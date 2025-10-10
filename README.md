@@ -6,7 +6,14 @@ Combines **manual** and **automated** testing using **Postman**, **Cypress**, an
 ---
 
 ## 📂 Project Structure
-
+```
+📦 tennis-kg-api-tests
+ ┣ 📁 postman           ← Postman collections & environment files
+ ┣ 📁 cypress           ← UI automation tests (Cypress)
+ ┣ 📁 docs              ← Documentation & test reports
+ ┣ 📄 .gitignore        ← Ignored files configuration
+ ┗ 📄 README.md         ← Project description
+```
 ---
 
 ## 🚀 How to Use
