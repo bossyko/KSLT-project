@@ -1,0 +1,109 @@
+{
+	"info": {
+		"_postman_id": "85066468-ab41-46cb-a245-36271e32e38c",
+		"name": "🎾 Tennis.KG Smoke Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45010182",
+		"_collection_link": "https://konstantinhan.postman.co/workspace/paysis-QAM40~9091b79d-a398-4a33-a6af-7b1b65ccfef0/collection/45010182-85066468-ab41-46cb-a245-36271e32e38c?action=share&source=collection_link&creator=45010182"
+	},
+	"item": [
+		{
+			"name": "GET Home Page",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+							"pm.test(\"Response time < timeout\", () => pm.expect(pm.response.responseTime).to.be.below(Number(pm.environment.get(\"timeoutMs\"))));",
+							"pm.test(\"Content-Type is HTML\", () => {",
+							"  pm.response.to.have.header(\"content-type\");",
+							"  pm.expect(pm.response.headers.get(\"content-type\").toLowerCase()).to.include(\"text/html\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET News Page",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+							"pm.test(\"Contains 'Новости' or 'news'\", () => {",
+							"  const t = pm.response.text().toLowerCase();",
+							"  pm.expect(t).to.satisfy(s => s.includes(\"новост\") || s.includes(\"news\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/news",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"news"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET Login Page",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Login page 200\", () => pm.response.to.have.status(200));",
+							"pm.test(\"Has phone/password hints\", () => {",
+							"  const h = pm.response.text().toLowerCase();",
+							"  pm.expect(h).to.satisfy(s => s.includes(\"телефон\") || s.includes(\"phone\"));",
+							"  pm.expect(h).to.satisfy(s => s.includes(\"парол\") || s.includes(\"password\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
