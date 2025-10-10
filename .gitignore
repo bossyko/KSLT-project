@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+.Trash
+/Library/
+
+# Node & tools
+node_modules/
+.env
+.env.local
+.nvm/
+.oh-my-zsh/
+coverage/
+reports/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
