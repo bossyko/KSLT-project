@@ -6,3 +6,15 @@ Combines **manual** and **automated** testing using **Postman**, **Cypress**, an
 ---
 
 ## 📂 Project Structure
+
+---
+
+## 🚀 How to Use
+
+### 🔹 Postman API Tests
+1. Open Postman and import:
+   - `postman/tenniskg-api.postman_collection.json`
+   - `postman/tenniskg-api.postman_environment.json`
+2. Run manually or via CLI:
+   ```bash
+   newman run postman/tenniskg-api.postman_collection.json -e postman/tenniskg-api.postman_environment.json
