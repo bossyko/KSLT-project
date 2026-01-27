@@ -201,6 +201,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ========================================
+    // ACTIVE NAV HIGHLIGHT ON SCROLL
+    // ========================================
+    const sections = document.querySelectorAll('main section[id]');
+    const navItems = document.querySelectorAll('.nav-links .nav-item');
+
+    function highlightNav() {
+        const scrollY = window.pageYOffset + 120;
+
+        sections.forEach(section => {
+            const top = section.offsetTop;
+            const height = section.offsetHeight;
+            const id = section.getAttribute('id');
+
+            if (scrollY >= top && scrollY < top + height) {
+                navItems.forEach(item => item.classList.remove('active'));
+                const activeLink = document.querySelector('.nav-links a[href="#' + id + '"]');
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+        });
+    }
+
+    window.addEventListener('scroll', highlightNav);
+    highlightNav();
+
+    // ========================================
     // LANGUAGE DROPDOWN
     // ========================================
     const langDropdown = document.getElementById('langDropdown');
