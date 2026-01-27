@@ -7,42 +7,728 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
+    <header class="floating-header header-hybrid">
         <nav>
-            <div class="logo">KSLT</div>
+            <!-- Левая часть: Логотип + Генеральный спонсор -->
+            <div class="nav-left">
+                <a href="#home" class="logo">
+                    <span class="logo-text">KSLT</span>
+                    <span class="logo-icon">🎾</span>
+                </a>
+                <div class="sponsor-badge">
+                    <span class="sponsor-label">при поддержке</span>
+                    <img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman" class="sponsor-logo-img">
+                </div>
+            </div>
+
+            <!-- Центр: Навигация -->
             <ul class="nav-links">
-                <li><a href="#home">Главная</a></li>
-                <li><a href="#about">О нас</a></li>
-                <li><a href="#services">Услуги</a></li>
-                <li><a href="#contact">Контакты</a></li>
+                <li class="nav-dropdown">
+                    <a href="#tournaments" class="nav-item nav-item-dropdown">
+                        Турниры
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="#tournaments-tour" class="nav-dropdown-item">Tour</a>
+                        <a href="#tournaments-challengers" class="nav-dropdown-item">Challengers</a>
+                        <a href="#tournaments-futures" class="nav-dropdown-item">Futures</a>
+                        <a href="#tournaments-masters" class="nav-dropdown-item">Masters</a>
+                        <a href="#tournaments-promasters" class="nav-dropdown-item">Pro Masters</a>
+                        <a href="#tournaments-friendly" class="nav-dropdown-item">Дружеские турниры</a>
+                    </div>
+                </li>
+                <li>
+                    <a href="#live" class="nav-item nav-item-live">
+                        <span class="live-dot"></span>
+                        Live
+                    </a>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="#rankings" class="nav-item nav-item-dropdown">
+                        Рейтинг
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="#rankings-singles-men" class="nav-dropdown-item">Одиночный мужской</a>
+                        <a href="#rankings-singles-women" class="nav-dropdown-item">Одиночный женский</a>
+                        <a href="#rankings-doubles-men" class="nav-dropdown-item">Парный мужской</a>
+                        <a href="#rankings-doubles-women" class="nav-dropdown-item">Парный женский</a>
+                        <a href="#rankings-mixed" class="nav-dropdown-item">Микст</a>
+                    </div>
+                </li>
+                <li>
+                    <a href="#players" class="nav-item">Игроки</a>
+                </li>
+                <li>
+                    <a href="#sponsors" class="nav-item">Спонсоры</a>
+                </li>
+                <li>
+                    <a href="#about" class="nav-item">О проекте</a>
+                </li>
             </ul>
+
+            <!-- Правая часть: Авторизация + Язык -->
+            <div class="nav-right">
+                <a href="auth.html" class="btn-auth">Войти</a>
+
+                <!-- Выпадающее меню языков -->
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-current">RU</span>
+                        <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </button>
+                    <div class="lang-menu">
+                        <a href="index.html" class="lang-option active" data-lang="RU">
+                            <span class="lang-flag">🇷🇺</span>
+                            <span class="lang-name">Русский</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                        <a href="index-en.html" class="lang-option" data-lang="EN">
+                            <span class="lang-flag">🇬🇧</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Бургер меню для мобильных -->
+            <button class="burger-menu" id="burgerMenu">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
         </nav>
+
+        <!-- Мобильная навигация -->
+        <div class="mobile-nav" id="mobileNav">
+            <ul class="mobile-nav-links">
+                <li class="mobile-nav-dropdown">
+                    <a href="#tournaments" class="mobile-dropdown-toggle">
+                        Турниры
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="#tournaments-tour">Tour</a></li>
+                        <li><a href="#tournaments-challengers">Challengers</a></li>
+                        <li><a href="#tournaments-futures">Futures</a></li>
+                        <li><a href="#tournaments-masters">Masters</a></li>
+                        <li><a href="#tournaments-promasters">Pro Masters</a></li>
+                        <li><a href="#tournaments-friendly">Дружеские турниры</a></li>
+                    </ul>
+                </li>
+                <li><a href="#live"><span class="live-dot"></span> Live</a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="#rankings" class="mobile-dropdown-toggle">
+                        Рейтинг
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="#rankings-singles-men">Одиночный мужской</a></li>
+                        <li><a href="#rankings-singles-women">Одиночный женский</a></li>
+                        <li><a href="#rankings-doubles-men">Парный мужской</a></li>
+                        <li><a href="#rankings-doubles-women">Парный женский</a></li>
+                        <li><a href="#rankings-mixed">Микст</a></li>
+                    </ul>
+                </li>
+                <li><a href="#players">Игроки</a></li>
+                <li><a href="#sponsors">Спонсоры</a></li>
+                <li><a href="#about">О проекте</a></li>
+            </ul>
+            <div class="mobile-nav-bottom">
+                <div class="mobile-lang-list">
+                    <span class="mobile-lang-title">Язык</span>
+                    <a href="index.html" class="mobile-lang-option active" data-lang="RU">
+                        <span class="lang-flag">🇷🇺</span> Русский
+                    </a>
+                    <a href="index-en.html" class="mobile-lang-option" data-lang="EN">
+                        <span class="lang-flag">🇬🇧</span> English
+                    </a>
+                </div>
+            </div>
+        </div>
     </header>
 
     <main>
+        <!-- HERO с фоновым изображением -->
         <section id="home" class="hero">
-            <h1>Добро пожаловать в KSLT</h1>
-            <p>Ваш надежный партнер</p>
+            <div class="hero-bg">
+                <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&h=1080&fit=crop&q=80" alt="" class="hero-bg-image">
+                <div class="hero-bg-overlay"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    Сезон 2026 открыт
+                </div>
+                <h1 class="hero-title">
+                    <span class="highlight">KSLT</span>
+                </h1>
+                <p class="hero-slogan">Твой теннисный бро</p>
+                <p class="hero-subtitle">
+                    Найди партнёра для игры, участвуй в турнирах и прокачивай свой рейтинг в сообществе теннисистов
+                </p>
+                <div class="hero-cta">
+                    <a href="#find" class="btn-primary">
+                        Найти партнёра
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <a href="#courts" class="btn-secondary">Забронировать корт</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-value">2,500+</span>
+                        <span class="stat-label">Игроков</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-value">150+</span>
+                        <span class="stat-label">Турниров</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-value">45</span>
+                        <span class="stat-label">Кортов</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image-container">
+                    <img
+                        src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=750&fit=crop&q=80"
+                        alt="Теннисист"
+                        class="hero-image"
+                    >
+                    <div class="floating-card card-rating">
+                        <div class="card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-title">Твой рейтинг</span>
+                            <span class="card-value">4.2 <small>+0.3</small></span>
+                        </div>
+                    </div>
+                    <div class="floating-card card-match">
+                        <div class="card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-title">Ближайший матч</span>
+                            <span class="card-value">Сегодня, 18:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карусель спонсоров -->
+            <div class="hero-sponsors-section">
+            <p class="hero-sponsors-title">Наши спонсоры</p>
+            <div class="sponsors-carousel-infinite hero-sponsors-carousel">
+                <div class="carousel-track-infinite">
+                    <!-- Первый набор -->
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>SportMax</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>FitnessPro</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>BankPlus</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>CourtMaster</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>SportShoes</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>WatchTime</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>AudioMax</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>SunStyle</span>
+                    </div>
+                    <!-- Дубликат для бесконечной прокрутки -->
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>SportMax</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>FitnessPro</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>BankPlus</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>CourtMaster</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>SportShoes</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>WatchTime</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>AudioMax</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&h=150&fit=crop&q=80" alt="Спонсор">
+                        <span>SunStyle</span>
+                    </div>
+                </div>
+            </div>
+            </div>
+
         </section>
 
-        <section id="about">
-            <h2>О нас</h2>
-            <p>Информация о компании KSLT.</p>
+        <!-- TOURNAMENTS -->
+        <section id="tournaments" class="section-tournaments">
+            <div class="section-header">
+                <h2>Ближайшие турниры</h2>
+                <a href="#all-tournaments" class="link-all">Все турниры →</a>
+            </div>
+            <div class="tournaments-grid">
+                <article class="tournament-card tournament-card-featured">
+                    <div class="tournament-image">
+                        <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=500&fit=crop&q=80" alt="Турнир">
+                        <span class="tournament-badge">Главный</span>
+                    </div>
+                    <div class="tournament-info">
+                        <span class="tournament-date">15-17 февраля 2026</span>
+                        <h3>KSLT Open Championship</h3>
+                        <p>Главный турнир сезона с призовым фондом 500,000 сом</p>
+                        <div class="tournament-meta">
+                            <span><strong>64</strong> участника</span>
+                            <span><strong>12</strong> осталось мест</span>
+                        </div>
+                        <a href="#register" class="btn-primary">Регистрация</a>
+                    </div>
+                </article>
+                <article class="tournament-card">
+                    <div class="tournament-image">
+                        <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=400&h=250&fit=crop&q=80" alt="Турнир">
+                    </div>
+                    <div class="tournament-info">
+                        <span class="tournament-date">22 февраля 2026</span>
+                        <h3>Weekend Cup</h3>
+                        <div class="tournament-meta">
+                            <span>32 участника</span>
+                        </div>
+                    </div>
+                </article>
+                <article class="tournament-card">
+                    <div class="tournament-image">
+                        <img src="https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=400&h=250&fit=crop&q=80" alt="Турнир">
+                    </div>
+                    <div class="tournament-info">
+                        <span class="tournament-date">1 марта 2026</span>
+                        <h3>Junior League</h3>
+                        <div class="tournament-meta">
+                            <span>До 18 лет</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
         </section>
 
-        <section id="services">
-            <h2>Услуги</h2>
-            <p>Наши услуги и предложения.</p>
+        <!-- LIVE SCORES -->
+        <section id="live" class="section-live">
+            <div class="section-header">
+                <h2><span class="live-indicator"></span> Live матчи</h2>
+            </div>
+            <div class="live-matches">
+                <div class="live-match">
+                    <div class="match-status">
+                        <span class="live-badge">LIVE</span>
+                        <span class="match-set">Сет 2</span>
+                    </div>
+                    <div class="match-players">
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" alt="Игрок">
+                            <span class="player-name">А. Иванов</span>
+                            <span class="player-score serving">6 4</span>
+                        </div>
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80" alt="Игрок">
+                            <span class="player-name">М. Петров</span>
+                            <span class="player-score">3 6</span>
+                        </div>
+                    </div>
+                    <a href="#watch" class="btn-watch">Смотреть</a>
+                </div>
+                <div class="live-match">
+                    <div class="match-status">
+                        <span class="live-badge">LIVE</span>
+                        <span class="match-set">Сет 1</span>
+                    </div>
+                    <div class="match-players">
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Игрок">
+                            <span class="player-name">Е. Сидорова</span>
+                            <span class="player-score serving">3</span>
+                        </div>
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&q=80" alt="Игрок">
+                            <span class="player-name">К. Николаева</span>
+                            <span class="player-score">2</span>
+                        </div>
+                    </div>
+                    <a href="#watch" class="btn-watch">Смотреть</a>
+                </div>
+            </div>
         </section>
 
-        <section id="contact">
-            <h2>Контакты</h2>
-            <p>Свяжитесь с нами.</p>
+        <!-- RANKINGS -->
+        <section id="rankings" class="section-rankings">
+            <div class="section-header">
+                <h2>Топ рейтинга</h2>
+                <a href="#full-rankings" class="link-all">Полный рейтинг →</a>
+            </div>
+            <div class="rankings-table">
+                <div class="ranking-row ranking-header">
+                    <span class="rank">#</span>
+                    <span class="player-col">Игрок</span>
+                    <span class="points">Очки</span>
+                    <span class="change">Δ</span>
+                </div>
+                <div class="ranking-row">
+                    <span class="rank">1</span>
+                    <div class="player-col">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt="">
+                        <span>Алексей Иванов</span>
+                    </div>
+                    <span class="points">2,450</span>
+                    <span class="change positive">+2</span>
+                </div>
+                <div class="ranking-row">
+                    <span class="rank">2</span>
+                    <div class="player-col">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt="">
+                        <span>Максим Петров</span>
+                    </div>
+                    <span class="points">2,380</span>
+                    <span class="change negative">-1</span>
+                </div>
+                <div class="ranking-row">
+                    <span class="rank">3</span>
+                    <div class="player-col">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt="">
+                        <span>Дмитрий Козлов</span>
+                    </div>
+                    <span class="points">2,310</span>
+                    <span class="change positive">+1</span>
+                </div>
+                <div class="ranking-row">
+                    <span class="rank">4</span>
+                    <div class="player-col">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt="">
+                        <span>Елена Сидорова</span>
+                    </div>
+                    <span class="points">2,290</span>
+                    <span class="change">—</span>
+                </div>
+                <div class="ranking-row">
+                    <span class="rank">5</span>
+                    <div class="player-col">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt="">
+                        <span>Ксения Николаева</span>
+                    </div>
+                    <span class="points">2,180</span>
+                    <span class="change positive">+3</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- PLAYERS / FIND PARTNER -->
+        <section id="players" class="section-players">
+            <div class="section-header">
+                <h2>Найди партнёра</h2>
+                <p class="section-desc">Игроки, которые ищут соперника прямо сейчас</p>
+            </div>
+            <div class="players-grid">
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
+                    <div class="player-info">
+                        <h4>Артём К.</h4>
+                        <span class="player-level">Уровень 4.0</span>
+                        <span class="player-location">📍 Бишкек, Асанбай</span>
+                        <span class="player-time">🕐 Сегодня, 17:00-19:00</span>
+                    </div>
+                    <a href="#invite" class="btn-invite">Пригласить</a>
+                </div>
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
+                    <div class="player-info">
+                        <h4>Мария С.</h4>
+                        <span class="player-level">Уровень 3.5</span>
+                        <span class="player-location">📍 Бишкек, Центр</span>
+                        <span class="player-time">🕐 Завтра, 10:00-12:00</span>
+                    </div>
+                    <a href="#invite" class="btn-invite">Пригласить</a>
+                </div>
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
+                    <div class="player-info">
+                        <h4>Руслан Б.</h4>
+                        <span class="player-level">Уровень 4.5</span>
+                        <span class="player-location">📍 Бишкек, Джал</span>
+                        <span class="player-time">🕐 Сегодня, 20:00-22:00</span>
+                    </div>
+                    <a href="#invite" class="btn-invite">Пригласить</a>
+                </div>
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
+                    <div class="player-info">
+                        <h4>Айгуль Т.</h4>
+                        <span class="player-level">Уровень 3.0</span>
+                        <span class="player-location">📍 Бишкек, Восток-5</span>
+                        <span class="player-time">🕐 Суббота, 09:00-11:00</span>
+                    </div>
+                    <a href="#invite" class="btn-invite">Пригласить</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- COURTS -->
+        <section id="courts" class="section-courts">
+            <div class="section-header">
+                <h2>Корты</h2>
+                <a href="#all-courts" class="link-all">Все корты →</a>
+            </div>
+            <div class="courts-grid">
+                <div class="court-card">
+                    <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=400&fit=crop&q=80" alt="Корт">
+                    <div class="court-info">
+                        <h4>Dordoi Tennis Club</h4>
+                        <span>📍 ул. Ахунбаева 165</span>
+                        <span class="court-price">от 800 сом/час</span>
+                        <span class="court-status available">4 корта свободны</span>
+                    </div>
+                </div>
+                <div class="court-card">
+                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop&q=80" alt="Корт">
+                    <div class="court-info">
+                        <h4>Tennis Park Bishkek</h4>
+                        <span>📍 мкр. Асанбай 21</span>
+                        <span class="court-price">от 1000 сом/час</span>
+                        <span class="court-status limited">2 корта свободны</span>
+                    </div>
+                </div>
+                <div class="court-card">
+                    <img src="https://images.unsplash.com/photo-1617083934555-17f6a2c82be0?w=600&h=400&fit=crop&q=80" alt="Корт">
+                    <div class="court-info">
+                        <h4>City Tennis Arena</h4>
+                        <span>📍 пр. Чуй 123</span>
+                        <span class="court-price">от 1200 сом/час</span>
+                        <span class="court-status busy">Все занято</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SPONSORS -->
+        <section id="sponsors" class="section-sponsors">
+            <div class="section-header">
+                <h2>Партнёры и спонсоры</h2>
+            </div>
+
+            <!-- Генеральный спонсор -->
+            <div class="main-sponsor">
+                <span class="sponsor-tier">Генеральный спонсор</span>
+                <div class="main-sponsor-card">
+                    <img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman">
+                    <div class="main-sponsor-info">
+                        <span class="main-sponsor-name">Nurzaman</span>
+                        <span class="main-sponsor-desc">Официальный партнёр KSLT</span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="#become-sponsor" class="btn-secondary">Стать спонсором</a>
+        </section>
+
+        <!-- ABOUT -->
+        <section id="about" class="section-about">
+            <div class="about-content">
+                <h2>О проекте KSLT</h2>
+                <p class="about-lead">
+                    Kyrgyzstan Social Lawn Tennis — первое теннисное сообщество в Кыргызстане,
+                    объединяющее любителей и профессионалов.
+                </p>
+                <div class="about-features">
+                    <div class="feature">
+                        <span class="feature-icon">🎾</span>
+                        <h4>Турниры</h4>
+                        <p>Регулярные соревнования для всех уровней</p>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">👥</span>
+                        <h4>Сообщество</h4>
+                        <p>Найди партнёра для игры в любое время</p>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">📊</span>
+                        <h4>Рейтинг</h4>
+                        <p>Прозрачная система очков и статистика</p>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">🏟️</span>
+                        <h4>Корты</h4>
+                        <p>Бронирование кортов в один клик</p>
+                    </div>
+                </div>
+            </div>
+            <div class="about-image">
+                <img src="https://images.unsplash.com/photo-1551773188-0801da12ddae?w=700&h=500&fit=crop&q=80" alt="Теннис">
+            </div>
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2026 KSLT. Все права защищены.</p>
+    <footer class="site-footer">
+        <div class="footer-content">
+            <!-- Блок KSLT -->
+            <div class="footer-block footer-brand">
+                <div class="footer-logo">
+                    <span class="logo-text">KSLT</span>
+                    <span class="logo-icon">🎾</span>
+                </div>
+                <p class="footer-desc">Kyrgyzstan Social Lawn Tennis — первое теннисное сообщество в Кыргызстане, объединяющее любителей и профессионалов.</p>
+                <div class="footer-socials">
+                    <a href="#" class="social-link" aria-label="Instagram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Telegram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="YouTube">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="WhatsApp">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="TikTok">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Навигация -->
+            <div class="footer-block">
+                <h4>Навигация</h4>
+                <ul class="footer-links">
+                    <li><a href="#tournaments">Турниры</a></li>
+                    <li><a href="#rankings">Рейтинг</a></li>
+                    <li><a href="#players">Игроки</a></li>
+                    <li><a href="#courts">Корты</a></li>
+                    <li><a href="#live">Live трансляции</a></li>
+                </ul>
+            </div>
+
+            <!-- Игрокам -->
+            <div class="footer-block">
+                <h4>Игрокам</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Правила лиги</a></li>
+                    <li><a href="#">Система рейтинга</a></li>
+                    <li><a href="#">Как вступить</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Кодекс игрока</a></li>
+                </ul>
+            </div>
+
+            <!-- Партнёрам -->
+            <div class="footer-block">
+                <h4>Партнёрам</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Стать спонсором</a></li>
+                    <li><a href="#">Рекламодателям</a></li>
+                    <li><a href="#">Аренда кортов</a></li>
+                    <li><a href="#">Организация турниров</a></li>
+                </ul>
+            </div>
+
+            <!-- Контакты -->
+            <div class="footer-block">
+                <h4>Контакты</h4>
+                <ul class="footer-contacts">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                        <a href="mailto:info@kslt.kg">info@kslt.kg</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                        <a href="tel:+996555123456">+996 555 123 456</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <span>г. Бишкек, Кыргызстан</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Нижняя строка -->
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2026 KSLT. Все права защищены.</p>
+            <div class="footer-legal">
+                <a href="#">Публичная оферта</a>
+                <a href="#">Политика конфиденциальности</a>
+            </div
+            <p class="footer-made">Сделано с ❤️ в Кыргызстане 🇰🇬</p>
+        </div>
     </footer>
 
     <script src="script.js"></script>

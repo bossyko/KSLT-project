@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSLT - Кыргызстан Социалдык Теннис Лигасы</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="floating-header header-hybrid">
+        <nav>
+            <div class="nav-left">
+                <a href="#home" class="logo">
+                    <span class="logo-text">KSLT</span>
+                    <span class="logo-icon">🎾</span>
+                </a>
+                <div class="sponsor-badge">
+                    <span class="sponsor-label">колдоосу менен</span>
+                    <img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman" class="sponsor-logo-img">
+                </div>
+            </div>
+
+            <ul class="nav-links">
+                <li>
+                    <a href="#tournaments" class="nav-item">
+                        Мелдештер
+                        <span class="indicator-dot"></span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#live" class="nav-item nav-item-live">
+                        <span class="live-dot"></span>
+                        Түз эфир
+                    </a>
+                </li>
+                <li>
+                    <a href="#rankings" class="nav-item">Рейтинг</a>
+                </li>
+                <li>
+                    <a href="#players" class="nav-item">Оюнчулар</a>
+                </li>
+                <li>
+                    <a href="#sponsors" class="nav-item">Демөөрчүлөр</a>
+                </li>
+                <li>
+                    <a href="#about" class="nav-item">Биз жөнүндө</a>
+                </li>
+            </ul>
+
+            <div class="nav-right">
+                <a href="#login" class="btn-auth">Кирүү</a>
+
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-current">KG</span>
+                        <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </button>
+                    <div class="lang-menu">
+                        <a href="index.html" class="lang-option" data-lang="RU">
+                            <span class="lang-flag">🇷🇺</span>
+                            <span class="lang-name">Русский</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                        <a href="index-kg.html" class="lang-option active" data-lang="KG">
+                            <span class="lang-flag">🇰🇬</span>
+                            <span class="lang-name">Кыргызча</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                        <a href="index-en.html" class="lang-option" data-lang="EN">
+                            <span class="lang-flag">🇬🇧</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="burger-menu" id="burgerMenu">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
+        </nav>
+
+        <div class="mobile-nav" id="mobileNav">
+            <ul class="mobile-nav-links">
+                <li><a href="#tournaments">Мелдештер <span class="indicator-dot"></span></a></li>
+                <li><a href="#live"><span class="live-dot"></span> Түз эфир</a></li>
+                <li><a href="#rankings">Рейтинг</a></li>
+                <li><a href="#players">Оюнчулар</a></li>
+                <li><a href="#sponsors">Демөөрчүлөр</a></li>
+                <li><a href="#about">Биз жөнүндө</a></li>
+            </ul>
+            <div class="mobile-nav-bottom">
+                <div class="mobile-lang-list">
+                    <span class="mobile-lang-title">Тил</span>
+                    <a href="index.html" class="mobile-lang-option" data-lang="RU">
+                        <span class="lang-flag">🇷🇺</span> Русский
+                    </a>
+                    <a href="index-kg.html" class="mobile-lang-option active" data-lang="KG">
+                        <span class="lang-flag">🇰🇬</span> Кыргызча
+                    </a>
+                    <a href="index-en.html" class="mobile-lang-option" data-lang="EN">
+                        <span class="lang-flag">🇬🇧</span> English
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="hero-video-bg">
+                <video autoplay muted loop playsinline>
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-tennis-player-serving-close-up-1536-large.mp4" type="video/mp4">
+                </video>
+                <div class="hero-video-overlay"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    2026-сезон ачылды
+                </div>
+                <h1 class="hero-title">
+                    <span class="highlight">KSLT</span>
+                </h1>
+                <p class="hero-slogan">Сенин теннис досуң</p>
+                <p class="hero-subtitle">
+                    Өнөктөш тап, мелдештерге катыш жана теннисчилер коомчулугунда рейтингиңди жогорулат
+                </p>
+                <div class="hero-cta">
+                    <a href="#find" class="btn-primary">
+                        Өнөктөш табуу
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <a href="#courts" class="btn-secondary">Корт ээлөө</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-value">2,500+</span>
+                        <span class="stat-label">Оюнчулар</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-value">150+</span>
+                        <span class="stat-label">Мелдештер</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-value">45</span>
+                        <span class="stat-label">Корттор</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image-container">
+                    <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=750&fit=crop&q=80" alt="Теннисчи" class="hero-image">
+                    <div class="floating-card card-rating">
+                        <div class="card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-title">Сенин рейтингиң</span>
+                            <span class="card-value">4.2 <small>+0.3</small></span>
+                        </div>
+                    </div>
+                    <div class="floating-card card-match">
+                        <div class="card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-title">Кийинки матч</span>
+                            <span class="card-value">Бүгүн, 18:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tournaments" class="section-tournaments">
+            <div class="section-header">
+                <h2>Жакынкы мелдештер</h2>
+                <a href="#all-tournaments" class="link-all">Бардык мелдештер →</a>
+            </div>
+            <div class="tournaments-grid">
+                <article class="tournament-card tournament-card-featured">
+                    <div class="tournament-image">
+                        <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=500&fit=crop&q=80" alt="Мелдеш">
+                        <span class="tournament-badge">Башкы</span>
+                    </div>
+                    <div class="tournament-info">
+                        <span class="tournament-date">15-17 февраль 2026</span>
+                        <h3>KSLT Ачык Чемпионаты</h3>
+                        <p>Сезондун башкы мелдеши, сыйлык фонду 500,000 сом</p>
+                        <div class="tournament-meta">
+                            <span><strong>64</strong> катышуучу</span>
+                            <span><strong>12</strong> орун калды</span>
+                        </div>
+                        <a href="#register" class="btn-primary">Катталуу</a>
+                    </div>
+                </article>
+                <article class="tournament-card">
+                    <div class="tournament-image">
+                        <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=400&h=250&fit=crop&q=80" alt="Мелдеш">
+                    </div>
+                    <div class="tournament-info">
+                        <span class="tournament-date">22 февраль 2026</span>
+                        <h3>Дем алыш күнү кубогу</h3>
+                        <div class="tournament-meta">
+                            <span>32 катышуучу</span>
+                        </div>
+                    </div>
+                </article>
+                <article class="tournament-card">
+                    <div class="tournament-image">
+                        <img src="https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=400&h=250&fit=crop&q=80" alt="Мелдеш">
+                    </div>
+                    <div class="tournament-info">
+                        <span class="tournament-date">1 март 2026</span>
+                        <h3>Жаштар лигасы</h3>
+                        <div class="tournament-meta">
+                            <span>18 жашка чейин</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="live" class="section-live">
+            <div class="section-header">
+                <h2><span class="live-indicator"></span> Түз эфирдеги матчтар</h2>
+            </div>
+            <div class="live-matches">
+                <div class="live-match">
+                    <div class="match-status">
+                        <span class="live-badge">LIVE</span>
+                        <span class="match-set">2-сет</span>
+                    </div>
+                    <div class="match-players">
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" alt="Оюнчу">
+                            <span class="player-name">А. Иванов</span>
+                            <span class="player-score serving">6 4</span>
+                        </div>
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80" alt="Оюнчу">
+                            <span class="player-name">М. Петров</span>
+                            <span class="player-score">3 6</span>
+                        </div>
+                    </div>
+                    <a href="#watch" class="btn-watch">Көрүү</a>
+                </div>
+                <div class="live-match">
+                    <div class="match-status">
+                        <span class="live-badge">LIVE</span>
+                        <span class="match-set">1-сет</span>
+                    </div>
+                    <div class="match-players">
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Оюнчу">
+                            <span class="player-name">Е. Сидорова</span>
+                            <span class="player-score serving">3</span>
+                        </div>
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&q=80" alt="Оюнчу">
+                            <span class="player-name">К. Николаева</span>
+                            <span class="player-score">2</span>
+                        </div>
+                    </div>
+                    <a href="#watch" class="btn-watch">Көрүү</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="rankings" class="section-rankings">
+            <div class="section-header">
+                <h2>Мыкты рейтинг</h2>
+                <a href="#full-rankings" class="link-all">Толук рейтинг →</a>
+            </div>
+            <div class="rankings-table">
+                <div class="ranking-row ranking-header">
+                    <span class="rank">#</span>
+                    <span class="player-col">Оюнчу</span>
+                    <span class="points">Упай</span>
+                    <span class="change">Δ</span>
+                </div>
+                <div class="ranking-row">
+                    <span class="rank">1</span>
+                    <div class="player-col">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt="">
+                        <span>Алексей Иванов</span>
+                    </div>
+                    <span class="points">2,450</span>
+                    <span class="change positive">+2</span>
+                </div>
+                <div class="ranking-row">
+                    <span class="rank">2</span>
+                    <div class="player-col">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt="">
+                        <span>Максим Петров</span>
+                    </div>
+                    <span class="points">2,380</span>
+                    <span class="change negative">-1</span>
+                </div>
+                <div class="ranking-row">
+                    <span class="rank">3</span>
+                    <div class="player-col">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt="">
+                        <span>Дмитрий Козлов</span>
+                    </div>
+                    <span class="points">2,310</span>
+                    <span class="change positive">+1</span>
+                </div>
+                <div class="ranking-row">
+                    <span class="rank">4</span>
+                    <div class="player-col">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt="">
+                        <span>Елена Сидорова</span>
+                    </div>
+                    <span class="points">2,290</span>
+                    <span class="change">—</span>
+                </div>
+                <div class="ranking-row">
+                    <span class="rank">5</span>
+                    <div class="player-col">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt="">
+                        <span>Ксения Николаева</span>
+                    </div>
+                    <span class="points">2,180</span>
+                    <span class="change positive">+3</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="players" class="section-players">
+            <div class="section-header">
+                <h2>Өнөктөш тап</h2>
+                <p class="section-desc">Азыр атаандаш издеп жаткан оюнчулар</p>
+            </div>
+            <div class="players-grid">
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop&q=80" alt="Оюнчу" class="player-photo">
+                    <div class="player-info">
+                        <h4>Артём К.</h4>
+                        <span class="player-level">Деңгээл 4.0</span>
+                        <span class="player-location">📍 Бишкек, Асанбай</span>
+                        <span class="player-time">🕐 Бүгүн, 17:00-19:00</span>
+                    </div>
+                    <a href="#invite" class="btn-invite">Чакыруу</a>
+                </div>
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&q=80" alt="Оюнчу" class="player-photo">
+                    <div class="player-info">
+                        <h4>Мария С.</h4>
+                        <span class="player-level">Деңгээл 3.5</span>
+                        <span class="player-location">📍 Бишкек, Борбор</span>
+                        <span class="player-time">🕐 Эртең, 10:00-12:00</span>
+                    </div>
+                    <a href="#invite" class="btn-invite">Чакыруу</a>
+                </div>
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop&q=80" alt="Оюнчу" class="player-photo">
+                    <div class="player-info">
+                        <h4>Руслан Б.</h4>
+                        <span class="player-level">Деңгээл 4.5</span>
+                        <span class="player-location">📍 Бишкек, Жал</span>
+                        <span class="player-time">🕐 Бүгүн, 20:00-22:00</span>
+                    </div>
+                    <a href="#invite" class="btn-invite">Чакыруу</a>
+                </div>
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&q=80" alt="Оюнчу" class="player-photo">
+                    <div class="player-info">
+                        <h4>Айгүл Т.</h4>
+                        <span class="player-level">Деңгээл 3.0</span>
+                        <span class="player-location">📍 Бишкек, Чыгыш-5</span>
+                        <span class="player-time">🕐 Ишемби, 09:00-11:00</span>
+                    </div>
+                    <a href="#invite" class="btn-invite">Чакыруу</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="courts" class="section-courts">
+            <div class="section-header">
+                <h2>Корттор</h2>
+                <a href="#all-courts" class="link-all">Бардык корттор →</a>
+            </div>
+            <div class="courts-grid">
+                <div class="court-card">
+                    <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=400&fit=crop&q=80" alt="Корт">
+                    <div class="court-info">
+                        <h4>Dordoi Tennis Club</h4>
+                        <span>📍 Ахунбаева көч. 165</span>
+                        <span class="court-price">800 сом/саат</span>
+                        <span class="court-status available">4 корт бош</span>
+                    </div>
+                </div>
+                <div class="court-card">
+                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop&q=80" alt="Корт">
+                    <div class="court-info">
+                        <h4>Tennis Park Bishkek</h4>
+                        <span>📍 Асанбай 21</span>
+                        <span class="court-price">1000 сом/саат</span>
+                        <span class="court-status limited">2 корт бош</span>
+                    </div>
+                </div>
+                <div class="court-card">
+                    <img src="https://images.unsplash.com/photo-1617083934555-17f6a2c82be0?w=600&h=400&fit=crop&q=80" alt="Корт">
+                    <div class="court-info">
+                        <h4>City Tennis Arena</h4>
+                        <span>📍 Чүй пр. 123</span>
+                        <span class="court-price">1200 сом/саат</span>
+                        <span class="court-status busy">Баары ээленген</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sponsors" class="section-sponsors">
+            <div class="section-header">
+                <h2>Өнөктөштөр жана демөөрчүлөр</h2>
+            </div>
+
+            <div class="main-sponsor">
+                <span class="sponsor-tier">Башкы демөөрчү</span>
+                <div class="main-sponsor-card">
+                    <img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman">
+                    <div class="main-sponsor-info">
+                        <span class="main-sponsor-name">Nurzaman</span>
+                        <span class="main-sponsor-desc">KSLT расмий өнөктөшү</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sponsors-carousel-infinite">
+                <div class="carousel-track-infinite">
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>SportMax</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>FitnessPro</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>BankPlus</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>CourtMaster</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>SportShoes</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>WatchTime</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>AudioMax</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>SunStyle</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>SportMax</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>FitnessPro</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>BankPlus</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>CourtMaster</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>SportShoes</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>WatchTime</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>AudioMax</span>
+                    </div>
+                    <div class="carousel-slide-infinite">
+                        <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&h=150&fit=crop&q=80" alt="Демөөрчү">
+                        <span>SunStyle</span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="#become-sponsor" class="btn-secondary">Демөөрчү болуу</a>
+        </section>
+
+        <section id="about" class="section-about">
+            <div class="about-content">
+                <h2>KSLT жөнүндө</h2>
+                <p class="about-lead">
+                    Kyrgyzstan Social Lawn Tennis — Кыргызстандагы биринчи теннис коомчулугу,
+                    ышкыбоздорду жана профессионалдарды бириктирет.
+                </p>
+                <div class="about-features">
+                    <div class="feature">
+                        <span class="feature-icon">🎾</span>
+                        <h4>Мелдештер</h4>
+                        <p>Бардык деңгээлдер үчүн үзгүлтүксүз мелдештер</p>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">👥</span>
+                        <h4>Коомчулук</h4>
+                        <p>Каалаган убакта оюн үчүн өнөктөш тап</p>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">📊</span>
+                        <h4>Рейтинг</h4>
+                        <p>Ачык упай системасы жана статистика</p>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">🏟️</span>
+                        <h4>Корттор</h4>
+                        <p>Бир чыкылдатуу менен корт ээлөө</p>
+                    </div>
+                </div>
+            </div>
+            <div class="about-image">
+                <img src="https://images.unsplash.com/photo-1551773188-0801da12ddae?w=700&h=500&fit=crop&q=80" alt="Теннис">
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-block footer-brand">
+                <div class="footer-logo">
+                    <span class="logo-text">KSLT</span>
+                    <span class="logo-icon">🎾</span>
+                </div>
+                <p class="footer-desc">Kyrgyzstan Social Lawn Tennis — Кыргызстандагы биринчи теннис коомчулугу, ышкыбоздорду жана профессионалдарды бириктирет.</p>
+                <div class="footer-socials">
+                    <a href="#" class="social-link" aria-label="Instagram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Telegram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="YouTube">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="WhatsApp">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="TikTok">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-block">
+                <h4>Навигация</h4>
+                <ul class="footer-links">
+                    <li><a href="#tournaments">Мелдештер</a></li>
+                    <li><a href="#rankings">Рейтинг</a></li>
+                    <li><a href="#players">Оюнчулар</a></li>
+                    <li><a href="#courts">Корттор</a></li>
+                    <li><a href="#live">Түз эфир</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>Оюнчуларга</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Лига эрежелери</a></li>
+                    <li><a href="#">Рейтинг системасы</a></li>
+                    <li><a href="#">Кантип катышуу</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Оюнчу кодекси</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>Өнөктөштөргө</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Демөөрчү болуу</a></li>
+                    <li><a href="#">Жарнамачыларга</a></li>
+                    <li><a href="#">Корт ижарасы</a></li>
+                    <li><a href="#">Мелдеш уюштуруу</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>Байланыш</h4>
+                <ul class="footer-contacts">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <a href="mailto:info@kslt.kg">info@kslt.kg</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        <a href="tel:+996555123456">+996 555 123 456</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>Бишкек, Кыргызстан</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2026 KSLT. Бардык укуктар корголгон.</p>
+            <div class="footer-legal">
+                <a href="#">Жалпыга маалымдоо оферта</a>
+                <a href="#">Купуялык саясаты</a>
+            </div>
+            <p class="footer-made">Кыргызстанда ❤️ менен жасалды 🇰🇬</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

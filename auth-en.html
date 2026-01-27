@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSLT — Sign In</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="auth-page">
+        <!-- Background -->
+        <div class="auth-bg">
+            <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&q=80" alt="" class="auth-bg-image">
+            <div class="auth-bg-overlay"></div>
+        </div>
+
+        <!-- Mini Header -->
+        <div class="auth-header">
+            <a href="index-en.html" class="logo">
+                <span class="logo-text">KSLT</span>
+                <span class="logo-icon">🎾</span>
+            </a>
+        </div>
+
+        <!-- Auth Card -->
+        <div class="auth-card">
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="signin">Sign In</button>
+                <button class="auth-tab" data-tab="signup">Sign Up</button>
+            </div>
+
+            <!-- Sign In Form -->
+            <form class="auth-form active" id="signinForm">
+                <div class="auth-field">
+                    <label class="auth-label" for="signin-email">Email</label>
+                    <input class="auth-input" type="email" id="signin-email" placeholder="you@example.com" required>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label" for="signin-password">Password</label>
+                    <div class="auth-password-wrap">
+                        <input class="auth-input" type="password" id="signin-password" placeholder="Enter password" required>
+                        <button type="button" class="auth-eye" data-target="signin-password">
+                            <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <a href="#" class="auth-forgot">Forgot password?</a>
+                <button type="submit" class="auth-btn">Sign In</button>
+
+                <div class="auth-divider">
+                    <span>or</span>
+                </div>
+
+                <div class="auth-social">
+                    <button type="button" class="auth-social-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        Google
+                    </button>
+                </div>
+            </form>
+
+            <!-- Forgot Password: Step 1 -->
+            <form class="auth-form" id="forgotForm">
+                <div class="auth-screen-header">
+                    <h2 class="auth-screen-title">Reset Password</h2>
+                    <p class="auth-screen-subtitle">Enter the email you used to register</p>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label" for="forgot-email">Email <span class="auth-required">*</span></label>
+                    <input class="auth-input" type="email" id="forgot-email" placeholder="you@example.com" required>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label" for="forgot-email-confirm">Confirm Email <span class="auth-required">*</span></label>
+                    <input class="auth-input" type="email" id="forgot-email-confirm" placeholder="Repeat email" required>
+                </div>
+                <button type="submit" class="auth-btn">Send Reset Link</button>
+                <a href="#" class="auth-back-link" id="forgotBack">Back to Sign In</a>
+            </form>
+
+            <!-- Forgot Password: Step 2 (Confirmation) -->
+            <div class="auth-form" id="forgotSuccess">
+                <div class="auth-screen-header">
+                    <div class="auth-icon-wrap">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 8L2 4"/></svg>
+                    </div>
+                    <h2 class="auth-screen-title">Check Your Email</h2>
+                    <p class="auth-screen-subtitle">We sent a password reset link to <strong id="forgotEmailDisplay"></strong></p>
+                </div>
+                <button type="button" class="auth-btn" id="forgotBackToLogin">Back to Sign In</button>
+                <p class="auth-resend">Didn't receive it? <a href="#" id="forgotResend">Resend</a></p>
+            </div>
+
+            <!-- Sign Up Form -->
+            <form class="auth-form" id="signupForm">
+                <div class="auth-row">
+                    <div class="auth-field">
+                        <label class="auth-label" for="signup-firstname">First Name <span class="auth-required">*</span></label>
+                        <input class="auth-input" type="text" id="signup-firstname" placeholder="First name" required>
+                    </div>
+                    <div class="auth-field">
+                        <label class="auth-label" for="signup-lastname">Last Name <span class="auth-required">*</span></label>
+                        <input class="auth-input" type="text" id="signup-lastname" placeholder="Last name" required>
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label" for="signup-email">Email <span class="auth-required">*</span></label>
+                    <input class="auth-input" type="email" id="signup-email" placeholder="you@example.com" required>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label" for="signup-email-confirm">Confirm Email <span class="auth-required">*</span></label>
+                    <input class="auth-input" type="email" id="signup-email-confirm" placeholder="Repeat email" required>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label">Phone <span class="auth-required">*</span></label>
+                    <div class="auth-phone-row">
+                        <select class="auth-input auth-phone-code" id="signup-phone-code">
+                            <option value="+1">+1 🇺🇸 USA</option>
+                            <option value="+1CA">+1 🇨🇦 Canada</option>
+                            <option value="+7RU">+7 🇷🇺 Russia</option>
+                            <option value="+7KZ">+7 🇰🇿 Kazakhstan</option>
+                            <option value="+20">+20 🇪🇬 Egypt</option>
+                            <option value="+27">+27 🇿🇦 South Africa</option>
+                            <option value="+30">+30 🇬🇷 Greece</option>
+                            <option value="+31">+31 🇳🇱 Netherlands</option>
+                            <option value="+32">+32 🇧🇪 Belgium</option>
+                            <option value="+33">+33 🇫🇷 France</option>
+                            <option value="+34">+34 🇪🇸 Spain</option>
+                            <option value="+36">+36 🇭🇺 Hungary</option>
+                            <option value="+39">+39 🇮🇹 Italy</option>
+                            <option value="+40">+40 🇷🇴 Romania</option>
+                            <option value="+41">+41 🇨🇭 Switzerland</option>
+                            <option value="+43">+43 🇦🇹 Austria</option>
+                            <option value="+44">+44 🇬🇧 UK</option>
+                            <option value="+45">+45 🇩🇰 Denmark</option>
+                            <option value="+46">+46 🇸🇪 Sweden</option>
+                            <option value="+47">+47 🇳🇴 Norway</option>
+                            <option value="+48">+48 🇵🇱 Poland</option>
+                            <option value="+49">+49 🇩🇪 Germany</option>
+                            <option value="+51">+51 🇵🇪 Peru</option>
+                            <option value="+52">+52 🇲🇽 Mexico</option>
+                            <option value="+53">+53 🇨🇺 Cuba</option>
+                            <option value="+54">+54 🇦🇷 Argentina</option>
+                            <option value="+55">+55 🇧🇷 Brazil</option>
+                            <option value="+56">+56 🇨🇱 Chile</option>
+                            <option value="+57">+57 🇨🇴 Colombia</option>
+                            <option value="+58">+58 🇻🇪 Venezuela</option>
+                            <option value="+60">+60 🇲🇾 Malaysia</option>
+                            <option value="+61">+61 🇦🇺 Australia</option>
+                            <option value="+62">+62 🇮🇩 Indonesia</option>
+                            <option value="+63">+63 🇵🇭 Philippines</option>
+                            <option value="+64">+64 🇳🇿 New Zealand</option>
+                            <option value="+65">+65 🇸🇬 Singapore</option>
+                            <option value="+66">+66 🇹🇭 Thailand</option>
+                            <option value="+81">+81 🇯🇵 Japan</option>
+                            <option value="+82">+82 🇰🇷 South Korea</option>
+                            <option value="+84">+84 🇻🇳 Vietnam</option>
+                            <option value="+86">+86 🇨🇳 China</option>
+                            <option value="+90">+90 🇹🇷 Turkey</option>
+                            <option value="+91">+91 🇮🇳 India</option>
+                            <option value="+92">+92 🇵🇰 Pakistan</option>
+                            <option value="+93">+93 🇦🇫 Afghanistan</option>
+                            <option value="+94">+94 🇱🇰 Sri Lanka</option>
+                            <option value="+95">+95 🇲🇲 Myanmar</option>
+                            <option value="+98">+98 🇮🇷 Iran</option>
+                            <option value="+212">+212 🇲🇦 Morocco</option>
+                            <option value="+213">+213 🇩🇿 Algeria</option>
+                            <option value="+216">+216 🇹🇳 Tunisia</option>
+                            <option value="+220">+220 🇬🇲 Gambia</option>
+                            <option value="+221">+221 🇸🇳 Senegal</option>
+                            <option value="+234">+234 🇳🇬 Nigeria</option>
+                            <option value="+249">+249 🇸🇩 Sudan</option>
+                            <option value="+251">+251 🇪🇹 Ethiopia</option>
+                            <option value="+254">+254 🇰🇪 Kenya</option>
+                            <option value="+255">+255 🇹🇿 Tanzania</option>
+                            <option value="+256">+256 🇺🇬 Uganda</option>
+                            <option value="+260">+260 🇿🇲 Zambia</option>
+                            <option value="+263">+263 🇿🇼 Zimbabwe</option>
+                            <option value="+351">+351 🇵🇹 Portugal</option>
+                            <option value="+352">+352 🇱🇺 Luxembourg</option>
+                            <option value="+353">+353 🇮🇪 Ireland</option>
+                            <option value="+354">+354 🇮🇸 Iceland</option>
+                            <option value="+358">+358 🇫🇮 Finland</option>
+                            <option value="+370">+370 🇱🇹 Lithuania</option>
+                            <option value="+371">+371 🇱🇻 Latvia</option>
+                            <option value="+372">+372 🇪🇪 Estonia</option>
+                            <option value="+373">+373 🇲🇩 Moldova</option>
+                            <option value="+374">+374 🇦🇲 Armenia</option>
+                            <option value="+375">+375 🇧🇾 Belarus</option>
+                            <option value="+380">+380 🇺🇦 Ukraine</option>
+                            <option value="+381">+381 🇷🇸 Serbia</option>
+                            <option value="+385">+385 🇭🇷 Croatia</option>
+                            <option value="+386">+386 🇸🇮 Slovenia</option>
+                            <option value="+389">+389 🇲🇰 North Macedonia</option>
+                            <option value="+420">+420 🇨🇿 Czech Republic</option>
+                            <option value="+421">+421 🇸🇰 Slovakia</option>
+                            <option value="+852">+852 🇭🇰 Hong Kong</option>
+                            <option value="+855">+855 🇰🇭 Cambodia</option>
+                            <option value="+856">+856 🇱🇦 Laos</option>
+                            <option value="+880">+880 🇧🇩 Bangladesh</option>
+                            <option value="+886">+886 🇹🇼 Taiwan</option>
+                            <option value="+960">+960 🇲🇻 Maldives</option>
+                            <option value="+961">+961 🇱🇧 Lebanon</option>
+                            <option value="+962">+962 🇯🇴 Jordan</option>
+                            <option value="+963">+963 🇸🇾 Syria</option>
+                            <option value="+964">+964 🇮🇶 Iraq</option>
+                            <option value="+965">+965 🇰🇼 Kuwait</option>
+                            <option value="+966">+966 🇸🇦 Saudi Arabia</option>
+                            <option value="+968">+968 🇴🇲 Oman</option>
+                            <option value="+971">+971 🇦🇪 UAE</option>
+                            <option value="+972">+972 🇮🇱 Israel</option>
+                            <option value="+973">+973 🇧🇭 Bahrain</option>
+                            <option value="+974">+974 🇶🇦 Qatar</option>
+                            <option value="+976">+976 🇲🇳 Mongolia</option>
+                            <option value="+977">+977 🇳🇵 Nepal</option>
+                            <option value="+992">+992 🇹🇯 Tajikistan</option>
+                            <option value="+993">+993 🇹🇲 Turkmenistan</option>
+                            <option value="+994">+994 🇦🇿 Azerbaijan</option>
+                            <option value="+995">+995 🇬🇪 Georgia</option>
+                            <option value="+996">+996 🇰🇬 Kyrgyzstan</option>
+                            <option value="+998">+998 🇺🇿 Uzbekistan</option>
+                        </select>
+                        <input class="auth-input auth-phone-number" type="tel" id="signup-phone" placeholder="XXX XXX XXX" required>
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label">Gender <span class="auth-required">*</span></label>
+                    <div class="auth-gender">
+                        <label class="auth-gender-option">
+                            <input type="radio" name="gender" value="male" required>
+                            <span>Male</span>
+                        </label>
+                        <label class="auth-gender-option">
+                            <input type="radio" name="gender" value="female">
+                            <span>Female</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label" for="signup-password">Password <span class="auth-required">*</span></label>
+                    <div class="auth-password-wrap">
+                        <input class="auth-input" type="password" id="signup-password" placeholder="Create a password" required minlength="8">
+                        <button type="button" class="auth-eye" data-target="signup-password">
+                            <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                    <div class="auth-pw-rules" id="pwRules">
+                        <span class="pw-rule" data-rule="length">8+ chars</span>
+                        <span class="pw-rule" data-rule="upper">A-Z</span>
+                        <span class="pw-rule" data-rule="digit">0-9</span>
+                        <span class="pw-rule" data-rule="special">!@#$</span>
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label" for="signup-confirm">Confirm Password <span class="auth-required">*</span></label>
+                    <div class="auth-password-wrap">
+                        <input class="auth-input" type="password" id="signup-confirm" placeholder="Repeat password" required>
+                        <button type="button" class="auth-eye" data-target="signup-confirm">
+                            <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <label class="auth-checkbox">
+                    <input type="checkbox" required>
+                    <span>I accept the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+                </label>
+                <button type="submit" class="auth-btn">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        const tabs = document.querySelectorAll('.auth-tab');
+        const forms = document.querySelectorAll('.auth-form');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.tab;
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                forms.forEach(f => f.classList.remove('active'));
+                document.getElementById(target === 'signin' ? 'signinForm' : 'signupForm').classList.add('active');
+            });
+        });
+
+        // Forgot password flow
+        const authTabs = document.querySelector('.auth-tabs');
+        const forgotLink = document.querySelector('.auth-forgot');
+        const forgotForm = document.getElementById('forgotForm');
+        const forgotSuccess = document.getElementById('forgotSuccess');
+        const forgotBack = document.getElementById('forgotBack');
+        const forgotBackToLogin = document.getElementById('forgotBackToLogin');
+        const forgotResend = document.getElementById('forgotResend');
+        const forgotEmailConfirm = document.getElementById('forgot-email-confirm');
+
+        function showScreen(screenId) {
+            forms.forEach(f => f.classList.remove('active'));
+            forgotForm.classList.remove('active');
+            forgotSuccess.classList.remove('active');
+            document.getElementById(screenId).classList.add('active');
+            authTabs.style.display = (screenId === 'forgotForm' || screenId === 'forgotSuccess') ? 'none' : 'flex';
+        }
+
+        forgotLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            tabs.forEach(t => t.classList.remove('active'));
+            showScreen('forgotForm');
+        });
+
+        forgotBack.addEventListener('click', function(e) {
+            e.preventDefault();
+            tabs[0].classList.add('active');
+            showScreen('signinForm');
+        });
+
+        forgotEmailConfirm.addEventListener('input', function() {
+            if (this.value !== document.getElementById('forgot-email').value) {
+                this.setCustomValidity('Email addresses do not match');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        forgotForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+            if (email !== forgotEmailConfirm.value) {
+                forgotEmailConfirm.setCustomValidity('Email addresses do not match');
+                forgotEmailConfirm.reportValidity();
+                return;
+            }
+            document.getElementById('forgotEmailDisplay').textContent = email;
+            showScreen('forgotSuccess');
+        });
+
+        forgotBackToLogin.addEventListener('click', function() {
+            tabs[0].classList.add('active');
+            showScreen('signinForm');
+        });
+
+        forgotResend.addEventListener('click', function(e) {
+            e.preventDefault();
+            this.textContent = 'Sent!';
+            setTimeout(() => { this.textContent = 'Resend'; }, 2000);
+        });
+
+        // Eye toggle (show/hide password)
+        document.querySelectorAll('.auth-eye').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = document.getElementById(btn.dataset.target);
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                btn.querySelector('.eye-open').style.display = isPassword ? 'none' : 'block';
+                btn.querySelector('.eye-closed').style.display = isPassword ? 'block' : 'none';
+            });
+        });
+
+        // Password strength live validation
+        const pwInput = document.getElementById('signup-password');
+        const rules = {
+            length: val => val.length >= 8,
+            upper: val => /[A-Z]/.test(val),
+            digit: val => /[0-9]/.test(val),
+            special: val => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val)
+        };
+
+        pwInput.addEventListener('input', function() {
+            const val = this.value;
+            Object.keys(rules).forEach(key => {
+                const el = document.querySelector(`.pw-rule[data-rule="${key}"]`);
+                if (rules[key](val)) {
+                    el.classList.add('valid');
+                } else {
+                    el.classList.remove('valid');
+                }
+            });
+        });
+
+        // Email match validation
+        const emailField = document.getElementById('signup-email');
+        const emailConfirm = document.getElementById('signup-email-confirm');
+
+        emailConfirm.addEventListener('input', function() {
+            if (this.value !== emailField.value) {
+                this.setCustomValidity('Email addresses do not match');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Password match validation + form submit
+        const signupForm = document.getElementById('signupForm');
+        signupForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (emailField.value !== emailConfirm.value) {
+                emailConfirm.setCustomValidity('Email addresses do not match');
+                emailConfirm.reportValidity();
+                return;
+            }
+
+            const pass = document.getElementById('signup-password').value;
+            const allRulesPass = Object.keys(rules).every(key => rules[key](pass));
+            if (!allRulesPass) {
+                document.getElementById('signup-password').setCustomValidity('Password does not meet requirements');
+                document.getElementById('signup-password').reportValidity();
+                return;
+            }
+            document.getElementById('signup-password').setCustomValidity('');
+
+            const confirm = document.getElementById('signup-confirm').value;
+            if (pass !== confirm) {
+                document.getElementById('signup-confirm').setCustomValidity('Passwords do not match');
+                document.getElementById('signup-confirm').reportValidity();
+                return;
+            }
+            document.getElementById('signup-confirm').setCustomValidity('');
+            alert('Registration (demo) — a confirmation email will be sent to your address.');
+        });
+
+        document.getElementById('signup-confirm').addEventListener('input', function() {
+            this.setCustomValidity('');
+        });
+
+        document.getElementById('signinForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Sign In (demo)');
+        });
+    </script>
+</body>
+</html>
