@@ -86,7 +86,7 @@
                     <div class="nav-dropdown-menu">
                         <a href="#about-mission" class="nav-dropdown-item">Миссия</a>
                         <a href="testimonies.html" class="nav-dropdown-item">Отзывы</a>
-                        <a href="sponsors.html" class="nav-dropdown-item">Спонсоры</a>
+                        <a href="#sponsors" class="nav-dropdown-item">Спонсоры</a>
                         <a href="#contacts" class="nav-dropdown-item">Контакты</a>
                     </div>
                 </li>
@@ -186,7 +186,7 @@
                     <ul class="mobile-dropdown-menu">
                         <li><a href="#about-mission">Миссия</a></li>
                         <li><a href="testimonies.html">Отзывы</a></li>
-                        <li><a href="sponsors.html">Спонсоры</a></li>
+                        <li><a href="#sponsors">Спонсоры</a></li>
                         <li><a href="#contacts">Контакты</a></li>
                     </ul>
                 </li>
@@ -226,7 +226,7 @@
                 </p>
                 <div class="hero-cta">
                     <a href="#find" class="btn-primary">
-                        Найти партнёра
+                        Найти игрока
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
@@ -521,8 +521,11 @@
         <!-- PLAYERS / FIND PARTNER -->
         <section id="players" class="section-players">
             <div class="section-header">
-                <h2>Найди партнёра</h2>
-                <p class="section-desc">Игроки, которые ищут соперника прямо сейчас</p>
+                <h2>Найди игрока своего уровня</h2>
+                <div class="section-badge">
+                    <span class="badge-dot"></span>
+                    Игроки онлайн прямо сейчас
+                </div>
             </div>
             <div class="players-grid">
                 <div class="player-card">
@@ -533,7 +536,7 @@
                         <span class="player-location">📍 Бишкек, Асанбай</span>
                         <span class="player-time">🕐 Сегодня, 17:00-19:00</span>
                     </div>
-                    <a href="#invite" class="btn-invite">Пригласить</a>
+                    <a href="auth.html?redirect=players" class="btn-invite">Пригласить</a>
                 </div>
                 <div class="player-card">
                     <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
@@ -543,7 +546,7 @@
                         <span class="player-location">📍 Бишкек, Центр</span>
                         <span class="player-time">🕐 Завтра, 10:00-12:00</span>
                     </div>
-                    <a href="#invite" class="btn-invite">Пригласить</a>
+                    <a href="auth.html?redirect=players" class="btn-invite">Пригласить</a>
                 </div>
                 <div class="player-card">
                     <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
@@ -553,7 +556,7 @@
                         <span class="player-location">📍 Бишкек, Джал</span>
                         <span class="player-time">🕐 Сегодня, 20:00-22:00</span>
                     </div>
-                    <a href="#invite" class="btn-invite">Пригласить</a>
+                    <a href="auth.html?redirect=players" class="btn-invite">Пригласить</a>
                 </div>
                 <div class="player-card">
                     <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
@@ -563,7 +566,47 @@
                         <span class="player-location">📍 Бишкек, Восток-5</span>
                         <span class="player-time">🕐 Суббота, 09:00-11:00</span>
                     </div>
-                    <a href="#invite" class="btn-invite">Пригласить</a>
+                    <a href="auth.html?redirect=players" class="btn-invite">Пригласить</a>
+                </div>
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
+                    <div class="player-info">
+                        <h4>Данияр М.</h4>
+                        <span class="player-level">Уровень 2.5</span>
+                        <span class="player-location">📍 Бишкек, Аламедин</span>
+                        <span class="player-time">🕐 Завтра, 18:00-20:00</span>
+                    </div>
+                    <a href="auth.html?redirect=players" class="btn-invite">Пригласить</a>
+                </div>
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
+                    <div class="player-info">
+                        <h4>Елена В.</h4>
+                        <span class="player-level">Уровень 5.0</span>
+                        <span class="player-location">📍 Бишкек, Южные ворота</span>
+                        <span class="player-time">🕐 Сегодня, 16:00-18:00</span>
+                    </div>
+                    <a href="auth.html?redirect=players" class="btn-invite">Пригласить</a>
+                </div>
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
+                    <div class="player-info">
+                        <h4>Тимур А.</h4>
+                        <span class="player-level">Уровень 2.0</span>
+                        <span class="player-location">📍 Бишкек, Тунгуч</span>
+                        <span class="player-time">🕐 Воскресенье, 08:00-10:00</span>
+                    </div>
+                    <a href="auth.html?redirect=players" class="btn-invite">Пригласить</a>
+                </div>
+                <div class="player-card">
+                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
+                    <div class="player-info">
+                        <h4>Жанара О.</h4>
+                        <span class="player-level">Уровень 3.0</span>
+                        <span class="player-location">📍 Бишкек, Кок-Жар</span>
+                        <span class="player-time">🕐 Суббота, 14:00-16:00</span>
+                    </div>
+                    <a href="auth.html?redirect=players" class="btn-invite">Пригласить</a>
                 </div>
             </div>
         </section>
@@ -571,32 +614,35 @@
         <!-- COURTS -->
         <section id="courts" class="section-courts">
             <div class="section-header">
-                <h2>Корты</h2>
+                <h2>Теннисные корты</h2>
                 <a href="#all-courts" class="link-all">Все корты →</a>
             </div>
             <div class="courts-grid">
                 <div class="court-card">
-                    <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=400&fit=crop&q=80" alt="Корт">
+                    <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600&h=400&fit=crop&q=80" alt="Хард корт">
                     <div class="court-info">
-                        <h4>Dordoi Tennis Club</h4>
+                        <h4>Хард корт</h4>
+                        <span class="court-surface">Покрытие: акрил</span>
                         <span>📍 ул. Ахунбаева 165</span>
                         <span class="court-price">от 800 сом/час</span>
                         <span class="court-status available">4 корта свободны</span>
                     </div>
                 </div>
                 <div class="court-card">
-                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop&q=80" alt="Корт">
+                    <img src="https://images.unsplash.com/photo-1599586120429-48281b6f0ece?w=600&h=400&fit=crop&q=80" alt="Грунтовый корт">
                     <div class="court-info">
-                        <h4>Tennis Park Bishkek</h4>
+                        <h4>Грунтовый корт</h4>
+                        <span class="court-surface">Покрытие: грунт (клэй)</span>
                         <span>📍 мкр. Асанбай 21</span>
                         <span class="court-price">от 1000 сом/час</span>
                         <span class="court-status limited">2 корта свободны</span>
                     </div>
                 </div>
                 <div class="court-card">
-                    <img src="https://images.unsplash.com/photo-1617083934555-17f6a2c82be0?w=600&h=400&fit=crop&q=80" alt="Корт">
+                    <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=400&fit=crop&q=80" alt="Крытый корт">
                     <div class="court-info">
-                        <h4>City Tennis Arena</h4>
+                        <h4>Крытый корт</h4>
+                        <span class="court-surface">Покрытие: синтетика</span>
                         <span>📍 пр. Чуй 123</span>
                         <span class="court-price">от 1200 сом/час</span>
                         <span class="court-status busy">Все занято</span>
@@ -605,25 +651,88 @@
             </div>
         </section>
 
-        <!-- SPONSORS -->
-        <section id="sponsors" class="section-sponsors">
+        <!-- COACHES -->
+        <section id="coaches" class="section-coaches">
             <div class="section-header">
-                <h2>Партнёры и спонсоры</h2>
+                <h2>Тренеры</h2>
+                <a href="#all-coaches" class="link-all">Все тренеры →</a>
             </div>
-
-            <!-- Генеральный спонсор -->
-            <div class="main-sponsor">
-                <span class="sponsor-tier">Генеральный спонсор</span>
-                <div class="main-sponsor-card">
-                    <img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman">
-                    <div class="main-sponsor-info">
-                        <span class="main-sponsor-name">Nurzaman</span>
-                        <span class="main-sponsor-desc">Официальный партнёр KSLT</span>
+            <div class="coaches-grid">
+                <div class="coach-card">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&q=80" alt="Тренер" class="coach-photo">
+                    <div class="coach-info">
+                        <h4>Азамат Жумабеков</h4>
+                        <span class="coach-speciality">Подача и тактика</span>
+                        <span class="coach-experience">Опыт: 12 лет</span>
+                        <span class="coach-level">ITF Level 2</span>
+                        <span class="coach-price">от 1500 сом/час</span>
                     </div>
+                    <a href="auth.html?redirect=coaches" class="btn-invite">Записаться</a>
+                </div>
+                <div class="coach-card">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&q=80" alt="Тренер" class="coach-photo">
+                    <div class="coach-info">
+                        <h4>Наталья Ким</h4>
+                        <span class="coach-speciality">Детский теннис</span>
+                        <span class="coach-experience">Опыт: 8 лет</span>
+                        <span class="coach-level">ITF Level 1</span>
+                        <span class="coach-price">от 1200 сом/час</span>
+                    </div>
+                    <a href="auth.html?redirect=coaches" class="btn-invite">Записаться</a>
+                </div>
+                <div class="coach-card">
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&q=80" alt="Тренер" class="coach-photo">
+                    <div class="coach-info">
+                        <h4>Руслан Абдыкеримов</h4>
+                        <span class="coach-speciality">Физподготовка и техника</span>
+                        <span class="coach-experience">Опыт: 15 лет</span>
+                        <span class="coach-level">ITF Level 3</span>
+                        <span class="coach-price">от 2000 сом/час</span>
+                    </div>
+                    <a href="auth.html?redirect=coaches" class="btn-invite">Записаться</a>
                 </div>
             </div>
+        </section>
 
-            <a href="#become-sponsor" class="btn-secondary">Стать спонсором</a>
+        <!-- SPONSORS -->
+        <section id="sponsors" class="section-sponsors-compact">
+            <div class="section-header">
+                <h2>Партнёры и спонсоры</h2>
+                <a href="#become-sponsor" class="link-all">Стать спонсором →</a>
+            </div>
+            <div class="sponsor-hero">
+                <span class="sponsor-hero-label">Генеральный спонсор</span>
+                <a href="https://nurzaman.kg" target="_blank" rel="noopener noreferrer" class="sponsor-hero-logo" title="Nurzaman">
+                    <img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman">
+                </a>
+            </div>
+            <div class="sponsors-cloud">
+                <a href="#" class="sponsor-logo-link" title="Sponsor 1"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Nike" alt="Nike"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 2"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Adidas" alt="Adidas"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 3"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Wilson" alt="Wilson"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 4"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Head" alt="Head"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 5"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Babolat" alt="Babolat"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 6"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Red+Bull" alt="Red Bull"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 7"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Coca-Cola" alt="Coca-Cola"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 8"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Samsung" alt="Samsung"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 9"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Toyota" alt="Toyota"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 10"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Emirates" alt="Emirates"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 11"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Rolex" alt="Rolex"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 12"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Puma" alt="Puma"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 13"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Under+Armour" alt="Under Armour"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 14"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Lacoste" alt="Lacoste"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 15"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Asics" alt="Asics"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 16"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=New+Balance" alt="New Balance"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 17"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Fila" alt="Fila"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 18"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Yonex" alt="Yonex"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 19"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Tecnifibre" alt="Tecnifibre"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 20"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Pepsi" alt="Pepsi"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 21"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Visa" alt="Visa"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 22"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Mastercard" alt="Mastercard"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 23"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Heineken" alt="Heineken"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 24"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=BMW" alt="BMW"></a>
+                <a href="#" class="sponsor-logo-link" title="Sponsor 25"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Dunlop" alt="Dunlop"></a>
+            </div>
         </section>
 
         <!-- ABOUT -->
@@ -762,7 +871,7 @@
                     </li>
                 </ul>
             </div>
-        </div>
+        </div>git
 
         <!-- Нижняя строка -->
         <div class="footer-bottom">
