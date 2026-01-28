@@ -228,6 +228,32 @@ document.addEventListener('DOMContentLoaded', function() {
     highlightNav();
 
     // ========================================
+    // RANKINGS TABS (hover on desktop, tap on mobile)
+    // ========================================
+    const rankingsTabs = document.querySelectorAll('.rankings-tabs');
+    const isTouchDevice = window.matchMedia('(hover: none)').matches;
+
+    rankingsTabs.forEach(tabBar => {
+        const tabs = tabBar.querySelectorAll('.rankings-tab');
+        const col = tabBar.closest('.rankings-col');
+        if (!col) return;
+
+        tabs.forEach(tab => {
+            const eventType = isTouchDevice ? 'click' : 'mouseenter';
+            tab.addEventListener(eventType, function() {
+                const targetId = this.getAttribute('data-target');
+                // Deactivate all tabs in this group
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                // Show target panel
+                col.querySelectorAll('.rankings-panel').forEach(p => p.classList.remove('active'));
+                const panel = document.getElementById(targetId);
+                if (panel) panel.classList.add('active');
+            });
+        });
+    });
+
+    // ========================================
     // LANGUAGE DROPDOWN
     // ========================================
     const langDropdown = document.getElementById('langDropdown');

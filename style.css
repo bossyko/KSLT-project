@@ -1729,6 +1729,70 @@ h2 {
     color: #FF3B30;
 }
 
+/* Rankings: columns, tabs, panels */
+.rankings-columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xl);
+}
+
+.rankings-col {
+    min-width: 0;
+}
+
+.rankings-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.rankings-tab {
+    padding: 8px 16px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.rankings-tab:hover,
+.rankings-tab.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+.rankings-panel {
+    display: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+.rankings-panel.active {
+    display: block;
+}
+
+.rankings-panel .ranking-row {
+    grid-template-columns: 40px 1fr 50px 70px 40px;
+}
+
+.country {
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.ranking-header .country {
+    font-size: 0.75rem;
+}
+
 /* ========================================
    PLAYERS SECTION
    ======================================== */
@@ -3424,5 +3488,30 @@ h2 {
     .auth-card {
         padding: 28px 20px;
         border-radius: var(--radius-lg);
+    }
+}
+
+/* Rankings responsive */
+@media (max-width: 992px) {
+    .rankings-columns {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    .rankings-panel .ranking-row {
+        grid-template-columns: 30px 1fr 36px 55px 32px;
+        padding: var(--space-sm) var(--space-sm);
+    }
+
+    .rankings-panel .player-col img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .rankings-tab {
+        padding: 6px 12px;
+        font-size: 0.72rem;
     }
 }

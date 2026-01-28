@@ -463,57 +463,125 @@
                 <h2>Топ рейтинга</h2>
                 <a href="#full-rankings" class="link-all">Полный рейтинг →</a>
             </div>
-            <div class="rankings-table">
-                <div class="ranking-row ranking-header">
-                    <span class="rank">#</span>
-                    <span class="player-col">Игрок</span>
-                    <span class="points">Очки</span>
-                    <span class="change">Δ</span>
-                </div>
-                <div class="ranking-row">
-                    <span class="rank">1</span>
-                    <div class="player-col">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt="">
-                        <span>Алексей Иванов</span>
+            <div class="rankings-columns">
+                <!-- MEN -->
+                <div class="rankings-col">
+                    <div class="rankings-tabs" data-group="men">
+                        <button class="rankings-tab active" data-target="men-promasters">Pro-Masters</button>
+                        <button class="rankings-tab" data-target="men-masters">Masters</button>
+                        <button class="rankings-tab" data-target="men-futures">Futures</button>
+                        <button class="rankings-tab" data-target="men-challenger">Challenger</button>
+                        <button class="rankings-tab" data-target="men-tour">Tour</button>
                     </div>
-                    <span class="points">2,450</span>
-                    <span class="change positive">+2</span>
-                </div>
-                <div class="ranking-row">
-                    <span class="rank">2</span>
-                    <div class="player-col">
-                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt="">
-                        <span>Максим Петров</span>
+                    <div class="rankings-panel active" id="men-promasters">
+                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
+                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Алексей Иванов</span></div><span class="country">🇰🇬</span><span class="points">2,450</span><span class="change positive">+2</span></div>
+                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Максим Петров</span></div><span class="country">🇰🇬</span><span class="points">2,380</span><span class="change negative">-1</span></div>
+                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Дмитрий Козлов</span></div><span class="country">🇰🇿</span><span class="points">2,310</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Тимур Асанов</span></div><span class="country">🇰🇬</span><span class="points">2,180</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Руслан Бакиров</span></div><span class="country">🇺🇿</span><span class="points">2,050</span><span class="change positive">+3</span></div>
+                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Эрлан Жумаев</span></div><span class="country">🇰🇬</span><span class="points">1,980</span><span class="change negative">-2</span></div>
+                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Данияр Мамбетов</span></div><span class="country">🇰🇿</span><span class="points">1,920</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Артём Кравцов</span></div><span class="country">🇷🇺</span><span class="points">1,870</span><span class="change">—</span></div>
                     </div>
-                    <span class="points">2,380</span>
-                    <span class="change negative">-1</span>
-                </div>
-                <div class="ranking-row">
-                    <span class="rank">3</span>
-                    <div class="player-col">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt="">
-                        <span>Дмитрий Козлов</span>
+                    <div class="rankings-panel" id="men-masters">
+                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
+                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Бекжан Турсунов</span></div><span class="country">🇰🇬</span><span class="points">1,850</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Нурлан Кыдыров</span></div><span class="country">🇰🇬</span><span class="points">1,780</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Марат Сулейманов</span></div><span class="country">🇰🇿</span><span class="points">1,720</span><span class="change negative">-1</span></div>
+                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Азат Жаныбеков</span></div><span class="country">🇰🇬</span><span class="points">1,690</span><span class="change positive">+2</span></div>
+                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Кенжебек Алиев</span></div><span class="country">🇺🇿</span><span class="points">1,650</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Саламат Орозов</span></div><span class="country">🇰🇬</span><span class="points">1,600</span><span class="change positive">+3</span></div>
+                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Иван Шевченко</span></div><span class="country">🇷🇺</span><span class="points">1,560</span><span class="change negative">-2</span></div>
+                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Алмаз Токтогулов</span></div><span class="country">🇰🇬</span><span class="points">1,520</span><span class="change">—</span></div>
                     </div>
-                    <span class="points">2,310</span>
-                    <span class="change positive">+1</span>
-                </div>
-                <div class="ranking-row">
-                    <span class="rank">4</span>
-                    <div class="player-col">
-                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt="">
-                        <span>Елена Сидорова</span>
+                    <div class="rankings-panel" id="men-futures">
+                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
+                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Аскар Болотов</span></div><span class="country">🇰🇬</span><span class="points">980</span><span class="change positive">+4</span></div>
+                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Темирлан Усенов</span></div><span class="country">🇰🇬</span><span class="points">920</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Жандос Касымов</span></div><span class="country">🇰🇿</span><span class="points">870</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Санжар Абдиев</span></div><span class="country">🇰🇬</span><span class="points">840</span><span class="change negative">-2</span></div>
+                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Бакыт Назаров</span></div><span class="country">🇰🇬</span><span class="points">810</span><span class="change positive">+2</span></div>
+                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Кайрат Эсенов</span></div><span class="country">🇺🇿</span><span class="points">780</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Мирлан Шералиев</span></div><span class="country">🇰🇬</span><span class="points">750</span><span class="change negative">-1</span></div>
+                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Нурбек Токтоев</span></div><span class="country">🇰🇬</span><span class="points">720</span><span class="change positive">+1</span></div>
                     </div>
-                    <span class="points">2,290</span>
-                    <span class="change">—</span>
-                </div>
-                <div class="ranking-row">
-                    <span class="rank">5</span>
-                    <div class="player-col">
-                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt="">
-                        <span>Ксения Николаева</span>
+                    <div class="rankings-panel" id="men-challenger">
+                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
+                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Элдияр Сатыбалдиев</span></div><span class="country">🇰🇬</span><span class="points">1,420</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Канат Джумагулов</span></div><span class="country">🇰🇬</span><span class="points">1,380</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Алишер Рахимов</span></div><span class="country">🇺🇿</span><span class="points">1,340</span><span class="change negative">-1</span></div>
+                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Улан Кожоев</span></div><span class="country">🇰🇬</span><span class="points">1,290</span><span class="change positive">+3</span></div>
+                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Талант Оморов</span></div><span class="country">🇰🇬</span><span class="points">1,250</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Серик Нурмухамедов</span></div><span class="country">🇰🇿</span><span class="points">1,210</span><span class="change positive">+2</span></div>
+                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Адилет Сыдыков</span></div><span class="country">🇰🇬</span><span class="points">1,180</span><span class="change negative">-1</span></div>
+                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Максат Турдалиев</span></div><span class="country">🇰🇬</span><span class="points">1,150</span><span class="change">—</span></div>
                     </div>
-                    <span class="points">2,180</span>
-                    <span class="change positive">+3</span>
+                    <div class="rankings-panel" id="men-tour">
+                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
+                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Самат Джолдошев</span></div><span class="country">🇰🇬</span><span class="points">520</span><span class="change positive">+5</span></div>
+                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Арсен Калыков</span></div><span class="country">🇰🇬</span><span class="points">490</span><span class="change positive">+2</span></div>
+                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Бегалы Маматов</span></div><span class="country">🇰🇬</span><span class="points">460</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Нуржигит Асылбеков</span></div><span class="country">🇰🇿</span><span class="points">430</span><span class="change negative">-1</span></div>
+                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Жаныш Омуралиев</span></div><span class="country">🇰🇬</span><span class="points">400</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Тилек Субанов</span></div><span class="country">🇰🇬</span><span class="points">380</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Мурат Байсалов</span></div><span class="country">🇰🇬</span><span class="points">350</span><span class="change negative">-3</span></div>
+                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Чынгыз Касымалиев</span></div><span class="country">🇰🇬</span><span class="points">320</span><span class="change positive">+2</span></div>
+                    </div>
+                </div>
+
+                <!-- WOMEN -->
+                <div class="rankings-col">
+                    <div class="rankings-tabs" data-group="women">
+                        <button class="rankings-tab active" data-target="women-masters">Masters</button>
+                        <button class="rankings-tab" data-target="women-tour">Tour</button>
+                        <button class="rankings-tab" data-target="women-challenger">Challenger</button>
+                        <button class="rankings-tab" data-target="women-promasters">Pro-Masters</button>
+                    </div>
+                    <div class="rankings-panel active" id="women-masters">
+                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
+                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Елена Сидорова</span></div><span class="country">🇰🇬</span><span class="points">2,290</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Ксения Николаева</span></div><span class="country">🇰🇬</span><span class="points">2,180</span><span class="change positive">+3</span></div>
+                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Айжан Токтосунова</span></div><span class="country">🇰🇬</span><span class="points">2,050</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Мадина Кулова</span></div><span class="country">🇰🇿</span><span class="points">1,980</span><span class="change negative">-1</span></div>
+                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Нургуль Аманбаева</span></div><span class="country">🇰🇬</span><span class="points">1,920</span><span class="change positive">+2</span></div>
+                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Динара Исмаилова</span></div><span class="country">🇺🇿</span><span class="points">1,870</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Жибек Касымова</span></div><span class="country">🇰🇬</span><span class="points">1,810</span><span class="change negative">-2</span></div>
+                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Салтанат Эргешова</span></div><span class="country">🇰🇬</span><span class="points">1,760</span><span class="change positive">+1</span></div>
+                    </div>
+                    <div class="rankings-panel" id="women-tour">
+                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
+                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Бегимай Орозова</span></div><span class="country">🇰🇬</span><span class="points">480</span><span class="change positive">+3</span></div>
+                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Аида Жолдошева</span></div><span class="country">🇰🇬</span><span class="points">450</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Камила Рахматова</span></div><span class="country">🇺🇿</span><span class="points">420</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Назгуль Сатыева</span></div><span class="country">🇰🇬</span><span class="points">390</span><span class="change negative">-1</span></div>
+                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Алтынай Бекова</span></div><span class="country">🇰🇬</span><span class="points">360</span><span class="change positive">+2</span></div>
+                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Гулзат Маматова</span></div><span class="country">🇰🇬</span><span class="points">330</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Эльмира Ташиева</span></div><span class="country">🇰🇿</span><span class="points">300</span><span class="change negative">-2</span></div>
+                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Чолпон Абдиева</span></div><span class="country">🇰🇬</span><span class="points">280</span><span class="change positive">+1</span></div>
+                    </div>
+                    <div class="rankings-panel" id="women-challenger">
+                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
+                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Асель Турганбаева</span></div><span class="country">🇰🇬</span><span class="points">1,350</span><span class="change positive">+2</span></div>
+                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Зарина Нуркулова</span></div><span class="country">🇰🇬</span><span class="points">1,290</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Дария Курманова</span></div><span class="country">🇰🇿</span><span class="points">1,240</span><span class="change negative">-1</span></div>
+                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Миргуль Алымова</span></div><span class="country">🇰🇬</span><span class="points">1,200</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Айнура Бектурова</span></div><span class="country">🇰🇬</span><span class="points">1,160</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Толкун Сагынова</span></div><span class="country">🇺🇿</span><span class="points">1,120</span><span class="change positive">+3</span></div>
+                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Нурзат Токтоева</span></div><span class="country">🇰🇬</span><span class="points">1,080</span><span class="change negative">-2</span></div>
+                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Бурул Эшматова</span></div><span class="country">🇰🇬</span><span class="points">1,040</span><span class="change">—</span></div>
+                    </div>
+                    <div class="rankings-panel" id="women-promasters">
+                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
+                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Анара Молдобаева</span></div><span class="country">🇰🇬</span><span class="points">2,420</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Венера Ташматова</span></div><span class="country">🇰🇬</span><span class="points">2,350</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Гулнара Омурзакова</span></div><span class="country">🇰🇿</span><span class="points">2,280</span><span class="change negative">-1</span></div>
+                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Жазгуль Сулайманова</span></div><span class="country">🇰🇬</span><span class="points">2,210</span><span class="change positive">+2</span></div>
+                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Калыс Абдраимова</span></div><span class="country">🇰🇬</span><span class="points">2,150</span><span class="change">—</span></div>
+                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Нуржамал Кадырова</span></div><span class="country">🇺🇿</span><span class="points">2,090</span><span class="change positive">+1</span></div>
+                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Сезим Тургунова</span></div><span class="country">🇰🇬</span><span class="points">2,030</span><span class="change negative">-2</span></div>
+                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Элнура Жусупова</span></div><span class="country">🇰🇬</span><span class="points">1,970</span><span class="change">—</span></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -871,7 +939,8 @@
                     </li>
                 </ul>
             </div>
-        </div>git
+        </div>
+
 
         <!-- Нижняя строка -->
         <div class="footer-bottom">
