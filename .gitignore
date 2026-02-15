@@ -12,6 +12,14 @@ node_modules/
 coverage/
 reports/
 
-# Cypress
-cypress/videos/
-cypress/screenshots/
+# IDE & tools
+.idea/
+.claude/
+
+# Test & API (empty/unused)
+cypress/
+docs/
+postman/
+
+# Misc
+.gitignoreэ

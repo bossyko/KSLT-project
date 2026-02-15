@@ -1646,6 +1646,139 @@ h2 {
 }
 
 /* ========================================
+   TOURNAMENTS PREVIEW (Main Page)
+   ======================================== */
+
+.section-tournaments-preview {
+    background: var(--bg-secondary);
+}
+
+.tournaments-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+}
+
+.tournament-preview-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.tournament-preview-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(204, 255, 0, 0.1);
+}
+
+.preview-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 60px;
+    padding: var(--space-sm);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.preview-day {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.preview-month {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+.preview-info {
+    flex: 1;
+}
+
+.preview-category {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(204, 255, 0, 0.1);
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.preview-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.preview-location {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.preview-status {
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.preview-status.open {
+    background: rgba(204, 255, 0, 0.15);
+    color: var(--accent);
+}
+
+.preview-status.soon {
+    background: rgba(255, 159, 67, 0.15);
+    color: #FF9F43;
+}
+
+@media (max-width: 1200px) {
+    .tournaments-preview-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .tournaments-preview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tournament-preview-card {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .preview-date {
+        flex-shrink: 0;
+    }
+
+    .preview-status {
+        display: none;
+    }
+}
+
+/* ========================================
    RANKINGS SECTION
    ======================================== */
 
@@ -3298,6 +3431,16 @@ h2 {
     box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
 }
 
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #141414 inset !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: #FFFFFF;
+}
+
 .auth-password-wrap {
     position: relative;
 }
@@ -3328,6 +3471,11 @@ h2 {
 .auth-phone-row {
     display: flex;
     gap: 10px;
+}
+
+.auth-phone-code option {
+    background: #141414;
+    color: #FFFFFF;
 }
 
 .auth-phone-code {

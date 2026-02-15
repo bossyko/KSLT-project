@@ -216,7 +216,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (scrollY >= top && scrollY < top + height) {
                 navItems.forEach(item => item.classList.remove('active'));
-                const activeLink = document.querySelector('.nav-links a[href="#' + id + '"]');
+                // Try direct nav link first
+                let activeLink = document.querySelector('.nav-links > li > a[href="#' + id + '"]');
+                // If not found, check dropdown items and highlight parent
+                if (!activeLink) {
+                    const dropdownItem = document.querySelector('.nav-dropdown-menu a[href="#' + id + '"]');
+                    if (dropdownItem) {
+                        activeLink = dropdownItem.closest('.nav-dropdown').querySelector('.nav-item');
+                    }
+                }
                 if (activeLink) {
                     activeLink.classList.add('active');
                 }

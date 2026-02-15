@@ -24,7 +24,7 @@
             <!-- Центр: Навигация -->
             <ul class="nav-links">
                 <li class="nav-dropdown">
-                    <a href="#tournaments" class="nav-item nav-item-dropdown">
+                    <a href="#" class="nav-item nav-item-dropdown" onclick="return false;">
                         Турниры
                         <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
@@ -32,12 +32,12 @@
                         </svg>
                     </a>
                     <div class="nav-dropdown-menu">
-                        <a href="#tournaments-tour" class="nav-dropdown-item">Tour</a>
-                        <a href="#tournaments-challengers" class="nav-dropdown-item">Challengers</a>
-                        <a href="#tournaments-futures" class="nav-dropdown-item">Futures</a>
-                        <a href="#tournaments-masters" class="nav-dropdown-item">Masters</a>
-                        <a href="#tournaments-promasters" class="nav-dropdown-item">Pro Masters</a>
-                        <a href="#tournaments-friendly" class="nav-dropdown-item">Дружеские турниры</a>
+                        <a href="tournaments.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments.html?category=challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="tournaments.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments.html?category=friendly" class="nav-dropdown-item">Friendly</a>
                     </div>
                 </li>
                 <li>
@@ -111,7 +111,7 @@
                             <span class="lang-check">✓</span>
                         </a>
                         <a href="index-en.html" class="lang-option" data-lang="EN">
-                            <span class="lang-flag">🇬🇧</span>
+                            <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
                         </a>
@@ -139,12 +139,12 @@
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
-                        <li><a href="#tournaments-tour">Tour</a></li>
-                        <li><a href="#tournaments-challengers">Challengers</a></li>
-                        <li><a href="#tournaments-futures">Futures</a></li>
-                        <li><a href="#tournaments-masters">Masters</a></li>
-                        <li><a href="#tournaments-promasters">Pro Masters</a></li>
-                        <li><a href="#tournaments-friendly">Дружеские турниры</a></li>
+                        <li><a href="tournaments.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="tournaments.html?category=masters">Masters</a></li>
+                        <li><a href="tournaments.html?category=challenger">Challenger</a></li>
+                        <li><a href="tournaments.html?category=futures">Futures</a></li>
+                        <li><a href="tournaments.html?category=tour">Tour</a></li>
+                        <li><a href="tournaments.html?category=friendly">Friendly</a></li>
                     </ul>
                 </li>
                 <li><a href="#live"><span class="live-dot"></span> Live</a></li>
@@ -198,7 +198,7 @@
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
                     <a href="index-en.html" class="mobile-lang-option" data-lang="EN">
-                        <span class="lang-flag">🇬🇧</span> English
+                        <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
             </div>
@@ -454,6 +454,64 @@
                     </div>
                     <a href="#watch" class="btn-watch">Смотреть</a>
                 </div>
+            </div>
+        </section>
+
+        <!-- TOURNAMENTS PREVIEW -->
+        <section id="tournaments" class="section-tournaments-preview">
+            <div class="section-header">
+                <h2>Ближайшие турниры</h2>
+                <a href="tournaments.html?category=tour" class="link-all">Все турниры →</a>
+            </div>
+            <div class="tournaments-preview-grid">
+                <a href="tournaments.html?category=tour" class="tournament-preview-card">
+                    <div class="preview-date">
+                        <span class="preview-day">15</span>
+                        <span class="preview-month">Фев</span>
+                    </div>
+                    <div class="preview-info">
+                        <span class="preview-category">Tour</span>
+                        <h4>KSLT Tour Open #1</h4>
+                        <span class="preview-location">📍 Бишкек, Ахунбаева 165</span>
+                    </div>
+                    <div class="preview-status open">Регистрация открыта</div>
+                </a>
+                <a href="tournaments.html?category=tour" class="tournament-preview-card">
+                    <div class="preview-date">
+                        <span class="preview-day">22</span>
+                        <span class="preview-month">Фев</span>
+                    </div>
+                    <div class="preview-info">
+                        <span class="preview-category">Tour</span>
+                        <h4>KSLT Tour Doubles</h4>
+                        <span class="preview-location">📍 Бишкек, Асанбай 21</span>
+                    </div>
+                    <div class="preview-status open">Регистрация открыта</div>
+                </a>
+                <a href="tournaments.html?category=challenger" class="tournament-preview-card">
+                    <div class="preview-date">
+                        <span class="preview-day">01</span>
+                        <span class="preview-month">Мар</span>
+                    </div>
+                    <div class="preview-info">
+                        <span class="preview-category">Challenger</span>
+                        <h4>Spring Challenger Cup</h4>
+                        <span class="preview-location">📍 Бишкек, Центральный корт</span>
+                    </div>
+                    <div class="preview-status soon">Скоро открытие</div>
+                </a>
+                <a href="tournaments.html?category=masters" class="tournament-preview-card">
+                    <div class="preview-date">
+                        <span class="preview-day">15</span>
+                        <span class="preview-month">Мар</span>
+                    </div>
+                    <div class="preview-info">
+                        <span class="preview-category">Masters</span>
+                        <h4>KSLT Masters Series</h4>
+                        <span class="preview-location">📍 Бишкек, Tennis Park</span>
+                    </div>
+                    <div class="preview-status soon">Скоро открытие</div>
+                </a>
             </div>
         </section>
 
@@ -914,7 +972,7 @@
             </div>
 
             <!-- Контакты -->
-            <div class="footer-block">
+            <div class="footer-block" id="contacts">
                 <h4>Контакты</h4>
                 <ul class="footer-contacts">
                     <li>

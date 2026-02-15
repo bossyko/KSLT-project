@@ -21,11 +21,22 @@
             </div>
 
             <ul class="nav-links">
-                <li>
-                    <a href="#tournaments" class="nav-item">
+                <li class="nav-dropdown">
+                    <a href="#" class="nav-item nav-item-dropdown" onclick="return false;">
                         Мелдештер
                         <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
                     </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="tournaments.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments.html?category=challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="tournaments.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments.html?category=friendly" class="nav-dropdown-item">Достук</a>
+                    </div>
                 </li>
                 <li>
                     <a href="#live" class="nav-item nav-item-live">
@@ -89,7 +100,7 @@
                             <span class="lang-check">✓</span>
                         </a>
                         <a href="index-en.html" class="lang-option" data-lang="EN">
-                            <span class="lang-flag">🇬🇧</span>
+                            <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
                         </a>
@@ -106,7 +117,23 @@
 
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
-                <li><a href="#tournaments">Мелдештер <span class="indicator-dot"></span></a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="#tournaments" class="mobile-dropdown-toggle">
+                        Мелдештер
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="tournaments.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="tournaments.html?category=masters">Masters</a></li>
+                        <li><a href="tournaments.html?category=challenger">Challenger</a></li>
+                        <li><a href="tournaments.html?category=futures">Futures</a></li>
+                        <li><a href="tournaments.html?category=tour">Tour</a></li>
+                        <li><a href="tournaments.html?category=friendly">Достук</a></li>
+                    </ul>
+                </li>
                 <li><a href="#live"><span class="live-dot"></span> Түз эфир</a></li>
                 <li><a href="#rankings">Рейтинг</a></li>
                 <li><a href="#players">Оюнчулар</a></li>
@@ -147,7 +174,7 @@
                         <span class="lang-flag">🇰🇬</span> Кыргызча
                     </a>
                     <a href="index-en.html" class="mobile-lang-option" data-lang="EN">
-                        <span class="lang-flag">🇬🇧</span> English
+                        <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
             </div>
