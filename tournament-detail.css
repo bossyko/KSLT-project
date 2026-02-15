@@ -1017,3 +1017,29 @@
     }
 }
 
+@media (max-width: 375px) {
+    .td-hero h1 {
+        font-size: 1.3rem;
+    }
+    .td-hero-meta {
+        font-size: 0.82rem;
+    }
+    .td-container {
+        padding: 32px 12px 48px;
+    }
+    .td-match {
+        width: 150px;
+        min-width: 150px;
+    }
+    .td-bracket-round {
+        min-width: 160px;
+    }
+    .td-tab {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+    }
+    .td-info-stat-num {
+        font-size: 1.3rem;
+    }
+}
+

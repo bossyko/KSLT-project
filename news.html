@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSLT — Турнир</title>
+    <title>KSLT — Новости</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="tournaments.css">
-    <link rel="stylesheet" href="tournament-detail.css">
+    <link rel="stylesheet" href="news.css">
 </head>
 <body>
     <!-- HEADER -->
@@ -25,9 +24,8 @@
 
             <ul class="nav-links">
                 <li class="nav-dropdown">
-                    <a href="tournaments.html" class="nav-item nav-item-dropdown active">
+                    <a href="tournaments.html" class="nav-item nav-item-dropdown">
                         Турниры
-                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -106,12 +104,12 @@
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="tournament.html" class="lang-option active" data-lang="RU">
+                        <a href="news.html" class="lang-option active" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="tournament-en.html" class="lang-option" data-lang="EN">
+                        <a href="news-en.html" class="lang-option" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -130,9 +128,8 @@
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
                 <li class="mobile-nav-dropdown">
-                    <a href="#tournaments" class="mobile-dropdown-toggle active">
+                    <a href="#tournaments" class="mobile-dropdown-toggle">
                         Турниры
-                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -196,10 +193,10 @@
             <div class="mobile-nav-bottom">
                 <div class="mobile-lang-list">
                     <span class="mobile-lang-title">Язык</span>
-                    <a href="tournament.html" class="mobile-lang-option active" data-lang="RU">
+                    <a href="news.html" class="mobile-lang-option active" data-lang="RU">
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
-                    <a href="tournament-en.html" class="mobile-lang-option" data-lang="EN">
+                    <a href="news-en.html" class="mobile-lang-option" data-lang="EN">
                         <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
@@ -209,50 +206,22 @@
 
     <main>
         <!-- HERO -->
-        <section class="td-hero" id="tournamentHero"></section>
+        <section class="news-hero" id="newsHero"></section>
 
-        <!-- TABS -->
-        <nav class="td-tabs-bar" id="tabsBar">
-            <div class="td-tabs">
-                <button class="td-tab active" data-target="bracket">Сетка</button>
-                <button class="td-tab" data-target="schedule">Расписание</button>
-                <button class="td-tab" data-target="participants">Участники</button>
-                <button class="td-tab" data-target="results">Результаты</button>
-            </div>
-        </nav>
+        <!-- ARTICLE BODY -->
+        <article class="news-article-body" id="newsArticleBody"></article>
 
-        <!-- BRACKET -->
-        <section class="td-section" id="bracket">
-            <div class="section-header">
-                <h2>Турнирная сетка</h2>
-            </div>
-            <div id="bracketContainer"></div>
-        </section>
+        <!-- TAGS -->
+        <section class="news-tags" id="newsTags"></section>
 
-        <!-- SCHEDULE -->
-        <section class="td-section" id="schedule">
-            <div class="section-header">
-                <h2>Расписание матчей</h2>
-            </div>
-            <div class="td-schedule-filters" id="scheduleFilters"></div>
-            <div id="scheduleList"></div>
-        </section>
+        <!-- REACTIONS -->
+        <section class="news-reactions" id="newsReactions"></section>
 
-        <!-- PARTICIPANTS -->
-        <section class="td-section" id="participants">
-            <div class="section-header">
-                <h2>Участники</h2>
-            </div>
-            <div class="td-participants-grid" id="participantsGrid"></div>
-        </section>
+        <!-- RELATED -->
+        <section class="news-related" id="newsRelated"></section>
 
-        <!-- RESULTS -->
-        <section class="td-section" id="results">
-            <div class="section-header">
-                <h2>Результаты</h2>
-            </div>
-            <div id="resultsPodium"></div>
-        </section>
+        <!-- NOT FOUND -->
+        <section class="news-not-found" id="newsNotFound"></section>
 
         <!-- SPONSORS -->
         <section id="sponsors" class="section-sponsors-compact">
@@ -359,8 +328,7 @@
     </footer>
 
     <script src="script.js"></script>
-    <script src="tournament-generator.js"></script>
-    <script src="tournament-detail-data.js"></script>
-    <script src="tournament-detail.js"></script>
+    <script src="news-data.js"></script>
+    <script src="news.js"></script>
 </body>
 </html>

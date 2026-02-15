@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSLT — Турнир</title>
+    <title>KSLT — Правила лиги</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="tournaments.css">
-    <link rel="stylesheet" href="tournament-detail.css">
+    <link rel="stylesheet" href="info-pages.css">
 </head>
 <body>
     <!-- HEADER -->
@@ -25,20 +24,19 @@
 
             <ul class="nav-links">
                 <li class="nav-dropdown">
-                    <a href="tournaments.html" class="nav-item nav-item-dropdown active">
+                    <a href="tournaments.html" class="nav-item nav-item-dropdown">
                         Турниры
-                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <div class="nav-dropdown-menu">
-                        <a href="tournaments.html?category=promasters" class="nav-dropdown-item" data-category="promasters">Pro-Masters</a>
-                        <a href="tournaments.html?category=masters" class="nav-dropdown-item" data-category="masters">Masters</a>
-                        <a href="tournaments.html?category=challenger" class="nav-dropdown-item" data-category="challenger">Challenger</a>
-                        <a href="tournaments.html?category=futures" class="nav-dropdown-item" data-category="futures">Futures</a>
-                        <a href="tournaments.html?category=tour" class="nav-dropdown-item" data-category="tour">Tour</a>
-                        <a href="tournaments.html?category=friendly" class="nav-dropdown-item" data-category="friendly">Friendly</a>
+                        <a href="tournaments.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments.html?category=challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="tournaments.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments.html?category=friendly" class="nav-dropdown-item">Friendly</a>
                     </div>
                 </li>
                 <li>
@@ -106,12 +104,12 @@
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="tournament.html" class="lang-option active" data-lang="RU">
+                        <a href="rules.html" class="lang-option active" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="tournament-en.html" class="lang-option" data-lang="EN">
+                        <a href="rules-en.html" class="lang-option" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -130,9 +128,8 @@
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
                 <li class="mobile-nav-dropdown">
-                    <a href="#tournaments" class="mobile-dropdown-toggle active">
+                    <a href="tournaments.html" class="mobile-dropdown-toggle">
                         Турниры
-                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -196,10 +193,10 @@
             <div class="mobile-nav-bottom">
                 <div class="mobile-lang-list">
                     <span class="mobile-lang-title">Язык</span>
-                    <a href="tournament.html" class="mobile-lang-option active" data-lang="RU">
+                    <a href="rules.html" class="mobile-lang-option active" data-lang="RU">
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
-                    <a href="tournament-en.html" class="mobile-lang-option" data-lang="EN">
+                    <a href="rules-en.html" class="mobile-lang-option" data-lang="EN">
                         <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
@@ -209,70 +206,132 @@
 
     <main>
         <!-- HERO -->
-        <section class="td-hero" id="tournamentHero"></section>
-
-        <!-- TABS -->
-        <nav class="td-tabs-bar" id="tabsBar">
-            <div class="td-tabs">
-                <button class="td-tab active" data-target="bracket">Сетка</button>
-                <button class="td-tab" data-target="schedule">Расписание</button>
-                <button class="td-tab" data-target="participants">Участники</button>
-                <button class="td-tab" data-target="results">Результаты</button>
-            </div>
-        </nav>
-
-        <!-- BRACKET -->
-        <section class="td-section" id="bracket">
-            <div class="section-header">
-                <h2>Турнирная сетка</h2>
-            </div>
-            <div id="bracketContainer"></div>
-        </section>
-
-        <!-- SCHEDULE -->
-        <section class="td-section" id="schedule">
-            <div class="section-header">
-                <h2>Расписание матчей</h2>
-            </div>
-            <div class="td-schedule-filters" id="scheduleFilters"></div>
-            <div id="scheduleList"></div>
-        </section>
-
-        <!-- PARTICIPANTS -->
-        <section class="td-section" id="participants">
-            <div class="section-header">
-                <h2>Участники</h2>
-            </div>
-            <div class="td-participants-grid" id="participantsGrid"></div>
-        </section>
-
-        <!-- RESULTS -->
-        <section class="td-section" id="results">
-            <div class="section-header">
-                <h2>Результаты</h2>
-            </div>
-            <div id="resultsPodium"></div>
-        </section>
-
-        <!-- SPONSORS -->
-        <section id="sponsors" class="section-sponsors-compact">
-            <div class="section-header">
-                <h2>Партнёры и спонсоры</h2>
-            </div>
-            <div class="sponsor-hero">
-                <span class="sponsor-hero-label">Генеральный спонсор</span>
-                <a href="#" class="sponsor-hero-logo">
-                    <img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">
-                </a>
-            </div>
-            <div class="sponsors-cloud">
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>
+        <section class="ip-hero">
+            <div class="ip-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=1400&q=80')"></div>
+            <div class="ip-hero-content">
+                <h1 class="ip-hero-title">Правила <span>KSLT</span></h1>
+                <p class="ip-hero-subtitle">Официальные правила и регламент Kyrgyzstan Social Lawn Tennis</p>
             </div>
         </section>
+
+        <!-- RULES CONTENT -->
+        <div class="ip-container">
+
+            <!-- Table of Contents -->
+            <div class="ip-toc ip-fade-in">
+                <div class="ip-toc-title">Содержание</div>
+                <ol class="ip-toc-list">
+                    <li><a href="#rules-general">Общие положения</a></li>
+                    <li><a href="#rules-membership">Членство в KSLT</a></li>
+                    <li><a href="#rules-tournaments">Турниры и матчи</a></li>
+                    <li><a href="#rules-ranking">Рейтинговая система</a></li>
+                    <li><a href="#rules-conduct">Кодекс поведения</a></li>
+                    <li><a href="#rules-sanctions">Санкции и дисквалификация</a></li>
+                </ol>
+            </div>
+
+            <!-- Section 1 -->
+            <div class="ip-rules-section ip-fade-in" id="rules-general">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">01</span>
+                    Общие положения
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>KSLT (Kyrgyzstan Social Lawn Tennis) является любительским теннисным сообществом, действующим на территории Кыргызской Республики.</li>
+                    <li>Целью KSLT является популяризация тенниса, организация турниров и создание единой рейтинговой системы для любителей.</li>
+                    <li>Участником KSLT может стать любое лицо старше 16 лет, принимающее настоящие правила.</li>
+                    <li>Все матчи и турниры проводятся по правилам ITF (Международная теннисная федерация) с дополнениями, установленными KSLT.</li>
+                    <li>Официальные языки сообщества: русский, кыргызский, английский.</li>
+                    <li>Администрация KSLT оставляет за собой право вносить изменения в правила с уведомлением участников не менее чем за 7 дней.</li>
+                </ol>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="ip-rules-section ip-fade-in" id="rules-membership">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">02</span>
+                    Членство в KSLT
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Для участия в рейтинговых турнирах необходимо активное членство KSLT.</li>
+                    <li>Членские взносы оплачиваются ежемесячно или ежегодно (при годовой оплате предоставляется скидка).</li>
+                    <li>При неоплате членского взноса более 30 дней участие в турнирах приостанавливается, но рейтинговые очки сохраняются в течение 90 дней.</li>
+                    <li>Член KSLT обязуется соблюдать настоящие правила, кодекс поведения и решения администрации.</li>
+                    <li>Членство может быть приостановлено по заявлению участника на срок до 3 месяцев.</li>
+                    <li>Возврат членских взносов возможен в течение 7 дней после оплаты, если участник не принимал участие в турнирах за этот период.</li>
+                </ol>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="ip-rules-section ip-fade-in" id="rules-tournaments">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">03</span>
+                    Турниры и матчи
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Турниры проводятся в 6 категориях: Pro-Masters, Masters, Challenger, Futures, Tour и Friendly.</li>
+                    <li>Регистрация на турнир открывается не менее чем за 7 дней до начала и закрывается за 24 часа.</li>
+                    <li>Количество участников ограничено форматом сетки (8, 16 или 32 игрока). При превышении лимита приоритет отдаётся игрокам с более высоким рейтингом.</li>
+                    <li>Формат матча: 2 сета до 6 геймов с тай-брейком при 6:6. Решающий 3-й сет проводится в формате супер тай-брейка (до 10 очков).</li>
+                    <li>Игрок обязан явиться на матч не позднее чем через 15 минут после назначенного времени. Опоздание свыше 15 минут считается неявкой (WO).</li>
+                    <li>Перенос матча возможен только по уважительной причине с согласия обоих игроков и организатора, не позднее чем за 12 часов до начала.</li>
+                    <li>Каждый игрок самостоятельно обеспечивает себя ракеткой и спортивной формой. Мячи предоставляются организатором турнира.</li>
+                    <li>Судейство матчей осуществляется на основе самосудейства (self-refereeing). При спорных ситуациях вызывается главный судья турнира.</li>
+                </ol>
+            </div>
+
+            <!-- Section 4 -->
+            <div class="ip-rules-section ip-fade-in" id="rules-ranking">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">04</span>
+                    Рейтинговая система
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Рейтинг KSLT основан на накопительной очковой системе. Очки начисляются за результаты в турнирах.</li>
+                    <li>Количество очков зависит от категории турнира, стадии (финал, полуфинал и т.д.) и рейтинга соперника.</li>
+                    <li>Рейтинг обновляется в течение 48 часов после завершения турнира.</li>
+                    <li>Очки за турниры сохраняются в течение 12 месяцев, после чего постепенно снижаются.</li>
+                    <li>Переход между категориями (повышение/понижение) определяется на основе накопленных очков и результатов за последние 6 месяцев.</li>
+                    <li>Новые участники начинают с категории Tour и могут перейти в более высокую категорию по результатам первых 3 турниров.</li>
+                    <li>В случае равенства очков приоритет определяется по: количеству побед, личным встречам, количеству сыгранных матчей.</li>
+                </ol>
+            </div>
+
+            <!-- Section 5 -->
+            <div class="ip-rules-section ip-fade-in" id="rules-conduct">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">05</span>
+                    Кодекс поведения
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Участники KSLT обязуются проявлять уважение к соперникам, организаторам и зрителям.</li>
+                    <li>Запрещено использование ненормативной лексики, агрессивное поведение, бросание ракетки и порча имущества кортов.</li>
+                    <li>Игроки должны соблюдать дресс-код: чистая спортивная форма, теннисная обувь. Игра в джинсах, сандалиях и т.п. запрещена.</li>
+                    <li>Запрещено употребление алкоголя и наркотических веществ до и во время матчей.</li>
+                    <li>Игроки обязаны честно вести счёт и признавать ауты/неты. В случае разногласий мяч переигрывается.</li>
+                    <li>Использование электронных устройств (телефонов, умных часов) во время матча запрещено, за исключением экстренных ситуаций.</li>
+                    <li>Курение на территории корта запрещено.</li>
+                </ol>
+            </div>
+
+            <!-- Section 6 -->
+            <div class="ip-rules-section ip-fade-in" id="rules-sanctions">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">06</span>
+                    Санкции и дисквалификация
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Неявка на матч без предупреждения (WO) — штраф: минус 50 рейтинговых очков.</li>
+                    <li>Повторная неявка в течение сезона — дисквалификация на 1 турнир.</li>
+                    <li>Нарушение кодекса поведения — предупреждение. Повторное нарушение — дисквалификация на 1-3 турнира.</li>
+                    <li>Грубое нарушение (агрессия, оскорбления) — немедленная дисквалификация с турнира и отстранение на 1-6 месяцев.</li>
+                    <li>Фальсификация результатов — пожизненная дисквалификация.</li>
+                    <li>Решения о санкциях принимает дисциплинарный комитет KSLT. Участник имеет право на апелляцию в течение 7 дней.</li>
+                    <li>Все санкции фиксируются в профиле игрока и влияют на его рейтинг и репутацию в сообществе.</li>
+                </ol>
+            </div>
+
+        </div>
     </main>
 
     <!-- FOOTER -->
@@ -305,9 +364,9 @@
             <div class="footer-block">
                 <h4>Навигация</h4>
                 <ul class="footer-links">
-                    <li><a href="index.html#tournaments">Турниры</a></li>
+                    <li><a href="tournaments.html">Турниры</a></li>
                     <li><a href="players.html">Рейтинг</a></li>
-                    <li><a href="courts.html">Корты</a></li>
+                    <li><a href="news.html">Новости</a></li>
                     <li><a href="index.html#live">Live трансляции</a></li>
                 </ul>
             </div>
@@ -315,10 +374,9 @@
                 <h4>Игрокам</h4>
                 <ul class="footer-links">
                     <li><a href="rules.html">Правила лиги</a></li>
-                    <li><a href="#">Система рейтинга</a></li>
-                    <li><a href="#">Как вступить</a></li>
+                    <li><a href="players.html">Система рейтинга</a></li>
+                    <li><a href="about.html">О проекте</a></li>
                     <li><a href="faq.html">FAQ</a></li>
-                    <li><a href="#">Кодекс игрока</a></li>
                 </ul>
             </div>
             <div class="footer-block">
@@ -359,8 +417,27 @@
     </footer>
 
     <script src="script.js"></script>
-    <script src="tournament-generator.js"></script>
-    <script src="tournament-detail-data.js"></script>
-    <script src="tournament-detail.js"></script>
+    <script>
+        // Smooth scroll for TOC links
+        document.querySelectorAll('.ip-toc-list a').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Scroll animations
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.ip-fade-in').forEach(function(el) { observer.observe(el); });
+    </script>
 </body>
 </html>

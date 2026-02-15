@@ -616,3 +616,25 @@
         display: none;
     }
 }
+
+@media (max-width: 375px) {
+    .tournament-list-header h1 {
+        font-size: 1.4rem;
+    }
+    .filter-btn {
+        padding: 7px 14px;
+        font-size: 0.78rem;
+    }
+    .tournament-card-content {
+        padding: 16px;
+    }
+    .tournament-card-title {
+        font-size: 1rem;
+    }
+    .tournament-details {
+        gap: var(--space-sm);
+    }
+    .detail-item {
+        font-size: 0.82rem;
+    }
+}

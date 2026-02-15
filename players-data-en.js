@@ -1,0 +1,240 @@
+// ========================================
+// PLAYERS DATA — EN
+// 9 categories, 15 players each + labels
+// ========================================
+
+window.playersLabels = {
+    title: "KSLT Rankings",
+    subtitle: "{count} players \u00b7 {online} online \u00b7 Season 2026",
+    searchPlaceholder: "Search player...",
+    men: "Men",
+    women: "Women",
+    rank: "#",
+    player: "Player",
+    country: "Country",
+    points: "Points",
+    record: "W/L",
+    form: "Form",
+    change: "\u0394",
+    actions: "",
+    online: "Online",
+    message: "Message",
+    challenge: "Challenge",
+    prevPage: "\u2190 Prev",
+    nextPage: "Next \u2192",
+    badgeChampion: "Tournament Champion",
+    badgeStreak: "Win streak 5+",
+    badgeTop1: "#1 of the month",
+    badgeNewbie: "Newcomer",
+    badgeBreakthrough: "Breakthrough",
+    sponsorsTitle: "Partners & Sponsors",
+    sponsorsGeneral: "General Sponsor",
+    noResults: "No players found",
+    authRequired: "Sign in required"
+};
+
+var playersData = {
+    categories: {
+        // ========== MEN ==========
+        "men-promasters": {
+            name: "Pro-Masters",
+            gender: "men",
+            genderLabel: "Men",
+            players: [
+                { id: "ivanov-alexey", name: "Alexey Ivanov", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2450, wins: 18, losses: 3, change: +2, form: ["W","W","W","L","W"], online: true, badges: ["champion","top1"] },
+                { id: "petrov-maxim", name: "Maxim Petrov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2380, wins: 16, losses: 5, change: -1, form: ["W","L","W","W","W"], online: false, badges: ["streak"] },
+                { id: "kozlov-dmitry", name: "Dmitry Kozlov", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 2310, wins: 15, losses: 4, change: +1, form: ["W","W","L","W","L"], online: false, badges: [] },
+                { id: "asanov-timur", name: "Timur Asanov", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2180, wins: 14, losses: 6, change: 0, form: ["L","W","W","W","L"], online: true, badges: [] },
+                { id: "bakirov-ruslan", name: "Ruslan Bakirov", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 2050, wins: 13, losses: 5, change: +3, form: ["W","W","W","W","L"], online: false, badges: ["streak"] },
+                { id: "zhumaev-erlan", name: "Erlan Zhumaev", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1980, wins: 12, losses: 7, change: -2, form: ["L","W","L","W","W"], online: false, badges: [] },
+                { id: "mambetov-daniyar", name: "Daniyar Mambetov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 1920, wins: 11, losses: 6, change: +1, form: ["W","L","W","W","W"], online: true, badges: [] },
+                { id: "kravtsov-artem", name: "Artem Kravtsov", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf7\ud83c\uddfa", points: 1870, wins: 10, losses: 8, change: 0, form: ["W","L","L","W","W"], online: false, badges: [] },
+                { id: "sultanov-aybek", name: "Aybek Sultanov", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1810, wins: 10, losses: 7, change: +2, form: ["W","W","L","W","L"], online: false, badges: [] },
+                { id: "orozbekov-nurdin", name: "Nurdin Orozbekov", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1760, wins: 9, losses: 8, change: -1, form: ["L","W","W","L","W"], online: true, badges: [] },
+                { id: "toktomushev-azamat", name: "Azamat Toktomushev", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1700, wins: 9, losses: 9, change: 0, form: ["W","L","W","L","W"], online: false, badges: [] },
+                { id: "kurbanov-farid", name: "Farid Kurbanov", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 1650, wins: 8, losses: 9, change: +1, form: ["W","W","L","L","W"], online: false, badges: ["newbie"] },
+                { id: "tashiev-bektur", name: "Bektur Tashiev", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1600, wins: 8, losses: 10, change: -3, form: ["L","L","W","W","L"], online: false, badges: [] },
+                { id: "ismailov-sultan", name: "Sultan Ismailov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1550, wins: 7, losses: 10, change: +12, form: ["W","W","W","W","W"], online: true, badges: ["breakthrough","streak"] },
+                { id: "abdykerimov-manas", name: "Manas Abdykerimov", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1500, wins: 7, losses: 11, change: -1, form: ["L","W","L","W","L"], online: false, badges: ["newbie"] }
+            ]
+        },
+        "men-masters": {
+            name: "Masters",
+            gender: "men",
+            genderLabel: "Men",
+            players: [
+                { id: "tursunov-bekzhan", name: "Bekzhan Tursunov", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1850, wins: 15, losses: 4, change: +1, form: ["W","W","L","W","W"], online: true, badges: ["champion","top1"] },
+                { id: "kydyrov-nurlan", name: "Nurlan Kydyrov", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1780, wins: 13, losses: 5, change: 0, form: ["W","L","W","W","L"], online: false, badges: [] },
+                { id: "suleymanov-marat", name: "Marat Suleymanov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 1720, wins: 12, losses: 6, change: -1, form: ["L","W","W","L","W"], online: false, badges: [] },
+                { id: "zhanybekov-azat", name: "Azat Zhanybekov", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1690, wins: 12, losses: 7, change: +2, form: ["W","W","W","L","W"], online: true, badges: [] },
+                { id: "aliev-kenzhebek", name: "Kenzhebek Aliev", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 1650, wins: 11, losses: 6, change: 0, form: ["W","L","W","L","W"], online: false, badges: [] },
+                { id: "orozov-salamat", name: "Salamat Orozov", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1600, wins: 10, losses: 7, change: +3, form: ["W","W","W","W","L"], online: false, badges: ["streak"] },
+                { id: "shevchenko-ivan", name: "Ivan Shevchenko", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf7\ud83c\uddfa", points: 1560, wins: 10, losses: 8, change: -2, form: ["L","L","W","W","W"], online: false, badges: [] },
+                { id: "toktogulov-almaz", name: "Almaz Toktogulov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1520, wins: 9, losses: 8, change: 0, form: ["W","L","W","L","L"], online: true, badges: [] },
+                { id: "beishenaliev-taalaibek", name: "Taalaibek Beishenaliev", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1480, wins: 9, losses: 9, change: +1, form: ["W","W","L","W","L"], online: false, badges: [] },
+                { id: "ryspek-uulu-aman", name: "Aman Ryspek uulu", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1440, wins: 8, losses: 9, change: -1, form: ["L","W","L","W","W"], online: false, badges: [] },
+                { id: "voronov-denis", name: "Denis Voronov", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf7\ud83c\uddfa", points: 1400, wins: 8, losses: 10, change: +2, form: ["W","W","L","L","W"], online: false, badges: [] },
+                { id: "karimov-dilshod", name: "Dilshod Karimov", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 1360, wins: 7, losses: 10, change: 0, form: ["L","W","W","L","L"], online: true, badges: ["newbie"] },
+                { id: "osmonov-chyngyz", name: "Chyngyz Osmonov", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1320, wins: 7, losses: 11, change: -2, form: ["L","L","W","L","W"], online: false, badges: [] },
+                { id: "niyazov-eldar", name: "Eldar Niyazov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1280, wins: 6, losses: 11, change: +11, form: ["W","W","W","W","W"], online: false, badges: ["breakthrough","streak"] },
+                { id: "tagaev-melis", name: "Melis Tagaev", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1240, wins: 6, losses: 12, change: -1, form: ["W","L","L","W","L"], online: false, badges: ["newbie"] }
+            ]
+        },
+        "men-futures": {
+            name: "Futures",
+            gender: "men",
+            genderLabel: "Men",
+            players: [
+                { id: "bolotov-askar", name: "Askar Bolotov", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 980, wins: 12, losses: 3, change: +4, form: ["W","W","W","W","L"], online: true, badges: ["champion","top1","streak"] },
+                { id: "usenov-temirlan", name: "Temirlan Usenov", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 920, wins: 10, losses: 4, change: +1, form: ["W","L","W","W","W"], online: false, badges: [] },
+                { id: "kasymov-zhandos", name: "Zhandos Kasymov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 870, wins: 9, losses: 5, change: 0, form: ["W","L","W","L","W"], online: false, badges: [] },
+                { id: "abdiev-sanzhar", name: "Sanzhar Abdiev", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 840, wins: 8, losses: 6, change: -2, form: ["L","L","W","W","L"], online: true, badges: [] },
+                { id: "nazarov-bakyt", name: "Bakyt Nazarov", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 810, wins: 8, losses: 7, change: +2, form: ["W","W","L","W","L"], online: false, badges: [] },
+                { id: "esenov-kayrat", name: "Kayrat Esenov", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 780, wins: 7, losses: 7, change: 0, form: ["L","W","W","L","W"], online: false, badges: [] },
+                { id: "sheraliev-mirlan", name: "Mirlan Sheraliev", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 750, wins: 7, losses: 8, change: -1, form: ["W","L","L","W","L"], online: false, badges: [] },
+                { id: "toktoev-nurbek", name: "Nurbek Toktoev", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 720, wins: 6, losses: 8, change: +1, form: ["W","L","W","W","L"], online: true, badges: [] },
+                { id: "dzhenaliev-dastan", name: "Dastan Dzhenaliev", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 690, wins: 6, losses: 9, change: 0, form: ["L","W","L","L","W"], online: false, badges: ["newbie"] },
+                { id: "torobekov-erzhan", name: "Erzhan Torobekov", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 660, wins: 5, losses: 9, change: -2, form: ["L","L","W","L","W"], online: false, badges: [] },
+                { id: "maratov-ilim", name: "Ilim Maratov", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 630, wins: 5, losses: 10, change: +1, form: ["W","L","W","L","L"], online: false, badges: [] },
+                { id: "kushchenko-igor", name: "Igor Kushchenko", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf7\ud83c\uddfa", points: 600, wins: 5, losses: 10, change: 0, form: ["L","W","L","W","L"], online: false, badges: ["newbie"] },
+                { id: "turgunov-saidakbar", name: "Saidakbar Turgunov", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 570, wins: 4, losses: 11, change: +13, form: ["W","W","W","W","W"], online: true, badges: ["breakthrough","streak"] },
+                { id: "kemelbekov-adilet", name: "Adilet Kemelbekov", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 540, wins: 4, losses: 11, change: -1, form: ["L","L","W","L","W"], online: false, badges: ["newbie"] },
+                { id: "sydykov-nurbolot", name: "Nurbolot Sydykov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 510, wins: 3, losses: 12, change: 0, form: ["L","W","L","L","L"], online: false, badges: ["newbie"] }
+            ]
+        },
+        "men-challenger": {
+            name: "Challenger",
+            gender: "men",
+            genderLabel: "Men",
+            players: [
+                { id: "satybaldiev-eldiyar", name: "Eldiyar Satybaldiev", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1420, wins: 14, losses: 4, change: +1, form: ["W","W","L","W","W"], online: false, badges: ["champion","top1"] },
+                { id: "dzhumagulov-kanat", name: "Kanat Dzhumagulov", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1380, wins: 13, losses: 5, change: 0, form: ["W","L","W","W","L"], online: true, badges: [] },
+                { id: "rakhimov-alisher", name: "Alisher Rakhimov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 1340, wins: 12, losses: 5, change: -1, form: ["L","W","W","W","L"], online: false, badges: [] },
+                { id: "kozhoev-ulan", name: "Ulan Kozhoev", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1290, wins: 11, losses: 6, change: +3, form: ["W","W","W","L","W"], online: false, badges: [] },
+                { id: "omorov-talant", name: "Talant Omorov", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1250, wins: 10, losses: 7, change: 0, form: ["W","L","W","L","W"], online: true, badges: [] },
+                { id: "nurmukhamedov-serik", name: "Serik Nurmukhamedov", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 1210, wins: 10, losses: 8, change: +2, form: ["W","W","L","W","L"], online: false, badges: [] },
+                { id: "sydykov-adilet", name: "Adilet Sydykov", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1180, wins: 9, losses: 8, change: -1, form: ["L","W","L","W","W"], online: false, badges: [] },
+                { id: "turdaliev-maksat", name: "Maksat Turdaliev", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1150, wins: 9, losses: 9, change: 0, form: ["W","L","W","L","L"], online: false, badges: [] },
+                { id: "kalmatov-ayan", name: "Ayan Kalmatov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1110, wins: 8, losses: 9, change: +1, form: ["W","W","L","L","W"], online: false, badges: [] },
+                { id: "batyrov-elaman", name: "Elaman Batyrov", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1080, wins: 8, losses: 10, change: -2, form: ["L","L","W","L","W"], online: true, badges: [] },
+                { id: "duishenov-kuban", name: "Kuban Duishenov", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1050, wins: 7, losses: 10, change: 0, form: ["W","L","W","L","L"], online: false, badges: ["newbie"] },
+                { id: "zholdoshov-nurzhigit", name: "Nurzhigit Zholdoshov", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1020, wins: 7, losses: 11, change: +11, form: ["W","W","W","W","W"], online: false, badges: ["breakthrough","streak"] },
+                { id: "rakhmanov-timur", name: "Timur Rakhmanov", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 990, wins: 6, losses: 11, change: -1, form: ["L","W","L","L","W"], online: false, badges: [] },
+                { id: "oruzbaev-semetey", name: "Semetey Oruzbaev", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 960, wins: 6, losses: 12, change: 0, form: ["L","L","W","W","L"], online: false, badges: ["newbie"] },
+                { id: "askarov-bolot", name: "Bolot Askarov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 930, wins: 5, losses: 12, change: +2, form: ["W","L","W","L","L"], online: false, badges: ["newbie"] }
+            ]
+        },
+        "men-tour": {
+            name: "Tour",
+            gender: "men",
+            genderLabel: "Men",
+            players: [
+                { id: "dzholdoshev-samat", name: "Samat Dzholdoshev", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 520, wins: 10, losses: 3, change: +5, form: ["W","W","W","W","W"], online: true, badges: ["champion","top1","streak"] },
+                { id: "kalykov-arsen", name: "Arsen Kalykov", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 490, wins: 9, losses: 4, change: +2, form: ["W","L","W","W","W"], online: false, badges: [] },
+                { id: "mamatov-begaly", name: "Begaly Mamatov", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 460, wins: 8, losses: 5, change: 0, form: ["W","L","W","L","W"], online: false, badges: [] },
+                { id: "asylbekov-nurzhigit", name: "Nurzhigit Asylbekov", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 430, wins: 7, losses: 5, change: -1, form: ["L","W","W","L","W"], online: false, badges: [] },
+                { id: "omuraliev-zhanysh", name: "Zhanysh Omuraliev", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 400, wins: 7, losses: 6, change: +1, form: ["W","W","L","W","L"], online: true, badges: [] },
+                { id: "subanov-tilek", name: "Tilek Subanov", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 380, wins: 6, losses: 7, change: 0, form: ["L","W","L","W","L"], online: false, badges: [] },
+                { id: "baisalov-murat", name: "Murat Baisalov", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 350, wins: 5, losses: 8, change: -3, form: ["L","L","L","W","L"], online: false, badges: [] },
+                { id: "kasymaliev-chyngyz", name: "Chyngyz Kasymaliev", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 320, wins: 5, losses: 8, change: +2, form: ["W","W","L","L","W"], online: false, badges: [] },
+                { id: "temirov-nursultan", name: "Nursultan Temirov", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 290, wins: 4, losses: 9, change: 0, form: ["L","W","L","L","W"], online: false, badges: ["newbie"] },
+                { id: "moldogaziev-emilbek", name: "Emilbek Moldogaziev", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 260, wins: 4, losses: 9, change: -1, form: ["W","L","L","L","W"], online: true, badges: ["newbie"] },
+                { id: "dzhumaev-nurgazy", name: "Nurgazy Dzhumaev", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 230, wins: 3, losses: 10, change: +1, form: ["L","L","W","L","L"], online: false, badges: ["newbie"] },
+                { id: "ergeshov-baiaman", name: "Baiaman Ergeshov", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 200, wins: 3, losses: 10, change: 0, form: ["W","L","L","W","L"], online: false, badges: ["newbie"] },
+                { id: "kulbaev-almaz", name: "Almaz Kulbaev", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 180, wins: 2, losses: 11, change: +12, form: ["W","W","W","W","W"], online: false, badges: ["breakthrough","streak"] },
+                { id: "ryskulov-aidyn", name: "Aidyn Ryskulov", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 150, wins: 2, losses: 11, change: -2, form: ["L","L","W","L","L"], online: false, badges: ["newbie"] },
+                { id: "nazarbekov-isa", name: "Isa Nazarbekov", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 120, wins: 1, losses: 12, change: 0, form: ["L","L","L","W","L"], online: false, badges: ["newbie"] }
+            ]
+        },
+
+        // ========== WOMEN ==========
+        "women-promasters": {
+            name: "Pro-Masters",
+            gender: "women",
+            genderLabel: "Women",
+            players: [
+                { id: "moldobaeva-anara", name: "Anara Moldobaeva", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2420, wins: 17, losses: 3, change: +1, form: ["W","W","L","W","W"], online: true, badges: ["champion","top1"] },
+                { id: "tashmatova-venera", name: "Venera Tashmatova", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2350, wins: 15, losses: 4, change: 0, form: ["W","L","W","W","W"], online: false, badges: ["streak"] },
+                { id: "omurzakova-gulnara", name: "Gulnara Omurzakova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 2280, wins: 14, losses: 5, change: -1, form: ["L","W","W","W","L"], online: false, badges: [] },
+                { id: "sulaymanova-zhazgul", name: "Zhazgul Sulaymanova", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2210, wins: 13, losses: 5, change: +2, form: ["W","W","W","L","W"], online: true, badges: [] },
+                { id: "abdraimova-kalys", name: "Kalys Abdraimova", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2150, wins: 12, losses: 6, change: 0, form: ["W","L","W","L","W"], online: false, badges: [] },
+                { id: "kadyrova-nurzhamal", name: "Nurzhamal Kadyrova", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 2090, wins: 11, losses: 7, change: +1, form: ["W","W","L","W","L"], online: false, badges: [] },
+                { id: "turgunova-sezim", name: "Sezim Turgunova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2030, wins: 11, losses: 8, change: -2, form: ["L","L","W","W","L"], online: false, badges: [] },
+                { id: "zhusupova-elnura", name: "Elnura Zhusupova", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1970, wins: 10, losses: 8, change: 0, form: ["W","L","W","W","L"], online: true, badges: [] },
+                { id: "anarbaeva-bermet", name: "Bermet Anarbaeva", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1910, wins: 10, losses: 9, change: +1, form: ["W","W","L","L","W"], online: false, badges: [] },
+                { id: "mamytova-asel", name: "Asel Mamytova", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1860, wins: 9, losses: 9, change: -1, form: ["L","W","L","W","W"], online: false, badges: [] },
+                { id: "kurmanbekova-jyldyz", name: "Jyldyz Kurmanbekova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1800, wins: 9, losses: 10, change: 0, form: ["W","L","W","L","L"], online: false, badges: [] },
+                { id: "raimkulova-kunuz", name: "Kunuz Raimkulova", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1740, wins: 8, losses: 10, change: +11, form: ["W","W","W","W","W"], online: false, badges: ["breakthrough","streak"] },
+                { id: "akmatova-eliza", name: "Eliza Akmatova", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1680, wins: 8, losses: 11, change: -2, form: ["L","L","W","L","W"], online: true, badges: [] },
+                { id: "satybaldyeva-nurkyz", name: "Nurkyz Satybaldyeva", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1620, wins: 7, losses: 11, change: +1, form: ["W","L","W","L","L"], online: false, badges: ["newbie"] },
+                { id: "orozalieva-aisulu", name: "Aisulu Orozalieva", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1560, wins: 7, losses: 12, change: 0, form: ["L","W","L","L","W"], online: false, badges: ["newbie"] }
+            ]
+        },
+        "women-masters": {
+            name: "Masters",
+            gender: "women",
+            genderLabel: "Women",
+            players: [
+                { id: "sidorova-elena", name: "Elena Sidorova", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2290, wins: 16, losses: 3, change: +1, form: ["W","W","W","L","W"], online: true, badges: ["champion","top1"] },
+                { id: "nikolaeva-ksenia", name: "Ksenia Nikolaeva", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2180, wins: 14, losses: 4, change: +3, form: ["W","W","W","W","L"], online: false, badges: ["streak"] },
+                { id: "toktosunova-aizhan", name: "Aizhan Toktosunova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 2050, wins: 13, losses: 5, change: 0, form: ["W","L","W","W","L"], online: false, badges: [] },
+                { id: "kulova-madina", name: "Madina Kulova", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 1980, wins: 12, losses: 6, change: -1, form: ["L","W","W","L","W"], online: true, badges: [] },
+                { id: "amanbaeva-nurgul", name: "Nurgul Amanbaeva", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1920, wins: 11, losses: 6, change: +2, form: ["W","W","L","W","W"], online: false, badges: [] },
+                { id: "ismailova-dinara", name: "Dinara Ismailova", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 1870, wins: 10, losses: 7, change: 0, form: ["W","L","L","W","W"], online: false, badges: [] },
+                { id: "kasymova-zhibek", name: "Zhibek Kasymova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1810, wins: 10, losses: 8, change: -2, form: ["L","L","W","W","L"], online: false, badges: [] },
+                { id: "ergeshova-saltanat", name: "Saltanat Ergeshova", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1760, wins: 9, losses: 8, change: +1, form: ["W","L","W","W","L"], online: false, badges: [] },
+                { id: "temirbekova-aida", name: "Aida Temirbekova", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1710, wins: 9, losses: 9, change: 0, form: ["L","W","L","W","W"], online: true, badges: [] },
+                { id: "zhaparova-cholpon", name: "Cholpon Zhaparova", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1660, wins: 8, losses: 9, change: -1, form: ["W","L","L","W","L"], online: false, badges: [] },
+                { id: "umetalieva-jazgul", name: "Jazgul Umetalieva", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1620, wins: 8, losses: 10, change: +2, form: ["W","W","L","L","W"], online: false, badges: [] },
+                { id: "abdullaeva-sevara", name: "Sevara Abdullaeva", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 1580, wins: 7, losses: 10, change: 0, form: ["L","W","W","L","L"], online: false, badges: ["newbie"] },
+                { id: "karabaeva-nuray", name: "Nuray Karabaeva", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1540, wins: 7, losses: 11, change: +12, form: ["W","W","W","W","W"], online: false, badges: ["breakthrough","streak"] },
+                { id: "moldoeva-ayzirek", name: "Ayzirek Moldoeva", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1500, wins: 6, losses: 11, change: -2, form: ["L","L","W","L","W"], online: false, badges: [] },
+                { id: "sagynalyeva-kanykei", name: "Kanykei Sagynalyeva", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1460, wins: 6, losses: 12, change: 0, form: ["W","L","L","L","W"], online: false, badges: ["newbie"] }
+            ]
+        },
+        "women-challenger": {
+            name: "Challenger",
+            gender: "women",
+            genderLabel: "Women",
+            players: [
+                { id: "turganbaeva-asel", name: "Asel Turganbaeva", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1350, wins: 13, losses: 4, change: +2, form: ["W","W","L","W","W"], online: false, badges: ["champion","top1"] },
+                { id: "nurkulova-zarina", name: "Zarina Nurkulova", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1290, wins: 12, losses: 5, change: 0, form: ["W","L","W","W","L"], online: true, badges: [] },
+                { id: "kurmanova-dariya", name: "Dariya Kurmanova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 1240, wins: 11, losses: 6, change: -1, form: ["L","W","W","L","W"], online: false, badges: [] },
+                { id: "alymova-mirgul", name: "Mirgul Alymova", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1200, wins: 10, losses: 6, change: +1, form: ["W","W","L","W","L"], online: false, badges: [] },
+                { id: "bekturova-ainura", name: "Ainura Bekturova", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1160, wins: 10, losses: 7, change: 0, form: ["W","L","W","L","W"], online: true, badges: [] },
+                { id: "sagynova-tolkun", name: "Tolkun Sagynova", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 1120, wins: 9, losses: 8, change: +3, form: ["W","W","W","L","W"], online: false, badges: [] },
+                { id: "toktoeva-nurzat", name: "Nurzat Toktoeva", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1080, wins: 9, losses: 9, change: -2, form: ["L","L","W","W","L"], online: false, badges: [] },
+                { id: "eshmatova-burul", name: "Burul Eshmatova", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1040, wins: 8, losses: 9, change: 0, form: ["W","L","W","L","L"], online: false, badges: [] },
+                { id: "tashtanova-gulzina", name: "Gulzina Tashtanova", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 1000, wins: 8, losses: 10, change: +1, form: ["L","W","W","L","W"], online: false, badges: [] },
+                { id: "musaeva-zhyldyz", name: "Zhyldyz Musaeva", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 960, wins: 7, losses: 10, change: -1, form: ["W","L","L","W","L"], online: true, badges: [] },
+                { id: "abdykadyrova-meerim", name: "Meerim Abdykadyrova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 920, wins: 7, losses: 11, change: 0, form: ["L","L","W","W","L"], online: false, badges: ["newbie"] },
+                { id: "ibraeva-elmira", name: "Elmira Ibraeva", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 880, wins: 6, losses: 11, change: +11, form: ["W","W","W","W","W"], online: false, badges: ["breakthrough","streak"] },
+                { id: "narmanbetova-saule", name: "Saule Narmanbetova", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 840, wins: 6, losses: 12, change: -2, form: ["L","W","L","L","W"], online: false, badges: [] },
+                { id: "zholdoshbekova-aidai", name: "Aidai Zholdoshbekova", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 800, wins: 5, losses: 12, change: +1, form: ["W","L","L","W","L"], online: false, badges: ["newbie"] },
+                { id: "shakirova-rano", name: "Rano Shakirova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 760, wins: 5, losses: 13, change: 0, form: ["L","L","W","L","L"], online: false, badges: ["newbie"] }
+            ]
+        },
+        "women-tour": {
+            name: "Tour",
+            gender: "women",
+            genderLabel: "Women",
+            players: [
+                { id: "orozova-begimai", name: "Begimai Orozova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 480, wins: 9, losses: 3, change: +3, form: ["W","W","W","L","W"], online: true, badges: ["champion","top1"] },
+                { id: "zholdosheva-aida", name: "Aida Zholdosheva", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 450, wins: 8, losses: 4, change: 0, form: ["W","L","W","W","L"], online: false, badges: [] },
+                { id: "rakhmatova-kamila", name: "Kamila Rakhmatova", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddfa\ud83c\uddff", points: 420, wins: 7, losses: 5, change: +1, form: ["W","L","W","L","W"], online: false, badges: [] },
+                { id: "satyeva-nazgul", name: "Nazgul Satyeva", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 390, wins: 7, losses: 6, change: -1, form: ["L","W","W","L","L"], online: true, badges: [] },
+                { id: "bekova-altynai", name: "Altynai Bekova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 360, wins: 6, losses: 6, change: +2, form: ["W","W","L","W","L"], online: false, badges: [] },
+                { id: "mamatova-gulzat", name: "Gulzat Mamatova", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 330, wins: 5, losses: 7, change: 0, form: ["L","W","L","W","L"], online: false, badges: [] },
+                { id: "tashieva-elmira", name: "Elmira Tashieva", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddff", points: 300, wins: 5, losses: 8, change: -2, form: ["L","L","W","L","W"], online: false, badges: [] },
+                { id: "abdieva-cholpon", name: "Cholpon Abdieva", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 280, wins: 4, losses: 8, change: +1, form: ["W","L","L","W","L"], online: false, badges: [] },
+                { id: "tashtemirova-aigerim", name: "Aigerim Tashtemirova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 250, wins: 4, losses: 9, change: 0, form: ["L","W","L","L","W"], online: true, badges: ["newbie"] },
+                { id: "nurmatova-begaiym", name: "Begaiym Nurmatova", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 220, wins: 3, losses: 9, change: -1, form: ["W","L","L","L","W"], online: false, badges: ["newbie"] },
+                { id: "sarykbaeva-damira", name: "Damira Sarykbaeva", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 200, wins: 3, losses: 10, change: +1, form: ["L","L","W","L","L"], online: false, badges: ["newbie"] },
+                { id: "dzhorobekova-jamilya", name: "Jamilya Dzhorobekova", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 180, wins: 2, losses: 10, change: 0, form: ["L","W","L","L","L"], online: false, badges: ["newbie"] },
+                { id: "tynystanova-aiturgan", name: "Aiturgan Tynystanova", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 160, wins: 2, losses: 11, change: +13, form: ["W","W","W","W","W"], online: false, badges: ["breakthrough","streak"] },
+                { id: "toktobaeva-ainash", name: "Ainash Toktobaeva", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 140, wins: 1, losses: 11, change: -2, form: ["L","L","L","W","L"], online: false, badges: ["newbie"] },
+                { id: "usenova-perizat", name: "Perizat Usenova", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80", country: "\ud83c\uddf0\ud83c\uddec", points: 120, wins: 1, losses: 12, change: 0, form: ["L","L","W","L","L"], online: false, badges: ["newbie"] }
+            ]
+        }
+    }
+};

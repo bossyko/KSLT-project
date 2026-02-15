@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSLT — Tournament</title>
+    <title>KSLT — League Rules</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="tournaments.css">
-    <link rel="stylesheet" href="tournament-detail.css">
+    <link rel="stylesheet" href="info-pages.css">
 </head>
 <body>
     <!-- HEADER -->
@@ -25,20 +24,19 @@
 
             <ul class="nav-links">
                 <li class="nav-dropdown">
-                    <a href="tournaments-en.html" class="nav-item nav-item-dropdown active">
+                    <a href="tournaments-en.html" class="nav-item nav-item-dropdown">
                         Tournaments
-                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <div class="nav-dropdown-menu">
-                        <a href="tournaments-en.html?category=promasters" class="nav-dropdown-item" data-category="promasters">Pro-Masters</a>
-                        <a href="tournaments-en.html?category=masters" class="nav-dropdown-item" data-category="masters">Masters</a>
-                        <a href="tournaments-en.html?category=challenger" class="nav-dropdown-item" data-category="challenger">Challenger</a>
-                        <a href="tournaments-en.html?category=futures" class="nav-dropdown-item" data-category="futures">Futures</a>
-                        <a href="tournaments-en.html?category=tour" class="nav-dropdown-item" data-category="tour">Tour</a>
-                        <a href="tournaments-en.html?category=friendly" class="nav-dropdown-item" data-category="friendly">Friendly</a>
+                        <a href="tournaments-en.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments-en.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments-en.html?category=challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="tournaments-en.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments-en.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments-en.html?category=friendly" class="nav-dropdown-item">Friendly</a>
                     </div>
                 </li>
                 <li>
@@ -106,12 +104,12 @@
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="tournament.html" class="lang-option" data-lang="RU">
+                        <a href="rules.html" class="lang-option" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="tournament-en.html" class="lang-option active" data-lang="EN">
+                        <a href="rules-en.html" class="lang-option active" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -130,9 +128,8 @@
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
                 <li class="mobile-nav-dropdown">
-                    <a href="#tournaments" class="mobile-dropdown-toggle active">
+                    <a href="tournaments-en.html" class="mobile-dropdown-toggle">
                         Tournaments
-                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -196,10 +193,10 @@
             <div class="mobile-nav-bottom">
                 <div class="mobile-lang-list">
                     <span class="mobile-lang-title">Language</span>
-                    <a href="tournament.html" class="mobile-lang-option" data-lang="RU">
+                    <a href="rules.html" class="mobile-lang-option" data-lang="RU">
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
-                    <a href="tournament-en.html" class="mobile-lang-option active" data-lang="EN">
+                    <a href="rules-en.html" class="mobile-lang-option active" data-lang="EN">
                         <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
@@ -209,70 +206,125 @@
 
     <main>
         <!-- HERO -->
-        <section class="td-hero" id="tournamentHero"></section>
-
-        <!-- TABS -->
-        <nav class="td-tabs-bar" id="tabsBar">
-            <div class="td-tabs">
-                <button class="td-tab active" data-target="bracket">Bracket</button>
-                <button class="td-tab" data-target="schedule">Schedule</button>
-                <button class="td-tab" data-target="participants">Players</button>
-                <button class="td-tab" data-target="results">Results</button>
-            </div>
-        </nav>
-
-        <!-- BRACKET -->
-        <section class="td-section" id="bracket">
-            <div class="section-header">
-                <h2>Tournament Bracket</h2>
-            </div>
-            <div id="bracketContainer"></div>
-        </section>
-
-        <!-- SCHEDULE -->
-        <section class="td-section" id="schedule">
-            <div class="section-header">
-                <h2>Match Schedule</h2>
-            </div>
-            <div class="td-schedule-filters" id="scheduleFilters"></div>
-            <div id="scheduleList"></div>
-        </section>
-
-        <!-- PARTICIPANTS -->
-        <section class="td-section" id="participants">
-            <div class="section-header">
-                <h2>Players</h2>
-            </div>
-            <div class="td-participants-grid" id="participantsGrid"></div>
-        </section>
-
-        <!-- RESULTS -->
-        <section class="td-section" id="results">
-            <div class="section-header">
-                <h2>Results</h2>
-            </div>
-            <div id="resultsPodium"></div>
-        </section>
-
-        <!-- SPONSORS -->
-        <section id="sponsors" class="section-sponsors-compact">
-            <div class="section-header">
-                <h2>Partners & Sponsors</h2>
-            </div>
-            <div class="sponsor-hero">
-                <span class="sponsor-hero-label">General Sponsor</span>
-                <a href="#" class="sponsor-hero-logo">
-                    <img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">
-                </a>
-            </div>
-            <div class="sponsors-cloud">
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>
+        <section class="ip-hero">
+            <div class="ip-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=1400&q=80')"></div>
+            <div class="ip-hero-content">
+                <h1 class="ip-hero-title"><span>KSLT</span> Rules</h1>
+                <p class="ip-hero-subtitle">Official rules and regulations of Kyrgyzstan Social Lawn Tennis</p>
             </div>
         </section>
+
+        <!-- RULES CONTENT -->
+        <div class="ip-container">
+
+            <div class="ip-toc ip-fade-in">
+                <div class="ip-toc-title">Table of Contents</div>
+                <ol class="ip-toc-list">
+                    <li><a href="#rules-general">General Provisions</a></li>
+                    <li><a href="#rules-membership">KSLT Membership</a></li>
+                    <li><a href="#rules-tournaments">Tournaments & Matches</a></li>
+                    <li><a href="#rules-ranking">Ranking System</a></li>
+                    <li><a href="#rules-conduct">Code of Conduct</a></li>
+                    <li><a href="#rules-sanctions">Sanctions & Disqualification</a></li>
+                </ol>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in" id="rules-general">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">01</span>
+                    General Provisions
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>KSLT (Kyrgyzstan Social Lawn Tennis) is an amateur tennis community operating in the Kyrgyz Republic.</li>
+                    <li>The purpose of KSLT is to popularize tennis, organize tournaments, and create a unified ranking system for amateurs.</li>
+                    <li>Any person over 16 years of age who accepts these rules may become a KSLT member.</li>
+                    <li>All matches and tournaments are conducted under ITF (International Tennis Federation) rules with additions established by KSLT.</li>
+                    <li>Official community languages: Russian, Kyrgyz, English.</li>
+                    <li>KSLT administration reserves the right to amend these rules with at least 7 days' notice to members.</li>
+                </ol>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in" id="rules-membership">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">02</span>
+                    KSLT Membership
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Active KSLT membership is required to participate in ranked tournaments.</li>
+                    <li>Membership fees are paid monthly or annually (annual payment includes a discount).</li>
+                    <li>If membership fees are unpaid for more than 30 days, tournament participation is suspended, but ranking points are preserved for 90 days.</li>
+                    <li>KSLT members agree to comply with these rules, the code of conduct, and administration decisions.</li>
+                    <li>Membership can be paused upon request for up to 3 months.</li>
+                    <li>Membership fee refunds are available within 7 days of payment, provided the member has not participated in any tournaments during that period.</li>
+                </ol>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in" id="rules-tournaments">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">03</span>
+                    Tournaments & Matches
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Tournaments are held in 6 categories: Pro-Masters, Masters, Challenger, Futures, Tour, and Friendly.</li>
+                    <li>Tournament registration opens at least 7 days before the start and closes 24 hours prior.</li>
+                    <li>The number of participants is limited by the bracket format (8, 16, or 32 players). When the limit is exceeded, priority is given to higher-ranked players.</li>
+                    <li>Match format: 2 sets to 6 games with a tiebreak at 6:6. The deciding 3rd set is played as a super tiebreak (first to 10 points).</li>
+                    <li>Players must arrive no later than 15 minutes after the scheduled match time. Delays exceeding 15 minutes count as a walkover (WO).</li>
+                    <li>Match rescheduling is only possible with valid reason, mutual consent of both players and the organizer, no later than 12 hours before the start.</li>
+                    <li>Each player is responsible for their own racket and sportswear. Balls are provided by the tournament organizer.</li>
+                    <li>Matches are officiated through self-refereeing. In disputed situations, the tournament referee is called upon.</li>
+                </ol>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in" id="rules-ranking">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">04</span>
+                    Ranking System
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>The KSLT ranking is based on a cumulative points system. Points are awarded for tournament results.</li>
+                    <li>The number of points depends on the tournament category, stage (final, semifinal, etc.), and the opponent's ranking.</li>
+                    <li>Rankings are updated within 48 hours of tournament completion.</li>
+                    <li>Tournament points are valid for 12 months, after which they gradually decrease.</li>
+                    <li>Category transitions (promotion/demotion) are determined based on accumulated points and results over the last 6 months.</li>
+                    <li>New members start in the Tour category and can advance to a higher category based on their first 3 tournament results.</li>
+                    <li>In case of equal points, priority is determined by: number of wins, head-to-head record, number of matches played.</li>
+                </ol>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in" id="rules-conduct">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">05</span>
+                    Code of Conduct
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>KSLT members must show respect to opponents, organizers, and spectators.</li>
+                    <li>Profanity, aggressive behavior, racket throwing, and court property damage are prohibited.</li>
+                    <li>Players must follow the dress code: clean sportswear, tennis shoes. Playing in jeans, sandals, etc. is prohibited.</li>
+                    <li>Alcohol and drug use before and during matches is prohibited.</li>
+                    <li>Players must honestly keep score and acknowledge outs/nets. In case of disagreement, the point is replayed.</li>
+                    <li>Use of electronic devices (phones, smartwatches) during matches is prohibited, except in emergencies.</li>
+                    <li>Smoking on court premises is prohibited.</li>
+                </ol>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in" id="rules-sanctions">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">06</span>
+                    Sanctions & Disqualification
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>No-show without notice (WO) — penalty: minus 50 ranking points.</li>
+                    <li>Repeated no-show within the season — disqualification for 1 tournament.</li>
+                    <li>Code of conduct violation — warning. Repeated violation — disqualification for 1-3 tournaments.</li>
+                    <li>Serious violation (aggression, insults) — immediate tournament disqualification and suspension for 1-6 months.</li>
+                    <li>Result falsification — lifetime disqualification.</li>
+                    <li>Sanction decisions are made by the KSLT disciplinary committee. Members have the right to appeal within 7 days.</li>
+                    <li>All sanctions are recorded in the player's profile and affect their ranking and community reputation.</li>
+                </ol>
+            </div>
+
+        </div>
     </main>
 
     <!-- FOOTER -->
@@ -302,38 +354,33 @@
                     </a>
                 </div>
             </div>
-
             <div class="footer-block">
                 <h4>Navigation</h4>
                 <ul class="footer-links">
-                    <li><a href="index-en.html#tournaments">Tournaments</a></li>
+                    <li><a href="tournaments-en.html">Tournaments</a></li>
                     <li><a href="players-en.html">Rankings</a></li>
-                    <li><a href="courts-en.html">Courts</a></li>
+                    <li><a href="news-en.html">News</a></li>
                     <li><a href="index-en.html#live">Live Streams</a></li>
                 </ul>
             </div>
-
             <div class="footer-block">
                 <h4>For Players</h4>
                 <ul class="footer-links">
                     <li><a href="rules-en.html">League Rules</a></li>
-                    <li><a href="#">Rating System</a></li>
-                    <li><a href="#">How to Join</a></li>
+                    <li><a href="players-en.html">Ranking System</a></li>
+                    <li><a href="about-en.html">About</a></li>
                     <li><a href="faq-en.html">FAQ</a></li>
-                    <li><a href="#">Player Code</a></li>
                 </ul>
             </div>
-
             <div class="footer-block">
                 <h4>For Partners</h4>
                 <ul class="footer-links">
                     <li><a href="#">Become a Sponsor</a></li>
                     <li><a href="#">Advertisers</a></li>
                     <li><a href="#">Court Rental</a></li>
-                    <li><a href="#">Tournament Organization</a></li>
+                    <li><a href="#">Event Organization</a></li>
                 </ul>
             </div>
-
             <div class="footer-block" id="contacts">
                 <h4>Contacts</h4>
                 <ul class="footer-contacts">
@@ -352,11 +399,10 @@
                 </ul>
             </div>
         </div>
-
         <div class="footer-bottom">
             <p class="footer-copyright">© 2026 KSLT. All rights reserved.</p>
             <div class="footer-legal">
-                <a href="#">Public Offer</a>
+                <a href="#">Terms of Service</a>
                 <a href="#">Privacy Policy</a>
             </div>
             <p class="footer-made">Made with ❤️ in Kyrgyzstan 🇰🇬</p>
@@ -364,8 +410,25 @@
     </footer>
 
     <script src="script.js"></script>
-    <script src="tournament-generator.js"></script>
-    <script src="tournament-detail-data-en.js"></script>
-    <script src="tournament-detail.js"></script>
+    <script>
+        document.querySelectorAll('.ip-toc-list a').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.ip-fade-in').forEach(function(el) { observer.observe(el); });
+    </script>
 </body>
 </html>

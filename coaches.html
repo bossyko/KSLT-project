@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSLT — Турнир</title>
+    <title>KSLT — Тренеры</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="tournaments.css">
-    <link rel="stylesheet" href="tournament-detail.css">
+    <link rel="stylesheet" href="coaches.css">
 </head>
 <body>
     <!-- HEADER -->
@@ -25,20 +24,19 @@
 
             <ul class="nav-links">
                 <li class="nav-dropdown">
-                    <a href="tournaments.html" class="nav-item nav-item-dropdown active">
+                    <a href="tournaments.html" class="nav-item nav-item-dropdown">
                         Турниры
-                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <div class="nav-dropdown-menu">
-                        <a href="tournaments.html?category=promasters" class="nav-dropdown-item" data-category="promasters">Pro-Masters</a>
-                        <a href="tournaments.html?category=masters" class="nav-dropdown-item" data-category="masters">Masters</a>
-                        <a href="tournaments.html?category=challenger" class="nav-dropdown-item" data-category="challenger">Challenger</a>
-                        <a href="tournaments.html?category=futures" class="nav-dropdown-item" data-category="futures">Futures</a>
-                        <a href="tournaments.html?category=tour" class="nav-dropdown-item" data-category="tour">Tour</a>
-                        <a href="tournaments.html?category=friendly" class="nav-dropdown-item" data-category="friendly">Friendly</a>
+                        <a href="tournaments.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments.html?category=challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="tournaments.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments.html?category=friendly" class="nav-dropdown-item">Friendly</a>
                     </div>
                 </li>
                 <li>
@@ -106,12 +104,12 @@
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="tournament.html" class="lang-option active" data-lang="RU">
+                        <a href="coaches.html" class="lang-option active" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="tournament-en.html" class="lang-option" data-lang="EN">
+                        <a href="coaches-en.html" class="lang-option" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -130,9 +128,8 @@
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
                 <li class="mobile-nav-dropdown">
-                    <a href="#tournaments" class="mobile-dropdown-toggle active">
+                    <a href="tournaments.html" class="mobile-dropdown-toggle">
                         Турниры
-                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -196,10 +193,10 @@
             <div class="mobile-nav-bottom">
                 <div class="mobile-lang-list">
                     <span class="mobile-lang-title">Язык</span>
-                    <a href="tournament.html" class="mobile-lang-option active" data-lang="RU">
+                    <a href="coaches.html" class="mobile-lang-option active" data-lang="RU">
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
-                    <a href="tournament-en.html" class="mobile-lang-option" data-lang="EN">
+                    <a href="coaches-en.html" class="mobile-lang-option" data-lang="EN">
                         <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
@@ -208,71 +205,11 @@
     </header>
 
     <main>
-        <!-- HERO -->
-        <section class="td-hero" id="tournamentHero"></section>
-
-        <!-- TABS -->
-        <nav class="td-tabs-bar" id="tabsBar">
-            <div class="td-tabs">
-                <button class="td-tab active" data-target="bracket">Сетка</button>
-                <button class="td-tab" data-target="schedule">Расписание</button>
-                <button class="td-tab" data-target="participants">Участники</button>
-                <button class="td-tab" data-target="results">Результаты</button>
-            </div>
-        </nav>
-
-        <!-- BRACKET -->
-        <section class="td-section" id="bracket">
-            <div class="section-header">
-                <h2>Турнирная сетка</h2>
-            </div>
-            <div id="bracketContainer"></div>
-        </section>
-
-        <!-- SCHEDULE -->
-        <section class="td-section" id="schedule">
-            <div class="section-header">
-                <h2>Расписание матчей</h2>
-            </div>
-            <div class="td-schedule-filters" id="scheduleFilters"></div>
-            <div id="scheduleList"></div>
-        </section>
-
-        <!-- PARTICIPANTS -->
-        <section class="td-section" id="participants">
-            <div class="section-header">
-                <h2>Участники</h2>
-            </div>
-            <div class="td-participants-grid" id="participantsGrid"></div>
-        </section>
-
-        <!-- RESULTS -->
-        <section class="td-section" id="results">
-            <div class="section-header">
-                <h2>Результаты</h2>
-            </div>
-            <div id="resultsPodium"></div>
-        </section>
-
-        <!-- SPONSORS -->
-        <section id="sponsors" class="section-sponsors-compact">
-            <div class="section-header">
-                <h2>Партнёры и спонсоры</h2>
-            </div>
-            <div class="sponsor-hero">
-                <span class="sponsor-hero-label">Генеральный спонсор</span>
-                <a href="#" class="sponsor-hero-logo">
-                    <img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">
-                </a>
-            </div>
-            <div class="sponsors-cloud">
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>
-            </div>
-        </section>
+        <section class="co-hero" id="coachesHero"></section>
+        <div class="co-container">
+            <div id="coachesFilters"></div>
+            <div id="coachesGrid"></div>
+        </div>
     </main>
 
     <!-- FOOTER -->
@@ -305,9 +242,9 @@
             <div class="footer-block">
                 <h4>Навигация</h4>
                 <ul class="footer-links">
-                    <li><a href="index.html#tournaments">Турниры</a></li>
+                    <li><a href="tournaments.html">Турниры</a></li>
                     <li><a href="players.html">Рейтинг</a></li>
-                    <li><a href="courts.html">Корты</a></li>
+                    <li><a href="news.html">Новости</a></li>
                     <li><a href="index.html#live">Live трансляции</a></li>
                 </ul>
             </div>
@@ -315,10 +252,9 @@
                 <h4>Игрокам</h4>
                 <ul class="footer-links">
                     <li><a href="rules.html">Правила лиги</a></li>
-                    <li><a href="#">Система рейтинга</a></li>
-                    <li><a href="#">Как вступить</a></li>
+                    <li><a href="players.html">Система рейтинга</a></li>
+                    <li><a href="about.html">О проекте</a></li>
                     <li><a href="faq.html">FAQ</a></li>
-                    <li><a href="#">Кодекс игрока</a></li>
                 </ul>
             </div>
             <div class="footer-block">
@@ -359,8 +295,7 @@
     </footer>
 
     <script src="script.js"></script>
-    <script src="tournament-generator.js"></script>
-    <script src="tournament-detail-data.js"></script>
-    <script src="tournament-detail.js"></script>
+    <script src="coaches-data.js"></script>
+    <script src="coaches.js"></script>
 </body>
 </html>

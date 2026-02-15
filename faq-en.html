@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSLT — Tournament</title>
+    <title>KSLT — Frequently Asked Questions</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="tournaments.css">
-    <link rel="stylesheet" href="tournament-detail.css">
+    <link rel="stylesheet" href="info-pages.css">
 </head>
 <body>
     <!-- HEADER -->
@@ -25,20 +24,19 @@
 
             <ul class="nav-links">
                 <li class="nav-dropdown">
-                    <a href="tournaments-en.html" class="nav-item nav-item-dropdown active">
+                    <a href="tournaments-en.html" class="nav-item nav-item-dropdown">
                         Tournaments
-                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <div class="nav-dropdown-menu">
-                        <a href="tournaments-en.html?category=promasters" class="nav-dropdown-item" data-category="promasters">Pro-Masters</a>
-                        <a href="tournaments-en.html?category=masters" class="nav-dropdown-item" data-category="masters">Masters</a>
-                        <a href="tournaments-en.html?category=challenger" class="nav-dropdown-item" data-category="challenger">Challenger</a>
-                        <a href="tournaments-en.html?category=futures" class="nav-dropdown-item" data-category="futures">Futures</a>
-                        <a href="tournaments-en.html?category=tour" class="nav-dropdown-item" data-category="tour">Tour</a>
-                        <a href="tournaments-en.html?category=friendly" class="nav-dropdown-item" data-category="friendly">Friendly</a>
+                        <a href="tournaments-en.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments-en.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments-en.html?category=challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="tournaments-en.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments-en.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments-en.html?category=friendly" class="nav-dropdown-item">Friendly</a>
                     </div>
                 </li>
                 <li>
@@ -106,12 +104,12 @@
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="tournament.html" class="lang-option" data-lang="RU">
+                        <a href="faq.html" class="lang-option" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="tournament-en.html" class="lang-option active" data-lang="EN">
+                        <a href="faq-en.html" class="lang-option active" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -130,9 +128,8 @@
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
                 <li class="mobile-nav-dropdown">
-                    <a href="#tournaments" class="mobile-dropdown-toggle active">
+                    <a href="tournaments-en.html" class="mobile-dropdown-toggle">
                         Tournaments
-                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -196,10 +193,10 @@
             <div class="mobile-nav-bottom">
                 <div class="mobile-lang-list">
                     <span class="mobile-lang-title">Language</span>
-                    <a href="tournament.html" class="mobile-lang-option" data-lang="RU">
+                    <a href="faq.html" class="mobile-lang-option" data-lang="RU">
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
-                    <a href="tournament-en.html" class="mobile-lang-option active" data-lang="EN">
+                    <a href="faq-en.html" class="mobile-lang-option active" data-lang="EN">
                         <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
@@ -209,70 +206,242 @@
 
     <main>
         <!-- HERO -->
-        <section class="td-hero" id="tournamentHero"></section>
-
-        <!-- TABS -->
-        <nav class="td-tabs-bar" id="tabsBar">
-            <div class="td-tabs">
-                <button class="td-tab active" data-target="bracket">Bracket</button>
-                <button class="td-tab" data-target="schedule">Schedule</button>
-                <button class="td-tab" data-target="participants">Players</button>
-                <button class="td-tab" data-target="results">Results</button>
-            </div>
-        </nav>
-
-        <!-- BRACKET -->
-        <section class="td-section" id="bracket">
-            <div class="section-header">
-                <h2>Tournament Bracket</h2>
-            </div>
-            <div id="bracketContainer"></div>
-        </section>
-
-        <!-- SCHEDULE -->
-        <section class="td-section" id="schedule">
-            <div class="section-header">
-                <h2>Match Schedule</h2>
-            </div>
-            <div class="td-schedule-filters" id="scheduleFilters"></div>
-            <div id="scheduleList"></div>
-        </section>
-
-        <!-- PARTICIPANTS -->
-        <section class="td-section" id="participants">
-            <div class="section-header">
-                <h2>Players</h2>
-            </div>
-            <div class="td-participants-grid" id="participantsGrid"></div>
-        </section>
-
-        <!-- RESULTS -->
-        <section class="td-section" id="results">
-            <div class="section-header">
-                <h2>Results</h2>
-            </div>
-            <div id="resultsPodium"></div>
-        </section>
-
-        <!-- SPONSORS -->
-        <section id="sponsors" class="section-sponsors-compact">
-            <div class="section-header">
-                <h2>Partners & Sponsors</h2>
-            </div>
-            <div class="sponsor-hero">
-                <span class="sponsor-hero-label">General Sponsor</span>
-                <a href="#" class="sponsor-hero-logo">
-                    <img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">
-                </a>
-            </div>
-            <div class="sponsors-cloud">
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>
+        <section class="ip-hero">
+            <div class="ip-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1400&q=80')"></div>
+            <div class="ip-hero-content">
+                <h1 class="ip-hero-title">Frequently Asked <span>Questions</span></h1>
+                <p class="ip-hero-subtitle">Answers to the most popular questions about KSLT, membership, tournaments, and the ranking system</p>
             </div>
         </section>
+
+        <!-- FAQ CONTENT -->
+        <div class="ip-container">
+
+            <div class="ip-faq-category ip-fade-in">
+                <h2 class="ip-faq-category-title">General</h2>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        What is KSLT?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            KSLT (Kyrgyzstan Social Lawn Tennis) is the first amateur tennis community in Kyrgyzstan. We unite players of all levels: from beginners to advanced amateurs. We organize tournaments, maintain rankings, help find playing partners, and develop tennis culture in the country.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        How do I join KSLT?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            Register on the website, fill out your profile, and choose a membership plan. After paying the membership fee, you'll get access to the ranking system, be able to participate in tournaments, and enjoy all community benefits.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        Do I need tennis experience?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            No! KSLT accepts players of all levels. We have categories ranging from Tour (beginners) to Pro-Masters (advanced). You'll play against opponents at your skill level, making every match exciting and competitive.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        Which cities does KSLT operate in?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            Currently, KSLT is based in Bishkek. We plan to expand to other cities in Kyrgyzstan — Osh, Karakol, Jalal-Abad. Stay tuned for updates!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ip-faq-category ip-fade-in">
+                <h2 class="ip-faq-category-title">Membership & Pricing</h2>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        How much does membership cost?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            We offer several membership plans — from basic to premium. The basic plan includes ranking participation and tournament schedule access. The premium plan unlocks priority tournament registration, personal statistics, and other perks. See the pricing page for details.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        How do I pay the membership fee?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            Payment is available via Mbank, bank cards, and cash. After payment, your membership is activated automatically. You'll receive confirmation via email and in your personal dashboard.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        Can I pause my membership?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            Yes, you can pause your membership for up to 3 months (e.g., during vacation or for health reasons). Contact support to do so. Your ranking points are preserved during the pause.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ip-faq-category ip-fade-in">
+                <h2 class="ip-faq-category-title">Tournaments</h2>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        How do I sign up for a tournament?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            Go to the tournaments page, select the tournament you're interested in, and click "Register". You need to be a registered KSLT member with an active membership. Spots are limited, so we recommend registering early.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        What tournament categories exist?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            KSLT hosts tournaments in 6 categories: Pro-Masters (highest level), Masters, Challenger, Futures, Tour (beginners), and Friendly (casual). Each category has its own ranking bracket and point system.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        What if I can't attend a match?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            Notify the organizers at least 24 hours before the match. No-shows (WO — walkover) result in penalty points in the ranking. Repeated no-shows may lead to disqualification from future tournaments.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        Are there prizes?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            Pro-Masters and Masters categories feature sponsor prizes — sports equipment, gift certificates, free membership. In other categories, the main rewards are ranking points, medals, and community recognition.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ip-faq-category ip-fade-in">
+                <h2 class="ip-faq-category-title">Rankings & Categories</h2>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        How does the ranking system work?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            The KSLT ranking is based on a points system. Points are awarded for tournament and match wins. The number of points depends on the tournament category, stage (finals award more than round of 16), and the opponent's ranking. Rankings are updated after each tournament.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        How do I move to a higher category?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            Category transitions happen automatically based on accumulated ranking points and results. Top players in a lower category receive an invitation to the next one. You can also apply for promotion if you believe your level is above your current category.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        Do points expire over time?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            Yes, ranking points have an "expiration date". Results older than 12 months gradually lose weight. This encourages regular tournament participation and keeps the rankings current.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ip-faq-category ip-fade-in">
+                <h2 class="ip-faq-category-title">Courts & Play</h2>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        Where are matches played?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            Matches take place at partner tennis courts in Bishkek. The list of available courts and schedules can be found on the website. For tournaments, we book courts in advance; for friendly matches, players arrange courts themselves.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        Can I book a court through KSLT?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            We're working on an online court booking system. Currently, you can contact the administration for booking assistance or use court contacts on our website.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ip-faq-item">
+                    <button class="ip-faq-question">
+                        How do I find a playing partner?
+                        <span class="ip-faq-icon">+</span>
+                    </button>
+                    <div class="ip-faq-answer">
+                        <div class="ip-faq-answer-inner">
+                            On the rankings page, you can see players' online status. Use the "Challenge" button next to a player's name. You can also post in our Telegram chat — there are always people looking for a game.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </main>
 
     <!-- FOOTER -->
@@ -302,38 +471,33 @@
                     </a>
                 </div>
             </div>
-
             <div class="footer-block">
                 <h4>Navigation</h4>
                 <ul class="footer-links">
-                    <li><a href="index-en.html#tournaments">Tournaments</a></li>
+                    <li><a href="tournaments-en.html">Tournaments</a></li>
                     <li><a href="players-en.html">Rankings</a></li>
-                    <li><a href="courts-en.html">Courts</a></li>
+                    <li><a href="news-en.html">News</a></li>
                     <li><a href="index-en.html#live">Live Streams</a></li>
                 </ul>
             </div>
-
             <div class="footer-block">
                 <h4>For Players</h4>
                 <ul class="footer-links">
                     <li><a href="rules-en.html">League Rules</a></li>
-                    <li><a href="#">Rating System</a></li>
-                    <li><a href="#">How to Join</a></li>
+                    <li><a href="players-en.html">Ranking System</a></li>
+                    <li><a href="about-en.html">About</a></li>
                     <li><a href="faq-en.html">FAQ</a></li>
-                    <li><a href="#">Player Code</a></li>
                 </ul>
             </div>
-
             <div class="footer-block">
                 <h4>For Partners</h4>
                 <ul class="footer-links">
                     <li><a href="#">Become a Sponsor</a></li>
                     <li><a href="#">Advertisers</a></li>
                     <li><a href="#">Court Rental</a></li>
-                    <li><a href="#">Tournament Organization</a></li>
+                    <li><a href="#">Event Organization</a></li>
                 </ul>
             </div>
-
             <div class="footer-block" id="contacts">
                 <h4>Contacts</h4>
                 <ul class="footer-contacts">
@@ -352,11 +516,10 @@
                 </ul>
             </div>
         </div>
-
         <div class="footer-bottom">
             <p class="footer-copyright">© 2026 KSLT. All rights reserved.</p>
             <div class="footer-legal">
-                <a href="#">Public Offer</a>
+                <a href="#">Terms of Service</a>
                 <a href="#">Privacy Policy</a>
             </div>
             <p class="footer-made">Made with ❤️ in Kyrgyzstan 🇰🇬</p>
@@ -364,8 +527,26 @@
     </footer>
 
     <script src="script.js"></script>
-    <script src="tournament-generator.js"></script>
-    <script src="tournament-detail-data-en.js"></script>
-    <script src="tournament-detail.js"></script>
+    <script>
+        document.querySelectorAll('.ip-faq-question').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var item = this.closest('.ip-faq-item');
+                var wasActive = item.classList.contains('active');
+                item.closest('.ip-faq-category').querySelectorAll('.ip-faq-item').forEach(function(el) {
+                    el.classList.remove('active');
+                });
+                if (!wasActive) item.classList.add('active');
+            });
+        });
+
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.ip-fade-in').forEach(function(el) { observer.observe(el); });
+    </script>
 </body>
 </html>

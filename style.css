@@ -72,6 +72,19 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Touch optimization — remove 200ms tap delay */
+a, button, input, select, textarea, [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS form reset */
+input, button, select, textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
 /* ========================================
    FLOATING HEADER - Glassmorphism Style
    ======================================== */
@@ -2762,14 +2775,15 @@ h2 {
     display: none;
     flex-direction: column;
     justify-content: center;
-    gap: 5px;
-    width: 28px;
-    height: 28px;
+    gap: 6px;
+    width: 44px;
+    height: 44px;
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 4px;
+    padding: 10px;
     z-index: 1001;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .burger-line {
@@ -2782,7 +2796,7 @@ h2 {
 }
 
 .burger-menu.active .burger-line:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+    transform: rotate(45deg) translate(6px, 6px);
 }
 
 .burger-menu.active .burger-line:nth-child(2) {
@@ -2790,7 +2804,7 @@ h2 {
 }
 
 .burger-menu.active .burger-line:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
+    transform: rotate(-45deg) translate(6px, -6px);
 }
 
 .mobile-nav {
@@ -2888,7 +2902,8 @@ h2 {
 }
 
 .mobile-nav-dropdown.active .mobile-dropdown-menu {
-    max-height: 300px;
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 .mobile-dropdown-menu li a {
@@ -3659,7 +3674,86 @@ h2 {
     }
 
     .rankings-tab {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ========================================
+   375px — Ultra-small phones (iPhone SE)
+   ======================================== */
+@media (max-width: 375px) {
+    .floating-header {
+        padding: 0 var(--space-sm);
+    }
+
+    nav {
+        height: 56px;
+    }
+
+    .logo-text {
+        font-size: 1.1rem;
+    }
+
+    .btn-auth {
         padding: 6px 12px;
-        font-size: 0.72rem;
+        font-size: 0.75rem;
+    }
+
+    .hero-title {
+        font-size: clamp(1.6rem, 8vw, 2.2rem);
+    }
+
+    .hero-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 0.88rem;
+    }
+
+    .section-title {
+        font-size: clamp(1.4rem, 6vw, 1.8rem);
+    }
+
+    .rankings-panel .ranking-row {
+        grid-template-columns: 24px 1fr 32px 48px 28px;
+        padding: var(--space-xs) var(--space-xs);
+        gap: 6px;
+    }
+
+    .rankings-panel .player-col img {
+        width: 28px;
+        height: 28px;
+    }
+
+    .rankings-tab {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+
+    .mobile-nav-links a {
+        padding: 12px 14px;
+        font-size: 0.92rem;
+    }
+
+    .mobile-dropdown-menu li a {
+        padding: 10px 14px;
+        font-size: 0.88rem;
+    }
+
+    .carousel-slide-infinite {
+        width: 110px;
+    }
+
+    .auth-card {
+        padding: 24px 16px;
     }
 }
