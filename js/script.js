@@ -282,4 +282,83 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // ========================================
+    // GUEST RESTRICTIONS (Rankings + Players)
+    // ========================================
+
+    (function() {
+        var rankingsSection = document.getElementById('rankings');
+        var playersSection = document.getElementById('players');
+        if (!rankingsSection && !playersSection) return;
+
+        function isLoggedIn() {
+            try {
+                var key = 'sb-qqkzszesviukopgjbead-auth-token';
+                var raw = localStorage.getItem(key);
+                if (!raw) return false;
+                var data = JSON.parse(raw);
+                return data && data.access_token && data.expires_at > Math.floor(Date.now() / 1000);
+            } catch (e) { return false; }
+        }
+
+        if (isLoggedIn()) return;
+
+        var isEn = window.location.pathname.indexOf('-en') !== -1;
+        var authUrl = isEn ? 'pages/auth-en.html' : 'pages/auth.html';
+        var ctaBtn = isEn ? 'Sign In / Register' : 'Войти / Регистрация';
+
+        // --- Rankings: show top 3, blur rest ---
+        if (rankingsSection) {
+            var panels = rankingsSection.querySelectorAll('.rankings-panel');
+            panels.forEach(function(panel) {
+                var rows = panel.querySelectorAll('.ranking-row:not(.ranking-header)');
+                for (var i = 3; i < rows.length; i++) {
+                    var blur = Math.min((i - 2) * 2, 8);
+                    var opacity = Math.max(0.7 - (i - 3) * 0.15, 0.15);
+                    rows[i].style.filter = 'blur(' + blur + 'px)';
+                    rows[i].style.opacity = opacity;
+                    rows[i].style.pointerEvents = 'none';
+                    rows[i].style.userSelect = 'none';
+                }
+            });
+
+            var rankTitle = isEn ? 'Sign up for full rankings' : 'Зарегистрируйтесь для полного рейтинга';
+            var rankCta = document.createElement('div');
+            rankCta.className = 'guest-section-cta';
+            rankCta.innerHTML =
+                '<div class="guest-cta-card">' +
+                    '<div class="guest-cta-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg></div>' +
+                    '<h3 class="guest-cta-title">' + rankTitle + '</h3>' +
+                    '<a href="' + authUrl + '" class="guest-cta-btn">' + ctaBtn + '</a>' +
+                '</div>';
+            rankingsSection.style.position = 'relative';
+            rankingsSection.appendChild(rankCta);
+        }
+
+        // --- Players: show 2 cards, blur rest ---
+        if (playersSection) {
+            var cards = playersSection.querySelectorAll('.player-card');
+            for (var i = 2; i < cards.length; i++) {
+                var blur = Math.min((i - 1) * 2, 10);
+                var opacity = Math.max(0.7 - (i - 2) * 0.12, 0.1);
+                cards[i].style.filter = 'blur(' + blur + 'px)';
+                cards[i].style.opacity = opacity;
+                cards[i].style.pointerEvents = 'none';
+                cards[i].style.userSelect = 'none';
+            }
+
+            var playersTitle = isEn ? 'Register to find a hitting partner' : 'Зарегистрируйтесь для поиска партнёра';
+            var playersCta = document.createElement('div');
+            playersCta.className = 'guest-section-cta guest-section-cta-players';
+            playersCta.innerHTML =
+                '<div class="guest-cta-card">' +
+                    '<div class="guest-cta-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>' +
+                    '<h3 class="guest-cta-title">' + playersTitle + '</h3>' +
+                    '<a href="' + authUrl + '" class="guest-cta-btn">' + ctaBtn + '</a>' +
+                '</div>';
+            playersSection.style.position = 'relative';
+            playersSection.appendChild(playersCta);
+        }
+    })();
+
 });
