@@ -1,25 +1,12 @@
 # macOS
 .DS_Store
-.Trash
-/Library/
 
 # Node & tools
 node_modules/
 .env
 .env.local
-.nvm/
-.oh-my-zsh/
 coverage/
-reports/
 
-# IDE & tools
+# IDE
 .idea/
 .claude/
-
-# Test & API (empty/unused)
-cypress/
-docs/
-postman/
-
-# Misc
-.gitignoreэ
