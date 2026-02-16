@@ -20,3 +20,6 @@ function initSupabase() {
     console.error('Supabase SDK not loaded');
     return null;
 }
+
+// Auto-init when loaded (captures OAuth tokens from URL hash)
+initSupabase();

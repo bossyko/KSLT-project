@@ -47,11 +47,26 @@
         redirecting: 'Успешно! Перенаправление...'
     };
 
-    // Init Supabase
-    var client = null;
-    if (window.supabase && window.supabase.createClient) {
-        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Use shared Supabase client from supabase-config.js
+    var client = window.supabaseClient;
+
+    // ---- Return URL (from auth-guard redirect) ----
+    var params = new URLSearchParams(window.location.search);
+    var returnUrl = params.get('return');
+
+    // Base URL (for Supabase OAuth/email redirects)
+    var basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+
+    function getRedirectUrl() {
+        if (returnUrl) return returnUrl;
+        return isEn ? 'index-en.html' : 'index.html';
     }
+
+    // ---- Clear forms on page load (security) ----
+    window.addEventListener('pageshow', function() {
+        document.querySelectorAll('form').forEach(function(f) { f.reset(); });
+        document.querySelectorAll('.pw-rule').forEach(function(r) { r.classList.remove('valid'); });
+    });
 
     // ---- DOM elements ----
     var tabs = document.querySelectorAll('.auth-tab');
@@ -102,9 +117,15 @@
 
     // ---- Tab switching ----
     function showScreen(screenId) {
-        forms.forEach(function(f) { f.classList.remove('active'); });
+        // Clear all forms and messages when switching
+        forms.forEach(function(f) {
+            f.classList.remove('active');
+            f.reset();
+            clearMessages(f);
+        });
         forgotForm.classList.remove('active');
         forgotSuccess.classList.remove('active');
+        document.querySelectorAll('.pw-rule').forEach(function(r) { r.classList.remove('valid'); });
         document.getElementById(screenId).classList.add('active');
         authTabs.style.display = (screenId === 'forgotForm' || screenId === 'forgotSuccess') ? 'none' : 'flex';
     }
@@ -221,7 +242,7 @@
 
         showMessage(signinForm, L.redirecting, false);
         setTimeout(function() {
-            window.location.href = isEn ? 'index-en.html' : 'index.html';
+            window.location.href = getRedirectUrl();
         }, 1000);
     });
 
@@ -320,7 +341,7 @@
         setLoading(btn, true, L.sendingLink, L.sendLink);
 
         var result = await client.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + (isEn ? '/auth-en.html' : '/auth.html')
+            redirectTo: basePath + (isEn ? 'auth-en.html' : 'auth.html')
         });
 
         setLoading(btn, false, L.sendingLink, L.sendLink);
@@ -343,7 +364,7 @@
         this.textContent = L.sendingLink;
 
         await client.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + (isEn ? '/auth-en.html' : '/auth.html')
+            redirectTo: basePath + (isEn ? 'auth-en.html' : 'auth.html')
         });
 
         this.textContent = L.sent;
@@ -362,7 +383,7 @@
             await client.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + (isEn ? '/index-en.html' : '/index.html')
+                    redirectTo: basePath + (isEn ? 'dashboard-en.html' : 'dashboard.html')
                 }
             });
         });
@@ -375,7 +396,7 @@
         if (!client) return;
         var result = await client.auth.getSession();
         if (result.data && result.data.session) {
-            window.location.href = isEn ? 'index-en.html' : 'index.html';
+            window.location.href = getRedirectUrl();
         }
     }
     checkSession();
