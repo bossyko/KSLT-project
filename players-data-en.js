@@ -33,6 +33,45 @@ window.playersLabels = {
     authRequired: "Sign in required"
 };
 
+window.playerProfileLabels = {
+    heroTitle: "Player Profile",
+    backToRankings: "Back to Rankings",
+    online: "Online",
+    message: "Message",
+    challenge: "Challenge",
+    statsPoints: "Rating",
+    statsWins: "Wins",
+    statsLosses: "Losses",
+    statsWinRate: "Win %",
+    statsStreak: "Streak",
+    sectionMatches: "Match History",
+    sectionAchievements: "Achievements",
+    sectionTournaments: "Tournaments",
+    ctaTitle: "Want to <span>play</span>?",
+    ctaText: "Sign up for KSLT to challenge players and compete in tournaments",
+    ctaBtn: "Sign Up",
+    win: "W",
+    loss: "L",
+    playerNotFound: "Player Not Found",
+    playerNotFoundText: "The link may be outdated or the player has been removed",
+    badgeChampion: "Tournament Champion",
+    badgeStreak: "Win streak 5+",
+    badgeTop1: "#1 of the month",
+    badgeNewbie: "Newcomer",
+    badgeBreakthrough: "Breakthrough",
+    veteran: "Veteran",
+    dominant: "Dominant",
+    victories: "victories",
+    winRateLabel: "win rate",
+    joined: "Since December 2025",
+    positionsMonth: "positions this month",
+    winsThisSeason: "wins this season",
+    monthName: "January 2026",
+    matchDates: ["Feb 14", "Feb 7", "Jan 28", "Jan 21", "Jan 14", "Jan 5", "Dec 28", "Dec 20"],
+    tournamentNames: ["KSLT Open 2026", "Winter Cup 2025", "Autumn Classic 2025", "KSLT Summer Series 2025"],
+    tournamentResults: ["Quarterfinal", "Semifinal", "Round of 16", "Finalist", "Winner"]
+};
+
 var playersData = {
     categories: {
         // ========== MEN ==========

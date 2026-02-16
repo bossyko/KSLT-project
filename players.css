@@ -464,6 +464,14 @@
 
 .pl-player-info {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+}
+
+.pl-player-name-row {
+    display: flex;
     align-items: center;
     gap: 6px;
     min-width: 0;
@@ -483,6 +491,18 @@
     color: var(--accent);
 }
 
+.pl-player-category {
+    display: inline-block;
+    font-size: 0.7rem;
+    color: var(--accent);
+    font-weight: 600;
+    background: rgba(204, 255, 0, 0.08);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    width: fit-content;
+    line-height: 1.3;
+}
+
 .pl-player-badges {
     display: flex;
     gap: 3px;
@@ -495,6 +515,9 @@
 
 .pl-col-country {
     text-align: center;
+}
+
+.pl-row:not(.pl-row-header) .pl-col-country {
     font-size: 1.2rem;
 }
 

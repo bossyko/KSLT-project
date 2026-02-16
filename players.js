@@ -100,11 +100,29 @@
     function getFilteredPlayers(tab) {
         var cat = getCategory(tab);
         if (!searchQuery) return cat.players;
+        // Search across ALL categories
         var q = searchQuery.toLowerCase();
-        return cat.players.filter(function(p) {
-            return p.name.toLowerCase().indexOf(q) !== -1;
-        });
+        var results = [];
+        var cats = playersData.categories;
+        for (var key in cats) {
+            if (!cats.hasOwnProperty(key)) continue;
+            var c = cats[key];
+            for (var i = 0; i < c.players.length; i++) {
+                var p = c.players[i];
+                if (p.name.toLowerCase().indexOf(q) !== -1) {
+                    results.push({
+                        player: p,
+                        categoryKey: key,
+                        categoryName: c.name,
+                        rankInCategory: i + 1
+                    });
+                }
+            }
+        }
+        return results;
     }
+
+    var isSearchMode = false;
 
     // ========================================
     // INIT
@@ -244,13 +262,29 @@
         if (!container) return;
 
         var labels = getLabels();
-        var players = getFilteredPlayers(tab);
-        var totalPages = Math.max(1, Math.ceil(players.length / PER_PAGE));
+        var filtered = getFilteredPlayers(tab);
+        isSearchMode = !!searchQuery;
+
+        // In search mode, filtered is array of {player, categoryKey, categoryName, rankInCategory}
+        // In normal mode, filtered is array of player objects
+        var items = isSearchMode ? filtered : filtered;
+        var totalPages = Math.max(1, Math.ceil(items.length / PER_PAGE));
         if (page > totalPages) page = totalPages;
         currentPage = page;
 
         var start = (page - 1) * PER_PAGE;
-        var pageItems = players.slice(start, start + PER_PAGE);
+        var pageItems = items.slice(start, start + PER_PAGE);
+
+        // Toggle podium/filters visibility in search mode
+        var podiumEl = document.getElementById('playersPodium');
+        var filtersEl = document.getElementById('playersFilters');
+        var paginationEl = document.getElementById('playersPagination');
+        var sponsorsEl = document.getElementById('playersSponsors');
+        if (podiumEl) podiumEl.style.display = isSearchMode ? 'none' : '';
+        if (filtersEl) filtersEl.style.display = isSearchMode ? 'none' : '';
+        // Reduce gap between table and sponsors in search mode
+        if (container) container.style.paddingBottom = isSearchMode ? '16px' : '';
+        if (sponsorsEl) sponsorsEl.style.paddingTop = isSearchMode ? '0' : '';
 
         if (pageItems.length === 0) {
             container.innerHTML = '<div class="pl-no-results">' + labels.noResults + '</div>';
@@ -264,7 +298,7 @@
         html += '<div class="pl-row pl-row-header">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
             '<span class="pl-col-player">' + labels.player + '</span>' +
-            '<span class="pl-col-online">' + '</span>' +
+            '<span class="pl-col-online">' + labels.online + '</span>' +
             '<span class="pl-col-country">' + labels.country + '</span>' +
             '<span class="pl-col-points">' + labels.points + '</span>' +
             '<span class="pl-col-record">' + labels.record + '</span>' +
@@ -275,8 +309,9 @@
 
         // Rows
         for (var i = 0; i < pageItems.length; i++) {
-            var p = pageItems[i];
-            var rank = start + i + 1;
+            var item = pageItems[i];
+            var p = isSearchMode ? item.player : item;
+            var rank = isSearchMode ? item.rankInCategory : (start + i + 1);
             var rankClass = rank <= 3 ? ' pl-rank-top' : '';
 
             // Badges
@@ -287,6 +322,9 @@
                     badgesHtml += '<span class="pl-badge" title="' + getBadgeTooltip(p.badges[b]) + '">' + badge.emoji + '</span>';
                 }
             }
+
+            // Category label (search mode only)
+            var catLabel = isSearchMode ? '<span class="pl-player-category">' + item.categoryName + '</span>' : '';
 
             // Form dots
             var formHtml = '';
@@ -317,8 +355,11 @@
                 '<div class="pl-col-player">' +
                     '<img src="' + p.photo + '" alt="" class="pl-player-photo">' +
                     '<div class="pl-player-info">' +
-                        '<a href="#" class="pl-player-name">' + p.name + '</a>' +
-                        (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
+                        '<div class="pl-player-name-row">' +
+                            '<a href="' + (isEnPage() ? 'player-en.html' : 'player.html') + '?id=' + p.id + '" class="pl-player-name">' + p.name + '</a>' +
+                            (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
+                        '</div>' +
+                        catLabel +
                     '</div>' +
                 '</div>' +
                 '<span class="pl-col-online">' + (p.online ? '<span class="pl-online-dot pl-online-pulse"></span>' : '<span class="pl-offline-dot"></span>') + '</span>' +
@@ -334,7 +375,7 @@
         html += '</div>';
         container.innerHTML = html;
 
-        renderPagination(players.length, page);
+        renderPagination(items.length, page);
         initScrollAnimations();
     }
 
@@ -463,9 +504,17 @@
             if (e.target.id !== 'playersSearch') return;
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(function() {
-                searchQuery = e.target.value.trim();
+                var val = e.target.value.trim();
+                var wasSearching = !!searchQuery;
+                searchQuery = val;
                 currentPage = 1;
                 renderTable(currentTab, 1);
+                // Restore podium/filters when search cleared
+                if (wasSearching && !val) {
+                    renderPodium(currentTab);
+                    renderFilters();
+                    initTabs();
+                }
             }, 250);
         });
     }
