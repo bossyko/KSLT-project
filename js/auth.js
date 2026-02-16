@@ -59,7 +59,7 @@
 
     function getRedirectUrl() {
         if (returnUrl) return returnUrl;
-        return isEn ? 'index-en.html' : 'index.html';
+        return isEn ? '../index-en.html' : '../index.html';
     }
 
     // ---- Clear forms on page load (security) ----

@@ -650,7 +650,7 @@ function renderNewsList() {
 
 function renderNotFound() {
     var labels = getLabels();
-    var homeUrl = isEnPage() ? 'index-en.html' : 'index.html';
+    var homeUrl = isEnPage() ? '../index-en.html' : '../index.html';
 
     var hero = document.getElementById('newsHero');
     if (hero) hero.style.display = 'none';

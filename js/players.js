@@ -9,6 +9,22 @@
     var searchQuery = '';
     var debounceTimer = null;
 
+    var GUEST_VISIBLE_ROWS = 8;
+    var GUEST_BLURRED_ROWS = 4;
+
+    function isLoggedIn() {
+        try {
+            var key = 'sb-qqkzszesviukopgjbead-auth-token';
+            var raw = localStorage.getItem(key);
+            if (!raw) return false;
+            var session = JSON.parse(raw);
+            if (session && session.access_token && session.expires_at) {
+                return session.expires_at > Math.floor(Date.now() / 1000);
+            }
+        } catch (e) {}
+        return false;
+    }
+
     var badgeMap = {
         champion: { emoji: '\ud83c\udfc6', ru: 'Чемпион последнего турнира', en: 'Tournament Champion' },
         streak:   { emoji: '\ud83d\udd25', ru: 'Серия 5+ побед', en: 'Win streak 5+' },
@@ -49,7 +65,10 @@
             sponsorsTitle: 'Партнёры и спонсоры',
             sponsorsGeneral: 'Генеральный спонсор',
             noResults: 'Игроки не найдены',
-            authRequired: 'Требуется авторизация'
+            authRequired: 'Требуется авторизация',
+            guestTitle: 'Зарегистрируйтесь для полного доступа',
+            guestText: 'Полный рейтинг, поиск игроков и статистика доступны после регистрации',
+            guestBtn: 'Войти / Регистрация'
         };
     }
 
@@ -161,16 +180,19 @@
             .replace('{count}', totalPlayers)
             .replace('{online}', onlineCount);
 
+        var searchHtml = isLoggedIn() ?
+            '<div class="pl-search-wrap">' +
+                '<svg class="pl-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                '<input type="text" class="pl-search-input" id="playersSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
+            '</div>' : '';
+
         container.innerHTML =
             '<div class="pl-hero-bg"></div>' +
             '<div class="pl-hero-overlay"></div>' +
             '<div class="pl-hero-content">' +
                 '<h1 class="pl-hero-title">' + labels.title + '</h1>' +
                 '<p class="pl-hero-subtitle">' + subtitle + '</p>' +
-                '<div class="pl-search-wrap">' +
-                    '<svg class="pl-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-                    '<input type="text" class="pl-search-input" id="playersSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
-                '</div>' +
+                searchHtml +
             '</div>';
     }
 
@@ -178,7 +200,7 @@
     // PODIUM (Top 3)
     // ========================================
 
-    function renderPodium(tab) {
+    function renderPodium(tab, instant) {
         var container = document.getElementById('playersPodium');
         if (!container) return;
 
@@ -188,6 +210,8 @@
         // Podium order: 2nd (left), 1st (center), 3rd (right)
         var order = [1, 0, 2];
         var placeClass = ['pl-podium-first', 'pl-podium-second', 'pl-podium-third'];
+
+        var animClasses = instant ? 'pl-animate pl-visible' : 'pl-animate';
 
         var html = '<div class="pl-podium">';
         for (var oi = 0; oi < order.length; oi++) {
@@ -202,7 +226,7 @@
                 }
             }
 
-            html += '<div class="pl-podium-card ' + placeClass[i] + ' pl-animate">' +
+            html += '<div class="pl-podium-card ' + placeClass[i] + ' ' + animClasses + '">' +
                 '<div class="pl-podium-medal">' + medals[i] + '</div>' +
                 '<div class="pl-podium-photo-wrap">' +
                     '<img src="' + p.photo + '" alt="' + p.name + '" class="pl-podium-photo">' +
@@ -304,15 +328,27 @@
             '<span class="pl-col-record">' + labels.record + '</span>' +
             '<span class="pl-col-form">' + labels.form + '</span>' +
             '<span class="pl-col-change">' + labels.change + '</span>' +
-            '<span class="pl-col-actions">' + labels.actions + '</span>' +
+            (logged ? '<span class="pl-col-actions">' + labels.actions + '</span>' : '') +
         '</div>';
 
+        // Guest restriction
+        var logged = isLoggedIn();
+        var isGuest = !logged && !isSearchMode;
+        var totalVisible = isGuest ? Math.min(pageItems.length, GUEST_VISIBLE_ROWS + GUEST_BLURRED_ROWS) : pageItems.length;
+
         // Rows
-        for (var i = 0; i < pageItems.length; i++) {
+        for (var i = 0; i < totalVisible; i++) {
             var item = pageItems[i];
             var p = isSearchMode ? item.player : item;
             var rank = isSearchMode ? item.rankInCategory : (start + i + 1);
             var rankClass = rank <= 3 ? ' pl-rank-top' : '';
+
+            // Blur level for guest rows beyond visible limit
+            var blurClass = '';
+            if (isGuest && i >= GUEST_VISIBLE_ROWS) {
+                var blurLevel = i - GUEST_VISIBLE_ROWS + 1;
+                blurClass = ' pl-row-blur pl-row-blur-' + blurLevel;
+            }
 
             // Badges
             var badgesHtml = '';
@@ -342,15 +378,17 @@
                 changeHtml = '<span class="pl-change-neutral">\u2014</span>';
             }
 
-            // Actions
-            var authUrl = getAuthUrl();
+            // Actions (only for logged-in users)
             var actionsHtml = '';
-            if (p.online) {
-                actionsHtml += '<a href="' + authUrl + '" class="pl-btn-message" title="' + labels.message + '">\u2709\ufe0f</a>';
+            if (logged) {
+                var authUrl = getAuthUrl();
+                if (p.online) {
+                    actionsHtml += '<a href="' + authUrl + '" class="pl-btn-message" title="' + labels.message + '">\u2709\ufe0f</a>';
+                }
+                actionsHtml += '<a href="' + authUrl + '" class="pl-btn-challenge" title="' + labels.challenge + '">\u2694\ufe0f</a>';
             }
-            actionsHtml += '<a href="' + authUrl + '" class="pl-btn-challenge" title="' + labels.challenge + '">\u2694\ufe0f</a>';
 
-            html += '<div class="pl-row pl-animate" style="transition-delay:' + Math.min(i * 30, 300) + 'ms">' +
+            html += '<div class="pl-row pl-animate' + blurClass + '" style="transition-delay:' + Math.min(i * 30, 300) + 'ms">' +
                 '<span class="pl-col-rank' + rankClass + '">' + rank + '</span>' +
                 '<div class="pl-col-player">' +
                     '<img src="' + p.photo + '" alt="" class="pl-player-photo">' +
@@ -368,12 +406,40 @@
                 '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
                 '<span class="pl-col-form">' + formHtml + '</span>' +
                 '<span class="pl-col-change">' + changeHtml + '</span>' +
-                '<span class="pl-col-actions">' + actionsHtml + '</span>' +
+                (logged ? '<span class="pl-col-actions">' + actionsHtml + '</span>' : '') +
             '</div>';
         }
 
         html += '</div>';
+
+        // Guest CTA banner
+        if (isGuest && pageItems.length > GUEST_VISIBLE_ROWS) {
+            var authUrl = getAuthUrl();
+            var hiddenCount = items.length - GUEST_VISIBLE_ROWS;
+            html += '<div class="pl-guest-overlay">' +
+                '<div class="pl-guest-cta">' +
+                    '<div class="pl-guest-icon">' +
+                        '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+                            '<rect x="3" y="11" width="18" height="11" rx="2"/>' +
+                            '<path d="M7 11V7a5 5 0 0 1 10 0v4"/>' +
+                            '<circle cx="12" cy="16" r="1"/>' +
+                        '</svg>' +
+                    '</div>' +
+                    '<h3 class="pl-guest-title">' + labels.guestTitle + '</h3>' +
+                    '<p class="pl-guest-text">' + labels.guestText + '</p>' +
+                    '<a href="' + authUrl + '" class="pl-guest-btn">' + labels.guestBtn + '</a>' +
+                    '<div class="pl-guest-hint">+' + hiddenCount + ' ' + (isEnPage() ? 'more players' : 'игроков скрыто') + '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
         container.innerHTML = html;
+
+        // Hide pagination for guests
+        if (!logged) {
+            var paginationEl = document.getElementById('playersPagination');
+            if (paginationEl) paginationEl.style.display = 'none';
+        }
 
         renderPagination(items.length, page);
         initScrollAnimations();
@@ -505,17 +571,23 @@
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(function() {
                 var val = e.target.value.trim();
-                var wasSearching = !!searchQuery;
                 searchQuery = val;
                 currentPage = 1;
-                renderTable(currentTab, 1);
-                // Restore podium/filters when search cleared
-                if (wasSearching && !val) {
-                    renderPodium(currentTab);
+
+                if (!val) {
+                    // Search cleared — restore podium for active tab
+                    isSearchMode = false;
+                    renderPodium(currentTab, true);
                     renderFilters();
-                    initTabs();
+                    var podiumEl = document.getElementById('playersPodium');
+                    var filtersEl = document.getElementById('playersFilters');
+                    if (podiumEl) podiumEl.style.display = '';
+                    if (filtersEl) filtersEl.style.display = '';
+                    renderTable(currentTab, 1);
+                } else {
+                    renderTable(currentTab, 1);
                 }
-            }, 250);
+            }, 200);
         });
     }
 

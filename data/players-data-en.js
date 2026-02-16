@@ -30,7 +30,10 @@ window.playersLabels = {
     sponsorsTitle: "Partners & Sponsors",
     sponsorsGeneral: "General Sponsor",
     noResults: "No players found",
-    authRequired: "Sign in required"
+    authRequired: "Sign in required",
+    guestTitle: "Sign up for full access",
+    guestText: "Full rankings, player search and statistics are available after registration",
+    guestBtn: "Sign In / Register"
 };
 
 window.playerProfileLabels = {

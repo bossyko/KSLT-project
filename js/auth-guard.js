@@ -7,7 +7,7 @@
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var authPage = isEn ? 'auth-en.html' : 'auth.html';
-    var homePage = isEn ? 'index-en.html' : 'index.html';
+    var homePage = isEn ? '../index-en.html' : '../index.html';
 
     // Use shared client from supabase-config.js
     var client = window.supabaseClient;

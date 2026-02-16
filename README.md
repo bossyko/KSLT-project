@@ -28,15 +28,18 @@ A full-featured tennis community platform for Kyrgyzstan, featuring player ranki
 
 ```
 KSLT/
-├── index.html / index-en.html / index-kg.html   # Main page (3 languages)
-├── auth.html / auth-en.html                      # Login / Register
-├── dashboard.html / dashboard-en.html            # User dashboard
-├── tournaments.html / tournament.html            # Tournament list & detail
-├── players.html / player.html                    # Rankings & player profile
-├── coaches.html / coach.html                     # Coaches list & profile
-├── courts.html / court.html                      # Courts list & detail
-├── news.html / news-en.html                      # News & articles
-├── about.html / faq.html / rules.html            # Info pages
+├── index.html / index-en.html / index-kg.html   # Entry points (3 languages)
+├── README.md
+│
+├── pages/                                        # All application pages
+│   ├── auth.html / auth-en.html                  #   Login / Register
+│   ├── dashboard.html / dashboard-en.html        #   User dashboard
+│   ├── tournaments.html / tournament.html        #   Tournament list & detail
+│   ├── players.html / player.html                #   Rankings & player profile
+│   ├── coaches.html / coach.html                 #   Coaches list & profile
+│   ├── courts.html / court.html                  #   Courts list & detail
+│   ├── news.html / news-en.html                  #   News & articles
+│   └── about.html / faq.html / rules.html        #   Info pages
 │
 ├── css/                                          # Stylesheets
 │   ├── style.css                                 #   Design system & global styles
@@ -76,14 +79,11 @@ KSLT/
 ├── images/                                       # Static assets
 ├── postman/                                      # API test collections
 │
-├── supabase/                                     # Database migrations
-│   ├── schema.sql                                #   Tables & RLS policies
-│   ├── seed.sql                                  #   Initial data
-│   ├── migrate-players.sql                       #   Player data migration
-│   └── add-social-fields.sql                     #   Social media fields
-│
-├── .gitignore
-└── README.md
+└── supabase/                                     # Database migrations
+    ├── schema.sql                                #   Tables & RLS policies
+    ├── seed.sql                                  #   Initial data
+    ├── migrate-players.sql                       #   Player data migration
+    └── add-social-fields.sql                     #   Social media fields
 ```
 
 ## Getting Started

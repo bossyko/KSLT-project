@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSLT — Корт</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/courts.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <title>KSLT — О проекте</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/info-pages.css">
 </head>
 <body>
     <!-- HEADER -->
     <header class="floating-header header-hybrid">
         <nav>
             <div class="nav-left">
-                <a href="index.html" class="logo">
+                <a href="../index.html" class="logo">
                     <span class="logo-text">KSLT</span>
                     <span class="logo-icon">🎾</span>
                 </a>
@@ -41,7 +40,7 @@
                     </div>
                 </li>
                 <li>
-                    <a href="index.html#live" class="nav-item nav-item-live">
+                    <a href="../index.html#live" class="nav-item nav-item-live">
                         <span class="live-dot"></span>
                         Live
                     </a>
@@ -69,7 +68,7 @@
                     <a href="news.html" class="nav-item">Новости</a>
                 </li>
                 <li class="nav-dropdown">
-                    <a href="index.html#services" class="nav-item nav-item-dropdown">
+                    <a href="../index.html#services" class="nav-item nav-item-dropdown">
                         Услуги
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
@@ -105,12 +104,12 @@
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="court.html" class="lang-option active" data-lang="RU">
+                        <a href="about.html" class="lang-option active" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="court-en.html" class="lang-option" data-lang="EN">
+                        <a href="about-en.html" class="lang-option" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -144,7 +143,7 @@
                         <li><a href="tournaments.html?category=friendly">Friendly</a></li>
                     </ul>
                 </li>
-                <li><a href="index.html#live"><span class="live-dot"></span> Live</a></li>
+                <li><a href="../index.html#live"><span class="live-dot"></span> Live</a></li>
                 <li class="mobile-nav-dropdown">
                     <a href="players.html" class="mobile-dropdown-toggle">
                         Рейтинг
@@ -166,7 +165,7 @@
                 </li>
                 <li><a href="news.html">Новости</a></li>
                 <li class="mobile-nav-dropdown">
-                    <a href="index.html#services" class="mobile-dropdown-toggle">
+                    <a href="../index.html#services" class="mobile-dropdown-toggle">
                         Услуги
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
@@ -194,10 +193,10 @@
             <div class="mobile-nav-bottom">
                 <div class="mobile-lang-list">
                     <span class="mobile-lang-title">Язык</span>
-                    <a href="court.html" class="mobile-lang-option active" data-lang="RU">
+                    <a href="about.html" class="mobile-lang-option active" data-lang="RU">
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
-                    <a href="court-en.html" class="mobile-lang-option" data-lang="EN">
+                    <a href="about-en.html" class="mobile-lang-option" data-lang="EN">
                         <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
@@ -206,8 +205,126 @@
     </header>
 
     <main>
-        <section class="ct-hero" id="courtDetailHero"></section>
-        <div class="ct-container" id="courtDetail"></div>
+        <!-- HERO -->
+        <section class="ip-hero">
+            <div class="ip-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=1400&q=80')"></div>
+            <div class="ip-hero-content">
+                <h1 class="ip-hero-title">О проекте <span>KSLT</span></h1>
+                <p class="ip-hero-subtitle">Первое любительское теннисное сообщество в Кыргызстане</p>
+            </div>
+        </section>
+
+        <!-- ABOUT CONTENT -->
+        <div class="ip-container">
+
+            <!-- Mission -->
+            <div class="ip-about-section ip-fade-in">
+                <h2 class="ip-about-section-title">Наша <span>миссия</span></h2>
+                <p class="ip-about-text">
+                    KSLT (Kyrgyzstan Social Lawn Tennis) создан для того, чтобы объединить всех любителей тенниса в Кыргызстане — от новичков до продвинутых игроков. Мы верим, что теннис — это больше, чем спорт. Это сообщество, здоровый образ жизни и настоящая конкуренция.
+                </p>
+
+                <div class="ip-mission-grid">
+                    <div class="ip-mission-card">
+                        <span class="ip-mission-icon">🎾</span>
+                        <h4>Развитие тенниса</h4>
+                        <p>Популяризация тенниса в Кыргызстане, привлечение новых игроков и повышение уровня игры</p>
+                    </div>
+                    <div class="ip-mission-card">
+                        <span class="ip-mission-icon">🤝</span>
+                        <h4>Сообщество</h4>
+                        <p>Создание дружественной среды, где каждый может найти партнёра для игры и единомышленников</p>
+                    </div>
+                    <div class="ip-mission-card">
+                        <span class="ip-mission-icon">🏆</span>
+                        <h4>Соревнования</h4>
+                        <p>Регулярные турниры с прозрачной рейтинговой системой для игроков всех уровней</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="ip-about-section ip-fade-in">
+                <h2 class="ip-about-section-title">KSLT в <span>цифрах</span></h2>
+                <div class="ip-stats-row">
+                    <div class="ip-stat-card">
+                        <div class="ip-stat-num">128+</div>
+                        <div class="ip-stat-label">Игроков</div>
+                    </div>
+                    <div class="ip-stat-card">
+                        <div class="ip-stat-num">24</div>
+                        <div class="ip-stat-label">Турнира проведено</div>
+                    </div>
+                    <div class="ip-stat-card">
+                        <div class="ip-stat-num">6</div>
+                        <div class="ip-stat-label">Категорий</div>
+                    </div>
+                    <div class="ip-stat-card">
+                        <div class="ip-stat-num">5</div>
+                        <div class="ip-stat-label">Партнёрских кортов</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History -->
+            <div class="ip-about-section ip-fade-in">
+                <h2 class="ip-about-section-title">Наша <span>история</span></h2>
+                <div class="ip-timeline">
+                    <div class="ip-timeline-item">
+                        <div class="ip-timeline-year">2024</div>
+                        <div class="ip-timeline-text">Идея создания теннисного сообщества. Группа энтузиастов из Бишкека начинает организовывать первые неформальные матчи и встречи на кортах города.</div>
+                    </div>
+                    <div class="ip-timeline-item">
+                        <div class="ip-timeline-year">Начало 2025</div>
+                        <div class="ip-timeline-text">Официальное создание KSLT. Запуск рейтинговой системы, проведение первого турнира с 16 участниками. Создание Telegram-группы сообщества.</div>
+                    </div>
+                    <div class="ip-timeline-item">
+                        <div class="ip-timeline-year">Середина 2025</div>
+                        <div class="ip-timeline-text">Рост сообщества до 80+ игроков. Введение категорий (Pro-Masters, Masters, Challenger, Futures, Tour). Партнёрство с первыми кортами и спонсорами.</div>
+                    </div>
+                    <div class="ip-timeline-item">
+                        <div class="ip-timeline-year">2026</div>
+                        <div class="ip-timeline-text">Запуск полноценного сайта KSLT. 128+ активных игроков, 24 турнира проведено. Женские категории. Планы расширения в другие города Кыргызстана.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team -->
+            <div class="ip-about-section ip-fade-in">
+                <h2 class="ip-about-section-title">Наша <span>команда</span></h2>
+                <div class="ip-team-grid">
+                    <div class="ip-team-card">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face" alt="Основатель" class="ip-team-photo">
+                        <h4>Азамат Исаков</h4>
+                        <div class="ip-team-role">Основатель и президент</div>
+                        <p>Теннисист с 10-летним стажем. Инициатор создания KSLT и главный организатор турниров.</p>
+                    </div>
+                    <div class="ip-team-card">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face" alt="Директор" class="ip-team-photo">
+                        <h4>Руслан Абдыраев</h4>
+                        <div class="ip-team-role">Спортивный директор</div>
+                        <p>Отвечает за рейтинговую систему, формирование сеток турниров и развитие категорий.</p>
+                    </div>
+                    <div class="ip-team-card">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face" alt="Менеджер" class="ip-team-photo">
+                        <h4>Айгуль Токтосунова</h4>
+                        <div class="ip-team-role">Менеджер по коммуникациям</div>
+                        <p>Ведёт социальные сети, работает с партнёрами и спонсорами, организует мероприятия.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="ip-cta ip-fade-in">
+                <h3>Присоединяйся к <span>KSLT</span></h3>
+                <p>Стань частью первого теннисного сообщества Кыргызстана. Играй, соревнуйся, развивайся!</p>
+                <a href="auth.html" class="ip-cta-btn">
+                    Зарегистрироваться
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+
+        </div>
     </main>
 
     <!-- FOOTER -->
@@ -243,7 +360,7 @@
                     <li><a href="tournaments.html">Турниры</a></li>
                     <li><a href="players.html">Рейтинг</a></li>
                     <li><a href="news.html">Новости</a></li>
-                    <li><a href="index.html#live">Live трансляции</a></li>
+                    <li><a href="../index.html#live">Live трансляции</a></li>
                 </ul>
             </div>
             <div class="footer-block">
@@ -292,10 +409,17 @@
         </div>
     </footer>
 
-    <script src="js/auth-nav.js"></script>
-    <script src="js/script.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="data/courts-data.js"></script>
-    <script src="js/courts.js"></script>
+    <script src="../js/auth-nav.js"></script>
+    <script src="../js/script.js"></script>
+    <script>
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.ip-fade-in').forEach(function(el) { observer.observe(el); });
+    </script>
 </body>
 </html>

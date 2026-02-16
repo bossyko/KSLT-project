@@ -10,7 +10,9 @@
     if (!btn) return;
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var dashUrl = isEn ? 'dashboard-en.html' : 'dashboard.html';
+    var inPages = window.location.pathname.indexOf('/pages/') !== -1;
+    var prefix = inPages ? '' : 'pages/';
+    var dashUrl = prefix + (isEn ? 'dashboard-en.html' : 'dashboard.html');
     var labelDash = isEn ? 'Dashboard' : 'Кабинет';
 
     // Check Supabase session in localStorage

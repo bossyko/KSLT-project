@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSLT — About Us</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/info-pages.css">
+    <title>KSLT — Tournament</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/tournaments.css">
+    <link rel="stylesheet" href="../css/tournament-detail.css">
 </head>
 <body>
     <!-- HEADER -->
     <header class="floating-header header-hybrid">
         <nav>
             <div class="nav-left">
-                <a href="index-en.html" class="logo">
+                <a href="../index-en.html" class="logo">
                     <span class="logo-text">KSLT</span>
                     <span class="logo-icon">🎾</span>
                 </a>
@@ -24,23 +25,24 @@
 
             <ul class="nav-links">
                 <li class="nav-dropdown">
-                    <a href="tournaments-en.html" class="nav-item nav-item-dropdown">
+                    <a href="tournaments-en.html" class="nav-item nav-item-dropdown active">
                         Tournaments
+                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <div class="nav-dropdown-menu">
-                        <a href="tournaments-en.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
-                        <a href="tournaments-en.html?category=masters" class="nav-dropdown-item">Masters</a>
-                        <a href="tournaments-en.html?category=challenger" class="nav-dropdown-item">Challenger</a>
-                        <a href="tournaments-en.html?category=futures" class="nav-dropdown-item">Futures</a>
-                        <a href="tournaments-en.html?category=tour" class="nav-dropdown-item">Tour</a>
-                        <a href="tournaments-en.html?category=friendly" class="nav-dropdown-item">Friendly</a>
+                        <a href="tournaments-en.html?category=promasters" class="nav-dropdown-item" data-category="promasters">Pro-Masters</a>
+                        <a href="tournaments-en.html?category=masters" class="nav-dropdown-item" data-category="masters">Masters</a>
+                        <a href="tournaments-en.html?category=challenger" class="nav-dropdown-item" data-category="challenger">Challenger</a>
+                        <a href="tournaments-en.html?category=futures" class="nav-dropdown-item" data-category="futures">Futures</a>
+                        <a href="tournaments-en.html?category=tour" class="nav-dropdown-item" data-category="tour">Tour</a>
+                        <a href="tournaments-en.html?category=friendly" class="nav-dropdown-item" data-category="friendly">Friendly</a>
                     </div>
                 </li>
                 <li>
-                    <a href="index-en.html#live" class="nav-item nav-item-live">
+                    <a href="../index-en.html#live" class="nav-item nav-item-live">
                         <span class="live-dot"></span>
                         Live
                     </a>
@@ -68,7 +70,7 @@
                     <a href="news-en.html" class="nav-item">News</a>
                 </li>
                 <li class="nav-dropdown">
-                    <a href="index-en.html#services" class="nav-item nav-item-dropdown">
+                    <a href="../index-en.html#services" class="nav-item nav-item-dropdown">
                         Services
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
@@ -104,12 +106,12 @@
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="about.html" class="lang-option" data-lang="RU">
+                        <a href="tournament.html" class="lang-option" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="about-en.html" class="lang-option active" data-lang="EN">
+                        <a href="tournament-en.html" class="lang-option active" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -128,8 +130,9 @@
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
                 <li class="mobile-nav-dropdown">
-                    <a href="tournaments-en.html" class="mobile-dropdown-toggle">
+                    <a href="#tournaments" class="mobile-dropdown-toggle active">
                         Tournaments
+                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -143,7 +146,7 @@
                         <li><a href="tournaments-en.html?category=friendly">Friendly</a></li>
                     </ul>
                 </li>
-                <li><a href="index-en.html#live"><span class="live-dot"></span> Live</a></li>
+                <li><a href="../index-en.html#live"><span class="live-dot"></span> Live</a></li>
                 <li class="mobile-nav-dropdown">
                     <a href="players-en.html" class="mobile-dropdown-toggle">
                         Rankings
@@ -165,7 +168,7 @@
                 </li>
                 <li><a href="news-en.html">News</a></li>
                 <li class="mobile-nav-dropdown">
-                    <a href="index-en.html#services" class="mobile-dropdown-toggle">
+                    <a href="../index-en.html#services" class="mobile-dropdown-toggle">
                         Services
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
@@ -193,10 +196,10 @@
             <div class="mobile-nav-bottom">
                 <div class="mobile-lang-list">
                     <span class="mobile-lang-title">Language</span>
-                    <a href="about.html" class="mobile-lang-option" data-lang="RU">
+                    <a href="tournament.html" class="mobile-lang-option" data-lang="RU">
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
-                    <a href="about-en.html" class="mobile-lang-option active" data-lang="EN">
+                    <a href="tournament-en.html" class="mobile-lang-option active" data-lang="EN">
                         <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
@@ -206,120 +209,70 @@
 
     <main>
         <!-- HERO -->
-        <section class="ip-hero">
-            <div class="ip-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=1400&q=80')"></div>
-            <div class="ip-hero-content">
-                <h1 class="ip-hero-title">About <span>KSLT</span></h1>
-                <p class="ip-hero-subtitle">The first amateur tennis community in Kyrgyzstan</p>
+        <section class="td-hero" id="tournamentHero"></section>
+
+        <!-- TABS -->
+        <nav class="td-tabs-bar" id="tabsBar">
+            <div class="td-tabs">
+                <button class="td-tab active" data-target="bracket">Bracket</button>
+                <button class="td-tab" data-target="schedule">Schedule</button>
+                <button class="td-tab" data-target="participants">Players</button>
+                <button class="td-tab" data-target="results">Results</button>
             </div>
+        </nav>
+
+        <!-- BRACKET -->
+        <section class="td-section" id="bracket">
+            <div class="section-header">
+                <h2>Tournament Bracket</h2>
+            </div>
+            <div id="bracketContainer"></div>
         </section>
 
-        <!-- ABOUT CONTENT -->
-        <div class="ip-container">
-
-            <div class="ip-about-section ip-fade-in">
-                <h2 class="ip-about-section-title">Our <span>Mission</span></h2>
-                <p class="ip-about-text">
-                    KSLT (Kyrgyzstan Social Lawn Tennis) was created to unite all tennis enthusiasts in Kyrgyzstan — from beginners to advanced players. We believe that tennis is more than a sport. It's a community, a healthy lifestyle, and real competition.
-                </p>
-
-                <div class="ip-mission-grid">
-                    <div class="ip-mission-card">
-                        <span class="ip-mission-icon">🎾</span>
-                        <h4>Tennis Development</h4>
-                        <p>Popularizing tennis in Kyrgyzstan, attracting new players, and raising the level of play</p>
-                    </div>
-                    <div class="ip-mission-card">
-                        <span class="ip-mission-icon">🤝</span>
-                        <h4>Community</h4>
-                        <p>Creating a friendly environment where everyone can find a playing partner and like-minded people</p>
-                    </div>
-                    <div class="ip-mission-card">
-                        <span class="ip-mission-icon">🏆</span>
-                        <h4>Competition</h4>
-                        <p>Regular tournaments with a transparent ranking system for players of all levels</p>
-                    </div>
-                </div>
+        <!-- SCHEDULE -->
+        <section class="td-section" id="schedule">
+            <div class="section-header">
+                <h2>Match Schedule</h2>
             </div>
+            <div class="td-schedule-filters" id="scheduleFilters"></div>
+            <div id="scheduleList"></div>
+        </section>
 
-            <div class="ip-about-section ip-fade-in">
-                <h2 class="ip-about-section-title">KSLT in <span>Numbers</span></h2>
-                <div class="ip-stats-row">
-                    <div class="ip-stat-card">
-                        <div class="ip-stat-num">128+</div>
-                        <div class="ip-stat-label">Players</div>
-                    </div>
-                    <div class="ip-stat-card">
-                        <div class="ip-stat-num">24</div>
-                        <div class="ip-stat-label">Tournaments Held</div>
-                    </div>
-                    <div class="ip-stat-card">
-                        <div class="ip-stat-num">6</div>
-                        <div class="ip-stat-label">Categories</div>
-                    </div>
-                    <div class="ip-stat-card">
-                        <div class="ip-stat-num">5</div>
-                        <div class="ip-stat-label">Partner Courts</div>
-                    </div>
-                </div>
+        <!-- PARTICIPANTS -->
+        <section class="td-section" id="participants">
+            <div class="section-header">
+                <h2>Players</h2>
             </div>
+            <div class="td-participants-grid" id="participantsGrid"></div>
+        </section>
 
-            <div class="ip-about-section ip-fade-in">
-                <h2 class="ip-about-section-title">Our <span>Story</span></h2>
-                <div class="ip-timeline">
-                    <div class="ip-timeline-item">
-                        <div class="ip-timeline-year">2024</div>
-                        <div class="ip-timeline-text">The idea of creating a tennis community. A group of enthusiasts from Bishkek begins organizing the first informal matches and meetups at city courts.</div>
-                    </div>
-                    <div class="ip-timeline-item">
-                        <div class="ip-timeline-year">Early 2025</div>
-                        <div class="ip-timeline-text">Official launch of KSLT. Ranking system goes live, first tournament with 16 participants. Creation of the community Telegram group.</div>
-                    </div>
-                    <div class="ip-timeline-item">
-                        <div class="ip-timeline-year">Mid 2025</div>
-                        <div class="ip-timeline-text">Community grows to 80+ players. Introduction of categories (Pro-Masters, Masters, Challenger, Futures, Tour). First court and sponsor partnerships.</div>
-                    </div>
-                    <div class="ip-timeline-item">
-                        <div class="ip-timeline-year">2026</div>
-                        <div class="ip-timeline-text">Launch of the full KSLT website. 128+ active players, 24 tournaments completed. Women's categories introduced. Plans to expand to other cities in Kyrgyzstan.</div>
-                    </div>
-                </div>
+        <!-- RESULTS -->
+        <section class="td-section" id="results">
+            <div class="section-header">
+                <h2>Results</h2>
             </div>
+            <div id="resultsPodium"></div>
+        </section>
 
-            <div class="ip-about-section ip-fade-in">
-                <h2 class="ip-about-section-title">Our <span>Team</span></h2>
-                <div class="ip-team-grid">
-                    <div class="ip-team-card">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face" alt="Founder" class="ip-team-photo">
-                        <h4>Azamat Isakov</h4>
-                        <div class="ip-team-role">Founder & President</div>
-                        <p>Tennis player with 10 years of experience. Initiator of KSLT and chief tournament organizer.</p>
-                    </div>
-                    <div class="ip-team-card">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face" alt="Director" class="ip-team-photo">
-                        <h4>Ruslan Abdyraev</h4>
-                        <div class="ip-team-role">Sports Director</div>
-                        <p>Responsible for the ranking system, tournament bracket formation, and category development.</p>
-                    </div>
-                    <div class="ip-team-card">
-                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face" alt="Manager" class="ip-team-photo">
-                        <h4>Aigul Toktosunova</h4>
-                        <div class="ip-team-role">Communications Manager</div>
-                        <p>Manages social media, works with partners and sponsors, organizes community events.</p>
-                    </div>
-                </div>
+        <!-- SPONSORS -->
+        <section id="sponsors" class="section-sponsors-compact">
+            <div class="section-header">
+                <h2>Partners & Sponsors</h2>
             </div>
-
-            <div class="ip-cta ip-fade-in">
-                <h3>Join <span>KSLT</span></h3>
-                <p>Become part of Kyrgyzstan's first tennis community. Play, compete, grow!</p>
-                <a href="auth-en.html" class="ip-cta-btn">
-                    Sign Up
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <div class="sponsor-hero">
+                <span class="sponsor-hero-label">General Sponsor</span>
+                <a href="#" class="sponsor-hero-logo">
+                    <img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">
                 </a>
             </div>
-
-        </div>
+            <div class="sponsors-cloud">
+                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>
+                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>
+                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>
+                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>
+                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>
+            </div>
+        </section>
     </main>
 
     <!-- FOOTER -->
@@ -349,33 +302,38 @@
                     </a>
                 </div>
             </div>
+
             <div class="footer-block">
                 <h4>Navigation</h4>
                 <ul class="footer-links">
-                    <li><a href="tournaments-en.html">Tournaments</a></li>
+                    <li><a href="../index-en.html#tournaments">Tournaments</a></li>
                     <li><a href="players-en.html">Rankings</a></li>
-                    <li><a href="news-en.html">News</a></li>
-                    <li><a href="index-en.html#live">Live Streams</a></li>
+                    <li><a href="courts-en.html">Courts</a></li>
+                    <li><a href="../index-en.html#live">Live Streams</a></li>
                 </ul>
             </div>
+
             <div class="footer-block">
                 <h4>For Players</h4>
                 <ul class="footer-links">
                     <li><a href="rules-en.html">League Rules</a></li>
-                    <li><a href="players-en.html">Ranking System</a></li>
-                    <li><a href="about-en.html">About</a></li>
+                    <li><a href="#">Rating System</a></li>
+                    <li><a href="#">How to Join</a></li>
                     <li><a href="faq-en.html">FAQ</a></li>
+                    <li><a href="#">Player Code</a></li>
                 </ul>
             </div>
+
             <div class="footer-block">
                 <h4>For Partners</h4>
                 <ul class="footer-links">
                     <li><a href="#">Become a Sponsor</a></li>
                     <li><a href="#">Advertisers</a></li>
                     <li><a href="#">Court Rental</a></li>
-                    <li><a href="#">Event Organization</a></li>
+                    <li><a href="#">Tournament Organization</a></li>
                 </ul>
             </div>
+
             <div class="footer-block" id="contacts">
                 <h4>Contacts</h4>
                 <ul class="footer-contacts">
@@ -394,27 +352,21 @@
                 </ul>
             </div>
         </div>
+
         <div class="footer-bottom">
             <p class="footer-copyright">© 2026 KSLT. All rights reserved.</p>
             <div class="footer-legal">
-                <a href="#">Terms of Service</a>
+                <a href="#">Public Offer</a>
                 <a href="#">Privacy Policy</a>
             </div>
             <p class="footer-made">Made with ❤️ in Kyrgyzstan 🇰🇬</p>
         </div>
     </footer>
 
-    <script src="js/auth-nav.js"></script>
-    <script src="js/script.js"></script>
-    <script>
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.ip-fade-in').forEach(function(el) { observer.observe(el); });
-    </script>
+    <script src="../js/auth-nav.js"></script>
+    <script src="../js/script.js"></script>
+    <script src="../js/tournament-generator.js"></script>
+    <script src="../data/tournament-detail-data-en.js"></script>
+    <script src="../js/tournament-detail.js"></script>
 </body>
 </html>

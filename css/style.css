@@ -3660,8 +3660,35 @@ h2 {
 }
 
 .auth-checkbox input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
     margin-top: 2px;
-    accent-color: var(--accent);
+    border: 1.5px solid var(--text-muted);
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition-fast);
+}
+
+.auth-checkbox input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.auth-checkbox input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 3.5px;
+    top: 0.5px;
+    width: 4px;
+    height: 8px;
+    border: solid #000;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
 }
 
 .auth-checkbox a {

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSLT — Sign In</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>KSLT — Вход</title>
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
     <div class="auth-page">
@@ -16,7 +16,7 @@
 
         <!-- Mini Header -->
         <div class="auth-header">
-            <a href="index-en.html" class="logo">
+            <a href="../index.html" class="logo">
                 <span class="logo-text">KSLT</span>
                 <span class="logo-icon">🎾</span>
             </a>
@@ -26,8 +26,8 @@
         <div class="auth-card">
             <!-- Tabs -->
             <div class="auth-tabs">
-                <button class="auth-tab active" data-tab="signin">Sign In</button>
-                <button class="auth-tab" data-tab="signup">Sign Up</button>
+                <button class="auth-tab active" data-tab="signin">Вход</button>
+                <button class="auth-tab" data-tab="signup">Регистрация</button>
             </div>
 
             <!-- Sign In Form -->
@@ -37,20 +37,20 @@
                     <input class="auth-input" type="email" id="signin-email" placeholder="you@example.com" required>
                 </div>
                 <div class="auth-field">
-                    <label class="auth-label" for="signin-password">Password</label>
+                    <label class="auth-label" for="signin-password">Пароль</label>
                     <div class="auth-password-wrap">
-                        <input class="auth-input" type="password" id="signin-password" placeholder="Enter password" required>
+                        <input class="auth-input" type="password" id="signin-password" placeholder="Введите пароль" required>
                         <button type="button" class="auth-eye" data-target="signin-password">
                             <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                         </button>
                     </div>
                 </div>
-                <a href="#" class="auth-forgot">Forgot password?</a>
-                <button type="submit" class="auth-btn">Sign In</button>
+                <a href="#" class="auth-forgot">Забыли пароль?</a>
+                <button type="submit" class="auth-btn">Войти</button>
 
                 <div class="auth-divider">
-                    <span>or</span>
+                    <span>или</span>
                 </div>
 
                 <div class="auth-social">
@@ -64,19 +64,19 @@
             <!-- Forgot Password: Step 1 -->
             <form class="auth-form" id="forgotForm">
                 <div class="auth-screen-header">
-                    <h2 class="auth-screen-title">Reset Password</h2>
-                    <p class="auth-screen-subtitle">Enter the email you used to register</p>
+                    <h2 class="auth-screen-title">Восстановление пароля</h2>
+                    <p class="auth-screen-subtitle">Введите email, указанный при регистрации</p>
                 </div>
                 <div class="auth-field">
                     <label class="auth-label" for="forgot-email">Email <span class="auth-required">*</span></label>
                     <input class="auth-input" type="email" id="forgot-email" placeholder="you@example.com" required>
                 </div>
                 <div class="auth-field">
-                    <label class="auth-label" for="forgot-email-confirm">Confirm Email <span class="auth-required">*</span></label>
-                    <input class="auth-input" type="email" id="forgot-email-confirm" placeholder="Repeat email" required>
+                    <label class="auth-label" for="forgot-email-confirm">Подтвердите Email <span class="auth-required">*</span></label>
+                    <input class="auth-input" type="email" id="forgot-email-confirm" placeholder="Повторите email" required>
                 </div>
-                <button type="submit" class="auth-btn">Send Reset Link</button>
-                <a href="#" class="auth-back-link" id="forgotBack">Back to Sign In</a>
+                <button type="submit" class="auth-btn">Отправить ссылку</button>
+                <a href="#" class="auth-back-link" id="forgotBack">Вернуться к входу</a>
             </form>
 
             <!-- Forgot Password: Step 2 (Confirmation) -->
@@ -85,23 +85,23 @@
                     <div class="auth-icon-wrap">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 8L2 4"/></svg>
                     </div>
-                    <h2 class="auth-screen-title">Check Your Email</h2>
-                    <p class="auth-screen-subtitle">We sent a password reset link to <strong id="forgotEmailDisplay"></strong></p>
+                    <h2 class="auth-screen-title">Проверьте почту</h2>
+                    <p class="auth-screen-subtitle">Мы отправили ссылку для сброса пароля на <strong id="forgotEmailDisplay"></strong></p>
                 </div>
-                <button type="button" class="auth-btn" id="forgotBackToLogin">Back to Sign In</button>
-                <p class="auth-resend">Didn't receive it? <a href="#" id="forgotResend">Resend</a></p>
+                <button type="button" class="auth-btn" id="forgotBackToLogin">Вернуться к входу</button>
+                <p class="auth-resend">Не получили письмо? <a href="#" id="forgotResend">Отправить повторно</a></p>
             </div>
 
             <!-- Sign Up Form -->
             <form class="auth-form" id="signupForm">
                 <div class="auth-row">
                     <div class="auth-field">
-                        <label class="auth-label" for="signup-firstname">First Name <span class="auth-required">*</span></label>
-                        <input class="auth-input" type="text" id="signup-firstname" placeholder="First name" required>
+                        <label class="auth-label" for="signup-firstname">Имя <span class="auth-required">*</span></label>
+                        <input class="auth-input" type="text" id="signup-firstname" placeholder="Имя" required>
                     </div>
                     <div class="auth-field">
-                        <label class="auth-label" for="signup-lastname">Last Name <span class="auth-required">*</span></label>
-                        <input class="auth-input" type="text" id="signup-lastname" placeholder="Last name" required>
+                        <label class="auth-label" for="signup-lastname">Фамилия <span class="auth-required">*</span></label>
+                        <input class="auth-input" type="text" id="signup-lastname" placeholder="Фамилия" required>
                     </div>
                 </div>
                 <div class="auth-field">
@@ -109,11 +109,11 @@
                     <input class="auth-input" type="email" id="signup-email" placeholder="you@example.com" required>
                 </div>
                 <div class="auth-field">
-                    <label class="auth-label" for="signup-email-confirm">Confirm Email <span class="auth-required">*</span></label>
-                    <input class="auth-input" type="email" id="signup-email-confirm" placeholder="Repeat email" required>
+                    <label class="auth-label" for="signup-email-confirm">Подтвердите Email <span class="auth-required">*</span></label>
+                    <input class="auth-input" type="email" id="signup-email-confirm" placeholder="Повторите email" required>
                 </div>
                 <div class="auth-field">
-                    <label class="auth-label">Phone <span class="auth-required">*</span></label>
+                    <label class="auth-label">Телефон <span class="auth-required">*</span></label>
                     <div class="auth-phone-row">
                         <select class="auth-input auth-phone-code" id="signup-phone-code">
                             <option value="+1">+1 🇺🇸 USA</option>
@@ -225,38 +225,38 @@
                     </div>
                 </div>
                 <div class="auth-field">
-                    <label class="auth-label">Gender <span class="auth-required">*</span></label>
+                    <label class="auth-label">Пол <span class="auth-required">*</span></label>
                     <div class="auth-gender">
                         <label class="auth-gender-option">
                             <input type="radio" name="gender" value="male" required>
-                            <span>Male</span>
+                            <span>Мужской</span>
                         </label>
                         <label class="auth-gender-option">
                             <input type="radio" name="gender" value="female">
-                            <span>Female</span>
+                            <span>Женский</span>
                         </label>
                     </div>
                 </div>
                 <div class="auth-field">
-                    <label class="auth-label" for="signup-password">Password <span class="auth-required">*</span></label>
+                    <label class="auth-label" for="signup-password">Пароль <span class="auth-required">*</span></label>
                     <div class="auth-password-wrap">
-                        <input class="auth-input" type="password" id="signup-password" placeholder="Create a password" required minlength="8">
+                        <input class="auth-input" type="password" id="signup-password" placeholder="Создайте пароль" required minlength="8">
                         <button type="button" class="auth-eye" data-target="signup-password">
                             <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                         </button>
                     </div>
                     <div class="auth-pw-rules" id="pwRules">
-                        <span class="pw-rule" data-rule="length">8+ chars</span>
+                        <span class="pw-rule" data-rule="length">8+ симв.</span>
                         <span class="pw-rule" data-rule="upper">A-Z</span>
                         <span class="pw-rule" data-rule="digit">0-9</span>
                         <span class="pw-rule" data-rule="special">!@#$</span>
                     </div>
                 </div>
                 <div class="auth-field">
-                    <label class="auth-label" for="signup-confirm">Confirm Password <span class="auth-required">*</span></label>
+                    <label class="auth-label" for="signup-confirm">Подтвердите пароль <span class="auth-required">*</span></label>
                     <div class="auth-password-wrap">
-                        <input class="auth-input" type="password" id="signup-confirm" placeholder="Repeat password" required>
+                        <input class="auth-input" type="password" id="signup-confirm" placeholder="Повторите пароль" required>
                         <button type="button" class="auth-eye" data-target="signup-confirm">
                             <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -265,16 +265,16 @@
                 </div>
                 <label class="auth-checkbox">
                     <input type="checkbox" required>
-                    <span>I accept the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+                    <span>Я принимаю <a href="#">условия использования</a> и <a href="#">политику конфиденциальности</a></span>
                 </label>
-                <button type="submit" class="auth-btn">Create Account</button>
+                <button type="submit" class="auth-btn">Создать аккаунт</button>
             </form>
         </div>
     </div>
 
     <!-- Supabase SDK -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-    <script src="js/supabase-config.js"></script>
-    <script src="js/auth.js"></script>
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/auth.js"></script>
 </body>
 </html>

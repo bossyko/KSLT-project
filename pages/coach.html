@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSLT — Корты</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/courts.css">
+    <title>KSLT — Тренер</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/coaches.css">
 </head>
 <body>
     <!-- HEADER -->
     <header class="floating-header header-hybrid">
         <nav>
             <div class="nav-left">
-                <a href="index.html" class="logo">
+                <a href="../index.html" class="logo">
                     <span class="logo-text">KSLT</span>
                     <span class="logo-icon">🎾</span>
                 </a>
@@ -40,7 +40,7 @@
                     </div>
                 </li>
                 <li>
-                    <a href="index.html#live" class="nav-item nav-item-live">
+                    <a href="../index.html#live" class="nav-item nav-item-live">
                         <span class="live-dot"></span>
                         Live
                     </a>
@@ -68,7 +68,7 @@
                     <a href="news.html" class="nav-item">Новости</a>
                 </li>
                 <li class="nav-dropdown">
-                    <a href="index.html#services" class="nav-item nav-item-dropdown">
+                    <a href="../index.html#services" class="nav-item nav-item-dropdown">
                         Услуги
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
@@ -104,12 +104,12 @@
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="courts.html" class="lang-option active" data-lang="RU">
+                        <a href="coach.html" class="lang-option active" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="courts-en.html" class="lang-option" data-lang="EN">
+                        <a href="coach-en.html" class="lang-option" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -143,7 +143,7 @@
                         <li><a href="tournaments.html?category=friendly">Friendly</a></li>
                     </ul>
                 </li>
-                <li><a href="index.html#live"><span class="live-dot"></span> Live</a></li>
+                <li><a href="../index.html#live"><span class="live-dot"></span> Live</a></li>
                 <li class="mobile-nav-dropdown">
                     <a href="players.html" class="mobile-dropdown-toggle">
                         Рейтинг
@@ -165,7 +165,7 @@
                 </li>
                 <li><a href="news.html">Новости</a></li>
                 <li class="mobile-nav-dropdown">
-                    <a href="index.html#services" class="mobile-dropdown-toggle">
+                    <a href="../index.html#services" class="mobile-dropdown-toggle">
                         Услуги
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
@@ -193,10 +193,10 @@
             <div class="mobile-nav-bottom">
                 <div class="mobile-lang-list">
                     <span class="mobile-lang-title">Язык</span>
-                    <a href="courts.html" class="mobile-lang-option active" data-lang="RU">
+                    <a href="coach.html" class="mobile-lang-option active" data-lang="RU">
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
-                    <a href="courts-en.html" class="mobile-lang-option" data-lang="EN">
+                    <a href="coach-en.html" class="mobile-lang-option" data-lang="EN">
                         <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
@@ -205,11 +205,8 @@
     </header>
 
     <main>
-        <section class="ct-hero" id="courtsHero"></section>
-        <div class="ct-container">
-            <div id="courtsFilters"></div>
-            <div id="courtsGrid"></div>
-        </div>
+        <section class="co-hero" id="coachDetailHero"></section>
+        <div class="co-container" id="coachDetail"></div>
     </main>
 
     <!-- FOOTER -->
@@ -245,7 +242,7 @@
                     <li><a href="tournaments.html">Турниры</a></li>
                     <li><a href="players.html">Рейтинг</a></li>
                     <li><a href="news.html">Новости</a></li>
-                    <li><a href="index.html#live">Live трансляции</a></li>
+                    <li><a href="../index.html#live">Live трансляции</a></li>
                 </ul>
             </div>
             <div class="footer-block">
@@ -294,9 +291,9 @@
         </div>
     </footer>
 
-    <script src="js/auth-nav.js"></script>
-    <script src="js/script.js"></script>
-    <script src="data/courts-data.js"></script>
-    <script src="js/courts.js"></script>
+    <script src="../js/auth-nav.js"></script>
+    <script src="../js/script.js"></script>
+    <script src="../data/coaches-data.js"></script>
+    <script src="../js/coaches.js"></script>
 </body>
 </html>
