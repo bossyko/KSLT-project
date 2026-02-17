@@ -3783,6 +3783,15 @@ h2 {
     flex: 1;
 }
 
+.auth-row-birthday {
+    gap: 8px;
+}
+
+.auth-row-birthday .auth-input {
+    flex: 1;
+    min-width: 0;
+}
+
 .auth-gender {
     display: flex;
     gap: 12px;

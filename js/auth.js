@@ -62,6 +62,17 @@
         return isEn ? '../index-en.html' : '../index.html';
     }
 
+    // ---- Populate birthday day select (1-31) ----
+    var daySelect = document.getElementById('signup-birth-day');
+    if (daySelect) {
+        for (var d = 1; d <= 31; d++) {
+            var opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            daySelect.appendChild(opt);
+        }
+    }
+
     // ---- Clear forms on page load (security) ----
     window.addEventListener('pageshow', function() {
         document.querySelectorAll('form').forEach(function(f) { f.reset(); });
@@ -260,6 +271,9 @@
         var phoneCode = document.getElementById('signup-phone-code').value.replace(/[A-Z]/g, '');
         var phoneNum = document.getElementById('signup-phone').value.trim().replace(/\s/g, '');
         var gender = document.querySelector('input[name="gender"]:checked');
+        var birthDay = document.getElementById('signup-birth-day').value;
+        var birthMonth = document.getElementById('signup-birth-month').value;
+        var birthYear = document.getElementById('signup-birth-year').value;
         var password = document.getElementById('signup-password').value;
         var confirmPw = document.getElementById('signup-confirm').value;
         var btn = signupForm.querySelector('.auth-btn');
@@ -297,7 +311,10 @@
                 data: {
                     full_name: firstName + ' ' + lastName,
                     phone: phoneCode + phoneNum,
-                    gender: gender ? gender.value : ''
+                    gender: gender ? gender.value : '',
+                    birth_day: birthDay ? parseInt(birthDay) : null,
+                    birth_month: birthMonth ? parseInt(birthMonth) : null,
+                    birth_year: birthYear ? parseInt(birthYear) : null
                 }
             }
         });

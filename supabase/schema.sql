@@ -78,6 +78,9 @@ CREATE TABLE profiles (
     full_name TEXT,
     avatar_url TEXT,
     phone TEXT,
+    birth_day INT CHECK (birth_day BETWEEN 1 AND 31),
+    birth_month INT CHECK (birth_month BETWEEN 1 AND 12),
+    birth_year INT,                          -- необязательно
     player_id TEXT REFERENCES players(id),  -- связь с игроком (если есть)
     role TEXT DEFAULT 'user' CHECK (role IN ('user', 'player', 'admin')),
     created_at TIMESTAMPTZ DEFAULT now(),

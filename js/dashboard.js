@@ -13,8 +13,20 @@
         stats: 'Statistics', settings: 'Settings',
         profileTitle: 'My Profile', tournamentsTitle: 'My Tournaments',
         statsTitle: 'Statistics', settingsTitle: 'Settings',
+        membership: 'Membership',
+        memberActive: 'Active',
+        memberExpired: 'Expired',
+        memberNone: 'No Membership',
+        memberExpiresIn: 'Expires in',
+        memberDays: 'days',
+        memberExpiredText: 'Your membership has expired',
+        memberNoneText: 'Get a membership to participate in tournaments',
+        memberRenew: 'Renew',
+        memberGet: 'Get Membership',
         firstName: 'First Name', lastName: 'Last Name',
         email: 'Email', phone: 'Phone', gender: 'Gender',
+        birthday: 'Date of Birth', birthDay: 'Day', birthMonth: 'Month', birthYear: 'Year (optional)',
+        months: ['','January','February','March','April','May','June','July','August','September','October','November','December'],
         male: 'Male', female: 'Female', selectGender: '— Select —',
         instagram: 'Instagram', telegram: 'Telegram',
         showSocials: 'Allow other users to see my social media',
@@ -60,8 +72,20 @@
         stats: 'Статистика', settings: 'Настройки',
         profileTitle: 'Мой профиль', tournamentsTitle: 'Мои турниры',
         statsTitle: 'Статистика', settingsTitle: 'Настройки',
+        membership: 'Членство',
+        memberActive: 'Активно',
+        memberExpired: 'Истекло',
+        memberNone: 'Нет членства',
+        memberExpiresIn: 'Истекает через',
+        memberDays: 'дн.',
+        memberExpiredText: 'Ваше членство истекло',
+        memberNoneText: 'Оформите членство для участия в турнирах',
+        memberRenew: 'Продлить',
+        memberGet: 'Оформить',
         firstName: 'Имя', lastName: 'Фамилия',
         email: 'Email', phone: 'Телефон', gender: 'Пол',
+        birthday: 'Дата рождения', birthDay: 'День', birthMonth: 'Месяц', birthYear: 'Год (необяз.)',
+        months: ['','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
         male: 'Мужской', female: 'Женский', selectGender: '— Выберите —',
         instagram: 'Instagram', telegram: 'Telegram',
         showSocials: 'Разрешить другим пользователям видеть мои соцсети',
@@ -120,11 +144,98 @@
         renderSidebar(profile);
         renderMobileTabs();
         renderProfile(user, profile);
+        renderMembershipCard();
         renderTournaments();
         renderStats(profile);
         renderSettings(user);
         initTabs();
     };
+
+    // ---- Render Membership Card ----
+    var pricingUrl = isEn ? 'pricing-en.html' : 'pricing.html';
+
+    async function renderMembershipCard() {
+        var container = document.getElementById('db-profile');
+        if (!container) return;
+
+        // Create placeholder
+        var card = document.createElement('div');
+        card.className = 'db-membership-card db-membership-loading';
+        card.id = 'dbMembershipCard';
+        card.innerHTML =
+            '<div class="db-card-title">' + L.membership + '</div>' +
+            '<p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p>';
+
+        // Insert after section title and banner, before first .db-card
+        var firstCard = container.querySelector('.db-card');
+        if (firstCard) {
+            container.insertBefore(card, firstCard);
+        } else {
+            container.appendChild(card);
+        }
+
+        // Check membership via global function (from membership.js)
+        if (typeof window.checkMembership !== 'function') {
+            renderMembershipState(card, 'none', null, 0);
+            return;
+        }
+
+        var result = await window.checkMembership();
+
+        if (result.active) {
+            renderMembershipState(card, 'active', result.membership, result.daysLeft);
+        } else {
+            // Check if there was any expired membership
+            var history = typeof window.getMembershipHistory === 'function' ? await window.getMembershipHistory() : [];
+            if (history.length > 0) {
+                renderMembershipState(card, 'expired', history[0], 0);
+            } else {
+                renderMembershipState(card, 'none', null, 0);
+            }
+        }
+    }
+
+    function renderMembershipState(card, state, membership, daysLeft) {
+        card.classList.remove('db-membership-loading');
+
+        if (state === 'active') {
+            var totalDays = 365;
+            if (membership && membership.starts_at && membership.expires_at) {
+                var s = new Date(membership.starts_at);
+                var e = new Date(membership.expires_at);
+                totalDays = Math.ceil((e - s) / (1000 * 60 * 60 * 24));
+            }
+            var progress = totalDays > 0 ? Math.round((daysLeft / totalDays) * 100) : 0;
+
+            card.className = 'db-membership-card db-membership-active';
+            card.innerHTML =
+                '<div class="db-membership-header">' +
+                    '<div class="db-card-title">' + L.membership + '</div>' +
+                    '<span class="db-membership-badge db-membership-badge-active">' + L.memberActive + '</span>' +
+                '</div>' +
+                '<div class="db-membership-progress-wrap">' +
+                    '<div class="db-membership-progress">' +
+                        '<div class="db-membership-progress-bar" style="width:' + progress + '%"></div>' +
+                    '</div>' +
+                    '<div class="db-membership-days">' + L.memberExpiresIn + ' <strong>' + daysLeft + '</strong> ' + L.memberDays + '</div>' +
+                '</div>';
+        } else if (state === 'expired') {
+            card.className = 'db-membership-card db-membership-expired';
+            card.innerHTML =
+                '<div class="db-membership-header">' +
+                    '<div class="db-card-title">' + L.membership + '</div>' +
+                    '<span class="db-membership-badge db-membership-badge-expired">' + L.memberExpired + '</span>' +
+                '</div>' +
+                '<p class="db-membership-text">' + L.memberExpiredText + '</p>' +
+                '<a href="' + pricingUrl + '" class="db-btn db-btn-primary db-membership-btn">' + L.memberRenew + '</a>';
+        } else {
+            card.className = 'db-membership-card db-membership-none';
+            card.innerHTML =
+                '<div class="db-card-title">' + L.membership + '</div>' +
+                '<p class="db-membership-text">' + L.memberNoneText + '</p>' +
+                '<a href="' + pricingUrl + '" class="db-btn db-btn-primary db-membership-btn">' + L.memberGet + '</a>';
+        }
+    }
 
     // ---- Render Sidebar ----
     function renderSidebar(profile) {
@@ -235,6 +346,17 @@
                 '<option value="female"' + (profile.gender === 'female' ? ' selected' : '') + '>' + L.female + '</option>' +
             '</select>';
 
+        // Birthday selects
+        var dayOpts = '<option value="">' + L.birthDay + '</option>';
+        for (var d = 1; d <= 31; d++) {
+            dayOpts += '<option value="' + d + '"' + (profile.birth_day === d ? ' selected' : '') + '>' + d + '</option>';
+        }
+        var monthOpts = '<option value="">' + L.birthMonth + '</option>';
+        for (var m = 1; m <= 12; m++) {
+            monthOpts += '<option value="' + m + '"' + (profile.birth_month === m ? ' selected' : '') + '>' + L.months[m] + '</option>';
+        }
+        var yearVal = profile.birth_year || '';
+
         // Mini stats card
         var statsHtml = '';
         if (profile.player_id) {
@@ -282,6 +404,14 @@
                     '<div class="db-field">' +
                         '<label class="db-field-label">' + L.gender + ' <span class="db-required">*</span></label>' +
                         genderSelect +
+                    '</div>' +
+                '</div>' +
+                '<div class="db-field">' +
+                    '<label class="db-field-label">' + L.birthday + ' <span class="db-required">*</span></label>' +
+                    '<div class="db-field-row db-field-row-3">' +
+                        '<select class="db-field-input" id="profileBirthDay">' + dayOpts + '</select>' +
+                        '<select class="db-field-input" id="profileBirthMonth">' + monthOpts + '</select>' +
+                        '<input class="db-field-input" type="number" id="profileBirthYear" value="' + yearVal + '" placeholder="' + L.birthYear + '" min="1940" max="2015">' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -371,6 +501,9 @@
             lastName: (document.getElementById('profileLastName') || {}).value || '',
             phone: (document.getElementById('profilePhone') || {}).value || '',
             gender: (document.getElementById('profileGender') || {}).value || '',
+            birthDay: (document.getElementById('profileBirthDay') || {}).value || '',
+            birthMonth: (document.getElementById('profileBirthMonth') || {}).value || '',
+            birthYear: (document.getElementById('profileBirthYear') || {}).value || '',
             instagram: (document.getElementById('profileInstagram') || {}).value || '',
             telegram: (document.getElementById('profileTelegram') || {}).value || '',
             showSocials: (document.getElementById('profileShowSocials') || {}).checked || false
@@ -387,6 +520,9 @@
                     current.lastName !== snap.lastName ||
                     current.phone !== snap.phone ||
                     current.gender !== snap.gender ||
+                    current.birthDay !== snap.birthDay ||
+                    current.birthMonth !== snap.birthMonth ||
+                    current.birthYear !== snap.birthYear ||
                     current.instagram !== snap.instagram ||
                     current.telegram !== snap.telegram ||
                     current.showSocials !== snap.showSocials;
@@ -404,6 +540,9 @@
         var lastName = document.getElementById('profileLastName').value.trim();
         var phone = document.getElementById('profilePhone').value.trim();
         var gender = document.getElementById('profileGender').value;
+        var birthDay = document.getElementById('profileBirthDay').value;
+        var birthMonth = document.getElementById('profileBirthMonth').value;
+        var birthYear = document.getElementById('profileBirthYear').value;
         var instagram = document.getElementById('profileInstagram').value.trim();
         var telegram = document.getElementById('profileTelegram').value.trim();
         var showSocials = document.getElementById('profileShowSocials').checked;
@@ -416,6 +555,9 @@
             full_name: fullName,
             phone: phone,
             gender: gender,
+            birth_day: birthDay ? parseInt(birthDay) : null,
+            birth_month: birthMonth ? parseInt(birthMonth) : null,
+            birth_year: birthYear ? parseInt(birthYear) : null,
             instagram: instagram,
             telegram: telegram,
             show_socials: showSocials
@@ -430,6 +572,9 @@
             window.ksltProfile.full_name = fullName;
             window.ksltProfile.phone = phone;
             window.ksltProfile.gender = gender;
+            window.ksltProfile.birth_day = birthDay ? parseInt(birthDay) : null;
+            window.ksltProfile.birth_month = birthMonth ? parseInt(birthMonth) : null;
+            window.ksltProfile.birth_year = birthYear ? parseInt(birthYear) : null;
             window.ksltProfile.instagram = instagram;
             window.ksltProfile.telegram = telegram;
             window.ksltProfile.show_socials = showSocials;
