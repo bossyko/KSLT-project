@@ -66,7 +66,13 @@
         socialMedia: 'Social Media',
         cropTitle: 'Crop Photo',
         cropApply: 'Apply',
-        cropCancel: 'Cancel'
+        cropCancel: 'Cancel',
+        lockedTitle: 'Get Membership',
+        lockedTitleExpired: 'Renew Membership',
+        lockedText: 'Subscribe to KSLT membership to access tournaments and statistics',
+        lockedTextExpired: 'Your membership has expired. Renew to access tournaments and statistics',
+        lockedBtn: 'Get Membership',
+        lockedBtnExpired: 'Renew'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', settings: 'Настройки',
@@ -125,7 +131,13 @@
         socialMedia: 'Соцсети',
         cropTitle: 'Обрезка фото',
         cropApply: 'Применить',
-        cropCancel: 'Отмена'
+        cropCancel: 'Отмена',
+        lockedTitle: 'Оформите членство',
+        lockedTitleExpired: 'Продлите членство',
+        lockedText: 'Для доступа к турнирам и статистике оформите членство KSLT',
+        lockedTextExpired: 'Ваше членство истекло. Продлите для доступа к турнирам и статистике',
+        lockedBtn: 'Оформить членство',
+        lockedBtnExpired: 'Продлить'
     };
 
     // Use shared Supabase client from supabase-config.js
@@ -144,7 +156,9 @@
         renderSidebar(profile);
         renderMobileTabs();
         renderProfile(user, profile);
-        renderMembershipCard();
+        renderMembershipCard().then(function(state) {
+            applyMembershipRestrictions(state);
+        });
         renderTournaments();
         renderStats(profile);
         renderSettings(user);
@@ -155,8 +169,9 @@
     var pricingUrl = isEn ? 'pricing-en.html' : 'pricing.html';
 
     async function renderMembershipCard() {
+        var noMembership = { active: false, membership: null, daysLeft: 0, state: 'none' };
         var container = document.getElementById('db-profile');
-        if (!container) return;
+        if (!container) return noMembership;
 
         // Create placeholder
         var card = document.createElement('div');
@@ -177,20 +192,23 @@
         // Check membership via global function (from membership.js)
         if (typeof window.checkMembership !== 'function') {
             renderMembershipState(card, 'none', null, 0);
-            return;
+            return { active: false, membership: null, daysLeft: 0, state: 'none' };
         }
 
         var result = await window.checkMembership();
 
         if (result.active) {
             renderMembershipState(card, 'active', result.membership, result.daysLeft);
+            return { active: true, membership: result.membership, daysLeft: result.daysLeft, state: 'active' };
         } else {
             // Check if there was any expired membership
             var history = typeof window.getMembershipHistory === 'function' ? await window.getMembershipHistory() : [];
             if (history.length > 0) {
                 renderMembershipState(card, 'expired', history[0], 0);
+                return { active: false, membership: history[0], daysLeft: 0, state: 'expired' };
             } else {
                 renderMembershipState(card, 'none', null, 0);
+                return { active: false, membership: null, daysLeft: 0, state: 'none' };
             }
         }
     }
@@ -235,6 +253,43 @@
                 '<p class="db-membership-text">' + L.memberNoneText + '</p>' +
                 '<a href="' + pricingUrl + '" class="db-btn db-btn-primary db-membership-btn">' + L.memberGet + '</a>';
         }
+    }
+
+    // ---- Membership Restrictions ----
+    function applyMembershipRestrictions(state) {
+        if (!state || state.active) return;
+
+        var isExpired = state.state === 'expired';
+        var title = isExpired ? L.lockedTitleExpired : L.lockedTitle;
+        var text = isExpired ? L.lockedTextExpired : L.lockedText;
+        var btnLabel = isExpired ? L.lockedBtnExpired : L.lockedBtn;
+        var btnUrl = isEn ? 'pricing-en.html' : 'pricing.html';
+
+        var lockSvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>';
+
+        var overlayHtml =
+            '<div class="db-locked-overlay">' +
+                '<div class="db-locked-icon">' + lockSvg + '</div>' +
+                '<h3 class="db-locked-title">' + title + '</h3>' +
+                '<p class="db-locked-text">' + text + '</p>' +
+                '<a href="' + btnUrl + '" class="db-btn db-btn-primary db-locked-btn">' + btnLabel + '</a>' +
+            '</div>';
+
+        // Apply overlay to tournaments and stats sections
+        var targets = ['db-tournaments', 'db-stats'];
+        targets.forEach(function(id) {
+            var section = document.getElementById(id);
+            if (!section) return;
+            // Keep section title, replace content
+            var sectionTitle = section.querySelector('.db-section-title');
+            var titleHtml = sectionTitle ? sectionTitle.outerHTML : '';
+            section.innerHTML = titleHtml + overlayHtml;
+        });
+
+        // Mark tab buttons as locked
+        document.querySelectorAll('[data-tab="tournaments"], [data-tab="stats"]').forEach(function(btn) {
+            btn.classList.add('db-tab-locked');
+        });
     }
 
     // ---- Render Sidebar ----

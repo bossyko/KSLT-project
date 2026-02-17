@@ -832,6 +832,61 @@ select.db-field-input {
     text-align: center;
 }
 
+/* ---- Locked Overlay (membership required) ---- */
+.db-locked-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 24px;
+    min-height: 300px;
+}
+
+.db-locked-icon {
+    opacity: 0.4;
+    margin-bottom: 16px;
+    color: var(--text-muted);
+}
+
+.db-locked-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 12px;
+}
+
+.db-locked-text {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    max-width: 400px;
+    margin: 0 auto 24px;
+    line-height: 1.5;
+}
+
+.db-locked-btn {
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+}
+
+/* Locked tab indicator */
+.db-tab-locked {
+    opacity: 0.5;
+}
+
+.db-sidebar-link.db-tab-locked::after {
+    content: '\1F512';
+    font-size: 0.65rem;
+    margin-left: auto;
+}
+
+.db-mobile-tab.db-tab-locked::after {
+    content: '\1F512';
+    font-size: 0.6rem;
+    margin-left: 4px;
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */
