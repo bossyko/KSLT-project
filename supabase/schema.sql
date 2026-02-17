@@ -257,9 +257,11 @@ CREATE POLICY "Public read coaches" ON coaches FOR SELECT USING (true);
 CREATE POLICY "Public read courts" ON courts FOR SELECT USING (true);
 CREATE POLICY "Public read news" ON news FOR SELECT USING (true);
 
--- PROFILES — пользователь видит только свой профиль
+-- PROFILES — пользователь видит и редактирует только свой профиль
 CREATE POLICY "Users read own profile" ON profiles
     FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users insert own profile" ON profiles
+    FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users update own profile" ON profiles
     FOR UPDATE USING (auth.uid() = id);
 
@@ -292,3 +294,16 @@ CREATE POLICY "Admin full access courts" ON courts FOR ALL
     USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
 CREATE POLICY "Admin full access news" ON news FOR ALL
     USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+
+-- ============================================
+-- STORAGE — Avatars bucket
+-- ============================================
+INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Public avatar read" ON storage.objects
+    FOR SELECT USING (bucket_id = 'avatars');
+CREATE POLICY "Users upload own avatar" ON storage.objects
+    FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Users update own avatar" ON storage.objects
+    FOR UPDATE USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);

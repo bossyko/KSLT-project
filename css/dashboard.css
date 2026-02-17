@@ -360,27 +360,49 @@ body.db-page.auth-ready {
     margin-top: var(--space-md);
 }
 
-/* ---- Message ---- */
-.db-message {
-    padding: 12px 16px;
+/* ---- Toast Notification ---- */
+.db-toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    padding: 14px 28px;
     border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    margin-bottom: 16px;
-    text-align: center;
-}
-
-.db-message-success {
-    background: rgba(34, 197, 94, 0.12);
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    color: #22c55e;
-    font-weight: 600;
     font-size: 0.95rem;
-    animation: db-msg-in 0.3s ease;
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    pointer-events: none;
+    text-align: center;
+    max-width: 90vw;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
-@keyframes db-msg-in {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
+.db-toast-success {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #22c55e;
+    box-shadow: 0 8px 32px rgba(34, 197, 94, 0.15);
+}
+
+.db-toast-error {
+    background: rgba(255, 59, 48, 0.15);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #ff6b6b;
+    box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15);
+}
+
+.db-toast-show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.db-toast-hide {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-30px);
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 /* Card flash on save */
@@ -392,6 +414,15 @@ body.db-page.auth-ready {
 
 .db-card-flash {
     animation: db-card-flash 1.2s ease;
+}
+
+/* Legacy inline messages (kept for fallback) */
+.db-message {
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    text-align: center;
 }
 
 .db-message-error {

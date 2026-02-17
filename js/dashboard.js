@@ -704,7 +704,7 @@
     async function doAvatarUpload(blob) {
         if (!client) return;
 
-        var path = window.ksltUser.id + '.jpg';
+        var path = window.ksltUser.id + '/avatar.jpg';
 
         showMessage('profileMessage', L.saving, false);
 
@@ -928,12 +928,27 @@
 
     // ---- Helpers ----
     function showMessage(containerId, text, isError) {
-        var el = document.getElementById(containerId);
-        if (!el) return;
-        el.innerHTML = '<div class="db-message ' + (isError ? 'db-message-error' : 'db-message-success') + '">' + escHtml(text) + '</div>';
-        if (!isError) {
-            setTimeout(function() { el.innerHTML = ''; }, 3000);
-        }
+        // Remove any existing toast
+        var prev = document.querySelector('.db-toast');
+        if (prev) prev.remove();
+
+        var toast = document.createElement('div');
+        toast.className = 'db-toast ' + (isError ? 'db-toast-error' : 'db-toast-success');
+        toast.textContent = text;
+        document.body.appendChild(toast);
+
+        // Trigger slide-in animation
+        requestAnimationFrame(function() {
+            toast.classList.add('db-toast-show');
+        });
+
+        // Auto-hide
+        var duration = isError ? 5000 : 3000;
+        setTimeout(function() {
+            toast.classList.remove('db-toast-show');
+            toast.classList.add('db-toast-hide');
+            setTimeout(function() { toast.remove(); }, 400);
+        }, duration);
     }
 
     function escHtml(str) {
