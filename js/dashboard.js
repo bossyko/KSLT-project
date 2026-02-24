@@ -29,6 +29,9 @@
         months: ['','January','February','March','April','May','June','July','August','September','October','November','December'],
         male: 'Male', female: 'Female', selectGender: '— Select —',
         instagram: 'Instagram', telegram: 'Telegram',
+        tgConnected: 'Telegram connected',
+        tgConnect: 'Connect Telegram',
+        tgConnectHint: 'Get membership expiry reminders via Telegram',
         showSocials: 'Allow other users to see my social media',
         save: 'Save', saving: 'Saving...', saved: 'Saved!',
         changeAvatar: 'Change Photo', removeAvatar: 'Remove',
@@ -72,7 +75,16 @@
         lockedText: 'Subscribe to KSLT membership to access tournaments and statistics',
         lockedTextExpired: 'Your membership has expired. Renew to access tournaments and statistics',
         lockedBtn: 'Get Membership',
-        lockedBtnExpired: 'Renew'
+        lockedBtnExpired: 'Renew',
+        payHistory: 'Payment History',
+        payDate: 'Date',
+        payAmount: 'Amount',
+        payMethod: 'Method',
+        payStatus: 'Status',
+        payNoPayments: 'No payments yet',
+        payCash: 'Cash',
+        payTransfer: 'Transfer',
+        payCard: 'Card'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', settings: 'Настройки',
@@ -94,6 +106,9 @@
         months: ['','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
         male: 'Мужской', female: 'Женский', selectGender: '— Выберите —',
         instagram: 'Instagram', telegram: 'Telegram',
+        tgConnected: 'Telegram подключён',
+        tgConnect: 'Подключить Telegram',
+        tgConnectHint: 'Получайте напоминания об истечении членства в Telegram',
         showSocials: 'Разрешить другим пользователям видеть мои соцсети',
         save: 'Сохранить', saving: 'Сохранение...', saved: 'Сохранено!',
         changeAvatar: 'Изменить фото', removeAvatar: 'Удалить',
@@ -137,7 +152,16 @@
         lockedText: 'Для доступа к турнирам и статистике оформите членство KSLT',
         lockedTextExpired: 'Ваше членство истекло. Продлите для доступа к турнирам и статистике',
         lockedBtn: 'Оформить членство',
-        lockedBtnExpired: 'Продлить'
+        lockedBtnExpired: 'Продлить',
+        payHistory: 'История платежей',
+        payDate: 'Дата',
+        payAmount: 'Сумма',
+        payMethod: 'Способ',
+        payStatus: 'Статус',
+        payNoPayments: 'Платежей пока нет',
+        payCash: 'Наличные',
+        payTransfer: 'Перевод',
+        payCard: 'Карта'
     };
 
     // Use shared Supabase client from supabase-config.js
@@ -199,12 +223,14 @@
 
         if (result.active) {
             renderMembershipState(card, 'active', result.membership, result.daysLeft);
+            renderPaymentHistory(card);
             return { active: true, membership: result.membership, daysLeft: result.daysLeft, state: 'active' };
         } else {
             // Check if there was any expired membership
             var history = typeof window.getMembershipHistory === 'function' ? await window.getMembershipHistory() : [];
             if (history.length > 0) {
                 renderMembershipState(card, 'expired', history[0], 0);
+                renderPaymentHistory(card);
                 return { active: false, membership: history[0], daysLeft: 0, state: 'expired' };
             } else {
                 renderMembershipState(card, 'none', null, 0);
@@ -253,6 +279,41 @@
                 '<p class="db-membership-text">' + L.memberNoneText + '</p>' +
                 '<a href="' + pricingUrl + '" class="db-btn db-btn-primary db-membership-btn">' + L.memberGet + '</a>';
         }
+    }
+
+    // ---- Payment History (inside membership card) ----
+    async function renderPaymentHistory(card) {
+        if (!client) return;
+
+        var userRes = await client.auth.getUser();
+        if (!userRes.data || !userRes.data.user) return;
+
+        var result = await client.from('payments')
+            .select('*')
+            .eq('profile_id', userRes.data.user.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+        var payments = result.data || [];
+        if (payments.length === 0) return;
+
+        var methodLabels = { cash: L.payCash, transfer: L.payTransfer, card: L.payCard };
+
+        var html = '<div class="db-pay-history" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-subtle);">' +
+            '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">' + L.payHistory + '</div>';
+
+        payments.forEach(function(p) {
+            var date = p.created_at ? p.created_at.split('T')[0] : '—';
+            var statusColor = p.status === 'completed' ? 'var(--accent)' : 'var(--text-dim)';
+            html += '<div style="display:grid;grid-template-columns:100px 1fr auto;gap:8px;align-items:center;padding:4px 0;font-size:0.8rem;">' +
+                '<span style="color:var(--text-dim);">' + date + '</span>' +
+                '<span style="font-weight:600;color:' + statusColor + ';">' + (p.amount || 0) + ' ' + (p.currency || 'KGS') + '</span>' +
+                '<span style="color:var(--text-dim);text-align:right;">' + (methodLabels[p.payment_method] || p.payment_method || '—') + '</span>' +
+            '</div>';
+        });
+
+        html += '</div>';
+        card.insertAdjacentHTML('beforeend', html);
     }
 
     // ---- Membership Restrictions ----
@@ -488,6 +549,13 @@
                     '<input type="checkbox" id="profileShowSocials"' + (profile.show_socials ? ' checked' : '') + '>' +
                     '<span class="db-checkbox-text">' + L.showSocials + '</span>' +
                 '</label>' +
+                '<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);">' +
+                    (profile.telegram_chat_id
+                        ? '<div style="display:flex;align-items:center;gap:8px;color:#4caf50;font-size:0.85rem;"><span style="font-size:1.1rem;">&#10003;</span> ' + L.tgConnected + '</div>'
+                        : '<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;">' + L.tgConnectHint + '</div>' +
+                          '<a href="https://t.me/' + (window.KSLT_TG_BOT || 'KSLTennisBot') + '?start=' + (profile.id || '') + '" target="_blank" rel="noopener" class="db-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font-size:0.8rem;background:rgba(0,136,204,0.15);color:#0088cc;border-radius:8px;text-decoration:none;border:1px solid rgba(0,136,204,0.3);">&#9993; ' + L.tgConnect + '</a>'
+                    ) +
+                '</div>' +
             '</div>' +
 
             // Mini stats

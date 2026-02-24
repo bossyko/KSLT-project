@@ -173,7 +173,7 @@ body.ad-page {
 .ad-content {
     margin-left: 260px;
     padding: var(--space-md) var(--space-lg);
-    max-width: 1100px;
+    max-width: 1400px;
 }
 
 .ad-section {
@@ -1925,4 +1925,200 @@ select.ad-field-input {
     .ad-modal {
         max-width: 100% !important;
     }
+}
+
+/* ---- Membership Badges ---- */
+.ad-mem-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ad-mem-active {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+}
+
+.ad-mem-expired {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+}
+
+.ad-mem-cancelled {
+    background: rgba(244, 67, 54, 0.15);
+    color: #f44336;
+}
+
+.ad-mem-expiring {
+    background: rgba(255, 152, 0, 0.15);
+    color: #ff9800;
+}
+
+.ad-mem-paid {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+}
+
+.ad-mem-unpaid {
+    background: rgba(244, 67, 54, 0.15);
+    color: #f44336;
+}
+
+.ad-mem-tg {
+    background: rgba(0, 136, 204, 0.15);
+    color: #0088cc;
+    font-size: 0.65rem;
+    padding: 1px 5px;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+/* ---- Membership Table Compact ---- */
+#adMemTable th,
+#adMemTable td {
+    padding: 8px 6px;
+    font-size: 0.8rem;
+}
+
+#adMemTable th {
+    font-size: 0.65rem;
+}
+
+/* ---- Membership Actions ---- */
+.ad-mem-actions {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.ad-mem-actions .ad-btn-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    margin-left: 4px;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.15s ease;
+}
+
+.ad-btn-extend:hover {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+    border-color: #4caf50;
+}
+
+.ad-btn-cancel-mem:hover {
+    background: rgba(244, 67, 54, 0.15);
+    color: #f44336;
+    border-color: #f44336;
+}
+
+.ad-btn-edit-mem:hover {
+    background: rgba(204, 255, 0, 0.1);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* ---- Member Profile Modal ---- */
+.ad-mem-profile-modal {
+    max-width: 550px;
+}
+
+.ad-mem-profile-link {
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.ad-mem-profile-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.ad-mem-profile-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.ad-mem-profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.ad-mem-profile-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(204, 255, 0, 0.15);
+    color: var(--accent);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.ad-mem-profile-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.ad-mem-profile-email {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.ad-mem-profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid var(--border, rgba(255,255,255,0.06));
+}
+.ad-mem-profile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+}
+.ad-mem-profile-label {
+    color: var(--text-secondary);
+}
+
+.ad-mem-profile-payments-section {
+    border-top: 1px solid var(--border, rgba(255,255,255,0.06));
+    padding-top: 16px;
+}
+
+.ad-mem-profile-payments {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+.ad-mem-profile-payments th {
+    text-align: left;
+    color: var(--text-secondary);
+    font-weight: 500;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border, rgba(255,255,255,0.06));
+}
+.ad-mem-profile-payments td {
+    padding: 6px 8px;
+    color: var(--text-primary);
+    border-bottom: 1px solid rgba(255,255,255,0.03);
 }

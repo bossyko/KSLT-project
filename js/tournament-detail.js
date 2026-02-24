@@ -1009,10 +1009,21 @@ function renderRegistrationButton(tournament, registrations, isEn) {
             var alreadyRegistered = registrations.find(function(r) { return r.player_id === playerId; });
 
             // Check category match
-            client.from('players').select('category_id').eq('id', playerId).single().then(function(plRes) {
+            client.from('players').select('category_id').eq('id', playerId).single().then(async function(plRes) {
                 if (!plRes.data) return;
 
                 var categoryMatch = !tournament.category_id || plRes.data.category_id === tournament.category_id;
+
+                // Check membership
+                var membershipOk = false;
+                var paidOk = false;
+                if (window.checkMembership) {
+                    var memResult = await window.checkMembership();
+                    membershipOk = memResult && memResult.active;
+                    paidOk = memResult && memResult.paid;
+                }
+
+                var pricingUrl = isEn ? 'pricing-en.html' : 'pricing.html';
 
                 // Find hero content to append button
                 var heroContent = document.querySelector('.td-hero-content');
@@ -1029,6 +1040,24 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 } else if (!categoryMatch) {
                     btnHtml += '<span style="color:var(--text-secondary);font-size:0.9rem;">' +
                         (isEn ? 'Your category does not match this tournament' : 'Ваша категория не соответствует этому турниру') + '</span>';
+                } else if (!membershipOk) {
+                    btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);">' +
+                        '<div style="color:#ffc107;font-weight:500;margin-bottom:4px;">' +
+                            (isEn ? 'Active KSLT membership required' : 'Требуется активное членство KSLT') +
+                        '</div>' +
+                        '<a href="' + pricingUrl + '" style="color:var(--accent);font-size:0.85rem;">' +
+                            (isEn ? 'View membership plans →' : 'Узнать о членстве →') +
+                        '</a>' +
+                    '</div>';
+                } else if (!paidOk) {
+                    btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);">' +
+                        '<div style="color:#ffc107;font-weight:500;margin-bottom:4px;">' +
+                            (isEn ? 'Please pay your membership to register' : 'Оплатите членство для записи на турнир') +
+                        '</div>' +
+                        '<a href="' + pricingUrl + '" style="color:var(--accent);font-size:0.85rem;">' +
+                            (isEn ? 'Go to payment →' : 'Перейти к оплате →') +
+                        '</a>' +
+                    '</div>';
                 } else {
                     btnHtml += '<button class="td-register-btn" id="tdRegisterBtn" style="padding:10px 24px;border:none;border-radius:8px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;font-size:1rem;">' +
                         (isEn ? 'Register for Tournament' : 'Записаться на турнир') + '</button>';

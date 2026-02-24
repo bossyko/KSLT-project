@@ -28,11 +28,11 @@
     };
 
     // ---- Check Membership ----
-    // Returns { active: bool, membership: object|null, daysLeft: number }
+    // Returns { active: bool, paid: bool, membership: object|null, daysLeft: number }
     window.checkMembership = async function() {
         var client = window.supabaseClient;
         if (!client || !window.ksltUser) {
-            return { active: false, membership: null, daysLeft: 0 };
+            return { active: false, paid: false, membership: null, daysLeft: 0 };
         }
 
         var today = new Date().toISOString().split('T')[0];
@@ -47,7 +47,7 @@
             .limit(1);
 
         if (result.error || !result.data || result.data.length === 0) {
-            return { active: false, membership: null, daysLeft: 0 };
+            return { active: false, paid: false, membership: null, daysLeft: 0 };
         }
 
         var m = result.data[0];
@@ -55,7 +55,20 @@
         var now = new Date();
         var daysLeft = Math.ceil((expires - now) / (1000 * 60 * 60 * 24));
 
-        return { active: true, membership: m, daysLeft: daysLeft };
+        // Check if membership has a completed payment
+        var paid = false;
+        var payRes = await client
+            .from('payments')
+            .select('id')
+            .eq('membership_id', m.id)
+            .eq('status', 'completed')
+            .limit(1);
+
+        if (payRes.data && payRes.data.length > 0) {
+            paid = true;
+        }
+
+        return { active: true, paid: paid, membership: m, daysLeft: daysLeft };
     };
 
     // ---- Get Membership History ----
