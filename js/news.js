@@ -1,6 +1,11 @@
 // ========================================
-// NEWS ARTICLE — Rendering + Interactivity
+// NEWS — Supabase + Static Fallback
 // ========================================
+
+function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     var urlParams = new URLSearchParams(window.location.search);
@@ -8,6 +13,145 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (slug) {
         updateLangLinks(slug);
+    }
+
+    // Try Supabase first, fallback to static data
+    var client = window.supabaseClient;
+    if (client) {
+        initFromSupabase(client, slug);
+    } else {
+        initFromStatic(slug);
+    }
+});
+
+// ========================================
+// SUPABASE FETCH LAYER
+// ========================================
+
+function mapDbArticle(row) {
+    var isEn = isEnPage();
+    var title = isEn ? (row.title_en || row.title) : row.title;
+    var content = isEn ? (row.content_en || row.content) : row.content;
+    var excerpt = isEn ? (row.excerpt_en || row.excerpt) : row.excerpt;
+
+    var catLabels = isEn
+        ? { results: 'Results', interview: 'Interview', announcement: 'Announcement' }
+        : { results: 'Результаты', interview: 'Интервью', announcement: 'Анонс' };
+
+    var dateStr = '';
+    if (row.published_at) {
+        var d = new Date(row.published_at);
+        dateStr = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', {
+            day: 'numeric', month: 'long', year: 'numeric'
+        });
+    }
+
+    // Convert plain text content to blocks (paragraphs by double newline)
+    var contentBlocks = [];
+    if (content) {
+        content.split(/\n\n+/).forEach(function(para) {
+            para = para.trim();
+            if (para) {
+                contentBlocks.push({ type: 'paragraph', text: para });
+            }
+        });
+    }
+
+    return {
+        slug: row.slug,
+        title: title,
+        subtitle: excerpt || '',
+        heroImage: row.image || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
+        date: dateStr,
+        author: row.author || 'KSLT',
+        category: row.category || 'announcement',
+        categoryLabel: catLabels[row.category] || row.category,
+        content: contentBlocks,
+        tags: [],
+        reactions: { tennis: 0, fire: 0, clap: 0 },
+        relatedSlugs: [],
+        _publishedAt: row.published_at || row.created_at || ''
+    };
+}
+
+async function initFromSupabase(client, slug) {
+    try {
+        if (!slug) {
+            // News list — fetch all published
+            var result = await client.from('news')
+                .select('*')
+                .not('published_at', 'is', null)
+                .order('published_at', { ascending: false });
+
+            if (result.error) throw result.error;
+
+            // Merge: keep static examples, add DB articles on top
+            if (typeof newsArticleData === 'undefined') window.newsArticleData = {};
+            (result.data || []).forEach(function(row) {
+                var article = mapDbArticle(row);
+                newsArticleData[article.slug] = article;
+            });
+
+            renderNewsList();
+        } else {
+            // Article detail — fetch single by slug
+            var result = await client.from('news')
+                .select('*')
+                .eq('slug', slug)
+                .not('published_at', 'is', null)
+                .single();
+
+            if (result.error) throw result.error;
+
+            var article = mapDbArticle(result.data);
+
+            // Fetch 3 related articles (latest, excluding current)
+            var relResult = await client.from('news')
+                .select('*')
+                .not('published_at', 'is', null)
+                .neq('id', result.data.id)
+                .order('published_at', { ascending: false })
+                .limit(3);
+
+            if (typeof newsArticleData === 'undefined') window.newsArticleData = {};
+            newsArticleData[article.slug] = article;
+
+            if (relResult.data && relResult.data.length) {
+                relResult.data.forEach(function(row) {
+                    var rel = mapDbArticle(row);
+                    newsArticleData[rel.slug] = rel;
+                });
+                article.relatedSlugs = relResult.data.map(function(r) { return r.slug; });
+            }
+
+            document.title = 'KSLT — ' + article.title;
+            var readTime = calculateReadTime(article);
+
+            renderProgressBar();
+            renderHero(article, readTime);
+            renderContent(article);
+            renderTags(article);
+            renderReactions(article);
+            renderRelated(article);
+
+            initProgressBar();
+            initParallax();
+            initScrollAnimations();
+            initReactions(slug);
+        }
+    } catch (e) {
+        console.error('Supabase news error:', e);
+        initFromStatic(slug);
+    }
+}
+
+// ========================================
+// STATIC DATA FALLBACK
+// ========================================
+
+function initFromStatic(slug) {
+    if (typeof newsArticleData === 'undefined') {
+        window.newsArticleData = {};
     }
 
     if (!slug) {
@@ -22,7 +166,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var article = newsArticleData[slug];
     document.title = 'KSLT — ' + article.title;
-
     var readTime = calculateReadTime(article);
 
     renderProgressBar();
@@ -37,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initScrollAnimations();
     initReactions(slug);
     initPoll(slug);
-});
+}
 
 // ========================================
 // HELPERS
@@ -168,7 +311,7 @@ function renderHero(article, readTime) {
 
     container.innerHTML =
         '<div class="news-hero-bg">' +
-            '<img src="' + article.heroImage + '" alt="">' +
+            '<img src="' + esc(article.heroImage) + '" alt="">' +
             '<div class="news-hero-overlay"></div>' +
         '</div>' +
         '<div class="news-hero-content">' +
@@ -225,7 +368,7 @@ function renderBlock(block, index) {
 
         case 'image':
             return '<figure class="news-figure news-animate" style="' + style + '">' +
-                '<img src="' + block.src + '" alt="' + (block.alt || '') + '" loading="lazy">' +
+                '<img src="' + esc(block.src) + '" alt="' + esc(block.alt || '') + '" loading="lazy">' +
                 (block.caption ? '<figcaption>' + block.caption + '</figcaption>' : '') +
                 '</figure>';
 
@@ -236,7 +379,7 @@ function renderBlock(block, index) {
                     '<p>' + block.text + '</p>' +
                 '</div>' +
                 '<div class="news-quote-author">' +
-                    (block.photo ? '<img src="' + block.photo + '" alt="' + block.author + '">' : '') +
+                    (block.photo ? '<img src="' + esc(block.photo) + '" alt="' + esc(block.author) + '">' : '') +
                     '<span>' + block.author + (block.country ? ' ' + block.country : '') + '</span>' +
                 '</div>' +
             '</blockquote>';
@@ -450,7 +593,7 @@ function renderRelated(article) {
 
         html += '<a href="' + basePage + '?slug=' + rel.slug + '" class="news-related-card">' +
             '<div class="news-related-img">' +
-                '<img src="' + rel.heroImage + '" alt="' + rel.title + '" loading="lazy">' +
+                '<img src="' + esc(rel.heroImage) + '" alt="' + esc(rel.title) + '" loading="lazy">' +
             '</div>' +
             '<div class="news-related-info">' +
                 '<span class="news-related-category news-category-' + rel.category + '">' + rel.categoryLabel + '</span>' +
@@ -503,6 +646,11 @@ function renderNewsList() {
         return newsArticleData[key];
     });
 
+    // Sort by date (newest first)
+    allArticles.sort(function(a, b) {
+        return (b._publishedAt || '').localeCompare(a._publishedAt || '');
+    });
+
     // Get unique categories
     var categories = [];
     var catMap = {};
@@ -523,7 +671,7 @@ function renderNewsList() {
         hero.classList.add('news-hero-list');
         hero.innerHTML =
             '<div class="news-hero-bg">' +
-                '<img src="' + allArticles[0].heroImage + '" alt="">' +
+                '<img src="' + esc(allArticles[0].heroImage) + '" alt="">' +
                 '<div class="news-hero-overlay news-hero-overlay-list"></div>' +
             '</div>' +
             '<div class="news-hero-content news-hero-content-list">' +
@@ -573,7 +721,7 @@ function renderNewsList() {
 
             html += '<a href="' + basePage + '?slug=' + article.slug + '" class="' + cardClass + '">' +
                 '<div class="news-bento-img">' +
-                    '<img src="' + article.heroImage + '" alt="' + article.title + '" loading="lazy">' +
+                    '<img src="' + esc(article.heroImage) + '" alt="' + esc(article.title) + '" loading="lazy">' +
                     '<div class="news-bento-img-overlay"></div>' +
                 '</div>' +
                 '<div class="news-bento-content">' +

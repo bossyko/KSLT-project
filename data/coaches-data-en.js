@@ -213,6 +213,8 @@ window.coachesLabels = {
     filterKids: "Kids",
     filterGroup: "Group",
     filterIndividual: "Individual",
+    filterBeginner: "Beginner",
+    filterAdvanced: "Advanced",
     experience: "years exp.",
     students: "students",
     rating: "rating",
@@ -228,5 +230,8 @@ window.coachesLabels = {
     ctaText: "Choose a coach and sign up for your first lesson",
     ctaBtn: "Sign Up",
     backBtn: "All coaches",
-    court: "Court"
+    court: "Court",
+    loginToContact: "Sign in to contact",
+    noContacts: "No contacts provided",
+    contactCoach: "Contact coach"
 };

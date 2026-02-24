@@ -2,6 +2,11 @@
 // TOURNAMENT DETAIL — Rendering Logic
 // ========================================
 
+function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const tournamentId = urlParams.get('id');
@@ -11,26 +16,38 @@ document.addEventListener('DOMContentLoaded', function() {
         updateLangLinks(tournamentId);
     }
 
-    if (!tournamentId || !tournamentDetailData[tournamentId]) {
+    if (!tournamentId) {
         renderLockedPage(tournamentId);
         return;
     }
 
-    const tournament = tournamentDetailData[tournamentId];
+    // Try static data first
+    if (typeof tournamentDetailData !== 'undefined' && tournamentDetailData[tournamentId]) {
+        const tournament = tournamentDetailData[tournamentId];
 
-    renderHero(tournament);
+        renderHero(tournament);
 
-    if (tournament.bracketType === 'single_elimination') {
-        renderSingleEliminationBracket(tournament);
-    } else if (tournament.bracketType === 'round_robin') {
-        renderRoundRobin(tournament);
+        if (tournament.bracketType === 'single_elimination') {
+            renderSingleEliminationBracket(tournament);
+        } else if (tournament.bracketType === 'round_robin') {
+            renderRoundRobin(tournament);
+        }
+
+        renderSchedule(tournament);
+        renderParticipants(tournament);
+        renderResults(tournament);
+        initTabsNavigation();
+        initScheduleFilters();
+        return;
     }
 
-    renderSchedule(tournament);
-    renderParticipants(tournament);
-    renderResults(tournament);
-    initTabsNavigation();
-    initScheduleFilters();
+    // Try Supabase
+    var client = window.supabaseClient;
+    if (client) {
+        loadFromSupabase(client, tournamentId);
+    } else {
+        renderLockedPage(tournamentId);
+    }
 });
 
 // ========================================
@@ -77,7 +94,7 @@ function renderHero(tournament) {
 
     container.innerHTML =
         '<div class="td-hero-bg">' +
-            '<img src="' + tournament.bgImage + '" alt="">' +
+            '<img src="' + esc(tournament.bgImage) + '" alt="">' +
             '<div class="td-hero-overlay"></div>' +
         '</div>' +
         '<div class="td-hero-content">' +
@@ -515,6 +532,537 @@ function updateLangLinks(tournamentId) {
             var separator = href.indexOf('?') !== -1 ? '&' : '?';
             link.setAttribute('href', href + separator + 'id=' + tournamentId);
         }
+    });
+}
+
+// ========================================
+// LOCKED PAGE (not authorized)
+// ========================================
+
+// ========================================
+// SUPABASE TOURNAMENT SUPPORT
+// ========================================
+
+function loadFromSupabase(client, id) {
+    client.from('tournaments').select('*').eq('id', id).single()
+        .then(function(result) {
+            if (result.error || !result.data) {
+                renderLockedPage(id);
+                return;
+            }
+            var tournament = result.data;
+
+            // Load matches, registrations, and players in parallel
+            var matchesPromise = client.from('matches')
+                .select('*')
+                .eq('tournament_id', id)
+                .order('round_number', { ascending: true })
+                .order('match_order', { ascending: true });
+
+            var regsPromise = client.from('tournament_registrations')
+                .select('*, players(id, name, name_en, points)')
+                .eq('tournament_id', id)
+                .order('seed_number', { ascending: true, nullsFirst: false });
+
+            Promise.all([matchesPromise, regsPromise]).then(function(results) {
+                var matches = results[0].data || [];
+                var registrations = results[1].data || [];
+
+                // Build players map
+                var playerIds = [];
+                registrations.forEach(function(r) { if (r.player_id) playerIds.push(r.player_id); });
+                matches.forEach(function(m) {
+                    if (m.player1_id) playerIds.push(m.player1_id);
+                    if (m.player2_id) playerIds.push(m.player2_id);
+                    if (m.winner_id) playerIds.push(m.winner_id);
+                });
+                playerIds = playerIds.filter(function(v, i) { return playerIds.indexOf(v) === i; });
+
+                if (playerIds.length > 0) {
+                    client.from('players').select('id, name, name_en, points, country').in('id', playerIds)
+                        .then(function(plRes) {
+                            var playersMap = {};
+                            (plRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
+                            renderSupabaseTournament(tournament, matches, registrations, playersMap);
+                        });
+                } else {
+                    renderSupabaseTournament(tournament, matches, registrations, {});
+                }
+            });
+        })
+        .catch(function(e) {
+            console.error('Error loading tournament from Supabase:', e);
+            renderLockedPage(id);
+        });
+}
+
+function renderSupabaseTournament(t, matches, registrations, playersMap) {
+    matches = matches || [];
+    registrations = registrations || [];
+    playersMap = playersMap || {};
+    var isEn = window.location.pathname.indexOf('-en') !== -1;
+
+    var months = isEn
+        ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+        : ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+
+    // Format date range
+    var d1 = new Date(t.date_start + 'T00:00:00');
+    var dateRange = d1.getDate() + ' ' + months[d1.getMonth()];
+    if (t.date_end && t.date_end !== t.date_start) {
+        var d2 = new Date(t.date_end + 'T00:00:00');
+        dateRange += ' — ' + d2.getDate() + ' ' + months[d2.getMonth()];
+    }
+    dateRange += ' ' + d1.getFullYear();
+
+    // Status labels & CSS class mapping
+    var statusLabels = isEn
+        ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Registration Closed', ongoing: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
+        : { registration_open: 'Регистрация открыта', upcoming: 'Скоро', registration_closed: 'Регистрация закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' };
+
+    var statusClassMap = { registration_open: 'live', registration_closed: 'upcoming', ongoing: 'live', cancelled: 'completed', upcoming: 'upcoming', completed: 'completed' };
+    var statusClass = statusClassMap[t.status] || 'upcoming';
+    var statusText = statusLabels[t.status] || t.status;
+
+    // Format labels
+    var formatLabels = isEn
+        ? { singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }
+        : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' };
+
+    // Category name from category_id (e.g. "men-tour" → "Tour")
+    var catId = t.category_id || '';
+    var catParts = catId.split('-');
+    var catName = catParts.length > 1
+        ? catParts.slice(1).map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-')
+        : catId;
+    var category = catParts.length > 1 ? catParts.slice(1).join('-') : catId;
+
+    // Gender badge
+    var gender = catParts[0] || '';
+    var genderLabel = gender === 'women'
+        ? (isEn ? '♀ Women' : '♀ Женский')
+        : (isEn ? '♂ Men' : '♂ Мужской');
+
+    var backUrl = isEn
+        ? 'tournaments-en.html?category=' + category
+        : 'tournaments.html?category=' + category;
+
+    var L = isEn ? {
+        format: 'Format', participants: 'Participants', prizeFund: 'Prize Fund',
+        description: 'About Tournament', scheduleSoon: 'Schedule will be published soon',
+        noParticipants: 'Participants will be announced soon',
+        noResults: 'Results will be available after the tournament ends'
+    } : {
+        format: 'Формат', participants: 'Участники', prizeFund: 'Призовой фонд',
+        description: 'О турнире', scheduleSoon: 'Расписание будет опубликовано позже',
+        noParticipants: 'Участники будут объявлены позже',
+        noResults: 'Результаты будут доступны после завершения турнира'
+    };
+
+    // ---- Render Hero ----
+    var hero = document.getElementById('tournamentHero');
+    if (hero) {
+        var bgImage = t.image || 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&q=80';
+        hero.innerHTML =
+            '<div class="td-hero-bg">' +
+                '<img src="' + esc(bgImage) + '" alt="">' +
+                '<div class="td-hero-overlay"></div>' +
+            '</div>' +
+            '<div class="td-hero-content">' +
+                '<a href="' + backUrl + '" class="td-back-link">' +
+                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>' +
+                    ' ' + catName +
+                '</a>' +
+                '<div class="td-hero-badges">' +
+                    '<span class="tournament-category-badge">' + catName + '</span>' +
+                    '<span class="tournament-gender-badge" style="margin-left:8px">' + genderLabel + '</span>' +
+                    '<span class="td-status-badge ' + statusClass + '">' + statusText + '</span>' +
+                '</div>' +
+                '<h1>' + (isEn ? (t.title_en || t.title) : t.title) + '</h1>' +
+                '<div class="td-hero-meta">' +
+                    '<div class="td-meta-item">' +
+                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+                        ' ' + dateRange +
+                    '</div>' +
+                    '<div class="td-meta-item">' +
+                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
+                        ' ' + (isEn ? (t.location_en || t.location || '') : (t.location || '')) +
+                    '</div>' +
+                '</div>' +
+                '<div class="td-hero-stats">' +
+                    '<div class="hero-stat">' +
+                        '<span class="hero-stat-value">' + (t.max_participants || '—') + '</span>' +
+                        '<span class="hero-stat-label">' + L.participants + '</span>' +
+                    '</div>' +
+                    '<div class="hero-stat">' +
+                        '<span class="hero-stat-value">' + (t.prize_fund || '—') + '</span>' +
+                        '<span class="hero-stat-label">' + L.prizeFund + '</span>' +
+                    '</div>' +
+                    '<div class="hero-stat">' +
+                        '<span class="hero-stat-value">' + (formatLabels[t.format] || t.format || '—') + '</span>' +
+                        '<span class="hero-stat-label">' + L.format + '</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+    }
+
+    // ---- Bracket section ----
+    var bracketContainer = document.getElementById('bracketContainer');
+    if (bracketContainer) {
+        if (matches.length > 0 && t.bracket_type === 'single_elimination') {
+            // Convert Supabase matches to tournament-detail format
+            var drawSize = t.draw_size || 16;
+            var totalRounds = Math.log2(drawSize);
+
+            // Build players array for getPlayer()
+            var playersArr = [];
+            var addedIds = {};
+            Object.keys(playersMap).forEach(function(pid) {
+                var p = playersMap[pid];
+                playersArr.push({
+                    id: pid,
+                    name: isEn ? (p.name_en || p.name) : p.name,
+                    seed: null,
+                    country: p.country || ''
+                });
+                addedIds[pid] = true;
+            });
+
+            // Find seeds from matches
+            matches.forEach(function(m) {
+                if (m.seed1 && m.player1_id) {
+                    var p = playersArr.find(function(x) { return x.id === m.player1_id; });
+                    if (p) p.seed = m.seed1;
+                }
+                if (m.seed2 && m.player2_id) {
+                    var p = playersArr.find(function(x) { return x.id === m.player2_id; });
+                    if (p) p.seed = m.seed2;
+                }
+            });
+
+            // Build rounds structure
+            var rounds = [];
+            var lang = isEn ? 'en' : 'ru';
+            var roundDefs = (typeof ROUND_DEFS !== 'undefined' && ROUND_DEFS[lang] && ROUND_DEFS[lang][drawSize])
+                ? ROUND_DEFS[lang][drawSize]
+                : null;
+
+            for (var r = 1; r <= totalRounds; r++) {
+                var roundMatches = matches.filter(function(m) { return m.round_number === r && m.round !== '3RD'; })
+                    .sort(function(a, b) { return a.match_order - b.match_order; });
+
+                var roundName = '';
+                if (roundDefs && roundDefs[r - 1]) {
+                    roundName = roundDefs[r - 1].name;
+                } else {
+                    var rf = totalRounds - r;
+                    if (rf === 0) roundName = isEn ? 'Final' : 'Финал';
+                    else if (rf === 1) roundName = isEn ? 'Semifinal' : 'Полуфинал';
+                    else if (rf === 2) roundName = isEn ? 'Quarterfinal' : 'Четвертьфинал';
+                    else roundName = isEn ? 'Round ' + r : 'Раунд ' + r;
+                }
+
+                var convertedMatches = roundMatches.map(function(m) {
+                    return {
+                        matchId: m.id,
+                        player1Id: m.player1_id,
+                        player2Id: m.player2_id,
+                        score: m.score || '',
+                        winnerId: m.winner_id,
+                        status: m.status || 'upcoming',
+                        court: m.court,
+                        scheduledTime: m.scheduled_time,
+                        scheduledDay: m.scheduled_day
+                    };
+                });
+
+                rounds.push({
+                    name: roundName,
+                    nameShort: roundDefs && roundDefs[r - 1] ? roundDefs[r - 1].nameShort : 'R' + r,
+                    matches: convertedMatches
+                });
+            }
+
+            // Build tournament object for renderer
+            var tournamentObj = {
+                id: t.id,
+                name: isEn ? (t.title_en || t.title) : t.title,
+                bracketType: 'single_elimination',
+                drawSize: drawSize,
+                players: playersArr,
+                bracket: { rounds: rounds },
+                status: statusClass
+            };
+
+            // Override getPlayer for this context
+            var origGetPlayer = window.getPlayer || getPlayer;
+
+            renderSingleEliminationBracket(tournamentObj);
+        } else {
+            var desc = isEn ? (t.description_en || t.description || '') : (t.description || '');
+            if (desc) {
+                bracketContainer.innerHTML =
+                    '<div style="max-width:800px">' +
+                        '<h3 style="color:var(--text-primary);margin-bottom:var(--space-md)">' + L.description + '</h3>' +
+                        '<p style="color:var(--text-secondary);line-height:1.8;font-size:1rem">' + desc.replace(/\n/g, '<br>') + '</p>' +
+                    '</div>';
+            } else {
+                bracketContainer.innerHTML = '<div class="td-no-results"><p>' + L.scheduleSoon + '</p></div>';
+            }
+        }
+    }
+
+    // ---- Schedule from matches ----
+    var scheduleFilters = document.getElementById('scheduleFilters');
+    var scheduleList = document.getElementById('scheduleList');
+    if (scheduleFilters) scheduleFilters.innerHTML = '';
+
+    if (scheduleList) {
+        if (matches.length > 0) {
+            // Group matches by day
+            var dayMap = {};
+            var dayOrder = [];
+            matches.forEach(function(m) {
+                var day = m.scheduled_day || 'TBD';
+                if (!dayMap[day]) {
+                    dayMap[day] = [];
+                    dayOrder.push(day);
+                }
+                dayMap[day].push(m);
+            });
+
+            var courtLabel = isEn ? 'Court' : 'Корт';
+            var schedHtml = '';
+            dayOrder.forEach(function(day) {
+                var dayLabel = day !== 'TBD' ? new Date(day + 'T00:00:00').toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'long' }) : 'TBD';
+                schedHtml += '<div class="td-schedule-day" data-day="' + day + '">' +
+                    '<h3 class="td-schedule-day-title">' + dayLabel + '</h3>' +
+                    '<div class="td-schedule-matches">';
+
+                dayMap[day].forEach(function(m) {
+                    var p1 = playersMap[m.player1_id] || {};
+                    var p2 = playersMap[m.player2_id] || {};
+                    var p1Name = isEn ? (p1.name_en || p1.name || 'TBD') : (p1.name || 'TBD');
+                    var p2Name = isEn ? (p2.name_en || p2.name || 'TBD') : (p2.name || 'TBD');
+
+                    schedHtml += '<div class="td-schedule-match ' + (m.status || 'upcoming') + '">' +
+                        '<div class="td-schedule-time">' + (m.scheduled_time || '—') + '</div>' +
+                        '<div class="td-schedule-court">' + courtLabel + ' ' + (m.court || '—') + '</div>' +
+                        '<div class="td-schedule-players">' +
+                            '<span class="td-schedule-p1 ' + (m.winner_id === m.player1_id ? 'winner' : '') + '">' + p1Name + '</span>' +
+                            '<span class="td-schedule-vs">vs</span>' +
+                            '<span class="td-schedule-p2 ' + (m.winner_id === m.player2_id ? 'winner' : '') + '">' + p2Name + '</span>' +
+                        '</div>' +
+                        '<div class="td-schedule-round">' + (m.round || '') + '</div>' +
+                        '<div class="td-schedule-score">' + (m.score || '—') + '</div>' +
+                        '<div class="td-schedule-status">' +
+                            '<span class="td-status-pill ' + (m.status || 'upcoming') + '">' +
+                                getStatusLabel(m.status || 'upcoming') +
+                            '</span>' +
+                        '</div>' +
+                    '</div>';
+                });
+
+                schedHtml += '</div></div>';
+            });
+            scheduleList.innerHTML = schedHtml;
+
+            // Add day filters
+            if (scheduleFilters && dayOrder.length > 1) {
+                var allLabel = isEn ? 'All Days' : 'Все дни';
+                var fHtml = '<button class="filter-btn active" data-day="all">' + allLabel + '</button>';
+                dayOrder.forEach(function(day) {
+                    var dayLabel = day !== 'TBD' ? new Date(day + 'T00:00:00').toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' }) : 'TBD';
+                    fHtml += '<button class="filter-btn" data-day="' + day + '">' + dayLabel + '</button>';
+                });
+                scheduleFilters.innerHTML = fHtml;
+                initScheduleFilters();
+            }
+        } else {
+            scheduleList.innerHTML = '<div class="td-no-results"><p>' + L.scheduleSoon + '</p></div>';
+        }
+    }
+
+    // ---- Participants from registrations ----
+    var participantsGrid = document.getElementById('participantsGrid');
+    if (participantsGrid) {
+        var approvedRegs = registrations.filter(function(r) { return r.status === 'approved'; });
+        if (approvedRegs.length > 0) {
+            var partHtml = '';
+            approvedRegs.sort(function(a, b) {
+                return (a.seed_number || 999) - (b.seed_number || 999);
+            });
+            approvedRegs.forEach(function(reg) {
+                var p = reg.players || playersMap[reg.player_id] || {};
+                var pName = isEn ? (p.name_en || p.name || reg.player_id) : (p.name || reg.player_id);
+                partHtml += '<div class="td-participant-card">' +
+                    '<div class="td-participant-info">' +
+                        (reg.seed_number ? '<span class="td-participant-seed">[' + reg.seed_number + ']</span>' : '') +
+                        '<span class="td-participant-name">' + pName + '</span>' +
+                        '<span class="td-participant-country">' + (p.country || '') + '</span>' +
+                    '</div>' +
+                '</div>';
+            });
+            participantsGrid.innerHTML = partHtml;
+        } else {
+            participantsGrid.innerHTML = '<div class="td-no-results"><p>' + L.noParticipants + '</p></div>';
+        }
+    }
+
+    // ---- Registration button for players ----
+    if (t.status === 'registration_open') {
+        renderRegistrationButton(t, registrations, isEn);
+    }
+
+    // ---- Results from matches ----
+    var resultsPodium = document.getElementById('resultsPodium');
+    if (resultsPodium) {
+        if (t.status === 'completed' && matches.length > 0) {
+            var drawSize = t.draw_size || 16;
+            var totalRounds = Math.log2(drawSize);
+            var finalMatch = matches.find(function(m) { return m.round_number === totalRounds && m.round !== '3RD'; });
+
+            if (finalMatch && finalMatch.winner_id) {
+                var winner = playersMap[finalMatch.winner_id] || {};
+                var finalist_id = finalMatch.winner_id === finalMatch.player1_id ? finalMatch.player2_id : finalMatch.player1_id;
+                var finalist = playersMap[finalist_id] || {};
+
+                var placeLabel = isEn ? 'place' : 'место';
+                var resHtml = '<div class="td-podium">' +
+                    '<div class="td-podium-card td-podium-1">' +
+                        '<div class="td-podium-medal">🥇</div>' +
+                        '<div class="td-podium-place">1-e ' + placeLabel + '</div>' +
+                        '<div class="td-podium-name">' + (isEn ? (winner.name_en || winner.name || '?') : (winner.name || '?')) + '</div>' +
+                    '</div>' +
+                    '<div class="td-podium-card td-podium-2">' +
+                        '<div class="td-podium-medal">🥈</div>' +
+                        '<div class="td-podium-place">2-e ' + placeLabel + '</div>' +
+                        '<div class="td-podium-name">' + (isEn ? (finalist.name_en || finalist.name || '?') : (finalist.name || '?')) + '</div>' +
+                    '</div>';
+
+                // 3rd place match result
+                var thirdPlaceMatch = matches.find(function(m) { return m.round === '3RD' && m.status === 'completed' && m.winner_id; });
+                if (thirdPlaceMatch) {
+                    var thirdPlayer = playersMap[thirdPlaceMatch.winner_id] || {};
+                    resHtml += '<div class="td-podium-card td-podium-3">' +
+                        '<div class="td-podium-medal">🥉</div>' +
+                        '<div class="td-podium-place">3-e ' + placeLabel + '</div>' +
+                        '<div class="td-podium-name">' + (isEn ? (thirdPlayer.name_en || thirdPlayer.name || '?') : (thirdPlayer.name || '?')) + '</div>' +
+                    '</div>';
+                    var fourthId = thirdPlaceMatch.winner_id === thirdPlaceMatch.player1_id ? thirdPlaceMatch.player2_id : thirdPlaceMatch.player1_id;
+                    if (fourthId) {
+                        var fourthPlayer = playersMap[fourthId] || {};
+                        resHtml += '<div class="td-podium-card td-podium-4">' +
+                            '<div class="td-podium-medal">4</div>' +
+                            '<div class="td-podium-place">4-e ' + placeLabel + '</div>' +
+                            '<div class="td-podium-name">' + (isEn ? (fourthPlayer.name_en || fourthPlayer.name || '?') : (fourthPlayer.name || '?')) + '</div>' +
+                        '</div>';
+                    }
+                } else {
+                    // Fallback: show SF losers as 3rd place (no 3rd place match)
+                    var sfMatches = matches.filter(function(m) { return m.round_number === totalRounds - 1 && m.status === 'completed'; });
+                    sfMatches.forEach(function(m) {
+                        var loserId = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
+                        if (loserId) {
+                            var sfPlayer = playersMap[loserId] || {};
+                            resHtml += '<div class="td-podium-card td-podium-3">' +
+                                '<div class="td-podium-medal">🥉</div>' +
+                                '<div class="td-podium-place">3-e ' + placeLabel + '</div>' +
+                                '<div class="td-podium-name">' + (isEn ? (sfPlayer.name_en || sfPlayer.name || '?') : (sfPlayer.name || '?')) + '</div>' +
+                            '</div>';
+                        }
+                    });
+                }
+
+                resHtml += '</div>';
+                resultsPodium.innerHTML = resHtml;
+            } else {
+                resultsPodium.innerHTML = '<div class="td-no-results"><p>' + L.noResults + '</p></div>';
+            }
+        } else {
+            resultsPodium.innerHTML = '<div class="td-no-results"><p>' + L.noResults + '</p></div>';
+        }
+    }
+
+    // Init tabs navigation
+    initTabsNavigation();
+}
+
+// ========================================
+// PLAYER REGISTRATION BUTTON
+// ========================================
+
+function renderRegistrationButton(tournament, registrations, isEn) {
+    var client = window.supabaseClient;
+    if (!client) return;
+
+    // Check if user is logged in and has a player_id
+    client.auth.getUser().then(function(userRes) {
+        if (!userRes.data || !userRes.data.user) return;
+        var userId = userRes.data.user.id;
+
+        client.from('profiles').select('player_id').eq('id', userId).single().then(function(profRes) {
+            if (!profRes.data || !profRes.data.player_id) return;
+            var playerId = profRes.data.player_id;
+
+            // Check if already registered
+            var alreadyRegistered = registrations.find(function(r) { return r.player_id === playerId; });
+
+            // Check category match
+            client.from('players').select('category_id').eq('id', playerId).single().then(function(plRes) {
+                if (!plRes.data) return;
+
+                var categoryMatch = !tournament.category_id || plRes.data.category_id === tournament.category_id;
+
+                // Find hero content to append button
+                var heroContent = document.querySelector('.td-hero-content');
+                if (!heroContent) return;
+
+                var btnHtml = '<div class="td-registration-area" style="margin-top:var(--space-md);">';
+
+                if (alreadyRegistered) {
+                    var statusLabels = isEn
+                        ? { pending: 'Registration Pending', approved: 'Registered', rejected: 'Registration Rejected', withdrawn: 'Withdrawn' }
+                        : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана' };
+                    btnHtml += '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
+                        statusLabels[alreadyRegistered.status] + '</span>';
+                } else if (!categoryMatch) {
+                    btnHtml += '<span style="color:var(--text-secondary);font-size:0.9rem;">' +
+                        (isEn ? 'Your category does not match this tournament' : 'Ваша категория не соответствует этому турниру') + '</span>';
+                } else {
+                    btnHtml += '<button class="td-register-btn" id="tdRegisterBtn" style="padding:10px 24px;border:none;border-radius:8px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;font-size:1rem;">' +
+                        (isEn ? 'Register for Tournament' : 'Записаться на турнир') + '</button>';
+                }
+
+                btnHtml += '</div>';
+                heroContent.insertAdjacentHTML('beforeend', btnHtml);
+
+                // Register button click handler
+                var regBtn = document.getElementById('tdRegisterBtn');
+                if (regBtn) {
+                    regBtn.addEventListener('click', async function() {
+                        regBtn.disabled = true;
+                        regBtn.textContent = isEn ? 'Registering...' : 'Отправка...';
+
+                        var res = await client.from('tournament_registrations').insert({
+                            tournament_id: tournament.id,
+                            player_id: playerId,
+                            status: 'pending'
+                        });
+
+                        if (res.error) {
+                            alert(res.error.message);
+                            regBtn.disabled = false;
+                            regBtn.textContent = isEn ? 'Register for Tournament' : 'Записаться на турнир';
+                            return;
+                        }
+
+                        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
+                            (isEn ? 'Registration Submitted!' : 'Заявка отправлена!') + '</span>';
+                    });
+                }
+            });
+        });
     });
 }
 

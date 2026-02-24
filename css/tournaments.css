@@ -215,6 +215,18 @@
     padding: var(--space-lg);
 }
 
+.tournament-gender-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(204, 255, 0, 0.08);
+    color: var(--accent);
+    border: 1px solid rgba(204, 255, 0, 0.2);
+    margin-bottom: 8px;
+}
+
 .tournament-card-body h3 {
     font-size: 1.25rem;
     font-weight: 700;

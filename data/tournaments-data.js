@@ -350,7 +350,7 @@ function loadUpcomingTournaments(category) {
                 </button>
                 <a href="tournament.html?id=${category}-${t.id}" class="btn-view-bracket" style="margin-right:auto">Подробнее</a>
                 ${t.status === 'open'
-                    ? '<a href="auth.html?redirect=tournament-register" class="btn-register">Зарегистрироваться</a>'
+                    ? '<button class="btn-register">Зарегистрироваться</button>'
                     : '<button class="btn-notify">Уведомить меня</button>'}
             </div>
         </div>
@@ -509,5 +509,107 @@ function initCalendarButtons() {
             btn.style.borderColor = 'var(--accent)';
             btn.disabled = true;
         }
+
+        // Registration gate
+        var regBtn = e.target.closest('.btn-register');
+        if (regBtn) {
+            e.preventDefault();
+
+            // 1. Check auth via localStorage (like auth-nav.js)
+            var isLoggedIn = false;
+            try {
+                var key = 'sb-qqkzszesviukopgjbead-auth-token';
+                var raw = localStorage.getItem(key);
+                if (raw) {
+                    var session = JSON.parse(raw);
+                    var now = Math.floor(Date.now() / 1000);
+                    if (session && session.access_token && session.expires_at > now) {
+                        isLoggedIn = true;
+                    }
+                }
+            } catch(ex) {}
+
+            // 2. Not logged in → redirect to auth
+            if (!isLoggedIn) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            // 3. Logged in → check membership
+            if (typeof window.checkMembership === 'function') {
+                window.checkMembership().then(function(result) {
+                    if (result.active) {
+                        showRegisterModal('allowed');
+                    } else {
+                        showRegisterModal('blocked');
+                    }
+                });
+            }
+        }
     });
 }
+
+// ========================================
+// REGISTRATION MODAL
+// ========================================
+
+function showRegisterModal(type) {
+    var existing = document.querySelector('.trn-register-modal-overlay');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'trn-register-modal-overlay';
+
+    var lockSvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+
+    if (type === 'blocked') {
+        overlay.innerHTML =
+            '<div class="trn-register-modal">' +
+                '<button class="trn-register-modal-close">&times;</button>' +
+                '<div class="trn-register-modal-icon">' + lockSvg + '</div>' +
+                '<h3 class="trn-register-modal-title">Оформите членство</h3>' +
+                '<p class="trn-register-modal-text">Для регистрации на турниры необходимо членство KSLT</p>' +
+                '<a href="pricing.html" class="btn-primary trn-register-modal-btn">Оформить членство</a>' +
+            '</div>';
+    } else {
+        overlay.innerHTML =
+            '<div class="trn-register-modal">' +
+                '<button class="trn-register-modal-close">&times;</button>' +
+                '<div class="trn-register-modal-icon" style="color:var(--accent);opacity:1"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>' +
+                '<h3 class="trn-register-modal-title">Скоро!</h3>' +
+                '<p class="trn-register-modal-text">Онлайн-регистрация на турниры скоро будет доступна</p>' +
+            '</div>';
+    }
+
+    document.body.appendChild(overlay);
+    requestAnimationFrame(function() { overlay.classList.add('active'); });
+
+    overlay.querySelector('.trn-register-modal-close').onclick = function() {
+        overlay.classList.remove('active');
+        setTimeout(function() { overlay.remove(); }, 200);
+    };
+    overlay.onclick = function(ev) {
+        if (ev.target === overlay) {
+            overlay.classList.remove('active');
+            setTimeout(function() { overlay.remove(); }, 200);
+        }
+    };
+}
+
+// Inject modal styles
+(function() {
+    var style = document.createElement('style');
+    style.textContent =
+        '.trn-register-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:10000;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease}' +
+        '.trn-register-modal-overlay.active{opacity:1}' +
+        '.trn-register-modal{background:var(--bg-card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:16px;padding:40px 32px;max-width:400px;width:90%;text-align:center;position:relative;transform:scale(0.95);transition:transform .2s ease}' +
+        '.trn-register-modal-overlay.active .trn-register-modal{transform:scale(1)}' +
+        '.trn-register-modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text-muted,#888);font-size:1.5rem;cursor:pointer;padding:4px 8px;line-height:1}' +
+        '.trn-register-modal-close:hover{color:var(--text-primary,#fff)}' +
+        '.trn-register-modal-icon{opacity:0.4;margin-bottom:16px;color:var(--text-muted,#888)}' +
+        '.trn-register-modal-title{font-size:1.3rem;font-weight:600;color:var(--text-primary,#fff);margin:0 0 12px}' +
+        '.trn-register-modal-text{font-size:0.95rem;color:var(--text-muted,#888);max-width:320px;margin:0 auto 24px;line-height:1.5}' +
+        '.trn-register-modal-btn{display:inline-block;padding:12px 32px;border-radius:8px;font-weight:600;text-decoration:none;transition:opacity .2s}' +
+        '.trn-register-modal-btn:hover{opacity:0.9}';
+    document.head.appendChild(style);
+})();

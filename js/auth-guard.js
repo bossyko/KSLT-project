@@ -40,6 +40,7 @@
                 var profileResult = await client.from('profiles').select('*').eq('id', window.ksltUser.id).single();
                 if (profileResult.data) {
                     window.ksltProfile = profileResult.data;
+                    localStorage.setItem('kslt_role', profileResult.data.role);
                 }
             } catch (e) {
                 console.error('Profile load error:', e);
@@ -47,6 +48,23 @@
 
             // Show page
             document.body.classList.add('auth-ready');
+
+            // Inject admin link in header for staff (admin/manager)
+            var staffRoles = ['admin', 'manager'];
+            if (window.ksltProfile && staffRoles.indexOf(window.ksltProfile.role) !== -1) {
+                var logoutBtn = document.querySelector('.nav-right .btn-auth');
+                if (logoutBtn && !document.querySelector('.btn-admin')) {
+                    var adminUrl = isEn ? 'admin-en.html' : 'admin.html';
+                    var labelAdmin = isEn ? 'Admin' : 'Админка';
+                    var adminLink = document.createElement('a');
+                    adminLink.href = adminUrl;
+                    adminLink.className = 'btn-auth btn-admin';
+                    adminLink.textContent = labelAdmin;
+                    adminLink.style.borderColor = 'rgba(204, 255, 0, 0.3)';
+                    adminLink.style.color = '#CCFF00';
+                    logoutBtn.parentNode.insertBefore(adminLink, logoutBtn);
+                }
+            }
 
             // Callback
             if (typeof window.onAuthReady === 'function') {
@@ -58,7 +76,15 @@
         }
     }, 200);
 
-    // Admin guard
+    // Staff guard (admin + manager can access admin panel)
+    window.requireStaff = function() {
+        var staffRoles = ['admin', 'manager'];
+        if (!window.ksltProfile || staffRoles.indexOf(window.ksltProfile.role) === -1) {
+            window.location.href = homePage;
+        }
+    };
+
+    // Admin-only guard
     window.requireAdmin = function() {
         if (!window.ksltProfile || window.ksltProfile.role !== 'admin') {
             window.location.href = homePage;
@@ -67,6 +93,7 @@
 
     // Logout
     window.ksltLogout = async function() {
+        localStorage.removeItem('kslt_role');
         if (client) {
             await client.auth.signOut();
         }

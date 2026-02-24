@@ -1482,11 +1482,22 @@ h2 {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: 1.2fr 1fr;
+    max-height: 400px;
+    overflow: hidden;
 }
 
 .tournament-image {
     position: relative;
     overflow: hidden;
+}
+
+.tournament-card-featured .tournament-image {
+    height: 100%;
+    max-height: 400px;
+}
+
+.tournament-card-featured .tournament-info {
+    overflow-y: auto;
 }
 
 .tournament-image img {
@@ -1788,6 +1799,133 @@ h2 {
 
     .preview-status {
         display: none;
+    }
+}
+
+/* ========================================
+   BADGES CTA SECTION
+   ======================================== */
+
+.section-badges-cta {
+    padding: var(--space-xl) 7%;
+    background: var(--bg-secondary);
+    position: relative;
+    overflow: hidden;
+}
+
+.badges-cta-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.badges-cta-text h2 {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.badges-cta-text p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+.badges-cta-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.badge-cta-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg) var(--space-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.badge-cta-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+}
+
+.badge-cta-emoji {
+    font-size: 2.5rem;
+    line-height: 1;
+}
+
+.badge-cta-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.badge-cta-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.badges-cta-btn {
+    display: inline-block;
+    padding: 14px 40px;
+    background: var(--accent);
+    color: #000;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.badges-cta-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(204, 255, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    .badges-cta-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm);
+    }
+
+    .badge-cta-card {
+        padding: var(--space-md) var(--space-sm);
+    }
+
+    .badge-cta-emoji {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .badges-cta-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .badge-cta-card {
+        padding: var(--space-sm);
+    }
+
+    .badge-cta-emoji {
+        font-size: 1.8rem;
+    }
+
+    .badge-cta-name {
+        font-size: 0.85rem;
+    }
+
+    .badges-cta-btn {
+        padding: 12px 32px;
+        font-size: 0.9rem;
     }
 }
 

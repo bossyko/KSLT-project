@@ -301,7 +301,7 @@
         var initials = nameParts.map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
 
         var avatarHtml = profile.avatar_url
-            ? '<img src="' + profile.avatar_url + '" class="db-sidebar-avatar" alt="">'
+            ? '<img src="' + escHtml(profile.avatar_url) + '" class="db-sidebar-avatar" alt="">'
             : '<div class="db-sidebar-avatar-placeholder">' + initials + '</div>';
 
         var roleLabel = L['role_' + profile.role] || profile.role;
@@ -390,7 +390,7 @@
         var initials = nameParts.map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
 
         var avatarHtml = profile.avatar_url
-            ? '<img src="' + profile.avatar_url + '" class="db-avatar-preview" id="avatarPreview" alt="">'
+            ? '<img src="' + escHtml(profile.avatar_url) + '" class="db-avatar-preview" id="avatarPreview" alt="">'
             : '<div class="db-avatar-preview-placeholder" id="avatarPreview">' + initials + '</div>';
 
         // Gender select
@@ -704,7 +704,7 @@
                     '<button class="db-crop-close" id="cropClose">&times;</button>' +
                 '</div>' +
                 '<div class="db-crop-body">' +
-                    '<img id="cropImage" src="' + imageSrc + '">' +
+                    '<img id="cropImage" src="' + escHtml(imageSrc) + '">' +
                 '</div>' +
                 '<div class="db-crop-footer">' +
                     '<button class="db-btn db-btn-outline" id="cropCancel">' + L.cropCancel + '</button>' +

@@ -5,6 +5,11 @@
 (function () {
     'use strict';
 
+    function esc(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
     var isEn = window.location.pathname.indexOf('-en') !== -1;
 
     // Seeded random for consistent mock data per player
@@ -226,7 +231,7 @@
         // ---- Header ----
         html += '<div class="pp-header pp-fade-in">';
         html += '<div class="pp-photo-wrap">';
-        html += '<img src="' + player.photo.replace('w=80&h=80', 'w=240&h=240') + '" alt="' + player.name + '" class="pp-photo">';
+        html += '<img src="' + esc(player.photo.replace('w=80&h=80', 'w=240&h=240')) + '" alt="' + esc(player.name) + '" class="pp-photo">';
         if (player.online) html += '<div class="pp-online-dot"></div>';
         html += '</div>';
 
@@ -288,7 +293,7 @@
             html += '<div class="pp-match">';
             html += '<div class="pp-match-date">' + m.date + '</div>';
             html += '<div class="pp-match-opponent">';
-            html += '<img src="' + m.opponent.photo + '" alt="' + m.opponent.name + '" class="pp-match-opponent-photo">';
+            html += '<img src="' + esc(m.opponent.photo) + '" alt="' + esc(m.opponent.name) + '" class="pp-match-opponent-photo">';
             html += '<span class="pp-match-opponent-name">' + m.opponent.name + '</span>';
             html += '</div>';
             html += '<div class="pp-match-score">' + m.score + '</div>';

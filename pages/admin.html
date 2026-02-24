@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSLT — Личный кабинет</title>
+    <title>KSLT — Админ-панель</title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/dashboard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    <link rel="stylesheet" href="../css/admin.css">
 </head>
-<body class="db-page">
+<body class="ad-page">
 
     <!-- Header (полный сайтовый) -->
     <header class="floating-header header-hybrid">
@@ -109,12 +108,12 @@
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="dashboard.html" class="lang-option active" data-lang="RU">
+                        <a href="admin.html" class="lang-option active" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="dashboard-en.html" class="lang-option" data-lang="EN">
+                        <a href="admin-en.html" class="lang-option" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -205,19 +204,24 @@
     </header>
 
     <!-- Mobile Tabs -->
-    <div class="db-mobile-tabs" id="dbMobileTabs"></div>
+    <div class="ad-mobile-tabs" id="adMobileTabs"></div>
 
     <!-- Layout -->
-    <div class="db-layout">
+    <div class="ad-layout">
         <!-- Sidebar -->
-        <aside class="db-sidebar" id="dbSidebar"></aside>
+        <aside class="ad-sidebar" id="adSidebar"></aside>
 
         <!-- Content -->
-        <main class="db-content">
-            <section class="db-section active" id="db-profile"></section>
-            <section class="db-section" id="db-tournaments"></section>
-            <section class="db-section" id="db-stats"></section>
-            <section class="db-section" id="db-settings"></section>
+        <main class="ad-content">
+            <section class="ad-section active" id="ad-dashboard"></section>
+            <section class="ad-section" id="ad-users"></section>
+            <section class="ad-section" id="ad-tournaments"></section>
+            <section class="ad-section" id="ad-players"></section>
+            <section class="ad-section" id="ad-courts"></section>
+            <section class="ad-section" id="ad-coaches"></section>
+            <section class="ad-section" id="ad-content"></section>
+            <section class="ad-section" id="ad-ratings"></section>
+            <section class="ad-section" id="ad-memberships"></section>
         </main>
     </div>
 
@@ -225,9 +229,8 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js"></script>
     <script src="../js/auth-guard.js"></script>
-    <script src="../js/membership.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-    <script src="../js/dashboard.js"></script>
+    <script src="../js/tournament-generator.js"></script>
+    <script src="../js/admin.js"></script>
     <script src="../js/script.js"></script>
 </body>
 </html>

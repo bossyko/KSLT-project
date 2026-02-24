@@ -60,6 +60,7 @@
                         <a href="pages/players-en.html?tab=women-promasters" class="nav-dropdown-item">Women Pro-Masters</a>
                         <a href="pages/players-en.html?tab=women-masters" class="nav-dropdown-item">Women Masters</a>
                         <a href="pages/players-en.html?tab=women-challenger" class="nav-dropdown-item">Women Challenger</a>
+                        <a href="pages/players-en.html?tab=women-futures" class="nav-dropdown-item">Women Futures</a>
                         <a href="pages/players-en.html?tab=women-tour" class="nav-dropdown-item">Women Tour</a>
                     </div>
                 </li>
@@ -161,6 +162,7 @@
                         <li><a href="pages/players-en.html?tab=women-promasters">Women Pro-Masters</a></li>
                         <li><a href="pages/players-en.html?tab=women-masters">Women Masters</a></li>
                         <li><a href="pages/players-en.html?tab=women-challenger">Women Challenger</a></li>
+                        <li><a href="pages/players-en.html?tab=women-futures">Women Futures</a></li>
                         <li><a href="pages/players-en.html?tab=women-tour">Women Tour</a></li>
                     </ul>
                 </li>
@@ -449,61 +451,36 @@
             </div>
         </section>
 
-        <!-- TOURNAMENTS PREVIEW -->
-        <section id="tournaments" class="section-tournaments-preview">
-            <div class="section-header">
-                <h2>Upcoming Tournaments</h2>
-                <a href="pages/tournaments-en.html?category=tour" class="link-all">All Tournaments →</a>
-            </div>
-            <div class="tournaments-preview-grid">
-                <a href="pages/tournaments-en.html?category=tour" class="tournament-preview-card">
-                    <div class="preview-date">
-                        <span class="preview-day">15</span>
-                        <span class="preview-month">Feb</span>
+        <!-- BADGES CTA -->
+        <section class="section-badges-cta">
+            <div class="badges-cta-inner">
+                <div class="badges-cta-text">
+                    <h2>Compete. Win. Earn Badges.</h2>
+                    <p>Register, play tournaments and earn rewards for your achievements</p>
+                </div>
+                <div class="badges-cta-cards">
+                    <div class="badge-cta-card">
+                        <span class="badge-cta-emoji">🆕</span>
+                        <span class="badge-cta-name">Newcomer</span>
+                        <span class="badge-cta-desc">Register and play your first match</span>
                     </div>
-                    <div class="preview-info">
-                        <span class="preview-category">Tour</span>
-                        <h4>KSLT Tour Open #1</h4>
-                        <span class="preview-location">📍 Bishkek, Akhunbaeva 165</span>
+                    <div class="badge-cta-card">
+                        <span class="badge-cta-emoji">🔥</span>
+                        <span class="badge-cta-name">Win Streak</span>
+                        <span class="badge-cta-desc">Win 5 matches in a row</span>
                     </div>
-                    <div class="preview-status open">Registration Open</div>
-                </a>
-                <a href="pages/tournaments-en.html?category=tour" class="tournament-preview-card">
-                    <div class="preview-date">
-                        <span class="preview-day">22</span>
-                        <span class="preview-month">Feb</span>
+                    <div class="badge-cta-card">
+                        <span class="badge-cta-emoji">⬆️</span>
+                        <span class="badge-cta-name">Breakthrough</span>
+                        <span class="badge-cta-desc">Climb 10+ places in rankings</span>
                     </div>
-                    <div class="preview-info">
-                        <span class="preview-category">Tour</span>
-                        <h4>KSLT Tour Doubles</h4>
-                        <span class="preview-location">📍 Bishkek, Asanbay 21</span>
+                    <div class="badge-cta-card">
+                        <span class="badge-cta-emoji">🏆</span>
+                        <span class="badge-cta-name">Champion</span>
+                        <span class="badge-cta-desc">Win a tournament final</span>
                     </div>
-                    <div class="preview-status open">Registration Open</div>
-                </a>
-                <a href="pages/tournaments-en.html?category=challenger" class="tournament-preview-card">
-                    <div class="preview-date">
-                        <span class="preview-day">01</span>
-                        <span class="preview-month">Mar</span>
-                    </div>
-                    <div class="preview-info">
-                        <span class="preview-category">Challenger</span>
-                        <h4>Spring Challenger Cup</h4>
-                        <span class="preview-location">📍 Bishkek, Central Court</span>
-                    </div>
-                    <div class="preview-status soon">Coming Soon</div>
-                </a>
-                <a href="pages/tournaments-en.html?category=masters" class="tournament-preview-card">
-                    <div class="preview-date">
-                        <span class="preview-day">15</span>
-                        <span class="preview-month">Mar</span>
-                    </div>
-                    <div class="preview-info">
-                        <span class="preview-category">Masters</span>
-                        <h4>KSLT Masters Series</h4>
-                        <span class="preview-location">📍 Bishkek, Tennis Park</span>
-                    </div>
-                    <div class="preview-status soon">Coming Soon</div>
-                </a>
+                </div>
+                <a href="pages/auth-en.html?tab=register" class="badges-cta-btn">Start your journey</a>
             </div>
         </section>
 
@@ -976,5 +953,246 @@
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
+    <script>
+    // Load Supabase courts into main page (EN)
+    (function() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        var grid = document.querySelector('.section-courts .courts-grid');
+        if (!grid) return;
+        client.from('courts').select('*').order('created_at', { ascending: false }).limit(6)
+            .then(function(res) {
+                if (res.error || !res.data || !res.data.length) return;
+                var SURF = { hard: 'Hard', clay: 'Clay', carpet: 'Carpet' };
+                var html = '';
+                res.data.forEach(function(row) {
+                    var ct = row.court_types || [];
+                    var surfKey = ct.length ? ct[0].surface : '';
+                    var surface = SURF[surfKey] || surfKey;
+                    var total = 0; ct.forEach(function(c) { total += (c.count || 0); });
+                    var minPrice = 0; ct.forEach(function(c) { if (c.price && (!minPrice || c.price < minPrice)) minPrice = c.price; });
+                    var name = row.name_en || row.name;
+                    var addr = [row.street_en || row.street, row.building, row.city_en || 'Bishkek'].filter(Boolean).join(', ');
+                    html += '<div class="court-card">' +
+                        '<div style="position:relative;">' +
+                            '<img src="' + (row.photo || 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=400&fit=crop&q=80') + '" alt="' + name + '">' +
+                            '<span style="position:absolute;top:8px;left:8px;background:#CCFF00;color:#000;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:100px;text-transform:uppercase;">New</span>' +
+                        '</div>' +
+                        '<div class="court-info">' +
+                            '<h4>' + name + '</h4>' +
+                            '<span class="court-surface">Surface: ' + surface + '</span>' +
+                            (addr ? '<span>\uD83D\uDCCD ' + addr + '</span>' : '') +
+                            (minPrice ? '<span class="court-price">from ' + minPrice + ' som/hour</span>' : '') +
+                            '<span class="court-status available">' + total + ' courts</span>' +
+                        '</div>' +
+                    '</div>';
+                });
+                grid.insertAdjacentHTML('afterbegin', html);
+            });
+    })();
+    // Load Supabase coaches into main page (EN)
+    (function() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        var grid = document.querySelector('.section-coaches .coaches-grid');
+        if (!grid) return;
+
+        // Check auth
+        var isLoggedIn = false;
+        try {
+            var key = 'sb-qqkzszesviukopgjbead-auth-token';
+            var raw = localStorage.getItem(key);
+            if (raw) {
+                var s = JSON.parse(raw);
+                if (s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000)) isLoggedIn = true;
+            }
+        } catch(e) {}
+
+        client.from('coaches').select('*').order('created_at', { ascending: false }).limit(6)
+            .then(function(res) {
+                if (res.error || !res.data || !res.data.length) return;
+                var html = '';
+                res.data.forEach(function(row) {
+                    var name = ((row.last_name_en || row.last_name || '') + ' ' + (row.first_name_en || row.first_name || '')).trim() || row.name_en || row.name || '';
+                    var pos = row.position_en || row.position || '';
+                    var exp = row.experience ? 'Experience: ' + row.experience + ' years' : '';
+                    var price = row.price ? 'from ' + row.price + ' som/hour' : '';
+                    var photo = row.photo || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&q=80';
+
+                    var contactHtml = '';
+                    if (isLoggedIn) {
+                        var btns = '';
+                        if (row.telegram) {
+                            var tgUser = row.telegram.replace('@', '');
+                            btns += '<a href="https://t.me/' + tgUser + '" target="_blank" class="btn-invite" style="flex:1;text-align:center;">Telegram</a>';
+                        }
+                        if (row.whatsapp) {
+                            var waNum = row.whatsapp.replace(/\D/g, '');
+                            btns += '<a href="https://wa.me/' + waNum + '" target="_blank" class="btn-invite" style="flex:1;text-align:center;">WhatsApp</a>';
+                        }
+                        if (!btns) btns = '<span style="color:rgba(255,255,255,0.4);font-size:0.85rem;">No contacts provided</span>';
+                        contactHtml = '<div style="display:flex;gap:8px;width:100%;">' + btns + '</div>';
+                    } else {
+                        contactHtml = '<a href="pages/auth-en.html?redirect=coaches" class="btn-invite">Sign in to contact</a>';
+                    }
+
+                    html += '<div class="coach-card">' +
+                        '<img src="' + photo + '" alt="' + name + '" class="coach-photo">' +
+                        '<div class="coach-info">' +
+                            '<h4>' + name + '</h4>' +
+                            (pos ? '<span class="coach-speciality">' + pos + '</span>' : '') +
+                            (exp ? '<span class="coach-experience">' + exp + '</span>' : '') +
+                            (price ? '<span class="coach-price">' + price + '</span>' : '') +
+                        '</div>' +
+                        contactHtml +
+                    '</div>';
+                });
+                grid.insertAdjacentHTML('afterbegin', html);
+            });
+    })();
+    // HTML escape helper
+    function esc(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    // Load Supabase tournaments into main page (EN)
+    (function() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        var grid = document.querySelector('.section-tournaments .tournaments-grid');
+        if (!grid) return;
+        var today = new Date().toISOString().split('T')[0];
+        client.from('tournaments').select('*').gte('date_start', today).order('date_start', { ascending: true }).limit(3)
+            .then(function(res) {
+                if (res.error || !res.data || !res.data.length) return;
+                var html = '';
+                res.data.forEach(function(t, i) {
+                    var isFeatured = i === 0;
+                    var dateStr = '';
+                    if (t.date_start) {
+                        var d = new Date(t.date_start + 'T00:00:00');
+                        dateStr = d.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+                        if (t.date_end && t.date_end !== t.date_start) {
+                            var d2 = new Date(t.date_end + 'T00:00:00');
+                            dateStr = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ' - ' + d2.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+                        }
+                    }
+                    var img = t.image || 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=500&fit=crop&q=80';
+                    var title = t.title_en || t.title || '';
+                    var desc = t.description_en || t.description || '';
+                    html += '<article class="tournament-card' + (isFeatured ? ' tournament-card-featured' : '') + '">' +
+                        '<div class="tournament-image">' +
+                            '<img src="' + esc(img) + '" alt="' + esc(title) + '">' +
+                            (isFeatured && t.status === 'registration' ? '<span class="tournament-badge">Registration</span>' : '') +
+                        '</div>' +
+                        '<div class="tournament-info">' +
+                            '<span class="tournament-date">' + dateStr + '</span>' +
+                            '<h3>' + title + '</h3>' +
+                            (isFeatured && desc ? '<p>' + desc.substring(0, 100) + '</p>' : '') +
+                            '<div class="tournament-meta">' +
+                                (t.max_participants ? '<span><strong>' + t.max_participants + '</strong> participants</span>' : '') +
+                            '</div>' +
+                            (isFeatured ? '<a href="pages/tournament-en.html?id=' + t.id + '" class="btn-primary">Details</a>' : '') +
+                        '</div>' +
+                    '</article>';
+                });
+                grid.innerHTML = html;
+            });
+    })();
+    // Load Supabase rankings into main page (EN)
+    (function() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        var section = document.querySelector('.section-rankings .rankings-columns');
+        if (!section) return;
+
+        var isLoggedIn = false;
+        try {
+            var key = 'sb-qqkzszesviukopgjbead-auth-token';
+            var raw = localStorage.getItem(key);
+            if (raw) {
+                var s = JSON.parse(raw);
+                if (s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000)) isLoggedIn = true;
+            }
+        } catch(e) {}
+
+        var VISIBLE_ROWS = 4;
+
+        Promise.all([
+            client.from('categories').select('*').order('sort_order', { ascending: true }),
+            client.from('players').select('id,name,name_en,photo,country,points,rank_change,category_id').order('points', { ascending: false })
+        ]).then(function(results) {
+            var cats = (results[0].data || []);
+            var players = (results[1].data || []);
+            if (!cats.length) return;
+
+            var menCats = cats.filter(function(c) { return c.gender === 'men'; });
+            var womenCats = cats.filter(function(c) { return c.gender === 'women'; });
+
+            function buildCol(catList) {
+                var tabs = '<div class="rankings-tabs">';
+                catList.forEach(function(c, i) {
+                    tabs += '<button class="rankings-tab' + (i === 0 ? ' active' : '') + '" data-target="' + c.id + '">' + (c.name_en || c.name) + '</button>';
+                });
+                tabs += '</div>';
+
+                var panels = '';
+                catList.forEach(function(c, ci) {
+                    var catPlayers = players.filter(function(p) { return p.category_id === c.id; }).slice(0, 8);
+                    panels += '<div class="rankings-panel' + (ci === 0 ? ' active' : '') + '" id="' + c.id + '">';
+                    panels += '<div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Player</span><span class="country">Country</span><span class="points">Points</span><span class="change">\u0394</span></div>';
+                    catPlayers.forEach(function(p, pi) {
+                        var blurClass = '';
+                        if (!isLoggedIn && pi >= VISIBLE_ROWS) {
+                            blurClass = ' ranking-row-blur';
+                        }
+                        var changeHtml = '';
+                        var ch = p.rank_change || 0;
+                        if (ch > 0) changeHtml = '<span class="change positive">+' + ch + '</span>';
+                        else if (ch < 0) changeHtml = '<span class="change negative">' + ch + '</span>';
+                        else changeHtml = '<span class="change">\u2014</span>';
+                        var photo = p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?';
+                        var name = p.name_en || p.name || '';
+                        panels += '<div class="ranking-row' + blurClass + '">' +
+                            '<span class="rank">' + (pi + 1) + '</span>' +
+                            '<div class="player-col"><img src="' + photo + '" alt=""><span>' + name + '</span></div>' +
+                            '<span class="country">' + (p.country || '\ud83c\uddf0\ud83c\uddec') + '</span>' +
+                            '<span class="points">' + (p.points || 0).toLocaleString() + '</span>' +
+                            changeHtml +
+                        '</div>';
+                    });
+                    if (!isLoggedIn && catPlayers.length > VISIBLE_ROWS) {
+                        panels += '<div class="ranking-lock-overlay">' +
+                            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+                            ' <a href="pages/auth-en.html?redirect=players">Sign in for full rankings</a>' +
+                        '</div>';
+                    }
+                    panels += '</div>';
+                });
+                return '<div class="rankings-col">' + tabs + panels + '</div>';
+            }
+
+            section.innerHTML = buildCol(menCats) + buildCol(womenCats);
+
+            section.querySelectorAll('.rankings-tab').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var parent = btn.closest('.rankings-col');
+                    parent.querySelectorAll('.rankings-tab').forEach(function(b) { b.classList.remove('active'); });
+                    parent.querySelectorAll('.rankings-panel').forEach(function(p) { p.classList.remove('active'); });
+                    btn.classList.add('active');
+                    var panel = parent.querySelector('#' + btn.dataset.target);
+                    if (panel) panel.classList.add('active');
+                });
+            });
+        });
+    })();
+    </script>
+    <style>
+    .ranking-row-blur { filter: blur(4px); pointer-events: none; user-select: none; opacity: 0.5; }
+    .ranking-lock-overlay { text-align: center; padding: 12px 0 4px; font-size: 0.85rem; color: rgba(255,255,255,0.5); }
+    .ranking-lock-overlay a { color: var(--accent, #CCFF00); text-decoration: none; font-weight: 600; }
+    .ranking-lock-overlay a:hover { text-decoration: underline; }
+    .ranking-lock-overlay svg { vertical-align: middle; margin-right: 4px; stroke: rgba(255,255,255,0.4); }
+    </style>
 </body>
 </html>

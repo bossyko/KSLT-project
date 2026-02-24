@@ -28,6 +28,20 @@
             if (session.expires_at > now) {
                 btn.href = dashUrl;
                 btn.textContent = labelDash;
+
+                // Show admin link if role is admin or manager
+                var role = localStorage.getItem('kslt_role');
+                if (role === 'admin' || role === 'manager') {
+                    var adminUrl = prefix + (isEn ? 'admin-en.html' : 'admin.html');
+                    var labelAdmin = isEn ? 'Admin' : 'Админка';
+                    var adminLink = document.createElement('a');
+                    adminLink.href = adminUrl;
+                    adminLink.className = 'btn-auth';
+                    adminLink.textContent = labelAdmin;
+                    adminLink.style.borderColor = 'rgba(204, 255, 0, 0.3)';
+                    adminLink.style.color = '#CCFF00';
+                    btn.parentNode.insertBefore(adminLink, btn);
+                }
             }
         }
     } catch (e) {

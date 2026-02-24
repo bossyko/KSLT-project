@@ -1,6 +1,11 @@
 (function() {
     'use strict';
 
+    function esc(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var L_labels = window.courtsLabels || {
         heroTitle: "Корты KSLT",
@@ -27,10 +32,15 @@
         backBtn: "Все корты",
         partnerBadge: "Партнёр KSLT",
         surface: "Покрытие",
-        phone: "Телефон"
+        phone: "Телефон",
+        newBadge: "Новый"
     };
 
-    var data = window.courtsData || [];
+    var SURFACE_MAP = { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр' };
+    var SURFACE_MAP_EN = { hard: 'Hard', clay: 'Clay', carpet: 'Carpet' };
+
+    var staticData = window.courtsData || [];
+    var data = staticData.slice(); // will be replaced after Supabase load
 
     var courtPage = window.location.pathname.indexOf('court.html') !== -1 || window.location.pathname.indexOf('court-en.html') !== -1;
     var isListPage = window.location.pathname.indexOf('courts.html') !== -1 || window.location.pathname.indexOf('courts-en.html') !== -1;
@@ -38,8 +48,150 @@
 
     if (isDetailPage) {
         initDetailPage();
+        loadSupabaseCourts(function(dbCourts) {
+            if (dbCourts.length) {
+                data = dbCourts.concat(staticData);
+                // Re-check if current detail is from DB
+                var params = new URLSearchParams(window.location.search);
+                var id = params.get('id');
+                var found = null;
+                for (var i = 0; i < dbCourts.length; i++) {
+                    if (dbCourts[i].id === id) { found = dbCourts[i]; break; }
+                }
+                if (found) {
+                    document.title = 'KSLT \u2014 ' + found.name;
+                    renderDetailHero(found);
+                    renderDetail(found);
+                    initScrollAnimations();
+                }
+            }
+        });
     } else {
         initListPage();
+        loadSupabaseCourts(function(dbCourts) {
+            if (dbCourts.length) {
+                data = dbCourts.concat(staticData);
+                // Re-render with current filter
+                var activeBtn = document.querySelector('.ct-filter-btn.active');
+                var currentFilter = activeBtn ? activeBtn.getAttribute('data-filter') : 'all';
+                renderGrid(currentFilter);
+            }
+        });
+    }
+
+    /* ===== SUPABASE LOADING ===== */
+
+    function loadSupabaseCourts(callback) {
+        var client = window.supabaseClient || null;
+        if (!client) {
+            callback([]);
+            return;
+        }
+        try {
+            client.from('courts').select('*').order('created_at', { ascending: false })
+                .then(function(result) {
+                    if (result.error || !result.data) { callback([]); return; }
+                    var mapped = result.data.map(function(row) { return mapDbCourt(row); });
+                    callback(mapped);
+                })
+                .catch(function() { callback([]); });
+        } catch (e) {
+            callback([]);
+        }
+    }
+
+    function mapDbCourt(row) {
+        var courtTypes = row.court_types || [];
+        // Determine primary type
+        var hasIndoor = courtTypes.some(function(ct) { return ct.type === 'indoor'; });
+        var hasOutdoor = courtTypes.some(function(ct) { return ct.type === 'outdoor'; });
+        var primaryType = hasIndoor ? 'indoor' : 'outdoor';
+
+        // Surface from first court type
+        var surfaceKey = courtTypes.length ? courtTypes[0].surface : 'hard';
+        var surface = isEn ? (SURFACE_MAP_EN[surfaceKey] || surfaceKey) : (SURFACE_MAP[surfaceKey] || surfaceKey);
+
+        // Total courts count
+        var totalCourts = 0;
+        courtTypes.forEach(function(ct) { totalCourts += (ct.count || 0); });
+
+        // Min price
+        var minPrice = 0;
+        courtTypes.forEach(function(ct) {
+            if (ct.price && (!minPrice || ct.price < minPrice)) minPrice = ct.price;
+        });
+
+        // Build address
+        var parts = [];
+        var street = isEn ? (row.street_en || row.street) : row.street;
+        if (street) parts.push(street);
+        if (row.building) parts.push(row.building);
+        var city = isEn ? (row.city_en || row.city) : (row.city || 'Бишкек');
+        if (city) parts.push(city);
+        var address = parts.join(', ');
+
+        // Description
+        var desc = isEn ? (row.description_en || row.description || '') : (row.description || '');
+        var shortDesc = desc.length > 120 ? desc.substr(0, 120) + '...' : desc;
+
+        // Name
+        var name = isEn ? (row.name_en || row.name) : row.name;
+
+        // Amenities — map keys to labels
+        var AMENITY_LABELS = {
+            locker_rooms: isEn ? 'Locker rooms' : 'Раздевалки',
+            showers: isEn ? 'Showers' : 'Душевые',
+            parking: isEn ? 'Parking' : 'Парковка',
+            racket_rental: isEn ? 'Racket rental' : 'Прокат ракеток',
+            pro_shop: 'Pro-shop',
+            cafe: isEn ? 'Café' : 'Кафе',
+            gym: isEn ? 'Gym' : 'Тренажёрный зал',
+            pool: isEn ? 'Pool' : 'Бассейн',
+            sauna: isEn ? 'Sauna' : 'Сауна',
+            climate: isEn ? 'Climate control' : 'Климат-контроль',
+            lighting: isEn ? 'Lighting' : 'Вечернее освещение',
+            kids_area: isEn ? 'Kids area' : 'Детская площадка',
+            kids_school: isEn ? 'Kids school' : 'Детская школа',
+            video: isEn ? 'Video' : 'Видеоанализ',
+            wifi: 'Wi-Fi',
+            benches: isEn ? 'Benches' : 'Скамейки'
+        };
+        var amenities = (row.amenities || []).map(function(key) {
+            return AMENITY_LABELS[key] || key;
+        });
+
+        // Type labels for mixed courts
+        var typeDesc = '';
+        if (hasIndoor && hasOutdoor) {
+            typeDesc = (isEn ? 'Indoor + Outdoor' : 'Крытый + Открытый');
+        }
+
+        return {
+            id: row.id,
+            name: name,
+            photo: row.photo || 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&q=80',
+            gallery: row.gallery || [],
+            type: primaryType,
+            _hasIndoor: hasIndoor,
+            _hasOutdoor: hasOutdoor,
+            _courtTypes: courtTypes,
+            surface: surface,
+            courtsCount: totalCourts,
+            rating: null,
+            price: minPrice,
+            address: address,
+            phone: row.phone || '',
+            shortDesc: shortDesc,
+            description: desc,
+            amenities: amenities,
+            schedule: {},
+            partner: row.partner || false,
+            google_maps_url: row.google_maps_url || '',
+            twogis_url: row.twogis_url || '',
+            _isNew: true,
+            _isDb: true,
+            _typeDesc: typeDesc
+        };
     }
 
     /* ===== LIST PAGE ===== */
@@ -87,35 +239,50 @@
 
         var filtered = data;
         if (filter === 'indoor') {
-            filtered = data.filter(function(c) { return c.type === 'indoor'; });
+            filtered = data.filter(function(c) {
+                return c.type === 'indoor' || (c._hasIndoor);
+            });
         } else if (filter === 'outdoor') {
-            filtered = data.filter(function(c) { return c.type === 'outdoor'; });
+            filtered = data.filter(function(c) {
+                return c.type === 'outdoor' || (c._hasOutdoor);
+            });
         } else if (filter === 'clay') {
-            filtered = data.filter(function(c) { return c.surface === 'Грунт' || c.surface === 'Clay'; });
+            filtered = data.filter(function(c) {
+                if (c._courtTypes) return c._courtTypes.some(function(ct) { return ct.surface === 'clay'; });
+                return c.surface === 'Грунт' || c.surface === 'Clay';
+            });
         } else if (filter === 'hard') {
-            filtered = data.filter(function(c) { return c.surface === 'Хард' || c.surface === 'Hard'; });
+            filtered = data.filter(function(c) {
+                if (c._courtTypes) return c._courtTypes.some(function(ct) { return ct.surface === 'hard'; });
+                return c.surface === 'Хард' || c.surface === 'Hard';
+            });
         }
 
         var detailBase = isEn ? 'court-en.html' : 'court.html';
 
         var html = '<div class="ct-grid">';
         filtered.forEach(function(c) {
-            var typeLabel = c.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor;
+            var typeLabel = c._typeDesc || (c.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor);
+            var newBadge = c._isNew ? '<span class="ct-new-badge">' + L_labels.newBadge + '</span>' : '';
+
             html += '<div class="ct-card ct-fade-in">' +
-                '<img src="' + c.photo + '" alt="' + c.name + '" class="ct-card-img" loading="lazy">' +
+                '<div class="ct-card-img-wrap">' +
+                    '<img src="' + esc(c.photo) + '" alt="' + esc(c.name) + '" class="ct-card-img" loading="lazy">' +
+                    newBadge +
+                '</div>' +
                 '<div class="ct-card-body">' +
                     '<div class="ct-card-top">' +
                         '<div class="ct-card-name">' + c.name + '</div>' +
                         (c.partner ? '<span class="ct-card-partner">' + L_labels.partnerBadge + '</span>' : '') +
                     '</div>' +
-                    '<div class="ct-card-type">' + typeLabel + ' · ' + c.surface + '</div>' +
-                    '<div class="ct-card-desc">' + c.shortDesc + '</div>' +
+                    '<div class="ct-card-type">' + typeLabel + ' \u00b7 ' + c.surface + '</div>' +
+                    '<div class="ct-card-desc">' + (c.shortDesc || '') + '</div>' +
                     '<div class="ct-card-stats">' +
                         '<div class="ct-card-stat"><div class="ct-card-stat-num">' + c.courtsCount + '</div><div class="ct-card-stat-label">' + L_labels.courts + '</div></div>' +
-                        '<div class="ct-card-stat"><div class="ct-card-stat-num">★ ' + c.rating + '</div><div class="ct-card-stat-label">' + L_labels.rating + '</div></div>' +
+                        (c.rating ? '<div class="ct-card-stat"><div class="ct-card-stat-num">\u2605 ' + c.rating + '</div><div class="ct-card-stat-label">' + L_labels.rating + '</div></div>' : '') +
                     '</div>' +
-                    '<div class="ct-card-price">' + L_labels.priceFrom + ' <strong>' + c.price + '</strong> ' + L_labels.priceCurrency + '</div>' +
-                    '<a href="' + detailBase + '?id=' + c.id + '" class="ct-card-btn">' + L_labels.detailsBtn + ' →</a>' +
+                    (c.price ? '<div class="ct-card-price">' + L_labels.priceFrom + ' <strong>' + c.price + '</strong> ' + L_labels.priceCurrency + '</div>' : '') +
+                    '<a href="' + detailBase + '?id=' + c.id + '" class="ct-card-btn">' + L_labels.detailsBtn + ' \u2192</a>' +
                 '</div>' +
             '</div>';
         });
@@ -143,8 +310,9 @@
             if (data[i].id === id) { court = data[i]; break; }
         }
         if (!court) {
+            // Will be retried after Supabase loads
             var container = document.getElementById('courtDetail');
-            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2>Court not found</h2><a href="' + (isEn ? 'courts-en.html' : 'courts.html') + '" class="ct-back-link">\u2190 ' + L_labels.backBtn + '</a></div>';
+            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-dim);">' + (isEn ? 'Loading...' : 'Загрузка...') + '</div>';
             return;
         }
 
@@ -157,11 +325,12 @@
     function renderDetailHero(court) {
         var hero = document.getElementById('courtDetailHero');
         if (!hero) return;
+        var subtitle = court.address || '';
         hero.innerHTML =
-            '<div class="ct-hero-bg" style="background-image: url(\'' + court.photo + '\')"></div>' +
+            '<div class="ct-hero-bg" style="background-image: url(\'' + esc(court.photo) + '\')"></div>' +
             '<div class="ct-hero-content">' +
                 '<h1 class="ct-hero-title">' + court.name + '</h1>' +
-                '<p class="ct-hero-subtitle">' + court.address + '</p>' +
+                '<p class="ct-hero-subtitle">' + subtitle + '</p>' +
             '</div>';
     }
 
@@ -171,7 +340,7 @@
 
         var courtsLink = isEn ? 'courts-en.html' : 'courts.html';
         var authLink = isEn ? 'auth-en.html' : 'auth.html';
-        var typeLabel = court.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor;
+        var typeLabel = court._typeDesc || (court.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor);
 
         var html = '';
 
@@ -180,14 +349,14 @@
 
         // Header
         html += '<div class="ct-detail-header ct-fade-in">' +
-            '<img src="' + court.photo + '" alt="' + court.name + '" class="ct-detail-photo">' +
+            '<img src="' + esc(court.photo) + '" alt="' + esc(court.name) + '" class="ct-detail-photo">' +
             '<div class="ct-detail-info">' +
                 '<h1>' + court.name + '</h1>' +
                 '<div class="ct-detail-type">' + typeLabel + ' \u00b7 ' + court.surface +
                     (court.partner ? ' \u00b7 <span style="background:var(--accent);color:#000;font-size:0.72rem;padding:2px 8px;border-radius:100px;font-weight:700;">' + L_labels.partnerBadge + '</span>' : '') +
                 '</div>' +
-                '<div class="ct-detail-address"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + court.address + '</div>' +
-                '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> <a href="tel:' + court.phone.replace(/\s/g, '') + '">' + court.phone + '</a></div>' +
+                (court.address ? '<div class="ct-detail-address"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + court.address + '</div>' : '') +
+                (court.phone ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> <a href="tel:' + court.phone.replace(/\s/g, '') + '">' + court.phone + '</a></div>' : '') +
             '</div>' +
         '</div>';
 
@@ -195,37 +364,51 @@
         html += '<div class="ct-detail-stats ct-fade-in">' +
             '<div class="ct-detail-stat"><div class="ct-detail-stat-num">' + court.courtsCount + '</div><div class="ct-detail-stat-label">' + L_labels.courts + '</div></div>' +
             '<div class="ct-detail-stat"><div class="ct-detail-stat-num">' + court.surface + '</div><div class="ct-detail-stat-label">' + L_labels.surface + '</div></div>' +
-            '<div class="ct-detail-stat"><div class="ct-detail-stat-num">\u2605 ' + court.rating + '</div><div class="ct-detail-stat-label">' + L_labels.rating + '</div></div>' +
-            '<div class="ct-detail-stat"><div class="ct-detail-stat-num">' + court.price + '</div><div class="ct-detail-stat-label">' + L_labels.priceCurrency + '</div></div>' +
+            (court.rating ? '<div class="ct-detail-stat"><div class="ct-detail-stat-num">\u2605 ' + court.rating + '</div><div class="ct-detail-stat-label">' + L_labels.rating + '</div></div>' : '') +
+            (court.price ? '<div class="ct-detail-stat"><div class="ct-detail-stat-num">' + court.price + '</div><div class="ct-detail-stat-label">' + L_labels.priceCurrency + '</div></div>' : '') +
         '</div>';
+
+        // Map links (for DB courts)
+        if (court.google_maps_url || court.twogis_url) {
+            html += '<div class="ct-section ct-fade-in"><div class="ct-map-links">';
+            if (court.google_maps_url) html += '<a href="' + court.google_maps_url + '" target="_blank" rel="noopener" class="ct-map-link">Google Maps \u2197</a>';
+            if (court.twogis_url) html += '<a href="' + court.twogis_url + '" target="_blank" rel="noopener" class="ct-map-link">2GIS \u2197</a>';
+            html += '</div></div>';
+        }
 
         // About
-        html += '<div class="ct-section ct-fade-in">' +
-            '<h2 class="ct-section-title">' + L_labels.aboutTitle + '</h2>' +
-            '<p class="ct-about-text">' + court.description + '</p>' +
-        '</div>';
+        if (court.description) {
+            html += '<div class="ct-section ct-fade-in">' +
+                '<h2 class="ct-section-title">' + L_labels.aboutTitle + '</h2>' +
+                '<p class="ct-about-text">' + court.description + '</p>' +
+            '</div>';
+        }
 
         // Amenities
-        html += '<div class="ct-section ct-fade-in">' +
-            '<h2 class="ct-section-title">' + L_labels.amenitiesTitle + '</h2>' +
-            '<div class="ct-amenities">';
-        court.amenities.forEach(function(a) {
-            html += '<div class="ct-amenity">' + a + '</div>';
-        });
-        html += '</div></div>';
+        if (court.amenities && court.amenities.length) {
+            html += '<div class="ct-section ct-fade-in">' +
+                '<h2 class="ct-section-title">' + L_labels.amenitiesTitle + '</h2>' +
+                '<div class="ct-amenities">';
+            court.amenities.forEach(function(a) {
+                html += '<div class="ct-amenity">' + a + '</div>';
+            });
+            html += '</div></div>';
+        }
 
-        // Schedule
-        html += '<div class="ct-section ct-fade-in">' +
-            '<h2 class="ct-section-title">' + L_labels.scheduleTitle + '</h2>' +
-            '<div class="ct-schedule">';
-        var keys = Object.keys(court.schedule);
-        keys.forEach(function(key) {
-            html += '<div class="ct-schedule-row">' +
-                '<span class="ct-schedule-day">' + key + '</span>' +
-                '<span class="ct-schedule-time">' + court.schedule[key] + '</span>' +
-            '</div>';
-        });
-        html += '</div></div>';
+        // Schedule (only for static courts)
+        if (court.schedule && Object.keys(court.schedule).length) {
+            html += '<div class="ct-section ct-fade-in">' +
+                '<h2 class="ct-section-title">' + L_labels.scheduleTitle + '</h2>' +
+                '<div class="ct-schedule">';
+            var keys = Object.keys(court.schedule);
+            keys.forEach(function(key) {
+                html += '<div class="ct-schedule-row">' +
+                    '<span class="ct-schedule-day">' + key + '</span>' +
+                    '<span class="ct-schedule-time">' + court.schedule[key] + '</span>' +
+                '</div>';
+            });
+            html += '</div></div>';
+        }
 
         // Gallery
         if (court.gallery && court.gallery.length > 0) {
@@ -233,16 +416,18 @@
                 '<h2 class="ct-section-title">' + L_labels.galleryTitle + '</h2>' +
                 '<div class="ct-gallery">';
             court.gallery.forEach(function(img) {
-                html += '<img src="' + img + '" alt="' + court.name + '" class="ct-gallery-img" loading="lazy">';
+                html += '<img src="' + esc(img) + '" alt="' + esc(court.name) + '" class="ct-gallery-img" loading="lazy">';
             });
             html += '</div></div>';
         }
 
-        // Location map
-        html += '<div class="ct-section ct-fade-in">' +
-            '<h2 class="ct-section-title">' + L_labels.locationTitle + '</h2>' +
-            '<div id="courtDetailMap" class="ct-detail-map"></div>' +
-        '</div>';
+        // Location map (only for static courts with lat/lng)
+        if (court.lat && court.lng) {
+            html += '<div class="ct-section ct-fade-in">' +
+                '<h2 class="ct-section-title">' + L_labels.locationTitle + '</h2>' +
+                '<div id="courtDetailMap" class="ct-detail-map"></div>' +
+            '</div>';
+        }
 
         // CTA
         html += '<div class="ct-cta ct-fade-in">' +
@@ -253,8 +438,8 @@
 
         container.innerHTML = html;
 
-        // Init mini map after DOM update
-        initDetailMap(court);
+        // Init mini map after DOM update (static courts only)
+        if (court.lat && court.lng) initDetailMap(court);
     }
 
     function initDetailMap(court) {

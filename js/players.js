@@ -1,8 +1,14 @@
 // ========================================
 // PLAYERS PAGE — Rendering + Interactivity
+// Supabase primary, static data fallback
 // ========================================
 
 (function() {
+    function esc(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
     var PER_PAGE = 20;
     var currentTab = 'men-promasters';
     var currentPage = 1;
@@ -11,6 +17,9 @@
 
     var GUEST_VISIBLE_ROWS = 8;
     var GUEST_BLURRED_ROWS = 4;
+
+    // Will be populated from Supabase or static
+    var categoriesData = {};
 
     function isLoggedIn() {
         try {
@@ -94,10 +103,9 @@
 
     function getAllPlayers() {
         var all = [];
-        var cats = playersData.categories;
-        for (var key in cats) {
-            if (cats.hasOwnProperty(key)) {
-                all = all.concat(cats[key].players);
+        for (var key in categoriesData) {
+            if (categoriesData.hasOwnProperty(key)) {
+                all = all.concat(categoriesData[key].players);
             }
         }
         return all;
@@ -113,21 +121,20 @@
     }
 
     function getCategory(tab) {
-        return playersData.categories[tab] || playersData.categories['men-promasters'];
+        return categoriesData[tab] || categoriesData['men-promasters'] || { players: [] };
     }
 
     function getFilteredPlayers(tab) {
         var cat = getCategory(tab);
-        if (!searchQuery) return cat.players;
-        // Search across ALL categories
+        if (!searchQuery) return cat.players || [];
         var q = searchQuery.toLowerCase();
         var results = [];
-        var cats = playersData.categories;
-        for (var key in cats) {
-            if (!cats.hasOwnProperty(key)) continue;
-            var c = cats[key];
-            for (var i = 0; i < c.players.length; i++) {
-                var p = c.players[i];
+        for (var key in categoriesData) {
+            if (!categoriesData.hasOwnProperty(key)) continue;
+            var c = categoriesData[key];
+            var players = c.players || [];
+            for (var i = 0; i < players.length; i++) {
+                var p = players[i];
                 if (p.name.toLowerCase().indexOf(q) !== -1) {
                     results.push({
                         player: p,
@@ -144,14 +151,87 @@
     var isSearchMode = false;
 
     // ========================================
+    // SUPABASE DATA LOADER
+    // ========================================
+
+    async function loadFromSupabase() {
+        if (!window.supabaseClient) return null;
+        var client = window.supabaseClient;
+        var isEn = isEnPage();
+
+        try {
+            // Load categories
+            var catResult = await client.from('categories').select('*').order('sort_order', { ascending: true });
+            if (catResult.error || !catResult.data || catResult.data.length === 0) return null;
+
+            // Load all players
+            var plrResult = await client.from('players').select('*').order('points', { ascending: false });
+            if (plrResult.error) return null;
+
+            var players = plrResult.data || [];
+            var categories = catResult.data;
+
+            // Build categoriesData structure matching static format
+            var result = {};
+            categories.forEach(function(cat) {
+                var catPlayers = players.filter(function(p) { return p.category_id === cat.id; });
+                result[cat.id] = {
+                    name: isEn ? (cat.name_en || cat.name) : cat.name,
+                    gender: cat.gender,
+                    genderLabel: isEn ? (cat.gender === 'men' ? 'Men' : 'Women') : (cat.gender === 'men' ? 'Мужчины' : 'Женщины'),
+                    players: catPlayers.map(function(p) {
+                        return {
+                            id: p.id,
+                            name: isEn ? (p.name_en || p.name) : p.name,
+                            photo: p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?',
+                            country: p.country || '🇰🇬',
+                            points: p.points || 0,
+                            wins: p.wins || 0,
+                            losses: p.losses || 0,
+                            change: p.rank_change || 0,
+                            form: p.form || [],
+                            online: false,
+                            badges: p.badges || []
+                        };
+                    })
+                };
+            });
+
+            return result;
+        } catch (e) {
+            console.error('Supabase players load error:', e);
+            return null;
+        }
+    }
+
+    function loadStaticData() {
+        if (typeof playersData !== 'undefined' && playersData.categories) {
+            return playersData.categories;
+        }
+        return {};
+    }
+
+    // ========================================
     // INIT
     // ========================================
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Try Supabase first, fallback to static
+        var dbData = await loadFromSupabase();
+        if (dbData && Object.keys(dbData).length > 0) {
+            categoriesData = dbData;
+        } else {
+            categoriesData = loadStaticData();
+        }
+
         var params = new URLSearchParams(window.location.search);
         var tab = params.get('tab');
-        if (tab && playersData.categories[tab]) {
+        if (tab && categoriesData[tab]) {
             currentTab = tab;
+        } else {
+            // Default to first category
+            var firstKey = Object.keys(categoriesData)[0];
+            if (firstKey) currentTab = firstKey;
         }
 
         renderHero();
@@ -205,9 +285,9 @@
         if (!container) return;
 
         var cat = getCategory(tab);
-        var top3 = cat.players.slice(0, 3);
+        var players = cat.players || [];
+        var top3 = players.slice(0, 3);
         var medals = ['\ud83e\udd47', '\ud83e\udd48', '\ud83e\udd49'];
-        // Podium order: 2nd (left), 1st (center), 3rd (right)
         var order = [1, 0, 2];
         var placeClass = ['pl-podium-first', 'pl-podium-second', 'pl-podium-third'];
 
@@ -219,17 +299,18 @@
             if (!top3[i]) continue;
             var p = top3[i];
             var badgesHtml = '';
-            for (var b = 0; b < p.badges.length; b++) {
-                var badge = badgeMap[p.badges[b]];
+            var pBadges = p.badges || [];
+            for (var b = 0; b < pBadges.length; b++) {
+                var badge = badgeMap[pBadges[b]];
                 if (badge) {
-                    badgesHtml += '<span class="pl-badge" title="' + getBadgeTooltip(p.badges[b]) + '">' + badge.emoji + '</span>';
+                    badgesHtml += '<span class="pl-badge" title="' + getBadgeTooltip(pBadges[b]) + '">' + badge.emoji + '</span>';
                 }
             }
 
             html += '<div class="pl-podium-card ' + placeClass[i] + ' ' + animClasses + '">' +
                 '<div class="pl-podium-medal">' + medals[i] + '</div>' +
                 '<div class="pl-podium-photo-wrap">' +
-                    '<img src="' + p.photo + '" alt="' + p.name + '" class="pl-podium-photo">' +
+                    '<img src="' + esc(p.photo) + '" alt="' + esc(p.name) + '" class="pl-podium-photo">' +
                     (p.online ? '<span class="pl-online-dot pl-online-pulse"></span>' : '') +
                 '</div>' +
                 '<div class="pl-podium-name">' + p.name + '</div>' +
@@ -254,15 +335,15 @@
 
         var menCats = [];
         var womenCats = [];
-        for (var key in playersData.categories) {
-            if (playersData.categories.hasOwnProperty(key)) {
-                var cat = playersData.categories[key];
+        for (var key in categoriesData) {
+            if (categoriesData.hasOwnProperty(key)) {
+                var cat = categoriesData[key];
                 if (cat.gender === 'men') menCats.push({ key: key, name: cat.name });
                 else womenCats.push({ key: key, name: cat.name });
             }
         }
 
-        html = '<div class="pl-gender-tabs">' +
+        var html = '<div class="pl-gender-tabs">' +
             '<button class="pl-gender-tab' + (currentGender === 'men' ? ' active' : '') + '" data-gender="men">' + labels.men + '</button>' +
             '<button class="pl-gender-tab' + (currentGender === 'women' ? ' active' : '') + '" data-gender="women">' + labels.women + '</button>' +
         '</div>';
@@ -289,9 +370,7 @@
         var filtered = getFilteredPlayers(tab);
         isSearchMode = !!searchQuery;
 
-        // In search mode, filtered is array of {player, categoryKey, categoryName, rankInCategory}
-        // In normal mode, filtered is array of player objects
-        var items = isSearchMode ? filtered : filtered;
+        var items = filtered;
         var totalPages = Math.max(1, Math.ceil(items.length / PER_PAGE));
         if (page > totalPages) page = totalPages;
         currentPage = page;
@@ -299,14 +378,11 @@
         var start = (page - 1) * PER_PAGE;
         var pageItems = items.slice(start, start + PER_PAGE);
 
-        // Toggle podium/filters visibility in search mode
         var podiumEl = document.getElementById('playersPodium');
         var filtersEl = document.getElementById('playersFilters');
-        var paginationEl = document.getElementById('playersPagination');
         var sponsorsEl = document.getElementById('playersSponsors');
         if (podiumEl) podiumEl.style.display = isSearchMode ? 'none' : '';
         if (filtersEl) filtersEl.style.display = isSearchMode ? 'none' : '';
-        // Reduce gap between table and sponsors in search mode
         if (container) container.style.paddingBottom = isSearchMode ? '16px' : '';
         if (sponsorsEl) sponsorsEl.style.paddingTop = isSearchMode ? '0' : '';
 
@@ -315,6 +391,10 @@
             renderPagination(0, 1);
             return;
         }
+
+        var logged = isLoggedIn();
+        var isGuest = !logged && !isSearchMode;
+        var totalVisible = isGuest ? Math.min(pageItems.length, GUEST_VISIBLE_ROWS + GUEST_BLURRED_ROWS) : pageItems.length;
 
         var html = '<div class="pl-table">';
 
@@ -331,11 +411,6 @@
             (logged ? '<span class="pl-col-actions">' + labels.actions + '</span>' : '') +
         '</div>';
 
-        // Guest restriction
-        var logged = isLoggedIn();
-        var isGuest = !logged && !isSearchMode;
-        var totalVisible = isGuest ? Math.min(pageItems.length, GUEST_VISIBLE_ROWS + GUEST_BLURRED_ROWS) : pageItems.length;
-
         // Rows
         for (var i = 0; i < totalVisible; i++) {
             var item = pageItems[i];
@@ -343,32 +418,29 @@
             var rank = isSearchMode ? item.rankInCategory : (start + i + 1);
             var rankClass = rank <= 3 ? ' pl-rank-top' : '';
 
-            // Blur level for guest rows beyond visible limit
             var blurClass = '';
             if (isGuest && i >= GUEST_VISIBLE_ROWS) {
                 var blurLevel = i - GUEST_VISIBLE_ROWS + 1;
                 blurClass = ' pl-row-blur pl-row-blur-' + blurLevel;
             }
 
-            // Badges
+            var pBadges = p.badges || [];
             var badgesHtml = '';
-            for (var b = 0; b < p.badges.length; b++) {
-                var badge = badgeMap[p.badges[b]];
+            for (var b = 0; b < pBadges.length; b++) {
+                var badge = badgeMap[pBadges[b]];
                 if (badge) {
-                    badgesHtml += '<span class="pl-badge" title="' + getBadgeTooltip(p.badges[b]) + '">' + badge.emoji + '</span>';
+                    badgesHtml += '<span class="pl-badge" title="' + getBadgeTooltip(pBadges[b]) + '">' + badge.emoji + '</span>';
                 }
             }
 
-            // Category label (search mode only)
             var catLabel = isSearchMode ? '<span class="pl-player-category">' + item.categoryName + '</span>' : '';
 
-            // Form dots
+            var pForm = p.form || [];
             var formHtml = '';
-            for (var f = 0; f < p.form.length; f++) {
-                formHtml += '<span class="pl-form-dot ' + (p.form[f] === 'W' ? 'pl-form-win' : 'pl-form-loss') + '"></span>';
+            for (var f = 0; f < pForm.length; f++) {
+                formHtml += '<span class="pl-form-dot ' + (pForm[f] === 'W' ? 'pl-form-win' : 'pl-form-loss') + '"></span>';
             }
 
-            // Change
             var changeHtml = '';
             if (p.change > 0) {
                 changeHtml = '<span class="pl-change-up">\u2191' + p.change + '</span>';
@@ -378,7 +450,6 @@
                 changeHtml = '<span class="pl-change-neutral">\u2014</span>';
             }
 
-            // Actions (only for logged-in users)
             var actionsHtml = '';
             if (logged) {
                 var authUrl = getAuthUrl();
@@ -391,7 +462,7 @@
             html += '<div class="pl-row pl-animate' + blurClass + '" style="transition-delay:' + Math.min(i * 30, 300) + 'ms">' +
                 '<span class="pl-col-rank' + rankClass + '">' + rank + '</span>' +
                 '<div class="pl-col-player">' +
-                    '<img src="' + p.photo + '" alt="" class="pl-player-photo">' +
+                    '<img src="' + esc(p.photo) + '" alt="" class="pl-player-photo">' +
                     '<div class="pl-player-info">' +
                         '<div class="pl-player-name-row">' +
                             '<a href="' + (isEnPage() ? 'player-en.html' : 'player.html') + '?id=' + p.id + '" class="pl-player-name">' + p.name + '</a>' +
@@ -435,7 +506,6 @@
 
         container.innerHTML = html;
 
-        // Hide pagination for guests
         if (!logged) {
             var paginationEl = document.getElementById('playersPagination');
             if (paginationEl) paginationEl.style.display = 'none';
@@ -505,14 +575,12 @@
     // ========================================
 
     function initTabs() {
-        // Gender tabs
         document.addEventListener('click', function(e) {
             var genderBtn = e.target.closest('.pl-gender-tab');
             if (genderBtn) {
                 var gender = genderBtn.dataset.gender;
-                // Find first category of this gender
-                for (var key in playersData.categories) {
-                    if (playersData.categories.hasOwnProperty(key) && playersData.categories[key].gender === gender) {
+                for (var key in categoriesData) {
+                    if (categoriesData.hasOwnProperty(key) && categoriesData[key].gender === gender) {
                         switchTab(key);
                         break;
                     }
@@ -526,7 +594,6 @@
                 return;
             }
 
-            // Pagination
             var pageBtn = e.target.closest('.pl-page-btn');
             if (pageBtn && !pageBtn.disabled) {
                 if (pageBtn.classList.contains('pl-page-prev')) {
@@ -544,7 +611,7 @@
     }
 
     function switchTab(tab) {
-        if (!playersData.categories[tab]) return;
+        if (!categoriesData[tab]) return;
         currentTab = tab;
         currentPage = 1;
         searchQuery = '';
@@ -575,7 +642,6 @@
                 currentPage = 1;
 
                 if (!val) {
-                    // Search cleared — restore podium for active tab
                     isSearchMode = false;
                     renderPodium(currentTab, true);
                     renderFilters();

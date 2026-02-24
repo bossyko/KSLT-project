@@ -61,7 +61,8 @@
 // Индексы 1-based (позиция в жеребьёвке)
 var SEED_POSITIONS = {
     32: [1, 32, 17, 16, 9, 24, 25, 8],  // 8 сеяных
-    16: [1, 16, 9, 8]                     // 4 сеяных
+    16: [1, 16, 9, 8],                    // 4 сеяных
+    8:  [1, 8, 5, 4]                      // 2 сеяных
 };
 
 // --- Названия раундов ---
@@ -79,6 +80,11 @@ var ROUND_DEFS = {
             { name: "Четвертьфинал", nameShort: "QF", prefix: "QF" },
             { name: "Полуфинал", nameShort: "SF", prefix: "SF" },
             { name: "Финал", nameShort: "F", prefix: "F" }
+        ],
+        8: [
+            { name: "Четвертьфинал", nameShort: "QF", prefix: "QF" },
+            { name: "Полуфинал", nameShort: "SF", prefix: "SF" },
+            { name: "Финал", nameShort: "F", prefix: "F" }
         ]
     },
     en: {
@@ -91,6 +97,11 @@ var ROUND_DEFS = {
         ],
         16: [
             { name: "Round of 16", nameShort: "R16", prefix: "R1" },
+            { name: "Quarterfinal", nameShort: "QF", prefix: "QF" },
+            { name: "Semifinal", nameShort: "SF", prefix: "SF" },
+            { name: "Final", nameShort: "F", prefix: "F" }
+        ],
+        8: [
             { name: "Quarterfinal", nameShort: "QF", prefix: "QF" },
             { name: "Semifinal", nameShort: "SF", prefix: "SF" },
             { name: "Final", nameShort: "F", prefix: "F" }
