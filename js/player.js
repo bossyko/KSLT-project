@@ -96,7 +96,7 @@
         var matches = [];
 
         // Use real form + extend to 8 matches
-        var results = player.form.slice();
+        var results = (player.form || []).slice();
         for (var i = results.length; i < 8; i++) {
             results.push(seededRandom(seed + i * 7) > 0.45 ? 'W' : 'L');
         }
@@ -146,7 +146,8 @@
         if (player.wins >= 15) {
             achievements.push({ icon: '\u2B50', name: L.veteran, desc: player.wins + ' ' + L.victories });
         }
-        var winRate = Math.round(player.wins / (player.wins + player.losses) * 100);
+        var totalG = (player.wins || 0) + (player.losses || 0);
+        var winRate = totalG > 0 ? Math.round(player.wins / totalG * 100) : 0;
         if (winRate >= 70) {
             achievements.push({ icon: '\uD83D\uDCAA', name: L.dominant, desc: winRate + '% ' + L.winRateLabel });
         }
@@ -215,8 +216,9 @@
         var player = data.player;
         var cat = data.category;
         var rank = data.rank;
-        var streak = calcStreak(player.form);
-        var winRate = Math.round(player.wins / (player.wins + player.losses) * 100);
+        var streak = calcStreak(player.form || []);
+        var totalM = (player.wins || 0) + (player.losses || 0);
+        var winRate = totalM > 0 ? Math.round(player.wins / totalM * 100) : 0;
         var matches = generateMatchHistory(data);
         var achievements = generateAchievements(player);
         var tournaments = generateTournaments(data);
@@ -231,7 +233,8 @@
         // ---- Header ----
         html += '<div class="pp-header pp-fade-in">';
         html += '<div class="pp-photo-wrap">';
-        html += '<img src="' + esc(player.photo.replace('w=80&h=80', 'w=240&h=240')) + '" alt="' + esc(player.name) + '" class="pp-photo">';
+        var photoUrl = player.photo ? player.photo.replace('w=80&h=80', 'w=240&h=240') : 'https://placehold.co/240x240?text=No+Photo';
+        html += '<img src="' + esc(photoUrl) + '" alt="' + esc(player.name) + '" class="pp-photo">';
         if (player.online) html += '<div class="pp-online-dot"></div>';
         html += '</div>';
 
@@ -279,7 +282,7 @@
         html += '<div class="pp-stat-num">' + streakLabel + '</div>';
         html += '<div class="pp-stat-label">' + L.statsStreak + '</div>';
         html += '<div class="pp-form">';
-        player.form.forEach(function (f) {
+        (player.form || []).forEach(function (f) {
             html += '<span class="pp-form-dot ' + (f === 'W' ? 'win' : 'loss') + '"></span>';
         });
         html += '</div></div>';

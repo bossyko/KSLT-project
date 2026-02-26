@@ -145,6 +145,8 @@
         regCount: 'registered',
         enterScore: 'Enter Score',
         saveScore: 'Save Score',
+        addSet: '+ Add Set',
+        removeSet: '- Remove Set',
         matchScore: 'Score',
         matchWinner: 'Winner',
         matchCompleted: 'completed',
@@ -481,6 +483,8 @@
         regCount: 'зарегистрировано',
         enterScore: 'Ввести счёт',
         saveScore: 'Сохранить счёт',
+        addSet: '+ Добавить сет',
+        removeSet: '- Убрать сет',
         matchScore: 'Счёт',
         matchWinner: 'Победитель',
         matchCompleted: 'завершён',
@@ -2301,7 +2305,7 @@
                 showConfirm(L.generateDrawConfirm, '', async function() {
                     await generateBracketDraw(tournament, registrations, playersMap);
                     renderBracketManagement(tournamentId);
-                });
+                }, L.generateDraw);
             });
         }
 
@@ -2331,7 +2335,13 @@
             recalcBtn.addEventListener('click', async function() {
                 recalcBtn.disabled = true;
                 recalcBtn.textContent = isEn ? 'Recalculating...' : 'Пересчёт...';
-                await finalizeTournament(tournament, matches, playersMap);
+                // Reload fresh matches from DB before recalculating
+                var freshRes = await client.from('matches').select('*')
+                    .eq('tournament_id', tournamentId)
+                    .order('round_number', { ascending: true })
+                    .order('match_order', { ascending: true });
+                var freshMatches = freshRes.data || matches;
+                await finalizeTournament(tournament, freshMatches, playersMap);
                 renderBracketManagement(tournamentId);
             });
         }
@@ -2625,7 +2635,7 @@
             var medal = '';
             if (place === 1) medal = '<span style="margin-right:4px;">🥇</span>';
             else if (place === 2) medal = '<span style="margin-right:4px;">🥈</span>';
-            else if (place <= 4) medal = '<span style="margin-right:4px;">🥉</span>';
+            else if (place === 3) medal = '<span style="margin-right:4px;">🥉</span>';
 
             html += '<tr style="' + (isWinner ? 'background:rgba(204,255,0,0.08);' : '') + '">' +
                 '<td style="font-weight:600;text-align:center;">' + medal + place + '</td>' +
@@ -2868,16 +2878,15 @@
         var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
 
         // Parse existing score: "6/4 7/6(11-9) 6/3" → sets + tiebreaks
-        var sets = (match.score && match.score !== 'BYE') ? match.score.split(' ') : [];
-        var sv = [['','','',''],['','','',''],['','','','']]; // [p1, p2, tb1, tb2]
+        var existingSets = (match.score && match.score !== 'BYE') ? match.score.split(' ') : [];
+        var sv = [['','','',''],['','','',''],['','','','']];
         for (var i = 0; i < 3; i++) {
-            if (sets[i]) {
-                var tbMatch = sets[i].match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
+            if (existingSets[i]) {
+                var tbMatch = existingSets[i].match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
                 if (tbMatch) {
                     sv[i] = [tbMatch[1], tbMatch[2], tbMatch[3] || '', tbMatch[4] || ''];
                 } else {
-                    // fallback: old format 7/6(4) → loser score only
-                    var oldMatch = sets[i].match(/^(\d+)\/(\d+)(?:\((\d+)\))?$/);
+                    var oldMatch = existingSets[i].match(/^(\d+)\/(\d+)(?:\((\d+)\))?$/);
                     if (oldMatch) {
                         sv[i] = [oldMatch[1], oldMatch[2], '', oldMatch[3] || ''];
                     }
@@ -2885,12 +2894,17 @@
             }
         }
 
+        // Determine initial visible sets count from existing data
+        var visibleSets = 1;
+        if (existingSets.length >= 3) visibleSets = 3;
+        else if (existingSets.length === 2) visibleSets = 2;
+
         function setRowHtml(setNum, vals) {
             var id1 = 'adS' + setNum + 'P1';
             var id2 = 'adS' + setNum + 'P2';
             var idTB1 = 'adS' + setNum + 'TB1';
             var idTB2 = 'adS' + setNum + 'TB2';
-            return '<div class="ad-score-set-row" data-set="' + setNum + '">' +
+            return '<div class="ad-score-set-row" data-set="' + setNum + '" id="adSetRow' + setNum + '">' +
                 '<label class="ad-field-label" style="min-width:40px;">Set ' + setNum + '</label>' +
                 '<input type="text" inputmode="numeric" maxlength="1" class="ad-field-input ad-score-input ad-set-game" id="' + id1 + '" value="' + vals[0] + '">' +
                 '<span style="font-weight:600;">:</span>' +
@@ -2918,12 +2932,15 @@
                         '<div style="color:var(--text-secondary);font-size:12px;margin:4px 0;">' + L.vsLabel + '</div>' +
                         '<div style="font-weight:600;">' + esc(p2Name) + (match.seed2 ? ' <span style="color:var(--accent);font-size:11px;">[' + match.seed2 + ']</span>' : '') + '</div>' +
                     '</div>' +
-                    setRowHtml(1, sv[0]) +
-                    setRowHtml(2, sv[1]) +
-                    '<div id="adSet3Block" style="display:none;">' +
+                    '<div id="adSetsContainer">' +
+                        setRowHtml(1, sv[0]) +
+                        setRowHtml(2, sv[1]) +
                         setRowHtml(3, sv[2]) +
                     '</div>' +
-                    // Winner auto-display
+                    '<div id="adSetButtons" style="display:flex;gap:8px;justify-content:center;margin-top:8px;">' +
+                        '<button class="ad-btn ad-btn-secondary" id="adAddSet" style="font-size:0.8rem;padding:4px 12px;">' + L.addSet + '</button>' +
+                        '<button class="ad-btn ad-btn-secondary" id="adRemoveSet" style="font-size:0.8rem;padding:4px 12px;">' + L.removeSet + '</button>' +
+                    '</div>' +
                     '<div style="margin-top:12px;text-align:center;">' +
                         '<label class="ad-field-label">' + L.matchWinner + '</label>' +
                         '<div id="adWinnerDisplay" style="padding:8px;font-size:0.95rem;"></div>' +
@@ -2937,11 +2954,44 @@
 
         document.body.appendChild(overlay);
 
+        var currentSets = visibleSets;
+
+        function updateSetsVisibility() {
+            for (var s = 1; s <= 3; s++) {
+                var row = document.getElementById('adSetRow' + s);
+                if (row) row.style.display = s <= currentSets ? '' : 'none';
+            }
+            document.getElementById('adAddSet').style.display = currentSets < 3 ? '' : 'none';
+            document.getElementById('adRemoveSet').style.display = currentSets > 1 ? '' : 'none';
+            // Clear hidden sets
+            for (var s = currentSets + 1; s <= 3; s++) {
+                var p1Input = document.getElementById('adS' + s + 'P1');
+                var p2Input = document.getElementById('adS' + s + 'P2');
+                var tb1Input = document.getElementById('adS' + s + 'TB1');
+                var tb2Input = document.getElementById('adS' + s + 'TB2');
+                if (p1Input) p1Input.value = '';
+                if (p2Input) p2Input.value = '';
+                if (tb1Input) tb1Input.value = '';
+                if (tb2Input) tb2Input.value = '';
+            }
+            updateState();
+        }
+
+        document.getElementById('adAddSet').addEventListener('click', function() {
+            if (currentSets < 3) { currentSets++; updateSetsVisibility(); }
+        });
+        document.getElementById('adRemoveSet').addEventListener('click', function() {
+            if (currentSets > 1) { currentSets--; updateSetsVisibility(); }
+        });
+
         // Show/hide tiebreak inputs when 7:6 or 6:7
         function checkTiebreaks() {
             for (var s = 1; s <= 3; s++) {
-                var v1 = parseInt(document.getElementById('adS' + s + 'P1').value) || 0;
-                var v2 = parseInt(document.getElementById('adS' + s + 'P2').value) || 0;
+                var p1El = document.getElementById('adS' + s + 'P1');
+                var p2El = document.getElementById('adS' + s + 'P2');
+                if (!p1El || !p2El) continue;
+                var v1 = parseInt(p1El.value) || 0;
+                var v2 = parseInt(p2El.value) || 0;
                 var tbWrap = document.getElementById('adS' + s + 'TB1Wrap');
                 if (tbWrap) {
                     tbWrap.style.display = ((v1 === 7 && v2 === 6) || (v1 === 6 && v2 === 7)) ? 'inline-flex' : 'none';
@@ -2952,66 +3002,61 @@
         function updateState() {
             checkTiebreaks();
 
-            var s1p1 = parseInt(document.getElementById('adS1P1').value) || 0;
-            var s1p2 = parseInt(document.getElementById('adS1P2').value) || 0;
-            var s2p1 = parseInt(document.getElementById('adS2P1').value) || 0;
-            var s2p2 = parseInt(document.getElementById('adS2P2').value) || 0;
-            var s3p1 = parseInt(document.getElementById('adS3P1').value) || 0;
-            var s3p2 = parseInt(document.getElementById('adS3P2').value) || 0;
-
             var p1Sets = 0, p2Sets = 0;
-            if (s1p1 > s1p2) p1Sets++; else if (s1p2 > s1p1) p2Sets++;
-            if (s2p1 > s2p2) p1Sets++; else if (s2p2 > s2p1) p2Sets++;
-
-            // Show set 3 if 1:1
-            var set3Block = document.getElementById('adSet3Block');
-            var showSet3 = (p1Sets === 1 && p2Sets === 1);
-            set3Block.style.display = showSet3 ? '' : 'none';
-
-            if (showSet3) {
-                if (s3p1 > s3p2) p1Sets++; else if (s3p2 > s3p1) p2Sets++;
+            for (var s = 1; s <= currentSets; s++) {
+                var v1 = parseInt(document.getElementById('adS' + s + 'P1').value) || 0;
+                var v2 = parseInt(document.getElementById('adS' + s + 'P2').value) || 0;
+                if (v1 > v2) p1Sets++; else if (v2 > v1) p2Sets++;
             }
 
-            // Winner
+            // Winner logic based on number of visible sets
             var winnerId = '';
             var winnerDisplay = document.getElementById('adWinnerDisplay');
-            if (p1Sets >= 2) {
+            var neededToWin = currentSets === 1 ? 1 : 2;
+
+            if (p1Sets >= neededToWin) {
                 winnerId = match.player1_id;
                 winnerDisplay.innerHTML = '<span style="color:var(--accent);font-weight:600;">' + esc(p1Name) + '</span>';
-            } else if (p2Sets >= 2) {
+            } else if (p2Sets >= neededToWin) {
                 winnerId = match.player2_id;
                 winnerDisplay.innerHTML = '<span style="color:var(--accent);font-weight:600;">' + esc(p2Name) + '</span>';
             } else {
-                var label = (p1Sets + p2Sets > 0) ? (p1Sets + ':' + p2Sets) : (isEn ? 'Enter score' : 'Введите счёт');
+                var totalPlayed = p1Sets + p2Sets;
+                var label = totalPlayed > 0 ? (p1Sets + ':' + p2Sets) : (isEn ? 'Enter score' : 'Введите счёт');
                 winnerDisplay.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem;">' + label + '</span>';
             }
             document.getElementById('adScoreWinner').value = winnerId;
         }
 
-        // Filter input: only 0-7 for game scores, digits for TB
-        overlay.querySelectorAll('.ad-set-game').forEach(function(input) {
-            input.addEventListener('input', function() {
-                var v = input.value.replace(/[^0-7]/g, '');
-                if (v.length > 1) v = v.charAt(v.length - 1);
-                input.value = v;
-                updateState();
-                // Auto-focus next input
-                if (v.length === 1) {
-                    var next = input.closest('.ad-score-set-row').querySelector('.ad-set-game:not(:focus) , .ad-tb-input');
-                    var allInputs = Array.from(overlay.querySelectorAll('.ad-set-game, .ad-tb-input'));
-                    var idx = allInputs.indexOf(input);
-                    if (idx >= 0 && idx < allInputs.length - 1) allInputs[idx + 1].focus();
-                }
+        function bindInputEvents() {
+            overlay.querySelectorAll('.ad-set-game').forEach(function(input) {
+                input.removeEventListener('input', input._handler);
+                input._handler = function() {
+                    var v = input.value.replace(/[^0-7]/g, '');
+                    if (v.length > 1) v = v.charAt(v.length - 1);
+                    input.value = v;
+                    updateState();
+                    if (v.length === 1) {
+                        var allInputs = Array.from(overlay.querySelectorAll('.ad-set-game:not([style*="display: none"] *), .ad-tb-input'));
+                        var visibleInputs = allInputs.filter(function(el) { return el.offsetParent !== null; });
+                        var idx = visibleInputs.indexOf(input);
+                        if (idx >= 0 && idx < visibleInputs.length - 1) visibleInputs[idx + 1].focus();
+                    }
+                };
+                input.addEventListener('input', input._handler);
             });
-        });
-        overlay.querySelectorAll('.ad-tb-input').forEach(function(input) {
-            input.addEventListener('input', function() {
-                input.value = input.value.replace(/[^0-9]/g, '').slice(0, 2);
-                updateState();
+            overlay.querySelectorAll('.ad-tb-input').forEach(function(input) {
+                input.removeEventListener('input', input._tbHandler);
+                input._tbHandler = function() {
+                    input.value = input.value.replace(/[^0-9]/g, '').slice(0, 2);
+                    updateState();
+                };
+                input.addEventListener('input', input._tbHandler);
             });
-        });
+        }
 
-        updateState();
+        bindInputEvents();
+        updateSetsVisibility();
 
         // Close
         document.getElementById('adScoreClose').addEventListener('click', function() { overlay.remove(); });
@@ -3019,36 +3064,27 @@
 
         // Save
         document.getElementById('adScoreSave').addEventListener('click', async function() {
-            var s1p1 = document.getElementById('adS1P1').value;
-            var s1p2 = document.getElementById('adS1P2').value;
-            var s2p1 = document.getElementById('adS2P1').value;
-            var s2p2 = document.getElementById('adS2P2').value;
-            var s3p1 = document.getElementById('adS3P1').value;
-            var s3p2 = document.getElementById('adS3P2').value;
-            var winnerId = document.getElementById('adScoreWinner').value;
+            // Validate visible sets
+            for (var s = 1; s <= currentSets; s++) {
+                var v1 = document.getElementById('adS' + s + 'P1').value;
+                var v2 = document.getElementById('adS' + s + 'P2').value;
+                if (v1 === '' || v2 === '') {
+                    showToast((isEn ? 'Fill in Set ' : 'Заполните сет ') + s, 'error');
+                    return;
+                }
+                if (!isValidSet(v1, v2)) {
+                    showToast((isEn ? 'Invalid Set ' : 'Некорректный счёт сета ') + s, 'error');
+                    return;
+                }
+            }
 
-            if (s1p1 === '' || s1p2 === '' || s2p1 === '' || s2p2 === '') {
-                showToast(isEn ? 'Enter at least 2 sets' : 'Введите минимум 2 сета', 'error');
-                return;
-            }
-            if (!isValidSet(s1p1, s1p2)) {
-                showToast(isEn ? 'Invalid Set 1 score' : 'Некорректный счёт сета 1', 'error');
-                return;
-            }
-            if (!isValidSet(s2p1, s2p2)) {
-                showToast(isEn ? 'Invalid Set 2 score' : 'Некорректный счёт сета 2', 'error');
-                return;
-            }
-            if (s3p1 !== '' && s3p2 !== '' && !isValidSet(s3p1, s3p2)) {
-                showToast(isEn ? 'Invalid Set 3 score' : 'Некорректный счёт сета 3', 'error');
-                return;
-            }
+            var winnerId = document.getElementById('adScoreWinner').value;
             if (!winnerId) {
                 showToast(isEn ? 'Cannot determine winner' : 'Невозможно определить победителя', 'error');
                 return;
             }
 
-            // Build score string with tiebreak: "6/4 7/6(11-9)" format
+            // Build score string
             function buildSet(num) {
                 var v1 = document.getElementById('adS' + num + 'P1').value;
                 var v2 = document.getElementById('adS' + num + 'P2').value;
@@ -3063,12 +3099,12 @@
             }
 
             var scoreParts = [];
-            var set1 = buildSet(1); if (set1) scoreParts.push(set1);
-            var set2 = buildSet(2); if (set2) scoreParts.push(set2);
-            var set3 = buildSet(3); if (set3) scoreParts.push(set3);
+            for (var s = 1; s <= currentSets; s++) {
+                var setStr = buildSet(s);
+                if (setStr) scoreParts.push(setStr);
+            }
             var scoreStr = scoreParts.join(' ');
 
-            // Update match
             var updateData = {
                 score: scoreStr,
                 winner_id: winnerId,
@@ -3082,7 +3118,6 @@
                 return;
             }
 
-            // Auto-advance winner to next round
             await advanceWinner(match, winnerId, tournamentId);
 
             overlay.remove();

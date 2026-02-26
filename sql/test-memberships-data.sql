@@ -32,7 +32,7 @@ BEGIN
   INSERT INTO payments (profile_id, membership_id, amount, payment_method, currency, status)
   VALUES (pid, mem_id, 1000, 'transfer', 'KGS', 'completed');
 
-  -- 4. Expired
+  -- 4. Expiredytn
   INSERT INTO memberships (id, profile_id, status, starts_at, expires_at, note)
   VALUES (gen_random_uuid(), pid, 'expired', NOW() - INTERVAL '60 days', NOW() - INTERVAL '5 days', 'Тест: истекло');
 
