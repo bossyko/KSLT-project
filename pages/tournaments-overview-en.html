@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,118 +7,118 @@
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://*.googleusercontent.com https://*.supabase.co https://images.unsplash.com https://nurzaman.kg https://placehold.co; connect-src 'self' https://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co;">
-    <title>KSLT — Рейтинг</title>
+    <title>KSLT — Tournaments</title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/players.css">
+    <link rel="stylesheet" href="../css/tournaments-overview.css?v=5">
 </head>
 <body>
     <!-- HEADER -->
     <header class="floating-header header-hybrid">
         <nav>
             <div class="nav-left">
-                <a href="../index.html" class="logo">
+                <a href="../index-en.html" class="logo">
                     <span class="logo-text">KSLT</span>
                     <span class="logo-icon">🎾</span>
                 </a>
                 <div class="sponsor-badge">
-                    <span class="sponsor-label">при поддержке</span>
+                    <span class="sponsor-label">supported by</span>
                     <a href="https://nurzaman.kg" target="_blank" rel="noopener" class="sponsor-logo-link"><img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman" class="sponsor-logo-img"></a>
                 </div>
             </div>
 
             <ul class="nav-links">
                 <li>
-                    <a href="../index.html#live" class="nav-item nav-item-live">
+                    <a href="../index-en.html#live" class="nav-item nav-item-live">
                         <span class="live-dot"></span>
                         Live
                     </a>
                 </li>
                 <li class="nav-dropdown">
-                    <a href="tournaments-overview.html" class="nav-item nav-item-dropdown">
-                        Турниры
+                    <a href="tournaments-overview-en.html" class="nav-item nav-item-dropdown active">
+                        Tournaments
                         <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <div class="nav-dropdown-menu">
-                        <a href="tournaments.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
-                        <a href="tournaments.html?category=masters" class="nav-dropdown-item">Masters</a>
-                        <a href="tournaments.html?category=challenger" class="nav-dropdown-item">Challenger</a>
-                        <a href="tournaments.html?category=futures" class="nav-dropdown-item">Futures</a>
-                        <a href="tournaments.html?category=tour" class="nav-dropdown-item">Tour</a>
-                        <a href="tournaments.html?category=friendly" class="nav-dropdown-item">Friendly</a>
+                        <a href="tournaments-en.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments-en.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments-en.html?category=challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="tournaments-en.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments-en.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments-en.html?category=friendly" class="nav-dropdown-item">Friendly</a>
                     </div>
                 </li>
                 <li class="nav-dropdown">
-                    <a href="players.html" class="nav-item nav-item-dropdown active">
-                        Рейтинг
+                    <a href="players-en.html" class="nav-item nav-item-dropdown">
+                        Rankings
                         <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <div class="nav-dropdown-menu">
-                        <a href="players.html?tab=men-promasters" class="nav-dropdown-item">Мужчины Pro-Masters</a>
-                        <a href="players.html?tab=men-masters" class="nav-dropdown-item">Мужчины Masters</a>
-                        <a href="players.html?tab=men-challenger" class="nav-dropdown-item">Мужчины Challenger</a>
-                        <a href="players.html?tab=men-futures" class="nav-dropdown-item">Мужчины Futures</a>
-                        <a href="players.html?tab=men-tour" class="nav-dropdown-item">Мужчины Tour</a>
-                        <a href="players.html?tab=women-promasters" class="nav-dropdown-item">Женщины Pro-Masters</a>
-                        <a href="players.html?tab=women-masters" class="nav-dropdown-item">Женщины Masters</a>
-                        <a href="players.html?tab=women-challenger" class="nav-dropdown-item">Женщины Challenger</a>
-                        <a href="players.html?tab=women-futures" class="nav-dropdown-item">Женщины Futures</a>
-                        <a href="players.html?tab=women-tour" class="nav-dropdown-item">Женщины Tour</a>
+                        <a href="players-en.html?tab=men-promasters" class="nav-dropdown-item">Men Pro-Masters</a>
+                        <a href="players-en.html?tab=men-masters" class="nav-dropdown-item">Men Masters</a>
+                        <a href="players-en.html?tab=men-challenger" class="nav-dropdown-item">Men Challenger</a>
+                        <a href="players-en.html?tab=men-futures" class="nav-dropdown-item">Men Futures</a>
+                        <a href="players-en.html?tab=men-tour" class="nav-dropdown-item">Men Tour</a>
+                        <a href="players-en.html?tab=women-promasters" class="nav-dropdown-item">Women Pro-Masters</a>
+                        <a href="players-en.html?tab=women-masters" class="nav-dropdown-item">Women Masters</a>
+                        <a href="players-en.html?tab=women-challenger" class="nav-dropdown-item">Women Challenger</a>
+                        <a href="players-en.html?tab=women-futures" class="nav-dropdown-item">Women Futures</a>
+                        <a href="players-en.html?tab=women-tour" class="nav-dropdown-item">Women Tour</a>
                     </div>
                 </li>
                 <li class="nav-dropdown">
-                    <a href="services.html" class="nav-item nav-item-dropdown">
-                        Услуги
+                    <a href="services-en.html" class="nav-item nav-item-dropdown">
+                        Services
                         <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <div class="nav-dropdown-menu">
-                        <a href="courts.html" class="nav-dropdown-item">Теннисные корты</a>
-                        <a href="coaches.html" class="nav-dropdown-item">Тренеры</a>
+                        <a href="courts-en.html" class="nav-dropdown-item">Tennis Courts</a>
+                        <a href="coaches-en.html" class="nav-dropdown-item">Coaches</a>
                     </div>
                 </li>
                 <li>
-                    <a href="news.html" class="nav-item">Новости <span class="indicator-dot"></span></a>
+                    <a href="news-en.html" class="nav-item">News <span class="indicator-dot"></span></a>
                 </li>
                 <li class="nav-dropdown">
                     <a href="#" class="nav-item nav-item-dropdown">
-                        Инфо
+                        Info
                         <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <div class="nav-dropdown-menu">
-                        <a href="about.html" class="nav-dropdown-item">О проекте</a>
-                        <a href="rules.html" class="nav-dropdown-item">Правила</a>
-                        <a href="faq.html" class="nav-dropdown-item">FAQ</a>
+                        <a href="about-en.html" class="nav-dropdown-item">About</a>
+                        <a href="rules-en.html" class="nav-dropdown-item">Rules</a>
+                        <a href="faq-en.html" class="nav-dropdown-item">FAQ</a>
                     </div>
                 </li>
             </ul>
 
             <div class="nav-right">
-                <a href="auth.html" class="btn-auth">Войти</a>
+                <a href="auth-en.html" class="btn-auth">Sign In</a>
                 <div class="lang-dropdown" id="langDropdown">
                     <button class="lang-toggle" id="langToggle">
-                        <span class="lang-current">RU</span>
+                        <span class="lang-current">EN</span>
                         <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="players.html" class="lang-option active" data-lang="RU">
+                        <a href="tournaments-overview.html" class="lang-option" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="players-en.html" class="lang-option" data-lang="EN">
+                        <a href="tournaments-overview-en.html" class="lang-option active" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -137,80 +137,80 @@
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
                 <li class="mobile-nav-dropdown">
-                    <a href="tournaments-overview.html" class="mobile-dropdown-toggle">
-                        Турниры
+                    <a href="tournaments-overview-en.html" class="mobile-dropdown-toggle active">
+                        Tournaments
                         <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
-                        <li><a href="tournaments.html?category=promasters">Pro-Masters</a></li>
-                        <li><a href="tournaments.html?category=masters">Masters</a></li>
-                        <li><a href="tournaments.html?category=challenger">Challenger</a></li>
-                        <li><a href="tournaments.html?category=futures">Futures</a></li>
-                        <li><a href="tournaments.html?category=tour">Tour</a></li>
-                        <li><a href="tournaments.html?category=friendly">Friendly</a></li>
+                        <li><a href="tournaments-en.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="tournaments-en.html?category=masters">Masters</a></li>
+                        <li><a href="tournaments-en.html?category=challenger">Challenger</a></li>
+                        <li><a href="tournaments-en.html?category=futures">Futures</a></li>
+                        <li><a href="tournaments-en.html?category=tour">Tour</a></li>
+                        <li><a href="tournaments-en.html?category=friendly">Friendly</a></li>
                     </ul>
                 </li>
-                <li><a href="../index.html#live"><span class="live-dot"></span> Live</a></li>
+                <li><a href="../index-en.html#live"><span class="live-dot"></span> Live</a></li>
                 <li class="mobile-nav-dropdown">
-                    <a href="players.html" class="mobile-dropdown-toggle active">
-                        Рейтинг
+                    <a href="players-en.html" class="mobile-dropdown-toggle">
+                        Rankings
                         <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
-                        <li><a href="players.html?tab=men-promasters">Мужчины Pro-Masters</a></li>
-                        <li><a href="players.html?tab=men-masters">Мужчины Masters</a></li>
-                        <li><a href="players.html?tab=men-challenger">Мужчины Challenger</a></li>
-                        <li><a href="players.html?tab=men-futures">Мужчины Futures</a></li>
-                        <li><a href="players.html?tab=men-tour">Мужчины Tour</a></li>
-                        <li><a href="players.html?tab=women-promasters">Женщины Pro-Masters</a></li>
-                        <li><a href="players.html?tab=women-masters">Женщины Masters</a></li>
-                        <li><a href="players.html?tab=women-challenger">Женщины Challenger</a></li>
-                        <li><a href="players.html?tab=women-futures">Женщины Futures</a></li>
-                        <li><a href="players.html?tab=women-tour">Женщины Tour</a></li>
+                        <li><a href="players-en.html?tab=men-promasters">Men Pro-Masters</a></li>
+                        <li><a href="players-en.html?tab=men-masters">Men Masters</a></li>
+                        <li><a href="players-en.html?tab=men-challenger">Men Challenger</a></li>
+                        <li><a href="players-en.html?tab=men-futures">Men Futures</a></li>
+                        <li><a href="players-en.html?tab=men-tour">Men Tour</a></li>
+                        <li><a href="players-en.html?tab=women-promasters">Women Pro-Masters</a></li>
+                        <li><a href="players-en.html?tab=women-masters">Women Masters</a></li>
+                        <li><a href="players-en.html?tab=women-challenger">Women Challenger</a></li>
+                        <li><a href="players-en.html?tab=women-futures">Women Futures</a></li>
+                        <li><a href="players-en.html?tab=women-tour">Women Tour</a></li>
                     </ul>
                 </li>
                 <li class="mobile-nav-dropdown">
-                    <a href="services.html" class="mobile-dropdown-toggle">
-                        Услуги
+                    <a href="services-en.html" class="mobile-dropdown-toggle">
+                        Services
                         <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
-                        <li><a href="courts.html">Теннисные корты</a></li>
-                        <li><a href="coaches.html">Тренеры</a></li>
+                        <li><a href="courts-en.html">Tennis Courts</a></li>
+                        <li><a href="coaches-en.html">Coaches</a></li>
                     </ul>
                 </li>
-                <li><a href="news.html">Новости <span class="indicator-dot"></span></a></li>
+                <li><a href="news-en.html">News <span class="indicator-dot"></span></a></li>
                 <li class="mobile-nav-dropdown">
                     <a href="#" class="mobile-dropdown-toggle">
-                        Инфо
+                        Info
                         <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
-                        <li><a href="about.html">О проекте</a></li>
-                        <li><a href="rules.html">Правила</a></li>
-                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="about-en.html">About</a></li>
+                        <li><a href="rules-en.html">Rules</a></li>
+                        <li><a href="faq-en.html">FAQ</a></li>
                     </ul>
                 </li>
             </ul>
             <div class="mobile-nav-bottom">
                 <div class="mobile-lang-list">
-                    <span class="mobile-lang-title">Язык</span>
-                    <a href="players.html" class="mobile-lang-option active" data-lang="RU">
+                    <span class="mobile-lang-title">Language</span>
+                    <a href="tournaments-overview.html" class="mobile-lang-option" data-lang="RU">
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
-                    <a href="players-en.html" class="mobile-lang-option" data-lang="EN">
+                    <a href="tournaments-overview-en.html" class="mobile-lang-option active" data-lang="EN">
                         <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
@@ -220,22 +220,10 @@
 
     <main>
         <!-- HERO -->
-        <section class="pl-hero" id="playersHero"></section>
+        <section class="to-hero" id="overviewHero"></section>
 
-        <!-- PODIUM -->
-        <section class="pl-podium-section" id="playersPodium"></section>
-
-        <!-- FILTERS -->
-        <section class="pl-filters-section" id="playersFilters"></section>
-
-        <!-- TABLE -->
-        <section class="pl-table-section" id="playersTable"></section>
-
-        <!-- PAGINATION -->
-        <section class="pl-pagination-section" id="playersPagination"></section>
-
-        <!-- SPONSORS -->
-        <section class="pl-sponsors-section section-sponsors-compact" id="playersSponsors"></section>
+        <!-- CATEGORIES -->
+        <section class="to-categories" id="overviewCategories"></section>
     </main>
 
     <!-- FOOTER -->
@@ -246,7 +234,7 @@
                     <span class="logo-text">KSLT</span>
                     <span class="logo-icon">🎾</span>
                 </div>
-                <p class="footer-desc">Kyrgyzstan Social Lawn Tennis — первое теннисное сообщество в Кыргызстане, объединяющее любителей и профессионалов.</p>
+                <p class="footer-desc">Kyrgyzstan Social Lawn Tennis — the first tennis community in Kyrgyzstan, uniting amateurs and professionals.</p>
                 <div class="footer-socials">
                     <a href="https://www.instagram.com/kslt_tennis.kg?igsh=OHNocjZhcHZxcTk0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
@@ -266,35 +254,35 @@
                 </div>
             </div>
             <div class="footer-block">
-                <h4>Навигация</h4>
+                <h4>Navigation</h4>
                 <ul class="footer-links">
-                    <li><a href="tournaments-overview.html">Турниры</a></li>
-                    <li><a href="players.html">Рейтинг</a></li>
-                    <li><a href="courts.html">Корты</a></li>
-                    <li><a href="../index.html#live">Live трансляции</a></li>
+                    <li><a href="tournaments-overview-en.html">Tournaments</a></li>
+                    <li><a href="players-en.html">Rankings</a></li>
+                    <li><a href="courts-en.html">Courts</a></li>
+                    <li><a href="../index-en.html#live">Live Streams</a></li>
                 </ul>
             </div>
             <div class="footer-block">
-                <h4>Игрокам</h4>
+                <h4>For Players</h4>
                 <ul class="footer-links">
-                    <li><a href="rules.html">Правила лиги</a></li>
-                    <li><a href="#">Система рейтинга</a></li>
-                    <li><a href="#">Как вступить</a></li>
-                    <li><a href="faq.html">FAQ</a></li>
-                    <li><a href="#">Кодекс игрока</a></li>
+                    <li><a href="rules-en.html">League Rules</a></li>
+                    <li><a href="#">Rating System</a></li>
+                    <li><a href="#">How to Join</a></li>
+                    <li><a href="faq-en.html">FAQ</a></li>
+                    <li><a href="#">Player Code</a></li>
                 </ul>
             </div>
             <div class="footer-block">
-                <h4>Партнёрам</h4>
+                <h4>For Partners</h4>
                 <ul class="footer-links">
-                    <li><a href="#">Стать спонсором</a></li>
-                    <li><a href="#">Рекламодателям</a></li>
-                    <li><a href="#">Аренда кортов</a></li>
-                    <li><a href="#">Организация турниров</a></li>
+                    <li><a href="#">Become a Sponsor</a></li>
+                    <li><a href="#">Advertising</a></li>
+                    <li><a href="#">Court Rental</a></li>
+                    <li><a href="#">Tournament Organizing</a></li>
                 </ul>
             </div>
             <div class="footer-block" id="contacts">
-                <h4>Контакты</h4>
+                <h4>Contacts</h4>
                 <ul class="footer-contacts">
                     <li>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -306,18 +294,18 @@
                     </li>
                     <li>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <span>г. Бишкек, Кыргызстан</span>
+                        <span>Bishkek, Kyrgyzstan</span>
                     </li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p class="footer-copyright">© 2026 KSLT. Все права защищены.</p>
+            <p class="footer-copyright">© 2026 KSLT. All rights reserved.</p>
             <div class="footer-legal">
-                <a href="offer.html">Публичная оферта</a>
-                <a href="#">Политика конфиденциальности</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
             </div>
-            <p class="footer-made">Сделано с ❤️ в Кыргызстане 🇰🇬</p>
+            <p class="footer-made">Made with ❤️ in Kyrgyzstan 🇰🇬</p>
         </div>
     </footer>
 
@@ -325,7 +313,7 @@
     <script src="../js/script.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js"></script>
-    <script src="../data/players-data.js"></script>
-    <script src="../js/players.js"></script>
+    <script src="../data/tournaments-data.js?v=3"></script>
+    <script src="../js/tournaments-overview.js?v=7"></script>
 </body>
 </html>

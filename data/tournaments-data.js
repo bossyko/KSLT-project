@@ -16,7 +16,7 @@ const tournamentsData = {
             title: 'Masters Tournaments',
             description: 'Турниры для продвинутых игроков с высоким уровнем подготовки.',
             stats: { tournaments: 8, participants: '180+', prize: '100K' },
-            bgImage: 'https://images.unsplash.com/photo-1551773188-d63e5b03c7ce?w=1920&q=80'
+            bgImage: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=1920&q=80'
         },
         challenger: {
             name: 'Challenger',
@@ -51,33 +51,67 @@ const tournamentsData = {
     // Upcoming tournaments by category
     upcoming: {
         promasters: [
-            { id: 1, name: 'KSLT Pro-Masters Championship', date: { day: '10', month: 'Мар' }, location: 'Бишкек, Tennis Palace', time: '09:00 - 20:00', format: 'Одиночный', participants: '16/32', prize: '100,000 сом', status: 'open' },
-            { id: 2, name: 'Spring Pro-Masters Open', date: { day: '24', month: 'Мар' }, location: 'Бишкек, Elite Courts', time: '10:00 - 19:00', format: 'Одиночный', participants: '8/16', prize: '50,000 сом', status: 'open' }
+            { id: 1, name: 'KSLT Pro-Masters Championship', date: { day: '10', month: 'Мар' }, location: 'Бишкек, Tennis Palace', time: '09:00 - 20:00', format: 'Одиночный', participants: '16/32', prize: '100,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&q=80' },
+            { id: 2, name: 'Spring Pro-Masters Open', date: { day: '24', month: 'Мар' }, location: 'Бишкек, Elite Courts', time: '10:00 - 19:00', format: 'Одиночный', participants: '8/16', prize: '50,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&q=80' },
+            { id: 3, name: 'Pro-Masters Doubles Cup', date: { day: '07', month: 'Апр' }, location: 'Бишкек, Асанбай', time: '10:00 - 18:00', format: 'Парный', participants: '6/16 пар', prize: '60,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=800&q=80' },
+            { id: 4, name: 'April Pro-Masters Grand', date: { day: '21', month: 'Апр' }, location: 'Бишкек, Central Court', time: '09:00 - 20:00', format: 'Одиночный', participants: '0/32', prize: '120,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1551773188-d63e5b03c7ce?w=800&q=80' },
+            { id: 5, name: 'Pro-Masters Mixed Invitational', date: { day: '05', month: 'Май' }, location: 'Бишкек, Tennis Park', time: '10:00 - 19:00', format: 'Микст', participants: '0/16 пар', prize: '40,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1560012057-4372e14c5085?w=800&q=80' },
+            { id: 6, name: 'May Pro-Masters Classic', date: { day: '19', month: 'Май' }, location: 'Бишкек, Ахунбаева 165', time: '09:00 - 20:00', format: 'Одиночный', participants: '0/32', prize: '80,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?w=800&q=80' },
+            { id: 7, name: 'Summer Pro-Masters Open', date: { day: '02', month: 'Июн' }, location: 'Бишкек, Elite Courts', time: '08:00 - 21:00', format: 'Одиночный', participants: '0/64', prize: '150,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&q=80' },
+            { id: 8, name: 'Pro-Masters Doubles Championship', date: { day: '16', month: 'Июн' }, location: 'Бишкек, Tennis Palace', time: '10:00 - 19:00', format: 'Парный', participants: '0/16 пар', prize: '70,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=800&q=80' }
         ],
         masters: [
-            { id: 1, name: 'KSLT Masters Series #1', date: { day: '08', month: 'Мар' }, location: 'Бишкек, Central Court', time: '09:00 - 18:00', format: 'Одиночный', participants: '28/32', prize: '40,000 сом', status: 'open' },
-            { id: 2, name: 'Masters Doubles Cup', date: { day: '22', month: 'Мар' }, location: 'Бишкек, Асанбай', time: '10:00 - 17:00', format: 'Парный', participants: '10/16 пар', prize: '30,000 сом', status: 'open' },
-            { id: 3, name: 'April Masters Championship', date: { day: '05', month: 'Апр' }, location: 'Бишкек, Tennis Park', time: '08:00 - 20:00', format: 'Одиночный', participants: '0/64', prize: '60,000 сом', status: 'soon' }
+            { id: 1, name: 'KSLT Masters Series #1', date: { day: '08', month: 'Мар' }, location: 'Бишкек, Central Court', time: '09:00 - 18:00', format: 'Одиночный', participants: '28/32', prize: '40,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1551773188-d63e5b03c7ce?w=800&q=80' },
+            { id: 2, name: 'Masters Doubles Cup', date: { day: '22', month: 'Мар' }, location: 'Бишкек, Асанбай', time: '10:00 - 17:00', format: 'Парный', participants: '10/16 пар', prize: '30,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=800&q=80' },
+            { id: 3, name: 'April Masters Championship', date: { day: '05', month: 'Апр' }, location: 'Бишкек, Tennis Park', time: '08:00 - 20:00', format: 'Одиночный', participants: '0/64', prize: '60,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&q=80' },
+            { id: 4, name: 'Masters Mixed Doubles', date: { day: '19', month: 'Апр' }, location: 'Бишкек, Джал', time: '10:00 - 18:00', format: 'Микст', participants: '0/16 пар', prize: '25,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&q=80' },
+            { id: 5, name: 'KSLT Masters Series #2', date: { day: '03', month: 'Май' }, location: 'Бишкек, Ахунбаева 165', time: '09:00 - 18:00', format: 'Одиночный', participants: '0/32', prize: '40,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1560012057-4372e14c5085?w=800&q=80' },
+            { id: 6, name: 'May Masters Doubles Open', date: { day: '17', month: 'Май' }, location: 'Бишкек, Central Court', time: '10:00 - 17:00', format: 'Парный', participants: '0/16 пар', prize: '35,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?w=800&q=80' },
+            { id: 7, name: 'Masters Grand Cup', date: { day: '07', month: 'Июн' }, location: 'Бишкек, Tennis Palace', time: '08:00 - 20:00', format: 'Одиночный', participants: '0/64', prize: '80,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&q=80' },
+            { id: 8, name: 'Summer Masters Classic', date: { day: '21', month: 'Июн' }, location: 'Бишкек, Elite Courts', time: '09:00 - 19:00', format: 'Одиночный', participants: '0/32', prize: '50,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=800&q=80' }
         ],
         challenger: [
-            { id: 1, name: 'Challenger Cup Spring', date: { day: '01', month: 'Мар' }, location: 'Бишкек, Центральный корт', time: '09:00 - 18:00', format: 'Одиночный', participants: '30/32', prize: '25,000 сом', status: 'open' },
-            { id: 2, name: 'Challenger Doubles', date: { day: '15', month: 'Мар' }, location: 'Бишкек, Джал', time: '10:00 - 17:00', format: 'Парный', participants: '12/16 пар', prize: '20,000 сом', status: 'open' },
-            { id: 3, name: 'March Challenger Open', date: { day: '29', month: 'Мар' }, location: 'Бишкек, Ахунбаева', time: '09:00 - 18:00', format: 'Одиночный', participants: '0/32', prize: '30,000 сом', status: 'soon' }
+            { id: 1, name: 'Challenger Cup Spring', date: { day: '01', month: 'Мар' }, location: 'Бишкек, Центральный корт', time: '09:00 - 18:00', format: 'Одиночный', participants: '30/32', prize: '25,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=800&q=80' },
+            { id: 2, name: 'Challenger Doubles', date: { day: '15', month: 'Мар' }, location: 'Бишкек, Джал', time: '10:00 - 17:00', format: 'Парный', participants: '12/16 пар', prize: '20,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&q=80' },
+            { id: 3, name: 'March Challenger Open', date: { day: '29', month: 'Мар' }, location: 'Бишкек, Ахунбаева', time: '09:00 - 18:00', format: 'Одиночный', participants: '0/32', prize: '30,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&q=80' },
+            { id: 4, name: 'Challenger Mixed Cup', date: { day: '12', month: 'Апр' }, location: 'Бишкек, Асанбай', time: '10:00 - 18:00', format: 'Микст', participants: '0/16 пар', prize: '18,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1560012057-4372e14c5085?w=800&q=80' },
+            { id: 5, name: 'April Challenger Championship', date: { day: '26', month: 'Апр' }, location: 'Бишкек, Tennis Park', time: '09:00 - 19:00', format: 'Одиночный', participants: '0/32', prize: '28,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1551773188-d63e5b03c7ce?w=800&q=80' },
+            { id: 6, name: 'Challenger Doubles Open', date: { day: '10', month: 'Май' }, location: 'Бишкек, Central Court', time: '10:00 - 17:00', format: 'Парный', participants: '0/16 пар', prize: '22,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?w=800&q=80' },
+            { id: 7, name: 'May Challenger Series', date: { day: '24', month: 'Май' }, location: 'Бишкек, Джал', time: '09:00 - 18:00', format: 'Одиночный', participants: '0/32', prize: '25,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&q=80' },
+            { id: 8, name: 'Summer Challenger Grand', date: { day: '14', month: 'Июн' }, location: 'Бишкек, Ахунбаева 165', time: '08:00 - 20:00', format: 'Одиночный', participants: '0/64', prize: '35,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=800&q=80' }
         ],
         futures: [
-            { id: 1, name: 'Futures Start Cup', date: { day: '20', month: 'Фев' }, location: 'Бишкек, Ахунбаева 165', time: '10:00 - 17:00', format: 'Одиночный', participants: '20/24', prize: '10,000 сом', status: 'open' },
-            { id: 2, name: 'Futures Junior Open', date: { day: '06', month: 'Мар' }, location: 'Бишкек, Асанбай', time: '09:00 - 16:00', format: 'Одиночный', participants: '15/24', prize: '8,000 сом', status: 'open' },
-            { id: 3, name: 'Spring Futures Championship', date: { day: '20', month: 'Мар' }, location: 'Бишкек, Tennis Park', time: '09:00 - 18:00', format: 'Одиночный', participants: '0/32', prize: '15,000 сом', status: 'soon' }
+            { id: 1, name: 'Futures Start Cup', date: { day: '20', month: 'Фев' }, location: 'Бишкек, Ахунбаева 165', time: '10:00 - 17:00', format: 'Одиночный', participants: '20/24', prize: '10,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1560012057-4372e14c5085?w=800&q=80' },
+            { id: 2, name: 'Futures Junior Open', date: { day: '06', month: 'Мар' }, location: 'Бишкек, Асанбай', time: '09:00 - 16:00', format: 'Одиночный', participants: '15/24', prize: '8,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&q=80' },
+            { id: 3, name: 'Spring Futures Championship', date: { day: '20', month: 'Мар' }, location: 'Бишкек, Tennis Park', time: '09:00 - 18:00', format: 'Одиночный', participants: '0/32', prize: '15,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&q=80' },
+            { id: 4, name: 'Futures Doubles Cup', date: { day: '03', month: 'Апр' }, location: 'Бишкек, Джал', time: '10:00 - 17:00', format: 'Парный', participants: '0/16 пар', prize: '6,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=800&q=80' },
+            { id: 5, name: 'April Futures Open', date: { day: '17', month: 'Апр' }, location: 'Бишкек, Центральный корт', time: '09:00 - 17:00', format: 'Одиночный', participants: '0/24', prize: '10,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1551773188-d63e5b03c7ce?w=800&q=80' },
+            { id: 6, name: 'Futures Mixed Tournament', date: { day: '01', month: 'Май' }, location: 'Бишкек, Асанбай', time: '10:00 - 18:00', format: 'Микст', participants: '0/12 пар', prize: '8,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?w=800&q=80' },
+            { id: 7, name: 'May Futures Series', date: { day: '15', month: 'Май' }, location: 'Бишкек, Ахунбаева 165', time: '09:00 - 17:00', format: 'Одиночный', participants: '0/24', prize: '12,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&q=80' },
+            { id: 8, name: 'Summer Futures Championship', date: { day: '05', month: 'Июн' }, location: 'Бишкек, Tennis Park', time: '09:00 - 18:00', format: 'Одиночный', participants: '0/32', prize: '15,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=800&q=80' },
+            { id: 9, name: 'Futures Doubles Open', date: { day: '19', month: 'Июн' }, location: 'Бишкек, Central Court', time: '10:00 - 17:00', format: 'Парный', participants: '0/16 пар', prize: '7,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1560012057-4372e14c5085?w=800&q=80' }
         ],
         tour: [
-            { id: 1, name: 'KSLT Tour Open #1', date: { day: '15', month: 'Фев' }, location: 'Бишкек, Ахунбаева 165', time: '09:00 - 18:00', format: 'Одиночный', participants: '24/32', prize: '15,000 сом', status: 'open' },
-            { id: 2, name: 'KSLT Tour Doubles', date: { day: '22', month: 'Фев' }, location: 'Бишкек, Асанбай 21', time: '10:00 - 17:00', format: 'Парный', participants: '12/16 пар', prize: '20,000 сом', status: 'open' },
-            { id: 3, name: 'Spring Tour Championship', date: { day: '01', month: 'Мар' }, location: 'Бишкек, Центральный корт', time: '08:00 - 20:00', format: 'Одиночный', participants: '0/64', prize: '50,000 сом', status: 'soon' }
+            { id: 1, name: 'KSLT Tour Open #1', date: { day: '15', month: 'Фев' }, location: 'Бишкек, Ахунбаева 165', time: '09:00 - 18:00', format: 'Одиночный', participants: '24/32', prize: '15,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&q=80' },
+            { id: 2, name: 'KSLT Tour Doubles', date: { day: '22', month: 'Фев' }, location: 'Бишкек, Асанбай 21', time: '10:00 - 17:00', format: 'Парный', participants: '12/16 пар', prize: '20,000 сом', status: 'open', image: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=800&q=80' },
+            { id: 3, name: 'Spring Tour Championship', date: { day: '01', month: 'Мар' }, location: 'Бишкек, Центральный корт', time: '08:00 - 20:00', format: 'Одиночный', participants: '0/64', prize: '50,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&q=80' },
+            { id: 4, name: 'Tour Mixed Cup', date: { day: '15', month: 'Мар' }, location: 'Бишкек, Джал', time: '10:00 - 18:00', format: 'Микст', participants: '0/12 пар', prize: '12,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1551773188-d63e5b03c7ce?w=800&q=80' },
+            { id: 5, name: 'KSLT Tour Open #2', date: { day: '29', month: 'Мар' }, location: 'Бишкек, Tennis Park', time: '09:00 - 18:00', format: 'Одиночный', participants: '0/32', prize: '15,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1560012057-4372e14c5085?w=800&q=80' },
+            { id: 6, name: 'April Tour Doubles', date: { day: '12', month: 'Апр' }, location: 'Бишкек, Асанбай', time: '10:00 - 17:00', format: 'Парный', participants: '0/16 пар', prize: '18,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?w=800&q=80' },
+            { id: 7, name: 'Tour Grand Series', date: { day: '03', month: 'Май' }, location: 'Бишкек, Central Court', time: '08:00 - 20:00', format: 'Одиночный', participants: '0/64', prize: '50,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&q=80' },
+            { id: 8, name: 'KSLT Tour Open #3', date: { day: '17', month: 'Май' }, location: 'Бишкек, Ахунбаева 165', time: '09:00 - 18:00', format: 'Одиночный', participants: '0/32', prize: '15,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=800&q=80' },
+            { id: 9, name: 'Summer Tour Championship', date: { day: '07', month: 'Июн' }, location: 'Бишкек, Tennis Palace', time: '08:00 - 20:00', format: 'Одиночный', participants: '0/64', prize: '60,000 сом', status: 'soon', image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&q=80' }
         ],
         friendly: [
-            { id: 1, name: 'Weekend Friendly #5', date: { day: '17', month: 'Фев' }, location: 'Бишкек, Асанбай', time: '14:00 - 18:00', format: 'Одиночный', participants: '12/16', prize: 'Без призового', status: 'open' },
-            { id: 2, name: 'Mixed Doubles Fun', date: { day: '24', month: 'Фев' }, location: 'Бишкек, Джал', time: '15:00 - 19:00', format: 'Микст', participants: '6/8 пар', prize: 'Без призового', status: 'open' },
-            { id: 3, name: 'Family Tennis Day', date: { day: '02', month: 'Мар' }, location: 'Бишкек, Tennis Park', time: '10:00 - 16:00', format: 'Семейный', participants: '0/20', prize: 'Без призового', status: 'soon' }
+            { id: 1, name: 'Weekend Friendly #5', date: { day: '17', month: 'Фев' }, location: 'Бишкек, Асанбай', time: '14:00 - 18:00', format: 'Одиночный', participants: '12/16', prize: 'Без призового', status: 'open', image: 'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?w=800&q=80' },
+            { id: 2, name: 'Mixed Doubles Fun', date: { day: '24', month: 'Фев' }, location: 'Бишкек, Джал', time: '15:00 - 19:00', format: 'Микст', participants: '6/8 пар', prize: 'Без призового', status: 'open', image: 'https://images.unsplash.com/photo-1560012057-4372e14c5085?w=800&q=80' },
+            { id: 3, name: 'Family Tennis Day', date: { day: '02', month: 'Мар' }, location: 'Бишкек, Tennis Park', time: '10:00 - 16:00', format: 'Семейный', participants: '0/20', prize: 'Без призового', status: 'soon', image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&q=80' },
+            { id: 4, name: 'Weekend Friendly #6', date: { day: '16', month: 'Мар' }, location: 'Бишкек, Ахунбаева 165', time: '14:00 - 18:00', format: 'Одиночный', participants: '0/16', prize: 'Без призового', status: 'soon', image: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=800&q=80' },
+            { id: 5, name: 'Doubles Fun Day', date: { day: '30', month: 'Мар' }, location: 'Бишкек, Асанбай', time: '15:00 - 19:00', format: 'Парный', participants: '0/12 пар', prize: 'Без призового', status: 'soon', image: 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&q=80' },
+            { id: 6, name: 'April Mixed Fun', date: { day: '13', month: 'Апр' }, location: 'Бишкек, Central Court', time: '14:00 - 18:00', format: 'Микст', participants: '0/10 пар', prize: 'Без призового', status: 'soon', image: 'https://images.unsplash.com/photo-1551773188-d63e5b03c7ce?w=800&q=80' },
+            { id: 7, name: 'Weekend Friendly #7', date: { day: '27', month: 'Апр' }, location: 'Бишкек, Джал', time: '14:00 - 18:00', format: 'Одиночный', participants: '0/16', prize: 'Без призового', status: 'soon', image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&q=80' },
+            { id: 8, name: 'Family Tennis Day #2', date: { day: '11', month: 'Май' }, location: 'Бишкек, Tennis Park', time: '10:00 - 16:00', format: 'Семейный', participants: '0/24', prize: 'Без призового', status: 'soon', image: 'https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=800&q=80' },
+            { id: 9, name: 'Summer Mixed Fun', date: { day: '08', month: 'Июн' }, location: 'Бишкек, Асанбай', time: '15:00 - 19:00', format: 'Микст', participants: '0/10 пар', prize: 'Без призового', status: 'soon', image: 'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?w=800&q=80' }
         ]
     },
 
@@ -285,20 +319,39 @@ function loadCategoryData(category) {
     const cat = tournamentsData.categories[category];
     if (!cat) return;
 
-    // Update hero
-    document.getElementById('categoryBadge').textContent = cat.name;
-    document.getElementById('categoryTitle').textContent = cat.title;
-    document.getElementById('categoryDescription').textContent = cat.description;
-    document.getElementById('statTournaments').textContent = cat.stats.tournaments;
-    document.getElementById('statParticipants').textContent = cat.stats.participants;
-    document.getElementById('statPrize').textContent = cat.stats.prize;
-    document.getElementById('heroBg').src = cat.bgImage;
+    // Update hero (elements only exist on tournaments.html, not overview)
+    var elBadge = document.getElementById('categoryBadge');
+    var elTitle = document.getElementById('categoryTitle');
+    var elDesc = document.getElementById('categoryDescription');
+    var elBg = document.getElementById('heroBg');
+    if (elBadge) elBadge.textContent = cat.name;
+    if (elTitle) elTitle.textContent = cat.title;
+    if (elDesc) elDesc.textContent = cat.description;
+    if (elBg) elBg.src = cat.bgImage;
+
+    // Hide stats for Friendly, show for others
+    var statsBlock = document.querySelector('.tournament-hero-stats');
+    if (category === 'friendly') {
+        if (statsBlock) statsBlock.style.display = 'none';
+    } else {
+        if (statsBlock) statsBlock.style.display = '';
+        var elStat = document.getElementById('statTournaments');
+        var elPart = document.getElementById('statParticipants');
+        var elPrize = document.getElementById('statPrize');
+        if (elStat) elStat.textContent = cat.stats.tournaments;
+        if (elPart) elPart.textContent = cat.stats.participants;
+        if (elPrize) elPrize.textContent = cat.stats.prize;
+    }
 
     // Update page title
     document.title = `KSLT — ${cat.name} Tournaments`;
 
     // Update ranking section title
-    document.getElementById('rankingCategoryName').textContent = cat.name;
+    var elRank = document.getElementById('rankingCategoryName');
+    if (elRank) elRank.textContent = cat.name;
+
+    // These functions only work on tournaments.html (not overview)
+    if (!document.getElementById('tournamentsGrid')) return;
 
     // Load tournaments
     loadUpcomingTournaments(category);
@@ -462,6 +515,19 @@ function highlightActiveCategory(category) {
 
 function initFilters() {
     const filterBtns = document.querySelectorAll('.filter-btn');
+    if (!filterBtns.length) return;
+
+    const isEn = window.location.pathname.indexOf('-en') !== -1;
+    const sectionTitle = document.querySelector('#upcoming .section-header h2');
+    const pastSection = document.getElementById('past');
+
+    // On page load — hide completed tournaments by default, hide past section
+    document.querySelectorAll('.tournament-card').forEach(card => {
+        if (card.dataset.status === 'past') {
+            card.style.display = 'none';
+        }
+    });
+    if (pastSection) pastSection.style.display = 'none';
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -469,10 +535,25 @@ function initFilters() {
             filterBtns.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
 
+            // Update section title based on filter
+            if (sectionTitle) {
+                if (filter === 'past') {
+                    sectionTitle.textContent = isEn ? 'Completed Tournaments' : 'Завершённые турниры';
+                } else {
+                    sectionTitle.textContent = isEn ? 'Upcoming Tournaments' : 'Предстоящие турниры';
+                }
+            }
+
             document.querySelectorAll('.tournament-card').forEach(card => {
                 const status = card.dataset.status;
-                if (filter === 'all' || status === filter) {
-                    card.style.display = 'block';
+                var show = false;
+                if (filter === 'all') {
+                    show = status !== 'past';
+                } else {
+                    show = status === filter;
+                }
+                if (show) {
+                    card.style.display = 'flex';
                     card.style.opacity = '1';
                 } else {
                     card.style.opacity = '0';

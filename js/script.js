@@ -1,5 +1,43 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+    // Active page indicator (yellow pulsing dot)
+    (function() {
+        var path = window.location.pathname.toLowerCase();
+
+        // For each nav-item, check if current page belongs to it
+        document.querySelectorAll('.nav-item, .mobile-dropdown-toggle').forEach(function(navItem) {
+            var parent = navItem.closest('.nav-dropdown') || navItem.closest('.mobile-nav-dropdown');
+            if (parent) {
+                // Dropdown: check if any child link matches current page
+                var links = parent.querySelectorAll('.nav-dropdown-item, .mobile-dropdown-menu a');
+                for (var i = 0; i < links.length; i++) {
+                    var href = (links[i].getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-en\.html/, '.html');
+                    var filename = href.split('/').pop().replace('.html', '');
+                    if (filename && path.indexOf(filename) !== -1) {
+                        navItem.classList.add('is-active');
+                        break;
+                    }
+                }
+            } else {
+                // Simple link (no dropdown), e.g. News
+                var href = (navItem.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-en\.html/, '.html');
+                var filename = href.split('/').pop().replace('.html', '');
+                if (filename && path.indexOf(filename) !== -1) {
+                    navItem.classList.add('is-active');
+                }
+            }
+        });
+
+        // Also handle mobile simple links (not .nav-item class)
+        document.querySelectorAll('.mobile-nav-links > li:not(.mobile-nav-dropdown) > a').forEach(function(a) {
+            var href = (a.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-en\.html/, '.html');
+            var filename = href.split('/').pop().replace('.html', '');
+            if (filename && path.indexOf(filename) !== -1) {
+                a.classList.add('is-active');
+            }
+        });
+    })();
+
     // Плавная прокрутка для навигации
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {

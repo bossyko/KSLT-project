@@ -355,23 +355,32 @@ nav {
 }
 
 .sponsor-label {
-    font-size: 0.625rem;
+    font-size: 0.5rem;
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .sponsor-logo-img {
-    height: 12px;
+    height: 80px;
     width: auto;
-    max-width: 60px;
+    max-width: 240px;
     object-fit: contain;
-    opacity: 0.7;
+    opacity: 1;
     transition: all var(--transition-fast);
 }
 
 .sponsor-badge:hover .sponsor-logo-img {
-    opacity: 1;
+    transform: scale(1.1);
+}
+
+.sponsor-logo-link {
+    display: inline-flex;
+    align-items: center;
+}
+
+.sponsor-logo-link:hover .sponsor-logo-img {
+    transform: scale(1.1);
 }
 
 /* Анимация теннисного мяча: отскок + вращение */
@@ -434,17 +443,15 @@ nav {
 }
 
 .nav-item.active {
-    background: var(--accent);
-    color: #000;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
 .nav-item.active:hover {
-    background: var(--accent);
-    color: #000;
+    color: var(--text-primary);
 }
 
-/* Пульсирующая Electric Lime точка — Live Indicator */
+/* Пульсирующая Electric Lime точка — Active page indicator */
 .indicator-dot {
     width: 6px;
     height: 6px;
@@ -452,6 +459,12 @@ nav {
     border-radius: 50%;
     animation: livePulse 2s ease-in-out infinite;
     box-shadow: 0 0 10px var(--accent-glow);
+    display: none;
+}
+
+.nav-item.active .indicator-dot,
+.nav-item.is-active .indicator-dot {
+    display: inline-block;
 }
 
 /* Live dot - красный пульсирующий индикатор */
@@ -460,16 +473,31 @@ nav {
     height: 8px;
     background: #FF3B30;
     border-radius: 50%;
-    animation: livePulse 1.5s ease-in-out infinite;
     box-shadow: 0 0 10px rgba(255, 59, 48, 0.5);
+    display: none;
+}
+
+.nav-item-live.is-live .live-dot {
+    display: inline-block;
+    animation: livePulse 1.5s ease-in-out infinite;
 }
 
 .nav-item-live {
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.nav-item-live:hover {
+    color: var(--text-primary) !important;
+}
+
+.nav-item-live.is-live {
     color: #FF3B30 !important;
     font-weight: 600;
 }
 
-.nav-item-live:hover {
+.nav-item-live.is-live:hover {
     color: #FF6961 !important;
 }
 
@@ -1937,6 +1965,10 @@ h2 {
     background: var(--bg-primary);
 }
 
+.section-rankings .section-header {
+    margin-bottom: var(--space-md);
+}
+
 .rankings-table {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
@@ -2017,11 +2049,23 @@ h2 {
 .rankings-columns {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-xl);
+    gap: var(--space-lg);
 }
 
 .rankings-col {
     min-width: 0;
+}
+
+.rankings-col-title {
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--space-md);
+    padding: 10px 0;
+    border-bottom: none;
 }
 
 .rankings-tabs {
@@ -2572,7 +2616,7 @@ h2 {
     gap: 20px 28px;
 }
 
-.sponsor-logo-link {
+.sponsors-cloud .sponsor-logo-link {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2581,7 +2625,7 @@ h2 {
     filter: grayscale(100%) brightness(1.5);
 }
 
-.sponsor-logo-link:hover {
+.sponsors-cloud .sponsor-logo-link:hover {
     opacity: 1;
     filter: grayscale(0%) brightness(1);
     transform: scale(1.15);
@@ -3158,11 +3202,27 @@ h2 {
 .mobile-nav-links .indicator-dot {
     width: 6px;
     height: 6px;
+    display: none;
+}
+
+.mobile-nav-links a.is-active .indicator-dot {
+    display: inline-block;
 }
 
 .mobile-nav-links .live-dot {
     width: 8px;
     height: 8px;
+    display: none;
+}
+
+.mobile-nav-links a.is-live .live-dot {
+    display: inline-block;
+    animation: livePulse 1.5s ease-in-out infinite;
+}
+
+.mobile-nav-links a.is-live {
+    color: #FF3B30 !important;
+    font-weight: 600;
 }
 
 /* Mobile Rankings Dropdown */

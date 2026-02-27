@@ -21,14 +21,20 @@
                 </a>
                 <div class="sponsor-badge">
                     <span class="sponsor-label">при поддержке</span>
-                    <img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman" class="sponsor-logo-img">
+                    <a href="https://nurzaman.kg" target="_blank" rel="noopener" class="sponsor-logo-link"><img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman" class="sponsor-logo-img"></a>
                 </div>
             </div>
 
             <!-- Центр: Навигация -->
             <ul class="nav-links">
+                <li>
+                    <a href="#live" class="nav-item nav-item-live is-live"><!-- DEMO: is-live -->
+                        <span class="live-dot"></span>
+                        Live
+                    </a>
+                </li>
                 <li class="nav-dropdown">
-                    <a href="#" class="nav-item nav-item-dropdown" onclick="return false;">
+                    <a href="pages/tournaments-overview.html" class="nav-item nav-item-dropdown">
                         Турниры
                         <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
@@ -44,15 +50,10 @@
                         <a href="pages/tournaments.html?category=friendly" class="nav-dropdown-item">Friendly</a>
                     </div>
                 </li>
-                <li>
-                    <a href="#live" class="nav-item nav-item-live">
-                        <span class="live-dot"></span>
-                        Live
-                    </a>
-                </li>
                 <li class="nav-dropdown">
                     <a href="pages/players.html" class="nav-item nav-item-dropdown">
                         Рейтинг
+                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -70,12 +71,10 @@
                         <a href="pages/players.html?tab=women-tour" class="nav-dropdown-item">Женщины Tour</a>
                     </div>
                 </li>
-                <li>
-                    <a href="pages/news.html" class="nav-item">Новости</a>
-                </li>
                 <li class="nav-dropdown">
-                    <a href="#services" class="nav-item nav-item-dropdown">
+                    <a href="pages/services.html" class="nav-item nav-item-dropdown">
                         Услуги
+                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -85,9 +84,13 @@
                         <a href="pages/coaches.html" class="nav-dropdown-item">Тренеры</a>
                     </div>
                 </li>
+                <li>
+                    <a href="pages/news.html" class="nav-item">Новости <span class="indicator-dot"></span></a>
+                </li>
                 <li class="nav-dropdown">
                     <a href="#" class="nav-item nav-item-dropdown">
                         Инфо
+                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -139,7 +142,7 @@
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
                 <li class="mobile-nav-dropdown">
-                    <a href="#tournaments" class="mobile-dropdown-toggle">
+                    <a href="pages/tournaments-overview.html" class="mobile-dropdown-toggle">
                         Турниры
                         <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
@@ -155,10 +158,11 @@
                         <li><a href="pages/tournaments.html?category=friendly">Friendly</a></li>
                     </ul>
                 </li>
-                <li><a href="#live"><span class="live-dot"></span> Live</a></li>
+                <li><a href="#live" class="is-live"><span class="live-dot"></span> Live</a></li><!-- DEMO: is-live -->
                 <li class="mobile-nav-dropdown">
                     <a href="pages/players.html" class="mobile-dropdown-toggle">
                         Рейтинг
+                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -176,10 +180,10 @@
                         <li><a href="pages/players.html?tab=women-tour">Женщины Tour</a></li>
                     </ul>
                 </li>
-                <li><a href="pages/news.html">Новости</a></li>
                 <li class="mobile-nav-dropdown">
-                    <a href="#services" class="mobile-dropdown-toggle">
+                    <a href="pages/services.html" class="mobile-dropdown-toggle">
                         Услуги
+                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -189,9 +193,11 @@
                         <li><a href="pages/coaches.html">Тренеры</a></li>
                     </ul>
                 </li>
+                <li><a href="pages/news.html">Новости <span class="indicator-dot"></span></a></li>
                 <li class="mobile-nav-dropdown">
                     <a href="#" class="mobile-dropdown-toggle">
                         Инфо
+                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -372,11 +378,82 @@
 
         </section>
 
+        <!-- LIVE SCORES (dynamic from Supabase) -->
+        <section id="live-real" class="section-live" style="display:none">
+            <div class="section-header">
+                <h2><span class="live-indicator"></span> Live матчи</h2>
+            </div>
+            <div class="live-matches" id="liveMatchesGrid"></div>
+        </section>
+        <!-- DEMO: временный блок для просмотра — УДАЛИТЬ -->
+        <section id="live" class="section-live">
+            <div class="section-header">
+                <h2><span class="live-indicator"></span> Live матчи</h2>
+            </div>
+            <div class="live-matches">
+                <div class="live-match">
+                    <div class="match-status">
+                        <span class="live-badge">LIVE</span>
+                        <span class="match-set">KSLT Masters #1 • SF</span>
+                    </div>
+                    <div class="match-players">
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" alt="Игрок">
+                            <span class="player-name">А. Иванов</span>
+                            <span class="player-score serving">6 4 3</span>
+                        </div>
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80" alt="Игрок">
+                            <span class="player-name">М. Петров</span>
+                            <span class="player-score">3 6 2</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="live-match">
+                    <div class="match-status">
+                        <span class="live-badge">LIVE</span>
+                        <span class="match-set">KSLT Challenger #2 • QF</span>
+                    </div>
+                    <div class="match-players">
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Игрок">
+                            <span class="player-name">Е. Сидорова</span>
+                            <span class="player-score serving">6 2</span>
+                        </div>
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&q=80" alt="Игрок">
+                            <span class="player-name">К. Николаева</span>
+                            <span class="player-score">4 1</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="live-match">
+                    <div class="match-status">
+                        <span class="live-badge">LIVE</span>
+                        <span class="match-set">KSLT Futures #3 • F</span>
+                    </div>
+                    <div class="match-players">
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" alt="Игрок">
+                            <span class="player-name">Д. Алиев</span>
+                            <span class="player-score">7 3</span>
+                        </div>
+                        <div class="player">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80" alt="Игрок">
+                            <span class="player-name">Б. Касымов</span>
+                            <span class="player-score serving">5 5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /DEMO -->
+
         <!-- TOURNAMENTS -->
         <section id="tournaments" class="section-tournaments">
             <div class="section-header">
                 <h2>Ближайшие турниры</h2>
-                <a href="pages/tournaments.html" class="link-all">Все турниры →</a>
+                <a href="pages/tournaments-overview.html" class="link-all">Все турниры →</a>
             </div>
             <div class="tournaments-grid">
                 <article class="tournament-card tournament-card-featured">
@@ -422,53 +499,6 @@
             </div>
         </section>
 
-        <!-- LIVE SCORES -->
-        <section id="live" class="section-live">
-            <div class="section-header">
-                <h2><span class="live-indicator"></span> Live матчи</h2>
-            </div>
-            <div class="live-matches">
-                <div class="live-match">
-                    <div class="match-status">
-                        <span class="live-badge">LIVE</span>
-                        <span class="match-set">Сет 2</span>
-                    </div>
-                    <div class="match-players">
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" alt="Игрок">
-                            <span class="player-name">А. Иванов</span>
-                            <span class="player-score serving">6 4</span>
-                        </div>
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80" alt="Игрок">
-                            <span class="player-name">М. Петров</span>
-                            <span class="player-score">3 6</span>
-                        </div>
-                    </div>
-                    <a href="#watch" class="btn-watch">Смотреть</a>
-                </div>
-                <div class="live-match">
-                    <div class="match-status">
-                        <span class="live-badge">LIVE</span>
-                        <span class="match-set">Сет 1</span>
-                    </div>
-                    <div class="match-players">
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Игрок">
-                            <span class="player-name">Е. Сидорова</span>
-                            <span class="player-score serving">3</span>
-                        </div>
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&q=80" alt="Игрок">
-                            <span class="player-name">К. Николаева</span>
-                            <span class="player-score">2</span>
-                        </div>
-                    </div>
-                    <a href="#watch" class="btn-watch">Смотреть</a>
-                </div>
-            </div>
-        </section>
-
         <!-- BADGES CTA -->
         <section class="section-badges-cta">
             <div class="badges-cta-inner">
@@ -511,6 +541,7 @@
             <div class="rankings-columns">
                 <!-- MEN -->
                 <div class="rankings-col">
+                    <h3 class="rankings-col-title">♂ Мужской одиночный рейтинг</h3>
                     <div class="rankings-tabs" data-group="men">
                         <button class="rankings-tab active" data-target="men-promasters">Pro-Masters</button>
                         <button class="rankings-tab" data-target="men-masters">Masters</button>
@@ -577,6 +608,7 @@
 
                 <!-- WOMEN -->
                 <div class="rankings-col">
+                    <h3 class="rankings-col-title">♀ Женский одиночный рейтинг</h3>
                     <div class="rankings-tabs" data-group="women">
                         <button class="rankings-tab active" data-target="women-masters">Masters</button>
                         <button class="rankings-tab" data-target="women-tour">Tour</button>
@@ -927,7 +959,7 @@
             <div class="footer-block">
                 <h4>Навигация</h4>
                 <ul class="footer-links">
-                    <li><a href="pages/tournaments.html">Турниры</a></li>
+                    <li><a href="pages/tournaments-overview.html">Турниры</a></li>
                     <li><a href="pages/players.html">Рейтинг</a></li>
                     <li><a href="pages/courts.html">Корты</a></li>
                     <li><a href="pages/news.html">Новости</a></li>
@@ -951,7 +983,7 @@
                 <ul class="footer-links">
                     <li><a href="pages/coaches.html">Тренеры</a></li>
                     <li><a href="pages/courts.html">Аренда кортов</a></li>
-                    <li><a href="pages/tournaments.html">Турниры</a></li>
+                    <li><a href="pages/tournaments-overview.html">Турниры</a></li>
                 </ul>
             </div>
 
@@ -988,7 +1020,7 @@
         <div class="footer-bottom">
             <p class="footer-copyright">© 2026 KSLT. Все права защищены.</p>
             <div class="footer-legal">
-                <a href="#">Публичная оферта</a>
+                <a href="pages/offer.html">Публичная оферта</a>
                 <a href="#">Политика конфиденциальности</a>
             </div>
 
@@ -1113,6 +1145,7 @@
             .then(function(res) {
                 if (res.error || !res.data || !res.data.length) return;
                 var html = '';
+                var formatLabels = { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' };
                 res.data.forEach(function(t, i) {
                     var isFeatured = i === 0;
                     var dateStr = '';
@@ -1126,6 +1159,8 @@
                     }
                     var rawImg = t.image || 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=500&fit=crop&q=80';
                     var img = rawImg.indexOf('unsplash.com') !== -1 ? rawImg : rawImg;
+                    var gender = (t.category_id || '').split('-')[0];
+                    var genderLabel = gender === 'women' ? '♀ Женский' : (gender === 'men' ? '♂ Мужской' : '');
                     html += '<article class="tournament-card' + (isFeatured ? ' tournament-card-featured' : '') + '">' +
                         '<div class="tournament-image">' +
                             '<img src="' + esc(img) + '" alt="' + esc(t.title || '') + '">' +
@@ -1136,7 +1171,10 @@
                             '<h3>' + (t.title || '') + '</h3>' +
                             (isFeatured && t.description ? '<p>' + t.description.substring(0, 100) + '</p>' : '') +
                             '<div class="tournament-meta">' +
+                                (genderLabel ? '<span>' + genderLabel + '</span>' : '') +
+                                (formatLabels[t.format] ? '<span>' + formatLabels[t.format] + '</span>' : '') +
                                 (t.max_participants ? '<span><strong>' + t.max_participants + '</strong> участников</span>' : '') +
+                                (t.prize_fund ? '<span>' + t.prize_fund + '</span>' : '') +
                             '</div>' +
                             (isFeatured ? '<a href="pages/tournament.html?id=' + t.id + '" class="btn-primary">Подробнее</a>' : '') +
                         '</div>' +
@@ -1175,7 +1213,10 @@
             var menCats = cats.filter(function(c) { return c.gender === 'men'; });
             var womenCats = cats.filter(function(c) { return c.gender === 'women'; });
 
-            function buildCol(catList) {
+            function buildCol(catList, gender) {
+                var colTitle = gender === 'women'
+                    ? '<h3 class="rankings-col-title">\u2640 Женский одиночный рейтинг</h3>'
+                    : '<h3 class="rankings-col-title">\u2642 Мужской одиночный рейтинг</h3>';
                 var tabs = '<div class="rankings-tabs">';
                 catList.forEach(function(c, i) {
                     tabs += '<button class="rankings-tab' + (i === 0 ? ' active' : '') + '" data-target="' + c.id + '">' + c.name + '</button>';
@@ -1215,10 +1256,10 @@
                     }
                     panels += '</div>';
                 });
-                return '<div class="rankings-col">' + tabs + panels + '</div>';
+                return '<div class="rankings-col">' + colTitle + tabs + panels + '</div>';
             }
 
-            section.innerHTML = buildCol(menCats) + buildCol(womenCats);
+            section.innerHTML = buildCol(menCats, 'men') + buildCol(womenCats, 'women');
 
             // Re-init tab clicks
             section.querySelectorAll('.rankings-tab').forEach(function(btn) {
@@ -1232,6 +1273,108 @@
                 });
             });
         });
+    })();
+    // Load LIVE matches from Supabase
+    // DEMO: temporarily disabled — remove "return;" to enable
+    (function() {
+        return;
+        var client = window.supabaseClient;
+        if (!client) return;
+        var section = document.getElementById('live');
+        var grid = document.getElementById('liveMatchesGrid');
+        if (!section || !grid) return;
+
+        var navLiveDesktop = document.querySelector('.nav-links .nav-item-live');
+        var navLiveMobileLinks = document.querySelectorAll('.mobile-menu a[href="#live"]');
+
+        function toggleLiveClass(active) {
+            if (navLiveDesktop) {
+                if (active) navLiveDesktop.classList.add('is-live');
+                else navLiveDesktop.classList.remove('is-live');
+            }
+            navLiveMobileLinks.forEach(function(a) {
+                if (active) a.classList.add('is-live');
+                else a.classList.remove('is-live');
+            });
+        }
+
+        function loadLive() {
+            client.from('matches').select('id,player1_id,player2_id,score,tournament_id,round_number,status')
+                .eq('status', 'live')
+                .then(function(res) {
+                    if (res.error || !res.data || !res.data.length) {
+                        section.style.display = 'none';
+                        toggleLiveClass(false);
+                        return;
+                    }
+                    var matches = res.data;
+                    var playerIds = [];
+                    var tournamentIds = [];
+                    matches.forEach(function(m) {
+                        if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
+                        if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
+                        if (m.tournament_id && tournamentIds.indexOf(m.tournament_id) === -1) tournamentIds.push(m.tournament_id);
+                    });
+
+                    var pPromise = playerIds.length
+                        ? client.from('players').select('id,name,photo').in('id', playerIds)
+                        : Promise.resolve({ data: [] });
+                    var tPromise = tournamentIds.length
+                        ? client.from('tournaments').select('id,title').in('id', tournamentIds)
+                        : Promise.resolve({ data: [] });
+
+                    Promise.all([pPromise, tPromise]).then(function(results) {
+                        var playersMap = {};
+                        (results[0].data || []).forEach(function(p) { playersMap[p.id] = p; });
+                        var tournamentsMap = {};
+                        (results[1].data || []).forEach(function(t) { tournamentsMap[t.id] = t; });
+
+                        var ROUND_NAMES = { 1: 'R1', 2: 'R2', 3: 'QF', 4: 'SF', 5: 'F' };
+                        var placeholder = 'https://placehold.co/80x80/1a1a1a/888?text=?';
+                        var html = '';
+                        matches.forEach(function(m) {
+                            var p1 = playersMap[m.player1_id] || {};
+                            var p2 = playersMap[m.player2_id] || {};
+                            var tourn = tournamentsMap[m.tournament_id] || {};
+                            var scoreArr = (m.score || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+                            var p1scores = '';
+                            var p2scores = '';
+                            scoreArr.forEach(function(set) {
+                                var parts = set.split('-');
+                                p1scores += (parts[0] || '0') + ' ';
+                                p2scores += (parts[1] || '0') + ' ';
+                            });
+                            var roundLabel = ROUND_NAMES[m.round_number] || ('R' + m.round_number);
+                            var tournLabel = tourn.title || '';
+
+                            html += '<div class="live-match">' +
+                                '<div class="match-status">' +
+                                    '<span class="live-badge">LIVE</span>' +
+                                    (tournLabel ? '<span class="match-set">' + tournLabel + ' \u2022 ' + roundLabel + '</span>' : '<span class="match-set">' + roundLabel + '</span>') +
+                                '</div>' +
+                                '<div class="match-players">' +
+                                    '<div class="player">' +
+                                        '<img src="' + (p1.photo || placeholder) + '" alt="' + (p1.name || 'TBD') + '">' +
+                                        '<span class="player-name">' + (p1.name || 'TBD') + '</span>' +
+                                        '<span class="player-score">' + p1scores.trim() + '</span>' +
+                                    '</div>' +
+                                    '<div class="player">' +
+                                        '<img src="' + (p2.photo || placeholder) + '" alt="' + (p2.name || 'TBD') + '">' +
+                                        '<span class="player-name">' + (p2.name || 'TBD') + '</span>' +
+                                        '<span class="player-score">' + p2scores.trim() + '</span>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                        });
+                        grid.innerHTML = html;
+                        section.style.display = '';
+                        toggleLiveClass(true);
+                    });
+                });
+        }
+
+        loadLive();
+        setInterval(loadLive, 30000);
     })();
     </script>
     <style>

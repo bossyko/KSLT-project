@@ -16,7 +16,7 @@ const tournamentsData = {
             title: 'Masters Tournaments',
             description: 'Tournaments for advanced players with high skill levels.',
             stats: { tournaments: 8, participants: '180+', prize: '100K' },
-            bgImage: 'https://images.unsplash.com/photo-1551773188-d63e5b03c7ce?w=1920&q=80'
+            bgImage: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=1920&q=80'
         },
         challenger: {
             name: 'Challenger',
@@ -436,16 +436,45 @@ function highlightActiveCategory(category) {
 }
 
 function initFilters() {
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    if (!filterBtns.length) return;
+
+    const sectionTitle = document.querySelector('#upcoming .section-header h2');
+    const pastSection = document.getElementById('past');
+
+    // On page load — hide completed tournaments by default, hide past section
+    document.querySelectorAll('.tournament-card').forEach(card => {
+        if (card.dataset.status === 'past') {
+            card.style.display = 'none';
+        }
+    });
+    if (pastSection) pastSection.style.display = 'none';
+
+    filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const filter = this.dataset.filter;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            filterBtns.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
+
+            // Update section title based on filter
+            if (sectionTitle) {
+                if (filter === 'past') {
+                    sectionTitle.textContent = 'Completed Tournaments';
+                } else {
+                    sectionTitle.textContent = 'Upcoming Tournaments';
+                }
+            }
 
             document.querySelectorAll('.tournament-card').forEach(card => {
                 const status = card.dataset.status;
-                if (filter === 'all' || status === filter) {
-                    card.style.display = 'block';
+                var show = false;
+                if (filter === 'all') {
+                    show = status !== 'past';
+                } else {
+                    show = status === filter;
+                }
+                if (show) {
+                    card.style.display = 'flex';
                     card.style.opacity = '1';
                 } else {
                     card.style.opacity = '0';

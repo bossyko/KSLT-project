@@ -20,13 +20,19 @@
                 </a>
                 <div class="sponsor-badge">
                     <span class="sponsor-label">supported by</span>
-                    <img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman" class="sponsor-logo-img">
+                    <a href="https://nurzaman.kg" target="_blank" rel="noopener" class="sponsor-logo-link"><img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman" class="sponsor-logo-img"></a>
                 </div>
             </div>
 
             <ul class="nav-links">
+                <li>
+                    <a href="#live" class="nav-item nav-item-live">
+                        <span class="live-dot"></span>
+                        Live
+                    </a>
+                </li>
                 <li class="nav-dropdown">
-                    <a href="#" class="nav-item nav-item-dropdown" onclick="return false;">
+                    <a href="pages/tournaments-overview-en.html" class="nav-item nav-item-dropdown">
                         Tournaments
                         <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
@@ -42,15 +48,10 @@
                         <a href="pages/tournaments-en.html?category=friendly" class="nav-dropdown-item">Friendly</a>
                     </div>
                 </li>
-                <li>
-                    <a href="#live" class="nav-item nav-item-live">
-                        <span class="live-dot"></span>
-                        Live
-                    </a>
-                </li>
                 <li class="nav-dropdown">
                     <a href="pages/players-en.html" class="nav-item nav-item-dropdown">
                         Rankings
+                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -68,12 +69,10 @@
                         <a href="pages/players-en.html?tab=women-tour" class="nav-dropdown-item">Women Tour</a>
                     </div>
                 </li>
-                <li>
-                    <a href="pages/news-en.html" class="nav-item">News</a>
-                </li>
                 <li class="nav-dropdown">
-                    <a href="#services" class="nav-item nav-item-dropdown">
+                    <a href="pages/services-en.html" class="nav-item nav-item-dropdown">
                         Services
+                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -83,9 +82,13 @@
                         <a href="pages/coaches-en.html" class="nav-dropdown-item">Coaches</a>
                     </div>
                 </li>
+                <li>
+                    <a href="pages/news-en.html" class="nav-item">News <span class="indicator-dot"></span></a>
+                </li>
                 <li class="nav-dropdown">
                     <a href="#" class="nav-item nav-item-dropdown">
                         Info
+                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -133,7 +136,7 @@
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
                 <li class="mobile-nav-dropdown">
-                    <a href="#tournaments" class="mobile-dropdown-toggle">
+                    <a href="pages/tournaments-overview-en.html" class="mobile-dropdown-toggle">
                         Tournaments
                         <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
@@ -153,6 +156,7 @@
                 <li class="mobile-nav-dropdown">
                     <a href="pages/players-en.html" class="mobile-dropdown-toggle">
                         Rankings
+                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -170,10 +174,10 @@
                         <li><a href="pages/players-en.html?tab=women-tour">Women Tour</a></li>
                     </ul>
                 </li>
-                <li><a href="pages/news-en.html">News</a></li>
                 <li class="mobile-nav-dropdown">
-                    <a href="#services" class="mobile-dropdown-toggle">
+                    <a href="pages/services-en.html" class="mobile-dropdown-toggle">
                         Services
+                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -183,9 +187,11 @@
                         <li><a href="pages/coaches-en.html">Coaches</a></li>
                     </ul>
                 </li>
+                <li><a href="pages/news-en.html">News <span class="indicator-dot"></span></a></li>
                 <li class="mobile-nav-dropdown">
                     <a href="#" class="mobile-dropdown-toggle">
                         Info
+                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -363,7 +369,7 @@
         <section id="tournaments" class="section-tournaments">
             <div class="section-header">
                 <h2>Upcoming Tournaments</h2>
-                <a href="pages/tournaments-en.html" class="link-all">All Tournaments →</a>
+                <a href="pages/tournaments-overview-en.html" class="link-all">All Tournaments →</a>
             </div>
             <div class="tournaments-grid">
                 <article class="tournament-card tournament-card-featured">
@@ -409,50 +415,12 @@
             </div>
         </section>
 
-        <section id="live" class="section-live">
+        <!-- LIVE SCORES (dynamic from Supabase) -->
+        <section id="live" class="section-live" style="display:none">
             <div class="section-header">
                 <h2><span class="live-indicator"></span> Live Matches</h2>
             </div>
-            <div class="live-matches">
-                <div class="live-match">
-                    <div class="match-status">
-                        <span class="live-badge">LIVE</span>
-                        <span class="match-set">Set 2</span>
-                    </div>
-                    <div class="match-players">
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" alt="Player">
-                            <span class="player-name">A. Ivanov</span>
-                            <span class="player-score serving">6 4</span>
-                        </div>
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80" alt="Player">
-                            <span class="player-name">M. Petrov</span>
-                            <span class="player-score">3 6</span>
-                        </div>
-                    </div>
-                    <a href="#watch" class="btn-watch">Watch</a>
-                </div>
-                <div class="live-match">
-                    <div class="match-status">
-                        <span class="live-badge">LIVE</span>
-                        <span class="match-set">Set 1</span>
-                    </div>
-                    <div class="match-players">
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Player">
-                            <span class="player-name">E. Sidorova</span>
-                            <span class="player-score serving">3</span>
-                        </div>
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&q=80" alt="Player">
-                            <span class="player-name">K. Nikolaeva</span>
-                            <span class="player-score">2</span>
-                        </div>
-                    </div>
-                    <a href="#watch" class="btn-watch">Watch</a>
-                </div>
-            </div>
+            <div class="live-matches" id="liveMatchesGrid"></div>
         </section>
 
         <!-- BADGES CTA -->
@@ -496,6 +464,7 @@
             <div class="rankings-columns">
                 <!-- MEN -->
                 <div class="rankings-col">
+                    <h3 class="rankings-col-title">♂ Men's Singles Ranking</h3>
                     <div class="rankings-tabs" data-group="men">
                         <button class="rankings-tab active" data-target="men-promasters">Pro-Masters</button>
                         <button class="rankings-tab" data-target="men-masters">Masters</button>
@@ -562,6 +531,7 @@
 
                 <!-- WOMEN -->
                 <div class="rankings-col">
+                    <h3 class="rankings-col-title">♀ Women's Singles Ranking</h3>
                     <div class="rankings-tabs" data-group="women">
                         <button class="rankings-tab active" data-target="women-masters">Masters</button>
                         <button class="rankings-tab" data-target="women-tour">Tour</button>
@@ -897,7 +867,7 @@
             <div class="footer-block">
                 <h4>Navigation</h4>
                 <ul class="footer-links">
-                    <li><a href="pages/tournaments-en.html">Tournaments</a></li>
+                    <li><a href="pages/tournaments-overview-en.html">Tournaments</a></li>
                     <li><a href="pages/players-en.html">Rankings</a></li>
                     <li><a href="pages/courts-en.html">Courts</a></li>
                     <li><a href="pages/news-en.html">News</a></li>
@@ -919,7 +889,7 @@
                 <ul class="footer-links">
                     <li><a href="pages/coaches-en.html">Coaches</a></li>
                     <li><a href="pages/courts-en.html">Court Rental</a></li>
-                    <li><a href="pages/tournaments-en.html">Tournaments</a></li>
+                    <li><a href="pages/tournaments-overview-en.html">Tournaments</a></li>
                 </ul>
             </div>
 
@@ -945,7 +915,7 @@
         <div class="footer-bottom">
             <p class="footer-copyright">© 2026 KSLT. All rights reserved.</p>
             <div class="footer-legal">
-                <a href="#">Public Offer</a>
+                <a href="pages/offer-en.html">Public Offer</a>
                 <a href="#">Privacy Policy</a>
             </div>
             <p class="footer-made">Made with ❤️ in Kyrgyzstan 🇰🇬</p>
@@ -1070,6 +1040,7 @@
             .then(function(res) {
                 if (res.error || !res.data || !res.data.length) return;
                 var html = '';
+                var formatLabels = { singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' };
                 res.data.forEach(function(t, i) {
                     var isFeatured = i === 0;
                     var dateStr = '';
@@ -1084,6 +1055,8 @@
                     var img = t.image || 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=500&fit=crop&q=80';
                     var title = t.title_en || t.title || '';
                     var desc = t.description_en || t.description || '';
+                    var gender = (t.category_id || '').split('-')[0];
+                    var genderLabel = gender === 'women' ? '♀ Women' : (gender === 'men' ? '♂ Men' : '');
                     html += '<article class="tournament-card' + (isFeatured ? ' tournament-card-featured' : '') + '">' +
                         '<div class="tournament-image">' +
                             '<img src="' + esc(img) + '" alt="' + esc(title) + '">' +
@@ -1094,7 +1067,10 @@
                             '<h3>' + title + '</h3>' +
                             (isFeatured && desc ? '<p>' + desc.substring(0, 100) + '</p>' : '') +
                             '<div class="tournament-meta">' +
+                                (genderLabel ? '<span>' + genderLabel + '</span>' : '') +
+                                (formatLabels[t.format] ? '<span>' + formatLabels[t.format] + '</span>' : '') +
                                 (t.max_participants ? '<span><strong>' + t.max_participants + '</strong> participants</span>' : '') +
+                                (t.prize_fund ? '<span>' + t.prize_fund + '</span>' : '') +
                             '</div>' +
                             (isFeatured ? '<a href="pages/tournament-en.html?id=' + t.id + '" class="btn-primary">Details</a>' : '') +
                         '</div>' +
@@ -1133,7 +1109,10 @@
             var menCats = cats.filter(function(c) { return c.gender === 'men'; });
             var womenCats = cats.filter(function(c) { return c.gender === 'women'; });
 
-            function buildCol(catList) {
+            function buildCol(catList, gender) {
+                var colTitle = gender === 'women'
+                    ? '<h3 class="rankings-col-title">\u2640 Women\'s Singles Ranking</h3>'
+                    : '<h3 class="rankings-col-title">\u2642 Men\'s Singles Ranking</h3>';
                 var tabs = '<div class="rankings-tabs">';
                 catList.forEach(function(c, i) {
                     tabs += '<button class="rankings-tab' + (i === 0 ? ' active' : '') + '" data-target="' + c.id + '">' + (c.name_en || c.name) + '</button>';
@@ -1173,10 +1152,10 @@
                     }
                     panels += '</div>';
                 });
-                return '<div class="rankings-col">' + tabs + panels + '</div>';
+                return '<div class="rankings-col">' + colTitle + tabs + panels + '</div>';
             }
 
-            section.innerHTML = buildCol(menCats) + buildCol(womenCats);
+            section.innerHTML = buildCol(menCats, 'men') + buildCol(womenCats, 'women');
 
             section.querySelectorAll('.rankings-tab').forEach(function(btn) {
                 btn.addEventListener('click', function() {
@@ -1189,6 +1168,108 @@
                 });
             });
         });
+    })();
+    // Load LIVE matches from Supabase
+    (function() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        var section = document.getElementById('live');
+        var grid = document.getElementById('liveMatchesGrid');
+        if (!section || !grid) return;
+
+        var navLiveDesktop = document.querySelector('.nav-links .nav-item-live');
+        var navLiveMobileLinks = document.querySelectorAll('.mobile-menu a[href="#live"]');
+
+        function toggleLiveClass(active) {
+            if (navLiveDesktop) {
+                if (active) navLiveDesktop.classList.add('is-live');
+                else navLiveDesktop.classList.remove('is-live');
+            }
+            navLiveMobileLinks.forEach(function(a) {
+                if (active) a.classList.add('is-live');
+                else a.classList.remove('is-live');
+            });
+        }
+
+        function loadLive() {
+            client.from('matches').select('id,player1_id,player2_id,score,tournament_id,round_number,status')
+                .eq('status', 'live')
+                .then(function(res) {
+                    if (res.error || !res.data || !res.data.length) {
+                        section.style.display = 'none';
+                        toggleLiveClass(false);
+                        return;
+                    }
+                    var matches = res.data;
+                    var playerIds = [];
+                    var tournamentIds = [];
+                    matches.forEach(function(m) {
+                        if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
+                        if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
+                        if (m.tournament_id && tournamentIds.indexOf(m.tournament_id) === -1) tournamentIds.push(m.tournament_id);
+                    });
+
+                    var pPromise = playerIds.length
+                        ? client.from('players').select('id,name,name_en,photo').in('id', playerIds)
+                        : Promise.resolve({ data: [] });
+                    var tPromise = tournamentIds.length
+                        ? client.from('tournaments').select('id,title,title_en').in('id', tournamentIds)
+                        : Promise.resolve({ data: [] });
+
+                    Promise.all([pPromise, tPromise]).then(function(results) {
+                        var playersMap = {};
+                        (results[0].data || []).forEach(function(p) { playersMap[p.id] = p; });
+                        var tournamentsMap = {};
+                        (results[1].data || []).forEach(function(t) { tournamentsMap[t.id] = t; });
+
+                        var ROUND_NAMES = { 1: 'R1', 2: 'R2', 3: 'QF', 4: 'SF', 5: 'F' };
+                        var placeholder = 'https://placehold.co/80x80/1a1a1a/888?text=?';
+                        var html = '';
+                        matches.forEach(function(m) {
+                            var p1 = playersMap[m.player1_id] || {};
+                            var p2 = playersMap[m.player2_id] || {};
+                            var tourn = tournamentsMap[m.tournament_id] || {};
+                            var scoreArr = (m.score || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+                            var p1scores = '';
+                            var p2scores = '';
+                            scoreArr.forEach(function(set) {
+                                var parts = set.split('-');
+                                p1scores += (parts[0] || '0') + ' ';
+                                p2scores += (parts[1] || '0') + ' ';
+                            });
+                            var roundLabel = ROUND_NAMES[m.round_number] || ('R' + m.round_number);
+                            var tournLabel = tourn.title_en || tourn.title || '';
+                            var p1name = p1.name_en || p1.name || 'TBD';
+                            var p2name = p2.name_en || p2.name || 'TBD';
+
+                            html += '<div class="live-match">' +
+                                '<div class="match-status">' +
+                                    '<span class="live-badge">LIVE</span>' +
+                                    (tournLabel ? '<span class="match-set">' + tournLabel + ' \u2022 ' + roundLabel + '</span>' : '<span class="match-set">' + roundLabel + '</span>') +
+                                '</div>' +
+                                '<div class="match-players">' +
+                                    '<div class="player">' +
+                                        '<img src="' + (p1.photo || placeholder) + '" alt="' + p1name + '">' +
+                                        '<span class="player-name">' + p1name + '</span>' +
+                                        '<span class="player-score">' + p1scores.trim() + '</span>' +
+                                    '</div>' +
+                                    '<div class="player">' +
+                                        '<img src="' + (p2.photo || placeholder) + '" alt="' + p2name + '">' +
+                                        '<span class="player-name">' + p2name + '</span>' +
+                                        '<span class="player-score">' + p2scores.trim() + '</span>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                        });
+                        grid.innerHTML = html;
+                        section.style.display = '';
+                        toggleLiveClass(true);
+                    });
+                });
+        }
+
+        loadLive();
+        setInterval(loadLive, 30000);
     })();
     </script>
     <style>
