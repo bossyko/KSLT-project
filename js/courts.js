@@ -70,7 +70,7 @@
         initListPage();
         loadSupabaseCourts(function(dbCourts) {
             if (dbCourts.length) {
-                data = dbCourts.concat(staticData);
+                data = sortPromotedFirst(dbCourts).concat(staticData);
                 // Re-render with current filter
                 var activeBtn = document.querySelector('.ct-filter-btn.active');
                 var currentFilter = activeBtn ? activeBtn.getAttribute('data-filter') : 'all';
@@ -190,8 +190,30 @@
             twogis_url: row.twogis_url || '',
             _isNew: true,
             _isDb: true,
-            _typeDesc: typeDesc
+            _typeDesc: typeDesc,
+            _promoted: row.promoted || false
         };
+    }
+
+    // Promoted first (fixed), rest shuffled
+    function sortPromotedFirst(arr) {
+        var promoted = [];
+        var rest = [];
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i]._promoted) {
+                promoted.push(arr[i]);
+            } else {
+                rest.push(arr[i]);
+            }
+        }
+        // Fisher-Yates shuffle rest
+        for (var i = rest.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = rest[i];
+            rest[i] = rest[j];
+            rest[j] = tmp;
+        }
+        return promoted.concat(rest);
     }
 
     /* ===== LIST PAGE ===== */

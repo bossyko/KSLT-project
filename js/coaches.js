@@ -85,8 +85,30 @@
             schedule: {},
             reviews: [],
             students: 0,
-            rating: 0
+            rating: 0,
+            _promoted: row.promoted || false
         };
+    }
+
+    // Promoted first (fixed), rest shuffled
+    function sortPromotedFirst(arr) {
+        var promoted = [];
+        var rest = [];
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i]._promoted) {
+                promoted.push(arr[i]);
+            } else {
+                rest.push(arr[i]);
+            }
+        }
+        // Fisher-Yates shuffle rest
+        for (var i = rest.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = rest[i];
+            rest[i] = rest[j];
+            rest[j] = tmp;
+        }
+        return promoted.concat(rest);
     }
 
     // Load from Supabase then init
@@ -96,9 +118,9 @@
             client.from('coaches').select('*').order('created_at', { ascending: false })
                 .then(function(res) {
                     if (res.data && res.data.length) {
-                        res.data.forEach(function(row) {
-                            allData.push(mapDbCoach(row));
-                        });
+                        var dbCoaches = res.data.map(function(row) { return mapDbCoach(row); });
+                        var sorted = sortPromotedFirst(dbCoaches);
+                        sorted.forEach(function(c) { allData.push(c); });
                     }
                     // Append static data
                     staticData.forEach(function(c) { allData.push(c); });
