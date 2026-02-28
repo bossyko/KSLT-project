@@ -711,6 +711,159 @@ nav {
 }
 
 /* ========================================
+   USER DROPDOWN (logged-in nav)
+   ======================================== */
+
+.user-dropdown {
+    position: relative;
+}
+
+.user-dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 5px 12px 5px 5px;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.user-dropdown-toggle:hover {
+    border-color: var(--border-light);
+    background: var(--bg-card);
+}
+
+.user-dropdown.open .user-dropdown-toggle {
+    border-color: var(--accent);
+    background: var(--bg-card);
+}
+
+.user-dropdown-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-dropdown-avatar-ph {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(204,255,0,0.2), rgba(204,255,0,0.05));
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.user-dropdown-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-dropdown-arrow {
+    opacity: 0.5;
+    transition: transform var(--transition-base);
+}
+
+.user-dropdown.open .user-dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown menu */
+.user-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 200px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 6px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.95);
+    transform-origin: top right;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+}
+
+.user-dropdown.open .user-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.user-dropdown-header {
+    padding: 8px 12px 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 4px;
+}
+
+.user-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+    text-decoration: none;
+}
+
+.user-dropdown-item:hover {
+    background: var(--surface-glass-hover);
+    color: var(--text-primary);
+}
+
+.user-dropdown-item svg {
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+
+.user-dropdown-item:hover svg {
+    opacity: 1;
+}
+
+.user-dropdown-divider {
+    height: 1px;
+    background: var(--border-subtle);
+    margin: 4px 0;
+}
+
+.user-dropdown-logout {
+    color: #ff6b6b;
+}
+
+.user-dropdown-logout:hover {
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+}
+
+.user-dropdown-logout svg {
+    opacity: 0.8;
+}
+
+/* ========================================
    LANGUAGE DROPDOWN
    ======================================== */
 
@@ -3409,6 +3562,18 @@ h2 {
     .btn-auth {
         padding: 8px 16px;
         font-size: 0.8125rem;
+    }
+
+    .user-dropdown-name {
+        display: none;
+    }
+
+    .user-dropdown-toggle {
+        padding: 4px;
+    }
+
+    .user-dropdown-arrow {
+        display: none;
     }
 
     .lang-dropdown {

@@ -10,7 +10,7 @@
     // Labels
     var L = isEn ? {
         profile: 'Profile', tournaments: 'My Tournaments',
-        stats: 'Statistics', settings: 'Settings',
+        stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
         profileTitle: 'My Profile', tournamentsTitle: 'My Tournaments',
         statsTitle: 'Statistics', settingsTitle: 'Settings',
         membership: 'Membership',
@@ -67,6 +67,18 @@
         category: 'Category', points: 'Points',
         wins: 'Wins', losses: 'Losses', rank: 'Rank Change',
         socialMedia: 'Social Media',
+        playLevel: 'Play Level',
+        selectLevel: '— Select —',
+        levelBeginner: 'Beginner',
+        levelIntermediate: 'Intermediate',
+        levelAdvanced: 'Advanced',
+        preferredTime: 'Preferred Time',
+        selectTime: '— Select —',
+        timeMorning: 'Morning',
+        timeAfternoon: 'Afternoon',
+        timeEvening: 'Evening',
+        timeWeekend: 'Weekend',
+        partnerPrefs: 'Partner Preferences',
         cropTitle: 'Crop Photo',
         cropApply: 'Apply',
         cropCancel: 'Cancel',
@@ -84,10 +96,18 @@
         payNoPayments: 'No payments yet',
         payCash: 'Cash',
         payTransfer: 'Transfer',
-        payCard: 'Card'
+        payCard: 'Card',
+        invitationsTitle: 'Game Invitations',
+        invSent: 'Sent',
+        invReceived: 'Received',
+        invAccepted: 'Accepted',
+        invDeclined: 'Declined',
+        invPending: 'Pending',
+        invNoInvites: 'No invitations yet',
+        invNoInvitesText: 'Send game invitations from the Partners page'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
-        stats: 'Статистика', settings: 'Настройки',
+        stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
         profileTitle: 'Мой профиль', tournamentsTitle: 'Мои турниры',
         statsTitle: 'Статистика', settingsTitle: 'Настройки',
         membership: 'Членство',
@@ -144,6 +164,18 @@
         category: 'Категория', points: 'Очки',
         wins: 'Победы', losses: 'Поражения', rank: 'Изм. рейтинга',
         socialMedia: 'Соцсети',
+        playLevel: 'Уровень игры',
+        selectLevel: '— Выберите —',
+        levelBeginner: 'Начинающий',
+        levelIntermediate: 'Средний',
+        levelAdvanced: 'Продвинутый',
+        preferredTime: 'Предпочитаемое время',
+        selectTime: '— Выберите —',
+        timeMorning: 'Утро',
+        timeAfternoon: 'День',
+        timeEvening: 'Вечер',
+        timeWeekend: 'Выходные',
+        partnerPrefs: 'Предпочтения для поиска партнёра',
         cropTitle: 'Обрезка фото',
         cropApply: 'Применить',
         cropCancel: 'Отмена',
@@ -161,7 +193,15 @@
         payNoPayments: 'Платежей пока нет',
         payCash: 'Наличные',
         payTransfer: 'Перевод',
-        payCard: 'Карта'
+        payCard: 'Карта',
+        invitationsTitle: 'Приглашения на игру',
+        invSent: 'Отправлено',
+        invReceived: 'Получено',
+        invAccepted: 'Принято',
+        invDeclined: 'Отклонено',
+        invPending: 'Ожидает',
+        invNoInvites: 'Приглашений пока нет',
+        invNoInvitesText: 'Отправляйте приглашения со страницы «Найти партнёра»'
     };
 
     // Use shared Supabase client from supabase-config.js
@@ -185,6 +225,7 @@
         });
         renderTournaments();
         renderStats(profile);
+        renderInvitations();
         renderSettings(user);
         initTabs();
     };
@@ -378,6 +419,7 @@
                 '<li class="db-sidebar-item"><button class="db-sidebar-link active" data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + L.profile + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="tournaments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 1012 0V2z"/></svg>' + L.tournaments + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>' + L.stats + '</button></li>' +
+                '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="invitations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>' + L.invitations + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</button></li>' +
             '</ul>';
     }
@@ -391,6 +433,7 @@
             '<button class="db-mobile-tab active" data-tab="profile">' + L.profile + '</button>' +
             '<button class="db-mobile-tab" data-tab="tournaments">' + L.tournaments + '</button>' +
             '<button class="db-mobile-tab" data-tab="stats">' + L.stats + '</button>' +
+            '<button class="db-mobile-tab" data-tab="invitations">' + L.invitations + '</button>' +
             '<button class="db-mobile-tab" data-tab="settings">' + L.settings + '</button>';
     }
 
@@ -558,6 +601,32 @@
                 '</div>' +
             '</div>' +
 
+            // Partner preferences card
+            '<div class="db-card">' +
+                '<div class="db-card-title">' + L.partnerPrefs + '</div>' +
+                '<div class="db-field-row">' +
+                    '<div class="db-field">' +
+                        '<label class="db-field-label">' + L.playLevel + '</label>' +
+                        '<select class="db-field-input" id="profilePlayLevel">' +
+                            '<option value="">' + L.selectLevel + '</option>' +
+                            '<option value="beginner"' + (profile.play_level === 'beginner' ? ' selected' : '') + '>' + L.levelBeginner + '</option>' +
+                            '<option value="intermediate"' + (profile.play_level === 'intermediate' ? ' selected' : '') + '>' + L.levelIntermediate + '</option>' +
+                            '<option value="advanced"' + (profile.play_level === 'advanced' ? ' selected' : '') + '>' + L.levelAdvanced + '</option>' +
+                        '</select>' +
+                    '</div>' +
+                    '<div class="db-field">' +
+                        '<label class="db-field-label">' + L.preferredTime + '</label>' +
+                        '<select class="db-field-input" id="profilePreferredTime">' +
+                            '<option value="">' + L.selectTime + '</option>' +
+                            '<option value="morning"' + (profile.preferred_time === 'morning' ? ' selected' : '') + '>' + L.timeMorning + '</option>' +
+                            '<option value="afternoon"' + (profile.preferred_time === 'afternoon' ? ' selected' : '') + '>' + L.timeAfternoon + '</option>' +
+                            '<option value="evening"' + (profile.preferred_time === 'evening' ? ' selected' : '') + '>' + L.timeEvening + '</option>' +
+                            '<option value="weekend"' + (profile.preferred_time === 'weekend' ? ' selected' : '') + '>' + L.timeWeekend + '</option>' +
+                        '</select>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+
             // Mini stats
             statsHtml +
 
@@ -617,6 +686,77 @@
             '</div>';
     }
 
+    // ---- Invitations section ----
+    function renderInvitations() {
+        var container = document.getElementById('db-invitations');
+        if (!container) return;
+
+        container.innerHTML =
+            '<h2 class="db-section-title">' + L.invitationsTitle + '</h2>' +
+            '<div class="db-card" id="dbGameInvites">' +
+                '<p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p>' +
+            '</div>';
+
+        if (client) {
+            loadGameInvites();
+        }
+    }
+
+    async function loadGameInvites() {
+        var card = document.getElementById('dbGameInvites');
+        if (!card || !client) return;
+
+        try {
+            var result = await client.rpc('get_my_game_invites');
+            var invites = result.data || [];
+
+            if (invites.length === 0) {
+                card.innerHTML =
+                    '<div class="db-empty" style="padding:var(--space-lg) 0;">' +
+                        '<div class="db-empty-icon">&#127934;</div>' +
+                        '<div class="db-empty-title">' + L.invNoInvites + '</div>' +
+                        '<div class="db-empty-text">' + L.invNoInvitesText + '</div>' +
+                    '</div>';
+                return;
+            }
+
+            var html = '<div class="db-invite-list">';
+
+            for (var i = 0; i < invites.length; i++) {
+                var inv = invites[i];
+                var initials = (inv.partner_name || '?').split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
+                var avatarHtml = inv.partner_avatar
+                    ? '<img src="' + escHtml(inv.partner_avatar) + '" class="db-invite-avatar" alt="">'
+                    : '<div class="db-invite-avatar-ph">' + initials + '</div>';
+
+                var dirLabel = inv.direction === 'sent' ? L.invSent : L.invReceived;
+                var statusLabel = inv.status === 'accepted' ? L.invAccepted : inv.status === 'declined' ? L.invDeclined : L.invPending;
+                var statusClass = inv.status === 'accepted' ? 'accepted' : inv.status === 'declined' ? 'declined' : 'pending';
+
+                var dateStr = '';
+                try {
+                    var d = new Date(inv.created_at);
+                    dateStr = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+                } catch(e) {}
+
+                html += '<div class="db-invite-item">' +
+                    avatarHtml +
+                    '<div class="db-invite-info">' +
+                        '<div class="db-invite-name">' + escHtml(inv.partner_name || '—') + '</div>' +
+                        '<div class="db-invite-meta">' + dirLabel + ' &middot; ' + dateStr + '</div>' +
+                    '</div>' +
+                    '<div class="db-invite-status db-invite-' + statusClass + '">' + statusLabel + '</div>' +
+                '</div>';
+            }
+
+            html += '</div>';
+            card.innerHTML = html;
+        } catch(e) {
+            console.error('Game invites error:', e);
+            card.innerHTML = '<p style="color:var(--text-muted);">—</p>';
+        }
+    }
+
     // ---- Dirty check ----
     function getProfileFormValues() {
         return {
@@ -629,7 +769,9 @@
             birthYear: (document.getElementById('profileBirthYear') || {}).value || '',
             instagram: (document.getElementById('profileInstagram') || {}).value || '',
             telegram: (document.getElementById('profileTelegram') || {}).value || '',
-            showSocials: (document.getElementById('profileShowSocials') || {}).checked || false
+            showSocials: (document.getElementById('profileShowSocials') || {}).checked || false,
+            playLevel: (document.getElementById('profilePlayLevel') || {}).value || '',
+            preferredTime: (document.getElementById('profilePreferredTime') || {}).value || ''
         };
     }
 
@@ -648,7 +790,9 @@
                     current.birthYear !== snap.birthYear ||
                     current.instagram !== snap.instagram ||
                     current.telegram !== snap.telegram ||
-                    current.showSocials !== snap.showSocials;
+                    current.showSocials !== snap.showSocials ||
+                    current.playLevel !== snap.playLevel ||
+                    current.preferredTime !== snap.preferredTime;
 
         btn.disabled = !dirty;
         btn.classList.remove('db-btn-saved');
@@ -669,6 +813,8 @@
         var instagram = document.getElementById('profileInstagram').value.trim();
         var telegram = document.getElementById('profileTelegram').value.trim();
         var showSocials = document.getElementById('profileShowSocials').checked;
+        var playLevel = document.getElementById('profilePlayLevel').value;
+        var preferredTime = document.getElementById('profilePreferredTime').value;
         var fullName = firstName + (lastName ? ' ' + lastName : '');
 
         btn.textContent = L.saving;
@@ -683,7 +829,9 @@
             birth_year: birthYear ? parseInt(birthYear) : null,
             instagram: instagram,
             telegram: telegram,
-            show_socials: showSocials
+            show_socials: showSocials,
+            play_level: playLevel || null,
+            preferred_time: preferredTime || null
         }).eq('id', window.ksltUser.id);
 
         if (result.error) {
@@ -701,6 +849,8 @@
             window.ksltProfile.instagram = instagram;
             window.ksltProfile.telegram = telegram;
             window.ksltProfile.show_socials = showSocials;
+            window.ksltProfile.play_level = playLevel || null;
+            window.ksltProfile.preferred_time = preferredTime || null;
             renderSidebar(window.ksltProfile);
 
             // Update banner

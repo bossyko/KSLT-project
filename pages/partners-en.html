@@ -7,9 +7,9 @@
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://*.googleusercontent.com https://*.supabase.co https://images.unsplash.com https://nurzaman.kg https://placehold.co; connect-src 'self' https://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co;">
-    <title>KSLT — Player Profile</title>
+    <title>KSLT — Find Partner</title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/player.css">
+    <link rel="stylesheet" href="../css/partners.css?v=1">
 </head>
 <body>
     <!-- HEADER -->
@@ -36,6 +36,7 @@
                 <li class="nav-dropdown">
                     <a href="tournaments-overview-en.html" class="nav-item nav-item-dropdown">
                         Tournaments
+                        <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -71,7 +72,7 @@
                     </div>
                 </li>
                 <li class="nav-dropdown">
-                    <a href="services-en.html" class="nav-item nav-item-dropdown">
+                    <a href="services-en.html" class="nav-item nav-item-dropdown active">
                         Services
                         <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
@@ -115,12 +116,12 @@
                         </svg>
                     </button>
                     <div class="lang-menu">
-                        <a href="player.html" class="lang-option" data-lang="RU">
+                        <a href="partners.html" class="lang-option" data-lang="RU">
                             <span class="lang-flag">🇷🇺</span>
                             <span class="lang-name">Русский</span>
                             <span class="lang-check">✓</span>
                         </a>
-                        <a href="player-en.html" class="lang-option active" data-lang="EN">
+                        <a href="partners-en.html" class="lang-option active" data-lang="EN">
                             <span class="lang-flag">🇺🇸</span>
                             <span class="lang-name">English</span>
                             <span class="lang-check">✓</span>
@@ -141,6 +142,7 @@
                 <li class="mobile-nav-dropdown">
                     <a href="tournaments-overview-en.html" class="mobile-dropdown-toggle">
                         Tournaments
+                        <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
                         </svg>
@@ -177,7 +179,7 @@
                     </ul>
                 </li>
                 <li class="mobile-nav-dropdown">
-                    <a href="services-en.html" class="mobile-dropdown-toggle">
+                    <a href="services-en.html" class="mobile-dropdown-toggle active">
                         Services
                         <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
@@ -211,10 +213,10 @@
             <div class="mobile-nav-bottom">
                 <div class="mobile-lang-list">
                     <span class="mobile-lang-title">Language</span>
-                    <a href="player.html" class="mobile-lang-option" data-lang="RU">
+                    <a href="partners.html" class="mobile-lang-option" data-lang="RU">
                         <span class="lang-flag">🇷🇺</span> Русский
                     </a>
-                    <a href="player-en.html" class="mobile-lang-option active" data-lang="EN">
+                    <a href="partners-en.html" class="mobile-lang-option active" data-lang="EN">
                         <span class="lang-flag">🇺🇸</span> English
                     </a>
                 </div>
@@ -223,8 +225,14 @@
     </header>
 
     <main>
-        <section class="pp-hero" id="playerHero"></section>
-        <div id="playerDetail"></div>
+        <!-- HERO -->
+        <section class="pt-hero" id="ptHero"></section>
+
+        <!-- FILTERS -->
+        <section class="pt-filters" id="ptFilters"></section>
+
+        <!-- GRID -->
+        <section class="pt-grid-wrap" id="ptGrid"></section>
     </main>
 
     <!-- FOOTER -->
@@ -235,7 +243,7 @@
                     <span class="logo-text">KSLT</span>
                     <span class="logo-icon">🎾</span>
                 </div>
-                <p class="footer-desc">Kyrgyzstan Social Lawn Tennis — the first tennis community in Kyrgyzstan uniting amateurs and professionals.</p>
+                <p class="footer-desc">Kyrgyzstan Social Lawn Tennis — the first tennis community in Kyrgyzstan, uniting amateurs and professionals.</p>
                 <div class="footer-socials">
                     <a href="https://www.instagram.com/kslt_tennis.kg?igsh=OHNocjZhcHZxcTk0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
@@ -259,23 +267,22 @@
                 <ul class="footer-links">
                     <li><a href="tournaments-overview-en.html">Tournaments</a></li>
                     <li><a href="players-en.html">Rankings</a></li>
-                    <li><a href="news-en.html">News</a></li>
+                    <li><a href="courts-en.html">Courts</a></li>
                     <li><a href="../index-en.html#live">Live Streams</a></li>
                 </ul>
             </div>
             <div class="footer-block">
-                <h4>For Players</h4>
+                <h4>Players</h4>
                 <ul class="footer-links">
                     <li><a href="rules-en.html">League Rules</a></li>
-                    <li><a href="players-en.html">Ranking System</a></li>
-                    <li><a href="about-en.html">About</a></li>
+                    <li><a href="#">Rating System</a></li>
+                    <li><a href="#">How to Join</a></li>
                     <li><a href="faq-en.html">FAQ</a></li>
-                        <li><a href="pricing-en.html">Pricing</a></li>
-                        <li><a href="offer-en.html">Public Offer</a></li>
+                    <li><a href="#">Player Code</a></li>
                 </ul>
             </div>
             <div class="footer-block">
-                <h4>For Partners</h4>
+                <h4>Partners</h4>
                 <ul class="footer-links">
                     <li><a href="#">Become a Sponsor</a></li>
                     <li><a href="#">Advertisers</a></li>
@@ -304,7 +311,7 @@
         <div class="footer-bottom">
             <p class="footer-copyright">© 2026 KSLT. All rights reserved.</p>
             <div class="footer-legal">
-                <a href="#">Terms of Service</a>
+                <a href="offer-en.html">Public Offer</a>
                 <a href="#">Privacy Policy</a>
             </div>
             <p class="footer-made">Made with ❤️ in Kyrgyzstan 🇰🇬</p>
@@ -312,9 +319,10 @@
     </footer>
 
     <script src="../js/auth-nav.js"></script>
-    <script src="../js/session-monitor.js"></script>
     <script src="../js/script.js"></script>
-    <script src="../data/players-data-en.js"></script>
-    <script src="../js/player.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/membership.js"></script>
+    <script src="../js/partners.js?v=2"></script>
 </body>
 </html>

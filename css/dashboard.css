@@ -1019,3 +1019,92 @@ select.db-field-input {
         font-size: 1.4rem;
     }
 }
+
+/* ============================================
+   GAME INVITES LIST
+   ============================================ */
+
+.db-invite-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.db-invite-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.db-invite-item:last-child {
+    border-bottom: none;
+}
+
+.db-invite-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.db-invite-avatar-ph {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(204, 255, 0, 0.1);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.db-invite-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.db-invite-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db-invite-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.db-invite-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.db-invite-accepted {
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.db-invite-declined {
+    color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+.db-invite-pending {
+    color: var(--accent);
+    background: rgba(204, 255, 0, 0.08);
+}

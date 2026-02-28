@@ -26,3 +26,24 @@ function initSupabase() {
 
 // Auto-init when loaded (captures OAuth tokens from URL hash)
 initSupabase();
+
+// Update last_seen for logged-in users
+(function() {
+    var c = window.supabaseClient;
+    if (!c) return;
+    c.auth.getSession().then(function(res) {
+        if (res.data && res.data.session) {
+            var uid = res.data.session.user.id;
+            c.from('profiles').update({ last_seen: new Date().toISOString() })
+              .eq('id', uid).then(function(){});
+            // Cache name/avatar for nav dropdown
+            c.from('profiles').select('full_name, avatar_url, role').eq('id', uid).single().then(function(r) {
+                if (r.data) {
+                    if (r.data.full_name) localStorage.setItem('kslt_name', r.data.full_name);
+                    if (r.data.avatar_url) localStorage.setItem('kslt_avatar', r.data.avatar_url);
+                    if (r.data.role) localStorage.setItem('kslt_role', r.data.role);
+                }
+            });
+        }
+    });
+})();

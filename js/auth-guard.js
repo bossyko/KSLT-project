@@ -41,6 +41,8 @@
                 if (profileResult.data) {
                     window.ksltProfile = profileResult.data;
                     localStorage.setItem('kslt_role', profileResult.data.role);
+                    if (profileResult.data.full_name) localStorage.setItem('kslt_name', profileResult.data.full_name);
+                    if (profileResult.data.avatar_url) localStorage.setItem('kslt_avatar', profileResult.data.avatar_url);
                 }
             } catch (e) {
                 console.error('Profile load error:', e);
