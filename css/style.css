@@ -863,6 +863,53 @@ nav {
     opacity: 0.8;
 }
 
+/* Admin Nav Dropdown (hover-based, like nav-dropdown) */
+.admin-nav-dropdown {
+    position: relative;
+}
+
+.admin-nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-color: rgba(204, 255, 0, 0.3) !important;
+    color: #CCFF00 !important;
+    text-decoration: none;
+}
+
+.admin-nav-toggle:hover {
+    border-color: rgba(204, 255, 0, 0.6) !important;
+    background: rgba(204, 255, 0, 0.08);
+}
+
+.admin-nav-toggle .nav-arrow {
+    opacity: 0.5;
+    transition: transform 0.3s ease;
+}
+
+.admin-nav-dropdown:hover .nav-arrow {
+    opacity: 1;
+    transform: rotate(180deg);
+}
+
+.admin-nav-menu {
+    left: 0 !important;
+    right: auto !important;
+    transform: translateY(10px) !important;
+    min-width: 220px;
+}
+
+.admin-nav-dropdown:hover .admin-nav-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) !important;
+}
+
+.admin-nav-menu .nav-dropdown-item {
+    opacity: 1;
+    transform: none;
+}
+
 /* ========================================
    LANGUAGE DROPDOWN
    ======================================== */
@@ -3674,7 +3721,8 @@ h2 {
     }
 
     .tournament-card-featured {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        max-height: 320px;
     }
 
     .section-about {
@@ -3698,6 +3746,15 @@ h2 {
     .section-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .tournament-card-featured {
+        grid-template-columns: 1fr;
+        max-height: none;
+    }
+
+    .tournament-card-featured .tournament-image {
+        max-height: 220px;
     }
 
     .live-matches {
