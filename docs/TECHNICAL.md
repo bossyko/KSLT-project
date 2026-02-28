@@ -1,7 +1,7 @@
 # KSLT — Техническая документация
 
-> Последнее обновление: 2026-02-27
-> Версия: 1.0
+> Последнее обновление: 2026-02-28
+> Версия: 1.1
 
 ---
 
@@ -236,9 +236,17 @@ courts                — корты
 └── promoted
 
 news                  — новости
-├── title, content, image
-├── category          — tournament / championship / other
-└── published_at
+├── title, title_en, title_kg
+├── content, content_en, content_kg
+├── excerpt, excerpt_en, excerpt_kg
+├── slug              — URL-идентификатор
+├── image             — обложка
+├── content_images    — JSONB [{url, after_paragraph}] — фото в тексте
+├── poll              — JSONB {question, options} | null — опрос
+├── gallery           — JSONB (legacy, заменён content_images)
+├── category          — results / interview / announcement / world
+├── author, executor
+└── published_at      — null = черновик
 
 memberships           — членство
 ├── profile_id        → profiles
@@ -602,17 +610,32 @@ const { data: membership } = await supabase
 
 ## 11. Админ-панель
 
-**Файл:** `admin.js` (7 001 строка) — самый большой файл проекта
+**Файл:** `admin.js` (~8 500 строк) — самый большой файл проекта
 
 ### Секции CRUD
 
 | Секция | Таблица | Функции |
 |--------|---------|---------|
+| Новости | news | CRUD + inline-фото + опрос + WYSIWYG-превью + автосохранение |
 | Тренеры | coaches | CRUD + фото + авто-перевод |
 | Корты | courts | CRUD + координаты + promoted |
 | Игроки | players | CRUD + категория + рейтинг |
 | Турниры | tournaments | CRUD + заявки + сетка + финализация |
 | Уровни | tournament_levels | CRUD + правила начисления очков |
+| Пользователи | profiles | Список + роли + членство (только admin) |
+
+### Новости — расширенный функционал
+
+- **Inline-фото** — фото вставляются между абзацами текста
+  - WYSIWYG-превью: текст разбивается на абзацы, между ними кнопки "+ Фото" / "URL"
+  - Хранение: `content_images JSONB [{url, after_paragraph}]`
+  - Загрузка: файл (Supabase Storage) или URL (любой HTTPS)
+- **Голосование** — опрос в конце статьи
+  - Хранение: `poll JSONB {question, options}` или null
+  - Голосование через localStorage (анонимное)
+- **Автосохранение** — черновик сохраняется в Supabase каждые 3 сек (при наличии заголовка)
+  - Нет localStorage-черновиков, нет модалки "Восстановить"
+  - Черновик сразу виден в списке статей (published_at = null)
 
 ### Функции админа
 
@@ -641,6 +664,14 @@ git push origin main
 1. Открыть Supabase Dashboard → SQL Editor
 2. Вставить содержимое файла из `sql/`
 3. Нажать Run
+
+Файлы миграций:
+- `sql/news-content-images-poll.sql` — content_images + poll колонки
+- `sql/news-executor-column.sql` — executor колонка
+- `sql/news-gallery-column.sql` — gallery колонка
+- `sql/news-kg-columns.sql` — кыргызский язык колонки
+- `sql/role-access-migration.sql` — RLS по ролям
+- `sql/admin-users-migration.sql` — RLS для пользователей
 
 ### Edge Functions
 
@@ -682,6 +713,12 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://qqkzszesviukopg
 | Game Invite | Приглашения через Telegram бот | ✅ |
 | User Dropdown | Dropdown меню в навигации | ✅ |
 | Dashboard Invitations | Таб "Приглашения" в ЛК | ✅ |
+| Admin Users | Секция "Пользователи" в админке | ✅ |
+| Admin Nav | Единый dropdown "Админка" для staff | ✅ |
+| Admin Dashboard | 9 карточек статистики + 6 таблиц активности | ✅ |
+| News Inline Photos | Фото в тексте + WYSIWYG-превью | ✅ |
+| News Polls | Голосование в статьях | ✅ |
+| News Autosave | Автосохранение черновиков в Supabase | ✅ |
 
 ---
 
@@ -699,6 +736,10 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://qqkzszesviukopg
 ### Статические данные (fallback)
 - Файлы в `data/` — резервные данные если Supabase недоступен
 - Используются на: coaches, courts, players, news, tournaments
+
+### Content Security Policy
+- `img-src 'self' data: https:` — разрешены все HTTPS-изображения (для inline-фото по URL)
+- CSP задаётся в `<meta>` теге каждого HTML-файла (43 файла)
 
 ### Лимиты
 - Приглашения на игру: 30 в день на пользователя
