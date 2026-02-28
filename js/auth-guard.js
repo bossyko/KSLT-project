@@ -51,23 +51,6 @@
             // Show page
             document.body.classList.add('auth-ready');
 
-            // Inject admin link in header for staff (admin/manager)
-            var staffRoles = ['admin', 'manager'];
-            if (window.ksltProfile && staffRoles.indexOf(window.ksltProfile.role) !== -1) {
-                var logoutBtn = document.querySelector('.nav-right .btn-auth');
-                if (logoutBtn && !document.querySelector('.btn-admin')) {
-                    var adminUrl = isEn ? 'admin-en.html' : 'admin.html';
-                    var labelAdmin = isEn ? 'Admin' : 'Админка';
-                    var adminLink = document.createElement('a');
-                    adminLink.href = adminUrl;
-                    adminLink.className = 'btn-auth btn-admin';
-                    adminLink.textContent = labelAdmin;
-                    adminLink.style.borderColor = 'rgba(204, 255, 0, 0.3)';
-                    adminLink.style.color = '#CCFF00';
-                    logoutBtn.parentNode.insertBefore(adminLink, logoutBtn);
-                }
-            }
-
             // Callback
             if (typeof window.onAuthReady === 'function') {
                 window.onAuthReady(window.ksltUser, window.ksltProfile);
