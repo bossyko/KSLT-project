@@ -11,8 +11,10 @@
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var inPages = window.location.pathname.indexOf('/pages/') !== -1;
+    var isAdminPage = window.location.pathname.indexOf('admin') !== -1;
     var prefix = inPages ? '' : 'pages/';
     var dashUrl = prefix + (isEn ? 'dashboard-en.html' : 'dashboard.html');
+    var adminUrl = prefix + (isEn ? 'admin-en.html' : 'admin.html');
 
     var L = isEn ? {
         profile: 'My Profile',
@@ -32,6 +34,29 @@
         logout: 'Выйти'
     };
 
+    // Admin dropdown sections
+    var ADMIN_SECTIONS = isEn ? [
+        { key: 'dashboard', icon: '📊', label: 'Dashboard' },
+        { key: 'content', icon: '📰', label: 'News' },
+        { key: 'tournaments', icon: '🏆', label: 'Tournaments' },
+        { key: 'players', icon: '🎾', label: 'Players' },
+        { key: 'courts', icon: '🏟️', label: 'Courts' },
+        { key: 'coaches', icon: '🎓', label: 'Coaches' },
+        { key: 'ratings', icon: '⭐', label: 'Ratings' },
+        { key: 'users', icon: '👥', label: 'Users', adminOnly: true },
+        { key: 'memberships', icon: '💳', label: 'Memberships' }
+    ] : [
+        { key: 'dashboard', icon: '📊', label: 'Дашборд' },
+        { key: 'content', icon: '📰', label: 'Новости' },
+        { key: 'tournaments', icon: '🏆', label: 'Турниры' },
+        { key: 'players', icon: '🎾', label: 'Игроки' },
+        { key: 'courts', icon: '🏟️', label: 'Корты' },
+        { key: 'coaches', icon: '🎓', label: 'Тренеры' },
+        { key: 'ratings', icon: '⭐', label: 'Рейтинг' },
+        { key: 'users', icon: '👥', label: 'Пользователи', adminOnly: true },
+        { key: 'memberships', icon: '💳', label: 'Членство' }
+    ];
+
     // Check Supabase session in localStorage
     try {
         var key = 'sb-qqkzszesviukopgjbead-auth-token';
@@ -47,16 +72,48 @@
                 var userAvatar = localStorage.getItem('kslt_avatar') || '';
                 var isAdmin = role === 'admin' || role === 'manager';
 
-                // Show admin link separately (keep existing behavior)
-                if (isAdmin) {
-                    var adminUrl = prefix + (isEn ? 'admin-en.html' : 'admin.html');
-                    var adminLink = document.createElement('a');
-                    adminLink.href = adminUrl;
-                    adminLink.className = 'btn-auth';
-                    adminLink.textContent = L.admin;
-                    adminLink.style.borderColor = 'rgba(204, 255, 0, 0.3)';
-                    adminLink.style.color = '#CCFF00';
-                    btn.parentNode.insertBefore(adminLink, btn);
+                // Admin dropdown (only on public pages, not on admin page itself)
+                if (isAdmin && !isAdminPage) {
+                    var adminDd = document.createElement('div');
+                    adminDd.className = 'user-dropdown admin-nav-dd';
+
+                    var menuItems = '';
+                    ADMIN_SECTIONS.forEach(function(s) {
+                        if (s.adminOnly && role !== 'admin') return;
+                        menuItems += '<a href="' + adminUrl + '#' + s.key + '" class="user-dropdown-item">' +
+                            '<span style="font-size:14px;width:16px;text-align:center;">' + s.icon + '</span>' +
+                            s.label + '</a>';
+                    });
+
+                    adminDd.innerHTML =
+                        '<button class="user-dropdown-toggle" style="border-color:rgba(204,255,0,0.3);color:#CCFF00;">' +
+                            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="flex-shrink:0;"><path d="M12 15V3m0 12l-4-4m4 4l4-4"/><path d="M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17"/></svg>' +
+                            '<span>' + L.admin + '</span>' +
+                            '<svg class="user-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1l4 4 4-4"/></svg>' +
+                        '</button>' +
+                        '<div class="user-dropdown-menu" style="min-width:200px;">' +
+                            '<div class="user-dropdown-header">' + L.admin + '</div>' +
+                            menuItems +
+                        '</div>';
+
+                    btn.parentNode.insertBefore(adminDd, btn);
+
+                    // Toggle
+                    var adminToggle = adminDd.querySelector('.user-dropdown-toggle');
+                    adminToggle.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // Close other dropdowns
+                        document.querySelectorAll('.user-dropdown.open').forEach(function(d) {
+                            if (d !== adminDd) d.classList.remove('open');
+                        });
+                        adminDd.classList.toggle('open');
+                    });
+
+                    document.addEventListener('click', function(e) {
+                        if (!adminDd.contains(e.target)) {
+                            adminDd.classList.remove('open');
+                        }
+                    });
                 }
 
                 // Replace btn-auth with user dropdown
@@ -88,11 +145,12 @@
                 btn.parentNode.replaceChild(dropdown, btn);
 
                 // Toggle dropdown
-                var toggle = dropdown.querySelector('.user-dropdown-toggle');
-                var menu = dropdown.querySelector('.user-dropdown-menu');
-
-                toggle.addEventListener('click', function(e) {
+                dropdown.querySelector('.user-dropdown-toggle').addEventListener('click', function(e) {
                     e.stopPropagation();
+                    // Close other dropdowns
+                    document.querySelectorAll('.user-dropdown.open').forEach(function(d) {
+                        if (d !== dropdown) d.classList.remove('open');
+                    });
                     dropdown.classList.toggle('open');
                 });
 
