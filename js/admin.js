@@ -896,7 +896,7 @@
 
     var ROLE_SECTIONS = {
         admin:   ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'ratings', 'users', 'memberships'],
-        manager: ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'ratings', 'memberships']
+        manager: ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'ratings', 'users', 'memberships']
     };
 
     // ---- Auth Ready Callback ----
@@ -3459,10 +3459,12 @@
             catFilterHtml += '<option value="' + c.id + '"' + selected + '>' + genderIcon + catName + '</option>';
         });
 
+        var isAdm = currentRole === 'admin';
+
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.players + '</h2>' +
-                '<button class="ad-btn ad-btn-primary" id="adPlrAdd">+ ' + L.addPlayer + '</button>' +
+                (isAdm ? '<button class="ad-btn ad-btn-primary" id="adPlrAdd">+ ' + L.addPlayer + '</button>' : '') +
             '</div>' +
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adPlrSearch" placeholder="' + L.plrSearch + '" value="' + esc(plrSearchQuery) + '">' +
@@ -3484,9 +3486,12 @@
                 '</div>' +
             '</div>';
 
-        document.getElementById('adPlrAdd').addEventListener('click', function() {
-            renderPlayerForm(null);
-        });
+        var plrAddBtn = document.getElementById('adPlrAdd');
+        if (plrAddBtn) {
+            plrAddBtn.addEventListener('click', function() {
+                renderPlayerForm(null);
+            });
+        }
 
         var searchTimer = null;
         document.getElementById('adPlrSearch').addEventListener('input', function() {
@@ -3505,6 +3510,7 @@
 
     async function loadPlayersList() {
         if (!client) return;
+        var isAdm = currentRole === 'admin';
 
         var query = client.from('players')
             .select('id,name,photo,country,category_id,points,wins,losses,rank_change')
@@ -3547,8 +3553,8 @@
             var changeClass = p.rank_change > 0 ? 'ad-change-up' : (p.rank_change < 0 ? 'ad-change-down' : '');
 
             tbody.innerHTML +=
-                '<tr data-plr-id="' + p.id + '">' +
-                    bulkCheckboxTd(p.id) +
+                '<tr data-plr-id="' + p.id + '"' + (isAdm ? ' style="cursor:pointer;"' : '') + '>' +
+                    (isAdm ? bulkCheckboxTd(p.id) : '') +
                     '<td>' + thumbHtml + '</td>' +
                     '<td style="font-weight:500;color:var(--text-primary);">' + (p.country || '') + ' ' + (p.name || L.noData) + '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
@@ -3558,14 +3564,16 @@
                 '</tr>';
         });
 
-        tbody.addEventListener('click', function(e) {
-            if (e.target.closest('.ad-bulk-cell')) return;
-            var row = e.target.closest('tr[data-plr-id]');
-            if (!row) return;
-            loadAndEditPlayer(row.dataset.plrId);
-        });
+        if (isAdm) {
+            tbody.addEventListener('click', function(e) {
+                if (e.target.closest('.ad-bulk-cell')) return;
+                var row = e.target.closest('tr[data-plr-id]');
+                if (!row) return;
+                loadAndEditPlayer(row.dataset.plrId);
+            });
 
-        setupBulkDelete({ tableId: 'adPlrTable', tableName: 'players', reloadFn: loadPlayersList });
+            setupBulkDelete({ tableId: 'adPlrTable', tableName: 'players', reloadFn: loadPlayersList });
+        }
     }
 
     async function loadAndEditPlayer(id) {
@@ -5796,19 +5804,26 @@
     function renderRatingsSection() {
         var container = document.getElementById('ad-ratings');
         if (!container) return;
+        var isAdm = currentRole === 'admin';
+
+        var tabsHtml = '<button class="ad-rat-tab active" data-rattab="rankings">' + L.ratSubRankings + '</button>';
+        var panelsHtml = '<div class="ad-rat-panel active" id="ratPanelRankings"></div>';
+
+        if (isAdm) {
+            tabsHtml +=
+                '<button class="ad-rat-tab" data-rattab="results">' + L.ratSubResults + '</button>' +
+                '<button class="ad-rat-tab" data-rattab="rules">' + L.ratSubRules + '</button>' +
+                '<button class="ad-rat-tab" data-rattab="promotions">' + L.ratSubPromotions + '</button>';
+            panelsHtml +=
+                '<div class="ad-rat-panel" id="ratPanelResults"></div>' +
+                '<div class="ad-rat-panel" id="ratPanelRules"></div>' +
+                '<div class="ad-rat-panel" id="ratPanelPromotions"></div>';
+        }
 
         container.innerHTML =
             '<h2 class="ad-section-title">' + L.ratings + '</h2>' +
-            '<div class="ad-rat-tabs">' +
-                '<button class="ad-rat-tab active" data-rattab="rankings">' + L.ratSubRankings + '</button>' +
-                '<button class="ad-rat-tab" data-rattab="results">' + L.ratSubResults + '</button>' +
-                '<button class="ad-rat-tab" data-rattab="rules">' + L.ratSubRules + '</button>' +
-                '<button class="ad-rat-tab" data-rattab="promotions">' + L.ratSubPromotions + '</button>' +
-            '</div>' +
-            '<div class="ad-rat-panel active" id="ratPanelRankings"></div>' +
-            '<div class="ad-rat-panel" id="ratPanelResults"></div>' +
-            '<div class="ad-rat-panel" id="ratPanelRules"></div>' +
-            '<div class="ad-rat-panel" id="ratPanelPromotions"></div>';
+            '<div class="ad-rat-tabs">' + tabsHtml + '</div>' +
+            panelsHtml;
 
         // Sub-tab switching
         container.addEventListener('click', function(e) {
@@ -5825,9 +5840,11 @@
             loadTournamentLevels().then(function() {
                 loadPointsRules().then(function() {
                     renderRatRankings();
-                    renderRatResults();
-                    renderRatRules();
-                    renderRatPromotions();
+                    if (isAdm) {
+                        renderRatResults();
+                        renderRatRules();
+                        renderRatPromotions();
+                    }
                 });
             });
         });
@@ -6366,6 +6383,7 @@
     async function renderMembershipsList() {
         var container = document.getElementById('ad-memberships');
         if (!container) return;
+        var isAdm = currentRole === 'admin';
 
         var statusFilterHtml = '<option value="">' + L.memAllStatuses + '</option>' +
             '<option value="active"' + (memFilterStatus === 'active' ? ' selected' : '') + '>' + L.memActive + '</option>' +
@@ -6376,7 +6394,7 @@
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.memberships + '</h2>' +
-                '<button class="ad-btn ad-btn-primary" id="adMemAdd">+ ' + L.memAdd + '</button>' +
+                (isAdm ? '<button class="ad-btn ad-btn-primary" id="adMemAdd">+ ' + L.memAdd + '</button>' : '') +
             '</div>' +
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adMemSearch" placeholder="' + L.memSearch + '" value="' + esc(memSearchQuery) + '">' +
@@ -6400,9 +6418,12 @@
                 '</div>' +
             '</div>';
 
-        document.getElementById('adMemAdd').addEventListener('click', function() {
-            renderMembershipForm(null);
-        });
+        var memAddBtn = document.getElementById('adMemAdd');
+        if (memAddBtn) {
+            memAddBtn.addEventListener('click', function() {
+                renderMembershipForm(null);
+            });
+        }
 
         var searchTimer = null;
         document.getElementById('adMemSearch').addEventListener('input', function() {
@@ -6421,6 +6442,7 @@
 
     async function loadMembershipsList() {
         if (!client) return;
+        var isAdm = currentRole === 'admin';
 
         var query = client.from('memberships')
             .select('id, profile_id, status, starts_at, expires_at, note, profiles!profile_id(full_name, email)')
@@ -6548,7 +6570,7 @@
 
             tbody.innerHTML +=
                 '<tr data-mem-id="' + m.id + '">' +
-                    bulkCheckboxTd(m.id) +
+                    (isAdm ? bulkCheckboxTd(m.id) : '') +
                     '<td>' +
                         '<div style="font-weight:500;">' + tgBadge + '<a href="#" class="ad-mem-profile-link" data-profile-id="' + m.profile_id + '" data-mem-id="' + m.id + '">' + name + '</a></div>' +
                         '<div style="font-size:0.75rem;color:var(--text-dim);">' + email + '</div>' +
@@ -6559,43 +6581,45 @@
                     '<td>' + (m.expires_at || '—') + '</td>' +
                     '<td style="text-align:center;font-weight:600;color:' + daysColor + ';">' + daysLeft + '</td>' +
                     '<td style="color:var(--text-dim);font-size:0.75rem;">' + esc(m.note || '') + '</td>' +
-                    '<td class="ad-mem-actions">' +
+                    (isAdm ? '<td class="ad-mem-actions">' +
                         '<button class="ad-btn-sm ad-btn-extend" data-id="' + m.id + '" title="' + L.memExtend + '">+1</button>' +
                         '<button class="ad-btn-sm ad-btn-cancel-mem" data-id="' + m.id + '" title="' + L.memCancel + '">✕</button>' +
                         '<button class="ad-btn-sm ad-btn-edit-mem" data-id="' + m.id + '" title="' + L.memEdit + '">✎</button>' +
-                    '</td>' +
+                    '</td>' : '') +
                 '</tr>';
         });
 
-        setupBulkDelete({ tableId: 'adMemTable', tableName: 'memberships', reloadFn: loadMembershipsList });
+        if (isAdm) {
+            setupBulkDelete({ tableId: 'adMemTable', tableName: 'memberships', reloadFn: loadMembershipsList });
 
-        // Quick action: Extend
-        tbody.querySelectorAll('.ad-btn-extend').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var id = this.getAttribute('data-id');
-                if (confirm(L.memExtendConfirm)) extendMembership(id);
+            // Quick action: Extend
+            tbody.querySelectorAll('.ad-btn-extend').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var id = this.getAttribute('data-id');
+                    if (confirm(L.memExtendConfirm)) extendMembership(id);
+                });
             });
-        });
 
-        // Quick action: Cancel
-        tbody.querySelectorAll('.ad-btn-cancel-mem').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var id = this.getAttribute('data-id');
-                if (confirm(L.memCancelConfirm)) cancelMembership(id);
+            // Quick action: Cancel
+            tbody.querySelectorAll('.ad-btn-cancel-mem').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var id = this.getAttribute('data-id');
+                    if (confirm(L.memCancelConfirm)) cancelMembership(id);
+                });
             });
-        });
 
-        // Quick action: Edit
-        tbody.querySelectorAll('.ad-btn-edit-mem').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var id = this.getAttribute('data-id');
-                var mem = items.find(function(m) { return m.id === id; });
-                if (mem) renderMembershipForm(mem);
+            // Quick action: Edit
+            tbody.querySelectorAll('.ad-btn-edit-mem').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var id = this.getAttribute('data-id');
+                    var mem = items.find(function(m) { return m.id === id; });
+                    if (mem) renderMembershipForm(mem);
+                });
             });
-        });
+        }
 
         // Profile link click
         tbody.querySelectorAll('.ad-mem-profile-link').forEach(function(link) {
@@ -6974,7 +6998,6 @@
     var usrCurrentUserId = null; // Set in onAuthReady
 
     async function renderUsersSection() {
-        if (currentRole !== 'admin') return;
         renderUsersList();
     }
 
@@ -6987,10 +7010,12 @@
             '<option value="manager"' + (usrFilterRole === 'manager' ? ' selected' : '') + '>' + L.roleManager + '</option>' +
             '<option value="user"' + (usrFilterRole === 'user' ? ' selected' : '') + '>' + L.roleUser + '</option>';
 
+        var isAdm = currentRole === 'admin';
+
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.users + '</h2>' +
-                '<button class="ad-btn ad-btn-primary" id="adUsrAddManager">+ ' + L.usrAddManager + '</button>' +
+                (isAdm ? '<button class="ad-btn ad-btn-primary" id="adUsrAddManager">+ ' + L.usrAddManager + '</button>' : '') +
             '</div>' +
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adUsrSearch" placeholder="' + L.usrSearch + '" value="' + esc(usrSearchQuery) + '">' +
@@ -7011,9 +7036,12 @@
                 '</div>' +
             '</div>';
 
-        document.getElementById('adUsrAddManager').addEventListener('click', function() {
-            openAddManagerModal();
-        });
+        var addMgrBtn = document.getElementById('adUsrAddManager');
+        if (addMgrBtn) {
+            addMgrBtn.addEventListener('click', function() {
+                openAddManagerModal();
+            });
+        }
 
         var searchTimer = null;
         document.getElementById('adUsrSearch').addEventListener('input', function() {
@@ -7032,6 +7060,7 @@
 
     async function loadUsersList() {
         if (!client) return;
+        var isAdm = currentRole === 'admin';
 
         var query = client.from('profiles')
             .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at')
@@ -7119,7 +7148,7 @@
             var regDate = u.created_at ? u.created_at.split('T')[0] : '—';
 
             var tr = document.createElement('tr');
-            tr.style.cursor = 'pointer';
+            if (isAdm) tr.style.cursor = 'pointer';
             tr.innerHTML =
                 '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml + '<span>' + (name || email) + onlineDot + '</span></div></td>' +
                 '<td style="color:var(--text-dim);font-size:0.85rem;">' + email + '</td>' +
@@ -7127,33 +7156,37 @@
                 '<td>' + memBadge + '</td>' +
                 '<td style="color:var(--text-dim);font-size:0.85rem;">' + regDate + '</td>';
 
-            tr.addEventListener('click', function() {
-                loadAndEditUser(u.id);
-            });
+            if (isAdm) {
+                tr.addEventListener('click', function() {
+                    loadAndEditUser(u.id);
+                });
+            }
 
             tbody.appendChild(tr);
         });
 
-        // Setup bulk delete
-        setupBulkDelete({
-            tableId: 'adUsrTable',
-            tableName: 'profiles',
-            confirmMsg: L.deleteSelectedConfirm,
-            reloadFn: loadUsersList
-        });
+        // Setup bulk delete (admin only)
+        if (isAdm) {
+            setupBulkDelete({
+                tableId: 'adUsrTable',
+                tableName: 'profiles',
+                confirmMsg: L.deleteSelectedConfirm,
+                reloadFn: loadUsersList
+            });
 
-        // Add checkbox column to rows
-        var rows = tbody.querySelectorAll('tr');
-        rows.forEach(function(tr, idx) {
-            if (items[idx]) {
-                var td = document.createElement('td');
-                td.className = 'ad-bulk-cell';
+            // Add checkbox column to rows
+            var rows = tbody.querySelectorAll('tr');
+            rows.forEach(function(tr, idx) {
+                if (items[idx]) {
+                    var td = document.createElement('td');
+                    td.className = 'ad-bulk-cell';
                 td.style.width = '36px';
                 td.style.textAlign = 'center';
                 td.innerHTML = '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + items[idx].id + '" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">';
                 tr.insertBefore(td, tr.firstChild);
             }
         });
+        } // end if (isAdm)
     }
 
     async function loadAndEditUser(id) {
