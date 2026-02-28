@@ -93,6 +93,8 @@
         newsPublishedAt: 'Publish Date',
         newsDraft: 'Draft',
         newsPublished: 'Published',
+        newsSearch: 'Search by title...',
+        newsAll: 'All',
         save: 'Save',
         saving: 'Saving...',
         saved: 'Saved!',
@@ -107,22 +109,43 @@
         uploadHint: 'JPG or PNG, max 2MB',
         orPasteUrl: 'Or paste image URL',
         applyUrl: 'Apply',
-        catResults: 'Results',
+        publish: 'Publish',
+        update: 'Update',
+        newsGallery: 'Gallery',
+        contentPreview: 'Preview',
+        insertPhoto: '+ Photo',
+        pollSection: 'Poll',
+        pollQuestion: 'Question',
+        pollOption: 'Option',
+        pollAdd: '+ Add option',
+        pollEnable: 'Add poll',
+        pollRemove: 'Remove poll',
+        catResults: 'Report',
         catInterview: 'Interview',
         catAnnouncement: 'Announcement',
+        catWorld: 'World Tennis',
         selectCategory: '— Select —',
         slugHint: 'Auto-generated from title. Used in URL.',
-        publishedHint: 'Leave empty for draft',
         translateBtn: 'Translate from RU',
         translating: 'Translating...',
         translateError: 'Translation error',
         fillRuFirst: 'Fill in RU field first',
+        fillAnyLang: 'Fill in any language',
+        textCopied: 'Text copied',
+        metaReadTime: 'min read',
+        translateFromAny: 'Translate',
         noArticles: 'No articles yet',
         noArticlesText: 'Click "Add Article" to create your first article',
         thTitle: 'Title',
         thCategory: 'Category',
         thStatus: 'Status',
         thPublished: 'Date',
+        thExecutor: 'Executor',
+        newsExecutor: 'Executor',
+        draftSaved: 'Draft saved',
+        unsavedChanges: 'Unsaved changes',
+        unsavedChangesText: 'You have unsaved changes. Leave without saving?',
+        unsavedLeaveBtn: 'Leave',
         // Tournaments
         addTournament: 'Add Tournament',
         editTournament: 'Edit Tournament',
@@ -526,6 +549,8 @@
         newsPublishedAt: 'Дата публикации',
         newsDraft: 'Черновик',
         newsPublished: 'Опубликовано',
+        newsSearch: 'Поиск по заголовку...',
+        newsAll: 'Все',
         save: 'Сохранить',
         saving: 'Сохранение...',
         saved: 'Сохранено!',
@@ -540,22 +565,43 @@
         uploadHint: 'JPG или PNG, до 2 МБ',
         orPasteUrl: 'Или вставьте URL изображения',
         applyUrl: 'Применить',
-        catResults: 'Результаты',
+        publish: 'Опубликовать',
+        update: 'Обновить',
+        newsGallery: 'Галерея',
+        contentPreview: 'Предпросмотр',
+        insertPhoto: '+ Фото',
+        pollSection: 'Голосование',
+        pollQuestion: 'Вопрос',
+        pollOption: 'Вариант',
+        pollAdd: '+ Добавить вариант',
+        pollEnable: 'Добавить голосование',
+        pollRemove: 'Убрать голосование',
+        catResults: 'Репортаж',
         catInterview: 'Интервью',
         catAnnouncement: 'Анонс',
+        catWorld: 'Мировой теннис',
         selectCategory: '— Выберите —',
         slugHint: 'Генерируется из заголовка. Используется в URL.',
-        publishedHint: 'Оставьте пустым для черновика',
         translateBtn: 'Перевести с RU',
         translating: 'Перевод...',
         translateError: 'Ошибка перевода',
         fillRuFirst: 'Сначала заполните поле RU',
+        fillAnyLang: 'Заполните на любом языке',
+        textCopied: 'Текст скопирован',
+        metaReadTime: 'мин чтения',
+        translateFromAny: 'Перевести',
         noArticles: 'Статей пока нет',
         noArticlesText: 'Нажмите "Добавить статью" чтобы создать первую статью',
         thTitle: 'Заголовок',
         thCategory: 'Категория',
         thStatus: 'Статус',
         thPublished: 'Дата',
+        thExecutor: 'Исполнитель',
+        newsExecutor: 'Исполнитель',
+        draftSaved: 'Черновик сохранён',
+        unsavedChanges: 'Несохранённые изменения',
+        unsavedChangesText: 'Есть несохранённые изменения. Выйти без сохранения?',
+        unsavedLeaveBtn: 'Выйти',
         // Tournaments
         addTournament: 'Добавить турнир',
         editTournament: 'Редактировать турнир',
@@ -879,9 +925,10 @@
 
     // Category map
     var CATEGORIES = {
-        results: isEn ? 'Results' : 'Результаты',
+        results: isEn ? 'Report' : 'Репортаж',
         interview: isEn ? 'Interview' : 'Интервью',
-        announcement: isEn ? 'Announcement' : 'Анонс'
+        announcement: isEn ? 'Announcement' : 'Анонс',
+        world: isEn ? 'World Tennis' : 'Мировой теннис'
     };
 
     // ---- Tournament Maps ----
@@ -1096,6 +1143,19 @@
         document.querySelectorAll('.ad-section').forEach(function(el) {
             el.classList.toggle('active', el.id === 'ad-' + tab);
         });
+        // Reset to list view when switching tabs via sidebar
+        var resetMap = {
+            content: renderNewsList,
+            tournaments: renderTournamentsList,
+            players: renderPlayersList,
+            courts: renderCourtsList,
+            coaches: renderCoachesList,
+            users: renderUsersList,
+            memberships: renderMembershipsList
+        };
+        if (resetMap[tab]) {
+            resetMap[tab]();
+        }
     }
 
     // ---- Render Dashboard ----
@@ -1212,7 +1272,7 @@
             client.from('tournament_registrations').select('id', { count: 'exact', head: true }).eq('status', 'pending'),               // [4] pending regs
             client.from('tournaments').select('id', { count: 'exact', head: true }).lt('date_start', today),                           // [5] past tournaments
             client.from('tournaments').select('id', { count: 'exact', head: true }).gte('date_start', today),                          // [6] upcoming tournaments
-            client.from('news').select('id', { count: 'exact', head: true }).eq('status', 'published'),                                // [7] published news
+            client.from('news').select('id', { count: 'exact', head: true }).not('published_at', 'is', null),                           // [7] published news
             client.from('courts').select('id', { count: 'exact', head: true }),                                                        // [8] courts
             client.from('coaches').select('id', { count: 'exact', head: true }),                                                       // [9] coaches
             client.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'manager'),                                // [10] managers
@@ -1380,8 +1440,20 @@
     // ============================================
 
     var newsEditingId = null;
+    var newsEditingPublishedAt = null;
     var newsImageFile = null;
     var newsImageUrl = '';
+    var newsGalleryUrls = [];
+    var newsGalleryFiles = [];
+    var newsContentImages = [];
+    var newsContentImageFiles = [];
+    var newsPollData = null;
+    var newsSearchQuery = '';
+    var newsSortCol = 'created_at';
+    var newsSortAsc = false;
+    var newsFilters = { category: [], published_at: [] };
+    var newsAllData = [];
+    var newsDraftDirty = false;
 
     function renderNewsSection() {
         renderNewsList();
@@ -1392,48 +1464,259 @@
         var container = document.getElementById('ad-content');
         if (!container) return;
 
+        function colHeader(col, label, filterable) {
+            var isActive = newsSortCol === col;
+            var hasFilter = filterable && newsFilters[col] && newsFilters[col].length > 0;
+            var cls = 'ad-col-header' + (isActive || hasFilter ? ' ad-col-active' : '');
+            return '<th><div class="' + cls + '" data-col="' + col + '">' +
+                '<span>' + label + '</span>' +
+                (isActive ? '<span class="ad-sort-arrow">' + (newsSortAsc ? '↑' : '↓') + '</span>' : '') +
+                '<span class="ad-col-filter-btn' + (hasFilter ? ' ad-col-filtered' : '') + '">▼</span>' +
+            '</div></th>';
+        }
+
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.content + '</h2>' +
                 '<button class="ad-btn ad-btn-primary" id="adNewsAdd">+ ' + L.addNews + '</button>' +
             '</div>' +
-            '<div class="ad-table-card">' +
+            '<div class="ad-filter-row">' +
+                '<input type="text" class="ad-field-input ad-filter-search" id="adNewsSearch" placeholder="' + L.newsSearch + '" value="' + esc(newsSearchQuery) + '">' +
+            '</div>' +
+            '<div class="ad-table-card" style="position:relative;">' +
                 '<div class="ad-table-wrap">' +
                     '<table class="ad-table ad-table-clickable" id="adNewsTable">' +
                         '<thead><tr>' +
-                            '<th></th>' +
-                            '<th>' + L.thTitle + '</th>' +
-                            '<th>' + L.thCategory + '</th>' +
-                            '<th>' + L.thStatus + '</th>' +
-                            '<th>' + L.thPublished + '</th>' +
+                            '<th style="width:40px;"></th>' +
+                            colHeader('title', L.thTitle, false) +
+                            colHeader('category', L.thCategory, true) +
+                            '<th>' + L.thExecutor + '</th>' +
+                            colHeader('published_at', L.thStatus, true) +
+                            colHeader('created_at', L.thPublished, false) +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
+                '<div class="ad-col-dropdown" id="adNewsColDropdown" style="display:none;"></div>' +
             '</div>';
 
         document.getElementById('adNewsAdd').addEventListener('click', function() {
             renderNewsForm(null);
         });
 
+        var searchTimer = null;
+        document.getElementById('adNewsSearch').addEventListener('input', function() {
+            newsSearchQuery = this.value;
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(loadNewsList, 300);
+        });
+
+        // Column header click → open dropdown
+        document.getElementById('adNewsTable').querySelector('thead').addEventListener('click', function(e) {
+            e.stopPropagation();
+            var hdr = e.target.closest('.ad-col-header');
+            if (!hdr) return;
+            openNewsColDropdown(hdr.dataset.col, hdr);
+        });
+
+        // Close dropdown on outside click
+        document.addEventListener('click', function(e) {
+            var dd = document.getElementById('adNewsColDropdown');
+            if (dd && dd.style.display !== 'none' && !dd.contains(e.target)) {
+                dd.style.display = 'none';
+            }
+        });
+
         await loadNewsList();
+    }
+
+    function openNewsColDropdown(col, hdr) {
+        var dd = document.getElementById('adNewsColDropdown');
+        if (!dd) return;
+
+        // Toggle: if already open for same column, close it
+        if (dd.style.display === 'block' && dd.dataset.col === col) {
+            dd.style.display = 'none';
+            return;
+        }
+        dd.dataset.col = col;
+
+        // Position dropdown below header
+        var rect = hdr.getBoundingClientRect();
+        var cardRect = dd.parentElement.getBoundingClientRect();
+        dd.style.left = Math.max(0, rect.left - cardRect.left) + 'px';
+        dd.style.top = (rect.bottom - cardRect.top + 4) + 'px';
+
+        var colLabels = { title: L.thTitle, category: L.thCategory, published_at: L.thStatus, created_at: L.thPublished };
+        var isDateCol = col === 'created_at';
+        var filterable = col === 'category' || col === 'published_at';
+
+        var html = '';
+
+        // Checkboxes first (for filterable columns)
+        if (filterable) {
+            var values;
+            if (col === 'category') {
+                values = Object.keys(CATEGORIES);
+            } else {
+                values = ['published', 'draft'];
+            }
+
+            var activeFilters = newsFilters[col] || [];
+            var allChecked = activeFilters.length === values.length;
+
+            // Select All + Title on same line
+            html += '<div class="ad-col-dd-title-row">' +
+                '<label class="ad-col-dd-check-all"><input type="checkbox" id="adColSelectAll"' + (allChecked ? ' checked' : '') + '> ' + (isEn ? 'All' : 'Все') + '</label>' +
+                '<span class="ad-col-dd-title">' + (colLabels[col] || col) + '</span>' +
+            '</div>';
+
+            values.forEach(function(v) {
+                var label = col === 'category' ? (CATEGORIES[v] || v) : (v === 'published' ? L.newsPublished : L.newsDraft);
+                var checked = activeFilters.indexOf(v) !== -1 ? ' checked' : '';
+                html += '<label class="ad-col-dd-check"><input type="checkbox" value="' + esc(v) + '"' + checked + '> ' + esc(label) + '</label>';
+            });
+
+            html += '<div class="ad-col-dd-divider"></div>';
+        } else {
+            html += '<div class="ad-col-dd-title">' + (colLabels[col] || col) + '</div>';
+        }
+
+        // Sort options after checkboxes
+        if (isDateCol) {
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Newest first' : '↓ Сначала новые') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Oldest first' : '↑ Сначала старые') + '</div>';
+        } else {
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ A → Z' : '↑ А → Я') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Z → A' : '↓ Я → А') + '</div>';
+        }
+
+        dd.innerHTML = html;
+        dd.style.display = 'block';
+
+        // Sort click
+        dd.querySelectorAll('.ad-col-dd-sort').forEach(function(el) {
+            el.addEventListener('click', function(ev) {
+                ev.stopPropagation();
+                newsSortCol = col;
+                newsSortAsc = this.dataset.sortDir === 'asc';
+                dd.style.display = 'none';
+                updateNewsColHeaders();
+                loadNewsList();
+            });
+        });
+
+        // Select All checkbox
+        var selectAllCb = dd.querySelector('#adColSelectAll');
+        var itemCbs = dd.querySelectorAll('input[type="checkbox"]:not(#adColSelectAll)');
+
+        if (selectAllCb) {
+            selectAllCb.addEventListener('change', function(ev) {
+                ev.stopPropagation();
+                var checked = this.checked;
+                var arr = [];
+                itemCbs.forEach(function(cb) {
+                    cb.checked = checked;
+                    if (checked) arr.push(cb.value);
+                });
+                newsFilters[col] = arr;
+                applyNewsFilters();
+                updateNewsColHeaders();
+            });
+        }
+
+        // Checkbox change
+        itemCbs.forEach(function(cb) {
+            cb.addEventListener('change', function(ev) {
+                ev.stopPropagation();
+                var val = this.value;
+                var arr = newsFilters[col] || [];
+                if (this.checked) {
+                    if (arr.indexOf(val) === -1) arr.push(val);
+                } else {
+                    arr = arr.filter(function(v) { return v !== val; });
+                }
+                newsFilters[col] = arr;
+                // Sync "Select All" state
+                if (selectAllCb) {
+                    selectAllCb.checked = arr.length === itemCbs.length;
+                }
+                applyNewsFilters();
+                updateNewsColHeaders();
+            });
+        });
+    }
+
+    function updateNewsColHeaders() {
+        var table = document.getElementById('adNewsTable');
+        if (!table) return;
+        table.querySelectorAll('.ad-col-header').forEach(function(hdr) {
+            var c = hdr.dataset.col;
+            var isActive = newsSortCol === c;
+            var filterable = c === 'category' || c === 'published_at';
+            var hasFilter = filterable && newsFilters[c] && newsFilters[c].length > 0;
+            hdr.classList.toggle('ad-col-active', isActive || hasFilter);
+            var arrow = hdr.querySelector('.ad-sort-arrow');
+            if (isActive) {
+                if (!arrow) {
+                    arrow = document.createElement('span');
+                    arrow.className = 'ad-sort-arrow';
+                    hdr.querySelector('.ad-col-filter-btn').before(arrow);
+                }
+                arrow.textContent = newsSortAsc ? '↑' : '↓';
+            } else if (arrow) {
+                arrow.remove();
+            }
+            var fb = hdr.querySelector('.ad-col-filter-btn');
+            if (fb) fb.classList.toggle('ad-col-filtered', hasFilter);
+        });
+    }
+
+    function applyNewsFilters() {
+        var filtered = newsAllData.slice();
+
+        // Category filter
+        if (newsFilters.category && newsFilters.category.length > 0) {
+            filtered = filtered.filter(function(a) {
+                return newsFilters.category.indexOf(a.category || '') !== -1;
+            });
+        }
+
+        // Status filter
+        if (newsFilters.published_at && newsFilters.published_at.length > 0) {
+            filtered = filtered.filter(function(a) {
+                var status = a.published_at ? 'published' : 'draft';
+                return newsFilters.published_at.indexOf(status) !== -1;
+            });
+        }
+
+        renderNewsRows(filtered);
     }
 
     async function loadNewsList() {
         if (!client) return;
 
-        var result = await client.from('news')
-            .select('id,title,image,category,published_at,created_at')
-            .order('created_at', { ascending: false });
+        var query = client.from('news')
+            .select('id,title,image,category,published_at,created_at,executor')
+            .order(newsSortCol, { ascending: newsSortAsc });
 
+        if (newsSearchQuery) {
+            query = query.ilike('title', '%' + newsSearchQuery + '%');
+        }
+
+        var result = await query;
+        newsAllData = result.data || [];
+        applyNewsFilters();
+    }
+
+    function renderNewsRows(articles) {
         var table = document.getElementById('adNewsTable');
         if (!table) return;
         var tbody = table.querySelector('tbody');
-        var articles = result.data || [];
 
         if (articles.length === 0) {
             tbody.innerHTML =
-                '<tr><td colspan="6" style="text-align:center;padding:60px 20px;">' +
+                '<tr><td colspan="7" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">📝</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noArticles + '</div>' +
                     '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noArticlesText + '</div>' +
@@ -1463,6 +1746,7 @@
                     '<td>' + thumbHtml + '</td>' +
                     '<td style="font-weight:500;color:var(--text-primary);">' + (a.title || L.noData) + '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
+                    '<td style="color:var(--text-secondary);">' + esc(a.executor || '\u2014') + '</td>' +
                     '<td>' + statusHtml + '</td>' +
                     '<td>' + dateStr + '</td>' +
                 '</tr>';
@@ -1493,8 +1777,15 @@
         if (!container) return;
 
         newsEditingId = article ? article.id : null;
+        newsEditingPublishedAt = (article && article.published_at) ? article.published_at : null;
         newsImageFile = null;
         newsImageUrl = (article && article.image) ? article.image : '';
+        newsGalleryUrls = (article && article.gallery) ? article.gallery.slice() : [];
+        newsGalleryFiles = [];
+        newsContentImages = (article && article.content_images) ? article.content_images.slice() : [];
+        newsContentImageFiles = [];
+        for (var ci = 0; ci < newsContentImages.length; ci++) newsContentImageFiles.push(null);
+        newsPollData = (article && article.poll) ? { question: article.poll.question || '', options: (article.poll.options || []).slice() } : null;
 
         var title = article ? L.editNews : L.addNews;
 
@@ -1528,6 +1819,15 @@
                 '</div>' +
             '</div>' +
 
+            // Meta preview
+            '<div class="ad-form-card ad-news-meta-preview">' +
+                '<div class="ad-news-meta-row">' +
+                    '<span>\uD83D\uDCC5 <span id="adMetaDate">\u2014</span></span>' +
+                    '<span>\uD83D\uDC64 <span id="adMetaAuthor">KSLT Media</span></span>' +
+                    '<span>\u23F1 <span id="adMetaReadTime">0</span> ' + L.metaReadTime + '</span>' +
+                '</div>' +
+            '</div>' +
+
             // Title + Slug
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.newsTitle + '</div>' +
@@ -1544,13 +1844,13 @@
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
                         '<input type="text" class="ad-field-input" id="adNewsTitleEn" placeholder="' + L.newsTitle + ' (EN)" value="' + esc(article ? article.title_en : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-src="adNewsTitle" data-target="adNewsTitleEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
+                        '<button type="button" class="ad-btn-translate" data-tolang="en">&#127760; ' + L.translateFromAny + '</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="kg">' +
                     '<div class="ad-field">' +
                         '<input type="text" class="ad-field-input" id="adNewsTitleKg" placeholder="' + L.newsTitle + ' (KG)" value="' + esc(article ? article.title_kg : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-src="adNewsTitle" data-target="adNewsTitleKg" data-tolang="kg">&#127760; ' + L.translateBtn + '</button>' +
+                        '<button type="button" class="ad-btn-translate" data-tolang="kg">&#127760; ' + L.translateFromAny + '</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-field">' +
@@ -1566,6 +1866,7 @@
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
@@ -1575,7 +1876,13 @@
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
                         '<textarea class="ad-field-input ad-field-textarea" id="adNewsExcerptEn" placeholder="' + L.newsExcerpt + ' (EN)">' + esc(article ? article.excerpt_en : '') + '</textarea>' +
-                        '<button type="button" class="ad-btn-translate" data-src="adNewsExcerpt" data-target="adNewsExcerptEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
+                        '<button type="button" class="ad-btn-translate" data-tolang="en">&#127760; ' + L.translateFromAny + '</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<div class="ad-field">' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adNewsExcerptKg" placeholder="' + L.newsExcerpt + ' (KG)">' + esc(article ? article.excerpt_kg : '') + '</textarea>' +
+                        '<button type="button" class="ad-btn-translate" data-tolang="kg">&#127760; ' + L.translateFromAny + '</button>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -1586,6 +1893,7 @@
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
@@ -1595,14 +1903,27 @@
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
                         '<textarea class="ad-field-input ad-field-textarea ad-field-textarea-lg" id="adNewsContentEn" placeholder="' + L.newsContent + ' (EN)">' + esc(article ? article.content_en : '') + '</textarea>' +
-                        '<button type="button" class="ad-btn-translate" data-src="adNewsContent" data-target="adNewsContentEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
+                        '<button type="button" class="ad-btn-translate" data-tolang="en">&#127760; ' + L.translateFromAny + '</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<div class="ad-field">' +
+                        '<textarea class="ad-field-input ad-field-textarea ad-field-textarea-lg" id="adNewsContentKg" placeholder="' + L.newsContent + ' (KG)">' + esc(article ? article.content_kg : '') + '</textarea>' +
+                        '<button type="button" class="ad-btn-translate" data-tolang="kg">&#127760; ' + L.translateFromAny + '</button>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
 
-            // Meta: category, author, date
+            // Content Preview (WYSIWYG with inline photos)
             '<div class="ad-form-card">' +
-                '<div class="ad-field-row-3 ad-field-row">' +
+                '<div class="ad-form-card-title">' + L.contentPreview + '</div>' +
+                '<div id="adNewsPreview"></div>' +
+                '<input type="file" accept="image/jpeg,image/png" id="adNewsContentImgInput" style="display:none">' +
+            '</div>' +
+
+            // Meta: category, author, executor, date
+            '<div class="ad-form-card">' +
+                '<div class="ad-field-row-4 ad-field-row">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.newsCategory + '</label>' +
                         '<select class="ad-field-input" id="adNewsCat">' +
@@ -1610,6 +1931,7 @@
                             '<option value="results"' + sel(article, 'category', 'results') + '>' + CATEGORIES.results + '</option>' +
                             '<option value="interview"' + sel(article, 'category', 'interview') + '>' + CATEGORIES.interview + '</option>' +
                             '<option value="announcement"' + sel(article, 'category', 'announcement') + '>' + CATEGORIES.announcement + '</option>' +
+                            '<option value="world"' + sel(article, 'category', 'world') + '>' + CATEGORIES.world + '</option>' +
                         '</select>' +
                     '</div>' +
                     '<div class="ad-field">' +
@@ -1617,27 +1939,54 @@
                         '<input type="text" class="ad-field-input" id="adNewsAuthor" value="' + esc(article ? article.author : 'KSLT Media') + '">' +
                     '</div>' +
                     '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.newsExecutor + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adNewsExecutor" value="' + esc(article ? (article.executor || '') : (localStorage.getItem('kslt_name') || '')) + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.newsPublishedAt + '</label>' +
-                        '<input type="datetime-local" class="ad-field-input" id="adNewsPubDate" value="' + formatDateLocal(article ? article.published_at : '') + '">' +
-                        '<div class="ad-field-hint">' + L.publishedHint + '</div>' +
+                        '<input type="date" class="ad-field-input" id="adNewsPubDate" value="' + (article && article.published_at ? article.published_at.substring(0, 10) : '') + '">' +
                     '</div>' +
                 '</div>' +
             '</div>' +
 
+            // Poll
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.pollSection + '</div>' +
+                '<div id="adNewsPollBody" style="display:none">' +
+                    '<div class="ad-field">' +
+                        '<input type="text" class="ad-field-input" id="adNewsPollQ" placeholder="' + L.pollQuestion + '">' +
+                    '</div>' +
+                    '<div id="adNewsPollOptions"></div>' +
+                    '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adNewsPollAddOpt">' + L.pollAdd + '</button>' +
+                '</div>' +
+                '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adNewsPollToggle">' +
+                    (newsPollData ? L.pollRemove : L.pollEnable) +
+                '</button>' +
+            '</div>' +
+
             // Actions
             '<div class="ad-btn-row">' +
-                '<button class="ad-btn ad-btn-primary" id="adNewsSave">' + L.save + '</button>' +
+                '<button class="ad-btn ad-btn-secondary" id="adNewsSave">' + L.save + '</button>' +
+                '<button class="ad-btn ad-btn-primary" id="adNewsPublish">' + (newsEditingPublishedAt ? L.update : L.publish) + '</button>' +
+                '<span class="ad-draft-status" id="adDraftStatus"></span>' +
                 (newsEditingId ? '<button class="ad-btn ad-btn-danger" id="adNewsDelete">' + L.delete + '</button>' : '') +
             '</div>';
 
         // --- Event Listeners ---
 
-        // Back
+        // Back (with unsaved changes protection)
         document.getElementById('adNewsBack').addEventListener('click', function() {
-            renderNewsList();
+            if (newsDraftDirty) {
+                showConfirm(L.unsavedChanges, L.unsavedChangesText, function() {
+                    newsDraftDirty = false;
+                    renderNewsList();
+                }, L.unsavedLeaveBtn);
+            } else {
+                renderNewsList();
+            }
         });
 
-        // Lang tabs (delegate)
+        // Lang tabs (delegate) + auto-copy
         container.addEventListener('click', function(e) {
             var tab = e.target.closest('.ad-lang-tab');
             if (!tab) return;
@@ -1646,22 +1995,57 @@
             if (!card) return;
             card.querySelectorAll('.ad-lang-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.lang === lang); });
             card.querySelectorAll('.ad-lang-panel').forEach(function(p) { p.classList.toggle('active', p.dataset.langPanel === lang); });
+
+            // Auto-copy: if target field is empty, copy from first non-empty panel
+            var activePanel = card.querySelector('.ad-lang-panel.active');
+            if (!activePanel) return;
+            var field = activePanel.querySelector('textarea, input.ad-field-input');
+            if (field && !field.value.trim()) {
+                card.querySelectorAll('.ad-lang-panel').forEach(function(p) {
+                    if (p === activePanel) return;
+                    var src = p.querySelector('textarea, input.ad-field-input');
+                    if (src && src.value.trim() && !field.value.trim()) {
+                        field.value = src.value;
+                        field.classList.add('ad-auto-copied');
+                    }
+                });
+            }
         });
 
-        // Translate buttons (delegate)
+        // Remove auto-copied hint on focus
+        container.addEventListener('focus', function(e) {
+            if (e.target.classList && e.target.classList.contains('ad-auto-copied')) {
+                e.target.classList.remove('ad-auto-copied');
+            }
+        }, true);
+
+        // Translate buttons (delegate) — universal: find source from other panels
         container.addEventListener('click', function(e) {
             var btn = e.target.closest('.ad-btn-translate');
             if (!btn) return;
-            var srcId = btn.dataset.src;
-            var targetId = btn.dataset.target;
             var toLang = btn.dataset.tolang;
-            var srcEl = document.getElementById(srcId);
-            var targetEl = document.getElementById(targetId);
-            if (!srcEl || !targetEl) return;
+            var card = btn.closest('.ad-form-card');
+            if (!card) return;
 
-            var srcText = srcEl.value.trim();
+            // Find target field in current panel
+            var currentPanel = btn.closest('.ad-lang-panel');
+            var targetEl = currentPanel ? currentPanel.querySelector('textarea, input.ad-field-input') : null;
+            if (!targetEl) return;
+
+            // Find first non-empty source from other panels
+            var srcText = '';
+            var srcLang = '';
+            card.querySelectorAll('.ad-lang-panel').forEach(function(p) {
+                if (p === currentPanel || srcText) return;
+                var src = p.querySelector('textarea, input.ad-field-input');
+                if (src && src.value.trim()) {
+                    srcText = src.value.trim();
+                    srcLang = p.dataset.langPanel;
+                }
+            });
+
             if (!srcText) {
-                showToast(L.fillRuFirst, 'error');
+                showToast(L.fillAnyLang, 'error');
                 return;
             }
 
@@ -1669,7 +2053,7 @@
             btn.textContent = L.translating;
             btn.disabled = true;
 
-            translateFromRu(srcText, toLang).then(function(result) {
+            translateText(srcText, srcLang, toLang).then(function(result) {
                 targetEl.value = result;
                 btn.textContent = origLabel;
                 btn.disabled = false;
@@ -1688,6 +2072,37 @@
                 slugInput.value = slugify(titleInput.value);
             });
         }
+
+        // Meta preview live update
+        var MONTHS_RU = ['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря'];
+        var MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        function updateMetaPreview() {
+            var dateEl = document.getElementById('adMetaDate');
+            var authorEl = document.getElementById('adMetaAuthor');
+            var readEl = document.getElementById('adMetaReadTime');
+            var pubInput = document.getElementById('adNewsPubDate');
+            var authorInput = document.getElementById('adNewsAuthor');
+            var contentInput = document.getElementById('adNewsContent');
+            if (dateEl && pubInput && pubInput.value) {
+                var d = new Date(pubInput.value + 'T12:00:00');
+                var months = isEn ? MONTHS_EN : MONTHS_RU;
+                dateEl.textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+            } else if (dateEl) {
+                dateEl.textContent = L.newsDraft;
+            }
+            if (authorEl && authorInput) {
+                authorEl.textContent = authorInput.value.trim() || 'KSLT Media';
+            }
+            if (readEl && contentInput) {
+                var words = contentInput.value.trim().split(/\s+/).filter(function(w) { return w; }).length;
+                readEl.textContent = Math.max(1, Math.ceil(words / 200));
+            }
+        }
+        ['adNewsPubDate', 'adNewsAuthor', 'adNewsContent'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', updateMetaPreview);
+        });
+        updateMetaPreview();
 
         // Image upload zone
         var imgZone = document.getElementById('adNewsImgZone');
@@ -1731,8 +2146,128 @@
             }
         });
 
-        // Save
-        document.getElementById('adNewsSave').addEventListener('click', saveNewsHandler);
+        // Content Preview: render + live update
+        renderNewsPreview();
+        var previewTimer = null;
+        var contentTextarea = document.getElementById('adNewsContent');
+        if (contentTextarea) {
+            contentTextarea.addEventListener('input', function() {
+                clearTimeout(previewTimer);
+                previewTimer = setTimeout(renderNewsPreview, 300);
+            });
+        }
+
+        // Content Preview: file input handler
+        var contentImgInput = document.getElementById('adNewsContentImgInput');
+        contentImgInput.addEventListener('change', function() {
+            var files = this.files;
+            if (!files || !files[0]) return;
+            var afterPar = parseInt(this.dataset.afterParagraph, 10) || 1;
+            var file = files[0];
+            newsContentImages.push({ url: URL.createObjectURL(file), after_paragraph: afterPar });
+            newsContentImageFiles.push(file);
+            renderNewsPreview();
+            this.value = '';
+        });
+
+        // Content Preview: delegated clicks (insert photo + remove photo)
+        document.getElementById('adNewsPreview').addEventListener('click', function(e) {
+            // Insert photo from file
+            var insertBtn = e.target.closest('.ad-preview-insert-btn');
+            if (insertBtn) {
+                var afterPar = parseInt(insertBtn.dataset.afterParagraph, 10) || 1;
+                contentImgInput.dataset.afterParagraph = afterPar;
+                contentImgInput.click();
+                return;
+            }
+            // Insert photo from URL
+            var urlBtn = e.target.closest('.ad-preview-insert-url-btn');
+            if (urlBtn) {
+                var afterPar = parseInt(urlBtn.dataset.afterParagraph, 10) || 1;
+                var url = prompt(isEn ? 'Paste image URL:' : 'Вставьте URL изображения:');
+                if (url && url.trim()) {
+                    newsContentImages.push({ url: url.trim(), after_paragraph: afterPar });
+                    newsContentImageFiles.push(null);
+                    renderNewsPreview();
+                }
+                return;
+            }
+            // Remove photo button
+            var rmBtn = e.target.closest('.ad-preview-img-remove');
+            if (rmBtn) {
+                var imgAfter = parseInt(rmBtn.dataset.afterParagraph, 10);
+                var imgIdx = parseInt(rmBtn.dataset.imgIdx, 10);
+                // Find and remove from arrays
+                var removeAt = -1;
+                var count = 0;
+                for (var i = 0; i < newsContentImages.length; i++) {
+                    if (newsContentImages[i].after_paragraph === imgAfter) {
+                        if (count === imgIdx) { removeAt = i; break; }
+                        count++;
+                    }
+                }
+                if (removeAt >= 0) {
+                    newsContentImages.splice(removeAt, 1);
+                    newsContentImageFiles.splice(removeAt, 1);
+                }
+                renderNewsPreview();
+            }
+        });
+
+        // Poll: init display
+        if (newsPollData) {
+            document.getElementById('adNewsPollBody').style.display = '';
+            document.getElementById('adNewsPollQ').value = newsPollData.question;
+            renderNewsPollOptions();
+        }
+
+        // Poll: toggle
+        document.getElementById('adNewsPollToggle').addEventListener('click', function() {
+            if (newsPollData) {
+                newsPollData = null;
+                document.getElementById('adNewsPollBody').style.display = 'none';
+                this.textContent = L.pollEnable;
+            } else {
+                newsPollData = { question: '', options: ['', ''] };
+                document.getElementById('adNewsPollBody').style.display = '';
+                document.getElementById('adNewsPollQ').value = '';
+                renderNewsPollOptions();
+                this.textContent = L.pollRemove;
+            }
+        });
+
+        // Poll: add option
+        document.getElementById('adNewsPollAddOpt').addEventListener('click', function() {
+            if (!newsPollData) return;
+            newsPollData.options.push('');
+            renderNewsPollOptions();
+        });
+
+        // Poll: question input
+        document.getElementById('adNewsPollQ').addEventListener('input', function() {
+            if (newsPollData) newsPollData.question = this.value;
+        });
+
+        // Poll: delegated remove + option input
+        document.getElementById('adNewsPollOptions').addEventListener('click', function(e) {
+            var rmBtn = e.target.closest('.ad-poll-opt-remove');
+            if (!rmBtn || !newsPollData) return;
+            if (newsPollData.options.length <= 2) return;
+            var idx = parseInt(rmBtn.dataset.idx, 10);
+            newsPollData.options.splice(idx, 1);
+            renderNewsPollOptions();
+        });
+        document.getElementById('adNewsPollOptions').addEventListener('input', function(e) {
+            if (!e.target.classList.contains('ad-poll-opt-input') || !newsPollData) return;
+            var idx = parseInt(e.target.dataset.idx, 10);
+            newsPollData.options[idx] = e.target.value;
+        });
+
+        // Save (draft)
+        document.getElementById('adNewsSave').addEventListener('click', function() { saveNewsHandler(false); });
+
+        // Publish / Update
+        document.getElementById('adNewsPublish').addEventListener('click', function() { saveNewsHandler(true); });
 
         // Delete
         var delBtn = document.getElementById('adNewsDelete');
@@ -1743,6 +2278,79 @@
                 });
             });
         }
+
+        // ---- Autosave to Supabase ----
+        newsDraftDirty = false;
+
+        function collectDraftData() {
+            return {
+                title: (document.getElementById('adNewsTitle') || {}).value || '',
+                title_en: (document.getElementById('adNewsTitleEn') || {}).value || '',
+                title_kg: (document.getElementById('adNewsTitleKg') || {}).value || '',
+                slug: (document.getElementById('adNewsSlug') || {}).value || '',
+                excerpt: (document.getElementById('adNewsExcerpt') || {}).value || '',
+                excerpt_en: (document.getElementById('adNewsExcerptEn') || {}).value || '',
+                excerpt_kg: (document.getElementById('adNewsExcerptKg') || {}).value || '',
+                content: (document.getElementById('adNewsContent') || {}).value || '',
+                content_en: (document.getElementById('adNewsContentEn') || {}).value || '',
+                content_kg: (document.getElementById('adNewsContentKg') || {}).value || '',
+                category: (document.getElementById('adNewsCat') || {}).value || '',
+                author: (document.getElementById('adNewsAuthor') || {}).value || '',
+                executor: (document.getElementById('adNewsExecutor') || {}).value || '',
+                image: newsImageUrl || null,
+                content_images: newsContentImages.filter(function(ci) { return ci.url && !ci.url.startsWith('blob:'); }),
+                poll: newsPollData,
+                published_at: null
+            };
+        }
+
+        var autosaveTimer = null;
+        var autosaving = false;
+
+        async function autosaveDraft() {
+            var title = (document.getElementById('adNewsTitle') || {}).value || '';
+            if (!title.trim()) return; // Don't save empty drafts
+
+            if (autosaving) return;
+            autosaving = true;
+
+            try {
+                var data = collectDraftData();
+                if (!data.slug) data.slug = slugify(data.title);
+
+                var result;
+                if (newsEditingId) {
+                    result = await client.from('news').update(data).eq('id', newsEditingId);
+                } else {
+                    data.id = crypto.randomUUID();
+                    result = await client.from('news').insert(data);
+                    if (!result.error) {
+                        newsEditingId = data.id;
+                    }
+                }
+
+                if (!result.error) {
+                    newsDraftDirty = false;
+                    var statusEl = document.getElementById('adDraftStatus');
+                    if (statusEl) {
+                        var now = new Date();
+                        var hh = String(now.getHours()).padStart(2, '0');
+                        var mm = String(now.getMinutes()).padStart(2, '0');
+                        statusEl.textContent = '\u2713 ' + L.draftSaved + ' ' + hh + ':' + mm;
+                    }
+                }
+            } catch (e) {
+                console.error('Autosave error:', e);
+            }
+            autosaving = false;
+        }
+
+        container.addEventListener('input', function(e) {
+            if (!e.target.closest('.ad-form-card, .ad-field')) return;
+            newsDraftDirty = true;
+            clearTimeout(autosaveTimer);
+            autosaveTimer = setTimeout(autosaveDraft, 3000);
+        });
     }
 
     function previewNewsImage(src) {
@@ -1776,26 +2384,156 @@
         }
     }
 
+    // ---- Content Preview (WYSIWYG) ----
+    function renderNewsPreview() {
+        var container = document.getElementById('adNewsPreview');
+        if (!container) return;
+
+        var textEl = document.getElementById('adNewsContent');
+        var text = textEl ? textEl.value.trim() : '';
+
+        if (!text) {
+            container.innerHTML = '<div style="color:var(--text-secondary);font-size:0.92em;padding:20px 0;text-align:center">' +
+                (isEn ? 'Start typing content to see preview' : 'Начните вводить текст для предпросмотра') + '</div>';
+            return;
+        }
+
+        // Split into paragraphs
+        var paragraphs = text.split(/\n\n+/).filter(function(p) { return p.trim(); });
+
+        // Group content_images by after_paragraph
+        var imgsByPar = {};
+        newsContentImages.forEach(function(item, idx) {
+            var key = item.after_paragraph || 1;
+            if (!imgsByPar[key]) imgsByPar[key] = [];
+            imgsByPar[key].push({ url: item.url, globalIdx: idx });
+        });
+
+        var html = '';
+        paragraphs.forEach(function(para, idx) {
+            var parNum = idx + 1;
+
+            // Paragraph text
+            html += '<div style="padding:10px 12px;margin:2px 0;background:rgba(255,255,255,0.03);border-radius:6px;border-left:3px solid rgba(204,255,0,0.15);font-size:0.9em;color:var(--text-secondary);line-height:1.5">' +
+                '<span style="color:var(--accent);font-size:0.75em;opacity:0.5;margin-right:6px">' + parNum + '</span>' +
+                esc(para.length > 200 ? para.substring(0, 200) + '...' : para) +
+            '</div>';
+
+            // Photos after this paragraph
+            if (imgsByPar[parNum]) {
+                imgsByPar[parNum].forEach(function(img, imgIdx) {
+                    html += '<div style="position:relative;display:inline-block;margin:6px 0 6px 24px">' +
+                        '<img src="' + esc(img.url) + '" alt="" style="max-width:300px;max-height:200px;border-radius:8px;display:block">' +
+                        '<button type="button" class="ad-preview-img-remove" data-after-paragraph="' + parNum + '" data-img-idx="' + imgIdx + '" ' +
+                            'style="position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.7);color:#fff;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">&times;</button>' +
+                    '</div>';
+                });
+            }
+
+            // Insert photo buttons (file + URL)
+            html += '<div style="text-align:center;padding:4px 0;display:flex;justify-content:center;gap:8px">' +
+                '<button type="button" class="ad-preview-insert-btn" data-after-paragraph="' + parNum + '" ' +
+                    'style="background:none;border:1px dashed rgba(204,255,0,0.25);color:var(--accent);padding:4px 16px;border-radius:6px;cursor:pointer;font-size:0.8em;opacity:0.5;transition:opacity 0.2s"' +
+                    ' onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5">' +
+                    L.insertPhoto +
+                '</button>' +
+                '<button type="button" class="ad-preview-insert-url-btn" data-after-paragraph="' + parNum + '" ' +
+                    'style="background:none;border:1px dashed rgba(204,255,0,0.15);color:var(--text-secondary);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.8em;opacity:0.5;transition:opacity 0.2s"' +
+                    ' onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5">' +
+                    'URL' +
+                '</button>' +
+            '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    // ---- Poll Options (News) ----
+    function renderNewsPollOptions() {
+        var container = document.getElementById('adNewsPollOptions');
+        if (!container || !newsPollData) return;
+        var html = '';
+        newsPollData.options.forEach(function(opt, idx) {
+            html += '<div style="display:flex;align-items:center;gap:8px;margin:4px 0">' +
+                '<span style="color:var(--text-secondary);font-size:0.85em;min-width:20px">' + (idx + 1) + '.</span>' +
+                '<input type="text" class="ad-field-input ad-poll-opt-input" data-idx="' + idx + '" value="' + esc(opt) + '" placeholder="' + L.pollOption + ' ' + (idx + 1) + '" style="flex:1">' +
+                (newsPollData.options.length > 2 ? '<button type="button" class="ad-gallery-remove ad-poll-opt-remove" data-idx="' + idx + '" style="position:static;width:24px;height:24px;font-size:14px">&times;</button>' : '') +
+            '</div>';
+        });
+        container.innerHTML = html;
+    }
+
     // ---- Save News ----
-    async function saveNewsHandler() {
+    async function saveNewsHandler(doPublish) {
         var saveBtn = document.getElementById('adNewsSave');
-        saveBtn.disabled = true;
-        saveBtn.textContent = L.saving;
+        var pubBtn = document.getElementById('adNewsPublish');
+        var activeBtn = doPublish ? pubBtn : saveBtn;
+        activeBtn.disabled = true;
+        activeBtn.textContent = L.saving;
 
         try {
-            // Upload image if file selected
+            // Upload cover image if file selected
             var imageUrl = newsImageUrl;
             if (newsImageFile) {
                 imageUrl = await uploadNewsImage(newsImageFile);
                 if (!imageUrl) {
-                    // detailed error already shown by uploadNewsImage
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = L.save;
+                    activeBtn.disabled = false;
+                    activeBtn.textContent = doPublish ? (newsEditingPublishedAt ? L.update : L.publish) : L.save;
                     return;
                 }
             }
 
-            var pubDate = document.getElementById('adNewsPubDate').value;
+            // Upload new content image files
+            var contentImagesFinal = [];
+            for (var ci = 0; ci < newsContentImages.length; ci++) {
+                var ciUrl = newsContentImages[ci].url;
+                if (newsContentImageFiles[ci]) {
+                    var ciUploaded = await uploadNewsImage(newsContentImageFiles[ci]);
+                    if (ciUploaded) {
+                        ciUrl = ciUploaded;
+                    } else {
+                        continue; // Skip failed uploads, don't save blob URL
+                    }
+                }
+                // Skip blob URLs (shouldn't happen but safety check)
+                if (ciUrl && ciUrl.startsWith('blob:')) continue;
+                if (ciUrl) {
+                    contentImagesFinal.push({ url: ciUrl, after_paragraph: newsContentImages[ci].after_paragraph || 1 });
+                }
+            }
+
+            // Collect poll data
+            var pollFinal = null;
+            if (newsPollData && newsPollData.question && newsPollData.question.trim()) {
+                var filteredOpts = newsPollData.options.filter(function(o) { return o && o.trim(); });
+                if (filteredOpts.length >= 2) {
+                    pollFinal = { question: newsPollData.question.trim(), options: filteredOpts };
+                }
+            }
+
+            // Determine published_at (date from field, time preserved internally)
+            var pubDateInput = document.getElementById('adNewsPubDate').value; // YYYY-MM-DD or ''
+            var publishedAt;
+            if (doPublish) {
+                if (pubDateInput) {
+                    // Use selected date + current time for tracking
+                    var now = new Date();
+                    publishedAt = pubDateInput + 'T' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':00.000Z';
+                    // If already published, keep original time
+                    if (newsEditingPublishedAt && newsEditingPublishedAt.substring(0, 10) === pubDateInput) {
+                        publishedAt = newsEditingPublishedAt;
+                    }
+                } else {
+                    publishedAt = newsEditingPublishedAt || new Date().toISOString();
+                }
+            } else {
+                // Save draft: keep existing published_at or null
+                if (pubDateInput && newsEditingPublishedAt) {
+                    publishedAt = newsEditingPublishedAt;
+                } else {
+                    publishedAt = null;
+                }
+            }
 
             var data = {
                 title: document.getElementById('adNewsTitle').value.trim(),
@@ -1804,18 +2542,23 @@
                 slug: document.getElementById('adNewsSlug').value.trim(),
                 excerpt: document.getElementById('adNewsExcerpt').value.trim(),
                 excerpt_en: document.getElementById('adNewsExcerptEn').value.trim(),
+                excerpt_kg: document.getElementById('adNewsExcerptKg').value.trim(),
                 content: document.getElementById('adNewsContent').value.trim(),
                 content_en: document.getElementById('adNewsContentEn').value.trim(),
+                content_kg: document.getElementById('adNewsContentKg').value.trim(),
                 image: imageUrl || null,
+                content_images: contentImagesFinal,
+                poll: pollFinal,
                 category: document.getElementById('adNewsCat').value,
                 author: document.getElementById('adNewsAuthor').value.trim(),
-                published_at: pubDate ? new Date(pubDate).toISOString() : null
+                executor: document.getElementById('adNewsExecutor').value.trim(),
+                published_at: publishedAt
             };
 
             if (!data.title) {
                 showToast(isEn ? 'Title is required' : 'Заголовок обязателен', 'error');
-                saveBtn.disabled = false;
-                saveBtn.textContent = L.save;
+                activeBtn.disabled = false;
+                activeBtn.textContent = doPublish ? (newsEditingPublishedAt ? L.update : L.publish) : L.save;
                 return;
             }
 
@@ -1833,17 +2576,18 @@
 
             if (result.error) {
                 showToast(result.error.message, 'error');
-                saveBtn.disabled = false;
-                saveBtn.textContent = L.save;
+                activeBtn.disabled = false;
+                activeBtn.textContent = doPublish ? (newsEditingPublishedAt ? L.update : L.publish) : L.save;
                 return;
             }
 
+            newsDraftDirty = false;
             showToast(L.saved, 'success');
             renderNewsList();
         } catch (e) {
             showToast(e.message || 'Error', 'error');
-            saveBtn.disabled = false;
-            saveBtn.textContent = L.save;
+            activeBtn.disabled = false;
+            activeBtn.textContent = doPublish ? (newsEditingPublishedAt ? L.update : L.publish) : L.save;
         }
     }
 
@@ -7925,7 +8669,7 @@
     }
 
     // ---- Confirm Modal ----
-    function showConfirm(title, text, onConfirm, confirmLabel) {
+    function showConfirm(title, text, onConfirm, confirmLabel, onCancel) {
         var btnLabel = confirmLabel || L.delete;
         var btnClass = confirmLabel ? 'ad-btn-primary' : 'ad-btn-danger';
         var overlay = document.createElement('div');
@@ -7941,15 +8685,21 @@
             '</div>';
         document.body.appendChild(overlay);
 
-        document.getElementById('adConfirmCancel').addEventListener('click', function() { overlay.remove(); });
+        function dismiss() { overlay.remove(); if (onCancel) onCancel(); }
+        document.getElementById('adConfirmCancel').addEventListener('click', dismiss);
         document.getElementById('adConfirmOk').addEventListener('click', function() { overlay.remove(); onConfirm(); });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
     }
 
     // ---- Translation (MyMemory API, free, no key) ----
     async function translateFromRu(text, targetLang) {
-        var langMap = { en: 'en', kg: 'ky' };
-        var toLang = langMap[targetLang] || targetLang;
+        return translateText(text, 'ru', targetLang);
+    }
+
+    async function translateText(text, fromLang, toLang) {
+        var langMap = { ru: 'ru', en: 'en', kg: 'ky' };
+        var from = langMap[fromLang] || fromLang;
+        var to = langMap[toLang] || toLang;
 
         // Split long text into chunks (API limit ~500 chars)
         var lines = text.split('\n');
@@ -7970,7 +8720,7 @@
         var results = [];
         for (var j = 0; j < chunks.length; j++) {
             var url = 'https://api.mymemory.translated.net/get?q=' +
-                encodeURIComponent(chunks[j]) + '&langpair=ru|' + toLang;
+                encodeURIComponent(chunks[j]) + '&langpair=' + from + '|' + to;
             var resp = await fetch(url);
             var data = await resp.json();
             if (data.responseData && data.responseData.translatedText) {

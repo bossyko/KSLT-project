@@ -35,8 +35,8 @@ function mapDbArticle(row) {
     var excerpt = isEn ? (row.excerpt_en || row.excerpt) : row.excerpt;
 
     var catLabels = isEn
-        ? { results: 'Results', interview: 'Interview', announcement: 'Announcement' }
-        : { results: 'Результаты', interview: 'Интервью', announcement: 'Анонс' };
+        ? { results: 'Report', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' }
+        : { results: 'Репортаж', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' };
 
     var dateStr = '';
     if (row.published_at) {
@@ -67,6 +67,9 @@ function mapDbArticle(row) {
         category: row.category || 'announcement',
         categoryLabel: catLabels[row.category] || row.category,
         content: contentBlocks,
+        gallery: (row.gallery && Array.isArray(row.gallery)) ? row.gallery : [],
+        content_images: (row.content_images && Array.isArray(row.content_images)) ? row.content_images : [],
+        poll: row.poll || null,
         tags: [],
         reactions: { tennis: 0, fire: 0, clap: 0 },
         relatedSlugs: [],
@@ -138,6 +141,7 @@ async function initFromSupabase(client, slug) {
             initParallax();
             initScrollAnimations();
             initReactions(slug);
+            initPoll(slug);
         }
     } catch (e) {
         console.error('Supabase news error:', e);
@@ -347,10 +351,52 @@ function renderContent(article) {
     var container = document.getElementById('newsArticleBody');
     if (!container) return;
 
+    // Sort content_images by after_paragraph (parseInt for JSONB safety)
+    var cimgs = (article.content_images || []).filter(function(ci) {
+        return ci && ci.url;
+    }).map(function(ci) {
+        return { url: ci.url, after_paragraph: parseInt(ci.after_paragraph, 10) || 1 };
+    }).sort(function(a, b) {
+        return a.after_paragraph - b.after_paragraph;
+    });
+    var cimgIdx = 0;
+
     var html = '';
     article.content.forEach(function(block, index) {
         html += renderBlock(block, index);
+        // Insert inline photos after paragraph (index+1 = 1-based paragraph number)
+        while (cimgIdx < cimgs.length && cimgs[cimgIdx].after_paragraph === index + 1) {
+            html += '<figure class="news-figure news-animate">' +
+                '<img src="' + esc(cimgs[cimgIdx].url) + '" loading="lazy">' +
+            '</figure>';
+            cimgIdx++;
+        }
     });
+
+    // Remaining content images (position > paragraph count) — render at end of text
+    while (cimgIdx < cimgs.length) {
+        html += '<figure class="news-figure news-animate">' +
+            '<img src="' + esc(cimgs[cimgIdx].url) + '" loading="lazy">' +
+        '</figure>';
+        cimgIdx++;
+    }
+
+    // Gallery (from gallery column, like courts)
+    if (article.gallery && article.gallery.length) {
+        html += '<div class="news-gallery news-animate">';
+        article.gallery.forEach(function(url) {
+            html += '<a href="' + esc(url) + '" class="news-gallery-item" target="_blank">' +
+                '<img src="' + esc(url) + '" alt="" loading="lazy">' +
+            '</a>';
+        });
+        html += '</div>';
+    }
+
+    // Poll (from poll column)
+    if (article.poll && article.poll.question && article.poll.options) {
+        html += renderBlock({ type: 'poll', question: article.poll.question, options: article.poll.options }, 99);
+    }
+
     container.innerHTML = html;
 }
 
