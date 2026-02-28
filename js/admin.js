@@ -38,6 +38,47 @@
         iconMemberships: '💳',
         iconTournaments: '🏆',
         iconPlayers: '📊',
+        // Dashboard cards
+        iconOverdue: '⚠️',
+        iconApproaching: '⏰',
+        iconNews: '📰',
+        statMembersDetail: 'members / users',
+        statOverdueDetail: 'expired memberships',
+        statApproachingDetail: 'expiring within 10 days',
+        statTournamentsDetail: 'past / upcoming',
+        statNewsDetail: 'articles published',
+        // Dashboard activity tables
+        actApproaching: 'Approaching Payment',
+        actOverdue: 'Overdue Payments',
+        actRecentRegistrations: 'Recent Registrations',
+        actRecentTournaments: 'Recent Tournaments',
+        actRecentNews: 'Recent News',
+        viewAll: 'View all',
+        thName: 'Name',
+        thExpires: 'Expires',
+        thDaysLeft: 'Days Left',
+        thOverdueDays: 'Overdue',
+        thTournament: 'Tournament',
+        thDateStart: 'Date',
+        thArticle: 'Article',
+        thStatus: 'Status',
+        iconPending: '📋',
+        iconCourts: '🏟️',
+        iconCoaches: '🎓',
+        iconManagers: '👔',
+        statPendingDetail: 'pending registrations',
+        statCourtsDetail: 'courts total',
+        statCoachesDetail: 'coaches total',
+        statManagersDetail: 'managers',
+        actPendingRegs: 'Pending Registrations',
+        thPlayer: 'Player',
+        thCategory: 'Category',
+        noPendingRegs: 'No pending registrations',
+        noApproaching: 'No expiring memberships',
+        noOverdue: 'No overdue payments',
+        noRecentUsers: 'No recent registrations',
+        noRecentTournaments: 'No recent tournaments',
+        noRecentNews: 'No recent news',
         // News
         addNews: 'Add Article',
         editNews: 'Edit Article',
@@ -430,6 +471,47 @@
         iconMemberships: '💳',
         iconTournaments: '🏆',
         iconPlayers: '📊',
+        // Dashboard cards
+        iconOverdue: '⚠️',
+        iconApproaching: '⏰',
+        iconNews: '📰',
+        statMembersDetail: 'членов / пользователей',
+        statOverdueDetail: 'просроченных членств',
+        statApproachingDetail: 'истекает в ближ. 10 дней',
+        statTournamentsDetail: 'прошло / предстоит',
+        statNewsDetail: 'статей опубликовано',
+        // Dashboard activity tables
+        actApproaching: 'Скоро оплата',
+        actOverdue: 'Просроченные оплаты',
+        actRecentRegistrations: 'Последние регистрации',
+        actRecentTournaments: 'Последние турниры',
+        actRecentNews: 'Последние новости',
+        viewAll: 'Все',
+        thName: 'Имя',
+        thExpires: 'Истекает',
+        thDaysLeft: 'Осталось',
+        thOverdueDays: 'Просрочка',
+        thTournament: 'Турнир',
+        thDateStart: 'Дата',
+        thArticle: 'Статья',
+        thStatus: 'Статус',
+        iconPending: '📋',
+        iconCourts: '🏟️',
+        iconCoaches: '🎓',
+        iconManagers: '👔',
+        statPendingDetail: 'заявок на турниры',
+        statCourtsDetail: 'кортов всего',
+        statCoachesDetail: 'тренеров всего',
+        statManagersDetail: 'менеджеров',
+        actPendingRegs: 'Ожидают одобрения',
+        thPlayer: 'Игрок',
+        thCategory: 'Категория',
+        noPendingRegs: 'Нет заявок на одобрение',
+        noApproaching: 'Нет истекающих членств',
+        noOverdue: 'Нет просроченных оплат',
+        noRecentUsers: 'Нет новых регистраций',
+        noRecentTournaments: 'Нет последних турниров',
+        noRecentNews: 'Нет последних новостей',
         // News
         addNews: 'Добавить статью',
         editNews: 'Редактировать статью',
@@ -1021,95 +1103,269 @@
         var container = document.getElementById('ad-dashboard');
         if (!container) return;
 
+        var isAdm = currentRole === 'admin';
+
         container.innerHTML =
             '<h2 class="ad-section-title">' + L.dashboardTitle + '</h2>' +
+            // Stat cards (3x3 grid)
             '<div class="ad-stats-grid" id="adStatsGrid">' +
-                renderStatCard(L.iconUsers, '...', L.totalUsers) +
-                renderStatCard(L.iconMemberships, '...', L.activeMemberships) +
-                renderStatCard(L.iconTournaments, '...', L.upcomingTournaments) +
-                renderStatCard(L.iconPlayers, '...', L.rankedPlayers) +
+                // Row 1: Members, Overdue, Approaching
+                renderStatCard(L.iconUsers, '...', L.statMembersDetail) +
+                renderStatCard(L.iconOverdue, '...', L.statOverdueDetail, 'ad-stat-card--danger', 'adDashOverdue') +
+                renderStatCard(L.iconApproaching, '...', L.statApproachingDetail, 'ad-stat-card--warning', 'adDashApproaching') +
+                // Row 2: Pending regs, Tournaments, News
+                renderStatCard(L.iconPending, '...', L.statPendingDetail, 'ad-stat-card--warning', 'adDashPendingRegs') +
+                renderStatCard(L.iconTournaments, '...', L.statTournamentsDetail) +
+                renderStatCard(L.iconNews, '...', L.statNewsDetail) +
+                // Row 3: Courts, Coaches, Managers (admin only)
+                renderStatCard(L.iconCourts, '...', L.statCourtsDetail) +
+                renderStatCard(L.iconCoaches, '...', L.statCoachesDetail) +
+                (isAdm ? renderStatCard(L.iconManagers, '...', L.statManagersDetail) : '') +
             '</div>' +
-            '<div class="ad-table-card">' +
-                '<div class="ad-table-card-title">' + L.recentRegistrations + '</div>' +
-                '<div class="ad-table-wrap">' +
-                    '<table class="ad-table" id="adRecentTable">' +
-                        '<thead><tr>' +
-                            '<th>' + L.thUser + '</th>' +
-                            '<th>' + L.thEmail + '</th>' +
-                            '<th>' + L.thRole + '</th>' +
-                            '<th>' + L.thDate + '</th>' +
-                        '</tr></thead>' +
-                        '<tbody><tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
-                    '</table>' +
-                '</div>' +
+            // Activity tables
+            '<div class="ad-dash-activity-grid">' +
+                buildActivityTableHtml('adDashPendingRegs', L.actPendingRegs, 'warning',
+                    [L.thPlayer, L.thTournament, L.thDate], 'tournaments') +
+                buildActivityTableHtml('adDashApproaching', L.actApproaching, 'warning',
+                    [L.thName, L.thExpires, L.thDaysLeft], 'memberships') +
+                buildActivityTableHtml('adDashOverdue', L.actOverdue, 'danger',
+                    [L.thName, L.thExpires, L.thOverdueDays], 'memberships') +
+                buildActivityTableHtml('adDashRecentUsers', L.actRecentRegistrations, 'neutral',
+                    [L.thUser, L.thEmail, L.thRole, L.thDate], 'users') +
+                buildActivityTableHtml('adDashRecentTournaments', L.actRecentTournaments, 'neutral',
+                    [L.thTournament, L.thDateStart, L.thStatus], 'tournaments') +
+                buildActivityTableHtml('adDashRecentNews', L.actRecentNews, 'neutral',
+                    [L.thArticle, L.thStatus, L.thDate], 'content') +
             '</div>';
 
         loadStats();
     }
 
-    function renderStatCard(icon, value, label) {
-        return '<div class="ad-stat-card">' +
+    function renderStatCard(icon, value, label, modifier, clickTarget) {
+        var cls = 'ad-stat-card' + (modifier ? ' ' + modifier : '');
+        var clickAttr = clickTarget ? ' data-scroll-to="' + clickTarget + '"' : '';
+        return '<div class="' + cls + '"' + clickAttr + '>' +
             '<div class="ad-stat-icon">' + icon + '</div>' +
             '<div class="ad-stat-value">' + value + '</div>' +
             '<div class="ad-stat-label">' + label + '</div>' +
         '</div>';
     }
 
+    function buildActivityTableHtml(id, title, badgeType, headers, tabTarget) {
+        var headerHtml = '';
+        headers.forEach(function(h) { headerHtml += '<th>' + h + '</th>'; });
+        return '<div class="ad-table-card" id="' + id + '">' +
+            '<div class="ad-table-card-header">' +
+                '<div class="ad-table-card-title">' + title +
+                    '<span class="ad-dash-count-badge ad-dash-count-badge--' + badgeType + '" id="' + id + 'Count"></span>' +
+                '</div>' +
+                '<a class="ad-dash-view-all" data-tab="' + tabTarget + '">' + L.viewAll + ' →</a>' +
+            '</div>' +
+            '<div class="ad-table-wrap">' +
+                '<table class="ad-table">' +
+                    '<thead><tr>' + headerHtml + '</tr></thead>' +
+                    '<tbody><tr><td colspan="' + headers.length + '" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                '</table>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function fillDashTable(containerId, result, rowFn, emptyMsg) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        var tbody = container.querySelector('tbody');
+        if (!tbody) return;
+        var items = (result.status === 'fulfilled' && result.value.data) ? result.value.data : [];
+        // Update count badge
+        var badge = document.getElementById(containerId + 'Count');
+        if (badge) badge.textContent = items.length > 0 ? items.length : '';
+        if (items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10"><div class="ad-dash-empty"><div class="ad-dash-empty-icon">✅</div>' + emptyMsg + '</div></td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        items.forEach(function(item) { tbody.innerHTML += rowFn(item); });
+    }
+
+    function fmtDate(dateStr) {
+        if (!dateStr) return L.noData;
+        return new Date(dateStr).toLocaleDateString(isEn ? 'en-US' : 'ru-RU');
+    }
+
     async function loadStats() {
         if (!client) return;
 
-        var today = new Date().toISOString().split('T')[0];
+        var isAdm = currentRole === 'admin';
+        var now = new Date();
+        var today = now.toISOString().split('T')[0];
+        var plus10 = new Date(now);
+        plus10.setDate(plus10.getDate() + 10);
+        var todayPlus10 = plus10.toISOString().split('T')[0];
+        var todayMs = new Date(today).getTime();
 
         var results = await Promise.allSettled([
-            client.from('profiles').select('id', { count: 'exact', head: true }),
-            client.from('memberships').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('expires_at', today),
-            client.from('tournaments').select('id', { count: 'exact', head: true }).gte('date_start', today),
-            client.from('players').select('id', { count: 'exact', head: true }),
-            client.from('profiles').select('id,full_name,email,role,avatar_url,created_at').order('created_at', { ascending: false }).limit(10)
+            // Counts
+            client.from('players').select('id', { count: 'exact', head: true }),                                                       // [0] members
+            client.from('profiles').select('id', { count: 'exact', head: true }),                                                      // [1] users
+            client.from('memberships').select('id', { count: 'exact', head: true }).eq('status', 'active').lt('expires_at', today),     // [2] overdue
+            client.from('memberships').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('expires_at', today).lte('expires_at', todayPlus10), // [3] approaching
+            client.from('tournament_registrations').select('id', { count: 'exact', head: true }).eq('status', 'pending'),               // [4] pending regs
+            client.from('tournaments').select('id', { count: 'exact', head: true }).lt('date_start', today),                           // [5] past tournaments
+            client.from('tournaments').select('id', { count: 'exact', head: true }).gte('date_start', today),                          // [6] upcoming tournaments
+            client.from('news').select('id', { count: 'exact', head: true }).eq('status', 'published'),                                // [7] published news
+            client.from('courts').select('id', { count: 'exact', head: true }),                                                        // [8] courts
+            client.from('coaches').select('id', { count: 'exact', head: true }),                                                       // [9] coaches
+            client.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'manager'),                                // [10] managers
+            // Data for tables
+            client.from('memberships').select('id, profile_id, expires_at, profiles!profile_id(full_name, email)')
+                .eq('status', 'active').gte('expires_at', today).lte('expires_at', todayPlus10)
+                .order('expires_at', { ascending: true }).limit(10),                                                                   // [11] approaching list
+            client.from('memberships').select('id, profile_id, expires_at, profiles!profile_id(full_name, email)')
+                .eq('status', 'active').lt('expires_at', today)
+                .order('expires_at', { ascending: true }).limit(10),                                                                   // [12] overdue list
+            client.from('tournament_registrations').select('id, player_id, tournament_id, registered_at, players(name), tournaments(title)')
+                .eq('status', 'pending')
+                .order('registered_at', { ascending: false }).limit(10),                                                               // [13] pending regs list
+            client.from('profiles').select('id,full_name,email,role,avatar_url,created_at')
+                .order('created_at', { ascending: false }).limit(10),                                                                  // [14] recent users
+            client.from('tournaments').select('id, title, date_start, status')
+                .order('date_start', { ascending: false }).limit(10),                                                                  // [15] recent tournaments
+            client.from('news').select('id, title, status, created_at')
+                .order('created_at', { ascending: false }).limit(10)                                                                   // [16] recent news
         ]);
 
+        // --- Stat cards ---
         var grid = document.getElementById('adStatsGrid');
         if (grid) {
-            var counts = [getCount(results[0]), getCount(results[1]), getCount(results[2]), getCount(results[3])];
-            var labels = [L.totalUsers, L.activeMemberships, L.upcomingTournaments, L.rankedPlayers];
-            var icons = [L.iconUsers, L.iconMemberships, L.iconTournaments, L.iconPlayers];
-            grid.innerHTML = '';
-            for (var i = 0; i < 4; i++) {
-                grid.innerHTML += renderStatCard(icons[i], counts[i], labels[i]);
-            }
+            var membersCount = getCount(results[0]);
+            var usersCount = getCount(results[1]);
+            var overdueCount = getCount(results[2]);
+            var approachingCount = getCount(results[3]);
+            var pendingCount = getCount(results[4]);
+            var pastTrn = getCount(results[5]);
+            var upcomingTrn = getCount(results[6]);
+            var newsCount = getCount(results[7]);
+            var courtsCount = getCount(results[8]);
+            var coachesCount = getCount(results[9]);
+            var managersCount = getCount(results[10]);
+
+            grid.innerHTML =
+                // Row 1
+                renderStatCard(L.iconUsers, membersCount + ' / ' + usersCount, L.statMembersDetail) +
+                renderStatCard(L.iconOverdue, overdueCount, L.statOverdueDetail, 'ad-stat-card--danger', 'adDashOverdue') +
+                renderStatCard(L.iconApproaching, approachingCount, L.statApproachingDetail, 'ad-stat-card--warning', 'adDashApproaching') +
+                // Row 2
+                renderStatCard(L.iconPending, pendingCount, L.statPendingDetail, 'ad-stat-card--warning', 'adDashPendingRegs') +
+                renderStatCard(L.iconTournaments, pastTrn + ' / ' + upcomingTrn, L.statTournamentsDetail) +
+                renderStatCard(L.iconNews, newsCount, L.statNewsDetail) +
+                // Row 3
+                renderStatCard(L.iconCourts, courtsCount, L.statCourtsDetail) +
+                renderStatCard(L.iconCoaches, coachesCount, L.statCoachesDetail) +
+                (isAdm ? renderStatCard(L.iconManagers, managersCount, L.statManagersDetail) : '');
         }
 
-        var table = document.getElementById('adRecentTable');
-        if (table) {
-            var tbody = table.querySelector('tbody');
-            var users = (results[4].status === 'fulfilled' && results[4].value.data) ? results[4].value.data : [];
+        // --- Activity tables ---
 
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:40px;">' + L.noData + '</td></tr>';
-            } else {
-                tbody.innerHTML = '';
-                users.forEach(function(u) {
-                    var nameParts = (u.full_name || '').split(' ');
-                    var initials = nameParts.map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
-                    var avatarHtml = u.avatar_url
-                        ? '<img src="' + esc(u.avatar_url) + '" class="ad-table-avatar" alt="">'
-                        : '<div class="ad-table-avatar-placeholder">' + initials + '</div>';
-                    var roleClass = 'ad-role-badge-' + (u.role || 'user');
-                    var roleLabel = L['role' + (u.role || 'user').charAt(0).toUpperCase() + (u.role || 'user').slice(1)] || u.role;
-                    var dateStr = u.created_at ? new Date(u.created_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU') : L.noData;
+        // Approaching payments
+        fillDashTable('adDashApproaching', results[11], function(m) {
+            var name = m.profiles ? esc(m.profiles.full_name || '') : L.noData;
+            var email = m.profiles ? esc(m.profiles.email || '') : '';
+            var expMs = m.expires_at ? new Date(m.expires_at).getTime() : 0;
+            var diff = Math.ceil((expMs - todayMs) / 86400000);
+            var dCls = diff <= 3 ? 'ad-days-danger' : diff <= 7 ? 'ad-days-warning' : 'ad-days-caution';
+            return '<tr>' +
+                '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:0.7rem;color:var(--text-dim);">' + email + '</div></td>' +
+                '<td>' + fmtDate(m.expires_at) + '</td>' +
+                '<td class="' + dCls + '">' + diff + (isEn ? 'd' : ' дн.') + '</td>' +
+            '</tr>';
+        }, L.noApproaching);
 
-                    tbody.innerHTML +=
-                        '<tr>' +
-                            '<td><div class="ad-table-user-cell">' + avatarHtml +
-                                '<div><div class="ad-table-user-name">' + (u.full_name || L.noData) + '</div></div>' +
-                            '</div></td>' +
-                            '<td>' + (u.email || L.noData) + '</td>' +
-                            '<td><span class="ad-role-badge ' + roleClass + '">' + roleLabel + '</span></td>' +
-                            '<td>' + dateStr + '</td>' +
-                        '</tr>';
-                });
-            }
-        }
+        // Overdue payments
+        fillDashTable('adDashOverdue', results[12], function(m) {
+            var name = m.profiles ? esc(m.profiles.full_name || '') : L.noData;
+            var email = m.profiles ? esc(m.profiles.email || '') : '';
+            var expMs = m.expires_at ? new Date(m.expires_at).getTime() : 0;
+            var diff = Math.ceil((todayMs - expMs) / 86400000);
+            return '<tr>' +
+                '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:0.7rem;color:var(--text-dim);">' + email + '</div></td>' +
+                '<td style="color:#f44336;">' + fmtDate(m.expires_at) + '</td>' +
+                '<td class="ad-days-danger">' + diff + (isEn ? 'd' : ' дн.') + '</td>' +
+            '</tr>';
+        }, L.noOverdue);
+
+        // Pending registrations
+        fillDashTable('adDashPendingRegs', results[13], function(r) {
+            var playerName = r.players ? esc(r.players.name || '') : L.noData;
+            var trnName = r.tournaments ? esc(r.tournaments.title || '') : L.noData;
+            return '<tr>' +
+                '<td style="font-weight:500;">' + playerName + '</td>' +
+                '<td>' + trnName + '</td>' +
+                '<td>' + fmtDate(r.registered_at) + '</td>' +
+            '</tr>';
+        }, L.noPendingRegs);
+
+        // Recent registrations
+        fillDashTable('adDashRecentUsers', results[14], function(u) {
+            var nameParts = (u.full_name || '').split(' ');
+            var initials = nameParts.map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
+            var avatarHtml = u.avatar_url
+                ? '<img src="' + esc(u.avatar_url) + '" class="ad-table-avatar" alt="">'
+                : '<div class="ad-table-avatar-placeholder">' + initials + '</div>';
+            var roleClass = 'ad-role-badge-' + (u.role || 'user');
+            var roleLabel = L['role' + (u.role || 'user').charAt(0).toUpperCase() + (u.role || 'user').slice(1)] || u.role;
+            return '<tr>' +
+                '<td><div class="ad-table-user-cell">' + avatarHtml +
+                    '<div><div class="ad-table-user-name">' + esc(u.full_name || L.noData) + '</div></div>' +
+                '</div></td>' +
+                '<td>' + esc(u.email || L.noData) + '</td>' +
+                '<td><span class="ad-role-badge ' + roleClass + '">' + roleLabel + '</span></td>' +
+                '<td>' + fmtDate(u.created_at) + '</td>' +
+            '</tr>';
+        }, L.noRecentUsers);
+
+        // Recent tournaments
+        fillDashTable('adDashRecentTournaments', results[15], function(t) {
+            var statusCls = 'ad-status-' + (t.status || '').replace(/_/g, '-');
+            var statusLabel = t.status ? t.status.replace(/_/g, ' ') : L.noData;
+            return '<tr>' +
+                '<td style="font-weight:500;color:var(--text-primary);">' + esc(t.title || L.noData) + '</td>' +
+                '<td>' + fmtDate(t.date_start) + '</td>' +
+                '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
+            '</tr>';
+        }, L.noRecentTournaments);
+
+        // Recent news
+        fillDashTable('adDashRecentNews', results[16], function(n) {
+            var statusCls = n.status === 'published' ? 'ad-status-published' : 'ad-status-draft';
+            var statusLabel = n.status === 'published' ? (isEn ? 'Published' : 'Опубликована') : (isEn ? 'Draft' : 'Черновик');
+            var title = n.title || L.noData;
+            if (title.length > 50) title = title.substring(0, 47) + '...';
+            return '<tr>' +
+                '<td style="font-weight:500;color:var(--text-primary);">' + esc(title) + '</td>' +
+                '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
+                '<td>' + fmtDate(n.created_at) + '</td>' +
+            '</tr>';
+        }, L.noRecentNews);
+
+        // --- Click handlers ---
+
+        // Stat card scroll-to
+        document.querySelectorAll('#ad-dashboard .ad-stat-card[data-scroll-to]').forEach(function(card) {
+            card.addEventListener('click', function() {
+                var target = document.getElementById(this.dataset.scrollTo);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // "View all" → switchTab
+        document.querySelectorAll('#ad-dashboard .ad-dash-view-all[data-tab]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var tab = this.dataset.tab;
+                switchTab(tab);
+                window.location.hash = tab;
+            });
+        });
     }
 
     function getCount(result) {
