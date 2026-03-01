@@ -299,6 +299,10 @@
         crtDeleteConfirm: 'Delete this court?',
         crtSearch: 'Search by name...',
         crtAllTypes: 'All Types',
+        crtStatOutdoor: 'Outdoor',
+        crtStatIndoor: 'Indoor',
+        crtStatTotal: 'Total',
+        crtAllSurfaces: 'All Surfaces',
         // Coaches
         coaches: 'Coaches',
         addCoach: 'Add Coach',
@@ -764,6 +768,10 @@
         crtDeleteConfirm: 'Удалить этот корт?',
         crtSearch: 'Поиск по названию...',
         crtAllTypes: 'Все типы',
+        crtStatOutdoor: 'Открытые',
+        crtStatIndoor: 'Закрытые',
+        crtStatTotal: 'Всего',
+        crtAllSurfaces: 'Все покрытия',
         // Coaches
         coaches: 'Тренеры',
         addCoach: 'Добавить тренера',
@@ -5255,7 +5263,13 @@
     var crtGalleryUrls = [];
     var crtGalleryFiles = [];
     var crtFilterType = '';
+    var crtFilterSurface = '';
+    var crtSortCol = 'name';
+    var crtSortAsc = true;
+    var crtAllData = [];
     var crtSearchQuery = '';
+    var crtPage = 1;
+    var CRT_PER_PAGE = 10;
     var crtCourtTypes = [];
     var crtPhones = [];
 
@@ -5264,6 +5278,299 @@
     }
 
     // ---- Courts List ----
+
+    function crtColHeader(col, label) {
+        var sortable = col === 'name' || col === 'price' || col === 'count' || col === 'city';
+        if (!sortable) return '<th>' + label + '</th>';
+        var isActive = crtSortCol === col;
+        var cls = 'ad-col-header' + (isActive ? ' ad-col-active' : '');
+        return '<th><div class="' + cls + '" data-col="' + col + '">' +
+            '<span>' + label + '</span>' +
+            (isActive ? '<span class="ad-sort-arrow">' + (crtSortAsc ? '↑' : '↓') + '</span>' : '') +
+            '<span class="ad-col-filter-btn">▼</span>' +
+        '</div></th>';
+    }
+
+    function openCrtColDropdown(col, hdr) {
+        var dd = document.getElementById('adCrtColDropdown');
+        if (!dd) return;
+
+        if (dd.style.display === 'block' && dd.dataset.col === col) {
+            dd.style.display = 'none';
+            return;
+        }
+        dd.dataset.col = col;
+
+        var rect = hdr.getBoundingClientRect();
+        var cardRect = dd.parentElement.getBoundingClientRect();
+        dd.style.left = Math.max(0, rect.left - cardRect.left) + 'px';
+        dd.style.top = (rect.bottom - cardRect.top + 4) + 'px';
+
+        var colLabels = { name: L.crtName, price: L.crtPrice, count: isEn ? 'Count' : 'Кол-во', city: L.crtCity };
+        var isNumeric = col === 'price' || col === 'count';
+
+        var html = '<div class="ad-col-dd-title">' + (colLabels[col] || col) + '</div>';
+
+        if (isNumeric) {
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Most first' : '↓ Сначала больше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Least first' : '↑ Сначала меньше') + '</div>';
+        } else {
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ A → Z' : '↑ А → Я') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Z → A' : '↓ Я → А') + '</div>';
+        }
+
+        dd.innerHTML = html;
+        dd.style.display = 'block';
+
+        dd.querySelectorAll('.ad-col-dd-sort').forEach(function(el) {
+            el.addEventListener('click', function(ev) {
+                ev.stopPropagation();
+                crtSortCol = col;
+                crtSortAsc = this.dataset.sortDir === 'asc';
+                dd.style.display = 'none';
+                updateCrtColHeaders();
+                applyCrtFilters();
+            });
+        });
+    }
+
+    function updateCrtColHeaders() {
+        var table = document.getElementById('adCrtTable');
+        if (!table) return;
+        table.querySelectorAll('.ad-col-header').forEach(function(hdr) {
+            var c = hdr.dataset.col;
+            var isActive = crtSortCol === c;
+            hdr.classList.toggle('ad-col-active', isActive);
+            var arrow = hdr.querySelector('.ad-sort-arrow');
+            if (isActive) {
+                if (!arrow) {
+                    arrow = document.createElement('span');
+                    arrow.className = 'ad-sort-arrow';
+                    hdr.querySelector('.ad-col-filter-btn').before(arrow);
+                }
+                arrow.textContent = crtSortAsc ? '↑' : '↓';
+            } else if (arrow) {
+                arrow.remove();
+            }
+        });
+    }
+
+    function updateCourtStats() {
+        var outdoorEl = document.getElementById('adCrtStatOutdoor');
+        var indoorEl = document.getElementById('adCrtStatIndoor');
+        var totalOutEl = document.getElementById('adCrtTotalOutdoor');
+        var totalInEl = document.getElementById('adCrtTotalIndoor');
+        if (!outdoorEl || !indoorEl) return;
+
+        var stats = { outdoor: {}, indoor: {} };
+        crtAllData.forEach(function(c) {
+            (c.court_types || []).forEach(function(t) {
+                var type = t.type || 'indoor';
+                var surface = t.surface || 'hard';
+                var count = t.count || 1;
+                if (!stats[type]) stats[type] = {};
+                stats[type][surface] = (stats[type][surface] || 0) + count;
+            });
+        });
+
+        var surfaceKeys = ['hard', 'clay', 'carpet'];
+        ['outdoor', 'indoor'].forEach(function(type) {
+            var el = type === 'outdoor' ? outdoorEl : indoorEl;
+            var totalEl = type === 'outdoor' ? totalOutEl : totalInEl;
+            var total = 0;
+            surfaceKeys.forEach(function(s) { total += (stats[type][s] || 0); });
+
+            if (totalEl) totalEl.textContent = total;
+
+            var html = '';
+            surfaceKeys.forEach(function(s) {
+                var cnt = stats[type][s] || 0;
+                if (cnt > 0) {
+                    var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+                    html += '<div class="ad-crt-stat-row">' +
+                        '<span class="ad-crt-stat-surface">' + (COURT_SURFACES[s] || s) + '</span>' +
+                        '<div class="ad-crt-stat-bar-wrap"><div class="ad-crt-stat-bar" style="width:' + pct + '%;"></div></div>' +
+                        '<span class="ad-crt-stat-count">' + cnt + '</span>' +
+                    '</div>';
+                }
+            });
+            el.innerHTML = html;
+        });
+    }
+
+    function getFilteredCrtTypes(c) {
+        var types = c.court_types || [];
+        if (crtFilterType) {
+            types = types.filter(function(t) { return t.type === crtFilterType; });
+        }
+        if (crtFilterSurface) {
+            types = types.filter(function(t) { return t.surface === crtFilterSurface; });
+        }
+        return types;
+    }
+
+    function applyCrtFilters() {
+        var items = crtAllData.slice();
+
+        // Filter — keep courts that have at least one matching type
+        if (crtFilterType || crtFilterSurface) {
+            items = items.filter(function(c) {
+                return getFilteredCrtTypes(c).length > 0;
+            });
+        }
+
+        // Search by name
+        if (crtSearchQuery) {
+            var q = crtSearchQuery.toLowerCase();
+            items = items.filter(function(c) {
+                return (c.name || '').toLowerCase().indexOf(q) !== -1;
+            });
+        }
+
+        // Client-side sort for price/count (sum of visible types only)
+        if (crtSortCol === 'price') {
+            items.sort(function(a, b) {
+                var va = getFilteredCrtTypes(a).reduce(function(s, t) { return s + (t.price || 0); }, 0);
+                var vb = getFilteredCrtTypes(b).reduce(function(s, t) { return s + (t.price || 0); }, 0);
+                return crtSortAsc ? va - vb : vb - va;
+            });
+        } else if (crtSortCol === 'count') {
+            items.sort(function(a, b) {
+                var va = getFilteredCrtTypes(a).reduce(function(s, t) { return s + (t.count || 0); }, 0);
+                var vb = getFilteredCrtTypes(b).reduce(function(s, t) { return s + (t.count || 0); }, 0);
+                return crtSortAsc ? va - vb : vb - va;
+            });
+        } else if (crtSortCol === 'city') {
+            items.sort(function(a, b) {
+                var va = (a.city || '').toLowerCase();
+                var vb = (b.city || '').toLowerCase();
+                return crtSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            });
+        }
+        // name sort is handled server-side (default)
+
+        // Pagination
+        var totalPages = Math.max(1, Math.ceil(items.length / CRT_PER_PAGE));
+        if (crtPage > totalPages) crtPage = totalPages;
+        var start = (crtPage - 1) * CRT_PER_PAGE;
+        var pageItems = items.slice(start, start + CRT_PER_PAGE);
+
+        renderCrtRows(pageItems);
+        renderCrtPagination(items.length, totalPages);
+    }
+
+    function renderCrtRows(items) {
+        var table = document.getElementById('adCrtTable');
+        if (!table) return;
+        var tbody = table.querySelector('tbody');
+
+        if (items.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
+                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🏟️</div>' +
+                    '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCourts + '</div>' +
+                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noCourtsText + '</div>' +
+                '</td></tr>';
+            return;
+        }
+
+        var html = '';
+        items.forEach(function(c) {
+            var types = getFilteredCrtTypes(c);
+            var rowCount = Math.max(1, types.length);
+            var partnerHtml = c.partner ? '<span class="ad-partner-badge">✓</span>' : '';
+            var cityText = esc(c.city || '—');
+
+            if (types.length === 0) {
+                html +=
+                    '<tr data-crt-id="' + c.id + '">' +
+                        bulkCheckboxTd(c.id) +
+                        '<td style="font-weight:500;color:var(--text-primary);">' + esc(c.name || L.noData) + '</td>' +
+                        '<td>' + L.noData + '</td>' +
+                        '<td>' + L.noData + '</td>' +
+                        '<td style="text-align:center;">' + L.noData + '</td>' +
+                        '<td>' + L.noData + '</td>' +
+                        '<td>' + cityText + '</td>' +
+                        '<td style="text-align:center;">' + partnerHtml + '</td>' +
+                    '</tr>';
+            } else {
+                // First row with rowspan
+                var t0 = types[0];
+                html +=
+                    '<tr data-crt-id="' + c.id + '">' +
+                        '<td class="ad-bulk-cell" rowspan="' + rowCount + '" style="width:36px;text-align:center;vertical-align:middle;">' +
+                            '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + c.id + '" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">' +
+                        '</td>' +
+                        '<td rowspan="' + rowCount + '" style="font-weight:500;color:var(--text-primary);vertical-align:middle;">' + esc(c.name || L.noData) + '</td>' +
+                        '<td><span class="ad-type-badge ad-type-' + (t0.type || 'indoor') + '">' + (COURT_TYPES[t0.type] || t0.type || '') + '</span></td>' +
+                        '<td style="text-align:center;">' + (COURT_SURFACES[t0.surface] || t0.surface || '') + '</td>' +
+                        '<td style="text-align:center;">' + (t0.count || 1) + '</td>' +
+                        '<td style="font-weight:600;color:var(--accent);">' + (t0.price || 0) + ' ' + (isEn ? 'som' : 'сом') + '</td>' +
+                        '<td rowspan="' + rowCount + '" style="vertical-align:middle;">' + cityText + '</td>' +
+                        '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + partnerHtml + '</td>' +
+                    '</tr>';
+
+                // Sub-rows
+                for (var i = 1; i < types.length; i++) {
+                    var ti = types[i];
+                    html +=
+                        '<tr class="ad-crt-subrow" data-crt-id="' + c.id + '">' +
+                            '<td><span class="ad-type-badge ad-type-' + (ti.type || 'indoor') + '">' + (COURT_TYPES[ti.type] || ti.type || '') + '</span></td>' +
+                            '<td style="text-align:center;">' + (COURT_SURFACES[ti.surface] || ti.surface || '') + '</td>' +
+                            '<td style="text-align:center;">' + (ti.count || 1) + '</td>' +
+                            '<td style="font-weight:600;color:var(--accent);">' + (ti.price || 0) + ' ' + (isEn ? 'som' : 'сом') + '</td>' +
+                        '</tr>';
+                }
+            }
+        });
+
+        tbody.innerHTML = html;
+
+        tbody.addEventListener('click', function(e) {
+            if (e.target.closest('.ad-bulk-cell')) return;
+            var row = e.target.closest('tr[data-crt-id]');
+            if (!row) return;
+            loadAndEditCourt(row.dataset.crtId);
+        });
+
+        setupBulkDelete({ tableId: 'adCrtTable', tableName: 'courts', reloadFn: loadCourtsList });
+    }
+
+    function renderCrtPagination(totalItems, totalPages) {
+        var existing = document.getElementById('adCrtPagination');
+        if (existing) existing.remove();
+
+        if (totalPages <= 1) return;
+
+        var wrap = document.createElement('div');
+        wrap.id = 'adCrtPagination';
+        wrap.className = 'ad-crt-pagination';
+
+        var html = '';
+        // Prev
+        html += '<button class="ad-crt-page-btn" data-page="' + (crtPage - 1) + '"' + (crtPage <= 1 ? ' disabled' : '') + '>&laquo;</button>';
+        // Page numbers
+        for (var p = 1; p <= totalPages; p++) {
+            html += '<button class="ad-crt-page-btn' + (p === crtPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
+        }
+        // Next
+        html += '<button class="ad-crt-page-btn" data-page="' + (crtPage + 1) + '"' + (crtPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
+        // Info
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+
+        wrap.innerHTML = html;
+
+        var tableCard = document.querySelector('#adCrtTable')?.closest('.ad-table-card');
+        if (tableCard) tableCard.after(wrap);
+
+        wrap.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ad-crt-page-btn');
+            if (!btn || btn.disabled) return;
+            crtPage = parseInt(btn.dataset.page, 10);
+            applyCrtFilters();
+        });
+    }
+
     async function renderCourtsList() {
         var container = document.getElementById('ad-courts');
         if (!container) return;
@@ -5274,28 +5581,65 @@
             typeFilterHtml += '<option value="' + k + '"' + selected + '>' + COURT_TYPES[k] + '</option>';
         });
 
+        var surfaceFilterHtml = '<option value="">' + L.crtAllSurfaces + '</option>';
+        Object.keys(COURT_SURFACES).forEach(function(k) {
+            var selected = crtFilterSurface === k ? ' selected' : '';
+            surfaceFilterHtml += '<option value="' + k + '"' + selected + '>' + COURT_SURFACES[k] + '</option>';
+        });
+
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.courts + '</h2>' +
-                '<button class="ad-btn ad-btn-primary" id="adCrtAdd">+ ' + L.addCourt + '</button>' +
             '</div>' +
-            '<div class="ad-filter-row">' +
+            // Court stat cards
+            '<div class="ad-crt-stats-grid">' +
+                '<div class="ad-crt-stat-card" id="adCrtCardOutdoor">' +
+                    '<div class="ad-crt-stat-header">' +
+                        '<span class="ad-crt-stat-title">🌤 ' + L.crtStatOutdoor + '</span>' +
+                        '<span class="ad-crt-stat-total-num" id="adCrtTotalOutdoor">...</span>' +
+                    '</div>' +
+                    '<div class="ad-crt-stat-body" id="adCrtStatOutdoor"></div>' +
+                '</div>' +
+                '<div class="ad-crt-stat-card" id="adCrtCardIndoor">' +
+                    '<div class="ad-crt-stat-header">' +
+                        '<span class="ad-crt-stat-title">🏠 ' + L.crtStatIndoor + '</span>' +
+                        '<span class="ad-crt-stat-total-num" id="adCrtTotalIndoor">...</span>' +
+                    '</div>' +
+                    '<div class="ad-crt-stat-body" id="adCrtStatIndoor"></div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="ad-filter-row ad-crt-filter-sticky" id="adCrtFilterRow">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adCrtSearch" placeholder="' + L.crtSearch + '" value="' + esc(crtSearchQuery) + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adCrtTypeFilter">' + typeFilterHtml + '</select>' +
+                '<select class="ad-field-input ad-filter-select" id="adCrtSurfaceFilter">' + surfaceFilterHtml + '</select>' +
+                '<button class="ad-btn ad-btn-primary" id="adCrtAdd" style="white-space:nowrap;margin-left:auto;">+ ' + L.addCourt + '</button>' +
             '</div>' +
-            '<div class="ad-table-card">' +
+            '<div class="ad-table-card" style="position:relative;">' +
                 '<div class="ad-table-wrap">' +
                     '<table class="ad-table ad-table-clickable" id="adCrtTable">' +
+                        '<colgroup>' +
+                            '<col style="width:40px;">' +
+                            '<col>' +
+                            '<col style="width:100px;">' +
+                            '<col style="width:90px;">' +
+                            '<col style="width:70px;">' +
+                            '<col style="width:120px;">' +
+                            '<col style="width:100px;">' +
+                            '<col style="width:80px;">' +
+                        '</colgroup>' +
                         '<thead><tr>' +
-                            '<th></th>' +
-                            '<th>' + L.crtName + '</th>' +
-                            '<th>' + L.crtType + ' / ' + L.crtSurface + '</th>' +
-                            '<th>' + L.crtPrice + '</th>' +
+                            crtColHeader('name', L.crtName) +
+                            '<th>' + L.crtType + '</th>' +
+                            '<th>' + L.crtSurface + '</th>' +
+                            crtColHeader('count', isEn ? 'Count' : 'Кол-во') +
+                            crtColHeader('price', L.crtPrice) +
+                            crtColHeader('city', L.crtCity) +
                             '<th>' + L.crtPartner + '</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
+                '<div class="ad-col-dropdown" id="adCrtColDropdown" style="display:none;"></div>' +
             '</div>';
 
         document.getElementById('adCrtAdd').addEventListener('click', function() {
@@ -5305,13 +5649,37 @@
         var searchTimer = null;
         document.getElementById('adCrtSearch').addEventListener('input', function() {
             crtSearchQuery = this.value;
+            crtPage = 1;
             clearTimeout(searchTimer);
-            searchTimer = setTimeout(function() { loadCourtsList(); }, 300);
+            searchTimer = setTimeout(function() { applyCrtFilters(); }, 300);
         });
 
         document.getElementById('adCrtTypeFilter').addEventListener('change', function() {
             crtFilterType = this.value;
-            loadCourtsList();
+            crtPage = 1;
+            applyCrtFilters();
+        });
+
+        document.getElementById('adCrtSurfaceFilter').addEventListener('change', function() {
+            crtFilterSurface = this.value;
+            crtPage = 1;
+            applyCrtFilters();
+        });
+
+        // Column header click → open dropdown
+        document.getElementById('adCrtTable').querySelector('thead').addEventListener('click', function(e) {
+            e.stopPropagation();
+            var hdr = e.target.closest('.ad-col-header');
+            if (!hdr) return;
+            openCrtColDropdown(hdr.dataset.col, hdr);
+        });
+
+        // Close dropdown on outside click
+        document.addEventListener('click', function(e) {
+            var dd = document.getElementById('adCrtColDropdown');
+            if (dd && dd.style.display !== 'none' && !dd.contains(e.target)) {
+                dd.style.display = 'none';
+            }
         });
 
         await loadCourtsList();
@@ -5320,76 +5688,17 @@
     async function loadCourtsList() {
         if (!client) return;
 
-        var query = client.from('courts')
-            .select('id,name,photo,court_types,partner')
-            .order('created_at', { ascending: false });
+        var serverSortCol = (crtSortCol === 'name' || crtSortCol === 'city') ? crtSortCol : 'name';
 
-        if (crtSearchQuery) {
-            query = query.ilike('name', '%' + crtSearchQuery + '%');
-        }
+        var query = client.from('courts')
+            .select('id,name,court_types,partner,city')
+            .order(serverSortCol, { ascending: crtSortCol === serverSortCol ? crtSortAsc : true });
 
         var result = await query;
+        crtAllData = result.data || [];
 
-        var table = document.getElementById('adCrtTable');
-        if (!table) return;
-        var tbody = table.querySelector('tbody');
-        var items = result.data || [];
-
-        // Client-side filter by type
-        if (crtFilterType) {
-            items = items.filter(function(c) {
-                var types = c.court_types || [];
-                return types.some(function(t) { return t.type === crtFilterType; });
-            });
-        }
-
-        if (items.length === 0) {
-            tbody.innerHTML =
-                '<tr><td colspan="6" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🏟️</div>' +
-                    '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCourts + '</div>' +
-                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noCourtsText + '</div>' +
-                '</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = '';
-        items.forEach(function(c) {
-            var thumbHtml = c.photo
-                ? '<img src="' + esc(c.photo) + '" class="ad-table-thumb" alt="">'
-                : '<div class="ad-table-thumb" style="background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:1.1rem;">🏟️</div>';
-
-            var types = c.court_types || [];
-            var typeSummary = types.map(function(t) {
-                return '<div class="ad-court-type-line">' +
-                    '<span class="ad-type-badge ad-type-' + (t.type || 'indoor') + '">' + (COURT_TYPES[t.type] || t.type) + '</span> ' +
-                    (COURT_SURFACES[t.surface] || t.surface || '') + ' &times;' + (t.count || 1) +
-                    ' <span style="color:var(--accent);font-weight:600;">' + (t.price || 0) + ' сом</span>' +
-                '</div>';
-            }).join('');
-            if (!typeSummary) typeSummary = L.noData;
-
-            var partnerHtml = c.partner ? '<span class="ad-partner-badge">✓</span>' : '';
-
-            tbody.innerHTML +=
-                '<tr data-crt-id="' + c.id + '">' +
-                    bulkCheckboxTd(c.id) +
-                    '<td>' + thumbHtml + '</td>' +
-                    '<td style="font-weight:500;color:var(--text-primary);">' + (c.name || L.noData) + '</td>' +
-                    '<td>' + typeSummary + '</td>' +
-                    '<td style="font-weight:600;color:var(--accent);">' + types.reduce(function(s, t) { return s + (t.price || 0); }, 0) + '</td>' +
-                    '<td style="text-align:center;">' + partnerHtml + '</td>' +
-                '</tr>';
-        });
-
-        tbody.addEventListener('click', function(e) {
-            if (e.target.closest('.ad-bulk-cell')) return;
-            var row = e.target.closest('tr[data-crt-id]');
-            if (!row) return;
-            loadAndEditCourt(row.dataset.crtId);
-        });
-
-        setupBulkDelete({ tableId: 'adCrtTable', tableName: 'courts', reloadFn: loadCourtsList });
+        applyCrtFilters();
+        updateCourtStats();
     }
 
     async function loadAndEditCourt(id) {

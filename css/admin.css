@@ -2492,3 +2492,141 @@ select.ad-field-input {
         font-size: 1.2rem;
     }
 }
+
+/* ---- Court Stats Cards ---- */
+.ad-crt-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.ad-crt-stat-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+}
+
+.ad-crt-stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.ad-crt-stat-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.ad-crt-stat-total-num {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.ad-crt-stat-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ad-crt-stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ad-crt-stat-surface {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.ad-crt-stat-count {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 28px;
+    text-align: right;
+}
+
+.ad-crt-stat-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    margin: 0 10px;
+    overflow: hidden;
+}
+
+.ad-crt-stat-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+/* Sticky filter row for courts */
+.ad-crt-filter-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-primary);
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+/* Rowspan sub-rows — no top border */
+.ad-crt-subrow td {
+    border-top: none !important;
+    padding-top: 2px;
+}
+
+/* Pagination */
+.ad-crt-pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: center;
+    padding: 12px 0 4px;
+}
+.ad-crt-page-btn {
+    min-width: 32px;
+    height: 30px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.ad-crt-page-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+.ad-crt-page-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+.ad-crt-page-active {
+    background: var(--accent) !important;
+    color: #000 !important;
+    border-color: var(--accent) !important;
+    font-weight: 600;
+}
+.ad-crt-page-info {
+    margin-left: 10px;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+}
+
+@media (max-width: 768px) {
+    .ad-crt-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
