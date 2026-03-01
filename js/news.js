@@ -58,6 +58,7 @@ function mapDbArticle(row) {
     }
 
     return {
+        _dbId: row.id || null,
         slug: row.slug,
         title: title,
         subtitle: excerpt || '',
@@ -142,6 +143,7 @@ async function initFromSupabase(client, slug) {
             initScrollAnimations();
             initReactions(slug);
             initPoll(slug);
+            incrementViewCount(result.data.id);
         }
     } catch (e) {
         console.error('Supabase news error:', e);
@@ -184,6 +186,7 @@ function initFromStatic(slug) {
     initScrollAnimations();
     initReactions(slug);
     initPoll(slug);
+    if (article._dbId) incrementViewCount(article._dbId);
 }
 
 // ========================================
@@ -509,44 +512,116 @@ function renderReactions(article) {
         '</div>';
 }
 
-function initReactions(slug) {
+async function getAuthUser() {
+    if (!window.supabaseClient) return null;
+    var resp = await window.supabaseClient.auth.getUser();
+    return (resp.data && resp.data.user) ? resp.data.user : null;
+}
+
+function getAuthRedirectUrl() {
+    var isEn = isEnPage();
+    var prefix = window.location.pathname.indexOf('/pages/') !== -1 ? '' : 'pages/';
+    return prefix + (isEn ? 'auth-en.html' : 'auth.html');
+}
+
+async function resolveNewsId(slug) {
+    var client = window.supabaseClient;
+    if (!client) return null;
+    // Check if article data has _dbId
+    if (typeof newsArticleData !== 'undefined' && newsArticleData[slug] && newsArticleData[slug]._dbId) {
+        return newsArticleData[slug]._dbId;
+    }
+    // Fallback: query by slug
+    var res = await client.from('news').select('id').eq('slug', slug).single();
+    return (res.data && res.data.id) ? res.data.id : null;
+}
+
+async function initReactions(slug) {
     var container = document.getElementById('newsReactions');
     if (!container) return;
 
-    var storageKey = 'news-reactions-' + slug;
-    var saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    var client = window.supabaseClient;
+    if (!client) return;
 
-    // Restore saved state
-    Object.keys(saved).forEach(function(type) {
-        if (saved[type]) {
-            var btn = container.querySelector('[data-type="' + type + '"]');
-            var countEl = document.getElementById('count-' + type);
-            if (btn) btn.classList.add('active');
-            if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1;
+    var newsId = await resolveNewsId(slug);
+    if (!newsId) return;
+
+    // Load counts from DB
+    var countsRes = await client.rpc('get_reaction_counts', { p_news_id: newsId });
+    if (countsRes.data && countsRes.data.length) {
+        var c = countsRes.data[0];
+        var el;
+        el = document.getElementById('count-tennis');
+        if (el) el.textContent = c.tennis || 0;
+        el = document.getElementById('count-fire');
+        if (el) el.textContent = c.fire || 0;
+        el = document.getElementById('count-clap');
+        if (el) el.textContent = c.clap || 0;
+    }
+
+    // Load user's own reactions
+    var user = await getAuthUser();
+    if (user) {
+        var userRes = await client.rpc('get_user_reactions', { p_news_id: newsId, p_user_id: user.id });
+        if (userRes.data) {
+            userRes.data.forEach(function(row) {
+                var btn = container.querySelector('[data-type="' + row.reaction_type + '"]');
+                if (btn) btn.classList.add('active');
+            });
         }
-    });
+    }
 
-    container.addEventListener('click', function(e) {
+    // Click handler
+    var busy = false;
+    container.addEventListener('click', async function(e) {
         var btn = e.target.closest('.news-reaction-btn');
-        if (!btn) return;
+        if (!btn || busy) return;
+
+        // Auth check
+        var currentUser = user || await getAuthUser();
+        if (!currentUser) {
+            window.location.href = getAuthRedirectUrl();
+            return;
+        }
 
         var type = btn.dataset.type;
         var countEl = document.getElementById('count-' + type);
-        var count = parseInt(countEl.textContent);
+        var count = parseInt(countEl.textContent) || 0;
+        var isActive = btn.classList.contains('active');
 
-        if (btn.classList.contains('active')) {
+        // Optimistic UI
+        if (isActive) {
             btn.classList.remove('active');
             countEl.textContent = Math.max(0, count - 1);
-            saved[type] = false;
         } else {
             btn.classList.add('active');
             countEl.textContent = count + 1;
-            saved[type] = true;
             btn.classList.add('news-reaction-bounce');
             setTimeout(function() { btn.classList.remove('news-reaction-bounce'); }, 400);
         }
 
-        localStorage.setItem(storageKey, JSON.stringify(saved));
+        busy = true;
+        if (isActive) {
+            var res = await client.from('news_reactions')
+                .delete()
+                .eq('news_id', newsId)
+                .eq('user_id', currentUser.id)
+                .eq('reaction_type', type);
+            if (res.error) {
+                // Revert
+                btn.classList.add('active');
+                countEl.textContent = count;
+            }
+        } else {
+            var res = await client.from('news_reactions')
+                .insert({ news_id: newsId, user_id: currentUser.id, reaction_type: type });
+            if (res.error) {
+                // Revert
+                btn.classList.remove('active');
+                countEl.textContent = count;
+            }
+        }
+        busy = false;
     });
 }
 
@@ -554,38 +629,69 @@ function initReactions(slug) {
 // POLL
 // ========================================
 
-function initPoll(slug) {
+async function initPoll(slug) {
     var pollEl = document.getElementById('newsPoll');
     if (!pollEl) return;
 
-    var storageKey = 'news-poll-' + slug;
-    var votesKey = 'news-poll-votes-' + slug;
-    var savedVote = localStorage.getItem(storageKey);
-    var votes = JSON.parse(localStorage.getItem(votesKey) || '[]');
+    var client = window.supabaseClient;
+    if (!client) return;
+
+    var newsId = await resolveNewsId(slug);
+    if (!newsId) return;
+
     var labels = getLabels();
-
     var optionBtns = pollEl.querySelectorAll('.news-poll-option');
+    var optionCount = optionBtns.length;
+    if (!optionCount) return;
 
-    // Init votes array if empty
-    if (!votes.length) {
-        votes = [];
-        for (var i = 0; i < optionBtns.length; i++) {
-            votes.push(0);
+    // Build votes array from DB
+    var votes = [];
+    for (var i = 0; i < optionCount; i++) votes.push(0);
+
+    var resultsRes = await client.rpc('get_poll_results', { p_news_id: newsId });
+    if (resultsRes.data) {
+        resultsRes.data.forEach(function(row) {
+            if (row.option_index >= 0 && row.option_index < optionCount) {
+                votes[row.option_index] = row.count || 0;
+            }
+        });
+    }
+
+    // Check if current user already voted
+    var user = await getAuthUser();
+    if (user) {
+        var voteRes = await client.from('news_poll_votes')
+            .select('option_index')
+            .eq('news_id', newsId)
+            .eq('user_id', user.id)
+            .maybeSingle();
+        if (voteRes.data) {
+            showPollResults(pollEl, votes, voteRes.data.option_index, labels);
+            return;
         }
     }
 
-    if (savedVote !== null) {
-        showPollResults(pollEl, votes, parseInt(savedVote), labels);
-        return;
-    }
-
+    // Click handler — vote
     optionBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', async function() {
+            var currentUser = user || await getAuthUser();
+            if (!currentUser) {
+                window.location.href = getAuthRedirectUrl();
+                return;
+            }
+
             var index = parseInt(btn.dataset.index);
             votes[index] = (votes[index] || 0) + 1;
-            localStorage.setItem(storageKey, index.toString());
-            localStorage.setItem(votesKey, JSON.stringify(votes));
+
+            // Show results immediately (optimistic)
             showPollResults(pollEl, votes, index, labels);
+
+            // Persist to DB
+            var res = await client.from('news_poll_votes')
+                .insert({ news_id: newsId, user_id: currentUser.id, option_index: index });
+            if (res.error) {
+                console.error('Poll vote error:', res.error);
+            }
         });
     });
 }
@@ -664,6 +770,21 @@ function updateLangLinks(slug) {
             var base = href.split('?')[0];
             link.setAttribute('href', base + '?slug=' + slug);
         }
+    });
+}
+
+// ========================================
+// VIEW COUNTER
+// ========================================
+
+function incrementViewCount(newsId) {
+    if (!newsId) return;
+    var key = 'kslt_viewed_' + newsId;
+    if (localStorage.getItem(key)) return;
+    var client = window.supabaseClient;
+    if (!client) return;
+    client.rpc('increment_news_view', { p_news_id: newsId }).then(function(res) {
+        if (!res.error) localStorage.setItem(key, '1');
     });
 }
 

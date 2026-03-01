@@ -120,6 +120,15 @@
         pollAdd: '+ Add option',
         pollEnable: 'Add poll',
         pollRemove: 'Remove poll',
+        thReactions: 'Reactions',
+        thVotes: 'Votes',
+        engagement: 'Engagement',
+        totalVotes: 'Total votes',
+        newsStatPublished: 'Published',
+        newsStatDrafts: 'Drafts',
+        newsStatPopular: 'Most Popular',
+        newsStatLastDate: 'Last',
+        newsStatNoArticles: 'No articles yet',
         catResults: 'Report',
         catInterview: 'Interview',
         catAnnouncement: 'Announcement',
@@ -576,6 +585,15 @@
         pollAdd: '+ Добавить вариант',
         pollEnable: 'Добавить голосование',
         pollRemove: 'Убрать голосование',
+        thReactions: 'Реакции',
+        thVotes: 'Голоса',
+        engagement: 'Вовлечённость',
+        totalVotes: 'Всего голосов',
+        newsStatPublished: 'Опубликовано',
+        newsStatDrafts: 'Черновики',
+        newsStatPopular: 'Популярные',
+        newsStatLastDate: 'Последняя',
+        newsStatNoArticles: 'Статей пока нет',
         catResults: 'Репортаж',
         catInterview: 'Интервью',
         catAnnouncement: 'Анонс',
@@ -1480,6 +1498,27 @@
                 '<h2 class="ad-section-title">' + L.content + '</h2>' +
                 '<button class="ad-btn ad-btn-primary" id="adNewsAdd">+ ' + L.addNews + '</button>' +
             '</div>' +
+            // News stat cards
+            '<div class="ad-news-stats-grid" id="adNewsStatsGrid">' +
+                '<div class="ad-news-stat-card">' +
+                    '<div class="ad-news-stat-icon">&#128240;</div>' +
+                    '<div class="ad-news-stat-value" id="adNewsStatPubCount">...</div>' +
+                    '<div class="ad-news-stat-label">' + L.newsStatPublished + '</div>' +
+                    '<div class="ad-news-stat-sub" id="adNewsStatPubDate"></div>' +
+                '</div>' +
+                '<div class="ad-news-stat-card">' +
+                    '<div class="ad-news-stat-icon">&#128221;</div>' +
+                    '<div class="ad-news-stat-value" id="adNewsStatDraftCount">...</div>' +
+                    '<div class="ad-news-stat-label">' + L.newsStatDrafts + '</div>' +
+                    '<div class="ad-news-stat-sub" id="adNewsStatDraftDate"></div>' +
+                '</div>' +
+                '<div class="ad-news-stat-card ad-news-stat-card--popular">' +
+                    '<div class="ad-news-stat-icon">&#128293; ' + L.newsStatPopular + '</div>' +
+                    '<div class="ad-news-stat-top-list" id="adNewsStatTopList">' +
+                        '<div style="color:var(--text-dim);font-size:0.8rem;">...</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adNewsSearch" placeholder="' + L.newsSearch + '" value="' + esc(newsSearchQuery) + '">' +
             '</div>' +
@@ -1493,8 +1532,11 @@
                             '<th>' + L.thExecutor + '</th>' +
                             colHeader('published_at', L.thStatus, true) +
                             colHeader('created_at', L.thPublished, false) +
+                            colHeader('view_count', '&#128065;', false) +
+                            colHeader('reactions', L.thReactions, false) +
+                            colHeader('votes', L.thVotes, false) +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="10" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
                 '<div class="ad-col-dropdown" id="adNewsColDropdown" style="display:none;"></div>' +
@@ -1528,6 +1570,66 @@
         });
 
         await loadNewsList();
+        loadNewsStats(); // fire-and-forget
+    }
+
+    async function loadNewsStats() {
+        if (!client) return;
+        try {
+            var results = await Promise.allSettled([
+                client.rpc('get_news_stats'),
+                client.rpc('get_top_news', { p_limit: 3 })
+            ]);
+
+            // Published + Drafts
+            var statsRes = results[0];
+            if (statsRes.status === 'fulfilled' && statsRes.value.data && statsRes.value.data.length) {
+                var s = statsRes.value.data[0];
+                var pubCountEl = document.getElementById('adNewsStatPubCount');
+                var pubDateEl = document.getElementById('adNewsStatPubDate');
+                var draftCountEl = document.getElementById('adNewsStatDraftCount');
+                var draftDateEl = document.getElementById('adNewsStatDraftDate');
+
+                if (pubCountEl) pubCountEl.textContent = s.published_count || 0;
+                if (draftCountEl) draftCountEl.textContent = s.draft_count || 0;
+
+                var dateFmt = isEn ? 'en-US' : 'ru-RU';
+                var dateOpts = { day: 'numeric', month: 'short' };
+                if (pubDateEl) {
+                    pubDateEl.textContent = s.last_published
+                        ? L.newsStatLastDate + ': ' + new Date(s.last_published).toLocaleDateString(dateFmt, dateOpts)
+                        : L.newsStatNoArticles;
+                }
+                if (draftDateEl) {
+                    draftDateEl.textContent = s.last_draft
+                        ? L.newsStatLastDate + ': ' + new Date(s.last_draft).toLocaleDateString(dateFmt, dateOpts)
+                        : '';
+                }
+            }
+
+            // Top-3 popular
+            var topRes = results[1];
+            var topList = document.getElementById('adNewsStatTopList');
+            if (topList && topRes.status === 'fulfilled' && topRes.value.data) {
+                var medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
+                var rows = topRes.value.data;
+                if (rows.length === 0) {
+                    topList.innerHTML = '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.newsStatNoArticles + '</div>';
+                } else {
+                    var html = '';
+                    rows.forEach(function(row, i) {
+                        html += '<div class="ad-news-stat-top-item">' +
+                            '<span class="ad-news-stat-top-medal">' + (medals[i] || '') + '</span>' +
+                            '<span class="ad-news-stat-top-title">' + esc(row.title) + '</span>' +
+                            '<span class="ad-news-stat-top-score">(' + (row.score || 0) + ')</span>' +
+                        '</div>';
+                    });
+                    topList.innerHTML = html;
+                }
+            }
+        } catch (e) {
+            console.error('loadNewsStats error:', e);
+        }
     }
 
     function openNewsColDropdown(col, hdr) {
@@ -1547,8 +1649,9 @@
         dd.style.left = Math.max(0, rect.left - cardRect.left) + 'px';
         dd.style.top = (rect.bottom - cardRect.top + 4) + 'px';
 
-        var colLabels = { title: L.thTitle, category: L.thCategory, published_at: L.thStatus, created_at: L.thPublished };
+        var colLabels = { title: L.thTitle, category: L.thCategory, published_at: L.thStatus, created_at: L.thPublished, view_count: '&#128065;', reactions: L.thReactions, votes: L.thVotes };
         var isDateCol = col === 'created_at';
+        var isNumericCol = col === 'view_count' || col === 'reactions' || col === 'votes';
         var filterable = col === 'category' || col === 'published_at';
 
         var html = '';
@@ -1586,6 +1689,9 @@
         if (isDateCol) {
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Newest first' : '↓ Сначала новые') + '</div>';
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Oldest first' : '↑ Сначала старые') + '</div>';
+        } else if (isNumericCol) {
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Most first' : '↓ Сначала больше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Least first' : '↑ Сначала меньше') + '</div>';
         } else {
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ A → Z' : '↑ А → Я') + '</div>';
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Z → A' : '↓ Я → А') + '</div>';
@@ -1696,9 +1802,13 @@
     async function loadNewsList() {
         if (!client) return;
 
+        // reactions/votes are not DB columns — sort client-side
+        var serverSortCol = (newsSortCol === 'reactions' || newsSortCol === 'votes') ? 'created_at' : newsSortCol;
+        var serverSortAsc = (newsSortCol === 'reactions' || newsSortCol === 'votes') ? false : newsSortAsc;
+
         var query = client.from('news')
-            .select('id,title,image,category,published_at,created_at,executor')
-            .order(newsSortCol, { ascending: newsSortAsc });
+            .select('id,title,image,category,published_at,created_at,executor,view_count')
+            .order(serverSortCol, { ascending: serverSortAsc });
 
         if (newsSearchQuery) {
             query = query.ilike('title', '%' + newsSearchQuery + '%');
@@ -1709,19 +1819,41 @@
         applyNewsFilters();
     }
 
-    function renderNewsRows(articles) {
+    async function renderNewsRows(articles) {
         var table = document.getElementById('adNewsTable');
         if (!table) return;
         var tbody = table.querySelector('tbody');
 
         if (articles.length === 0) {
             tbody.innerHTML =
-                '<tr><td colspan="7" style="text-align:center;padding:60px 20px;">' +
+                '<tr><td colspan="10" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">📝</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noArticles + '</div>' +
                     '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noArticlesText + '</div>' +
                 '</td></tr>';
             return;
+        }
+
+        // Load engagement data
+        var engMap = {};
+        if (client) {
+            var ids = articles.map(function(a) { return a.id; });
+            var engRes = await client.rpc('get_news_engagement', { p_news_ids: ids });
+            if (engRes.data) {
+                engRes.data.forEach(function(row) {
+                    engMap[row.news_id] = { reactions: row.total_reactions || 0, votes: row.total_votes || 0 };
+                });
+            }
+        }
+
+        // Client-side sort for reactions/votes
+        if (newsSortCol === 'reactions' || newsSortCol === 'votes') {
+            var sortKey = newsSortCol;
+            articles.sort(function(a, b) {
+                var va = (engMap[a.id] || {})[sortKey] || 0;
+                var vb = (engMap[b.id] || {})[sortKey] || 0;
+                return newsSortAsc ? va - vb : vb - va;
+            });
         }
 
         tbody.innerHTML = '';
@@ -1740,6 +1872,11 @@
                 ? new Date(a.published_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU')
                 : L.noData;
 
+            var eng = engMap[a.id] || { reactions: 0, votes: 0 };
+            var viewsCell = (a.view_count || 0) > 0 ? a.view_count : '\u2014';
+            var reactionsCell = eng.reactions > 0 ? eng.reactions : '\u2014';
+            var votesCell = eng.votes > 0 ? eng.votes : '\u2014';
+
             tbody.innerHTML +=
                 '<tr data-news-id="' + a.id + '">' +
                     bulkCheckboxTd(a.id) +
@@ -1749,6 +1886,9 @@
                     '<td style="color:var(--text-secondary);">' + esc(a.executor || '\u2014') + '</td>' +
                     '<td>' + statusHtml + '</td>' +
                     '<td>' + dateStr + '</td>' +
+                    '<td style="text-align:center;color:var(--text-secondary);">' + viewsCell + '</td>' +
+                    '<td style="text-align:center;color:var(--text-secondary);">' + reactionsCell + '</td>' +
+                    '<td style="text-align:center;color:var(--text-secondary);">' + votesCell + '</td>' +
                 '</tr>';
         });
 
@@ -1826,6 +1966,18 @@
                     '<span>\uD83D\uDC64 <span id="adMetaAuthor">KSLT Media</span></span>' +
                     '<span>\u23F1 <span id="adMetaReadTime">0</span> ' + L.metaReadTime + '</span>' +
                 '</div>' +
+            '</div>' +
+
+            // Engagement (shown only for published articles)
+            '<div class="ad-form-card" id="adNewsEngagement" style="display:none">' +
+                '<div class="ad-form-card-title">' + L.engagement + '</div>' +
+                '<div class="ad-engagement-stats">' +
+                    '<div class="ad-engagement-item">&#128065; <span id="adEngViews">0</span></div>' +
+                    '<div class="ad-engagement-item">&#127934; <span id="adEngTennis">0</span></div>' +
+                    '<div class="ad-engagement-item">&#128293; <span id="adEngFire">0</span></div>' +
+                    '<div class="ad-engagement-item">&#128079; <span id="adEngClap">0</span></div>' +
+                '</div>' +
+                '<div id="adNewsPollStats"></div>' +
             '</div>' +
 
             // Title + Slug
@@ -2103,6 +2255,60 @@
             if (el) el.addEventListener('input', updateMetaPreview);
         });
         updateMetaPreview();
+
+        // Load engagement stats for existing published articles
+        if (article && article.id && article.published_at && client) {
+            (async function() {
+                var engCard = document.getElementById('adNewsEngagement');
+                if (!engCard) return;
+
+                // View count (from article data — already in select('*'))
+                var viewsEl = document.getElementById('adEngViews');
+                if (viewsEl) viewsEl.textContent = article.view_count || 0;
+
+                // Reaction counts
+                var countsRes = await client.rpc('get_reaction_counts', { p_news_id: article.id });
+                if (countsRes.data && countsRes.data.length) {
+                    var c = countsRes.data[0];
+                    var el;
+                    el = document.getElementById('adEngTennis');
+                    if (el) el.textContent = c.tennis || 0;
+                    el = document.getElementById('adEngFire');
+                    if (el) el.textContent = c.fire || 0;
+                    el = document.getElementById('adEngClap');
+                    if (el) el.textContent = c.clap || 0;
+                }
+
+                // Poll results
+                var pollStatsEl = document.getElementById('adNewsPollStats');
+                if (pollStatsEl && article.poll && article.poll.options && article.poll.options.length) {
+                    var pollRes = await client.rpc('get_poll_results', { p_news_id: article.id });
+                    var votes = [];
+                    for (var pi = 0; pi < article.poll.options.length; pi++) votes.push(0);
+                    if (pollRes.data) {
+                        pollRes.data.forEach(function(row) {
+                            if (row.option_index >= 0 && row.option_index < votes.length) {
+                                votes[row.option_index] = row.count || 0;
+                            }
+                        });
+                    }
+                    var totalV = votes.reduce(function(a, b) { return a + b; }, 0);
+                    var pollHtml = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color);">' +
+                        '<div style="font-weight:500;margin-bottom:8px;">' + esc(article.poll.question || '') + '</div>';
+                    for (var vi = 0; vi < article.poll.options.length; vi++) {
+                        var pct = totalV > 0 ? Math.round((votes[vi] / totalV) * 100) : 0;
+                        pollHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+                            '<span style="color:var(--text-secondary);">' + esc(article.poll.options[vi]) + '</span>' +
+                            '<span style="color:var(--accent);font-weight:500;">' + pct + '% (' + votes[vi] + ')</span>' +
+                        '</div>';
+                    }
+                    pollHtml += '<div style="margin-top:8px;color:var(--text-dim);font-size:0.85rem;">' + L.totalVotes + ': ' + totalV + '</div></div>';
+                    pollStatsEl.innerHTML = pollHtml;
+                }
+
+                engCard.style.display = '';
+            })();
+        }
 
         // Image upload zone
         var imgZone = document.getElementById('adNewsImgZone');

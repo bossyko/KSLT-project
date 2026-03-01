@@ -138,7 +138,7 @@
 
 /* === ARTICLE BODY === */
 .news-article-body {
-    max-width: 720px;
+    max-width: 900px;
     margin: 0 auto;
     padding: var(--space-xl) 7%;
 }
@@ -424,7 +424,7 @@ h3.news-heading {
 
 /* === TAGS === */
 .news-tags {
-    max-width: 720px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 0 7% var(--space-lg);
 }
@@ -462,7 +462,7 @@ h3.news-heading {
 
 /* === REACTIONS === */
 .news-reactions {
-    max-width: 720px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 0 7% var(--space-xl);
     text-align: center;

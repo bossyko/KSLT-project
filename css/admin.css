@@ -1332,6 +1332,26 @@ select.ad-field-input {
     color: var(--text-dim);
 }
 
+/* ---- Engagement stats ---- */
+.ad-engagement-stats {
+    display: flex;
+    gap: 24px;
+    font-size: 1.1rem;
+}
+
+.ad-engagement-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+}
+
+.ad-engagement-item span {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
 /* ---- Auto-copied hint ---- */
 .ad-auto-copied {
     border-color: rgba(204, 255, 0, 0.3) !important;
@@ -2366,4 +2386,109 @@ select.ad-field-input {
     color: var(--text-dim);
     margin-left: 12px;
     transition: opacity 0.3s;
+}
+
+/* ---- News Stats Grid ---- */
+.ad-news-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.ad-news-stat-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    text-align: center;
+}
+
+.ad-news-stat-icon {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+    opacity: 0.7;
+}
+
+.ad-news-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 2px;
+}
+
+.ad-news-stat-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ad-news-stat-sub {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+/* Popular card — left aligned with top list */
+.ad-news-stat-card--popular {
+    text-align: left;
+    padding: 12px 16px;
+}
+
+.ad-news-stat-top-list {
+    margin-top: 8px;
+}
+
+.ad-news-stat-top-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+}
+
+.ad-news-stat-top-medal {
+    flex-shrink: 0;
+    width: 18px;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.ad-news-stat-top-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.ad-news-stat-top-score {
+    flex-shrink: 0;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+@media (max-width: 992px) {
+    .ad-news-stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .ad-news-stat-card--popular {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 480px) {
+    .ad-news-stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .ad-news-stat-card--popular {
+        grid-column: 1 / -1;
+    }
+    .ad-news-stat-value {
+        font-size: 1.2rem;
+    }
 }
