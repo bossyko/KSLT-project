@@ -172,8 +172,7 @@ body.ad-page {
 /* ---- Content ---- */
 .ad-content {
     margin-left: 260px;
-    padding: var(--space-md) var(--space-lg);
-    max-width: 1400px;
+    padding: var(--space-sm) var(--space-md);
 }
 
 .ad-section {
@@ -371,6 +370,14 @@ body.ad-page {
 }
 .ad-col-header:hover .ad-col-filter-btn { opacity: 0.7; }
 .ad-col-filter-btn.ad-col-filtered { opacity: 1; color: var(--accent); }
+.ad-col-filter-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+    margin-left: 2px;
+}
 
 /* Column filter dropdown */
 .ad-col-dropdown {
@@ -733,6 +740,52 @@ body.ad-page {
 .ad-btn-translate:disabled {
     opacity: 0.5;
     cursor: wait;
+}
+
+.ad-btn-translate-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    color: #CCFF00;
+    background: rgba(204, 255, 0, 0.08);
+    border: 1px solid rgba(204, 255, 0, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.ad-btn-translate-all:hover {
+    background: rgba(204, 255, 0, 0.15);
+    border-color: rgba(204, 255, 0, 0.4);
+}
+.ad-btn-translate-all:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+/* Map preview iframe */
+.ad-crt-map-preview iframe {
+    width: 100%;
+    height: 200px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    margin-top: 10px;
+}
+
+/* Custom amenity input row */
+.ad-crt-custom-amenity-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+/* Gallery URL input row */
+.ad-crt-gallery-url-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .ad-btn-row {
@@ -1497,6 +1550,10 @@ select.ad-field-input {
     .ad-content {
         padding: 16px;
         padding-top: 80px;
+    }
+
+    .ad-filter-sticky {
+        top: 120px; /* header 64px + mobile tabs ~56px */
     }
 
     .ad-stats-grid {
@@ -2570,13 +2627,15 @@ select.ad-field-input {
 }
 
 /* Sticky filter row for courts */
-.ad-crt-filter-sticky {
+.ad-filter-sticky {
     position: sticky;
-    top: 0;
-    z-index: 10;
+    top: 64px;
+    z-index: 20;
     background: var(--bg-primary);
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 0;
 }
 
 /* Rowspan sub-rows — no top border */
@@ -2626,6 +2685,193 @@ select.ad-field-input {
 
 @media (max-width: 768px) {
     .ad-crt-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
+/* ---- Coaches Stats & Tags ---- */
+.ad-cch-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.ad-cch-stat-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ad-cch-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.ad-cch-stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.ad-cch-tag-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: rgba(204, 255, 0, 0.1);
+    color: var(--accent);
+    border: 1px solid rgba(204, 255, 0, 0.2);
+    margin: 1px 2px;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .ad-cch-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
+/* ---- Payments Section ---- */
+.ad-pay-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ad-pay-active {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+}
+
+.ad-pay-expired {
+    background: rgba(244, 67, 54, 0.15);
+    color: #f44336;
+}
+
+.ad-pay-type-court {
+    background: rgba(33, 150, 243, 0.15);
+    color: #2196f3;
+}
+
+.ad-pay-type-coach {
+    background: rgba(156, 39, 176, 0.15);
+    color: #ce93d8;
+}
+
+.ad-pay-type-player {
+    background: rgba(255, 152, 0, 0.15);
+    color: #ff9800;
+}
+
+.ad-pay-purpose-promoted {
+    background: rgba(204, 255, 0, 0.15);
+    color: var(--accent);
+}
+
+.ad-pay-purpose-sponsorship {
+    background: rgba(0, 188, 212, 0.15);
+    color: #00bcd4;
+}
+
+.ad-pay-purpose-rental {
+    background: rgba(121, 85, 72, 0.15);
+    color: #bcaaa4;
+}
+
+.ad-pay-purpose-other {
+    background: rgba(158, 158, 158, 0.15);
+    color: #9e9e9e;
+}
+
+.ad-pay-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.ad-pay-stat-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+
+.ad-pay-stat-card .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.ad-pay-stat-card .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ad-pay-entity-wrap {
+    position: relative;
+}
+
+.ad-pay-entity-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1a1f2e;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    margin-top: 4px;
+}
+
+.ad-pay-entity-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+}
+
+.ad-pay-entity-item:hover {
+    background: rgba(204, 255, 0, 0.08);
+    color: var(--text-primary);
+}
+
+.ad-pay-entity-item:last-child {
+    border-bottom: none;
+}
+
+.ad-crt-edit-btn {
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+.ad-crt-edit-btn:hover {
+    transform: scale(1.4);
+    filter: brightness(1.3) drop-shadow(0 0 6px var(--accent));
+}
+
+@media (max-width: 768px) {
+    .ad-pay-stats-grid {
         grid-template-columns: 1fr;
         gap: 8px;
     }

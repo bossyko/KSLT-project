@@ -275,7 +275,7 @@
         crtType: 'Type',
         crtSurface: 'Surface',
         crtCourtsCount: 'Qty',
-        crtPrice: 'Price (som/hr)',
+        crtPrice: 'Price<br><span style="font-size:0.65rem;font-weight:400;color:var(--text-dim);">(som/hr)</span>',
         crtMobile: 'Mobile',
         crtLandline: 'Landline',
         crtAddPhone: '+ Add phone',
@@ -283,6 +283,7 @@
         crtDescription: 'Description',
         crtAmenities: 'Amenities',
         crtPartner: 'Partner',
+        crtPromoted: 'Promoted',
         crtPhoto: 'Main Photo',
         crtGallery: 'Gallery',
         crtGoogleMaps: 'Google Maps',
@@ -303,6 +304,12 @@
         crtStatIndoor: 'Indoor',
         crtStatTotal: 'Total',
         crtAllSurfaces: 'All Surfaces',
+        crtOther: 'Other',
+        crtCustomAmenity: 'Custom amenity',
+        crtAddCustom: '+ Add custom',
+        crtAddByUrl: '+ By URL',
+        translateAllBtn: 'Translate to empty',
+        allFieldsFilled: 'All fields are already filled',
         // Coaches
         coaches: 'Coaches',
         addCoach: 'Add Coach',
@@ -328,6 +335,17 @@
         cchDeleteConfirm: 'Delete this coach?',
         cchSearch: 'Search by name...',
         cchAllTags: 'All Tags',
+        cchPromoted: 'Promoted',
+        cchStatTotal: 'Total Coaches',
+        cchStatPromoted: 'Promoted',
+        cchStatNew: 'New This Month',
+        cchViewTitle: 'Coach Overview',
+        cchViewInfo: 'Information',
+        cchViewPayments: 'Payments & Services',
+        cchViewNoPayments: 'No payments for this coach',
+        cchViewEdit: 'Edit',
+        cchPromotedBadge: 'Promoted',
+        cchPromotedHint: 'Managed via Payments section',
         // Ratings
         ratings: 'Ratings',
         ratSubRankings: 'Rankings',
@@ -477,7 +495,62 @@
         usrOffline: 'Offline',
         usrActive: 'Active',
         usrExpired: 'Expired',
-        usrNone: 'None'
+        usrNone: 'None',
+        // Payments
+        payments: 'Payments',
+        addPayment: 'Add Payment',
+        editPayment: 'Edit Payment',
+        payEntityType: 'Entity Type',
+        payEntity: 'Payer',
+        paySearchEntity: 'Search by name...',
+        payAmount: 'Amount',
+        payCurrency: 'Currency',
+        payPeriodStart: 'Period Start',
+        payPeriodEnd: 'Period End',
+        payMethod: 'Payment Method',
+        payPurpose: 'Purpose',
+        payNote: 'Note',
+        payStatus: 'Status',
+        payActive: 'Active',
+        payExpired: 'Expired',
+        payAllStatuses: 'All statuses',
+        payAllTypes: 'All types',
+        payAllPurposes: 'All purposes',
+        paySearch: 'Search payments...',
+        payCash: 'Cash',
+        payTransfer: 'Transfer',
+        payCard: 'Card',
+        payPromoted: 'Promoted',
+        paySponsorship: 'Sponsorship',
+        payRental: 'Rental',
+        payOther: 'Other',
+        payCourt: 'Court',
+        payCoach: 'Coach',
+        payPlayer: 'Player',
+        payNoPayments: 'No payments yet',
+        payNoPaymentsText: 'Add the first payment',
+        payStatActive: 'Active',
+        payStatExpired: 'Expired',
+        payStatMonth: 'This Month',
+        payCreatedAt: 'Created',
+        payEntityRequired: 'Select an entity',
+        payAmountRequired: 'Enter the amount',
+        payPeriodRequired: 'Enter the period',
+        paySaved: 'Payment saved',
+        payDeleted: 'Payment deleted',
+        payDeleteConfirm: 'Delete this payment?',
+        crtPromotedBadge: 'Promoted',
+        crtPromotedHint: 'Managed via Payments section',
+        crtViewTitle: 'Court Overview',
+        crtViewInfo: 'Information',
+        crtViewPayments: 'Payments & Services',
+        crtViewNoPayments: 'No payments for this court',
+        crtViewEdit: 'Edit',
+        crtViewAmount: 'Amount',
+        crtViewPurpose: 'Purpose',
+        crtViewActiveUntil: 'Active Until',
+        crtViewStatus: 'Status',
+        crtViewMethod: 'Method'
     } : {
         dashboard: 'Дашборд',
         users: 'Пользователи',
@@ -744,7 +817,7 @@
         crtType: 'Тип',
         crtSurface: 'Покрытие',
         crtCourtsCount: 'Кол-во',
-        crtPrice: 'Цена (сом/час)',
+        crtPrice: 'Цена<br><span style="font-size:0.65rem;font-weight:400;color:var(--text-dim);">(сом/час)</span>',
         crtMobile: 'Мобильный',
         crtLandline: 'Стационарный',
         crtAddPhone: '+ Добавить телефон',
@@ -752,6 +825,7 @@
         crtDescription: 'Описание',
         crtAmenities: 'Удобства',
         crtPartner: 'Партнёр',
+        crtPromoted: 'Promoted',
         crtPhoto: 'Главное фото',
         crtGallery: 'Галерея',
         crtGoogleMaps: 'Google Maps',
@@ -772,6 +846,12 @@
         crtStatIndoor: 'Закрытые',
         crtStatTotal: 'Всего',
         crtAllSurfaces: 'Все покрытия',
+        crtOther: 'Другое',
+        crtCustomAmenity: 'Своё удобство',
+        crtAddCustom: '+ Добавить своё',
+        crtAddByUrl: '+ По ссылке',
+        translateAllBtn: 'Перевести в пустые',
+        allFieldsFilled: 'Все поля уже заполнены',
         // Coaches
         coaches: 'Тренеры',
         addCoach: 'Добавить тренера',
@@ -797,6 +877,17 @@
         cchDeleteConfirm: 'Удалить этого тренера?',
         cchSearch: 'Поиск по имени...',
         cchAllTags: 'Все теги',
+        cchPromoted: 'Promoted',
+        cchStatTotal: 'Всего тренеров',
+        cchStatPromoted: 'Продвигаются',
+        cchStatNew: 'Новые за месяц',
+        cchViewTitle: 'Обзор тренера',
+        cchViewInfo: 'Информация',
+        cchViewPayments: 'Оплаты и услуги',
+        cchViewNoPayments: 'Нет оплат по этому тренеру',
+        cchViewEdit: 'Редактировать',
+        cchPromotedBadge: 'Продвигается',
+        cchPromotedHint: 'Управляется через раздел Оплаты',
         // Ratings
         ratings: 'Рейтинг',
         ratSubRankings: 'Рейтинги',
@@ -946,7 +1037,62 @@
         usrOffline: 'Офлайн',
         usrActive: 'Активно',
         usrExpired: 'Истекло',
-        usrNone: 'Нет'
+        usrNone: 'Нет',
+        // Payments
+        payments: 'Оплаты',
+        addPayment: 'Добавить оплату',
+        editPayment: 'Редактировать оплату',
+        payEntityType: 'Тип объекта',
+        payEntity: 'Плательщик',
+        paySearchEntity: 'Поиск по названию...',
+        payAmount: 'Сумма',
+        payCurrency: 'Валюта',
+        payPeriodStart: 'Начало периода',
+        payPeriodEnd: 'Конец периода',
+        payMethod: 'Способ оплаты',
+        payPurpose: 'Назначение',
+        payNote: 'Примечание',
+        payStatus: 'Статус',
+        payActive: 'Активна',
+        payExpired: 'Истекла',
+        payAllStatuses: 'Все статусы',
+        payAllTypes: 'Все типы',
+        payAllPurposes: 'Все назначения',
+        paySearch: 'Поиск оплат...',
+        payCash: 'Наличные',
+        payTransfer: 'Перевод',
+        payCard: 'Карта',
+        payPromoted: 'Продвижение',
+        paySponsorship: 'Спонсорство',
+        payRental: 'Аренда',
+        payOther: 'Другое',
+        payCourt: 'Корт',
+        payCoach: 'Тренер',
+        payPlayer: 'Игрок',
+        payNoPayments: 'Оплат пока нет',
+        payNoPaymentsText: 'Добавьте первую оплату',
+        payStatActive: 'Активных',
+        payStatExpired: 'Просроченных',
+        payStatMonth: 'За этот месяц',
+        payCreatedAt: 'Создано',
+        payEntityRequired: 'Выберите объект',
+        payAmountRequired: 'Введите сумму',
+        payPeriodRequired: 'Укажите период',
+        paySaved: 'Оплата сохранена',
+        payDeleted: 'Оплата удалена',
+        payDeleteConfirm: 'Удалить эту оплату?',
+        crtPromotedBadge: 'Продвигается',
+        crtPromotedHint: 'Управляется через раздел Оплаты',
+        crtViewTitle: 'Обзор корта',
+        crtViewInfo: 'Информация',
+        crtViewPayments: 'Оплаты и услуги',
+        crtViewNoPayments: 'Нет оплат по этому корту',
+        crtViewEdit: 'Редактировать',
+        crtViewAmount: 'Сумма',
+        crtViewPurpose: 'Назначение',
+        crtViewActiveUntil: 'Активен до',
+        crtViewStatus: 'Статус',
+        crtViewMethod: 'Способ'
     };
 
     // Category map
@@ -1034,7 +1180,8 @@
         card: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
         location: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>',
         coach: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
-        star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+        star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+        wallet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="16" rx="2"/><path d="M1 10h22"/><circle cx="18" cy="15" r="1"/></svg>'
     };
 
     var SECTION_ICONS = {
@@ -1044,14 +1191,15 @@
         memberships: '💳',
         courts: '🏟️',
         coaches: '🎓',
-        ratings: '⭐'
+        ratings: '⭐',
+        payments: '💰'
     };
 
     var currentRole = 'manager';
 
     var ROLE_SECTIONS = {
-        admin:   ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'ratings', 'users', 'memberships'],
-        manager: ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'ratings', 'users', 'memberships']
+        admin:   ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'ratings', 'users', 'memberships', 'payments'],
+        manager: ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'ratings', 'users', 'memberships', 'payments']
     };
 
     // ---- Auth Ready Callback ----
@@ -1069,6 +1217,7 @@
         renderCoachesSection();
         renderRatingsSection();
         renderMembershipsSection();
+        renderPaymentsSection();
         renderUsersSection();
         initTabs();
     };
@@ -1099,7 +1248,8 @@
             { key: 'ratings', icon: ICONS.star,    label: L.ratings, badge: false },
             { key: '_divider' },
             { key: 'users',     icon: ICONS.users,  label: L.users,     badge: false },
-            { key: 'memberships', icon: ICONS.card, label: L.memberships, badge: true }
+            { key: 'memberships', icon: ICONS.card, label: L.memberships, badge: true },
+            { key: 'payments', icon: ICONS.wallet, label: L.payments, badge: false }
         ];
 
         var navHtml = '';
@@ -1177,7 +1327,8 @@
             courts: renderCourtsList,
             coaches: renderCoachesList,
             users: renderUsersList,
-            memberships: renderMembershipsList
+            memberships: renderMembershipsList,
+            payments: renderPaymentsList
         };
         if (resetMap[tab]) {
             resetMap[tab]();
@@ -1504,7 +1655,6 @@
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.content + '</h2>' +
-                '<button class="ad-btn ad-btn-primary" id="adNewsAdd">+ ' + L.addNews + '</button>' +
             '</div>' +
             // News stat cards
             '<div class="ad-news-stats-grid" id="adNewsStatsGrid">' +
@@ -1527,8 +1677,9 @@
                     '</div>' +
                 '</div>' +
             '</div>' +
-            '<div class="ad-filter-row">' +
+            '<div class="ad-filter-row ad-filter-sticky">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adNewsSearch" placeholder="' + L.newsSearch + '" value="' + esc(newsSearchQuery) + '">' +
+                '<button class="ad-btn ad-btn-primary" id="adNewsAdd" style="white-space:nowrap;margin-left:auto;">+ ' + L.addNews + '</button>' +
             '</div>' +
             '<div class="ad-table-card" style="position:relative;">' +
                 '<div class="ad-table-wrap">' +
@@ -5280,7 +5431,7 @@
     // ---- Courts List ----
 
     function crtColHeader(col, label) {
-        var sortable = col === 'name' || col === 'price' || col === 'count' || col === 'city';
+        var sortable = col === 'name' || col === 'price' || col === 'count' || col === 'city' || col === 'type' || col === 'surface' || col === 'partner';
         if (!sortable) return '<th>' + label + '</th>';
         var isActive = crtSortCol === col;
         var cls = 'ad-col-header' + (isActive ? ' ad-col-active' : '');
@@ -5306,8 +5457,8 @@
         dd.style.left = Math.max(0, rect.left - cardRect.left) + 'px';
         dd.style.top = (rect.bottom - cardRect.top + 4) + 'px';
 
-        var colLabels = { name: L.crtName, price: L.crtPrice, count: isEn ? 'Count' : 'Кол-во', city: L.crtCity };
-        var isNumeric = col === 'price' || col === 'count';
+        var colLabels = { name: L.crtName, price: L.crtPrice, count: isEn ? 'Count' : 'Кол-во', city: L.crtCity, type: L.crtType, surface: L.crtSurface, partner: L.crtPartner };
+        var isNumeric = col === 'price' || col === 'count' || col === 'partner';
 
         var html = '<div class="ad-col-dd-title">' + (colLabels[col] || col) + '</div>';
 
@@ -5322,6 +5473,7 @@
         dd.innerHTML = html;
         dd.style.display = 'block';
 
+        // Sort click
         dd.querySelectorAll('.ad-col-dd-sort').forEach(function(el) {
             el.addEventListener('click', function(ev) {
                 ev.stopPropagation();
@@ -5332,6 +5484,7 @@
                 applyCrtFilters();
             });
         });
+
     }
 
     function updateCrtColHeaders() {
@@ -5446,6 +5599,24 @@
                 var vb = (b.city || '').toLowerCase();
                 return crtSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
             });
+        } else if (crtSortCol === 'type') {
+            items.sort(function(a, b) {
+                var va = ((a.court_types || [])[0] || {}).type || '';
+                var vb = ((b.court_types || [])[0] || {}).type || '';
+                return crtSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            });
+        } else if (crtSortCol === 'surface') {
+            items.sort(function(a, b) {
+                var va = ((a.court_types || [])[0] || {}).surface || '';
+                var vb = ((b.court_types || [])[0] || {}).surface || '';
+                return crtSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            });
+        } else if (crtSortCol === 'partner') {
+            items.sort(function(a, b) {
+                var va = a.partner ? 1 : 0;
+                var vb = b.partner ? 1 : 0;
+                return crtSortAsc ? va - vb : vb - va;
+            });
         }
         // name sort is handled server-side (default)
 
@@ -5464,9 +5635,11 @@
         if (!table) return;
         var tbody = table.querySelector('tbody');
 
+        var editBtnHtml = '<button class="ad-crt-edit-btn" title="' + L.crtViewEdit + '" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:1rem;padding:4px;border-radius:4px;transition:color 0.15s;">✏️</button>';
+
         if (items.length === 0) {
             tbody.innerHTML =
-                '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
+                '<tr><td colspan="11" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🏟️</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCourts + '</div>' +
                     '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noCourtsText + '</div>' +
@@ -5479,12 +5652,14 @@
             var types = getFilteredCrtTypes(c);
             var rowCount = Math.max(1, types.length);
             var partnerHtml = c.partner ? '<span class="ad-partner-badge">✓</span>' : '';
+            var promotedHtml = c.promoted ? '<span style="color:var(--accent);">⭐</span>' : '—';
             var cityText = esc(c.city || '—');
 
             if (types.length === 0) {
                 html +=
                     '<tr data-crt-id="' + c.id + '">' +
                         bulkCheckboxTd(c.id) +
+                        '<td style="text-align:center;">' + editBtnHtml + '</td>' +
                         '<td style="font-weight:500;color:var(--text-primary);">' + esc(c.name || L.noData) + '</td>' +
                         '<td>' + L.noData + '</td>' +
                         '<td>' + L.noData + '</td>' +
@@ -5492,6 +5667,7 @@
                         '<td>' + L.noData + '</td>' +
                         '<td>' + cityText + '</td>' +
                         '<td style="text-align:center;">' + partnerHtml + '</td>' +
+                        '<td style="text-align:center;">' + promotedHtml + '</td>' +
                     '</tr>';
             } else {
                 // First row with rowspan
@@ -5501,13 +5677,15 @@
                         '<td class="ad-bulk-cell" rowspan="' + rowCount + '" style="width:36px;text-align:center;vertical-align:middle;">' +
                             '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + c.id + '" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">' +
                         '</td>' +
+                        '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + editBtnHtml + '</td>' +
                         '<td rowspan="' + rowCount + '" style="font-weight:500;color:var(--text-primary);vertical-align:middle;">' + esc(c.name || L.noData) + '</td>' +
                         '<td><span class="ad-type-badge ad-type-' + (t0.type || 'indoor') + '">' + (COURT_TYPES[t0.type] || t0.type || '') + '</span></td>' +
                         '<td style="text-align:center;">' + (COURT_SURFACES[t0.surface] || t0.surface || '') + '</td>' +
                         '<td style="text-align:center;">' + (t0.count || 1) + '</td>' +
-                        '<td style="font-weight:600;color:var(--accent);">' + (t0.price || 0) + ' ' + (isEn ? 'som' : 'сом') + '</td>' +
+                        '<td style="font-weight:600;color:var(--accent);">' + (t0.price || 0) + '</td>' +
                         '<td rowspan="' + rowCount + '" style="vertical-align:middle;">' + cityText + '</td>' +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + partnerHtml + '</td>' +
+                        '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + promotedHtml + '</td>' +
                     '</tr>';
 
                 // Sub-rows
@@ -5518,7 +5696,7 @@
                             '<td><span class="ad-type-badge ad-type-' + (ti.type || 'indoor') + '">' + (COURT_TYPES[ti.type] || ti.type || '') + '</span></td>' +
                             '<td style="text-align:center;">' + (COURT_SURFACES[ti.surface] || ti.surface || '') + '</td>' +
                             '<td style="text-align:center;">' + (ti.count || 1) + '</td>' +
-                            '<td style="font-weight:600;color:var(--accent);">' + (ti.price || 0) + ' ' + (isEn ? 'som' : 'сом') + '</td>' +
+                            '<td style="font-weight:600;color:var(--accent);">' + (ti.price || 0) + '</td>' +
                         '</tr>';
                 }
             }
@@ -5528,9 +5706,16 @@
 
         tbody.addEventListener('click', function(e) {
             if (e.target.closest('.ad-bulk-cell')) return;
+            // Edit button → direct edit
+            if (e.target.closest('.ad-crt-edit-btn')) {
+                var row = e.target.closest('tr[data-crt-id]');
+                if (row) loadAndEditCourt(row.dataset.crtId);
+                return;
+            }
+            // Row click → snapshot view
             var row = e.target.closest('tr[data-crt-id]');
             if (!row) return;
-            loadAndEditCourt(row.dataset.crtId);
+            loadAndViewCourt(row.dataset.crtId);
         });
 
         setupBulkDelete({ tableId: 'adCrtTable', tableName: 'courts', reloadFn: loadCourtsList });
@@ -5608,7 +5793,7 @@
                     '<div class="ad-crt-stat-body" id="adCrtStatIndoor"></div>' +
                 '</div>' +
             '</div>' +
-            '<div class="ad-filter-row ad-crt-filter-sticky" id="adCrtFilterRow">' +
+            '<div class="ad-filter-row ad-filter-sticky" id="adCrtFilterRow">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adCrtSearch" placeholder="' + L.crtSearch + '" value="' + esc(crtSearchQuery) + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adCrtTypeFilter">' + typeFilterHtml + '</select>' +
                 '<select class="ad-field-input ad-filter-select" id="adCrtSurfaceFilter">' + surfaceFilterHtml + '</select>' +
@@ -5619,24 +5804,28 @@
                     '<table class="ad-table ad-table-clickable" id="adCrtTable">' +
                         '<colgroup>' +
                             '<col style="width:40px;">' +
-                            '<col>' +
+                            '<col style="width:36px;">' +
+                            '<col style="min-width:180px;">' +
+                            '<col style="width:90px;">' +
+                            '<col style="width:80px;">' +
+                            '<col style="width:55px;">' +
                             '<col style="width:100px;">' +
                             '<col style="width:90px;">' +
                             '<col style="width:70px;">' +
-                            '<col style="width:120px;">' +
-                            '<col style="width:100px;">' +
-                            '<col style="width:80px;">' +
+                            '<col style="width:70px;">' +
                         '</colgroup>' +
                         '<thead><tr>' +
+                            '<th style="width:36px;"></th>' +
                             crtColHeader('name', L.crtName) +
-                            '<th>' + L.crtType + '</th>' +
-                            '<th>' + L.crtSurface + '</th>' +
+                            crtColHeader('type', L.crtType) +
+                            crtColHeader('surface', L.crtSurface) +
                             crtColHeader('count', isEn ? 'Count' : 'Кол-во') +
                             crtColHeader('price', L.crtPrice) +
                             crtColHeader('city', L.crtCity) +
-                            '<th>' + L.crtPartner + '</th>' +
+                            crtColHeader('partner', L.crtPartner) +
+                            crtColHeader('promoted', L.crtPromoted) +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="10" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
                 '<div class="ad-col-dropdown" id="adCrtColDropdown" style="display:none;"></div>' +
@@ -5685,20 +5874,198 @@
         await loadCourtsList();
     }
 
+    async function syncAllExpiredPromoted() {
+        if (!client) return;
+        var today = new Date().toISOString().slice(0, 10);
+
+        // Find courts that are promoted but have no active promoted payment
+        var promoted = await client.from('courts').select('id').eq('promoted', true);
+        var ids = (promoted.data || []).map(function(c) { return String(c.id); });
+        if (ids.length === 0) return;
+
+        // Check which have active promoted payments
+        var payments = await client.from('entity_payments')
+            .select('entity_id')
+            .eq('entity_type', 'court')
+            .eq('purpose', 'promoted')
+            .gte('period_end', today)
+            .lte('period_start', today)
+            .in('entity_id', ids);
+
+        var activeIds = {};
+        (payments.data || []).forEach(function(p) { activeIds[p.entity_id] = true; });
+
+        // Reset promoted for courts without active payment
+        for (var i = 0; i < ids.length; i++) {
+            if (!activeIds[ids[i]]) {
+                await client.from('courts').update({ promoted: false }).eq('id', ids[i]);
+            }
+        }
+    }
+
     async function loadCourtsList() {
         if (!client) return;
+
+        await syncAllExpiredPromoted();
 
         var serverSortCol = (crtSortCol === 'name' || crtSortCol === 'city') ? crtSortCol : 'name';
 
         var query = client.from('courts')
-            .select('id,name,court_types,partner,city')
+            .select('id,name,court_types,partner,city,promoted')
             .order(serverSortCol, { ascending: crtSortCol === serverSortCol ? crtSortAsc : true });
 
         var result = await query;
         crtAllData = result.data || [];
 
+        // Update surface filter dropdown with custom surfaces from DB
+        var surfaceSelect = document.getElementById('adCrtSurfaceFilter');
+        if (surfaceSelect) {
+            var knownSurfaces = {};
+            Object.keys(COURT_SURFACES).forEach(function(k) { knownSurfaces[k] = true; });
+            var customSurfaces = [];
+            crtAllData.forEach(function(c) {
+                (c.court_types || []).forEach(function(t) {
+                    if (t.surface && !knownSurfaces[t.surface]) {
+                        knownSurfaces[t.surface] = true;
+                        customSurfaces.push(t.surface);
+                    }
+                });
+            });
+            customSurfaces.sort().forEach(function(s) {
+                var opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                if (crtFilterSurface === s) opt.selected = true;
+                surfaceSelect.appendChild(opt);
+            });
+        }
+
         applyCrtFilters();
         updateCourtStats();
+    }
+
+    async function loadAndViewCourt(id) {
+        if (!client) return;
+        var result = await client.from('courts').select('*').eq('id', id).single();
+        if (!result.data) return;
+
+        var payments = await client.from('entity_payments')
+            .select('*')
+            .eq('entity_type', 'court')
+            .eq('entity_id', String(id))
+            .order('created_at', { ascending: false });
+
+        renderCourtView(result.data, payments.data || []);
+    }
+
+    function renderCourtView(item, payments) {
+        var container = document.getElementById('ad-courts');
+        if (!container) return;
+
+        var today = new Date().toISOString().slice(0, 10);
+
+        // Court types info
+        var typesHtml = '';
+        (item.court_types || []).forEach(function(t) {
+            typesHtml +=
+                '<span class="ad-type-badge ad-type-' + (t.type || 'indoor') + '" style="margin-right:6px;">' +
+                    (COURT_TYPES[t.type] || t.type || '') +
+                '</span>' +
+                '<span style="color:var(--text-secondary);margin-right:12px;">' +
+                    (COURT_SURFACES[t.surface] || t.surface || '') + ' × ' + (t.count || 1) +
+                    ' — ' + (t.price || 0) + ' ' + (isEn ? 'som' : 'сом') +
+                '</span>';
+        });
+        if (!typesHtml) typesHtml = '<span style="color:var(--text-dim);">' + L.noData + '</span>';
+
+        // Promoted status
+        var promotedHtml = item.promoted
+            ? '<span class="ad-pay-badge ad-pay-active">⭐ ' + L.crtPromotedBadge + '</span>'
+            : '<span style="color:var(--text-dim);">—</span>';
+
+        // Partner
+        var partnerHtml = item.partner
+            ? '<span class="ad-partner-badge" style="margin-right:4px;">✓</span>' + (isEn ? 'Yes' : 'Да')
+            : '<span style="color:var(--text-dim);">' + (isEn ? 'No' : 'Нет') + '</span>';
+
+        // Payments table
+        var paymentsHtml = '';
+        if (payments.length === 0) {
+            paymentsHtml =
+                '<div style="text-align:center;padding:30px 20px;color:var(--text-dim);">' +
+                    '<div style="font-size:1.5rem;opacity:0.3;margin-bottom:6px;">💰</div>' +
+                    L.crtViewNoPayments +
+                '</div>';
+        } else {
+            paymentsHtml =
+                '<table class="ad-table" style="margin:0;">' +
+                    '<thead><tr>' +
+                        '<th>' + L.crtViewPurpose + '</th>' +
+                        '<th>' + L.crtViewAmount + '</th>' +
+                        '<th>' + L.crtViewActiveUntil + '</th>' +
+                        '<th>' + L.crtViewMethod + '</th>' +
+                        '<th>' + L.crtViewStatus + '</th>' +
+                    '</tr></thead><tbody>';
+
+            payments.forEach(function(p) {
+                var isActive = p.period_end >= today;
+                var statusBadge = isActive
+                    ? '<span class="ad-pay-badge ad-pay-active">' + L.payActive + '</span>'
+                    : '<span class="ad-pay-badge ad-pay-expired">' + L.payExpired + '</span>';
+                var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + p.purpose + '">' + (PAYMENT_PURPOSES[p.purpose] || p.purpose) + '</span>';
+
+                paymentsHtml +=
+                    '<tr>' +
+                        '<td>' + purposeBadge + '</td>' +
+                        '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + (p.currency || 'KGS') + '</td>' +
+                        '<td style="font-size:0.85rem;">' + formatPayDate(p.period_end) + '</td>' +
+                        '<td>' + (PAYMENT_METHODS[p.payment_method] || p.payment_method) + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
+                    '</tr>';
+            });
+
+            paymentsHtml += '</tbody></table>';
+        }
+
+        container.innerHTML =
+            '<div class="ad-section-header">' +
+                '<h2>' + L.crtViewTitle + '</h2>' +
+                '<div style="display:flex;gap:8px;">' +
+                    '<button class="ad-btn ad-btn-primary" id="adCrtViewEditBtn">' + L.crtViewEdit + '</button>' +
+                    '<button class="ad-btn ad-btn-secondary" id="adCrtViewBackBtn">' + L.back + '</button>' +
+                '</div>' +
+            '</div>' +
+
+            // Info card
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.crtViewInfo + '</div>' +
+                '<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:0.9rem;">' +
+                    '<span style="color:var(--text-dim);">' + L.crtName + '</span>' +
+                    '<span style="color:var(--text-primary);font-weight:500;">' + esc(item.name || '—') + '</span>' +
+                    '<span style="color:var(--text-dim);">' + L.crtCity + '</span>' +
+                    '<span style="color:var(--text-secondary);">' + esc(item.city || '—') + '</span>' +
+                    '<span style="color:var(--text-dim);">' + L.crtType + ' / ' + L.crtSurface + '</span>' +
+                    '<span>' + typesHtml + '</span>' +
+                    '<span style="color:var(--text-dim);">' + L.crtPartner + '</span>' +
+                    '<span>' + partnerHtml + '</span>' +
+                    '<span style="color:var(--text-dim);">' + L.crtPromoted + '</span>' +
+                    '<span>' + promotedHtml + '</span>' +
+                '</div>' +
+            '</div>' +
+
+            // Payments card
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.crtViewPayments + '</div>' +
+                paymentsHtml +
+            '</div>';
+
+        document.getElementById('adCrtViewEditBtn').addEventListener('click', function() {
+            renderCourtForm(item);
+        });
+
+        document.getElementById('adCrtViewBackBtn').addEventListener('click', function() {
+            renderCourtsList();
+        });
     }
 
     async function loadAndEditCourt(id) {
@@ -5770,20 +6137,18 @@
                 '</div>' +
             '</div>' +
 
-            // Gallery (thumbnails + upload)
-            '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.crtGallery + '</div>' +
-                '<div class="ad-gallery-grid" id="adCrtGalleryGrid"></div>' +
-                '<input type="file" accept="image/jpeg,image/png" multiple id="adCrtGalleryInput" style="display:none">' +
-                '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtGalleryAdd">+ ' + L.uploadImage + '</button>' +
-            '</div>' +
+            // Promoted badge (read-only, managed via Payments)
+            (item && item.promoted ?
+                '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.crtPromotedBadge + '</span> <span style="color:var(--text-dim);font-size:0.8rem;">' + L.crtPromotedHint + '</span></div>'
+            : '') +
 
-            // Name (RU/EN)
+            // Name (RU/EN/KG)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.crtName + '</div>' +
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
@@ -5793,9 +6158,14 @@
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
                         '<input type="text" class="ad-field-input" id="adCrtNameEn" placeholder="' + L.crtName + ' (EN)" value="' + esc(item ? item.name_en : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-src="adCrtName" data-target="adCrtNameEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
                     '</div>' +
                 '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<div class="ad-field">' +
+                        '<input type="text" class="ad-field-input" id="adCrtNameKg" placeholder="' + L.crtName + ' (KG)" value="' + esc(item ? item.name_kg : '') + '">' +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adCrtName" data-en="adCrtNameEn" data-kg="adCrtNameKg">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
             // Court Types (dynamic rows with headers)
@@ -5813,27 +6183,13 @@
                 '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtTypesAdd">' + L.crtAdd + '</button>' +
             '</div>' +
 
-            // Links: Google Maps + 2GIS
-            '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.crtGoogleMaps + ' / ' + L.crtTwoGis + '</div>' +
-                '<div class="ad-field-row">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.crtGoogleMaps + '</label>' +
-                        '<input type="url" class="ad-field-input" id="adCrtGoogleMaps" placeholder="https://maps.google.com/..." value="' + esc(item ? item.google_maps_url : '') + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.crtTwoGis + '</label>' +
-                        '<input type="url" class="ad-field-input" id="adCrtTwoGis" placeholder="https://2gis.kg/..." value="' + esc(item ? item.twogis_url : '') + '">' +
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-
-            // Address form
+            // Address form (RU/EN/KG)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + (isEn ? 'Address' : 'Адрес') + '</div>' +
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
                     '<div class="ad-field-row">' +
@@ -5866,19 +6222,50 @@
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.crtStreet + ' (EN)</label>' +
                             '<input type="text" class="ad-field-input" id="adCrtStreetEn" value="' + esc(item ? item.street_en : '') + '">' +
-                            '<button type="button" class="ad-btn-translate" data-src="adCrtStreet" data-target="adCrtStreetEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
                         '</div>' +
                     '</div>' +
                     '<div class="ad-field" style="margin-top:8px;">' +
                         '<label class="ad-field-label">' + L.crtDistrict + ' (EN)</label>' +
                         '<input type="text" class="ad-field-input" id="adCrtDistrictEn" value="' + esc(item ? item.district_en : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-src="adCrtDistrict" data-target="adCrtDistrictEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
                     '</div>' +
                     '<div class="ad-field" style="margin-top:8px;">' +
                         '<label class="ad-field-label">' + L.crtCity + ' (EN)</label>' +
                         '<input type="text" class="ad-field-input" id="adCrtCityEn" value="' + esc(item ? item.city_en : 'Bishkek') + '">' +
                     '</div>' +
                 '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<div class="ad-field-row">' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.crtStreet + ' (KG)</label>' +
+                            '<input type="text" class="ad-field-input" id="adCrtStreetKg" value="' + esc(item ? item.street_kg : '') + '">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="ad-field" style="margin-top:8px;">' +
+                        '<label class="ad-field-label">' + L.crtDistrict + ' (KG)</label>' +
+                        '<input type="text" class="ad-field-input" id="adCrtDistrictKg" value="' + esc(item ? item.district_kg : '') + '">' +
+                    '</div>' +
+                    '<div class="ad-field" style="margin-top:8px;">' +
+                        '<label class="ad-field-label">' + L.crtCity + ' (KG)</label>' +
+                        '<input type="text" class="ad-field-input" id="adCrtCityKg" value="' + esc(item ? item.city_kg : '') + '">' +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-group="address">&#127760; ' + L.translateAllBtn + '</button>' +
+            '</div>' +
+
+            // Links: Google Maps + 2GIS with iframe preview
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.crtGoogleMaps + ' / ' + L.crtTwoGis + '</div>' +
+                '<div class="ad-field-row">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.crtGoogleMaps + '</label>' +
+                        '<input type="url" class="ad-field-input" id="adCrtGoogleMaps" placeholder="https://maps.google.com/..." value="' + esc(item ? item.google_maps_url : '') + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.crtTwoGis + '</label>' +
+                        '<input type="url" class="ad-field-input" id="adCrtTwoGis" placeholder="https://2gis.kg/..." value="' + esc(item ? item.twogis_url : '') + '">' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-crt-map-preview" id="adCrtMapPreview"></div>' +
             '</div>' +
 
             // Phones + Email
@@ -5892,12 +6279,13 @@
                 '</div>' +
             '</div>' +
 
-            // Description (RU/EN)
+            // Description (RU/EN/KG)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.crtDescription + '</div>' +
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
@@ -5907,34 +6295,62 @@
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
                         '<textarea class="ad-field-input ad-field-textarea" id="adCrtDescEn" rows="4" placeholder="' + L.crtDescription + ' (EN)">' + esc(item ? item.description_en : '') + '</textarea>' +
-                        '<button type="button" class="ad-btn-translate" data-src="adCrtDesc" data-target="adCrtDescEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
                     '</div>' +
                 '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<div class="ad-field">' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adCrtDescKg" rows="4" placeholder="' + L.crtDescription + ' (KG)">' + esc(item ? item.description_kg : '') + '</textarea>' +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adCrtDesc" data-en="adCrtDescEn" data-kg="adCrtDescKg">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
-            // Amenities (checkbox grid)
+            // Amenities (checkbox grid + custom)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.crtAmenities + '</div>' +
                 '<div class="ad-badges-grid" id="adCrtAmenities">' + amenitiesCheckboxHtml + '</div>' +
+                '<div id="adCrtCustomAmenities"></div>' +
+                '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtAmenityAdd" style="margin-top:8px;">' + L.crtAddCustom + '</button>' +
             '</div>' +
 
-            // Slogan (RU/EN)
+            // Slogan / Additional Info (RU/EN/KG) — textarea
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.crtSlogan + '</div>' +
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adCrtSlogan" placeholder="' + L.crtSlogan + ' (RU)" value="' + esc(item ? item.slogan : '') + '">' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adCrtSlogan" rows="3" placeholder="' + L.crtSlogan + ' (RU)">' + esc(item ? item.slogan : '') + '</textarea>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adCrtSloganEn" placeholder="' + L.crtSlogan + ' (EN)" value="' + esc(item ? item.slogan_en : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-src="adCrtSlogan" data-target="adCrtSloganEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adCrtSloganEn" rows="3" placeholder="' + L.crtSlogan + ' (EN)">' + esc(item ? item.slogan_en : '') + '</textarea>' +
                     '</div>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<div class="ad-field">' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adCrtSloganKg" rows="3" placeholder="' + L.crtSlogan + ' (KG)">' + esc(item ? item.slogan_kg : '') + '</textarea>' +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adCrtSlogan" data-en="adCrtSloganEn" data-kg="adCrtSloganKg">&#127760; ' + L.translateAllBtn + '</button>' +
+            '</div>' +
+
+            // Gallery (moved to bottom — thumbnails + upload + URL)
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.crtGallery + '</div>' +
+                '<div class="ad-gallery-grid" id="adCrtGalleryGrid"></div>' +
+                '<input type="file" accept="image/jpeg,image/png" multiple id="adCrtGalleryInput" style="display:none">' +
+                '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+                    '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtGalleryAdd">+ ' + L.uploadImage + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtGalleryAddUrl">' + L.crtAddByUrl + '</button>' +
+                '</div>' +
+                '<div id="adCrtGalleryUrlRow" style="display:none;" class="ad-crt-gallery-url-row">' +
+                    '<input type="url" class="ad-field-input" id="adCrtGalleryUrlInput" placeholder="https://example.com/photo.jpg" style="flex:1;">' +
+                    '<button type="button" class="ad-btn ad-btn-sm" id="adCrtGalleryUrlConfirm">&#10003;</button>' +
                 '</div>' +
             '</div>' +
 
@@ -5962,36 +6378,136 @@
             card.querySelectorAll('.ad-lang-panel').forEach(function(p) { p.classList.toggle('active', p.dataset.langPanel === lang); });
         });
 
-        // Translate buttons (delegate)
+        // Translate ALL — 3-language "translate to empty" buttons (delegate)
         container.addEventListener('click', function(e) {
-            var btn = e.target.closest('.ad-btn-translate');
+            var btn = e.target.closest('.ad-btn-translate-all');
             if (!btn) return;
-            var srcId = btn.dataset.src;
-            var targetId = btn.dataset.target;
-            var toLang = btn.dataset.tolang;
-            var srcEl = document.getElementById(srcId);
-            var targetEl = document.getElementById(targetId);
-            if (!srcEl || !targetEl) return;
 
-            var srcText = srcEl.value.trim();
-            if (!srcText) {
-                showToast(L.fillRuFirst, 'error');
+            // Address group has 3 field-pairs
+            if (btn.dataset.group === 'address') {
+                var fields = [
+                    { ru: 'adCrtStreet', en: 'adCrtStreetEn', kg: 'adCrtStreetKg' },
+                    { ru: 'adCrtDistrict', en: 'adCrtDistrictEn', kg: 'adCrtDistrictKg' },
+                    { ru: 'adCrtCity', en: 'adCrtCityEn', kg: 'adCrtCityKg' }
+                ];
+                var origLabel = btn.textContent;
+                btn.textContent = L.translating;
+                btn.disabled = true;
+                (async function() {
+                    try {
+                        for (var f = 0; f < fields.length; f++) {
+                            await translateToEmpty(fields[f].ru, fields[f].en, fields[f].kg, { textContent: '', disabled: false });
+                        }
+                    } catch (ex) { /* handled inside */ }
+                    btn.textContent = origLabel;
+                    btn.disabled = false;
+                })();
                 return;
             }
 
-            var origLabel = btn.textContent;
-            btn.textContent = L.translating;
-            btn.disabled = true;
+            // Standard: data-ru, data-en, data-kg
+            translateToEmpty(btn.dataset.ru, btn.dataset.en, btn.dataset.kg, btn);
+        });
 
-            translateFromRu(srcText, toLang).then(function(result) {
-                targetEl.value = result;
-                btn.textContent = origLabel;
-                btn.disabled = false;
-            }).catch(function() {
-                showToast(L.translateError, 'error');
-                btn.textContent = origLabel;
-                btn.disabled = false;
+        // Map preview on URL blur
+        function updateCrtMapPreview() {
+            var preview = document.getElementById('adCrtMapPreview');
+            if (!preview) return;
+            var gUrl = document.getElementById('adCrtGoogleMaps').value.trim();
+            var tUrl = document.getElementById('adCrtTwoGis').value.trim();
+            var embedUrl = getCrtMapEmbed(gUrl) || getCrtMapEmbed(tUrl);
+            if (embedUrl) {
+                preview.innerHTML = '<iframe src="' + esc(embedUrl) + '" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+            } else {
+                preview.innerHTML = '';
+            }
+        }
+        document.getElementById('adCrtGoogleMaps').addEventListener('blur', updateCrtMapPreview);
+        document.getElementById('adCrtTwoGis').addEventListener('blur', updateCrtMapPreview);
+        updateCrtMapPreview();
+
+        // Custom amenities
+        var crtCustomAmenities = [];
+        if (item && item.amenities) {
+            var knownKeys = COURT_AMENITIES.map(function(a) { return a.key; });
+            item.amenities.forEach(function(a) {
+                if (knownKeys.indexOf(a) === -1) crtCustomAmenities.push(a);
             });
+        }
+        function renderCrtCustomAmenities() {
+            var wrap = document.getElementById('adCrtCustomAmenities');
+            if (!wrap) return;
+            var html = '';
+            crtCustomAmenities.forEach(function(a, idx) {
+                html += '<label class="ad-checkbox-label"><input type="checkbox" class="ad-crt-amenity ad-crt-custom-amenity" value="' + esc(a) + '" checked> ' + esc(a) +
+                    ' <button type="button" class="ad-btn-icon ad-crt-custom-amenity-remove" data-idx="' + idx + '" style="font-size:0.7rem;">&times;</button></label>';
+            });
+            wrap.innerHTML = html;
+        }
+        renderCrtCustomAmenities();
+
+        document.getElementById('adCrtAmenityAdd').addEventListener('click', function() {
+            var wrap = document.getElementById('adCrtCustomAmenities');
+            // Check if input row already exists
+            if (wrap.querySelector('.ad-crt-custom-amenity-row')) return;
+            var row = document.createElement('div');
+            row.className = 'ad-crt-custom-amenity-row';
+            row.innerHTML = '<input type="text" class="ad-field-input" placeholder="' + L.crtCustomAmenity + '..." style="flex:1;">' +
+                '<button type="button" class="ad-btn ad-btn-sm ad-crt-custom-amenity-confirm">&#10003;</button>';
+            wrap.appendChild(row);
+            row.querySelector('input').focus();
+        });
+        document.getElementById('adCrtCustomAmenities').addEventListener('click', function(e) {
+            // Confirm custom amenity
+            var confirmBtn = e.target.closest('.ad-crt-custom-amenity-confirm');
+            if (confirmBtn) {
+                var row = confirmBtn.closest('.ad-crt-custom-amenity-row');
+                var val = row.querySelector('input').value.trim();
+                if (val) {
+                    crtCustomAmenities.push(val);
+                    renderCrtCustomAmenities();
+                }
+                return;
+            }
+            // Remove custom amenity
+            var rmBtn = e.target.closest('.ad-crt-custom-amenity-remove');
+            if (rmBtn) {
+                var idx = parseInt(rmBtn.dataset.idx, 10);
+                crtCustomAmenities.splice(idx, 1);
+                renderCrtCustomAmenities();
+            }
+        });
+        // Enter key in custom amenity input
+        document.getElementById('adCrtCustomAmenities').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                var row = e.target.closest('.ad-crt-custom-amenity-row');
+                if (row) {
+                    e.preventDefault();
+                    var val = e.target.value.trim();
+                    if (val) {
+                        crtCustomAmenities.push(val);
+                        renderCrtCustomAmenities();
+                    }
+                }
+            }
+        });
+
+        // Gallery URL add
+        document.getElementById('adCrtGalleryAddUrl').addEventListener('click', function() {
+            var row = document.getElementById('adCrtGalleryUrlRow');
+            row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+            if (row.style.display === 'flex') document.getElementById('adCrtGalleryUrlInput').focus();
+        });
+        document.getElementById('adCrtGalleryUrlConfirm').addEventListener('click', function() {
+            var input = document.getElementById('adCrtGalleryUrlInput');
+            var url = input.value.trim();
+            if (url) {
+                crtGalleryUrls.push(url);
+                crtGalleryFiles.push(null);
+                renderCrtGallery();
+                input.value = '';
+                document.getElementById('adCrtGalleryUrlRow').style.display = 'none';
+            }
         });
 
         // Court types: render rows
@@ -6011,18 +6527,28 @@
             Object.keys(COURT_SURFACES).forEach(function(k) {
                 html += '<option value="' + k + '"' + (selected === k ? ' selected' : '') + '>' + COURT_SURFACES[k] + '</option>';
             });
+            html += '<option value="__other__"' + (selected === '__other__' ? ' selected' : '') + '>' + L.crtOther + '...</option>';
             return html;
+        }
+        function isCustomSurface(val) {
+            return val && val !== '__other__' && !COURT_SURFACES.hasOwnProperty(val);
         }
         function renderCrtTypeRows() {
             var rowsEl = document.getElementById('adCrtTypesRows');
             if (!rowsEl) return;
             var html = '';
             crtCourtTypes.forEach(function(ct, idx) {
+                var surfaceHtml;
+                if (isCustomSurface(ct.surface)) {
+                    surfaceHtml = '<input type="text" class="ad-field-input ad-ct-surface ad-ct-surface-custom" value="' + esc(ct.surface) + '" placeholder="' + L.crtSurface + '...">';
+                } else {
+                    surfaceHtml = '<select class="ad-field-input ad-ct-surface">' + buildSurfaceOptions(ct.surface) + '</select>';
+                }
                 html += '<div class="ad-court-type-row" data-idx="' + idx + '">' +
                     '<select class="ad-field-input ad-ct-type">' + buildTypeOptions(ct.type) + '</select>' +
-                    '<select class="ad-field-input ad-ct-surface">' + buildSurfaceOptions(ct.surface) + '</select>' +
-                    '<input type="text" class="ad-field-input ad-ct-count" inputmode="numeric" value="' + (ct.count || '') + '">' +
-                    '<input type="text" class="ad-field-input ad-ct-price" inputmode="numeric" value="' + (ct.price || '') + '">' +
+                    surfaceHtml +
+                    '<input type="text" class="ad-field-input ad-ct-count" inputmode="numeric" pattern="[0-9]*" value="' + (ct.count || '') + '">' +
+                    '<input type="text" class="ad-field-input ad-ct-price" inputmode="numeric" pattern="[0-9]*" value="' + (ct.price || '') + '">' +
                     '<label class="ad-ct-partner-wrap"><input type="checkbox" class="ad-ct-partner"' + (ct.partner ? ' checked' : '') + '></label>' +
                     (crtCourtTypes.length > 1 ? '<button type="button" class="ad-btn-icon ad-ct-remove">&times;</button>' : '<div></div>') +
                 '</div>';
@@ -6052,15 +6578,33 @@
             if (!row) return;
             var idx = parseInt(row.dataset.idx, 10);
             if (e.target.classList.contains('ad-ct-type')) crtCourtTypes[idx].type = e.target.value;
-            if (e.target.classList.contains('ad-ct-surface')) crtCourtTypes[idx].surface = e.target.value;
+            if (e.target.classList.contains('ad-ct-surface')) {
+                if (e.target.value === '__other__') {
+                    crtCourtTypes[idx].surface = '';
+                    renderCrtTypeRows();
+                    var newInput = document.querySelector('.ad-court-type-row[data-idx="' + idx + '"] .ad-ct-surface-custom');
+                    if (newInput) newInput.focus();
+                } else {
+                    crtCourtTypes[idx].surface = e.target.value;
+                }
+            }
             if (e.target.classList.contains('ad-ct-partner')) crtCourtTypes[idx].partner = e.target.checked;
         });
         document.getElementById('adCrtTypesRows').addEventListener('input', function(e) {
             var row = e.target.closest('.ad-court-type-row');
             if (!row) return;
             var idx = parseInt(row.dataset.idx, 10);
-            if (e.target.classList.contains('ad-ct-count')) crtCourtTypes[idx].count = parseInt(e.target.value, 10) || 0;
-            if (e.target.classList.contains('ad-ct-price')) crtCourtTypes[idx].price = parseInt(e.target.value, 10) || 0;
+            if (e.target.classList.contains('ad-ct-count')) {
+                e.target.value = e.target.value.replace(/\D/g, '');
+                crtCourtTypes[idx].count = parseInt(e.target.value, 10) || 0;
+            }
+            if (e.target.classList.contains('ad-ct-price')) {
+                e.target.value = e.target.value.replace(/\D/g, '');
+                crtCourtTypes[idx].price = parseInt(e.target.value, 10) || 0;
+            }
+            if (e.target.classList.contains('ad-ct-surface-custom')) {
+                crtCourtTypes[idx].surface = e.target.value.trim();
+            }
         });
 
         // Phones: render
@@ -6206,6 +6750,31 @@
         }
     }
 
+    // ---- Map embed URL parser ----
+    function getCrtMapEmbed(url) {
+        if (!url) return null;
+        // Google Maps
+        if (url.indexOf('google.com/maps') !== -1 || url.indexOf('goo.gl/maps') !== -1 || url.indexOf('maps.app.goo.gl') !== -1) {
+            if (url.indexOf('/embed') !== -1) return url;
+            var qMatch = url.match(/[?&]q=([^&]+)/);
+            if (qMatch) return 'https://maps.google.com/maps?q=' + qMatch[1] + '&output=embed';
+            var coordMatch = url.match(/@(-?[\d.]+),(-?[\d.]+)/);
+            if (coordMatch) return 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&output=embed';
+            var placeMatch = url.match(/\/place\/([^/]+)/);
+            if (placeMatch) return 'https://maps.google.com/maps?q=' + placeMatch[1] + '&output=embed';
+            return 'https://maps.google.com/maps?q=' + encodeURIComponent(url) + '&output=embed';
+        }
+        // 2GIS
+        if (url.indexOf('2gis.') !== -1) {
+            var gisMatch = url.match(/\/([\d.]+)%2C([\d.]+)\//);
+            if (!gisMatch) gisMatch = url.match(/\/([\d.]+),([\d.]+)\//);
+            if (gisMatch) {
+                return 'https://maps.google.com/maps?q=' + gisMatch[2] + ',' + gisMatch[1] + '&output=embed';
+            }
+        }
+        return null;
+    }
+
     // ---- Gallery Thumbnails ----
     function renderCrtGallery() {
         var grid = document.getElementById('adCrtGalleryGrid');
@@ -6298,6 +6867,7 @@
             var data = {
                 name: name,
                 name_en: document.getElementById('adCrtNameEn').value.trim() || null,
+                name_kg: document.getElementById('adCrtNameKg').value.trim() || null,
                 photo: imageUrl || null,
                 gallery: galleryFinal,
                 court_types: crtCourtTypes,
@@ -6305,19 +6875,24 @@
                 twogis_url: document.getElementById('adCrtTwoGis').value.trim() || null,
                 street: document.getElementById('adCrtStreet').value.trim() || null,
                 street_en: document.getElementById('adCrtStreetEn').value.trim() || null,
+                street_kg: document.getElementById('adCrtStreetKg').value.trim() || null,
                 building: document.getElementById('adCrtBuilding').value.trim() || null,
                 district: document.getElementById('adCrtDistrict').value.trim() || null,
                 district_en: document.getElementById('adCrtDistrictEn').value.trim() || null,
+                district_kg: document.getElementById('adCrtDistrictKg').value.trim() || null,
                 city: document.getElementById('adCrtCity').value.trim() || null,
                 city_en: document.getElementById('adCrtCityEn').value.trim() || null,
+                city_kg: document.getElementById('adCrtCityKg').value.trim() || null,
                 postal_code: document.getElementById('adCrtPostal').value.trim() || null,
                 phone: phonesStr || null,
                 email: document.getElementById('adCrtEmail').value.trim() || null,
                 description: document.getElementById('adCrtDesc').value.trim() || null,
                 description_en: document.getElementById('adCrtDescEn').value.trim() || null,
+                description_kg: document.getElementById('adCrtDescKg').value.trim() || null,
                 amenities: amenities,
                 slogan: document.getElementById('adCrtSlogan').value.trim() || null,
                 slogan_en: document.getElementById('adCrtSloganEn').value.trim() || null,
+                slogan_kg: document.getElementById('adCrtSloganKg').value.trim() || null,
                 partner: crtCourtTypes.some(function(ct) { return ct.partner; })
             };
 
@@ -6401,6 +6976,9 @@
     var cchFilterTag = '';
     var cchAchievements = [];
     var cchAchievementsEn = [];
+    var cchPage = 1;
+    var cchAllData = [];
+    var CCH_PER_PAGE = 15;
 
     var COACH_TAGS = {
         adults: isEn ? 'Adults' : 'Взрослые',
@@ -6428,100 +7006,352 @@
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.coaches + '</h2>' +
-                '<button class="ad-btn ad-btn-primary" id="adCchAdd">+ ' + L.addCoach + '</button>' +
             '</div>' +
-            '<div class="ad-filters">' +
+            // Stat cards
+            '<div class="ad-cch-stats-grid">' +
+                '<div class="ad-cch-stat-card">' +
+                    '<div class="ad-cch-stat-label">' + L.cchStatTotal + '</div>' +
+                    '<div class="ad-cch-stat-value" id="adCchStatTotal">...</div>' +
+                '</div>' +
+                '<div class="ad-cch-stat-card">' +
+                    '<div class="ad-cch-stat-label">' + L.cchStatPromoted + '</div>' +
+                    '<div class="ad-cch-stat-value" id="adCchStatPromoted">...</div>' +
+                '</div>' +
+                '<div class="ad-cch-stat-card">' +
+                    '<div class="ad-cch-stat-label">' + L.cchStatNew + '</div>' +
+                    '<div class="ad-cch-stat-value" id="adCchStatNew">...</div>' +
+                '</div>' +
+            '</div>' +
+            // Filter row
+            '<div class="ad-filter-row ad-filter-sticky" id="adCchFilterRow">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adCchSearch" placeholder="' + L.cchSearch + '" value="' + esc(cchSearchQuery) + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adCchTagFilter">' + tagFilterHtml + '</select>' +
+                '<button class="ad-btn ad-btn-primary" id="adCchAdd" style="white-space:nowrap;margin-left:auto;">+ ' + L.addCoach + '</button>' +
             '</div>' +
-            '<div class="ad-table-wrap">' +
-                '<table class="ad-table ad-table-clickable" id="adCchTable">' +
-                    '<thead><tr>' +
-                        '<th style="width:50px"></th>' +
-                        '<th>' + (isEn ? 'Name' : 'ФИО') + '</th>' +
-                        '<th>' + L.cchPosition + '</th>' +
-                        '<th>' + L.cchPrice + '</th>' +
-                    '</tr></thead>' +
-                    '<tbody></tbody>' +
-                '</table>' +
+            // Table
+            '<div class="ad-table-card" style="position:relative;">' +
+                '<div class="ad-table-wrap">' +
+                    '<table class="ad-table ad-table-clickable" id="adCchTable">' +
+                        '<colgroup>' +
+                            '<col style="width:40px;">' +
+                            '<col style="width:36px;">' +
+                            '<col style="min-width:130px;">' +
+                            '<col style="width:130px;">' +
+                            '<col style="width:120px;">' +
+                            '<col style="width:140px;">' +
+                            '<col style="width:80px;">' +
+                            '<col style="width:80px;">' +
+                        '</colgroup>' +
+                        '<thead><tr>' +
+                            '<th style="width:36px;"></th>' +
+                            '<th>' + (isEn ? 'Name' : 'ФИО') + '</th>' +
+                            '<th>' + L.cchPosition + '</th>' +
+                            '<th>' + L.cchCourt + '</th>' +
+                            '<th>' + L.cchTags + '</th>' +
+                            '<th style="text-align:center;">' + (isEn ? 'Price' : 'Цена') + '</th>' +
+                            '<th style="text-align:center;">' + L.cchPromoted + '</th>' +
+                        '</tr></thead>' +
+                        '<tbody><tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                    '</table>' +
+                '</div>' +
             '</div>';
 
         document.getElementById('adCchAdd').addEventListener('click', function() {
             renderCoachForm(null);
         });
+
+        var searchTimer = null;
         document.getElementById('adCchSearch').addEventListener('input', function() {
             cchSearchQuery = this.value;
-            loadCoachesList();
+            cchPage = 1;
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(function() { applyCchFilters(); }, 300);
         });
         document.getElementById('adCchTagFilter').addEventListener('change', function() {
             cchFilterTag = this.value;
-            loadCoachesList();
+            cchPage = 1;
+            applyCchFilters();
         });
 
         loadCoachesList();
     }
 
-    async function loadCoachesList() {
-        if (!client) return;
-        var table = document.getElementById('adCchTable');
-        if (!table) return;
-        var tbody = table.querySelector('tbody');
-
-        var query = client.from('coaches').select('*').order('created_at', { ascending: false });
-        if (cchSearchQuery) {
-            query = query.or('last_name.ilike.%' + cchSearchQuery + '%,first_name.ilike.%' + cchSearchQuery + '%');
-        }
-
-        var result = await query;
-        if (result.error) { showToast(result.error.message, 'error'); return; }
-
-        var rows = result.data || [];
+    function applyCchFilters() {
+        var items = cchAllData.slice();
 
         // Client-side tag filter
         if (cchFilterTag) {
-            rows = rows.filter(function(r) {
+            items = items.filter(function(r) {
                 return (r.tags || []).indexOf(cchFilterTag) !== -1;
             });
         }
 
-        if (rows.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="ad-empty">' +
-                '<div class="ad-empty-icon">🎓</div>' +
-                '<div class="ad-empty-title">' + L.noCoaches + '</div>' +
-                '<div class="ad-empty-text">' + L.noCoachesText + '</div>' +
-            '</td></tr>';
+        // Client-side search
+        if (cchSearchQuery) {
+            var q = cchSearchQuery.toLowerCase();
+            items = items.filter(function(r) {
+                var name = ((r.last_name || '') + ' ' + (r.first_name || '')).toLowerCase();
+                return name.indexOf(q) !== -1;
+            });
+        }
+
+        // Pagination
+        var totalPages = Math.max(1, Math.ceil(items.length / CCH_PER_PAGE));
+        if (cchPage > totalPages) cchPage = totalPages;
+        var start = (cchPage - 1) * CCH_PER_PAGE;
+        var pageItems = items.slice(start, start + CCH_PER_PAGE);
+
+        renderCchRows(pageItems);
+        renderCchPagination(items.length, totalPages);
+    }
+
+    function renderCchRows(items) {
+        var table = document.getElementById('adCchTable');
+        if (!table) return;
+        var tbody = table.querySelector('tbody');
+
+        var editBtnHtml = '<button class="ad-crt-edit-btn" title="' + L.cchViewEdit + '" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:1rem;padding:4px;border-radius:4px;transition:color 0.15s;">✏️</button>';
+
+        if (items.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
+                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🎓</div>' +
+                    '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCoaches + '</div>' +
+                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noCoachesText + '</div>' +
+                '</td></tr>';
             return;
         }
 
         var html = '';
-        rows.forEach(function(row) {
-            var photoHtml = row.photo
-                ? '<img src="' + esc(row.photo) + '" class="ad-table-thumb" alt="">'
-                : '<div class="ad-table-thumb-placeholder">🎓</div>';
+        items.forEach(function(row) {
             var fullName = isEn
                 ? ((row.last_name_en || row.last_name || '') + ' ' + (row.first_name_en || row.first_name || ''))
                 : ((row.last_name || '') + ' ' + (row.first_name || ''));
             var pos = isEn ? (row.position_en || row.position || '') : (row.position || '');
+            var courtText = esc(row.court || '—');
+            var tagsHtml = '';
+            (row.tags || []).forEach(function(t) {
+                tagsHtml += '<span class="ad-cch-tag-badge">' + (COACH_TAGS[t] || t) + '</span>';
+            });
+            if (!tagsHtml) tagsHtml = '<span style="color:var(--text-dim);">—</span>';
+            var promotedHtml = row.promoted ? '<span style="color:var(--accent);">⭐</span>' : '—';
 
             html += '<tr data-id="' + row.id + '">' +
                 bulkCheckboxTd(row.id) +
-                '<td>' + photoHtml + '</td>' +
-                '<td><strong>' + esc(fullName.trim()) + '</strong></td>' +
+                '<td style="text-align:center;">' + editBtnHtml + '</td>' +
+                '<td style="font-weight:500;color:var(--text-primary);">' + esc(fullName.trim()) + '</td>' +
                 '<td>' + esc(pos) + '</td>' +
-                '<td>' + (row.price || '—') + '</td>' +
+                '<td>' + courtText + '</td>' +
+                '<td>' + tagsHtml + '</td>' +
+                '<td style="font-weight:600;color:var(--accent);text-align:center;">' + (row.price || '—') + '</td>' +
+                '<td style="text-align:center;">' + promotedHtml + '</td>' +
             '</tr>';
         });
         tbody.innerHTML = html;
 
-        // Click to edit
-        tbody.querySelectorAll('tr[data-id]').forEach(function(tr) {
-            tr.addEventListener('click', function(e) {
-                if (e.target.closest('.ad-bulk-cell')) return;
-                loadAndEditCoach(tr.dataset.id);
-            });
+        tbody.addEventListener('click', function(e) {
+            if (e.target.closest('.ad-bulk-cell')) return;
+            // Edit button → direct edit
+            if (e.target.closest('.ad-crt-edit-btn')) {
+                var row = e.target.closest('tr[data-id]');
+                if (row) loadAndEditCoach(row.dataset.id);
+                return;
+            }
+            // Row click → snapshot view
+            var row = e.target.closest('tr[data-id]');
+            if (!row) return;
+            loadAndViewCoach(row.dataset.id);
         });
 
         setupBulkDelete({ tableId: 'adCchTable', tableName: 'coaches', reloadFn: loadCoachesList });
+    }
+
+    function renderCchPagination(totalItems, totalPages) {
+        var existing = document.getElementById('adCchPagination');
+        if (existing) existing.remove();
+
+        if (totalPages <= 1) return;
+
+        var wrap = document.createElement('div');
+        wrap.id = 'adCchPagination';
+        wrap.className = 'ad-crt-pagination';
+
+        var html = '';
+        html += '<button class="ad-crt-page-btn" data-page="' + (cchPage - 1) + '"' + (cchPage <= 1 ? ' disabled' : '') + '>&laquo;</button>';
+        for (var p = 1; p <= totalPages; p++) {
+            html += '<button class="ad-crt-page-btn' + (p === cchPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
+        }
+        html += '<button class="ad-crt-page-btn" data-page="' + (cchPage + 1) + '"' + (cchPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+
+        wrap.innerHTML = html;
+
+        var tableCard = document.querySelector('#adCchTable')?.closest('.ad-table-card');
+        if (tableCard) tableCard.after(wrap);
+
+        wrap.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ad-crt-page-btn');
+            if (!btn || btn.disabled) return;
+            cchPage = parseInt(btn.dataset.page, 10);
+            applyCchFilters();
+        });
+    }
+
+    function updateCchStats() {
+        var totalEl = document.getElementById('adCchStatTotal');
+        var promotedEl = document.getElementById('adCchStatPromoted');
+        var newEl = document.getElementById('adCchStatNew');
+        if (!totalEl) return;
+
+        var total = cchAllData.length;
+        var promoted = cchAllData.filter(function(c) { return c.promoted; }).length;
+
+        // New this month
+        var now = new Date();
+        var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+        var newCount = cchAllData.filter(function(c) {
+            return c.created_at && c.created_at.slice(0, 10) >= monthStart;
+        }).length;
+
+        totalEl.textContent = total;
+        promotedEl.textContent = promoted;
+        newEl.textContent = newCount;
+    }
+
+    async function loadCoachesList() {
+        if (!client) return;
+
+        await syncAllExpiredPromotedCoaches();
+
+        var query = client.from('coaches')
+            .select('id,last_name,first_name,last_name_en,first_name_en,photo,position,position_en,court,tags,price,promoted,created_at')
+            .order('created_at', { ascending: false });
+
+        var result = await query;
+        if (result.error) { showToast(result.error.message, 'error'); return; }
+
+        cchAllData = result.data || [];
+        updateCchStats();
+        applyCchFilters();
+    }
+
+    // ---- Snapshot View ----
+    async function loadAndViewCoach(id) {
+        if (!client) return;
+        var result = await client.from('coaches').select('*').eq('id', id).single();
+        if (!result.data) return;
+
+        var payments = await client.from('entity_payments')
+            .select('*')
+            .eq('entity_type', 'coach')
+            .eq('entity_id', String(id))
+            .order('created_at', { ascending: false });
+
+        renderCoachView(result.data, payments.data || []);
+    }
+
+    function renderCoachView(item, payments) {
+        var container = document.getElementById('ad-coaches');
+        if (!container) return;
+
+        var today = new Date().toISOString().slice(0, 10);
+
+        var fullName = isEn
+            ? ((item.last_name_en || item.last_name || '') + ' ' + (item.first_name_en || item.first_name || ''))
+            : ((item.last_name || '') + ' ' + (item.first_name || ''));
+        var pos = isEn ? (item.position_en || item.position || '') : (item.position || '');
+        var tagsHtml = '';
+        (item.tags || []).forEach(function(t) {
+            tagsHtml += '<span class="ad-cch-tag-badge" style="margin-right:4px;">' + (COACH_TAGS[t] || t) + '</span>';
+        });
+        if (!tagsHtml) tagsHtml = '<span style="color:var(--text-dim);">—</span>';
+
+        var promotedHtml = item.promoted
+            ? '<span class="ad-pay-badge ad-pay-active">⭐ ' + L.cchPromotedBadge + '</span>'
+            : '<span style="color:var(--text-dim);">—</span>';
+
+        // Payments table
+        var paymentsHtml = '';
+        if (payments.length === 0) {
+            paymentsHtml =
+                '<div style="text-align:center;padding:30px 20px;color:var(--text-dim);">' +
+                    '<div style="font-size:1.5rem;opacity:0.3;margin-bottom:6px;">💰</div>' +
+                    L.cchViewNoPayments +
+                '</div>';
+        } else {
+            paymentsHtml =
+                '<table class="ad-table" style="margin:0;">' +
+                    '<thead><tr>' +
+                        '<th>' + L.crtViewPurpose + '</th>' +
+                        '<th>' + L.crtViewAmount + '</th>' +
+                        '<th>' + L.crtViewActiveUntil + '</th>' +
+                        '<th>' + L.crtViewMethod + '</th>' +
+                        '<th>' + L.crtViewStatus + '</th>' +
+                    '</tr></thead><tbody>';
+
+            payments.forEach(function(p) {
+                var isActive = p.period_end >= today;
+                var statusBadge = isActive
+                    ? '<span class="ad-pay-badge ad-pay-active">' + L.payActive + '</span>'
+                    : '<span class="ad-pay-badge ad-pay-expired">' + L.payExpired + '</span>';
+                var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + p.purpose + '">' + (PAYMENT_PURPOSES[p.purpose] || p.purpose) + '</span>';
+
+                paymentsHtml +=
+                    '<tr>' +
+                        '<td>' + purposeBadge + '</td>' +
+                        '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + (p.currency || 'KGS') + '</td>' +
+                        '<td style="font-size:0.85rem;">' + formatPayDate(p.period_end) + '</td>' +
+                        '<td>' + (PAYMENT_METHODS[p.payment_method] || p.payment_method) + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
+                    '</tr>';
+            });
+
+            paymentsHtml += '</tbody></table>';
+        }
+
+        container.innerHTML =
+            '<div class="ad-section-header">' +
+                '<h2>' + L.cchViewTitle + '</h2>' +
+                '<div style="display:flex;gap:8px;">' +
+                    '<button class="ad-btn ad-btn-primary" id="adCchViewEditBtn">' + L.cchViewEdit + '</button>' +
+                    '<button class="ad-btn ad-btn-secondary" id="adCchViewBackBtn">' + L.back + '</button>' +
+                '</div>' +
+            '</div>' +
+
+            // Info card
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.cchViewInfo + '</div>' +
+                '<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:0.9rem;">' +
+                    '<span style="color:var(--text-dim);">' + (isEn ? 'Name' : 'ФИО') + '</span>' +
+                    '<span style="color:var(--text-primary);font-weight:500;">' + esc(fullName.trim()) + '</span>' +
+                    '<span style="color:var(--text-dim);">' + L.cchPosition + '</span>' +
+                    '<span style="color:var(--text-secondary);">' + esc(pos || '—') + '</span>' +
+                    '<span style="color:var(--text-dim);">' + L.cchCourt + '</span>' +
+                    '<span style="color:var(--text-secondary);">' + esc(item.court || '—') + '</span>' +
+                    '<span style="color:var(--text-dim);">' + L.cchExperience + '</span>' +
+                    '<span style="color:var(--text-secondary);">' + (item.experience || '—') + '</span>' +
+                    '<span style="color:var(--text-dim);">' + L.cchPrice + '</span>' +
+                    '<span style="color:var(--text-secondary);font-weight:600;">' + (item.price || '—') + '</span>' +
+                    '<span style="color:var(--text-dim);">' + L.cchTags + '</span>' +
+                    '<span>' + tagsHtml + '</span>' +
+                    '<span style="color:var(--text-dim);">' + L.cchPromoted + '</span>' +
+                    '<span>' + promotedHtml + '</span>' +
+                '</div>' +
+            '</div>' +
+
+            // Payments card
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.cchViewPayments + '</div>' +
+                paymentsHtml +
+            '</div>';
+
+        document.getElementById('adCchViewEditBtn').addEventListener('click', function() {
+            renderCoachForm(item);
+        });
+
+        document.getElementById('adCchViewBackBtn').addEventListener('click', function() {
+            renderCoachesList();
+        });
     }
 
     async function loadAndEditCoach(id) {
@@ -6529,6 +7359,32 @@
         var result = await client.from('coaches').select('*').eq('id', id).single();
         if (result.error) { showToast(result.error.message, 'error'); return; }
         renderCoachForm(result.data);
+    }
+
+    async function syncAllExpiredPromotedCoaches() {
+        if (!client) return;
+        var today = new Date().toISOString().slice(0, 10);
+
+        var promoted = await client.from('coaches').select('id').eq('promoted', true);
+        var ids = (promoted.data || []).map(function(c) { return String(c.id); });
+        if (ids.length === 0) return;
+
+        var payments = await client.from('entity_payments')
+            .select('entity_id')
+            .eq('entity_type', 'coach')
+            .eq('purpose', 'promoted')
+            .gte('period_end', today)
+            .lte('period_start', today)
+            .in('entity_id', ids);
+
+        var activeIds = {};
+        (payments.data || []).forEach(function(p) { activeIds[p.entity_id] = true; });
+
+        for (var i = 0; i < ids.length; i++) {
+            if (!activeIds[ids[i]]) {
+                await client.from('coaches').update({ promoted: false }).eq('id', ids[i]);
+            }
+        }
     }
 
     // ---- Coach Form ----
@@ -6620,6 +7476,11 @@
                 '<h2 class="ad-section-title">' + title + '</h2>' +
                 '<button class="ad-btn ad-btn-secondary" id="adCchBack">' + L.back + '</button>' +
             '</div>' +
+
+            // Promoted badge (read-only)
+            (item && item.promoted
+                ? '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.cchPromotedBadge + '</span> <span style="color:var(--text-dim);font-size:0.8rem;">' + L.cchPromotedHint + '</span></div>'
+                : '') +
 
             // Photo
             '<div class="ad-form-card">' +
@@ -8505,6 +9366,557 @@
     }
 
     // ============================================
+    // PAYMENTS SECTION
+    // ============================================
+
+    var PAYMENT_METHODS = { cash: L.payCash, transfer: L.payTransfer, card: L.payCard };
+    var PAYMENT_PURPOSES = { promoted: L.payPromoted, sponsorship: L.paySponsorship, rental: L.payRental, other: L.payOther };
+    var PAYMENT_ENTITY_TYPES = { court: L.payCourt, coach: L.payCoach, player: L.payPlayer };
+
+    function formatPayDate(d) {
+        if (!d) return '—';
+        var parts = d.split('-');
+        return parts[2] + '.' + parts[1] + '.' + parts[0].slice(2);
+    }
+
+    var paySearchQuery = '', payFilterType = '', payFilterPurpose = '', payFilterStatus = '';
+    var payPage = 1, payAllData = [], payEditingId = null;
+    var PAY_PER_PAGE = 15;
+
+    function renderPaymentsSection() {
+        renderPaymentsList();
+    }
+
+    function renderPaymentsList() {
+        var container = document.getElementById('ad-payments');
+        if (!container) return;
+
+        var typeOptions = '<option value="">' + L.payAllTypes + '</option>';
+        Object.keys(PAYMENT_ENTITY_TYPES).forEach(function(k) {
+            typeOptions += '<option value="' + k + '"' + (payFilterType === k ? ' selected' : '') + '>' + PAYMENT_ENTITY_TYPES[k] + '</option>';
+        });
+
+        var purposeOptions = '<option value="">' + L.payAllPurposes + '</option>';
+        Object.keys(PAYMENT_PURPOSES).forEach(function(k) {
+            purposeOptions += '<option value="' + k + '"' + (payFilterPurpose === k ? ' selected' : '') + '>' + PAYMENT_PURPOSES[k] + '</option>';
+        });
+
+        var statusOptions = '<option value="">' + L.payAllStatuses + '</option>' +
+            '<option value="active"' + (payFilterStatus === 'active' ? ' selected' : '') + '>' + L.payActive + '</option>' +
+            '<option value="expired"' + (payFilterStatus === 'expired' ? ' selected' : '') + '>' + L.payExpired + '</option>';
+
+        container.innerHTML =
+            '<div class="ad-section-header">' +
+                '<h2>' + L.payments + '</h2>' +
+                '<button class="ad-btn ad-btn-primary" id="adPayAddBtn">+ ' + L.addPayment + '</button>' +
+            '</div>' +
+
+            '<div class="ad-pay-stats-grid">' +
+                '<div class="ad-pay-stat-card" id="adPayStatActive"><div class="stat-value">0</div><div class="stat-label">' + L.payStatActive + '</div></div>' +
+                '<div class="ad-pay-stat-card" id="adPayStatExpired"><div class="stat-value">0</div><div class="stat-label">' + L.payStatExpired + '</div></div>' +
+                '<div class="ad-pay-stat-card" id="adPayStatMonth"><div class="stat-value">0</div><div class="stat-label">' + L.payStatMonth + '</div></div>' +
+            '</div>' +
+
+            '<div class="ad-filter-row sticky">' +
+                '<input type="text" class="ad-field-input" id="adPaySearch" placeholder="' + L.paySearch + '" value="' + esc(paySearchQuery) + '" style="max-width:220px;">' +
+                '<select class="ad-field-input" id="adPayTypeFilter" style="max-width:150px;">' + typeOptions + '</select>' +
+                '<select class="ad-field-input" id="adPayPurposeFilter" style="max-width:150px;">' + purposeOptions + '</select>' +
+                '<select class="ad-field-input" id="adPayStatusFilter" style="max-width:150px;">' + statusOptions + '</select>' +
+            '</div>' +
+
+            '<div class="ad-table-wrap">' +
+                '<table class="ad-table ad-table-clickable" id="adPayTable">' +
+                    '<thead><tr>' +
+                        '<th>' + L.payEntity + '</th>' +
+                        '<th>' + L.payEntityType + '</th>' +
+                        '<th>' + L.payPurpose + '</th>' +
+                        '<th>' + L.payAmount + '</th>' +
+                        '<th>' + (isEn ? 'Active Until' : 'Активен до') + '</th>' +
+                        '<th>' + L.payMethod + '</th>' +
+                        '<th>' + L.payStatus + '</th>' +
+                        '<th>' + L.payCreatedAt + '</th>' +
+                    '</tr></thead>' +
+                    '<tbody></tbody>' +
+                '</table>' +
+            '</div>';
+
+        document.getElementById('adPayAddBtn').addEventListener('click', function() {
+            renderPaymentForm(null);
+        });
+
+        var searchInput = document.getElementById('adPaySearch');
+        var debounceTimer;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function() {
+                paySearchQuery = searchInput.value.trim().toLowerCase();
+                payPage = 1;
+                applyPayFilters();
+            }, 300);
+        });
+
+        document.getElementById('adPayTypeFilter').addEventListener('change', function() {
+            payFilterType = this.value;
+            payPage = 1;
+            loadPaymentsList();
+        });
+
+        document.getElementById('adPayPurposeFilter').addEventListener('change', function() {
+            payFilterPurpose = this.value;
+            payPage = 1;
+            loadPaymentsList();
+        });
+
+        document.getElementById('adPayStatusFilter').addEventListener('change', function() {
+            payFilterStatus = this.value;
+            payPage = 1;
+            applyPayFilters();
+        });
+
+        loadPaymentsList();
+    }
+
+    async function loadPaymentsList() {
+        if (!client) return;
+
+        var query = client.from('entity_payments').select('*').order('created_at', { ascending: false });
+
+        if (payFilterType) {
+            query = query.eq('entity_type', payFilterType);
+        }
+        if (payFilterPurpose) {
+            query = query.eq('purpose', payFilterPurpose);
+        }
+
+        var result = await query;
+        payAllData = result.data || [];
+
+        applyPayFilters();
+        updatePayStats();
+    }
+
+    function applyPayFilters() {
+        var today = new Date().toISOString().slice(0, 10);
+        var filtered = payAllData.slice();
+
+        if (paySearchQuery) {
+            filtered = filtered.filter(function(p) {
+                return (p.entity_name || '').toLowerCase().indexOf(paySearchQuery) !== -1;
+            });
+        }
+
+        if (payFilterStatus === 'active') {
+            filtered = filtered.filter(function(p) { return p.period_end >= today; });
+        } else if (payFilterStatus === 'expired') {
+            filtered = filtered.filter(function(p) { return p.period_end < today; });
+        }
+
+        var totalItems = filtered.length;
+        var totalPages = Math.max(1, Math.ceil(totalItems / PAY_PER_PAGE));
+        if (payPage > totalPages) payPage = totalPages;
+        var start = (payPage - 1) * PAY_PER_PAGE;
+        var pageItems = filtered.slice(start, start + PAY_PER_PAGE);
+
+        renderPayRows(pageItems);
+        renderPayPagination(totalItems, totalPages);
+    }
+
+    function updatePayStats() {
+        var today = new Date().toISOString().slice(0, 10);
+        var now = new Date();
+        var monthStart = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
+
+        var active = 0, expired = 0, month = 0;
+        payAllData.forEach(function(p) {
+            if (p.period_end >= today) active++;
+            else expired++;
+            if (p.created_at >= monthStart) month++;
+        });
+
+        var elActive = document.querySelector('#adPayStatActive .stat-value');
+        var elExpired = document.querySelector('#adPayStatExpired .stat-value');
+        var elMonth = document.querySelector('#adPayStatMonth .stat-value');
+        if (elActive) elActive.textContent = active;
+        if (elExpired) elExpired.textContent = expired;
+        if (elMonth) elMonth.textContent = month;
+    }
+
+    function renderPayRows(items) {
+        var table = document.getElementById('adPayTable');
+        if (!table) return;
+        var tbody = table.querySelector('tbody');
+
+        if (items.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="9" style="text-align:center;padding:60px 20px;">' +
+                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">💰</div>' +
+                    '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.payNoPayments + '</div>' +
+                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.payNoPaymentsText + '</div>' +
+                '</td></tr>';
+            return;
+        }
+
+        var today = new Date().toISOString().slice(0, 10);
+        var html = '';
+        items.forEach(function(p) {
+            var isActive = p.period_end >= today;
+            var statusBadge = isActive
+                ? '<span class="ad-pay-badge ad-pay-active">' + L.payActive + '</span>'
+                : '<span class="ad-pay-badge ad-pay-expired">' + L.payExpired + '</span>';
+            var typeBadge = '<span class="ad-pay-badge ad-pay-type-' + p.entity_type + '">' + (PAYMENT_ENTITY_TYPES[p.entity_type] || p.entity_type) + '</span>';
+            var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + p.purpose + '">' + (PAYMENT_PURPOSES[p.purpose] || p.purpose) + '</span>';
+            var periodEnd = formatPayDate(p.period_end);
+            var createdDate = p.created_at ? new Date(p.created_at).toLocaleDateString() : '—';
+
+            html +=
+                '<tr data-pay-id="' + p.id + '">' +
+                    bulkCheckboxTd(p.id) +
+                    '<td style="font-weight:500;color:var(--text-primary);">' + esc(p.entity_name || '—') + '</td>' +
+                    '<td>' + typeBadge + '</td>' +
+                    '<td>' + purposeBadge + '</td>' +
+                    '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + (p.currency || 'KGS') + '</td>' +
+                    '<td style="font-size:0.8rem;white-space:nowrap;">' + periodEnd + '</td>' +
+                    '<td>' + (PAYMENT_METHODS[p.payment_method] || p.payment_method) + '</td>' +
+                    '<td>' + statusBadge + '</td>' +
+                    '<td style="font-size:0.8rem;color:var(--text-dim);">' + createdDate + '</td>' +
+                '</tr>';
+        });
+
+        tbody.innerHTML = html;
+
+        tbody.addEventListener('click', function(e) {
+            if (e.target.closest('.ad-bulk-cell')) return;
+            var row = e.target.closest('tr[data-pay-id]');
+            if (!row) return;
+            loadAndEditPayment(row.dataset.payId);
+        });
+
+        setupBulkDelete({ tableId: 'adPayTable', tableName: 'entity_payments', reloadFn: loadPaymentsList });
+    }
+
+    function renderPayPagination(totalItems, totalPages) {
+        var existing = document.getElementById('adPayPagination');
+        if (existing) existing.remove();
+
+        if (totalPages <= 1) return;
+
+        var wrap = document.createElement('div');
+        wrap.id = 'adPayPagination';
+        wrap.className = 'ad-crt-pagination';
+
+        var html = '';
+        if (payPage > 1) {
+            html += '<button class="ad-crt-page-btn" data-pay-page="' + (payPage - 1) + '">&laquo;</button>';
+        }
+        for (var i = 1; i <= totalPages; i++) {
+            html += '<button class="ad-crt-page-btn' + (i === payPage ? ' active' : '') + '" data-pay-page="' + i + '">' + i + '</button>';
+        }
+        if (payPage < totalPages) {
+            html += '<button class="ad-crt-page-btn" data-pay-page="' + (payPage + 1) + '">&raquo;</button>';
+        }
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+
+        wrap.innerHTML = html;
+        var container = document.getElementById('ad-payments');
+        if (container) container.appendChild(wrap);
+
+        wrap.addEventListener('click', function(e) {
+            var btn = e.target.closest('[data-pay-page]');
+            if (!btn) return;
+            payPage = parseInt(btn.dataset.payPage);
+            applyPayFilters();
+        });
+    }
+
+    async function loadAndEditPayment(id) {
+        if (!client) return;
+        var result = await client.from('entity_payments').select('*').eq('id', id).single();
+        if (result.data) {
+            renderPaymentForm(result.data);
+        }
+    }
+
+    function renderPaymentForm(item) {
+        var container = document.getElementById('ad-payments');
+        if (!container) return;
+
+        payEditingId = item ? item.id : null;
+
+        var entityTypeOptions = '';
+        Object.keys(PAYMENT_ENTITY_TYPES).forEach(function(k) {
+            entityTypeOptions += '<option value="' + k + '"' + (item && item.entity_type === k ? ' selected' : '') + '>' + PAYMENT_ENTITY_TYPES[k] + '</option>';
+        });
+
+        var purposeOptions = '';
+        Object.keys(PAYMENT_PURPOSES).forEach(function(k) {
+            purposeOptions += '<option value="' + k + '"' + (item && item.purpose === k ? ' selected' : '') + '>' + PAYMENT_PURPOSES[k] + '</option>';
+        });
+
+        var methodOptions = '';
+        Object.keys(PAYMENT_METHODS).forEach(function(k) {
+            methodOptions += '<option value="' + k + '"' + (item && item.payment_method === k ? ' selected' : '') + '>' + PAYMENT_METHODS[k] + '</option>';
+        });
+
+        container.innerHTML =
+            '<div class="ad-section-header">' +
+                '<h2>' + (item ? L.editPayment : L.addPayment) + '</h2>' +
+            '</div>' +
+
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.payEntityType + '</div>' +
+                '<select class="ad-field-input" id="adPayEntityType">' + entityTypeOptions + '</select>' +
+            '</div>' +
+
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.payEntity + '</div>' +
+                '<div class="ad-pay-entity-wrap">' +
+                    '<input type="text" class="ad-field-input" id="adPayEntitySearch" placeholder="' + L.paySearchEntity + '" value="' + esc(item ? item.entity_name : '') + '" autocomplete="off">' +
+                    '<div class="ad-pay-entity-results" id="adPayEntityResults" style="display:none;"></div>' +
+                '</div>' +
+                '<input type="hidden" id="adPayEntityId" value="' + (item ? item.entity_id : '') + '">' +
+                '<input type="hidden" id="adPayEntityName" value="' + esc(item ? item.entity_name : '') + '">' +
+            '</div>' +
+
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.payPurpose + '</div>' +
+                '<select class="ad-field-input" id="adPayPurpose">' + purposeOptions + '</select>' +
+            '</div>' +
+
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.payAmount + '</div>' +
+                '<div style="display:flex;gap:10px;">' +
+                    '<input type="text" inputmode="numeric" class="ad-field-input" id="adPayAmount" placeholder="0" value="' + (item ? item.amount : '') + '" style="max-width:180px;">' +
+                    '<input type="text" class="ad-field-input" id="adPayCurrency" value="' + (item ? item.currency : 'KGS') + '" style="width:70px;text-align:center;">' +
+                '</div>' +
+            '</div>' +
+
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + (isEn ? 'Period' : 'Период') + '</div>' +
+                '<div style="display:flex;gap:10px;align-items:center;">' +
+                    '<input type="date" class="ad-field-input" id="adPayPeriodStart" value="' + (item ? item.period_start : '') + '" style="flex:1;">' +
+                    '<span style="color:var(--text-dim);">—</span>' +
+                    '<input type="date" class="ad-field-input" id="adPayPeriodEnd" value="' + (item ? item.period_end : '') + '" style="flex:1;">' +
+                '</div>' +
+            '</div>' +
+
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.payMethod + '</div>' +
+                '<select class="ad-field-input" id="adPayMethod">' + methodOptions + '</select>' +
+            '</div>' +
+
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.payNote + '</div>' +
+                '<textarea class="ad-field-input" id="adPayNote" rows="3">' + esc(item ? item.note || '' : '') + '</textarea>' +
+            '</div>' +
+
+            '<div class="ad-form-actions">' +
+                '<button class="ad-btn ad-btn-primary" id="adPaySaveBtn">' + L.save + '</button>' +
+                '<button class="ad-btn ad-btn-secondary" id="adPayBackBtn">' + L.back + '</button>' +
+                (item ? '<button class="ad-btn ad-btn-danger" id="adPayDeleteBtn" style="margin-left:auto;">' + L.delete + '</button>' : '') +
+            '</div>';
+
+        // Entity search
+        var searchInput = document.getElementById('adPayEntitySearch');
+        var resultsDiv = document.getElementById('adPayEntityResults');
+        var searchTimer;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimer);
+            var q = searchInput.value.trim();
+            if (q.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            searchTimer = setTimeout(function() {
+                var type = document.getElementById('adPayEntityType').value;
+                searchPayEntity(type, q);
+            }, 300);
+        });
+
+        searchInput.addEventListener('focus', function() {
+            if (searchInput.value.trim().length >= 2) {
+                var type = document.getElementById('adPayEntityType').value;
+                searchPayEntity(type, searchInput.value.trim());
+            }
+        });
+
+        document.addEventListener('click', function hideResults(e) {
+            if (!e.target.closest('.ad-pay-entity-wrap')) {
+                resultsDiv.style.display = 'none';
+            }
+        });
+
+        document.getElementById('adPayEntityType').addEventListener('change', function() {
+            document.getElementById('adPayEntityId').value = '';
+            document.getElementById('adPayEntityName').value = '';
+            searchInput.value = '';
+            resultsDiv.style.display = 'none';
+        });
+
+        // Only digits allowed in amount field
+        var amountInput = document.getElementById('adPayAmount');
+        amountInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        amountInput.addEventListener('wheel', function(e) { e.preventDefault(); });
+        amountInput.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+        });
+
+        document.getElementById('adPaySaveBtn').addEventListener('click', savePaymentHandler);
+        document.getElementById('adPayBackBtn').addEventListener('click', function() {
+            renderPaymentsList();
+        });
+
+        if (item) {
+            document.getElementById('adPayDeleteBtn').addEventListener('click', function() {
+                if (confirm(L.payDeleteConfirm)) {
+                    deletePayment(item.id);
+                }
+            });
+        }
+    }
+
+    async function searchPayEntity(type, query) {
+        if (!client) return;
+        var resultsDiv = document.getElementById('adPayEntityResults');
+        if (!resultsDiv) return;
+
+        var result;
+        var items = [];
+
+        if (type === 'court') {
+            result = await client.from('courts').select('id,name').ilike('name', '%' + query + '%').limit(10);
+            items = (result.data || []).map(function(r) { return { id: String(r.id), name: r.name }; });
+        } else if (type === 'coach') {
+            result = await client.from('coaches').select('id,last_name,first_name').or('last_name.ilike.%' + query + '%,first_name.ilike.%' + query + '%').limit(10);
+            items = (result.data || []).map(function(r) { return { id: String(r.id), name: (r.last_name || '') + ' ' + (r.first_name || '') }; });
+        } else if (type === 'player') {
+            result = await client.from('players').select('id,name').ilike('name', '%' + query + '%').limit(10);
+            items = (result.data || []).map(function(r) { return { id: String(r.id), name: r.name }; });
+        }
+
+        if (items.length === 0) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
+
+        var html = '';
+        items.forEach(function(item) {
+            html += '<div class="ad-pay-entity-item" data-id="' + item.id + '" data-name="' + esc(item.name) + '">' + esc(item.name) + '</div>';
+        });
+        resultsDiv.innerHTML = html;
+        resultsDiv.style.display = 'block';
+
+        resultsDiv.querySelectorAll('.ad-pay-entity-item').forEach(function(el) {
+            el.addEventListener('click', function() {
+                document.getElementById('adPayEntityId').value = el.dataset.id;
+                document.getElementById('adPayEntityName').value = el.dataset.name;
+                document.getElementById('adPayEntitySearch').value = el.dataset.name;
+                resultsDiv.style.display = 'none';
+            });
+        });
+    }
+
+    async function savePaymentHandler() {
+        var entityId = document.getElementById('adPayEntityId').value;
+        var entityName = document.getElementById('adPayEntityName').value;
+        var entityType = document.getElementById('adPayEntityType').value;
+        var amount = parseFloat(document.getElementById('adPayAmount').value);
+        var periodStart = document.getElementById('adPayPeriodStart').value;
+        var periodEnd = document.getElementById('adPayPeriodEnd').value;
+
+        if (!entityId || !entityName) {
+            showToast(L.payEntityRequired, 'error');
+            return;
+        }
+        if (!amount || amount <= 0) {
+            showToast(L.payAmountRequired, 'error');
+            return;
+        }
+        if (!periodStart || !periodEnd) {
+            showToast(L.payPeriodRequired, 'error');
+            return;
+        }
+
+        var saveBtn = document.getElementById('adPaySaveBtn');
+        saveBtn.disabled = true;
+        saveBtn.textContent = '...';
+
+        var data = {
+            entity_type: entityType,
+            entity_id: entityId,
+            entity_name: entityName,
+            amount: amount,
+            currency: document.getElementById('adPayCurrency').value.trim() || 'KGS',
+            period_start: periodStart,
+            period_end: periodEnd,
+            payment_method: document.getElementById('adPayMethod').value,
+            purpose: document.getElementById('adPayPurpose').value,
+            note: document.getElementById('adPayNote').value.trim() || null
+        };
+
+        var result;
+        if (payEditingId) {
+            result = await client.from('entity_payments').update(data).eq('id', payEditingId);
+        } else {
+            var session = await client.auth.getSession();
+            data.created_by = session.data.session ? session.data.session.user.id : null;
+            result = await client.from('entity_payments').insert(data);
+        }
+
+        if (result.error) {
+            showToast(result.error.message, 'error');
+            saveBtn.disabled = false;
+            saveBtn.textContent = L.save;
+            return;
+        }
+
+        await syncPromotedStatus(entityType, entityId);
+        showToast(L.paySaved, 'success');
+        renderPaymentsList();
+    }
+
+    async function syncPromotedStatus(entityType, entityId) {
+        if (entityType !== 'court' && entityType !== 'coach') return;
+
+        var today = new Date().toISOString().slice(0, 10);
+
+        var check = await client.from('entity_payments')
+            .select('id')
+            .eq('entity_type', entityType)
+            .eq('entity_id', entityId)
+            .eq('purpose', 'promoted')
+            .gte('period_end', today)
+            .lte('period_start', today)
+            .limit(1);
+
+        var hasActive = (check.data && check.data.length > 0);
+        var tableName = entityType === 'court' ? 'courts' : 'coaches';
+
+        await client.from(tableName).update({ promoted: hasActive }).eq('id', entityId);
+    }
+
+    async function deletePayment(id) {
+        if (!client) return;
+
+        var item = payAllData.find(function(p) { return p.id === id; });
+        var result = await client.from('entity_payments').delete().eq('id', id);
+
+        if (result.error) {
+            showToast(result.error.message, 'error');
+            return;
+        }
+
+        if (item) {
+            await syncPromotedStatus(item.entity_type, item.entity_id);
+        }
+
+        showToast(L.payDeleted, 'success');
+        renderPaymentsList();
+    }
+
+    // ============================================
     // USERS SECTION (Admin only)
     // ============================================
 
@@ -9207,6 +10619,57 @@
     }
 
     // ---- Translation (MyMemory API, free, no key) ----
+
+    // Translate filled field(s) to empty ones (auto-detect source language)
+    async function translateToEmpty(ruId, enId, kgId, btn) {
+        var ruEl = document.getElementById(ruId);
+        var enEl = document.getElementById(enId);
+        var kgEl = kgId ? document.getElementById(kgId) : null;
+
+        var ruVal = ruEl ? ruEl.value.trim() : '';
+        var enVal = enEl ? enEl.value.trim() : '';
+        var kgVal = kgEl ? kgEl.value.trim() : '';
+
+        // Find source: first non-empty
+        var srcLang = '';
+        var srcText = '';
+        if (ruVal) { srcLang = 'ru'; srcText = ruVal; }
+        else if (enVal) { srcLang = 'en'; srcText = enVal; }
+        else if (kgVal) { srcLang = 'kg'; srcText = kgVal; }
+
+        if (!srcText) {
+            showToast(L.fillRuFirst, 'error');
+            return;
+        }
+
+        // Determine targets
+        var targets = [];
+        if (!ruVal && ruEl && srcLang !== 'ru') targets.push({ el: ruEl, lang: 'ru' });
+        if (!enVal && enEl && srcLang !== 'en') targets.push({ el: enEl, lang: 'en' });
+        if (!kgVal && kgEl && srcLang !== 'kg') targets.push({ el: kgEl, lang: 'kg' });
+
+        if (targets.length === 0) {
+            showToast(L.allFieldsFilled, 'info');
+            return;
+        }
+
+        var origLabel = btn.textContent;
+        btn.textContent = L.translating;
+        btn.disabled = true;
+
+        try {
+            for (var i = 0; i < targets.length; i++) {
+                var result = await translateText(srcText, srcLang, targets[i].lang);
+                targets[i].el.value = result;
+            }
+        } catch (e) {
+            showToast(L.translateError, 'error');
+        }
+
+        btn.textContent = origLabel;
+        btn.disabled = false;
+    }
+
     async function translateFromRu(text, targetLang) {
         return translateText(text, 'ru', targetLang);
     }
