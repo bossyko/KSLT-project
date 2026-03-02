@@ -37,7 +37,8 @@
         { key: 'coaches', icon: '🎓', label: 'Coaches' },
         { key: 'ratings', icon: '⭐', label: 'Ratings' },
         { key: 'users', icon: '👥', label: 'Users', adminOnly: true },
-        { key: 'memberships', icon: '💳', label: 'Memberships' }
+        { key: 'memberships', icon: '💳', label: 'Memberships' },
+        { key: 'payments', icon: '💰', label: 'Payments' }
     ] : [
         { key: 'dashboard', icon: '📊', label: 'Дашборд' },
         { key: 'content', icon: '📰', label: 'Новости' },
@@ -47,7 +48,8 @@
         { key: 'coaches', icon: '🎓', label: 'Тренеры' },
         { key: 'ratings', icon: '⭐', label: 'Рейтинг' },
         { key: 'users', icon: '👥', label: 'Пользователи', adminOnly: true },
-        { key: 'memberships', icon: '💳', label: 'Членство' }
+        { key: 'memberships', icon: '💳', label: 'Членство' },
+        { key: 'payments', icon: '💰', label: 'Оплаты' }
     ];
 
     // Check Supabase session in localStorage

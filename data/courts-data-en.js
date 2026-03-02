@@ -170,5 +170,8 @@ window.courtsLabels = {
     backBtn: "All courts",
     partnerBadge: "KSLT Partner",
     surface: "Surface",
-    phone: "Phone"
+    phone: "Phone",
+    filterType: "Court type",
+    filterSurface: "Surface",
+    filterCarpet: "Carpet"
 };

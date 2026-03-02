@@ -6,6 +6,29 @@
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    function getMapEmbed(url) {
+        if (!url) return null;
+        // Google Maps
+        if (url.indexOf('google.com/maps') !== -1 || url.indexOf('goo.gl/maps') !== -1 || url.indexOf('maps.app.goo.gl') !== -1) {
+            if (url.indexOf('/embed') !== -1) return url;
+            var qMatch = url.match(/[?&]q=([^&]+)/);
+            if (qMatch) return 'https://maps.google.com/maps?q=' + qMatch[1] + '&output=embed';
+            var coordMatch = url.match(/@(-?[\d.]+),(-?[\d.]+)/);
+            if (coordMatch) return 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&output=embed';
+            // Place URL: extract place name from /place/Name/
+            var placeMatch = url.match(/\/place\/([^/]+)/);
+            if (placeMatch) return 'https://maps.google.com/maps?q=' + placeMatch[1] + '&output=embed';
+            return 'https://maps.google.com/maps?q=' + encodeURIComponent(url) + '&output=embed';
+        }
+        // 2GIS
+        if (url.indexOf('2gis.') !== -1) {
+            var gisMatch = url.match(/\/([\d.]+)%2C([\d.]+)\//);
+            if (!gisMatch) gisMatch = url.match(/\/([\d.]+),([\d.]+)\//);
+            if (gisMatch) return 'https://maps.google.com/maps?q=' + gisMatch[2] + ',' + gisMatch[1] + '&output=embed';
+        }
+        return null;
+    }
+
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var L_labels = window.courtsLabels || {
         heroTitle: "Корты KSLT",
@@ -33,7 +56,10 @@
         partnerBadge: "Партнёр KSLT",
         surface: "Покрытие",
         phone: "Телефон",
-        newBadge: "Новый"
+        newBadge: "Новый",
+        filterType: "Тип корта",
+        filterSurface: "Покрытие",
+        filterCarpet: "Ковёр"
     };
 
     var SURFACE_MAP = { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр' };
@@ -41,6 +67,9 @@
 
     var staticData = window.courtsData || [];
     var data = staticData.slice(); // will be replaced after Supabase load
+
+    var currentTypeFilter = 'all';
+    var currentSurfaceFilter = 'all';
 
     var courtPage = window.location.pathname.indexOf('court.html') !== -1 || window.location.pathname.indexOf('court-en.html') !== -1;
     var isListPage = window.location.pathname.indexOf('courts.html') !== -1 || window.location.pathname.indexOf('courts-en.html') !== -1;
@@ -71,10 +100,7 @@
         loadSupabaseCourts(function(dbCourts) {
             if (dbCourts.length) {
                 data = sortPromotedFirst(dbCourts).concat(staticData);
-                // Re-render with current filter
-                var activeBtn = document.querySelector('.ct-filter-btn.active');
-                var currentFilter = activeBtn ? activeBtn.getAttribute('data-filter') : 'all';
-                renderGrid(currentFilter);
+                renderGrid();
             }
         });
     }
@@ -221,7 +247,7 @@
     function initListPage() {
         renderHero();
         renderFilters();
-        renderGrid('all');
+        renderGrid();
         initFilterClicks();
         initScrollAnimations();
     }
@@ -240,43 +266,64 @@
     function renderFilters() {
         var container = document.getElementById('courtsFilters');
         if (!container) return;
-        var filters = [
-            { key: 'all', label: L_labels.filterAll },
-            { key: 'indoor', label: L_labels.filterIndoor },
-            { key: 'outdoor', label: L_labels.filterOutdoor },
-            { key: 'clay', label: L_labels.filterClay },
-            { key: 'hard', label: L_labels.filterHard }
-        ];
-        var html = '<div class="ct-filters">';
-        filters.forEach(function(f) {
-            html += '<button class="ct-filter-btn' + (f.key === 'all' ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
-        });
-        html += '</div>';
+
+        container.className = 'ct-filters-wrap';
+
+        var html =
+            '<div class="ct-filter-group">' +
+                '<span class="ct-filter-label">' + L_labels.filterType + '</span>' +
+                '<div class="ct-filter-chips">' +
+                    '<button class="ct-filter-btn active" data-filter-type="all">' + L_labels.filterAll + '</button>' +
+                    '<button class="ct-filter-btn" data-filter-type="indoor">' + L_labels.filterIndoor + '</button>' +
+                    '<button class="ct-filter-btn" data-filter-type="outdoor">' + L_labels.filterOutdoor + '</button>' +
+                '</div>' +
+            '</div>' +
+            '<div class="ct-filter-divider"></div>' +
+            '<div class="ct-filter-group">' +
+                '<span class="ct-filter-label">' + L_labels.filterSurface + '</span>' +
+                '<div class="ct-filter-chips">' +
+                    '<button class="ct-filter-btn active" data-filter-surface="all">' + L_labels.filterAll + '</button>' +
+                    '<button class="ct-filter-btn" data-filter-surface="hard">' + L_labels.filterHard + '</button>' +
+                    '<button class="ct-filter-btn" data-filter-surface="clay">' + L_labels.filterClay + '</button>' +
+                    '<button class="ct-filter-btn" data-filter-surface="carpet">' + L_labels.filterCarpet + '</button>' +
+                '</div>' +
+            '</div>';
         container.innerHTML = html;
+
+        // Sticky shadow on scroll
+        var observer = new IntersectionObserver(function(entries) {
+            container.classList.toggle('stuck', !entries[0].isIntersecting);
+        }, { threshold: [1], rootMargin: '-65px 0px 0px 0px' });
+        var sentinel = document.createElement('div');
+        sentinel.style.height = '1px';
+        container.parentNode.insertBefore(sentinel, container);
+        observer.observe(sentinel);
     }
 
-    function renderGrid(filter) {
+    function renderGrid() {
         var container = document.getElementById('courtsGrid');
         if (!container) return;
 
         var filtered = data;
-        if (filter === 'indoor') {
-            filtered = data.filter(function(c) {
-                return c.type === 'indoor' || (c._hasIndoor);
+
+        // Filter by type
+        if (currentTypeFilter === 'indoor') {
+            filtered = filtered.filter(function(c) {
+                return c.type === 'indoor' || c._hasIndoor;
             });
-        } else if (filter === 'outdoor') {
-            filtered = data.filter(function(c) {
-                return c.type === 'outdoor' || (c._hasOutdoor);
+        } else if (currentTypeFilter === 'outdoor') {
+            filtered = filtered.filter(function(c) {
+                return c.type === 'outdoor' || c._hasOutdoor;
             });
-        } else if (filter === 'clay') {
-            filtered = data.filter(function(c) {
-                if (c._courtTypes) return c._courtTypes.some(function(ct) { return ct.surface === 'clay'; });
-                return c.surface === 'Грунт' || c.surface === 'Clay';
-            });
-        } else if (filter === 'hard') {
-            filtered = data.filter(function(c) {
-                if (c._courtTypes) return c._courtTypes.some(function(ct) { return ct.surface === 'hard'; });
-                return c.surface === 'Хард' || c.surface === 'Hard';
+        }
+
+        // Filter by surface
+        if (currentSurfaceFilter !== 'all') {
+            filtered = filtered.filter(function(c) {
+                if (c._courtTypes) return c._courtTypes.some(function(ct) { return ct.surface === currentSurfaceFilter; });
+                var surfMap = { hard: ['Хард', 'Hard'], clay: ['Грунт', 'Clay'], carpet: ['Ковёр', 'Carpet'] };
+                var variants = surfMap[currentSurfaceFilter] || [];
+                return variants.indexOf(c.surface) !== -1;
             });
         }
 
@@ -316,9 +363,18 @@
     function initFilterClicks() {
         document.addEventListener('click', function(e) {
             if (!e.target.classList.contains('ct-filter-btn')) return;
-            document.querySelectorAll('.ct-filter-btn').forEach(function(b) { b.classList.remove('active'); });
-            e.target.classList.add('active');
-            renderGrid(e.target.getAttribute('data-filter'));
+
+            if (e.target.hasAttribute('data-filter-type')) {
+                currentTypeFilter = e.target.getAttribute('data-filter-type');
+                e.target.closest('.ct-filter-group').querySelectorAll('.ct-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                e.target.classList.add('active');
+                renderGrid();
+            } else if (e.target.hasAttribute('data-filter-surface')) {
+                currentSurfaceFilter = e.target.getAttribute('data-filter-surface');
+                e.target.closest('.ct-filter-group').querySelectorAll('.ct-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                e.target.classList.add('active');
+                renderGrid();
+            }
         });
     }
 
@@ -390,14 +446,6 @@
             (court.price ? '<div class="ct-detail-stat"><div class="ct-detail-stat-num">' + court.price + '</div><div class="ct-detail-stat-label">' + L_labels.priceCurrency + '</div></div>' : '') +
         '</div>';
 
-        // Map links (for DB courts)
-        if (court.google_maps_url || court.twogis_url) {
-            html += '<div class="ct-section ct-fade-in"><div class="ct-map-links">';
-            if (court.google_maps_url) html += '<a href="' + court.google_maps_url + '" target="_blank" rel="noopener" class="ct-map-link">Google Maps \u2197</a>';
-            if (court.twogis_url) html += '<a href="' + court.twogis_url + '" target="_blank" rel="noopener" class="ct-map-link">2GIS \u2197</a>';
-            html += '</div></div>';
-        }
-
         // About
         if (court.description) {
             html += '<div class="ct-section ct-fade-in">' +
@@ -449,6 +497,20 @@
                 '<h2 class="ct-section-title">' + L_labels.locationTitle + '</h2>' +
                 '<div id="courtDetailMap" class="ct-detail-map"></div>' +
             '</div>';
+        }
+
+        // Map embed + links (for DB courts — at the bottom)
+        if (court.google_maps_url || court.twogis_url) {
+            var mapEmbedUrl = getMapEmbed(court.google_maps_url) || getMapEmbed(court.twogis_url);
+            html += '<div class="ct-section ct-fade-in">';
+            html += '<h2 class="ct-section-title">' + L_labels.locationTitle + '</h2>';
+            if (mapEmbedUrl) {
+                html += '<div class="ct-map-embed"><iframe src="' + esc(mapEmbedUrl) + '" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
+            }
+            html += '<div class="ct-map-links">';
+            if (court.google_maps_url) html += '<a href="' + court.google_maps_url + '" target="_blank" rel="noopener" class="ct-map-link">Google Maps \u2197</a>';
+            if (court.twogis_url) html += '<a href="' + court.twogis_url + '" target="_blank" rel="noopener" class="ct-map-link">2GIS \u2197</a>';
+            html += '</div></div>';
         }
 
         // CTA

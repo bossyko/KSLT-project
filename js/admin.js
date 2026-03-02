@@ -149,6 +149,8 @@
         thCategory: 'Category',
         thStatus: 'Status',
         thPublished: 'Date',
+        thPubDate: 'Pub. Date',
+        thViews: 'Views',
         thExecutor: 'Executor',
         newsExecutor: 'Executor',
         draftSaved: 'Draft saved',
@@ -165,7 +167,9 @@
         trnStatus: 'Status',
         trnDateStart: 'Start Date',
         trnDateEnd: 'End Date',
+        trnDateEndShort: 'End Date',
         trnMaxParticipants: 'Max Participants',
+        trnMaxParticipantsShort: 'Max Part.',
         trnPrizeFund: 'Prize Fund',
         trnImage: 'Cover Image',
         noTournaments: 'No tournaments yet',
@@ -195,6 +199,17 @@
         bracketRR: 'Round Robin',
         selectDrawSize: '— Select —',
         selectBracketType: '— Select —',
+        trnStatTotal: 'Total Tournaments',
+        trnStatUpcoming: 'Upcoming',
+        trnStatCompleted: 'Completed',
+        trnStatMenSingles: "Men's Singles",
+        trnStatWomenSingles: "Women's Singles",
+        trnStatMenDoubles: "Men's Doubles",
+        trnStatWomenDoubles: "Women's Doubles",
+        trnStatFriendly: 'Friendly',
+        trnSearch: 'Search by title...',
+        trnAllCategories: 'All Categories',
+        trnAllStatuses: 'All Statuses',
         // Bracket management
         bracketTab: 'Bracket',
         registrationsTab: 'Registrations',
@@ -691,6 +706,8 @@
         thCategory: 'Категория',
         thStatus: 'Статус',
         thPublished: 'Дата',
+        thPubDate: 'Дата публикации',
+        thViews: 'Просмотры',
         thExecutor: 'Исполнитель',
         newsExecutor: 'Исполнитель',
         draftSaved: 'Черновик сохранён',
@@ -707,7 +724,9 @@
         trnStatus: 'Статус',
         trnDateStart: 'Дата начала',
         trnDateEnd: 'Дата окончания',
+        trnDateEndShort: 'Дата оконч.',
         trnMaxParticipants: 'Макс. участников',
+        trnMaxParticipantsShort: 'Макс. участ.',
         trnPrizeFund: 'Призовой фонд',
         trnImage: 'Обложка',
         noTournaments: 'Турниров пока нет',
@@ -737,6 +756,17 @@
         bracketRR: 'Круговая система',
         selectDrawSize: '— Выберите —',
         selectBracketType: '— Выберите —',
+        trnStatTotal: 'Всего турниров',
+        trnStatUpcoming: 'Предстоящие',
+        trnStatCompleted: 'Прошедшие',
+        trnStatMenSingles: 'Мужские одиночные',
+        trnStatWomenSingles: 'Женские одиночные',
+        trnStatMenDoubles: 'Мужские парные',
+        trnStatWomenDoubles: 'Женские парные',
+        trnStatFriendly: 'Дружеские',
+        trnSearch: 'Поиск по названию...',
+        trnAllCategories: 'Все категории',
+        trnAllStatuses: 'Все статусы',
         // Bracket management
         bracketTab: 'Сетка',
         registrationsTab: 'Заявки',
@@ -1372,7 +1402,7 @@
                 buildActivityTableHtml('adDashRecentTournaments', L.actRecentTournaments, 'neutral',
                     [L.thTournament, L.thDateStart, L.thStatus], 'tournaments') +
                 buildActivityTableHtml('adDashRecentNews', L.actRecentNews, 'neutral',
-                    [L.thArticle, L.thStatus, L.thDate], 'content') +
+                    [L.thArticle, L.thCategory, L.thExecutor, L.thStatus, L.thPubDate, '&#128065;'], 'content') +
             '</div>';
 
         loadStats();
@@ -1467,8 +1497,8 @@
                 .order('created_at', { ascending: false }).limit(10),                                                                  // [14] recent users
             client.from('tournaments').select('id, title, date_start, status')
                 .order('date_start', { ascending: false }).limit(10),                                                                  // [15] recent tournaments
-            client.from('news').select('id, title, status, created_at')
-                .order('created_at', { ascending: false }).limit(10)                                                                   // [16] recent news
+            client.from('news').select('id, title, category, executor, published_at, created_at, view_count')
+                .order('created_at', { ascending: false }).limit(10)                                                                    // [16] recent news
         ]);
 
         // --- Stat cards ---
@@ -1573,14 +1603,18 @@
 
         // Recent news
         fillDashTable('adDashRecentNews', results[16], function(n) {
-            var statusCls = n.status === 'published' ? 'ad-status-published' : 'ad-status-draft';
-            var statusLabel = n.status === 'published' ? (isEn ? 'Published' : 'Опубликована') : (isEn ? 'Draft' : 'Черновик');
+            var isPublished = !!n.published_at;
+            var statusCls = isPublished ? 'ad-status-published' : 'ad-status-draft';
+            var statusLabel = isPublished ? (isEn ? 'Published' : 'Опубликована') : (isEn ? 'Draft' : 'Черновик');
             var title = n.title || L.noData;
             if (title.length > 50) title = title.substring(0, 47) + '...';
             return '<tr>' +
                 '<td style="font-weight:500;color:var(--text-primary);">' + esc(title) + '</td>' +
+                '<td>' + esc(n.category || '—') + '</td>' +
+                '<td>' + esc(n.executor || '—') + '</td>' +
                 '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
-                '<td>' + fmtDate(n.created_at) + '</td>' +
+                '<td>' + (n.published_at ? fmtDate(n.published_at) : '—') + '</td>' +
+                '<td style="text-align:center;">' + (n.view_count || 0) + '</td>' +
             '</tr>';
         }, L.noRecentNews);
 
@@ -3003,6 +3037,14 @@
     var trnEditingId = null;
     var trnImageFile = null;
     var trnImageUrl = '';
+    var trnAllData = [];
+    var trnSearchQuery = '';
+    var trnFilterCategory = '';
+    var trnFilterStatus = '';
+    var trnSortCol = 'date_start';
+    var trnSortAsc = false;
+    var trnPage = 1;
+    var TRN_PER_PAGE = 15;
 
     async function renderTournamentsSection() {
         await loadCategories();
@@ -3015,29 +3057,146 @@
         var container = document.getElementById('ad-tournaments');
         if (!container) return;
 
+        // Reset filters
+        trnSearchQuery = '';
+        trnFilterCategory = '';
+        trnFilterStatus = '';
+        trnSortCol = 'date_start';
+        trnSortAsc = false;
+        trnPage = 1;
+
+        // Category filter options
+        var catFilterHtml = '<option value="">' + L.trnAllCategories + '</option>';
+        cachedCategories.forEach(function(c) {
+            var genderIcon = c.gender === 'women' ? '♀ ' : '♂ ';
+            var catName = isEn ? c.name_en : c.name;
+            catFilterHtml += '<option value="' + c.id + '">' + genderIcon + catName + '</option>';
+        });
+
+        // Status filter options
+        var statusFilterHtml = '<option value="">' + L.trnAllStatuses + '</option>';
+        Object.keys(TOURNAMENT_STATUSES).forEach(function(key) {
+            statusFilterHtml += '<option value="' + key + '">' + TOURNAMENT_STATUSES[key] + '</option>';
+        });
+
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.tournaments + '</h2>' +
-                '<button class="ad-btn ad-btn-primary" id="adTrnAdd">+ ' + L.addTournament + '</button>' +
             '</div>' +
-            '<div class="ad-table-card">' +
+            '<div class="ad-trn-stats-header">' +
+                L.trnStatTotal + ': <span id="adTrnStatTotal">...</span>' +
+                '<span style="color:var(--text-dim);">|</span>' +
+                L.trnStatUpcoming + ': <span id="adTrnStatUpcoming">...</span>' +
+                '<span style="color:var(--text-dim);">|</span>' +
+                L.trnStatCompleted + ': <span id="adTrnStatCompleted">...</span>' +
+            '</div>' +
+            '<div class="ad-trn-stats-grid">' +
+                '<div class="ad-crt-stat-card">' +
+                    '<div class="ad-crt-stat-header">' +
+                        '<span class="ad-crt-stat-title">\u2642 ' + L.trnStatMenSingles + '</span>' +
+                        '<span class="ad-crt-stat-total-num" id="adTrnTotalMS">...</span>' +
+                    '</div>' +
+                    '<div class="ad-crt-stat-body" id="adTrnBodyMS"></div>' +
+                '</div>' +
+                '<div class="ad-crt-stat-card">' +
+                    '<div class="ad-crt-stat-header">' +
+                        '<span class="ad-crt-stat-title">\u2640 ' + L.trnStatWomenSingles + '</span>' +
+                        '<span class="ad-crt-stat-total-num" id="adTrnTotalWS">...</span>' +
+                    '</div>' +
+                    '<div class="ad-crt-stat-body" id="adTrnBodyWS"></div>' +
+                '</div>' +
+                '<div class="ad-crt-stat-card">' +
+                    '<div class="ad-crt-stat-header">' +
+                        '<span class="ad-crt-stat-title">\u2642 ' + L.trnStatMenDoubles + '</span>' +
+                        '<span class="ad-crt-stat-total-num" id="adTrnTotalMD">...</span>' +
+                    '</div>' +
+                    '<div class="ad-crt-stat-body" id="adTrnBodyMD"></div>' +
+                '</div>' +
+                '<div class="ad-crt-stat-card">' +
+                    '<div class="ad-crt-stat-header">' +
+                        '<span class="ad-crt-stat-title">\u2640 ' + L.trnStatWomenDoubles + '</span>' +
+                        '<span class="ad-crt-stat-total-num" id="adTrnTotalWD">...</span>' +
+                    '</div>' +
+                    '<div class="ad-crt-stat-body" id="adTrnBodyWD"></div>' +
+                '</div>' +
+                '<div class="ad-crt-stat-card">' +
+                    '<div class="ad-crt-stat-header">' +
+                        '<span class="ad-crt-stat-title">\uD83E\uDD1D ' + L.trnStatFriendly + '</span>' +
+                        '<span class="ad-crt-stat-total-num" id="adTrnTotalFR">...</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="ad-filter-row ad-filter-sticky" id="adTrnFilterRow">' +
+                '<input type="text" class="ad-field-input ad-filter-search" id="adTrnSearch" placeholder="' + L.trnSearch + '">' +
+                '<select class="ad-field-input ad-filter-select" id="adTrnCategoryFilter">' + catFilterHtml + '</select>' +
+                '<select class="ad-field-input ad-filter-select" id="adTrnStatusFilter">' + statusFilterHtml + '</select>' +
+                '<button class="ad-btn ad-btn-primary" id="adTrnAdd" style="white-space:nowrap;margin-left:auto;">+ ' + L.addTournament + '</button>' +
+            '</div>' +
+            '<div class="ad-table-card" style="position:relative;">' +
+                '<div class="ad-col-dropdown" id="adTrnColDropdown" style="display:none;"></div>' +
                 '<div class="ad-table-wrap">' +
                     '<table class="ad-table ad-table-clickable" id="adTrnTable">' +
                         '<thead><tr>' +
+                            trnColHeader('title', L.trnTitle) +
+                            trnColHeader('category', L.trnCategory) +
+                            trnColHeader('status', L.trnStatus) +
+                            trnColHeader('date_start', L.trnDateStart) +
+                            trnColHeader('date_end', L.trnDateEndShort) +
+                            trnColHeader('participants', L.trnMaxParticipantsShort) +
                             '<th></th>' +
-                            '<th>' + L.trnTitle + '</th>' +
-                            '<th>' + L.trnCategory + '</th>' +
-                            '<th>' + L.trnStatus + '</th>' +
-                            '<th>' + L.trnDateStart + '</th>' +
-                            '<th>' + L.trnMaxParticipants + '</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
 
+        // Add button
         document.getElementById('adTrnAdd').addEventListener('click', function() {
             renderTournamentForm(null);
+        });
+
+        // Search with debounce
+        var trnSearchTimer = null;
+        document.getElementById('adTrnSearch').addEventListener('input', function() {
+            var val = this.value.trim();
+            clearTimeout(trnSearchTimer);
+            trnSearchTimer = setTimeout(function() {
+                trnSearchQuery = val;
+                trnPage = 1;
+                applyTrnFilters();
+            }, 300);
+        });
+
+        // Category filter
+        document.getElementById('adTrnCategoryFilter').addEventListener('change', function() {
+            trnFilterCategory = this.value;
+            trnPage = 1;
+            applyTrnFilters();
+        });
+
+        // Status filter
+        document.getElementById('adTrnStatusFilter').addEventListener('change', function() {
+            trnFilterStatus = this.value;
+            trnPage = 1;
+            applyTrnFilters();
+        });
+
+        // Column header click → dropdown
+        var thead = document.querySelector('#adTrnTable thead');
+        if (thead) {
+            thead.addEventListener('click', function(e) {
+                var hdr = e.target.closest('.ad-col-header');
+                if (!hdr) return;
+                openTrnColDropdown(hdr.dataset.col, hdr);
+            });
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', function(e) {
+            var dd = document.getElementById('adTrnColDropdown');
+            if (dd && dd.style.display === 'block' && !e.target.closest('.ad-col-dropdown') && !e.target.closest('.ad-col-header')) {
+                dd.style.display = 'none';
+            }
         });
 
         await loadTournamentsList();
@@ -3047,17 +3206,180 @@
         if (!client) return;
 
         var result = await client.from('tournaments')
-            .select('id,title,image,category_id,status,date_start,date_end,max_participants,bracket_type,draw_size')
+            .select('id,title,image,category_id,format,status,date_start,date_end,max_participants,bracket_type,draw_size')
             .order('created_at', { ascending: false });
 
+        var items = result.data || [];
+        trnAllData = items;
+        updateTournamentStats();
+        applyTrnFilters();
+    }
+
+    function updateTournamentStats() {
+        var upcomingStatuses = ['upcoming', 'registration_open', 'registration_closed', 'ongoing'];
+        var total = trnAllData.length;
+        var upcoming = 0;
+        var completed = 0;
+        trnAllData.forEach(function(t) {
+            if (upcomingStatuses.indexOf(t.status) !== -1) upcoming++;
+            if (t.status === 'completed') completed++;
+        });
+
+        var elTotal = document.getElementById('adTrnStatTotal');
+        var elUp = document.getElementById('adTrnStatUpcoming');
+        var elComp = document.getElementById('adTrnStatCompleted');
+        if (elTotal) elTotal.textContent = total;
+        if (elUp) elUp.textContent = upcoming;
+        if (elComp) elComp.textContent = completed;
+
+        var cards = [
+            { gender: 'men', format: 'singles', totalId: 'adTrnTotalMS', bodyId: 'adTrnBodyMS' },
+            { gender: 'women', format: 'singles', totalId: 'adTrnTotalWS', bodyId: 'adTrnBodyWS' },
+            { gender: 'men', format: 'doubles', totalId: 'adTrnTotalMD', bodyId: 'adTrnBodyMD' },
+            { gender: 'women', format: 'doubles', totalId: 'adTrnTotalWD', bodyId: 'adTrnBodyWD' }
+        ];
+
+        cards.forEach(function(card) {
+            var filtered = trnAllData.filter(function(t) {
+                var cat = categoriesMap[t.category_id];
+                return cat && cat.gender === card.gender && t.format === card.format;
+            });
+            var cardTotal = filtered.length;
+            var totalEl = document.getElementById(card.totalId);
+            var bodyEl = document.getElementById(card.bodyId);
+            if (totalEl) totalEl.textContent = cardTotal;
+            if (!bodyEl) return;
+
+            var breakdown = {};
+            filtered.forEach(function(t) {
+                var cat = categoriesMap[t.category_id];
+                if (!cat) return;
+                var key = cat.id;
+                if (!breakdown[key]) breakdown[key] = { name: isEn ? cat.name_en : cat.name, sort: cat.sort_order || 0, count: 0 };
+                breakdown[key].count++;
+            });
+
+            var sorted = Object.keys(breakdown).map(function(k) { return breakdown[k]; });
+            sorted.sort(function(a, b) { return a.sort - b.sort; });
+
+            var html = '';
+            sorted.forEach(function(row) {
+                if (row.count > 0) {
+                    var pct = cardTotal > 0 ? Math.round(row.count / cardTotal * 100) : 0;
+                    html += '<div class="ad-crt-stat-row">' +
+                        '<span class="ad-crt-stat-surface">' + row.name + '</span>' +
+                        '<div class="ad-crt-stat-bar-wrap"><div class="ad-crt-stat-bar" style="width:' + pct + '%;"></div></div>' +
+                        '<span class="ad-crt-stat-count">' + row.count + '</span>' +
+                    '</div>';
+                }
+            });
+            bodyEl.innerHTML = html;
+        });
+
+        var friendlyTotal = trnAllData.filter(function(t) { return t.format === 'mixed_doubles'; }).length;
+        var elFR = document.getElementById('adTrnTotalFR');
+        if (elFR) elFR.textContent = friendlyTotal;
+    }
+
+    // ---- Tournament Column Header ----
+    function trnColHeader(col, label) {
+        var sortable = col === 'title' || col === 'category' || col === 'status' || col === 'date_start' || col === 'date_end' || col === 'participants';
+        if (!sortable) return '<th>' + label + '</th>';
+        var isActive = trnSortCol === col;
+        var cls = 'ad-col-header' + (isActive ? ' ad-col-active' : '');
+        return '<th><div class="' + cls + '" data-col="' + col + '">' +
+            '<span>' + label + '</span>' +
+            (isActive ? '<span class="ad-sort-arrow">' + (trnSortAsc ? '↑' : '↓') + '</span>' : '') +
+            '<span class="ad-col-filter-btn">▼</span>' +
+        '</div></th>';
+    }
+
+    // ---- Tournament Apply Filters ----
+    function applyTrnFilters() {
+        var items = trnAllData.slice();
+
+        // Filter by category
+        if (trnFilterCategory) {
+            items = items.filter(function(t) {
+                return t.category_id === trnFilterCategory;
+            });
+        }
+
+        // Filter by status
+        if (trnFilterStatus) {
+            items = items.filter(function(t) {
+                return t.status === trnFilterStatus;
+            });
+        }
+
+        // Search by title
+        if (trnSearchQuery) {
+            var q = trnSearchQuery.toLowerCase();
+            items = items.filter(function(t) {
+                return (t.title || '').toLowerCase().indexOf(q) !== -1;
+            });
+        }
+
+        // Sort
+        if (trnSortCol === 'title') {
+            items.sort(function(a, b) {
+                var va = (a.title || '').toLowerCase();
+                var vb = (b.title || '').toLowerCase();
+                return trnSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            });
+        } else if (trnSortCol === 'category') {
+            items.sort(function(a, b) {
+                var ca = categoriesMap[a.category_id];
+                var cb = categoriesMap[b.category_id];
+                var va = ca ? (isEn ? ca.name_en : ca.name) : '';
+                var vb = cb ? (isEn ? cb.name_en : cb.name) : '';
+                return trnSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            });
+        } else if (trnSortCol === 'status') {
+            items.sort(function(a, b) {
+                var va = (TOURNAMENT_STATUSES[a.status] || a.status || '').toLowerCase();
+                var vb = (TOURNAMENT_STATUSES[b.status] || b.status || '').toLowerCase();
+                return trnSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            });
+        } else if (trnSortCol === 'date_start') {
+            items.sort(function(a, b) {
+                var va = a.date_start || '';
+                var vb = b.date_start || '';
+                return trnSortAsc ? (va < vb ? -1 : va > vb ? 1 : 0) : (vb < va ? -1 : vb > va ? 1 : 0);
+            });
+        } else if (trnSortCol === 'date_end') {
+            items.sort(function(a, b) {
+                var va = a.date_end || '';
+                var vb = b.date_end || '';
+                return trnSortAsc ? (va < vb ? -1 : va > vb ? 1 : 0) : (vb < va ? -1 : vb > va ? 1 : 0);
+            });
+        } else if (trnSortCol === 'participants') {
+            items.sort(function(a, b) {
+                var va = a.max_participants || 0;
+                var vb = b.max_participants || 0;
+                return trnSortAsc ? va - vb : vb - va;
+            });
+        }
+
+        // Pagination
+        var totalPages = Math.max(1, Math.ceil(items.length / TRN_PER_PAGE));
+        if (trnPage > totalPages) trnPage = totalPages;
+        var start = (trnPage - 1) * TRN_PER_PAGE;
+        var pageItems = items.slice(start, start + TRN_PER_PAGE);
+
+        renderTrnRows(pageItems);
+        renderTrnPagination(items.length, totalPages);
+    }
+
+    // ---- Tournament Render Rows ----
+    function renderTrnRows(items) {
         var table = document.getElementById('adTrnTable');
         if (!table) return;
         var tbody = table.querySelector('tbody');
-        var items = result.data || [];
 
         if (items.length === 0) {
             tbody.innerHTML =
-                '<tr><td colspan="7" style="text-align:center;padding:60px 20px;">' +
+                '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🏆</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noTournaments + '</div>' +
                     '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noTournamentsText + '</div>' +
@@ -3067,37 +3389,33 @@
 
         tbody.innerHTML = '';
         items.forEach(function(t) {
-            var thumbHtml = t.image
-                ? '<img src="' + esc(t.image) + '" class="ad-table-thumb" alt="">'
-                : '<div class="ad-table-thumb" style="background:var(--bg-elevated);"></div>';
-
             var catObj = categoriesMap[t.category_id];
             var catLabel = catObj ? (catObj.gender === 'women' ? '♀ ' : '♂ ') + (isEn ? catObj.name_en : catObj.name) : (t.category_id || L.noData);
             var statusLabel = TOURNAMENT_STATUSES[t.status] || t.status || L.noData;
             var statusClass = 'ad-status-' + (t.status || '').replace(/_/g, '-');
 
-            var dateStr = t.date_start
+            var dateStartStr = t.date_start
                 ? new Date(t.date_start + 'T00:00:00').toLocaleDateString(isEn ? 'en-US' : 'ru-RU')
                 : L.noData;
-            if (t.date_end && t.date_end !== t.date_start) {
-                dateStr += ' — ' + new Date(t.date_end + 'T00:00:00').toLocaleDateString(isEn ? 'en-US' : 'ru-RU');
-            }
+            var dateEndStr = t.date_end
+                ? new Date(t.date_end + 'T00:00:00').toLocaleDateString(isEn ? 'en-US' : 'ru-RU')
+                : '—';
 
             tbody.innerHTML +=
                 '<tr data-trn-id="' + t.id + '">' +
                     bulkCheckboxTd(t.id) +
-                    '<td>' + thumbHtml + '</td>' +
                     '<td style="font-weight:500;color:var(--text-primary);">' + (t.title || L.noData) + '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
-                    '<td><span class="ad-status-badge ' + statusClass + '">' + statusLabel + '</span></td>' +
-                    '<td>' + dateStr + '</td>' +
-                    '<td>' + (t.max_participants || L.noData) + '</td>' +
+                    '<td style="text-align:center;"><span class="ad-status-badge ' + statusClass + '">' + statusLabel + '</span></td>' +
+                    '<td style="text-align:center;">' + dateStartStr + '</td>' +
+                    '<td style="text-align:center;">' + dateEndStr + '</td>' +
+                    '<td style="text-align:center;">' + (t.max_participants || L.noData) + '</td>' +
                     '<td>' + (t.bracket_type ? '<button class="ad-btn ad-btn-sm ad-btn-secondary ad-brk-btn" data-brk-id="' + t.id + '">' + L.bracketTab + '</button>' : '') + '</td>' +
                 '</tr>';
         });
 
-        // Click bracket button
-        tbody.addEventListener('click', function(e) {
+        // Click bracket button / row
+        tbody.onclick = function(e) {
             var brkBtn = e.target.closest('.ad-brk-btn');
             if (brkBtn) {
                 e.stopPropagation();
@@ -3108,9 +3426,111 @@
             var row = e.target.closest('tr[data-trn-id]');
             if (!row) return;
             loadAndEditTournament(row.dataset.trnId);
-        });
+        };
 
-        setupBulkDelete({ tableId: 'adTrnTable', tableName: 'tournaments', reloadFn: loadTournamentsList });
+        setupBulkDelete({ tableId: 'adTrnTable', tableName: 'tournaments', reloadFn: function() { loadTournamentsList(); } });
+    }
+
+    // ---- Tournament Pagination ----
+    function renderTrnPagination(totalItems, totalPages) {
+        var existing = document.getElementById('adTrnPagination');
+        if (existing) existing.remove();
+
+        if (totalPages <= 1) return;
+
+        var wrap = document.createElement('div');
+        wrap.id = 'adTrnPagination';
+        wrap.className = 'ad-crt-pagination';
+
+        var html = '';
+        html += '<button class="ad-crt-page-btn" data-page="' + (trnPage - 1) + '"' + (trnPage <= 1 ? ' disabled' : '') + '>&laquo;</button>';
+        for (var p = 1; p <= totalPages; p++) {
+            html += '<button class="ad-crt-page-btn' + (p === trnPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
+        }
+        html += '<button class="ad-crt-page-btn" data-page="' + (trnPage + 1) + '"' + (trnPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+
+        wrap.innerHTML = html;
+
+        var tableCard = document.querySelector('#adTrnTable')?.closest('.ad-table-card');
+        if (tableCard) tableCard.after(wrap);
+
+        wrap.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ad-crt-page-btn');
+            if (!btn || btn.disabled) return;
+            trnPage = parseInt(btn.dataset.page, 10);
+            applyTrnFilters();
+        });
+    }
+
+    // ---- Tournament Column Dropdown ----
+    function openTrnColDropdown(col, hdr) {
+        var dd = document.getElementById('adTrnColDropdown');
+        if (!dd) return;
+
+        if (dd.style.display === 'block' && dd.dataset.col === col) {
+            dd.style.display = 'none';
+            return;
+        }
+        dd.dataset.col = col;
+
+        var rect = hdr.getBoundingClientRect();
+        var cardRect = dd.parentElement.getBoundingClientRect();
+        dd.style.left = Math.max(0, rect.left - cardRect.left) + 'px';
+        dd.style.top = (rect.bottom - cardRect.top + 4) + 'px';
+
+        var colLabels = { title: L.trnTitle, category: L.trnCategory, status: L.trnStatus, date_start: L.trnDateStart, date_end: L.trnDateEnd, participants: L.trnMaxParticipants };
+        var isNumeric = col === 'participants';
+        var isDate = col === 'date_start' || col === 'date_end';
+
+        var html = '<div class="ad-col-dd-title">' + (colLabels[col] || col) + '</div>';
+
+        if (isNumeric) {
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Most first' : '↓ Сначала больше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Least first' : '↑ Сначала меньше') + '</div>';
+        } else if (isDate) {
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Newest first' : '↓ Сначала новые') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Oldest first' : '↑ Сначала старые') + '</div>';
+        } else {
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ A → Z' : '↑ А → Я') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Z → A' : '↓ Я → А') + '</div>';
+        }
+
+        dd.innerHTML = html;
+        dd.style.display = 'block';
+
+        dd.querySelectorAll('.ad-col-dd-sort').forEach(function(el) {
+            el.addEventListener('click', function(ev) {
+                ev.stopPropagation();
+                trnSortCol = col;
+                trnSortAsc = this.dataset.sortDir === 'asc';
+                dd.style.display = 'none';
+                updateTrnColHeaders();
+                applyTrnFilters();
+            });
+        });
+    }
+
+    // ---- Tournament Update Column Headers ----
+    function updateTrnColHeaders() {
+        var table = document.getElementById('adTrnTable');
+        if (!table) return;
+        table.querySelectorAll('.ad-col-header').forEach(function(hdr) {
+            var c = hdr.dataset.col;
+            var isActive = trnSortCol === c;
+            hdr.classList.toggle('ad-col-active', isActive);
+            var arrow = hdr.querySelector('.ad-sort-arrow');
+            if (isActive) {
+                if (!arrow) {
+                    arrow = document.createElement('span');
+                    arrow.className = 'ad-sort-arrow';
+                    hdr.querySelector('.ad-col-filter-btn').before(arrow);
+                }
+                arrow.textContent = trnSortAsc ? '↑' : '↓';
+            } else if (arrow) {
+                arrow.remove();
+            }
+        });
     }
 
     async function loadAndEditTournament(id) {
