@@ -776,6 +776,10 @@
                         <span class="court-price">от 800 сом/час</span>
                         <span class="court-status available">4 корта свободны</span>
                     </div>
+                    <div class="court-card-actions">
+                        <a href="pages/courts.html" class="court-card-details">Подробнее →</a>
+                        <span class="court-card-cta">Забронировать</span>
+                    </div>
                 </div>
                 <div class="court-card">
                     <img src="https://images.unsplash.com/photo-1599586120429-48281b6f0ece?w=600&h=400&fit=crop&q=80" alt="Грунтовый корт">
@@ -786,6 +790,10 @@
                         <span class="court-price">от 1000 сом/час</span>
                         <span class="court-status limited">2 корта свободны</span>
                     </div>
+                    <div class="court-card-actions">
+                        <a href="pages/courts.html" class="court-card-details">Подробнее →</a>
+                        <span class="court-card-cta">Забронировать</span>
+                    </div>
                 </div>
                 <div class="court-card">
                     <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=400&fit=crop&q=80" alt="Крытый корт">
@@ -795,6 +803,10 @@
                         <span>📍 пр. Чуй 123</span>
                         <span class="court-price">от 1200 сом/час</span>
                         <span class="court-status busy">Все занято</span>
+                    </div>
+                    <div class="court-card-actions">
+                        <a href="pages/courts.html" class="court-card-details">Подробнее →</a>
+                        <span class="court-card-cta">Забронировать</span>
                     </div>
                 </div>
             </div>
@@ -816,7 +828,10 @@
                         <span class="coach-level">ITF Level 2</span>
                         <span class="coach-price">от 1500 сом/час</span>
                     </div>
-                    <a href="pages/auth.html?redirect=coaches" class="btn-invite">Записаться</a>
+                    <div class="coach-card-actions">
+                        <a href="pages/coaches.html" class="coach-card-details">Подробнее →</a>
+                        <span class="coach-card-cta">Связаться</span>
+                    </div>
                 </div>
                 <div class="coach-card">
                     <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&q=80" alt="Тренер" class="coach-photo">
@@ -827,7 +842,10 @@
                         <span class="coach-level">ITF Level 1</span>
                         <span class="coach-price">от 1200 сом/час</span>
                     </div>
-                    <a href="pages/auth.html?redirect=coaches" class="btn-invite">Записаться</a>
+                    <div class="coach-card-actions">
+                        <a href="pages/coaches.html" class="coach-card-details">Подробнее →</a>
+                        <span class="coach-card-cta">Связаться</span>
+                    </div>
                 </div>
                 <div class="coach-card">
                     <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&q=80" alt="Тренер" class="coach-photo">
@@ -838,7 +856,10 @@
                         <span class="coach-level">ITF Level 3</span>
                         <span class="coach-price">от 2000 сом/час</span>
                     </div>
-                    <a href="pages/auth.html?redirect=coaches" class="btn-invite">Записаться</a>
+                    <div class="coach-card-actions">
+                        <a href="pages/coaches.html" class="coach-card-details">Подробнее →</a>
+                        <span class="coach-card-cta">Связаться</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1043,6 +1064,7 @@
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
+    <script src="js/membership.js"></script>
     <script>
     // Load Supabase courts into main page
     (function() {
@@ -1050,6 +1072,58 @@
         if (!client) return;
         var grid = document.querySelector('.section-courts .courts-grid');
         if (!grid) return;
+
+        var _courtAccess = 'guest';
+        var _courtToastTimer = null;
+
+        function detectCourtAccess() {
+            if (!client) return Promise.resolve();
+            return client.auth.getSession().then(function(res) {
+                if (!res.data || !res.data.session) return;
+                _courtAccess = 'registered';
+                if (typeof window.checkMembership === 'function') {
+                    return window.checkMembership().then(function(mem) {
+                        if (mem && mem.active) _courtAccess = 'member';
+                    }).catch(function() {});
+                }
+            }).catch(function() {});
+        }
+
+        function showCourtToast(message) {
+            var old = document.querySelector('.court-toast');
+            if (old) old.remove();
+            if (_courtToastTimer) clearTimeout(_courtToastTimer);
+            var toast = document.createElement('div');
+            toast.className = 'court-toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            requestAnimationFrame(function() { toast.classList.add('visible'); });
+            _courtToastTimer = setTimeout(function() {
+                toast.classList.remove('visible');
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 3000);
+        }
+
+        // CTA click delegation
+        grid.addEventListener('click', function(e) {
+            var cta = e.target.closest('.court-card-cta');
+            if (!cta) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (_courtAccess === 'guest') {
+                showCourtToast('Зарегистрируйтесь и станьте членом КСЛТ');
+                return;
+            }
+            if (_courtAccess === 'registered') {
+                showCourtToast('Станьте членом КСЛТ для бронирования');
+                return;
+            }
+            var id = cta.getAttribute('data-id');
+            window.location.href = 'pages/court.html?id=' + id;
+        });
+
+        detectCourtAccess();
+
         client.from('courts').select('*').order('created_at', { ascending: false }).limit(6)
             .then(function(res) {
                 if (res.error || !res.data || !res.data.length) return;
@@ -1062,7 +1136,7 @@
                     var total = 0; ct.forEach(function(c) { total += (c.count || 0); });
                     var minPrice = 0; ct.forEach(function(c) { if (c.price && (!minPrice || c.price < minPrice)) minPrice = c.price; });
                     var addr = [row.street, row.building, row.city || 'Бишкек'].filter(Boolean).join(', ');
-                    html += '<a href="pages/court.html?id=' + row.id + '" class="court-card">' +
+                    html += '<div class="court-card">' +
                         '<div style="position:relative;">' +
                             '<img src="' + (row.photo || 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=400&fit=crop&q=80') + '" alt="' + row.name + '">' +
                             '<span style="position:absolute;top:8px;left:8px;background:#CCFF00;color:#000;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:100px;text-transform:uppercase;">Новый</span>' +
@@ -1074,9 +1148,13 @@
                             (minPrice ? '<span class="court-price">от ' + minPrice + ' сом/час</span>' : '') +
                             '<span class="court-status available">' + total + ' кортов</span>' +
                         '</div>' +
-                    '</a>';
+                        '<div class="court-card-actions">' +
+                            '<a href="pages/court.html?id=' + row.id + '" class="court-card-details">Подробнее →</a>' +
+                            '<span class="court-card-cta" data-id="' + row.id + '">Забронировать</span>' +
+                        '</div>' +
+                    '</div>';
                 });
-                grid.insertAdjacentHTML('afterbegin', html);
+                grid.innerHTML = html;
             });
     })();
     // Load Supabase coaches into main page
@@ -1086,18 +1164,58 @@
         var grid = document.querySelector('.section-coaches .coaches-grid');
         if (!grid) return;
 
-        // Check auth
-        var isLoggedIn = false;
-        try {
-            var key = 'sb-qqkzszesviukopgjbead-auth-token';
-            var raw = localStorage.getItem(key);
-            if (raw) {
-                var s = JSON.parse(raw);
-                if (s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000)) isLoggedIn = true;
-            }
-        } catch(e) {}
+        var _coachAccess = 'guest';
+        var _coachToastTimer = null;
 
-        client.from('coaches').select('*').order('created_at', { ascending: false }).limit(6)
+        function detectCoachAccess() {
+            if (!client) return Promise.resolve();
+            return client.auth.getSession().then(function(res) {
+                if (!res.data || !res.data.session) return;
+                _coachAccess = 'registered';
+                if (typeof window.checkMembership === 'function') {
+                    return window.checkMembership().then(function(mem) {
+                        if (mem && mem.active) _coachAccess = 'member';
+                    }).catch(function() {});
+                }
+            }).catch(function() {});
+        }
+
+        function showCoachToast(message) {
+            var old = document.querySelector('.coach-toast');
+            if (old) old.remove();
+            if (_coachToastTimer) clearTimeout(_coachToastTimer);
+            var toast = document.createElement('div');
+            toast.className = 'coach-toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            requestAnimationFrame(function() { toast.classList.add('visible'); });
+            _coachToastTimer = setTimeout(function() {
+                toast.classList.remove('visible');
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 3000);
+        }
+
+        // CTA click delegation
+        grid.addEventListener('click', function(e) {
+            var cta = e.target.closest('.coach-card-cta');
+            if (!cta) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (_coachAccess === 'guest') {
+                showCoachToast('Зарегистрируйтесь и станьте членом КСЛТ');
+                return;
+            }
+            if (_coachAccess === 'registered') {
+                showCoachToast('Станьте членом КСЛТ чтобы связаться');
+                return;
+            }
+            var id = cta.getAttribute('data-id');
+            window.location.href = 'pages/coach.html?id=' + id;
+        });
+
+        detectCoachAccess();
+
+        client.from('coaches').select('*').order('created_at', { ascending: false }).limit(9)
             .then(function(res) {
                 if (res.error || !res.data || !res.data.length) return;
                 var html = '';
@@ -1108,24 +1226,7 @@
                     var price = row.price ? 'от ' + row.price + ' сом/час' : '';
                     var photo = row.photo || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&q=80';
 
-                    var contactHtml = '';
-                    if (isLoggedIn) {
-                        var btns = '';
-                        if (row.telegram) {
-                            var tgUser = row.telegram.replace('@', '');
-                            btns += '<a href="https://t.me/' + tgUser + '" target="_blank" class="btn-invite" style="flex:1;text-align:center;">Telegram</a>';
-                        }
-                        if (row.whatsapp) {
-                            var waNum = row.whatsapp.replace(/\D/g, '');
-                            btns += '<a href="https://wa.me/' + waNum + '" target="_blank" class="btn-invite" style="flex:1;text-align:center;">WhatsApp</a>';
-                        }
-                        if (!btns) btns = '<span style="color:rgba(255,255,255,0.4);font-size:0.85rem;">Контакты не указаны</span>';
-                        contactHtml = '<div style="display:flex;gap:8px;width:100%;">' + btns + '</div>';
-                    } else {
-                        contactHtml = '<a href="pages/auth.html?redirect=coaches" class="btn-invite">Войти чтобы связаться</a>';
-                    }
-
-                    html += '<a href="pages/coach.html?id=' + row.id + '" class="coach-card">' +
+                    html += '<div class="coach-card">' +
                         '<img src="' + photo + '" alt="' + name + '" class="coach-photo">' +
                         '<div class="coach-info">' +
                             '<h4>' + name + '</h4>' +
@@ -1133,10 +1234,13 @@
                             (exp ? '<span class="coach-experience">' + exp + '</span>' : '') +
                             (price ? '<span class="coach-price">' + price + '</span>' : '') +
                         '</div>' +
-                        contactHtml +
-                    '</a>';
+                        '<div class="coach-card-actions">' +
+                            '<a href="pages/coach.html?id=' + row.id + '" class="coach-card-details">Подробнее →</a>' +
+                            '<span class="coach-card-cta" data-id="' + row.id + '">Связаться</span>' +
+                        '</div>' +
+                    '</div>';
                 });
-                grid.insertAdjacentHTML('afterbegin', html);
+                grid.innerHTML = html;
             });
     })();
     // HTML escape helper

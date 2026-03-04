@@ -89,6 +89,8 @@
     var ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
     var GUEST_VISIBLE = 8;
     var GUEST_BLURRED = 4;
+    var PER_PAGE = 20;
+    var _currentPage = 1;
 
     var emptySvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
     var lockSvg = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>';
@@ -101,8 +103,10 @@
     async function init() {
         renderHero();
         renderFilters();
+        initPaginationClicks();
         await detectAccess();
         await loadPartners();
+        renderSponsors();
     }
 
     // ---- Detect access level ----
@@ -216,6 +220,7 @@
 
         document.getElementById('ptSearch').addEventListener('input', function(e) {
             _searchQuery = e.target.value.toLowerCase().trim();
+            _currentPage = 1;
             renderGrid();
         });
 
@@ -223,6 +228,7 @@
             var btn = e.target.closest('.pt-filter-btn');
             if (!btn) return;
             _currentFilter = btn.dataset.filter;
+            _currentPage = 1;
             var btns = el.querySelectorAll('.pt-filter-btn');
             for (var j = 0; j < btns.length; j++) {
                 btns[j].classList.toggle('active', btns[j].dataset.filter === _currentFilter);
@@ -293,15 +299,18 @@
 
         if (_partners.length === 0) {
             html = '<div class="pt-grid"><div class="pt-empty">' + emptySvg + '<p>' + L.empty + '</p></div></div>';
+            renderPagination(0, 1);
         } else if (filtered.length === 0) {
             html = '<div class="pt-grid"><div class="pt-empty">' + emptySvg + '<p>' + L.emptyFiltered + '</p></div></div>';
-        } else {
-            var total = isGuest ? Math.min(filtered.length, GUEST_VISIBLE + GUEST_BLURRED) : filtered.length;
+            renderPagination(0, 1);
+        } else if (isGuest) {
+            // Guest: no pagination, limited view
+            var total = Math.min(filtered.length, GUEST_VISIBLE + GUEST_BLURRED);
 
             html = '<div class="pt-grid">';
             for (var i = 0; i < total; i++) {
                 var blurClass = '';
-                if (isGuest && i >= GUEST_VISIBLE) {
+                if (i >= GUEST_VISIBLE) {
                     var level = i - GUEST_VISIBLE + 1;
                     blurClass = ' pt-card-blur pt-card-blur-' + level;
                 }
@@ -310,7 +319,7 @@
             html += '</div>';
 
             // Guest CTA overlay
-            if (isGuest && filtered.length > GUEST_VISIBLE) {
+            if (filtered.length > GUEST_VISIBLE) {
                 var hiddenCount = filtered.length - GUEST_VISIBLE;
                 html += '<div class="pt-guest-overlay">' +
                     '<div class="pt-guest-cta">' +
@@ -322,6 +331,18 @@
                     '</div>' +
                 '</div>';
             }
+            renderPagination(0, 1);
+        } else {
+            // Registered/member: paginate
+            var start = (_currentPage - 1) * PER_PAGE;
+            var pageItems = filtered.slice(start, start + PER_PAGE);
+
+            html = '<div class="pt-grid">';
+            for (var i = 0; i < pageItems.length; i++) {
+                html += renderCard(pageItems[i], '');
+            }
+            html += '</div>';
+            renderPagination(filtered.length, _currentPage);
         }
 
         el.innerHTML = html;
@@ -361,6 +382,71 @@
 
         html += '</div>';
         return html;
+    }
+
+    // ---- PAGINATION ----
+    function renderPagination(total, page) {
+        var container = document.getElementById('ptPagination');
+        if (!container) return;
+
+        var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        var prevLabel = isEn ? '\u2190 Back' : '\u2190 Назад';
+        var nextLabel = isEn ? 'Next \u2192' : 'Далее \u2192';
+        var html = '<div class="pt-pagination">';
+        html += '<button class="pt-page-btn pt-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + prevLabel + '</button>';
+        for (var p = 1; p <= totalPages; p++) {
+            html += '<button class="pt-page-btn pt-page-num' + (p === page ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
+        }
+        html += '<button class="pt-page-btn pt-page-next"' + (page === totalPages ? ' disabled' : '') + '>' + nextLabel + '</button>';
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function initPaginationClicks() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.pt-page-btn');
+            if (!btn || btn.disabled) return;
+
+            if (btn.classList.contains('pt-page-prev')) {
+                _currentPage = Math.max(1, _currentPage - 1);
+            } else if (btn.classList.contains('pt-page-next')) {
+                _currentPage++;
+            } else if (btn.dataset.page) {
+                _currentPage = parseInt(btn.dataset.page);
+            }
+            renderGrid();
+            var gridEl = document.getElementById('ptGrid');
+            if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+    // ---- SPONSORS ----
+    function renderSponsors() {
+        var container = document.getElementById('ptSponsors');
+        if (!container) return;
+
+        var title = isEn ? 'Partners & Sponsors' : 'Партнёры и спонсоры';
+        var general = isEn ? 'General sponsor' : 'Генеральный спонсор';
+        container.innerHTML =
+            '<div class="section-header"><h2>' + title + '</h2></div>' +
+            '<div class="sponsor-hero">' +
+                '<span class="sponsor-hero-label">' + general + '</span>' +
+                '<a href="#" class="sponsor-hero-logo">' +
+                    '<img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">' +
+                '</a>' +
+            '</div>' +
+            '<div class="sponsors-cloud">' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>' +
+            '</div>';
     }
 
     // ---- Invite click delegation ----

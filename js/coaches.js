@@ -54,6 +54,45 @@
         }
     } catch(e) {}
 
+    var _accessLevel = 'guest';
+    var _toastTimer = null;
+    var PER_PAGE = 20;
+    var _currentPage = 1;
+    var _currentFilter = 'all';
+
+    async function detectAccess() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        try {
+            var res = await client.auth.getSession();
+            if (!res.data || !res.data.session) return;
+        } catch(e) { return; }
+        _accessLevel = 'registered';
+        if (typeof window.checkMembership === 'function') {
+            try {
+                var mem = await window.checkMembership();
+                if (mem && mem.active) _accessLevel = 'member';
+            } catch(e) {}
+        }
+    }
+
+    function showToast(message, type) {
+        var old = document.querySelector('.co-toast');
+        if (old) old.remove();
+        if (_toastTimer) clearTimeout(_toastTimer);
+        var toast = document.createElement('div');
+        toast.className = 'co-toast' + (type ? ' ' + type : '');
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        requestAnimationFrame(function() {
+            toast.classList.add('visible');
+        });
+        _toastTimer = setTimeout(function() {
+            toast.classList.remove('visible');
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 3000);
+    }
+
     // All data (Supabase + static)
     var allData = [];
 
@@ -149,7 +188,11 @@
         renderBackLink();
         renderGrid('all');
         initFilterClicks();
+        initPaginationClicks();
+        initCtaClicks();
         initScrollAnimations();
+        renderSponsors();
+        detectAccess();
     }
 
     function renderBackLink() {
@@ -204,19 +247,27 @@
     }
 
     function renderGrid(filter) {
+        if (filter !== undefined) _currentFilter = filter;
         var container = document.getElementById('coachesGrid');
         if (!container) return;
         var filtered = allData;
-        if (filter !== 'all') {
+        if (_currentFilter !== 'all') {
             filtered = allData.filter(function(c) {
-                return (c.tags || []).indexOf(filter) !== -1;
+                return (c.tags || []).indexOf(_currentFilter) !== -1;
             });
         }
+
+        var start = (_currentPage - 1) * PER_PAGE;
+        var pageItems = filtered.slice(start, start + PER_PAGE);
+
         var detailBase = isEn ? 'coach-en.html' : 'coach.html';
         var authLink = isEn ? 'auth-en.html?redirect=coaches' : 'auth.html?redirect=coaches';
         var html = '<div class="co-grid">';
-        filtered.forEach(function(c) {
-            var contactHtml = '<span class="co-card-btn">' + L.detailsBtn + ' →</span>';
+        pageItems.forEach(function(c) {
+            var contactHtml = '<div class="co-card-actions">' +
+                '<span class="co-card-btn">' + L.detailsBtn + ' →</span>' +
+                '<span class="co-card-cta" data-id="' + c.id + '">' + (isEn ? 'Contact' : 'Связаться') + '</span>' +
+            '</div>';
 
             // Stats
             var statsHtml = '';
@@ -242,7 +293,96 @@
         });
         html += '</div>';
         container.innerHTML = html;
+        renderPagination(filtered.length, _currentPage);
         initScrollAnimations();
+    }
+
+    // ---- PAGINATION ----
+    function renderPagination(total, page) {
+        var container = document.getElementById('coachesPagination');
+        if (!container) return;
+
+        var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        var prevLabel = isEn ? '\u2190 Back' : '\u2190 Назад';
+        var nextLabel = isEn ? 'Next \u2192' : 'Далее \u2192';
+        var html = '<div class="co-pagination">';
+        html += '<button class="co-page-btn co-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + prevLabel + '</button>';
+        for (var p = 1; p <= totalPages; p++) {
+            html += '<button class="co-page-btn co-page-num' + (p === page ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
+        }
+        html += '<button class="co-page-btn co-page-next"' + (page === totalPages ? ' disabled' : '') + '>' + nextLabel + '</button>';
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function initPaginationClicks() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.co-page-btn');
+            if (!btn || btn.disabled) return;
+
+            if (btn.classList.contains('co-page-prev')) {
+                _currentPage = Math.max(1, _currentPage - 1);
+            } else if (btn.classList.contains('co-page-next')) {
+                _currentPage++;
+            } else if (btn.dataset.page) {
+                _currentPage = parseInt(btn.dataset.page);
+            }
+            renderGrid();
+            var gridEl = document.getElementById('coachesGrid');
+            if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+    // ---- SPONSORS ----
+    function renderSponsors() {
+        var container = document.getElementById('coachesSponsors');
+        if (!container) return;
+
+        var title = isEn ? 'Partners & Sponsors' : 'Партнёры и спонсоры';
+        var general = isEn ? 'General sponsor' : 'Генеральный спонсор';
+        container.innerHTML =
+            '<div class="section-header"><h2>' + title + '</h2></div>' +
+            '<div class="sponsor-hero">' +
+                '<span class="sponsor-hero-label">' + general + '</span>' +
+                '<a href="#" class="sponsor-hero-logo">' +
+                    '<img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">' +
+                '</a>' +
+            '</div>' +
+            '<div class="sponsors-cloud">' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>' +
+            '</div>';
+    }
+
+    function initCtaClicks() {
+        var grid = document.getElementById('coachesGrid');
+        if (!grid) return;
+        grid.addEventListener('click', function(e) {
+            var cta = e.target.closest('.co-card-cta');
+            if (!cta) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (_accessLevel === 'guest') {
+                showToast(isEn ? 'Sign up and become a KSLT member' : 'Зарегистрируйтесь и станьте членом КСЛТ', 'info');
+                return;
+            }
+            if (_accessLevel === 'registered') {
+                showToast(isEn ? 'Become a KSLT member to contact' : 'Станьте членом КСЛТ чтобы связаться', 'info');
+                return;
+            }
+            var id = cta.getAttribute('data-id');
+            var detailBase = isEn ? 'coach-en.html' : 'coach.html';
+            window.location.href = detailBase + '?id=' + id;
+        });
     }
 
     function initFilterClicks() {
@@ -250,6 +390,7 @@
             if (!e.target.classList.contains('co-filter-btn')) return;
             document.querySelectorAll('.co-filter-btn').forEach(function(b) { b.classList.remove('active'); });
             e.target.classList.add('active');
+            _currentPage = 1;
             renderGrid(e.target.getAttribute('data-filter'));
         });
     }

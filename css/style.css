@@ -2622,7 +2622,8 @@ h2 {
     cursor: pointer;
     text-decoration: none;
     color: inherit;
-    display: block;
+    display: flex;
+    flex-direction: column;
 }
 
 .court-card:hover {
@@ -2641,6 +2642,7 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    flex-grow: 1;
 }
 
 .court-info h4 {
@@ -2702,6 +2704,79 @@ h2 {
     font-weight: 500;
 }
 
+.court-card-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0 var(--space-lg) var(--space-lg);
+}
+
+.court-card-details,
+.court-card-cta {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    border-radius: var(--radius-full);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.court-card-details {
+    background: none;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+}
+
+.court-card-details:hover {
+    background: var(--accent);
+    color: #000;
+}
+
+.court-card-cta {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: var(--bg-primary);
+    font-weight: 700;
+}
+
+.court-card-cta:hover {
+    opacity: 0.85;
+}
+
+/* Court toast */
+.court-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    z-index: 10000;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(30, 30, 30, 0.95);
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    white-space: nowrap;
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.court-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
 /* ========================================
    COACHES SECTION
    ======================================== */
@@ -2754,6 +2829,7 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex-grow: 1;
 }
 
 .coach-info h4 {
@@ -2778,6 +2854,80 @@ h2 {
     font-size: 0.9rem;
     color: var(--text-primary);
     font-weight: 600;
+}
+
+.coach-card-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: auto;
+    width: 100%;
+}
+
+.coach-card-details,
+.coach-card-cta {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    border-radius: var(--radius-full);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.coach-card-details {
+    background: none;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+}
+
+.coach-card-details:hover {
+    background: var(--accent);
+    color: #000;
+}
+
+.coach-card-cta {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: var(--bg-primary);
+    font-weight: 700;
+}
+
+.coach-card-cta:hover {
+    opacity: 0.85;
+}
+
+/* Coach toast */
+.coach-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    z-index: 10000;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(30, 30, 30, 0.95);
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    white-space: nowrap;
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.coach-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
 /* ========================================

@@ -71,6 +71,44 @@
     var currentTypeFilter = 'all';
     var currentSurfaceFilter = 'all';
 
+    var _accessLevel = 'guest';
+    var PER_PAGE = 20;
+    var _currentPage = 1;
+    var _toastTimer = null;
+
+    async function detectAccess() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        try {
+            var res = await client.auth.getSession();
+            if (!res.data || !res.data.session) return;
+        } catch(e) { return; }
+        _accessLevel = 'registered';
+        if (typeof window.checkMembership === 'function') {
+            try {
+                var mem = await window.checkMembership();
+                if (mem && mem.active) _accessLevel = 'member';
+            } catch(e) {}
+        }
+    }
+
+    function showToast(message, type) {
+        var old = document.querySelector('.ct-toast');
+        if (old) old.remove();
+        if (_toastTimer) clearTimeout(_toastTimer);
+        var toast = document.createElement('div');
+        toast.className = 'ct-toast' + (type ? ' ' + type : '');
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        requestAnimationFrame(function() {
+            toast.classList.add('visible');
+        });
+        _toastTimer = setTimeout(function() {
+            toast.classList.remove('visible');
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 3000);
+    }
+
     var courtPage = window.location.pathname.indexOf('court.html') !== -1 || window.location.pathname.indexOf('court-en.html') !== -1;
     var isListPage = window.location.pathname.indexOf('courts.html') !== -1 || window.location.pathname.indexOf('courts-en.html') !== -1;
     var isDetailPage = courtPage && !isListPage;
@@ -250,7 +288,11 @@
         renderBackLink();
         renderGrid();
         initFilterClicks();
+        initPaginationClicks();
+        initCtaClicks();
         initScrollAnimations();
+        renderSponsors();
+        detectAccess();
     }
 
     function renderBackLink() {
@@ -339,10 +381,13 @@
             });
         }
 
+        var start = (_currentPage - 1) * PER_PAGE;
+        var pageItems = filtered.slice(start, start + PER_PAGE);
+
         var detailBase = isEn ? 'court-en.html' : 'court.html';
 
         var html = '<div class="ct-grid">';
-        filtered.forEach(function(c) {
+        pageItems.forEach(function(c) {
             var typeLabel = c._typeDesc || (c.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor);
             var newBadge = c._isNew ? '<span class="ct-new-badge">' + L_labels.newBadge + '</span>' : '';
 
@@ -363,13 +408,105 @@
                         (c.rating ? '<div class="ct-card-stat"><div class="ct-card-stat-num">\u2605 ' + c.rating + '</div><div class="ct-card-stat-label">' + L_labels.rating + '</div></div>' : '') +
                     '</div>' +
                     (c.price ? '<div class="ct-card-price">' + L_labels.priceFrom + ' <strong>' + c.price + '</strong> ' + L_labels.priceCurrency + '</div>' : '') +
-                    '<span class="ct-card-btn">' + L_labels.detailsBtn + ' \u2192</span>' +
+                    '<div class="ct-card-actions">' +
+                        '<span class="ct-card-btn">' + L_labels.detailsBtn + ' \u2192</span>' +
+                        '<span class="ct-card-cta" data-id="' + c.id + '">' + (isEn ? 'Book' : 'Забронировать') + '</span>' +
+                    '</div>' +
                 '</div>' +
             '</a>';
         });
         html += '</div>';
         container.innerHTML = html;
+        renderPagination(filtered.length, _currentPage);
         initScrollAnimations();
+    }
+
+    // ---- PAGINATION ----
+    function renderPagination(total, page) {
+        var container = document.getElementById('courtsPagination');
+        if (!container) return;
+
+        var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        var prevLabel = isEn ? '\u2190 Back' : '\u2190 Назад';
+        var nextLabel = isEn ? 'Next \u2192' : 'Далее \u2192';
+        var html = '<div class="ct-pagination">';
+        html += '<button class="ct-page-btn ct-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + prevLabel + '</button>';
+        for (var p = 1; p <= totalPages; p++) {
+            html += '<button class="ct-page-btn ct-page-num' + (p === page ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
+        }
+        html += '<button class="ct-page-btn ct-page-next"' + (page === totalPages ? ' disabled' : '') + '>' + nextLabel + '</button>';
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function initPaginationClicks() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ct-page-btn');
+            if (!btn || btn.disabled) return;
+
+            if (btn.classList.contains('ct-page-prev')) {
+                _currentPage = Math.max(1, _currentPage - 1);
+            } else if (btn.classList.contains('ct-page-next')) {
+                _currentPage++;
+            } else if (btn.dataset.page) {
+                _currentPage = parseInt(btn.dataset.page);
+            }
+            renderGrid();
+            var gridEl = document.getElementById('courtsGrid');
+            if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+    // ---- SPONSORS ----
+    function renderSponsors() {
+        var container = document.getElementById('courtsSponsors');
+        if (!container) return;
+
+        var title = isEn ? 'Partners & Sponsors' : 'Партнёры и спонсоры';
+        var general = isEn ? 'General sponsor' : 'Генеральный спонсор';
+        container.innerHTML =
+            '<div class="section-header"><h2>' + title + '</h2></div>' +
+            '<div class="sponsor-hero">' +
+                '<span class="sponsor-hero-label">' + general + '</span>' +
+                '<a href="#" class="sponsor-hero-logo">' +
+                    '<img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">' +
+                '</a>' +
+            '</div>' +
+            '<div class="sponsors-cloud">' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>' +
+            '</div>';
+    }
+
+    function initCtaClicks() {
+        var grid = document.getElementById('courtsGrid');
+        if (!grid) return;
+        grid.addEventListener('click', function(e) {
+            var cta = e.target.closest('.ct-card-cta');
+            if (!cta) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (_accessLevel === 'guest') {
+                showToast(isEn ? 'Sign up and become a KSLT member' : 'Зарегистрируйтесь и станьте членом КСЛТ', 'info');
+                return;
+            }
+            if (_accessLevel === 'registered') {
+                showToast(isEn ? 'Become a KSLT member to book' : 'Станьте членом КСЛТ для бронирования', 'info');
+                return;
+            }
+            var id = cta.getAttribute('data-id');
+            var detailBase = isEn ? 'court-en.html' : 'court.html';
+            window.location.href = detailBase + '?id=' + id;
+        });
     }
 
     function initFilterClicks() {
@@ -380,11 +517,13 @@
                 currentTypeFilter = e.target.getAttribute('data-filter-type');
                 e.target.closest('.ct-filter-group').querySelectorAll('.ct-filter-btn').forEach(function(b) { b.classList.remove('active'); });
                 e.target.classList.add('active');
+                _currentPage = 1;
                 renderGrid();
             } else if (e.target.hasAttribute('data-filter-surface')) {
                 currentSurfaceFilter = e.target.getAttribute('data-filter-surface');
                 e.target.closest('.ct-filter-group').querySelectorAll('.ct-filter-btn').forEach(function(b) { b.classList.remove('active'); });
                 e.target.classList.add('active');
+                _currentPage = 1;
                 renderGrid();
             }
         });
