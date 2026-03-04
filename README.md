@@ -1,155 +1,161 @@
 # KSLT — Kyrgyzstan Social Lawn Tennis
 
-A full-featured tennis community platform for Kyrgyzstan, featuring player rankings, tournament management, coach profiles, court listings, and a user dashboard with Supabase backend.
+Теннисное сообщество Кыргызстана — платформа для игроков, тренеров, турниров и кортов.
 
-## Features
+## Возможности
 
-- **Multi-language** — Russian (base), English, Kyrgyz
-- **Player Rankings** — Points-based rating system with categories (PRO, A, B, C, Juniors, Women)
-- **Tournaments** — Event listings, bracket generation, match results
-- **Coaches & Courts** — Searchable profiles with booking-ready infrastructure
-- **News** — Articles with category filtering and full article view
-- **Authentication** — Email/password + Google OAuth via Supabase Auth
-- **User Dashboard** — Profile management, avatar upload with crop, password change, stats
-- **Responsive Design** — Mobile-first, tested on 375px–1920px+
+- **Рейтинговая система** — очки по категориям (Tour → Futures → Challenger → Masters → Pro-Masters)
+- **Турниры** — расписание, турнирная сетка, жеребьёвка, автоподсчёт очков
+- **Тренеры и корты** — каталоги с фильтрами, пагинацией, promoted-карточки
+- **Найти партнёра** — поиск теннисистов для игры, приглашения через Telegram
+- **Новости** — статьи с фото, голосования, счётчик просмотров
+- **Личный кабинет** — профиль, аватар с кропом, статистика, настройки
+- **Админ-панель** — CRUD всех сущностей, управление рейтингом, пользователями, оплатами
+- **3 языка** — Русский (основной), English, Кыргызча
+- **Адаптивный дизайн** — 375px – 1920px+
 
-## Tech Stack
+## Стек технологий
 
-| Layer | Technology |
-|-------|-----------|
+| Слой | Технология |
+|------|-----------|
 | Frontend | HTML5, CSS3, Vanilla JavaScript |
-| Backend | [Supabase](https://supabase.com) (PostgreSQL, Auth, Storage, RLS) |
-| Design | Dark theme, accent `#CCFF00`, Inter font, glassmorphism |
-| Auth | Supabase Auth (email/password, Google OAuth) |
-| Storage | Supabase Storage (avatar uploads) |
-| Libraries | [Cropper.js](https://fengyuanchen.github.io/cropperjs/) (avatar crop) |
+| Backend | [Supabase](https://supabase.com) (PostgreSQL, Auth, Storage, RLS, Edge Functions) |
+| Дизайн | Dark theme, accent `#CCFF00`, Inter font, glassmorphism |
+| Авторизация | Supabase Auth (email/пароль, Google OAuth) |
+| Библиотеки | [Cropper.js](https://fengyuanchen.github.io/cropperjs/) (кроп аватара, CDN) |
 
-## Project Structure
+---
+
+## Быстрый старт — пошаговая инструкция
+
+### Что нужно
+
+- Современный браузер (Chrome, Firefox, Safari, Edge)
+- Один из вариантов локального сервера (см. шаг 2)
+
+### Шаг 1. Клонировать репозиторий
+
+```bash
+git clone https://github.com/bossyko/KSLT-project.git
+cd KSLT-project
+```
+
+### Шаг 2. Запустить локальный сервер
+
+Сайт — статические файлы, но для работы Supabase SDK нужен HTTP-сервер (не `file://`).
+
+**Вариант A — Python (есть на macOS/Linux из коробки):**
+```bash
+python3 -m http.server 8080
+```
+
+**Вариант B — Node.js (npx, без установки):**
+```bash
+npx serve .
+```
+
+**Вариант C — VS Code:**
+1. Установить расширение **Live Server**
+2. Правый клик на `index.html` → **Open with Live Server**
+
+### Шаг 3. Открыть в браузере
+
+```
+http://localhost:8080
+```
+
+Готово! Сайт работает — данные загружаются из Supabase автоматически.
+
+---
+
+## Что доступно без дополнительных настроек
+
+| Функция | Работает? |
+|---------|-----------|
+| Просмотр всех страниц | Да |
+| Данные из Supabase (корты, тренеры, турниры, рейтинг, новости) | Да |
+| Регистрация / Вход | Да |
+| Личный кабинет | Да (после входа) |
+| Админ-панель | Да (нужен аккаунт с ролью admin/manager) |
+
+Supabase anon key и URL уже в коде (`js/supabase-config.js`). Это **публичные** ключи — безопасность обеспечивается RLS-политиками на уровне базы данных.
+
+---
+
+## Структура проекта
 
 ```
 KSLT/
-├── index.html / index-en.html / index-kg.html   # Entry points (3 languages)
-├── README.md
+├── index.html / index-en.html          # Главная (RU / EN)
 │
-├── pages/                                        # All application pages
-│   ├── auth.html / auth-en.html                  #   Login / Register
-│   ├── dashboard.html / dashboard-en.html        #   User dashboard
-│   ├── tournaments.html / tournament.html        #   Tournament list & detail
-│   ├── players.html / player.html                #   Rankings & player profile
-│   ├── coaches.html / coach.html                 #   Coaches list & profile
-│   ├── courts.html / court.html                  #   Courts list & detail
-│   ├── news.html / news-en.html                  #   News & articles
-│   └── about.html / faq.html / rules.html        #   Info pages
+├── pages/                               # Все страницы
+│   ├── auth.html / auth-en.html         #   Авторизация
+│   ├── dashboard.html / dashboard-en.html #   Личный кабинет
+│   ├── admin.html / admin-en.html       #   Админ-панель
+│   ├── tournaments.html / tournament.html #   Турниры + детали
+│   ├── players.html / player.html       #   Рейтинг + профиль игрока
+│   ├── coaches.html / coach.html        #   Тренеры + профиль
+│   ├── courts.html / court.html         #   Корты + детали
+│   ├── news.html / news-en.html         #   Новости
+│   ├── partners.html / partners-en.html #   Найти партнёра
+│   ├── services.html / services-en.html #   Услуги
+│   ├── info.html / info-en.html         #   Информация
+│   └── about / faq / rules / pricing    #   Инфо-страницы
 │
-├── css/                                          # Stylesheets
-│   ├── style.css                                 #   Design system & global styles
-│   ├── dashboard.css                             #   Dashboard layout & components
-│   ├── tournaments.css                           #   Tournament pages
-│   ├── tournament-detail.css                     #   Tournament brackets & detail
-│   ├── players.css                               #   Rankings page
-│   ├── player.css                                #   Player profile
-│   ├── coaches.css                               #   Coaches pages
-│   ├── courts.css                                #   Courts pages
-│   ├── news.css                                  #   News pages
-│   └── info-pages.css                            #   About, FAQ, Rules
+├── css/                                 # Стили (19 675 строк)
+│   ├── style.css                        #   Дизайн-система (4 692)
+│   ├── admin.css                        #   Админ-панель (2 124)
+│   ├── players.css                      #   Рейтинги (1 227)
+│   ├── news.css                         #   Новости (1 189)
+│   ├── partners.css                     #   Партнёры (980)
+│   ├── courts.css                       #   Корты (908)
+│   ├── coaches.css                      #   Тренеры (731)
+│   └── ...                              #   Остальные
 │
-├── js/                                           # Application logic
-│   ├── script.js                                 #   Global (header, burger, lang)
-│   ├── supabase-config.js                        #   Supabase client init
-│   ├── auth.js                                   #   Login/register logic
-│   ├── auth-guard.js                             #   Route protection middleware
-│   ├── auth-nav.js                               #   Logged-in nav toggle
-│   ├── dashboard.js                              #   Dashboard logic
-│   ├── players.js                                #   Rankings logic
-│   ├── player.js                                 #   Player profile logic
-│   ├── coaches.js                                #   Coaches logic
-│   ├── courts.js                                 #   Courts logic
-│   ├── news.js                                   #   News logic
-│   ├── tournament-detail.js                      #   Tournament bracket viewer
-│   └── tournament-generator.js                   #   Bracket generation
+├── js/                                  # Логика (22 046 строк)
+│   ├── admin.js                         #   Админ-панель (11 100+)
+│   ├── dashboard.js                     #   Личный кабинет (1 233)
+│   ├── tournament-detail.js             #   Турнирная сетка (1 153)
+│   ├── courts.js                        #   Корты (723)
+│   ├── players.js                       #   Рейтинги (693)
+│   ├── partners.js                      #   Партнёры (667)
+│   ├── coaches.js                       #   Тренеры (561)
+│   ├── supabase-config.js               #   Supabase клиент
+│   └── ...                              #   Остальные
 │
-├── data/                                         # Static data (RU + EN)
-│   ├── tournaments-data.js / -en.js
-│   ├── tournament-detail-data.js / -en.js
-│   ├── players-data.js / -en.js
-│   ├── coaches-data.js / -en.js
-│   ├── courts-data.js / -en.js
-│   └── news-data.js / -en.js
-│
-├── images/                                       # Static assets
-├── postman/                                      # API test collections
-│
-└── supabase/                                     # Database migrations
-    ├── schema.sql                                #   Tables & RLS policies
-    ├── seed.sql                                  #   Initial data
-    ├── migrate-players.sql                       #   Player data migration
-    └── add-social-fields.sql                     #   Social media fields
+├── data/                                # Статические данные (fallback)
+├── images/                              # Локальные изображения
+├── sql/                                 # SQL-миграции для Supabase
+├── supabase/                            # Schema + Edge Functions
+├── postman/                             # API тест-коллекции
+└── docs/                                # Документация
+    ├── TECHNICAL.md                     #   Техническая документация
+    └── MANAGER-GUIDE.md                 #   Гайд для менеджеров
 ```
 
-## Getting Started
+---
 
-### Prerequisites
+## Архитектура
 
-- A modern web browser (Chrome, Firefox, Safari, Edge)
-- Python 3 (for local development server)
-- A [Supabase](https://supabase.com) project (for backend features)
-
-### Local Development
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/bossyko/KSLT-project.git
-   cd KSLT-project
-   ```
-
-2. **Start a local server**
-   ```bash
-   python3 -m http.server 8080
-   ```
-
-3. **Open in browser**
-   ```
-   http://localhost:8080
-   ```
-
-### Supabase Setup
-
-1. Create a project at [supabase.com](https://supabase.com)
-2. Run `supabase/schema.sql` in the SQL Editor to create tables
-3. Run `supabase/seed.sql` to populate initial data
-4. Update `js/supabase-config.js` with your project URL and anon key
-5. Configure Auth providers (email, Google OAuth) in Supabase Dashboard
-6. Create a public `avatars` bucket in Supabase Storage
-
-### Environment
-
-| Setting | Value |
-|---------|-------|
-| Supabase Site URL | `http://localhost:8080/index.html` |
-| Redirect URLs | `http://localhost:8080/**` |
-| Auth Providers | Email, Google |
-
-## Architecture
-
-- **No build tools** — Pure HTML/CSS/JS, zero dependencies (except Cropper.js CDN)
-- **Multi-language** — Separate HTML files per language (`-en.html`, `-kg.html` suffixes)
-- **Auth flow** — `auth-guard.js` protects dashboard routes, `auth-nav.js` toggles nav state
-- **Shared Supabase client** — Single `window.supabaseClient` instance from `supabase-config.js`
-- **RLS (Row Level Security)** — Database-level access control for all tables
-- **CSS design system** — CSS variables in `style.css` for consistent theming
+- **Без сборки** — чистый HTML/CSS/JS, нет npm, webpack, React и т.д.
+- **Supabase** — БД (PostgreSQL) + Auth + Storage + Edge Functions + RLS
+- **Мультиязычность** — отдельные HTML-файлы (`-en.html`, `-kg.html`)
+- **RLS** — Row Level Security на уровне БД для всех таблиц
+- **CSS-система** — переменные в `style.css`, префиксы по страницам (co-, ct-, pl-, pt-...)
+- **Данные** — Supabase primary, статические файлы как fallback
 
 ## Roadmap
 
-- [x] **Phase 1** — Frontend pages + responsive design
-- [x] **Phase 2** — Supabase backend, auth, user dashboard
-- [ ] **Phase 3** — Membership, payments, notifications
-- [ ] **Phase 4** — Admin panel, CRUD, financial reports
-- [ ] **Phase 5** — AI chatbot, court booking, shop, PWA
+- [x] **Фаза 1** — Frontend + адаптивный дизайн
+- [x] **Фаза 2** — Supabase, авторизация, личный кабинет
+- [x] **Фаза 4** — Админ-панель, CRUD, рейтинговая система, турнирная сетка
+- [ ] **Фаза 3** — Членство, платежи, уведомления
+- [ ] **Фаза 5** — AI чат-бот, бронирование кортов, магазин, PWA
 
-## Author
+## Автор
 
 **KSLT Team** — Kyrgyzstan Social Lawn Tennis
 
-## License
+## Лицензия
 
-This project is proprietary. All rights reserved.
+Проект является собственностью KSLT. Все права защищены.
