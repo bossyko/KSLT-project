@@ -64,11 +64,29 @@
 }
 
 /* ---- FILTERS ---- */
+#coachesFilters {
+    position: sticky;
+    top: 64px;
+    z-index: 90;
+    background: var(--bg-primary);
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.co-back-link.co-back-service {
+    margin-bottom: 10px;
+    display: none;
+}
+
+#coachesFilters.stuck .co-back-link.co-back-service {
+    display: inline-flex;
+}
+
 .co-filters {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    margin-bottom: 40px;
+    margin-bottom: 0;
     justify-content: center;
 }
 
@@ -113,6 +131,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .co-card:hover {
@@ -443,7 +464,19 @@
     transform: translateY(-2px);
 }
 
-/* Back link */
+/* Back links */
+.co-back-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 32px;
+}
+
+.co-back-sep {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
 .co-back-link {
     display: inline-flex;
     align-items: center;
@@ -452,7 +485,6 @@
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
-    margin-bottom: 32px;
     transition: color var(--transition-fast);
 }
 

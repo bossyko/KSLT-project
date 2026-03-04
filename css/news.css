@@ -664,6 +664,11 @@ h3.news-heading {
     gap: 8px;
     flex-wrap: wrap;
     margin-bottom: var(--space-lg);
+    position: sticky;
+    top: 64px;
+    z-index: 30;
+    background: var(--bg-primary);
+    padding: var(--space-sm) 0;
 }
 
 .news-filter-btn {

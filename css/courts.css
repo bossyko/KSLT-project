@@ -69,7 +69,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 24px;
+    flex-wrap: wrap;
+    gap: 10px 24px;
     padding: 14px 24px;
     margin-bottom: 0;
     position: sticky;
@@ -155,6 +156,9 @@
     transition: border-color var(--transition-base), transform var(--transition-base);
     display: flex;
     flex-direction: column;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .ct-card:hover {
@@ -331,7 +335,29 @@
 
 /* ---- DETAIL PAGE ---- */
 
-/* Back link */
+/* Back links */
+.ct-back-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 32px;
+}
+
+.ct-back-sep {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.ct-back-link.ct-back-service {
+    flex-basis: 100%;
+    margin-bottom: 0;
+    display: none;
+}
+
+.ct-filters-wrap.stuck .ct-back-link.ct-back-service {
+    display: inline-flex;
+}
+
 .ct-back-link {
     display: inline-flex;
     align-items: center;
@@ -340,7 +366,6 @@
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
-    margin-bottom: 32px;
     transition: color var(--transition-fast);
 }
 

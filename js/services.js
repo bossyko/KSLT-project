@@ -229,6 +229,18 @@
 
         container.innerHTML = html;
         attachEvents();
+
+        // Sticky headers: remove border-radius when stuck
+        var headers = container.querySelectorAll('.sv-column-header');
+        headers.forEach(function(hdr) {
+            var sentinel = document.createElement('div');
+            sentinel.style.height = '1px';
+            hdr.parentNode.insertBefore(sentinel, hdr);
+            var obs = new IntersectionObserver(function(entries) {
+                hdr.classList.toggle('stuck', !entries[0].isIntersecting);
+            }, { threshold: [1], rootMargin: '-65px 0px 0px 0px' });
+            obs.observe(sentinel);
+        });
     }
 
     // --- Carousel wrapper — infinite auto-scroll (items duplicated for seamless loop) ---

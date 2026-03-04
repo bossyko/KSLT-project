@@ -315,9 +315,13 @@
 
 /* === FILTERS === */
 .pl-filters-section {
-    padding: 0 7% var(--space-md);
+    padding: 12px 7% var(--space-md);
     max-width: 1200px;
     margin: 0 auto;
+    position: sticky;
+    top: 64px;
+    z-index: 30;
+    background: var(--bg-primary);
 }
 
 .pl-gender-tabs {

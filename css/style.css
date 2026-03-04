@@ -443,12 +443,12 @@ nav {
 }
 
 .nav-item.active {
-    color: var(--text-primary);
+    color: var(--accent);
     font-weight: 600;
 }
 
 .nav-item.active:hover {
-    color: var(--text-primary);
+    color: var(--accent);
 }
 
 /* Пульсирующая Electric Lime точка — Active page indicator */
@@ -464,6 +464,10 @@ nav {
 
 .nav-item.active .indicator-dot,
 .nav-item.is-active .indicator-dot {
+    display: inline-block;
+}
+
+.nav-item:hover .indicator-dot {
     display: inline-block;
 }
 
@@ -1699,6 +1703,9 @@ h2 {
     border-radius: var(--radius-xl);
     overflow: hidden;
     transition: all var(--transition-base);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .tournament-card:hover {
@@ -2604,6 +2611,10 @@ h2 {
     border-radius: var(--radius-xl);
     overflow: hidden;
     transition: all var(--transition-base);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
 .court-card:hover {
@@ -2709,6 +2720,9 @@ h2 {
     text-align: center;
     padding: var(--space-lg);
     gap: var(--space-md);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .coach-card:hover {
@@ -3514,6 +3528,54 @@ h2 {
 }
 
 /* ========================================
+   STICKY BACK BAR — Fixed back button on scroll
+   ======================================== */
+
+.sticky-back-bar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 10px 24px;
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.sticky-back-bar.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.sticky-back-bar a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: color 0.2s;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.sticky-back-bar a:hover {
+    color: var(--accent);
+}
+
+.sticky-back-bar a svg {
+    flex-shrink: 0;
+}
+
+/* ========================================
    RESPONSIVE DESIGN
    ======================================== */
 
@@ -3580,6 +3642,15 @@ h2 {
 
     .floating-header.header-pill nav {
         height: 56px;
+    }
+
+    .sticky-back-bar {
+        top: 56px;
+        padding: 8px 16px;
+    }
+
+    .sticky-back-bar a {
+        font-size: 0.82rem;
     }
 
     .floating-header.header-pill.scrolled {
@@ -4403,4 +4474,51 @@ h2 {
     .auth-card {
         padding: 24px 16px;
     }
+
+    .scroll-to-top {
+        bottom: 20px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ==============================
+   SCROLL TO TOP BUTTON
+   ============================== */
+.scroll-to-top {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--bg-primary);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.scroll-to-top:hover {
+    background: #e0ff4d;
+}
+
+.scroll-to-top svg {
+    width: 20px;
+    height: 20px;
 }

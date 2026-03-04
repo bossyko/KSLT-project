@@ -399,4 +399,87 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     })();
 
+    // ========================================
+    // STICKY BACK BUTTON — fixed bar on scroll
+    // Back links are JS-generated, so we watch DOM for them
+    // ========================================
+    (function() {
+        var SELECTORS = '.ct-back-links, .co-back-links, .ct-back-link, .co-back-link, .td-back-link, .news-back-link, .trn-back-link';
+        var bar = null;
+
+        function setup(backLink) {
+            if (bar) return; // already set up
+
+            bar = document.createElement('div');
+            bar.className = 'sticky-back-bar';
+            var clone = backLink.cloneNode(true);
+            // Remove margin from clone
+            clone.style.marginBottom = '0';
+            bar.appendChild(clone);
+            document.body.appendChild(bar);
+
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        bar.classList.remove('visible');
+                    } else {
+                        bar.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0, rootMargin: '-64px 0px 0px 0px' });
+
+            observer.observe(backLink);
+        }
+
+        // Check if back link already exists
+        var existing = document.querySelector(SELECTORS);
+        if (existing) {
+            setup(existing);
+            return;
+        }
+
+        // Watch for dynamically added back links
+        var domObserver = new MutationObserver(function() {
+            var link = document.querySelector(SELECTORS);
+            if (link) {
+                setup(link);
+                domObserver.disconnect();
+            }
+        });
+        domObserver.observe(document.body, { childList: true, subtree: true });
+
+        // Safety: stop watching after 10s
+        setTimeout(function() { domObserver.disconnect(); }, 10000);
+    })();
+
+    // ========================================
+    // SCROLL TO TOP BUTTON
+    // ========================================
+    (function() {
+        var btn = document.createElement('button');
+        btn.className = 'scroll-to-top';
+        btn.setAttribute('aria-label', 'Scroll to top');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
+        document.body.appendChild(btn);
+
+        var ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                requestAnimationFrame(function() {
+                    if (window.scrollY > 400) {
+                        btn.classList.add('visible');
+                    } else {
+                        btn.classList.remove('visible');
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        btn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    })();
+
 });

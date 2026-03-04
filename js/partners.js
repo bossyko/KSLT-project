@@ -207,6 +207,11 @@
             html += '<button class="pt-filter-btn' + (f.key === _currentFilter ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
         }
         html += '<div class="pt-search-wrap"><input type="text" class="pt-search" id="ptSearch" placeholder="' + L.searchPlaceholder + '"></div>';
+
+        // Back link (hidden, shown on scroll)
+        var servicesLink = isEn ? 'services-en.html' : 'services.html';
+        html = '<a href="' + servicesLink + '" class="pt-back-link">\u2190 ' + (isEn ? 'Services' : 'Услуги') + '</a>' + html;
+
         el.innerHTML = html;
 
         document.getElementById('ptSearch').addEventListener('input', function(e) {
@@ -224,6 +229,14 @@
             }
             renderGrid();
         });
+
+        // Detect stuck state
+        var sentinel = document.createElement('div');
+        sentinel.style.height = '1px';
+        el.parentNode.insertBefore(sentinel, el);
+        new IntersectionObserver(function(entries) {
+            el.classList.toggle('stuck', !entries[0].isIntersecting);
+        }, { threshold: [1], rootMargin: '-65px 0px 0px 0px' }).observe(sentinel);
     }
 
     // ---- Load partners via RPC ----

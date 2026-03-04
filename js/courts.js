@@ -247,9 +247,21 @@
     function initListPage() {
         renderHero();
         renderFilters();
+        renderBackLink();
         renderGrid();
         initFilterClicks();
         initScrollAnimations();
+    }
+
+    function renderBackLink() {
+        var filters = document.getElementById('courtsFilters');
+        if (!filters) return;
+        var servicesLink = isEn ? 'services-en.html' : 'services.html';
+        var link = document.createElement('a');
+        link.href = servicesLink;
+        link.className = 'ct-back-link ct-back-service';
+        link.innerHTML = '\u2190 ' + (isEn ? 'Services' : 'Услуги');
+        filters.insertBefore(link, filters.firstChild);
     }
 
     function renderHero() {
@@ -334,7 +346,7 @@
             var typeLabel = c._typeDesc || (c.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor);
             var newBadge = c._isNew ? '<span class="ct-new-badge">' + L_labels.newBadge + '</span>' : '';
 
-            html += '<div class="ct-card ct-fade-in">' +
+            html += '<a href="' + detailBase + '?id=' + c.id + '" class="ct-card ct-fade-in">' +
                 '<div class="ct-card-img-wrap">' +
                     '<img src="' + esc(c.photo) + '" alt="' + esc(c.name) + '" class="ct-card-img" loading="lazy">' +
                     newBadge +
@@ -351,9 +363,9 @@
                         (c.rating ? '<div class="ct-card-stat"><div class="ct-card-stat-num">\u2605 ' + c.rating + '</div><div class="ct-card-stat-label">' + L_labels.rating + '</div></div>' : '') +
                     '</div>' +
                     (c.price ? '<div class="ct-card-price">' + L_labels.priceFrom + ' <strong>' + c.price + '</strong> ' + L_labels.priceCurrency + '</div>' : '') +
-                    '<a href="' + detailBase + '?id=' + c.id + '" class="ct-card-btn">' + L_labels.detailsBtn + ' \u2192</a>' +
+                    '<span class="ct-card-btn">' + L_labels.detailsBtn + ' \u2192</span>' +
                 '</div>' +
-            '</div>';
+            '</a>';
         });
         html += '</div>';
         container.innerHTML = html;
@@ -422,8 +434,13 @@
 
         var html = '';
 
-        // Back link
-        html += '<a href="' + courtsLink + '" class="ct-back-link">\u2190 ' + L_labels.backBtn + '</a>';
+        // Back links
+        var servicesLink = isEn ? 'services-en.html' : 'services.html';
+        html += '<div class="ct-back-links">';
+        html += '<a href="' + servicesLink + '" class="ct-back-link">\u2190 ' + (isEn ? 'Services' : 'Услуги') + '</a>';
+        html += '<span class="ct-back-sep">/</span>';
+        html += '<a href="' + courtsLink + '" class="ct-back-link">' + L_labels.backBtn + '</a>';
+        html += '</div>';
 
         // Header
         html += '<div class="ct-detail-header ct-fade-in">' +

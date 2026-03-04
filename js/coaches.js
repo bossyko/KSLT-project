@@ -146,9 +146,21 @@
     function initListPage() {
         renderHero();
         renderFilters();
+        renderBackLink();
         renderGrid('all');
         initFilterClicks();
         initScrollAnimations();
+    }
+
+    function renderBackLink() {
+        var filtersEl = document.getElementById('coachesFilters');
+        if (!filtersEl) return;
+        var servicesLink = isEn ? 'services-en.html' : 'services.html';
+        var link = document.createElement('a');
+        link.href = servicesLink;
+        link.className = 'co-back-link co-back-service';
+        link.innerHTML = '\u2190 ' + (isEn ? 'Services' : 'Услуги');
+        filtersEl.insertBefore(link, filtersEl.firstChild);
     }
 
     function renderHero() {
@@ -180,6 +192,15 @@
         });
         html += '</div>';
         container.innerHTML = html;
+
+        // Detect stuck state
+        var sentinel = document.createElement('div');
+        sentinel.style.height = '1px';
+        container.parentNode.insertBefore(sentinel, container);
+        var obs = new IntersectionObserver(function(entries) {
+            container.classList.toggle('stuck', !entries[0].isIntersecting);
+        }, { threshold: [1], rootMargin: '-65px 0px 0px 0px' });
+        obs.observe(sentinel);
     }
 
     function renderGrid(filter) {
@@ -195,7 +216,7 @@
         var authLink = isEn ? 'auth-en.html?redirect=coaches' : 'auth.html?redirect=coaches';
         var html = '<div class="co-grid">';
         filtered.forEach(function(c) {
-            var contactHtml = '<a href="' + detailBase + '?id=' + c.id + '" class="co-card-btn">' + L.detailsBtn + ' →</a>';
+            var contactHtml = '<span class="co-card-btn">' + L.detailsBtn + ' →</span>';
 
             // Stats
             var statsHtml = '';
@@ -209,7 +230,7 @@
                 statsHtml += '<div class="co-card-stat"><div class="co-card-stat-num">' + c.rating + '</div><div class="co-card-stat-label">' + L.rating + '</div></div>';
             }
 
-            html += '<div class="co-card co-fade-in">' +
+            html += '<a href="' + detailBase + '?id=' + c.id + '" class="co-card co-fade-in">' +
                 '<img src="' + esc(c.photo) + '" alt="' + esc(c.name) + '" class="co-card-photo">' +
                 '<div class="co-card-name">' + esc(c.name) + '</div>' +
                 (c.specialization ? '<div class="co-card-spec">' + c.specialization + '</div>' : '') +
@@ -217,7 +238,7 @@
                 (statsHtml ? '<div class="co-card-stats">' + statsHtml + '</div>' : '') +
                 (c.price ? '<div class="co-card-price">' + L.priceFrom + ' <strong>' + c.price + '</strong> ' + L.priceCurrency + '</div>' : '') +
                 contactHtml +
-            '</div>';
+            '</a>';
         });
         html += '</div>';
         container.innerHTML = html;
@@ -272,7 +293,12 @@
         var authLink = isEn ? 'auth-en.html' : 'auth.html';
 
         var html = '';
-        html += '<a href="' + coachesLink + '" class="co-back-link">← ' + L.backBtn + '</a>';
+        var servicesLink = isEn ? 'services-en.html' : 'services.html';
+        html += '<div class="co-back-links">';
+        html += '<a href="' + servicesLink + '" class="co-back-link">\u2190 ' + (isEn ? 'Services' : 'Услуги') + '</a>';
+        html += '<span class="co-back-sep">/</span>';
+        html += '<a href="' + coachesLink + '" class="co-back-link">' + L.backBtn + '</a>';
+        html += '</div>';
 
         // Header
         html += '<div class="co-detail-header co-fade-in">' +
