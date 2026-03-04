@@ -671,6 +671,16 @@ body.ad-page {
     background: rgba(255, 59, 48, 0.2);
 }
 
+.ad-btn-warning {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ffb74d;
+    border: 1px solid rgba(255, 152, 0, 0.2);
+}
+
+.ad-btn-warning:hover {
+    background: rgba(255, 152, 0, 0.2);
+}
+
 .ad-bulk-actions {
     display: flex;
     align-items: center;
@@ -1893,11 +1903,94 @@ select.ad-field-input {
 .ad-status-rejected { color: #ef4444; }
 .ad-status-withdrawn { color: var(--text-secondary); }
 
-.ad-status-registration-open { color: #22c55e; }
-.ad-status-registration-closed { color: #f59e0b; }
-.ad-status-ongoing { color: var(--accent); }
-.ad-status-completed { color: var(--text-secondary); }
-.ad-status-cancelled { color: #ef4444; }
+.ad-reg-check,
+.ad-reg-check-all {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 2px solid var(--border-light);
+    border-radius: 3px;
+    background: transparent;
+    position: relative;
+    vertical-align: middle;
+}
+
+.ad-reg-check:checked,
+.ad-reg-check-all:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.ad-reg-check:checked::after,
+.ad-reg-check-all:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid #000;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.ad-reg-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.ad-reg-columns .ad-table {
+    font-size: 0.8rem;
+}
+
+.ad-reg-columns .ad-table th {
+    padding: 8px 5px;
+    font-size: 0.65rem;
+}
+
+.ad-reg-columns .ad-table td {
+    padding: 6px 5px;
+}
+
+@media (max-width: 768px) {
+    .ad-reg-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ad-reg-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ad-reg-section-title .ad-badge {
+    font-size: 0.75rem;
+}
+
+.ad-trn-status-field {
+    cursor: default;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.ad-trn-status-field.ad-status-draft { color: #ffc107; }
+.ad-trn-status-field.ad-status-upcoming { color: #60a5fa; }
+.ad-trn-status-field.ad-status-registration-open { color: #22c55e; }
+.ad-trn-status-field.ad-status-registration-closed { color: #f59e0b; }
+.ad-trn-status-field.ad-status-ongoing { color: var(--accent); }
+.ad-trn-status-field.ad-status-completed { color: var(--text-secondary); }
+.ad-trn-status-field.ad-status-cancelled { color: #ef4444; }
 
 /* ========================================
    VISUAL BRACKET (admin)

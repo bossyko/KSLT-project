@@ -27,7 +27,7 @@
 .td-hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, var(--bg-primary) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.3) 100%);
+    background: linear-gradient(to top, var(--bg-primary) 0%, rgba(0,0,0,0.75) 50%, rgba(0,0,0,0.5) 100%);
 }
 
 .td-hero-content {
@@ -57,15 +57,41 @@
 
 .td-hero-badges {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
     margin-bottom: var(--space-sm);
+}
+
+/* Uniform badge size in hero — all same padding/font/height */
+.td-hero-badges .tournament-category-badge {
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 0;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.td-hero-badges .tournament-gender-badge {
+    background: rgba(204, 255, 0, 0.15);
+    border-color: rgba(204, 255, 0, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 0;
+    margin-left: 0;
 }
 
 .td-status-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 12px;
+    padding: 5px 14px;
     border-radius: var(--radius-full);
     font-size: 0.75rem;
     font-weight: 600;
@@ -74,19 +100,70 @@
 }
 
 .td-status-badge.completed {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.12);
     color: var(--text-secondary);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .td-status-badge.live {
-    background: rgba(239, 68, 68, 0.15);
+    background: rgba(239, 68, 68, 0.25);
     color: #ef4444;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     animation: pulse-glow 2s ease-in-out infinite;
 }
 
 .td-status-badge.upcoming {
-    background: rgba(204, 255, 0, 0.1);
+    background: rgba(204, 255, 0, 0.18);
     color: var(--accent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Registration open / ongoing / closed / cancelled */
+.td-status-badge.registration_open,
+.td-status-badge.open {
+    background: rgba(204, 255, 0, 0.18);
+    color: var(--accent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.td-status-badge.ongoing {
+    background: rgba(0, 163, 255, 0.2);
+    color: #00A3FF;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.td-status-badge.closed {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-muted);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.td-status-badge.cancelled {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Static data status classes (open/soon/past) */
+.td-status-badge.soon {
+    background: rgba(255, 159, 67, 0.18);
+    color: #FF9F43;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.td-status-badge.past {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-muted);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 @keyframes pulse-glow {
@@ -120,6 +197,15 @@
 .td-meta-item svg {
     flex-shrink: 0;
     opacity: 0.7;
+}
+
+.td-meta-reg {
+    color: var(--accent);
+}
+
+.td-meta-reg svg {
+    opacity: 1;
+    stroke: var(--accent);
 }
 
 .td-hero-stats {
@@ -184,6 +270,10 @@
 .td-section .section-header {
     max-width: 1400px;
     margin: 0 auto var(--space-lg);
+}
+
+#participants .section-header {
+    max-width: none;
 }
 
 .td-section .section-header h2 {
@@ -558,6 +648,100 @@
     width: 100%;
 }
 
+/* === VENUE === */
+.td-venue-card {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.td-venue-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    justify-content: center;
+}
+
+.td-venue-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.td-venue-name:hover {
+    opacity: 0.8;
+}
+
+.td-venue-address {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.td-venue-address svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.td-venue-links {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-xs);
+}
+
+.td-venue-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.td-venue-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.td-venue-map {
+    aspect-ratio: 16 / 10;
+    min-height: 220px;
+}
+
+.td-venue-map iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .td-venue-card {
+        grid-template-columns: 1fr;
+    }
+    .td-venue-map {
+        aspect-ratio: 16 / 9;
+        min-height: 200px;
+    }
+}
+
 /* === SCHEDULE === */
 .td-schedule-filters {
     display: flex;
@@ -699,6 +883,12 @@
     gap: 10px;
 }
 
+/* When registration tables are inside, remove grid/max-width constraints */
+.td-participants-grid:has(.td-reg-columns) {
+    display: block;
+    max-width: none;
+}
+
 .td-participant-card {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
@@ -734,6 +924,118 @@
 
 .td-participant-country {
     font-size: 1.1rem;
+}
+
+.td-participants-subtitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.td-participants-count {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--bg-elevated);
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+}
+
+.td-reg-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+}
+
+@media (max-width: 768px) {
+    .td-reg-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+.td-reg-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.td-reg-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.td-reg-table th,
+.td-reg-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.td-reg-table thead th {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.td-reg-table tbody tr {
+    transition: background 0.15s;
+}
+
+.td-reg-table tbody tr:hover {
+    background: var(--surface-glass-hover);
+}
+
+.td-reg-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.td-reg-table td:first-child {
+    width: 24px;
+    color: var(--text-dim);
+    font-weight: 600;
+    text-align: center;
+}
+
+.td-reg-table td:nth-child(2) {
+    width: 32px;
+}
+
+.td-reg-table td:nth-child(5),
+.td-reg-table td:nth-child(6) {
+    white-space: nowrap;
+    color: var(--text-secondary);
+}
+
+.td-reg-photo {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.td-reg-photo-empty {
+    background: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+}
+
+.td-reg-table-waitlist {
+    opacity: 0.6;
+}
+
+.td-reg-table-waitlist tbody tr:hover {
+    opacity: 1;
 }
 
 /* === RESULTS / PODIUM === */

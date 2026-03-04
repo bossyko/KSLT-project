@@ -175,6 +175,9 @@
         noTournaments: 'No tournaments yet',
         noTournamentsText: 'Click "Add Tournament" to create your first tournament',
         trnDeleteConfirm: 'Delete this tournament?',
+        trnDraft: 'Draft',
+        trnCancelTournament: 'Cancel Tournament',
+        trnCancelConfirm: 'Cancel this tournament? It will be marked as cancelled.',
         statusUpcoming: 'Upcoming',
         statusRegOpen: 'Registration Open',
         statusRegClosed: 'Registration Closed',
@@ -194,7 +197,14 @@
         trnBracketType: 'Bracket Type',
         trnCourtCount: 'Courts',
         trnMatchDuration: 'Match Duration (min)',
-        trnRegDeadline: 'Registration Deadline',
+        trnRegStart: 'Registration Start',
+        trnRegEnd: 'Registration End',
+        trnVenue: 'Venue',
+        trnVenueSearch: 'Search court by name...',
+        trnVenueClear: 'Clear',
+        trnVenueAddress: 'Address',
+        trnVenuePhone: 'Phone',
+        trnVenueMap: 'Map',
         bracketSE: 'Single Elimination',
         bracketRR: 'Round Robin',
         selectDrawSize: '— Select —',
@@ -231,6 +241,11 @@
         regPending: 'Pending',
         regWithdrawn: 'Withdrawn',
         regCount: 'registered',
+        regMainDraw: 'Main Draw',
+        regWaitlist: 'Waitlist',
+        regRemoveSelected: 'Remove Selected',
+        regRemoveConfirm: 'Remove selected participants?',
+        regNoWaitlist: 'No waitlisted players',
         enterScore: 'Enter Score',
         saveScore: 'Save Score',
         addSet: '+ Add Set',
@@ -732,6 +747,9 @@
         noTournaments: 'Турниров пока нет',
         noTournamentsText: 'Нажмите "Добавить турнир" чтобы создать первый турнир',
         trnDeleteConfirm: 'Удалить этот турнир?',
+        trnDraft: 'Черновик',
+        trnCancelTournament: 'Отменить турнир',
+        trnCancelConfirm: 'Отменить этот турнир? Он будет помечен как отменённый.',
         statusUpcoming: 'Предстоящий',
         statusRegOpen: 'Регистрация открыта',
         statusRegClosed: 'Регистрация закрыта',
@@ -751,7 +769,14 @@
         trnBracketType: 'Тип сетки',
         trnCourtCount: 'Корты',
         trnMatchDuration: 'Длит. матча (мин)',
-        trnRegDeadline: 'Дедлайн регистрации',
+        trnRegStart: 'Начало регистрации',
+        trnRegEnd: 'Конец регистрации',
+        trnVenue: 'Место проведения',
+        trnVenueSearch: 'Введите название корта...',
+        trnVenueClear: 'Сбросить',
+        trnVenueAddress: 'Адрес',
+        trnVenuePhone: 'Телефон',
+        trnVenueMap: 'Карта',
         bracketSE: 'Олимпийская система',
         bracketRR: 'Круговая система',
         selectDrawSize: '— Выберите —',
@@ -788,6 +813,11 @@
         regPending: 'Ожидает',
         regWithdrawn: 'Отозвана',
         regCount: 'зарегистрировано',
+        regMainDraw: 'Основная сетка',
+        regWaitlist: 'Лист ожидания',
+        regRemoveSelected: 'Удалить выбранных',
+        regRemoveConfirm: 'Удалить выбранных участников?',
+        regNoWaitlist: 'Нет игроков в листе ожидания',
         enterScore: 'Ввести счёт',
         saveScore: 'Сохранить счёт',
         addSet: '+ Добавить сет',
@@ -1200,6 +1230,16 @@
         cancelled: L.statusCancelled
     };
 
+    function computeTournamentStatus(regStart, regEnd, dateStart, dateEnd) {
+        var now = new Date().toISOString().substring(0, 10);
+        if (regStart && now < regStart) return 'upcoming';
+        if (regStart && regEnd && now >= regStart && now <= regEnd) return 'registration_open';
+        if (dateEnd && now > dateEnd) return 'completed';
+        if (dateStart && now >= dateStart) return 'ongoing';
+        if (regEnd && now > regEnd) return 'registration_closed';
+        return 'upcoming';
+    }
+
     // ---- SVG Icons ----
     var ICONS = {
         grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
@@ -1321,9 +1361,26 @@
     }
 
     // ---- Init Tabs ----
+    function parseHash(hash) {
+        // Formats: "tab", "tab/edit/ID", "tab/view/ID", "tab/bracket/ID"
+        var m = hash.match(/^(\w+)\/(edit|view|bracket)\/(.+)$/);
+        if (m) return { tab: m[1], action: m[2], itemId: m[3] };
+        return { tab: hash || 'dashboard', action: null, itemId: null };
+    }
+
+    function setAdminHash(tab, action, id) {
+        var hash = action && id ? tab + '/' + action + '/' + id : tab;
+        history.replaceState(null, '', '#' + hash);
+    }
+
+    function isDeepLinked(sectionTab) {
+        var parsed = parseHash(window.location.hash.replace('#', ''));
+        return parsed.itemId && parsed.tab === sectionTab;
+    }
+
     function initTabs() {
-        var hash = window.location.hash.replace('#', '') || 'dashboard';
-        switchTab(hash);
+        var parsed = parseHash(window.location.hash.replace('#', ''));
+        switchTab(parsed.tab, parsed.action, parsed.itemId);
 
         document.addEventListener('click', function(e) {
             var link = e.target.closest('[data-tab]');
@@ -1334,12 +1391,12 @@
         });
 
         window.addEventListener('hashchange', function() {
-            var hash = window.location.hash.replace('#', '') || 'dashboard';
-            switchTab(hash);
+            var parsed = parseHash(window.location.hash.replace('#', ''));
+            switchTab(parsed.tab, parsed.action, parsed.itemId);
         });
     }
 
-    function switchTab(tab) {
+    function switchTab(tab, action, itemId) {
         document.querySelectorAll('.ad-sidebar-link').forEach(function(el) {
             el.classList.toggle('active', el.dataset.tab === tab);
         });
@@ -1349,6 +1406,25 @@
         document.querySelectorAll('.ad-section').forEach(function(el) {
             el.classList.toggle('active', el.id === 'ad-' + tab);
         });
+
+        // Deep-link: open edit/view form directly
+        if (itemId && action) {
+            var deepMap = {
+                content:     { edit: loadAndEditNews },
+                tournaments: { edit: loadAndEditTournament, bracket: renderBracketManagement },
+                players:     { edit: loadAndEditPlayer },
+                courts:      { edit: loadAndEditCourt, view: loadAndViewCourt },
+                coaches:     { edit: loadAndEditCoach, view: loadAndViewCoach },
+                payments:    { edit: loadAndEditPayment },
+                memberships: { edit: loadAndEditMembership },
+                users:       { edit: loadAndEditUser }
+            };
+            if (deepMap[tab] && deepMap[tab][action]) {
+                deepMap[tab][action](itemId);
+                return;
+            }
+        }
+
         // Reset to list view when switching tabs via sidebar
         var resetMap = {
             content: renderNewsList,
@@ -1667,6 +1743,7 @@
     var newsDraftDirty = false;
 
     function renderNewsSection() {
+        if (isDeepLinked('content')) return;
         renderNewsList();
     }
 
@@ -2100,6 +2177,7 @@
         if (!client) return;
         var result = await client.from('news').select('*').eq('id', id).single();
         if (result.data) {
+            setAdminHash('content', 'edit', id);
             renderNewsForm(result.data);
         }
     }
@@ -2324,9 +2402,11 @@
             if (newsDraftDirty) {
                 showConfirm(L.unsavedChanges, L.unsavedChangesText, function() {
                     newsDraftDirty = false;
+                    setAdminHash('content');
                     renderNewsList();
                 }, L.unsavedLeaveBtn);
             } else {
+                setAdminHash('content');
                 renderNewsList();
             }
         });
@@ -3035,6 +3115,7 @@
     // ============================================
 
     var trnEditingId = null;
+    var trnEditingPublishedAt = null;
     var trnImageFile = null;
     var trnImageUrl = '';
     var trnAllData = [];
@@ -3045,10 +3126,14 @@
     var trnSortAsc = false;
     var trnPage = 1;
     var TRN_PER_PAGE = 15;
+    var trnDraftDirty = false;
+    var trnAutosaveTimer = null;
+    var trnAutosaving = false;
 
     async function renderTournamentsSection() {
         await loadCategories();
         await loadTournamentLevels();
+        if (isDeepLinked('tournaments')) return;
         renderTournamentsList();
     }
 
@@ -3065,16 +3150,23 @@
         trnSortAsc = false;
         trnPage = 1;
 
-        // Category filter options
+        // Category filter options — deduplicate Friendly
         var catFilterHtml = '<option value="">' + L.trnAllCategories + '</option>';
+        var friendlyFilterSeen = false;
         cachedCategories.forEach(function(c) {
-            var genderIcon = c.gender === 'women' ? '♀ ' : '♂ ';
+            var isFriendly = (c.name || '').toLowerCase() === 'friendly' || c.gender === null;
+            if (isFriendly) {
+                if (friendlyFilterSeen) return;
+                friendlyFilterSeen = true;
+            }
+            var genderIcon = isFriendly ? '' : (c.gender === 'women' ? '♀ ' : '♂ ');
             var catName = isEn ? c.name_en : c.name;
             catFilterHtml += '<option value="' + c.id + '">' + genderIcon + catName + '</option>';
         });
 
         // Status filter options
         var statusFilterHtml = '<option value="">' + L.trnAllStatuses + '</option>';
+        statusFilterHtml += '<option value="draft">' + L.trnDraft + '</option>';
         Object.keys(TOURNAMENT_STATUSES).forEach(function(key) {
             statusFilterHtml += '<option value="' + key + '">' + TOURNAMENT_STATUSES[key] + '</option>';
         });
@@ -3206,7 +3298,7 @@
         if (!client) return;
 
         var result = await client.from('tournaments')
-            .select('id,title,image,category_id,format,status,date_start,date_end,max_participants,bracket_type,draw_size')
+            .select('id,title,image,category_id,format,status,date_start,date_end,max_participants,bracket_type,draw_size,published_at,registration_start,registration_end')
             .order('created_at', { ascending: false });
 
         var items = result.data || [];
@@ -3216,13 +3308,14 @@
     }
 
     function updateTournamentStats() {
-        var upcomingStatuses = ['upcoming', 'registration_open', 'registration_closed', 'ongoing'];
         var total = trnAllData.length;
         var upcoming = 0;
         var completed = 0;
         trnAllData.forEach(function(t) {
-            if (upcomingStatuses.indexOf(t.status) !== -1) upcoming++;
-            if (t.status === 'completed') completed++;
+            var isDraft = !t.published_at && (!t.status || t.status === 'upcoming');
+            if (isDraft) return; // skip drafts
+            if (t.status === 'completed') { completed++; return; }
+            if (t.status !== 'cancelled') upcoming++;
         });
 
         var elTotal = document.getElementById('adTrnStatTotal');
@@ -3276,7 +3369,7 @@
             bodyEl.innerHTML = html;
         });
 
-        var friendlyTotal = trnAllData.filter(function(t) { return t.format === 'mixed_doubles'; }).length;
+        var friendlyTotal = trnAllData.filter(function(t) { var cat = categoriesMap[t.category_id]; return cat && ((cat.name || '').toLowerCase() === 'friendly' || cat.gender === null); }).length;
         var elFR = document.getElementById('adTrnTotalFR');
         if (elFR) elFR.textContent = friendlyTotal;
     }
@@ -3308,7 +3401,9 @@
         // Filter by status
         if (trnFilterStatus) {
             items = items.filter(function(t) {
-                return t.status === trnFilterStatus;
+                var isDraft = !t.published_at && (!t.status || t.status === 'upcoming');
+                if (trnFilterStatus === 'draft') return isDraft;
+                return !isDraft && t.status === trnFilterStatus;
             });
         }
 
@@ -3390,9 +3485,22 @@
         tbody.innerHTML = '';
         items.forEach(function(t) {
             var catObj = categoriesMap[t.category_id];
-            var catLabel = catObj ? (catObj.gender === 'women' ? '♀ ' : '♂ ') + (isEn ? catObj.name_en : catObj.name) : (t.category_id || L.noData);
-            var statusLabel = TOURNAMENT_STATUSES[t.status] || t.status || L.noData;
-            var statusClass = 'ad-status-' + (t.status || '').replace(/_/g, '-');
+            var isCatFriendly = catObj && ((catObj.name || '').toLowerCase() === 'friendly' || catObj.gender === null);
+            var catGIcon = catObj ? (isCatFriendly ? '' : (catObj.gender === 'women' ? '♀ ' : '♂ ')) : '';
+            var catLabel = catObj ? catGIcon + (isEn ? catObj.name_en : catObj.name) : (t.category_id || L.noData);
+            var statusLabel, statusClass;
+            var isDraft = !t.published_at && (!t.status || t.status === 'upcoming');
+            if (isDraft) {
+                statusLabel = L.trnDraft;
+                statusClass = 'ad-status-draft';
+            } else if (t.status === 'cancelled' || t.status === 'registration_closed' || t.status === 'completed') {
+                statusLabel = TOURNAMENT_STATUSES[t.status] || t.status;
+                statusClass = 'ad-status-' + (t.status || '').replace(/_/g, '-');
+            } else {
+                var autoSt = computeTournamentStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
+                statusLabel = TOURNAMENT_STATUSES[autoSt] || L.statusUpcoming;
+                statusClass = 'ad-status-' + autoSt.replace(/_/g, '-');
+            }
 
             var dateStartStr = t.date_start
                 ? new Date(t.date_start + 'T00:00:00').toLocaleDateString(isEn ? 'en-US' : 'ru-RU')
@@ -3537,6 +3645,7 @@
         if (!client) return;
         var result = await client.from('tournaments').select('*').eq('id', id).single();
         if (result.data) {
+            setAdminHash('tournaments', 'edit', id);
             renderTournamentForm(result.data);
         }
     }
@@ -3547,6 +3656,9 @@
         if (!container) return;
 
         trnEditingId = item ? item.id : null;
+        trnEditingPublishedAt = (item && item.published_at) ? item.published_at : null;
+        trnDraftDirty = false;
+        clearTimeout(trnAutosaveTimer);
         trnImageFile = null;
         trnImageUrl = (item && item.image) ? item.image : '';
 
@@ -3563,21 +3675,41 @@
 
         var hasImageClass = trnImageUrl ? ' has-image' : '';
 
-        // Category options (from Supabase)
+        // Category options (from Supabase) — deduplicate Friendly
         var catOptionsHtml = '<option value="">' + L.selectCategoryTrn + '</option>';
+        var friendlySeen = false;
         cachedCategories.forEach(function(c) {
+            var isFriendly = (c.name || '').toLowerCase() === 'friendly' || c.gender === null;
+            if (isFriendly) {
+                if (friendlySeen) return;
+                friendlySeen = true;
+            }
             var selected = (item && item.category_id === c.id) ? ' selected' : '';
-            var genderIcon = c.gender === 'women' ? '♀ ' : '♂ ';
+            var genderIcon = isFriendly ? '' : (c.gender === 'women' ? '♀ ' : '♂ ');
             var catName = isEn ? c.name_en : c.name;
             catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + genderIcon + catName + '</option>';
         });
 
-        // Status options
-        var statusOptionsHtml = '<option value="">' + L.selectStatus + '</option>';
-        Object.keys(TOURNAMENT_STATUSES).forEach(function(key) {
-            var selected = (item && item.status === key) ? ' selected' : '';
-            statusOptionsHtml += '<option value="' + key + '"' + selected + '>' + TOURNAMENT_STATUSES[key] + '</option>';
-        });
+        // Status badge (read-only, auto-computed)
+        // Backward compat: old tournaments without published_at but with status set → treat as published
+        var trnIsDraft = !trnEditingPublishedAt && (!item || !item.status || item.status === 'upcoming');
+        var trnStatusBadgeLabel, trnStatusBadgeClass;
+        if (trnIsDraft) {
+            trnStatusBadgeLabel = L.trnDraft;
+            trnStatusBadgeClass = 'ad-status-draft';
+        } else if (item && (item.status === 'cancelled' || item.status === 'registration_closed' || item.status === 'completed')) {
+            trnStatusBadgeLabel = TOURNAMENT_STATUSES[item.status] || item.status;
+            trnStatusBadgeClass = 'ad-status-' + (item.status || '').replace(/_/g, '-');
+        } else {
+            var autoStatus = computeTournamentStatus(
+                item ? item.registration_start : null,
+                item ? item.registration_end : null,
+                item ? item.date_start : null,
+                item ? item.date_end : null
+            );
+            trnStatusBadgeLabel = TOURNAMENT_STATUSES[autoStatus] || L.statusUpcoming;
+            trnStatusBadgeClass = 'ad-status-' + autoStatus.replace(/_/g, '-');
+        }
 
         // Tournament level options
         var trnLevelOptionsHtml = '<option value="">—</option>';
@@ -3622,23 +3754,23 @@
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
                         '<input type="text" class="ad-field-input" id="adTrnTitleEn" placeholder="' + L.trnTitle + ' (EN)" value="' + esc(item ? item.title_en : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-src="adTrnTitle" data-target="adTrnTitleEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="kg">' +
                     '<div class="ad-field">' +
                         '<input type="text" class="ad-field-input" id="adTrnTitleKg" placeholder="' + L.trnTitle + ' (KG)" value="' + esc(item ? item.title_kg : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-src="adTrnTitle" data-target="adTrnTitleKg" data-tolang="kg">&#127760; ' + L.translateBtn + '</button>' +
                     '</div>' +
                 '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adTrnTitle" data-en="adTrnTitleEn" data-kg="adTrnTitleKg">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
-            // Description (RU/EN)
+            // Description (RU/EN/KG)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.trnDescription + '</div>' +
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
@@ -3648,41 +3780,33 @@
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
                         '<textarea class="ad-field-input ad-field-textarea" id="adTrnDescEn" placeholder="' + L.trnDescription + ' (EN)">' + esc(item ? item.description_en : '') + '</textarea>' +
-                        '<button type="button" class="ad-btn-translate" data-src="adTrnDesc" data-target="adTrnDescEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
                     '</div>' +
                 '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<div class="ad-field">' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adTrnDescKg" placeholder="' + L.trnDescription + ' (KG)">' + esc(item ? item.description_kg : '') + '</textarea>' +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adTrnDesc" data-en="adTrnDescEn" data-kg="adTrnDescKg">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
-            // Location (RU/EN)
+            // Venue (court autocomplete)
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.trnLocation + '</div>' +
-                '<div class="ad-lang-tabs">' +
-                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
-                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                '<div class="ad-form-card-title">' + L.trnVenue + '</div>' +
+                '<div class="ad-pay-entity-wrap">' +
+                    '<input type="text" class="ad-field-input" id="adTrnVenueSearch" placeholder="' + L.trnVenueSearch + '" autocomplete="off">' +
+                    '<div class="ad-pay-entity-results" id="adTrnVenueResults" style="display:none;"></div>' +
                 '</div>' +
-                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
-                    '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adTrnLocation" placeholder="' + L.trnLocation + ' (RU)" value="' + esc(item ? item.location : '') + '">' +
-                    '</div>' +
-                '</div>' +
-                '<div class="ad-lang-panel" data-lang-panel="en">' +
-                    '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adTrnLocationEn" placeholder="' + L.trnLocation + ' (EN)" value="' + esc(item ? item.location_en : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-src="adTrnLocation" data-target="adTrnLocationEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
-                    '</div>' +
-                '</div>' +
+                '<input type="hidden" id="adTrnCourtId" value="' + (item && item.court_id ? item.court_id : '') + '">' +
+                '<div id="adTrnVenueInfo" style="display:none;margin-top:10px;"></div>' +
             '</div>' +
 
-            // Meta: category, status, format, max participants
+            // Meta row 1: Category / Format / Level
             '<div class="ad-form-card">' +
                 '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnCategory + '</label>' +
                         '<select class="ad-field-input" id="adTrnCat">' + catOptionsHtml + '</select>' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnStatus + '</label>' +
-                        '<select class="ad-field-input" id="adTrnStatus">' + statusOptionsHtml + '</select>' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnFormat + '</label>' +
@@ -3693,8 +3817,36 @@
                             '<option value="mixed_doubles"' + sel(item, 'format', 'mixed_doubles') + '>' + L.formatMixedDoubles + '</option>' +
                         '</select>' +
                     '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.ratTournamentLevel + '</label>' +
+                        '<select class="ad-field-input" id="adTrnLevel">' + trnLevelOptionsHtml + '</select>' +
+                    '</div>' +
                 '</div>' +
+                // Meta row 2: Max participants / Prize fund / Status badge
                 '<div class="ad-field-row ad-field-row-3">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnMaxParticipants + '</label>' +
+                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnMaxPart" placeholder="0" value="' + (item ? (item.max_participants || '') : '') + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnPrizeFund + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adTrnPrize" placeholder="100,000 сом" value="' + esc(item ? item.prize_fund : '') + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnStatus + '</label>' +
+                        '<div class="ad-field-input ad-trn-status-field" id="adTrnStatusBadge" data-status-class="' + trnStatusBadgeClass + '">' + trnStatusBadgeLabel + '</div>' +
+                    '</div>' +
+                '</div>' +
+                // Meta row 3: Reg start / Reg end / Tournament start / Tournament end
+                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnRegStart + '</label>' +
+                        '<input type="date" class="ad-field-input" id="adTrnRegStart" value="' + (item ? (item.registration_start || '') : '') + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnRegEnd + '</label>' +
+                        '<input type="date" class="ad-field-input" id="adTrnRegEnd" value="' + (item ? (item.registration_end || '') : '') + '">' +
+                    '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnDateStart + '</label>' +
                         '<input type="date" class="ad-field-input" id="adTrnDateStart" value="' + (item ? (item.date_start || '') : '') + '">' +
@@ -3703,21 +3855,6 @@
                         '<label class="ad-field-label">' + L.trnDateEnd + '</label>' +
                         '<input type="date" class="ad-field-input" id="adTrnDateEnd" value="' + (item ? (item.date_end || '') : '') + '">' +
                     '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnMaxParticipants + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adTrnMaxPart" min="0" value="' + (item ? (item.max_participants || '') : '') + '">' +
-                    '</div>' +
-                '</div>' +
-                '<div class="ad-field-row ad-field-row-3">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnPrizeFund + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adTrnPrize" placeholder="100,000 сом" value="' + esc(item ? item.prize_fund : '') + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.ratTournamentLevel + '</label>' +
-                        '<select class="ad-field-input" id="adTrnLevel">' + trnLevelOptionsHtml + '</select>' +
-                    '</div>' +
-                    '<div class="ad-field"></div>' +
                 '</div>' +
             '</div>' +
 
@@ -3740,38 +3877,51 @@
                             '<option value="8"' + (item && +item.draw_size === 8 ? ' selected' : '') + '>8</option>' +
                             '<option value="16"' + (item && +item.draw_size === 16 ? ' selected' : '') + '>16</option>' +
                             '<option value="32"' + (item && +item.draw_size === 32 ? ' selected' : '') + '>32</option>' +
+                            '<option value="64"' + (item && +item.draw_size === 64 ? ' selected' : '') + '>64</option>' +
                         '</select>' +
                     '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnRegDeadline + '</label>' +
-                        '<input type="date" class="ad-field-input" id="adTrnRegDeadline" value="' + (item ? (item.registration_deadline || '') : '') + '">' +
-                    '</div>' +
-                '</div>' +
-                '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnCourtCount + '</label>' +
                         '<input type="number" class="ad-field-input" id="adTrnCourtCount" min="1" max="10" value="' + (item ? (item.court_count || 2) : 2) + '">' +
                     '</div>' +
+                '</div>' +
+                '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnMatchDuration + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adTrnMatchDuration" min="30" max="180" value="' + (item ? (item.match_duration || 90) : 90) + '">' +
+                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnMatchDuration" placeholder="90" value="' + (item ? (item.match_duration || 90) : 90) + '">' +
                     '</div>' +
+                    '<div class="ad-field"></div>' +
                     '<div class="ad-field"></div>' +
                 '</div>' +
             '</div>' +
 
+            // Registrations block (filled async after render)
+            (trnEditingId && !trnIsDraft ? '<div id="adTrnRegBlock"></div>' : '') +
+
             // Actions
             '<div class="ad-btn-row">' +
-                '<button class="ad-btn ad-btn-primary" id="adTrnSave">' + L.save + '</button>' +
-                (trnEditingId && item && item.bracket_type ? '<button class="ad-btn ad-btn-secondary" id="adTrnBracket">' + L.bracketTab + '</button>' : '') +
+                '<button class="ad-btn ad-btn-secondary" id="adTrnSave">' + L.save + '</button>' +
+                '<button class="ad-btn ad-btn-primary" id="adTrnPublish">' + (!trnIsDraft ? L.update : L.publish) + '</button>' +
+                (!trnIsDraft && trnEditingId && item && item.bracket_type ? '<button class="ad-btn ad-btn-secondary" id="adTrnBracket">' + L.bracketTab + '</button>' : '') +
+                (!trnIsDraft && trnEditingId && item && item.status !== 'cancelled' ? '<button class="ad-btn ad-btn-warning" id="adTrnCancel">' + L.trnCancelTournament + '</button>' : '') +
                 (trnEditingId ? '<button class="ad-btn ad-btn-danger" id="adTrnDelete">' + L.delete + '</button>' : '') +
+                '<span class="ad-draft-status" id="adTrnDraftStatus" style="margin-left:auto"></span>' +
             '</div>';
 
         // --- Event Listeners ---
 
-        // Back
+        // Back (with unsaved changes protection)
         document.getElementById('adTrnBack').addEventListener('click', function() {
-            renderTournamentsList();
+            if (trnDraftDirty) {
+                showConfirm(L.unsavedChanges, L.unsavedChangesText, function() {
+                    trnDraftDirty = false;
+                    setAdminHash('tournaments');
+                    renderTournamentsList();
+                }, L.unsavedLeaveBtn);
+            } else {
+                setAdminHash('tournaments');
+                renderTournamentsList();
+            }
         });
 
         // Lang tabs (delegate)
@@ -3785,36 +3935,75 @@
             card.querySelectorAll('.ad-lang-panel').forEach(function(p) { p.classList.toggle('active', p.dataset.langPanel === lang); });
         });
 
-        // Translate buttons (delegate)
+        // Translate ALL — 3-language "translate to empty" buttons (delegate)
         container.addEventListener('click', function(e) {
-            var btn = e.target.closest('.ad-btn-translate');
+            var btn = e.target.closest('.ad-btn-translate-all');
             if (!btn) return;
-            var srcId = btn.dataset.src;
-            var targetId = btn.dataset.target;
-            var toLang = btn.dataset.tolang;
-            var srcEl = document.getElementById(srcId);
-            var targetEl = document.getElementById(targetId);
-            if (!srcEl || !targetEl) return;
+            translateToEmpty(btn.dataset.ru, btn.dataset.en, btn.dataset.kg, btn);
+        });
 
-            var srcText = srcEl.value.trim();
-            if (!srcText) {
-                showToast(L.fillRuFirst, 'error');
+        // Venue search (court autocomplete)
+        var trnVenueSearchInput = document.getElementById('adTrnVenueSearch');
+        var trnVenueResultsDiv = document.getElementById('adTrnVenueResults');
+        var trnVenueTimer;
+
+        trnVenueSearchInput.addEventListener('input', function() {
+            clearTimeout(trnVenueTimer);
+            var q = trnVenueSearchInput.value.trim();
+            if (q.length < 2) {
+                trnVenueResultsDiv.style.display = 'none';
                 return;
             }
+            trnVenueTimer = setTimeout(function() {
+                searchTrnVenue(q);
+            }, 300);
+        });
 
-            var origLabel = btn.textContent;
-            btn.textContent = L.translating;
-            btn.disabled = true;
+        trnVenueSearchInput.addEventListener('focus', function() {
+            if (trnVenueSearchInput.value.trim().length >= 2) {
+                searchTrnVenue(trnVenueSearchInput.value.trim());
+            }
+        });
 
-            translateFromRu(srcText, toLang).then(function(result) {
-                targetEl.value = result;
-                btn.textContent = origLabel;
-                btn.disabled = false;
-            }).catch(function() {
-                showToast(L.translateError, 'error');
-                btn.textContent = origLabel;
-                btn.disabled = false;
-            });
+        document.addEventListener('click', function hideTrnVenue(e) {
+            if (!e.target.closest('.ad-pay-entity-wrap')) {
+                trnVenueResultsDiv.style.display = 'none';
+            }
+        });
+
+        // Load venue info if editing and court_id exists
+        if (item && item.court_id) {
+            loadTrnVenueInfo(item.court_id);
+        }
+
+        // Load registrations block
+        if (trnEditingId && !trnIsDraft) {
+            loadTrnRegistrations(trnEditingId);
+        }
+
+        // Max participants — only digits + auto-sync draw size
+        var maxPartInput = document.getElementById('adTrnMaxPart');
+        maxPartInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            var v = parseInt(this.value, 10);
+            if ([8, 16, 32, 64].indexOf(v) !== -1) {
+                var dsEl = document.getElementById('adTrnDrawSize');
+                if (dsEl) dsEl.value = String(v);
+            }
+        });
+        maxPartInput.addEventListener('wheel', function(e) { e.preventDefault(); });
+        maxPartInput.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+        });
+
+        // Match duration — only digits
+        var matchDurInput = document.getElementById('adTrnMatchDuration');
+        matchDurInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        matchDurInput.addEventListener('wheel', function(e) { e.preventDefault(); });
+        matchDurInput.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
         });
 
         // Image upload zone
@@ -3859,14 +4048,34 @@
             }
         });
 
-        // Save
-        document.getElementById('adTrnSave').addEventListener('click', saveTournamentHandler);
+        // Save (draft)
+        document.getElementById('adTrnSave').addEventListener('click', function() { saveTournamentHandler(false); });
+
+        // Publish / Update
+        document.getElementById('adTrnPublish').addEventListener('click', function() { saveTournamentHandler(true); });
 
         // Bracket management
         var brkBtn = document.getElementById('adTrnBracket');
         if (brkBtn) {
             brkBtn.addEventListener('click', function() {
                 renderBracketManagement(trnEditingId);
+            });
+        }
+
+        // Cancel tournament
+        var cancelBtn = document.getElementById('adTrnCancel');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                showConfirm(L.trnCancelConfirm, L.deleteConfirmText, async function() {
+                    var res = await client.from('tournaments').update({ status: 'cancelled' }).eq('id', trnEditingId);
+                    if (res.error) {
+                        showToast(res.error.message, 'error');
+                        return;
+                    }
+                    showToast(L.saved, 'success');
+                    // Reload to show updated badge
+                    loadAndEditTournament(trnEditingId);
+                });
             });
         }
 
@@ -3879,6 +4088,15 @@
                 });
             });
         }
+
+        // Autosave on input (debounce 3s)
+        trnDraftDirty = false;
+        container.addEventListener('input', function(e) {
+            if (!e.target.closest('.ad-form-card, .ad-field')) return;
+            trnDraftDirty = true;
+            clearTimeout(trnAutosaveTimer);
+            trnAutosaveTimer = setTimeout(autosaveTrnDraft, 3000);
+        });
     }
 
     function previewTrnImage(src) {
@@ -3912,53 +4130,229 @@
         }
     }
 
+    // ---- Collect Tournament Form Data ----
+    function collectTrnFormData() {
+        var maxPart = document.getElementById('adTrnMaxPart').value;
+        var courtId = document.getElementById('adTrnCourtId').value || null;
+        var venueInfo = document.getElementById('adTrnVenueInfo');
+        var venueName = venueInfo && venueInfo.dataset.courtName ? venueInfo.dataset.courtName : '';
+        var venueNameEn = venueInfo && venueInfo.dataset.courtNameEn ? venueInfo.dataset.courtNameEn : '';
+
+        return {
+            title: document.getElementById('adTrnTitle').value.trim(),
+            title_en: document.getElementById('adTrnTitleEn').value.trim(),
+            title_kg: document.getElementById('adTrnTitleKg').value.trim(),
+            description: document.getElementById('adTrnDesc').value.trim(),
+            description_en: document.getElementById('adTrnDescEn').value.trim(),
+            description_kg: document.getElementById('adTrnDescKg').value.trim(),
+            location: venueName || null,
+            location_en: venueNameEn || null,
+            court_id: courtId,
+            category_id: document.getElementById('adTrnCat').value,
+            date_start: document.getElementById('adTrnDateStart').value || null,
+            date_end: document.getElementById('adTrnDateEnd').value || null,
+            max_participants: maxPart ? parseInt(maxPart, 10) : null,
+            prize_fund: document.getElementById('adTrnPrize').value.trim() || null,
+            image: trnImageUrl || null,
+            format: document.getElementById('adTrnFormat').value || 'singles',
+            level_id: document.getElementById('adTrnLevel').value || null,
+            bracket_type: document.getElementById('adTrnBracketType').value || null,
+            draw_size: (function() { var v = document.getElementById('adTrnDrawSize').value; return v ? parseInt(v, 10) : null; })(),
+            court_count: parseInt(document.getElementById('adTrnCourtCount').value, 10) || 2,
+            match_duration: parseInt(document.getElementById('adTrnMatchDuration').value, 10) || 90,
+            registration_start: document.getElementById('adTrnRegStart').value || null,
+            registration_end: document.getElementById('adTrnRegEnd').value || null
+        };
+    }
+
+    // ---- Load & Render Registrations Block on Tournament Form ----
+    async function loadTrnRegistrations(tournamentId) {
+        var block = document.getElementById('adTrnRegBlock');
+        if (!block || !tournamentId) return;
+
+        var maxPart = parseInt(document.getElementById('adTrnMaxPart').value, 10) || 16;
+
+        var regRes = await client.from('tournament_registrations')
+            .select('*, players(id, name, name_en, photo, points, category_id)')
+            .eq('tournament_id', tournamentId)
+            .order('registered_at', { ascending: true });
+        var regs = regRes.data || [];
+
+        var active = regs.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; });
+        var mainDraw = active.slice(0, maxPart);
+        var waitlist = active.slice(maxPart);
+
+        var thName = isEn ? 'Name' : 'ФИО';
+        var thCat = isEn ? 'Category' : 'Категория';
+        var thDate = isEn ? 'Date' : 'Дата';
+        var thTime = isEn ? 'Time' : 'Время';
+
+        var thReg = isEn ? 'Registered' : 'Регистрация';
+        var regTHead = '<th style="width:30px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"></th>' +
+            '<th style="width:28px;">#</th><th style="width:32px;"></th><th>' + thName + '</th><th>' + thCat + '</th><th>' + thReg + '</th>';
+
+        var html = '<div class="ad-form-card" style="margin-top:20px;">' +
+            '<h3 class="ad-form-card-title">' + L.registrationsTab + '</h3>' +
+            '<div class="ad-reg-columns">';
+
+        // Left column: Main Draw
+        html += '<div>';
+        html += '<h4 class="ad-reg-section-title">' + L.regMainDraw + ' <span class="ad-badge">' + mainDraw.length + '/' + maxPart + '</span></h4>';
+        if (mainDraw.length > 0) {
+            html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                regTHead.replace('GRP', 'main') +
+            '</tr></thead><tbody>';
+            mainDraw.forEach(function(reg, idx) { html += renderTrnRegRow(reg, idx + 1, 'main'); });
+            html += '</tbody></table></div>';
+            html += '<div style="margin-top:8px;"><button class="ad-btn ad-btn-sm ad-btn-danger" id="adTrnRegRemoveMain" disabled>' + L.regRemoveSelected + '</button></div>';
+        } else {
+            html += '<div class="ad-empty-state" style="padding:12px 0;"><p>' + L.noRegistrations + '</p></div>';
+        }
+        html += '</div>';
+
+        // Right column: Waitlist
+        html += '<div>';
+        html += '<h4 class="ad-reg-section-title">' + L.regWaitlist + ' <span class="ad-badge">' + waitlist.length + '</span></h4>';
+        if (waitlist.length > 0) {
+            html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                regTHead.replace('GRP', 'wait') +
+            '</tr></thead><tbody>';
+            waitlist.forEach(function(reg, idx) { html += renderTrnRegRow(reg, idx + 1, 'wait'); });
+            html += '</tbody></table></div>';
+            html += '<div style="margin-top:8px;"><button class="ad-btn ad-btn-sm ad-btn-danger" id="adTrnRegRemoveWait" disabled>' + L.regRemoveSelected + '</button></div>';
+        } else {
+            html += '<div class="ad-empty-state" style="padding:12px 0;"><p>' + L.regNoWaitlist + '</p></div>';
+        }
+        html += '</div>';
+
+        html += '</div></div>';
+        block.innerHTML = html;
+
+        // Checkbox: select all
+        block.querySelectorAll('.ad-reg-check-all').forEach(function(allCb) {
+            allCb.addEventListener('change', function() {
+                block.querySelectorAll('.ad-reg-check[data-group="' + allCb.dataset.group + '"]').forEach(function(cb) { cb.checked = allCb.checked; });
+                updateTrnRegBtn(allCb.dataset.group);
+            });
+        });
+
+        // Checkbox: individual
+        block.querySelectorAll('.ad-reg-check').forEach(function(cb) {
+            cb.addEventListener('change', function() { updateTrnRegBtn(cb.dataset.group); });
+        });
+
+        function updateTrnRegBtn(group) {
+            var btn = document.getElementById(group === 'main' ? 'adTrnRegRemoveMain' : 'adTrnRegRemoveWait');
+            if (!btn) return;
+            var cnt = block.querySelectorAll('.ad-reg-check[data-group="' + group + '"]:checked').length;
+            btn.disabled = cnt === 0;
+            btn.textContent = L.regRemoveSelected + (cnt > 0 ? ' (' + cnt + ')' : '');
+        }
+
+        // Remove buttons
+        ['adTrnRegRemoveMain', 'adTrnRegRemoveWait'].forEach(function(btnId) {
+            var btn = document.getElementById(btnId);
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    var group = btnId === 'adTrnRegRemoveMain' ? 'main' : 'wait';
+                    var ids = [];
+                    block.querySelectorAll('.ad-reg-check[data-group="' + group + '"]:checked').forEach(function(cb) { ids.push(cb.dataset.regId); });
+                    if (ids.length === 0) return;
+                    showConfirm(L.regRemoveConfirm, '', async function() {
+                        await removeRegistrations(ids, tournamentId);
+                        loadTrnRegistrations(tournamentId);
+                    }, L.regRemoveSelected);
+                });
+            }
+        });
+    }
+
+    function renderTrnRegRow(reg, num, group) {
+        var player = reg.players || {};
+        var pName = isEn ? (player.name_en || player.name || '—') : (player.name || '—');
+        var photo = player.photo || '';
+        var photoHtml = photo
+            ? '<img src="' + esc(photo) + '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">'
+            : '<div style="width:28px;height:28px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--text-dim);">—</div>';
+        var catId = player.category_id || '';
+        var catParts = catId.split('-');
+        var catLabel = catParts.length > 1
+            ? catParts.slice(1).map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-')
+            : catId || '—';
+        var regDT = '';
+        if (reg.registered_at) {
+            var d = new Date(reg.registered_at);
+            regDT = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
+                ' <span style="color:var(--text-dim);">' +
+                d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
+        }
+        return '<tr>' +
+            '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '"></td>' +
+            '<td>' + num + '</td>' +
+            '<td>' + photoHtml + '</td>' +
+            '<td>' + esc(pName) + '</td>' +
+            '<td style="font-size:0.8rem;">' + esc(catLabel) + '</td>' +
+            '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
+        '</tr>';
+    }
+
+    // ---- Update Status Badge ----
+    function updateTrnStatusBadge() {
+        var badge = document.getElementById('adTrnStatusBadge');
+        if (!badge) return;
+        var label, cls;
+        if (!trnEditingPublishedAt) {
+            label = L.trnDraft;
+            cls = 'ad-status-draft';
+        } else {
+            var regStart = document.getElementById('adTrnRegStart').value || null;
+            var regEnd = document.getElementById('adTrnRegEnd').value || null;
+            var dateStart = document.getElementById('adTrnDateStart').value || null;
+            var dateEnd = document.getElementById('adTrnDateEnd').value || null;
+            var autoStatus = computeTournamentStatus(regStart, regEnd, dateStart, dateEnd);
+            label = TOURNAMENT_STATUSES[autoStatus] || L.statusUpcoming;
+            cls = 'ad-status-' + autoStatus.replace(/_/g, '-');
+        }
+        badge.className = 'ad-field-input ad-trn-status-field ' + cls;
+        badge.setAttribute('data-status-class', cls);
+        badge.textContent = label;
+    }
+
     // ---- Save Tournament ----
-    async function saveTournamentHandler() {
+    async function saveTournamentHandler(doPublish) {
         var saveBtn = document.getElementById('adTrnSave');
-        saveBtn.disabled = true;
-        saveBtn.textContent = L.saving;
+        var pubBtn = document.getElementById('adTrnPublish');
+        var activeBtn = doPublish ? pubBtn : saveBtn;
+        activeBtn.disabled = true;
+        activeBtn.textContent = L.saving;
 
         try {
-            var imageUrl = trnImageUrl;
+            // Upload image if file selected
             if (trnImageFile) {
-                imageUrl = await uploadTournamentImage(trnImageFile);
-                if (!imageUrl) {
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = L.save;
+                var uploaded = await uploadTournamentImage(trnImageFile);
+                if (!uploaded) {
+                    activeBtn.disabled = false;
+                    activeBtn.textContent = doPublish ? (trnEditingPublishedAt ? L.update : L.publish) : L.save;
                     return;
                 }
+                trnImageUrl = uploaded;
             }
 
-            var maxPart = document.getElementById('adTrnMaxPart').value;
+            var data = collectTrnFormData();
 
-            var data = {
-                title: document.getElementById('adTrnTitle').value.trim(),
-                title_en: document.getElementById('adTrnTitleEn').value.trim(),
-                title_kg: document.getElementById('adTrnTitleKg').value.trim(),
-                description: document.getElementById('adTrnDesc').value.trim(),
-                description_en: document.getElementById('adTrnDescEn').value.trim(),
-                location: document.getElementById('adTrnLocation').value.trim(),
-                location_en: document.getElementById('adTrnLocationEn').value.trim(),
-                category_id: document.getElementById('adTrnCat').value,
-                status: document.getElementById('adTrnStatus').value,
-                date_start: document.getElementById('adTrnDateStart').value || null,
-                date_end: document.getElementById('adTrnDateEnd').value || null,
-                max_participants: maxPart ? parseInt(maxPart, 10) : null,
-                prize_fund: document.getElementById('adTrnPrize').value.trim() || null,
-                image: imageUrl || null,
-                format: document.getElementById('adTrnFormat').value || 'singles',
-                level_id: document.getElementById('adTrnLevel').value || null,
-                bracket_type: document.getElementById('adTrnBracketType').value || null,
-                draw_size: (function() { var v = document.getElementById('adTrnDrawSize').value; return v ? parseInt(v, 10) : null; })(),
-                court_count: parseInt(document.getElementById('adTrnCourtCount').value, 10) || 2,
-                match_duration: parseInt(document.getElementById('adTrnMatchDuration').value, 10) || 90,
-                registration_deadline: document.getElementById('adTrnRegDeadline').value || null
-            };
+            // Determine published_at and status
+            if (doPublish) {
+                data.published_at = trnEditingPublishedAt || new Date().toISOString();
+                data.status = computeTournamentStatus(data.registration_start, data.registration_end, data.date_start, data.date_end);
+            } else {
+                data.published_at = null;
+                data.status = 'upcoming';
+            }
 
             if (!data.title) {
                 showToast(isEn ? 'Title is required' : 'Название обязательно', 'error');
-                saveBtn.disabled = false;
-                saveBtn.textContent = L.save;
+                activeBtn.disabled = false;
+                activeBtn.textContent = doPublish ? (trnEditingPublishedAt ? L.update : L.publish) : L.save;
                 return;
             }
 
@@ -3968,21 +4362,38 @@
             } else {
                 data.id = crypto.randomUUID();
                 result = await client.from('tournaments').insert(data);
+                if (!result.error) {
+                    trnEditingId = data.id;
+                }
             }
 
             if (result.error) {
                 showToast(result.error.message, 'error');
-                saveBtn.disabled = false;
-                saveBtn.textContent = L.save;
+                activeBtn.disabled = false;
+                activeBtn.textContent = doPublish ? (trnEditingPublishedAt ? L.update : L.publish) : L.save;
                 return;
             }
 
+            // Update state
+            if (doPublish) {
+                trnEditingPublishedAt = data.published_at;
+            } else {
+                trnEditingPublishedAt = null;
+            }
+
+            trnDraftDirty = false;
             showToast(L.saved, 'success');
-            renderTournamentsList();
+
+            // Update UI — badge and publish button text
+            updateTrnStatusBadge();
+            pubBtn.textContent = trnEditingPublishedAt ? L.update : L.publish;
+            activeBtn.disabled = false;
+            activeBtn.textContent = doPublish ? (trnEditingPublishedAt ? L.update : L.publish) : L.save;
+
         } catch (e) {
             showToast(e.message || 'Error', 'error');
-            saveBtn.disabled = false;
-            saveBtn.textContent = L.save;
+            activeBtn.disabled = false;
+            activeBtn.textContent = doPublish ? (trnEditingPublishedAt ? L.update : L.publish) : L.save;
         }
     }
 
@@ -3996,6 +4407,142 @@
         }
         showToast(isEn ? 'Deleted' : 'Удалено', 'success');
         renderTournamentsList();
+    }
+
+    // ---- Autosave Tournament Draft ----
+    async function autosaveTrnDraft() {
+        var title = (document.getElementById('adTrnTitle') || {}).value || '';
+        if (!title.trim()) return;
+
+        if (trnAutosaving) return;
+        trnAutosaving = true;
+
+        try {
+            var data = collectTrnFormData();
+
+            // Keep published_at as-is (draft stays draft, published stays published)
+            data.published_at = trnEditingPublishedAt;
+            data.status = trnEditingPublishedAt
+                ? computeTournamentStatus(data.registration_start, data.registration_end, data.date_start, data.date_end)
+                : 'upcoming';
+
+            var result;
+            if (trnEditingId) {
+                result = await client.from('tournaments').update(data).eq('id', trnEditingId);
+            } else {
+                data.id = crypto.randomUUID();
+                result = await client.from('tournaments').insert(data);
+                if (!result.error) {
+                    trnEditingId = data.id;
+                }
+            }
+
+            if (!result.error) {
+                trnDraftDirty = false;
+                var statusEl = document.getElementById('adTrnDraftStatus');
+                if (statusEl) {
+                    var now = new Date();
+                    var hh = String(now.getHours()).padStart(2, '0');
+                    var mm = String(now.getMinutes()).padStart(2, '0');
+                    statusEl.textContent = '\u2713 ' + L.draftSaved + ' ' + hh + ':' + mm;
+                }
+            }
+        } catch (e) {
+            console.error('Tournament autosave error:', e);
+        }
+        trnAutosaving = false;
+    }
+
+    // ---- Venue Search (court autocomplete) ----
+    async function searchTrnVenue(query) {
+        if (!client) return;
+        var resultsDiv = document.getElementById('adTrnVenueResults');
+        if (!resultsDiv) return;
+
+        var result = await client.from('courts')
+            .select('id,name,name_en,street,building,city,phone,google_maps_url,twogis_url')
+            .ilike('name', '%' + query + '%')
+            .limit(10);
+
+        var items = result.data || [];
+        if (items.length === 0) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
+
+        var html = '';
+        items.forEach(function(c) {
+            var addr = [c.street, c.building, c.city].filter(Boolean).join(', ');
+            html += '<div class="ad-pay-entity-item" data-id="' + c.id + '" data-name="' + esc(c.name || '') + '" data-name-en="' + esc(c.name_en || '') + '">' +
+                esc(c.name) + (addr ? ' <span style="color:var(--text-dim);font-size:0.8rem;">— ' + esc(addr) + '</span>' : '') +
+            '</div>';
+        });
+        resultsDiv.innerHTML = html;
+        resultsDiv.style.display = 'block';
+
+        resultsDiv.querySelectorAll('.ad-pay-entity-item').forEach(function(el) {
+            el.addEventListener('click', function() {
+                document.getElementById('adTrnCourtId').value = el.dataset.id;
+                document.getElementById('adTrnVenueSearch').value = el.dataset.name;
+                resultsDiv.style.display = 'none';
+                loadTrnVenueInfo(el.dataset.id);
+            });
+        });
+    }
+
+    async function loadTrnVenueInfo(courtId) {
+        if (!client || !courtId) return;
+        var result = await client.from('courts')
+            .select('id,name,name_en,street,building,city,phone,google_maps_url,twogis_url')
+            .eq('id', courtId)
+            .single();
+
+        var court = result.data;
+        if (!court) return;
+
+        var infoDiv = document.getElementById('adTrnVenueInfo');
+        if (!infoDiv) return;
+
+        var searchInput = document.getElementById('adTrnVenueSearch');
+        if (searchInput && !searchInput.value) {
+            searchInput.value = court.name || '';
+        }
+
+        // Store court names for save handler
+        infoDiv.dataset.courtName = court.name || '';
+        infoDiv.dataset.courtNameEn = court.name_en || '';
+
+        var addr = [court.street, court.building, court.city].filter(Boolean).join(', ');
+        var mapUrl = court.google_maps_url || court.twogis_url || '';
+
+        var html = '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+                '<strong style="color:var(--text-primary);">' + esc(court.name) + '</strong>' +
+                '<button type="button" class="ad-btn ad-btn-sm ad-btn-secondary" id="adTrnVenueClear">' + L.trnVenueClear + '</button>' +
+            '</div>';
+        if (addr) {
+            html += '<div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:4px;">' + L.trnVenueAddress + ': ' + esc(addr) + '</div>';
+        }
+        if (court.phone) {
+            html += '<div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:4px;">' + L.trnVenuePhone + ': ' + esc(court.phone) + '</div>';
+        }
+        if (mapUrl) {
+            html += '<div style="font-size:0.85rem;"><a href="' + esc(mapUrl) + '" target="_blank" style="color:var(--accent);">' + L.trnVenueMap + ' ↗</a></div>';
+        }
+        html += '</div>';
+
+        infoDiv.innerHTML = html;
+        infoDiv.style.display = 'block';
+
+        // Clear button
+        document.getElementById('adTrnVenueClear').addEventListener('click', function() {
+            document.getElementById('adTrnCourtId').value = '';
+            document.getElementById('adTrnVenueSearch').value = '';
+            infoDiv.innerHTML = '';
+            infoDiv.style.display = 'none';
+            infoDiv.dataset.courtName = '';
+            infoDiv.dataset.courtNameEn = '';
+        });
     }
 
     // ---- Upload Tournament Image ----
@@ -4057,9 +4604,11 @@
 
     // ---- Render Bracket Management View ----
     // Called after saving a tournament that has bracket_type set, or from edit view
-    async function renderBracketManagement(tournamentId) {
+    async function renderBracketManagement(tournamentId, forceTab) {
         var container = document.getElementById('ad-tournaments');
         if (!container) return;
+
+        setAdminHash('tournaments', 'bracket', tournamentId);
 
         // Ensure levels are loaded for results display
         await loadTournamentLevels();
@@ -4120,7 +4669,7 @@
         }
 
         // Build tabs
-        var activeTab = isTournamentCompleted ? 'results' : (hasMatches ? 'bracket' : 'registrations');
+        var activeTab = forceTab || (isTournamentCompleted ? 'results' : (hasMatches ? 'bracket' : 'registrations'));
 
         var html = '<div class="ad-section-header">' +
             '<h2 class="ad-section-title">' + esc(isEn ? (tournament.title_en || tournament.title) : tournament.title) + ' — ' + L.bracketTab + '</h2>' +
@@ -4177,20 +4726,64 @@
 
         // Back button
         document.getElementById('adBrkBack').addEventListener('click', function() {
+            setAdminHash('tournaments');
             renderTournamentsList();
         });
 
-        // Registration action buttons
-        container.querySelectorAll('[data-reg-action]').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
-                var regId = btn.dataset.regId;
-                var action = btn.dataset.regAction;
-                var newStatus = action === 'approve' ? 'approved' : 'rejected';
-                var res = await client.from('tournament_registrations').update({ status: newStatus }).eq('id', regId);
-                if (res.error) { showToast(res.error.message, 'error'); return; }
-                renderBracketManagement(tournamentId);
+        // Registration checkboxes: select all
+        container.querySelectorAll('.ad-reg-check-all').forEach(function(allCb) {
+            allCb.addEventListener('change', function() {
+                var group = allCb.dataset.group;
+                container.querySelectorAll('.ad-reg-check[data-group="' + group + '"]').forEach(function(cb) {
+                    cb.checked = allCb.checked;
+                });
+                updateRegRemoveBtn(group);
             });
         });
+
+        // Registration checkboxes: individual toggle
+        container.querySelectorAll('.ad-reg-check').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                updateRegRemoveBtn(cb.dataset.group);
+            });
+        });
+
+        function updateRegRemoveBtn(group) {
+            var btnId = group === 'main' ? 'adRegRemoveMain' : 'adRegRemoveWait';
+            var btn = document.getElementById(btnId);
+            if (!btn) return;
+            var checked = container.querySelectorAll('.ad-reg-check[data-group="' + group + '"]:checked');
+            btn.disabled = checked.length === 0;
+            btn.textContent = L.regRemoveSelected + (checked.length > 0 ? ' (' + checked.length + ')' : '');
+        }
+
+        // Remove selected from main draw
+        var removeMainBtn = document.getElementById('adRegRemoveMain');
+        if (removeMainBtn) {
+            removeMainBtn.addEventListener('click', function() {
+                var ids = [];
+                container.querySelectorAll('.ad-reg-check[data-group="main"]:checked').forEach(function(cb) { ids.push(cb.dataset.regId); });
+                if (ids.length === 0) return;
+                showConfirm(L.regRemoveConfirm, '', async function() {
+                    await removeRegistrations(ids, tournamentId);
+                    renderBracketManagement(tournamentId, 'registrations');
+                }, L.regRemoveSelected);
+            });
+        }
+
+        // Remove selected from waitlist
+        var removeWaitBtn = document.getElementById('adRegRemoveWait');
+        if (removeWaitBtn) {
+            removeWaitBtn.addEventListener('click', function() {
+                var ids = [];
+                container.querySelectorAll('.ad-reg-check[data-group="wait"]:checked').forEach(function(cb) { ids.push(cb.dataset.regId); });
+                if (ids.length === 0) return;
+                showConfirm(L.regRemoveConfirm, '', async function() {
+                    await removeRegistrations(ids, tournamentId);
+                    renderBracketManagement(tournamentId, 'registrations');
+                }, L.regRemoveSelected);
+            });
+        }
 
         // Generate draw button
         var genBtn = document.getElementById('adBrkGenerateDraw');
@@ -4244,58 +4837,90 @@
     // ---- Registrations Panel HTML ----
     function renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate) {
         var html = '';
-        if (registrations.length === 0) {
+        var maxPart = tournament.max_participants || 16;
+
+        // Sort all active registrations by registered_at ASC (first come first served)
+        var active = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; })
+            .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
+
+        var mainDraw = active.slice(0, maxPart);
+        var waitlist = active.slice(maxPart);
+        var withdrawn = registrations.filter(function(r) { return r.status === 'withdrawn' || r.status === 'rejected'; });
+
+        if (active.length === 0 && withdrawn.length === 0) {
             html += '<div class="ad-empty-state"><p>' + L.noRegistrations + '</p></div>';
         } else {
-            html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
-                '<th>#</th><th>' + L.plrName + '</th><th>' + L.plrPoints + '</th><th>' + (isEn ? 'Registered' : 'Подал заявку') + '</th><th>' + L.regStatus + '</th><th></th>' +
-            '</tr></thead><tbody>';
+            var thCategory = isEn ? 'Category' : 'Категория';
+            var thRegTime = isEn ? 'Registered' : 'Регистрация';
+            var regTableHead = '<th style="width:36px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"></th>' +
+                '<th>#</th><th>' + L.plrName + '</th><th>' + thCategory + '</th><th>' + thRegTime + '</th>';
 
-            registrations.forEach(function(reg, idx) {
-                var player = reg.players || playersMap[reg.player_id] || {};
-                var pName = isEn ? (player.name_en || player.name || reg.player_id) : (player.name || reg.player_id);
-                var statusClass = 'ad-status-' + reg.status;
-                var statusLabel = reg.status === 'approved' ? L.regApproved :
-                                  reg.status === 'rejected' ? L.regRejected :
-                                  reg.status === 'withdrawn' ? L.regWithdrawn : L.regPending;
-                var seedHtml = reg.seed_number ? ' <span class="ad-badge ad-badge-accent">[' + reg.seed_number + ']</span>' : '';
+            // ---- Main Draw ----
+            html += '<h3 class="ad-reg-section-title">' + L.regMainDraw + ' <span class="ad-badge">' + mainDraw.length + '/' + maxPart + '</span></h3>';
+            if (mainDraw.length > 0) {
+                html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                    regTableHead.replace('GRP', 'main') +
+                '</tr></thead><tbody>';
+                mainDraw.forEach(function(reg, idx) {
+                    html += renderRegRow(reg, idx + 1, playersMap, 'main');
+                });
+                html += '</tbody></table></div>';
+                html += '<div style="margin-top:8px;"><button class="ad-btn ad-btn-sm ad-btn-danger" id="adRegRemoveMain" disabled>' + L.regRemoveSelected + '</button></div>';
+            } else {
+                html += '<div class="ad-empty-state" style="padding:16px 0;"><p>' + L.noRegistrations + '</p></div>';
+            }
 
-                // Format registration time
-                var regTime = '';
-                if (reg.registered_at) {
-                    var d = new Date(reg.registered_at);
-                    regTime = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' }) +
-                        ' ' + d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit' });
-                }
-
-                html += '<tr>' +
-                    '<td>' + (idx + 1) + '</td>' +
-                    '<td>' + esc(pName) + seedHtml + '</td>' +
-                    '<td>' + (player.points || 0) + '</td>' +
-                    '<td style="font-size:0.8rem;color:var(--text-secondary);">' + regTime + '</td>' +
-                    '<td><span class="ad-status ' + statusClass + '">' + statusLabel + '</span></td>' +
-                    '<td>';
-
-                if (reg.status === 'pending') {
-                    html += '<button class="ad-btn ad-btn-sm ad-btn-primary" data-reg-action="approve" data-reg-id="' + reg.id + '">' + L.regApprove + '</button> ' +
-                            '<button class="ad-btn ad-btn-sm ad-btn-danger" data-reg-action="reject" data-reg-id="' + reg.id + '">' + L.regReject + '</button>';
-                }
-                html += '</td></tr>';
-            });
-            html += '</tbody></table></div>';
+            // ---- Waitlist ----
+            html += '<h3 class="ad-reg-section-title" style="margin-top:24px;">' + L.regWaitlist + ' <span class="ad-badge">' + waitlist.length + '</span></h3>';
+            if (waitlist.length > 0) {
+                html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                    regTableHead.replace('GRP', 'wait') +
+                '</tr></thead><tbody>';
+                waitlist.forEach(function(reg, idx) {
+                    html += renderRegRow(reg, idx + 1, playersMap, 'wait');
+                });
+                html += '</tbody></table></div>';
+                html += '<div style="margin-top:8px;"><button class="ad-btn ad-btn-sm ad-btn-danger" id="adRegRemoveWait" disabled>' + L.regRemoveSelected + '</button></div>';
+            } else {
+                html += '<div class="ad-empty-state" style="padding:16px 0;"><p>' + L.regNoWaitlist + '</p></div>';
+            }
         }
 
         // Generate draw button
         if (canGenerate && tournament.bracket_type) {
-            var approvedCount = registrations.filter(function(r) { return r.status === 'approved'; }).length;
             var drawSize = tournament.draw_size || 16;
             html += '<div style="margin-top:16px;text-align:center;">' +
-                '<p style="margin-bottom:8px;">' + approvedCount + ' ' + L.regCount + ' / ' + drawSize + '</p>' +
+                '<p style="margin-bottom:8px;">' + mainDraw.length + ' ' + L.regCount + ' / ' + drawSize + '</p>' +
                 '<button class="ad-btn ad-btn-primary" id="adBrkGenerateDraw">' + L.generateDraw + '</button>' +
             '</div>';
         }
 
         return html;
+    }
+
+    function renderRegRow(reg, num, playersMap, group) {
+        var player = reg.players || playersMap[reg.player_id] || {};
+        var pName = isEn ? (player.name_en || player.name || reg.player_id) : (player.name || reg.player_id);
+        var seedHtml = reg.seed_number ? ' <span class="ad-badge ad-badge-accent">[' + reg.seed_number + ']</span>' : '';
+        var catId = player.category_id || '';
+        var catParts = catId.split('-');
+        var catLabel = catParts.length > 1
+            ? catParts.slice(1).map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-')
+            : catId || '—';
+        var regDT = '';
+        if (reg.registered_at) {
+            var d = new Date(reg.registered_at);
+            regDT = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
+                ' <span style="color:var(--text-dim);">' +
+                d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
+        }
+        return '<tr>' +
+            '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '"></td>' +
+            '<td>' + num + '</td>' +
+            '<td>' + esc(pName) + seedHtml + '</td>' +
+            '<td style="font-size:0.8rem;">' + esc(catLabel) + '</td>' +
+            '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
+        '</tr>';
     }
 
     // ---- Bracket Panel HTML ----
@@ -4542,6 +5167,40 @@
         html += '</tbody></table></div></div>';
 
         return html;
+    }
+
+    // ---- Remove Registrations + Auto-Promote from Waitlist ----
+    async function removeRegistrations(regIds, tournamentId) {
+        // Set selected to withdrawn
+        var res = await client.from('tournament_registrations').update({ status: 'withdrawn' }).in('id', regIds);
+        if (res.error) { showToast(res.error.message, 'error'); return; }
+
+        // Auto-promote: load tournament max_participants, then check if main draw has room
+        var trnRes = await client.from('tournaments').select('max_participants').eq('id', tournamentId).single();
+        var maxPart = (trnRes.data && trnRes.data.max_participants) || 16;
+
+        // Count current approved
+        var appRes = await client.from('tournament_registrations')
+            .select('id', { count: 'exact', head: true })
+            .eq('tournament_id', tournamentId)
+            .eq('status', 'approved');
+        var approvedCount = appRes.count || 0;
+
+        // If there's room, promote from pending (waitlist) ordered by registered_at
+        var slotsAvailable = maxPart - approvedCount;
+        if (slotsAvailable > 0) {
+            var pendRes = await client.from('tournament_registrations')
+                .select('id')
+                .eq('tournament_id', tournamentId)
+                .eq('status', 'pending')
+                .order('registered_at', { ascending: true })
+                .limit(slotsAvailable);
+            var toPromote = (pendRes.data || []).map(function(r) { return r.id; });
+            if (toPromote.length > 0) {
+                await client.from('tournament_registrations').update({ status: 'approved' }).in('id', toPromote);
+            }
+        }
+        showToast(isEn ? 'Participants removed' : 'Участники удалены', 'success');
     }
 
     // ---- Generate Bracket Draw ----
@@ -5228,6 +5887,7 @@
 
     async function renderPlayersSection() {
         await loadCategories();
+        if (isDeepLinked('players')) return;
         renderPlayersList();
     }
 
@@ -5365,6 +6025,7 @@
         if (!client) return;
         var result = await client.from('players').select('*').eq('id', id).single();
         if (result.data) {
+            setAdminHash('players', 'edit', id);
             renderPlayerForm(result.data);
         }
     }
@@ -5564,6 +6225,7 @@
 
         // Back
         document.getElementById('adPlrBack').addEventListener('click', function() {
+            setAdminHash('players');
             renderPlayersList();
         });
 
@@ -5845,6 +6507,7 @@
     var crtPhones = [];
 
     async function renderCourtsSection() {
+        if (isDeepLinked('courts')) return;
         renderCourtsList();
     }
 
@@ -6375,6 +7038,7 @@
             .eq('entity_id', String(id))
             .order('created_at', { ascending: false });
 
+        setAdminHash('courts', 'view', id);
         renderCourtView(result.data, payments.data || []);
     }
 
@@ -6480,10 +7144,12 @@
             '</div>';
 
         document.getElementById('adCrtViewEditBtn').addEventListener('click', function() {
+            setAdminHash('courts', 'edit', item.id);
             renderCourtForm(item);
         });
 
         document.getElementById('adCrtViewBackBtn').addEventListener('click', function() {
+            setAdminHash('courts');
             renderCourtsList();
         });
     }
@@ -6492,6 +7158,7 @@
         if (!client) return;
         var result = await client.from('courts').select('*').eq('id', id).single();
         if (result.data) {
+            setAdminHash('courts', 'edit', id);
             renderCourtForm(result.data);
         }
     }
@@ -6784,6 +7451,7 @@
 
         // Back
         document.getElementById('adCrtBack').addEventListener('click', function() {
+            setAdminHash('courts');
             renderCourtsList();
         });
 
@@ -7410,6 +8078,7 @@
     };
 
     function renderCoachesSection() {
+        if (isDeepLinked('coaches')) return;
         renderCoachesList();
     }
 
@@ -7667,6 +8336,7 @@
             .eq('entity_id', String(id))
             .order('created_at', { ascending: false });
 
+        setAdminHash('coaches', 'view', id);
         renderCoachView(result.data, payments.data || []);
     }
 
@@ -7766,10 +8436,12 @@
             '</div>';
 
         document.getElementById('adCchViewEditBtn').addEventListener('click', function() {
+            setAdminHash('coaches', 'edit', item.id);
             renderCoachForm(item);
         });
 
         document.getElementById('adCchViewBackBtn').addEventListener('click', function() {
+            setAdminHash('coaches');
             renderCoachesList();
         });
     }
@@ -7778,6 +8450,7 @@
         if (!client) return;
         var result = await client.from('coaches').select('*').eq('id', id).single();
         if (result.error) { showToast(result.error.message, 'error'); return; }
+        setAdminHash('coaches', 'edit', id);
         renderCoachForm(result.data);
     }
 
@@ -8071,6 +8744,7 @@
 
         // Back
         document.getElementById('adCchBack').addEventListener('click', function() {
+            setAdminHash('coaches');
             renderCoachesList();
         });
 
@@ -9172,6 +9846,7 @@
     var memFilterStatus = '';
 
     async function renderMembershipsSection() {
+        if (isDeepLinked('memberships')) return;
         renderMembershipsList();
     }
 
@@ -9412,7 +10087,10 @@
                     e.stopPropagation();
                     var id = this.getAttribute('data-id');
                     var mem = items.find(function(m) { return m.id === id; });
-                    if (mem) renderMembershipForm(mem);
+                    if (mem) {
+                        setAdminHash('memberships', 'edit', id);
+                        renderMembershipForm(mem);
+                    }
                 });
             });
         }
@@ -9559,6 +10237,16 @@
         loadMembershipsList();
     }
 
+    async function loadAndEditMembership(id) {
+        if (!client) return;
+        var result = await client.from('memberships')
+            .select('*, profiles(full_name, email)')
+            .eq('id', id).single();
+        if (result.data) {
+            renderMembershipForm(result.data);
+        }
+    }
+
     // ---- Membership Form ----
     async function renderMembershipForm(mem) {
         var container = document.getElementById('ad-memberships');
@@ -9654,6 +10342,7 @@
 
         // Back button
         document.getElementById('adMemBack').addEventListener('click', function() {
+            setAdminHash('memberships');
             renderMembershipsList();
         });
 
@@ -9804,6 +10493,7 @@
     var PAY_PER_PAGE = 15;
 
     function renderPaymentsSection() {
+        if (isDeepLinked('payments')) return;
         renderPaymentsList();
     }
 
@@ -10052,6 +10742,7 @@
         if (!client) return;
         var result = await client.from('entity_payments').select('*').eq('id', id).single();
         if (result.data) {
+            setAdminHash('payments', 'edit', id);
             renderPaymentForm(result.data);
         }
     }
@@ -10185,6 +10876,7 @@
 
         document.getElementById('adPaySaveBtn').addEventListener('click', savePaymentHandler);
         document.getElementById('adPayBackBtn').addEventListener('click', function() {
+            setAdminHash('payments');
             renderPaymentsList();
         });
 
@@ -10345,6 +11037,7 @@
     var usrCurrentUserId = null; // Set in onAuthReady
 
     async function renderUsersSection() {
+        if (isDeepLinked('users')) return;
         renderUsersList();
     }
 
@@ -10560,6 +11253,7 @@
 
         var membership = (memRes.data && memRes.data.length > 0) ? memRes.data[0] : null;
 
+        setAdminHash('users', 'edit', id);
         renderUserForm(user, membership);
     }
 
@@ -10688,6 +11382,7 @@
 
         // Event listeners
         document.getElementById('adUsrBack').addEventListener('click', function() {
+            setAdminHash('users');
             renderUsersList();
         });
 

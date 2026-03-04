@@ -7,6 +7,26 @@ function esc(str) {
     return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+function getMapEmbed(url) {
+    if (!url) return null;
+    if (url.indexOf('google.com/maps') !== -1 || url.indexOf('goo.gl/maps') !== -1 || url.indexOf('maps.app.goo.gl') !== -1) {
+        if (url.indexOf('/embed') !== -1) return url;
+        var qMatch = url.match(/[?&]q=([^&]+)/);
+        if (qMatch) return 'https://maps.google.com/maps?q=' + qMatch[1] + '&output=embed';
+        var coordMatch = url.match(/@(-?[\d.]+),(-?[\d.]+)/);
+        if (coordMatch) return 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&output=embed';
+        var placeMatch = url.match(/\/place\/([^/]+)/);
+        if (placeMatch) return 'https://maps.google.com/maps?q=' + placeMatch[1] + '&output=embed';
+        return 'https://maps.google.com/maps?q=' + encodeURIComponent(url) + '&output=embed';
+    }
+    if (url.indexOf('2gis.') !== -1) {
+        var gisMatch = url.match(/\/([\d.]+)%2C([\d.]+)\//);
+        if (!gisMatch) gisMatch = url.match(/\/([\d.]+),([\d.]+)\//);
+        if (gisMatch) return 'https://maps.google.com/maps?q=' + gisMatch[2] + ',' + gisMatch[1] + '&output=embed';
+    }
+    return null;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const tournamentId = urlParams.get('id');
@@ -560,13 +580,18 @@ function loadFromSupabase(client, id) {
                 .order('match_order', { ascending: true });
 
             var regsPromise = client.from('tournament_registrations')
-                .select('*, players(id, name, name_en, points)')
+                .select('*, players(id, name, name_en, photo, points, category_id)')
                 .eq('tournament_id', id)
-                .order('seed_number', { ascending: true, nullsFirst: false });
+                .order('registered_at', { ascending: true });
 
-            Promise.all([matchesPromise, regsPromise]).then(function(results) {
+            var courtPromise = tournament.court_id
+                ? client.from('courts').select('id, name, name_en, street, street_en, building, city, city_en, google_maps_url, twogis_url, photo').eq('id', tournament.court_id).single()
+                : Promise.resolve({ data: null });
+
+            Promise.all([matchesPromise, regsPromise, courtPromise]).then(function(results) {
                 var matches = results[0].data || [];
                 var registrations = results[1].data || [];
+                var courtData = results[2].data || null;
 
                 // Build players map
                 var playerIds = [];
@@ -579,14 +604,14 @@ function loadFromSupabase(client, id) {
                 playerIds = playerIds.filter(function(v, i) { return playerIds.indexOf(v) === i; });
 
                 if (playerIds.length > 0) {
-                    client.from('players').select('id, name, name_en, points, country').in('id', playerIds)
+                    client.from('players').select('id, name, name_en, photo, points, country, category_id').in('id', playerIds)
                         .then(function(plRes) {
                             var playersMap = {};
                             (plRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
-                            renderSupabaseTournament(tournament, matches, registrations, playersMap);
+                            renderSupabaseTournament(tournament, matches, registrations, playersMap, courtData);
                         });
                 } else {
-                    renderSupabaseTournament(tournament, matches, registrations, {});
+                    renderSupabaseTournament(tournament, matches, registrations, {}, courtData);
                 }
             });
         })
@@ -596,7 +621,17 @@ function loadFromSupabase(client, id) {
         });
 }
 
-function renderSupabaseTournament(t, matches, registrations, playersMap) {
+function computeStatus(regStart, regEnd, dateStart, dateEnd) {
+    var now = new Date().toISOString().substring(0, 10);
+    if (regStart && now < regStart) return 'upcoming';
+    if (regStart && regEnd && now >= regStart && now <= regEnd) return 'registration_open';
+    if (dateEnd && now > dateEnd) return 'completed';
+    if (dateStart && now >= dateStart) return 'ongoing';
+    if (regEnd && now > regEnd) return 'registration_closed';
+    return 'upcoming';
+}
+
+function renderSupabaseTournament(t, matches, registrations, playersMap, courtData) {
     matches = matches || [];
     registrations = registrations || [];
     playersMap = playersMap || {};
@@ -615,14 +650,31 @@ function renderSupabaseTournament(t, matches, registrations, playersMap) {
     }
     dateRange += ' ' + d1.getFullYear();
 
+    // Registration dates line (show only if reg_end >= today)
+    var today = new Date().toISOString().substring(0, 10);
+    var regDateRange = '';
+    if (t.registration_start && t.registration_end && t.registration_end >= today) {
+        var rs = new Date(t.registration_start + 'T00:00:00');
+        var re = new Date(t.registration_end + 'T00:00:00');
+        regDateRange = rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()] + ' ' + rs.getFullYear();
+    }
+
+    // Auto-compute status (with overrides)
+    var effectiveStatus;
+    if (t.status === 'cancelled' || t.status === 'registration_closed' || t.status === 'completed') {
+        effectiveStatus = t.status;
+    } else {
+        effectiveStatus = computeStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
+    }
+
     // Status labels & CSS class mapping
     var statusLabels = isEn
         ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Registration Closed', ongoing: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
         : { registration_open: 'Регистрация открыта', upcoming: 'Скоро', registration_closed: 'Регистрация закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' };
 
     var statusClassMap = { registration_open: 'live', registration_closed: 'upcoming', ongoing: 'live', cancelled: 'completed', upcoming: 'upcoming', completed: 'completed' };
-    var statusClass = statusClassMap[t.status] || 'upcoming';
-    var statusText = statusLabels[t.status] || t.status;
+    var statusClass = statusClassMap[effectiveStatus] || 'upcoming';
+    var statusText = statusLabels[effectiveStatus] || effectiveStatus;
 
     // Format labels
     var formatLabels = isEn
@@ -675,7 +727,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap) {
                 '</a>' +
                 '<div class="td-hero-badges">' +
                     '<span class="tournament-category-badge">' + catName + '</span>' +
-                    '<span class="tournament-gender-badge" style="margin-left:8px">' + genderLabel + '</span>' +
+                    '<span class="tournament-gender-badge">' + genderLabel + '</span>' +
                     '<span class="td-status-badge ' + statusClass + '">' + statusText + '</span>' +
                 '</div>' +
                 '<h1>' + (isEn ? (t.title_en || t.title) : t.title) + '</h1>' +
@@ -684,6 +736,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap) {
                         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
                         ' ' + dateRange +
                     '</div>' +
+                    (regDateRange ? '<div class="td-meta-item td-meta-reg">' +
+                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>' +
+                        ' ' + (isEn ? 'Reg: ' : 'Рег: ') + regDateRange +
+                    '</div>' : '') +
                     '<div class="td-meta-item">' +
                         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
                         ' ' + (isEn ? (t.location_en || t.location || '') : (t.location || '')) +
@@ -886,23 +942,79 @@ function renderSupabaseTournament(t, matches, registrations, playersMap) {
     // ---- Participants from registrations ----
     var participantsGrid = document.getElementById('participantsGrid');
     if (participantsGrid) {
-        var approvedRegs = registrations.filter(function(r) { return r.status === 'approved'; });
-        if (approvedRegs.length > 0) {
+        var maxPart = t.max_participants || 16;
+        var activeRegs = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; })
+            .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
+
+        var mainDraw = activeRegs.slice(0, maxPart);
+        var waitlist = activeRegs.slice(maxPart);
+
+        if (mainDraw.length > 0) {
             var partHtml = '';
-            approvedRegs.sort(function(a, b) {
-                return (a.seed_number || 999) - (b.seed_number || 999);
-            });
-            approvedRegs.forEach(function(reg) {
+            var mainDrawLabel = isEn ? 'Main Draw' : 'Основная сетка';
+            var waitlistLabel = isEn ? 'Waitlist' : 'Лист ожидания';
+            var thName = isEn ? 'Name' : 'ФИО';
+            var thCat = isEn ? 'Category' : 'Категория';
+            var thDate = isEn ? 'Date' : 'Дата';
+            var thTime = isEn ? 'Time' : 'Время';
+
+            function pubRegRow(reg, idx) {
                 var p = reg.players || playersMap[reg.player_id] || {};
-                var pName = isEn ? (p.name_en || p.name || reg.player_id) : (p.name || reg.player_id);
-                partHtml += '<div class="td-participant-card">' +
-                    '<div class="td-participant-info">' +
-                        (reg.seed_number ? '<span class="td-participant-seed">[' + reg.seed_number + ']</span>' : '') +
-                        '<span class="td-participant-name">' + pName + '</span>' +
-                        '<span class="td-participant-country">' + (p.country || '') + '</span>' +
-                    '</div>' +
-                '</div>';
-            });
+                var pName = isEn ? (p.name_en || p.name || '—') : (p.name || '—');
+                var photo = p.photo || '';
+                var photoHtml = photo
+                    ? '<img class="td-reg-photo" src="' + esc(photo) + '" alt="">'
+                    : '<div class="td-reg-photo td-reg-photo-empty">—</div>';
+                var catId = p.category_id || '';
+                var catParts = catId.split('-');
+                var catLabel = catParts.length > 1
+                    ? catParts.slice(1).map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-')
+                    : catId || '—';
+                var regDate = '', regTime = '';
+                if (reg.registered_at) {
+                    var d = new Date(reg.registered_at);
+                    regDate = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' });
+                    regTime = d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                }
+                return '<tr>' +
+                    '<td>' + idx + '</td>' +
+                    '<td>' + photoHtml + '</td>' +
+                    '<td>' + esc(pName) + '</td>' +
+                    '<td>' + esc(catLabel) + '</td>' +
+                    '<td>' + regDate + '</td>' +
+                    '<td>' + regTime + '</td>' +
+                '</tr>';
+            }
+
+            var regTHead = '<th>#</th><th></th><th>' + thName + '</th><th>' + thCat + '</th><th>' + thDate + '</th><th>' + thTime + '</th>';
+
+            partHtml += '<div class="td-reg-columns">';
+
+            // Left: Main Draw
+            partHtml += '<div>';
+            partHtml += '<h3 class="td-participants-subtitle">' + mainDrawLabel + ' <span class="td-participants-count">' + mainDraw.length + '/' + maxPart + '</span></h3>';
+            partHtml += '<div class="td-reg-table-wrap"><table class="td-reg-table"><thead><tr>' +
+                regTHead +
+            '</tr></thead><tbody>';
+            mainDraw.forEach(function(reg, idx) { partHtml += pubRegRow(reg, idx + 1); });
+            partHtml += '</tbody></table></div>';
+            partHtml += '</div>';
+
+            // Right: Waitlist
+            partHtml += '<div>';
+            partHtml += '<h3 class="td-participants-subtitle">' + waitlistLabel + ' <span class="td-participants-count">' + waitlist.length + '</span></h3>';
+            if (waitlist.length > 0) {
+                partHtml += '<div class="td-reg-table-wrap"><table class="td-reg-table td-reg-table-waitlist"><thead><tr>' +
+                    regTHead +
+                '</tr></thead><tbody>';
+                waitlist.forEach(function(reg, idx) { partHtml += pubRegRow(reg, idx + 1); });
+                partHtml += '</tbody></table></div>';
+            } else {
+                partHtml += '<div class="td-no-results" style="padding:var(--space-md) 0;"><p>' + (isEn ? 'No waitlisted players' : 'Нет игроков в листе ожидания') + '</p></div>';
+            }
+            partHtml += '</div>';
+
+            partHtml += '</div>';
             participantsGrid.innerHTML = partHtml;
         } else {
             participantsGrid.innerHTML = '<div class="td-no-results"><p>' + L.noParticipants + '</p></div>';
@@ -984,8 +1096,74 @@ function renderSupabaseTournament(t, matches, registrations, playersMap) {
         }
     }
 
+    // ---- Venue section ----
+    if (courtData) {
+        renderVenueSection(courtData, isEn);
+    }
+
     // Init tabs navigation
     initTabsNavigation();
+}
+
+// ========================================
+// VENUE SECTION
+// ========================================
+
+function renderVenueSection(court, isEn) {
+    var venueSection = document.getElementById('venue');
+    var venueContent = document.getElementById('venueContent');
+    if (!venueSection || !venueContent) return;
+
+    var courtName = isEn ? (court.name_en || court.name) : court.name;
+    var street = isEn ? (court.street_en || court.street || '') : (court.street || '');
+    var city = isEn ? (court.city_en || court.city || '') : (court.city || '');
+    var building = court.building || '';
+
+    var addressParts = [];
+    if (street) addressParts.push(street);
+    if (building) addressParts.push(building);
+    if (city) addressParts.push(city);
+    var address = addressParts.join(', ');
+
+    var courtUrl = isEn ? 'court-en.html?id=' + court.id : 'court.html?id=' + court.id;
+    var mapUrl = court.google_maps_url || court.twogis_url || '';
+    var embedUrl = getMapEmbed(mapUrl);
+
+    var html = '<div class="td-venue-card">';
+
+    // Info block
+    html += '<div class="td-venue-info">' +
+        '<a href="' + esc(courtUrl) + '" class="td-venue-name">' + esc(courtName) + '</a>';
+    if (address) {
+        html += '<div class="td-venue-address">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
+            ' ' + esc(address) +
+        '</div>';
+    }
+
+    // Map links
+    var linksHtml = '';
+    if (court.google_maps_url) {
+        linksHtml += '<a href="' + esc(court.google_maps_url) + '" target="_blank" rel="noopener" class="td-venue-link">Google Maps</a>';
+    }
+    if (court.twogis_url) {
+        linksHtml += '<a href="' + esc(court.twogis_url) + '" target="_blank" rel="noopener" class="td-venue-link">2GIS</a>';
+    }
+    if (linksHtml) {
+        html += '<div class="td-venue-links">' + linksHtml + '</div>';
+    }
+    html += '</div>';
+
+    // Map embed
+    if (embedUrl) {
+        html += '<div class="td-venue-map">' +
+            '<iframe src="' + esc(embedUrl) + '" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>' +
+        '</div>';
+    }
+
+    html += '</div>';
+    venueContent.innerHTML = html;
+    venueSection.style.display = '';
 }
 
 // ========================================
@@ -1001,9 +1179,10 @@ function renderRegistrationButton(tournament, registrations, isEn) {
         if (!userRes.data || !userRes.data.user) return;
         var userId = userRes.data.user.id;
 
-        client.from('profiles').select('player_id').eq('id', userId).single().then(function(profRes) {
+        client.from('profiles').select('player_id, role').eq('id', userId).single().then(function(profRes) {
             if (!profRes.data || !profRes.data.player_id) return;
             var playerId = profRes.data.player_id;
+            var isStaff = profRes.data.role === 'admin' || profRes.data.role === 'manager';
 
             // Check if already registered
             var alreadyRegistered = registrations.find(function(r) { return r.player_id === playerId; });
@@ -1012,12 +1191,51 @@ function renderRegistrationButton(tournament, registrations, isEn) {
             client.from('players').select('category_id').eq('id', playerId).single().then(async function(plRes) {
                 if (!plRes.data) return;
 
-                var categoryMatch = !tournament.category_id || plRes.data.category_id === tournament.category_id;
+                // Category hierarchy: Tour(1) < Futures(2) < Challenger(3) < Masters(4) < Pro-Masters(5)
+                var CAT_LEVELS = { tour: 1, futures: 2, challenger: 3, masters: 4, promasters: 5 };
+                function getCatLevel(cid) {
+                    if (!cid) return 0;
+                    var tier = cid.split('-').slice(1).join('');
+                    return CAT_LEVELS[tier] || 0;
+                }
+                function getCatGender(cid) { return cid ? cid.split('-')[0] : null; }
 
-                // Check membership
-                var membershipOk = false;
-                var paidOk = false;
-                if (window.checkMembership) {
+                var categoryMatch = true;
+                var tCatId = tournament.category_id;
+                var pCatId = plRes.data.category_id;
+
+                if (tCatId) {
+                    // Friendly tournaments — open to all categories
+                    if (tCatId.indexOf('friendly') !== -1) {
+                        categoryMatch = true;
+                    } else if (pCatId === tCatId) {
+                        // Same category — OK
+                        categoryMatch = true;
+                    } else {
+                        categoryMatch = false;
+                        // Check promotion: player one level below + same gender + top-5 by points
+                        var tLevel = getCatLevel(tCatId);
+                        var pLevel = getCatLevel(pCatId);
+                        var tGender = getCatGender(tCatId);
+                        var pGender = getCatGender(pCatId);
+                        if (pLevel === tLevel - 1 && pGender === tGender && pLevel > 0) {
+                            var top5Res = await client.from('players')
+                                .select('id')
+                                .eq('category_id', pCatId)
+                                .order('points', { ascending: false })
+                                .limit(5);
+                            var top5Ids = (top5Res.data || []).map(function(p) { return p.id; });
+                            if (top5Ids.indexOf(playerId) !== -1) {
+                                categoryMatch = true;
+                            }
+                        }
+                    }
+                }
+
+                // Check membership (staff bypass)
+                var membershipOk = isStaff;
+                var paidOk = isStaff;
+                if (!isStaff && window.checkMembership) {
                     var memResult = await window.checkMembership();
                     membershipOk = memResult && memResult.active;
                     paidOk = memResult && memResult.paid;

@@ -8,23 +8,21 @@
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var client = window.supabaseClient;
 
-    // Auth-gate: intercept all "Подробнее" / detail clicks on tournament cards
-    var authPage = isEn ? 'auth-en.html' : 'auth.html';
-    document.addEventListener('click', function(e) {
-        var link = e.target.closest('.btn-view-bracket');
-        if (!link) return;
-        e.preventDefault();
-        var href = link.dataset.href || link.getAttribute('href');
-        if (!href || href === '#') return;
-        var authToken = localStorage.getItem('sb-qqkzszesviukopgjbead-auth-token');
-        if (authToken) {
-            window.location.href = href;
-        } else {
-            window.location.href = authPage;
-        }
-    });
+    // Detail page URL base
+    var detailPage = isEn ? 'tournament-en.html' : 'tournament.html';
 
     if (!client) return;
+
+    // Auto-compute tournament status from dates
+    function computeStatus(regStart, regEnd, dateStart, dateEnd) {
+        var now = new Date().toISOString().substring(0, 10);
+        if (regStart && now < regStart) return 'upcoming';
+        if (regStart && regEnd && now >= regStart && now <= regEnd) return 'registration_open';
+        if (dateEnd && now > dateEnd) return 'completed';
+        if (dateStart && now >= dateStart) return 'ongoing';
+        if (regEnd && now > regEnd) return 'registration_closed';
+        return 'upcoming';
+    }
 
     // Format prize fund total: 500000 → "500 000 сом", 0 → "0 сом"
     function formatPrize(num) {
@@ -59,10 +57,12 @@
         try {
             // All tournaments in this category — both men + women (all statuses)
             var result = await client.from('tournaments')
-                .select('id, prize_fund')
+                .select('id, prize_fund, published_at')
                 .like('category_id', '%-' + category);
 
-            var tournaments = (result.data && !result.error) ? result.data : [];
+            var allT = (result.data && !result.error) ? result.data : [];
+            var tournaments = allT.filter(function(t) { return t.published_at !== null; });
+            if (tournaments.length === 0) tournaments = allT;
             var tournamentCount = tournaments.length;
 
             // Sum prize funds — extract number from text like "100,000 сом" or "500000"
@@ -114,15 +114,17 @@
             var result = await client.from('tournaments')
                 .select('*')
                 .like('category_id', '%-' + category)
-                .in('status', ['upcoming', 'registration_open', 'registration_closed', 'ongoing', 'completed'])
                 .order('date_start', { ascending: true });
 
             console.log('Supabase tournaments query:', category, result);
 
-            if (!result.data || result.data.length === 0) return;
+            // Filter out drafts (published_at null = draft)
+            var allData = result.data || [];
+            var publishedData = allData.filter(function(t) { return t.published_at !== null; });
+            if (publishedData.length === 0) publishedData = allData;
 
             // Load registration counts per tournament for participant display
-            var tIds = result.data.map(function(t) { return t.id; });
+            var tIds = publishedData.map(function(t) { return t.id; });
             var regCounts = {};
             try {
                 if (tIds.length > 0) {
@@ -148,8 +150,8 @@
                 : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' };
 
             var statusLabels = isEn
-                ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Registration Closed', ongoing: 'In Progress', completed: 'Completed' }
-                : { registration_open: 'Регистрация открыта', upcoming: 'Скоро открытие', registration_closed: 'Регистрация закрыта', ongoing: 'Идёт', completed: 'Завершён' };
+                ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Registration Closed', ongoing: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
+                : { registration_open: 'Регистрация открыта', upcoming: 'Скоро открытие', registration_closed: 'Регистрация закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' };
 
             var L = isEn ? {
                 format: 'Format', participants: 'Players', prizeFund: 'Prize',
@@ -159,12 +161,23 @@
                 gender: 'Пол', details: 'Подробнее', register: 'Регистрация', notify: 'Уведомить', calendar: 'В календарь'
             };
 
+            var today = new Date().toISOString().substring(0, 10);
+
             // Convert Supabase data to card format
-            var supaItems = result.data.map(function(t) {
+            var supaItems = publishedData.map(function(t) {
                 var d = new Date(t.date_start + 'T00:00:00');
                 var day = String(d.getDate()).padStart(2, '0');
                 var month = months[d.getMonth()];
-                var cardStatus = t.status === 'registration_open' ? 'open' : (t.status === 'completed' ? 'past' : 'soon');
+
+                // Auto-compute status (with overrides)
+                var effectiveStatus;
+                if (t.status === 'cancelled' || t.status === 'registration_closed' || t.status === 'completed') {
+                    effectiveStatus = t.status;
+                } else {
+                    effectiveStatus = computeStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
+                }
+                var cardStatusMap = { registration_open: 'open', completed: 'past', ongoing: 'ongoing', cancelled: 'past', registration_closed: 'closed' };
+                var cardStatus = cardStatusMap[effectiveStatus] || 'soon';
 
                 var gender = (t.category_id || '').split('-')[0];
                 var cat = (t.category_id || '').replace(/^(men|women)-/, '');
@@ -173,6 +186,14 @@
                         ? (isEn ? '♀ Women' : '♀ Женский')
                         : (isEn ? '♂ Men' : '♂ Мужской'))
                     : '';
+
+                // Registration dates line (show only if reg_end >= today)
+                var regLine = '';
+                if (t.registration_start && t.registration_end && t.registration_end >= today) {
+                    var rs = new Date(t.registration_start + 'T00:00:00');
+                    var re = new Date(t.registration_end + 'T00:00:00');
+                    regLine = (isEn ? 'Reg: ' : 'Рег: ') + rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()];
+                }
 
                 return {
                     id: t.id,
@@ -185,29 +206,27 @@
                     participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
                     prize: t.prize_fund ? ((/[а-яa-z]/i.test(String(t.prize_fund))) ? String(t.prize_fund) : formatPrize(parseInt(String(t.prize_fund).replace(/[^\d]/g, ''), 10) || 0)) : '',
                     status: cardStatus,
-                    statusText: statusLabels[t.status] || statusLabels.upcoming,
+                    statusText: statusLabels[effectiveStatus] || statusLabels.upcoming,
                     genderLabel: genderLabel,
+                    regLine: regLine,
                     image: t.image_url || t.image || '',
                     _fromSupabase: true
                 };
             });
 
-            // Use static items only as fallback when Supabase returned nothing
-            var all;
-            if (supaItems.length > 0) {
-                all = supaItems;
-            } else {
-                var monthMap = isEn
-                    ? {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
-                    : {'Янв':'01','Фев':'02','Мар':'03','Апр':'04','Май':'05','Июн':'06','Июл':'07','Авг':'08','Сен':'09','Окт':'10','Ноя':'11','Дек':'12'};
+            // Combine: Supabase data first, then static as fallback/demo
+            var monthMap = isEn
+                ? {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
+                : {'Янв':'01','Фев':'02','Мар':'03','Апр':'04','Май':'05','Июн':'06','Июл':'07','Авг':'08','Сен':'09','Окт':'10','Ноя':'11','Дек':'12'};
 
-                all = (tournamentsData.upcoming[category] || []).map(function(t) {
-                    return Object.assign({}, t, {
-                        _dateSort: '2026-' + (monthMap[t.date.month] || '01') + '-' + t.date.day,
-                        _fromSupabase: false
-                    });
+            var staticItems = (typeof tournamentsData !== 'undefined' && tournamentsData.upcoming[category] || []).map(function(t) {
+                return Object.assign({}, t, {
+                    _dateSort: '2026-' + (monthMap[t.date.month] || '01') + '-' + t.date.day,
+                    _fromSupabase: false
                 });
-            }
+            });
+
+            var all = supaItems.concat(staticItems);
 
             // Sort by date (closest first)
             all.sort(function(a, b) {
@@ -223,7 +242,8 @@
                     ? (isEn ? 'Registration Open' : 'Регистрация открыта')
                     : (isEn ? 'Coming Soon' : 'Скоро открытие'));
 
-                return '<div class="tournament-card" data-status="' + t.status + '"' +
+                var cardHref = detailPage + '?id=' + (t._fromSupabase ? t.id : category + '-' + t.id);
+                return '<div class="tournament-card" data-status="' + t.status + '" data-id="' + (t._fromSupabase ? t.id : category + '-' + t.id) + '"' +
                     (t.image ? ' style="background-image:url(' + t.image + ')"' : '') + '>' +
                     '<div class="tournament-card-header">' +
                         '<span class="tournament-date">' +
@@ -242,6 +262,7 @@
                             (t.time ? '<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + t.time + '</span>' : '') +
                         '</div>' +
                         '<div class="tournament-details">' +
+                            (t.regLine ? '<div class="detail-item detail-reg"><span class="detail-label">' + (isEn ? 'Registration' : 'Регистрация') + '</span><span class="detail-value">' + t.regLine.replace(/^(Reg|Рег): /, '') + '</span></div>' : '') +
                             '<div class="detail-item"><span class="detail-label">' + L.format + '</span><span class="detail-value">' + (t.format || '') + '</span></div>' +
                             '<div class="detail-item"><span class="detail-label">' + L.participants + '</span><span class="detail-value">' + (t.participants || '') + '</span></div>' +
                             '<div class="detail-item"><span class="detail-label">' + L.prizeFund + '</span><span class="detail-value prize">' + (t.prize || '') + '</span></div>' +
@@ -249,7 +270,7 @@
                     '</div>' +
                     '<div class="tournament-card-footer">' +
                         '<button class="btn-calendar" title="' + L.calendar + '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>' +
-                        '<button class="btn-view-bracket btn-auth-gate" data-href="' + (isEn ? 'tournament-en.html' : 'tournament.html') + '?id=' + (t._fromSupabase ? t.id : category + '-' + t.id) + '\">' + L.details + '</button>' +
+                        '<span class="btn-view-bracket">' + L.details + '</span>' +
                         (t.status === 'open'
                             ? '<button class="btn-register">' + L.register + '</button>'
                             : (t.status === 'past' ? '' : '<button class="btn-notify">' + L.notify + '</button>')) +
@@ -257,7 +278,16 @@
                 '</div>';
             }).join('');
 
-            // Hide completed tournaments by default (show only via "Завершённые" filter)
+            // Make each card clickable — direct listener (more reliable than delegation)
+            grid.querySelectorAll('.tournament-card[data-id]').forEach(function(card) {
+                card.addEventListener('click', function(e) {
+                    // Skip footer buttons
+                    if (e.target.closest('.btn-calendar, .btn-register, .btn-notify')) return;
+                    window.location.href = detailPage + '?id=' + this.dataset.id;
+                });
+            });
+
+            // Hide completed/cancelled tournaments by default
             grid.querySelectorAll('.tournament-card[data-status="past"]').forEach(function(card) {
                 card.style.display = 'none';
             });

@@ -35,6 +35,22 @@
             return { active: false, paid: false, membership: null, daysLeft: 0 };
         }
 
+        // Staff bypass — admin and manager skip membership check
+        var role = window.ksltProfile && window.ksltProfile.role;
+        if (!role) {
+            // Public pages may not have ksltProfile — check from localStorage or DB
+            role = localStorage.getItem('kslt_role');
+            if (!role) {
+                try {
+                    var pr = await client.from('profiles').select('role').eq('id', window.ksltUser.id).single();
+                    if (pr.data) role = pr.data.role;
+                } catch (e) { /* ignore */ }
+            }
+        }
+        if (role === 'admin' || role === 'manager') {
+            return { active: true, paid: true, membership: { staff_bypass: true }, daysLeft: 999 };
+        }
+
         var today = new Date().toISOString().split('T')[0];
 
         var result = await client

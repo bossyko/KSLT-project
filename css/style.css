@@ -442,12 +442,14 @@ nav {
     background: var(--surface-glass-hover);
 }
 
-.nav-item.active {
+.nav-item.active,
+.nav-item.is-active {
     color: var(--accent);
     font-weight: 600;
 }
 
-.nav-item.active:hover {
+.nav-item.active:hover,
+.nav-item.is-active:hover {
     color: var(--accent);
 }
 
@@ -455,6 +457,7 @@ nav {
 .indicator-dot {
     width: 6px;
     height: 6px;
+    flex-shrink: 0;
     background: var(--accent);
     border-radius: 50%;
     animation: livePulse 2s ease-in-out infinite;
@@ -587,6 +590,11 @@ nav {
 .nav-dropdown:hover .nav-dropdown-item:nth-child(3) { transition-delay: 0.15s; }
 .nav-dropdown:hover .nav-dropdown-item:nth-child(4) { transition-delay: 0.2s; }
 .nav-dropdown:hover .nav-dropdown-item:nth-child(5) { transition-delay: 0.25s; }
+
+.nav-dropdown-item.active {
+    color: var(--accent);
+    font-weight: 600;
+}
 
 .nav-dropdown-item:hover {
     background: var(--surface-glass-hover);
@@ -3420,6 +3428,11 @@ h2 {
     display: none;
 }
 
+.mobile-nav-links a.is-active {
+    color: var(--accent);
+    font-weight: 600;
+}
+
 .mobile-nav-links a.is-active .indicator-dot {
     display: inline-block;
 }
@@ -3502,6 +3515,11 @@ h2 {
 .mobile-nav-dropdown.active .mobile-dropdown-menu li:nth-child(3) a { transition-delay: 0.15s; }
 .mobile-nav-dropdown.active .mobile-dropdown-menu li:nth-child(4) a { transition-delay: 0.2s; }
 .mobile-nav-dropdown.active .mobile-dropdown-menu li:nth-child(5) a { transition-delay: 0.25s; }
+
+.mobile-dropdown-menu li a.active {
+    color: var(--accent);
+    font-weight: 600;
+}
 
 .mobile-dropdown-menu li a:hover {
     color: var(--accent);

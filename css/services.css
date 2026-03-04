@@ -426,6 +426,97 @@
     100% { transform: translateX(-50%); }
 }
 
+/* ========================================
+   PARTNERS SECTION — centered below columns
+   ======================================== */
+
+.sv-partners-section {
+    grid-column: 1 / -1;
+    max-width: 50%;
+    margin: 0 auto;
+}
+
+/* Partner initials (featured) */
+.sv-partner-initials {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(204, 255, 0, 0.15);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+    border: 2px solid var(--accent);
+}
+
+/* Partner online/offline status */
+.sv-partner-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+.sv-partner-status.online {
+    color: #4ade80;
+}
+
+.sv-partner-status.offline {
+    color: var(--text-muted);
+}
+
+.sv-partner-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sv-partner-status.online .sv-partner-dot {
+    background: #4ade80;
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+}
+
+.sv-partner-status.offline .sv-partner-dot {
+    background: var(--text-muted);
+}
+
+/* Compact partner — avatar with online dot */
+.sv-compact-partner-head {
+    position: relative;
+    width: 44px;
+    margin-bottom: var(--space-sm);
+}
+
+.sv-compact-initials {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(204, 255, 0, 0.1);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 2px solid var(--border-subtle);
+}
+
+.sv-compact-online-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #4ade80;
+    border: 2px solid var(--bg-card);
+    box-shadow: 0 0 4px rgba(74, 222, 128, 0.5);
+}
+
 /* Empty state */
 .sv-empty {
     text-align: center;
@@ -438,6 +529,14 @@
     display: block;
     margin: 0 auto var(--space-sm);
     opacity: 0.3;
+}
+
+/* ========================================
+   SPONSORS
+   ======================================== */
+
+.sv-sponsors-section {
+    padding: var(--space-lg) 7%;
 }
 
 /* ========================================
@@ -473,6 +572,10 @@
     .sv-columns {
         grid-template-columns: 1fr;
         padding: var(--space-lg) 5%;
+    }
+
+    .sv-partners-section {
+        max-width: 100%;
     }
 
     .sv-featured {

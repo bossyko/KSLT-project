@@ -2,6 +2,23 @@
    TOURNAMENTS PAGE STYLES
    ======================================== */
 
+/* Back link */
+.trn-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 20px 7% 0;
+    transition: color var(--transition-fast);
+}
+
+.trn-back-link:hover {
+    color: var(--accent);
+}
+
 /* Tournament Hero */
 .tournament-hero {
     position: relative;
@@ -155,6 +172,9 @@
     position: relative;
     background-size: cover;
     background-position: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .tournament-card[style*="background-image"]::before {
@@ -329,6 +349,10 @@
 }
 
 .detail-value.prize {
+    color: var(--accent);
+}
+
+.detail-reg .detail-value {
     color: var(--accent);
 }
 

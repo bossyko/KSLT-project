@@ -25,8 +25,8 @@
         : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' };
 
     var statusLabels = isEn
-        ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Reg. Closed', ongoing: 'In Progress', completed: 'Completed' }
-        : { registration_open: 'Регистрация открыта', upcoming: 'Скоро', registration_closed: 'Рег. закрыта', ongoing: 'Идёт', completed: 'Завершён' };
+        ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Reg. Closed', ongoing: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
+        : { registration_open: 'Регистрация открыта', upcoming: 'Скоро', registration_closed: 'Рег. закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' };
 
     var L = isEn ? {
         heroTitle: 'Tournaments',
@@ -58,10 +58,20 @@
 
     var tournamentPage = isEn ? 'tournament-en.html' : 'tournament.html';
     var tournamentsPage = isEn ? 'tournaments-en.html' : 'tournaments.html';
-    var authPage = isEn ? 'auth-en.html' : 'auth.html';
 
     var _grouped = {};
     var _bgImages = {};
+
+    // Auto-compute tournament status from dates
+    function computeStatus(regStart, regEnd, dateStart, dateEnd) {
+        var now = new Date().toISOString().substring(0, 10);
+        if (regStart && now < regStart) return 'upcoming';
+        if (regStart && regEnd && now >= regStart && now <= regEnd) return 'registration_open';
+        if (dateEnd && now > dateEnd) return 'completed';
+        if (dateStart && now >= dateStart) return 'ongoing';
+        if (regEnd && now > regEnd) return 'registration_closed';
+        return 'upcoming';
+    }
 
     // SVG icons
     var pinSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
@@ -94,16 +104,23 @@
 
         if (client) {
             try {
-                // Load all tournaments (including completed) so every category has data with gender
+                // Load all tournaments so every category has data with gender
                 var result = await client.from('tournaments')
                     .select('*')
                     .order('date_start', { ascending: true });
 
                 console.log('[overview] Supabase returned', result.data ? result.data.length : 0, 'tournaments');
                 if (result.data && result.data.length > 0) {
-                    result.data.forEach(function(t) { console.log('  ->', t.id, 'category_id:', t.category_id, 'format:', t.format); });
+                    // Filter out drafts (published_at is null = draft)
+                    var publishedRows = result.data.filter(function(t) {
+                        return t.published_at !== null;
+                    });
+                    // Backward compat: if ALL tournaments have published_at=null, show all
+                    if (publishedRows.length === 0) {
+                        publishedRows = result.data;
+                    }
                     // Load registration counts per tournament
-                    var tIds = result.data.map(function(t) { return t.id; });
+                    var tIds = publishedRows.map(function(t) { return t.id; });
                     var regCounts = {};
                     try {
                         if (tIds.length > 0) {
@@ -119,18 +136,14 @@
                     } catch (re) {
                         console.warn('Registration counts unavailable:', re.message);
                     }
-                    grouped = groupByCategory(result.data, true, regCounts);
+                    grouped = groupByCategory(publishedRows, true, regCounts);
                 }
             } catch(e) {
                 console.error('Supabase tournaments overview error:', e);
             }
         }
 
-        // Static fallback
-        if (!grouped) {
-            grouped = buildStaticGrouped();
-        }
-
+        if (!grouped) grouped = {};
         renderCategories(grouped);
     }
 
@@ -149,6 +162,7 @@
     function groupByCategory(rows, fromSupabase, regCounts) {
         regCounts = regCounts || {};
         var map = {};
+        var today = new Date().toISOString().substring(0, 10);
         CATEGORIES.forEach(function(c) { map[c.key] = []; });
 
         rows.forEach(function(t) {
@@ -159,7 +173,23 @@
             var day = String(d.getDate()).padStart(2, '0');
             var month = months[d.getMonth()];
             var gender = getGender(t.category_id);
-            var cardStatus = mapStatus(t.status);
+
+            // Auto-compute status (with overrides)
+            var effectiveStatus;
+            if (t.status === 'cancelled' || t.status === 'registration_closed' || t.status === 'completed') {
+                effectiveStatus = t.status;
+            } else {
+                effectiveStatus = computeStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
+            }
+            var cardStatus = mapStatus(effectiveStatus);
+
+            // Registration dates line (show only if reg_end >= today)
+            var regLine = '';
+            if (t.registration_start && t.registration_end && t.registration_end >= today) {
+                var rs = new Date(t.registration_start + 'T00:00:00');
+                var re = new Date(t.registration_end + 'T00:00:00');
+                regLine = rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()];
+            }
 
             map[cat].push({
                 id: t.id,
@@ -171,60 +201,27 @@
                 participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
                 prize: t.prize_fund || '',
                 status: cardStatus,
-                statusText: statusLabels[t.status] || statusLabels.upcoming,
+                statusText: statusLabels[effectiveStatus] || statusLabels.upcoming,
                 gender: gender,
                 genderLabel: (t.format !== 'mixed_doubles' && cat !== 'friendly' && (gender === 'men' || gender === 'women'))
                     ? (gender === 'women' ? ('♀ ' + L.women) : ('♂ ' + L.men))
                     : '',
+                regLine: regLine,
                 image: t.image_url || t.image || '',
                 _fromSupabase: true
             });
         });
 
-        // Sort each category: non-completed first (by date asc), completed last (by date desc)
+        // Sort: active/upcoming first (date asc), then past (date desc)
         Object.keys(map).forEach(function(key) {
             map[key].sort(function(a, b) {
-                var aPast = a.status === 'past' ? 1 : 0;
-                var bPast = b.status === 'past' ? 1 : 0;
-                if (aPast !== bPast) return aPast - bPast;
+                var aIsPast = a.status === 'past';
+                var bIsPast = b.status === 'past';
+                if (aIsPast !== bIsPast) return aIsPast ? 1 : -1;
+                if (aIsPast) return (b._dateSort || '').localeCompare(a._dateSort || '');
                 return (a._dateSort || '').localeCompare(b._dateSort || '');
             });
             map[key] = map[key].slice(0, 4);
-        });
-
-        return map;
-    }
-
-    function buildStaticGrouped() {
-        var map = {};
-        if (typeof tournamentsData === 'undefined') return map;
-
-        CATEGORIES.forEach(function(c) {
-            var items = tournamentsData.upcoming[c.key] || [];
-            map[c.key] = items.slice(0, 4).map(function(t) {
-                var monthMap = isEn
-                    ? {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
-                    : {'Янв':'01','Фев':'02','Мар':'03','Апр':'04','Май':'05','Июн':'06','Июл':'07','Авг':'08','Сен':'09','Окт':'10','Ноя':'11','Дек':'12'};
-
-                return {
-                    id: c.key + '-' + t.id,
-                    name: t.name,
-                    date: t.date,
-                    _dateSort: '2026-' + (monthMap[t.date.month] || '01') + '-' + t.date.day,
-                    location: t.location || '',
-                    format: t.format || '',
-                    participants: t.participants || '',
-                    prize: t.prize || '',
-                    status: t.status || 'soon',
-                    statusText: t.status === 'open'
-                        ? (isEn ? 'Registration Open' : 'Регистрация открыта')
-                        : (isEn ? 'Coming Soon' : 'Скоро'),
-                    gender: '',
-                    genderLabel: '',
-                    image: t.image || '',
-                    _fromSupabase: false
-                };
-            });
         });
 
         return map;
@@ -234,7 +231,7 @@
         if (s === 'registration_open') return 'open';
         if (s === 'ongoing') return 'ongoing';
         if (s === 'registration_closed') return 'closed';
-        if (s === 'completed') return 'past';
+        if (s === 'completed' || s === 'cancelled') return 'past';
         return 'soon';
     }
 
@@ -265,7 +262,7 @@
                 html += '<div class="to-card-grid">';
                 // Featured card — use category image (more reliable for overview)
                 var featuredBg = items[0].image || bgImage;
-                html += renderFeatured(items[0], featuredBg);
+                html += renderFeatured(items[0], featuredBg, cat.key);
                 // Side stack (items 1-3)
                 if (items.length > 1) {
                     html += '<div class="to-side-stack">';
@@ -284,10 +281,10 @@
         attachEvents();
     }
 
-    function renderFeatured(t, bgImage) {
+    function renderFeatured(t, bgImage, catKey) {
         var linkHref = tournamentPage + '?id=' + t.id;
 
-        return '<div class="to-featured">' +
+        return '<div class="to-featured" data-href="' + linkHref + '">' +
             (bgImage
                 ? '<div class="to-featured-bg"><img src="' + bgImage + '" alt="" loading="lazy"></div><div class="to-featured-overlay"></div>'
                 : '<div class="to-featured-overlay" style="background:var(--bg-card)"></div>') +
@@ -302,17 +299,20 @@
                     '<span>' + pinSvg + ' ' + t.location + '</span>' +
                 '</div>' +
                 '<div class="to-featured-details">' +
+                    (t.regLine ? '<div class="to-featured-detail"><span class="to-label">' + (isEn ? 'Reg' : 'Рег') + '</span><span class="to-value">' + t.regLine + '</span></div>' : '') +
                     (t.format ? '<div class="to-featured-detail"><span class="to-label">' + L.format + '</span><span class="to-value">' + t.format + '</span></div>' : '') +
                     (t.participants ? '<div class="to-featured-detail"><span class="to-label">' + L.participants + '</span><span class="to-value">' + t.participants + '</span></div>' : '') +
                     (t.prize ? '<div class="to-featured-detail"><span class="to-label">' + L.prize + '</span><span class="to-value prize">' + t.prize + '</span></div>' : '') +
                 '</div>' +
-                '<button class="to-featured-link" data-href="' + linkHref + '">' + L.details + '</button>' +
+                '<span class="to-featured-link">' + L.details + '</span>' +
             '</div>' +
         '</div>';
     }
 
     function renderCompact(t, catKey, idx) {
-        return '<div class="to-compact" data-cat="' + catKey + '" data-idx="' + idx + '"' +
+        var compactHref = tournamentPage + '?id=' + t.id;
+
+        return '<div class="to-compact" data-cat="' + catKey + '" data-idx="' + idx + '" data-href="' + compactHref + '"' +
             (t.image ? ' style="background-image:url(' + t.image + ')"' : '') + '>' +
             '<div class="to-compact-left">' +
                 '<div class="to-compact-date">' +
@@ -325,7 +325,7 @@
                 '<h4>' + t.name + '</h4>' +
                 '<div class="to-compact-sub">' +
                     '<span>' + pinSvg + ' ' + t.location + '</span>' +
-                    (t.format ? '<span>' + t.format + '</span>' : '') +
+                    (t.regLine ? '<span class="to-compact-reg">' + (isEn ? 'Reg: ' : 'Рег: ') + t.regLine + '</span>' : '') +
                 '</div>' +
             '</div>' +
             '<div class="to-compact-right">' +
@@ -346,7 +346,7 @@
         if (!grid) return;
 
         var featuredBg = items[0].image || bgImage;
-        var html = renderFeatured(items[0], featuredBg);
+        var html = renderFeatured(items[0], featuredBg, catKey);
         if (items.length > 1) {
             html += '<div class="to-side-stack">';
             for (var i = 1; i < items.length; i++) {
@@ -362,34 +362,10 @@
         if (!container) return;
 
         container.addEventListener('click', function(e) {
-            // Carousel: compact card click
-            var compact = e.target.closest('.to-compact');
-            if (compact) {
-                e.preventDefault();
-                var catKey = compact.dataset.cat;
-                var idx = parseInt(compact.dataset.idx, 10);
-                if (catKey && !isNaN(idx) && _grouped[catKey]) {
-                    var items = _grouped[catKey];
-                    var temp = items[0];
-                    items[0] = items[idx];
-                    items[idx] = temp;
-                    renderCardGrid(catKey);
-                }
-                return;
-            }
-
-            // Auth-gate: details button click
-            var btn = e.target.closest('.to-featured-link');
-            if (btn) {
-                e.preventDefault();
-                var href = btn.dataset.href;
-                if (!href) return;
-                var authToken = localStorage.getItem('sb-qqkzszesviukopgjbead-auth-token');
-                if (authToken) {
-                    window.location.href = href;
-                } else {
-                    window.location.href = authPage;
-                }
+            // Any card with data-href → navigate
+            var card = e.target.closest('.to-featured[data-href], .to-compact[data-href]');
+            if (card) {
+                window.location.href = card.dataset.href;
             }
         });
     }

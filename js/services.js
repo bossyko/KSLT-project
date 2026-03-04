@@ -13,8 +13,10 @@
         heroDesc: 'Best courts and professional coaches in Bishkek',
         courtsTitle: 'Courts',
         coachesTitle: 'Coaches',
+        partnersTitle: 'Find a partner',
         viewAllCourts: 'All courts',
         viewAllCoaches: 'All coaches',
+        viewAllPartners: 'All partners',
         details: 'Details',
         surface: 'Surface',
         price: 'Price',
@@ -23,15 +25,24 @@
         years: 'years',
         emptyCourts: 'No courts available',
         emptyCoaches: 'No coaches available',
-        from: 'from'
+        emptyPartners: 'No partners available',
+        from: 'from',
+        online: 'Online',
+        offline: 'Offline',
+        levelBeginner: 'Beginner',
+        levelIntermediate: 'Intermediate',
+        levelAdvanced: 'Advanced',
+        levelUnknown: 'Level not specified'
     } : {
         heroTagline: 'KSLT Услуги',
         heroTitle: 'Ваш теннис <span>начинается здесь</span>',
         heroDesc: 'Лучшие корты и профессиональные тренеры Бишкека',
         courtsTitle: 'Корты',
         coachesTitle: 'Тренеры',
+        partnersTitle: 'Найти партнёра',
         viewAllCourts: 'Все корты',
         viewAllCoaches: 'Все тренеры',
+        viewAllPartners: 'Все партнёры',
         details: 'Подробнее',
         surface: 'Покрытие',
         price: 'Цена',
@@ -40,16 +51,27 @@
         years: 'лет',
         emptyCourts: 'Нет доступных кортов',
         emptyCoaches: 'Нет доступных тренеров',
-        from: 'от'
+        emptyPartners: 'Нет доступных партнёров',
+        from: 'от',
+        online: 'Онлайн',
+        offline: 'Оффлайн',
+        levelBeginner: 'Начинающий',
+        levelIntermediate: 'Средний',
+        levelAdvanced: 'Продвинутый',
+        levelUnknown: 'Уровень не указан'
     };
 
     var courtPage = isEn ? 'court-en.html' : 'court.html';
     var coachPage = isEn ? 'coach-en.html' : 'coach.html';
     var courtsPage = isEn ? 'courts-en.html' : 'courts.html';
     var coachesPage = isEn ? 'coaches-en.html' : 'coaches.html';
+    var partnersPage = isEn ? 'partners-en.html' : 'partners.html';
 
     var _courts = [];
     var _coaches = [];
+    var _partners = [];
+
+    var ONLINE_THRESHOLD = 5 * 60 * 1000;
 
     // SVG icons
     var pinSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
@@ -63,6 +85,7 @@
     function init() {
         renderHero();
         loadData();
+        renderSponsors();
     }
 
     // Fisher-Yates shuffle
@@ -91,8 +114,8 @@
             '</div>';
     }
 
-    // Separate promoted (fixed top) from rest (random), combine
-    function sortPromotedFirst(data) {
+    // Promoted always included, rest random, limit total to cap
+    function selectForDisplay(data, cap) {
         var promoted = [];
         var rest = [];
         for (var i = 0; i < data.length; i++) {
@@ -102,19 +125,21 @@
                 rest.push(data[i]);
             }
         }
-        return promoted.concat(shuffle(rest));
+        var remaining = Math.max(0, cap - promoted.length);
+        return promoted.concat(shuffle(rest).slice(0, remaining));
     }
 
     async function loadData() {
         var courts = null;
         var coaches = null;
+        var partners = null;
 
         if (client) {
             try {
                 var cResult = await client.from('courts')
                     .select('id, name, name_en, photo, street, street_en, building, district, district_en, city, city_en, court_types, partner, promoted');
                 if (cResult.data && cResult.data.length > 0) {
-                    courts = sortPromotedFirst(cResult.data);
+                    courts = selectForDisplay(cResult.data, 10);
                 }
             } catch(e) {
                 console.error('Supabase courts error:', e);
@@ -124,15 +149,25 @@
                 var chResult = await client.from('coaches')
                     .select('id, last_name, first_name, last_name_en, first_name_en, name, name_en, photo, position, position_en, tags, experience, price, court, court_en, promoted');
                 if (chResult.data && chResult.data.length > 0) {
-                    coaches = sortPromotedFirst(chResult.data);
+                    coaches = selectForDisplay(chResult.data, 10);
                 }
             } catch(e) {
                 console.error('Supabase coaches error:', e);
+            }
+
+            try {
+                var pResult = await client.rpc('get_public_partners');
+                if (pResult.data && pResult.data.length > 0) {
+                    partners = shuffle(pResult.data).slice(0, 10);
+                }
+            } catch(e) {
+                console.error('Supabase partners error:', e);
             }
         }
 
         _courts = courts || [];
         _coaches = coaches || [];
+        _partners = partners || [];
 
         renderColumns();
     }
@@ -227,8 +262,35 @@
         }
         html += '</div>';
 
+        // Partners section (centered below)
+        html += '<div class="sv-section sv-partners-section" data-type="partners">';
+        html += '<div class="sv-column-header">';
+        html += '<h2 class="sv-column-title"><span>' + L.partnersTitle + '</span></h2>';
+        html += '<a href="' + partnersPage + '" class="sv-view-all">' + L.viewAllPartners + ' ' + arrowSvg + '</a>';
+        html += '</div>';
+        if (_partners.length === 0) {
+            html += '<div class="sv-empty">' + emptySvg + '<p>' + L.emptyPartners + '</p></div>';
+        } else {
+            html += '<div class="sv-card-grid">';
+            html += renderFeaturedPartner(_partners[0]);
+            if (_partners.length > 1) {
+                html += renderCarousel(_partners.slice(1), 'partners');
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+
         container.innerHTML = html;
         attachEvents();
+
+        // Normalize carousel speed: ~4s per item so all scroll at the same rate
+        var carousels = container.querySelectorAll('.sv-carousel');
+        carousels.forEach(function(car) {
+            var itemCount = car.children.length / 2;
+            if (itemCount > 0) {
+                car.style.animationDuration = (itemCount * 4) + 's';
+            }
+        });
 
         // Sticky headers: remove border-radius when stuck
         var headers = container.querySelectorAll('.sv-column-header');
@@ -252,8 +314,10 @@
             for (var i = 0; i < items.length; i++) {
                 if (type === 'courts') {
                     html += renderCompactCourt(items[i], i + 1);
-                } else {
+                } else if (type === 'coaches') {
                     html += renderCompactCoach(items[i], i + 1);
+                } else {
+                    html += renderCompactPartner(items[i], i + 1);
                 }
             }
         }
@@ -353,9 +417,88 @@
         '</div>';
     }
 
+    // --- Partner helpers ---
+    function isOnline(lastSeen) {
+        if (!lastSeen) return false;
+        return (new Date() - new Date(lastSeen)) < ONLINE_THRESHOLD;
+    }
+
+    function getPartnerName(p) {
+        return p.full_name || '';
+    }
+
+    function getPartnerLevel(p) {
+        var category = isEn ? (p.category_name_en || p.category_name) : p.category_name;
+        if (category) return category;
+        var levelMap = { beginner: L.levelBeginner, intermediate: L.levelIntermediate, advanced: L.levelAdvanced };
+        return (p.play_level && levelMap[p.play_level]) || L.levelUnknown;
+    }
+
+    function getInitials(name) {
+        if (!name) return '?';
+        var parts = name.trim().split(/\s+/);
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return parts[0][0].toUpperCase();
+    }
+
+    // --- Featured Partner ---
+    function renderFeaturedPartner(p) {
+        var name = getPartnerName(p);
+        var level = getPartnerLevel(p);
+        var online = isOnline(p.last_seen);
+        var href = partnersPage;
+
+        var avatarHtml;
+        if (p.avatar_url) {
+            avatarHtml = '<div class="sv-featured-bg"><img src="' + p.avatar_url + '" alt="" loading="lazy"></div><div class="sv-featured-overlay"></div>';
+        } else {
+            avatarHtml = '<div class="sv-featured-overlay" style="background:var(--bg-card)"></div>';
+        }
+
+        return '<a class="sv-featured" href="' + href + '">' +
+            avatarHtml +
+            '<div class="sv-featured-content">' +
+                (p.avatar_url ? '<img class="sv-coach-avatar" src="' + p.avatar_url + '" alt="" loading="lazy">' : '<div class="sv-partner-initials">' + getInitials(name) + '</div>') +
+                '<h3>' + name + '</h3>' +
+                '<div class="sv-featured-meta">' +
+                    '<span class="sv-partner-status ' + (online ? 'online' : 'offline') + '">' +
+                        '<span class="sv-partner-dot"></span>' + (online ? L.online : L.offline) +
+                    '</span>' +
+                '</div>' +
+                '<div class="sv-featured-details">' +
+                    '<div class="sv-featured-detail"><span class="sv-label">' + L.level + '</span><span class="sv-value">' + level + '</span></div>' +
+                '</div>' +
+                '<span class="sv-featured-link">' + L.details + '</span>' +
+            '</div>' +
+        '</a>';
+    }
+
+    // --- Compact Partner (card for carousel) ---
+    function renderCompactPartner(p, idx) {
+        var name = getPartnerName(p);
+        var level = getPartnerLevel(p);
+        var online = isOnline(p.last_seen);
+
+        var avatarHtml;
+        if (p.avatar_url) {
+            avatarHtml = '<img class="sv-compact-avatar" src="' + p.avatar_url + '" alt="" loading="lazy">';
+        } else {
+            avatarHtml = '<div class="sv-compact-initials">' + getInitials(name) + '</div>';
+        }
+
+        return '<div class="sv-compact" data-type="partners" data-idx="' + idx + '">' +
+            '<div class="sv-compact-partner-head">' +
+                avatarHtml +
+                (online ? '<span class="sv-compact-online-dot"></span>' : '') +
+            '</div>' +
+            '<h4>' + name + '</h4>' +
+            '<div class="sv-compact-sub">' + level + '</div>' +
+        '</div>';
+    }
+
     // --- Re-render a single section ---
     function renderSection(type) {
-        var items = type === 'courts' ? _courts : _coaches;
+        var items = type === 'courts' ? _courts : (type === 'coaches' ? _coaches : _partners);
         var section = document.querySelector('.sv-section[data-type="' + type + '"]');
         if (!section) return;
 
@@ -366,9 +509,12 @@
         if (type === 'courts') {
             html += renderFeaturedCourt(items[0]);
             if (items.length > 1) html += renderCarousel(items.slice(1), 'courts');
-        } else {
+        } else if (type === 'coaches') {
             html += renderFeaturedCoach(items[0]);
             if (items.length > 1) html += renderCarousel(items.slice(1), 'coaches');
+        } else {
+            html += renderFeaturedPartner(items[0]);
+            if (items.length > 1) html += renderCarousel(items.slice(1), 'partners');
         }
         grid.innerHTML = html;
     }
@@ -387,7 +533,7 @@
                 var idx = parseInt(compact.dataset.idx, 10);
                 if (!type || isNaN(idx)) return;
 
-                var items = type === 'courts' ? _courts : _coaches;
+                var items = type === 'courts' ? _courts : (type === 'coaches' ? _coaches : _partners);
                 if (idx > 0 && idx < items.length) {
                     var temp = items[0];
                     items[0] = items[idx];
@@ -397,6 +543,31 @@
                 return;
             }
         });
+    }
+
+    // --- Sponsors ---
+    function renderSponsors() {
+        var container = document.getElementById('svSponsors');
+        if (!container) return;
+
+        var title = isEn ? 'Partners & Sponsors' : 'ПАРТНЁРЫ И СПОНСОРЫ';
+        var generalLabel = isEn ? 'GENERAL SPONSOR' : 'ГЕНЕРАЛЬНЫЙ СПОНСОР';
+
+        container.innerHTML =
+            '<div class="section-header"><h2>' + title + '</h2></div>' +
+            '<div class="sponsor-hero">' +
+                '<span class="sponsor-hero-label">' + generalLabel + '</span>' +
+                '<a href="https://nurzaman.kg" target="_blank" rel="noopener" class="sponsor-hero-logo">' +
+                    '<img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman">' +
+                '</a>' +
+            '</div>' +
+            '<div class="sponsors-cloud">' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>' +
+                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>' +
+            '</div>';
     }
 
 })();

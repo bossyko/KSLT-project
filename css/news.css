@@ -656,19 +656,20 @@ h3.news-heading {
 .news-list-page {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 7% var(--space-xl);
+    padding: var(--space-lg) 7% var(--space-xl);
 }
 
 .news-filters {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-    margin-bottom: var(--space-lg);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-sm) 7%;
     position: sticky;
     top: 64px;
     z-index: 30;
     background: var(--bg-primary);
-    padding: var(--space-sm) 0;
 }
 
 .news-filter-btn {
@@ -997,11 +998,13 @@ h3.news-heading {
     }
 
     .news-list-page {
-        padding: var(--space-lg) 5%;
+        padding: var(--space-md) 5% var(--space-lg);
     }
 
     .news-filters {
         gap: 6px;
+        padding: var(--space-sm) 5%;
+        top: 56px;
     }
 
     .news-filter-btn {

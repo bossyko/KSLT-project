@@ -8,6 +8,7 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co;">
     <title>KSLT - Kyrgyzstan Social Lawn Tennis</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -952,7 +953,7 @@
                     var minPrice = 0; ct.forEach(function(c) { if (c.price && (!minPrice || c.price < minPrice)) minPrice = c.price; });
                     var name = row.name_en || row.name;
                     var addr = [row.street_en || row.street, row.building, row.city_en || 'Bishkek'].filter(Boolean).join(', ');
-                    html += '<div class="court-card">' +
+                    html += '<a href="pages/court-en.html?id=' + row.id + '" class="court-card">' +
                         '<div style="position:relative;">' +
                             '<img src="' + (row.photo || 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=400&fit=crop&q=80') + '" alt="' + name + '">' +
                             '<span style="position:absolute;top:8px;left:8px;background:#CCFF00;color:#000;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:100px;text-transform:uppercase;">New</span>' +
@@ -964,7 +965,7 @@
                             (minPrice ? '<span class="court-price">from ' + minPrice + ' som/hour</span>' : '') +
                             '<span class="court-status available">' + total + ' courts</span>' +
                         '</div>' +
-                    '</div>';
+                    '</a>';
                 });
                 grid.insertAdjacentHTML('afterbegin', html);
             });
@@ -1015,7 +1016,7 @@
                         contactHtml = '<a href="pages/auth-en.html?redirect=coaches" class="btn-invite">Sign in to contact</a>';
                     }
 
-                    html += '<div class="coach-card">' +
+                    html += '<a href="pages/coach-en.html?id=' + row.id + '" class="coach-card">' +
                         '<img src="' + photo + '" alt="' + name + '" class="coach-photo">' +
                         '<div class="coach-info">' +
                             '<h4>' + name + '</h4>' +
@@ -1024,7 +1025,7 @@
                             (price ? '<span class="coach-price">' + price + '</span>' : '') +
                         '</div>' +
                         contactHtml +
-                    '</div>';
+                    '</a>';
                 });
                 grid.insertAdjacentHTML('afterbegin', html);
             });
@@ -1062,7 +1063,7 @@
                     var desc = t.description_en || t.description || '';
                     var gender = (t.category_id || '').split('-')[0];
                     var genderLabel = gender === 'women' ? '♀ Women' : (gender === 'men' ? '♂ Men' : '');
-                    html += '<article class="tournament-card' + (isFeatured ? ' tournament-card-featured' : '') + '">' +
+                    html += '<a href="pages/tournament-en.html?id=' + t.id + '" class="tournament-card' + (isFeatured ? ' tournament-card-featured' : '') + '">' +
                         '<div class="tournament-image">' +
                             '<img src="' + esc(img) + '" alt="' + esc(title) + '">' +
                             (isFeatured && t.status === 'registration' ? '<span class="tournament-badge">Registration</span>' : '') +
@@ -1077,9 +1078,9 @@
                                 (t.max_participants ? '<span><strong>' + t.max_participants + '</strong> participants</span>' : '') +
                                 (t.prize_fund ? '<span>' + t.prize_fund + '</span>' : '') +
                             '</div>' +
-                            (isFeatured ? '<a href="pages/tournament-en.html?id=' + t.id + '" class="btn-primary">Details</a>' : '') +
+                            (isFeatured ? '<span class="btn-primary">Details</span>' : '') +
                         '</div>' +
-                    '</article>';
+                    '</a>';
                 });
                 grid.innerHTML = html;
             });

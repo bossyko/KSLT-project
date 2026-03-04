@@ -29,11 +29,21 @@ window.playersLabels = {
     badgeBreakthrough: "Breakthrough",
     sponsorsTitle: "Partners & Sponsors",
     sponsorsGeneral: "General Sponsor",
+    viewAll: "View all",
     noResults: "No players found",
     authRequired: "Sign in required",
     guestTitle: "Sign up for full access",
     guestText: "Full rankings, player search and statistics are available after registration",
-    guestBtn: "Sign In / Register"
+    guestBtn: "Sign In / Register",
+    catPageBack: "Back to rankings",
+    catPagePlayers: "Players",
+    catPageTournaments: "Completed tournaments",
+    catPageLogin: "Log in to view player profiles",
+    catPageRegister: "Register for access",
+    catPageMemberOnly: "Full access for KSLT members",
+    catPageWins: "W",
+    catPageLosses: "L",
+    catPageTournamentsCol: "Tournaments"
 };
 
 window.playerProfileLabels = {

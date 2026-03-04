@@ -9,11 +9,15 @@
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    var PER_PAGE = 20;
+    var PER_PAGE = 10;
+    var CAT_PER_PAGE = 20;
     var currentTab = 'men-promasters';
     var currentPage = 1;
     var searchQuery = '';
     var debounceTimer = null;
+    var isCategoryMode = false;
+    var catCurrentPage = 1;
+    var _accessLevel = 'guest'; // guest | registered | member
 
     var GUEST_VISIBLE_ROWS = 8;
     var GUEST_BLURRED_ROWS = 4;
@@ -73,11 +77,21 @@
             badgeBreakthrough: 'Прорыв',
             sponsorsTitle: 'Партнёры и спонсоры',
             sponsorsGeneral: 'Генеральный спонсор',
+            viewAll: 'Показать всех',
             noResults: 'Игроки не найдены',
             authRequired: 'Требуется авторизация',
             guestTitle: 'Зарегистрируйтесь для полного доступа',
             guestText: 'Полный рейтинг, поиск игроков и статистика доступны после регистрации',
-            guestBtn: 'Войти / Регистрация'
+            guestBtn: 'Войти / Регистрация',
+            catPageBack: 'Назад к рейтингу',
+            catPagePlayers: 'Игроков',
+            catPageTournaments: 'Завершённых турниров',
+            catPageLogin: 'Войдите, чтобы просматривать профили игроков',
+            catPageRegister: 'Зарегистрируйтесь для доступа',
+            catPageMemberOnly: 'Полный доступ для членов КСЛТ',
+            catPageWins: 'П',
+            catPageLosses: 'П',
+            catPageTournamentsCol: 'Турниры'
         };
     }
 
@@ -151,6 +165,32 @@
     var isSearchMode = false;
 
     // ========================================
+    // ACCESS LEVEL DETECTION
+    // ========================================
+
+    async function detectAccess() {
+        var client = window.supabaseClient;
+        if (!client) { _accessLevel = 'guest'; return; }
+
+        var loggedIn = false;
+        try {
+            var res = await client.auth.getSession();
+            if (res.data && res.data.session) loggedIn = true;
+        } catch(e) {}
+
+        if (!loggedIn) { _accessLevel = 'guest'; return; }
+
+        _accessLevel = 'registered';
+
+        if (typeof window.checkMembership === 'function') {
+            try {
+                var mem = await window.checkMembership();
+                if (mem && mem.active) _accessLevel = 'member';
+            } catch(e) {}
+        }
+    }
+
+    // ========================================
     // SUPABASE DATA LOADER
     // ========================================
 
@@ -171,9 +211,10 @@
             var players = plrResult.data || [];
             var categories = catResult.data;
 
-            // Build categoriesData structure matching static format
+            // Build categoriesData structure matching static format (skip Friendly — no ranking)
             var result = {};
             categories.forEach(function(cat) {
+                if (cat.name && cat.name.toLowerCase().indexOf('friendly') !== -1) return;
                 var catPlayers = players.filter(function(p) { return p.category_id === cat.id; });
                 result[cat.id] = {
                     name: isEn ? (cat.name_en || cat.name) : cat.name,
@@ -225,14 +266,20 @@
         }
 
         var params = new URLSearchParams(window.location.search);
-        var tab = params.get('tab');
-        if (tab && categoriesData[tab]) {
-            currentTab = tab;
-        } else {
-            // Default to first category
-            var firstKey = Object.keys(categoriesData)[0];
-            if (firstKey) currentTab = firstKey;
+        var tabParam = params.get('tab');
+
+        // Category page mode: ?tab=men-tour → full page for that category
+        if (tabParam && categoriesData[tabParam]) {
+            isCategoryMode = true;
+            currentTab = tabParam;
+            await detectAccess();
+            renderCategoryPage(tabParam);
+            return;
         }
+
+        // Overview mode (no ?tab or invalid tab)
+        var firstKey = Object.keys(categoriesData)[0];
+        if (firstKey) currentTab = firstKey;
 
         renderHero();
         renderFilters();
@@ -242,7 +289,6 @@
         initTabs();
         initSearch();
         initScrollAnimations();
-        updateLangLinks(currentTab);
     });
 
     // ========================================
@@ -348,11 +394,15 @@
             '<button class="pl-gender-tab' + (currentGender === 'women' ? ' active' : '') + '" data-gender="women">' + labels.women + '</button>' +
         '</div>';
 
+        html += '<div class="pl-category-row">';
         html += '<div class="pl-category-pills" id="categoryPills">';
         var cats = currentGender === 'men' ? menCats : womenCats;
         for (var i = 0; i < cats.length; i++) {
             html += '<button class="pl-category-pill' + (cats[i].key === currentTab ? ' active' : '') + '" data-tab="' + cats[i].key + '">' + cats[i].name + '</button>';
         }
+        html += '</div>';
+        var playersPage = isEnPage() ? 'players-en.html' : 'players.html';
+        html += '<a href="' + playersPage + '?tab=' + currentTab + '" class="pl-view-all">' + labels.viewAll + ' <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>';
         html += '</div>';
 
         container.innerHTML = html;
@@ -371,12 +421,7 @@
         isSearchMode = !!searchQuery;
 
         var items = filtered;
-        var totalPages = Math.max(1, Math.ceil(items.length / PER_PAGE));
-        if (page > totalPages) page = totalPages;
-        currentPage = page;
-
-        var start = (page - 1) * PER_PAGE;
-        var pageItems = items.slice(start, start + PER_PAGE);
+        var pageItems = items.slice(0, PER_PAGE);
 
         var podiumEl = document.getElementById('playersPodium');
         var filtersEl = document.getElementById('playersFilters');
@@ -415,7 +460,7 @@
         for (var i = 0; i < totalVisible; i++) {
             var item = pageItems[i];
             var p = isSearchMode ? item.player : item;
-            var rank = isSearchMode ? item.rankInCategory : (start + i + 1);
+            var rank = isSearchMode ? item.rankInCategory : (i + 1);
             var rankClass = rank <= 3 ? ' pl-rank-top' : '';
 
             var blurClass = '';
@@ -506,12 +551,6 @@
 
         container.innerHTML = html;
 
-        if (!logged) {
-            var paginationEl = document.getElementById('playersPagination');
-            if (paginationEl) paginationEl.style.display = 'none';
-        }
-
-        renderPagination(items.length, page);
         initScrollAnimations();
     }
 
@@ -571,6 +610,321 @@
     }
 
     // ========================================
+    // CATEGORY PAGE MODE
+    // ========================================
+
+    async function renderCategoryPage(tabId) {
+        var cat = getCategory(tabId);
+        var labels = getLabels();
+        var isEn = isEnPage();
+        var genderIcon = cat.gender === 'men' ? '\u2642' : '\u2640';
+        var playersPage = isEn ? 'players-en.html' : 'players.html';
+
+        // Count completed tournaments for this category
+        var tournamentsCount = 0;
+        if (window.supabaseClient) {
+            try {
+                var tRes = await window.supabaseClient
+                    .from('tournaments')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('category_id', tabId)
+                    .eq('status', 'completed')
+                    .not('published_at', 'is', null);
+                if (tRes.count !== null && tRes.count !== undefined) tournamentsCount = tRes.count;
+            } catch(e) {}
+        }
+
+        // Render hero
+        renderCatHero(cat, genderIcon, labels, playersPage, tournamentsCount);
+
+        // Hide podium
+        var podiumEl = document.getElementById('playersPodium');
+        if (podiumEl) podiumEl.style.display = 'none';
+
+        // Render sticky category bar in filters section (already sticky at top:64px)
+        // Content hidden until .stuck class is added via IntersectionObserver
+        var filtersEl = document.getElementById('playersFilters');
+        if (filtersEl) {
+            filtersEl.classList.add('pl-cat-mode');
+            filtersEl.innerHTML =
+                '<a href="' + playersPage + '" class="pl-cat-sticky-back">' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>' +
+                    labels.catPageBack +
+                '</a>' +
+                '<div class="pl-cat-sticky-bar">' +
+                    '<div class="pl-cat-sticky-name">' + esc(cat.name) + ' <span>' + genderIcon + '</span></div>' +
+                '</div>';
+
+            // Sentinel before filters — when scrolled past hero, add .stuck
+            var sentinel = document.createElement('div');
+            sentinel.style.height = '1px';
+            filtersEl.parentNode.insertBefore(sentinel, filtersEl);
+            var obs = new IntersectionObserver(function(entries) {
+                filtersEl.classList.toggle('stuck', !entries[0].isIntersecting);
+            }, { threshold: [1], rootMargin: '-65px 0px 0px 0px' });
+            obs.observe(sentinel);
+        }
+
+        // Render table
+        renderCatTable(tabId, 1);
+
+        // Sponsors
+        renderSponsors();
+
+        // Init pagination clicks
+        initCatPagination(tabId);
+
+        initScrollAnimations();
+        updateCatLangLinks(tabId);
+    }
+
+    function renderCatHero(cat, genderIcon, labels, playersPage, tournamentsCount) {
+        var container = document.getElementById('playersHero');
+        if (!container) return;
+
+        var players = cat.players || [];
+        var playerCount = players.length;
+        var onlineCount = 0;
+        for (var i = 0; i < players.length; i++) {
+            if (players[i].online) onlineCount++;
+        }
+
+        var onlineLabel = isEnPage() ? 'Online' : 'Онлайн';
+
+        container.innerHTML =
+            '<div class="pl-hero-bg"></div>' +
+            '<div class="pl-hero-overlay"></div>' +
+            '<div class="pl-cat-hero-content">' +
+                '<h1 class="pl-cat-title">' + esc(cat.name) + ' <span class="pl-cat-gender">' + genderIcon + '</span></h1>' +
+                '<div class="pl-cat-stats">' +
+                    '<div class="pl-cat-stat">' +
+                        '<div class="pl-cat-stat-value">' + playerCount + '</div>' +
+                        '<div class="pl-cat-stat-label">' + labels.catPagePlayers + '</div>' +
+                    '</div>' +
+                    '<div class="pl-cat-stat">' +
+                        '<div class="pl-cat-stat-value">' + tournamentsCount + '</div>' +
+                        '<div class="pl-cat-stat-label">' + labels.catPageTournaments + '</div>' +
+                    '</div>' +
+                    '<div class="pl-cat-stat pl-cat-stat-online">' +
+                        '<div class="pl-cat-stat-value">' + onlineCount + ' <span class="pl-online-dot pl-online-pulse"></span></div>' +
+                        '<div class="pl-cat-stat-label">' + onlineLabel + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+    }
+
+    function renderCatTable(tabId, page) {
+        var container = document.getElementById('playersTable');
+        if (!container) return;
+
+        var labels = getLabels();
+        var cat = getCategory(tabId);
+        var players = cat.players || [];
+        var isEn = isEnPage();
+
+        catCurrentPage = page;
+        var totalPages = Math.max(1, Math.ceil(players.length / CAT_PER_PAGE));
+        var start = (page - 1) * CAT_PER_PAGE;
+        var pageItems = players.slice(start, start + CAT_PER_PAGE);
+
+        if (pageItems.length === 0) {
+            container.innerHTML = '<div class="pl-cat-table-wrap"><div class="pl-no-results">' + labels.noResults + '</div></div>';
+            renderCatPaginationUI(0, 1);
+            return;
+        }
+
+        var isGuest = _accessLevel === 'guest';
+        var isRegistered = _accessLevel === 'registered';
+        var isMember = _accessLevel === 'member';
+        var playerPage = isEn ? 'player-en.html' : 'player.html';
+
+        // Sticky table header (separate from body for sticky to work)
+        var headerRow = '<div class="pl-row pl-row-header pl-cat-row">' +
+            '<span class="pl-col-rank">' + labels.rank + '</span>' +
+            '<span class="pl-col-player">' + labels.player + '</span>' +
+            '<span class="pl-col-points">' + labels.points + '</span>' +
+            '<span class="pl-col-record">' + labels.record + '</span>' +
+            '<span class="pl-col-form">' + labels.form + '</span>' +
+            '<span class="pl-col-change">' + labels.change + '</span>' +
+        '</div>';
+
+        var html = '<div class="pl-cat-table-wrap">';
+
+        // Sticky header
+        html += '<div class="pl-cat-thead"><div class="pl-table">' + headerRow + '</div></div>';
+
+        // Table body
+        html += '<div class="pl-table pl-cat-table-body">';
+
+        // Rows
+        for (var i = 0; i < pageItems.length; i++) {
+            var p = pageItems[i];
+            var rank = start + i + 1;
+            var rankClass = rank <= 3 ? ' pl-rank-top' : '';
+            var rowClass = isGuest ? ' pl-cat-row-disabled' : '';
+
+            var pBadges = p.badges || [];
+            var badgesHtml = '';
+            for (var b = 0; b < pBadges.length; b++) {
+                var badge = badgeMap[pBadges[b]];
+                if (badge) {
+                    badgesHtml += '<span class="pl-badge" title="' + getBadgeTooltip(pBadges[b]) + '">' + badge.emoji + '</span>';
+                }
+            }
+
+            var pForm = p.form || [];
+            var formHtml = '';
+            for (var f = 0; f < pForm.length; f++) {
+                formHtml += '<span class="pl-form-dot ' + (pForm[f] === 'W' ? 'pl-form-win' : 'pl-form-loss') + '"></span>';
+            }
+
+            var changeHtml = '';
+            if (p.change > 0) {
+                changeHtml = '<span class="pl-change-up">\u2191' + p.change + '</span>';
+            } else if (p.change < 0) {
+                changeHtml = '<span class="pl-change-down">\u2193' + Math.abs(p.change) + '</span>';
+            } else {
+                changeHtml = '<span class="pl-change-neutral">\u2014</span>';
+            }
+
+            // Name: link or plain text based on access
+            var nameHtml;
+            if (isGuest) {
+                nameHtml = '<span class="pl-player-name pl-cat-name-plain">' + esc(p.name) + '</span>';
+            } else if (isRegistered) {
+                nameHtml = '<a href="' + playerPage + '?id=' + p.id + '&access=view" class="pl-player-name">' + esc(p.name) + '</a>';
+            } else {
+                nameHtml = '<a href="' + playerPage + '?id=' + p.id + '" class="pl-player-name">' + esc(p.name) + '</a>';
+            }
+
+            html += '<div class="pl-row pl-cat-row pl-animate' + rowClass + '" style="transition-delay:' + Math.min(i * 30, 300) + 'ms"' +
+                (!isGuest ? ' data-player-id="' + p.id + '"' : '') +
+                (!isGuest ? ' data-access="' + (isMember ? 'full' : 'view') + '"' : '') + '>' +
+                '<span class="pl-col-rank' + rankClass + '">' + rank + '</span>' +
+                '<div class="pl-col-player">' +
+                    '<img src="' + esc(p.photo) + '" alt="" class="pl-player-photo">' +
+                    '<div class="pl-player-info">' +
+                        '<div class="pl-player-name-row">' +
+                            nameHtml +
+                            (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
+                '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
+                '<span class="pl-col-form">' + formHtml + '</span>' +
+                '<span class="pl-col-change">' + changeHtml + '</span>' +
+            '</div>';
+        }
+
+        html += '</div>'; // close pl-table
+
+        // Access banner
+        if (isGuest) {
+            var authUrl = getAuthUrl();
+            html += '<div class="pl-cat-banner">' +
+                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>' +
+                '</svg>' +
+                '<span>' + labels.catPageLogin + '</span>' +
+                '<a href="' + authUrl + '" class="pl-cat-banner-btn">' + labels.guestBtn + '</a>' +
+            '</div>';
+        }
+
+        html += '</div>'; // close pl-cat-table-wrap
+
+        container.innerHTML = html;
+
+        // Clickable rows for non-guests
+        if (!isGuest) {
+            var rows = container.querySelectorAll('.pl-cat-row[data-player-id]');
+            rows.forEach(function(row) {
+                row.style.cursor = 'pointer';
+                row.addEventListener('click', function(e) {
+                    if (e.target.closest('a')) return; // let link handle it
+                    var pid = row.dataset.playerId;
+                    var access = row.dataset.access;
+                    var url = playerPage + '?id=' + pid;
+                    if (access === 'view') url += '&access=view';
+                    window.location.href = url;
+                });
+            });
+        }
+
+        // Pagination UI
+        renderCatPaginationUI(players.length, page);
+
+        // Set sticky top for thead: 64px header + sticky bar height when visible
+        // Sticky bar only appears on scroll (.stuck), so we measure after a brief toggle
+        var filtersEl = document.getElementById('playersFilters');
+        var thead = container.querySelector('.pl-cat-thead');
+        if (thead && filtersEl) {
+            filtersEl.classList.add('stuck');
+            var barH = filtersEl.offsetHeight;
+            filtersEl.classList.remove('stuck');
+            thead.style.top = (64 + barH) + 'px';
+        }
+
+        initScrollAnimations();
+    }
+
+    function renderCatPaginationUI(total, page) {
+        var container = document.getElementById('playersPagination');
+        if (!container) return;
+
+        var totalPages = Math.max(1, Math.ceil(total / CAT_PER_PAGE));
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        var labels = getLabels();
+        var html = '<div class="pl-pagination">';
+        html += '<button class="pl-page-btn pl-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + labels.prevPage + '</button>';
+        for (var p = 1; p <= totalPages; p++) {
+            html += '<button class="pl-page-btn pl-page-num' + (p === page ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
+        }
+        html += '<button class="pl-page-btn pl-page-next"' + (page === totalPages ? ' disabled' : '') + '>' + labels.nextPage + '</button>';
+        html += '</div>';
+
+        container.innerHTML = html;
+    }
+
+    function initCatPagination(tabId) {
+        document.addEventListener('click', function(e) {
+            if (!isCategoryMode) return;
+
+            var pageBtn = e.target.closest('.pl-page-btn');
+            if (pageBtn && !pageBtn.disabled) {
+                var cat = getCategory(tabId);
+                var totalPages = Math.max(1, Math.ceil((cat.players || []).length / CAT_PER_PAGE));
+
+                if (pageBtn.classList.contains('pl-page-prev')) {
+                    catCurrentPage = Math.max(1, catCurrentPage - 1);
+                } else if (pageBtn.classList.contains('pl-page-next')) {
+                    catCurrentPage = Math.min(totalPages, catCurrentPage + 1);
+                } else if (pageBtn.dataset.page) {
+                    catCurrentPage = parseInt(pageBtn.dataset.page);
+                }
+
+                renderCatTable(tabId, catCurrentPage);
+                var tableEl = document.getElementById('playersTable');
+                if (tableEl) tableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
+    function updateCatLangLinks(tabId) {
+        document.querySelectorAll('.lang-option, .mobile-lang-option').forEach(function(link) {
+            var href = link.getAttribute('href');
+            if (href && href.indexOf('players') !== -1) {
+                var base = href.split('?')[0];
+                link.setAttribute('href', base + '?tab=' + tabId);
+            }
+        });
+    }
+
+    // ========================================
     // INTERACTIVITY
     // ========================================
 
@@ -622,14 +976,6 @@
         renderFilters();
         renderPodium(tab);
         renderTable(tab, 1);
-        updateUrl(tab);
-        updateLangLinks(tab);
-    }
-
-    function updateUrl(tab) {
-        var url = new URL(window.location);
-        url.searchParams.set('tab', tab);
-        history.replaceState(null, '', url);
     }
 
     function initSearch() {

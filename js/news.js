@@ -860,9 +860,15 @@ function renderNewsList() {
         filtersHtml += '<button class="news-filter-btn" data-cat="' + cat.key + '">' + cat.label + '</button>';
     });
 
+    // Insert filters as direct child of <main> so sticky works through sponsors
+    var filtersWrapper = document.createElement('div');
+    filtersWrapper.className = 'news-filters';
+    filtersWrapper.id = 'newsFilters';
+    filtersWrapper.innerHTML = filtersHtml;
+    notFound.parentNode.insertBefore(filtersWrapper, notFound);
+
     notFound.innerHTML =
         '<div class="news-list-page">' +
-            '<div class="news-filters" id="newsFilters">' + filtersHtml + '</div>' +
             '<div class="news-bento" id="newsBento"></div>' +
             '<div class="news-pagination" id="newsPagination"></div>' +
         '</div>';

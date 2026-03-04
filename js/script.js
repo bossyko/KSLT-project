@@ -15,8 +15,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     var filename = href.split('/').pop().replace('.html', '');
                     if (filename && path.indexOf(filename) !== -1) {
                         navItem.classList.add('is-active');
+                        links[i].classList.add('active');
                         break;
                     }
+                }
+                // Also check if the parent page itself matches (e.g. services.html on services page)
+                var parentHref = (navItem.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-en\.html/, '.html');
+                var parentFilename = parentHref.split('/').pop().replace('.html', '');
+                if (parentFilename && path.indexOf(parentFilename) !== -1) {
+                    navItem.classList.add('is-active');
                 }
             } else {
                 // Simple link (no dropdown), e.g. News
