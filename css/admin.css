@@ -1749,6 +1749,38 @@ select.ad-field-input {
     color: #fff;
 }
 
+.ad-rat-form-clickable {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.ad-rat-form-clickable:hover {
+    opacity: 0.7;
+}
+
+.ad-rat-player-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.ad-rat-player-link:hover {
+    color: var(--accent, #CCFF00);
+}
+
+.ad-rat-trn-row:hover {
+    background: rgba(204,255,0,0.05);
+}
+
+.ad-rat-trn-row.ad-rat-trn-active {
+    background: rgba(204,255,0,0.1);
+}
+
+.ad-rat-trn-link {
+    color: var(--accent, #CCFF00);
+    font-weight: 500;
+}
+
 /* Level badge */
 .ad-rat-level-badge {
     padding: 10px 16px;
@@ -1809,6 +1841,16 @@ select.ad-field-input {
     outline: none;
 }
 
+.rat-rule-input::-webkit-outer-spin-button,
+.rat-rule-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.rat-rule-input {
+    -moz-appearance: textfield;
+}
+
 /* Status badges for promotions */
 .ad-status-eligible {
     background: rgba(33,150,243,0.15);
@@ -1818,6 +1860,36 @@ select.ad-field-input {
 .ad-status-transition {
     background: rgba(255,152,0,0.15);
     color: #ffb74d;
+}
+
+.ad-status-completed {
+    background: rgba(156,163,175,0.15);
+    color: #9ca3af;
+}
+
+/* Promotion tables alignment */
+.ad-promo-table {
+    table-layout: fixed;
+}
+
+.ad-promo-history {
+    table-layout: fixed;
+}
+
+.ad-promo-table td:first-child,
+.ad-promo-history td:nth-child(4) {
+    text-align: center;
+}
+
+.ad-promo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ad-promo-actions .ad-btn {
+    width: 100%;
+    text-align: center;
 }
 
 /* Responsive */

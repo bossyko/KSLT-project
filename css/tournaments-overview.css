@@ -81,7 +81,7 @@
 
 .to-search-icon {
     position: absolute;
-    left: calc(7% + 18px);
+    right: calc(7% + 18px);
     top: calc(var(--space-lg) + 14px);
     color: var(--text-muted);
     pointer-events: none;
@@ -89,7 +89,7 @@
 
 .to-search-input {
     width: 100%;
-    padding: 14px 20px 14px 50px;
+    padding: 14px 50px 14px 20px;
     background: rgba(255,255,255,0.06);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -577,7 +577,7 @@
     }
 
     .to-search-icon {
-        left: calc(5% + 18px);
+        right: calc(5% + 18px);
         top: calc(var(--space-md) + 14px);
     }
 
