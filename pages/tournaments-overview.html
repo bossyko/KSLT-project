@@ -10,7 +10,7 @@
     <title>KSLT — Турниры</title>
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/tournaments-overview.css?v=5">
+    <link rel="stylesheet" href="../css/tournaments-overview.css?v=6">
 </head>
 <body>
     <!-- HEADER -->
@@ -229,6 +229,12 @@
         <!-- HERO -->
         <section class="to-hero" id="overviewHero"></section>
 
+        <!-- SEARCH -->
+        <div class="to-search-wrap" id="overviewSearchWrap">
+            <svg class="to-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="to-search-input" id="overviewSearch" placeholder="Поиск турнира..." autocomplete="off">
+        </div>
+
         <!-- CATEGORIES -->
         <section class="to-categories" id="overviewCategories"></section>
     </main>
@@ -321,6 +327,6 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js"></script>
     <script src="../data/tournaments-data.js?v=3"></script>
-    <script src="../js/tournaments-overview.js?v=14"></script>
+    <script src="../js/tournaments-overview.js?v=15"></script>
 </body>
 </html>

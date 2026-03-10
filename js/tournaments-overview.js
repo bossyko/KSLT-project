@@ -60,7 +60,9 @@
     var tournamentsPage = isEn ? 'tournaments-en.html' : 'tournaments.html';
 
     var _grouped = {};
+    var _allGrouped = {};
     var _bgImages = {};
+    var _searchTimer = null;
 
     // Auto-compute tournament status from dates
     function computeStatus(regStart, regEnd, dateStart, dateEnd) {
@@ -221,10 +223,21 @@
                 if (aIsPast) return (b._dateSort || '').localeCompare(a._dateSort || '');
                 return (a._dateSort || '').localeCompare(b._dateSort || '');
             });
-            map[key] = map[key].slice(0, 4);
         });
 
-        return map;
+        // Save full data for search
+        _allGrouped = {};
+        Object.keys(map).forEach(function(key) {
+            _allGrouped[key] = map[key].slice();
+        });
+
+        // Limit to 4 per category for default view
+        var sliced = {};
+        Object.keys(map).forEach(function(key) {
+            sliced[key] = map[key].slice(0, 4);
+        });
+
+        return sliced;
     }
 
     function mapStatus(s) {
@@ -279,6 +292,7 @@
 
         container.innerHTML = html;
         attachEvents();
+        initSearch();
     }
 
     function renderFeatured(t, bgImage, catKey) {
@@ -368,6 +382,72 @@
                 window.location.href = card.dataset.href;
             }
         });
+    }
+
+    function initSearch() {
+        var input = document.getElementById('overviewSearch');
+        if (!input) return;
+
+        input.addEventListener('input', function() {
+            clearTimeout(_searchTimer);
+            _searchTimer = setTimeout(function() {
+                var query = input.value.trim().toLowerCase();
+                if (!query) {
+                    renderCategories(_grouped);
+                    return;
+                }
+                // Filter ALL tournaments (not sliced) by name
+                var filtered = {};
+                CATEGORIES.forEach(function(cat) {
+                    var items = (_allGrouped[cat.key] || []).filter(function(item) {
+                        return item.name.toLowerCase().indexOf(query) !== -1;
+                    });
+                    if (items.length > 0) filtered[cat.key] = items;
+                });
+                renderSearchResults(filtered);
+            }, 200);
+        });
+    }
+
+    function renderSearchResults(filtered) {
+        var container = document.getElementById('overviewCategories');
+        if (!container) return;
+
+        var html = '';
+
+        CATEGORIES.forEach(function(cat) {
+            var items = filtered[cat.key];
+            if (!items || !items.length) return;
+
+            var catData = (typeof tournamentsData !== 'undefined' && tournamentsData.categories[cat.key]) || {};
+            var bgImage = catData.bgImage || '';
+
+            html += '<div class="to-category-block" data-cat="' + cat.key + '">';
+            html += '<div class="to-category-header">';
+            html += '<h2 class="to-category-title"><span>' + cat.name + '</span></h2>';
+            html += '<a href="' + tournamentsPage + '?category=' + cat.key + '" class="to-view-all">' + L.viewAll + ' ' + arrowSvg + '</a>';
+            html += '</div>';
+
+            html += '<div class="to-card-grid">';
+            var featuredBg = items[0].image || bgImage;
+            html += renderFeatured(items[0], featuredBg, cat.key);
+            if (items.length > 1) {
+                html += '<div class="to-side-stack">';
+                for (var i = 1; i < items.length; i++) {
+                    html += renderCompact(items[i], cat.key, i);
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+            html += '</div>';
+        });
+
+        if (!html) {
+            html = '<div class="to-category-block"><div class="to-card-grid"><div class="to-empty">' + emptySvg + '<p>' + (isEn ? 'Nothing found' : 'Ничего не найдено') + '</p></div></div></div>';
+        }
+
+        container.innerHTML = html;
+        attachEvents();
     }
 
 })();

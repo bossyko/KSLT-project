@@ -232,54 +232,38 @@
 
         <!-- TABS -->
         <nav class="td-tabs-bar" id="tabsBar">
+            <a class="td-tabs-back" id="tabsBackLink" href="#">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+                <span id="tabsBackText"></span>
+            </a>
             <div class="td-tabs">
-                <button class="td-tab active" data-target="bracket">Сетка</button>
-                <button class="td-tab" data-target="schedule">Расписание</button>
+                <button class="td-tab active" data-target="description">Описание</button>
+                <button class="td-tab" data-target="venue">Место проведения</button>
                 <button class="td-tab" data-target="participants">Участники</button>
+                <button class="td-tab" data-target="bracket">Сетка</button>
                 <button class="td-tab" data-target="results">Результаты</button>
             </div>
         </nav>
 
-        <!-- BRACKET -->
-        <section class="td-section" id="bracket">
-            <div class="section-header">
-                <h2>Турнирная сетка</h2>
-            </div>
-            <div id="bracketContainer"></div>
-        </section>
+        <!-- DESCRIPTION -->
+        <div class="td-section-header" id="description"><h2>Описание турнира</h2></div>
+        <section class="td-section"><div id="descriptionContent"></div></section>
 
         <!-- VENUE -->
-        <section class="td-section" id="venue" style="display:none">
-            <div class="section-header">
-                <h2>Место проведения</h2>
-            </div>
-            <div id="venueContent"></div>
-        </section>
-
-        <!-- SCHEDULE -->
-        <section class="td-section" id="schedule">
-            <div class="section-header">
-                <h2>Расписание матчей</h2>
-            </div>
-            <div class="td-schedule-filters" id="scheduleFilters"></div>
-            <div id="scheduleList"></div>
-        </section>
+        <div class="td-section-header" id="venue"><h2>Место проведения</h2></div>
+        <section class="td-section"><div id="venueContent"></div></section>
 
         <!-- PARTICIPANTS -->
-        <section class="td-section" id="participants">
-            <div class="section-header">
-                <h2>Участники</h2>
-            </div>
-            <div class="td-participants-grid" id="participantsGrid"></div>
-        </section>
+        <div class="td-section-header" id="participants"><h2>Участники</h2></div>
+        <section class="td-section"><div class="td-participants-grid" id="participantsGrid"></div></section>
+
+        <!-- BRACKET -->
+        <div class="td-section-header" id="bracket"><h2>Турнирная сетка</h2></div>
+        <section class="td-section"><div id="bracketContainer"></div></section>
 
         <!-- RESULTS -->
-        <section class="td-section" id="results">
-            <div class="section-header">
-                <h2>Результаты</h2>
-            </div>
-            <div id="resultsPodium"></div>
-        </section>
+        <div class="td-section-header" id="results"><h2>Результаты</h2></div>
+        <section class="td-section"><div id="resultsPodium"></div></section>
 
         <!-- SPONSORS -->
         <section id="sponsors" class="section-sponsors-compact">

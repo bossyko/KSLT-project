@@ -1885,6 +1885,41 @@ select.ad-field-input {
     color: var(--accent);
 }
 
+.ad-tab.disabled,
+.ad-tab[disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Floating action bar for registration removal */
+.ad-reg-floating-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-elevated, #1a1a2e);
+    border: 1px solid var(--accent, #CCFF00);
+    border-radius: 12px;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    animation: adFloatUp 0.25s ease-out;
+}
+.ad-reg-floating-count {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    white-space: nowrap;
+}
+@keyframes adFloatUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 .ad-badge {
     font-size: 0.75rem;
     padding: 2px 6px;
@@ -1992,6 +2027,44 @@ select.ad-field-input {
 .ad-trn-status-field.ad-status-completed { color: var(--text-secondary); }
 .ad-trn-status-field.ad-status-cancelled { color: #ef4444; }
 
+/* ---- Bracket Management: Sticky Header ---- */
+.ad-brk-sticky-header {
+    position: sticky;
+    top: 64px;
+    z-index: 40;
+    background: var(--bg-primary);
+    padding-bottom: 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.ad-brk-sticky-header .ad-section-header {
+    margin-bottom: 8px;
+}
+
+.ad-brk-sticky-header .ad-trn-nav-tabs {
+    margin-bottom: 0;
+}
+
+/* ---- Tournament Form: Sticky Header (title + tabs) ---- */
+.ad-trn-sticky-header {
+    position: sticky;
+    top: 64px;
+    z-index: 40;
+    background: var(--bg-primary);
+    padding: 8px 0 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.ad-trn-sticky-header .ad-section-header {
+    margin-bottom: 8px;
+}
+
+.ad-trn-sticky-header .ad-trn-nav-tabs {
+    margin-bottom: 0;
+}
+
 /* ========================================
    VISUAL BRACKET (admin)
    ======================================== */
@@ -2060,6 +2133,14 @@ select.ad-field-input {
 .ad-brk-match.live {
     border-color: #f59e0b;
     box-shadow: 0 0 8px rgba(245,158,11,0.2);
+}
+
+/* Schedule info above players */
+.ad-brk-schedule {
+    font-size: 0.7rem;
+    color: var(--text-dim, rgba(255,255,255,0.45));
+    padding: 3px 8px 0;
+    white-space: nowrap;
 }
 
 /* Player row inside match */
@@ -2148,9 +2229,14 @@ select.ad-field-input {
 .ad-brk-connector {
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
     width: 32px;
     flex-shrink: 0;
+}
+
+.ad-brk-connector-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .ad-brk-conn-pair {
@@ -2219,6 +2305,26 @@ select.ad-field-input {
     right: 0;
     height: 1px;
     background: var(--border-light, rgba(255,255,255,0.15));
+}
+
+/* FIC bracket sections */
+.ad-fic-section {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+}
+.ad-fic-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+.ad-fic-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding-left: 4px;
 }
 
 /* Modal overlay */
@@ -3022,4 +3128,175 @@ select.ad-field-input {
     .ad-trn-stats-grid .ad-crt-stat-card:last-child {
         grid-column: auto;
     }
+}
+
+/* ---- Group Stage: Playoff / Section Titles ---- */
+.ad-grp-playoff-section {
+    margin-bottom: 24px;
+}
+
+.ad-grp-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid rgba(204, 255, 0, 0.2);
+}
+
+.ad-grp-stage-separator {
+    margin: 28px 0 16px;
+}
+
+/* ---- Group Stage (Round-Robin) ---- */
+.ad-grp-block {
+    margin-bottom: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.ad-grp-title {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+}
+
+.ad-grp-matrix {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.ad-grp-matrix th,
+.ad-grp-matrix td {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    font-size: 0.8rem;
+}
+
+.ad-grp-matrix th {
+    background: rgba(255, 255, 255, 0.04);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ad-grp-diag {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: var(--text-secondary);
+    text-align: center;
+    font-weight: 600;
+}
+
+.ad-grp-score {
+    text-align: center;
+    white-space: nowrap;
+    font-size: 0.78rem;
+    transition: background 0.15s;
+}
+
+.ad-grp-win {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.ad-grp-loss {
+    color: var(--text-secondary);
+}
+
+.ad-grp-pending {
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.ad-grp-pending:hover {
+    background: rgba(204, 255, 0, 0.08);
+    color: var(--accent);
+}
+
+.ad-grp-pts,
+.ad-grp-place {
+    text-align: center;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .ad-grp-block {
+        padding: 10px;
+    }
+    .ad-grp-matrix th,
+    .ad-grp-matrix td {
+        padding: 4px 5px;
+        font-size: 0.72rem;
+    }
+}
+
+/* ---- Schedule by courts ---- */
+.ad-sched-section { margin-bottom: 24px; }
+
+.ad-sched-court-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid rgba(204, 255, 0, 0.2);
+}
+
+.ad-sched-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.ad-sched-table th,
+.ad-sched-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ad-sched-table .sched-num    { width: 3%; text-align: center; }
+.ad-sched-table .sched-time   { width: 9%; }
+.ad-sched-table .sched-round  { width: 10%; }
+.ad-sched-table .sched-p      { width: 24.5%; }
+.ad-sched-table .sched-vs     { width: 4%; text-align: center; padding-left: 0; padding-right: 0; color: var(--text-dim); }
+.ad-sched-table .sched-court  { width: 10%; }
+.ad-sched-table .sched-status { width: 15%; }
+
+.ad-sched-time,
+.ad-sched-player,
+.ad-sched-court {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-primary);
+    padding: 4px 8px;
+    font-size: 0.82rem;
+    box-sizing: border-box;
+}
+
+.ad-sched-time   { width: 100%; }
+.ad-sched-player { width: 100%; }
+.ad-sched-court  { width: 100%; }
+
+.ad-sched-time:focus,
+.ad-sched-player:focus,
+.ad-sched-court:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(204, 255, 0, 0.15);
+}
+
+.ad-sched-time:disabled,
+.ad-sched-player:disabled,
+.ad-sched-court:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

@@ -153,6 +153,32 @@
     border-color: var(--accent);
 }
 
+/* Tournament Search Input */
+.tournament-search-input {
+    padding: 8px 18px;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: all 0.3s;
+    min-width: 140px;
+}
+
+.tournament-search-input::placeholder {
+    color: var(--text-dim);
+}
+
+.tournament-search-input:focus {
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
+}
+
 /* Tournament Grid */
 .tournaments-grid {
     display: grid;

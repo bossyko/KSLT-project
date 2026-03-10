@@ -5,6 +5,7 @@
 /* === HERO === */
 .td-hero {
     position: relative;
+    z-index: 0;
     min-height: 420px;
     display: flex;
     align-items: flex-end;
@@ -218,11 +219,40 @@
     position: sticky;
     top: 64px;
     z-index: 50;
-    background: rgba(0, 0, 0, 0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: var(--bg-primary, #0a0a0a);
     border-bottom: 1px solid var(--border-subtle);
     padding: 0 7%;
+    /* Override global nav styles */
+    height: auto;
+    max-width: none;
+    margin: 0;
+}
+
+/* Back link inside tabs bar */
+.td-tabs-back {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 0 4px;
+    max-width: 1400px;
+    margin: 0 auto;
+    transition: color 0.2s;
+}
+
+.td-tabs-back:hover {
+    color: var(--accent);
+}
+
+.td-tabs-back svg {
+    flex-shrink: 0;
+}
+
+.td-tabs-back.visible {
+    display: flex;
 }
 
 .td-tabs {
@@ -267,16 +297,16 @@
     padding: var(--space-xl) 7%;
 }
 
-.td-section .section-header {
+.td-section-header {
+    background: var(--bg-primary, #0a0a0a);
+    padding: var(--space-md) 7% var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+    scroll-margin-top: 120px;
+}
+
+.td-section-header h2 {
     max-width: 1400px;
-    margin: 0 auto var(--space-lg);
-}
-
-#participants .section-header {
-    max-width: none;
-}
-
-.td-section .section-header h2 {
+    margin: 0 auto;
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -411,9 +441,14 @@
 .td-connector-column {
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
     width: 36px;
     flex-shrink: 0;
+}
+
+.td-connector-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .td-connector-pair {
@@ -482,6 +517,26 @@
     right: 0;
     height: 1px;
     background: var(--border-light);
+}
+
+/* === FIC SECTIONS === */
+.td-fic-section {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+}
+.td-fic-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+.td-fic-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding-left: 4px;
 }
 
 /* === ROUND ROBIN === */
@@ -1038,51 +1093,108 @@
     opacity: 1;
 }
 
-/* === RESULTS / PODIUM === */
+/* === DESCRIPTION === */
+.td-description-text {
+    max-width: 900px;
+    margin: 0 auto;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+}
+
+/* === RESULTS / PODIUM (Olympic: 3-1-2) === */
 .td-podium {
-    max-width: 1400px;
+    max-width: 800px;
     margin: 0 auto;
     display: flex;
-    gap: var(--space-md);
-    flex-wrap: wrap;
     justify-content: center;
+    align-items: flex-end;
+    gap: 0;
+    position: relative;
+    padding-bottom: 1px;
 }
 
 .td-podium-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: var(--space-lg) var(--space-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-    min-width: 200px;
-    flex: 1;
-    max-width: 280px;
+    padding: var(--space-md) var(--space-xl) 0;
     transition: all 0.2s;
 }
 
-.td-podium-card:hover {
-    border-color: var(--border-light);
-    transform: translateY(-2px);
+/* Pedestal block */
+.td-podium-card::after {
+    content: '';
+    display: block;
+    width: 100%;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    margin-top: var(--space-sm);
 }
 
-.td-podium-1 {
-    border-color: rgba(204, 255, 0, 0.3);
-    background: linear-gradient(180deg, rgba(204, 255, 0, 0.05) 0%, var(--bg-card) 100%);
-    order: 0;
+/* Olympic order: 3rd LEFT, 1st CENTER, 2nd RIGHT */
+.td-podium-1 { order: 1; z-index: 3; margin: 0 -8px; }
+.td-podium-2 { order: 2; z-index: 2; }
+.td-podium-3 { order: 0; z-index: 1; }
+
+.td-podium-1::after {
+    height: 120px;
+    background: linear-gradient(to top, rgba(204, 255, 0, 0.08), rgba(204, 255, 0, 0.02));
+    border: 1px solid rgba(204, 255, 0, 0.2);
+    border-bottom: none;
 }
 
-.td-podium-2 {
-    order: 1;
+.td-podium-2::after {
+    height: 80px;
+    background: linear-gradient(to top, rgba(192, 192, 192, 0.06), transparent);
+    border: 1px solid var(--border-subtle);
+    border-bottom: none;
 }
 
-.td-podium-3 {
-    order: 2;
+.td-podium-3::after {
+    height: 56px;
+    background: linear-gradient(to top, rgba(205, 127, 50, 0.06), transparent);
+    border: 1px solid var(--border-subtle);
+    border-bottom: none;
 }
 
-.td-podium-medal {
-    font-size: 2.5rem;
-    margin-bottom: var(--space-xs);
+.td-podium-photo-wrap {
+    margin-bottom: var(--space-sm);
 }
+
+.td-podium-photo {
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.td-podium-card:hover .td-podium-photo {
+    transform: scale(1.05);
+}
+
+.td-podium-1 .td-podium-photo {
+    width: 110px;
+    height: 110px;
+    border: 3px solid var(--accent);
+    box-shadow: 0 0 20px rgba(204, 255, 0, 0.15);
+}
+
+.td-podium-2 .td-podium-photo {
+    width: 80px;
+    height: 80px;
+    border: 3px solid rgba(192, 192, 192, 0.4);
+}
+
+.td-podium-3 .td-podium-photo {
+    width: 72px;
+    height: 72px;
+    border: 3px solid rgba(205, 127, 50, 0.4);
+}
+
+.td-podium-medal { margin-bottom: var(--space-xs); }
+.td-podium-1 .td-podium-medal { font-size: 2.8rem; }
+.td-podium-2 .td-podium-medal { font-size: 2rem; }
+.td-podium-3 .td-podium-medal { font-size: 1.8rem; }
 
 .td-podium-place {
     font-size: 0.75rem;
@@ -1094,22 +1206,14 @@
 }
 
 .td-podium-name {
-    font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 4px;
 }
 
-.td-podium-country {
-    font-size: 1.2rem;
-    margin-bottom: var(--space-sm);
-}
-
-.td-podium-prize {
-    font-size: 0.85rem;
-    color: var(--accent);
-    font-weight: 600;
-}
+.td-podium-1 .td-podium-name { font-size: 1.15rem; }
+.td-podium-2 .td-podium-name,
+.td-podium-3 .td-podium-name { font-size: 0.95rem; }
 
 .td-no-results {
     max-width: 1400px;
@@ -1180,6 +1284,58 @@
     color: var(--accent);
 }
 
+/* === GROUP TABLES 2-COLUMN GRID === */
+.td-groups-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .td-groups-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* === GROUP CROSS-TABLE (Round Robin) === */
+.td-group-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+}
+
+.td-group-table th,
+.td-group-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 0.85rem;
+}
+
+.td-group-table thead th {
+    background: var(--bg-elevated);
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.td-group-table tbody tr {
+    transition: background 0.15s;
+}
+
+.td-group-table tbody tr:hover {
+    background: var(--surface-glass-hover);
+}
+
+.td-group-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 992px) {
     .td-hero {
@@ -1208,6 +1364,10 @@
 
     .td-section {
         padding: var(--space-lg) 5%;
+    }
+
+    .td-section-header {
+        padding: var(--space-sm) 5% var(--space-xs);
     }
 
     .td-tabs-bar {
@@ -1248,15 +1408,19 @@
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     }
 
-    .td-podium {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .td-podium-card {
-        max-width: 100%;
-        width: 100%;
-    }
+    .td-podium-card { padding: var(--space-sm) var(--space-md) 0; }
+    .td-podium-1 .td-podium-photo { width: 80px; height: 80px; }
+    .td-podium-2 .td-podium-photo { width: 65px; height: 65px; }
+    .td-podium-3 .td-podium-photo { width: 58px; height: 58px; }
+    .td-podium-1 .td-podium-medal { font-size: 2.2rem; }
+    .td-podium-2 .td-podium-medal { font-size: 1.6rem; }
+    .td-podium-3 .td-podium-medal { font-size: 1.4rem; }
+    .td-podium-1::after { height: 100px; }
+    .td-podium-2::after { height: 65px; }
+    .td-podium-3::after { height: 45px; }
+    .td-podium-1 .td-podium-name { font-size: 0.95rem; }
+    .td-podium-2 .td-podium-name,
+    .td-podium-3 .td-podium-name { font-size: 0.85rem; }
 
     .td-rr-knockout-matches {
         flex-direction: column;

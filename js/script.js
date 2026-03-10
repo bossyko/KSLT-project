@@ -411,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Back links are JS-generated, so we watch DOM for them
     // ========================================
     (function() {
-        var SELECTORS = '.ct-back-links, .co-back-links, .ct-back-link, .co-back-link, .td-back-link, .news-back-link, .trn-back-link';
+        var SELECTORS = '.ct-back-links, .co-back-links, .ct-back-link, .co-back-link, .news-back-link, .trn-back-link';
         var bar = null;
 
         function setup(backLink) {

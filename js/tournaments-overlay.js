@@ -292,8 +292,68 @@
                 card.style.display = 'none';
             });
 
+            // Init search + filter buttons interaction
+            initSearch(grid);
+            initFilterSearch(grid);
+
         } catch (e) {
             console.error('Supabase tournaments overlay error:', e);
         }
+    }
+
+    var _searchTimer = null;
+
+    function initSearch(grid) {
+        var input = document.getElementById('tournamentSearch');
+        if (!input) return;
+
+        input.addEventListener('input', function() {
+            clearTimeout(_searchTimer);
+            _searchTimer = setTimeout(function() {
+                applyFilters(grid);
+            }, 200);
+        });
+    }
+
+    function initFilterSearch(grid) {
+        // Clone filter buttons to remove old handlers from tournaments-data.js
+        var filterBtns = document.querySelectorAll('.filter-btn[data-filter]');
+        filterBtns.forEach(function(btn) {
+            var clone = btn.cloneNode(true);
+            btn.parentNode.replaceChild(clone, btn);
+        });
+
+        // Re-query cloned buttons and bind new handlers
+        var newBtns = document.querySelectorAll('.filter-btn[data-filter]');
+        newBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                newBtns.forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                applyFilters(grid);
+            });
+        });
+    }
+
+    function applyFilters(grid) {
+        var input = document.getElementById('tournamentSearch');
+        var query = input ? input.value.trim().toLowerCase() : '';
+        var activeBtn = document.querySelector('.filter-btn.active');
+        var filter = activeBtn ? activeBtn.dataset.filter : 'all';
+
+        // Update section title
+        var sectionTitle = document.querySelector('#upcoming .section-header h2');
+        if (sectionTitle) {
+            sectionTitle.textContent = (filter === 'past')
+                ? (isEn ? 'Completed Tournaments' : 'Завершённые турниры')
+                : (isEn ? 'Upcoming Tournaments' : 'Предстоящие турниры');
+        }
+
+        grid.querySelectorAll('.tournament-card').forEach(function(card) {
+            var status = card.dataset.status;
+            var statusMatch = (filter === 'all') ? (status !== 'past') : (status === filter);
+            var title = card.querySelector('h3');
+            var nameMatch = !query || (title && title.textContent.toLowerCase().indexOf(query) !== -1);
+            card.style.display = (statusMatch && nameMatch) ? '' : 'none';
+        });
     }
 })();
