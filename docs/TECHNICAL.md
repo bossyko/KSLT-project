@@ -1,7 +1,7 @@
 # KSLT — Техническая документация
 
-> Последнее обновление: 2026-02-28
-> Версия: 1.1
+> Последнее обновление: 2026-03-10
+> Версия: 1.2
 
 ---
 
@@ -50,7 +50,7 @@
 KSLT/
 ├── index.html / index-en.html / index-kg.html    ← Главная (3 языка)
 │
-├── pages/                          ← 52 HTML-страницы (26 RU + 26 EN)
+├── pages/                          ← 42 HTML-страницы
 │   ├── auth.html                   ← Авторизация
 │   ├── dashboard.html              ← Личный кабинет
 │   ├── admin.html                  ← Админ-панель
@@ -73,49 +73,49 @@ KSLT/
 │   ├── pricing.html                ← Цены
 │   └── offer.html                  ← Публичная оферта
 │
-├── css/                            ← 18 CSS-файлов (19 675 строк)
+├── css/                            ← 18 CSS-файлов (20 192 строк)
 │   ├── style.css                   ← Дизайн-система (4 692 строк)
-│   ├── admin.css                   ← Админ-панель (2 124)
+│   ├── admin.css                   ← Админ-панель (3 302)
+│   ├── players.css                 ← Рейтинги (1 528)
+│   ├── tournament-detail.css       ← Детали турнира (1 511)
+│   ├── news.css                    ← Новости (1 227)
 │   ├── dashboard.css               ← Личный кабинет (1 110)
-│   ├── players.css                 ← Рейтинги (1 227)
-│   ├── news.css                    ← Новости (1 189)
-│   ├── tournament-detail.css       ← Турнирная сетка (1 045)
-│   ├── tournaments.css             ← Список турниров (704)
-│   ├── tournaments-overview.css    ← Обзор турниров (623)
-│   ├── courts.css                  ← Корты (908)
-│   ├── coaches.css                 ← Тренеры (731)
-│   ├── info-pages.css              ← About/FAQ/Rules (605)
-│   ├── pricing.css                 ← Цены (579)
-│   ├── services.css                ← Услуги (550)
 │   ├── partners.css                ← Найти партнёра (980)
-│   ├── info-overview.css           ← Инфо-хаб (324)
+│   ├── courts.css                  ← Корты (908)
+│   ├── tournaments.css             ← Список турниров (754)
+│   ├── coaches.css                 ← Тренеры (731)
+│   ├── tournaments-overview.css    ← Обзор турниров (679)
+│   ├── services.css                ← Услуги (667)
+│   ├── info-pages.css              ← About/FAQ/Rules (605)
 │   ├── player.css                  ← Профиль игрока (595)
+│   ├── pricing.css                 ← Цены (579)
+│   ├── info-overview.css           ← Инфо-хаб (324)
 │   └── coach.css                   ← Профиль тренера
 │
-├── js/                             ← 21 JS-файл (22 046 строк)
-│   ├── admin.js                    ← Админ-панель (7 001) ★
+├── js/                             ← 21 JS-файл (25 449 строк)
+│   ├── admin.js                    ← Админ-панель (14 603) ★
+│   ├── tournament-detail.js        ← Сетка турнира (1 860)
 │   ├── dashboard.js                ← Личный кабинет (1 233)
-│   ├── tournament-detail.js        ← Сетка турнира (1 153)
-│   ├── news.js                     ← Новости (830)
-│   ├── players.js                  ← Рейтинги (693)
+│   ├── players.js                  ← Рейтинги (1 039)
+│   ├── news.js                     ← Новости (1 003)
 │   ├── courts.js                   ← Корты (723)
 │   ├── partners.js                 ← Найти партнёра (667)
+│   ├── coaches.js                  ← Тренеры (561)
+│   ├── services.js                 ← Услуги (573)
 │   ├── tournament-generator.js     ← Генератор сетки (494)
+│   ├── script.js                   ← Глобальный (492)
+│   ├── tournaments-overview.js     ← Обзор турниров + поиск (453)
 │   ├── auth.js                     ← Авторизация (421)
 │   ├── player.js                   ← Профиль игрока (410)
-│   ├── script.js                   ← Глобальный (402)
-│   ├── tournaments-overview.js     ← Обзор турниров (397)
-│   ├── coaches.js                  ← Тренеры (561)
-│   ├── services.js                 ← Услуги (390)
-│   ├── tournaments-overlay.js      ← Список турниров (269)
-│   ├── auth-nav.js                 ← User dropdown (118)
+│   ├── tournaments-overlay.js      ← Список турниров + поиск (359)
+│   ├── auth-nav.js                 ← User dropdown (162)
 │   ├── info-overview.js            ← Инфо-хаб (117)
-│   ├── auth-guard.js               ← Защита роутов (104)
-│   ├── membership.js               ← Членство (89)
+│   ├── membership.js               ← Членство (105)
+│   ├── auth-guard.js               ← Защита роутов (87)
 │   ├── supabase-config.js          ← Supabase клиент (49)
 │   └── session-monitor.js          ← Мониторинг сессий (38)
 │
-├── data/                           ← 12 файлов статических данных (4 064 строк)
+├── data/                           ← 12 файлов статических данных (4 077 строк)
 │   ├── tournaments-data.js / -en.js
 │   ├── tournament-detail-data.js / -en.js
 │   ├── news-data.js / -en.js
@@ -123,7 +123,7 @@ KSLT/
 │   ├── coaches-data.js / -en.js
 │   └── courts-data.js / -en.js
 │
-├── sql/                            ← 16 SQL-миграций
+├── sql/                            ← 31 SQL-файлов
 │   ├── bracket-system-migration.sql
 │   ├── rating-system-migration.sql
 │   ├── rating-system-fix.sql
@@ -151,7 +151,7 @@ KSLT/
 └── images/                         ← Логотип
 ```
 
-**Итого: 117 файлов, ~58 000 строк кода**
+**Итого: ~136 файлов, ~62 000 строк кода**
 
 ---
 
@@ -199,8 +199,10 @@ tournaments           — турниры
 ├── level_id          → tournament_levels
 ├── dates, location
 ├── draw_size         — 8 / 16 / 32
+├── bracket_type      — single_elimination / fic / group_stage
 ├── status            — upcoming / ongoing / completed
-└── registration_deadline
+├── published_at      — null = черновик
+└── registration_start, registration_end
 
 tournament_levels     — уровни турниров
 ├── Кат.1, Кат.2, Кат.3, Кат.4, Grand (ТБШ)
@@ -546,6 +548,14 @@ Tour → Futures → Challenger → Masters → Pro-Masters (высшая)
 
 Очки за каждый раунд: W / F / SF / QF / R16 / R32
 
+### Типы турнирных сеток
+
+| Тип | Описание |
+|-----|----------|
+| **Single Elimination (SE)** | Стандартная олимпийская сетка (8/16/32) |
+| **Full Individual Consolation (FIC)** | Олимпийская + утешительные матчи (все места) |
+| **Group Stage** | Групповой этап → плей-офф |
+
 ### Турнирная сетка (Bracket)
 
 ```
@@ -554,23 +564,34 @@ Tour → Futures → Challenger → Masters → Pro-Masters (высшая)
 2. ITF seeding: топ-сиды на фиксированных позициях (SEED_POSITIONS)
 3. Fisher-Yates shuffle для несеяных
 4. Byes для неполной сетки (8/16/32)
+5. FIC: bit-reversal order для финальных мест
+6. Group Stage: деление на группы, round-robin в группах
 
 Проведение:
 1. Admin вводит счёт → modal с сетами
 2. Auto-detect winner → advanceWinner() в следующий раунд
-3. Финализация → recalc_player_points() → обновление рейтинга
-4. form[] → массив последних 5 результатов (W/L)
+3. FIC: проигравшие продвигаются в утешительную сетку
+4. Финализация → recalc_player_points() → обновление рейтинга
+5. form[] → массив последних 5 результатов (W/L)
 ```
+
+### Поиск турниров
+
+- **Overview** (`tournaments-overview.js`): поиск по названию во всех категориях, debounce 200ms
+- **Category** (`tournaments-overlay.js`): inline-поиск + фильтр статуса работают вместе
 
 ### Файлы турнирной системы
 
 | Файл | Назначение |
 |------|-----------|
-| `admin.js` (секция Brackets) | Управление заявками + сеткой |
+| `admin.js` (секция Brackets) | Управление заявками + сеткой (SE/FIC/Group Stage) |
 | `tournament-generator.js` | Алгоритм генерации сетки |
 | `tournament-detail.js` | Публичная визуализация сетки |
+| `tournaments-overview.js` | Обзор категорий + поиск |
+| `tournaments-overlay.js` | Список турниров + поиск + фильтры |
 | `bracket-system-migration.sql` | Таблицы: registrations, matches |
 | `rating-system-migration.sql` | Таблицы: levels, points_rules |
+| `group-stage-migration.sql` | Расширение для группового этапа |
 
 ---
 
@@ -610,7 +631,7 @@ const { data: membership } = await supabase
 
 ## 11. Админ-панель
 
-**Файл:** `admin.js` (~8 500 строк) — самый большой файл проекта
+**Файл:** `admin.js` (~14 600 строк) — самый большой файл проекта
 
 ### Секции CRUD
 
@@ -620,7 +641,7 @@ const { data: membership } = await supabase
 | Тренеры | coaches | CRUD + фото + авто-перевод |
 | Корты | courts | CRUD + координаты + promoted |
 | Игроки | players | CRUD + категория + рейтинг |
-| Турниры | tournaments | CRUD + заявки + сетка + финализация |
+| Турниры | tournaments | CRUD + заявки + сетка (SE/FIC/Group Stage) + финализация |
 | Уровни | tournament_levels | CRUD + правила начисления очков |
 | Пользователи | profiles | Список + роли + членство (только admin) |
 
@@ -672,6 +693,10 @@ git push origin main
 - `sql/news-kg-columns.sql` — кыргызский язык колонки
 - `sql/role-access-migration.sql` — RLS по ролям
 - `sql/admin-users-migration.sql` — RLS для пользователей
+- `sql/group-stage-migration.sql` — групповой этап турниров
+- `sql/test-fic-16-players.sql` — тестовый FIC-турнир (16 игроков)
+- `sql/test-32-players-promasters.sql` — тестовый SE-турнир (32 игрока)
+- `sql/test-tournaments-seed.sql` — 90 тестовых турниров (6 категорий)
 
 ### Edge Functions
 
@@ -706,7 +731,9 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://qqkzszesviukopg
 | Phase 4 | Админ-панель CRUD (5 секций) | ✅ |
 | Phase 4.3 | Публичные страницы ← Supabase | ✅ |
 | Рейтинг | Рейтинговая система в админке | ✅ |
-| Bracket | Турнирная сетка (ITF seeding) | ✅ |
+| Bracket | Турнирная сетка SE (ITF seeding) | ✅ |
+| Bracket FIC | Full Individual Consolation (все места) | ✅ |
+| Bracket Group | Групповой этап + плей-офф | ✅ |
 | Services | Страница услуг (promoted сверху) | ✅ |
 | Info | Информационный хаб | ✅ |
 | Partners | Найти партнёра + фильтры + поиск | ✅ |
@@ -719,6 +746,13 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://qqkzszesviukopg
 | News Inline Photos | Фото в тексте + WYSIWYG-превью | ✅ |
 | News Polls | Голосование в статьях | ✅ |
 | News Autosave | Автосохранение черновиков в Supabase | ✅ |
+| News Stats | Счётчик просмотров + статистика | ✅ |
+| Sticky Filters | Фиксированные фильтры + scroll-to-top | ✅ |
+| Category Ratings | Страницы рейтинга по категориям | ✅ |
+| Pagination | Пагинация (тренеры, корты, партнёры) | ✅ |
+| Sponsors | Блоки спонсоров на страницах | ✅ |
+| Homepage CTA | Кнопки действий на главной (корты, тренеры) | ✅ |
+| Tournament Search | Поиск турниров (overview + category) | ✅ |
 
 ---
 
@@ -744,7 +778,7 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://qqkzszesviukopg
 ### Лимиты
 - Приглашения на игру: 30 в день на пользователя
 - Аватар: максимум 2MB (JPG/PNG)
-- Турнирная сетка: 8, 16 или 32 участника
+- Турнирная сетка: 8, 16 или 32 участника (SE, FIC, Group Stage)
 
 ---
 
