@@ -24,6 +24,13 @@
         errGeneric: 'An error occurred. Please try again.',
         errInvalidLogin: 'Invalid email or password',
         errEmailTaken: 'An account with this email already exists',
+        errPhoneTaken: 'This phone number is already registered',
+        resetTitle: 'New Password',
+        resetSaving: 'Saving...',
+        resetSave: 'Save Password',
+        resetSuccess: 'Password updated successfully!',
+        errResetPwRules: 'Password does not meet requirements',
+        errResetPwMatch: 'Passwords do not match',
         successCheckEmail: 'Check your email to confirm your account!',
         successResetSent: 'Password reset link sent to your email',
         redirecting: 'Success! Redirecting...'
@@ -42,6 +49,13 @@
         errGeneric: 'Произошла ошибка. Попробуйте снова.',
         errInvalidLogin: 'Неверный email или пароль',
         errEmailTaken: 'Аккаунт с этим email уже существует',
+        errPhoneTaken: 'Этот номер телефона уже зарегистрирован',
+        resetTitle: 'Новый пароль',
+        resetSaving: 'Сохранение...',
+        resetSave: 'Сохранить пароль',
+        resetSuccess: 'Пароль успешно обновлён!',
+        errResetPwRules: 'Пароль не соответствует требованиям',
+        errResetPwMatch: 'Пароли не совпадают',
         successCheckEmail: 'Проверьте почту для подтверждения аккаунта!',
         successResetSent: 'Ссылка для сброса пароля отправлена на вашу почту',
         redirecting: 'Успешно! Перенаправление...'
@@ -95,6 +109,19 @@
     var forgotResend = document.getElementById('forgotResend');
     var forgotEmailConfirm = document.getElementById('forgot-email-confirm');
 
+    var signupSuccess = document.getElementById('signupSuccess');
+    var signupBackToLogin = document.getElementById('signupBackToLogin');
+    var signupEmailDisplay = document.getElementById('signupEmailDisplay');
+
+    var resetForm = document.getElementById('resetForm');
+    var resetSuccess = document.getElementById('resetSuccess');
+    var resetBackToLogin = document.getElementById('resetBackToLogin');
+
+    var emailTakenModal = document.getElementById('emailTakenModal');
+    var emailTakenLogin = document.getElementById('emailTakenLogin');
+    var emailTakenForgot = document.getElementById('emailTakenForgot');
+    var emailTakenClose = document.getElementById('emailTakenClose');
+
     // ---- Error/Success message ----
     function showMessage(form, text, isError) {
         var existing = form.querySelector('.auth-message');
@@ -131,14 +158,19 @@
         // Clear all forms and messages when switching
         forms.forEach(function(f) {
             f.classList.remove('active');
-            f.reset();
+            if (typeof f.reset === 'function') f.reset();
             clearMessages(f);
         });
         forgotForm.classList.remove('active');
         forgotSuccess.classList.remove('active');
+        if (signupSuccess) signupSuccess.classList.remove('active');
+        if (resetForm) resetForm.classList.remove('active');
+        if (resetSuccess) resetSuccess.classList.remove('active');
         document.querySelectorAll('.pw-rule').forEach(function(r) { r.classList.remove('valid'); });
+        document.querySelectorAll('.pw-rule-reset').forEach(function(r) { r.classList.remove('valid'); });
         document.getElementById(screenId).classList.add('active');
-        authTabs.style.display = (screenId === 'forgotForm' || screenId === 'forgotSuccess') ? 'none' : 'flex';
+        var hideTabs = (screenId === 'forgotForm' || screenId === 'forgotSuccess' || screenId === 'signupSuccess' || screenId === 'resetForm' || screenId === 'resetSuccess');
+        authTabs.style.display = hideTabs ? 'none' : 'flex';
     }
 
     tabs.forEach(function(tab) {
@@ -168,6 +200,76 @@
         tabs[0].classList.add('active');
         showScreen('signinForm');
     });
+
+    if (signupBackToLogin) {
+        signupBackToLogin.addEventListener('click', function() {
+            tabs[0].classList.add('active');
+            showScreen('signinForm');
+        });
+    }
+
+    if (resetBackToLogin) {
+        resetBackToLogin.addEventListener('click', async function() {
+            // Sign out recovery session before going to login
+            if (client) await client.auth.signOut();
+            tabs[0].classList.add('active');
+            showScreen('signinForm');
+        });
+    }
+
+    // ---- Email Taken Modal ----
+    function showEmailTakenModal() {
+        if (emailTakenModal) emailTakenModal.classList.add('active');
+    }
+
+    function hideEmailTakenModal() {
+        if (emailTakenModal) emailTakenModal.classList.remove('active');
+    }
+
+    if (emailTakenClose) {
+        emailTakenClose.addEventListener('click', hideEmailTakenModal);
+    }
+
+    if (emailTakenLogin) {
+        emailTakenLogin.addEventListener('click', function() {
+            hideEmailTakenModal();
+            tabs[0].classList.add('active');
+            tabs[1].classList.remove('active');
+            showScreen('signinForm');
+        });
+    }
+
+    if (emailTakenForgot) {
+        emailTakenForgot.addEventListener('click', function() {
+            hideEmailTakenModal();
+            tabs.forEach(function(t) { t.classList.remove('active'); });
+            showScreen('forgotForm');
+        });
+    }
+
+    if (emailTakenModal) {
+        emailTakenModal.addEventListener('click', function(e) {
+            if (e.target === emailTakenModal) hideEmailTakenModal();
+        });
+    }
+
+    // ---- Password rules for reset form ----
+    var resetPwInput = document.getElementById('reset-password');
+    if (resetPwInput) {
+        resetPwInput.addEventListener('input', function() {
+            var val = this.value;
+            Object.keys(rules).forEach(function(key) {
+                var el = document.querySelector('.pw-rule-reset[data-rule="' + key + '"]');
+                if (el) {
+                    if (rules[key](val)) {
+                        el.classList.add('valid');
+                    } else {
+                        el.classList.remove('valid');
+                    }
+                }
+            });
+        });
+    }
 
     forgotEmailConfirm.addEventListener('input', function() {
         if (this.value !== document.getElementById('forgot-email').value) {
@@ -251,6 +353,22 @@
             return;
         }
 
+        // Cache profile data for nav dropdown before redirect
+        var user = result.data.user;
+        if (user && user.user_metadata && user.user_metadata.full_name) {
+            localStorage.setItem('kslt_name', user.user_metadata.full_name);
+        }
+        if (user) {
+            try {
+                var profileRes = await client.from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single();
+                if (profileRes.data) {
+                    if (profileRes.data.full_name) localStorage.setItem('kslt_name', profileRes.data.full_name);
+                    if (profileRes.data.avatar_url) localStorage.setItem('kslt_avatar', profileRes.data.avatar_url);
+                    if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
+                }
+            } catch (e) { /* continue with redirect */ }
+        }
+
         showMessage(signinForm, L.redirecting, false);
         setTimeout(function() {
             window.location.href = getRedirectUrl();
@@ -304,13 +422,36 @@
 
         setLoading(btn, true, L.creatingAccount, L.createAccount);
 
+        // Check email/phone uniqueness before signUp
+        var phone = phoneCode + phoneNum;
+        try {
+            var checkResult = await client.rpc('check_registration_available', {
+                p_email: email,
+                p_phone: phone
+            });
+            if (checkResult.data) {
+                if (checkResult.data.email_taken) {
+                    setLoading(btn, false, L.creatingAccount, L.createAccount);
+                    showEmailTakenModal();
+                    return;
+                }
+                if (checkResult.data.phone_taken) {
+                    setLoading(btn, false, L.creatingAccount, L.createAccount);
+                    showMessage(signupForm, L.errPhoneTaken, true);
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error('Registration check error:', e);
+        }
+
         var result = await client.auth.signUp({
             email: email,
             password: password,
             options: {
                 data: {
                     full_name: firstName + ' ' + lastName,
-                    phone: phoneCode + phoneNum,
+                    phone: phone,
                     gender: gender ? gender.value : '',
                     birth_day: birthDay ? parseInt(birthDay) : null,
                     birth_month: birthMonth ? parseInt(birthMonth) : null,
@@ -322,15 +463,25 @@
         if (result.error) {
             setLoading(btn, false, L.creatingAccount, L.createAccount);
             if (result.error.message.indexOf('already') !== -1) {
-                showMessage(signupForm, L.errEmailTaken, true);
+                showEmailTakenModal();
             } else {
                 showMessage(signupForm, result.error.message, true);
             }
             return;
         }
 
+        // Detect fake success (email already exists, Supabase hides it)
+        if (result.data && result.data.user && result.data.user.identities && result.data.user.identities.length === 0) {
+            setLoading(btn, false, L.creatingAccount, L.createAccount);
+            showEmailTakenModal();
+            return;
+        }
+
         setLoading(btn, false, L.creatingAccount, L.createAccount);
-        showMessage(signupForm, L.successCheckEmail, false);
+
+        // Show success screen
+        if (signupEmailDisplay) signupEmailDisplay.textContent = email;
+        showScreen('signupSuccess');
     });
 
     // ============================================
@@ -390,6 +541,50 @@
     });
 
     // ============================================
+    // RESET PASSWORD — Supabase (from email link)
+    // ============================================
+    if (resetForm) {
+        resetForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearMessages(resetForm);
+
+            var newPw = document.getElementById('reset-password').value;
+            var confirmPw = document.getElementById('reset-confirm').value;
+            var btn = resetForm.querySelector('.auth-btn');
+
+            var allRulesPass = Object.keys(rules).every(function(key) { return rules[key](newPw); });
+            if (!allRulesPass) {
+                showMessage(resetForm, L.errResetPwRules, true);
+                return;
+            }
+
+            if (newPw !== confirmPw) {
+                showMessage(resetForm, L.errResetPwMatch, true);
+                return;
+            }
+
+            if (!client) {
+                showMessage(resetForm, L.errGeneric, true);
+                return;
+            }
+
+            setLoading(btn, true, L.resetSaving, L.resetSave);
+
+            var result = await client.auth.updateUser({ password: newPw });
+
+            if (result.error) {
+                setLoading(btn, false, L.resetSaving, L.resetSave);
+                showMessage(resetForm, result.error.message, true);
+                return;
+            }
+
+            // Sign out so user re-logs with new password
+            await client.auth.signOut();
+            showScreen('resetSuccess');
+        });
+    }
+
+    // ============================================
     // GOOGLE OAUTH — Supabase
     // ============================================
     var googleBtn = document.querySelector('.auth-social-btn');
@@ -408,11 +603,32 @@
 
     // ============================================
     // CHECK SESSION — redirect if logged in
+    // Intercept recovery flow (password reset link)
     // ============================================
+    var isRecoveryFlow = false;
+
+    // Supabase v2: listen for PASSWORD_RECOVERY event
+    if (client) {
+        client.auth.onAuthStateChange(function(event, session) {
+            if (event === 'PASSWORD_RECOVERY') {
+                isRecoveryFlow = true;
+                showScreen('resetForm');
+            }
+        });
+    }
+
     async function checkSession() {
         if (!client) return;
+
+        // Check URL hash for recovery type (fallback)
+        var hash = window.location.hash;
+        if (hash && hash.indexOf('type=recovery') !== -1) {
+            // Let onAuthStateChange handle it
+            return;
+        }
+
         var result = await client.auth.getSession();
-        if (result.data && result.data.session) {
+        if (result.data && result.data.session && !isRecoveryFlow) {
             window.location.href = getRedirectUrl();
         }
     }
