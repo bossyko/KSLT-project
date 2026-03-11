@@ -85,6 +85,14 @@
 - [ ] Auto-deploy to Netlify
 - [ ] Test status badge in README
 
+## Loyalty Program (Backlog)
+
+- [ ] Points system: earn points for tournament participation, using site services (booking, membership, etc.)
+- [ ] Redeem points for tournament entry, court booking, or other benefits
+- [ ] Points balance in dashboard
+- [ ] Points history (earned / spent)
+- [ ] Admin: manage point rules (how many points per action)
+
 ## Auth & Security (Backlog)
 
 - [ ] Two-step password reset: email (existing) + SMS code verification
