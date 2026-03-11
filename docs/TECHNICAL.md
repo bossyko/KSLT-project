@@ -92,8 +92,24 @@ KSLT/
 │   ├── info-overview.css           ← Инфо-хаб (324)
 │   └── coach.css                   ← Профиль тренера
 │
-├── js/                             ← 21 JS-файл (25 449 строк)
-│   ├── admin.js                    ← Админ-панель (14 603) ★
+├── js/                             ← 34 JS-файла (26 400 строк)
+│   ├── admin/                      ← Админ-панель (15 312, модульная) ★
+│   │   ├── core/
+│   │   │   ├── constants.js        ← L (EN/RU), ICONS, enums (1 432)
+│   │   │   ├── utils.js            ← toast, confirm, esc, translate, uploadImage (312)
+│   │   │   ├── layout.js           ← sidebar, tabs, dashboard (454)
+│   │   │   └── init.js             ← onAuthReady orchestration (32)
+│   │   └── sections/
+│   │       ├── news.js             ← CRUD + inline-фото + опрос (1 374)
+│   │       ├── tournaments.js      ← CRUD + заявки + финализация (1 518)
+│   │       ├── bracket.js          ← Сетка SE/FIC/Group Stage (3 950)
+│   │       ├── courts.js           ← CRUD + promoted + координаты (1 556)
+│   │       ├── coaches.js          ← CRUD + фото + авто-перевод (1 089)
+│   │       ├── ratings.js          ← Таблица + промоушен + правила (1 147)
+│   │       ├── players.js          ← CRUD + категория (594)
+│   │       ├── memberships.js      ← Одобрение + история (661)
+│   │       ├── payments.js         ← CRUD + promoted (558)
+│   │       └── users.js            ← Список + роли + удаление (635)
 │   ├── tournament-detail.js        ← Сетка турнира (1 860)
 │   ├── dashboard.js                ← Личный кабинет (1 233)
 │   ├── players.js                  ← Рейтинги (1 039)
@@ -123,7 +139,7 @@ KSLT/
 │   ├── coaches-data.js / -en.js
 │   └── courts-data.js / -en.js
 │
-├── sql/                            ← 31 SQL-файлов
+├── sql/                            ← 38 SQL-файлов
 │   ├── bracket-system-migration.sql
 │   ├── rating-system-migration.sql
 │   ├── rating-system-fix.sql
@@ -141,7 +157,8 @@ KSLT/
 ├── supabase/
 │   ├── schema.sql                  ← Основная схема БД
 │   ├── seed.sql                    ← Начальные данные
-│   └── functions/                  ← 3 Edge Functions (Deno/TypeScript)
+│   └── functions/                  ← 4 Edge Functions (Deno/TypeScript)
+│       ├── admin-manage-user/      ← Создание менеджеров, удаление пользователей
 │       ├── send-game-invite/       ← Отправка приглашений
 │       ├── telegram-webhook/       ← Telegram бот
 │       └── membership-notify/      ← Уведомления о членстве
@@ -151,7 +168,7 @@ KSLT/
 └── images/                         ← Логотип
 ```
 
-**Итого: ~136 файлов, ~62 000 строк кода**
+**Итого: ~140 файлов, ~74 000 строк кода**
 
 ---
 
@@ -584,7 +601,7 @@ Tour → Futures → Challenger → Masters → Pro-Masters (высшая)
 
 | Файл | Назначение |
 |------|-----------|
-| `admin.js` (секция Brackets) | Управление заявками + сеткой (SE/FIC/Group Stage) |
+| `admin/sections/bracket.js` | Управление заявками + сеткой (SE/FIC/Group Stage) |
 | `tournament-generator.js` | Алгоритм генерации сетки |
 | `tournament-detail.js` | Публичная визуализация сетки |
 | `tournaments-overview.js` | Обзор категорий + поиск |
@@ -631,7 +648,9 @@ const { data: membership } = await supabase
 
 ## 11. Админ-панель
 
-**Файл:** `admin.js` (~14 600 строк) — самый большой файл проекта
+**Модульная архитектура:** `js/admin/` — 14 файлов, ~15 300 строк
+
+Все модули используют namespace `window.KSLT_ADMIN` (alias `A`). Каждый файл — IIFE, регистрирующий свои функции на общем namespace. Shared utilities (`A.showToast`, `A.esc`, `A.uploadImage`, `A.setupBulkDelete`) в `core/utils.js`, layout/navigation в `core/layout.js`.
 
 ### Секции CRUD
 

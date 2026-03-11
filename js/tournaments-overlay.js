@@ -70,7 +70,6 @@
             tournaments.forEach(function(t) {
                 if (t.prize_fund != null) {
                     var raw = String(t.prize_fund);
-                    console.log('  prize_fund raw [' + t.id + ']:', JSON.stringify(raw));
                     // Try to extract number: take first sequence of digits (possibly with separators)
                     var match = raw.match(/[\d][\d\s,.\u00a0]*/);
                     if (match) {
@@ -80,8 +79,6 @@
                     }
                 }
             });
-            console.log('Hero stats:', category, '| tournaments:', tournamentCount, '| totalPrize:', totalPrize);
-
             // Always update tournament count and prize (even if 0)
             if (elCount) elCount.textContent = tournamentCount;
             if (elPrize) {

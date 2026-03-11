@@ -17,7 +17,6 @@ var supabaseClient = null;
 function initSupabase() {
     if (window.supabase && window.supabase.createClient) {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase connected');
         return supabaseClient;
     }
     console.error('Supabase SDK not loaded');

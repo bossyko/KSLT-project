@@ -255,10 +255,8 @@
 
         var html = '';
 
-        console.log('[overview] renderCategories, source:', grouped === _grouped ? 'cached' : 'new');
         CATEGORIES.forEach(function(cat) {
             var items = grouped[cat.key] || [];
-            if (items.length) console.log('[overview]', cat.key, ':', items.length, 'items, first genderLabel:', JSON.stringify(items[0].genderLabel), 'fromSupabase:', items[0]._fromSupabase);
             var catData = (typeof tournamentsData !== 'undefined' && tournamentsData.categories[cat.key]) || {};
             var bgImage = catData.bgImage || '';
             _bgImages[cat.key] = bgImage;
