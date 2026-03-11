@@ -48,8 +48,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Плавная прокрутка для навигации
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
+            var raw = this.getAttribute('href');
+            if (!raw || raw.length < 2 || raw.indexOf('/') !== -1) return;
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            var target = document.querySelector(raw);
             if (target) {
                 target.scrollIntoView({
                     behavior: 'smooth'
