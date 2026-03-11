@@ -642,15 +642,16 @@
     }
 
 
-    var PAYMENT_METHODS = { cash: L.payCash, transfer: L.payTransfer, card: L.payCard };
-    var PAYMENT_PURPOSES = { promoted: L.payPromoted, sponsorship: L.paySponsorship, rental: L.payRental, other: L.payOther };
-    var PAYMENT_ENTITY_TYPES = { court: L.payCourt, coach: L.payCoach, player: L.payPlayer };
+    var PAYMENT_METHODS = A.PAYMENT_METHODS = { cash: L.payCash, transfer: L.payTransfer, card: L.payCard };
+    var PAYMENT_PURPOSES = A.PAYMENT_PURPOSES = { promoted: L.payPromoted, sponsorship: L.paySponsorship, rental: L.payRental, other: L.payOther };
+    var PAYMENT_ENTITY_TYPES = A.PAYMENT_ENTITY_TYPES = { court: L.payCourt, coach: L.payCoach, player: L.payPlayer };
 
-    function formatPayDate(d) {
+    A.formatPayDate = function formatPayDate(d) {
         if (!d) return '—';
         var parts = d.split('-');
         return parts[2] + '.' + parts[1] + '.' + parts[0].slice(2);
-    }
+    };
+    var formatPayDate = A.formatPayDate;
 
 
     // ---- Export to namespace ----

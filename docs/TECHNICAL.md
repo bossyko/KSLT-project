@@ -529,6 +529,17 @@ Body: Telegram Update object
 | `/start <profileId>` | Привязка Telegram к профилю KSLT |
 | Inline: Принять | Принять приглашение на игру |
 | Inline: Отклонить | Отклонить приглашение |
+| Inline: Записаться | Регистрация на турнир (callback `tournament_register:{id}`) |
+
+### Групповые рассылки
+
+| Параметр | Значение |
+|----------|----------|
+| Секрет | TELEGRAM_GROUP_CHAT_ID в Supabase Vault |
+| Функция | Edge Function `/tournament-notify` |
+| Триггер (ручной) | Кнопка "Рассылка в Telegram" в форме турнира (admin) |
+| Триггер (авто) | pg_cron ежедневно 05:00 UTC, `registration_start = today` |
+| Дедупликация | Поле `tournaments.notified_at` |
 
 ### Deep Link
 

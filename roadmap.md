@@ -27,8 +27,10 @@
 - [ ] Recurring payments (auto-renewal)
 
 ### 3.3 Notifications
+- [x] Telegram bot: tournament registration announcements to group
+- [x] Telegram bot: inline registration (callback query)
+- [x] pg_cron: auto-notify when registration opens (daily)
 - [ ] Email templates (Resend)
-- [ ] Cron job for reminders
 - [ ] SMS integration (Nikita.kg)
 - [ ] Push notifications
 
@@ -50,6 +52,7 @@
 - [ ] Charts and analytics
 
 ### 4.5 Automation
+- [x] Telegram tournament notify button in admin (manual broadcast)
 - [ ] Auto-block debtors
 - [ ] Mass email / SMS campaigns
 

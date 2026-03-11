@@ -655,6 +655,18 @@ Handles incoming Telegram bot events (messages and callback queries).
 | `/start` (no params) | Sends onboarding message or status |
 | `invite_accept:<id>` callback | Accepts game invite, exchanges contacts via Telegram |
 | `invite_decline:<id>` callback | Declines game invite, notifies sender |
+| `tournament_register:<id>` callback | Registers player for tournament via Telegram |
+
+**Tournament Registration Callback Flow:**
+1. Find profile by `telegram_chat_id`
+2. Verify `player_id` exists on profile
+3. Load tournament, check status is `registration_open`
+4. Check for duplicate registration
+5. Validate category (exact match / friendly / top-5 promotion)
+6. Check active membership (staff bypass)
+7. Insert `tournament_registrations` with status `pending`
+8. Answer callback: "Заявка отправлена!"
+9. Send DM confirmation with tournament title
 
 **Callback Flow (Accept):**
 1. Verify callback sender is the actual receiver (by `telegram_chat_id`)
@@ -662,6 +674,51 @@ Handles incoming Telegram bot events (messages and callback queries).
 3. Remove inline buttons from original message
 4. Send receiver a button to open sender's Telegram chat
 5. Notify sender that invite was accepted
+
+---
+
+### `tournament-notify`
+
+Sends tournament registration announcement to Telegram group. Two modes: manual (admin button) and cron (daily auto-check).
+
+| | |
+|---|---|
+| **Endpoint** | `POST /functions/v1/tournament-notify` |
+| **Auth (manual)** | Bearer JWT (admin role required) + `apikey` header |
+| **Auth (cron)** | Bearer CRON_SECRET |
+| **Schedule** | Daily at 05:00 UTC (11:00 Bishkek) |
+
+**Request (manual):**
+```json
+{ "tournament_id": "friendly-women-doubles-soon-2026" }
+```
+
+**Request (cron):** empty body `{}`
+
+**Success Response (200):**
+```json
+{ "sent": 1, "errors": 0, "total": 1 }
+```
+
+**Error Responses:**
+- `401` — Unauthorized (invalid JWT or missing apikey)
+- `403` — Forbidden (not admin)
+- `404` — Tournament not found
+- `409` — Already notified (`notified_at` is set)
+
+**Flow (manual):**
+1. Verify JWT + admin role
+2. Load tournament by ID, check `notified_at IS NULL`
+3. Build announcement message (title, dates, venue, category, max participants)
+4. Send to Telegram group (`TELEGRAM_GROUP_CHAT_ID`) with inline keyboard: "Записаться" (callback) + "На сайт" (URL)
+5. Update `tournaments.notified_at = now()`
+
+**Flow (cron):**
+1. Verify CRON_SECRET
+2. Query tournaments where `registration_start = today` AND `notified_at IS NULL` AND `status != cancelled`
+3. Send announcement for each, update `notified_at`
+
+**Deduplication:** `notified_at` field prevents duplicate notifications.
 
 ---
 

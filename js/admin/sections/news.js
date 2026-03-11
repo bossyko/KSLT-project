@@ -389,7 +389,7 @@
 
         // Load engagement data
         var engMap = {};
-        if (client) {
+        if (A.client) {
             var ids = articles.map(function(a) { return a.id; });
             var engRes = await A.client.rpc('get_news_engagement', { p_news_ids: ids });
             if (engRes.data) {

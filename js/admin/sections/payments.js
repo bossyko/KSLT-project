@@ -23,13 +23,13 @@
         if (!container) return;
 
         var typeOptions = '<option value="">' + L.payAllTypes + '</option>';
-        Object.keys(PAYMENT_ENTITY_TYPES).forEach(function(k) {
-            typeOptions += '<option value="' + k + '"' + (payFilterType === k ? ' selected' : '') + '>' + PAYMENT_ENTITY_TYPES[k] + '</option>';
+        Object.keys(A.PAYMENT_ENTITY_TYPES).forEach(function(k) {
+            typeOptions += '<option value="' + k + '"' + (payFilterType === k ? ' selected' : '') + '>' + A.PAYMENT_ENTITY_TYPES[k] + '</option>';
         });
 
         var purposeOptions = '<option value="">' + L.payAllPurposes + '</option>';
-        Object.keys(PAYMENT_PURPOSES).forEach(function(k) {
-            purposeOptions += '<option value="' + k + '"' + (payFilterPurpose === k ? ' selected' : '') + '>' + PAYMENT_PURPOSES[k] + '</option>';
+        Object.keys(A.PAYMENT_PURPOSES).forEach(function(k) {
+            purposeOptions += '<option value="' + k + '"' + (payFilterPurpose === k ? ' selected' : '') + '>' + A.PAYMENT_PURPOSES[k] + '</option>';
         });
 
         var statusOptions = '<option value="">' + L.payAllStatuses + '</option>' +
@@ -194,9 +194,9 @@
             var statusBadge = isActive
                 ? '<span class="ad-pay-badge ad-pay-active">' + L.payActive + '</span>'
                 : '<span class="ad-pay-badge ad-pay-expired">' + L.payExpired + '</span>';
-            var typeBadge = '<span class="ad-pay-badge ad-pay-type-' + p.entity_type + '">' + (PAYMENT_ENTITY_TYPES[p.entity_type] || p.entity_type) + '</span>';
-            var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + p.purpose + '">' + (PAYMENT_PURPOSES[p.purpose] || p.purpose) + '</span>';
-            var periodEnd = formatPayDate(p.period_end);
+            var typeBadge = '<span class="ad-pay-badge ad-pay-type-' + p.entity_type + '">' + (A.PAYMENT_ENTITY_TYPES[p.entity_type] || p.entity_type) + '</span>';
+            var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + p.purpose + '">' + (A.PAYMENT_PURPOSES[p.purpose] || p.purpose) + '</span>';
+            var periodEnd = A.formatPayDate(p.period_end);
             var createdDate = p.created_at ? new Date(p.created_at).toLocaleDateString() : '—';
 
             html +=
@@ -207,7 +207,7 @@
                     '<td>' + purposeBadge + '</td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + (p.currency || 'KGS') + '</td>' +
                     '<td style="font-size:0.8rem;white-space:nowrap;">' + periodEnd + '</td>' +
-                    '<td>' + (PAYMENT_METHODS[p.payment_method] || p.payment_method) + '</td>' +
+                    '<td>' + (A.PAYMENT_METHODS[p.payment_method] || p.payment_method) + '</td>' +
                     '<td>' + statusBadge + '</td>' +
                     '<td style="font-size:0.8rem;color:var(--text-dim);">' + createdDate + '</td>' +
                 '</tr>';
@@ -275,18 +275,18 @@
         payEditingId = item ? item.id : null;
 
         var entityTypeOptions = '';
-        Object.keys(PAYMENT_ENTITY_TYPES).forEach(function(k) {
-            entityTypeOptions += '<option value="' + k + '"' + (item && item.entity_type === k ? ' selected' : '') + '>' + PAYMENT_ENTITY_TYPES[k] + '</option>';
+        Object.keys(A.PAYMENT_ENTITY_TYPES).forEach(function(k) {
+            entityTypeOptions += '<option value="' + k + '"' + (item && item.entity_type === k ? ' selected' : '') + '>' + A.PAYMENT_ENTITY_TYPES[k] + '</option>';
         });
 
         var purposeOptions = '';
-        Object.keys(PAYMENT_PURPOSES).forEach(function(k) {
-            purposeOptions += '<option value="' + k + '"' + (item && item.purpose === k ? ' selected' : '') + '>' + PAYMENT_PURPOSES[k] + '</option>';
+        Object.keys(A.PAYMENT_PURPOSES).forEach(function(k) {
+            purposeOptions += '<option value="' + k + '"' + (item && item.purpose === k ? ' selected' : '') + '>' + A.PAYMENT_PURPOSES[k] + '</option>';
         });
 
         var methodOptions = '';
-        Object.keys(PAYMENT_METHODS).forEach(function(k) {
-            methodOptions += '<option value="' + k + '"' + (item && item.payment_method === k ? ' selected' : '') + '>' + PAYMENT_METHODS[k] + '</option>';
+        Object.keys(A.PAYMENT_METHODS).forEach(function(k) {
+            methodOptions += '<option value="' + k + '"' + (item && item.payment_method === k ? ' selected' : '') + '>' + A.PAYMENT_METHODS[k] + '</option>';
         });
 
         container.innerHTML =

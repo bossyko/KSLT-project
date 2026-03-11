@@ -45,7 +45,7 @@
         A.setAdminHash('tournaments', 'bracket', tournamentId);
 
         // Ensure levels are loaded for results display
-        await loadTournamentLevels();
+        await A.loadTournamentLevels();
 
         // Load tournament
         var tRes = await A.client.from('tournaments').select('*').eq('id', tournamentId).single();
@@ -192,7 +192,7 @@
         container.querySelectorAll('[data-trn-nav]').forEach(function(tab) {
             tab.addEventListener('click', function() {
                 var nav = tab.dataset.trnNav;
-                if (nav === 'edit') { loadAndEditTournament(tournamentId); return; }
+                if (nav === 'edit') { A.loadAndEditTournament(tournamentId); return; }
                 // Map nav value → panel tab value
                 var panelTab = (nav === 'regs') ? 'registrations' :
                                (nav === 'points') ? 'results' : nav;
@@ -213,7 +213,7 @@
 
         // Back button → return to tournament form (not list)
         document.getElementById('adBrkBack').addEventListener('click', function() {
-            loadAndEditTournament(tournamentId);
+            A.loadAndEditTournament(tournamentId);
         });
 
         // ---- Schedule save handler ----
@@ -1776,7 +1776,7 @@
                 '<div style="font-size:0.75rem;color:var(--text-secondary);">' + (isEn ? 'Tournament Level' : 'Уровень турнира') + '</div>' +
                 '<div style="font-size:1.4rem;font-weight:700;color:var(--text-primary);">' + (function() {
                     if (!tournament.level_id) return '—';
-                    var lv = cachedLevels.find(function(l) { return l.id === tournament.level_id; });
+                    var lv = A.cachedLevels.find(function(l) { return l.id === tournament.level_id; });
                     return lv ? A.esc(isEn ? (lv.name_en || lv.name) : lv.name) : '—';
                 })() + '</div>' +
             '</div>' +

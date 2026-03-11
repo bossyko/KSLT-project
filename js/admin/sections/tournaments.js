@@ -28,7 +28,7 @@
 
     async function renderTournamentsSection() {
         await A.loadCategories();
-        await loadTournamentLevels();
+        await A.loadTournamentLevels();
         if (A.isDeepLinked('tournaments')) return;
         renderTournamentsList();
     }
@@ -610,7 +610,7 @@
 
         // Tournament level options
         var trnLevelOptionsHtml = '<option value="">—</option>';
-        cachedLevels.forEach(function(lv) {
+        A.cachedLevels.forEach(function(lv) {
             var selected = (item && item.level_id === lv.id) ? ' selected' : '';
             var name = isEn ? (lv.name_en || lv.name) : lv.name;
             trnLevelOptionsHtml += '<option value="' + lv.id + '"' + selected + '>' + name + '</option>';
@@ -824,6 +824,11 @@
                 '<button class="ad-btn ad-btn-primary" id="adTrnSave">' + L.save + '</button>' +
                 (!trnIsDraft && trnEditingId && item && item.status !== 'cancelled' ? '<button class="ad-btn ad-btn-warning" id="adTrnCancel">' + L.trnCancelTournament + '</button>' : '') +
                 (trnEditingId ? '<button class="ad-btn ad-btn-danger" id="adTrnDelete">' + L.delete + '</button>' : '') +
+                (trnEditingId && !trnIsDraft && A.currentRole === 'admin' ? (
+                    item && item.notified_at
+                        ? '<button class="ad-btn ad-btn-secondary" id="adTrnNotify" disabled title="' + L.trnNotifySent + ' ' + A.esc(item.notified_at.split('T')[0]) + '">📢 ' + L.trnNotifySent + ' ' + item.notified_at.split('T')[0] + '</button>'
+                        : '<button class="ad-btn ad-btn-secondary" id="adTrnNotify">📢 ' + L.trnNotify + '</button>'
+                ) : '') +
                 '<span class="ad-draft-status" id="adTrnDraftStatus" style="margin-left:auto"></span>' +
             '</div>';
 
@@ -1046,6 +1051,43 @@
                 A.showConfirm(L.trnDeleteConfirm, L.deleteConfirmText, function() {
                     deleteTournamentHandler();
                 });
+            });
+        }
+
+        // Telegram notify
+        var notifyBtn = document.getElementById('adTrnNotify');
+        if (notifyBtn && !notifyBtn.disabled) {
+            notifyBtn.addEventListener('click', function() {
+                A.showConfirm(L.trnNotifyConfirm, '', function() {
+                    notifyBtn.disabled = true;
+                    notifyBtn.textContent = '📢 ...';
+                    (async function() {
+                        try {
+                            var session = await A.client.auth.getSession();
+                            var token = session.data.session ? session.data.session.access_token : '';
+                            var res = await fetch(SUPABASE_URL + '/functions/v1/tournament-notify', {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': 'Bearer ' + token,
+                                    'Content-Type': 'application/json',
+                                    'apikey': SUPABASE_ANON_KEY
+                                },
+                                body: JSON.stringify({ tournament_id: trnEditingId })
+                            });
+                            var result = await res.json();
+                            if (!res.ok) {
+                                throw new Error(result.error || 'HTTP ' + res.status);
+                            }
+                            A.showToast(isEn ? 'Notification sent!' : 'Рассылка отправлена!', 'success');
+                            var today = new Date().toISOString().split('T')[0];
+                            notifyBtn.textContent = '📢 ' + L.trnNotifySent + ' ' + today;
+                        } catch (err) {
+                            A.showToast(err.message || 'Error', 'error');
+                            notifyBtn.disabled = false;
+                            notifyBtn.textContent = '📢 ' + L.trnNotify;
+                        }
+                    })();
+                }, L.trnNotifyBtn);
             });
         }
 

@@ -5,6 +5,7 @@
 // Handles:
 // 1. /start command with deep link parameter (profile UUID)
 // 2. callback_query for game invite accept/decline
+// 3. callback_query for tournament registration (tournament_register:{id})
 //
 // Deploy: Supabase Dashboard → Edge Functions → New Function
 // Set webhook: https://api.telegram.org/bot<TOKEN>/setWebhook?url=<FUNCTION_URL>
@@ -107,16 +108,23 @@ Deno.serve(async (req) => {
   }
 })
 
-// ---- Game Invite Callback Handler ----
+// ---- Callback Query Dispatcher ----
 async function handleCallbackQuery(query: { id: string; data?: string; from: { id: number }; message?: { chat: { id: number }; message_id: number } }) {
   const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
   if (!token) return
 
   const data = query.data || ''
   const chatId = query.message?.chat?.id
-  const messageId = query.message?.message_id
 
-  // Parse: "invite_accept:UUID" or "invite_decline:UUID"
+  // Route: tournament_register:{id}
+  const trnMatch = data.match(/^tournament_register:(.+)$/)
+  if (trnMatch) {
+    await handleTournamentRegister(query, trnMatch[1])
+    return
+  }
+
+  // Route: invite_accept/decline:{uuid}
+  const messageId = query.message?.message_id
   const match = data.match(/^invite_(accept|decline):(.+)$/)
   if (!match || !chatId) {
     await answerCallbackQuery(token, query.id, 'Unknown action')
@@ -233,6 +241,174 @@ async function handleCallbackQuery(query: { id: string; data?: string; from: { i
 
     await answerCallbackQuery(token, query.id, 'Отклонено')
   }
+}
+
+// ---- Tournament Registration Callback Handler ----
+async function handleTournamentRegister(
+  query: { id: string; data?: string; from: { id: number }; message?: { chat: { id: number }; message_id: number } },
+  tournamentId: string
+) {
+  const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
+  if (!token) return
+
+  const tgUserId = query.from.id
+
+  const db = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  // 1. Find profile by telegram_chat_id
+  const { data: profile } = await db
+    .from('profiles')
+    .select('id, full_name, player_id, role')
+    .eq('telegram_chat_id', tgUserId)
+    .limit(1)
+    .single()
+
+  if (!profile) {
+    await answerCallbackQuery(token, query.id, 'Привяжите Telegram к аккаунту KSLT')
+    return
+  }
+
+  // 2. Check player_id
+  if (!profile.player_id) {
+    await answerCallbackQuery(token, query.id, 'У вас нет карточки игрока')
+    return
+  }
+
+  // 3. Load tournament
+  const { data: tournament } = await db
+    .from('tournaments')
+    .select('id, title, status, category_id, max_participants')
+    .eq('id', tournamentId)
+    .single()
+
+  if (!tournament) {
+    await answerCallbackQuery(token, query.id, 'Турнир не найден')
+    return
+  }
+
+  if (tournament.status !== 'registration_open') {
+    await answerCallbackQuery(token, query.id, 'Регистрация закрыта')
+    return
+  }
+
+  // 4. Check duplicate registration
+  const { data: existingReg } = await db
+    .from('tournament_registrations')
+    .select('id')
+    .eq('tournament_id', tournamentId)
+    .eq('player_id', profile.player_id)
+    .limit(1)
+
+  if (existingReg && existingReg.length > 0) {
+    await answerCallbackQuery(token, query.id, 'Вы уже записаны на этот турнир')
+    return
+  }
+
+  // 5. Category check
+  const isStaff = profile.role === 'admin' || profile.role === 'manager'
+
+  const { data: player } = await db
+    .from('players')
+    .select('id, category_id, points')
+    .eq('id', profile.player_id)
+    .single()
+
+  if (!player) {
+    await answerCallbackQuery(token, query.id, 'Карточка игрока не найдена')
+    return
+  }
+
+  if (tournament.category_id) {
+    const tCatId = tournament.category_id
+    const pCatId = player.category_id
+
+    // Category hierarchy: Tour(1) < Futures(2) < Challenger(3) < Masters(4) < Pro-Masters(5)
+    const CAT_LEVELS: Record<string, number> = { tour: 1, futures: 2, challenger: 3, masters: 4, promasters: 5 }
+    function getCatLevel(cid: string | null): number {
+      if (!cid) return 0
+      const tier = cid.split('-').slice(1).join('')
+      return CAT_LEVELS[tier] || 0
+    }
+    function getCatGender(cid: string | null): string | null {
+      return cid ? cid.split('-')[0] : null
+    }
+
+    const isFriendly = tCatId.indexOf('friendly') !== -1
+    let categoryMatch = isFriendly || pCatId === tCatId
+
+    if (!categoryMatch) {
+      // Check promotion: player one level below + same gender + top-5 by points
+      const tLevel = getCatLevel(tCatId)
+      const pLevel = getCatLevel(pCatId)
+      const tGender = getCatGender(tCatId)
+      const pGender = getCatGender(pCatId)
+
+      if (pLevel === tLevel - 1 && pGender === tGender && pLevel > 0) {
+        const { data: top5 } = await db
+          .from('players')
+          .select('id')
+          .eq('category_id', pCatId)
+          .order('points', { ascending: false })
+          .limit(5)
+
+        const top5Ids = (top5 || []).map((p: any) => p.id)
+        if (top5Ids.includes(player.id)) {
+          categoryMatch = true
+        }
+      }
+    }
+
+    if (!categoryMatch) {
+      await answerCallbackQuery(token, query.id, 'Ваша категория не подходит для этого турнира')
+      return
+    }
+  }
+
+  // 6. Check membership (staff bypass)
+  if (!isStaff) {
+    const { data: membership } = await db
+      .from('memberships')
+      .select('id, status')
+      .eq('profile_id', profile.id)
+      .eq('status', 'active')
+      .limit(1)
+
+    if (!membership || membership.length === 0) {
+      await answerCallbackQuery(token, query.id, 'Необходимо активное членство KSLT')
+      return
+    }
+  }
+
+  // 7. Register
+  const { error: regError } = await db
+    .from('tournament_registrations')
+    .insert({
+      tournament_id: tournamentId,
+      player_id: profile.player_id,
+      status: 'pending'
+    })
+
+  if (regError) {
+    console.error('Registration error:', regError)
+    await answerCallbackQuery(token, query.id, 'Ошибка регистрации')
+    return
+  }
+
+  // 8. Answer callback
+  await answerCallbackQuery(token, query.id, '✅ Заявка отправлена!')
+
+  // 9. Send confirmation DM
+  await sendMessage(
+    tgUserId,
+    `✅ <b>Заявка на турнир отправлена!</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nСтатус: ожидает подтверждения. Следите за обновлениями на сайте.`
+  )
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 async function sendMessageWithButton(chatId: number, text: string, btnText: string, btnUrl: string) {
