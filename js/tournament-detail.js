@@ -1680,45 +1680,26 @@ function renderRegistrationButton(tournament, registrations, isEn) {
             client.from('players').select('category_id').eq('id', playerId).single().then(async function(plRes) {
                 if (!plRes.data) return;
 
-                // Category hierarchy: Tour(1) < Futures(2) < Challenger(3) < Masters(4) < Pro-Masters(5)
-                var CAT_LEVELS = { tour: 1, futures: 2, challenger: 3, masters: 4, promasters: 5 };
-                function getCatLevel(cid) {
-                    if (!cid) return 0;
-                    var tier = cid.split('-').slice(1).join('');
-                    return CAT_LEVELS[tier] || 0;
-                }
                 function getCatGender(cid) { return cid ? cid.split('-')[0] : null; }
 
-                var categoryMatch = true;
+                var genderBlocked = false;
+                var isExactCategory = true;
                 var tCatId = tournament.category_id;
                 var pCatId = plRes.data.category_id;
+                var catRes = null;
 
                 if (tCatId) {
-                    // Friendly tournaments — open to all categories
-                    if (tCatId.indexOf('friendly') !== -1) {
-                        categoryMatch = true;
-                    } else if (pCatId === tCatId) {
-                        // Same category — OK
-                        categoryMatch = true;
-                    } else {
-                        categoryMatch = false;
-                        // Check promotion: player one level below + same gender + top-5 by points
-                        var tLevel = getCatLevel(tCatId);
-                        var pLevel = getCatLevel(pCatId);
-                        var tGender = getCatGender(tCatId);
-                        var pGender = getCatGender(pCatId);
-                        if (pLevel === tLevel - 1 && pGender === tGender && pLevel > 0) {
-                            var top5Res = await client.from('players')
-                                .select('id')
-                                .eq('category_id', pCatId)
-                                .order('points', { ascending: false })
-                                .limit(5);
-                            var top5Ids = (top5Res.data || []).map(function(p) { return p.id; });
-                            if (top5Ids.indexOf(playerId) !== -1) {
-                                categoryMatch = true;
-                            }
-                        }
+                    // 1. Gender check: load category gender from categories table
+                    catRes = await client.from('categories').select('gender').eq('id', tCatId).single();
+                    var catGender = (catRes.data && catRes.data.gender) || null;
+                    var playerGender = getCatGender(pCatId);
+
+                    if (catGender && playerGender && catGender !== playerGender) {
+                        genderBlocked = true;
                     }
+
+                    // 2. Category match → pending (main draw) or waitlist
+                    isExactCategory = (pCatId === tCatId);
                 }
 
                 // Check membership (staff bypass)
@@ -1740,13 +1721,15 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
                 if (alreadyRegistered) {
                     var statusLabels = isEn
-                        ? { pending: 'Registration Pending', approved: 'Registered', rejected: 'Registration Rejected', withdrawn: 'Withdrawn' }
-                        : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана' };
+                        ? { pending: 'Registration Pending', approved: 'Registered', rejected: 'Registration Rejected', withdrawn: 'Withdrawn', waitlist: 'On Waitlist' }
+                        : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания' };
                     btnHtml += '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
                         statusLabels[alreadyRegistered.status] + '</span>';
-                } else if (!categoryMatch) {
-                    btnHtml += '<span style="color:var(--text-secondary);font-size:0.9rem;">' +
-                        (isEn ? 'Your category does not match this tournament' : 'Ваша категория не соответствует этому турниру') + '</span>';
+                } else if (genderBlocked) {
+                    var genderMsg = (catRes.data && catRes.data.gender) === 'men'
+                        ? (isEn ? 'This tournament is for men only' : 'Этот турнир только для мужчин')
+                        : (isEn ? 'This tournament is for women only' : 'Этот турнир только для женщин');
+                    btnHtml += '<span style="color:var(--text-secondary);font-size:0.9rem;">' + genderMsg + '</span>';
                 } else if (!membershipOk) {
                     btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);">' +
                         '<div style="color:#ffc107;font-weight:500;margin-bottom:4px;">' +
@@ -1780,10 +1763,11 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         regBtn.disabled = true;
                         regBtn.textContent = isEn ? 'Registering...' : 'Отправка...';
 
+                        var regStatus = isExactCategory ? 'pending' : 'waitlist';
                         var res = await client.from('tournament_registrations').insert({
                             tournament_id: tournament.id,
                             player_id: playerId,
-                            status: 'pending'
+                            status: regStatus
                         });
 
                         if (res.error) {
@@ -1793,8 +1777,11 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                             return;
                         }
 
+                        var regMsg = regStatus === 'waitlist'
+                            ? (isEn ? 'On Waitlist — Awaiting Approval' : 'В листе ожидания — ожидает одобрения')
+                            : (isEn ? 'Registration Submitted!' : 'Заявка отправлена!');
                         regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
-                            (isEn ? 'Registration Submitted!' : 'Заявка отправлена!') + '</span>';
+                            regMsg + '</span>';
                     });
                 }
             });

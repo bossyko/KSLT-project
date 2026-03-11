@@ -336,6 +336,28 @@
             });
         });
 
+        // Waitlist: approve buttons
+        container.querySelectorAll('.ad-btn-approve').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var regId = btn.dataset.regId;
+                btn.disabled = true;
+                await A.client.from('tournament_registrations').update({ status: 'pending' }).eq('id', regId);
+                A.showToast(L.regApproved);
+                renderBracketManagement(tournamentId, 'registrations');
+            });
+        });
+
+        // Waitlist: reject buttons
+        container.querySelectorAll('.ad-btn-reject').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var regId = btn.dataset.regId;
+                btn.disabled = true;
+                await A.client.from('tournament_registrations').update({ status: 'rejected' }).eq('id', regId);
+                A.showToast(L.regRejected);
+                renderBracketManagement(tournamentId, 'registrations');
+            });
+        });
+
         // Floating bar: remove button
         floatingBar.querySelector('.ad-reg-floating-remove').addEventListener('click', function() {
             var checked = container.querySelectorAll('.ad-reg-check:checked');
@@ -433,15 +455,14 @@
         var html = '';
         var maxPart = tournament.max_participants || 16;
 
-        // Sort all active registrations by registered_at ASC (first come first served)
-        var active = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; })
+        // Split by status (not overflow)
+        var mainDraw = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; })
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
-
-        var mainDraw = active.slice(0, maxPart);
-        var waitlist = active.slice(maxPart);
+        var waitlistRegs = registrations.filter(function(r) { return r.status === 'waitlist'; })
+            .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
         var withdrawn = registrations.filter(function(r) { return r.status === 'withdrawn' || r.status === 'rejected'; });
 
-        if (active.length === 0 && withdrawn.length === 0) {
+        if (mainDraw.length === 0 && waitlistRegs.length === 0 && withdrawn.length === 0) {
             html += '<div class="ad-empty-state"><p>' + L.noRegistrations + '</p></div>';
         } else {
             var thCategory = isEn ? 'Category' : 'Категория';
@@ -449,6 +470,14 @@
             var thRegTime = isEn ? 'Registered' : 'Регистрация';
             var regTableHead = '<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"></th>' +
                 '<th style="width:32px;text-align:center;padding:4px 6px;">#</th><th style="width:32px;text-align:center;padding:4px 6px;">' + thRank + '</th><th>' + L.plrName + '</th><th>' + thCategory + '</th><th>' + thRegTime + '</th>';
+
+            // Overflow warning
+            if (mainDraw.length > maxPart) {
+                html += '<div class="ad-alert ad-alert-warning" style="margin-bottom:12px;">' +
+                    (isEn ? 'Warning: ' : 'Внимание: ') + mainDraw.length + ' ' + L.regCount + ', ' +
+                    (isEn ? 'but max participants is ' : 'но макс. участников — ') + maxPart +
+                '</div>';
+            }
 
             // ---- Main Draw ----
             html += '<h3 class="ad-reg-section-title">' + L.regMainDraw + ' <span class="ad-badge">' + mainDraw.length + '/' + maxPart + '</span></h3>';
@@ -465,12 +494,13 @@
             }
 
             // ---- Waitlist ----
-            html += '<h3 class="ad-reg-section-title" style="margin-top:24px;">' + L.regWaitlist + ' <span class="ad-badge">' + waitlist.length + '</span></h3>';
-            if (waitlist.length > 0) {
+            var waitTableHead = regTableHead + '<th style="width:80px;text-align:center;">' + (isEn ? 'Actions' : 'Действия') + '</th>';
+            html += '<h3 class="ad-reg-section-title" style="margin-top:24px;">' + L.regWaitlist + ' <span class="ad-badge">' + waitlistRegs.length + '</span></h3>';
+            if (waitlistRegs.length > 0) {
                 html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
-                    regTableHead.replace('GRP', 'wait') +
+                    waitTableHead.replace('GRP', 'wait') +
                 '</tr></thead><tbody>';
-                waitlist.forEach(function(reg, idx) {
+                waitlistRegs.forEach(function(reg, idx) {
                     html += renderRegRow(reg, idx + 1, playersMap, 'wait');
                 });
                 html += '</tbody></table></div>';
@@ -509,6 +539,13 @@
                 ' <span style="color:var(--text-dim);">' +
                 d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
         }
+        var actionsTd = '';
+        if (group === 'wait') {
+            actionsTd = '<td style="text-align:center;white-space:nowrap;">' +
+                '<button class="ad-btn-icon ad-btn-approve" data-reg-id="' + reg.id + '" title="' + L.regApprove + '" style="color:#4caf50;background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 6px;">✓</button>' +
+                '<button class="ad-btn-icon ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '" style="color:#f44336;background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 6px;">✕</button>' +
+            '</td>';
+        }
         return '<tr>' +
             '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"></td>' +
             '<td style="text-align:center;padding:4px 6px;">' + num + '</td>' +
@@ -516,6 +553,7 @@
             '<td>' + A.esc(pName) + seedHtml + '</td>' +
             '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
             '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
+            actionsTd +
         '</tr>';
     }
 

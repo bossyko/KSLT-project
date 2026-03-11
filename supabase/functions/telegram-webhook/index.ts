@@ -321,50 +321,36 @@ async function handleTournamentRegister(
     return
   }
 
-  if (tournament.category_id) {
-    const tCatId = tournament.category_id
-    const pCatId = player.category_id
+  // Gender helper
+  function getCatGender(cid: string | null): string | null {
+    return cid ? cid.split('-')[0] : null
+  }
 
-    // Category hierarchy: Tour(1) < Futures(2) < Challenger(3) < Masters(4) < Pro-Masters(5)
-    const CAT_LEVELS: Record<string, number> = { tour: 1, futures: 2, challenger: 3, masters: 4, promasters: 5 }
-    function getCatLevel(cid: string | null): number {
-      if (!cid) return 0
-      const tier = cid.split('-').slice(1).join('')
-      return CAT_LEVELS[tier] || 0
-    }
-    function getCatGender(cid: string | null): string | null {
-      return cid ? cid.split('-')[0] : null
-    }
+  // Determine registration status (pending vs waitlist)
+  let regStatus = 'pending'
+  const tCatId = tournament.category_id
+  const pCatId = player.category_id
 
-    const isFriendly = tCatId.indexOf('friendly') !== -1
-    let categoryMatch = isFriendly || pCatId === tCatId
+  if (tCatId) {
+    // 1. Gender check: load category gender from categories table
+    const { data: catRow } = await db
+      .from('categories')
+      .select('gender')
+      .eq('id', tCatId)
+      .single()
+    const catGender = catRow?.gender || null // 'men' | 'women' | null
+    const playerGender = getCatGender(pCatId)
 
-    if (!categoryMatch) {
-      // Check promotion: player one level below + same gender + top-5 by points
-      const tLevel = getCatLevel(tCatId)
-      const pLevel = getCatLevel(pCatId)
-      const tGender = getCatGender(tCatId)
-      const pGender = getCatGender(pCatId)
-
-      if (pLevel === tLevel - 1 && pGender === tGender && pLevel > 0) {
-        const { data: top5 } = await db
-          .from('players')
-          .select('id')
-          .eq('category_id', pCatId)
-          .order('points', { ascending: false })
-          .limit(5)
-
-        const top5Ids = (top5 || []).map((p: any) => p.id)
-        if (top5Ids.includes(player.id)) {
-          categoryMatch = true
-        }
-      }
-    }
-
-    if (!categoryMatch) {
-      await answerCallbackQuery(token, query.id, 'Ваша категория не подходит для этого турнира')
+    if (catGender && playerGender && catGender !== playerGender) {
+      const genderMsg = catGender === 'men'
+        ? 'Этот турнир только для мужчин'
+        : 'Этот турнир только для женщин'
+      await answerCallbackQuery(token, query.id, genderMsg)
       return
     }
+
+    // 2. Category match → pending (main draw) or waitlist
+    regStatus = (pCatId === tCatId) ? 'pending' : 'waitlist'
   }
 
   // 6. Check membership (staff bypass)
@@ -388,7 +374,7 @@ async function handleTournamentRegister(
     .insert({
       tournament_id: tournamentId,
       player_id: profile.player_id,
-      status: 'pending'
+      status: regStatus
     })
 
   if (regError) {
@@ -397,14 +383,20 @@ async function handleTournamentRegister(
     return
   }
 
-  // 8. Answer callback
-  await answerCallbackQuery(token, query.id, '✅ Заявка отправлена!')
-
-  // 9. Send confirmation DM
-  await sendMessage(
-    tgUserId,
-    `✅ <b>Заявка на турнир отправлена!</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nСтатус: ожидает подтверждения. Следите за обновлениями на сайте.`
-  )
+  // 8. Answer callback + DM based on status
+  if (regStatus === 'waitlist') {
+    await answerCallbackQuery(token, query.id, '⏳ Вы в листе ожидания')
+    await sendMessage(
+      tgUserId,
+      `⏳ <b>Вы в листе ожидания</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nВаша заявка ожидает одобрения администратора. Следите за обновлениями на сайте.`
+    )
+  } else {
+    await answerCallbackQuery(token, query.id, '✅ Заявка отправлена!')
+    await sendMessage(
+      tgUserId,
+      `✅ <b>Заявка на турнир отправлена!</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nСтатус: ожидает подтверждения. Следите за обновлениями на сайте.`
+    )
+  }
 }
 
 function escapeHtml(s: string): string {
