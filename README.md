@@ -125,4 +125,4 @@ The Supabase anon key is already configured in `js/supabase-config.js`. This is 
 
 ## Author
 
-**Konstantin Boyko** — [github.com/bossyko](https://github.com/bossyko)
+**Costa Han** — [github.com/bossyko](https://github.com/bossyko)
