@@ -43,7 +43,7 @@
 - [x] Dashboard: 9 stat cards + 6 activity tables
 - [x] Bulk delete, pagination, promoted listings, sponsors blocks
 - [x] Public pages loading from Supabase with static fallback
-- [ ] Fix homepage tournament layout (featured card: info on right)
+- [x] Fix homepage tournament layout (featured card: info on right)
 
 ### 4.4 Financial Reports (waiting for Phase 3)
 - [ ] Payments table with filters and search
@@ -68,8 +68,8 @@
 
 - [x] Technical docs (docs/TECHNICAL.md)
 - [x] Manager guide (docs/MANAGER-GUIDE.md)
-- [ ] Tournament rules and regulations
-- [ ] Membership terms and conditions
+- [x] Tournament rules and regulations (rules.html)
+- [x] Membership terms and conditions (offer.html)
 - [ ] API documentation (Supabase schema, RLS, endpoints)
 
 ## Phase 7 — Refactoring + QA + CI/CD

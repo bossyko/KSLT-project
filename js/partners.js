@@ -5,6 +5,7 @@
 
 (function() {
     var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var client = window.supabaseClient;
 
     var L = isEn ? {
@@ -41,6 +42,40 @@
         modalRegText: 'Get a KSLT membership to send game invitations to other players',
         modalRegBtn: 'Pay for membership',
         modalRegDisclaimer: 'By paying, you agree to the <a href="rules-en.html" target="_blank">rules</a> and <a href="pricing-en.html" target="_blank">pricing</a> of KSLT'
+    } : isKg ? {
+        heroTagline: 'KSLT Өнөктөштөр',
+        heroTitle: '<span>Өнөктөш</span> табуу',
+        heroDesc: 'Оюн жана машыгуу үчүн Бишкектеги теннисчилерди табыңыз',
+        online: 'Онлайн',
+        offline: 'Оффлайн',
+        filterAll: 'Баары',
+        filterMen: 'Эркектер',
+        filterWomen: 'Аялдар',
+        guestTitle: 'Баарын көрүү үчүн катталыңыз',
+        guestText: 'Теннис өнөктөштөрүнүн толук тизмесине мүмкүнчүлүк алуу үчүн аккаунт түзүңүз',
+        guestBtn: 'Каттоо',
+        guestHidden: 'оюнчу жашырылган',
+        searchPlaceholder: 'Аты боюнча издөө...',
+        empty: 'Өнөктөштөр табылган жок',
+        emptyFiltered: 'Тандалган чыпка боюнча өнөктөштөр жок',
+        levelBeginner: 'Башталгыч',
+        levelIntermediate: 'Орточо',
+        levelAdvanced: 'Алдыңкы',
+        levelUnknown: 'Деңгээл көрсөтүлгөн эмес',
+        inviteBtn: 'Оюн сунуштоо',
+        inviteSent: 'Чакыруу жөнөтүлдү!',
+        inviteNoTg: 'Оюнчунун Telegram\'ы байланган эмес',
+        inviteError: 'Чакыруу жөнөтүлгөн жок',
+        inviteLimit: 'Күнүмдүк чакыруу лимити (5/күн)',
+        invitePending: 'Чакыруу мурунтан жөнөтүлгөн',
+        inviteSelf: 'Өзүңдү чакыра албайсыз',
+        modalGuestTitle: 'Кошулуңуз!',
+        modalGuestText: 'Оюнга чакыруу жөнөтүү үчүн катталып, КСЛТ мүчөсү болуңуз',
+        modalGuestBtn: 'Каттоо',
+        modalRegTitle: 'КСЛТ мүчөсү болуңуз',
+        modalRegText: 'Башка оюнчуларга оюнга чакыруу жөнөтүү үчүн КСЛТ мүчөлүгүн алыңыз',
+        modalRegBtn: 'Мүчөлүктү төлөө',
+        modalRegDisclaimer: 'Баскычты басуу менен, <a href="rules-kg.html" target="_blank">эрежелер</a> жана <a href="pricing-kg.html" target="_blank">баалар</a> менен тааныштыгыңызды тастыктайсыз'
     } : {
         heroTagline: 'KSLT Партнёры',
         heroTitle: 'Найти <span>партнёра</span>',
@@ -77,8 +112,8 @@
         modalRegDisclaimer: 'Нажимая кнопку, вы подтверждаете, что ознакомлены с <a href="rules.html" target="_blank">правилами</a> и <a href="pricing.html" target="_blank">тарифами</a> КСЛТ'
     };
 
-    var authPage = isEn ? 'auth-en.html' : 'auth.html';
-    var pricingPage = isEn ? 'pricing-en.html' : 'pricing.html';
+    var authPage = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+    var pricingPage = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
     var FUNCTIONS_URL = 'https://qqkzszesviukopgjbead.supabase.co/functions/v1';
     var ANON_KEY = 'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G';
     var _partners = [];
@@ -213,8 +248,8 @@
         html += '<div class="pt-search-wrap"><input type="text" class="pt-search" id="ptSearch" placeholder="' + L.searchPlaceholder + '"></div>';
 
         // Back link (hidden, shown on scroll)
-        var servicesLink = isEn ? 'services-en.html' : 'services.html';
-        html = '<a href="' + servicesLink + '" class="pt-back-link">\u2190 ' + (isEn ? 'Services' : 'Услуги') + '</a>' + html;
+        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
+        html = '<a href="' + servicesLink + '" class="pt-back-link">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' + html;
 
         el.innerHTML = html;
 
@@ -352,7 +387,7 @@
     function renderCard(p, extraClass) {
         var online = isOnline(p.last_seen);
         var name = escHtml(p.full_name);
-        var category = isEn ? (p.category_name_en || p.category_name) : p.category_name;
+        var category = isEn ? (p.category_name_en || p.category_name) : (isKg ? (p.category_name_kg || p.category_name) : p.category_name);
 
         // Play level fallback if no official category
         var levelMap = { beginner: L.levelBeginner, intermediate: L.levelIntermediate, advanced: L.levelAdvanced };
@@ -395,8 +430,8 @@
             return;
         }
 
-        var prevLabel = isEn ? '\u2190 Back' : '\u2190 Назад';
-        var nextLabel = isEn ? 'Next \u2192' : 'Далее \u2192';
+        var prevLabel = isEn ? '\u2190 Back' : (isKg ? '\u2190 Артка' : '\u2190 Назад');
+        var nextLabel = isEn ? 'Next \u2192' : (isKg ? 'Кийинки \u2192' : 'Далее \u2192');
         var html = '<div class="pt-pagination">';
         html += '<button class="pt-page-btn pt-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + prevLabel + '</button>';
         for (var p = 1; p <= totalPages; p++) {
@@ -430,8 +465,8 @@
         var container = document.getElementById('ptSponsors');
         if (!container) return;
 
-        var title = isEn ? 'Partners & Sponsors' : 'Партнёры и спонсоры';
-        var general = isEn ? 'General sponsor' : 'Генеральный спонсор';
+        var title = isEn ? 'Partners & Sponsors' : (isKg ? 'Өнөктөштөр жана демөөрчүлөр' : 'Партнёры и спонсоры');
+        var general = isEn ? 'General sponsor' : (isKg ? 'Баш демөөрчү' : 'Генеральный спонсор');
         container.innerHTML =
             '<div class="section-header"><h2>' + title + '</h2></div>' +
             '<div class="sponsor-hero">' +
@@ -569,25 +604,25 @@
         var old = document.querySelector('.pt-modal-overlay');
         if (old) old.remove();
 
-        var rulesPage = isEn ? 'rules-en.html' : 'rules.html';
-        var pricePage = isEn ? 'pricing-en.html' : 'pricing.html';
+        var rulesPage = isEn ? 'rules-en.html' : (isKg ? 'rules-kg.html' : 'rules.html');
+        var pricePage = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
 
-        var title = isEn ? 'Become a KSLT Member' : 'Станьте членом КСЛТ';
+        var title = isEn ? 'Become a KSLT Member' : (isKg ? 'КСЛТ мүчөсү болуңуз' : 'Станьте членом КСЛТ');
         var subtitle = isEn
             ? 'Monthly membership — <strong style="color:var(--accent)">1,000 KGS/mo</strong>'
-            : 'Ежемесячное членство — <strong style="color:var(--accent)">1 000 сом/мес</strong>';
-        var cardsLabel = isEn ? 'Bank cards' : 'Банковские карты';
-        var mobileLabel = isEn ? 'Mobile banks' : 'Мобильные банки';
-        var walletsLabel = isEn ? 'E-wallets' : 'Электронные кошельки';
-        var orLabel = isEn ? 'or' : 'или';
-        var tgBtn = isEn ? 'Message in Telegram' : 'Написать в Telegram';
+            : (isKg ? 'Ай сайынкы мүчөлүк — <strong style="color:var(--accent)">1 000 сом/ай</strong>' : 'Ежемесячное членство — <strong style="color:var(--accent)">1 000 сом/мес</strong>');
+        var cardsLabel = isEn ? 'Bank cards' : (isKg ? 'Банк карталары' : 'Банковские карты');
+        var mobileLabel = isEn ? 'Mobile banks' : (isKg ? 'Мобилдик банктар' : 'Мобильные банки');
+        var walletsLabel = isEn ? 'E-wallets' : (isKg ? 'Электрондук капчыктар' : 'Электронные кошельки');
+        var orLabel = isEn ? 'or' : (isKg ? 'же' : 'или');
+        var tgBtn = isEn ? 'Message in Telegram' : (isKg ? 'Telegram\'га жазуу' : 'Написать в Telegram');
         var noteText = isEn
             ? 'Online payment coming soon. Contact the admin for now.'
-            : 'Онлайн-оплата появится в ближайшее время. Пока свяжитесь с администратором.';
+            : (isKg ? 'Онлайн төлөм жакында ишке кирет. Азырынча администраторго кайрылыңыз.' : 'Онлайн-оплата появится в ближайшее время. Пока свяжитесь с администратором.');
         var disclaimer = isEn
             ? 'By paying, you agree to the <a href="' + rulesPage + '" target="_blank">rules</a> and <a href="' + pricePage + '" target="_blank">pricing</a> of KSLT'
-            : 'Нажимая кнопку, вы подтверждаете, что ознакомлены с <a href="' + rulesPage + '" target="_blank">правилами</a> и <a href="' + pricePage + '" target="_blank">тарифами</a> КСЛТ';
-        var soonLabel = isEn ? 'soon' : 'скоро';
+            : (isKg ? 'Баскычты басуу менен, <a href="' + rulesPage + '" target="_blank">эрежелер</a> жана <a href="' + pricePage + '" target="_blank">баалар</a> менен тааныштыгыңызды тастыктайсыз' : 'Нажимая кнопку, вы подтверждаете, что ознакомлены с <a href="' + rulesPage + '" target="_blank">правилами</a> и <a href="' + pricePage + '" target="_blank">тарифами</a> КСЛТ');
+        var soonLabel = isEn ? 'soon' : (isKg ? 'жакында' : 'скоро');
 
         var overlay = document.createElement('div');
         overlay.className = 'pt-modal-overlay';

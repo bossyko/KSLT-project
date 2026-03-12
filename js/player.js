@@ -1,6 +1,8 @@
 // ========================================
 // PLAYER PROFILE — Detail Page Logic
-// Uses playersData from players-data.js / players-data-en.js
+// Uses playersData from players-data.js / -en / -kg
+// Supabase: real matches + tournaments, mock fallback
+// H2H modal on opponent click
 // ========================================
 (function () {
     'use strict';
@@ -11,6 +13,11 @@
     }
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var client = window.supabaseClient;
+    var _playerId = null;
+    var _playerName = '';
+    var _playerPhoto = '';
 
     // Seeded random for consistent mock data per player
     function seededRandom(seed) {
@@ -67,6 +74,24 @@
         tournamentResults: ['Четвертьфинал', 'Полуфинал', '1/8 финала', 'Финалист', 'Победитель']
     };
 
+    // ---- H2H Labels ----
+    var LH = isEn ? {
+        vs: 'VS', wins: 'Wins', setsWon: 'Sets won', gamesWon: 'Games won',
+        last5: 'Last 5 matches', fullProfile: 'Open full profile',
+        noMatches: 'No head-to-head matches found', loading: 'Loading...',
+        noData: 'No match data yet', participated: 'Participated'
+    } : isKg ? {
+        vs: 'VS', wins: 'Жеңиштер', setsWon: 'Утулган сеттер', gamesWon: 'Утулган геймдер',
+        last5: 'Акыркы 5 матч', fullProfile: 'Толук профилди ачуу',
+        noMatches: 'Бетме-бет матчтар жок', loading: 'Жүктөлүүдө...',
+        noData: 'Матч маалыматы жок', participated: 'Катышкан'
+    } : {
+        vs: 'VS', wins: 'Победы', setsWon: 'Выигранные сеты', gamesWon: 'Выигранные геймы',
+        last5: 'Последние 5 матчей', fullProfile: 'Открыть полный профиль',
+        noMatches: 'Матчей между игроками не найдено', loading: 'Загрузка...',
+        noData: 'Нет данных о матчах', participated: 'Участвовал'
+    };
+
     // ---- Find player across all categories ----
     function findPlayer(id) {
         var cats = playersData.categories;
@@ -87,7 +112,7 @@
         return null;
     }
 
-    // ---- Generate mock match history ----
+    // ---- Generate mock match history (fallback) ----
     function generateMatchHistory(data) {
         var player = data.player;
         var cat = data.category;
@@ -95,7 +120,6 @@
         var opponents = cat.players.filter(function (p) { return p.id !== player.id; });
         var matches = [];
 
-        // Use real form + extend to 8 matches
         var results = (player.form || []).slice();
         for (var i = results.length; i < 8; i++) {
             results.push(seededRandom(seed + i * 7) > 0.45 ? 'W' : 'L');
@@ -142,7 +166,6 @@
             if (badgeMap[b]) achievements.push(badgeMap[b]);
         });
 
-        // Bonus achievements from stats
         if (player.wins >= 15) {
             achievements.push({ icon: '\u2B50', name: L.veteran, desc: player.wins + ' ' + L.victories });
         }
@@ -155,7 +178,7 @@
         return achievements;
     }
 
-    // ---- Generate mock tournaments ----
+    // ---- Generate mock tournaments (fallback) ----
     function generateTournaments(data) {
         var seed = hashStr(data.player.id);
         var results = L.tournamentResults;
@@ -185,6 +208,45 @@
         newbie: '\uD83C\uDD95',
         breakthrough: '\u2B06\uFE0F'
     };
+
+    // ---- Score helpers ----
+    function formatMatchDate(dateStr) {
+        if (!dateStr) return '\u2014';
+        var d = new Date(dateStr);
+        var months = isEn
+            ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+            : ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+        return d.getDate() + ' ' + months[d.getMonth()];
+    }
+
+    function formatScore(score) {
+        if (!score) return '\u2014';
+        return score.replace(/(\d+)\/(\d+)/g, '$1:$2');
+    }
+
+    function flipScore(score) {
+        if (!score) return score;
+        return score.replace(/(\d+)\/(\d+)/g, '$2/$1');
+    }
+
+    function parseScoreStats(score) {
+        if (!score || score === 'BYE') return null;
+        var sets = score.trim().split(/\s+/);
+        var p1S = 0, p2S = 0, p1G = 0, p2G = 0;
+        sets.forEach(function(s) {
+            var m = s.match(/^(\d+)\/(\d+)/);
+            if (m) {
+                var g1 = parseInt(m[1], 10), g2 = parseInt(m[2], 10);
+                p1G += g1; p2G += g2;
+                if (g1 > g2) p1S++; else if (g2 > g1) p2S++;
+            }
+        });
+        return { p1Sets: p1S, p2Sets: p2S, p1Games: p1G, p2Games: p2G };
+    }
+
+    function playerPage() {
+        return isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
+    }
 
     // ---- Render helpers ----
     function statCard(num, label, change, changeClass) {
@@ -219,16 +281,22 @@
         var streak = calcStreak(player.form || []);
         var totalM = (player.wins || 0) + (player.losses || 0);
         var winRate = totalM > 0 ? Math.round(player.wins / totalM * 100) : 0;
-        var matches = generateMatchHistory(data);
         var achievements = generateAchievements(player);
-        var tournaments = generateTournaments(data);
-        var authPage = isEn ? 'auth-en.html' : 'auth.html';
-        var rankingsPage = isEn ? 'players-en.html' : 'players.html';
+        var authPage = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+        var rankingsPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
 
-        var html = '<div class="pp-container">';
+        var html = '';
 
-        // Back link
-        html += '<a href="' + rankingsPage + '?tab=' + data.categoryKey + '" class="pp-back-link pp-fade-in">\u2190 ' + L.backToRankings + '</a>';
+        // Back link — contextual label
+        var cameFromPlayer = document.referrer && document.referrer.indexOf('player') !== -1 && document.referrer.indexOf('players') === -1 && document.referrer.indexOf('id=') !== -1;
+        var backLabel = cameFromPlayer
+            ? (isEn ? 'Back' : (isKg ? 'Артка' : 'Назад'))
+            : L.backToRankings;
+        html += '<div class="kslt-back-wrap">';
+        html += '<a href="' + rankingsPage + '?tab=' + data.categoryKey + '" class="kslt-back">\u2190 ' + backLabel + '</a>';
+        html += '</div>';
+
+        html += '<div class="pp-container">';
 
         // ---- Header ----
         html += '<div class="pp-header pp-fade-in">';
@@ -288,21 +356,11 @@
         html += '</div></div>';
         html += '</div>'; // .pp-stats
 
-        // ---- Match History ----
+        // ---- Match History (async loaded) ----
         html += '<div class="pp-section pp-fade-in">';
         html += '<h3 class="pp-section-title">\u2694\uFE0F ' + L.sectionMatches + '</h3>';
-        html += '<div class="pp-matches">';
-        matches.forEach(function (m) {
-            html += '<div class="pp-match">';
-            html += '<div class="pp-match-date">' + m.date + '</div>';
-            html += '<div class="pp-match-opponent">';
-            html += '<img src="' + esc(m.opponent.photo) + '" alt="' + esc(m.opponent.name) + '" class="pp-match-opponent-photo">';
-            html += '<span class="pp-match-opponent-name">' + m.opponent.name + '</span>';
-            html += '</div>';
-            html += '<div class="pp-match-score">' + m.score + '</div>';
-            html += '<div class="pp-match-result ' + (m.result === 'W' ? 'win' : 'loss') + '">' + (m.result === 'W' ? L.win : L.loss) + '</div>';
-            html += '</div>';
-        });
+        html += '<div class="pp-matches" id="ppMatchesContainer">';
+        html += '<div class="pp-loading">' + LH.loading + '</div>';
         html += '</div></div>';
 
         // ---- Achievements ----
@@ -321,16 +379,11 @@
             html += '</div></div>';
         }
 
-        // ---- Tournaments ----
+        // ---- Tournaments (async loaded) ----
         html += '<div class="pp-section pp-fade-in">';
         html += '<h3 class="pp-section-title">\uD83C\uDFBE ' + L.sectionTournaments + '</h3>';
-        html += '<div class="pp-tournaments">';
-        tournaments.forEach(function (t) {
-            html += '<div class="pp-tournament">';
-            html += '<span class="pp-tournament-name">' + t.name + '</span>';
-            html += '<span class="pp-tournament-result">' + t.result + '</span>';
-            html += '</div>';
-        });
+        html += '<div class="pp-tournaments" id="ppTournamentsContainer">';
+        html += '<div class="pp-loading">' + LH.loading + '</div>';
         html += '</div></div>';
 
         // ---- CTA ----
@@ -342,13 +395,335 @@
 
         html += '</div>'; // .pp-container
         el.innerHTML = html;
+
+        // Back button: history.back() with ratings fallback
+        var backBtn = el.querySelector('.kslt-back');
+        if (backBtn) {
+            backBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var fallback = backBtn.getAttribute('href');
+                history.back();
+                setTimeout(function() { window.location.href = fallback; }, 200);
+            });
+        }
+
+        // Async load real data from Supabase
+        loadRealMatches(data);
+        loadRealTournaments(data);
+    }
+
+    // ================================================
+    // SUPABASE: Real Matches
+    // ================================================
+
+    // Look up player from static data
+    function lookupPlayer(id) {
+        var d = findPlayer(id);
+        if (d) return { id: id, name: d.player.name, photo: d.player.photo || '' };
+        return { id: id, name: id, photo: '' };
+    }
+
+    function loadRealMatches(data) {
+        var container = document.getElementById('ppMatchesContainer');
+        if (!container) return;
+
+        if (!client) {
+            renderMockMatches(container, data);
+            return;
+        }
+
+        client.from('matches')
+            .select('*')
+            .or('player1_id.eq.' + _playerId + ',player2_id.eq.' + _playerId)
+            .not('winner_id', 'is', null)
+            .order('played_at', { ascending: false })
+            .limit(10)
+            .then(function(res) {
+                console.log('[KSLT] matches query:', res.error ? res.error.message : (res.data ? res.data.length + ' results' : 'no data'));
+                if (res.error || !res.data || res.data.length === 0) {
+                    renderMockMatches(container, data);
+                    return;
+                }
+                renderRealMatches(container, res.data);
+            });
+    }
+
+    function renderRealMatches(container, matches) {
+        var html = '';
+        matches.forEach(function(m) {
+            var isP1 = m.player1_id === _playerId;
+            var oppId = isP1 ? m.player2_id : m.player1_id;
+            var opp = lookupPlayer(oppId);
+            var result = m.winner_id === _playerId ? 'W' : 'L';
+            var oppPhoto = opp.photo || 'https://placehold.co/36x36?text=?';
+            var score = m.score || '';
+            var displayScore = isP1 ? formatScore(score) : formatScore(flipScore(score));
+
+            html += '<div class="pp-match pp-match-clickable" data-opponent-id="' + esc(opp.id) + '" data-opponent-name="' + esc(opp.name) + '" data-opponent-photo="' + esc(oppPhoto) + '">';
+            html += '<div class="pp-match-date">' + formatMatchDate(m.played_at) + '</div>';
+            html += '<div class="pp-match-opponent">';
+            html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(opp.name) + '" class="pp-match-opponent-photo">';
+            html += '<span class="pp-match-opponent-name">' + esc(opp.name) + '</span>';
+            html += '</div>';
+            html += '<div class="pp-match-score">' + displayScore + '</div>';
+            html += '<div class="pp-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + (result === 'W' ? L.win : L.loss) + '</div>';
+            html += '<button class="pp-match-h2h" title="Head to Head">H2H</button>';
+            html += '</div>';
+        });
+        container.innerHTML = html;
+        attachMatchClickHandlers(container);
+    }
+
+    function renderMockMatches(container, data) {
+        var matches = generateMatchHistory(data);
+        var html = '';
+        matches.forEach(function(m) {
+            html += '<div class="pp-match">';
+            html += '<div class="pp-match-date">' + m.date + '</div>';
+            html += '<div class="pp-match-opponent">';
+            html += '<img src="' + esc(m.opponent.photo) + '" alt="' + esc(m.opponent.name) + '" class="pp-match-opponent-photo">';
+            html += '<span class="pp-match-opponent-name">' + m.opponent.name + '</span>';
+            html += '</div>';
+            html += '<div class="pp-match-score">' + m.score + '</div>';
+            html += '<div class="pp-match-result ' + (m.result === 'W' ? 'win' : 'loss') + '">' + (m.result === 'W' ? L.win : L.loss) + '</div>';
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    function attachMatchClickHandlers(container) {
+        container.querySelectorAll('.pp-match-h2h').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var row = btn.closest('.pp-match-clickable');
+                if (!row) return;
+                var oppId = row.getAttribute('data-opponent-id');
+                var oppName = row.getAttribute('data-opponent-name');
+                var oppPhoto = row.getAttribute('data-opponent-photo');
+                showH2H(oppId, oppName, oppPhoto);
+            });
+        });
+    }
+
+    // ================================================
+    // SUPABASE: Real Tournaments
+    // ================================================
+    function loadRealTournaments(data) {
+        var container = document.getElementById('ppTournamentsContainer');
+        if (!container) return;
+
+        if (!client) {
+            renderMockTournaments(container, data);
+            return;
+        }
+
+        client.from('tournament_registrations')
+            .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start)')
+            .eq('player_id', _playerId)
+            .eq('status', 'approved')
+            .order('registered_at', { ascending: false })
+            .limit(8)
+            .then(function(res) {
+                console.log('[KSLT] tournaments query:', res.error ? res.error.message : (res.data ? res.data.length + ' results' : 'no data'));
+                if (res.error || !res.data || res.data.length === 0) {
+                    renderMockTournaments(container, data);
+                    return;
+                }
+                var html = '';
+                res.data.forEach(function(reg) {
+                    var t = reg.tournament;
+                    if (!t) return;
+                    var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
+                    html += '<div class="pp-tournament">';
+                    html += '<span class="pp-tournament-name">' + esc(tName) + '</span>';
+                    html += '<span class="pp-tournament-result">' + LH.participated + '</span>';
+                    html += '</div>';
+                });
+                container.innerHTML = html;
+            });
+    }
+
+    function renderMockTournaments(container, data) {
+        var tournaments = generateTournaments(data);
+        var html = '';
+        tournaments.forEach(function(t) {
+            html += '<div class="pp-tournament">';
+            html += '<span class="pp-tournament-name">' + t.name + '</span>';
+            html += '<span class="pp-tournament-result">' + t.result + '</span>';
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    // ================================================
+    // H2H MODAL
+    // ================================================
+    function showH2H(oppId, oppName, oppPhoto) {
+        var old = document.querySelector('.h2h-overlay');
+        if (old) old.remove();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'h2h-overlay';
+        overlay.innerHTML =
+            '<div class="h2h-modal">' +
+                '<button class="h2h-close">&times;</button>' +
+                '<div class="h2h-loading">' + LH.loading + '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+
+        // Close handlers
+        var closeBtn = overlay.querySelector('.h2h-close');
+        closeBtn.addEventListener('click', function() { closeH2H(overlay); });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeH2H(overlay);
+        });
+        var escHandler = function(e) {
+            if (e.key === 'Escape') {
+                closeH2H(overlay);
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+
+        if (!client) {
+            renderH2HEmpty(overlay);
+            return;
+        }
+
+        client.from('matches')
+            .select('id, player1_id, player2_id, score, winner_id, played_at, tournament:tournaments(title, title_en, title_kg)')
+            .or('and(player1_id.eq.' + _playerId + ',player2_id.eq.' + oppId + '),and(player1_id.eq.' + oppId + ',player2_id.eq.' + _playerId + ')')
+            .not('winner_id', 'is', null)
+            .order('played_at', { ascending: false })
+            .then(function(res) {
+                var modal = overlay.querySelector('.h2h-modal');
+                if (!modal) return;
+
+                if (res.error || !res.data || res.data.length === 0) {
+                    renderH2HEmpty(overlay);
+                    return;
+                }
+
+                renderH2HContent(modal, res.data, oppId, oppName, oppPhoto);
+                attachH2HCloseBtn(overlay);
+            });
+    }
+
+    function renderH2HContent(modal, matches, oppId, oppName, oppPhoto) {
+        var myWins = 0, oppWins = 0;
+        var mySets = 0, oppSets = 0;
+        var myGames = 0, oppGames = 0;
+
+        matches.forEach(function(m) {
+            var isP1 = m.player1_id === _playerId;
+            if (m.winner_id === _playerId) myWins++; else oppWins++;
+
+            if (m.score) {
+                var stats = parseScoreStats(m.score);
+                if (stats) {
+                    if (isP1) {
+                        mySets += stats.p1Sets; oppSets += stats.p2Sets;
+                        myGames += stats.p1Games; oppGames += stats.p2Games;
+                    } else {
+                        mySets += stats.p2Sets; oppSets += stats.p1Sets;
+                        myGames += stats.p2Games; oppGames += stats.p1Games;
+                    }
+                }
+            }
+        });
+
+        var profileUrl = playerPage() + '?id=' + oppId;
+
+        var html = '<button class="h2h-close">&times;</button>';
+
+        // Header: avatars + score
+        html += '<div class="h2h-header">';
+        html += '<div class="h2h-player">';
+        html += '<img src="' + esc(_playerPhoto) + '" class="h2h-photo" alt="">';
+        html += '<div class="h2h-name">' + esc(_playerName) + '</div>';
+        html += '</div>';
+        html += '<div class="h2h-center">';
+        var totalMatches = matches.length;
+        var matchesLabel = isEn ? (totalMatches + ' matches') : (isKg ? (totalMatches + ' матч') : (totalMatches + ' матчей'));
+        html += '<div class="h2h-score">' + myWins + ' \u2014 ' + oppWins + '</div>';
+        html += '<div class="h2h-label">' + matchesLabel + '</div>';
+        html += '</div>';
+        html += '<div class="h2h-player">';
+        html += '<img src="' + esc(oppPhoto) + '" class="h2h-photo" alt="">';
+        html += '<div class="h2h-name">' + esc(oppName) + '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        // Stats
+        html += '<div class="h2h-stats">';
+        html += '<div class="h2h-stat-row">';
+        html += '<span class="h2h-stat-val h2h-val-left">' + mySets + '</span>';
+        html += '<span class="h2h-stat-label">' + LH.setsWon + '</span>';
+        html += '<span class="h2h-stat-val h2h-val-right">' + oppSets + '</span>';
+        html += '</div>';
+        html += '<div class="h2h-stat-row">';
+        html += '<span class="h2h-stat-val h2h-val-left">' + myGames + '</span>';
+        html += '<span class="h2h-stat-label">' + LH.gamesWon + '</span>';
+        html += '<span class="h2h-stat-val h2h-val-right">' + oppGames + '</span>';
+        html += '</div>';
+        html += '</div>';
+
+        // Last 5 matches
+        var last5 = matches.slice(0, 5);
+        html += '<div class="h2h-matches">';
+        html += '<div class="h2h-matches-title">' + LH.last5 + '</div>';
+        last5.forEach(function(m) {
+            var isP1 = m.player1_id === _playerId;
+            var result = m.winner_id === _playerId ? 'W' : 'L';
+            var score = m.score || '';
+            var displayScore = isP1 ? formatScore(score) : formatScore(flipScore(score));
+            var tName = '';
+            if (m.tournament) {
+                tName = isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title);
+            }
+
+            html += '<div class="h2h-match">';
+            html += '<span class="h2h-match-date">' + formatMatchDate(m.played_at) + '</span>';
+            if (tName) html += '<span class="h2h-match-tournament">' + esc(tName) + '</span>';
+            html += '<span class="h2h-match-score">' + displayScore + '</span>';
+            html += '<span class="h2h-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + (result === 'W' ? L.win : L.loss) + '</span>';
+            html += '</div>';
+        });
+        html += '</div>';
+
+        // Profile link
+        html += '<a href="' + profileUrl + '" class="h2h-profile-btn">' + LH.fullProfile + ' \u2192</a>';
+
+        modal.innerHTML = html;
+    }
+
+    function renderH2HEmpty(overlay) {
+        var modal = overlay.querySelector('.h2h-modal');
+        if (!modal) return;
+        modal.innerHTML =
+            '<button class="h2h-close">&times;</button>' +
+            '<div class="h2h-empty">' + LH.noMatches + '</div>';
+        attachH2HCloseBtn(overlay);
+    }
+
+    function closeH2H(overlay) {
+        overlay.classList.remove('visible');
+        setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 300);
+    }
+
+    function attachH2HCloseBtn(overlay) {
+        var btn = overlay.querySelector('.h2h-close');
+        if (btn) {
+            btn.addEventListener('click', function() { closeH2H(overlay); });
+        }
     }
 
     // ---- Not Found ----
     function renderNotFound() {
         var el = document.getElementById('playerDetail');
         if (!el) return;
-        var rankingsPage = isEn ? 'players-en.html' : 'players.html';
+        var rankingsPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
         el.innerHTML =
             '<div class="pp-container" style="text-align:center; padding:120px 24px;">' +
             '<h2 style="font-size:1.8rem; margin-bottom:12px;">' + L.playerNotFound + '</h2>' +
@@ -388,6 +763,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         var params = new URLSearchParams(window.location.search);
         var playerId = params.get('id');
+        _playerId = playerId;
 
         renderHero();
         updateLangLinks(playerId);
@@ -402,6 +778,11 @@
             renderNotFound();
             return;
         }
+
+        _playerName = data.player.name;
+        _playerPhoto = data.player.photo
+            ? data.player.photo.replace('w=80&h=80', 'w=240&h=240')
+            : 'https://placehold.co/80x80?text=?';
 
         document.title = data.player.name + ' \u2014 KSLT';
         renderProfile(data);

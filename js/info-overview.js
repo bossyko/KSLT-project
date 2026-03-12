@@ -4,6 +4,7 @@
 
 (function() {
     var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
 
     var L = isEn ? {
         heroTagline: 'KSLT Information',
@@ -21,6 +22,22 @@
         offerTitle: 'Public Offer',
         offerDesc: 'Legal terms of service, membership agreement and official documentation.',
         more: 'Learn more'
+    } : isKg ? {
+        heroTagline: 'KSLT Маалымат',
+        heroTitle: '<span>KSLT</span> жөнүндө баары',
+        heroDesc: 'Эрежелер, баалар жана теннис коомчулугу жөнүндө бардыгы',
+        featuredTitle: 'Долбоор жөнүндө',
+        featuredDesc: 'KSLT — Кыргызстандагы биринчи теннис коомчулугу, ышкыбоздорду жана профессионалдарды бириктирет. Биздин миссия, тарых жана пландар жөнүндө билиңиз.',
+        featuredBtn: 'Толугураак',
+        rulesTitle: 'Эрежелер',
+        rulesDesc: 'Мелдеш эрежелери, оюнчулар кодекси жана лига регламенти.',
+        faqTitle: 'FAQ',
+        faqDesc: 'KSLT мүчөлүгү жана мелдештер жөнүндө көп берилүүчү суроолорго жооптор.',
+        pricingTitle: 'Баалар',
+        pricingDesc: 'Мүчөлүк төлөмдөр, мелдештерге катышуу наркы жана жеткиликтүү пакеттер.',
+        offerTitle: 'Ачык оферта',
+        offerDesc: 'Юридикалык шарттар, мүчөлүк келишими жана расмий документация.',
+        more: 'Толугураак'
     } : {
         heroTagline: 'KSLT Информация',
         heroTitle: 'Всё о <span>KSLT</span>',
@@ -39,11 +56,11 @@
         more: 'Подробнее'
     };
 
-    var aboutPage = isEn ? 'about-en.html' : 'about.html';
-    var rulesPage = isEn ? 'rules-en.html' : 'rules.html';
-    var faqPage = isEn ? 'faq-en.html' : 'faq.html';
-    var pricingPage = isEn ? 'pricing-en.html' : 'pricing.html';
-    var offerPage = isEn ? 'offer-en.html' : 'offer.html';
+    var aboutPage = isEn ? 'about-en.html' : (isKg ? 'about-kg.html' : 'about.html');
+    var rulesPage = isEn ? 'rules-en.html' : (isKg ? 'rules-kg.html' : 'rules.html');
+    var faqPage = isEn ? 'faq-en.html' : (isKg ? 'faq-kg.html' : 'faq.html');
+    var pricingPage = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
+    var offerPage = isEn ? 'offer-en.html' : (isKg ? 'offer-kg.html' : 'offer.html');
 
     // SVG icons
     var bookSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';

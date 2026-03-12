@@ -7,9 +7,35 @@
 
     // Detect language
     var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
 
     // Labels
-    var L = isEn ? {
+    var L = isKg ? {
+        signingIn: 'Кирүү...',
+        signIn: 'Кирүү',
+        creatingAccount: 'Аккаунт түзүлүүдө...',
+        createAccount: 'Аккаунт түзүү',
+        sendingLink: 'Жөнөтүлүүдө...',
+        sendLink: 'Шилтеме жөнөтүү',
+        sent: 'Жөнөтүлдү!',
+        resend: 'Кайра жөнөтүү',
+        errEmailMatch: 'Email даректер дал келбейт',
+        errPwRules: 'Сыр сөз талаптарга жооп бербейт',
+        errPwMatch: 'Сыр сөздөр дал келбейт',
+        errGeneric: 'Ката кетти. Кайра аракет кылыңыз.',
+        errInvalidLogin: 'Туура эмес email же сыр сөз',
+        errEmailTaken: 'Бул email менен аккаунт бар',
+        errPhoneTaken: 'Бул телефон номери катталган',
+        resetTitle: 'Жаңы сыр сөз',
+        resetSaving: 'Сакталууда...',
+        resetSave: 'Сыр сөздү сактоо',
+        resetSuccess: 'Сыр сөз ийгиликтүү жаңыланды!',
+        errResetPwRules: 'Сыр сөз талаптарга жооп бербейт',
+        errResetPwMatch: 'Сыр сөздөр дал келбейт',
+        successCheckEmail: 'Аккаунтуңузду тастыктоо үчүн email текшериңиз!',
+        successResetSent: 'Сыр сөздү калыбына келтирүү шилтемеси email\'ге жөнөтүлдү',
+        redirecting: 'Ийгиликтүү! Багыттоо...'
+    } : isEn ? {
         signingIn: 'Signing in...',
         signIn: 'Sign In',
         creatingAccount: 'Creating account...',
@@ -73,7 +99,7 @@
 
     function getRedirectUrl() {
         if (returnUrl) return returnUrl;
-        return isEn ? '../index-en.html' : '../index.html';
+        return isKg ? '../index-kg.html' : isEn ? '../index-en.html' : '../index.html';
     }
 
     // ---- Populate birthday day select (1-31) ----
@@ -509,7 +535,7 @@
         setLoading(btn, true, L.sendingLink, L.sendLink);
 
         var result = await client.auth.resetPasswordForEmail(email, {
-            redirectTo: basePath + (isEn ? 'auth-en.html' : 'auth.html')
+            redirectTo: basePath + (isKg ? 'auth-kg.html' : isEn ? 'auth-en.html' : 'auth.html')
         });
 
         setLoading(btn, false, L.sendingLink, L.sendLink);
@@ -532,7 +558,7 @@
         this.textContent = L.sendingLink;
 
         await client.auth.resetPasswordForEmail(email, {
-            redirectTo: basePath + (isEn ? 'auth-en.html' : 'auth.html')
+            redirectTo: basePath + (isKg ? 'auth-kg.html' : isEn ? 'auth-en.html' : 'auth.html')
         });
 
         this.textContent = L.sent;
@@ -595,7 +621,7 @@
             await client.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: basePath + (isEn ? 'dashboard-en.html' : 'dashboard.html')
+                    redirectTo: basePath + (isKg ? 'dashboard-kg.html' : isEn ? 'dashboard-en.html' : 'dashboard.html')
                 }
             });
         });

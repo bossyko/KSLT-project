@@ -522,12 +522,18 @@
     transform: translateY(-2px);
 }
 
-/* Back links */
+/* Back links — sticky */
 .co-back-links {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 32px;
+    position: sticky;
+    top: 64px;
+    z-index: 10;
+    background: var(--bg-primary);
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .co-back-sep {

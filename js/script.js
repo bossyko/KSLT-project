@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Dropdown: check if any child link matches current page
                 var links = parent.querySelectorAll('.nav-dropdown-item, .mobile-dropdown-menu a');
                 for (var i = 0; i < links.length; i++) {
-                    var href = (links[i].getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-en\.html/, '.html');
+                    var href = (links[i].getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-(en|kg)\.html/, '.html');
                     var filename = href.split('/').pop().replace('.html', '');
                     if (filename && path.indexOf(filename) !== -1) {
                         navItem.classList.add('is-active');
@@ -20,14 +20,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
                 // Also check if the parent page itself matches (e.g. services.html on services page)
-                var parentHref = (navItem.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-en\.html/, '.html');
+                var parentHref = (navItem.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-(en|kg)\.html/, '.html');
                 var parentFilename = parentHref.split('/').pop().replace('.html', '');
                 if (parentFilename && path.indexOf(parentFilename) !== -1) {
                     navItem.classList.add('is-active');
                 }
             } else {
                 // Simple link (no dropdown), e.g. News
-                var href = (navItem.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-en\.html/, '.html');
+                var href = (navItem.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-(en|kg)\.html/, '.html');
                 var filename = href.split('/').pop().replace('.html', '');
                 if (filename && path.indexOf(filename) !== -1) {
                     navItem.classList.add('is-active');
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Also handle mobile simple links (not .nav-item class)
         document.querySelectorAll('.mobile-nav-links > li:not(.mobile-nav-dropdown) > a').forEach(function(a) {
-            var href = (a.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-en\.html/, '.html');
+            var href = (a.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-(en|kg)\.html/, '.html');
             var filename = href.split('/').pop().replace('.html', '');
             if (filename && path.indexOf(filename) !== -1) {
                 a.classList.add('is-active');
@@ -351,8 +351,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isLoggedIn()) return;
 
         var isEn = window.location.pathname.indexOf('-en') !== -1;
-        var authUrl = isEn ? 'pages/auth-en.html' : 'pages/auth.html';
-        var ctaBtn = isEn ? 'Sign In / Register' : 'Войти / Регистрация';
+        var isKg = window.location.pathname.indexOf('-kg') !== -1;
+        var authUrl = isEn ? 'pages/auth-en.html' : (isKg ? 'pages/auth-kg.html' : 'pages/auth.html');
+        var ctaBtn = isEn ? 'Sign In / Register' : (isKg ? 'Кирүү / Каттоо' : 'Войти / Регистрация');
 
         // --- Rankings: show top 3, blur rest ---
         if (rankingsSection) {
@@ -369,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            var rankTitle = isEn ? 'Sign up for full rankings' : 'Зарегистрируйтесь для полного рейтинга';
+            var rankTitle = isEn ? 'Sign up for full rankings' : (isKg ? 'Толук рейтинг үчүн катталыңыз' : 'Зарегистрируйтесь для полного рейтинга');
             var rankCta = document.createElement('div');
             rankCta.className = 'guest-section-cta';
             rankCta.innerHTML =
@@ -394,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 cards[i].style.userSelect = 'none';
             }
 
-            var playersTitle = isEn ? 'Register to find a hitting partner' : 'Зарегистрируйтесь для поиска партнёра';
+            var playersTitle = isEn ? 'Register to find a hitting partner' : (isKg ? 'Өнөктөш табуу үчүн катталыңыз' : 'Зарегистрируйтесь для поиска партнёра');
             var playersCta = document.createElement('div');
             playersCta.className = 'guest-section-cta guest-section-cta-players';
             playersCta.innerHTML =
@@ -413,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Back links are JS-generated, so we watch DOM for them
     // ========================================
     (function() {
-        var SELECTORS = '.ct-back-links, .co-back-links, .ct-back-link, .co-back-link, .news-back-link, .trn-back-link';
+        var SELECTORS = '.news-back-link, .trn-back-link';
         var bar = null;
 
         function setup(backLink) {

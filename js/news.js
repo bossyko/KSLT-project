@@ -30,18 +30,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function mapDbArticle(row) {
     var isEn = isEnPage();
-    var title = isEn ? (row.title_en || row.title) : row.title;
-    var content = isEn ? (row.content_en || row.content) : row.content;
-    var excerpt = isEn ? (row.excerpt_en || row.excerpt) : row.excerpt;
+    var isKg = isKgPage();
+    var title = isEn ? (row.title_en || row.title) : (isKg ? (row.title_kg || row.title) : row.title);
+    var content = isEn ? (row.content_en || row.content) : (isKg ? (row.content_kg || row.content) : row.content);
+    var excerpt = isEn ? (row.excerpt_en || row.excerpt) : (isKg ? (row.excerpt_kg || row.excerpt) : row.excerpt);
 
     var catLabels = isEn
         ? { results: 'Report', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' }
-        : { results: 'Репортаж', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' };
+        : (isKg
+            ? { results: 'Репортаж', interview: 'Интервью', announcement: 'Жарыялоо', world: 'Дүйнөлүк теннис' }
+            : { results: 'Репортаж', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' });
 
     var dateStr = '';
     if (row.published_at) {
         var d = new Date(row.published_at);
-        dateStr = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', {
+        dateStr = d.toLocaleDateString(isEn ? 'en-US' : (isKg ? 'ky-KG' : 'ru-RU'), {
             day: 'numeric', month: 'long', year: 'numeric'
         });
     }
@@ -239,6 +242,10 @@ function isEnPage() {
     return window.location.pathname.indexOf('-en') !== -1;
 }
 
+function isKgPage() {
+    return window.location.pathname.indexOf('-kg') !== -1;
+}
+
 // ========================================
 // PROGRESS BAR
 // ========================================
@@ -314,7 +321,7 @@ function renderHero(article, readTime) {
     if (!container) return;
 
     var labels = getLabels();
-    var backUrl = isEnPage() ? 'news-en.html' : 'news.html';
+    var backUrl = isEnPage() ? 'news-en.html' : (isKgPage() ? 'news-kg.html' : 'news.html');
 
     container.innerHTML =
         '<div class="news-hero-bg">' +
@@ -520,8 +527,9 @@ async function getAuthUser() {
 
 function getAuthRedirectUrl() {
     var isEn = isEnPage();
+    var isKg = isKgPage();
     var prefix = window.location.pathname.indexOf('/pages/') !== -1 ? '' : 'pages/';
-    return prefix + (isEn ? 'auth-en.html' : 'auth.html');
+    return prefix + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html'));
 }
 
 async function resolveNewsId(slug) {
@@ -735,7 +743,7 @@ function renderRelated(article) {
     if (!container || !article.relatedSlugs || !article.relatedSlugs.length) return;
 
     var labels = getLabels();
-    var basePage = isEnPage() ? 'news-en.html' : 'news.html';
+    var basePage = isEnPage() ? 'news-en.html' : (isKgPage() ? 'news-kg.html' : 'news.html');
 
     var html = '<h2 class="news-section-title">' + labels.relatedTitle + '</h2><div class="news-related-grid">';
 
@@ -794,7 +802,7 @@ function incrementViewCount(newsId) {
 
 function renderNewsList() {
     var labels = getLabels();
-    var basePage = isEnPage() ? 'news-en.html' : 'news.html';
+    var basePage = isEnPage() ? 'news-en.html' : (isKgPage() ? 'news-kg.html' : 'news.html');
     var PER_PAGE = 6;
 
     document.title = 'KSLT — ' + labels.newsListTitle;
@@ -971,7 +979,7 @@ function renderNewsList() {
 
 function renderNotFound() {
     var labels = getLabels();
-    var homeUrl = isEnPage() ? '../index-en.html' : '../index.html';
+    var homeUrl = isEnPage() ? '../index-en.html' : (isKgPage() ? '../index-kg.html' : '../index.html');
 
     var hero = document.getElementById('newsHero');
     if (hero) hero.style.display = 'none';

@@ -7,7 +7,37 @@
     }
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var L = window.coachesLabels || {
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var L = window.coachesLabels || (isKg ? {
+        heroTitle: 'KSLT Машыктыруучулары',
+        heroSubtitle: 'Бардык деңгээлдеги оюнчулар үчүн кесипкөй машыктыруучулар',
+        filterAll: 'Баары',
+        filterAdults: 'Чоңдор',
+        filterKids: 'Балдар',
+        filterGroup: 'Топтук',
+        filterIndividual: 'Жеке',
+        filterBeginner: 'Башталгыч',
+        filterAdvanced: 'Алдыңкы',
+        experience: 'жыл тажрыйба',
+        students: 'окуучу',
+        rating: 'рейтинг',
+        priceFrom: 'дан',
+        priceCurrency: 'сом/саат',
+        detailsBtn: 'Толугураак',
+        bookBtn: 'Машыгууга жазылуу',
+        bioTitle: 'Машыктыруучу жөнүндө',
+        achievementsTitle: 'Жетишкендиктер',
+        scheduleTitle: 'Тартип',
+        reviewsTitle: 'Окуучулардын пикирлери',
+        ctaTitle: 'Бүгүн машыгууну баштаңыз',
+        ctaText: 'Машыктыруучу тандап, биринчи сабакка жазылыңыз',
+        ctaBtn: 'Жазылуу',
+        backBtn: 'Бардык машыктыруучулар',
+        court: 'Корт',
+        loginToContact: 'Байланыш үчүн кириңиз',
+        noContacts: 'Байланыш маалыматы көрсөтүлгөн эмес',
+        contactCoach: 'Машыктыруучу менен байланышуу'
+    } : {
         heroTitle: "Тренеры KSLT",
         heroSubtitle: "Профессиональные тренеры для игроков всех уровней",
         filterAll: "Все",
@@ -36,11 +66,11 @@
         loginToContact: "Войти чтобы связаться",
         noContacts: "Контакты не указаны",
         contactCoach: "Связаться с тренером"
-    };
+    });
 
     var staticData = window.coachesData || [];
-    var coachPage = window.location.pathname.indexOf('coach.html') !== -1 || window.location.pathname.indexOf('coach-en.html') !== -1;
-    var isListPage = window.location.pathname.indexOf('coaches.html') !== -1 || window.location.pathname.indexOf('coaches-en.html') !== -1;
+    var coachPage = window.location.pathname.indexOf('coach.html') !== -1 || window.location.pathname.indexOf('coach-en.html') !== -1 || window.location.pathname.indexOf('coach-kg.html') !== -1;
+    var isListPage = window.location.pathname.indexOf('coaches.html') !== -1 || window.location.pathname.indexOf('coaches-en.html') !== -1 || window.location.pathname.indexOf('coaches-kg.html') !== -1;
     var isDetailPage = coachPage && !isListPage;
 
     // Check auth (lightweight, no SDK needed)
@@ -100,12 +130,14 @@
     function mapDbCoach(row) {
         var name = isEn
             ? ((row.last_name_en || row.last_name || '') + ' ' + (row.first_name_en || row.first_name || '')).trim() || row.name_en || row.name
+            : isKg
+            ? ((row.last_name_kg || row.last_name || '') + ' ' + (row.first_name_kg || row.first_name || '')).trim() || row.name_kg || row.name
             : ((row.last_name || '') + ' ' + (row.first_name || '')).trim() || row.name;
-        var spec = isEn ? (row.position_en || row.position || '') : (row.position || '');
-        var shortDesc = isEn ? (row.short_desc_en || row.short_desc || '') : (row.short_desc || '');
-        var bio = isEn ? (row.bio_en || row.bio || '') : (row.bio || '');
-        var court = isEn ? (row.court_en || row.court || '') : (row.court || '');
-        var achievements = isEn ? (row.achievements_en || row.achievements || []) : (row.achievements || []);
+        var spec = isEn ? (row.position_en || row.position || '') : isKg ? (row.position_kg || row.position || '') : (row.position || '');
+        var shortDesc = isEn ? (row.short_desc_en || row.short_desc || '') : isKg ? (row.short_desc_kg || row.short_desc || '') : (row.short_desc || '');
+        var bio = isEn ? (row.bio_en || row.bio || '') : isKg ? (row.bio_kg || row.bio || '') : (row.bio || '');
+        var court = isEn ? (row.court_en || row.court || '') : isKg ? (row.court_kg || row.court || '') : (row.court || '');
+        var achievements = isEn ? (row.achievements_en || row.achievements || []) : isKg ? (row.achievements_kg || row.achievements || []) : (row.achievements || []);
         return {
             id: row.id,
             _isDb: true,
@@ -198,11 +230,11 @@
     function renderBackLink() {
         var filtersEl = document.getElementById('coachesFilters');
         if (!filtersEl) return;
-        var servicesLink = isEn ? 'services-en.html' : 'services.html';
+        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
         var link = document.createElement('a');
         link.href = servicesLink;
         link.className = 'co-back-link co-back-service';
-        link.innerHTML = '\u2190 ' + (isEn ? 'Services' : 'Услуги');
+        link.innerHTML = '\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги'));
         filtersEl.insertBefore(link, filtersEl.firstChild);
     }
 
@@ -260,13 +292,13 @@
         var start = (_currentPage - 1) * PER_PAGE;
         var pageItems = filtered.slice(start, start + PER_PAGE);
 
-        var detailBase = isEn ? 'coach-en.html' : 'coach.html';
-        var authLink = isEn ? 'auth-en.html?redirect=coaches' : 'auth.html?redirect=coaches';
+        var detailBase = isEn ? 'coach-en.html' : (isKg ? 'coach-kg.html' : 'coach.html');
+        var authLink = isEn ? 'auth-en.html?redirect=coaches' : (isKg ? 'auth-kg.html?redirect=coaches' : 'auth.html?redirect=coaches');
         var html = '<div class="co-grid">';
         pageItems.forEach(function(c) {
             var contactHtml = '<div class="co-card-actions">' +
                 '<span class="co-card-btn">' + L.detailsBtn + ' →</span>' +
-                '<span class="co-card-cta" data-id="' + c.id + '">' + (isEn ? 'Contact' : 'Связаться') + '</span>' +
+                '<span class="co-card-cta" data-id="' + c.id + '">' + (isEn ? 'Contact' : (isKg ? 'Байланышуу' : 'Связаться')) + '</span>' +
             '</div>';
 
             // Stats
@@ -308,8 +340,8 @@
             return;
         }
 
-        var prevLabel = isEn ? '\u2190 Back' : '\u2190 Назад';
-        var nextLabel = isEn ? 'Next \u2192' : 'Далее \u2192';
+        var prevLabel = isEn ? '\u2190 Back' : (isKg ? '\u2190 Артка' : '\u2190 Назад');
+        var nextLabel = isEn ? 'Next \u2192' : (isKg ? 'Кийинки \u2192' : 'Далее \u2192');
         var html = '<div class="co-pagination">';
         html += '<button class="co-page-btn co-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + prevLabel + '</button>';
         for (var p = 1; p <= totalPages; p++) {
@@ -343,8 +375,8 @@
         var container = document.getElementById('coachesSponsors');
         if (!container) return;
 
-        var title = isEn ? 'Partners & Sponsors' : 'Партнёры и спонсоры';
-        var general = isEn ? 'General sponsor' : 'Генеральный спонсор';
+        var title = isEn ? 'Partners & Sponsors' : (isKg ? 'Өнөктөштөр жана демөөрчүлөр' : 'Партнёры и спонсоры');
+        var general = isEn ? 'General sponsor' : (isKg ? 'Башкы демөөрчү' : 'Генеральный спонсор');
         container.innerHTML =
             '<div class="section-header"><h2>' + title + '</h2></div>' +
             '<div class="sponsor-hero">' +
@@ -372,15 +404,15 @@
             e.stopPropagation();
 
             if (_accessLevel === 'guest') {
-                showToast(isEn ? 'Sign up and become a KSLT member' : 'Зарегистрируйтесь и станьте членом КСЛТ', 'info');
+                showToast(isEn ? 'Sign up and become a KSLT member' : (isKg ? 'Катталыңыз жана КСЛТ мүчөсү болуңуз' : 'Зарегистрируйтесь и станьте членом КСЛТ'), 'info');
                 return;
             }
             if (_accessLevel === 'registered') {
-                showToast(isEn ? 'Become a KSLT member to contact' : 'Станьте членом КСЛТ чтобы связаться', 'info');
+                showToast(isEn ? 'Become a KSLT member to contact' : (isKg ? 'Байланышуу үчүн КСЛТ мүчөсү болуңуз' : 'Станьте членом КСЛТ чтобы связаться'), 'info');
                 return;
             }
             var id = cta.getAttribute('data-id');
-            var detailBase = isEn ? 'coach-en.html' : 'coach.html';
+            var detailBase = isEn ? 'coach-en.html' : (isKg ? 'coach-kg.html' : 'coach.html');
             window.location.href = detailBase + '?id=' + id;
         });
     }
@@ -405,7 +437,7 @@
         }
         if (!coach) {
             var container = document.getElementById('coachDetail');
-            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2>Coach not found</h2><a href="' + (isEn ? 'coaches-en.html' : 'coaches.html') + '" class="co-back-link">← ' + L.backBtn + '</a></div>';
+            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2>Coach not found</h2><a href="' + (isEn ? 'coaches-en.html' : (isKg ? 'coaches-kg.html' : 'coaches.html')) + '" class="co-back-link">← ' + L.backBtn + '</a></div>';
             return;
         }
 
@@ -430,13 +462,13 @@
         var container = document.getElementById('coachDetail');
         if (!container) return;
 
-        var coachesLink = isEn ? 'coaches-en.html' : 'coaches.html';
-        var authLink = isEn ? 'auth-en.html' : 'auth.html';
+        var coachesLink = isEn ? 'coaches-en.html' : (isKg ? 'coaches-kg.html' : 'coaches.html');
+        var authLink = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
 
         var html = '';
-        var servicesLink = isEn ? 'services-en.html' : 'services.html';
+        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
         html += '<div class="co-back-links">';
-        html += '<a href="' + servicesLink + '" class="co-back-link">\u2190 ' + (isEn ? 'Services' : 'Услуги') + '</a>';
+        html += '<a href="' + servicesLink + '" class="co-back-link">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
         html += '<span class="co-back-sep">/</span>';
         html += '<a href="' + coachesLink + '" class="co-back-link">' + L.backBtn + '</a>';
         html += '</div>';

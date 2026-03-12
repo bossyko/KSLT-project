@@ -6,10 +6,11 @@
 
 (function() {
     var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var client = window.supabaseClient;
 
     // Detail page URL base
-    var detailPage = isEn ? 'tournament-en.html' : 'tournament.html';
+    var detailPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
 
     if (!client) return;
 
@@ -144,19 +145,24 @@
 
             var formatLabels = isEn
                 ? { singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }
-                : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' };
+                : (isKg ? { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }
+                : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
 
             var statusLabels = isEn
                 ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Registration Closed', ongoing: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
-                : { registration_open: 'Регистрация открыта', upcoming: 'Скоро открытие', registration_closed: 'Регистрация закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' };
+                : (isKg ? { registration_open: 'Каттоо ачык', upcoming: 'Жакында', registration_closed: 'Каттоо жабык', ongoing: 'Жүрүп жатат', completed: 'Аяктады', cancelled: 'Жокко чыгарылды' }
+                : { registration_open: 'Регистрация открыта', upcoming: 'Скоро открытие', registration_closed: 'Регистрация закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' });
 
             var L = isEn ? {
                 format: 'Format', participants: 'Players', prizeFund: 'Prize',
                 gender: 'Gender', details: 'Details', register: 'Register', notify: 'Notify Me', calendar: 'Add to calendar'
+            } : (isKg ? {
+                format: 'Формат', participants: 'Катышуучулар', prizeFund: 'Сыйлык',
+                gender: 'Жынысы', details: 'Толугураак', register: 'Каттоо', notify: 'Кабарлоо', calendar: 'Календарга'
             } : {
                 format: 'Формат', participants: 'Участники', prizeFund: 'Призовой',
                 gender: 'Пол', details: 'Подробнее', register: 'Регистрация', notify: 'Уведомить', calendar: 'В календарь'
-            };
+            });
 
             var today = new Date().toISOString().substring(0, 10);
 
@@ -180,8 +186,8 @@
                 var cat = (t.category_id || '').replace(/^(men|women)-/, '');
                 var genderLabel = (t.format !== 'mixed_doubles' && cat !== 'friendly' && (gender === 'men' || gender === 'women'))
                     ? (gender === 'women'
-                        ? (isEn ? '♀ Women' : '♀ Женский')
-                        : (isEn ? '♂ Men' : '♂ Мужской'))
+                        ? (isEn ? '♀ Women' : (isKg ? '♀ Аялдар' : '♀ Женский'))
+                        : (isEn ? '♂ Men' : (isKg ? '♂ Эркектер' : '♂ Мужской')))
                     : '';
 
                 // Registration dates line (show only if reg_end >= today)
@@ -189,15 +195,15 @@
                 if (t.registration_start && t.registration_end && t.registration_end >= today) {
                     var rs = new Date(t.registration_start + 'T00:00:00');
                     var re = new Date(t.registration_end + 'T00:00:00');
-                    regLine = (isEn ? 'Reg: ' : 'Рег: ') + rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()];
+                    regLine = (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()];
                 }
 
                 return {
                     id: t.id,
-                    name: isEn ? (t.title_en || t.title) : t.title,
+                    name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
                     date: { day: day, month: month },
                     _dateSort: t.date_start,
-                    location: isEn ? (t.location_en || t.location) : (t.location || ''),
+                    location: isEn ? (t.location_en || t.location) : (isKg ? (t.location_kg || t.location || '') : (t.location || '')),
                     time: '',
                     format: formatLabels[t.format] || t.format || '',
                     participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
@@ -236,8 +242,8 @@
 
             grid.innerHTML = all.map(function(t) {
                 var statusText = t.statusText || (t.status === 'open'
-                    ? (isEn ? 'Registration Open' : 'Регистрация открыта')
-                    : (isEn ? 'Coming Soon' : 'Скоро открытие'));
+                    ? (isEn ? 'Registration Open' : (isKg ? 'Каттоо ачык' : 'Регистрация открыта'))
+                    : (isEn ? 'Coming Soon' : (isKg ? 'Жакында' : 'Скоро открытие')));
 
                 var cardHref = detailPage + '?id=' + (t._fromSupabase ? t.id : category + '-' + t.id);
                 return '<div class="tournament-card" data-status="' + t.status + '" data-id="' + (t._fromSupabase ? t.id : category + '-' + t.id) + '"' +
@@ -259,7 +265,7 @@
                             (t.time ? '<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + t.time + '</span>' : '') +
                         '</div>' +
                         '<div class="tournament-details">' +
-                            (t.regLine ? '<div class="detail-item detail-reg"><span class="detail-label">' + (isEn ? 'Registration' : 'Регистрация') + '</span><span class="detail-value">' + t.regLine.replace(/^(Reg|Рег): /, '') + '</span></div>' : '') +
+                            (t.regLine ? '<div class="detail-item detail-reg"><span class="detail-label">' + (isEn ? 'Registration' : (isKg ? 'Каттоо' : 'Регистрация')) + '</span><span class="detail-value">' + t.regLine.replace(/^(Reg|Рег|Кат): /, '') + '</span></div>' : '') +
                             '<div class="detail-item"><span class="detail-label">' + L.format + '</span><span class="detail-value">' + (t.format || '') + '</span></div>' +
                             '<div class="detail-item"><span class="detail-label">' + L.participants + '</span><span class="detail-value">' + (t.participants || '') + '</span></div>' +
                             '<div class="detail-item"><span class="detail-label">' + L.prizeFund + '</span><span class="detail-value prize">' + (t.prize || '') + '</span></div>' +
@@ -341,8 +347,8 @@
         var sectionTitle = document.querySelector('#upcoming .section-header h2');
         if (sectionTitle) {
             sectionTitle.textContent = (filter === 'past')
-                ? (isEn ? 'Completed Tournaments' : 'Завершённые турниры')
-                : (isEn ? 'Upcoming Tournaments' : 'Предстоящие турниры');
+                ? (isEn ? 'Completed Tournaments' : (isKg ? 'Аяктаган мелдештер' : 'Завершённые турниры'))
+                : (isEn ? 'Upcoming Tournaments' : (isKg ? 'Алдыдагы мелдештер' : 'Предстоящие турниры'));
         }
 
         grid.querySelectorAll('.tournament-card').forEach(function(card) {

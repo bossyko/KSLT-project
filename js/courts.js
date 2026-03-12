@@ -30,7 +30,38 @@
     }
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var L_labels = window.courtsLabels || {
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var L_labels = window.courtsLabels || (isKg ? {
+        heroTitle: 'KSLT Корттору',
+        heroSubtitle: 'Бишкектеги теннис корттору машыгуу жана мелдештер үчүн',
+        filterAll: 'Баары',
+        filterIndoor: 'Жабык',
+        filterOutdoor: 'Ачык',
+        filterClay: 'Топурак',
+        filterHard: 'Катуу',
+        courts: 'корт',
+        rating: 'рейтинг',
+        priceFrom: 'дан',
+        priceCurrency: 'сом/саат',
+        detailsBtn: 'Толугураак',
+        bookBtn: 'Корт ээлөө',
+        aboutTitle: 'Аянтча жөнүндө',
+        amenitiesTitle: 'Ыңгайлуулуктар',
+        scheduleTitle: 'Тартип жана баалар',
+        locationTitle: 'Жайгашкан жери',
+        galleryTitle: 'Галерея',
+        ctaTitle: 'Корт ээлөө',
+        ctaText: 'Корттарды онлайн ээлөө жана KSLT мүчөлөрү үчүн арзандатуу алуу үчүн катталыңыз',
+        ctaBtn: 'Каттоо',
+        backBtn: 'Бардык корттор',
+        partnerBadge: 'KSLT Өнөктөшү',
+        surface: 'Жабуу',
+        phone: 'Телефон',
+        newBadge: 'Жаңы',
+        filterType: 'Корт түрү',
+        filterSurface: 'Жабуу',
+        filterCarpet: 'Килем'
+    } : {
         heroTitle: "Корты KSLT",
         heroSubtitle: "Теннисные корты Бишкека для тренировок и турниров",
         filterAll: "Все",
@@ -60,10 +91,11 @@
         filterType: "Тип корта",
         filterSurface: "Покрытие",
         filterCarpet: "Ковёр"
-    };
+    });
 
     var SURFACE_MAP = { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр' };
     var SURFACE_MAP_EN = { hard: 'Hard', clay: 'Clay', carpet: 'Carpet' };
+    var SURFACE_MAP_KG = { hard: 'Катуу', clay: 'Топурак', carpet: 'Килем' };
 
     var staticData = window.courtsData || [];
     var data = staticData.slice(); // will be replaced after Supabase load
@@ -109,8 +141,8 @@
         }, 3000);
     }
 
-    var courtPage = window.location.pathname.indexOf('court.html') !== -1 || window.location.pathname.indexOf('court-en.html') !== -1;
-    var isListPage = window.location.pathname.indexOf('courts.html') !== -1 || window.location.pathname.indexOf('courts-en.html') !== -1;
+    var courtPage = window.location.pathname.indexOf('court.html') !== -1 || window.location.pathname.indexOf('court-en.html') !== -1 || window.location.pathname.indexOf('court-kg.html') !== -1;
+    var isListPage = window.location.pathname.indexOf('courts.html') !== -1 || window.location.pathname.indexOf('courts-en.html') !== -1 || window.location.pathname.indexOf('courts-kg.html') !== -1;
     var isDetailPage = courtPage && !isListPage;
 
     if (isDetailPage) {
@@ -173,7 +205,7 @@
 
         // Surface from first court type
         var surfaceKey = courtTypes.length ? courtTypes[0].surface : 'hard';
-        var surface = isEn ? (SURFACE_MAP_EN[surfaceKey] || surfaceKey) : (SURFACE_MAP[surfaceKey] || surfaceKey);
+        var surface = isEn ? (SURFACE_MAP_EN[surfaceKey] || surfaceKey) : isKg ? (SURFACE_MAP_KG[surfaceKey] || surfaceKey) : (SURFACE_MAP[surfaceKey] || surfaceKey);
 
         // Total courts count
         var totalCourts = 0;
@@ -187,38 +219,38 @@
 
         // Build address
         var parts = [];
-        var street = isEn ? (row.street_en || row.street) : row.street;
+        var street = isEn ? (row.street_en || row.street) : isKg ? (row.street_kg || row.street) : row.street;
         if (street) parts.push(street);
         if (row.building) parts.push(row.building);
-        var city = isEn ? (row.city_en || row.city) : (row.city || 'Бишкек');
+        var city = isEn ? (row.city_en || row.city) : isKg ? (row.city_kg || row.city || 'Бишкек') : (row.city || 'Бишкек');
         if (city) parts.push(city);
         var address = parts.join(', ');
 
         // Description
-        var desc = isEn ? (row.description_en || row.description || '') : (row.description || '');
+        var desc = isEn ? (row.description_en || row.description || '') : isKg ? (row.description_kg || row.description || '') : (row.description || '');
         var shortDesc = desc.length > 120 ? desc.substr(0, 120) + '...' : desc;
 
         // Name
-        var name = isEn ? (row.name_en || row.name) : row.name;
+        var name = isEn ? (row.name_en || row.name) : isKg ? (row.name_kg || row.name) : row.name;
 
         // Amenities — map keys to labels
         var AMENITY_LABELS = {
-            locker_rooms: isEn ? 'Locker rooms' : 'Раздевалки',
-            showers: isEn ? 'Showers' : 'Душевые',
-            parking: isEn ? 'Parking' : 'Парковка',
-            racket_rental: isEn ? 'Racket rental' : 'Прокат ракеток',
+            locker_rooms: isEn ? 'Locker rooms' : isKg ? 'Кийим алмаштыруучу' : 'Раздевалки',
+            showers: isEn ? 'Showers' : isKg ? 'Душ' : 'Душевые',
+            parking: isEn ? 'Parking' : isKg ? 'Токтоочу жай' : 'Парковка',
+            racket_rental: isEn ? 'Racket rental' : isKg ? 'Ракетка ижарасы' : 'Прокат ракеток',
             pro_shop: 'Pro-shop',
-            cafe: isEn ? 'Café' : 'Кафе',
-            gym: isEn ? 'Gym' : 'Тренажёрный зал',
-            pool: isEn ? 'Pool' : 'Бассейн',
-            sauna: isEn ? 'Sauna' : 'Сауна',
-            climate: isEn ? 'Climate control' : 'Климат-контроль',
-            lighting: isEn ? 'Lighting' : 'Вечернее освещение',
-            kids_area: isEn ? 'Kids area' : 'Детская площадка',
-            kids_school: isEn ? 'Kids school' : 'Детская школа',
-            video: isEn ? 'Video' : 'Видеоанализ',
+            cafe: isEn ? 'Café' : isKg ? 'Кафе' : 'Кафе',
+            gym: isEn ? 'Gym' : isKg ? 'Спорт зал' : 'Тренажёрный зал',
+            pool: isEn ? 'Pool' : isKg ? 'Бассейн' : 'Бассейн',
+            sauna: isEn ? 'Sauna' : isKg ? 'Сауна' : 'Сауна',
+            climate: isEn ? 'Climate control' : isKg ? 'Климат-контроль' : 'Климат-контроль',
+            lighting: isEn ? 'Lighting' : isKg ? 'Кечки жарык' : 'Вечернее освещение',
+            kids_area: isEn ? 'Kids area' : isKg ? 'Балдар аянтчасы' : 'Детская площадка',
+            kids_school: isEn ? 'Kids school' : isKg ? 'Балдар мектеби' : 'Детская школа',
+            video: isEn ? 'Video' : isKg ? 'Видео талдоо' : 'Видеоанализ',
             wifi: 'Wi-Fi',
-            benches: isEn ? 'Benches' : 'Скамейки'
+            benches: isEn ? 'Benches' : isKg ? 'Отургучтар' : 'Скамейки'
         };
         var amenities = (row.amenities || []).map(function(key) {
             return AMENITY_LABELS[key] || key;
@@ -227,7 +259,7 @@
         // Type labels for mixed courts
         var typeDesc = '';
         if (hasIndoor && hasOutdoor) {
-            typeDesc = (isEn ? 'Indoor + Outdoor' : 'Крытый + Открытый');
+            typeDesc = (isEn ? 'Indoor + Outdoor' : isKg ? 'Жабык + Ачык' : 'Крытый + Открытый');
         }
 
         return {
@@ -298,11 +330,11 @@
     function renderBackLink() {
         var filters = document.getElementById('courtsFilters');
         if (!filters) return;
-        var servicesLink = isEn ? 'services-en.html' : 'services.html';
+        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
         var link = document.createElement('a');
         link.href = servicesLink;
         link.className = 'ct-back-link ct-back-service';
-        link.innerHTML = '\u2190 ' + (isEn ? 'Services' : 'Услуги');
+        link.innerHTML = '\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги'));
         filters.insertBefore(link, filters.firstChild);
     }
 
@@ -384,7 +416,7 @@
         var start = (_currentPage - 1) * PER_PAGE;
         var pageItems = filtered.slice(start, start + PER_PAGE);
 
-        var detailBase = isEn ? 'court-en.html' : 'court.html';
+        var detailBase = isEn ? 'court-en.html' : (isKg ? 'court-kg.html' : 'court.html');
 
         var html = '<div class="ct-grid">';
         pageItems.forEach(function(c) {
@@ -410,7 +442,7 @@
                     (c.price ? '<div class="ct-card-price">' + L_labels.priceFrom + ' <strong>' + c.price + '</strong> ' + L_labels.priceCurrency + '</div>' : '') +
                     '<div class="ct-card-actions">' +
                         '<span class="ct-card-btn">' + L_labels.detailsBtn + ' \u2192</span>' +
-                        '<span class="ct-card-cta" data-id="' + c.id + '">' + (isEn ? 'Book' : 'Забронировать') + '</span>' +
+                        '<span class="ct-card-cta" data-id="' + c.id + '">' + (isEn ? 'Book' : (isKg ? 'Ээлөө' : 'Забронировать')) + '</span>' +
                     '</div>' +
                 '</div>' +
             '</a>';
@@ -432,8 +464,8 @@
             return;
         }
 
-        var prevLabel = isEn ? '\u2190 Back' : '\u2190 Назад';
-        var nextLabel = isEn ? 'Next \u2192' : 'Далее \u2192';
+        var prevLabel = isEn ? '\u2190 Back' : (isKg ? '\u2190 Артка' : '\u2190 Назад');
+        var nextLabel = isEn ? 'Next \u2192' : (isKg ? 'Кийинки \u2192' : 'Далее \u2192');
         var html = '<div class="ct-pagination">';
         html += '<button class="ct-page-btn ct-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + prevLabel + '</button>';
         for (var p = 1; p <= totalPages; p++) {
@@ -467,8 +499,8 @@
         var container = document.getElementById('courtsSponsors');
         if (!container) return;
 
-        var title = isEn ? 'Partners & Sponsors' : 'Партнёры и спонсоры';
-        var general = isEn ? 'General sponsor' : 'Генеральный спонсор';
+        var title = isEn ? 'Partners & Sponsors' : (isKg ? 'Өнөктөштөр жана демөөрчүлөр' : 'Партнёры и спонсоры');
+        var general = isEn ? 'General sponsor' : (isKg ? 'Башкы демөөрчү' : 'Генеральный спонсор');
         container.innerHTML =
             '<div class="section-header"><h2>' + title + '</h2></div>' +
             '<div class="sponsor-hero">' +
@@ -496,15 +528,15 @@
             e.stopPropagation();
 
             if (_accessLevel === 'guest') {
-                showToast(isEn ? 'Sign up and become a KSLT member' : 'Зарегистрируйтесь и станьте членом КСЛТ', 'info');
+                showToast(isEn ? 'Sign up and become a KSLT member' : (isKg ? 'Катталыңыз жана КСЛТ мүчөсү болуңуз' : 'Зарегистрируйтесь и станьте членом КСЛТ'), 'info');
                 return;
             }
             if (_accessLevel === 'registered') {
-                showToast(isEn ? 'Become a KSLT member to book' : 'Станьте членом КСЛТ для бронирования', 'info');
+                showToast(isEn ? 'Become a KSLT member to book' : (isKg ? 'Ээлөө үчүн КСЛТ мүчөсү болуңуз' : 'Станьте членом КСЛТ для бронирования'), 'info');
                 return;
             }
             var id = cta.getAttribute('data-id');
-            var detailBase = isEn ? 'court-en.html' : 'court.html';
+            var detailBase = isEn ? 'court-en.html' : (isKg ? 'court-kg.html' : 'court.html');
             window.location.href = detailBase + '?id=' + id;
         });
     }
@@ -541,7 +573,7 @@
         if (!court) {
             // Will be retried after Supabase loads
             var container = document.getElementById('courtDetail');
-            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-dim);">' + (isEn ? 'Loading...' : 'Загрузка...') + '</div>';
+            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-dim);">' + (isEn ? 'Loading...' : (isKg ? 'Жүктөлүүдө...' : 'Загрузка...')) + '</div>';
             return;
         }
 
@@ -567,16 +599,16 @@
         var container = document.getElementById('courtDetail');
         if (!container) return;
 
-        var courtsLink = isEn ? 'courts-en.html' : 'courts.html';
-        var authLink = isEn ? 'auth-en.html' : 'auth.html';
+        var courtsLink = isEn ? 'courts-en.html' : (isKg ? 'courts-kg.html' : 'courts.html');
+        var authLink = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
         var typeLabel = court._typeDesc || (court.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor);
 
         var html = '';
 
         // Back links
-        var servicesLink = isEn ? 'services-en.html' : 'services.html';
+        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
         html += '<div class="ct-back-links">';
-        html += '<a href="' + servicesLink + '" class="ct-back-link">\u2190 ' + (isEn ? 'Services' : 'Услуги') + '</a>';
+        html += '<a href="' + servicesLink + '" class="ct-back-link">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
         html += '<span class="ct-back-sep">/</span>';
         html += '<a href="' + courtsLink + '" class="ct-back-link">' + L_labels.backBtn + '</a>';
         html += '</div>';

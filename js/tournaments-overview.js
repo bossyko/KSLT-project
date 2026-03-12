@@ -4,6 +4,7 @@
 
 (function() {
     var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var client = window.supabaseClient;
 
     // Category order + meta
@@ -22,11 +23,13 @@
 
     var formatLabels = isEn
         ? { singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }
-        : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' };
+        : (isKg ? { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }
+        : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
 
     var statusLabels = isEn
         ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Reg. Closed', ongoing: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
-        : { registration_open: 'Регистрация открыта', upcoming: 'Скоро', registration_closed: 'Рег. закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' };
+        : (isKg ? { registration_open: 'Каттоо ачык', upcoming: 'Жакында', registration_closed: 'Каттоо жабык', ongoing: 'Жүрүп жатат', completed: 'Аяктады', cancelled: 'Жокко чыгарылды' }
+        : { registration_open: 'Регистрация открыта', upcoming: 'Скоро', registration_closed: 'Рег. закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' });
 
     var L = isEn ? {
         heroTitle: 'Tournaments',
@@ -41,6 +44,19 @@
         men: 'Men',
         women: 'Women',
         gender: 'Gender'
+    } : (isKg ? {
+        heroTitle: 'Мелдештер',
+        heroDesc: 'KSLT мелдештеринин бардык категориялары — башталгычтан профессионал деңгээлге чейин',
+        heroBadge: 'KSLT',
+        viewAll: 'Бардык мелдештер',
+        details: 'Толугураак',
+        empty: 'Алдыдагы мелдештер жок',
+        format: 'Формат',
+        participants: 'Катышуучулар',
+        prize: 'Сыйлык',
+        men: 'Эрк',
+        women: 'Аял',
+        gender: 'Жынысы'
     } : {
         heroTitle: 'Турниры',
         heroDesc: 'Все категории турниров KSLT — от начального до профессионального уровня',
@@ -54,10 +70,10 @@
         men: 'Муж',
         women: 'Жен',
         gender: 'Пол'
-    };
+    });
 
-    var tournamentPage = isEn ? 'tournament-en.html' : 'tournament.html';
-    var tournamentsPage = isEn ? 'tournaments-en.html' : 'tournaments.html';
+    var tournamentPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
+    var tournamentsPage = isEn ? 'tournaments-en.html' : (isKg ? 'tournaments-kg.html' : 'tournaments.html');
 
     var _grouped = {};
     var _allGrouped = {};
@@ -195,10 +211,10 @@
 
             map[cat].push({
                 id: t.id,
-                name: isEn ? (t.title_en || t.title) : t.title,
+                name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
                 date: { day: day, month: month },
                 _dateSort: t.date_start,
-                location: isEn ? (t.location_en || t.location) : (t.location || ''),
+                location: isEn ? (t.location_en || t.location) : (isKg ? (t.location_kg || t.location || '') : (t.location || '')),
                 format: formatLabels[t.format] || t.format || '',
                 participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
                 prize: t.prize_fund || '',
@@ -311,7 +327,7 @@
                     '<span>' + pinSvg + ' ' + t.location + '</span>' +
                 '</div>' +
                 '<div class="to-featured-details">' +
-                    (t.regLine ? '<div class="to-featured-detail"><span class="to-label">' + (isEn ? 'Reg' : 'Рег') + '</span><span class="to-value">' + t.regLine + '</span></div>' : '') +
+                    (t.regLine ? '<div class="to-featured-detail"><span class="to-label">' + (isEn ? 'Reg' : (isKg ? 'Кат' : 'Рег')) + '</span><span class="to-value">' + t.regLine + '</span></div>' : '') +
                     (t.format ? '<div class="to-featured-detail"><span class="to-label">' + L.format + '</span><span class="to-value">' + t.format + '</span></div>' : '') +
                     (t.participants ? '<div class="to-featured-detail"><span class="to-label">' + L.participants + '</span><span class="to-value">' + t.participants + '</span></div>' : '') +
                     (t.prize ? '<div class="to-featured-detail"><span class="to-label">' + L.prize + '</span><span class="to-value prize">' + t.prize + '</span></div>' : '') +
@@ -337,7 +353,7 @@
                 '<h4>' + t.name + '</h4>' +
                 '<div class="to-compact-sub">' +
                     '<span>' + pinSvg + ' ' + t.location + '</span>' +
-                    (t.regLine ? '<span class="to-compact-reg">' + (isEn ? 'Reg: ' : 'Рег: ') + t.regLine + '</span>' : '') +
+                    (t.regLine ? '<span class="to-compact-reg">' + (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + t.regLine + '</span>' : '') +
                 '</div>' +
             '</div>' +
             '<div class="to-compact-right">' +
@@ -441,7 +457,7 @@
         });
 
         if (!html) {
-            html = '<div class="to-category-block"><div class="to-card-grid"><div class="to-empty">' + emptySvg + '<p>' + (isEn ? 'Nothing found' : 'Ничего не найдено') + '</p></div></div></div>';
+            html = '<div class="to-category-block"><div class="to-card-grid"><div class="to-empty">' + emptySvg + '<p>' + (isEn ? 'Nothing found' : (isKg ? 'Эч нерсе табылган жок' : 'Ничего не найдено')) + '</p></div></div></div>';
         }
 
         container.innerHTML = html;

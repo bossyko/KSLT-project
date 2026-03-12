@@ -105,9 +105,11 @@ function renderHero(tournament) {
     var statusText = getStatusLabel(tournament.status);
     var backUrl = 'tournaments.html?category=' + tournament.category;
 
-    // Check if we're on English page
+    // Check if we're on English or Kyrgyz page
     if (window.location.pathname.indexOf('-en') !== -1) {
         backUrl = 'tournaments-en.html?category=' + tournament.category;
+    } else if (window.location.pathname.indexOf('-kg') !== -1) {
+        backUrl = 'tournaments-kg.html?category=' + tournament.category;
     }
 
     container.innerHTML =
@@ -820,6 +822,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     registrations = registrations || [];
     playersMap = playersMap || {};
     var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
 
     var months = isEn
         ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -854,7 +857,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // Status labels & CSS class mapping
     var statusLabels = isEn
         ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Registration Closed', ongoing: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
-        : { registration_open: 'Регистрация открыта', upcoming: 'Скоро', registration_closed: 'Регистрация закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' };
+        : (isKg ? { registration_open: 'Каттоо ачык', upcoming: 'Жакында', registration_closed: 'Каттоо жабык', ongoing: 'Жүрүп жатат', completed: 'Аяктады', cancelled: 'Жокко чыгарылды' }
+        : { registration_open: 'Регистрация открыта', upcoming: 'Скоро', registration_closed: 'Регистрация закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' });
 
     var statusClassMap = { registration_open: 'live', registration_closed: 'upcoming', ongoing: 'live', cancelled: 'completed', upcoming: 'upcoming', completed: 'completed' };
     var statusClass = statusClassMap[effectiveStatus] || 'upcoming';
@@ -863,7 +867,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // Format labels
     var formatLabels = isEn
         ? { singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }
-        : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' };
+        : (isKg ? { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }
+        : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
 
     // Category name from category_id (e.g. "men-tour" → "Tour")
     var catId = t.category_id || '';
@@ -876,24 +881,30 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // Gender badge
     var gender = catParts[0] || '';
     var genderLabel = gender === 'women'
-        ? (isEn ? '♀ Women' : '♀ Женский')
-        : (isEn ? '♂ Men' : '♂ Мужской');
+        ? (isEn ? '♀ Women' : (isKg ? '♀ Аялдар' : '♀ Женский'))
+        : (isEn ? '♂ Men' : (isKg ? '♂ Эркектер' : '♂ Мужской'));
 
     var backUrl = isEn
         ? 'tournaments-en.html?category=' + category
-        : 'tournaments.html?category=' + category;
+        : (isKg ? 'tournaments-kg.html?category=' + category
+        : 'tournaments.html?category=' + category);
 
     var L = isEn ? {
         format: 'Format', participants: 'Participants', prizeFund: 'Prize Fund',
         description: 'About Tournament', scheduleSoon: 'Schedule will be published soon',
         noParticipants: 'Participants will be announced soon',
         noResults: 'Results will be available after the tournament ends'
+    } : (isKg ? {
+        format: 'Формат', participants: 'Катышуучулар', prizeFund: 'Сыйлык фонду',
+        description: 'Мелдеш жөнүндө', scheduleSoon: 'Тартип кийинчерээк жарыяланат',
+        noParticipants: 'Катышуучулар кийинчерээк жарыяланат',
+        noResults: 'Жыйынтыктар мелдеш аяктагандан кийин жеткиликтүү болот'
     } : {
         format: 'Формат', participants: 'Участники', prizeFund: 'Призовой фонд',
         description: 'О турнире', scheduleSoon: 'Расписание будет опубликовано позже',
         noParticipants: 'Участники будут объявлены позже',
         noResults: 'Результаты будут доступны после завершения турнира'
-    };
+    });
 
     // ---- Render Hero ----
     var hero = document.getElementById('tournamentHero');
@@ -914,7 +925,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     '<span class="tournament-gender-badge">' + genderLabel + '</span>' +
                     '<span class="td-status-badge ' + statusClass + '">' + statusText + '</span>' +
                 '</div>' +
-                '<h1>' + (isEn ? (t.title_en || t.title) : t.title) + '</h1>' +
+                '<h1>' + (isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title)) + '</h1>' +
                 '<div class="td-hero-meta">' +
                     '<div class="td-meta-item">' +
                         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
@@ -922,11 +933,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     '</div>' +
                     (regDateRange ? '<div class="td-meta-item td-meta-reg">' +
                         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>' +
-                        ' ' + (isEn ? 'Reg: ' : 'Рег: ') + regDateRange +
+                        ' ' + (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + regDateRange +
                     '</div>' : '') +
                     '<div class="td-meta-item">' +
                         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
-                        ' ' + (isEn ? (t.location_en || t.location || '') : (t.location || '')) +
+                        ' ' + (isEn ? (t.location_en || t.location || '') : (isKg ? (t.location_kg || t.location || '') : (t.location || ''))) +
                     '</div>' +
                 '</div>' +
                 '<div class="td-hero-stats">' +
@@ -949,11 +960,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // ---- Description section ----
     var descContent = document.getElementById('descriptionContent');
     if (descContent) {
-        var descText = isEn ? (t.description_en || t.description || '') : (t.description || '');
+        var descText = isEn ? (t.description_en || t.description || '') : (isKg ? (t.description_kg || t.description || '') : (t.description || ''));
         if (descText) {
             descContent.innerHTML = '<div class="td-description-text">' + descText.replace(/\n/g, '<br>') + '</div>';
         } else {
-            descContent.innerHTML = '<div class="td-no-results"><p>' + (isEn ? 'No description available.' : 'Описание отсутствует.') + '</p></div>';
+            descContent.innerHTML = '<div class="td-no-results"><p>' + (isEn ? 'No description available.' : (isKg ? 'Сүрөттөмө жок.' : 'Описание отсутствует.')) + '</p></div>';
         }
     }
 
@@ -990,7 +1001,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                 var p = playersMap[pid];
                                 plPlayersArr.push({
                                     id: pid,
-                                    name: p ? (isEn ? (p.name_en || p.name) : p.name) : 'TBD',
+                                    name: p ? (isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name)) : 'TBD',
                                     seed: null,
                                     country: p ? (p.country || '') : ''
                                 });
@@ -1016,10 +1027,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         var prMatches = ploffMatches.filter(function(m) { return m.round_number === pr && m.round !== '3RD'; })
                             .sort(function(a, b) { return a.match_order - b.match_order; });
                         var prf = plTotalRounds - pr;
-                        var prName = prf === 0 ? (isEn ? 'Final' : 'Финал') :
-                                     prf === 1 ? (isEn ? 'Semifinal' : 'Полуфинал') :
-                                     prf === 2 ? (isEn ? 'Quarterfinal' : 'Четвертьфинал') :
-                                     (isEn ? 'Round ' + pr : 'Раунд ' + pr);
+                        var prName = prf === 0 ? (isEn ? 'Final' : (isKg ? 'Финал' : 'Финал')) :
+                                     prf === 1 ? (isEn ? 'Semifinal' : (isKg ? 'Жарым финал' : 'Полуфинал')) :
+                                     prf === 2 ? (isEn ? 'Quarterfinal' : (isKg ? 'Чейрек финал' : 'Четвертьфинал')) :
+                                     (isEn ? 'Round ' + pr : (isKg ? 'Раунд ' + pr : 'Раунд ' + pr));
 
                         var prConverted = prMatches.map(function(m) {
                             return {
@@ -1037,7 +1048,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     var thirdMatch = ploffMatches.find(function(m) { return m.round === '3RD'; });
 
-                    bHtml += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Playoff' : 'Плей-офф') + '</h3>';
+                    bHtml += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Playoff' : (isKg ? 'Плей-офф' : 'Плей-офф')) + '</h3>';
                     bHtml += '<div class="td-bracket-scroll"><div class="td-bracket">';
                     plRounds.forEach(function(round, ri) {
                         var isLastRound = ri === plRounds.length - 1;
@@ -1063,7 +1074,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     // 3rd place — separate block under bracket
                     if (thirdMatch) {
                         bHtml += '<div style="margin-top:20px;max-width:200px;">';
-                        bHtml += '<div class="td-round-title">' + (isEn ? '3rd Place' : 'За 3-е место') + '</div>';
+                        bHtml += '<div class="td-round-title">' + (isEn ? '3rd Place' : (isKg ? '3-орун үчүн' : 'За 3-е место')) + '</div>';
                         bHtml += renderMatch(plTournObj, {
                             matchId: thirdMatch.id, player1Id: thirdMatch.player1_id, player2Id: thirdMatch.player2_id,
                             score: thirdMatch.score || '', winnerId: thirdMatch.winner_id, status: thirdMatch.status || 'upcoming'
@@ -1075,7 +1086,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 }
 
                 // Group tables (2-column grid)
-                bHtml += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Group Stage' : 'Групповой этап') + '</h3>';
+                bHtml += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Group Stage' : (isKg ? 'Топтук этап' : 'Групповой этап')) + '</h3>';
                 bHtml += '<div class="td-groups-grid">';
 
                 for (var g = 1; g <= groupCount; g++) {
@@ -1114,18 +1125,18 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     var letter = groupLetters[g - 1] || String(g);
                     bHtml += '<div style="margin-bottom:24px;">';
-                    bHtml += '<div style="font-weight:700;color:var(--text-primary);margin-bottom:8px;font-size:0.95rem;">' + (isEn ? 'Group ' : 'Группа ') + letter + '</div>';
+                    bHtml += '<div style="font-weight:700;color:var(--text-primary);margin-bottom:8px;font-size:0.95rem;">' + (isEn ? 'Group ' : (isKg ? 'Топ ' : 'Группа ')) + letter + '</div>';
                     bHtml += '<div style="overflow-x:auto;"><table class="td-group-table">';
-                    bHtml += '<thead><tr><th>№</th><th>' + (isEn ? 'Player' : 'Игрок') + '</th>';
+                    bHtml += '<thead><tr><th>№</th><th>' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th>';
                     for (var c = 0; c < standings.length; c++) bHtml += '<th style="text-align:center;min-width:65px;white-space:nowrap;">' + (c + 1) + '</th>';
-                    bHtml += '<th style="text-align:center;width:30px;">' + (isEn ? 'W' : 'П') + '</th>';
-                    bHtml += '<th style="text-align:center;width:40px;">' + (isEn ? 'Pos' : 'М') + '</th>';
+                    bHtml += '<th style="text-align:center;width:30px;">' + (isEn ? 'W' : (isKg ? 'Ж' : 'П')) + '</th>';
+                    bHtml += '<th style="text-align:center;width:40px;">' + (isEn ? 'Pos' : (isKg ? 'О' : 'М')) + '</th>';
                     bHtml += '</tr></thead><tbody>';
 
                     for (var row = 0; row < standings.length; row++) {
                         var st = standings[row];
                         var p = playersMap[st.playerId] || {};
-                        var pName = isEn ? (p.name_en || p.name || '?') : (p.name || '?');
+                        var pName = isEn ? (p.name_en || p.name || '?') : (isKg ? (p.name_kg || p.name || '?') : (p.name || '?'));
                         var seedHtml = st.seed ? ' <span style="color:var(--accent);font-size:0.7rem;">[' + st.seed + ']</span>' : '';
                         var isQualified = st.place <= qualifiers && allGroupDone;
 
@@ -1184,7 +1195,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var p = playersMap[pid];
                 ficPlayersArr.push({
                     id: pid,
-                    name: isEn ? (p.name_en || p.name) : p.name,
+                    name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
                     seed: null,
                     country: p.country || ''
                 });
@@ -1280,7 +1291,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var p = playersMap[pid];
                 playersArr.push({
                     id: pid,
-                    name: isEn ? (p.name_en || p.name) : p.name,
+                    name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
                     seed: null,
                     country: p.country || ''
                 });
@@ -1315,10 +1326,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     roundName = roundDefs[r - 1].name;
                 } else {
                     var rf = totalRounds - r;
-                    if (rf === 0) roundName = isEn ? 'Final' : 'Финал';
-                    else if (rf === 1) roundName = isEn ? 'Semifinal' : 'Полуфинал';
-                    else if (rf === 2) roundName = isEn ? 'Quarterfinal' : 'Четвертьфинал';
-                    else roundName = isEn ? 'Round ' + r : 'Раунд ' + r;
+                    if (rf === 0) roundName = isEn ? 'Final' : (isKg ? 'Финал' : 'Финал');
+                    else if (rf === 1) roundName = isEn ? 'Semifinal' : (isKg ? 'Жарым финал' : 'Полуфинал');
+                    else if (rf === 2) roundName = isEn ? 'Quarterfinal' : (isKg ? 'Чейрек финал' : 'Четвертьфинал');
+                    else roundName = isEn ? 'Round ' + r : (isKg ? 'Раунд ' + r : 'Раунд ' + r);
                 }
 
                 var convertedMatches = roundMatches.map(function(m) {
@@ -1345,7 +1356,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             // Build tournament object for renderer
             var tournamentObj = {
                 id: t.id,
-                name: isEn ? (t.title_en || t.title) : t.title,
+                name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
                 bracketType: 'single_elimination',
                 drawSize: drawSize,
                 players: playersArr,
@@ -1384,16 +1395,16 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
         if (mainDraw.length > 0) {
             var partHtml = '';
-            var mainDrawLabel = isEn ? 'Main Draw' : 'Основная сетка';
-            var waitlistLabel = isEn ? 'Waitlist' : 'Лист ожидания';
-            var thName = isEn ? 'Name' : 'ФИО';
-            var thCat = isEn ? 'Category' : 'Категория';
-            var thDate = isEn ? 'Date' : 'Дата';
-            var thTime = isEn ? 'Time' : 'Время';
+            var mainDrawLabel = isEn ? 'Main Draw' : (isKg ? 'Негизги тор' : 'Основная сетка');
+            var waitlistLabel = isEn ? 'Waitlist' : (isKg ? 'Күтүү тизмеси' : 'Лист ожидания');
+            var thName = isEn ? 'Name' : (isKg ? 'Аты-жөнү' : 'ФИО');
+            var thCat = isEn ? 'Category' : (isKg ? 'Категория' : 'Категория');
+            var thDate = isEn ? 'Date' : (isKg ? 'Датасы' : 'Дата');
+            var thTime = isEn ? 'Time' : (isKg ? 'Убактысы' : 'Время');
 
             function pubRegRow(reg, idx) {
                 var p = reg.players || playersMap[reg.player_id] || {};
-                var pName = isEn ? (p.name_en || p.name || '—') : (p.name || '—');
+                var pName = isEn ? (p.name_en || p.name || '—') : (isKg ? (p.name_kg || p.name || '—') : (p.name || '—'));
                 var photo = p.photo || '';
                 var photoHtml = photo
                     ? '<img class="td-reg-photo" src="' + esc(photo) + '" alt="">'
@@ -1443,7 +1454,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 waitlist.forEach(function(reg, idx) { partHtml += pubRegRow(reg, idx + 1); });
                 partHtml += '</tbody></table></div>';
             } else {
-                partHtml += '<div class="td-no-results" style="padding:var(--space-md) 0;"><p>' + (isEn ? 'No waitlisted players' : 'Нет игроков в листе ожидания') + '</p></div>';
+                partHtml += '<div class="td-no-results" style="padding:var(--space-md) 0;"><p>' + (isEn ? 'No waitlisted players' : (isKg ? 'Күтүү тизмесинде оюнчулар жок' : 'Нет игроков в листе ожидания')) + '</p></div>';
             }
             partHtml += '</div>';
 
@@ -1470,7 +1481,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var defaultPhoto = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect fill="%231a1f2e" width="80" height="80" rx="40"/><text x="40" y="48" text-anchor="middle" fill="%23666" font-size="28">?</text></svg>');
 
             function podiumCard(player, place, medal) {
-                var pName = isEn ? (player.name_en || player.name || '?') : (player.name || '?');
+                var pName = isEn ? (player.name_en || player.name || '?') : (isKg ? (player.name_kg || player.name || '?') : (player.name || '?'));
                 var photo = player.photo || defaultPhoto;
                 return '<div class="td-podium-card td-podium-' + place + '">' +
                     '<div class="td-podium-medal">' + medal + '</div>' +
@@ -1526,10 +1537,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         resHtml += '<div style="max-width:500px;margin:24px auto 0;">';
                         resHtml += '<table style="width:100%;border-collapse:collapse;">';
                         resHtml += '<thead><tr><th style="text-align:center;padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">#</th>' +
-                            '<th style="padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">' + (isEn ? 'Player' : 'Игрок') + '</th></tr></thead><tbody>';
+                            '<th style="padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th></tr></thead><tbody>';
                         for (var i = 3; i < ficPlaces.length; i++) {
                             var fp = playersMap[ficPlaces[i].playerId] || {};
-                            var fpName = isEn ? (fp.name_en || fp.name || '?') : (fp.name || '?');
+                            var fpName = isEn ? (fp.name_en || fp.name || '?') : (isKg ? (fp.name_kg || fp.name || '?') : (fp.name || '?'));
                             resHtml += '<tr style="border-bottom:1px solid var(--border, rgba(255,255,255,0.06));">' +
                                 '<td style="text-align:center;padding:8px;font-weight:600;color:var(--text-secondary);">' + ficPlaces[i].place + '</td>' +
                                 '<td style="padding:8px;">' + esc(fpName) + '</td></tr>';
@@ -1588,7 +1599,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     if (courtData) {
         renderVenueSection(courtData, isEn);
     } else if (venueContent) {
-        venueContent.innerHTML = '<div class="td-no-results"><p>' + (isEn ? 'Venue information not available.' : 'Информация о месте проведения отсутствует.') + '</p></div>';
+        venueContent.innerHTML = '<div class="td-no-results"><p>' + (isEn ? 'Venue information not available.' : (isKg ? 'Өткөрүлүүчү жер жөнүндө маалымат жок.' : 'Информация о месте проведения отсутствует.')) + '</p></div>';
     }
 
     // Init tabs navigation
@@ -1600,13 +1611,14 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 // ========================================
 
 function renderVenueSection(court, isEn) {
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var venueSection = document.getElementById('venue');
     var venueContent = document.getElementById('venueContent');
     if (!venueSection || !venueContent) return;
 
-    var courtName = isEn ? (court.name_en || court.name) : court.name;
-    var street = isEn ? (court.street_en || court.street || '') : (court.street || '');
-    var city = isEn ? (court.city_en || court.city || '') : (court.city || '');
+    var courtName = isEn ? (court.name_en || court.name) : (isKg ? (court.name_kg || court.name) : court.name);
+    var street = isEn ? (court.street_en || court.street || '') : (isKg ? (court.street_kg || court.street || '') : (court.street || ''));
+    var city = isEn ? (court.city_en || court.city || '') : (isKg ? (court.city_kg || court.city || '') : (court.city || ''));
     var building = court.building || '';
 
     var addressParts = [];
@@ -1615,7 +1627,7 @@ function renderVenueSection(court, isEn) {
     if (city) addressParts.push(city);
     var address = addressParts.join(', ');
 
-    var courtUrl = isEn ? 'court-en.html?id=' + court.id : 'court.html?id=' + court.id;
+    var courtUrl = isEn ? 'court-en.html?id=' + court.id : (isKg ? 'court-kg.html?id=' + court.id : 'court.html?id=' + court.id);
     var mapUrl = court.google_maps_url || court.twogis_url || '';
     var embedUrl = getMapEmbed(mapUrl);
 
@@ -1711,7 +1723,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     paidOk = memResult && memResult.paid;
                 }
 
-                var pricingUrl = isEn ? 'pricing-en.html' : 'pricing.html';
+                var pricingUrl = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
 
                 // Find hero content to append button
                 var heroContent = document.querySelector('.td-hero-content');
@@ -1722,35 +1734,36 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 if (alreadyRegistered) {
                     var statusLabels = isEn
                         ? { pending: 'Registration Pending', approved: 'Registered', rejected: 'Registration Rejected', withdrawn: 'Withdrawn', waitlist: 'On Waitlist' }
-                        : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания' };
+                        : (isKg ? { pending: 'Арыз каралууда', approved: 'Сиз катталдыңыз', rejected: 'Арыз четке кагылды', withdrawn: 'Арыз кайтарылды', waitlist: 'Күтүү тизмесинде' }
+                        : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания' });
                     btnHtml += '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
                         statusLabels[alreadyRegistered.status] + '</span>';
                 } else if (genderBlocked) {
                     var genderMsg = (catRes.data && catRes.data.gender) === 'men'
-                        ? (isEn ? 'This tournament is for men only' : 'Этот турнир только для мужчин')
-                        : (isEn ? 'This tournament is for women only' : 'Этот турнир только для женщин');
+                        ? (isEn ? 'This tournament is for men only' : (isKg ? 'Бул мелдеш эркектер үчүн гана' : 'Этот турнир только для мужчин'))
+                        : (isEn ? 'This tournament is for women only' : (isKg ? 'Бул мелдеш аялдар үчүн гана' : 'Этот турнир только для женщин'));
                     btnHtml += '<span style="color:var(--text-secondary);font-size:0.9rem;">' + genderMsg + '</span>';
                 } else if (!membershipOk) {
                     btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);">' +
                         '<div style="color:#ffc107;font-weight:500;margin-bottom:4px;">' +
-                            (isEn ? 'Active KSLT membership required' : 'Требуется активное членство KSLT') +
+                            (isEn ? 'Active KSLT membership required' : (isKg ? 'KSLT активдүү мүчөлүгү талап кылынат' : 'Требуется активное членство KSLT')) +
                         '</div>' +
                         '<a href="' + pricingUrl + '" style="color:var(--accent);font-size:0.85rem;">' +
-                            (isEn ? 'View membership plans →' : 'Узнать о членстве →') +
+                            (isEn ? 'View membership plans →' : (isKg ? 'Мүчөлүк жөнүндө билүү →' : 'Узнать о членстве →')) +
                         '</a>' +
                     '</div>';
                 } else if (!paidOk) {
                     btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);">' +
                         '<div style="color:#ffc107;font-weight:500;margin-bottom:4px;">' +
-                            (isEn ? 'Please pay your membership to register' : 'Оплатите членство для записи на турнир') +
+                            (isEn ? 'Please pay your membership to register' : (isKg ? 'Каттоо үчүн мүчөлүк төлөмүн төлөңүз' : 'Оплатите членство для записи на турнир')) +
                         '</div>' +
                         '<a href="' + pricingUrl + '" style="color:var(--accent);font-size:0.85rem;">' +
-                            (isEn ? 'Go to payment →' : 'Перейти к оплате →') +
+                            (isEn ? 'Go to payment →' : (isKg ? 'Төлөмгө өтүү →' : 'Перейти к оплате →')) +
                         '</a>' +
                     '</div>';
                 } else {
                     btnHtml += '<button class="td-register-btn" id="tdRegisterBtn" style="padding:10px 24px;border:none;border-radius:8px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;font-size:1rem;">' +
-                        (isEn ? 'Register for Tournament' : 'Записаться на турнир') + '</button>';
+                        (isEn ? 'Register for Tournament' : (isKg ? 'Мелдешке каттоо' : 'Записаться на турнир')) + '</button>';
                 }
 
                 btnHtml += '</div>';
@@ -1761,7 +1774,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 if (regBtn) {
                     regBtn.addEventListener('click', async function() {
                         regBtn.disabled = true;
-                        regBtn.textContent = isEn ? 'Registering...' : 'Отправка...';
+                        regBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
 
                         var regStatus = isExactCategory ? 'pending' : 'waitlist';
                         var res = await client.from('tournament_registrations').insert({
@@ -1773,13 +1786,13 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         if (res.error) {
                             alert(res.error.message);
                             regBtn.disabled = false;
-                            regBtn.textContent = isEn ? 'Register for Tournament' : 'Записаться на турнир';
+                            regBtn.textContent = isEn ? 'Register for Tournament' : (isKg ? 'Мелдешке каттоо' : 'Записаться на турнир');
                             return;
                         }
 
                         var regMsg = regStatus === 'waitlist'
-                            ? (isEn ? 'On Waitlist — Awaiting Approval' : 'В листе ожидания — ожидает одобрения')
-                            : (isEn ? 'Registration Submitted!' : 'Заявка отправлена!');
+                            ? (isEn ? 'On Waitlist — Awaiting Approval' : (isKg ? 'Күтүү тизмесинде — бекитүүнү күтүүдө' : 'В листе ожидания — ожидает одобрения'))
+                            : (isEn ? 'Registration Submitted!' : (isKg ? 'Арыз жөнөтүлдү!' : 'Заявка отправлена!'));
                         regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
                             regMsg + '</span>';
                     });
@@ -1795,8 +1808,9 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
 function renderLockedPage(tournamentId) {
     var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var authUrl = isEn ? 'auth-en.html' : 'auth.html';
-    var backUrl = isEn ? 'tournaments-en.html' : 'tournaments.html';
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var authUrl = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+    var backUrl = isEn ? 'tournaments-en.html' : (isKg ? 'tournaments-kg.html' : 'tournaments.html');
 
     var texts = isEn ? {
         title: 'Tournament Details',
@@ -1805,6 +1819,13 @@ function renderLockedPage(tournamentId) {
         btn: 'Sign In',
         btnRegister: 'Create Account',
         back: 'Back to Tournaments'
+    } : (isKg ? {
+        title: 'Мелдештин чоо-жайы',
+        subtitle: 'Толук торду жана матч жыйынтыктарын көрүү үчүн кириңиз',
+        features: ['Толук мелдеш тору', 'Түз эфирдеги упайлар жана жыйынтыктар', 'Оюнчулардын статистикасы'],
+        btn: 'Кирүү',
+        btnRegister: 'Аккаунт түзүү',
+        back: 'Мелдештерге кайтуу'
     } : {
         title: 'Детали турнира',
         subtitle: 'Войдите, чтобы увидеть полную сетку и результаты матчей',
@@ -1812,7 +1833,7 @@ function renderLockedPage(tournamentId) {
         btn: 'Войти',
         btnRegister: 'Создать аккаунт',
         back: 'Назад к турнирам'
-    };
+    });
 
     // Hide tabs
     var tabsBar = document.getElementById('tabsBar');

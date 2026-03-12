@@ -10,9 +10,10 @@
     if (!btn) return;
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var inPages = window.location.pathname.indexOf('/pages/') !== -1;
     var prefix = inPages ? '' : 'pages/';
-    var dashUrl = prefix + (isEn ? 'dashboard-en.html' : 'dashboard.html');
+    var dashUrl = prefix + (isEn ? 'dashboard-en.html' : (isKg ? 'dashboard-kg.html' : 'dashboard.html'));
     var adminUrl = prefix + (isEn ? 'admin-en.html' : 'admin.html');
 
     var L = isEn ? {
@@ -20,6 +21,11 @@
         settings: 'Settings',
         admin: 'Admin',
         logout: 'Sign Out'
+    } : isKg ? {
+        profile: 'Менин профилим',
+        settings: 'Жөндөөлөр',
+        admin: 'Админка',
+        logout: 'Чыгуу'
     } : {
         profile: 'Мой профиль',
         settings: 'Настройки',
@@ -63,7 +69,7 @@
             var now = Math.floor(Date.now() / 1000);
             if (session.expires_at > now) {
                 var role = localStorage.getItem('kslt_role');
-                var userName = localStorage.getItem('kslt_name') || (isEn ? 'User' : 'Пользователь');
+                var userName = localStorage.getItem('kslt_name') || (isEn ? 'User' : (isKg ? 'Колдонуучу' : 'Пользователь'));
                 var userAvatar = localStorage.getItem('kslt_avatar') || '';
                 var isStaff = role === 'admin' || role === 'manager';
 
@@ -105,7 +111,7 @@
                         localStorage.removeItem('kslt_role');
                         localStorage.removeItem('kslt_name');
                         localStorage.removeItem('kslt_avatar');
-                        window.location.href = prefix + (isEn ? 'auth-en.html' : 'auth.html');
+                        window.location.href = prefix + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html'));
                     });
 
                 } else {
@@ -151,7 +157,7 @@
                         localStorage.removeItem('kslt_role');
                         localStorage.removeItem('kslt_name');
                         localStorage.removeItem('kslt_avatar');
-                        window.location.href = prefix + (isEn ? 'auth-en.html' : 'auth.html');
+                        window.location.href = prefix + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html'));
                     });
                 }
             }

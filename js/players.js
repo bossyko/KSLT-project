@@ -14,6 +14,7 @@
     var currentTab = 'men-promasters';
     var currentPage = 1;
     var searchQuery = '';
+    var catSearchQuery = '';
     var debounceTimer = null;
     var isCategoryMode = false;
     var catCurrentPage = 1;
@@ -39,11 +40,11 @@
     }
 
     var badgeMap = {
-        champion: { emoji: '\ud83c\udfc6', ru: 'Чемпион последнего турнира', en: 'Tournament Champion' },
-        streak:   { emoji: '\ud83d\udd25', ru: 'Серия 5+ побед', en: 'Win streak 5+' },
-        top1:     { emoji: '\ud83d\udc51', ru: '#1 текущего месяца', en: '#1 of the month' },
-        newbie:   { emoji: '\ud83c\udd95', ru: 'Новичок', en: 'Newcomer' },
-        breakthrough: { emoji: '\u2b06\ufe0f', ru: 'Прорыв (+10 позиций)', en: 'Breakthrough' }
+        champion: { emoji: '\ud83c\udfc6', ru: 'Чемпион последнего турнира', en: 'Tournament Champion', kg: 'Акыркы мелдештин чемпиону' },
+        streak:   { emoji: '\ud83d\udd25', ru: 'Серия 5+ побед', en: 'Win streak 5+', kg: '5+ жеңиш сериясы' },
+        top1:     { emoji: '\ud83d\udc51', ru: '#1 текущего месяца', en: '#1 of the month', kg: 'Айдын #1' },
+        newbie:   { emoji: '\ud83c\udd95', ru: 'Новичок', en: 'Newcomer', kg: 'Жаңы оюнчу' },
+        breakthrough: { emoji: '\u2b06\ufe0f', ru: 'Прорыв (+10 позиций)', en: 'Breakthrough', kg: 'Жарыш (+10 позиция)' }
     };
 
     // ========================================
@@ -99,8 +100,12 @@
         return window.location.pathname.indexOf('-en') !== -1;
     }
 
+    function isKgPage() {
+        return window.location.pathname.indexOf('-kg') !== -1;
+    }
+
     function getAuthUrl() {
-        return isEnPage() ? 'auth-en.html' : 'auth.html';
+        return isEnPage() ? 'auth-en.html' : (isKgPage() ? 'auth-kg.html' : 'auth.html');
     }
 
     function getBadgeTooltip(key) {
@@ -198,6 +203,7 @@
         if (!window.supabaseClient) return null;
         var client = window.supabaseClient;
         var isEn = isEnPage();
+        var isKg = isKgPage();
 
         try {
             // Load categories
@@ -217,13 +223,13 @@
                 if (cat.name && cat.name.toLowerCase().indexOf('friendly') !== -1) return;
                 var catPlayers = players.filter(function(p) { return p.category_id === cat.id; });
                 result[cat.id] = {
-                    name: isEn ? (cat.name_en || cat.name) : cat.name,
+                    name: isEn ? (cat.name_en || cat.name) : (isKg ? (cat.name_kg || cat.name) : cat.name),
                     gender: cat.gender,
-                    genderLabel: isEn ? (cat.gender === 'men' ? 'Men' : 'Women') : (cat.gender === 'men' ? 'Мужчины' : 'Женщины'),
+                    genderLabel: isEn ? (cat.gender === 'men' ? 'Men' : 'Women') : (isKg ? (cat.gender === 'men' ? 'Эркектер' : 'Аялдар') : (cat.gender === 'men' ? 'Мужчины' : 'Женщины')),
                     players: catPlayers.map(function(p) {
                         return {
                             id: p.id,
-                            name: isEn ? (p.name_en || p.name) : p.name,
+                            name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
                             photo: p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?',
                             country: p.country || '🇰🇬',
                             points: p.points || 0,
@@ -401,7 +407,7 @@
             html += '<button class="pl-category-pill' + (cats[i].key === currentTab ? ' active' : '') + '" data-tab="' + cats[i].key + '">' + cats[i].name + '</button>';
         }
         html += '</div>';
-        var playersPage = isEnPage() ? 'players-en.html' : 'players.html';
+        var playersPage = isEnPage() ? 'players-en.html' : (isKgPage() ? 'players-kg.html' : 'players.html');
         html += '<a href="' + playersPage + '?tab=' + currentTab + '" class="pl-view-all">' + labels.viewAll + ' <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>';
         html += '</div>';
 
@@ -510,7 +516,7 @@
                     '<img src="' + esc(p.photo) + '" alt="" class="pl-player-photo">' +
                     '<div class="pl-player-info">' +
                         '<div class="pl-player-name-row">' +
-                            '<a href="' + (isEnPage() ? 'player-en.html' : 'player.html') + '?id=' + p.id + '" class="pl-player-name">' + p.name + '</a>' +
+                            '<a href="' + (isEnPage() ? 'player-en.html' : (isKgPage() ? 'player-kg.html' : 'player.html')) + '?id=' + p.id + '" class="pl-player-name">' + p.name + '</a>' +
                             (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
                         '</div>' +
                         catLabel +
@@ -544,7 +550,7 @@
                     '<h3 class="pl-guest-title">' + labels.guestTitle + '</h3>' +
                     '<p class="pl-guest-text">' + labels.guestText + '</p>' +
                     '<a href="' + authUrl + '" class="pl-guest-btn">' + labels.guestBtn + '</a>' +
-                    '<div class="pl-guest-hint">+' + hiddenCount + ' ' + (isEnPage() ? 'more players' : 'игроков скрыто') + '</div>' +
+                    '<div class="pl-guest-hint">+' + hiddenCount + ' ' + (isEnPage() ? 'more players' : (isKgPage() ? 'оюнчу жашырылган' : 'игроков скрыто')) + '</div>' +
                 '</div>' +
             '</div>';
         }
@@ -617,8 +623,9 @@
         var cat = getCategory(tabId);
         var labels = getLabels();
         var isEn = isEnPage();
+        var isKg = isKgPage();
         var genderIcon = cat.gender === 'men' ? '\u2642' : '\u2640';
-        var playersPage = isEn ? 'players-en.html' : 'players.html';
+        var playersPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
 
         // Count completed tournaments for this category
         var tournamentsCount = 0;
@@ -673,6 +680,7 @@
 
         // Init pagination clicks
         initCatPagination(tabId);
+        initCatSearch(tabId);
 
         initScrollAnimations();
         updateCatLangLinks(tabId);
@@ -689,7 +697,14 @@
             if (players[i].online) onlineCount++;
         }
 
-        var onlineLabel = isEnPage() ? 'Online' : 'Онлайн';
+        var onlineLabel = isEnPage() ? 'Online' : (isKgPage() ? 'Онлайн' : 'Онлайн');
+
+        var logged = isLoggedIn();
+        var searchHtml =
+            '<div class="pl-search-wrap pl-cat-search-wrap">' +
+                '<svg class="pl-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                '<input type="text" class="pl-search-input" id="catSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
+            '</div>';
 
         container.innerHTML =
             '<div class="pl-hero-bg"></div>' +
@@ -710,6 +725,7 @@
                         '<div class="pl-cat-stat-label">' + onlineLabel + '</div>' +
                     '</div>' +
                 '</div>' +
+                searchHtml +
             '</div>';
     }
 
@@ -719,8 +735,18 @@
 
         var labels = getLabels();
         var cat = getCategory(tabId);
-        var players = cat.players || [];
+        var allPlayers = cat.players || [];
         var isEn = isEnPage();
+        var isKg = isKgPage();
+
+        // Filter by search query
+        var players = allPlayers;
+        if (catSearchQuery) {
+            var q = catSearchQuery.toLowerCase();
+            players = allPlayers.filter(function(p) {
+                return p.name.toLowerCase().indexOf(q) !== -1;
+            });
+        }
 
         catCurrentPage = page;
         var totalPages = Math.max(1, Math.ceil(players.length / CAT_PER_PAGE));
@@ -736,7 +762,7 @@
         var isGuest = _accessLevel === 'guest';
         var isRegistered = _accessLevel === 'registered';
         var isMember = _accessLevel === 'member';
-        var playerPage = isEn ? 'player-en.html' : 'player.html';
+        var playerPage = isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
 
         // Sticky table header (separate from body for sticky to work)
         var headerRow = '<div class="pl-row pl-row-header pl-cat-row">' +
@@ -759,7 +785,7 @@
         // Rows
         for (var i = 0; i < pageItems.length; i++) {
             var p = pageItems[i];
-            var rank = start + i + 1;
+            var rank = catSearchQuery ? (allPlayers.indexOf(p) + 1) : (start + i + 1);
             var rankClass = rank <= 3 ? ' pl-rank-top' : '';
             var rowClass = isGuest ? ' pl-cat-row-disabled' : '';
 
@@ -1001,6 +1027,75 @@
                 }
             }, 200);
         });
+    }
+
+    function initCatSearch(tabId) {
+        var guestModalShown = false;
+
+        document.addEventListener('input', function(e) {
+            if (e.target.id !== 'catSearch') return;
+
+            // Guest: show modal on first input
+            if (!isLoggedIn()) {
+                if (!guestModalShown) {
+                    guestModalShown = true;
+                    showSearchAuthModal();
+                }
+                return;
+            }
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function() {
+                catSearchQuery = e.target.value.trim();
+                catCurrentPage = 1;
+                renderCatTable(tabId, 1);
+            }, 200);
+        });
+    }
+
+    function showSearchAuthModal() {
+        var labels = getLabels();
+        var authUrl = getAuthUrl();
+        var isEn = isEnPage();
+        var isKg = isKgPage();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'pl-search-modal-overlay';
+        overlay.innerHTML =
+            '<div class="pl-search-modal">' +
+                '<button class="pl-search-modal-close">&times;</button>' +
+                '<div class="pl-search-modal-icon">' +
+                    '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                '</div>' +
+                '<h3>' + labels.guestTitle + '</h3>' +
+                '<p>' + (isEn ? 'Sign up to search players and access full rankings' : (isKg ? 'Оюнчуларды издөө жана толук рейтингге кирүү үчүн катталыңыз' : 'Зарегистрируйтесь, чтобы искать игроков и получить полный доступ к рейтингу')) + '</p>' +
+                '<a href="' + authUrl + '" class="pl-search-modal-btn">' + labels.guestBtn + '</a>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+
+        // Clear search input
+        var input = document.getElementById('catSearch');
+        if (input) input.value = '';
+
+        // Close handlers
+        var closeBtn = overlay.querySelector('.pl-search-modal-close');
+        closeBtn.addEventListener('click', function() { closeModal(overlay); });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeModal(overlay);
+        });
+        document.addEventListener('keydown', function handler(e) {
+            if (e.key === 'Escape') {
+                closeModal(overlay);
+                document.removeEventListener('keydown', handler);
+            }
+        });
+
+        function closeModal(el) {
+            el.classList.remove('visible');
+            setTimeout(function() { if (el.parentNode) el.remove(); }, 300);
+        }
     }
 
     // ========================================

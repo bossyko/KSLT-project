@@ -5,6 +5,7 @@
 
 (function() {
     var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var client = window.supabaseClient;
 
     var L = isEn ? {
@@ -33,6 +34,32 @@
         levelIntermediate: 'Intermediate',
         levelAdvanced: 'Advanced',
         levelUnknown: 'Level not specified'
+    } : isKg ? {
+        heroTagline: 'KSLT Кызматтар',
+        heroTitle: 'Сенин теннисиң <span>ушул жерден башталат</span>',
+        heroDesc: 'Бишкектеги мыкты корттор жана кесипкөй машыктыруучулар',
+        courtsTitle: 'Корттор',
+        coachesTitle: 'Машыктыруучулар',
+        partnersTitle: 'Өнөктөш табуу',
+        viewAllCourts: 'Бардык корттор',
+        viewAllCoaches: 'Бардык машыктыруучулар',
+        viewAllPartners: 'Бардык өнөктөштөр',
+        details: 'Толугураак',
+        surface: 'Жабуу',
+        price: 'Баа',
+        experience: 'Тажрыйба',
+        level: 'Деңгээл',
+        years: 'жыл',
+        emptyCourts: 'Жеткиликтүү корттор жок',
+        emptyCoaches: 'Жеткиликтүү машыктыруучулар жок',
+        emptyPartners: 'Жеткиликтүү өнөктөштөр жок',
+        from: 'дан',
+        online: 'Онлайн',
+        offline: 'Оффлайн',
+        levelBeginner: 'Башталгыч',
+        levelIntermediate: 'Орточо',
+        levelAdvanced: 'Алдыңкы',
+        levelUnknown: 'Деңгээл көрсөтүлгөн эмес'
     } : {
         heroTagline: 'KSLT Услуги',
         heroTitle: 'Ваш теннис <span>начинается здесь</span>',
@@ -61,11 +88,11 @@
         levelUnknown: 'Уровень не указан'
     };
 
-    var courtPage = isEn ? 'court-en.html' : 'court.html';
-    var coachPage = isEn ? 'coach-en.html' : 'coach.html';
-    var courtsPage = isEn ? 'courts-en.html' : 'courts.html';
-    var coachesPage = isEn ? 'coaches-en.html' : 'coaches.html';
-    var partnersPage = isEn ? 'partners-en.html' : 'partners.html';
+    var courtPage = isEn ? 'court-en.html' : (isKg ? 'court-kg.html' : 'court.html');
+    var coachPage = isEn ? 'coach-en.html' : (isKg ? 'coach-kg.html' : 'coach.html');
+    var courtsPage = isEn ? 'courts-en.html' : (isKg ? 'courts-kg.html' : 'courts.html');
+    var coachesPage = isEn ? 'coaches-en.html' : (isKg ? 'coaches-kg.html' : 'coaches.html');
+    var partnersPage = isEn ? 'partners-en.html' : (isKg ? 'partners-kg.html' : 'partners.html');
 
     var _courts = [];
     var _coaches = [];
@@ -173,8 +200,8 @@
     }
 
     function getCourtAddress(c) {
-        var street = isEn ? (c.street_en || c.street) : c.street;
-        var district = isEn ? (c.district_en || c.district) : c.district;
+        var street = isEn ? (c.street_en || c.street) : (isKg ? (c.street_kg || c.street) : c.street);
+        var district = isEn ? (c.district_en || c.district) : (isKg ? (c.district_kg || c.district) : c.district);
         var parts = [];
         if (street) parts.push(street);
         if (c.building) parts.push(c.building);
@@ -204,19 +231,23 @@
             if (ch.name_en) return ch.name_en;
             if (ch.first_name_en && ch.last_name_en) return ch.first_name_en + ' ' + ch.last_name_en;
         }
+        if (isKg) {
+            if (ch.name_kg) return ch.name_kg;
+            if (ch.first_name_kg && ch.last_name_kg) return ch.first_name_kg + ' ' + ch.last_name_kg;
+        }
         if (ch.name) return ch.name;
         return (ch.last_name || '') + ' ' + (ch.first_name || '');
     }
 
     function getCoachSpec(ch) {
-        return isEn ? (ch.position_en || ch.position || '') : (ch.position || '');
+        return isEn ? (ch.position_en || ch.position || '') : (isKg ? (ch.position_kg || ch.position || '') : (ch.position || ''));
     }
 
     function getCoachLevel(ch) {
         if (!ch.tags || !ch.tags.length) return '';
         var levelTags = [];
-        if (ch.tags.indexOf('beginner') !== -1) levelTags.push(isEn ? 'Beginner' : 'Начинающие');
-        if (ch.tags.indexOf('advanced') !== -1) levelTags.push(isEn ? 'Advanced' : 'Продвинутые');
+        if (ch.tags.indexOf('beginner') !== -1) levelTags.push(isEn ? 'Beginner' : (isKg ? 'Башталгыч' : 'Начинающие'));
+        if (ch.tags.indexOf('advanced') !== -1) levelTags.push(isEn ? 'Advanced' : (isKg ? 'Алдыңкы' : 'Продвинутые'));
         return levelTags.join(', ');
     }
 
@@ -328,7 +359,7 @@
 
     // --- Featured Court ---
     function renderFeaturedCourt(c) {
-        var name = isEn ? (c.name_en || c.name) : c.name;
+        var name = isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name);
         var addr = getCourtAddress(c);
         var surface = getCourtSurface(c);
         var price = getCourtMinPrice(c);
@@ -385,7 +416,7 @@
 
     // --- Compact Court (card for carousel) ---
     function renderCompactCourt(c, idx) {
-        var name = isEn ? (c.name_en || c.name) : c.name;
+        var name = isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name);
         var addr = getCourtAddress(c);
         var price = getCourtMinPrice(c);
         var photo = c.photo || '';
@@ -428,7 +459,7 @@
     }
 
     function getPartnerLevel(p) {
-        var category = isEn ? (p.category_name_en || p.category_name) : p.category_name;
+        var category = isEn ? (p.category_name_en || p.category_name) : (isKg ? (p.category_name_kg || p.category_name) : p.category_name);
         if (category) return category;
         var levelMap = { beginner: L.levelBeginner, intermediate: L.levelIntermediate, advanced: L.levelAdvanced };
         return (p.play_level && levelMap[p.play_level]) || L.levelUnknown;
@@ -550,8 +581,8 @@
         var container = document.getElementById('svSponsors');
         if (!container) return;
 
-        var title = isEn ? 'Partners & Sponsors' : 'ПАРТНЁРЫ И СПОНСОРЫ';
-        var generalLabel = isEn ? 'GENERAL SPONSOR' : 'ГЕНЕРАЛЬНЫЙ СПОНСОР';
+        var title = isEn ? 'Partners & Sponsors' : (isKg ? 'ӨНӨКТӨШТӨР ЖАНА ДЕМӨӨРЧҮЛӨР' : 'ПАРТНЁРЫ И СПОНСОРЫ');
+        var generalLabel = isEn ? 'GENERAL SPONSOR' : (isKg ? 'БАШ ДЕМӨӨРЧҮ' : 'ГЕНЕРАЛЬНЫЙ СПОНСОР');
 
         container.innerHTML =
             '<div class="section-header"><h2>' + title + '</h2></div>' +
