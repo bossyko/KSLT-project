@@ -29,6 +29,11 @@
 
         <!-- Auth Card -->
         <div class="auth-card">
+            <!-- Ban Notice -->
+            <div id="banNotice" style="display:none;background:rgba(255,59,48,0.12);border:1px solid rgba(255,59,48,0.3);border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#ff6b6b;font-size:0.9rem;text-align:center;">
+                Сиздин аккаунтуңуз бөгөттөлгөн. Администраторго кайрылыңыз.
+            </div>
+
             <!-- Tabs -->
             <div class="auth-tabs">
                 <button class="auth-tab active" data-tab="signin">Кирүү</button>
@@ -386,5 +391,6 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js"></script>
     <script src="../js/auth.js"></script>
+    <script>if(new URLSearchParams(window.location.search).get('banned')==='1'){var bn=document.getElementById('banNotice');if(bn)bn.style.display='block';}</script>
 </body>
 </html>

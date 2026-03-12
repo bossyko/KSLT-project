@@ -44,10 +44,11 @@
                             '<th>' + L.thUser + '</th>' +
                             '<th>' + L.thEmail + '</th>' +
                             '<th>' + L.thRole + '</th>' +
+                            '<th>' + L.usrThStatus + '</th>' +
                             '<th>' + L.usrThMembership + '</th>' +
                             '<th>' + L.thDate + '</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -79,7 +80,7 @@
         var isAdm = A.currentRole === 'admin';
 
         var query = A.client.from('profiles')
-            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at')
+            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at, banned_until')
             .order('created_at', { ascending: false });
 
         if (usrFilterRole) {
@@ -120,7 +121,7 @@
 
         if (items.length === 0) {
             tbody.innerHTML =
-                '<tr><td colspan="5" style="text-align:center;padding:60px 20px;">' +
+                '<tr><td colspan="6" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">👥</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.usrNoUsers + '</div>' +
                     '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.usrNoUsersText + '</div>' +
@@ -157,6 +158,19 @@
                 memBadge = '<span style="color:var(--text-dim);font-size:0.8rem;">' + L.usrNone + '</span>';
             }
 
+            // Ban status badge
+            var isBanned = u.banned_until && new Date(u.banned_until) > new Date();
+            var banBadge;
+            if (isBanned) {
+                var isPermanent = new Date(u.banned_until).getFullYear() >= 2099;
+                var banLabel = isPermanent
+                    ? L.usrBannedForever
+                    : L.usrBannedUntil + ' ' + u.banned_until.split('T')[0];
+                banBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + banLabel + '</span>';
+            } else {
+                banBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(52,199,89,0.15);color:#34c759;">' + L.usrStatusActive + '</span>';
+            }
+
             // Online indicator
             var isOnline = u.last_seen && (now - new Date(u.last_seen).getTime()) < 5 * 60 * 1000;
             var onlineDot = isOnline ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#34c759;margin-left:6px;" title="' + L.usrOnline + '"></span>' : '';
@@ -169,6 +183,7 @@
                 '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml + '<span>' + (name || email) + onlineDot + '</span></div></td>' +
                 '<td style="color:var(--text-dim);font-size:0.85rem;">' + email + '</td>' +
                 '<td>' + roleBadge + '</td>' +
+                '<td>' + banBadge + '</td>' +
                 '<td>' + memBadge + '</td>' +
                 '<td style="color:var(--text-dim);font-size:0.85rem;">' + regDate + '</td>';
 
@@ -209,7 +224,7 @@
         if (!A.client) return;
 
         var userRes = await A.client.from('profiles')
-            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at')
+            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at, banned_until, ban_reason')
             .eq('id', id)
             .single();
 
@@ -288,8 +303,28 @@
                 '</div>';
         }
 
-        // Role actions
+        // Moderation section (ban/unban) — admin only, not self, not other admin
         var isSelf = user.id === A.currentUserId;
+        var isUserBanned = user.banned_until && new Date(user.banned_until) > new Date();
+        var moderationHtml = '';
+        if (!isSelf && user.role !== 'admin') {
+            if (isUserBanned) {
+                var isPerm = new Date(user.banned_until).getFullYear() >= 2099;
+                var banDateStr = isPerm ? L.usrBannedForever : (L.usrBannedUntil + ' ' + user.banned_until.split('T')[0]);
+                var banReasonStr = user.ban_reason ? '<div style="color:var(--text-dim);font-size:0.8rem;margin-top:4px;">' + A.esc(user.ban_reason) + '</div>' : '';
+                moderationHtml =
+                    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
+                        '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:0.8rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + L.usrBanned + ': ' + banDateStr + '</span>' +
+                    '</div>' +
+                    banReasonStr +
+                    '<button class="ad-btn ad-btn-sm" id="adUsrUnban" style="margin-top:8px;background:rgba(52,199,89,0.15);color:#34c759;border:1px solid rgba(52,199,89,0.3);">' + L.usrUnbanUser + '</button>';
+            } else {
+                moderationHtml =
+                    '<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrBan">' + L.usrBanUser + '</button>';
+            }
+        }
+
+        // Role actions
         var roleActionsHtml = '';
         if (isSelf) {
             roleActionsHtml = '<div style="color:var(--text-dim);font-size:0.85rem;font-style:italic;">' + L.usrCannotDeleteSelf + '</div>';
@@ -349,6 +384,8 @@
                 // Membership
                 '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrMembership + '</h3>' +
                 memHtml +
+                // Moderation
+                (moderationHtml ? '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrModeration + '</h3>' + moderationHtml : '') +
                 // Actions
                 '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrActions + '</h3>' +
                 '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
@@ -409,6 +446,22 @@
         if (deleteBtn) {
             deleteBtn.addEventListener('click', function() {
                 deleteUserHandler(user.id);
+            });
+        }
+
+        // Ban button
+        var banBtn = document.getElementById('adUsrBan');
+        if (banBtn) {
+            banBtn.addEventListener('click', function() {
+                openBanModal(user.id);
+            });
+        }
+
+        // Unban button
+        var unbanBtn = document.getElementById('adUsrUnban');
+        if (unbanBtn) {
+            unbanBtn.addEventListener('click', function() {
+                unbanUserHandler(user.id);
             });
         }
     }
@@ -542,6 +595,109 @@
                 A.showToast('Error: ' + err.message, 'error');
             }
         });
+    }
+
+    function openBanModal(userId) {
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-confirm-overlay';
+        overlay.innerHTML =
+            '<div class="ad-confirm-modal" style="max-width:440px;">' +
+                '<div class="ad-confirm-title">' + L.usrBanConfirm + '</div>' +
+                '<div style="margin-bottom:16px;">' +
+                    '<label class="ad-field-label">' + L.usrBanDuration + '</label>' +
+                    '<select class="ad-field-input" id="adBanDuration">' +
+                        '<option value="1d">' + L.usrBan1d + '</option>' +
+                        '<option value="3d">' + L.usrBan3d + '</option>' +
+                        '<option value="7d" selected>' + L.usrBan7d + '</option>' +
+                        '<option value="30d">' + L.usrBan30d + '</option>' +
+                        '<option value="permanent">' + L.usrBanPermanent + '</option>' +
+                    '</select>' +
+                '</div>' +
+                '<div style="margin-bottom:16px;">' +
+                    '<label class="ad-field-label">' + L.usrBanReason + '</label>' +
+                    '<textarea class="ad-field-input" id="adBanReason" rows="2" style="resize:vertical;"></textarea>' +
+                '</div>' +
+                '<div class="ad-confirm-actions">' +
+                    '<button class="ad-btn ad-btn-secondary" id="adBanCancel">' + L.cancel + '</button>' +
+                    '<button class="ad-btn ad-btn-danger" id="adBanSubmit">' + L.usrBanUser + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        document.getElementById('adBanCancel').addEventListener('click', function() { overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+        document.getElementById('adBanSubmit').addEventListener('click', async function() {
+            var duration = document.getElementById('adBanDuration').value;
+            var reason = document.getElementById('adBanReason').value.trim();
+
+            var btn = document.getElementById('adBanSubmit');
+            btn.textContent = L.saving;
+            btn.disabled = true;
+
+            try {
+                var session = await A.client.auth.getSession();
+                var token = session.data.session.access_token;
+
+                var resp = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        action: 'ban_user',
+                        user_id: userId,
+                        duration: duration,
+                        reason: reason || undefined
+                    })
+                });
+
+                var data = await resp.json();
+                if (data.error) {
+                    A.showToast(data.error, 'error');
+                    btn.textContent = L.usrBanUser;
+                    btn.disabled = false;
+                } else {
+                    overlay.remove();
+                    A.showToast(L.usrBanSuccess, 'success');
+                    loadAndEditUser(userId);
+                }
+            } catch (err) {
+                A.showToast('Error: ' + err.message, 'error');
+                btn.textContent = L.usrBanUser;
+                btn.disabled = false;
+            }
+        });
+    }
+
+    async function unbanUserHandler(userId) {
+        A.showConfirm(L.usrUnbanUser, L.usrUnbanConfirm, async function() {
+            try {
+                var session = await A.client.auth.getSession();
+                var token = session.data.session.access_token;
+
+                var resp = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ action: 'unban_user', user_id: userId })
+                });
+
+                var data = await resp.json();
+                if (data.error) {
+                    A.showToast(data.error, 'error');
+                } else {
+                    A.showToast(L.usrUnbanSuccess, 'success');
+                    loadAndEditUser(userId);
+                }
+            } catch (err) {
+                A.showToast('Error: ' + err.message, 'error');
+            }
+        }, L.usrUnbanUser);
     }
 
     function openAddManagerModal() {

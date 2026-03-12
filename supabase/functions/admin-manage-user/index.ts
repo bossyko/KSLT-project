@@ -1,6 +1,6 @@
 // ============================================
 // KSLT — Admin Manage User Edge Function
-// Operations: create_manager, delete_user
+// Operations: create_manager, delete_user, ban_user, unban_user
 // JWT auth + admin role check
 // ============================================
 
@@ -10,6 +10,8 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+const TELEGRAM_API = 'https://api.telegram.org/bot'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -98,6 +100,154 @@ Deno.serve(async (req) => {
       return json({ success: true, action: 'invited', user_id: newUserId })
     }
 
+    // ---- BAN USER ----
+    if (action === 'ban_user') {
+      const { user_id, duration, reason } = body
+      if (!user_id) return json({ error: 'user_id required' }, 400)
+      if (!duration) return json({ error: 'duration required' }, 400)
+
+      // Cannot ban self
+      if (user_id === user.id) {
+        return json({ error: 'Cannot ban yourself' }, 400)
+      }
+
+      // Cannot ban another admin
+      const { data: targetProfile } = await db
+        .from('profiles')
+        .select('role, telegram_chat_id')
+        .eq('id', user_id)
+        .single()
+
+      if (!targetProfile) return json({ error: 'User not found' }, 404)
+      if (targetProfile.role === 'admin') {
+        return json({ error: 'Cannot ban admin' }, 403)
+      }
+
+      // Calculate banned_until
+      const durationMap: Record<string, number> = {
+        '1d': 1, '3d': 3, '7d': 7, '30d': 30
+      }
+      let bannedUntil: string
+      if (duration === 'permanent') {
+        bannedUntil = '2099-12-31T23:59:59.000Z'
+      } else {
+        const days = durationMap[duration]
+        if (!days) return json({ error: 'Invalid duration' }, 400)
+        const dt = new Date()
+        dt.setDate(dt.getDate() + days)
+        bannedUntil = dt.toISOString()
+      }
+
+      // Update profile
+      await db
+        .from('profiles')
+        .update({
+          banned_until: bannedUntil,
+          ban_reason: reason || null
+        })
+        .eq('id', user_id)
+
+      // Ban in Supabase Auth (blocks login)
+      const banDuration = duration === 'permanent' ? '876000h' : (durationMap[duration] * 24) + 'h'
+      await db.auth.admin.updateUserById(user_id, { ban_duration: banDuration })
+
+      // Telegram: restrict + notify
+      const tgToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
+      const groupChatId = Deno.env.get('TELEGRAM_GROUP_CHAT_ID')
+      const tgChatId = targetProfile.telegram_chat_id
+
+      if (tgToken && tgChatId) {
+        // Restrict in group (read-only)
+        if (groupChatId) {
+          await tgFetch(tgToken, 'restrictChatMember', {
+            chat_id: groupChatId,
+            user_id: tgChatId,
+            permissions: {
+              can_send_messages: false,
+              can_send_media_messages: false,
+              can_send_polls: false,
+              can_send_other_messages: false,
+              can_add_web_page_previews: false,
+              can_change_info: false,
+              can_invite_users: false,
+              can_pin_messages: false
+            }
+          })
+        }
+
+        // DM notification
+        const banDateStr = duration === 'permanent'
+          ? 'навсегда'
+          : new Date(bannedUntil).toLocaleDateString('ru-RU')
+        const reasonText = reason ? '\nПричина: ' + reason : ''
+        await tgFetch(tgToken, 'sendMessage', {
+          chat_id: tgChatId,
+          text: `⛔ Вы заблокированы до: ${banDateStr}${reasonText}`,
+          parse_mode: 'HTML'
+        })
+      }
+
+      return json({ success: true, action: 'banned', banned_until: bannedUntil })
+    }
+
+    // ---- UNBAN USER ----
+    if (action === 'unban_user') {
+      const { user_id } = body
+      if (!user_id) return json({ error: 'user_id required' }, 400)
+
+      const { data: targetProfile } = await db
+        .from('profiles')
+        .select('telegram_chat_id')
+        .eq('id', user_id)
+        .single()
+
+      // Clear ban in profile
+      await db
+        .from('profiles')
+        .update({
+          banned_until: null,
+          ban_reason: null
+        })
+        .eq('id', user_id)
+
+      // Unban in Supabase Auth
+      await db.auth.admin.updateUserById(user_id, { ban_duration: 'none' })
+
+      // Telegram: restore + notify
+      const tgToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
+      const groupChatId = Deno.env.get('TELEGRAM_GROUP_CHAT_ID')
+      const tgChatId = targetProfile?.telegram_chat_id
+
+      if (tgToken && tgChatId) {
+        // Restore permissions in group
+        if (groupChatId) {
+          await tgFetch(tgToken, 'restrictChatMember', {
+            chat_id: groupChatId,
+            user_id: tgChatId,
+            permissions: {
+              can_send_messages: true,
+              can_send_media_messages: true,
+              can_send_polls: true,
+              can_send_other_messages: true,
+              can_add_web_page_previews: true,
+              can_change_info: false,
+              can_invite_users: true,
+              can_pin_messages: false
+            }
+          })
+        }
+
+        // DM notification
+        await tgFetch(tgToken, 'sendMessage', {
+          chat_id: tgChatId,
+          text: '✅ Вы разблокированы. Добро пожаловать обратно!',
+          parse_mode: 'HTML'
+        })
+      }
+
+      return json({ success: true, action: 'unbanned' })
+    }
+
     // ---- DELETE USER ----
     if (action === 'delete_user') {
       const { user_id } = body
@@ -111,12 +261,34 @@ Deno.serve(async (req) => {
       // Cannot delete another admin
       const { data: targetProfile } = await db
         .from('profiles')
-        .select('role')
+        .select('role, telegram_chat_id')
         .eq('id', user_id)
         .single()
 
       if (targetProfile && targetProfile.role === 'admin') {
         return json({ error: 'Cannot delete admin' }, 403)
+      }
+
+      // Telegram: notify + kick from group
+      const tgToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
+      const groupChatId = Deno.env.get('TELEGRAM_GROUP_CHAT_ID')
+      const tgChatId = targetProfile?.telegram_chat_id
+
+      if (tgToken && tgChatId) {
+        // DM notification (before kick)
+        await tgFetch(tgToken, 'sendMessage', {
+          chat_id: tgChatId,
+          text: '⛔ Ваш аккаунт KSLT удалён.',
+          parse_mode: 'HTML'
+        })
+
+        // Kick from group
+        if (groupChatId) {
+          await tgFetch(tgToken, 'banChatMember', {
+            chat_id: groupChatId,
+            user_id: tgChatId
+          })
+        }
       }
 
       // Delete from auth (cascades to profiles via trigger/FK)
@@ -140,6 +312,19 @@ Deno.serve(async (req) => {
     return json({ error: 'Internal error' }, 500)
   }
 })
+
+// ---- Telegram API helper ----
+async function tgFetch(token: string, method: string, body: Record<string, unknown>) {
+  try {
+    await fetch(`${TELEGRAM_API}${token}/${method}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+  } catch (e) {
+    console.error(`TG ${method} error:`, e)
+  }
+}
 
 function json(data: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(data), {

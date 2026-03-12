@@ -6,8 +6,9 @@
     'use strict';
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var authPage = isEn ? 'auth-en.html' : 'auth.html';
-    var homePage = isEn ? '../index-en.html' : '../index.html';
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var authPage = isEn ? 'auth-en.html' : isKg ? 'auth-kg.html' : 'auth.html';
+    var homePage = isEn ? '../index-en.html' : isKg ? '../index-kg.html' : '../index.html';
 
     // Use shared client from supabase-config.js
     var client = window.supabaseClient;
@@ -40,6 +41,15 @@
                 var profileResult = await client.from('profiles').select('*').eq('id', window.ksltUser.id).single();
                 if (profileResult.data) {
                     window.ksltProfile = profileResult.data;
+
+                    // Ban check
+                    if (profileResult.data.banned_until && new Date(profileResult.data.banned_until) > new Date()) {
+                        await client.auth.signOut();
+                        localStorage.removeItem('kslt_role');
+                        window.location.href = authPage + '?banned=1';
+                        return;
+                    }
+
                     localStorage.setItem('kslt_role', profileResult.data.role);
                     if (profileResult.data.full_name) localStorage.setItem('kslt_name', profileResult.data.full_name);
                     if (profileResult.data.avatar_url) localStorage.setItem('kslt_avatar', profileResult.data.avatar_url);

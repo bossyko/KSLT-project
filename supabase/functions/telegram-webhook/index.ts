@@ -261,13 +261,23 @@ async function handleTournamentRegister(
   // 1. Find profile by telegram_chat_id
   const { data: profile } = await db
     .from('profiles')
-    .select('id, full_name, player_id, role')
+    .select('id, full_name, player_id, role, banned_until')
     .eq('telegram_chat_id', tgUserId)
     .limit(1)
     .single()
 
   if (!profile) {
     await answerCallbackQuery(token, query.id, 'Привяжите Telegram к аккаунту KSLT')
+    return
+  }
+
+  // 1.5. Ban check
+  if (profile.banned_until && new Date(profile.banned_until) > new Date()) {
+    const isPerm = new Date(profile.banned_until).getFullYear() >= 2099
+    const banMsg = isPerm
+      ? '⛔ Вы заблокированы навсегда'
+      : '⛔ Вы заблокированы до ' + new Date(profile.banned_until).toLocaleDateString('ru-RU')
+    await answerCallbackQuery(token, query.id, banMsg)
     return
   }
 
