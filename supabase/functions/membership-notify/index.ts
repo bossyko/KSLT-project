@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
       const text =
         `Здравствуйте${name ? ', ' + name : ''}! Ваше членство KSLT истекает через 7 дней (${expiresFormatted}).\n` +
         `Для продления оплатите 1000 сом/мес.\n` +
-        `Подробнее: https://kslt.kg/pages/pricing.html`
+        `Подробнее: https://kslt.netlify.app/pages/pricing.html`
 
       const success = await sendMessage(profile.telegram_chat_id, text)
 
