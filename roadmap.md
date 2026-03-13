@@ -30,6 +30,8 @@
 - [x] Telegram bot: tournament registration announcements to group
 - [x] Telegram bot: inline registration (callback query)
 - [x] pg_cron: auto-notify when registration opens (daily)
+- [ ] Tournament reminders: за 3 дня + за 1 день до турнира (Telegram + email)
+- [ ] Настройка уведомлений: игрок может отключить напоминания (Telegram / email / оба)
 - [ ] Email templates (Resend)
 - [ ] SMS integration (Nikita.kg)
 - [ ] Push notifications
@@ -60,6 +62,7 @@
 
 - [ ] AI chatbot (Claude/OpenAI, knowledge base, chat widget)
 - [ ] Court booking system (calendar, payments, reminders)
+- [ ] Auto-scheduling: авто-распределение матчей по кортам и времени (корты, интервалы, конфликты игроков)
 - [ ] Shop / merchandise (catalog, cart, orders, admin)
 - [ ] PWA (Service Worker, offline mode, push notifications)
 - [ ] Coach reviews (ratings + comments from members)
@@ -100,6 +103,16 @@
 
 - [ ] Two-step password reset: email (existing) + SMS code verification
 - [ ] SMS verification provider (Twilio / Nikita.kg)
+
+### User Ban & Moderation System
+- [ ] Temp ban (1d / 3d / 7d / 30d) — Supabase `ban_duration` + auto-unban
+- [ ] Permanent ban — Supabase `banned_until` forever
+- [ ] Early unban — restore access from admin panel
+- [ ] Telegram restrict on ban (read-only in group, no tournament registration via bot)
+- [ ] Telegram kick on delete (full removal from group)
+- [ ] Ban UI in admin Users section (status badge, ban/unban buttons, duration modal)
+- [ ] Ban reason field (optional, stored in profiles)
+- [ ] Edge Function: ban_user, unban_user actions in admin-manage-user
 
 ## Infrastructure (Backlog)
 
