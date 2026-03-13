@@ -1214,6 +1214,95 @@ select.db-field-input {
     margin-bottom: 8px;
 }
 
+/* ---- All Badges Grid (expandable) ---- */
+.db-badges-expand-btn {
+    display: block;
+    width: 100%;
+    background: none;
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px 16px;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: center;
+}
+
+.db-badges-expand-btn:hover {
+    border-color: var(--accent);
+    background: rgba(204, 255, 0, 0.04);
+}
+
+.db-badges-expand-btn.active {
+    border-style: solid;
+    border-color: var(--accent);
+    background: rgba(204, 255, 0, 0.06);
+}
+
+.db-badges-all {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.db-badge-all-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    background: var(--surface-glass);
+    border: 1px solid var(--border-subtle);
+    transition: border-color var(--transition-fast);
+}
+
+.db-badge-all-earned {
+    border-color: rgba(204, 255, 0, 0.2);
+}
+
+.db-badge-all-locked {
+    opacity: 0.5;
+}
+
+.db-badge-all-icon {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    width: 32px;
+    text-align: center;
+}
+
+.db-badge-all-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.db-badge-all-name {
+    font-weight: 600;
+    font-size: 0.88rem;
+    margin-bottom: 1px;
+}
+
+.db-badge-all-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.db-badge-all-earned .db-badge-all-desc {
+    color: var(--accent);
+}
+
+.db-badge-all-check {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
 /* ---- Badge Toast ---- */
 .db-badge-toast {
     position: fixed;

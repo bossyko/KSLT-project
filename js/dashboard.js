@@ -1442,7 +1442,7 @@
             var results = await Promise.all([
                 client.from('badge_definitions').select('*').order('sort_order', { ascending: true }),
                 client.from('player_badges')
-                    .select('badge_id, earned_at, badge:badge_definitions(icon, name, name_en, name_kg)')
+                    .select('badge_id, earned_at, badge:badge_definitions(icon, name, name_en, name_kg, description, description_en, description_kg)')
                     .eq('player_id', playerId)
                     .order('earned_at', { ascending: true })
             ]);
@@ -1457,6 +1457,9 @@
             earned.forEach(function(pb) { earnedMap[pb.badge_id] = pb; });
 
             var pct = Math.round(earned.length / total * 100);
+
+            function bName(b) { return isEn ? (b.name_en || b.name) : (isKg ? (b.name_kg || b.name) : b.name); }
+            function bDesc(b) { return isEn ? (b.description_en || b.description) : (isKg ? (b.description_kg || b.description) : b.description); }
 
             var html = '<div class="db-card">';
             html += '<div class="db-card-title">' + badgesLabel + '</div>';
@@ -1473,16 +1476,15 @@
                 earned.forEach(function(pb) {
                     var b = pb.badge;
                     if (!b) return;
-                    var name = isEn ? (b.name_en || b.name) : (isKg ? (b.name_kg || b.name) : b.name);
-                    html += '<div class="db-badge-item db-badge-earned" title="' + name + '">';
+                    html += '<div class="db-badge-item db-badge-earned" title="' + bName(b) + '">';
                     html += '<span class="db-badge-icon">' + b.icon + '</span>';
-                    html += '<span class="db-badge-name">' + name + '</span>';
+                    html += '<span class="db-badge-name">' + bName(b) + '</span>';
                     html += '</div>';
                 });
                 html += '</div>';
             }
 
-            // Nearest locked badges (up to 3 for motivation)
+            // Nearest locked (3 goals)
             var lockedDefs = allDefs.filter(function(d) { return !earnedMap[d.id] && d.condition_type !== 'manual'; });
             var nearest = lockedDefs.slice(0, 3);
             if (nearest.length > 0) {
@@ -1490,21 +1492,59 @@
                 html += '<div class="db-badges-next-label">' + nextLabel + '</div>';
                 html += '<div class="db-badges-earned">';
                 nearest.forEach(function(d) {
-                    var name = isEn ? (d.name_en || d.name) : (isKg ? (d.name_kg || d.name) : d.name);
-                    var desc = isEn ? (d.description_en || d.description) : (isKg ? (d.description_kg || d.description) : d.description);
-                    html += '<div class="db-badge-item db-badge-locked" title="' + desc + '">';
+                    html += '<div class="db-badge-item db-badge-locked" title="' + bDesc(d) + '">';
                     html += '<span class="db-badge-icon db-badge-icon-locked">' + d.icon + '</span>';
-                    html += '<span class="db-badge-name">' + name + '</span>';
+                    html += '<span class="db-badge-name">' + bName(d) + '</span>';
                     html += '</div>';
                 });
                 html += '</div>';
             }
 
-            html += '</div>';
+            // "All achievements" expandable grid
+            var allLabel = isKg ? 'Бардык жетишкендиктер' : isEn ? 'All achievements' : 'Все достижения';
+            var collapseLabel = isKg ? 'Жашыруу' : isEn ? 'Collapse' : 'Свернуть';
+            html += '<button class="db-badges-expand-btn" id="dbBadgesExpandBtn">' + allLabel + ' (' + total + ')</button>';
+            html += '<div class="db-badges-all" id="dbBadgesAll" style="display:none;">';
+
+            allDefs.forEach(function(d) {
+                var isEarned = !!earnedMap[d.id];
+                var cls = isEarned ? 'db-badge-all-item db-badge-all-earned' : 'db-badge-all-item db-badge-all-locked';
+                var subtitle = isEarned ? formatBadgeDate(earnedMap[d.id].earned_at) : bDesc(d);
+                html += '<div class="' + cls + '">';
+                html += '<div class="db-badge-all-icon' + (isEarned ? '' : ' db-badge-icon-locked') + '">' + d.icon + '</div>';
+                html += '<div class="db-badge-all-info">';
+                html += '<div class="db-badge-all-name">' + bName(d) + '</div>';
+                html += '<div class="db-badge-all-desc">' + subtitle + '</div>';
+                html += '</div>';
+                if (isEarned) html += '<div class="db-badge-all-check">✓</div>';
+                html += '</div>';
+            });
+
+            html += '</div>'; // .db-badges-all
+            html += '</div>'; // .db-card
             container.innerHTML = html;
+
+            // Expand/collapse toggle
+            var expandBtn = document.getElementById('dbBadgesExpandBtn');
+            var allGrid = document.getElementById('dbBadgesAll');
+            var expanded = false;
+            expandBtn.addEventListener('click', function() {
+                expanded = !expanded;
+                allGrid.style.display = expanded ? '' : 'none';
+                expandBtn.textContent = expanded ? collapseLabel : (allLabel + ' (' + total + ')');
+                expandBtn.classList.toggle('active', expanded);
+            });
         } catch(e) {
             console.warn('[KSLT] badges stats load error:', e);
         }
+    }
+
+    function formatBadgeDate(dateStr) {
+        if (!dateStr) return '';
+        var d = new Date(dateStr);
+        var dd = d.getDate();
+        var mm = d.getMonth() + 1;
+        return dd + '.' + (mm < 10 ? '0' : '') + mm + '.' + d.getFullYear();
     }
 
     // ---- Rating History Chart ----
