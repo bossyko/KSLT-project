@@ -450,10 +450,24 @@
     // SUPABASE: Real Matches
     // ================================================
 
-    // Look up player from static data
+    // Cache for Supabase-loaded player names (opponent display)
+    var _playerCache = {};
+
+    // Look up player from static data or cache
     function lookupPlayer(id) {
         var d = findPlayer(id);
         if (d) return { id: id, name: d.player.name, photo: d.player.photo || '' };
+        if (_playerCache[id]) return _playerCache[id];
+        // Async load into cache for next render
+        if (client) {
+            client.from('players').select('id, first_name, last_name, photo_url').eq('id', id).single()
+                .then(function(res) {
+                    if (res.data) {
+                        var n = ((res.data.last_name || '') + ' ' + (res.data.first_name || '')).trim();
+                        _playerCache[id] = { id: id, name: n || id, photo: res.data.photo_url || '' };
+                    }
+                });
+        }
         return { id: id, name: id, photo: '' };
     }
 
@@ -807,7 +821,61 @@
             return;
         }
 
-        var data = findPlayer(playerId);
+        var data = null;
+        try {
+            data = findPlayer(playerId);
+        } catch(e) {
+            console.warn('[KSLT] findPlayer static error:', e);
+        }
+        console.log('[KSLT] Player lookup:', playerId, 'static:', !!data, 'client:', !!client);
+
+        // Supabase fallback — if player not in static data, load from DB
+        if (!data && client) {
+            try {
+                var plrRes = await client.from('players').select('*').eq('id', playerId).single();
+                console.log('[KSLT] Supabase fallback:', plrRes.error ? plrRes.error.message : 'found', plrRes.data);
+                if (plrRes.data) {
+                    var p = plrRes.data;
+                    var catName = '';
+                    var catKey = '';
+                    var rank = 0;
+                    if (p.category_id) {
+                        var catRes = await client.from('categories').select('*').eq('id', p.category_id).single();
+                        if (catRes.data) {
+                            var c = catRes.data;
+                            catName = isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name);
+                            catKey = (c.gender === 'female' ? 'women-' : 'men-') + (c.name_en || c.name).toLowerCase().replace(/[^a-z0-9-]/g, '');
+                        }
+                        // Calculate rank in category
+                        var rankRes = await client.from('players').select('id', { count: 'exact', head: true })
+                            .eq('category_id', p.category_id).gt('points', p.points || 0);
+                        rank = (rankRes.count || 0) + 1;
+                    }
+                    var fullName = ((p.last_name || '') + ' ' + (p.first_name || '')).trim();
+                    data = {
+                        player: {
+                            id: p.id,
+                            name: fullName || playerId,
+                            photo: p.photo_url || '',
+                            country: p.country || '',
+                            points: p.points || 0,
+                            wins: p.wins || 0,
+                            losses: p.losses || 0,
+                            change: p.change || 0,
+                            form: p.form || [],
+                            badges: [],
+                            online: false
+                        },
+                        category: { name: catName || '\u2014', players: [] },
+                        categoryKey: catKey,
+                        rank: rank
+                    };
+                }
+            } catch(e) {
+                console.error('[KSLT] player Supabase fallback error:', e);
+            }
+        }
+
         if (!data) {
             renderNotFound();
             return;

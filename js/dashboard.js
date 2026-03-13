@@ -107,7 +107,12 @@
         invNoInvites: 'Чакыруулар жок',
         invNoInvitesText: '«Өнөктөш табуу» барагынан оюнга чакыруулар жөнөтүңүз',
         ratingHistory: 'Рейтинг тарыхы',
-        rhTotalPoints: 'Жалпы упайлар'
+        rhTotalPoints: 'Жалпы упайлар',
+        qrShare: 'QR код',
+        qrTitle: 'Профилди бөлүшүү',
+        qrDownload: 'PNG жүктөө',
+        qrCopy: 'Шилтемени көчүрүү',
+        qrCopied: 'Көчүрүлдү!'
     } : isEn ? {
         profile: 'Profile', tournaments: 'My Tournaments',
         stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
@@ -206,7 +211,12 @@
         invNoInvites: 'No invitations yet',
         invNoInvitesText: 'Send game invitations from the Partners page',
         ratingHistory: 'Rating History',
-        rhTotalPoints: 'Total Points'
+        rhTotalPoints: 'Total Points',
+        qrShare: 'QR Code',
+        qrTitle: 'Share Profile',
+        qrDownload: 'Download PNG',
+        qrCopy: 'Copy Link',
+        qrCopied: 'Copied!'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
@@ -305,7 +315,12 @@
         invNoInvites: 'Приглашений пока нет',
         invNoInvitesText: 'Отправляйте приглашения со страницы «Найти партнёра»',
         ratingHistory: 'История рейтинга',
-        rhTotalPoints: 'Всего очков'
+        rhTotalPoints: 'Всего очков',
+        qrShare: 'QR код',
+        qrTitle: 'Поделиться профилем',
+        qrDownload: 'Скачать PNG',
+        qrCopy: 'Скопировать ссылку',
+        qrCopied: 'Скопировано!'
     };
 
     // Use shared Supabase client from supabase-config.js
@@ -344,6 +359,7 @@
     // ---- Auth Ready Callback ----
     window.onAuthReady = function(user, profile) {
         renderSidebar(profile);
+        initQrButton(profile);
         renderMobileTabs();
         renderProfile(user, profile);
         renderMembershipCard().then(function(state) {
@@ -534,12 +550,16 @@
 
         var roleLabel = L['role_' + profile.role] || profile.role;
 
+        var qrBtnHtml = profile.player_id
+            ? '<button class="db-sidebar-qr-btn" id="dbQrBtn" title="' + L.qrShare + '"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><line x1="20" y1="14" x2="20" y2="20"/><line x1="14" y1="20" x2="20" y2="20"/></svg> ' + L.qrShare + '</button>'
+            : '';
+
         container.innerHTML =
             '<div class="db-sidebar-user">' +
                 avatarHtml +
                 '<div class="db-sidebar-name">' + (profile.full_name || 'User') + '</div>' +
-                '<div class="db-sidebar-email">' + (profile.email || '') + '</div>' +
                 '<div class="db-sidebar-role">' + roleLabel + '</div>' +
+                qrBtnHtml +
             '</div>' +
             '<ul class="db-sidebar-nav">' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link active" data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + L.profile + '</button></li>' +
@@ -548,6 +568,137 @@
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="invitations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>' + L.invitations + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</button></li>' +
             '</ul>';
+    }
+
+    // ---- QR Code Modal ----
+    function initQrButton(profile) {
+        var btn = document.getElementById('dbQrBtn');
+        if (!btn || !profile.player_id) return;
+
+        btn.addEventListener('click', function() {
+            showQrModal(profile);
+        });
+    }
+
+    function showQrModal(profile) {
+        // Remove existing modal
+        var old = document.getElementById('dbQrModal');
+        if (old) old.remove();
+
+        var baseUrl = 'https://kslt.netlify.app';
+        var playerUrl = baseUrl + '/pages/player.html?id=' + encodeURIComponent(profile.player_id);
+
+        var overlay = document.createElement('div');
+        overlay.id = 'dbQrModal';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+
+        overlay.innerHTML =
+            '<div style="background:#1a1a1a;border:1px solid #333;border-radius:16px;padding:32px;text-align:center;max-width:340px;width:90%;position:relative;">' +
+                '<button id="dbQrClose" style="position:absolute;top:12px;right:16px;background:none;border:none;color:#888;font-size:24px;cursor:pointer;">&times;</button>' +
+                '<div style="font-size:1.5rem;font-weight:700;color:#CCFF00;margin-bottom:4px;">KSLT</div>' +
+                '<div style="font-size:0.85rem;color:#888;margin-bottom:20px;">' + L.qrTitle + '</div>' +
+                '<div id="dbQrCode" style="display:inline-block;padding:12px;background:#fff;border-radius:8px;margin-bottom:16px;"></div>' +
+                '<div style="font-weight:600;font-size:1rem;color:#fff;margin-bottom:4px;">' + escHtml(profile.full_name || '') + '</div>' +
+                '<div id="dbQrCategory" style="font-size:0.85rem;color:var(--accent);margin-bottom:20px;"></div>' +
+                '<div style="display:flex;gap:8px;justify-content:center;">' +
+                    '<button class="db-btn db-btn-primary" id="dbQrDownload">' + L.qrDownload + '</button>' +
+                    '<button class="db-btn db-btn-outline" id="dbQrCopy">' + L.qrCopy + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        // Generate QR
+        var qrEl = document.getElementById('dbQrCode');
+        var qr = new QRCode(qrEl, {
+            text: playerUrl,
+            width: 200,
+            height: 200,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // Load category
+        if (client && profile.player_id) {
+            client.from('players').select('category_id').eq('id', profile.player_id).single().then(function(res) {
+                if (res.data && res.data.category_id) {
+                    client.from('categories').select('name').eq('id', res.data.category_id).single().then(function(catRes) {
+                        var catEl = document.getElementById('dbQrCategory');
+                        if (catEl && catRes.data) catEl.textContent = catRes.data.name;
+                    });
+                }
+            });
+        }
+
+        // Close
+        document.getElementById('dbQrClose').addEventListener('click', function() { overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+        // Copy link
+        document.getElementById('dbQrCopy').addEventListener('click', function() {
+            navigator.clipboard.writeText(playerUrl).then(function() {
+                var btn = document.getElementById('dbQrCopy');
+                btn.textContent = L.qrCopied;
+                setTimeout(function() { btn.textContent = L.qrCopy; }, 2000);
+            });
+        });
+
+        // Download PNG (composite: logo + QR + name)
+        document.getElementById('dbQrDownload').addEventListener('click', function() {
+            setTimeout(function() {
+                var qrCanvas = qrEl.querySelector('canvas');
+                if (!qrCanvas) return;
+
+                var w = 300;
+                var h = 400;
+                var c = document.createElement('canvas');
+                c.width = w;
+                c.height = h;
+                var ctx = c.getContext('2d');
+
+                // Background
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(0, 0, w, h);
+
+                // Logo text
+                ctx.fillStyle = '#CCFF00';
+                ctx.font = 'bold 28px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('KSLT', w / 2, 40);
+
+                // QR code (centered)
+                var qrSize = 200;
+                var qrX = (w - qrSize) / 2;
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(qrX - 8, 55, qrSize + 16, qrSize + 16);
+                ctx.drawImage(qrCanvas, qrX, 63, qrSize, qrSize);
+
+                // Player name
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px Inter, sans-serif';
+                ctx.fillText(profile.full_name || '', w / 2, 305);
+
+                // Category
+                var catEl = document.getElementById('dbQrCategory');
+                if (catEl && catEl.textContent) {
+                    ctx.fillStyle = '#CCFF00';
+                    ctx.font = '14px Inter, sans-serif';
+                    ctx.fillText(catEl.textContent, w / 2, 325);
+                }
+
+                // URL small
+                ctx.fillStyle = '#666';
+                ctx.font = '10px Inter, sans-serif';
+                ctx.fillText('kslt.netlify.app', w / 2, 380);
+
+                // Download
+                var link = document.createElement('a');
+                link.download = 'KSLT-' + (profile.player_id || 'profile') + '.png';
+                link.href = c.toDataURL('image/png');
+                link.click();
+            }, 300);
+        });
     }
 
     // ---- Render Mobile Tabs ----
