@@ -20,8 +20,12 @@
         sent: 'Жөнөтүлдү!',
         resend: 'Кайра жөнөтүү',
         errEmailMatch: 'Email даректер дал келбейт',
-        errPwRules: 'Сыр сөз талаптарга жооп бербейт',
+        errPwRules: 'Сыр сөз талаптарга жооп бербейт:',
         errPwMatch: 'Сыр сөздөр дал келбейт',
+        ruleLength: '8+ символ',
+        ruleUpper: 'Чоң тамга (A-Z)',
+        ruleDigit: 'Сан (0-9)',
+        ruleSpecial: 'Атайын белги (!@#$)',
         errGeneric: 'Ката кетти. Кайра аракет кылыңыз.',
         errInvalidLogin: 'Туура эмес email же сыр сөз',
         errEmailTaken: 'Бул email менен аккаунт бар',
@@ -45,8 +49,12 @@
         sent: 'Sent!',
         resend: 'Resend',
         errEmailMatch: 'Email addresses do not match',
-        errPwRules: 'Password does not meet requirements',
+        errPwRules: 'Password does not meet requirements:',
         errPwMatch: 'Passwords do not match',
+        ruleLength: '8+ characters',
+        ruleUpper: 'Uppercase letter (A-Z)',
+        ruleDigit: 'Number (0-9)',
+        ruleSpecial: 'Special character (!@#$)',
         errGeneric: 'An error occurred. Please try again.',
         errInvalidLogin: 'Invalid email or password',
         errEmailTaken: 'An account with this email already exists',
@@ -70,8 +78,12 @@
         sent: 'Отправлено!',
         resend: 'Отправить повторно',
         errEmailMatch: 'Email адреса не совпадают',
-        errPwRules: 'Пароль не соответствует требованиям',
+        errPwRules: 'Пароль не соответствует требованиям:',
         errPwMatch: 'Пароли не совпадают',
+        ruleLength: '8+ символов',
+        ruleUpper: 'Заглавная буква (A-Z)',
+        ruleDigit: 'Цифра (0-9)',
+        ruleSpecial: 'Спецсимвол (!@#$)',
         errGeneric: 'Произошла ошибка. Попробуйте снова.',
         errInvalidLogin: 'Неверный email или пароль',
         errEmailTaken: 'Аккаунт с этим email уже существует',
@@ -166,6 +178,41 @@
 
         if (!isError) {
             setTimeout(function() { msg.remove(); }, 5000);
+        }
+    }
+
+    // Detailed password error — lists exactly which rules failed
+    function showPwError(form, password) {
+        var ruleLabels = {
+            length: L.ruleLength,
+            upper: L.ruleUpper,
+            digit: L.ruleDigit,
+            special: L.ruleSpecial
+        };
+
+        var missing = [];
+        Object.keys(rules).forEach(function(key) {
+            if (!rules[key](password)) {
+                missing.push(ruleLabels[key] || key);
+            }
+        });
+
+        var text = L.errPwRules + '\n' + missing.join(', ');
+
+        var existing = form.querySelector('.auth-message');
+        if (existing) existing.remove();
+
+        var msg = document.createElement('div');
+        msg.className = 'auth-message auth-message-error auth-pw-detail';
+        msg.innerHTML = '<strong>' + L.errPwRules + '</strong><ul>' +
+            missing.map(function(m) { return '<li>' + m + '</li>'; }).join('') +
+            '</ul>';
+
+        var btn = form.querySelector('.auth-btn');
+        if (btn) {
+            btn.parentNode.insertBefore(msg, btn);
+        } else {
+            form.appendChild(msg);
         }
     }
 
@@ -289,11 +336,14 @@
                 if (el) {
                     if (rules[key](val)) {
                         el.classList.add('valid');
+                        el.classList.remove('pw-rule-error');
                     } else {
                         el.classList.remove('valid');
                     }
                 }
             });
+            var detailMsg = resetForm.querySelector('.auth-pw-detail');
+            if (detailMsg) detailMsg.remove();
         });
     }
 
@@ -331,10 +381,14 @@
             var el = document.querySelector('.pw-rule[data-rule="' + key + '"]');
             if (rules[key](val)) {
                 el.classList.add('valid');
+                el.classList.remove('pw-rule-error');
             } else {
                 el.classList.remove('valid');
             }
         });
+        // Clear detailed error message when user starts typing
+        var detailMsg = signupForm.querySelector('.auth-pw-detail');
+        if (detailMsg) detailMsg.remove();
     });
 
     // ---- Email confirm validation ----
@@ -453,7 +507,19 @@
 
         var allRulesPass = Object.keys(rules).every(function(key) { return rules[key](password); });
         if (!allRulesPass) {
-            showMessage(signupForm, L.errPwRules, true);
+            showPwError(signupForm, password);
+            // Highlight unfulfilled rules
+            document.querySelectorAll('.pw-rule').forEach(function(el) {
+                var key = el.dataset.rule;
+                if (rules[key] && !rules[key](password)) {
+                    el.classList.add('pw-rule-error');
+                } else {
+                    el.classList.remove('pw-rule-error');
+                }
+            });
+            // Scroll to password field
+            pwInput.focus();
+            pwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 
@@ -614,7 +680,17 @@
 
             var allRulesPass = Object.keys(rules).every(function(key) { return rules[key](newPw); });
             if (!allRulesPass) {
-                showMessage(resetForm, L.errResetPwRules, true);
+                showPwError(resetForm, newPw);
+                document.querySelectorAll('.pw-rule-reset').forEach(function(el) {
+                    var key = el.dataset.rule;
+                    if (rules[key] && !rules[key](newPw)) {
+                        el.classList.add('pw-rule-error');
+                    } else {
+                        el.classList.remove('pw-rule-error');
+                    }
+                });
+                resetPwInput.focus();
+                resetPwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
 

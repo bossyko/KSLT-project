@@ -4178,6 +4178,49 @@ h2 {
     color: var(--accent);
 }
 
+.pw-rule.pw-rule-error,
+.pw-rule-reset.pw-rule-error {
+    color: #ef4444;
+    animation: pw-rule-shake 0.5s ease;
+}
+
+.pw-rule.pw-rule-error::before,
+.pw-rule-reset.pw-rule-error::before {
+    content: '✕ ';
+}
+
+@keyframes pw-rule-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-3px); }
+    40%, 80% { transform: translateX(3px); }
+}
+
+.auth-pw-detail {
+    text-align: left;
+}
+
+.auth-pw-detail strong {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.auth-pw-detail ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.auth-pw-detail li {
+    padding: 2px 0;
+    font-size: 0.85rem;
+}
+
+.auth-pw-detail li::before {
+    content: '✕ ';
+    color: #ef4444;
+    font-weight: 700;
+}
+
 .pw-rule + .pw-rule,
 .pw-rule-reset + .pw-rule-reset {
     margin-left: 6px;
