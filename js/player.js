@@ -270,6 +270,28 @@
             '</div>';
     }
 
+    // ---- Access level detection ----
+    var _accessLevel = 'guest';
+
+    async function detectAccess() {
+        if (!client) { _accessLevel = 'guest'; return; }
+        try {
+            var res = await client.auth.getSession();
+            if (!res.data || !res.data.session) { _accessLevel = 'guest'; return; }
+            // Set ksltUser for membership.js (not set on public pages without auth-guard)
+            if (!window.ksltUser) window.ksltUser = res.data.session.user;
+        } catch(e) { _accessLevel = 'guest'; return; }
+
+        _accessLevel = 'registered';
+
+        if (typeof window.checkMembership === 'function') {
+            try {
+                var mem = await window.checkMembership();
+                if (mem && mem.active) _accessLevel = 'member';
+            } catch(e) {}
+        }
+    }
+
     // ---- Render Profile ----
     function renderProfile(data) {
         var el = document.getElementById('playerDetail');
@@ -386,12 +408,24 @@
         html += '<div class="pp-loading">' + LH.loading + '</div>';
         html += '</div></div>';
 
-        // ---- CTA ----
-        html += '<div class="pp-cta pp-fade-in">';
-        html += '<h3>' + L.ctaTitle + '</h3>';
-        html += '<p>' + L.ctaText + '</p>';
-        html += '<a href="' + authPage + '" class="pp-cta-btn">' + L.ctaBtn + ' \u2192</a>';
-        html += '</div>';
+        // ---- CTA (guest / registered only, hidden for members) ----
+        if (_accessLevel !== 'member') {
+            var pricingPage = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
+            html += '<div class="pp-cta pp-fade-in">';
+            if (_accessLevel === 'registered') {
+                var ctaTitleReg = isEn ? 'Want to <span>compete</span>?' : (isKg ? '<span>Мелдешкиңиз</span> келеби?' : 'Хочешь <span>играть</span>?');
+                var ctaTextReg = isEn ? 'Get a KSLT membership to challenge players and join tournaments' : (isKg ? 'Оюнчуларга кыйынчылык жана мелдештерге катышуу үчүн KSLT мүчөлүгүн алыңыз' : 'Оформи членство KSLT, чтобы бросить вызов игрокам и участвовать в турнирах');
+                var ctaBtnReg = isEn ? 'Get Membership' : (isKg ? 'Мүчөлүк алуу' : 'Оформить членство');
+                html += '<h3>' + ctaTitleReg + '</h3>';
+                html += '<p>' + ctaTextReg + '</p>';
+                html += '<a href="' + pricingPage + '" class="pp-cta-btn">' + ctaBtnReg + ' \u2192</a>';
+            } else {
+                html += '<h3>' + L.ctaTitle + '</h3>';
+                html += '<p>' + L.ctaText + '</p>';
+                html += '<a href="' + authPage + '" class="pp-cta-btn">' + L.ctaBtn + ' \u2192</a>';
+            }
+            html += '</div>';
+        }
 
         html += '</div>'; // .pp-container
         el.innerHTML = html;
@@ -760,7 +794,7 @@
     }
 
     // ---- Init ----
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', async function () {
         var params = new URLSearchParams(window.location.search);
         var playerId = params.get('id');
         _playerId = playerId;
@@ -784,6 +818,7 @@
             ? data.player.photo.replace('w=80&h=80', 'w=240&h=240')
             : 'https://placehold.co/80x80?text=?';
 
+        await detectAccess();
         document.title = data.player.name + ' \u2014 KSLT';
         renderProfile(data);
         initScrollAnimations();
