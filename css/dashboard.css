@@ -1131,3 +1131,34 @@ select.db-field-input {
     color: var(--accent);
     background: rgba(204, 255, 0, 0.08);
 }
+
+/* ---- Badge Toast ---- */
+.db-badge-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-lg);
+    padding: 14px 24px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    z-index: 9999;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.4s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.db-badge-toast.visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.db-badge-toast-icon {
+    font-size: 1.2rem;
+    margin-right: 4px;
+}

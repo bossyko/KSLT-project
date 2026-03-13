@@ -39,13 +39,9 @@
         return false;
     }
 
-    var badgeMap = {
-        champion: { emoji: '\ud83c\udfc6', ru: 'Чемпион последнего турнира', en: 'Tournament Champion', kg: 'Акыркы мелдештин чемпиону' },
-        streak:   { emoji: '\ud83d\udd25', ru: 'Серия 5+ побед', en: 'Win streak 5+', kg: '5+ жеңиш сериясы' },
-        top1:     { emoji: '\ud83d\udc51', ru: '#1 текущего месяца', en: '#1 of the month', kg: 'Айдын #1' },
-        newbie:   { emoji: '\ud83c\udd95', ru: 'Новичок', en: 'Newcomer', kg: 'Жаңы оюнчу' },
-        breakthrough: { emoji: '\u2b06\ufe0f', ru: 'Прорыв (+10 позиций)', en: 'Breakthrough', kg: 'Жарыш (+10 позиция)' }
-    };
+    // Badge data loaded from Supabase (player_id → [{badge_id, icon, name}])
+    var _badgesByPlayer = {};
+    var _badgeDefsMap = {};
 
     // ========================================
     // HELPERS
@@ -108,16 +104,22 @@
         return isEnPage() ? 'auth-en.html' : (isKgPage() ? 'auth-kg.html' : 'auth.html');
     }
 
-    function getBadgeTooltip(key) {
-        var labels = getLabels();
-        var map = {
-            champion: labels.badgeChampion,
-            streak: labels.badgeStreak,
-            top1: labels.badgeTop1,
-            newbie: labels.badgeNewbie,
-            breakthrough: labels.badgeBreakthrough
-        };
-        return map[key] || key;
+    function getBadgeTooltip(badgeId) {
+        var def = _badgeDefsMap[badgeId];
+        if (!def) return badgeId;
+        return isEnPage() ? (def.name_en || def.name) : (isKgPage() ? (def.name_kg || def.name) : def.name);
+    }
+
+    function getPlayerBadgesHtml(playerId, maxCount) {
+        var badges = _badgesByPlayer[playerId];
+        if (!badges || badges.length === 0) return '';
+        var html = '';
+        var show = badges.slice(0, maxCount || 5);
+        for (var i = 0; i < show.length; i++) {
+            var b = show[i];
+            html += '<span class="pl-badge" title="' + esc(getBadgeTooltip(b.badge_id)) + '">' + (b.icon || '') + '</span>';
+        }
+        return html;
     }
 
     function getAllPlayers() {
@@ -196,6 +198,37 @@
     }
 
     // ========================================
+    // LOAD BADGES FROM SUPABASE
+    // ========================================
+
+    async function loadBadgesFromSupabase() {
+        if (!window.supabaseClient) return;
+        var client = window.supabaseClient;
+        try {
+            // Load badge definitions
+            var defsRes = await client.from('badge_definitions').select('*');
+            if (defsRes.data) {
+                defsRes.data.forEach(function(d) { _badgeDefsMap[d.id] = d; });
+            }
+            // Load all player badges
+            var pbRes = await client.from('player_badges')
+                .select('player_id, badge_id, badge:badge_definitions(icon)')
+                .order('earned_at', { ascending: true });
+            if (pbRes.data) {
+                pbRes.data.forEach(function(pb) {
+                    if (!_badgesByPlayer[pb.player_id]) _badgesByPlayer[pb.player_id] = [];
+                    _badgesByPlayer[pb.player_id].push({
+                        badge_id: pb.badge_id,
+                        icon: pb.badge ? pb.badge.icon : ''
+                    });
+                });
+            }
+        } catch(e) {
+            console.warn('[KSLT] badges load error:', e);
+        }
+    }
+
+    // ========================================
     // SUPABASE DATA LOADER
     // ========================================
 
@@ -263,8 +296,9 @@
     // ========================================
 
     document.addEventListener('DOMContentLoaded', async function() {
-        // Try Supabase first, fallback to static
-        var dbData = await loadFromSupabase();
+        // Load badges + players in parallel from Supabase
+        var results = await Promise.all([loadFromSupabase(), loadBadgesFromSupabase()]);
+        var dbData = results[0];
         if (dbData && Object.keys(dbData).length > 0) {
             categoriesData = dbData;
         } else {
@@ -350,14 +384,7 @@
             var i = order[oi];
             if (!top3[i]) continue;
             var p = top3[i];
-            var badgesHtml = '';
-            var pBadges = p.badges || [];
-            for (var b = 0; b < pBadges.length; b++) {
-                var badge = badgeMap[pBadges[b]];
-                if (badge) {
-                    badgesHtml += '<span class="pl-badge" title="' + getBadgeTooltip(pBadges[b]) + '">' + badge.emoji + '</span>';
-                }
-            }
+            var badgesHtml = getPlayerBadgesHtml(p.id, 3);
 
             html += '<div class="pl-podium-card ' + placeClass[i] + ' ' + animClasses + '">' +
                 '<div class="pl-podium-medal">' + medals[i] + '</div>' +
@@ -475,14 +502,7 @@
                 blurClass = ' pl-row-blur pl-row-blur-' + blurLevel;
             }
 
-            var pBadges = p.badges || [];
-            var badgesHtml = '';
-            for (var b = 0; b < pBadges.length; b++) {
-                var badge = badgeMap[pBadges[b]];
-                if (badge) {
-                    badgesHtml += '<span class="pl-badge" title="' + getBadgeTooltip(pBadges[b]) + '">' + badge.emoji + '</span>';
-                }
-            }
+            var badgesHtml = getPlayerBadgesHtml(p.id, 3);
 
             var catLabel = isSearchMode ? '<span class="pl-player-category">' + item.categoryName + '</span>' : '';
 
@@ -789,14 +809,7 @@
             var rankClass = rank <= 3 ? ' pl-rank-top' : '';
             var rowClass = isGuest ? ' pl-cat-row-disabled' : '';
 
-            var pBadges = p.badges || [];
-            var badgesHtml = '';
-            for (var b = 0; b < pBadges.length; b++) {
-                var badge = badgeMap[pBadges[b]];
-                if (badge) {
-                    badgesHtml += '<span class="pl-badge" title="' + getBadgeTooltip(pBadges[b]) + '">' + badge.emoji + '</span>';
-                }
-            }
+            var badgesHtml = getPlayerBadgesHtml(p.id, 3);
 
             var pForm = p.form || [];
             var formHtml = '';

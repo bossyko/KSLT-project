@@ -356,6 +356,48 @@
                p.phone && p.phone.trim() !== '';
     };
 
+    // ---- Badge Toast ----
+    function showBadgeToast(icon, name) {
+        var label = isKg ? 'Жаңы бейдж' : isEn ? 'New badge' : 'Новый бейдж';
+        var el = document.createElement('div');
+        el.className = 'db-badge-toast';
+        el.innerHTML = '<span class="db-badge-toast-icon">' + icon + '</span> ' + label + ': ' + name;
+        document.body.appendChild(el);
+        requestAnimationFrame(function() { el.classList.add('visible'); });
+        setTimeout(function() {
+            el.classList.remove('visible');
+            setTimeout(function() { if (el.parentNode) el.remove(); }, 400);
+        }, 4000);
+    }
+
+    async function checkNewBadges(playerId) {
+        if (!client || !playerId) return;
+        // Throttle: check max once per hour
+        var key = 'kslt_last_badge_check';
+        var last = parseInt(localStorage.getItem(key) || '0', 10);
+        if (Date.now() - last < 3600000) return;
+        localStorage.setItem(key, String(Date.now()));
+
+        try {
+            var res = await client.rpc('check_and_award_badges', { p_player_id: playerId });
+            var newBadges = res.data || [];
+            if (newBadges.length === 0) return;
+
+            // Load badge definitions for the new badges
+            var defsRes = await client.from('badge_definitions')
+                .select('id, icon, name, name_en, name_kg')
+                .in('id', newBadges);
+            var defs = defsRes.data || [];
+
+            defs.forEach(function(b) {
+                var name = isEn ? (b.name_en || b.name) : (isKg ? (b.name_kg || b.name) : b.name);
+                showBadgeToast(b.icon, name);
+            });
+        } catch(e) {
+            console.warn('[KSLT] badge check error:', e);
+        }
+    }
+
     // ---- Auth Ready Callback ----
     window.onAuthReady = function(user, profile) {
         renderSidebar(profile);
@@ -370,6 +412,11 @@
         renderInvitations();
         renderSettings(user);
         initTabs();
+
+        // Check for new badges (async, non-blocking)
+        if (profile.player_id) {
+            checkNewBadges(profile.player_id);
+        }
     };
 
     // ---- Render Membership Card ----

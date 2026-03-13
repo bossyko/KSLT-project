@@ -311,7 +311,15 @@
         plrLosses: 'Losses',
         plrRankChange: 'Rank Change',
         plrForm: 'Recent Form',
-        plrBadges: 'Badges',
+        plrBadges: 'Achievements',
+        badgeEarned: 'Earned',
+        badgeLocked: 'Locked',
+        badgeHowTo: 'How to earn',
+        badgeManualAward: 'Award badge',
+        badgeRemove: 'Remove',
+        badgeNewToast: 'New badge',
+        badgeCheckBtn: 'Check badges',
+        badgeNoEarned: 'No badges yet',
         plrBio: 'Biography',
         plrPhone: 'Phone',
         plrEmail: 'Email',
@@ -984,7 +992,15 @@
         plrLosses: 'Поражения',
         plrRankChange: 'Динамика',
         plrForm: 'Последняя форма',
-        plrBadges: 'Бейджи',
+        plrBadges: 'Достижения',
+        badgeEarned: 'Получен',
+        badgeLocked: 'Заблокирован',
+        badgeHowTo: 'Как получить',
+        badgeManualAward: 'Выдать бейдж',
+        badgeRemove: 'Убрать',
+        badgeNewToast: 'Новый бейдж',
+        badgeCheckBtn: 'Проверить бейджи',
+        badgeNoEarned: 'Бейджей пока нет',
         plrBio: 'Биография',
         plrPhone: 'Телефон',
         plrEmail: 'Email',
@@ -1384,14 +1400,6 @@
         mixed_doubles: L.formatMixedDoubles
     };
 
-    var PLAYER_BADGES = {
-        champion: isEn ? 'Champion' : 'Чемпион',
-        top1: isEn ? 'Top 1' : 'Топ 1',
-        streak: isEn ? 'Win Streak' : 'Серия побед',
-        newbie: isEn ? 'Newcomer' : 'Новичок',
-        breakthrough: isEn ? 'Breakthrough' : 'Прорыв'
-    };
-
     var COURT_TYPES = {
         indoor: isEn ? 'Indoor' : 'Крытый',
         outdoor: isEn ? 'Outdoor' : 'Открытый'
@@ -1481,7 +1489,6 @@
         CATEGORIES: CATEGORIES,
         TOURNAMENT_FORMATS: TOURNAMENT_FORMATS,
         TOURNAMENT_STATUSES: TOURNAMENT_STATUSES,
-        PLAYER_BADGES: PLAYER_BADGES,
         COURT_TYPES: COURT_TYPES,
         COURT_SURFACES: COURT_SURFACES,
         COURT_AMENITIES: COURT_AMENITIES,

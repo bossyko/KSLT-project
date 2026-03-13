@@ -152,31 +152,47 @@
         return matches;
     }
 
-    // ---- Generate achievements from badges + stats ----
-    function generateAchievements(player) {
-        var badgeMap = {
-            champion: { icon: '\uD83C\uDFC6', name: L.badgeChampion, desc: 'KSLT Open 2026' },
-            streak: { icon: '\uD83D\uDD25', name: L.badgeStreak, desc: player.wins + ' ' + L.winsThisSeason },
-            top1: { icon: '\uD83D\uDC51', name: L.badgeTop1, desc: L.monthName },
-            newbie: { icon: '\uD83C\uDD95', name: L.badgeNewbie, desc: L.joined },
-            breakthrough: { icon: '\u2B06\uFE0F', name: L.badgeBreakthrough, desc: '+' + Math.abs(player.change) + ' ' + L.positionsMonth }
-        };
+    // ---- Badge data (loaded from Supabase) ----
+    var _earnedBadges = [];
+    var _allBadges = [];
 
-        var achievements = [];
-        player.badges.forEach(function (b) {
-            if (badgeMap[b]) achievements.push(badgeMap[b]);
-        });
+    async function loadPlayerBadges(playerId) {
+        if (!client) return [];
+        try {
+            var res = await client.from('player_badges')
+                .select('badge_id, earned_at, badge:badge_definitions(*)')
+                .eq('player_id', playerId)
+                .order('earned_at', { ascending: true });
+            return res.data || [];
+        } catch(e) { return []; }
+    }
 
-        if (player.wins >= 15) {
-            achievements.push({ icon: '\u2B50', name: L.veteran, desc: player.wins + ' ' + L.victories });
-        }
-        var totalG = (player.wins || 0) + (player.losses || 0);
-        var winRate = totalG > 0 ? Math.round(player.wins / totalG * 100) : 0;
-        if (winRate >= 70) {
-            achievements.push({ icon: '\uD83D\uDCAA', name: L.dominant, desc: winRate + '% ' + L.winRateLabel });
-        }
+    async function loadAllBadges() {
+        if (!client) return [];
+        try {
+            var res = await client.from('badge_definitions')
+                .select('*')
+                .order('sort_order', { ascending: true });
+            return res.data || [];
+        } catch(e) { return []; }
+    }
 
-        return achievements;
+    function getBadgeName(b) {
+        if (!b) return '';
+        return isEn ? (b.name_en || b.name) : (isKg ? (b.name_kg || b.name) : b.name);
+    }
+    function getBadgeDesc(b) {
+        if (!b) return '';
+        return isEn ? (b.description_en || b.description) : (isKg ? (b.description_kg || b.description) : b.description);
+    }
+
+    function formatBadgeDate(dateStr) {
+        if (!dateStr) return '';
+        var d = new Date(dateStr);
+        var dd = d.getDate();
+        var mm = d.getMonth() + 1;
+        var yy = d.getFullYear();
+        return dd + '.' + (mm < 10 ? '0' : '') + mm + '.' + yy;
     }
 
     // ---- Generate mock tournaments (fallback) ----
@@ -201,14 +217,7 @@
         return { count: count, type: first === 'W' ? 'up' : 'down' };
     }
 
-    // ---- Badge emoji map ----
-    var badgeEmoji = {
-        champion: '\uD83C\uDFC6',
-        streak: '\uD83D\uDD25',
-        top1: '\uD83D\uDC51',
-        newbie: '\uD83C\uDD95',
-        breakthrough: '\u2B06\uFE0F'
-    };
+    // Badge emoji map removed — now loaded from badge_definitions
 
     // ---- Score helpers ----
     function formatMatchDate(dateStr) {
@@ -304,7 +313,6 @@
         var streak = calcStreak(player.form || []);
         var totalM = (player.wins || 0) + (player.losses || 0);
         var winRate = totalM > 0 ? Math.round(player.wins / totalM * 100) : 0;
-        var achievements = generateAchievements(player);
         var authPage = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
         var rankingsPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
 
@@ -339,11 +347,19 @@
         }
         html += '</div>';
 
-        if (player.badges.length > 0) {
+        // Header badges — show first 5 earned badge emoji
+        if (_earnedBadges.length > 0) {
             html += '<div class="pp-badges">';
-            player.badges.forEach(function (b) {
-                html += '<span class="pp-badge"><span class="pp-badge-icon">' + (badgeEmoji[b] || '') + '</span></span>';
+            var headerBadges = _earnedBadges.slice(0, 5);
+            headerBadges.forEach(function (pb) {
+                var b = pb.badge;
+                if (b) {
+                    html += '<span class="pp-badge" title="' + esc(getBadgeName(b)) + '"><span class="pp-badge-icon">' + b.icon + '</span></span>';
+                }
             });
+            if (_earnedBadges.length > 5) {
+                html += '<span class="pp-badge pp-badge-more">+' + (_earnedBadges.length - 5) + '</span>';
+            }
             html += '</div>';
         }
         html += '</div>'; // .pp-info
@@ -386,21 +402,12 @@
         html += '<div class="pp-loading">' + LH.loading + '</div>';
         html += '</div></div>';
 
-        // ---- Achievements ----
-        if (achievements.length > 0) {
-            html += '<div class="pp-section pp-fade-in">';
-            html += '<h3 class="pp-section-title">\uD83C\uDFC5 ' + L.sectionAchievements + '</h3>';
-            html += '<div class="pp-achievements">';
-            achievements.forEach(function (a) {
-                html += '<div class="pp-achievement">';
-                html += '<div class="pp-achievement-icon">' + a.icon + '</div>';
-                html += '<div class="pp-achievement-info">';
-                html += '<div class="pp-achievement-name">' + a.name + '</div>';
-                html += '<div class="pp-achievement-desc">' + a.desc + '</div>';
-                html += '</div></div>';
-            });
-            html += '</div></div>';
-        }
+        // ---- Achievements (loaded from Supabase) ----
+        html += '<div class="pp-section pp-fade-in">';
+        html += '<h3 class="pp-section-title">\uD83C\uDFC5 ' + L.sectionAchievements + '</h3>';
+        html += '<div class="pp-achievements" id="ppAchievements">';
+        html += '<div class="pp-loading">' + LH.loading + '</div>';
+        html += '</div></div>';
 
         // ---- Tournaments (async loaded) ----
         html += '<div class="pp-section pp-fade-in">';
@@ -768,6 +775,86 @@
         }
     }
 
+    // ---- Render Badges Section ----
+    function renderBadgesSection() {
+        var container = document.getElementById('ppAchievements');
+        if (!container) return;
+
+        var earnedIds = {};
+        _earnedBadges.forEach(function(pb) { earnedIds[pb.badge_id] = pb; });
+
+        var earned = [];
+        var locked = [];
+        _allBadges.forEach(function(b) {
+            if (earnedIds[b.id]) {
+                earned.push({ def: b, pb: earnedIds[b.id] });
+            } else {
+                locked.push(b);
+            }
+        });
+
+        if (earned.length === 0 && locked.length === 0) {
+            container.innerHTML = '<div class="pp-badges-empty">' +
+                (isEn ? 'No achievements yet' : (isKg ? 'Жетишкендиктер жок' : 'Достижений пока нет')) + '</div>';
+            return;
+        }
+
+        var VISIBLE_COUNT = 8;
+        var html = '';
+
+        // Earned badges
+        earned.forEach(function(item, idx) {
+            var b = item.def;
+            var hidden = idx >= VISIBLE_COUNT ? ' pp-badge-hidden' : '';
+            html += '<div class="pp-achievement pp-achievement-earned' + hidden + '" title="' + esc(getBadgeName(b)) + ' — ' + formatBadgeDate(item.pb.earned_at) + '">';
+            html += '<div class="pp-achievement-icon">' + b.icon + '</div>';
+            html += '<div class="pp-achievement-info">';
+            html += '<div class="pp-achievement-name">' + esc(getBadgeName(b)) + '</div>';
+            html += '<div class="pp-achievement-desc">' + formatBadgeDate(item.pb.earned_at) + '</div>';
+            html += '</div></div>';
+        });
+
+        // Locked badges
+        locked.forEach(function(b, idx) {
+            var hidden = (earned.length + idx) >= VISIBLE_COUNT ? ' pp-badge-hidden' : '';
+            html += '<div class="pp-achievement pp-achievement-locked' + hidden + '">';
+            html += '<div class="pp-achievement-icon pp-achievement-icon-locked">' + b.icon + '</div>';
+            html += '<div class="pp-achievement-info">';
+            html += '<div class="pp-achievement-name pp-achievement-name-locked">' + esc(getBadgeName(b)) + '</div>';
+            html += '<div class="pp-achievement-desc">' + esc(getBadgeDesc(b)) + '</div>';
+            html += '</div></div>';
+        });
+
+        // Expand button
+        var total = earned.length + locked.length;
+        if (total > VISIBLE_COUNT) {
+            var moreLabel = isEn ? 'Show all' : (isKg ? 'Баарын көрсөтүү' : 'Показать все');
+            var lessLabel = isEn ? 'Show less' : (isKg ? 'Жашыруу' : 'Свернуть');
+            html += '<button class="pp-badges-expand" id="ppBadgesExpand">+' + (total - VISIBLE_COUNT) + ' ' + moreLabel + '</button>';
+        }
+
+        container.innerHTML = html;
+
+        // Expand toggle
+        var expandBtn = document.getElementById('ppBadgesExpand');
+        if (expandBtn) {
+            var expanded = false;
+            expandBtn.addEventListener('click', function() {
+                expanded = !expanded;
+                var moreLabel = isEn ? 'Show all' : (isKg ? 'Баарын көрсөтүү' : 'Показать все');
+                var lessLabel = isEn ? 'Show less' : (isKg ? 'Жашыруу' : 'Свернуть');
+                container.querySelectorAll('.pp-badge-hidden').forEach(function(el) {
+                    el.style.display = expanded ? '' : 'none';
+                });
+                expandBtn.textContent = expanded ? lessLabel : ('+' + (total - VISIBLE_COUNT) + ' ' + moreLabel);
+            });
+            // Initially hide overflow
+            container.querySelectorAll('.pp-badge-hidden').forEach(function(el) {
+                el.style.display = 'none';
+            });
+        }
+    }
+
     // ---- Not Found ----
     function renderNotFound() {
         var el = document.getElementById('playerDetail');
@@ -890,9 +977,18 @@
             ? data.player.photo.replace('w=80&h=80', 'w=240&h=240')
             : 'https://placehold.co/80x80?text=?';
 
+        // Load badges from Supabase (parallel)
+        var badgeResults = await Promise.all([
+            loadPlayerBadges(playerId),
+            loadAllBadges()
+        ]);
+        _earnedBadges = badgeResults[0];
+        _allBadges = badgeResults[1];
+
         await detectAccess();
         document.title = data.player.name + ' \u2014 KSLT';
         renderProfile(data);
+        renderBadgesSection();
         initScrollAnimations();
     });
 })();

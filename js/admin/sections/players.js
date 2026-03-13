@@ -219,13 +219,7 @@
             catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + genderIcon + catName + '</option>';
         });
 
-        // Badges checkboxes
-        var badgesHtml = '';
-        var currentBadges = (item && item.badges) ? item.badges : [];
-        Object.keys(A.PLAYER_BADGES).forEach(function(key) {
-            var checked = currentBadges.indexOf(key) !== -1 ? ' checked' : '';
-            badgesHtml += '<label class="ad-checkbox-label"><input type="checkbox" class="ad-plr-badge" value="' + key + '"' + checked + '> ' + A.PLAYER_BADGES[key] + '</label>';
-        });
+        // Badges section is now loaded dynamically from player_badges table
 
         // Form (W/L) — 5 toggle pairs
         var currentForm = (item && item.form) ? item.form : [];
@@ -330,10 +324,10 @@
                 '<div class="ad-form-toggles" id="adPlrFormToggles">' + formHtml + '</div>' +
             '</div>' +
 
-            // Badges
+            // Badges (loaded from Supabase)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.plrBadges + '</div>' +
-                '<div class="ad-badges-grid" id="adPlrBadges">' + badgesHtml + '</div>' +
+                '<div id="adPlrBadgesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
             '</div>' +
 
             // Bio (RU/EN)
@@ -404,6 +398,11 @@
                 '<button class="ad-btn ad-btn-primary" id="adPlrSave">' + L.save + '</button>' +
                 (plrEditingId ? '<button class="ad-btn ad-btn-danger" id="adPlrDelete">' + L.delete + '</button>' : '') +
             '</div>';
+
+        // --- Load Badges (edit only) ---
+        if (plrEditingId) {
+            loadPlayerBadgesAdmin(plrEditingId);
+        }
 
         // --- Rating History Events (edit only) ---
         if (plrEditingId) {
@@ -624,12 +623,6 @@
                 if (active) formArr.push(active.dataset.val);
             });
 
-            // Collect badges
-            var badges = [];
-            document.querySelectorAll('.ad-plr-badge:checked').forEach(function(cb) {
-                badges.push(cb.value);
-            });
-
             var name = document.getElementById('adPlrName').value.trim();
             var nameEn = document.getElementById('adPlrNameEn').value.trim() || null;
             var nameKg = document.getElementById('adPlrNameKg').value.trim() || null;
@@ -660,7 +653,6 @@
                 losses: parseInt(document.getElementById('adPlrLosses').value, 10) || 0,
                 rank_change: parseInt(document.getElementById('adPlrRankChange').value, 10) || 0,
                 form: formArr,
-                badges: badges,
                 bio: document.getElementById('adPlrBio').value.trim() || null,
                 bio_en: document.getElementById('adPlrBioEn').value.trim() || null,
                 phone: document.getElementById('adPlrPhone').value.trim() || null,
@@ -872,6 +864,134 @@
                 }
             }
         });
+    }
+
+    // ---- Badge Management in Player Form ----
+    async function loadPlayerBadgesAdmin(playerId) {
+        var container = document.getElementById('adPlrBadgesContainer');
+        if (!container || !A.client) return;
+
+        // Load all badge definitions
+        var defsRes = await A.client.from('badge_definitions').select('*').order('sort_order', { ascending: true });
+        var allDefs = defsRes.data || [];
+
+        // Load earned badges for this player
+        var earnedRes = await A.client.from('player_badges')
+            .select('id, badge_id, earned_at')
+            .eq('player_id', playerId)
+            .order('earned_at', { ascending: true });
+        var earned = earnedRes.data || [];
+
+        var earnedMap = {};
+        earned.forEach(function(pb) { earnedMap[pb.badge_id] = pb; });
+
+        var html = '';
+
+        // Earned badges table
+        if (earned.length > 0) {
+            html += '<table class="ad-table" style="margin-bottom:16px;"><thead><tr>' +
+                '<th></th><th>' + L.plrBadges + '</th><th>' + L.badgeEarned + '</th>' +
+                (A.currentRole === 'admin' ? '<th style="width:40px;"></th>' : '') +
+                '</tr></thead><tbody>';
+
+            earned.forEach(function(pb) {
+                var def = allDefs.find(function(d) { return d.id === pb.badge_id; });
+                if (!def) return;
+                var name = isEn ? (def.name_en || def.name) : def.name;
+                var dateStr = pb.earned_at ? new Date(pb.earned_at).toLocaleDateString() : '';
+
+                html += '<tr>';
+                html += '<td style="font-size:1.3rem;text-align:center;width:40px;">' + def.icon + '</td>';
+                html += '<td style="font-weight:500;">' + A.esc(name) + '</td>';
+                html += '<td style="color:var(--text-muted);font-size:0.82rem;">' + dateStr + '</td>';
+                if (A.currentRole === 'admin') {
+                    html += '<td><button class="ad-btn-icon ad-badge-del" data-pb-id="' + pb.id + '" title="' + L.badgeRemove + '">&times;</button></td>';
+                }
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+        } else {
+            html += '<div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">' + L.badgeNoEarned + '</div>';
+        }
+
+        // Manual award (admin only)
+        if (A.currentRole === 'admin') {
+            // Dropdown with unearned badges
+            var unearnedDefs = allDefs.filter(function(d) { return !earnedMap[d.id]; });
+            var optionsHtml = '<option value="">\u2014 ' + L.badgeManualAward + ' \u2014</option>';
+            unearnedDefs.forEach(function(d) {
+                var name = isEn ? (d.name_en || d.name) : d.name;
+                optionsHtml += '<option value="' + d.id + '">' + d.icon + ' ' + A.esc(name) + '</option>';
+            });
+
+            html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">';
+            html += '<select class="ad-field-input" id="adPlrBadgeSelect" style="flex:1;min-width:200px;">' + optionsHtml + '</select>';
+            html += '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrBadgeAdd">+ ' + L.badgeManualAward + '</button>';
+            html += '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrBadgeCheck">' + L.badgeCheckBtn + '</button>';
+            html += '</div>';
+        }
+
+        container.innerHTML = html;
+
+        // Delete badge handlers
+        container.querySelectorAll('.ad-badge-del').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var pbId = btn.dataset.pbId;
+                var res = await A.client.from('player_badges').delete().eq('id', pbId);
+                if (res.error) {
+                    A.showToast(res.error.message, 'error');
+                    return;
+                }
+                A.showToast(isEn ? 'Badge removed' : 'Бейдж убран', 'success');
+                loadPlayerBadgesAdmin(playerId);
+            });
+        });
+
+        // Add badge handler
+        var addBtn = document.getElementById('adPlrBadgeAdd');
+        if (addBtn) {
+            addBtn.addEventListener('click', async function() {
+                var sel = document.getElementById('adPlrBadgeSelect');
+                var badgeId = sel.value;
+                if (!badgeId) return;
+
+                var res = await A.client.from('player_badges').insert({
+                    player_id: playerId,
+                    badge_id: badgeId
+                });
+
+                if (res.error) {
+                    A.showToast(res.error.message, 'error');
+                    return;
+                }
+                A.showToast(isEn ? 'Badge awarded' : 'Бейдж выдан', 'success');
+                loadPlayerBadgesAdmin(playerId);
+            });
+        }
+
+        // Check badges handler (runs the auto-check function)
+        var checkBtn = document.getElementById('adPlrBadgeCheck');
+        if (checkBtn) {
+            checkBtn.addEventListener('click', async function() {
+                checkBtn.disabled = true;
+                checkBtn.textContent = L.saving;
+                try {
+                    var res = await A.client.rpc('check_and_award_badges', { p_player_id: playerId });
+                    var newBadges = res.data || [];
+                    if (newBadges.length > 0) {
+                        A.showToast((isEn ? 'New badges: ' : 'Новые бейджи: ') + newBadges.length, 'success');
+                    } else {
+                        A.showToast(isEn ? 'No new badges' : 'Новых бейджей нет', 'info');
+                    }
+                    loadPlayerBadgesAdmin(playerId);
+                } catch(e) {
+                    A.showToast(e.message || 'Error', 'error');
+                }
+                checkBtn.disabled = false;
+                checkBtn.textContent = L.badgeCheckBtn;
+            });
+        }
     }
 
     // ---- Export to namespace ----
