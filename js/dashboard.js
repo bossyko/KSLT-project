@@ -1420,10 +1420,91 @@
                         '<canvas id="dbRatingChart"></canvas>' +
                     '</div>' +
                 '</div>' +
-            '</div>';
+            '</div>' +
+            '<div id="dbBadgesCard"></div>';
 
         // Render rating history chart
         renderRatingChart(profile.player_id, 'dbRatingChart', 'dbRatingChartWrap');
+
+        // Render badges card
+        renderStatsBadges(profile.player_id);
+    }
+
+    // ---- Badges Card in Stats ----
+    async function renderStatsBadges(playerId) {
+        var container = document.getElementById('dbBadgesCard');
+        if (!container || !client) return;
+
+        var badgesLabel = isKg ? 'Жетишкендиктер' : isEn ? 'Achievements' : 'Достижения';
+
+        try {
+            // Load all definitions + earned in parallel
+            var results = await Promise.all([
+                client.from('badge_definitions').select('*').order('sort_order', { ascending: true }),
+                client.from('player_badges')
+                    .select('badge_id, earned_at, badge:badge_definitions(icon, name, name_en, name_kg)')
+                    .eq('player_id', playerId)
+                    .order('earned_at', { ascending: true })
+            ]);
+
+            var allDefs = results[0].data || [];
+            var earned = results[1].data || [];
+            var total = allDefs.length;
+
+            if (total === 0) return;
+
+            var earnedMap = {};
+            earned.forEach(function(pb) { earnedMap[pb.badge_id] = pb; });
+
+            var pct = Math.round(earned.length / total * 100);
+
+            var html = '<div class="db-card">';
+            html += '<div class="db-card-title">' + badgesLabel + '</div>';
+
+            // Progress
+            html += '<div class="db-badges-progress">';
+            html += '<div class="db-badges-progress-bar"><div class="db-badges-progress-fill" style="width:' + pct + '%"></div></div>';
+            html += '<span class="db-badges-progress-text">' + earned.length + '/' + total + '</span>';
+            html += '</div>';
+
+            // Earned badges
+            if (earned.length > 0) {
+                html += '<div class="db-badges-earned">';
+                earned.forEach(function(pb) {
+                    var b = pb.badge;
+                    if (!b) return;
+                    var name = isEn ? (b.name_en || b.name) : (isKg ? (b.name_kg || b.name) : b.name);
+                    html += '<div class="db-badge-item db-badge-earned" title="' + name + '">';
+                    html += '<span class="db-badge-icon">' + b.icon + '</span>';
+                    html += '<span class="db-badge-name">' + name + '</span>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            // Nearest locked badges (up to 3 for motivation)
+            var lockedDefs = allDefs.filter(function(d) { return !earnedMap[d.id] && d.condition_type !== 'manual'; });
+            var nearest = lockedDefs.slice(0, 3);
+            if (nearest.length > 0) {
+                var nextLabel = isKg ? 'Кийинки максаттар' : isEn ? 'Next goals' : 'Следующие цели';
+                html += '<div class="db-badges-next-label">' + nextLabel + '</div>';
+                html += '<div class="db-badges-earned">';
+                nearest.forEach(function(d) {
+                    var name = isEn ? (d.name_en || d.name) : (isKg ? (d.name_kg || d.name) : d.name);
+                    var desc = isEn ? (d.description_en || d.description) : (isKg ? (d.description_kg || d.description) : d.description);
+                    html += '<div class="db-badge-item db-badge-locked" title="' + desc + '">';
+                    html += '<span class="db-badge-icon db-badge-icon-locked">' + d.icon + '</span>';
+                    html += '<span class="db-badge-name">' + name + '</span>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        } catch(e) {
+            console.warn('[KSLT] badges stats load error:', e);
+        }
     }
 
     // ---- Rating History Chart ----

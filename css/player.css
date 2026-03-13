@@ -419,6 +419,38 @@
     font-size: 0.82rem;
 }
 
+/* ---- BADGES: Progress Bar ---- */
+.pp-badges-progress {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.pp-badges-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.pp-badges-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}
+
+.pp-badges-progress-text {
+    color: var(--accent);
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 /* ---- BADGES: Earned vs Locked ---- */
 .pp-achievement-earned {
     border-color: rgba(204, 255, 0, 0.2);

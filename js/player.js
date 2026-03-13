@@ -799,14 +799,22 @@
             return;
         }
 
-        var VISIBLE_COUNT = 8;
-        var html = '';
+        // Progress bar
+        var total = earned.length + locked.length;
+        var pct = total > 0 ? Math.round(earned.length / total * 100) : 0;
+        var progressLabel = earned.length + '/' + total;
+        var html = '<div class="pp-badges-progress">' +
+            '<div class="pp-badges-progress-bar"><div class="pp-badges-progress-fill" style="width:' + pct + '%"></div></div>' +
+            '<span class="pp-badges-progress-text">' + progressLabel + '</span>' +
+            '</div>';
 
-        // Earned badges
-        earned.forEach(function(item, idx) {
+        // Visible logic: all earned always visible, locked limited to 4 initially
+        var LOCKED_VISIBLE = 4;
+
+        // All earned badges (always visible)
+        earned.forEach(function(item) {
             var b = item.def;
-            var hidden = idx >= VISIBLE_COUNT ? ' pp-badge-hidden' : '';
-            html += '<div class="pp-achievement pp-achievement-earned' + hidden + '" title="' + esc(getBadgeName(b)) + ' — ' + formatBadgeDate(item.pb.earned_at) + '">';
+            html += '<div class="pp-achievement pp-achievement-earned" title="' + esc(getBadgeName(b)) + ' — ' + formatBadgeDate(item.pb.earned_at) + '">';
             html += '<div class="pp-achievement-icon">' + b.icon + '</div>';
             html += '<div class="pp-achievement-info">';
             html += '<div class="pp-achievement-name">' + esc(getBadgeName(b)) + '</div>';
@@ -814,9 +822,9 @@
             html += '</div></div>';
         });
 
-        // Locked badges
+        // Locked badges — first LOCKED_VISIBLE visible, rest hidden
         locked.forEach(function(b, idx) {
-            var hidden = (earned.length + idx) >= VISIBLE_COUNT ? ' pp-badge-hidden' : '';
+            var hidden = idx >= LOCKED_VISIBLE ? ' pp-badge-hidden' : '';
             html += '<div class="pp-achievement pp-achievement-locked' + hidden + '">';
             html += '<div class="pp-achievement-icon pp-achievement-icon-locked">' + b.icon + '</div>';
             html += '<div class="pp-achievement-info">';
@@ -825,12 +833,12 @@
             html += '</div></div>';
         });
 
-        // Expand button
-        var total = earned.length + locked.length;
-        if (total > VISIBLE_COUNT) {
+        // Expand button (only if there are hidden locked badges)
+        var hiddenCount = Math.max(0, locked.length - LOCKED_VISIBLE);
+        if (hiddenCount > 0) {
             var moreLabel = isEn ? 'Show all' : (isKg ? 'Баарын көрсөтүү' : 'Показать все');
             var lessLabel = isEn ? 'Show less' : (isKg ? 'Жашыруу' : 'Свернуть');
-            html += '<button class="pp-badges-expand" id="ppBadgesExpand">+' + (total - VISIBLE_COUNT) + ' ' + moreLabel + '</button>';
+            html += '<button class="pp-badges-expand" id="ppBadgesExpand">+' + hiddenCount + ' ' + moreLabel + '</button>';
         }
 
         container.innerHTML = html;
@@ -846,7 +854,7 @@
                 container.querySelectorAll('.pp-badge-hidden').forEach(function(el) {
                     el.style.display = expanded ? '' : 'none';
                 });
-                expandBtn.textContent = expanded ? lessLabel : ('+' + (total - VISIBLE_COUNT) + ' ' + moreLabel);
+                expandBtn.textContent = expanded ? lessLabel : ('+' + hiddenCount + ' ' + moreLabel);
             });
             // Initially hide overflow
             container.querySelectorAll('.pp-badge-hidden').forEach(function(el) {

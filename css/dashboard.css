@@ -1132,6 +1132,88 @@ select.db-field-input {
     background: rgba(204, 255, 0, 0.08);
 }
 
+/* ---- Badges Card in Stats ---- */
+.db-badges-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.db-badges-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-elevated);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.db-badges-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}
+
+.db-badges-progress-text {
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.db-badges-earned {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.db-badge-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: border-color var(--transition-fast);
+}
+
+.db-badge-earned {
+    border-color: rgba(204, 255, 0, 0.25);
+    color: var(--text-primary);
+}
+
+.db-badge-locked {
+    opacity: 0.5;
+    color: var(--text-muted);
+}
+
+.db-badge-icon {
+    font-size: 1rem;
+}
+
+.db-badge-icon-locked {
+    filter: grayscale(1);
+    opacity: 0.5;
+}
+
+.db-badge-name {
+    white-space: nowrap;
+}
+
+.db-badges-next-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
 /* ---- Badge Toast ---- */
 .db-badge-toast {
     position: fixed;
