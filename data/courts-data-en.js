@@ -173,5 +173,7 @@ window.courtsLabels = {
     phone: "Phone",
     filterType: "Court type",
     filterSurface: "Surface",
-    filterCarpet: "Carpet"
+    filterCarpet: "Carpet",
+    searchPlaceholder: "Search court...",
+    recommendedBadge: "Recommended by KSLT"
 };

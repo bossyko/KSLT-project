@@ -615,14 +615,14 @@
                 var statusBadge = isActive
                     ? '<span class="ad-pay-badge ad-pay-active">' + L.payActive + '</span>'
                     : '<span class="ad-pay-badge ad-pay-expired">' + L.payExpired + '</span>';
-                var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + p.purpose + '">' + (PAYMENT_PURPOSES[p.purpose] || p.purpose) + '</span>';
+                var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + p.purpose + '">' + (A.PAYMENT_PURPOSES[p.purpose] || p.purpose) + '</span>';
 
                 paymentsHtml +=
                     '<tr>' +
                         '<td>' + purposeBadge + '</td>' +
                         '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + (p.currency || 'KGS') + '</td>' +
-                        '<td style="font-size:0.85rem;">' + formatPayDate(p.period_end) + '</td>' +
-                        '<td>' + (PAYMENT_METHODS[p.payment_method] || p.payment_method) + '</td>' +
+                        '<td style="font-size:0.85rem;">' + A.formatPayDate(p.period_end) + '</td>' +
+                        '<td>' + (A.PAYMENT_METHODS[p.payment_method] || p.payment_method) + '</td>' +
                         '<td>' + statusBadge + '</td>' +
                     '</tr>';
             });

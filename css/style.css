@@ -4295,6 +4295,107 @@ h2 {
     color: var(--accent);
 }
 
+.kslt-back-sep {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Back link inside sticky filters (no separate sticky wrapper) */
+.kslt-back-inside {
+    align-self: flex-start;
+    margin-bottom: -6px;
+}
+
+/* ---- PROMOTED / RECOMMENDED BADGE ---- */
+
+/* Badge on card photo (overlay, bottom-left) */
+.kslt-recommended-badge {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+    line-height: 1.2;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Card with promoted highlight */
+.kslt-promoted-card {
+    border: 1px solid rgba(204, 255, 0, 0.25);
+}
+
+/* Image wrapper needs position:relative for badge overlay */
+.co-card-img-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Badge on circular coach photo — centered below circle */
+.co-card-img-wrap .kslt-recommended-badge {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    margin-top: -14px;
+    margin-bottom: 4px;
+}
+
+/* Badge next to h1 on detail page */
+.kslt-recommended-detail {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(204, 255, 0, 0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 6px;
+    line-height: 1.2;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Title row with badge alignment */
+.ct-detail-title-row,
+.co-detail-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ct-detail-title-row h1,
+.co-detail-title-row h1 {
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    .kslt-recommended-badge {
+        font-size: 0.6rem;
+        padding: 3px 8px;
+        bottom: 8px;
+        left: 8px;
+    }
+    .kslt-recommended-detail {
+        font-size: 0.65rem;
+        padding: 3px 10px;
+    }
+}
+
 @media (max-width: 768px) {
     .kslt-back-wrap {
         padding: 12px 16px;

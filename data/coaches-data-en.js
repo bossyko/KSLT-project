@@ -233,5 +233,7 @@ window.coachesLabels = {
     court: "Court",
     loginToContact: "Sign in to contact",
     noContacts: "No contacts provided",
-    contactCoach: "Contact coach"
+    contactCoach: "Contact coach",
+    searchPlaceholder: "Search coach...",
+    recommendedBadge: "Recommended by KSLT"
 };

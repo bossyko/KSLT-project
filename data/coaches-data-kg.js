@@ -233,5 +233,7 @@ window.coachesLabels = {
     court: 'Корт',
     loginToContact: 'Байланыш үчүн кириңиз',
     noContacts: 'Байланыш маалыматы көрсөтүлгөн эмес',
-    contactCoach: 'Машыктыруучу менен байланышуу'
+    contactCoach: 'Машыктыруучу менен байланышуу',
+    searchPlaceholder: 'Машыктыруучу издөө...',
+    recommendedBadge: 'KSLT сунуштайт'
 };

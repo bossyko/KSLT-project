@@ -64,7 +64,7 @@
         pwRuleDigit: 'Бир сан',
         pwRuleSpecial: 'Бир атайын белги',
         showPassword: 'Сыр сөздү көрсөтүү',
-        role_user: 'Колдонуучу', role_player: 'Оюнчу', role_admin: 'Администратор',
+        role_user: 'Колдонуучу', role_player: 'Оюнчу', role_admin: 'Администратор', role_manager: 'Менеджер',
         category: 'Категория', points: 'Упайлар',
         wins: 'Жеңиштер', losses: 'Жеңилүүлөр', rank: 'Рейтинг өзгөрүшү',
         socialMedia: 'Социалдык тармактар',
@@ -168,7 +168,7 @@
         pwRuleDigit: 'One digit',
         pwRuleSpecial: 'One special character',
         showPassword: 'Show password',
-        role_user: 'User', role_player: 'Player', role_admin: 'Admin',
+        role_user: 'User', role_player: 'Player', role_admin: 'Admin', role_manager: 'Manager',
         category: 'Category', points: 'Points',
         wins: 'Wins', losses: 'Losses', rank: 'Rank Change',
         socialMedia: 'Social Media',
@@ -272,7 +272,7 @@
         pwRuleDigit: 'Одна цифра',
         pwRuleSpecial: 'Один спецсимвол',
         showPassword: 'Показать пароль',
-        role_user: 'Пользователь', role_player: 'Игрок', role_admin: 'Администратор',
+        role_user: 'Пользователь', role_player: 'Игрок', role_admin: 'Администратор', role_manager: 'Менеджер',
         category: 'Категория', points: 'Очки',
         wins: 'Победы', losses: 'Поражения', rank: 'Изм. рейтинга',
         socialMedia: 'Соцсети',
@@ -595,7 +595,14 @@
             ? '<img src="' + escHtml(profile.avatar_url) + '" class="db-sidebar-avatar" alt="">'
             : '<div class="db-sidebar-avatar-placeholder">' + initials + '</div>';
 
-        var roleLabel = L['role_' + profile.role] || profile.role;
+        var roleLabel;
+        if (profile.role === 'admin' || profile.role === 'manager') {
+            roleLabel = L['role_' + profile.role] || profile.role;
+        } else if (profile.player_id) {
+            roleLabel = L.role_player;
+        } else {
+            roleLabel = L.role_user;
+        }
 
         var qrBtnHtml = profile.player_id
             ? '<button class="db-sidebar-qr-btn" id="dbQrBtn" title="' + L.qrShare + '"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><line x1="20" y1="14" x2="20" y2="20"/><line x1="14" y1="20" x2="20" y2="20"/></svg> ' + L.qrShare + '</button>'
@@ -840,14 +847,6 @@
         }
         var yearVal = profile.birth_year || '';
 
-        // Mini stats card
-        var statsHtml = '';
-        if (profile.player_id) {
-            statsHtml = '<div class="db-card" id="profileStatsCard"><div class="db-card-title">' + L.stats + '</div><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
-        } else {
-            statsHtml = '<div class="db-card"><div class="db-card-title">' + L.stats + '</div>' +
-                '<p style="color:var(--text-muted);font-size:0.85rem;">' + L.playerNotLinked + '. ' + L.playerNotLinkedText + '</p></div>';
-        }
 
         container.innerHTML =
             '<h2 class="db-section-title">' + L.profileTitle + '</h2>' +
@@ -951,9 +950,6 @@
                 '</div>' +
             '</div>' +
 
-            // Mini stats
-            statsHtml +
-
             // Save button
             '<div class="db-btn-row">' +
                 '<button class="db-btn db-btn-primary" id="profileSaveBtn">' + L.save + '</button>' +
@@ -983,35 +979,6 @@
         attachScriptCheck('profileFirstName');
         attachScriptCheck('profileLastName');
 
-        // Load mini stats if player_id linked
-        if (profile.player_id && client) {
-            loadProfileStats(profile.player_id);
-        }
-    }
-
-    // ---- Load mini stats on profile ----
-    async function loadProfileStats(playerId) {
-        var card = document.getElementById('profileStatsCard');
-        if (!card || !client) return;
-
-        var result = await client.from('players').select('points, wins, losses, rank_change, categories(name)').eq('id', playerId).single();
-
-        if (!result.data) {
-            card.innerHTML = '<div class="db-card-title">' + L.stats + '</div><p style="color:var(--text-muted);">—</p>';
-            return;
-        }
-
-        var p = result.data;
-        var catName = p.categories ? p.categories.name : '-';
-
-        card.innerHTML =
-            '<div class="db-card-title">' + L.stats + ' — ' + catName + '</div>' +
-            '<div class="db-stats-grid db-stats-grid-mini">' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + p.points + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + p.wins + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + p.losses + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + (p.rank_change > 0 ? '+' : '') + p.rank_change + '</div><div class="db-stat-label">' + L.rank + '</div></div>' +
-            '</div>';
     }
 
     // ---- Invitations section ----

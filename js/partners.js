@@ -247,11 +247,14 @@
         }
         html += '<div class="pt-search-wrap"><input type="text" class="pt-search" id="ptSearch" placeholder="' + L.searchPlaceholder + '"></div>';
 
-        // Back link (hidden, shown on scroll)
-        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
-        html = '<a href="' + servicesLink + '" class="pt-back-link">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' + html;
-
         el.innerHTML = html;
+
+        // Back link before filters
+        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
+        var backWrap = document.createElement('div');
+        backWrap.className = 'kslt-back-wrap';
+        backWrap.innerHTML = '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
+        el.parentNode.insertBefore(backWrap, el);
 
         document.getElementById('ptSearch').addEventListener('input', function(e) {
             _searchQuery = e.target.value.toLowerCase().trim();

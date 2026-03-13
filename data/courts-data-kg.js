@@ -174,5 +174,7 @@ window.courtsLabels = {
     newBadge: 'Жаңы',
     filterType: 'Корт түрү',
     filterSurface: 'Жабуу',
-    filterCarpet: 'Килем'
+    filterCarpet: 'Килем',
+    searchPlaceholder: 'Корт издөө...',
+    recommendedBadge: 'KSLT сунуштайт'
 };

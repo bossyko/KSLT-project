@@ -36,7 +36,9 @@
         court: 'Корт',
         loginToContact: 'Байланыш үчүн кириңиз',
         noContacts: 'Байланыш маалыматы көрсөтүлгөн эмес',
-        contactCoach: 'Машыктыруучу менен байланышуу'
+        contactCoach: 'Машыктыруучу менен байланышуу',
+        searchPlaceholder: 'Машыктыруучу издөө...',
+        recommendedBadge: 'KSLT сунуштайт'
     } : {
         heroTitle: "Тренеры KSLT",
         heroSubtitle: "Профессиональные тренеры для игроков всех уровней",
@@ -65,7 +67,9 @@
         court: "Корт",
         loginToContact: "Войти чтобы связаться",
         noContacts: "Контакты не указаны",
-        contactCoach: "Связаться с тренером"
+        contactCoach: "Связаться с тренером",
+        searchPlaceholder: "Поиск тренера...",
+        recommendedBadge: "Рекомендован KSLT"
     });
 
     var staticData = window.coachesData || [];
@@ -89,6 +93,7 @@
     var PER_PAGE = 20;
     var _currentPage = 1;
     var _currentFilter = 'all';
+    var _searchQuery = '';
 
     async function detectAccess() {
         var client = window.supabaseClient;
@@ -217,25 +222,14 @@
     function initListPage() {
         renderHero();
         renderFilters();
-        renderBackLink();
         renderGrid('all');
+        initSearchInput();
         initFilterClicks();
         initPaginationClicks();
         initCtaClicks();
         initScrollAnimations();
         renderSponsors();
         detectAccess();
-    }
-
-    function renderBackLink() {
-        var filtersEl = document.getElementById('coachesFilters');
-        if (!filtersEl) return;
-        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
-        var link = document.createElement('a');
-        link.href = servicesLink;
-        link.className = 'co-back-link co-back-service';
-        link.innerHTML = '\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги'));
-        filtersEl.insertBefore(link, filtersEl.firstChild);
     }
 
     function renderHero() {
@@ -261,7 +255,14 @@
             { key: 'beginner', label: L.filterBeginner },
             { key: 'advanced', label: L.filterAdvanced }
         ];
-        var html = '<div class="co-filters">';
+        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
+        var html =
+            '<a href="' + servicesLink + '" class="kslt-back kslt-back-inside">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+            '<div class="co-search-wrap">' +
+                '<svg class="co-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                '<input type="text" class="co-search-input" id="coachesSearch" placeholder="' + L.searchPlaceholder + '" autocomplete="off">' +
+            '</div>' +
+            '<div class="co-filters">';
         filters.forEach(function(f) {
             html += '<button class="co-filter-btn' + (f.key === 'all' ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
         });
@@ -283,8 +284,15 @@
         var container = document.getElementById('coachesGrid');
         if (!container) return;
         var filtered = allData;
+        if (_searchQuery) {
+            var q = _searchQuery.toLowerCase();
+            filtered = filtered.filter(function(c) {
+                return (c.name && c.name.toLowerCase().indexOf(q) !== -1) ||
+                       (c.specialization && c.specialization.toLowerCase().indexOf(q) !== -1);
+            });
+        }
         if (_currentFilter !== 'all') {
-            filtered = allData.filter(function(c) {
+            filtered = filtered.filter(function(c) {
                 return (c.tags || []).indexOf(_currentFilter) !== -1;
             });
         }
@@ -313,8 +321,13 @@
                 statsHtml += '<div class="co-card-stat"><div class="co-card-stat-num">' + c.rating + '</div><div class="co-card-stat-label">' + L.rating + '</div></div>';
             }
 
-            html += '<a href="' + detailBase + '?id=' + c.id + '" class="co-card co-fade-in">' +
-                '<img src="' + esc(c.photo) + '" alt="' + esc(c.name) + '" class="co-card-photo">' +
+            var promoBadge = c._promoted ? '<span class="kslt-recommended-badge">' + L.recommendedBadge + '</span>' : '';
+
+            html += '<a href="' + detailBase + '?id=' + c.id + '" class="co-card co-fade-in' + (c._promoted ? ' kslt-promoted-card' : '') + '">' +
+                '<div class="co-card-img-wrap">' +
+                    '<img src="' + esc(c.photo) + '" alt="' + esc(c.name) + '" class="co-card-photo">' +
+                    promoBadge +
+                '</div>' +
                 '<div class="co-card-name">' + esc(c.name) + '</div>' +
                 (c.specialization ? '<div class="co-card-spec">' + c.specialization + '</div>' : '') +
                 (c.shortDesc ? '<div class="co-card-desc">' + c.shortDesc + '</div>' : '') +
@@ -417,6 +430,16 @@
         });
     }
 
+    function initSearchInput() {
+        var searchInput = document.getElementById('coachesSearch');
+        if (!searchInput) return;
+        searchInput.addEventListener('input', function() {
+            _searchQuery = searchInput.value.trim();
+            _currentPage = 1;
+            renderGrid();
+        });
+    }
+
     function initFilterClicks() {
         document.addEventListener('click', function(e) {
             if (!e.target.classList.contains('co-filter-btn')) return;
@@ -437,7 +460,7 @@
         }
         if (!coach) {
             var container = document.getElementById('coachDetail');
-            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2>Coach not found</h2><a href="' + (isEn ? 'coaches-en.html' : (isKg ? 'coaches-kg.html' : 'coaches.html')) + '" class="co-back-link">← ' + L.backBtn + '</a></div>';
+            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2>Coach not found</h2><a href="' + (isEn ? 'coaches-en.html' : (isKg ? 'coaches-kg.html' : 'coaches.html')) + '" class="kslt-back">\u2190 ' + L.backBtn + '</a></div>';
             return;
         }
 
@@ -467,17 +490,19 @@
 
         var html = '';
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
-        html += '<div class="co-back-links">';
-        html += '<a href="' + servicesLink + '" class="co-back-link">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
-        html += '<span class="co-back-sep">/</span>';
-        html += '<a href="' + coachesLink + '" class="co-back-link">' + L.backBtn + '</a>';
+        html += '<div class="kslt-back-wrap">';
+        html += '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
+        html += '<span class="kslt-back-sep">/</span>';
+        html += '<a href="' + coachesLink + '" class="kslt-back">' + L.backBtn + '</a>';
         html += '</div>';
 
         // Header
         html += '<div class="co-detail-header co-fade-in">' +
             '<img src="' + esc(coach.photo) + '" alt="' + esc(coach.name) + '" class="co-detail-photo">' +
             '<div class="co-detail-info">' +
-                '<h1>' + coach.name + '</h1>' +
+                '<div class="co-detail-title-row"><h1>' + coach.name + '</h1>' +
+                (coach._promoted ? '<span class="kslt-recommended-detail">' + L.recommendedBadge + '</span>' : '') +
+                '</div>' +
                 (coach.specialization ? '<div class="co-detail-spec">' + coach.specialization + '</div>' : '') +
                 (coach.court ? '<div class="co-detail-court"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + coach.court + '</div>' : '') +
             '</div>' +

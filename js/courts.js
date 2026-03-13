@@ -60,7 +60,9 @@
         newBadge: 'Жаңы',
         filterType: 'Корт түрү',
         filterSurface: 'Жабуу',
-        filterCarpet: 'Килем'
+        filterCarpet: 'Килем',
+        searchPlaceholder: 'Корт издөө...',
+        recommendedBadge: 'KSLT сунуштайт'
     } : {
         heroTitle: "Корты KSLT",
         heroSubtitle: "Теннисные корты Бишкека для тренировок и турниров",
@@ -90,7 +92,9 @@
         newBadge: "Новый",
         filterType: "Тип корта",
         filterSurface: "Покрытие",
-        filterCarpet: "Ковёр"
+        filterCarpet: "Ковёр",
+        searchPlaceholder: "Поиск корта...",
+        recommendedBadge: "Рекомендован KSLT"
     });
 
     var SURFACE_MAP = { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр' };
@@ -102,6 +106,7 @@
 
     var currentTypeFilter = 'all';
     var currentSurfaceFilter = 'all';
+    var _searchQuery = '';
 
     var _accessLevel = 'guest';
     var PER_PAGE = 20;
@@ -317,25 +322,14 @@
     function initListPage() {
         renderHero();
         renderFilters();
-        renderBackLink();
         renderGrid();
+        initSearchInput();
         initFilterClicks();
         initPaginationClicks();
         initCtaClicks();
         initScrollAnimations();
         renderSponsors();
         detectAccess();
-    }
-
-    function renderBackLink() {
-        var filters = document.getElementById('courtsFilters');
-        if (!filters) return;
-        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
-        var link = document.createElement('a');
-        link.href = servicesLink;
-        link.className = 'ct-back-link ct-back-service';
-        link.innerHTML = '\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги'));
-        filters.insertBefore(link, filters.firstChild);
     }
 
     function renderHero() {
@@ -355,23 +349,31 @@
 
         container.className = 'ct-filters-wrap';
 
+        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
         var html =
-            '<div class="ct-filter-group">' +
-                '<span class="ct-filter-label">' + L_labels.filterType + '</span>' +
-                '<div class="ct-filter-chips">' +
-                    '<button class="ct-filter-btn active" data-filter-type="all">' + L_labels.filterAll + '</button>' +
-                    '<button class="ct-filter-btn" data-filter-type="indoor">' + L_labels.filterIndoor + '</button>' +
-                    '<button class="ct-filter-btn" data-filter-type="outdoor">' + L_labels.filterOutdoor + '</button>' +
-                '</div>' +
+            '<a href="' + servicesLink + '" class="kslt-back kslt-back-inside">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+            '<div class="ct-search-wrap">' +
+                '<svg class="ct-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                '<input type="text" class="ct-search-input" id="courtsSearch" placeholder="' + L_labels.searchPlaceholder + '" autocomplete="off">' +
             '</div>' +
-            '<div class="ct-filter-divider"></div>' +
-            '<div class="ct-filter-group">' +
-                '<span class="ct-filter-label">' + L_labels.filterSurface + '</span>' +
-                '<div class="ct-filter-chips">' +
-                    '<button class="ct-filter-btn active" data-filter-surface="all">' + L_labels.filterAll + '</button>' +
-                    '<button class="ct-filter-btn" data-filter-surface="hard">' + L_labels.filterHard + '</button>' +
-                    '<button class="ct-filter-btn" data-filter-surface="clay">' + L_labels.filterClay + '</button>' +
-                    '<button class="ct-filter-btn" data-filter-surface="carpet">' + L_labels.filterCarpet + '</button>' +
+            '<div class="ct-filters-row">' +
+                '<div class="ct-filter-group">' +
+                    '<span class="ct-filter-label">' + L_labels.filterType + '</span>' +
+                    '<div class="ct-filter-chips">' +
+                        '<button class="ct-filter-btn active" data-filter-type="all">' + L_labels.filterAll + '</button>' +
+                        '<button class="ct-filter-btn" data-filter-type="indoor">' + L_labels.filterIndoor + '</button>' +
+                        '<button class="ct-filter-btn" data-filter-type="outdoor">' + L_labels.filterOutdoor + '</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ct-filter-divider"></div>' +
+                '<div class="ct-filter-group">' +
+                    '<span class="ct-filter-label">' + L_labels.filterSurface + '</span>' +
+                    '<div class="ct-filter-chips">' +
+                        '<button class="ct-filter-btn active" data-filter-surface="all">' + L_labels.filterAll + '</button>' +
+                        '<button class="ct-filter-btn" data-filter-surface="hard">' + L_labels.filterHard + '</button>' +
+                        '<button class="ct-filter-btn" data-filter-surface="clay">' + L_labels.filterClay + '</button>' +
+                        '<button class="ct-filter-btn" data-filter-surface="carpet">' + L_labels.filterCarpet + '</button>' +
+                    '</div>' +
                 '</div>' +
             '</div>';
         container.innerHTML = html;
@@ -391,6 +393,16 @@
         if (!container) return;
 
         var filtered = data;
+
+        // Filter by search query
+        if (_searchQuery) {
+            var q = _searchQuery.toLowerCase();
+            filtered = filtered.filter(function(c) {
+                return (c.name && c.name.toLowerCase().indexOf(q) !== -1) ||
+                       (c.address && c.address.toLowerCase().indexOf(q) !== -1) ||
+                       (c.surface && c.surface.toLowerCase().indexOf(q) !== -1);
+            });
+        }
 
         // Filter by type
         if (currentTypeFilter === 'indoor') {
@@ -422,11 +434,13 @@
         pageItems.forEach(function(c) {
             var typeLabel = c._typeDesc || (c.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor);
             var newBadge = c._isNew ? '<span class="ct-new-badge">' + L_labels.newBadge + '</span>' : '';
+            var promoBadge = c._promoted ? '<span class="kslt-recommended-badge">' + L_labels.recommendedBadge + '</span>' : '';
 
-            html += '<a href="' + detailBase + '?id=' + c.id + '" class="ct-card ct-fade-in">' +
+            html += '<a href="' + detailBase + '?id=' + c.id + '" class="ct-card ct-fade-in' + (c._promoted ? ' kslt-promoted-card' : '') + '">' +
                 '<div class="ct-card-img-wrap">' +
                     '<img src="' + esc(c.photo) + '" alt="' + esc(c.name) + '" class="ct-card-img" loading="lazy">' +
                     newBadge +
+                    promoBadge +
                 '</div>' +
                 '<div class="ct-card-body">' +
                     '<div class="ct-card-top">' +
@@ -541,6 +555,16 @@
         });
     }
 
+    function initSearchInput() {
+        var searchInput = document.getElementById('courtsSearch');
+        if (!searchInput) return;
+        searchInput.addEventListener('input', function() {
+            _searchQuery = searchInput.value.trim();
+            _currentPage = 1;
+            renderGrid();
+        });
+    }
+
     function initFilterClicks() {
         document.addEventListener('click', function(e) {
             if (!e.target.classList.contains('ct-filter-btn')) return;
@@ -607,17 +631,19 @@
 
         // Back links
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
-        html += '<div class="ct-back-links">';
-        html += '<a href="' + servicesLink + '" class="ct-back-link">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
-        html += '<span class="ct-back-sep">/</span>';
-        html += '<a href="' + courtsLink + '" class="ct-back-link">' + L_labels.backBtn + '</a>';
+        html += '<div class="kslt-back-wrap">';
+        html += '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
+        html += '<span class="kslt-back-sep">/</span>';
+        html += '<a href="' + courtsLink + '" class="kslt-back">' + L_labels.backBtn + '</a>';
         html += '</div>';
 
         // Header
         html += '<div class="ct-detail-header ct-fade-in">' +
             '<img src="' + esc(court.photo) + '" alt="' + esc(court.name) + '" class="ct-detail-photo">' +
             '<div class="ct-detail-info">' +
-                '<h1>' + court.name + '</h1>' +
+                '<div class="ct-detail-title-row"><h1>' + court.name + '</h1>' +
+                (court._promoted ? '<span class="kslt-recommended-detail">' + L_labels.recommendedBadge + '</span>' : '') +
+                '</div>' +
                 '<div class="ct-detail-type">' + typeLabel + ' \u00b7 ' + court.surface +
                     (court.partner ? ' \u00b7 <span style="background:var(--accent);color:#000;font-size:0.72rem;padding:2px 8px;border-radius:100px;font-weight:700;">' + L_labels.partnerBadge + '</span>' : '') +
                 '</div>' +
