@@ -216,7 +216,8 @@ function getLabels() {
         featuredLabel: "Главное",
         readMore: "Читать",
         allArticles: "Все статьи",
-        filterAll: "Все"
+        filterAll: "Все",
+        searchPlaceholder: "Поиск новости..."
     };
 }
 
@@ -839,6 +840,7 @@ function renderNewsList() {
     // State
     var currentFilter = 'all';
     var currentPage = 1;
+    var searchQuery = '';
 
     // === HERO ===
     var hero = document.getElementById('newsHero');
@@ -863,10 +865,17 @@ function renderNewsList() {
     notFound.style.display = 'block';
 
     // Build filters + grid + pagination shell
-    var filtersHtml = '<button class="news-filter-btn active" data-cat="all">' + labels.filterAll + '</button>';
+    var chipsHtml = '<button class="news-filter-btn active" data-cat="all">' + labels.filterAll + '</button>';
     categories.forEach(function(cat) {
-        filtersHtml += '<button class="news-filter-btn" data-cat="' + cat.key + '">' + cat.label + '</button>';
+        chipsHtml += '<button class="news-filter-btn" data-cat="' + cat.key + '">' + cat.label + '</button>';
     });
+
+    var filtersHtml =
+        '<div class="nw-search-wrap">' +
+            '<svg class="nw-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+            '<input type="text" class="nw-search-input" id="newsSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
+        '</div>' +
+        '<div class="news-filter-chips">' + chipsHtml + '</div>';
 
     // Insert filters as direct child of <main> so sticky works through sponsors
     var filtersWrapper = document.createElement('div');
@@ -883,9 +892,20 @@ function renderNewsList() {
 
     // === RENDER FUNCTION ===
     function renderGrid() {
-        var filtered = currentFilter === 'all' ? allArticles : allArticles.filter(function(a) {
-            return a.category === currentFilter;
-        });
+        var filtered = allArticles;
+        if (searchQuery) {
+            var q = searchQuery.toLowerCase();
+            filtered = filtered.filter(function(a) {
+                return (a.title && a.title.toLowerCase().indexOf(q) !== -1) ||
+                       (a.subtitle && a.subtitle.toLowerCase().indexOf(q) !== -1) ||
+                       (a.categoryLabel && a.categoryLabel.toLowerCase().indexOf(q) !== -1);
+            });
+        }
+        if (currentFilter !== 'all') {
+            filtered = filtered.filter(function(a) {
+                return a.category === currentFilter;
+            });
+        }
 
         var totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
         if (currentPage > totalPages) currentPage = totalPages;
@@ -944,6 +964,13 @@ function renderNewsList() {
     renderGrid();
 
     // === EVENT LISTENERS ===
+    // Search
+    document.getElementById('newsSearch').addEventListener('input', function(e) {
+        searchQuery = e.target.value.trim();
+        currentPage = 1;
+        renderGrid();
+    });
+
     // Filters
     document.getElementById('newsFilters').addEventListener('click', function(e) {
         var btn = e.target.closest('.news-filter-btn');

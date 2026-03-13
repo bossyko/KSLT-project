@@ -21,7 +21,8 @@ window.newsLabels = {
     featuredLabel: "Башкы",
     readMore: "Толугураак окуу",
     allArticles: "Бардык макалалар",
-    filterAll: "Баары"
+    filterAll: "Баары",
+    searchPlaceholder: "Жаңылыктарды издөө..."
 };
 
 var newsArticleData = {

@@ -21,7 +21,8 @@ window.newsLabels = {
     featuredLabel: "Featured",
     readMore: "Read article",
     allArticles: "All Articles",
-    filterAll: "All"
+    filterAll: "All",
+    searchPlaceholder: "Search news..."
 };
 
 var newsArticleData = {
