@@ -828,13 +828,10 @@
         } catch(e) {
             console.warn('[KSLT] findPlayer static error:', e);
         }
-        console.log('[KSLT] Player lookup:', playerId, 'static:', !!data, 'client:', !!client);
-
         // Supabase fallback — if player not in static data, load from DB
         if (!data && client) {
             try {
                 var plrRes = await client.from('players').select('*').eq('id', playerId).single();
-                console.log('[KSLT] Supabase fallback:', plrRes.error ? plrRes.error.message : 'found', plrRes.data);
                 if (plrRes.data) {
                     var p = plrRes.data;
                     var catName = '';
