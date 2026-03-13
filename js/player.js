@@ -856,7 +856,7 @@
                     // If player has no photo, try linked profile avatar
                     var playerPhoto = p.photo || '';
                     if (!playerPhoto) {
-                        var profRes = await client.from('profiles').select('avatar_url').eq('player_id', p.id).single();
+                        var profRes = await client.from('profiles').select('avatar_url').eq('player_id', p.id).maybeSingle();
                         if (profRes.data && profRes.data.avatar_url) playerPhoto = profRes.data.avatar_url;
                     }
                     data = {
