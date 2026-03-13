@@ -672,7 +672,15 @@
         crtViewPurpose: 'Purpose',
         crtViewActiveUntil: 'Active Until',
         crtViewStatus: 'Status',
-        crtViewMethod: 'Method'
+        crtViewMethod: 'Method',
+        // Rating History
+        ratingHistory: 'Rating History',
+        rhTournament: 'Tournament',
+        rhPoints: 'Points',
+        rhDate: 'Date',
+        rhAdd: 'Add',
+        rhNoData: 'No rating history',
+        rhTotalPoints: 'Total Points'
     } : {
         dashboard: 'Дашборд',
         users: 'Пользователи',
@@ -1337,7 +1345,15 @@
         crtViewPurpose: 'Назначение',
         crtViewActiveUntil: 'Активен до',
         crtViewStatus: 'Статус',
-        crtViewMethod: 'Способ'
+        crtViewMethod: 'Способ',
+        // Rating History
+        ratingHistory: 'История рейтинга',
+        rhTournament: 'Турнир',
+        rhPoints: 'Очки',
+        rhDate: 'Дата',
+        rhAdd: 'Добавить',
+        rhNoData: 'Нет данных',
+        rhTotalPoints: 'Всего очков'
     };
 
     // Category map

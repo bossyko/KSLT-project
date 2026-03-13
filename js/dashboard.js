@@ -105,7 +105,9 @@
         invDeclined: 'Четке кагылды',
         invPending: 'Күтүүдө',
         invNoInvites: 'Чакыруулар жок',
-        invNoInvitesText: '«Өнөктөш табуу» барагынан оюнга чакыруулар жөнөтүңүз'
+        invNoInvitesText: '«Өнөктөш табуу» барагынан оюнга чакыруулар жөнөтүңүз',
+        ratingHistory: 'Рейтинг тарыхы',
+        rhTotalPoints: 'Жалпы упайлар'
     } : isEn ? {
         profile: 'Profile', tournaments: 'My Tournaments',
         stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
@@ -202,7 +204,9 @@
         invDeclined: 'Declined',
         invPending: 'Pending',
         invNoInvites: 'No invitations yet',
-        invNoInvitesText: 'Send game invitations from the Partners page'
+        invNoInvitesText: 'Send game invitations from the Partners page',
+        ratingHistory: 'Rating History',
+        rhTotalPoints: 'Total Points'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
@@ -299,11 +303,35 @@
         invDeclined: 'Отклонено',
         invPending: 'Ожидает',
         invNoInvites: 'Приглашений пока нет',
-        invNoInvitesText: 'Отправляйте приглашения со страницы «Найти партнёра»'
+        invNoInvitesText: 'Отправляйте приглашения со страницы «Найти партнёра»',
+        ratingHistory: 'История рейтинга',
+        rhTotalPoints: 'Всего очков'
     };
 
     // Use shared Supabase client from supabase-config.js
     var client = window.supabaseClient;
+
+    // ---- Script validation (Cyrillic / Latin / Kyrgyz) ----
+    var SCRIPT_RU = /^[а-яА-ЯёЁ\s\-'.]+$/;
+    var SCRIPT_EN = /^[a-zA-Z\s\-'.]+$/;
+    var SCRIPT_KG = /^[а-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
+    var scriptRegex = isKg ? SCRIPT_KG : isEn ? SCRIPT_EN : SCRIPT_RU;
+    var scriptHint = isKg ? 'Кыргыз тамгалары гана' : isEn ? 'Latin characters only' : 'Только кириллица';
+
+    function attachScriptCheck(inputId) {
+        var el = document.getElementById(inputId);
+        if (!el) return;
+        var hint = document.createElement('div');
+        hint.style.cssText = 'color:#ff4444;font-size:0.75rem;margin-top:2px;display:none;';
+        hint.textContent = scriptHint;
+        el.parentNode.appendChild(hint);
+        el.addEventListener('input', function() {
+            var v = el.value.trim();
+            var bad = v.length > 0 && !scriptRegex.test(v);
+            el.style.borderColor = bad ? '#ff4444' : '';
+            hint.style.display = bad ? '' : 'none';
+        });
+    }
 
     // ---- Profile completeness check (global) ----
     window.isProfileComplete = function() {
@@ -753,6 +781,10 @@
             field.addEventListener('change', checkProfileDirty);
         });
 
+        // Script validation on name fields
+        attachScriptCheck('profileFirstName');
+        attachScriptCheck('profileLastName');
+
         // Load mini stats if player_id linked
         if (profile.player_id && client) {
             loadProfileStats(profile.player_id);
@@ -903,6 +935,18 @@
         var btn = document.getElementById('profileSaveBtn');
         var firstName = document.getElementById('profileFirstName').value.trim();
         var lastName = document.getElementById('profileLastName').value.trim();
+
+        // Script validation
+        if (firstName && !scriptRegex.test(firstName)) {
+            var msg = isKg ? 'Атын кыргыз тамгалары менен жазыңыз' : isEn ? 'First name must use Latin characters' : 'Имя должно быть на кириллице';
+            alert(msg);
+            return;
+        }
+        if (lastName && !scriptRegex.test(lastName)) {
+            var msg2 = isKg ? 'Фамилиясын кыргыз тамгалары менен жазыңыз' : isEn ? 'Last name must use Latin characters' : 'Фамилия должна быть на кириллице';
+            alert(msg2);
+            return;
+        }
         var phone = document.getElementById('profilePhone').value.trim();
         var gender = document.getElementById('profileGender').value;
         var birthDay = document.getElementById('profileBirthDay').value;
@@ -1145,7 +1189,7 @@
 
         if (!client) return;
 
-        var result = await client.from('players').select('*, categories(name)').eq('id', profile.player_id).single();
+        var result = await client.from('players').select('*').eq('id', profile.player_id).single();
 
         if (!result.data) {
             container.innerHTML = '<h2 class="db-section-title">' + L.statsTitle + '</h2><div class="db-card"><div class="db-empty"><div class="db-empty-icon">📊</div><div class="db-empty-title">' + L.noStats + '</div></div></div>';
@@ -1153,7 +1197,11 @@
         }
 
         var p = result.data;
-        var catName = p.categories ? p.categories.name : '-';
+        var catName = '-';
+        if (p.category_id) {
+            var catRes = await client.from('categories').select('name').eq('id', p.category_id).single();
+            if (catRes.data) catName = catRes.data.name;
+        }
 
         container.innerHTML =
             '<h2 class="db-section-title">' + L.statsTitle + '</h2>' +
@@ -1166,7 +1214,97 @@
             '<div class="db-card">' +
                 '<div class="db-card-title">' + L.category + '</div>' +
                 '<p style="color:var(--accent);font-size:1.1rem;font-weight:600;">' + catName + '</p>' +
+            '</div>' +
+            '<div id="dbRatingChartWrap" style="display:none;">' +
+                '<div class="db-card">' +
+                    '<div class="db-card-title">' + L.ratingHistory + '</div>' +
+                    '<div style="position:relative;height:250px;">' +
+                        '<canvas id="dbRatingChart"></canvas>' +
+                    '</div>' +
+                '</div>' +
             '</div>';
+
+        // Render rating history chart
+        renderRatingChart(profile.player_id, 'dbRatingChart', 'dbRatingChartWrap');
+    }
+
+    // ---- Rating History Chart ----
+    async function renderRatingChart(playerId, canvasId, wrapId) {
+        if (!playerId || !client || typeof Chart === 'undefined') return;
+
+        var res = await client.from('rating_history')
+            .select('*')
+            .eq('player_id', playerId)
+            .order('recorded_at', { ascending: true });
+
+        var data = res.data || [];
+        if (data.length === 0) return;
+
+        var wrap = document.getElementById(wrapId);
+        if (wrap) wrap.style.display = '';
+
+        var labels = [];
+        var values = [];
+        var cumulative = 0;
+        var tooltipNames = [];
+
+        data.forEach(function(row) {
+            cumulative += row.points_earned;
+            labels.push(row.recorded_at);
+            values.push(cumulative);
+            tooltipNames.push(row.tournament_name + ' (+' + row.points_earned + ')');
+        });
+
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: L.rhTotalPoints,
+                    data: values,
+                    borderColor: '#CCFF00',
+                    backgroundColor: 'rgba(204,255,0,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#CCFF00',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(ctx) { return tooltipNames[ctx[0].dataIndex]; },
+                            label: function(ctx) { return L.rhTotalPoints + ': ' + ctx.parsed.y; }
+                        },
+                        backgroundColor: 'rgba(30,30,30,0.95)',
+                        titleColor: '#CCFF00',
+                        bodyColor: '#fff',
+                        borderColor: '#CCFF00',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#888', maxRotation: 45 },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#888' },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    }
+                }
+            }
+        });
     }
 
     // ---- Render Settings ----

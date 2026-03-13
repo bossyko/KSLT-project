@@ -353,6 +353,28 @@
         this.setCustomValidity('');
     });
 
+    // ---- Name script validation (RU → Cyrillic, EN → Latin, KG → Kyrgyz) ----
+    var _sRu = /^[а-яА-ЯёЁ\s\-'.]+$/;
+    var _sEn = /^[a-zA-Z\s\-'.]+$/;
+    var _sKg = /^[а-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
+    var _sRe = isKg ? _sKg : isEn ? _sEn : _sRu;
+    var _sHint = isKg ? 'Кыргыз тамгалары гана' : isEn ? 'Latin characters only' : 'Только кириллица';
+
+    ['signup-firstname', 'signup-lastname'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var hint = document.createElement('div');
+        hint.style.cssText = 'color:#ff4444;font-size:0.75rem;margin-top:2px;display:none;';
+        hint.textContent = _sHint;
+        el.parentNode.appendChild(hint);
+        el.addEventListener('input', function() {
+            var v = el.value.trim();
+            var bad = v.length > 0 && !_sRe.test(v);
+            el.style.borderColor = bad ? '#ff4444' : '';
+            hint.style.display = bad ? '' : 'none';
+        });
+    });
+
     // ============================================
     // SIGN IN — Supabase
     // ============================================
@@ -443,6 +465,18 @@
 
         if (!client) {
             showMessage(signupForm, L.errGeneric, true);
+            return;
+        }
+
+        // Script validation (RU → Cyrillic, EN → Latin, KG → Kyrgyz Cyrillic)
+        var _scriptRu = /^[а-яА-ЯёЁ\s\-'.]+$/;
+        var _scriptEn = /^[a-zA-Z\s\-'.]+$/;
+        var _scriptKg = /^[а-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
+        var _scriptRe = isKg ? _scriptKg : isEn ? _scriptEn : _scriptRu;
+        var _scriptMsg = isKg ? 'Атыңызды кыргыз тамгалары менен жазыңыз' : isEn ? 'Name must use Latin characters' : 'Имя и фамилия должны быть на кириллице';
+
+        if ((firstName && !_scriptRe.test(firstName)) || (lastName && !_scriptRe.test(lastName))) {
+            showMessage(signupForm, _scriptMsg, true);
             return;
         }
 

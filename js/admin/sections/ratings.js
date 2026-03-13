@@ -676,20 +676,32 @@
 
         for (var i = 0; i < unique.length; i++) {
             var pid = unique[i];
-            // Get all results for this player in current season
-            var res = await A.client.from('tournament_results').select('points_earned').eq('player_id', pid);
-            var total = 0;
+
+            // Wins/losses from tournament_results
+            var trRes = await A.client.from('tournament_results').select('round_reached').eq('player_id', pid);
             var wins = 0;
             var losses = 0;
-            (res.data || []).forEach(function(r) {
-                total += r.points_earned || 0;
+            (trRes.data || []).forEach(function(r) {
                 if (r.round_reached === 'W') wins++;
                 else losses++;
+            });
+
+            // Points from rating_history (current season = calendar year, auto + manual)
+            var currentYear = new Date().getFullYear();
+            var rhRes = await A.client.from('rating_history')
+                .select('points_earned')
+                .eq('player_id', pid)
+                .gte('recorded_at', currentYear + '-01-01')
+                .lte('recorded_at', currentYear + '-12-31');
+            var total = 0;
+            (rhRes.data || []).forEach(function(r) {
+                total += r.points_earned || 0;
             });
 
             await A.client.from('players').update({ points: total, wins: wins, losses: losses }).eq('id', pid);
         }
     }
+    A.recalcPlayerPoints = recalcPlayerPoints;
 
     // ---- Points Rules Sub-tab ----
     function renderRatRules() {

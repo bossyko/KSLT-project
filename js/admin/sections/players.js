@@ -13,6 +13,30 @@
     var plrImageFile = null;
     var plrImageUrl = '';
     var plrFilterCategory = '';
+
+    // Script validation patterns
+    var SCRIPT_RU = /^[а-яА-ЯёЁ\s\-'.]+$/;
+    var SCRIPT_EN = /^[a-zA-Z\s\-'.]+$/;
+    var SCRIPT_KG = /^[а-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
+
+    function attachScriptValidation(inputId, regex, hintText) {
+        var el = document.getElementById(inputId);
+        if (!el) return;
+        var hint = document.createElement('div');
+        hint.style.cssText = 'color:#ff4444;font-size:0.75rem;margin-top:2px;display:none;';
+        hint.textContent = hintText;
+        el.parentNode.appendChild(hint);
+        el.addEventListener('input', function() {
+            var v = el.value.trim();
+            var bad = v.length > 0 && !regex.test(v);
+            el.style.borderColor = bad ? '#ff4444' : '';
+            hint.style.display = bad ? '' : 'none';
+        });
+    }
+
+    function checkScript(value, regex) {
+        return !value || regex.test(value);
+    }
     var plrSearchQuery = '';
 
     async function renderPlayersSection() {
@@ -150,6 +174,11 @@
         if (!A.client) return;
         var result = await A.client.from('players').select('*').eq('id', id).single();
         if (result.data) {
+            // Look up linked profile gender
+            var profRes = await A.client.from('profiles').select('gender').eq('player_id', id).single();
+            if (profRes.data && profRes.data.gender) {
+                result.data._gender = profRes.data.gender; // 'male' or 'female'
+            }
             A.setAdminHash('players', 'edit', id);
             renderPlayerForm(result.data);
         }
@@ -177,9 +206,13 @@
 
         var hasImageClass = plrImageUrl ? ' has-image' : '';
 
-        // Category options
+        // Category options (filtered by player gender if known)
+        var plrGender = item ? item._gender : null; // 'male' or 'female' from linked profile
+        var catGenderFilter = plrGender === 'male' ? 'men' : plrGender === 'female' ? 'women' : null;
+
         var catOptionsHtml = '<option value="">' + L.selectCategoryTrn + '</option>';
         A.cachedCategories.forEach(function(c) {
+            if (catGenderFilter && c.gender && c.gender !== catGenderFilter) return;
             var selected = (item && item.category_id === c.id) ? ' selected' : '';
             var genderIcon = c.gender === 'women' ? '♀ ' : '♂ ';
             var catName = isEn ? c.name_en : c.name;
@@ -340,11 +373,88 @@
                 '</div>' +
             '</div>' +
 
+            // Rating History (edit only)
+            (plrEditingId ? (
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.ratingHistory + '</div>' +
+                '<div id="adPlrRhChartWrap" style="display:none;margin-bottom:16px;">' +
+                    '<canvas id="adPlrRhChart" height="220"></canvas>' +
+                '</div>' +
+                '<div id="adPlrRhTable"></div>' +
+                '<div style="margin-top:12px;display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">' +
+                    '<div class="ad-field" style="flex:0 0 140px;">' +
+                        '<label class="ad-field-label">' + L.rhDate + '</label>' +
+                        '<input type="date" class="ad-field-input" id="adPlrRhDate">' +
+                    '</div>' +
+                    '<div class="ad-field" style="flex:1;min-width:160px;">' +
+                        '<label class="ad-field-label">' + L.rhTournament + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adPlrRhName" placeholder="' + L.rhTournament + '">' +
+                    '</div>' +
+                    '<div class="ad-field" style="flex:0 0 100px;">' +
+                        '<label class="ad-field-label">' + L.rhPoints + '</label>' +
+                        '<input type="number" class="ad-field-input" id="adPlrRhPoints" min="0" placeholder="0">' +
+                    '</div>' +
+                    '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrRhAdd">' + L.rhAdd + '</button>' +
+                '</div>' +
+            '</div>'
+            ) : '') +
+
             // Actions
             '<div class="ad-btn-row">' +
                 '<button class="ad-btn ad-btn-primary" id="adPlrSave">' + L.save + '</button>' +
                 (plrEditingId ? '<button class="ad-btn ad-btn-danger" id="adPlrDelete">' + L.delete + '</button>' : '') +
             '</div>';
+
+        // --- Rating History Events (edit only) ---
+        if (plrEditingId) {
+            loadPlrRatingHistory(plrEditingId);
+
+            // Fix: prevent date picker from closing due to document click handlers
+            var rhDateInput = document.getElementById('adPlrRhDate');
+            rhDateInput.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+
+            document.getElementById('adPlrRhAdd').addEventListener('click', async function() {
+                var dateVal = document.getElementById('adPlrRhDate').value;
+                var nameVal = document.getElementById('adPlrRhName').value.trim();
+                var ptsVal = parseInt(document.getElementById('adPlrRhPoints').value) || 0;
+
+                if (!dateVal || !nameVal) {
+                    A.showToast(L.fillRequired || 'Fill required fields', 'error');
+                    return;
+                }
+
+                if (!checkScript(nameVal, rhNameRegex)) {
+                    A.showToast(rhNameHint, 'error');
+                    return;
+                }
+
+                var res = await A.client.from('rating_history').insert({
+                    player_id: plrEditingId,
+                    tournament_name: nameVal,
+                    points_earned: ptsVal,
+                    recorded_at: dateVal
+                });
+
+                if (res.error) {
+                    A.showToast(res.error.message, 'error');
+                    return;
+                }
+
+                document.getElementById('adPlrRhDate').value = '';
+                document.getElementById('adPlrRhName').value = '';
+                document.getElementById('adPlrRhPoints').value = '';
+                loadPlrRatingHistory(plrEditingId);
+                await recalcPointsFromHistory(plrEditingId);
+            });
+        }
+
+        // --- Script validation on name fields ---
+        attachScriptValidation('adPlrName', SCRIPT_RU, 'Только кириллица');
+        attachScriptValidation('adPlrNameEn', SCRIPT_EN, 'Latin characters only');
+        attachScriptValidation('adPlrNameKg', SCRIPT_KG, 'Кыргыз тамгалары гана');
+        var rhNameHint = isEn ? 'Latin characters only' : 'Только кириллица';
+        var rhNameRegex = isEn ? SCRIPT_EN : SCRIPT_RU;
+        attachScriptValidation('adPlrRhName', rhNameRegex, rhNameHint);
 
         // --- Event Listeners ---
 
@@ -521,11 +631,27 @@
             });
 
             var name = document.getElementById('adPlrName').value.trim();
+            var nameEn = document.getElementById('adPlrNameEn').value.trim() || null;
+            var nameKg = document.getElementById('adPlrNameKg').value.trim() || null;
+
+            // Script validation
+            if (name && !checkScript(name, SCRIPT_RU)) {
+                A.showToast(isEn ? 'RU name must use Cyrillic' : 'Имя (RU) должно быть на кириллице', 'error');
+                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+            }
+            if (nameEn && !checkScript(nameEn, SCRIPT_EN)) {
+                A.showToast(isEn ? 'EN name must use Latin' : 'Имя (EN) должно быть на латинице', 'error');
+                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+            }
+            if (nameKg && !checkScript(nameKg, SCRIPT_KG)) {
+                A.showToast(isEn ? 'KG name must use Kyrgyz script' : 'Имя (KG) должно быть на кыргызском', 'error');
+                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+            }
 
             var data = {
                 name: name,
-                name_en: document.getElementById('adPlrNameEn').value.trim() || null,
-                name_kg: document.getElementById('adPlrNameKg').value.trim() || null,
+                name_en: nameEn,
+                name_kg: nameKg,
                 photo: imageUrl || null,
                 country: document.getElementById('adPlrCountry').value.trim() || null,
                 category_id: document.getElementById('adPlrCat').value || null,
@@ -565,7 +691,19 @@
             }
 
             A.showToast(L.saved, 'success');
-            renderPlayersList();
+            if (plrEditingId) {
+                // Stay on edit form — re-load fresh data
+                var fresh = await A.client.from('players').select('*').eq('id', plrEditingId).single();
+                if (fresh.data) {
+                    var profRes = await A.client.from('profiles').select('gender').eq('player_id', plrEditingId).single();
+                    if (profRes.data && profRes.data.gender) {
+                        fresh.data._gender = profRes.data.gender;
+                    }
+                    renderPlayerForm(fresh.data);
+                }
+            } else {
+                renderPlayersList();
+            }
         } catch (e) {
             A.showToast(e.message || 'Error', 'error');
             saveBtn.disabled = false;
@@ -585,6 +723,156 @@
         renderPlayersList();
     }
 
+
+    // ---- Rating History helpers ----
+    var plrRhChart = null;
+
+    async function loadPlrRatingHistory(playerId) {
+        var res = await A.client.from('rating_history')
+            .select('*')
+            .eq('player_id', playerId)
+            .order('recorded_at', { ascending: true });
+
+        var data = res.data || [];
+        renderPlrRhTable(data, playerId);
+        renderPlrRhChart(data);
+    }
+
+    function renderPlrRhTable(data, playerId) {
+        var tableEl = document.getElementById('adPlrRhTable');
+        if (!tableEl) return;
+
+        if (data.length === 0) {
+            tableEl.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">' + L.rhNoData + '</div>';
+            return;
+        }
+
+        var html = '<div class="ad-table-wrap" style="overflow-x:auto;"><table class="ad-table"><thead><tr>' +
+            '<th>' + L.rhDate + '</th>' +
+            '<th>' + L.rhTournament + '</th>' +
+            '<th style="text-align:center;">' + L.rhPoints + '</th>' +
+            '<th style="width:40px;"></th>' +
+            '</tr></thead><tbody>';
+
+        // Show newest first in table
+        var reversed = data.slice().reverse();
+        reversed.forEach(function(row) {
+            html += '<tr>' +
+                '<td>' + row.recorded_at + '</td>' +
+                '<td>' + A.esc(row.tournament_name) + '</td>' +
+                '<td style="text-align:center;color:var(--accent);font-weight:600;">' + row.points_earned + '</td>' +
+                '<td><button class="ad-btn-icon ad-rh-del" data-rh-id="' + row.id + '" title="' + L.delete + '">&times;</button></td>' +
+                '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        tableEl.innerHTML = html;
+
+        // Delete handlers
+        tableEl.querySelectorAll('.ad-rh-del').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var rhId = btn.dataset.rhId;
+                await A.client.from('rating_history').delete().eq('id', rhId);
+                loadPlrRatingHistory(playerId);
+                await recalcPointsFromHistory(playerId);
+            });
+        });
+    }
+
+    async function recalcPointsFromHistory(playerId) {
+        var currentYear = new Date().getFullYear();
+        var res = await A.client.from('rating_history')
+            .select('points_earned')
+            .eq('player_id', playerId)
+            .gte('recorded_at', currentYear + '-01-01')
+            .lte('recorded_at', currentYear + '-12-31');
+
+        var total = 0;
+        (res.data || []).forEach(function(r) { total += r.points_earned || 0; });
+
+        await A.client.from('players').update({ points: total }).eq('id', playerId);
+
+        // Update the form field if visible
+        var ptsField = document.getElementById('adPlrPoints');
+        if (ptsField) ptsField.value = total;
+    }
+
+    function renderPlrRhChart(data) {
+        var wrapEl = document.getElementById('adPlrRhChartWrap');
+        var canvasEl = document.getElementById('adPlrRhChart');
+        if (!wrapEl || !canvasEl) return;
+
+        if (data.length === 0 || typeof Chart === 'undefined') {
+            wrapEl.style.display = 'none';
+            return;
+        }
+
+        wrapEl.style.display = '';
+
+        var labels = [];
+        var values = [];
+        var cumulative = 0;
+        var tooltipNames = [];
+
+        data.forEach(function(row) {
+            cumulative += row.points_earned;
+            labels.push(row.recorded_at);
+            values.push(cumulative);
+            tooltipNames.push(row.tournament_name + ' (+' + row.points_earned + ')');
+        });
+
+        if (plrRhChart) {
+            plrRhChart.destroy();
+        }
+
+        plrRhChart = new Chart(canvasEl, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: L.rhTotalPoints,
+                    data: values,
+                    borderColor: '#CCFF00',
+                    backgroundColor: 'rgba(204,255,0,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#CCFF00',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(ctx) { return tooltipNames[ctx[0].dataIndex]; },
+                            label: function(ctx) { return L.rhTotalPoints + ': ' + ctx.parsed.y; }
+                        },
+                        backgroundColor: 'rgba(30,30,30,0.95)',
+                        titleColor: '#CCFF00',
+                        bodyColor: '#fff',
+                        borderColor: '#CCFF00',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#888', maxRotation: 45 },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#888' },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    }
+                }
+            }
+        });
+    }
 
     // ---- Export to namespace ----
     A.renderPlayersSection = renderPlayersSection;

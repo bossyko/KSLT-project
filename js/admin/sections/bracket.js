@@ -9,6 +9,26 @@
     var L = A.L;
     var isEn = A.isEn;
 
+    // ---- Save Rating History on finalization ----
+    async function saveRatingHistory(tournament, results) {
+        // Delete old entries for this tournament (re-finalization safe)
+        await A.client.from('rating_history').delete().eq('tournament_id', tournament.id);
+
+        if (!results || results.length === 0) return;
+
+        var rows = results.map(function(r) {
+            return {
+                player_id: r.player_id,
+                tournament_name: tournament.name,
+                tournament_id: tournament.id,
+                points_earned: r.points_earned || 0,
+                recorded_at: tournament.start_date
+            };
+        });
+
+        await A.client.from('rating_history').insert(rows);
+    }
+
     // Round mapping: round_number → round_reached key for points
     var ROUND_TO_KEY = {};
     // Will be populated dynamically based on draw_size
@@ -3633,7 +3653,8 @@
                 }
 
                 // Recalculate player points
-                await recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
+                await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
+                await saveRatingHistory(tournament, toUpsert);
             }
 
             // Update player form arrays (W/L from recent matches)
@@ -3765,7 +3786,8 @@
                     A.showToast(upsRes.error.message, 'error');
                     return;
                 }
-                await recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
+                await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
+                await saveRatingHistory(tournament, toUpsert);
             }
 
             // Update player form arrays (W/L from recent matches)
@@ -3946,7 +3968,8 @@
                     A.showToast(insRes.error.message, 'error');
                     return;
                 }
-                await recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
+                await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
+                await saveRatingHistory(tournament, toUpsert);
             }
 
             // Update player form arrays
