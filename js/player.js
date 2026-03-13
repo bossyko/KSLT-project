@@ -117,7 +117,8 @@
         var player = data.player;
         var cat = data.category;
         var seed = hashStr(player.id);
-        var opponents = cat.players.filter(function (p) { return p.id !== player.id; });
+        var opponents = (cat.players || []).filter(function (p) { return p.id !== player.id; });
+        if (opponents.length === 0) return [];
         var matches = [];
 
         var results = (player.form || []).slice();
@@ -460,11 +461,11 @@
         if (_playerCache[id]) return _playerCache[id];
         // Async load into cache for next render
         if (client) {
-            client.from('players').select('id, first_name, last_name, photo_url').eq('id', id).single()
+            client.from('players').select('id, name, name_en, name_kg, photo').eq('id', id).single()
                 .then(function(res) {
                     if (res.data) {
-                        var n = ((res.data.last_name || '') + ' ' + (res.data.first_name || '')).trim();
-                        _playerCache[id] = { id: id, name: n || id, photo: res.data.photo_url || '' };
+                        var n = isEn ? (res.data.name_en || res.data.name) : (isKg ? (res.data.name_kg || res.data.name) : res.data.name);
+                        _playerCache[id] = { id: id, name: n || id, photo: res.data.photo || '' };
                     }
                 });
         }
@@ -851,17 +852,17 @@
                             .eq('category_id', p.category_id).gt('points', p.points || 0);
                         rank = (rankRes.count || 0) + 1;
                     }
-                    var fullName = ((p.last_name || '') + ' ' + (p.first_name || '')).trim();
+                    var playerName = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
                     data = {
                         player: {
                             id: p.id,
-                            name: fullName || playerId,
-                            photo: p.photo_url || '',
+                            name: playerName || playerId,
+                            photo: p.photo || '',
                             country: p.country || '',
                             points: p.points || 0,
                             wins: p.wins || 0,
                             losses: p.losses || 0,
-                            change: p.change || 0,
+                            change: p.rank_change || 0,
                             form: p.form || [],
                             badges: [],
                             online: false
