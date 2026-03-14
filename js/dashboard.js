@@ -128,7 +128,20 @@
         chalNoChallengesText: 'Оюнчунун профилинен матчка чакыруу жөнөтүңүз',
         chalDate: 'Күнү',
         chalTime: 'Убакыт',
-        chalVenue: 'Аянтча'
+        chalVenue: 'Аянтча',
+        vouchers: 'Ваучерлер',
+        vouchersTitle: 'Менин ваучерлерим',
+        voucherActive: 'Активдүү',
+        voucherUsed: 'Колдонулду',
+        voucherExpired: 'Мөөнөтү бүттү',
+        voucherNoVouchers: 'Ваучерлер жок',
+        voucherNoVouchersText: 'Өнөктөш корт же машыктыруучу бетинен ваучер алыңыз',
+        voucherSaved: 'Үнөмдөлдү',
+        voucherShowQR: 'QR көрсөтүү',
+        voucherService: 'Кызмат',
+        voucherDiscount: 'Арзандатуу',
+        voucherExpires: 'Мөөнөтү',
+        voucherVenue: 'Жер'
     } : isEn ? {
         profile: 'Profile', tournaments: 'My Tournaments',
         stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
@@ -248,7 +261,20 @@
         chalNoChallengesText: 'Send a match challenge from a player\'s profile page',
         chalDate: 'Date',
         chalTime: 'Time',
-        chalVenue: 'Venue'
+        chalVenue: 'Venue',
+        vouchers: 'Vouchers',
+        vouchersTitle: 'My Vouchers',
+        voucherActive: 'Active',
+        voucherUsed: 'Used',
+        voucherExpired: 'Expired',
+        voucherNoVouchers: 'No vouchers yet',
+        voucherNoVouchersText: 'Get a voucher from a partner court or coach page',
+        voucherSaved: 'Saved',
+        voucherShowQR: 'Show QR',
+        voucherService: 'Service',
+        voucherDiscount: 'Discount',
+        voucherExpires: 'Expires',
+        voucherVenue: 'Venue'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
@@ -368,11 +394,29 @@
         chalNoChallengesText: 'Отправьте вызов на матч со страницы профиля игрока',
         chalDate: 'Дата',
         chalTime: 'Время',
-        chalVenue: 'Площадка'
+        chalVenue: 'Площадка',
+        vouchers: 'Ваучеры',
+        vouchersTitle: 'Мои ваучеры',
+        voucherActive: 'Активный',
+        voucherUsed: 'Использован',
+        voucherExpired: 'Истёк',
+        voucherNoVouchers: 'Ваучеров пока нет',
+        voucherNoVouchersText: 'Получите ваучер на странице партнёрского корта или тренера',
+        voucherSaved: 'Сэкономлено',
+        voucherShowQR: 'Показать QR',
+        voucherService: 'Услуга',
+        voucherDiscount: 'Скидка',
+        voucherExpires: 'Действует до',
+        voucherVenue: 'Заведение'
     };
 
     // Use shared Supabase client from supabase-config.js
     var client = window.supabaseClient;
+
+    function dbEsc(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
 
     // ---- Script validation (Cyrillic / Latin / Kyrgyz) ----
     var SCRIPT_RU = /^[а-яА-ЯёЁ\s\-'.]+$/;
@@ -459,6 +503,7 @@
         renderStats(profile);
         renderInvitations();
         renderChallenges();
+        renderVouchers();
         renderSettings(user);
         initTabs();
 
@@ -670,6 +715,7 @@
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>' + L.stats + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="invitations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>' + L.invitations + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="challenges"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg>' + L.challenges + '</button></li>' +
+                '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="vouchers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>' + L.vouchers + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</button></li>' +
             '</ul>';
     }
@@ -816,6 +862,7 @@
             '<button class="db-mobile-tab" data-tab="stats">' + L.stats + '</button>' +
             '<button class="db-mobile-tab" data-tab="invitations">' + L.invitations + '</button>' +
             '<button class="db-mobile-tab" data-tab="challenges">' + L.challenges + '</button>' +
+            '<button class="db-mobile-tab" data-tab="vouchers">' + L.vouchers + '</button>' +
             '<button class="db-mobile-tab" data-tab="settings">' + L.settings + '</button>';
     }
 
@@ -1737,6 +1784,150 @@
                         grid: { color: 'rgba(255,255,255,0.05)' }
                     }
                 }
+            }
+        });
+    }
+
+    // ---- Render Vouchers ----
+    function renderVouchers() {
+        var container = document.getElementById('db-vouchers');
+        if (!container) return;
+
+        container.innerHTML =
+            '<h2 class="db-section-title">' + L.vouchersTitle + '</h2>' +
+            '<div class="db-card" id="dbVouchers">' +
+                '<p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p>' +
+            '</div>';
+
+        if (client) loadVouchers();
+    }
+
+    async function loadVouchers() {
+        var card = document.getElementById('dbVouchers');
+        if (!card || !client) return;
+
+        try {
+            var result = await client.from('discount_vouchers')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            var items = result.data || [];
+
+            if (!items.length) {
+                card.innerHTML =
+                    '<div class="db-empty" style="padding:var(--space-lg) 0;">' +
+                        '<div class="db-empty-icon">&#127915;</div>' +
+                        '<div class="db-empty-title">' + L.voucherNoVouchers + '</div>' +
+                        '<div class="db-empty-text">' + L.voucherNoVouchersText + '</div>' +
+                    '</div>';
+                return;
+            }
+
+            // Auto-expire active vouchers past expiry
+            var now = new Date();
+            items.forEach(function(v) {
+                if (v.status === 'active' && new Date(v.expires_at) < now) {
+                    v.status = 'expired';
+                }
+            });
+
+            // Count saved
+            var totalSaved = 0;
+            items.forEach(function(v) {
+                if (v.status === 'used') totalSaved++;
+            });
+
+            var html = '';
+            if (totalSaved > 0) {
+                html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:12px 16px;background:rgba(204,255,0,0.06);border-radius:10px;border:1px solid rgba(204,255,0,0.12);">' +
+                    '<span style="font-size:1.2rem;">&#127881;</span>' +
+                    '<span style="color:var(--accent);font-weight:600;">' + L.voucherSaved + ': ' + totalSaved + ' ' + (totalSaved === 1 ? (isEn ? 'voucher' : (isKg ? 'ваучер' : 'ваучер')) : (isEn ? 'vouchers' : (isKg ? 'ваучер' : 'ваучеров'))) + '</span>' +
+                '</div>';
+            }
+
+            html += '<div class="db-invite-list">';
+            items.forEach(function(v) {
+                var statusClass = v.status === 'active' ? 'db-status-active' : (v.status === 'used' ? 'db-status-approved' : 'db-status-rejected');
+                var statusLabel = v.status === 'active' ? L.voucherActive : (v.status === 'used' ? L.voucherUsed : L.voucherExpired);
+                var dateStr = new Date(v.created_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+
+                var expiresStr = '';
+                if (v.expires_at) {
+                    expiresStr = new Date(v.expires_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                }
+
+                html += '<div class="db-invite-card" style="padding:14px 16px;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">' +
+                        '<div style="flex:1;">' +
+                            '<div style="font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:4px;">' + dbEsc(v.entity_name) + '</div>' +
+                            '<div style="font-size:0.8rem;color:rgba(255,255,255,0.5);">' + dbEsc(v.service_name) + ' &middot; -' + v.discount_percent + '%</div>' +
+                            '<div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:4px;">' + dateStr +
+                                (expiresStr ? ' &middot; ' + L.voucherExpires + ': ' + expiresStr : '') +
+                            '</div>' +
+                        '</div>' +
+                        '<div style="display:flex;align-items:center;gap:8px;">' +
+                            '<span class="' + statusClass + '" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;">' + statusLabel + '</span>';
+                if (v.status === 'active') {
+                    html += '<button class="db-voucher-qr-btn" data-token="' + v.qr_token + '" style="background:var(--accent);color:#000;border:none;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">' + L.voucherShowQR + '</button>';
+                }
+                html += '</div></div></div>';
+            });
+            html += '</div>';
+            card.innerHTML = html;
+
+            // QR button clicks
+            card.querySelectorAll('.db-voucher-qr-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    showDashboardVoucherQR(this.dataset.token);
+                });
+            });
+        } catch (e) {
+            console.error('Vouchers error:', e);
+            card.innerHTML = '<p style="color:var(--text-muted);">—</p>';
+        }
+    }
+
+    function showDashboardVoucherQR(token) {
+        var existing = document.getElementById('dbVoucherQRModal');
+        if (existing) existing.remove();
+
+        var verifyUrl = 'https://kslt.netlify.app/pages/verify.html?token=' + token;
+
+        var modal = document.createElement('div');
+        modal.id = 'dbVoucherQRModal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+        modal.innerHTML =
+            '<div style="background:#1a1a2e;border:1px solid rgba(204,255,0,0.2);border-radius:20px;padding:32px;max-width:320px;width:100%;text-align:center;position:relative;">' +
+                '<button id="dbVQRClose" style="position:absolute;top:12px;right:16px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.5rem;cursor:pointer;">&times;</button>' +
+                '<div id="dbVQRCode" style="display:flex;justify-content:center;background:#fff;border-radius:12px;padding:16px;width:fit-content;margin:0 auto 16px;"></div>' +
+                '<button id="dbVQRDownload" style="background:var(--accent);color:#000;border:none;padding:8px 20px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;">' + L.voucherShowQR + '</button>' +
+            '</div>';
+
+        document.body.appendChild(modal);
+
+        var qrContainer = document.getElementById('dbVQRCode');
+        if (typeof QRCode !== 'undefined') {
+            new QRCode(qrContainer, {
+                text: verifyUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+
+        document.getElementById('dbVQRClose').addEventListener('click', function() { modal.remove(); });
+        modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+
+        document.getElementById('dbVQRDownload').addEventListener('click', function() {
+            var canvas = qrContainer.querySelector('canvas');
+            if (canvas) {
+                var link = document.createElement('a');
+                link.download = 'kslt-voucher-' + token.substring(0, 8) + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
             }
         });
     }

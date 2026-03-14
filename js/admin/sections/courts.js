@@ -24,6 +24,8 @@
     var CRT_PER_PAGE = 10;
     var crtCourtTypes = [];
     var crtPhones = [];
+    var crtPartnerServices = [];
+    var crtPartnerPin = '';
 
     async function renderCourtsSection() {
         if (A.isDeepLinked('courts')) return;
@@ -693,6 +695,8 @@
         crtGalleryUrls = (item && item.gallery) ? item.gallery.slice() : [];
         crtGalleryFiles = [];
         crtCourtTypes = (item && item.court_types) ? JSON.parse(JSON.stringify(item.court_types)) : [];
+        crtPartnerPin = (item && item.partner_pin) ? item.partner_pin : '';
+        crtPartnerServices = [];
 
         var title = item ? L.editCourt : L.addCourt;
 
@@ -960,6 +964,31 @@
                 '</div>' +
             '</div>' +
 
+            // Partner section (visible when court is partner)
+            '<div class="ad-form-card" id="adCrtPartnerCard" style="display:' + (item && item.partner ? 'block' : 'none') + ';">' +
+                '<div class="ad-form-card-title">' + L.crtPartnerSection + '</div>' +
+                '<p class="ad-field-hint" style="margin-bottom:12px;">' + L.crtPartnerHint + '</p>' +
+                '<div class="ad-form-row" style="align-items:flex-end;">' +
+                    '<div class="ad-field" style="flex:0 0 200px;">' +
+                        '<label class="ad-field-label">' + L.crtPartnerPin + '</label>' +
+                        '<div style="display:flex;gap:6px;">' +
+                            '<input type="text" class="ad-field-input" id="adCrtPartnerPin" value="' + A.esc(crtPartnerPin) + '" readonly style="font-size:1.2rem;letter-spacing:4px;text-align:center;font-weight:700;">' +
+                            '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtResetPin">' + L.crtResetPin + '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="margin-top:16px;">' +
+                    '<label class="ad-field-label">' + (isEn ? 'Partner Services' : 'Услуги партнёра') + '</label>' +
+                    '<div class="ad-partner-services-header" style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:4px;font-size:0.75rem;color:var(--text-dim);">' +
+                        '<span>' + L.crtServiceName + '</span>' +
+                        '<span>' + L.crtDiscount + '</span>' +
+                        '<span></span>' +
+                    '</div>' +
+                    '<div id="adCrtPartnerServicesRows"></div>' +
+                    '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtAddService" style="margin-top:8px;">' + L.crtAddService + '</button>' +
+                '</div>' +
+            '</div>' +
+
             // Actions
             '<div class="ad-btn-row">' +
                 '<button class="ad-btn ad-btn-primary" id="adCrtSave">' + L.save + '</button>' +
@@ -1195,7 +1224,23 @@
                     crtCourtTypes[idx].surface = e.target.value;
                 }
             }
-            if (e.target.classList.contains('ad-ct-partner')) crtCourtTypes[idx].partner = e.target.checked;
+            if (e.target.classList.contains('ad-ct-partner')) {
+                crtCourtTypes[idx].partner = e.target.checked;
+                var isAnyPartner = crtCourtTypes.some(function(ct) { return ct.partner; });
+                var partnerCard = document.getElementById('adCrtPartnerCard');
+                if (partnerCard) {
+                    partnerCard.style.display = isAnyPartner ? 'block' : 'none';
+                    if (isAnyPartner && !crtPartnerPin) {
+                        crtPartnerPin = String(Math.floor(1000 + Math.random() * 9000));
+                        document.getElementById('adCrtPartnerPin').value = crtPartnerPin;
+                    }
+                    if (isAnyPartner && crtPartnerServices.length === 0) {
+                        crtPartnerServices.push({ id: null, service_name: isEn ? L.crtDefaultService : L.crtDefaultService, service_name_en: '', service_name_kg: '', discount_percent: 0 });
+                        renderCrtPartnerServices();
+                        if (crtEditingId) loadCrtPartnerServices(crtEditingId);
+                    }
+                }
+            }
         });
         document.getElementById('adCrtTypesRows').addEventListener('input', function(e) {
             var row = e.target.closest('.ad-court-type-row');
@@ -1343,6 +1388,25 @@
             }
         });
 
+        // Partner section
+        document.getElementById('adCrtResetPin').addEventListener('click', function() {
+            crtPartnerPin = String(Math.floor(1000 + Math.random() * 9000));
+            document.getElementById('adCrtPartnerPin').value = crtPartnerPin;
+        });
+        document.getElementById('adCrtAddService').addEventListener('click', function() {
+            crtPartnerServices.push({ id: null, service_name: '', service_name_en: '', service_name_kg: '', discount_percent: 0 });
+            renderCrtPartnerServices();
+        });
+        // Load partner services if editing
+        if (crtEditingId && item && item.partner) {
+            loadCrtPartnerServices(crtEditingId);
+            // Auto-generate PIN if missing
+            if (!crtPartnerPin) {
+                crtPartnerPin = String(Math.floor(1000 + Math.random() * 9000));
+                document.getElementById('adCrtPartnerPin').value = crtPartnerPin;
+            }
+        }
+
         // Save
         document.getElementById('adCrtSave').addEventListener('click', saveCourtHandler);
 
@@ -1428,6 +1492,98 @@
                 document.getElementById('adCrtImgUrl').value = '';
                 document.getElementById('adCrtImgInput').value = '';
             });
+        }
+    }
+
+    // ---- Partner Services (Courts) ----
+    async function loadCrtPartnerServices(courtId) {
+        if (!A.client) return;
+        var result = await A.client.from('partner_services')
+            .select('*')
+            .eq('entity_type', 'court')
+            .eq('entity_id', courtId)
+            .order('sort_order', { ascending: true });
+        crtPartnerServices = (result.data && result.data.length) ? result.data : [];
+        if (crtPartnerServices.length === 0) {
+            crtPartnerServices.push({ id: null, service_name: L.crtDefaultService, service_name_en: '', service_name_kg: '', discount_percent: 0 });
+        }
+        renderCrtPartnerServices();
+    }
+
+    function renderCrtPartnerServices() {
+        var container = document.getElementById('adCrtPartnerServicesRows');
+        if (!container) return;
+        var html = '';
+        crtPartnerServices.forEach(function(svc, idx) {
+            html += '<div class="ad-partner-svc-row" data-idx="' + idx + '" style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:6px;align-items:center;">' +
+                '<input type="text" class="ad-field-input ad-psvc-name" value="' + A.esc(svc.service_name || '') + '" placeholder="' + L.crtServiceName + '">' +
+                '<input type="number" class="ad-field-input ad-psvc-discount" value="' + (svc.discount_percent || '') + '" min="1" max="100" placeholder="%">' +
+                (crtPartnerServices.length > 1 ? '<button type="button" class="ad-btn-icon ad-psvc-remove">&times;</button>' : '<div></div>') +
+            '</div>';
+        });
+        container.innerHTML = html;
+
+        // Events
+        container.addEventListener('input', function handler(e) {
+            var row = e.target.closest('.ad-partner-svc-row');
+            if (!row) return;
+            var idx = parseInt(row.dataset.idx, 10);
+            if (e.target.classList.contains('ad-psvc-name')) crtPartnerServices[idx].service_name = e.target.value.trim();
+            if (e.target.classList.contains('ad-psvc-discount')) crtPartnerServices[idx].discount_percent = parseInt(e.target.value, 10) || 0;
+        });
+        container.addEventListener('click', function(e) {
+            if (e.target.classList.contains('ad-psvc-remove')) {
+                var row = e.target.closest('.ad-partner-svc-row');
+                var idx = parseInt(row.dataset.idx, 10);
+                crtPartnerServices.splice(idx, 1);
+                renderCrtPartnerServices();
+            }
+        });
+    }
+
+    async function saveCrtPartnerData(courtId) {
+        if (!A.client) return;
+        var isPartner = crtCourtTypes.some(function(ct) { return ct.partner; });
+        if (!isPartner) return;
+
+        // Save partner_pin
+        await A.client.from('courts').update({ partner_pin: crtPartnerPin }).eq('id', courtId);
+
+        // Get existing services
+        var existing = await A.client.from('partner_services')
+            .select('id')
+            .eq('entity_type', 'court')
+            .eq('entity_id', courtId);
+        var existingIds = (existing.data || []).map(function(s) { return s.id; });
+
+        // Determine which to keep
+        var keepIds = crtPartnerServices.filter(function(s) { return s.id; }).map(function(s) { return s.id; });
+        var toDelete = existingIds.filter(function(id) { return keepIds.indexOf(id) === -1; });
+
+        // Delete removed
+        if (toDelete.length) {
+            await A.client.from('partner_services').delete().in('id', toDelete);
+        }
+
+        // Upsert remaining
+        for (var i = 0; i < crtPartnerServices.length; i++) {
+            var svc = crtPartnerServices[i];
+            if (!svc.service_name) continue;
+            var row = {
+                entity_type: 'court',
+                entity_id: courtId,
+                service_name: svc.service_name,
+                service_name_en: svc.service_name_en || null,
+                service_name_kg: svc.service_name_kg || null,
+                discount_percent: svc.discount_percent || 0,
+                sort_order: i,
+                is_active: true
+            };
+            if (svc.id) {
+                await A.client.from('partner_services').update(row).eq('id', svc.id);
+            } else {
+                await A.client.from('partner_services').insert(row);
+            }
         }
     }
 
@@ -1524,6 +1680,10 @@
                 saveBtn.textContent = L.save;
                 return;
             }
+
+            // Save partner services
+            var courtId = crtEditingId || data.id;
+            await saveCrtPartnerData(courtId);
 
             A.showToast(L.saved, 'success');
             renderCourtsList();

@@ -780,6 +780,357 @@
     background: transparent;
 }
 
+/* === DISCOUNT / VOUCHER === */
+.co-discount-section {
+    border: 1px solid rgba(204,255,0,0.15);
+    border-radius: 16px;
+    padding: 24px;
+    background: rgba(204,255,0,0.03);
+}
+.co-discount-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.co-discount-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.co-discount-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+.co-discount-name {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.85);
+}
+.co-discount-percent {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+}
+.co-discount-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+}
+.co-discount-btn:hover { opacity: 0.85; }
+.co-discount-hint {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+    margin: 0;
+    text-align: right;
+}
+
+/* Voucher Modal */
+.co-voucher-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+.co-voucher-modal {
+    background: #1a1a2e;
+    border: 1px solid rgba(204,255,0,0.2);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+    text-align: center;
+}
+.co-voucher-close {
+    position: absolute;
+    top: 12px; right: 16px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+.co-voucher-title {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 20px;
+}
+.co-voucher-qr {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+.co-voucher-details {
+    text-align: left;
+    margin-bottom: 20px;
+}
+.co-voucher-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.co-voucher-row:last-child { border-bottom: none; }
+.co-voucher-percent {
+    color: var(--accent);
+    font-weight: 700;
+}
+.co-voucher-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+.co-voucher-download {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.co-voucher-download:hover { opacity: 0.85; }
+
+/* Voucher History */
+.co-voucher-history {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+.co-voucher-history h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 12px;
+}
+.co-vh-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.co-vh-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.82rem;
+}
+.co-vh-date {
+    color: rgba(255,255,255,0.4);
+    white-space: nowrap;
+    min-width: 50px;
+}
+.co-vh-service {
+    color: rgba(255,255,255,0.7);
+    flex: 1;
+}
+.co-vh-discount {
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+}
+.co-vh-status {
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.co-vh-status-active {
+    background: rgba(204,255,0,0.15);
+    color: var(--accent);
+}
+.co-vh-status-used {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.35);
+}
+.co-vh-status-expired {
+    background: rgba(255,100,100,0.1);
+    color: rgba(255,100,100,0.6);
+}
+.co-vh-qr-btn {
+    background: none;
+    border: 1px solid rgba(204,255,0,0.3);
+    color: var(--accent);
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+.co-vh-qr-btn:hover {
+    background: rgba(204,255,0,0.1);
+}
+.co-vh-empty {
+    color: rgba(255,255,255,0.25);
+    font-size: 0.82rem;
+    padding: 8px 0;
+}
+
+/* Service Picker Overlay */
+.co-picker-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+.co-picker-modal {
+    background: #1a1a2e;
+    border: 1px solid rgba(204,255,0,0.2);
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 380px;
+    width: 100%;
+    position: relative;
+}
+.co-picker-close {
+    position: absolute;
+    top: 10px; right: 14px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+.co-picker-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    text-align: center;
+}
+.co-picker-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+.co-picker-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+.co-picker-option:hover {
+    border-color: rgba(204,255,0,0.2);
+}
+.co-picker-option.selected {
+    border-color: var(--accent);
+    background: rgba(204,255,0,0.06);
+}
+.co-picker-radio {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+}
+.co-picker-option.selected .co-picker-radio {
+    border-color: var(--accent);
+}
+.co-picker-option.selected .co-picker-radio::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+}
+.co-picker-label {
+    flex: 1;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.8);
+}
+.co-picker-percent {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+.co-picker-submit {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.co-picker-submit:hover { opacity: 0.85; }
+.co-picker-submit:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+    .co-discount-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .co-discount-btn {
+        width: 100%;
+        text-align: center;
+    }
+    .co-voucher-modal {
+        padding: 24px 20px;
+    }
+    .co-vh-item {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .co-picker-modal {
+        padding: 20px 16px;
+    }
+}
+
 /* === SPONSORS === */
 .co-sponsors-section {
     padding: var(--space-lg) 7%;

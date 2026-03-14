@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co;">
+    <title>KSLT — Проверка ваучера</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/verify.css">
+</head>
+<body>
+    <div class="vr-page">
+        <div class="vr-header">
+            <a href="../index.html" class="logo">
+                <span class="logo-text">KSLT</span>
+                <span class="logo-icon">&#127934;</span>
+            </a>
+        </div>
+        <div class="vr-card" id="vrCard">
+            <div class="vr-loading">Загрузка...</div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/verify.js"></script>
+</body>
+</html>

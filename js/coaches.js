@@ -24,13 +24,13 @@
         priceFrom: 'дан',
         priceCurrency: 'сом/саат',
         detailsBtn: 'Толугураак',
-        bookBtn: 'Машыгууга жазылуу',
+        bookBtn: 'KSLT арзандатуу',
         bioTitle: 'Машыктыруучу жөнүндө',
         achievementsTitle: 'Жетишкендиктер',
         scheduleTitle: 'Тартип',
         reviewsTitle: 'Окуучулардын пикирлери',
-        ctaTitle: 'Бүгүн машыгууну баштаңыз',
-        ctaText: 'Машыктыруучу тандап, биринчи сабакка жазылыңыз',
+        ctaTitle: 'KSLT мүчөлөрүнө арзандатуу',
+        ctaText: 'Катталыңыз жана KSLT мүчөсү болуп, өнөктөш машыктыруучуларда арзандатуу алыңыз',
         ctaBtn: 'Жазылуу',
         backBtn: 'Бардык машыктыруучулар',
         court: 'Корт',
@@ -38,7 +38,26 @@
         noContacts: 'Байланыш маалыматы көрсөтүлгөн эмес',
         contactCoach: 'Машыктыруучу менен байланышуу',
         searchPlaceholder: 'Машыктыруучу издөө...',
-        recommendedBadge: 'KSLT сунуштайт'
+        recommendedBadge: 'KSLT сунуштайт',
+        discountTitle: 'KSLT мүчөлөрүнө арзандатуу',
+        getVoucher: 'Ваучер алуу',
+        discountGuest: 'Арзандатуу алуу үчүн катталыңыз жана KSLT мүчөсү болуңуз',
+        discountRegistered: 'Арзандатуу алуу үчүн KSLT мүчөсү болуңуз',
+        voucherReady: 'Ваучериңиз даяр!',
+        voucherLimit: 'Чек: бул машыктыруучуга күнүнө 1 ваучер',
+        voucherExpires: 'Мөөнөтү',
+        voucherDownload: 'QR жүктөө',
+        voucherDiscount: 'Арзандатуу',
+        voucherService: 'Кызмат',
+        myVouchers: 'Менин ваучерлерим',
+        voucherActive: 'Активдүү',
+        voucherUsed: 'Колдонулду',
+        voucherExpired: 'Мөөнөтү бүттү',
+        voucherShowQR: 'QR',
+        noVouchersYet: 'Ваучерлер жок',
+        pickService: 'Кызматты тандаңыз',
+        pickSubmit: 'Ваучер алуу',
+        noDiscountsConfigured: 'Арзандатуу жок'
     } : {
         heroTitle: "Тренеры KSLT",
         heroSubtitle: "Профессиональные тренеры для игроков всех уровней",
@@ -55,13 +74,13 @@
         priceFrom: "от",
         priceCurrency: "сом/час",
         detailsBtn: "Подробнее",
-        bookBtn: "Записаться на тренировку",
+        bookBtn: "Скидка KSLT",
         bioTitle: "О тренере",
         achievementsTitle: "Достижения",
         scheduleTitle: "Расписание",
         reviewsTitle: "Отзывы учеников",
-        ctaTitle: "Начните тренироваться сегодня",
-        ctaText: "Выберите тренера и запишитесь на первое занятие",
+        ctaTitle: "Скидки для членов KSLT",
+        ctaText: "Зарегистрируйтесь и станьте членом KSLT для скидок у партнёрских тренеров",
         ctaBtn: "Записаться",
         backBtn: "Все тренеры",
         court: "Корт",
@@ -69,7 +88,26 @@
         noContacts: "Контакты не указаны",
         contactCoach: "Связаться с тренером",
         searchPlaceholder: "Поиск тренера...",
-        recommendedBadge: "Рекомендован KSLT"
+        recommendedBadge: "Рекомендован KSLT",
+        discountTitle: "Скидки для членов KSLT",
+        getVoucher: "Получить ваучер",
+        discountGuest: "Зарегистрируйтесь и оформите членство для скидок",
+        discountRegistered: "Оформите членство KSLT для скидок",
+        voucherReady: "Ваш ваучер готов!",
+        voucherLimit: "Лимит: 1 ваучер в день на этого тренера",
+        voucherExpires: "Действителен до",
+        voucherDownload: "Скачать QR",
+        voucherDiscount: "Скидка",
+        voucherService: "Услуга",
+        myVouchers: "Мои ваучеры",
+        voucherActive: "Активен",
+        voucherUsed: "Использован",
+        voucherExpired: "Истёк",
+        voucherShowQR: "QR",
+        noVouchersYet: "Ваучеров пока нет",
+        pickService: "Выберите услугу",
+        pickSubmit: "Получить ваучер",
+        noDiscountsConfigured: "Скидки пока не настроены"
     });
 
     var staticData = window.coachesData || [];
@@ -101,6 +139,7 @@
         try {
             var res = await client.auth.getSession();
             if (!res.data || !res.data.session) return;
+            if (!window.ksltUser) window.ksltUser = res.data.session.user;
         } catch(e) { return; }
         _accessLevel = 'registered';
         if (typeof window.checkMembership === 'function') {
@@ -162,7 +201,8 @@
             reviews: [],
             students: 0,
             rating: 0,
-            _promoted: row.promoted || false
+            _promoted: row.promoted || false,
+            partner: row.partner || false
         };
     }
 
@@ -306,7 +346,7 @@
         pageItems.forEach(function(c) {
             var contactHtml = '<div class="co-card-actions">' +
                 '<span class="co-card-btn">' + L.detailsBtn + ' →</span>' +
-                '<span class="co-card-cta" data-id="' + c.id + '">' + (isEn ? 'Contact' : (isKg ? 'Байланышуу' : 'Связаться')) + '</span>' +
+                '<span class="co-card-cta" data-id="' + c.id + '">' + L.bookBtn + '</span>' +
             '</div>';
 
             // Stats
@@ -417,16 +457,93 @@
             e.stopPropagation();
 
             if (_accessLevel === 'guest') {
-                showToast(isEn ? 'Sign up and become a KSLT member' : (isKg ? 'Катталыңыз жана КСЛТ мүчөсү болуңуз' : 'Зарегистрируйтесь и станьте членом КСЛТ'), 'info');
+                showToast(isEn ? 'Sign up and become a KSLT member for discounts' : (isKg ? 'Арзандатуу алуу үчүн катталыңыз жана КСЛТ мүчөсү болуңуз' : 'Зарегистрируйтесь и станьте членом КСЛТ для скидок'), 'info');
                 return;
             }
             if (_accessLevel === 'registered') {
-                showToast(isEn ? 'Become a KSLT member to contact' : (isKg ? 'Байланышуу үчүн КСЛТ мүчөсү болуңуз' : 'Станьте членом КСЛТ чтобы связаться'), 'info');
+                showToast(isEn ? 'Become a KSLT member for discounts' : (isKg ? 'Арзандатуу алуу үчүн КСЛТ мүчөсү болуңуз' : 'Станьте членом КСЛТ для скидок'), 'info');
                 return;
             }
+            // Member: inline voucher generation
             var id = cta.getAttribute('data-id');
-            var detailBase = isEn ? 'coach-en.html' : (isKg ? 'coach-kg.html' : 'coach.html');
-            window.location.href = detailBase + '?id=' + id;
+            coCtaLoadServices(cta, 'coach', id);
+        });
+    }
+
+    async function coCtaLoadServices(btnEl, entityType, entityId) {
+        var client = window.supabaseClient;
+        if (!client) return;
+        var origText = btnEl.textContent;
+        btnEl.textContent = '...';
+        btnEl.style.pointerEvents = 'none';
+        try {
+            var res = await client.from('partner_services')
+                .select('*')
+                .eq('entity_type', entityType)
+                .eq('entity_id', entityId)
+                .eq('is_active', true);
+            var services = res.data || [];
+            if (!services.length) {
+                showToast(L.noDiscountsConfigured, 'info');
+                return;
+            }
+            if (services.length === 1) {
+                coGenerateVoucher(entityType, entityId, services[0].id);
+            } else {
+                coShowServicePicker(entityType, entityId, services);
+            }
+        } catch(e) {
+            showToast(e.message || 'Error', 'error');
+        } finally {
+            btnEl.textContent = origText;
+            btnEl.style.pointerEvents = '';
+        }
+    }
+
+    function coShowServicePicker(entityType, entityId, services) {
+        var existing = document.getElementById('coPickerModal');
+        if (existing) existing.remove();
+
+        var overlay = document.createElement('div');
+        overlay.id = 'coPickerModal';
+        overlay.className = 'co-picker-overlay';
+
+        var optionsHtml = '';
+        services.forEach(function(svc, i) {
+            var svcName = isEn ? (svc.service_name_en || svc.service_name) : (isKg ? (svc.service_name_kg || svc.service_name) : svc.service_name);
+            optionsHtml += '<div class="co-picker-option' + (i === 0 ? ' selected' : '') + '" data-service-id="' + svc.id + '">' +
+                '<div class="co-picker-radio"></div>' +
+                '<span class="co-picker-label">' + esc(svcName) + '</span>' +
+                '<span class="co-picker-percent">-' + svc.discount_percent + '%</span>' +
+            '</div>';
+        });
+
+        overlay.innerHTML =
+            '<div class="co-picker-modal">' +
+                '<button class="co-picker-close">&times;</button>' +
+                '<div class="co-picker-title">' + L.pickService + '</div>' +
+                '<div class="co-picker-options">' + optionsHtml + '</div>' +
+                '<button class="co-picker-submit">' + L.pickSubmit + '</button>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        var selectedId = services[0].id;
+
+        overlay.querySelectorAll('.co-picker-option').forEach(function(opt) {
+            opt.addEventListener('click', function() {
+                overlay.querySelectorAll('.co-picker-option').forEach(function(o) { o.classList.remove('selected'); });
+                this.classList.add('selected');
+                selectedId = this.dataset.serviceId;
+            });
+        });
+
+        overlay.querySelector('.co-picker-close').addEventListener('click', function() { overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+        overlay.querySelector('.co-picker-submit').addEventListener('click', function() {
+            overlay.remove();
+            coGenerateVoucher(entityType, entityId, selectedId);
         });
     }
 
@@ -591,6 +708,16 @@
             html += '</div></div>';
         }
 
+        // Discount section (partner coaches)
+        if (coach._isDb && coach.partner) {
+            html += '<div class="co-section co-fade-in co-discount-section">' +
+                '<h2 class="co-section-title">' + L.discountTitle + '</h2>' +
+                '<div class="co-discount-list" id="coDiscountList">' +
+                    '<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">' + (isEn ? 'Loading...' : (isKg ? 'Жүктөлүүдө...' : 'Загрузка...')) + '</p>' +
+                '</div>' +
+            '</div>';
+        }
+
         // CTA
         if (!coach._isDb) {
             html += '<div class="co-cta co-fade-in">' +
@@ -601,6 +728,293 @@
         }
 
         container.innerHTML = html;
+
+        // Load discount services
+        if (coach._isDb && coach.partner) {
+            loadCoachDiscounts(coach);
+        }
+    }
+
+    /* ===== DISCOUNT / VOUCHER ===== */
+
+    async function loadCoachDiscounts(coach) {
+        var container = document.getElementById('coDiscountList');
+        if (!container) return;
+        var client = window.supabaseClient;
+        if (!client) return;
+
+        // Detect access level independently (async)
+        var accessLevel = 'guest';
+        try {
+            var sess = await client.auth.getSession();
+            if (sess.data && sess.data.session) {
+                accessLevel = 'registered';
+                // Ensure ksltUser is set for checkMembership
+                if (!window.ksltUser) window.ksltUser = sess.data.session.user;
+                if (typeof window.checkMembership === 'function') {
+                    var mem = await window.checkMembership();
+                    if (mem && mem.active) accessLevel = 'member';
+                }
+            }
+        } catch(e) {}
+
+        try {
+            var result = await client.from('partner_services')
+                .select('*')
+                .eq('entity_type', 'coach')
+                .eq('entity_id', coach.id)
+                .eq('is_active', true)
+                .order('sort_order', { ascending: true });
+
+            var services = result.data || [];
+            if (!services.length) {
+                container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">' + (isEn ? 'No discounts available' : (isKg ? 'Арзандатуу жок' : 'Скидок пока нет')) + '</p>';
+                return;
+            }
+
+            var html = '';
+            services.forEach(function(svc) {
+                var svcName = isEn ? (svc.service_name_en || svc.service_name) : (isKg ? (svc.service_name_kg || svc.service_name) : svc.service_name);
+                html += '<div class="co-discount-item">' +
+                    '<div class="co-discount-info">' +
+                        '<span class="co-discount-name">' + esc(svcName) + '</span>' +
+                        '<span class="co-discount-percent">-' + svc.discount_percent + '%</span>' +
+                    '</div>';
+                if (accessLevel === 'member') {
+                    html += '<button class="co-discount-btn" data-service-id="' + svc.id + '" data-coach-id="' + coach.id + '">' + L.getVoucher + '</button>';
+                } else if (accessLevel === 'registered') {
+                    html += '<p class="co-discount-hint">' + L.discountRegistered + '</p>';
+                } else {
+                    html += '<p class="co-discount-hint">' + L.discountGuest + '</p>';
+                }
+                html += '</div>';
+            });
+            container.innerHTML = html;
+
+            container.querySelectorAll('.co-discount-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var serviceId = this.dataset.serviceId;
+                    var coachId = this.dataset.coachId;
+                    coGenerateVoucher('coach', coachId, serviceId, function() {
+                        coLoadVoucherHistory('coach', coach.id, services, accessLevel, container);
+                    });
+                });
+            });
+
+            // Load voucher history for members
+            coLoadVoucherHistory('coach', coach.id, services, accessLevel, container);
+        } catch (e) {
+            console.error('Discount load error:', e);
+        }
+    }
+
+    async function coLoadVoucherHistory(entityType, entityId, services, accessLevel, parentContainer) {
+        if (accessLevel !== 'member') return;
+        var client = window.supabaseClient;
+        if (!client) return;
+
+        try {
+            var sess = await client.auth.getSession();
+            if (!sess.data || !sess.data.session) return;
+            var userId = sess.data.session.user.id;
+
+            var res = await client.from('discount_vouchers')
+                .select('*')
+                .eq('entity_type', entityType)
+                .eq('entity_id', entityId)
+                .eq('profile_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            var vouchers = res.data || [];
+
+            // Build service name map
+            var svcMap = {};
+            services.forEach(function(s) {
+                var nm = isEn ? (s.service_name_en || s.service_name) : (isKg ? (s.service_name_kg || s.service_name) : s.service_name);
+                svcMap[s.id] = nm;
+            });
+
+            // Remove old history block
+            var oldHist = parentContainer.querySelector('.co-voucher-history');
+            if (oldHist) oldHist.remove();
+
+            var histDiv = document.createElement('div');
+            histDiv.className = 'co-voucher-history';
+            histDiv.innerHTML = '<h4>' + L.myVouchers + '</h4>';
+
+            if (!vouchers.length) {
+                histDiv.innerHTML += '<p class="co-vh-empty">' + L.noVouchersYet + '</p>';
+            } else {
+                var listHtml = '<div class="co-vh-list">';
+                var now = new Date();
+                vouchers.forEach(function(v) {
+                    var d = new Date(v.created_at);
+                    var dateStr = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+                    var svcName = svcMap[v.service_id] || v.service_id;
+                    var status = v.status;
+                    if (status === 'active' && v.expires_at && new Date(v.expires_at) < now) {
+                        status = 'expired';
+                    }
+                    var statusLabel = status === 'active' ? L.voucherActive : (status === 'used' ? L.voucherUsed : L.voucherExpired);
+                    var statusClass = 'co-vh-status co-vh-status-' + status;
+
+                    listHtml += '<div class="co-vh-item">' +
+                        '<span class="co-vh-date">' + dateStr + '</span>' +
+                        '<span class="co-vh-service">' + esc(svcName) + '</span>' +
+                        '<span class="co-vh-discount">-' + v.discount_percent + '%</span>' +
+                        '<span class="' + statusClass + '">' + statusLabel + '</span>';
+                    if (status === 'active') {
+                        listHtml += '<button class="co-vh-qr-btn" data-token="' + esc(v.qr_token) + '" data-service="' + esc(svcName) + '" data-percent="' + v.discount_percent + '" data-entity="' + esc(v.entity_name || '') + '" data-expires="' + v.expires_at + '">' + L.voucherShowQR + '</button>';
+                    }
+                    listHtml += '</div>';
+                });
+                listHtml += '</div>';
+                histDiv.innerHTML += listHtml;
+            }
+
+            parentContainer.appendChild(histDiv);
+
+            // QR button clicks in history
+            histDiv.querySelectorAll('.co-vh-qr-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    coShowVoucherModal({
+                        qr_token: this.dataset.token,
+                        service_name: this.dataset.service,
+                        discount_percent: this.dataset.percent,
+                        entity_name: this.dataset.entity,
+                        expires_at: this.dataset.expires
+                    });
+                });
+            });
+        } catch(e) {
+            console.error('Voucher history error:', e);
+        }
+    }
+
+    async function coGenerateVoucher(entityType, entityId, serviceId, onSuccess) {
+        var client = window.supabaseClient;
+        if (!client) return;
+
+        try {
+            var result = await client.rpc('generate_voucher', {
+                p_entity_type: entityType,
+                p_entity_id: entityId,
+                p_service_id: serviceId
+            });
+
+            if (result.error) {
+                console.error('Voucher RPC error:', result.error);
+                showToast(result.error.message || (isEn ? 'Error generating voucher' : (isKg ? 'Ваучер түзүүдө ката' : 'Ошибка генерации ваучера')), 'error');
+                return;
+            }
+            var data = result.data;
+            if (!data) {
+                showToast(isEn ? 'Error generating voucher' : (isKg ? 'Ваучер түзүүдө ката' : 'Ошибка генерации ваучера'), 'error');
+                return;
+            }
+            if (data.error) {
+                if (data.error === 'daily_limit') {
+                    coShowLimitModal();
+                    return;
+                }
+                var msgs = {
+                    not_authenticated: isEn ? 'Please log in' : (isKg ? 'Кириңиз' : 'Войдите в систему'),
+                    not_member: isEn ? 'Membership required' : (isKg ? 'Мүчөлүк керек' : 'Требуется членство'),
+                    service_not_found: isEn ? 'Service not found' : (isKg ? 'Кызмат табылган жок' : 'Услуга не найдена'),
+                    entity_not_partner: isEn ? 'Not a partner' : (isKg ? 'Өнөктөш эмес' : 'Не партнёр')
+                };
+                showToast(msgs[data.error] || data.error, 'error');
+                return;
+            }
+            if (data.success && data.voucher) {
+                coShowVoucherModal(data.voucher);
+                if (typeof onSuccess === 'function') onSuccess();
+            }
+        } catch (e) {
+            showToast(e.message || 'Error', 'error');
+        }
+    }
+
+    function coShowVoucherModal(voucher) {
+        var existing = document.getElementById('coVoucherModal');
+        if (existing) existing.remove();
+
+        var verifyUrl = 'https://kslt.netlify.app/pages/verify.html?token=' + voucher.qr_token;
+        var expiresDate = new Date(voucher.expires_at);
+        var expiresStr = expiresDate.toLocaleString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+        var modal = document.createElement('div');
+        modal.id = 'coVoucherModal';
+        modal.className = 'co-voucher-overlay';
+        modal.innerHTML =
+            '<div class="co-voucher-modal">' +
+                '<button class="co-voucher-close" id="coVoucherClose">&times;</button>' +
+                '<h3 class="co-voucher-title">' + L.voucherReady + '</h3>' +
+                '<div class="co-voucher-qr" id="coVoucherQR"></div>' +
+                '<div class="co-voucher-details">' +
+                    '<div class="co-voucher-row"><span>' + L.voucherService + ':</span><span>' + esc(voucher.service_name) + '</span></div>' +
+                    '<div class="co-voucher-row"><span>' + L.voucherDiscount + ':</span><span class="co-voucher-percent">-' + voucher.discount_percent + '%</span></div>' +
+                    '<div class="co-voucher-row"><span>' + esc(voucher.entity_name) + '</span></div>' +
+                    '<div class="co-voucher-row"><span>' + L.voucherExpires + ':</span><span>' + expiresStr + '</span></div>' +
+                '</div>' +
+                '<div class="co-voucher-actions">' +
+                    '<button class="co-voucher-download" id="coVoucherDownload">' + L.voucherDownload + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(modal);
+
+        var qrContainer = document.getElementById('coVoucherQR');
+        if (typeof QRCode !== 'undefined') {
+            new QRCode(qrContainer, {
+                text: verifyUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+
+        document.getElementById('coVoucherClose').addEventListener('click', function() { modal.remove(); });
+        modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+
+        document.getElementById('coVoucherDownload').addEventListener('click', function() {
+            var canvas = qrContainer.querySelector('canvas');
+            if (canvas) {
+                var link = document.createElement('a');
+                link.download = 'kslt-voucher-' + voucher.qr_token.substring(0, 8) + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+        });
+    }
+
+    /* ===== LIMIT MODAL ===== */
+
+    function coShowLimitModal() {
+        var existing = document.getElementById('coLimitModal');
+        if (existing) existing.remove();
+
+        var modal = document.createElement('div');
+        modal.id = 'coLimitModal';
+        modal.className = 'co-voucher-overlay';
+        modal.innerHTML =
+            '<div class="co-voucher-modal" style="text-align:center;">' +
+                '<button class="co-voucher-close" id="coLimitClose">&times;</button>' +
+                '<div style="font-size:2.5rem;margin-bottom:12px;">&#9203;</div>' +
+                '<h3 class="co-voucher-title">' + L.voucherLimit + '</h3>' +
+                '<p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:20px;">' +
+                    (isEn ? 'Try again tomorrow' : (isKg ? 'Эртең кайра аракет кылыңыз' : 'Попробуйте завтра')) +
+                '</p>' +
+                '<button class="co-voucher-download" id="coLimitOk">OK</button>' +
+            '</div>';
+
+        document.body.appendChild(modal);
+        document.getElementById('coLimitClose').addEventListener('click', function() { modal.remove(); });
+        document.getElementById('coLimitOk').addEventListener('click', function() { modal.remove(); });
+        modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
     }
 
     function initScrollAnimations() {

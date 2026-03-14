@@ -1,0 +1,239 @@
+/* ========================================
+   VERIFY — Voucher Verification Page
+   Styles with vr- prefix
+   ======================================== */
+
+.vr-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
+}
+
+.vr-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.vr-header .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.vr-header .logo-text {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 2px;
+}
+
+.vr-header .logo-icon {
+    font-size: 1.4rem;
+}
+
+.vr-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 40px 32px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    backdrop-filter: blur(12px);
+}
+
+.vr-loading {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.95rem;
+    padding: 40px 0;
+}
+
+/* Valid voucher card */
+.vr-valid {
+    text-align: center;
+}
+
+.vr-badge {
+    display: inline-block;
+    background: rgba(204,255,0,0.12);
+    color: var(--accent);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.vr-details {
+    text-align: left;
+    margin: 20px 0;
+}
+
+.vr-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.vr-row:last-child { border-bottom: none; }
+
+.vr-row-label {
+    color: rgba(255,255,255,0.45);
+}
+
+.vr-row-value {
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+}
+
+.vr-discount-badge {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* PIN input */
+.vr-pin-section {
+    margin-top: 28px;
+}
+
+.vr-pin-label {
+    display: block;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 12px;
+}
+
+.vr-pin-input {
+    width: 180px;
+    height: 56px;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 12px;
+    text-align: center;
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: 'Inter', monospace;
+}
+
+.vr-pin-input:focus {
+    border-color: var(--accent);
+}
+
+.vr-pin-input.vr-pin-error {
+    border-color: #ff4757;
+    animation: vrShake 0.3s;
+}
+
+@keyframes vrShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
+
+.vr-confirm-btn {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.vr-confirm-btn:hover { opacity: 0.85; }
+.vr-confirm-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Error states */
+.vr-error {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.vr-error-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+}
+
+.vr-error-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ff4757;
+    margin-bottom: 8px;
+}
+
+.vr-error-text {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.5);
+}
+
+/* Success state */
+.vr-success {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.vr-success-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    animation: vrPop 0.4s ease-out;
+}
+
+@keyframes vrPop {
+    0% { transform: scale(0.3); opacity: 0; }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.vr-success-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+
+.vr-success-text {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.6);
+}
+
+.vr-pin-error-msg {
+    color: #ff4757;
+    font-size: 0.85rem;
+    margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+    .vr-card {
+        padding: 28px 20px;
+        border-radius: 16px;
+    }
+    .vr-pin-input {
+        width: 160px;
+        height: 48px;
+        font-size: 1.6rem;
+        letter-spacing: 10px;
+    }
+}

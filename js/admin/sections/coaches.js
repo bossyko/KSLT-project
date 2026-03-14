@@ -19,6 +19,8 @@
     var cchPage = 1;
     var cchAllData = [];
     var CCH_PER_PAGE = 15;
+    var cchPartnerServices = [];
+    var cchPartnerPin = '';
 
     var COACH_TAGS = {
         adults: isEn ? 'Adults' : 'Взрослые',
@@ -442,6 +444,8 @@
         cchImageUrl = (item && item.photo) ? item.photo : '';
         cchAchievements = (item && item.achievements) ? item.achievements.slice() : [];
         cchAchievementsEn = (item && item.achievements_en) ? item.achievements_en.slice() : [];
+        cchPartnerPin = (item && item.partner_pin) ? item.partner_pin : '';
+        cchPartnerServices = [];
 
         // Load courts from DB for dropdown
         var courtsList = [];
@@ -688,6 +692,35 @@
                 '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchAchAddEn">' + L.cchAchievementAdd + '</button>' +
             '</div>' +
 
+            // Partner section
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.cchPartnerSection + '</div>' +
+                '<label class="ad-checkbox-label" style="margin-bottom:12px;">' +
+                    '<input type="checkbox" id="adCchPartner"' + (item && item.partner ? ' checked' : '') + '> ' + L.cchPartner +
+                '</label>' +
+                '<div id="adCchPartnerBody" style="display:' + (item && item.partner ? 'block' : 'none') + ';">' +
+                    '<div class="ad-form-row" style="align-items:flex-end;">' +
+                        '<div class="ad-field" style="flex:0 0 200px;">' +
+                            '<label class="ad-field-label">' + L.cchPartnerPin + '</label>' +
+                            '<div style="display:flex;gap:6px;">' +
+                                '<input type="text" class="ad-field-input" id="adCchPartnerPin" value="' + A.esc(cchPartnerPin) + '" readonly style="font-size:1.2rem;letter-spacing:4px;text-align:center;font-weight:700;">' +
+                                '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchResetPin">' + L.cchResetPin + '</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="margin-top:16px;">' +
+                        '<label class="ad-field-label">' + (isEn ? 'Partner Services' : 'Услуги партнёра') + '</label>' +
+                        '<div style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:4px;font-size:0.75rem;color:var(--text-dim);">' +
+                            '<span>' + L.cchServiceName + '</span>' +
+                            '<span>' + L.cchDiscount + '</span>' +
+                            '<span></span>' +
+                        '</div>' +
+                        '<div id="adCchPartnerServicesRows"></div>' +
+                        '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchAddService" style="margin-top:8px;">' + L.cchAddService + '</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+
             // Actions
             '<div class="ad-form-actions">' +
                 '<button class="ad-btn ad-btn-primary" id="adCchSave">' + L.save + '</button>' +
@@ -922,6 +955,36 @@
             });
         });
 
+        // Partner toggle
+        document.getElementById('adCchPartner').addEventListener('change', function() {
+            var body = document.getElementById('adCchPartnerBody');
+            if (body) body.style.display = this.checked ? 'block' : 'none';
+            if (this.checked && !cchPartnerPin) {
+                cchPartnerPin = String(Math.floor(1000 + Math.random() * 9000));
+                document.getElementById('adCchPartnerPin').value = cchPartnerPin;
+            }
+            if (this.checked && cchPartnerServices.length === 0) {
+                cchPartnerServices.push({ id: null, service_name: L.cchDefaultService, service_name_en: '', service_name_kg: '', discount_percent: 0 });
+                renderCchPartnerServices();
+            }
+        });
+        document.getElementById('adCchResetPin').addEventListener('click', function() {
+            cchPartnerPin = String(Math.floor(1000 + Math.random() * 9000));
+            document.getElementById('adCchPartnerPin').value = cchPartnerPin;
+        });
+        document.getElementById('adCchAddService').addEventListener('click', function() {
+            cchPartnerServices.push({ id: null, service_name: '', service_name_en: '', service_name_kg: '', discount_percent: 0 });
+            renderCchPartnerServices();
+        });
+        // Load partner services if editing
+        if (cchEditingId && item && item.partner) {
+            loadCchPartnerServices(cchEditingId);
+            if (!cchPartnerPin) {
+                cchPartnerPin = String(Math.floor(1000 + Math.random() * 9000));
+                document.getElementById('adCchPartnerPin').value = cchPartnerPin;
+            }
+        }
+
         // Save
         document.getElementById('adCchSave').addEventListener('click', saveCoachHandler);
 
@@ -964,6 +1027,91 @@
                 document.getElementById('adCchImgUrl').value = '';
                 document.getElementById('adCchImgInput').value = '';
             });
+        }
+    }
+
+    // ---- Partner Services (Coaches) ----
+    async function loadCchPartnerServices(coachId) {
+        if (!A.client) return;
+        var result = await A.client.from('partner_services')
+            .select('*')
+            .eq('entity_type', 'coach')
+            .eq('entity_id', coachId)
+            .order('sort_order', { ascending: true });
+        cchPartnerServices = (result.data && result.data.length) ? result.data : [];
+        if (cchPartnerServices.length === 0) {
+            cchPartnerServices.push({ id: null, service_name: L.cchDefaultService, service_name_en: '', service_name_kg: '', discount_percent: 0 });
+        }
+        renderCchPartnerServices();
+    }
+
+    function renderCchPartnerServices() {
+        var container = document.getElementById('adCchPartnerServicesRows');
+        if (!container) return;
+        var html = '';
+        cchPartnerServices.forEach(function(svc, idx) {
+            html += '<div class="ad-partner-svc-row" data-idx="' + idx + '" style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:6px;align-items:center;">' +
+                '<input type="text" class="ad-field-input ad-psvc-name" value="' + A.esc(svc.service_name || '') + '" placeholder="' + L.cchServiceName + '">' +
+                '<input type="number" class="ad-field-input ad-psvc-discount" value="' + (svc.discount_percent || '') + '" min="1" max="100" placeholder="%">' +
+                (cchPartnerServices.length > 1 ? '<button type="button" class="ad-btn-icon ad-psvc-remove">&times;</button>' : '<div></div>') +
+            '</div>';
+        });
+        container.innerHTML = html;
+
+        container.addEventListener('input', function(e) {
+            var row = e.target.closest('.ad-partner-svc-row');
+            if (!row) return;
+            var idx = parseInt(row.dataset.idx, 10);
+            if (e.target.classList.contains('ad-psvc-name')) cchPartnerServices[idx].service_name = e.target.value.trim();
+            if (e.target.classList.contains('ad-psvc-discount')) cchPartnerServices[idx].discount_percent = parseInt(e.target.value, 10) || 0;
+        });
+        container.addEventListener('click', function(e) {
+            if (e.target.classList.contains('ad-psvc-remove')) {
+                var row = e.target.closest('.ad-partner-svc-row');
+                var idx = parseInt(row.dataset.idx, 10);
+                cchPartnerServices.splice(idx, 1);
+                renderCchPartnerServices();
+            }
+        });
+    }
+
+    async function saveCchPartnerData(coachId) {
+        if (!A.client) return;
+        var isPartner = document.getElementById('adCchPartner').checked;
+        if (!isPartner) return;
+
+        await A.client.from('coaches').update({ partner_pin: cchPartnerPin }).eq('id', coachId);
+
+        var existing = await A.client.from('partner_services')
+            .select('id')
+            .eq('entity_type', 'coach')
+            .eq('entity_id', coachId);
+        var existingIds = (existing.data || []).map(function(s) { return s.id; });
+        var keepIds = cchPartnerServices.filter(function(s) { return s.id; }).map(function(s) { return s.id; });
+        var toDelete = existingIds.filter(function(id) { return keepIds.indexOf(id) === -1; });
+
+        if (toDelete.length) {
+            await A.client.from('partner_services').delete().in('id', toDelete);
+        }
+
+        for (var i = 0; i < cchPartnerServices.length; i++) {
+            var svc = cchPartnerServices[i];
+            if (!svc.service_name) continue;
+            var row = {
+                entity_type: 'coach',
+                entity_id: coachId,
+                service_name: svc.service_name,
+                service_name_en: svc.service_name_en || null,
+                service_name_kg: svc.service_name_kg || null,
+                discount_percent: svc.discount_percent || 0,
+                sort_order: i,
+                is_active: true
+            };
+            if (svc.id) {
+                await A.client.from('partner_services').update(row).eq('id', svc.id);
+            } else {
+                await A.client.from('partner_services').insert(row);
+            }
         }
     }
 
@@ -1033,7 +1181,8 @@
                 court_en: courtNameEn || null,
                 phone: phoneLocal ? '+996' + phoneLocal : null,
                 telegram: document.getElementById('adCchTelegram').value.trim() || null,
-                whatsapp: waLocal ? '+996' + waLocal : null
+                whatsapp: waLocal ? '+996' + waLocal : null,
+                partner: document.getElementById('adCchPartner').checked
             };
 
             if (!lastName) {
@@ -1057,6 +1206,10 @@
                 saveBtn.textContent = L.save;
                 return;
             }
+
+            // Save partner services
+            var coachId = cchEditingId || data.id;
+            await saveCchPartnerData(coachId);
 
             A.showToast(L.saved, 'success');
             renderCoachesList();
