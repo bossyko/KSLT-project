@@ -1,7 +1,7 @@
 # KSLT — Техническая документация
 
-> Последнее обновление: 2026-03-10
-> Версия: 1.2
+> Последнее обновление: 2026-03-14
+> Версия: 1.3
 
 ---
 
@@ -93,12 +93,12 @@ KSLT/
 │   └── coach.css                   ← Профиль тренера
 │
 ├── js/                             ← 34 JS-файла (26 400 строк)
-│   ├── admin/                      ← Админ-панель (15 312, модульная) ★
+│   ├── admin/                      ← Админ-панель (17 400+, модульная) ★
 │   │   ├── core/
-│   │   │   ├── constants.js        ← L (EN/RU), ICONS, enums (1 432)
+│   │   │   ├── constants.js        ← L (EN/RU), ICONS, enums (1 700+)
 │   │   │   ├── utils.js            ← toast, confirm, esc, translate, uploadImage (312)
-│   │   │   ├── layout.js           ← sidebar, tabs, dashboard (454)
-│   │   │   └── init.js             ← onAuthReady orchestration (32)
+│   │   │   ├── layout.js           ← sidebar, tabs, dashboard (450)
+│   │   │   └── init.js             ← onAuthReady orchestration (33)
 │   │   └── sections/
 │   │       ├── news.js             ← CRUD + inline-фото + опрос (1 374)
 │   │       ├── tournaments.js      ← CRUD + заявки + финализация (1 518)
@@ -107,9 +107,10 @@ KSLT/
 │   │       ├── coaches.js          ← CRUD + фото + авто-перевод (1 089)
 │   │       ├── ratings.js          ← Таблица + промоушен + правила (1 147)
 │   │       ├── players.js          ← CRUD + категория (594)
-│   │       ├── memberships.js      ← Одобрение + история (661)
-│   │       ├── payments.js         ← CRUD + promoted (558)
-│   │       └── users.js            ← Список + роли + удаление (635)
+│   │       ├── memberships.js      ← Одобрение + история + статы + период + PDF (900+)
+│   │       ├── payments.js         ← CRUD + promoted + статы + период + PDF (770+)
+│   │       ├── vouchers.js         ← Дашборд + таблица + фильтры + PDF (430+)
+│   │       └── users.js            ← Список + роли + аналитика + график + PDF (1 400+)
 │   ├── tournament-detail.js        ← Сетка турнира (1 860)
 │   ├── dashboard.js                ← Личный кабинет (1 233)
 │   ├── players.js                  ← Рейтинги (1 039)
@@ -139,7 +140,7 @@ KSLT/
 │   ├── coaches-data.js / -en.js
 │   └── courts-data.js / -en.js
 │
-├── sql/                            ← 38 SQL-файлов
+├── sql/                            ← 40+ SQL-файлов
 │   ├── bracket-system-migration.sql
 │   ├── rating-system-migration.sql
 │   ├── rating-system-fix.sql
@@ -157,10 +158,12 @@ KSLT/
 ├── supabase/
 │   ├── schema.sql                  ← Основная схема БД
 │   ├── seed.sql                    ← Начальные данные
-│   └── functions/                  ← 4 Edge Functions (Deno/TypeScript)
+│   └── functions/                  ← 6 Edge Functions (Deno/TypeScript)
 │       ├── admin-manage-user/      ← Создание менеджеров, удаление пользователей
 │       ├── send-game-invite/       ← Отправка приглашений
-│       ├── telegram-webhook/       ← Telegram бот
+│       ├── create-challenge/       ← Вызовы на матч (Challenge Board)
+│       ├── tournament-notify/      ← Рассылка турниров в Telegram
+│       ├── telegram-webhook/       ← Telegram бот (все callbacks)
 │       └── membership-notify/      ← Уведомления о членстве
 │
 ├── docs/                           ← Документация
@@ -168,7 +171,7 @@ KSLT/
 └── images/                         ← Логотип
 ```
 
-**Итого: ~140 файлов, ~74 000 строк кода**
+**Итого: ~150 файлов, ~78 000 строк кода**
 
 ---
 
@@ -283,6 +286,36 @@ game_invites          — приглашения на игру
 ├── receiver_profile_id → profiles
 ├── status            — pending / accepted / declined / expired
 └── created_at, responded_at
+
+challenges            — вызовы на матч (Challenge Board)
+├── challenger_id     → profiles
+├── opponent_id       → profiles (player_id связь)
+├── proposed_date, proposed_time
+├── proposed_court    → courts.id или другая площадка
+├── message           — до 150 символов
+├── status            — pending / accepted / counter / declined / expired
+└── expires_at        — автоматически через 72ч (pg_cron)
+
+discount_vouchers     — ваучеры скидок (членство)
+├── profile_id        → profiles
+├── player_name       — имя игрока
+├── entity_type       — court / coach
+├── entity_id, entity_name
+├── service_id, service_name
+├── discount_percent  — процент скидки
+├── qr_token          — уникальный токен для QR-кода
+├── status            — active / used / expired / cancelled
+├── created_at, expires_at, used_at
+└── confirmed_by_ip   — IP при верификации
+
+deleted_accounts      — лог удалённых аккаунтов
+├── profile_id        — ID удалённого профиля
+├── full_name, email, role, phone
+├── telegram_chat_id, player_id
+├── had_membership    — была ли активная подписка
+├── deleted_at        — дата удаления
+└── reason            — причина (опционально)
+    Trigger: trg_log_deleted_profile BEFORE DELETE ON profiles
 
 notification_log      — лог уведомлений (защита от дублей)
 ├── profile_id, type
@@ -659,7 +692,7 @@ const { data: membership } = await supabase
 
 ## 11. Админ-панель
 
-**Модульная архитектура:** `js/admin/` — 14 файлов, ~15 300 строк
+**Модульная архитектура:** `js/admin/` — 15 файлов, ~17 400 строк
 
 Все модули используют namespace `window.KSLT_ADMIN` (alias `A`). Каждый файл — IIFE, регистрирующий свои функции на общем namespace. Shared utilities (`A.showToast`, `A.esc`, `A.uploadImage`, `A.setupBulkDelete`) в `core/utils.js`, layout/navigation в `core/layout.js`.
 
@@ -674,6 +707,21 @@ const { data: membership } = await supabase
 | Турниры | tournaments | CRUD + заявки + сетка (SE/FIC/Group Stage) + финализация |
 | Уровни | tournament_levels | CRUD + правила начисления очков |
 | Пользователи | profiles | Список + роли + членство (только admin) |
+| Ваучеры | discount_vouchers | Дашборд + таблица + фильтры + отмена |
+
+### Отчёты и аналитика
+
+Каждая секция (ваучеры, оплаты, членства, пользователи) содержит:
+
+- **Карточки статистики** — ключевые метрики (всего, активных, за период)
+- **Фильтр периода** — Всё время / Этот месяц / Прошлый месяц / Свой период
+- **PDF-экспорт** — открывает отчёт в новой вкладке (`window.print()` → "Сохранить как PDF")
+- **Ваучеры**: сумма скидок рассчитывается из цен кортов/тренеров × процент
+- **Пользователи**: график динамики за текущий месяц (Chart.js — зарегистрировано, удалено, прирост)
+
+### Трекинг удалённых аккаунтов
+
+PostgreSQL trigger `trg_log_deleted_profile` — при удалении профиля данные копируются в таблицу `deleted_accounts`. Позволяет анализировать отток пользователей.
 
 ### Новости — расширенный функционал
 
@@ -783,6 +831,14 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://qqkzszesviukopg
 | Sponsors | Блоки спонсоров на страницах | ✅ |
 | Homepage CTA | Кнопки действий на главной (корты, тренеры) | ✅ |
 | Tournament Search | Поиск турниров (overview + category) | ✅ |
+| Admin Refactoring | 15 000 строк → 15 модулей (KSLT_ADMIN namespace) | ✅ |
+| KG Translation | 20 HTML + 6 data + 14 JS — кыргызский язык | ✅ |
+| Voucher System | QR-ваучеры, лимиты, верификация, история | ✅ |
+| Vouchers Admin | Дашборд, таблица, фильтры, период, PDF | ✅ |
+| Period Filters + PDF | Оплаты, членства, пользователи — период + экспорт | ✅ |
+| User Analytics | Карточки статистики + Chart.js график роста | ✅ |
+| Deleted Accounts | PostgreSQL trigger + admin visibility | ✅ |
+| Challenge Board | Вызовы на матч через Telegram (counter-offer, expire) | ✅ |
 
 ---
 

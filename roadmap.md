@@ -47,11 +47,16 @@
 - [x] Public pages loading from Supabase with static fallback
 - [x] Fix homepage tournament layout (featured card: info on right)
 
-### 4.4 Financial Reports (waiting for Phase 3)
-- [ ] Payments table with filters and search
-- [ ] Monthly reports, debtors list
+### 4.4 Vouchers & Reports ✅
+- [x] Vouchers admin section: dashboard (total issued, total discount sum), table with filters/sort/pagination, detail modal, cancel (admin only)
+- [x] Period filter (all time / this month / last month / custom) for vouchers, payments, memberships, users
+- [x] PDF report export (print-ready) for vouchers, payments, memberships, users
+- [x] Payments stats: active, expired, this month, total amount
+- [x] Memberships stats: total, active, expired, expiring soon
+- [x] User analytics: stat cards (total, members, telegram, banned, deleted, admins, managers, new this month) + current month growth chart (Chart.js)
+- [x] Deleted accounts tracking (PostgreSQL trigger + admin visibility)
 - [ ] Excel export
-- [ ] Charts and analytics
+- [ ] Debtors list + auto-block
 
 ### 4.5 Automation
 - [x] Telegram tournament notify button in admin (manual broadcast)
