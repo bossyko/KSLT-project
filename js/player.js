@@ -71,7 +71,30 @@
         monthName: 'Январь 2026',
         matchDates: ['14 Фев', '7 Фев', '28 Янв', '21 Янв', '14 Янв', '5 Янв', '28 Дек', '20 Дек'],
         tournamentNames: ['KSLT Open 2026', 'Winter Cup 2025', 'Autumn Classic 2025', 'KSLT Summer Series 2025'],
-        tournamentResults: ['Четвертьфинал', 'Полуфинал', '1/8 финала', 'Финалист', 'Победитель']
+        tournamentResults: ['Четвертьфинал', 'Полуфинал', '1/8 финала', 'Финалист', 'Победитель'],
+        challengeModalTitle: 'Бросить вызов',
+        challengeDate: 'Дата',
+        challengeTime: 'Время',
+        challengeVenue: 'Площадка',
+        challengeMessage: 'Сообщение (необязательно)',
+        challengeSend: 'Отправить вызов',
+        challengeSending: 'Отправка...',
+        challengeSent: 'Вызов отправлен!',
+        challengeSentText: 'Оппонент получит уведомление в Telegram и сможет принять, предложить другое время или отклонить вызов.',
+        challengeNoTg: 'Telegram не подключён',
+        challengeNoTgText: 'У этого игрока не подключён Telegram-бот. Вызов можно отправить только игрокам с подключённым Telegram.',
+        challengeError: 'Ошибка отправки',
+        challengeLimit: 'Лимит вызовов: 5 в день',
+        challengePending: 'Активный вызов',
+        challengePendingText: 'У вас уже есть активный вызов этому игроку. Дождитесь ответа или истечения срока (72 часа).',
+        challengeSelf: 'Нельзя вызвать самого себя',
+        challengeSelectVenue: 'Выберите корт',
+        challengeOtherVenue: 'Другая площадка',
+        challengeLoginRequired: 'Войдите в аккаунт',
+        challengeLoginText: 'Для отправки вызова необходимо авторизоваться',
+        challengeMemberRequired: 'Оформите членство',
+        challengeMemberText: 'Для отправки вызова необходимо членство KSLT',
+        challengeNoPlayer: 'Привяжите профиль игрока для отправки вызовов'
     };
 
     // ---- H2H Labels ----
@@ -369,7 +392,7 @@
         if (player.online) {
             html += '<a href="' + authPage + '" class="pp-action-btn pp-action-secondary">\u2709\uFE0F ' + L.message + '</a>';
         }
-        html += '<a href="' + authPage + '" class="pp-action-btn pp-action-primary">\u2694\uFE0F ' + L.challenge + '</a>';
+        html += '<button class="pp-action-btn pp-action-primary" id="ppChallengeBtn">\u2694\uFE0F ' + L.challenge + '</button>';
         html += '</div>';
 
         html += '</div>'; // .pp-header
@@ -446,6 +469,14 @@
                 var fallback = backBtn.getAttribute('href');
                 history.back();
                 setTimeout(function() { window.location.href = fallback; }, 200);
+            });
+        }
+
+        // Challenge button handler
+        var chalBtn = el.querySelector('#ppChallengeBtn');
+        if (chalBtn) {
+            chalBtn.addEventListener('click', function() {
+                handleChallengeClick(data.player);
             });
         }
 
@@ -999,4 +1030,245 @@
         renderBadgesSection();
         initScrollAnimations();
     });
+
+    // ================================================
+    // CHALLENGE MODAL
+    // ================================================
+    var _challengeSending = false;
+
+    function handleChallengeClick(player) {
+        if (_accessLevel === 'guest') {
+            showChallengeAlert(L.challengeLoginRequired, L.challengeLoginText);
+            return;
+        }
+        if (_accessLevel === 'registered') {
+            showChallengeAlert(L.challengeMemberRequired, L.challengeMemberText);
+            return;
+        }
+        showChallengeModal(player);
+    }
+
+    function showChallengeAlert(title, text) {
+        var old = document.querySelector('.pp-chal-overlay');
+        if (old) old.remove();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'pp-chal-overlay';
+        overlay.innerHTML =
+            '<div class="pp-chal-modal">' +
+                '<button class="pp-chal-close">&times;</button>' +
+                '<h3 class="pp-chal-title">' + esc(title) + '</h3>' +
+                '<p style="color:var(--text-muted);margin:var(--space-md) 0;">' + esc(text) + '</p>' +
+            '</div>';
+        document.body.appendChild(overlay);
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+        attachChalClose(overlay);
+    }
+
+    function showChallengeModal(player) {
+        var old = document.querySelector('.pp-chal-overlay');
+        if (old) old.remove();
+
+        var today = new Date().toISOString().split('T')[0];
+        var playerName = player.name || '';
+
+        var overlay = document.createElement('div');
+        overlay.className = 'pp-chal-overlay';
+        overlay.innerHTML =
+            '<div class="pp-chal-modal">' +
+                '<button class="pp-chal-close">&times;</button>' +
+                '<h3 class="pp-chal-title">\u2694\uFE0F ' + esc(L.challengeModalTitle) + ' ' + esc(playerName) + '</h3>' +
+                '<div class="pp-chal-form">' +
+                    '<div class="pp-chal-row">' +
+                        '<div class="pp-chal-field">' +
+                            '<label class="pp-chal-label">' + L.challengeDate + ' *</label>' +
+                            '<input type="date" class="pp-chal-input" id="ppChalDate" min="' + today + '" required>' +
+                        '</div>' +
+                        '<div class="pp-chal-field">' +
+                            '<label class="pp-chal-label">' + L.challengeTime + ' *</label>' +
+                            '<input type="time" class="pp-chal-input" id="ppChalTime" required>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="pp-chal-field">' +
+                        '<label class="pp-chal-label">' + L.challengeVenue + '</label>' +
+                        '<select class="pp-chal-input" id="ppChalCourt">' +
+                            '<option value="">' + L.challengeSelectVenue + '</option>' +
+                            '<option value="other">' + L.challengeOtherVenue + '</option>' +
+                        '</select>' +
+                    '</div>' +
+                    '<div class="pp-chal-field" id="ppChalVenueWrap" style="display:none;">' +
+                        '<input type="text" class="pp-chal-input" id="ppChalVenueText" placeholder="' + L.challengeOtherVenue + '">' +
+                    '</div>' +
+                    '<div class="pp-chal-field">' +
+                        '<label class="pp-chal-label">' + L.challengeMessage + '</label>' +
+                        '<textarea class="pp-chal-input pp-chal-textarea" id="ppChalMsg" maxlength="150" rows="2"></textarea>' +
+                        '<div class="pp-chal-counter"><span id="ppChalMsgCount">0</span>/150</div>' +
+                    '</div>' +
+                    '<button class="pp-chal-submit" id="ppChalSubmit">' + L.challengeSend + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+        attachChalClose(overlay);
+
+        // Load courts into select
+        loadCourtsForChallenge();
+
+        // Court select toggle
+        var courtSel = document.getElementById('ppChalCourt');
+        var venueWrap = document.getElementById('ppChalVenueWrap');
+        if (courtSel) {
+            courtSel.addEventListener('change', function() {
+                venueWrap.style.display = courtSel.value === 'other' ? '' : 'none';
+            });
+        }
+
+        // Message counter
+        var msgInput = document.getElementById('ppChalMsg');
+        var msgCount = document.getElementById('ppChalMsgCount');
+        if (msgInput && msgCount) {
+            msgInput.addEventListener('input', function() {
+                msgCount.textContent = msgInput.value.length;
+            });
+        }
+
+        // Submit
+        var submitBtn = document.getElementById('ppChalSubmit');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function() {
+                submitChallenge(player, overlay);
+            });
+        }
+    }
+
+    function loadCourtsForChallenge() {
+        if (!client) return;
+        client.from('courts').select('id, name').order('name').then(function(res) {
+            var sel = document.getElementById('ppChalCourt');
+            if (!sel || !res.data) return;
+            for (var i = 0; i < res.data.length; i++) {
+                var opt = document.createElement('option');
+                opt.value = res.data[i].id;
+                opt.textContent = res.data[i].name;
+                sel.insertBefore(opt, sel.lastElementChild);
+            }
+        });
+    }
+
+    async function submitChallenge(player, overlay) {
+        if (_challengeSending) return;
+
+        var dateEl = document.getElementById('ppChalDate');
+        var timeEl = document.getElementById('ppChalTime');
+        var courtEl = document.getElementById('ppChalCourt');
+        var venueEl = document.getElementById('ppChalVenueText');
+        var msgEl = document.getElementById('ppChalMsg');
+        var submitBtn = document.getElementById('ppChalSubmit');
+
+        if (!dateEl.value || !timeEl.value) return;
+
+        _challengeSending = true;
+        if (submitBtn) {
+            submitBtn.textContent = L.challengeSending;
+            submitBtn.disabled = true;
+        }
+
+        try {
+            var session = await client.auth.getSession();
+            var token = session.data.session ? session.data.session.access_token : null;
+            if (!token) {
+                showChalToast(L.challengeError, 'error');
+                return;
+            }
+
+            var body = {
+                opponent_player_id: _playerId,
+                proposed_date: dateEl.value,
+                proposed_time: timeEl.value
+            };
+
+            if (courtEl.value && courtEl.value !== '' && courtEl.value !== 'other') {
+                body.court_id = courtEl.value;
+            }
+            if (courtEl.value === 'other' && venueEl && venueEl.value.trim()) {
+                body.venue_text = venueEl.value.trim();
+            }
+            if (msgEl && msgEl.value.trim()) {
+                body.message = msgEl.value.trim();
+            }
+
+            var res = await fetch(SUPABASE_URL + '/functions/v1/create-challenge', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                    'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify(body)
+            });
+
+            var data = await res.json();
+
+            if (res.ok && data.success) {
+                closeChalModal(overlay);
+                showChallengeAlert('\u2694\uFE0F ' + L.challengeSent, L.challengeSentText);
+            } else if (data.error === 'no_telegram') {
+                closeChalModal(overlay);
+                showChallengeAlert(L.challengeNoTg, L.challengeNoTgText);
+            } else if (data.error === 'already_pending') {
+                closeChalModal(overlay);
+                showChallengeAlert(L.challengePending, L.challengePendingText);
+            } else {
+                var errMsg = L.challengeError;
+                if (data.error === 'daily_limit') errMsg = L.challengeLimit;
+                else if (data.error === 'self_challenge') errMsg = L.challengeSelf;
+                else if (data.error === 'no_player') errMsg = L.challengeNoPlayer;
+                showChalToast(errMsg, 'error');
+            }
+        } catch (e) {
+            console.error('Challenge error:', e);
+            showChalToast(L.challengeError, 'error');
+        } finally {
+            _challengeSending = false;
+            if (submitBtn) {
+                submitBtn.textContent = L.challengeSend;
+                submitBtn.disabled = false;
+            }
+        }
+    }
+
+    function attachChalClose(overlay) {
+        var closeBtn = overlay.querySelector('.pp-chal-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() { closeChalModal(overlay); });
+        }
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeChalModal(overlay);
+        });
+        var escHandler = function(e) {
+            if (e.key === 'Escape') {
+                closeChalModal(overlay);
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    }
+
+    function closeChalModal(overlay) {
+        overlay.classList.remove('visible');
+        setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 300);
+    }
+
+    function showChalToast(msg, type) {
+        var toast = document.createElement('div');
+        toast.className = 'pp-chal-toast pp-chal-toast-' + type;
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        requestAnimationFrame(function() { toast.classList.add('visible'); });
+        setTimeout(function() {
+            toast.classList.remove('visible');
+            setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+        }, 3000);
+    }
 })();

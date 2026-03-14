@@ -82,7 +82,30 @@ window.playerProfileLabels = {
     monthName: "Январь 2026",
     matchDates: ["Фев 14", "Фев 7", "Янв 28", "Янв 21", "Янв 14", "Янв 5", "Дек 28", "Дек 20"],
     tournamentNames: ["KSLT Open 2026", "Кышкы Кубок 2025", "Күзгү Классик 2025", "KSLT Жайкы Серия 2025"],
-    tournamentResults: ["Чейрек финал", "Жарым финал", "1/8 финал", "Финалист", "Жеңүүчү"]
+    tournamentResults: ["Чейрек финал", "Жарым финал", "1/8 финал", "Финалист", "Жеңүүчү"],
+    challengeModalTitle: "Чакыруу жөнөтүү",
+    challengeDate: "Күнү",
+    challengeTime: "Убакыт",
+    challengeVenue: "Аянтча",
+    challengeMessage: "Билдирүү (милдеттүү эмес)",
+    challengeSend: "Чакыруу жөнөтүү",
+    challengeSending: "Жөнөтүлүүдө...",
+    challengeSent: "Чакыруу жөнөтүлдү!",
+    challengeSentText: "Оппонент Telegram аркылуу билдирүү алат жана кабыл алуу, башка убакыт сунуштоо же четке кагуу мүмкүнчүлүгүнө ээ болот.",
+    challengeNoTg: "Telegram байланган эмес",
+    challengeNoTgText: "Бул оюнчу Telegram-ботту байлаган эмес. Чакыруу Telegram байланган оюнчуларга гана жөнөтүлөт.",
+    challengeError: "Чакыруу жөнөтүүдө ката",
+    challengeLimit: "Чакыруу лимити: күнүнө 5",
+    challengePending: "Активдүү чакыруу",
+    challengePendingText: "Бул оюнчуга активдүү чакыруу бар. Жооп же мөөнөт бүтүшүн күтүңүз (72 саат).",
+    challengeSelf: "Өзүңүзгө чакыруу жөнөтүү мүмкүн эмес",
+    challengeSelectVenue: "Корт тандаңыз",
+    challengeOtherVenue: "Башка аянтча",
+    challengeLoginRequired: "Кириңиз",
+    challengeLoginText: "Чакыруу жөнөтүү үчүн авторизациялануу керек",
+    challengeMemberRequired: "Мүчөлүк керек",
+    challengeMemberText: "Чакыруу жөнөтүү үчүн KSLT мүчөлүгү талап кылынат",
+    challengeNoPlayer: "Чакыруу жөнөтүү үчүн оюнчу профилин байлаңыз"
 };
 
 var playersData = {

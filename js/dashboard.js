@@ -112,7 +112,23 @@
         qrTitle: 'Профилди бөлүшүү',
         qrDownload: 'PNG жүктөө',
         qrCopy: 'Шилтемени көчүрүү',
-        qrCopied: 'Көчүрүлдү!'
+        qrCopied: 'Көчүрүлдү!',
+        challenges: 'Сынактар',
+        challengesTitle: 'Матчка чакыруулар',
+        chalSent: 'Жөнөтүлдү',
+        chalReceived: 'Алынды',
+        chalActive: 'Активдүү',
+        chalNegotiating: 'Сүйлөшүүдө',
+        chalCountered: 'Каршы сунуш',
+        chalAccepted: 'Кабыл алынды',
+        chalDeclined: 'Четке кагылды',
+        chalExpired: 'Мөөнөтү бүттү',
+        chalCompleted: 'Аяктады',
+        chalNoChallenges: 'Чакыруулар жок',
+        chalNoChallengesText: 'Оюнчунун профилинен матчка чакыруу жөнөтүңүз',
+        chalDate: 'Күнү',
+        chalTime: 'Убакыт',
+        chalVenue: 'Аянтча'
     } : isEn ? {
         profile: 'Profile', tournaments: 'My Tournaments',
         stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
@@ -216,7 +232,23 @@
         qrTitle: 'Share Profile',
         qrDownload: 'Download PNG',
         qrCopy: 'Copy Link',
-        qrCopied: 'Copied!'
+        qrCopied: 'Copied!',
+        challenges: 'Challenges',
+        challengesTitle: 'Match Challenges',
+        chalSent: 'Sent',
+        chalReceived: 'Received',
+        chalActive: 'Active',
+        chalNegotiating: 'Negotiating',
+        chalCountered: 'Counter-proposal',
+        chalAccepted: 'Accepted',
+        chalDeclined: 'Declined',
+        chalExpired: 'Expired',
+        chalCompleted: 'Completed',
+        chalNoChallenges: 'No challenges yet',
+        chalNoChallengesText: 'Send a match challenge from a player\'s profile page',
+        chalDate: 'Date',
+        chalTime: 'Time',
+        chalVenue: 'Venue'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
@@ -320,7 +352,23 @@
         qrTitle: 'Поделиться профилем',
         qrDownload: 'Скачать PNG',
         qrCopy: 'Скопировать ссылку',
-        qrCopied: 'Скопировано!'
+        qrCopied: 'Скопировано!',
+        challenges: 'Вызовы',
+        challengesTitle: 'Вызовы на матч',
+        chalSent: 'Отправлено',
+        chalReceived: 'Получено',
+        chalActive: 'Активный',
+        chalNegotiating: 'Переговоры',
+        chalCountered: 'Встречное',
+        chalAccepted: 'Принят',
+        chalDeclined: 'Отклонён',
+        chalExpired: 'Истёк',
+        chalCompleted: 'Завершён',
+        chalNoChallenges: 'Вызовов пока нет',
+        chalNoChallengesText: 'Отправьте вызов на матч со страницы профиля игрока',
+        chalDate: 'Дата',
+        chalTime: 'Время',
+        chalVenue: 'Площадка'
     };
 
     // Use shared Supabase client from supabase-config.js
@@ -410,6 +458,7 @@
         renderTournaments();
         renderStats(profile);
         renderInvitations();
+        renderChallenges();
         renderSettings(user);
         initTabs();
 
@@ -620,6 +669,7 @@
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="tournaments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 1012 0V2z"/></svg>' + L.tournaments + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>' + L.stats + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="invitations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>' + L.invitations + '</button></li>' +
+                '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="challenges"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg>' + L.challenges + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</button></li>' +
             '</ul>';
     }
@@ -765,6 +815,7 @@
             '<button class="db-mobile-tab" data-tab="tournaments">' + L.tournaments + '</button>' +
             '<button class="db-mobile-tab" data-tab="stats">' + L.stats + '</button>' +
             '<button class="db-mobile-tab" data-tab="invitations">' + L.invitations + '</button>' +
+            '<button class="db-mobile-tab" data-tab="challenges">' + L.challenges + '</button>' +
             '<button class="db-mobile-tab" data-tab="settings">' + L.settings + '</button>';
     }
 
@@ -1048,6 +1099,103 @@
             card.innerHTML = html;
         } catch(e) {
             console.error('Game invites error:', e);
+            card.innerHTML = '<p style="color:var(--text-muted);">—</p>';
+        }
+    }
+
+    // ---- Challenges section ----
+    function renderChallenges() {
+        var container = document.getElementById('db-challenges');
+        if (!container) return;
+
+        container.innerHTML =
+            '<h2 class="db-section-title">' + L.challengesTitle + '</h2>' +
+            '<div class="db-card" id="dbChallenges">' +
+                '<p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p>' +
+            '</div>';
+
+        if (client) {
+            loadChallenges();
+        }
+    }
+
+    async function loadChallenges() {
+        var card = document.getElementById('dbChallenges');
+        if (!card || !client) return;
+
+        try {
+            var result = await client.rpc('get_my_challenges');
+            var items = result.data || [];
+
+            if (!items || items.length === 0) {
+                card.innerHTML =
+                    '<div class="db-empty" style="padding:var(--space-lg) 0;">' +
+                        '<div class="db-empty-icon">&#9876;&#65039;</div>' +
+                        '<div class="db-empty-title">' + L.chalNoChallenges + '</div>' +
+                        '<div class="db-empty-text">' + L.chalNoChallengesText + '</div>' +
+                    '</div>';
+                return;
+            }
+
+            var html = '<div class="db-invite-list">';
+
+            for (var i = 0; i < items.length; i++) {
+                var ch = items[i];
+                var isSent = ch.direction === 'sent';
+                var partnerName = isSent ? (ch.opponent_name || '—') : (ch.challenger_name || '—');
+                var partnerAvatar = isSent ? ch.opponent_avatar : ch.challenger_avatar;
+
+                var initials = (partnerName).split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
+                var avatarHtml = partnerAvatar
+                    ? '<img src="' + escHtml(partnerAvatar) + '" class="db-invite-avatar" alt="">'
+                    : '<div class="db-invite-avatar-ph">' + initials + '</div>';
+
+                var dirLabel = isSent ? L.chalSent : L.chalReceived;
+
+                // Status label + class
+                var statusMap = {
+                    active: { label: L.chalActive, cls: 'pending' },
+                    negotiating: { label: L.chalNegotiating, cls: 'pending' },
+                    countered: { label: L.chalCountered, cls: 'pending' },
+                    accepted: { label: L.chalAccepted, cls: 'accepted' },
+                    declined: { label: L.chalDeclined, cls: 'declined' },
+                    expired: { label: L.chalExpired, cls: 'declined' },
+                    completed: { label: L.chalCompleted, cls: 'accepted' }
+                };
+                var st = statusMap[ch.status] || { label: ch.status, cls: 'pending' };
+
+                // Date/time/venue
+                var finalDate = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_date ? ch.counter_date : ch.proposed_date;
+                var finalTime = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_time ? ch.counter_time : ch.proposed_time;
+                var finalVenue = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_venue ? ch.counter_venue : (ch.court_name || ch.proposed_venue || '');
+
+                var dateStr = '';
+                try {
+                    var d = new Date(finalDate);
+                    dateStr = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+                } catch(e) {}
+
+                var metaParts = [dirLabel];
+                if (dateStr) metaParts.push(dateStr);
+                if (finalTime) metaParts.push(finalTime);
+
+                var venueHtml = finalVenue ? '<div class="db-invite-meta" style="font-size:0.75rem;">\uD83D\uDCCD ' + escHtml(finalVenue) + '</div>' : '';
+
+                html += '<div class="db-invite-item">' +
+                    avatarHtml +
+                    '<div class="db-invite-info">' +
+                        '<div class="db-invite-name">' + escHtml(partnerName) + '</div>' +
+                        '<div class="db-invite-meta">' + metaParts.join(' &middot; ') + '</div>' +
+                        venueHtml +
+                    '</div>' +
+                    '<div class="db-invite-status db-invite-' + st.cls + '">' + st.label + '</div>' +
+                '</div>';
+            }
+
+            html += '</div>';
+            card.innerHTML = html;
+        } catch(e) {
+            console.error('Challenges error:', e);
             card.innerHTML = '<p style="color:var(--text-muted);">—</p>';
         }
     }

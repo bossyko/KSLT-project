@@ -1056,3 +1056,152 @@
         font-size: 1.4rem;
     }
 }
+
+/* ========================================
+   CHALLENGE MODAL (pp-chal-)
+   ======================================== */
+.pp-chal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 16px;
+}
+.pp-chal-overlay.visible { opacity: 1; }
+
+.pp-chal-modal {
+    background: rgba(30,30,30,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 28px 24px;
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.pp-chal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+}
+.pp-chal-close:hover { color: #fff; }
+
+.pp-chal-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 20px;
+}
+
+.pp-chal-form { display: flex; flex-direction: column; gap: 14px; }
+
+.pp-chal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.pp-chal-field { display: flex; flex-direction: column; gap: 4px; }
+
+.pp-chal-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.pp-chal-input {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: #fff;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.pp-chal-input:focus {
+    border-color: var(--accent, #CCFF00);
+}
+
+.pp-chal-textarea {
+    resize: vertical;
+    min-height: 48px;
+}
+
+.pp-chal-counter {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+.pp-chal-submit {
+    background: var(--accent, #CCFF00);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 4px;
+}
+.pp-chal-submit:hover { opacity: 0.9; }
+.pp-chal-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Challenge Toast */
+.pp-chal-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+}
+.pp-chal-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.pp-chal-toast-success {
+    background: var(--accent, #CCFF00);
+    color: #000;
+}
+.pp-chal-toast-error {
+    background: #ff4444;
+    color: #fff;
+}
+
+@media (max-width: 480px) {
+    .pp-chal-modal {
+        padding: 20px 16px;
+    }
+    .pp-chal-row {
+        grid-template-columns: 1fr;
+    }
+}

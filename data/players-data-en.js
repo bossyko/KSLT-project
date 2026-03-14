@@ -82,7 +82,30 @@ window.playerProfileLabels = {
     monthName: "January 2026",
     matchDates: ["Feb 14", "Feb 7", "Jan 28", "Jan 21", "Jan 14", "Jan 5", "Dec 28", "Dec 20"],
     tournamentNames: ["KSLT Open 2026", "Winter Cup 2025", "Autumn Classic 2025", "KSLT Summer Series 2025"],
-    tournamentResults: ["Quarterfinal", "Semifinal", "Round of 16", "Finalist", "Winner"]
+    tournamentResults: ["Quarterfinal", "Semifinal", "Round of 16", "Finalist", "Winner"],
+    challengeModalTitle: "Challenge",
+    challengeDate: "Date",
+    challengeTime: "Time",
+    challengeVenue: "Venue",
+    challengeMessage: "Message (optional)",
+    challengeSend: "Send Challenge",
+    challengeSending: "Sending...",
+    challengeSent: "Challenge sent!",
+    challengeSentText: "Your opponent will receive a Telegram notification and can accept, suggest a different time, or decline.",
+    challengeNoTg: "Telegram not connected",
+    challengeNoTgText: "This player has not connected the Telegram bot. Challenges can only be sent to players with Telegram connected.",
+    challengeError: "Error sending challenge",
+    challengeLimit: "Challenge limit: 5 per day",
+    challengePending: "Active challenge",
+    challengePendingText: "You already have an active challenge to this player. Wait for a response or expiration (72 hours).",
+    challengeSelf: "Cannot challenge yourself",
+    challengeSelectVenue: "Select a court",
+    challengeOtherVenue: "Other venue",
+    challengeLoginRequired: "Sign in required",
+    challengeLoginText: "Please sign in to send a challenge",
+    challengeMemberRequired: "Membership required",
+    challengeMemberText: "KSLT membership is required to send challenges",
+    challengeNoPlayer: "Link your player profile to send challenges"
 };
 
 var playersData = {
