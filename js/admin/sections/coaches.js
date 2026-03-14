@@ -449,7 +449,7 @@
 
         // Load courts from DB for dropdown
         var courtsList = [];
-        if (client) {
+        if (A.client) {
             var cRes = await A.client.from('courts').select('id,name,name_en').order('name');
             if (cRes.data) courtsList = cRes.data;
         }

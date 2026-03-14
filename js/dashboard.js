@@ -141,7 +141,10 @@
         voucherService: 'Кызмат',
         voucherDiscount: 'Арзандатуу',
         voucherExpires: 'Мөөнөтү',
-        voucherVenue: 'Жер'
+        voucherVenue: 'Жер',
+        voucherCourts: 'Корттор',
+        voucherCoaches: 'Машыктыруучулар',
+        voucherShowAll: 'Баарын көрсөтүү'
     } : isEn ? {
         profile: 'Profile', tournaments: 'My Tournaments',
         stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
@@ -274,7 +277,10 @@
         voucherService: 'Service',
         voucherDiscount: 'Discount',
         voucherExpires: 'Expires',
-        voucherVenue: 'Venue'
+        voucherVenue: 'Venue',
+        voucherCourts: 'Courts',
+        voucherCoaches: 'Coaches',
+        voucherShowAll: 'Show all'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
@@ -407,7 +413,10 @@
         voucherService: 'Услуга',
         voucherDiscount: 'Скидка',
         voucherExpires: 'Действует до',
-        voucherVenue: 'Заведение'
+        voucherVenue: 'Заведение',
+        voucherCourts: 'Корты',
+        voucherCoaches: 'Тренеры',
+        voucherShowAll: 'Показать все'
     };
 
     // Use shared Supabase client from supabase-config.js
@@ -1802,6 +1811,36 @@
         if (client) loadVouchers();
     }
 
+    var VOUCHER_PREVIEW = 5;
+
+    function renderVoucherItem(v, hiddenType) {
+        var statusClass = v.status === 'active' ? 'db-status-active' : (v.status === 'used' ? 'db-status-approved' : 'db-status-rejected');
+        var statusLabel = v.status === 'active' ? L.voucherActive : (v.status === 'used' ? L.voucherUsed : L.voucherExpired);
+        var dateStr = new Date(v.created_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+        var expiresStr = '';
+        if (v.expires_at) {
+            expiresStr = new Date(v.expires_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+        var isHidden = !!hiddenType;
+        var h = '<div class="db-invite-card" style="padding:14px 16px;' + (isHidden ? 'display:none;' : '') + '"' +
+            (isHidden ? ' data-vg-hidden="' + hiddenType + '"' : '') + '>' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">' +
+                '<div style="flex:1;">' +
+                    '<div style="font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:4px;">' + dbEsc(v.entity_name) + '</div>' +
+                    '<div style="font-size:0.8rem;color:rgba(255,255,255,0.5);">' + dbEsc(v.service_name) + ' &middot; -' + v.discount_percent + '%</div>' +
+                    '<div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:4px;">' + dateStr +
+                        (expiresStr ? ' &middot; ' + L.voucherExpires + ': ' + expiresStr : '') +
+                    '</div>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:8px;">' +
+                    '<span class="' + statusClass + '" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;">' + statusLabel + '</span>';
+        if (v.status === 'active') {
+            h += '<button class="db-voucher-qr-btn" data-token="' + v.qr_token + '" style="background:var(--accent);color:#000;border:none;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">' + L.voucherShowQR + '</button>';
+        }
+        h += '</div></div></div>';
+        return h;
+    }
+
     async function loadVouchers() {
         var card = document.getElementById('dbVouchers');
         if (!card || !client) return;
@@ -1810,7 +1849,7 @@
             var result = await client.from('discount_vouchers')
                 .select('*')
                 .order('created_at', { ascending: false })
-                .limit(50);
+                .limit(100);
 
             var items = result.data || [];
 
@@ -1838,6 +1877,23 @@
                 if (v.status === 'used') totalSaved++;
             });
 
+            // Group by entity_type
+            var groups = {};
+            items.forEach(function(v) {
+                var t = v.entity_type || 'other';
+                if (!groups[t]) groups[t] = [];
+                groups[t].push(v);
+            });
+
+            var groupLabels = {
+                court: L.voucherCourts,
+                coach: L.voucherCoaches
+            };
+            var groupIcons = {
+                court: '&#127934;',
+                coach: '&#127947;'
+            };
+
             var html = '';
             if (totalSaved > 0) {
                 html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:12px 16px;background:rgba(204,255,0,0.06);border-radius:10px;border:1px solid rgba(204,255,0,0.12);">' +
@@ -1846,40 +1902,60 @@
                 '</div>';
             }
 
-            html += '<div class="db-invite-list">';
-            items.forEach(function(v) {
-                var statusClass = v.status === 'active' ? 'db-status-active' : (v.status === 'used' ? 'db-status-approved' : 'db-status-rejected');
-                var statusLabel = v.status === 'active' ? L.voucherActive : (v.status === 'used' ? L.voucherUsed : L.voucherExpired);
-                var dateStr = new Date(v.created_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
-
-                var expiresStr = '';
-                if (v.expires_at) {
-                    expiresStr = new Date(v.expires_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-                }
-
-                html += '<div class="db-invite-card" style="padding:14px 16px;">' +
-                    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">' +
-                        '<div style="flex:1;">' +
-                            '<div style="font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:4px;">' + dbEsc(v.entity_name) + '</div>' +
-                            '<div style="font-size:0.8rem;color:rgba(255,255,255,0.5);">' + dbEsc(v.service_name) + ' &middot; -' + v.discount_percent + '%</div>' +
-                            '<div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:4px;">' + dateStr +
-                                (expiresStr ? ' &middot; ' + L.voucherExpires + ': ' + expiresStr : '') +
-                            '</div>' +
-                        '</div>' +
-                        '<div style="display:flex;align-items:center;gap:8px;">' +
-                            '<span class="' + statusClass + '" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;">' + statusLabel + '</span>';
-                if (v.status === 'active') {
-                    html += '<button class="db-voucher-qr-btn" data-token="' + v.qr_token + '" style="background:var(--accent);color:#000;border:none;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">' + L.voucherShowQR + '</button>';
-                }
-                html += '</div></div></div>';
+            var groupOrder = ['court', 'coach'];
+            // Add any other types not in groupOrder
+            Object.keys(groups).forEach(function(t) {
+                if (groupOrder.indexOf(t) === -1) groupOrder.push(t);
             });
-            html += '</div>';
+
+            groupOrder.forEach(function(type) {
+                var arr = groups[type];
+                if (!arr || !arr.length) return;
+
+                var label = groupLabels[type] || type;
+                var icon = groupIcons[type] || '&#127903;';
+                var groupId = 'dbVG_' + type;
+
+                html += '<div style="margin-bottom:20px;">' +
+                    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">' +
+                        '<span style="font-size:1.1rem;">' + icon + '</span>' +
+                        '<span style="font-weight:700;font-size:0.95rem;color:rgba(255,255,255,0.85);">' + label + '</span>' +
+                        '<span style="font-size:0.78rem;color:rgba(255,255,255,0.35);margin-left:4px;">(' + arr.length + ')</span>' +
+                    '</div>' +
+                    '<div class="db-invite-list" id="' + groupId + '">';
+
+                arr.forEach(function(v, idx) {
+                    html += renderVoucherItem(v, idx >= VOUCHER_PREVIEW ? type : null);
+                });
+
+                html += '</div>';
+
+                if (arr.length > VOUCHER_PREVIEW) {
+                    html += '<button class="db-voucher-show-all" data-vg-type="' + type + '" style="display:block;width:100%;margin-top:8px;padding:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:var(--accent);font-size:0.82rem;font-weight:600;cursor:pointer;transition:background 0.2s;">' +
+                        L.voucherShowAll + ' (' + (arr.length - VOUCHER_PREVIEW) + ')' +
+                    '</button>';
+                }
+
+                html += '</div>';
+            });
+
             card.innerHTML = html;
 
             // QR button clicks
             card.querySelectorAll('.db-voucher-qr-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     showDashboardVoucherQR(this.dataset.token);
+                });
+            });
+
+            // Show all buttons
+            card.querySelectorAll('.db-voucher-show-all').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var type = this.dataset.vgType;
+                    document.querySelectorAll('[data-vg-hidden="' + type + '"]').forEach(function(el) {
+                        el.style.display = '';
+                    });
+                    this.remove();
                 });
             });
         } catch (e) {
