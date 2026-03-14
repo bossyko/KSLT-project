@@ -308,7 +308,7 @@ function getFicSectionsPublic(drawSize, isEn) {
 // SINGLE ELIMINATION BRACKET
 // ========================================
 
-function renderSingleEliminationBracket(tournament) {
+function renderSingleEliminationBracket(tournament, predOpts) {
     var container = document.getElementById('bracketContainer');
     if (!container) return;
 
@@ -321,7 +321,7 @@ function renderSingleEliminationBracket(tournament) {
             '<div class="td-bracket-matches">';
 
         round.matches.forEach(function(match) {
-            html += renderMatch(tournament, match);
+            html += renderMatch(tournament, match, predOpts);
         });
 
         html += '</div></div>';
@@ -347,7 +347,7 @@ function renderSingleEliminationBracket(tournament) {
     container.innerHTML = html;
 }
 
-function renderMatch(tournament, match) {
+function renderMatch(tournament, match, predOpts) {
     var p1 = getPlayer(tournament, match.player1Id);
     var p2 = getPlayer(tournament, match.player2Id);
     var scores = match.score ? match.score.split(' ') : [];
@@ -385,6 +385,34 @@ function renderMatch(tournament, match) {
         });
     }
     html += '</div>';
+
+    // Prediction bar (non-completed matches with two known players)
+    if (predOpts && match.status !== 'completed' && match.player1Id && match.player2Id) {
+        var p1Data = predOpts.playersMap[match.player1Id];
+        var p2Data = predOpts.playersMap[match.player2Id];
+        if (p1Data && p2Data && (p1Data.points || p2Data.points)) {
+            var pred = calculatePrediction(p1Data, p2Data, predOpts.h2hMap);
+            var isLeftFav = pred.p1Pct >= pred.p2Pct;
+            // Short surname for bar label
+            var p1Short = (p1.name || '').split(' ').pop() || '';
+            var p2Short = (p2.name || '').split(' ').pop() || '';
+            html += '<div class="td-prediction">' +
+                '<div class="td-pred-names">' +
+                    '<span class="td-pred-name">' + esc(p1Short) + '</span>' +
+                    '<span class="td-pred-name">' + esc(p2Short) + '</span>' +
+                '</div>' +
+                '<div class="td-pred-bar" title="' + esc(predOpts.tooltip) + '">' +
+                    '<div class="td-pred-fill ' + (isLeftFav ? 'td-pred-fav' : 'td-pred-dog') + '" data-width="' + pred.p1Pct + '%" style="width:0">' +
+                        '<span class="td-pred-pct">' + pred.p1Pct + '%</span>' +
+                    '</div>' +
+                    '<div class="td-pred-fill ' + (isLeftFav ? 'td-pred-dog' : 'td-pred-fav') + '" data-width="' + pred.p2Pct + '%" style="width:0">' +
+                        '<span class="td-pred-pct">' + pred.p2Pct + '%</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="td-pred-label">' + predOpts.label + '</div>' +
+            '</div>';
+        }
+    }
 
     html += '</div>';
     return html;
@@ -746,6 +774,100 @@ function updateLangLinks(tournamentId) {
 // ========================================
 
 // ========================================
+// PREDICTION ENGINE
+// ========================================
+
+function buildH2HMap(h2hRows) {
+    var map = {};
+    h2hRows.forEach(function(r) {
+        var a = r.player1_id < r.player2_id ? r.player1_id : r.player2_id;
+        var b = r.player1_id < r.player2_id ? r.player2_id : r.player1_id;
+        var key = a + ':' + b;
+        if (!map[key]) map[key] = {};
+        if (!map[key][r.winner_id]) map[key][r.winner_id] = 0;
+        map[key][r.winner_id]++;
+    });
+    return map;
+}
+
+function getH2H(h2hMap, idA, idB) {
+    var a = idA < idB ? idA : idB;
+    var b = idA < idB ? idB : idA;
+    var rec = h2hMap[a + ':' + b];
+    if (!rec) return { winsA: 0, winsB: 0 };
+    return { winsA: rec[idA] || 0, winsB: rec[idB] || 0 };
+}
+
+function getStreak(form) {
+    if (!form || !form.length) return 0;
+    var first = form[0];
+    if (first !== 'W' && first !== 'L') return 0;
+    var count = 0;
+    for (var i = 0; i < form.length; i++) {
+        if (form[i] === first) count++;
+        else break;
+    }
+    return first === 'W' ? count : -count;
+}
+
+function calculatePrediction(p1Data, p2Data, h2hMap) {
+    var rA = p1Data.points || 0;
+    var rB = p2Data.points || 0;
+
+    // 1. Elo expected (60%)
+    var eloA = 1 / (1 + Math.pow(10, (rB - rA) / 400));
+
+    // 2. Win Rate (20%)
+    var wA = p1Data.wins || 0, lA = p1Data.losses || 0;
+    var wB = p2Data.wins || 0, lB = p2Data.losses || 0;
+    var wrA = (wA + lA) > 0 ? wA / (wA + lA) : 0.5;
+    var wrB = (wB + lB) > 0 ? wB / (wB + lB) : 0.5;
+    var wrExp = (wrA + wrB) > 0 ? wrA / (wrA + wrB) : 0.5;
+
+    // 3. Streak (10%)
+    var sA = getStreak(p1Data.form);
+    var sB = getStreak(p2Data.form);
+    var streakBonus = 0;
+    streakBonus += Math.max(-0.10, Math.min(0.10, sA * 0.03));
+    streakBonus -= Math.max(-0.10, Math.min(0.10, sB * 0.03));
+    var streakA = 0.5 + streakBonus;
+
+    // 4. H2H (10%)
+    var h2h = getH2H(h2hMap, p1Data.id, p2Data.id);
+    var h2hTotal = h2h.winsA + h2h.winsB;
+    var h2hA = 0.5;
+    if (h2hTotal > 0) {
+        var diff = (h2h.winsA - h2h.winsB) / h2hTotal;
+        h2hA = 0.5 + Math.max(-0.05, Math.min(0.05, diff * 0.1));
+    }
+
+    // 5. Composite
+    var finalA = 0.6 * eloA + 0.2 * wrExp + 0.1 * streakA + 0.1 * h2hA;
+
+    // 6. Clamp
+    var pctA = Math.round(Math.max(5, Math.min(95, finalA * 100)));
+    return { p1Pct: pctA, p2Pct: 100 - pctA };
+}
+
+function initPredictionAnimations() {
+    var bars = document.querySelectorAll('.td-prediction');
+    if (!bars.length) return;
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                var fills = entry.target.querySelectorAll('.td-pred-fill');
+                fills.forEach(function(fill) {
+                    fill.style.width = fill.getAttribute('data-width');
+                });
+                entry.target.classList.add('animated');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.3 });
+    bars.forEach(function(bar) { observer.observe(bar); });
+}
+
+// ========================================
 // SUPABASE TOURNAMENT SUPPORT
 // ========================================
 
@@ -790,14 +912,21 @@ function loadFromSupabase(client, id) {
                 playerIds = playerIds.filter(function(v, i) { return playerIds.indexOf(v) === i; });
 
                 if (playerIds.length > 0) {
-                    client.from('players').select('id, name, name_en, photo, points, country, category_id').in('id', playerIds)
-                        .then(function(plRes) {
-                            var playersMap = {};
-                            (plRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
-                            renderSupabaseTournament(tournament, matches, registrations, playersMap, courtData);
-                        });
+                    var playersPromise = client.from('players').select('id, name, name_en, photo, points, country, category_id, wins, losses, form').in('id', playerIds);
+                    var h2hPromise = client.from('matches')
+                        .select('player1_id, player2_id, winner_id')
+                        .not('winner_id', 'is', null)
+                        .in('player1_id', playerIds)
+                        .in('player2_id', playerIds);
+
+                    Promise.all([playersPromise, h2hPromise]).then(function(res) {
+                        var playersMap = {};
+                        (res[0].data || []).forEach(function(p) { playersMap[p.id] = p; });
+                        var h2hMap = buildH2HMap(res[1].data || []);
+                        renderSupabaseTournament(tournament, matches, registrations, playersMap, courtData, h2hMap);
+                    });
                 } else {
-                    renderSupabaseTournament(tournament, matches, registrations, {}, courtData);
+                    renderSupabaseTournament(tournament, matches, registrations, {}, courtData, {});
                 }
             });
         })
@@ -817,7 +946,8 @@ function computeStatus(regStart, regEnd, dateStart, dateEnd) {
     return 'upcoming';
 }
 
-function renderSupabaseTournament(t, matches, registrations, playersMap, courtData) {
+function renderSupabaseTournament(t, matches, registrations, playersMap, courtData, h2hMap) {
+    h2hMap = h2hMap || {};
     matches = matches || [];
     registrations = registrations || [];
     playersMap = playersMap || {};
@@ -905,6 +1035,14 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         noParticipants: 'Участники будут объявлены позже',
         noResults: 'Результаты будут доступны после завершения турнира'
     });
+
+    // Prediction options for renderMatch
+    var predOpts = {
+        playersMap: playersMap,
+        h2hMap: h2hMap,
+        label: isEn ? 'KSLT AI Prediction' : (isKg ? 'KSLT AI Болжолу' : 'Прогноз KSLT AI'),
+        tooltip: isEn ? 'Based on rating, form, and head-to-head' : (isKg ? 'Рейтинг, форма жана жолугушуулар тарыхы' : 'На основе рейтинга, формы и истории встреч')
+    };
 
     // ---- Render Hero ----
     var hero = document.getElementById('tournamentHero');
@@ -1055,7 +1193,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         bHtml += '<div class="td-bracket-round">';
                         bHtml += '<div class="td-round-title">' + round.name + '</div>';
                         bHtml += '<div class="td-bracket-matches">';
-                        round.matches.forEach(function(match) { bHtml += renderMatch(plTournObj, match); });
+                        round.matches.forEach(function(match) { bHtml += renderMatch(plTournObj, match, predOpts); });
                         bHtml += '</div>';
                         bHtml += '</div>';
                         if (ri < plRounds.length - 1) {
@@ -1078,7 +1216,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         bHtml += renderMatch(plTournObj, {
                             matchId: thirdMatch.id, player1Id: thirdMatch.player1_id, player2Id: thirdMatch.player2_id,
                             score: thirdMatch.score || '', winnerId: thirdMatch.winner_id, status: thirdMatch.status || 'upcoming'
-                        });
+                        }, predOpts);
                         bHtml += '</div>';
                     }
 
@@ -1236,7 +1374,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         bHtml += renderMatch(ficTournObj, {
                             matchId: m.id, player1Id: m.player1_id, player2Id: m.player2_id,
                             score: m.score || '', winnerId: m.winner_id, status: m.status || 'upcoming'
-                        });
+                        }, predOpts);
                     });
                     bHtml += '</div></div>';
 
@@ -1268,7 +1406,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         bHtml += renderMatch(ficTournObj, {
                             matchId: pm.id, player1Id: pm.player1_id, player2Id: pm.player2_id,
                             score: pm.score || '', winnerId: pm.winner_id, status: pm.status || 'upcoming'
-                        });
+                        }, predOpts);
                         bHtml += '</div>';
                     }
                 }
@@ -1367,7 +1505,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             // Override getPlayer for this context
             var origGetPlayer = window.getPlayer || getPlayer;
 
-            renderSingleEliminationBracket(tournamentObj);
+            renderSingleEliminationBracket(tournamentObj, predOpts);
             }
         } else {
             var desc = isEn ? (t.description_en || t.description || '') : (t.description || '');
@@ -1604,6 +1742,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
     // Init tabs navigation
     initTabsNavigation();
+
+    // Init prediction bar animations
+    initPredictionAnimations();
 }
 
 // ========================================

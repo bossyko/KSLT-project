@@ -1509,3 +1509,92 @@
     }
 }
 
+/* === PREDICTION BAR === */
+.td-prediction {
+    padding: 6px 8px 4px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.td-pred-names {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+    letter-spacing: 0.2px;
+}
+
+.td-pred-bar {
+    display: flex;
+    height: 18px;
+    border-radius: 9px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+    cursor: help;
+}
+
+.td-pred-fill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.td-pred-fav {
+    background: linear-gradient(90deg, var(--accent), rgba(204,255,0,0.7));
+    color: #000;
+}
+
+.td-pred-dog {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-muted);
+}
+
+.td-pred-pct {
+    white-space: nowrap;
+}
+
+.td-pred-label {
+    text-align: center;
+    font-size: 0.58rem;
+    color: var(--text-dim);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+
+/* Hide pct text when bar is too narrow */
+.td-pred-fill[data-width="5%"] .td-pred-pct,
+.td-pred-fill[data-width="6%"] .td-pred-pct,
+.td-pred-fill[data-width="7%"] .td-pred-pct,
+.td-pred-fill[data-width="8%"] .td-pred-pct,
+.td-pred-fill[data-width="9%"] .td-pred-pct,
+.td-pred-fill[data-width="10%"] .td-pred-pct,
+.td-pred-fill[data-width="11%"] .td-pred-pct,
+.td-pred-fill[data-width="12%"] .td-pred-pct {
+    font-size: 0;
+}
+
+/* Responsive prediction */
+@media (max-width: 480px) {
+    .td-prediction {
+        padding: 4px 6px 3px;
+    }
+    .td-pred-bar {
+        height: 14px;
+    }
+    .td-pred-fill {
+        font-size: 0.55rem;
+    }
+    .td-pred-label {
+        font-size: 0.5rem;
+    }
+}
+
