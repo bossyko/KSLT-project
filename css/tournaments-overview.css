@@ -263,12 +263,14 @@
     font-weight: 600;
     padding: 4px 12px;
     border-radius: var(--radius-full);
-    background: rgba(204, 255, 0, 0.15);
+    background: rgba(0, 0, 0, 0.6);
     color: var(--accent);
-    border: 1px solid rgba(204, 255, 0, 0.35);
+    border: 1px solid rgba(204, 255, 0, 0.45);
     margin-bottom: 6px;
     margin-left: 8px;
     vertical-align: middle;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .to-featured-content h3 {
@@ -339,23 +341,43 @@
 }
 
 .to-featured-status.open {
-    background: rgba(204, 255, 0, 0.15);
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(204, 255, 0, 0.5);
     color: var(--accent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .to-featured-status.soon {
-    background: rgba(255, 159, 67, 0.15);
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 159, 67, 0.5);
     color: #FF9F43;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .to-featured-status.ongoing {
-    background: rgba(0, 163, 255, 0.15);
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(0, 163, 255, 0.5);
     color: #00A3FF;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .to-featured-status.closed {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.to-featured-status.past {
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     color: var(--text-muted);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .to-featured-link {
@@ -423,9 +445,9 @@
     font-weight: 700;
     padding: 2px 8px;
     border-radius: var(--radius-full);
-    background: rgba(204, 255, 0, 0.12);
+    background: rgba(0, 0, 0, 0.6);
     color: var(--accent);
-    border: 1px solid rgba(204, 255, 0, 0.25);
+    border: 1px solid rgba(204, 255, 0, 0.4);
     white-space: nowrap;
     line-height: 1.3;
 }
@@ -515,22 +537,32 @@
 }
 
 .to-compact-status.open {
-    background: rgba(204, 255, 0, 0.12);
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(204, 255, 0, 0.4);
     color: var(--accent);
 }
 
 .to-compact-status.soon {
-    background: rgba(255, 159, 67, 0.12);
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 159, 67, 0.4);
     color: #FF9F43;
 }
 
 .to-compact-status.ongoing {
-    background: rgba(0, 163, 255, 0.12);
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(0, 163, 255, 0.4);
     color: #00A3FF;
 }
 
 .to-compact-status.closed {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-secondary);
+}
+
+.to-compact-status.past {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     color: var(--text-muted);
 }
 
@@ -676,4 +708,144 @@
         padding: 8px 20px;
         font-size: 0.8rem;
     }
+}
+
+/* === COMPACT COUNTDOWN (cards) === */
+.to-cd {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(220,38,38,0.9), rgba(185,28,28,0.95));
+    border: 1px solid rgba(255,100,100,0.3);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    line-height: 1;
+    position: relative;
+    overflow: hidden;
+    animation: toCdAppear 0.4s ease-out;
+    box-shadow: 0 2px 12px rgba(220,38,38,0.25);
+}
+
+/* Shimmer glow effect */
+.to-cd::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    animation: toCdShimmer 3s ease-in-out infinite;
+}
+
+@keyframes toCdShimmer {
+    0%, 100% { left: -100%; }
+    50% { left: 150%; }
+}
+
+@keyframes toCdAppear {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.to-cd-unit {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1px;
+    position: relative;
+    z-index: 1;
+}
+
+.to-cd-unit small {
+    font-size: 0.58rem;
+    font-weight: 600;
+    opacity: 0.75;
+    margin-right: 3px;
+}
+
+.to-cd-unit:last-child small {
+    margin-right: 0;
+}
+
+/* Urgent: < 1 hour — intense pulse */
+.to-cd-urgent {
+    background: linear-gradient(135deg, rgba(239,68,68,0.95), rgba(220,38,38,1));
+    box-shadow: 0 2px 16px rgba(239,68,68,0.4);
+    animation: toCdAppear 0.4s ease-out, toCdUrgentPulse 2s ease-in-out infinite;
+}
+
+@keyframes toCdUrgentPulse {
+    0%, 100% { box-shadow: 0 2px 12px rgba(239,68,68,0.3); }
+    50% { box-shadow: 0 2px 24px rgba(239,68,68,0.6); }
+}
+
+/* Live indicator — green with sonar */
+.to-cd-live {
+    background: linear-gradient(135deg, rgba(22,163,74,0.9), rgba(21,128,61,0.95));
+    border-color: rgba(74,222,128,0.3);
+    color: #fff;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 2px 12px rgba(22,163,74,0.3);
+}
+
+.to-cd-live::after {
+    display: none;
+}
+
+.to-cd-dot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    z-index: 1;
+}
+
+/* Sonar ring effect */
+.to-cd-dot::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid rgba(74,222,128,0.6);
+    animation: toCdSonar 2s ease-out infinite;
+}
+
+@keyframes toCdSonar {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Countdown prefix label */
+.to-cd-label {
+    font-size: 0.56rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    opacity: 0.85;
+    position: relative;
+    z-index: 1;
+    margin-right: 4px;
+}
+
+/* Positioning in featured card */
+.to-featured-content > .to-cd {
+    margin: 6px 0 2px;
+}
+
+/* Positioning in compact card */
+.to-compact-right .to-cd {
+    margin-top: 6px;
+}
+
+/* Positioning in tournament-card (category pages) */
+.tournament-card > .to-cd {
+    margin: 0 var(--space-md);
 }

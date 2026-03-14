@@ -96,11 +96,83 @@
     var arrowSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
     var emptySvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
 
+    // Countdown helpers
+    var _countdownInterval = null;
+    var CL = isEn
+        ? { days: 'd', hours: 'h', min: 'm', sec: 's', live: 'LIVE NOW', prefix: 'STARTS IN' }
+        : (isKg
+            ? { days: 'к', hours: 'с', min: 'м', sec: 'с', live: 'ТҮЗ ЭФИР', prefix: 'БАШТАЛАТ' }
+            : { days: 'д', hours: 'ч', min: 'м', sec: 'с', live: 'ИДЁТ СЕЙЧАС', prefix: 'СТАРТ ЧЕРЕЗ' });
+
+    function getCountdownHtml(dateSort, startTime) {
+        if (!dateSort) return '';
+        var timeStr = startTime || '00:00';
+        var target = new Date(dateSort + 'T' + timeStr + ':00');
+        var now = new Date();
+        var diff = target.getTime() - now.getTime();
+        if (diff <= 0) return '<span class="to-cd to-cd-live"><span class="to-cd-dot"></span>' + CL.live + '</span>';
+        if (diff > 48 * 60 * 60 * 1000) return '';
+        var d = Math.floor(diff / (1000*60*60*24));
+        var h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+        var m = Math.floor((diff % (1000*60*60)) / (1000*60));
+        var s = Math.floor((diff % (1000*60)) / 1000);
+        var urgent = diff < 60 * 60 * 1000 ? ' to-cd-urgent' : '';
+        var parts = '<span class="to-cd-label">' + CL.prefix + '</span>';
+        if (d > 0) parts += '<span class="to-cd-unit">' + d + '<small>' + CL.days + '</small></span>';
+        parts += '<span class="to-cd-unit">' + String(h).padStart(2,'0') + '<small>' + CL.hours + '</small></span>';
+        parts += '<span class="to-cd-unit">' + String(m).padStart(2,'0') + '<small>' + CL.min + '</small></span>';
+        parts += '<span class="to-cd-unit">' + String(s).padStart(2,'0') + '<small>' + CL.sec + '</small></span>';
+        return '<span class="to-cd' + urgent + '" data-cd-date="' + dateSort + '" data-cd-time="' + timeStr + '">' + parts + '</span>';
+    }
+
+    function updateCountdowns() {
+        document.querySelectorAll('.to-cd[data-cd-date]').forEach(function(el) {
+            var dateSort = el.dataset.cdDate;
+            var timeStr = el.dataset.cdTime || '00:00';
+            var target = new Date(dateSort + 'T' + timeStr + ':00');
+            var now = new Date();
+            var diff = target.getTime() - now.getTime();
+            if (diff <= 0) {
+                el.className = 'to-cd to-cd-live';
+                el.innerHTML = '<span class="to-cd-dot"></span>' + CL.live;
+                return;
+            }
+            var d = Math.floor(diff / (1000*60*60*24));
+            var h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+            var m = Math.floor((diff % (1000*60*60)) / (1000*60));
+            var s = Math.floor((diff % (1000*60)) / 1000);
+            if (diff < 60 * 60 * 1000) el.classList.add('to-cd-urgent'); else el.classList.remove('to-cd-urgent');
+            var parts = '<span class="to-cd-label">' + CL.prefix + '</span>';
+            if (d > 0) parts += '<span class="to-cd-unit">' + d + '<small>' + CL.days + '</small></span>';
+            parts += '<span class="to-cd-unit">' + String(h).padStart(2,'0') + '<small>' + CL.hours + '</small></span>';
+            parts += '<span class="to-cd-unit">' + String(m).padStart(2,'0') + '<small>' + CL.min + '</small></span>';
+            parts += '<span class="to-cd-unit">' + String(s).padStart(2,'0') + '<small>' + CL.sec + '</small></span>';
+            el.innerHTML = parts;
+        });
+    }
+
+    function startCountdownTimer() {
+        if (_countdownInterval) clearInterval(_countdownInterval);
+        if (document.querySelectorAll('.to-cd[data-cd-date]').length > 0) {
+            _countdownInterval = setInterval(updateCountdowns, 1000);
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', init);
 
     function init() {
         renderHero();
         loadTournaments();
+        trackPageView('tournaments-overview');
+    }
+
+    function trackPageView(pageName) {
+        if (!client) return;
+        var key = 'kslt_pv_' + pageName;
+        if (sessionStorage.getItem(key)) return;
+        client.rpc('increment_page_view', { p_page_name: pageName }).then(function(res) {
+            if (!res.error) sessionStorage.setItem(key, '1');
+        });
     }
 
     function renderHero() {
@@ -226,6 +298,7 @@
                     : '',
                 regLine: regLine,
                 image: t.image_url || t.image || '',
+                _startTime: t.start_time || null,
                 _fromSupabase: true
             });
         });
@@ -247,10 +320,11 @@
             _allGrouped[key] = map[key].slice();
         });
 
-        // Limit to 4 per category for default view
+        // Limit to 4 per category for default view (exclude past)
         var sliced = {};
         Object.keys(map).forEach(function(key) {
-            sliced[key] = map[key].slice(0, 4);
+            var active = map[key].filter(function(t) { return t.status !== 'past'; });
+            sliced[key] = active.slice(0, 4);
         });
 
         return sliced;
@@ -307,6 +381,7 @@
         container.innerHTML = html;
         attachEvents();
         initSearch();
+        startCountdownTimer();
     }
 
     function renderFeatured(t, bgImage, catKey) {
@@ -321,6 +396,7 @@
                     '<span class="to-featured-date"><span class="to-day">' + t.date.day + '</span><span class="to-month">' + t.date.month + '</span></span>' +
                     (t.genderLabel ? '<span class="to-gender-badge">' + t.genderLabel + '</span>' : '') +
                 '</div>' +
+                getCountdownHtml(t._dateSort, t._startTime) +
                 '<span class="to-featured-status ' + t.status + '">' + t.statusText + '</span>' +
                 '<h3>' + t.name + '</h3>' +
                 '<div class="to-featured-meta">' +
@@ -358,6 +434,7 @@
             '</div>' +
             '<div class="to-compact-right">' +
                 '<span class="to-compact-status ' + t.status + '">' + t.statusText + '</span>' +
+                getCountdownHtml(t._dateSort, t._startTime) +
             '</div>' +
         '</div>';
     }
@@ -410,11 +487,11 @@
                     renderCategories(_grouped);
                     return;
                 }
-                // Filter ALL tournaments (not sliced) by name
+                // Filter ALL tournaments (not sliced) by name, exclude past
                 var filtered = {};
                 CATEGORIES.forEach(function(cat) {
                     var items = (_allGrouped[cat.key] || []).filter(function(item) {
-                        return item.name.toLowerCase().indexOf(query) !== -1;
+                        return item.status !== 'past' && item.name.toLowerCase().indexOf(query) !== -1;
                     });
                     if (items.length > 0) filtered[cat.key] = items;
                 });
@@ -462,6 +539,7 @@
 
         container.innerHTML = html;
         attachEvents();
+        startCountdownTimer();
     }
 
 })();

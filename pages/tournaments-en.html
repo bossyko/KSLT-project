@@ -272,18 +272,20 @@
             </div>
         </section>
 
+        <!-- TOURNAMENTS HEADER (sticky) -->
+        <div class="trn-sticky-header" id="trnStickyHeader">
+            <h2>Upcoming Tournaments</h2>
+            <div class="tournament-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="open">Registration Open</button>
+                <button class="filter-btn" data-filter="soon">Upcoming</button>
+                <button class="filter-btn" data-filter="past">Completed</button>
+                <input type="text" class="tournament-search-input" id="tournamentSearch" placeholder="Search..." autocomplete="off">
+            </div>
+        </div>
+
         <!-- UPCOMING TOURNAMENTS -->
         <section class="section-tournaments" id="upcoming">
-            <div class="section-header">
-                <h2>Upcoming Tournaments</h2>
-                <div class="tournament-filters">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="open">Registration Open</button>
-                    <button class="filter-btn" data-filter="soon">Upcoming</button>
-                    <button class="filter-btn" data-filter="past">Completed</button>
-                    <input type="text" class="tournament-search-input" id="tournamentSearch" placeholder="Search..." autocomplete="off">
-                </div>
-            </div>
             <div class="tournaments-grid" id="tournamentsGrid">
                 <!-- Tournaments loaded dynamically -->
             </div>

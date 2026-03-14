@@ -193,7 +193,7 @@
                 buildActivityTableHtml('adDashRecentUsers', L.actRecentRegistrations, 'neutral',
                     [L.thUser, L.thEmail, L.thRole, L.thDate], 'users') +
                 buildActivityTableHtml('adDashRecentTournaments', L.actRecentTournaments, 'neutral',
-                    [L.thTournament, L.thDateStart, L.thStatus], 'tournaments') +
+                    [L.thTournament, L.thDateStart, L.thStatus, '&#128065;'], 'tournaments') +
                 buildActivityTableHtml('adDashRecentNews', L.actRecentNews, 'neutral',
                     [L.thArticle, L.thCategory, L.thExecutor, L.thStatus, L.thPubDate, '&#128065;'], 'content') +
             '</div>';
@@ -288,7 +288,7 @@
                 .order('registered_at', { ascending: false }).limit(10),                                                               // [13] pending regs list
             A.client.from('profiles').select('id,full_name,email,role,avatar_url,created_at')
                 .order('created_at', { ascending: false }).limit(10),                                                                  // [14] recent users
-            A.client.from('tournaments').select('id, title, date_start, status')
+            A.client.from('tournaments').select('id, title, date_start, status, view_count')
                 .order('date_start', { ascending: false }).limit(10),                                                                  // [15] recent tournaments
             A.client.from('news').select('id, title, category, executor, published_at, created_at, view_count')
                 .order('created_at', { ascending: false }).limit(10)                                                                    // [16] recent news
@@ -391,6 +391,7 @@
                 '<td style="font-weight:500;color:var(--text-primary);">' + A.esc(t.title || L.noData) + '</td>' +
                 '<td>' + A.fmtDate(t.date_start) + '</td>' +
                 '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
+                '<td style="text-align:center;">' + (t.view_count || 0) + '</td>' +
             '</tr>';
         }, L.noRecentTournaments);
 

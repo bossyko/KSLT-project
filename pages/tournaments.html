@@ -272,18 +272,20 @@
             </div>
         </section>
 
+        <!-- TOURNAMENTS HEADER (sticky) -->
+        <div class="trn-sticky-header" id="trnStickyHeader">
+            <h2>Предстоящие турниры</h2>
+            <div class="tournament-filters">
+                <button class="filter-btn active" data-filter="all">Все</button>
+                <button class="filter-btn" data-filter="open">Регистрация открыта</button>
+                <button class="filter-btn" data-filter="soon">Предстоящие</button>
+                <button class="filter-btn" data-filter="past">Завершённые</button>
+                <input type="text" class="tournament-search-input" id="tournamentSearch" placeholder="Поиск..." autocomplete="off">
+            </div>
+        </div>
+
         <!-- UPCOMING TOURNAMENTS -->
         <section class="section-tournaments" id="upcoming">
-            <div class="section-header">
-                <h2>Предстоящие турниры</h2>
-                <div class="tournament-filters">
-                    <button class="filter-btn active" data-filter="all">Все</button>
-                    <button class="filter-btn" data-filter="open">Регистрация открыта</button>
-                    <button class="filter-btn" data-filter="soon">Предстоящие</button>
-                    <button class="filter-btn" data-filter="past">Завершённые</button>
-                    <input type="text" class="tournament-search-input" id="tournamentSearch" placeholder="Поиск..." autocomplete="off">
-                </div>
-            </div>
             <div class="tournaments-grid" id="tournamentsGrid">
                 <!-- Tournaments loaded dynamically -->
             </div>

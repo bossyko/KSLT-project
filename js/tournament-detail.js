@@ -871,6 +871,15 @@ function initPredictionAnimations() {
 // SUPABASE TOURNAMENT SUPPORT
 // ========================================
 
+function incrementTournamentView(client, id) {
+    if (!id) return;
+    var key = 'kslt_tview_' + id;
+    if (localStorage.getItem(key)) return;
+    client.rpc('increment_tournament_view', { p_tournament_id: id }).then(function(res) {
+        if (!res.error) localStorage.setItem(key, '1');
+    });
+}
+
 function loadFromSupabase(client, id) {
     client.from('tournaments').select('*').eq('id', id).single()
         .then(function(result) {
@@ -879,6 +888,7 @@ function loadFromSupabase(client, id) {
                 return;
             }
             var tournament = result.data;
+            incrementTournamentView(client, id);
 
             // Load matches, registrations, and players in parallel
             var matchesPromise = client.from('matches')
@@ -1023,17 +1033,29 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         format: 'Format', participants: 'Participants', prizeFund: 'Prize Fund',
         description: 'About Tournament', scheduleSoon: 'Schedule will be published soon',
         noParticipants: 'Participants will be announced soon',
-        noResults: 'Results will be available after the tournament ends'
+        noResults: 'Results will be available after the tournament ends',
+        countdownTitle: 'TOURNAMENT STARTS IN',
+        countdownDays: 'days', countdownHours: 'hours', countdownMin: 'min', countdownSec: 'sec',
+        tournamentLive: 'Tournament in progress',
+        regClosingSoon: 'Registration closes in less than 24 hours!'
     } : (isKg ? {
         format: 'Формат', participants: 'Катышуучулар', prizeFund: 'Сыйлык фонду',
         description: 'Мелдеш жөнүндө', scheduleSoon: 'Тартип кийинчерээк жарыяланат',
         noParticipants: 'Катышуучулар кийинчерээк жарыяланат',
-        noResults: 'Жыйынтыктар мелдеш аяктагандан кийин жеткиликтүү болот'
+        noResults: 'Жыйынтыктар мелдеш аяктагандан кийин жеткиликтүү болот',
+        countdownTitle: 'МЕЛДЕШ БАШТАЛГАНГА',
+        countdownDays: 'күн', countdownHours: 'саат', countdownMin: 'мүн', countdownSec: 'сек',
+        tournamentLive: 'Мелдеш жүрүп жатат',
+        regClosingSoon: 'Каттоо 24 сааттан кийин жабылат!'
     } : {
         format: 'Формат', participants: 'Участники', prizeFund: 'Призовой фонд',
         description: 'О турнире', scheduleSoon: 'Расписание будет опубликовано позже',
         noParticipants: 'Участники будут объявлены позже',
-        noResults: 'Результаты будут доступны после завершения турнира'
+        noResults: 'Результаты будут доступны после завершения турнира',
+        countdownTitle: 'ТУРНИР НАЧИНАЕТСЯ ЧЕРЕЗ',
+        countdownDays: 'дней', countdownHours: 'часов', countdownMin: 'минут', countdownSec: 'секунд',
+        tournamentLive: 'Турнир идёт',
+        regClosingSoon: 'Регистрация закроется менее чем через 24 часа!'
     });
 
     // Prediction options for renderMatch
@@ -1092,8 +1114,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         '<span class="hero-stat-label">' + L.format + '</span>' +
                     '</div>' +
                 '</div>' +
+                '<div id="tdCountdown"></div>' +
             '</div>';
     }
+
+    // ---- Countdown Timer ----
+    initCountdown(t);
 
     // ---- Description section ----
     var descContent = document.getElementById('descriptionContent');
@@ -1941,6 +1967,152 @@ function renderRegistrationButton(tournament, registrations, isEn) {
             });
         });
     });
+}
+
+// ========================================
+// COUNTDOWN TIMER
+// ========================================
+
+function initCountdown(t) {
+    var container = document.getElementById('tdCountdown');
+    if (!container) return;
+
+    var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var CL = isEn ? {
+        title: 'TOURNAMENT STARTS IN',
+        days: 'days', hours: 'hours', min: 'min', sec: 'sec',
+        live: 'Tournament in progress',
+        regClosing: 'Registration closes in less than 24 hours!'
+    } : (isKg ? {
+        title: 'МЕЛДЕШ БАШТАЛГАНГА',
+        days: 'күн', hours: 'саат', min: 'мүн', sec: 'сек',
+        live: 'Мелдеш жүрүп жатат',
+        regClosing: 'Каттоо 24 сааттан кийин жабылат!'
+    } : {
+        title: 'ТУРНИР НАЧИНАЕТСЯ ЧЕРЕЗ',
+        days: 'дней', hours: 'часов', min: 'минут', sec: 'секунд',
+        live: 'Турнир идёт',
+        regClosing: 'Регистрация закроется менее чем через 24 часа!'
+    });
+
+    // Parse tournament start datetime
+    if (!t.date_start) return;
+    var startStr = t.date_start; // YYYY-MM-DD
+    var timeStr = t.start_time || '00:00'; // HH:MM
+    var startDate = new Date(startStr + 'T' + timeStr + ':00');
+
+    // Parse tournament end date
+    var endDate = t.date_end ? new Date(t.date_end + 'T23:59:59') : null;
+
+    // Parse registration end
+    var regEnd = t.registration_end ? new Date(t.registration_end + 'T23:59:59') : null;
+
+    // Status check
+    var now = new Date();
+    var diff = startDate.getTime() - now.getTime();
+
+    // Tournament already ended
+    if (endDate && now > endDate) return;
+
+    // Tournament in progress (started but not ended)
+    if (diff <= 0) {
+        container.innerHTML =
+            '<div class="td-countdown td-countdown-live">' +
+                '<div class="td-cd-pulse-dot"></div>' +
+                '<span class="td-cd-live-text">' + CL.live + '</span>' +
+            '</div>';
+        return;
+    }
+
+    // Only show countdown if ≤ 48 hours
+    if (diff > 48 * 60 * 60 * 1000) {
+        // Check registration closing warning
+        if (regEnd) {
+            var regDiff = regEnd.getTime() - now.getTime();
+            if (regDiff > 0 && regDiff < 24 * 60 * 60 * 1000) {
+                container.innerHTML =
+                    '<div class="td-countdown td-countdown-reg">' +
+                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ' +
+                        '<span>' + CL.regClosing + '</span>' +
+                    '</div>';
+            }
+        }
+        return;
+    }
+
+    // Render countdown boxes
+    function renderTimer() {
+        var now2 = new Date();
+        var d = startDate.getTime() - now2.getTime();
+
+        if (d <= 0) {
+            clearInterval(interval);
+            container.innerHTML =
+                '<div class="td-countdown td-countdown-live">' +
+                    '<div class="td-cd-pulse-dot"></div>' +
+                    '<span class="td-cd-live-text">' + CL.live + '</span>' +
+                '</div>';
+            return;
+        }
+
+        var days = Math.floor(d / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((d % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var mins = Math.floor((d % (1000 * 60 * 60)) / (1000 * 60));
+        var secs = Math.floor((d % (1000 * 60)) / 1000);
+
+        var isUrgent = d < 10 * 60 * 1000; // < 10 min
+        var isPulse = d < 60 * 60 * 1000;  // < 1 hour
+        var urgentClass = isUrgent ? ' td-cd-urgent' : '';
+        var pulseClass = isPulse ? ' td-cd-pulse' : '';
+
+        var regWarning = '';
+        if (regEnd) {
+            var regDiff2 = regEnd.getTime() - now2.getTime();
+            if (regDiff2 > 0 && regDiff2 < 24 * 60 * 60 * 1000) {
+                regWarning =
+                    '<div class="td-cd-reg-warning">' +
+                        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ' +
+                        CL.regClosing +
+                    '</div>';
+            }
+        }
+
+        var html =
+            '<div class="td-countdown' + pulseClass + '">' +
+                '<div class="td-cd-title">' + CL.title + '</div>' +
+                '<div class="td-cd-boxes">';
+
+        if (days > 0) {
+            html +=
+                    '<div class="td-cd-box' + urgentClass + '">' +
+                        '<span class="td-cd-num">' + days + '</span>' +
+                        '<span class="td-cd-label">' + CL.days + '</span>' +
+                    '</div>';
+        }
+
+        html +=
+                    '<div class="td-cd-box' + urgentClass + '">' +
+                        '<span class="td-cd-num">' + String(hours).padStart(2, '0') + '</span>' +
+                        '<span class="td-cd-label">' + CL.hours + '</span>' +
+                    '</div>' +
+                    '<div class="td-cd-box' + urgentClass + '">' +
+                        '<span class="td-cd-num">' + String(mins).padStart(2, '0') + '</span>' +
+                        '<span class="td-cd-label">' + CL.min + '</span>' +
+                    '</div>' +
+                    '<div class="td-cd-box' + urgentClass + '">' +
+                        '<span class="td-cd-num">' + String(secs).padStart(2, '0') + '</span>' +
+                        '<span class="td-cd-label">' + CL.sec + '</span>' +
+                    '</div>' +
+                '</div>' +
+                regWarning +
+            '</div>';
+
+        container.innerHTML = html;
+    }
+
+    renderTimer();
+    var interval = setInterval(renderTimer, 1000);
 }
 
 // ========================================

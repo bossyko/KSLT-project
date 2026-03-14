@@ -32,12 +32,84 @@
         return str + ' ' + (isEn ? 'som' : 'сом');
     }
 
+    // Countdown helpers
+    var _cdInterval = null;
+    var CL = isEn
+        ? { days: 'd', hours: 'h', min: 'm', sec: 's', live: 'LIVE NOW', prefix: 'STARTS IN' }
+        : (isKg
+            ? { days: 'к', hours: 'с', min: 'м', sec: 'с', live: 'ТҮЗ ЭФИР', prefix: 'БАШТАЛАТ' }
+            : { days: 'д', hours: 'ч', min: 'м', sec: 'с', live: 'ИДЁТ СЕЙЧАС', prefix: 'СТАРТ ЧЕРЕЗ' });
+
+    function getCountdownHtml(dateSort, startTime) {
+        if (!dateSort) return '';
+        var timeStr = startTime || '00:00';
+        var target = new Date(dateSort + 'T' + timeStr + ':00');
+        var now = new Date();
+        var diff = target.getTime() - now.getTime();
+        if (diff <= 0) return '<span class="to-cd to-cd-live"><span class="to-cd-dot"></span>' + CL.live + '</span>';
+        if (diff > 48 * 60 * 60 * 1000) return '';
+        var d = Math.floor(diff / (1000*60*60*24));
+        var h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+        var m = Math.floor((diff % (1000*60*60)) / (1000*60));
+        var s = Math.floor((diff % (1000*60)) / 1000);
+        var urgent = diff < 60 * 60 * 1000 ? ' to-cd-urgent' : '';
+        var parts = '<span class="to-cd-label">' + CL.prefix + '</span>';
+        if (d > 0) parts += '<span class="to-cd-unit">' + d + '<small>' + CL.days + '</small></span>';
+        parts += '<span class="to-cd-unit">' + String(h).padStart(2,'0') + '<small>' + CL.hours + '</small></span>';
+        parts += '<span class="to-cd-unit">' + String(m).padStart(2,'0') + '<small>' + CL.min + '</small></span>';
+        parts += '<span class="to-cd-unit">' + String(s).padStart(2,'0') + '<small>' + CL.sec + '</small></span>';
+        return '<span class="to-cd' + urgent + '" data-cd-date="' + dateSort + '" data-cd-time="' + timeStr + '">' + parts + '</span>';
+    }
+
+    function updateCountdowns() {
+        document.querySelectorAll('.to-cd[data-cd-date]').forEach(function(el) {
+            var dateSort = el.dataset.cdDate;
+            var timeStr = el.dataset.cdTime || '00:00';
+            var target = new Date(dateSort + 'T' + timeStr + ':00');
+            var now = new Date();
+            var diff = target.getTime() - now.getTime();
+            if (diff <= 0) {
+                el.className = 'to-cd to-cd-live';
+                el.innerHTML = '<span class="to-cd-dot"></span>' + CL.live;
+                return;
+            }
+            var d = Math.floor(diff / (1000*60*60*24));
+            var h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+            var m = Math.floor((diff % (1000*60*60)) / (1000*60));
+            var s = Math.floor((diff % (1000*60)) / 1000);
+            if (diff < 60 * 60 * 1000) el.classList.add('to-cd-urgent'); else el.classList.remove('to-cd-urgent');
+            var parts = '<span class="to-cd-label">' + CL.prefix + '</span>';
+            if (d > 0) parts += '<span class="to-cd-unit">' + d + '<small>' + CL.days + '</small></span>';
+            parts += '<span class="to-cd-unit">' + String(h).padStart(2,'0') + '<small>' + CL.hours + '</small></span>';
+            parts += '<span class="to-cd-unit">' + String(m).padStart(2,'0') + '<small>' + CL.min + '</small></span>';
+            parts += '<span class="to-cd-unit">' + String(s).padStart(2,'0') + '<small>' + CL.sec + '</small></span>';
+            el.innerHTML = parts;
+        });
+    }
+
+    function startCountdownTimer() {
+        if (_cdInterval) clearInterval(_cdInterval);
+        if (document.querySelectorAll('.to-cd[data-cd-date]').length > 0) {
+            _cdInterval = setInterval(updateCountdowns, 1000);
+        }
+    }
+
+    function trackPageView(pageName) {
+        if (!client) return;
+        var key = 'kslt_pv_' + pageName;
+        if (sessionStorage.getItem(key)) return;
+        client.rpc('increment_page_view', { p_page_name: pageName }).then(function(res) {
+            if (!res.error) sessionStorage.setItem(key, '1');
+        });
+    }
+
     // Run after static data has rendered
     window.addEventListener('load', function() {
         var urlParams = new URLSearchParams(window.location.search);
         var category = urlParams.get('category') || 'tour';
         overlaySupabaseTournaments(category);
         loadHeroStats(category);
+        trackPageView('tournaments-' + category);
     });
 
     // Load hero stats from Supabase (tournament count, participants, prize fund)
@@ -213,6 +285,7 @@
                     genderLabel: genderLabel,
                     regLine: regLine,
                     image: t.image_url || t.image || '',
+                    _startTime: t.start_time || null,
                     _fromSupabase: true
                 };
             });
@@ -231,8 +304,12 @@
 
             var all = supaItems.concat(staticItems);
 
-            // Sort by date (closest first)
+            // Sort: active/upcoming first (date asc), then past (date desc)
             all.sort(function(a, b) {
+                var aIsPast = a.status === 'past';
+                var bIsPast = b.status === 'past';
+                if (aIsPast !== bIsPast) return aIsPast ? 1 : -1;
+                if (aIsPast) return (b._dateSort || '').localeCompare(a._dateSort || '');
                 return (a._dateSort || '').localeCompare(b._dateSort || '');
             });
 
@@ -255,6 +332,7 @@
                         '</span>' +
                         '<span class="tournament-status ' + t.status + '">' + statusText + '</span>' +
                     '</div>' +
+                    getCountdownHtml(t._dateSort, t._startTime) +
                     '<div class="tournament-card-body">' +
                         '<div class="tournament-title-row">' +
                             '<h3>' + t.name + '</h3>' +
@@ -298,6 +376,8 @@
             // Init search + filter buttons interaction
             initSearch(grid);
             initFilterSearch(grid);
+            startCountdownTimer();
+            initStickyHeader();
 
         } catch (e) {
             console.error('Supabase tournaments overlay error:', e);
@@ -344,7 +424,7 @@
         var filter = activeBtn ? activeBtn.dataset.filter : 'all';
 
         // Update section title
-        var sectionTitle = document.querySelector('#upcoming .section-header h2');
+        var sectionTitle = document.querySelector('#trnStickyHeader h2');
         if (sectionTitle) {
             sectionTitle.textContent = (filter === 'past')
                 ? (isEn ? 'Completed Tournaments' : (isKg ? 'Аяктаган мелдештер' : 'Завершённые турниры'))
@@ -358,5 +438,23 @@
             var nameMatch = !query || (title && title.textContent.toLowerCase().indexOf(query) !== -1);
             card.style.display = (statusMatch && nameMatch) ? '' : 'none';
         });
+    }
+
+    function initStickyHeader() {
+        var header = document.getElementById('trnStickyHeader');
+        if (!header) return;
+        // Insert sentinel before header
+        var sentinel = document.createElement('div');
+        sentinel.className = 'trn-sticky-sentinel';
+        sentinel.style.height = '1px';
+        sentinel.style.marginBottom = '-1px';
+        header.parentNode.insertBefore(sentinel, header);
+
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                header.classList.toggle('stuck', !entry.isIntersecting);
+            });
+        }, { threshold: 0, rootMargin: '-113px 0px 0px 0px' });
+        observer.observe(sentinel);
     }
 })();
