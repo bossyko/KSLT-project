@@ -3069,7 +3069,7 @@ select.ad-field-input {
 
 .ad-pay-stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 12px;
     margin-bottom: 16px;
 }
@@ -3371,4 +3371,282 @@ select.ad-field-input {
 .ad-sched-court:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* ---- Dashboard Chart ---- */
+.ad-dash-chart-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.ad-dash-chart-card .ad-table-card-header {
+    padding: 16px 20px 0;
+}
+
+/* ---- Users Stats Cards ---- */
+.ad-usr-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.ad-usr-cards--3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.ad-usr-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 18px 20px;
+}
+
+.ad-usr-card--sm {
+    padding: 14px 16px;
+}
+
+.ad-usr-card-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.ad-usr-card-icon--sm {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+}
+
+.ad-usr-card-body {
+    min-width: 0;
+}
+
+.ad-usr-card-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.ad-usr-card--sm .ad-usr-card-value {
+    font-size: 1.3rem;
+}
+
+.ad-usr-card-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 992px) {
+    .ad-usr-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .ad-usr-cards--3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .ad-usr-cards,
+    .ad-usr-cards--3 {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .ad-usr-card {
+        padding: 14px 16px;
+    }
+}
+
+/* ---- Vouchers Section ---- */
+.ad-vch-stats-big {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.ad-vch-stat-big {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+}
+
+.ad-vch-stat-big .stat-icon {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+}
+
+.ad-vch-stat-big .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.ad-vch-stat-big .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ad-vch-stats-small {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.ad-vch-stat {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.ad-vch-stat span {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.ad-vch-stat small {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.ad-vch-period-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.ad-vch-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ad-vch-badge-active {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+}
+
+.ad-vch-badge-used {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+}
+
+.ad-vch-badge-expired {
+    background: rgba(158, 158, 158, 0.15);
+    color: #9e9e9e;
+}
+
+.ad-vch-badge-cancelled {
+    background: rgba(244, 67, 54, 0.15);
+    color: #f44336;
+}
+
+.ad-btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.ad-btn-icon:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.ad-btn-danger-icon:hover {
+    background: rgba(244, 67, 54, 0.15);
+}
+
+.ad-btn-sm {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+}
+
+.ad-btn-outline {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text-secondary);
+}
+
+.ad-btn-outline:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--text-primary);
+}
+
+/* Voucher detail modal */
+.ad-vch-detail-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ad-vch-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.ad-vch-detail-row:last-child {
+    border-bottom: none;
+}
+
+.ad-vch-detail-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+@media (max-width: 768px) {
+    .ad-vch-stats-big {
+        grid-template-columns: 1fr;
+    }
+    .ad-vch-stats-small {
+        grid-template-columns: 1fr;
+    }
+    .ad-vch-period-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }

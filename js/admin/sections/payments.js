@@ -10,6 +10,7 @@
     var isEn = A.isEn;
 
     var paySearchQuery = '', payFilterType = '', payFilterPurpose = '', payFilterStatus = '';
+    var payPeriodMode = '', payDateFrom = '', payDateTo = '';
     var payPage = 1, payAllData = [], payEditingId = null;
     var PAY_PER_PAGE = 15;
 
@@ -46,6 +47,21 @@
                 '<div class="ad-pay-stat-card" id="adPayStatActive"><div class="stat-value">0</div><div class="stat-label">' + L.payStatActive + '</div></div>' +
                 '<div class="ad-pay-stat-card" id="adPayStatExpired"><div class="stat-value">0</div><div class="stat-label">' + L.payStatExpired + '</div></div>' +
                 '<div class="ad-pay-stat-card" id="adPayStatMonth"><div class="stat-value">0</div><div class="stat-label">' + L.payStatMonth + '</div></div>' +
+                '<div class="ad-pay-stat-card" id="adPayStatTotal"><div class="stat-value">0</div><div class="stat-label">' + L.payTotalAmount + '</div></div>' +
+            '</div>' +
+
+            // Period row
+            '<div class="ad-vch-period-row">' +
+                '<select class="ad-field-input" id="adPayPeriod" style="max-width:160px;">' +
+                    '<option value=""' + (payPeriodMode === '' ? ' selected' : '') + '>' + L.payPrdAll + '</option>' +
+                    '<option value="this_month"' + (payPeriodMode === 'this_month' ? ' selected' : '') + '>' + L.payPrdThis + '</option>' +
+                    '<option value="last_month"' + (payPeriodMode === 'last_month' ? ' selected' : '') + '>' + L.payPrdLast + '</option>' +
+                    '<option value="custom"' + (payPeriodMode === 'custom' ? ' selected' : '') + '>' + L.payPrdCustom + '</option>' +
+                '</select>' +
+                '<input type="date" class="ad-field-input" id="adPayDateFrom" value="' + payDateFrom + '" style="max-width:150px;display:' + (payPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
+                '<input type="date" class="ad-field-input" id="adPayDateTo" value="' + payDateTo + '" style="max-width:150px;display:' + (payPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
+                '<button class="ad-btn ad-btn-sm" id="adPayPrdApply" style="display:' + (payPeriodMode === 'custom' ? 'inline-flex' : 'none') + ';">' + L.payPrdApply + '</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adPayPdfBtn" title="' + L.payPdfExport + '">📄 PDF</button>' +
             '</div>' +
 
             '<div class="ad-filter-row sticky">' +
@@ -104,6 +120,35 @@
             applyPayFilters();
         });
 
+        // Period
+        document.getElementById('adPayPeriod').addEventListener('change', function() {
+            payPeriodMode = this.value;
+            var fromEl = document.getElementById('adPayDateFrom');
+            var toEl = document.getElementById('adPayDateTo');
+            var applyBtn = document.getElementById('adPayPrdApply');
+            var isCustom = payPeriodMode === 'custom';
+            fromEl.style.display = isCustom ? 'block' : 'none';
+            toEl.style.display = isCustom ? 'block' : 'none';
+            applyBtn.style.display = isCustom ? 'inline-flex' : 'none';
+            if (!isCustom) {
+                computePayPeriodDates();
+                payPage = 1;
+                applyPayFilters();
+            }
+        });
+
+        document.getElementById('adPayPrdApply').addEventListener('click', function() {
+            payDateFrom = document.getElementById('adPayDateFrom').value;
+            payDateTo = document.getElementById('adPayDateTo').value;
+            payPage = 1;
+            applyPayFilters();
+        });
+
+        // PDF
+        document.getElementById('adPayPdfBtn').addEventListener('click', function() {
+            openPayPdfReport();
+        });
+
         loadPaymentsList();
     }
 
@@ -122,13 +167,28 @@
         var result = await query;
         payAllData = result.data || [];
 
+        computePayPeriodDates();
         applyPayFilters();
-        updatePayStats();
     }
 
     function applyPayFilters() {
         var today = new Date().toISOString().slice(0, 10);
         var filtered = payAllData.slice();
+
+        // Period filter
+        if (payDateFrom) {
+            filtered = filtered.filter(function(p) {
+                return p.created_at && p.created_at.slice(0, 10) >= payDateFrom;
+            });
+        }
+        if (payDateTo) {
+            filtered = filtered.filter(function(p) {
+                return p.created_at && p.created_at.slice(0, 10) <= payDateTo;
+            });
+        }
+
+        // Update stats based on period-filtered data
+        updatePayStats(filtered);
 
         if (paySearchQuery) {
             filtered = filtered.filter(function(p) {
@@ -152,24 +212,162 @@
         renderPayPagination(totalItems, totalPages);
     }
 
-    function updatePayStats() {
+    function updatePayStats(data) {
+        var items = data || payAllData;
         var today = new Date().toISOString().slice(0, 10);
         var now = new Date();
         var monthStart = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
 
-        var active = 0, expired = 0, month = 0;
-        payAllData.forEach(function(p) {
+        var active = 0, expired = 0, month = 0, totalAmount = 0;
+        items.forEach(function(p) {
             if (p.period_end >= today) active++;
             else expired++;
             if (p.created_at >= monthStart) month++;
+            totalAmount += (p.amount || 0);
         });
 
         var elActive = document.querySelector('#adPayStatActive .stat-value');
         var elExpired = document.querySelector('#adPayStatExpired .stat-value');
         var elMonth = document.querySelector('#adPayStatMonth .stat-value');
+        var elTotal = document.querySelector('#adPayStatTotal .stat-value');
         if (elActive) elActive.textContent = active;
         if (elExpired) elExpired.textContent = expired;
         if (elMonth) elMonth.textContent = month;
+        if (elTotal) elTotal.textContent = totalAmount.toLocaleString() + ' KGS';
+    }
+
+    function computePayPeriodDates() {
+        var now = new Date();
+        if (payPeriodMode === 'this_month') {
+            payDateFrom = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
+            payDateTo = '';
+        } else if (payPeriodMode === 'last_month') {
+            var lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            var lmEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+            payDateFrom = lm.getFullYear() + '-' + String(lm.getMonth() + 1).padStart(2, '0') + '-01';
+            payDateTo = lmEnd.getFullYear() + '-' + String(lmEnd.getMonth() + 1).padStart(2, '0') + '-' + String(lmEnd.getDate()).padStart(2, '0');
+        } else {
+            payDateFrom = '';
+            payDateTo = '';
+        }
+    }
+
+    function openPayPdfReport() {
+        // Gather period-filtered data
+        var today = new Date().toISOString().slice(0, 10);
+        var filtered = payAllData.slice();
+        if (payDateFrom) {
+            filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) >= payDateFrom; });
+        }
+        if (payDateTo) {
+            filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) <= payDateTo; });
+        }
+
+        // Stats
+        var active = 0, expired = 0, totalAmount = 0;
+        filtered.forEach(function(p) {
+            if (p.period_end >= today) active++;
+            else expired++;
+            totalAmount += (p.amount || 0);
+        });
+
+        // Period label
+        var periodLabel = '';
+        if (payPeriodMode === 'this_month') periodLabel = L.payPrdThis;
+        else if (payPeriodMode === 'last_month') periodLabel = L.payPrdLast;
+        else if (payPeriodMode === 'custom' && payDateFrom) periodLabel = fmtPayPdfDate(payDateFrom) + ' – ' + (payDateTo ? fmtPayPdfDate(payDateTo) : '...');
+        else periodLabel = L.payPrdAll;
+
+        var tableRows = '';
+        filtered.forEach(function(p, i) {
+            var isActive = p.period_end >= today;
+            var statusLabel = isActive ? L.payActive : L.payExpired;
+            var typeName = A.PAYMENT_ENTITY_TYPES[p.entity_type] || p.entity_type;
+            var purposeName = A.PAYMENT_PURPOSES[p.purpose] || p.purpose;
+            var createdDate = p.created_at ? fmtPayPdfDate(p.created_at.slice(0, 10)) : '—';
+            tableRows +=
+                '<tr>' +
+                    '<td>' + (i + 1) + '</td>' +
+                    '<td>' + escPayHtml(p.entity_name || '—') + '</td>' +
+                    '<td>' + escPayHtml(typeName) + '</td>' +
+                    '<td>' + escPayHtml(purposeName) + '</td>' +
+                    '<td>' + (p.amount || 0) + ' ' + (p.currency || 'KGS') + '</td>' +
+                    '<td>' + fmtPayPdfDate(p.period_end) + '</td>' +
+                    '<td>' + statusLabel + '</td>' +
+                    '<td>' + createdDate + '</td>' +
+                '</tr>';
+        });
+
+        var reportDate = fmtPayPdfDate(new Date().toISOString().slice(0, 10));
+
+        var win = window.open('', '_blank');
+        if (!win) return;
+
+        var htmlContent =
+            '<!DOCTYPE html><html><head>' +
+            '<meta charset="UTF-8">' +
+            '<title>' + L.payPdfTitle + '</title>' +
+            '<style>' +
+                '* { margin: 0; padding: 0; box-sizing: border-box; }' +
+                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size: 12px; }' +
+                '.report-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }' +
+                '.report-header h1 { font-size: 20px; margin-bottom: 4px; }' +
+                '.report-header .period { font-size: 13px; color: #666; }' +
+                '.stats-grid { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }' +
+                '.stat-box { flex: 1; min-width: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }' +
+                '.stat-box .val { font-size: 20px; font-weight: 700; }' +
+                '.stat-box .lbl { font-size: 11px; color: #666; margin-top: 2px; }' +
+                'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
+                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size: 11px; }' +
+                'td { padding: 6px; border-bottom: 1px solid #eee; font-size: 11px; }' +
+                'tr:nth-child(even) { background: #fafafa; }' +
+                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size: 11px; color: #888; }' +
+                '@media print { body { padding: 15px; } }' +
+            '</style>' +
+            '</head><body>' +
+            '<div class="report-header">' +
+                '<h1>' + escPayHtml(L.payPdfTitle) + '</h1>' +
+                '<div class="period">' + L.payPeriod + ': ' + escPayHtml(periodLabel) + '</div>' +
+            '</div>' +
+            '<div class="stats-grid">' +
+                '<div class="stat-box"><div class="val">' + filtered.length + '</div><div class="lbl">' + L.payTotalCount + '</div></div>' +
+                '<div class="stat-box"><div class="val">' + totalAmount.toLocaleString() + ' KGS</div><div class="lbl">' + L.payTotalAmount + '</div></div>' +
+                '<div class="stat-box"><div class="val">' + active + '</div><div class="lbl">' + L.payStatActive + '</div></div>' +
+                '<div class="stat-box"><div class="val">' + expired + '</div><div class="lbl">' + L.payStatExpired + '</div></div>' +
+            '</div>' +
+            '<table>' +
+                '<thead><tr>' +
+                    '<th>№</th>' +
+                    '<th>' + L.payEntity + '</th>' +
+                    '<th>' + L.payEntityType + '</th>' +
+                    '<th>' + L.payPurpose + '</th>' +
+                    '<th>' + L.payAmount + '</th>' +
+                    '<th>' + (isEn ? 'Active Until' : 'Активен до') + '</th>' +
+                    '<th>' + L.payStatus + '</th>' +
+                    '<th>' + L.payCreatedAt + '</th>' +
+                '</tr></thead>' +
+                '<tbody>' + tableRows + '</tbody>' +
+            '</table>' +
+            '<div class="report-footer">' +
+                '<span>' + L.payTotalCount + ': ' + filtered.length + ' ' + L.payPdfPayments + '</span>' +
+                '<span>' + L.payPdfDate + ': ' + reportDate + '</span>' +
+            '</div>' +
+            '<script>window.onload=function(){window.print();}<\/script>' +
+            '</body></html>';
+
+        win.document.write(htmlContent);
+        win.document.close();
+    }
+
+    function fmtPayPdfDate(dateStr) {
+        if (!dateStr) return '—';
+        var parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        return parts[2] + '.' + parts[1] + '.' + parts[0].slice(2);
+    }
+
+    function escPayHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     function renderPayRows(items) {

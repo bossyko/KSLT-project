@@ -11,6 +11,8 @@
 
     var memSearchQuery = '';
     var memFilterStatus = '';
+    var memPeriodMode = '', memDateFrom = '', memDateTo = '';
+    var memAllItems = [];
 
     async function renderMembershipsSection() {
         if (A.isDeepLinked('memberships')) return;
@@ -34,6 +36,29 @@
                 '<h2 class="ad-section-title">' + L.memberships + '</h2>' +
                 (isAdm ? '<button class="ad-btn ad-btn-primary" id="adMemAdd">+ ' + L.memAdd + '</button>' : '') +
             '</div>' +
+
+            // Stats cards
+            '<div class="ad-pay-stats-grid" id="adMemStatsGrid">' +
+                '<div class="ad-pay-stat-card" id="adMemStatTotal"><div class="stat-value">...</div><div class="stat-label">' + L.memStatTotal + '</div></div>' +
+                '<div class="ad-pay-stat-card" id="adMemStatActive"><div class="stat-value">...</div><div class="stat-label">' + L.memStatActiveCount + '</div></div>' +
+                '<div class="ad-pay-stat-card" id="adMemStatExpired"><div class="stat-value">...</div><div class="stat-label">' + L.memStatExpiredCount + '</div></div>' +
+                '<div class="ad-pay-stat-card" id="adMemStatExpiring"><div class="stat-value">...</div><div class="stat-label">' + L.memStatExpiringCount + '</div></div>' +
+            '</div>' +
+
+            // Period row
+            '<div class="ad-vch-period-row">' +
+                '<select class="ad-field-input" id="adMemPeriod" style="max-width:160px;">' +
+                    '<option value=""' + (memPeriodMode === '' ? ' selected' : '') + '>' + L.memPrdAll + '</option>' +
+                    '<option value="this_month"' + (memPeriodMode === 'this_month' ? ' selected' : '') + '>' + L.memPrdThis + '</option>' +
+                    '<option value="last_month"' + (memPeriodMode === 'last_month' ? ' selected' : '') + '>' + L.memPrdLast + '</option>' +
+                    '<option value="custom"' + (memPeriodMode === 'custom' ? ' selected' : '') + '>' + L.memPrdCustom + '</option>' +
+                '</select>' +
+                '<input type="date" class="ad-field-input" id="adMemDateFrom" value="' + memDateFrom + '" style="max-width:150px;display:' + (memPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
+                '<input type="date" class="ad-field-input" id="adMemDateTo" value="' + memDateTo + '" style="max-width:150px;display:' + (memPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
+                '<button class="ad-btn ad-btn-sm" id="adMemPrdApply" style="display:' + (memPeriodMode === 'custom' ? 'inline-flex' : 'none') + ';">' + L.memPrdApply + '</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adMemPdfBtn" title="' + L.memPdfExport + '">📄 PDF</button>' +
+            '</div>' +
+
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adMemSearch" placeholder="' + L.memSearch + '" value="' + A.esc(memSearchQuery) + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adMemStatusFilter">' + statusFilterHtml + '</select>' +
@@ -75,6 +100,33 @@
             loadMembershipsList();
         });
 
+        // Period
+        document.getElementById('adMemPeriod').addEventListener('change', function() {
+            memPeriodMode = this.value;
+            var fromEl = document.getElementById('adMemDateFrom');
+            var toEl = document.getElementById('adMemDateTo');
+            var applyBtn = document.getElementById('adMemPrdApply');
+            var isCustom = memPeriodMode === 'custom';
+            fromEl.style.display = isCustom ? 'block' : 'none';
+            toEl.style.display = isCustom ? 'block' : 'none';
+            applyBtn.style.display = isCustom ? 'inline-flex' : 'none';
+            if (!isCustom) {
+                computeMemPeriodDates();
+                loadMembershipsList();
+            }
+        });
+
+        document.getElementById('adMemPrdApply').addEventListener('click', function() {
+            memDateFrom = document.getElementById('adMemDateFrom').value;
+            memDateTo = document.getElementById('adMemDateTo').value;
+            loadMembershipsList();
+        });
+
+        // PDF
+        document.getElementById('adMemPdfBtn').addEventListener('click', function() {
+            openMemPdfReport();
+        });
+
         await loadMembershipsList();
     }
 
@@ -100,6 +152,24 @@
         if (!table) return;
         var tbody = table.querySelector('tbody');
         var items = result.data || [];
+
+        // Period filter
+        computeMemPeriodDates();
+        if (memDateFrom) {
+            items = items.filter(function(m) {
+                var d = m.created_at || m.starts_at || '';
+                return d.slice(0, 10) >= memDateFrom;
+            });
+        }
+        if (memDateTo) {
+            items = items.filter(function(m) {
+                var d = m.created_at || m.starts_at || '';
+                return d.slice(0, 10) <= memDateTo;
+            });
+        }
+
+        memAllItems = items.slice();
+        updateMemStats(items);
 
         // Load payments + telegram status separately to avoid join issues
         var memIds = items.map(function(m) { return m.id; });
@@ -641,6 +711,171 @@
         container.innerHTML = html;
     }
 
+
+    // ---- Stats ----
+    function updateMemStats(items) {
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var total = items.length, active = 0, expired = 0, expiring = 0;
+        items.forEach(function(m) {
+            if (m.status === 'active') {
+                active++;
+                if (m.expires_at) {
+                    var exp = new Date(m.expires_at); exp.setHours(0, 0, 0, 0);
+                    var diff = Math.ceil((exp - today) / 86400000);
+                    if (diff > 0 && diff <= 7) expiring++;
+                }
+            } else if (m.status === 'expired') {
+                expired++;
+            }
+        });
+        var el = function(id, val) {
+            var e = document.querySelector('#' + id + ' .stat-value');
+            if (e) e.textContent = val;
+        };
+        el('adMemStatTotal', total);
+        el('adMemStatActive', active);
+        el('adMemStatExpired', expired);
+        el('adMemStatExpiring', expiring);
+    }
+
+    // ---- Period ----
+    function computeMemPeriodDates() {
+        var now = new Date();
+        if (memPeriodMode === 'this_month') {
+            memDateFrom = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
+            memDateTo = '';
+        } else if (memPeriodMode === 'last_month') {
+            var lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            var lmEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+            memDateFrom = lm.getFullYear() + '-' + String(lm.getMonth() + 1).padStart(2, '0') + '-01';
+            memDateTo = lmEnd.getFullYear() + '-' + String(lmEnd.getMonth() + 1).padStart(2, '0') + '-' + String(lmEnd.getDate()).padStart(2, '0');
+        } else if (memPeriodMode !== 'custom') {
+            memDateFrom = '';
+            memDateTo = '';
+        }
+    }
+
+    // ---- PDF ----
+    function openMemPdfReport() {
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var items = memAllItems;
+
+        var total = items.length, active = 0, expired = 0, expiring = 0;
+        items.forEach(function(m) {
+            if (m.status === 'active') {
+                active++;
+                if (m.expires_at) {
+                    var exp = new Date(m.expires_at); exp.setHours(0, 0, 0, 0);
+                    var diff = Math.ceil((exp - today) / 86400000);
+                    if (diff > 0 && diff <= 7) expiring++;
+                }
+            } else if (m.status === 'expired') {
+                expired++;
+            }
+        });
+
+        var periodLabel = '';
+        if (memPeriodMode === 'this_month') periodLabel = L.memPrdThis;
+        else if (memPeriodMode === 'last_month') periodLabel = L.memPrdLast;
+        else if (memPeriodMode === 'custom' && memDateFrom) periodLabel = fmtMemPdfDate(memDateFrom) + ' – ' + (memDateTo ? fmtMemPdfDate(memDateTo) : '...');
+        else periodLabel = L.memPrdAll;
+
+        var statusLabels = { active: L.memActive, expired: L.memExpired, cancelled: L.memCancelled };
+        var tableRows = '';
+        items.forEach(function(m, i) {
+            var name = m.profiles ? escMemHtml(m.profiles.full_name || '—') : '—';
+            var email = m.profiles ? escMemHtml(m.profiles.email || '') : '';
+            var statusLabel = statusLabels[m.status] || m.status;
+            var daysLeft = '';
+            if (m.expires_at && m.status === 'active') {
+                var exp2 = new Date(m.expires_at); exp2.setHours(0, 0, 0, 0);
+                var diff2 = Math.ceil((exp2 - today) / 86400000);
+                daysLeft = diff2 > 0 ? diff2 + (isEn ? 'd' : ' дн.') : '0';
+            }
+            tableRows +=
+                '<tr>' +
+                    '<td>' + (i + 1) + '</td>' +
+                    '<td>' + name + '</td>' +
+                    '<td>' + email + '</td>' +
+                    '<td>' + statusLabel + '</td>' +
+                    '<td>' + (m.starts_at || '—') + '</td>' +
+                    '<td>' + (m.expires_at || '—') + '</td>' +
+                    '<td>' + daysLeft + '</td>' +
+                '</tr>';
+        });
+
+        var reportDate = fmtMemPdfDate(new Date().toISOString().slice(0, 10));
+
+        var win = window.open('', '_blank');
+        if (!win) return;
+
+        var htmlContent =
+            '<!DOCTYPE html><html><head>' +
+            '<meta charset="UTF-8">' +
+            '<title>' + L.memPdfTitle + '</title>' +
+            '<style>' +
+                '* { margin: 0; padding: 0; box-sizing: border-box; }' +
+                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size: 12px; }' +
+                '.report-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }' +
+                '.report-header h1 { font-size: 20px; margin-bottom: 4px; }' +
+                '.report-header .period { font-size: 13px; color: #666; }' +
+                '.stats-grid { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }' +
+                '.stat-box { flex: 1; min-width: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }' +
+                '.stat-box .val { font-size: 20px; font-weight: 700; }' +
+                '.stat-box .lbl { font-size: 11px; color: #666; margin-top: 2px; }' +
+                'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
+                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size: 11px; }' +
+                'td { padding: 6px; border-bottom: 1px solid #eee; font-size: 11px; }' +
+                'tr:nth-child(even) { background: #fafafa; }' +
+                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size: 11px; color: #888; }' +
+                '@media print { body { padding: 15px; } }' +
+            '</style>' +
+            '</head><body>' +
+            '<div class="report-header">' +
+                '<h1>' + escMemHtml(L.memPdfTitle) + '</h1>' +
+                '<div class="period">' + L.memPeriod + ': ' + escMemHtml(periodLabel) + '</div>' +
+            '</div>' +
+            '<div class="stats-grid">' +
+                '<div class="stat-box"><div class="val">' + total + '</div><div class="lbl">' + L.memStatTotal + '</div></div>' +
+                '<div class="stat-box"><div class="val">' + active + '</div><div class="lbl">' + L.memStatActiveCount + '</div></div>' +
+                '<div class="stat-box"><div class="val">' + expired + '</div><div class="lbl">' + L.memStatExpiredCount + '</div></div>' +
+                '<div class="stat-box"><div class="val">' + expiring + '</div><div class="lbl">' + L.memStatExpiringCount + '</div></div>' +
+            '</div>' +
+            '<table>' +
+                '<thead><tr>' +
+                    '<th>№</th>' +
+                    '<th>' + L.memUser + '</th>' +
+                    '<th>Email</th>' +
+                    '<th>' + L.memStatus + '</th>' +
+                    '<th>' + L.memStartsAt + '</th>' +
+                    '<th>' + L.memExpiresAt + '</th>' +
+                    '<th>' + L.memDaysLeft + '</th>' +
+                '</tr></thead>' +
+                '<tbody>' + tableRows + '</tbody>' +
+            '</table>' +
+            '<div class="report-footer">' +
+                '<span>' + L.memTotalCount + ': ' + total + ' ' + L.memPdfMembers + '</span>' +
+                '<span>' + L.memPdfDate + ': ' + reportDate + '</span>' +
+            '</div>' +
+            '<script>window.onload=function(){window.print();}<\/script>' +
+            '</body></html>';
+
+        win.document.write(htmlContent);
+        win.document.close();
+    }
+
+    function fmtMemPdfDate(dateStr) {
+        if (!dateStr) return '—';
+        var parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        return parts[2] + '.' + parts[1] + '.' + parts[0].slice(2);
+    }
+
+    function escMemHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
 
     var PAYMENT_METHODS = A.PAYMENT_METHODS = { cash: L.payCash, transfer: L.payTransfer, card: L.payCard };
     var PAYMENT_PURPOSES = A.PAYMENT_PURPOSES = { promoted: L.payPromoted, sponsorship: L.paySponsorship, rental: L.payRental, other: L.payOther };

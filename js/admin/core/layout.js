@@ -36,7 +36,8 @@
             { key: '_divider' },
             { key: 'users',     icon: A.ICONS.users,  label: L.users,     badge: false },
             { key: 'memberships', icon: A.ICONS.card, label: L.memberships, badge: true },
-            { key: 'payments', icon: A.ICONS.wallet, label: L.payments, badge: false }
+            { key: 'payments', icon: A.ICONS.wallet, label: L.payments, badge: false },
+            { key: 'vouchers', icon: A.ICONS.ticket, label: L.vouchers, badge: false }
         ];
 
         var navHtml = '';
@@ -134,7 +135,8 @@
                 coaches:     { edit: A.loadAndEditCoach, view: A.loadAndViewCoach },
                 payments:    { edit: A.loadAndEditPayment },
                 memberships: { edit: A.loadAndEditMembership },
-                users:       { edit: A.loadAndEditUser }
+                users:       { edit: A.loadAndEditUser },
+                vouchers:    { view: A.loadAndViewVoucher }
             };
             if (deepMap[tab] && deepMap[tab][action]) {
                 deepMap[tab][action](itemId);
@@ -151,7 +153,8 @@
             coaches: A.renderCoachesList,
             users: A.renderUsersList,
             memberships: A.renderMembershipsList,
-            payments: A.renderPaymentsList
+            payments: A.renderPaymentsList,
+            vouchers: A.renderVouchersList
         };
         if (resetMap[tab]) {
             resetMap[tab]();
@@ -439,7 +442,6 @@
         }
         return L.noData;
     }
-
 
     // ---- Export to namespace ----
     A.renderSidebar = renderSidebar;

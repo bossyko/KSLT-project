@@ -25,6 +25,7 @@
         A.renderRatingsSection();
         A.renderMembershipsSection();
         A.renderPaymentsSection();
+        A.renderVouchersSection();
         A.renderUsersSection();
         A.initTabs();
     };

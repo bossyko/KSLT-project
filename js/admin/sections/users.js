@@ -11,6 +11,10 @@
 
     var usrSearchQuery = '';
     var usrFilterRole = '';
+    var usrPeriodMode = '', usrDateFrom = '', usrDateTo = '';
+    var usrAllItems = [], usrMemMap = {};
+    var usrDeletedCount = 0, usrDeletedPeriodCount = 0;
+    var usrChartInstance = null;
 
     async function renderUsersSection() {
         if (A.isDeepLinked('users')) return;
@@ -28,11 +32,80 @@
 
         var isAdm = A.currentRole === 'admin';
 
+        var curMonthName = isEn
+            ? ['January','February','March','April','May','June','July','August','September','October','November','December'][new Date().getMonth()]
+            : ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][new Date().getMonth()];
+
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.users + '</h2>' +
                 (isAdm ? '<button class="ad-btn ad-btn-primary" id="adUsrAddManager">+ ' + L.usrAddManager + '</button>' : '') +
             '</div>' +
+
+            // Chart (current month, full width)
+            '<div class="ad-dash-chart-card">' +
+                '<div class="ad-table-card-header">' +
+                    '<div class="ad-table-card-title">' + L.usrChartTitle + ' — ' + curMonthName + ' ' + new Date().getFullYear() + '</div>' +
+                '</div>' +
+                '<div style="position:relative;height:260px;padding:12px;">' +
+                    '<canvas id="adUsrGrowthChart"></canvas>' +
+                '</div>' +
+            '</div>' +
+
+            // Stats cards — top row (4)
+            '<div class="ad-usr-cards" id="adUsrStatsGrid">' +
+                '<div class="ad-usr-card" id="adUsrStatTotal">' +
+                    '<div class="ad-usr-card-icon" style="background:rgba(204,255,0,0.12);color:#ccff00;">👥</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatTotal + '</div></div>' +
+                '</div>' +
+                '<div class="ad-usr-card" id="adUsrStatMembers">' +
+                    '<div class="ad-usr-card-icon" style="background:rgba(52,199,89,0.12);color:#34c759;">🏅</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatMembers + '</div></div>' +
+                '</div>' +
+                '<div class="ad-usr-card" id="adUsrStatTg">' +
+                    '<div class="ad-usr-card-icon" style="background:rgba(0,136,204,0.12);color:#0088cc;">✈️</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatTelegram + '</div></div>' +
+                '</div>' +
+                '<div class="ad-usr-card" id="adUsrStatBanned">' +
+                    '<div class="ad-usr-card-icon" style="background:rgba(255,59,48,0.12);color:#ff3b30;">🚫</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatBanned + '</div></div>' +
+                '</div>' +
+            '</div>' +
+
+            // Stats cards — bottom row (4)
+            '<div class="ad-usr-cards" id="adUsrBreakdown">' +
+                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrBrkDeletedCard">' +
+                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(255,59,48,0.10);color:#ff3b30;">🗑️</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value" id="adUsrBrkDeleted">0</div><div class="ad-usr-card-label">' + L.usrStatDeleted + '</div></div>' +
+                '</div>' +
+                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrBrkAdminsCard">' +
+                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(175,130,255,0.12);color:#af82ff;">🛡️</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value" id="adUsrBrkAdmins">0</div><div class="ad-usr-card-label">' + L.usrStatAdmins + '</div></div>' +
+                '</div>' +
+                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrBrkManagersCard">' +
+                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(0,122,255,0.12);color:#007aff;">👔</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value" id="adUsrBrkManagers">0</div><div class="ad-usr-card-label">' + L.usrStatManagers + '</div></div>' +
+                '</div>' +
+                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrBrkNewCard">' +
+                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(52,199,89,0.10);color:#34c759;">📈</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value" id="adUsrBrkNewMonth">0</div><div class="ad-usr-card-label">' + (isEn ? 'New' : 'Новых') + ' (' + curMonthName + ')</div></div>' +
+                '</div>' +
+            '</div>' +
+
+            // Period row
+            '<div class="ad-vch-period-row">' +
+                '<select class="ad-field-input" id="adUsrPeriod" style="max-width:160px;">' +
+                    '<option value=""' + (usrPeriodMode === '' ? ' selected' : '') + '>' + L.usrPrdAll + '</option>' +
+                    '<option value="this_month"' + (usrPeriodMode === 'this_month' ? ' selected' : '') + '>' + L.usrPrdThis + '</option>' +
+                    '<option value="last_month"' + (usrPeriodMode === 'last_month' ? ' selected' : '') + '>' + L.usrPrdLast + '</option>' +
+                    '<option value="custom"' + (usrPeriodMode === 'custom' ? ' selected' : '') + '>' + L.usrPrdCustom + '</option>' +
+                '</select>' +
+                '<input type="date" class="ad-field-input" id="adUsrDateFrom" value="' + usrDateFrom + '" style="max-width:150px;display:' + (usrPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
+                '<input type="date" class="ad-field-input" id="adUsrDateTo" value="' + usrDateTo + '" style="max-width:150px;display:' + (usrPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
+                '<button class="ad-btn ad-btn-sm" id="adUsrPrdApply" style="display:' + (usrPeriodMode === 'custom' ? 'inline-flex' : 'none') + ';">' + L.usrPrdApply + '</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adUsrPdfBtn" title="' + L.usrPdfExport + '">📄 PDF</button>' +
+            '</div>' +
+
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adUsrSearch" placeholder="' + L.usrSearch + '" value="' + A.esc(usrSearchQuery) + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adUsrRoleFilter">' + roleFilterHtml + '</select>' +
@@ -72,6 +145,33 @@
             loadUsersList();
         });
 
+        // Period
+        document.getElementById('adUsrPeriod').addEventListener('change', function() {
+            usrPeriodMode = this.value;
+            var fromEl = document.getElementById('adUsrDateFrom');
+            var toEl = document.getElementById('adUsrDateTo');
+            var applyBtn = document.getElementById('adUsrPrdApply');
+            var isCustom = usrPeriodMode === 'custom';
+            fromEl.style.display = isCustom ? 'block' : 'none';
+            toEl.style.display = isCustom ? 'block' : 'none';
+            applyBtn.style.display = isCustom ? 'inline-flex' : 'none';
+            if (!isCustom) {
+                computeUsrPeriodDates();
+                loadUsersList();
+            }
+        });
+
+        document.getElementById('adUsrPrdApply').addEventListener('click', function() {
+            usrDateFrom = document.getElementById('adUsrDateFrom').value;
+            usrDateTo = document.getElementById('adUsrDateTo').value;
+            loadUsersList();
+        });
+
+        // PDF
+        document.getElementById('adUsrPdfBtn').addEventListener('click', function() {
+            openUsrPdfReport();
+        });
+
         await loadUsersList();
     }
 
@@ -104,6 +204,41 @@
                 if (!memMap[m.profile_id]) memMap[m.profile_id] = m;
             });
         }
+        usrMemMap = memMap;
+
+        // Load deleted accounts count
+        var delResult = await A.client.from('deleted_accounts').select('id, deleted_at');
+        var delAll = delResult.data || [];
+
+        // Period filter
+        computeUsrPeriodDates();
+
+        // Deleted counts
+        usrDeletedCount = delAll.length;
+        usrDeletedPeriodCount = delAll.filter(function(d) {
+            var dt = d.deleted_at ? d.deleted_at.slice(0, 10) : '';
+            if (usrDateFrom && dt < usrDateFrom) return false;
+            if (usrDateTo && dt > usrDateTo) return false;
+            return true;
+        }).length;
+
+        var periodFiltered = items.slice();
+        if (usrDateFrom) {
+            periodFiltered = periodFiltered.filter(function(u) {
+                return u.created_at && u.created_at.slice(0, 10) >= usrDateFrom;
+            });
+        }
+        if (usrDateTo) {
+            periodFiltered = periodFiltered.filter(function(u) {
+                return u.created_at && u.created_at.slice(0, 10) <= usrDateTo;
+            });
+        }
+
+        // Update stats — use ALL items for totals, period-filtered for "new" count
+        updateUsrStats(items, periodFiltered, memMap);
+        renderUsrGrowthChart(items, delAll);
+        usrAllItems = periodFiltered;
+        items = periodFiltered;
 
         // Client-side search
         if (usrSearchQuery) {
@@ -977,6 +1112,354 @@
         });
     }
 
+
+    // ---- Stats ----
+    function renderUsrGrowthChart(allProfiles, allDeleted) {
+        var canvas = document.getElementById('adUsrGrowthChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        var now = new Date();
+        var year = now.getFullYear();
+        var month = now.getMonth();
+        var today = now.getDate();
+
+        // Build labels: days 1..today
+        var labels = [];
+        for (var d = 1; d <= today; d++) {
+            labels.push(d);
+        }
+
+        // Month key for filtering (e.g. "2026-03")
+        var monthKey = year + '-' + String(month + 1).padStart(2, '0');
+
+        // Count registrations per day this month
+        var regPerDay = {};
+        for (var i = 1; i <= today; i++) regPerDay[i] = 0;
+
+        allProfiles.forEach(function(p) {
+            if (!p.created_at) return;
+            if (p.created_at.slice(0, 7) !== monthKey) return;
+            var day = parseInt(p.created_at.slice(8, 10), 10);
+            if (day >= 1 && day <= today) regPerDay[day]++;
+        });
+
+        // Count deletions per day this month
+        var delPerDay = {};
+        for (var j = 1; j <= today; j++) delPerDay[j] = 0;
+
+        allDeleted.forEach(function(del) {
+            if (!del.deleted_at) return;
+            if (del.deleted_at.slice(0, 7) !== monthKey) return;
+            var day = parseInt(del.deleted_at.slice(8, 10), 10);
+            if (day >= 1 && day <= today) delPerDay[day]++;
+        });
+
+        // Build cumulative data
+        var regData = [], delData = [], netData = [];
+        var regSum = 0, delSum = 0;
+
+        for (var k = 1; k <= today; k++) {
+            regSum += regPerDay[k];
+            delSum += delPerDay[k];
+            regData.push(regSum);
+            delData.push(delSum);
+            netData.push(regSum - delSum);
+        }
+
+        // Destroy previous instance
+        if (usrChartInstance) {
+            usrChartInstance.destroy();
+            usrChartInstance = null;
+        }
+
+        usrChartInstance = new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: L.usrChartRegistered,
+                        data: regData,
+                        borderColor: 'rgba(76, 175, 80, 1)',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(76, 175, 80, 1)',
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: L.usrChartDeleted,
+                        data: delData,
+                        borderColor: 'rgba(244, 67, 54, 1)',
+                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(244, 67, 54, 1)',
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: L.usrChartNet,
+                        data: netData,
+                        borderColor: 'rgba(204, 255, 0, 0.9)',
+                        backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(204, 255, 0, 1)',
+                        tension: 0.3,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: 'rgba(255,255,255,0.7)',
+                            font: { size: 11 },
+                            boxWidth: 12,
+                            padding: 16
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(20,24,36,0.95)',
+                        titleColor: '#fff',
+                        bodyColor: 'rgba(255,255,255,0.8)',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            title: function(items) {
+                                return items[0].label + ' ' + (isEn
+                                    ? ['January','February','March','April','May','June','July','August','September','October','November','December'][month]
+                                    : ['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря'][month]);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.04)' },
+                        ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } },
+                        title: {
+                            display: true,
+                            text: isEn ? 'Day' : 'День',
+                            color: 'rgba(255,255,255,0.4)',
+                            font: { size: 10 }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        ticks: {
+                            color: 'rgba(255,255,255,0.5)',
+                            font: { size: 10 },
+                            stepSize: 1,
+                            callback: function(val) { return Number.isInteger(val) ? val : ''; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateUsrStats(allItems, periodItems, memMap) {
+        var total = allItems.length;
+        var activeMembers = 0;
+        var admins = 0, managers = 0, tgCount = 0, bannedCount = 0;
+        var now = new Date();
+
+        // Count new this month
+        var monthStart = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
+        var newThisMonth = 0;
+
+        allItems.forEach(function(u) {
+            if (u.role === 'admin') admins++;
+            else if (u.role === 'manager') managers++;
+            if (u.telegram_chat_id) tgCount++;
+            if (u.banned_until && new Date(u.banned_until) > now) bannedCount++;
+            var mem = memMap[u.id];
+            if (mem && mem.status === 'active') activeMembers++;
+            if (u.created_at && u.created_at.slice(0, 10) >= monthStart) newThisMonth++;
+        });
+
+        var el = function(id, val) {
+            var e = document.querySelector('#' + id + ' .ad-usr-card-value');
+            if (e) e.textContent = val;
+        };
+        el('adUsrStatTotal', total);
+        el('adUsrStatMembers', activeMembers);
+        el('adUsrStatTg', tgCount);
+        el('adUsrStatBanned', bannedCount);
+
+        var setEl = function(id, val) {
+            var e = document.getElementById(id);
+            if (e) e.textContent = val;
+        };
+        setEl('adUsrBrkAdmins', admins);
+        setEl('adUsrBrkManagers', managers);
+        setEl('adUsrBrkDeleted', usrDeletedCount);
+        setEl('adUsrBrkNewMonth', newThisMonth);
+    }
+
+    // ---- Period ----
+    function computeUsrPeriodDates() {
+        var now = new Date();
+        if (usrPeriodMode === 'this_month') {
+            usrDateFrom = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
+            usrDateTo = '';
+        } else if (usrPeriodMode === 'last_month') {
+            var lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            var lmEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+            usrDateFrom = lm.getFullYear() + '-' + String(lm.getMonth() + 1).padStart(2, '0') + '-01';
+            usrDateTo = lmEnd.getFullYear() + '-' + String(lmEnd.getMonth() + 1).padStart(2, '0') + '-' + String(lmEnd.getDate()).padStart(2, '0');
+        } else if (usrPeriodMode !== 'custom') {
+            usrDateFrom = '';
+            usrDateTo = '';
+        }
+    }
+
+    // ---- PDF ----
+    function openUsrPdfReport() {
+        var now = new Date();
+        var items = usrAllItems;
+        var memMap = usrMemMap;
+
+        // Compute stats
+        var total = items.length;
+        var activeMembers = 0, linkedPlayers = 0;
+        var admins = 0, managers2 = 0, users2 = 0, tgCount = 0, bannedCount = 0;
+
+        items.forEach(function(u) {
+            if (u.role === 'admin') admins++;
+            else if (u.role === 'manager') managers2++;
+            else users2++;
+            if (u.telegram_chat_id) tgCount++;
+            if (u.banned_until && new Date(u.banned_until) > now) bannedCount++;
+            var mem = memMap[u.id];
+            if (mem && mem.status === 'active') activeMembers++;
+            if (u.player_id) linkedPlayers++;
+        });
+
+        // Period label
+        var periodLabel = '';
+        if (usrPeriodMode === 'this_month') periodLabel = L.usrPrdThis;
+        else if (usrPeriodMode === 'last_month') periodLabel = L.usrPrdLast;
+        else if (usrPeriodMode === 'custom' && usrDateFrom) periodLabel = fmtUsrDate(usrDateFrom) + ' – ' + (usrDateTo ? fmtUsrDate(usrDateTo) : '...');
+        else periodLabel = L.usrPrdAll;
+
+        // Table rows
+        var tableRows = '';
+        items.forEach(function(u, i) {
+            var roleLabel = L['role' + u.role.charAt(0).toUpperCase() + u.role.slice(1)] || u.role;
+            var mem = memMap[u.id];
+            var memLabel = (mem && mem.status === 'active') ? L.usrActive : (mem && mem.status === 'expired') ? L.usrExpired : L.usrNone;
+            var playerBadge = u.player_id ? '✓' : '—';
+            var tgBadge = u.telegram_chat_id ? '✓' : '—';
+            var regDate = u.created_at ? u.created_at.split('T')[0] : '—';
+
+            tableRows +=
+                '<tr>' +
+                    '<td>' + (i + 1) + '</td>' +
+                    '<td>' + escUsrHtml(u.full_name || '—') + '</td>' +
+                    '<td>' + escUsrHtml(u.email || '—') + '</td>' +
+                    '<td>' + roleLabel + '</td>' +
+                    '<td>' + memLabel + '</td>' +
+                    '<td>' + playerBadge + '</td>' +
+                    '<td>' + tgBadge + '</td>' +
+                    '<td>' + regDate + '</td>' +
+                '</tr>';
+        });
+
+        var reportDate = fmtUsrDate(now.toISOString().slice(0, 10));
+
+        var win = window.open('', '_blank');
+        if (!win) return;
+
+        var htmlContent =
+            '<!DOCTYPE html><html><head>' +
+            '<meta charset="UTF-8">' +
+            '<title>' + L.usrPdfTitle + '</title>' +
+            '<style>' +
+                '* { margin: 0; padding: 0; box-sizing: border-box; }' +
+                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size: 12px; }' +
+                '.report-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }' +
+                '.report-header h1 { font-size: 20px; margin-bottom: 4px; }' +
+                '.report-header .period { font-size: 13px; color: #666; }' +
+                '.stats-grid { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }' +
+                '.stat-box { flex: 1; min-width: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }' +
+                '.stat-box .val { font-size: 20px; font-weight: 700; }' +
+                '.stat-box .lbl { font-size: 11px; color: #666; margin-top: 2px; }' +
+                '.breakdown { display: flex; gap: 20px; margin-bottom: 24px; font-size: 12px; color: #555; flex-wrap: wrap; }' +
+                '.breakdown span { font-weight: 600; color: #1a1a1a; }' +
+                'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
+                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size: 11px; }' +
+                'td { padding: 6px; border-bottom: 1px solid #eee; font-size: 11px; }' +
+                'tr:nth-child(even) { background: #fafafa; }' +
+                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size: 11px; color: #888; }' +
+                '@media print { body { padding: 15px; } }' +
+            '</style>' +
+            '</head><body>' +
+            '<div class="report-header">' +
+                '<h1>' + escUsrHtml(L.usrPdfTitle) + '</h1>' +
+                '<div class="period">' + L.usrPeriod + ': ' + escUsrHtml(periodLabel) + '</div>' +
+            '</div>' +
+            '<div class="stats-grid">' +
+                '<div class="stat-box"><div class="val">' + total + '</div><div class="lbl">' + L.usrStatTotal + '</div></div>' +
+                '<div class="stat-box"><div class="val">' + activeMembers + '</div><div class="lbl">' + L.usrStatMembers + '</div></div>' +
+                '<div class="stat-box"><div class="val">' + linkedPlayers + '</div><div class="lbl">' + L.usrStatPlayers + '</div></div>' +
+            '</div>' +
+            '<div class="breakdown">' +
+                '🛡️ <span>' + admins + '</span> ' + L.usrStatAdmins +
+                ' · <span>' + managers2 + '</span> ' + L.usrStatManagers +
+                ' · <span>' + users2 + '</span> ' + L.usrStatRegular +
+                ' &nbsp;|&nbsp; 📱 <span>' + tgCount + '</span> Telegram' +
+                ' &nbsp;|&nbsp; 🚫 <span>' + bannedCount + '</span> ' + L.usrStatBanned +
+                ' &nbsp;|&nbsp; 🗑️ <span>' + usrDeletedPeriodCount + '</span> ' + L.usrStatDeleted +
+            '</div>' +
+            '<table>' +
+                '<thead><tr>' +
+                    '<th>№</th>' +
+                    '<th>' + L.thUser + '</th>' +
+                    '<th>' + L.thEmail + '</th>' +
+                    '<th>' + L.thRole + '</th>' +
+                    '<th>' + L.usrThMembership + '</th>' +
+                    '<th>🎾</th>' +
+                    '<th>TG</th>' +
+                    '<th>' + L.thDate + '</th>' +
+                '</tr></thead>' +
+                '<tbody>' + tableRows + '</tbody>' +
+            '</table>' +
+            '<div class="report-footer">' +
+                '<span>' + L.usrTotalCount + ': ' + total + ' ' + L.usrPdfUsers + '</span>' +
+                '<span>' + L.usrPdfDate + ': ' + reportDate + '</span>' +
+            '</div>' +
+            '<script>window.onload=function(){window.print();}<\/script>' +
+            '</body></html>';
+
+        win.document.write(htmlContent);
+        win.document.close();
+    }
+
+    function fmtUsrDate(dateStr) {
+        if (!dateStr) return '—';
+        var parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        return parts[2] + '.' + parts[1] + '.' + parts[0].slice(2);
+    }
+
+    function escUsrHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
 
     // ---- Export to namespace ----
     A.renderUsersSection = renderUsersSection;
