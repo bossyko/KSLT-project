@@ -205,14 +205,17 @@
 
         var results = await Promise.all([
             A.client.from('discount_vouchers').select('*').order('created_at', { ascending: false }),
-            A.client.from('courts').select('id, name, price'),
+            A.client.from('courts').select('id, name, court_types'),
             A.client.from('coaches').select('id, name, price')
         ]);
 
         vchAllData = results[0].data || [];
         vchCourtsMap = {};
         vchCoachesMap = {};
-        (results[1].data || []).forEach(function(c) { vchCourtsMap[c.id] = c; });
+        (results[1].data || []).forEach(function(c) {
+            var firstType = (c.court_types || [])[0];
+            vchCourtsMap[c.id] = { id: c.id, name: c.name, price: firstType ? (firstType.price || 0) : 0 };
+        });
         (results[2].data || []).forEach(function(c) { vchCoachesMap[c.id] = c; });
 
         computePeriodDates();
