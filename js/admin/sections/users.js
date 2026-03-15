@@ -719,7 +719,7 @@
                 ) +
                 '<div style="margin-bottom:16px;">' +
                     '<label class="ad-field-label">' + L.usrMembershipPeriod + '</label>' +
-                    '<select class="ad-field-input" id="adMemPeriod">' +
+                    '<select class="ad-field-input" id="adUsrMemPeriod">' +
                         '<option value="1">' + L.usrMonths1 + '</option>' +
                         '<option value="3">' + L.usrMonths3 + '</option>' +
                         '<option value="6">' + L.usrMonths6 + '</option>' +
@@ -742,7 +742,7 @@
             btn.textContent = L.saving;
             btn.disabled = true;
 
-            var months = parseInt(document.getElementById('adMemPeriod').value);
+            var months = parseInt(document.getElementById('adUsrMemPeriod').value, 10) || 1;
             var categoryId = null;
             var catEl = document.getElementById('adMemCategory');
             if (catEl) categoryId = catEl.value;
