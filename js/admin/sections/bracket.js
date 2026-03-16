@@ -271,6 +271,44 @@
             });
         }
 
+        // ---- Schedule notify handler ----
+        var notifySchedBtn = document.getElementById('adSchedNotify');
+        if (notifySchedBtn) {
+            notifySchedBtn.addEventListener('click', function() {
+                A.showConfirm(L.schedNotifyConfirm, '', async function() {
+                    notifySchedBtn.disabled = true;
+                    notifySchedBtn.textContent = '📢 ...';
+                    try {
+                        var session = await A.client.auth.getSession();
+                        var token = session.data.session ? session.data.session.access_token : '';
+                        var res = await fetch(SUPABASE_URL + '/functions/v1/match-notify', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                'Content-Type': 'application/json',
+                                'apikey': SUPABASE_ANON_KEY
+                            },
+                            body: JSON.stringify({ tournament_id: tournamentId })
+                        });
+                        var result = await res.json();
+                        if (!res.ok) {
+                            throw new Error(result.error || 'HTTP ' + res.status);
+                        }
+                        if (result.sent === 0 && result.noTelegram > 0) {
+                            A.showToast(L.schedNotifyNone, 'warning');
+                        } else {
+                            A.showToast(L.schedNotifySent + ' (' + result.sent + ')', 'success');
+                        }
+                        notifySchedBtn.textContent = '📢 ' + L.schedNotifySent;
+                    } catch (err) {
+                        A.showToast(err.message || 'Error', 'error');
+                        notifySchedBtn.disabled = false;
+                        notifySchedBtn.textContent = '📢 ' + L.schedNotify;
+                    }
+                }, '📢 ' + L.schedNotify);
+            });
+        }
+
         // ---- Recalculate points button ----
         var recalcBtn = document.getElementById('adBrkRecalcPoints');
         if (recalcBtn) {
@@ -833,8 +871,9 @@
             html += '</tbody></table></div>';
         }
 
-        // Save button
-        html += '<div style="text-align:right;margin-top:16px;">' +
+        // Save + Notify buttons
+        html += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">' +
+            '<button class="ad-btn ad-btn-secondary" id="adSchedNotify">📢 ' + L.schedNotify + '</button>' +
             '<button class="ad-btn ad-btn-primary" id="adSchedSave">' + L.schedSave + '</button>' +
         '</div>';
 
