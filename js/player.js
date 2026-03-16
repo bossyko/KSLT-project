@@ -102,17 +102,23 @@
         vs: 'VS', wins: 'Wins', setsWon: 'Sets won', gamesWon: 'Games won',
         last5: 'Last 5 matches', fullProfile: 'Open full profile',
         noMatches: 'No head-to-head matches found', loading: 'Loading...',
-        noData: 'No match data yet', participated: 'Participated'
+        noData: 'No match data yet', participated: 'Participated',
+        winner: '🏆 Winner', roundF: 'Final', roundSF: 'SF', roundQF: 'QF',
+        round3rd: '3rd place', round4th: '4th place', upcoming: 'Upcoming'
     } : isKg ? {
         vs: 'VS', wins: 'Жеңиштер', setsWon: 'Утулган сеттер', gamesWon: 'Утулган геймдер',
         last5: 'Акыркы 5 матч', fullProfile: 'Толук профилди ачуу',
         noMatches: 'Бетме-бет матчтар жок', loading: 'Жүктөлүүдө...',
-        noData: 'Матч маалыматы жок', participated: 'Катышкан'
+        noData: 'Матч маалыматы жок', participated: 'Катышкан',
+        winner: '🏆 Жеңүүчү', roundF: 'Финал', roundSF: '1/2', roundQF: '1/4',
+        round3rd: '3-орун', round4th: '4-орун', upcoming: 'Алдыда'
     } : {
         vs: 'VS', wins: 'Победы', setsWon: 'Выигранные сеты', gamesWon: 'Выигранные геймы',
         last5: 'Последние 5 матчей', fullProfile: 'Открыть полный профиль',
         noMatches: 'Матчей между игроками не найдено', loading: 'Загрузка...',
-        noData: 'Нет данных о матчах', participated: 'Участвовал'
+        noData: 'Нет данных о матчах', participated: 'Участвовал',
+        winner: '🏆 Победитель', roundF: 'Финал', roundSF: '1/2', roundQF: '1/4',
+        round3rd: '3-е место', round4th: '4-е место', upcoming: 'Скоро'
     };
 
     // ---- Find player across all categories ----
@@ -363,10 +369,17 @@
         html += '<div class="pp-info">';
         html += '<h2 class="pp-name">' + player.name + '</h2>';
         html += '<div class="pp-meta">';
-        html += '<span class="pp-meta-country">' + player.country + '</span>';
-        html += '<span class="pp-meta-category">' + cat.name + ' \u00b7 #' + rank + '</span>';
+        if (player.country) html += '<span class="pp-meta-country">' + player.country + '</span>';
         if (player.online) {
             html += '<span class="pp-meta-online">' + L.online + '</span>';
+        }
+        html += '</div>';
+
+        // Ratings block
+        html += '<div class="pp-ratings">';
+        html += '<div class="pp-rating-row"><span class="pp-rating-label">KSLT</span><span class="pp-rating-value">' + cat.name + ' · #' + rank + '</span></div>';
+        if (player.ntrp_rating) {
+            html += '<div class="pp-rating-row"><span class="pp-rating-label">NTRP</span><span class="pp-rating-value">' + Number(player.ntrp_rating).toFixed(1) + '</span></div>';
         }
         html += '</div>';
 
@@ -604,30 +617,64 @@
             return;
         }
 
-        client.from('tournament_registrations')
-            .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start)')
-            .eq('player_id', _playerId)
-            .eq('status', 'approved')
-            .order('registered_at', { ascending: false })
-            .limit(8)
-            .then(function(res) {
-                console.log('[KSLT] tournaments query:', res.error ? res.error.message : (res.data ? res.data.length + ' results' : 'no data'));
-                if (res.error || !res.data || res.data.length === 0) {
-                    renderMockTournaments(container, data);
-                    return;
-                }
-                var html = '';
-                res.data.forEach(function(reg) {
-                    var t = reg.tournament;
-                    if (!t) return;
-                    var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
-                    html += '<div class="pp-tournament">';
-                    html += '<span class="pp-tournament-name">' + esc(tName) + '</span>';
-                    html += '<span class="pp-tournament-result">' + LH.participated + '</span>';
-                    html += '</div>';
-                });
-                container.innerHTML = html;
+        var ROUND_LABELS = {
+            'W': LH.winner, 'F': LH.roundF, 'SF': LH.roundSF, 'QF': LH.roundQF,
+            'R16': 'R16', 'R32': 'R32', '3RD': LH.round3rd, '4TH': LH.round4th
+        };
+
+        Promise.all([
+            client.from('tournament_registrations')
+                .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start)')
+                .eq('player_id', _playerId)
+                .in('status', ['approved', 'draw'])
+                .order('registered_at', { ascending: false })
+                .limit(10),
+            client.from('tournament_results')
+                .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start)')
+                .eq('player_id', _playerId)
+                .order('created_at', { ascending: false })
+                .limit(10)
+        ]).then(function(results) {
+            var regs = results[0].data || [];
+            var tResults = results[1].data || [];
+
+            // Map results by tournament_id
+            var resultsMap = {};
+            tResults.forEach(function(tr) { resultsMap[tr.tournament_id] = tr; });
+
+            // Merge registrations + results
+            var items = [];
+            var seen = {};
+            regs.forEach(function(reg) {
+                if (!reg.tournament || seen[reg.tournament.id]) return;
+                seen[reg.tournament.id] = true;
+                var tr = resultsMap[reg.tournament.id];
+                items.push({ tournament: reg.tournament, round_reached: tr ? tr.round_reached : null, points_earned: tr ? tr.points_earned : 0 });
             });
+            tResults.forEach(function(tr) {
+                if (!tr.tournament || seen[tr.tournament_id]) return;
+                seen[tr.tournament_id] = true;
+                items.push({ tournament: tr.tournament, round_reached: tr.round_reached, points_earned: tr.points_earned });
+            });
+
+            if (items.length === 0) { renderMockTournaments(container, data); return; }
+
+            var html = '';
+            items.forEach(function(item) {
+                var t = item.tournament;
+                var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
+                var result = item.round_reached ? (ROUND_LABELS[item.round_reached] || item.round_reached) : LH.participated;
+                if (item.points_earned > 0) result += ' · +' + item.points_earned;
+                var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
+                html += '<a class="pp-tournament" href="tournament.html' + (isEn ? '-en' : isKg ? '-kg' : '') + '?id=' + t.id + '">';
+                html += '<div class="pp-tournament-info"><span class="pp-tournament-name">' + esc(tName) + '</span>';
+                if (dateStr) html += '<span class="pp-tournament-date">' + dateStr + '</span>';
+                html += '</div>';
+                html += '<span class="pp-tournament-result' + (item.round_reached === 'W' ? ' pp-tournament-winner' : '') + '">' + result + '</span>';
+                html += '</a>';
+            });
+            container.innerHTML = html;
+        });
     }
 
     function renderMockTournaments(container, data) {
@@ -994,7 +1041,8 @@
                             change: p.rank_change || 0,
                             form: p.form || [],
                             badges: [],
-                            online: false
+                            online: false,
+                            ntrp_rating: p.ntrp_rating || null
                         },
                         category: { name: catName || '\u2014', players: [] },
                         categoryKey: catKey,

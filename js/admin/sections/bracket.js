@@ -9,6 +9,95 @@
     var L = A.L;
     var isEn = A.isEn;
 
+    // ---- NTRP Elo Calculation ----
+    var NTRP_K = 0.15; // Sensitivity factor (how much rating changes per match)
+    var NTRP_DEFAULT = 3.0; // Default rating for unrated players
+
+    function eloExpected(ra, rb) {
+        // Expected score for player A vs player B
+        // Using NTRP scale: 400 Elo points ≈ 2.0 NTRP difference
+        return 1 / (1 + Math.pow(10, (rb - ra) / 2.0));
+    }
+
+    function clampNtrp(val) {
+        return Math.max(1.0, Math.min(7.0, Math.round(val * 100) / 100));
+    }
+
+    async function updateNtrpRatings(tournament, matches) {
+        // Get all completed matches with winner (exclude BYEs)
+        var completedMatches = matches.filter(function(m) {
+            return m.status === 'completed' && m.winner_id && m.score !== 'BYE'
+                && m.player1_id && m.player2_id;
+        });
+        if (completedMatches.length === 0) return;
+
+        // Sort by round_number to process in order
+        completedMatches.sort(function(a, b) { return (a.round_number || 0) - (b.round_number || 0); });
+
+        // Collect all player IDs
+        var playerIds = [];
+        completedMatches.forEach(function(m) {
+            if (playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
+            if (playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
+        });
+
+        // Load current NTRP ratings from players
+        var res = await A.client.from('players').select('id, ntrp_rating').in('id', playerIds);
+        var ratings = {};
+        var ratingsBefore = {};
+        (res.data || []).forEach(function(p) {
+            ratings[p.id] = p.ntrp_rating || NTRP_DEFAULT;
+            ratingsBefore[p.id] = p.ntrp_rating || NTRP_DEFAULT;
+        });
+
+        // Re-finalization safety: if rating_history already has ntrp_before for this tournament,
+        // restore those values as starting point (prevents double-counting)
+        var histRes = await A.client.from('rating_history')
+            .select('player_id, ntrp_before')
+            .eq('tournament_id', tournament.id)
+            .not('ntrp_before', 'is', null);
+        if (histRes.data && histRes.data.length > 0) {
+            histRes.data.forEach(function(h) {
+                ratings[h.player_id] = Number(h.ntrp_before);
+                ratingsBefore[h.player_id] = Number(h.ntrp_before);
+            });
+        }
+
+        // Process each match: update ratings via Elo
+        completedMatches.forEach(function(m) {
+            var ra = ratings[m.player1_id] || NTRP_DEFAULT;
+            var rb = ratings[m.player2_id] || NTRP_DEFAULT;
+
+            var expectedA = eloExpected(ra, rb);
+            var expectedB = 1 - expectedA;
+
+            var actualA = m.winner_id === m.player1_id ? 1 : 0;
+            var actualB = 1 - actualA;
+
+            ratings[m.player1_id] = clampNtrp(ra + NTRP_K * (actualA - expectedA));
+            ratings[m.player2_id] = clampNtrp(rb + NTRP_K * (actualB - expectedB));
+        });
+
+        // Save updated ratings to players
+        for (var i = 0; i < playerIds.length; i++) {
+            var pid = playerIds[i];
+            var newRating = Math.round(ratings[pid] * 10) / 10;
+            await A.client.from('players').update({ ntrp_rating: newRating }).eq('id', pid);
+        }
+
+        // Save NTRP history to rating_history
+        for (var j = 0; j < playerIds.length; j++) {
+            var pid2 = playerIds[j];
+            await A.client.from('rating_history')
+                .update({
+                    ntrp_before: ratingsBefore[pid2],
+                    ntrp_after: Math.round(ratings[pid2] * 100) / 100
+                })
+                .eq('tournament_id', tournament.id)
+                .eq('player_id', pid2);
+        }
+    }
+
     // ---- Save Rating History on finalization ----
     async function saveRatingHistory(tournament, results) {
         // Delete old entries for this tournament (re-finalization safe)
@@ -19,10 +108,10 @@
         var rows = results.map(function(r) {
             return {
                 player_id: r.player_id,
-                tournament_name: tournament.name,
+                tournament_name: tournament.title,
                 tournament_id: tournament.id,
                 points_earned: r.points_earned || 0,
-                recorded_at: tournament.start_date
+                recorded_at: tournament.date_start
             };
         });
 
@@ -3694,6 +3783,7 @@
                 // Recalculate player points
                 await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
                 await saveRatingHistory(tournament, toUpsert);
+                await updateNtrpRatings(tournament, matches);
             }
 
             // Update player form arrays (W/L from recent matches)
@@ -3827,6 +3917,7 @@
                 }
                 await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
                 await saveRatingHistory(tournament, toUpsert);
+                await updateNtrpRatings(tournament, matches);
             }
 
             // Update player form arrays (W/L from recent matches)
@@ -4009,6 +4100,7 @@
                 }
                 await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
                 await saveRatingHistory(tournament, toUpsert);
+                await updateNtrpRatings(tournament, matches);
             }
 
             // Update player form arrays

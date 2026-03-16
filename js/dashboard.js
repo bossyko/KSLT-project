@@ -503,12 +503,13 @@
     window.onAuthReady = function(user, profile) {
         renderSidebar(profile);
         initQrButton(profile);
+        loadSidebarRatings(profile);
         renderMobileTabs();
         renderProfile(user, profile);
         renderMembershipCard().then(function(state) {
             applyMembershipRestrictions(state);
         });
-        renderTournaments();
+        renderTournaments(profile);
         renderStats(profile);
         renderInvitations();
         renderChallenges();
@@ -698,13 +699,10 @@
             ? '<img src="' + escHtml(profile.avatar_url) + '" class="db-sidebar-avatar" alt="">'
             : '<div class="db-sidebar-avatar-placeholder">' + initials + '</div>';
 
-        var roleLabel;
+        // Role badge for admin/manager only
+        var roleHtml = '';
         if (profile.role === 'admin' || profile.role === 'manager') {
-            roleLabel = L['role_' + profile.role] || profile.role;
-        } else if (profile.player_id) {
-            roleLabel = L.role_player;
-        } else {
-            roleLabel = L.role_user;
+            roleHtml = '<div class="db-sidebar-role">' + (L['role_' + profile.role] || profile.role) + '</div>';
         }
 
         var qrBtnHtml = profile.player_id
@@ -715,7 +713,8 @@
             '<div class="db-sidebar-user">' +
                 avatarHtml +
                 '<div class="db-sidebar-name">' + (profile.full_name || 'User') + '</div>' +
-                '<div class="db-sidebar-role">' + roleLabel + '</div>' +
+                roleHtml +
+                '<div class="db-sidebar-ratings" id="dbSidebarRatings"></div>' +
                 qrBtnHtml +
             '</div>' +
             '<ul class="db-sidebar-nav">' +
@@ -727,6 +726,42 @@
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="vouchers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>' + L.vouchers + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</button></li>' +
             '</ul>';
+    }
+
+    // ---- Sidebar Ratings (KSLT rank + NTRP) ----
+    async function loadSidebarRatings(profile) {
+        var container = document.getElementById('dbSidebarRatings');
+        if (!container || !profile.player_id || !client) return;
+
+        var res = await client.from('players').select('points, category_id, ntrp_rating').eq('id', profile.player_id).single();
+        if (!res.data) return;
+
+        var player = res.data;
+        var html = '';
+
+        // KSLT rank
+        if (player.category_id) {
+            var catRes = await client.from('categories').select('name').eq('id', player.category_id).single();
+            var catName = (catRes.data && catRes.data.name) || '';
+            // Calculate rank in category
+            var rankRes = await client.from('players').select('id', { count: 'exact', head: true })
+                .eq('category_id', player.category_id).gt('points', player.points || 0);
+            var rank = (rankRes.count || 0) + 1;
+            html += '<div class="db-sidebar-rating-row">' +
+                '<span class="db-sidebar-rating-label">KSLT</span>' +
+                '<span class="db-sidebar-rating-value">' + escHtml(catName) + ' · #' + rank + '</span>' +
+            '</div>';
+        }
+
+        // NTRP rating
+        if (player.ntrp_rating) {
+            html += '<div class="db-sidebar-rating-row">' +
+                '<span class="db-sidebar-rating-label">NTRP</span>' +
+                '<span class="db-sidebar-rating-value">' + player.ntrp_rating.toFixed(1) + '</span>' +
+            '</div>';
+        }
+
+        if (html) container.innerHTML = html;
     }
 
     // ---- QR Code Modal ----
@@ -1523,11 +1558,22 @@
     }
 
     // ---- Render Tournaments ----
-    function renderTournaments() {
+    var ROUND_LABELS_DB = isEn ? {
+        'W': '🏆 Winner', 'F': 'Final', 'SF': 'Semifinal', 'QF': 'Quarterfinal',
+        'R16': 'R16', 'R32': 'R32', '3RD': '3rd place', '4TH': '4th place'
+    } : isKg ? {
+        'W': '🏆 Жеңүүчү', 'F': 'Финал', 'SF': '1/2 финал', 'QF': '1/4 финал',
+        'R16': 'R16', 'R32': 'R32', '3RD': '3-орун', '4TH': '4-орун'
+    } : {
+        'W': '🏆 Победитель', 'F': 'Финал', 'SF': '1/2 финала', 'QF': '1/4 финала',
+        'R16': 'R16', 'R32': 'R32', '3RD': '3-е место', '4TH': '4-е место'
+    };
+
+    async function renderTournaments(profile) {
         var container = document.getElementById('db-tournaments');
         if (!container) return;
 
-        container.innerHTML =
+        var emptyHtml =
             '<h2 class="db-section-title">' + L.tournamentsTitle + '</h2>' +
             '<div class="db-card">' +
                 '<div class="db-empty">' +
@@ -1536,6 +1582,91 @@
                     '<div class="db-empty-text">' + L.noTournamentsText + '</div>' +
                 '</div>' +
             '</div>';
+
+        if (!profile || !profile.player_id || !client) {
+            container.innerHTML = emptyHtml;
+            return;
+        }
+
+        var pid = profile.player_id;
+
+        try {
+            var results = await Promise.all([
+                client.from('tournament_registrations')
+                    .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start, status)')
+                    .eq('player_id', pid)
+                    .in('status', ['approved', 'draw'])
+                    .order('registered_at', { ascending: false })
+                    .limit(20),
+                client.from('tournament_results')
+                    .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start)')
+                    .eq('player_id', pid)
+                    .order('created_at', { ascending: false })
+                    .limit(20)
+            ]);
+
+            var regs = results[0].data || [];
+            var tResults = results[1].data || [];
+
+            // Map results by tournament_id
+            var resultsMap = {};
+            tResults.forEach(function(tr) { resultsMap[tr.tournament_id] = tr; });
+
+            // Merge
+            var items = [];
+            var seen = {};
+            regs.forEach(function(reg) {
+                if (!reg.tournament || seen[reg.tournament.id]) return;
+                seen[reg.tournament.id] = true;
+                var tr = resultsMap[reg.tournament.id];
+                items.push({
+                    tournament: reg.tournament,
+                    round_reached: tr ? tr.round_reached : null,
+                    points_earned: tr ? tr.points_earned : 0
+                });
+            });
+            tResults.forEach(function(tr) {
+                if (!tr.tournament || seen[tr.tournament_id]) return;
+                seen[tr.tournament_id] = true;
+                items.push({
+                    tournament: tr.tournament,
+                    round_reached: tr.round_reached,
+                    points_earned: tr.points_earned
+                });
+            });
+
+            if (items.length === 0) {
+                container.innerHTML = emptyHtml;
+                return;
+            }
+
+            var html = '<h2 class="db-section-title">' + L.tournamentsTitle + '</h2>';
+            html += '<div class="db-tournaments-list">';
+            items.forEach(function(item) {
+                var t = item.tournament;
+                var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
+                var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
+                var result = item.round_reached
+                    ? (ROUND_LABELS_DB[item.round_reached] || item.round_reached)
+                    : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован');
+                var pts = item.points_earned > 0 ? ' · +' + item.points_earned + ' pts' : '';
+                var isWinner = item.round_reached === 'W';
+
+                html += '<a class="db-tournament-row" href="tournament.html' + (isEn ? '-en' : isKg ? '-kg' : '') + '?id=' + t.id + '">';
+                html += '<div class="db-tournament-info">';
+                html += '<span class="db-tournament-name">' + escHtml(tName) + '</span>';
+                html += '<span class="db-tournament-date">' + dateStr + '</span>';
+                html += '</div>';
+                html += '<span class="db-tournament-result' + (isWinner ? ' db-tournament-winner' : '') + '">' + result + pts + '</span>';
+                html += '</a>';
+            });
+            html += '</div>';
+            container.innerHTML = html;
+
+        } catch(e) {
+            console.warn('[KSLT] tournaments load error:', e);
+            container.innerHTML = emptyHtml;
+        }
     }
 
     // ---- Render Stats ----
@@ -1735,45 +1866,106 @@
 
         var labels = [];
         var values = [];
+        var ntrpValues = [];
         var cumulative = 0;
         var tooltipNames = [];
+        var hasNtrp = false;
 
         data.forEach(function(row) {
             cumulative += row.points_earned;
             labels.push(row.recorded_at);
             values.push(cumulative);
             tooltipNames.push(row.tournament_name + ' (+' + row.points_earned + ')');
+            if (row.ntrp_after != null) {
+                ntrpValues.push(row.ntrp_after);
+                hasNtrp = true;
+            } else {
+                ntrpValues.push(null);
+            }
         });
 
         var canvas = document.getElementById(canvasId);
         if (!canvas) return;
 
+        var datasets = [{
+            label: isEn ? 'KSLT Points' : 'КСЛТ очки',
+            data: values,
+            borderColor: '#CCFF00',
+            backgroundColor: 'rgba(204,255,0,0.1)',
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: '#CCFF00',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 2,
+            yAxisID: 'y'
+        }];
+
+        if (hasNtrp) {
+            datasets.push({
+                label: 'NTRP',
+                data: ntrpValues,
+                borderColor: '#00BFFF',
+                backgroundColor: 'rgba(0,191,255,0.05)',
+                fill: false,
+                tension: 0.3,
+                pointBackgroundColor: '#00BFFF',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                borderWidth: 2,
+                borderDash: [5, 3],
+                yAxisID: 'y1'
+            });
+        }
+
+        var scales = {
+            x: {
+                ticks: { color: '#888', maxRotation: 45 },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: { color: '#CCFF00' },
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                title: { display: hasNtrp, text: 'KSLT', color: '#CCFF00' }
+            }
+        };
+
+        if (hasNtrp) {
+            scales.y1 = {
+                position: 'right',
+                min: 1.0,
+                max: 7.0,
+                ticks: { color: '#00BFFF', stepSize: 0.5 },
+                grid: { display: false },
+                title: { display: true, text: 'NTRP', color: '#00BFFF' }
+            };
+        }
+
         new Chart(canvas, {
             type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: L.rhTotalPoints,
-                    data: values,
-                    borderColor: '#CCFF00',
-                    backgroundColor: 'rgba(204,255,0,0.1)',
-                    fill: true,
-                    tension: 0.3,
-                    pointBackgroundColor: '#CCFF00',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    borderWidth: 2
-                }]
-            },
+            data: { labels: labels, datasets: datasets },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: '#ccc',
+                            usePointStyle: true,
+                            pointStyle: 'line',
+                            padding: 16,
+                            font: { size: 12 }
+                        }
+                    },
                     tooltip: {
                         callbacks: {
                             title: function(ctx) { return tooltipNames[ctx[0].dataIndex]; },
-                            label: function(ctx) { return L.rhTotalPoints + ': ' + ctx.parsed.y; }
+                            label: function(ctx) {
+                                if (ctx.dataset.label === 'NTRP') return 'NTRP: ' + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(2) : '—');
+                                return (isEn ? 'KSLT' : 'КСЛТ') + ': ' + ctx.parsed.y;
+                            }
                         },
                         backgroundColor: 'rgba(30,30,30,0.95)',
                         titleColor: '#CCFF00',
@@ -1782,17 +1974,7 @@
                         borderWidth: 1
                     }
                 },
-                scales: {
-                    x: {
-                        ticks: { color: '#888', maxRotation: 45 },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: '#888' },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
-                    }
-                }
+                scales: scales
             }
         });
     }

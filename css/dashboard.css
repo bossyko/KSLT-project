@@ -95,6 +95,34 @@ body.db-page.auth-ready {
     border: 1px solid rgba(204, 255, 0, 0.2);
 }
 
+.db-sidebar-ratings {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+.db-sidebar-rating-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.75rem;
+}
+
+.db-sidebar-rating-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    min-width: 36px;
+}
+
+.db-sidebar-rating-value {
+    color: var(--text-secondary);
+}
+
 .db-sidebar-qr-btn {
     display: inline-flex;
     align-items: center;
@@ -558,6 +586,63 @@ select.db-field-input {
     background-position: right 16px center;
     padding-right: 40px;
     cursor: pointer;
+}
+
+/* ---- Tournaments List ---- */
+.db-tournaments-list {
+    display: grid;
+    gap: 8px;
+}
+
+.db-tournament-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.db-tournament-row:hover {
+    border-color: var(--accent);
+    background: rgba(204,255,0,0.04);
+}
+
+.db-tournament-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.db-tournament-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db-tournament-date {
+    font-size: 0.8rem;
+    color: var(--text-muted, #888);
+}
+
+.db-tournament-result {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+.db-tournament-winner {
+    color: #FFD700;
 }
 
 /* ---- Stats Grid ---- */

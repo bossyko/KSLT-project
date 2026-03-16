@@ -30,7 +30,7 @@ A full-featured community platform for tennis players in Kyrgyzstan — tourname
 | Frontend | HTML5, CSS3, Vanilla JavaScript (no frameworks, no build step) |
 | Backend | [Supabase](https://supabase.com) — PostgreSQL, Auth, Storage, Edge Functions, Row Level Security |
 | Auth | Supabase Auth (email/password + Google OAuth) |
-| Serverless | 4 Deno/TypeScript Edge Functions |
+| Serverless | 7 Deno/TypeScript Edge Functions |
 | Bot | Telegram Bot API (webhooks) |
 | Design | Dark theme, accent `#CCFF00`, Inter font, glassmorphism |
 | Libraries | [Cropper.js](https://fengyuanchen.github.io/cropperjs/) (avatar cropping, CDN) |
@@ -87,7 +87,7 @@ KSLT/
 │
 ├── data/                               # Static data (Supabase fallback)
 ├── sql/                                # 38 SQL migrations
-├── supabase/                           # Schema + 4 Edge Functions
+├── supabase/                           # Schema + 7 Edge Functions
 ├── docs/                               # Technical docs
 └── images/                             # Assets
 ```
@@ -114,6 +114,26 @@ npx serve .
 2. Right-click `index.html` → **Open with Live Server**
 
 The Supabase anon key is already configured in `js/supabase-config.js`. This is a **public** key — security is enforced through RLS policies at the database level.
+
+## Environment Variables
+
+See [`.env.example`](.env.example) for all required variables.
+
+| Variable | Where | Description |
+|----------|-------|-------------|
+| `SUPABASE_URL` | Edge Functions (auto) | Supabase project URL |
+| `SUPABASE_ANON_KEY` | `js/supabase-config.js` + Edge Functions | Public key (RLS protects data) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Edge Functions (auto) | Server key (bypasses RLS) |
+| `TELEGRAM_BOT_TOKEN` | Edge Functions secret | Telegram bot token |
+| `TELEGRAM_GROUP_CHAT_ID` | Edge Functions secret | Telegram group chat ID |
+| `CRON_SECRET` | Edge Functions secret | Secret for pg_cron jobs |
+
+## Documentation
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — Git flow, code style, architecture patterns
+- [docs/TECHNICAL.md](docs/TECHNICAL.md) — Full technical documentation
+- [docs/MANAGER-GUIDE.md](docs/MANAGER-GUIDE.md) — Admin panel guide for managers
+- [docs/API.md](docs/API.md) — API documentation
 
 ## Live Demo
 

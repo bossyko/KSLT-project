@@ -112,6 +112,34 @@
     font-weight: 600;
 }
 
+.pp-ratings {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.pp-rating-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+}
+
+.pp-rating-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    min-width: 40px;
+    font-size: 0.8rem;
+}
+
+.pp-rating-value {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
 .pp-meta-online {
     display: inline-flex;
     align-items: center;
@@ -508,7 +536,7 @@
     gap: 8px;
 }
 
-.pp-tournament {
+a.pp-tournament {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -516,17 +544,46 @@
     background: var(--surface-glass);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, background 0.2s;
+}
+a.pp-tournament:hover {
+    border-color: var(--accent);
+    background: rgba(204,255,0,0.04);
+}
+
+.pp-tournament-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
 }
 
 .pp-tournament-name {
     font-weight: 600;
     font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pp-tournament-date {
+    font-size: 0.8rem;
+    color: #888;
 }
 
 .pp-tournament-result {
     color: var(--accent);
     font-weight: 700;
     font-size: 0.9rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+.pp-tournament-winner {
+    color: #FFD700;
 }
 
 /* ---- CTA ---- */
