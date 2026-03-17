@@ -901,70 +901,82 @@
             btn.textContent = L.saving;
             btn.disabled = true;
 
-            try {
-                var session = await A.client.auth.getSession();
-                var token = session.data.session.access_token;
+            // 1. Direct DB update (works via RLS)
+            var result = await A.client.from('players').update({
+                banned_until: bannedUntil,
+                ban_reason: reason || null
+            }).eq('id', playerId);
 
-                var resp = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        action: 'ban_player',
-                        player_id: playerId,
-                        banned_until: bannedUntil,
-                        reason: reason || undefined
-                    })
-                });
-
-                var data = await resp.json();
-                if (data.error) {
-                    A.showToast(data.error, 'error');
-                    btn.textContent = L.plrBanPlayer;
-                    btn.disabled = false;
-                } else {
-                    overlay.remove();
-                    A.showToast(L.plrBanSuccess, 'success');
-                    loadAndEditPlayer(playerId);
-                }
-            } catch (err) {
-                A.showToast('Error: ' + err.message, 'error');
+            if (result.error) {
+                A.showToast(result.error.message, 'error');
                 btn.textContent = L.plrBanPlayer;
                 btn.disabled = false;
+                return;
             }
+
+            overlay.remove();
+            A.showToast(L.plrBanSuccess, 'success');
+            loadAndEditPlayer(playerId);
+
+            // 2. TG notification (best-effort, non-blocking)
+            try {
+                var session = await A.client.auth.getSession();
+                var token = session.data && session.data.session ? session.data.session.access_token : null;
+                if (token) {
+                    fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token,
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({
+                            action: 'ban_player',
+                            player_id: playerId,
+                            banned_until: bannedUntil,
+                            reason: reason || undefined
+                        })
+                    }).catch(function() {});
+                }
+            } catch (e) { /* TG notification is best-effort */ }
         });
     }
 
     async function unbanPlayerHandler(playerId) {
         A.showConfirm(L.plrUnbanPlayer, L.plrUnbanConfirm, async function() {
+            // 1. Direct DB update
+            var result = await A.client.from('players').update({
+                banned_until: null,
+                ban_reason: null
+            }).eq('id', playerId);
+
+            if (result.error) {
+                A.showToast(result.error.message, 'error');
+                return;
+            }
+
+            A.showToast(L.plrUnbanSuccess, 'success');
+            loadAndEditPlayer(playerId);
+
+            // 2. TG notification (best-effort, non-blocking)
             try {
                 var session = await A.client.auth.getSession();
-                var token = session.data.session.access_token;
-
-                var resp = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        action: 'unban_player',
-                        player_id: playerId
-                    })
-                });
-
-                var data = await resp.json();
-                if (data.error) {
-                    A.showToast(data.error, 'error');
-                } else {
-                    A.showToast(L.plrUnbanSuccess, 'success');
-                    loadAndEditPlayer(playerId);
+                var token = session.data && session.data.session ? session.data.session.access_token : null;
+                if (token) {
+                    fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token,
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({
+                            action: 'unban_player',
+                            player_id: playerId
+                        })
+                    }).catch(function() {});
                 }
-            } catch (err) {
-                A.showToast('Error: ' + err.message, 'error');
-            }
+            } catch (e) { /* TG notification is best-effort */ }
         });
     }
 
