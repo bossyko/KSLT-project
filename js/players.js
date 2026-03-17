@@ -61,7 +61,8 @@
             record: 'W/L',
             form: 'Форма',
             change: '\u0394',
-            actions: '',
+            actions: 'Вызов',
+            ntrp: 'NTRP',
             online: 'Онлайн',
             message: 'Написать',
             challenge: 'Вызов',
@@ -271,7 +272,9 @@
                             change: p.rank_change || 0,
                             form: p.form || [],
                             online: false,
-                            badges: p.badges || []
+                            badges: p.badges || [],
+                            ntrp_rating: p.ntrp_rating || null,
+                            banned_until: p.banned_until || null
                         };
                     })
                 };
@@ -482,6 +485,7 @@
             '<span class="pl-col-player">' + labels.player + '</span>' +
             '<span class="pl-col-online">' + labels.online + '</span>' +
             '<span class="pl-col-country">' + labels.country + '</span>' +
+            '<span class="pl-col-ntrp">' + (labels.ntrp || 'NTRP') + '</span>' +
             '<span class="pl-col-points">' + labels.points + '</span>' +
             '<span class="pl-col-record">' + labels.record + '</span>' +
             '<span class="pl-col-form">' + labels.form + '</span>' +
@@ -538,12 +542,14 @@
                         '<div class="pl-player-name-row">' +
                             '<a href="' + (isEnPage() ? 'player-en.html' : (isKgPage() ? 'player-kg.html' : 'player.html')) + '?id=' + p.id + '" class="pl-player-name">' + p.name + '</a>' +
                             (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
+                            (p.banned_until && new Date(p.banned_until) > new Date() ? '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + (isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.')) + '</span>' : '') +
                         '</div>' +
                         catLabel +
                     '</div>' +
                 '</div>' +
                 '<span class="pl-col-online">' + (p.online ? '<span class="pl-online-dot pl-online-pulse"></span>' : '<span class="pl-offline-dot"></span>') + '</span>' +
                 '<span class="pl-col-country">' + p.country + '</span>' +
+                '<span class="pl-col-ntrp">' + (p.ntrp_rating ? '<span class="pl-ntrp-value">' + Number(p.ntrp_rating).toFixed(1) + '</span>' : '<span class="pl-ntrp-na">\u2014</span>') + '</span>' +
                 '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
                 '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
                 '<span class="pl-col-form">' + formHtml + '</span>' +
@@ -788,6 +794,7 @@
         var headerRow = '<div class="pl-row pl-row-header pl-cat-row">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
             '<span class="pl-col-player">' + labels.player + '</span>' +
+            '<span class="pl-col-ntrp">' + (labels.ntrp || 'NTRP') + '</span>' +
             '<span class="pl-col-points">' + labels.points + '</span>' +
             '<span class="pl-col-record">' + labels.record + '</span>' +
             '<span class="pl-col-form">' + labels.form + '</span>' +
@@ -846,9 +853,11 @@
                         '<div class="pl-player-name-row">' +
                             nameHtml +
                             (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
+                            (p.banned_until && new Date(p.banned_until) > new Date() ? '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + (isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.')) + '</span>' : '') +
                         '</div>' +
                     '</div>' +
                 '</div>' +
+                '<span class="pl-col-ntrp">' + (p.ntrp_rating ? '<span class="pl-ntrp-value">' + Number(p.ntrp_rating).toFixed(1) + '</span>' : '<span class="pl-ntrp-na">\u2014</span>') + '</span>' +
                 '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
                 '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
                 '<span class="pl-col-form">' + formHtml + '</span>' +

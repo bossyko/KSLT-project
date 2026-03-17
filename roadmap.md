@@ -111,15 +111,19 @@
 - [ ] Two-step password reset: email (existing) + SMS code verification
 - [ ] SMS verification provider (Twilio / Nikita.kg)
 
-### User Ban & Moderation System
-- [ ] Temp ban (1d / 3d / 7d / 30d) — Supabase `ban_duration` + auto-unban
-- [ ] Permanent ban — Supabase `banned_until` forever
-- [ ] Early unban — restore access from admin panel
-- [ ] Telegram restrict on ban (read-only in group, no tournament registration via bot)
-- [ ] Telegram kick on delete (full removal from group)
-- [ ] Ban UI in admin Users section (status badge, ban/unban buttons, duration modal)
-- [ ] Ban reason field (optional, stored in profiles)
-- [ ] Edge Function: ban_user, unban_user actions in admin-manage-user
+### User Ban & Moderation System ✅
+- [x] Temp ban (7d / 30d / 90d / 1y / custom) — player `banned_until`
+- [x] Permanent ban — `banned_until = 2099-12-31`
+- [x] Early unban — restore from admin panel (players + users)
+- [x] Telegram DM on ban/unban (via Edge Function `ban_player` / `unban_player`)
+- [x] Telegram restrict on user ban (read-only in group)
+- [x] Telegram kick on user delete (full removal from group)
+- [x] Ban UI in admin Players section (badge, modal, unban button)
+- [x] Ban UI in admin Users section (badge, modal, unban button)
+- [x] Manager can ban/delete regular users (role=user only)
+- [x] Ban check: tournament registration blocked on site + Telegram bot
+- [x] Ban badge on public rating pages (RU/EN/KG)
+- [x] Edge Function: ban_player, unban_player, ban_user, unban_user, delete_user
 
 ## Infrastructure (Backlog)
 

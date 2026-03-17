@@ -1855,8 +1855,8 @@ function renderRegistrationButton(tournament, registrations, isEn) {
             // Check if already registered
             var alreadyRegistered = registrations.find(function(r) { return r.player_id === playerId; });
 
-            // Check category match
-            client.from('players').select('category_id').eq('id', playerId).single().then(async function(plRes) {
+            // Check category match + ban status
+            client.from('players').select('category_id, banned_until, ban_reason').eq('id', playerId).single().then(async function(plRes) {
                 if (!plRes.data) return;
 
                 function getCatGender(cid) { return cid ? cid.split('-')[0] : null; }
@@ -1898,6 +1898,9 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
                 var btnHtml = '<div class="td-registration-area" style="margin-top:var(--space-md);">';
 
+                // Ban check
+                var playerBanned = plRes.data.banned_until && new Date(plRes.data.banned_until) > new Date();
+
                 if (alreadyRegistered) {
                     var statusLabels = isEn
                         ? { pending: 'Registration Pending', approved: 'Registered', rejected: 'Registration Rejected', withdrawn: 'Withdrawn', waitlist: 'On Waitlist' }
@@ -1905,6 +1908,23 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания' });
                     btnHtml += '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
                         statusLabels[alreadyRegistered.status] + '</span>';
+                } else if (playerBanned) {
+                    var isPerm = new Date(plRes.data.banned_until).getFullYear() >= 2099;
+                    var banDateStr = isPerm
+                        ? (isEn ? 'permanently' : (isKg ? 'түбөлүккө' : 'навсегда'))
+                        : new Date(plRes.data.banned_until).toLocaleDateString(isEn ? 'en-US' : 'ru-RU');
+                    var banReasonText = plRes.data.ban_reason
+                        ? '<div style="color:var(--text-dim);font-size:0.85rem;margin-top:4px;">' +
+                            (isEn ? 'Reason: ' : (isKg ? 'Себеби: ' : 'Причина: ')) + plRes.data.ban_reason + '</div>'
+                        : '';
+                    btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);">' +
+                        '<div style="color:#ff3b30;font-weight:500;margin-bottom:4px;">' +
+                            (isEn ? 'You are banned from tournaments until ' + banDateStr
+                                : (isKg ? 'Сиз мелдештерден ' + banDateStr + ' чейин бөгөттөлгөнсүз'
+                                : 'Вы заблокированы для участия в турнирах до ' + banDateStr)) +
+                        '</div>' +
+                        banReasonText +
+                    '</div>';
                 } else if (genderBlocked) {
                     var genderMsg = (catRes.data && catRes.data.gender) === 'men'
                         ? (isEn ? 'This tournament is for men only' : (isKg ? 'Бул мелдеш эркектер үчүн гана' : 'Этот турнир только для мужчин'))

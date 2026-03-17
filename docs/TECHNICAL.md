@@ -159,7 +159,7 @@ KSLT/
 │   ├── schema.sql                  ← Основная схема БД
 │   ├── seed.sql                    ← Начальные данные
 │   └── functions/                  ← 6 Edge Functions (Deno/TypeScript)
-│       ├── admin-manage-user/      ← Создание менеджеров, удаление пользователей
+│       ├── admin-manage-user/      ← Управление: create_manager, ban/unban user+player, delete_user
 │       ├── send-game-invite/       ← Отправка приглашений
 │       ├── create-challenge/       ← Вызовы на матч (Challenge Board)
 │       ├── tournament-notify/      ← Рассылка турниров в Telegram
@@ -206,7 +206,9 @@ players               — игроки рейтинга
 ├── points, wins, losses
 ├── rank_change
 ├── form[]            — последние 5 результатов (W/L)
-└── seed
+├── seed
+├── banned_until      — дата окончания бана (NULL = не забанен)
+└── ban_reason        — причина бана (опционально)
 
 categories            — категории рейтинга
 ├── id, name, name_en
@@ -328,7 +330,7 @@ notification_log      — лог уведомлений (защита от ду�
 - **profiles** — пользователь видит/редактирует только свой
 - **game_invites** — sender видит отправленные, receiver — полученные
 - **coaches/courts/news** — публичное чтение, запись только admin/manager
-- **players** — публичное чтение, запись через admin
+- **players** — публичное чтение, запись через admin/manager (бан)
 - **memberships/payments** — staff full access
 
 ### RPC-функции
@@ -350,7 +352,7 @@ recalc_player_points()    — пересчёт рейтинга после ту�
 | **Гость** | Просмотр публичных страниц |
 | **user** | Личный кабинет, профиль, участие в турнирах |
 | **user + membership** | Все функции user + приглашения на игру |
-| **manager** | Всё user + админ-панель (CRUD) |
+| **manager** | Всё user + админ-панель (CRUD) + бан/удаление обычных пользователей |
 | **admin** | Полный доступ ко всему |
 
 ### Поток авторизации
@@ -780,6 +782,7 @@ git push origin main
 - `sql/role-access-migration.sql` — RLS по ролям
 - `sql/admin-users-migration.sql` — RLS для пользователей
 - `sql/group-stage-migration.sql` — групповой этап турниров
+- `sql/player-ban-migration.sql` — колонки бана + RLS для менеджера
 - `sql/test-fic-16-players.sql` — тестовый FIC-турнир (16 игроков)
 - `sql/test-32-players-promasters.sql` — тестовый SE-турнир (32 игрока)
 - `sql/test-tournaments-seed.sql` — 90 тестовых турниров (6 категорий)

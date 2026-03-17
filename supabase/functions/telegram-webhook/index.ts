@@ -343,12 +343,22 @@
 
     const { data: player } = await db
       .from('players')
-      .select('id, category_id, points')
+      .select('id, category_id, points, banned_until, ban_reason')
       .eq('id', profile.player_id)
       .single()
 
     if (!player) {
       await answerCallbackQuery(token, query.id, 'Карточка игрока не найдена')
+      return
+    }
+
+    // 5.5. Player-level ban check
+    if (player.banned_until && new Date(player.banned_until) > new Date()) {
+      const isPerm = new Date(player.banned_until).getFullYear() >= 2099
+      const banMsg = isPerm
+        ? '⛔ Вы заблокированы навсегда'
+        : '⛔ Вы заблокированы до ' + new Date(player.banned_until).toLocaleDateString('ru-RU')
+      await answerCallbackQuery(token, query.id, banMsg)
       return
     }
 

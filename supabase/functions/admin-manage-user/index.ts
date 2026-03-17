@@ -1,7 +1,7 @@
 // ============================================
 // KSLT — Admin Manage User Edge Function
-// Operations: create_manager, delete_user, ban_user, unban_user
-// JWT auth + admin role check
+// Operations: create_manager, delete_user, ban_user, unban_user, ban_player, unban_player
+// JWT auth + staff role check (admin / manager)
 // ============================================
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -40,22 +40,26 @@ Deno.serve(async (req) => {
 
     const db = createClient(supabaseUrl, serviceKey)
 
-    // Check admin role
+    // Check caller role (admin or manager)
     const { data: callerProfile } = await db
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    if (!callerProfile || callerProfile.role !== 'admin') {
-      return json({ error: 'Forbidden: admin only' }, 403)
+    const callerRole = callerProfile?.role
+    if (!callerRole || (callerRole !== 'admin' && callerRole !== 'manager')) {
+      return json({ error: 'Forbidden: staff only' }, 403)
     }
 
     const body = await req.json()
     const { action } = body
 
-    // ---- CREATE MANAGER ----
+    // ---- CREATE MANAGER ---- (admin only)
     if (action === 'create_manager') {
+      if (callerRole !== 'admin') {
+        return json({ error: 'Forbidden: admin only' }, 403)
+      }
       const { email, first_name, last_name } = body
       if (!email) return json({ error: 'email required' }, 400)
 
@@ -121,6 +125,10 @@ Deno.serve(async (req) => {
       if (!targetProfile) return json({ error: 'User not found' }, 404)
       if (targetProfile.role === 'admin') {
         return json({ error: 'Cannot ban admin' }, 403)
+      }
+      // Manager can only ban regular users (not other managers/admins)
+      if (callerRole === 'manager' && targetProfile.role !== 'user') {
+        return json({ error: 'Managers can only ban regular users' }, 403)
       }
 
       // Calculate banned_until
@@ -197,9 +205,14 @@ Deno.serve(async (req) => {
 
       const { data: targetProfile } = await db
         .from('profiles')
-        .select('telegram_chat_id')
+        .select('role, telegram_chat_id')
         .eq('id', user_id)
         .single()
+
+      // Manager can only unban regular users
+      if (callerRole === 'manager' && targetProfile && targetProfile.role !== 'user') {
+        return json({ error: 'Managers can only unban regular users' }, 403)
+      }
 
       // Clear ban in profile
       await db
@@ -268,6 +281,10 @@ Deno.serve(async (req) => {
       if (targetProfile && targetProfile.role === 'admin') {
         return json({ error: 'Cannot delete admin' }, 403)
       }
+      // Manager can only delete regular users
+      if (callerRole === 'manager' && targetProfile && targetProfile.role !== 'user') {
+        return json({ error: 'Managers can only delete regular users' }, 403)
+      }
 
       // Telegram: notify + kick from group
       const tgToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
@@ -303,6 +320,93 @@ Deno.serve(async (req) => {
       await db.from('profiles').delete().eq('id', user_id)
 
       return json({ success: true, action: 'deleted' })
+    }
+
+    // ---- BAN PLAYER ----
+    if (action === 'ban_player') {
+      const { player_id, banned_until, reason } = body
+      if (!player_id) return json({ error: 'player_id required' }, 400)
+      if (!banned_until) return json({ error: 'banned_until required' }, 400)
+
+      // Update player ban fields
+      const { error: upErr } = await db
+        .from('players')
+        .update({
+          banned_until: banned_until,
+          ban_reason: reason || null
+        })
+        .eq('id', player_id)
+
+      if (upErr) {
+        console.error('Ban player error:', upErr)
+        return json({ error: upErr.message }, 500)
+      }
+
+      // Find linked profile for Telegram notification
+      const { data: linkedProfile } = await db
+        .from('profiles')
+        .select('telegram_chat_id')
+        .eq('player_id', player_id)
+        .limit(1)
+        .single()
+
+      const tgToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
+      const tgChatId = linkedProfile?.telegram_chat_id
+
+      if (tgToken && tgChatId) {
+        const isPerm = new Date(banned_until).getFullYear() >= 2099
+        const banDateStr = isPerm
+          ? 'навсегда'
+          : new Date(banned_until).toLocaleDateString('ru-RU')
+        const reasonText = reason ? '\nПричина: ' + reason : ''
+        await tgFetch(tgToken, 'sendMessage', {
+          chat_id: tgChatId,
+          text: `⛔ Вы заблокированы до: ${banDateStr}${reasonText}`,
+          parse_mode: 'HTML'
+        })
+      }
+
+      return json({ success: true, action: 'player_banned', banned_until })
+    }
+
+    // ---- UNBAN PLAYER ----
+    if (action === 'unban_player') {
+      const { player_id } = body
+      if (!player_id) return json({ error: 'player_id required' }, 400)
+
+      const { error: upErr } = await db
+        .from('players')
+        .update({
+          banned_until: null,
+          ban_reason: null
+        })
+        .eq('id', player_id)
+
+      if (upErr) {
+        console.error('Unban player error:', upErr)
+        return json({ error: upErr.message }, 500)
+      }
+
+      // Find linked profile for Telegram notification
+      const { data: linkedProfile } = await db
+        .from('profiles')
+        .select('telegram_chat_id')
+        .eq('player_id', player_id)
+        .limit(1)
+        .single()
+
+      const tgToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
+      const tgChatId = linkedProfile?.telegram_chat_id
+
+      if (tgToken && tgChatId) {
+        await tgFetch(tgToken, 'sendMessage', {
+          chat_id: tgChatId,
+          text: '✅ Вы разблокированы. Добро пожаловать обратно!',
+          parse_mode: 'HTML'
+        })
+      }
+
+      return json({ success: true, action: 'player_unbanned' })
     }
 
     return json({ error: 'Unknown action' }, 400)

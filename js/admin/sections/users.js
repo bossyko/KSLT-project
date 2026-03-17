@@ -510,11 +510,12 @@
             }
         }
 
-        // Moderation section (ban/unban) — admin only, not self, not other admin
+        // Moderation section (ban/unban) — admin or manager (manager only for role=user)
         var isSelf = user.id === A.currentUserId;
         var isUserBanned = user.banned_until && new Date(user.banned_until) > new Date();
         var moderationHtml = '';
-        if (isAdm && !isSelf && user.role !== 'admin') {
+        var canModerate = isAdm ? (!isSelf && user.role !== 'admin') : (A.currentRole === 'manager' && !isSelf && user.role === 'user');
+        if (canModerate) {
             if (isUserBanned) {
                 var isPerm = new Date(user.banned_until).getFullYear() >= 2099;
                 var banDateStr = isPerm ? L.usrBannedForever : (L.usrBannedUntil + ' ' + user.banned_until.split('T')[0]);
@@ -531,7 +532,7 @@
             }
         }
 
-        // Role actions — admin only
+        // Role actions — admin, or manager (delete user only)
         var roleActionsHtml = '';
         if (isAdm) {
             if (isSelf) {
@@ -545,6 +546,9 @@
                     '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adUsrMakeManager">' + L.usrMakeManager + '</button>' +
                     '<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrDelete">' + L.usrDeleteUser + '</button>';
             }
+        } else if (A.currentRole === 'manager' && !isSelf && user.role === 'user') {
+            roleActionsHtml =
+                '<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrDelete">' + L.usrDeleteUser + '</button>';
         }
 
         // Profile readonly for manager
@@ -595,10 +599,10 @@
                 (canManageMembership ? '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrMembership + '</h3>' + memHtml : '') +
                 // Player category
                 playerCatHtml +
-                // Moderation (admin only)
-                (isAdm && moderationHtml ? '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrModeration + '</h3>' + moderationHtml : '') +
-                // Actions (admin only)
-                (isAdm ? '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrActions + '</h3>' +
+                // Moderation (admin or manager for regular users)
+                (moderationHtml ? '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrModeration + '</h3>' + moderationHtml : '') +
+                // Actions (admin, or manager for regular users)
+                (roleActionsHtml ? '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrActions + '</h3>' +
                 '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + roleActionsHtml + '</div>' : '') +
             '</div>';
 
@@ -682,7 +686,7 @@
             });
         }
 
-        // Ban button (admin only)
+        // Ban button
         var banBtn = document.getElementById('adUsrBan');
         if (banBtn) {
             banBtn.addEventListener('click', function() {
@@ -690,7 +694,7 @@
             });
         }
 
-        // Unban button (admin only)
+        // Unban button
         var unbanBtn = document.getElementById('adUsrUnban');
         if (unbanBtn) {
             unbanBtn.addEventListener('click', function() {

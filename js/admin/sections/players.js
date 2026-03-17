@@ -191,7 +191,7 @@
         var isAdm = A.currentRole === 'admin';
 
         var query = A.client.from('players')
-            .select('id,name,photo,country,category_id,points,wins,losses,rank_change')
+            .select('id,name,photo,country,category_id,points,wins,losses,rank_change,banned_until')
             .order('points', { ascending: false });
 
         if (plrFilterCategory) {
@@ -231,7 +231,9 @@
                 '<tr data-plr-id="' + p.id + '"' + (isAdm ? ' style="cursor:pointer;"' : '') + '>' +
                     (isAdm ? A.bulkCheckboxTd(p.id) : '') +
                     '<td>' + thumbHtml + '</td>' +
-                    '<td style="font-weight:500;color:var(--text-primary);">' + (p.country || '') + ' ' + (p.name || L.noData) + '</td>' +
+                    '<td style="font-weight:500;color:var(--text-primary);">' + (p.country || '') + ' ' + (p.name || L.noData) +
+                        (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.7rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + L.plrBanned + '</span>' : '') +
+                    '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + (p.points || 0) + '</td>' +
                     '<td>' + (p.wins || 0) + '/' + (p.losses || 0) + '</td>' +
@@ -477,7 +479,28 @@
             '<div class="ad-btn-row">' +
                 '<button class="ad-btn ad-btn-primary" id="adPlrSave">' + L.save + '</button>' +
                 (plrEditingId ? '<button class="ad-btn ad-btn-danger" id="adPlrDelete">' + L.delete + '</button>' : '') +
-            '</div>';
+            '</div>' +
+
+            // Ban moderation section (admin + manager, edit only)
+            (plrEditingId ? (function() {
+                var isPlayerBanned = item && item.banned_until && new Date(item.banned_until) > new Date();
+                var banHtml = '<div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">' +
+                    '<h3 style="font-size:0.9rem;color:var(--accent);margin-bottom:12px;font-weight:600;">' + (isEn ? 'Moderation' : 'Модерация') + '</h3>';
+                if (isPlayerBanned) {
+                    var isPerm = new Date(item.banned_until).getFullYear() >= 2099;
+                    var banDateStr = isPerm ? L.plrBannedForever : (L.plrBannedUntil + ' ' + new Date(item.banned_until).toLocaleDateString(isEn ? 'en-US' : 'ru-RU'));
+                    var banReasonStr = item.ban_reason ? '<div style="color:var(--text-dim);font-size:0.8rem;margin-top:4px;">' + A.esc(item.ban_reason) + '</div>' : '';
+                    banHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+                        '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:0.8rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + banDateStr + '</span>' +
+                    '</div>' +
+                    banReasonStr +
+                    '<button class="ad-btn ad-btn-sm" id="adPlrUnban" style="margin-top:8px;background:rgba(52,199,89,0.15);color:#34c759;border:1px solid rgba(52,199,89,0.3);">' + L.plrUnbanPlayer + '</button>';
+                } else {
+                    banHtml += '<button class="ad-btn ad-btn-danger ad-btn-sm" id="adPlrBan">' + L.plrBanPlayer + '</button>';
+                }
+                banHtml += '</div>';
+                return banHtml;
+            })() : '');
 
         // --- Load Badges (edit only) ---
         if (plrEditingId) {
@@ -646,6 +669,22 @@
                 });
             });
         }
+
+        // Ban button
+        var banBtn = document.getElementById('adPlrBan');
+        if (banBtn) {
+            banBtn.addEventListener('click', function() {
+                openPlayerBanModal(plrEditingId);
+            });
+        }
+
+        // Unban button
+        var unbanBtn = document.getElementById('adPlrUnban');
+        if (unbanBtn) {
+            unbanBtn.addEventListener('click', function() {
+                unbanPlayerHandler(plrEditingId);
+            });
+        }
     }
 
     function previewPlrImage(src) {
@@ -795,6 +834,139 @@
         renderPlayersSection();
     }
 
+    // ---- Player Ban Modal ----
+    function openPlayerBanModal(playerId) {
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-confirm-overlay';
+        overlay.innerHTML =
+            '<div class="ad-confirm-modal" style="max-width:440px;">' +
+                '<div class="ad-confirm-title">' + L.plrBanConfirm + '</div>' +
+                '<div style="margin-bottom:16px;">' +
+                    '<label class="ad-field-label">' + L.plrBanDuration + '</label>' +
+                    '<select class="ad-field-input" id="adPlrBanDuration">' +
+                        '<option value="7d">' + L.plrBan7d + '</option>' +
+                        '<option value="30d">' + L.plrBan30d + '</option>' +
+                        '<option value="90d">' + L.plrBan90d + '</option>' +
+                        '<option value="1y">' + L.plrBan1y + '</option>' +
+                        '<option value="permanent">' + L.plrBanPermanent + '</option>' +
+                        '<option value="custom">' + L.plrBanCustom + '</option>' +
+                    '</select>' +
+                '</div>' +
+                '<div style="margin-bottom:16px;display:none;" id="adPlrBanCustomWrap">' +
+                    '<label class="ad-field-label">' + (isEn ? 'Date' : 'Дата') + '</label>' +
+                    '<input type="date" class="ad-field-input" id="adPlrBanCustomDate">' +
+                '</div>' +
+                '<div style="margin-bottom:16px;">' +
+                    '<label class="ad-field-label">' + L.plrBanReason + '</label>' +
+                    '<textarea class="ad-field-input" id="adPlrBanReason" rows="2" style="resize:vertical;"></textarea>' +
+                '</div>' +
+                '<div class="ad-confirm-actions">' +
+                    '<button class="ad-btn ad-btn-secondary" id="adPlrBanCancel">' + L.cancel + '</button>' +
+                    '<button class="ad-btn ad-btn-danger" id="adPlrBanSubmit">' + L.plrBanPlayer + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        // Show/hide custom date
+        document.getElementById('adPlrBanDuration').addEventListener('change', function() {
+            document.getElementById('adPlrBanCustomWrap').style.display = this.value === 'custom' ? '' : 'none';
+        });
+
+        document.getElementById('adPlrBanCancel').addEventListener('click', function() { overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+        document.getElementById('adPlrBanSubmit').addEventListener('click', async function() {
+            var duration = document.getElementById('adPlrBanDuration').value;
+            var reason = document.getElementById('adPlrBanReason').value.trim();
+
+            var bannedUntil;
+            if (duration === 'permanent') {
+                bannedUntil = '2099-12-31T23:59:59.000Z';
+            } else if (duration === 'custom') {
+                var customDate = document.getElementById('adPlrBanCustomDate').value;
+                if (!customDate) {
+                    A.showToast(isEn ? 'Select a date' : 'Выберите дату', 'error');
+                    return;
+                }
+                bannedUntil = new Date(customDate + 'T23:59:59').toISOString();
+            } else {
+                var daysMap = { '7d': 7, '30d': 30, '90d': 90, '1y': 365 };
+                var dt = new Date();
+                dt.setDate(dt.getDate() + (daysMap[duration] || 7));
+                bannedUntil = dt.toISOString();
+            }
+
+            var btn = document.getElementById('adPlrBanSubmit');
+            btn.textContent = L.saving;
+            btn.disabled = true;
+
+            try {
+                var session = await A.client.auth.getSession();
+                var token = session.data.session.access_token;
+
+                var resp = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        action: 'ban_player',
+                        player_id: playerId,
+                        banned_until: bannedUntil,
+                        reason: reason || undefined
+                    })
+                });
+
+                var data = await resp.json();
+                if (data.error) {
+                    A.showToast(data.error, 'error');
+                    btn.textContent = L.plrBanPlayer;
+                    btn.disabled = false;
+                } else {
+                    overlay.remove();
+                    A.showToast(L.plrBanSuccess, 'success');
+                    loadAndEditPlayer(playerId);
+                }
+            } catch (err) {
+                A.showToast('Error: ' + err.message, 'error');
+                btn.textContent = L.plrBanPlayer;
+                btn.disabled = false;
+            }
+        });
+    }
+
+    async function unbanPlayerHandler(playerId) {
+        A.showConfirm(L.plrUnbanPlayer, L.plrUnbanConfirm, async function() {
+            try {
+                var session = await A.client.auth.getSession();
+                var token = session.data.session.access_token;
+
+                var resp = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        action: 'unban_player',
+                        player_id: playerId
+                    })
+                });
+
+                var data = await resp.json();
+                if (data.error) {
+                    A.showToast(data.error, 'error');
+                } else {
+                    A.showToast(L.plrUnbanSuccess, 'success');
+                    loadAndEditPlayer(playerId);
+                }
+            } catch (err) {
+                A.showToast('Error: ' + err.message, 'error');
+            }
+        });
+    }
 
     // ---- Rating History helpers ----
     var plrRhChart = null;
