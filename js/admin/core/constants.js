@@ -661,6 +661,10 @@
         usrStatRegular: 'Users',
         usrStatTelegram: 'Telegram',
         usrStatBanned: 'Banned',
+        usrStatConversion: 'Conversion',
+        usrShowAll: 'Show all',
+        usrHidePlayers: 'Only non-players',
+        usrChartPlayers: 'Became Players',
         usrPeriod: 'Period',
         usrPrdAll: 'All time',
         usrPrdThis: 'This month',
@@ -819,7 +823,20 @@
         rhDate: 'Date',
         rhAdd: 'Add',
         rhNoData: 'No rating history',
-        rhTotalPoints: 'Total Points'
+        rhTotalPoints: 'Total Points',
+        // Finances (unified tab)
+        finances: 'Finances',
+        finTypeMembership: 'Membership',
+        finTypePromotion: 'Promotion',
+        // Settings
+        settings: 'Settings',
+        setSubRules: 'Points Rules',
+        setSubPromo: 'Promotions',
+        // Players subtabs
+        plrSubList: 'List',
+        plrSubRankings: 'Rankings',
+        plrSubResults: 'Results',
+        plrMembershipExp: 'Membership'
     } : {
         dashboard: 'Дашборд',
         users: 'Пользователи',
@@ -1473,6 +1490,10 @@
         usrStatRegular: 'Пользователей',
         usrStatTelegram: 'Telegram',
         usrStatBanned: 'Забанено',
+        usrStatConversion: 'Конверсия',
+        usrShowAll: 'Показать всех',
+        usrHidePlayers: 'Только без игрока',
+        usrChartPlayers: 'Стали игроками',
         usrPeriod: 'Период',
         usrPrdAll: 'Всё время',
         usrPrdThis: 'Этот месяц',
@@ -1631,7 +1652,20 @@
         rhDate: 'Дата',
         rhAdd: 'Добавить',
         rhNoData: 'Нет данных',
-        rhTotalPoints: 'Всего очков'
+        rhTotalPoints: 'Всего очков',
+        // Finances (unified tab)
+        finances: 'Финансы',
+        finTypeMembership: 'Членство',
+        finTypePromotion: 'Промоушен',
+        // Settings
+        settings: 'Настройки',
+        setSubRules: 'Правила очков',
+        setSubPromo: 'Промоушен',
+        // Players subtabs
+        plrSubList: 'Список',
+        plrSubRankings: 'Рейтинг',
+        plrSubResults: 'Результаты',
+        plrMembershipExp: 'Членство'
     };
 
     // Category map
@@ -1723,25 +1757,25 @@
         coach: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
         star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
         wallet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="16" rx="2"/><path d="M1 10h22"/><circle cx="18" cy="15" r="1"/></svg>',
-        ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 013-3h14a3 3 0 013 3v0a3 3 0 01-3 3v1a3 3 0 013 3v0a3 3 0 01-3 3H5a3 3 0 01-3-3v0a3 3 0 013-3v-1a3 3 0 01-3-3z"/></svg>'
+        ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 013-3h14a3 3 0 013 3v0a3 3 0 01-3 3v1a3 3 0 013 3v0a3 3 0 01-3 3H5a3 3 0 01-3-3v0a3 3 0 013-3v-1a3 3 0 01-3-3z"/></svg>',
+        settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>'
     };
 
     var SECTION_ICONS = {
         users: '👥',
         tournaments: '🏆',
         players: '📊',
-        memberships: '💳',
         courts: '🏟️',
         coaches: '🎓',
-        ratings: '⭐',
-        payments: '💰',
-        vouchers: '🎫'
+        finances: '💰',
+        vouchers: '🎫',
+        settings: '⚙️'
     };
 
 
     var ROLE_SECTIONS = {
-        admin:   ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'ratings', 'users', 'memberships', 'payments', 'vouchers'],
-        manager: ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'ratings', 'users', 'memberships', 'payments', 'vouchers']
+        admin:   ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'users', 'finances', 'vouchers', 'settings'],
+        manager: ['dashboard', 'content', 'tournaments', 'players', 'courts', 'coaches', 'users', 'finances', 'vouchers']
     };
 
     // ---- Initialize namespace ----
@@ -1763,6 +1797,16 @@
         client: null,
         currentRole: 'manager',
         currentUserId: null
+    };
+
+    // ---- Shared exports (moved from memberships.js) ----
+    window.KSLT_ADMIN.PAYMENT_METHODS = { cash: L.payCash, transfer: L.payTransfer, card: L.payCard };
+    window.KSLT_ADMIN.PAYMENT_PURPOSES = { promoted: L.payPromoted, sponsorship: L.paySponsorship, rental: L.payRental, other: L.payOther };
+    window.KSLT_ADMIN.PAYMENT_ENTITY_TYPES = { court: L.payCourt, coach: L.payCoach, player: L.payPlayer };
+    window.KSLT_ADMIN.formatPayDate = function(d) {
+        if (!d) return '—';
+        var parts = d.split('-');
+        return parts[2] + '.' + parts[1] + '.' + parts[0].slice(2);
     };
 
     // loadCategories must update KSLT_ADMIN properties directly

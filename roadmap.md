@@ -39,7 +39,7 @@
 ## Phase 4 — Admin Panel + Reports ✅
 
 - [x] Admin panel layout + role-based access (admin / manager)
-- [x] CRUD: news, tournaments, players, courts, coaches, users, payments, memberships
+- [x] CRUD: news, tournaments, players, courts, coaches, users, finances
 - [x] Tournament brackets (SE / FIC / Group Stage) + ITF seeding + auto-scoring
 - [x] News: inline photos, polls, autosave, view counter
 - [x] Dashboard: 9 stat cards + 6 activity tables
@@ -85,6 +85,8 @@
 ### 7.1 Admin Refactoring ✅
 - [x] Split admin.js (15,000+ lines) into 14 modular files (js/admin/)
 - [x] Shared namespace window.KSLT_ADMIN, consolidated utilities
+- [x] Tab consolidation: 11 tabs → 10 tabs (Рейтинг → Игроки, Членство + Оплаты → Финансы, Правила + Промоушен → Настройки)
+- [x] Users funnel analytics: conversion cards + chart (registered → became players)
 
 ### 7.2 QA Automation
 - [ ] E2E testing framework (Cypress / Playwright)

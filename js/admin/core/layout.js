@@ -32,12 +32,11 @@
             { key: 'players',   icon: A.ICONS.chart,  label: L.players,   badge: false },
             { key: 'courts',   icon: A.ICONS.location, label: L.courts,  badge: false },
             { key: 'coaches', icon: A.ICONS.coach,    label: L.coaches, badge: false },
-            { key: 'ratings', icon: A.ICONS.star,    label: L.ratings, badge: false },
             { key: '_divider' },
             { key: 'users',     icon: A.ICONS.users,  label: L.users,     badge: false },
-            { key: 'memberships', icon: A.ICONS.card, label: L.memberships, badge: true },
-            { key: 'payments', icon: A.ICONS.wallet, label: L.payments, badge: false },
-            { key: 'vouchers', icon: A.ICONS.ticket, label: L.vouchers, badge: false }
+            { key: 'finances', icon: A.ICONS.wallet, label: L.finances, badge: false },
+            { key: 'vouchers', icon: A.ICONS.ticket, label: L.vouchers, badge: false },
+            { key: 'settings', icon: A.ICONS.settings, label: L.settings, badge: false }
         ];
 
         var navHtml = '';
@@ -115,6 +114,10 @@
     }
 
     function switchTab(tab, action, itemId) {
+        // Backward compat: redirect old hashes to new tabs
+        if (tab === 'ratings') tab = 'players';
+        if (tab === 'memberships' || tab === 'payments') tab = 'finances';
+
         document.querySelectorAll('.ad-sidebar-link').forEach(function(el) {
             el.classList.toggle('active', el.dataset.tab === tab);
         });
@@ -133,8 +136,7 @@
                 players:     { edit: A.loadAndEditPlayer },
                 courts:      { edit: A.loadAndEditCourt, view: A.loadAndViewCourt },
                 coaches:     { edit: A.loadAndEditCoach, view: A.loadAndViewCoach },
-                payments:    { edit: A.loadAndEditPayment },
-                memberships: { edit: A.loadAndEditMembership },
+                finances:    { edit: A.loadAndEditFinance },
                 users:       { edit: A.loadAndEditUser },
                 vouchers:    { view: A.loadAndViewVoucher }
             };
@@ -148,12 +150,12 @@
         var resetMap = {
             content: A.renderNewsList,
             tournaments: A.renderTournamentsList,
-            players: A.renderPlayersList,
+            players: A.renderPlayersSection,
             courts: A.renderCourtsList,
             coaches: A.renderCoachesList,
             users: A.renderUsersList,
-            memberships: A.renderMembershipsList,
-            payments: A.renderPaymentsList,
+            finances: A.renderFinancesList,
+            settings: A.renderSettingsSection,
             vouchers: A.renderVouchersList
         };
         if (resetMap[tab]) {
@@ -190,9 +192,9 @@
                 buildActivityTableHtml('adDashPendingRegs', L.actPendingRegs, 'warning',
                     [L.thPlayer, L.thTournament, L.thDate], 'tournaments') +
                 buildActivityTableHtml('adDashApproaching', L.actApproaching, 'warning',
-                    [L.thName, L.thExpires, L.thDaysLeft], 'memberships') +
+                    [L.thName, L.thExpires, L.thDaysLeft], 'users') +
                 buildActivityTableHtml('adDashOverdue', L.actOverdue, 'danger',
-                    [L.thName, L.thExpires, L.thOverdueDays], 'memberships') +
+                    [L.thName, L.thExpires, L.thOverdueDays], 'users') +
                 buildActivityTableHtml('adDashRecentUsers', L.actRecentRegistrations, 'neutral',
                     [L.thUser, L.thEmail, L.thRole, L.thDate], 'users') +
                 buildActivityTableHtml('adDashRecentTournaments', L.actRecentTournaments, 'neutral',

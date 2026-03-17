@@ -15,6 +15,8 @@
     var usrAllItems = [], usrMemMap = {};
     var usrDeletedCount = 0, usrDeletedPeriodCount = 0;
     var usrChartInstance = null;
+    var usrSortByMembership = 0; // 0=none, 1=asc (expiring soon first), -1=desc
+    var usrHidePlayers = true; // hide users who became players by default
 
     async function renderUsersSection() {
         if (A.isDeepLinked('users')) return;
@@ -52,43 +54,43 @@
                 '</div>' +
             '</div>' +
 
-            // Stats cards — top row (4)
+            // Stats cards — funnel row (4)
             '<div class="ad-usr-cards" id="adUsrStatsGrid">' +
                 '<div class="ad-usr-card" id="adUsrStatTotal">' +
                     '<div class="ad-usr-card-icon" style="background:rgba(204,255,0,0.12);color:#ccff00;">👥</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatTotal + '</div></div>' +
                 '</div>' +
-                '<div class="ad-usr-card" id="adUsrStatMembers">' +
-                    '<div class="ad-usr-card-icon" style="background:rgba(52,199,89,0.12);color:#34c759;">🏅</div>' +
-                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatMembers + '</div></div>' +
+                '<div class="ad-usr-card" id="adUsrStatPlayers">' +
+                    '<div class="ad-usr-card-icon" style="background:rgba(52,199,89,0.12);color:#34c759;">🎾</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatPlayers + '</div></div>' +
                 '</div>' +
-                '<div class="ad-usr-card" id="adUsrStatTg">' +
-                    '<div class="ad-usr-card-icon" style="background:rgba(0,136,204,0.12);color:#0088cc;">✈️</div>' +
-                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatTelegram + '</div></div>' +
+                '<div class="ad-usr-card" id="adUsrStatConversion">' +
+                    '<div class="ad-usr-card-icon" style="background:rgba(255,214,0,0.12);color:#ffd600;">📊</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatConversion + '</div></div>' +
                 '</div>' +
-                '<div class="ad-usr-card" id="adUsrStatBanned">' +
-                    '<div class="ad-usr-card-icon" style="background:rgba(255,59,48,0.12);color:#ff3b30;">🚫</div>' +
-                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatBanned + '</div></div>' +
+                '<div class="ad-usr-card" id="adUsrStatNewMonth">' +
+                    '<div class="ad-usr-card-icon" style="background:rgba(0,136,204,0.12);color:#0088cc;">📈</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + (isEn ? 'New' : 'Новых') + ' (' + curMonthName + ')</div></div>' +
                 '</div>' +
             '</div>' +
 
-            // Stats cards — bottom row (4)
+            // Stats cards — detail row (4)
             '<div class="ad-usr-cards" id="adUsrBreakdown">' +
+                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrStatMembers">' +
+                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(52,199,89,0.10);color:#34c759;">🏅</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">0</div><div class="ad-usr-card-label">' + L.usrStatMembers + '</div></div>' +
+                '</div>' +
+                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrStatTg">' +
+                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(0,136,204,0.10);color:#0088cc;">✈️</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">0</div><div class="ad-usr-card-label">' + L.usrStatTelegram + '</div></div>' +
+                '</div>' +
                 '<div class="ad-usr-card ad-usr-card--sm" id="adUsrBrkDeletedCard">' +
                     '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(255,59,48,0.10);color:#ff3b30;">🗑️</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value" id="adUsrBrkDeleted">0</div><div class="ad-usr-card-label">' + L.usrStatDeleted + '</div></div>' +
                 '</div>' +
-                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrBrkAdminsCard">' +
-                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(175,130,255,0.12);color:#af82ff;">🛡️</div>' +
-                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value" id="adUsrBrkAdmins">0</div><div class="ad-usr-card-label">' + L.usrStatAdmins + '</div></div>' +
-                '</div>' +
-                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrBrkManagersCard">' +
-                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(0,122,255,0.12);color:#007aff;">👔</div>' +
-                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value" id="adUsrBrkManagers">0</div><div class="ad-usr-card-label">' + L.usrStatManagers + '</div></div>' +
-                '</div>' +
-                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrBrkNewCard">' +
-                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(52,199,89,0.10);color:#34c759;">📈</div>' +
-                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value" id="adUsrBrkNewMonth">0</div><div class="ad-usr-card-label">' + (isEn ? 'New' : 'Новых') + ' (' + curMonthName + ')</div></div>' +
+                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrStatBanned">' +
+                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(255,59,48,0.10);color:#ff3b30;">🚫</div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">0</div><div class="ad-usr-card-label">' + L.usrStatBanned + '</div></div>' +
                 '</div>' +
             '</div>' +
 
@@ -109,6 +111,7 @@
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adUsrSearch" placeholder="' + L.usrSearch + '" value="' + A.esc(usrSearchQuery) + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adUsrRoleFilter">' + roleFilterHtml + '</select>' +
+                '<button class="ad-btn ad-btn-sm' + (usrHidePlayers ? ' ad-btn-primary' : ' ad-btn-outline') + '" id="adUsrTogglePlayers" style="white-space:nowrap;">' + (usrHidePlayers ? L.usrHidePlayers : L.usrShowAll) + '</button>' +
             '</div>' +
             '<div class="ad-table-card">' +
                 '<div class="ad-table-wrap">' +
@@ -118,7 +121,7 @@
                             '<th>' + L.thEmail + '</th>' +
                             '<th>' + L.thRole + '</th>' +
                             '<th>' + L.usrThStatus + '</th>' +
-                            '<th>' + L.usrThMembership + '</th>' +
+                            '<th style="cursor:pointer;user-select:none;" id="adUsrSortMem">' + L.usrThMembership + ' <span style="opacity:0.4;">⇅</span></th>' +
                             '<th>' + L.thDate + '</th>' +
                         '</tr></thead>' +
                         '<tbody><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
@@ -133,6 +136,13 @@
             });
         }
 
+        // Sort by membership expiry
+        document.getElementById('adUsrSortMem').addEventListener('click', function() {
+            usrSortByMembership = usrSortByMembership === 1 ? -1 : 1;
+            this.querySelector('span').textContent = usrSortByMembership === 1 ? '↑' : '↓';
+            loadUsersList();
+        });
+
         var searchTimer = null;
         document.getElementById('adUsrSearch').addEventListener('input', function() {
             usrSearchQuery = this.value;
@@ -142,6 +152,14 @@
 
         document.getElementById('adUsrRoleFilter').addEventListener('change', function() {
             usrFilterRole = this.value;
+            loadUsersList();
+        });
+
+        // Toggle: show all vs hide players
+        document.getElementById('adUsrTogglePlayers').addEventListener('click', function() {
+            usrHidePlayers = !usrHidePlayers;
+            this.textContent = usrHidePlayers ? L.usrHidePlayers : L.usrShowAll;
+            this.className = 'ad-btn ad-btn-sm ' + (usrHidePlayers ? 'ad-btn-primary' : 'ad-btn-outline');
             loadUsersList();
         });
 
@@ -234,11 +252,16 @@
             });
         }
 
-        // Update stats — use ALL items for totals, period-filtered for "new" count
+        // Update stats — use ALL items for totals (funnel needs full data)
         updateUsrStats(items, periodFiltered, memMap);
         renderUsrGrowthChart(items, delAll);
         usrAllItems = periodFiltered;
         items = periodFiltered;
+
+        // Filter out users who became players (if toggle is on)
+        if (usrHidePlayers) {
+            items = items.filter(function(u) { return !u.player_id; });
+        }
 
         // Client-side search
         if (usrSearchQuery) {
@@ -247,6 +270,19 @@
                 var name = (u.full_name || '').toLowerCase();
                 var email = (u.email || '').toLowerCase();
                 return name.indexOf(q) !== -1 || email.indexOf(q) !== -1;
+            });
+        }
+
+        // Sort by membership expiry if toggled
+        if (usrSortByMembership !== 0) {
+            items.sort(function(a, b) {
+                var ma = memMap[a.id], mb = memMap[b.id];
+                var da = ma && ma.expires_at ? ma.expires_at : '';
+                var db = mb && mb.expires_at ? mb.expires_at : '';
+                if (!da && !db) return 0;
+                if (!da) return 1;
+                if (!db) return -1;
+                return usrSortByMembership === 1 ? (da < db ? -1 : da > db ? 1 : 0) : (da > db ? -1 : da < db ? 1 : 0);
             });
         }
 
@@ -282,13 +318,17 @@
             var roleColor = u.role === 'admin' ? '#ff3b30' : u.role === 'manager' ? 'var(--accent)' : 'var(--text-secondary)';
             var roleBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;background:' + roleBg + ';color:' + roleColor + ';">' + roleLabel + '</span>';
 
-            // Membership badge
+            // Membership badge with expiry date
             var mem = memMap[u.id];
             var memBadge;
             if (mem && mem.status === 'active') {
-                memBadge = '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + '</span>';
+                var expDate = mem.expires_at ? mem.expires_at.split('T')[0].split('-') : null;
+                var expFormatted = expDate ? expDate[2] + '.' + expDate[1] + '.' + expDate[0] : '';
+                memBadge = '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + (expFormatted ? ' ' + (isEn ? 'until' : 'до') + ' ' + expFormatted : '') + '</span>';
             } else if (mem && mem.status === 'expired') {
-                memBadge = '<span class="ad-mem-badge ad-mem-expired">' + L.usrExpired + '</span>';
+                var expDate2 = mem.expires_at ? mem.expires_at.split('T')[0].split('-') : null;
+                var expFormatted2 = expDate2 ? expDate2[2] + '.' + expDate2[1] + '.' + expDate2[0] : '';
+                memBadge = '<span class="ad-mem-badge ad-mem-expired">' + L.usrExpired + (expFormatted2 ? ' ' + expFormatted2 : '') + '</span>';
             } else {
                 memBadge = '<span style="color:var(--text-dim);font-size:0.8rem;">' + L.usrNone + '</span>';
             }
@@ -1143,6 +1183,17 @@
             if (day >= 1 && day <= today) regPerDay[day]++;
         });
 
+        // Count players (profiles with player_id) created per day this month
+        var plrPerDay = {};
+        for (var p = 1; p <= today; p++) plrPerDay[p] = 0;
+
+        allProfiles.forEach(function(pr) {
+            if (!pr.player_id || !pr.created_at) return;
+            if (pr.created_at.slice(0, 7) !== monthKey) return;
+            var day = parseInt(pr.created_at.slice(8, 10), 10);
+            if (day >= 1 && day <= today) plrPerDay[day]++;
+        });
+
         // Count deletions per day this month
         var delPerDay = {};
         for (var j = 1; j <= today; j++) delPerDay[j] = 0;
@@ -1155,13 +1206,15 @@
         });
 
         // Build cumulative data
-        var regData = [], delData = [], netData = [];
-        var regSum = 0, delSum = 0;
+        var regData = [], plrData = [], delData = [], netData = [];
+        var regSum = 0, plrSum = 0, delSum = 0;
 
         for (var k = 1; k <= today; k++) {
             regSum += regPerDay[k];
+            plrSum += plrPerDay[k];
             delSum += delPerDay[k];
             regData.push(regSum);
+            plrData.push(plrSum);
             delData.push(delSum);
             netData.push(regSum - delSum);
         }
@@ -1185,6 +1238,17 @@
                         borderWidth: 2,
                         pointRadius: 3,
                         pointBackgroundColor: 'rgba(76, 175, 80, 1)',
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: L.usrChartPlayers,
+                        data: plrData,
+                        borderColor: 'rgba(255, 214, 0, 1)',
+                        backgroundColor: 'rgba(255, 214, 0, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(255, 214, 0, 1)',
                         tension: 0.3,
                         fill: false
                     },
@@ -1274,8 +1338,8 @@
 
     function updateUsrStats(allItems, periodItems, memMap) {
         var total = allItems.length;
-        var activeMembers = 0;
-        var admins = 0, managers = 0, tgCount = 0, bannedCount = 0;
+        var linkedPlayers = 0, activeMembers = 0;
+        var tgCount = 0, bannedCount = 0;
         var now = new Date();
 
         // Count new this month
@@ -1283,8 +1347,7 @@
         var newThisMonth = 0;
 
         allItems.forEach(function(u) {
-            if (u.role === 'admin') admins++;
-            else if (u.role === 'manager') managers++;
+            if (u.player_id) linkedPlayers++;
             if (u.telegram_chat_id) tgCount++;
             if (u.banned_until && new Date(u.banned_until) > now) bannedCount++;
             var mem = memMap[u.id];
@@ -1292,11 +1355,18 @@
             if (u.created_at && u.created_at.slice(0, 10) >= monthStart) newThisMonth++;
         });
 
+        var conversionPct = total > 0 ? Math.round(linkedPlayers / total * 100) : 0;
+
         var el = function(id, val) {
             var e = document.querySelector('#' + id + ' .ad-usr-card-value');
             if (e) e.textContent = val;
         };
+        // Funnel row
         el('adUsrStatTotal', total);
+        el('adUsrStatPlayers', linkedPlayers);
+        el('adUsrStatConversion', conversionPct + '%');
+        el('adUsrStatNewMonth', newThisMonth);
+        // Detail row
         el('adUsrStatMembers', activeMembers);
         el('adUsrStatTg', tgCount);
         el('adUsrStatBanned', bannedCount);
@@ -1305,10 +1375,7 @@
             var e = document.getElementById(id);
             if (e) e.textContent = val;
         };
-        setEl('adUsrBrkAdmins', admins);
-        setEl('adUsrBrkManagers', managers);
         setEl('adUsrBrkDeleted', usrDeletedCount);
-        setEl('adUsrBrkNewMonth', newThisMonth);
     }
 
     // ---- Period ----

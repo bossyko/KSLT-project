@@ -22,11 +22,10 @@
         A.renderPlayersSection();
         A.renderCourtsSection();
         A.renderCoachesSection();
-        A.renderRatingsSection();
-        A.renderMembershipsSection();
-        A.renderPaymentsSection();
+        A.renderFinancesSection();
         A.renderVouchersSection();
         A.renderUsersSection();
+        A.renderSettingsSection();
         A.initTabs();
     };
 
