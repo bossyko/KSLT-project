@@ -256,10 +256,12 @@
         if (!A.client) return;
         var result = await A.client.from('players').select('*').eq('id', id).single();
         if (result.data) {
-            // Look up linked profile gender
-            var profRes = await A.client.from('profiles').select('gender').eq('player_id', id).single();
-            if (profRes.data && profRes.data.gender) {
-                result.data._gender = profRes.data.gender; // 'male' or 'female'
+            // Look up linked profile (gender, socials)
+            var profRes = await A.client.from('profiles').select('gender, telegram_username, instagram').eq('player_id', id).single();
+            if (profRes.data) {
+                if (profRes.data.gender) result.data._gender = profRes.data.gender;
+                result.data._telegram = profRes.data.telegram_username || '';
+                result.data._instagram = profRes.data.instagram || '';
             }
             A.setAdminHash('players', 'edit', id);
             renderPlayerForm(result.data);
@@ -406,6 +408,14 @@
                 '<div class="ad-form-toggles" id="adPlrFormToggles">' + formHtml + '</div>' +
             '</div>' +
 
+            // Last Matches (loaded from Supabase, edit only)
+            (plrEditingId ? (
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.plrLastMatches + '</div>' +
+                '<div id="adPlrMatchesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
+            '</div>'
+            ) : '') +
+
             // Badges (loaded from Supabase)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.plrBadges + '</div>' +
@@ -448,6 +458,28 @@
                     '</div>' +
                 '</div>' +
             '</div>' +
+
+            // Social Media (from linked profile, read-only, edit only)
+            (plrEditingId ? (
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.plrSocials + '</div>' +
+                '<div class="ad-field-row ad-field-row-2">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrTelegram + '</label>' +
+                        '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
+                            (item._telegram ? '@' + A.esc(item._telegram) : '<span style="color:var(--text-dim);">\u2014</span>') +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrInstagram + '</label>' +
+                        '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
+                            (item._instagram ? '@' + A.esc(item._instagram) : '<span style="color:var(--text-dim);">\u2014</span>') +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-field-hint" style="margin-top:4px;">' + (isEn ? 'Linked from user profile (read-only)' : 'Из профиля пользователя (только чтение)') + '</div>' +
+            '</div>'
+            ) : '') +
 
             // Rating History (edit only)
             (plrEditingId ? (
@@ -505,6 +537,11 @@
         // --- Load Badges (edit only) ---
         if (plrEditingId) {
             loadPlayerBadgesAdmin(plrEditingId);
+        }
+
+        // --- Load Last Matches (edit only) ---
+        if (plrEditingId) {
+            loadPlayerMatchesAdmin(plrEditingId);
         }
 
         // --- Rating History Events (edit only) ---
@@ -806,9 +843,11 @@
                 // Stay on edit form — re-load fresh data
                 var fresh = await A.client.from('players').select('*').eq('id', plrEditingId).single();
                 if (fresh.data) {
-                    var profRes = await A.client.from('profiles').select('gender').eq('player_id', plrEditingId).single();
-                    if (profRes.data && profRes.data.gender) {
-                        fresh.data._gender = profRes.data.gender;
+                    var profRes = await A.client.from('profiles').select('gender, telegram_username, instagram').eq('player_id', plrEditingId).single();
+                    if (profRes.data) {
+                        if (profRes.data.gender) fresh.data._gender = profRes.data.gender;
+                        fresh.data._telegram = profRes.data.telegram_username || '';
+                        fresh.data._instagram = profRes.data.instagram || '';
                     }
                     renderPlayerForm(fresh.data);
                 }
@@ -978,6 +1017,103 @@
                 }
             } catch (e) { /* TG notification is best-effort */ }
         });
+    }
+
+    // ---- Last Matches (read-only, from matches table) ----
+    async function loadPlayerMatchesAdmin(playerId) {
+        var container = document.getElementById('adPlrMatchesContainer');
+        if (!container || !A.client) return;
+
+        var res = await A.client.from('matches')
+            .select('id, player1_id, player2_id, score, winner_id, round, played_at, created_at, tournament:tournaments(title, title_en)')
+            .or('player1_id.eq.' + playerId + ',player2_id.eq.' + playerId)
+            .not('winner_id', 'is', null)
+            .order('played_at', { ascending: false })
+            .limit(10);
+
+        if (res.error || !res.data || res.data.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-dim);padding:8px 0;">' + L.plrNoMatches + '</div>';
+            return;
+        }
+
+        // Collect unique opponent IDs
+        var oppIds = [];
+        res.data.forEach(function(m) {
+            var oppId = m.player1_id === playerId ? m.player2_id : m.player1_id;
+            if (oppId && oppIds.indexOf(oppId) === -1) oppIds.push(oppId);
+        });
+
+        // Load opponent names
+        var oppMap = {};
+        if (oppIds.length > 0) {
+            var oppRes = await A.client.from('players').select('id, name, name_en, photo').in('id', oppIds);
+            if (oppRes.data) {
+                oppRes.data.forEach(function(p) { oppMap[p.id] = p; });
+            }
+        }
+
+        // Render matches table
+        var html = '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">' +
+            '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.08);color:var(--text-dim);font-size:0.75rem;">' +
+                '<th style="text-align:left;padding:6px 8px;">' + (isEn ? 'Date' : 'Дата') + '</th>' +
+                '<th style="text-align:left;padding:6px 8px;">' + (isEn ? 'Opponent' : 'Соперник') + '</th>' +
+                '<th style="text-align:center;padding:6px 8px;">' + (isEn ? 'Score' : 'Счёт') + '</th>' +
+                '<th style="text-align:center;padding:6px 8px;">' + (isEn ? 'Result' : 'Итог') + '</th>' +
+                '<th style="text-align:left;padding:6px 8px;">' + (isEn ? 'Tournament' : 'Турнир') + '</th>' +
+            '</tr></thead><tbody>';
+
+        res.data.forEach(function(m) {
+            var isP1 = m.player1_id === playerId;
+            var oppId = isP1 ? m.player2_id : m.player1_id;
+            var opp = oppMap[oppId] || { name: '?', name_en: '?' };
+            var oppName = isEn ? (opp.name_en || opp.name) : opp.name;
+            var isWin = m.winner_id === playerId;
+            var resultBadge = isWin
+                ? '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:0.75rem;background:rgba(52,199,89,0.15);color:#34c759;">W</span>'
+                : '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:0.75rem;background:rgba(255,59,48,0.15);color:#ff3b30;">L</span>';
+
+            // Format score (flip if player is p2 so their sets come first)
+            var score = m.score || '';
+            if (!isP1 && score) {
+                score = score.split(',').map(function(s) {
+                    var parts = s.trim().split(':');
+                    return parts.length === 2 ? parts[1] + ':' + parts[0] : s;
+                }).join(', ');
+            }
+
+            var dateStr = m.played_at
+                ? new Date(m.played_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' })
+                : (m.created_at ? new Date(m.created_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '\u2014');
+
+            var trnName = '';
+            if (m.tournament) {
+                trnName = isEn ? (m.tournament.title_en || m.tournament.title || '') : (m.tournament.title || '');
+            }
+
+            var roundLabel = m.round || '';
+            if (roundLabel) {
+                var roundMap = { 'final': 'F', 'semifinal': 'SF', 'quarterfinal': 'QF', 'group': 'GS' };
+                roundLabel = roundMap[roundLabel] || roundLabel;
+            }
+
+            html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.04);">' +
+                '<td style="padding:6px 8px;white-space:nowrap;">' + dateStr + '</td>' +
+                '<td style="padding:6px 8px;">' +
+                    '<div style="display:flex;align-items:center;gap:6px;">' +
+                        (opp.photo ? '<img src="' + A.esc(opp.photo) + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">' : '') +
+                        '<span>' + A.esc(oppName) + '</span>' +
+                    '</div>' +
+                '</td>' +
+                '<td style="padding:6px 8px;text-align:center;font-family:monospace;">' + A.esc(score) + '</td>' +
+                '<td style="padding:6px 8px;text-align:center;">' + resultBadge + '</td>' +
+                '<td style="padding:6px 8px;font-size:0.75rem;color:var(--text-dim);">' +
+                    A.esc(trnName) + (roundLabel ? ' <span style="opacity:0.6;">(' + A.esc(roundLabel) + ')</span>' : '') +
+                '</td>' +
+            '</tr>';
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
     }
 
     // ---- Rating History helpers ----
