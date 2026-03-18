@@ -4,12 +4,12 @@
 -- Run in Supabase SQL Editor.
 -- Requires pg_cron and pg_net extensions (enable in Dashboard → Database → Extensions).
 --
--- Runs daily at 06:00 UTC — calls auto-unban Edge Function
+-- Runs daily at 03:00 UTC (09:00 Bishkek time) — calls auto-unban Edge Function
 -- to clear expired player bans and send Telegram notifications.
 
 SELECT cron.schedule(
   'auto-unban-expired',
-  '0 6 * * *',
+  '0 3 * * *',
   $$
   SELECT net.http_post(
     url := 'https://qqkzszesviukopgjbead.supabase.co/functions/v1/auto-unban',
