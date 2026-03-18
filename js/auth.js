@@ -744,9 +744,17 @@
     // ============================================
     var isRecoveryFlow = false;
 
+    // Clean token hash from URL (after Supabase reads it)
+    function cleanHash() {
+        if (window.location.hash && window.location.hash.indexOf('access_token') !== -1) {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+    }
+
     // Supabase v2: listen for PASSWORD_RECOVERY event
     if (client) {
         client.auth.onAuthStateChange(function(event, session) {
+            cleanHash();
             if (event === 'PASSWORD_RECOVERY') {
                 isRecoveryFlow = true;
                 showScreen('resetForm');

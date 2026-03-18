@@ -1,5 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+    // Clean Supabase auth tokens from URL (prevent user seeing access_token in address bar)
+    if (window.location.hash && window.location.hash.indexOf('access_token') !== -1) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+
     // Active page indicator (yellow pulsing dot)
     (function() {
         var path = window.location.pathname.toLowerCase();
