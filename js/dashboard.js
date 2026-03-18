@@ -68,18 +68,6 @@
         category: 'Категория', points: 'Упайлар',
         wins: 'Жеңиштер', losses: 'Жеңилүүлөр', rank: 'Рейтинг өзгөрүшү',
         socialMedia: 'Социалдык тармактар',
-        playLevel: 'Оюн деңгээли',
-        selectLevel: '— Тандаңыз —',
-        levelBeginner: 'Жаңы баштаган',
-        levelIntermediate: 'Орто',
-        levelAdvanced: 'Тажрыйбалуу',
-        preferredTime: 'Артыкчылыктуу убакыт',
-        selectTime: '— Тандаңыз —',
-        timeMorning: 'Таңкы',
-        timeAfternoon: 'Күндүзгү',
-        timeEvening: 'Кечки',
-        timeWeekend: 'Дем алыш',
-        partnerPrefs: 'Өнөктөш издөө артыкчылыктары',
         cropTitle: 'Сүрөттү кыркуу',
         cropApply: 'Колдонуу',
         cropCancel: 'Жокко чыгаруу',
@@ -98,6 +86,13 @@
         payCash: 'Накталай',
         payTransfer: 'Которуу',
         payCard: 'Карта',
+        payments: 'Төлөмдөр',
+        payPurposeMembership: 'Мүчөлүк',
+        payPurposeTournament: 'Мелдеш',
+        payPurposeOther: 'Башка',
+        payCompleted: 'Аткарылды',
+        payPending: 'Күтүүдө',
+        payNote: 'Эскертүү',
         invitationsTitle: 'Оюнга чакыруулар',
         invSent: 'Жөнөтүлдү',
         invReceived: 'Алынды',
@@ -213,18 +208,6 @@
         category: 'Category', points: 'Points',
         wins: 'Wins', losses: 'Losses', rank: 'Rank Change',
         socialMedia: 'Social Media',
-        playLevel: 'Play Level',
-        selectLevel: '— Select —',
-        levelBeginner: 'Beginner',
-        levelIntermediate: 'Intermediate',
-        levelAdvanced: 'Advanced',
-        preferredTime: 'Preferred Time',
-        selectTime: '— Select —',
-        timeMorning: 'Morning',
-        timeAfternoon: 'Afternoon',
-        timeEvening: 'Evening',
-        timeWeekend: 'Weekend',
-        partnerPrefs: 'Partner Preferences',
         cropTitle: 'Crop Photo',
         cropApply: 'Apply',
         cropCancel: 'Cancel',
@@ -243,6 +226,13 @@
         payCash: 'Cash',
         payTransfer: 'Transfer',
         payCard: 'Card',
+        payments: 'Payments',
+        payPurposeMembership: 'Membership',
+        payPurposeTournament: 'Tournament',
+        payPurposeOther: 'Other',
+        payCompleted: 'Completed',
+        payPending: 'Pending',
+        payNote: 'Note',
         invitationsTitle: 'Game Invitations',
         invSent: 'Sent',
         invReceived: 'Received',
@@ -358,18 +348,6 @@
         category: 'Категория', points: 'Очки',
         wins: 'Победы', losses: 'Поражения', rank: 'Изм. рейтинга',
         socialMedia: 'Соцсети',
-        playLevel: 'Уровень игры',
-        selectLevel: '— Выберите —',
-        levelBeginner: 'Начинающий',
-        levelIntermediate: 'Средний',
-        levelAdvanced: 'Продвинутый',
-        preferredTime: 'Предпочитаемое время',
-        selectTime: '— Выберите —',
-        timeMorning: 'Утро',
-        timeAfternoon: 'День',
-        timeEvening: 'Вечер',
-        timeWeekend: 'Выходные',
-        partnerPrefs: 'Предпочтения для поиска партнёра',
         cropTitle: 'Обрезка фото',
         cropApply: 'Применить',
         cropCancel: 'Отмена',
@@ -388,6 +366,13 @@
         payCash: 'Наличные',
         payTransfer: 'Перевод',
         payCard: 'Карта',
+        payments: 'Платежи',
+        payPurposeMembership: 'Членство',
+        payPurposeTournament: 'Турнир',
+        payPurposeOther: 'Другое',
+        payCompleted: 'Завершён',
+        payPending: 'Ожидание',
+        payNote: 'Примечание',
         invitationsTitle: 'Приглашения на игру',
         invSent: 'Отправлено',
         invReceived: 'Получено',
@@ -541,6 +526,7 @@
         renderInvitations();
         renderChallenges();
         renderVouchers();
+        renderPayments();
         renderSettings(user);
         initTabs();
 
@@ -751,6 +737,7 @@
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="invitations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>' + L.invitations + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="challenges"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg>' + L.challenges + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="vouchers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>' + L.vouchers + '</button></li>' +
+                '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="payments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>' + L.payments + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</button></li>' +
             '</ul>';
     }
@@ -934,6 +921,7 @@
             '<button class="db-mobile-tab" data-tab="invitations">' + L.invitations + '</button>' +
             '<button class="db-mobile-tab" data-tab="challenges">' + L.challenges + '</button>' +
             '<button class="db-mobile-tab" data-tab="vouchers">' + L.vouchers + '</button>' +
+            '<button class="db-mobile-tab" data-tab="payments">' + L.payments + '</button>' +
             '<button class="db-mobile-tab" data-tab="settings">' + L.settings + '</button>';
     }
 
@@ -1090,32 +1078,6 @@
                         : '<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;">' + L.tgConnectHint + '</div>' +
                           '<a href="https://t.me/' + (window.KSLT_TG_BOT || 'KSLTennisBot') + '?start=' + (profile.id || '') + '" target="_blank" rel="noopener" class="db-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font-size:0.8rem;background:rgba(0,136,204,0.15);color:#0088cc;border-radius:8px;text-decoration:none;border:1px solid rgba(0,136,204,0.3);">&#9993; ' + L.tgConnect + '</a>'
                     ) +
-                '</div>' +
-            '</div>' +
-
-            // Partner preferences card
-            '<div class="db-card">' +
-                '<div class="db-card-title">' + L.partnerPrefs + '</div>' +
-                '<div class="db-field-row">' +
-                    '<div class="db-field">' +
-                        '<label class="db-field-label">' + L.playLevel + '</label>' +
-                        '<select class="db-field-input" id="profilePlayLevel">' +
-                            '<option value="">' + L.selectLevel + '</option>' +
-                            '<option value="beginner"' + (profile.play_level === 'beginner' ? ' selected' : '') + '>' + L.levelBeginner + '</option>' +
-                            '<option value="intermediate"' + (profile.play_level === 'intermediate' ? ' selected' : '') + '>' + L.levelIntermediate + '</option>' +
-                            '<option value="advanced"' + (profile.play_level === 'advanced' ? ' selected' : '') + '>' + L.levelAdvanced + '</option>' +
-                        '</select>' +
-                    '</div>' +
-                    '<div class="db-field">' +
-                        '<label class="db-field-label">' + L.preferredTime + '</label>' +
-                        '<select class="db-field-input" id="profilePreferredTime">' +
-                            '<option value="">' + L.selectTime + '</option>' +
-                            '<option value="morning"' + (profile.preferred_time === 'morning' ? ' selected' : '') + '>' + L.timeMorning + '</option>' +
-                            '<option value="afternoon"' + (profile.preferred_time === 'afternoon' ? ' selected' : '') + '>' + L.timeAfternoon + '</option>' +
-                            '<option value="evening"' + (profile.preferred_time === 'evening' ? ' selected' : '') + '>' + L.timeEvening + '</option>' +
-                            '<option value="weekend"' + (profile.preferred_time === 'weekend' ? ' selected' : '') + '>' + L.timeWeekend + '</option>' +
-                        '</select>' +
-                    '</div>' +
                 '</div>' +
             '</div>' +
 
@@ -1330,9 +1292,7 @@
             birthYear: (document.getElementById('profileBirthYear') || {}).value || '',
             instagram: (document.getElementById('profileInstagram') || {}).value || '',
             telegram: (document.getElementById('profileTelegram') || {}).value || '',
-            showSocials: (document.getElementById('profileShowSocials') || {}).checked || false,
-            playLevel: (document.getElementById('profilePlayLevel') || {}).value || '',
-            preferredTime: (document.getElementById('profilePreferredTime') || {}).value || ''
+            showSocials: (document.getElementById('profileShowSocials') || {}).checked || false
         };
     }
 
@@ -1351,9 +1311,7 @@
                     current.birthYear !== snap.birthYear ||
                     current.instagram !== snap.instagram ||
                     current.telegram !== snap.telegram ||
-                    current.showSocials !== snap.showSocials ||
-                    current.playLevel !== snap.playLevel ||
-                    current.preferredTime !== snap.preferredTime;
+                    current.showSocials !== snap.showSocials;
 
         btn.disabled = !dirty;
         btn.classList.remove('db-btn-saved');
@@ -1386,8 +1344,6 @@
         var instagram = document.getElementById('profileInstagram').value.trim();
         var telegram = document.getElementById('profileTelegram').value.trim();
         var showSocials = document.getElementById('profileShowSocials').checked;
-        var playLevel = document.getElementById('profilePlayLevel').value;
-        var preferredTime = document.getElementById('profilePreferredTime').value;
         var fullName = firstName + (lastName ? ' ' + lastName : '');
 
         btn.textContent = L.saving;
@@ -1402,9 +1358,7 @@
             birth_year: birthYear ? parseInt(birthYear) : null,
             instagram: instagram,
             telegram: telegram,
-            show_socials: showSocials,
-            play_level: playLevel || null,
-            preferred_time: preferredTime || null
+            show_socials: showSocials
         }).eq('id', window.ksltUser.id);
 
         if (result.error) {
@@ -1426,8 +1380,6 @@
             window.ksltProfile.instagram = instagram;
             window.ksltProfile.telegram = telegram;
             window.ksltProfile.show_socials = showSocials;
-            window.ksltProfile.play_level = playLevel || null;
-            window.ksltProfile.preferred_time = preferredTime || null;
             renderSidebar(window.ksltProfile);
 
             // Update banner
@@ -2326,6 +2278,126 @@
         } else {
             showMessage('settingsMessage', L.notifSaved, false);
         }
+    }
+
+    // ---- Render Payments ----
+    var payPage = 1;
+    var PAY_PER_PAGE = 10;
+    var payAllData = [];
+
+    async function renderPayments() {
+        var container = document.getElementById('db-payments');
+        if (!container || !client) return;
+
+        var userRes = await client.auth.getUser();
+        if (!userRes.data || !userRes.data.user) return;
+
+        var userId = userRes.data.user.id;
+
+        var result = await client.from('payments')
+            .select('*')
+            .eq('profile_id', userId)
+            .order('created_at', { ascending: false });
+
+        payAllData = result.data || [];
+
+        var methodLabels = { cash: L.payCash, transfer: L.payTransfer, card: L.payCard };
+        var statusLabels = { completed: L.payCompleted, pending: L.payPending };
+
+        function renderPayTable() {
+            var total = payAllData.length;
+            var totalPages = Math.ceil(total / PAY_PER_PAGE) || 1;
+            if (payPage > totalPages) payPage = totalPages;
+            var start = (payPage - 1) * PAY_PER_PAGE;
+            var pageData = payAllData.slice(start, start + PAY_PER_PAGE);
+
+            if (total === 0) {
+                container.innerHTML =
+                    '<h2 class="db-section-title">' + L.payHistory + '</h2>' +
+                    '<div class="db-card"><div class="db-empty">' +
+                        '<div class="db-empty-icon">💳</div>' +
+                        '<div class="db-empty-title">' + L.payNoPayments + '</div>' +
+                    '</div></div>';
+                return;
+            }
+
+            var html = '<h2 class="db-section-title">' + L.payHistory + '</h2>';
+
+            // Stats summary
+            var totalAmount = 0;
+            var completedCount = 0;
+            payAllData.forEach(function(p) {
+                if (p.status === 'completed') {
+                    totalAmount += (p.amount || 0);
+                    completedCount++;
+                }
+            });
+
+            html += '<div class="db-card" style="margin-bottom:16px;">' +
+                '<div style="display:flex;gap:24px;flex-wrap:wrap;">' +
+                    '<div style="text-align:center;">' +
+                        '<div style="font-size:1.4rem;font-weight:700;color:var(--accent);">' + total + '</div>' +
+                        '<div style="font-size:0.75rem;color:var(--text-dim);">' + L.payHistory + '</div>' +
+                    '</div>' +
+                    '<div style="text-align:center;">' +
+                        '<div style="font-size:1.4rem;font-weight:700;color:var(--accent);">' + totalAmount.toLocaleString() + ' KGS</div>' +
+                        '<div style="font-size:0.75rem;color:var(--text-dim);">' + L.payAmount + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+
+            // Table
+            html += '<div class="db-card" style="overflow-x:auto;">' +
+                '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
+                '<thead><tr style="border-bottom:1px solid var(--border-subtle);">' +
+                    '<th style="text-align:left;padding:8px;color:var(--text-dim);font-weight:600;">' + L.payDate + '</th>' +
+                    '<th style="text-align:right;padding:8px;color:var(--text-dim);font-weight:600;">' + L.payAmount + '</th>' +
+                    '<th style="text-align:left;padding:8px;color:var(--text-dim);font-weight:600;">' + L.payMethod + '</th>' +
+                    '<th style="text-align:left;padding:8px;color:var(--text-dim);font-weight:600;">' + L.payStatus + '</th>' +
+                    '<th style="text-align:left;padding:8px;color:var(--text-dim);font-weight:600;">' + L.payNote + '</th>' +
+                '</tr></thead><tbody>';
+
+            pageData.forEach(function(p) {
+                var date = p.created_at ? p.created_at.split('T')[0].split('-').reverse().join('.') : '—';
+                var amount = (p.amount || 0).toLocaleString() + ' ' + (p.currency || 'KGS');
+                var method = methodLabels[p.payment_method] || p.payment_method || '—';
+                var statusColor = p.status === 'completed' ? 'var(--accent)' : 'var(--text-dim)';
+                var statusText = statusLabels[p.status] || p.status || '—';
+                var note = p.note ? escHtml(p.note) : '—';
+
+                html += '<tr style="border-bottom:1px solid var(--border-subtle);">' +
+                    '<td style="padding:8px;color:var(--text-secondary);">' + date + '</td>' +
+                    '<td style="padding:8px;text-align:right;font-weight:600;">' + amount + '</td>' +
+                    '<td style="padding:8px;color:var(--text-secondary);">' + method + '</td>' +
+                    '<td style="padding:8px;"><span style="color:' + statusColor + ';font-weight:600;">' + statusText + '</span></td>' +
+                    '<td style="padding:8px;color:var(--text-dim);font-size:0.8rem;">' + note + '</td>' +
+                '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+
+            // Pagination
+            if (totalPages > 1) {
+                html += '<div style="display:flex;justify-content:center;gap:8px;margin-top:16px;">';
+                for (var pg = 1; pg <= totalPages; pg++) {
+                    var activeStyle = pg === payPage ? 'background:var(--accent);color:#000;' : 'background:var(--card-bg);color:var(--text-secondary);';
+                    html += '<button class="db-pay-page-btn" data-page="' + pg + '" style="' + activeStyle + 'border:1px solid var(--border-subtle);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">' + pg + '</button>';
+                }
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+
+            // Pagination clicks
+            container.querySelectorAll('.db-pay-page-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    payPage = parseInt(this.dataset.page);
+                    renderPayTable();
+                });
+            });
+        }
+
+        renderPayTable();
     }
 
     // ---- Render Settings ----

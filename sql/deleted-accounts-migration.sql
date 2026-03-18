@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS deleted_accounts (
     role TEXT DEFAULT 'user',
     phone TEXT,
     telegram_chat_id TEXT,
-    player_id TEXT,
+    player_id TEXT,vj;
     had_membership BOOLEAN DEFAULT false,
     deleted_at TIMESTAMPTZ DEFAULT NOW(),
     reason TEXT

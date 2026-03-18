@@ -575,6 +575,7 @@
             email: email,
             password: password,
             options: {
+                emailRedirectTo: basePath + (isKg ? 'auth-kg.html' : isEn ? 'auth-en.html' : 'auth.html'),
                 data: {
                     full_name: firstName + ' ' + lastName,
                     phone: phone,

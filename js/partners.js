@@ -118,6 +118,7 @@
     var ANON_KEY = 'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G';
     var _partners = [];
     var _currentFilter = 'all';
+    var _ntrpFilter = null;
     var _searchQuery = '';
     var _sendingInvite = false;
 
@@ -245,6 +246,20 @@
             var f = filters[i];
             html += '<button class="pt-filter-btn' + (f.key === _currentFilter ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
         }
+        var ntrpRanges = [
+            { value: '', label: isEn ? 'All NTRP' : (isKg ? 'Баары NTRP' : 'Все NTRP') },
+            { value: '1-2.5', min: 1, max: 2.5, label: isEn ? 'Beginner (1.0\u20132.5)' : (isKg ? 'Башталгыч (1.0\u20132.5)' : 'Начинающий (1.0\u20132.5)') },
+            { value: '2.5-3.5', min: 2.5, max: 3.5, label: isEn ? 'Intermediate (2.5\u20133.5)' : (isKg ? 'Орточо (2.5\u20133.5)' : 'Средний (2.5\u20133.5)') },
+            { value: '3.5-4.5', min: 3.5, max: 4.5, label: isEn ? 'Advanced (3.5\u20134.5)' : (isKg ? '\u04e8\u043d\u04af\u043a\u043a\u04e9\u043d (3.5\u20134.5)' : 'Продвинутый (3.5\u20134.5)') },
+            { value: '4.5-5.5', min: 4.5, max: 5.5, label: isEn ? 'Strong (4.5\u20135.5)' : (isKg ? 'К\u04af\u0447\u0442\u04af\u04af (4.5\u20135.5)' : 'Сильный (4.5\u20135.5)') },
+            { value: '5.5-7', min: 5.5, max: 7, label: isEn ? 'Expert (5.5\u20137.0)' : (isKg ? 'Эксперт (5.5\u20137.0)' : 'Эксперт (5.5\u20137.0)') }
+        ];
+        html += '<select class="pt-ntrp-select" id="ptNtrpFilter">';
+        for (var n = 0; n < ntrpRanges.length; n++) {
+            html += '<option value="' + ntrpRanges[n].value + '">' + ntrpRanges[n].label + '</option>';
+        }
+        html += '</select>';
+
         html += '<div class="pt-search-wrap"><input type="text" class="pt-search" id="ptSearch" placeholder="' + L.searchPlaceholder + '"></div>';
 
         el.innerHTML = html;
@@ -258,6 +273,18 @@
 
         document.getElementById('ptSearch').addEventListener('input', function(e) {
             _searchQuery = e.target.value.toLowerCase().trim();
+            _currentPage = 1;
+            renderGrid();
+        });
+
+        document.getElementById('ptNtrpFilter').addEventListener('change', function(e) {
+            var val = e.target.value;
+            if (!val) {
+                _ntrpFilter = null;
+            } else {
+                var found = ntrpRanges.filter(function(r) { return r.value === val; })[0];
+                _ntrpFilter = found ? { min: found.min, max: found.max } : null;
+            }
             _currentPage = 1;
             renderGrid();
         });
@@ -293,6 +320,13 @@
         try {
             var result = await client.rpc('get_public_partners');
             if (result.data && result.data.length > 0) {
+                // Load NTRP ratings from players table
+                var playerIds = result.data.map(function(p) { return p.id; });
+                var ntrpRes = await client.from('players').select('id, ntrp_rating').in('id', playerIds);
+                var ntrpMap = {};
+                (ntrpRes.data || []).forEach(function(p) { ntrpMap[p.id] = p.ntrp_rating; });
+                result.data.forEach(function(p) { p.ntrp_rating = ntrpMap[p.id] || null; });
+
                 var shuffled = shuffle(result.data);
                 var onlineArr = [];
                 var offlineArr = [];
@@ -317,6 +351,11 @@
         var list = _partners;
         if (_currentFilter !== 'all') {
             list = list.filter(function(p) { return p.gender === _currentFilter; });
+        }
+        if (_ntrpFilter) {
+            list = list.filter(function(p) {
+                return p.ntrp_rating && p.ntrp_rating >= _ntrpFilter.min && p.ntrp_rating < _ntrpFilter.max;
+            });
         }
         if (_searchQuery) {
             list = list.filter(function(p) {
@@ -404,7 +443,13 @@
             avatarHtml = '<div class="pt-avatar-placeholder">' + getInitials(p.full_name) + '</div>';
         }
 
+        var ntrpHtml = '';
+        if (p.ntrp_rating) {
+            ntrpHtml = '<div class="pt-ntrp-badge">NTRP ' + Number(p.ntrp_rating).toFixed(1) + '</div>';
+        }
+
         var html = '<div class="pt-card' + (extraClass || '') + '">' +
+            ntrpHtml +
             '<div class="pt-avatar-wrap">' +
                 avatarHtml +
                 (online ? '<div class="pt-online-dot"></div>' : '') +
