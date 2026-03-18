@@ -257,10 +257,10 @@
         var result = await A.client.from('players').select('*').eq('id', id).single();
         if (result.data) {
             // Look up linked profile (gender, socials)
-            var profRes = await A.client.from('profiles').select('gender, telegram_username, instagram').eq('player_id', id).maybeSingle();
+            var profRes = await A.client.from('profiles').select('gender, telegram, instagram').eq('player_id', id).maybeSingle();
             if (profRes.data) {
                 if (profRes.data.gender) result.data._gender = profRes.data.gender;
-                result.data._telegram = profRes.data.telegram_username || '';
+                result.data._telegram = profRes.data.telegram || '';
                 result.data._instagram = profRes.data.instagram || '';
             }
             A.setAdminHash('players', 'edit', id);
@@ -825,10 +825,10 @@
                 // Stay on edit form — re-load fresh data
                 var fresh = await A.client.from('players').select('*').eq('id', plrEditingId).single();
                 if (fresh.data) {
-                    var profRes = await A.client.from('profiles').select('gender, telegram_username, instagram').eq('player_id', plrEditingId).maybeSingle();
+                    var profRes = await A.client.from('profiles').select('gender, telegram, instagram').eq('player_id', plrEditingId).maybeSingle();
                     if (profRes.data) {
                         if (profRes.data.gender) fresh.data._gender = profRes.data.gender;
-                        fresh.data._telegram = profRes.data.telegram_username || '';
+                        fresh.data._telegram = profRes.data.telegram || '';
                         fresh.data._instagram = profRes.data.instagram || '';
                     }
                     renderPlayerForm(fresh.data);
