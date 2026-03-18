@@ -280,10 +280,10 @@
         var title = item ? L.editPlayer : L.addPlayer;
 
         var imagePreviewHtml = plrImageUrl
-            ? '<img src="' + A.esc(plrImageUrl) + '" class="ad-image-upload-preview" id="adPlrImgPreview" style="border-radius:12px;">' +
+            ? '<img src="' + A.esc(plrImageUrl) + '" class="ad-image-upload-preview" id="adPlrImgPreview" style="border-radius:12px;width:100%;height:100%;aspect-ratio:auto;max-height:none;object-fit:cover;">' +
               '<button type="button" class="ad-image-upload-remove" id="adPlrImgRemove">&times;</button>'
-            : '<div class="ad-image-upload-placeholder">' +
-                  '<div class="ad-image-upload-icon">📷</div>' +
+            : '<div class="ad-image-upload-placeholder" style="padding:16px 8px;font-size:0.7rem;text-align:center;">' +
+                  '<div style="font-size:1.5rem;">📷</div>' +
                   '<div>' + L.uploadImage + '</div>' +
                   '<div class="ad-field-hint">' + L.uploadHint + '</div>' +
               '</div>';
@@ -315,7 +315,7 @@
             // Photo
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.plrPhoto + '</div>' +
-                '<div class="ad-image-upload' + hasImageClass + '" id="adPlrImgZone" style="width:140px;height:180px;border-radius:12px;margin:0 auto 16px;border:2px solid var(--accent);">' +
+                '<div class="ad-image-upload' + hasImageClass + '" id="adPlrImgZone" style="width:140px;height:180px;border-radius:12px;margin:0 auto 16px;border:2px solid var(--accent);overflow:hidden;">' +
                     imagePreviewHtml +
                 '</div>' +
                 '<input type="file" accept="image/jpeg,image/png" id="adPlrImgInput" style="display:none">' +
@@ -325,32 +325,65 @@
                 '</div>' +
             '</div>' +
 
-            // Name (RU/EN/KG)
-            '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.plrName + '</div>' +
-                '<div class="ad-lang-tabs">' +
-                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
-                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
-                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
-                '</div>' +
-                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
-                    '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adPlrName" placeholder="' + L.plrName + ' (RU)" value="' + A.esc(item ? item.name : '') + '">' +
+            // Name (RU/EN/KG) — split into First + Last
+            (function() {
+                // Split existing names into first/last
+                var nameParts = (item ? (item.name || '') : '').split(' ');
+                var fnRu = nameParts[0] || '';
+                var lnRu = nameParts.slice(1).join(' ') || '';
+                var namePartsEn = (item ? (item.name_en || '') : '').split(' ');
+                var fnEn = namePartsEn[0] || '';
+                var lnEn = namePartsEn.slice(1).join(' ') || '';
+                var namePartsKg = (item ? (item.name_kg || '') : '').split(' ');
+                var fnKg = namePartsKg[0] || '';
+                var lnKg = namePartsKg.slice(1).join(' ') || '';
+                return '<div class="ad-form-card">' +
+                    '<div class="ad-form-card-title">' + L.plrName + '</div>' +
+                    '<div class="ad-lang-tabs">' +
+                        '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
+                        '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                        '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                     '</div>' +
-                '</div>' +
-                '<div class="ad-lang-panel" data-lang-panel="en">' +
-                    '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adPlrNameEn" placeholder="' + L.plrName + ' (EN)" value="' + A.esc(item ? item.name_en : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-src="adPlrName" data-target="adPlrNameEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
+                    '<div class="ad-lang-panel active" data-lang-panel="ru">' +
+                        '<div class="ad-field-row ad-field-row-2">' +
+                            '<div class="ad-field">' +
+                                '<label class="ad-field-label">' + L.plrFirstName + '</label>' +
+                                '<input type="text" class="ad-field-input" id="adPlrFirstName" placeholder="' + L.plrFirstName + '" value="' + A.esc(fnRu) + '">' +
+                            '</div>' +
+                            '<div class="ad-field">' +
+                                '<label class="ad-field-label">' + L.plrLastName + '</label>' +
+                                '<input type="text" class="ad-field-input" id="adPlrLastName" placeholder="' + L.plrLastName + '" value="' + A.esc(lnRu) + '">' +
+                            '</div>' +
+                        '</div>' +
                     '</div>' +
-                '</div>' +
-                '<div class="ad-lang-panel" data-lang-panel="kg">' +
-                    '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adPlrNameKg" placeholder="' + L.plrName + ' (KG)" value="' + A.esc(item ? item.name_kg : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-src="adPlrName" data-target="adPlrNameKg" data-tolang="kg">&#127760; ' + L.translateBtn + '</button>' +
+                    '<div class="ad-lang-panel" data-lang-panel="en">' +
+                        '<div class="ad-field-row ad-field-row-2">' +
+                            '<div class="ad-field">' +
+                                '<label class="ad-field-label">' + L.plrFirstName + ' (EN)</label>' +
+                                '<input type="text" class="ad-field-input" id="adPlrFirstNameEn" value="' + A.esc(fnEn) + '">' +
+                            '</div>' +
+                            '<div class="ad-field">' +
+                                '<label class="ad-field-label">' + L.plrLastName + ' (EN)</label>' +
+                                '<input type="text" class="ad-field-input" id="adPlrLastNameEn" value="' + A.esc(lnEn) + '">' +
+                            '</div>' +
+                        '</div>' +
+                        '<button type="button" class="ad-btn-translate" id="adPlrTranslateEn">&#127760; ' + L.translateBtn + '</button>' +
                     '</div>' +
-                '</div>' +
-            '</div>' +
+                    '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                        '<div class="ad-field-row ad-field-row-2">' +
+                            '<div class="ad-field">' +
+                                '<label class="ad-field-label">' + L.plrFirstName + ' (KG)</label>' +
+                                '<input type="text" class="ad-field-input" id="adPlrFirstNameKg" value="' + A.esc(fnKg) + '">' +
+                            '</div>' +
+                            '<div class="ad-field">' +
+                                '<label class="ad-field-label">' + L.plrLastName + ' (KG)</label>' +
+                                '<input type="text" class="ad-field-input" id="adPlrLastNameKg" value="' + A.esc(lnKg) + '">' +
+                            '</div>' +
+                        '</div>' +
+                        '<button type="button" class="ad-btn-translate" id="adPlrTranslateKg">&#127760; ' + L.translateBtn + '</button>' +
+                    '</div>' +
+                '</div>';
+            })() +
 
             // Motto (single field, max 100 chars)
             '<div class="ad-form-card">' +
@@ -559,9 +592,12 @@
         }
 
         // --- Script validation on name fields ---
-        attachScriptValidation('adPlrName', SCRIPT_RU, 'Только кириллица');
-        attachScriptValidation('adPlrNameEn', SCRIPT_EN, 'Latin characters only');
-        attachScriptValidation('adPlrNameKg', SCRIPT_KG, 'Кыргыз тамгалары гана');
+        attachScriptValidation('adPlrFirstName', SCRIPT_RU, 'Только кириллица');
+        attachScriptValidation('adPlrLastName', SCRIPT_RU, 'Только кириллица');
+        attachScriptValidation('adPlrFirstNameEn', SCRIPT_EN, 'Latin characters only');
+        attachScriptValidation('adPlrLastNameEn', SCRIPT_EN, 'Latin characters only');
+        attachScriptValidation('adPlrFirstNameKg', SCRIPT_KG, 'Кыргыз тамгалары гана');
+        attachScriptValidation('adPlrLastNameKg', SCRIPT_KG, 'Кыргыз тамгалары гана');
         var rhNameHint = isEn ? 'Latin characters only' : 'Только кириллица';
         var rhNameRegex = isEn ? SCRIPT_EN : SCRIPT_RU;
         attachScriptValidation('adPlrRhName', rhNameRegex, rhNameHint);
@@ -572,6 +608,41 @@
             mottoInput.addEventListener('input', function() {
                 var cnt = document.getElementById('adPlrMottoCount');
                 if (cnt) cnt.textContent = mottoInput.value.length;
+            });
+        }
+
+        // --- Name translate buttons (EN / KG) ---
+        function translateNameFields(toLang, fnTargetId, lnTargetId, btn) {
+            var fnRu = document.getElementById('adPlrFirstName').value.trim();
+            var lnRu = document.getElementById('adPlrLastName').value.trim();
+            if (!fnRu && !lnRu) { A.showToast(L.fillRuFirst, 'error'); return; }
+            var origLabel = btn.textContent;
+            btn.textContent = L.translating;
+            btn.disabled = true;
+            var fullName = fnRu + (lnRu ? ' ' + lnRu : '');
+            A.translateFromRu(fullName, toLang).then(function(result) {
+                var parts = result.split(' ');
+                document.getElementById(fnTargetId).value = parts[0] || '';
+                document.getElementById(lnTargetId).value = parts.slice(1).join(' ') || '';
+                btn.textContent = origLabel;
+                btn.disabled = false;
+            }).catch(function() {
+                A.showToast(L.translateError, 'error');
+                btn.textContent = origLabel;
+                btn.disabled = false;
+            });
+        }
+
+        var translateEnBtn = document.getElementById('adPlrTranslateEn');
+        if (translateEnBtn) {
+            translateEnBtn.addEventListener('click', function() {
+                translateNameFields('en', 'adPlrFirstNameEn', 'adPlrLastNameEn', translateEnBtn);
+            });
+        }
+        var translateKgBtn = document.getElementById('adPlrTranslateKg');
+        if (translateKgBtn) {
+            translateKgBtn.addEventListener('click', function() {
+                translateNameFields('kg', 'adPlrFirstNameKg', 'adPlrLastNameKg', translateKgBtn);
             });
         }
 
@@ -700,7 +771,7 @@
         if (!zone) return;
         zone.classList.add('has-image');
         zone.innerHTML =
-            '<img src="' + A.esc(src) + '" class="ad-image-upload-preview" id="adPlrImgPreview" style="border-radius:12px;">' +
+            '<img src="' + A.esc(src) + '" class="ad-image-upload-preview" id="adPlrImgPreview" style="border-radius:12px;width:100%;height:100%;aspect-ratio:auto;max-height:none;object-fit:cover;">' +
             '<button type="button" class="ad-image-upload-remove" id="adPlrImgRemove">&times;</button>';
         setupPlrImgRemove();
     }
@@ -759,21 +830,42 @@
                 }
             }
 
-            var name = document.getElementById('adPlrName').value.trim();
-            var nameEn = document.getElementById('adPlrNameEn').value.trim() || null;
-            var nameKg = document.getElementById('adPlrNameKg').value.trim() || null;
+            // Concatenate first + last name
+            var fnRu = document.getElementById('adPlrFirstName').value.trim();
+            var lnRu = document.getElementById('adPlrLastName').value.trim();
+            var name = fnRu + (lnRu ? ' ' + lnRu : '');
+
+            var fnEn = document.getElementById('adPlrFirstNameEn').value.trim();
+            var lnEn = document.getElementById('adPlrLastNameEn').value.trim();
+            var nameEn = (fnEn || lnEn) ? (fnEn + (lnEn ? ' ' + lnEn : '')) : null;
+
+            var fnKg = document.getElementById('adPlrFirstNameKg').value.trim();
+            var lnKg = document.getElementById('adPlrLastNameKg').value.trim();
+            var nameKg = (fnKg || lnKg) ? (fnKg + (lnKg ? ' ' + lnKg : '')) : null;
 
             // Script validation
-            if (name && !checkScript(name, SCRIPT_RU)) {
+            if (fnRu && !checkScript(fnRu, SCRIPT_RU)) {
                 A.showToast(isEn ? 'RU name must use Cyrillic' : 'Имя (RU) должно быть на кириллице', 'error');
                 saveBtn.disabled = false; saveBtn.textContent = L.save; return;
             }
-            if (nameEn && !checkScript(nameEn, SCRIPT_EN)) {
+            if (lnRu && !checkScript(lnRu, SCRIPT_RU)) {
+                A.showToast(isEn ? 'RU last name must use Cyrillic' : 'Фамилия (RU) должна быть на кириллице', 'error');
+                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+            }
+            if (fnEn && !checkScript(fnEn, SCRIPT_EN)) {
                 A.showToast(isEn ? 'EN name must use Latin' : 'Имя (EN) должно быть на латинице', 'error');
                 saveBtn.disabled = false; saveBtn.textContent = L.save; return;
             }
-            if (nameKg && !checkScript(nameKg, SCRIPT_KG)) {
+            if (lnEn && !checkScript(lnEn, SCRIPT_EN)) {
+                A.showToast(isEn ? 'EN last name must use Latin' : 'Фамилия (EN) должна быть на латинице', 'error');
+                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+            }
+            if (fnKg && !checkScript(fnKg, SCRIPT_KG)) {
                 A.showToast(isEn ? 'KG name must use Kyrgyz script' : 'Имя (KG) должно быть на кыргызском', 'error');
+                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+            }
+            if (lnKg && !checkScript(lnKg, SCRIPT_KG)) {
+                A.showToast(isEn ? 'KG last name must use Kyrgyz script' : 'Фамилия (KG) должна быть на кыргызском', 'error');
                 saveBtn.disabled = false; saveBtn.textContent = L.save; return;
             }
 
@@ -795,8 +887,8 @@
                 show_phone: document.getElementById('adPlrShowPhone').checked
             };
 
-            if (!data.name) {
-                A.showToast(isEn ? 'Name is required' : 'Имя обязательно', 'error');
+            if (!fnRu) {
+                A.showToast(isEn ? 'First name is required' : 'Имя обязательно', 'error');
                 saveBtn.disabled = false;
                 saveBtn.textContent = L.save;
                 return;
