@@ -257,7 +257,7 @@
         var result = await A.client.from('players').select('*').eq('id', id).single();
         if (result.data) {
             // Look up linked profile (gender, socials)
-            var profRes = await A.client.from('profiles').select('gender, telegram_username, instagram').eq('player_id', id).single();
+            var profRes = await A.client.from('profiles').select('gender, telegram_username, instagram').eq('player_id', id).maybeSingle();
             if (profRes.data) {
                 if (profRes.data.gender) result.data._gender = profRes.data.gender;
                 result.data._telegram = profRes.data.telegram_username || '';
@@ -280,7 +280,7 @@
         var title = item ? L.editPlayer : L.addPlayer;
 
         var imagePreviewHtml = plrImageUrl
-            ? '<img src="' + A.esc(plrImageUrl) + '" class="ad-image-upload-preview" id="adPlrImgPreview" style="border-radius:50%;">' +
+            ? '<img src="' + A.esc(plrImageUrl) + '" class="ad-image-upload-preview" id="adPlrImgPreview" style="border-radius:12px;">' +
               '<button type="button" class="ad-image-upload-remove" id="adPlrImgRemove">&times;</button>'
             : '<div class="ad-image-upload-placeholder">' +
                   '<div class="ad-image-upload-icon">📷</div>' +
@@ -305,18 +305,6 @@
 
         // Badges section is now loaded dynamically from player_badges table
 
-        // Form (W/L) — 5 toggle pairs
-        var currentForm = (item && item.form) ? item.form : [];
-        var formHtml = '';
-        for (var i = 0; i < 5; i++) {
-            var val = currentForm[i] || '';
-            var wActive = val === 'W' ? ' active' : '';
-            var lActive = val === 'L' ? ' active' : '';
-            formHtml += '<div class="ad-form-toggle" data-index="' + i + '">' +
-                '<button type="button" class="ad-form-btn-w' + wActive + '" data-val="W">W</button>' +
-                '<button type="button" class="ad-form-btn-l' + lActive + '" data-val="L">L</button>' +
-            '</div>';
-        }
 
         container.innerHTML =
             '<div class="ad-section-header">' +
@@ -327,7 +315,7 @@
             // Photo
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.plrPhoto + '</div>' +
-                '<div class="ad-image-upload ad-image-upload-round' + hasImageClass + '" id="adPlrImgZone">' +
+                '<div class="ad-image-upload' + hasImageClass + '" id="adPlrImgZone" style="width:140px;height:180px;border-radius:12px;margin:0 auto 16px;border:2px solid var(--accent);">' +
                     imagePreviewHtml +
                 '</div>' +
                 '<input type="file" accept="image/jpeg,image/png" id="adPlrImgInput" style="display:none">' +
@@ -400,12 +388,6 @@
                         '<input type="number" class="ad-field-input" id="adPlrRankChange" value="' + (item ? (item.rank_change || 0) : '') + '">' +
                     '</div>' +
                 '</div>' +
-            '</div>' +
-
-            // Form (W/L)
-            '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.plrForm + '</div>' +
-                '<div class="ad-form-toggles" id="adPlrFormToggles">' + formHtml + '</div>' +
             '</div>' +
 
             // Last Matches (loaded from Supabase, edit only)
@@ -646,15 +628,6 @@
             });
         });
 
-        // Form toggles (W/L)
-        document.getElementById('adPlrFormToggles').addEventListener('click', function(e) {
-            var btn = e.target.closest('.ad-form-btn-w, .ad-form-btn-l');
-            if (!btn) return;
-            var toggle = btn.closest('.ad-form-toggle');
-            toggle.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
-            btn.classList.add('active');
-        });
-
         // Image upload
         var imgZone = document.getElementById('adPlrImgZone');
         var imgInput = document.getElementById('adPlrImgInput');
@@ -729,7 +702,7 @@
         if (!zone) return;
         zone.classList.add('has-image');
         zone.innerHTML =
-            '<img src="' + A.esc(src) + '" class="ad-image-upload-preview" id="adPlrImgPreview" style="border-radius:50%;">' +
+            '<img src="' + A.esc(src) + '" class="ad-image-upload-preview" id="adPlrImgPreview" style="border-radius:12px;">' +
             '<button type="button" class="ad-image-upload-remove" id="adPlrImgRemove">&times;</button>';
         setupPlrImgRemove();
     }
@@ -772,12 +745,21 @@
                 }
             }
 
-            // Collect form (W/L)
+            // Auto-compute form (W/L) from last 5 matches
             var formArr = [];
-            document.querySelectorAll('.ad-form-toggle').forEach(function(toggle) {
-                var active = toggle.querySelector('button.active');
-                if (active) formArr.push(active.dataset.val);
-            });
+            if (plrEditingId) {
+                var matchRes = await A.client.from('matches')
+                    .select('winner_id')
+                    .or('player1_id.eq.' + plrEditingId + ',player2_id.eq.' + plrEditingId)
+                    .not('winner_id', 'is', null)
+                    .order('played_at', { ascending: false })
+                    .limit(5);
+                if (matchRes.data) {
+                    matchRes.data.forEach(function(m) {
+                        formArr.push(m.winner_id === plrEditingId ? 'W' : 'L');
+                    });
+                }
+            }
 
             var name = document.getElementById('adPlrName').value.trim();
             var nameEn = document.getElementById('adPlrNameEn').value.trim() || null;
@@ -843,7 +825,7 @@
                 // Stay on edit form — re-load fresh data
                 var fresh = await A.client.from('players').select('*').eq('id', plrEditingId).single();
                 if (fresh.data) {
-                    var profRes = await A.client.from('profiles').select('gender, telegram_username, instagram').eq('player_id', plrEditingId).single();
+                    var profRes = await A.client.from('profiles').select('gender, telegram_username, instagram').eq('player_id', plrEditingId).maybeSingle();
                     if (profRes.data) {
                         if (profRes.data.gender) fresh.data._gender = profRes.data.gender;
                         fresh.data._telegram = profRes.data.telegram_username || '';
