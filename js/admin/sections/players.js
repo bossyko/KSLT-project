@@ -352,6 +352,15 @@
                 '</div>' +
             '</div>' +
 
+            // Motto (single field, max 100 chars)
+            '<div class="ad-form-card">' +
+                '<div class="ad-field">' +
+                    '<label class="ad-field-label">' + L.plrMotto + '</label>' +
+                    '<input type="text" class="ad-field-input" id="adPlrMotto" maxlength="100" placeholder="' + (isEn ? 'e.g. Never give up!' : 'напр. Никогда не сдавайся!') + '" value="' + A.esc(item ? item.bio : '') + '">' +
+                    '<div class="ad-field-hint" style="text-align:right;margin-top:2px;"><span id="adPlrMottoCount">' + ((item && item.bio) ? item.bio.length : 0) + '</span>/100</div>' +
+                '</div>' +
+            '</div>' +
+
             // Category + Country
             '<div class="ad-form-card">' +
                 '<div class="ad-field-row ad-field-row-3">' +
@@ -402,26 +411,6 @@
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.plrBadges + '</div>' +
                 '<div id="adPlrBadgesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
-            '</div>' +
-
-            // Bio (RU/EN)
-            '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.plrBio + '</div>' +
-                '<div class="ad-lang-tabs">' +
-                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
-                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
-                '</div>' +
-                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
-                    '<div class="ad-field">' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adPlrBio" placeholder="' + L.plrBio + ' (RU)">' + A.esc(item ? item.bio : '') + '</textarea>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="ad-lang-panel" data-lang-panel="en">' +
-                    '<div class="ad-field">' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adPlrBioEn" placeholder="' + L.plrBio + ' (EN)">' + A.esc(item ? item.bio_en : '') + '</textarea>' +
-                        '<button type="button" class="ad-btn-translate" data-src="adPlrBio" data-target="adPlrBioEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
-                    '</div>' +
-                '</div>' +
             '</div>' +
 
             // Contact: Phone, Email, Show Phone
@@ -576,6 +565,15 @@
         var rhNameHint = isEn ? 'Latin characters only' : 'Только кириллица';
         var rhNameRegex = isEn ? SCRIPT_EN : SCRIPT_RU;
         attachScriptValidation('adPlrRhName', rhNameRegex, rhNameHint);
+
+        // --- Motto character counter ---
+        var mottoInput = document.getElementById('adPlrMotto');
+        if (mottoInput) {
+            mottoInput.addEventListener('input', function() {
+                var cnt = document.getElementById('adPlrMottoCount');
+                if (cnt) cnt.textContent = mottoInput.value.length;
+            });
+        }
 
         // --- Event Listeners ---
 
@@ -791,8 +789,7 @@
                 losses: parseInt(document.getElementById('adPlrLosses').value, 10) || 0,
                 rank_change: parseInt(document.getElementById('adPlrRankChange').value, 10) || 0,
                 form: formArr,
-                bio: document.getElementById('adPlrBio').value.trim() || null,
-                bio_en: document.getElementById('adPlrBioEn').value.trim() || null,
+                bio: document.getElementById('adPlrMotto').value.trim() || null,
                 phone: document.getElementById('adPlrPhone').value.trim() || null,
                 email: document.getElementById('adPlrEmail').value.trim() || null,
                 show_phone: document.getElementById('adPlrShowPhone').checked

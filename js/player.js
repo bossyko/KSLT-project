@@ -398,6 +398,11 @@
             }
             html += '</div>';
         }
+        // Motto
+        if (player.bio) {
+            html += '<div class="pp-motto" style="font-style:italic;color:var(--text-muted);font-size:0.9rem;margin-top:8px;">&laquo;' + esc(player.bio) + '&raquo;</div>';
+        }
+
         html += '</div>'; // .pp-info
 
         // Actions
@@ -1042,7 +1047,8 @@
                             form: p.form || [],
                             badges: [],
                             online: false,
-                            ntrp_rating: p.ntrp_rating || null
+                            ntrp_rating: p.ntrp_rating || null,
+                            bio: p.bio || ''
                         },
                         category: { name: catName || '\u2014', players: [] },
                         categoryKey: catKey,
