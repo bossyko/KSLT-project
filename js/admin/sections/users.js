@@ -822,6 +822,9 @@
 
         A.showToast(L.usrMembershipGiven, 'success');
 
+        // TG notification (fire and forget)
+        notifyMembershipTg('granted', user.id, end.toISOString());
+
         // Auto-create player if no player_id
         if (!user.player_id && categoryId) {
             await autoCreatePlayer(user, categoryId);
@@ -885,7 +888,7 @@
 
     async function extendMembership(memId, months) {
         // Get current expiry
-        var res = await A.client.from('memberships').select('expires_at').eq('id', memId).single();
+        var res = await A.client.from('memberships').select('expires_at, profile_id').eq('id', memId).single();
         if (res.error || !res.data) { A.showToast('Error', 'error'); return; }
 
         var expiry = new Date(res.data.expires_at);
@@ -901,6 +904,12 @@
             A.showToast(result.error.message, 'error');
         } else {
             A.showToast(L.usrMembershipExtended, 'success');
+
+            // TG notification (fire and forget)
+            if (res.data.profile_id) {
+                notifyMembershipTg('extended', res.data.profile_id, expiry.toISOString());
+            }
+
             // Reload current user
             var profileRes = await A.client.from('memberships').select('profile_id').eq('id', memId).single();
             if (profileRes.data) loadAndEditUser(profileRes.data.profile_id);
@@ -917,9 +926,30 @@
                 A.showToast(result.error.message, 'error');
             } else {
                 A.showToast(L.usrMembershipCancelled, 'success');
+
+                // TG notification (fire and forget)
+                notifyMembershipTg('cancelled', profileId);
+
                 loadAndEditUser(profileId);
             }
         }, L.usrCancelMembership);
+    }
+
+    function notifyMembershipTg(action, profileId, expiresAt) {
+        A.client.auth.getSession().then(function(res) {
+            if (!res.data || !res.data.session) return;
+            var token = res.data.session.access_token;
+            var body = { action: action, profile_id: profileId };
+            if (expiresAt) body.expires_at = expiresAt;
+            fetch(SUPABASE_URL + '/functions/v1/membership-tg-notify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(body)
+            }).catch(function() { /* fire and forget */ });
+        }).catch(function() { /* ignore */ });
     }
 
     async function changeUserRole(userId, newRole) {

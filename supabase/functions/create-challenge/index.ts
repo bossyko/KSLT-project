@@ -59,12 +59,13 @@ Deno.serve(async (req) => {
     // 3. Membership check (admin/manager bypass)
     const isStaff = sender.role === 'admin' || sender.role === 'manager'
     if (!isStaff) {
-      const now = new Date().toISOString()
+      const today = new Date().toISOString().split('T')[0]
       const { data: membership } = await db
         .from('memberships')
         .select('id')
         .eq('profile_id', user.id)
         .eq('status', 'active')
+        .gte('expires_at', today)
         .limit(1)
         .single()
 
