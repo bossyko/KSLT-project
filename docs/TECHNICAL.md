@@ -1,7 +1,7 @@
 # KSLT — Техническая документация
 
 > Последнее обновление: 2026-03-17
-> Версия: 1.4
+> Версия: 1.5
 
 ---
 
@@ -200,12 +200,13 @@ profiles              — пользователи (auth + профиль)
 
 players               — игроки рейтинга
 ├── id (TEXT, PK)
-├── name
+├── name, name_en, name_kg — ФИО (Имя Фамилия, split в админке)
 ├── photo
 ├── category_id       → categories
 ├── points, wins, losses
 ├── rank_change
-├── form[]            — последние 5 результатов (W/L)
+├── form[]            — последние 5 результатов (W/L), авто из matches
+├── bio               — девиз игрока (макс 100 символов)
 ├── seed
 ├── banned_until      — дата окончания бана (NULL = не забанен)
 └── ban_reason        — причина бана (опционально)
@@ -852,6 +853,9 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://qqkzszesviukopg
 | User Analytics | Карточки статистики + Chart.js график роста | ✅ |
 | Deleted Accounts | PostgreSQL trigger + admin visibility | ✅ |
 | Challenge Board | Вызовы на матч через Telegram (counter-offer, expire) | ✅ |
+| Player Ban System | Бан/разбан игроков + TG уведомления + бейджи | ✅ |
+| Manager Rights | Менеджер может банить/удалять обычных пользователей | ✅ |
+| Admin Player Form | Имя+Фамилия, девиз, соцсети, матчи, прямоугольное фото | ✅ |
 
 ---
 

@@ -124,6 +124,16 @@
 - [x] Ban check: tournament registration blocked on site + Telegram bot
 - [x] Ban badge on public rating pages (RU/EN/KG)
 - [x] Edge Function: ban_player, unban_player, ban_user, unban_user, delete_user
+- [ ] Auto-unban by pg_cron when ban expires + TG notification
+
+### Admin Player Form Improvements ✅
+- [x] Split Name into First Name + Last Name (per language tab)
+- [x] Rectangular photo with accent border (140×180px, border-radius 12px)
+- [x] Bio → Motto (single input, max 100 chars, shown on public profile)
+- [x] Telegram + Instagram display from linked profile (read-only)
+- [x] Last Matches table (opponent, score, result, tournament from matches table)
+- [x] Remove manual W/L form toggles (auto-computed from last 5 matches)
+- [x] Fix 406 error (.single() → .maybeSingle() for profile lookup)
 
 ## Infrastructure (Backlog)
 
