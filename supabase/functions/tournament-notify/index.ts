@@ -2,7 +2,7 @@
 // KSLT — Tournament Registration Notify
 // Supabase Edge Function
 // ============================================
-// Sends tournament announcement to Telegram group when registration opens.
+// Sends tournament announcement to Telegram group + email when registration opens.
 //
 // Two modes:
 // 1. Manual: POST { tournament_id: "xxx" } with JWT (admin button)
@@ -141,8 +141,15 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'TELEGRAM_GROUP_CHAT_ID not configured' }, 500)
     }
 
+    // Load all profiles with email for email notifications
+    const { data: allProfiles } = await db
+      .from('profiles')
+      .select('email, notify_preferences')
+      .not('email', 'is', null)
+
     let sent = 0
     let errors = 0
+    let emailSent = 0
 
     for (const t of tournaments) {
       const catName = t.category_id && catMap[t.category_id]
@@ -186,9 +193,29 @@ Deno.serve(async (req) => {
       } else {
         errors++
       }
+
+      // Email to all profiles with email
+      for (const p of (allProfiles || [])) {
+        if (p.email && shouldNotify(p.notify_preferences, 'email', 'tournaments')) {
+          const ok = await callSendEmail(serviceKey, {
+            to: p.email,
+            subject: `🎾 Регистрация открыта: ${t.title}`,
+            template: 'tournament-announcement',
+            data: {
+              title: t.title || '',
+              dates: dateStr,
+              venue: venue,
+              category: catName,
+              max_participants: t.max_participants,
+              tournament_id: t.id
+            }
+          })
+          if (ok) emailSent++
+        }
+      }
     }
 
-    return jsonResponse({ sent, errors, total: tournaments.length })
+    return jsonResponse({ sent, email_sent: emailSent, errors, total: tournaments.length })
   } catch (err) {
     console.error('tournament-notify error:', err)
     return jsonResponse({ error: String(err) }, 500)
@@ -196,6 +223,27 @@ Deno.serve(async (req) => {
 })
 
 // --- Helpers ---
+
+function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
+  if (!prefs) return true
+  const ch = prefs[channel]
+  if (!ch) return true
+  return ch[cat] !== false
+}
+
+async function callSendEmail(serviceKey: string, payload: any): Promise<boolean> {
+  try {
+    const res = await fetch(
+      Deno.env.get('SUPABASE_URL') + '/functions/v1/send-email',
+      {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }
+    )
+    return res.ok
+  } catch { return false }
+}
 
 function formatDate(d: string): string {
   if (!d) return ''

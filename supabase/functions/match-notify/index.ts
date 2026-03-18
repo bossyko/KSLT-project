@@ -128,7 +128,7 @@ async function autoNotify(db: any): Promise<Response> {
 
   // Load players, profiles, tournaments
   const { data: players } = await db.from('players').select('id, name').in('id', playerIds)
-  const { data: profiles } = await db.from('profiles').select('player_id, telegram_chat_id, notify_preferences').in('player_id', playerIds)
+  const { data: profiles } = await db.from('profiles').select('player_id, telegram_chat_id, email, notify_preferences').in('player_id', playerIds)
 
   const playerMap: Record<string, any> = {}
   for (const p of (players || [])) playerMap[p.id] = p
@@ -140,8 +140,11 @@ async function autoNotify(db: any): Promise<Response> {
   const tournamentMap: Record<string, any> = {}
   for (const t of (tournaments || [])) tournamentMap[t.id] = t
 
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
   // Send notifications
   let sent = 0
+  let emailSent = 0
   for (const match of upcoming) {
     const t = tournamentMap[match.tournament_id]
     const p1 = playerMap[match.player1_id]
@@ -150,23 +153,55 @@ async function autoNotify(db: any): Promise<Response> {
     const pr2 = profileMap[match.player2_id]
     const courtStr = match.court ? `Корт ${match.court}` : ''
 
+    // Player 1 — TG
     if (pr1?.telegram_chat_id && shouldNotify(pr1.notify_preferences, 'tg', 'matches')) {
       const msg = `🎾 <b>Ваш матч скоро!</b>\n\n🏆 ${esc(t?.title || '')}\n⏰ ${match.scheduled_time}\n${courtStr ? '📍 ' + courtStr + '\n' : ''}🆚 ${esc(p2?.name || '?')}\n\n💪 Удачи!`
       await sendTg(pr1.telegram_chat_id, msg)
       sent++
     }
+    // Player 1 — Email
+    if (pr1?.email && shouldNotify(pr1.notify_preferences, 'email', 'matches')) {
+      const ok = await callSendEmail(serviceKey, {
+        to: pr1.email,
+        subject: `🎾 Ваш матч скоро: ${t?.title || ''}`,
+        template: 'match-schedule',
+        data: {
+          player_name: p1?.name || '',
+          tournament_title: t?.title || '',
+          tournament_id: match.tournament_id,
+          matches: [{ time: match.scheduled_time, opponent: p2?.name || '?', court: courtStr }]
+        }
+      })
+      if (ok) emailSent++
+    }
 
+    // Player 2 — TG
     if (pr2?.telegram_chat_id && shouldNotify(pr2.notify_preferences, 'tg', 'matches')) {
       const msg = `🎾 <b>Ваш матч скоро!</b>\n\n🏆 ${esc(t?.title || '')}\n⏰ ${match.scheduled_time}\n${courtStr ? '📍 ' + courtStr + '\n' : ''}🆚 ${esc(p1?.name || '?')}\n\n💪 Удачи!`
       await sendTg(pr2.telegram_chat_id, msg)
       sent++
+    }
+    // Player 2 — Email
+    if (pr2?.email && shouldNotify(pr2.notify_preferences, 'email', 'matches')) {
+      const ok = await callSendEmail(serviceKey, {
+        to: pr2.email,
+        subject: `🎾 Ваш матч скоро: ${t?.title || ''}`,
+        template: 'match-schedule',
+        data: {
+          player_name: p2?.name || '',
+          tournament_title: t?.title || '',
+          tournament_id: match.tournament_id,
+          matches: [{ time: match.scheduled_time, opponent: p1?.name || '?', court: courtStr }]
+        }
+      })
+      if (ok) emailSent++
     }
 
     // Mark as notified
     await db.from('matches').update({ notified_at: new Date().toISOString() }).eq('id', match.id)
   }
 
-  return jsonResponse({ sent, matches: upcoming.length, mode: 'auto' })
+  return jsonResponse({ sent, email_sent: emailSent, matches: upcoming.length, mode: 'auto' })
 }
 
 // ============================================
@@ -204,7 +239,7 @@ async function manualNotify(db: any, tournamentId: string): Promise<Response> {
   const playerIds = [...new Set(matches.flatMap((m: any) => [m.player1_id, m.player2_id]))]
 
   const { data: players } = await db.from('players').select('id, name').in('id', playerIds)
-  const { data: profiles } = await db.from('profiles').select('player_id, telegram_chat_id, notify_preferences').in('player_id', playerIds)
+  const { data: profiles } = await db.from('profiles').select('player_id, telegram_chat_id, email, notify_preferences').in('player_id', playerIds)
 
   const playerMap: Record<string, any> = {}
   for (const p of (players || [])) playerMap[p.id] = p
@@ -223,21 +258,16 @@ async function manualNotify(db: any, tournamentId: string): Promise<Response> {
   // Format date
   const dateStr = tournament.date_start ? formatDate(tournament.date_start) : ''
 
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
   // Send summary to each player
   let sent = 0
+  let emailSent = 0
   let noTg = 0
 
   for (const playerId of Object.keys(playerMatches)) {
     const pr = profileMap[playerId]
-    if (!pr?.telegram_chat_id) {
-      noTg++
-      continue
-    }
-
-    if (!shouldNotify(pr.notify_preferences, 'tg', 'matches')) {
-      noTg++
-      continue
-    }
+    const playerName = playerMap[playerId]?.name || ''
 
     const myMatches = playerMatches[playerId]
     // Sort by day then time
@@ -246,26 +276,55 @@ async function manualNotify(db: any, tournamentId: string): Promise<Response> {
       return (a.scheduled_time || '') < (b.scheduled_time || '') ? -1 : 1
     })
 
-    const playerName = playerMap[playerId]?.name || ''
-    let msg = `📋 <b>Расписание турнира</b>\n\n`
-    if (playerName) msg += `👤 ${esc(playerName)}\n`
-    msg += `🏆 ${esc(tournament.title)}\n`
-    if (dateStr) msg += `📅 ${dateStr}\n`
-    msg += `\nВаши матчи:\n`
-
-    for (const m of myMatches) {
+    // Build match list for email template
+    const matchList = myMatches.map((m: any) => {
       const oppName = playerMap[m.opponentId]?.name || '?'
       const time = m.scheduled_time ? m.scheduled_time.slice(0, 5) : '??:??'
-      const court = m.court ? `, Корт ${m.court}` : ''
-      const roundLabel = getRoundLabel(m.round, m.group_number)
-      const roundStr = roundLabel ? ` (${roundLabel})` : ''
-      msg += `⏰ ${time} — vs ${esc(oppName)}${court}${roundStr}\n`
+      const court = m.court ? `Корт ${m.court}` : ''
+      return { time, opponent: oppName, court }
+    })
+
+    // TG notification
+    if (pr?.telegram_chat_id && shouldNotify(pr?.notify_preferences, 'tg', 'matches')) {
+      let msg = `📋 <b>Расписание турнира</b>\n\n`
+      if (playerName) msg += `👤 ${esc(playerName)}\n`
+      msg += `🏆 ${esc(tournament.title)}\n`
+      if (dateStr) msg += `📅 ${dateStr}\n`
+      msg += `\nВаши матчи:\n`
+
+      for (const m of myMatches) {
+        const oppName = playerMap[m.opponentId]?.name || '?'
+        const time = m.scheduled_time ? m.scheduled_time.slice(0, 5) : '??:??'
+        const court = m.court ? `, Корт ${m.court}` : ''
+        const roundLabel = getRoundLabel(m.round, m.group_number)
+        const roundStr = roundLabel ? ` (${roundLabel})` : ''
+        msg += `⏰ ${time} — vs ${esc(oppName)}${court}${roundStr}\n`
+      }
+
+      msg += `\n🎾 Удачи!`
+
+      await sendTg(pr.telegram_chat_id, msg)
+      sent++
+    } else {
+      noTg++
     }
 
-    msg += `\n🎾 Удачи!`
-
-    await sendTg(pr.telegram_chat_id, msg)
-    sent++
+    // Email notification
+    if (pr?.email && shouldNotify(pr?.notify_preferences, 'email', 'matches')) {
+      const ok = await callSendEmail(serviceKey, {
+        to: pr.email,
+        subject: `📋 Расписание: ${tournament.title}`,
+        template: 'match-schedule',
+        data: {
+          player_name: playerName,
+          tournament_title: tournament.title,
+          tournament_id: tournamentId,
+          date: dateStr,
+          matches: matchList
+        }
+      })
+      if (ok) emailSent++
+    }
   }
 
   // Mark all included matches as notified
@@ -274,10 +333,24 @@ async function manualNotify(db: any, tournamentId: string): Promise<Response> {
     await db.from('matches').update({ notified_at: new Date().toISOString() }).in('id', matchIds)
   }
 
-  return jsonResponse({ sent, noTelegram: noTg, totalPlayers: Object.keys(playerMatches).length, mode: 'manual' })
+  return jsonResponse({ sent, email_sent: emailSent, noTelegram: noTg, totalPlayers: Object.keys(playerMatches).length, mode: 'manual' })
 }
 
 // --- Helpers ---
+
+async function callSendEmail(serviceKey: string, payload: any): Promise<boolean> {
+  try {
+    const res = await fetch(
+      Deno.env.get('SUPABASE_URL') + '/functions/v1/send-email',
+      {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }
+    )
+    return res.ok
+  } catch { return false }
+}
 
 function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
   if (!prefs) return true

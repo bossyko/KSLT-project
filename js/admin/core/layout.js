@@ -171,7 +171,10 @@
         var isAdm = A.currentRole === 'admin';
 
         container.innerHTML =
-            '<h2 class="ad-section-title">' + L.dashboardTitle + '</h2>' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
+                '<h2 class="ad-section-title" style="margin-bottom:0;">' + L.dashboardTitle + '</h2>' +
+                (isAdm ? '<button class="ad-btn ad-btn--accent" id="adBroadcastBtn" style="white-space:nowrap;">📢 ' + L.broadcastBtn + '</button>' : '') +
+            '</div>' +
             // Stat cards (3x3 grid)
             '<div class="ad-stats-grid" id="adStatsGrid">' +
                 // Row 1: Members, Overdue, Approaching
@@ -204,6 +207,12 @@
             '</div>';
 
         loadStats();
+
+        // Broadcast button (admin only)
+        var broadcastBtn = document.getElementById('adBroadcastBtn');
+        if (broadcastBtn && A.openBroadcastModal) {
+            broadcastBtn.addEventListener('click', A.openBroadcastModal);
+        }
     }
 
     function renderStatCard(icon, value, label, modifier, clickTarget) {

@@ -130,16 +130,16 @@ Deno.serve(async (req) => {
       return json({ error: 'Player not found' }, 404)
     }
 
-    // 10. Resolve opponent profile (with telegram)
+    // 10. Resolve opponent profile (with telegram or email)
     const { data: opponentProfile } = await db
       .from('profiles')
-      .select('id, telegram_chat_id, full_name, notify_preferences')
+      .select('id, telegram_chat_id, email, full_name, notify_preferences')
       .eq('player_id', opponent_player_id)
       .limit(1)
       .single()
 
-    if (!opponentProfile || !opponentProfile.telegram_chat_id) {
-      return json({ error: 'no_telegram' }, 400)
+    if (!opponentProfile || (!opponentProfile.telegram_chat_id && !opponentProfile.email)) {
+      return json({ error: 'no_contact' }, 400)
     }
 
     // 11. Venue text
@@ -173,10 +173,11 @@ Deno.serve(async (req) => {
     }
 
     // 13. Telegram notification to opponent (respect opt-out)
+    const senderName = sender.full_name || 'Игрок KSLT'
+    const dateFormatted = formatDate(proposed_date)
     const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
+
     if (token && opponentProfile.telegram_chat_id && shouldNotify(opponentProfile.notify_preferences, 'tg', 'challenges')) {
-      const senderName = sender.full_name || 'Игрок KSLT'
-      const dateFormatted = formatDate(proposed_date)
       const msgParts = [
         `⚔️ <b>Вызов на матч!</b>`,
         ``,
@@ -205,6 +206,22 @@ Deno.serve(async (req) => {
       })
     }
 
+    // 14. Email notification to opponent
+    if (opponentProfile.email && shouldNotify(opponentProfile.notify_preferences, 'email', 'challenges')) {
+      await callSendEmail(serviceKey, {
+        to: opponentProfile.email,
+        subject: `⚔️ Вызов на матч от ${senderName}`,
+        template: 'challenge-received',
+        data: {
+          challenger_name: senderName,
+          date: dateFormatted,
+          time: proposed_time,
+          venue: venueDisplay || '',
+          message: message || ''
+        }
+      })
+    }
+
     return json({ success: true, challenge_id: challenge.id })
 
   } catch (err) {
@@ -218,6 +235,20 @@ function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean
   const ch = prefs[channel]
   if (!ch) return true
   return ch[cat] !== false
+}
+
+async function callSendEmail(serviceKey: string, payload: any): Promise<boolean> {
+  try {
+    const res = await fetch(
+      Deno.env.get('SUPABASE_URL') + '/functions/v1/send-email',
+      {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }
+    )
+    return res.ok
+  } catch { return false }
 }
 
 function json(data: Record<string, unknown>, status = 200) {

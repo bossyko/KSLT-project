@@ -54,10 +54,9 @@ Deno.serve(async (req) => {
     const targetDate = target.toISOString().split('T')[0] // YYYY-MM-DD
 
     // Find active memberships expiring on target date
-    // with telegram_chat_id set on the profile
     const { data: memberships, error: memError } = await supabase
       .from('memberships')
-      .select('id, profile_id, expires_at, profiles(full_name, telegram_chat_id, notify_preferences)')
+      .select('id, profile_id, expires_at, profiles(full_name, telegram_chat_id, email, notify_preferences)')
       .eq('status', 'active')
       .gte('expires_at', targetDate + 'T00:00:00')
       .lt('expires_at', targetDate + 'T23:59:59')
@@ -71,18 +70,15 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ sent: 0, message: 'No expiring memberships for ' + targetDate }), { status: 200 })
     }
 
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
     let sent = 0
+    let emailSent = 0
     let skipped = 0
 
     for (const m of memberships) {
       const profile = m.profiles as any
-      if (!profile || !profile.telegram_chat_id) {
-        skipped++
-        continue
-      }
-
-      // Check opt-out preference
-      if (!shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
+      if (!profile) {
         skipped++
         continue
       }
@@ -100,29 +96,44 @@ Deno.serve(async (req) => {
         continue
       }
 
-      // Send Telegram message
       const name = profile.full_name || ''
       const expiresFormatted = m.expires_at ? m.expires_at.split('T')[0] : targetDate
-      const text =
-        `Здравствуйте${name ? ', ' + name : ''}! Ваше членство KSLT истекает через 7 дней (${expiresFormatted}).\n` +
-        `Для продления оплатите 1000 сом/мес.\n` +
-        `Подробнее: https://kslt.netlify.app/pages/pricing.html`
+      let notified = false
 
-      const success = await sendMessage(profile.telegram_chat_id, text)
+      // Send Telegram message
+      if (profile.telegram_chat_id && shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
+        const text =
+          `Здравствуйте${name ? ', ' + name : ''}! Ваше членство KSLT истекает через 7 дней (${expiresFormatted}).\n` +
+          `Для продления оплатите 1000 сом/мес.\n` +
+          `Подробнее: https://kslt.netlify.app/pages/pricing.html`
 
-      if (success) {
+        const success = await sendMessage(profile.telegram_chat_id, text)
+        if (success) { sent++; notified = true }
+      }
+
+      // Send email
+      if (profile.email && shouldNotify(profile.notify_preferences, 'email', 'membership')) {
+        const emailOk = await callSendEmail(serviceKey, {
+          to: profile.email,
+          subject: '⏰ Членство KSLT истекает через 7 дней',
+          template: 'membership-expiring',
+          data: { name, expires_at: expiresFormatted }
+        })
+        if (emailOk) { emailSent++; notified = true }
+      }
+
+      if (notified) {
         // Log notification
         await supabase.from('notification_log').insert({
           profile_id: m.profile_id,
           membership_id: m.id,
           type: 'expiry_7d'
         })
-        sent++
       }
     }
 
     return new Response(
-      JSON.stringify({ sent, skipped, total: memberships.length, targetDate }),
+      JSON.stringify({ sent, email_sent: emailSent, skipped, total: memberships.length, targetDate }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
   } catch (err) {
@@ -136,6 +147,20 @@ function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean
   const ch = prefs[channel]
   if (!ch) return true
   return ch[cat] !== false
+}
+
+async function callSendEmail(serviceKey: string, payload: any): Promise<boolean> {
+  try {
+    const res = await fetch(
+      Deno.env.get('SUPABASE_URL') + '/functions/v1/send-email',
+      {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }
+    )
+    return res.ok
+  } catch { return false }
 }
 
 async function sendMessage(chatId: number, text: string): Promise<boolean> {

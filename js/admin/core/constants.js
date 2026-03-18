@@ -861,7 +861,22 @@
         plrSubList: 'List',
         plrSubRankings: 'Rankings',
         plrSubResults: 'Results',
-        plrMembershipExp: 'Membership'
+        plrMembershipExp: 'Membership',
+        // Broadcast
+        broadcastBtn: 'Broadcast',
+        broadcastTitle: 'Broadcast',
+        broadcastSubject: 'Subject',
+        broadcastMessage: 'Message',
+        broadcastAudience: 'Recipients',
+        broadcastAudienceAll: 'All users',
+        broadcastAudienceMembers: 'KSLT Members',
+        broadcastAudienceTournament: 'Tournament',
+        broadcastChannels: 'Channels',
+        broadcastSend: 'Send Broadcast',
+        broadcastSending: 'Sending...',
+        broadcastSuccess: 'Broadcast sent',
+        broadcastSelectTournament: '— Select tournament —',
+        broadcastConfirm: 'Send broadcast to selected audience?'
     } : {
         dashboard: 'Дашборд',
         users: 'Пользователи',
@@ -1715,7 +1730,22 @@
         plrSubList: 'Список',
         plrSubRankings: 'Рейтинг',
         plrSubResults: 'Результаты',
-        plrMembershipExp: 'Членство'
+        plrMembershipExp: 'Членство',
+        // Broadcast
+        broadcastBtn: 'Рассылка',
+        broadcastTitle: 'Рассылка',
+        broadcastSubject: 'Тема',
+        broadcastMessage: 'Сообщение',
+        broadcastAudience: 'Получатели',
+        broadcastAudienceAll: 'Все пользователи',
+        broadcastAudienceMembers: 'Члены KSLT',
+        broadcastAudienceTournament: 'Турнир',
+        broadcastChannels: 'Каналы',
+        broadcastSend: 'Отправить рассылку',
+        broadcastSending: 'Отправка...',
+        broadcastSuccess: 'Рассылка отправлена',
+        broadcastSelectTournament: '— Выберите турнир —',
+        broadcastConfirm: 'Отправить рассылку выбранной аудитории?'
     };
 
     // Category map

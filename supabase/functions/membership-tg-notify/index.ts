@@ -72,48 +72,59 @@ Deno.serve(async (req) => {
     // 4. Get target profile
     const { data: profile } = await db
       .from('profiles')
-      .select('full_name, telegram_chat_id, notify_preferences')
+      .select('full_name, telegram_chat_id, email, notify_preferences')
       .eq('id', profile_id)
       .single()
 
-    if (!profile || !profile.telegram_chat_id) {
-      return json({ ok: true, sent: false, reason: 'no_telegram' })
-    }
-
-    if (!shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
-      return json({ ok: true, sent: false, reason: 'opt_out' })
+    if (!profile) {
+      return json({ ok: true, sent: false, reason: 'no_profile' })
     }
 
     // 5. Build message
     const name = profile.full_name || ''
+    const expDate = expires_at ? formatDate(expires_at) : ''
     let text = ''
 
     if (action === 'granted') {
-      const expDate = expires_at ? formatDate(expires_at) : ''
       text = `${name ? name + ', в' : 'В'}ам выдано членство KSLT!`
       if (expDate) text += `\nДействует до: ${expDate}`
       text += '\n\nДобро пожаловать! 🎾'
     } else if (action === 'extended') {
-      const expDate = expires_at ? formatDate(expires_at) : ''
       text = `${name ? name + ', в' : 'В'}аше членство KSLT продлено!`
       if (expDate) text += `\nНовая дата окончания: ${expDate}`
     } else if (action === 'cancelled') {
       text = `${name ? name + ', в' : 'В'}аше членство KSLT отменено.\n\nДля продления: /membership`
     }
 
-    // 6. Send TG
+    let tgSent = false
+    let emailSent = false
+
+    // 6. Send TG (independent of email)
     const tgToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
-    if (!tgToken) {
-      return json({ ok: true, sent: false, reason: 'no_token' })
+    if (tgToken && profile.telegram_chat_id && shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
+      await tgFetch(tgToken, 'sendMessage', {
+        chat_id: profile.telegram_chat_id,
+        text,
+        parse_mode: 'HTML'
+      })
+      tgSent = true
     }
 
-    await tgFetch(tgToken, 'sendMessage', {
-      chat_id: profile.telegram_chat_id,
-      text,
-      parse_mode: 'HTML'
-    })
+    // 7. Send email (independent of TG)
+    if (profile.email && shouldNotify(profile.notify_preferences, 'email', 'membership')) {
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      const emailAction = action === 'cancelled' ? action : (action === 'granted' ? 'granted' : 'extended')
+      emailSent = await callSendEmail(serviceKey, {
+        to: profile.email,
+        subject: action === 'cancelled'
+          ? '❌ Членство KSLT отменено'
+          : `✅ Членство KSLT ${action === 'granted' ? 'выдано' : 'продлено'}`,
+        template: 'membership-approved',
+        data: { name, action: emailAction, expires_at: expDate }
+      })
+    }
 
-    return json({ ok: true, sent: true })
+    return json({ ok: true, tg_sent: tgSent, email_sent: emailSent })
 
   } catch (err) {
     console.error('membership-tg-notify error:', err)
@@ -127,6 +138,20 @@ function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean
   const ch = prefs[channel]
   if (!ch) return true
   return ch[cat] !== false
+}
+
+async function callSendEmail(serviceKey: string, payload: any): Promise<boolean> {
+  try {
+    const res = await fetch(
+      Deno.env.get('SUPABASE_URL') + '/functions/v1/send-email',
+      {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }
+    )
+    return res.ok
+  } catch { return false }
 }
 
 function formatDate(isoStr: string): string {

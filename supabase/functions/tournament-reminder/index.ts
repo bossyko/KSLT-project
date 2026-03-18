@@ -47,6 +47,20 @@ function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean
   return ch[cat] !== false
 }
 
+async function callSendEmail(serviceKey: string, payload: any): Promise<boolean> {
+  try {
+    const res = await fetch(
+      Deno.env.get('SUPABASE_URL') + '/functions/v1/send-email',
+      {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }
+    )
+    return res.ok
+  } catch { return false }
+}
+
 // --- Telegram helpers ---
 
 async function sendTg(chatId: string | number, text: string, replyMarkup?: unknown): Promise<boolean> {
@@ -229,10 +243,23 @@ Deno.serve(async (req) => {
               else errors++
             }
 
-            // Email (заглушка — готовим данные, отправка когда подключим Resend)
+            // Email
             if (p.email && shouldNotify(p.notify_preferences, 'email', 'tournaments')) {
-              console.log(`[EMAIL STUB] Reminder ${task.type} → ${p.email} for tournament ${t.title}`)
-              emailQueued++
+              const emailOk = await callSendEmail(serviceKey, {
+                to: p.email,
+                subject: `🔔 Турнир ${daysLabel}: ${t.title}`,
+                template: 'tournament-reminder',
+                data: {
+                  title: t.title || '',
+                  dates: dateStr,
+                  venue: venue,
+                  start_time: t.start_time || '',
+                  player_name: name,
+                  days: is3d ? 3 : 1,
+                  tournament_id: t.id
+                }
+              })
+              if (emailOk) emailQueued++
             }
           }
         }

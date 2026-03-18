@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     // Find active memberships that have expired
     const { data: expired, error } = await db
       .from('memberships')
-      .select('id, profile_id, expires_at, profiles(full_name, telegram_chat_id, notify_preferences)')
+      .select('id, profile_id, expires_at, profiles(full_name, telegram_chat_id, email, notify_preferences)')
       .eq('status', 'active')
       .lt('expires_at', now)
 
@@ -74,12 +74,22 @@ Deno.serve(async (req) => {
 
       // Send Telegram notification
       const profile = m.profiles as any
-      if (tgToken && profile?.telegram_chat_id && shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
-        const name = profile.full_name || ''
+      const name = profile?.full_name || ''
+      if (tgToken && profile?.telegram_chat_id && shouldNotify(profile?.notify_preferences, 'tg', 'membership')) {
         await tgFetch(tgToken, 'sendMessage', {
           chat_id: profile.telegram_chat_id,
           text: `${name ? name + ', в' : 'В'}аше членство KSLT истекло.\n\nДля продления используйте /membership или оплатите на сайте:\nhttps://kslt.netlify.app/pages/pricing.html`,
           parse_mode: 'HTML'
+        })
+      }
+
+      // Send email notification
+      if (profile?.email && shouldNotify(profile?.notify_preferences, 'email', 'membership')) {
+        await callSendEmail(serviceKey, {
+          to: profile.email,
+          subject: '❌ Членство KSLT истекло',
+          template: 'membership-expired',
+          data: { name }
         })
       }
 
@@ -105,6 +115,20 @@ function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean
   const ch = prefs[channel]
   if (!ch) return true
   return ch[cat] !== false
+}
+
+async function callSendEmail(serviceKey: string, payload: any): Promise<boolean> {
+  try {
+    const res = await fetch(
+      Deno.env.get('SUPABASE_URL') + '/functions/v1/send-email',
+      {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }
+    )
+    return res.ok
+  } catch { return false }
 }
 
 async function tgFetch(token: string, method: string, body: Record<string, unknown>) {
