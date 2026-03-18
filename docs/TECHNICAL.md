@@ -856,6 +856,7 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://qqkzszesviukopg
 | Player Ban System | Бан/разбан игроков + TG уведомления + бейджи | ✅ |
 | Manager Rights | Менеджер может банить/удалять обычных пользователей | ✅ |
 | Admin Player Form | Имя+Фамилия, девиз, соцсети, матчи, прямоугольное фото | ✅ |
+| Auto-Unban | pg_cron 09:00 Bishkek + Edge Function + TG уведомление | ✅ |
 
 ---
 

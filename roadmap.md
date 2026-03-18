@@ -124,7 +124,7 @@
 - [x] Ban check: tournament registration blocked on site + Telegram bot
 - [x] Ban badge on public rating pages (RU/EN/KG)
 - [x] Edge Function: ban_player, unban_player, ban_user, unban_user, delete_user
-- [ ] Auto-unban by pg_cron when ban expires + TG notification
+- [x] Auto-unban by pg_cron (09:00 Bishkek) when ban expires + TG notification
 
 ### Admin Player Form Improvements ✅
 - [x] Split Name into First Name + Last Name (per language tab)
