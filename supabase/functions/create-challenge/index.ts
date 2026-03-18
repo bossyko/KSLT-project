@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
     // 10. Resolve opponent profile (with telegram)
     const { data: opponentProfile } = await db
       .from('profiles')
-      .select('id, telegram_chat_id, full_name')
+      .select('id, telegram_chat_id, full_name, notify_preferences')
       .eq('player_id', opponent_player_id)
       .limit(1)
       .single()
@@ -172,9 +172,9 @@ Deno.serve(async (req) => {
       return json({ error: 'DB error' }, 500)
     }
 
-    // 13. Telegram notification to opponent
+    // 13. Telegram notification to opponent (respect opt-out)
     const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
-    if (token && opponentProfile.telegram_chat_id) {
+    if (token && opponentProfile.telegram_chat_id && shouldNotify(opponentProfile.notify_preferences, 'tg', 'challenges')) {
       const senderName = sender.full_name || 'Игрок KSLT'
       const dateFormatted = formatDate(proposed_date)
       const msgParts = [
@@ -212,6 +212,13 @@ Deno.serve(async (req) => {
     return json({ error: 'Internal error' }, 500)
   }
 })
+
+function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
+  if (!prefs) return true
+  const ch = prefs[channel]
+  if (!ch) return true
+  return ch[cat] !== false
+}
 
 function json(data: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(data), {

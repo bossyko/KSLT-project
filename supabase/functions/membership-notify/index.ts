@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
     // with telegram_chat_id set on the profile
     const { data: memberships, error: memError } = await supabase
       .from('memberships')
-      .select('id, profile_id, expires_at, profiles(full_name, telegram_chat_id)')
+      .select('id, profile_id, expires_at, profiles(full_name, telegram_chat_id, notify_preferences)')
       .eq('status', 'active')
       .gte('expires_at', targetDate + 'T00:00:00')
       .lt('expires_at', targetDate + 'T23:59:59')
@@ -77,6 +77,12 @@ Deno.serve(async (req) => {
     for (const m of memberships) {
       const profile = m.profiles as any
       if (!profile || !profile.telegram_chat_id) {
+        skipped++
+        continue
+      }
+
+      // Check opt-out preference
+      if (!shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
         skipped++
         continue
       }
@@ -124,6 +130,13 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: String(err) }), { status: 500 })
   }
 })
+
+function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
+  if (!prefs) return true
+  const ch = prefs[channel]
+  if (!ch) return true
+  return ch[cat] !== false
+}
 
 async function sendMessage(chatId: number, text: string): Promise<boolean> {
   const token = Deno.env.get('TELEGRAM_BOT_TOKEN')

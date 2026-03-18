@@ -31,7 +31,7 @@
 - [x] Telegram bot: inline registration (callback query)
 - [x] pg_cron: auto-notify when registration opens (daily)
 - [ ] Tournament reminders: за 3 дня + за 1 день до турнира (Telegram + email)
-- [ ] Настройка уведомлений: игрок может отключить напоминания (Telegram / email / оба)
+- [x] Настройка уведомлений: opt-out по 4 категориям × 2 канала (TG + Email), /notifications в боте, тогглы в dashboard
 - [ ] Email templates (Resend)
 - [ ] SMS integration (Nikita.kg)
 - [ ] Push notifications

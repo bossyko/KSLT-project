@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     // Find active memberships that have expired
     const { data: expired, error } = await db
       .from('memberships')
-      .select('id, profile_id, expires_at, profiles(full_name, telegram_chat_id)')
+      .select('id, profile_id, expires_at, profiles(full_name, telegram_chat_id, notify_preferences)')
       .eq('status', 'active')
       .lt('expires_at', now)
 
@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
 
       // Send Telegram notification
       const profile = m.profiles as any
-      if (tgToken && profile?.telegram_chat_id) {
+      if (tgToken && profile?.telegram_chat_id && shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
         const name = profile.full_name || ''
         await tgFetch(tgToken, 'sendMessage', {
           chat_id: profile.telegram_chat_id,
@@ -100,6 +100,13 @@ Deno.serve(async (req) => {
 })
 
 // ---- Helpers ----
+function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
+  if (!prefs) return true
+  const ch = prefs[channel]
+  if (!ch) return true
+  return ch[cat] !== false
+}
+
 async function tgFetch(token: string, method: string, body: Record<string, unknown>) {
   try {
     await fetch(`${TELEGRAM_API}${token}/${method}`, {

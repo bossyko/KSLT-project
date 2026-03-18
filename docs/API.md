@@ -267,7 +267,7 @@ Auto-created on registration via trigger. Linked to Supabase Auth.
 | `email` | TEXT | |
 | `full_name` | TEXT | |
 | `avatar_url` | TEXT | |
-| `phone` | TEXT | Format: `+996XXXXXXXXX` |
+| `phone` | TEXT | Format: `+996XXXXXXXXX` (UNIQUE) |
 | `gender` | TEXT | |
 | `birth_day` / `birth_month` / `birth_year` | INT | Date of birth |
 | `player_id` | TEXT FK → players | Link to player card (nullable) |
@@ -276,8 +276,9 @@ Auto-created on registration via trigger. Linked to Supabase Auth.
 | `play_level` | TEXT | `'beginner'` \| `'intermediate'` \| `'advanced'` |
 | `preferred_time` | TEXT | `'morning'` \| `'afternoon'` \| `'evening'` \| `'weekend'` |
 | `instagram` / `telegram` | TEXT | Social handles |
-| `telegram_chat_id` | BIGINT | Telegram bot integration |
+| `telegram_chat_id` | BIGINT | Telegram bot integration (UNIQUE) |
 | `show_socials` | BOOL | Privacy toggle |
+| `notify_preferences` | JSONB | Opt-out prefs: `{tg: {membership, tournaments, matches, challenges}, email: {...}}` |
 
 #### `memberships`
 
@@ -651,8 +652,11 @@ Handles incoming Telegram bot events (messages and callback queries).
 
 | Event | Action |
 |-------|--------|
-| `/start <profile_uuid>` | Links Telegram account to KSLT profile (saves `telegram_chat_id`) |
+| `/start <profile_uuid>` | Links Telegram account to KSLT profile (clears previous binding, saves `telegram_chat_id`) |
 | `/start` (no params) | Sends onboarding message or status |
+| `/membership` | Membership request flow (period → category → receipt → approval) |
+| `/notifications` | Notification preferences: inline keyboard with 4 toggles (membership, tournaments, matches, challenges) |
+| `notif_toggle:<cat>` callback | Toggles notification category on/off, updates message |
 | `invite_accept:<id>` callback | Accepts game invite, exchanges contacts via Telegram |
 | `invite_decline:<id>` callback | Declines game invite, notifies sender |
 | `tournament_register:<id>` callback | Registers player for tournament via Telegram |

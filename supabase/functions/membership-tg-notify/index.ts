@@ -72,12 +72,16 @@ Deno.serve(async (req) => {
     // 4. Get target profile
     const { data: profile } = await db
       .from('profiles')
-      .select('full_name, telegram_chat_id')
+      .select('full_name, telegram_chat_id, notify_preferences')
       .eq('id', profile_id)
       .single()
 
     if (!profile || !profile.telegram_chat_id) {
       return json({ ok: true, sent: false, reason: 'no_telegram' })
+    }
+
+    if (!shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
+      return json({ ok: true, sent: false, reason: 'opt_out' })
     }
 
     // 5. Build message
@@ -118,6 +122,13 @@ Deno.serve(async (req) => {
 })
 
 // ---- Helpers ----
+function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
+  if (!prefs) return true
+  const ch = prefs[channel]
+  if (!ch) return true
+  return ch[cat] !== false
+}
+
 function formatDate(isoStr: string): string {
   try {
     const d = new Date(isoStr)

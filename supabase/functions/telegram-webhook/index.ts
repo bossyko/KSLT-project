@@ -71,6 +71,13 @@
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
           )
 
+          // Clear chat_id from any previous profile (UNIQUE constraint)
+          await supabase
+            .from('profiles')
+            .update({ telegram_chat_id: null, telegram_username: null })
+            .eq('telegram_chat_id', chatId)
+            .neq('id', profileId)
+
           // Save chat_id and username
           const tgUsername = message.from?.username || null
           const updateData: Record<string, unknown> = { telegram_chat_id: chatId }
@@ -123,6 +130,12 @@
           return new Response('ok', { status: 200 })
         }
 
+        // Handle /notifications command
+        if (text === '/notifications') {
+          await handleNotificationsCommand(chatId)
+          return new Response('ok', { status: 200 })
+        }
+
         // Check for active challenge counter-step (text message flow)
         const counterHandled = await handleCounterStep(chatId, text)
         if (counterHandled) {
@@ -130,7 +143,7 @@
         }
 
         // Unknown command
-        await sendMessage(chatId, 'Нажмите /start или подключите аккаунт через личный кабинет KSLT.\n\nКоманды:\n/membership — заявка на членство')
+        await sendMessage(chatId, 'Нажмите /start или подключите аккаунт через личный кабинет KSLT.\n\nКоманды:\n/membership — заявка на членство\n/notifications — настройки уведомлений')
 
         return new Response('ok', { status: 200 })
       } catch (err) {
@@ -146,6 +159,12 @@
 
       const data = query.data || ''
       const chatId = query.message?.chat?.id
+
+      // Route: notification toggle callbacks
+      if (data.startsWith('notif_toggle:')) {
+        await handleNotifToggle(query, data)
+        return
+      }
 
       // Route: membership callbacks (mem_period, mem_cat, mem_approve, mem_reject)
       if (data.startsWith('mem_')) {
@@ -228,7 +247,7 @@
       // Get sender profile
       const { data: senderProfile } = await db
         .from('profiles')
-        .select('id, full_name, telegram_chat_id, telegram_username')
+        .select('id, full_name, telegram_chat_id, telegram_username, notify_preferences')
         .eq('id', invite.sender_id)
         .single()
 
@@ -269,8 +288,8 @@
           senderUrl
         )
 
-        // Notify sender — button to open chat with receiver
-        if (senderProfile.telegram_chat_id) {
+        // Notify sender — button to open chat with receiver (respect opt-out)
+        if (senderProfile.telegram_chat_id && shouldNotify(senderProfile.notify_preferences, 'tg', 'challenges')) {
           await sendMessageWithButton(
             senderProfile.telegram_chat_id,
             `✅ <b>${receiverProfile.full_name} принял(а) ваше приглашение!</b>\n\nНажмите кнопку ниже, чтобы начать общение 🎾` + disclaimer,
@@ -284,7 +303,7 @@
         // Declined
         await sendMessage(chatId, 'Приглашение отклонено.')
 
-        if (senderProfile.telegram_chat_id) {
+        if (senderProfile.telegram_chat_id && shouldNotify(senderProfile.notify_preferences, 'tg', 'challenges')) {
           await sendMessage(
             senderProfile.telegram_chat_id,
             `${receiverProfile.full_name} отклонил(а) приглашение на игру.`
@@ -313,7 +332,7 @@
       // 1. Find profile by telegram_chat_id
       const { data: profile } = await db
         .from('profiles')
-        .select('id, full_name, player_id, role, banned_until')
+        .select('id, full_name, player_id, role, banned_until, notify_preferences')
         .eq('telegram_chat_id', tgUserId)
         .limit(1)
         .single()
@@ -460,16 +479,20 @@
       // 8. Answer callback + DM based on status
       if (regStatus === 'waitlist') {
         await answerCallbackQuery(token, query.id, '⏳ Вы в листе ожидания')
-        await sendMessage(
-          tgUserId,
-          `⏳ <b>Вы в листе ожидания</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nВаша заявка ожидает одобрения администратора. Следите за обновлениями на сайте.`
-        )
+        if (shouldNotify(profile.notify_preferences, 'tg', 'tournaments')) {
+          await sendMessage(
+            tgUserId,
+            `⏳ <b>Вы в листе ожидания</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nВаша заявка ожидает одобрения администратора. Следите за обновлениями на сайте.`
+          )
+        }
       } else {
         await answerCallbackQuery(token, query.id, '✅ Заявка отправлена!')
-        await sendMessage(
-          tgUserId,
-          `✅ <b>Заявка на турнир отправлена!</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nСтатус: ожидает подтверждения. Следите за обновлениями на сайте.`
-        )
+        if (shouldNotify(profile.notify_preferences, 'tg', 'tournaments')) {
+          await sendMessage(
+            tgUserId,
+            `✅ <b>Заявка на турнир отправлена!</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nСтатус: ожидает подтверждения. Следите за обновлениями на сайте.`
+          )
+        }
       }
     }
 
@@ -522,13 +545,13 @@
       // Get profiles
       const { data: challengerProfile } = await db
         .from('profiles')
-        .select('full_name, telegram_chat_id')
+        .select('full_name, telegram_chat_id, notify_preferences')
         .eq('id', challenge.challenger_id)
         .single()
 
       const { data: opponentProfile } = await db
         .from('profiles')
-        .select('full_name, telegram_chat_id')
+        .select('full_name, telegram_chat_id, notify_preferences')
         .eq('id', challenge.opponent_profile_id)
         .single()
 
@@ -538,11 +561,11 @@
 
       const confirmMsg = `✅ <b>Матч подтверждён!</b>\n\n${escapeHtml(cName)} vs ${escapeHtml(oName)}\n📅 ${dateStr}  ⏰ ${finalTime || ''}${finalVenue ? '\n📍 ' + escapeHtml(finalVenue) : ''}`
 
-      // Notify both
-      if (challengerProfile?.telegram_chat_id) {
+      // Notify both (respect opt-out)
+      if (challengerProfile?.telegram_chat_id && shouldNotify(challengerProfile.notify_preferences, 'tg', 'challenges')) {
         await sendMessage(challengerProfile.telegram_chat_id, confirmMsg)
       }
-      if (opponentProfile?.telegram_chat_id) {
+      if (opponentProfile?.telegram_chat_id && shouldNotify(opponentProfile.notify_preferences, 'tg', 'challenges')) {
         await sendMessage(opponentProfile.telegram_chat_id, confirmMsg)
       }
 
@@ -656,7 +679,7 @@
       // Get names
       const { data: challengerProfile } = await db
         .from('profiles')
-        .select('full_name, telegram_chat_id')
+        .select('full_name, telegram_chat_id, notify_preferences')
         .eq('id', challenge.challenger_id)
         .single()
 
@@ -671,7 +694,7 @@
       if (chatId) {
         await sendMessage(chatId, 'Вызов отклонён.')
       }
-      if (challengerProfile?.telegram_chat_id) {
+      if (challengerProfile?.telegram_chat_id && shouldNotify(challengerProfile.notify_preferences, 'tg', 'challenges')) {
         await sendMessage(challengerProfile.telegram_chat_id, `${escapeHtml(declinedByName)} отклонил(а) ваш вызов на матч.`)
       }
 
@@ -1178,7 +1201,7 @@
       // Get user profile
       const { data: profile } = await db
         .from('profiles')
-        .select('id, full_name, player_id, gender, telegram_chat_id')
+        .select('id, full_name, player_id, gender, telegram_chat_id, notify_preferences')
         .eq('id', req.profile_id)
         .single()
 
@@ -1230,8 +1253,8 @@
           .update({ status: 'approved', updated_at: new Date().toISOString() })
           .eq('id', req.id)
 
-        // 5. Notify user via TG
-        if (profile.telegram_chat_id) {
+        // 5. Notify user via TG (respect opt-out)
+        if (profile.telegram_chat_id && shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
           const expDateStr = expiresAt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
           await sendMessage(
             profile.telegram_chat_id,
@@ -1265,7 +1288,7 @@
           .update({ status: 'rejected', updated_at: new Date().toISOString() })
           .eq('id', req.id)
 
-        if (profile.telegram_chat_id) {
+        if (profile.telegram_chat_id && shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
           await sendMessage(
             profile.telegram_chat_id,
             '❌ Заявка на членство отклонена.\n\nОбратитесь к менеджеру для уточнения.'
@@ -1340,6 +1363,134 @@
 
       // Link player to profile
       await db.from('profiles').update({ player_id: finalId }).eq('id', profile.id)
+    }
+
+    // ---- /notifications command ----
+    const NOTIF_CATS = ['membership', 'tournaments', 'matches', 'challenges'] as const
+    const NOTIF_LABELS: Record<string, string> = {
+      membership: 'Членство',
+      tournaments: 'Турниры',
+      matches: 'Матчи',
+      challenges: 'Вызовы'
+    }
+
+    async function handleNotificationsCommand(chatId: number) {
+      const db = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      )
+
+      const { data: profile } = await db
+        .from('profiles')
+        .select('id, notify_preferences')
+        .eq('telegram_chat_id', chatId)
+        .limit(1)
+        .single()
+
+      if (!profile) {
+        await sendMessage(chatId, 'Привяжите Telegram к аккаунту KSLT через личный кабинет.')
+        return
+      }
+
+      const prefs = profile.notify_preferences || {}
+      await sendNotifKeyboard(chatId, prefs, null)
+    }
+
+    async function sendNotifKeyboard(chatId: number, prefs: any, messageId: number | null) {
+      const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
+      if (!token) return
+
+      let text = '🔔 <b>Уведомления Telegram</b>\n\n'
+      const buttons: Array<{ text: string; callback_data: string }[]> = []
+
+      for (const cat of NOTIF_CATS) {
+        const on = shouldNotify(prefs, 'tg', cat)
+        const icon = on ? '✅' : '❌'
+        text += `${icon} ${NOTIF_LABELS[cat]}\n`
+        buttons.push([{
+          text: `${icon} ${NOTIF_LABELS[cat]}`,
+          callback_data: `notif_toggle:${cat}`
+        }])
+      }
+
+      const payload: Record<string, unknown> = {
+        chat_id: chatId,
+        text,
+        parse_mode: 'HTML',
+        reply_markup: { inline_keyboard: buttons }
+      }
+
+      if (messageId) {
+        // Edit existing message
+        payload.message_id = messageId
+        await fetch(`${TELEGRAM_API}${token}/editMessageText`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+      } else {
+        await fetch(`${TELEGRAM_API}${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+      }
+    }
+
+    async function handleNotifToggle(
+      query: { id: string; data?: string; from: { id: number }; message?: { chat: { id: number }; message_id: number } },
+      data: string
+    ) {
+      const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
+      if (!token) return
+
+      const chatId = query.message?.chat?.id
+      const messageId = query.message?.message_id
+      const cat = data.replace('notif_toggle:', '')
+
+      if (!NOTIF_CATS.includes(cat as any)) {
+        await answerCallbackQuery(token, query.id, 'Неизвестная категория')
+        return
+      }
+
+      const db = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      )
+
+      const { data: profile } = await db
+        .from('profiles')
+        .select('id, notify_preferences')
+        .eq('telegram_chat_id', chatId)
+        .limit(1)
+        .single()
+
+      if (!profile) {
+        await answerCallbackQuery(token, query.id, 'Профиль не найден')
+        return
+      }
+
+      const prefs = profile.notify_preferences || {}
+      if (!prefs.tg) prefs.tg = {}
+      const currentVal = prefs.tg[cat] !== false
+      prefs.tg[cat] = !currentVal
+
+      await db.from('profiles').update({ notify_preferences: prefs }).eq('id', profile.id)
+
+      const statusText = !currentVal ? 'включено' : 'выключено'
+      await answerCallbackQuery(token, query.id, `${NOTIF_LABELS[cat]}: ${statusText}`)
+
+      // Update keyboard
+      if (chatId && messageId) {
+        await sendNotifKeyboard(chatId, prefs, messageId)
+      }
+    }
+
+    function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
+      if (!prefs) return true
+      const ch = prefs[channel]
+      if (!ch) return true
+      return ch[cat] !== false
     }
 
     function formatDateRu(dateStr: string | null | undefined): string {

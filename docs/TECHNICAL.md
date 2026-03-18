@@ -1,7 +1,7 @@
 # KSLT — Техническая документация
 
-> Последнее обновление: 2026-03-17
-> Версия: 1.5
+> Последнее обновление: 2026-03-18
+> Версия: 1.6
 
 ---
 
@@ -163,8 +163,11 @@ KSLT/
 │       ├── send-game-invite/       ← Отправка приглашений
 │       ├── create-challenge/       ← Вызовы на матч (Challenge Board)
 │       ├── tournament-notify/      ← Рассылка турниров в Telegram
-│       ├── telegram-webhook/       ← Telegram бот (все callbacks)
-│       └── membership-notify/      ← Уведомления о членстве
+│       ├── telegram-webhook/       ← Telegram бот (все callbacks + /notifications)
+│       ├── membership-notify/      ← 7-day expiry reminder (cron)
+│       ├── membership-expire/      ← Auto-expire + TG notification (cron)
+│       ├── membership-tg-notify/   ← Admin grant/extend/cancel → TG DM
+│       └── match-notify/           ← Match schedule notification (cron + manual)
 │
 ├── docs/                           ← Документация
 ├── postman/                        ← API-тесты
@@ -196,6 +199,7 @@ profiles              — пользователи (auth + профиль)
 ├── play_level        — beginner / intermediate / advanced
 ├── preferred_time    — morning / afternoon / evening / weekend
 ├── last_seen         — онлайн-статус
+├── notify_preferences — JSONB {tg: {membership, tournaments, matches, challenges}, email: {...}}
 └── membership_*      — данные членства
 
 players               — игроки рейтинга
@@ -563,6 +567,8 @@ Body: Telegram Update object
 | Команда | Действие |
 |---------|----------|
 | `/start <profileId>` | Привязка Telegram к профилю KSLT |
+| `/membership` | Заявка на членство через бот |
+| `/notifications` | Настройка уведомлений (4 категории, inline toggles) |
 | Inline: Принять | Принять приглашение на игру |
 | Inline: Отклонить | Отклонить приглашение |
 | Inline: Записаться | Регистрация на турнир (callback `tournament_register:{id}`) |
@@ -688,8 +694,27 @@ const { data: membership } = await supabase
 
 ### Уведомления
 
-- За 7 дней до истечения → Telegram напоминание
-- Ежедневная cron-задача через `membership-notify`
+- За 7 дней до истечения → Telegram напоминание (`membership-notify`)
+- При истечении → авто-expire + TG DM (`membership-expire`)
+- При выдаче/продлении/отмене → TG DM (`membership-tg-notify`)
+- Все уведомления проверяют `notify_preferences` (opt-out)
+
+### Настройка уведомлений (opt-out)
+
+Колонка `profiles.notify_preferences JSONB`:
+```json
+{
+  "tg":    { "membership": true, "tournaments": true, "matches": true, "challenges": true },
+  "email": { "membership": true, "tournaments": true, "matches": true, "challenges": true }
+}
+```
+
+- `NULL` = всё включено (по умолчанию)
+- Проверка: `prefs?.tg?.membership === false` → НЕ отправлять
+- **Не блокируется:** бан/разбан, удаление аккаунта, `/start`, `/membership` flow
+- UI: Dashboard → Настройки → тогглы (4×2 таблица)
+- Telegram: `/notifications` → inline keyboard тогглов
+- UNIQUE constraints: `telegram_chat_id`, `phone` (предотвращают дубликаты)
 
 ---
 
@@ -784,6 +809,8 @@ git push origin main
 - `sql/admin-users-migration.sql` — RLS для пользователей
 - `sql/group-stage-migration.sql` — групповой этап турниров
 - `sql/player-ban-migration.sql` — колонки бана + RLS для менеджера
+- `sql/notify-preferences-migration.sql` — notify_preferences JSONB колонка
+- `sql/unique-constraints-migration.sql` — UNIQUE на telegram_chat_id + phone
 - `sql/test-fic-16-players.sql` — тестовый FIC-турнир (16 игроков)
 - `sql/test-32-players-promasters.sql` — тестовый SE-турнир (32 игрока)
 - `sql/test-tournaments-seed.sql` — 90 тестовых турниров (6 категорий)
@@ -857,6 +884,8 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://qqkzszesviukopg
 | Manager Rights | Менеджер может банить/удалять обычных пользователей | ✅ |
 | Admin Player Form | Имя+Фамилия, девиз, соцсети, матчи, прямоугольное фото | ✅ |
 | Auto-Unban | pg_cron 09:00 Bishkek + Edge Function + TG уведомление | ✅ |
+| Notification Preferences | Opt-out по 4 категориям × 2 канала, /notifications в боте | ✅ |
+| Unique Constraints | UNIQUE на telegram_chat_id + phone, /start очищает предыдущий | ✅ |
 
 ---
 

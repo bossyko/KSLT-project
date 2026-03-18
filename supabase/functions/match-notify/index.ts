@@ -128,7 +128,7 @@ async function autoNotify(db: any): Promise<Response> {
 
   // Load players, profiles, tournaments
   const { data: players } = await db.from('players').select('id, name').in('id', playerIds)
-  const { data: profiles } = await db.from('profiles').select('player_id, telegram_chat_id').in('player_id', playerIds)
+  const { data: profiles } = await db.from('profiles').select('player_id, telegram_chat_id, notify_preferences').in('player_id', playerIds)
 
   const playerMap: Record<string, any> = {}
   for (const p of (players || [])) playerMap[p.id] = p
@@ -150,13 +150,13 @@ async function autoNotify(db: any): Promise<Response> {
     const pr2 = profileMap[match.player2_id]
     const courtStr = match.court ? `Корт ${match.court}` : ''
 
-    if (pr1?.telegram_chat_id) {
+    if (pr1?.telegram_chat_id && shouldNotify(pr1.notify_preferences, 'tg', 'matches')) {
       const msg = `🎾 <b>Ваш матч скоро!</b>\n\n🏆 ${esc(t?.title || '')}\n⏰ ${match.scheduled_time}\n${courtStr ? '📍 ' + courtStr + '\n' : ''}🆚 ${esc(p2?.name || '?')}\n\n💪 Удачи!`
       await sendTg(pr1.telegram_chat_id, msg)
       sent++
     }
 
-    if (pr2?.telegram_chat_id) {
+    if (pr2?.telegram_chat_id && shouldNotify(pr2.notify_preferences, 'tg', 'matches')) {
       const msg = `🎾 <b>Ваш матч скоро!</b>\n\n🏆 ${esc(t?.title || '')}\n⏰ ${match.scheduled_time}\n${courtStr ? '📍 ' + courtStr + '\n' : ''}🆚 ${esc(p1?.name || '?')}\n\n💪 Удачи!`
       await sendTg(pr2.telegram_chat_id, msg)
       sent++
@@ -204,7 +204,7 @@ async function manualNotify(db: any, tournamentId: string): Promise<Response> {
   const playerIds = [...new Set(matches.flatMap((m: any) => [m.player1_id, m.player2_id]))]
 
   const { data: players } = await db.from('players').select('id, name').in('id', playerIds)
-  const { data: profiles } = await db.from('profiles').select('player_id, telegram_chat_id').in('player_id', playerIds)
+  const { data: profiles } = await db.from('profiles').select('player_id, telegram_chat_id, notify_preferences').in('player_id', playerIds)
 
   const playerMap: Record<string, any> = {}
   for (const p of (players || [])) playerMap[p.id] = p
@@ -230,6 +230,11 @@ async function manualNotify(db: any, tournamentId: string): Promise<Response> {
   for (const playerId of Object.keys(playerMatches)) {
     const pr = profileMap[playerId]
     if (!pr?.telegram_chat_id) {
+      noTg++
+      continue
+    }
+
+    if (!shouldNotify(pr.notify_preferences, 'tg', 'matches')) {
       noTg++
       continue
     }
@@ -273,6 +278,13 @@ async function manualNotify(db: any, tournamentId: string): Promise<Response> {
 }
 
 // --- Helpers ---
+
+function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
+  if (!prefs) return true
+  const ch = prefs[channel]
+  if (!ch) return true
+  return ch[cat] !== false
+}
 
 function getRoundLabel(round: string | null, groupNumber: number | null): string {
   if (!round) return ''

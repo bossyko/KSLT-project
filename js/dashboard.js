@@ -144,7 +144,16 @@
         voucherVenue: 'Жер',
         voucherCourts: 'Корттор',
         voucherCoaches: 'Машыктыруучулар',
-        voucherShowAll: 'Баарын көрсөтүү'
+        voucherShowAll: 'Баарын көрсөтүү',
+        notifications: 'Билдирмелер',
+        notifMembership: 'Мүчөлүк',
+        notifTournaments: 'Мелдештер',
+        notifMatches: 'Матчтар',
+        notifChallenges: 'Сынактар',
+        notifTelegram: 'Telegram',
+        notifEmail: 'Email',
+        notifSaved: 'Билдирме жөндөөлөрү сакталды',
+        errPhoneTaken: 'Бул телефон башка аккаунтка катталган'
     } : isEn ? {
         profile: 'Profile', tournaments: 'My Tournaments',
         stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
@@ -280,7 +289,16 @@
         voucherVenue: 'Venue',
         voucherCourts: 'Courts',
         voucherCoaches: 'Coaches',
-        voucherShowAll: 'Show all'
+        voucherShowAll: 'Show all',
+        notifications: 'Notifications',
+        notifMembership: 'Membership',
+        notifTournaments: 'Tournaments',
+        notifMatches: 'Matches',
+        notifChallenges: 'Challenges',
+        notifTelegram: 'Telegram',
+        notifEmail: 'Email',
+        notifSaved: 'Notification settings saved',
+        errPhoneTaken: 'This phone number is already linked to another account'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
@@ -416,7 +434,16 @@
         voucherVenue: 'Заведение',
         voucherCourts: 'Корты',
         voucherCoaches: 'Тренеры',
-        voucherShowAll: 'Показать все'
+        voucherShowAll: 'Показать все',
+        notifications: 'Уведомления',
+        notifMembership: 'Членство',
+        notifTournaments: 'Турниры',
+        notifMatches: 'Матчи',
+        notifChallenges: 'Вызовы',
+        notifTelegram: 'Telegram',
+        notifEmail: 'Email',
+        notifSaved: 'Настройки уведомлений сохранены',
+        errPhoneTaken: 'Этот номер телефона уже привязан к другому аккаунту'
     };
 
     // Use shared Supabase client from supabase-config.js
@@ -1381,7 +1408,11 @@
         }).eq('id', window.ksltUser.id);
 
         if (result.error) {
-            showMessage('profileMessage', result.error.message, true);
+            var errMsg = result.error.message;
+            if (result.error.code === '23505' && errMsg.indexOf('phone') !== -1) {
+                errMsg = L.errPhoneTaken;
+            }
+            showMessage('profileMessage', errMsg, true);
             btn.textContent = L.save;
             btn.disabled = false;
         } else {
@@ -1961,16 +1992,39 @@
                     },
                     tooltip: {
                         callbacks: {
-                            title: function(ctx) { return tooltipNames[ctx[0].dataIndex]; },
+                            title: function(ctx) {
+                                var isNtrp = ctx[0].dataset.label === 'NTRP';
+                                if (isNtrp) {
+                                    var row = data[ctx[0].dataIndex];
+                                    return row ? row.tournament_name : '';
+                                }
+                                return tooltipNames[ctx[0].dataIndex];
+                            },
                             label: function(ctx) {
                                 if (ctx.dataset.label === 'NTRP') return 'NTRP: ' + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(2) : '—');
                                 return (isEn ? 'KSLT' : 'КСЛТ') + ': ' + ctx.parsed.y;
+                            },
+                            labelColor: function(ctx) {
+                                var isNtrp = ctx.dataset.label === 'NTRP';
+                                return { borderColor: isNtrp ? '#00BFFF' : '#CCFF00', backgroundColor: isNtrp ? '#00BFFF' : '#CCFF00' };
                             }
                         },
                         backgroundColor: 'rgba(30,30,30,0.95)',
-                        titleColor: '#CCFF00',
-                        bodyColor: '#fff',
-                        borderColor: '#CCFF00',
+                        titleColor: function(ctx) {
+                            var dp = ctx.tooltip && ctx.tooltip.dataPoints;
+                            if (dp && dp[0] && dp[0].dataset.label === 'NTRP') return '#00BFFF';
+                            return '#CCFF00';
+                        },
+                        bodyColor: function(ctx) {
+                            var dp = ctx.tooltip && ctx.tooltip.dataPoints;
+                            if (dp && dp[0] && dp[0].dataset.label === 'NTRP') return '#00BFFF';
+                            return '#fff';
+                        },
+                        borderColor: function(ctx) {
+                            var dp = ctx.tooltip && ctx.tooltip.dataPoints;
+                            if (dp && dp[0] && dp[0].dataset.label === 'NTRP') return '#00BFFF';
+                            return '#CCFF00';
+                        },
                         borderWidth: 1
                     }
                 },
@@ -2190,6 +2244,90 @@
         });
     }
 
+    // ---- Notification Preferences ----
+    var NOTIF_CATS = ['membership', 'tournaments', 'matches', 'challenges'];
+    var NOTIF_CHANNELS = ['tg', 'email'];
+
+    function getNotifyPrefs() {
+        var p = window.ksltProfile;
+        return (p && p.notify_preferences) ? p.notify_preferences : {};
+    }
+
+    function isNotifOn(prefs, channel, cat) {
+        if (!prefs || !prefs[channel]) return true;
+        return prefs[channel][cat] !== false;
+    }
+
+    function buildNotifySection() {
+        var prefs = getNotifyPrefs();
+        var catLabels = {
+            membership: L.notifMembership,
+            tournaments: L.notifTournaments,
+            matches: L.notifMatches,
+            challenges: L.notifChallenges
+        };
+
+        var rows = '';
+        NOTIF_CATS.forEach(function(cat) {
+            var cells = '';
+            NOTIF_CHANNELS.forEach(function(ch) {
+                var on = isNotifOn(prefs, ch, cat);
+                cells +=
+                    '<td style="text-align:center;padding:8px 12px;">' +
+                        '<label class="db-notif-toggle">' +
+                            '<input type="checkbox" data-ch="' + ch + '" data-cat="' + cat + '"' + (on ? ' checked' : '') + '>' +
+                            '<span class="db-notif-slider"></span>' +
+                        '</label>' +
+                    '</td>';
+            });
+            rows +=
+                '<tr>' +
+                    '<td style="padding:8px 12px;color:var(--text-secondary);font-size:0.9rem;">' + catLabels[cat] + '</td>' +
+                    cells +
+                '</tr>';
+        });
+
+        return '<div class="db-card db-settings-section">' +
+            '<div class="db-card-title">' + L.notifications + '</div>' +
+            '<table style="width:100%;border-collapse:collapse;">' +
+                '<thead><tr>' +
+                    '<th></th>' +
+                    '<th style="text-align:center;padding:4px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:500;">' + L.notifTelegram + '</th>' +
+                    '<th style="text-align:center;padding:4px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:500;">' + L.notifEmail + '</th>' +
+                '</tr></thead>' +
+                '<tbody>' + rows + '</tbody>' +
+            '</table>' +
+        '</div>';
+    }
+
+    async function onNotifToggle(e) {
+        var cb = e.target;
+        if (!cb.dataset || !cb.dataset.ch) return;
+        var ch = cb.dataset.ch;
+        var cat = cb.dataset.cat;
+        var on = cb.checked;
+
+        var prefs = getNotifyPrefs();
+        if (!prefs[ch]) prefs[ch] = {};
+        prefs[ch][cat] = on;
+
+        // Optimistic update
+        if (window.ksltProfile) window.ksltProfile.notify_preferences = prefs;
+
+        var res = await client.from('profiles').update({ notify_preferences: prefs }).eq('id', window.ksltUser.id);
+        if (res.error) {
+            // Revert
+            cb.checked = !on;
+            if (window.ksltProfile) {
+                prefs[ch][cat] = !on;
+                window.ksltProfile.notify_preferences = prefs;
+            }
+            showMessage('settingsMessage', res.error.message, true);
+        } else {
+            showMessage('settingsMessage', L.notifSaved, false);
+        }
+    }
+
     // ---- Render Settings ----
     function renderSettings(user) {
         var container = document.getElementById('db-settings');
@@ -2234,6 +2372,8 @@
                     '<a href="dashboard-en.html#settings" class="db-btn ' + (isEn ? 'db-btn-primary' : 'db-btn-outline') + '">English</a>' +
                 '</div>' +
             '</div>' +
+
+            buildNotifySection() +
 
             '<div class="db-card db-danger-zone">' +
                 '<div class="db-card-title">' + L.dangerZone + '</div>' +
@@ -2282,6 +2422,11 @@
         });
 
         updateBtn.addEventListener('click', updatePassword);
+
+        // Notification toggles
+        document.querySelectorAll('.db-notif-toggle input').forEach(function(cb) {
+            cb.addEventListener('change', onNotifToggle);
+        });
     }
 
     // ---- Update Password ----
