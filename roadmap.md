@@ -133,12 +133,22 @@
 - [ ] Auto-deploy to Netlify
 - [ ] Test status badge in README
 
-## Loyalty Program (Backlog)
+## Loyalty Program ✅
 
-- [ ] Points system: earn points for participation, services
-- [ ] Redeem points for tournament entry, court booking
-- [ ] Points balance + history in dashboard
-- [ ] Admin: manage point rules
+- [x] Points system: earn points for participation, services
+- [x] Auto-earn on payment (court, coach, membership) + tournament finalization
+- [x] Welcome bonus: first membership → 200 points (one-time)
+- [x] Redeem points for rewards (tournament entry, membership)
+- [x] Points balance + history in dashboard
+- [x] Admin: manage rules (CRUD), rewards (CRUD), transactions, manual adjust
+- [x] Points expiry: auto-expire after 12 months (pg_cron)
+- [x] RLS: staff full CRUD, users read own + redeem
+- [x] Loyalty tab in user dropdown + admin dropdown
+- [x] 3 languages: RU, EN, KG
+- [x] Vouchers renamed to Discounts (all 3 languages)
+- [x] Broadcast modal: removed tournament audience, fixed styling
+- [x] Admin dashboard cards: compact layout
+- [x] All modals: unified dark theme (--bg-card), proper ad-field-input classes
 
 ## Auth & Security (Backlog)
 

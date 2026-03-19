@@ -3816,6 +3816,9 @@
                 return;
             }
 
+            // Loyalty: earn points for all approved participants
+            await earnTournamentLoyalty(tournament.id);
+
             A.showToast(L.tournamentFinalized, 'success');
         } catch (err) {
             console.error('Finalize tournament error:', err);
@@ -3949,6 +3952,9 @@
                 A.showToast(statusRes.error.message, 'error');
                 return;
             }
+
+            // Loyalty: earn points for all approved participants
+            await earnTournamentLoyalty(tournament.id);
 
             A.showToast(L.tournamentFinalized, 'success');
         } catch (err) {
@@ -4125,6 +4131,10 @@
             }
 
             await A.client.from('tournaments').update({ status: 'completed' }).eq('id', tournament.id);
+
+            // Loyalty: earn points for all approved participants
+            await earnTournamentLoyalty(tournament.id);
+
             A.showToast(L.tournamentFinalized, 'success');
         } catch (err) {
             console.error('Finalize group tournament error:', err);
@@ -4135,6 +4145,34 @@
     // ---- Hook: Add "Bracket" button to tournament list ----
     // Extend renderTournamentsList to add bracket management button
 
+
+    // ---- Loyalty: earn points for tournament participants ----
+    async function earnTournamentLoyalty(tournamentId) {
+        if (!A.earnLoyaltyPoints) return;
+        try {
+            // Get all approved participants
+            var regRes = await A.client.from('tournament_registrations')
+                .select('player_id')
+                .eq('tournament_id', tournamentId)
+                .in('status', ['approved', 'draw']);
+
+            var regs = regRes.data || [];
+            if (regs.length === 0) return;
+
+            // Get profile_ids for each player
+            var playerIds = regs.map(function(r) { return r.player_id; });
+            var profRes = await A.client.from('profiles')
+                .select('id, player_id')
+                .in('player_id', playerIds);
+
+            var profiles = profRes.data || [];
+            for (var i = 0; i < profiles.length; i++) {
+                await A.earnLoyaltyPoints(profiles[i].id, 'tournament', tournamentId, null);
+            }
+        } catch (e) {
+            console.error('Tournament loyalty earn error:', e);
+        }
+    }
 
     // ---- Export to namespace ----
     A.renderBracketManagement = renderBracketManagement;

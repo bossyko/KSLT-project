@@ -827,6 +827,21 @@
                 return;
             }
 
+            // Loyalty: earn points for membership payment
+            if (amount > 0 && A.earnLoyaltyPoints) {
+                A.earnLoyaltyPoints(profileId, 'membership', memResult.data.id, null);
+
+                // First membership welcome bonus (one-time only)
+                var existingBonus = await A.client.from('loyalty_transactions')
+                    .select('id')
+                    .eq('profile_id', profileId)
+                    .eq('action', 'first_membership')
+                    .limit(1);
+                if (!existingBonus.data || existingBonus.data.length === 0) {
+                    A.earnLoyaltyPoints(profileId, 'first_membership', memResult.data.id, null);
+                }
+            }
+
             A.showToast(L.paySaved, 'success');
             renderFinancesList();
             return;
@@ -905,6 +920,16 @@
         }
 
         await syncPromotedStatus(entityType, entityId);
+
+        // Loyalty: earn points for court/coach payment (not club, not edit)
+        if (!finEditingId && amount > 0 && (entityType === 'court' || entityType === 'coach') && A.earnLoyaltyPoints) {
+            // Try to find profile linked to this entity payment's created_by
+            var createdBy = data.created_by || null;
+            if (createdBy) {
+                A.earnLoyaltyPoints(createdBy, entityType, null, null);
+            }
+        }
+
         A.showToast(L.paySaved, 'success');
         renderFinancesList();
     }

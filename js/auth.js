@@ -111,7 +111,11 @@
 
     function getRedirectUrl() {
         if (returnUrl) return returnUrl;
-        return isKg ? '../index-kg.html' : isEn ? '../index-en.html' : '../index.html';
+        var role = localStorage.getItem('kslt_role');
+        if (role === 'admin' || role === 'manager') {
+            return isEn ? 'admin-en.html' : 'admin.html';
+        }
+        return 'dashboard.html';
     }
 
     // ---- Populate birthday day select (1-31) ----
@@ -732,7 +736,7 @@
             await client.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: basePath + (isKg ? 'dashboard-kg.html' : isEn ? 'dashboard-en.html' : 'dashboard.html')
+                    redirectTo: basePath + (isKg ? 'auth-kg.html' : isEn ? 'auth-en.html' : 'auth.html')
                 }
             });
         });
@@ -774,6 +778,16 @@
 
         var result = await client.auth.getSession();
         if (result.data && result.data.session && !isRecoveryFlow) {
+            // Load profile to get role before redirect (important for Google OAuth)
+            try {
+                var uid = result.data.session.user.id;
+                var profileRes = await client.from('profiles').select('full_name, avatar_url, role').eq('id', uid).single();
+                if (profileRes.data) {
+                    if (profileRes.data.full_name) localStorage.setItem('kslt_name', profileRes.data.full_name);
+                    if (profileRes.data.avatar_url) localStorage.setItem('kslt_avatar', profileRes.data.avatar_url);
+                    if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
+                }
+            } catch (e) { /* continue */ }
             window.location.href = getRedirectUrl();
         }
     }

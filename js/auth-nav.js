@@ -18,16 +18,19 @@
 
     var L = isEn ? {
         profile: 'My Profile',
+        loyalty: 'Points',
         settings: 'Settings',
         admin: 'Admin',
         logout: 'Sign Out'
     } : isKg ? {
         profile: 'Менин профилим',
+        loyalty: 'Баллдар',
         settings: 'Жөндөөлөр',
         admin: 'Админка',
         logout: 'Чыгуу'
     } : {
         profile: 'Мой профиль',
+        loyalty: 'Баллы',
         settings: 'Настройки',
         admin: 'Админка',
         logout: 'Выйти'
@@ -44,7 +47,8 @@
         { key: 'ratings', icon: '⭐', label: 'Ratings' },
         { key: 'users', icon: '👥', label: 'Users', adminOnly: true },
         { key: 'memberships', icon: '💳', label: 'Memberships' },
-        { key: 'payments', icon: '💰', label: 'Payments' }
+        { key: 'payments', icon: '💰', label: 'Payments' },
+        { key: 'loyalty', icon: '⭐', label: 'Loyalty' }
     ] : [
         { key: 'dashboard', icon: '📊', label: 'Дашборд' },
         { key: 'content', icon: '📰', label: 'Новости' },
@@ -55,7 +59,8 @@
         { key: 'ratings', icon: '⭐', label: 'Рейтинг' },
         { key: 'users', icon: '👥', label: 'Пользователи', adminOnly: true },
         { key: 'memberships', icon: '💳', label: 'Членство' },
-        { key: 'payments', icon: '💰', label: 'Оплаты' }
+        { key: 'payments', icon: '💰', label: 'Оплаты' },
+        { key: 'loyalty', icon: '⭐', label: 'Лояльность' }
     ];
 
     // Check Supabase session in localStorage
@@ -134,6 +139,7 @@
                         '<div class="user-dropdown-menu">' +
                             '<div class="user-dropdown-header">' + userName + '</div>' +
                             '<a href="' + dashUrl + '" class="user-dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + L.profile + '</a>' +
+                            '<a href="' + dashUrl + '#loyalty" class="user-dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' + L.loyalty + '</a>' +
                             '<a href="' + dashUrl + '#settings" class="user-dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</a>' +
                             '<div class="user-dropdown-divider"></div>' +
                             '<button class="user-dropdown-item user-dropdown-logout" id="navLogoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>' + L.logout + '</button>' +

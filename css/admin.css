@@ -194,36 +194,38 @@ body.ad-page {
 .ad-stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: var(--space-lg);
+    gap: 8px;
+    margin-bottom: var(--space-md);
 }
 
 .ad-stat-card {
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 14px 12px;
+    border-radius: var(--radius-sm);
+    padding: 8px 6px;
     text-align: center;
 }
 
 .ad-stat-icon {
-    font-size: 1.1rem;
-    margin-bottom: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 2px;
     opacity: 0.7;
 }
 
 .ad-stat-value {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--accent);
-    margin-bottom: 2px;
+    margin-bottom: 1px;
+    line-height: 1.2;
 }
 
 .ad-stat-label {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    line-height: 1.2;
 }
 
 /* Danger card (overdue) */
@@ -935,6 +937,12 @@ body.ad-page {
     font-family: inherit;
     transition: var(--transition-fast);
     box-sizing: border-box;
+    -moz-appearance: textfield;
+}
+.ad-field-input::-webkit-outer-spin-button,
+.ad-field-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .ad-field-input:focus {
@@ -1091,6 +1099,27 @@ input[type="date"]::-webkit-datetime-edit {
     accent-color: var(--accent);
     width: 16px;
     height: 16px;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    border-radius: 3px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+}
+.ad-checkbox-label input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+.ad-checkbox-label input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    color: #000;
+    font-weight: 700;
 }
 
 .ad-field-hint {
@@ -1512,6 +1541,17 @@ select.ad-field-input {
     margin-bottom: var(--space-md);
 }
 
+/* When confirm modal has form fields inside, widen it */
+.ad-confirm-text .ad-field {
+    text-align: left;
+}
+.ad-confirm-text .ad-field-input {
+    margin-bottom: 0;
+}
+.ad-confirm-modal:has(.ad-field) {
+    max-width: 520px;
+}
+
 .ad-confirm-actions {
     display: flex;
     gap: 12px;
@@ -1644,15 +1684,15 @@ select.ad-field-input {
 
     .ad-stats-grid {
         grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        gap: 6px;
     }
 
     .ad-stat-card {
-        padding: 10px 8px;
+        padding: 6px 4px;
     }
 
     .ad-stat-value {
-        font-size: 1.2rem;
+        font-size: 1rem;
     }
 }
 
@@ -1982,8 +2022,8 @@ select.ad-field-input {
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--bg-elevated, #1a1a2e);
-    border: 1px solid var(--accent, #CCFF00);
+    background: var(--bg-elevated);
+    border: 1px solid var(--accent);
     border-radius: 12px;
     padding: 12px 24px;
     display: flex;
@@ -2197,8 +2237,8 @@ select.ad-field-input {
 
 /* Match card */
 .ad-brk-match {
-    background: var(--card-bg, #1a1f2e);
-    border: 1px solid var(--border, rgba(255,255,255,0.1));
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
     border-radius: 8px;
     margin: 4px 0;
     width: 210px;
@@ -2428,8 +2468,8 @@ select.ad-field-input {
 }
 
 .ad-modal {
-    background: var(--card-bg, #1a1f2e);
-    border: 1px solid var(--border, rgba(255,255,255,0.1));
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
     border-radius: 16px;
     width: 100%;
     max-height: 90vh;
@@ -2441,7 +2481,7 @@ select.ad-field-input {
     justify-content: space-between;
     align-items: center;
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border, rgba(255,255,255,0.1));
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .ad-modal-header h3 {
@@ -2470,7 +2510,7 @@ select.ad-field-input {
 
 .ad-modal-footer {
     padding: 16px 20px;
-    border-top: 1px solid var(--border, rgba(255,255,255,0.1));
+    border-top: 1px solid var(--border-subtle);
     text-align: right;
 }
 
@@ -3118,8 +3158,8 @@ select.ad-field-input {
     top: 100%;
     left: 0;
     right: 0;
-    background: #1a1f2e;
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
     border-radius: 8px;
     max-height: 200px;
     overflow-y: auto;
@@ -3237,8 +3277,8 @@ select.ad-field-input {
 /* ---- Group Stage (Round-Robin) ---- */
 .ad-grp-block {
     margin-bottom: 24px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 16px;
 }

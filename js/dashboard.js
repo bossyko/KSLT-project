@@ -134,13 +134,13 @@
         chalDate: 'Күнү',
         chalTime: 'Убакыт',
         chalVenue: 'Аянтча',
-        vouchers: 'Ваучерлер',
-        vouchersTitle: 'Менин ваучерлерим',
+        vouchers: 'Арзандатуулар',
+        vouchersTitle: 'Менин арзандатууларым',
         voucherActive: 'Активдүү',
         voucherUsed: 'Колдонулду',
         voucherExpired: 'Мөөнөтү бүттү',
-        voucherNoVouchers: 'Ваучерлер жок',
-        voucherNoVouchersText: 'Өнөктөш корт же машыктыруучу бетинен ваучер алыңыз',
+        voucherNoVouchers: 'Арзандатуулар жок',
+        voucherNoVouchersText: 'Өнөктөш корт же машыктыруучу бетинен арзандатуу алыңыз',
         voucherSaved: 'Үнөмдөлдү',
         voucherShowQR: 'QR көрсөтүү',
         voucherService: 'Кызмат',
@@ -158,7 +158,29 @@
         notifTelegram: 'Telegram',
         notifEmail: 'Email',
         notifSaved: 'Билдирме жөндөөлөрү сакталды',
-        errPhoneTaken: 'Бул телефон башка аккаунтка катталган'
+        errPhoneTaken: 'Бул телефон башка аккаунтка катталган',
+        // Loyalty
+        loyaltyTab: 'Баллдар',
+        loyBalance: 'Баланс',
+        loyPoints: 'балл',
+        loyHistory: 'Тарыхы',
+        loyDate: 'Күнү',
+        loyAction: 'Аракет',
+        loyPointsCol: 'Баллдар',
+        loySource: 'Булак',
+        loyEarn: 'Алуу',
+        loyRedeem: 'Чыгымдоо',
+        loyExpire: 'Мөөнөтү бүттү',
+        loyAdjust: 'Оңдоо',
+        loyNoHistory: 'Баллдар жок',
+        loyNoHistoryText: 'Мелдештерге катышуу, корт арендалоо аркылуу балл топтоңуз',
+        loyRedeemTitle: 'Баллдарды алмаштыруу',
+        loyRedeemBtn: 'Алмаштыруу',
+        loyRedeemed: 'Балдар ийгиликтүү алмаштырылды',
+        loyNotEnough: 'Балдар жетишсиз',
+        loyNextExpiry: 'Кийинки сгорание',
+        loyPointsIn: 'балл',
+        loyDays: 'күн ичинде'
     } : isEn ? {
         profile: 'Profile', tournaments: 'My Tournaments',
         stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
@@ -284,13 +306,13 @@
         chalDate: 'Date',
         chalTime: 'Time',
         chalVenue: 'Venue',
-        vouchers: 'Vouchers',
-        vouchersTitle: 'My Vouchers',
+        vouchers: 'Discounts',
+        vouchersTitle: 'My Discounts',
         voucherActive: 'Active',
         voucherUsed: 'Used',
         voucherExpired: 'Expired',
-        voucherNoVouchers: 'No vouchers yet',
-        voucherNoVouchersText: 'Get a voucher from a partner court or coach page',
+        voucherNoVouchers: 'No discounts yet',
+        voucherNoVouchersText: 'Get a discount from a partner court or coach page',
         voucherSaved: 'Saved',
         voucherShowQR: 'Show QR',
         voucherService: 'Service',
@@ -308,7 +330,29 @@
         notifTelegram: 'Telegram',
         notifEmail: 'Email',
         notifSaved: 'Notification settings saved',
-        errPhoneTaken: 'This phone number is already linked to another account'
+        errPhoneTaken: 'This phone number is already linked to another account',
+        // Loyalty
+        loyaltyTab: 'Points',
+        loyBalance: 'Balance',
+        loyPoints: 'pts',
+        loyHistory: 'History',
+        loyDate: 'Date',
+        loyAction: 'Action',
+        loyPointsCol: 'Points',
+        loySource: 'Source',
+        loyEarn: 'Earned',
+        loyRedeem: 'Redeemed',
+        loyExpire: 'Expired',
+        loyAdjust: 'Adjusted',
+        loyNoHistory: 'No points yet',
+        loyNoHistoryText: 'Earn points by participating in tournaments, booking courts, and more',
+        loyRedeemTitle: 'Redeem Points',
+        loyRedeemBtn: 'Redeem',
+        loyRedeemed: 'Points redeemed successfully',
+        loyNotEnough: 'Not enough points',
+        loyNextExpiry: 'Next expiry',
+        loyPointsIn: 'pts in',
+        loyDays: 'days'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
@@ -434,13 +478,13 @@
         chalDate: 'Дата',
         chalTime: 'Время',
         chalVenue: 'Площадка',
-        vouchers: 'Ваучеры',
-        vouchersTitle: 'Мои ваучеры',
+        vouchers: 'Скидки',
+        vouchersTitle: 'Мои скидки',
         voucherActive: 'Активный',
         voucherUsed: 'Использован',
         voucherExpired: 'Истёк',
-        voucherNoVouchers: 'Ваучеров пока нет',
-        voucherNoVouchersText: 'Получите ваучер на странице партнёрского корта или тренера',
+        voucherNoVouchers: 'Скидок пока нет',
+        voucherNoVouchersText: 'Получите скидку на странице партнёрского корта или тренера',
         voucherSaved: 'Сэкономлено',
         voucherShowQR: 'Показать QR',
         voucherService: 'Услуга',
@@ -458,7 +502,29 @@
         notifTelegram: 'Telegram',
         notifEmail: 'Email',
         notifSaved: 'Настройки уведомлений сохранены',
-        errPhoneTaken: 'Этот номер телефона уже привязан к другому аккаунту'
+        errPhoneTaken: 'Этот номер телефона уже привязан к другому аккаунту',
+        // Loyalty
+        loyaltyTab: 'Баллы',
+        loyBalance: 'Баланс',
+        loyPoints: 'б.',
+        loyHistory: 'История',
+        loyDate: 'Дата',
+        loyAction: 'Действие',
+        loyPointsCol: 'Баллы',
+        loySource: 'Источник',
+        loyEarn: 'Начисление',
+        loyRedeem: 'Списание',
+        loyExpire: 'Сгорание',
+        loyAdjust: 'Корректировка',
+        loyNoHistory: 'Баллов пока нет',
+        loyNoHistoryText: 'Зарабатывайте баллы участвуя в турнирах, бронируя корты и тренировки',
+        loyRedeemTitle: 'Обменять баллы',
+        loyRedeemBtn: 'Обменять',
+        loyRedeemed: 'Баллы успешно обменяны',
+        loyNotEnough: 'Недостаточно баллов',
+        loyNextExpiry: 'Ближайшее сгорание',
+        loyPointsIn: 'б. через',
+        loyDays: 'дн.'
     };
 
     // Use shared Supabase client from supabase-config.js
@@ -555,6 +621,7 @@
         renderStats(profile);
         renderInvitations();
         renderVouchers();
+        renderLoyalty(user);
         renderPayments();
         renderSettings(user);
         initTabs();
@@ -764,6 +831,7 @@
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>' + L.stats + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="invitations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>' + L.invitations + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="vouchers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>' + L.vouchers + '</button></li>' +
+                '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="loyalty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' + L.loyaltyTab + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="payments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>' + L.payments + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + L.profile + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</button></li>' +
@@ -947,6 +1015,7 @@
             '<button class="db-mobile-tab" data-tab="stats">' + L.stats + '</button>' +
             '<button class="db-mobile-tab" data-tab="invitations">' + L.invitations + '</button>' +
             '<button class="db-mobile-tab" data-tab="vouchers">' + L.vouchers + '</button>' +
+            '<button class="db-mobile-tab" data-tab="loyalty">' + L.loyaltyTab + '</button>' +
             '<button class="db-mobile-tab" data-tab="payments">' + L.payments + '</button>' +
             '<button class="db-mobile-tab" data-tab="profile">' + L.profile + '</button>' +
             '<button class="db-mobile-tab" data-tab="settings">' + L.settings + '</button>';
@@ -1417,7 +1486,7 @@
         try {
             var pid = profile.player_id;
             var res = await client.from('matches')
-                .select('*, tournament:tournaments(id, title, title_en, title_kg)')
+                .select('*, tournament:tournaments(id, title, title_en, title_kg, draw_size)')
                 .or('player1_id.eq.' + pid + ',player2_id.eq.' + pid)
                 .not('winner_id', 'is', null)
                 .order('played_at', { ascending: false })
@@ -1455,12 +1524,30 @@
         }
     }
 
+    function getRoundLabel(m) {
+        // Use text 'round' field if present
+        if (m.round) {
+            if (m.round === '3RD') return '3rd';
+            if (m.round.indexOf('GS_') === 0) return 'GS';
+        }
+        // Derive from round_number + draw_size from tournament
+        var rn = m.round_number;
+        if (!rn) return '';
+        var ds = (m.tournament && m.tournament.draw_size) ? m.tournament.draw_size : 16;
+        var totalRounds = Math.log2(ds);
+        var fromEnd = totalRounds - rn;
+        if (fromEnd === 0) return 'F';
+        if (fromEnd === 1) return 'SF';
+        if (fromEnd === 2) return 'QF';
+        if (fromEnd === 3) return 'R16';
+        if (fromEnd === 4) return 'R32';
+        return 'R' + rn;
+    }
+
     function renderGamesMatchesList(container, matches, pid, profile, showAll) {
         var LIMIT = 25;
         var visible = showAll ? matches : matches.slice(0, LIMIT);
         var hasMore = !showAll && matches.length > LIMIT;
-
-        var roundMap = { 'final': 'F', 'semifinal': 'SF', 'quarterfinal': 'QF', 'group': 'GS' };
 
         var html = '<table class="db-matches-table"><thead><tr>';
         html += '<th>' + L.matchDate + '</th>';
@@ -1481,11 +1568,10 @@
             var displayScore = isP1 ? dbFormatScore(score) : dbFormatScore(dbFlipScore(score));
 
             var tName = '';
-            var roundLabel = '';
             if (m.tournament) {
                 tName = isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title);
             }
-            if (m.round_number) roundLabel = roundMap[m.round_number] || '';
+            var roundLabel = getRoundLabel(m);
 
             var dateStr = dbFormatDate(m.played_at || m.created_at);
             var resultCls = isWin ? 'win' : 'loss';
@@ -2235,13 +2321,27 @@
             if (catRes.data) catName = catRes.data.name;
         }
 
+        // Count wins/losses from actual matches
+        var wins = 0, losses = 0;
+        var matchesRes = await client.from('matches')
+            .select('winner_id')
+            .or('player1_id.eq.' + p.id + ',player2_id.eq.' + p.id)
+            .not('winner_id', 'is', null)
+            .neq('score', 'BYE');
+        if (matchesRes.data) {
+            matchesRes.data.forEach(function(m) {
+                if (m.winner_id === p.id) wins++;
+                else losses++;
+            });
+        }
+
         container.innerHTML =
             '<h2 class="db-section-title">' + L.statsTitle + '</h2>' +
             '<div class="db-stats-grid">' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + p.points + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + p.wins + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + p.losses + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + (p.rank_change > 0 ? '+' : '') + p.rank_change + '</div><div class="db-stat-label">' + L.rank + '</div></div>' +
+                '<div class="db-stat-card"><div class="db-stat-value">' + (p.points || 0) + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
+                '<div class="db-stat-card"><div class="db-stat-value">' + wins + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
+                '<div class="db-stat-card"><div class="db-stat-value">' + losses + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
+                '<div class="db-stat-card"><div class="db-stat-value">' + ((p.rank_change || 0) > 0 ? '+' : '') + (p.rank_change || 0) + '</div><div class="db-stat-label">' + L.rank + '</div></div>' +
             '</div>' +
             '<div class="db-card">' +
                 '<div class="db-card-title">' + L.category + '</div>' +
@@ -2635,7 +2735,7 @@
             if (totalSaved > 0) {
                 html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:12px 16px;background:rgba(204,255,0,0.06);border-radius:10px;border:1px solid rgba(204,255,0,0.12);">' +
                     '<span style="font-size:1.2rem;">&#127881;</span>' +
-                    '<span style="color:var(--accent);font-weight:600;">' + L.voucherSaved + ': ' + totalSaved + ' ' + (totalSaved === 1 ? (isEn ? 'voucher' : (isKg ? 'ваучер' : 'ваучер')) : (isEn ? 'vouchers' : (isKg ? 'ваучер' : 'ваучеров'))) + '</span>' +
+                    '<span style="color:var(--accent);font-weight:600;">' + L.voucherSaved + ': ' + totalSaved + ' ' + (totalSaved === 1 ? (isEn ? 'discount' : (isKg ? 'арзандатуу' : 'скидка')) : (isEn ? 'discounts' : (isKg ? 'арзандатуу' : 'скидок'))) + '</span>' +
                 '</div>';
             }
 
@@ -2830,6 +2930,269 @@
     }
 
     // ---- Render Payments ----
+    // ---- Render Loyalty Tab ----
+    var LOY_PER_PAGE = 20;
+    var loyPage = 1;
+    var loyAllTx = [];
+
+    var LOY_ACTION_MAP = {
+        tournament: isKg ? 'Мелдеш' : isEn ? 'Tournament' : 'Турнир',
+        court: isKg ? 'Корт' : isEn ? 'Court' : 'Корт',
+        coach: isKg ? 'Машыктыруучу' : isEn ? 'Coach' : 'Тренер',
+        membership: isKg ? 'Мүчөлүк' : isEn ? 'Membership' : 'Членство',
+        expiry: isKg ? 'Сгорание' : isEn ? 'Expiry' : 'Сгорание',
+        admin: isKg ? 'Администратор' : isEn ? 'Admin' : 'Админ'
+    };
+
+    async function renderLoyalty(user) {
+        var container = document.getElementById('db-loyalty');
+        if (!container || !client) return;
+
+        container.innerHTML = '<h2 class="db-section-title">' + L.loyaltyTab + '</h2><div class="db-card" id="dbLoyCard"><p style="color:var(--text-muted);">...</p></div>';
+
+        try {
+            // Get balance
+            var balRes = await client.rpc('get_loyalty_balance', { p_profile_id: user.id });
+            var balance = balRes.data || 0;
+
+            // Get transactions
+            var txRes = await client.from('loyalty_transactions')
+                .select('*')
+                .eq('profile_id', user.id)
+                .order('created_at', { ascending: false });
+
+            loyAllTx = txRes.data || [];
+
+            // Next expiry
+            var now = new Date();
+            var nextExpiry = null;
+            loyAllTx.forEach(function(t) {
+                if (t.type === 'earn' && t.expires_at) {
+                    var exp = new Date(t.expires_at);
+                    if (exp > now) {
+                        if (!nextExpiry || exp < nextExpiry.date) {
+                            nextExpiry = { date: exp, points: t.points };
+                        }
+                    }
+                }
+            });
+
+            // Get rewards
+            var rwRes = await client.from('loyalty_rewards').select('*').eq('active', true).order('cost');
+            var rewards = rwRes.data || [];
+
+            var card = document.getElementById('dbLoyCard');
+            if (!card) return;
+
+            // Balance card
+            var expiryHtml = '';
+            if (nextExpiry) {
+                var daysUntil = Math.ceil((nextExpiry.date - now) / 86400000);
+                expiryHtml = '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:8px;">' +
+                    L.loyNextExpiry + ': ' + nextExpiry.points + ' ' + L.loyPointsIn + ' ' + daysUntil + ' ' + L.loyDays +
+                    '</div>';
+            }
+
+            var balanceHtml =
+                '<div style="text-align:center;padding:28px 16px 20px;background:linear-gradient(135deg, rgba(204,255,0,0.08) 0%, rgba(204,255,0,0.02) 100%);border-radius:12px;border:1px solid rgba(204,255,0,0.15);">' +
+                    '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.4);margin-bottom:8px;">' + L.loyBalance + '</div>' +
+                    '<div style="font-size:3rem;font-weight:800;color:#CCFF00;line-height:1;">' + balance + '</div>' +
+                    '<div style="font-size:0.8rem;color:rgba(255,255,255,0.35);margin-top:4px;">' + L.loyPoints + '</div>' +
+                    expiryHtml +
+                    (rewards.length > 0 ? '<button style="margin-top:20px;background:#CCFF00;color:#000;border:none;padding:10px 28px;border-radius:8px;font-weight:700;font-size:0.9rem;cursor:pointer;" id="dbLoyRedeemBtn">' + L.loyRedeemTitle + '</button>' : '') +
+                '</div>';
+
+            // History table
+            var historyHtml = '<h3 style="margin:20px 0 12px;font-size:1rem;">' + L.loyHistory + '</h3>';
+
+            if (loyAllTx.length === 0) {
+                historyHtml += '<div class="db-empty" style="padding:24px 0;">' +
+                    '<div class="db-empty-icon">⭐</div>' +
+                    '<div class="db-empty-title">' + L.loyNoHistory + '</div>' +
+                    '<div class="db-empty-text">' + L.loyNoHistoryText + '</div>' +
+                    '</div>';
+            } else {
+                historyHtml += '<div id="dbLoyHistory"></div>';
+            }
+
+            card.innerHTML = balanceHtml + historyHtml;
+
+            if (loyAllTx.length > 0) {
+                loyPage = 1;
+                renderLoyaltyHistory();
+            }
+
+            // Redeem button
+            var redeemBtn = document.getElementById('dbLoyRedeemBtn');
+            if (redeemBtn) {
+                redeemBtn.addEventListener('click', function() {
+                    showRedeemModal(user.id, balance, rewards);
+                });
+            }
+        } catch (err) {
+            console.error('Loyalty load error:', err);
+        }
+    }
+
+    function renderLoyaltyHistory() {
+        var wrap = document.getElementById('dbLoyHistory');
+        if (!wrap) return;
+
+        var total = loyAllTx.length;
+        var start = (loyPage - 1) * LOY_PER_PAGE;
+        var page = loyAllTx.slice(start, start + LOY_PER_PAGE);
+
+        var html = '<div class="db-table-wrap" style="overflow-x:auto;"><table class="db-matches-table" style="width:100%;"><thead><tr>' +
+            '<th>' + L.loyDate + '</th>' +
+            '<th>' + L.loyAction + '</th>' +
+            '<th>' + L.loyPointsCol + '</th>' +
+            '</tr></thead><tbody>';
+
+        page.forEach(function(t) {
+            var typeLabel = '';
+            if (t.type === 'earn') typeLabel = L.loyEarn;
+            else if (t.type === 'redeem') typeLabel = L.loyRedeem;
+            else if (t.type === 'expire') typeLabel = L.loyExpire;
+            else typeLabel = L.loyAdjust;
+
+            var actionLabel = LOY_ACTION_MAP[t.action] || (t.action || '—');
+            var dateStr = new Date(t.created_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+
+            var ptsStyle = '';
+            var ptsPrefix = '';
+            if (t.type === 'earn' || (t.type === 'admin_adjust' && t.points > 0)) {
+                ptsStyle = 'color:#4caf50;';
+                ptsPrefix = '+';
+            } else {
+                ptsStyle = 'color:#f44336;';
+                ptsPrefix = '-';
+            }
+
+            html += '<tr>' +
+                '<td style="font-size:0.8rem;color:var(--text-muted);">' + dateStr + '</td>' +
+                '<td><span style="font-size:0.75rem;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);">' + dbEsc(typeLabel) + '</span> ' + dbEsc(actionLabel) + '</td>' +
+                '<td style="font-weight:600;' + ptsStyle + '">' + ptsPrefix + Math.abs(t.points) + '</td>' +
+            '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+
+        // Pagination
+        var totalPages = Math.ceil(total / LOY_PER_PAGE);
+        if (totalPages > 1) {
+            html += '<div style="display:flex;justify-content:center;gap:4px;margin-top:12px;">';
+            for (var p = 1; p <= totalPages; p++) {
+                var activeStyle = p === loyPage ? 'background:var(--accent);color:#000;' : 'background:rgba(255,255,255,0.06);color:var(--text-muted);';
+                html += '<button class="db-loy-page" data-loyp="' + p + '" style="border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.8rem;' + activeStyle + '">' + p + '</button>';
+            }
+            html += '</div>';
+        }
+
+        wrap.innerHTML = html;
+
+        wrap.querySelectorAll('[data-loyp]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                loyPage = parseInt(this.dataset.loyp);
+                renderLoyaltyHistory();
+            });
+        });
+    }
+
+    function showRedeemModal(profileId, balance, rewards) {
+        // Build overlay
+        var overlay = document.createElement('div');
+        overlay.className = 'db-modal-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+
+        var html = '<div style="background:#111111;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px 24px;max-width:420px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
+                '<h3 style="margin:0;font-size:1.15rem;color:#fff;">' + L.loyRedeemTitle + '</h3>' +
+                '<button class="db-loy-close" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:1.2rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>' +
+            '</div>' +
+            '<div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px;">' +
+                '<div style="font-size:2.2rem;font-weight:700;color:#CCFF00;">' + balance + '</div>' +
+                '<div style="font-size:0.8rem;color:rgba(255,255,255,0.45);margin-top:4px;">' + L.loyBalance + '</div>' +
+            '</div>';
+
+        rewards.forEach(function(rw) {
+            var title = isEn ? (rw.title_en || rw.title) : rw.title;
+            var canRedeem = balance >= rw.cost;
+            var btnStyle = canRedeem
+                ? 'background:#CCFF00;color:#000;cursor:pointer;font-weight:700;'
+                : 'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.3);cursor:not-allowed;';
+
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:8px;">' +
+                '<div>' +
+                    '<div style="font-weight:600;color:#fff;font-size:0.95rem;">' + dbEsc(title) + '</div>' +
+                    '<div style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-top:2px;">' + rw.cost + ' ' + L.loyPoints + '</div>' +
+                '</div>' +
+                '<button class="db-loy-redeem-item" data-rwid="' + rw.id + '" data-rwcost="' + rw.cost + '" data-rwcode="' + rw.code + '"' +
+                    (!canRedeem ? ' disabled' : '') +
+                    ' style="border:none;padding:8px 18px;border-radius:8px;font-size:0.8rem;' + btnStyle + '">' + L.loyRedeemBtn + '</button>' +
+            '</div>';
+        });
+
+        html += '</div>';
+
+        overlay.innerHTML = html;
+        document.body.appendChild(overlay);
+
+        // Close
+        overlay.querySelector('.db-loy-close').addEventListener('click', function() {
+            overlay.remove();
+        });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) overlay.remove();
+        });
+
+        // Redeem buttons
+        overlay.querySelectorAll('.db-loy-redeem-item').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                if (this.disabled) return;
+                var rwId = this.dataset.rwid;
+                var rwCost = parseInt(this.dataset.rwcost);
+                var rwCode = this.dataset.rwcode;
+
+                this.disabled = true;
+                this.textContent = '...';
+
+                // Check balance again
+                var balCheck = await client.rpc('get_loyalty_balance', { p_profile_id: profileId });
+                var currentBal = balCheck.data || 0;
+                if (currentBal < rwCost) {
+                    alert(L.loyNotEnough);
+                    this.disabled = false;
+                    this.textContent = L.loyRedeemBtn;
+                    return;
+                }
+
+                // Insert redeem transaction
+                var res = await client.from('loyalty_transactions').insert({
+                    profile_id: profileId,
+                    type: 'redeem',
+                    points: rwCost,
+                    action: rwCode,
+                    note: null
+                });
+
+                if (res.error) {
+                    alert(res.error.message);
+                    this.disabled = false;
+                    this.textContent = L.loyRedeemBtn;
+                    return;
+                }
+
+                overlay.remove();
+                // Refresh loyalty tab
+                var session = await client.auth.getSession();
+                if (session.data.session) {
+                    renderLoyalty(session.data.session.user);
+                }
+            });
+        });
+    }
+
+    // ---- Payments ----
     var payPage = 1;
     var PAY_PER_PAGE = 10;
     var payAllData = [];
@@ -2882,16 +3245,14 @@
                 }
             });
 
-            html += '<div class="db-card" style="margin-bottom:16px;">' +
-                '<div style="display:flex;gap:24px;flex-wrap:wrap;">' +
-                    '<div style="text-align:center;">' +
-                        '<div style="font-size:1.4rem;font-weight:700;color:var(--accent);">' + total + '</div>' +
-                        '<div style="font-size:0.75rem;color:var(--text-dim);">' + L.payHistory + '</div>' +
-                    '</div>' +
-                    '<div style="text-align:center;">' +
-                        '<div style="font-size:1.4rem;font-weight:700;color:var(--accent);">' + totalAmount.toLocaleString() + ' KGS</div>' +
-                        '<div style="font-size:0.75rem;color:var(--text-dim);">' + L.payAmount + '</div>' +
-                    '</div>' +
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">' +
+                '<div class="db-card" style="text-align:center;padding:20px 16px;">' +
+                    '<div style="font-size:2rem;font-weight:700;color:var(--accent);">' + total + '</div>' +
+                    '<div style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;">' + L.payHistory + '</div>' +
+                '</div>' +
+                '<div class="db-card" style="text-align:center;padding:20px 16px;">' +
+                    '<div style="font-size:2rem;font-weight:700;color:var(--accent);">' + totalAmount.toLocaleString() + '</div>' +
+                    '<div style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;">' + L.payAmount + ' (KGS)</div>' +
                 '</div>' +
             '</div>';
 

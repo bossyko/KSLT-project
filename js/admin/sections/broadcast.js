@@ -20,46 +20,40 @@
         overlay.id = 'adBroadcastModal';
         overlay.className = 'ad-modal-overlay';
         overlay.innerHTML =
-            '<div class="ad-modal" style="max-width:540px;">' +
+            '<div class="ad-modal" style="max-width:520px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>📢 ' + L.broadcastTitle + '</h3>' +
                     '<button class="ad-modal-close" id="adBroadcastClose">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
-                    // Subject
-                    '<div class="ad-form-group">' +
-                        '<label class="ad-label">' + L.broadcastSubject + '</label>' +
-                        '<input type="text" id="adBcSubject" class="ad-input" maxlength="100" placeholder="' + L.broadcastSubject + '...">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.broadcastSubject + '</label>' +
+                        '<input type="text" id="adBcSubject" class="ad-field-input" maxlength="100" placeholder="' + L.broadcastSubject + '...">' +
                     '</div>' +
-                    // Message
-                    '<div class="ad-form-group">' +
-                        '<label class="ad-label">' + L.broadcastMessage + '</label>' +
-                        '<textarea id="adBcMessage" class="ad-textarea" rows="5" maxlength="2000" placeholder="' + L.broadcastMessage + '..."></textarea>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.broadcastMessage + '</label>' +
+                        '<textarea id="adBcMessage" class="ad-field-input ad-field-textarea" rows="4" maxlength="2000" placeholder="' + L.broadcastMessage + '..."></textarea>' +
                     '</div>' +
-                    // Audience
-                    '<div class="ad-form-group">' +
-                        '<label class="ad-label">' + L.broadcastAudience + '</label>' +
-                        '<div class="ad-radio-group">' +
-                            '<label class="ad-radio"><input type="radio" name="bcAudience" value="all" checked> ' + L.broadcastAudienceAll + '</label>' +
-                            '<label class="ad-radio"><input type="radio" name="bcAudience" value="members"> ' + L.broadcastAudienceMembers + '</label>' +
-                            '<label class="ad-radio"><input type="radio" name="bcAudience" value="tournament"> ' + L.broadcastAudienceTournament + '</label>' +
+                    '<div style="display:flex;gap:32px;align-items:baseline;margin-top:4px;">' +
+                        '<div>' +
+                            '<span class="ad-field-label">' + L.broadcastAudience + '</span>' +
+                            '<div style="display:flex;gap:12px;margin-top:6px;">' +
+                                '<span style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><input type="radio" name="bcAudience" value="all" checked style="margin:0;width:14px;height:14px;accent-color:var(--accent);"> ' + L.broadcastAudienceAll + '</span>' +
+                                '<span style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><input type="radio" name="bcAudience" value="members" style="margin:0;width:14px;height:14px;accent-color:var(--accent);"> ' + L.broadcastAudienceMembers + '</span>' +
+                            '</div>' +
                         '</div>' +
-                        '<select id="adBcTournament" class="ad-select" style="display:none;margin-top:8px;">' +
-                            '<option value="">' + L.broadcastSelectTournament + '</option>' +
-                        '</select>' +
-                    '</div>' +
-                    // Channels
-                    '<div class="ad-form-group">' +
-                        '<label class="ad-label">' + L.broadcastChannels + '</label>' +
-                        '<div style="display:flex;gap:16px;">' +
-                            '<label class="ad-checkbox"><input type="checkbox" id="adBcChTg" checked> Telegram</label>' +
-                            '<label class="ad-checkbox"><input type="checkbox" id="adBcChEmail" checked> Email</label>' +
+                        '<div>' +
+                            '<span class="ad-field-label">' + L.broadcastChannels + '</span>' +
+                            '<div style="display:flex;gap:12px;margin-top:6px;">' +
+                                '<span style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><input type="checkbox" id="adBcChTg" checked style="margin:0;width:14px;height:14px;accent-color:var(--accent);"> TG</span>' +
+                                '<span style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><input type="checkbox" id="adBcChEmail" checked style="margin:0;width:14px;height:14px;accent-color:var(--accent);"> Email</span>' +
+                            '</div>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-modal-footer">' +
                     '<button class="ad-btn" id="adBcCancel">' + L.cancel + '</button>' +
-                    '<button class="ad-btn ad-btn--accent" id="adBcSend">' + L.broadcastSend + '</button>' +
+                    ' <button class="ad-btn ad-btn--accent" id="adBcSend">' + L.broadcastSend + '</button>' +
                 '</div>' +
             '</div>';
 
@@ -72,18 +66,6 @@
             if (e.target === overlay) closeModal();
         });
 
-        // Audience radio → show/hide tournament select
-        var radios = overlay.querySelectorAll('input[name="bcAudience"]');
-        var tSelect = document.getElementById('adBcTournament');
-        radios.forEach(function(r) {
-            r.addEventListener('change', function() {
-                tSelect.style.display = r.value === 'tournament' ? 'block' : 'none';
-                if (r.value === 'tournament' && tSelect.options.length <= 1) {
-                    loadTournaments(tSelect);
-                }
-            });
-        });
-
         // Send handler
         document.getElementById('adBcSend').addEventListener('click', sendBroadcast);
     }
@@ -91,28 +73,6 @@
     function closeModal() {
         var m = document.getElementById('adBroadcastModal');
         if (m) m.remove();
-    }
-
-    // ---- Load tournaments for dropdown ----
-    async function loadTournaments(select) {
-        try {
-            var { data } = await A.client.from('tournaments')
-                .select('id, title')
-                .neq('status', 'cancelled')
-                .order('date_start', { ascending: false })
-                .limit(30);
-
-            if (data) {
-                data.forEach(function(t) {
-                    var opt = document.createElement('option');
-                    opt.value = t.id;
-                    opt.textContent = t.title;
-                    select.appendChild(opt);
-                });
-            }
-        } catch (e) {
-            console.error('Load tournaments error:', e);
-        }
     }
 
     // ---- Send Broadcast ----
@@ -128,14 +88,6 @@
         // Audience
         var audienceRadio = document.querySelector('input[name="bcAudience"]:checked');
         var audience = audienceRadio ? audienceRadio.value : 'all';
-        if (audience === 'tournament') {
-            var tId = document.getElementById('adBcTournament').value;
-            if (!tId) {
-                A.showToast(L.broadcastSelectTournament, 'error');
-                return;
-            }
-            audience = 'tournament:' + tId;
-        }
 
         // Channels
         var chTg = document.getElementById('adBcChTg').checked;

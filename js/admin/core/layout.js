@@ -36,6 +36,7 @@
             { key: 'users',     icon: A.ICONS.users,  label: L.users,     badge: false },
             { key: 'finances', icon: A.ICONS.wallet, label: L.finances, badge: false },
             { key: 'vouchers', icon: A.ICONS.ticket, label: L.vouchers, badge: false },
+            { key: 'loyalty', icon: A.ICONS.star, label: L.loyalty, badge: false },
             { key: 'settings', icon: A.ICONS.settings, label: L.settings, badge: false }
         ];
 
@@ -156,7 +157,8 @@
             users: A.renderUsersList,
             finances: A.renderFinancesList,
             settings: A.renderSettingsSection,
-            vouchers: A.renderVouchersList
+            vouchers: A.renderVouchersList,
+            loyalty: A.renderLoyaltySection
         };
         if (resetMap[tab]) {
             resetMap[tab]();

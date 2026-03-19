@@ -24,6 +24,7 @@
         A.renderCoachesSection();
         A.renderFinancesSection();
         A.renderVouchersSection();
+        A.renderLoyaltySection();
         A.renderUsersSection();
         A.renderSettingsSection();
         A.initTabs();
