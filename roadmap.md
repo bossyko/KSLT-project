@@ -27,21 +27,17 @@
 - [x] Dashboard: overdue + approaching tables, stat cards
 - [x] User dashboard: membership status card + renewal prompt
 
-### 3.2 Payments
-- [ ] Payment provider integration (Mbank / PayBox)
-- [ ] Payment page + webhook processing
+### 3.2 Payments ✅
 - [x] Payment history in dashboard (via Finances section)
-- [ ] Recurring payments (auto-renewal)
+- [x] Admin Finances: manual payment recording (membership, court, coach, club)
 
-### 3.3 Notifications
+### 3.3 Notifications ✅
 - [x] Telegram bot: tournament registration announcements to group
 - [x] Telegram bot: inline registration (callback query)
 - [x] pg_cron: auto-notify when registration opens (daily)
 - [x] Настройка уведомлений: opt-out по 4 категориям × 2 канала (TG + Email)
 - [x] Email templates (Resend) + broadcast from admin
 - [x] Tournament reminders + payment reminders
-- [ ] SMS integration (Nikita.kg)
-- [ ] Push notifications
 
 ## Phase 4 — Admin Panel + Reports ✅
 
@@ -88,10 +84,6 @@
 - [x] Dashboard: challenges tab (RPC, status colors, direction)
 - [x] Admin dashboard: challenges stat card (active count)
 
-### Challenge Board — Этап 2 (Backlog)
-- [ ] Challenge match page + prediction
-- [ ] Challenge results + rating impact
-
 ### Auto-scheduling ✅
 - [x] Match distribution by courts (wave system: courtIndex = i % courtCount)
 - [x] Auto time calculation (waveStart + duration + buffer between rounds)
@@ -104,34 +96,20 @@
 - [x] Meta tags in all 68 HTML files (manifest, theme-color, apple-touch-icon)
 - [x] Installable on desktop (Chrome) + mobile (Android/iOS)
 
-### Other (Backlog)
-- [ ] Shop / merchandise (catalog, cart, orders, admin)
-
 ## Phase 6 — Documentation ✅
 
 - [x] Technical docs (docs/TECHNICAL.md)
 - [x] Manager guide v5.0 (docs/MANAGER-GUIDE.md)
 - [x] Tournament rules and regulations (rules.html)
 - [x] Membership terms and conditions (offer.html)
-- [ ] API documentation (Supabase schema, RLS, endpoints)
 
-## Phase 7 — Refactoring + QA + CI/CD
+## Phase 7 — Refactoring ✅
 
 ### 7.1 Admin Refactoring ✅
 - [x] Split admin.js (15,000+ lines) into 14 modular files (js/admin/)
 - [x] Shared namespace window.KSLT_ADMIN, consolidated utilities
 - [x] Tab consolidation: 11 tabs → 10 tabs
 - [x] Users funnel analytics: conversion cards + chart
-
-### 7.2 QA Automation
-- [ ] E2E testing framework (Cypress / Playwright)
-- [ ] Tests: auth, dashboard, navigation, ratings, admin CRUD
-
-### 7.3 CI/CD
-- [ ] GitHub Actions: linting (ESLint) on PR
-- [ ] GitHub Actions: auto-run E2E tests
-- [ ] Auto-deploy to Netlify
-- [ ] Test status badge in README
 
 ## Loyalty Program ✅
 
@@ -150,10 +128,7 @@
 - [x] Admin dashboard cards: compact layout
 - [x] All modals: unified dark theme (--bg-card), proper ad-field-input classes
 
-## Auth & Security (Backlog)
-
-- [ ] Two-step password reset: email + SMS code
-- [ ] SMS verification provider (Twilio / Nikita.kg)
+## Auth & Security ✅
 
 ### User Ban & Moderation System ✅
 - [x] Temp ban (7d / 30d / 90d / 1y / custom) + permanent ban
@@ -173,7 +148,42 @@
 - [x] Last Matches table (auto from matches)
 - [x] Remove manual W/L toggles (auto-computed from last 5 matches)
 
-## Infrastructure (Backlog)
+## Infrastructure ✅
 
 - [x] Kyrgyz language (KG) — all 20+ pages
-- [ ] Remove Co-Authored-By from old git commits (rebase)
+
+---
+
+## Challenge Battle Page ✅
+
+- [x] SQL: ALTER challenges (battle_title, battle_published, voting_closed) + challenge_predictions table
+- [x] RPC: get_battle_public(), get_battle_votes(), cast_battle_vote() + RLS
+- [x] Public page: challenge.html (RU/EN/KG) — VS layout, voting, H2H, score
+- [x] JS: challenge-detail.js (IIFE) — load battle, render hero/voting/details/h2h/score
+- [x] CSS: challenge-detail.css (ch- prefix) — responsive VS layout, voting bar, score display
+- [x] Admin section: challenges.js — accepted/published tabs, publish modal, score modal
+- [x] Edge Function: battle-publish — JWT auth, TG announcement with inline voting buttons, retry, notify_only mode
+- [x] Telegram webhook: handleBattleVote — vote via inline buttons, update buttons with % after vote
+- [x] Admin sidebar: challenges section (swords icon) for admin + manager
+- [x] Battle cards: dark theme grid (3 columns desktop, 2 tablet, 1 mobile), banner as inner image
+- [x] One-time voting: no vote changes allowed (site + TG)
+- [x] Cross-check voting: site ↔ telegram (same person can't vote twice via different channels)
+- [x] Auto-close voting: when match date/time arrives (Asia/Bishkek timezone)
+- [x] TG inline buttons: short callback_data (bv:UUID:1|2), vote counts + % shown after voting
+- [x] Admin: delete battle, clickable title, broadcast tracking (battle_notified_at)
+- [x] Breadcrumb: sticky back navigation (from home or tournaments), replaces old back link
+- [x] Score modal: closes only on success, button re-enables on error
+
+## Ideas / Future
+
+- Online payments: provider integration (Mbank / PayBox), payment page, webhooks
+- Recurring payments: auto-renewal memberships
+- SMS integration (Nikita.kg / Twilio) — verification, notifications
+- Push notifications (FCM / Web Push)
+- Two-step password reset (email + SMS)
+- Shop / merchandise (catalog, cart, orders, admin)
+- E2E testing (Cypress / Playwright)
+- CI/CD: GitHub Actions linting, auto-tests, auto-deploy Netlify
+- API documentation (Supabase schema, RLS, endpoints)
+- YouTube Live stream integration
+- Live Score (real-time match scoreboard)

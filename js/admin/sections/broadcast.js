@@ -34,20 +34,16 @@
                         '<label class="ad-field-label">' + L.broadcastMessage + '</label>' +
                         '<textarea id="adBcMessage" class="ad-field-input ad-field-textarea" rows="4" maxlength="2000" placeholder="' + L.broadcastMessage + '..."></textarea>' +
                     '</div>' +
-                    '<div style="display:flex;gap:32px;align-items:baseline;margin-top:4px;">' +
+                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;">' +
                         '<div>' +
-                            '<span class="ad-field-label">' + L.broadcastAudience + '</span>' +
-                            '<div style="display:flex;gap:12px;margin-top:6px;">' +
-                                '<span style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><input type="radio" name="bcAudience" value="all" checked style="margin:0;width:14px;height:14px;accent-color:var(--accent);"> ' + L.broadcastAudienceAll + '</span>' +
-                                '<span style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><input type="radio" name="bcAudience" value="members" style="margin:0;width:14px;height:14px;accent-color:var(--accent);"> ' + L.broadcastAudienceMembers + '</span>' +
-                            '</div>' +
+                            '<span class="ad-field-label" style="margin-bottom:8px;display:block;">' + L.broadcastAudience + '</span>' +
+                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;margin-bottom:6px;"><input type="radio" name="bcAudience" value="all" checked style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> ' + L.broadcastAudienceAll + '</label>' +
+                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;"><input type="radio" name="bcAudience" value="members" style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> ' + L.broadcastAudienceMembers + '</label>' +
                         '</div>' +
                         '<div>' +
-                            '<span class="ad-field-label">' + L.broadcastChannels + '</span>' +
-                            '<div style="display:flex;gap:12px;margin-top:6px;">' +
-                                '<span style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><input type="checkbox" id="adBcChTg" checked style="margin:0;width:14px;height:14px;accent-color:var(--accent);"> TG</span>' +
-                                '<span style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><input type="checkbox" id="adBcChEmail" checked style="margin:0;width:14px;height:14px;accent-color:var(--accent);"> Email</span>' +
-                            '</div>' +
+                            '<span class="ad-field-label" style="margin-bottom:8px;display:block;">' + L.broadcastChannels + '</span>' +
+                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;margin-bottom:6px;"><input type="checkbox" id="adBcChTg" checked style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> Telegram</label>' +
+                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;"><input type="checkbox" id="adBcChEmail" checked style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> Email</label>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -97,8 +93,8 @@
             return;
         }
 
-        // Confirm
-        var ok = await A.showConfirm(L.broadcastConfirm);
+        // Confirm (async — returns Promise)
+        var ok = await A.showConfirmAsync(L.broadcastConfirm, '', L.broadcastSend);
         if (!ok) return;
 
         var btn = document.getElementById('adBcSend');

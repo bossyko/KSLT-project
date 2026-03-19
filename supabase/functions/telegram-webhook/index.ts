@@ -194,6 +194,19 @@
         return
       }
 
+      // Route: battle_noop (info button, no action)
+      if (data.startsWith('battle_noop:') || data.startsWith('bn:')) {
+        await answerCallbackQuery(token, query.id, '📊 Голосование активно')
+        return
+      }
+
+      // Route: bv:{challenge_id}:{1|2} — 1=challenger, 2=opponent
+      const battleMatch = data.match(/^bv:([0-9a-f-]+):([12])$/)
+      if (battleMatch) {
+        await handleBattleVote(query, token, battleMatch[1], battleMatch[2])
+        return
+      }
+
       // Route: invite_accept/decline:{uuid}
       const messageId = query.message?.message_id
       const match = data.match(/^invite_(accept|decline):(.+)$/)
@@ -493,6 +506,144 @@
             `✅ <b>Заявка на турнир отправлена!</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nСтатус: ожидает подтверждения. Следите за обновлениями на сайте.`
           )
         }
+      }
+    }
+
+    // ---- Battle Vote Handler ----
+    // playerSlot: "1" = challenger, "2" = opponent (short callback_data for TG 64-byte limit)
+
+    async function handleBattleVote(
+      query: { id: string; data?: string; from: { id: number }; message?: { chat: { id: number }; message_id: number } },
+      token: string,
+      challengeId: string,
+      playerSlot: string
+    ) {
+      const db = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      )
+
+      const voterId = String(query.from.id)
+
+      // Step 1: parallel — challenge + existing vote + linked profile
+      const [chalRes, existRes, profileRes] = await Promise.all([
+        db.from('challenges')
+          .select('id, battle_published, voting_closed, challenger_player_id, opponent_player_id, proposed_date, proposed_time, counter_date, counter_time')
+          .eq('id', challengeId).single(),
+        db.from('challenge_predictions')
+          .select('id')
+          .eq('challenge_id', challengeId)
+          .eq('voter_type', 'telegram')
+          .eq('voter_id', voterId)
+          .maybeSingle(),
+        db.from('profiles')
+          .select('id')
+          .eq('telegram_chat_id', voterId)
+          .maybeSingle()
+      ])
+
+      const challenge = chalRes.data
+      if (!challenge || !challenge.battle_published) {
+        await answerCallbackQuery(token, query.id, 'Баттл не найден'); return
+      }
+      if (challenge.voting_closed) {
+        await answerCallbackQuery(token, query.id, '❌ Голосование закрыто'); return
+      }
+
+      // Auto-close: check if match time has passed (Asia/Bishkek = UTC+6)
+      const matchDate = challenge.counter_date || challenge.proposed_date
+      const matchTime = challenge.counter_time || challenge.proposed_time
+      if (matchDate && matchTime) {
+        const matchDt = new Date(`${matchDate}T${matchTime}:00+06:00`)
+        if (!isNaN(matchDt.getTime()) && Date.now() >= matchDt.getTime()) {
+          db.from('challenges').update({ voting_closed: true }).eq('id', challengeId)
+          await answerCallbackQuery(token, query.id, '❌ Голосование закрыто — матч начался'); return
+        }
+      }
+
+      if (existRes.data) {
+        await answerCallbackQuery(token, query.id, '✅ Вы уже проголосовали!'); return
+      }
+
+      // Resolve player_id from slot
+      const playerId = playerSlot === '1' ? challenge.challenger_player_id : challenge.opponent_player_id
+
+      // Cross-check: site vote by linked profile
+      if (profileRes.data) {
+        const { data: siteVote } = await db
+          .from('challenge_predictions')
+          .select('id')
+          .eq('challenge_id', challengeId)
+          .eq('voter_type', 'site')
+          .eq('voter_id', profileRes.data.id)
+          .maybeSingle()
+        if (siteVote) {
+          await answerCallbackQuery(token, query.id, '✅ Вы уже голосовали на сайте!'); return
+        }
+      }
+
+      // Step 2: insert vote + get player names in parallel
+      const [_ins, playersRes] = await Promise.all([
+        db.from('challenge_predictions').insert({
+          challenge_id: challengeId,
+          voter_type: 'telegram',
+          voter_id: voterId,
+          predicted_winner_id: playerId
+        }),
+        db.from('players')
+          .select('id, name')
+          .in('id', [challenge.challenger_player_id, challenge.opponent_player_id])
+      ])
+
+      const pMap: Record<string, string> = {}
+      if (playersRes.data) playersRes.data.forEach((p: any) => { pMap[p.id] = p.name })
+      const cName = pMap[challenge.challenger_player_id] || '?'
+      const oName = pMap[challenge.opponent_player_id] || '?'
+      const votedName = pMap[playerId] || '?'
+
+      await answerCallbackQuery(token, query.id, `✅ Голос за ${votedName} принят!`)
+
+      // Step 3: update buttons with vote counts
+      const chatId = query.message?.chat?.id
+      const messageId = query.message?.message_id
+      if (chatId && messageId) {
+        const { data: votes } = await db
+          .from('challenge_predictions')
+          .select('predicted_winner_id')
+          .eq('challenge_id', challengeId)
+
+        let v1 = 0, v2 = 0
+        if (votes) votes.forEach((v: any) => {
+          if (v.predicted_winner_id === challenge.challenger_player_id) v1++
+          else if (v.predicted_winner_id === challenge.opponent_player_id) v2++
+        })
+        const total = v1 + v2
+        const p1 = total > 0 ? Math.round(v1 / total * 100) : 50
+        const p2 = total > 0 ? Math.round(v2 / total * 100) : 50
+        const isChal = playerSlot === '1'
+
+        await fetch(`${TELEGRAM_API}${token}/editMessageReplyMarkup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            message_id: messageId,
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: `${isChal ? '✅ ' : ''}🔴 ${cName} — ${p1}%`, callback_data: `bv:${challengeId}:1` },
+                  { text: `${!isChal ? '✅ ' : ''}🔵 ${oName} — ${p2}%`, callback_data: `bv:${challengeId}:2` }
+                ],
+                [
+                  { text: `📊 Голосов: ${total}`, callback_data: `bn:${challengeId}` }
+                ],
+                [
+                  { text: '🎾 Подробнее', url: `https://kslt.netlify.app/pages/challenge.html?id=${challengeId}` }
+                ]
+              ]
+            }
+          })
+        })
       }
     }
 

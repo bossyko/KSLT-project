@@ -173,6 +173,19 @@
         overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
     }
 
+    // ---- Async confirm (Promise-based wrapper) ----
+    function showConfirmAsync(title, text, confirmLabel) {
+        return new Promise(function(resolve) {
+            showConfirm(
+                title,
+                text || '',
+                function() { resolve(true); },
+                confirmLabel || L.confirm || 'OK',
+                function() { resolve(false); }
+            );
+        });
+    }
+
     // ---- Translation (MyMemory API, free, no key) ----
 
     // Translate filled field(s) to empty ones (auto-detect source language)
@@ -325,6 +338,7 @@
     // ---- Export to namespace ----
     A.showToast = showToast;
     A.showConfirm = showConfirm;
+    A.showConfirmAsync = showConfirmAsync;
     A.esc = esc;
     A.sel = sel;
     A.transliterate = transliterate;
