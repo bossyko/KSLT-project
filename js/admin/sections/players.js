@@ -158,8 +158,9 @@
                             '<th>' + L.plrCategory + '</th>' +
                             '<th>' + L.thPoints + '</th>' +
                             '<th>' + L.thWL + '</th>' +
+                            '<th style="text-align:center;width:50px;">&#128065;</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -191,7 +192,7 @@
         var isAdm = A.currentRole === 'admin';
 
         var query = A.client.from('players')
-            .select('id,name,photo,country,category_id,points,wins,losses,rank_change,banned_until')
+            .select('id,name,photo,country,category_id,points,wins,losses,rank_change,banned_until,view_count')
             .order('points', { ascending: false });
 
         if (plrFilterCategory) {
@@ -210,7 +211,7 @@
 
         if (items.length === 0) {
             tbody.innerHTML =
-                '<tr><td colspan="7" style="text-align:center;padding:60px 20px;">' +
+                '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">📊</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noPlayers + '</div>' +
                     '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noPlayersText + '</div>' +
@@ -237,6 +238,7 @@
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + (p.points || 0) + '</td>' +
                     '<td>' + (p.wins || 0) + '/' + (p.losses || 0) + '</td>' +
+                    '<td style="text-align:center;color:var(--text-dim);">' + ((p.view_count || 0) > 0 ? p.view_count : '\u2014') + '</td>' +
                 '</tr>';
         });
 

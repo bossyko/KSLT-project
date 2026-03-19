@@ -27,14 +27,14 @@
             '<option value="membership"' + (finFilterType === 'membership' ? ' selected' : '') + '>' + L.finTypeMembership + '</option>' +
             '<option value="court"' + (finFilterType === 'court' ? ' selected' : '') + '>' + L.payCourt + '</option>' +
             '<option value="coach"' + (finFilterType === 'coach' ? ' selected' : '') + '>' + L.payCoach + '</option>' +
-            '<option value="player"' + (finFilterType === 'player' ? ' selected' : '') + '>' + L.payPlayer + '</option>';
+            '<option value="club"' + (finFilterType === 'club' ? ' selected' : '') + '>' + L.payClub + '</option>';
 
         var statusOptions = '<option value="">' + L.payAllStatuses + '</option>' +
             '<option value="active"' + (finFilterStatus === 'active' ? ' selected' : '') + '>' + L.payActive + '</option>' +
             '<option value="expired"' + (finFilterStatus === 'expired' ? ' selected' : '') + '>' + L.payExpired + '</option>';
 
         container.innerHTML =
-            '<div class="ad-section-header">' +
+            '<div class="ad-section-header" style="position:sticky;top:64px;z-index:10;background:var(--bg-primary);padding:12px 0;">' +
                 '<h2>' + L.finances + '</h2>' +
                 '<button class="ad-btn ad-btn-primary" id="adFinAddBtn">+ ' + L.addPayment + '</button>' +
             '</div>' +
@@ -46,8 +46,19 @@
                 '<div class="ad-pay-stat-card" id="adFinStatTotal"><div class="stat-value">0</div><div class="stat-label">' + L.payTotalAmount + '</div></div>' +
             '</div>' +
 
+            // Payments chart
+            '<div class="ad-dash-chart-card">' +
+                '<div class="ad-table-card-header">' +
+                    '<div class="ad-table-card-title">' + L.finChartTitle + '</div>' +
+                '</div>' +
+                '<div style="position:relative;height:260px;padding:12px;">' +
+                    '<canvas id="adFinChart"></canvas>' +
+                '</div>' +
+            '</div>' +
+
             // Period row
             '<div class="ad-vch-period-row">' +
+                '<span style="color:var(--text-secondary);font-size:0.85rem;font-weight:500;">' + (isEn ? 'Date:' : 'Дата:') + '</span>' +
                 '<select class="ad-field-input" id="adFinPeriod" style="max-width:160px;">' +
                     '<option value=""' + (finPeriodMode === '' ? ' selected' : '') + '>' + L.payPrdAll + '</option>' +
                     '<option value="this_month"' + (finPeriodMode === 'this_month' ? ' selected' : '') + '>' + L.payPrdThis + '</option>' +
@@ -58,6 +69,7 @@
                 '<input type="date" class="ad-field-input" id="adFinDateTo" value="' + finDateTo + '" style="max-width:150px;display:' + (finPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
                 '<button class="ad-btn ad-btn-sm" id="adFinPrdApply" style="display:' + (finPeriodMode === 'custom' ? 'inline-flex' : 'none') + ';">' + L.payPrdApply + '</button>' +
                 '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adFinPdfBtn" title="' + L.payPdfExport + '">📄 PDF</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adFinExcelBtn" title="' + L.payExcelExport + '">📊 Excel</button>' +
             '</div>' +
 
             '<div class="ad-filter-row sticky">' +
@@ -135,6 +147,9 @@
         // PDF
         document.getElementById('adFinPdfBtn').addEventListener('click', openFinPdfReport);
 
+        // Excel
+        document.getElementById('adFinExcelBtn').addEventListener('click', exportFinExcel);
+
         loadFinancesList();
     }
 
@@ -162,7 +177,7 @@
 
         // Load membership payments
         var mpRes = await A.client.from('payments')
-            .select('*, profiles!profile_id(full_name, email), memberships!membership_id(expires_at)')
+            .select('*, profiles!profile_id(full_name, email), memberships!membership_id(starts_at, expires_at)')
             .order('created_at', { ascending: false });
         var memPayments = (mpRes.data || []).map(function(p) {
             var profileName = p.profiles ? (p.profiles.full_name || p.profiles.email || '—') : '—';
@@ -191,6 +206,7 @@
 
         computeFinPeriodDates();
         applyFinFilters();
+        renderFinChart();
     }
 
     function applyFinFilters() {
@@ -285,7 +301,8 @@
             membership: L.finTypeMembership,
             court: L.payCourt,
             coach: L.payCoach,
-            player: L.payPlayer
+            player: L.payPlayer,
+            club: L.payClub
         };
         return map[type] || type;
     }
@@ -314,7 +331,7 @@
                 : '<span class="ad-pay-badge ad-pay-expired">' + L.payExpired + '</span>';
             var typeBadge = '<span class="ad-pay-badge ad-pay-type-' + p.type + '">' + getTypeLabel(p.type) + '</span>';
             var periodEnd = A.formatPayDate(p.period_end);
-            var createdDate = p.created_at ? new Date(p.created_at).toLocaleDateString() : '—';
+            var createdDate = p.created_at ? A.formatPayDate(p.created_at.slice(0, 10)) : '—';
             var methodLabel = A.PAYMENT_METHODS[p.payment_method] || p.payment_method || '—';
 
             html +=
@@ -394,9 +411,14 @@
         finEditingId = item ? item.id : null;
         finEditingSource = source;
 
+        var initType = item ? item.entity_type : 'court';
+        var isMembership = source === 'membership' || initType === 'membership';
+        var isClub = initType === 'club';
+        var todayStr = new Date().toISOString().slice(0, 10);
+
         var entityTypeOptions = '';
         Object.keys(A.PAYMENT_ENTITY_TYPES).forEach(function(k) {
-            entityTypeOptions += '<option value="' + k + '"' + (item && item.entity_type === k ? ' selected' : '') + '>' + A.PAYMENT_ENTITY_TYPES[k] + '</option>';
+            entityTypeOptions += '<option value="' + k + '"' + (initType === k ? ' selected' : '') + '>' + A.PAYMENT_ENTITY_TYPES[k] + '</option>';
         });
 
         var purposeOptions = '';
@@ -419,17 +441,35 @@
                 '<select class="ad-field-input" id="adFinEntityType">' + entityTypeOptions + '</select>' +
             '</div>' +
 
-            '<div class="ad-form-card">' +
+            // Entity search (court/coach)
+            '<div class="ad-form-card" id="adFinEntityBlock"' + (isClub || isMembership ? ' style="display:none;"' : '') + '>' +
                 '<div class="ad-form-card-title">' + L.payEntity + '</div>' +
                 '<div class="ad-pay-entity-wrap">' +
-                    '<input type="text" class="ad-field-input" id="adFinEntitySearch" placeholder="' + L.paySearchEntity + '" value="' + A.esc(item ? item.entity_name : '') + '" autocomplete="off">' +
+                    '<input type="text" class="ad-field-input" id="adFinEntitySearch" placeholder="' + L.paySearchEntity + '" value="' + A.esc(item && !isClub ? item.entity_name : '') + '" autocomplete="off">' +
                     '<div class="ad-pay-entity-results" id="adFinEntityResults" style="display:none;"></div>' +
                 '</div>' +
                 '<input type="hidden" id="adFinEntityId" value="' + (item ? item.entity_id : '') + '">' +
                 '<input type="hidden" id="adFinEntityName" value="' + A.esc(item ? item.entity_name : '') + '">' +
             '</div>' +
 
-            '<div class="ad-form-card">' +
+            // From (club only)
+            '<div class="ad-form-card" id="adFinClubFromBlock"' + (isClub ? '' : ' style="display:none;"') + '>' +
+                '<div class="ad-form-card-title">' + L.payFrom + '</div>' +
+                '<input type="text" class="ad-field-input" id="adFinClubFrom" placeholder="' + (isEn ? 'Sponsor / Organization name' : 'Спонсор / Название организации') + '" value="' + A.esc(item && isClub ? item.entity_name : '') + '">' +
+            '</div>' +
+
+            // Profile search (membership only)
+            '<div class="ad-form-card" id="adFinProfileBlock"' + (isMembership ? '' : ' style="display:none;"') + '>' +
+                '<div class="ad-form-card-title">' + (isEn ? 'User' : 'Пользователь') + '</div>' +
+                '<div class="ad-pay-entity-wrap">' +
+                    '<input type="text" class="ad-field-input" id="adFinProfileSearch" placeholder="' + L.paySearchProfile + '" value="' + A.esc(isMembership && item ? item.entity_name || '' : '') + '" autocomplete="off">' +
+                    '<div class="ad-pay-entity-results" id="adFinProfileResults" style="display:none;"></div>' +
+                '</div>' +
+                '<input type="hidden" id="adFinProfileId" value="' + (isMembership && item ? item._raw.profile_id || '' : '') + '">' +
+                '<input type="hidden" id="adFinProfileName" value="' + A.esc(isMembership && item ? item.entity_name || '' : '') + '">' +
+            '</div>' +
+
+            '<div class="ad-form-card" id="adFinPurposeBlock"' + (isMembership ? ' style="display:none;"' : '') + '>' +
                 '<div class="ad-form-card-title">' + L.payPurpose + '</div>' +
                 '<select class="ad-field-input" id="adFinPurpose">' + purposeOptions + '</select>' +
             '</div>' +
@@ -442,13 +482,36 @@
                 '</div>' +
             '</div>' +
 
-            '<div class="ad-form-card">' +
+            // Period (court/coach)
+            '<div class="ad-form-card" id="adFinPeriodBlock"' + (isClub || isMembership ? ' style="display:none;"' : '') + '>' +
                 '<div class="ad-form-card-title">' + (isEn ? 'Period' : 'Период') + '</div>' +
                 '<div style="display:flex;gap:10px;align-items:center;">' +
-                    '<input type="date" class="ad-field-input" id="adFinPeriodStart" value="' + (item ? item.period_start : '') + '" style="flex:1;">' +
+                    '<input type="date" class="ad-field-input" id="adFinPeriodStart" value="' + (item && !isMembership ? item.period_start : '') + '" style="flex:1;">' +
                     '<span style="color:var(--text-dim);">—</span>' +
-                    '<input type="date" class="ad-field-input" id="adFinPeriodEnd" value="' + (item ? item.period_end : '') + '" style="flex:1;">' +
+                    '<input type="date" class="ad-field-input" id="adFinPeriodEnd" value="' + (item && !isMembership ? item.period_end : '') + '" style="flex:1;">' +
                 '</div>' +
+            '</div>' +
+
+            // Membership period
+            '<div class="ad-form-card" id="adFinMemberPeriodBlock"' + (isMembership ? '' : ' style="display:none;"') + '>' +
+                '<div class="ad-form-card-title">' + L.payMemberPeriod + '</div>' +
+                '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="1">1 ' + (isEn ? 'mo' : 'мес') + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="3">3 ' + (isEn ? 'mo' : 'мес') + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="6">6 ' + (isEn ? 'mo' : 'мес') + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="12">1 ' + (isEn ? 'yr' : 'год') + '</button>' +
+                '</div>' +
+                '<div style="display:flex;gap:10px;align-items:center;">' +
+                    '<input type="date" class="ad-field-input" id="adFinMemberStart" value="' + (isMembership && item && item._raw ? (item._raw.memberships ? item._raw.memberships.starts_at || '' : '').slice(0, 10) : todayStr) + '" style="flex:1;">' +
+                    '<span style="color:var(--text-dim);">—</span>' +
+                    '<input type="date" class="ad-field-input" id="adFinMemberEnd" value="' + (isMembership && item && item._raw && item._raw.memberships ? (item._raw.memberships.expires_at || '').slice(0, 10) : '') + '" style="flex:1;">' +
+                '</div>' +
+            '</div>' +
+
+            // Transaction date (club only)
+            '<div class="ad-form-card" id="adFinOpDateBlock"' + (isClub ? '' : ' style="display:none;"') + '>' +
+                '<div class="ad-form-card-title">' + L.payOpDate + '</div>' +
+                '<input type="date" class="ad-field-input" id="adFinOpDate" value="' + (item && isClub ? (item.period_start || todayStr) : todayStr) + '" style="max-width:200px;">' +
             '</div>' +
 
             '<div class="ad-form-card">' +
@@ -466,6 +529,20 @@
                 '<button class="ad-btn ad-btn-secondary" id="adFinBackBtn">' + L.back + '</button>' +
                 (item ? '<button class="ad-btn ad-btn-danger" id="adFinDeleteBtn" style="margin-left:auto;">' + L.delete + '</button>' : '') +
             '</div>';
+
+        // Toggle form fields based on type
+        function toggleFormMode(typeVal) {
+            var isC = typeVal === 'club';
+            var isM = typeVal === 'membership';
+            var isEntity = !isC && !isM;
+            document.getElementById('adFinEntityBlock').style.display = isEntity ? '' : 'none';
+            document.getElementById('adFinClubFromBlock').style.display = isC ? '' : 'none';
+            document.getElementById('adFinProfileBlock').style.display = isM ? '' : 'none';
+            document.getElementById('adFinPeriodBlock').style.display = isEntity ? '' : 'none';
+            document.getElementById('adFinMemberPeriodBlock').style.display = isM ? '' : 'none';
+            document.getElementById('adFinOpDateBlock').style.display = isC ? '' : 'none';
+            document.getElementById('adFinPurposeBlock').style.display = isM ? 'none' : '';
+        }
 
         // Entity search
         var searchInput = document.getElementById('adFinEntitySearch');
@@ -495,14 +572,63 @@
         document.addEventListener('click', function hideResults(e) {
             if (!e.target.closest('.ad-pay-entity-wrap')) {
                 resultsDiv.style.display = 'none';
+                var profileResults = document.getElementById('adFinProfileResults');
+                if (profileResults) profileResults.style.display = 'none';
+            }
+        });
+
+        // Profile search (membership)
+        var profileInput = document.getElementById('adFinProfileSearch');
+        var profileResults = document.getElementById('adFinProfileResults');
+        var profileTimer;
+
+        profileInput.addEventListener('input', function() {
+            clearTimeout(profileTimer);
+            var q = profileInput.value.trim();
+            if (q.length < 1) {
+                profileResults.style.display = 'none';
+                return;
+            }
+            profileTimer = setTimeout(function() {
+                searchProfiles(q);
+            }, 300);
+        });
+
+        profileInput.addEventListener('focus', function() {
+            if (profileInput.value.trim().length >= 1) {
+                searchProfiles(profileInput.value.trim());
             }
         });
 
         document.getElementById('adFinEntityType').addEventListener('change', function() {
+            var val = this.value;
+            toggleFormMode(val);
             document.getElementById('adFinEntityId').value = '';
             document.getElementById('adFinEntityName').value = '';
             searchInput.value = '';
+            document.getElementById('adFinClubFrom').value = '';
+            document.getElementById('adFinProfileId').value = '';
+            document.getElementById('adFinProfileName').value = '';
+            profileInput.value = '';
             resultsDiv.style.display = 'none';
+            profileResults.style.display = 'none';
+        });
+
+        // Membership period presets
+        document.querySelectorAll('.ad-mem-preset').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var months = parseInt(btn.dataset.months);
+                var startEl = document.getElementById('adFinMemberStart');
+                var start = startEl.value ? new Date(startEl.value) : new Date();
+                var end = new Date(start);
+                end.setMonth(end.getMonth() + months);
+                var endStr = end.getFullYear() + '-' + String(end.getMonth() + 1).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0');
+                document.getElementById('adFinMemberEnd').value = endStr;
+                // highlight active preset
+                document.querySelectorAll('.ad-mem-preset').forEach(function(b) { b.style.borderColor = ''; b.style.color = ''; });
+                btn.style.borderColor = 'var(--accent)';
+                btn.style.color = 'var(--accent)';
+            });
         });
 
         // Only digits allowed in amount field
@@ -540,9 +666,6 @@
         } else if (type === 'coach') {
             result = await A.client.from('coaches').select('id,last_name,first_name').or('last_name.ilike.%' + query + '%,first_name.ilike.%' + query + '%').limit(10);
             items = (result.data || []).map(function(r) { return { id: String(r.id), name: (r.last_name || '') + ' ' + (r.first_name || '') }; });
-        } else if (type === 'player') {
-            result = await A.client.from('players').select('id,name').ilike('name', '%' + query + '%').limit(10);
-            items = (result.data || []).map(function(r) { return { id: String(r.id), name: r.name }; });
         }
 
         if (items.length === 0) {
@@ -567,24 +690,184 @@
         });
     }
 
-    async function saveFinanceHandler() {
-        var entityId = document.getElementById('adFinEntityId').value;
-        var entityName = document.getElementById('adFinEntityName').value;
-        var entityType = document.getElementById('adFinEntityType').value;
-        var amount = parseFloat(document.getElementById('adFinAmount').value);
-        var periodStart = document.getElementById('adFinPeriodStart').value;
-        var periodEnd = document.getElementById('adFinPeriodEnd').value;
+    async function searchProfiles(query) {
+        if (!A.client) return;
+        var resultsDiv = document.getElementById('adFinProfileResults');
+        if (!resultsDiv) return;
 
-        if (!entityId || !entityName) {
-            A.showToast(L.payEntityRequired, 'error');
+        // 1. Search profiles by full_name / email
+        var profResult = await A.client.from('profiles')
+            .select('id, full_name, email, player_id')
+            .or('full_name.ilike.%' + query + '%,email.ilike.%' + query + '%')
+            .limit(10);
+
+        var seen = {};
+        var items = [];
+        (profResult.data || []).forEach(function(r) {
+            if (seen[r.id]) return;
+            seen[r.id] = true;
+            items.push({ id: r.id, name: r.full_name || r.email || '—' });
+        });
+
+        // 2. Search players by name → find linked profiles
+        var plResult = await A.client.from('players')
+            .select('id, name')
+            .ilike('name', '%' + query + '%')
+            .limit(10);
+
+        if (plResult.data && plResult.data.length > 0) {
+            var playerIds = plResult.data.map(function(p) { return p.id; });
+            var playerNames = {};
+            plResult.data.forEach(function(p) { playerNames[p.id] = p.name; });
+
+            var linkedResult = await A.client.from('profiles')
+                .select('id, full_name, email, player_id')
+                .in('player_id', playerIds)
+                .limit(10);
+
+            (linkedResult.data || []).forEach(function(r) {
+                if (seen[r.id]) return;
+                seen[r.id] = true;
+                var pName = playerNames[r.player_id] || '';
+                items.push({ id: r.id, name: pName || r.full_name || '—' });
+            });
+        }
+
+        if (items.length === 0) {
+            resultsDiv.innerHTML = '<div style="padding:10px;color:var(--text-dim);font-size:0.85rem;">' + (isEn ? 'Not found' : 'Не найдено') + '</div>';
+            resultsDiv.style.display = 'block';
             return;
         }
-        if (!amount || amount <= 0) {
+
+        var html = '';
+        items.forEach(function(item) {
+            html += '<div class="ad-pay-entity-item" data-id="' + item.id + '" data-name="' + A.esc(item.name) + '">' + A.esc(item.name) + '</div>';
+        });
+        resultsDiv.innerHTML = html;
+        resultsDiv.style.display = 'block';
+
+        resultsDiv.querySelectorAll('.ad-pay-entity-item').forEach(function(el) {
+            el.addEventListener('click', function() {
+                document.getElementById('adFinProfileId').value = el.dataset.id;
+                document.getElementById('adFinProfileName').value = el.dataset.name;
+                document.getElementById('adFinProfileSearch').value = el.dataset.name;
+                resultsDiv.style.display = 'none';
+            });
+        });
+    }
+
+    async function saveFinanceHandler() {
+        var entityType = document.getElementById('adFinEntityType').value;
+        var isClub = entityType === 'club';
+        var isMembership = entityType === 'membership';
+        var amount = parseFloat(document.getElementById('adFinAmount').value) || 0;
+        var note = document.getElementById('adFinNote').value.trim() || null;
+        var method = document.getElementById('adFinMethod').value;
+        var currency = document.getElementById('adFinCurrency').value.trim() || 'KGS';
+
+        // --- Membership save ---
+        if (isMembership) {
+            var profileId = document.getElementById('adFinProfileId').value;
+            var profileName = document.getElementById('adFinProfileName').value;
+            var memberStart = document.getElementById('adFinMemberStart').value;
+            var memberEnd = document.getElementById('adFinMemberEnd').value;
+
+            if (!profileId) {
+                A.showToast(L.payProfileRequired, 'error');
+                return;
+            }
+            if (!memberStart || !memberEnd) {
+                A.showToast(L.payPeriodRequired, 'error');
+                return;
+            }
+            if (amount === 0 && !note) {
+                A.showToast(L.payNoteRequiredZero, 'error');
+                return;
+            }
+
+            var saveBtn = document.getElementById('adFinSaveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '...';
+
+            var session = await A.client.auth.getSession();
+            var createdBy = session.data.session ? session.data.session.user.id : null;
+
+            // 1. Create membership
+            var memResult = await A.client.from('memberships').insert({
+                profile_id: profileId,
+                status: 'active',
+                starts_at: memberStart + 'T00:00:00.000Z',
+                expires_at: memberEnd + 'T23:59:59.000Z',
+                note: note || (isEn ? 'Admin: via finances' : 'Админ: через финансы')
+            }).select('id').single();
+
+            if (memResult.error) {
+                A.showToast(memResult.error.message, 'error');
+                saveBtn.disabled = false;
+                saveBtn.textContent = L.save;
+                return;
+            }
+
+            // 2. Create payment record
+            var payResult = await A.client.from('payments').insert({
+                profile_id: profileId,
+                membership_id: memResult.data.id,
+                amount: amount,
+                currency: currency,
+                payment_method: method,
+                status: 'completed',
+                note: note,
+                created_by: createdBy
+            });
+
+            if (payResult.error) {
+                A.showToast(payResult.error.message, 'error');
+                saveBtn.disabled = false;
+                saveBtn.textContent = L.save;
+                return;
+            }
+
+            A.showToast(L.paySaved, 'success');
+            renderFinancesList();
+            return;
+        }
+
+        // --- Club / Entity save ---
+        var entityId, entityName, periodStart, periodEnd;
+
+        if (isClub) {
+            entityName = document.getElementById('adFinClubFrom').value.trim();
+            entityId = 'club';
+            var opDate = document.getElementById('adFinOpDate').value;
+            periodStart = opDate;
+            periodEnd = opDate;
+
+            if (!entityName) {
+                A.showToast(L.payEntityRequired, 'error');
+                return;
+            }
+            if (!opDate) {
+                A.showToast(isEn ? 'Enter transaction date' : 'Укажите дату операции', 'error');
+                return;
+            }
+        } else {
+            entityId = document.getElementById('adFinEntityId').value;
+            entityName = document.getElementById('adFinEntityName').value;
+            periodStart = document.getElementById('adFinPeriodStart').value;
+            periodEnd = document.getElementById('adFinPeriodEnd').value;
+
+            if (!entityId || !entityName) {
+                A.showToast(L.payEntityRequired, 'error');
+                return;
+            }
+            if (!periodStart || !periodEnd) {
+                A.showToast(L.payPeriodRequired, 'error');
+                return;
+            }
+        }
+
+        if (amount <= 0) {
             A.showToast(L.payAmountRequired, 'error');
-            return;
-        }
-        if (!periodStart || !periodEnd) {
-            A.showToast(L.payPeriodRequired, 'error');
             return;
         }
 
@@ -597,12 +880,12 @@
             entity_id: entityId,
             entity_name: entityName,
             amount: amount,
-            currency: document.getElementById('adFinCurrency').value.trim() || 'KGS',
+            currency: currency,
             period_start: periodStart,
             period_end: periodEnd,
-            payment_method: document.getElementById('adFinMethod').value,
+            payment_method: method,
             purpose: document.getElementById('adFinPurpose').value,
-            note: document.getElementById('adFinNote').value.trim() || null
+            note: note
         };
 
         var result;
@@ -760,6 +1043,148 @@
 
     function escH(str) {
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ---- Excel Export ----
+    function exportFinExcel() {
+        var today = new Date().toISOString().slice(0, 10);
+        var filtered = finAllData.slice();
+        if (finDateFrom) {
+            filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) >= finDateFrom; });
+        }
+        if (finDateTo) {
+            filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) <= finDateTo; });
+        }
+
+        var headers = ['№', L.payEntity, isEn ? 'Type' : 'Тип', L.payAmount, isEn ? 'Currency' : 'Валюта', isEn ? 'Active Until' : 'Активен до', L.payStatus, L.payCreatedAt];
+        var rows = filtered.map(function(p, i) {
+            var isAct = p.period_end >= today;
+            var statusLabel = isAct ? L.payActive : L.payExpired;
+            var createdDate = p.created_at ? p.created_at.slice(0, 10) : '—';
+            return [i + 1, p.name, getTypeLabel(p.type), p.amount || 0, p.currency || 'KGS', A.formatPayDate(p.period_end), statusLabel, createdDate];
+        });
+
+        A.exportCsv('kslt-finances-' + today + '.csv', headers, rows);
+    }
+
+    // ---- Payments Chart (12 months) ----
+    var finChartInstance = null;
+
+    function renderFinChart() {
+        var canvas = document.getElementById('adFinChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        // Build last 12 months
+        var now = new Date();
+        var months = [];
+        for (var i = 11; i >= 0; i--) {
+            var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            months.push({
+                key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'),
+                label: d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { month: 'short', year: '2-digit' })
+            });
+        }
+
+        // Aggregate by type per month
+        var types = ['membership', 'court', 'coach', 'club'];
+        var typeMap = {};
+        types.forEach(function(t) {
+            typeMap[t] = {};
+            months.forEach(function(m) { typeMap[t][m.key] = 0; });
+        });
+
+        finAllData.forEach(function(p) {
+            if (!p.created_at || !p.type) return;
+            var mk = p.created_at.slice(0, 7);
+            var t = p.type === 'player' ? 'membership' : p.type;
+            if (typeMap[t] && typeMap[t][mk] !== undefined) {
+                typeMap[t][mk] += (p.amount || 0);
+            }
+        });
+
+        var labels = months.map(function(m) { return m.label; });
+
+        var colors = {
+            membership: { border: 'rgba(204, 255, 0, 0.9)', bg: 'rgba(204, 255, 0, 0.1)', point: 'rgba(204, 255, 0, 1)' },
+            court:      { border: 'rgba(76, 175, 80, 1)',    bg: 'rgba(76, 175, 80, 0.1)',  point: 'rgba(76, 175, 80, 1)' },
+            coach:      { border: 'rgba(255, 214, 0, 1)',    bg: 'rgba(255, 214, 0, 0.1)',  point: 'rgba(255, 214, 0, 1)' },
+            club:       { border: 'rgba(33, 150, 243, 1)',   bg: 'rgba(33, 150, 243, 0.1)', point: 'rgba(33, 150, 243, 1)' }
+        };
+
+        var datasets = types.map(function(t) {
+            return {
+                label: getTypeLabel(t),
+                data: months.map(function(m) { return typeMap[t][m.key]; }),
+                borderColor: colors[t].border,
+                backgroundColor: colors[t].bg,
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: colors[t].point,
+                tension: 0.3,
+                fill: false
+            };
+        });
+
+        if (finChartInstance) finChartInstance.destroy();
+
+        finChartInstance = new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: 'rgba(255,255,255,0.7)',
+                            font: { size: 11 },
+                            boxWidth: 12,
+                            padding: 16
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(20,24,36,0.95)',
+                        titleColor: '#fff',
+                        bodyColor: 'rgba(255,255,255,0.8)',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(ctx) {
+                                return ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString() + ' KGS';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.04)' },
+                        ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        ticks: {
+                            color: 'rgba(255,255,255,0.5)',
+                            font: { size: 10 },
+                            callback: function(val) { return val.toLocaleString(); }
+                        },
+                        title: {
+                            display: true,
+                            text: 'KGS',
+                            color: 'rgba(255,255,255,0.4)',
+                            font: { size: 10 }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     // ---- Export to namespace ----

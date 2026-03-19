@@ -84,6 +84,7 @@
                             '<col style="width:140px;">' +
                             '<col style="width:80px;">' +
                             '<col style="width:80px;">' +
+                            '<col style="width:50px;">' +
                         '</colgroup>' +
                         '<thead><tr>' +
                             '<th style="width:36px;"></th>' +
@@ -93,8 +94,9 @@
                             '<th>' + L.cchTags + '</th>' +
                             '<th style="text-align:center;">' + (isEn ? 'Price' : 'Цена') + '</th>' +
                             '<th style="text-align:center;">' + L.cchPromoted + '</th>' +
+                            '<th style="text-align:center;width:50px;">&#128065;</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="9" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -157,7 +159,7 @@
 
         if (items.length === 0) {
             tbody.innerHTML =
-                '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
+                '<tr><td colspan="9" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🎓</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCoaches + '</div>' +
                     '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noCoachesText + '</div>' +
@@ -188,6 +190,7 @@
                 '<td>' + tagsHtml + '</td>' +
                 '<td style="font-weight:600;color:var(--accent);text-align:center;">' + (row.price || '—') + '</td>' +
                 '<td style="text-align:center;">' + promotedHtml + '</td>' +
+                '<td style="text-align:center;color:var(--text-dim);">' + ((row.view_count || 0) > 0 ? row.view_count : '\u2014') + '</td>' +
             '</tr>';
         });
         tbody.innerHTML = html;
@@ -267,7 +270,7 @@
         await syncAllExpiredPromotedCoaches();
 
         var query = A.client.from('coaches')
-            .select('id,last_name,first_name,last_name_en,first_name_en,photo,position,position_en,court,tags,price,promoted,created_at')
+            .select('id,last_name,first_name,last_name_en,first_name_en,photo,position,position_en,court,tags,price,promoted,view_count,created_at')
             .order('created_at', { ascending: false });
 
         var result = await query;

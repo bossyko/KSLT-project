@@ -108,6 +108,16 @@
         qrDownload: 'PNG жүктөө',
         qrCopy: 'Шилтемени көчүрүү',
         qrCopied: 'Көчүрүлдү!',
+        games: 'Менин оюндарым',
+        gamesTitle: 'Менин оюндарым',
+        subTournaments: 'Мелдештер',
+        subMatches: 'Матчтар',
+        subChallenges: 'Чакыруулар',
+        showAll: 'Баарын көрсөтүү',
+        collapseBtn: 'Жыйуу',
+        noMatches: 'Матчтар жок',
+        noMatchesText: 'Сиздин матчтарыңыз мелдештерден кийин бул жерде көрүнөт',
+        matchDate: 'Күн', matchOpponent: 'Атаандаш', matchScore: 'Эсеп', matchResult: 'Жыйынтык', matchTournament: 'Мелдеш', matchRound: 'Раунд',
         challenges: 'Сынактар',
         challengesTitle: 'Матчка чакыруулар',
         chalSent: 'Жөнөтүлдү',
@@ -248,6 +258,16 @@
         qrDownload: 'Download PNG',
         qrCopy: 'Copy Link',
         qrCopied: 'Copied!',
+        games: 'My Games',
+        gamesTitle: 'My Games',
+        subTournaments: 'Tournaments',
+        subMatches: 'Matches',
+        subChallenges: 'Challenges',
+        showAll: 'Show all',
+        collapseBtn: 'Collapse',
+        noMatches: 'No matches yet',
+        noMatchesText: 'Your matches will appear here after tournaments',
+        matchDate: 'Date', matchOpponent: 'Opponent', matchScore: 'Score', matchResult: 'Result', matchTournament: 'Tournament', matchRound: 'Round',
         challenges: 'Challenges',
         challengesTitle: 'Match Challenges',
         chalSent: 'Sent',
@@ -388,6 +408,16 @@
         qrDownload: 'Скачать PNG',
         qrCopy: 'Скопировать ссылку',
         qrCopied: 'Скопировано!',
+        games: 'Мои Игры',
+        gamesTitle: 'Мои Игры',
+        subTournaments: 'Турниры',
+        subMatches: 'Матчи',
+        subChallenges: 'Вызовы',
+        showAll: 'Показать все',
+        collapseBtn: 'Свернуть',
+        noMatches: 'Матчей пока нет',
+        noMatchesText: 'Ваши матчи появятся здесь после участия в турнирах',
+        matchDate: 'Дата', matchOpponent: 'Соперник', matchScore: 'Счёт', matchResult: 'Итог', matchTournament: 'Турнир', matchRound: 'Раунд',
         challenges: 'Вызовы',
         challengesTitle: 'Вызовы на матч',
         chalSent: 'Отправлено',
@@ -521,10 +551,9 @@
         renderMembershipCard().then(function(state) {
             applyMembershipRestrictions(state);
         });
-        renderTournaments(profile);
+        renderGames(profile);
         renderStats(profile);
         renderInvitations();
-        renderChallenges();
         renderVouchers();
         renderPayments();
         renderSettings(user);
@@ -684,7 +713,7 @@
             '</div>';
 
         // Apply overlay to tournaments and stats sections
-        var targets = ['db-tournaments', 'db-stats'];
+        var targets = ['db-games', 'db-stats'];
         targets.forEach(function(id) {
             var section = document.getElementById(id);
             if (!section) return;
@@ -731,13 +760,12 @@
                 qrBtnHtml +
             '</div>' +
             '<ul class="db-sidebar-nav">' +
-                '<li class="db-sidebar-item"><button class="db-sidebar-link active" data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + L.profile + '</button></li>' +
-                '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="tournaments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 1012 0V2z"/></svg>' + L.tournaments + '</button></li>' +
+                '<li class="db-sidebar-item"><button class="db-sidebar-link active" data-tab="games"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>' + L.games + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>' + L.stats + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="invitations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>' + L.invitations + '</button></li>' +
-                '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="challenges"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg>' + L.challenges + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="vouchers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>' + L.vouchers + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="payments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>' + L.payments + '</button></li>' +
+                '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + L.profile + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</button></li>' +
             '</ul>';
     }
@@ -915,19 +943,18 @@
         if (!container) return;
 
         container.innerHTML =
-            '<button class="db-mobile-tab active" data-tab="profile">' + L.profile + '</button>' +
-            '<button class="db-mobile-tab" data-tab="tournaments">' + L.tournaments + '</button>' +
+            '<button class="db-mobile-tab active" data-tab="games">' + L.games + '</button>' +
             '<button class="db-mobile-tab" data-tab="stats">' + L.stats + '</button>' +
             '<button class="db-mobile-tab" data-tab="invitations">' + L.invitations + '</button>' +
-            '<button class="db-mobile-tab" data-tab="challenges">' + L.challenges + '</button>' +
             '<button class="db-mobile-tab" data-tab="vouchers">' + L.vouchers + '</button>' +
             '<button class="db-mobile-tab" data-tab="payments">' + L.payments + '</button>' +
+            '<button class="db-mobile-tab" data-tab="profile">' + L.profile + '</button>' +
             '<button class="db-mobile-tab" data-tab="settings">' + L.settings + '</button>';
     }
 
     // ---- Init Tabs ----
     function initTabs() {
-        var hash = window.location.hash.replace('#', '') || 'profile';
+        var hash = window.location.hash.replace('#', '') || 'games';
         switchTab(hash);
 
         document.addEventListener('click', function(e) {
@@ -939,12 +966,14 @@
         });
 
         window.addEventListener('hashchange', function() {
-            var hash = window.location.hash.replace('#', '') || 'profile';
+            var hash = window.location.hash.replace('#', '') || 'games';
             switchTab(hash);
         });
     }
 
     function switchTab(tab) {
+        // Backward compat: old tabs redirect to games
+        if (tab === 'tournaments' || tab === 'challenges') { tab = 'games'; window.location.hash = 'games'; }
         document.querySelectorAll('.db-sidebar-link').forEach(function(el) {
             el.classList.toggle('active', el.dataset.tab === tab);
         });
@@ -1183,7 +1212,527 @@
         }
     }
 
-    // ---- Challenges section ----
+    // ================================================
+    // MY GAMES — combined: Tournaments + Matches + Challenges
+    // ================================================
+    function renderGames(profile) {
+        var container = document.getElementById('db-games');
+        if (!container) return;
+
+        var html = '<h2 class="db-section-title">' + L.gamesTitle + '</h2>';
+
+        // -- Subsection: Tournaments --
+        html += '<div class="db-subsection">';
+        html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubTournaments">';
+        html += '<span>\uD83C\uDFC6 ' + L.subTournaments + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
+        html += '<div class="db-subsection-body" id="dbSubTournaments">';
+        html += '<div id="dbGamesTournaments"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
+        html += '</div></div>';
+
+        // -- Subsection: Matches --
+        html += '<div class="db-subsection">';
+        html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubMatches">';
+        html += '<span>\u2694\uFE0F ' + L.subMatches + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
+        html += '<div class="db-subsection-body" id="dbSubMatches">';
+        html += '<div id="dbGamesMatches"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
+        html += '</div></div>';
+
+        // -- Subsection: Challenges --
+        html += '<div class="db-subsection">';
+        html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubChallenges">';
+        html += '<span>\uD83E\uDD4A ' + L.subChallenges + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
+        html += '<div class="db-subsection-body" id="dbSubChallenges">';
+        html += '<div id="dbGamesChallenges"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
+        html += '</div></div>';
+
+        container.innerHTML = html;
+
+        // Toggle handlers
+        container.querySelectorAll('.db-subsection-toggle').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var targetId = btn.getAttribute('data-target');
+                var body = document.getElementById(targetId);
+                if (!body) return;
+                var isOpen = btn.classList.contains('db-subsection-open');
+                if (isOpen) {
+                    body.classList.add('db-subsection-collapsed');
+                    btn.classList.remove('db-subsection-open');
+                    btn.querySelector('.db-toggle-arrow').textContent = '\u25B6';
+                } else {
+                    body.classList.remove('db-subsection-collapsed');
+                    btn.classList.add('db-subsection-open');
+                    btn.querySelector('.db-toggle-arrow').textContent = '\u25BC';
+                }
+            });
+        });
+
+        // Load data
+        loadGamesTournaments(profile);
+        loadGamesMatches(profile);
+        loadGamesChallenges();
+    }
+
+    // ---- Games: Tournaments subsection ----
+    async function loadGamesTournaments(profile) {
+        var container = document.getElementById('dbGamesTournaments');
+        if (!container || !profile || !profile.player_id || !client) {
+            if (container) container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC6</div><div class="db-empty-title">' + L.noTournaments + '</div></div>';
+            return;
+        }
+
+        try {
+            var pid = profile.player_id;
+            var results = await Promise.all([
+                client.from('tournament_registrations')
+                    .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start, image, status)')
+                    .eq('player_id', pid).in('status', ['approved', 'draw'])
+                    .order('registered_at', { ascending: false }).limit(10),
+                client.from('tournament_results')
+                    .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start, image)')
+                    .eq('player_id', pid).order('created_at', { ascending: false }).limit(10)
+            ]);
+
+            var regs = results[0].data || [];
+            var tResults = results[1].data || [];
+            var resultsMap = {};
+            tResults.forEach(function(tr) { resultsMap[tr.tournament_id] = tr; });
+
+            var items = [];
+            var seen = {};
+            regs.forEach(function(reg) {
+                if (!reg.tournament || seen[reg.tournament.id]) return;
+                seen[reg.tournament.id] = true;
+                var tr = resultsMap[reg.tournament.id];
+                items.push({ tournament: reg.tournament, round_reached: tr ? tr.round_reached : null, points_earned: tr ? tr.points_earned : 0 });
+            });
+            tResults.forEach(function(tr) {
+                if (!tr.tournament || seen[tr.tournament_id]) return;
+                seen[tr.tournament_id] = true;
+                items.push({ tournament: tr.tournament, round_reached: tr.round_reached, points_earned: tr.points_earned });
+            });
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC6</div><div class="db-empty-title">' + L.noTournaments + '</div></div>';
+                return;
+            }
+
+            var html = '<div class="db-tournaments-list">';
+            items.forEach(function(item) {
+                var t = item.tournament;
+                var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
+                var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
+                var result = item.round_reached
+                    ? (ROUND_LABELS_DB[item.round_reached] || item.round_reached)
+                    : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован');
+                var pts = item.points_earned > 0 ? ' \u00B7 +' + item.points_earned + ' pts' : '';
+                var isWinner = item.round_reached === 'W';
+                var tImg = t.image || '';
+
+                html += '<a class="db-tournament-row" href="tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id + '">';
+                if (tImg) {
+                    html += '<img src="' + escHtml(tImg) + '" alt="" class="db-tournament-photo">';
+                } else {
+                    html += '<div class="db-tournament-photo db-tournament-photo-empty">\uD83C\uDFBE</div>';
+                }
+                html += '<div class="db-tournament-info">';
+                html += '<span class="db-tournament-name">' + escHtml(tName) + '</span>';
+                html += '<span class="db-tournament-date">' + dateStr + '</span>';
+                html += '</div>';
+                html += '<span class="db-tournament-result' + (isWinner ? ' db-tournament-winner' : '') + '">' + result + pts + '</span>';
+                html += '</a>';
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        } catch(e) {
+            console.warn('[KSLT] games tournaments error:', e);
+            container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC6</div><div class="db-empty-title">' + L.noTournaments + '</div></div>';
+        }
+    }
+
+    // ---- Score utils ----
+    function dbFormatDate(dateStr) {
+        if (!dateStr) return '\u2014';
+        try {
+            var d = new Date(dateStr);
+            var dd = String(d.getDate()).padStart(2, '0');
+            var mm = String(d.getMonth() + 1).padStart(2, '0');
+            var yy = String(d.getFullYear()).slice(2);
+            return isEn ? mm + '/' + dd + '/' + yy : dd + '.' + mm + '.' + yy;
+        } catch(e) { return '\u2014'; }
+    }
+
+    function dbFlipScore(score) {
+        if (!score) return score;
+        return score.replace(/(\d+)\/(\d+)/g, '$2/$1');
+    }
+
+    function dbFormatScore(score) {
+        if (!score) return '\u2014';
+        return score.replace(/(\d+)\/(\d+)/g, '$1:$2');
+    }
+
+    function dbParseScoreStats(score) {
+        if (!score || score === 'BYE') return null;
+        var sets = score.trim().split(/\s+/);
+        var p1S = 0, p2S = 0, p1G = 0, p2G = 0;
+        sets.forEach(function(s) {
+            var m = s.match(/^(\d+)\/(\d+)/);
+            if (m) {
+                var g1 = parseInt(m[1], 10), g2 = parseInt(m[2], 10);
+                p1G += g1; p2G += g2;
+                if (g1 > g2) p1S++; else if (g2 > g1) p2S++;
+            }
+        });
+        return { p1Sets: p1S, p2Sets: p2S, p1Games: p1G, p2Games: p2G };
+    }
+
+    // ---- H2H labels ----
+    var LH = isKg ? {
+        setsWon: 'Утулган сеттер', gamesWon: 'Утулган геймдер',
+        last5: 'Акыркы 5 матч', fullProfile: 'Толук профилди ачуу',
+        noMatches: 'Бетме-бет матчтар жок', loading: 'Жүктөлүүдө...',
+        matchesLabel: ' матч'
+    } : isEn ? {
+        setsWon: 'Sets won', gamesWon: 'Games won',
+        last5: 'Last 5 matches', fullProfile: 'Open full profile',
+        noMatches: 'No head-to-head matches found', loading: 'Loading...',
+        matchesLabel: ' matches'
+    } : {
+        setsWon: 'Выигранные сеты', gamesWon: 'Выигранные геймы',
+        last5: 'Последние 5 матчей', fullProfile: 'Открыть полный профиль',
+        noMatches: 'Матчей между игроками не найдено', loading: 'Загрузка...',
+        matchesLabel: ' матчей'
+    };
+
+    // ---- Games: Matches subsection ----
+    var _matchesOpponents = {}; // cache: oppId → { name, photo }
+
+    async function loadGamesMatches(profile) {
+        var container = document.getElementById('dbGamesMatches');
+        if (!container || !profile || !profile.player_id || !client) {
+            if (container) container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\u2694\uFE0F</div><div class="db-empty-title">' + L.noMatches + '</div><div class="db-empty-text">' + L.noMatchesText + '</div></div>';
+            return;
+        }
+
+        try {
+            var pid = profile.player_id;
+            var res = await client.from('matches')
+                .select('*, tournament:tournaments(id, title, title_en, title_kg)')
+                .or('player1_id.eq.' + pid + ',player2_id.eq.' + pid)
+                .not('winner_id', 'is', null)
+                .order('played_at', { ascending: false })
+                .limit(50);
+
+            if (res.error || !res.data || res.data.length === 0) {
+                container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\u2694\uFE0F</div><div class="db-empty-title">' + L.noMatches + '</div><div class="db-empty-text">' + L.noMatchesText + '</div></div>';
+                return;
+            }
+
+            // Bulk load opponent names + photos
+            var oppIds = [];
+            res.data.forEach(function(m) {
+                var oid = m.player1_id === pid ? m.player2_id : m.player1_id;
+                if (oid && oppIds.indexOf(oid) === -1) oppIds.push(oid);
+            });
+
+            if (oppIds.length > 0) {
+                var oppRes = await client.from('players')
+                    .select('id, name, name_en, name_kg, photo')
+                    .in('id', oppIds);
+                if (oppRes.data) {
+                    oppRes.data.forEach(function(p) {
+                        _matchesOpponents[p.id] = {
+                            name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
+                            photo: p.photo || ''
+                        };
+                    });
+                }
+            }
+
+            renderGamesMatchesList(container, res.data, pid, profile, false);
+        } catch(e) {
+            console.warn('[KSLT] games matches error:', e);
+        }
+    }
+
+    function renderGamesMatchesList(container, matches, pid, profile, showAll) {
+        var LIMIT = 25;
+        var visible = showAll ? matches : matches.slice(0, LIMIT);
+        var hasMore = !showAll && matches.length > LIMIT;
+
+        var roundMap = { 'final': 'F', 'semifinal': 'SF', 'quarterfinal': 'QF', 'group': 'GS' };
+
+        var html = '<table class="db-matches-table"><thead><tr>';
+        html += '<th>' + L.matchDate + '</th>';
+        html += '<th>' + L.matchOpponent + '</th>';
+        html += '<th style="text-align:center">' + L.matchScore + '</th>';
+        html += '<th style="text-align:center">' + L.matchResult + '</th>';
+        html += '<th>' + L.matchTournament + '</th>';
+        html += '<th style="text-align:center">' + L.matchRound + '</th>';
+        html += '<th style="text-align:center">H2H</th>';
+        html += '</tr></thead><tbody>';
+
+        visible.forEach(function(m) {
+            var isP1 = m.player1_id === pid;
+            var oppId = isP1 ? m.player2_id : m.player1_id;
+            var opp = _matchesOpponents[oppId] || { name: oppId, photo: '' };
+            var isWin = m.winner_id === pid;
+            var score = m.score || '';
+            var displayScore = isP1 ? dbFormatScore(score) : dbFormatScore(dbFlipScore(score));
+
+            var tName = '';
+            var roundLabel = '';
+            if (m.tournament) {
+                tName = isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title);
+            }
+            if (m.round_number) roundLabel = roundMap[m.round_number] || '';
+
+            var dateStr = dbFormatDate(m.played_at || m.created_at);
+            var resultCls = isWin ? 'win' : 'loss';
+            var resultLabel = isWin ? 'W' : 'L';
+
+            var avatarHtml = opp.photo
+                ? '<img src="' + escHtml(opp.photo) + '" alt="" class="db-match-avatar">'
+                : '<div class="db-match-avatar db-match-avatar-ph">' + escHtml(opp.name.charAt(0)) + '</div>';
+
+            html += '<tr>';
+            html += '<td class="db-match-date">' + dateStr + '</td>';
+            html += '<td><div class="db-match-opponent">' + avatarHtml + '<span>' + escHtml(opp.name) + '</span></div></td>';
+            html += '<td class="db-match-score">' + displayScore + '</td>';
+            html += '<td class="db-match-result-cell"><span class="db-match-result ' + resultCls + '">' + resultLabel + '</span></td>';
+            html += '<td class="db-match-tournament">' + escHtml(tName) + '</td>';
+            html += '<td class="db-match-round">' + roundLabel + '</td>';
+            html += '<td><button class="db-match-h2h" data-opp-id="' + escHtml(oppId) + '" data-opp-name="' + escHtml(opp.name) + '" data-opp-photo="' + escHtml(opp.photo) + '" title="Head to Head">H2H</button></td>';
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+
+        if (hasMore) {
+            html += '<button class="db-show-all-btn" id="dbShowAllMatches">' + L.showAll + ' (' + matches.length + ')</button>';
+        } else if (showAll && matches.length > LIMIT) {
+            html += '<button class="db-show-all-btn" id="dbCollapseMatches">' + L.collapseBtn + '</button>';
+        }
+
+        container.innerHTML = html;
+
+        // Show all / Collapse
+        var showBtn = document.getElementById('dbShowAllMatches');
+        if (showBtn) {
+            showBtn.addEventListener('click', function() { renderGamesMatchesList(container, matches, pid, profile, true); });
+        }
+        var colBtn = document.getElementById('dbCollapseMatches');
+        if (colBtn) {
+            colBtn.addEventListener('click', function() {
+                renderGamesMatchesList(container, matches, pid, profile, false);
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
+        // H2H buttons
+        container.querySelectorAll('.db-match-h2h').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var oppId = btn.getAttribute('data-opp-id');
+                var oppName = btn.getAttribute('data-opp-name');
+                var oppPhoto = btn.getAttribute('data-opp-photo');
+                showDashboardH2H(pid, profile, oppId, oppName, oppPhoto);
+            });
+        });
+    }
+
+    // ---- H2H Modal ----
+    function showDashboardH2H(pid, profile, oppId, oppName, oppPhoto) {
+        var old = document.querySelector('.h2h-overlay');
+        if (old) old.remove();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'h2h-overlay';
+        overlay.innerHTML = '<div class="h2h-modal"><button class="h2h-close">&times;</button><div class="h2h-loading">' + LH.loading + '</div></div>';
+        document.body.appendChild(overlay);
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+
+        var closeOverlay = function() {
+            overlay.classList.remove('visible');
+            setTimeout(function() { overlay.remove(); }, 300);
+        };
+        overlay.querySelector('.h2h-close').addEventListener('click', closeOverlay);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) closeOverlay(); });
+        document.addEventListener('keydown', function handler(e) {
+            if (e.key === 'Escape') { closeOverlay(); document.removeEventListener('keydown', handler); }
+        });
+
+        if (!client) { renderDashH2HEmpty(overlay); return; }
+
+        client.from('matches')
+            .select('id, player1_id, player2_id, score, winner_id, played_at, tournament:tournaments(title, title_en, title_kg)')
+            .or('and(player1_id.eq.' + pid + ',player2_id.eq.' + oppId + '),and(player1_id.eq.' + oppId + ',player2_id.eq.' + pid + ')')
+            .not('winner_id', 'is', null)
+            .order('played_at', { ascending: false })
+            .then(function(res) {
+                var modal = overlay.querySelector('.h2h-modal');
+                if (!modal) return;
+                if (res.error || !res.data || res.data.length === 0) {
+                    renderDashH2HEmpty(overlay);
+                    return;
+                }
+                renderDashH2HContent(modal, res.data, pid, profile, oppId, oppName, oppPhoto);
+                modal.querySelector('.h2h-close').addEventListener('click', closeOverlay);
+            });
+    }
+
+    function renderDashH2HContent(modal, matches, pid, profile, oppId, oppName, oppPhoto) {
+        var myWins = 0, oppWins = 0, mySets = 0, oppSets = 0, myGames = 0, oppGames = 0;
+
+        matches.forEach(function(m) {
+            var isP1 = m.player1_id === pid;
+            if (m.winner_id === pid) myWins++; else oppWins++;
+            if (m.score) {
+                var stats = dbParseScoreStats(m.score);
+                if (stats) {
+                    if (isP1) {
+                        mySets += stats.p1Sets; oppSets += stats.p2Sets;
+                        myGames += stats.p1Games; oppGames += stats.p2Games;
+                    } else {
+                        mySets += stats.p2Sets; oppSets += stats.p1Sets;
+                        myGames += stats.p2Games; oppGames += stats.p1Games;
+                    }
+                }
+            }
+        });
+
+        var myName = profile.full_name || 'You';
+        var myPhoto = profile.avatar_url || '';
+        var playerPage = isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
+
+        var html = '<button class="h2h-close">&times;</button>';
+
+        // Header
+        html += '<div class="h2h-header">';
+        html += '<div class="h2h-player">';
+        html += myPhoto ? '<img src="' + escHtml(myPhoto) + '" class="h2h-photo" alt="">' : '<div class="h2h-photo h2h-photo-ph">' + escHtml(myName.charAt(0)) + '</div>';
+        html += '<div class="h2h-name">' + escHtml(myName) + '</div>';
+        html += '</div>';
+        html += '<div class="h2h-center">';
+        html += '<div class="h2h-score">' + myWins + ' \u2014 ' + oppWins + '</div>';
+        html += '<div class="h2h-label">' + matches.length + LH.matchesLabel + '</div>';
+        html += '</div>';
+        html += '<div class="h2h-player">';
+        html += oppPhoto ? '<img src="' + escHtml(oppPhoto) + '" class="h2h-photo" alt="">' : '<div class="h2h-photo h2h-photo-ph">' + escHtml(oppName.charAt(0)) + '</div>';
+        html += '<div class="h2h-name">' + escHtml(oppName) + '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        // Stats
+        html += '<div class="h2h-stats">';
+        html += '<div class="h2h-stat-row"><span class="h2h-stat-val h2h-val-left">' + mySets + '</span><span class="h2h-stat-label">' + LH.setsWon + '</span><span class="h2h-stat-val h2h-val-right">' + oppSets + '</span></div>';
+        html += '<div class="h2h-stat-row"><span class="h2h-stat-val h2h-val-left">' + myGames + '</span><span class="h2h-stat-label">' + LH.gamesWon + '</span><span class="h2h-stat-val h2h-val-right">' + oppGames + '</span></div>';
+        html += '</div>';
+
+        // Last 5 matches
+        var last5 = matches.slice(0, 5);
+        html += '<div class="h2h-matches"><div class="h2h-matches-title">' + LH.last5 + '</div>';
+        last5.forEach(function(m) {
+            var isP1 = m.player1_id === pid;
+            var result = m.winner_id === pid ? 'W' : 'L';
+            var displayScore = isP1 ? dbFormatScore(m.score) : dbFormatScore(dbFlipScore(m.score));
+            var tName = '';
+            if (m.tournament) {
+                tName = isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title);
+            }
+            html += '<div class="h2h-match">';
+            html += '<span class="h2h-match-date">' + dbFormatDate(m.played_at) + '</span>';
+            if (tName) html += '<span class="h2h-match-tournament">' + escHtml(tName) + '</span>';
+            html += '<span class="h2h-match-score">' + displayScore + '</span>';
+            html += '<span class="h2h-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + result + '</span>';
+            html += '</div>';
+        });
+        html += '</div>';
+
+        // Profile link
+        html += '<a href="' + playerPage + '?id=' + escHtml(oppId) + '" class="h2h-profile-btn">' + LH.fullProfile + ' \u2192</a>';
+
+        modal.innerHTML = html;
+    }
+
+    function renderDashH2HEmpty(overlay) {
+        var modal = overlay.querySelector('.h2h-modal');
+        if (!modal) return;
+        modal.innerHTML = '<button class="h2h-close">&times;</button><div class="h2h-empty">' + LH.noMatches + '</div>';
+        modal.querySelector('.h2h-close').addEventListener('click', function() {
+            overlay.classList.remove('visible');
+            setTimeout(function() { overlay.remove(); }, 300);
+        });
+    }
+
+    // ---- Games: Challenges subsection ----
+    async function loadGamesChallenges() {
+        var card = document.getElementById('dbGamesChallenges');
+        if (!card || !client) return;
+
+        try {
+            var result = await client.rpc('get_my_challenges');
+            var items = result.data || [];
+
+            if (!items || items.length === 0) {
+                card.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\u2694\uFE0F</div><div class="db-empty-title">' + L.chalNoChallenges + '</div><div class="db-empty-text">' + L.chalNoChallengesText + '</div></div>';
+                return;
+            }
+
+            var html = '<div class="db-invite-list">';
+            for (var i = 0; i < items.length; i++) {
+                var ch = items[i];
+                var isSent = ch.direction === 'sent';
+                var partnerName = isSent ? (ch.opponent_name || '\u2014') : (ch.challenger_name || '\u2014');
+                var partnerAvatar = isSent ? ch.opponent_avatar : ch.challenger_avatar;
+                var initials = (partnerName).split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
+                var avatarHtml = partnerAvatar
+                    ? '<img src="' + escHtml(partnerAvatar) + '" class="db-invite-avatar" alt="">'
+                    : '<div class="db-invite-avatar-ph">' + initials + '</div>';
+
+                var dirLabel = isSent ? L.chalSent : L.chalReceived;
+                var statusMap = {
+                    active: { label: L.chalActive, cls: 'pending' },
+                    negotiating: { label: L.chalNegotiating, cls: 'pending' },
+                    countered: { label: L.chalCountered, cls: 'pending' },
+                    accepted: { label: L.chalAccepted, cls: 'accepted' },
+                    declined: { label: L.chalDeclined, cls: 'declined' },
+                    expired: { label: L.chalExpired, cls: 'declined' },
+                    completed: { label: L.chalCompleted, cls: 'accepted' }
+                };
+                var st = statusMap[ch.status] || { label: ch.status, cls: 'pending' };
+                var finalDate = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_date ? ch.counter_date : ch.proposed_date;
+                var finalTime = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_time ? ch.counter_time : ch.proposed_time;
+                var finalVenue = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_venue ? ch.counter_venue : (ch.court_name || ch.proposed_venue || '');
+
+                var dateStr = '';
+                try {
+                    var d = new Date(finalDate);
+                    dateStr = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+                } catch(e) {}
+
+                var metaParts = [dirLabel];
+                if (dateStr) metaParts.push(dateStr);
+                if (finalTime) metaParts.push(finalTime);
+                var venueHtml = finalVenue ? '<div class="db-invite-meta" style="font-size:0.75rem;">\uD83D\uDCCD ' + escHtml(finalVenue) + '</div>' : '';
+                var scoreHtml = ch.match_score ? '<div class="db-invite-meta" style="font-size:0.8rem;font-weight:700;">' + escHtml(ch.match_score) + '</div>' : '';
+
+                html += '<div class="db-invite-item">' +
+                    avatarHtml +
+                    '<div class="db-invite-info">' +
+                        '<div class="db-invite-name">' + escHtml(partnerName) + '</div>' +
+                        '<div class="db-invite-meta">' + metaParts.join(' \u00B7 ') + '</div>' +
+                        venueHtml + scoreHtml +
+                    '</div>' +
+                    '<div class="db-invite-status ' + st.cls + '">' + st.label + '</div>' +
+                '</div>';
+            }
+            html += '</div>';
+            card.innerHTML = html;
+        } catch(e) {
+            console.warn('[KSLT] games challenges error:', e);
+        }
+    }
+
+    // ---- Challenges section (legacy, kept for reference) ----
     function renderChallenges() {
         var container = document.getElementById('db-challenges');
         if (!container) return;

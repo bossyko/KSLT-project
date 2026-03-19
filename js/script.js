@@ -497,4 +497,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     })();
 
+    // ========================================
+    // SERVICE WORKER REGISTRATION (PWA)
+    // ========================================
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(function() {});
+    }
+
 });

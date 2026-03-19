@@ -174,7 +174,7 @@
 
             try {
                 var chResult = await client.from('coaches')
-                    .select('id, last_name, first_name, last_name_en, first_name_en, name, name_en, photo, position, position_en, tags, experience, price, court, court_en, promoted');
+                    .select('id, last_name, first_name, last_name_en, first_name_en, name, name_en, photo, position, position_en, tags, experience, price, court, court_en, promoted, partner');
                 if (chResult.data && chResult.data.length > 0) {
                     coaches = selectForDisplay(chResult.data, 10);
                 }
@@ -195,6 +195,30 @@
         _courts = courts || [];
         _coaches = coaches || [];
         _partners = partners || [];
+
+        // Load max discounts for partner courts + coaches
+        if (client && (_courts.length || _coaches.length)) {
+            try {
+                var dsResult = await client.from('partner_services')
+                    .select('entity_type, entity_id, discount_percent');
+                if (dsResult.data && dsResult.data.length) {
+                    var courtMap = {};
+                    var coachMap = {};
+                    dsResult.data.forEach(function(s) {
+                        var map = s.entity_type === 'court' ? courtMap : coachMap;
+                        if (!map[s.entity_id] || s.discount_percent > map[s.entity_id]) {
+                            map[s.entity_id] = s.discount_percent;
+                        }
+                    });
+                    _courts.forEach(function(c) {
+                        if (c.partner && courtMap[c.id]) c._maxDiscount = courtMap[c.id];
+                    });
+                    _coaches.forEach(function(c) {
+                        if (c.partner && coachMap[c.id]) c._maxDiscount = coachMap[c.id];
+                    });
+                }
+            } catch(e) {}
+        }
 
         renderColumns();
     }
@@ -366,10 +390,13 @@
         var photo = c.photo || '';
         var href = courtPage + '?id=' + c.id;
 
+        var discountHtml = c._maxDiscount ? '<span class="sv-discount-overlay">\uD83C\uDFF7\uFE0F ' + (isEn ? 'up to' : isKg ? 'чейин' : 'до') + ' -' + c._maxDiscount + '%</span>' : '';
+
         return '<a class="sv-featured" href="' + href + '">' +
             (photo
                 ? '<div class="sv-featured-bg"><img src="' + photo + '" alt="" loading="lazy"></div><div class="sv-featured-overlay"></div>'
                 : '<div class="sv-featured-overlay" style="background:var(--bg-card)"></div>') +
+            discountHtml +
             '<div class="sv-featured-content">' +
                 '<h3>' + name + '</h3>' +
                 '<div class="sv-featured-meta">' +
@@ -393,11 +420,13 @@
         var href = coachPage + '?id=' + ch.id;
         var exp = ch.experience ? ch.experience + ' ' + L.years : '';
         var price = ch.price ? ch.price + ' сом/ч' : '';
+        var discountHtml = ch._maxDiscount ? '<span class="sv-discount-overlay">\uD83C\uDFF7\uFE0F ' + (isEn ? 'up to' : isKg ? 'чейин' : 'до') + ' -' + ch._maxDiscount + '%</span>' : '';
 
         return '<a class="sv-featured" href="' + href + '">' +
             (photo
                 ? '<div class="sv-featured-bg"><img src="' + photo + '" alt="" loading="lazy"></div><div class="sv-featured-overlay"></div>'
                 : '<div class="sv-featured-overlay" style="background:var(--bg-card)"></div>') +
+            discountHtml +
             '<div class="sv-featured-content">' +
                 (photo ? '<img class="sv-coach-avatar" src="' + photo + '" alt="" loading="lazy">' : '') +
                 '<h3>' + name + '</h3>' +
@@ -421,10 +450,15 @@
         var price = getCourtMinPrice(c);
         var photo = c.photo || '';
 
+        var discountSm = c._maxDiscount ? '<span class="sv-discount-overlay-sm">-' + c._maxDiscount + '%</span>' : '';
+
         return '<div class="sv-compact" data-type="courts" data-idx="' + idx + '">' +
-            (photo
-                ? '<img class="sv-compact-photo" src="' + photo + '" alt="" loading="lazy">'
-                : '<div class="sv-compact-icon">' + courtSvg + '</div>') +
+            '<div class="sv-compact-img-wrap">' +
+                (photo
+                    ? '<img class="sv-compact-photo" src="' + photo + '" alt="" loading="lazy">'
+                    : '<div class="sv-compact-icon">' + courtSvg + '</div>') +
+                discountSm +
+            '</div>' +
             '<h4>' + name + '</h4>' +
             (addr ? '<div class="sv-compact-sub">' + pinSvg + ' ' + addr + '</div>' : '') +
             (price ? '<div class="sv-compact-price">' + price + '</div>' : '') +
@@ -437,11 +471,15 @@
         var spec = getCoachSpec(ch);
         var price = ch.price ? ch.price + ' сом/ч' : '';
         var photo = ch.photo || '';
+        var discountSm = ch._maxDiscount ? '<span class="sv-discount-overlay-sm">-' + ch._maxDiscount + '%</span>' : '';
 
         return '<div class="sv-compact" data-type="coaches" data-idx="' + idx + '">' +
-            (photo
-                ? '<img class="sv-compact-avatar" src="' + photo + '" alt="" loading="lazy">'
-                : '<div class="sv-compact-icon">' + courtSvg + '</div>') +
+            '<div class="sv-compact-img-wrap">' +
+                (photo
+                    ? '<img class="sv-compact-avatar" src="' + photo + '" alt="" loading="lazy">'
+                    : '<div class="sv-compact-icon">' + courtSvg + '</div>') +
+                discountSm +
+            '</div>' +
             '<h4>' + name + '</h4>' +
             (spec ? '<div class="sv-compact-sub">' + spec + '</div>' : '') +
             (price ? '<div class="sv-compact-price">' + price + '</div>' : '') +

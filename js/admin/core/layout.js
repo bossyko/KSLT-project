@@ -185,9 +185,11 @@
                 renderStatCard(L.iconPending, '...', L.statPendingDetail, 'ad-stat-card--warning', 'adDashPendingRegs') +
                 renderStatCard(L.iconTournaments, '...', L.statTournamentsDetail) +
                 renderStatCard(L.iconNews, '...', L.statNewsDetail) +
-                // Row 3: Courts, Coaches, Managers (admin only)
+                // Row 3: Courts, Coaches, Challenges
                 renderStatCard(L.iconCourts, '...', L.statCourtsDetail) +
                 renderStatCard(L.iconCoaches, '...', L.statCoachesDetail) +
+                renderStatCard(L.iconChallenges, '...', L.statChallengesDetail) +
+                // Row 4: Managers (admin only)
                 (isAdm ? renderStatCard(L.iconManagers, '...', L.statManagersDetail) : '') +
             '</div>' +
             // Activity tables
@@ -305,7 +307,8 @@
             A.client.from('tournaments').select('id, title, date_start, status, view_count')
                 .order('date_start', { ascending: false }).limit(10),                                                                  // [15] recent tournaments
             A.client.from('news').select('id, title, category, executor, published_at, created_at, view_count')
-                .order('created_at', { ascending: false }).limit(10)                                                                    // [16] recent news
+                .order('created_at', { ascending: false }).limit(10),                                                                   // [16] recent news
+            A.client.from('challenges').select('id', { count: 'exact', head: true }).in('status', ['active', 'negotiating', 'countered']) // [17] active challenges
         ]);
 
         // --- Stat cards ---
@@ -322,6 +325,7 @@
             var courtsCount = getCount(results[8]);
             var coachesCount = getCount(results[9]);
             var managersCount = getCount(results[10]);
+            var challengesCount = getCount(results[17]);
 
             grid.innerHTML =
                 // Row 1
@@ -335,6 +339,8 @@
                 // Row 3
                 renderStatCard(L.iconCourts, courtsCount, L.statCourtsDetail) +
                 renderStatCard(L.iconCoaches, coachesCount, L.statCoachesDetail) +
+                renderStatCard(L.iconChallenges, challengesCount, L.statChallengesDetail) +
+                // Row 4
                 (isAdm ? renderStatCard(L.iconManagers, managersCount, L.statManagersDetail) : '');
         }
 

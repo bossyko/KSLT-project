@@ -167,6 +167,8 @@ window.courtsLabels = {
     ctaTitle: 'KSLT мүчөлөрүнө арзандатуу',
     ctaText: 'Катталыңыз жана KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз',
     ctaBtn: 'Каттоо',
+    ctaTextAuth: 'KSLT мүчөсү катары өнөктөш корттордо арзандатуу алыңыз',
+    ctaBtnAuth: 'Арзандатуу көрүү',
     backBtn: 'Бардык корттор',
     partnerBadge: 'KSLT Өнөктөшү',
     surface: 'Жабуу',

@@ -294,6 +294,34 @@
         }
     }
 
+    // ---- CSV Export (Excel-compatible) ----
+    function exportCsv(filename, headers, rows) {
+        var BOM = '\uFEFF';
+        var csvRows = [];
+        csvRows.push(headers.map(csvCell).join(','));
+        for (var i = 0; i < rows.length; i++) {
+            csvRows.push(rows[i].map(csvCell).join(','));
+        }
+        var csvString = BOM + csvRows.join('\r\n');
+        var blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function csvCell(val) {
+        var s = val === null || val === undefined ? '' : String(val);
+        if (s.indexOf('"') !== -1 || s.indexOf(',') !== -1 || s.indexOf('\n') !== -1 || s.indexOf('\r') !== -1) {
+            return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+    }
+
     // ---- Export to namespace ----
     A.showToast = showToast;
     A.showConfirm = showConfirm;
@@ -308,5 +336,6 @@
     A.setupBulkDelete = setupBulkDelete;
     A.bulkCheckboxTd = bulkCheckboxTd;
     A.uploadImage = uploadImage;
+    A.exportCsv = exportCsv;
 
 })();

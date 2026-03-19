@@ -786,8 +786,6 @@
         }
 
         var isGuest = _accessLevel === 'guest';
-        var isRegistered = _accessLevel === 'registered';
-        var isMember = _accessLevel === 'member';
         var playerPage = isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
 
         // Sticky table header (separate from body for sticky to work)
@@ -837,15 +835,13 @@
             var nameHtml;
             if (isGuest) {
                 nameHtml = '<span class="pl-player-name pl-cat-name-plain">' + esc(p.name) + '</span>';
-            } else if (isRegistered) {
-                nameHtml = '<a href="' + playerPage + '?id=' + p.id + '&access=view" class="pl-player-name">' + esc(p.name) + '</a>';
             } else {
                 nameHtml = '<a href="' + playerPage + '?id=' + p.id + '" class="pl-player-name">' + esc(p.name) + '</a>';
             }
 
             html += '<div class="pl-row pl-cat-row pl-animate' + rowClass + '" style="transition-delay:' + Math.min(i * 30, 300) + 'ms"' +
                 (!isGuest ? ' data-player-id="' + p.id + '"' : '') +
-                (!isGuest ? ' data-access="' + (isMember ? 'full' : 'view') + '"' : '') + '>' +
+                (!isGuest ? ' data-access="full"' : '') + '>' +
                 '<span class="pl-col-rank' + rankClass + '">' + rank + '</span>' +
                 '<div class="pl-col-player">' +
                     '<img src="' + esc(p.photo) + '" alt="" class="pl-player-photo">' +
@@ -891,10 +887,7 @@
                 row.addEventListener('click', function(e) {
                     if (e.target.closest('a')) return; // let link handle it
                     var pid = row.dataset.playerId;
-                    var access = row.dataset.access;
-                    var url = playerPage + '?id=' + pid;
-                    if (access === 'view') url += '&access=view';
-                    window.location.href = url;
+                    window.location.href = playerPage + '?id=' + pid;
                 });
             });
         }

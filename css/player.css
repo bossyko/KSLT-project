@@ -317,7 +317,7 @@
 
 .pp-match {
     display: grid;
-    grid-template-columns: 80px 1fr auto auto;
+    grid-template-columns: 80px auto 1fr auto auto;
     gap: 16px;
     align-items: center;
     padding: 16px 20px;
@@ -328,7 +328,7 @@
 }
 
 .pp-match.pp-match-clickable {
-    grid-template-columns: 80px 1fr auto auto auto;
+    grid-template-columns: 80px auto 1fr auto auto auto;
 }
 
 .pp-match:hover {
@@ -361,6 +361,25 @@
     color: var(--text-muted);
     font-size: 0.85rem;
     font-weight: 500;
+}
+
+.pp-match-tournament {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pp-match-tournament a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.pp-match-tournament a:hover {
+    color: var(--accent);
 }
 
 .pp-match-opponent {
@@ -538,9 +557,9 @@
 
 a.pp-tournament {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 14px 20px;
+    gap: 14px;
+    padding: 12px 16px;
     background: var(--surface-glass);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
@@ -553,11 +572,29 @@ a.pp-tournament:hover {
     background: rgba(204,255,0,0.04);
 }
 
+.pp-tournament-photo {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border-subtle);
+}
+
+.pp-tournament-photo-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-elevated);
+    font-size: 1.2rem;
+}
+
 .pp-tournament-info {
     display: flex;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
+    flex: 1;
 }
 
 .pp-tournament-name {
@@ -576,14 +613,154 @@ a.pp-tournament:hover {
 .pp-tournament-result {
     color: var(--accent);
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     white-space: nowrap;
     flex-shrink: 0;
-    margin-left: 12px;
 }
 
 .pp-tournament-winner {
     color: #FFD700;
+}
+
+/* ---- SUBSECTIONS (accordion inside My Games) ---- */
+.pp-subsection {
+    margin-bottom: 16px;
+}
+
+.pp-subsection:last-child {
+    margin-bottom: 0;
+}
+
+.pp-subsection-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 14px 20px;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.pp-subsection-toggle:hover {
+    border-color: var(--accent);
+    background: rgba(204, 255, 0, 0.04);
+}
+
+.pp-subsection-toggle.pp-subsection-open {
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    border-bottom-color: transparent;
+}
+
+.pp-toggle-arrow {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+}
+
+.pp-subsection-body {
+    overflow: hidden;
+    max-height: 2000px;
+    transition: max-height 0.3s ease;
+}
+
+.pp-subsection-body.pp-subsection-collapsed {
+    max-height: 0;
+}
+
+/* Show all / Collapse button */
+.pp-show-all-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    margin-top: 8px;
+    background: none;
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.pp-show-all-btn:hover {
+    border-color: var(--accent);
+    background: rgba(204, 255, 0, 0.05);
+}
+
+/* ---- CHALLENGES ---- */
+.pp-challenges {
+    display: grid;
+    gap: 8px;
+}
+
+.pp-challenge {
+    display: grid;
+    grid-template-columns: 80px 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+}
+
+.pp-challenge-date {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.pp-challenge-opponent {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pp-challenge-opp-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.pp-challenge-opp-name:hover {
+    color: var(--accent);
+}
+
+.pp-challenge-venue {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.pp-challenge-status {
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+.pp-challenge-status.accepted {
+    background: rgba(234, 179, 8, 0.15);
+    color: #eab308;
+}
+
+.pp-challenge-status.completed {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
 }
 
 /* ---- CTA ---- */
@@ -690,6 +867,10 @@ a.pp-tournament:hover {
     .pp-match-date {
         grid-column: 1 / -1;
     }
+    .pp-match-tournament {
+        grid-column: 1 / -1;
+        max-width: none;
+    }
     .pp-match-opponent {
         grid-column: 1 / -1;
     }
@@ -699,6 +880,16 @@ a.pp-tournament:hover {
     }
     .pp-achievements {
         grid-template-columns: 1fr;
+    }
+    .pp-challenge {
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+    }
+    .pp-challenge-date {
+        grid-column: 1 / -1;
+    }
+    .pp-challenge-opponent {
+        grid-column: 1 / -1;
     }
     .pp-cta {
         padding: 36px 24px;

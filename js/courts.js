@@ -53,6 +53,8 @@
         ctaTitle: 'KSLT мүчөлөрүнө арзандатуу',
         ctaText: 'Катталыңыз жана KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз',
         ctaBtn: 'Каттоо',
+        ctaTextAuth: 'KSLT мүчөсү катары өнөктөш корттордо арзандатуу алыңыз',
+        ctaBtnAuth: 'Арзандатуу көрүү',
         backBtn: 'Бардык корттор',
         partnerBadge: 'KSLT Өнөктөшү',
         surface: 'Жабуу',
@@ -104,6 +106,8 @@
         ctaTitle: "Скидки для членов KSLT",
         ctaText: "Зарегистрируйтесь и оформите членство, чтобы получать скидки у партнёрских кортов",
         ctaBtn: "Регистрация",
+        ctaTextAuth: "Как член KSLT вы получаете скидки у партнёрских кортов и тренеров",
+        ctaBtnAuth: "Смотреть скидки",
         backBtn: "Все корты",
         partnerBadge: "Партнёр KSLT",
         surface: "Покрытие",
@@ -168,6 +172,48 @@
         }
     }
 
+    function showMembershipModal(level) {
+        var authLink = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+        var pricingLink = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
+        var isGuest = level === 'guest';
+
+        var title = isGuest
+            ? (isEn ? 'Become a KSLT Member' : isKg ? 'KSLT мүчөсү болуңуз' : 'Станьте членом KSLT')
+            : (isEn ? 'Membership Required' : isKg ? 'Мүчөлүк керек' : 'Нужно членство');
+        var text = isGuest
+            ? (isEn ? 'Register and become a KSLT member to get discounts at partner courts and coaches' : isKg ? 'Катталыңыз жана KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз' : 'Зарегистрируйтесь и оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров')
+            : (isEn ? 'Become a KSLT member to unlock discounts at partner courts and coaches' : isKg ? 'KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз' : 'Оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров');
+        var btnText = isGuest
+            ? (isEn ? 'Sign Up' : isKg ? 'Каттоо' : 'Регистрация')
+            : (isEn ? 'View Plans' : isKg ? 'Тарифтар' : 'Тарифы');
+        var btnLink = isGuest ? authLink : pricingLink;
+
+        var overlay = document.createElement('div');
+        overlay.className = 'ct-membership-overlay';
+        overlay.innerHTML =
+            '<div class="ct-membership-modal">' +
+                '<button class="ct-membership-close">&times;</button>' +
+                '<div class="ct-membership-icon">\uD83C\uDFF7\uFE0F</div>' +
+                '<h3>' + title + '</h3>' +
+                '<p>' + text + '</p>' +
+                '<a href="' + btnLink + '" class="ct-membership-btn">' + btnText + ' \u2192</a>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+
+        overlay.querySelector('.ct-membership-close').onclick = function() {
+            overlay.classList.remove('visible');
+            setTimeout(function() { overlay.remove(); }, 300);
+        };
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                overlay.classList.remove('visible');
+                setTimeout(function() { overlay.remove(); }, 300);
+            }
+        });
+    }
+
     function showToast(message, type) {
         var old = document.querySelector('.ct-toast');
         if (old) old.remove();
@@ -189,6 +235,18 @@
     var isListPage = window.location.pathname.indexOf('courts.html') !== -1 || window.location.pathname.indexOf('courts-en.html') !== -1 || window.location.pathname.indexOf('courts-kg.html') !== -1;
     var isDetailPage = courtPage && !isListPage;
 
+    // View counter for detail page (localStorage dedup)
+    function incrementCourtView(id) {
+        if (!id) return;
+        var key = 'kslt_crtview_' + id;
+        if (localStorage.getItem(key)) return;
+        var cl = window.supabaseClient;
+        if (!cl) return;
+        cl.rpc('increment_court_view', { p_id: id }).then(function(res) {
+            if (!res.error) localStorage.setItem(key, '1');
+        });
+    }
+
     if (isDetailPage) {
         initDetailPage();
         detectAccess();
@@ -207,6 +265,7 @@
                     renderDetailHero(found);
                     renderDetail(found);
                     initScrollAnimations();
+                    incrementCourtView(id);
                 }
             }
         });
@@ -215,7 +274,9 @@
         loadSupabaseCourts(function(dbCourts) {
             if (dbCourts.length) {
                 data = sortPromotedFirst(dbCourts).concat(staticData);
-                renderGrid();
+                loadMaxDiscounts(function() {
+                    renderGrid();
+                });
             }
         });
     }
@@ -239,6 +300,33 @@
         } catch (e) {
             callback([]);
         }
+    }
+
+    function loadMaxDiscounts(callback) {
+        var client = window.supabaseClient || null;
+        if (!client) { callback(); return; }
+        try {
+            client.from('partner_services')
+                .select('entity_id, discount_percent')
+                .eq('entity_type', 'court')
+                .then(function(res) {
+                    if (res.data && res.data.length) {
+                        var maxMap = {};
+                        res.data.forEach(function(s) {
+                            if (!maxMap[s.entity_id] || s.discount_percent > maxMap[s.entity_id]) {
+                                maxMap[s.entity_id] = s.discount_percent;
+                            }
+                        });
+                        data.forEach(function(c) {
+                            if (c._isDb && c.partner && maxMap[c.id]) {
+                                c._maxDiscount = maxMap[c.id];
+                            }
+                        });
+                    }
+                    callback();
+                })
+                .catch(function() { callback(); });
+        } catch(e) { callback(); }
     }
 
     function mapDbCourt(row) {
@@ -475,12 +563,14 @@
             var typeLabel = c._typeDesc || (c.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor);
             var newBadge = c._isNew ? '<span class="ct-new-badge">' + L_labels.newBadge + '</span>' : '';
             var promoBadge = c._promoted ? '<span class="kslt-recommended-badge">' + L_labels.recommendedBadge + '</span>' : '';
+            var discountBadge = c._maxDiscount ? '<span class="ct-discount-overlay">\uD83C\uDFF7\uFE0F ' + (isEn ? 'up to' : isKg ? 'чейин' : 'до') + ' -' + c._maxDiscount + '%</span>' : '';
 
             html += '<a href="' + detailBase + '?id=' + c.id + '" class="ct-card ct-fade-in' + (c._promoted ? ' kslt-promoted-card' : '') + '">' +
                 '<div class="ct-card-img-wrap">' +
                     '<img src="' + esc(c.photo) + '" alt="' + esc(c.name) + '" class="ct-card-img" loading="lazy">' +
                     newBadge +
                     promoBadge +
+                    discountBadge +
                 '</div>' +
                 '<div class="ct-card-body">' +
                     '<div class="ct-card-top">' +
@@ -582,11 +672,11 @@
             e.stopPropagation();
 
             if (_accessLevel === 'guest') {
-                showToast(isEn ? 'Sign up and become a KSLT member for discounts' : (isKg ? 'Арзандатуу алуу үчүн катталыңыз жана КСЛТ мүчөсү болуңуз' : 'Зарегистрируйтесь и станьте членом КСЛТ для скидок'), 'info');
+                showMembershipModal('guest');
                 return;
             }
             if (_accessLevel === 'registered') {
-                showToast(isEn ? 'Become a KSLT member for discounts' : (isKg ? 'Арзандатуу алуу үчүн КСЛТ мүчөсү болуңуз' : 'Станьте членом КСЛТ для скидок'), 'info');
+                showMembershipModal('registered');
                 return;
             }
             // Member: inline voucher generation
@@ -854,12 +944,16 @@
             html += '</div></div>';
         }
 
-        // CTA (hide for DB partner courts — they have discount section)
+        // CTA — different for guest vs authenticated
         if (!(court._isDb && court.partner)) {
+            var isAuth = _accessLevel !== 'guest';
+            var ctaLink = isAuth ? servicesLink : authLink;
+            var ctaText = isAuth ? (L_labels.ctaTextAuth || L_labels.ctaText) : L_labels.ctaText;
+            var ctaBtnText = isAuth ? (L_labels.ctaBtnAuth || L_labels.ctaBtn) : L_labels.ctaBtn;
             html += '<div class="ct-cta ct-fade-in">' +
                 '<h3>' + L_labels.ctaTitle.replace('KSLT', '<span>KSLT</span>') + '</h3>' +
-                '<p>' + L_labels.ctaText + '</p>' +
-                '<a href="' + authLink + '" class="ct-cta-btn">' + L_labels.ctaBtn + ' <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>' +
+                '<p>' + ctaText + '</p>' +
+                '<a href="' + ctaLink + '" class="ct-cta-btn">' + ctaBtnText + ' <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>' +
             '</div>';
         }
 

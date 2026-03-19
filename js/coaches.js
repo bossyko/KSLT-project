@@ -567,6 +567,18 @@
         });
     }
 
+    // View counter for detail page (localStorage dedup)
+    function incrementCoachView(id) {
+        if (!id) return;
+        var key = 'kslt_cchview_' + id;
+        if (localStorage.getItem(key)) return;
+        var cl = window.supabaseClient;
+        if (!cl) return;
+        cl.rpc('increment_coach_view', { p_id: id }).then(function(res) {
+            if (!res.error) localStorage.setItem(key, '1');
+        });
+    }
+
     // ---- DETAIL PAGE ----
     function initDetailPage() {
         var params = new URLSearchParams(window.location.search);
@@ -585,6 +597,7 @@
         renderDetailHero(coach);
         renderDetail(coach);
         initScrollAnimations();
+        incrementCoachView(id);
     }
 
     function renderDetailHero(coach) {

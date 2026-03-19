@@ -596,9 +596,9 @@ select.db-field-input {
 
 .db-tournament-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 14px 20px;
+    gap: 14px;
+    padding: 12px 16px;
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
@@ -617,6 +617,24 @@ select.db-field-input {
     flex-direction: column;
     gap: 2px;
     min-width: 0;
+    flex: 1;
+}
+
+.db-tournament-photo {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--bg-elevated);
+}
+
+.db-tournament-photo-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    border: 1px solid var(--border-subtle);
 }
 
 .db-tournament-name {
@@ -638,7 +656,6 @@ select.db-field-input {
     font-size: 0.85rem;
     white-space: nowrap;
     flex-shrink: 0;
-    margin-left: 12px;
 }
 
 .db-tournament-winner {
@@ -1038,6 +1055,191 @@ select.db-field-input {
     margin-left: 4px;
 }
 
+/* ---- Games Subsections (accordion cards) ---- */
+.db-subsection {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.db-subsection:last-child {
+    margin-bottom: 0;
+}
+
+.db-subsection-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.db-subsection-toggle:hover {
+    background: rgba(204,255,0,0.04);
+}
+
+.db-toggle-arrow {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.db-subsection-body {
+    padding: 0 20px 16px;
+    min-height: 120px;
+}
+
+.db-subsection-collapsed {
+    display: none;
+}
+
+/* ---- Matches Table ---- */
+.db-matches-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.db-matches-table thead tr {
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.db-matches-table th {
+    text-align: left;
+    padding: 6px 8px;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.db-matches-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.db-match-date {
+    white-space: nowrap;
+    color: var(--text-muted);
+}
+
+.db-match-opponent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.db-match-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.db-match-avatar-ph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(204,255,0,0.1);
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.db-match-score {
+    text-align: center;
+    font-family: monospace;
+    font-weight: 600;
+}
+
+.db-match-result-cell {
+    text-align: center;
+}
+
+.db-match-result {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.db-match-result.win {
+    background: rgba(52,199,89,0.15);
+    color: #34c759;
+}
+
+.db-match-result.loss {
+    background: rgba(255,59,48,0.15);
+    color: #ff3b30;
+}
+
+.db-match-tournament {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db-match-round {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.db-match-h2h {
+    background: transparent;
+    border: 1px solid rgba(204,255,0,0.3);
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.db-match-h2h:hover {
+    background: rgba(204,255,0,0.1);
+    border-color: var(--accent);
+}
+
+/* ---- Show All / Collapse Button ---- */
+.db-show-all-btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(204, 255, 0, 0.06);
+    border: 1px solid rgba(204, 255, 0, 0.15);
+    border-radius: var(--radius-md);
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.db-show-all-btn:hover {
+    background: rgba(204, 255, 0, 0.12);
+    border-color: var(--accent);
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */
@@ -1141,6 +1343,16 @@ select.db-field-input {
 
     .db-btn-row {
         flex-direction: column;
+    }
+
+    .db-matches-table th:nth-child(5),
+    .db-matches-table td.db-match-tournament {
+        display: none;
+    }
+
+    .db-tournament-photo {
+        width: 40px;
+        height: 40px;
     }
 }
 
@@ -1460,4 +1672,192 @@ select.db-field-input {
 .db-badge-toast-icon {
     font-size: 1.2rem;
     margin-right: 4px;
+}
+
+/* ============================================
+   H2H MODAL (dashboard)
+   ============================================ */
+.h2h-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.h2h-overlay.visible { opacity: 1; }
+
+.h2h-modal {
+    background: #1a1a1a;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    padding: 36px 32px;
+    max-width: 520px;
+    width: 100%;
+    position: relative;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.h2h-overlay.visible .h2h-modal { transform: translateY(0); }
+
+.h2h-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: none; border: none;
+    color: var(--text-muted);
+    font-size: 1.6rem;
+    cursor: pointer;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    transition: color 0.2s, background 0.2s;
+}
+.h2h-close:hover { color: var(--text-primary); background: var(--surface-glass); }
+
+.h2h-loading, .h2h-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.h2h-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.h2h-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.h2h-photo {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border-subtle);
+}
+
+.h2h-photo-ph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(204,255,0,0.1);
+    color: var(--accent);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.h2h-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.h2h-center { text-align: center; flex-shrink: 0; }
+.h2h-score {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 2px;
+}
+.h2h-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+.h2h-stats {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 24px;
+}
+.h2h-stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+.h2h-stat-row + .h2h-stat-row { border-top: 1px solid var(--border-subtle); }
+.h2h-stat-val { font-size: 1.1rem; font-weight: 700; min-width: 40px; }
+.h2h-val-left { text-align: left; color: var(--accent); }
+.h2h-val-right { text-align: right; color: var(--text-primary); }
+.h2h-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.h2h-matches { margin-bottom: 20px; }
+.h2h-matches-title {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+.h2h-match {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.h2h-match:last-child { border-bottom: none; }
+.h2h-match-date { color: var(--text-muted); font-size: 0.8rem; min-width: 70px; }
+.h2h-match-tournament { color: var(--text-dim); font-size: 0.8rem; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h2h-match-score { font-weight: 700; font-family: monospace; }
+.h2h-match-result {
+    font-size: 0.75rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 3px;
+}
+.h2h-match-result.win { background: rgba(52,199,89,0.15); color: #34c759; }
+.h2h-match-result.loss { background: rgba(255,59,48,0.15); color: #ff3b30; }
+
+.h2h-profile-btn {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    background: rgba(204,255,0,0.06);
+    border: 1px solid rgba(204,255,0,0.15);
+    border-radius: var(--radius-md);
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.h2h-profile-btn:hover { background: rgba(204,255,0,0.12); }
+
+@media (max-width: 480px) {
+    .h2h-modal { padding: 24px 16px; }
+    .h2h-photo { width: 56px; height: 56px; }
+    .h2h-header { gap: 16px; }
+    .h2h-score { font-size: 1.5rem; }
+    .h2h-name { font-size: 0.75rem; max-width: 100px; }
 }

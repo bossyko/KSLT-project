@@ -243,7 +243,7 @@
 
         if (items.length === 0) {
             tbody.innerHTML =
-                '<tr><td colspan="11" style="text-align:center;padding:60px 20px;">' +
+                '<tr><td colspan="12" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🏟️</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCourts + '</div>' +
                     '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noCourtsText + '</div>' +
@@ -259,6 +259,8 @@
             var promotedHtml = c.promoted ? '<span style="color:var(--accent);">⭐</span>' : '—';
             var cityText = A.esc(c.city || '—');
 
+            var viewsCell = (c.view_count || 0) > 0 ? c.view_count : '\u2014';
+
             if (types.length === 0) {
                 html +=
                     '<tr data-crt-id="' + c.id + '">' +
@@ -272,6 +274,7 @@
                         '<td>' + cityText + '</td>' +
                         '<td style="text-align:center;">' + partnerHtml + '</td>' +
                         '<td style="text-align:center;">' + promotedHtml + '</td>' +
+                        '<td style="text-align:center;color:var(--text-dim);">' + viewsCell + '</td>' +
                     '</tr>';
             } else {
                 // First row with rowspan
@@ -290,6 +293,7 @@
                         '<td rowspan="' + rowCount + '" style="vertical-align:middle;">' + cityText + '</td>' +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + partnerHtml + '</td>' +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + promotedHtml + '</td>' +
+                        '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;color:var(--text-dim);">' + viewsCell + '</td>' +
                     '</tr>';
 
                 // Sub-rows
@@ -428,8 +432,9 @@
                             crtColHeader('city', L.crtCity) +
                             crtColHeader('partner', L.crtPartner) +
                             crtColHeader('promoted', L.crtPromoted) +
+                            '<th style="text-align:center;width:50px;">&#128065;</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="10" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="11" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
                 '<div class="ad-col-dropdown" id="adCrtColDropdown" style="display:none;"></div>' +
@@ -515,7 +520,7 @@
         var serverSortCol = (crtSortCol === 'name' || crtSortCol === 'city') ? crtSortCol : 'name';
 
         var query = A.client.from('courts')
-            .select('id,name,court_types,partner,city,promoted')
+            .select('id,name,court_types,partner,city,promoted,view_count')
             .order(serverSortCol, { ascending: crtSortCol === serverSortCol ? crtSortAsc : true });
 
         var result = await query;

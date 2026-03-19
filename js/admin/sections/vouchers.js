@@ -83,6 +83,7 @@
                 '<input type="date" class="ad-field-input" id="adVchDateTo" value="' + vchDateTo + '" style="max-width:150px;display:' + (vchPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
                 '<button class="ad-btn ad-btn-sm" id="adVchApply" style="display:' + (vchPeriodMode === 'custom' ? 'inline-flex' : 'none') + ';">' + L.vchApply + '</button>' +
                 '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adVchExportPdf" title="' + L.vchExportPdf + '">📄 PDF</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adVchExcelBtn" title="' + L.vchExcelExport + '">📊 Excel</button>' +
             '</div>' +
 
             // Filters
@@ -176,6 +177,11 @@
         // Export PDF
         document.getElementById('adVchExportPdf').addEventListener('click', function() {
             openPdfReport();
+        });
+
+        // Export Excel
+        document.getElementById('adVchExcelBtn').addEventListener('click', function() {
+            exportVchExcel();
         });
 
         // Load data
@@ -628,6 +634,22 @@
 
     function escHtml(str) {
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ---- Excel Export ----
+    function exportVchExcel() {
+        var data = vchFilteredData;
+        var today = new Date().toISOString().slice(0, 10);
+
+        var headers = ['№', L.vchPlayer, L.vchEntity, L.vchServiceType, L.vchDiscount + '%', L.vchDate, L.vchStatus];
+        var rows = data.map(function(v, i) {
+            var typeIcon = v.entity_type === 'court' ? '🏟️' : '🎓';
+            var statusLabel = L['vchStatus' + v.status.charAt(0).toUpperCase() + v.status.slice(1)] || v.status;
+            var dateStr = v.created_at ? formatVchDate(v.created_at) : '—';
+            return [i + 1, v.player_name || '—', typeIcon + ' ' + (v.entity_name || '—'), v.service_name || '—', v.discount_percent, dateStr, statusLabel];
+        });
+
+        A.exportCsv('kslt-vouchers-' + today + '.csv', headers, rows);
     }
 
     // ---- Export ----

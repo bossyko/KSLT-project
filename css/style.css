@@ -4276,8 +4276,12 @@ h2 {
     top: 64px;
     z-index: 10;
     background: var(--bg-primary);
-    padding: 16px 7%;
+    padding: 16px calc(max(24px, (100% - 1100px) / 2));
     border-bottom: 1px solid var(--border-subtle);
+}
+
+.kslt-back-wrap .kslt-back-sep {
+    margin: 0 6px;
 }
 
 .kslt-back {

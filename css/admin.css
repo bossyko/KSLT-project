@@ -943,6 +943,18 @@ body.ad-page {
     box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
 }
 
+.ad-field-input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 1;
+}
+
+.ad-field-input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit {
+    color: var(--text-primary);
+}
+
 .ad-field-textarea {
     min-height: 120px;
     resize: vertical;

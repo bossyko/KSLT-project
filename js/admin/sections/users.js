@@ -106,6 +106,7 @@
                 '<input type="date" class="ad-field-input" id="adUsrDateTo" value="' + usrDateTo + '" style="max-width:150px;display:' + (usrPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
                 '<button class="ad-btn ad-btn-sm" id="adUsrPrdApply" style="display:' + (usrPeriodMode === 'custom' ? 'inline-flex' : 'none') + ';">' + L.usrPrdApply + '</button>' +
                 '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adUsrPdfBtn" title="' + L.usrPdfExport + '">📄 PDF</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adUsrExcelBtn" title="' + L.usrExcelExport + '">📊 Excel</button>' +
             '</div>' +
 
             '<div class="ad-filter-row">' +
@@ -188,6 +189,11 @@
         // PDF
         document.getElementById('adUsrPdfBtn').addEventListener('click', function() {
             openUsrPdfReport();
+        });
+
+        // Excel
+        document.getElementById('adUsrExcelBtn').addEventListener('click', function() {
+            exportUsrExcel();
         });
 
         await loadUsersList();
@@ -442,7 +448,7 @@
             ? '<img src="' + A.esc(user.avatar_url) + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">'
             : '<div style="width:64px;height:64px;border-radius:50%;background:rgba(204,255,0,0.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;">' + initials + '</div>';
 
-        // Membership section
+        // Membership section (info only — management through Finances)
         var memHtml = '';
         if (canManageMembership) {
             if (membership && membership.status === 'active') {
@@ -455,27 +461,17 @@
                     daysLeft = diff > 0 ? ' (' + diff + ' ' + (isEn ? 'days left' : 'дн.') + ')' : '';
                 }
                 memHtml =
-                    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
+                    '<div style="display:flex;align-items:center;gap:8px;">' +
                         '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + '</span>' +
                         '<span style="color:var(--text-secondary);font-size:0.85rem;">' + (isEn ? 'until ' : 'до ') + expDate + daysLeft + '</span>' +
-                    '</div>' +
-                    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-                        '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adUsrExtendMem">' + L.usrExtendMembership + '</button>' +
-                        '<select class="ad-field-input" id="adUsrExtendPeriod" style="width:auto;padding:4px 8px;font-size:0.8rem;">' +
-                            '<option value="1">' + L.usrMonths1 + '</option>' +
-                            '<option value="3">' + L.usrMonths3 + '</option>' +
-                            '<option value="6">' + L.usrMonths6 + '</option>' +
-                            '<option value="12">' + L.usrMonths12 + '</option>' +
-                        '</select>' +
-                        '<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrCancelMem">' + L.usrCancelMembership + '</button>' +
                     '</div>';
             } else {
                 memHtml =
-                    '<div style="color:var(--text-dim);margin-bottom:12px;">' + L.usrNoMembership + '</div>' +
-                    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-                        '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adUsrGiveMem">' + L.usrGiveMembership + '</button>' +
-                    '</div>';
+                    '<div style="color:var(--text-dim);">' + L.usrNoMembership + '</div>';
             }
+            memHtml += '<div style="margin-top:8px;">' +
+                '<a href="#finances" style="color:var(--accent);font-size:0.85rem;text-decoration:none;" onclick="window.KSLT_ADMIN.switchTab(\'finances\');return false;">→ ' + (isEn ? 'Manage in Finances' : 'Управление в Финансах') + '</a>' +
+            '</div>';
         }
 
         // Player category section
@@ -616,29 +612,6 @@
         if (saveBtn) {
             saveBtn.addEventListener('click', function() {
                 saveUserHandler(user.id);
-            });
-        }
-
-        // Membership actions
-        var giveMem = document.getElementById('adUsrGiveMem');
-        if (giveMem) {
-            giveMem.addEventListener('click', function() {
-                openGiveMembershipModal(user);
-            });
-        }
-
-        var extendMem = document.getElementById('adUsrExtendMem');
-        if (extendMem) {
-            extendMem.addEventListener('click', function() {
-                var months = parseInt(document.getElementById('adUsrExtendPeriod').value);
-                extendMembership(membership.id, months);
-            });
-        }
-
-        var cancelMem = document.getElementById('adUsrCancelMem');
-        if (cancelMem) {
-            cancelMem.addEventListener('click', function() {
-                cancelMembership(membership.id, user.id);
             });
         }
 
@@ -1560,6 +1533,26 @@
 
     function escUsrHtml(str) {
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ---- Excel Export ----
+    function exportUsrExcel() {
+        var items = usrAllItems;
+        var memMap = usrMemMap;
+        var today = new Date().toISOString().slice(0, 10);
+
+        var headers = ['№', L.thUser, L.thEmail, L.thRole, isEn ? 'Membership' : 'Членство', isEn ? 'Player' : 'Игрок', 'Telegram', L.thDate];
+        var rows = items.map(function(u, i) {
+            var roleLabel = L['role' + u.role.charAt(0).toUpperCase() + u.role.slice(1)] || u.role;
+            var mem = memMap[u.id];
+            var memLabel = (mem && mem.status === 'active') ? L.usrActive : (mem && mem.status === 'expired') ? L.usrExpired : L.usrNone;
+            var playerBadge = u.player_id ? '✓' : '—';
+            var tgBadge = u.telegram_chat_id ? '✓' : '—';
+            var regDate = u.created_at ? u.created_at.split('T')[0] : '—';
+            return [i + 1, u.full_name || '—', u.email || '—', roleLabel, memLabel, playerBadge, tgBadge, regDate];
+        });
+
+        A.exportCsv('kslt-users-' + today + '.csv', headers, rows);
     }
 
     // ---- Export to namespace ----

@@ -46,9 +46,19 @@
         statsLosses: 'Поражения',
         statsWinRate: '% Побед',
         statsStreak: 'Серия',
+        sectionGames: 'Мои Игры',
+        subsectionTournaments: 'Турниры',
+        subsectionMatches: 'Матчи',
+        subsectionChallenges: 'Вызовы',
         sectionMatches: 'История матчей',
         sectionAchievements: 'Достижения',
         sectionTournaments: 'Турниры',
+        sectionChallenges: 'Вызовы',
+        challengeAccepted: 'Принят',
+        challengeCompleted: 'Сыгран',
+        tournament: 'Турнир',
+        showAll: 'Показать все',
+        collapse: 'Свернуть',
         ctaTitle: 'Хочешь <span>сыграть</span>?',
         ctaText: 'Зарегистрируйся в KSLT, чтобы бросить вызов игрокам и участвовать в турнирах',
         ctaBtn: 'Регистрация',
@@ -436,13 +446,6 @@
         html += '</div></div>';
         html += '</div>'; // .pp-stats
 
-        // ---- Match History (async loaded) ----
-        html += '<div class="pp-section pp-fade-in">';
-        html += '<h3 class="pp-section-title">\u2694\uFE0F ' + L.sectionMatches + '</h3>';
-        html += '<div class="pp-matches" id="ppMatchesContainer">';
-        html += '<div class="pp-loading">' + LH.loading + '</div>';
-        html += '</div></div>';
-
         // ---- Achievements (loaded from Supabase) ----
         html += '<div class="pp-section pp-fade-in">';
         html += '<h3 class="pp-section-title">\uD83C\uDFC5 ' + L.sectionAchievements + '</h3>';
@@ -450,12 +453,38 @@
         html += '<div class="pp-loading">' + LH.loading + '</div>';
         html += '</div></div>';
 
-        // ---- Tournaments (async loaded) ----
+        // ---- My Games (combined: Tournaments + Matches + Challenges) ----
         html += '<div class="pp-section pp-fade-in">';
-        html += '<h3 class="pp-section-title">\uD83C\uDFBE ' + L.sectionTournaments + '</h3>';
+        html += '<h3 class="pp-section-title">\uD83C\uDFBE ' + L.sectionGames + '</h3>';
+
+        // -- Subsection: Tournaments --
+        html += '<div class="pp-subsection">';
+        html += '<button class="pp-subsection-toggle pp-subsection-open" data-target="ppSubTournaments">';
+        html += '<span>\uD83C\uDFC6 ' + L.subsectionTournaments + '</span><span class="pp-toggle-arrow">\u25BC</span></button>';
+        html += '<div class="pp-subsection-body" id="ppSubTournaments">';
         html += '<div class="pp-tournaments" id="ppTournamentsContainer">';
         html += '<div class="pp-loading">' + LH.loading + '</div>';
-        html += '</div></div>';
+        html += '</div></div></div>';
+
+        // -- Subsection: Matches --
+        html += '<div class="pp-subsection">';
+        html += '<button class="pp-subsection-toggle pp-subsection-open" data-target="ppSubMatches">';
+        html += '<span>\u2694\uFE0F ' + L.subsectionMatches + '</span><span class="pp-toggle-arrow">\u25BC</span></button>';
+        html += '<div class="pp-subsection-body" id="ppSubMatches">';
+        html += '<div class="pp-matches" id="ppMatchesContainer">';
+        html += '<div class="pp-loading">' + LH.loading + '</div>';
+        html += '</div></div></div>';
+
+        // -- Subsection: Challenges --
+        html += '<div class="pp-subsection" id="ppChallengesSection" style="display:none">';
+        html += '<button class="pp-subsection-toggle" data-target="ppSubChallenges">';
+        html += '<span>\uD83E\uDD4A ' + L.subsectionChallenges + '</span><span class="pp-toggle-arrow">\u25B6</span></button>';
+        html += '<div class="pp-subsection-body pp-subsection-collapsed" id="ppSubChallenges">';
+        html += '<div class="pp-challenges" id="ppChallengesContainer">';
+        html += '<div class="pp-loading">' + LH.loading + '</div>';
+        html += '</div></div></div>';
+
+        html += '</div>'; // .pp-section (My Games)
 
         // ---- CTA (guest / registered only, hidden for members) ----
         if (_accessLevel !== 'member') {
@@ -498,9 +527,29 @@
             });
         }
 
+        // Subsection toggle handlers
+        el.querySelectorAll('.pp-subsection-toggle').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var targetId = btn.getAttribute('data-target');
+                var body = document.getElementById(targetId);
+                if (!body) return;
+                var isOpen = btn.classList.contains('pp-subsection-open');
+                if (isOpen) {
+                    body.classList.add('pp-subsection-collapsed');
+                    btn.classList.remove('pp-subsection-open');
+                    btn.querySelector('.pp-toggle-arrow').textContent = '\u25B6';
+                } else {
+                    body.classList.remove('pp-subsection-collapsed');
+                    btn.classList.add('pp-subsection-open');
+                    btn.querySelector('.pp-toggle-arrow').textContent = '\u25BC';
+                }
+            });
+        });
+
         // Async load real data from Supabase
         loadRealMatches(data);
         loadRealTournaments(data);
+        loadPlayerChallenges();
     }
 
     // ================================================
@@ -538,11 +587,11 @@
         }
 
         client.from('matches')
-            .select('*')
+            .select('*, tournament:tournaments(id, title, title_en, title_kg)')
             .or('player1_id.eq.' + _playerId + ',player2_id.eq.' + _playerId)
             .not('winner_id', 'is', null)
             .order('played_at', { ascending: false })
-            .limit(10)
+            .limit(50)
             .then(function(res) {
                 console.log('[KSLT] matches query:', res.error ? res.error.message : (res.data ? res.data.length + ' results' : 'no data'));
                 if (res.error || !res.data || res.data.length === 0) {
@@ -553,9 +602,14 @@
             });
     }
 
-    function renderRealMatches(container, matches) {
+    var _allMatchesLoaded = false;
+
+    function renderRealMatches(container, matches, showAll) {
+        var LIMIT = 25;
+        var visible = showAll ? matches : matches.slice(0, LIMIT);
+        var hasMore = !showAll && matches.length > LIMIT;
         var html = '';
-        matches.forEach(function(m) {
+        visible.forEach(function(m) {
             var isP1 = m.player1_id === _playerId;
             var oppId = isP1 ? m.player2_id : m.player1_id;
             var opp = lookupPlayer(oppId);
@@ -564,8 +618,17 @@
             var score = m.score || '';
             var displayScore = isP1 ? formatScore(score) : formatScore(flipScore(score));
 
+            var tName = m.tournament ? (isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title)) : '';
+            var tId = m.tournament ? m.tournament.id : '';
+
             html += '<div class="pp-match pp-match-clickable" data-opponent-id="' + esc(opp.id) + '" data-opponent-name="' + esc(opp.name) + '" data-opponent-photo="' + esc(oppPhoto) + '">';
             html += '<div class="pp-match-date">' + formatMatchDate(m.played_at) + '</div>';
+            if (tName) {
+                var tPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
+                html += '<div class="pp-match-tournament"><a href="' + tPage + '?id=' + esc(tId) + '">' + esc(tName) + '</a></div>';
+            } else {
+                html += '<div class="pp-match-tournament"></div>';
+            }
             html += '<div class="pp-match-opponent">';
             html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(opp.name) + '" class="pp-match-opponent-photo">';
             html += '<span class="pp-match-opponent-name">' + esc(opp.name) + '</span>';
@@ -575,8 +638,29 @@
             html += '<button class="pp-match-h2h" title="Head to Head">H2H</button>';
             html += '</div>';
         });
+
+        if (hasMore) {
+            html += '<button class="pp-show-all-btn" id="ppShowAllMatches">' + L.showAll + ' (' + matches.length + ')</button>';
+        } else if (showAll && matches.length > 10) {
+            html += '<button class="pp-show-all-btn" id="ppCollapseMatches">' + L.collapse + '</button>';
+        }
+
         container.innerHTML = html;
         attachMatchClickHandlers(container);
+
+        var showBtn = document.getElementById('ppShowAllMatches');
+        if (showBtn) {
+            showBtn.addEventListener('click', function() {
+                renderRealMatches(container, matches, true);
+            });
+        }
+        var colBtn = document.getElementById('ppCollapseMatches');
+        if (colBtn) {
+            colBtn.addEventListener('click', function() {
+                renderRealMatches(container, matches, false);
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
     }
 
     function renderMockMatches(container, data) {
@@ -585,6 +669,7 @@
         matches.forEach(function(m) {
             html += '<div class="pp-match">';
             html += '<div class="pp-match-date">' + m.date + '</div>';
+            html += '<div class="pp-match-tournament"></div>';
             html += '<div class="pp-match-opponent">';
             html += '<img src="' + esc(m.opponent.photo) + '" alt="' + esc(m.opponent.name) + '" class="pp-match-opponent-photo">';
             html += '<span class="pp-match-opponent-name">' + m.opponent.name + '</span>';
@@ -629,13 +714,13 @@
 
         Promise.all([
             client.from('tournament_registrations')
-                .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start)')
+                .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start, image)')
                 .eq('player_id', _playerId)
                 .in('status', ['approved', 'draw'])
                 .order('registered_at', { ascending: false })
                 .limit(10),
             client.from('tournament_results')
-                .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start)')
+                .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start, image)')
                 .eq('player_id', _playerId)
                 .order('created_at', { ascending: false })
                 .limit(10)
@@ -671,7 +756,14 @@
                 var result = item.round_reached ? (ROUND_LABELS[item.round_reached] || item.round_reached) : LH.participated;
                 if (item.points_earned > 0) result += ' · +' + item.points_earned;
                 var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
-                html += '<a class="pp-tournament" href="tournament.html' + (isEn ? '-en' : isKg ? '-kg' : '') + '?id=' + t.id + '">';
+                var tImg = t.image || '';
+                var tPage = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id;
+                html += '<a class="pp-tournament" href="' + tPage + '">';
+                if (tImg) {
+                    html += '<img src="' + esc(tImg) + '" alt="' + esc(tName) + '" class="pp-tournament-photo">';
+                } else {
+                    html += '<div class="pp-tournament-photo pp-tournament-photo-empty">\uD83C\uDFBE</div>';
+                }
                 html += '<div class="pp-tournament-info"><span class="pp-tournament-name">' + esc(tName) + '</span>';
                 if (dateStr) html += '<span class="pp-tournament-date">' + dateStr + '</span>';
                 html += '</div>';
@@ -687,11 +779,80 @@
         var html = '';
         tournaments.forEach(function(t) {
             html += '<div class="pp-tournament">';
-            html += '<span class="pp-tournament-name">' + t.name + '</span>';
+            html += '<div class="pp-tournament-photo pp-tournament-photo-empty">\uD83C\uDFBE</div>';
+            html += '<div class="pp-tournament-info"><span class="pp-tournament-name">' + t.name + '</span></div>';
             html += '<span class="pp-tournament-result">' + t.result + '</span>';
             html += '</div>';
         });
         container.innerHTML = html;
+    }
+
+    // ================================================
+    // SUPABASE: Player Challenges
+    // ================================================
+    function loadPlayerChallenges() {
+        var section = document.getElementById('ppChallengesSection');
+        var container = document.getElementById('ppChallengesContainer');
+        if (!container || !section || !client) return;
+
+        client.rpc('get_player_challenges', { p_player_id: _playerId })
+            .then(function(res) {
+                if (res.error || !res.data || res.data.length === 0) {
+                    section.style.display = 'none';
+                    return;
+                }
+                section.style.display = '';
+                renderChallenges(container, res.data);
+            });
+    }
+
+    function renderChallenges(container, challenges) {
+        var html = '';
+        challenges.forEach(function(c) {
+            var isChallenger = c.challenger_player_id === _playerId;
+            var oppName, oppPhoto, oppId;
+            if (isChallenger) {
+                oppName = isEn ? (c.opponent_name_en || c.opponent_name) : (isKg ? (c.opponent_name_kg || c.opponent_name) : c.opponent_name);
+                oppPhoto = c.opponent_photo || 'https://placehold.co/36x36?text=?';
+                oppId = c.opponent_player_id;
+            } else {
+                oppName = isEn ? (c.challenger_name_en || c.challenger_name) : (isKg ? (c.challenger_name_kg || c.challenger_name) : c.challenger_name);
+                oppPhoto = c.challenger_photo || 'https://placehold.co/36x36?text=?';
+                oppId = c.challenger_player_id;
+            }
+
+            var date = c.counter_date || c.proposed_date || '';
+            var venue = c.counter_venue || c.counter_court_name || c.proposed_venue || c.court_name || '';
+            var statusClass = c.status === 'completed' ? 'completed' : 'accepted';
+            var statusLabel = c.status === 'completed' ? L.challengeCompleted : L.challengeAccepted;
+            var score = c.match_score || '';
+
+            var playerPage = isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
+
+            html += '<div class="pp-challenge">';
+            html += '<div class="pp-challenge-date">' + formatChalDate(date) + '</div>';
+            html += '<div class="pp-challenge-opponent">';
+            html += '<a href="' + playerPage + '?id=' + esc(oppId) + '">';
+            html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(oppName) + '" class="pp-match-opponent-photo">';
+            html += '</a>';
+            html += '<a href="' + playerPage + '?id=' + esc(oppId) + '" class="pp-challenge-opp-name">' + esc(oppName) + '</a>';
+            html += '</div>';
+            if (score) {
+                html += '<div class="pp-match-score">' + esc(score) + '</div>';
+            } else {
+                html += '<div class="pp-challenge-venue">' + esc(venue) + '</div>';
+            }
+            html += '<div class="pp-challenge-status ' + statusClass + '">' + statusLabel + '</div>';
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    function formatChalDate(d) {
+        if (!d) return '';
+        var parts = d.split('-');
+        if (parts.length === 3) return parts[2] + '.' + parts[1];
+        return d;
     }
 
     // ================================================
@@ -986,6 +1147,17 @@
         });
     }
 
+    // View counter for player detail page (localStorage dedup)
+    function incrementPlayerView(id) {
+        if (!id) return;
+        var key = 'kslt_plview_' + id;
+        if (localStorage.getItem(key)) return;
+        if (!client) return;
+        client.rpc('increment_player_view', { p_id: id }).then(function(res) {
+            if (!res.error) localStorage.setItem(key, '1');
+        });
+    }
+
     // ---- Init ----
     document.addEventListener('DOMContentLoaded', async function () {
         var params = new URLSearchParams(window.location.search);
@@ -1083,6 +1255,7 @@
         renderProfile(data);
         renderBadgesSection();
         initScrollAnimations();
+        incrementPlayerView(playerId);
     });
 
     // ================================================

@@ -358,6 +358,100 @@
     font-weight: 700;
 }
 
+/* Membership Modal */
+.ct-membership-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.ct-membership-overlay.visible {
+    opacity: 1;
+}
+
+.ct-membership-modal {
+    background: #1a1a2e;
+    border: 1px solid rgba(204,255,0,0.2);
+    border-radius: 20px;
+    padding: 40px 32px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+}
+
+.ct-membership-close {
+    position: absolute;
+    top: 12px; right: 16px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.ct-membership-icon {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+}
+
+.ct-membership-modal h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.ct-membership-modal p {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.ct-membership-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 14px 32px;
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.ct-membership-btn:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+}
+
+/* Discount overlay on card photo */
+.ct-discount-overlay {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(220, 38, 38, 0.9);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 100px;
+    z-index: 2;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(4px);
+}
+
 .ct-card-actions {
     display: flex;
     gap: 10px;

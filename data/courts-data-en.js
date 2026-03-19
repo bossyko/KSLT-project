@@ -167,6 +167,8 @@ window.courtsLabels = {
     ctaTitle: "KSLT Member Discounts",
     ctaText: "Register and become a member to get discounts at partner courts",
     ctaBtn: "Sign Up",
+    ctaTextAuth: "As a KSLT member you get discounts at partner courts and coaches",
+    ctaBtnAuth: "View Discounts",
     backBtn: "All courts",
     partnerBadge: "KSLT Partner",
     surface: "Surface",
