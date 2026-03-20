@@ -192,16 +192,21 @@
 - [x] Filtered duel matches from Matches section (duels only in Challenges)
 - [x] Applied to both dashboard (personal) and player.html (public profile)
 
-## Ideas / Future
+## В работе
+
+- [ ] YouTube Live stream integration
+- [ ] Live Score (real-time match scoreboard)
+
+## Техдолг
+
+- [ ] E2E testing (Cypress / Playwright)
+- [ ] CI/CD: GitHub Actions linting, auto-tests, auto-deploy Netlify
+- [ ] API documentation (Supabase schema, RLS, endpoints)
+- [ ] Password reset improvements (email-only, без SMS)
+
+## Идеи для реализации
 
 - Online payments: provider integration (Mbank / PayBox), payment page, webhooks
 - Recurring payments: auto-renewal memberships
 - SMS integration (Nikita.kg / Twilio) — verification, notifications
-- Push notifications (FCM / Web Push)
-- Two-step password reset (email + SMS)
 - Shop / merchandise (catalog, cart, orders, admin)
-- E2E testing (Cypress / Playwright)
-- CI/CD: GitHub Actions linting, auto-tests, auto-deploy Netlify
-- API documentation (Supabase schema, RLS, endpoints)
-- YouTube Live stream integration
-- Live Score (real-time match scoreboard)
