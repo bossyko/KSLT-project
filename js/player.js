@@ -446,25 +446,9 @@
         html += '</div></div>';
         html += '</div>'; // .pp-stats
 
-        // ---- Achievements (loaded from Supabase) ----
-        html += '<div class="pp-section pp-fade-in">';
-        html += '<h3 class="pp-section-title">\uD83C\uDFC5 ' + L.sectionAchievements + '</h3>';
-        html += '<div class="pp-achievements" id="ppAchievements">';
-        html += '<div class="pp-loading">' + LH.loading + '</div>';
-        html += '</div></div>';
-
-        // ---- My Games (combined: Tournaments + Matches + Challenges) ----
+        // ---- My Games (combined: Matches + Challenges + Tournaments) ----
         html += '<div class="pp-section pp-fade-in">';
         html += '<h3 class="pp-section-title">\uD83C\uDFBE ' + L.sectionGames + '</h3>';
-
-        // -- Subsection: Tournaments --
-        html += '<div class="pp-subsection">';
-        html += '<button class="pp-subsection-toggle pp-subsection-open" data-target="ppSubTournaments">';
-        html += '<span>\uD83C\uDFC6 ' + L.subsectionTournaments + '</span><span class="pp-toggle-arrow">\u25BC</span></button>';
-        html += '<div class="pp-subsection-body" id="ppSubTournaments">';
-        html += '<div class="pp-tournaments" id="ppTournamentsContainer">';
-        html += '<div class="pp-loading">' + LH.loading + '</div>';
-        html += '</div></div></div>';
 
         // -- Subsection: Matches --
         html += '<div class="pp-subsection">';
@@ -484,7 +468,23 @@
         html += '<div class="pp-loading">' + LH.loading + '</div>';
         html += '</div></div></div>';
 
+        // -- Subsection: Tournaments --
+        html += '<div class="pp-subsection">';
+        html += '<button class="pp-subsection-toggle pp-subsection-open" data-target="ppSubTournaments">';
+        html += '<span>\uD83C\uDFC6 ' + L.subsectionTournaments + '</span><span class="pp-toggle-arrow">\u25BC</span></button>';
+        html += '<div class="pp-subsection-body" id="ppSubTournaments">';
+        html += '<div class="pp-tournaments" id="ppTournamentsContainer">';
+        html += '<div class="pp-loading">' + LH.loading + '</div>';
+        html += '</div></div></div>';
+
         html += '</div>'; // .pp-section (My Games)
+
+        // ---- Achievements (bottom of page) ----
+        html += '<div class="pp-section pp-fade-in">';
+        html += '<h3 class="pp-section-title">\uD83C\uDFC5 ' + L.sectionAchievements + '</h3>';
+        html += '<div class="pp-achievements" id="ppAchievements">';
+        html += '<div class="pp-loading">' + LH.loading + '</div>';
+        html += '</div></div>';
 
         // ---- CTA (guest / registered only, hidden for members) ----
         if (_accessLevel !== 'member') {
@@ -587,7 +587,7 @@
         }
 
         client.from('matches')
-            .select('*, tournament:tournaments(id, title, title_en, title_kg)')
+            .select('*, match_type, tournament:tournaments(id, title, title_en, title_kg)')
             .or('player1_id.eq.' + _playerId + ',player2_id.eq.' + _playerId)
             .not('winner_id', 'is', null)
             .order('played_at', { ascending: false })
@@ -598,7 +598,10 @@
                     renderMockMatches(container, data);
                     return;
                 }
-                renderRealMatches(container, res.data);
+                // Filter out duel matches — only tournament matches here
+                var filtered = res.data.filter(function(m) { return !m.match_type || m.match_type === 'tournament'; });
+                if (filtered.length === 0) { renderMockMatches(container, data); return; }
+                renderRealMatches(container, filtered);
             });
     }
 

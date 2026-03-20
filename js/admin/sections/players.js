@@ -2018,6 +2018,7 @@
         for (var i = 0; i < unique.length; i++) {
             var pid = unique[i];
 
+            // Tournament wins/losses
             var trRes = await A.client.from('tournament_results').select('round_reached').eq('player_id', pid);
             var wins = 0;
             var losses = 0;
@@ -2025,6 +2026,19 @@
                 if (r.round_reached === 'W') wins++;
                 else losses++;
             });
+
+            // Duel wins/losses (match_type = 'duel')
+            var duelWinRes = await A.client.from('matches')
+                .select('id', { count: 'exact', head: true })
+                .eq('match_type', 'duel').eq('status', 'completed').eq('winner_id', pid);
+            var duelTotalRes = await A.client.from('matches')
+                .select('id', { count: 'exact', head: true })
+                .eq('match_type', 'duel').eq('status', 'completed')
+                .or('player1_id.eq.' + pid + ',player2_id.eq.' + pid);
+            var duelWins = duelWinRes.count || 0;
+            var duelTotal = duelTotalRes.count || 0;
+            wins += duelWins;
+            losses += (duelTotal - duelWins);
 
             var currentYear = new Date().getFullYear();
             var rhRes = await A.client.from('rating_history')

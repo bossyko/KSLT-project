@@ -1290,15 +1290,7 @@
 
         var html = '<h2 class="db-section-title">' + L.gamesTitle + '</h2>';
 
-        // -- Subsection: Tournaments --
-        html += '<div class="db-subsection">';
-        html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubTournaments">';
-        html += '<span>\uD83C\uDFC6 ' + L.subTournaments + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
-        html += '<div class="db-subsection-body" id="dbSubTournaments">';
-        html += '<div id="dbGamesTournaments"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
-        html += '</div></div>';
-
-        // -- Subsection: Matches --
+        // -- Subsection: Matches (tournament only) --
         html += '<div class="db-subsection">';
         html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubMatches">';
         html += '<span>\u2694\uFE0F ' + L.subMatches + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
@@ -1313,6 +1305,21 @@
         html += '<div class="db-subsection-body" id="dbSubChallenges">';
         html += '<div id="dbGamesChallenges"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
         html += '</div></div>';
+
+        // -- Subsection: Tournaments --
+        html += '<div class="db-subsection">';
+        html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubTournaments">';
+        html += '<span>\uD83C\uDFC6 ' + L.subTournaments + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
+        html += '<div class="db-subsection-body" id="dbSubTournaments">';
+        html += '<div id="dbGamesTournaments"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
+        html += '</div></div>';
+
+        // -- Achievements (flat, bottom of page) --
+        var achLabel = isKg ? 'Жетишкендиктер' : isEn ? 'Achievements' : 'Достижения';
+        html += '<div style="margin-top:var(--space-xl,2rem);">';
+        html += '<h3 style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">\uD83C\uDFC5 ' + achLabel + '</h3>';
+        html += '<div id="dbGamesAchievements"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
+        html += '</div>';
 
         container.innerHTML = html;
 
@@ -1336,9 +1343,10 @@
         });
 
         // Load data
-        loadGamesTournaments(profile);
         loadGamesMatches(profile);
         loadGamesChallenges();
+        loadGamesTournaments(profile);
+        loadGamesAchievements(profile);
     }
 
     // ---- Games: Tournaments subsection ----
@@ -1491,6 +1499,11 @@
                 .not('winner_id', 'is', null)
                 .order('played_at', { ascending: false })
                 .limit(50);
+
+            // Filter out duel matches — show only tournament matches
+            if (res.data) {
+                res.data = res.data.filter(function(m) { return !m.match_type || m.match_type === 'tournament'; });
+            }
 
             if (res.error || !res.data || res.data.length === 0) {
                 container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\u2694\uFE0F</div><div class="db-empty-title">' + L.noMatches + '</div><div class="db-empty-text">' + L.noMatchesText + '</div></div>';
@@ -1815,6 +1828,87 @@
             card.innerHTML = html;
         } catch(e) {
             console.warn('[KSLT] games challenges error:', e);
+        }
+    }
+
+    // ---- Games: Achievements subsection ----
+    async function loadGamesAchievements(profile) {
+        var container = document.getElementById('dbGamesAchievements');
+        if (!container || !client) return;
+
+        var noAchLabel = isKg ? 'Жетишкендиктер жок' : isEn ? 'No achievements yet' : 'Нет достижений';
+
+        if (!profile || !profile.player_id) {
+            container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC5</div><div class="db-empty-title">' + noAchLabel + '</div></div>';
+            return;
+        }
+
+        try {
+            var results = await Promise.all([
+                client.from('badge_definitions').select('*').order('sort_order', { ascending: true }),
+                client.from('player_badges')
+                    .select('badge_id, earned_at, badge:badge_definitions(icon, name, name_en, name_kg, description, description_en, description_kg)')
+                    .eq('player_id', profile.player_id)
+                    .order('earned_at', { ascending: true })
+            ]);
+
+            var allDefs = results[0].data || [];
+            var earned = results[1].data || [];
+            var total = allDefs.length;
+
+            if (total === 0) {
+                container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC5</div><div class="db-empty-title">' + noAchLabel + '</div></div>';
+                return;
+            }
+
+            var earnedMap = {};
+            earned.forEach(function(pb) { earnedMap[pb.badge_id] = pb; });
+            var pct = Math.round(earned.length / total * 100);
+
+            function bName(b) { return isEn ? (b.name_en || b.name) : (isKg ? (b.name_kg || b.name) : b.name); }
+            function bDesc(b) { return isEn ? (b.description_en || b.description) : (isKg ? (b.description_kg || b.description) : b.description); }
+
+            var html = '';
+            // Progress
+            html += '<div class="db-badges-progress">';
+            html += '<div class="db-badges-progress-bar"><div class="db-badges-progress-fill" style="width:' + pct + '%"></div></div>';
+            html += '<span class="db-badges-progress-text">' + earned.length + '/' + total + '</span>';
+            html += '</div>';
+
+            // Earned badges
+            if (earned.length > 0) {
+                html += '<div class="db-badges-earned">';
+                earned.forEach(function(pb) {
+                    var b = pb.badge;
+                    if (!b) return;
+                    html += '<div class="db-badge-item db-badge-earned" title="' + bName(b) + '">';
+                    html += '<span class="db-badge-icon">' + b.icon + '</span>';
+                    html += '<span class="db-badge-name">' + bName(b) + '</span>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            // Nearest locked goals
+            var lockedDefs = allDefs.filter(function(d) { return !earnedMap[d.id] && d.condition_type !== 'manual'; });
+            var nearest = lockedDefs.slice(0, 3);
+            if (nearest.length > 0) {
+                var nextLabel = isKg ? 'Кийинки максаттар' : isEn ? 'Next goals' : 'Следующие цели';
+                html += '<div class="db-badges-next-label">' + nextLabel + '</div>';
+                html += '<div class="db-badges-earned">';
+                nearest.forEach(function(d) {
+                    html += '<div class="db-badge-item db-badge-locked" title="' + bDesc(d) + '">';
+                    html += '<span class="db-badge-icon db-badge-icon-locked">' + d.icon + '</span>';
+                    html += '<span class="db-badge-name">' + bName(d) + '</span>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        } catch(e) {
+            console.warn('[KSLT] games achievements error:', e);
+            container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC5</div><div class="db-empty-title">' + noAchLabel + '</div></div>';
         }
     }
 

@@ -982,7 +982,15 @@
         chalConfirmNotify: 'Send battle announcement?',
         chalDelete: 'Delete',
         chalConfirmDelete: 'Delete this battle? This cannot be undone.',
-        chalDeleted: 'Battle deleted'
+        chalDeleted: 'Battle deleted',
+        chalCompletedTab: 'Completed',
+        chalNoCompleted: 'No completed battles',
+        chalFinalize: 'Complete Match',
+        chalFinalizing: 'Completing...',
+        chalFinalized: 'Match completed!',
+        chalSaveDraft: 'Save',
+        chalDraftSaved: 'Score saved',
+        chalScore: 'Score'
     } : {
         dashboard: 'Дашборд',
         users: 'Пользователи',
@@ -1957,7 +1965,15 @@
         chalConfirmNotify: 'Отправить анонс баттла?',
         chalDelete: 'Удалить',
         chalConfirmDelete: 'Удалить этот баттл? Это действие необратимо.',
-        chalDeleted: 'Баттл удалён'
+        chalDeleted: 'Баттл удалён',
+        chalCompletedTab: 'Завершённые',
+        chalNoCompleted: 'Нет завершённых баттлов',
+        chalFinalize: 'Завершить матч',
+        chalFinalizing: 'Завершение...',
+        chalFinalized: 'Матч завершён!',
+        chalSaveDraft: 'Сохранить',
+        chalDraftSaved: 'Счёт сохранён',
+        chalScore: 'Счёт'
     };
 
     // Category map

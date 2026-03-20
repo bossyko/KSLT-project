@@ -13,6 +13,7 @@
     var subTab = 'accepted';
     var acceptedList = [];
     var publishedList = [];
+    var completedList = [];
     var allPlayers = [];
     var allCourts = [];
 
@@ -29,6 +30,7 @@
             '<div class="ad-rat-tabs" id="chalTabs" style="margin-bottom:20px;">' +
                 '<button class="ad-rat-tab' + (subTab === 'accepted' ? ' active' : '') + '" data-subtab="accepted">' + L.chalAccepted + '</button>' +
                 '<button class="ad-rat-tab' + (subTab === 'published' ? ' active' : '') + '" data-subtab="published">' + L.chalPublished + '</button>' +
+                '<button class="ad-rat-tab' + (subTab === 'completed' ? ' active' : '') + '" data-subtab="completed">' + L.chalCompletedTab + '</button>' +
             '</div>' +
             '<div id="chalContent"></div>';
 
@@ -52,21 +54,27 @@
     function loadData() {
         Promise.all([
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at')
+                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, score_draft')
                 .eq('status', 'accepted')
                 .eq('battle_published', false)
                 .order('accepted_at', { ascending: false }),
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, battle_notified_at')
+                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, battle_notified_at, score_draft')
                 .eq('battle_published', true)
+                .neq('status', 'completed')
                 .order('battle_published_at', { ascending: false }),
             A.client.from('players').select('id, name, name_en, photo').order('name'),
-            A.client.from('courts').select('id, name, name_en, street, street_en, district, district_en, city, city_en').order('name')
+            A.client.from('courts').select('id, name, name_en, street, street_en, district, district_en, city, city_en').order('name'),
+            A.client.from('challenges')
+                .select('id, challenger_player_id, opponent_player_id, status, battle_title, match_id, accepted_at')
+                .eq('status', 'completed')
+                .order('accepted_at', { ascending: false })
         ]).then(function(results) {
             acceptedList = results[0].data || [];
             publishedList = results[1].data || [];
             allPlayers = results[2].data || [];
             allCourts = results[3].data || [];
+            completedList = results[4].data || [];
 
             var pMap = {};
             allPlayers.forEach(function(p) { pMap[p.id] = p; });
@@ -78,7 +86,8 @@
 
     function renderSubTab() {
         if (subTab === 'accepted') renderAccepted();
-        else renderPublished();
+        else if (subTab === 'published') renderPublished();
+        else renderCompleted();
     }
 
     // ---- Accepted challenges (not yet published) ----
@@ -237,6 +246,62 @@
         el.querySelectorAll('[data-delete]').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 deleteBattle(btn.dataset.delete);
+            });
+        });
+    }
+
+    // ---- Completed battles ----
+    function renderCompleted() {
+        var el = document.getElementById('chalContent');
+        if (!el) return;
+        var pMap = A._chalPlayersMap || {};
+
+        if (completedList.length === 0) {
+            el.innerHTML = '<div class="ad-empty-state">' + L.chalNoCompleted + '</div>';
+            return;
+        }
+
+        var html = '<table class="ad-table"><thead><tr>' +
+            '<th>' + L.chalBattleTitle + '</th>' +
+            '<th>' + L.chalChallenger + '</th>' +
+            '<th>' + L.chalOpponent + '</th>' +
+            '<th>' + L.chalScore + '</th>' +
+            '<th>' + L.chalWinner + '</th>' +
+            '<th>' + L.chalDate + '</th>' +
+            '</tr></thead><tbody>';
+
+        completedList.forEach(function(c) {
+            var p1 = pMap[c.challenger_player_id] || {};
+            var p2 = pMap[c.opponent_player_id] || {};
+            var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
+            var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+            var date = c.accepted_at ? formatDate(c.accepted_at) : '-';
+
+            html += '<tr>' +
+                '<td><a href="../pages/challenge.html?id=' + c.id + '" target="_blank" style="color:var(--accent);font-weight:600;text-decoration:none;">' + A.esc(c.battle_title || '-') + '</a></td>' +
+                '<td>' + A.esc(p1Name) + '</td>' +
+                '<td>' + A.esc(p2Name) + '</td>' +
+                '<td id="chalCScore_' + c.id + '">...</td>' +
+                '<td id="chalCWinner_' + c.id + '">...</td>' +
+                '<td>' + date + '</td>' +
+                '</tr>';
+        });
+
+        html += '</tbody></table>';
+        el.innerHTML = html;
+
+        // Load match data for score + winner
+        completedList.forEach(function(c) {
+            if (!c.match_id) return;
+            A.client.from('matches').select('score, winner_id').eq('id', c.match_id).single().then(function(res) {
+                if (!res.data) return;
+                var scoreCell = document.getElementById('chalCScore_' + c.id);
+                var winnerCell = document.getElementById('chalCWinner_' + c.id);
+                if (scoreCell) scoreCell.textContent = (res.data.score || '-').replace(/\//g, ':');
+                if (winnerCell) {
+                    var wp = pMap[res.data.winner_id] || {};
+                    winnerCell.innerHTML = '<strong style="color:var(--accent);">' + A.esc(isEn ? (wp.name_en || wp.name || '?') : (wp.name || '?')) + '</strong>';
+                }
             });
         });
     }
@@ -689,21 +754,29 @@
         var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
         var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
 
-        var visibleSets = 2;
+        // Parse score_draft or existing match score to pre-fill
         var sv = [['','','',''],['','','',''],['','','','']];
+        var visibleSets = 2;
+        var draft = challenge.score_draft || '';
+        if (draft) {
+            var parsed = parseScoreToSets(draft);
+            sv = parsed.sets;
+            visibleSets = parsed.count;
+        }
 
         function setRowHtml(setNum, vals) {
             var id1 = 'chS' + setNum + 'P1';
             var id2 = 'chS' + setNum + 'P2';
             var idTB1 = 'chS' + setNum + 'TB1';
             var idTB2 = 'chS' + setNum + 'TB2';
+            var showTB = (parseInt(vals[0]) === 7 && parseInt(vals[1]) === 6) || (parseInt(vals[0]) === 6 && parseInt(vals[1]) === 7);
             return '<div class="ad-score-set-row" data-set="' + setNum + '" id="chSetRow' + setNum + '"' +
                 (setNum > visibleSets ? ' style="display:none"' : '') + '>' +
                 '<label class="ad-field-label" style="min-width:40px;">' + L.chalSet + ' ' + setNum + '</label>' +
                 '<input type="text" inputmode="numeric" maxlength="1" class="ad-field-input ad-score-input ad-set-game" id="' + id1 + '" value="' + vals[0] + '">' +
                 '<span style="font-weight:600;">:</span>' +
                 '<input type="text" inputmode="numeric" maxlength="1" class="ad-field-input ad-score-input ad-set-game" id="' + id2 + '" value="' + vals[1] + '">' +
-                '<span class="ad-tb-wrap" id="' + idTB1 + 'Wrap" style="display:none;">' +
+                '<span class="ad-tb-wrap" id="' + idTB1 + 'Wrap"' + (showTB ? '' : ' style="display:none;"') + '>' +
                     '<span style="font-size:11px;color:var(--text-secondary);margin-left:8px;">' + L.chalTiebreak + '</span>' +
                     '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-tb-input" id="' + idTB1 + '" value="' + vals[2] + '">' +
                     '<span style="font-weight:600;font-size:11px;">:</span>' +
@@ -735,8 +808,9 @@
                     '</div>' +
                     '<div id="chWinnerDisplay" style="text-align:center;margin:12px 0;font-weight:600;color:var(--accent);"></div>' +
                 '</div>' +
-                '<div class="ad-modal-footer">' +
-                    '<button class="ad-btn ad-btn-accent" id="chSaveScore">' + L.chalSave + '</button>' +
+                '<div class="ad-modal-footer" style="display:flex;gap:10px;">' +
+                    '<button class="ad-btn" id="chSaveDraft">' + L.chalSaveDraft + '</button>' +
+                    '<button class="ad-btn ad-btn-accent" id="chFinalizeScore">' + L.chalFinalize + '</button>' +
                 '</div>' +
             '</div>';
 
@@ -814,13 +888,46 @@
             else display.textContent = '';
         }
 
-        document.getElementById('chSaveScore').addEventListener('click', function() {
+        function collectScore() {
+            var sets = [];
+            for (var s = 1; s <= visibleSets; s++) {
+                var g1 = (document.getElementById('chS' + s + 'P1') || {}).value || '';
+                var g2 = (document.getElementById('chS' + s + 'P2') || {}).value || '';
+                if (!g1 && !g2) continue;
+                var setStr = g1 + '/' + g2;
+                var tb1 = (document.getElementById('chS' + s + 'TB1') || {}).value || '';
+                var tb2 = (document.getElementById('chS' + s + 'TB2') || {}).value || '';
+                if (tb1 && tb2) setStr += '(' + tb1 + '-' + tb2 + ')';
+                sets.push(setStr);
+            }
+            return sets.join(' ');
+        }
+
+        // Pre-fill winner display on open
+        updateWinnerDisplay();
+
+        // ---- Save Draft ----
+        document.getElementById('chSaveDraft').addEventListener('click', function() {
+            var score = collectScore();
+            if (!score) { A.showToast(isEn ? 'Enter at least one set' : 'Введите хотя бы один сет', 'error'); return; }
+            var btn = document.getElementById('chSaveDraft');
+            btn.disabled = true;
+            A.client.from('challenges').update({ score_draft: score }).eq('id', challenge.id).then(function(res) {
+                btn.disabled = false;
+                if (res.error) { A.showToast(res.error.message, 'error'); return; }
+                challenge.score_draft = score;
+                A.showToast(L.chalDraftSaved, 'success');
+            });
+        });
+
+        // ---- Finalize Match ----
+        document.getElementById('chFinalizeScore').addEventListener('click', function() {
             var sets = [];
             var p1Wins = 0, p2Wins = 0;
             for (var s = 1; s <= visibleSets; s++) {
                 var g1 = (document.getElementById('chS' + s + 'P1') || {}).value || '';
                 var g2 = (document.getElementById('chS' + s + 'P2') || {}).value || '';
-                if (!g1 || !g2) { A.showToast('Fill all sets'); return; }
+                if (!g1 || !g2) { A.showToast(isEn ? 'Fill all sets' : 'Заполните все сеты', 'error'); return; }
                 var setStr = g1 + '/' + g2;
                 var tb1 = (document.getElementById('chS' + s + 'TB1') || {}).value || '';
                 var tb2 = (document.getElementById('chS' + s + 'TB2') || {}).value || '';
@@ -829,26 +936,48 @@
                 if (parseInt(g1) > parseInt(g2)) p1Wins++;
                 else if (parseInt(g2) > parseInt(g1)) p2Wins++;
             }
-            if (p1Wins === 0 && p2Wins === 0) { A.showToast('No winner determined'); return; }
+            if (p1Wins < 2 && p2Wins < 2) {
+                A.showToast(isEn ? 'Winner must win 2 sets (2-0 or 2-1)' : 'Победитель должен выиграть 2 сета (2-0 или 2-1)', 'error');
+                return;
+            }
 
             var winnerId = p1Wins > p2Wins ? challenge.challenger_player_id : challenge.opponent_player_id;
+            var loserId = p1Wins > p2Wins ? challenge.opponent_player_id : challenge.challenger_player_id;
             var score = sets.join(' ');
-            var btn = document.getElementById('chSaveScore');
+            var btn = document.getElementById('chFinalizeScore');
             btn.disabled = true;
+            btn.textContent = L.chalFinalizing;
 
-            saveScore(challenge, score, winnerId).then(function(ok) {
+            finalizeMatch(challenge, score, winnerId, loserId).then(function(ok) {
                 if (ok) {
                     overlay.remove();
-                    A.showToast(L.chalScoreSaved, 'success');
+                    A.showToast(L.chalFinalized, 'success');
                     loadData();
                 } else {
                     btn.disabled = false;
+                    btn.textContent = L.chalFinalize;
                 }
             });
         });
     }
 
-    function saveScore(challenge, score, winnerId) {
+    // Parse score string "6/4 7/6(11-9) 6/3" → sets array for pre-fill
+    function parseScoreToSets(scoreStr) {
+        var sets = [['','','',''],['','','',''],['','','','']];
+        var parts = (scoreStr || '').trim().split(/\s+/);
+        var count = Math.min(parts.length, 3);
+        if (count < 2) count = 2;
+        for (var i = 0; i < parts.length && i < 3; i++) {
+            var m = parts[i].match(/^(\d)\/(\d)(?:\((\d{1,2})-(\d{1,2})\))?$/);
+            if (m) {
+                sets[i] = [m[1], m[2], m[3] || '', m[4] || ''];
+            }
+        }
+        return { sets: sets, count: count };
+    }
+
+    // Finalize: create match, update challenge, update player stats
+    function finalizeMatch(challenge, score, winnerId, loserId) {
         return A.client.from('challenges')
             .update({ voting_closed: true })
             .eq('id', challenge.id)
@@ -860,25 +989,66 @@
                     score: score,
                     status: 'completed',
                     round_number: 0,
-                    match_order: 0
+                    match_order: 0,
+                    match_type: 'duel'
                 }).select('id').single();
             }).then(function(matchRes) {
                 if (matchRes.error) {
                     console.error('Match insert error:', matchRes.error);
-                    A.showToast('Error: ' + matchRes.error.message);
+                    A.showToast('Error: ' + matchRes.error.message, 'error');
                     return false;
                 }
                 return A.client.from('challenges').update({
                     status: 'completed',
-                    match_id: matchRes.data.id
+                    match_id: matchRes.data.id,
+                    score_draft: null
                 }).eq('id', challenge.id).then(function(updRes) {
-                    return !updRes.error;
+                    if (updRes.error) return false;
+                    // Update player stats
+                    return updateDuelPlayerStats(winnerId, loserId);
                 });
             }).catch(function(err) {
-                console.error('Save score error:', err);
-                A.showToast('Error saving score');
+                console.error('Finalize match error:', err);
+                A.showToast(isEn ? 'Error finalizing match' : 'Ошибка завершения матча', 'error');
                 return false;
             });
+    }
+
+    // Update wins/losses + form for duel result
+    async function updateDuelPlayerStats(winnerId, loserId) {
+        try {
+            // Winner: wins + 1
+            var wRes = await A.client.from('players').select('wins').eq('id', winnerId).single();
+            await A.client.from('players').update({ wins: ((wRes.data || {}).wins || 0) + 1 }).eq('id', winnerId);
+
+            // Loser: losses + 1
+            var lRes = await A.client.from('players').select('losses').eq('id', loserId).single();
+            await A.client.from('players').update({ losses: ((lRes.data || {}).losses || 0) + 1 }).eq('id', loserId);
+
+            // Update form for both
+            await updatePlayerForm(winnerId);
+            await updatePlayerForm(loserId);
+
+            return true;
+        } catch (e) {
+            console.error('updateDuelPlayerStats error:', e);
+            return true; // non-critical, don't block finalization
+        }
+    }
+
+    async function updatePlayerForm(playerId) {
+        var res = await A.client.from('matches')
+            .select('winner_id')
+            .or('player1_id.eq.' + playerId + ',player2_id.eq.' + playerId)
+            .eq('status', 'completed')
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+        var form = (res.data || []).map(function(m) {
+            return m.winner_id === playerId ? 'W' : 'L';
+        });
+
+        await A.client.from('players').update({ form: form }).eq('id', playerId);
     }
 
     // ---- Notify: send TG group announcement with inline voting buttons ----

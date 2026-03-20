@@ -451,7 +451,7 @@
 
         // Query matches where these two players faced each other
         client.from('matches')
-            .select('id, player1_id, player2_id, winner_id, score, created_at, status')
+            .select('id, player1_id, player2_id, winner_id, score, created_at, status, match_type')
             .eq('status', 'completed')
             .or('and(player1_id.eq.' + p1 + ',player2_id.eq.' + p2 + '),and(player1_id.eq.' + p2 + ',player2_id.eq.' + p1 + ')')
             .order('created_at', { ascending: false })
@@ -481,12 +481,14 @@
         if (matches.length === 0) {
             listHtml = '<div class="ch-h2h-empty">' + L.noH2H + '</div>';
         } else {
+            var duelLabel = isEn ? '(Duel)' : (isKg ? '(Чакыруу)' : '(Вызов)');
             listHtml = '<div class="ch-h2h-list">';
             matches.forEach(function(m) {
                 var winName = m.winner_id === p1 ? c1Name : c2Name;
+                var typeTag = m.match_type === 'duel' ? ' <span style="color:var(--accent);font-size:0.8em;">' + duelLabel + '</span>' : '';
                 listHtml +=
                     '<div class="ch-h2h-match">' +
-                        '<span class="ch-h2h-date">' + formatDate(m.created_at) + '</span>' +
+                        '<span class="ch-h2h-date">' + formatDate(m.created_at) + typeTag + '</span>' +
                         '<span class="ch-h2h-score-text">' + esc(m.score || '-') + '</span>' +
                         '<span class="ch-h2h-winner">' + esc(winName) + '</span>' +
                     '</div>';

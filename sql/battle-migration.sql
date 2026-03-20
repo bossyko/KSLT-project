@@ -13,6 +13,7 @@ ALTER TABLE challenges ADD COLUMN IF NOT EXISTS banner_url TEXT;
 CREATE INDEX IF NOT EXISTS idx_challenges_battle ON challenges(battle_published) WHERE battle_published = true;
 
 -- 1b. RLS: everyone (including anon) can read published battles
+DROP POLICY IF EXISTS challenges_public_battles ON challenges;
 CREATE POLICY challenges_public_battles ON challenges
     FOR SELECT USING (battle_published = true);
 
@@ -33,21 +34,25 @@ CREATE INDEX IF NOT EXISTS idx_predictions_challenge ON challenge_predictions(ch
 ALTER TABLE challenge_predictions ENABLE ROW LEVEL SECURITY;
 
 -- Anon + authenticated: read all predictions
+DROP POLICY IF EXISTS "predictions_select_all" ON challenge_predictions;
 CREATE POLICY "predictions_select_all" ON challenge_predictions
     FOR SELECT USING (true);
 
 -- Authenticated: insert own vote (site)
+DROP POLICY IF EXISTS "predictions_insert_auth" ON challenge_predictions;
 CREATE POLICY "predictions_insert_auth" ON challenge_predictions
     FOR INSERT TO authenticated
     WITH CHECK (voter_type = 'site' AND voter_id = auth.uid()::TEXT);
 
 -- Authenticated: update own vote (site)
+DROP POLICY IF EXISTS "predictions_update_auth" ON challenge_predictions;
 CREATE POLICY "predictions_update_auth" ON challenge_predictions
     FOR UPDATE TO authenticated
     USING (voter_type = 'site' AND voter_id = auth.uid()::TEXT)
     WITH CHECK (voter_type = 'site' AND voter_id = auth.uid()::TEXT);
 
 -- Staff: full CRUD
+DROP POLICY IF EXISTS "predictions_staff_all" ON challenge_predictions;
 CREATE POLICY "predictions_staff_all" ON challenge_predictions
     FOR ALL USING (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'manager'))
@@ -62,7 +67,7 @@ RETURNS TABLE(player_id TEXT, votes BIGINT) AS $$
     FROM challenge_predictions
     WHERE challenge_id = p_challenge_id
     GROUP BY predicted_winner_id;
-$$ LANGUAGE sql STABLE;
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
 
 -- 5. RPC: public battle data (no auth required)
 CREATE OR REPLACE FUNCTION get_battle_public(p_challenge_id UUID)
@@ -87,10 +92,16 @@ RETURNS JSON AS $$
         WHERE c.id = p_challenge_id
           AND c.battle_published = true
     ) r;
-$$ LANGUAGE sql STABLE;
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
 
 -- 6. Grant RPC access to anon
 GRANT EXECUTE ON FUNCTION get_battle_public(UUID) TO anon;
 GRANT EXECUTE ON FUNCTION get_battle_public(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_battle_votes(UUID) TO anon;
 GRANT EXECUTE ON FUNCTION get_battle_votes(UUID) TO authenticated;
+
+-- 7. Match type: tournament (default) or duel (challenge battle)
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS match_type TEXT DEFAULT 'tournament';
+
+-- 8. Score draft for interrupted matches
+ALTER TABLE challenges ADD COLUMN IF NOT EXISTS score_draft TEXT;
