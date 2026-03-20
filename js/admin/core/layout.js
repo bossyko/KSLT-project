@@ -199,7 +199,7 @@
             // Activity tables
             '<div class="ad-dash-activity-grid">' +
                 buildActivityTableHtml('adDashPendingRegs', L.actPendingRegs, 'warning',
-                    [L.thPlayer, L.thTournament, L.thDate], 'tournaments') +
+                    [L.thPlayer, L.thCategory || (isEn ? 'Category' : 'Категория'), L.thRating || (isEn ? 'Rating' : 'Рейтинг'), L.thTournament, L.thDate, ''], 'tournaments') +
                 buildActivityTableHtml('adDashApproaching', L.actApproaching, 'warning',
                     [L.thName, L.thExpires, L.thDaysLeft], 'users') +
                 buildActivityTableHtml('adDashOverdue', L.actOverdue, 'danger',
@@ -303,7 +303,7 @@
             A.client.from('memberships').select('id, profile_id, expires_at, profiles!profile_id(full_name, email)')
                 .eq('status', 'active').lt('expires_at', today)
                 .order('expires_at', { ascending: true }).limit(10),                                                                   // [12] overdue list
-            A.client.from('tournament_registrations').select('id, player_id, tournament_id, registered_at, players(name), tournaments(title)')
+            A.client.from('tournament_registrations').select('id, player_id, tournament_id, registered_at, players(id, name, category_id, points), tournaments(title)')
                 .eq('status', 'pending')
                 .order('registered_at', { ascending: false }).limit(10),                                                               // [13] pending regs list
             A.client.from('profiles').select('id,full_name,email,role,avatar_url,created_at')
@@ -380,13 +380,69 @@
         // Pending registrations
         fillDashTable('adDashPendingRegs', results[13], function(r) {
             var playerName = r.players ? A.esc(r.players.name || '') : L.noData;
+            var playerId = r.players ? r.players.id : '';
+            var catId = r.players ? r.players.category_id : '';
+            var catObj = catId && A.categoriesMap ? A.categoriesMap[catId] : null;
+            var catName = catObj ? (isEn ? (catObj.name_en || catObj.name) : catObj.name) : '—';
+            var pts = r.players ? (r.players.points || 0) : 0;
             var trnName = r.tournaments ? A.esc(r.tournaments.title || '') : L.noData;
+            var trnId = r.tournament_id || '';
             return '<tr>' +
-                '<td style="font-weight:500;">' + playerName + '</td>' +
-                '<td>' + trnName + '</td>' +
+                '<td style="font-weight:500;"><a href="#" class="ad-dash-player-link" data-player-id="' + A.esc(playerId) + '" style="color:var(--text-primary);text-decoration:none;cursor:pointer;">' + playerName + '</a></td>' +
+                '<td style="font-size:0.85rem;color:var(--text-dim);">' + A.esc(catName) + '</td>' +
+                '<td style="font-size:0.85rem;text-align:center;">' + pts + '</td>' +
+                '<td><a href="#" class="ad-dash-trn-link" data-trn-id="' + A.esc(trnId) + '" style="color:var(--accent);text-decoration:none;cursor:pointer;">' + trnName + '</a></td>' +
                 '<td>' + A.fmtDate(r.registered_at) + '</td>' +
+                '<td style="white-space:nowrap;text-align:right;">' +
+                    '<button class="ad-dash-reg-approve" data-reg-id="' + r.id + '" title="' + L.regApproved + '" style="background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.4);color:#4caf50;border-radius:6px;padding:5px 10px;cursor:pointer;margin-right:8px;font-size:1rem;">✓</button>' +
+                    '<button class="ad-dash-reg-reject" data-reg-id="' + r.id + '" title="' + L.regRejected + '" style="background:rgba(244,67,54,0.15);border:1px solid rgba(244,67,54,0.4);color:#f44336;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:1rem;">✗</button>' +
+                '</td>' +
             '</tr>';
         }, L.noPendingRegs);
+
+        // Pending regs: clicks (tournament link, player link, approve/reject)
+        var pendingTable = document.getElementById('adDashPendingRegs');
+        if (pendingTable) {
+            pendingTable.addEventListener('click', function(e) {
+                // Tournament link → bracket tab (clear container first to avoid flash)
+                var link = e.target.closest('.ad-dash-trn-link');
+                if (link) {
+                    e.preventDefault();
+                    var trnId = link.dataset.trnId;
+                    if (trnId) {
+                        var trnContainer = document.getElementById('ad-tournaments');
+                        if (trnContainer) trnContainer.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-dim);">...</div>';
+                        A.switchTab('tournaments', 'bracket', trnId);
+                    }
+                    return;
+                }
+                // Player link → edit player in admin
+                var playerLink = e.target.closest('.ad-dash-player-link');
+                if (playerLink) {
+                    e.preventDefault();
+                    var pId = playerLink.dataset.playerId;
+                    if (pId) A.switchTab('players', 'edit', pId);
+                    return;
+                }
+                // Approve button
+                var approveBtn = e.target.closest('.ad-dash-reg-approve');
+                if (approveBtn) {
+                    var regId = approveBtn.dataset.regId;
+                    approveBtn.disabled = true;
+                    A.client.from('tournament_registrations').update({ status: 'approved' }).eq('id', regId)
+                        .then(function() { A.showToast(L.regApproved); loadStats(); });
+                    return;
+                }
+                // Reject button
+                var rejectBtn = e.target.closest('.ad-dash-reg-reject');
+                if (rejectBtn) {
+                    var regId2 = rejectBtn.dataset.regId;
+                    rejectBtn.disabled = true;
+                    A.client.from('tournament_registrations').update({ status: 'rejected' }).eq('id', regId2)
+                        .then(function() { A.showToast(L.regRejected); loadStats(); });
+                }
+            });
+        }
 
         // Recent registrations
         fillDashTable('adDashRecentUsers', results[14], function(u) {

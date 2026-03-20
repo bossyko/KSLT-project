@@ -607,9 +607,11 @@
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
         var waitlistRegs = registrations.filter(function(r) { return r.status === 'waitlist'; })
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
-        var withdrawn = registrations.filter(function(r) { return r.status === 'withdrawn' || r.status === 'rejected'; });
+        var rejected = registrations.filter(function(r) { return r.status === 'rejected'; })
+            .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
+        var withdrawn = registrations.filter(function(r) { return r.status === 'withdrawn'; });
 
-        if (mainDraw.length === 0 && waitlistRegs.length === 0 && withdrawn.length === 0) {
+        if (mainDraw.length === 0 && waitlistRegs.length === 0 && rejected.length === 0 && withdrawn.length === 0) {
             html += '<div class="ad-empty-state"><p>' + L.noRegistrations + '</p></div>';
         } else {
             var thCategory = isEn ? 'Category' : 'Категория';
@@ -653,6 +655,41 @@
                 html += '</tbody></table></div>';
             } else {
                 html += '<div class="ad-empty-state" style="padding:16px 0;"><p>' + L.regNoWaitlist + '</p></div>';
+            }
+
+            // ---- Rejected (admin only) ----
+            if (A.currentRole === 'admin' && rejected.length > 0) {
+                var rejTitle = isEn ? 'Rejected' : 'Отклонённые';
+                html += '<h3 class="ad-reg-section-title" style="margin-top:24px;color:#f44336;">' + rejTitle + ' <span class="ad-badge" style="background:rgba(244,67,54,0.15);color:#f44336;">' + rejected.length + '</span></h3>';
+                html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                    regTableHead.replace('GRP', 'rejected').replace('<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="rejected"></th>', '') +
+                '</tr></thead><tbody>';
+                rejected.forEach(function(reg, idx) {
+                    var player = reg.players || playersMap[reg.player_id] || {};
+                    var pmEntry = playersMap[reg.player_id] || {};
+                    var pName = isEn ? (player.name_en || player.name || reg.player_id) : (player.name || reg.player_id);
+                    var catId = player.category_id || pmEntry.category_id || '';
+                    var catParts = catId.split('-');
+                    var catLabel = catParts.length > 1
+                        ? catParts.slice(1).map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-')
+                        : catId || '—';
+                    var rankVal = pmEntry.rank || '—';
+                    var regDT = '';
+                    if (reg.registered_at) {
+                        var d = new Date(reg.registered_at);
+                        regDT = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
+                            ' <span style="color:var(--text-dim);">' +
+                            d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
+                    }
+                    html += '<tr style="opacity:0.6;">' +
+                        '<td style="text-align:center;padding:4px 6px;">' + (idx + 1) + '</td>' +
+                        '<td style="text-align:center;padding:4px 6px;font-size:0.65rem;color:var(--accent);font-weight:600;">' + rankVal + '</td>' +
+                        '<td>' + A.esc(pName) + '</td>' +
+                        '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
+                        '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
+                    '</tr>';
+                });
+                html += '</tbody></table></div>';
             }
         }
 
