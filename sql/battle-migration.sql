@@ -12,6 +12,10 @@ ALTER TABLE challenges ADD COLUMN IF NOT EXISTS banner_url TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_challenges_battle ON challenges(battle_published) WHERE battle_published = true;
 
+-- 1b. RLS: everyone (including anon) can read published battles
+CREATE POLICY challenges_public_battles ON challenges
+    FOR SELECT USING (battle_published = true);
+
 -- 2. Predictions table (voting)
 CREATE TABLE IF NOT EXISTS challenge_predictions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
