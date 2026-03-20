@@ -173,6 +173,24 @@
 - [x] Admin: delete battle, clickable title, broadcast tracking (battle_notified_at)
 - [x] Breadcrumb: sticky back navigation (from home or tournaments), replaces old back link
 - [x] Score modal: closes only on success, button re-enables on error
+- [x] Match finalization: Save Draft + Finalize Match (two-step), player wins/losses/form update
+- [x] Match type: tournament vs duel — duel matches separated from tournament stats
+- [x] Completed tab in admin challenges section
+- [x] H2H duel label on challenge detail page
+
+## Admin Dashboard Improvements ✅
+
+- [x] Pending Registrations: quick approve/reject buttons on dashboard
+- [x] Pending Registrations: clickable tournament → bracket management
+- [x] Pending Registrations: clickable player → player edit form
+- [x] Pending Registrations: added Category and Rating columns
+- [x] Rejected registrations tab in tournament bracket (admin only)
+
+## Player Profile Improvements ✅
+
+- [x] Reordered sections: Matches → Challenges → Tournaments → Achievements (bottom)
+- [x] Filtered duel matches from Matches section (duels only in Challenges)
+- [x] Applied to both dashboard (personal) and player.html (public profile)
 
 ## Ideas / Future
 
