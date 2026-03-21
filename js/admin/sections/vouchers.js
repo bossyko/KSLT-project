@@ -467,7 +467,7 @@
             '<div class="ad-modal-overlay" id="adVchModal">' +
                 '<div class="ad-modal" style="max-width:500px;">' +
                     '<div class="ad-modal-header">' +
-                        '<h3>🎫 ' + (isEn ? 'Voucher Details' : 'Детали ваучера') + '</h3>' +
+                        '<h3>🎫 ' + (isEn ? 'Discount Details' : 'Детали скидки') + '</h3>' +
                         '<button class="ad-modal-close" id="adVchModalClose">✕</button>' +
                     '</div>' +
                     '<div class="ad-modal-body" style="padding:20px;">' +

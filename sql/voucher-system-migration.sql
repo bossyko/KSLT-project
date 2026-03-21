@@ -128,7 +128,7 @@ BEGIN
     END IF;
 
     -- Get player name from profile
-    SELECT COALESCE(full_name, first_name || ' ' || last_name, 'Member')
+    SELECT COALESCE(full_name, 'Member')
     INTO v_player_name
     FROM profiles WHERE id = v_user_id;
 

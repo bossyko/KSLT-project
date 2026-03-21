@@ -310,10 +310,19 @@ discount_vouchers     — ваучеры скидок (членство)
 ├── entity_id, entity_name
 ├── service_id, service_name
 ├── discount_percent  — процент скидки
-├── qr_token          — уникальный токен для QR-кода
+├── qr_token          — уникальный токен для QR-кода (hex, 32 char)
 ├── status            — active / used / expired / cancelled
-├── created_at, expires_at, used_at
+├── created_at        — дата создания
+├── expires_at        — дата истечения (по умолчанию +7 дней)
+├── used_at           — дата использования
 └── confirmed_by_ip   — IP при верификации
+
+Логика RPC generate_voucher:
+1. Проверка авторизации + активного членства
+2. Auto-expire старых ваучеров (expires_at < NOW())
+3. Блокировка: активный ваучер на ту же услугу → error 'active_voucher_exists'
+4. Дневной лимит: 1 ваучер на услугу в 24ч → error 'daily_limit'
+5. Создание ваучера с QR-токеном (7 дней)
 
 deleted_accounts      — лог удалённых аккаунтов
 ├── profile_id        — ID удалённого профиля

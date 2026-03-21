@@ -54,23 +54,23 @@
         searchPlaceholder: 'Машыктыруучу издөө...',
         recommendedBadge: 'KSLT сунуштайт',
         discountTitle: 'KSLT мүчөлөрүнө арзандатуу',
-        getVoucher: 'Ваучер алуу',
+        getVoucher: 'Арзандатуу алуу',
         discountGuest: 'Арзандатуу алуу үчүн катталыңыз жана KSLT мүчөсү болуңуз',
         discountRegistered: 'Арзандатуу алуу үчүн KSLT мүчөсү болуңуз',
-        voucherReady: 'Ваучериңиз даяр!',
-        voucherLimit: 'Активдүү ваучериңиз бар',
+        voucherReady: 'Арзандатууңуз даяр!',
+        voucherLimit: 'Активдүү арзандатууңуз бар',
         voucherExpires: 'Мөөнөтү',
         voucherDownload: 'QR жүктөө',
         voucherDiscount: 'Арзандатуу',
         voucherService: 'Кызмат',
-        myVouchers: 'Менин ваучерлерим',
+        myVouchers: 'Менин арзандатууларым',
         voucherActive: 'Активдүү',
         voucherUsed: 'Колдонулду',
         voucherExpired: 'Мөөнөтү бүттү',
         voucherShowQR: 'QR',
-        noVouchersYet: 'Ваучерлер жок',
+        noVouchersYet: 'Арзандатуулар жок',
         pickService: 'Кызматты тандаңыз',
-        pickSubmit: 'Ваучер алуу',
+        pickSubmit: 'Арзандатуу алуу',
         noDiscountsConfigured: 'Арзандатуу жок'
     } : {
         heroTitle: "Тренеры KSLT",
@@ -104,23 +104,23 @@
         searchPlaceholder: "Поиск тренера...",
         recommendedBadge: "Рекомендован KSLT",
         discountTitle: "Скидки для членов KSLT",
-        getVoucher: "Получить ваучер",
+        getVoucher: "Получить скидку",
         discountGuest: "Зарегистрируйтесь и оформите членство для скидок",
         discountRegistered: "Оформите членство KSLT для скидок",
-        voucherReady: "Ваш ваучер готов!",
-        voucherLimit: "У вас есть активный ваучер",
-        voucherExpires: "Действителен до",
+        voucherReady: "Ваша скидка готова!",
+        voucherLimit: "У вас есть активная скидка",
+        voucherExpires: "Действительна до",
         voucherDownload: "Скачать QR",
         voucherDiscount: "Скидка",
         voucherService: "Услуга",
-        myVouchers: "Мои ваучеры",
-        voucherActive: "Активен",
-        voucherUsed: "Использован",
-        voucherExpired: "Истёк",
+        myVouchers: "Мои скидки",
+        voucherActive: "Активна",
+        voucherUsed: "Использована",
+        voucherExpired: "Истекла",
         voucherShowQR: "QR",
-        noVouchersYet: "Ваучеров пока нет",
+        noVouchersYet: "Скидок пока нет",
         pickService: "Выберите услугу",
-        pickSubmit: "Получить ваучер",
+        pickSubmit: "Получить скидку",
         noDiscountsConfigured: "Скидки пока не настроены"
     });
 
@@ -974,12 +974,12 @@
 
             if (result.error) {
                 console.error('Voucher RPC error:', result.error);
-                showToast(result.error.message || (isEn ? 'Error generating voucher' : (isKg ? 'Ваучер түзүүдө ката' : 'Ошибка генерации ваучера')), 'error');
+                showToast(result.error.message || (isEn ? 'Error getting discount' : (isKg ? 'Арзандатуу алууда ката' : 'Ошибка получения скидки')), 'error');
                 return;
             }
             var data = result.data;
             if (!data) {
-                showToast(isEn ? 'Error generating voucher' : (isKg ? 'Ваучер түзүүдө ката' : 'Ошибка генерации ваучера'), 'error');
+                showToast(isEn ? 'Error getting discount' : (isKg ? 'Арзандатуу алууда ката' : 'Ошибка получения скидки'), 'error');
                 return;
             }
             if (data.error) {
@@ -1144,10 +1144,10 @@
         var title, desc;
         if (reason === 'daily') {
             title = isEn ? 'Daily limit reached' : (isKg ? 'Күнүмдүк лимит' : 'Дневной лимит');
-            desc = isEn ? 'You can get a new voucher for this service tomorrow' : (isKg ? 'Бул кызмат үчүн жаңы ваучерди эртең ала аласыз' : 'Новый ваучер на эту услугу можно получить завтра');
+            desc = isEn ? 'You can get a new discount for this service tomorrow' : (isKg ? 'Бул кызмат үчүн жаңы арзандатууну эртең ала аласыз' : 'Новую скидку на эту услугу можно получить завтра');
         } else {
             title = L.voucherLimit;
-            desc = isEn ? 'Use or wait for your current voucher to expire' : (isKg ? 'Учурдагы ваучериңизди колдонуңуз же мөөнөтү бүткөнчө күтүңүз' : 'Используйте текущий ваучер или дождитесь его истечения');
+            desc = isEn ? 'Use or wait for your current discount to expire' : (isKg ? 'Учурдагы арзандатууңузду колдонуңуз же мөөнөтү бүткөнчө күтүңүз' : 'Используйте текущую скидку или дождитесь её истечения');
         }
 
         var modal = document.createElement('div');
