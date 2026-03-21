@@ -3582,8 +3582,9 @@
             '<div class="db-card db-settings-section">' +
                 '<div class="db-card-title">' + L.language + '</div>' +
                 '<div class="db-btn-row">' +
-                    '<a href="dashboard.html#settings" class="db-btn ' + (!isEn ? 'db-btn-primary' : 'db-btn-outline') + '">Русский</a>' +
+                    '<a href="dashboard.html#settings" class="db-btn ' + (!isEn && !isKg ? 'db-btn-primary' : 'db-btn-outline') + '">Русский</a>' +
                     '<a href="dashboard-en.html#settings" class="db-btn ' + (isEn ? 'db-btn-primary' : 'db-btn-outline') + '">English</a>' +
+                    '<a href="dashboard-kg.html#settings" class="db-btn ' + (isKg ? 'db-btn-primary' : 'db-btn-outline') + '">Кыргызча</a>' +
                 '</div>' +
             '</div>' +
 
