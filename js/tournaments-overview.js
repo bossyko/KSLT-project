@@ -72,6 +72,23 @@
         gender: 'Пол'
     });
 
+    var SL = isEn ? {
+        totalLabel: 'Tournaments',
+        participantsLabel: 'Participants',
+        prizeLabel: 'Prize Fund',
+        categoriesLabel: 'Categories'
+    } : (isKg ? {
+        totalLabel: 'Мелдештер',
+        participantsLabel: 'Катышуучулар',
+        prizeLabel: 'Сыйлык фонду',
+        categoriesLabel: 'Категориялар'
+    } : {
+        totalLabel: 'Турниров',
+        participantsLabel: 'Участников',
+        prizeLabel: 'Призовой фонд',
+        categoriesLabel: 'Категорий'
+    });
+
     var tournamentPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
     var tournamentsPage = isEn ? 'tournaments-en.html' : (isKg ? 'tournaments-kg.html' : 'tournaments.html');
 
@@ -199,7 +216,68 @@
                 '<span class="to-hero-badge">' + L.heroBadge + '</span>' +
                 '<h1>' + L.heroTitle + '</h1>' +
                 '<p>' + L.heroDesc + '</p>' +
+                '<div class="tournament-hero-stats">' +
+                    '<div class="hero-stat"><span class="hero-stat-value" id="toStatTotal">&mdash;</span><span class="hero-stat-label">' + SL.totalLabel + '</span></div>' +
+                    '<div class="hero-stat"><span class="hero-stat-value" id="toStatParticipants">&mdash;</span><span class="hero-stat-label">' + SL.participantsLabel + '</span></div>' +
+                    '<div class="hero-stat"><span class="hero-stat-value" id="toStatPrize">&mdash;</span><span class="hero-stat-label">' + SL.prizeLabel + '</span></div>' +
+                    '<div class="hero-stat"><span class="hero-stat-value" id="toStatCategories">&mdash;</span><span class="hero-stat-label">' + SL.categoriesLabel + '</span></div>' +
+                '</div>' +
             '</div>';
+        loadOverviewStats();
+    }
+
+    function formatPrize(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (num >= 1000) return Math.round(num / 1000) + 'K';
+        return String(num);
+    }
+
+    async function loadOverviewStats() {
+        if (!client) return;
+        try {
+            var res = await client.from('tournaments')
+                .select('id, prize_fund, published_at, category_id');
+            var all = (res.data || []).filter(function(t) { return t.published_at !== null; });
+            if (all.length === 0) all = res.data || [];
+
+            var el = document.getElementById('toStatTotal');
+            if (el) el.textContent = all.length;
+
+            // Unique categories
+            var cats = {};
+            all.forEach(function(t) {
+                var cat = (t.category_id || '').split('-').pop();
+                if (cat) cats[cat] = true;
+            });
+            el = document.getElementById('toStatCategories');
+            if (el) el.textContent = Object.keys(cats).length;
+
+            // Prize fund
+            var totalPrize = 0;
+            all.forEach(function(t) {
+                if (t.prize_fund != null) {
+                    var match = String(t.prize_fund).match(/[\d][\d\s,.\u00a0]*/);
+                    if (match) {
+                        var num = parseInt(match[0].replace(/[\s,.\u00a0]/g, ''), 10);
+                        if (!isNaN(num) && num <= 100000000) totalPrize += num;
+                    }
+                }
+            });
+            el = document.getElementById('toStatPrize');
+            if (el) el.textContent = formatPrize(totalPrize);
+
+            // Participants
+            try {
+                var ids = all.map(function(t) { return t.id; });
+                if (ids.length > 0) {
+                    var regs = await client.from('tournament_registrations')
+                        .select('*', { count: 'exact', head: true })
+                        .in('tournament_id', ids);
+                    el = document.getElementById('toStatParticipants');
+                    if (el) el.textContent = regs.count || 0;
+                }
+            } catch(e) {}
+        } catch(e) {}
     }
 
     async function loadTournaments() {

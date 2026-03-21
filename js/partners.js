@@ -241,7 +241,15 @@
             { key: 'female', label: L.filterWomen }
         ];
 
-        var html = '';
+        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
+        var html = '<a href="' + servicesLink + '" class="kslt-back kslt-back-inside">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
+
+        html += '<div class="pt-search-wrap">' +
+            '<svg class="pt-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+            '<input type="text" class="pt-search" id="ptSearch" placeholder="' + L.searchPlaceholder + '">' +
+            '</div>';
+
+        html += '<div class="pt-filter-row">';
         for (var i = 0; i < filters.length; i++) {
             var f = filters[i];
             html += '<button class="pt-filter-btn' + (f.key === _currentFilter ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
@@ -259,17 +267,9 @@
             html += '<option value="' + ntrpRanges[n].value + '">' + ntrpRanges[n].label + '</option>';
         }
         html += '</select>';
-
-        html += '<div class="pt-search-wrap"><input type="text" class="pt-search" id="ptSearch" placeholder="' + L.searchPlaceholder + '"></div>';
+        html += '</div>';
 
         el.innerHTML = html;
-
-        // Back link before filters
-        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
-        var backWrap = document.createElement('div');
-        backWrap.className = 'kslt-back-wrap';
-        backWrap.innerHTML = '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
-        el.parentNode.insertBefore(backWrap, el);
 
         document.getElementById('ptSearch').addEventListener('input', function(e) {
             _searchQuery = e.target.value.toLowerCase().trim();
@@ -382,29 +382,31 @@
             renderPagination(0, 1);
         } else if (isGuest) {
             // Guest: no pagination, limited view
-            var total = Math.min(filtered.length, GUEST_VISIBLE + GUEST_BLURRED);
+            // NTRP filter = stricter limit (3 visible + 2 blur)
+            var hasFilter = _ntrpFilter || _currentFilter !== 'all';
+            var guestVis = hasFilter ? 4 : GUEST_VISIBLE;
+            var guestBlur = _ntrpFilter ? 2 : GUEST_BLURRED;
+            var total = Math.min(filtered.length, guestVis + guestBlur);
 
             html = '<div class="pt-grid">';
             for (var i = 0; i < total; i++) {
                 var blurClass = '';
-                if (i >= GUEST_VISIBLE) {
-                    var level = i - GUEST_VISIBLE + 1;
+                if (i >= guestVis) {
+                    var level = i - guestVis + 1;
                     blurClass = ' pt-card-blur pt-card-blur-' + level;
                 }
                 html += renderCard(filtered[i], blurClass);
             }
             html += '</div>';
 
-            // Guest CTA overlay
-            if (filtered.length > GUEST_VISIBLE) {
-                var hiddenCount = filtered.length - GUEST_VISIBLE;
+            // Guest CTA overlay — always show when NTRP filter active
+            if (filtered.length > guestVis || _ntrpFilter) {
                 html += '<div class="pt-guest-overlay">' +
                     '<div class="pt-guest-cta">' +
                         '<div class="pt-guest-icon">' + lockSvg + '</div>' +
                         '<h3 class="pt-guest-title">' + L.guestTitle + '</h3>' +
                         '<p class="pt-guest-text">' + L.guestText + '</p>' +
                         '<a href="' + authPage + '" class="pt-guest-btn">' + L.guestBtn + '</a>' +
-                        '<div class="pt-guest-hint">+' + hiddenCount + ' ' + L.guestHidden + '</div>' +
                     '</div>' +
                 '</div>';
             }

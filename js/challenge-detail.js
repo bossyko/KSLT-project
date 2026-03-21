@@ -25,6 +25,8 @@
         votingUntil: 'Voting open until',
         loginToVote: 'Log in to vote',
         yourVote: 'Your vote',
+        youVotedFor: 'You voted for',
+        youVotedViaTg: 'You voted via Telegram for',
         voteChanged: 'Vote changed!',
         voteAccepted: 'Vote accepted!',
         alreadyVotedTg: 'You already voted via Telegram!',
@@ -57,6 +59,8 @@
         votingUntil: 'Добуш берүү ачык',
         loginToVote: 'Добуш берүү үчүн кириңиз',
         yourVote: 'Сиздин добушуңуз',
+        youVotedFor: 'Сиз добуш бердиңиз',
+        youVotedViaTg: 'Telegram аркылуу добуш бердиңиз',
         voteChanged: 'Добуш өзгөртүлдү!',
         voteAccepted: 'Добуш кабыл алынды!',
         alreadyVotedTg: 'Сиз Телеграмда добуш бергенсиз!',
@@ -89,6 +93,8 @@
         votingUntil: 'Голосование открыто до',
         loginToVote: 'Войдите, чтобы голосовать',
         yourVote: 'Ваш голос',
+        youVotedFor: 'Вы проголосовали за',
+        youVotedViaTg: 'Вы голосовали в Telegram за',
         voteChanged: 'Голос изменён!',
         voteAccepted: 'Голос принят!',
         alreadyVotedTg: 'Вы уже голосовали в Telegram!',
@@ -295,13 +301,27 @@
             }
         }
         var closed = b.voting_closed || b.status === 'completed' || timeExpired;
-        var canVote = _userId && !closed;
+        var alreadyVoted = !!_myVotePlayerId;
+        var canVote = _userId && !closed && !alreadyVoted;
 
-        // Check if user already voted
-        var myVoteHtml = '';
-        if (_userId && !closed) {
-            // We'll load user's vote async
-            loadMyVote();
+        // Button states: disabled if closed OR already voted
+        var btnDisabled = closed || alreadyVoted;
+        var btn1Selected = alreadyVoted && _myVotePlayerId === c1Id;
+        var btn2Selected = alreadyVoted && _myVotePlayerId === c2Id;
+
+        var btn1Class = 'ch-vote-btn' + (btnDisabled ? ' disabled' : '') + (btn1Selected ? ' selected' : '');
+        var btn2Class = 'ch-vote-btn' + (btnDisabled ? ' disabled' : '') + (btn2Selected ? ' selected' : '');
+
+        var btn1Check = btn1Selected ? '<span class="ch-vote-check">&#10003;</span> ' : '';
+        var btn2Check = btn2Selected ? '<span class="ch-vote-check">&#10003;</span> ' : '';
+
+        // Voted badge
+        var votedBadgeHtml = '';
+        if (alreadyVoted) {
+            var votedName = _myVotePlayerId === c1Id ? c1Name : c2Name;
+            var voteLabel = _myVoteSource === 'telegram' ? L.youVotedViaTg : L.youVotedFor;
+            var tgIcon = _myVoteSource === 'telegram' ? '<svg class="ch-tg-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> ' : '';
+            votedBadgeHtml = '<div class="ch-voted-badge">' + tgIcon + '&#10003; ' + voteLabel + ' <strong>' + esc(votedName) + '</strong></div>';
         }
 
         section.innerHTML =
@@ -316,11 +336,11 @@
                     '</div>' +
                 '</div>' +
                 '<div class="ch-vote-buttons" id="voteButtons">' +
-                    '<button class="ch-vote-btn' + (closed ? ' disabled' : '') + '" id="voteBtn1" data-player="' + c1Id + '"' + (closed ? ' disabled' : '') + '>' +
-                        '<span class="ch-vote-dot-red">●</span> ' + esc(c1Name) + ' <small>(' + v1 + ' ' + L.votes + ')</small>' +
+                    '<button class="' + btn1Class + '" id="voteBtn1" data-player="' + c1Id + '"' + (btnDisabled ? ' disabled' : '') + '>' +
+                        btn1Check + '<span class="ch-vote-dot-red">●</span> ' + esc(c1Name) + ' <small>(' + v1 + ' ' + L.votes + ')</small>' +
                     '</button>' +
-                    '<button class="ch-vote-btn' + (closed ? ' disabled' : '') + '" id="voteBtn2" data-player="' + c2Id + '"' + (closed ? ' disabled' : '') + '>' +
-                        '<span class="ch-vote-dot-blue">●</span> ' + esc(c2Name) + ' <small>(' + v2 + ' ' + L.votes + ')</small>' +
+                    '<button class="' + btn2Class + '" id="voteBtn2" data-player="' + c2Id + '"' + (btnDisabled ? ' disabled' : '') + '>' +
+                        btn2Check + '<span class="ch-vote-dot-blue">●</span> ' + esc(c2Name) + ' <small>(' + v2 + ' ' + L.votes + ')</small>' +
                     '</button>' +
                 '</div>' +
                 '<div class="ch-voting-total">' + L.totalVotes + ': ' + total + '</div>' +
@@ -330,44 +350,81 @@
                         ? '<div class="ch-voting-until">' + L.votingUntil + ' ' + matchDate + ' ' + matchTime + '</div>'
                         : '')) +
                 (!_userId && !closed ? '<div class="ch-voting-login"><a href="' + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html')) + '">' + L.loginToVote + '</a></div>' : '') +
-                '<div id="voteStatus"></div>' +
+                '<div id="voteStatus">' + votedBadgeHtml + '</div>' +
             '</div>';
 
+        // Attach vote click handlers only if can vote
         if (canVote) {
             var btn1 = document.getElementById('voteBtn1');
             var btn2 = document.getElementById('voteBtn2');
             if (btn1) btn1.addEventListener('click', function() { castVote(c1Id); });
             if (btn2) btn2.addEventListener('click', function() { castVote(c2Id); });
         }
+
+        // Load user's vote from DB (first render only, when _myVotePlayerId not set yet)
+        if (_userId && !closed && !_myVotePlayerId) {
+            loadMyVote();
+        }
     }
 
-    function loadMyVote() {
+    var _myVotePlayerId = null;
+    var _myVoteSource = null; // 'site' or 'telegram'
+
+    async function loadMyVote() {
         if (!_userId || !_challengeId) return;
         var client = window.supabaseClient;
         if (!client) return;
 
-        client.from('challenge_predictions')
+        // 1. Check site vote
+        var siteRes = await client.from('challenge_predictions')
             .select('predicted_winner_id')
             .eq('challenge_id', _challengeId)
             .eq('voter_type', 'site')
             .eq('voter_id', _userId)
-            .maybeSingle()
-            .then(function(res) {
-                if (res.data) {
-                    highlightVote(res.data.predicted_winner_id);
+            .maybeSingle();
+
+        if (siteRes.data) {
+            _myVotePlayerId = siteRes.data.predicted_winner_id;
+            _myVoteSource = 'site';
+            lockVoteUI(_myVotePlayerId);
+            return;
+        }
+
+        // 2. Check telegram vote via profile's telegram_chat_id
+        try {
+            var profileRes = await client.from('profiles')
+                .select('telegram_chat_id')
+                .eq('id', _userId)
+                .single();
+
+            if (profileRes.data && profileRes.data.telegram_chat_id) {
+                var tgRes = await client.from('challenge_predictions')
+                    .select('predicted_winner_id')
+                    .eq('challenge_id', _challengeId)
+                    .eq('voter_type', 'telegram')
+                    .eq('voter_id', profileRes.data.telegram_chat_id)
+                    .maybeSingle();
+
+                if (tgRes.data) {
+                    _myVotePlayerId = tgRes.data.predicted_winner_id;
+                    _myVoteSource = 'telegram';
+                    lockVoteUI(_myVotePlayerId);
                 }
-            });
+            }
+        } catch(e) {}
     }
 
-    function highlightVote(playerId) {
-        var btn1 = document.getElementById('voteBtn1');
-        var btn2 = document.getElementById('voteBtn2');
-        if (btn1) btn1.classList.toggle('selected', btn1.dataset.player === playerId);
-        if (btn2) btn2.classList.toggle('selected', btn2.dataset.player === playerId);
+    function lockVoteUI(playerId) {
+        _myVotePlayerId = playerId;
+        // Re-render voting section with locked state
+        if (_battle && _votes) {
+            renderVoting(_battle, _votes);
+        }
     }
 
     function castVote(playerId) {
         if (!_userId || !_challengeId) return;
+        if (_myVotePlayerId) return; // Already voted
         var client = window.supabaseClient;
         if (!client) return;
 
@@ -376,7 +433,6 @@
         if (btn1) btn1.disabled = true;
         if (btn2) btn2.disabled = true;
 
-        // Use RPC for one-time voting (no change allowed)
         client.rpc('cast_battle_vote', {
             p_challenge_id: _challengeId,
             p_player_id: playerId
@@ -389,13 +445,18 @@
             }
             var result = res.data;
             if (result && result.ok === false) {
-                // Already voted — lock buttons
-                var msg = result.error === 'already_voted_tg' ? L.alreadyVotedTg : L.yourVote;
-                showVoteStatus(msg);
-                highlightVote(playerId);
+                // Already voted — set flag and re-render locked
+                _myVotePlayerId = playerId;
+                _myVoteSource = result.error === 'already_voted_tg' ? 'telegram' : 'site';
+                renderVoting(_battle, _votes);
+                if (result.error === 'already_voted_tg') {
+                    showVoteStatus(L.alreadyVotedTg);
+                }
                 return;
             }
-            // Success — refresh votes
+            // Success — refresh votes bar, then lock
+            _myVotePlayerId = playerId;
+            _myVoteSource = 'site';
             client.rpc('get_battle_votes', { p_challenge_id: _challengeId })
                 .then(function(vRes) {
                     _votes = {};
@@ -404,8 +465,8 @@
                             _votes[v.player_id] = parseInt(v.votes) || 0;
                         });
                     }
+                    // Re-render with updated bar + locked buttons + badge
                     renderVoting(_battle, _votes);
-                    highlightVote(playerId);
                     showVoteStatus(L.voteAccepted);
                 });
         }).catch(function(e) {
@@ -418,8 +479,12 @@
     function showVoteStatus(msg) {
         var el = document.getElementById('voteStatus');
         if (!el) return;
-        el.innerHTML = '<div style="color:var(--accent);margin-top:8px;font-size:0.9rem">' + msg + '</div>';
-        setTimeout(function() { if (el) el.innerHTML = ''; }, 3000);
+        // Temporary toast — 3s, then highlightVote shows persistent badge
+        el.innerHTML = '<div class="ch-vote-toast">' + msg + '</div>';
+        setTimeout(function() {
+            var toast = el.querySelector('.ch-vote-toast');
+            if (toast) toast.remove();
+        }, 3000);
     }
 
     /* ========== DETAILS ========== */

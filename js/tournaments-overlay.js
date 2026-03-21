@@ -114,13 +114,51 @@
 
     // Load hero stats from Supabase (tournament count, participants, prize fund)
     // Always overwrites static fallback with real data (even if 0)
+    var friendlyLabels = isEn ? {
+        total: 'Total this season',
+        upcoming: 'Upcoming',
+        completed: 'Completed'
+    } : (isKg ? {
+        total: 'Мезгилде баары',
+        upcoming: 'Алдыдагы',
+        completed: 'Аяктаган'
+    } : {
+        total: 'Всего за сезон',
+        upcoming: 'Предстоящих',
+        completed: 'Завершённых'
+    });
+
     async function loadHeroStats(category) {
-        // Friendly — no stats
         var statsBlock = document.querySelector('.tournament-hero-stats');
+
         if (category === 'friendly') {
-            if (statsBlock) statsBlock.style.display = 'none';
+            // Friendly: show Total / Upcoming / Completed
+            if (statsBlock) {
+                statsBlock.innerHTML =
+                    '<div class="hero-stat"><span class="hero-stat-value" id="statFriendlyTotal">&mdash;</span><span class="hero-stat-label">' + friendlyLabels.total + '</span></div>' +
+                    '<div class="hero-stat"><span class="hero-stat-value" id="statFriendlyUpcoming">&mdash;</span><span class="hero-stat-label">' + friendlyLabels.upcoming + '</span></div>' +
+                    '<div class="hero-stat"><span class="hero-stat-value" id="statFriendlyCompleted">&mdash;</span><span class="hero-stat-label">' + friendlyLabels.completed + '</span></div>';
+                statsBlock.style.display = '';
+            }
+            try {
+                var result = await client.from('tournaments')
+                    .select('id, date_end, published_at')
+                    .like('category_id', '%-friendly');
+                var allT = (result.data || []).filter(function(t) { return t.published_at !== null; });
+                if (allT.length === 0) allT = result.data || [];
+                var today = new Date().toISOString().substring(0, 10);
+                var upcoming = allT.filter(function(t) { return !t.date_end || t.date_end >= today; }).length;
+                var completed = allT.filter(function(t) { return t.date_end && t.date_end < today; }).length;
+                var el = document.getElementById('statFriendlyTotal');
+                if (el) el.textContent = allT.length;
+                el = document.getElementById('statFriendlyUpcoming');
+                if (el) el.textContent = upcoming;
+                el = document.getElementById('statFriendlyCompleted');
+                if (el) el.textContent = completed;
+            } catch(e) {}
             return;
         }
+
         if (statsBlock) statsBlock.style.display = '';
 
         var elCount = document.getElementById('statTournaments');
@@ -143,7 +181,6 @@
             tournaments.forEach(function(t) {
                 if (t.prize_fund != null) {
                     var raw = String(t.prize_fund);
-                    // Try to extract number: take first sequence of digits (possibly with separators)
                     var match = raw.match(/[\d][\d\s,.\u00a0]*/);
                     if (match) {
                         var cleaned = match[0].replace(/[\s,.\u00a0]/g, '');
@@ -152,13 +189,12 @@
                     }
                 }
             });
-            // Always update tournament count and prize (even if 0)
             if (elCount) elCount.textContent = tournamentCount;
             if (elPrize) {
                 elPrize.textContent = formatPrize(totalPrize);
             }
 
-            // Count participants from registrations (separate try — table may not exist yet)
+            // Count participants from registrations
             try {
                 var ids = tournaments.map(function(t) { return t.id; });
                 if (ids.length > 0) {

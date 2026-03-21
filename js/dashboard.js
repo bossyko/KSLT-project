@@ -535,6 +535,20 @@
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
     // ---- Script validation (Cyrillic / Latin / Kyrgyz) ----
     var SCRIPT_RU = /^[а-яА-ЯёЁ\s\-'.]+$/;
     var SCRIPT_EN = /^[a-zA-Z\s\-'.]+$/;
@@ -894,11 +908,12 @@
 
         var overlay = document.createElement('div');
         overlay.id = 'dbQrModal';
-        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;animation:dbModalFadeIn 0.25s ease forwards;';
 
         overlay.innerHTML =
-            '<div style="background:#1a1a1a;border:1px solid #333;border-radius:16px;padding:32px;text-align:center;max-width:340px;width:90%;position:relative;">' +
-                '<button id="dbQrClose" style="position:absolute;top:12px;right:16px;background:none;border:none;color:#888;font-size:24px;cursor:pointer;">&times;</button>' +
+            '<style>@keyframes dbModalFadeIn{to{opacity:1}}@keyframes dbModalSlideIn{to{transform:translateY(0) scale(1)}}</style>' +
+            '<div style="background:rgba(26,26,30,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;text-align:center;max-width:340px;width:90%;position:relative;transform:translateY(20px) scale(0.95);animation:dbModalSlideIn 0.25s ease forwards;">' +
+                '<button id="dbQrClose" style="position:absolute;top:12px;right:16px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.5rem;cursor:pointer;">&times;</button>' +
                 '<div style="font-size:1.5rem;font-weight:700;color:#CCFF00;margin-bottom:4px;">KSLT</div>' +
                 '<div style="font-size:0.85rem;color:#888;margin-bottom:20px;">' + L.qrTitle + '</div>' +
                 '<div id="dbQrCode" style="display:inline-block;padding:12px;background:#fff;border-radius:8px;margin-bottom:16px;"></div>' +
@@ -948,55 +963,87 @@
             });
         });
 
-        // Download PNG (composite: logo + QR + name)
+        // Download branded PNG
         document.getElementById('dbQrDownload').addEventListener('click', function() {
             setTimeout(function() {
                 var qrCanvas = qrEl.querySelector('canvas');
                 if (!qrCanvas) return;
 
-                var w = 300;
-                var h = 400;
+                var w = 380;
+                var h = 480;
                 var c = document.createElement('canvas');
                 c.width = w;
                 c.height = h;
                 var ctx = c.getContext('2d');
 
-                // Background
-                ctx.fillStyle = '#1a1a1a';
+                // Gradient background
+                var grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, '#0f0f0f');
+                grad.addColorStop(1, '#1a1a2e');
+                ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
 
-                // Logo text
+                // Accent top stripe
                 ctx.fillStyle = '#CCFF00';
-                ctx.font = 'bold 28px Inter, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('KSLT', w / 2, 40);
+                ctx.fillRect(0, 0, w, 4);
 
-                // QR code (centered)
-                var qrSize = 200;
-                var qrX = (w - qrSize) / 2;
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(qrX - 8, 55, qrSize + 16, qrSize + 16);
-                ctx.drawImage(qrCanvas, qrX, 63, qrSize, qrSize);
+                // Logo
+                ctx.fillStyle = '#CCFF00';
+                ctx.font = 'bold 26px Inter, Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('KSLT', w / 2, 42);
+
+                // Subtitle
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.font = '11px Inter, Arial, sans-serif';
+                ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
+
+                // Divider
+                ctx.strokeStyle = 'rgba(204,255,0,0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(40, 75);
+                ctx.lineTo(w - 40, 75);
+                ctx.stroke();
 
                 // Player name
                 ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 16px Inter, sans-serif';
-                ctx.fillText(profile.full_name || '', w / 2, 305);
+                ctx.font = 'bold 18px Inter, Arial, sans-serif';
+                ctx.fillText(profile.full_name || '', w / 2, 105);
 
                 // Category
                 var catEl = document.getElementById('dbQrCategory');
                 if (catEl && catEl.textContent) {
                     ctx.fillStyle = '#CCFF00';
-                    ctx.font = '14px Inter, sans-serif';
-                    ctx.fillText(catEl.textContent, w / 2, 325);
+                    ctx.font = '14px Inter, Arial, sans-serif';
+                    ctx.fillText(catEl.textContent, w / 2, 128);
                 }
 
-                // URL small
-                ctx.fillStyle = '#666';
-                ctx.font = '10px Inter, sans-serif';
-                ctx.fillText('kslt.netlify.app', w / 2, 380);
+                // QR code with rounded white bg
+                var qrSize = 200;
+                var qrX = (w - qrSize) / 2;
+                var qrY = 150;
+                var pad = 12;
+                ctx.fillStyle = '#ffffff';
+                roundRect(ctx, qrX - pad, qrY - pad, qrSize + pad * 2, qrSize + pad * 2, 12);
+                ctx.fill();
+                ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
 
-                // Download
+                // Scan text
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.font = '11px Inter, Arial, sans-serif';
+                var scanLabel = isEn ? 'Scan to view player profile' : (isKg ? 'Оюнчунун профилин көрүү үчүн сканерлеңиз' : 'Отсканируйте для просмотра профиля');
+                ctx.fillText(scanLabel, w / 2, qrY + qrSize + pad + 22);
+
+                // Bottom accent stripe
+                ctx.fillStyle = '#CCFF00';
+                ctx.fillRect(0, h - 4, w, 4);
+
+                // URL footer
+                ctx.fillStyle = 'rgba(255,255,255,0.25)';
+                ctx.font = '10px Inter, Arial, sans-serif';
+                ctx.fillText('kslt.netlify.app', w / 2, h - 14);
+
                 var link = document.createElement('a');
                 link.download = 'KSLT-' + (profile.player_id || 'profile') + '.png';
                 link.href = c.toDataURL('image/png');
@@ -2766,7 +2813,7 @@
                 '<div style="display:flex;align-items:center;gap:8px;">' +
                     '<span class="' + statusClass + '" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;">' + statusLabel + '</span>';
         if (v.status === 'active') {
-            h += '<button class="db-voucher-qr-btn" data-token="' + v.qr_token + '" style="background:var(--accent);color:#000;border:none;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">' + L.voucherShowQR + '</button>';
+            h += '<button class="db-voucher-qr-btn" data-token="' + v.qr_token + '" data-service="' + dbEsc(v.service_name || '') + '" data-entity="' + dbEsc(v.entity_name || '') + '" data-discount="' + (v.discount_percent || '') + '" data-expires="' + (v.expires_at || '') + '" style="background:var(--accent);color:#000;border:none;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">' + L.voucherShowQR + '</button>';
         }
         h += '</div></div></div>';
         return h;
@@ -2875,7 +2922,13 @@
             // QR button clicks
             card.querySelectorAll('.db-voucher-qr-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
-                    showDashboardVoucherQR(this.dataset.token);
+                    showDashboardVoucherQR({
+                        qr_token: this.dataset.token,
+                        service_name: this.dataset.service,
+                        entity_name: this.dataset.entity,
+                        discount_percent: this.dataset.discount,
+                        expires_at: this.dataset.expires
+                    });
                 });
             });
 
@@ -2895,20 +2948,30 @@
         }
     }
 
-    function showDashboardVoucherQR(token) {
+    function showDashboardVoucherQR(voucher) {
         var existing = document.getElementById('dbVoucherQRModal');
         if (existing) existing.remove();
 
+        var token = voucher.qr_token;
         var verifyUrl = 'https://kslt.netlify.app/pages/verify.html?token=' + token;
+        var expiresStr = '';
+        if (voucher.expires_at) {
+            expiresStr = new Date(voucher.expires_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
 
         var modal = document.createElement('div');
         modal.id = 'dbVoucherQRModal';
-        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;opacity:0;animation:dbModalFadeIn 0.25s ease forwards;';
         modal.innerHTML =
-            '<div style="background:#1a1a2e;border:1px solid rgba(204,255,0,0.2);border-radius:20px;padding:32px;max-width:320px;width:100%;text-align:center;position:relative;">' +
+            '<style>@keyframes dbModalFadeIn{to{opacity:1}}@keyframes dbModalSlideIn{to{transform:translateY(0) scale(1)}}</style>' +
+            '<div style="background:rgba(26,26,30,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;max-width:340px;width:100%;text-align:center;position:relative;transform:translateY(20px) scale(0.95);animation:dbModalSlideIn 0.25s ease forwards;">' +
                 '<button id="dbVQRClose" style="position:absolute;top:12px;right:16px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.5rem;cursor:pointer;">&times;</button>' +
+                (voucher.discount_percent ? '<div style="color:#CCFF00;font-size:1.8rem;font-weight:700;margin-bottom:4px;">-' + voucher.discount_percent + '%</div>' : '') +
+                (voucher.service_name ? '<div style="color:#fff;font-weight:600;font-size:0.95rem;margin-bottom:2px;">' + dbEsc(voucher.service_name) + '</div>' : '') +
+                (voucher.entity_name ? '<div style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:12px;">' + dbEsc(voucher.entity_name) + '</div>' : '') +
                 '<div id="dbVQRCode" style="display:flex;justify-content:center;background:#fff;border-radius:12px;padding:16px;width:fit-content;margin:0 auto 16px;"></div>' +
-                '<button id="dbVQRDownload" style="background:var(--accent);color:#000;border:none;padding:8px 20px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;">' + L.voucherShowQR + '</button>' +
+                (expiresStr ? '<div style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:12px;">' + expiresStr + '</div>' : '') +
+                '<button id="dbVQRDownload" style="background:var(--accent);color:#000;border:none;padding:10px 24px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;">' + (isEn ? 'Download QR' : (isKg ? 'QR жүктөө' : 'Скачать QR')) + '</button>' +
             '</div>';
 
         document.body.appendChild(modal);
@@ -2929,13 +2992,88 @@
         modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
 
         document.getElementById('dbVQRDownload').addEventListener('click', function() {
-            var canvas = qrContainer.querySelector('canvas');
-            if (canvas) {
+            setTimeout(function() {
+                var qrCanvas = qrContainer.querySelector('canvas');
+                if (!qrCanvas) return;
+
+                var w = 380;
+                var h = 520;
+                var c = document.createElement('canvas');
+                c.width = w;
+                c.height = h;
+                var ctx = c.getContext('2d');
+
+                var grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, '#0f0f0f');
+                grad.addColorStop(1, '#1a1a2e');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                ctx.fillStyle = '#CCFF00';
+                ctx.fillRect(0, 0, w, 4);
+
+                ctx.fillStyle = '#CCFF00';
+                ctx.font = 'bold 26px Inter, Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('KSLT', w / 2, 42);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.font = '11px Inter, Arial, sans-serif';
+                ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
+
+                ctx.strokeStyle = 'rgba(204,255,0,0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(40, 75);
+                ctx.lineTo(w - 40, 75);
+                ctx.stroke();
+
+                if (voucher.discount_percent) {
+                    ctx.fillStyle = '#CCFF00';
+                    ctx.font = 'bold 32px Inter, Arial, sans-serif';
+                    ctx.fillText('-' + voucher.discount_percent + '%', w / 2, 112);
+                }
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 15px Inter, Arial, sans-serif';
+                ctx.fillText(voucher.service_name || '', w / 2, 138);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = '13px Inter, Arial, sans-serif';
+                ctx.fillText(voucher.entity_name || '', w / 2, 160);
+
+                var qrSize = 200;
+                var qrX = (w - qrSize) / 2;
+                var qrY = 180;
+                var pad = 12;
+                ctx.fillStyle = '#ffffff';
+                roundRect(ctx, qrX - pad, qrY - pad, qrSize + pad * 2, qrSize + pad * 2, 12);
+                ctx.fill();
+                ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.font = '11px Inter, Arial, sans-serif';
+                var scanLabel = isEn ? 'Scan QR to verify discount' : (isKg ? 'Арзандатууну текшерүү үчүн QR сканерлеңиз' : 'Отсканируйте QR для проверки скидки');
+                ctx.fillText(scanLabel, w / 2, qrY + qrSize + pad + 22);
+
+                if (expiresStr) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx.font = '12px Inter, Arial, sans-serif';
+                    ctx.fillText(expiresStr, w / 2, qrY + qrSize + pad + 44);
+                }
+
+                ctx.fillStyle = '#CCFF00';
+                ctx.fillRect(0, h - 4, w, 4);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.25)';
+                ctx.font = '10px Inter, Arial, sans-serif';
+                ctx.fillText('kslt.netlify.app', w / 2, h - 14);
+
                 var link = document.createElement('a');
-                link.download = 'kslt-voucher-' + token.substring(0, 8) + '.png';
-                link.href = canvas.toDataURL('image/png');
+                link.download = 'KSLT-voucher-' + token.substring(0, 8) + '.png';
+                link.href = c.toDataURL('image/png');
                 link.click();
-            }
+            }, 300);
         });
     }
 

@@ -183,7 +183,7 @@ window.courtsLabels = {
     discountGuest: "Register and become a KSLT member to get discounts",
     discountRegistered: "Become a KSLT member to get discounts",
     voucherReady: "Your voucher is ready!",
-    voucherLimit: "Limit: 1 voucher per day for this venue",
+    voucherLimit: "You have an active voucher",
     voucherExpires: "Valid until",
     voucherDownload: "Download QR",
     voucherDiscount: "Discount",

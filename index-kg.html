@@ -288,17 +288,17 @@
                 </div>
                 <div class="hero-stats">
                     <div class="stat">
-                        <span class="stat-value">2,500+</span>
+                        <span class="stat-value" id="statPlayers">—</span>
                         <span class="stat-label">Оюнчулар</span>
                     </div>
                     <div class="stat-divider"></div>
                     <div class="stat">
-                        <span class="stat-value">150+</span>
+                        <span class="stat-value" id="statTournaments">—</span>
                         <span class="stat-label">Мелдештер</span>
                     </div>
                     <div class="stat-divider"></div>
                     <div class="stat">
-                        <span class="stat-value">45</span>
+                        <span class="stat-value" id="statCourts">—</span>
                         <span class="stat-label">Корттор</span>
                     </div>
                 </div>
@@ -764,6 +764,35 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/battle-cards.js?v=6"></script>
+    <script>
+    (function() {
+        var c = window.supabaseClient;
+        if (!c) return;
+        Promise.all([
+            c.from('players').select('id', { count: 'exact', head: true }),
+            c.from('tournaments').select('id', { count: 'exact', head: true }),
+            c.from('courts').select('court_types')
+        ]).then(function(r) {
+            var el;
+            if (r[0].count != null) {
+                el = document.getElementById('statPlayers');
+                if (el) el.textContent = r[0].count.toLocaleString('ru-RU');
+            }
+            if (r[1].count != null) {
+                el = document.getElementById('statTournaments');
+                if (el) el.textContent = r[1].count.toLocaleString('ru-RU');
+            }
+            if (r[2].data) {
+                var total = 0;
+                r[2].data.forEach(function(row) {
+                    (row.court_types || []).forEach(function(ct) { total += (ct.count || 0); });
+                });
+                el = document.getElementById('statCourts');
+                if (el) el.textContent = total;
+            }
+        });
+    })();
+    </script>
     <script>
     // Random badges CTA
     (function() {

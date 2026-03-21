@@ -533,6 +533,46 @@ function getAuthRedirectUrl() {
     return prefix + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html'));
 }
 
+function showGuestModal() {
+    var old = document.querySelector('.news-guest-overlay');
+    if (old) old.remove();
+
+    var isEn = isEnPage();
+    var isKg = isKgPage();
+    var authUrl = getAuthRedirectUrl();
+
+    var title = isEn ? 'Join us!' : (isKg ? 'Кошулуңуз!' : 'Присоединяйтесь!');
+    var text = isEn
+        ? 'Sign up to vote in polls and react to articles'
+        : (isKg ? 'Опростко катышуу жана макалаларды баалоо үчүн катталыңыз' : 'Зарегистрируйтесь, чтобы голосовать в опросах и оценивать статьи');
+    var btnLabel = isEn ? 'Sign Up' : (isKg ? 'Каттоо' : 'Регистрация');
+
+    var overlay = document.createElement('div');
+    overlay.className = 'news-guest-overlay';
+    overlay.innerHTML =
+        '<div class="news-guest-modal">' +
+            '<button class="news-guest-modal-close">&times;</button>' +
+            '<div class="news-guest-modal-icon">&#127934;</div>' +
+            '<div class="news-guest-modal-title">' + title + '</div>' +
+            '<div class="news-guest-modal-text">' + text + '</div>' +
+            '<a href="' + authUrl + '" class="news-guest-modal-btn">' + btnLabel + '</a>' +
+        '</div>';
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(function() { overlay.classList.add('visible'); });
+
+    overlay.querySelector('.news-guest-modal-close').addEventListener('click', function() {
+        overlay.classList.remove('visible');
+        setTimeout(function() { overlay.remove(); }, 250);
+    });
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            overlay.classList.remove('visible');
+            setTimeout(function() { overlay.remove(); }, 250);
+        }
+    });
+}
+
 async function resolveNewsId(slug) {
     var client = window.supabaseClient;
     if (!client) return null;
@@ -543,6 +583,11 @@ async function resolveNewsId(slug) {
     // Fallback: query by slug
     var res = await client.from('news').select('id').eq('slug', slug).single();
     return (res.data && res.data.id) ? res.data.id : null;
+}
+
+function addReactionCheck(btn) {
+    if (btn.querySelector('.news-reaction-check')) return;
+    btn.insertAdjacentHTML('beforeend', '<span class="news-reaction-check">&#10003;</span>');
 }
 
 async function initReactions(slug) {
@@ -575,60 +620,48 @@ async function initReactions(slug) {
         if (userRes.data) {
             userRes.data.forEach(function(row) {
                 var btn = container.querySelector('[data-type="' + row.reaction_type + '"]');
-                if (btn) btn.classList.add('active');
+                if (btn) {
+                    btn.classList.add('active');
+                    addReactionCheck(btn);
+                }
             });
         }
     }
 
-    // Click handler
+    // Click handler — one-time reactions (no toggle)
     var busy = false;
     container.addEventListener('click', async function(e) {
         var btn = e.target.closest('.news-reaction-btn');
         if (!btn || busy) return;
 
-        // Auth check
+        // Already reacted — ignore
+        if (btn.classList.contains('active')) return;
+
+        // Auth check — show modal for guests
         var currentUser = user || await getAuthUser();
         if (!currentUser) {
-            window.location.href = getAuthRedirectUrl();
+            showGuestModal();
             return;
         }
 
         var type = btn.dataset.type;
         var countEl = document.getElementById('count-' + type);
         var count = parseInt(countEl.textContent) || 0;
-        var isActive = btn.classList.contains('active');
 
-        // Optimistic UI
-        if (isActive) {
-            btn.classList.remove('active');
-            countEl.textContent = Math.max(0, count - 1);
-        } else {
-            btn.classList.add('active');
-            countEl.textContent = count + 1;
-            btn.classList.add('news-reaction-bounce');
-            setTimeout(function() { btn.classList.remove('news-reaction-bounce'); }, 400);
-        }
+        // Optimistic UI — add reaction
+        btn.classList.add('active');
+        addReactionCheck(btn);
+        countEl.textContent = count + 1;
+        btn.classList.add('news-reaction-bounce');
+        setTimeout(function() { btn.classList.remove('news-reaction-bounce'); }, 400);
 
         busy = true;
-        if (isActive) {
-            var res = await client.from('news_reactions')
-                .delete()
-                .eq('news_id', newsId)
-                .eq('user_id', currentUser.id)
-                .eq('reaction_type', type);
-            if (res.error) {
-                // Revert
-                btn.classList.add('active');
-                countEl.textContent = count;
-            }
-        } else {
-            var res = await client.from('news_reactions')
-                .insert({ news_id: newsId, user_id: currentUser.id, reaction_type: type });
-            if (res.error) {
-                // Revert
-                btn.classList.remove('active');
-                countEl.textContent = count;
-            }
+        var res = await client.from('news_reactions')
+            .insert({ news_id: newsId, user_id: currentUser.id, reaction_type: type });
+        if (res.error) {
+            // Revert on error
+            btn.classList.remove('active');
+            countEl.textContent = count;
         }
         busy = false;
     });
@@ -685,7 +718,7 @@ async function initPoll(slug) {
         btn.addEventListener('click', async function() {
             var currentUser = user || await getAuthUser();
             if (!currentUser) {
-                window.location.href = getAuthRedirectUrl();
+                showGuestModal();
                 return;
             }
 

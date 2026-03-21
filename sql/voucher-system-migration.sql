@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS discount_vouchers (
     qr_token TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex'),
     status TEXT DEFAULT 'active' CHECK (status IN ('active','used','expired','cancelled')),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '24 hours'),
+    expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '7 days'),
     used_at TIMESTAMPTZ,
     confirmed_by_ip TEXT
 );
@@ -156,27 +156,43 @@ BEGIN
         RETURN json_build_object('error', 'entity_not_partner');
     END IF;
 
-    -- Check daily limit: 1 voucher per day per entity
+    -- Auto-expire old vouchers for this specific service
+    UPDATE discount_vouchers
+    SET status = 'expired'
+    WHERE profile_id = v_user_id
+      AND entity_type = p_entity_type
+      AND entity_id = p_entity_id
+      AND service_id = p_service_id
+      AND status = 'active'
+      AND expires_at < NOW();
+
+    -- Check 1: Block if active voucher exists for this exact service
     SELECT COUNT(*) INTO v_existing
     FROM discount_vouchers
     WHERE profile_id = v_user_id
       AND entity_type = p_entity_type
       AND entity_id = p_entity_id
+      AND service_id = p_service_id
+      AND status = 'active'
+      AND expires_at > NOW();
+
+    IF v_existing > 0 THEN
+        RETURN json_build_object('error', 'active_voucher_exists');
+    END IF;
+
+    -- Check 2: Daily limit per service (prevents use-and-repeat abuse)
+    SELECT COUNT(*) INTO v_existing
+    FROM discount_vouchers
+    WHERE profile_id = v_user_id
+      AND entity_type = p_entity_type
+      AND entity_id = p_entity_id
+      AND service_id = p_service_id
       AND created_at > NOW() - INTERVAL '24 hours'
       AND status IN ('active', 'used');
 
     IF v_existing > 0 THEN
         RETURN json_build_object('error', 'daily_limit');
     END IF;
-
-    -- Expire any old active vouchers for this user+entity
-    UPDATE discount_vouchers
-    SET status = 'expired'
-    WHERE profile_id = v_user_id
-      AND entity_type = p_entity_type
-      AND entity_id = p_entity_id
-      AND status = 'active'
-      AND expires_at < NOW();
 
     -- Create voucher
     INSERT INTO discount_vouchers (

@@ -96,6 +96,20 @@
             ? { days: 'к', hours: 'с', min: 'м', sec: 'с', prefix: 'БАШТАЛАТ' }
             : { days: 'д', hours: 'ч', min: 'м', sec: 'с', prefix: 'СТАРТ ЧЕРЕЗ' });
 
+    var BL = isEn ? {
+        total: 'Total this season',
+        upcoming: 'Upcoming',
+        completed: 'Completed'
+    } : (isKg ? {
+        total: 'Мезгилде баары',
+        upcoming: 'Алдыдагы',
+        completed: 'Аяктаган'
+    } : {
+        total: 'Всего за сезон',
+        upcoming: 'Предстоящих',
+        completed: 'Завершённых'
+    });
+
     var challengePage = isEn ? 'challenge-en.html' : (isKg ? 'challenge-kg.html' : 'challenge.html');
 
     var emptySvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>';
@@ -222,6 +236,11 @@
                 '<span class="bo-hero-badge">' + L.heroBadge + '</span>' +
                 '<h1>' + L.heroTitle + '</h1>' +
                 '<p>' + L.heroDesc + '</p>' +
+                '<div class="bo-hero-stats">' +
+                    '<div class="bo-hero-stat"><span class="bo-hero-stat-value" id="boStatTotal">&mdash;</span><span class="bo-hero-stat-label">' + BL.total + '</span></div>' +
+                    '<div class="bo-hero-stat"><span class="bo-hero-stat-value" id="boStatUpcoming">&mdash;</span><span class="bo-hero-stat-label">' + BL.upcoming + '</span></div>' +
+                    '<div class="bo-hero-stat"><span class="bo-hero-stat-value" id="boStatCompleted">&mdash;</span><span class="bo-hero-stat-label">' + BL.completed + '</span></div>' +
+                '</div>' +
             '</div>';
     }
 
@@ -314,6 +333,14 @@
             // Battle is "completed" if: status=completed OR voting_closed OR match time has passed
             var active = battles.filter(function(b) { return !isBattleCompleted(b); });
             var completed = battles.filter(function(b) { return isBattleCompleted(b); });
+
+            // Update hero stats
+            var elTotal = document.getElementById('boStatTotal');
+            var elUp = document.getElementById('boStatUpcoming');
+            var elDone = document.getElementById('boStatCompleted');
+            if (elTotal) elTotal.textContent = active.length + completed.length;
+            if (elUp) elUp.textContent = active.length;
+            if (elDone) elDone.textContent = completed.length;
 
             renderSections(active, completed);
 

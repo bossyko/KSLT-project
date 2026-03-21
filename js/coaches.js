@@ -6,6 +6,20 @@
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var L = window.coachesLabels || (isKg ? {
@@ -44,7 +58,7 @@
         discountGuest: 'Арзандатуу алуу үчүн катталыңыз жана KSLT мүчөсү болуңуз',
         discountRegistered: 'Арзандатуу алуу үчүн KSLT мүчөсү болуңуз',
         voucherReady: 'Ваучериңиз даяр!',
-        voucherLimit: 'Чек: бул машыктыруучуга күнүнө 1 ваучер',
+        voucherLimit: 'Активдүү ваучериңиз бар',
         voucherExpires: 'Мөөнөтү',
         voucherDownload: 'QR жүктөө',
         voucherDiscount: 'Арзандатуу',
@@ -94,7 +108,7 @@
         discountGuest: "Зарегистрируйтесь и оформите членство для скидок",
         discountRegistered: "Оформите членство KSLT для скидок",
         voucherReady: "Ваш ваучер готов!",
-        voucherLimit: "Лимит: 1 ваучер в день на этого тренера",
+        voucherLimit: "У вас есть активный ваучер",
         voucherExpires: "Действителен до",
         voucherDownload: "Скачать QR",
         voucherDiscount: "Скидка",
@@ -969,8 +983,12 @@
                 return;
             }
             if (data.error) {
+                if (data.error === 'active_voucher_exists') {
+                    coShowLimitModal('active');
+                    return;
+                }
                 if (data.error === 'daily_limit') {
-                    coShowLimitModal();
+                    coShowLimitModal('daily');
                     return;
                 }
                 var msgs = {
@@ -1036,21 +1054,101 @@
         modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
 
         document.getElementById('coVoucherDownload').addEventListener('click', function() {
-            var canvas = qrContainer.querySelector('canvas');
-            if (canvas) {
+            setTimeout(function() {
+                var qrCanvas = qrContainer.querySelector('canvas');
+                if (!qrCanvas) return;
+
+                var w = 380;
+                var h = 520;
+                var c = document.createElement('canvas');
+                c.width = w;
+                c.height = h;
+                var ctx = c.getContext('2d');
+
+                var grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, '#0f0f0f');
+                grad.addColorStop(1, '#1a1a2e');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                ctx.fillStyle = '#CCFF00';
+                ctx.fillRect(0, 0, w, 4);
+
+                ctx.fillStyle = '#CCFF00';
+                ctx.font = 'bold 26px Inter, Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('KSLT', w / 2, 42);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.font = '11px Inter, Arial, sans-serif';
+                ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
+
+                ctx.strokeStyle = 'rgba(204,255,0,0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(40, 75);
+                ctx.lineTo(w - 40, 75);
+                ctx.stroke();
+
+                ctx.fillStyle = '#CCFF00';
+                ctx.font = 'bold 32px Inter, Arial, sans-serif';
+                ctx.fillText('-' + voucher.discount_percent + '%', w / 2, 112);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 15px Inter, Arial, sans-serif';
+                ctx.fillText(voucher.service_name || '', w / 2, 138);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = '13px Inter, Arial, sans-serif';
+                ctx.fillText(voucher.entity_name || '', w / 2, 160);
+
+                var qrSize = 200;
+                var qrX = (w - qrSize) / 2;
+                var qrY = 180;
+                var pad = 12;
+                ctx.fillStyle = '#ffffff';
+                roundRect(ctx, qrX - pad, qrY - pad, qrSize + pad * 2, qrSize + pad * 2, 12);
+                ctx.fill();
+                ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.font = '11px Inter, Arial, sans-serif';
+                var scanLabel = isEn ? 'Scan QR to verify discount' : (isKg ? 'Арзандатууну текшерүү үчүн QR сканерлеңиз' : 'Отсканируйте QR для проверки скидки');
+                ctx.fillText(scanLabel, w / 2, qrY + qrSize + pad + 22);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.font = '12px Inter, Arial, sans-serif';
+                ctx.fillText(expiresStr, w / 2, qrY + qrSize + pad + 44);
+
+                ctx.fillStyle = '#CCFF00';
+                ctx.fillRect(0, h - 4, w, 4);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.25)';
+                ctx.font = '10px Inter, Arial, sans-serif';
+                ctx.fillText('kslt.netlify.app', w / 2, h - 14);
+
                 var link = document.createElement('a');
-                link.download = 'kslt-voucher-' + voucher.qr_token.substring(0, 8) + '.png';
-                link.href = canvas.toDataURL('image/png');
+                link.download = 'KSLT-voucher-' + voucher.qr_token.substring(0, 8) + '.png';
+                link.href = c.toDataURL('image/png');
                 link.click();
-            }
+            }, 300);
         });
     }
 
     /* ===== LIMIT MODAL ===== */
 
-    function coShowLimitModal() {
+    function coShowLimitModal(reason) {
         var existing = document.getElementById('coLimitModal');
         if (existing) existing.remove();
+
+        var title, desc;
+        if (reason === 'daily') {
+            title = isEn ? 'Daily limit reached' : (isKg ? 'Күнүмдүк лимит' : 'Дневной лимит');
+            desc = isEn ? 'You can get a new voucher for this service tomorrow' : (isKg ? 'Бул кызмат үчүн жаңы ваучерди эртең ала аласыз' : 'Новый ваучер на эту услугу можно получить завтра');
+        } else {
+            title = L.voucherLimit;
+            desc = isEn ? 'Use or wait for your current voucher to expire' : (isKg ? 'Учурдагы ваучериңизди колдонуңуз же мөөнөтү бүткөнчө күтүңүз' : 'Используйте текущий ваучер или дождитесь его истечения');
+        }
 
         var modal = document.createElement('div');
         modal.id = 'coLimitModal';
@@ -1059,10 +1157,8 @@
             '<div class="co-voucher-modal" style="text-align:center;">' +
                 '<button class="co-voucher-close" id="coLimitClose">&times;</button>' +
                 '<div style="font-size:2.5rem;margin-bottom:12px;">&#9203;</div>' +
-                '<h3 class="co-voucher-title">' + L.voucherLimit + '</h3>' +
-                '<p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:20px;">' +
-                    (isEn ? 'Try again tomorrow' : (isKg ? 'Эртең кайра аракет кылыңыз' : 'Попробуйте завтра')) +
-                '</p>' +
+                '<h3 class="co-voucher-title">' + title + '</h3>' +
+                '<p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:20px;">' + desc + '</p>' +
                 '<button class="co-voucher-download" id="coLimitOk">OK</button>' +
             '</div>';
 

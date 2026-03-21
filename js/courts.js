@@ -6,6 +6,20 @@
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
     function getMapEmbed(url) {
         if (!url) return null;
         // Google Maps
@@ -70,7 +84,7 @@
         discountGuest: 'Арзандатуу алуу үчүн катталыңыз жана KSLT мүчөсү болуңуз',
         discountRegistered: 'Арзандатуу алуу үчүн KSLT мүчөсү болуңуз',
         voucherReady: 'Ваучериңиз даяр!',
-        voucherLimit: 'Чек: бул жерге күнүнө 1 ваучер',
+        voucherLimit: 'Активдүү ваучериңиз бар',
         voucherExpires: 'Мөөнөтү',
         voucherDownload: 'QR жүктөө',
         voucherDiscount: 'Арзандатуу',
@@ -123,7 +137,7 @@
         discountGuest: "Зарегистрируйтесь и оформите членство для скидок",
         discountRegistered: "Оформите членство KSLT для скидок",
         voucherReady: "Ваш ваучер готов!",
-        voucherLimit: "Лимит: 1 ваучер в день на это заведение",
+        voucherLimit: "У вас есть активный ваучер",
         voucherExpires: "Действителен до",
         voucherDownload: "Скачать QR",
         voucherDiscount: "Скидка",
@@ -1176,8 +1190,12 @@
                 return;
             }
             if (data.error) {
+                if (data.error === 'active_voucher_exists') {
+                    showLimitModal('active');
+                    return;
+                }
                 if (data.error === 'daily_limit') {
-                    showLimitModal();
+                    showLimitModal('daily');
                     return;
                 }
                 var msgs = {
@@ -1251,23 +1269,116 @@
             if (e.target === modal) modal.remove();
         });
 
-        // Download
+        // Download branded PNG
         document.getElementById('ctVoucherDownload').addEventListener('click', function() {
-            var canvas = qrContainer.querySelector('canvas');
-            if (canvas) {
+            setTimeout(function() {
+                var qrCanvas = qrContainer.querySelector('canvas');
+                if (!qrCanvas) return;
+
+                var w = 380;
+                var h = 520;
+                var c = document.createElement('canvas');
+                c.width = w;
+                c.height = h;
+                var ctx = c.getContext('2d');
+
+                // Gradient background
+                var grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, '#0f0f0f');
+                grad.addColorStop(1, '#1a1a2e');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                // Accent top stripe
+                ctx.fillStyle = '#CCFF00';
+                ctx.fillRect(0, 0, w, 4);
+
+                // Logo
+                ctx.fillStyle = '#CCFF00';
+                ctx.font = 'bold 26px Inter, Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('KSLT', w / 2, 42);
+
+                // Subtitle
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.font = '11px Inter, Arial, sans-serif';
+                ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
+
+                // Divider line
+                ctx.strokeStyle = 'rgba(204,255,0,0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(40, 75);
+                ctx.lineTo(w - 40, 75);
+                ctx.stroke();
+
+                // Discount badge
+                ctx.fillStyle = '#CCFF00';
+                ctx.font = 'bold 32px Inter, Arial, sans-serif';
+                ctx.fillText('-' + voucher.discount_percent + '%', w / 2, 112);
+
+                // Service name
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 15px Inter, Arial, sans-serif';
+                ctx.fillText(voucher.service_name || '', w / 2, 138);
+
+                // Entity name
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = '13px Inter, Arial, sans-serif';
+                ctx.fillText(voucher.entity_name || '', w / 2, 160);
+
+                // QR code with rounded white background
+                var qrSize = 200;
+                var qrX = (w - qrSize) / 2;
+                var qrY = 180;
+                var pad = 12;
+                ctx.fillStyle = '#ffffff';
+                roundRect(ctx, qrX - pad, qrY - pad, qrSize + pad * 2, qrSize + pad * 2, 12);
+                ctx.fill();
+                ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+
+                // Scan text
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.font = '11px Inter, Arial, sans-serif';
+                var scanLabel = isEn ? 'Scan QR to verify discount' : (isKg ? 'Арзандатууну текшерүү үчүн QR сканерлеңиз' : 'Отсканируйте QR для проверки скидки');
+                ctx.fillText(scanLabel, w / 2, qrY + qrSize + pad + 22);
+
+                // Expires
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.font = '12px Inter, Arial, sans-serif';
+                ctx.fillText(expiresStr, w / 2, qrY + qrSize + pad + 44);
+
+                // Bottom accent stripe
+                ctx.fillStyle = '#CCFF00';
+                ctx.fillRect(0, h - 4, w, 4);
+
+                // URL footer
+                ctx.fillStyle = 'rgba(255,255,255,0.25)';
+                ctx.font = '10px Inter, Arial, sans-serif';
+                ctx.fillText('kslt.netlify.app', w / 2, h - 14);
+
                 var link = document.createElement('a');
-                link.download = 'kslt-voucher-' + voucher.qr_token.substring(0, 8) + '.png';
-                link.href = canvas.toDataURL('image/png');
+                link.download = 'KSLT-voucher-' + voucher.qr_token.substring(0, 8) + '.png';
+                link.href = c.toDataURL('image/png');
                 link.click();
-            }
+            }, 300);
         });
     }
 
     /* ===== LIMIT MODAL ===== */
 
-    function showLimitModal() {
+    function showLimitModal(reason) {
         var existing = document.getElementById('ctLimitModal');
         if (existing) existing.remove();
+
+        var title, desc;
+        if (reason === 'daily') {
+            title = isEn ? 'Daily limit reached' : (isKg ? 'Күнүмдүк лимит' : 'Дневной лимит');
+            desc = isEn ? 'You can get a new voucher for this service tomorrow' : (isKg ? 'Бул кызмат үчүн жаңы ваучерди эртең ала аласыз' : 'Новый ваучер на эту услугу можно получить завтра');
+        } else {
+            title = L_labels.voucherLimit;
+            desc = isEn ? 'Use or wait for your current voucher to expire' : (isKg ? 'Учурдагы ваучериңизди колдонуңуз же мөөнөтү бүткөнчө күтүңүз' : 'Используйте текущий ваучер или дождитесь его истечения');
+        }
 
         var modal = document.createElement('div');
         modal.id = 'ctLimitModal';
@@ -1276,10 +1387,8 @@
             '<div class="ct-voucher-modal" style="text-align:center;">' +
                 '<button class="ct-voucher-close" id="ctLimitClose">&times;</button>' +
                 '<div style="font-size:2.5rem;margin-bottom:12px;">&#9203;</div>' +
-                '<h3 class="ct-voucher-title">' + L_labels.voucherLimit + '</h3>' +
-                '<p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:20px;">' +
-                    (isEn ? 'Try again tomorrow' : (isKg ? 'Эртең кайра аракет кылыңыз' : 'Попробуйте завтра')) +
-                '</p>' +
+                '<h3 class="ct-voucher-title">' + title + '</h3>' +
+                '<p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:20px;">' + desc + '</p>' +
                 '<button class="ct-voucher-download" id="ctLimitOk">OK</button>' +
             '</div>';
 
