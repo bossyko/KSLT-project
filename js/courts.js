@@ -190,13 +190,17 @@
 
         var overlay = document.createElement('div');
         overlay.className = 'ct-membership-overlay';
+        var svgIcon = isGuest
+            ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+            : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+
         overlay.innerHTML =
             '<div class="ct-membership-modal">' +
                 '<button class="ct-membership-close">&times;</button>' +
-                '<div class="ct-membership-icon">\uD83C\uDFF7\uFE0F</div>' +
+                '<div class="ct-membership-icon">' + svgIcon + '</div>' +
                 '<h3>' + title + '</h3>' +
                 '<p>' + text + '</p>' +
-                '<a href="' + btnLink + '" class="ct-membership-btn">' + btnText + ' \u2192</a>' +
+                '<a href="' + btnLink + '" class="ct-membership-btn">' + btnText + '</a>' +
             '</div>';
 
         document.body.appendChild(overlay);

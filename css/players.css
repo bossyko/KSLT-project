@@ -1120,70 +1120,67 @@
     margin-left: 4px;
 }
 
-/* In category mode, collapse filters section until stuck */
+/* In category mode — always visible bar with back link */
 .pl-filters-section.pl-cat-mode {
-    padding: 0 7%;
+    padding: 10px 7%;
+    top: 64px;
 }
 
 .pl-filters-section.pl-cat-mode.stuck {
-    padding: 10px 7%;
     border-bottom: 1px solid var(--border-subtle);
 }
 
-/* Sticky category bar — hidden until .stuck */
+/* Sticky category bar — always visible (back link), name+search appear on .stuck */
 .pl-cat-sticky-bar {
     display: flex;
     align-items: center;
-    justify-content: center;
     max-width: 860px;
     margin: 0 auto;
-    opacity: 0;
-    transform: translateY(-8px);
-    transition: opacity 0.25s, transform 0.25s;
-    pointer-events: none;
-    height: 0;
-    overflow: hidden;
+    gap: 12px;
 }
 
-.pl-filters-section.stuck .pl-cat-sticky-bar {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-    height: auto;
-    overflow: visible;
-}
-
-.pl-cat-sticky-back {
-    position: absolute;
-    left: calc(25% - 215px);
-    top: 50%;
-    transform: translate(-50%, -50%);
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    color: var(--accent);
-    text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 600;
-    white-space: nowrap;
+/* Category name + search — hidden until stuck */
+.pl-cat-sticky-name,
+.pl-cat-sticky-search {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s;
 }
 
-.pl-filters-section.stuck .pl-cat-sticky-back {
+.pl-filters-section.stuck .pl-cat-sticky-name,
+.pl-filters-section.stuck .pl-cat-sticky-search {
     opacity: 1;
     pointer-events: auto;
 }
 
-.pl-cat-sticky-back:hover {
+/* (pl-cat-back-bar removed — back link now inside pl-cat-sticky-bar) */
+
+.pl-cat-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+}
+
+.pl-cat-back-link:hover {
     opacity: 0.7;
 }
 
 .pl-cat-sticky-name {
+    flex: 1;
+    text-align: center;
     font-size: 1.25rem;
     font-weight: 800;
     color: var(--accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .pl-cat-sticky-name span {
@@ -1191,6 +1188,54 @@
     opacity: 0.5;
     font-size: 0.8em;
     margin-left: 4px;
+}
+
+/* Sticky search input in category bar */
+.pl-cat-sticky-search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    padding: 6px 14px;
+    flex-shrink: 0;
+    transition: border-color 0.2s, opacity 0.25s;
+}
+
+.pl-cat-sticky-search:focus-within {
+    border-color: var(--accent);
+}
+
+.pl-cat-sticky-search svg {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.pl-cat-sticky-search input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    width: 160px;
+    font-family: inherit;
+}
+
+.pl-cat-sticky-search input::placeholder {
+    color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+    .pl-cat-sticky-search input {
+        width: 100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pl-cat-sticky-search {
+        display: none;
+    }
 }
 
 /* Table compact wrapper */
@@ -1222,20 +1267,9 @@
     grid-template-columns: 44px 1fr 55px 72px 60px 88px 52px;
 }
 
-.pl-cat-row-disabled {
-    cursor: default !important;
-}
-
-.pl-cat-row-disabled:hover {
-    background: transparent !important;
-}
-
-.pl-cat-name-plain {
-    cursor: default;
-}
-
-.pl-cat-name-plain:hover {
-    color: var(--text-primary);
+/* Guest profile link in category table */
+.pl-cat-row .pl-player-name[data-guest-profile] {
+    cursor: pointer;
 }
 
 /* Guest/registered banner */

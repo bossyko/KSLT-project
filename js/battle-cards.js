@@ -22,7 +22,8 @@
         openIn: 'Open in',
         cancel: 'Cancel',
         voteRecorded: 'Vote recorded!',
-        moreDetails: 'More details'
+        moreDetails: 'More details',
+        allBattles: 'All battles'
     } : (isKg ? {
         battle: 'БАТТЛ',
         vs: 'VS',
@@ -34,7 +35,8 @@
         openIn: 'Ачуу',
         cancel: 'Жокко чыгаруу',
         voteRecorded: 'Добуш кабыл алынды!',
-        moreDetails: 'Толугураак'
+        moreDetails: 'Толугураак',
+        allBattles: 'Бардык баттлдар'
     } : {
         battle: 'БАТТЛ',
         vs: 'VS',
@@ -46,7 +48,8 @@
         openIn: 'Открыть в',
         cancel: 'Отмена',
         voteRecorded: 'Голос принят!',
-        moreDetails: 'Подробнее'
+        moreDetails: 'Подробнее',
+        allBattles: 'Все баттлы'
     });
 
     var userId = null;
@@ -65,7 +68,8 @@
         var inPages = window.location.pathname.indexOf('/pages/') !== -1;
         var prefix = inPages ? '' : 'pages/';
         var suffix = isEn ? '-en' : (isKg ? '-kg' : '');
-        return prefix + 'challenge' + suffix + '.html?id=' + id;
+        var from = inPages ? 'tournaments' : 'home';
+        return prefix + 'challenge' + suffix + '.html?id=' + id + '&from=' + from;
     }
 
     function getPlayerName(p) {
@@ -432,8 +436,14 @@
             html += renderBattleCard(b, data.players, data.votes);
         });
 
+        // "All battles" link — compute URL based on location
+        var inPages = window.location.pathname.indexOf('/pages/') !== -1;
+        var prefix = inPages ? '' : 'pages/';
+        var suffix = isEn ? '-en' : (isKg ? '-kg' : '');
+        var allBattlesUrl = prefix + 'battles-overview' + suffix + '.html';
+
         container.innerHTML =
-            '<div class="section-header"><h2>' + L.battle + '</h2></div>' +
+            '<div class="section-header"><h2>' + L.battle + '</h2><a href="' + allBattlesUrl + '" class="link-all">' + L.allBattles + ' →</a></div>' +
             '<div class="bc-grid">' + html + '</div>';
         container.style.display = '';
 

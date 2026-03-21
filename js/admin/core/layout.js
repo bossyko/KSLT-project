@@ -30,6 +30,7 @@
             { key: 'content',   icon: A.ICONS.file,   label: L.content,   badge: false },
             { key: 'tournaments', icon: A.ICONS.trophy, label: L.tournaments, badge: false },
             { key: 'challenges', icon: A.ICONS.swords, label: L.challenges, badge: false },
+            { key: 'live',       icon: A.ICONS.tv,     label: L.liveSection, badge: false },
             { key: 'players',   icon: A.ICONS.chart,  label: L.players,   badge: false },
             { key: 'courts',   icon: A.ICONS.location, label: L.courts,  badge: false },
             { key: 'coaches', icon: A.ICONS.coach,    label: L.coaches, badge: false },
@@ -160,7 +161,8 @@
             settings: A.renderSettingsSection,
             vouchers: A.renderVouchersList,
             loyalty: A.renderLoyaltySection,
-            challenges: A.renderChallengesSection
+            challenges: A.renderChallengesSection,
+            live: A.renderLiveSection
         };
         if (resetMap[tab]) {
             resetMap[tab]();

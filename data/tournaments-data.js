@@ -404,7 +404,7 @@ function loadUpcomingTournaments(category) {
                 <a href="tournament.html?id=${category}-${t.id}" class="btn-view-bracket" style="margin-right:auto">Подробнее</a>
                 ${t.status === 'open'
                     ? '<button class="btn-register">Зарегистрироваться</button>'
-                    : '<button class="btn-notify">Уведомить меня</button>'}
+                    : ''}
             </div>
         </div>
     `).join('');
@@ -581,14 +581,6 @@ function initCalendarButtons() {
             const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${date}T090000/${date}T180000`;
 
             window.open(googleUrl, '_blank');
-        }
-
-        if (e.target.closest('.btn-notify')) {
-            const btn = e.target.closest('.btn-notify');
-            btn.textContent = 'Уведомление ✓';
-            btn.style.color = 'var(--accent)';
-            btn.style.borderColor = 'var(--accent)';
-            btn.disabled = true;
         }
 
         // Registration gate

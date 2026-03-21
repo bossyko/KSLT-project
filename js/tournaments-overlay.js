@@ -227,13 +227,13 @@
 
             var L = isEn ? {
                 format: 'Format', participants: 'Players', prizeFund: 'Prize',
-                gender: 'Gender', details: 'Details', register: 'Register', notify: 'Notify Me', calendar: 'Add to calendar'
+                gender: 'Gender', details: 'Details', register: 'Register', calendar: 'Add to calendar'
             } : (isKg ? {
                 format: 'Формат', participants: 'Катышуучулар', prizeFund: 'Сыйлык',
-                gender: 'Жынысы', details: 'Толугураак', register: 'Каттоо', notify: 'Кабарлоо', calendar: 'Календарга'
+                gender: 'Жынысы', details: 'Толугураак', register: 'Каттоо', calendar: 'Календарга'
             } : {
                 format: 'Формат', participants: 'Участники', prizeFund: 'Призовой',
-                gender: 'Пол', details: 'Подробнее', register: 'Регистрация', notify: 'Уведомить', calendar: 'В календарь'
+                gender: 'Пол', details: 'Подробнее', register: 'Регистрация', calendar: 'В календарь'
             });
 
             var today = new Date().toISOString().substring(0, 10);
@@ -270,6 +270,9 @@
                     regLine = (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()];
                 }
 
+                // Gender for filtering: men, women, or mixed
+                var _gender = (gender === 'men' || gender === 'women') ? gender : 'mixed';
+
                 return {
                     id: t.id,
                     name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
@@ -283,6 +286,7 @@
                     status: cardStatus,
                     statusText: statusLabels[effectiveStatus] || statusLabels.upcoming,
                     genderLabel: genderLabel,
+                    _gender: _gender,
                     regLine: regLine,
                     image: t.image_url || t.image || '',
                     _startTime: t.start_time || null,
@@ -295,9 +299,11 @@
                 ? {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
                 : {'Янв':'01','Фев':'02','Мар':'03','Апр':'04','Май':'05','Июн':'06','Июл':'07','Авг':'08','Сен':'09','Окт':'10','Ноя':'11','Дек':'12'};
 
+            var staticGender = category.indexOf('women') !== -1 ? 'women' : (category.indexOf('men') !== -1 ? 'men' : 'mixed');
             var staticItems = (typeof tournamentsData !== 'undefined' && tournamentsData.upcoming[category] || []).map(function(t) {
                 return Object.assign({}, t, {
                     _dateSort: '2026-' + (monthMap[t.date.month] || '01') + '-' + t.date.day,
+                    _gender: staticGender,
                     _fromSupabase: false
                 });
             });
@@ -323,7 +329,7 @@
                     : (isEn ? 'Coming Soon' : (isKg ? 'Жакында' : 'Скоро открытие')));
 
                 var cardHref = detailPage + '?id=' + (t._fromSupabase ? t.id : category + '-' + t.id);
-                return '<div class="tournament-card" data-status="' + t.status + '" data-id="' + (t._fromSupabase ? t.id : category + '-' + t.id) + '"' +
+                return '<div class="tournament-card" data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '" data-id="' + (t._fromSupabase ? t.id : category + '-' + t.id) + '"' +
                     (t.image ? ' style="background-image:url(' + t.image + ')"' : '') + '>' +
                     '<div class="tournament-card-header">' +
                         '<span class="tournament-date">' +
@@ -354,7 +360,7 @@
                         '<span class="btn-view-bracket">' + L.details + '</span>' +
                         (t.status === 'open'
                             ? '<button class="btn-register">' + L.register + '</button>'
-                            : (t.status === 'past' ? '' : '<button class="btn-notify">' + L.notify + '</button>')) +
+                            : '') +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -363,7 +369,7 @@
             grid.querySelectorAll('.tournament-card[data-id]').forEach(function(card) {
                 card.addEventListener('click', function(e) {
                     // Skip footer buttons
-                    if (e.target.closest('.btn-calendar, .btn-register, .btn-notify')) return;
+                    if (e.target.closest('.btn-calendar, .btn-register')) return;
                     window.location.href = detailPage + '?id=' + this.dataset.id;
                 });
             });
@@ -399,29 +405,24 @@
     }
 
     function initFilterSearch(grid) {
-        // Clone filter buttons to remove old handlers from tournaments-data.js
-        var filterBtns = document.querySelectorAll('.filter-btn[data-filter]');
-        filterBtns.forEach(function(btn) {
-            var clone = btn.cloneNode(true);
-            btn.parentNode.replaceChild(clone, btn);
-        });
+        var statusSelect = document.getElementById('statusFilter');
+        var genderSelect = document.getElementById('genderFilter');
 
-        // Re-query cloned buttons and bind new handlers
-        var newBtns = document.querySelectorAll('.filter-btn[data-filter]');
-        newBtns.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                newBtns.forEach(function(b) { b.classList.remove('active'); });
-                btn.classList.add('active');
-                applyFilters(grid);
-            });
-        });
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function() { applyFilters(grid); });
+        }
+        if (genderSelect) {
+            genderSelect.addEventListener('change', function() { applyFilters(grid); });
+        }
     }
 
     function applyFilters(grid) {
         var input = document.getElementById('tournamentSearch');
         var query = input ? input.value.trim().toLowerCase() : '';
-        var activeBtn = document.querySelector('.filter-btn.active');
-        var filter = activeBtn ? activeBtn.dataset.filter : 'all';
+        var statusSelect = document.getElementById('statusFilter');
+        var genderSelect = document.getElementById('genderFilter');
+        var filter = statusSelect ? statusSelect.value : 'all';
+        var genderFilter = genderSelect ? genderSelect.value : 'all';
 
         // Update section title
         var sectionTitle = document.querySelector('#trnStickyHeader h2');
@@ -433,10 +434,12 @@
 
         grid.querySelectorAll('.tournament-card').forEach(function(card) {
             var status = card.dataset.status;
+            var cardGender = card.dataset.gender || 'all';
             var statusMatch = (filter === 'all') ? (status !== 'past') : (status === filter);
+            var genderMatch = (genderFilter === 'all') || (cardGender === genderFilter);
             var title = card.querySelector('h3');
             var nameMatch = !query || (title && title.textContent.toLowerCase().indexOf(query) !== -1);
-            card.style.display = (statusMatch && nameMatch) ? '' : 'none';
+            card.style.display = (statusMatch && genderMatch && nameMatch) ? '' : 'none';
         });
     }
 

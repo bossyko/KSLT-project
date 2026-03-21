@@ -837,8 +837,10 @@ function renderNewsList() {
         }
     });
 
-    // State
-    var currentFilter = 'all';
+    // State — read ?category= from URL if present
+    var urlCat = new URLSearchParams(window.location.search).get('category') || '';
+    var knownCats = ['announcement', 'world', 'results', 'interview'];
+    var currentFilter = (urlCat && knownCats.indexOf(urlCat) !== -1) ? urlCat : 'all';
     var currentPage = 1;
     var searchQuery = '';
 
@@ -864,10 +866,23 @@ function renderNewsList() {
     if (!notFound) return;
     notFound.style.display = 'block';
 
+    // Ensure all known categories are shown in filter chips (even if no articles yet)
+    var catLabelsAll = isEnPage()
+        ? { results: 'Report', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' }
+        : (isKgPage()
+            ? { results: 'Репортаж', interview: 'Интервью', announcement: 'Жарыялоо', world: 'Дүйнөлүк теннис' }
+            : { results: 'Репортаж', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' });
+    var existingKeys = categories.map(function(c) { return c.key; });
+    knownCats.forEach(function(k) {
+        if (existingKeys.indexOf(k) === -1) {
+            categories.push({ key: k, label: catLabelsAll[k] || k });
+        }
+    });
+
     // Build filters + grid + pagination shell
-    var chipsHtml = '<button class="news-filter-btn active" data-cat="all">' + labels.filterAll + '</button>';
+    var chipsHtml = '<button class="news-filter-btn' + (currentFilter === 'all' ? ' active' : '') + '" data-cat="all">' + labels.filterAll + '</button>';
     categories.forEach(function(cat) {
-        chipsHtml += '<button class="news-filter-btn" data-cat="' + cat.key + '">' + cat.label + '</button>';
+        chipsHtml += '<button class="news-filter-btn' + (currentFilter === cat.key ? ' active' : '') + '" data-cat="' + cat.key + '">' + cat.label + '</button>';
     });
 
     var filtersHtml =

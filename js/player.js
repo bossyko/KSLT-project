@@ -114,21 +114,21 @@
         noMatches: 'No head-to-head matches found', loading: 'Loading...',
         noData: 'No match data yet', participated: 'Participated',
         winner: '🏆 Winner', roundF: 'Final', roundSF: 'SF', roundQF: 'QF',
-        round3rd: '3rd place', round4th: '4th place', upcoming: 'Upcoming'
+        round3rd: '3rd place', round4th: '4th place', upcoming: 'Upcoming', registered: 'Registered'
     } : isKg ? {
         vs: 'VS', wins: 'Жеңиштер', setsWon: 'Утулган сеттер', gamesWon: 'Утулган геймдер',
         last5: 'Акыркы 5 матч', fullProfile: 'Толук профилди ачуу',
         noMatches: 'Бетме-бет матчтар жок', loading: 'Жүктөлүүдө...',
         noData: 'Матч маалыматы жок', participated: 'Катышкан',
         winner: '🏆 Жеңүүчү', roundF: 'Финал', roundSF: '1/2', roundQF: '1/4',
-        round3rd: '3-орун', round4th: '4-орун', upcoming: 'Алдыда'
+        round3rd: '3-орун', round4th: '4-орун', upcoming: 'Алдыда', registered: 'Катталган'
     } : {
         vs: 'VS', wins: 'Победы', setsWon: 'Выигранные сеты', gamesWon: 'Выигранные геймы',
         last5: 'Последние 5 матчей', fullProfile: 'Открыть полный профиль',
         noMatches: 'Матчей между игроками не найдено', loading: 'Загрузка...',
         noData: 'Нет данных о матчах', participated: 'Участвовал',
         winner: '🏆 Победитель', roundF: 'Финал', roundSF: '1/2', roundQF: '1/4',
-        round3rd: '3-е место', round4th: '4-е место', upcoming: 'Скоро'
+        round3rd: '3-е место', round4th: '4-е место', upcoming: 'Скоро', registered: 'Зарегистрирован'
     };
 
     // ---- Find player across all categories ----
@@ -341,6 +341,45 @@
         }
     }
 
+    // ---- Guest block ----
+    function renderGuestBlock(data) {
+        var el = document.getElementById('playerDetail');
+        if (!el) return;
+
+        var player = data.player;
+        var rankingsPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
+        var authPage = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+        var photoUrl = player.photo ? player.photo.replace('w=80&h=80', 'w=240&h=240') : 'https://placehold.co/240x240?text=?';
+
+        var titleText = isEn ? 'Register to view player profiles' : (isKg ? 'Оюнчулардын профилин көрүү үчүн катталыңыз' : 'Зарегистрируйтесь для просмотра профилей');
+        var descText = isEn ? 'Full stats, match history, achievements and challenges are available after registration' : (isKg ? 'Толук статистика, матч тарыхы, жетишкендиктер жана чакырыктар каттоодон кийин жеткиликтүү' : 'Полная статистика, история матчей, достижения и вызовы доступны после регистрации');
+        var btnText = isEn ? 'Sign In / Register' : (isKg ? 'Кирүү / Каттоо' : 'Войти / Регистрация');
+        var backText = isEn ? 'Back to rankings' : (isKg ? 'Рейтингге кайтуу' : 'Назад к рейтингу');
+
+        document.title = player.name + ' \u2014 KSLT';
+
+        el.innerHTML =
+            '<div class="kslt-back-wrap">' +
+                '<a href="' + rankingsPage + '" class="kslt-back">\u2190 ' + backText + '</a>' +
+            '</div>' +
+            '<div class="pp-guest-block">' +
+                '<div class="pp-guest-preview">' +
+                    '<img src="' + esc(photoUrl) + '" alt="" class="pp-guest-photo">' +
+                    '<h2 class="pp-guest-name">' + esc(player.name) + '</h2>' +
+                '</div>' +
+                '<div class="pp-guest-cta">' +
+                    '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+                        '<rect x="3" y="11" width="18" height="11" rx="2"/>' +
+                        '<path d="M7 11V7a5 5 0 0 1 10 0v4"/>' +
+                        '<circle cx="12" cy="16" r="1"/>' +
+                    '</svg>' +
+                    '<h3>' + titleText + '</h3>' +
+                    '<p>' + descText + '</p>' +
+                    '<a href="' + authPage + '?tab=register" class="pp-guest-btn">' + btnText + '</a>' +
+                '</div>' +
+            '</div>';
+    }
+
     // ---- Render Profile ----
     function renderProfile(data) {
         var el = document.getElementById('playerDetail');
@@ -461,10 +500,10 @@
 
         // -- Subsection: Challenges --
         html += '<div class="pp-subsection" id="ppChallengesSection" style="display:none">';
-        html += '<button class="pp-subsection-toggle" data-target="ppSubChallenges">';
-        html += '<span>\uD83E\uDD4A ' + L.subsectionChallenges + '</span><span class="pp-toggle-arrow">\u25B6</span></button>';
-        html += '<div class="pp-subsection-body pp-subsection-collapsed" id="ppSubChallenges">';
-        html += '<div class="pp-challenges" id="ppChallengesContainer">';
+        html += '<button class="pp-subsection-toggle pp-subsection-open" data-target="ppSubChallenges">';
+        html += '<span>\uD83E\uDD4A ' + L.subsectionChallenges + '</span><span class="pp-toggle-arrow">\u25BC</span></button>';
+        html += '<div class="pp-subsection-body" id="ppSubChallenges">';
+        html += '<div class="pp-matches" id="ppChallengesContainer">';
         html += '<div class="pp-loading">' + LH.loading + '</div>';
         html += '</div></div></div>';
 
@@ -710,11 +749,6 @@
             return;
         }
 
-        var ROUND_LABELS = {
-            'W': LH.winner, 'F': LH.roundF, 'SF': LH.roundSF, 'QF': LH.roundQF,
-            'R16': 'R16', 'R32': 'R32', '3RD': LH.round3rd, '4TH': LH.round4th
-        };
-
         Promise.all([
             client.from('tournament_registrations')
                 .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start, image)')
@@ -752,29 +786,71 @@
 
             if (items.length === 0) { renderMockTournaments(container, data); return; }
 
-            var html = '';
+            // Split into upcoming and past
+            var today = new Date().toISOString().slice(0, 10);
+            var upcoming = [];
+            var past = [];
             items.forEach(function(item) {
-                var t = item.tournament;
-                var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
-                var result = item.round_reached ? (ROUND_LABELS[item.round_reached] || item.round_reached) : LH.participated;
-                if (item.points_earned > 0) result += ' · +' + item.points_earned;
-                var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
-                var tImg = t.image || '';
-                var tPage = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id;
-                html += '<a class="pp-tournament" href="' + tPage + '">';
-                if (tImg) {
-                    html += '<img src="' + esc(tImg) + '" alt="' + esc(tName) + '" class="pp-tournament-photo">';
-                } else {
-                    html += '<div class="pp-tournament-photo pp-tournament-photo-empty">\uD83C\uDFBE</div>';
-                }
-                html += '<div class="pp-tournament-info"><span class="pp-tournament-name">' + esc(tName) + '</span>';
-                if (dateStr) html += '<span class="pp-tournament-date">' + dateStr + '</span>';
-                html += '</div>';
-                html += '<span class="pp-tournament-result' + (item.round_reached === 'W' ? ' pp-tournament-winner' : '') + '">' + result + '</span>';
-                html += '</a>';
+                var isUpcoming = !item.round_reached && item.tournament.date_start && item.tournament.date_start >= today;
+                if (isUpcoming) upcoming.push(item);
+                else past.push(item);
             });
+
+            var html = '';
+
+            // Upcoming tournaments
+            if (upcoming.length) {
+                html += '<div class="pp-tournament-section-label">' + LH.upcoming + '</div>';
+                upcoming.forEach(function(item) {
+                    html += renderTournamentCard(item, true);
+                });
+            }
+
+            // Past tournaments
+            if (past.length) {
+                if (upcoming.length) {
+                    html += '<div class="pp-tournament-section-label" style="margin-top:12px;">' +
+                        (isEn ? 'Played' : isKg ? 'Ойнолгон' : 'Сыгранные') + '</div>';
+                }
+                past.forEach(function(item) {
+                    html += renderTournamentCard(item, false);
+                });
+            }
+
             container.innerHTML = html;
         });
+    }
+
+    function renderTournamentCard(item, isUpcoming) {
+        var ROUND_LABELS = {
+            'W': LH.winner, 'F': LH.roundF, 'SF': LH.roundSF, 'QF': LH.roundQF,
+            'R16': 'R16', 'R32': 'R32', '3RD': LH.round3rd, '4TH': LH.round4th
+        };
+        var t = item.tournament;
+        var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
+        var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
+        var tImg = t.image || '';
+        var tPage = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id;
+        var result;
+        if (isUpcoming) {
+            result = LH.registered;
+        } else {
+            result = item.round_reached ? (ROUND_LABELS[item.round_reached] || item.round_reached) : LH.participated;
+            if (item.points_earned > 0) result += ' · +' + item.points_earned;
+        }
+        var resultClass = isUpcoming ? ' pp-tournament-upcoming' : (item.round_reached === 'W' ? ' pp-tournament-winner' : '');
+        var html = '<a class="pp-tournament" href="' + tPage + '">';
+        if (tImg) {
+            html += '<img src="' + esc(tImg) + '" alt="' + esc(tName) + '" class="pp-tournament-photo">';
+        } else {
+            html += '<div class="pp-tournament-photo pp-tournament-photo-empty">\uD83C\uDFBE</div>';
+        }
+        html += '<div class="pp-tournament-info"><span class="pp-tournament-name">' + esc(tName) + '</span>';
+        if (dateStr) html += '<span class="pp-tournament-date">' + dateStr + '</span>';
+        html += '</div>';
+        html += '<span class="pp-tournament-result' + resultClass + '">' + result + '</span>';
+        html += '</a>';
+        return html;
     }
 
     function renderMockTournaments(container, data) {
@@ -805,6 +881,15 @@
                     return;
                 }
                 section.style.display = '';
+                // Force expanded state
+                var btn = section.querySelector('.pp-subsection-toggle');
+                var body = document.getElementById('ppSubChallenges');
+                if (btn && body) {
+                    body.classList.remove('pp-subsection-collapsed');
+                    btn.classList.add('pp-subsection-open');
+                    var arrow = btn.querySelector('.pp-toggle-arrow');
+                    if (arrow) arrow.textContent = '\u25BC';
+                }
                 renderChallenges(container, res.data);
             });
     }
@@ -825,30 +910,63 @@
             }
 
             var date = c.counter_date || c.proposed_date || '';
-            var venue = c.counter_venue || c.counter_court_name || c.proposed_venue || c.court_name || '';
-            var statusClass = c.status === 'completed' ? 'completed' : 'accepted';
-            var statusLabel = c.status === 'completed' ? L.challengeCompleted : L.challengeAccepted;
             var score = c.match_score || '';
+            var result = chalWinLoss(score, isChallenger);
 
             var playerPage = isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
 
-            html += '<div class="pp-challenge">';
-            html += '<div class="pp-challenge-date">' + formatChalDate(date) + '</div>';
-            html += '<div class="pp-challenge-opponent">';
+            html += '<div class="pp-match pp-match-clickable" data-opponent-id="' + esc(oppId) + '" data-opponent-name="' + esc(oppName) + '" data-opponent-photo="' + esc(oppPhoto) + '">';
+            html += '<div class="pp-match-date">' + formatChalDate(date) + '</div>';
+            html += '<div class="pp-match-tournament"></div>';
+            html += '<div class="pp-match-opponent">';
             html += '<a href="' + playerPage + '?id=' + esc(oppId) + '">';
             html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(oppName) + '" class="pp-match-opponent-photo">';
             html += '</a>';
-            html += '<a href="' + playerPage + '?id=' + esc(oppId) + '" class="pp-challenge-opp-name">' + esc(oppName) + '</a>';
+            html += '<a href="' + playerPage + '?id=' + esc(oppId) + '" class="pp-match-opponent-name" style="color:inherit;text-decoration:none;">' + esc(oppName) + '</a>';
             html += '</div>';
-            if (score) {
-                html += '<div class="pp-match-score">' + esc(score) + '</div>';
+            html += '<div class="pp-match-score">' + esc(score || '—') + '</div>';
+            if (c.status === 'completed' && result) {
+                html += '<div class="pp-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + (result === 'W' ? L.win : L.loss) + '</div>';
             } else {
-                html += '<div class="pp-challenge-venue">' + esc(venue) + '</div>';
+                html += '<div class="pp-match-result accepted">' + L.challengeAccepted + '</div>';
             }
-            html += '<div class="pp-challenge-status ' + statusClass + '">' + statusLabel + '</div>';
+            html += '<button class="pp-match-h2h" title="Head to Head">H2H</button>';
             html += '</div>';
         });
         container.innerHTML = html;
+        attachMatchClickHandlers(container);
+    }
+
+    function chalWinnerId(score, p1Id, p2Id) {
+        if (!score) return null;
+        var sets = score.trim().split(/\s+/);
+        var s1 = 0, s2 = 0;
+        sets.forEach(function(s) {
+            var m = s.match(/^(\d+)\/(\d+)/);
+            if (m) {
+                if (parseInt(m[1]) > parseInt(m[2])) s1++;
+                else s2++;
+            }
+        });
+        if (s1 > s2) return p1Id;
+        if (s2 > s1) return p2Id;
+        return null;
+    }
+
+    function chalWinLoss(score, isChallenger) {
+        if (!score) return null;
+        var sets = score.trim().split(/\s+/);
+        var s1 = 0, s2 = 0;
+        sets.forEach(function(s) {
+            var m = s.match(/^(\d+)\/(\d+)/);
+            if (m) {
+                if (parseInt(m[1]) > parseInt(m[2])) s1++;
+                else s2++;
+            }
+        });
+        if (s1 === s2) return null;
+        var p1Won = s1 > s2;
+        return isChallenger ? (p1Won ? 'W' : 'L') : (p1Won ? 'L' : 'W');
     }
 
     function formatChalDate(d) {
@@ -894,21 +1012,53 @@
             return;
         }
 
-        client.from('matches')
-            .select('id, player1_id, player2_id, score, winner_id, played_at, tournament:tournaments(title, title_en, title_kg)')
-            .or('and(player1_id.eq.' + _playerId + ',player2_id.eq.' + oppId + '),and(player1_id.eq.' + oppId + ',player2_id.eq.' + _playerId + ')')
-            .not('winner_id', 'is', null)
-            .order('played_at', { ascending: false })
-            .then(function(res) {
+        Promise.all([
+            client.from('matches')
+                .select('id, player1_id, player2_id, score, winner_id, played_at, tournament:tournaments(title, title_en, title_kg)')
+                .or('and(player1_id.eq.' + _playerId + ',player2_id.eq.' + oppId + '),and(player1_id.eq.' + oppId + ',player2_id.eq.' + _playerId + ')')
+                .not('winner_id', 'is', null)
+                .order('played_at', { ascending: false }),
+            client.from('challenges')
+                .select('id, challenger_player_id, opponent_player_id, score_draft, proposed_date, created_at')
+                .or('and(challenger_player_id.eq.' + _playerId + ',opponent_player_id.eq.' + oppId + '),and(challenger_player_id.eq.' + oppId + ',opponent_player_id.eq.' + _playerId + ')')
+                .eq('status', 'completed')
+                .not('score_draft', 'is', null)
+                .order('created_at', { ascending: false })
+        ]).then(function(results) {
                 var modal = overlay.querySelector('.h2h-modal');
                 if (!modal) return;
 
-                if (res.error || !res.data || res.data.length === 0) {
+                var tournamentMatches = results[0].data || [];
+                var chalMatches = results[1].data || [];
+
+                // Convert challenges to match-like format
+                var chalConverted = chalMatches.map(function(c) {
+                    var score = c.score_draft || '';
+                    var winnerId = chalWinnerId(score, c.challenger_player_id, c.opponent_player_id);
+                    return {
+                        id: c.id,
+                        player1_id: c.challenger_player_id,
+                        player2_id: c.opponent_player_id,
+                        score: score,
+                        winner_id: winnerId,
+                        played_at: c.proposed_date || c.created_at,
+                        tournament: null,
+                        _isChallenge: true
+                    };
+                });
+
+                // Merge and sort by date descending
+                var allMatches = tournamentMatches.concat(chalConverted);
+                allMatches.sort(function(a, b) {
+                    return (b.played_at || '').localeCompare(a.played_at || '');
+                });
+
+                if (allMatches.length === 0) {
                     renderH2HEmpty(overlay);
                     return;
                 }
 
-                renderH2HContent(modal, res.data, oppId, oppName, oppPhoto);
+                renderH2HContent(modal, allMatches, oppId, oppName, oppPhoto);
                 attachH2HCloseBtn(overlay);
             });
     }
@@ -1254,6 +1404,13 @@
         _allBadges = badgeResults[1];
 
         await detectAccess();
+
+        // Block guests from viewing profiles
+        if (_accessLevel === 'guest') {
+            renderGuestBlock(data);
+            return;
+        }
+
         document.title = data.player.name + ' \u2014 KSLT';
         renderProfile(data);
         renderBadgesSection();

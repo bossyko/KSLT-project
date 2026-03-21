@@ -54,6 +54,7 @@
                         <a href="tournaments.html?category=futures" class="nav-dropdown-item" data-category="futures">Futures</a>
                         <a href="tournaments.html?category=tour" class="nav-dropdown-item" data-category="tour">Tour</a>
                         <a href="tournaments.html?category=friendly" class="nav-dropdown-item" data-category="friendly">Friendly</a>
+                        <a href="battles-overview.html" class="nav-dropdown-item">Баттлы</a>
                     </div>
                 </li>
                 <li class="nav-dropdown">
@@ -91,8 +92,20 @@
                         <a href="partners.html" class="nav-dropdown-item">Найти партнёра</a>
                     </div>
                 </li>
-                <li>
-                    <a href="news.html" class="nav-item">Новости <span class="indicator-dot"></span></a>
+                <li class="nav-dropdown">
+                    <a href="news.html" class="nav-item nav-item-dropdown">
+                        Новости
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="news.html?category=announcement" class="nav-dropdown-item">Анонс</a>
+                        <a href="news.html?category=world" class="nav-dropdown-item">Мировой теннис</a>
+                        <a href="news.html?category=results" class="nav-dropdown-item">Результаты</a>
+                        <a href="news.html?category=interview" class="nav-dropdown-item">Интервью</a>
+                    </div>
                 </li>
                 <li class="nav-dropdown">
                     <a href="info.html" class="nav-item nav-item-dropdown">
@@ -170,6 +183,7 @@
                         <li><a href="tournaments.html?category=futures">Futures</a></li>
                         <li><a href="tournaments.html?category=tour">Tour</a></li>
                         <li><a href="tournaments.html?category=friendly">Friendly</a></li>
+                        <li><a href="battles-overview.html">Баттлы</a></li>
                     </ul>
                 </li>
                 <li><a href="../index.html#live"><span class="live-dot"></span> Live</a></li>
@@ -208,7 +222,21 @@
                         <li><a href="partners.html">Найти партнёра</a></li>
                     </ul>
                 </li>
-                <li><a href="news.html">Новости <span class="indicator-dot"></span></a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="news.html" class="mobile-dropdown-toggle">
+                        Новости
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="news.html?category=announcement">Анонс</a></li>
+                        <li><a href="news.html?category=world">Мировой теннис</a></li>
+                        <li><a href="news.html?category=results">Результаты</a></li>
+                        <li><a href="news.html?category=interview">Интервью</a></li>
+                    </ul>
+                </li>
                 <li class="mobile-nav-dropdown">
                     <a href="info.html" class="mobile-dropdown-toggle">
                         Инфо
@@ -244,10 +272,6 @@
     </header>
 
     <main>
-        <div class="kslt-back-wrap">
-            <a href="tournaments-overview.html" class="kslt-back">&larr; Все турниры</a>
-        </div>
-
         <!-- HERO - Dynamic content -->
         <section class="tournament-hero">
             <div class="tournament-hero-bg">
@@ -277,13 +301,27 @@
 
         <!-- TOURNAMENTS HEADER (sticky) -->
         <div class="trn-sticky-header" id="trnStickyHeader">
-            <h2>Предстоящие турниры</h2>
-            <div class="tournament-filters">
-                <button class="filter-btn active" data-filter="all">Все</button>
-                <button class="filter-btn" data-filter="open">Регистрация открыта</button>
-                <button class="filter-btn" data-filter="soon">Предстоящие</button>
-                <button class="filter-btn" data-filter="past">Завершённые</button>
-                <input type="text" class="tournament-search-input" id="tournamentSearch" placeholder="Поиск..." autocomplete="off">
+            <a href="tournaments-overview.html" class="trn-back-link">&larr; Все турниры</a>
+            <div class="trn-title-row">
+                <h2>Предстоящие турниры</h2>
+                <div class="tournament-filters">
+                    <label class="trn-filter-label">Статус:
+                        <select class="trn-filter-select" id="statusFilter">
+                            <option value="all" selected>Все</option>
+                            <option value="open">Регистрация открыта</option>
+                            <option value="soon">Предстоящие</option>
+                            <option value="past">Завершённые</option>
+                        </select>
+                    </label>
+                    <label class="trn-filter-label">Пол:
+                        <select class="trn-filter-select" id="genderFilter">
+                            <option value="all" selected>Все</option>
+                            <option value="men">♂ Мужские</option>
+                            <option value="women">♀ Женские</option>
+                        </select>
+                    </label>
+                    <input type="text" class="tournament-search-input" id="tournamentSearch" placeholder="Поиск..." autocomplete="off">
+                </div>
             </div>
         </div>
 
@@ -416,5 +454,8 @@
     <script src="../js/script.js"></script>
     <script src="../data/tournaments-data.js?v=3"></script>
     <script src="../js/tournaments-overlay.js?v=7"></script>
+    <script>
+    (function(){var h=document.getElementById('trnStickyHeader');if(!h)return;var s=document.createElement('div');s.style.height='1px';h.parentNode.insertBefore(s,h);new IntersectionObserver(function(e){h.classList.toggle('stuck',!e[0].isIntersecting)}).observe(s)})();
+    </script>
 </body>
 </html>

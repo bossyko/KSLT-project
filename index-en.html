@@ -6,7 +6,7 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co; frame-src https://www.youtube.com;">
     <title>KSLT - Kyrgyzstan Social Lawn Tennis</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="manifest" href="/manifest.json">
@@ -51,6 +51,7 @@
                         <a href="pages/tournaments-en.html?category=futures" class="nav-dropdown-item">Futures</a>
                         <a href="pages/tournaments-en.html?category=tour" class="nav-dropdown-item">Tour</a>
                         <a href="pages/tournaments-en.html?category=friendly" class="nav-dropdown-item">Friendly</a>
+                        <a href="pages/battles-overview-en.html" class="nav-dropdown-item">Battles</a>
                     </div>
                 </li>
                 <li class="nav-dropdown">
@@ -88,8 +89,20 @@
                         <a href="pages/partners-en.html" class="nav-dropdown-item">Find Partner</a>
                     </div>
                 </li>
-                <li>
-                    <a href="pages/news-en.html" class="nav-item">News <span class="indicator-dot"></span></a>
+                <li class="nav-dropdown">
+                    <a href="pages/news-en.html" class="nav-item nav-item-dropdown">
+                        News
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="pages/news-en.html?category=announcement" class="nav-dropdown-item">Announcements</a>
+                        <a href="pages/news-en.html?category=world" class="nav-dropdown-item">World Tennis</a>
+                        <a href="pages/news-en.html?category=results" class="nav-dropdown-item">Results</a>
+                        <a href="pages/news-en.html?category=interview" class="nav-dropdown-item">Interviews</a>
+                    </div>
                 </li>
                 <li class="nav-dropdown">
                     <a href="pages/info-en.html" class="nav-item nav-item-dropdown">
@@ -163,6 +176,7 @@
                         <li><a href="pages/tournaments-en.html?category=futures">Futures</a></li>
                         <li><a href="pages/tournaments-en.html?category=tour">Tour</a></li>
                         <li><a href="pages/tournaments-en.html?category=friendly">Friendly</a></li>
+                        <li><a href="pages/battles-overview-en.html">Battles</a></li>
                     </ul>
                 </li>
                 <li><a href="#live"><span class="live-dot"></span> Live</a></li>
@@ -201,7 +215,21 @@
                         <li><a href="pages/partners-en.html">Find Partner</a></li>
                     </ul>
                 </li>
-                <li><a href="pages/news-en.html">News <span class="indicator-dot"></span></a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="pages/news-en.html" class="mobile-dropdown-toggle">
+                        News
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/news-en.html?category=announcement">Announcements</a></li>
+                        <li><a href="pages/news-en.html?category=world">World Tennis</a></li>
+                        <li><a href="pages/news-en.html?category=results">Results</a></li>
+                        <li><a href="pages/news-en.html?category=interview">Interviews</a></li>
+                    </ul>
+                </li>
                 <li class="mobile-nav-dropdown">
                     <a href="pages/info-en.html" class="mobile-dropdown-toggle">
                         Info
@@ -261,7 +289,6 @@
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
                     </a>
-                    <a href="pages/courts-en.html" class="btn-secondary">Book a Court</a>
                 </div>
                 <div class="hero-stats">
                     <div class="stat">
@@ -452,28 +479,7 @@
                     <h2>Compete. Win. Earn Badges.</h2>
                     <p>Register, play tournaments and earn rewards for your achievements</p>
                 </div>
-                <div class="badges-cta-cards">
-                    <div class="badge-cta-card">
-                        <span class="badge-cta-emoji">🆕</span>
-                        <span class="badge-cta-name">Newcomer</span>
-                        <span class="badge-cta-desc">Register and play your first match</span>
-                    </div>
-                    <div class="badge-cta-card">
-                        <span class="badge-cta-emoji">🔥</span>
-                        <span class="badge-cta-name">Win Streak</span>
-                        <span class="badge-cta-desc">Win 5 matches in a row</span>
-                    </div>
-                    <div class="badge-cta-card">
-                        <span class="badge-cta-emoji">⬆️</span>
-                        <span class="badge-cta-name">Breakthrough</span>
-                        <span class="badge-cta-desc">Climb 10+ places in rankings</span>
-                    </div>
-                    <div class="badge-cta-card">
-                        <span class="badge-cta-emoji">🏆</span>
-                        <span class="badge-cta-name">Champion</span>
-                        <span class="badge-cta-desc">Win a tournament final</span>
-                    </div>
-                </div>
+                <div class="badges-cta-cards" id="badgesCtaCards"></div>
                 <a href="pages/auth-en.html?tab=register" class="badges-cta-btn">Start your journey</a>
             </div>
         </section>
@@ -714,7 +720,7 @@
                     </div>
                     <div class="court-card-actions">
                         <a href="pages/courts-en.html" class="court-card-details">Details →</a>
-                        <span class="court-card-cta">Book</span>
+                        <span class="court-card-cta">KSLT Discount</span>
                     </div>
                 </div>
                 <div class="court-card">
@@ -728,7 +734,7 @@
                     </div>
                     <div class="court-card-actions">
                         <a href="pages/courts-en.html" class="court-card-details">Details →</a>
-                        <span class="court-card-cta">Book</span>
+                        <span class="court-card-cta">KSLT Discount</span>
                     </div>
                 </div>
                 <div class="court-card">
@@ -742,7 +748,7 @@
                     </div>
                     <div class="court-card-actions">
                         <a href="pages/courts-en.html" class="court-card-details">Details →</a>
-                        <span class="court-card-cta">Book</span>
+                        <span class="court-card-cta">KSLT Discount</span>
                     </div>
                 </div>
             </div>
@@ -766,7 +772,7 @@
                     </div>
                     <div class="coach-card-actions">
                         <a href="pages/coaches-en.html" class="coach-card-details">Details →</a>
-                        <span class="coach-card-cta">Contact</span>
+                        <span class="coach-card-cta">KSLT Discount</span>
                     </div>
                 </div>
                 <div class="coach-card">
@@ -780,7 +786,7 @@
                     </div>
                     <div class="coach-card-actions">
                         <a href="pages/coaches-en.html" class="coach-card-details">Details →</a>
-                        <span class="coach-card-cta">Contact</span>
+                        <span class="coach-card-cta">KSLT Discount</span>
                     </div>
                 </div>
                 <div class="coach-card">
@@ -794,7 +800,7 @@
                     </div>
                     <div class="coach-card-actions">
                         <a href="pages/coaches-en.html" class="coach-card-details">Details →</a>
-                        <span class="coach-card-cta">Contact</span>
+                        <span class="coach-card-cta">KSLT Discount</span>
                     </div>
                 </div>
             </div>
@@ -972,6 +978,51 @@
     <script src="js/membership.js"></script>
     <script src="js/battle-cards.js?v=6"></script>
     <script>
+    // Random badges CTA
+    (function() {
+        var ALL = [
+            {e:'🎾',n:'First Match',d:'Play your first match'},
+            {e:'🏅',n:'First Win',d:'Win your first match'},
+            {e:'🔟',n:'Ten',d:'Play 10 matches'},
+            {e:'💪',n:'Fifty',d:'Play 50 matches'},
+            {e:'💯',n:'Hundred',d:'Play 100 matches'},
+            {e:'⭐',n:'5 Wins',d:'Win 5 matches'},
+            {e:'🌟',n:'10 Wins',d:'Win 10 matches'},
+            {e:'🏆',n:'25 Wins',d:'Win 25 matches'},
+            {e:'👑',n:'50 Wins',d:'Win 50 matches'},
+            {e:'🔥',n:'Streak 3',d:'Win 3 matches in a row'},
+            {e:'⚡',n:'Streak 5',d:'Win 5 matches in a row'},
+            {e:'🚀',n:'Streak 10',d:'Win 10 matches in a row'},
+            {e:'🎯',n:'First Tournament',d:'Participate in a tournament'},
+            {e:'🏆',n:'Champion',d:'Win a tournament final'},
+            {e:'🥈',n:'Finalist',d:'Reach the final'},
+            {e:'👑',n:'Champion x3',d:'Win 3 tournaments'},
+            {e:'💎',n:'Flawless',d:'Win a tournament without losing a set'},
+            {e:'😱',n:'Sensation',d:'Beat a favorite with 500+ points'},
+            {e:'📈',n:'Top-10',d:'Reach top-10 in your category'},
+            {e:'🥇',n:'Number One',d:'Become #1 in your category'},
+            {e:'😤',n:'Dominator',d:'5+ wins against one opponent'},
+            {e:'⏰',n:'Pioneer',d:'Registered in KSLT first year'},
+            {e:'💚',n:'KSLT Member',d:'Active membership'},
+            {e:'🎖️',n:'Veteran 3',d:'3 years in KSLT'},
+            {e:'🏅',n:'Veteran 5',d:'5 years in KSLT'},
+            {e:'🤝',n:'Accepted Challenge',d:'Accept 5 match challenges'},
+            {e:'⚔️',n:'Challenger',d:'Send 10 match challenges'}
+        ];
+        var el = document.getElementById('badgesCtaCards');
+        if (!el) return;
+        var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
+        var pick = shuffled.slice(0, 5);
+        el.innerHTML = pick.map(function(b) {
+            return '<div class="badge-cta-card">' +
+                '<span class="badge-cta-emoji">' + b.e + '</span>' +
+                '<span class="badge-cta-name">' + b.n + '</span>' +
+                '<span class="badge-cta-desc">' + b.d + '</span>' +
+            '</div>';
+        }).join('');
+    })();
+    </script>
+    <script>
     // Load Supabase courts into main page (EN)
     (function() {
         var client = window.supabaseClient;
@@ -980,7 +1031,6 @@
         if (!grid) return;
 
         var _courtAccess = 'guest';
-        var _courtToastTimer = null;
 
         function detectCourtAccess() {
             if (!client) return Promise.resolve();
@@ -995,19 +1045,39 @@
             }).catch(function() {});
         }
 
-        function showCourtToast(message) {
-            var old = document.querySelector('.court-toast');
-            if (old) old.remove();
-            if (_courtToastTimer) clearTimeout(_courtToastTimer);
-            var toast = document.createElement('div');
-            toast.className = 'court-toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            requestAnimationFrame(function() { toast.classList.add('visible'); });
-            _courtToastTimer = setTimeout(function() {
-                toast.classList.remove('visible');
-                setTimeout(function() { toast.remove(); }, 300);
-            }, 3000);
+        function showCourtModal(level) {
+            var isGuest = level === 'guest';
+            var title = isGuest ? 'Become a KSLT Member' : 'Membership Required';
+            var text = isGuest
+                ? 'Register and become a KSLT member to get discounts at partner courts and coaches'
+                : 'Become a KSLT member to unlock discounts at partner courts and coaches';
+            var btnText = isGuest ? 'Sign Up' : 'View Plans';
+            var btnLink = isGuest ? 'pages/auth-en.html' : 'pages/pricing-en.html';
+            var svgIcon = isGuest
+                ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+                : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+            var overlay = document.createElement('div');
+            overlay.className = 'hp-membership-overlay';
+            overlay.innerHTML =
+                '<div class="hp-membership-modal">' +
+                    '<button class="hp-membership-close">&times;</button>' +
+                    '<div class="hp-membership-icon">' + svgIcon + '</div>' +
+                    '<h3>' + title + '</h3>' +
+                    '<p>' + text + '</p>' +
+                    '<a href="' + btnLink + '" class="hp-membership-btn">' + btnText + '</a>' +
+                '</div>';
+            document.body.appendChild(overlay);
+            requestAnimationFrame(function() { overlay.classList.add('visible'); });
+            overlay.querySelector('.hp-membership-close').onclick = function() {
+                overlay.classList.remove('visible');
+                setTimeout(function() { overlay.remove(); }, 300);
+            };
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.classList.remove('visible');
+                    setTimeout(function() { overlay.remove(); }, 300);
+                }
+            });
         }
 
         grid.addEventListener('click', function(e) {
@@ -1015,12 +1085,8 @@
             if (!cta) return;
             e.preventDefault();
             e.stopPropagation();
-            if (_courtAccess === 'guest') {
-                showCourtToast('Sign up and become a KSLT member');
-                return;
-            }
-            if (_courtAccess === 'registered') {
-                showCourtToast('Become a KSLT member to book');
+            if (_courtAccess === 'guest' || _courtAccess === 'registered') {
+                showCourtModal(_courtAccess);
                 return;
             }
             var id = cta.getAttribute('data-id');
@@ -1056,7 +1122,7 @@
                         '</div>' +
                         '<div class="court-card-actions">' +
                             '<a href="pages/court-en.html?id=' + row.id + '" class="court-card-details">Details →</a>' +
-                            '<span class="court-card-cta" data-id="' + row.id + '">Book</span>' +
+                            '<span class="court-card-cta" data-id="' + row.id + '">KSLT Discount</span>' +
                         '</div>' +
                     '</div>';
                 });
@@ -1071,7 +1137,6 @@
         if (!grid) return;
 
         var _coachAccess = 'guest';
-        var _coachToastTimer = null;
 
         function detectCoachAccess() {
             if (!client) return Promise.resolve();
@@ -1086,19 +1151,39 @@
             }).catch(function() {});
         }
 
-        function showCoachToast(message) {
-            var old = document.querySelector('.coach-toast');
-            if (old) old.remove();
-            if (_coachToastTimer) clearTimeout(_coachToastTimer);
-            var toast = document.createElement('div');
-            toast.className = 'coach-toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            requestAnimationFrame(function() { toast.classList.add('visible'); });
-            _coachToastTimer = setTimeout(function() {
-                toast.classList.remove('visible');
-                setTimeout(function() { toast.remove(); }, 300);
-            }, 3000);
+        function showCoachModal(level) {
+            var isGuest = level === 'guest';
+            var title = isGuest ? 'Become a KSLT Member' : 'Membership Required';
+            var text = isGuest
+                ? 'Register and become a KSLT member to get discounts at partner coaches'
+                : 'Become a KSLT member to unlock discounts at partner coaches';
+            var btnText = isGuest ? 'Sign Up' : 'View Plans';
+            var btnLink = isGuest ? 'pages/auth-en.html' : 'pages/pricing-en.html';
+            var svgIcon = isGuest
+                ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+                : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+            var overlay = document.createElement('div');
+            overlay.className = 'hp-membership-overlay';
+            overlay.innerHTML =
+                '<div class="hp-membership-modal">' +
+                    '<button class="hp-membership-close">&times;</button>' +
+                    '<div class="hp-membership-icon">' + svgIcon + '</div>' +
+                    '<h3>' + title + '</h3>' +
+                    '<p>' + text + '</p>' +
+                    '<a href="' + btnLink + '" class="hp-membership-btn">' + btnText + '</a>' +
+                '</div>';
+            document.body.appendChild(overlay);
+            requestAnimationFrame(function() { overlay.classList.add('visible'); });
+            overlay.querySelector('.hp-membership-close').onclick = function() {
+                overlay.classList.remove('visible');
+                setTimeout(function() { overlay.remove(); }, 300);
+            };
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.classList.remove('visible');
+                    setTimeout(function() { overlay.remove(); }, 300);
+                }
+            });
         }
 
         // CTA click delegation
@@ -1107,12 +1192,8 @@
             if (!cta) return;
             e.preventDefault();
             e.stopPropagation();
-            if (_coachAccess === 'guest') {
-                showCoachToast('Sign up and become a KSLT member');
-                return;
-            }
-            if (_coachAccess === 'registered') {
-                showCoachToast('Become a KSLT member to contact');
+            if (_coachAccess === 'guest' || _coachAccess === 'registered') {
+                showCoachModal(_coachAccess);
                 return;
             }
             var id = cta.getAttribute('data-id');
@@ -1142,7 +1223,7 @@
                         '</div>' +
                         '<div class="coach-card-actions">' +
                             '<a href="pages/coach-en.html?id=' + row.id + '" class="coach-card-details">Details →</a>' +
-                            '<span class="coach-card-cta" data-id="' + row.id + '">Contact</span>' +
+                            '<span class="coach-card-cta" data-id="' + row.id + '">KSLT Discount</span>' +
                         '</div>' +
                     '</div>';
                 });
@@ -1221,7 +1302,7 @@
             }
         } catch(e) {}
 
-        var VISIBLE_ROWS = 4;
+        var VISIBLE_ROWS = 8;
 
         Promise.all([
             client.from('categories').select('*').order('sort_order', { ascending: true }),
@@ -1246,7 +1327,7 @@
 
                 var panels = '';
                 catList.forEach(function(c, ci) {
-                    var catPlayers = players.filter(function(p) { return p.category_id === c.id; }).slice(0, 8);
+                    var catPlayers = players.filter(function(p) { return p.category_id === c.id; }).slice(0, 12);
                     panels += '<div class="rankings-panel' + (ci === 0 ? ' active' : '') + '" id="' + c.id + '">';
                     panels += '<div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Player</span><span class="country">Country</span><span class="points">Points</span><span class="change">\u0394</span></div>';
                     catPlayers.forEach(function(p, pi) {
@@ -1261,9 +1342,12 @@
                         else changeHtml = '<span class="change">\u2014</span>';
                         var photo = p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?';
                         var name = p.name_en || p.name || '';
+                        var nameTag = isLoggedIn
+                            ? '<a href="pages/player-en.html?id=' + p.id + '" style="color:inherit;text-decoration:none;">' + name + '</a>'
+                            : '<a href="#" data-guest-profile="1" style="color:inherit;text-decoration:none;cursor:pointer;">' + name + '</a>';
                         panels += '<div class="ranking-row' + blurClass + '">' +
                             '<span class="rank">' + (pi + 1) + '</span>' +
-                            '<div class="player-col"><img src="' + photo + '" alt=""><span>' + name + '</span></div>' +
+                            '<div class="player-col"><img src="' + photo + '" alt="">' + nameTag + '</div>' +
                             '<span class="country">' + (p.country || '\ud83c\uddf0\ud83c\uddec') + '</span>' +
                             '<span class="points">' + (p.points || 0).toLocaleString() + '</span>' +
                             changeHtml +
@@ -1294,7 +1378,7 @@
             });
         });
     })();
-    // Load LIVE matches from Supabase
+    // Load LIVE matches from Supabase (live_matches table)
     (function() {
         var client = window.supabaseClient;
         if (!client) return;
@@ -1317,8 +1401,10 @@
         }
 
         function loadLive() {
-            client.from('matches').select('id,player1_id,player2_id,score,tournament_id,round_number,status')
-                .eq('status', 'live')
+            client.from('live_matches')
+                .select('id, player1_id, player2_id, player1_name, player2_name, status, sets_data, current_game_p1, current_game_p2, points_p1, points_p2, serving_player, tournament_label, is_tiebreak, tiebreak_p1, tiebreak_p2')
+                .in('status', ['warmup', 'live', 'paused'])
+                .order('created_at', { ascending: false })
                 .then(function(res) {
                     if (res.error || !res.data || !res.data.length) {
                         section.style.display = 'none';
@@ -1327,64 +1413,58 @@
                     }
                     var matches = res.data;
                     var playerIds = [];
-                    var tournamentIds = [];
                     matches.forEach(function(m) {
                         if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
                         if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
-                        if (m.tournament_id && tournamentIds.indexOf(m.tournament_id) === -1) tournamentIds.push(m.tournament_id);
                     });
 
                     var pPromise = playerIds.length
                         ? client.from('players').select('id,name,name_en,photo').in('id', playerIds)
                         : Promise.resolve({ data: [] });
-                    var tPromise = tournamentIds.length
-                        ? client.from('tournaments').select('id,title,title_en').in('id', tournamentIds)
-                        : Promise.resolve({ data: [] });
 
-                    Promise.all([pPromise, tPromise]).then(function(results) {
-                        var playersMap = {};
-                        (results[0].data || []).forEach(function(p) { playersMap[p.id] = p; });
-                        var tournamentsMap = {};
-                        (results[1].data || []).forEach(function(t) { tournamentsMap[t.id] = t; });
-
-                        var ROUND_NAMES = { 1: 'R1', 2: 'R2', 3: 'QF', 4: 'SF', 5: 'F' };
+                    pPromise.then(function(pRes) {
+                        var pMap = {};
+                        (pRes.data || []).forEach(function(p) { pMap[p.id] = p; });
                         var placeholder = 'https://placehold.co/80x80/1a1a1a/888?text=?';
                         var html = '';
-                        matches.forEach(function(m) {
-                            var p1 = playersMap[m.player1_id] || {};
-                            var p2 = playersMap[m.player2_id] || {};
-                            var tourn = tournamentsMap[m.tournament_id] || {};
-                            var scoreArr = (m.score || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-                            var p1scores = '';
-                            var p2scores = '';
-                            scoreArr.forEach(function(set) {
-                                var parts = set.split('-');
-                                p1scores += (parts[0] || '0') + ' ';
-                                p2scores += (parts[1] || '0') + ' ';
-                            });
-                            var roundLabel = ROUND_NAMES[m.round_number] || ('R' + m.round_number);
-                            var tournLabel = tourn.title_en || tourn.title || '';
-                            var p1name = p1.name_en || p1.name || 'TBD';
-                            var p2name = p2.name_en || p2.name || 'TBD';
 
-                            html += '<div class="live-match">' +
+                        matches.forEach(function(m) {
+                            var p1 = pMap[m.player1_id] || {};
+                            var p2 = pMap[m.player2_id] || {};
+                            var p1Name = m.player1_name || p1.name_en || p1.name || 'TBD';
+                            var p2Name = m.player2_name || p2.name_en || p2.name || 'TBD';
+                            var label = m.tournament_label || '';
+
+                            var p1scores = '', p2scores = '';
+                            (m.sets_data || []).forEach(function(s) {
+                                p1scores += s.g1 + ' ';
+                                p2scores += s.g2 + ' ';
+                            });
+                            p1scores += (m.current_game_p1 || 0);
+                            p2scores += (m.current_game_p2 || 0);
+
+                            var servingClass1 = m.serving_player === 1 ? ' serving' : '';
+                            var servingClass2 = m.serving_player === 2 ? ' serving' : '';
+                            var statusBadge = m.status === 'live' ? 'LIVE' : m.status === 'warmup' ? 'WARM-UP' : 'PAUSED';
+
+                            html += '<a href="pages/live-match-en.html?id=' + m.id + '" class="live-match" style="text-decoration:none;color:inherit;cursor:pointer;">' +
                                 '<div class="match-status">' +
-                                    '<span class="live-badge">LIVE</span>' +
-                                    (tournLabel ? '<span class="match-set">' + tournLabel + ' \u2022 ' + roundLabel + '</span>' : '<span class="match-set">' + roundLabel + '</span>') +
+                                    '<span class="live-badge">' + statusBadge + '</span>' +
+                                    (label ? '<span class="match-set">' + label + '</span>' : '') +
                                 '</div>' +
                                 '<div class="match-players">' +
                                     '<div class="player">' +
-                                        '<img src="' + (p1.photo || placeholder) + '" alt="' + p1name + '">' +
-                                        '<span class="player-name">' + p1name + '</span>' +
-                                        '<span class="player-score">' + p1scores.trim() + '</span>' +
+                                        '<img src="' + (p1.photo || placeholder) + '" alt="' + p1Name + '">' +
+                                        '<span class="player-name">' + p1Name + '</span>' +
+                                        '<span class="player-score' + servingClass1 + '">' + p1scores.trim() + '</span>' +
                                     '</div>' +
                                     '<div class="player">' +
-                                        '<img src="' + (p2.photo || placeholder) + '" alt="' + p2name + '">' +
-                                        '<span class="player-name">' + p2name + '</span>' +
-                                        '<span class="player-score">' + p2scores.trim() + '</span>' +
+                                        '<img src="' + (p2.photo || placeholder) + '" alt="' + p2Name + '">' +
+                                        '<span class="player-name">' + p2Name + '</span>' +
+                                        '<span class="player-score' + servingClass2 + '">' + p2scores.trim() + '</span>' +
                                     '</div>' +
                                 '</div>' +
-                            '</div>';
+                            '</a>';
                         });
                         grid.innerHTML = html;
                         section.style.display = '';
@@ -1394,7 +1474,40 @@
         }
 
         loadLive();
-        setInterval(loadLive, 30000);
+        setInterval(loadLive, 15000);
+    })();
+    // Guest profile modal for ranking names
+    (function() {
+        document.addEventListener('click', function(e) {
+            var link = e.target.closest('[data-guest-profile]');
+            if (!link) return;
+            e.preventDefault();
+            var existing = document.querySelector('.hp-profile-modal-overlay');
+            if (existing) return;
+            var overlay = document.createElement('div');
+            overlay.className = 'hp-profile-modal-overlay';
+            overlay.innerHTML =
+                '<div class="hp-profile-modal">' +
+                    '<button class="hp-profile-modal-close">&times;</button>' +
+                    '<div class="hp-profile-modal-icon">' +
+                        '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent,#CCFF00)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
+                    '</div>' +
+                    '<h3>Sign up for full access</h3>' +
+                    '<p>Sign up to view player profiles and full rankings</p>' +
+                    '<a href="pages/auth-en.html" class="hp-profile-modal-btn">Sign In / Register</a>' +
+                '</div>';
+            document.body.appendChild(overlay);
+            requestAnimationFrame(function() { overlay.classList.add('visible'); });
+            function closeModal() {
+                overlay.classList.remove('visible');
+                setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 300);
+            }
+            overlay.querySelector('.hp-profile-modal-close').addEventListener('click', closeModal);
+            overlay.addEventListener('click', function(ev) { if (ev.target === overlay) closeModal(); });
+            document.addEventListener('keydown', function handler(ev) {
+                if (ev.key === 'Escape') { closeModal(); document.removeEventListener('keydown', handler); }
+            });
+        });
     })();
     </script>
     <style>
@@ -1403,6 +1516,29 @@
     .ranking-lock-overlay a { color: var(--accent, #CCFF00); text-decoration: none; font-weight: 600; }
     .ranking-lock-overlay a:hover { text-decoration: underline; }
     .ranking-lock-overlay svg { vertical-align: middle; margin-right: 4px; stroke: rgba(255,255,255,0.4); }
+    .ranking-row .player-col a:hover { color: var(--accent, #CCFF00) !important; }
+    .hp-profile-modal-overlay { position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;transition:opacity 0.3s ease; }
+    .hp-profile-modal-overlay.visible { opacity:1; }
+    .hp-profile-modal { background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:40px 32px;max-width:400px;width:100%;text-align:center;position:relative;transform:translateY(20px);transition:transform 0.3s ease; }
+    .hp-profile-modal-overlay.visible .hp-profile-modal { transform:translateY(0); }
+    .hp-profile-modal-close { position:absolute;top:12px;right:12px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.5rem;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:color 0.2s,background 0.2s; }
+    .hp-profile-modal-close:hover { color:#fff;background:rgba(255,255,255,0.1); }
+    .hp-profile-modal-icon { margin-bottom:16px; }
+    .hp-profile-modal h3 { font-size:1.2rem;font-weight:700;margin-bottom:8px;color:#fff; }
+    .hp-profile-modal p { color:rgba(255,255,255,0.6);font-size:0.9rem;margin-bottom:24px;line-height:1.5; }
+    .hp-profile-modal-btn { display:inline-flex;align-items:center;gap:8px;background:var(--accent,#CCFF00);color:#000;font-family:inherit;font-size:0.95rem;font-weight:700;padding:12px 32px;border:none;border-radius:100px;text-decoration:none;cursor:pointer;transition:background 0.2s,transform 0.2s; }
+    .hp-profile-modal-btn:hover { transform:translateY(-2px); }
+    .hp-membership-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .hp-membership-overlay.visible { opacity: 1; }
+    .hp-membership-overlay.visible .hp-membership-modal { transform: translateY(0); }
+    .hp-membership-modal { background: #1a1a1a; border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 40px 32px; max-width: 400px; width: 100%; text-align: center; position: relative; transform: translateY(20px); transition: transform 0.3s ease; }
+    .hp-membership-close { position: absolute; top: 12px; right: 16px; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
+    .hp-membership-close:hover { color: #fff; }
+    .hp-membership-icon { margin-bottom: 16px; }
+    .hp-membership-modal h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; color: var(--text-primary); }
+    .hp-membership-modal p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px; }
+    .hp-membership-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--accent); color: #000; font-weight: 700; font-size: 1rem; padding: 12px 32px; border-radius: var(--radius-full); text-decoration: none; transition: background var(--transition-fast), transform var(--transition-fast); }
+    .hp-membership-btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
     </style>
 </body>
 </html>

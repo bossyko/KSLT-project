@@ -164,6 +164,19 @@
         renderHero();
         loadTournaments();
         trackPageView('tournaments-overview');
+        initStickySearch();
+    }
+
+    function initStickySearch() {
+        var wrap = document.getElementById('overviewSearchWrap');
+        if (!wrap) return;
+        var sentinel = document.createElement('div');
+        sentinel.style.height = '1px';
+        wrap.parentNode.insertBefore(sentinel, wrap);
+        var obs = new IntersectionObserver(function(entries) {
+            wrap.classList.toggle('stuck', !entries[0].isIntersecting);
+        });
+        obs.observe(sentinel);
     }
 
     function trackPageView(pageName) {

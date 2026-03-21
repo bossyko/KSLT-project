@@ -2077,7 +2077,7 @@ h2 {
 
 .badges-cta-cards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: var(--space-md);
     margin-bottom: var(--space-lg);
 }
@@ -2136,7 +2136,7 @@ h2 {
 
 @media (max-width: 768px) {
     .badges-cta-cards {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: var(--space-sm);
     }
 
@@ -2146,6 +2146,12 @@ h2 {
 
     .badge-cta-emoji {
         font-size: 2rem;
+    }
+}
+
+@media (max-width: 540px) {
+    .badges-cta-cards {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 

@@ -22,6 +22,8 @@
 
     var GUEST_VISIBLE_ROWS = 8;
     var GUEST_BLURRED_ROWS = 4;
+    var GUEST_CAT_VISIBLE = 8;
+    var GUEST_CAT_BLURRED = 4;
 
     // Will be populated from Supabase or static
     var categoriesData = {};
@@ -540,7 +542,9 @@
                     '<img src="' + esc(p.photo) + '" alt="" class="pl-player-photo">' +
                     '<div class="pl-player-info">' +
                         '<div class="pl-player-name-row">' +
-                            '<a href="' + (isEnPage() ? 'player-en.html' : (isKgPage() ? 'player-kg.html' : 'player.html')) + '?id=' + p.id + '" class="pl-player-name">' + p.name + '</a>' +
+                            (isGuest
+                                ? '<a href="#" class="pl-player-name" data-guest-profile="1">' + p.name + '</a>'
+                                : '<a href="' + (isEnPage() ? 'player-en.html' : (isKgPage() ? 'player-kg.html' : 'player.html')) + '?id=' + p.id + '" class="pl-player-name">' + p.name + '</a>') +
                             (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
                             (p.banned_until && new Date(p.banned_until) > new Date() ? '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + (isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.')) + '</span>' : '') +
                         '</div>' +
@@ -563,7 +567,6 @@
         // Guest CTA banner
         if (isGuest && pageItems.length > GUEST_VISIBLE_ROWS) {
             var authUrl = getAuthUrl();
-            var hiddenCount = items.length - GUEST_VISIBLE_ROWS;
             html += '<div class="pl-guest-overlay">' +
                 '<div class="pl-guest-cta">' +
                     '<div class="pl-guest-icon">' +
@@ -576,7 +579,6 @@
                     '<h3 class="pl-guest-title">' + labels.guestTitle + '</h3>' +
                     '<p class="pl-guest-text">' + labels.guestText + '</p>' +
                     '<a href="' + authUrl + '" class="pl-guest-btn">' + labels.guestBtn + '</a>' +
-                    '<div class="pl-guest-hint">+' + hiddenCount + ' ' + (isEnPage() ? 'more players' : (isKgPage() ? 'оюнчу жашырылган' : 'игроков скрыто')) + '</div>' +
                 '</div>' +
             '</div>';
         }
@@ -676,16 +678,21 @@
 
         // Render sticky category bar in filters section (already sticky at top:64px)
         // Content hidden until .stuck class is added via IntersectionObserver
+        // Sticky bar — back + category name + search (all in one row)
         var filtersEl = document.getElementById('playersFilters');
         if (filtersEl) {
             filtersEl.classList.add('pl-cat-mode');
             filtersEl.innerHTML =
-                '<a href="' + playersPage + '" class="pl-cat-sticky-back">' +
-                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>' +
-                    labels.catPageBack +
-                '</a>' +
                 '<div class="pl-cat-sticky-bar">' +
+                    '<a href="' + playersPage + '" class="pl-cat-back-link">' +
+                        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>' +
+                        labels.catPageBack +
+                    '</a>' +
                     '<div class="pl-cat-sticky-name">' + esc(cat.name) + ' <span>' + genderIcon + '</span></div>' +
+                    '<div class="pl-cat-sticky-search">' +
+                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                        '<input type="text" id="catSearchSticky" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
+                    '</div>' +
                 '</div>';
 
             // Sentinel before filters — when scrolled past hero, add .stuck
@@ -788,6 +795,9 @@
         var isGuest = _accessLevel === 'guest';
         var playerPage = isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
 
+        // Guest: limit visible rows
+        var totalVisible = isGuest ? Math.min(pageItems.length, GUEST_CAT_VISIBLE + GUEST_CAT_BLURRED) : pageItems.length;
+
         // Sticky table header (separate from body for sticky to work)
         var headerRow = '<div class="pl-row pl-row-header pl-cat-row">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
@@ -808,11 +818,18 @@
         html += '<div class="pl-table pl-cat-table-body">';
 
         // Rows
-        for (var i = 0; i < pageItems.length; i++) {
+        for (var i = 0; i < totalVisible; i++) {
             var p = pageItems[i];
             var rank = catSearchQuery ? (allPlayers.indexOf(p) + 1) : (start + i + 1);
             var rankClass = rank <= 3 ? ' pl-rank-top' : '';
-            var rowClass = isGuest ? ' pl-cat-row-disabled' : '';
+            var rowClass = '';
+
+            // Blur for guests after GUEST_CAT_VISIBLE rows
+            var blurClass = '';
+            if (isGuest && i >= GUEST_CAT_VISIBLE) {
+                var blurLevel = i - GUEST_CAT_VISIBLE + 1;
+                blurClass = ' pl-row-blur pl-row-blur-' + blurLevel;
+            }
 
             var badgesHtml = getPlayerBadgesHtml(p.id, 3);
 
@@ -831,15 +848,15 @@
                 changeHtml = '<span class="pl-change-neutral">\u2014</span>';
             }
 
-            // Name: link or plain text based on access
+            // Name: link for all, guests get modal instead of navigation
             var nameHtml;
             if (isGuest) {
-                nameHtml = '<span class="pl-player-name pl-cat-name-plain">' + esc(p.name) + '</span>';
+                nameHtml = '<a href="#" class="pl-player-name" data-guest-profile="1">' + esc(p.name) + '</a>';
             } else {
                 nameHtml = '<a href="' + playerPage + '?id=' + p.id + '" class="pl-player-name">' + esc(p.name) + '</a>';
             }
 
-            html += '<div class="pl-row pl-cat-row pl-animate' + rowClass + '" style="transition-delay:' + Math.min(i * 30, 300) + 'ms"' +
+            html += '<div class="pl-row pl-cat-row pl-animate' + rowClass + blurClass + '" style="transition-delay:' + Math.min(i * 30, 300) + 'ms"' +
                 (!isGuest ? ' data-player-id="' + p.id + '"' : '') +
                 (!isGuest ? ' data-access="full"' : '') + '>' +
                 '<span class="pl-col-rank' + rankClass + '">' + rank + '</span>' +
@@ -863,15 +880,22 @@
 
         html += '</div>'; // close pl-table
 
-        // Access banner
-        if (isGuest) {
+        // Guest CTA overlay (same pattern as main ranking page)
+        if (isGuest && pageItems.length > GUEST_CAT_VISIBLE) {
             var authUrl = getAuthUrl();
-            html += '<div class="pl-cat-banner">' +
-                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                    '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>' +
-                '</svg>' +
-                '<span>' + labels.catPageLogin + '</span>' +
-                '<a href="' + authUrl + '" class="pl-cat-banner-btn">' + labels.guestBtn + '</a>' +
+            html += '<div class="pl-guest-overlay">' +
+                '<div class="pl-guest-cta">' +
+                    '<div class="pl-guest-icon">' +
+                        '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+                            '<rect x="3" y="11" width="18" height="11" rx="2"/>' +
+                            '<path d="M7 11V7a5 5 0 0 1 10 0v4"/>' +
+                            '<circle cx="12" cy="16" r="1"/>' +
+                        '</svg>' +
+                    '</div>' +
+                    '<h3 class="pl-guest-title">' + labels.guestTitle + '</h3>' +
+                    '<p class="pl-guest-text">' + labels.guestText + '</p>' +
+                    '<a href="' + authUrl + '" class="pl-guest-btn">' + labels.guestBtn + '</a>' +
+                '</div>' +
             '</div>';
         }
 
@@ -892,8 +916,13 @@
             });
         }
 
-        // Pagination UI
-        renderCatPaginationUI(players.length, page);
+        // Pagination UI (hide for guests)
+        if (!isGuest) {
+            renderCatPaginationUI(players.length, page);
+        } else {
+            var paginationEl = document.getElementById('playersPagination');
+            if (paginationEl) paginationEl.innerHTML = '';
+        }
 
         // Set sticky top for thead: 64px header + sticky bar height when visible
         // Sticky bar only appears on scroll (.stuck), so we measure after a brief toggle
@@ -1047,8 +1076,8 @@
     function initCatSearch(tabId) {
         var guestModalShown = false;
 
-        document.addEventListener('input', function(e) {
-            if (e.target.id !== 'catSearch') return;
+        function handleSearch(e) {
+            if (e.target.id !== 'catSearch' && e.target.id !== 'catSearchSticky') return;
 
             // Guest: show modal on first input
             if (!isLoggedIn()) {
@@ -1059,13 +1088,22 @@
                 return;
             }
 
+            // Sync both inputs
+            var val = e.target.value;
+            var hero = document.getElementById('catSearch');
+            var sticky = document.getElementById('catSearchSticky');
+            if (hero && hero !== e.target) hero.value = val;
+            if (sticky && sticky !== e.target) sticky.value = val;
+
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(function() {
-                catSearchQuery = e.target.value.trim();
+                catSearchQuery = val.trim();
                 catCurrentPage = 1;
                 renderCatTable(tabId, 1);
             }, 200);
-        });
+        }
+
+        document.addEventListener('input', handleSearch);
     }
 
     function showSearchAuthModal() {
@@ -1112,6 +1150,59 @@
             setTimeout(function() { if (el.parentNode) el.remove(); }, 300);
         }
     }
+
+    // ========================================
+    // GUEST PROFILE MODAL + DELEGATION
+    // ========================================
+
+    function showProfileAuthModal() {
+        var authUrl = getAuthUrl();
+        var isEn = isEnPage();
+        var isKg = isKgPage();
+        var labels = getLabels();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'pl-search-modal-overlay';
+        overlay.innerHTML =
+            '<div class="pl-search-modal">' +
+                '<button class="pl-search-modal-close">&times;</button>' +
+                '<div class="pl-search-modal-icon">' +
+                    '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
+                '</div>' +
+                '<h3>' + labels.guestTitle + '</h3>' +
+                '<p>' + (isEn ? 'Sign up to view player profiles and full rankings' : (isKg ? 'Оюнчулардын профилдерин жана толук рейтингди көрүү үчүн катталыңыз' : 'Зарегистрируйтесь, чтобы просматривать профили игроков и полный рейтинг')) + '</p>' +
+                '<a href="' + authUrl + '" class="pl-search-modal-btn">' + labels.guestBtn + '</a>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+
+        var closeBtn = overlay.querySelector('.pl-search-modal-close');
+        closeBtn.addEventListener('click', function() { closeModal(overlay); });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeModal(overlay);
+        });
+        document.addEventListener('keydown', function handler(e) {
+            if (e.key === 'Escape') {
+                closeModal(overlay);
+                document.removeEventListener('keydown', handler);
+            }
+        });
+
+        function closeModal(el) {
+            el.classList.remove('visible');
+            setTimeout(function() { if (el.parentNode) el.remove(); }, 300);
+        }
+    }
+
+    // Event delegation for guest profile clicks
+    document.addEventListener('click', function(e) {
+        var link = e.target.closest('[data-guest-profile]');
+        if (link) {
+            e.preventDefault();
+            showProfileAuthModal();
+        }
+    });
 
     // ========================================
     // SCROLL ANIMATIONS

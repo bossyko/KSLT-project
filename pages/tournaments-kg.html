@@ -52,6 +52,7 @@
                         <a href="tournaments-kg.html?category=futures" class="nav-dropdown-item" data-category="futures">Futures</a>
                         <a href="tournaments-kg.html?category=tour" class="nav-dropdown-item" data-category="tour">Tour</a>
                         <a href="tournaments-kg.html?category=friendly" class="nav-dropdown-item" data-category="friendly">Достук</a>
+                        <a href="battles-overview-kg.html" class="nav-dropdown-item">Баттлдар</a>
                     </div>
                 </li>
                 <li class="nav-dropdown">
@@ -89,8 +90,20 @@
                         <a href="partners-kg.html" class="nav-dropdown-item">Өнөктөш табуу</a>
                     </div>
                 </li>
-                <li>
-                    <a href="news-kg.html" class="nav-item">Жаңылыктар <span class="indicator-dot"></span></a>
+                <li class="nav-dropdown">
+                    <a href="news-kg.html" class="nav-item nav-item-dropdown">
+                        Жаңылыктар
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="news-kg.html?category=announcement" class="nav-dropdown-item">Жарыялоо</a>
+                        <a href="news-kg.html?category=world" class="nav-dropdown-item">Дүйнөлүк теннис</a>
+                        <a href="news-kg.html?category=results" class="nav-dropdown-item">Жыйынтыктар</a>
+                        <a href="news-kg.html?category=interview" class="nav-dropdown-item">Интервью</a>
+                    </div>
                 </li>
                 <li class="nav-dropdown">
                     <a href="info-kg.html" class="nav-item nav-item-dropdown">
@@ -163,6 +176,7 @@
                         <li><a href="tournaments-kg.html?category=futures">Futures</a></li>
                         <li><a href="tournaments-kg.html?category=tour">Tour</a></li>
                         <li><a href="tournaments-kg.html?category=friendly">Достук</a></li>
+                        <li><a href="battles-overview-kg.html">Баттлдар</a></li>
                     </ul>
                 </li>
                 <li><a href="../index-kg.html#live"><span class="live-dot"></span> Түз эфир</a></li>
@@ -201,7 +215,21 @@
                         <li><a href="partners-kg.html">Өнөктөш табуу</a></li>
                     </ul>
                 </li>
-                <li><a href="news-kg.html">Жаңылыктар <span class="indicator-dot"></span></a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="news-kg.html" class="mobile-dropdown-toggle">
+                        Жаңылыктар
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="news-kg.html?category=announcement">Жарыялоо</a></li>
+                        <li><a href="news-kg.html?category=world">Дүйнөлүк теннис</a></li>
+                        <li><a href="news-kg.html?category=results">Жыйынтыктар</a></li>
+                        <li><a href="news-kg.html?category=interview">Интервью</a></li>
+                    </ul>
+                </li>
                 <li class="mobile-nav-dropdown">
                     <a href="info-kg.html" class="mobile-dropdown-toggle">
                         Инфо
@@ -237,10 +265,6 @@
     </header>
 
     <main>
-        <div class="kslt-back-wrap">
-            <a href="tournaments-overview-kg.html" class="kslt-back">&larr; Бардык мелдештер</a>
-        </div>
-
         <!-- HERO - Dynamic content -->
         <section class="tournament-hero">
             <div class="tournament-hero-bg">
@@ -270,13 +294,27 @@
 
         <!-- TOURNAMENTS HEADER (sticky) -->
         <div class="trn-sticky-header" id="trnStickyHeader">
-            <h2>Алдыдагы мелдештер</h2>
-            <div class="tournament-filters">
-                <button class="filter-btn active" data-filter="all">Баары</button>
-                <button class="filter-btn" data-filter="open">Каттоо ачык</button>
-                <button class="filter-btn" data-filter="soon">Алдыдагы</button>
-                <button class="filter-btn" data-filter="past">Аяктаган</button>
-                <input type="text" class="tournament-search-input" id="tournamentSearch" placeholder="Издөө..." autocomplete="off">
+            <a href="tournaments-overview-kg.html" class="trn-back-link">&larr; Бардык мелдештер</a>
+            <div class="trn-title-row">
+                <h2>Алдыдагы мелдештер</h2>
+                <div class="tournament-filters">
+                    <label class="trn-filter-label">Статус:
+                        <select class="trn-filter-select" id="statusFilter">
+                            <option value="all" selected>Баары</option>
+                            <option value="open">Каттоо ачык</option>
+                            <option value="soon">Алдыдагы</option>
+                            <option value="past">Аяктаган</option>
+                        </select>
+                    </label>
+                    <label class="trn-filter-label">Жынысы:
+                        <select class="trn-filter-select" id="genderFilter">
+                            <option value="all" selected>Баары</option>
+                            <option value="men">♂ Эркектер</option>
+                            <option value="women">♀ Аялдар</option>
+                        </select>
+                    </label>
+                    <input type="text" class="tournament-search-input" id="tournamentSearch" placeholder="Издөө..." autocomplete="off">
+                </div>
             </div>
         </div>
 
@@ -390,5 +428,8 @@
     <script src="../js/script.js"></script>
     <script src="../data/tournaments-data-kg.js?v=3"></script>
     <script src="../js/tournaments-overlay.js?v=7"></script>
+    <script>
+    (function(){var h=document.getElementById('trnStickyHeader');if(!h)return;var s=document.createElement('div');s.style.height='1px';h.parentNode.insertBefore(s,h);new IntersectionObserver(function(e){h.classList.toggle('stuck',!e[0].isIntersecting)}).observe(s)})();
+    </script>
 </body>
 </html>

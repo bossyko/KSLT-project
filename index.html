@@ -90,8 +90,20 @@
                         <a href="pages/partners.html" class="nav-dropdown-item">Найти партнёра</a>
                     </div>
                 </li>
-                <li>
-                    <a href="pages/news.html" class="nav-item">Новости <span class="indicator-dot"></span></a>
+                <li class="nav-dropdown">
+                    <a href="pages/news.html" class="nav-item nav-item-dropdown">
+                        Новости
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="pages/news.html?category=announcement" class="nav-dropdown-item">Анонс</a>
+                        <a href="pages/news.html?category=world" class="nav-dropdown-item">Мировой теннис</a>
+                        <a href="pages/news.html?category=results" class="nav-dropdown-item">Результаты</a>
+                        <a href="pages/news.html?category=interview" class="nav-dropdown-item">Интервью</a>
+                    </div>
                 </li>
                 <li class="nav-dropdown">
                     <a href="pages/info.html" class="nav-item nav-item-dropdown">
@@ -207,7 +219,21 @@
                         <li><a href="pages/partners.html">Найти партнёра</a></li>
                     </ul>
                 </li>
-                <li><a href="pages/news.html">Новости <span class="indicator-dot"></span></a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="pages/news.html" class="mobile-dropdown-toggle">
+                        Новости
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/news.html?category=announcement">Анонс</a></li>
+                        <li><a href="pages/news.html?category=world">Мировой теннис</a></li>
+                        <li><a href="pages/news.html?category=results">Результаты</a></li>
+                        <li><a href="pages/news.html?category=interview">Интервью</a></li>
+                    </ul>
+                </li>
                 <li class="mobile-nav-dropdown">
                     <a href="pages/info.html" class="mobile-dropdown-toggle">
                         Инфо
@@ -793,7 +819,7 @@
                     </div>
                     <div class="court-card-actions">
                         <a href="pages/courts.html" class="court-card-details">Подробнее →</a>
-                        <span class="court-card-cta">Забронировать</span>
+                        <span class="court-card-cta">Скидка КСЛТ</span>
                     </div>
                 </div>
                 <div class="court-card">
@@ -807,7 +833,7 @@
                     </div>
                     <div class="court-card-actions">
                         <a href="pages/courts.html" class="court-card-details">Подробнее →</a>
-                        <span class="court-card-cta">Забронировать</span>
+                        <span class="court-card-cta">Скидка КСЛТ</span>
                     </div>
                 </div>
                 <div class="court-card">
@@ -821,7 +847,7 @@
                     </div>
                     <div class="court-card-actions">
                         <a href="pages/courts.html" class="court-card-details">Подробнее →</a>
-                        <span class="court-card-cta">Забронировать</span>
+                        <span class="court-card-cta">Скидка КСЛТ</span>
                     </div>
                 </div>
             </div>
@@ -845,7 +871,7 @@
                     </div>
                     <div class="coach-card-actions">
                         <a href="pages/coaches.html" class="coach-card-details">Подробнее →</a>
-                        <span class="coach-card-cta">Связаться</span>
+                        <span class="coach-card-cta">Скидка КСЛТ</span>
                     </div>
                 </div>
                 <div class="coach-card">
@@ -859,7 +885,7 @@
                     </div>
                     <div class="coach-card-actions">
                         <a href="pages/coaches.html" class="coach-card-details">Подробнее →</a>
-                        <span class="coach-card-cta">Связаться</span>
+                        <span class="coach-card-cta">Скидка КСЛТ</span>
                     </div>
                 </div>
                 <div class="coach-card">
@@ -873,7 +899,7 @@
                     </div>
                     <div class="coach-card-actions">
                         <a href="pages/coaches.html" class="coach-card-details">Подробнее →</a>
-                        <span class="coach-card-cta">Связаться</span>
+                        <span class="coach-card-cta">Скидка КСЛТ</span>
                     </div>
                 </div>
             </div>
@@ -1090,7 +1116,6 @@
         if (!grid) return;
 
         var _courtAccess = 'guest';
-        var _courtToastTimer = null;
 
         function detectCourtAccess() {
             if (!client) return Promise.resolve();
@@ -1105,19 +1130,39 @@
             }).catch(function() {});
         }
 
-        function showCourtToast(message) {
-            var old = document.querySelector('.court-toast');
-            if (old) old.remove();
-            if (_courtToastTimer) clearTimeout(_courtToastTimer);
-            var toast = document.createElement('div');
-            toast.className = 'court-toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            requestAnimationFrame(function() { toast.classList.add('visible'); });
-            _courtToastTimer = setTimeout(function() {
-                toast.classList.remove('visible');
-                setTimeout(function() { toast.remove(); }, 300);
-            }, 3000);
+        function showCourtModal(level) {
+            var isGuest = level === 'guest';
+            var title = isGuest ? 'Станьте членом KSLT' : 'Нужно членство';
+            var text = isGuest
+                ? 'Зарегистрируйтесь и оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров'
+                : 'Оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров';
+            var btnText = isGuest ? 'Регистрация' : 'Тарифы';
+            var btnLink = isGuest ? 'pages/auth.html' : 'pages/pricing.html';
+            var svgIcon = isGuest
+                ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+                : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+            var overlay = document.createElement('div');
+            overlay.className = 'hp-membership-overlay';
+            overlay.innerHTML =
+                '<div class="hp-membership-modal">' +
+                    '<button class="hp-membership-close">&times;</button>' +
+                    '<div class="hp-membership-icon">' + svgIcon + '</div>' +
+                    '<h3>' + title + '</h3>' +
+                    '<p>' + text + '</p>' +
+                    '<a href="' + btnLink + '" class="hp-membership-btn">' + btnText + '</a>' +
+                '</div>';
+            document.body.appendChild(overlay);
+            requestAnimationFrame(function() { overlay.classList.add('visible'); });
+            overlay.querySelector('.hp-membership-close').onclick = function() {
+                overlay.classList.remove('visible');
+                setTimeout(function() { overlay.remove(); }, 300);
+            };
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.classList.remove('visible');
+                    setTimeout(function() { overlay.remove(); }, 300);
+                }
+            });
         }
 
         // CTA click delegation
@@ -1126,12 +1171,8 @@
             if (!cta) return;
             e.preventDefault();
             e.stopPropagation();
-            if (_courtAccess === 'guest') {
-                showCourtToast('Зарегистрируйтесь и станьте членом КСЛТ');
-                return;
-            }
-            if (_courtAccess === 'registered') {
-                showCourtToast('Станьте членом КСЛТ для бронирования');
+            if (_courtAccess === 'guest' || _courtAccess === 'registered') {
+                showCourtModal(_courtAccess);
                 return;
             }
             var id = cta.getAttribute('data-id');
@@ -1166,7 +1207,7 @@
                         '</div>' +
                         '<div class="court-card-actions">' +
                             '<a href="pages/court.html?id=' + row.id + '" class="court-card-details">Подробнее →</a>' +
-                            '<span class="court-card-cta" data-id="' + row.id + '">Забронировать</span>' +
+                            '<span class="court-card-cta" data-id="' + row.id + '">Скидка КСЛТ</span>' +
                         '</div>' +
                     '</div>';
                 });
@@ -1181,7 +1222,6 @@
         if (!grid) return;
 
         var _coachAccess = 'guest';
-        var _coachToastTimer = null;
 
         function detectCoachAccess() {
             if (!client) return Promise.resolve();
@@ -1196,19 +1236,39 @@
             }).catch(function() {});
         }
 
-        function showCoachToast(message) {
-            var old = document.querySelector('.coach-toast');
-            if (old) old.remove();
-            if (_coachToastTimer) clearTimeout(_coachToastTimer);
-            var toast = document.createElement('div');
-            toast.className = 'coach-toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            requestAnimationFrame(function() { toast.classList.add('visible'); });
-            _coachToastTimer = setTimeout(function() {
-                toast.classList.remove('visible');
-                setTimeout(function() { toast.remove(); }, 300);
-            }, 3000);
+        function showCoachModal(level) {
+            var isGuest = level === 'guest';
+            var title = isGuest ? 'Станьте членом KSLT' : 'Нужно членство';
+            var text = isGuest
+                ? 'Зарегистрируйтесь и оформите членство KSLT, чтобы получить скидки у партнёрских тренеров'
+                : 'Оформите членство KSLT, чтобы получить скидки у партнёрских тренеров';
+            var btnText = isGuest ? 'Регистрация' : 'Тарифы';
+            var btnLink = isGuest ? 'pages/auth.html' : 'pages/pricing.html';
+            var svgIcon = isGuest
+                ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+                : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+            var overlay = document.createElement('div');
+            overlay.className = 'hp-membership-overlay';
+            overlay.innerHTML =
+                '<div class="hp-membership-modal">' +
+                    '<button class="hp-membership-close">&times;</button>' +
+                    '<div class="hp-membership-icon">' + svgIcon + '</div>' +
+                    '<h3>' + title + '</h3>' +
+                    '<p>' + text + '</p>' +
+                    '<a href="' + btnLink + '" class="hp-membership-btn">' + btnText + '</a>' +
+                '</div>';
+            document.body.appendChild(overlay);
+            requestAnimationFrame(function() { overlay.classList.add('visible'); });
+            overlay.querySelector('.hp-membership-close').onclick = function() {
+                overlay.classList.remove('visible');
+                setTimeout(function() { overlay.remove(); }, 300);
+            };
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.classList.remove('visible');
+                    setTimeout(function() { overlay.remove(); }, 300);
+                }
+            });
         }
 
         // CTA click delegation
@@ -1217,12 +1277,8 @@
             if (!cta) return;
             e.preventDefault();
             e.stopPropagation();
-            if (_coachAccess === 'guest') {
-                showCoachToast('Зарегистрируйтесь и станьте членом КСЛТ');
-                return;
-            }
-            if (_coachAccess === 'registered') {
-                showCoachToast('Станьте членом КСЛТ чтобы связаться');
+            if (_coachAccess === 'guest' || _coachAccess === 'registered') {
+                showCoachModal(_coachAccess);
                 return;
             }
             var id = cta.getAttribute('data-id');
@@ -1252,7 +1308,7 @@
                         '</div>' +
                         '<div class="coach-card-actions">' +
                             '<a href="pages/coach.html?id=' + row.id + '" class="coach-card-details">Подробнее →</a>' +
-                            '<span class="coach-card-cta" data-id="' + row.id + '">Связаться</span>' +
+                            '<span class="coach-card-cta" data-id="' + row.id + '">Скидка КСЛТ</span>' +
                         '</div>' +
                     '</div>';
                 });
@@ -1513,6 +1569,17 @@
     .ranking-lock-overlay a { color: var(--accent, #CCFF00); text-decoration: none; font-weight: 600; }
     .ranking-lock-overlay a:hover { text-decoration: underline; }
     .ranking-lock-overlay svg { vertical-align: middle; margin-right: 4px; stroke: rgba(255,255,255,0.4); }
+    .hp-membership-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .hp-membership-overlay.visible { opacity: 1; }
+    .hp-membership-overlay.visible .hp-membership-modal { transform: translateY(0); }
+    .hp-membership-modal { background: #1a1a1a; border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 40px 32px; max-width: 400px; width: 100%; text-align: center; position: relative; transform: translateY(20px); transition: transform 0.3s ease; }
+    .hp-membership-close { position: absolute; top: 12px; right: 16px; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
+    .hp-membership-close:hover { color: #fff; }
+    .hp-membership-icon { margin-bottom: 16px; }
+    .hp-membership-modal h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; color: var(--text-primary); }
+    .hp-membership-modal p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px; }
+    .hp-membership-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--accent); color: #000; font-weight: 700; font-size: 1rem; padding: 12px 32px; border-radius: var(--radius-full); text-decoration: none; transition: background var(--transition-fast), transform var(--transition-fast); }
+    .hp-membership-btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
     </style>
 </body>
 </html>

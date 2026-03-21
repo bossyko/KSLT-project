@@ -6,7 +6,7 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co; frame-src https://www.youtube.com;">
     <title>KSLT - Кыргызстан Социалдык Теннис Лигасы</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="manifest" href="/manifest.json">
@@ -51,6 +51,7 @@
                         <a href="pages/tournaments-kg.html?category=futures" class="nav-dropdown-item">Futures</a>
                         <a href="pages/tournaments-kg.html?category=tour" class="nav-dropdown-item">Tour</a>
                         <a href="pages/tournaments-kg.html?category=friendly" class="nav-dropdown-item">Достук</a>
+                        <a href="pages/battles-overview-kg.html" class="nav-dropdown-item">Баттлдар</a>
                     </div>
                 </li>
                 <li class="nav-dropdown">
@@ -85,8 +86,20 @@
                         <a href="pages/partners-kg.html" class="nav-dropdown-item">Өнөктөш табуу</a>
                     </div>
                 </li>
-                <li>
-                    <a href="pages/news-kg.html" class="nav-item">Жанылыктар <span class="indicator-dot"></span></a>
+                <li class="nav-dropdown">
+                    <a href="pages/news-kg.html" class="nav-item nav-item-dropdown">
+                        Жаңылыктар
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="pages/news-kg.html?category=announcement" class="nav-dropdown-item">Жарыялоо</a>
+                        <a href="pages/news-kg.html?category=world" class="nav-dropdown-item">Дүйнөлүк теннис</a>
+                        <a href="pages/news-kg.html?category=results" class="nav-dropdown-item">Жыйынтыктар</a>
+                        <a href="pages/news-kg.html?category=interview" class="nav-dropdown-item">Интервью</a>
+                    </div>
                 </li>
                 <li class="nav-dropdown">
                     <a href="pages/info-kg.html" class="nav-item nav-item-dropdown">
@@ -160,6 +173,7 @@
                         <li><a href="pages/tournaments-kg.html?category=futures">Futures</a></li>
                         <li><a href="pages/tournaments-kg.html?category=tour">Tour</a></li>
                         <li><a href="pages/tournaments-kg.html?category=friendly">Достук</a></li>
+                        <li><a href="pages/battles-overview-kg.html">Баттлдар</a></li>
                     </ul>
                 </li>
                 <li><a href="#live"><span class="live-dot"></span> Түз эфир</a></li>
@@ -195,7 +209,21 @@
                         <li><a href="pages/partners-kg.html">Өнөктөш табуу</a></li>
                     </ul>
                 </li>
-                <li><a href="pages/news-kg.html">Жанылыктар <span class="indicator-dot"></span></a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="pages/news-kg.html" class="mobile-dropdown-toggle">
+                        Жаңылыктар
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/news-kg.html?category=announcement">Жарыялоо</a></li>
+                        <li><a href="pages/news-kg.html?category=world">Дүйнөлүк теннис</a></li>
+                        <li><a href="pages/news-kg.html?category=results">Жыйынтыктар</a></li>
+                        <li><a href="pages/news-kg.html?category=interview">Интервью</a></li>
+                    </ul>
+                </li>
                 <li class="mobile-nav-dropdown">
                     <a href="pages/info-kg.html" class="mobile-dropdown-toggle">
                         Инфо
@@ -257,7 +285,6 @@
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
                     </a>
-                    <a href="pages/courts-kg.html" class="btn-secondary">Корт ээлөө</a>
                 </div>
                 <div class="hero-stats">
                     <div class="stat">
@@ -355,54 +382,28 @@
             </div>
         </section>
 
-        <section id="live" class="section-live">
+        <!-- LIVE SCORES (dynamic from Supabase) -->
+        <section id="live" class="section-live" style="display:none">
             <div class="section-header">
                 <h2><span class="live-indicator"></span> Түз эфирдеги матчтар</h2>
             </div>
-            <div class="live-matches">
-                <div class="live-match">
-                    <div class="match-status">
-                        <span class="live-badge">LIVE</span>
-                        <span class="match-set">2-сет</span>
-                    </div>
-                    <div class="match-players">
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" alt="Оюнчу">
-                            <span class="player-name">А. Иванов</span>
-                            <span class="player-score serving">6 4</span>
-                        </div>
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80" alt="Оюнчу">
-                            <span class="player-name">М. Петров</span>
-                            <span class="player-score">3 6</span>
-                        </div>
-                    </div>
-                    <a href="#watch" class="btn-watch">Көрүү</a>
-                </div>
-                <div class="live-match">
-                    <div class="match-status">
-                        <span class="live-badge">LIVE</span>
-                        <span class="match-set">1-сет</span>
-                    </div>
-                    <div class="match-players">
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Оюнчу">
-                            <span class="player-name">Е. Сидорова</span>
-                            <span class="player-score serving">3</span>
-                        </div>
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&q=80" alt="Оюнчу">
-                            <span class="player-name">К. Николаева</span>
-                            <span class="player-score">2</span>
-                        </div>
-                    </div>
-                    <a href="#watch" class="btn-watch">Көрүү</a>
-                </div>
-            </div>
+            <div class="live-matches" id="liveMatchesGrid"></div>
         </section>
 
         <!-- BATTLE CARDS -->
         <div id="battleContainer" class="bc-section" style="display:none"></div>
+
+        <!-- BADGES CTA -->
+        <section class="section-badges-cta">
+            <div class="badges-cta-inner">
+                <div class="badges-cta-text">
+                    <h2>Катыш. Жең. Бейджик ал.</h2>
+                    <p>Катталгыла, турнирлерде ойногула жана жетишкендиктериңиз үчүн сыйлыктарды алгыла</p>
+                </div>
+                <div class="badges-cta-cards" id="badgesCtaCards"></div>
+                <a href="pages/auth-kg.html?tab=register" class="badges-cta-btn">Жеңишке жол баштоо</a>
+            </div>
+        </section>
 
         <section id="rankings" class="section-rankings">
             <div class="section-header">
@@ -420,7 +421,7 @@
                     <span class="rank">1</span>
                     <div class="player-col">
                         <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt="">
-                        <span>Алексей Иванов</span>
+                        <a href="#" data-guest-profile="1" style="color:inherit;text-decoration:none;cursor:pointer;">Алексей Иванов</a>
                     </div>
                     <span class="points">2,450</span>
                     <span class="change positive">+2</span>
@@ -429,7 +430,7 @@
                     <span class="rank">2</span>
                     <div class="player-col">
                         <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt="">
-                        <span>Максим Петров</span>
+                        <a href="#" data-guest-profile="1" style="color:inherit;text-decoration:none;cursor:pointer;">Максим Петров</a>
                     </div>
                     <span class="points">2,380</span>
                     <span class="change negative">-1</span>
@@ -438,7 +439,7 @@
                     <span class="rank">3</span>
                     <div class="player-col">
                         <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt="">
-                        <span>Дмитрий Козлов</span>
+                        <a href="#" data-guest-profile="1" style="color:inherit;text-decoration:none;cursor:pointer;">Дмитрий Козлов</a>
                     </div>
                     <span class="points">2,310</span>
                     <span class="change positive">+1</span>
@@ -447,7 +448,7 @@
                     <span class="rank">4</span>
                     <div class="player-col">
                         <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt="">
-                        <span>Елена Сидорова</span>
+                        <a href="#" data-guest-profile="1" style="color:inherit;text-decoration:none;cursor:pointer;">Елена Сидорова</a>
                     </div>
                     <span class="points">2,290</span>
                     <span class="change">—</span>
@@ -456,7 +457,7 @@
                     <span class="rank">5</span>
                     <div class="player-col">
                         <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt="">
-                        <span>Ксения Николаева</span>
+                        <a href="#" data-guest-profile="1" style="color:inherit;text-decoration:none;cursor:pointer;">Ксения Николаева</a>
                     </div>
                     <span class="points">2,180</span>
                     <span class="change positive">+3</span>
@@ -763,7 +764,199 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/battle-cards.js?v=6"></script>
+    <script>
+    // Random badges CTA
+    (function() {
+        var ALL = [
+            {e:'🎾',n:'Биринчи матч',d:'1 матч ойно'},
+            {e:'🏅',n:'Биринчи жеңиш',d:'1 матч жең'},
+            {e:'🔟',n:'Ондук',d:'10 матч ойно'},
+            {e:'💪',n:'Элүүлүк',d:'50 матч ойно'},
+            {e:'💯',n:'Жүздүк',d:'100 матч ойно'},
+            {e:'⭐',n:'5 жеңиш',d:'5 жеңишке жет'},
+            {e:'🌟',n:'10 жеңиш',d:'10 жеңишке жет'},
+            {e:'🏆',n:'25 жеңиш',d:'25 жеңишке жет'},
+            {e:'👑',n:'50 жеңиш',d:'50 жеңишке жет'},
+            {e:'🔥',n:'Серия 3',d:'Катары менен 3 матч жең'},
+            {e:'⚡',n:'Серия 5',d:'Катары менен 5 матч жең'},
+            {e:'🚀',n:'Серия 10',d:'Катары менен 10 матч жең'},
+            {e:'🎯',n:'Биринчи турнир',d:'Турнирге катыш'},
+            {e:'🏆',n:'Чемпион',d:'Турнирдин финалын жең'},
+            {e:'🥈',n:'Финалист',d:'Финалга чык'},
+            {e:'👑',n:'Чемпион х3',d:'3 турнир жең'},
+            {e:'💎',n:'Жоготуусуз',d:'Сет жоготпой турнир жең'},
+            {e:'😱',n:'Сенсация',d:'500+ упайлуу фаворитти жең'},
+            {e:'📈',n:'Топ-10',d:'Категорияда топ-10го кир'},
+            {e:'🥇',n:'Биринчи',d:'Категорияда #1 бол'},
+            {e:'😤',n:'Доминатор',d:'Бир атаандашты 5+ жолу жең'},
+            {e:'⏰',n:'Алгачкы',d:'KSLT биринчи жылында катталган'},
+            {e:'💚',n:'КСЛТ мүчөсү',d:'Активдүү мүчөлүк'},
+            {e:'🎖️',n:'Ветеран 3',d:'KSLTде 3 жыл'},
+            {e:'🏅',n:'Ветеран 5',d:'KSLTде 5 жыл'},
+            {e:'🤝',n:'Кабыл алды',d:'5 чакырыкты кабыл ал'},
+            {e:'⚔️',n:'Чакыруучу',d:'10 чакырык жөнөт'}
+        ];
+        var el = document.getElementById('badgesCtaCards');
+        if (!el) return;
+        var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
+        var pick = shuffled.slice(0, 5);
+        el.innerHTML = pick.map(function(b) {
+            return '<div class="badge-cta-card">' +
+                '<span class="badge-cta-emoji">' + b.e + '</span>' +
+                '<span class="badge-cta-name">' + b.n + '</span>' +
+                '<span class="badge-cta-desc">' + b.d + '</span>' +
+            '</div>';
+        }).join('');
+    })();
+    </script>
     <script src="js/auth-nav.js?v=2"></script>
     <script src="js/script.js"></script>
+    <script>
+    // Load LIVE matches from Supabase (live_matches table)
+    (function() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        var section = document.getElementById('live');
+        var grid = document.getElementById('liveMatchesGrid');
+        if (!section || !grid) return;
+
+        var navLiveDesktop = document.querySelector('.nav-links .nav-item-live');
+        var navLiveMobileLinks = document.querySelectorAll('.mobile-menu a[href="#live"]');
+
+        function toggleLiveClass(active) {
+            if (navLiveDesktop) {
+                if (active) navLiveDesktop.classList.add('is-live');
+                else navLiveDesktop.classList.remove('is-live');
+            }
+            navLiveMobileLinks.forEach(function(a) {
+                if (active) a.classList.add('is-live');
+                else a.classList.remove('is-live');
+            });
+        }
+
+        function loadLive() {
+            client.from('live_matches')
+                .select('id, player1_id, player2_id, player1_name, player2_name, status, sets_data, current_game_p1, current_game_p2, points_p1, points_p2, serving_player, tournament_label, is_tiebreak, tiebreak_p1, tiebreak_p2')
+                .in('status', ['warmup', 'live', 'paused'])
+                .order('created_at', { ascending: false })
+                .then(function(res) {
+                    if (res.error || !res.data || !res.data.length) {
+                        section.style.display = 'none';
+                        toggleLiveClass(false);
+                        return;
+                    }
+                    var matches = res.data;
+                    var playerIds = [];
+                    matches.forEach(function(m) {
+                        if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
+                        if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
+                    });
+
+                    var pPromise = playerIds.length
+                        ? client.from('players').select('id,name,photo').in('id', playerIds)
+                        : Promise.resolve({ data: [] });
+
+                    pPromise.then(function(pRes) {
+                        var pMap = {};
+                        (pRes.data || []).forEach(function(p) { pMap[p.id] = p; });
+                        var placeholder = 'https://placehold.co/80x80/1a1a1a/888?text=?';
+                        var html = '';
+
+                        matches.forEach(function(m) {
+                            var p1 = pMap[m.player1_id] || {};
+                            var p2 = pMap[m.player2_id] || {};
+                            var p1Name = m.player1_name || p1.name || 'TBD';
+                            var p2Name = m.player2_name || p2.name || 'TBD';
+                            var label = m.tournament_label || '';
+
+                            var p1scores = '', p2scores = '';
+                            (m.sets_data || []).forEach(function(s) {
+                                p1scores += s.g1 + ' ';
+                                p2scores += s.g2 + ' ';
+                            });
+                            p1scores += (m.current_game_p1 || 0);
+                            p2scores += (m.current_game_p2 || 0);
+
+                            var servingClass1 = m.serving_player === 1 ? ' serving' : '';
+                            var servingClass2 = m.serving_player === 2 ? ' serving' : '';
+                            var statusBadge = m.status === 'live' ? 'LIVE' : m.status === 'warmup' ? 'WARM-UP' : 'PAUSED';
+
+                            html += '<a href="pages/live-match-kg.html?id=' + m.id + '" class="live-match" style="text-decoration:none;color:inherit;cursor:pointer;">' +
+                                '<div class="match-status">' +
+                                    '<span class="live-badge">' + statusBadge + '</span>' +
+                                    (label ? '<span class="match-set">' + label + '</span>' : '') +
+                                '</div>' +
+                                '<div class="match-players">' +
+                                    '<div class="player">' +
+                                        '<img src="' + (p1.photo || placeholder) + '" alt="' + p1Name + '">' +
+                                        '<span class="player-name">' + p1Name + '</span>' +
+                                        '<span class="player-score' + servingClass1 + '">' + p1scores.trim() + '</span>' +
+                                    '</div>' +
+                                    '<div class="player">' +
+                                        '<img src="' + (p2.photo || placeholder) + '" alt="' + p2Name + '">' +
+                                        '<span class="player-name">' + p2Name + '</span>' +
+                                        '<span class="player-score' + servingClass2 + '">' + p2scores.trim() + '</span>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</a>';
+                        });
+                        grid.innerHTML = html;
+                        section.style.display = '';
+                        toggleLiveClass(true);
+                    });
+                });
+        }
+
+        loadLive();
+        setInterval(loadLive, 15000);
+    })();
+    // Guest profile modal for ranking names
+    (function() {
+        document.addEventListener('click', function(e) {
+            var link = e.target.closest('[data-guest-profile]');
+            if (!link) return;
+            e.preventDefault();
+            var existing = document.querySelector('.hp-profile-modal-overlay');
+            if (existing) return;
+            var overlay = document.createElement('div');
+            overlay.className = 'hp-profile-modal-overlay';
+            overlay.innerHTML =
+                '<div class="hp-profile-modal">' +
+                    '<button class="hp-profile-modal-close">&times;</button>' +
+                    '<div class="hp-profile-modal-icon">' +
+                        '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent,#CCFF00)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
+                    '</div>' +
+                    '<h3>Толук мүмкүнчүлүк үчүн катталыңыз</h3>' +
+                    '<p>Оюнчулардын профилдерин жана толук рейтингди көрүү үчүн катталыңыз</p>' +
+                    '<a href="pages/auth-kg.html" class="hp-profile-modal-btn">Кирүү / Каттоо</a>' +
+                '</div>';
+            document.body.appendChild(overlay);
+            requestAnimationFrame(function() { overlay.classList.add('visible'); });
+            function closeModal() {
+                overlay.classList.remove('visible');
+                setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 300);
+            }
+            overlay.querySelector('.hp-profile-modal-close').addEventListener('click', closeModal);
+            overlay.addEventListener('click', function(ev) { if (ev.target === overlay) closeModal(); });
+            document.addEventListener('keydown', function handler(ev) {
+                if (ev.key === 'Escape') { closeModal(); document.removeEventListener('keydown', handler); }
+            });
+        });
+    })();
+    </script>
+    <style>
+    .ranking-row .player-col a:hover { color: var(--accent, #CCFF00) !important; }
+    .hp-profile-modal-overlay { position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;transition:opacity 0.3s ease; }
+    .hp-profile-modal-overlay.visible { opacity:1; }
+    .hp-profile-modal { background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:40px 32px;max-width:400px;width:100%;text-align:center;position:relative;transform:translateY(20px);transition:transform 0.3s ease; }
+    .hp-profile-modal-overlay.visible .hp-profile-modal { transform:translateY(0); }
+    .hp-profile-modal-close { position:absolute;top:12px;right:12px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.5rem;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:color 0.2s,background 0.2s; }
+    .hp-profile-modal-close:hover { color:#fff;background:rgba(255,255,255,0.1); }
+    .hp-profile-modal-icon { margin-bottom:16px; }
+    .hp-profile-modal h3 { font-size:1.2rem;font-weight:700;margin-bottom:8px;color:#fff; }
+    .hp-profile-modal p { color:rgba(255,255,255,0.6);font-size:0.9rem;margin-bottom:24px;line-height:1.5; }
+    .hp-profile-modal-btn { display:inline-flex;align-items:center;gap:8px;background:var(--accent,#CCFF00);color:#000;font-family:inherit;font-size:0.95rem;font-weight:700;padding:12px 32px;border:none;border-radius:100px;text-decoration:none;cursor:pointer;transition:background 0.2s,transform 0.2s; }
+    .hp-profile-modal-btn:hover { transform:translateY(-2px); }
+    </style>
 </body>
 </html>

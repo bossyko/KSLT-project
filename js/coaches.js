@@ -447,6 +447,52 @@
             '</div>';
     }
 
+    function showMembershipModal(level) {
+        var authLink = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+        var pricingLink = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
+        var isGuest = level === 'guest';
+
+        var title = isGuest
+            ? (isEn ? 'Become a KSLT Member' : isKg ? 'KSLT мүчөсү болуңуз' : 'Станьте членом KSLT')
+            : (isEn ? 'Membership Required' : isKg ? 'Мүчөлүк керек' : 'Нужно членство');
+        var text = isGuest
+            ? (isEn ? 'Register and become a KSLT member to get discounts at partner coaches' : isKg ? 'Катталыңыз жана KSLT мүчөсү болуп, машыктыруучулардан арзандатуу алыңыз' : 'Зарегистрируйтесь и оформите членство KSLT, чтобы получить скидки у партнёрских тренеров')
+            : (isEn ? 'Become a KSLT member to unlock discounts at partner coaches' : isKg ? 'KSLT мүчөсү болуп, машыктыруучулардан арзандатуу алыңыз' : 'Оформите членство KSLT, чтобы получить скидки у партнёрских тренеров');
+        var btnText = isGuest
+            ? (isEn ? 'Sign Up' : isKg ? 'Каттоо' : 'Регистрация')
+            : (isEn ? 'View Plans' : isKg ? 'Тарифтар' : 'Тарифы');
+        var btnLink = isGuest ? authLink : pricingLink;
+
+        var svgIcon = isGuest
+            ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+            : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+
+        var overlay = document.createElement('div');
+        overlay.className = 'co-membership-overlay';
+        overlay.innerHTML =
+            '<div class="co-membership-modal">' +
+                '<button class="co-membership-close">&times;</button>' +
+                '<div class="co-membership-icon">' + svgIcon + '</div>' +
+                '<h3>' + title + '</h3>' +
+                '<p>' + text + '</p>' +
+                '<a href="' + btnLink + '" class="co-membership-btn">' + btnText + '</a>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+
+        overlay.querySelector('.co-membership-close').onclick = function() {
+            overlay.classList.remove('visible');
+            setTimeout(function() { overlay.remove(); }, 300);
+        };
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                overlay.classList.remove('visible');
+                setTimeout(function() { overlay.remove(); }, 300);
+            }
+        });
+    }
+
     function initCtaClicks() {
         var grid = document.getElementById('coachesGrid');
         if (!grid) return;
@@ -456,12 +502,8 @@
             e.preventDefault();
             e.stopPropagation();
 
-            if (_accessLevel === 'guest') {
-                showToast(isEn ? 'Sign up and become a KSLT member for discounts' : (isKg ? 'Арзандатуу алуу үчүн катталыңыз жана КСЛТ мүчөсү болуңуз' : 'Зарегистрируйтесь и станьте членом КСЛТ для скидок'), 'info');
-                return;
-            }
-            if (_accessLevel === 'registered') {
-                showToast(isEn ? 'Become a KSLT member for discounts' : (isKg ? 'Арзандатуу алуу үчүн КСЛТ мүчөсү болуңуз' : 'Станьте членом КСЛТ для скидок'), 'info');
+            if (_accessLevel === 'guest' || _accessLevel === 'registered') {
+                showMembershipModal(_accessLevel);
                 return;
             }
             // Member: inline voucher generation

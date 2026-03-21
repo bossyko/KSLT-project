@@ -1,4 +1,4 @@
-var CACHE_NAME = 'kslt-v1';
+var CACHE_NAME = 'kslt-v2';
 
 var PRE_CACHE = [
   '/favicon.svg',
@@ -56,8 +56,22 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // CSS, JS, images, fonts: Cache First (fast load, network fallback)
-  if (/\.(css|js|png|jpg|jpeg|webp|svg|woff2?|ttf)$/.test(url.pathname)) {
+  // CSS, JS: Network First (always fresh, offline fallback)
+  if (/\.(css|js)$/.test(url.pathname)) {
+    e.respondWith(
+      fetch(e.request).then(function(res) {
+        var clone = res.clone();
+        caches.open(CACHE_NAME).then(function(cache) { cache.put(e.request, clone); });
+        return res;
+      }).catch(function() {
+        return caches.match(e.request);
+      })
+    );
+    return;
+  }
+
+  // Images, fonts: Cache First (fast load, network fallback)
+  if (/\.(png|jpg|jpeg|webp|svg|woff2?|ttf)$/.test(url.pathname)) {
     e.respondWith(
       caches.match(e.request).then(function(cached) {
         if (cached) return cached;

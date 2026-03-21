@@ -403,7 +403,7 @@ function loadUpcomingTournaments(category) {
                 <a href="tournament-kg.html?id=${category}-${t.id}" class="btn-view-bracket" style="margin-right:auto">Толугураак</a>
                 ${t.status === 'open'
                     ? '<button class="btn-register">Каттоо</button>'
-                    : '<button class="btn-notify">Кабарлоо</button>'}
+                    : ''}
             </div>
         </div>
     `).join('');
@@ -579,14 +579,6 @@ function initCalendarButtons() {
             const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${date}T090000/${date}T180000`;
 
             window.open(googleUrl, '_blank');
-        }
-
-        if (e.target.closest('.btn-notify')) {
-            const btn = e.target.closest('.btn-notify');
-            btn.textContent = 'Кабарлоо коюлду ✓';
-            btn.style.color = 'var(--accent)';
-            btn.style.borderColor = 'var(--accent)';
-            btn.disabled = true;
         }
 
         // Registration gate

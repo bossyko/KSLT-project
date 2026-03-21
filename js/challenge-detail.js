@@ -135,10 +135,9 @@
         var el = document.getElementById('challengeBreadcrumb');
         if (!el) return;
 
-        // Detect where user came from
-        var ref = document.referrer || '';
-        var fromHome = ref.indexOf('index') !== -1 || ref.match(/\/[^\/]*\/?$/);
-        var fromTournaments = ref.indexOf('tournaments-overview') !== -1;
+        // Read source from URL param (reliable) instead of document.referrer
+        var params = new URLSearchParams(window.location.search);
+        var from = params.get('from') || 'home';
 
         var suffix = isEn ? '-en' : (isKg ? '-kg' : '');
 
@@ -148,7 +147,9 @@
 
         var html = '';
 
-        if (fromTournaments) {
+        if (from === 'battles') {
+            html += '<a href="battles-overview' + suffix + '.html" class="kslt-back">\u2190 ' + battleLabel + '</a>';
+        } else if (from === 'tournaments') {
             html += '<a href="tournaments-overview' + suffix + '.html" class="kslt-back">\u2190 ' + tourLabel + '</a>';
             html += '<span class="kslt-back-sep">/</span>';
             html += '<span class="kslt-back" style="color:var(--text-muted);cursor:default;">' + battleLabel + '</span>';
