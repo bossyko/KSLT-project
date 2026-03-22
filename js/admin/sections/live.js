@@ -52,7 +52,7 @@
     function loadData() {
         Promise.all([
             A.client.from('live_matches')
-                .select('id, match_id, player1_id, player2_id, player1_name, player2_name, best_of, youtube_url, umpire_key, status, final_score, tournament_label, created_at, sets_data, current_game_p1, current_game_p2, points_p1, points_p2, serving_player, is_tiebreak, tiebreak_p1, tiebreak_p2')
+                .select('id, match_id, player1_id, player2_id, player1_name, player2_name, best_of, youtube_url, umpire_key, status, final_score, tournament_label, sponsor_logo, created_at, sets_data, current_game_p1, current_game_p2, points_p1, points_p2, serving_player, is_tiebreak, tiebreak_p1, tiebreak_p2')
                 .in('status', ['warmup', 'live', 'paused'])
                 .order('created_at', { ascending: false }),
             A.client.from('live_matches')
@@ -307,6 +307,17 @@
                     '</div>' +
                     // Selected players preview (for tournament/battle)
                     '<div id="livePlayersPreview" style="display:none;padding:12px;background:rgba(255,255,255,0.04);border-radius:12px;margin-bottom:12px;"></div>' +
+                    // Sponsor logo
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">' + L.liveSponsor + '</label>' +
+                        '<div style="display:flex;gap:8px;align-items:center;">' +
+                            '<button class="ad-btn ad-btn-outline ad-btn-sm" id="liveSponsorUpload" type="button">' + L.liveSponsorUpload + '</button>' +
+                            '<input type="file" id="liveSponsorFile" accept="image/*" style="display:none;">' +
+                            '<span id="liveSponsorName" style="font-size:0.8rem;color:var(--text-dim);"></span>' +
+                        '</div>' +
+                        '<input type="hidden" id="liveSponsorUrl">' +
+                        '<div id="liveSponsorPreview" style="margin-top:8px;display:none;"><img id="liveSponsorImg" style="max-height:40px;border-radius:4px;"></div>' +
+                    '</div>' +
                     // YouTube
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.liveYoutube + '</label>' +
@@ -387,6 +398,30 @@
             document.getElementById('liveTournLabel').value = b.battle_title || (b._p1Name + ' vs ' + b._p2Name);
         });
 
+        // Sponsor upload
+        var sponsorUploadBtn = document.getElementById('liveSponsorUpload');
+        var sponsorFileInput = document.getElementById('liveSponsorFile');
+        sponsorUploadBtn.addEventListener('click', function() { sponsorFileInput.click(); });
+        sponsorFileInput.addEventListener('change', function() {
+            var file = this.files[0];
+            if (!file) return;
+            sponsorUploadBtn.disabled = true;
+            sponsorUploadBtn.textContent = '...';
+            A.uploadImage(file, 'sponsor').then(function(url) {
+                document.getElementById('liveSponsorUrl').value = url;
+                document.getElementById('liveSponsorName').textContent = file.name;
+                var img = document.getElementById('liveSponsorImg');
+                img.src = url;
+                document.getElementById('liveSponsorPreview').style.display = '';
+                sponsorUploadBtn.disabled = false;
+                sponsorUploadBtn.textContent = L.liveSponsorUpload;
+            }).catch(function() {
+                A.showToast('Upload error', 'error');
+                sponsorUploadBtn.disabled = false;
+                sponsorUploadBtn.textContent = L.liveSponsorUpload;
+            });
+        });
+
         // Save
         document.getElementById('liveModalSave').addEventListener('click', function() {
             var mode = sourceSelect.value;
@@ -394,6 +429,7 @@
                 youtube_url: document.getElementById('liveYoutube').value.trim() || null,
                 best_of: parseInt(document.getElementById('liveBestOf').value) || 3,
                 tournament_label: document.getElementById('liveTournLabel').value.trim() || null,
+                sponsor_logo: document.getElementById('liveSponsorUrl').value || null,
                 status: 'warmup'
             };
 

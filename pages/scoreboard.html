@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co;">
+    <title>KSLT Scoreboard</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800&display=swap">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: transparent; font-family: 'Inter', sans-serif; overflow: hidden; }
+
+        #sb-root { position: fixed; bottom: 20px; left: 20px; }
+
+        .sb-board {
+            background: rgba(10,10,10,0.88);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            min-width: 320px;
+        }
+
+        .sb-row {
+            display: flex;
+            align-items: center;
+            padding: 6px 14px;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .sb-row:last-child { border-bottom: none; }
+
+        .sb-name {
+            flex: 1;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
+        }
+
+        .sb-serve {
+            font-size: 0.75rem;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .sb-scores {
+            display: flex;
+            gap: 2px;
+        }
+
+        .sb-set-val, .sb-game-val, .sb-pts-val {
+            width: 30px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            color: #fff;
+            padding: 2px 0;
+        }
+        .sb-game-val {
+            color: #CCFF00;
+        }
+        .sb-pts-val {
+            color: #CCFF00;
+            background: rgba(204,255,0,0.1);
+            border-radius: 4px;
+        }
+
+        /* Logos bar */
+        .sb-logos {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sb-logo-img {
+            height: 36px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        .sb-logo-kslt {
+            height: 32px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div id="sb-root"></div>
+    <div class="sb-logos" id="sb-logos"></div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/scoreboard.js"></script>
+</body>
+</html>
