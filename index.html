@@ -425,75 +425,12 @@
         </section>
 
         <!-- LIVE SCORES (dynamic from Supabase) -->
-        <section id="live-real" class="section-live" style="display:none">
+        <section id="live" class="section-live" style="display:none">
             <div class="section-header">
                 <h2><span class="live-indicator"></span> Live матчи</h2>
             </div>
             <div class="live-matches" id="liveMatchesGrid"></div>
         </section>
-        <!-- DEMO: временный блок для просмотра — УДАЛИТЬ -->
-        <section id="live" class="section-live">
-            <div class="section-header">
-                <h2><span class="live-indicator"></span> Live матчи</h2>
-            </div>
-            <div class="live-matches">
-                <div class="live-match">
-                    <div class="match-status">
-                        <span class="live-badge">LIVE</span>
-                        <span class="match-set">KSLT Masters #1 • SF</span>
-                    </div>
-                    <div class="match-players">
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" alt="Игрок">
-                            <span class="player-name">А. Иванов</span>
-                            <span class="player-score serving">6 4 3</span>
-                        </div>
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80" alt="Игрок">
-                            <span class="player-name">М. Петров</span>
-                            <span class="player-score">3 6 2</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="live-match">
-                    <div class="match-status">
-                        <span class="live-badge">LIVE</span>
-                        <span class="match-set">KSLT Challenger #2 • QF</span>
-                    </div>
-                    <div class="match-players">
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Игрок">
-                            <span class="player-name">Е. Сидорова</span>
-                            <span class="player-score serving">6 2</span>
-                        </div>
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&q=80" alt="Игрок">
-                            <span class="player-name">К. Николаева</span>
-                            <span class="player-score">4 1</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="live-match">
-                    <div class="match-status">
-                        <span class="live-badge">LIVE</span>
-                        <span class="match-set">KSLT Futures #3 • F</span>
-                    </div>
-                    <div class="match-players">
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" alt="Игрок">
-                            <span class="player-name">Д. Алиев</span>
-                            <span class="player-score">7 3</span>
-                        </div>
-                        <div class="player">
-                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80" alt="Игрок">
-                            <span class="player-name">Б. Касымов</span>
-                            <span class="player-score serving">5 5</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- /DEMO -->
 
         <!-- BATTLE CARDS -->
         <div id="battleContainer" class="bc-section" style="display:none"></div>
@@ -1491,10 +1428,8 @@
             });
         });
     })();
-    // Load LIVE matches from Supabase
-    // DEMO: temporarily disabled — remove "return;" to enable
+    // Load LIVE matches from Supabase (live_matches table)
     (function() {
-        return;
         var client = window.supabaseClient;
         if (!client) return;
         var section = document.getElementById('live');
@@ -1516,8 +1451,10 @@
         }
 
         function loadLive() {
-            client.from('matches').select('id,player1_id,player2_id,score,tournament_id,round_number,status')
-                .eq('status', 'live')
+            client.from('live_matches')
+                .select('id, player1_id, player2_id, player1_name, player2_name, status, sets_data, current_game_p1, current_game_p2, points_p1, points_p2, serving_player, tournament_label, is_tiebreak, tiebreak_p1, tiebreak_p2')
+                .in('status', ['warmup', 'live', 'paused'])
+                .order('created_at', { ascending: false })
                 .then(function(res) {
                     if (res.error || !res.data || !res.data.length) {
                         section.style.display = 'none';
@@ -1526,62 +1463,58 @@
                     }
                     var matches = res.data;
                     var playerIds = [];
-                    var tournamentIds = [];
                     matches.forEach(function(m) {
                         if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
                         if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
-                        if (m.tournament_id && tournamentIds.indexOf(m.tournament_id) === -1) tournamentIds.push(m.tournament_id);
                     });
 
                     var pPromise = playerIds.length
                         ? client.from('players').select('id,name,photo').in('id', playerIds)
                         : Promise.resolve({ data: [] });
-                    var tPromise = tournamentIds.length
-                        ? client.from('tournaments').select('id,title').in('id', tournamentIds)
-                        : Promise.resolve({ data: [] });
 
-                    Promise.all([pPromise, tPromise]).then(function(results) {
-                        var playersMap = {};
-                        (results[0].data || []).forEach(function(p) { playersMap[p.id] = p; });
-                        var tournamentsMap = {};
-                        (results[1].data || []).forEach(function(t) { tournamentsMap[t.id] = t; });
-
-                        var ROUND_NAMES = { 1: 'R1', 2: 'R2', 3: 'QF', 4: 'SF', 5: 'F' };
+                    pPromise.then(function(pRes) {
+                        var pMap = {};
+                        (pRes.data || []).forEach(function(p) { pMap[p.id] = p; });
                         var placeholder = 'https://placehold.co/80x80/1a1a1a/888?text=?';
                         var html = '';
-                        matches.forEach(function(m) {
-                            var p1 = playersMap[m.player1_id] || {};
-                            var p2 = playersMap[m.player2_id] || {};
-                            var tourn = tournamentsMap[m.tournament_id] || {};
-                            var scoreArr = (m.score || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-                            var p1scores = '';
-                            var p2scores = '';
-                            scoreArr.forEach(function(set) {
-                                var parts = set.split('-');
-                                p1scores += (parts[0] || '0') + ' ';
-                                p2scores += (parts[1] || '0') + ' ';
-                            });
-                            var roundLabel = ROUND_NAMES[m.round_number] || ('R' + m.round_number);
-                            var tournLabel = tourn.title || '';
 
-                            html += '<div class="live-match">' +
+                        matches.forEach(function(m) {
+                            var p1 = pMap[m.player1_id] || {};
+                            var p2 = pMap[m.player2_id] || {};
+                            var p1Name = m.player1_name || p1.name || 'TBD';
+                            var p2Name = m.player2_name || p2.name || 'TBD';
+                            var label = m.tournament_label || '';
+
+                            var p1scores = '', p2scores = '';
+                            (m.sets_data || []).forEach(function(s) {
+                                p1scores += s.g1 + ' ';
+                                p2scores += s.g2 + ' ';
+                            });
+                            p1scores += (m.current_game_p1 || 0);
+                            p2scores += (m.current_game_p2 || 0);
+
+                            var servingClass1 = m.serving_player === 1 ? ' serving' : '';
+                            var servingClass2 = m.serving_player === 2 ? ' serving' : '';
+                            var statusBadge = m.status === 'live' ? 'LIVE' : m.status === 'warmup' ? 'РАЗМИНКА' : 'ПАУЗА';
+
+                            html += '<a href="pages/live-match.html?id=' + m.id + '" class="live-match" style="text-decoration:none;color:inherit;cursor:pointer;">' +
                                 '<div class="match-status">' +
-                                    '<span class="live-badge">LIVE</span>' +
-                                    (tournLabel ? '<span class="match-set">' + tournLabel + ' \u2022 ' + roundLabel + '</span>' : '<span class="match-set">' + roundLabel + '</span>') +
+                                    '<span class="live-badge">' + statusBadge + '</span>' +
+                                    (label ? '<span class="match-set">' + label + '</span>' : '') +
                                 '</div>' +
                                 '<div class="match-players">' +
                                     '<div class="player">' +
-                                        '<img src="' + (p1.photo || placeholder) + '" alt="' + (p1.name || 'TBD') + '">' +
-                                        '<span class="player-name">' + (p1.name || 'TBD') + '</span>' +
-                                        '<span class="player-score">' + p1scores.trim() + '</span>' +
+                                        '<img src="' + (p1.photo || placeholder) + '" alt="' + p1Name + '">' +
+                                        '<span class="player-name">' + p1Name + '</span>' +
+                                        '<span class="player-score' + servingClass1 + '">' + p1scores.trim() + '</span>' +
                                     '</div>' +
                                     '<div class="player">' +
-                                        '<img src="' + (p2.photo || placeholder) + '" alt="' + (p2.name || 'TBD') + '">' +
-                                        '<span class="player-name">' + (p2.name || 'TBD') + '</span>' +
-                                        '<span class="player-score">' + p2scores.trim() + '</span>' +
+                                        '<img src="' + (p2.photo || placeholder) + '" alt="' + p2Name + '">' +
+                                        '<span class="player-name">' + p2Name + '</span>' +
+                                        '<span class="player-score' + servingClass2 + '">' + p2scores.trim() + '</span>' +
                                     '</div>' +
                                 '</div>' +
-                            '</div>';
+                            '</a>';
                         });
                         grid.innerHTML = html;
                         section.style.display = '';
@@ -1591,7 +1524,7 @@
         }
 
         loadLive();
-        setInterval(loadLive, 30000);
+        setInterval(loadLive, 15000);
     })();
     </script>
     <style>

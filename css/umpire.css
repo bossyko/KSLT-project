@@ -1,0 +1,280 @@
+/* ============================================
+   KSLT — Umpire Page Styles (um- prefix)
+   Mobile-first, high contrast for outdoor use
+   ============================================ */
+
+:root {
+    --um-bg: #0a0a0a;
+    --um-card: #1a1a1a;
+    --um-accent: #CCFF00;
+    --um-text: #fff;
+    --um-dim: rgba(255,255,255,0.5);
+    --um-p1: #4FC3F7;
+    --um-p2: #FF7043;
+    --um-green: #66BB6A;
+    --um-red: #EF5350;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: var(--um-bg);
+    color: var(--um-text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior: none;
+}
+
+#um-app {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+    gap: 12px;
+}
+
+/* Status bar */
+.um-status {
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 8px;
+    border-radius: 8px;
+}
+.um-status-warmup { background: rgba(255,255,255,0.1); color: var(--um-dim); }
+.um-status-live { background: rgba(239,83,80,0.2); color: var(--um-red); animation: um-pulse 1.5s infinite; }
+.um-status-paused { background: rgba(255,167,38,0.2); color: #FFA726; }
+.um-status-completed { background: rgba(204,255,0,0.15); color: var(--um-accent); }
+
+@keyframes um-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Winner banner */
+.um-winner {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--um-accent);
+    padding: 12px;
+    background: rgba(204,255,0,0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(204,255,0,0.3);
+}
+
+/* Scoreboard */
+.um-scoreboard {
+    background: var(--um-card);
+    border-radius: 16px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.um-player-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 52px 52px;
+    align-items: center;
+    padding: 12px 8px;
+    border-radius: 12px;
+    gap: 8px;
+    transition: background 0.2s;
+}
+.um-player-row.um-serving { background: rgba(255,255,255,0.06); }
+.um-player-row.um-winner-row { background: rgba(204,255,0,0.1); }
+
+.um-serve-dot {
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.um-player-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.um-games, .um-points {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+.um-games { color: var(--um-text); }
+.um-points { color: var(--um-accent); }
+
+/* Sets history */
+.um-sets {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.um-set-score {
+    background: var(--um-card);
+    border-radius: 10px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+.um-set-label {
+    font-size: 0.7rem;
+    color: var(--um-dim);
+    margin-right: 4px;
+    text-transform: uppercase;
+}
+.um-set-val { font-variant-numeric: tabular-nums; }
+.um-set-sep { color: var(--um-dim); margin: 0 2px; }
+.um-set-tb { color: var(--um-dim); font-size: 0.8rem; }
+
+/* Tiebreak label */
+.um-tiebreak-label {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #FFA726;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Serve choice (warmup) */
+.um-serve-choice {
+    text-align: center;
+}
+.um-serve-choice-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--um-dim);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.um-serve-choice-btns {
+    display: flex;
+    gap: 12px;
+}
+.um-btn-serve {
+    flex: 1;
+    padding: 16px 12px;
+    font-size: 1.1rem;
+    background: var(--um-card);
+    color: var(--um-text);
+    border: 2px solid rgba(255,255,255,0.12);
+    transition: border-color 0.2s, background 0.2s;
+}
+.um-btn-serve-active {
+    border-color: var(--um-accent);
+    background: rgba(204,255,0,0.1);
+    color: var(--um-accent);
+}
+
+/* Action buttons */
+.um-actions {
+    flex: 1;
+    display: flex;
+    gap: 12px;
+    min-height: 0;
+}
+
+.um-btn {
+    border: none;
+    border-radius: 16px;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+    -webkit-tap-highlight-color: transparent;
+}
+.um-btn:active {
+    transform: scale(0.96);
+    opacity: 0.85;
+}
+
+.um-btn-p1, .um-btn-p2 {
+    flex: 1;
+    font-size: 1.3rem;
+    line-height: 1.3;
+    color: #fff;
+    min-height: 140px;
+}
+.um-btn-p1 {
+    background: linear-gradient(135deg, #1565C0, #42A5F5);
+}
+.um-btn-p2 {
+    background: linear-gradient(135deg, #D84315, #FF7043);
+}
+
+.um-btn-start {
+    flex: 1;
+    font-size: 1.5rem;
+    color: #000;
+    background: var(--um-accent);
+    min-height: 140px;
+}
+
+/* Bottom actions */
+.um-bottom-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.um-btn-undo, .um-btn-pause {
+    flex: 1;
+    padding: 14px;
+    font-size: 1rem;
+    background: var(--um-card);
+    color: var(--um-text);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Error */
+.um-error {
+    text-align: center;
+    color: var(--um-red);
+    font-size: 1.2rem;
+    padding: 60px 20px;
+}
+
+/* Large phones */
+@media (min-height: 700px) {
+    .um-btn-p1, .um-btn-p2, .um-btn-start { min-height: 180px; }
+    .um-player-name { font-size: 1.2rem; }
+    .um-games, .um-points { font-size: 1.8rem; }
+}
+
+/* Small phones (375px) */
+@media (max-width: 375px) {
+    #um-app { padding: 10px; gap: 10px; }
+    .um-serve-choice-btns { gap: 8px; }
+    .um-serve-choice-title { font-size: 0.95rem; }
+    .um-btn-serve { padding: 12px 8px; font-size: 0.95rem; }
+    .um-player-row { padding: 10px 6px; grid-template-columns: 24px 1fr 44px 44px; }
+    .um-player-name { font-size: 0.95rem; }
+    .um-games, .um-points { font-size: 1.4rem; }
+}
+
+/* Landscape */
+@media (orientation: landscape) and (max-height: 500px) {
+    #um-app { padding: 6px; gap: 6px; }
+    .um-btn-p1, .um-btn-p2, .um-btn-start { min-height: 80px; font-size: 1rem; }
+    .um-player-row { padding: 6px 8px; }
+    .um-games, .um-points { font-size: 1.3rem; }
+}
