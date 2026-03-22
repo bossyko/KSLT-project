@@ -274,15 +274,23 @@ function loadCategoryData(category) {
     const cat = tournamentsData.categories[category];
     if (!cat) return;
 
-    document.getElementById('categoryBadge').textContent = cat.name;
-    document.getElementById('categoryTitle').textContent = cat.title;
-    document.getElementById('categoryDescription').textContent = cat.description;
-    document.getElementById('statTournaments').textContent = cat.stats.tournaments;
-    document.getElementById('statParticipants').textContent = cat.stats.participants;
-    document.getElementById('statPrize').textContent = cat.stats.prize;
-    document.getElementById('heroBg').src = cat.bgImage;
+    var elBadge = document.getElementById('categoryBadge');
+    var elTitle = document.getElementById('categoryTitle');
+    var elDesc = document.getElementById('categoryDescription');
+    var elStat = document.getElementById('statTournaments');
+    var elPart = document.getElementById('statParticipants');
+    var elPrize = document.getElementById('statPrize');
+    var elBg = document.getElementById('heroBg');
+    var elRank = document.getElementById('rankingCategoryName');
+    if (elBadge) elBadge.textContent = cat.name;
+    if (elTitle) elTitle.textContent = cat.title;
+    if (elDesc) elDesc.textContent = cat.description;
+    if (elStat) elStat.textContent = cat.stats.tournaments;
+    if (elPart) elPart.textContent = cat.stats.participants;
+    if (elPrize) elPrize.textContent = cat.stats.prize;
+    if (elBg) elBg.src = cat.bgImage;
     document.title = `KSLT — ${cat.name} Tournaments`;
-    document.getElementById('rankingCategoryName').textContent = cat.name;
+    if (elRank) elRank.textContent = cat.name;
 
     loadUpcomingTournaments(category);
     loadRankings(category);

@@ -10,7 +10,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: transparent; font-family: 'Inter', sans-serif; overflow: hidden; }
 
-        #sb-root { position: fixed; bottom: 20px; left: 20px; }
+        #sb-wrapper { position: fixed; bottom: 20px; left: 20px; }
 
         .sb-board {
             background: rgba(10,10,10,0.88);
@@ -69,14 +69,12 @@
             border-radius: 4px;
         }
 
-        /* Logos bar */
+        /* Logos bar — above scoreboard */
         .sb-logos {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
             display: flex;
             align-items: center;
             gap: 12px;
+            margin-bottom: 8px;
         }
         .sb-logo-img {
             height: 36px;
@@ -90,8 +88,10 @@
     </style>
 </head>
 <body>
-    <div id="sb-root"></div>
-    <div class="sb-logos" id="sb-logos"></div>
+    <div id="sb-wrapper">
+        <div class="sb-logos" id="sb-logos"></div>
+        <div id="sb-root"></div>
+    </div>
 
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js"></script>

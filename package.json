@@ -1,0 +1,27 @@
+{
+  "name": "kslt",
+  "version": "1.0.0",
+  "description": "A full-featured community platform for tennis players in Kyrgyzstan — tournaments, rankings, coaches, courts, memberships, and more.",
+  "main": "sw.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bossyko/kslt-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/bossyko/kslt-project/issues"
+  },
+  "homepage": "https://github.com/bossyko/kslt-project#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}

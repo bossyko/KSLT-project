@@ -158,7 +158,7 @@
         content.querySelectorAll('[data-delete-live]').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var id = this.dataset.deleteLive;
-                A.showConfirm(L.liveDelete + '?', function() {
+                A.showConfirm(L.liveDelete + '?', '', function() {
                     A.client.from('live_matches').delete().eq('id', id).then(function(res) {
                         if (res.error) return A.showToast(res.error.message, 'error');
                         A.showToast(L.liveDeleted, 'success');
@@ -222,7 +222,7 @@
         content.querySelectorAll('[data-delete-live]').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var id = this.dataset.deleteLive;
-                A.showConfirm(L.liveDelete + '?', function() {
+                A.showConfirm(L.liveDelete + '?', '', function() {
                     A.client.from('live_matches').delete().eq('id', id).then(function(res) {
                         if (res.error) return A.showToast(res.error.message, 'error');
                         A.showToast(L.liveDeleted, 'success');

@@ -4995,3 +4995,33 @@ h2 {
     width: 20px;
     height: 20px;
 }
+
+/* ========================================
+   OVERFLOW FIXES (E2E BUG-002)
+   ======================================== */
+
+/* Prevent sections from causing horizontal scroll */
+section {
+    overflow-x: hidden;
+}
+
+/* Fix players-grid cascade: 480px rule was overridden by later 768px rule */
+@media (max-width: 480px) {
+    .players-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .live-matches {
+        grid-template-columns: 1fr;
+    }
+
+    .courts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Global image constraint */
+img {
+    max-width: 100%;
+    height: auto;
+}
