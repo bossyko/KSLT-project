@@ -915,14 +915,19 @@
 
             var playerPage = isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
 
-            html += '<div class="pp-match pp-match-clickable" data-opponent-id="' + esc(oppId) + '" data-opponent-name="' + esc(oppName) + '" data-opponent-photo="' + esc(oppPhoto) + '">';
+            html += '<div class="pp-match' + (oppId ? ' pp-match-clickable' : '') + '" data-opponent-id="' + esc(oppId || '') + '" data-opponent-name="' + esc(oppName) + '" data-opponent-photo="' + esc(oppPhoto) + '">';
             html += '<div class="pp-match-date">' + formatChalDate(date) + '</div>';
             html += '<div class="pp-match-tournament"></div>';
             html += '<div class="pp-match-opponent">';
-            html += '<a href="' + playerPage + '?id=' + esc(oppId) + '">';
-            html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(oppName) + '" class="pp-match-opponent-photo">';
-            html += '</a>';
-            html += '<a href="' + playerPage + '?id=' + esc(oppId) + '" class="pp-match-opponent-name" style="color:inherit;text-decoration:none;">' + esc(oppName) + '</a>';
+            if (oppId) {
+                html += '<a href="' + playerPage + '?id=' + esc(oppId) + '">';
+                html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(oppName) + '" class="pp-match-opponent-photo">';
+                html += '</a>';
+                html += '<a href="' + playerPage + '?id=' + esc(oppId) + '" class="pp-match-opponent-name" style="color:inherit;text-decoration:none;">' + esc(oppName) + '</a>';
+            } else {
+                html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(oppName) + '" class="pp-match-opponent-photo">';
+                html += '<span class="pp-match-opponent-name" style="color:rgba(255,255,255,0.5);">' + esc(oppName || 'Unknown') + '</span>';
+            }
             html += '</div>';
             html += '<div class="pp-match-score">' + esc(score || '—') + '</div>';
             if (c.status === 'completed' && result) {
@@ -930,7 +935,9 @@
             } else {
                 html += '<div class="pp-match-result accepted">' + L.challengeAccepted + '</div>';
             }
-            html += '<button class="pp-match-h2h" title="Head to Head">H2H</button>';
+            if (oppId) {
+                html += '<button class="pp-match-h2h" title="Head to Head">H2H</button>';
+            }
             html += '</div>';
         });
         container.innerHTML = html;
