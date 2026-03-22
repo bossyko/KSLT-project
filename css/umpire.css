@@ -186,6 +186,52 @@ body {
     color: var(--um-accent);
 }
 
+/* Changeover timer */
+.um-changeover {
+    text-align: center;
+    background: rgba(255,167,38,0.1);
+    border: 1px solid rgba(255,167,38,0.3);
+    border-radius: 16px;
+    padding: 16px;
+}
+.um-changeover-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #FFA726;
+    margin-bottom: 8px;
+}
+.um-changeover-time {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #FFA726;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-bottom: 12px;
+}
+.um-changeover-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+.um-changeover-fill {
+    height: 100%;
+    background: #FFA726;
+    border-radius: 3px;
+    transition: width 1s linear;
+}
+.um-btn-continue {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    background: rgba(255,167,38,0.15);
+    color: #FFA726;
+    border: 1px solid rgba(255,167,38,0.3);
+}
+
 /* Action buttons */
 .um-actions {
     flex: 1;

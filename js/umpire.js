@@ -255,11 +255,17 @@
     // UMPIRE UI — page controller
     // ============================================================
 
+    var CHANGEOVER_GAME = 180; // 3 minutes between odd games
+    var CHANGEOVER_SET = 300;  // 5 minutes between sets
+
     var umpireKey = null;
     var matchData = null;
     var state = null;
     var saveTimeout = null;
     var serveChosen = false;
+    var changeoverEndTime = 0;
+    var changeoverTotalSec = 0;
+    var changeoverInterval = null;
 
     function init() {
         var params = new URLSearchParams(window.location.search);
@@ -301,14 +307,64 @@
         }, 300);
     }
 
+    function startChangeover(seconds) {
+        clearChangeover();
+        changeoverTotalSec = seconds;
+        changeoverEndTime = Date.now() + seconds * 1000;
+        changeoverInterval = setInterval(function() {
+            if (Date.now() >= changeoverEndTime) {
+                clearChangeover();
+            }
+            render();
+        }, 1000);
+        render();
+    }
+
+    function clearChangeover() {
+        changeoverEndTime = 0;
+        changeoverTotalSec = 0;
+        if (changeoverInterval) {
+            clearInterval(changeoverInterval);
+            changeoverInterval = null;
+        }
+    }
+
+    function getChangeoverRemaining() {
+        if (!changeoverEndTime) return 0;
+        var ms = changeoverEndTime - Date.now();
+        return ms > 0 ? Math.ceil(ms / 1000) : 0;
+    }
+
     function handleScore(player) {
         if (state.status === 'completed') return;
+
+        // Clear any active changeover — umpire starts scoring
+        if (changeoverEndTime) clearChangeover();
+
+        var prevSetsCount = state.sets_data.length;
+        var prevGames = state.current_game_p1 + state.current_game_p2;
+
         state = scorePoint(state, player);
         render();
         saveState();
+
+        if (state.status === 'completed') return;
+
+        // Set just ended → 5 min changeover
+        if (state.sets_data.length > prevSetsCount) {
+            startChangeover(CHANGEOVER_SET);
+            return;
+        }
+
+        // Game just ended (same set) → check odd total for 3 min changeover
+        var newGames = state.current_game_p1 + state.current_game_p2;
+        if (newGames > prevGames && newGames % 2 === 1 && newGames > 1) {
+            startChangeover(CHANGEOVER_GAME);
+        }
     }
 
     function handleUndo() {
+        if (changeoverEndTime) clearChangeover();
         state = undo(state);
         render();
         saveState();
@@ -404,6 +460,22 @@
             '</div>' +
             (setsHtml ? '<div class="um-sets">' + setsHtml + '</div>' : '') +
             (state.is_tiebreak ? '<div class="um-tiebreak-label">Тайбрейк</div>' : '') +
+            (function() {
+                var rem = getChangeoverRemaining();
+                if (!rem) return '';
+                var min = Math.floor(rem / 60);
+                var sec = rem % 60;
+                var timeStr = min + ':' + (sec < 10 ? '0' : '') + sec;
+                var isSetBreak = changeoverTotalSec === CHANGEOVER_SET;
+                var label = isSetBreak ? 'Перерыв между сетами' : 'Переход';
+                var pct = Math.round((rem / changeoverTotalSec) * 100);
+                return '<div class="um-changeover">' +
+                    '<div class="um-changeover-label">' + label + '</div>' +
+                    '<div class="um-changeover-time">' + timeStr + '</div>' +
+                    '<div class="um-changeover-bar"><div class="um-changeover-fill" style="width:' + pct + '%;"></div></div>' +
+                    '<button class="um-btn um-btn-continue" id="umContinue">Продолжить ▶</button>' +
+                '</div>';
+            })() +
             (isWarmup
                 ? '<div class="um-serve-choice">' +
                     '<div class="um-serve-choice-title">Кто подаёт первым?</div>' +
@@ -433,6 +505,7 @@
             );
 
         // Bind events
+        var btnContinue = document.getElementById('umContinue');
         var btnServe1 = document.getElementById('umServe1');
         var btnServe2 = document.getElementById('umServe2');
         var btnStart = document.getElementById('umStart');
@@ -441,6 +514,7 @@
         var btnUndo = document.getElementById('umUndo');
         var btnPause = document.getElementById('umPause');
 
+        if (btnContinue) btnContinue.addEventListener('click', function() { clearChangeover(); render(); });
         if (btnServe1) btnServe1.addEventListener('click', function() { handleChooseServe(1); });
         if (btnServe2) btnServe2.addEventListener('click', function() { handleChooseServe(2); });
         if (btnStart) btnStart.addEventListener('click', handleStart);
