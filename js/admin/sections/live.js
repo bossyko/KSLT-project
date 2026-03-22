@@ -85,12 +85,15 @@
     function buildScoreDisplay(m) {
         var parts = [];
         (m.sets_data || []).forEach(function(s) {
-            parts.push(s.g1 + '-' + s.g2);
+            var set = s.g1 + '-' + s.g2;
+            if (s.tb1 !== null && s.tb1 !== undefined) set += '(' + Math.min(s.tb1, s.tb2) + ')';
+            parts.push(set);
         });
         if (m.status !== 'completed') {
-            parts.push('{' + (m.current_game_p1 || 0) + '-' + (m.current_game_p2 || 0) + '}');
+            var g = (m.current_game_p1 || 0) + '-' + (m.current_game_p2 || 0);
+            parts.push(g);
         }
-        return parts.join(' ') || '0-0';
+        return parts.join('  ') || '0-0';
     }
 
     // ---- Active list ----
