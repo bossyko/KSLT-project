@@ -192,17 +192,23 @@
 - [x] Filtered duel matches from Matches section (duels only in Challenges)
 - [x] Applied to both dashboard (personal) and player.html (public profile)
 
-## В работе
+## Live Match System ✅
 
-- [ ] YouTube Live stream integration
-- [ ] Live Score (real-time match scoreboard)
+- [x] YouTube Live stream integration (embed on live-match page, URL field in admin)
+- [x] Live Score: real-time match scoreboard (umpire panel, scoreboard OBS, public page)
+- [x] Umpire engine: full tennis scoring (games, sets, tiebreak, deuce, AD)
+- [x] Serve indicator (🎾) + first serve choice before match
+- [x] Changeover rest timer (3 min game / 5 min set) with skip button
+- [x] Admin: create live from Free match / Tournament bracket / Battle
+- [x] Auto-record completed free matches as challenges (partial player support)
+- [x] Live cards on homepage (RU/EN/KG) with realtime refresh (15s)
+- [x] Score sync: live → tournament bracket (manual) on completion
 
 ## Техдолг
 
 - [ ] E2E testing (Cypress / Playwright)
 - [ ] CI/CD: GitHub Actions linting, auto-tests, auto-deploy Netlify
 - [ ] API documentation (Supabase schema, RLS, endpoints)
-- [ ] Password reset improvements (email-only, без SMS)
 
 ## Идеи для реализации
 
