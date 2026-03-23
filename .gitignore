@@ -13,3 +13,9 @@ coverage/
 
 # Backups
 *.bak
+
+# Playwright / Tests
+test-results/
+tests/reports/html/
+tests/reports/results.json
+.playwright/
