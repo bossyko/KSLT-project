@@ -1861,3 +1861,128 @@ select.db-field-input {
     .h2h-score { font-size: 1.5rem; }
     .h2h-name { font-size: 0.75rem; max-width: 100px; }
 }
+
+/* ---- Onboarding Welcome Modal ---- */
+.db-onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 16px;
+}
+.db-onboarding-overlay.visible { opacity: 1; }
+
+.db-onboarding-modal {
+    background: #1a1a1a;
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    max-width: 440px;
+    width: 100%;
+    padding: 40px 32px 32px;
+    text-align: center;
+    position: relative;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.db-onboarding-modal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.db-onboarding-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+    transition: color 0.2s;
+}
+.db-onboarding-close:hover { color: var(--text-primary); }
+
+.db-onboarding-emoji {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    line-height: 1;
+}
+
+.db-onboarding-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 12px;
+}
+
+.db-onboarding-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 20px;
+}
+
+.db-onboarding-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.db-onboarding-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-subtle);
+    transition: background 0.3s, transform 0.3s;
+}
+.db-onboarding-dot.active {
+    background: var(--accent);
+    transform: scale(1.25);
+}
+
+.db-onboarding-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 40px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.db-onboarding-btn:hover { opacity: 0.85; }
+
+.db-onboarding-tg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #2AABEE;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 16px;
+    transition: opacity 0.2s;
+}
+.db-onboarding-tg-btn:hover { opacity: 0.85; }
+
+@media (max-width: 480px) {
+    .db-onboarding-modal { padding: 32px 20px 24px; }
+    .db-onboarding-emoji { font-size: 2.5rem; }
+    .db-onboarding-title { font-size: 1.15rem; }
+    .db-onboarding-btn { width: 100%; }
+}

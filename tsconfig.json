@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true,
+    "strict": false,
+    "target": "ES2020",
+    "skipLibCheck": true
+  },
+  "include": ["js/globals.d.ts", "js/supabase-config.js", "js/membership.js", "js/dashboard.js", "js/admin/core/utils.js", "js/admin/core/constants.js"],
+  "exclude": ["node_modules", "tests"]
+}

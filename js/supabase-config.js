@@ -2,18 +2,24 @@
 // KSLT — Supabase Configuration
 // ============================================
 
+/** @type {string} Supabase project URL */
 var SUPABASE_URL = 'https://qqkzszesviukopgjbead.supabase.co';
+/** @type {string} Supabase anonymous (public) key */
 var SUPABASE_ANON_KEY = 'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G';
 
-// Telegram bot username (for deep link: t.me/BOT?start=PROFILE_ID)
+/** @type {string} Telegram bot username (for deep link: t.me/BOT?start=PROFILE_ID) */
 window.KSLT_TG_BOT = 'KSLTennisBot';
 
 // Supabase SDK CDN
 // <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
-// Supabase client
+/** @type {any} Global Supabase client instance */
 var supabaseClient = null;
 
+/**
+ * Initializes the Supabase client from the CDN-loaded SDK.
+ * @returns {any} The Supabase client instance, or null if SDK not loaded.
+ */
 function initSupabase() {
     if (window.supabase && window.supabase.createClient) {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

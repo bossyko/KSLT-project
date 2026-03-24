@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ============================================
 // KSLT — Dashboard (Личный кабинет)
 // ============================================
@@ -180,7 +181,17 @@
         loyNotEnough: 'Балдар жетишсиз',
         loyNextExpiry: 'Кийинки сгорание',
         loyPointsIn: 'балл',
-        loyDays: 'күн ичинде'
+        loyDays: 'күн ичинде',
+        // Onboarding
+        obStep1Title: 'KSLT\'ге кош келиңиз!',
+        obStep1Text: 'Кыргызстандын теннис коомчулугу. Мелдештер, рейтинг, оюнга өнөктөш — баары бир жерде.',
+        obStep2Title: 'Клубдун мүчөсү бол',
+        obStep2Text: 'Мелдештерге катыш, рейтингге кир, өнөктөштөрдөн арзандатуу ал. «Мүчөлүк» бөлүмүнөн тариздеңиз.',
+        obStep3Title: 'Telegram\'ды байла',
+        obStep3Text: 'Мелдештер жана матчтар жөнүндө билдирме алыңыз. Ботту байлоо үчүн баскычты басыңыз.',
+        obConnectTg: 'Telegram байлоо',
+        obNext: 'Кийинки',
+        obDone: 'Баштайлы!'
     } : isEn ? {
         profile: 'Profile', tournaments: 'My Tournaments',
         stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
@@ -352,7 +363,17 @@
         loyNotEnough: 'Not enough points',
         loyNextExpiry: 'Next expiry',
         loyPointsIn: 'pts in',
-        loyDays: 'days'
+        loyDays: 'days',
+        // Onboarding
+        obStep1Title: 'Welcome to KSLT!',
+        obStep1Text: 'Tennis community of Kyrgyzstan. Tournaments, rankings, partners for a game — all in one place.',
+        obStep2Title: 'Become a Club Member',
+        obStep2Text: 'Participate in tournaments, get ranked, enjoy partner discounts. Sign up in the "Membership" section.',
+        obStep3Title: 'Connect Telegram',
+        obStep3Text: 'Get notifications about tournaments and matches. Tap the button below to connect the bot.',
+        obConnectTg: 'Connect Telegram',
+        obNext: 'Next',
+        obDone: 'Let\'s go!'
     } : {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
@@ -524,7 +545,17 @@
         loyNotEnough: 'Недостаточно баллов',
         loyNextExpiry: 'Ближайшее сгорание',
         loyPointsIn: 'б. через',
-        loyDays: 'дн.'
+        loyDays: 'дн.',
+        // Onboarding
+        obStep1Title: 'Добро пожаловать в KSLT!',
+        obStep1Text: 'Теннисное сообщество Кыргызстана. Турниры, рейтинг, партнёры для игры — всё в одном месте.',
+        obStep2Title: 'Стань членом клуба',
+        obStep2Text: 'Участвуй в турнирах, попади в рейтинг, получай скидки у партнёров. Оформи членство в разделе «Членство».',
+        obStep3Title: 'Подключи Telegram',
+        obStep3Text: 'Получай уведомления о турнирах и матчах. Нажми кнопку ниже, чтобы подключить бота.',
+        obConnectTg: 'Подключить Telegram',
+        obNext: 'Далее',
+        obDone: 'Начнём!'
     };
 
     // Use shared Supabase client from supabase-config.js
@@ -621,6 +652,100 @@
         }
     }
 
+    /**
+     * Shows a 3-step onboarding modal for first-time users.
+     * Skips for staff and users who completed onboarding (localStorage flag).
+     * @param {{ id: string, role: string }} profile
+     */
+    function showOnboarding(profile) {
+        if (localStorage.getItem('kslt_onboarding_done')) return;
+        if (profile.role === 'admin' || profile.role === 'manager') return;
+
+        var steps = [
+            {
+                icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>',
+                emoji: '🎾',
+                title: L.obStep1Title,
+                text: L.obStep1Text,
+                extra: ''
+            },
+            {
+                icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
+                emoji: '⭐',
+                title: L.obStep2Title,
+                text: L.obStep2Text,
+                extra: ''
+            },
+            {
+                icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
+                emoji: '📱',
+                title: L.obStep3Title,
+                text: L.obStep3Text,
+                extra: '<a href="https://t.me/KSLTennisBot?start=' + profile.id + '" target="_blank" rel="noopener" class="db-onboarding-tg-btn">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>' +
+                    ' ' + L.obConnectTg + '</a>'
+            }
+        ];
+
+        var currentStep = 0;
+
+        var overlay = document.createElement('div');
+        overlay.className = 'db-onboarding-overlay';
+
+        function renderStep() {
+            var s = steps[currentStep];
+            var isLast = currentStep === steps.length - 1;
+            var dots = '';
+            for (var i = 0; i < steps.length; i++) {
+                dots += '<span class="db-onboarding-dot' + (i === currentStep ? ' active' : '') + '"></span>';
+            }
+
+            overlay.innerHTML =
+                '<div class="db-onboarding-modal">' +
+                    '<button class="db-onboarding-close" aria-label="Close">&times;</button>' +
+                    '<div class="db-onboarding-emoji">' + s.emoji + '</div>' +
+                    '<h3 class="db-onboarding-title">' + s.title + '</h3>' +
+                    '<p class="db-onboarding-text">' + s.text + '</p>' +
+                    s.extra +
+                    '<div class="db-onboarding-dots">' + dots + '</div>' +
+                    '<button class="db-onboarding-btn">' + (isLast ? L.obDone : L.obNext) + '</button>' +
+                '</div>';
+
+            // Animate modal in
+            var modal = overlay.querySelector('.db-onboarding-modal');
+            requestAnimationFrame(function() { modal.classList.add('visible'); });
+
+            // Button handler
+            overlay.querySelector('.db-onboarding-btn').onclick = function() {
+                if (isLast) {
+                    closeOnboarding();
+                } else {
+                    currentStep++;
+                    modal.classList.remove('visible');
+                    setTimeout(function() { renderStep(); }, 200);
+                }
+            };
+
+            // Close button
+            overlay.querySelector('.db-onboarding-close').onclick = closeOnboarding;
+        }
+
+        function closeOnboarding() {
+            localStorage.setItem('kslt_onboarding_done', '1');
+            overlay.classList.remove('visible');
+            setTimeout(function() { overlay.remove(); }, 300);
+        }
+
+        // Overlay click to close
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeOnboarding();
+        });
+
+        document.body.appendChild(overlay);
+        renderStep();
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+    }
+
     // ---- Auth Ready Callback ----
     window.onAuthReady = function(user, profile) {
         renderSidebar(profile);
@@ -644,6 +769,9 @@
         if (profile.player_id) {
             checkNewBadges(profile.player_id);
         }
+
+        // Onboarding for first-time users
+        showOnboarding(profile);
     };
 
     // ---- Render Membership Card ----

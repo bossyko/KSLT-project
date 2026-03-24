@@ -9,7 +9,10 @@
   "scripts": {
     "test": "npx playwright test --project=desktop",
     "test:all": "npx playwright test",
-    "test:report": "npx playwright show-report tests/reports/html"
+    "test:report": "npx playwright show-report tests/reports/html",
+    "test:unit": "vitest run tests/unit/",
+    "test:unit:watch": "vitest tests/unit/",
+    "typecheck": "npx tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -24,6 +27,8 @@
   },
   "homepage": "https://github.com/bossyko/kslt-project#readme",
   "devDependencies": {
-    "@playwright/test": "^1.58.2"
+    "@playwright/test": "^1.58.2",
+    "typescript": "^6.0.2",
+    "vitest": "^3.2.4"
   }
 }

@@ -203,12 +203,25 @@
 - [x] Auto-record completed free matches as challenges (partial player support)
 - [x] Live cards on homepage (RU/EN/KG) with realtime refresh (15s)
 - [x] Score sync: live → tournament bracket (manual) on completion
+- [x] OBS Scoreboard overlay (transparent, auto-detect active match, sponsor + KSLT logos)
 
-## Техдолг
+## E2E Testing ✅
 
-- [ ] E2E testing (Cypress / Playwright)
-- [ ] CI/CD: GitHub Actions linting, auto-tests, auto-deploy Netlify
-- [ ] API documentation (Supabase schema, RLS, endpoints)
+- [x] Playwright setup (9 test suites, 603 tests, 3 viewports: desktop/tablet/mobile)
+- [x] Page loading: all 63 pages (RU/EN/KG) — HTTP 200, no JS errors
+- [x] Navigation: header links, language switcher, footer
+- [x] Responsive: horizontal overflow check (5 breakpoints × 9 pages)
+- [x] CSS/JS integrity: no 404 for resources, dark theme, Inter font
+- [x] Auth page: form elements, Google OAuth, validation
+- [x] PWA: manifest, service worker, meta tags, icons
+- [x] SEO: title, lang attribute, charset, accessibility
+- [x] Content pages: About, FAQ, Rules, Pricing, etc.
+- [x] Bug fixes found by tests: tournaments-en JS crash, homepage overflow, image constraints
+
+## Техдолг ✅
+
+- [x] CI/CD: GitHub Actions — E2E tests on push/PR + auto-deploy to Netlify
+- [x] API documentation v2.0 (31 tables, 28 RPCs, 15 Edge Functions, RLS matrix, Telegram bot, cron jobs)
 
 ## Идеи для реализации
 

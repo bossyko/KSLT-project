@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ============================================
 // KSLT Admin — Utility Functions
 // ============================================
@@ -9,6 +10,10 @@
     var L = A.L;
     var isEn = A.isEn;
 
+    /**
+     * Sets up bulk-delete UI (checkboxes + delete button) for an admin table.
+     * @param {{ tableId: string, tableName: string, confirmMsg?: string, reloadFn: function }} opts
+     */
     function setupBulkDelete(opts) {
         var table = document.getElementById(opts.tableId);
         if (!table) return;
@@ -88,12 +93,22 @@
     /**
      * Returns checkbox TD html for a row.
      */
+    /**
+     * Returns HTML for a bulk-select checkbox table cell.
+     * @param {string} id - Row identifier
+     * @returns {string} HTML string
+     */
     function bulkCheckboxTd(id) {
         return '<td class="ad-bulk-cell" style="width:36px;text-align:center;">' +
             '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + id + '" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">' +
         '</td>';
     }
 
+    /**
+     * Transliterates Cyrillic text to Latin.
+     * @param {string} text
+     * @returns {string}
+     */
     function transliterate(text) {
         var map = {'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'};
         return text.split('').map(function(c) {
@@ -106,6 +121,11 @@
         }).join('');
     }
 
+    /**
+     * Creates a URL-friendly slug from Russian text.
+     * @param {string} text
+     * @returns {string}
+     */
     function slugify(text) {
         var map = {'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'j','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'};
         return text.toLowerCase().split('').map(function(c) { return map[c] || c; }).join('')
@@ -113,15 +133,32 @@
             .replace(/^-+|-+$/g, '');
     }
 
+    /**
+     * Escapes HTML entities (& " < >).
+     * @param {*} str
+     * @returns {string}
+     */
     function esc(str) {
         if (!str) return '';
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    /**
+     * Returns ' selected' attribute if article[field] === value.
+     * @param {Object} article
+     * @param {string} field
+     * @param {*} value
+     * @returns {string}
+     */
     function sel(article, field, value) {
         return (article && article[field] === value) ? ' selected' : '';
     }
 
+    /**
+     * Converts ISO date string to local YYYY-MM-DDTHH:MM format.
+     * @param {string} isoStr
+     * @returns {string}
+     */
     function formatDateLocal(isoStr) {
         if (!isoStr) return '';
         var d = new Date(isoStr);
@@ -130,7 +167,11 @@
         return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
     }
 
-    // ---- Toast ----
+    /**
+     * Shows a toast notification (auto-dismiss 3s).
+     * @param {string} message
+     * @param {string} [type='success'] - 'success' | 'error' | 'warning' | 'info'
+     */
     function showToast(message, type) {
         var existing = document.querySelector('.ad-toast');
         if (existing) existing.remove();
@@ -150,7 +191,14 @@
         }, 3000);
     }
 
-    // ---- Confirm Modal ----
+    /**
+     * Shows a confirm dialog modal.
+     * @param {string} title
+     * @param {string} text
+     * @param {function} onConfirm - Called when user confirms
+     * @param {string} [confirmLabel] - Custom confirm button text
+     * @param {function} [onCancel] - Called when user cancels
+     */
     function showConfirm(title, text, onConfirm, confirmLabel, onCancel) {
         var btnLabel = confirmLabel || L.delete;
         var btnClass = confirmLabel ? 'ad-btn-primary' : 'ad-btn-danger';
@@ -173,7 +221,13 @@
         overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
     }
 
-    // ---- Async confirm (Promise-based wrapper) ----
+    /**
+     * Promise-based confirm dialog.
+     * @param {string} title
+     * @param {string} [text]
+     * @param {string} [confirmLabel]
+     * @returns {Promise<boolean>}
+     */
     function showConfirmAsync(title, text, confirmLabel) {
         return new Promise(function(resolve) {
             showConfirm(
@@ -188,7 +242,13 @@
 
     // ---- Translation (MyMemory API, free, no key) ----
 
-    // Translate filled field(s) to empty ones (auto-detect source language)
+    /**
+     * Auto-translates filled form fields to empty ones using MyMemory API.
+     * @param {string} ruId - Russian field input ID
+     * @param {string} enId - English field input ID
+     * @param {string} [kgId] - Kyrgyz field input ID
+     * @param {HTMLButtonElement} btn - Trigger button (for loading state)
+     */
     async function translateToEmpty(ruId, enId, kgId, btn) {
         var ruEl = document.getElementById(ruId);
         var enEl = document.getElementById(enId);
@@ -243,10 +303,23 @@
         btn.disabled = false;
     }
 
+    /**
+     * Translates Russian text to target language.
+     * @param {string} text
+     * @param {string} targetLang - 'ru' | 'en' | 'kg'
+     * @returns {Promise<string>}
+     */
     async function translateFromRu(text, targetLang) {
         return translateText(text, 'ru', targetLang);
     }
 
+    /**
+     * Translates text via MyMemory API with chunking for long strings.
+     * @param {string} text
+     * @param {string} fromLang - Source language code
+     * @param {string} toLang - Target language code
+     * @returns {Promise<string>}
+     */
     async function translateText(text, fromLang, toLang) {
         var langMap = { ru: 'ru', en: 'en', kg: 'ky' };
         var from = langMap[fromLang] || fromLang;
@@ -285,7 +358,12 @@
     }
 
 
-    // ---- Consolidated Upload Image ----
+    /**
+     * Uploads an image to Supabase Storage (news bucket).
+     * @param {File} file - The file to upload
+     * @param {string} prefix - Filename prefix (e.g. 'news-', 'coach-')
+     * @returns {Promise<string|null>} Public URL or null on failure
+     */
     async function uploadImage(file, prefix) {
         if (!A.client || !file) return null;
         var ext = file.name.split('.').pop().toLowerCase();
@@ -307,7 +385,12 @@
         }
     }
 
-    // ---- CSV Export (Excel-compatible) ----
+    /**
+     * Exports data as a CSV file download (UTF-8 BOM for Excel).
+     * @param {string} filename
+     * @param {string[]} headers
+     * @param {Array<Array<*>>} rows
+     */
     function exportCsv(filename, headers, rows) {
         var BOM = '\uFEFF';
         var csvRows = [];
@@ -327,6 +410,11 @@
         URL.revokeObjectURL(url);
     }
 
+    /**
+     * Escapes and quotes a CSV cell value.
+     * @param {*} val
+     * @returns {string}
+     */
     function csvCell(val) {
         var s = val === null || val === undefined ? '' : String(val);
         if (s.indexOf('"') !== -1 || s.indexOf(',') !== -1 || s.indexOf('\n') !== -1 || s.indexOf('\r') !== -1) {

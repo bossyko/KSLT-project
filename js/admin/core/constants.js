@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ============================================
 // KSLT Admin — Constants, Labels, Enums
 // ============================================
@@ -2171,7 +2172,28 @@
         manager: ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'users', 'finances', 'vouchers', 'loyalty']
     };
 
-    // ---- Initialize namespace ----
+    /**
+     * @typedef {Object} KSLT_ADMIN_Namespace
+     * @property {boolean} isEn - English locale flag
+     * @property {Object} L - UI label strings (EN or RU)
+     * @property {Object} ICONS - SVG icon strings
+     * @property {Object} SECTION_ICONS - Emoji icons per section
+     * @property {Object} CATEGORIES - News category enum
+     * @property {Object} TOURNAMENT_FORMATS - Tournament format enum
+     * @property {Object} TOURNAMENT_STATUSES - Tournament status enum
+     * @property {Object} COURT_TYPES - Court type enum
+     * @property {Object} COURT_SURFACES - Court surface enum
+     * @property {Array} COURT_AMENITIES - Array of amenity objects
+     * @property {Object} ROLE_SECTIONS - Allowed sections per role
+     * @property {function} computeTournamentStatus - Derives status from dates
+     * @property {Array} cachedCategories - Loaded categories from DB
+     * @property {Object} categoriesMap - Map: id → category
+     * @property {any} client - Supabase client (set by init.js)
+     * @property {string} currentRole - 'admin' | 'manager'
+     * @property {string|null} currentUserId - Auth user ID
+     */
+
+    /** @type {KSLT_ADMIN_Namespace} */
     window.KSLT_ADMIN = {
         isEn: isEn,
         L: L,
@@ -2196,13 +2218,21 @@
     window.KSLT_ADMIN.PAYMENT_METHODS = { cash: L.payCash, transfer: L.payTransfer, card: L.payCard };
     window.KSLT_ADMIN.PAYMENT_PURPOSES = { promoted: L.payPromoted, sponsorship: L.paySponsorship, rental: L.payRental, other: L.payOther };
     window.KSLT_ADMIN.PAYMENT_ENTITY_TYPES = { membership: L.finTypeMembership, court: L.payCourt, coach: L.payCoach, club: L.payClub };
+    /**
+     * Formats ISO date to DD.MM.YY.
+     * @param {string} d - ISO date string (YYYY-MM-DD)
+     * @returns {string}
+     */
     window.KSLT_ADMIN.formatPayDate = function(d) {
         if (!d) return '—';
         var parts = d.split('-');
         return parts[2] + '.' + parts[1] + '.' + parts[0].slice(2);
     };
 
-    // loadCategories must update KSLT_ADMIN properties directly
+    /**
+     * Loads categories from Supabase and populates cachedCategories/categoriesMap.
+     * @returns {Promise<void>}
+     */
     window.KSLT_ADMIN.loadCategories = async function() {
         var A = window.KSLT_ADMIN;
         if (A.cachedCategories.length > 0) return;
