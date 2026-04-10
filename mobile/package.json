@@ -1,0 +1,20 @@
+{
+  "name": "kslt-mobile",
+  "version": "1.0.0",
+  "description": "KSLT Tennis — Android App",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Static files — no build needed'",
+    "cap:sync": "npx cap sync",
+    "cap:open": "npx cap open android",
+    "cap:run": "npx cap run android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6",
+    "@capacitor/core": "^6",
+    "@capacitor/cli": "^6",
+    "@capacitor/splash-screen": "^6",
+    "@capacitor/status-bar": "^6",
+    "@capacitor/keyboard": "^6"
+  }
+}
