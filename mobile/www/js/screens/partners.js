@@ -240,6 +240,29 @@
     );
   };
 
+  window.KSLT_INFO.showPricing = function() {
+    showInfoOverlay(I18N.t('pricing.title'),
+      '<div style="text-align:center;padding:8px 0">' +
+        '<div style="display:inline-block;background:var(--accent);color:#0A0A0A;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:12px">' + I18N.t('pricing.singlePlan') + '</div>' +
+        '<div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">' + I18N.t('pricing.monthlyMembership') + '</div>' +
+        '<div style="margin-bottom:16px"><span style="font-size:40px;font-weight:800;color:var(--accent)">1 000</span> <span style="font-size:14px;color:var(--text-muted)">' + I18N.t('td.som') + ' / ' + I18N.t('pricing.perMonth') + '</span></div>' +
+      '</div>' +
+      '<div class="info-content" style="text-align:left">' +
+        '<ul style="list-style:none;padding:0;margin:0 0 20px">' +
+          '<li style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px">✅ ' + I18N.t('pricing.feat1') + '</li>' +
+          '<li style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px">✅ ' + I18N.t('pricing.feat2') + '</li>' +
+          '<li style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px">✅ ' + I18N.t('pricing.feat3') + '</li>' +
+          '<li style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px">✅ ' + I18N.t('pricing.feat4') + '</li>' +
+          '<li style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px">✅ ' + I18N.t('pricing.feat5') + '</li>' +
+          '<li style="padding:8px 0;font-size:14px">✅ ' + I18N.t('pricing.feat6') + '</li>' +
+        '</ul>' +
+        '<p style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:16px">' + I18N.t('pricing.howToPay') + '</p>' +
+        '<a href="https://wa.me/996555000000" target="_blank" class="pd-challenge-btn" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px;color:#0A0A0A">WhatsApp</a>' +
+        '<a href="https://t.me/kslt_admin" target="_blank" class="pd-challenge-btn" style="background:#2AABEE;display:block;text-align:center;text-decoration:none;color:#fff">Telegram</a>' +
+      '</div>'
+    );
+  };
+
   window.KSLT_INFO.showFaq = function() {
     showInfoOverlay('FAQ',
       '<div class="info-content">' +

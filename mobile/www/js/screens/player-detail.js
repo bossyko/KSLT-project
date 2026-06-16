@@ -248,6 +248,27 @@
     html += '<div id="pdAchievements"></div>';
     html += '</div>';
 
+    // ---- Contact info (member only, if player allows) ----
+    if (access === 'member') {
+      var hasContact = (p.phone && p.show_phone) || p.telegram || p.instagram;
+      if (hasContact) {
+        html += '<div class="pd-section"><h3 class="pd-section-title">📞 ' + I18N.t('pd.contact') + '</h3>';
+        html += '<div style="display:flex;flex-direction:column;gap:8px">';
+        if (p.phone && p.show_phone) {
+          html += '<a href="tel:' + esc(p.phone) + '" class="pd-challenge-btn" style="display:block;text-align:center;text-decoration:none;color:#0A0A0A">📱 ' + esc(p.phone) + '</a>';
+          html += '<a href="https://wa.me/' + esc(p.phone.replace(/[^0-9]/g, '')) + '" target="_blank" class="pd-challenge-btn" style="background:#25D366;display:block;text-align:center;text-decoration:none;color:#fff">WhatsApp</a>';
+        }
+        if (p.telegram) {
+          var tgHandle = p.telegram.replace('@', '');
+          html += '<a href="https://t.me/' + esc(tgHandle) + '" target="_blank" class="pd-challenge-btn" style="background:#2AABEE;display:block;text-align:center;text-decoration:none;color:#fff">Telegram @' + esc(tgHandle) + '</a>';
+        }
+        if (p.instagram) {
+          html += '<a href="https://instagram.com/' + esc(p.instagram.replace('@', '')) + '" target="_blank" class="pd-challenge-btn" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:block;text-align:center;text-decoration:none;color:#fff">Instagram @' + esc(p.instagram.replace('@', '')) + '</a>';
+        }
+        html += '</div></div>';
+      }
+    }
+
     // ---- Challenge button (member only) ----
     if (access === 'member') {
       html += '<div class="pd-challenge-wrap">';

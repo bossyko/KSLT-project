@@ -226,6 +226,11 @@
     menuOverlay.classList.remove('open');
     if (window.KSLT_INFO) window.KSLT_INFO.showFaq();
   });
+  var menuPricing = document.getElementById('menuPricing');
+  if (menuPricing) menuPricing.addEventListener('click', function() {
+    menuOverlay.classList.remove('open');
+    if (window.KSLT_INFO) window.KSLT_INFO.showPricing();
+  });
 
   // === Menu theme/lang controls ===
   function initMenuControls() {

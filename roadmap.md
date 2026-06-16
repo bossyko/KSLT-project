@@ -218,9 +218,12 @@
 - [x] Content pages: About, FAQ, Rules, Pricing, etc.
 - [x] Bug fixes found by tests: tournaments-en JS crash, homepage overflow, image constraints
 
-## Техдолг ✅
+## Developer Experience ✅
 
-- [x] CI/CD: GitHub Actions — E2E tests on push/PR + auto-deploy to Netlify
+- [x] Onboarding modal: first-visit guide for new users (localStorage, 3 languages)
+- [x] Unit tests: 72 tests for Edge Functions (Vitest) — create-challenge, admin-manage-user, battle-publish
+- [x] JSDoc type annotations: @param, @returns, @typedef across JS codebase
+- [x] CI/CD: GitHub Actions — E2E tests on push/PR (test.yml) + auto-deploy to Netlify (deploy.yml)
 - [x] API documentation v2.0 (31 tables, 28 RPCs, 15 Edge Functions, RLS matrix, Telegram bot, cron jobs)
 
 ## Идеи для реализации

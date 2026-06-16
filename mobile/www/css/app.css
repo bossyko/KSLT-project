@@ -2153,6 +2153,41 @@ a, button, [role="button"] {
 .lfi-label { color: var(--text-muted); }
 .lfi-val { font-weight: 600; color: var(--text); }
 
+/* Live overlay — extra elements */
+.live-full-video iframe { border-radius: var(--radius-lg); }
+.sb-set-val.sb-points { background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.live-full-sb-row.winner-row .sb-pname { color: var(--accent); }
+.live-badge-warmup { background: var(--orange) !important; }
+.live-badge-warmup::before { background: var(--orange) !important; }
+.live-badge-paused { background: var(--text-muted) !important; }
+.live-badge-paused::before { background: var(--text-muted) !important; }
+.lm-badge-warmup .sb-dot { background: var(--orange) !important; }
+.lm-badge-warmup .sb-label { color: var(--orange) !important; }
+.lm-badge-paused .sb-dot { background: var(--text-muted) !important; }
+.lm-badge-paused .sb-label { color: var(--text-muted) !important; }
+.lm-badge-completed .sb-dot { display: none; }
+.lm-tiebreak-tag {
+  margin: 0 16px 8px;
+  padding: 6px 14px;
+  background: var(--accent-dim);
+  border-radius: var(--radius-full);
+  font-size: 12px; font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  width: fit-content;
+  align-self: center;
+}
+.lm-winner-block {
+  margin: 0 16px 12px;
+  padding: 16px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(204,255,0,0.2);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+.lm-winner-text { font-size: 16px; font-weight: 800; color: var(--accent); }
+.lm-final-score { font-size: 13px; color: var(--text-sec); margin-top: 4px; }
+
 /* ===== NEWS DETAIL OVERLAY ===== */
 .nd-hero-img {
   height: 200px;
@@ -2274,6 +2309,34 @@ a, button, [role="button"] {
   font-size: 13px;
   color: var(--accent);
   margin-top: -4px;
+  cursor: pointer;
+}
+.auth-forgot-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+  text-align: center;
+  line-height: 1.4;
+}
+.auth-success {
+  background: rgba(52, 199, 89, 0.1);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+  color: #34c759;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 8px;
+}
+.td-reg-done {
+  background: rgba(204, 255, 0, 0.1);
+  border: 1px solid rgba(204, 255, 0, 0.2);
+  color: var(--accent);
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
 }
 .auth-divider {
   display: flex;

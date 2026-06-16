@@ -632,7 +632,6 @@
             .order('played_at', { ascending: false })
             .limit(50)
             .then(function(res) {
-                console.log('[KSLT] matches query:', res.error ? res.error.message : (res.data ? res.data.length + ' results' : 'no data'));
                 if (res.error || !res.data || res.data.length === 0) {
                     renderMockMatches(container, data);
                     return;

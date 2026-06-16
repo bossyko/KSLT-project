@@ -9,94 +9,7 @@
     var L = A.L;
     var isEn = A.isEn;
 
-    // ---- NTRP Elo Calculation ----
-    var NTRP_K = 0.15; // Sensitivity factor (how much rating changes per match)
-    var NTRP_DEFAULT = 3.0; // Default rating for unrated players
-
-    function eloExpected(ra, rb) {
-        // Expected score for player A vs player B
-        // Using NTRP scale: 400 Elo points ≈ 2.0 NTRP difference
-        return 1 / (1 + Math.pow(10, (rb - ra) / 2.0));
-    }
-
-    function clampNtrp(val) {
-        return Math.max(1.0, Math.min(7.0, Math.round(val * 100) / 100));
-    }
-
-    async function updateNtrpRatings(tournament, matches) {
-        // Get all completed matches with winner (exclude BYEs)
-        var completedMatches = matches.filter(function(m) {
-            return m.status === 'completed' && m.winner_id && m.score !== 'BYE'
-                && m.player1_id && m.player2_id;
-        });
-        if (completedMatches.length === 0) return;
-
-        // Sort by round_number to process in order
-        completedMatches.sort(function(a, b) { return (a.round_number || 0) - (b.round_number || 0); });
-
-        // Collect all player IDs
-        var playerIds = [];
-        completedMatches.forEach(function(m) {
-            if (playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
-            if (playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
-        });
-
-        // Load current NTRP ratings from players
-        var res = await A.client.from('players').select('id, ntrp_rating').in('id', playerIds);
-        var ratings = {};
-        var ratingsBefore = {};
-        (res.data || []).forEach(function(p) {
-            ratings[p.id] = p.ntrp_rating || NTRP_DEFAULT;
-            ratingsBefore[p.id] = p.ntrp_rating || NTRP_DEFAULT;
-        });
-
-        // Re-finalization safety: if rating_history already has ntrp_before for this tournament,
-        // restore those values as starting point (prevents double-counting)
-        var histRes = await A.client.from('rating_history')
-            .select('player_id, ntrp_before')
-            .eq('tournament_id', tournament.id)
-            .not('ntrp_before', 'is', null);
-        if (histRes.data && histRes.data.length > 0) {
-            histRes.data.forEach(function(h) {
-                ratings[h.player_id] = Number(h.ntrp_before);
-                ratingsBefore[h.player_id] = Number(h.ntrp_before);
-            });
-        }
-
-        // Process each match: update ratings via Elo
-        completedMatches.forEach(function(m) {
-            var ra = ratings[m.player1_id] || NTRP_DEFAULT;
-            var rb = ratings[m.player2_id] || NTRP_DEFAULT;
-
-            var expectedA = eloExpected(ra, rb);
-            var expectedB = 1 - expectedA;
-
-            var actualA = m.winner_id === m.player1_id ? 1 : 0;
-            var actualB = 1 - actualA;
-
-            ratings[m.player1_id] = clampNtrp(ra + NTRP_K * (actualA - expectedA));
-            ratings[m.player2_id] = clampNtrp(rb + NTRP_K * (actualB - expectedB));
-        });
-
-        // Save updated ratings to players
-        for (var i = 0; i < playerIds.length; i++) {
-            var pid = playerIds[i];
-            var newRating = Math.round(ratings[pid] * 10) / 10;
-            await A.client.from('players').update({ ntrp_rating: newRating }).eq('id', pid);
-        }
-
-        // Save NTRP history to rating_history
-        for (var j = 0; j < playerIds.length; j++) {
-            var pid2 = playerIds[j];
-            await A.client.from('rating_history')
-                .update({
-                    ntrp_before: ratingsBefore[pid2],
-                    ntrp_after: Math.round(ratings[pid2] * 100) / 100
-                })
-                .eq('tournament_id', tournament.id)
-                .eq('player_id', pid2);
-        }
-    }
+    // NTRP is now managed manually by admin (no auto-calculation)
 
     // ---- Save Rating History on finalization ----
     async function saveRatingHistory(tournament, results) {
@@ -216,6 +129,36 @@
             }
         }
 
+        // Load membership status for debt labels
+        var debtPlayerIds = {};
+        var regPlayerIds = registrations.map(function(r) { return r.player_id; }).filter(Boolean);
+        if (regPlayerIds.length > 0) {
+            // Get profile_ids linked to these player_ids
+            var profRes = await A.client.from('profiles').select('id, player_id').in('player_id', regPlayerIds);
+            var profileIds = (profRes.data || []).map(function(p) { return p.id; });
+            var playerProfileMap = {};
+            (profRes.data || []).forEach(function(p) { playerProfileMap[p.player_id] = p.id; });
+
+            // Load active memberships for these profiles
+            var activeMemberIds = {};
+            if (profileIds.length > 0) {
+                var memRes = await A.client.from('memberships')
+                    .select('profile_id')
+                    .in('profile_id', profileIds)
+                    .eq('status', 'active')
+                    .gte('expires_at', new Date().toISOString());
+                (memRes.data || []).forEach(function(m) { activeMemberIds[m.profile_id] = true; });
+            }
+
+            // Mark players with debt (no active membership)
+            regPlayerIds.forEach(function(pid) {
+                var profId = playerProfileMap[pid];
+                if (!profId || !activeMemberIds[profId]) {
+                    debtPlayerIds[pid] = true;
+                }
+            });
+        }
+
         var hasMatches = matches.length > 0;
         var isRegOpen = tournament.status === 'registration_open';
         var canGenerate = !hasMatches && registrations.filter(function(r) { return r.status === 'approved'; }).length >= 2;
@@ -260,7 +203,7 @@
 
         // Registrations panel
         html += '<div class="ad-brk-panel" id="adBrkRegPanel" style="' + (activeTab !== 'registrations' ? 'display:none;' : '') + '">';
-        html += renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate);
+        html += renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds);
         html += '</div>';
 
         // Bracket / Group panel
@@ -483,13 +426,13 @@
             });
         });
 
-        // Waitlist: approve buttons
+        // Waitlist: approve (move to main) buttons
         container.querySelectorAll('.ad-btn-approve').forEach(function(btn) {
             btn.addEventListener('click', async function() {
                 var regId = btn.dataset.regId;
                 btn.disabled = true;
-                await A.client.from('tournament_registrations').update({ status: 'pending' }).eq('id', regId);
-                A.showToast(L.regApproved);
+                await A.client.from('tournament_registrations').update({ status: 'approved' }).eq('id', regId);
+                A.showToast(L.regMovedToMain);
                 renderBracketManagement(tournamentId, 'registrations');
             });
         });
@@ -504,6 +447,59 @@
                 renderBracketManagement(tournamentId, 'registrations');
             });
         });
+
+        // Main draw: move to waitlist buttons
+        container.querySelectorAll('.ad-btn-to-waitlist').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var regId = btn.dataset.regId;
+                btn.disabled = true;
+                await A.client.from('tournament_registrations').update({ status: 'waitlist' }).eq('id', regId);
+                A.showToast(L.regMovedToWaitlist);
+                renderBracketManagement(tournamentId, 'registrations');
+            });
+        });
+
+        // Add External Participant button
+        var extBtn = document.getElementById('adBrkAddExternal');
+        if (extBtn) {
+            extBtn.addEventListener('click', function() {
+                var modalHtml =
+                    '<div style="display:flex;flex-direction:column;gap:12px;min-width:300px;">' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.regExternalName + ' *</label>' +
+                            '<input type="text" class="ad-field-input" id="adExtName" placeholder="' + (isEn ? 'John Smith' : 'Иванов Иван') + '">' +
+                        '</div>' +
+                        '<div style="display:flex;gap:12px;">' +
+                            '<div class="ad-field" style="flex:1;">' +
+                                '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
+                                '<input type="text" class="ad-field-input" id="adExtCountry" placeholder="🇰🇬" style="font-size:1.3rem;text-align:center;">' +
+                            '</div>' +
+                            '<div class="ad-field" style="flex:1;">' +
+                                '<label class="ad-field-label">' + L.regExternalNtrp + '</label>' +
+                                '<input type="number" class="ad-field-input" id="adExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+                A.showConfirm(L.regAddExternal, modalHtml, async function() {
+                    var extName = document.getElementById('adExtName').value.trim();
+                    if (!extName) { A.showToast(isEn ? 'Name is required' : 'Имя обязательно', 'error'); return; }
+                    var extCountry = document.getElementById('adExtCountry').value.trim() || null;
+                    var extNtrp = parseFloat(document.getElementById('adExtNtrp').value) || null;
+                    var insRes = await A.client.from('tournament_registrations').insert({
+                        tournament_id: tournamentId,
+                        player_id: null,
+                        is_external: true,
+                        external_name: extName,
+                        external_country: extCountry,
+                        external_ntrp: extNtrp,
+                        status: 'approved'
+                    });
+                    if (insRes.error) { A.showToast(insRes.error.message, 'error'); return; }
+                    A.showToast(L.regExternalAdded);
+                    renderBracketManagement(tournamentId, 'registrations');
+                }, isEn ? 'Add' : 'Добавить');
+            });
+        }
 
         // Floating bar: remove button
         floatingBar.querySelector('.ad-reg-floating-remove').addEventListener('click', function() {
@@ -598,9 +594,10 @@
     }
 
     // ---- Registrations Panel HTML ----
-    function renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate) {
+    function renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds) {
         var html = '';
         var maxPart = tournament.max_participants || 16;
+        debtPlayerIds = debtPlayerIds || {};
 
         // Split by status (not overflow)
         var mainDraw = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; })
@@ -611,14 +608,20 @@
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
         var withdrawn = registrations.filter(function(r) { return r.status === 'withdrawn'; });
 
+        // Add External Participant button
+        html += '<div style="margin-bottom:12px;text-align:right;">' +
+            '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adBrkAddExternal">' + L.regAddExternal + '</button>' +
+        '</div>';
+
         if (mainDraw.length === 0 && waitlistRegs.length === 0 && rejected.length === 0 && withdrawn.length === 0) {
             html += '<div class="ad-empty-state"><p>' + L.noRegistrations + '</p></div>';
         } else {
             var thCategory = isEn ? 'Category' : 'Категория';
             var thRank = isEn ? 'Rank' : 'Ранг';
             var thRegTime = isEn ? 'Registered' : 'Регистрация';
+            var thActions = isEn ? 'Actions' : 'Действия';
             var regTableHead = '<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"></th>' +
-                '<th style="width:32px;text-align:center;padding:4px 6px;">#</th><th style="width:32px;text-align:center;padding:4px 6px;">' + thRank + '</th><th>' + L.plrName + '</th><th>' + thCategory + '</th><th>' + thRegTime + '</th>';
+                '<th style="width:32px;text-align:center;padding:4px 6px;">#</th><th style="width:32px;text-align:center;padding:4px 6px;">' + thRank + '</th><th>' + L.plrName + '</th><th>' + thCategory + '</th><th>' + thRegTime + '</th><th style="width:100px;text-align:center;">' + thActions + '</th>';
 
             // Overflow warning
             if (mainDraw.length > maxPart) {
@@ -635,7 +638,7 @@
                     regTableHead.replace('GRP', 'main') +
                 '</tr></thead><tbody>';
                 mainDraw.forEach(function(reg, idx) {
-                    html += renderRegRow(reg, idx + 1, playersMap, 'main');
+                    html += renderRegRow(reg, idx + 1, playersMap, 'main', debtPlayerIds);
                 });
                 html += '</tbody></table></div>';
             } else {
@@ -643,14 +646,13 @@
             }
 
             // ---- Waitlist ----
-            var waitTableHead = regTableHead + '<th style="width:80px;text-align:center;">' + (isEn ? 'Actions' : 'Действия') + '</th>';
             html += '<h3 class="ad-reg-section-title" style="margin-top:24px;">' + L.regWaitlist + ' <span class="ad-badge">' + waitlistRegs.length + '</span></h3>';
             if (waitlistRegs.length > 0) {
                 html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
-                    waitTableHead.replace('GRP', 'wait') +
+                    regTableHead.replace('GRP', 'wait') +
                 '</tr></thead><tbody>';
                 waitlistRegs.forEach(function(reg, idx) {
-                    html += renderRegRow(reg, idx + 1, playersMap, 'wait');
+                    html += renderRegRow(reg, idx + 1, playersMap, 'wait', debtPlayerIds);
                 });
                 html += '</tbody></table></div>';
             } else {
@@ -705,17 +707,28 @@
         return html;
     }
 
-    function renderRegRow(reg, num, playersMap, group) {
-        var player = reg.players || playersMap[reg.player_id] || {};
-        var pmEntry = playersMap[reg.player_id] || {};
-        var pName = isEn ? (player.name_en || player.name || reg.player_id) : (player.name || reg.player_id);
+    function renderRegRow(reg, num, playersMap, group, debtPlayerIds) {
+        debtPlayerIds = debtPlayerIds || {};
+        var isExternal = reg.is_external;
+        var player = isExternal ? null : (reg.players || playersMap[reg.player_id] || {});
+        var pmEntry = isExternal ? {} : (playersMap[reg.player_id] || {});
+        var pName = isExternal
+            ? (reg.external_name || (isEn ? 'External' : 'Внешний'))
+            : (isEn ? (player.name_en || player.name || reg.player_id) : (player.name || reg.player_id));
         var seedHtml = reg.seed_number ? ' <span class="ad-badge ad-badge-accent">[' + reg.seed_number + ']</span>' : '';
-        var catId = player.category_id || pmEntry.category_id || '';
+        var hasDebt = !isExternal && debtPlayerIds[reg.player_id];
+        var debtBadge = hasDebt
+            ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(244,67,54,0.15);color:#f44336;margin-left:4px;">' + L.regDebt + '</span>'
+            : '';
+        var externalBadge = isExternal
+            ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(33,150,243,0.15);color:#2196f3;margin-left:4px;">' + (reg.external_country || 'EXT') + '</span>'
+            : '';
+        var catId = isExternal ? '' : (player.category_id || pmEntry.category_id || '');
         var catParts = catId.split('-');
-        var catLabel = catParts.length > 1
+        var catLabel = isExternal ? '—' : (catParts.length > 1
             ? catParts.slice(1).map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-')
-            : catId || '—';
-        var rankVal = pmEntry.rank || '—';
+            : catId || '—');
+        var rankVal = isExternal ? '—' : (pmEntry.rank || '—');
         var regDT = '';
         if (reg.registered_at) {
             var d = new Date(reg.registered_at);
@@ -723,18 +736,21 @@
                 ' <span style="color:var(--text-dim);">' +
                 d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
         }
-        var actionsTd = '';
-        if (group === 'wait') {
-            actionsTd = '<td style="text-align:center;white-space:nowrap;">' +
-                '<button class="ad-btn-icon ad-btn-approve" data-reg-id="' + reg.id + '" title="' + L.regApprove + '" style="color:#4caf50;background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 6px;">✓</button>' +
-                '<button class="ad-btn-icon ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '" style="color:#f44336;background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 6px;">✕</button>' +
-            '</td>';
+        var actionsTd = '<td style="text-align:center;white-space:nowrap;">';
+        if (group === 'main') {
+            actionsTd += '<button class="ad-btn-icon ad-btn-to-waitlist" data-reg-id="' + reg.id + '" title="' + L.regMoveToWaitlist + '" style="color:#FFA726;background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 6px;">⏏</button>';
+        } else if (group === 'wait') {
+            actionsTd += '<button class="ad-btn-icon ad-btn-approve" data-reg-id="' + reg.id + '" title="' + L.regMoveToMain + '" style="color:#4caf50;background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 6px;">✓</button>' +
+                '<button class="ad-btn-icon ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '" style="color:#f44336;background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 6px;">✕</button>';
         }
-        return '<tr>' +
+        actionsTd += '</td>';
+
+        var rowStyle = hasDebt ? ' style="background:rgba(244,67,54,0.04);"' : '';
+        return '<tr' + rowStyle + '>' +
             '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"></td>' +
             '<td style="text-align:center;padding:4px 6px;">' + num + '</td>' +
             '<td style="text-align:center;padding:4px 6px;font-size:0.65rem;color:var(--accent);font-weight:600;">' + rankVal + '</td>' +
-            '<td>' + A.esc(pName) + seedHtml + '</td>' +
+            '<td>' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</td>' +
             '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
             '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
             actionsTd +
@@ -3820,7 +3836,6 @@
                 // Recalculate player points
                 await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
                 await saveRatingHistory(tournament, toUpsert);
-                await updateNtrpRatings(tournament, matches);
             }
 
             // Update player form arrays (W/L from recent matches)
@@ -3957,7 +3972,6 @@
                 }
                 await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
                 await saveRatingHistory(tournament, toUpsert);
-                await updateNtrpRatings(tournament, matches);
             }
 
             // Update player form arrays (W/L from recent matches)
@@ -4143,7 +4157,6 @@
                 }
                 await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
                 await saveRatingHistory(tournament, toUpsert);
-                await updateNtrpRatings(tournament, matches);
             }
 
             // Update player form arrays

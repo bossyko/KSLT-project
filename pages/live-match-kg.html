@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-XXXXXXXXXX");</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co wss://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co; frame-src https://www.youtube.com https://maps.google.com https://www.google.com;">
+    <title>KSLT — Live матч</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0A0A0A">
+    <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/live-match.css">
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="floating-header header-hybrid">
+        <nav>
+            <div class="nav-left">
+                <a href="../index-kg.html" class="logo">
+                    <span class="logo-text">KSLT</span>
+                    <span class="logo-icon">🎾</span>
+                </a>
+                <div class="sponsor-badge">
+                    <span class="sponsor-label">колдоосу менен</span>
+                    <a href="https://nurzaman.kg" target="_blank" rel="noopener" class="sponsor-logo-link"><img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman" class="sponsor-logo-img"></a>
+                </div>
+            </div>
+
+            <ul class="nav-links">
+                <li>
+                    <a href="../index-kg.html#live" class="nav-item nav-item-live">
+                        <span class="live-dot"></span>
+                        Live
+                    </a>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="tournaments-overview-kg.html" class="nav-item nav-item-dropdown">
+                        Турниры
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1l4 4 4-4"/></svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="tournaments-kg.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments-kg.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments-kg.html?category=challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="tournaments-kg.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments-kg.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments-kg.html?category=friendly" class="nav-dropdown-item">Friendly</a>
+                        <a href="battles-overview-kg.html" class="nav-dropdown-item">Баттлдар</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="players-kg.html" class="nav-item nav-item-dropdown">
+                        Рейтинг
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1l4 4 4-4"/></svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="players-kg.html?tab=men-promasters" class="nav-dropdown-item">Эркектер Pro-Masters</a>
+                        <a href="players-kg.html?tab=men-masters" class="nav-dropdown-item">Эркектер Masters</a>
+                        <a href="players-kg.html?tab=men-challenger" class="nav-dropdown-item">Эркектер Challenger</a>
+                        <a href="players-kg.html?tab=men-futures" class="nav-dropdown-item">Эркектер Futures</a>
+                        <a href="players-kg.html?tab=men-tour" class="nav-dropdown-item">Эркектер Tour</a>
+                        <a href="players-kg.html?tab=women-promasters" class="nav-dropdown-item">Аялдар Pro-Masters</a>
+                        <a href="players-kg.html?tab=women-masters" class="nav-dropdown-item">Аялдар Masters</a>
+                        <a href="players-kg.html?tab=women-challenger" class="nav-dropdown-item">Аялдар Challenger</a>
+                        <a href="players-kg.html?tab=women-futures" class="nav-dropdown-item">Аялдар Futures</a>
+                        <a href="players-kg.html?tab=women-tour" class="nav-dropdown-item">Аялдар Tour</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="services-kg.html" class="nav-item nav-item-dropdown">
+                        Услуги
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1l4 4 4-4"/></svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="courts-kg.html" class="nav-dropdown-item">Теннис корттору</a>
+                        <a href="coaches-kg.html" class="nav-dropdown-item">Машыктыруучулар</a>
+                        <a href="partners-kg.html" class="nav-dropdown-item">Өнөктөш табуу</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="news-kg.html" class="nav-item nav-item-dropdown">
+                        Жаңылыктар
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="news-kg.html?category=announcement" class="nav-dropdown-item">Жарыялоо</a>
+                        <a href="news-kg.html?category=world" class="nav-dropdown-item">Дүйнөлүк теннис</a>
+                        <a href="news-kg.html?category=results" class="nav-dropdown-item">Жыйынтыктар</a>
+                        <a href="news-kg.html?category=interview" class="nav-dropdown-item">Интервью</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="info-kg.html" class="nav-item nav-item-dropdown">
+                        Инфо
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1l4 4 4-4"/></svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="about-kg.html" class="nav-dropdown-item">Долбоор жөнүндө</a>
+                        <a href="rules-kg.html" class="nav-dropdown-item">Эрежелер</a>
+                        <a href="faq-kg.html" class="nav-dropdown-item">FAQ</a>
+                        <a href="pricing-kg.html" class="nav-dropdown-item">Баалар</a>
+                        <a href="offer-kg.html" class="nav-dropdown-item">Ачык оферта</a>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="nav-right">
+                <a href="auth-kg.html" class="btn-auth">Кирүү</a>
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-current">KG</span>
+                        <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1l4 4 4-4"/></svg>
+                    </button>
+                    <div class="lang-menu">
+                        <a href="live-match.html" class="lang-option" data-lang="RU">
+                            <span class="lang-flag">🇷🇺</span>
+                            <span class="lang-name">Русский</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                        <a href="live-match-kg.html" class="lang-option active" data-lang="KG">
+                            <span class="lang-flag">🇰🇬</span>
+                            <span class="lang-name">Кыргызча</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                        <a href="live-match-en.html" class="lang-option" data-lang="EN">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="burger-menu" id="burgerMenu">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
+        </nav>
+
+        <div class="mobile-nav" id="mobileNav">
+            <ul class="mobile-nav-links">
+                <li class="mobile-nav-dropdown">
+                    <a href="#tournaments" class="mobile-dropdown-toggle">
+                        Турниры
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1l4 4 4-4"/></svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="tournaments-kg.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="tournaments-kg.html?category=masters">Masters</a></li>
+                        <li><a href="tournaments-kg.html?category=challenger">Challenger</a></li>
+                        <li><a href="tournaments-kg.html?category=futures">Futures</a></li>
+                        <li><a href="tournaments-kg.html?category=tour">Tour</a></li>
+                        <li><a href="tournaments-kg.html?category=friendly">Friendly</a></li>
+                        <li><a href="battles-overview-kg.html">Баттлдар</a></li>
+                    </ul>
+                </li>
+                <li><a href="../index-kg.html#live"><span class="live-dot"></span> Live</a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="players-kg.html" class="mobile-dropdown-toggle">
+                        Рейтинг
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1l4 4 4-4"/></svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="players-kg.html?tab=men-promasters">Эркектер Pro-Masters</a></li>
+                        <li><a href="players-kg.html?tab=men-masters">Эркектер Masters</a></li>
+                        <li><a href="players-kg.html?tab=men-challenger">Эркектер Challenger</a></li>
+                        <li><a href="players-kg.html?tab=men-futures">Эркектер Futures</a></li>
+                        <li><a href="players-kg.html?tab=men-tour">Эркектер Tour</a></li>
+                        <li><a href="players-kg.html?tab=women-promasters">Аялдар Pro-Masters</a></li>
+                        <li><a href="players-kg.html?tab=women-masters">Аялдар Masters</a></li>
+                        <li><a href="players-kg.html?tab=women-challenger">Аялдар Challenger</a></li>
+                        <li><a href="players-kg.html?tab=women-futures">Аялдар Futures</a></li>
+                        <li><a href="players-kg.html?tab=women-tour">Аялдар Tour</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="services-kg.html" class="mobile-dropdown-toggle">
+                        Услуги
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1l4 4 4-4"/></svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="courts-kg.html">Теннис корттору</a></li>
+                        <li><a href="coaches-kg.html">Машыктыруучулар</a></li>
+                        <li><a href="partners-kg.html">Өнөктөш табуу</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="news-kg.html" class="mobile-dropdown-toggle">
+                        Жаңылыктар
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="news-kg.html?category=announcement">Жарыялоо</a></li>
+                        <li><a href="news-kg.html?category=world">Дүйнөлүк теннис</a></li>
+                        <li><a href="news-kg.html?category=results">Жыйынтыктар</a></li>
+                        <li><a href="news-kg.html?category=interview">Интервью</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="info-kg.html" class="mobile-dropdown-toggle">
+                        Инфо
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1l4 4 4-4"/></svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="about-kg.html">Долбоор жөнүндө</a></li>
+                        <li><a href="rules-kg.html">Эрежелер</a></li>
+                        <li><a href="faq-kg.html">FAQ</a></li>
+                        <li><a href="pricing-kg.html">Баалар</a></li>
+                        <li><a href="offer-kg.html">Ачык оферта</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main>
+        <div class="lm-container" id="lmContainer">
+            <div class="lm-loading">Жүктөлүүдө...</div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-block footer-brand">
+                <div class="footer-logo">
+                    <span class="logo-text">KSLT</span>
+                    <span class="logo-icon">🎾</span>
+                </div>
+                <p class="footer-desc">Kyrgyzstan Social Lawn Tennis — Кыргызстандагы биринчи теннис коомчулугу, сүйүүчүлөрдү жана кесипкөйлөрдү бириктирет.</p>
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/kslt_tennis.kg?igsh=OHNocjZhcHZxcTk0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
+                    <a href="https://t.me/kslt_tennis" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Telegram">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-block">
+                <h4>Навигация</h4>
+                <ul class="footer-links">
+                    <li><a href="../index-kg.html#tournaments">Мелдештер</a></li>
+                    <li><a href="players-kg.html">Рейтинг</a></li>
+                    <li><a href="courts-kg.html">Корттор</a></li>
+                    <li><a href="../index-kg.html#live">Live көрсөтүүлөр</a></li>
+                </ul>
+            </div>
+            <div class="footer-block">
+                <h4>Оюнчуларга</h4>
+                <ul class="footer-links">
+                    <li><a href="rules-kg.html">Лига эрежелери</a></li>
+                    <li><a href="#">Рейтинг системасы</a></li>
+                    <li><a href="#">Кантип кирүү</a></li>
+                    <li><a href="#">Оюнчу кодекси</a></li>
+                </ul>
+            </div>
+            <div class="footer-block">
+                <h4>Өнөктөштөргө</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Демөөрчү болуу</a></li>
+                    <li><a href="#">Жарнамачыларга</a></li>
+                    <li><a href="#">Корт ижарасы</a></li>
+                    <li><a href="#">Мелдеш уюштуруу</a></li>
+                </ul>
+            </div>
+            <div class="footer-block" id="contacts">
+                <h4>Байланыштар</h4>
+                <ul class="footer-contacts">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <a href="mailto:info@kslt.kg">info@kslt.kg</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                        <a href="tel:+996555123456">+996 555 123-456</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copyright">&copy; 2026 KSLT. Бардык укуктар корголгон.</p>
+            <div class="footer-legal">
+                <a href="offer-kg.html">Ачык оферта</a>
+                <a href="#">Купуялык саясаты</a>
+            </div>
+            <p class="footer-made">❤️ менен Кыргызстанда жасалган 🇰🇬</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/auth-nav.js?v=2"></script>
+    <script src="../js/membership.js"></script>
+    <script src="../js/script.js"></script>
+    <script src="../js/live-match.js"></script>
+</body>
+</html>

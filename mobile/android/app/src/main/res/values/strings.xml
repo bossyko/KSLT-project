@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">KSLT Tennis</string>
+    <string name="title_activity_main">KSLT Tennis</string>
+    <string name="package_name">kg.kslt.app</string>
+    <string name="custom_url_scheme">kg.kslt.app</string>
+</resources>

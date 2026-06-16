@@ -798,7 +798,6 @@
         // Guest: limit visible rows
         var totalVisible = isGuest ? Math.min(pageItems.length, GUEST_CAT_VISIBLE + GUEST_CAT_BLURRED) : pageItems.length;
 
-        // Sticky table header (separate from body for sticky to work)
         var headerRow = '<div class="pl-row pl-row-header pl-cat-row">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
             '<span class="pl-col-player">' + labels.player + '</span>' +
@@ -811,11 +810,9 @@
 
         var html = '<div class="pl-cat-table-wrap">';
 
-        // Sticky header
-        html += '<div class="pl-cat-thead"><div class="pl-table">' + headerRow + '</div></div>';
-
-        // Table body
+        // Table with header as first row (no separate sticky wrapper)
         html += '<div class="pl-table pl-cat-table-body">';
+        html += headerRow;
 
         // Rows
         for (var i = 0; i < totalVisible; i++) {
@@ -924,16 +921,6 @@
             if (paginationEl) paginationEl.innerHTML = '';
         }
 
-        // Set sticky top for thead: 64px header + sticky bar height when visible
-        // Sticky bar only appears on scroll (.stuck), so we measure after a brief toggle
-        var filtersEl = document.getElementById('playersFilters');
-        var thead = container.querySelector('.pl-cat-thead');
-        if (thead && filtersEl) {
-            filtersEl.classList.add('stuck');
-            var barH = filtersEl.offsetHeight;
-            filtersEl.classList.remove('stuck');
-            thead.style.top = (64 + barH) + 'px';
-        }
 
         initScrollAnimations();
     }

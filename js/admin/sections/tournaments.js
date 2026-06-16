@@ -731,6 +731,31 @@
                         '<select class="ad-field-input" id="adTrnLevel">' + trnLevelOptionsHtml + '</select>' +
                     '</div>' +
                 '</div>' +
+                // Meta row 1b: Gender / NTRP Min / NTRP Max / Combined NTRP Max
+                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px;">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnGender + '</label>' +
+                        '<select class="ad-field-input" id="adTrnGender">' +
+                            '<option value="">—</option>' +
+                            '<option value="men"' + A.sel(item, 'gender', 'men') + '>' + L.genderMen + '</option>' +
+                            '<option value="women"' + A.sel(item, 'gender', 'women') + '>' + L.genderWomen + '</option>' +
+                            '<option value="mixed"' + A.sel(item, 'gender', 'mixed') + '>' + L.genderMixed + '</option>' +
+                        '</select>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnNtrpMin + '</label>' +
+                        '<input type="number" class="ad-field-input" id="adTrnNtrpMin" min="1.0" max="7.0" step="0.5" placeholder="1.0" value="' + (item && item.ntrp_min ? item.ntrp_min : '') + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnNtrpMax + '</label>' +
+                        '<input type="number" class="ad-field-input" id="adTrnNtrpMax" min="1.0" max="7.0" step="0.5" placeholder="7.0" value="' + (item && item.ntrp_max ? item.ntrp_max : '') + '">' +
+                    '</div>' +
+                    '<div class="ad-field" id="adTrnNtrpCombinedWrap">' +
+                        '<label class="ad-field-label">' + L.trnNtrpCombinedMax + '</label>' +
+                        '<input type="number" class="ad-field-input" id="adTrnNtrpCombinedMax" min="2.0" max="14.0" step="0.5" placeholder="14.0" value="' + (item && item.ntrp_combined_max ? item.ntrp_combined_max : '') + '">' +
+                        '<div class="ad-field-hint">' + L.trnNtrpHint + '</div>' +
+                    '</div>' +
+                '</div>' +
                 // Meta row 2: Max participants / Prize fund / Status badge
                 '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
@@ -959,6 +984,15 @@
         document.getElementById('adTrnBracketType').addEventListener('change', toggleBracketFields);
         toggleBracketFields();
 
+        // Toggle combined NTRP max based on format (doubles/mixed only)
+        function toggleNtrpCombinedField() {
+            var fmt = document.getElementById('adTrnFormat').value;
+            var wrap = document.getElementById('adTrnNtrpCombinedWrap');
+            if (wrap) wrap.style.display = (fmt === 'doubles' || fmt === 'mixed_doubles') ? '' : 'none';
+        }
+        document.getElementById('adTrnFormat').addEventListener('change', toggleNtrpCombinedField);
+        toggleNtrpCombinedField();
+
         // Image upload zone
         var imgZone = document.getElementById('adTrnImgZone');
         var imgInput = document.getElementById('adTrnImgInput');
@@ -1167,7 +1201,11 @@
             start_time: document.getElementById('adTrnStartTime').value || null,
             buffer_minutes: parseInt(document.getElementById('adTrnBuffer').value, 10) || 15,
             registration_start: document.getElementById('adTrnRegStart').value || null,
-            registration_end: document.getElementById('adTrnRegEnd').value || null
+            registration_end: document.getElementById('adTrnRegEnd').value || null,
+            gender: document.getElementById('adTrnGender').value || null,
+            ntrp_min: (function() { var v = document.getElementById('adTrnNtrpMin').value; return v ? parseFloat(v) : null; })(),
+            ntrp_max: (function() { var v = document.getElementById('adTrnNtrpMax').value; return v ? parseFloat(v) : null; })(),
+            ntrp_combined_max: (function() { var v = document.getElementById('adTrnNtrpCombinedMax').value; return v ? parseFloat(v) : null; })()
         };
     }
 

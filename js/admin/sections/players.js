@@ -434,6 +434,15 @@
                 '</div>' +
             '</div>' +
 
+            // NTRP Rating (manual edit by admin)
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.plrNtrp + '</div>' +
+                '<div class="ad-field" style="max-width:200px;">' +
+                    '<input type="number" class="ad-field-input" id="adPlrNtrp" min="1.0" max="7.0" step="0.5" value="' + (item && item.ntrp_rating ? item.ntrp_rating : '') + '" placeholder="3.0">' +
+                    '<div class="ad-field-hint">' + L.plrNtrpHint + '</div>' +
+                '</div>' +
+            '</div>' +
+
             // Last Matches (loaded from Supabase, edit only)
             (plrEditingId ? (
             '<div class="ad-form-card">' +
@@ -886,7 +895,8 @@
                 bio: document.getElementById('adPlrMotto').value.trim() || null,
                 phone: document.getElementById('adPlrPhone').value.trim() || null,
                 email: document.getElementById('adPlrEmail').value.trim() || null,
-                show_phone: document.getElementById('adPlrShowPhone').checked
+                show_phone: document.getElementById('adPlrShowPhone').checked,
+                ntrp_rating: parseFloat(document.getElementById('adPlrNtrp').value) || null
             };
 
             if (!fnRu) {

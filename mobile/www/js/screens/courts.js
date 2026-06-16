@@ -172,9 +172,9 @@
 
     var html = '<div class="td-topbar">' +
       '<button class="td-back" id="courtDetailBack">' +
-        '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Назад' +
+        '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>' + I18N.t('common.back') +
       '</button>' +
-      '<span class="td-topbar-title">Корт</span>' +
+      '<span class="td-topbar-title">' + I18N.t('court.detail') + '</span>' +
       '<span style="width:60px"></span>' +
     '</div>';
 
@@ -186,7 +186,7 @@
         html += '<div class="nd-hero-img" style="display:inline-block;width:100%;scroll-snap-align:start;background-image:url(' + img + ')"></div>';
       });
       html += '</div>';
-      html += '<div style="text-align:center;padding:4px 0;font-size:11px;color:var(--text-muted)">← свайпните для просмотра (' + galleryImages.length + ' фото) →</div>';
+      html += '<div style="text-align:center;padding:4px 0;font-size:11px;color:var(--text-muted)">← ' + I18N.t('court.swipe') + ' (' + galleryImages.length + ') →</div>';
     } else if (c.photo) {
       html += '<div class="nd-hero-img" style="background-image:url(' + c.photo + ')"></div>';
     }
@@ -204,7 +204,7 @@
 
     // Address
     if (c.address) {
-      html += '<div class="pd-section"><h3 class="pd-section-title">📍 Адрес</h3>';
+      html += '<div class="pd-section"><h3 class="pd-section-title">📍 ' + I18N.t('court.address') + '</h3>';
       html += '<div style="font-size:13px;color:var(--text-sec)">' + esc(c.address) + '</div>';
       if (c.google_maps_url || c.twogis_url) {
         html += '<div style="display:flex;gap:8px;margin-top:8px">';
@@ -217,7 +217,7 @@
 
     // Prices table
     if (c.courtTypes.length > 0) {
-      html += '<div class="pd-section"><h3 class="pd-section-title">💰 Цены</h3>';
+      html += '<div class="pd-section"><h3 class="pd-section-title">💰 ' + I18N.t('court.prices') + '</h3>';
       html += '<div class="pd-matches-list">';
       c.courtTypes.forEach(function(t) {
         var typeName = t.type === 'indoor' ? 'Indoor' : 'Outdoor';
@@ -232,13 +232,13 @@
 
     // Description
     if (c.description) {
-      html += '<div class="pd-section"><h3 class="pd-section-title">📝 Описание</h3>';
+      html += '<div class="pd-section"><h3 class="pd-section-title">📝 ' + I18N.t('court.description') + '</h3>';
       html += '<div style="font-size:13px;color:var(--text-sec);line-height:1.5">' + esc(c.description) + '</div></div>';
     }
 
     // Amenities
     if (c.amenities.length > 0) {
-      html += '<div class="pd-section"><h3 class="pd-section-title">🏗 Удобства</h3>';
+      html += '<div class="pd-section"><h3 class="pd-section-title">🏗 ' + I18N.t('court.amenities') + '</h3>';
       html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
       c.amenities.forEach(function(a) {
         var label = AMENITY_MAP[a] || a;
@@ -249,11 +249,11 @@
 
     // Contact (member only)
     if (isMember && c.phone) {
-      html += '<div class="pd-section"><h3 class="pd-section-title">📞 Контакт</h3>';
+      html += '<div class="pd-section"><h3 class="pd-section-title">📞 ' + I18N.t('court.contact') + '</h3>';
       html += '<a href="tel:' + esc(c.phone) + '" class="pd-challenge-btn" style="display:block;text-align:center;text-decoration:none">' + esc(c.phone) + '</a>';
       html += '</div>';
     } else if (!isMember && c.phone) {
-      html += '<div class="pd-cta-membership"><p>Контакты корта доступны для членов KSLT</p></div>';
+      html += '<div class="pd-cta-membership"><p>' + I18N.t('court.contactLocked') + '</p></div>';
     }
 
     html += '</div>';

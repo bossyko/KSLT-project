@@ -222,8 +222,6 @@
                 .like('category_id', '%-' + category)
                 .order('date_start', { ascending: true });
 
-            console.log('Supabase tournaments query:', category, result);
-
             // Filter out drafts (published_at null = draft)
             var allData = result.data || [];
             var publishedData = allData.filter(function(t) { return t.published_at !== null; });

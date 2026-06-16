@@ -1855,29 +1855,52 @@ function renderRegistrationButton(tournament, registrations, isEn) {
             // Check if already registered
             var alreadyRegistered = registrations.find(function(r) { return r.player_id === playerId; });
 
-            // Check category match + ban status
-            client.from('players').select('category_id, banned_until, ban_reason').eq('id', playerId).single().then(async function(plRes) {
+            // Check category match + ban status + NTRP
+            client.from('players').select('category_id, banned_until, ban_reason, ntrp_rating').eq('id', playerId).single().then(async function(plRes) {
                 if (!plRes.data) return;
+
+                // Get player gender from profile
+                var profGenderRes = await client.from('profiles').select('gender').eq('player_id', playerId).maybeSingle();
+                var playerGenderProfile = profGenderRes.data ? profGenderRes.data.gender : null;
 
                 function getCatGender(cid) { return cid ? cid.split('-')[0] : null; }
 
                 var genderBlocked = false;
+                var ntrpBlocked = false;
                 var isExactCategory = true;
                 var tCatId = tournament.category_id;
                 var pCatId = plRes.data.category_id;
                 var catRes = null;
 
-                if (tCatId) {
-                    // 1. Gender check: load category gender from categories table
+                // Gender check: use tournament.gender field first, fallback to category gender
+                var trnGender = tournament.gender;
+                if (trnGender && trnGender !== 'mixed') {
+                    var pGender = playerGenderProfile || getCatGender(pCatId);
+                    if (pGender === 'male') pGender = 'men';
+                    if (pGender === 'female') pGender = 'women';
+                    if (pGender && pGender !== trnGender) {
+                        genderBlocked = true;
+                    }
+                } else if (tCatId) {
                     catRes = await client.from('categories').select('gender').eq('id', tCatId).single();
                     var catGender = (catRes.data && catRes.data.gender) || null;
                     var playerGender = getCatGender(pCatId);
-
                     if (catGender && playerGender && catGender !== playerGender) {
                         genderBlocked = true;
                     }
+                }
 
-                    // 2. Category match → pending (main draw) or waitlist
+                // NTRP check (singles)
+                var playerNtrp = plRes.data.ntrp_rating;
+                if (playerNtrp && tournament.ntrp_min && playerNtrp < tournament.ntrp_min) {
+                    ntrpBlocked = true;
+                }
+                if (playerNtrp && tournament.ntrp_max && playerNtrp > tournament.ntrp_max) {
+                    ntrpBlocked = true;
+                }
+
+                if (tCatId) {
+                    // Category match → pending (main draw) or waitlist
                     isExactCategory = (pCatId === tCatId);
                 }
 
@@ -1926,10 +1949,24 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         banReasonText +
                     '</div>';
                 } else if (genderBlocked) {
-                    var genderMsg = (catRes.data && catRes.data.gender) === 'men'
+                    var tGender = tournament.gender || (catRes && catRes.data && catRes.data.gender);
+                    var genderMsg = tGender === 'men'
                         ? (isEn ? 'This tournament is for men only' : (isKg ? 'Бул мелдеш эркектер үчүн гана' : 'Этот турнир только для мужчин'))
                         : (isEn ? 'This tournament is for women only' : (isKg ? 'Бул мелдеш аялдар үчүн гана' : 'Этот турнир только для женщин'));
                     btnHtml += '<span style="color:var(--text-secondary);font-size:0.9rem;">' + genderMsg + '</span>';
+                } else if (ntrpBlocked) {
+                    var ntrpMsg = isEn ? 'Your NTRP (' + (playerNtrp || '?') + ') does not meet tournament requirements'
+                        : (isKg ? 'Сиздин NTRP (' + (playerNtrp || '?') + ') мелдеш талаптарына туура келбейт'
+                        : 'Ваш NTRP (' + (playerNtrp || '?') + ') не соответствует требованиям турнира');
+                    var rangeStr = '';
+                    if (tournament.ntrp_min && tournament.ntrp_max) rangeStr = tournament.ntrp_min + ' – ' + tournament.ntrp_max;
+                    else if (tournament.ntrp_min) rangeStr = '≥ ' + tournament.ntrp_min;
+                    else if (tournament.ntrp_max) rangeStr = '≤ ' + tournament.ntrp_max;
+                    btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);">' +
+                        '<div style="color:#ff3b30;font-weight:500;">' + ntrpMsg + '</div>' +
+                        (rangeStr ? '<div style="color:var(--text-dim);font-size:0.85rem;margin-top:4px;">' +
+                            (isEn ? 'Required NTRP: ' : (isKg ? 'Талап кылынган NTRP: ' : 'Требуемый NTRP: ')) + rangeStr + '</div>' : '') +
+                    '</div>';
                 } else if (!membershipOk) {
                     btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);">' +
                         '<div style="color:#ffc107;font-weight:500;margin-bottom:4px;">' +

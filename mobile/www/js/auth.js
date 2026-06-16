@@ -28,8 +28,9 @@
     });
   };
 
-  // Load profile from DB
-  AUTH.loadProfile = function(uid) {
+  // Load profile from DB (with retry for new registrations)
+  AUTH.loadProfile = function(uid, retries) {
+    retries = retries || 0;
     return supabaseClient.from('profiles')
       .select('*, players(*)')
       .eq('id', uid)
@@ -41,8 +42,34 @@
           supabaseClient.from('profiles')
             .update({ last_seen: new Date().toISOString() })
             .eq('id', uid).then(function(){});
+          return r.data;
         }
-        return r.data;
+        // Profile not yet created by trigger — retry up to 3 times
+        if (retries < 3) {
+          return new Promise(function(resolve) {
+            setTimeout(function() {
+              resolve(AUTH.loadProfile(uid, retries + 1));
+            }, 1000);
+          });
+        }
+        // Fallback: create profile manually
+        var meta = AUTH.currentUser.user_metadata || {};
+        return supabaseClient.from('profiles')
+          .insert({
+            id: uid,
+            full_name: meta.full_name || meta.name || '',
+            email: AUTH.currentUser.email || '',
+            phone: meta.phone || '',
+            role: 'user'
+          })
+          .select('*, players(*)')
+          .single()
+          .then(function(ins) {
+            if (ins.data) {
+              AUTH.currentProfile = ins.data;
+            }
+            return ins.data;
+          });
       });
   };
 
@@ -103,25 +130,79 @@
       });
   };
 
+  // Reset password
+  AUTH.resetPassword = function(email) {
+    var siteUrl = 'https://kslt.kg';
+    return supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: siteUrl + '/pages/reset-password.html'
+    });
+  };
+
   // Setup auth UI handlers
   AUTH.setupAuthUI = function() {
     var authScreen = document.getElementById('authScreen');
     var loginForm = document.getElementById('authLogin');
     var regForm = document.getElementById('authRegister');
+    var forgotForm = document.getElementById('authForgot');
     var tabLogin = document.getElementById('authTabLogin');
     var tabRegister = document.getElementById('authTabRegister');
     var skipBtn = document.getElementById('authSkip');
     var googleBtn = document.getElementById('authGoogle');
+    var forgotLink = document.getElementById('authForgotLink');
+    var backToLogin = document.getElementById('authBackToLogin');
 
     function switchTab(tab) {
       tabLogin.classList.toggle('active', tab === 'login');
       tabRegister.classList.toggle('active', tab === 'register');
       loginForm.classList.toggle('active', tab === 'login');
       regForm.classList.toggle('active', tab === 'register');
+      if (forgotForm) forgotForm.classList.toggle('active', tab === 'forgot');
     }
 
     tabLogin.addEventListener('click', function() { switchTab('login'); });
     tabRegister.addEventListener('click', function() { switchTab('register'); });
+
+    // Forgot password link
+    if (forgotLink) {
+      forgotLink.addEventListener('click', function() { switchTab('forgot'); });
+    }
+    if (backToLogin) {
+      backToLogin.addEventListener('click', function() { switchTab('login'); });
+    }
+
+    // Forgot password form
+    if (forgotForm) {
+      forgotForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var email = document.getElementById('forgotEmail').value.trim();
+        var errEl = document.getElementById('forgotError');
+        var successEl = document.getElementById('forgotSuccess');
+        var btn = document.getElementById('forgotSubmitBtn');
+        var I18N = window.KSLT_I18N;
+
+        errEl.className = 'auth-error';
+        errEl.textContent = '';
+        successEl.style.display = 'none';
+
+        if (!email) return;
+
+        btn.disabled = true;
+        btn.textContent = I18N ? I18N.t('common.loading') : 'Loading...';
+
+        AUTH.resetPassword(email).then(function(res) {
+          btn.disabled = false;
+          btn.textContent = I18N ? I18N.t('auth.sendReset') : 'Send link';
+
+          if (res.error) {
+            errEl.textContent = res.error.message;
+            errEl.className = 'auth-error show';
+            return;
+          }
+          successEl.textContent = I18N ? I18N.t('auth.checkEmail') : 'Check your email';
+          successEl.style.display = 'block';
+        });
+      });
+    }
 
     skipBtn.addEventListener('click', function() {
       authScreen.classList.remove('open');
@@ -176,18 +257,37 @@
 
       AUTH.register(email, pass, name, phone).then(function(res) {
         if (res.error) {
-          errEl.textContent = res.error.message;
+          errEl.textContent = res.error.message === 'User already registered'
+            ? 'Этот email уже зарегистрирован. Войдите.' : res.error.message;
+          errEl.className = 'auth-error show';
+          return;
+        }
+        // Supabase returns fake success for duplicate email (when confirm email is on)
+        if (res.data.user && res.data.user.identities && res.data.user.identities.length === 0) {
+          errEl.textContent = 'Этот email уже зарегистрирован. Войдите.';
           errEl.className = 'auth-error show';
           return;
         }
         if (res.data.user) {
-          AUTH.currentUser = res.data.user;
-          AUTH.loadProfile(res.data.user.id).then(function() {
-            authScreen.classList.remove('open');
-            if (window.KSLT_APP && window.KSLT_APP.onAuthChange) {
-              window.KSLT_APP.onAuthChange();
-            }
-          });
+          // Check if email confirmation is required
+          if (res.data.session) {
+            // Session exists — email confirmed or confirmation disabled
+            AUTH.currentUser = res.data.user;
+            AUTH.loadProfile(res.data.user.id).then(function() {
+              authScreen.classList.remove('open');
+              if (window.KSLT_APP && window.KSLT_APP.onAuthChange) {
+                window.KSLT_APP.onAuthChange();
+              }
+            });
+          } else {
+            // No session — email confirmation required
+            var I18N = window.KSLT_I18N;
+            errEl.textContent = I18N ? I18N.t('auth.verifyEmail') : 'Проверьте почту для подтверждения email';
+            errEl.className = 'auth-error show';
+            errEl.style.background = 'rgba(52,199,89,0.1)';
+            errEl.style.borderColor = 'rgba(52,199,89,0.3)';
+            errEl.style.color = '#34c759';
+          }
         }
       });
     });

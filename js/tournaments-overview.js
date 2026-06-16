@@ -290,7 +290,6 @@
                     .select('*')
                     .order('date_start', { ascending: true });
 
-                console.log('[overview] Supabase returned', result.data ? result.data.length : 0, 'tournaments');
                 if (result.data && result.data.length > 0) {
                     // Filter out drafts (published_at is null = draft)
                     var publishedRows = result.data.filter(function(t) {

@@ -386,20 +386,15 @@
       if (t.prize_fund && t.prize_fund !== '0') info += tdInfoRow('💰', 'Призовой фонд', t.prize_fund + ' сом');
       info += '</div>';
       if (t.description) info += '<p class="td-description">' + esc(t.description) + '</p>';
-      if (t.status === 'upcoming') {
-        var AUTH = window.KSLT_AUTH;
-        var isGuest = !(AUTH && AUTH.currentUser);
-        var isMember = AUTH && AUTH._membershipStatus;
-
-        if (isGuest) {
-          info += '<div class="td-access-cta"><p>Войдите, чтобы записаться на турнир</p><button class="btn-accent td-register-btn" data-action="login">Войти</button></div>';
-        } else if (!isMember) {
-          info += '<div class="td-access-cta"><p>Для участия в турнирах необходимо членство KSLT</p><button class="btn-accent td-register-btn" data-action="membership">Оформить членство</button></div>';
-        } else {
-          info += '<button class="btn-accent td-register-btn" data-tid="' + t.id + '">Записаться на турнир</button>';
-        }
+      if (t.status === 'upcoming' || t.status === 'registration_open') {
+        info += '<div id="tdRegArea" style="margin-top:16px"><div class="loading-center"><div class="spinner" style="width:24px;height:24px"></div></div></div>';
       }
       document.getElementById('tdInfo').innerHTML = info;
+
+      // Async registration check
+      if (t.status === 'upcoming' || t.status === 'registration_open') {
+        checkAndRenderRegistration(t);
+      }
 
       overlay.querySelectorAll('.td-tab').forEach(function(tab, i) { tab.classList.toggle('active', i === 0); });
       overlay.querySelectorAll('.td-tab-content').forEach(function(tc, i) { tc.classList.toggle('active', i === 0); });
@@ -409,6 +404,114 @@
 
   function tdInfoRow(icon, l, v) {
     return '<div class="td-info-row"><span class="td-info-icon">' + icon + '</span><div class="td-info-text"><div class="td-info-label">' + esc(l) + '</div><div class="td-info-value">' + esc(v) + '</div></div></div>';
+  }
+
+  // ============================
+  // TOURNAMENT REGISTRATION
+  // ============================
+
+  function checkAndRenderRegistration(t) {
+    var area = document.getElementById('tdRegArea');
+    if (!area) return;
+
+    var AUTH = window.KSLT_AUTH;
+
+    // 1. Not logged in
+    if (!AUTH || !AUTH.currentUser) {
+      area.innerHTML = '<div class="td-access-cta"><p>' + I18N.t('trn.needAuth') + '</p>' +
+        '<button class="btn-accent td-register-btn" id="tdRegLogin">' + I18N.t('common.login') + '</button></div>';
+      var loginBtn = document.getElementById('tdRegLogin');
+      if (loginBtn) loginBtn.addEventListener('click', function() { AUTH.showAuth(); });
+      return;
+    }
+
+    var profile = AUTH.currentProfile;
+
+    // 2. No player_id linked
+    if (!profile || !profile.player_id) {
+      area.innerHTML = '<div class="td-access-cta"><p>' + I18N.t('trn.needPlayer') + '</p></div>';
+      return;
+    }
+
+    var playerId = profile.player_id;
+
+    // Async checks: already registered, player data, membership
+    Promise.all([
+      supabaseClient.from('tournament_registrations')
+        .select('id, status')
+        .eq('tournament_id', t.id)
+        .eq('player_id', playerId)
+        .limit(1),
+      supabaseClient.from('players')
+        .select('category_id, banned_until, ban_reason')
+        .eq('id', playerId)
+        .single(),
+      AUTH.checkMembership()
+    ]).then(function(results) {
+      var existingReg = results[0].data && results[0].data[0];
+      var player = results[1].data;
+      var membership = results[2];
+
+      // 3. Already registered
+      if (existingReg) {
+        var statusLabels = {
+          pending: I18N.t('trn.registered'),
+          approved: I18N.t('trn.registered'),
+          waitlist: I18N.t('trn.waitlist'),
+          rejected: I18N.t('common.error'),
+          withdrawn: I18N.t('common.error')
+        };
+        area.innerHTML = '<div class="td-reg-done">' + (statusLabels[existingReg.status] || I18N.t('trn.registered')) + '</div>';
+        return;
+      }
+
+      // 4. Banned
+      if (player && player.banned_until && new Date(player.banned_until) > new Date()) {
+        area.innerHTML = '<div class="td-access-cta" style="background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.2)"><p style="color:#ff3b30">' + I18N.t('trn.banned') + '</p></div>';
+        return;
+      }
+
+      // 5. No active membership
+      if (!membership) {
+        area.innerHTML = '<div class="td-access-cta"><p>' + I18N.t('trn.needMembership') + '</p></div>';
+        return;
+      }
+
+      // Determine status: exact category match → pending, else waitlist
+      var regStatus = 'pending';
+      if (t.category_id && player && player.category_id && t.category_id !== player.category_id) {
+        regStatus = 'waitlist';
+      }
+
+      // Show register button
+      area.innerHTML = '<button class="btn-accent td-register-btn" id="tdRegisterBtn">' + I18N.t('trn.register') + '</button>';
+
+      document.getElementById('tdRegisterBtn').addEventListener('click', function() {
+        var btn = this;
+        btn.disabled = true;
+        btn.textContent = I18N.t('common.loading');
+
+        supabaseClient.from('tournament_registrations').insert({
+          tournament_id: t.id,
+          player_id: playerId,
+          status: regStatus
+        }).then(function(r) {
+          if (r.error) {
+            if (r.error.message && r.error.message.indexOf('unique') !== -1) {
+              area.innerHTML = '<div class="td-reg-done">' + I18N.t('trn.alreadyReg') + '</div>';
+            } else {
+              if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('common.error'));
+              btn.disabled = false;
+              btn.textContent = I18N.t('trn.register');
+            }
+            return;
+          }
+          var msg = regStatus === 'waitlist' ? I18N.t('trn.waitlist') : I18N.t('trn.registered');
+          area.innerHTML = '<div class="td-reg-done">' + msg + '</div>';
+          if (window.KSLT_APP) window.KSLT_APP.toast(msg);
+        });
+      });
+    });
   }
 
   // ============================

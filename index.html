@@ -2,11 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-XXXXXXXXXX");</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co;">
     <title>KSLT</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="manifest" href="/manifest.json">
@@ -120,6 +123,7 @@
                         <a href="pages/faq.html" class="nav-dropdown-item">FAQ</a>
                         <a href="pages/pricing.html" class="nav-dropdown-item">Цены</a>
                         <a href="pages/offer.html" class="nav-dropdown-item">Публичная оферта</a>
+                        <a href="https://github.com/bossyko/KSLT-project/releases/download/v1.0.0-beta/app-debug.apk" class="nav-dropdown-item download-app-link">📲 Скачать приложение</a>
                     </div>
                 </li>
             </ul>
@@ -250,6 +254,7 @@
                         <li><a href="pages/faq.html">FAQ</a></li>
                         <li><a href="pages/pricing.html">Цены</a></li>
                         <li><a href="pages/offer.html">Публичная оферта</a></li>
+                        <li><a href="https://github.com/bossyko/KSLT-project/releases/download/v1.0.0-beta/app-debug.apk" class="download-app-link">📲 Скачать приложение (Android)</a></li>
                     </ul>
                 </li>
             </ul>
