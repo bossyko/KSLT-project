@@ -1,0 +1,5003 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>KSLT Mobile App — Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0A0A0A;
+  --bg-card: #141414;
+  --bg-card-hover: #1A1A1A;
+  --bg-elevated: #1E1E1E;
+  --accent: #CCFF00;
+  --accent-hover: #E0FF4D;
+  --accent-dim: rgba(204,255,0,0.15);
+  --accent-glow: rgba(204,255,0,0.3);
+  --text: #FFFFFF;
+  --text-sec: rgba(255,255,255,0.72);
+  --text-muted: rgba(255,255,255,0.5);
+  --text-dim: rgba(255,255,255,0.35);
+  --border: rgba(255,255,255,0.08);
+  --border-light: rgba(255,255,255,0.12);
+  --glass: rgba(255,255,255,0.04);
+  --red: #FF4757;
+  --green: #2ED573;
+  --blue: #3B82F6;
+  --orange: #FF9F43;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 100px;
+  --shadow: 0 4px 16px rgba(0,0,0,0.3);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tab-height: 64px;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  position: relative;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+img { display: block; max-width: 100%; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Touch */
+a, button, [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== APP SHELL ===== */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== STATUS BAR (fake) ===== */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px;
+  padding-top: calc(8px + var(--safe-top));
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg);
+  z-index: 100;
+  flex-shrink: 0;
+}
+.status-bar-time { font-weight: 700; }
+.status-bar-icons { display: flex; gap: 5px; align-items: center; }
+.status-bar-icons svg { width: 16px; height: 16px; fill: var(--text); }
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 12px;
+  background: var(--bg);
+  z-index: 90;
+  flex-shrink: 0;
+}
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-logo-text {
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #F0FF7A 0%, #CCFF00 40%, #9ED900 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 12px rgba(204,255,0,0.5));
+}
+.header-logo-icon {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 10px rgba(204,255,0,0.4));
+}
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.header-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.header-btn:active { background: var(--border-light); }
+.header-btn svg { width: 18px; height: 18px; stroke: var(--text-sec); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ===== SCREEN CONTAINER ===== */
+.screens {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--tab-height) + var(--safe-bottom) + 16px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+.screen.active { opacity: 1; visibility: visible; }
+
+/* ===== TAB BAR ===== */
+.tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--tab-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0;
+  min-width: 56px;
+  transition: all 0.2s;
+}
+.tab-item svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all 0.2s;
+}
+.tab-item span {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+.tab-item.active svg { stroke: var(--accent); }
+.tab-item.active span { color: var(--accent); font-weight: 600; }
+.tab-item:active { transform: scale(0.9); }
+
+/* ===== SECTION TITLE ===== */
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 8px;
+}
+.section-title h2 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.section-title .see-all {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+/* ===== LIVE MATCH CARD ===== */
+.live-card {
+  margin: 8px 16px;
+  padding: 16px;
+  position: relative;
+  overflow: visible;
+}
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.live-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  animation: pulse-live 1.5s infinite;
+}
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.live-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.live-court {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.live-players {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.live-player {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.live-player:last-child { align-items: center; }
+.live-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-sec);
+}
+.live-player-name {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+.live-score-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 80px;
+}
+.live-sets {
+  display: flex;
+  gap: 6px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.live-set {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.live-set-score {
+  line-height: 1;
+}
+.live-set-score.serving { color: var(--accent); }
+.live-set-divider {
+  width: 20px;
+  height: 1px;
+  background: var(--border-light);
+  margin: 2px 0;
+}
+.live-game {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.live-vs {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+/* ===== UPCOMING TOURNAMENT ===== */
+.tournament-card {
+  margin: 8px 16px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.tournament-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 48px;
+  padding: 8px;
+  background: var(--accent-dim);
+  border-radius: var(--radius-md);
+}
+.tournament-date-day {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+.tournament-date-month {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.tournament-info { flex: 1; }
+.tournament-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.tournament-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.tournament-meta svg { width: 12px; height: 12px; stroke: var(--text-muted); fill: none; stroke-width: 2; }
+.tournament-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* ===== TOP RATING ===== */
+.rating-mini {
+  margin: 8px 16px;
+  padding: 0;
+}
+.rating-mini-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.rating-mini-cat {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  color: var(--text-sec);
+}
+.rating-mini-cat.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+.rating-mini-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.rating-mini-row:last-child { border-bottom: none; }
+.rating-mini-row:active { background: var(--glass); }
+.rating-rank {
+  width: 24px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+}
+.rating-rank.top { color: var(--accent); }
+.rating-mini-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-sec);
+  flex-shrink: 0;
+}
+.rating-mini-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+}
+.rating-mini-pts {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.rating-mini-change {
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 24px;
+  text-align: right;
+}
+.rating-mini-change.up { color: var(--green); }
+.rating-mini-change.down { color: var(--red); }
+.rating-mini-change.same { color: var(--text-dim); }
+
+/* ===== NEWS CARDS (horizontal scroll) ===== */
+.news-scroll {
+  display: flex;
+  gap: 12px;
+  padding: 8px 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.news-scroll::-webkit-scrollbar { display: none; }
+.news-card {
+  min-width: 260px;
+  max-width: 280px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+.news-card-img {
+  height: 140px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.news-card-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.6));
+}
+.news-card-img-icon {
+  font-size: 40px;
+  opacity: 0.3;
+}
+.news-card-body { padding: 12px; }
+.news-card-tag {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.news-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.news-card-date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== SCREEN: TOURNAMENTS ===== */
+.screen-header {
+  padding: 4px 16px 12px;
+}
+.screen-header h1 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.screen-header p {
+  font-size: 13px;
+  color: var(--text-sec);
+  margin-top: 2px;
+}
+
+/* Filters row */
+.filters-row {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+}
+.filters-row::-webkit-scrollbar { display: none; }
+.filter-chip {
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  color: var(--text-sec);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.filter-chip.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.filter-chip:active { transform: scale(0.95); }
+
+/* Tournament list */
+.tournament-list { padding: 0 16px; }
+.tournament-list-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 12px;
+  transition: background 0.15s;
+}
+.tournament-list-item:active { background: var(--bg-card-hover); }
+.tl-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 44px;
+}
+.tl-date-day { font-size: 20px; font-weight: 800; color: var(--accent); line-height: 1; }
+.tl-date-month { font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; }
+.tl-info { flex: 1; }
+.tl-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.tl-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.tl-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.tl-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+.tl-badge.cat { background: var(--accent-dim); color: var(--accent); }
+.tl-badge.status-open { background: rgba(46,213,115,0.15); color: var(--green); }
+.tl-badge.status-soon { background: rgba(255,159,67,0.15); color: var(--orange); }
+.tl-badge.status-live { background: rgba(255,71,87,0.15); color: var(--red); }
+.tl-badge.status-done { background: var(--glass); color: var(--text-muted); }
+
+/* ===== SCREEN: RATING ===== */
+.rating-categories {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+}
+.rating-categories::-webkit-scrollbar { display: none; }
+
+.rating-table {
+  margin: 0 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.rating-table-head {
+  display: flex;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.rt-col-rank { width: 32px; }
+.rt-col-name { flex: 1; }
+.rt-col-pts { width: 50px; text-align: right; }
+.rt-col-wl { width: 48px; text-align: right; }
+.rt-col-form { width: 50px; text-align: right; }
+
+.rating-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.rating-row:last-child { border-bottom: none; }
+.rating-row:active { background: var(--glass); }
+.rr-rank {
+  width: 32px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.rr-rank.top { color: var(--accent); }
+.rr-player {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rr-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-sec);
+  flex-shrink: 0;
+}
+.rr-name { font-size: 13px; font-weight: 500; }
+.rr-pts {
+  width: 50px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.rr-wl {
+  width: 48px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--text-sec);
+}
+.rr-form {
+  width: 50px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+}
+.rr-form-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.rr-form-dot.w { background: var(--green); }
+.rr-form-dot.l { background: var(--red); }
+
+/* ===== SCREEN: PROFILE ===== */
+.profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 16px 24px;
+}
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 3px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.profile-name {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.profile-role {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.profile-membership {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background: var(--accent-dim);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.profile-membership svg { width: 14px; height: 14px; fill: var(--accent); stroke: none; }
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 10px;
+  text-align: center;
+}
+.stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Profile sections */
+.profile-section {
+  margin: 0 16px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.profile-section-title {
+  padding: 12px 14px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.profile-row {
+  display: flex;
+  align-items: center;
+  padding: 11px 14px;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.profile-row:last-child { border-bottom: none; }
+.profile-row:active { background: var(--glass); }
+.profile-row-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.profile-row-icon svg { width: 18px; height: 18px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.profile-row-icon.green { background: rgba(46,213,115,0.15); }
+.profile-row-icon.green svg { stroke: var(--green); }
+.profile-row-icon.blue { background: rgba(59,130,246,0.15); }
+.profile-row-icon.blue svg { stroke: var(--blue); }
+.profile-row-icon.orange { background: rgba(255,159,67,0.15); }
+.profile-row-icon.orange svg { stroke: var(--orange); }
+.profile-row-icon.yellow { background: var(--accent-dim); }
+.profile-row-icon.yellow svg { stroke: var(--accent); }
+.profile-row-icon.red { background: rgba(255,71,87,0.15); }
+.profile-row-icon.red svg { stroke: var(--red); }
+.profile-row-text { flex: 1; }
+.profile-row-label { font-size: 14px; font-weight: 500; }
+.profile-row-sub { font-size: 11px; color: var(--text-muted); }
+.profile-row-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.profile-row-arrow {
+  color: var(--text-dim);
+  font-size: 16px;
+}
+
+/* ===== SIDE MENU (Overlay) ===== */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+.menu-overlay.open { opacity: 1; visibility: visible; }
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  max-width: 80vw;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  z-index: 201;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(16px + var(--safe-top));
+  padding-bottom: var(--safe-bottom);
+  overflow-y: auto;
+}
+.menu-overlay.open .side-menu { transform: translateX(0); }
+
+.menu-close {
+  align-self: flex-end;
+  margin: 0 16px 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.menu-close svg { width: 16px; height: 16px; stroke: var(--text-sec); fill: none; stroke-width: 2; }
+
+.menu-section { padding: 0 16px; margin-bottom: 20px; }
+.menu-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  transition: opacity 0.15s;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item:active { opacity: 0.6; }
+.menu-item svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--text-sec);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.menu-item span {
+  font-size: 14px;
+  font-weight: 500;
+}
+.menu-item .menu-badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+}
+
+.menu-footer {
+  margin-top: auto;
+  padding: 20px 16px;
+  border-top: 1px solid var(--border);
+}
+.menu-footer-logo {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.menu-footer-logo span { color: var(--accent); }
+.menu-footer-ver {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ===== SCREEN: NEWS ===== */
+.news-list { padding: 0 16px; }
+.news-list-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: background 0.15s;
+}
+.news-list-item:active { background: var(--bg-card-hover); }
+.news-list-img {
+  height: 160px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.news-list-img-icon { font-size: 48px; opacity: 0.25; }
+.news-list-body { padding: 14px; }
+.news-list-tag {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.news-list-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.news-list-excerpt {
+  font-size: 12px;
+  color: var(--text-sec);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.news-list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== SCREEN: BATTLES ===== */
+.battle-card {
+  margin: 0 16px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.battle-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--red), var(--accent));
+}
+.battle-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.battle-vs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.battle-fighter {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.battle-fighter-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-sec);
+}
+.battle-fighter-name {
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+.battle-vs-text {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+.battle-vote-bar {
+  margin-top: 14px;
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+.battle-vote-fill-l {
+  background: var(--accent);
+  transition: width 0.5s ease;
+}
+.battle-vote-fill-r {
+  background: var(--red);
+  transition: width 0.5s ease;
+}
+.battle-vote-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.battle-vote-labels strong { color: var(--text); font-weight: 600; }
+.battle-btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.battle-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.2s;
+}
+.battle-btn:active { transform: scale(0.97); }
+.battle-btn.primary {
+  background: var(--accent);
+  color: #000;
+}
+.battle-btn.secondary {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  color: var(--text-sec);
+}
+
+/* ===== EMPTY / SKELETON ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 16px;
+  text-align: center;
+}
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.3;
+}
+.empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.empty-text {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ===== BUTTON STYLES ===== */
+.btn-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #000;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  transition: all 0.2s;
+}
+.btn-accent:active { transform: scale(0.97); background: var(--accent-hover); }
+
+/* ===== PULL-TO-REFRESH indicator ===== */
+.ptr-indicator {
+  text-align: center;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--text-dim);
+  display: none;
+}
+
+/* ===== NOTIFICATION DOT ===== */
+.notif-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in > * {
+  animation: fadeInUp 0.4s ease both;
+}
+.animate-in > *:nth-child(1) { animation-delay: 0.05s; }
+.animate-in > *:nth-child(2) { animation-delay: 0.1s; }
+.animate-in > *:nth-child(3) { animation-delay: 0.15s; }
+.animate-in > *:nth-child(4) { animation-delay: 0.2s; }
+.animate-in > *:nth-child(5) { animation-delay: 0.25s; }
+.animate-in > *:nth-child(6) { animation-delay: 0.3s; }
+.animate-in > *:nth-child(7) { animation-delay: 0.35s; }
+
+/* ===== SEARCH BAR ===== */
+.search-bar {
+  margin: 0 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0 14px;
+  height: 40px;
+}
+.search-bar svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+.search-bar input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.search-bar input::placeholder { color: var(--text-dim); }
+/* ===== TOURNAMENT DETAIL OVERLAY ===== */
+.td-overlay {
+  position: fixed;
+  top: 0; bottom: 0;
+  left: 50%; transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 440px;
+  background: var(--bg);
+  z-index: 300;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transition: transform 0.3s ease;
+}
+.td-overlay.open { transform: translateX(-50%) translateY(0); }
+.td-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  padding-top: calc(12px + var(--safe-top));
+  position: sticky;
+  top: 0;
+  background: rgba(10,10,10,0.95);
+  backdrop-filter: blur(12px);
+  z-index: 10;
+  border-bottom: 1px solid var(--border);
+}
+.td-back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+}
+.td-back svg { width: 20px; height: 20px; stroke: var(--accent); fill: none; stroke-width: 2; }
+.td-topbar-title { font-size: 14px; font-weight: 600; }
+
+/* TD info */
+.td-hero { padding: 20px 16px; text-align: center; }
+.td-hero h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.td-hero-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 12px; }
+.td-hero-detail { font-size: 12px; color: var(--text-sec); margin-bottom: 4px; }
+
+/* TD tabs */
+.td-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin: 0 16px;
+  gap: 0;
+}
+.td-tab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.td-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.td-tab:active { opacity: 0.7; }
+.td-tab-content { display: none; padding: 16px; }
+.td-tab-content.active { display: block; }
+
+/* Bracket */
+.bracket-round { margin-bottom: 20px; }
+.bracket-round-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.bracket-match {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.bracket-player {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.bracket-player:last-child { border-bottom: none; }
+.bracket-player.winner { background: rgba(204,255,0,0.06); }
+.bracket-seed {
+  width: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-align: center;
+}
+.bracket-pname { flex: 1; font-size: 13px; font-weight: 500; }
+.bracket-player.winner .bracket-pname { color: var(--accent); font-weight: 600; }
+.bracket-pscore { font-size: 13px; font-weight: 700; min-width: 50px; text-align: right; }
+.bracket-player.winner .bracket-pscore { color: var(--accent); }
+
+/* Group stage tables */
+.bracket-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 20px 0 8px;
+  padding: 10px 0 6px;
+  border-bottom: 1px solid var(--border);
+}
+.bracket-section-title:first-child { margin-top: 0; }
+
+.group-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+.group-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.group-table th {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.group-table th:first-child,
+.group-table th:nth-child(2) {
+  text-align: left;
+}
+.group-table td {
+  font-size: 12px;
+  padding: 8px 4px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-sec);
+}
+.group-table td:first-child {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 11px;
+  width: 20px;
+}
+.group-table td:nth-child(2) {
+  text-align: left;
+  color: var(--text);
+  font-weight: 500;
+  font-size: 13px;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.group-table td.g-self {
+  color: var(--text-dim);
+  font-size: 10px;
+}
+.group-table td.g-win {
+  color: var(--green);
+  font-weight: 600;
+}
+.group-table td.g-loss {
+  color: var(--red);
+  font-weight: 600;
+}
+.group-table td:last-child {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 13px;
+}
+.group-table tr:last-child td { border-bottom: none; }
+.group-table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.group-table-wrap .group-table { margin-bottom: 0; }
+.group-table-wrap .group-table th,
+.group-table-wrap .group-table td { padding: 8px 6px; }
+
+/* Playoff bracket - horizontal scroll */
+.bracket-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.bracket-scroll::-webkit-scrollbar { height: 3px; }
+.bracket-scroll::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+.bracket-col {
+  min-width: 200px;
+  flex-shrink: 0;
+}
+.bracket-col-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.bracket-match-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.bracket-match-card.final { border-color: var(--accent); }
+.bracket-match-meta {
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.bracket-match-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.bracket-match-row:last-child { border-bottom: none; }
+.bracket-match-row.winner { background: rgba(204,255,0,0.06); }
+.bracket-match-row .bm-seed {
+  font-size: 10px;
+  color: var(--text-dim);
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.bracket-match-row .bm-name {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bracket-match-row.winner .bm-name { color: var(--accent); font-weight: 600; }
+.bracket-match-row .bm-score {
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.bracket-match-row.winner .bm-score { color: var(--accent); }
+.bracket-match-status {
+  text-align: center;
+  padding: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* Score entry */
+.score-entry-card {
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin: 0 16px 16px;
+}
+.score-entry-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-align: center;
+  color: var(--accent);
+}
+.score-entry-sets {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.score-set-col { text-align: center; }
+.score-set-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+.score-set-inputs { display: flex; flex-direction: column; gap: 4px; }
+.score-set-input {
+  width: 40px;
+  height: 36px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  font-family: inherit;
+  outline: none;
+}
+.score-set-input:focus { border-color: var(--accent); }
+.score-entry-names {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  margin-right: 12px;
+}
+.score-entry-name {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-sec);
+}
+
+/* ===== COMPACT FILTER BAR ===== */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+.filter-bar-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0 14px;
+  height: 40px;
+}
+.filter-bar-search svg {
+  width: 16px; height: 16px;
+  stroke: var(--text-muted); fill: none; stroke-width: 2;
+  flex-shrink: 0;
+}
+.filter-bar-search input {
+  flex: 1; background: none; border: none;
+  color: var(--text); font-size: 13px; font-family: inherit; outline: none;
+}
+.filter-bar-search input::placeholder { color: var(--text-dim); }
+.filter-btn {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.2s;
+}
+.filter-btn:active { background: var(--border-light); }
+.filter-btn svg { width: 18px; height: 18px; stroke: var(--text-sec); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.filter-btn.has-filters { border-color: var(--accent); }
+.filter-btn.has-filters svg { stroke: var(--accent); }
+.filter-dot {
+  position: absolute; top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  background: var(--accent); border-radius: 50%;
+}
+
+/* Active filters strip */
+.active-filters {
+  display: flex;
+  gap: 6px;
+  padding: 0 16px 10px;
+  flex-wrap: wrap;
+}
+.active-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--accent-dim);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.active-filter-tag .aft-x {
+  font-size: 13px;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+/* Bottom sheet */
+.bottom-sheet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 250;
+  opacity: 0; visibility: hidden;
+  transition: all 0.3s;
+}
+.bottom-sheet-overlay.open { opacity: 1; visibility: visible; }
+.bottom-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  max-width: 440px; margin: 0 auto;
+  background: var(--bg-card);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  z-index: 251;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  padding: 0 16px 24px;
+  padding-bottom: calc(24px + var(--safe-bottom));
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.bottom-sheet-overlay.open .bottom-sheet { transform: translateY(0); }
+.bs-handle {
+  width: 36px; height: 4px;
+  background: var(--border-light);
+  border-radius: 2px;
+  margin: 10px auto 16px;
+}
+.bs-title {
+  font-size: 16px; font-weight: 700;
+  margin-bottom: 16px;
+}
+.bs-section { margin-bottom: 16px; }
+.bs-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.04em; margin-bottom: 8px;
+}
+.bs-options {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.bs-option {
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 13px; font-weight: 500;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  color: var(--text-sec);
+  transition: all 0.15s;
+}
+.bs-option.active {
+  background: var(--accent); color: #000;
+  border-color: var(--accent); font-weight: 600;
+}
+.bs-option:active { transform: scale(0.95); }
+.bs-apply {
+  width: 100%; padding: 14px;
+  border-radius: var(--radius-full);
+  background: var(--accent); color: #000;
+  font-size: 15px; font-weight: 600;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+.bs-apply:active { transform: scale(0.98); background: var(--accent-hover); }
+
+/* Dropdown select */
+.dropdown-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #000;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dropdown-select:active { transform: scale(0.95); }
+.dropdown-select svg { width: 14px; height: 14px; stroke: #000; fill: none; stroke-width: 2.5; }
+
+/* Gender toggle */
+.gender-toggle {
+  display: inline-flex;
+  border-radius: var(--radius-full);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.gender-toggle-btn {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  border-right: 1px solid var(--border);
+}
+.gender-toggle-btn:last-child { border-right: none; }
+.gender-toggle-btn.active {
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+}
+.gender-toggle-btn:active { opacity: 0.7; }
+
+/* Compact tournament meta line */
+.tl-meta-line {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.tl-meta-line span { margin-right: 6px; }
+.tl-status-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+.tl-status-dot.open { background: var(--green); }
+.tl-status-dot.live { background: var(--red); animation: pulse-live 1.5s infinite; }
+.tl-status-dot.done { background: var(--text-dim); }
+.tl-status-dot.soon { background: var(--orange); }
+
+/* ===== LIVE MATCH SCREEN ===== */
+.live-list-card {
+  margin: 0 16px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.live-list-card:active { background: var(--bg-card-hover); }
+.live-list-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.live-list-info { font-size: 11px; color: var(--text-muted); }
+.live-list-players {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.live-list-p {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.live-list-p.right { flex-direction: row-reverse; }
+.live-list-av {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600;
+  color: var(--text-sec); flex-shrink: 0;
+}
+.live-list-pname { font-size: 13px; font-weight: 600; line-height: 1.2; }
+.live-list-pname .serving-dot {
+  display: inline-block; width: 6px; height: 6px;
+  background: var(--accent); border-radius: 50%;
+  margin-left: 4px; vertical-align: middle;
+}
+.live-list-score { min-width: 60px; text-align: center; }
+.live-list-sets {
+  display: flex; gap: 8px; justify-content: center;
+  font-size: 18px; font-weight: 800;
+}
+.live-list-set {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 1px; line-height: 1.1;
+}
+.live-list-set .s-top.leading { color: var(--accent); }
+.live-list-game { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+/* Full live match view */
+.live-full {
+  position: fixed; top: 0; bottom: 0;
+  left: 50%; transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 440px;
+  background: var(--bg); z-index: 300;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+}
+.live-full.open { transform: translateX(-50%) translateY(0); }
+/* Scoreboard (like website) */
+.live-full-scoreboard {
+  margin: 0 16px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.live-full-sb-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.live-full-sb-header .sb-dot {
+  width: 8px; height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  animation: livePulse 1.5s infinite;
+}
+.live-full-sb-header .sb-label {
+  font-size: 12px; font-weight: 700;
+  color: var(--red); text-transform: uppercase;
+}
+.live-full-sb-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.live-full-sb-row:last-child { border-bottom: none; }
+.live-full-sb-row.serving { background: rgba(204,255,0,0.04); }
+.sb-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--text-sec);
+  flex-shrink: 0;
+}
+.live-full-sb-row.serving .sb-avatar {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.sb-dot-serve {
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sb-no-serve { width: 6px; flex-shrink: 0; }
+.sb-pname {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-sets {
+  display: flex; gap: 4px; flex-shrink: 0;
+}
+.sb-set-val {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  color: var(--text-sec);
+}
+.sb-set-val.won { color: var(--accent); }
+.sb-set-val.current {
+  background: var(--accent);
+  color: #000;
+  font-weight: 800;
+}
+
+/* Video / stream area */
+.live-full-video {
+  margin: 0 16px 12px;
+  aspect-ratio: 16/9;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+/* Match info bar */
+.live-full-info {
+  margin: 0 16px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.live-full-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+.live-full-info-row .lfi-label { color: var(--text-muted); }
+.live-full-info-row .lfi-val { font-weight: 600; }
+
+/* Match stats */
+.live-stats {
+  margin: 0 16px 16px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 14px;
+}
+.live-stats-title {
+  font-size: 12px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;
+}
+.live-stat-row { display: flex; align-items: center; margin-bottom: 8px; }
+.live-stat-row:last-child { margin-bottom: 0; }
+.ls-val { width: 32px; text-align: center; font-size: 13px; font-weight: 700; }
+.ls-val.lead { color: var(--accent); }
+.ls-bar-wrap { flex: 1; height: 4px; border-radius: 2px; background: var(--bg-elevated); margin: 0 8px; position: relative; overflow: hidden; }
+.ls-bar-fill { height: 100%; border-radius: 2px; position: absolute; top: 0; }
+.ls-bar-fill.left { left: 0; background: var(--accent); }
+.ls-bar-fill.right { right: 0; background: var(--red); }
+.ls-label { font-size: 10px; color: var(--text-muted); text-align: center; min-width: 44px; }
+
+/* ===== PLAYER PROFILE / CHALLENGE ===== */
+.player-overlay {
+  position: fixed; top: 0; bottom: 0;
+  left: 50%; transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 440px;
+  background: var(--bg);
+  z-index: 300;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transition: transform 0.3s ease;
+}
+.player-overlay.open { transform: translateX(-50%) translateY(0); }
+
+.player-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 16px;
+  position: relative;
+}
+.player-hero-avatar {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 3px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.player-hero-name {
+  font-size: 22px; font-weight: 800;
+  margin-bottom: 2px;
+}
+.player-hero-cat {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.player-stats-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.player-stat {
+  text-align: center;
+}
+.player-stat-val {
+  font-size: 20px; font-weight: 800;
+  color: var(--accent); line-height: 1;
+}
+.player-stat-label {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  margin-top: 2px;
+}
+
+/* Challenge form */
+.challenge-form {
+  margin: 0 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.challenge-form-title {
+  font-size: 15px; font-weight: 700;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.challenge-form-title span { font-size: 18px; }
+.challenge-row {
+  margin-bottom: 14px;
+}
+.challenge-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+.challenge-select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='2 4 6 8 10 4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+.challenge-select:focus { border-color: var(--accent); }
+.challenge-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+.challenge-input:focus { border-color: var(--accent); }
+.challenge-date-row {
+  display: flex; gap: 8px;
+}
+.challenge-date-row .challenge-input { flex: 1; }
+.challenge-msg {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+}
+.challenge-msg:focus { border-color: var(--accent); }
+.challenge-send {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #000;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 4px;
+  transition: all 0.2s;
+}
+.challenge-send:active { transform: scale(0.98); }
+
+/* H2H section */
+.h2h-section {
+  margin: 0 16px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.h2h-title {
+  font-size: 13px; font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 12px;
+}
+.h2h-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.h2h-player {
+  text-align: center;
+}
+.h2h-player-name {
+  font-size: 12px; color: var(--text-sec);
+  margin-bottom: 4px;
+}
+.h2h-player-wins {
+  font-size: 28px; font-weight: 800;
+  color: var(--accent);
+}
+.h2h-vs {
+  font-size: 14px; font-weight: 600;
+  color: var(--text-dim);
+}
+.h2h-match {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+.h2h-match-date { color: var(--text-muted); min-width: 60px; }
+.h2h-match-score { font-weight: 600; }
+.h2h-match-winner { color: var(--accent); }
+
+/* ===== AUTH SCREEN ===== */
+.auth-screen {
+  position: fixed; top: 0; bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 440px;
+  background: var(--bg);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  opacity: 0; visibility: hidden;
+  transition: all 0.3s;
+}
+.auth-screen.open { opacity: 1; visibility: visible; }
+.auth-logo {
+  margin-bottom: 8px;
+}
+.auth-logo-text {
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  background: linear-gradient(90deg, #F0FF7A 0%, #CCFF00 40%, #9ED900 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(204,255,0,0.5));
+}
+.auth-logo-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 16px rgba(204,255,0,0.4));
+}
+.auth-subtitle {
+  font-size: 14px;
+  color: var(--text-sec);
+  margin-bottom: 40px;
+  text-align: center;
+}
+/* Auth tabs (Вход / Регистрация) */
+.auth-tabs {
+  display: flex;
+  width: 100%;
+  max-width: 320px;
+  background: var(--bg-card);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  margin-bottom: 24px;
+}
+.auth-tab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: var(--radius-full);
+  transition: all 0.25s;
+  cursor: pointer;
+}
+.auth-tab.active {
+  background: var(--accent);
+  color: #000;
+}
+/* Auth form */
+.auth-form {
+  width: 100%;
+  max-width: 320px;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+.auth-form.active { display: flex; }
+.auth-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.auth-input:focus { border-color: var(--accent); }
+.auth-input::placeholder { color: var(--text-dim); }
+.auth-submit {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #000;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.2s;
+}
+.auth-submit:active { transform: scale(0.97); }
+.auth-forgot {
+  text-align: right;
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: -4px;
+}
+/* Social buttons */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+  width: 100%;
+}
+.auth-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.auth-divider-text {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.auth-social {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.auth-social-btn {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.auth-social-btn:active { transform: scale(0.93); }
+.auth-social-btn.google { background: #fff; }
+.auth-social-btn.apple { background: #fff; }
+.auth-social-btn.telegram { background: #2AABEE; border-color: #2AABEE; }
+.auth-social-icon { width: 24px; height: 24px; }
+.auth-footer {
+  margin-top: 32px;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.4;
+}
+.auth-footer a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.auth-skip {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding-top: var(--safe-top);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ===== CLIENT REVIEW MODE ===== */
+.review-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #000;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.review-bar.visible { display: flex; }
+.review-bar-text { flex: 1; }
+.review-bar-close {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.15);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Floating review button */
+.review-fab {
+  display: none;
+  position: fixed;
+  bottom: calc(var(--tab-height) + var(--safe-bottom) + 16px);
+  right: 16px;
+  z-index: 150;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 4px 20px rgba(204,255,0,0.4);
+  align-items: center; justify-content: center;
+  font-size: 20px;
+  transition: transform 0.2s;
+}
+.review-fab.visible { display: flex; }
+.review-fab:active { transform: scale(0.9); }
+
+/* Review comment overlay */
+.review-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: all 0.3s;
+}
+.review-overlay.open { opacity: 1; visibility: visible; }
+.review-panel {
+  width: 100%; max-width: 440px;
+  background: var(--bg-card);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  padding: 0 16px 24px;
+  padding-bottom: calc(24px + var(--safe-bottom));
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.review-overlay.open .review-panel { transform: translateY(0); }
+.review-panel .bs-handle {
+  width: 36px; height: 4px;
+  background: var(--border-light);
+  border-radius: 2px;
+  margin: 10px auto 16px;
+}
+.review-panel-title {
+  font-size: 16px; font-weight: 700;
+  margin-bottom: 4px;
+}
+.review-panel-screen {
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.review-options {
+  display: flex; gap: 8px;
+  margin-bottom: 16px;
+}
+.review-opt {
+  flex: 1;
+  padding: 12px 8px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  border: 2px solid var(--border);
+  background: var(--glass);
+  transition: all 0.15s;
+}
+.review-opt:active { transform: scale(0.95); }
+.review-opt.selected { border-color: var(--accent); background: var(--accent-dim); }
+.review-opt-icon { font-size: 24px; margin-bottom: 4px; }
+.review-opt-label { color: var(--text-sec); }
+.review-opt.selected .review-opt-label { color: var(--accent); }
+.review-comment {
+  width: 100%;
+  min-height: 80px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  padding: 12px;
+  outline: none;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+.review-comment:focus { border-color: var(--accent); }
+.review-comment::placeholder { color: var(--text-dim); }
+.review-submit {
+  width: 100%; padding: 14px;
+  border-radius: var(--radius-full);
+  background: var(--accent); color: #000;
+  font-size: 15px; font-weight: 600;
+  transition: all 0.2s;
+}
+.review-submit:active { transform: scale(0.98); }
+
+/* Saved reviews indicator */
+.review-count {
+  position: absolute;
+  top: -4px; right: -4px;
+  min-width: 18px; height: 18px;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--bg);
+}
+
+/* Summary overlay */
+.review-summary-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 350;
+  display: flex;
+  align-items: center; justify-content: center;
+  padding: 16px;
+  opacity: 0; visibility: hidden;
+  transition: all 0.3s;
+}
+.review-summary-overlay.open { opacity: 1; visibility: visible; }
+.review-summary {
+  width: 100%; max-width: 400px;
+  max-height: 80vh;
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  padding: 20px;
+  overflow-y: auto;
+}
+.review-summary h2 {
+  font-size: 18px; font-weight: 700;
+  margin-bottom: 16px;
+}
+.review-summary-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.review-summary-item:last-child { border-bottom: none; }
+.review-summary-screen {
+  font-size: 13px; font-weight: 600;
+  margin-bottom: 4px;
+}
+.review-summary-verdict {
+  font-size: 12px; font-weight: 600;
+  margin-bottom: 4px;
+}
+.review-summary-verdict.keep { color: var(--green); }
+.review-summary-verdict.change { color: var(--orange); }
+.review-summary-verdict.remove { color: var(--red); }
+.review-summary-note {
+  font-size: 12px;
+  color: var(--text-sec);
+  line-height: 1.4;
+}
+.review-summary-actions {
+  display: flex; gap: 8px;
+  margin-top: 16px;
+}
+.review-summary-actions button {
+  flex: 1; padding: 12px;
+  border-radius: var(--radius-full);
+  font-size: 14px; font-weight: 600;
+  transition: all 0.2s;
+}
+.review-summary-actions button:active { transform: scale(0.97); }
+.review-btn-copy {
+  background: var(--accent); color: #000;
+}
+.review-btn-close {
+  background: var(--glass); color: var(--text-sec);
+  border: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Review mode bar -->
+  <div class="review-bar visible" id="reviewBar">
+    <div class="review-bar-text">Режим просмотра. Нажмите 💬 чтобы оставить отзыв</div>
+    <div class="review-bar-close" onclick="disableReview()">×</div>
+  </div>
+
+  <!-- Status bar (fake) -->
+  <div class="status-bar">
+    <span class="status-bar-time">9:41</span>
+    <div class="status-bar-icons">
+      <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 00-6 0zm-4-4l2 2a7.07 7.07 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zM13 18h-2v-2h2v2zm0-4h-2V9h2v5z"/></svg>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-logo">
+      <span class="header-logo-text">KSLT</span>
+      <span class="header-logo-icon">🎾</span>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn" style="position:relative" aria-label="Уведомления">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="header-btn" id="menuBtn" aria-label="Меню">
+        <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Screens container -->
+  <div class="screens">
+
+    <!-- ====== HOME SCREEN ====== -->
+    <div class="screen active animate-in" id="screenHome">
+      <!-- Live match -->
+      <div class="section-title">
+        <h2>Live</h2>
+        <span class="see-all">Смотреть</span>
+      </div>
+      <div class="card live-card">
+        <div class="live-header">
+          <span class="live-badge">LIVE</span>
+          <span class="live-court">Корт #1 · Сет 2</span>
+        </div>
+        <div class="live-players">
+          <div class="live-player">
+            <div class="live-avatar">АИ</div>
+            <div class="live-player-name">Алексей<br>Иванов</div>
+          </div>
+          <div class="live-score-block">
+            <div class="live-sets">
+              <div class="live-set">
+                <span class="live-set-score serving">6</span>
+                <div class="live-set-divider"></div>
+                <span class="live-set-score">3</span>
+              </div>
+              <div class="live-set">
+                <span class="live-set-score">4</span>
+                <div class="live-set-divider"></div>
+                <span class="live-set-score serving">5</span>
+              </div>
+            </div>
+            <span class="live-game">Гейм: 30-40</span>
+          </div>
+          <div class="live-player">
+            <div class="live-avatar">ДК</div>
+            <div class="live-player-name">Дмитрий<br>Козлов</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming tournament -->
+      <div class="section-title">
+        <h2>Ближайший турнир</h2>
+        <span class="see-all">Все</span>
+      </div>
+      <div class="card tournament-card">
+        <div class="tournament-date">
+          <span class="tournament-date-day">12</span>
+          <span class="tournament-date-month">Апр</span>
+        </div>
+        <div class="tournament-info">
+          <div class="tournament-name">KSLT Spring Open 2026</div>
+          <div class="tournament-meta">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Dordoi Tennis Club
+          </div>
+        </div>
+        <span class="tournament-badge">Кат. 2</span>
+      </div>
+
+      <!-- News -->
+      <div class="section-title">
+        <h2>Новости</h2>
+        <span class="see-all">Все</span>
+      </div>
+      <div class="news-scroll">
+        <div class="news-card">
+          <div class="news-card-img"><span class="news-card-img-icon">🏆</span></div>
+          <div class="news-card-body">
+            <div class="news-card-tag">Турниры</div>
+            <div class="news-card-title">Результаты KSLT Winter Cup 2026 — полный отчёт</div>
+            <div class="news-card-date">5 апр 2026</div>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="news-card-img" style="background:linear-gradient(135deg,#0d1b2a,#1b263b)"><span class="news-card-img-icon">🎾</span></div>
+          <div class="news-card-body">
+            <div class="news-card-tag">Клуб</div>
+            <div class="news-card-title">Новые корты в Бишкеке: Dordoi Tennis Club обновился</div>
+            <div class="news-card-date">3 апр 2026</div>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="news-card-img" style="background:linear-gradient(135deg,#1a0a2e,#2d1b69)"><span class="news-card-img-icon">⭐</span></div>
+          <div class="news-card-body">
+            <div class="news-card-tag">Рейтинг</div>
+            <div class="news-card-title">Обновление рейтинга: 3 игрока получили промоушен</div>
+            <div class="news-card-date">1 апр 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== LIVE SCREEN ====== -->
+    <div class="screen" id="screenLive">
+      <div class="screen-header">
+        <h1>Live</h1>
+        <p>Матчи в реальном времени</p>
+      </div>
+
+      <div class="live-list-card" onclick="openLiveMatch()">
+        <div class="live-list-top">
+          <span class="live-badge">LIVE</span>
+          <span class="live-list-info">Корт #1 · Masters Invitational</span>
+        </div>
+        <div class="live-list-players">
+          <div class="live-list-p">
+            <div class="live-list-av">АИ</div>
+            <div class="live-list-pname">А. Иванов <span class="serving-dot"></span></div>
+          </div>
+          <div class="live-list-score">
+            <div class="live-list-sets">
+              <div class="live-list-set"><span class="s-top leading">6</span><span>3</span></div>
+              <div class="live-list-set"><span class="s-top">4</span><span class="leading" style="color:var(--accent)">5</span></div>
+            </div>
+            <div class="live-list-game">30-40</div>
+          </div>
+          <div class="live-list-p right">
+            <div class="live-list-av">ДК</div>
+            <div class="live-list-pname">Д. Козлов</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="live-list-card" onclick="openLiveMatch()">
+        <div class="live-list-top">
+          <span class="live-badge">LIVE</span>
+          <span class="live-list-info">Корт #2 · Masters Invitational</span>
+        </div>
+        <div class="live-list-players">
+          <div class="live-list-p">
+            <div class="live-list-av">БС</div>
+            <div class="live-list-pname">Б. Сыдыков</div>
+          </div>
+          <div class="live-list-score">
+            <div class="live-list-sets">
+              <div class="live-list-set"><span class="s-top">3</span><span class="leading" style="color:var(--accent)">6</span></div>
+              <div class="live-list-set"><span class="s-top leading">2</span><span>1</span></div>
+            </div>
+            <div class="live-list-game">15-15</div>
+          </div>
+          <div class="live-list-p right">
+            <div class="live-list-av">НА</div>
+            <div class="live-list-pname">Н. Аманов <span class="serving-dot"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="live-list-card" onclick="openLiveMatch()">
+        <div class="live-list-top">
+          <span class="live-badge">LIVE</span>
+          <span class="live-list-info">Корт #3 · Masters Invitational</span>
+        </div>
+        <div class="live-list-players">
+          <div class="live-list-p">
+            <div class="live-list-av">ТМ</div>
+            <div class="live-list-pname">Т. Маратов <span class="serving-dot"></span></div>
+          </div>
+          <div class="live-list-score">
+            <div class="live-list-sets">
+              <div class="live-list-set"><span class="s-top leading">6</span><span>4</span></div>
+              <div class="live-list-set"><span class="s-top leading">5</span><span>3</span></div>
+            </div>
+            <div class="live-list-game">40-30</div>
+          </div>
+          <div class="live-list-p right">
+            <div class="live-list-av">ЕЖ</div>
+            <div class="live-list-pname">Е. Жумабеков</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state when no live matches -->
+      <div style="display:none">
+        <div class="empty-state">
+          <div class="empty-icon">📺</div>
+          <div class="empty-title">Нет матчей</div>
+          <div class="empty-text">Сейчас нет live-трансляций. Следите за расписанием турниров.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TOURNAMENTS SCREEN ====== -->
+    <div class="screen" id="screenTournaments">
+      <div class="screen-header">
+        <h1>Турниры</h1>
+      </div>
+
+      <!-- Search + Filter button -->
+      <div class="filter-bar">
+        <div class="filter-bar-search">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" placeholder="Поиск турнира..." readonly>
+        </div>
+        <button class="filter-btn" onclick="toggleSheet('tournamentSheet')">
+          <svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+        </button>
+      </div>
+
+      <!-- Active filters (compact, empty by default — appears when user applies filters) -->
+      <div class="active-filters" id="tournamentActiveFilters">
+      </div>
+
+      <div class="tournament-list animate-in">
+        <div class="tournament-list-item" onclick="openTournamentDetail(0)" style="cursor:pointer">
+          <div class="tl-date">
+            <span class="tl-date-day">12</span>
+            <span class="tl-date-month">Апр</span>
+          </div>
+          <div class="tl-info">
+            <div class="tl-name">KSLT Spring Open 2026</div>
+            <div class="tl-details"><span>Dordoi Tennis Club · 32 игрока</span></div>
+            <div class="tl-meta-line"><span>Кат. 2 · Masters · ♂</span> <span class="tl-status-dot open"></span>Регистрация</div>
+          </div>
+        </div>
+
+        <div class="tournament-list-item" onclick="openTournamentDetail(1)" style="cursor:pointer">
+          <div class="tl-date">
+            <span class="tl-date-day">7</span>
+            <span class="tl-date-month">Апр</span>
+          </div>
+          <div class="tl-info">
+            <div class="tl-name">Masters Invitational</div>
+            <div class="tl-details"><span>Ак-Булак · 16 игроков</span></div>
+            <div class="tl-meta-line"><span>Кат. 1 · Masters · ♂</span> <span class="tl-status-dot live"></span>Live</div>
+          </div>
+        </div>
+
+        <div class="tournament-list-item" onclick="openTournamentDetail(2)" style="cursor:pointer">
+          <div class="tl-date">
+            <span class="tl-date-day">28</span>
+            <span class="tl-date-month">Мар</span>
+          </div>
+          <div class="tl-info">
+            <div class="tl-name">Challenger Spring 2026</div>
+            <div class="tl-details"><span>Спартак · 24 игрока</span></div>
+            <div class="tl-meta-line"><span>Кат. 3 · Challenger · ♀</span> <span class="tl-status-dot done"></span>Завершён</div>
+          </div>
+        </div>
+
+        <div class="tournament-list-item" onclick="openTournamentDetail(3)" style="cursor:pointer">
+          <div class="tl-date">
+            <span class="tl-date-day">15</span>
+            <span class="tl-date-month">Мар</span>
+          </div>
+          <div class="tl-info">
+            <div class="tl-name">KSLT Winter Cup 2026</div>
+            <div class="tl-details"><span>Dordoi Tennis Club · 48 игроков</span></div>
+            <div class="tl-meta-line"><span>Grand · Pro-Masters · ♂</span> <span class="tl-status-dot done"></span>Завершён</div>
+          </div>
+        </div>
+
+        <div class="tournament-list-item" onclick="openTournamentDetail(4)" style="cursor:pointer">
+          <div class="tl-date">
+            <span class="tl-date-day">20</span>
+            <span class="tl-date-month">Апр</span>
+          </div>
+          <div class="tl-info">
+            <div class="tl-name">Futures Весенний Турнир</div>
+            <div class="tl-details"><span>Олимпийский Центр · 16 игроков</span></div>
+            <div class="tl-meta-line"><span>Кат. 4 · Futures · Микст</span> <span class="tl-status-dot soon"></span>Скоро</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== RATING SCREEN ====== -->
+    <div class="screen" id="screenRating">
+      <div class="screen-header">
+        <h1>Рейтинг</h1>
+      </div>
+
+      <!-- Compact: dropdown + gender toggle -->
+      <div class="filter-bar" style="gap:10px">
+        <button class="dropdown-select" onclick="toggleSheet('ratingSheet')">
+          Masters <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="gender-toggle">
+          <button class="gender-toggle-btn active">Все</button>
+          <button class="gender-toggle-btn">МУЖ</button>
+          <button class="gender-toggle-btn">ЖЕН</button>
+        </div>
+        <div style="flex:1"></div>
+        <button class="filter-btn" style="width:36px;height:36px">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+      </div>
+
+      <div class="rating-table">
+        <div class="rating-table-head">
+          <span class="rt-col-rank">#</span>
+          <span class="rt-col-name">Игрок</span>
+          <span class="rt-col-pts">Очки</span>
+          <span class="rt-col-wl">В/П</span>
+          <span class="rt-col-form">Форма</span>
+        </div>
+
+        <div class="rating-row">
+          <span class="rr-rank top">1</span>
+          <div class="rr-player">
+            <div class="rr-avatar">АИ</div>
+            <span class="rr-name">Алексей Иванов</span>
+          </div>
+          <span class="rr-pts">2450</span>
+          <span class="rr-wl">28/4</span>
+          <div class="rr-form"><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span></div>
+        </div>
+
+        <div class="rating-row" onclick="openPlayerOverlay()" style="cursor:pointer">
+          <span class="rr-rank top">2</span>
+          <div class="rr-player">
+            <div class="rr-avatar">БС</div>
+            <span class="rr-name">Бакыт Сыдыков</span>
+          </div>
+          <span class="rr-pts">2310</span>
+          <span class="rr-wl">25/6</span>
+          <div class="rr-form"><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span></div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rr-rank top">3</span>
+          <div class="rr-player">
+            <div class="rr-avatar">ДК</div>
+            <span class="rr-name">Дмитрий Козлов</span>
+          </div>
+          <span class="rr-pts">2180</span>
+          <span class="rr-wl">22/8</span>
+          <div class="rr-form"><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span></div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rr-rank">4</span>
+          <div class="rr-player">
+            <div class="rr-avatar">НА</div>
+            <span class="rr-name">Нурлан Аманов</span>
+          </div>
+          <span class="rr-pts">2050</span>
+          <span class="rr-wl">20/9</span>
+          <div class="rr-form"><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span></div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rr-rank">5</span>
+          <div class="rr-player">
+            <div class="rr-avatar">ТМ</div>
+            <span class="rr-name">Тимур Маратов</span>
+          </div>
+          <span class="rr-pts">1980</span>
+          <span class="rr-wl">19/7</span>
+          <div class="rr-form"><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span></div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rr-rank">6</span>
+          <div class="rr-player">
+            <div class="rr-avatar">ЕЖ</div>
+            <span class="rr-name">Ержан Жумабеков</span>
+          </div>
+          <span class="rr-pts">1870</span>
+          <span class="rr-wl">17/10</span>
+          <div class="rr-form"><span class="rr-form-dot l"></span><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span></div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rr-rank">7</span>
+          <div class="rr-player">
+            <div class="rr-avatar">АТ</div>
+            <span class="rr-name">Азамат Токоев</span>
+          </div>
+          <span class="rr-pts">1750</span>
+          <span class="rr-wl">15/11</span>
+          <div class="rr-form"><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span></div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rr-rank">8</span>
+          <div class="rr-player">
+            <div class="rr-avatar">РМ</div>
+            <span class="rr-name">Руслан Мусаев</span>
+          </div>
+          <span class="rr-pts">1680</span>
+          <span class="rr-wl">14/12</span>
+          <div class="rr-form"><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span></div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rr-rank">9</span>
+          <div class="rr-player">
+            <div class="rr-avatar">МС</div>
+            <span class="rr-name">Максат Сатыбалдиев</span>
+          </div>
+          <span class="rr-pts">1520</span>
+          <span class="rr-wl">13/13</span>
+          <div class="rr-form"><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span></div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rr-rank">10</span>
+          <div class="rr-player">
+            <div class="rr-avatar">КА</div>
+            <span class="rr-name">Кубанычбек Алиев</span>
+          </div>
+          <span class="rr-pts">1410</span>
+          <span class="rr-wl">12/14</span>
+          <div class="rr-form"><span class="rr-form-dot l"></span><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span><span class="rr-form-dot w"></span><span class="rr-form-dot l"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== NEWS SCREEN ====== -->
+    <div class="screen" id="screenNews">
+      <div class="screen-header">
+        <h1>Новости</h1>
+        <p>Последние события KSLT</p>
+      </div>
+
+      <div class="filters-row">
+        <button class="filter-chip active">Все</button>
+        <button class="filter-chip">Турниры</button>
+        <button class="filter-chip">Клуб</button>
+        <button class="filter-chip">Рейтинг</button>
+      </div>
+
+      <div class="news-list animate-in">
+        <div class="news-list-item">
+          <div class="news-list-img"><span class="news-list-img-icon">🏆</span></div>
+          <div class="news-list-body">
+            <div class="news-list-tag">Турниры</div>
+            <div class="news-list-title">Результаты KSLT Winter Cup 2026 — полный отчёт</div>
+            <div class="news-list-excerpt">Алексей Иванов одержал победу в категории Masters, обыграв в финале Бакыта Сыдыкова со счётом 6-4, 3-6, 7-5.</div>
+            <div class="news-list-footer">
+              <span>5 апр 2026</span>
+              <span>324 просмотра</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="news-list-item">
+          <div class="news-list-img" style="background:linear-gradient(135deg,#0d1b2a,#1b263b)"><span class="news-list-img-icon">🎾</span></div>
+          <div class="news-list-body">
+            <div class="news-list-tag">Клуб</div>
+            <div class="news-list-title">Новые корты в Бишкеке: Dordoi Tennis Club обновился</div>
+            <div class="news-list-excerpt">Три новых хардовых корта открыты для тренировок и турниров. Бронирование уже доступно.</div>
+            <div class="news-list-footer">
+              <span>3 апр 2026</span>
+              <span>189 просмотров</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="news-list-item">
+          <div class="news-list-img" style="background:linear-gradient(135deg,#1a0a2e,#2d1b69)"><span class="news-list-img-icon">⭐</span></div>
+          <div class="news-list-body">
+            <div class="news-list-tag">Рейтинг</div>
+            <div class="news-list-title">Обновление рейтинга: 3 игрока получили промоушен</div>
+            <div class="news-list-excerpt">По итогам сезонного обновления трое игроков из Challenger перешли в Masters.</div>
+            <div class="news-list-footer">
+              <span>1 апр 2026</span>
+              <span>256 просмотров</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="news-list-item">
+          <div class="news-list-img" style="background:linear-gradient(135deg,#1a2a0a,#2d6917)"><span class="news-list-img-icon">🤝</span></div>
+          <div class="news-list-body">
+            <div class="news-list-tag">Партнёры</div>
+            <div class="news-list-title">KSLT подписал спонсорское соглашение с Wilson</div>
+            <div class="news-list-excerpt">Компания Wilson стала официальным поставщиком мячей для всех турниров KSLT в сезоне 2026.</div>
+            <div class="news-list-footer">
+              <span>28 мар 2026</span>
+              <span>412 просмотров</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== PROFILE SCREEN ====== -->
+    <div class="screen" id="screenProfile">
+      <div class="screen-header">
+        <h1>Профиль</h1>
+      </div>
+
+      <div class="profile-hero">
+        <div class="profile-avatar">АИ</div>
+        <div class="profile-name">Алексей Иванов</div>
+        <div class="profile-role">Masters · #1 в рейтинге</div>
+        <div class="profile-membership">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Член KSLT до 31.12.2026
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">2450</div>
+          <div class="stat-label">Очки</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">28</div>
+          <div class="stat-label">Победы</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">4</div>
+          <div class="stat-label">Поражения</div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Активность</div>
+        <div class="profile-row">
+          <div class="profile-row-icon yellow">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Баллы лояльности</div>
+            <div class="profile-row-sub">Доступно для обмена</div>
+          </div>
+          <span class="profile-row-value">850</span>
+          <span class="profile-row-arrow">›</span>
+        </div>
+        <div class="profile-row">
+          <div class="profile-row-icon green">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Мои турниры</div>
+            <div class="profile-row-sub">Текущие и прошлые</div>
+          </div>
+          <span class="profile-row-value">12</span>
+          <span class="profile-row-arrow">›</span>
+        </div>
+        <div class="profile-row">
+          <div class="profile-row-icon blue">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Мои вызовы</div>
+            <div class="profile-row-sub">Активные баттлы</div>
+          </div>
+          <span class="profile-row-value">2</span>
+          <span class="profile-row-arrow">›</span>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Настройки</div>
+        <div class="profile-row">
+          <div class="profile-row-icon orange">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Редактировать профиль</div>
+          </div>
+          <span class="profile-row-arrow">›</span>
+        </div>
+        <div class="profile-row">
+          <div class="profile-row-icon blue">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Уведомления</div>
+          </div>
+          <span class="profile-row-arrow">›</span>
+        </div>
+        <div class="profile-row">
+          <div class="profile-row-icon green">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Язык</div>
+            <div class="profile-row-sub">Русский</div>
+          </div>
+          <span class="profile-row-arrow">›</span>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Информация</div>
+        <div class="profile-row">
+          <div class="profile-row-icon yellow">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">О KSLT</div>
+          </div>
+          <span class="profile-row-arrow">›</span>
+        </div>
+        <div class="profile-row">
+          <div class="profile-row-icon blue">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Правила</div>
+          </div>
+          <span class="profile-row-arrow">›</span>
+        </div>
+        <div class="profile-row">
+          <div class="profile-row-icon red">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Выйти</div>
+          </div>
+          <span class="profile-row-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== BATTLES SCREEN ====== -->
+    <div class="screen" id="screenBattles">
+      <div class="screen-header">
+        <h1>Баттлы</h1>
+        <p>Голосуй за любимого игрока</p>
+      </div>
+
+      <div class="filters-row">
+        <button class="filter-chip active">Активные</button>
+        <button class="filter-chip">Завершённые</button>
+      </div>
+
+      <div class="animate-in">
+        <div class="battle-card">
+          <div class="battle-title">Баттл недели</div>
+          <div class="battle-vs">
+            <div class="battle-fighter">
+              <div class="battle-fighter-avatar">АИ</div>
+              <div class="battle-fighter-name">Алексей<br>Иванов</div>
+            </div>
+            <span class="battle-vs-text">VS</span>
+            <div class="battle-fighter">
+              <div class="battle-fighter-avatar">БС</div>
+              <div class="battle-fighter-name">Бакыт<br>Сыдыков</div>
+            </div>
+          </div>
+          <div class="battle-vote-bar">
+            <div class="battle-vote-fill-l" style="width:62%"></div>
+            <div class="battle-vote-fill-r" style="width:38%"></div>
+          </div>
+          <div class="battle-vote-labels">
+            <span><strong>62%</strong> (186)</span>
+            <span><strong>38%</strong> (114)</span>
+          </div>
+          <div class="battle-btn-row">
+            <button class="battle-btn primary">Голосовать</button>
+            <button class="battle-btn secondary">Подробнее</button>
+          </div>
+        </div>
+
+        <div class="battle-card">
+          <div class="battle-title">Вызов Masters</div>
+          <div class="battle-vs">
+            <div class="battle-fighter">
+              <div class="battle-fighter-avatar">ДК</div>
+              <div class="battle-fighter-name">Дмитрий<br>Козлов</div>
+            </div>
+            <span class="battle-vs-text">VS</span>
+            <div class="battle-fighter">
+              <div class="battle-fighter-avatar">НА</div>
+              <div class="battle-fighter-name">Нурлан<br>Аманов</div>
+            </div>
+          </div>
+          <div class="battle-vote-bar">
+            <div class="battle-vote-fill-l" style="width:45%"></div>
+            <div class="battle-vote-fill-r" style="width:55%"></div>
+          </div>
+          <div class="battle-vote-labels">
+            <span><strong>45%</strong> (89)</span>
+            <span><strong>55%</strong> (109)</span>
+          </div>
+          <div class="battle-btn-row">
+            <button class="battle-btn primary">Голосовать</button>
+            <button class="battle-btn secondary">Подробнее</button>
+          </div>
+        </div>
+
+        <div class="battle-card">
+          <div class="battle-title">Дерби Challenger</div>
+          <div class="battle-vs">
+            <div class="battle-fighter">
+              <div class="battle-fighter-avatar">ТМ</div>
+              <div class="battle-fighter-name">Тимур<br>Маратов</div>
+            </div>
+            <span class="battle-vs-text">VS</span>
+            <div class="battle-fighter">
+              <div class="battle-fighter-avatar">ЕЖ</div>
+              <div class="battle-fighter-name">Ержан<br>Жумабеков</div>
+            </div>
+          </div>
+          <div class="battle-vote-bar">
+            <div class="battle-vote-fill-l" style="width:51%"></div>
+            <div class="battle-vote-fill-r" style="width:49%"></div>
+          </div>
+          <div class="battle-vote-labels">
+            <span><strong>51%</strong> (73)</span>
+            <span><strong>49%</strong> (70)</span>
+          </div>
+          <div class="battle-btn-row">
+            <button class="battle-btn primary">Голосовать</button>
+            <button class="battle-btn secondary">Подробнее</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== COURTS SCREEN ====== -->
+    <div class="screen" id="screenCourts">
+      <div class="screen-header">
+        <h1>Корты</h1>
+        <p>Теннисные корты Бишкека</p>
+      </div>
+
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" placeholder="Поиск корта..." readonly>
+      </div>
+
+      <div class="tournament-list animate-in">
+        <div class="tournament-list-item" style="align-items:flex-start;">
+          <div style="width:64px;height:64px;border-radius:var(--radius-md);background:linear-gradient(135deg,#1a3a0a,#2d6917);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">🎾</div>
+          <div class="tl-info">
+            <div class="tl-name">Dordoi Tennis Club</div>
+            <div class="tl-details">
+              <span>6 кортов · Хард</span>
+              <span>800 сом/час</span>
+            </div>
+            <div class="tl-badges">
+              <span class="tl-badge status-open">Открыт</span>
+            </div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:flex-start;">
+          <div style="width:64px;height:64px;border-radius:var(--radius-md);background:linear-gradient(135deg,#0d1b2a,#1b263b);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">🏟</div>
+          <div class="tl-info">
+            <div class="tl-name">Ак-Булак</div>
+            <div class="tl-details">
+              <span>4 корта · Грунт</span>
+              <span>600 сом/час</span>
+            </div>
+            <div class="tl-badges">
+              <span class="tl-badge status-open">Открыт</span>
+            </div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:flex-start;">
+          <div style="width:64px;height:64px;border-radius:var(--radius-md);background:linear-gradient(135deg,#2a1b0d,#69421b);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">🏠</div>
+          <div class="tl-info">
+            <div class="tl-name">Спартак</div>
+            <div class="tl-details">
+              <span>3 корта · Хард</span>
+              <span>500 сом/час</span>
+            </div>
+            <div class="tl-badges">
+              <span class="tl-badge status-done">Закрыт</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== COACHES SCREEN ====== -->
+    <div class="screen" id="screenCoaches">
+      <div class="screen-header">
+        <h1>Тренеры</h1>
+        <p>Профессиональные тренеры</p>
+      </div>
+
+      <div class="tournament-list animate-in">
+        <div class="tournament-list-item" style="align-items:flex-start;">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--text-sec);flex-shrink:0;border:2px solid var(--border-light)">ВП</div>
+          <div class="tl-info">
+            <div class="tl-name">Виктор Петров</div>
+            <div class="tl-details">
+              <span>ITF Level 2</span>
+              <span>Dordoi Tennis Club</span>
+            </div>
+            <div class="tl-badges">
+              <span class="tl-badge cat">15 лет опыта</span>
+            </div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:flex-start;">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--text-sec);flex-shrink:0;border:2px solid var(--border-light)">АН</div>
+          <div class="tl-info">
+            <div class="tl-name">Айбек Назаров</div>
+            <div class="tl-details">
+              <span>ITF Level 1</span>
+              <span>Ак-Булак</span>
+            </div>
+            <div class="tl-badges">
+              <span class="tl-badge cat">10 лет опыта</span>
+            </div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:flex-start;">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--text-sec);flex-shrink:0;border:2px solid var(--border-light)">ОС</div>
+          <div class="tl-info">
+            <div class="tl-name">Олег Смирнов</div>
+            <div class="tl-details">
+              <span>PTR Professional</span>
+              <span>Спартак</span>
+            </div>
+            <div class="tl-badges">
+              <span class="tl-badge cat">8 лет опыта</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== PARTNERS SCREEN ====== -->
+    <div class="screen" id="screenPartners">
+      <div class="screen-header">
+        <h1>Найти партнёра</h1>
+        <p>Для тренировки или спарринга</p>
+      </div>
+
+      <div class="filters-row">
+        <button class="filter-chip active">Все</button>
+        <button class="filter-chip">Онлайн</button>
+        <button class="filter-chip">Мой уровень</button>
+      </div>
+
+      <!-- NTRP level filter -->
+      <div class="filters-row" style="padding-top:0">
+        <button class="filter-chip active">Все NTRP</button>
+        <button class="filter-chip">1.0-2.0</button>
+        <button class="filter-chip">2.5-3.0</button>
+        <button class="filter-chip">3.5-4.0</button>
+        <button class="filter-chip">4.5-5.0</button>
+        <button class="filter-chip">5.5+</button>
+      </div>
+
+      <div class="tournament-list animate-in">
+        <div class="tournament-list-item" style="align-items:center;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--text-sec);flex-shrink:0;position:relative">
+            ТМ
+            <span style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--green);border-radius:50%;border:2px solid var(--bg-card)"></span>
+          </div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">Тимур Маратов</div>
+            <div class="tl-details" style="margin-bottom:0">
+              <span>Masters</span>
+              <span>1980 очков</span>
+              <span style="color:var(--accent);font-weight:600">NTRP 4.5</span>
+            </div>
+          </div>
+          <button class="btn-accent" style="padding:8px 14px;font-size:12px">Написать</button>
+        </div>
+        <div class="tournament-list-item" style="align-items:center;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--text-sec);flex-shrink:0;position:relative">
+            ЕЖ
+            <span style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--green);border-radius:50%;border:2px solid var(--bg-card)"></span>
+          </div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">Ержан Жумабеков</div>
+            <div class="tl-details" style="margin-bottom:0">
+              <span>Masters</span>
+              <span>1870 очков</span>
+              <span style="color:var(--accent);font-weight:600">NTRP 4.0</span>
+            </div>
+          </div>
+          <button class="btn-accent" style="padding:8px 14px;font-size:12px">Написать</button>
+        </div>
+        <div class="tournament-list-item" style="align-items:center;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--text-sec);flex-shrink:0;position:relative">
+            АТ
+            <span style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--text-dim);border-radius:50%;border:2px solid var(--bg-card)"></span>
+          </div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">Азамат Токоев</div>
+            <div class="tl-details" style="margin-bottom:0">
+              <span>Masters</span>
+              <span>1750 очков</span>
+              <span style="color:var(--accent);font-weight:600">NTRP 3.5</span>
+            </div>
+          </div>
+          <button class="btn-accent" style="padding:8px 14px;font-size:12px;background:var(--glass);color:var(--text-sec);border:1px solid var(--border)">Написать</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== SERVICES SCREEN ====== -->
+    <div class="screen" id="screenServices">
+      <div class="screen-header">
+        <h1>Услуги</h1>
+        <p>Аренда кортов и тренировки</p>
+      </div>
+
+      <div class="tournament-list animate-in">
+        <div class="tournament-list-item" style="align-items:flex-start;">
+          <div style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🎾</div>
+          <div class="tl-info">
+            <div class="tl-name">Аренда корта</div>
+            <div class="tl-details"><span>от 500 сом/час</span></div>
+            <div style="font-size:12px;color:var(--text-sec);margin-top:4px;line-height:1.3">Хард, грунт, крытые и открытые. Бронируйте удобное время.</div>
+          </div>
+          <span class="profile-row-arrow" style="align-self:center">›</span>
+        </div>
+        <div class="tournament-list-item" style="align-items:flex-start;">
+          <div style="width:56px;height:56px;border-radius:var(--radius-md);background:rgba(59,130,246,0.15);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏋️</div>
+          <div class="tl-info">
+            <div class="tl-name">Индивидуальные тренировки</div>
+            <div class="tl-details"><span>от 1500 сом</span></div>
+            <div style="font-size:12px;color:var(--text-sec);margin-top:4px;line-height:1.3">Персональные занятия с сертифицированными тренерами ITF/PTR.</div>
+          </div>
+          <span class="profile-row-arrow" style="align-self:center">›</span>
+        </div>
+        <div class="tournament-list-item" style="align-items:flex-start;">
+          <div style="width:56px;height:56px;border-radius:var(--radius-md);background:rgba(255,159,67,0.15);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">👥</div>
+          <div class="tl-info">
+            <div class="tl-name">Групповые занятия</div>
+            <div class="tl-details"><span>от 800 сом</span></div>
+            <div style="font-size:12px;color:var(--text-sec);margin-top:4px;line-height:1.3">Занятия в группах 3-6 человек. Начальный и средний уровень.</div>
+          </div>
+          <span class="profile-row-arrow" style="align-self:center">›</span>
+        </div>
+        <div class="tournament-list-item" style="align-items:flex-start;">
+          <div style="width:56px;height:56px;border-radius:var(--radius-md);background:rgba(46,213,115,0.15);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏆</div>
+          <div class="tl-info">
+            <div class="tl-name">Членство KSLT</div>
+            <div class="tl-details"><span>от 3000 сом/мес</span></div>
+            <div style="font-size:12px;color:var(--text-sec);margin-top:4px;line-height:1.3">Участие в турнирах, рейтинг, баллы лояльности, скидки.</div>
+          </div>
+          <span class="profile-row-arrow" style="align-self:center">›</span>
+        </div>
+        <div class="tournament-list-item" style="align-items:flex-start;cursor:pointer" onclick="switchToScreen('screenDiscounts')">
+          <div style="width:56px;height:56px;border-radius:var(--radius-md);background:rgba(255,71,87,0.15);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏷️</div>
+          <div class="tl-info">
+            <div class="tl-name">Скидки для членов KSLT</div>
+            <div class="tl-details"><span>Партнёры клуба</span></div>
+            <div style="font-size:12px;color:var(--text-sec);margin-top:4px;line-height:1.3">Скидки от партнёров KSLT: еда, спорт, экипировка и другое.</div>
+          </div>
+          <span class="profile-row-arrow" style="align-self:center">›</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== SPONSORS SCREEN ====== -->
+    <div class="screen" id="screenSponsors">
+      <div class="screen-header">
+        <h1>Спонсоры и партнёры</h1>
+        <p>Поддерживают развитие тенниса в КР</p>
+      </div>
+
+      <div class="section-title"><h2>Титульные спонсоры</h2></div>
+      <div class="tournament-list animate-in">
+        <div class="tournament-list-item" style="align-items:center;">
+          <div style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏢</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name">Wilson</div>
+            <div class="tl-details" style="margin:0"><span>Официальный поставщик мячей</span></div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:center;">
+          <div style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏦</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name">Optima Bank</div>
+            <div class="tl-details" style="margin:0"><span>Генеральный спонсор сезона 2026</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title"><h2>Партнёры</h2></div>
+      <div class="tournament-list">
+        <div class="tournament-list-item" style="align-items:center;">
+          <div style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🎾</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name">Dordoi Tennis Club</div>
+            <div class="tl-details" style="margin:0"><span>Площадка проведения турниров</span></div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:center;">
+          <div style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📺</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name">Sport Media KG</div>
+            <div class="tl-details" style="margin:0"><span>Медиа-партнёр</span></div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:center;">
+          <div style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏥</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name">SportMed Clinic</div>
+            <div class="tl-details" style="margin:0"><span>Медицинский партнёр</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== DISCOUNTS SCREEN ====== -->
+    <div class="screen" id="screenDiscounts">
+      <div class="td-topbar" style="position:relative">
+        <button class="td-back" onclick="switchToScreen('screenServices')">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Услуги
+        </button>
+        <span class="td-topbar-title">Скидки</span>
+        <span style="width:60px"></span>
+      </div>
+
+      <div class="screen-header" style="padding-top:8px">
+        <h1>Скидки для членов</h1>
+        <p>Покажите членскую карту KSLT</p>
+      </div>
+
+      <div class="filters-row">
+        <button class="filter-chip active">Все</button>
+        <button class="filter-chip">🍽 Еда</button>
+        <button class="filter-chip">💪 Спорт</button>
+        <button class="filter-chip">🎾 Экипировка</button>
+        <button class="filter-chip">📚 Обучение</button>
+        <button class="filter-chip">🏔 Отдых</button>
+      </div>
+
+      <!-- Еда и напитки -->
+      <div class="section-title"><h2>🍽 Еда и напитки</h2></div>
+      <div class="tournament-list">
+        <div class="tournament-list-item" style="align-items:center">
+          <div style="width:48px;height:48px;border-radius:var(--radius-md);background:rgba(255,159,67,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">☕</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">Sierra Coffee</div>
+            <div class="tl-details" style="margin:0"><span>Все филиалы Бишкека</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:16px;font-weight:800;color:var(--accent)">-15%</div>
+            <div style="font-size:10px;color:var(--text-muted)">на всё меню</div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:center">
+          <div style="width:48px;height:48px;border-radius:var(--radius-md);background:rgba(255,159,67,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🍕</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">Dolce Vita</div>
+            <div class="tl-details" style="margin:0"><span>ул. Киевская 122</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:16px;font-weight:800;color:var(--accent)">-10%</div>
+            <div style="font-size:10px;color:var(--text-muted)">на основное</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Спорт и здоровье -->
+      <div class="section-title"><h2>💪 Спорт и здоровье</h2></div>
+      <div class="tournament-list">
+        <div class="tournament-list-item" style="align-items:center">
+          <div style="width:48px;height:48px;border-radius:var(--radius-md);background:rgba(46,213,115,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏋️</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">World Class Fitness</div>
+            <div class="tl-details" style="margin:0"><span>ТЦ Дордой Плаза</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:16px;font-weight:800;color:var(--accent)">-20%</div>
+            <div style="font-size:10px;color:var(--text-muted)">абонемент</div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:center">
+          <div style="width:48px;height:48px;border-radius:var(--radius-md);background:rgba(46,213,115,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💆</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">SportMed Clinic</div>
+            <div class="tl-details" style="margin:0"><span>ул. Токтогула 89</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:16px;font-weight:800;color:var(--accent)">-15%</div>
+            <div style="font-size:10px;color:var(--text-muted)">массаж, физио</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Экипировка -->
+      <div class="section-title"><h2>🎾 Экипировка</h2></div>
+      <div class="tournament-list">
+        <div class="tournament-list-item" style="align-items:center">
+          <div style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏸</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">Tennis Pro Shop</div>
+            <div class="tl-details" style="margin:0"><span>ТЦ Бишкек Парк</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:16px;font-weight:800;color:var(--accent)">-25%</div>
+            <div style="font-size:10px;color:var(--text-muted)">ракетки, мячи</div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:center">
+          <div style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">👟</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">Nike Store</div>
+            <div class="tl-details" style="margin:0"><span>ТРЦ Asia Mall</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:16px;font-weight:800;color:var(--accent)">-10%</div>
+            <div style="font-size:10px;color:var(--text-muted)">спортобувь</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Обучение -->
+      <div class="section-title"><h2>📚 Обучение</h2></div>
+      <div class="tournament-list">
+        <div class="tournament-list-item" style="align-items:center">
+          <div style="width:48px;height:48px;border-radius:var(--radius-md);background:rgba(59,130,246,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🌐</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">English First</div>
+            <div class="tl-details" style="margin:0"><span>ул. Манаса 57</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:16px;font-weight:800;color:var(--accent)">-10%</div>
+            <div style="font-size:10px;color:var(--text-muted)">курсы англ.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Отдых -->
+      <div class="section-title"><h2>🏔 Отдых</h2></div>
+      <div class="tournament-list">
+        <div class="tournament-list-item" style="align-items:center">
+          <div style="width:48px;height:48px;border-radius:var(--radius-md);background:rgba(59,130,246,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏔</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">Raduga Resort</div>
+            <div class="tl-details" style="margin:0"><span>Иссык-Куль, с. Бостери</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:16px;font-weight:800;color:var(--accent)">-15%</div>
+            <div style="font-size:10px;color:var(--text-muted)">проживание</div>
+          </div>
+        </div>
+        <div class="tournament-list-item" style="align-items:center">
+          <div style="width:48px;height:48px;border-radius:var(--radius-md);background:rgba(59,130,246,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏨</div>
+          <div class="tl-info" style="padding:0">
+            <div class="tl-name" style="font-size:14px">Hyatt Regency Bishkek</div>
+            <div class="tl-details" style="margin:0"><span>ул. Советская 191</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:16px;font-weight:800;color:var(--accent)">-10%</div>
+            <div style="font-size:10px;color:var(--text-muted)">спа, бассейн</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <!-- ====== TAB BAR ====== -->
+  <nav class="tab-bar">
+    <button class="tab-item active" data-screen="screenHome">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Главная</span>
+    </button>
+    <button class="tab-item" data-screen="screenTournaments">
+      <svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>
+      <span>Турниры</span>
+    </button>
+    <button class="tab-item" data-screen="screenRating">
+      <svg viewBox="0 0 24 24"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+      <span>Рейтинг</span>
+    </button>
+    <button class="tab-item" data-screen="screenServices">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <span>Услуги</span>
+    </button>
+    <button class="tab-item" data-screen="screenProfile">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Профиль</span>
+    </button>
+  </nav>
+
+  <!-- ====== SIDE MENU ====== -->
+  <div class="menu-overlay" id="menuOverlay">
+    <div class="side-menu">
+      <button class="menu-close" id="menuClose">
+        <svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+
+      <div class="menu-section">
+        <div class="menu-section-title">Разделы</div>
+        <button class="menu-item" data-screen="screenLive">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M16.24 7.76a6 6 0 010 8.49"/><path d="M7.76 16.24a6 6 0 010-8.49"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M4.93 19.07a10 10 0 010-14.14"/></svg>
+          <span>Live</span>
+          <span class="menu-badge">3</span>
+        </button>
+        <button class="menu-item" data-screen="screenNews">
+          <svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6z"/></svg>
+          <span>Новости</span>
+        </button>
+        <button class="menu-item" data-screen="screenBattles">
+          <svg viewBox="0 0 24 24"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19.5 6.5L21 3l-3.5 1.5L14 8l4 4 3.5-3.5z"/></svg>
+          <span>Баттлы</span>
+          <span class="menu-badge">3</span>
+        </button>
+        <button class="menu-item" data-screen="screenCourts">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Корты</span>
+        </button>
+        <button class="menu-item" data-screen="screenCoaches">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          <span>Тренеры</span>
+        </button>
+        <button class="menu-item" data-screen="screenPartners">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          <span>Найти партнёра</span>
+        </button>
+        <button class="menu-item" data-screen="screenSponsors">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          <span>Спонсоры и партнёры</span>
+        </button>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-section-title">Информация</div>
+        <button class="menu-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>О KSLT</span>
+        </button>
+        <button class="menu-item">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span>Правила</span>
+        </button>
+        <button class="menu-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          <span>FAQ</span>
+        </button>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-section-title">Связаться</div>
+        <a class="menu-item" href="https://wa.me/996555000000" target="_blank">
+          <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          <span>WhatsApp</span>
+        </a>
+        <a class="menu-item" href="https://t.me/kslt_admin" target="_blank">
+          <svg viewBox="0 0 24 24"><path d="M21.2 4.4L2.4 11.4c-.5.2-.5.8 0 1l4.8 1.8 1.8 5.8c.1.4.6.5.9.3l2.7-2.2 4.8 3.5c.4.3 1 .1 1.1-.4l3.3-15c.1-.6-.4-1-.6-.8z"/><path d="M8 13.5l9-6.5"/></svg>
+          <span>Telegram</span>
+        </a>
+      </div>
+
+      <div class="menu-footer">
+        <div class="menu-footer-logo">KS<span>LT</span></div>
+        <div class="menu-footer-ver">Версия 1.0.0 (mockup)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== BOTTOM SHEET: TOURNAMENT FILTERS ====== -->
+  <div class="bottom-sheet-overlay" id="tournamentSheet" onclick="closeSheet(event,'tournamentSheet')">
+    <div class="bottom-sheet">
+      <div class="bs-handle"></div>
+      <div class="bs-title">Фильтры турниров</div>
+
+      <div class="bs-section">
+        <div class="bs-label">Статус</div>
+        <div class="bs-options">
+          <button class="bs-option active">Все</button>
+          <button class="bs-option">Предстоящие</button>
+          <button class="bs-option">Live</button>
+          <button class="bs-option">Завершённые</button>
+        </div>
+      </div>
+
+      <div class="bs-section">
+        <div class="bs-label">Категория</div>
+        <div class="bs-options">
+          <button class="bs-option">Все</button>
+          <button class="bs-option active">Masters</button>
+          <button class="bs-option">Challenger</button>
+          <button class="bs-option">Futures</button>
+          <button class="bs-option">Tour</button>
+          <button class="bs-option">Grand</button>
+        </div>
+      </div>
+
+      <div class="bs-section">
+        <div class="bs-label">Гендер</div>
+        <div class="bs-options">
+          <button class="bs-option">Все</button>
+          <button class="bs-option active">♂ Мужские</button>
+          <button class="bs-option">♀ Женские</button>
+          <button class="bs-option">Микст</button>
+        </div>
+      </div>
+
+      <button class="bs-apply" onclick="closeSheet(null,'tournamentSheet')">Применить</button>
+    </div>
+  </div>
+
+  <!-- ====== BOTTOM SHEET: RATING CATEGORY ====== -->
+  <div class="bottom-sheet-overlay" id="ratingSheet" onclick="closeSheet(event,'ratingSheet')">
+    <div class="bottom-sheet">
+      <div class="bs-handle"></div>
+      <div class="bs-title">Категория рейтинга</div>
+
+      <div class="bs-section">
+        <div class="bs-options" style="flex-direction:column;gap:0">
+          <button class="bs-option" style="border-radius:0;border-bottom:1px solid var(--border);width:100%;text-align:left;padding:14px 16px">Tour</button>
+          <button class="bs-option" style="border-radius:0;border-bottom:1px solid var(--border);width:100%;text-align:left;padding:14px 16px">Futures</button>
+          <button class="bs-option" style="border-radius:0;border-bottom:1px solid var(--border);width:100%;text-align:left;padding:14px 16px">Challenger</button>
+          <button class="bs-option active" style="border-radius:0;border-bottom:1px solid var(--border);width:100%;text-align:left;padding:14px 16px">Masters</button>
+          <button class="bs-option" style="border-radius:0;width:100%;text-align:left;padding:14px 16px">Pro-Masters</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TOURNAMENT DETAIL OVERLAY ====== -->
+  <div class="td-overlay" id="tdOverlay">
+    <div class="td-topbar">
+      <button class="td-back" onclick="closeTournamentDetail()">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Назад
+      </button>
+      <span class="td-topbar-title">Турнир</span>
+      <span style="width:60px"></span>
+    </div>
+
+    <div class="td-hero">
+      <h1 id="tdName">KSLT Spring Open 2026</h1>
+      <div class="td-hero-meta" id="tdBadges">
+        <span class="tl-badge cat">Кат. 2 · Masters</span>
+        <span class="tl-badge" style="background:rgba(59,130,246,0.15);color:var(--blue)">♂ Муж</span>
+        <span class="tl-badge status-open">Регистрация</span>
+      </div>
+      <div class="td-hero-detail" id="tdDetails">12 апреля 2026 · Dordoi Tennis Club · 32 игрока</div>
+    </div>
+
+    <div class="td-tabs" id="tdTabs">
+      <button class="td-tab active" data-tab="tdInfo">Информация</button>
+      <button class="td-tab" data-tab="tdBracket">Сетка</button>
+      <button class="td-tab" data-tab="tdResults">Результаты</button>
+      <button class="td-tab" data-tab="tdScore">Счёт</button>
+    </div>
+
+    <!-- Info tab -->
+    <div class="td-tab-content active" id="tdInfo">
+      <div class="profile-section" style="margin:0 0 12px">
+        <div class="profile-row">
+          <div class="profile-row-icon yellow">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Дата</div>
+            <div class="profile-row-sub">12 апреля 2026, 09:00</div>
+          </div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-row-icon green">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Место</div>
+            <div class="profile-row-sub">Dordoi Tennis Club, Бишкек</div>
+          </div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-row-icon blue">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Участники</div>
+            <div class="profile-row-sub">24 / 32 мест занято</div>
+          </div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-row-icon orange">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Дедлайн регистрации</div>
+            <div class="profile-row-sub">10 апреля 2026, 23:59</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-accent" style="width:100%;padding:14px;font-size:15px;margin-bottom:12px">Записаться на турнир</button>
+      <p style="font-size:12px;color:var(--text-muted);line-height:1.5">Турнир проводится по олимпийской системе (single elimination). 5 раундов, лучший из 3 сетов. Финал — до 3 побед в сетах. Регистрационный взнос: 1500 сом.</p>
+    </div>
+
+    <!-- Bracket tab -->
+    <div class="td-tab-content" id="tdBracket">
+
+      <!-- ===== ГРУППОВОЙ ЭТАП ===== -->
+      <div class="bracket-section-title">Групповой этап</div>
+
+      <!-- Группа A -->
+      <div class="group-title">Группа A</div>
+      <div class="group-table-wrap">
+        <table class="group-table">
+          <tr><th>№</th><th>Игрок</th><th>1</th><th>2</th><th>3</th><th>4</th><th>П</th><th>Место</th></tr>
+          <tr>
+            <td>1</td><td>Яна Голубева</td>
+            <td class="g-self">×</td><td class="g-win">6:0</td><td class="g-win">6:1</td><td class="g-win">4:6</td><td>2</td><td>1</td>
+          </tr>
+          <tr>
+            <td>2</td><td>Вали Ермакова</td>
+            <td class="g-loss">0:6</td><td class="g-self">×</td><td class="g-loss">2:6</td><td class="g-win">6:3</td><td>1</td><td>3</td>
+          </tr>
+          <tr>
+            <td>3</td><td>Инга Климова</td>
+            <td class="g-loss">1:6</td><td class="g-win">6:2</td><td class="g-self">×</td><td class="g-win">6:4</td><td>2</td><td>2</td>
+          </tr>
+          <tr>
+            <td>4</td><td>Майя Логинова</td>
+            <td class="g-win">6:4</td><td class="g-loss">3:6</td><td class="g-loss">4:6</td><td class="g-self">×</td><td>1</td><td>4</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Группа B -->
+      <div class="group-title">Группа B</div>
+      <div class="group-table-wrap">
+        <table class="group-table">
+          <tr><th>№</th><th>Игрок</th><th>1</th><th>2</th><th>3</th><th>4</th><th>П</th><th>Место</th></tr>
+          <tr>
+            <td>1</td><td>Ника Воронова</td>
+            <td class="g-self">×</td><td class="g-win">7:6</td><td class="g-win">7:5</td><td class="g-win">6:4</td><td>3</td><td>1</td>
+          </tr>
+          <tr>
+            <td>2</td><td>Марта Тихонова</td>
+            <td class="g-loss">6:7</td><td class="g-self">×</td><td class="g-win">2:6</td><td class="g-win">6:1</td><td>2</td><td>2</td>
+          </tr>
+          <tr>
+            <td>3</td><td>Инна Карпова</td>
+            <td class="g-loss">5:7</td><td class="g-win">6:2</td><td class="g-self">×</td><td class="g-loss">1:6</td><td>1</td><td>4</td>
+          </tr>
+          <tr>
+            <td>4</td><td>Тома Журавлёва</td>
+            <td class="g-loss">4:6</td><td class="g-loss">1:6</td><td class="g-win">6:1</td><td class="g-self">×</td><td>1</td><td>3</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Группа C -->
+      <div class="group-title">Группа C</div>
+      <div class="group-table-wrap">
+        <table class="group-table">
+          <tr><th>№</th><th>Игрок</th><th>1</th><th>2</th><th>3</th><th>4</th><th>П</th><th>Место</th></tr>
+          <tr>
+            <td>1</td><td>Рита Тарасова</td>
+            <td class="g-self">×</td><td class="g-win">6:0</td><td class="g-win">6:0</td><td class="g-win">0:6</td><td>2</td><td>2</td>
+          </tr>
+          <tr>
+            <td>2</td><td>Лиза Гаврилина</td>
+            <td class="g-loss">0:6</td><td class="g-self">×</td><td class="g-win">6:0</td><td class="g-win">0:6</td><td>1</td><td>3</td>
+          </tr>
+          <tr>
+            <td>3</td><td>Зоя Макарова</td>
+            <td class="g-loss">0:6</td><td class="g-loss">0:6</td><td class="g-self">×</td><td class="g-win">6:0</td><td>1</td><td>4</td>
+          </tr>
+          <tr>
+            <td>4</td><td>Роза Никитина</td>
+            <td class="g-win">6:0</td><td class="g-win">6:0</td><td class="g-win">6:0</td><td class="g-self">×</td><td>2</td><td>1</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ===== ПЛЕЙ-ОФФ СЕТКА ===== -->
+      <div class="bracket-section-title">Плей-офф</div>
+
+      <div class="bracket-scroll">
+        <!-- Четвертьфинал -->
+        <div class="bracket-col">
+          <div class="bracket-col-title">Четвертьфинал</div>
+
+          <div class="bracket-match-card">
+            <div class="bracket-match-meta"><span>14:00 · Корт 1</span></div>
+            <div class="bracket-match-row winner">
+              <span class="bm-seed">[1]</span>
+              <span class="bm-name">Яна Голубева</span>
+              <span class="bm-score">6</span>
+            </div>
+            <div class="bracket-match-row">
+              <span class="bm-seed"></span>
+              <span class="bm-name">Рита Тарасова</span>
+              <span class="bm-score">3</span>
+            </div>
+          </div>
+
+          <div class="bracket-match-card">
+            <div class="bracket-match-meta"><span>14:00 · Корт 2</span></div>
+            <div class="bracket-match-row winner">
+              <span class="bm-seed"></span>
+              <span class="bm-name">Инга Климова</span>
+              <span class="bm-score">7</span>
+            </div>
+            <div class="bracket-match-row">
+              <span class="bm-seed">[4]</span>
+              <span class="bm-name">Лена Белова</span>
+              <span class="bm-score">5</span>
+            </div>
+          </div>
+
+          <div class="bracket-match-card">
+            <div class="bracket-match-meta"><span>14:00 · Корт 3</span></div>
+            <div class="bracket-match-row winner">
+              <span class="bm-seed">[3]</span>
+              <span class="bm-name">Роза Никитина</span>
+              <span class="bm-score">6</span>
+            </div>
+            <div class="bracket-match-row">
+              <span class="bm-seed"></span>
+              <span class="bm-name">Марта Тихонова</span>
+              <span class="bm-score">1</span>
+            </div>
+          </div>
+
+          <div class="bracket-match-card">
+            <div class="bracket-match-meta"><span>14:00 · Корт 4</span></div>
+            <div class="bracket-match-row winner">
+              <span class="bm-seed"></span>
+              <span class="bm-name">Алла Захарова</span>
+              <span class="bm-score">7</span>
+            </div>
+            <div class="bracket-match-row">
+              <span class="bm-seed">[2]</span>
+              <span class="bm-name">Ника Воронова</span>
+              <span class="bm-score">6<sup>7</sup></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Полуфинал -->
+        <div class="bracket-col">
+          <div class="bracket-col-title">Полуфинал</div>
+
+          <div class="bracket-match-card">
+            <div class="bracket-match-meta"><span>14:50 · Корт 1</span></div>
+            <div class="bracket-match-row">
+              <span class="bm-seed"></span>
+              <span class="bm-name">Яна Голубева</span>
+              <span class="bm-score">1</span>
+            </div>
+            <div class="bracket-match-row winner">
+              <span class="bm-seed"></span>
+              <span class="bm-name">Инга Климова</span>
+              <span class="bm-score">6</span>
+            </div>
+            <div class="bracket-match-status">Игр.</div>
+          </div>
+
+          <div class="bracket-match-card">
+            <div class="bracket-match-meta"><span>14:50 · Корт 2</span></div>
+            <div class="bracket-match-row winner">
+              <span class="bm-seed"></span>
+              <span class="bm-name">Роза Никитина</span>
+              <span class="bm-score">6</span>
+            </div>
+            <div class="bracket-match-row">
+              <span class="bm-seed"></span>
+              <span class="bm-name">Алла Захарова</span>
+              <span class="bm-score">2</span>
+            </div>
+            <div class="bracket-match-status">Игр.</div>
+          </div>
+        </div>
+
+        <!-- Финал -->
+        <div class="bracket-col">
+          <div class="bracket-col-title">Финал</div>
+
+          <div class="bracket-match-card final">
+            <div class="bracket-match-meta"><span>15:40 · Корт 2</span></div>
+            <div class="bracket-match-row winner">
+              <span class="bm-seed"></span>
+              <span class="bm-name">Инга Климова</span>
+              <span class="bm-score">6</span>
+            </div>
+            <div class="bracket-match-row">
+              <span class="bm-seed"></span>
+              <span class="bm-name">Роза Никитина</span>
+              <span class="bm-score">2</span>
+            </div>
+            <div class="bracket-match-status">Игр.</div>
+          </div>
+
+          <div style="text-align:center;padding:12px 0">
+            <span style="font-size:20px">🏆</span>
+            <div style="font-size:13px;font-weight:700;color:var(--accent);margin-top:4px">Инга Климова</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- За 3-е место -->
+      <div style="margin-top:12px">
+        <div class="bracket-section-title">За 3-е место</div>
+        <div class="bracket-match-card">
+          <div class="bracket-match-meta"><span>15:40 · Корт 1</span></div>
+          <div class="bracket-match-row winner">
+            <span class="bm-seed"></span>
+            <span class="bm-name">Яна Голубева</span>
+            <span class="bm-score">6</span>
+          </div>
+          <div class="bracket-match-row">
+            <span class="bm-seed"></span>
+            <span class="bm-name">Алла Захарова</span>
+            <span class="bm-score">2</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Results tab -->
+    <div class="td-tab-content" id="tdResults">
+      <div class="profile-section" style="margin:0">
+        <div class="profile-section-title">Итоговые результаты</div>
+        <div class="profile-row">
+          <div style="font-size:20px;width:32px;text-align:center">🥇</div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Алексей Иванов</div>
+            <div class="profile-row-sub">+150 очков</div>
+          </div>
+        </div>
+        <div class="profile-row">
+          <div style="font-size:20px;width:32px;text-align:center">🥈</div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Дмитрий Козлов</div>
+            <div class="profile-row-sub">+100 очков</div>
+          </div>
+        </div>
+        <div class="profile-row">
+          <div style="font-size:20px;width:32px;text-align:center">🥉</div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Бакыт Сыдыков</div>
+            <div class="profile-row-sub">+60 очков</div>
+          </div>
+        </div>
+        <div class="profile-row">
+          <div style="font-size:20px;width:32px;text-align:center">🥉</div>
+          <div class="profile-row-text">
+            <div class="profile-row-label">Тимур Маратов</div>
+            <div class="profile-row-sub">+60 очков</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score entry tab (для игроков) -->
+    <div class="td-tab-content" id="tdScore">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:13px;color:var(--text-sec);line-height:1.4">Запишите счёт вашего матча.<br>После подтверждения результат попадёт в сетку.</div>
+      </div>
+      <div class="score-entry-card">
+        <div class="score-entry-title">Полуфинал · Матч #3</div>
+        <div style="display:flex;justify-content:center">
+          <div class="score-entry-names">
+            <div class="score-entry-name">А. Иванов</div>
+            <div class="score-entry-name">Т. Маратов</div>
+          </div>
+          <div class="score-entry-sets">
+            <div class="score-set-col">
+              <div class="score-set-label">Сет 1</div>
+              <div class="score-set-inputs">
+                <input class="score-set-input" type="number" min="0" max="7" value="6">
+                <input class="score-set-input" type="number" min="0" max="7" value="3">
+              </div>
+            </div>
+            <div class="score-set-col">
+              <div class="score-set-label">Сет 2</div>
+              <div class="score-set-inputs">
+                <input class="score-set-input" type="number" min="0" max="7" value="6">
+                <input class="score-set-input" type="number" min="0" max="7" value="4">
+              </div>
+            </div>
+            <div class="score-set-col">
+              <div class="score-set-label">Сет 3</div>
+              <div class="score-set-inputs">
+                <input class="score-set-input" type="number" min="0" max="7" value="">
+                <input class="score-set-input" type="number" min="0" max="7" value="">
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-accent" style="width:100%;padding:12px;font-size:14px;margin-top:8px">Подтвердить счёт</button>
+        <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text-muted)">Оба игрока должны подтвердить результат</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== LIVE MATCH FULL OVERLAY ====== -->
+  <div class="live-full" id="liveFullOverlay">
+    <div class="td-topbar">
+      <button class="td-back" onclick="closeLiveMatch()">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Live
+      </button>
+      <span class="live-badge">LIVE</span>
+      <span style="width:60px"></span>
+    </div>
+
+    <!-- Video / stream area -->
+    <div class="live-full-video">
+      Нет трансляции
+    </div>
+
+    <!-- Scoreboard — like website -->
+    <div class="live-full-scoreboard">
+      <div class="live-full-sb-header">
+        <span class="sb-dot"></span>
+        <span class="sb-label">LIVE</span>
+      </div>
+      <div class="live-full-sb-row serving">
+        <div class="sb-avatar">КХ</div>
+        <span class="sb-dot-serve"></span>
+        <span class="sb-pname">Константин Хан</span>
+        <div class="sb-sets">
+          <span class="sb-set-val won">6</span>
+          <span class="sb-set-val">7</span>
+          <span class="sb-set-val won">1</span>
+          <span class="sb-set-val current">0</span>
+        </div>
+      </div>
+      <div class="live-full-sb-row">
+        <div class="sb-avatar">ТР</div>
+        <span class="sb-no-serve"></span>
+        <span class="sb-pname">Тенниса Ракетовна</span>
+        <div class="sb-sets">
+          <span class="sb-set-val">1</span>
+          <span class="sb-set-val won">6</span>
+          <span class="sb-set-val">5</span>
+          <span class="sb-set-val current">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Match info -->
+    <div class="live-full-info">
+      <div class="live-full-info-row">
+        <span class="lfi-label">Турнир</span>
+        <span class="lfi-val">5 сетовый марафон</span>
+      </div>
+      <div class="live-full-info-row">
+        <span class="lfi-label">Формат</span>
+        <span class="lfi-val">Лучший из 5</span>
+      </div>
+      <div class="live-full-info-row">
+        <span class="lfi-label">Корт</span>
+        <span class="lfi-val">Корт #1</span>
+      </div>
+      <div class="live-full-info-row">
+        <span class="lfi-label">Раунд</span>
+        <span class="lfi-val">Полуфинал</span>
+      </div>
+    </div>
+
+    <!-- Match stats -->
+    <div class="live-stats">
+      <div class="live-stats-title">Статистика матча</div>
+
+      <div class="live-stat-row">
+        <span class="ls-val lead">68%</span>
+        <div class="ls-bar-wrap">
+          <div class="ls-bar-fill left" style="width:68%"></div>
+        </div>
+        <span class="ls-label">1-я подача</span>
+        <div class="ls-bar-wrap">
+          <div class="ls-bar-fill right" style="width:58%"></div>
+        </div>
+        <span class="ls-val">58%</span>
+      </div>
+
+      <div class="live-stat-row">
+        <span class="ls-val lead">4</span>
+        <div class="ls-bar-wrap">
+          <div class="ls-bar-fill left" style="width:57%"></div>
+        </div>
+        <span class="ls-label">Эйсы</span>
+        <div class="ls-bar-wrap">
+          <div class="ls-bar-fill right" style="width:43%"></div>
+        </div>
+        <span class="ls-val">3</span>
+      </div>
+
+      <div class="live-stat-row">
+        <span class="ls-val">2</span>
+        <div class="ls-bar-wrap">
+          <div class="ls-bar-fill left" style="width:40%"></div>
+        </div>
+        <span class="ls-label">Д. ошибки</span>
+        <div class="ls-bar-wrap">
+          <div class="ls-bar-fill right" style="width:60%"></div>
+        </div>
+        <span class="ls-val lead">3</span>
+      </div>
+
+      <div class="live-stat-row">
+        <span class="ls-val lead">18</span>
+        <div class="ls-bar-wrap">
+          <div class="ls-bar-fill left" style="width:60%"></div>
+        </div>
+        <span class="ls-label">Виннерсы</span>
+        <div class="ls-bar-wrap">
+          <div class="ls-bar-fill right" style="width:40%"></div>
+        </div>
+        <span class="ls-val">12</span>
+      </div>
+
+      <div class="live-stat-row">
+        <span class="ls-val lead">3/5</span>
+        <div class="ls-bar-wrap">
+          <div class="ls-bar-fill left" style="width:60%"></div>
+        </div>
+        <span class="ls-label">Брейки</span>
+        <div class="ls-bar-wrap">
+          <div class="ls-bar-fill right" style="width:33%"></div>
+        </div>
+        <span class="ls-val">1/3</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PLAYER PROFILE + CHALLENGE OVERLAY ====== -->
+  <div class="player-overlay" id="playerOverlay">
+    <div class="td-topbar">
+      <button class="td-back" onclick="closePlayerOverlay()">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Назад
+      </button>
+      <span class="td-topbar-title">Профиль игрока</span>
+      <span style="width:60px"></span>
+    </div>
+
+    <div class="player-hero">
+      <div class="player-hero-avatar">БС</div>
+      <div class="player-hero-name">Бакыт Сыдыков</div>
+      <div class="player-hero-cat">Masters · #2 в рейтинге</div>
+      <div class="player-stats-row">
+        <div class="player-stat">
+          <div class="player-stat-val">2310</div>
+          <div class="player-stat-label">Очки</div>
+        </div>
+        <div class="player-stat">
+          <div class="player-stat-val">25</div>
+          <div class="player-stat-label">Победы</div>
+        </div>
+        <div class="player-stat">
+          <div class="player-stat-val">6</div>
+          <div class="player-stat-label">Поражения</div>
+        </div>
+        <div class="player-stat">
+          <div class="player-stat-val">4.5</div>
+          <div class="player-stat-label">NTRP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- H2H -->
+    <div class="h2h-section">
+      <div class="h2h-title">Личные встречи</div>
+      <div class="h2h-score">
+        <div class="h2h-player">
+          <div class="h2h-player-name">Вы</div>
+          <div class="h2h-player-wins">3</div>
+        </div>
+        <div class="h2h-vs">—</div>
+        <div class="h2h-player">
+          <div class="h2h-player-name">Сыдыков</div>
+          <div class="h2h-player-wins">2</div>
+        </div>
+      </div>
+      <div class="h2h-match">
+        <span class="h2h-match-date">15 мар</span>
+        <span class="h2h-match-score h2h-match-winner">6-4 3-6 7-5</span>
+        <span style="font-size:11px;color:var(--green)">Победа</span>
+      </div>
+      <div class="h2h-match">
+        <span class="h2h-match-date">28 фев</span>
+        <span class="h2h-match-score">4-6 2-6</span>
+        <span style="font-size:11px;color:var(--red)">Поражение</span>
+      </div>
+      <div class="h2h-match">
+        <span class="h2h-match-date">10 фев</span>
+        <span class="h2h-match-score h2h-match-winner">7-6 6-3</span>
+        <span style="font-size:11px;color:var(--green)">Победа</span>
+      </div>
+    </div>
+
+    <!-- Challenge form -->
+    <div class="challenge-form">
+      <div class="challenge-form-title"><span>⚔️</span> Вызвать на матч</div>
+
+      <div class="challenge-row">
+        <div class="challenge-label">Корт</div>
+        <select class="challenge-select">
+          <option>Выберите корт...</option>
+          <option>Dordoi Tennis Club</option>
+          <option>Ак-Булак</option>
+          <option>Спартак</option>
+        </select>
+      </div>
+
+      <div class="challenge-row">
+        <div class="challenge-label">Дата и время</div>
+        <div class="challenge-date-row">
+          <input class="challenge-input" type="date" value="2026-04-12">
+          <input class="challenge-input" type="time" value="10:00">
+        </div>
+      </div>
+
+      <div class="challenge-row">
+        <div class="challenge-label">Сообщение (необязательно)</div>
+        <textarea class="challenge-msg" placeholder="Напишите сообщение сопернику..."></textarea>
+      </div>
+
+      <button class="challenge-send" onclick="sendChallenge()">Отправить вызов</button>
+    </div>
+  </div>
+
+  <!-- ====== AUTH SCREEN ====== -->
+  <div class="auth-screen" id="authScreen">
+    <button class="auth-skip" onclick="closeAuth()">Пропустить</button>
+
+    <div class="auth-logo">
+      <span class="auth-logo-text">KSLT</span>
+      <span class="auth-logo-icon">🎾</span>
+    </div>
+    <div class="auth-subtitle">Теннисное сообщество Кыргызстана</div>
+
+    <!-- Tabs: Вход / Регистрация -->
+    <div class="auth-tabs">
+      <div class="auth-tab active" data-auth="login" onclick="switchAuthTab('login')">Вход</div>
+      <div class="auth-tab" data-auth="register" onclick="switchAuthTab('register')">Регистрация</div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="auth-form active" id="authLogin">
+      <input class="auth-input" type="email" placeholder="Email" autocomplete="email">
+      <input class="auth-input" type="password" placeholder="Пароль" autocomplete="current-password">
+      <a class="auth-forgot" href="#">Забыли пароль?</a>
+      <button class="auth-submit" onclick="closeAuth()">Войти</button>
+
+      <div class="auth-divider">
+        <div class="auth-divider-line"></div>
+        <span class="auth-divider-text">или войти через</span>
+        <div class="auth-divider-line"></div>
+      </div>
+
+      <div class="auth-social">
+        <button class="auth-social-btn google" onclick="closeAuth()">
+          <svg class="auth-social-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        </button>
+        <button class="auth-social-btn apple" onclick="closeAuth()">
+          <svg class="auth-social-icon" viewBox="0 0 24 24" fill="#000"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        </button>
+        <button class="auth-social-btn telegram" onclick="closeAuth()">
+          <svg class="auth-social-icon" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Register Form -->
+    <div class="auth-form" id="authRegister">
+      <input class="auth-input" type="text" placeholder="Имя и фамилия" autocomplete="name">
+      <input class="auth-input" type="email" placeholder="Email" autocomplete="email">
+
+      <input class="auth-input" type="password" placeholder="Пароль" autocomplete="new-password">
+      <button class="auth-submit" onclick="closeAuth()">Создать аккаунт</button>
+
+      <div class="auth-divider">
+        <div class="auth-divider-line"></div>
+        <span class="auth-divider-text">или через</span>
+        <div class="auth-divider-line"></div>
+      </div>
+
+      <div class="auth-social">
+        <button class="auth-social-btn google" onclick="closeAuth()">
+          <svg class="auth-social-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        </button>
+        <button class="auth-social-btn apple" onclick="closeAuth()">
+          <svg class="auth-social-icon" viewBox="0 0 24 24" fill="#000"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        </button>
+        <button class="auth-social-btn telegram" onclick="closeAuth()">
+          <svg class="auth-social-icon" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="auth-footer">
+      Продолжая, вы соглашаетесь с<br>
+      <a href="#">Условиями использования</a> и <a href="#">Политикой конфиденциальности</a>
+    </div>
+  </div>
+
+  <!-- Review FAB -->
+  <button class="review-fab visible" id="reviewFab" onclick="openReviewPanel()">
+    💬
+    <span class="review-count" id="reviewCount" style="display:none">0</span>
+  </button>
+
+  <!-- Review comment panel -->
+  <div class="review-overlay" id="reviewOverlay" onclick="if(event.target===this)closeReviewPanel()">
+    <div class="review-panel">
+      <div class="bs-handle"></div>
+      <div class="review-panel-title">Оставить отзыв</div>
+      <div class="review-panel-screen" id="reviewScreenName">Экран: Главная</div>
+
+      <div class="review-options" id="reviewOptions">
+        <button class="review-opt" data-verdict="keep" onclick="selectVerdict(this)">
+          <div class="review-opt-icon">✅</div>
+          <div class="review-opt-label">Оставить</div>
+        </button>
+        <button class="review-opt" data-verdict="change" onclick="selectVerdict(this)">
+          <div class="review-opt-icon">✏️</div>
+          <div class="review-opt-label">Изменить</div>
+        </button>
+        <button class="review-opt" data-verdict="remove" onclick="selectVerdict(this)">
+          <div class="review-opt-icon">❌</div>
+          <div class="review-opt-label">Убрать</div>
+        </button>
+      </div>
+
+      <textarea class="review-comment" id="reviewComment" placeholder="Комментарий (необязательно)..."></textarea>
+
+      <button class="review-submit" onclick="saveReview()">Сохранить отзыв</button>
+    </div>
+  </div>
+
+  <!-- Review summary -->
+  <div class="review-summary-overlay" id="reviewSummaryOverlay" onclick="if(event.target===this)closeSummary()">
+    <div class="review-summary" id="reviewSummaryContent">
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+(function() {
+  'use strict';
+
+  // === Tab Navigation ===
+  var tabs = document.querySelectorAll('.tab-item');
+  var screens = document.querySelectorAll('.screen');
+  var menuOverlay = document.getElementById('menuOverlay');
+  var menuBtn = document.getElementById('menuBtn');
+  var menuClose = document.getElementById('menuClose');
+  var menuItems = document.querySelectorAll('.menu-item[data-screen]');
+
+  function switchScreen(screenId) {
+    screens.forEach(function(s) { s.classList.remove('active'); });
+    tabs.forEach(function(t) { t.classList.remove('active'); });
+
+    var target = document.getElementById(screenId);
+    if (target) {
+      target.classList.add('active');
+      target.scrollTop = 0;
+    }
+
+    tabs.forEach(function(t) {
+      if (t.getAttribute('data-screen') === screenId) {
+        t.classList.add('active');
+      }
+    });
+
+    // Close menu if open
+    menuOverlay.classList.remove('open');
+  }
+
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      var screenId = this.getAttribute('data-screen');
+      switchScreen(screenId);
+    });
+  });
+
+  // === Side Menu ===
+  menuBtn.addEventListener('click', function() {
+    menuOverlay.classList.add('open');
+  });
+
+  menuClose.addEventListener('click', function() {
+    menuOverlay.classList.remove('open');
+  });
+
+  menuOverlay.addEventListener('click', function(e) {
+    if (e.target === menuOverlay) {
+      menuOverlay.classList.remove('open');
+    }
+  });
+
+  menuItems.forEach(function(item) {
+    item.addEventListener('click', function() {
+      var screenId = this.getAttribute('data-screen');
+      switchScreen(screenId);
+    });
+  });
+
+  // === Filter chips (toggle active) ===
+  document.querySelectorAll('.filters-row, .rating-categories, .rating-mini-header').forEach(function(row) {
+    row.addEventListener('click', function(e) {
+      var chip = e.target.closest('.filter-chip, .rating-mini-cat');
+      if (!chip) return;
+      row.querySelectorAll('.filter-chip, .rating-mini-cat').forEach(function(c) {
+        c.classList.remove('active');
+      });
+      chip.classList.add('active');
+    });
+  });
+
+  // === "See all" navigation from Home ===
+  document.querySelectorAll('.section-title .see-all').forEach(function(link) {
+    link.addEventListener('click', function() {
+      var h2 = this.closest('.section-title').querySelector('h2');
+      if (!h2) return;
+      var text = h2.textContent.toLowerCase();
+      if (text.indexOf('live') !== -1) switchScreen('screenLive');
+      else if (text.indexOf('турнир') !== -1) switchScreen('screenTournaments');
+      else if (text.indexOf('рейтинг') !== -1) switchScreen('screenRating');
+      else if (text.indexOf('новости') !== -1) switchScreen('screenNews');
+    });
+  });
+
+  // === Haptic-style feedback on tap ===
+  document.querySelectorAll('.card, .tournament-list-item, .news-list-item, .rating-row, .battle-card, .profile-row').forEach(function(el) {
+    el.addEventListener('touchstart', function() {
+      this.style.transform = 'scale(0.98)';
+      this.style.transition = 'transform 0.1s';
+    }, { passive: true });
+    el.addEventListener('touchend', function() {
+      var self = this;
+      setTimeout(function() {
+        self.style.transform = '';
+      }, 100);
+    }, { passive: true });
+  });
+
+  // === Live score animation ===
+  var gameScoreEl = document.querySelector('.live-game');
+  if (gameScoreEl) {
+    var scores = ['15-0', '15-15', '30-15', '30-30', '40-30', 'Deuce', 'Ad-In', '30-40', '40-40', '15-40'];
+    var idx = 7;
+    setInterval(function() {
+      idx = (idx + 1) % scores.length;
+      gameScoreEl.textContent = '\u0413\u0435\u0439\u043c: ' + scores[idx];
+      gameScoreEl.style.color = 'var(--accent)';
+      setTimeout(function() {
+        gameScoreEl.style.color = '';
+      }, 500);
+    }, 4000);
+  }
+
+  // === Time in status bar ===
+  function updateTime() {
+    var now = new Date();
+    var h = now.getHours();
+    var m = now.getMinutes();
+    document.querySelector('.status-bar-time').textContent =
+      h + ':' + (m < 10 ? '0' : '') + m;
+  }
+  updateTime();
+  setInterval(updateTime, 30000);
+
+  // === Bottom sheets ===
+  window.toggleSheet = function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('open');
+  };
+  window.closeSheet = function(e, id) {
+    var el = document.getElementById(id);
+    if (!e || e.target === el) el.classList.remove('open');
+  };
+
+  // BS option toggle
+  document.querySelectorAll('.bs-options').forEach(function(group) {
+    group.addEventListener('click', function(e) {
+      var opt = e.target.closest('.bs-option');
+      if (!opt) return;
+      group.querySelectorAll('.bs-option').forEach(function(o) { o.classList.remove('active'); });
+      opt.classList.add('active');
+    });
+  });
+
+  // Gender toggle
+  document.querySelectorAll('.gender-toggle').forEach(function(group) {
+    group.addEventListener('click', function(e) {
+      var btn = e.target.closest('.gender-toggle-btn');
+      if (!btn) return;
+      group.querySelectorAll('.gender-toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+
+  // === Tournament Detail Overlay ===
+  var tdOverlay = document.getElementById('tdOverlay');
+  var tdTabs = document.querySelectorAll('#tdTabs .td-tab');
+
+  // Global screen switch (for onclick in HTML)
+  window.switchToScreen = function(screenId) {
+    switchScreen(screenId);
+  };
+
+  window.openTournamentDetail = function(idx) {
+    tdOverlay.classList.add('open');
+  };
+
+  window.closeTournamentDetail = function() {
+    tdOverlay.classList.remove('open');
+  };
+
+  // TD tab switching
+  tdTabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tdTabs.forEach(function(t) { t.classList.remove('active'); });
+      this.classList.add('active');
+      var targetId = this.getAttribute('data-tab');
+      document.querySelectorAll('.td-tab-content').forEach(function(c) {
+        c.classList.remove('active');
+      });
+      var target = document.getElementById(targetId);
+      if (target) target.classList.add('active');
+    });
+  });
+
+  // === Live Match Overlay ===
+  var liveFullOverlay = document.getElementById('liveFullOverlay');
+
+  window.openLiveMatch = function() {
+    liveFullOverlay.classList.add('open');
+  };
+
+  window.closeLiveMatch = function() {
+    liveFullOverlay.classList.remove('open');
+  };
+
+  // === Player Profile + Challenge ===
+  var playerOverlay = document.getElementById('playerOverlay');
+
+  window.openPlayerOverlay = function() {
+    playerOverlay.classList.add('open');
+  };
+
+  window.closePlayerOverlay = function() {
+    playerOverlay.classList.remove('open');
+  };
+
+  window.sendChallenge = function() {
+    // Show confirmation
+    var conf = document.createElement('div');
+    conf.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-card);border:1px solid var(--accent);border-radius:16px;padding:24px;text-align:center;z-index:400;max-width:280px;width:90%';
+    conf.innerHTML = '<div style="font-size:32px;margin-bottom:8px">⚔️</div><div style="font-size:16px;font-weight:700;margin-bottom:4px">Вызов отправлен!</div><div style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Бакыт Сыдыков получит уведомление через Push и Telegram</div><button onclick="this.parentElement.remove();closePlayerOverlay()" style="padding:10px 24px;border-radius:100px;background:var(--accent);color:#000;font-size:14px;font-weight:600;border:none;font-family:inherit;cursor:pointer">Отлично</button>';
+    document.body.appendChild(conf);
+  };
+
+  // === Auth Screen ===
+  var authScreen = document.getElementById('authScreen');
+
+  window.closeAuth = function() {
+    authScreen.classList.remove('open');
+  };
+
+  window.switchAuthTab = function(tab) {
+    // Toggle tabs
+    document.querySelectorAll('.auth-tab').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-auth') === tab);
+    });
+    // Toggle forms
+    document.getElementById('authLogin').classList.toggle('active', tab === 'login');
+    document.getElementById('authRegister').classList.toggle('active', tab === 'register');
+  };
+
+  // Show auth on first load (demo)
+  setTimeout(function() {
+    authScreen.classList.add('open');
+  }, 500);
+
+  // === Review Mode ===
+  var reviews = {};
+  var screenNames = {
+    screenHome: 'Главная',
+    screenLive: 'Live матчи',
+    screenTournaments: 'Турниры',
+    screenRating: 'Рейтинг',
+    screenNews: 'Новости',
+    screenProfile: 'Профиль',
+    screenServices: 'Услуги',
+    screenBattles: 'Баттлы',
+    screenCourts: 'Корты',
+    screenCoaches: 'Тренеры',
+    screenPartners: 'Найти партнёра',
+    screenSponsors: 'Спонсоры и партнёры',
+    screenDiscounts: 'Скидки для членов'
+  };
+
+  function getCurrentScreenId() {
+    var active = document.querySelector('.screen.active');
+    return active ? active.id : 'screenHome';
+  }
+
+  function updateReviewCount() {
+    var count = Object.keys(reviews).length;
+    var el = document.getElementById('reviewCount');
+    if (count > 0) {
+      el.textContent = count;
+      el.style.display = 'flex';
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
+  window.openReviewPanel = function() {
+    var screenId = getCurrentScreenId();
+    document.getElementById('reviewScreenName').textContent = 'Экран: ' + (screenNames[screenId] || screenId);
+    // Pre-fill if already reviewed
+    var existing = reviews[screenId];
+    document.querySelectorAll('.review-opt').forEach(function(o) { o.classList.remove('selected'); });
+    document.getElementById('reviewComment').value = '';
+    if (existing) {
+      var opt = document.querySelector('.review-opt[data-verdict="' + existing.verdict + '"]');
+      if (opt) opt.classList.add('selected');
+      document.getElementById('reviewComment').value = existing.comment || '';
+    }
+    document.getElementById('reviewOverlay').classList.add('open');
+  };
+
+  window.closeReviewPanel = function() {
+    document.getElementById('reviewOverlay').classList.remove('open');
+  };
+
+  window.selectVerdict = function(el) {
+    document.querySelectorAll('.review-opt').forEach(function(o) { o.classList.remove('selected'); });
+    el.classList.add('selected');
+  };
+
+  window.saveReview = function() {
+    var screenId = getCurrentScreenId();
+    var verdictEl = document.querySelector('.review-opt.selected');
+    if (!verdictEl) {
+      alert('Выберите: Оставить, Изменить или Убрать');
+      return;
+    }
+    var verdict = verdictEl.getAttribute('data-verdict');
+    var comment = document.getElementById('reviewComment').value.trim();
+    reviews[screenId] = {
+      screen: screenNames[screenId] || screenId,
+      verdict: verdict,
+      comment: comment,
+      time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    };
+    updateReviewCount();
+    closeReviewPanel();
+  };
+
+  window.disableReview = function() {
+    document.getElementById('reviewBar').classList.remove('visible');
+    document.getElementById('reviewFab').classList.remove('visible');
+  };
+
+  // Long press on FAB = show summary
+  var fabEl = document.getElementById('reviewFab');
+  var fabTimer = null;
+  fabEl.addEventListener('touchstart', function(e) {
+    fabTimer = setTimeout(function() {
+      showSummary();
+    }, 600);
+  }, { passive: true });
+  fabEl.addEventListener('touchend', function() {
+    clearTimeout(fabTimer);
+  }, { passive: true });
+
+  // Also double-click for desktop
+  var lastFabClick = 0;
+  fabEl.addEventListener('click', function() {
+    var now = Date.now();
+    if (now - lastFabClick < 400) {
+      showSummary();
+      lastFabClick = 0;
+    } else {
+      lastFabClick = now;
+    }
+  });
+
+  function showSummary() {
+    var keys = Object.keys(reviews);
+    if (keys.length === 0) {
+      alert('Пока нет отзывов. Нажмите 💬 на каждом экране.');
+      return;
+    }
+    var verdictLabels = { keep: '✅ Оставить', change: '✏️ Изменить', remove: '❌ Убрать' };
+    var verdictClass = { keep: 'keep', change: 'change', remove: 'remove' };
+
+    var html = '<h2>Отзывы по экранам</h2>';
+    keys.forEach(function(k) {
+      var r = reviews[k];
+      html += '<div class="review-summary-item">';
+      html += '<div class="review-summary-screen">' + r.screen + '</div>';
+      html += '<div class="review-summary-verdict ' + verdictClass[r.verdict] + '">' + verdictLabels[r.verdict] + '</div>';
+      if (r.comment) {
+        html += '<div class="review-summary-note">' + r.comment.replace(/</g, '&lt;') + '</div>';
+      }
+      html += '</div>';
+    });
+
+    html += '<div class="review-summary-actions">';
+    html += '<button class="review-btn-close" onclick="closeSummary()">Закрыть</button>';
+    html += '<button class="review-btn-copy" onclick="copySummary()">Копировать</button>';
+    html += '</div>';
+
+    document.getElementById('reviewSummaryContent').innerHTML = html;
+    document.getElementById('reviewSummaryOverlay').classList.add('open');
+  }
+
+  window.closeSummary = function() {
+    document.getElementById('reviewSummaryOverlay').classList.remove('open');
+  };
+
+  window.copySummary = function() {
+    var keys = Object.keys(reviews);
+    var verdictLabels = { keep: 'Оставить', change: 'Изменить', remove: 'Убрать' };
+    var text = 'KSLT Mobile App — Отзыв заказчика\n';
+    text += '================================\n\n';
+    keys.forEach(function(k) {
+      var r = reviews[k];
+      text += r.screen + ': ' + verdictLabels[r.verdict] + '\n';
+      if (r.comment) text += '  → ' + r.comment + '\n';
+      text += '\n';
+    });
+    text += 'Дата: ' + new Date().toLocaleDateString('ru-RU');
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        alert('Скопировано в буфер обмена!');
+      });
+    } else {
+      // Fallback
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      alert('Скопировано!');
+    }
+  };
+
+})();
+</script>
+</body>
+</html>

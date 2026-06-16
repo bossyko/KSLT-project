@@ -29,6 +29,7 @@
     'menu.about':       { ru: 'О KSLT',       en: 'About KSLT',    kg: 'KSLT жөнүндө' },
     'menu.rules':       { ru: 'Правила',      en: 'Rules',         kg: 'Эрежелер' },
     'menu.faq':         { ru: 'FAQ',           en: 'FAQ',           kg: 'FAQ' },
+    'menu.pricing':     { ru: 'Членство',     en: 'Membership',    kg: 'Мүчөлүк' },
     'menu.contact':     { ru: 'Связаться',    en: 'Contact',       kg: 'Байланыш' },
     'menu.version':     { ru: 'Версия',       en: 'Version',       kg: 'Версия' },
 
@@ -85,6 +86,16 @@
     'td.bracketEmpty':  { ru: 'Сетка пока не сформирована', en: 'Bracket not yet formed', kg: 'Тор азырынча түзүлө элек' },
     'td.resultsEmpty':  { ru: 'Результаты пока недоступны', en: 'Results not yet available', kg: 'Жыйынтыктар азырынча жок' },
     'td.regApproved':   { ru: 'Вы зарегистрированы ✓', en: 'You are registered ✓', kg: 'Сиз катталдыңыз ✓' },
+
+    // === Tournament registration ===
+    'trn.register':       { ru: 'Записаться на турнир', en: 'Register for tournament', kg: 'Мелдешке жазылуу' },
+    'trn.registered':     { ru: 'Вы записаны ✓',       en: 'You are registered ✓',   kg: 'Сиз жазылдыңыз ✓' },
+    'trn.needAuth':       { ru: 'Войдите, чтобы записаться на турнир', en: 'Log in to register for the tournament', kg: 'Мелдешке жазылуу үчүн кириңиз' },
+    'trn.needMembership': { ru: 'Для участия необходимо членство KSLT', en: 'KSLT membership required to participate', kg: 'Катышуу үчүн KSLT мүчөлүгү керек' },
+    'trn.needPlayer':     { ru: 'Ваш профиль не привязан к карточке игрока. Обратитесь к администратору.', en: 'Your profile is not linked to a player card. Contact admin.', kg: 'Профилиңиз оюнчу картасына байланган эмес. Администраторго кайрылыңыз.' },
+    'trn.banned':         { ru: 'Вы отстранены от участия в турнирах', en: 'You are banned from tournaments', kg: 'Сиз мелдештерден четтетилдиңиз' },
+    'trn.waitlist':       { ru: 'Лист ожидания — ожидает одобрения', en: 'Waitlist — awaiting approval', kg: 'Күтүү тизмеси — бекитүүнү күтүүдө' },
+    'trn.alreadyReg':     { ru: 'Вы уже записаны на этот турнир', en: 'You are already registered for this tournament', kg: 'Сиз бул мелдешке жазылгансыз' },
 
     // === Rating screen ===
     'rating.title':      { ru: 'Рейтинг',           en: 'Rating',          kg: 'Рейтинг' },
@@ -202,6 +213,14 @@
     'coaches.years':       { ru: 'лет',                   en: 'years',            kg: 'жыл' },
     'coaches.perHour':     { ru: 'сом/час',               en: 'KGS/h',           kg: 'сом/саат' },
     'coaches.partner':     { ru: 'Партнёр',               en: 'Partner',          kg: 'Өнөктөш' },
+    'coach.detail':        { ru: 'Тренер',                en: 'Coach',            kg: 'Машыктыруучу' },
+    'coach.yearsExp':      { ru: 'Лет опыта',             en: 'Years exp.',       kg: 'Жыл тажрыйба' },
+    'coach.pricePerH':     { ru: 'Сом/час',               en: 'KGS/h',           kg: 'Сом/саат' },
+    'coach.court':         { ru: 'Площадка',              en: 'Court',            kg: 'Аянтча' },
+    'coach.about':         { ru: 'О тренере',             en: 'About',            kg: 'Тренер жөнүндө' },
+    'coach.achievements':  { ru: 'Достижения',            en: 'Achievements',     kg: 'Жетишкендиктер' },
+    'coach.contacts':      { ru: 'Контакты',              en: 'Contacts',         kg: 'Байланыштар' },
+    'coach.contactsLocked':{ ru: 'Контакты тренера доступны для членов KSLT', en: 'Coach contacts available for KSLT members', kg: 'Тренер байланыштары KSLT мүчөлөрү үчүн жеткиликтүү' },
 
     // === Courts screen ===
     'courts.title':        { ru: 'Корты',                 en: 'Courts',           kg: 'Корттор' },
@@ -211,6 +230,14 @@
     'courts.court':        { ru: 'корт',                   en: 'court',           kg: 'корт' },
     'courts.courts':       { ru: 'кортов',                 en: 'courts',          kg: 'корт' },
     'courts.from':         { ru: 'от',                     en: 'from',            kg: 'баштап' },
+    'court.detail':        { ru: 'Корт',                  en: 'Court',            kg: 'Корт' },
+    'court.swipe':         { ru: 'свайпните для просмотра', en: 'swipe to view',  kg: 'көрүү үчүн сүрүңүз' },
+    'court.address':       { ru: 'Адрес',                 en: 'Address',          kg: 'Дарек' },
+    'court.prices':        { ru: 'Цены',                  en: 'Prices',           kg: 'Баалар' },
+    'court.description':   { ru: 'Описание',              en: 'Description',      kg: 'Сүрөттөмө' },
+    'court.amenities':     { ru: 'Удобства',              en: 'Amenities',        kg: 'Ыңгайлуулуктар' },
+    'court.contact':       { ru: 'Контакт',               en: 'Contact',          kg: 'Байланыш' },
+    'court.contactLocked': { ru: 'Контакты корта доступны для членов KSLT', en: 'Court contacts available for KSLT members', kg: 'Корт байланыштары KSLT мүчөлөрү үчүн жеткиликтүү' },
 
     // === Sponsors screen ===
     'sponsors.title':      { ru: 'Спонсоры',              en: 'Sponsors',         kg: 'Демөөрчүлөр' },
@@ -222,6 +249,15 @@
     'live.empty':          { ru: 'Нет матчей',             en: 'No matches',      kg: 'Матч жок' },
     'live.emptyText':      { ru: 'Сейчас нет live-трансляций. Следите за расписанием турниров.', en: 'No live streams right now. Follow the tournament schedule.', kg: 'Азырынча live-трансляция жок. Мелдеш расписаниесин байкаңыз.' },
     'live.noStream':       { ru: 'Нет трансляции',         en: 'No stream',       kg: 'Трансляция жок' },
+    'live.noVideo':        { ru: 'Нет трансляции',         en: 'No broadcast',    kg: 'Трансляция жок' },
+    'live.warmup':         { ru: 'РАЗМИНКА',               en: 'WARM-UP',         kg: 'ДАЯРДОО' },
+    'live.paused':         { ru: 'ПАУЗА',                  en: 'PAUSED',          kg: 'ТЫНЫМ' },
+    'live.completed':      { ru: 'ЗАВЕРШЁН',               en: 'COMPLETED',       kg: 'АЯКТАГАН' },
+    'live.tiebreak':       { ru: 'Тайбрейк',              en: 'Tiebreak',        kg: 'Тайбрейк' },
+    'live.bestOf':         { ru: 'Лучший из',              en: 'Best of',         kg: 'Лучший из' },
+    'live.wins':           { ru: 'побеждает!',             en: 'wins!',           kg: 'жеңет!' },
+    'live.tournament':     { ru: 'Турнир',                 en: 'Tournament',      kg: 'Турнир' },
+    'live.format':         { ru: 'Формат',                 en: 'Format',          kg: 'Формат' },
     'live.round':          { ru: 'Раунд',                  en: 'Round',           kg: 'Раунд' },
     'live.court':          { ru: 'Корт',                   en: 'Court',           kg: 'Корт' },
 
@@ -250,6 +286,11 @@
     'auth.password':     { ru: 'Пароль',               en: 'Password',          kg: 'Сырсөз' },
     'auth.submit':       { ru: 'Войти',                en: 'Log in',            kg: 'Кирүү' },
     'auth.forgot':       { ru: 'Забыли пароль?',       en: 'Forgot password?',  kg: 'Сырсөздү унуттуңузбу?' },
+    'auth.forgotText':   { ru: 'Введите email и мы отправим ссылку для сброса пароля', en: 'Enter your email and we\'ll send a reset link', kg: 'Email жазыңыз, биз сырсөздү калыбына келтирүү шилтемесин жөнөтөбүз' },
+    'auth.sendReset':    { ru: 'Отправить ссылку',    en: 'Send reset link',   kg: 'Шилтеме жөнөтүү' },
+    'auth.checkEmail':   { ru: 'Проверьте почту! Ссылка для сброса отправлена.', en: 'Check your email! Reset link has been sent.', kg: 'Почтаңызды текшериңиз! Калыбына келтирүү шилтемеси жөнөтүлдү.' },
+    'auth.backToLogin':  { ru: 'Вернуться ко входу',  en: 'Back to login',     kg: 'Кирүүгө кайтуу' },
+    'auth.verifyEmail':  { ru: 'Проверьте почту для подтверждения email', en: 'Check your email to verify your account', kg: 'Email ырастоо үчүн почтаңызды текшери��из' },
     'auth.name':         { ru: 'Имя и фамилия',       en: 'Full name',          kg: 'Аты-жөнү' },
     'auth.phone':        { ru: 'Телефон +996...',      en: 'Phone +996...',      kg: 'Телефон +996...' },
     'auth.passMin':      { ru: 'Пароль (мин. 6 символов)', en: 'Password (min 6 chars)', kg: 'Сырсөз (мин. 6 белги)' },
@@ -350,6 +391,7 @@
     'pd.h2hSets':       { ru: 'Сеты',     en: 'Sets',   kg: 'Сеттер' },
     'pd.h2hGames':      { ru: 'Геймы',    en: 'Games',  kg: 'Геймдер' },
     'pd.h2hLatest':     { ru: 'Последние матчи', en: 'Recent matches', kg: 'Акыркы матчтар' },
+    'pd.contact':       { ru: 'Контакты',          en: 'Contacts',        kg: 'Байланыштар' },
     'pd.h2hNoMatches':  { ru: 'Матчей не найдено', en: 'No matches found', kg: 'Матч табылган жок' },
     'pd.completed':     { ru: 'Завершён',  en: 'Finished', kg: 'Аяктады' },
     'pd.upcoming':      { ru: 'Предстоит', en: 'Upcoming', kg: 'Алдыдагы' },
@@ -358,6 +400,19 @@
     'pd.chalSelf':      { ru: 'Нельзя вызвать самого себя', en: 'Cannot challenge yourself', kg: 'Өзүңүздү чакыра албайсыз' },
     'pd.chalExists':    { ru: 'Активный вызов уже есть', en: 'Active challenge exists', kg: 'Активдүү чакыруу бар' },
     'pd.chalSent':      { ru: 'Вызов отправлен!', en: 'Challenge sent!', kg: 'Чакыруу жөнөтүлдү!' },
+
+    // === Pricing ===
+    'pricing.title':             { ru: 'Членство KSLT',          en: 'KSLT Membership',       kg: 'KSLT мүчөлүгү' },
+    'pricing.singlePlan':        { ru: 'Единый тариф',           en: 'Single plan',           kg: 'Бирдиктүү тариф' },
+    'pricing.monthlyMembership': { ru: 'Ежемесячное членство',   en: 'Monthly membership',    kg: 'Ай сайын мүчөлүк' },
+    'pricing.perMonth':          { ru: 'мес',                     en: 'mo',                   kg: 'ай' },
+    'pricing.feat1':             { ru: 'Участие во всех турнирах KSLT', en: 'Participate in all KSLT tournaments', kg: 'Бардык KSLT мелдештерине катышуу' },
+    'pricing.feat2':             { ru: 'Полный рейтинг и статистика',   en: 'Full rating & statistics',           kg: 'Толук рейтинг жана статистика' },
+    'pricing.feat3':             { ru: 'Скидки на аренду кортов',       en: 'Discounts on court rental',          kg: 'Корт ижарасына арзандатуу' },
+    'pricing.feat4':             { ru: 'Доступ к закрытым мероприятиям', en: 'Access to exclusive events',         kg: 'Жабык иш-чараларга жетүү' },
+    'pricing.feat5':             { ru: 'Система вызовов между игроками', en: 'Player challenge system',            kg: 'Оюнчулар арасында чакыруу системасы' },
+    'pricing.feat6':             { ru: 'Программа лояльности (баллы)',   en: 'Loyalty program (points)',            kg: 'Лоялдуулук программасы (упайлар)' },
+    'pricing.howToPay':          { ru: 'Для оплаты свяжитесь с нами:',  en: 'To pay, contact us:',                kg: 'Төлөө үчүн биз менен байланышыңыз:' },
 
     // === Generic ===
     'common.back':       { ru: 'Назад',     en: 'Back',     kg: 'Артка' },
@@ -368,6 +423,7 @@
     'common.error':      { ru: 'Ошибка',    en: 'Error',    kg: 'Ката' },
     'common.success':    { ru: 'Успешно',   en: 'Success',  kg: 'Ийгиликтүү' },
     'common.notFound':   { ru: 'не найден', en: 'not found', kg: 'табылган жок' },
+    'common.tryLater':   { ru: 'Попробуйте позже', en: 'Try again later', kg: 'Кийинчерээк аракет кылыңыз' },
     'tournaments.today':    { ru: 'Сегодня',  en: 'Today',    kg: 'Бүгүн' },
     'tournaments.tomorrow': { ru: 'Завтра',   en: 'Tomorrow', kg: 'Эртең' },
     'tournaments.soon':     { ru: 'Скоро',    en: 'Soon',     kg: 'Жакында' },

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#CCFF00"/>
+      <stop offset="100%" style="stop-color:#A8D900"/>
+    </linearGradient>
+  </defs>
+  <!-- Background — accent color -->
+  <rect width="512" height="512" rx="108" fill="url(#bg3)"/>
+  <!-- K letter stylized -->
+  <text x="256" y="310" text-anchor="middle" font-family="Inter, Helvetica, Arial, sans-serif" font-weight="900" font-size="280" fill="#0A0A0A">K</text>
+  <!-- Tennis ball dots (subtle texture) -->
+  <circle cx="380" cy="100" r="40" fill="#0A0A0A" opacity="0.08"/>
+  <circle cx="420" cy="150" r="25" fill="#0A0A0A" opacity="0.05"/>
+  <!-- Ball seam accent on K -->
+  <path d="M140 380 C180 400, 330 400, 370 380" stroke="#0A0A0A" stroke-width="4" fill="none" opacity="0.15" stroke-linecap="round"/>
+  <!-- Underline -->
+  <rect x="140" y="360" width="232" height="6" rx="3" fill="#0A0A0A" opacity="0.2"/>
+</svg>

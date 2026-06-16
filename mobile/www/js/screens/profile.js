@@ -242,10 +242,17 @@
       AUTH._membershipStatus = !!mem;
 
       if (!mem) {
-        container.innerHTML = '<div class="prof-membership none">' +
+        container.innerHTML = '<div class="prof-membership none" id="profMemNone" style="cursor:pointer">' +
           '<div class="prof-mem-icon">📋</div>' +
           '<div class="prof-mem-info"><div class="prof-mem-status">' + I18N.t('profile.noMembership') + '</div><div class="prof-mem-sub">' + I18N.t('profile.getMembership') + '</div></div>' +
+          '<span class="profile-row-arrow">›</span>' +
         '</div>';
+        var memNoneBtn = document.getElementById('profMemNone');
+        if (memNoneBtn) {
+          memNoneBtn.addEventListener('click', function() {
+            if (window.KSLT_INFO && window.KSLT_INFO.showPricing) window.KSLT_INFO.showPricing();
+          });
+        }
         return;
       }
 

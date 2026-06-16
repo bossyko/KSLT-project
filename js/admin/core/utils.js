@@ -359,19 +359,96 @@
 
 
     /**
+     * Compresses an image file using canvas.
+     * @param {File} file - Original file
+     * @param {number} maxWidth - Max width in px
+     * @param {number} quality - JPEG quality 0-1
+     * @returns {Promise<{blob: Blob, ext: string}>}
+     */
+    function compressImage(file, maxWidth, quality) {
+        return new Promise(function(resolve, reject) {
+            var img = new Image();
+            img.onload = function() {
+                var w = img.width;
+                var h = img.height;
+                if (w > maxWidth) {
+                    h = Math.round(h * maxWidth / w);
+                    w = maxWidth;
+                }
+                var canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                canvas.toBlob(function(blob) {
+                    if (blob) {
+                        resolve({ blob: blob, ext: 'jpg' });
+                    } else {
+                        reject(new Error('Canvas toBlob failed'));
+                    }
+                }, 'image/jpeg', quality);
+                URL.revokeObjectURL(img.src);
+            };
+            img.onerror = function() {
+                URL.revokeObjectURL(img.src);
+                reject(new Error('Image load failed'));
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    var MAX_FILE_SIZE = 5 * 1024 * 1024;      // 5 MB hard limit
+    var COMPRESS_THRESHOLD = 500 * 1024;        // compress if > 500 KB
+    var COMPRESS_MAX_WIDTH = 1200;              // resize to 1200px width
+    var COMPRESS_QUALITY = 0.82;                // JPEG quality 82%
+
+    /**
      * Uploads an image to Supabase Storage (news bucket).
+     * Auto-compresses large images (>500KB → 1200px, quality 82%).
      * @param {File} file - The file to upload
      * @param {string} prefix - Filename prefix (e.g. 'news-', 'coach-')
      * @returns {Promise<string|null>} Public URL or null on failure
      */
     async function uploadImage(file, prefix) {
         if (!A.client || !file) return null;
+
+        // Validate format
+        var allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (allowed.indexOf(file.type) === -1) {
+            showToast(L.uploadFormatError || 'Формат: JPEG, PNG, WebP, GIF', 'error');
+            return null;
+        }
+
+        // Hard size limit (before compression)
+        if (file.size > MAX_FILE_SIZE) {
+            showToast(L.uploadSizeError || 'Макс. размер файла: 5 МБ', 'error');
+            return null;
+        }
+
+        var uploadBlob = file;
         var ext = file.name.split('.').pop().toLowerCase();
+
+        // Auto-compress if > 500 KB
+        if (file.size > COMPRESS_THRESHOLD && file.type !== 'image/gif') {
+            try {
+                var compressed = await compressImage(file, COMPRESS_MAX_WIDTH, COMPRESS_QUALITY);
+                uploadBlob = compressed.blob;
+                ext = compressed.ext;
+                var saved = Math.round((1 - uploadBlob.size / file.size) * 100);
+                if (saved > 5) {
+                    showToast((L.imageCompressed || 'Сжато') + ': ' + formatBytes(file.size) + ' → ' + formatBytes(uploadBlob.size) + ' (-' + saved + '%)');
+                }
+            } catch (e) {
+                // Compression failed — upload original
+            }
+        }
+
         var filename = (prefix || '') + Date.now() + '-' + Math.random().toString(36).substr(2, 8) + '.' + ext;
         try {
-            var result = await A.client.storage.from('news').upload(filename, file, {
+            var result = await A.client.storage.from('news').upload(filename, uploadBlob, {
                 cacheControl: '3600',
-                upsert: false
+                upsert: false,
+                contentType: 'image/' + (ext === 'jpg' ? 'jpeg' : ext)
             });
             if (result.error) {
                 showToast('Storage: ' + (result.error.message || result.error.statusCode || JSON.stringify(result.error)), 'error');
@@ -383,6 +460,12 @@
             showToast('Upload exception: ' + e.message, 'error');
             return null;
         }
+    }
+
+    function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
 
     /**

@@ -1244,22 +1244,9 @@
     margin: 0 auto;
 }
 
-/* Sticky table header */
-.pl-cat-thead {
-    position: sticky;
-    z-index: 29;
-    background: var(--bg-primary);
-}
-
-.pl-cat-thead .pl-table {
-    border-bottom: none;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-}
-
-/* Category table body */
+/* Category table body (header row inside same container) */
 .pl-cat-table-body {
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-    border-top: none;
+    border-radius: var(--radius-lg);
 }
 
 /* Category table — compact grid (no online, country, actions) */
@@ -1502,13 +1489,8 @@
         display: flex;
     }
 
-    .pl-cat-thead {
+    .pl-cat-table-body .pl-row-header {
         display: none;
-    }
-
-    .pl-cat-table-body {
-        border-radius: var(--radius-lg);
-        border-top: 1px solid var(--border-subtle);
     }
 
     .pl-cat-banner {

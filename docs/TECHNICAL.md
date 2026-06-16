@@ -1,22 +1,24 @@
 # KSLT — Техническая документация
 
-> Последнее обновление: 2026-03-18
-> Версия: 1.6
+> Последнее обновление: 2026-03-24
+> Версия: 2.0
 
 ---
 
 ## 1. Обзор проекта
 
-**KSLT (Kyrgyzstan Social Lawn Tennis)** — веб-платформа теннисного сообщества Кыргызстана. Объединяет любителей и профессионалов: рейтинги, турниры, тренеры, корты, членство.
+**KSLT (Kyrgyzstan Social Lawn Tennis)** — веб-платформа теннисного сообщества Кыргызстана. Объединяет любителей и профессионалов: рейтинги, турниры, тренеры, корты, членство, живые матчи, баттлы, программа лояльности.
 
 | Параметр | Значение |
 |----------|----------|
 | Языки | RU (основной), EN, KG |
 | Тема | Dark, accent #CCFF00 |
 | Шрифт | Inter |
-| Хостинг | GitHub Pages (фронтенд) |
+| Хостинг | Netlify (фронтенд) |
 | Backend | Supabase (PostgreSQL + Auth + Storage + Edge Functions) |
 | Бот | Telegram Bot API |
+| Тестирование | Playwright (E2E) + Vitest (Unit) |
+| CI/CD | GitHub Actions (test.yml + deploy.yml) |
 | Фреймворки | Нет (Vanilla HTML/CSS/JS) |
 | Сборка | Нет (статика, без бандлера) |
 
@@ -25,22 +27,31 @@
 ## 2. Стек технологий
 
 ### Frontend
-- **HTML5** — статические страницы, файловая мультиязычность (`-en`, `-kg` суффиксы)
-- **CSS3** — переменные, glassmorphism, responsive (375/480/768/992px)
-- **Vanilla JavaScript** — IIFE-модули, без зависимостей
+- **HTML5** — 80 статических страниц, файловая мультиязычность (`-en`, `-kg` суффиксы)
+- **CSS3** — 22 файла, переменные, glassmorphism, responsive (375/480/768/992px)
+- **Vanilla JavaScript** — 45 файлов, IIFE-модули, JSDoc типизация, без зависимостей
 - **Supabase JS SDK** — подключение через CDN (unpkg.com)
+- **Chart.js** — аналитические графики в админке (CDN)
 
 ### Backend (Supabase)
-- **PostgreSQL** — основная база данных
+- **PostgreSQL** — основная база данных (31+ таблица)
 - **Row Level Security (RLS)** — безопасность на уровне строк
 - **Auth** — email/password + Google OAuth
-- **Storage** — аватары пользователей
-- **Edge Functions** — Deno/TypeScript (серверная логика)
-- **RPC** — SQL-функции вызываемые с фронта
+- **Storage** — аватары пользователей, фото новостей
+- **Edge Functions** — 15 Deno/TypeScript функций
+- **RPC** — 28+ SQL-функций вызываемых с фронта
+- **Realtime** — подписки на изменения (live match)
+- **pg_cron** — автоматические задачи по расписанию
+
+### Тестирование
+- **Playwright** — E2E тесты (9 test suites, 3 viewport: desktop/tablet/mobile)
+- **Vitest** — Unit тесты Edge Functions (72 теста, 3 suite)
+- **GitHub Actions** — CI/CD (test.yml: тесты, deploy.yml: деплой на Netlify)
 
 ### Интеграции
-- **Telegram Bot** (`@KSLTennisBot`) — уведомления, приглашения на игру
+- **Telegram Bot** (`@KSLTennisBot`) — уведомления, голосование, регистрация
 - **Cropper.js** — обрезка аватаров в dashboard
+- **Chart.js** — графики: рост пользователей, динамика оплат
 
 ---
 
@@ -50,7 +61,7 @@
 KSLT/
 ├── index.html / index-en.html / index-kg.html    ← Главная (3 языка)
 │
-├── pages/                          ← 42 HTML-страницы
+├── pages/                          ← 76 HTML-страниц
 │   ├── auth.html                   ← Авторизация
 │   ├── dashboard.html              ← Личный кабинет
 │   ├── admin.html                  ← Админ-панель
@@ -67,114 +78,152 @@ KSLT/
 │   ├── services.html               ← Обзор услуг
 │   ├── info.html                   ← Информационный хаб
 │   ├── partners.html               ← Найти партнёра
+│   ├── challenge.html              ← Баттл (VS layout)
+│   ├── battles.html                ← Обзор баттлов (карточки)
+│   ├── live-match.html             ← Живой матч + стрим
+│   ├── umpire.html                 ← Панель судьи (scoring)
+│   ├── verify.html                 ← Верификация ваучеров
 │   ├── about.html                  ← О проекте
 │   ├── faq.html                    ← FAQ
 │   ├── rules.html                  ← Правила
 │   ├── pricing.html                ← Цены
 │   └── offer.html                  ← Публичная оферта
 │
-├── css/                            ← 18 CSS-файлов (20 192 строк)
-│   ├── style.css                   ← Дизайн-система (4 692 строк)
-│   ├── admin.css                   ← Админ-панель (3 302)
-│   ├── players.css                 ← Рейтинги (1 528)
-│   ├── tournament-detail.css       ← Детали турнира (1 511)
-│   ├── news.css                    ← Новости (1 227)
-│   ├── dashboard.css               ← Личный кабинет (1 110)
-│   ├── partners.css                ← Найти партнёра (980)
-│   ├── courts.css                  ← Корты (908)
-│   ├── tournaments.css             ← Список турниров (754)
-│   ├── coaches.css                 ← Тренеры (731)
-│   ├── tournaments-overview.css    ← Обзор турниров (679)
-│   ├── services.css                ← Услуги (667)
-│   ├── info-pages.css              ← About/FAQ/Rules (605)
-│   ├── player.css                  ← Профиль игрока (595)
-│   ├── pricing.css                 ← Цены (579)
-│   ├── info-overview.css           ← Инфо-хаб (324)
-│   └── coach.css                   ← Профиль тренера
+├── css/                            ← 22 CSS-файла (~27 500 строк)
+│   ├── style.css                   ← Дизайн-система + глобальные стили
+│   ├── admin.css                   ← Админ-панель
+│   ├── players.css                 ← Рейтинги
+│   ├── tournament-detail.css       ← Детали турнира
+│   ├── live-match.css              ← Живой матч + scoreboard
+│   ├── umpire.css                  ← Панель судьи
+│   ├── challenge-detail.css        ← Баттл (VS layout)
+│   ├── battle-cards.css            ← Карточки баттлов
+│   ├── battles-overview.css        ← Обзор баттлов
+│   ├── news.css                    ← Новости
+│   ├── dashboard.css               ← Личный кабинет
+│   ├── partners.css                ← Найти партнёра
+│   ├── courts.css                  ← Корты
+│   ├── tournaments.css             ← Список турниров
+│   ├── coaches.css                 ← Тренеры
+│   ├── tournaments-overview.css    ← Обзор турниров
+│   ├── services.css                ← Услуги
+│   ├── info-pages.css              ← About/FAQ/Rules
+│   ├── player.css                  ← Профиль игрока
+│   ├── pricing.css                 ← Цены
+│   ├── info-overview.css           ← Инфо-хаб
+│   └── verify.css                  ← Верификация
 │
-├── js/                             ← 34 JS-файла (26 400 строк)
-│   ├── admin/                      ← Админ-панель (17 400+, модульная) ★
+├── js/                             ← 45 JS-файлов (~42 700 строк)
+│   ├── admin/                      ← Админ-панель (~22 000, 18 файлов) ★
 │   │   ├── core/
-│   │   │   ├── constants.js        ← L (EN/RU), ICONS, enums (1 700+)
-│   │   │   ├── utils.js            ← toast, confirm, esc, translate, uploadImage (312)
-│   │   │   ├── layout.js           ← sidebar, tabs, dashboard (450)
-│   │   │   └── init.js             ← onAuthReady orchestration (33)
+│   │   │   ├── constants.js        ← L (EN/RU), ICONS, enums, maps
+│   │   │   ├── utils.js            ← toast, confirm, esc, translate, uploadImage, exportCsv
+│   │   │   ├── layout.js           ← sidebar, tabs, dashboard, switchTab
+│   │   │   └── init.js             ← onAuthReady orchestration
 │   │   └── sections/
-│   │       ├── news.js             ← CRUD + inline-фото + опрос (1 374)
-│   │       ├── tournaments.js      ← CRUD + заявки + финализация (1 518)
-│   │       ├── bracket.js          ← Сетка SE/FIC/Group Stage (3 950)
-│   │       ├── courts.js           ← CRUD + promoted + координаты (1 556)
-│   │       ├── coaches.js          ← CRUD + фото + авто-перевод (1 089)
-│   │       ├── ratings.js          ← Таблица + промоушен + правила (1 147)
-│   │       ├── players.js          ← CRUD + категория (594)
-│   │       ├── memberships.js      ← Одобрение + история + статы + период + PDF (900+)
-│   │       ├── payments.js         ← CRUD + promoted + статы + период + PDF (770+)
-│   │       ├── vouchers.js         ← Дашборд + таблица + фильтры + PDF (430+)
-│   │       └── users.js            ← Список + роли + аналитика + график + PDF (1 400+)
-│   ├── tournament-detail.js        ← Сетка турнира (1 860)
-│   ├── dashboard.js                ← Личный кабинет (1 233)
-│   ├── players.js                  ← Рейтинги (1 039)
-│   ├── news.js                     ← Новости (1 003)
-│   ├── courts.js                   ← Корты (723)
-│   ├── partners.js                 ← Найти партнёра (667)
-│   ├── coaches.js                  ← Тренеры (561)
-│   ├── services.js                 ← Услуги (573)
-│   ├── tournament-generator.js     ← Генератор сетки (494)
-│   ├── script.js                   ← Глобальный (492)
-│   ├── tournaments-overview.js     ← Обзор турниров + поиск (453)
-│   ├── auth.js                     ← Авторизация (421)
-│   ├── player.js                   ← Профиль игрока (410)
-│   ├── tournaments-overlay.js      ← Список турниров + поиск (359)
-│   ├── auth-nav.js                 ← User dropdown (162)
-│   ├── info-overview.js            ← Инфо-хаб (117)
-│   ├── membership.js               ← Членство (105)
-│   ├── auth-guard.js               ← Защита роутов (87)
-│   ├── supabase-config.js          ← Supabase клиент (49)
-│   └── session-monitor.js          ← Мониторинг сессий (38)
+│   │       ├── news.js             ← CRUD + inline-фото + опрос
+│   │       ├── tournaments.js      ← CRUD + заявки + финализация
+│   │       ├── bracket.js          ← Сетка SE/FIC/Group Stage
+│   │       ├── courts.js           ← CRUD + promoted + координаты
+│   │       ├── coaches.js          ← CRUD + фото + авто-перевод
+│   │       ├── players.js          ← CRUD + категория + бан
+│   │       ├── settings.js         ← Правила очков + промоушен
+│   │       ├── finances.js         ← CRUD + promoted + период + PDF/Excel
+│   │       ├── vouchers.js         ← Дашборд + таблица + фильтры + PDF
+│   │       ├── users.js            ← Список + роли + аналитика + бан
+│   │       ├── challenges.js       ← Баттлы: publish, score, manage
+│   │       ├── live.js             ← Живые матчи: create, control, score sync
+│   │       ├── loyalty.js          ← Правила, награды, транзакции, manual adjust
+│   │       └── broadcast.js        ← Email/TG рассылка
+│   ├── umpire.js                   ← Движок теннисного счёта
+│   ├── scoreboard.js               ← OBS overlay scoreboard
+│   ├── live-match.js               ← Публичная страница живого матча
+│   ├── challenge-detail.js         ← Баттл: VS, голосование, H2H, счёт
+│   ├── battle-cards.js             ← Карточки баттлов (homepage/battles)
+│   ├── battles-overview.js         ← Обзор баттлов
+│   ├── tournament-detail.js        ← Сетка турнира
+│   ├── dashboard.js                ← Личный кабинет
+│   ├── players.js                  ← Рейтинги
+│   ├── news.js                     ← Новости
+│   ├── courts.js                   ← Корты
+│   ├── partners.js                 ← Найти партнёра
+│   ├── coaches.js                  ← Тренеры
+│   ├── services.js                 ← Услуги
+│   ├── tournament-generator.js     ← Генератор сетки
+│   ├── script.js                   ← Глобальный (header, burger, scroll, lang, scroll-to-top)
+│   ├── tournaments-overview.js     ← Обзор турниров + поиск
+│   ├── auth.js                     ← Авторизация
+│   ├── player.js                   ← Профиль игрока
+│   ├── tournaments-overlay.js      ← Список турниров + поиск
+│   ├── verify.js                   ← Верификация ваучеров
+│   ├── auth-nav.js                 ← User dropdown
+│   ├── info-overview.js            ← Инфо-хаб
+│   ├── membership.js               ← Членство
+│   ├── auth-guard.js               ← Защита роутов
+│   ├── supabase-config.js          ← Supabase клиент
+│   └── session-monitor.js          ← Мониторинг сессий
 │
-├── data/                           ← 12 файлов статических данных (4 077 строк)
-│   ├── tournaments-data.js / -en.js
+├── data/                           ← 18 файлов статических данных (~6 350 строк)
+│   ├── tournaments-data.js / -en.js / -kg.js
 │   ├── tournament-detail-data.js / -en.js
-│   ├── news-data.js / -en.js
-│   ├── players-data.js / -en.js
-│   ├── coaches-data.js / -en.js
-│   └── courts-data.js / -en.js
+│   ├── news-data.js / -en.js / -kg.js
+│   ├── players-data.js / -en.js / -kg.js
+│   ├── coaches-data.js / -en.js / -kg.js
+│   └── courts-data.js / -en.js / -kg.js
 │
-├── sql/                            ← 40+ SQL-файлов
-│   ├── bracket-system-migration.sql
-│   ├── rating-system-migration.sql
-│   ├── rating-system-fix.sql
-│   ├── rls-security-fix.sql
-│   ├── partners-migration.sql
-│   ├── partners-rpc-update.sql
-│   ├── game-invites-migration.sql
-│   ├── membership-admin-migration.sql
-│   ├── telegram-notifications-migration.sql
-│   ├── add-promoted-column.sql
-│   ├── add-women-futures.sql
-│   ├── update-partners-rpc-playlevel.sql
-│   └── *-seed.sql (тестовые данные)
+├── sql/                            ← 64 SQL-файла (миграции + тесты)
 │
 ├── supabase/
 │   ├── schema.sql                  ← Основная схема БД
 │   ├── seed.sql                    ← Начальные данные
-│   └── functions/                  ← 6 Edge Functions (Deno/TypeScript)
-│       ├── admin-manage-user/      ← Управление: create_manager, ban/unban user+player, delete_user
-│       ├── send-game-invite/       ← Отправка приглашений
-│       ├── create-challenge/       ← Вызовы на матч (Challenge Board)
-│       ├── tournament-notify/      ← Рассылка турниров в Telegram
-│       ├── telegram-webhook/       ← Telegram бот (все callbacks + /notifications)
-│       ├── membership-notify/      ← 7-day expiry reminder (cron)
+│   └── functions/                  ← 15 Edge Functions (Deno/TypeScript)
+│       ├── admin-manage-user/      ← create_manager, ban/unban, delete_user
+│       ├── auto-unban/             ← Авто-разбан по pg_cron
+│       ├── battle-announce/        ← Анонс баттла в TG группу
+│       ├── battle-publish/         ← Публикация баттла + TG кнопки голосования
+│       ├── broadcast/              ← Email/TG рассылка (универсальная)
+│       ├── create-challenge/       ← Создание вызова на матч
+│       ├── match-notify/           ← Уведомления о матчах (cron + manual)
 │       ├── membership-expire/      ← Auto-expire + TG notification (cron)
+│       ├── membership-notify/      ← 7-day expiry reminder (cron)
 │       ├── membership-tg-notify/   ← Admin grant/extend/cancel → TG DM
-│       └── match-notify/           ← Match schedule notification (cron + manual)
+│       ├── send-email/             ← Отправка email (Resend)
+│       ├── send-game-invite/       ← Приглашение на игру → TG
+│       ├── telegram-webhook/       ← Webhook бота (все callbacks)
+│       ├── tournament-notify/      ← Анонс турнира в TG группу
+│       └── tournament-reminder/    ← Напоминание о турнире
+│
+├── tests/
+│   ├── e2e/                        ← 9 Playwright test suites
+│   │   ├── 01-pages-load.spec.js
+│   │   ├── 02-navigation.spec.js
+│   │   ├── 03-responsive.spec.js
+│   │   ├── 04-css-integrity.spec.js
+│   │   ├── 05-auth-page.spec.js
+│   │   ├── 06-homepage-sections.spec.js
+│   │   ├── 07-pwa.spec.js
+│   │   ├── 08-seo-meta.spec.js
+│   │   └── 09-content-pages.spec.js
+│   └── unit/edge-functions/        ← 72 Vitest теста
+│       ├── create-challenge.test.js    (23 теста)
+│       ├── admin-manage-user.test.js   (29 тестов)
+│       └── battle-publish.test.js      (20 тестов)
+│
+├── .github/workflows/              ← CI/CD
+│   ├── test.yml                    ← Тесты на push/PR
+│   └── deploy.yml                  ← Auto-deploy на Netlify
 │
 ├── docs/                           ← Документация
-├── postman/                        ← API-тесты
-└── images/                         ← Логотип
+│   ├── TECHNICAL.md                ← Техническая документация (RU)
+│   ├── TECHNICAL-EN.md             ← Техническая документация (EN)
+│   ├── MANAGER-GUIDE.md            ← Инструкция для менеджеров (RU)
+│   ├── MANAGER-GUIDE-EN.md         ← Инструкция для менеджеров (EN)
+│   └── API.md                      ← API документация
+│
+└── images/                         ← Логотип, иконки, спонсоры
 ```
 
-**Итого: ~150 файлов, ~78 000 строк кода**
+**Итого: ~260 файлов, ~121 000 строк кода**
 
 ---
 
@@ -212,6 +261,7 @@ players               — игроки рейтинга
 ├── form[]            — последние 5 результатов (W/L), авто из matches
 ├── bio               — девиз игрока (макс 100 символов)
 ├── seed
+├── ntrp_rating       — NTRP Elo рейтинг (1.0–7.0)
 ├── banned_until      — дата окончания бана (NULL = не забанен)
 └── ban_reason        — причина бана (опционально)
 
@@ -229,6 +279,7 @@ tournaments           — турниры
 ├── bracket_type      — single_elimination / fic / group_stage
 ├── status            — upcoming / ongoing / completed
 ├── published_at      — null = черновик
+├── youtube_url       — ссылка на YouTube стрим
 └── registration_start, registration_end
 
 tournament_levels     — уровни турниров
@@ -248,6 +299,7 @@ matches               — матчи турнирной сетки
 ├── winner_id
 ├── seed1, seed2
 ├── court, scheduled_time
+├── match_type        — tournament / duel
 └── status            — scheduled / completed
 
 coaches               — тренеры
@@ -272,7 +324,6 @@ news                  — новости
 ├── image             — обложка
 ├── content_images    — JSONB [{url, after_paragraph}] — фото в тексте
 ├── poll              — JSONB {question, options} | null — опрос
-├── gallery           — JSONB (legacy, заменён content_images)
 ├── category          — results / interview / announcement / world
 ├── author, executor
 └── published_at      — null = черновик
@@ -282,10 +333,12 @@ memberships           — членство
 ├── type, start_date, end_date
 └── status            — active / expired
 
-payments              — платежи
-├── profile_id, membership_id
-├── amount, method    — cash / transfer / card
-└── status
+entity_payments       — оплаты (Membership / Court / Coach / Club)
+├── profile_id, entity_type, entity_id
+├── amount, currency, method
+├── start_date, end_date
+├── purpose           — promotion / sponsorship / rent / other
+└── status            — active / expired
 
 game_invites          — приглашения на игру
 ├── sender_id         → profiles
@@ -294,43 +347,65 @@ game_invites          — приглашения на игру
 ├── status            — pending / accepted / declined / expired
 └── created_at, responded_at
 
-challenges            — вызовы на матч (Challenge Board)
+challenges            — вызовы на матч (Challenge Board + Battles)
 ├── challenger_id     → profiles
 ├── opponent_id       → profiles (player_id связь)
 ├── proposed_date, proposed_time
 ├── proposed_court    → courts.id или другая площадка
 ├── message           — до 150 символов
 ├── status            — pending / accepted / counter / declined / expired
+├── battle_title      — заголовок баттла (для публикации)
+├── battle_published  — опубликован ли баттл
+├── voting_closed     — голосование закрыто
+├── battle_notified_at — дата рассылки в TG
 └── expires_at        — автоматически через 72ч (pg_cron)
+
+challenge_predictions — голоса за баттлы
+├── challenge_id      → challenges
+├── profile_id        → profiles (или telegram_chat_id)
+├── predicted_winner  — 1 (challenger) или 2 (opponent)
+└── source            — 'site' / 'telegram'
 
 discount_vouchers     — ваучеры скидок (членство)
 ├── profile_id        → profiles
-├── player_name       — имя игрока
 ├── entity_type       — court / coach
 ├── entity_id, entity_name
-├── service_id, service_name
-├── discount_percent  — процент скидки
-├── qr_token          — уникальный токен для QR-кода (hex, 32 char)
+├── discount_percent
+├── qr_token          — уникальный токен для QR-кода
 ├── status            — active / used / expired / cancelled
-├── created_at        — дата создания
-├── expires_at        — дата истечения (по умолчанию +7 дней)
-├── used_at           — дата использования
+├── expires_at        — +7 дней
 └── confirmed_by_ip   — IP при верификации
 
-Логика RPC generate_voucher:
-1. Проверка авторизации + активного членства
-2. Auto-expire старых ваучеров (expires_at < NOW())
-3. Блокировка: активный ваучер на ту же услугу → error 'active_voucher_exists'
-4. Дневной лимит: 1 ваучер на услугу в 24ч → error 'daily_limit'
-5. Создание ваучера с QR-токеном (7 дней)
+loyalty_rules         — правила начисления баллов
+├── event_type        — payment_membership / payment_court / tournament_win / ...
+├── points            — кол-во баллов
+└── description
+
+loyalty_rewards       — награды для обмена
+├── name, description
+├── points_cost       — стоимость в баллах
+└── is_active
+
+loyalty_transactions  — транзакции баллов
+├── profile_id        → profiles
+├── rule_id / reward_id
+├── points            — +earn / -redeem
+├── type              — earn / redeem / adjust / expire
+└── expires_at        — +12 мес (pg_cron auto-expire)
+
+live_matches          — живые матчи
+├── player1_id, player2_id → players
+├── source_type       — free / tournament / battle
+├── source_id         — tournament_id или challenge_id
+├── score_data        — JSONB (сеты, геймы, поинты, serve)
+├── youtube_url       — URL YouTube стрима
+├── status            — warmup / live / changeover / finished
+└── finished_at
 
 deleted_accounts      — лог удалённых аккаунтов
-├── profile_id        — ID удалённого профиля
-├── full_name, email, role, phone
-├── telegram_chat_id, player_id
-├── had_membership    — была ли активная подписка
-├── deleted_at        — дата удаления
-└── reason            — причина (опционально)
+├── profile_id, full_name, email, role
+├── had_membership
+└── deleted_at
     Trigger: trg_log_deleted_profile BEFORE DELETE ON profiles
 
 notification_log      — лог уведомлений (защита от дублей)
@@ -346,13 +421,23 @@ notification_log      — лог уведомлений (защита от ду�
 - **coaches/courts/news** — публичное чтение, запись только admin/manager
 - **players** — публичное чтение, запись через admin/manager (бан)
 - **memberships/payments** — staff full access
+- **challenges** — участники видят свои, staff — все
+- **challenge_predictions** — пользователь 1 голос, staff видят все
+- **loyalty_*** — staff full CRUD, users read own + redeem
+- **live_matches** — публичное чтение, staff управление
 
-### RPC-функции
+### RPC-функции (28+)
 
 ```sql
-get_public_partners()     — список игроков с online, telegram, уровнем
-get_my_game_invites()     — история приглашений (sent + received)
-recalc_player_points()    — пересчёт рейтинга после турнира
+get_public_partners()        — список партнёров с online, telegram, уровнем
+get_my_game_invites()        — история приглашений (sent + received)
+recalc_player_points()       — пересчёт рейтинга после турнира
+get_battle_public()          — публичные данные баттла
+get_battle_votes()           — результаты голосования
+cast_battle_vote()           — проголосовать за игрока
+get_loyalty_balance()        — баланс баллов лояльности
+generate_voucher()           — генерация ваучера со скидкой
+...
 ```
 
 ---
@@ -364,8 +449,8 @@ recalc_player_points()    — пересчёт рейтинга после ту�
 | Роль | Доступ |
 |------|--------|
 | **Гость** | Просмотр публичных страниц |
-| **user** | Личный кабинет, профиль, участие в турнирах |
-| **user + membership** | Все функции user + приглашения на игру |
+| **user** | Личный кабинет, профиль, голосование в баттлах |
+| **user + membership** | Все функции user + турниры + вызовы + лояльность |
 | **manager** | Всё user + админ-панель (CRUD) + бан/удаление обычных пользователей |
 | **admin** | Полный доступ ко всему |
 
@@ -391,15 +476,6 @@ recalc_player_points()    — пересчёт рейтинга после ту�
 | `auth-guard.js` | Защита роутов, загрузка профиля, функции requireStaff/requireAdmin |
 | `auth-nav.js` | UI навигации: "Войти" ↔ User Dropdown |
 
-### localStorage
-
-```
-sb-qqkzszesviukopgjbead-auth-token  — JWT сессия Supabase
-kslt_name                            — имя для dropdown
-kslt_avatar                          — URL аватара для dropdown
-kslt_role                            — роль (admin/manager/user)
-```
-
 ---
 
 ## 6. Frontend — Архитектурные паттерны
@@ -414,15 +490,11 @@ index-kg.html       — KG
 Определение: window.location.pathname.indexOf('-en') !== -1
 ```
 
-Каждый JS-файл содержит объект labels для обоих языков:
+Каждый JS-файл содержит объект labels для языков:
 ```javascript
-var L = isEn ? {
-    profile: 'Profile',
-    save: 'Save'
-} : {
-    profile: 'Профиль',
-    save: 'Сохранить'
-};
+var isEn = window.location.pathname.indexOf('-en') !== -1;
+var isKg = window.location.pathname.indexOf('-kg') !== -1;
+var L = isEn ? { profile: 'Profile' } : isKg ? { profile: 'Профиль' } : { profile: 'Профиль' };
 ```
 
 ### IIFE-модули (изоляция)
@@ -433,6 +505,18 @@ var L = isEn ? {
     'use strict';
     // вся логика модуля
 })();
+```
+
+### JSDoc типизация
+
+Ключевые функции аннотированы JSDoc:
+```javascript
+/**
+ * @param {string} profileId - UUID пользователя
+ * @param {Object} options
+ * @param {number} options.amount - Сумма в KGS
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
 ```
 
 ### CSS-префиксы по страницам
@@ -450,6 +534,12 @@ var L = isEn ? {
 | `td-` | Tournament detail (сетка) |
 | `pr-` | Pricing (цены) |
 | `ip-` | Info pages (about, faq, rules) |
+| `ch-` | Challenge detail (баттл) |
+| `lm-` | Live match (живой матч) |
+| `um-` | Umpire (панель судьи) |
+| `bc-` | Battle cards (карточки баттлов) |
+| `bo-` | Battles overview |
+| `vr-` | Verify (верификация) |
 
 ### Дизайн-система (CSS-переменные)
 
@@ -478,86 +568,49 @@ if (result.data && result.data.length > 0) {
 }
 ```
 
-### Detail-страницы (URL-параметры)
-
-```
-coach.html?id=abc123    → загрузка по ID
-court.html?id=xyz789    → загрузка по ID
-player.html?id=pl001    → загрузка по ID
-tournament.html?id=t01  → загрузка + сетка
-```
-
 ---
 
-## 7. Edge Functions (Serverless)
+## 7. Edge Functions (15 штук)
 
-### send-game-invite (TypeScript/Deno)
+| # | Функция | JWT | Триггер | Назначение |
+|---|---------|-----|---------|-----------|
+| 1 | `admin-manage-user` | Да | Админка | create_manager, ban/unban, delete_user |
+| 2 | `auto-unban` | Нет (cron) | pg_cron 09:00 | Авто-разбан + TG уведомление |
+| 3 | `battle-announce` | Да | Админка | Анонс баттла в TG группу |
+| 4 | `battle-publish` | Да | Админка | Публикация баттла + inline кнопки голосования |
+| 5 | `broadcast` | Да | Админка | Универсальная Email/TG рассылка |
+| 6 | `create-challenge` | Да | Dashboard | Создание вызова (membership check, 5/day limit) |
+| 7 | `match-notify` | Нет (cron) | pg_cron + manual | Уведомления о матчах |
+| 8 | `membership-expire` | Нет (cron) | pg_cron 09:30 | Auto-expire + TG + Email |
+| 9 | `membership-notify` | Нет (cron) | pg_cron 10:00 | 7-day expiry reminder |
+| 10 | `membership-tg-notify` | Да | Админка | Grant/extend/cancel → TG DM |
+| 11 | `send-email` | Да | Система | Отправка email через Resend |
+| 12 | `send-game-invite` | Да | Dashboard | Приглашение на игру → TG |
+| 13 | `telegram-webhook` | Нет | Telegram | Все callbacks + /start + /notifications |
+| 14 | `tournament-notify` | Да + cron | Админка + pg_cron | Анонс турнира в TG группу |
+| 15 | `tournament-reminder` | Нет (cron) | pg_cron | Напоминание о турнире |
 
-**Путь:** `supabase/functions/send-game-invite/index.ts`
-**JWT:** Включён (требует авторизацию)
+### Паттерн Edge Function
 
-```
-POST /send-game-invite
-Body: { receiver_player_id: "player_id" }
-Headers: Authorization: Bearer <JWT>, apikey: <ANON_KEY>
+```typescript
+// CORS headers обязательны
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
-Логика:
-1. Проверка JWT → получение sender_id
-2. Загрузка профиля sender (имя, телефон, telegram)
-3. Проверка роли: admin/manager → bypass членства
-4. Проверка активного членства
-5. Проверка лимита (30 приглашений/день)
-6. Проверка дубликатов (pending к тому же игроку)
-7. Поиск receiver: player → profile → telegram_chat_id
-8. INSERT game_invites (status: pending)
-9. Telegram: sendMessage с inline_keyboard [Принять] [Отклонить]
-10. Ответ: { success: true }
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
-Ошибки:
-- 401: не авторизован
-- 403: нет членства / лимит / дубликат
-- 404: игрок не найден
-- 400: telegram не привязан
-```
+  // JWT auth (если включена)
+  const supabase = createClient(url, anonKey, {
+    global: { headers: { Authorization: req.headers.get('Authorization')! } }
+  });
+  const { data: { user } } = await supabase.auth.getUser();
 
-### telegram-webhook (TypeScript/Deno)
-
-**Путь:** `supabase/functions/telegram-webhook/index.ts`
-**JWT:** Отключён (Telegram шлёт без авторизации)
-**Webhook URL:** настроен через Telegram Bot API
-
-```
-POST /telegram-webhook
-Body: Telegram Update object
-
-Обработка /start <profileId>:
-1. Валидация UUID
-2. Сохранение chat_id + username в profiles
-3. Ответ: "Telegram привязан к KSLT"
-
-Обработка callback_query (invite_accept:UUID / invite_decline:UUID):
-1. Парсинг action + invite_id
-2. UPDATE game_invites SET status + responded_at
-3. Если accepted:
-   → Telegram получателю: "Принято! [Открыть чат]" (t.me/username)
-   → Telegram отправителю: "Приглашение принято! [Открыть чат]"
-4. Если declined:
-   → Telegram отправителю: "Приглашение отклонено"
-5. answerCallbackQuery() — убрать loading
-6. editMessageReplyMarkup() — убрать кнопки
-```
-
-### membership-notify (TypeScript/Deno)
-
-**Путь:** `supabase/functions/membership-notify/index.ts`
-**Запуск:** pg_cron ежедневно в 04:00 UTC (10:00 Бишкек)
-
-```
-Логика:
-1. Найти memberships с end_date через 7 дней
-2. Проверить notification_log (не дублировать)
-3. Telegram: напоминание об истечении членства
-4. Записать в notification_log
+  // Логика...
+  return new Response(JSON.stringify(result), { headers: corsHeaders });
+});
 ```
 
 ---
@@ -578,27 +631,17 @@ Body: Telegram Update object
 | `/start <profileId>` | Привязка Telegram к профилю KSLT |
 | `/membership` | Заявка на членство через бот |
 | `/notifications` | Настройка уведомлений (4 категории, inline toggles) |
-| Inline: Принять | Принять приглашение на игру |
-| Inline: Отклонить | Отклонить приглашение |
-| Inline: Записаться | Регистрация на турнир (callback `tournament_register:{id}`) |
+| Inline: Принять/Отклонить | Приглашение на игру |
+| Inline: Записаться | Регистрация на турнир |
+| Inline: Голосование (1/2) | Голос за игрока в баттле (с % после голоса) |
 
 ### Групповые рассылки
 
-| Параметр | Значение |
-|----------|----------|
-| Секрет | TELEGRAM_GROUP_CHAT_ID в Supabase Vault |
-| Функция | Edge Function `/tournament-notify` |
-| Триггер (ручной) | Кнопка "Рассылка в Telegram" в форме турнира (admin) |
-| Триггер (авто) | pg_cron ежедневно 05:00 UTC, `registration_start = today` |
-| Дедупликация | Поле `tournaments.notified_at` |
-
-### Deep Link
-
-```
-t.me/KSLTennisBot?start=UUID_PROFILE_ID
-```
-
-Ссылка размещена в dashboard → настройки → "Привязать Telegram"
+| Тип | Функция | Триггер |
+|-----|---------|---------|
+| Турнир | `tournament-notify` | Кнопка в админке + pg_cron |
+| Баттл | `battle-announce` | Кнопка в админке |
+| Матч | `match-notify` | Кнопка в админке + pg_cron |
 
 ---
 
@@ -614,18 +657,6 @@ Tour → Futures → Challenger → Masters → Pro-Masters (высшая)
 - Топ-5 → промоушен в высшую категорию
 - Сезон = календарный год
 - Defending points (как ATP/WTA)
-
-### Уровни турниров
-
-| Уровень | Очки за победу |
-|---------|---------------|
-| Кат.4 | Минимальные |
-| Кат.3 | Средние |
-| Кат.2 | Высокие |
-| Кат.1 | Очень высокие |
-| Grand (ТБШ) | Максимальные |
-
-Очки за каждый раунд: W / F / SF / QF / R16 / R32
 
 ### Типы турнирных сеток
 
@@ -654,298 +685,252 @@ Tour → Futures → Challenger → Masters → Pro-Masters (высшая)
 5. form[] → массив последних 5 результатов (W/L)
 ```
 
-### Поиск турниров
+---
 
-- **Overview** (`tournaments-overview.js`): поиск по названию во всех категориях, debounce 200ms
-- **Category** (`tournaments-overlay.js`): inline-поиск + фильтр статуса работают вместе
+## 10. Challenge Battle System
 
-### Файлы турнирной системы
+### Жизненный цикл вызова
 
-| Файл | Назначение |
-|------|-----------|
-| `admin/sections/bracket.js` | Управление заявками + сеткой (SE/FIC/Group Stage) |
-| `tournament-generator.js` | Алгоритм генерации сетки |
-| `tournament-detail.js` | Публичная визуализация сетки |
-| `tournaments-overview.js` | Обзор категорий + поиск |
-| `tournaments-overlay.js` | Список турниров + поиск + фильтры |
-| `bracket-system-migration.sql` | Таблицы: registrations, matches |
-| `rating-system-migration.sql` | Таблицы: levels, points_rules |
-| `group-stage-migration.sql` | Расширение для группового этапа |
+```
+Игрок A → создаёт challenge → Telegram бот отправляет Игроку B
+  → B принимает / делает counter-offer / отклоняет
+  → Если accepted → статус challenge = accepted
+  → Админ публикует баттл (battle_published = true)
+  → Голосование на сайте + в Telegram (inline кнопки)
+  → Матч проходит → umpire вводит счёт
+  → Финализация → wins/losses/form обновляются
+```
+
+### Публичная страница баттла
+
+`challenge.html` / `challenge-en.html` / `challenge-kg.html`:
+- VS layout (2 игрока, фото, статистика)
+- Голосование (бар с процентами)
+- H2H: история личных встреч
+- Детали матча (дата, время, корт)
+- Score (после завершения)
+- One-time voting: нельзя переголосовать
+- Cross-check: site ↔ Telegram (один человек — один голос)
+
+### Карточки баттлов
+
+`battles.html` — обзорная страница:
+- Grid: 3 колонки desktop / 2 tablet / 1 mobile
+- Баннер матча, имена игроков, дата, статус
+- Фильтры: активные / завершённые
 
 ---
 
-## 10. Членство
+## 11. Live Match System
+
+### Архитектура
+
+```
+Admin → создаёт Live Match (source: free/tournament/battle)
+  → Umpire (umpire.html) вводит счёт через панель
+  → Supabase Realtime → live_matches → score_data (JSONB)
+  → Публичная страница (live-match.html): scoreboard + YouTube embed
+  → Scoreboard OBS (scoreboard.html): transparent overlay
+  → Homepage: live cards с 15-секундным auto-refresh
+```
+
+### Umpire Engine (`js/umpire.js`)
+
+Полный теннисный счёт:
+- Games → Sets → Match
+- Deuce / Advantage
+- Tiebreak (7-point, first to 7, win by 2)
+- Serve indicator (первая подача)
+- Changeover timer (3 мин game / 5 мин set)
+- Skip changeover button
+
+### Создание Live Match (из админки)
+
+3 источника:
+1. **Free match** — свободный матч (выбор 2 игроков)
+2. **Tournament bracket** — из сетки турнира
+3. **Battle** — из принятого вызова
+
+### Score sync
+
+При завершении Live Match (tournament source):
+- Score копируется в `matches` (tournament bracket)
+- Ручной sync через кнопку в админке
+
+---
+
+## 12. Loyalty Program
+
+### Механика
+
+- **Earn**: при оплате (court/coach/membership) + финализации турнира
+- **Welcome bonus**: 200 баллов за первое членство (one-time)
+- **Redeem**: обмен на награды (запись на турнир, продление членства)
+- **Expire**: авто-списание через 12 мес (pg_cron)
+
+### Таблицы
+
+- `loyalty_rules` — правила начисления (event_type, points)
+- `loyalty_rewards` — награды для обмена (name, points_cost)
+- `loyalty_transactions` — история (earn/redeem/adjust/expire)
+
+### RPC
+
+- `get_loyalty_balance(profile_id)` — текущий баланс
+
+### UI
+
+- Dashboard → вкладка "Баллы" (баланс, история, обмен)
+- Admin → секция "Лояльность" (правила, награды, транзакции, manual adjust)
+
+---
+
+## 13. Членство
 
 ### Статусы
 
 | Статус | Доступ |
 |--------|--------|
 | Нет членства | Просмотр, профиль |
-| Активно | Турниры, приглашения, полный доступ |
+| Активно | Турниры, приглашения, лояльность, полный доступ |
 | Истекло | Ограниченный (как "нет членства") |
-
-### Проверка членства
-
-```javascript
-// Frontend (partners.js)
-var memberRes = await client.from('memberships')
-    .select('id').eq('profile_id', userId)
-    .gte('end_date', new Date().toISOString())
-    .eq('status', 'active').limit(1);
-
-// Backend (Edge Function)
-const { data: membership } = await supabase
-    .from('memberships').select('id')
-    .eq('profile_id', senderId)
-    .gte('end_date', new Date().toISOString())
-    .eq('status', 'active').limit(1);
-```
 
 ### Уведомления
 
-- За 7 дней до истечения → Telegram напоминание (`membership-notify`)
+- За 7 дней до истечения → TG + Email (`membership-notify`)
 - При истечении → авто-expire + TG DM (`membership-expire`)
 - При выдаче/продлении/отмене → TG DM (`membership-tg-notify`)
 - Все уведомления проверяют `notify_preferences` (opt-out)
 
-### Настройка уведомлений (opt-out)
+### Автоматические процессы (pg_cron)
 
-Колонка `profiles.notify_preferences JSONB`:
-```json
-{
-  "tg":    { "membership": true, "tournaments": true, "matches": true, "challenges": true },
-  "email": { "membership": true, "tournaments": true, "matches": true, "challenges": true }
-}
-```
-
-- `NULL` = всё включено (по умолчанию)
-- Проверка: `prefs?.tg?.membership === false` → НЕ отправлять
-- **Не блокируется:** бан/разбан, удаление аккаунта, `/start`, `/membership` flow
-- UI: Dashboard → Настройки → тогглы (4×2 таблица)
-- Telegram: `/notifications` → inline keyboard тогглов
-- UNIQUE constraints: `telegram_chat_id`, `phone` (предотвращают дубликаты)
+| Процесс | Время (Бишкек) | Что делает |
+|---------|----------------|------------|
+| Авто-истечение | 09:30 | Просроченные → status='expired' → TG + Email |
+| Напоминание | 10:00 | Истекающие через 7 дней → TG + Email |
+| Авто-разбан | 09:00 | Снимает истёкшие баны → TG |
+| Баллы expire | Ежедневно | Списание баллов старше 12 мес |
 
 ---
 
-## 11. Админ-панель
+## 14. Админ-панель
 
-**Модульная архитектура:** `js/admin/` — 14 файлов, ~16 000 строк
+**Модульная архитектура:** `js/admin/` — 18 файлов, ~22 000 строк
 
-Все модули используют namespace `window.KSLT_ADMIN` (alias `A`). Каждый файл — IIFE, регистрирующий свои функции на общем namespace. Shared utilities (`A.showToast`, `A.esc`, `A.uploadImage`, `A.setupBulkDelete`) в `core/utils.js`, layout/navigation в `core/layout.js`.
+Все модули используют namespace `window.KSLT_ADMIN` (alias `A`). Каждый файл — IIFE, регистрирующий свои функции. Shared utilities в `core/utils.js`, layout в `core/layout.js`.
 
-### 10 вкладок (после рефакторинга)
+### Вкладки
 
 | # | Вкладка | Содержимое | Роли |
 |---|---------|-----------|------|
-| 1 | Dashboard | Статистика (9 карточек + 6 таблиц) | all |
+| 1 | Dashboard | Статистика (12 карточек + 6 таблиц) | all |
 | 2 | Новости | CRUD + inline-фото + опрос + автосохранение | all |
 | 3 | Турниры | CRUD + заявки + сетка (SE/FIC/Group Stage) | all |
-| 4 | **Игроки** | Подвкладки: Список / Рейтинг / Результаты | Результаты — admin only |
+| 4 | Игроки | Подвкладки: Список / Рейтинг / Результаты | Результаты — admin only |
 | 5 | Корты | CRUD + координаты + promoted | all |
 | 6 | Тренеры | CRUD + фото + авто-перевод | all |
-| 7 | **Пользователи** | Воронка конверсии + аналитика + фильтр игроков | all |
-| 8 | **Финансы** | Единая таблица: entity_payments + payments | all |
+| 7 | Пользователи | Воронка конверсии + аналитика + бан | all |
+| 8 | Финансы | entity_payments + payments + PDF/Excel | all |
 | 9 | Ваучеры | Дашборд + таблица + фильтры + отмена | all |
-| 10 | **Настройки** | Подвкладки: Правила очков / Промоушен | admin only |
-
-### Ключевые объединения
-
-- **Игроки** = бывшая "Игроки" + "Рейтинг" (таблица + результаты)
-- **Финансы** = бывшая "Оплаты" (entity_payments) + "Членство" (payments) — единая таблица с фильтром по типу
-- **Настройки** = бывшая "Рейтинг → Правила очков" + "Рейтинг → Промоушен"
+| 10 | Вызовы | Accepted/Published/Completed + publish/score | all |
+| 11 | Live | Создание/управление живыми матчами | all |
+| 12 | Лояльность | Правила + Награды + Транзакции + Adjust | all |
+| 13 | Настройки | Правила очков / Промоушен | admin only |
 
 ### Отчёты и аналитика
 
-Секции с аналитикой (ваучеры, финансы, пользователи):
-
-- **Карточки статистики** — ключевые метрики (всего, активных, за период)
-- **Фильтр периода** — Всё время / Этот месяц / Прошлый месяц / Свой период
-- **PDF-экспорт** — открывает отчёт в новой вкладке (`window.print()` → "Сохранить как PDF")
-- **Ваучеры**: сумма скидок рассчитывается из цен кортов/тренеров × процент
-- **Пользователи**: воронка конверсии (зарегистрировано → стали игроками → %), график динамики за текущий месяц (Chart.js — 4 линии: регистрации, стали игроками, удалено, прирост), таблица по умолчанию показывает только не-игроков (toggle "Показать всех")
-
-### Трекинг удалённых аккаунтов
-
-PostgreSQL trigger `trg_log_deleted_profile` — при удалении профиля данные копируются в таблицу `deleted_accounts`. Позволяет анализировать отток пользователей.
-
-### Новости — расширенный функционал
-
-- **Inline-фото** — фото вставляются между абзацами текста
-  - WYSIWYG-превью: текст разбивается на абзацы, между ними кнопки "+ Фото" / "URL"
-  - Хранение: `content_images JSONB [{url, after_paragraph}]`
-  - Загрузка: файл (Supabase Storage) или URL (любой HTTPS)
-- **Голосование** — опрос в конце статьи
-  - Хранение: `poll JSONB {question, options}` или null
-  - Голосование через localStorage (анонимное)
-- **Автосохранение** — черновик сохраняется в Supabase каждые 3 сек (при наличии заголовка)
-  - Нет localStorage-черновиков, нет модалки "Восстановить"
-  - Черновик сразу виден в списке статей (published_at = null)
-
-### Функции админа
-
-- **Массовое удаление** — `setupBulkDelete()` универсальная функция
-- **Авто-перевод** — `translateFromRu()` API для полей name_en
-- **Транслитерация** — `transliterate()` Кириллица → Латиница
-- **Формат телефона** — +996 XXX XX-XX-XX
-- **Турнирная сетка** — полный цикл: заявки → draw → счёт → финализация
-- **Членство** — одобрение/отказ + история платежей
+- **PDF-экспорт** — Финансы, Пользователи, Ваучеры
+- **Excel/CSV-экспорт** — UTF-8 BOM, все секции
+- **Графики** — Chart.js: рост пользователей, динамика оплат (4 линии)
+- **Воронка конверсии** — зарегистрировано → стали игроками → %
 
 ---
 
-## 12. Деплой
+## 15. PWA (Progressive Web App)
 
-### Frontend (GitHub Pages)
+- `manifest.json` — standalone, dark theme, icons (192/512/apple-touch-icon)
+- **Service Worker** — pre-cache core assets, Network First HTML, Cache First CSS/JS/images
+- Meta tags в всех 80 HTML-файлах
+- Installable: desktop (Chrome) + mobile (Android/iOS)
+
+---
+
+## 16. Onboarding
+
+Модальное окно для новых посетителей:
+- Показывается один раз (localStorage flag)
+- 3 языка (RU/EN/KG)
+- Шаги: приветствие → возможности → как начать
+- Кнопка "Не показывать снова"
+
+---
+
+## 17. Тестирование
+
+### E2E тесты (Playwright)
+
+9 test suites × 3 viewport (desktop 1920px / tablet 768px / mobile 375px):
+
+| Suite | Что тестирует |
+|-------|--------------|
+| 01-pages-load | Все 80 страниц (HTTP 200, нет JS ошибок) |
+| 02-navigation | Header links, language switcher, footer |
+| 03-responsive | Horizontal overflow (5 breakpoints × 9 pages) |
+| 04-css-integrity | No 404 for CSS/JS, dark theme, Inter font |
+| 05-auth-page | Form elements, Google OAuth, validation |
+| 06-homepage-sections | Hero, tournaments, news, courts, coaches |
+| 07-pwa | Manifest, service worker, meta tags, icons |
+| 08-seo-meta | Title, lang, charset, accessibility |
+| 09-content-pages | About, FAQ, Rules, Pricing, etc. |
+
+### Unit тесты (Vitest)
+
+72 теста для Edge Functions:
+
+| Suite | Тесты | Что тестирует |
+|-------|-------|--------------|
+| create-challenge | 23 | JWT, membership, limits, validation |
+| admin-manage-user | 29 | create_manager, ban/unban, delete, roles |
+| battle-publish | 20 | Auth, publish flow, TG announce, retry |
+
+### CI/CD (GitHub Actions)
+
+| Workflow | Триггер | Что делает |
+|----------|---------|-----------|
+| `test.yml` | push, PR | E2E + Unit тесты |
+| `deploy.yml` | push to main | Auto-deploy на Netlify |
+
+---
+
+## 18. Деплой
+
+### Frontend (Netlify)
 
 ```bash
-git add .
-git commit -m "описание"
 git push origin main
-# → автодеплой на GitHub Pages
+# → GitHub Actions → tests → deploy на Netlify
 ```
 
 ### SQL миграции
 
-1. Открыть Supabase Dashboard → SQL Editor
+1. Supabase Dashboard → SQL Editor
 2. Вставить содержимое файла из `sql/`
-3. Нажать Run
-
-Файлы миграций:
-- `sql/news-content-images-poll.sql` — content_images + poll колонки
-- `sql/news-executor-column.sql` — executor колонка
-- `sql/news-gallery-column.sql` — gallery колонка
-- `sql/news-kg-columns.sql` — кыргызский язык колонки
-- `sql/role-access-migration.sql` — RLS по ролям
-- `sql/admin-users-migration.sql` — RLS для пользователей
-- `sql/group-stage-migration.sql` — групповой этап турниров
-- `sql/player-ban-migration.sql` — колонки бана + RLS для менеджера
-- `sql/notify-preferences-migration.sql` — notify_preferences JSONB колонка
-- `sql/unique-constraints-migration.sql` — UNIQUE на telegram_chat_id + phone
-- `sql/test-fic-16-players.sql` — тестовый FIC-турнир (16 игроков)
-- `sql/test-32-players-promasters.sql` — тестовый SE-турнир (32 игрока)
-- `sql/test-tournaments-seed.sql` — 90 тестовых турниров (6 категорий)
+3. Run
 
 ### Edge Functions
 
-1. Supabase Dashboard → Edge Functions
-2. "Deploy a new function" или выбрать существующую
-3. "Via Editor" → вставить код из `supabase/functions/*/index.ts`
-4. Deploy
+```bash
+supabase functions deploy <name> --no-verify-jwt
+```
 
 ### Секреты (Supabase Vault)
 
 | Секрет | Назначение |
 |--------|-----------|
 | TELEGRAM_BOT_TOKEN | Токен Telegram бота |
-| SUPABASE_SERVICE_ROLE_KEY | Серверный ключ (для Edge Functions) |
-
-### Telegram Webhook
-
-```bash
-# Установка webhook
-curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://qqkzszesviukopgjbead.supabase.co/functions/v1/telegram-webhook"
-```
-
----
-
-## 13. Завершённые этапы
-
-| Этап | Описание | Статус |
-|------|----------|--------|
-| Phase 1 | Frontend — все страницы + responsive | ✅ |
-| Phase 2 | Supabase backend + Auth + Dashboard | ✅ |
-| Phase 3.1 | Членство (stub) | ✅ |
-| Phase 4 | Админ-панель CRUD (5 секций) | ✅ |
-| Phase 4.3 | Публичные страницы ← Supabase | ✅ |
-| Рейтинг | Рейтинговая система в админке | ✅ |
-| Bracket | Турнирная сетка SE (ITF seeding) | ✅ |
-| Bracket FIC | Full Individual Consolation (все места) | ✅ |
-| Bracket Group | Групповой этап + плей-офф | ✅ |
-| Services | Страница услуг (promoted сверху) | ✅ |
-| Info | Информационный хаб | ✅ |
-| Partners | Найти партнёра + фильтры + поиск | ✅ |
-| Game Invite | Приглашения через Telegram бот | ✅ |
-| User Dropdown | Dropdown меню в навигации | ✅ |
-| Dashboard Invitations | Таб "Приглашения" в ЛК | ✅ |
-| Admin Users | Секция "Пользователи" в админке | ✅ |
-| Admin Nav | Единый dropdown "Админка" для staff | ✅ |
-| Admin Dashboard | 9 карточек статистики + 6 таблиц активности | ✅ |
-| News Inline Photos | Фото в тексте + WYSIWYG-превью | ✅ |
-| News Polls | Голосование в статьях | ✅ |
-| News Autosave | Автосохранение черновиков в Supabase | ✅ |
-| News Stats | Счётчик просмотров + статистика | ✅ |
-| Sticky Filters | Фиксированные фильтры + scroll-to-top | ✅ |
-| Category Ratings | Страницы рейтинга по категориям | ✅ |
-| Pagination | Пагинация (тренеры, корты, партнёры) | ✅ |
-| Sponsors | Блоки спонсоров на страницах | ✅ |
-| Homepage CTA | Кнопки действий на главной (корты, тренеры) | ✅ |
-| Tournament Search | Поиск турниров (overview + category) | ✅ |
-| Admin Refactoring | 15 000 строк → 14 модулей (KSLT_ADMIN namespace) | ✅ |
-| Admin Tab Consolidation | 11 вкладок → 10 (Рейтинг→Игроки, Членство+Оплаты→Финансы, Настройки) | ✅ |
-| Users Funnel | Воронка конверсии: регистрации → игроки (карточки + график) | ✅ |
-| KG Translation | 20 HTML + 6 data + 14 JS — кыргызский язык | ✅ |
-| Voucher System | QR-ваучеры, лимиты, верификация, история | ✅ |
-| Vouchers Admin | Дашборд, таблица, фильтры, период, PDF | ✅ |
-| Period Filters + PDF | Оплаты, членства, пользователи — период + экспорт | ✅ |
-| User Analytics | Карточки статистики + Chart.js график роста | ✅ |
-| Deleted Accounts | PostgreSQL trigger + admin visibility | ✅ |
-| Challenge Board | Вызовы на матч через Telegram (counter-offer, expire) | ✅ |
-| Player Ban System | Бан/разбан игроков + TG уведомления + бейджи | ✅ |
-| Manager Rights | Менеджер может банить/удалять обычных пользователей | ✅ |
-| Admin Player Form | Имя+Фамилия, девиз, соцсети, матчи, прямоугольное фото | ✅ |
-| Auto-Unban | pg_cron 09:00 Bishkek + Edge Function + TG уведомление | ✅ |
-| Notification Preferences | Opt-out по 4 категориям × 2 канала, /notifications в боте | ✅ |
-| Unique Constraints | UNIQUE на telegram_chat_id + phone, /start очищает предыдущий | ✅ |
-
----
-
-## 14. Известные особенности
-
-### JWT в Edge Functions
-- `telegram-webhook` — JWT **отключён** (Telegram шлёт без авторизации)
-- `send-game-invite` — JWT **включён** + требует `apikey` header
-- `membership-notify` — вызывается через pg_cron (service role)
-
-### Self-invite
-- В `send-game-invite` проверка `sender !== receiver` временно отключена для тестирования
-- Нужно включить обратно для продакшена
-
-### Статические данные (fallback)
-- Файлы в `data/` — резервные данные если Supabase недоступен
-- Используются на: coaches, courts, players, news, tournaments
-
-### Content Security Policy
-- `img-src 'self' data: https:` — разрешены все HTTPS-изображения (для inline-фото по URL)
-- CSP задаётся в `<meta>` теге каждого HTML-файла (43 файла)
-
-### Лимиты
-- Приглашения на игру: 30 в день на пользователя
-- Аватар: максимум 2MB (JPG/PNG)
-- Турнирная сетка: 8, 16 или 32 участника (SE, FIC, Group Stage)
-
----
-
-## 15. Полезные команды
-
-### Supabase RPC (из консоли браузера)
-
-```javascript
-// Список партнёров
-supabaseClient.rpc('get_public_partners').then(r => console.log(r.data))
-
-// Мои приглашения
-supabaseClient.rpc('get_my_game_invites').then(r => console.log(r.data))
-
-// Профиль текущего пользователя
-supabaseClient.from('profiles').select('*').eq('id', ksltUser.id).single()
-```
-
-### Git
-
-```bash
-git status          # текущее состояние
-git log --oneline   # история коммитов
-git push            # деплой на GitHub Pages
-```
+| TELEGRAM_GROUP_CHAT_ID | ID группы |
+| CRON_SECRET | Секрет для pg_cron |
+| RESEND_API_KEY | API ключ для email (Resend) |
 
 ---
 

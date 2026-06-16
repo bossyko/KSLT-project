@@ -138,9 +138,9 @@
 
     var html = '<div class="td-topbar">' +
       '<button class="td-back" id="coachDetailBack">' +
-        '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Назад' +
+        '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>' + I18N.t('common.back') +
       '</button>' +
-      '<span class="td-topbar-title">Тренер</span>' +
+      '<span class="td-topbar-title">' + I18N.t('coach.detail') + '</span>' +
       '<span style="width:60px"></span>' +
     '</div>';
 
@@ -157,23 +157,23 @@
 
     // Stats
     html += '<div class="pd-stats" style="grid-template-columns:repeat(2,1fr)">';
-    if (c.experience) html += '<div class="pd-stat"><div class="pd-stat-num">' + c.experience + '</div><div class="pd-stat-label">Лет опыта</div></div>';
-    if (c.price) html += '<div class="pd-stat"><div class="pd-stat-num">' + c.price + '</div><div class="pd-stat-label">Сом/час</div></div>';
+    if (c.experience) html += '<div class="pd-stat"><div class="pd-stat-num">' + c.experience + '</div><div class="pd-stat-label">' + I18N.t('coach.yearsExp') + '</div></div>';
+    if (c.price) html += '<div class="pd-stat"><div class="pd-stat-num">' + c.price + '</div><div class="pd-stat-label">' + I18N.t('coach.pricePerH') + '</div></div>';
     html += '</div>';
 
     // Court
     if (c.court) {
-      html += '<div class="pd-section"><h3 class="pd-section-title">📍 Площадка</h3><div class="pd-empty-small" style="color:var(--text)">' + esc(c.court) + '</div></div>';
+      html += '<div class="pd-section"><h3 class="pd-section-title">📍 ' + I18N.t('coach.court') + '</h3><div class="pd-empty-small" style="color:var(--text)">' + esc(c.court) + '</div></div>';
     }
 
     // Bio
     if (c.bio) {
-      html += '<div class="pd-section"><h3 class="pd-section-title">📝 О тренере</h3><div style="font-size:13px;color:var(--text-sec);line-height:1.5">' + esc(c.bio) + '</div></div>';
+      html += '<div class="pd-section"><h3 class="pd-section-title">📝 ' + I18N.t('coach.about') + '</h3><div style="font-size:13px;color:var(--text-sec);line-height:1.5">' + esc(c.bio) + '</div></div>';
     }
 
     // Achievements
     if (c.achievements.length > 0) {
-      html += '<div class="pd-section"><h3 class="pd-section-title">🏆 Достижения</h3>';
+      html += '<div class="pd-section"><h3 class="pd-section-title">🏆 ' + I18N.t('coach.achievements') + '</h3>';
       c.achievements.forEach(function(a) {
         html += '<div style="font-size:13px;color:var(--text-sec);padding:4px 0">• ' + esc(a) + '</div>';
       });
@@ -182,12 +182,12 @@
 
     // Contacts (member only)
     if (isMember && (c.telegram || c.whatsapp)) {
-      html += '<div class="pd-section"><h3 class="pd-section-title">📞 Контакты</h3>';
+      html += '<div class="pd-section"><h3 class="pd-section-title">📞 ' + I18N.t('coach.contacts') + '</h3>';
       if (c.telegram) html += '<a href="https://t.me/' + esc(c.telegram) + '" target="_blank" class="pd-challenge-btn" style="background:var(--blue);margin-bottom:8px;display:block;text-align:center;text-decoration:none;color:#fff">Telegram: @' + esc(c.telegram) + '</a>';
       if (c.whatsapp) html += '<a href="https://wa.me/' + esc(c.whatsapp) + '" target="_blank" class="pd-challenge-btn" style="background:var(--green);display:block;text-align:center;text-decoration:none;color:#fff">WhatsApp</a>';
       html += '</div>';
     } else if (!isMember) {
-      html += '<div class="pd-cta-membership"><p>Контакты тренера доступны для членов KSLT</p></div>';
+      html += '<div class="pd-cta-membership"><p>' + I18N.t('coach.contactsLocked') + '</p></div>';
     }
 
     html += '</div>';
