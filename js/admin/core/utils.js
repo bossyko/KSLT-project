@@ -258,10 +258,21 @@
         var enVal = enEl ? enEl.value.trim() : '';
         var kgVal = kgEl ? kgEl.value.trim() : '';
 
-        // Find source: first non-empty
+        // Detect active language tab — translate FROM the currently visible tab
+        var activeLang = '';
+        var card = btn.closest('.ad-form-card');
+        if (card) {
+            var activeTab = card.querySelector('.ad-lang-tab.active');
+            if (activeTab) activeLang = activeTab.dataset.lang;
+        }
+
+        // Find source: active tab first, then first non-empty
         var srcLang = '';
         var srcText = '';
-        if (ruVal) { srcLang = 'ru'; srcText = ruVal; }
+        if (activeLang === 'ru' && ruVal) { srcLang = 'ru'; srcText = ruVal; }
+        else if (activeLang === 'en' && enVal) { srcLang = 'en'; srcText = enVal; }
+        else if (activeLang === 'kg' && kgVal) { srcLang = 'kg'; srcText = kgVal; }
+        else if (ruVal) { srcLang = 'ru'; srcText = ruVal; }
         else if (enVal) { srcLang = 'en'; srcText = enVal; }
         else if (kgVal) { srcLang = 'kg'; srcText = kgVal; }
 
@@ -270,11 +281,11 @@
             return;
         }
 
-        // Determine targets
+        // Translate to all other languages (overwrite existing)
         var targets = [];
-        if (!ruVal && ruEl && srcLang !== 'ru') targets.push({ el: ruEl, lang: 'ru' });
-        if (!enVal && enEl && srcLang !== 'en') targets.push({ el: enEl, lang: 'en' });
-        if (!kgVal && kgEl && srcLang !== 'kg') targets.push({ el: kgEl, lang: 'kg' });
+        if (ruEl && srcLang !== 'ru') targets.push({ el: ruEl, lang: 'ru' });
+        if (enEl && srcLang !== 'en') targets.push({ el: enEl, lang: 'en' });
+        if (kgEl && srcLang !== 'kg') targets.push({ el: kgEl, lang: 'kg' });
 
         if (targets.length === 0) {
             showToast(L.allFieldsFilled, 'info');
