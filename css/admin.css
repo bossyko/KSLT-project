@@ -950,6 +950,13 @@ body.ad-page {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
 }
+.ad-field-input:-webkit-autofill,
+.ad-field-input:-webkit-autofill:hover,
+.ad-field-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-elevated) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
 
 .ad-field-input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -3768,4 +3775,98 @@ select.ad-field-input {
     width: 100%;
     height: auto;
     display: block;
+}
+
+/* ---- Inter-group (IG) matches ---- */
+.ad-ig-section {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.ad-ig-matches-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+@media (max-width: 600px) {
+    .ad-ig-matches-grid { grid-template-columns: 1fr; }
+}
+.ad-ig-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+.ad-ig-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+.ad-ig-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(204, 255, 0, 0.15);
+}
+.ad-ig-card-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border-subtle);
+}
+.ad-ig-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.ad-ig-card-row:last-child {
+    border-bottom: none;
+}
+.ad-ig-card-row.ad-ig-card-winner {
+    background: rgba(204, 255, 0, 0.06);
+}
+.ad-ig-card-name {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+}
+.ad-ig-card-winner .ad-ig-card-name {
+    color: var(--accent);
+    font-weight: 700;
+}
+.ad-ig-card-score {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    white-space: nowrap;
+    margin-left: 8px;
+}
+.ad-ig-card-winner .ad-ig-card-score {
+    color: var(--accent);
+}
+.ad-brk-grp-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(204, 255, 0, 0.15);
+    color: var(--accent);
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 1px 0;
+    border-radius: 3px;
+    min-width: 22px;
+    width: 22px;
+    flex-shrink: 0;
+    text-align: center;
+    line-height: 1.4;
 }

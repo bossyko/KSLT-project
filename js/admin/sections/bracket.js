@@ -207,7 +207,7 @@
         html += '</div>';
 
         // Bracket / Group panel
-        html += '<div class="ad-brk-panel" id="adBrkBracketPanel" style="' + (activeTab !== 'bracket' ? 'display:none;' : '') + '">';
+        html += '<div class="ad-brk-panel" id="adBrkBracketPanel" style="padding-top:8px;' + (activeTab !== 'bracket' ? 'display:none;' : '') + '">';
         if (hasMatches) {
             if (tournament.bracket_type === 'round_robin') {
                 html += renderGroupPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted);
@@ -217,7 +217,7 @@
                 html += renderBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted);
             }
         } else {
-            html += '<div class="ad-empty-state"><p>' + (isEn ? 'No bracket generated yet. Approve registrations and generate draw.' : 'Сетка ещё не сгенерирована. Одобрите заявки и сгенерируйте жеребьёвку.') + '</p></div>';
+            html += '<div class="ad-empty-state" style="margin-top:24px;"><p>' + (isEn ? 'No bracket generated yet. Approve registrations and generate draw.' : 'Сетка ещё не сгенерирована. Одобрите заявки и сгенерируйте жеребьёвку.') + '</p></div>';
         }
         html += '</div>';
 
@@ -553,7 +553,15 @@
             });
         }
 
-        // Generate Playoff button
+        // Playoff Format choice button (groups done, no IG yet)
+        var formatBtn = document.getElementById('adBrkPlayoffFormat');
+        if (formatBtn) {
+            formatBtn.addEventListener('click', function() {
+                showPlayoffFormatModal(tournament, matches, playersMap, tournamentId);
+            });
+        }
+
+        // Generate Playoff button (after IG or direct)
         var genPlayoffBtn = document.getElementById('adBrkGenPlayoff');
         if (genPlayoffBtn) {
             genPlayoffBtn.addEventListener('click', function() {
@@ -1025,7 +1033,8 @@
     // ---- Group Panel HTML (Round-Robin) ----
     // ---- Helpers to distinguish group vs playoff matches ----
     function isGroupMatch(m) { return m.group_number && m.group_number > 0; }
-    function isPlayoffMatch(m) { return !m.group_number && m.round && m.round.charAt(0) !== 'G'; }
+    function isIGMatch(m) { return m.round === 'IG'; }
+    function isPlayoffMatch(m) { return !m.group_number && m.round && m.round !== 'IG' && m.round.charAt(0) !== 'G'; }
 
     function renderGroupPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted) {
         var groupCount = tournament.group_count || 2;
@@ -1033,10 +1042,13 @@
         var html = '';
         var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-        // Split matches into group and playoff
+        // Split matches into group, IG, and playoff
         var grpMatches = matches.filter(isGroupMatch);
+        var igMatches = matches.filter(isIGMatch);
         var plMatches = matches.filter(isPlayoffMatch);
         var hasPlayoff = plMatches.length > 0;
+        var hasIG = igMatches.length > 0;
+        var allIGCompleted = hasIG && igMatches.every(function(m) { return m.status === 'completed'; });
 
         // Group completion: all GROUP matches completed
         var allGroupCompleted = grpMatches.length > 0 && grpMatches.every(function(m) { return m.status === 'completed'; });
@@ -1045,41 +1057,32 @@
         // Playoff completion
         var allPlayoffCompleted = hasPlayoff && plMatches.every(function(m) { return m.status === 'completed'; });
 
-        // Overall completion
-        var totalAllCompleted = allGroupCompleted && (!hasPlayoff || allPlayoffCompleted);
+        // Overall completion (IG must also be complete if present)
+        var totalAllCompleted = allGroupCompleted && (!hasIG || allIGCompleted) && (!hasPlayoff || allPlayoffCompleted);
 
-        // Action buttons
-        html += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;">';
+        // Top buttons (only regenerate before any results)
         if (!anyGroupCompleted && !isTournamentCompleted) {
+            html += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;">';
             html += '<button class="ad-btn ad-btn-secondary" id="adBrkRegenerate">' + L.regenerateDraw + '</button>';
-        }
-        if (allGroupCompleted && !hasPlayoff && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-primary" id="adBrkGenPlayoff">' + L.generatePlayoff + '</button>';
-        }
-        if (totalAllCompleted && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize">' + L.finalizeTournament + '</button>';
-        }
-        html += '</div>';
-
-        // ---- Playoff bracket (rendered above groups) ----
-        if (hasPlayoff) {
-            html += '<div class="ad-grp-playoff-section">';
-            html += '<div class="ad-grp-section-title">' + L.playoffTitle + '</div>';
-            // Determine draw_size for playoff bracket from playoff matches
-            var plR1 = plMatches.filter(function(m) { return m.round_number === 1; });
-            var plDrawSize = 1;
-            while (plDrawSize < plR1.length * 2) plDrawSize *= 2;
-            if (plDrawSize < 2) plDrawSize = plMatches.length * 2;
-            // Use renderBracketPanel logic inline for playoff
-            html += renderPlayoffBracketHtml(plMatches, playersMap, plDrawSize);
-            html += '</div>';
-            // Separator
-            html += '<div class="ad-grp-stage-separator">';
-            html += '<div class="ad-grp-section-title">' + L.groupStageTitle + '</div>';
             html += '</div>';
         }
 
-        // ---- Group tables ----
+        // Build playerGroupLabel map: playerId → "A1", "B2", "C3" etc.
+        var playerGroupLabel = {};
+        for (var g = 1; g <= groupCount; g++) {
+            var gm = grpMatches.filter(function(m) { return m.group_number === g; });
+            var pids = [];
+            gm.forEach(function(m) {
+                if (m.player1_id && pids.indexOf(m.player1_id) === -1) pids.push(m.player1_id);
+                if (m.player2_id && pids.indexOf(m.player2_id) === -1) pids.push(m.player2_id);
+            });
+            var st = calculateGroupStandings(pids, gm, playersMap);
+            st.sort(function(a, b) { return a.place - b.place; });
+            var letter = groupLetters[g - 1] || String(g);
+            st.forEach(function(s) { playerGroupLabel[s.playerId] = letter + s.place; });
+        }
+
+        // ---- Group tables (FIRST) ----
         for (var g = 1; g <= groupCount; g++) {
             var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
             if (!groupMatchesG.length) continue;
@@ -1164,11 +1167,94 @@
             html += '</tbody></table></div></div>';
         }
 
+        // ---- IG matches section (after groups) — SE-style bracket ----
+        if (hasIG) {
+            html += '<div class="ad-ig-section" style="margin-top:24px;">';
+            html += '<div class="ad-grp-section-title">' + L.igStageTitle + '</div>';
+            html += '<div class="ad-ig-matches-grid">';
+            igMatches.sort(function(a, b) { return a.match_order - b.match_order; });
+            igMatches.forEach(function(m) {
+                var p1 = playersMap[m.player1_id] || {};
+                var p2 = playersMap[m.player2_id] || {};
+                var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
+                var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+                var p1Label = playerGroupLabel[m.player1_id] || '';
+                var p2Label = playerGroupLabel[m.player2_id] || '';
+                var isCompleted = m.status === 'completed';
+                var isP1Win = isCompleted && m.winner_id === m.player1_id;
+                var isP2Win = isCompleted && m.winner_id === m.player2_id;
+
+                var p1Scores = [], p2Scores = [];
+                if (isCompleted && m.score) {
+                    m.score.split(' ').forEach(function(s) {
+                        var pr = s.match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
+                        if (pr) {
+                            p1Scores.push(pr[1] + (pr[3] ? '<sup>' + pr[3] + '</sup>' : ''));
+                            p2Scores.push(pr[2] + (pr[4] ? '<sup>' + pr[4] + '</sup>' : ''));
+                        }
+                    });
+                }
+
+                var canEdit = m.player1_id && m.player2_id;
+                var matchClass = 'ad-brk-match' + (isCompleted ? ' completed' : '');
+                html += '<div class="' + matchClass + '">';
+                // Player 1
+                var p1LblHtml = p1Label ? '<span class="ad-brk-grp-label">' + p1Label + '</span> ' : '';
+                html += '<div class="ad-brk-player' + (isP1Win ? ' winner' : (isP2Win ? ' loser' : '')) + '">' +
+                    p1LblHtml +
+                    '<span class="ad-brk-name">' + A.esc(p1Name) + '</span><span class="ad-brk-sets">';
+                p1Scores.forEach(function(s) { html += '<span class="ad-brk-set">' + s + '</span>'; });
+                html += '</span></div>';
+                // Player 2
+                var p2LblHtml = p2Label ? '<span class="ad-brk-grp-label">' + p2Label + '</span> ' : '';
+                html += '<div class="ad-brk-player' + (isP2Win ? ' winner' : (isP1Win ? ' loser' : '')) + '">' +
+                    p2LblHtml +
+                    '<span class="ad-brk-name">' + A.esc(p2Name) + '</span><span class="ad-brk-sets">';
+                p2Scores.forEach(function(s) { html += '<span class="ad-brk-set">' + s + '</span>'; });
+                html += '</span></div>';
+                if (canEdit) {
+                    html += '<button class="ad-brk-edit" data-match-edit="' + m.id + '">' +
+                        (isCompleted ? (isEn ? 'Edit' : 'Изм.') : (isEn ? 'Score' : 'Счёт')) + '</button>';
+                }
+                html += '</div>';
+            });
+            html += '</div>'; // /ad-ig-matches-grid
+            html += '</div>'; // /ad-ig-section
+        }
+
+        // ---- Playoff bracket (after IG, after groups) ----
+        if (hasPlayoff) {
+            html += '<div class="ad-grp-playoff-section" style="margin-top:24px;">';
+            html += '<div class="ad-grp-section-title">' + L.playoffTitle + '</div>';
+            var plR1 = plMatches.filter(function(m) { return m.round_number === 1; });
+            var plDrawSize = 1;
+            while (plDrawSize < plR1.length * 2) plDrawSize *= 2;
+            if (plDrawSize < 2) plDrawSize = plMatches.length * 2;
+            html += renderPlayoffBracketHtml(plMatches, playersMap, plDrawSize, playerGroupLabel);
+            html += '</div>';
+        }
+
+        // Action buttons (bottom)
+        var canIG = groupCount % 2 === 0 && groupCount >= 2; // IG only for even group count (2,4,6...)
+        html += '<div style="display:flex;justify-content:center;gap:12px;margin-top:24px;padding:16px 0;">';
+        if (allGroupCompleted && !hasPlayoff && !hasIG && !isTournamentCompleted) {
+            if (canIG) {
+                html += '<button class="ad-btn ad-btn-primary" id="adBrkPlayoffFormat" style="font-size:1rem;padding:12px 32px;">' + L.playoffFormatTitle + '</button>';
+            } else {
+                html += '<button class="ad-btn ad-btn-primary" id="adBrkGenPlayoff" style="font-size:1rem;padding:12px 32px;">' + L.generatePlayoff + '</button>';
+            }
+        }
+        if (totalAllCompleted && !isTournamentCompleted) {
+            html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize" style="font-size:1rem;padding:12px 32px;">' + L.finalizeTournament + '</button>';
+        }
+        html += '</div>';
+
         return html;
     }
 
     // ---- Render Playoff bracket HTML (reuses bracket logic for SE matches) ----
-    function renderPlayoffBracketHtml(plMatches, playersMap, drawSize) {
+    function renderPlayoffBracketHtml(plMatches, playersMap, drawSize, playerGroupLabel) {
+        playerGroupLabel = playerGroupLabel || {};
         var totalRounds = Math.log2(drawSize);
         var html = '';
 
@@ -1201,8 +1287,11 @@
             roundMatches.forEach(function(match) {
                 var p1 = playersMap[match.player1_id];
                 var p2 = playersMap[match.player2_id];
-                var p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : 'BYE');
-                var p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : 'BYE');
+                // Group labels for playoff display
+                var p1GrpLbl = match.player1_id && playerGroupLabel[match.player1_id] ? playerGroupLabel[match.player1_id] : '';
+                var p2GrpLbl = match.player2_id && playerGroupLabel[match.player2_id] ? playerGroupLabel[match.player2_id] : '';
+                var p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : '<span style="color:var(--text-dim);">TBD</span>');
+                var p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : '<span style="color:var(--text-dim);">TBD</span>');
 
                 var isCompleted = match.status === 'completed';
                 var isBye = match.score === 'BYE';
@@ -1219,13 +1308,19 @@
                     if (match.court) schedInfo += ' · ' + (isEn ? 'Court ' : 'Корт ') + match.court;
                     html += '<div class="ad-brk-schedule">' + schedInfo + '</div>';
                 }
+                // Player 1 with group label
+                var p1SeedHtml = match.seed1 ? '<span class="ad-brk-seed">[' + match.seed1 + ']</span>' : '';
+                var p1LblHtml = p1GrpLbl ? '<span class="ad-brk-grp-label">' + p1GrpLbl + '</span> ' : '';
                 html += '<div class="ad-brk-player' + (p1Winner ? ' winner' : (p2Winner ? ' loser' : '')) + '">' +
-                    (match.seed1 ? '<span class="ad-brk-seed">[' + match.seed1 + ']</span>' : '') +
+                    p1SeedHtml + p1LblHtml +
                     '<span class="ad-brk-name">' + p1Name + '</span><span class="ad-brk-sets">';
                 setData.p1.forEach(function(s) { html += '<span class="ad-brk-set">' + s + '</span>'; });
                 html += '</span></div>';
+                // Player 2 with group label
+                var p2SeedHtml = match.seed2 ? '<span class="ad-brk-seed">[' + match.seed2 + ']</span>' : '';
+                var p2LblHtml = p2GrpLbl ? '<span class="ad-brk-grp-label">' + p2GrpLbl + '</span> ' : '';
                 html += '<div class="ad-brk-player' + (p2Winner ? ' winner' : (p1Winner ? ' loser' : '')) + '">' +
-                    (match.seed2 ? '<span class="ad-brk-seed">[' + match.seed2 + ']</span>' : '') +
+                    p2SeedHtml + p2LblHtml +
                     '<span class="ad-brk-name">' + p2Name + '</span><span class="ad-brk-sets">';
                 setData.p2.forEach(function(s) { html += '<span class="ad-brk-set">' + s + '</span>'; });
                 html += '</span></div>';
@@ -1253,7 +1348,7 @@
 
         html += '</div></div>'; // /ad-brk-grid, /ad-brk-scroll
 
-        // 3rd place — separate block under bracket
+        // 3rd place — separate block, aligned right (under final column)
         var thirdMatch = plMatches.find(function(m) { return m.round === '3RD'; });
         if (thirdMatch) {
             var tp1 = playersMap[thirdMatch.player1_id];
@@ -1266,7 +1361,8 @@
             var tCanEdit = thirdMatch.player1_id && thirdMatch.player2_id && thirdMatch.score !== 'BYE';
             var tSetData = parseSets(thirdMatch.score);
 
-            html += '<div style="margin-top:20px;max-width:220px;">';
+            html += '<div style="margin-top:20px;display:flex;justify-content:flex-end;">';
+            html += '<div style="width:220px;">';
             html += '<div class="ad-brk-title" style="font-size:0.8rem;margin-bottom:8px;">' + L.round3rd + '</div>';
             html += '<div class="ad-brk-match' + (tCompleted ? ' completed' : '') + '">';
             if (thirdMatch.scheduled_time) {
@@ -1285,7 +1381,7 @@
                 html += '<button class="ad-brk-edit" data-match-edit="' + thirdMatch.id + '">' +
                     (tCompleted ? (isEn ? 'Edit' : 'Изм.') : (isEn ? 'Score' : 'Счёт')) + '</button>';
             }
-            html += '</div></div>';
+            html += '</div></div></div>';
         }
 
         return html;
@@ -2650,13 +2746,24 @@
         var allPlayers = seeded.concat(unseeded);
 
         // S-curve (snake) distribution into groups
+        // Incomplete last pass fills from group A forward (not snake-reversed)
         var groups = [];
         for (var g = 0; g < groupCount; g++) groups.push([]);
+
+        var fullPasses = Math.floor(allPlayers.length / groupCount);
+        var remainder = allPlayers.length % groupCount;
 
         for (var idx = 0; idx < allPlayers.length; idx++) {
             var pass = Math.floor(idx / groupCount);
             var posInPass = idx % groupCount;
-            var groupIdx = (pass % 2 === 0) ? posInPass : (groupCount - 1 - posInPass);
+            var groupIdx;
+            if (pass < fullPasses) {
+                // Full passes: snake pattern
+                groupIdx = (pass % 2 === 0) ? posInPass : (groupCount - 1 - posInPass);
+            } else {
+                // Incomplete last pass: fill A, B, C... forward
+                groupIdx = posInPass;
+            }
             groups[groupIdx].push({
                 reg: allPlayers[idx],
                 seed: idx < seedCount ? (idx + 1) : null
@@ -2722,15 +2829,54 @@
         A.showToast(L.drawGenerated, 'success');
     }
 
-    // ---- Generate Playoff Draw from Group Winners ----
-    async function generatePlayoffDraw(tournament, matches, playersMap) {
+    // ---- Playoff Format Modal (choose direct or IG) ----
+    function showPlayoffFormatModal(tournament, matches, playersMap, tournamentId) {
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-confirm-overlay';
+        overlay.innerHTML =
+            '<div class="ad-confirm-modal">' +
+                '<div class="ad-confirm-title">' + L.playoffFormatTitle + '</div>' +
+                '<div class="ad-confirm-text" style="text-align:left;margin-bottom:16px;">' +
+                    '<p style="margin-bottom:8px;color:var(--text-secondary);">' + L.igDirectQualifiers + ': ' + (isEn ? '1st places go directly to playoff' : '1-е места проходят напрямую') + '</p>' +
+                    '<p style="color:var(--text-secondary);">' + L.igAutoLabel + ': ' + (isEn ? '2nd vs 3rd from cross groups' : '2-е vs 3-и из перекрёстных групп') + '</p>' +
+                '</div>' +
+                '<div class="ad-confirm-actions" style="flex-direction:column;gap:8px;">' +
+                    '<button class="ad-btn ad-btn-primary" id="adFormatDirect" style="width:100%;">' + L.playoffDirect + '</button>' +
+                    '<button class="ad-btn ad-btn-primary" id="adFormatIG" style="width:100%;background:var(--bg-elevated);color:var(--accent);border:1px solid var(--accent);">' + L.playoffWithIG + '</button>' +
+                    '<button class="ad-btn ad-btn-secondary" id="adFormatCancel" style="width:100%;">' + L.cancel + '</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        function dismiss() { overlay.remove(); }
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
+        document.getElementById('adFormatCancel').addEventListener('click', dismiss);
+
+        document.getElementById('adFormatDirect').addEventListener('click', async function() {
+            dismiss();
+            A.showConfirm(L.generatePlayoffConfirm, '', async function() {
+                await generatePlayoffDraw(tournament, matches, playersMap);
+                renderBracketManagement(tournamentId, 'bracket');
+            }, L.generatePlayoff);
+        });
+
+        document.getElementById('adFormatIG').addEventListener('click', async function() {
+            dismiss();
+            A.showConfirm(L.igGenerateConfirm, '', async function() {
+                await generateIGMatches(tournament, matches, playersMap);
+                renderBracketManagement(tournamentId, 'bracket');
+            }, L.igGenerate);
+        });
+    }
+
+    // ---- Generate Inter-Group (IG) Matches + Playoff Bracket simultaneously ----
+    async function generateIGMatches(tournament, matches, playersMap) {
         try {
             var groupCount = tournament.group_count || 2;
-            var qualifiers = tournament.qualifiers_per_group || 2;
             var grpMatches = matches.filter(isGroupMatch);
 
-            // 1. Get standings for each group → top-N qualifiers
-            var allQualified = [];
+            // 1. Get standings for each group
+            var groupStandings = [];
             for (var g = 1; g <= groupCount; g++) {
                 var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
                 var playerIds = [];
@@ -2740,13 +2886,234 @@
                 });
                 var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
                 standings.sort(function(a, b) { return a.place - b.place; });
+                groupStandings.push(standings);
+            }
 
-                for (var p = 0; p < Math.min(qualifiers, standings.length); p++) {
-                    allQualified.push({
-                        playerId: standings[p].playerId,
-                        groupIdx: g - 1,
-                        place: standings[p].place
+            // 2. Create IG cross-pairs
+            var igToInsert = [];
+            var igOrder = 0;
+
+            for (var i = 0; i < groupCount - 1; i += 2) {
+                var gA = groupStandings[i];
+                var gB = groupStandings[i + 1];
+                if (!gA || !gB) continue;
+
+                var a2 = gA.find(function(s) { return s.place === 2; });
+                var b3 = gB.find(function(s) { return s.place === 3; });
+                if (a2 && b3) {
+                    igOrder++;
+                    igToInsert.push({
+                        tournament_id: tournament.id,
+                        player1_id: a2.playerId, player2_id: b3.playerId,
+                        round: 'IG', round_number: 0, match_order: igOrder,
+                        group_number: null, status: 'upcoming', seed1: null, seed2: null
                     });
+                }
+
+                var b2 = gB.find(function(s) { return s.place === 2; });
+                var a3 = gA.find(function(s) { return s.place === 3; });
+                if (b2 && a3) {
+                    igOrder++;
+                    igToInsert.push({
+                        tournament_id: tournament.id,
+                        player1_id: b2.playerId, player2_id: a3.playerId,
+                        round: 'IG', round_number: 0, match_order: igOrder,
+                        group_number: null, status: 'upcoming', seed1: null, seed2: null
+                    });
+                }
+            }
+
+            if (igToInsert.length === 0) {
+                A.showToast(isEn ? 'Not enough players for inter-group matches' : 'Недостаточно игроков для межгрупповых матчей', 'error');
+                return;
+            }
+
+            // 3. Build SE playoff bracket simultaneously
+            // Direct qualifiers: 1st places from each group (seeded)
+            var firstPlaces = [];
+            for (var g = 0; g < groupCount; g++) {
+                var first = groupStandings[g].find(function(s) { return s.place === 1; });
+                if (first) firstPlaces.push({ playerId: first.playerId, groupIdx: g });
+            }
+
+            var totalQualified = firstPlaces.length + igToInsert.length;
+            var drawSize = 2;
+            while (drawSize < totalQualified) drawSize *= 2;
+            var totalRounds = Math.log2(drawSize);
+
+            // Seed positions
+            var seedPositions = (typeof SEED_POSITIONS !== 'undefined' && SEED_POSITIONS[drawSize])
+                ? SEED_POSITIONS[drawSize]
+                : (drawSize === 8 ? [1, 8, 5, 4] : (drawSize === 4 ? [1, 4, 3, 2] : [1, 2]));
+
+            // Place 1st places at seed positions, rest empty (TBD for IG winners)
+            var draw = new Array(drawSize);
+            for (var d = 0; d < drawSize; d++) draw[d] = null;
+
+            for (var s = 0; s < firstPlaces.length && s < seedPositions.length; s++) {
+                draw[seedPositions[s] - 1] = {
+                    player_id: firstPlaces[s].playerId,
+                    seed: s + 1,
+                    groupIdx: firstPlaces[s].groupIdx
+                };
+            }
+
+            // Cross-seeding: IG winners should face 1st places from opposite groups
+            // IG match order: 1=A2vB3, 2=B2vA3, 3=C2vD3, 4=D2vC3
+            // Map IG match_order → which seeded position they should play against
+            // IG1 (from A/B) → vs C1 or D1; IG2 (from A/B) → vs D1 or C1
+            // IG3 (from C/D) → vs A1 or B1; IG4 (from C/D) → vs B1 or A1
+            var igSlotMap = {}; // igMatchOrder → draw position index (0-based)
+            for (var d = 0; d < drawSize; d++) {
+                if (draw[d]) continue; // skip filled (seeded) positions
+                // Find which seed this slot is paired with
+                var pairedIdx = (d % 2 === 0) ? d + 1 : d - 1;
+                var pairedSeed = draw[pairedIdx];
+                if (pairedSeed) {
+                    var seedGrp = pairedSeed.groupIdx; // 0=A, 1=B, 2=C, 3=D
+                    // IG matches from opposite half should go here
+                    // Seed from group 0(A) or 1(B) → IG from groups 2,3 (match_order 3,4)
+                    // Seed from group 2(C) or 3(D) → IG from groups 0,1 (match_order 1,2)
+                    if (seedGrp <= 1) {
+                        // Opposite = IG3 or IG4, assign first available
+                        if (!igSlotMap[3]) igSlotMap[3] = d;
+                        else if (!igSlotMap[4]) igSlotMap[4] = d;
+                    } else {
+                        // Opposite = IG1 or IG2
+                        if (!igSlotMap[1]) igSlotMap[1] = d;
+                        else if (!igSlotMap[2]) igSlotMap[2] = d;
+                    }
+                }
+            }
+            // Store IG slot mapping for tryFillPlayoffFromIG
+            // Save as metadata in IG matches: we'll use igSlotMap when filling
+
+            // Generate R1 matches
+            var playoffToInsert = [];
+            var plMatchOrder = 0;
+            for (var d = 0; d < drawSize; d += 2) {
+                plMatchOrder++;
+                var slot1 = draw[d];
+                var slot2 = draw[d + 1];
+                var m = {
+                    tournament_id: tournament.id,
+                    player1_id: slot1 ? slot1.player_id : null,
+                    player2_id: slot2 ? slot2.player_id : null,
+                    round: 'R1', round_number: 1, match_order: plMatchOrder,
+                    group_number: null, status: 'upcoming',
+                    seed1: slot1 ? slot1.seed : null,
+                    seed2: slot2 ? slot2.seed : null
+                };
+                playoffToInsert.push(m);
+            }
+
+            // Subsequent rounds (R2, SF, QF, F)
+            for (var r = 2; r <= totalRounds; r++) {
+                var matchesInRound = drawSize / Math.pow(2, r);
+                for (var m = 1; m <= matchesInRound; m++) {
+                    var roundPrefix = r === totalRounds ? 'F' :
+                                      r === totalRounds - 1 ? 'SF' :
+                                      r === totalRounds - 2 ? 'QF' : 'R' + r;
+                    playoffToInsert.push({
+                        tournament_id: tournament.id,
+                        player1_id: null, player2_id: null,
+                        round: roundPrefix, round_number: r, match_order: m,
+                        group_number: null, status: 'upcoming',
+                        seed1: null, seed2: null
+                    });
+                }
+            }
+
+            // 3rd place match
+            playoffToInsert.push({
+                tournament_id: tournament.id,
+                player1_id: null, player2_id: null,
+                round: '3RD', round_number: totalRounds, match_order: 0,
+                group_number: null, status: 'upcoming',
+                seed1: null, seed2: null
+            });
+
+            // 4. Insert all matches (IG + playoff)
+            var allToInsert = igToInsert.concat(playoffToInsert);
+            var insertRes = await A.client.from('matches').insert(allToInsert);
+            if (insertRes.error) {
+                A.showToast(insertRes.error.message, 'error');
+                return;
+            }
+
+            A.showToast(isEn ? 'Bracket created: ' + igToInsert.length + ' IG matches + playoff' : 'Сетка создана: ' + igToInsert.length + ' доп. матчей + плей-офф', 'success');
+        } catch (err) {
+            console.error('Generate IG matches error:', err);
+            A.showToast((isEn ? 'Error: ' : 'Ошибка: ') + err.message, 'error');
+        }
+    }
+
+    // ---- Generate Playoff Draw from Group Winners ----
+    async function generatePlayoffDraw(tournament, matches, playersMap) {
+        try {
+            var groupCount = tournament.group_count || 2;
+            var qualifiers = tournament.qualifiers_per_group || 2;
+            var grpMatches = matches.filter(isGroupMatch);
+
+            // Reload IG matches from DB (fresh data)
+            var igRes = await A.client.from('matches')
+                .select('*')
+                .eq('tournament_id', tournament.id)
+                .eq('round', 'IG');
+            var igMatchesFresh = (igRes.data || []).filter(function(m) { return m.status === 'completed' && m.winner_id; });
+            var hasIGPath = igMatchesFresh.length > 0;
+
+            // 1. Get standings for each group
+            var allQualified = [];
+
+            if (hasIGPath) {
+                // IG path: 1st places (direct) + IG match winners
+                for (var g = 1; g <= groupCount; g++) {
+                    var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
+                    var playerIds = [];
+                    groupMatchesG.forEach(function(m) {
+                        if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
+                        if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
+                    });
+                    var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
+                    standings.sort(function(a, b) { return a.place - b.place; });
+
+                    // Only 1st place as direct qualifier (seeded)
+                    if (standings.length > 0 && standings[0].place === 1) {
+                        allQualified.push({
+                            playerId: standings[0].playerId,
+                            groupIdx: g - 1,
+                            place: 1
+                        });
+                    }
+                }
+                // Add IG winners as unseeded qualifiers
+                igMatchesFresh.forEach(function(m) {
+                    allQualified.push({
+                        playerId: m.winner_id,
+                        groupIdx: -1,
+                        place: 2
+                    });
+                });
+            } else {
+                // Direct path: top-N from each group
+                for (var g = 1; g <= groupCount; g++) {
+                    var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
+                    var playerIds = [];
+                    groupMatchesG.forEach(function(m) {
+                        if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
+                        if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
+                    });
+                    var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
+                    standings.sort(function(a, b) { return a.place - b.place; });
+
+                    for (var p = 0; p < Math.min(qualifiers, standings.length); p++) {
+                        allQualified.push({
+                            playerId: standings[p].playerId,
+                            groupIdx: g - 1,
+                            place: standings[p].place
+                        });
+                    }
                 }
             }
 
@@ -3651,8 +4018,12 @@
                 return;
             }
 
-            // Skip advanceWinner for group matches (no next round)
-            if (!match.group_number) {
+            // Handle IG match: auto-fill R1 when all IG done
+            if (match.round === 'IG') {
+                await tryFillPlayoffFromIG(tournamentId);
+            }
+            // Skip advanceWinner for group matches
+            else if (!match.group_number) {
                 var isFicMatch = match.round && match.round.indexOf('FIC-') === 0;
                 if (isFicMatch) {
                     var ficRes = await A.client.from('matches').select('*')
@@ -3670,6 +4041,95 @@
         });
     }
 
+    // ---- Auto-fill R1 with IG winners when all IG matches completed ----
+    // Cross-seeding: IG winners from groups A/B play vs seeds from C/D and vice versa
+    async function tryFillPlayoffFromIG(tournamentId) {
+        // Load all IG matches
+        var igRes = await A.client.from('matches').select('*')
+            .eq('tournament_id', tournamentId).eq('round', 'IG');
+        var igAll = igRes.data || [];
+        var allDone = igAll.length > 0 && igAll.every(function(m) { return m.status === 'completed' && m.winner_id; });
+        if (!allDone) return;
+
+        // Load R1 matches with seeds
+        var r1Res = await A.client.from('matches').select('*')
+            .eq('tournament_id', tournamentId).eq('round_number', 1)
+            .neq('round', 'IG')
+            .order('match_order');
+        var r1Matches = r1Res.data || [];
+
+        // Load tournament to get group standings for seed→group mapping
+        var trnRes = await A.client.from('tournaments').select('*').eq('id', tournamentId).single();
+        var tournament = trnRes.data;
+        var groupCount = tournament ? (tournament.group_count || 2) : 2;
+
+        // Load group matches to determine which seed is from which group
+        var grpRes = await A.client.from('matches').select('*')
+            .eq('tournament_id', tournamentId)
+            .not('group_number', 'is', null);
+        var grpMatches = grpRes.data || [];
+
+        // Build player→group map from group matches
+        var playerGroup = {};
+        grpMatches.forEach(function(m) {
+            if (m.player1_id) playerGroup[m.player1_id] = m.group_number;
+            if (m.player2_id) playerGroup[m.player2_id] = m.group_number;
+        });
+
+        // Sort IG matches by match_order: 1=A2vB3, 2=B2vA3, 3=C2vD3, 4=D2vC3
+        igAll.sort(function(a, b) { return a.match_order - b.match_order; });
+
+        // Categorize IG winners by source group pair
+        // match_order 1,2 = from groups A(1)/B(2) pair
+        // match_order 3,4 = from groups C(3)/D(4) pair
+        var igFromAB = [];
+        var igFromCD = [];
+        igAll.forEach(function(m) {
+            if (m.match_order <= 2) igFromAB.push(m.winner_id);
+            else igFromCD.push(m.winner_id);
+        });
+
+        // Fill R1: IG winners from A/B should play vs seeds from C/D and vice versa
+        for (var i = 0; i < r1Matches.length; i++) {
+            var rm = r1Matches[i];
+            var emptyField = null;
+            var seededPlayerId = null;
+
+            if (rm.player1_id && !rm.player2_id) {
+                emptyField = 'player2_id';
+                seededPlayerId = rm.player1_id;
+            } else if (!rm.player1_id && rm.player2_id) {
+                emptyField = 'player1_id';
+                seededPlayerId = rm.player2_id;
+            }
+            if (!emptyField || !seededPlayerId) continue;
+
+            var seedGroup = playerGroup[seededPlayerId] || 0;
+            var winner = null;
+
+            // Seed from group 1,2 (A,B) → fill with IG winner from C/D
+            if (seedGroup <= 2 && igFromCD.length > 0) {
+                winner = igFromCD.shift();
+            }
+            // Seed from group 3,4 (C,D) → fill with IG winner from A/B
+            else if (seedGroup > 2 && igFromAB.length > 0) {
+                winner = igFromAB.shift();
+            }
+            // Fallback: use whatever is left
+            else if (igFromAB.length > 0) {
+                winner = igFromAB.shift();
+            } else if (igFromCD.length > 0) {
+                winner = igFromCD.shift();
+            }
+
+            if (winner) {
+                var upd = {};
+                upd[emptyField] = winner;
+                await A.client.from('matches').update(upd).eq('id', rm.id);
+            }
+        }
+    }
+
     // ---- Auto-advance winner to next round ----
     async function advanceWinner(match, winnerId, tournamentId) {
         var roundNumber = match.round_number;
@@ -3682,12 +4142,19 @@
         // Find next match: match_order = ceil(matchOrder / 2)
         var nextMatchOrder = Math.ceil(matchOrder / 2);
 
+        console.log('[advanceWinner] match:', match.round, 'rn:', roundNumber, 'mo:', matchOrder, '→ next rn:', nextRound, 'mo:', nextMatchOrder);
+
         var nextRes = await A.client.from('matches')
             .select('*')
             .eq('tournament_id', tournamentId)
             .eq('round_number', nextRound)
             .eq('match_order', nextMatchOrder)
+            .is('group_number', null)
+            .neq('round', 'IG')
+            .neq('round', '3RD')
             .maybeSingle();
+
+        console.log('[advanceWinner] nextRes:', nextRes.data ? nextRes.data.round + ' id:' + nextRes.data.id : 'NULL', 'error:', nextRes.error);
 
         if (!nextRes.data) return; // Final match or error
 

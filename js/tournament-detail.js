@@ -1151,8 +1151,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var qualifiers = t.qualifiers_per_group || 2;
                 var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
                 var grpMatches = matches.filter(function(m) { return m.group_number && m.group_number > 0; });
-                var ploffMatches = matches.filter(function(m) { return !m.group_number || m.group_number <= 0; });
+                var igMatches = matches.filter(function(m) { return m.round === 'IG'; });
+                var ploffMatches = matches.filter(function(m) { return (!m.group_number || m.group_number <= 0) && m.round !== 'IG'; });
                 var hasPlayoff = ploffMatches.length > 0;
+                var hasIG = igMatches.length > 0;
                 var allGroupDone = grpMatches.length > 0 && grpMatches.every(function(m) { return m.status === 'completed'; });
 
                 var bHtml = '';
@@ -1255,6 +1257,44 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     }
 
                     bHtml += '<div style="margin-bottom:32px;"></div>';
+                }
+
+                // Inter-group matches section
+                if (hasIG) {
+                    bHtml += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Additional Matches' : (isKg ? 'Кошумча матчтар' : 'Дополнительные матчи')) + '</h3>';
+                    bHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:32px;">';
+                    igMatches.sort(function(a, b) { return a.match_order - b.match_order; });
+                    igMatches.forEach(function(m, idx) {
+                        var p1 = playersMap[m.player1_id] || {};
+                        var p2 = playersMap[m.player2_id] || {};
+                        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (isKg ? (p1.name_kg || p1.name || '?') : (p1.name || '?'));
+                        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (isKg ? (p2.name_kg || p2.name || '?') : (p2.name || '?'));
+                        var isCompleted = m.status === 'completed';
+                        var isP1Winner = isCompleted && m.winner_id === m.player1_id;
+                        var isP2Winner = isCompleted && m.winner_id === m.player2_id;
+
+                        var p1Score = '', p2Score = '';
+                        if (isCompleted && m.score) {
+                            var sets = m.score.split(' ');
+                            p1Score = sets.map(function(s) { var p = s.match(/^(\d+)\/(\d+)/); return p ? p[1] : ''; }).join(' ');
+                            p2Score = sets.map(function(s) { var p = s.match(/^(\d+)\/(\d+)/); return p ? p[2] : ''; }).join(' ');
+                        }
+
+                        var matchLabel = isEn ? 'Match ' : (isKg ? 'Матч ' : 'Матч ');
+                        bHtml += '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">';
+                        bHtml += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);">' + matchLabel + (idx + 1) + '</div>';
+                        // P1
+                        bHtml += '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);' + (isP1Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
+                        bHtml += '<span style="font-size:0.85rem;' + (isP1Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + esc(p1Name) + '</span>';
+                        bHtml += '<span style="font-size:0.8rem;font-weight:600;' + (isP1Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p1Score || '—') + '</span>';
+                        bHtml += '</div>';
+                        // P2
+                        bHtml += '<div style="display:flex;justify-content:space-between;padding:8px 12px;' + (isP2Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
+                        bHtml += '<span style="font-size:0.85rem;' + (isP2Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + esc(p2Name) + '</span>';
+                        bHtml += '<span style="font-size:0.8rem;font-weight:600;' + (isP2Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p2Score || '—') + '</span>';
+                        bHtml += '</div></div>';
+                    });
+                    bHtml += '</div>';
                 }
 
                 // Group tables (2-column grid)

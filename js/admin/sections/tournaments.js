@@ -767,7 +767,7 @@
                 '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnMaxParticipants + '</label>' +
-                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnMaxPart" placeholder="0" value="' + (item ? (item.max_participants || '') : '') + '">' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnMaxPart" placeholder="0" value="' + (item ? (item.max_participants || '') : '') + '">' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnPrizeFund + '</label>' +
@@ -824,11 +824,11 @@
                     '</div>' +
                     '<div class="ad-field" id="adTrnGroupCountWrap" style="display:none;">' +
                         '<label class="ad-field-label">' + L.trnGroupCount + '</label>' +
-                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnGroupCount" placeholder="2" value="' + (item && item.group_count ? item.group_count : '') + '">' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnGroupCount" placeholder="2" value="' + (item && item.group_count ? item.group_count : '') + '">' +
                     '</div>' +
                     '<div class="ad-field" id="adTrnQualifiersWrap" style="display:none;">' +
                         '<label class="ad-field-label">' + L.trnQualifiers + '</label>' +
-                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnQualifiers" placeholder="2" value="' + (item && item.qualifiers_per_group ? item.qualifiers_per_group : '2') + '">' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnQualifiers" placeholder="2" value="' + (item && item.qualifiers_per_group ? item.qualifiers_per_group : '2') + '">' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnCourtCount + '</label>' +
