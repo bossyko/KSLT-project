@@ -539,6 +539,11 @@
 
     async function loadAndEditTournament(id) {
         if (!A.client) return;
+        // Ensure categories and levels are loaded (needed for form dropdowns)
+        if (A.loadCategories) await A.loadCategories();
+        if (A.loadTournamentLevels) await A.loadTournamentLevels();
+        if (!A.cachedCategories) A.cachedCategories = [];
+        if (!A.cachedLevels) A.cachedLevels = [];
         var result = await A.client.from('tournaments').select('*').eq('id', id).single();
         if (result.data) {
             A.setAdminHash('tournaments', 'edit', id);
@@ -550,6 +555,8 @@
     function renderTournamentForm(item) {
         var container = document.getElementById('ad-tournaments');
         if (!container) return;
+        if (!A.cachedCategories) A.cachedCategories = [];
+        if (!A.cachedLevels) A.cachedLevels = [];
 
         trnEditingId = item ? item.id : null;
         trnEditingPublishedAt = (item && item.published_at) ? item.published_at : null;
@@ -1557,8 +1564,6 @@
         infoDiv.dataset.courtNameEn = court.name_en || '';
 
         var addr = [court.street, court.building, court.city].filter(Boolean).join(', ');
-        var mapUrl = court.google_maps_url || court.twogis_url || '';
-
         var html = '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;">' +
             '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
                 '<strong style="color:var(--text-primary);">' + A.esc(court.name) + '</strong>' +
@@ -1570,8 +1575,16 @@
         if (court.phone) {
             html += '<div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:4px;">' + L.trnVenuePhone + ': ' + A.esc(court.phone) + '</div>';
         }
-        if (mapUrl) {
-            html += '<div style="font-size:0.85rem;"><a href="' + A.esc(mapUrl) + '" target="_blank" style="color:var(--accent);">' + L.trnVenueMap + ' ↗</a></div>';
+        var mapLinks = '';
+        if (court.google_maps_url) {
+            mapLinks += '<a href="' + A.esc(court.google_maps_url) + '" target="_blank" style="color:var(--accent);">Google Maps ↗</a>';
+        }
+        if (court.twogis_url) {
+            if (mapLinks) mapLinks += ' &nbsp;·&nbsp; ';
+            mapLinks += '<a href="' + A.esc(court.twogis_url) + '" target="_blank" style="color:var(--accent);">2GIS ↗</a>';
+        }
+        if (mapLinks) {
+            html += '<div style="font-size:0.85rem;">' + mapLinks + '</div>';
         }
         html += '</div>';
 
