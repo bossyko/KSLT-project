@@ -44,7 +44,8 @@
         if (roundsFromEnd === 2) return 'QF';  // lost in Quarterfinal
         if (roundsFromEnd === 3) return 'R16';
         if (roundsFromEnd === 4) return 'R32';
-        return 'R32';
+        if (roundsFromEnd === 5) return 'R64';
+        return 'R' + Math.pow(2, roundsFromEnd + 1);
     }
 
     // Round names for bracket display
@@ -55,6 +56,7 @@
         if (roundsFromEnd === 2) return L.roundQF;
         if (roundsFromEnd === 3) return L.roundR16;
         if (roundsFromEnd === 4) return isEn ? 'Round of 32' : '1/16 финала';
+        if (roundsFromEnd === 5) return isEn ? 'Round of 64' : '1/32 финала';
         return isEn ? 'Round ' + roundNum : 'Раунд ' + roundNum;
     }
 
@@ -2075,14 +2077,14 @@
 
         // Round labels for display
         var roundLabels = isEn
-            ? { W: 'Winner', F: 'Finalist', '3RD': '3rd Place', '4TH': '4th Place', SF: 'Semifinal', QF: 'Quarterfinal', R16: 'Round of 16', R32: 'Round of 32',
+            ? { W: 'Winner', F: 'Finalist', '3RD': '3rd Place', '4TH': '4th Place', SF: 'Semifinal', QF: 'Quarterfinal', R16: 'Round of 16', R32: 'Round of 32', R64: 'Round of 64',
                 G1: '1st in Group', G2: '2nd in Group', G3: '3rd in Group', G4: '4th in Group', G5: '5th in Group', G6: '6th in Group' }
-            : { W: 'Победитель', F: 'Финалист', '3RD': '3-е место', '4TH': '4-е место', SF: 'Полуфинал', QF: 'Четвертьфинал', R16: '1/8 финала', R32: '1/32 финала',
+            : { W: 'Победитель', F: 'Финалист', '3RD': '3-е место', '4TH': '4-е место', SF: 'Полуфинал', QF: 'Четвертьфинал', R16: '1/8 финала', R32: '1/16 финала', R64: '1/32 финала',
                 G1: '1-е в группе', G2: '2-е в группе', G3: '3-е в группе', G4: '4-е в группе', G5: '5-е в группе', G6: '6-е в группе' };
 
         // Sort results: by points DESC, then by round order
-        var roundOrder = { W: 1, F: 2, '3RD': 3, '4TH': 4, SF: 5, QF: 6, R16: 7, R32: 8,
-            G3: 9, G4: 10, G5: 11, G6: 12 };
+        var roundOrder = { W: 1, F: 2, '3RD': 3, '4TH': 4, SF: 5, QF: 6, R16: 7, R32: 8, R64: 9,
+            G3: 10, G4: 11, G5: 12, G6: 13 };
         results.sort(function(a, b) {
             var ptsA = a.points_earned || 0;
             var ptsB = b.points_earned || 0;
@@ -2127,7 +2129,7 @@
             '</tr></thead><tbody>';
 
         // Place mapping: W=1, F=2, 3RD=3, 4TH=4, SF=3(fallback), QF=5, R16=9, R32=17
-        var placeByRound = { W: 1, F: 2, '3RD': 3, '4TH': 4, SF: 4, QF: 5, R16: 9, R32: 17 };
+        var placeByRound = { W: 1, F: 2, '3RD': 3, '4TH': 4, SF: 4, QF: 5, R16: 9, R32: 17, R64: 33 };
 
         results.forEach(function(r, idx) {
             var place = placeByRound[r.round_reached] || (idx + 1);
