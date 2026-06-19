@@ -820,6 +820,7 @@
                             '<option value="16"' + (item && +item.draw_size === 16 ? ' selected' : '') + '>16</option>' +
                             '<option value="32"' + (item && +item.draw_size === 32 ? ' selected' : '') + '>32</option>' +
                             '<option value="64"' + (item && +item.draw_size === 64 ? ' selected' : '') + '>64</option>' +
+                            '<option value="128"' + (item && +item.draw_size === 128 ? ' selected' : '') + '>128</option>' +
                         '</select>' +
                     '</div>' +
                     '<div class="ad-field" id="adTrnGroupCountWrap" style="display:none;">' +
@@ -1405,6 +1406,16 @@
                 saveBtn.disabled = false;
                 saveBtn.textContent = L.save;
                 return;
+            }
+
+            // Validate: max_participants <= draw_size for SE/FIC
+            if (data.bracket_type && data.bracket_type !== 'round_robin' && data.draw_size && data.max_participants) {
+                if (data.max_participants > data.draw_size) {
+                    A.showToast(isEn ? 'Max participants (' + data.max_participants + ') cannot exceed draw size (' + data.draw_size + ')' : 'Макс. участников (' + data.max_participants + ') не может превышать размер сетки (' + data.draw_size + ')', 'error');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = L.save;
+                    return;
+                }
             }
 
             var result;
