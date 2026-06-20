@@ -246,7 +246,7 @@
             // Unique categories
             var cats = {};
             all.forEach(function(t) {
-                var cat = (t.category_id || '').split('-').pop();
+                var cat = t.category_id || '';
                 if (cat) cats[cat] = true;
             });
             el = document.getElementById('toStatCategories');
@@ -327,16 +327,10 @@
         renderCategories(grouped);
     }
 
-    // Strip gender prefix: "men-promasters" → "promasters", "women-masters" → "masters"
-    function stripGender(catId) {
+    // Category ID is now stored without gender prefix
+    function getCatId(catId) {
         if (!catId) return 'tour';
-        return catId.replace(/^(men|women)-/, '');
-    }
-
-    function getGender(catId) {
-        if (!catId) return 'men';
-        if (catId.indexOf('women') === 0) return 'women';
-        return 'men';
+        return catId;
     }
 
     function groupByCategory(rows, fromSupabase, regCounts) {
@@ -346,13 +340,13 @@
         CATEGORIES.forEach(function(c) { map[c.key] = []; });
 
         rows.forEach(function(t) {
-            var cat = stripGender(t.category_id);
+            var cat = getCatId(t.category_id);
             if (!map[cat]) map[cat] = [];
 
             var d = new Date(t.date_start + 'T00:00:00');
             var day = String(d.getDate()).padStart(2, '0');
             var month = months[d.getMonth()];
-            var gender = getGender(t.category_id);
+            var gender = t.gender || '';
 
             // Auto-compute status (with overrides)
             var effectiveStatus;
@@ -383,8 +377,8 @@
                 status: cardStatus,
                 statusText: statusLabels[effectiveStatus] || statusLabels.upcoming,
                 gender: gender,
-                genderLabel: (t.format !== 'mixed_doubles' && cat !== 'friendly' && (gender === 'men' || gender === 'women'))
-                    ? (gender === 'women' ? ('♀ ' + L.women) : ('♂ ' + L.men))
+                genderLabel: (t.format !== 'mixed_doubles' && cat !== 'friendly' && gender)
+                    ? (gender === 'women' ? ('♀ ' + L.women) : (gender === 'mixed' ? '⚤' : ('♂ ' + L.men)))
                     : '',
                 regLine: regLine,
                 image: t.image_url || t.image || '',
@@ -410,11 +404,10 @@
             _allGrouped[key] = map[key].slice();
         });
 
-        // Limit to 4 per category for default view (exclude past)
+        // Limit to 4 per category for default view (show all including past)
         var sliced = {};
         Object.keys(map).forEach(function(key) {
-            var active = map[key].filter(function(t) { return t.status !== 'past'; });
-            sliced[key] = active.slice(0, 4);
+            sliced[key] = map[key].slice(0, 4);
         });
 
         return sliced;
@@ -577,11 +570,11 @@
                     renderCategories(_grouped);
                     return;
                 }
-                // Filter ALL tournaments (not sliced) by name, exclude past
+                // Filter ALL tournaments (not sliced) by name
                 var filtered = {};
                 CATEGORIES.forEach(function(cat) {
                     var items = (_allGrouped[cat.key] || []).filter(function(item) {
-                        return item.status !== 'past' && item.name.toLowerCase().indexOf(query) !== -1;
+                        return item.name.toLowerCase().indexOf(query) !== -1;
                     });
                     if (items.length > 0) filtered[cat.key] = items;
                 });

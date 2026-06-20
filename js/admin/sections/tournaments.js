@@ -46,18 +46,11 @@
         trnSortAsc = false;
         trnPage = 1;
 
-        // Category filter options — deduplicate Friendly
+        // Category filter options
         var catFilterHtml = '<option value="">' + L.trnAllCategories + '</option>';
-        var friendlyFilterSeen = false;
         A.cachedCategories.forEach(function(c) {
-            var isFriendly = (c.name || '').toLowerCase() === 'friendly' || c.gender === null;
-            if (isFriendly) {
-                if (friendlyFilterSeen) return;
-                friendlyFilterSeen = true;
-            }
-            var genderIcon = isFriendly ? '' : (c.gender === 'women' ? '♀ ' : '♂ ');
             var catName = isEn ? c.name_en : c.name;
-            catFilterHtml += '<option value="' + c.id + '">' + genderIcon + catName + '</option>';
+            catFilterHtml += '<option value="' + c.id + '">' + catName + '</option>';
         });
 
         // Status filter options
@@ -194,7 +187,7 @@
         if (!A.client) return;
 
         var result = await A.client.from('tournaments')
-            .select('id,title,image,category_id,format,status,date_start,date_end,max_participants,bracket_type,draw_size,published_at,registration_start,registration_end')
+            .select('id,title,image,category_id,format,gender,status,date_start,date_end,max_participants,bracket_type,draw_size,published_at,registration_start,registration_end')
             .order('created_at', { ascending: false });
 
         var items = result.data || [];
@@ -230,8 +223,7 @@
 
         cards.forEach(function(card) {
             var filtered = trnAllData.filter(function(t) {
-                var cat = A.categoriesMap[t.category_id];
-                return cat && cat.gender === card.gender && t.format === card.format;
+                return t.gender === card.gender && t.format === card.format;
             });
             var cardTotal = filtered.length;
             var totalEl = document.getElementById(card.totalId);
@@ -265,7 +257,7 @@
             bodyEl.innerHTML = html;
         });
 
-        var friendlyTotal = trnAllData.filter(function(t) { var cat = A.categoriesMap[t.category_id]; return cat && ((cat.name || '').toLowerCase() === 'friendly' || cat.gender === null); }).length;
+        var friendlyTotal = trnAllData.filter(function(t) { return t.category_id === 'friendly'; }).length;
         var elFR = document.getElementById('adTrnTotalFR');
         if (elFR) elFR.textContent = friendlyTotal;
     }
@@ -381,9 +373,7 @@
         tbody.innerHTML = '';
         items.forEach(function(t) {
             var catObj = A.categoriesMap[t.category_id];
-            var isCatFriendly = catObj && ((catObj.name || '').toLowerCase() === 'friendly' || catObj.gender === null);
-            var catGIcon = catObj ? (isCatFriendly ? '' : (catObj.gender === 'women' ? '♀ ' : '♂ ')) : '';
-            var catLabel = catObj ? catGIcon + (isEn ? catObj.name_en : catObj.name) : (t.category_id || L.noData);
+            var catLabel = catObj ? (isEn ? catObj.name_en : catObj.name) : (t.category_id || L.noData);
             var statusLabel, statusClass;
             var isDraft = !t.published_at && (!t.status || t.status === 'upcoming');
             if (isDraft) {
@@ -579,19 +569,12 @@
 
         var hasImageClass = trnImageUrl ? ' has-image' : '';
 
-        // Category options (from Supabase) — deduplicate Friendly
+        // Category options (from Supabase)
         var catOptionsHtml = '<option value="">' + L.selectCategoryTrn + '</option>';
-        var friendlySeen = false;
         A.cachedCategories.forEach(function(c) {
-            var isFriendly = (c.name || '').toLowerCase() === 'friendly' || c.gender === null;
-            if (isFriendly) {
-                if (friendlySeen) return;
-                friendlySeen = true;
-            }
             var selected = (item && item.category_id === c.id) ? ' selected' : '';
-            var genderIcon = isFriendly ? '' : (c.gender === 'women' ? '♀ ' : '♂ ');
             var catName = isEn ? c.name_en : c.name;
-            catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + genderIcon + catName + '</option>';
+            catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + catName + '</option>';
         });
 
         // Status badge (read-only, auto-computed)
@@ -810,6 +793,7 @@
                             '<option value="single_elimination"' + A.sel(item, 'bracket_type', 'single_elimination') + '>' + L.bracketSE + '</option>' +
                             '<option value="fic"' + A.sel(item, 'bracket_type', 'fic') + '>' + L.bracketFIC + '</option>' +
                             '<option value="round_robin"' + A.sel(item, 'bracket_type', 'round_robin') + '>' + L.bracketRR + '</option>' +
+                            '<option value="group_league"' + A.sel(item, 'bracket_type', 'group_league') + '>' + L.bracketGL + '</option>' +
                         '</select>' +
                     '</div>' +
                     '<div class="ad-field" id="adTrnDrawSizeWrap">' +
@@ -980,6 +964,10 @@
             var gcWrap = document.getElementById('adTrnGroupCountWrap');
             var qWrap = document.getElementById('adTrnQualifiersWrap');
             if (bt === 'round_robin') {
+                dsWrap.style.display = 'none';
+                gcWrap.style.display = '';
+                qWrap.style.display = '';
+            } else if (bt === 'group_league') {
                 dsWrap.style.display = 'none';
                 gcWrap.style.display = '';
                 qWrap.style.display = '';
@@ -1409,7 +1397,7 @@
             }
 
             // Validate: max_participants <= draw_size for SE/FIC
-            if (data.bracket_type && data.bracket_type !== 'round_robin' && data.draw_size && data.max_participants) {
+            if (data.bracket_type && data.bracket_type !== 'round_robin' && data.bracket_type !== 'group_league' && data.draw_size && data.max_participants) {
                 if (data.max_participants > data.draw_size) {
                     A.showToast(isEn ? 'Max participants (' + data.max_participants + ') cannot exceed draw size (' + data.draw_size + ')' : 'Макс. участников (' + data.max_participants + ') не может превышать размер сетки (' + data.draw_size + ')', 'error');
                     saveBtn.disabled = false;

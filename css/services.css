@@ -6,9 +6,9 @@
 /* Hero */
 .sv-hero {
     position: relative;
-    padding: 140px 7% 60px;
+    padding: 120px 7% 48px;
     text-align: center;
-    min-height: 50vh;
+    min-height: 380px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -591,8 +591,8 @@
 
 @media (max-width: 768px) {
     .sv-hero {
-        padding: 110px 5% 40px;
-        min-height: 35vh;
+        padding: 100px 5% 36px;
+        min-height: 320px;
     }
 
     .sv-hero h1 {
@@ -642,8 +642,8 @@
 
 @media (max-width: 480px) {
     .sv-hero {
-        padding: 95px 5% 30px;
-        min-height: 30vh;
+        padding: 90px 5% 28px;
+        min-height: 280px;
     }
 
     .sv-hero h1 {

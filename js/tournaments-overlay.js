@@ -143,7 +143,7 @@
             try {
                 var result = await client.from('tournaments')
                     .select('id, date_end, published_at')
-                    .like('category_id', '%-friendly');
+                    .eq('category_id', 'friendly');
                 var allT = (result.data || []).filter(function(t) { return t.published_at !== null; });
                 if (allT.length === 0) allT = result.data || [];
                 var today = new Date().toISOString().substring(0, 10);
@@ -166,10 +166,10 @@
         var elPrize = document.getElementById('statPrize');
 
         try {
-            // All tournaments in this category — both men + women (all statuses)
+            // All tournaments in this category (all statuses)
             var result = await client.from('tournaments')
                 .select('id, prize_fund, published_at')
-                .like('category_id', '%-' + category);
+                .eq('category_id', category);
 
             var allT = (result.data && !result.error) ? result.data : [];
             var tournaments = allT.filter(function(t) { return t.published_at !== null; });
@@ -219,7 +219,7 @@
         try {
             var result = await client.from('tournaments')
                 .select('*')
-                .like('category_id', '%-' + category)
+                .eq('category_id', category)
                 .order('date_start', { ascending: true });
 
             // Filter out drafts (published_at null = draft)
@@ -288,13 +288,12 @@
                 var cardStatusMap = { registration_open: 'open', completed: 'past', ongoing: 'ongoing', cancelled: 'past', registration_closed: 'closed' };
                 var cardStatus = cardStatusMap[effectiveStatus] || 'soon';
 
-                var gender = (t.category_id || '').split('-')[0];
-                var cat = (t.category_id || '').replace(/^(men|women)-/, '');
-                var genderLabel = (t.format !== 'mixed_doubles' && cat !== 'friendly' && (gender === 'men' || gender === 'women'))
+                var gender = t.gender || '';
+                var genderLabel = (t.format !== 'mixed_doubles' && category !== 'friendly' && (gender === 'men' || gender === 'women'))
                     ? (gender === 'women'
                         ? (isEn ? '♀ Women' : (isKg ? '♀ Аялдар' : '♀ Женский'))
                         : (isEn ? '♂ Men' : (isKg ? '♂ Эркектер' : '♂ Мужской')))
-                    : '';
+                    : (gender === 'mixed' ? (isEn ? '⚤ Mixed' : (isKg ? '⚤ Аралаш' : '⚤ Смешанный')) : '');
 
                 // Registration dates line (show only if reg_end >= today)
                 var regLine = '';
@@ -304,8 +303,8 @@
                     regLine = (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()];
                 }
 
-                // Gender for filtering: men, women, or mixed
-                var _gender = (gender === 'men' || gender === 'women') ? gender : 'mixed';
+                // Gender for filtering
+                var _gender = gender || 'all';
 
                 return {
                     id: t.id,
@@ -333,7 +332,7 @@
                 ? {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
                 : {'Янв':'01','Фев':'02','Мар':'03','Апр':'04','Май':'05','Июн':'06','Июл':'07','Авг':'08','Сен':'09','Окт':'10','Ноя':'11','Дек':'12'};
 
-            var staticGender = category.indexOf('women') !== -1 ? 'women' : (category.indexOf('men') !== -1 ? 'men' : 'mixed');
+            var staticGender = 'all';
             var staticItems = (typeof tournamentsData !== 'undefined' && tournamentsData.upcoming[category] || []).map(function(t) {
                 return Object.assign({}, t, {
                     _dateSort: '2026-' + (monthMap[t.date.month] || '01') + '-' + t.date.day,
@@ -344,26 +343,121 @@
 
             var all = supaItems.concat(staticItems);
 
-            // Sort: active/upcoming first (date asc), then past (date desc)
-            all.sort(function(a, b) {
-                var aIsPast = a.status === 'past';
-                var bIsPast = b.status === 'past';
-                if (aIsPast !== bIsPast) return aIsPast ? 1 : -1;
-                if (aIsPast) return (b._dateSort || '').localeCompare(a._dateSort || '');
-                return (a._dateSort || '').localeCompare(b._dateSort || '');
+            // Load ALL active tournaments (all categories) for main grid
+            var activeItems = [];
+            try {
+                var activeResult = await client.from('tournaments')
+                    .select('*')
+                    .neq('status', 'completed')
+                    .neq('status', 'cancelled')
+                    .not('published_at', 'is', null)
+                    .order('date_start', { ascending: true });
+                var activeData = activeResult.data || [];
+                activeItems = activeData.map(function(t) {
+                    var d = new Date(t.date_start + 'T00:00:00');
+                    var day = String(d.getDate()).padStart(2, '0');
+                    var month = months[d.getMonth()];
+                    var effectiveStatus;
+                    if (t.status === 'registration_closed') {
+                        effectiveStatus = t.status;
+                    } else {
+                        effectiveStatus = computeStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
+                    }
+                    var cardStatusMap = { registration_open: 'open', completed: 'past', ongoing: 'ongoing', cancelled: 'past', registration_closed: 'closed' };
+                    var cardStatus = cardStatusMap[effectiveStatus] || 'soon';
+                    var gender = t.gender || '';
+                    var genderLabel = (t.format !== 'mixed_doubles' && t.category_id !== 'friendly' && (gender === 'men' || gender === 'women'))
+                        ? (gender === 'women'
+                            ? (isEn ? '♀ Women' : (isKg ? '♀ Аялдар' : '♀ Женский'))
+                            : (isEn ? '♂ Men' : (isKg ? '♂ Эркектер' : '♂ Мужской')))
+                        : (gender === 'mixed' ? (isEn ? '⚤ Mixed' : (isKg ? '⚤ Аралаш' : '⚤ Смешанный')) : '');
+                    var regLine = '';
+                    if (t.registration_start && t.registration_end && t.registration_end >= today) {
+                        var rs = new Date(t.registration_start + 'T00:00:00');
+                        var re = new Date(t.registration_end + 'T00:00:00');
+                        regLine = (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()];
+                    }
+                    return {
+                        id: t.id,
+                        name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
+                        date: { day: day, month: month },
+                        _dateSort: t.date_start,
+                        location: isEn ? (t.location_en || t.location) : (isKg ? (t.location_kg || t.location || '') : (t.location || '')),
+                        format: formatLabels[t.format] || t.format || '',
+                        participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
+                        prize: t.prize_fund ? ((/[а-яa-z]/i.test(String(t.prize_fund))) ? String(t.prize_fund) : formatPrize(parseInt(String(t.prize_fund).replace(/[^\d]/g, ''), 10) || 0)) : '',
+                        status: cardStatus,
+                        statusText: statusLabels[effectiveStatus] || statusLabels.upcoming,
+                        genderLabel: genderLabel,
+                        _gender: gender || 'all',
+                        regLine: regLine,
+                        image: t.image_url || t.image || '',
+                        _startTime: t.start_time || null,
+                        _fromSupabase: true
+                    };
+                });
+            } catch(ae) {
+                console.warn('Active tournaments load error:', ae);
+                // Fallback: use category-specific items
+                activeItems = all.filter(function(t) { return t.status !== 'past'; });
+            }
+            // Filter out items whose computed status is 'past' (date_end passed)
+            activeItems = activeItems.filter(function(t) { return t.status !== 'past'; });
+            // Sort: newest first
+            activeItems.sort(function(a, b) {
+                return (b._dateSort || '').localeCompare(a._dateSort || '');
             });
 
-            // Re-render grid
+            // Load ALL completed tournaments (all categories) for past section
+            var pastItems = [];
+            try {
+                var pastResult = await client.from('tournaments')
+                    .select('*')
+                    .eq('status', 'completed')
+                    .not('published_at', 'is', null)
+                    .order('date_start', { ascending: false });
+                var pastData = pastResult.data || [];
+                pastItems = pastData.map(function(t) {
+                    var d = new Date(t.date_start + 'T00:00:00');
+                    var day = String(d.getDate()).padStart(2, '0');
+                    var month = months[d.getMonth()];
+                    var gender = t.gender || '';
+                    var genderLabel = (t.format !== 'mixed_doubles' && t.category_id !== 'friendly' && (gender === 'men' || gender === 'women'))
+                        ? (gender === 'women'
+                            ? (isEn ? '♀ Women' : (isKg ? '♀ Аялдар' : '♀ Женский'))
+                            : (isEn ? '♂ Men' : (isKg ? '♂ Эркектер' : '♂ Мужской')))
+                        : (gender === 'mixed' ? (isEn ? '⚤ Mixed' : (isKg ? '⚤ Аралаш' : '⚤ Смешанный')) : '');
+                    return {
+                        id: t.id,
+                        name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
+                        date: { day: day, month: month },
+                        _dateSort: t.date_start,
+                        location: isEn ? (t.location_en || t.location) : (isKg ? (t.location_kg || t.location || '') : (t.location || '')),
+                        format: formatLabels[t.format] || t.format || '',
+                        participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
+                        prize: t.prize_fund ? ((/[а-яa-z]/i.test(String(t.prize_fund))) ? String(t.prize_fund) : formatPrize(parseInt(String(t.prize_fund).replace(/[^\d]/g, ''), 10) || 0)) : '',
+                        statusText: statusLabels.completed || (isEn ? 'Completed' : 'Завершён'),
+                        genderLabel: genderLabel,
+                        image: t.image_url || t.image || '',
+                        _fromSupabase: true
+                    };
+                });
+            } catch(pe) {
+                console.warn('Past tournaments load error:', pe);
+            }
+
+            // Re-render main grid (show more: 3 cols × 3 rows = 9 per load)
             var grid = document.getElementById('tournamentsGrid');
             if (!grid) return;
+            var ITEMS_PER_LOAD = 6;
+            var _activeShown = 0;
+            var upcomingSection = document.getElementById('upcoming');
 
-            grid.innerHTML = all.map(function(t) {
+            function renderActiveCard(t) {
                 var statusText = t.statusText || (t.status === 'open'
                     ? (isEn ? 'Registration Open' : (isKg ? 'Каттоо ачык' : 'Регистрация открыта'))
                     : (isEn ? 'Coming Soon' : (isKg ? 'Жакында' : 'Скоро открытие')));
-
-                var cardHref = detailPage + '?id=' + (t._fromSupabase ? t.id : category + '-' + t.id);
-                return '<div class="tournament-card" data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '" data-id="' + (t._fromSupabase ? t.id : category + '-' + t.id) + '"' +
+                return '<div class="tournament-card" data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '" data-id="' + t.id + '"' +
                     (t.image ? ' style="background-image:url(' + t.image + ')"' : '') + '>' +
                     '<div class="tournament-card-header">' +
                         '<span class="tournament-date">' +
@@ -380,7 +474,6 @@
                         '</div>' +
                         '<div class="tournament-meta">' +
                             '<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + t.location + '</span>' +
-                            (t.time ? '<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + t.time + '</span>' : '') +
                         '</div>' +
                         '<div class="tournament-details">' +
                             (t.regLine ? '<div class="detail-item detail-reg"><span class="detail-label">' + (isEn ? 'Registration' : (isKg ? 'Каттоо' : 'Регистрация')) + '</span><span class="detail-value">' + t.regLine.replace(/^(Reg|Рег|Кат): /, '') + '</span></div>' : '') +
@@ -397,25 +490,121 @@
                             : '') +
                     '</div>' +
                 '</div>';
-            }).join('');
+            }
 
-            // Make each card clickable — direct listener (more reliable than delegation)
-            grid.querySelectorAll('.tournament-card[data-id]').forEach(function(card) {
-                card.addEventListener('click', function(e) {
-                    // Skip footer buttons
-                    if (e.target.closest('.btn-calendar, .btn-register')) return;
-                    window.location.href = detailPage + '?id=' + this.dataset.id;
+            var showMoreLabel = isEn ? 'Show more' : (isKg ? 'Дагы көрсөтүү' : 'Показать ещё');
+            var showMoreArrow = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+
+            function renderActiveShowMore() {
+                var nextItems = activeItems.slice(_activeShown, _activeShown + ITEMS_PER_LOAD);
+                var html = nextItems.map(renderActiveCard).join('');
+                grid.insertAdjacentHTML('beforeend', html);
+                _activeShown += nextItems.length;
+
+                // Click listeners for new cards
+                grid.querySelectorAll('.tournament-card[data-id]').forEach(function(card) {
+                    if (card._clickBound) return;
+                    card._clickBound = true;
+                    card.addEventListener('click', function(e) {
+                        if (e.target.closest('.btn-calendar, .btn-register')) return;
+                        window.location.href = detailPage + '?id=' + this.dataset.id;
+                    });
                 });
-            });
 
-            // Hide completed/cancelled tournaments by default
-            grid.querySelectorAll('.tournament-card[data-status="past"]').forEach(function(card) {
-                card.style.display = 'none';
-            });
+                // Show/hide button
+                var oldBtn = upcomingSection.querySelector('.trn-show-more');
+                if (oldBtn) oldBtn.remove();
+                if (_activeShown < activeItems.length) {
+                    var btnHtml = '<div class="trn-show-more"><button class="trn-show-more-btn" id="activeShowMore">' + showMoreLabel + ' ' + showMoreArrow + '</button></div>';
+                    grid.insertAdjacentHTML('afterend', btnHtml);
+                    document.getElementById('activeShowMore').addEventListener('click', function() {
+                        renderActiveShowMore();
+                    });
+                }
+
+                startCountdownTimer();
+            }
+
+            grid.innerHTML = '';
+            renderActiveShowMore();
+
+            // Render past tournaments into #pastTournamentsGrid (show more pattern)
+            var pastGrid = document.getElementById('pastTournamentsGrid');
+            var pastSection = document.getElementById('past');
+            var _pastShown = 0;
+
+            function renderPastCard(t) {
+                var statusText = t.statusText || (isEn ? 'Completed' : (isKg ? 'Аяктады' : 'Завершён'));
+                return '<div class="tournament-card" data-status="past" data-id="' + t.id + '"' +
+                    (t.image ? ' style="background-image:url(' + t.image + ')"' : '') + '>' +
+                    '<div class="tournament-card-header">' +
+                        '<span class="tournament-date">' +
+                            '<span class="date-day">' + t.date.day + '</span>' +
+                            '<span class="date-month">' + t.date.month + '</span>' +
+                        '</span>' +
+                        '<span class="tournament-status past">' + statusText + '</span>' +
+                    '</div>' +
+                    '<div class="tournament-card-body">' +
+                        '<div class="tournament-title-row">' +
+                            '<h3>' + t.name + '</h3>' +
+                            (t.genderLabel ? '<span class="tournament-gender-badge">' + t.genderLabel + '</span>' : '') +
+                        '</div>' +
+                        '<div class="tournament-meta">' +
+                            '<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + t.location + '</span>' +
+                        '</div>' +
+                        '<div class="tournament-details">' +
+                            '<div class="detail-item"><span class="detail-label">' + L.format + '</span><span class="detail-value">' + (t.format || '') + '</span></div>' +
+                            '<div class="detail-item"><span class="detail-label">' + L.participants + '</span><span class="detail-value">' + (t.participants || '') + '</span></div>' +
+                            '<div class="detail-item"><span class="detail-label">' + L.prizeFund + '</span><span class="detail-value prize">' + (t.prize || '') + '</span></div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="tournament-card-footer">' +
+                        '<span class="btn-view-bracket">' + L.details + '</span>' +
+                    '</div>' +
+                '</div>';
+            }
+
+            function renderPastShowMore() {
+                if (!pastGrid) return;
+                var nextItems = pastItems.slice(_pastShown, _pastShown + ITEMS_PER_LOAD);
+                var html = nextItems.map(renderPastCard).join('');
+                pastGrid.insertAdjacentHTML('beforeend', html);
+                _pastShown += nextItems.length;
+
+                // Click listeners for new cards
+                pastGrid.querySelectorAll('.tournament-card[data-id]').forEach(function(card) {
+                    if (card._clickBound) return;
+                    card._clickBound = true;
+                    card.addEventListener('click', function() {
+                        window.location.href = detailPage + '?id=' + this.dataset.id;
+                    });
+                });
+
+                // Show/hide button
+                var oldBtn = pastSection.querySelector('.trn-show-more');
+                if (oldBtn) oldBtn.remove();
+                if (_pastShown < pastItems.length) {
+                    var btnHtml = '<div class="trn-show-more"><button class="trn-show-more-btn" id="pastShowMore">' + showMoreLabel + ' ' + showMoreArrow + '</button></div>';
+                    pastGrid.insertAdjacentHTML('afterend', btnHtml);
+                    document.getElementById('pastShowMore').addEventListener('click', function() {
+                        renderPastShowMore();
+                    });
+                }
+            }
+
+            if (pastGrid && pastItems.length > 0) {
+                if (pastSection) pastSection.style.display = '';
+                pastGrid.innerHTML = '';
+                renderPastShowMore();
+            } else if (pastSection && pastItems.length === 0) {
+                pastSection.style.display = 'none';
+            }
 
             // Init search + filter buttons interaction
             initSearch(grid);
             initFilterSearch(grid);
+            // Apply current filter state
+            applyFilters(grid);
             startCountdownTimer();
             initStickyHeader();
 

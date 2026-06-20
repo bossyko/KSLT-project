@@ -6,12 +6,12 @@
 /* ---- HERO ---- */
 .co-hero {
     position: relative;
-    min-height: 340px;
+    min-height: 380px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 120px 24px 60px;
+    padding: 120px 7% 48px;
     overflow: hidden;
 }
 

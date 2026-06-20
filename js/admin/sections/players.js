@@ -132,10 +132,9 @@
 
         var catFilterHtml = '<option value="">' + L.plrAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
-            var genderIcon = c.gender === 'women' ? '♀ ' : '♂ ';
             var catName = isEn ? c.name_en : c.name;
             var selected = plrFilterCategory === c.id ? ' selected' : '';
-            catFilterHtml += '<option value="' + c.id + '"' + selected + '>' + genderIcon + catName + '</option>';
+            catFilterHtml += '<option value="' + c.id + '"' + selected + '>' + catName + '</option>';
         });
 
         var isAdm = A.currentRole === 'admin';
@@ -226,7 +225,7 @@
                 : '<div class="ad-table-thumb ad-table-thumb-round" style="background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:1.1rem;">' + (p.country || '?') + '</div>';
 
             var catObj = A.categoriesMap[p.category_id];
-            var catLabel = catObj ? (catObj.gender === 'women' ? '♀ ' : '♂ ') + (isEn ? catObj.name_en : catObj.name) : (p.category_id || L.noData);
+            var catLabel = catObj ? (isEn ? catObj.name_en : catObj.name) : (p.category_id || L.noData);
 
             tbody.innerHTML +=
                 '<tr data-plr-id="' + p.id + '"' + (isAdm ? ' style="cursor:pointer;"' : '') + '>' +
@@ -292,17 +291,12 @@
 
         var hasImageClass = plrImageUrl ? ' has-image' : '';
 
-        // Category options (filtered by player gender if known)
-        var plrGender = item ? item._gender : null; // 'male' or 'female' from linked profile
-        var catGenderFilter = plrGender === 'male' ? 'men' : plrGender === 'female' ? 'women' : null;
-
+        // Category options
         var catOptionsHtml = '<option value="">' + L.selectCategoryTrn + '</option>';
         A.cachedCategories.forEach(function(c) {
-            if (catGenderFilter && c.gender && c.gender !== catGenderFilter) return;
             var selected = (item && item.category_id === c.id) ? ' selected' : '';
-            var genderIcon = c.gender === 'women' ? '♀ ' : '♂ ';
             var catName = isEn ? c.name_en : c.name;
-            catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + genderIcon + catName + '</option>';
+            catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + catName + '</option>';
         });
 
         // Badges section is now loaded dynamically from player_badges table
@@ -1492,9 +1486,7 @@
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
             var name = isEn ? (c.name_en || c.name) : c.name;
-            var isFriendly = (c.name || '').toLowerCase() === 'friendly' || c.gender === null;
-            var genderIcon = isFriendly ? '' : (c.gender === 'women' ? '\u2640 ' : '\u2642 ');
-            catOpts += '<option value="' + c.id + '">' + genderIcon + name + '</option>';
+            catOpts += '<option value="' + c.id + '">' + name + '</option>';
         });
 
         panel.innerHTML =
@@ -1512,17 +1504,8 @@
 
         document.getElementById('ratGenderFilter').addEventListener('change', function() {
             _ratGenderFilter = this.value;
-            var catSelect = document.getElementById('ratCatFilter');
-            var newCatOpts = '<option value="">' + L.ratAllCategories + '</option>';
-            A.cachedCategories.forEach(function(c) {
-                if (_ratGenderFilter && c.gender !== _ratGenderFilter) return;
-                var name = isEn ? (c.name_en || c.name) : c.name;
-                var isFriendly = (c.name || '').toLowerCase() === 'friendly' || c.gender === null;
-                var genderIcon = isFriendly ? '' : (c.gender === 'women' ? '\u2640 ' : '\u2642 ');
-                newCatOpts += '<option value="' + c.id + '">' + genderIcon + name + '</option>';
-            });
-            catSelect.innerHTML = newCatOpts;
             _ratCatFilter = '';
+            document.getElementById('ratCatFilter').value = '';
             loadRatRankings();
         });
 
@@ -1544,16 +1527,11 @@
         if (!body) return;
         body.innerHTML = '<div style="padding:20px;opacity:0.5;">Loading...</div>';
 
-        var query = A.client.from('players').select('*, categories(name, name_en, gender)').order('points', { ascending: false });
+        var query = A.client.from('players').select('*, categories(name, name_en)').order('points', { ascending: false });
         if (_ratCatFilter) query = query.eq('category_id', _ratCatFilter);
+        if (_ratGenderFilter) query = query.eq('gender', _ratGenderFilter);
         var res = await query;
         var players = res.data || [];
-
-        if (_ratGenderFilter) {
-            players = players.filter(function(p) {
-                return p.categories && p.categories.gender === _ratGenderFilter;
-            });
-        }
 
         if (_ratSearchQuery) {
             players = players.filter(function(p) {
@@ -1611,15 +1589,12 @@
         sortedCatIds.forEach(function(catId) {
             var catPlayers = groups[catId];
             var catName = '';
-            var catGenderIcon = '';
             if (catId !== 'none' && A.categoriesMap[catId]) {
                 catName = isEn ? (A.categoriesMap[catId].name_en || A.categoriesMap[catId].name) : A.categoriesMap[catId].name;
-                var cg = A.categoriesMap[catId].gender;
-                catGenderIcon = cg === 'women' ? '\u2640 ' : (cg === 'men' ? '\u2642 ' : '');
             }
 
             if (!_ratCatFilter) {
-                html += '<h3 class="ad-rat-cat-title">' + catGenderIcon + (catName || 'N/A') + '</h3>';
+                html += '<h3 class="ad-rat-cat-title">' + (catName || 'N/A') + '</h3>';
             }
 
             html += '<div class="ad-table-card"><div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
@@ -1736,9 +1711,7 @@
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
             var name = isEn ? (c.name_en || c.name) : c.name;
-            var isFriendly = (c.name || '').toLowerCase() === 'friendly' || c.gender === null;
-            var genderIcon = isFriendly ? '' : (c.gender === 'women' ? '\u2640 ' : '\u2642 ');
-            catOpts += '<option value="' + c.id + '">' + genderIcon + name + '</option>';
+            catOpts += '<option value="' + c.id + '">' + name + '</option>';
         });
 
         panel.innerHTML =
@@ -1754,17 +1727,8 @@
 
         document.getElementById('ratResGenderFilter').addEventListener('change', function() {
             _ratResGenderFilter = this.value;
-            var catSelect = document.getElementById('ratResCatFilter');
-            var newCatOpts = '<option value="">' + L.ratAllCategories + '</option>';
-            A.cachedCategories.forEach(function(c) {
-                if (_ratResGenderFilter && c.gender !== _ratResGenderFilter) return;
-                var name = isEn ? (c.name_en || c.name) : c.name;
-                var isFriendly = (c.name || '').toLowerCase() === 'friendly' || c.gender === null;
-                var genderIcon = isFriendly ? '' : (c.gender === 'women' ? '\u2640 ' : '\u2642 ');
-                newCatOpts += '<option value="' + c.id + '">' + genderIcon + name + '</option>';
-            });
-            catSelect.innerHTML = newCatOpts;
             _ratResCatFilter = '';
+            document.getElementById('ratResCatFilter').value = '';
             rebuildTrnList();
         });
 
@@ -1790,10 +1754,7 @@
 
         var filtered = _ratResAllTournaments.filter(function(t) {
             if (_ratResCatFilter && t.category_id !== _ratResCatFilter) return false;
-            if (_ratResGenderFilter && !_ratResCatFilter) {
-                var catG = A.categoriesMap[t.category_id];
-                if (!catG || catG.gender !== _ratResGenderFilter) return false;
-            }
+            if (_ratResGenderFilter && t.gender !== _ratResGenderFilter) return false;
             if (_ratResSearchQuery) {
                 var title = isEn ? (t.title_en || t.title) : t.title;
                 if (title.toLowerCase().indexOf(_ratResSearchQuery) === -1) return false;
@@ -1817,12 +1778,8 @@
             var title = isEn ? (t.title_en || t.title) : t.title;
             var date = t.date_start ? t.date_start.substring(0, 10) : '';
             var cat = A.categoriesMap[t.category_id];
-            var catName = '';
-            var genderIcon = '';
-            if (cat) {
-                catName = isEn ? (cat.name_en || cat.name) : cat.name;
-                genderIcon = cat.gender === 'women' ? '\u2640 ' : (cat.gender === 'men' ? '\u2642 ' : '');
-            }
+            var catName = cat ? (isEn ? (cat.name_en || cat.name) : cat.name) : '';
+            var genderIcon = t.gender === 'women' ? '\u2640 ' : (t.gender === 'men' ? '\u2642 ' : '');
             html += '<tr class="ad-rat-trn-row" data-trn-id="' + t.id + '" style="cursor:pointer;">' +
                 '<td>' + date + '</td>' +
                 '<td><span class="ad-rat-trn-link">' + genderIcon + A.esc(title) + '</span></td>' +
