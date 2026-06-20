@@ -3870,3 +3870,6 @@ select.ad-field-input {
     text-align: center;
     line-height: 1.4;
 }
+.ad-brk-grp-label:empty {
+    background: none;
+}

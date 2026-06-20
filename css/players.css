@@ -6,9 +6,10 @@
 /* === HERO === */
 .pl-hero {
     position: relative;
-    padding: 140px 7% 60px;
+    padding: 120px 7% 48px;
     text-align: center;
     overflow: hidden;
+    min-height: 380px;
 }
 
 .pl-hero-bg {

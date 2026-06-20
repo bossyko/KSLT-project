@@ -437,6 +437,17 @@
     font-size: 0.8rem;
 }
 
+.td-match-outcome {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: rgba(204, 255, 0, 0.15);
+    color: var(--accent);
+    margin-left: 2px;
+    vertical-align: middle;
+}
+
 /* === BRACKET CONNECTORS === */
 .td-connector-column {
     display: flex;
@@ -1732,6 +1743,51 @@
     }
     .td-cd-boxes {
         gap: 6px;
+    }
+}
+
+/* ========================================
+   DUAL LEAGUE LAYOUT (Group + Leagues)
+   ======================================== */
+
+.td-dual-league {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 32px;
+}
+
+.td-league-bracket {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.td-league-title {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm, 6px);
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+}
+
+.td-league-title-premier {
+    color: var(--accent);
+    background: rgba(204, 255, 0, 0.08);
+    border: 1px solid rgba(204, 255, 0, 0.2);
+}
+
+.td-league-title-consolation {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 1200px) {
+    .td-dual-league {
+        flex-direction: column;
     }
 }
 

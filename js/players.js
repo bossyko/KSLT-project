@@ -253,33 +253,41 @@
             var players = plrResult.data || [];
             var categories = catResult.data;
 
-            // Build categoriesData structure matching static format (skip Friendly — no ranking)
+            // Build categoriesData: composite keys men-{catId} / women-{catId}
+            // Categories are gender-neutral (masters, tour), player.gender is separate
+            // Skip Friendly — no ranking
             var result = {};
+            var genders = ['men', 'women'];
             categories.forEach(function(cat) {
                 if (cat.name && cat.name.toLowerCase().indexOf('friendly') !== -1) return;
-                var catPlayers = players.filter(function(p) { return p.category_id === cat.id; });
-                result[cat.id] = {
-                    name: isEn ? (cat.name_en || cat.name) : (isKg ? (cat.name_kg || cat.name) : cat.name),
-                    gender: cat.gender,
-                    genderLabel: isEn ? (cat.gender === 'men' ? 'Men' : 'Women') : (isKg ? (cat.gender === 'men' ? 'Эркектер' : 'Аялдар') : (cat.gender === 'men' ? 'Мужчины' : 'Женщины')),
-                    players: catPlayers.map(function(p) {
-                        return {
-                            id: p.id,
-                            name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
-                            photo: p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?',
-                            country: p.country || '🇰🇬',
-                            points: p.points || 0,
-                            wins: p.wins || 0,
-                            losses: p.losses || 0,
-                            change: p.rank_change || 0,
-                            form: p.form || [],
-                            online: false,
-                            badges: p.badges || [],
-                            ntrp_rating: p.ntrp_rating || null,
-                            banned_until: p.banned_until || null
-                        };
-                    })
-                };
+                var catName = isEn ? (cat.name_en || cat.name) : (isKg ? (cat.name_kg || cat.name) : cat.name);
+                genders.forEach(function(g) {
+                    var catPlayers = players.filter(function(p) { return p.category_id === cat.id && p.gender === g; });
+                    if (catPlayers.length === 0) return;
+                    var key = g + '-' + cat.id;
+                    result[key] = {
+                        name: catName,
+                        gender: g,
+                        genderLabel: isEn ? (g === 'men' ? 'Men' : 'Women') : (isKg ? (g === 'men' ? 'Эркектер' : 'Аялдар') : (g === 'men' ? 'Мужчины' : 'Женщины')),
+                        players: catPlayers.map(function(p) {
+                            return {
+                                id: p.id,
+                                name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
+                                photo: p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?',
+                                country: p.country || '🇰🇬',
+                                points: p.points || 0,
+                                wins: p.wins || 0,
+                                losses: p.losses || 0,
+                                change: p.rank_change || 0,
+                                form: p.form || [],
+                                online: false,
+                                badges: p.badges || [],
+                                ntrp_rating: p.ntrp_rating || null,
+                                banned_until: p.banned_until || null
+                            };
+                        })
+                    };
+                });
             });
 
             return result;
@@ -655,14 +663,18 @@
         var genderIcon = cat.gender === 'men' ? '\u2642' : '\u2640';
         var playersPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
 
-        // Count completed tournaments for this category
+        // Extract base category ID (e.g. "men-promasters" → "promasters")
+        var baseCatId = tabId.indexOf('-') !== -1 ? tabId.split('-').slice(1).join('-') : tabId;
+
+        // Count completed tournaments for this category + gender
         var tournamentsCount = 0;
         if (window.supabaseClient) {
             try {
                 var tRes = await window.supabaseClient
                     .from('tournaments')
                     .select('id', { count: 'exact', head: true })
-                    .eq('category_id', tabId)
+                    .eq('category_id', baseCatId)
+                    .eq('gender', cat.gender)
                     .eq('status', 'completed')
                     .not('published_at', 'is', null);
                 if (tRes.count !== null && tRes.count !== undefined) tournamentsCount = tRes.count;
