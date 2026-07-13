@@ -11,8 +11,323 @@
 
     // NTRP is now managed manually by admin (no auto-calculation)
 
+    // ---- Doubles helpers ----
+
+    function isDoublesTournament(tournament) {
+        return tournament && (tournament.format === 'doubles' || tournament.format === 'mixed_doubles');
+    }
+
+    /**
+     * Get display name for a team (doubles) or single player.
+     * For doubles: "Фамилия И. / Фамилия И." or "Фамилия И. / ExtName"
+     * @param {string} playerId - captain player_id
+     * @param {Object} regsMap - map playerId → registration
+     * @param {Object} playersMap - map playerId → player
+     * @param {boolean} isDoubles - is doubles tournament
+     * @returns {string}
+     */
+    function getTeamDisplayName(playerId, regsMap, playersMap, isDoubles) {
+        var p = playersMap[playerId];
+        var captainName = p ? A.esc(isEn ? (p.name_en || p.name) : p.name) : (playerId ? 'TBD' : 'BYE');
+
+        if (!isDoubles) return captainName;
+
+        var reg = regsMap ? regsMap[playerId] : null;
+        if (!reg) return captainName;
+
+        var partnerName = '';
+        if (reg.partner_id) {
+            var pp = playersMap[reg.partner_id];
+            partnerName = pp ? A.esc(isEn ? (pp.name_en || pp.name) : pp.name) : '?';
+        } else if (reg.partner_external_name) {
+            partnerName = A.esc(reg.partner_external_name);
+        }
+
+        if (partnerName) {
+            return '<span class="ad-team-name">' + captainName + ' / ' + partnerName + '</span>';
+        }
+        return captainName;
+    }
+
+    /**
+     * Build regsMap: player_id → registration (for doubles lookup).
+     * Also handles external registrations (player_id = null) using a synthetic key.
+     */
+    function buildRegsMap(registrations) {
+        var map = {};
+        registrations.forEach(function(r) {
+            var key = r.player_id || ('ext_' + r.id);
+            map[key] = r;
+        });
+        return map;
+    }
+
+    function validateNtrpCombined(ntrp1, ntrp2, max) {
+        if (!max) return true;
+        if (!ntrp1 || !ntrp2) return true; // can't validate without both
+        return (ntrp1 + ntrp2) <= max;
+    }
+
+    function validateMixedDoublesGender(gender1, gender2) {
+        if (!gender1 || !gender2) return true; // can't validate without both
+        return (gender1 !== gender2);
+    }
+
+    /**
+     * Get combined points for a doubles team for seeding.
+     */
+    function getTeamPoints(reg, playersMap) {
+        var captainPts = 0;
+        if (reg.player_id && playersMap[reg.player_id]) {
+            captainPts = playersMap[reg.player_id].doubles_points || playersMap[reg.player_id].points || 0;
+        }
+        var partnerPts = 0;
+        if (reg.partner_id && playersMap[reg.partner_id]) {
+            partnerPts = playersMap[reg.partner_id].doubles_points || playersMap[reg.partner_id].points || 0;
+        }
+        return captainPts + partnerPts;
+    }
+
+    /**
+     * Open modal to assign a partner to a registration (admin action).
+     * Supports: KSLT player search or external player name entry.
+     */
+    function openPartnerModal(regId, tournament, tournamentId, registrations) {
+        var isMixed = tournament.format === 'mixed_doubles';
+
+        // Collect already-used player IDs in this tournament
+        var usedIds = {};
+        registrations.forEach(function(r) {
+            if (r.player_id) usedIds[r.player_id] = true;
+            if (r.partner_id) usedIds[r.partner_id] = true;
+        });
+
+        var modalHtml =
+            '<div style="display:flex;flex-direction:column;gap:12px;min-width:320px;">' +
+                '<div class="ad-field">' +
+                    '<label class="ad-field-label">' + L.doublesPartnerSearch + '</label>' +
+                    '<input type="text" class="ad-field-input" id="adPartnerSearch" placeholder="' + (isEn ? 'Type name...' : 'Введите имя...') + '" autocomplete="off">' +
+                    '<div id="adPartnerResults" style="max-height:180px;overflow-y:auto;margin-top:4px;"></div>' +
+                    '<input type="hidden" id="adPartnerSelectedId" value="">' +
+                '</div>' +
+                '<hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:4px 0;">' +
+                '<div class="ad-field">' +
+                    '<label class="ad-field-label">' + (isEn ? 'Or external partner' : 'Или внешний партнёр') + '</label>' +
+                    '<input type="text" class="ad-field-input" id="adPartnerExtName" placeholder="' + L.doublesExtPartnerName + '">' +
+                '</div>' +
+                '<div style="display:flex;gap:12px;">' +
+                    '<div class="ad-field" style="flex:1;">' +
+                        '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + '</label>' +
+                        '<input type="number" class="ad-field-input" id="adPartnerExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
+                    '</div>' +
+                    '<div class="ad-field" style="flex:1;">' +
+                        '<label class="ad-field-label">' + L.doublesExtPartnerGender + '</label>' +
+                        '<select class="ad-field-input" id="adPartnerExtGender">' +
+                            '<option value="">—</option>' +
+                            '<option value="men">' + L.genderMen + '</option>' +
+                            '<option value="women">' + L.genderWomen + '</option>' +
+                        '</select>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+
+        A.showConfirm(L.doublesAddPartner, modalHtml, async function() {
+            var selectedId = document.getElementById('adPartnerSelectedId').value.trim();
+            var extName = document.getElementById('adPartnerExtName').value.trim();
+            var extNtrp = parseFloat(document.getElementById('adPartnerExtNtrp').value) || null;
+            var extGender = document.getElementById('adPartnerExtGender').value || null;
+
+            if (!selectedId && !extName) {
+                A.showToast(isEn ? 'Select a partner or enter external name' : 'Выберите партнёра или введите имя', 'error');
+                return;
+            }
+
+            var updateData = {};
+            if (selectedId) {
+                // KSLT player partner
+                updateData.partner_id = selectedId;
+                updateData.partner_external_name = null;
+                updateData.partner_external_ntrp = null;
+                updateData.partner_gender = null;
+
+                // Mixed doubles gender check
+                if (isMixed) {
+                    var reg = registrations.find(function(r) { return r.id === regId; });
+                    if (reg && reg.player_id) {
+                        var captainRes = await A.client.from('players').select('gender').eq('id', reg.player_id).single();
+                        var partnerRes = await A.client.from('players').select('gender').eq('id', selectedId).single();
+                        if (captainRes.data && partnerRes.data) {
+                            if (!validateMixedDoublesGender(captainRes.data.gender, partnerRes.data.gender)) {
+                                A.showToast(L.doublesGenderError, 'error');
+                                return;
+                            }
+                        }
+                    }
+                }
+            } else {
+                // External partner
+                updateData.partner_id = null;
+                updateData.partner_external_name = extName;
+                updateData.partner_external_ntrp = extNtrp;
+                updateData.partner_gender = extGender;
+
+                // Mixed doubles gender check for external
+                if (isMixed && extGender) {
+                    var reg = registrations.find(function(r) { return r.id === regId; });
+                    if (reg && reg.player_id) {
+                        var captainRes2 = await A.client.from('players').select('gender').eq('id', reg.player_id).single();
+                        if (captainRes2.data && !validateMixedDoublesGender(captainRes2.data.gender, extGender)) {
+                            A.showToast(L.doublesGenderError, 'error');
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // NTRP combined check
+            if (tournament.ntrp_combined_max) {
+                var reg = registrations.find(function(r) { return r.id === regId; });
+                var captainNtrp = null;
+                if (reg && reg.player_id) {
+                    var cnRes = await A.client.from('players').select('ntrp_rating').eq('id', reg.player_id).single();
+                    captainNtrp = cnRes.data ? cnRes.data.ntrp_rating : null;
+                } else if (reg) {
+                    captainNtrp = reg.external_ntrp;
+                }
+                var partnerNtrp = selectedId ? null : extNtrp;
+                if (selectedId) {
+                    var pnRes = await A.client.from('players').select('ntrp_rating').eq('id', selectedId).single();
+                    partnerNtrp = pnRes.data ? pnRes.data.ntrp_rating : null;
+                }
+                if (!validateNtrpCombined(captainNtrp, partnerNtrp, tournament.ntrp_combined_max)) {
+                    A.showToast(L.doublesNtrpCombinedError, 'error');
+                    return;
+                }
+            }
+
+            var upRes = await A.client.from('tournament_registrations').update(updateData).eq('id', regId);
+            if (upRes.error) { A.showToast(upRes.error.message, 'error'); return; }
+            A.showToast(isEn ? 'Partner added' : 'Партнёр добавлен', 'success');
+            renderBracketManagement(tournamentId, 'registrations');
+        }, isEn ? 'Save' : 'Сохранить');
+
+        // Wire up player search
+        setTimeout(function() {
+            var searchInput = document.getElementById('adPartnerSearch');
+            var resultsDiv = document.getElementById('adPartnerResults');
+            var hiddenInput = document.getElementById('adPartnerSelectedId');
+            if (!searchInput) return;
+
+            var searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                var q = searchInput.value.trim();
+                if (q.length < 2) { resultsDiv.innerHTML = ''; return; }
+
+                searchTimeout = setTimeout(async function() {
+                    var res = await A.client.from('players')
+                        .select('id, name, name_en, gender, ntrp_rating, category_id')
+                        .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
+                        .limit(10);
+                    var players = (res.data || []).filter(function(p) { return !usedIds[p.id]; });
+
+                    if (players.length === 0) {
+                        resultsDiv.innerHTML = '<div style="padding:8px;color:var(--text-dim);font-size:0.85rem;">' +
+                            (isEn ? 'No players found' : 'Игроков не найдено') + '</div>';
+                        return;
+                    }
+
+                    var html = '';
+                    players.forEach(function(p) {
+                        var pName = isEn ? (p.name_en || p.name) : p.name;
+                        var genderIcon = p.gender === 'men' ? '♂' : (p.gender === 'women' ? '♀' : '');
+                        html += '<div class="ad-partner-search-item" data-player-id="' + p.id + '" ' +
+                            'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.9rem;display:flex;justify-content:space-between;align-items:center;">' +
+                            '<span>' + A.esc(pName) + ' ' + genderIcon + '</span>' +
+                            (p.ntrp_rating ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + p.ntrp_rating + '</span>' : '') +
+                        '</div>';
+                    });
+                    resultsDiv.innerHTML = html;
+
+                    resultsDiv.querySelectorAll('.ad-partner-search-item').forEach(function(item) {
+                        item.addEventListener('click', function() {
+                            hiddenInput.value = item.dataset.playerId;
+                            searchInput.value = item.querySelector('span').textContent.trim();
+                            resultsDiv.innerHTML = '';
+                            // Clear external fields
+                            var extNameEl = document.getElementById('adPartnerExtName');
+                            if (extNameEl) extNameEl.value = '';
+                        });
+                    });
+                }, 300);
+            });
+        }, 100);
+    }
+
+    /**
+     * Expand results for doubles: for each captain result, add partner result row.
+     * Only KSLT partners (partner_id) get results; external partners don't.
+     * @param {Array} results - captain results [{player_id, round_reached, points_earned, ...}]
+     * @param {Array} registrations - tournament registrations
+     * @param {boolean} isDbl - is doubles tournament
+     * @returns {Array} expanded results
+     */
+    function expandDoublesResults(results, registrations, isDbl) {
+        if (!isDbl) return results;
+
+        var regsMap = {};
+        registrations.forEach(function(r) {
+            if (r.player_id) regsMap[r.player_id] = r;
+        });
+
+        var expanded = [];
+        results.forEach(function(res) {
+            // Captain result - mark as doubles
+            var captainRow = {};
+            Object.keys(res).forEach(function(k) { captainRow[k] = res[k]; });
+            captainRow.is_doubles = true;
+            expanded.push(captainRow);
+
+            // Partner result (only KSLT players)
+            var reg = regsMap[res.player_id];
+            if (reg && reg.partner_id) {
+                var partnerRow = {};
+                Object.keys(res).forEach(function(k) { partnerRow[k] = res[k]; });
+                partnerRow.player_id = reg.partner_id;
+                partnerRow.partner_id = res.player_id;
+                partnerRow.is_doubles = true;
+                expanded.push(partnerRow);
+            }
+        });
+
+        return expanded;
+    }
+
+    /**
+     * Recalculate doubles_points for a set of player IDs.
+     */
+    async function recalcDoublesPoints(playerIds) {
+        var unique = playerIds.filter(function(id, i) { return playerIds.indexOf(id) === i; });
+        var currentYear = new Date().getFullYear();
+
+        for (var i = 0; i < unique.length; i++) {
+            var pid = unique[i];
+            var rhRes = await A.client.from('rating_history')
+                .select('points_earned')
+                .eq('player_id', pid)
+                .eq('is_doubles', true)
+                .gte('recorded_at', currentYear + '-01-01')
+                .lte('recorded_at', currentYear + '-12-31');
+            var total = 0;
+            (rhRes.data || []).forEach(function(r) {
+                total += r.points_earned || 0;
+            });
+            await A.client.from('players').update({ doubles_points: total }).eq('id', pid);
+        }
+    }
+
     // ---- Save Rating History on finalization ----
-    async function saveRatingHistory(tournament, results) {
+    async function saveRatingHistory(tournament, results, isDbl) {
         // Delete old entries for this tournament (re-finalization safe)
         await A.client.from('rating_history').delete().eq('tournament_id', tournament.id);
 
@@ -24,7 +339,8 @@
                 tournament_name: tournament.title,
                 tournament_id: tournament.id,
                 points_earned: r.points_earned || 0,
-                recorded_at: tournament.date_start
+                recorded_at: tournament.date_start,
+                is_doubles: isDbl || false
             };
         });
 
@@ -79,12 +395,14 @@
         }
         var tournament = tRes.data;
 
-        // Load registrations
+        // Load registrations (include partner fields)
         var regRes = await A.client.from('tournament_registrations')
             .select('*, players(id, name, name_en, points, category_id)')
             .eq('tournament_id', tournamentId)
             .order('registered_at', { ascending: true });
         var registrations = regRes.data || [];
+        var isDbl = isDoublesTournament(tournament);
+        var regsMap = buildRegsMap(registrations);
 
         // Load matches
         var matchRes = await A.client.from('matches')
@@ -94,9 +412,12 @@
             .order('match_order', { ascending: true });
         var matches = matchRes.data || [];
 
-        // Load players map for display
+        // Load players map for display (include partner_ids)
         var playerIds = [];
-        registrations.forEach(function(r) { if (r.player_id) playerIds.push(r.player_id); });
+        registrations.forEach(function(r) {
+            if (r.player_id) playerIds.push(r.player_id);
+            if (r.partner_id) playerIds.push(r.partner_id);
+        });
         matches.forEach(function(m) {
             if (m.player1_id) playerIds.push(m.player1_id);
             if (m.player2_id) playerIds.push(m.player2_id);
@@ -106,7 +427,7 @@
 
         var playersMap = {};
         if (playerIds.length > 0) {
-            var plRes = await A.client.from('players').select('id, name, name_en, points, category_id').in('id', playerIds);
+            var plRes = await A.client.from('players').select('id, name, name_en, points, doubles_points, category_id, gender, ntrp_rating').in('id', playerIds);
             (plRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
 
             // Compute rank within category: load all players for relevant categories
@@ -205,20 +526,20 @@
 
         // Registrations panel
         html += '<div class="ad-brk-panel" id="adBrkRegPanel" style="' + (activeTab !== 'registrations' ? 'display:none;' : '') + '">';
-        html += renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds);
+        html += renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds, isDbl, regsMap);
         html += '</div>';
 
         // Bracket / Group panel
         html += '<div class="ad-brk-panel" id="adBrkBracketPanel" style="padding-top:8px;' + (activeTab !== 'bracket' ? 'display:none;' : '') + '">';
         if (hasMatches) {
             if (tournament.bracket_type === 'group_league') {
-                html += renderGroupLeaguePanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted);
+                html += renderGroupLeaguePanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap);
             } else if (tournament.bracket_type === 'round_robin') {
-                html += renderGroupPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted);
+                html += renderGroupPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap);
             } else if (tournament.bracket_type === 'fic') {
-                html += renderFicBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted);
+                html += renderFicBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap);
             } else {
-                html += renderBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted);
+                html += renderBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap);
             }
         } else {
             html += '<div class="ad-empty-state" style="margin-top:24px;"><p>' + (isEn ? 'No bracket generated yet. Approve registrations and generate draw.' : 'Сетка ещё не сгенерирована. Одобрите заявки и сгенерируйте жеребьёвку.') + '</p></div>';
@@ -485,13 +806,35 @@
                                 '<input type="number" class="ad-field-input" id="adExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
                             '</div>' +
                         '</div>' +
+                        (isDbl ? (
+                        '<hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:4px 0;">' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.doublesExtPartnerName + '</label>' +
+                            '<input type="text" class="ad-field-input" id="adExtPartnerName" placeholder="' + (isEn ? 'Partner Name' : 'Имя партнёра') + '">' +
+                        '</div>' +
+                        '<div style="display:flex;gap:12px;">' +
+                            '<div class="ad-field" style="flex:1;">' +
+                                '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + '</label>' +
+                                '<input type="number" class="ad-field-input" id="adExtPartnerNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
+                            '</div>' +
+                            '<div class="ad-field" style="flex:1;">' +
+                                '<label class="ad-field-label">' + L.doublesExtPartnerGender + '</label>' +
+                                '<select class="ad-field-input" id="adExtPartnerGender">' +
+                                    '<option value="">—</option>' +
+                                    '<option value="men">' + L.genderMen + '</option>' +
+                                    '<option value="women">' + L.genderWomen + '</option>' +
+                                '</select>' +
+                            '</div>' +
+                        '</div>'
+                        ) : '') +
                     '</div>';
                 A.showConfirm(L.regAddExternal, modalHtml, async function() {
                     var extName = document.getElementById('adExtName').value.trim();
                     if (!extName) { A.showToast(isEn ? 'Name is required' : 'Имя обязательно', 'error'); return; }
                     var extCountry = document.getElementById('adExtCountry').value.trim() || null;
                     var extNtrp = parseFloat(document.getElementById('adExtNtrp').value) || null;
-                    var insRes = await A.client.from('tournament_registrations').insert({
+
+                    var insertData = {
                         tournament_id: tournamentId,
                         player_id: null,
                         is_external: true,
@@ -499,7 +842,29 @@
                         external_country: extCountry,
                         external_ntrp: extNtrp,
                         status: 'approved'
-                    });
+                    };
+
+                    // Doubles: add partner fields
+                    if (isDbl) {
+                        var partnerNameEl = document.getElementById('adExtPartnerName');
+                        var partnerNtrpEl = document.getElementById('adExtPartnerNtrp');
+                        var partnerGenderEl = document.getElementById('adExtPartnerGender');
+                        if (partnerNameEl && partnerNameEl.value.trim()) {
+                            insertData.partner_external_name = partnerNameEl.value.trim();
+                            insertData.partner_external_ntrp = partnerNtrpEl ? (parseFloat(partnerNtrpEl.value) || null) : null;
+                            insertData.partner_gender = partnerGenderEl ? (partnerGenderEl.value || null) : null;
+
+                            // NTRP combined check
+                            if (tournament.ntrp_combined_max && extNtrp && insertData.partner_external_ntrp) {
+                                if (!validateNtrpCombined(extNtrp, insertData.partner_external_ntrp, tournament.ntrp_combined_max)) {
+                                    A.showToast(L.doublesNtrpCombinedError, 'error');
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    var insRes = await A.client.from('tournament_registrations').insert(insertData);
                     if (insRes.error) { A.showToast(insRes.error.message, 'error'); return; }
                     A.showToast(L.regExternalAdded);
                     renderBracketManagement(tournamentId, 'registrations');
@@ -529,6 +894,16 @@
             }, L.regRemoveSelected);
         });
 
+        // Add Partner buttons (doubles only)
+        if (isDbl) {
+            container.querySelectorAll('.ad-btn-add-partner').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var regId = btn.dataset.regId;
+                    openPartnerModal(regId, tournament, tournamentId, registrations);
+                });
+            });
+        }
+
         // Generate draw button
         var genBtn = document.getElementById('adBrkGenerateDraw');
         if (genBtn) {
@@ -547,7 +922,7 @@
                 var match = matches.find(function(m) { return m.id === matchId; });
                 if (match) {
                     var rowPlayer = btn.dataset.rowPlayer || null;
-                    openScoreModal(match, playersMap, tournamentId, rowPlayer);
+                    openScoreModal(match, playersMap, tournamentId, rowPlayer, isDbl, regsMap);
                 }
             });
         });
@@ -673,7 +1048,7 @@
     }
 
     // ---- Registrations Panel HTML ----
-    function renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds) {
+    function renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds, isDbl, regsMap) {
         var html = '';
         var maxPart = tournament.max_participants || 16;
         debtPlayerIds = debtPlayerIds || {};
@@ -687,6 +1062,16 @@
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
         var withdrawn = registrations.filter(function(r) { return r.status === 'withdrawn'; });
 
+        // Doubles: warn about unpaired registrations
+        if (isDbl) {
+            var unpaired = mainDraw.filter(function(r) { return !r.partner_id && !r.partner_external_name; });
+            if (unpaired.length > 0) {
+                html += '<div class="ad-alert ad-alert-warning" style="margin-bottom:12px;">' +
+                    '⚠ ' + L.doublesUnpaired + ' (' + unpaired.length + ')' +
+                '</div>';
+            }
+        }
+
         // Add External Participant button
         html += '<div style="margin-bottom:12px;text-align:right;">' +
             '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adBrkAddExternal">' + L.regAddExternal + '</button>' +
@@ -699,8 +1084,9 @@
             var thRank = isEn ? 'Rank' : 'Ранг';
             var thRegTime = isEn ? 'Registered' : 'Регистрация';
             var thActions = isEn ? 'Actions' : 'Действия';
+            var partnerTh = isDbl ? '<th>' + L.doublesPartner + '</th>' : '';
             var regTableHead = '<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"></th>' +
-                '<th style="width:32px;text-align:center;padding:4px 6px;">#</th><th style="width:32px;text-align:center;padding:4px 6px;">' + thRank + '</th><th>' + L.plrName + '</th><th>' + thCategory + '</th><th>' + thRegTime + '</th><th style="width:100px;text-align:center;">' + thActions + '</th>';
+                '<th style="width:32px;text-align:center;padding:4px 6px;">#</th><th style="width:32px;text-align:center;padding:4px 6px;">' + thRank + '</th><th>' + L.plrName + '</th>' + partnerTh + '<th>' + thCategory + '</th><th>' + thRegTime + '</th><th style="width:100px;text-align:center;">' + thActions + '</th>';
 
             // Overflow warning
             if (mainDraw.length > maxPart) {
@@ -717,7 +1103,7 @@
                     regTableHead.replace('GRP', 'main') +
                 '</tr></thead><tbody>';
                 mainDraw.forEach(function(reg, idx) {
-                    html += renderRegRow(reg, idx + 1, playersMap, 'main', debtPlayerIds);
+                    html += renderRegRow(reg, idx + 1, playersMap, 'main', debtPlayerIds, isDbl);
                 });
                 html += '</tbody></table></div>';
             } else {
@@ -731,7 +1117,7 @@
                     regTableHead.replace('GRP', 'wait') +
                 '</tr></thead><tbody>';
                 waitlistRegs.forEach(function(reg, idx) {
-                    html += renderRegRow(reg, idx + 1, playersMap, 'wait', debtPlayerIds);
+                    html += renderRegRow(reg, idx + 1, playersMap, 'wait', debtPlayerIds, isDbl);
                 });
                 html += '</tbody></table></div>';
             } else {
@@ -786,7 +1172,7 @@
         return html;
     }
 
-    function renderRegRow(reg, num, playersMap, group, debtPlayerIds) {
+    function renderRegRow(reg, num, playersMap, group, debtPlayerIds, isDbl) {
         debtPlayerIds = debtPlayerIds || {};
         var isExternal = reg.is_external;
         var player = isExternal ? null : (reg.players || playersMap[reg.player_id] || {});
@@ -824,12 +1210,30 @@
         }
         actionsTd += '</td>';
 
+        // Partner column for doubles
+        var partnerTd = '';
+        if (isDbl) {
+            var partnerDisplay = '';
+            if (reg.partner_id) {
+                var pp = playersMap[reg.partner_id];
+                partnerDisplay = pp ? A.esc(isEn ? (pp.name_en || pp.name) : pp.name) : '?';
+            } else if (reg.partner_external_name) {
+                partnerDisplay = A.esc(reg.partner_external_name) +
+                    ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(33,150,243,0.15);color:#2196f3;margin-left:4px;">EXT</span>';
+            } else {
+                partnerDisplay = '<span style="color:var(--text-dim);font-style:italic;">' + L.doublesNoPartner + '</span>' +
+                    ' <button class="ad-btn-icon ad-btn-add-partner" data-reg-id="' + reg.id + '" style="color:var(--accent);background:none;border:none;cursor:pointer;font-size:0.75rem;padding:2px 6px;" title="' + L.doublesAddPartner + '">+</button>';
+            }
+            partnerTd = '<td style="font-size:0.85rem;">' + partnerDisplay + '</td>';
+        }
+
         var rowStyle = hasDebt ? ' style="background:rgba(244,67,54,0.04);"' : '';
         return '<tr' + rowStyle + '>' +
             '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"></td>' +
             '<td style="text-align:center;padding:4px 6px;">' + num + '</td>' +
             '<td style="text-align:center;padding:4px 6px;font-size:0.65rem;color:var(--accent);font-weight:600;">' + rankVal + '</td>' +
             '<td>' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</td>' +
+            partnerTd +
             '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
             '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
             actionsTd +
@@ -1117,7 +1521,7 @@
         return null;
     }
 
-    function renderGroupPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted) {
+    function renderGroupPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap) {
         var groupCount = tournament.group_count || 2;
         var qualifiers = tournament.qualifiers_per_group || 2;
         var html = '';
@@ -1237,13 +1641,15 @@
             for (var row = 0; row < standings.length; row++) {
                 var st = standings[row];
                 var p = playersMap[st.playerId] || {};
-                var pName = isEn ? (p.name_en || p.name || '?') : (p.name || '?');
+                var pName = isDbl
+                    ? getTeamDisplayName(st.playerId, regsMap, playersMap, true)
+                    : A.esc(isEn ? (p.name_en || p.name || '?') : (p.name || '?'));
                 var seedHtml = st.seed ? ' <span class="ad-badge" style="font-size:0.65rem;">[' + st.seed + ']</span>' : '';
                 var isQualified = st.place <= qualifiers && allGroupCompleted;
 
                 html += '<tr' + (isQualified && hasPlayoff ? ' style="background:rgba(204,255,0,0.06);"' : '') + '>';
                 html += '<td style="font-weight:600;text-align:center;">' + (row + 1) + '</td>';
-                html += '<td style="white-space:nowrap;">' + A.esc(pName) + seedHtml +
+                html += '<td style="white-space:nowrap;">' + pName + seedHtml +
                     (isQualified && hasPlayoff ? ' <span style="color:var(--accent);font-size:0.65rem;">&#9654;</span>' : '') + '</td>';
 
                 for (var col = 0; col < standings.length; col++) {
@@ -1731,7 +2137,7 @@
     }
 
     // ---- Bracket Panel HTML ----
-    function renderBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted) {
+    function renderBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap) {
         var drawSize = tournament.draw_size || 16;
         var totalRounds = Math.log2(drawSize);
         var html = '';
@@ -1770,8 +2176,12 @@
             roundMatches.forEach(function(match) {
                 var p1 = playersMap[match.player1_id];
                 var p2 = playersMap[match.player2_id];
-                var p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : 'BYE');
-                var p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : 'BYE');
+                var p1Name = isDbl
+                    ? getTeamDisplayName(match.player1_id, regsMap, playersMap, true)
+                    : (p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : 'BYE'));
+                var p2Name = isDbl
+                    ? getTeamDisplayName(match.player2_id, regsMap, playersMap, true)
+                    : (p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : 'BYE'));
 
                 var isCompleted = match.status === 'completed';
                 var isBye = match.score === 'BYE';
@@ -2057,11 +2467,15 @@
     }
 
     // ---- FIC Match Card Renderer ----
-    function renderFicMatchCard(match, playersMap, parseSets) {
+    function renderFicMatchCard(match, playersMap, parseSets, isDbl, regsMap) {
         var p1 = playersMap[match.player1_id];
         var p2 = playersMap[match.player2_id];
-        var p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : 'BYE');
-        var p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : 'BYE');
+        var p1Name = isDbl
+            ? getTeamDisplayName(match.player1_id, regsMap, playersMap, true)
+            : (p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : 'BYE'));
+        var p2Name = isDbl
+            ? getTeamDisplayName(match.player2_id, regsMap, playersMap, true)
+            : (p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : 'BYE'));
 
         var isCompleted = match.status === 'completed';
         var isBye = match.score === 'BYE';
@@ -2109,7 +2523,7 @@
     }
 
     // ---- FIC Bracket Panel ----
-    function renderFicBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted) {
+    function renderFicBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap) {
         var drawSize = tournament.draw_size || 16;
         var sections = getFicSections(drawSize, isEn ? 'en' : 'ru');
         var html = '';
@@ -2148,7 +2562,7 @@
                 html += '<div class="ad-brk-matches">';
 
                 roundMatches.forEach(function(match) {
-                    html += renderFicMatchCard(match, playersMap, parseSets);
+                    html += renderFicMatchCard(match, playersMap, parseSets, isDbl, regsMap);
                 });
 
                 html += '</div></div>';
@@ -2183,7 +2597,7 @@
                 if (pm) {
                     html += '<div style="margin-top:12px;max-width:220px;">';
                     html += '<div class="ad-brk-title" style="font-size:0.8rem;margin-bottom:8px;">' + section.placeMatch.label + '</div>';
-                    html += renderFicMatchCard(pm, playersMap, parseSets);
+                    html += renderFicMatchCard(pm, playersMap, parseSets, isDbl, regsMap);
                     html += '</div>';
                 }
             }
@@ -2386,18 +2800,36 @@
         var matchDuration = tournament.match_duration || 90;
 
         // Get approved registrations
+        var isDbl = isDoublesTournament(tournament);
         var approved = registrations.filter(function(r) { return r.status === 'approved'; });
+
+        // Doubles: filter out unpaired registrations
+        if (isDbl) {
+            var paired = approved.filter(function(r) { return r.partner_id || r.partner_external_name; });
+            var unpairedCount = approved.length - paired.length;
+            if (unpairedCount > 0) {
+                A.showToast((isEn ? 'Excluded ' : 'Исключено ') + unpairedCount + (isEn ? ' unpaired registrations' : ' незапаренных заявок'), 'warning');
+            }
+            approved = paired;
+        }
+
         if (approved.length < 2) {
             A.showToast(isEn ? 'Need at least 2 approved players' : 'Нужно минимум 2 одобренных игрока', 'error');
             return;
         }
 
         // Sort by points DESC (seeded first)
-        approved.sort(function(a, b) {
-            var pA = (a.players ? a.players.points : 0) || 0;
-            var pB = (b.players ? b.players.points : 0) || 0;
-            return pB - pA;
-        });
+        if (isDbl) {
+            approved.sort(function(a, b) {
+                return getTeamPoints(b, playersMap) - getTeamPoints(a, playersMap);
+            });
+        } else {
+            approved.sort(function(a, b) {
+                var pA = (a.players ? a.players.points : 0) || 0;
+                var pB = (b.players ? b.players.points : 0) || 0;
+                return pB - pA;
+            });
+        }
 
         // Dispatch to group draw for round_robin
         if (bracketType === 'round_robin') {
@@ -4033,7 +4465,7 @@
         }).join('  ') + suffix;
     }
 
-    function openScoreModal(match, playersMap, tournamentId, rowPlayerId) {
+    function openScoreModal(match, playersMap, tournamentId, rowPlayerId, isDbl, regsMap) {
         // Swap display order if rowPlayer is player2 (so row player always on top)
         var swapped = rowPlayerId && rowPlayerId === match.player2_id;
         var displayP1Id = swapped ? match.player2_id : match.player1_id;
@@ -4043,8 +4475,14 @@
 
         var p1 = playersMap[displayP1Id] || {};
         var p2 = playersMap[displayP2Id] || {};
-        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+        var p1Name, p2Name;
+        if (isDbl) {
+            p1Name = getTeamDisplayName(displayP1Id, regsMap, playersMap, true).replace(/<[^>]*>/g, '');
+            p2Name = getTeamDisplayName(displayP2Id, regsMap, playersMap, true).replace(/<[^>]*>/g, '');
+        } else {
+            p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
+            p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+        }
 
         // Parse existing score: "6/4 7/6(11-9) 6/3 RET" → sets + tiebreaks + outcome
         var existingOutcome = '';
@@ -4680,6 +5118,7 @@
             });
 
             // Upsert tournament_results
+            var isDbl = isDoublesTournament(tournament);
             var toUpsert = [];
             Object.keys(playerResults).forEach(function(pid) {
                 toUpsert.push({
@@ -4692,6 +5131,14 @@
                 });
             });
 
+            // Doubles: expand results to include partners
+            if (isDbl) {
+                var regRes2 = await A.client.from('tournament_registrations')
+                    .select('player_id, partner_id, partner_external_name')
+                    .eq('tournament_id', tournament.id);
+                toUpsert = expandDoublesResults(toUpsert, regRes2.data || [], true);
+            }
+
             if (toUpsert.length > 0) {
                 // Clean up old results before inserting (prevents duplicates from re-finalization)
                 await A.client.from('tournament_results').delete().eq('tournament_id', tournament.id);
@@ -4703,8 +5150,13 @@
                 }
 
                 // Recalculate player points
-                await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
-                await saveRatingHistory(tournament, toUpsert);
+                var resultPlayerIds = toUpsert.map(function(r) { return r.player_id; });
+                if (isDbl) {
+                    await recalcDoublesPoints(resultPlayerIds);
+                } else {
+                    await A.recalcPlayerPoints(resultPlayerIds);
+                }
+                await saveRatingHistory(tournament, toUpsert, isDbl);
             }
 
             // Update player form arrays (W/L from recent matches)
@@ -4737,7 +5189,7 @@
                 return;
             }
 
-            // Loyalty: earn points for all approved participants
+            // Loyalty: earn points for all approved participants (includes partners)
             await earnTournamentLoyalty(tournament.id);
 
             A.showToast(L.tournamentFinalized, 'success');
@@ -4820,6 +5272,7 @@
             });
 
             // Upsert tournament_results
+            var isDblFic = isDoublesTournament(tournament);
             var toUpsert = [];
             Object.keys(playerResults).forEach(function(pid) {
                 toUpsert.push({
@@ -4832,6 +5285,13 @@
                 });
             });
 
+            if (isDblFic) {
+                var ficRegRes = await A.client.from('tournament_registrations')
+                    .select('player_id, partner_id, partner_external_name')
+                    .eq('tournament_id', tournament.id);
+                toUpsert = expandDoublesResults(toUpsert, ficRegRes.data || [], true);
+            }
+
             if (toUpsert.length > 0) {
                 await A.client.from('tournament_results').delete().eq('tournament_id', tournament.id);
                 var upsRes = await A.client.from('tournament_results').insert(toUpsert);
@@ -4839,8 +5299,13 @@
                     A.showToast(upsRes.error.message, 'error');
                     return;
                 }
-                await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
-                await saveRatingHistory(tournament, toUpsert);
+                var ficResultIds = toUpsert.map(function(r) { return r.player_id; });
+                if (isDblFic) {
+                    await recalcDoublesPoints(ficResultIds);
+                } else {
+                    await A.recalcPlayerPoints(ficResultIds);
+                }
+                await saveRatingHistory(tournament, toUpsert, isDblFic);
             }
 
             // Update player form arrays (W/L from recent matches)
@@ -5017,6 +5482,15 @@
                 }
             }
 
+            // Doubles expansion
+            var isDblGrp = isDoublesTournament(tournament);
+            if (isDblGrp) {
+                var grpRegRes = await A.client.from('tournament_registrations')
+                    .select('player_id, partner_id, partner_external_name')
+                    .eq('tournament_id', tournament.id);
+                toUpsert = expandDoublesResults(toUpsert, grpRegRes.data || [], true);
+            }
+
             if (toUpsert.length > 0) {
                 await A.client.from('tournament_results').delete().eq('tournament_id', tournament.id);
                 var insRes = await A.client.from('tournament_results').insert(toUpsert);
@@ -5024,8 +5498,13 @@
                     A.showToast(insRes.error.message, 'error');
                     return;
                 }
-                await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
-                await saveRatingHistory(tournament, toUpsert);
+                var grpResultIds = toUpsert.map(function(r) { return r.player_id; });
+                if (isDblGrp) {
+                    await recalcDoublesPoints(grpResultIds);
+                } else {
+                    await A.recalcPlayerPoints(grpResultIds);
+                }
+                await saveRatingHistory(tournament, toUpsert, isDblGrp);
             }
 
             // Update player form arrays
@@ -5532,7 +6011,7 @@
     }
 
     // ---- Render Group League Panel (admin) ----
-    function renderGroupLeaguePanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted) {
+    function renderGroupLeaguePanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap) {
         var groupCount = tournament.group_count || 2;
         var html = '';
         var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -5643,7 +6122,9 @@
             for (var row = 0; row < standings.length; row++) {
                 var st = standings[row];
                 var p = playersMap[st.playerId] || {};
-                var pName = isEn ? (p.name_en || p.name || '?') : (p.name || '?');
+                var pName = isDbl
+                    ? getTeamDisplayName(st.playerId, regsMap, playersMap, true)
+                    : A.esc(isEn ? (p.name_en || p.name || '?') : (p.name || '?'));
                 var seedHtml = st.seed ? ' <span class="ad-badge" style="font-size:0.65rem;">[' + st.seed + ']</span>' : '';
                 // Highlight: top half of qualifiers → PL (green), bottom half → CL (dim)
                 var glQualifiers = tournament.qualifiers_per_group || 4;
@@ -5654,7 +6135,7 @@
                 html += '<tr' + (isPLRow && hasLeagues ? ' style="background:rgba(204,255,0,0.06);"' : '') +
                     (isCLRow && hasLeagues ? ' style="background:rgba(255,255,255,0.03);"' : '') + '>';
                 html += '<td style="font-weight:600;text-align:center;">' + (row + 1) + '</td>';
-                html += '<td style="white-space:nowrap;">' + A.esc(pName) + seedHtml +
+                html += '<td style="white-space:nowrap;">' + pName + seedHtml +
                     (isPLRow && hasLeagues ? ' <span style="color:var(--accent);font-size:0.65rem;">&#9654;</span>' : '') +
                     (isCLRow && hasLeagues ? ' <span style="color:var(--text-dim);font-size:0.65rem;">&#9654;</span>' : '') + '</td>';
 
@@ -5959,6 +6440,15 @@
             // Consolation League: half points (multiplier 0.5)
             processLeague(matches.filter(isCLMatch), 0.5, 'CL');
 
+            // Doubles expansion
+            var isDblGL = isDoublesTournament(tournament);
+            if (isDblGL) {
+                var glRegRes = await A.client.from('tournament_registrations')
+                    .select('player_id, partner_id, partner_external_name')
+                    .eq('tournament_id', tournament.id);
+                toUpsert = expandDoublesResults(toUpsert, glRegRes.data || [], true);
+            }
+
             if (toUpsert.length > 0) {
                 await A.client.from('tournament_results').delete().eq('tournament_id', tournament.id);
                 var insRes = await A.client.from('tournament_results').insert(toUpsert);
@@ -5966,8 +6456,13 @@
                     A.showToast(insRes.error.message, 'error');
                     return;
                 }
-                await A.recalcPlayerPoints(toUpsert.map(function(r) { return r.player_id; }));
-                await saveRatingHistory(tournament, toUpsert);
+                var glResultIds = toUpsert.map(function(r) { return r.player_id; });
+                if (isDblGL) {
+                    await recalcDoublesPoints(glResultIds);
+                } else {
+                    await A.recalcPlayerPoints(glResultIds);
+                }
+                await saveRatingHistory(tournament, toUpsert, isDblGL);
             }
 
             // Update player form arrays
@@ -6004,17 +6499,23 @@
     async function earnTournamentLoyalty(tournamentId) {
         if (!A.earnLoyaltyPoints) return;
         try {
-            // Get all approved participants
+            // Get all approved participants (include partner_id for doubles)
             var regRes = await A.client.from('tournament_registrations')
-                .select('player_id')
+                .select('player_id, partner_id')
                 .eq('tournament_id', tournamentId)
                 .in('status', ['approved', 'draw']);
 
             var regs = regRes.data || [];
             if (regs.length === 0) return;
 
-            // Get profile_ids for each player
-            var playerIds = regs.map(function(r) { return r.player_id; });
+            // Collect all player IDs (captains + KSLT partners)
+            var playerIds = [];
+            regs.forEach(function(r) {
+                if (r.player_id) playerIds.push(r.player_id);
+                if (r.partner_id) playerIds.push(r.partner_id);
+            });
+            playerIds = playerIds.filter(function(id, i) { return playerIds.indexOf(id) === i; });
+
             var profRes = await A.client.from('profiles')
                 .select('id, player_id')
                 .in('player_id', playerIds);

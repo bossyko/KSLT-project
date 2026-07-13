@@ -35,6 +35,45 @@ function getMapEmbed(url, fallbackAddress) {
     return null;
 }
 
+// ---- Doubles helpers ----
+function isDoublesTournamentPublic(t) {
+    return t && (t.format === 'doubles' || t.format === 'mixed_doubles');
+}
+
+function buildPublicRegsMap(registrations) {
+    var map = {};
+    registrations.forEach(function(r) {
+        var key = r.player_id || ('ext_' + r.id);
+        map[key] = r;
+    });
+    return map;
+}
+
+function getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg) {
+    var p = playersMap[playerId];
+    var captainName = p
+        ? esc(isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name))
+        : (playerId ? 'TBD' : 'BYE');
+
+    var reg = regsMap ? regsMap[playerId] : null;
+    if (!reg) return captainName;
+
+    var partnerName = '';
+    if (reg.partner_id) {
+        var pp = playersMap[reg.partner_id];
+        partnerName = pp
+            ? esc(isEn ? (pp.name_en || pp.name) : (isKg ? (pp.name_kg || pp.name) : pp.name))
+            : '?';
+    } else if (reg.partner_external_name) {
+        partnerName = esc(reg.partner_external_name);
+    }
+
+    if (partnerName) {
+        return '<span class="td-team-name">' + captainName + ' / ' + partnerName + '</span>';
+    }
+    return captainName;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const tournamentId = urlParams.get('id');
@@ -1030,6 +1069,8 @@ function loadFromSupabase(client, id) {
                 .eq('tournament_id', id)
                 .order('registered_at', { ascending: true });
 
+            // Doubles: will also need partner player data
+
             var courtPromise = tournament.court_id
                 ? client.from('courts').select('id, name, name_en, street, street_en, building, city, city_en, google_maps_url, twogis_url, photo').eq('id', tournament.court_id).single()
                 : Promise.resolve({ data: null });
@@ -1039,9 +1080,12 @@ function loadFromSupabase(client, id) {
                 var registrations = results[1].data || [];
                 var courtData = results[2].data || null;
 
-                // Build players map
+                // Build players map (include partner_ids for doubles)
                 var playerIds = [];
-                registrations.forEach(function(r) { if (r.player_id) playerIds.push(r.player_id); });
+                registrations.forEach(function(r) {
+                    if (r.player_id) playerIds.push(r.player_id);
+                    if (r.partner_id) playerIds.push(r.partner_id);
+                });
                 matches.forEach(function(m) {
                     if (m.player1_id) playerIds.push(m.player1_id);
                     if (m.player2_id) playerIds.push(m.player2_id);
@@ -1091,6 +1135,15 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     playersMap = playersMap || {};
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isDbl = isDoublesTournamentPublic(t);
+    var regsMap = isDbl ? buildPublicRegsMap(registrations) : null;
+
+    // Helper: get player/team display name (respects doubles)
+    function pName(playerId) {
+        if (isDbl) return getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg);
+        var p = playersMap[playerId];
+        return p ? esc(isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name)) : (playerId ? 'TBD' : 'BYE');
+    }
 
     var months = isEn
         ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -1352,8 +1405,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     for (var grow = 0; grow < ggStandings.length; grow++) {
                         var gst = ggStandings[grow];
-                        var gp = playersMap[gst.playerId] || {};
-                        var gpName = isEn ? (gp.name_en || gp.name || '?') : (isKg ? (gp.name_kg || gp.name || '?') : (gp.name || '?'));
+                        var gpName = pName(gst.playerId);
                         var gSeedHtml = gst.seed ? ' <span style="color:var(--accent);font-size:0.7rem;">[' + gst.seed + ']</span>' : '';
                         var glQPG = t.qualifiers_per_group || 4;
                         var glPLCut = Math.floor(Math.min(glQPG, ggStandings.length) / 2);
@@ -1362,7 +1414,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                         glHtml += '<tr' + (gIsPL && glAllGroupDone ? ' style="background:rgba(204,255,0,0.06);"' : (gIsCL && glAllGroupDone ? ' style="background:rgba(204,255,0,0.03);"' : '')) + '>';
                         glHtml += '<td style="text-align:center;font-weight:600;">' + (grow + 1) + '</td>';
-                        glHtml += '<td style="white-space:nowrap;">' + esc(gpName) + gSeedHtml + '</td>';
+                        glHtml += '<td style="white-space:nowrap;">' + gpName + gSeedHtml + '</td>';
 
                         for (var gcol = 0; gcol < ggStandings.length; gcol++) {
                             if (grow === gcol) {
@@ -1524,10 +1576,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     bHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:32px;">';
                     igMatches.sort(function(a, b) { return a.match_order - b.match_order; });
                     igMatches.forEach(function(m, idx) {
-                        var p1 = playersMap[m.player1_id] || {};
-                        var p2 = playersMap[m.player2_id] || {};
-                        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (isKg ? (p1.name_kg || p1.name || '?') : (p1.name || '?'));
-                        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (isKg ? (p2.name_kg || p2.name || '?') : (p2.name || '?'));
+                        var p1Name = pName(m.player1_id);
+                        var p2Name = pName(m.player2_id);
                         var isCompleted = m.status === 'completed';
                         var isP1Winner = isCompleted && m.winner_id === m.player1_id;
                         var isP2Winner = isCompleted && m.winner_id === m.player2_id;
@@ -1549,12 +1599,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         bHtml += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);">' + matchLabel + (idx + 1) + '</div>';
                         // P1
                         bHtml += '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);' + (isP1Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
-                        bHtml += '<span style="font-size:0.85rem;' + (isP1Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + esc(p1Name) + '</span>';
+                        bHtml += '<span style="font-size:0.85rem;' + (isP1Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p1Name + '</span>';
                         bHtml += '<span style="font-size:0.8rem;font-weight:600;' + (isP1Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p1Score || '—') + '</span>';
                         bHtml += '</div>';
                         // P2
                         bHtml += '<div style="display:flex;justify-content:space-between;padding:8px 12px;' + (isP2Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
-                        bHtml += '<span style="font-size:0.85rem;' + (isP2Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + esc(p2Name) + '</span>';
+                        bHtml += '<span style="font-size:0.85rem;' + (isP2Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p2Name + '</span>';
                         bHtml += '<span style="font-size:0.8rem;font-weight:600;' + (isP2Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p2Score || '—') + '</span>';
                         bHtml += '</div></div>';
                     });
@@ -1621,14 +1671,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     for (var row = 0; row < standings.length; row++) {
                         var st = standings[row];
-                        var p = playersMap[st.playerId] || {};
-                        var pName = isEn ? (p.name_en || p.name || '?') : (isKg ? (p.name_kg || p.name || '?') : (p.name || '?'));
+                        var stName = pName(st.playerId);
                         var seedHtml = st.seed ? ' <span style="color:var(--accent);font-size:0.7rem;">[' + st.seed + ']</span>' : '';
                         var isQualified = st.place <= qualifiers && allGroupDone;
 
                         bHtml += '<tr' + (isQualified && allGroupDone ? ' style="background:rgba(204,255,0,0.06);"' : '') + '>';
                         bHtml += '<td style="text-align:center;font-weight:600;">' + (row + 1) + '</td>';
-                        bHtml += '<td style="white-space:nowrap;">' + esc(pName) + seedHtml + '</td>';
+                        bHtml += '<td style="white-space:nowrap;">' + stName + seedHtml + '</td>';
 
                         for (var col = 0; col < standings.length; col++) {
                             if (row === col) {
@@ -1782,9 +1831,16 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var addedIds = {};
             Object.keys(playersMap).forEach(function(pid) {
                 var p = playersMap[pid];
+                var displayName;
+                if (isDbl && regsMap && regsMap[pid]) {
+                    // Strip HTML tags for SE bracket (uses text rendering)
+                    displayName = getPublicTeamName(pid, regsMap, playersMap, isEn, isKg).replace(/<[^>]*>/g, '');
+                } else {
+                    displayName = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
+                }
                 playersArr.push({
                     id: pid,
-                    name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
+                    name: displayName,
                     seed: null,
                     country: p.country || ''
                 });
@@ -1897,7 +1953,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
             function pubRegRow(reg, idx) {
                 var p = reg.players || playersMap[reg.player_id] || {};
-                var pName = isEn ? (p.name_en || p.name || '—') : (isKg ? (p.name_kg || p.name || '—') : (p.name || '—'));
+                var regDisplayName = isDbl
+                    ? getPublicTeamName(reg.player_id, regsMap, playersMap, isEn, isKg).replace(/<[^>]*>/g, '')
+                    : (isEn ? (p.name_en || p.name || '—') : (isKg ? (p.name_kg || p.name || '—') : (p.name || '—')));
+                var pName = regDisplayName;
                 var photo = p.photo || '';
                 var photoHtml = photo
                     ? '<img class="td-reg-photo" src="' + esc(photo) + '" alt="">'
@@ -1971,15 +2030,17 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var defaultPhoto = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect fill="%231a1f2e" width="80" height="80" rx="40"/><text x="40" y="48" text-anchor="middle" fill="%23666" font-size="28">?</text></svg>');
 
             function podiumCard(player, place, medal) {
-                var pName = isEn ? (player.name_en || player.name || '?') : (isKg ? (player.name_kg || player.name || '?') : (player.name || '?'));
+                var podName = isDbl
+                    ? getPublicTeamName(player.id, regsMap, playersMap, isEn, isKg).replace(/<[^>]*>/g, '')
+                    : (isEn ? (player.name_en || player.name || '?') : (isKg ? (player.name_kg || player.name || '?') : (player.name || '?')));
                 var photo = player.photo || defaultPhoto;
                 return '<div class="td-podium-card td-podium-' + place + '">' +
                     '<div class="td-podium-medal">' + medal + '</div>' +
                     '<div class="td-podium-photo-wrap">' +
-                        '<img class="td-podium-photo" src="' + esc(photo) + '" alt="' + esc(pName) + '">' +
+                        '<img class="td-podium-photo" src="' + esc(photo) + '" alt="' + esc(podName) + '">' +
                     '</div>' +
                     '<div class="td-podium-place">' + place + '-e ' + placeLabel + '</div>' +
-                    '<div class="td-podium-name">' + esc(pName) + '</div>' +
+                    '<div class="td-podium-name">' + esc(podName) + '</div>' +
                 '</div>';
             }
 
@@ -2029,11 +2090,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         resHtml += '<thead><tr><th style="text-align:center;padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">#</th>' +
                             '<th style="padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th></tr></thead><tbody>';
                         for (var i = 3; i < ficPlaces.length; i++) {
-                            var fp = playersMap[ficPlaces[i].playerId] || {};
-                            var fpName = isEn ? (fp.name_en || fp.name || '?') : (isKg ? (fp.name_kg || fp.name || '?') : (fp.name || '?'));
+                            var fpName = pName(ficPlaces[i].playerId);
                             resHtml += '<tr style="border-bottom:1px solid var(--border, rgba(255,255,255,0.06));">' +
                                 '<td style="text-align:center;padding:8px;font-weight:600;color:var(--text-secondary);">' + ficPlaces[i].place + '</td>' +
-                                '<td style="padding:8px;">' + esc(fpName) + '</td></tr>';
+                                '<td style="padding:8px;">' + fpName + '</td></tr>';
                         }
                         resHtml += '</tbody></table></div>';
                     }
@@ -2310,10 +2370,30 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 btnHtml += '</div>';
                 heroContent.insertAdjacentHTML('beforeend', btnHtml);
 
+                // Check if doubles tournament
+                var isTournamentDoubles = tournament.format === 'doubles' || tournament.format === 'mixed_doubles';
+
+                // Also check if player is already registered as partner
+                var alreadyAsPartner = registrations.find(function(r) { return r.partner_id === playerId; });
+                if (alreadyAsPartner && !alreadyRegistered) {
+                    // Player is already in a team as partner — show status
+                    var partnerBtn = document.getElementById('tdRegisterBtn');
+                    if (partnerBtn) {
+                        partnerBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
+                            (isEn ? 'Registered as partner' : (isKg ? 'Өнөктөш катары катталган' : 'Зарегистрирован как партнёр')) + '</span>';
+                    }
+                }
+
                 // Register button click handler
                 var regBtn = document.getElementById('tdRegisterBtn');
                 if (regBtn) {
                     regBtn.addEventListener('click', async function() {
+                        if (isTournamentDoubles) {
+                            // Show doubles registration modal
+                            showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, regBtn);
+                            return;
+                        }
+
                         regBtn.disabled = true;
                         regBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
 
@@ -2341,6 +2421,187 @@ function renderRegistrationButton(tournament, registrations, isEn) {
             });
         });
     });
+}
+
+// ========================================
+// DOUBLES REGISTRATION MODAL
+// ========================================
+
+function showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, regBtn) {
+    // Create modal overlay
+    var overlay = document.createElement('div');
+    overlay.className = 'td-doubles-modal-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;';
+
+    var isMixed = tournament.format === 'mixed_doubles';
+    var soloLabel = isEn ? 'Register without partner (add later)' : (isKg ? 'Өнөктөшсүз каттоо (кийин кошуу)' : 'Записаться без партнёра (добавить позже)');
+    var searchLabel = isEn ? 'Search partner by name...' : (isKg ? 'Өнөктөштү аты боюнча издөө...' : 'Поиск партнёра по имени...');
+    var registerLabel = isEn ? 'Register' : (isKg ? 'Каттоо' : 'Записаться');
+    var cancelLabel = isEn ? 'Cancel' : (isKg ? 'Жокко чыгаруу' : 'Отмена');
+
+    var modalHtml = '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto;">' +
+        '<h3 style="color:var(--text-primary);margin:0 0 16px;font-size:1.1rem;">' +
+            (isEn ? 'Partner Selection' : (isKg ? 'Өнөктөштү тандоо' : 'Выбор партнёра')) +
+        '</h3>' +
+        '<div style="margin-bottom:12px;">' +
+            '<input type="text" id="tdPartnerSearch" placeholder="' + searchLabel + '" ' +
+                'style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;box-sizing:border-box;" autocomplete="off">' +
+            '<div id="tdPartnerResults" style="max-height:200px;overflow-y:auto;margin-top:4px;"></div>' +
+            '<input type="hidden" id="tdPartnerSelectedId" value="">' +
+            '<div id="tdPartnerSelectedName" style="display:none;padding:8px 12px;margin-top:4px;border-radius:8px;background:rgba(204,255,0,0.1);color:var(--accent);font-size:0.9rem;"></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:12px;margin-top:16px;">' +
+            '<button id="tdDoublesCancel" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text-secondary);cursor:pointer;">' + cancelLabel + '</button>' +
+            '<button id="tdDoublesRegSolo" style="flex:1;padding:10px;border:none;border-radius:8px;background:rgba(204,255,0,0.2);color:var(--accent);cursor:pointer;font-size:0.85rem;">' +
+                (isEn ? 'Solo' : (isKg ? 'Жалгыз' : 'Без партнёра')) +
+            '</button>' +
+            '<button id="tdDoublesRegWithPartner" style="flex:1;padding:10px;border:none;border-radius:8px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;" disabled>' + registerLabel + '</button>' +
+        '</div>' +
+    '</div>';
+
+    overlay.innerHTML = modalHtml;
+    document.body.appendChild(overlay);
+
+    // Close on overlay click
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) overlay.remove();
+    });
+
+    // Cancel button
+    document.getElementById('tdDoublesCancel').addEventListener('click', function() {
+        overlay.remove();
+    });
+
+    // Solo registration
+    document.getElementById('tdDoublesRegSolo').addEventListener('click', async function() {
+        var soloBtn = document.getElementById('tdDoublesRegSolo');
+        soloBtn.disabled = true;
+        soloBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
+
+        var regStatus = isExactCategory ? 'pending' : 'waitlist';
+        var res = await client.from('tournament_registrations').insert({
+            tournament_id: tournament.id,
+            player_id: playerId,
+            status: regStatus
+        });
+
+        overlay.remove();
+
+        if (res.error) {
+            alert(res.error.message);
+            return;
+        }
+
+        var regMsg = isEn ? 'Registered (no partner yet)' : (isKg ? 'Катталды (өнөктөш жок)' : 'Зарегистрирован (без партнёра)');
+        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' + regMsg + '</span>';
+    });
+
+    // Register with partner
+    document.getElementById('tdDoublesRegWithPartner').addEventListener('click', async function() {
+        var partnerId = document.getElementById('tdPartnerSelectedId').value;
+        if (!partnerId) return;
+
+        var regWithBtn = document.getElementById('tdDoublesRegWithPartner');
+        regWithBtn.disabled = true;
+        regWithBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
+
+        var regStatus = isExactCategory ? 'pending' : 'waitlist';
+        var res = await client.from('tournament_registrations').insert({
+            tournament_id: tournament.id,
+            player_id: playerId,
+            partner_id: partnerId,
+            status: regStatus
+        });
+
+        overlay.remove();
+
+        if (res.error) {
+            alert(res.error.message);
+            return;
+        }
+
+        var regMsg = isEn ? 'Registration Submitted!' : (isKg ? 'Арыз жөнөтүлдү!' : 'Заявка отправлена!');
+        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' + regMsg + '</span>';
+    });
+
+    // Partner search
+    var searchInput = document.getElementById('tdPartnerSearch');
+    var resultsDiv = document.getElementById('tdPartnerResults');
+    var hiddenInput = document.getElementById('tdPartnerSelectedId');
+    var selectedNameDiv = document.getElementById('tdPartnerSelectedName');
+    var regWithBtn = document.getElementById('tdDoublesRegWithPartner');
+    var searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        var q = searchInput.value.trim();
+        if (q.length < 2) { resultsDiv.innerHTML = ''; return; }
+
+        searchTimeout = setTimeout(async function() {
+            var res = await client.from('players')
+                .select('id, name, name_en, name_kg, gender, ntrp_rating')
+                .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
+                .neq('id', playerId)
+                .limit(8);
+
+            var players = res.data || [];
+            if (players.length === 0) {
+                resultsDiv.innerHTML = '<div style="padding:8px;color:var(--text-dim);font-size:0.85rem;">' +
+                    (isEn ? 'No players found' : (isKg ? 'Оюнчулар табылган жок' : 'Игроков не найдено')) + '</div>';
+                return;
+            }
+
+            var html = '';
+            players.forEach(function(p) {
+                var displayName = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
+                var genderIcon = p.gender === 'men' ? ' ♂' : (p.gender === 'women' ? ' ♀' : '');
+                html += '<div class="td-partner-item" data-id="' + p.id + '" data-name="' + esc(displayName) + '" data-gender="' + (p.gender || '') + '" data-ntrp="' + (p.ntrp_rating || '') + '" ' +
+                    'style="padding:8px 12px;cursor:pointer;border-radius:6px;font-size:0.9rem;color:var(--text-primary);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+                    '<span>' + esc(displayName) + genderIcon + '</span>' +
+                    (p.ntrp_rating ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + p.ntrp_rating + '</span>' : '') +
+                '</div>';
+            });
+            resultsDiv.innerHTML = html;
+
+            resultsDiv.querySelectorAll('.td-partner-item').forEach(function(item) {
+                item.addEventListener('click', function() {
+                    // Gender validation for mixed doubles
+                    if (isMixed) {
+                        // We need to check captain's gender
+                        client.from('players').select('gender').eq('id', playerId).single().then(function(captRes) {
+                            var captGender = captRes.data ? captRes.data.gender : '';
+                            var partGender = item.dataset.gender;
+                            if (captGender && partGender && captGender === partGender) {
+                                alert(isEn ? 'Mixed doubles requires one man and one woman' : (isKg ? 'Микст бир эркек жана бир аял талап кылат' : 'Микст требует одного мужчину и одну женщину'));
+                                return;
+                            }
+                            selectPartner(item);
+                        });
+                    } else {
+                        selectPartner(item);
+                    }
+                });
+            });
+        }, 300);
+    });
+
+    function selectPartner(item) {
+        hiddenInput.value = item.dataset.id;
+        searchInput.style.display = 'none';
+        resultsDiv.innerHTML = '';
+        selectedNameDiv.style.display = 'block';
+        selectedNameDiv.textContent = item.dataset.name;
+        selectedNameDiv.innerHTML += ' <span style="cursor:pointer;margin-left:8px;color:var(--text-dim);" id="tdPartnerClear">✕</span>';
+        regWithBtn.disabled = false;
+
+        document.getElementById('tdPartnerClear').addEventListener('click', function() {
+            hiddenInput.value = '';
+            searchInput.style.display = '';
+            searchInput.value = '';
+            selectedNameDiv.style.display = 'none';
+            regWithBtn.disabled = true;
+        });
+    }
 }
 
 // ========================================
