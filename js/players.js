@@ -235,19 +235,24 @@
     // SUPABASE DATA LOADER
     // ========================================
 
-    async function loadFromSupabase() {
+    // Track rating mode: 'singles' or 'doubles'
+    var ratingMode = 'singles';
+
+    async function loadFromSupabase(mode) {
         if (!window.supabaseClient) return null;
         var client = window.supabaseClient;
         var isEn = isEnPage();
         var isKg = isKgPage();
+        var isDoubles = mode === 'doubles';
 
         try {
             // Load categories
             var catResult = await client.from('categories').select('*').order('sort_order', { ascending: true });
             if (catResult.error || !catResult.data || catResult.data.length === 0) return null;
 
-            // Load all players
-            var plrResult = await client.from('players').select('*').order('points', { ascending: false });
+            // Load all players, sorted by appropriate points
+            var sortField = isDoubles ? 'doubles_points' : 'points';
+            var plrResult = await client.from('players').select('*').order(sortField, { ascending: false });
             if (plrResult.error) return null;
 
             var players = plrResult.data || [];
@@ -262,7 +267,12 @@
                 if (cat.name && cat.name.toLowerCase().indexOf('friendly') !== -1) return;
                 var catName = isEn ? (cat.name_en || cat.name) : (isKg ? (cat.name_kg || cat.name) : cat.name);
                 genders.forEach(function(g) {
-                    var catPlayers = players.filter(function(p) { return p.category_id === cat.id && p.gender === g; });
+                    var catPlayers = players.filter(function(p) {
+                        if (p.category_id !== cat.id || p.gender !== g) return false;
+                        // In doubles mode, only show players with doubles_points > 0
+                        if (isDoubles && !(p.doubles_points > 0)) return false;
+                        return true;
+                    });
                     if (catPlayers.length === 0) return;
                     var key = g + '-' + cat.id;
                     result[key] = {
@@ -275,7 +285,7 @@
                                 name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
                                 photo: p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?',
                                 country: p.country || '🇰🇬',
-                                points: p.points || 0,
+                                points: isDoubles ? (p.doubles_points || 0) : (p.points || 0),
                                 wins: p.wins || 0,
                                 losses: p.losses || 0,
                                 change: p.rank_change || 0,
@@ -435,7 +445,15 @@
             }
         }
 
-        var html = '<div class="pl-gender-tabs">' +
+        // Rating mode toggle (Singles / Doubles)
+        var singlesLabel = isEnPage() ? 'Singles' : (isKgPage() ? 'Жалгыздар' : 'Одиночный');
+        var doublesLabel = isEnPage() ? 'Doubles' : (isKgPage() ? 'Жуптар' : 'Парный');
+        var html = '<div class="pl-rating-mode-toggle" style="display:flex;gap:4px;margin-bottom:12px;justify-content:center;">' +
+            '<button class="pl-mode-btn' + (ratingMode === 'singles' ? ' active' : '') + '" data-mode="singles" style="padding:6px 16px;border:1px solid var(--border);border-radius:6px;background:' + (ratingMode === 'singles' ? 'var(--accent)' : 'transparent') + ';color:' + (ratingMode === 'singles' ? '#000' : 'var(--text-secondary)') + ';cursor:pointer;font-size:0.85rem;font-weight:600;">' + singlesLabel + '</button>' +
+            '<button class="pl-mode-btn' + (ratingMode === 'doubles' ? ' active' : '') + '" data-mode="doubles" style="padding:6px 16px;border:1px solid var(--border);border-radius:6px;background:' + (ratingMode === 'doubles' ? 'var(--accent)' : 'transparent') + ';color:' + (ratingMode === 'doubles' ? '#000' : 'var(--text-secondary)') + ';cursor:pointer;font-size:0.85rem;font-weight:600;">' + doublesLabel + '</button>' +
+        '</div>';
+
+        html += '<div class="pl-gender-tabs">' +
             '<button class="pl-gender-tab' + (currentGender === 'men' ? ' active' : '') + '" data-gender="men">' + labels.men + '</button>' +
             '<button class="pl-gender-tab' + (currentGender === 'women' ? ' active' : '') + '" data-gender="women">' + labels.women + '</button>' +
         '</div>';
@@ -999,6 +1017,30 @@
 
     function initTabs() {
         document.addEventListener('click', function(e) {
+            // Rating mode toggle (Singles / Doubles)
+            var modeBtn = e.target.closest('.pl-mode-btn');
+            if (modeBtn) {
+                var newMode = modeBtn.dataset.mode;
+                if (newMode !== ratingMode) {
+                    ratingMode = newMode;
+                    // Reload data with new mode
+                    loadFromSupabase(ratingMode).then(function(dbData) {
+                        if (dbData && Object.keys(dbData).length > 0) {
+                            categoriesData = dbData;
+                        } else {
+                            categoriesData = {};
+                        }
+                        var firstKey = Object.keys(categoriesData)[0];
+                        if (firstKey) currentTab = firstKey;
+                        currentPage = 1;
+                        renderFilters();
+                        renderPodium(currentTab);
+                        renderTable(currentTab, 1);
+                    });
+                }
+                return;
+            }
+
             var genderBtn = e.target.closest('.pl-gender-tab');
             if (genderBtn) {
                 var gender = genderBtn.dataset.gender;

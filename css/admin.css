@@ -3873,3 +3873,21 @@ select.ad-field-input {
 .ad-brk-grp-label:empty {
     background: none;
 }
+
+/* ---- Doubles: team name in brackets ---- */
+.ad-team-name {
+    font-size: 0.82em;
+    line-height: 1.3;
+    display: inline;
+}
+.ad-partner-search-item:hover {
+    background: rgba(204, 255, 0, 0.08);
+}
+.ad-alert-warning {
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+    font-size: 0.85rem;
+}
