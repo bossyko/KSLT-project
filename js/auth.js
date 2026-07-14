@@ -845,16 +845,12 @@
     window.onTelegramAuth = async function(tgUser) {
         if (!client) return;
 
-        // Build tg_data object
-        var tgData = {
-            id: String(tgUser.id),
-            first_name: tgUser.first_name || '',
-            last_name: tgUser.last_name || '',
-            username: tgUser.username || '',
-            photo_url: tgUser.photo_url || '',
-            auth_date: String(tgUser.auth_date),
-            hash: tgUser.hash
-        };
+        // Build tg_data object — only include non-empty fields (Telegram excludes empty from HMAC)
+        var tgData = { id: String(tgUser.id), auth_date: String(tgUser.auth_date), hash: tgUser.hash };
+        if (tgUser.first_name) tgData.first_name = tgUser.first_name;
+        if (tgUser.last_name) tgData.last_name = tgUser.last_name;
+        if (tgUser.username) tgData.username = tgUser.username;
+        if (tgUser.photo_url) tgData.photo_url = tgUser.photo_url;
 
         // Show loading on signin form
         var btn = signinForm.querySelector('.auth-btn');

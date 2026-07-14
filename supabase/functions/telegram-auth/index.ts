@@ -29,10 +29,11 @@ async function verifyTelegramData(
   tgData: Record<string, string>,
   botToken: string
 ): Promise<boolean> {
-  // 1. Create data-check-string (sorted key=value pairs, excluding hash)
+  // 1. Create data-check-string (sorted key=value pairs, excluding hash and empty values)
   const checkArr: string[] = []
   for (const key of Object.keys(tgData).sort()) {
     if (key === 'hash') continue
+    if (tgData[key] === '' || tgData[key] === undefined || tgData[key] === null) continue
     checkArr.push(`${key}=${tgData[key]}`)
   }
   const dataCheckString = checkArr.join('\n')
