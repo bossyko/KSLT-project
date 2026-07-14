@@ -842,8 +842,10 @@
     }
 
     // Telegram Login Widget callback (global)
+    var _tgAuthInProgress = false;
     window.onTelegramAuth = async function(tgUser) {
-        if (!client) return;
+        if (!client || _tgAuthInProgress) return;
+        _tgAuthInProgress = true;
 
         // Pass all tgUser fields as-is (Telegram widget provides exact data for HMAC)
         var tgData = {};
@@ -871,12 +873,14 @@
 
             if (data.status === 'new_user') {
                 // Show mini registration form
+                _tgAuthInProgress = false;
                 if (btn) setLoading(btn, false, L.tgLoggingIn, L.signIn);
                 _pendingTgData = tgData;
                 var tgRegTitle = document.getElementById('tgRegTitle');
                 var tgRegSubtitle = document.getElementById('tgRegSubtitle');
                 if (tgRegTitle) tgRegTitle.textContent = L.tgNewUserTitle;
-                if (tgRegSubtitle) tgRegSubtitle.textContent = L.tgNewUserSubtitle + (tgData.first_name + ' ' + tgData.last_name).trim();
+                var tgName = (tgData.first_name || '') + ' ' + (tgData.last_name || '');
+                if (tgRegSubtitle) tgRegSubtitle.textContent = L.tgNewUserSubtitle + tgName.trim();
                 showScreen('tgRegisterForm');
                 return;
             }
@@ -915,9 +919,11 @@
             }
 
             // Error
+            _tgAuthInProgress = false;
             if (btn) setLoading(btn, false, L.tgLoggingIn, L.signIn);
             showMessage(signinForm, data.error || L.errGeneric, true);
         } catch (err) {
+            _tgAuthInProgress = false;
             if (btn) setLoading(btn, false, L.tgLoggingIn, L.signIn);
             showMessage(signinForm, L.errGeneric, true);
         }
