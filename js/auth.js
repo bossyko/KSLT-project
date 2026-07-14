@@ -29,7 +29,12 @@
         errGeneric: 'Ката кетти. Кайра аракет кылыңыз.',
         errInvalidLogin: 'Туура эмес email же сыр сөз',
         errEmailTaken: 'Бул email менен аккаунт бар',
-        errPhoneTaken: 'Бул телефон номери катталган',
+        tgLoggingIn: 'Telegram менен кирүү...',
+        tgRegistering: 'Аккаунт түзүлүүдө...',
+        tgNewUserTitle: 'Каттоону аяктаңыз',
+        tgNewUserSubtitle: 'Telegram: ',
+        tgEmailRequired: 'Email киргизиңиз',
+        tgEmailTaken: 'Бул email катталган. Кириңиз жана Telegram\'ды профилде байлаңыз.',
         resetTitle: 'Жаңы сыр сөз',
         resetSaving: 'Сакталууда...',
         resetSave: 'Сыр сөздү сактоо',
@@ -58,7 +63,12 @@
         errGeneric: 'An error occurred. Please try again.',
         errInvalidLogin: 'Invalid email or password',
         errEmailTaken: 'An account with this email already exists',
-        errPhoneTaken: 'This phone number is already registered',
+        tgLoggingIn: 'Signing in via Telegram...',
+        tgRegistering: 'Creating account...',
+        tgNewUserTitle: 'Complete Registration',
+        tgNewUserSubtitle: 'Telegram: ',
+        tgEmailRequired: 'Please enter your email',
+        tgEmailTaken: 'This email is already registered. Sign in and link Telegram in your profile.',
         resetTitle: 'New Password',
         resetSaving: 'Saving...',
         resetSave: 'Save Password',
@@ -87,7 +97,12 @@
         errGeneric: 'Произошла ошибка. Попробуйте снова.',
         errInvalidLogin: 'Неверный email или пароль',
         errEmailTaken: 'Аккаунт с этим email уже существует',
-        errPhoneTaken: 'Этот номер телефона уже зарегистрирован',
+        tgLoggingIn: 'Вход через Telegram...',
+        tgRegistering: 'Создание аккаунта...',
+        tgNewUserTitle: 'Завершите регистрацию',
+        tgNewUserSubtitle: 'Telegram: ',
+        tgEmailRequired: 'Введите email',
+        tgEmailTaken: 'Этот email уже зарегистрирован. Войдите и привяжите Telegram в профиле.',
         resetTitle: 'Новый пароль',
         resetSaving: 'Сохранение...',
         resetSave: 'Сохранить пароль',
@@ -243,10 +258,12 @@
         if (signupSuccess) signupSuccess.classList.remove('active');
         if (resetForm) resetForm.classList.remove('active');
         if (resetSuccess) resetSuccess.classList.remove('active');
+        var tgRegForm = document.getElementById('tgRegisterForm');
+        if (tgRegForm) tgRegForm.classList.remove('active');
         document.querySelectorAll('.pw-rule').forEach(function(r) { r.classList.remove('valid'); });
         document.querySelectorAll('.pw-rule-reset').forEach(function(r) { r.classList.remove('valid'); });
         document.getElementById(screenId).classList.add('active');
-        var hideTabs = (screenId === 'forgotForm' || screenId === 'forgotSuccess' || screenId === 'signupSuccess' || screenId === 'resetForm' || screenId === 'resetSuccess');
+        var hideTabs = (screenId === 'forgotForm' || screenId === 'forgotSuccess' || screenId === 'signupSuccess' || screenId === 'resetForm' || screenId === 'resetSuccess' || screenId === 'tgRegisterForm');
         authTabs.style.display = hideTabs ? 'none' : 'flex';
     }
 
@@ -492,8 +509,6 @@
         var lastName = document.getElementById('signup-lastname').value.trim();
         var email = document.getElementById('signup-email').value.trim();
         var emailConf = document.getElementById('signup-email-confirm').value.trim();
-        var phoneCode = document.getElementById('signup-phone-code').value.replace(/[A-Z]/g, '');
-        var phoneNum = document.getElementById('signup-phone').value.trim().replace(/\s/g, '');
         var gender = document.querySelector('input[name="gender"]:checked');
         var birthDay = document.getElementById('signup-birth-day').value;
         var birthMonth = document.getElementById('signup-birth-month').value;
@@ -552,27 +567,18 @@
 
         setLoading(btn, true, L.creatingAccount, L.createAccount);
 
-        // Check email/phone uniqueness before signUp
-        var phone = phoneCode + phoneNum;
+        // Check email uniqueness before signUp
         try {
             var checkResult = await client.rpc('check_registration_available', {
-                p_email: email,
-                p_phone: phone
+                p_email: email
             });
-            if (checkResult.data) {
-                if (checkResult.data.email_taken) {
-                    setLoading(btn, false, L.creatingAccount, L.createAccount);
-                    showEmailTakenModal();
-                    return;
-                }
-                if (checkResult.data.phone_taken) {
-                    setLoading(btn, false, L.creatingAccount, L.createAccount);
-                    showMessage(signupForm, L.errPhoneTaken, true);
-                    return;
-                }
+            if (checkResult.data && checkResult.data.email_taken) {
+                setLoading(btn, false, L.creatingAccount, L.createAccount);
+                showEmailTakenModal();
+                return;
             }
         } catch (e) {
-            console.error('Registration check error:', e);
+            // continue with signUp — Supabase will catch duplicates
         }
 
         var result = await client.auth.signUp({
@@ -582,7 +588,6 @@
                 emailRedirectTo: basePath + (isKg ? 'auth-kg.html' : isEn ? 'auth-en.html' : 'auth.html'),
                 data: {
                     full_name: firstName + ' ' + lastName,
-                    phone: phone,
                     gender: gender ? gender.value : '',
                     birth_day: birthDay ? parseInt(birthDay) : null,
                     birth_month: birthMonth ? parseInt(birthMonth) : null,
@@ -792,5 +797,289 @@
         }
     }
     checkSession();
+
+    // ============================================
+    // TELEGRAM LOGIN
+    // ============================================
+    // Globals from supabase-config.js: SUPABASE_URL, SUPABASE_ANON_KEY, KSLT_TG_BOT
+    var TG_BOT = window.KSLT_TG_BOT || 'KSLTennisBot';
+
+    // Populate TG birthday day select (1-31)
+    var tgDaySelect = document.getElementById('tg-birth-day');
+    if (tgDaySelect) {
+        for (var td = 1; td <= 31; td++) {
+            var topt = document.createElement('option');
+            topt.value = td;
+            topt.textContent = td;
+            tgDaySelect.appendChild(topt);
+        }
+    }
+
+    // Populate TG birthday year select
+    var tgYearSelect = document.getElementById('tg-birth-year');
+    if (tgYearSelect) {
+        for (var ty = 2020; ty >= 1940; ty--) {
+            var tyopt = document.createElement('option');
+            tyopt.value = ty;
+            tyopt.textContent = ty;
+            tgYearSelect.appendChild(tyopt);
+        }
+    }
+
+    // Store pending TG data for registration flow
+    var _pendingTgData = null;
+
+    var tgRegisterForm = document.getElementById('tgRegisterForm');
+    var tgRegBack = document.getElementById('tgRegBack');
+
+    if (tgRegBack) {
+        tgRegBack.addEventListener('click', function(e) {
+            e.preventDefault();
+            _pendingTgData = null;
+            tabs[0].classList.add('active');
+            showScreen('signinForm');
+        });
+    }
+
+    // Telegram Login Widget callback (global)
+    window.onTelegramAuth = async function(tgUser) {
+        if (!client) return;
+
+        // Build tg_data object
+        var tgData = {
+            id: String(tgUser.id),
+            first_name: tgUser.first_name || '',
+            last_name: tgUser.last_name || '',
+            username: tgUser.username || '',
+            photo_url: tgUser.photo_url || '',
+            auth_date: String(tgUser.auth_date),
+            hash: tgUser.hash
+        };
+
+        // Show loading on signin form
+        var btn = signinForm.querySelector('.auth-btn');
+        if (btn) setLoading(btn, true, L.tgLoggingIn, L.signIn);
+
+        try {
+            var resp = await fetch(window.SUPABASE_URL + '/functions/v1/telegram-auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': window.SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({ action: 'login', tg_data: tgData })
+            });
+
+            var data = await resp.json();
+
+            if (data.status === 'new_user') {
+                // Show mini registration form
+                if (btn) setLoading(btn, false, L.tgLoggingIn, L.signIn);
+                _pendingTgData = tgData;
+                var tgRegTitle = document.getElementById('tgRegTitle');
+                var tgRegSubtitle = document.getElementById('tgRegSubtitle');
+                if (tgRegTitle) tgRegTitle.textContent = L.tgNewUserTitle;
+                if (tgRegSubtitle) tgRegSubtitle.textContent = L.tgNewUserSubtitle + (tgData.first_name + ' ' + tgData.last_name).trim();
+                showScreen('tgRegisterForm');
+                return;
+            }
+
+            if (data.status === 'ok' && data.hashed_token && data.email) {
+                // Verify OTP with hashed token
+                var otpResult = await client.auth.verifyOtp({
+                    email: data.email,
+                    token: data.hashed_token,
+                    type: 'magiclink'
+                });
+
+                if (otpResult.error) {
+                    if (btn) setLoading(btn, false, L.tgLoggingIn, L.signIn);
+                    showMessage(signinForm, L.errGeneric, true);
+                    return;
+                }
+
+                // Cache profile data
+                var user = otpResult.data.user;
+                if (user) {
+                    try {
+                        var profileRes = await client.from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single();
+                        if (profileRes.data) {
+                            if (profileRes.data.full_name) localStorage.setItem('kslt_name', profileRes.data.full_name);
+                            if (profileRes.data.avatar_url) localStorage.setItem('kslt_avatar', profileRes.data.avatar_url);
+                            if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
+                        }
+                    } catch (e) { /* continue */ }
+                }
+
+                showMessage(signinForm, L.redirecting, false);
+                setTimeout(function() {
+                    window.location.href = getRedirectUrl();
+                }, 1000);
+                return;
+            }
+
+            // Error
+            if (btn) setLoading(btn, false, L.tgLoggingIn, L.signIn);
+            showMessage(signinForm, data.error || L.errGeneric, true);
+        } catch (err) {
+            if (btn) setLoading(btn, false, L.tgLoggingIn, L.signIn);
+            showMessage(signinForm, L.errGeneric, true);
+        }
+    };
+
+    // TG mini registration form submit
+    if (tgRegisterForm) {
+        tgRegisterForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearMessages(tgRegisterForm);
+
+            if (!_pendingTgData || !client) {
+                showMessage(tgRegisterForm, L.errGeneric, true);
+                return;
+            }
+
+            var email = document.getElementById('tg-email').value.trim();
+            var gender = document.querySelector('input[name="tg-gender"]:checked');
+            var birthDay = document.getElementById('tg-birth-day').value;
+            var birthMonth = document.getElementById('tg-birth-month').value;
+            var birthYear = document.getElementById('tg-birth-year').value;
+            var btn = document.getElementById('tgRegSubmit');
+
+            if (!email) {
+                showMessage(tgRegisterForm, L.tgEmailRequired, true);
+                return;
+            }
+
+            setLoading(btn, true, L.tgRegistering, L.createAccount);
+
+            try {
+                var resp = await fetch(window.SUPABASE_URL + '/functions/v1/telegram-auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': window.SUPABASE_ANON_KEY
+                    },
+                    body: JSON.stringify({
+                        action: 'register',
+                        tg_data: _pendingTgData,
+                        email: email,
+                        gender: gender ? gender.value : '',
+                        birth_day: birthDay ? parseInt(birthDay) : null,
+                        birth_month: birthMonth ? parseInt(birthMonth) : null,
+                        birth_year: birthYear ? parseInt(birthYear) : null
+                    })
+                });
+
+                var data = await resp.json();
+
+                if (data.error === 'email_taken') {
+                    setLoading(btn, false, L.tgRegistering, L.createAccount);
+                    showMessage(tgRegisterForm, L.tgEmailTaken, true);
+                    return;
+                }
+
+                if (data.error) {
+                    setLoading(btn, false, L.tgRegistering, L.createAccount);
+                    showMessage(tgRegisterForm, data.error, true);
+                    return;
+                }
+
+                if (data.status === 'ok' && data.hashed_token && data.email) {
+                    var otpResult = await client.auth.verifyOtp({
+                        email: data.email,
+                        token: data.hashed_token,
+                        type: 'magiclink'
+                    });
+
+                    if (otpResult.error) {
+                        setLoading(btn, false, L.tgRegistering, L.createAccount);
+                        showMessage(tgRegisterForm, L.errGeneric, true);
+                        return;
+                    }
+
+                    // Cache profile data
+                    var user = otpResult.data.user;
+                    if (user) {
+                        try {
+                            var profileRes = await client.from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single();
+                            if (profileRes.data) {
+                                if (profileRes.data.full_name) localStorage.setItem('kslt_name', profileRes.data.full_name);
+                                if (profileRes.data.avatar_url) localStorage.setItem('kslt_avatar', profileRes.data.avatar_url);
+                                if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
+                            }
+                        } catch (e) { /* continue */ }
+                    }
+
+                    _pendingTgData = null;
+                    showMessage(tgRegisterForm, L.redirecting, false);
+                    setTimeout(function() {
+                        window.location.href = getRedirectUrl();
+                    }, 1000);
+                    return;
+                }
+
+                setLoading(btn, false, L.tgRegistering, L.createAccount);
+                showMessage(tgRegisterForm, L.errGeneric, true);
+            } catch (err) {
+                setLoading(btn, false, L.tgRegistering, L.createAccount);
+                showMessage(tgRegisterForm, L.errGeneric, true);
+            }
+        });
+    }
+
+    // Telegram Login Widget — load widget script, then proxy clicks
+    var telegramLoginBtn = document.getElementById('telegramLoginBtn');
+    var _tgWidgetLoaded = false;
+
+    function loadTelegramWidget() {
+        if (_tgWidgetLoaded) return;
+        _tgWidgetLoaded = true;
+
+        var container = document.createElement('div');
+        container.id = 'tg-widget-container';
+        container.style.cssText = 'position:absolute;overflow:hidden;width:1px;height:1px;opacity:0.01;pointer-events:none;';
+        document.body.appendChild(container);
+
+        var script = document.createElement('script');
+        script.src = 'https://telegram.org/js/telegram-widget.js?22';
+        script.setAttribute('data-telegram-login', TG_BOT);
+        script.setAttribute('data-size', 'large');
+        script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+        script.setAttribute('data-request-access', 'write');
+        script.async = true;
+        container.appendChild(script);
+    }
+
+    // Pre-load widget on page load
+    loadTelegramWidget();
+
+    if (telegramLoginBtn) {
+        telegramLoginBtn.addEventListener('click', function() {
+            // Find the Telegram widget iframe and click its button
+            var container = document.getElementById('tg-widget-container');
+            if (container) {
+                var iframe = container.querySelector('iframe');
+                if (iframe) {
+                    // Make iframe visible and clickable momentarily
+                    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:1;pointer-events:auto;';
+                    iframe.style.cssText = 'width:250px;height:40px;border:none;cursor:pointer;';
+
+                    // Auto-hide after 10s if user doesn't interact
+                    var hideTimer = setTimeout(function() {
+                        container.style.cssText = 'position:absolute;overflow:hidden;width:1px;height:1px;opacity:0.01;pointer-events:none;';
+                    }, 10000);
+
+                    // Click outside to close
+                    container.addEventListener('click', function onOverlay(e) {
+                        if (e.target === container) {
+                            clearTimeout(hideTimer);
+                            container.style.cssText = 'position:absolute;overflow:hidden;width:1px;height:1px;opacity:0.01;pointer-events:none;';
+                            container.removeEventListener('click', onOverlay);
+                        }
+                    });
+                }
+            }
+        });
+    }
 
 })();
