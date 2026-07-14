@@ -4743,6 +4743,56 @@ h2 {
     margin-top: 12px;
 }
 
+/* Signup option buttons (Google / Telegram / Form) */
+.auth-signup-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.auth-option-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+}
+
+.auth-option-google {
+    background: #fff;
+    color: #1f1f1f;
+}
+.auth-option-google:hover {
+    background: #f2f2f2;
+}
+
+.auth-option-telegram {
+    background: #0088cc;
+    color: #fff;
+}
+.auth-option-telegram:hover {
+    background: #006daa;
+}
+
+.auth-option-form {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+.auth-option-form:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
 .auth-row {
     display: flex;
     gap: 12px;

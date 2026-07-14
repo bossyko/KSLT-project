@@ -267,6 +267,34 @@
         authTabs.style.display = hideTabs ? 'none' : 'flex';
     }
 
+    // ---- Signup form: show/hide fields ----
+    var signupFieldsWrap = document.getElementById('signupFields');
+    var signupShowForm = document.getElementById('signupShowForm');
+    var signupOptions = document.querySelector('.auth-signup-options');
+    if (signupShowForm && signupFieldsWrap) {
+        signupShowForm.addEventListener('click', function() {
+            signupFieldsWrap.style.display = '';
+            if (signupOptions) signupOptions.style.display = 'none';
+        });
+    }
+
+
+    // ---- Signup Telegram button → trigger TG widget click ----
+    var signupTgBtn = document.getElementById('signupTgBtn');
+    if (signupTgBtn) {
+        signupTgBtn.addEventListener('click', function() {
+            var tgIframe = document.querySelector('#tgWidgetWrap iframe');
+            if (tgIframe) {
+                tgIframe.style.display = 'block';
+                tgIframe.click();
+            }
+            // Fallback: switch to signin tab and let user click TG widget there
+            if (!tgIframe) {
+                tabs[0].click();
+            }
+        });
+    }
+
     tabs.forEach(function(tab) {
         tab.addEventListener('click', function() {
             var target = tab.dataset.tab;
@@ -274,6 +302,9 @@
             tab.classList.add('active');
             forms.forEach(function(f) { f.classList.remove('active'); });
             document.getElementById(target === 'signin' ? 'signinForm' : 'signupForm').classList.add('active');
+            // Reset signup form: always show options, hide fields
+            if (signupFieldsWrap) signupFieldsWrap.style.display = 'none';
+            if (signupOptions) signupOptions.style.display = '';
         });
     });
 
@@ -492,6 +523,7 @@
             } catch (e) { /* continue with redirect */ }
         }
 
+        localStorage.setItem('kslt_session_start', Date.now().toString());
         showMessage(signinForm, L.redirecting, false);
         setTimeout(function() {
             window.location.href = getRedirectUrl();
@@ -733,19 +765,19 @@
     // ============================================
     // GOOGLE OAUTH — Supabase
     // ============================================
-    var googleBtn = document.querySelector('.auth-social-btn');
-    if (googleBtn) {
-        googleBtn.addEventListener('click', async function() {
+    document.querySelectorAll('.auth-social-btn').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
             if (!client) return;
 
             await client.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: basePath + (isKg ? 'dashboard-kg.html' : isEn ? 'dashboard-en.html' : 'dashboard.html')
+                    redirectTo: basePath + (isKg ? 'dashboard-kg.html' : isEn ? 'dashboard-en.html' : 'dashboard.html'),
+                    queryParams: { prompt: 'select_account' }
                 }
             });
         });
-    }
+    });
 
     // ============================================
     // CHECK SESSION — redirect if logged in
@@ -793,6 +825,10 @@
                     if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
                 }
             } catch (e) { /* continue */ }
+            // Set session start if not already set (Google OAuth redirect flow)
+            if (!localStorage.getItem('kslt_session_start')) {
+                localStorage.setItem('kslt_session_start', Date.now().toString());
+            }
             window.location.href = getRedirectUrl();
         }
     }
@@ -911,6 +947,7 @@
                     } catch (e) { /* continue */ }
                 }
 
+                localStorage.setItem('kslt_session_start', Date.now().toString());
                 showMessage(signinForm, L.redirecting, false);
                 setTimeout(function() {
                     window.location.href = getRedirectUrl();
@@ -1012,6 +1049,7 @@
                     }
 
                     _pendingTgData = null;
+                    localStorage.setItem('kslt_session_start', Date.now().toString());
                     showMessage(tgRegisterForm, L.redirecting, false);
                     setTimeout(function() {
                         window.location.href = getRedirectUrl();
