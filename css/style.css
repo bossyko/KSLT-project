@@ -4737,6 +4737,17 @@ h2 {
     border-color: var(--border-light);
 }
 
+.auth-tg-btn {
+    background: rgba(0, 136, 204, 0.1);
+    border-color: rgba(0, 136, 204, 0.3);
+    color: #29B6F6;
+}
+
+.auth-tg-btn:hover {
+    background: rgba(0, 136, 204, 0.2);
+    border-color: rgba(0, 136, 204, 0.5);
+}
+
 .auth-row {
     display: flex;
     gap: 12px;
