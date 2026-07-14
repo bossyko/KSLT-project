@@ -1027,59 +1027,7 @@
         });
     }
 
-    // Telegram Login Widget — load widget script, then proxy clicks
-    var telegramLoginBtn = document.getElementById('telegramLoginBtn');
-    var _tgWidgetLoaded = false;
-
-    function loadTelegramWidget() {
-        if (_tgWidgetLoaded) return;
-        _tgWidgetLoaded = true;
-
-        var container = document.createElement('div');
-        container.id = 'tg-widget-container';
-        container.style.cssText = 'position:absolute;overflow:hidden;width:1px;height:1px;opacity:0.01;pointer-events:none;';
-        document.body.appendChild(container);
-
-        var script = document.createElement('script');
-        script.src = 'https://telegram.org/js/telegram-widget.js?22';
-        script.setAttribute('data-telegram-login', TG_BOT);
-        script.setAttribute('data-size', 'large');
-        script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-        script.setAttribute('data-request-access', 'write');
-        script.async = true;
-        container.appendChild(script);
-    }
-
-    // Pre-load widget on page load
-    loadTelegramWidget();
-
-    if (telegramLoginBtn) {
-        telegramLoginBtn.addEventListener('click', function() {
-            // Find the Telegram widget iframe and click its button
-            var container = document.getElementById('tg-widget-container');
-            if (container) {
-                var iframe = container.querySelector('iframe');
-                if (iframe) {
-                    // Make iframe visible and clickable momentarily
-                    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:1;pointer-events:auto;';
-                    iframe.style.cssText = 'width:250px;height:40px;border:none;cursor:pointer;';
-
-                    // Auto-hide after 10s if user doesn't interact
-                    var hideTimer = setTimeout(function() {
-                        container.style.cssText = 'position:absolute;overflow:hidden;width:1px;height:1px;opacity:0.01;pointer-events:none;';
-                    }, 10000);
-
-                    // Click outside to close
-                    container.addEventListener('click', function onOverlay(e) {
-                        if (e.target === container) {
-                            clearTimeout(hideTimer);
-                            container.style.cssText = 'position:absolute;overflow:hidden;width:1px;height:1px;opacity:0.01;pointer-events:none;';
-                            container.removeEventListener('click', onOverlay);
-                        }
-                    });
-                }
-            }
-        });
-    }
+    // Telegram Widget is embedded directly in auth HTML pages
+    // It calls window.onTelegramAuth(user) on successful auth — defined above
 
 })();
