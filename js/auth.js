@@ -884,8 +884,7 @@
             if (data.status === 'ok' && data.hashed_token && data.email) {
                 // Verify OTP with hashed token
                 var otpResult = await client.auth.verifyOtp({
-                    email: data.email,
-                    token: data.hashed_token,
+                    token_hash: data.hashed_token,
                     type: 'magiclink'
                 });
 
@@ -983,8 +982,7 @@
 
                 if (data.status === 'ok' && data.hashed_token && data.email) {
                     var otpResult = await client.auth.verifyOtp({
-                        email: data.email,
-                        token: data.hashed_token,
+                        token_hash: data.hashed_token,
                         type: 'magiclink'
                     });
 
