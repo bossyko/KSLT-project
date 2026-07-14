@@ -123,7 +123,8 @@
     return supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/index.html'
+        redirectTo: window.location.origin + '/index.html',
+        queryParams: { prompt: 'select_account' }
       }
     });
   };
@@ -174,16 +175,53 @@
     var forgotLink = document.getElementById('authForgotLink');
     var backToLogin = document.getElementById('authBackToLogin');
 
+    var loginDivider = document.getElementById('authLoginDivider');
+    var loginSocial = document.getElementById('authLoginSocial');
+    var regOptions = document.getElementById('regOptions');
+    var regFields = document.getElementById('regFields');
+    var regShowForm = document.getElementById('regShowForm');
+    var regGoogleBtn = document.getElementById('regGoogle');
+    var regTelegramBtn = document.getElementById('regTelegram');
+
     function switchTab(tab) {
       tabLogin.classList.toggle('active', tab === 'login');
       tabRegister.classList.toggle('active', tab === 'register');
       loginForm.classList.toggle('active', tab === 'login');
       regForm.classList.toggle('active', tab === 'register');
       if (forgotForm) forgotForm.classList.toggle('active', tab === 'forgot');
+      // Show/hide login social buttons
+      if (loginDivider) loginDivider.style.display = (tab === 'login') ? '' : 'none';
+      if (loginSocial) loginSocial.style.display = (tab === 'login') ? '' : 'none';
+      // Reset register view: show options, hide fields
+      if (regOptions) regOptions.style.display = '';
+      if (regFields) regFields.style.display = 'none';
     }
 
     tabLogin.addEventListener('click', function() { switchTab('login'); });
     tabRegister.addEventListener('click', function() { switchTab('register'); });
+
+    // Register: show form on button click
+    if (regShowForm && regFields && regOptions) {
+      regShowForm.addEventListener('click', function() {
+        regOptions.style.display = 'none';
+        regFields.style.display = '';
+      });
+    }
+
+    // Register Google → same as login Google
+    if (regGoogleBtn) {
+      regGoogleBtn.addEventListener('click', function() {
+        AUTH.loginGoogle();
+      });
+    }
+
+    // Register Telegram → same as login Telegram
+    if (regTelegramBtn) {
+      regTelegramBtn.addEventListener('click', function() {
+        var tgBtnLogin = document.getElementById('authTelegram');
+        if (tgBtnLogin) tgBtnLogin.click();
+      });
+    }
 
     // Forgot password link
     if (forgotLink) {
