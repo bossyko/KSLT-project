@@ -2372,6 +2372,44 @@ a, button, [role="button"] {
 .auth-social-btn.google { background: #fff; }
 .auth-social-btn.telegram { background: #2AABEE; border-color: #2AABEE; }
 .auth-social-icon { width: 24px; height: 24px; }
+
+/* Signup option buttons */
+.auth-signup-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.auth-option-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.auth-option-btn:active { transform: scale(0.97); }
+.auth-option-google { background: #fff; color: #1f1f1f; }
+.auth-option-telegram { background: #0088cc; color: #fff; }
+.auth-option-form {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+#regFields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
 .auth-footer {
   margin-top: 32px;
   font-size: 11px;
