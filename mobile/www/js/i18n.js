@@ -96,6 +96,21 @@
     'trn.banned':         { ru: 'Вы отстранены от участия в турнирах', en: 'You are banned from tournaments', kg: 'Сиз мелдештерден четтетилдиңиз' },
     'trn.waitlist':       { ru: 'Лист ожидания — ожидает одобрения', en: 'Waitlist — awaiting approval', kg: 'Күтүү тизмеси — бекитүүнү күтүүдө' },
     'trn.alreadyReg':     { ru: 'Вы уже записаны на этот турнир', en: 'You are already registered for this tournament', kg: 'Сиз бул мелдешке жазылгансыз' },
+    'trn.joinWaitlist':   { ru: 'Встать в лист ожидания', en: 'Join Waitlist', kg: 'Күтүү тизмесине кошулуу' },
+    'trn.slotsFull':      { ru: 'Основная сетка заполнена. Вы можете встать в лист ожидания.', en: 'Main draw is full. You can join the waitlist.', kg: 'Негизги сетка толук. Күтүү тизмесине кошулсаңыз болот.' },
+    'trn.partnerSelect':  { ru: 'Выбор партнёра', en: 'Partner Selection', kg: 'Өнөктөштү тандоо' },
+    'trn.partnerSearch':  { ru: 'Поиск партнёра по имени...', en: 'Search partner by name...', kg: 'Өнөктөштү аты боюнча издөө...' },
+    'trn.soloReg':        { ru: 'Без партнёра', en: 'Solo', kg: 'Жалгыз' },
+    'trn.registering':    { ru: 'Отправка...', en: 'Registering...', kg: 'Жөнөтүлүүдө...' },
+    'trn.regSent':        { ru: 'Заявка отправлена!', en: 'Registration Submitted!', kg: 'Арыз жөнөтүлдү!' },
+    'trn.regSoloSent':    { ru: 'Зарегистрирован (без партнёра)', en: 'Registered (no partner)', kg: 'Катталды (өнөктөш жок)' },
+    'trn.noPlayersFound': { ru: 'Игроков не найдено', en: 'No players found', kg: 'Оюнчулар табылган жок' },
+    'trn.ntrpExceed':     { ru: 'Суммарный NTRP превышает лимит', en: 'Combined NTRP exceeds the limit', kg: 'Жалпы NTRP чектен ашып кетти' },
+    'trn.mixedGender':    { ru: 'Микст требует одного мужчину и одну женщину', en: 'Mixed doubles requires one man and one woman', kg: 'Микст бир эркек жана бир аял талап кылат' },
+    'trn.regAsPartner':   { ru: 'Зарегистрирован как партнёр', en: 'Registered as partner', kg: 'Өнөктөш катары катталган' },
+    'trn.addPartner':     { ru: 'Добавить партнёра', en: 'Add Partner', kg: 'Өнөктөш кошуу' },
+    'trn.partnerAdded':   { ru: 'Партнёр добавлен!', en: 'Partner added!', kg: 'Өнөктөш кошулду!' },
+    'trn.waitlistSolo':   { ru: 'В листе ожидания (без партнёра)', en: 'On Waitlist (no partner yet)', kg: 'Күтүү тизмесинде (өнөктөш жок)' },
 
     // === Rating screen ===
     'rating.title':      { ru: 'Рейтинг',           en: 'Rating',          kg: 'Рейтинг' },
@@ -113,6 +128,8 @@
     'rating.guestTitle': { ru: 'Полный рейтинг',     en: 'Full Rating',     kg: 'Толук рейтинг' },
     'rating.guestText':  { ru: 'Зарегистрируйтесь, чтобы видеть полный рейтинг всех игроков', en: 'Register to see the full rating of all players', kg: 'Бардык оюнчулардын рейтингин көрүү үчүн катталыңыз' },
     'rating.guestBtn':   { ru: 'Регистрация',        en: 'Register',        kg: 'Каттоо' },
+    'rating.singles':    { ru: 'Одиночный',          en: 'Singles',         kg: 'Жалгыз' },
+    'rating.doubles':    { ru: 'Парный',              en: 'Doubles',        kg: 'Жуп' },
 
     // === News screen ===
     'news.title':       { ru: 'Новости',              en: 'News',            kg: 'Жанылыктар' },

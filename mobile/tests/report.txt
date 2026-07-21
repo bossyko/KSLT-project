@@ -1,0 +1,175 @@
+
+1. Syntax Check — All JS Files
+  ✓ js/supabase-config.js — syntax OK
+  ✓ js/i18n.js — syntax OK
+  ✓ js/auth.js — syntax OK
+  ✓ js/app.js — syntax OK
+  ✓ js/screens/home.js — syntax OK
+  ✓ js/screens/tournaments.js — syntax OK
+  ✓ js/screens/rating.js — syntax OK
+  ✓ js/screens/news.js — syntax OK
+  ✓ js/screens/profile.js — syntax OK
+  ✓ js/screens/battles.js — syntax OK
+  ✓ js/screens/coaches.js — syntax OK
+  ✓ js/screens/courts.js — syntax OK
+  ✓ js/screens/live.js — syntax OK
+  ✓ js/screens/partners.js — syntax OK
+  ✓ js/screens/player-detail.js — syntax OK
+
+2. HTML — index.html Integrity
+  ✓ DOM id="authScreen" found
+  ✓ DOM id="screenHome" found
+  ✓ DOM id="screenTournaments" found
+  ✓ DOM id="screenRating" found
+  ✓ DOM id="screenNews" found
+  ✓ DOM id="screenProfile" found
+  ✓ DOM id="tournamentList" found
+  ✓ DOM id="ratingContent" found
+  ✓ DOM id="ratingGender" found
+  ✓ DOM id="ratingCatBtn" found
+  ✓ DOM id="ratingCatSheet" found
+  ✓ DOM id="ratingCatOptions" found
+  ✓ DOM id="ratingSearch" found
+  ✓ DOM id="ratingTypeToggle" found
+  ✓ DOM id="tdOverlay" found
+  ✓ Rating type toggle (singles/doubles) buttons present
+
+3. i18n — Key Completeness
+  ✓ i18n key "trn.joinWaitlist" defined
+  ✓ i18n key "trn.slotsFull" defined
+  ✓ i18n key "trn.partnerSelect" defined
+  ✓ i18n key "trn.partnerSearch" defined
+  ✓ i18n key "trn.soloReg" defined
+  ✓ i18n key "trn.registering" defined
+  ✓ i18n key "trn.regSent" defined
+  ✓ i18n key "trn.regSoloSent" defined
+  ✓ i18n key "trn.noPlayersFound" defined
+  ✓ i18n key "trn.ntrpExceed" defined
+  ✓ i18n key "trn.mixedGender" defined
+  ✓ i18n key "trn.regAsPartner" defined
+  ✓ i18n key "trn.addPartner" defined
+  ✓ i18n key "trn.partnerAdded" defined
+  ✓ i18n key "trn.waitlistSolo" defined
+  ✓ i18n key "rating.singles" defined
+  ✓ i18n key "rating.doubles" defined
+  ✓ i18n "trn.joinWaitlist" has all 3 languages (ru/en/kg)
+  ✓ i18n "trn.slotsFull" has all 3 languages (ru/en/kg)
+  ✓ i18n "trn.partnerSelect" has all 3 languages (ru/en/kg)
+  ✓ i18n "rating.singles" has all 3 languages (ru/en/kg)
+  ✓ i18n "rating.doubles" has all 3 languages (ru/en/kg)
+
+4. Regression — Auth Module
+  ✓ AUTH.checkSession() exists
+  ✓ AUTH.loadProfile() exists
+  ✓ AUTH.login() exists
+  ✓ AUTH.register() exists
+  ✓ AUTH.logout() exists
+  ✓ AUTH.checkMembership() exists
+  ✓ AUTH.showAuth() exists
+  ✓ AUTH.telegramAuth() exists
+  ✓ AUTH.verifyTelegramOtp() exists
+  ✓ AUTH.loginGoogle() exists
+  ✓ AUTH.resetPassword() exists
+  ✓ AUTH.setupAuthUI() exists
+  ✓ AUTH.currentUser initialized
+  ✓ AUTH.currentProfile initialized
+  ✓ AUTH._membershipStatus cached
+  ✓ Auth uses getSession() for session check
+  ✓ Profile retry logic (3 retries) present
+  ✓ Profile fallback creation with role:user
+  ✓ Logout clears user state
+  ✓ Registration validates password >= 6 chars
+  ✓ Duplicate email detection via identities check
+  ✓ Email verification flow exists
+  ✓ Google OAuth configured
+  ✓ Telegram auth callback defined
+  ✓ Telegram new user registration flow exists
+  ✓ last_seen tracked on login
+
+5. Regression — Tournament Registration
+  ✓ checkAndRenderRegistration() exists
+  ✓ Auth check: user logged in
+  ✓ Player link check: player_id
+  ✓ Ban check present
+  ✓ Membership check present
+  ✓ Category mismatch → waitlist logic
+  ✓ Already registered check present
+  ✓ Duplicate registration error handling
+  ✓ Status "pending" handled
+  ✓ Status "approved" handled
+  ✓ Status "waitlist" handled
+  ✓ Status "rejected" handled
+  ✓ Status "withdrawn" handled
+
+6. New Feature — Doubles Registration
+  ✓ Doubles format detection (doubles + mixed_doubles)
+  ✓ isDbl flag computed
+  ✓ showDoublesModal() function exists
+  ✓ Partner search input (mobPartnerSearch) present
+  ✓ Partner search queries Supabase
+  ✓ Solo registration button present
+  ✓ Register with partner button present
+  ✓ Partner selection state (hidden input) present
+  ✓ Cancel button in doubles modal
+  ✓ partner_id sent in registration insert
+  ✓ Already registered as partner check
+  ✓ Add partner to existing registration (update mode)
+
+7. New Feature — NTRP Combined Validation
+  ✓ ntrp_combined_max field checked
+  ✓ captainNtrp computed from player data
+  ✓ ntrp_rating loaded from players table
+  ✓ NTRP exceed alert uses i18n key
+  ✓ Combined NTRP calculated (captain + partner)
+  ✓ NTRP hint displayed in modal
+
+8. New Feature — Mixed Doubles Gender Validation
+  ✓ isMixed flag computed
+  ✓ Gender validation: captain gender loaded
+  ✓ Gender validation: same gender blocked
+  ✓ Mixed gender alert uses i18n key
+
+9. New Feature — Waitlist Overflow
+  ✓ Online slots = max_participants - reserved_spots
+  ✓ onlineSlotsFull flag computed
+  ✓ Active registrations counted
+  ✓ Waitlist button with data-waitlist attribute
+  ✓ Waitlist flag checked on registration
+  ✓ Slots full message shown (i18n)
+  ✓ Join waitlist button text (i18n)
+
+10. New Feature — Doubles Rating Toggle
+  ✓ currentRatingType state variable exists
+  ✓ initRatingTypeToggle() function exists
+  ✓ ratingTypeToggle DOM element referenced
+  ✓ doubles_points field used for doubles ranking
+  ✓ Conditional doubles_points vs points display
+  ✓ Filter out players with 0 doubles_points
+
+11. CSS — Rating Type Toggle
+  ✓ CSS .rating-type-btn defined
+  ✓ CSS .rating-type-btn.active defined
+  ✓ Light theme override for rating-type-btn
+
+12. Regression — Existing Features Preserved
+  ✓ T.load() preserved
+  ✓ T.filter() preserved
+  ✓ T.search() preserved
+  ✓ T.refresh() preserved
+  ✓ T.setupPullToRefresh() preserved
+  ✓ renderCard() preserved
+  ✓ renderLoadMore() preserved
+  ✓ openTournamentOverlay() preserved
+  ✓ R.load() preserved
+  ✓ initGenderToggle() preserved
+  ✓ initCategoryDropdown() preserved
+  ✓ initSearch() preserved
+  ✓ Guest access restriction preserved
+
+==================================================
+Results:
+  Passed: 143
+  Total:  143
+==================================================
+
+ALL TESTS PASSED!

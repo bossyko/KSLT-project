@@ -136,7 +136,8 @@
 [data-theme="light"] .pd-challenge-btn,
 [data-theme="light"] .filter-chip.active,
 [data-theme="light"] .seg-btn.active,
-[data-theme="light"] .gender-toggle-btn.active {
+[data-theme="light"] .gender-toggle-btn.active,
+[data-theme="light"] .rating-type-btn.active {
   color: #fff;
 }
 /* Light theme — header & tab bar subtle border */
@@ -1693,6 +1694,20 @@ a, button, [role="button"] {
 }
 .gender-toggle-btn:last-child { border-right: none; }
 .gender-toggle-btn.active {
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+}
+.rating-type-btn {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  border-right: 1px solid var(--border);
+}
+.rating-type-btn:last-child { border-right: none; }
+.rating-type-btn.active {
   background: var(--accent);
   color: #000;
   font-weight: 600;
