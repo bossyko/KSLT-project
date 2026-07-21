@@ -434,25 +434,48 @@
     }
 
     var playerId = profile.player_id;
+    var isDbl = t.format === 'doubles' || t.format === 'mixed_doubles';
 
-    // Async checks: already registered, player data, membership
+    // Async checks: already registered (self + as partner), player data, membership, all registrations count
     Promise.all([
       supabaseClient.from('tournament_registrations')
-        .select('id, status')
+        .select('id, status, partner_id')
         .eq('tournament_id', t.id)
         .eq('player_id', playerId)
         .limit(1),
       supabaseClient.from('players')
-        .select('category_id, banned_until, ban_reason')
+        .select('category_id, banned_until, ban_reason, ntrp_rating, gender')
         .eq('id', playerId)
         .single(),
-      AUTH.checkMembership()
+      AUTH.checkMembership(),
+      supabaseClient.from('tournament_registrations')
+        .select('id, status, player_id, partner_id', { count: 'exact' })
+        .eq('tournament_id', t.id)
+        .in('status', ['approved', 'pending']),
+      isDbl ? supabaseClient.from('tournament_registrations')
+        .select('id')
+        .eq('tournament_id', t.id)
+        .eq('partner_id', playerId)
+        .limit(1) : Promise.resolve({ data: [] })
     ]).then(function(results) {
       var existingReg = results[0].data && results[0].data[0];
       var player = results[1].data;
       var membership = results[2];
+      var activeRegs = results[3].data || [];
+      var activeRegCount = activeRegs.length;
+      var asPartner = results[4].data && results[4].data[0];
 
-      // 3. Already registered
+      // Online slots check
+      var onlineSlots = (t.max_participants || 0) - (t.reserved_spots || 0);
+      var onlineSlotsFull = onlineSlots > 0 && activeRegCount >= onlineSlots;
+
+      // 3. Already registered as partner
+      if (!existingReg && asPartner) {
+        area.innerHTML = '<div class="td-reg-done">' + I18N.t('trn.regAsPartner') + '</div>';
+        return;
+      }
+
+      // 4. Already registered
       if (existingReg) {
         var statusLabels = {
           pending: I18N.t('trn.registered'),
@@ -461,35 +484,69 @@
           rejected: I18N.t('common.error'),
           withdrawn: I18N.t('common.error')
         };
-        area.innerHTML = '<div class="td-reg-done">' + (statusLabels[existingReg.status] || I18N.t('trn.registered')) + '</div>';
+        var html = '<div class="td-reg-done">' + (statusLabels[existingReg.status] || I18N.t('trn.registered')) + '</div>';
+
+        // Doubles without partner: show "Add Partner" button
+        if (isDbl && !existingReg.partner_id) {
+          html += ' <button class="btn-accent td-register-btn" id="tdAddPartnerBtn" style="margin-top:8px;font-size:0.85rem;padding:8px 16px;">' + I18N.t('trn.addPartner') + '</button>';
+        }
+        area.innerHTML = html;
+
+        // Bind "Add Partner" handler
+        var addPartnerBtn = document.getElementById('tdAddPartnerBtn');
+        if (addPartnerBtn) {
+          var captainNtrp = player ? parseFloat(player.ntrp_rating) || 0 : 0;
+          addPartnerBtn.addEventListener('click', function() {
+            showDoublesModal(t, playerId, false, area, null, captainNtrp, onlineSlotsFull, existingReg.id);
+          });
+        }
         return;
       }
 
-      // 4. Banned
+      // 5. Banned
       if (player && player.banned_until && new Date(player.banned_until) > new Date()) {
         area.innerHTML = '<div class="td-access-cta" style="background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.2)"><p style="color:#ff3b30">' + I18N.t('trn.banned') + '</p></div>';
         return;
       }
 
-      // 5. No active membership
+      // 6. No active membership
       if (!membership) {
         area.innerHTML = '<div class="td-access-cta"><p>' + I18N.t('trn.needMembership') + '</p></div>';
         return;
       }
 
       // Determine status: exact category match → pending, else waitlist
-      var regStatus = 'pending';
+      var isExactCategory = true;
       if (t.category_id && player && player.category_id && t.category_id !== player.category_id) {
-        regStatus = 'waitlist';
+        isExactCategory = false;
       }
 
-      // Show register button
-      area.innerHTML = '<button class="btn-accent td-register-btn" id="tdRegisterBtn">' + I18N.t('trn.register') + '</button>';
+      var captainNtrp = player ? parseFloat(player.ntrp_rating) || 0 : 0;
+
+      // 7. Online slots full → waitlist UI
+      if (onlineSlotsFull) {
+        area.innerHTML = '<div style="margin-bottom:8px;padding:8px 12px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.2);font-size:0.85rem;color:#ffc107;">' +
+          I18N.t('trn.slotsFull') + '</div>' +
+          '<button class="btn-accent td-register-btn" id="tdRegisterBtn" data-waitlist="1" style="background:rgba(255,193,7,0.3);color:#ffc107;">' + I18N.t('trn.joinWaitlist') + '</button>';
+      } else {
+        // Show register button
+        area.innerHTML = '<button class="btn-accent td-register-btn" id="tdRegisterBtn">' + I18N.t('trn.register') + '</button>';
+      }
 
       document.getElementById('tdRegisterBtn').addEventListener('click', function() {
         var btn = this;
+        var isWaitlist = btn.dataset.waitlist === '1';
+
+        if (isDbl) {
+          // Show doubles registration modal
+          showDoublesModal(t, playerId, isExactCategory, area, btn, captainNtrp, onlineSlotsFull, null);
+          return;
+        }
+
         btn.disabled = true;
-        btn.textContent = I18N.t('common.loading');
+        btn.textContent = I18N.t('trn.registering');
+
+        var regStatus = isWaitlist ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
 
         supabaseClient.from('tournament_registrations').insert({
           tournament_id: t.id,
@@ -502,7 +559,7 @@
             } else {
               if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('common.error'));
               btn.disabled = false;
-              btn.textContent = I18N.t('trn.register');
+              btn.textContent = isWaitlist ? I18N.t('trn.joinWaitlist') : I18N.t('trn.register');
             }
             return;
           }
@@ -512,6 +569,214 @@
         });
       });
     });
+  }
+
+  // ============================
+  // DOUBLES REGISTRATION MODAL
+  // ============================
+
+  function showDoublesModal(tournament, playerId, isExactCategory, area, regBtn, captainNtrp, onlineSlotsFull, existingRegId) {
+    var isMixed = tournament.format === 'mixed_doubles';
+
+    // Create modal overlay
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;';
+
+    // NTRP combined hint
+    var ntrpHint = '';
+    if (tournament.ntrp_combined_max && captainNtrp) {
+      var remaining = tournament.ntrp_combined_max - captainNtrp;
+      ntrpHint = '<div style="padding:8px 12px;margin-bottom:12px;border-radius:8px;background:rgba(204,255,0,0.08);border:1px solid rgba(204,255,0,0.2);font-size:0.8rem;color:var(--text-secondary);">' +
+        'NTRP: ' + tournament.ntrp_combined_max + ' (' + I18N.t('rating.pts').toLowerCase() + ': ' + captainNtrp + ', max: ' + remaining.toFixed(1) + ')' +
+      '</div>';
+    }
+
+    var registerLabel = existingRegId ? I18N.t('common.save') : I18N.t('trn.register');
+
+    overlay.innerHTML =
+      '<div style="background:var(--bg-card, #1a1a2e);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:20px;width:100%;max-width:360px;max-height:70vh;overflow-y:auto;">' +
+        '<h3 style="color:#fff;margin:0 0 12px;font-size:1rem;">' + I18N.t('trn.partnerSelect') + '</h3>' +
+        ntrpHint +
+        '<div style="margin-bottom:12px;">' +
+          '<input type="text" id="mobPartnerSearch" placeholder="' + I18N.t('trn.partnerSearch') + '" ' +
+            'style="width:100%;padding:10px 12px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;background:rgba(255,255,255,0.05);color:#fff;font-size:0.9rem;box-sizing:border-box;" autocomplete="off">' +
+          '<div id="mobPartnerResults" style="max-height:180px;overflow-y:auto;margin-top:4px;"></div>' +
+          '<input type="hidden" id="mobPartnerSelectedId" value="">' +
+          '<div id="mobPartnerSelectedName" style="display:none;padding:8px 12px;margin-top:4px;border-radius:8px;background:rgba(204,255,0,0.1);color:#CCFF00;font-size:0.9rem;"></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+          '<button id="mobDoublesCancel" style="flex:1;padding:10px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;font-size:0.85rem;">' + I18N.t('common.cancel') + '</button>' +
+          (existingRegId ? '' :
+          '<button id="mobDoublesRegSolo" style="flex:1;padding:10px;border:none;border-radius:10px;background:rgba(204,255,0,0.15);color:#CCFF00;cursor:pointer;font-size:0.85rem;">' + I18N.t('trn.soloReg') + '</button>') +
+          '<button id="mobDoublesRegWithPartner" style="flex:1;padding:10px;border:none;border-radius:10px;background:#CCFF00;color:#000;font-weight:600;cursor:pointer;font-size:0.85rem;" disabled>' + registerLabel + '</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+
+    // Close on overlay click
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    // Cancel
+    document.getElementById('mobDoublesCancel').addEventListener('click', function() {
+      overlay.remove();
+    });
+
+    // Solo registration
+    var soloBtn = document.getElementById('mobDoublesRegSolo');
+    if (soloBtn) {
+      soloBtn.addEventListener('click', function() {
+        soloBtn.disabled = true;
+        soloBtn.textContent = I18N.t('trn.registering');
+
+        var regStatus = onlineSlotsFull ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
+
+        supabaseClient.from('tournament_registrations').insert({
+          tournament_id: tournament.id,
+          player_id: playerId,
+          status: regStatus
+        }).then(function(r) {
+          overlay.remove();
+          if (r.error) {
+            if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('common.error'));
+            return;
+          }
+          var msg = regStatus === 'waitlist' ? I18N.t('trn.waitlistSolo') : I18N.t('trn.regSoloSent');
+          area.innerHTML = '<div class="td-reg-done">' + msg + '</div>';
+          if (window.KSLT_APP) window.KSLT_APP.toast(msg);
+        });
+      });
+    }
+
+    // Register with partner
+    document.getElementById('mobDoublesRegWithPartner').addEventListener('click', function() {
+      var partnerId = document.getElementById('mobPartnerSelectedId').value;
+      if (!partnerId) return;
+
+      var rwBtn = this;
+      rwBtn.disabled = true;
+      rwBtn.textContent = I18N.t('trn.registering');
+
+      if (existingRegId) {
+        // Update mode: add partner to existing registration
+        supabaseClient.from('tournament_registrations').update({ partner_id: partnerId }).eq('id', existingRegId).then(function(r) {
+          overlay.remove();
+          if (r.error) {
+            if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('common.error'));
+            return;
+          }
+          area.innerHTML = '<div class="td-reg-done">' + I18N.t('trn.partnerAdded') + '</div>';
+          if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('trn.partnerAdded'));
+        });
+      } else {
+        var regStatus = onlineSlotsFull ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
+        supabaseClient.from('tournament_registrations').insert({
+          tournament_id: tournament.id,
+          player_id: playerId,
+          partner_id: partnerId,
+          status: regStatus
+        }).then(function(r) {
+          overlay.remove();
+          if (r.error) {
+            if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('common.error'));
+            return;
+          }
+          var msg = regStatus === 'waitlist' ? I18N.t('trn.waitlist') : I18N.t('trn.regSent');
+          area.innerHTML = '<div class="td-reg-done">' + msg + '</div>';
+          if (window.KSLT_APP) window.KSLT_APP.toast(msg);
+        });
+      }
+    });
+
+    // Partner search
+    var searchInput = document.getElementById('mobPartnerSearch');
+    var resultsDiv = document.getElementById('mobPartnerResults');
+    var hiddenInput = document.getElementById('mobPartnerSelectedId');
+    var selectedNameDiv = document.getElementById('mobPartnerSelectedName');
+    var rwBtn = document.getElementById('mobDoublesRegWithPartner');
+    var searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      var q = searchInput.value.trim();
+      if (q.length < 2) { resultsDiv.innerHTML = ''; return; }
+
+      searchTimeout = setTimeout(function() {
+        supabaseClient.from('players')
+          .select('id, name, name_en, name_kg, gender, ntrp_rating')
+          .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
+          .neq('id', playerId)
+          .limit(8)
+          .then(function(res) {
+            var players = res.data || [];
+            if (players.length === 0) {
+              resultsDiv.innerHTML = '<div style="padding:8px;color:rgba(255,255,255,0.4);font-size:0.85rem;">' + I18N.t('trn.noPlayersFound') + '</div>';
+              return;
+            }
+
+            var html = '';
+            players.forEach(function(p) {
+              var displayName = p.name || '';
+              var genderIcon = p.gender === 'men' ? ' ♂' : (p.gender === 'women' ? ' ♀' : '');
+              html += '<div class="mob-partner-item" data-id="' + p.id + '" data-name="' + esc(displayName) + '" data-gender="' + (p.gender || '') + '" data-ntrp="' + (p.ntrp_rating || '') + '" ' +
+                'style="padding:10px 12px;cursor:pointer;border-radius:8px;font-size:0.9rem;color:#fff;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+                '<span>' + esc(displayName) + genderIcon + '</span>' +
+                (p.ntrp_rating ? '<span style="color:rgba(255,255,255,0.4);font-size:0.75rem;">NTRP ' + p.ntrp_rating + '</span>' : '') +
+              '</div>';
+            });
+            resultsDiv.innerHTML = html;
+
+            resultsDiv.querySelectorAll('.mob-partner-item').forEach(function(item) {
+              item.addEventListener('click', function() {
+                // NTRP combined validation
+                if (tournament.ntrp_combined_max && captainNtrp) {
+                  var partnerNtrp = parseFloat(item.dataset.ntrp) || 0;
+                  var combined = captainNtrp + partnerNtrp;
+                  if (combined > tournament.ntrp_combined_max) {
+                    alert(I18N.t('trn.ntrpExceed') + ': ' + combined.toFixed(1) + ' > ' + tournament.ntrp_combined_max);
+                    return;
+                  }
+                }
+
+                // Gender validation for mixed doubles
+                if (isMixed) {
+                  supabaseClient.from('players').select('gender').eq('id', playerId).single().then(function(captRes) {
+                    var captGender = captRes.data ? captRes.data.gender : '';
+                    var partGender = item.dataset.gender;
+                    if (captGender && partGender && captGender === partGender) {
+                      alert(I18N.t('trn.mixedGender'));
+                      return;
+                    }
+                    selectPartner(item);
+                  });
+                } else {
+                  selectPartner(item);
+                }
+              });
+            });
+          });
+      }, 300);
+    });
+
+    function selectPartner(item) {
+      hiddenInput.value = item.dataset.id;
+      searchInput.style.display = 'none';
+      resultsDiv.innerHTML = '';
+      selectedNameDiv.style.display = 'block';
+      selectedNameDiv.textContent = item.dataset.name;
+      selectedNameDiv.innerHTML += ' <span style="cursor:pointer;margin-left:8px;color:rgba(255,255,255,0.4);" id="mobPartnerClear">✕</span>';
+      rwBtn.disabled = false;
+
+      document.getElementById('mobPartnerClear').addEventListener('click', function() {
+        hiddenInput.value = '';
+        searchInput.style.display = '';
+        searchInput.value = '';
+        selectedNameDiv.style.display = 'none';
+        rwBtn.disabled = true;
+      });
+    }
   }
 
   // ============================

@@ -20,6 +20,7 @@
   var currentGender = 'men';
   var currentCatKey = 'masters';
   var currentSearch = '';
+  var currentRatingType = 'singles'; // 'singles' or 'doubles'
   var GUEST_VISIBLE = 5;
   var GUEST_BLUR = 3;
   var listenersReady = false;
@@ -28,6 +29,7 @@
     if (!supabaseClient) return;
     if (!listenersReady) {
       initGenderToggle();
+      initRatingTypeToggle();
       initCategoryDropdown();
       initSearch();
       listenersReady = true;
@@ -46,6 +48,20 @@
       container.querySelectorAll('.gender-toggle-btn').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
       currentGender = btn.getAttribute('data-gender');
+      loadPlayers();
+    });
+  }
+
+  // --- Rating type toggle (singles/doubles) ---
+  function initRatingTypeToggle() {
+    var container = document.getElementById('ratingTypeToggle');
+    if (!container) return;
+    container.addEventListener('click', function(e) {
+      var btn = e.target.closest('.rating-type-btn');
+      if (!btn || btn.classList.contains('active')) return;
+      container.querySelectorAll('.rating-type-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentRatingType = btn.getAttribute('data-type');
       loadPlayers();
     });
   }
@@ -119,13 +135,18 @@
     el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
     var categoryId = currentGender + '-' + currentCatKey;
+    var orderField = currentRatingType === 'doubles' ? 'doubles_points' : 'points';
 
     supabaseClient.from('players')
       .select('*')
       .eq('category_id', categoryId)
-      .order('points', { ascending: false })
+      .order(orderField, { ascending: false })
       .then(function(r) {
         allPlayers = r.data || [];
+        // For doubles: filter out players with 0 doubles_points
+        if (currentRatingType === 'doubles') {
+          allPlayers = allPlayers.filter(function(p) { return (p.doubles_points || 0) > 0; });
+        }
         render();
       });
   }
@@ -183,7 +204,7 @@
           (p.photo ? '<img class="rr-avatar-img" src="' + esc(p.photo) + '" alt="">' : '<div class="rr-avatar">' + initials(p.name) + '</div>') +
           '<span class="rr-name">' + esc(p.name) + '</span>' +
         '</div>' +
-        '<span class="rr-pts">' + (p.points || 0) + '</span>' +
+        '<span class="rr-pts">' + (currentRatingType === 'doubles' ? (p.doubles_points || 0) : (p.points || 0)) + '</span>' +
         '<span class="rr-wl">' + (p.wins || 0) + '/' + (p.losses || 0) + '</span>' +
         '<div class="rr-form">' + formDots + '</div>' +
       '</div>';
