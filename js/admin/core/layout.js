@@ -305,7 +305,7 @@
             A.client.from('memberships').select('id, profile_id, expires_at, profiles!profile_id(full_name, email)')
                 .eq('status', 'active').lt('expires_at', today)
                 .order('expires_at', { ascending: true }).limit(10),                                                                   // [12] overdue list
-            A.client.from('tournament_registrations').select('id, player_id, tournament_id, registered_at, players(id, name, category_id, points), tournaments(title)')
+            A.client.from('tournament_registrations').select('id, player_id, tournament_id, registered_at, players:player_id(id, name, category_id, points), tournaments(title)')
                 .eq('status', 'pending')
                 .order('registered_at', { ascending: false }).limit(10),                                                               // [13] pending regs list
             A.client.from('profiles').select('id,full_name,email,role,avatar_url,created_at')

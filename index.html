@@ -91,7 +91,7 @@
                     <div class="nav-dropdown-menu">
                         <a href="pages/courts.html" class="nav-dropdown-item">Теннисные корты</a>
                         <a href="pages/coaches.html" class="nav-dropdown-item">Тренеры</a>
-                        <a href="pages/partners.html" class="nav-dropdown-item">Найти партнёра</a>
+                        <a href="pages/partners.html" class="nav-dropdown-item">Поиск игрока</a>
                     </div>
                 </li>
                 <li class="nav-dropdown">
@@ -222,7 +222,7 @@
                     <ul class="mobile-dropdown-menu">
                         <li><a href="pages/courts.html">Теннисные корты</a></li>
                         <li><a href="pages/coaches.html">Тренеры</a></li>
-                        <li><a href="pages/partners.html">Найти партнёра</a></li>
+                        <li><a href="pages/partners.html">Поиск игрока</a></li>
                     </ul>
                 </li>
                 <li class="mobile-nav-dropdown">
@@ -495,31 +495,10 @@
             <div class="badges-cta-inner">
                 <div class="badges-cta-text">
                     <h2>Участвуй. Побеждай. Зарабатывай бейджи.</h2>
-                    <p>Регистрируйся, играй в турнирах и получай награды за достижения</p>
+                    <p id="badgesCtaDesc">Регистрируйся, играй в турнирах и получай награды за достижения</p>
                 </div>
-                <div class="badges-cta-cards">
-                    <div class="badge-cta-card">
-                        <span class="badge-cta-emoji">🆕</span>
-                        <span class="badge-cta-name">Новичок</span>
-                        <span class="badge-cta-desc">Зарегистрируйся и сыграй первый матч</span>
-                    </div>
-                    <div class="badge-cta-card">
-                        <span class="badge-cta-emoji">🔥</span>
-                        <span class="badge-cta-name">Серия побед</span>
-                        <span class="badge-cta-desc">Одержи 5 побед подряд</span>
-                    </div>
-                    <div class="badge-cta-card">
-                        <span class="badge-cta-emoji">⬆️</span>
-                        <span class="badge-cta-name">Прорыв</span>
-                        <span class="badge-cta-desc">Поднимись на 10+ мест в рейтинге</span>
-                    </div>
-                    <div class="badge-cta-card">
-                        <span class="badge-cta-emoji">🏆</span>
-                        <span class="badge-cta-name">Чемпион</span>
-                        <span class="badge-cta-desc">Выиграй финал турнира</span>
-                    </div>
-                </div>
-                <a href="pages/auth.html?tab=register" class="badges-cta-btn">Начать путь к победе</a>
+                <div class="badges-cta-cards" id="badgesCtaCards"></div>
+                <a href="pages/auth.html?tab=register" class="badges-cta-btn" id="badgesCtaBtn">Начать путь к победе</a>
             </div>
         </section>
 
@@ -1048,6 +1027,7 @@
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
+    <script src="js/session-monitor.js"></script>
     <script src="js/membership.js"></script>
     <script src="js/battle-cards.js?v=6"></script>
     <script>
@@ -1078,6 +1058,109 @@
                 if (el) el.textContent = total;
             }
         });
+    })();
+    </script>
+    <script>
+    // Badges CTA — dynamic for authorized users
+    (function() {
+        var client = window.supabaseClient;
+        var el = document.getElementById('badgesCtaCards');
+        var btn = document.getElementById('badgesCtaBtn');
+        var desc = document.getElementById('badgesCtaDesc');
+        if (!el) return;
+
+        var ALL = [
+            {e:'🎾',n:'Первый матч',d:'Сыграй свой первый матч'},
+            {e:'🏅',n:'Первая победа',d:'Одержи первую победу'},
+            {e:'🔟',n:'Десятка',d:'Сыграй 10 матчей'},
+            {e:'💪',n:'Полтинник',d:'Сыграй 50 матчей'},
+            {e:'💯',n:'Сотня',d:'Сыграй 100 матчей'},
+            {e:'⭐',n:'5 побед',d:'Одержи 5 побед'},
+            {e:'🌟',n:'10 побед',d:'Одержи 10 побед'},
+            {e:'🏆',n:'25 побед',d:'Одержи 25 побед'},
+            {e:'👑',n:'50 побед',d:'Одержи 50 побед'},
+            {e:'🔥',n:'Серия 3',d:'Одержи 3 победы подряд'},
+            {e:'⚡',n:'Серия 5',d:'Одержи 5 побед подряд'},
+            {e:'🚀',n:'Серия 10',d:'Одержи 10 побед подряд'},
+            {e:'🎯',n:'Первый турнир',d:'Прими участие в турнире'},
+            {e:'🏆',n:'Чемпион',d:'Выиграй финал турнира'},
+            {e:'🥈',n:'Финалист',d:'Выйди в финал'},
+            {e:'👑',n:'Чемпион х3',d:'Выиграй 3 турнира'},
+            {e:'💎',n:'Безупречный',d:'Выиграй турнир без потери сета'},
+            {e:'😱',n:'Сенсация',d:'Обыграй фаворита с 500+ очками'},
+            {e:'📈',n:'Топ-10',d:'Войди в топ-10 своей категории'},
+            {e:'🥇',n:'Первый номер',d:'Стань №1 в своей категории'},
+            {e:'😤',n:'Доминатор',d:'5+ побед над одним соперником'},
+            {e:'⏰',n:'Пионер',d:'Зарегистрирован в первый год KSLT'},
+            {e:'💚',n:'Член КСЛТ',d:'Активное членство'},
+            {e:'🎖️',n:'Ветеран 3',d:'3 года в KSLT'},
+            {e:'🏅',n:'Ветеран 5',d:'5 лет в KSLT'},
+            {e:'🤝',n:'Принял вызов',d:'Прими 5 вызовов на матч'},
+            {e:'⚔️',n:'Челленджер',d:'Отправь 10 вызовов на матч'}
+        ];
+
+        function renderCard(b) {
+            return '<div class="badge-cta-card">' +
+                '<span class="badge-cta-emoji">' + b.e + '</span>' +
+                '<span class="badge-cta-name">' + b.n + '</span>' +
+                '<span class="badge-cta-desc">' + b.d + '</span>' +
+            '</div>';
+        }
+
+        var isLoggedIn = false;
+        try {
+            var key = 'sb-qqkzszesviukopgjbead-auth-token';
+            var raw = localStorage.getItem(key);
+            if (raw) {
+                var s = JSON.parse(raw);
+                if (s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000)) isLoggedIn = true;
+            }
+        } catch(e) {}
+
+        if (!isLoggedIn || !client) {
+            var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
+            el.innerHTML = shuffled.slice(0, 5).map(renderCard).join('');
+            return;
+        }
+
+        (async function() {
+            var userRes = await client.auth.getUser();
+            if (!userRes.data || !userRes.data.user) return;
+            var uid = userRes.data.user.id;
+
+            var results = await Promise.all([
+                client.from('badge_definitions').select('id, icon, name, name_en, name_kg').order('sort_order'),
+                client.from('profiles').select('player_id').eq('id', uid).single()
+            ]);
+
+            var defs = results[0].data || [];
+            if (!defs.length) {
+                var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
+                el.innerHTML = shuffled.slice(0, 5).map(renderCard).join('');
+                return;
+            }
+
+            var earnedSet = {};
+            if (results[1].data && results[1].data.player_id) {
+                var badgesRes = await client.from('player_badges').select('badge_id').eq('player_id', results[1].data.player_id);
+                (badgesRes.data || []).forEach(function(b) { earnedSet[b.badge_id] = true; });
+            }
+
+            el.classList.add('badges-all');
+            el.innerHTML = defs.map(function(b) {
+                var locked = earnedSet[b.id] ? '' : ' locked';
+                return '<div class="badge-cta-card' + locked + '">' +
+                    '<span class="badge-cta-emoji">' + b.icon + '</span>' +
+                    '<span class="badge-cta-name">' + b.name + '</span>' +
+                '</div>';
+            }).join('');
+
+            if (desc) desc.textContent = 'Играй в турнирах и получай награды за достижения';
+            if (btn) {
+                btn.href = 'pages/dashboard.html';
+                btn.textContent = 'Мои бейджи';
+            }
+        })();
     })();
     </script>
     <script>

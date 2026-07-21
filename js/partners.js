@@ -1,5 +1,5 @@
 // ========================================
-// Partners Page — Find a Partner
+// Partners Page — Player Search
 // 3 access levels: guest (8 + blur), registered (all), member (full)
 // ========================================
 
@@ -10,7 +10,7 @@
 
     var L = isEn ? {
         heroTagline: 'KSLT Partners',
-        heroTitle: 'Find a <span>partner</span>',
+        heroTitle: 'Player <span>Search</span>',
         heroDesc: 'Connect with tennis players in Bishkek for games and practice',
         online: 'Online',
         offline: 'Offline',
@@ -44,7 +44,7 @@
         modalRegDisclaimer: 'By paying, you agree to the <a href="rules-en.html" target="_blank">rules</a> and <a href="pricing-en.html" target="_blank">pricing</a> of KSLT'
     } : isKg ? {
         heroTagline: 'KSLT Өнөктөштөр',
-        heroTitle: '<span>Өнөктөш</span> табуу',
+        heroTitle: '<span>Оюнчу</span> издөө',
         heroDesc: 'Оюн жана машыгуу үчүн Бишкектеги теннисчилерди табыңыз',
         online: 'Онлайн',
         offline: 'Оффлайн',
@@ -78,7 +78,7 @@
         modalRegDisclaimer: 'Баскычты басуу менен, <a href="rules-kg.html" target="_blank">эрежелер</a> жана <a href="pricing-kg.html" target="_blank">баалар</a> менен тааныштыгыңызды тастыктайсыз'
     } : {
         heroTagline: 'KSLT Партнёры',
-        heroTitle: 'Найти <span>партнёра</span>',
+        heroTitle: 'Поиск <span>игрока</span>',
         heroDesc: 'Найдите теннисистов в Бишкеке для совместных игр и тренировок',
         online: 'Онлайн',
         offline: 'Оффлайн',

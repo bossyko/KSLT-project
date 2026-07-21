@@ -374,7 +374,7 @@
       // 3. Load tournament
       const { data: tournament } = await db
         .from('tournaments')
-        .select('id, title, status, category_id, max_participants')
+        .select('id, title, status, category_id, max_participants, reserved_spots')
         .eq('id', tournamentId)
         .single()
 
@@ -470,6 +470,21 @@
 
         if (!membership || membership.length === 0) {
           await answerCallbackQuery(token, query.id, 'Необходимо активное членство KSLT')
+          return
+        }
+      }
+
+      // 6.5. Check online slots (max - reserved)
+      const reservedSpots = tournament.reserved_spots || 0
+      const onlineSlots = (tournament.max_participants || 0) - reservedSpots
+      if (onlineSlots > 0) {
+        const { count: activeCount } = await db
+          .from('tournament_registrations')
+          .select('id', { count: 'exact', head: true })
+          .eq('tournament_id', tournamentId)
+          .in('status', ['approved', 'pending'])
+        if ((activeCount || 0) >= onlineSlots) {
+          await answerCallbackQuery(token, query.id, 'Регистрация заполнена')
           return
         }
       }

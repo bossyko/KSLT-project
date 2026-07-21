@@ -734,23 +734,27 @@
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnNtrpMin + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adTrnNtrpMin" min="1.0" max="7.0" step="0.5" placeholder="1.0" value="' + (item && item.ntrp_min ? item.ntrp_min : '') + '">' +
+                        '<select class="ad-field-input" id="adTrnNtrpMin">' + A.ntrpOptions(item && item.ntrp_min) + '</select>' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnNtrpMax + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adTrnNtrpMax" min="1.0" max="7.0" step="0.5" placeholder="7.0" value="' + (item && item.ntrp_max ? item.ntrp_max : '') + '">' +
+                        '<select class="ad-field-input" id="adTrnNtrpMax">' + A.ntrpOptions(item && item.ntrp_max) + '</select>' +
                     '</div>' +
                     '<div class="ad-field" id="adTrnNtrpCombinedWrap">' +
                         '<label class="ad-field-label">' + L.trnNtrpCombinedMax + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adTrnNtrpCombinedMax" min="2.0" max="14.0" step="0.5" placeholder="14.0" value="' + (item && item.ntrp_combined_max ? item.ntrp_combined_max : '') + '">' +
+                        '<select class="ad-field-input" id="adTrnNtrpCombinedMax">' + A.ntrpOptions(item && item.ntrp_combined_max, { min: 2.0, max: 14.0 }) + '</select>' +
                         '<div class="ad-field-hint">' + L.trnNtrpHint + '</div>' +
                     '</div>' +
                 '</div>' +
-                // Meta row 2: Max participants / Prize fund / Status badge
-                '<div class="ad-field-row ad-field-row-3">' +
+                // Meta row 2: Max participants / Reserved spots / Prize fund / Status badge
+                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnMaxParticipants + '</label>' +
                         '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnMaxPart" placeholder="0" value="' + (item ? (item.max_participants || '') : '') + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnReservedSpots + '</label>' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnReservedSpots" placeholder="0" value="' + (item ? (item.reserved_spots || '') : '') + '">' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnPrizeFund + '</label>' +
@@ -891,19 +895,13 @@
         trnVenueSearchInput.addEventListener('input', function() {
             clearTimeout(trnVenueTimer);
             var q = trnVenueSearchInput.value.trim();
-            if (q.length < 2) {
-                trnVenueResultsDiv.style.display = 'none';
-                return;
-            }
             trnVenueTimer = setTimeout(function() {
                 searchTrnVenue(q);
-            }, 300);
+            }, 200);
         });
 
         trnVenueSearchInput.addEventListener('focus', function() {
-            if (trnVenueSearchInput.value.trim().length >= 2) {
-                searchTrnVenue(trnVenueSearchInput.value.trim());
-            }
+            searchTrnVenue(trnVenueSearchInput.value.trim());
         });
 
         document.addEventListener('click', function hideTrnVenue(e) {
@@ -1184,6 +1182,7 @@
             date_start: document.getElementById('adTrnDateStart').value || null,
             date_end: document.getElementById('adTrnDateEnd').value || null,
             max_participants: maxPart ? parseInt(maxPart, 10) : null,
+            reserved_spots: parseInt(document.getElementById('adTrnReservedSpots').value, 10) || 0,
             prize_fund: document.getElementById('adTrnPrize').value.trim() || null,
             image: trnImageUrl || null,
             format: document.getElementById('adTrnFormat').value || 'singles',
@@ -1509,10 +1508,10 @@
         var resultsDiv = document.getElementById('adTrnVenueResults');
         if (!resultsDiv) return;
 
-        var result = await A.client.from('courts')
-            .select('id,name,name_en,street,building,city,phone,google_maps_url,twogis_url')
-            .ilike('name', '%' + query + '%')
-            .limit(10);
+        var qb = A.client.from('courts')
+            .select('id,name,name_en,street,building,city,phone,google_maps_url,twogis_url');
+        if (query) qb = qb.ilike('name', '%' + query + '%');
+        var result = await qb.order('name').limit(20);
 
         var items = result.data || [];
         if (items.length === 0) {

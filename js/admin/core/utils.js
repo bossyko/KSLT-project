@@ -217,7 +217,7 @@
 
         function dismiss() { overlay.remove(); if (onCancel) onCancel(); }
         document.getElementById('adConfirmCancel').addEventListener('click', dismiss);
-        document.getElementById('adConfirmOk').addEventListener('click', function() { overlay.remove(); onConfirm(); });
+        document.getElementById('adConfirmOk').addEventListener('click', async function() { await onConfirm(); overlay.remove(); });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
     }
 
@@ -533,5 +533,21 @@
     A.bulkCheckboxTd = bulkCheckboxTd;
     A.uploadImage = uploadImage;
     A.exportCsv = exportCsv;
+
+    // NTRP select options helper (1.0 - 7.0, step 0.5)
+    A.ntrpOptions = function(selectedVal, opts) {
+        opts = opts || {};
+        var min = opts.min || 1.0;
+        var max = opts.max || 7.0;
+        var step = opts.step || 0.5;
+        var emptyLabel = opts.emptyLabel || '—';
+        var html = '<option value="">' + emptyLabel + '</option>';
+        for (var v = min; v <= max + 0.01; v += step) {
+            var val = v.toFixed(1);
+            var sel = (selectedVal && parseFloat(selectedVal).toFixed(1) === val) ? ' selected' : '';
+            html += '<option value="' + val + '"' + sel + '>' + val + '</option>';
+        }
+        return html;
+    };
 
 })();

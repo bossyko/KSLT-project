@@ -89,7 +89,7 @@
                     <div class="nav-dropdown-menu">
                         <a href="pages/courts-en.html" class="nav-dropdown-item">Tennis Courts</a>
                         <a href="pages/coaches-en.html" class="nav-dropdown-item">Coaches</a>
-                        <a href="pages/partners-en.html" class="nav-dropdown-item">Find Partner</a>
+                        <a href="pages/partners-en.html" class="nav-dropdown-item">Player Search</a>
                     </div>
                 </li>
                 <li class="nav-dropdown">
@@ -216,7 +216,7 @@
                     <ul class="mobile-dropdown-menu">
                         <li><a href="pages/courts-en.html">Tennis Courts</a></li>
                         <li><a href="pages/coaches-en.html">Coaches</a></li>
-                        <li><a href="pages/partners-en.html">Find Partner</a></li>
+                        <li><a href="pages/partners-en.html">Player Search</a></li>
                     </ul>
                 </li>
                 <li class="mobile-nav-dropdown">
@@ -285,11 +285,11 @@
                 </h1>
                 <p class="hero-slogan">Your Tennis Bro</p>
                 <p class="hero-subtitle">
-                    Find a partner, compete in tournaments and boost your rating in the tennis community
+                    Find a player, compete in tournaments and boost your rating in the tennis community
                 </p>
                 <div class="hero-cta">
                     <a href="pages/partners-en.html" class="btn-primary">
-                        Find Partner
+                        Player Search
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
@@ -482,10 +482,10 @@
             <div class="badges-cta-inner">
                 <div class="badges-cta-text">
                     <h2>Compete. Win. Earn Badges.</h2>
-                    <p>Register, play tournaments and earn rewards for your achievements</p>
+                    <p id="badgesCtaDesc">Register, play tournaments and earn rewards for your achievements</p>
                 </div>
                 <div class="badges-cta-cards" id="badgesCtaCards"></div>
-                <a href="pages/auth-en.html?tab=register" class="badges-cta-btn">Start your journey</a>
+                <a href="pages/auth-en.html?tab=register" class="badges-cta-btn" id="badgesCtaBtn">Start your journey</a>
             </div>
         </section>
 
@@ -868,7 +868,7 @@
                     <div class="feature">
                         <span class="feature-icon">👥</span>
                         <h4>Community</h4>
-                        <p>Find a partner to play anytime</p>
+                        <p>Find a player to play anytime</p>
                     </div>
                     <div class="feature">
                         <span class="feature-icon">📊</span>
@@ -980,6 +980,7 @@
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
+    <script src="js/session-monitor.js"></script>
     <script src="js/membership.js"></script>
     <script src="js/battle-cards.js?v=6"></script>
     <script>
@@ -1012,8 +1013,14 @@
     })();
     </script>
     <script>
-    // Random badges CTA
+    // Badges CTA — dynamic for authorized users
     (function() {
+        var client = window.supabaseClient;
+        var el = document.getElementById('badgesCtaCards');
+        var btn = document.getElementById('badgesCtaBtn');
+        var desc = document.getElementById('badgesCtaDesc');
+        if (!el) return;
+
         var ALL = [
             {e:'🎾',n:'First Match',d:'Play your first match'},
             {e:'🏅',n:'First Win',d:'Win your first match'},
@@ -1043,17 +1050,69 @@
             {e:'🤝',n:'Accepted Challenge',d:'Accept 5 match challenges'},
             {e:'⚔️',n:'Challenger',d:'Send 10 match challenges'}
         ];
-        var el = document.getElementById('badgesCtaCards');
-        if (!el) return;
-        var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
-        var pick = shuffled.slice(0, 5);
-        el.innerHTML = pick.map(function(b) {
+
+        function renderCard(b) {
             return '<div class="badge-cta-card">' +
                 '<span class="badge-cta-emoji">' + b.e + '</span>' +
                 '<span class="badge-cta-name">' + b.n + '</span>' +
                 '<span class="badge-cta-desc">' + b.d + '</span>' +
             '</div>';
-        }).join('');
+        }
+
+        var isLoggedIn = false;
+        try {
+            var key = 'sb-qqkzszesviukopgjbead-auth-token';
+            var raw = localStorage.getItem(key);
+            if (raw) {
+                var s = JSON.parse(raw);
+                if (s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000)) isLoggedIn = true;
+            }
+        } catch(e) {}
+
+        if (!isLoggedIn || !client) {
+            var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
+            el.innerHTML = shuffled.slice(0, 5).map(renderCard).join('');
+            return;
+        }
+
+        (async function() {
+            var userRes = await client.auth.getUser();
+            if (!userRes.data || !userRes.data.user) return;
+            var uid = userRes.data.user.id;
+
+            var results = await Promise.all([
+                client.from('badge_definitions').select('id, icon, name, name_en, name_kg').order('sort_order'),
+                client.from('profiles').select('player_id').eq('id', uid).single()
+            ]);
+
+            var defs = results[0].data || [];
+            if (!defs.length) {
+                var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
+                el.innerHTML = shuffled.slice(0, 5).map(renderCard).join('');
+                return;
+            }
+
+            var earnedSet = {};
+            if (results[1].data && results[1].data.player_id) {
+                var badgesRes = await client.from('player_badges').select('badge_id').eq('player_id', results[1].data.player_id);
+                (badgesRes.data || []).forEach(function(b) { earnedSet[b.badge_id] = true; });
+            }
+
+            el.classList.add('badges-all');
+            el.innerHTML = defs.map(function(b) {
+                var locked = earnedSet[b.id] ? '' : ' locked';
+                return '<div class="badge-cta-card' + locked + '">' +
+                    '<span class="badge-cta-emoji">' + b.icon + '</span>' +
+                    '<span class="badge-cta-name">' + (b.name_en || b.name) + '</span>' +
+                '</div>';
+            }).join('');
+
+            if (desc) desc.textContent = 'Play tournaments and earn rewards for your achievements';
+            if (btn) {
+                btn.href = 'pages/dashboard-en.html';
+                btn.textContent = 'My Badges';
+            }
+        })();
     })();
     </script>
     <script>

@@ -81,8 +81,12 @@ CREATE POLICY "staff_delete_coaches" ON coaches FOR DELETE
   );
 
 -- ============================================
--- PLAYERS — admin ONLY can modify
+-- PLAYERS — public read, admin ONLY can modify
 -- ============================================
+CREATE POLICY "authenticated_read_players" ON players
+  FOR SELECT TO authenticated
+  USING (true);
+
 CREATE POLICY "admin_insert_players" ON players FOR INSERT
   WITH CHECK (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')

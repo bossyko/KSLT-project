@@ -23,7 +23,7 @@
     'menu.battles':     { ru: 'Баттлы',       en: 'Battles',       kg: 'Баттлдар' },
     'menu.courts':      { ru: 'Корты',        en: 'Courts',        kg: 'Корттор' },
     'menu.coaches':     { ru: 'Тренеры',      en: 'Coaches',       kg: 'Машыктыруучулар' },
-    'menu.partners':    { ru: 'Найти партнёра', en: 'Find Partner', kg: 'Өнөктөш табуу' },
+    'menu.partners':    { ru: 'Поиск игрока', en: 'Player Search', kg: 'Оюнчу издөө' },
     'menu.sponsors':    { ru: 'Спонсоры',     en: 'Sponsors',      kg: 'Демөөрчүлөр' },
     'menu.info':        { ru: 'Информация',   en: 'Information',   kg: 'Маалымат' },
     'menu.about':       { ru: 'О KSLT',       en: 'About KSLT',    kg: 'KSLT жөнүндө' },
@@ -199,8 +199,8 @@
     'battles.soon':        { ru: 'Скоро здесь появятся баттлы', en: 'Battles coming soon', kg: 'Баттлдар жакында пайда болот' },
 
     // === Partners screen ===
-    'partners.title':      { ru: 'Найти партнёра',       en: 'Find Partner',      kg: 'Өнөктөш табуу' },
-    'partners.subtitle':   { ru: 'Найди партнёра по NTRP уровню', en: 'Find a partner by NTRP level', kg: 'NTRP деңгээли боюнча өнөктөш табуу' },
+    'partners.title':      { ru: 'Поиск игрока',       en: 'Player Search',      kg: 'Оюнчу издөө' },
+    'partners.subtitle':   { ru: 'Найди игрока по NTRP уровню', en: 'Find a player by NTRP level', kg: 'NTRP деңгээли боюнча оюнчу издөө' },
     'partners.search':     { ru: 'Поиск по имени...',    en: 'Search by name...', kg: 'Аты боюнча издөө...' },
     'partners.all':        { ru: 'Все',                   en: 'All',              kg: 'Баары' },
     'partners.empty':      { ru: 'Нет партнёров',        en: 'No partners',       kg: 'Өнөктөш жок' },

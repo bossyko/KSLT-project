@@ -2160,12 +2160,9 @@ select.ad-field-input {
 
 /* ---- Bracket Management: Sticky Header ---- */
 .ad-brk-sticky-header {
-    position: sticky;
-    top: 64px;
-    z-index: 40;
     background: var(--bg-primary);
     padding-bottom: 4px;
-    margin-bottom: 16px;
+    margin-bottom: 4px;
     border-bottom: 1px solid var(--border-subtle);
 }
 
