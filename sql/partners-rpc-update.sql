@@ -2,7 +2,7 @@
 -- KSLT — Updated Partners RPC
 -- Source: players table (150 records)
 -- If player has linked profile → show last_seen, avatar
--- Gender from categories.gender (men/women → male/female)
+-- Gender: profile.gender (male/female) → category.gender (men/women) → NULL
 -- ============================================
 
 CREATE OR REPLACE FUNCTION get_public_partners()
@@ -19,7 +19,10 @@ RETURNS TABLE (
         pl.id,
         pl.name AS full_name,
         COALESCE(pr.avatar_url, pl.photo) AS avatar_url,
-        CASE WHEN c.gender = 'men' THEN 'male' ELSE 'female' END AS gender,
+        COALESCE(
+            pr.gender,
+            CASE c.gender WHEN 'men' THEN 'male' WHEN 'women' THEN 'female' ELSE NULL END
+        ) AS gender,
         pr.last_seen,
         c.name AS category_name,
         c.name_en AS category_name_en

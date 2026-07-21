@@ -1284,7 +1284,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 '</div>' +
                 '<div class="td-hero-stats">' +
                     '<div class="hero-stat">' +
-                        '<span class="hero-stat-value">' + (t.max_participants || '—') + '</span>' +
+                        '<span class="hero-stat-value">' + ((t.max_participants || 0) - (t.reserved_spots || 0) || t.max_participants || '—') + '</span>' +
                         '<span class="hero-stat-label">' + L.participants + '</span>' +
                     '</div>' +
                     '<div class="hero-stat">' +
@@ -2298,6 +2298,11 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
                 var btnHtml = '<div class="td-registration-area" style="margin-top:var(--space-md);">';
 
+                // Check online slots (max - reserved)
+                var onlineSlots = (tournament.max_participants || 0) - (tournament.reserved_spots || 0);
+                var activeRegCount = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; }).length;
+                var onlineSlotsFull = onlineSlots > 0 && activeRegCount >= onlineSlots;
+
                 // Ban check
                 var playerBanned = plRes.data.banned_until && new Date(plRes.data.banned_until) > new Date();
 
@@ -2308,6 +2313,12 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания' });
                     btnHtml += '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
                         statusLabels[alreadyRegistered.status] + '</span>';
+                    // Doubles without partner: show "Add Partner" button
+                    var isTournamentDoublesCheck = tournament.format === 'doubles' || tournament.format === 'mixed_doubles';
+                    if (isTournamentDoublesCheck && !alreadyRegistered.partner_id) {
+                        btnHtml += ' <button id="tdAddPartnerBtn" style="margin-left:12px;padding:8px 16px;border:1px solid var(--accent);border-radius:8px;background:transparent;color:var(--accent);font-weight:500;cursor:pointer;font-size:0.9rem;">' +
+                            (isEn ? 'Add Partner' : (isKg ? 'Өнөктөш кошуу' : 'Добавить партнёра')) + '</button>';
+                    }
                 } else if (playerBanned) {
                     var isPerm = new Date(plRes.data.banned_until).getFullYear() >= 2099;
                     var banDateStr = isPerm
@@ -2362,6 +2373,12 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                             (isEn ? 'Go to payment →' : (isKg ? 'Төлөмгө өтүү →' : 'Перейти к оплате →')) +
                         '</a>' +
                     '</div>';
+                } else if (onlineSlotsFull) {
+                    btnHtml += '<div style="margin-bottom:8px;padding:8px 12px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.2);font-size:0.85rem;color:#ffc107;">' +
+                        (isEn ? 'Main draw is full. You can join the waitlist.' : (isKg ? 'Негизги сетка толук. Күтүү тизмесине кошулсаңыз болот.' : 'Основная сетка заполнена. Вы можете встать в лист ожидания.')) +
+                    '</div>' +
+                    '<button class="td-register-btn" id="tdRegisterBtn" data-waitlist="1" style="padding:10px 24px;border:none;border-radius:8px;background:rgba(255,193,7,0.3);color:#ffc107;font-weight:600;cursor:pointer;font-size:1rem;">' +
+                        (isEn ? 'Join Waitlist' : (isKg ? 'Күтүү тизмесине кошулуу' : 'Встать в лист ожидания')) + '</button>';
                 } else {
                     btnHtml += '<button class="td-register-btn" id="tdRegisterBtn" style="padding:10px 24px;border:none;border-radius:8px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;font-size:1rem;">' +
                         (isEn ? 'Register for Tournament' : (isKg ? 'Мелдешке каттоо' : 'Записаться на турнир')) + '</button>';
@@ -2372,6 +2389,14 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
                 // Check if doubles tournament
                 var isTournamentDoubles = tournament.format === 'doubles' || tournament.format === 'mixed_doubles';
+
+                // "Add Partner" button handler for solo doubles registration
+                var addPartnerBtn = document.getElementById('tdAddPartnerBtn');
+                if (addPartnerBtn) {
+                    addPartnerBtn.addEventListener('click', function() {
+                        showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, addPartnerBtn, alreadyRegistered.id, playerNtrp, onlineSlotsFull);
+                    });
+                }
 
                 // Also check if player is already registered as partner
                 var alreadyAsPartner = registrations.find(function(r) { return r.partner_id === playerId; });
@@ -2390,14 +2415,15 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     regBtn.addEventListener('click', async function() {
                         if (isTournamentDoubles) {
                             // Show doubles registration modal
-                            showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, regBtn);
+                            showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, regBtn, null, playerNtrp, onlineSlotsFull);
                             return;
                         }
 
+                        var isWaitlist = regBtn.dataset.waitlist === '1';
                         regBtn.disabled = true;
                         regBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
 
-                        var regStatus = isExactCategory ? 'pending' : 'waitlist';
+                        var regStatus = isWaitlist ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
                         var res = await client.from('tournament_registrations').insert({
                             tournament_id: tournament.id,
                             player_id: playerId,
@@ -2407,7 +2433,9 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         if (res.error) {
                             alert(res.error.message);
                             regBtn.disabled = false;
-                            regBtn.textContent = isEn ? 'Register for Tournament' : (isKg ? 'Мелдешке каттоо' : 'Записаться на турнир');
+                            regBtn.textContent = isWaitlist
+                                ? (isEn ? 'Join Waitlist' : (isKg ? 'Күтүү тизмесине кошулуу' : 'Встать в лист ожидания'))
+                                : (isEn ? 'Register for Tournament' : (isKg ? 'Мелдешке каттоо' : 'Записаться на турнир'));
                             return;
                         }
 
@@ -2427,7 +2455,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 // DOUBLES REGISTRATION MODAL
 // ========================================
 
-function showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, regBtn) {
+function showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, regBtn, existingRegId, captainNtrp, onlineSlotsFull) {
     // Create modal overlay
     var overlay = document.createElement('div');
     overlay.className = 'td-doubles-modal-overlay';
@@ -2436,13 +2464,27 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
     var isMixed = tournament.format === 'mixed_doubles';
     var soloLabel = isEn ? 'Register without partner (add later)' : (isKg ? 'Өнөктөшсүз каттоо (кийин кошуу)' : 'Записаться без партнёра (добавить позже)');
     var searchLabel = isEn ? 'Search partner by name...' : (isKg ? 'Өнөктөштү аты боюнча издөө...' : 'Поиск партнёра по имени...');
-    var registerLabel = isEn ? 'Register' : (isKg ? 'Каттоо' : 'Записаться');
+    var registerLabel = existingRegId
+        ? (isEn ? 'Save' : (isKg ? 'Сактоо' : 'Сохранить'))
+        : (isEn ? 'Register' : (isKg ? 'Каттоо' : 'Записаться'));
     var cancelLabel = isEn ? 'Cancel' : (isKg ? 'Жокко чыгаруу' : 'Отмена');
+
+    // NTRP combined hint
+    var ntrpHint = '';
+    if (tournament.ntrp_combined_max && captainNtrp) {
+        var remaining = tournament.ntrp_combined_max - captainNtrp;
+        ntrpHint = '<div style="padding:8px 12px;margin-bottom:12px;border-radius:8px;background:rgba(204,255,0,0.08);border:1px solid rgba(204,255,0,0.2);font-size:0.85rem;color:var(--text-secondary);">' +
+            (isEn ? 'NTRP limit: ' + tournament.ntrp_combined_max + ' (yours: ' + captainNtrp + ', partner max: ' + remaining.toFixed(1) + ')'
+                : (isKg ? 'NTRP чеги: ' + tournament.ntrp_combined_max + ' (сиздики: ' + captainNtrp + ', өнөктөш макс: ' + remaining.toFixed(1) + ')'
+                : 'Лимит NTRP: ' + tournament.ntrp_combined_max + ' (ваш: ' + captainNtrp + ', партнёр макс: ' + remaining.toFixed(1) + ')')) +
+        '</div>';
+    }
 
     var modalHtml = '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto;">' +
         '<h3 style="color:var(--text-primary);margin:0 0 16px;font-size:1.1rem;">' +
             (isEn ? 'Partner Selection' : (isKg ? 'Өнөктөштү тандоо' : 'Выбор партнёра')) +
         '</h3>' +
+        ntrpHint +
         '<div style="margin-bottom:12px;">' +
             '<input type="text" id="tdPartnerSearch" placeholder="' + searchLabel + '" ' +
                 'style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;box-sizing:border-box;" autocomplete="off">' +
@@ -2452,9 +2494,10 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
         '</div>' +
         '<div style="display:flex;gap:12px;margin-top:16px;">' +
             '<button id="tdDoublesCancel" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text-secondary);cursor:pointer;">' + cancelLabel + '</button>' +
+            (existingRegId ? '' :
             '<button id="tdDoublesRegSolo" style="flex:1;padding:10px;border:none;border-radius:8px;background:rgba(204,255,0,0.2);color:var(--accent);cursor:pointer;font-size:0.85rem;">' +
                 (isEn ? 'Solo' : (isKg ? 'Жалгыз' : 'Без партнёра')) +
-            '</button>' +
+            '</button>') +
             '<button id="tdDoublesRegWithPartner" style="flex:1;padding:10px;border:none;border-radius:8px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;" disabled>' + registerLabel + '</button>' +
         '</div>' +
     '</div>';
@@ -2472,13 +2515,14 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
         overlay.remove();
     });
 
-    // Solo registration
-    document.getElementById('tdDoublesRegSolo').addEventListener('click', async function() {
+    // Solo registration (not shown in update mode)
+    var soloBtn = document.getElementById('tdDoublesRegSolo');
+    if (soloBtn) soloBtn.addEventListener('click', async function() {
         var soloBtn = document.getElementById('tdDoublesRegSolo');
         soloBtn.disabled = true;
         soloBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
 
-        var regStatus = isExactCategory ? 'pending' : 'waitlist';
+        var regStatus = onlineSlotsFull ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
         var res = await client.from('tournament_registrations').insert({
             tournament_id: tournament.id,
             player_id: playerId,
@@ -2492,7 +2536,9 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
             return;
         }
 
-        var regMsg = isEn ? 'Registered (no partner yet)' : (isKg ? 'Катталды (өнөктөш жок)' : 'Зарегистрирован (без партнёра)');
+        var regMsg = regStatus === 'waitlist'
+            ? (isEn ? 'On Waitlist (no partner yet)' : (isKg ? 'Күтүү тизмесинде (өнөктөш жок)' : 'В листе ожидания (без партнёра)'))
+            : (isEn ? 'Registered (no partner yet)' : (isKg ? 'Катталды (өнөктөш жок)' : 'Зарегистрирован (без партнёра)'));
         regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' + regMsg + '</span>';
     });
 
@@ -2505,13 +2551,20 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
         regWithBtn.disabled = true;
         regWithBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
 
-        var regStatus = isExactCategory ? 'pending' : 'waitlist';
-        var res = await client.from('tournament_registrations').insert({
-            tournament_id: tournament.id,
-            player_id: playerId,
-            partner_id: partnerId,
-            status: regStatus
-        });
+        var res;
+        if (existingRegId) {
+            // Update mode: add partner to existing registration
+            res = await client.from('tournament_registrations').update({ partner_id: partnerId }).eq('id', existingRegId);
+        } else {
+            // New registration
+            var regStatus = onlineSlotsFull ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
+            res = await client.from('tournament_registrations').insert({
+                tournament_id: tournament.id,
+                player_id: playerId,
+                partner_id: partnerId,
+                status: regStatus
+            });
+        }
 
         overlay.remove();
 
@@ -2520,8 +2573,20 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
             return;
         }
 
-        var regMsg = isEn ? 'Registration Submitted!' : (isKg ? 'Арыз жөнөтүлдү!' : 'Заявка отправлена!');
-        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' + regMsg + '</span>';
+        var regMsg = existingRegId
+            ? (isEn ? 'Partner added!' : (isKg ? 'Өнөктөш кошулду!' : 'Партнёр добавлен!'))
+            : (regStatus === 'waitlist'
+                ? (isEn ? 'On Waitlist — Awaiting Approval' : (isKg ? 'Күтүү тизмесинде — бекитүүнү күтүүдө' : 'В листе ожидания — ожидает одобрения'))
+                : (isEn ? 'Registration Submitted!' : (isKg ? 'Арыз жөнөтүлдү!' : 'Заявка отправлена!')));
+        if (existingRegId) {
+            // Remove the "Add Partner" button and update status text
+            var addPartnerBtnEl = document.getElementById('tdAddPartnerBtn');
+            if (addPartnerBtnEl) addPartnerBtnEl.remove();
+            var statusEl = document.querySelector('.td-reg-status');
+            if (statusEl) statusEl.textContent = regMsg;
+        } else {
+            regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' + regMsg + '</span>';
+        }
     });
 
     // Partner search
@@ -2565,6 +2630,21 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
 
             resultsDiv.querySelectorAll('.td-partner-item').forEach(function(item) {
                 item.addEventListener('click', function() {
+                    // Combined NTRP validation for doubles
+                    var ntrpCombinedMax = tournament.ntrp_combined_max;
+                    if (ntrpCombinedMax && captainNtrp) {
+                        var partnerNtrp = parseFloat(item.dataset.ntrp) || 0;
+                        var combinedNtrp = captainNtrp + partnerNtrp;
+                        if (combinedNtrp > ntrpCombinedMax) {
+                            alert(isEn
+                                ? 'Combined NTRP ' + combinedNtrp.toFixed(1) + ' exceeds the limit ' + ntrpCombinedMax + ' (yours: ' + captainNtrp + ' + partner: ' + partnerNtrp + ')'
+                                : (isKg
+                                    ? 'Жалпы NTRP ' + combinedNtrp.toFixed(1) + ' чектен (' + ntrpCombinedMax + ') ашып кетти (сиздики: ' + captainNtrp + ' + өнөктөш: ' + partnerNtrp + ')'
+                                    : 'Суммарный NTRP ' + combinedNtrp.toFixed(1) + ' превышает лимит ' + ntrpCombinedMax + ' (ваш: ' + captainNtrp + ' + партнёр: ' + partnerNtrp + ')'));
+                            return;
+                        }
+                    }
+
                     // Gender validation for mixed doubles
                     if (isMixed) {
                         // We need to check captain's gender

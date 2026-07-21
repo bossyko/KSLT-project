@@ -86,7 +86,7 @@
                     <div class="nav-dropdown-menu">
                         <a href="pages/courts-kg.html" class="nav-dropdown-item">Теннис корттору</a>
                         <a href="pages/coaches-kg.html" class="nav-dropdown-item">Машыктыруучулар</a>
-                        <a href="pages/partners-kg.html" class="nav-dropdown-item">Өнөктөш табуу</a>
+                        <a href="pages/partners-kg.html" class="nav-dropdown-item">Оюнчу издөө</a>
                     </div>
                 </li>
                 <li class="nav-dropdown">
@@ -210,7 +210,7 @@
                     <ul class="mobile-dropdown-menu">
                         <li><a href="pages/courts-kg.html">Теннис корттору</a></li>
                         <li><a href="pages/coaches-kg.html">Машыктыруучулар</a></li>
-                        <li><a href="pages/partners-kg.html">Өнөктөш табуу</a></li>
+                        <li><a href="pages/partners-kg.html">Оюнчу издөө</a></li>
                     </ul>
                 </li>
                 <li class="mobile-nav-dropdown">
@@ -285,7 +285,7 @@
                 </p>
                 <div class="hero-cta">
                     <a href="pages/players-kg.html" class="btn-primary">
-                        Өнөктөш табуу
+                        Оюнчу издөө
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
@@ -403,10 +403,10 @@
             <div class="badges-cta-inner">
                 <div class="badges-cta-text">
                     <h2>Катыш. Жең. Бейджик ал.</h2>
-                    <p>Катталгыла, турнирлерде ойногула жана жетишкендиктериңиз үчүн сыйлыктарды алгыла</p>
+                    <p id="badgesCtaDesc">Катталгыла, турнирлерде ойногула жана жетишкендиктериңиз үчүн сыйлыктарды алгыла</p>
                 </div>
                 <div class="badges-cta-cards" id="badgesCtaCards"></div>
-                <a href="pages/auth-kg.html?tab=register" class="badges-cta-btn">Жеңишке жол баштоо</a>
+                <a href="pages/auth-kg.html?tab=register" class="badges-cta-btn" id="badgesCtaBtn">Жеңишке жол баштоо</a>
             </div>
         </section>
 
@@ -768,6 +768,7 @@
 
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
+    <script src="js/session-monitor.js"></script>
     <script src="js/battle-cards.js?v=6"></script>
     <script>
     (function() {
@@ -799,8 +800,14 @@
     })();
     </script>
     <script>
-    // Random badges CTA
+    // Badges CTA — dynamic for authorized users
     (function() {
+        var client = window.supabaseClient;
+        var el = document.getElementById('badgesCtaCards');
+        var btn = document.getElementById('badgesCtaBtn');
+        var desc = document.getElementById('badgesCtaDesc');
+        if (!el) return;
+
         var ALL = [
             {e:'🎾',n:'Биринчи матч',d:'1 матч ойно'},
             {e:'🏅',n:'Биринчи жеңиш',d:'1 матч жең'},
@@ -830,17 +837,69 @@
             {e:'🤝',n:'Кабыл алды',d:'5 чакырыкты кабыл ал'},
             {e:'⚔️',n:'Чакыруучу',d:'10 чакырык жөнөт'}
         ];
-        var el = document.getElementById('badgesCtaCards');
-        if (!el) return;
-        var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
-        var pick = shuffled.slice(0, 5);
-        el.innerHTML = pick.map(function(b) {
+
+        function renderCard(b) {
             return '<div class="badge-cta-card">' +
                 '<span class="badge-cta-emoji">' + b.e + '</span>' +
                 '<span class="badge-cta-name">' + b.n + '</span>' +
                 '<span class="badge-cta-desc">' + b.d + '</span>' +
             '</div>';
-        }).join('');
+        }
+
+        var isLoggedIn = false;
+        try {
+            var key = 'sb-qqkzszesviukopgjbead-auth-token';
+            var raw = localStorage.getItem(key);
+            if (raw) {
+                var s = JSON.parse(raw);
+                if (s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000)) isLoggedIn = true;
+            }
+        } catch(e) {}
+
+        if (!isLoggedIn || !client) {
+            var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
+            el.innerHTML = shuffled.slice(0, 5).map(renderCard).join('');
+            return;
+        }
+
+        (async function() {
+            var userRes = await client.auth.getUser();
+            if (!userRes.data || !userRes.data.user) return;
+            var uid = userRes.data.user.id;
+
+            var results = await Promise.all([
+                client.from('badge_definitions').select('id, icon, name, name_en, name_kg').order('sort_order'),
+                client.from('profiles').select('player_id').eq('id', uid).single()
+            ]);
+
+            var defs = results[0].data || [];
+            if (!defs.length) {
+                var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
+                el.innerHTML = shuffled.slice(0, 5).map(renderCard).join('');
+                return;
+            }
+
+            var earnedSet = {};
+            if (results[1].data && results[1].data.player_id) {
+                var badgesRes = await client.from('player_badges').select('badge_id').eq('player_id', results[1].data.player_id);
+                (badgesRes.data || []).forEach(function(b) { earnedSet[b.badge_id] = true; });
+            }
+
+            el.classList.add('badges-all');
+            el.innerHTML = defs.map(function(b) {
+                var locked = earnedSet[b.id] ? '' : ' locked';
+                return '<div class="badge-cta-card' + locked + '">' +
+                    '<span class="badge-cta-emoji">' + b.icon + '</span>' +
+                    '<span class="badge-cta-name">' + (b.name_kg || b.name) + '</span>' +
+                '</div>';
+            }).join('');
+
+            if (desc) desc.textContent = 'Турнирлерде ойноңуз жана жетишкендиктер үчүн сыйлыктарды алыңыз';
+            if (btn) {
+                btn.href = 'pages/dashboard-kg.html';
+                btn.textContent = 'Менин бейджиктерим';
+            }
+        })();
     })();
     </script>
     <script src="js/auth-nav.js?v=2"></script>

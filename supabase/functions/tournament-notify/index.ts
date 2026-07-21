@@ -172,6 +172,11 @@ Deno.serve(async (req) => {
       text += `📅 ${dateStr}\n`
       if (venue) text += `📍 ${escapeHtml(venue)}\n`
       if (catName) text += `🎯 Категория: ${escapeHtml(catName)}\n`
+      // Format & gender
+      const fmtMap: Record<string, string> = { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' }
+      const gdrMap: Record<string, string> = { men: '♂ Мужской', women: '♀ Женский', mixed: '⚤ Смешанный' }
+      if (t.format && fmtMap[t.format]) text += `🎾 Формат: ${fmtMap[t.format]}\n`
+      if (t.gender && gdrMap[t.gender]) text += `${gdrMap[t.gender]}\n`
       if (t.max_participants) text += `👥 Мест: ${t.max_participants}\n`
 
       // Inline keyboard: Register + Website
@@ -206,6 +211,8 @@ Deno.serve(async (req) => {
               dates: dateStr,
               venue: venue,
               category: catName,
+              format: t.format ? (fmtMap[t.format] || t.format) : '',
+              gender: t.gender ? (gdrMap[t.gender] || t.gender) : '',
               max_participants: t.max_participants,
               tournament_id: t.id
             }

@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 cards[i].style.userSelect = 'none';
             }
 
-            var playersTitle = isEn ? 'Register to find a hitting partner' : (isKg ? 'Өнөктөш табуу үчүн катталыңыз' : 'Зарегистрируйтесь для поиска партнёра');
+            var playersTitle = isEn ? 'Register to find a player' : (isKg ? 'Оюнчу издөө үчүн катталыңыз' : 'Зарегистрируйтесь для поиска игрока');
             var playersCta = document.createElement('div');
             playersCta.className = 'guest-section-cta guest-section-cta-players';
             playersCta.innerHTML =

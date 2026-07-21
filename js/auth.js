@@ -279,20 +279,29 @@
     }
 
 
-    // ---- Signup Telegram button → trigger TG widget click ----
+    // ---- Telegram App Modal ----
+    var tgAppModal = document.getElementById('tgAppModal');
+    function showTgAppModal() {
+        if (tgAppModal) tgAppModal.classList.add('active');
+    }
+    function hideTgAppModal() {
+        if (tgAppModal) tgAppModal.classList.remove('active');
+    }
+    var tgAppClose = document.getElementById('tgAppClose');
+    var tgAppCloseX = document.getElementById('tgAppCloseX');
+    if (tgAppClose) tgAppClose.addEventListener('click', hideTgAppModal);
+    if (tgAppCloseX) tgAppCloseX.addEventListener('click', hideTgAppModal);
+    if (tgAppModal) tgAppModal.addEventListener('click', function(e) {
+        if (e.target === tgAppModal) hideTgAppModal();
+    });
+
+    // All TG buttons on page → show modal
+    document.querySelectorAll('.auth-tg-app-btn').forEach(function(btn) {
+        btn.addEventListener('click', showTgAppModal);
+    });
     var signupTgBtn = document.getElementById('signupTgBtn');
     if (signupTgBtn) {
-        signupTgBtn.addEventListener('click', function() {
-            var tgIframe = document.querySelector('#tgWidgetWrap iframe');
-            if (tgIframe) {
-                tgIframe.style.display = 'block';
-                tgIframe.click();
-            }
-            // Fallback: switch to signin tab and let user click TG widget there
-            if (!tgIframe) {
-                tabs[0].click();
-            }
-        });
+        signupTgBtn.addEventListener('click', showTgAppModal);
     }
 
     tabs.forEach(function(tab) {
