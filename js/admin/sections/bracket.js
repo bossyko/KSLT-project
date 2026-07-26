@@ -5810,20 +5810,22 @@
     // ---- Handle IG completion: auto-fill X-slots with IG winners ----
     async function tryFillPlayoffFromIG(tournamentId) {
         try {
+            console.log('[tryFill] START for', tournamentId);
             // Check if ALL IG matches are done
             var igRes = await A.client.from('matches').select('*')
                 .eq('tournament_id', tournamentId).eq('round', 'IG');
             var igAll = igRes.data || [];
-            if (igAll.length === 0) return;
+            if (igAll.length === 0) { console.log('[tryFill] EXIT: no IG matches'); return; }
             var allDone = igAll.every(function(m) { return m.status === 'completed' && m.winner_id; });
-            if (!allDone) return;
+            if (!allDone) { console.log('[tryFill] EXIT: IG not all done', igAll.map(function(m){return {status:m.status,winner:m.winner_id};})); return; }
 
             // Collect IG winners
             var igWinners = [];
             igAll.forEach(function(m) {
                 if (m.winner_id) igWinners.push(m.winner_id);
             });
-            if (igWinners.length === 0) return;
+            if (igWinners.length === 0) { console.log('[tryFill] EXIT: no winners'); return; }
+            console.log('[tryFill] igWinners:', igWinners);
 
             // Build player→group map from group matches
             var grpRes = await A.client.from('matches').select('player1_id, player2_id, group_number')
@@ -5839,6 +5841,7 @@
                 .eq('tournament_id', tournamentId).eq('round_number', 1)
                 .is('group_number', null).neq('round', 'IG').order('match_order');
             var r1Matches = r1Res.data || [];
+            console.log('[tryFill] R1 playoff matches:', r1Matches.length);
 
             var xSlots = [];
             r1Matches.forEach(function(rm) {
@@ -5850,8 +5853,9 @@
                     xSlots.push({ matchId: rm.id, field: 'player1_id', opponentId: null, matchOrder: rm.match_order });
                 }
             });
+            console.log('[tryFill] xSlots:', xSlots.length, JSON.stringify(xSlots));
 
-            if (xSlots.length === 0) return;
+            if (xSlots.length === 0) { console.log('[tryFill] EXIT: no xSlots'); return; }
 
             // Filter winners not already placed in R1
             var alreadyInR1 = [];
@@ -5862,7 +5866,8 @@
             var unplacedWinners = igWinners.filter(function(wId) {
                 return alreadyInR1.indexOf(wId) === -1;
             });
-            if (unplacedWinners.length === 0) return;
+            console.log('[tryFill] unplaced:', unplacedWinners.length, 'alreadyInR1:', alreadyInR1.length);
+            if (unplacedWinners.length === 0) { console.log('[tryFill] EXIT: all winners already in R1'); return; }
 
             // Multiple winners/slots → leave for manual dropdown (renderXSlotSection)
             if (unplacedWinners.length > 1 || xSlots.length > 1) {
