@@ -4238,11 +4238,7 @@
                 }
             }
 
-            // 3. Determine draw size
-            var drawSize = 2;
-            while (drawSize < directQualifiers.length) drawSize *= 2;
-
-            // 4. Use manual distribution from modal
+            // 4. Use manual distribution from modal (moved BEFORE drawSize calc)
             var autoPassPlayers = manualAutoPass || [];
             var igToInsert = [];
             var igOrder = 0;
@@ -4269,6 +4265,11 @@
                     });
                 }
             }
+
+            // 3. Determine draw size (includes direct + auto-pass + IG winners)
+            var totalPlayoffPlayers = directQualifiers.length + autoPassPlayers.length + igToInsert.length;
+            var drawSize = 2;
+            while (drawSize < totalPlayoffPlayers) drawSize *= 2;
 
             // 5. Build SE playoff bracket
             var totalRounds = Math.log2(drawSize);
