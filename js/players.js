@@ -19,6 +19,8 @@
     var isCategoryMode = false;
     var catCurrentPage = 1;
     var _accessLevel = 'guest'; // guest | registered | member
+    var _catObserver = null;
+    var _catListenersReady = false;
 
     var GUEST_VISIBLE_ROWS = 8;
     var GUEST_BLURRED_ROWS = 4;
@@ -674,6 +676,14 @@
     // ========================================
 
     async function renderCategoryPage(tabId) {
+        // Cleanup previous observer/sentinel
+        if (_catObserver) { _catObserver.disconnect(); _catObserver = null; }
+        document.querySelectorAll('.pl-cat-sentinel').forEach(function(el) { el.remove(); });
+
+        currentTab = tabId;
+        catSearchQuery = '';
+        catCurrentPage = 1;
+
         var cat = getCategory(tabId);
         var labels = getLabels();
         var isEn = isEnPage();
@@ -707,8 +717,6 @@
         if (podiumEl) podiumEl.style.display = 'none';
 
         // Render sticky category bar in filters section (already sticky at top:64px)
-        // Content hidden until .stuck class is added via IntersectionObserver
-        // Sticky bar — back + category name + search (all in one row)
         var filtersEl = document.getElementById('playersFilters');
         if (filtersEl) {
             filtersEl.classList.add('pl-cat-mode');
@@ -727,12 +735,13 @@
 
             // Sentinel before filters — when scrolled past hero, add .stuck
             var sentinel = document.createElement('div');
+            sentinel.className = 'pl-cat-sentinel';
             sentinel.style.height = '1px';
             filtersEl.parentNode.insertBefore(sentinel, filtersEl);
-            var obs = new IntersectionObserver(function(entries) {
+            _catObserver = new IntersectionObserver(function(entries) {
                 filtersEl.classList.toggle('stuck', !entries[0].isIntersecting);
             }, { threshold: [1], rootMargin: '-65px 0px 0px 0px' });
-            obs.observe(sentinel);
+            _catObserver.observe(sentinel);
         }
 
         // Render table
@@ -741,12 +750,29 @@
         // Sponsors
         renderSponsors();
 
-        // Init pagination clicks
-        initCatPagination(tabId);
-        initCatSearch(tabId);
+        // Init delegated listeners once
+        if (!_catListenersReady) {
+            initCatPagination();
+            initCatSearch();
+            initCatGenderToggle();
+            _catListenersReady = true;
+        }
 
         initScrollAnimations();
         updateCatLangLinks(tabId);
+    }
+
+    function initCatGenderToggle() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.pl-cat-gender-btn');
+            if (!btn || !isCategoryMode) return;
+            var newGender = btn.dataset.gender;
+            var baseCatId = currentTab.indexOf('-') !== -1 ? currentTab.split('-').slice(1).join('-') : currentTab;
+            var newTabId = newGender + '-' + baseCatId;
+            if (!categoriesData[newTabId] || newTabId === currentTab) return;
+            history.replaceState(null, '', '?tab=' + newTabId);
+            renderCategoryPage(newTabId);
+        });
     }
 
     function renderCatHero(cat, genderIcon, labels, playersPage, tournamentsCount) {
@@ -769,6 +795,14 @@
                 '<input type="text" class="pl-search-input" id="catSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
             '</div>';
 
+        var menLabel = isEnPage() ? 'Men' : (isKgPage() ? 'Эркектер' : 'Мужчины');
+        var womenLabel = isEnPage() ? 'Women' : (isKgPage() ? 'Аялдар' : 'Женщины');
+        var genderToggleHtml =
+            '<div class="pl-gender-tabs" style="margin-top:16px">' +
+                '<button class="pl-cat-gender-btn pl-gender-tab' + (cat.gender === 'men' ? ' active' : '') + '" data-gender="men">' + menLabel + '</button>' +
+                '<button class="pl-cat-gender-btn pl-gender-tab' + (cat.gender === 'women' ? ' active' : '') + '" data-gender="women">' + womenLabel + '</button>' +
+            '</div>';
+
         container.innerHTML =
             '<div class="pl-hero-bg"></div>' +
             '<div class="pl-hero-overlay"></div>' +
@@ -788,6 +822,7 @@
                         '<div class="pl-cat-stat-label">' + onlineLabel + '</div>' +
                     '</div>' +
                 '</div>' +
+                genderToggleHtml +
                 searchHtml +
             '</div>';
     }
@@ -977,13 +1012,13 @@
         container.innerHTML = html;
     }
 
-    function initCatPagination(tabId) {
+    function initCatPagination() {
         document.addEventListener('click', function(e) {
             if (!isCategoryMode) return;
 
             var pageBtn = e.target.closest('.pl-page-btn');
             if (pageBtn && !pageBtn.disabled) {
-                var cat = getCategory(tabId);
+                var cat = getCategory(currentTab);
                 var totalPages = Math.max(1, Math.ceil((cat.players || []).length / CAT_PER_PAGE));
 
                 if (pageBtn.classList.contains('pl-page-prev')) {
@@ -994,7 +1029,7 @@
                     catCurrentPage = parseInt(pageBtn.dataset.page);
                 }
 
-                renderCatTable(tabId, catCurrentPage);
+                renderCatTable(currentTab, catCurrentPage);
                 var tableEl = document.getElementById('playersTable');
                 if (tableEl) tableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
@@ -1114,7 +1149,7 @@
         });
     }
 
-    function initCatSearch(tabId) {
+    function initCatSearch() {
         var guestModalShown = false;
 
         function handleSearch(e) {
@@ -1140,7 +1175,7 @@
             debounceTimer = setTimeout(function() {
                 catSearchQuery = val.trim();
                 catCurrentPage = 1;
-                renderCatTable(tabId, 1);
+                renderCatTable(currentTab, 1);
             }, 200);
         }
 

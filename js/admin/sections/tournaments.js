@@ -729,7 +729,6 @@
                             '<option value="">—</option>' +
                             '<option value="men"' + A.sel(item, 'gender', 'men') + '>' + L.genderMen + '</option>' +
                             '<option value="women"' + A.sel(item, 'gender', 'women') + '>' + L.genderWomen + '</option>' +
-                            '<option value="mixed"' + A.sel(item, 'gender', 'mixed') + '>' + L.genderMixed + '</option>' +
                         '</select>' +
                     '</div>' +
                     '<div class="ad-field">' +
@@ -749,7 +748,7 @@
                 // Meta row 2: Max participants / Reserved spots / Prize fund / Status badge
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">' +
                     '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnMaxParticipants + '</label>' +
+                        '<label class="ad-field-label" id="adTrnMaxPartLabel">' + L.trnMaxParticipants + '</label>' +
                         '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnMaxPart" placeholder="0" value="' + (item ? (item.max_participants || '') : '') + '">' +
                     '</div>' +
                     '<div class="ad-field">' +
@@ -979,13 +978,30 @@
         toggleBracketFields();
 
         // Toggle combined NTRP max based on format (doubles/mixed only)
-        function toggleNtrpCombinedField() {
+        // + auto-hide Gender when Mixed Doubles (gender = 'mixed' auto)
+        function toggleFormatDependentFields() {
             var fmt = document.getElementById('adTrnFormat').value;
             var wrap = document.getElementById('adTrnNtrpCombinedWrap');
             if (wrap) wrap.style.display = (fmt === 'doubles' || fmt === 'mixed_doubles') ? '' : 'none';
+
+            // Update max participants label: "Макс. участников" ↔ "Макс. пар"
+            var maxPartLabel = document.getElementById('adTrnMaxPartLabel');
+            if (maxPartLabel) maxPartLabel.textContent = (fmt === 'doubles' || fmt === 'mixed_doubles') ? L.trnMaxPairs : L.trnMaxParticipants;
+
+            var genderField = document.getElementById('adTrnGender');
+            var genderWrap = genderField ? genderField.closest('.ad-field') : null;
+            if (genderWrap) {
+                if (fmt === 'mixed_doubles') {
+                    genderWrap.style.display = 'none';
+                    genderField.value = 'mixed';
+                } else {
+                    genderWrap.style.display = '';
+                    if (genderField.value === 'mixed') genderField.value = '';
+                }
+            }
         }
-        document.getElementById('adTrnFormat').addEventListener('change', toggleNtrpCombinedField);
-        toggleNtrpCombinedField();
+        document.getElementById('adTrnFormat').addEventListener('change', toggleFormatDependentFields);
+        toggleFormatDependentFields();
 
         // Image upload zone
         var imgZone = document.getElementById('adTrnImgZone');
@@ -1398,7 +1414,10 @@
             // Validate: max_participants <= draw_size for SE/FIC
             if (data.bracket_type && data.bracket_type !== 'round_robin' && data.bracket_type !== 'group_league' && data.draw_size && data.max_participants) {
                 if (data.max_participants > data.draw_size) {
-                    A.showToast(isEn ? 'Max participants (' + data.max_participants + ') cannot exceed draw size (' + data.draw_size + ')' : 'Макс. участников (' + data.max_participants + ') не может превышать размер сетки (' + data.draw_size + ')', 'error');
+                    var _isDbl = data.format === 'doubles' || data.format === 'mixed_doubles';
+                    A.showToast(isEn
+                        ? 'Max ' + (_isDbl ? 'pairs' : 'participants') + ' (' + data.max_participants + ') cannot exceed draw size (' + data.draw_size + ')'
+                        : 'Макс. ' + (_isDbl ? 'пар' : 'участников') + ' (' + data.max_participants + ') не может превышать размер сетки (' + data.draw_size + ')', 'error');
                     saveBtn.disabled = false;
                     saveBtn.textContent = L.save;
                     return;

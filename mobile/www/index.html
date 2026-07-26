@@ -12,6 +12,22 @@
 </head>
 <body>
 
+<!-- Animated Splash Screen -->
+<div class="splash-overlay" id="splashOverlay">
+  <div class="splash-content">
+    <div class="splash-logo">
+      <div class="splash-glow"></div>
+      <svg class="splash-ball" viewBox="0 0 120 120" width="120" height="120">
+        <circle cx="60" cy="60" r="54" fill="#CCFF00"/>
+        <path d="M30 12c18 14 22 42 14 68s-28 42-40 48" fill="none" stroke="#0A0A0A" stroke-width="4" stroke-linecap="round"/>
+        <path d="M90 108c-18-14-22-42-14-68s28-42 40-48" fill="none" stroke="#0A0A0A" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="splash-text">KSLT</div>
+    <div class="splash-tagline">Tennis Community</div>
+  </div>
+</div>
+
 <div class="app" id="app">
 
   <!-- Status bar spacer (Capacitor safe area) -->
@@ -71,26 +87,40 @@
     <div class="screen" id="screenRating">
       <div class="screen-header">
         <h1 data-i18n="rating.title">Рейтинг</h1>
+        <p id="ratingSubtitle" style="font-size:0.75rem;color:var(--text-sec);margin:2px 0 0;"></p>
       </div>
-      <div class="filter-bar" style="gap:10px">
-        <button class="dropdown-select" id="ratingCatBtn">
-          Masters <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="gender-toggle" id="ratingGender">
-          <button class="gender-toggle-btn active" data-gender="men" data-i18n="rating.men">МУЖ</button>
-          <button class="gender-toggle-btn" data-gender="women" data-i18n="rating.women">ЖЕН</button>
+      <!-- Podium (top 3) -->
+      <div id="ratingPodium"></div>
+      <!-- Category dropdown (centered) -->
+      <div class="rf-row" style="justify-content:center">
+        <div class="rf-col" style="max-width:280px">
+          <div class="rf-label" style="text-align:center" data-i18n="rating.catLabel">Категория</div>
+          <button class="rf-select" id="ratingCatBtn">Pro-Masters <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
       </div>
-      <div class="filter-bar" style="gap:10px">
-        <div class="gender-toggle" id="ratingTypeToggle">
-          <button class="rating-type-btn active" data-type="singles" data-i18n="rating.singles">Одиночный</button>
-          <button class="rating-type-btn" data-type="doubles" data-i18n="rating.doubles">Парный</button>
-        </div>
+      <!-- Type toggle: Одиночный / Парный -->
+      <div class="rating-toggle-row">
+        <button class="rating-toggle-btn active" data-type="singles" data-i18n="rating.singles">Одиночный</button>
+        <button class="rating-toggle-btn" data-type="doubles" data-i18n="rating.doubles">Парный</button>
       </div>
-      <div class="filter-bar">
+      <!-- Gender toggle: Мужчины / Женщины -->
+      <div class="rating-toggle-row">
+        <button class="rating-toggle-btn active" data-gender="men" data-i18n="rating.men">Мужчины</button>
+        <button class="rating-toggle-btn" data-gender="women" data-i18n="rating.women">Женщины</button>
+      </div>
+      <!-- Search -->
+      <div class="filter-bar" style="padding:4px 16px;">
         <div class="filter-bar-search" style="flex:1">
           <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           <input type="text" id="ratingSearch" placeholder="Поиск игрока..." data-i18n-ph="rating.search">
+        </div>
+      </div>
+      <!-- Bottom sheet (shared for all 3 dropdowns) -->
+      <div class="bottom-sheet-overlay" id="ratingSheet">
+        <div class="bottom-sheet">
+          <div class="bs-handle"></div>
+          <div class="bs-title" id="ratingSheetTitle"></div>
+          <div class="bs-options" id="ratingSheetOptions"></div>
         </div>
       </div>
       <div id="ratingContent"></div>
@@ -201,15 +231,6 @@
     </div>
 
   </div><!-- /screens -->
-
-  <!-- Rating Category Bottom Sheet -->
-  <div class="bottom-sheet-overlay" id="ratingCatSheet">
-    <div class="bottom-sheet">
-      <div class="bs-handle"></div>
-      <div class="bs-title" data-i18n="rating.category">Категория</div>
-      <div class="bs-options" id="ratingCatOptions"></div>
-    </div>
-  </div>
 
   <!-- TAB BAR -->
   <nav class="tab-bar">
@@ -413,7 +434,7 @@
   </div>
 
   <div class="auth-footer">
-    Регистрируясь, вы соглашаетесь с<br><a href="#">условиями использования</a> и <a href="#">политикой конфиденциальности</a>
+    Регистрируясь, вы соглашаетесь с<br><a href="https://kslt.kg/pages/terms.html" target="_blank">условиями использования</a> и <a href="https://kslt.kg/pages/privacy-policy.html" target="_blank">политикой конфиденциальности</a>
   </div>
 </div>
 
@@ -435,7 +456,7 @@
   <div class="td-tabs" id="tdTabs">
     <button class="td-tab active" data-tab="tdInfo" data-i18n="td.info">Информация</button>
     <button class="td-tab" data-tab="tdBracket" data-i18n="td.bracket">Сетка</button>
-    <button class="td-tab" data-tab="tdResults" data-i18n="td.results">Результаты</button>
+    <button class="td-tab" data-tab="tdResults" data-i18n="td.results">Очки</button>
   </div>
   <div class="td-tab-content active" id="tdInfo"></div>
   <div class="td-tab-content" id="tdBracket"></div>

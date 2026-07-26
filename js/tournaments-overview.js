@@ -40,6 +40,7 @@
         empty: 'No upcoming tournaments',
         format: 'Format',
         participants: 'Players',
+        pairs: 'Pairs',
         prize: 'Prize',
         men: 'Men',
         women: 'Women',
@@ -53,6 +54,7 @@
         empty: 'Алдыдагы мелдештер жок',
         format: 'Формат',
         participants: 'Катышуучулар',
+        pairs: 'Жуптар',
         prize: 'Сыйлык',
         men: 'Эрк',
         women: 'Аял',
@@ -66,6 +68,7 @@
         empty: 'Нет предстоящих турниров',
         format: 'Формат',
         participants: 'Участники',
+        pairs: 'Пар',
         prize: 'Призовой',
         men: 'Муж',
         women: 'Жен',
@@ -372,6 +375,7 @@
                 _dateSort: t.date_start,
                 location: isEn ? (t.location_en || t.location) : (isKg ? (t.location_kg || t.location || '') : (t.location || '')),
                 format: formatLabels[t.format] || t.format || '',
+                _rawFormat: t.format || '',
                 participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
                 prize: t.prize_fund || '',
                 status: cardStatus,
@@ -488,7 +492,7 @@
                 '<div class="to-featured-details">' +
                     (t.regLine ? '<div class="to-featured-detail"><span class="to-label">' + (isEn ? 'Reg' : (isKg ? 'Кат' : 'Рег')) + '</span><span class="to-value">' + t.regLine + '</span></div>' : '') +
                     (t.format ? '<div class="to-featured-detail"><span class="to-label">' + L.format + '</span><span class="to-value">' + t.format + '</span></div>' : '') +
-                    (t.participants ? '<div class="to-featured-detail"><span class="to-label">' + L.participants + '</span><span class="to-value">' + t.participants + '</span></div>' : '') +
+                    (t.participants ? '<div class="to-featured-detail"><span class="to-label">' + ((t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles') ? L.pairs : L.participants) + '</span><span class="to-value">' + t.participants + '</span></div>' : '') +
                     (t.prize ? '<div class="to-featured-detail"><span class="to-label">' + L.prize + '</span><span class="to-value prize">' + t.prize + '</span></div>' : '') +
                 '</div>' +
                 '<span class="to-featured-link">' + L.details + '</span>' +

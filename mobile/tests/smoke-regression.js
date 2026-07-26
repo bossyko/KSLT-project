@@ -73,8 +73,8 @@ var html = fs.readFileSync(htmlPath, 'utf8');
 var criticalIds = [
   'authScreen', 'screenHome', 'screenTournaments', 'screenRating',
   'screenNews', 'screenProfile', 'tournamentList', 'ratingContent',
-  'ratingGender', 'ratingCatBtn', 'ratingCatSheet', 'ratingCatOptions',
-  'ratingSearch', 'ratingTypeToggle', 'tdOverlay'
+  'ratingCatBtn', 'ratingGenderBtn', 'ratingTypeBtn',
+  'ratingSheet', 'ratingSearch', 'ratingPodium', 'tdOverlay'
 ];
 
 criticalIds.forEach(function(id) {
@@ -85,11 +85,11 @@ criticalIds.forEach(function(id) {
   }
 });
 
-// Check rating type toggle buttons
-if (html.indexOf('data-type="singles"') !== -1 && html.indexOf('data-type="doubles"') !== -1) {
-  ok('Rating type toggle (singles/doubles) buttons present');
+// Check rating dropdown buttons
+if (html.indexOf('id="ratingCatBtn"') !== -1 && html.indexOf('id="ratingGenderBtn"') !== -1 && html.indexOf('id="ratingTypeBtn"') !== -1) {
+  ok('Rating dropdown buttons (cat/gender/type) present');
 } else {
-  fail('Rating type toggle buttons missing');
+  fail('Rating dropdown buttons missing');
 }
 
 // ============================
@@ -411,11 +411,11 @@ var ratingCode = fs.readFileSync(path.join(WWW, 'js/screens/rating.js'), 'utf8')
 if (ratingCode.indexOf('currentRatingType') !== -1) ok('currentRatingType state variable exists');
 else fail('currentRatingType state variable missing');
 
-if (ratingCode.indexOf('initRatingTypeToggle') !== -1) ok('initRatingTypeToggle() function exists');
-else fail('initRatingTypeToggle() function missing');
+if (ratingCode.indexOf('initDropdowns') !== -1) ok('initDropdowns() function exists');
+else fail('initDropdowns() function missing');
 
-if (ratingCode.indexOf('ratingTypeToggle') !== -1) ok('ratingTypeToggle DOM element referenced');
-else fail('ratingTypeToggle DOM element not referenced');
+if (ratingCode.indexOf('ratingTypeBtn') !== -1) ok('ratingTypeBtn dropdown referenced');
+else fail('ratingTypeBtn dropdown not referenced');
 
 if (ratingCode.indexOf('doubles_points') !== -1) ok('doubles_points field used for doubles ranking');
 else fail('doubles_points field not used');
@@ -478,11 +478,11 @@ else fail('openTournamentOverlay() missing');
 if (ratingCode.indexOf('R.load') !== -1) ok('R.load() preserved');
 else fail('R.load() missing');
 
-if (ratingCode.indexOf('initGenderToggle') !== -1) ok('initGenderToggle() preserved');
-else fail('initGenderToggle() missing');
+if (ratingCode.indexOf('updateAllBtnLabels') !== -1) ok('updateAllBtnLabels() preserved');
+else fail('updateAllBtnLabels() missing');
 
-if (ratingCode.indexOf('initCategoryDropdown') !== -1) ok('initCategoryDropdown() preserved');
-else fail('initCategoryDropdown() missing');
+if (ratingCode.indexOf('loadCategories') !== -1) ok('loadCategories() preserved');
+else fail('loadCategories() missing');
 
 if (ratingCode.indexOf('initSearch') !== -1) ok('initSearch() preserved');
 else fail('initSearch() missing');
