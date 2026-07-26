@@ -4275,9 +4275,13 @@
                 ? SEED_POSITIONS[drawSize]
                 : (drawSize === 16 ? [1, 16, 9, 8, 5, 12, 13, 4] : (drawSize === 8 ? [1, 8, 5, 4] : (drawSize === 4 ? [1, 4, 3, 2] : [1, 2])));
 
-            // Separate 1st-place finishers (seeds) and 2nd-place (rest)
+            // Separate 1st-place finishers (seeds), 2nd-place, and auto-pass (3rd)
             var firstPlaces = directQualifiers.filter(function(q) { return q.place === 1; });
             var secondPlaces = directQualifiers.filter(function(q) { return q.place === 2; });
+            // Auto-pass: placed directly in draw (like extra qualifiers)
+            var autoPassToPlace = autoPassPlayers.map(function(ap) {
+                return { playerId: ap.playerId, groupIdx: ap.groupIdx, place: 3 };
+            });
 
             // Build draw array
             var draw = new Array(drawSize);
@@ -4292,9 +4296,10 @@
                 };
             }
 
-            // Calculate BYE count early to reserve slots opposite top seeds
-            var xSlotCount = autoPassPlayers.length + igToInsert.length;
-            var totalEmpty = drawSize - directQualifiers.length;
+            // X-slots = only IG winners (assigned manually after IG matches complete)
+            var xSlotCount = igToInsert.length;
+            var totalPlaced = directQualifiers.length + autoPassToPlace.length;
+            var totalEmpty = drawSize - totalPlaced;
             var byeCount = Math.max(0, totalEmpty - xSlotCount);
 
             // Reserve BYE positions: opposite top seeds (seed [1] first, then [2], etc.)
@@ -4398,6 +4403,60 @@
                 emptySlots.splice(bestSlotIdx, 1);
             }
 
+            // Place auto-pass players (3rd places) with same cross-seeding logic
+            for (var ap = 0; ap < autoPassToPlace.length; ap++) {
+                var apPlayer = autoPassToPlace[ap];
+                var apBestIdx = -1;
+                var apBestScore = -1;
+                for (var apsi = 0; apsi < emptySlots.length; apsi++) {
+                    var apSlot = emptySlots[apsi];
+                    var apScore = 0;
+                    var apOppSlot = (apSlot % 2 === 0) ? apSlot + 1 : apSlot - 1;
+                    var apOpp = draw[apOppSlot];
+                    if (apOpp && apOpp.groupIdx === apPlayer.groupIdx) {
+                        apScore = 0;
+                    } else {
+                        var apHalf = Math.floor(apSlot / halfSize);
+                        var apGroupsInHalf = getGroupsInHalf(apHalf);
+                        apScore = (apGroupsInHalf.indexOf(apPlayer.groupIdx) === -1) ? 2 : 1;
+                    }
+                    if (apScore > apBestScore) {
+                        apBestScore = apScore;
+                        apBestIdx = apsi;
+                        if (apScore === 2) break;
+                    }
+                }
+                if (apBestIdx === -1) apBestIdx = 0;
+
+                // Cross-seeding swap fix for auto-pass
+                if (apBestScore === 0 && emptySlots.length > 0) {
+                    var apChosen = emptySlots[apBestIdx];
+                    var apOppSlot2 = (apChosen % 2 === 0) ? apChosen + 1 : apChosen - 1;
+                    var apConflict = draw[apOppSlot2];
+                    if (apConflict && apConflict.groupIdx === apPlayer.groupIdx && !apConflict.seed) {
+                        for (var apsw = 0; apsw < drawSize; apsw++) {
+                            if (draw[apsw] && !draw[apsw].seed && draw[apsw].groupIdx !== apPlayer.groupIdx && apsw !== apOppSlot2) {
+                                var apSwOpp = (apsw % 2 === 0) ? apsw + 1 : apsw - 1;
+                                var apSwEntry = draw[apSwOpp];
+                                if (!apSwEntry || apSwEntry.groupIdx !== apConflict.groupIdx) {
+                                    var apSwTmp = draw[apsw];
+                                    draw[apsw] = draw[apOppSlot2];
+                                    draw[apOppSlot2] = apSwTmp;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                draw[emptySlots[apBestIdx]] = {
+                    player_id: apPlayer.playerId,
+                    seed: null,
+                    groupIdx: apPlayer.groupIdx
+                };
+                emptySlots.splice(apBestIdx, 1);
+            }
+
             // Generate R1 matches
             var playoffToInsert = [];
             var plMatchOrder = 0;
@@ -4485,11 +4544,13 @@
                 }
             }
 
-            // 9. Store auto-pass and IG info in tournament metadata for X-slot assignment
+            // 9. Store IG info in tournament metadata for X-slot assignment
+            // auto_pass are already placed in draw, only IG winners need X-slot assignment
             var igMeta = {
                 auto_pass_players: autoPassPlayers.map(function(c) {
                     return { playerId: c.playerId, groupIdx: c.groupIdx };
                 }),
+                auto_pass_placed: true,
                 ig_match_count: igToInsert.length,
                 x_slot_count: xSlotCount,
                 bye_count: byeCount
@@ -5765,12 +5826,15 @@
         var allIGDone = igAll.length === 0 || igAll.every(function(m) { return m.status === 'completed' && m.winner_id; });
         if (!allIGDone && igAll.length > 0) return; // IG still in progress
 
-        // Collect available players for X-slots: auto-pass + IG winners
+        // Collect available players for X-slots: only IG winners
+        // (auto-pass players are already placed directly in the draw)
         var availablePlayers = [];
-        // Auto-pass players from ig_meta
-        (igMeta.auto_pass_players || []).forEach(function(ap) {
-            availablePlayers.push({ playerId: ap.playerId, groupIdx: ap.groupIdx, source: 'auto_pass' });
-        });
+        // Auto-pass from ig_meta — only if NOT already placed in draw (legacy support)
+        if (!igMeta.auto_pass_placed) {
+            (igMeta.auto_pass_players || []).forEach(function(ap) {
+                availablePlayers.push({ playerId: ap.playerId, groupIdx: ap.groupIdx, source: 'auto_pass' });
+            });
+        }
         // IG winners
         igAll.forEach(function(m) {
             if (m.winner_id) {
