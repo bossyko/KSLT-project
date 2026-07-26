@@ -1015,16 +1015,32 @@
       this.disabled = true;
       this.textContent = I18N.t('profile.deleting');
 
-      // Call edge function or just sign out (actual deletion requires admin)
-      supabaseClient.from('profiles')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', _profile.id)
-        .then(function() {
+      // Call Edge Function for full account deletion
+      supabaseClient.auth.getSession().then(function(sess) {
+        var token = sess.data.session ? sess.data.session.access_token : '';
+        fetch(SUPABASE_URL + '/functions/v1/delete-account', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'apikey': SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.error) throw new Error(data.error);
           window.KSLT_AUTH.logout().then(function() {
             if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('profile.deletedOk'));
             P.load();
           });
+        })
+        .catch(function(err) {
+          console.error('Delete account error:', err);
+          if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('profile.deleteError') || 'Error');
+          document.getElementById('profDeleteConfirm').disabled = false;
+          document.getElementById('profDeleteConfirm').textContent = I18N.t('profile.deleteBtn');
         });
+      });
     });
   }
 

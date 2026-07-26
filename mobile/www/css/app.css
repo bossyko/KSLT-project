@@ -1,6 +1,91 @@
 /* ===== KSLT Mobile App — Styles ===== */
 /* Extracted from mockup, adapted for Capacitor */
 
+/* ===== SPLASH SCREEN ===== */
+.splash-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #0A0A0A;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.splash-overlay.hide {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+.splash-logo {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  animation: splashBounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.splash-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 220px; height: 220px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(204,255,0,0.3) 0%, rgba(204,255,0,0.1) 40%, transparent 70%);
+  animation: splashPulse 2s ease-in-out 0.5s infinite;
+}
+.splash-ball {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 30px rgba(204,255,0,0.5));
+}
+.splash-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 14px;
+  padding-right: -14px;
+  background: linear-gradient(90deg, #fff 0%, #fff 40%, #CCFF00 50%, #fff 60%, #fff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: splashFadeUp 0.5s ease-out 0.3s both, splashShimmer 2.5s ease-in-out 1s infinite;
+}
+.splash-tagline {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 5px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  animation: splashFadeUp 0.4s ease-out 0.6s both;
+}
+
+@keyframes splashBounceIn {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  40%  { transform: scale(1.12) rotate(4deg); opacity: 1; }
+  60%  { transform: scale(0.96) rotate(-2deg); }
+  80%  { transform: scale(1.03) rotate(1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes splashPulse {
+  0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 0.5; }
+  50%      { transform: translate(-50%,-50%) scale(1.5); opacity: 1; }
+}
+@keyframes splashFadeUp {
+  0%   { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes splashShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* ===== RESET & BASE ===== */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -955,9 +1040,9 @@ a, button, [role="button"] {
 }
 .rt-col-rank { width: 32px; }
 .rt-col-name { flex: 1; }
-.rt-col-pts { width: 50px; text-align: right; }
-.rt-col-wl { width: 48px; text-align: right; }
-.rt-col-form { width: 50px; text-align: right; }
+.rt-col-pts { width: 48px; text-align: right; }
+.rt-col-ntrp { width: 44px; text-align: right; }
+.rt-col-wl { width: 44px; text-align: right; }
 
 .rating-row {
   display: flex;
@@ -1002,25 +1087,19 @@ a, button, [role="button"] {
   font-weight: 700;
   color: var(--accent);
 }
+.rr-ntrp {
+  width: 44px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
 .rr-wl {
-  width: 48px;
+  width: 44px;
   text-align: right;
   font-size: 12px;
   color: var(--text-sec);
 }
-.rr-form {
-  width: 50px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 2px;
-}
-.rr-form-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-.rr-form-dot.w { background: var(--green); }
-.rr-form-dot.l { background: var(--red); }
 
 /* Guest restriction — progressive blur */
 .rr-blur {
@@ -1713,6 +1792,135 @@ a, button, [role="button"] {
   font-weight: 600;
 }
 
+/* --- Rating filter dropdowns row --- */
+.rf-row {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  align-items: flex-start;
+}
+.rf-col { flex: 1; min-width: 0; }
+.rf-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-sec);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  padding-left: 2px;
+}
+.rf-select {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--glass);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rf-select svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text-sec);
+  fill: none;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+/* --- Rating toggle pills (gender / type) --- */
+.rating-toggle-row {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  padding: 6px 16px;
+}
+.rating-toggle-btn {
+  flex: 1;
+  max-width: 160px;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--text-sec);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.rating-toggle-btn:first-child { border-radius: 12px 0 0 12px; }
+.rating-toggle-btn:last-child { border-radius: 0 12px 12px 0; border-left: none; }
+.rating-toggle-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+
+/* --- Rating podium (top 3) --- */
+.rating-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px 8px;
+}
+.rp-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+  width: 90px;
+}
+.rp-first { order: 2; }
+.rp-second { order: 1; }
+.rp-third { order: 3; }
+.rp-medal { font-size: 16px; margin-bottom: 4px; }
+.rp-first .rp-medal { font-size: 20px; }
+.rp-photo-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  margin-bottom: 4px;
+}
+.rp-first .rp-photo-wrap {
+  width: 64px;
+  height: 64px;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(204,255,0,0.3);
+}
+.rp-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rp-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 80px;
+  white-space: pre-line;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rp-pts {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 2px;
+}
+
 /* ===== BOTTOM SHEET ===== */
 .bottom-sheet-overlay {
   position: fixed; inset: 0;
@@ -1746,6 +1954,7 @@ a, button, [role="button"] {
 .bs-title {
   font-size: 16px; font-weight: 700;
   margin-bottom: 16px;
+  text-align: center;
 }
 .bs-section { margin-bottom: 16px; }
 .bs-label {
@@ -1754,16 +1963,19 @@ a, button, [role="button"] {
   letter-spacing: 0.04em; margin-bottom: 8px;
 }
 .bs-options {
-  display: flex; flex-wrap: wrap; gap: 8px;
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center;
 }
 .bs-option {
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: var(--radius-full);
-  font-size: 13px; font-weight: 500;
+  font-size: 14px; font-weight: 500;
   background: var(--glass);
   border: 1px solid var(--border);
   color: var(--text-sec);
   transition: all 0.15s;
+  min-width: 80px;
+  text-align: center;
 }
 .bs-option.active {
   background: var(--accent); color: #000;
@@ -2225,6 +2437,67 @@ a, button, [role="button"] {
 .nd-body { font-size: 14px; line-height: 1.7; color: var(--text-sec); }
 .nd-body p { margin-bottom: 12px; }
 .nd-body img { max-width: 100%; border-radius: var(--radius-md); margin: 12px 0; }
+
+/* News Reactions */
+.nd-reactions {
+  margin-top: 24px;
+  padding: 20px 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.nd-reactions-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.nd-reactions-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.nd-react-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.2s, background 0.2s;
+  justify-content: center;
+}
+.nd-react-btn:active { transform: scale(0.92); }
+.nd-react-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.nd-react-emoji { font-size: 22px; line-height: 1; }
+.nd-react-count { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.nd-react-btn.active .nd-react-count { color: var(--accent); }
+.nd-react-check {
+  position: absolute;
+  top: -4px; right: -4px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #0A0A0A;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.nd-react-bounce { animation: ndReactBounce 0.4s ease; }
+@keyframes ndReactBounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
 
 /* ===== AUTH SCREEN ===== */
 .auth-screen {
@@ -3422,37 +3695,114 @@ select.prof-field-input { color: var(--text); }
   margin: 0 0 12px; line-height: 1.5;
 }
 
-/* ===== Bracket ===== */
-.bracket-container {
-  display: flex; flex-direction: column; gap: 16px;
+/* ===== Bracket — Round Pills ===== */
+.round-pills {
+  display: flex; gap: 6px;
+  padding: 0 0 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
-.bracket-round-title {
-  font-size: 13px; font-weight: 700; color: var(--accent);
-  margin-bottom: 8px; text-transform: uppercase;
-  letter-spacing: 0.5px;
+.round-pills::-webkit-scrollbar { display: none; }
+.round-pill {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
 }
-.bracket-match {
+.round-pill.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+
+/* ===== Match Card (shared: bracket + groups) ===== */
+.mob-match-card {
   background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); margin-bottom: 6px;
-  overflow: hidden; position: relative;
+  border-radius: var(--radius-sm); margin-bottom: 8px;
+  overflow: hidden;
 }
-.bracket-player {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
+.mob-match-row {
+  display: flex; align-items: center;
+  padding: 10px 12px; gap: 8px;
   font-size: 13px; color: var(--text-sec);
+  border-bottom: 1px solid var(--border);
 }
-.bracket-player:last-of-type { border-bottom: none; }
-.bracket-player.winner {
-  color: var(--accent); font-weight: 600;
-  background: var(--accent-dim);
+.mob-match-row:last-child { border-bottom: none; }
+.mob-match-row.winner {
+  color: #fff; font-weight: 600;
+  background: rgba(204,255,0,0.06);
 }
-.bracket-pname {
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.mob-match-seed {
+  color: var(--text-muted); font-size: 11px;
+  min-width: 24px; font-weight: 700;
 }
-.bracket-score {
-  position: absolute; right: 12px; top: 50%;
-  transform: translateY(-50%);
-  font-size: 11px; color: var(--text-muted); font-weight: 600;
+.mob-match-name {
+  flex: 1; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.mob-match-sets {
+  display: flex; gap: 2px; flex-shrink: 0;
+}
+.mob-set {
+  min-width: 20px; text-align: center;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-muted);
+}
+.mob-match-row.winner .mob-set { color: var(--accent); }
+.mob-match-row.winner .mob-match-name { color: var(--accent); }
+.mob-match-vs {
+  text-align: center; padding: 2px 0;
+  font-size: 10px; color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+/* ===== Mobile Group Stage ===== */
+.mob-group { margin-bottom: 20px; }
+.mob-group-title {
+  font-size: 14px; font-weight: 700; color: var(--accent);
+  margin-bottom: 8px;
+}
+.mob-standings {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; margin-bottom: 12px;
+}
+.mob-standings th {
+  text-align: left; padding: 6px 8px;
+  color: var(--text-muted); font-size: 11px;
+  font-weight: 600; text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.mob-standings th.num { text-align: center; width: 28px; }
+.mob-standings th.stat { text-align: center; width: 32px; }
+.mob-standings td {
+  padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.mob-standings td.num { text-align: center; font-weight: 600; }
+.mob-standings td.stat { text-align: center; }
+.mob-standings tr.qualified { background: rgba(204,255,0,0.06); }
+.mob-standings .seed {
+  color: var(--accent); font-size: 10px;
+  font-weight: 700; margin-left: 4px;
+}
+.mob-section-title {
+  font-size: 14px; font-weight: 700; color: var(--accent);
+  margin: 16px 0 8px;
+}
+.mob-no-results {
+  text-align: center; padding: 16px;
+  color: var(--text-muted); font-size: 13px;
+}
+
+/* ===== Venue Card ===== */
+.td-venue-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 12px;
+  margin-top: 8px;
 }
 
 /* ===== ONBOARDING ===== */
@@ -3548,3 +3898,104 @@ select.prof-field-input { color: var(--text); }
   font-weight: 600;
 }
 .seg-btn:active { transform: scale(0.95); }
+
+/* ===== RESPONSIVE — SMALL PHONES (SE, 5s, narrow Android) ===== */
+@media (max-width: 340px) {
+  /* Podium: shrink cards */
+  .rp-card { width: 74px; }
+  .rp-photo-wrap { width: 44px; height: 44px; }
+  .rp-first .rp-photo-wrap { width: 54px; height: 54px; }
+  .rp-name { font-size: 10px; max-width: 68px; }
+  .rp-pts { font-size: 10px; }
+  .rp-medal { font-size: 14px; }
+  .rp-first .rp-medal { font-size: 17px; }
+  .rating-podium { gap: 4px; padding: 8px 12px 6px; }
+
+  /* Dropdowns: smaller text */
+  .rf-select { font-size: 11px; padding: 6px 8px; gap: 2px; }
+  .rf-label { font-size: 9px; }
+  .rf-row { gap: 4px; padding: 6px 12px; }
+
+  /* Rating table: tighter columns */
+  .rating-table { margin: 0 10px; }
+  .rating-table-head, .rating-row { padding: 8px 10px; }
+  .rr-rank { width: 24px; font-size: 12px; }
+  .rr-name { font-size: 11px; }
+  .rr-pts { width: 38px; font-size: 11px; }
+  .rr-ntrp { width: 36px; font-size: 10px; }
+  .rr-wl { width: 36px; font-size: 11px; }
+  .rr-avatar, .rr-avatar-img { width: 28px; height: 28px; }
+  .rt-col-rank { font-size: 10px; }
+  .rt-col-name, .rt-col-pts, .rt-col-ntrp, .rt-col-wl { font-size: 10px; }
+
+  /* General: reduce padding and fonts */
+  .section-title { padding: 12px 12px 6px; }
+  .section-title h2 { font-size: 16px; }
+  .screen-title h1 { font-size: 1.2rem; }
+  .news-card { min-width: 220px; max-width: 240px; }
+  .news-card-img { height: 120px; }
+
+  /* Tournament cards */
+  .tc-card { margin-bottom: 10px; }
+
+  /* Tab bar */
+  .tab-item { min-width: 44px; }
+  .tab-item svg { width: 22px; height: 22px; }
+  .tab-item span { font-size: 9px; }
+
+  /* Guest CTA */
+  .rr-guest-cta { padding: 24px 16px 20px; }
+  .rr-guest-btn { padding: 10px 32px; font-size: 13px; }
+
+  /* Bottom sheet */
+  .bs-option { padding: 8px 14px; font-size: 13px; min-width: 70px; }
+  .bs-title { font-size: 15px; }
+}
+
+/* ===== RESPONSIVE — LARGE PHONES (Pro Max, Samsung Ultra) ===== */
+@media (min-width: 414px) {
+  /* Podium: larger cards */
+  .rp-card { width: 100px; }
+  .rp-photo-wrap { width: 56px; height: 56px; }
+  .rp-first .rp-photo-wrap { width: 70px; height: 70px; }
+  .rp-name { font-size: 12px; max-width: 92px; }
+  .rp-pts { font-size: 12px; }
+  .rp-medal { font-size: 18px; }
+  .rp-first .rp-medal { font-size: 22px; }
+  .rating-podium { gap: 12px; }
+
+  /* Dropdowns: more room */
+  .rf-select { font-size: 13px; }
+
+  /* Rating table: spacious */
+  .rr-name { font-size: 14px; }
+  .rr-pts { font-size: 14px; }
+  .rr-wl { font-size: 13px; }
+  .rr-avatar, .rr-avatar-img { width: 36px; height: 36px; }
+
+  /* General */
+  .section-title h2 { font-size: 20px; }
+  .news-card { min-width: 280px; max-width: 310px; }
+}
+
+/* ===== RESPONSIVE — EXTRA LARGE (430px+ tablets in phone mode) ===== */
+@media (min-width: 430px) {
+  .rp-card { width: 110px; }
+  .rp-first .rp-photo-wrap { width: 74px; height: 74px; }
+  .rp-photo-wrap { width: 60px; height: 60px; }
+  .rating-podium { gap: 14px; padding: 16px 20px 10px; }
+
+  .rf-row { padding: 10px 20px; }
+  .rating-table { margin: 0 20px; }
+  .rating-table-head, .rating-row { padding: 12px 16px; }
+  .tournament-list { padding: 0 20px; }
+
+  .rr-guest-cta { padding: 36px 28px 32px; }
+  .rr-guest-title { font-size: 18px; }
+  .rr-guest-text { font-size: 14px; }
+}
+
+/* ===== SAFE AREA — notch/dynamic island phones ===== */
+@supports (padding: env(safe-area-inset-top)) {
+  .screen { padding-top: env(safe-area-inset-top); }
+}

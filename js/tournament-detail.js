@@ -1065,7 +1065,7 @@ function loadFromSupabase(client, id) {
                 .order('match_order', { ascending: true });
 
             var regsPromise = client.from('tournament_registrations')
-                .select('*, players(id, name, name_en, photo, points, category_id)')
+                .select('*')
                 .eq('tournament_id', id)
                 .order('registered_at', { ascending: true });
 
@@ -1212,16 +1212,16 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         : 'tournaments.html?category=' + category);
 
     var L = isEn ? {
-        format: 'Format', participants: 'Participants', prizeFund: 'Prize Fund',
+        format: 'Format', participants: 'Participants', pairs: 'Pairs', prizeFund: 'Prize Fund',
         description: 'About Tournament', scheduleSoon: 'Schedule will be published soon',
         noParticipants: 'Participants will be announced soon',
-        noResults: 'Results will be available after the tournament ends',
+        noResults: 'Points will be awarded after the tournament ends',
         countdownTitle: 'TOURNAMENT STARTS IN',
         countdownDays: 'days', countdownHours: 'hours', countdownMin: 'min', countdownSec: 'sec',
         tournamentLive: 'Tournament in progress',
         regClosingSoon: 'Registration closes in less than 24 hours!'
     } : (isKg ? {
-        format: 'Формат', participants: 'Катышуучулар', prizeFund: 'Сыйлык фонду',
+        format: 'Формат', participants: 'Катышуучулар', pairs: 'Жуптар', prizeFund: 'Сыйлык фонду',
         description: 'Мелдеш жөнүндө', scheduleSoon: 'Тартип кийинчерээк жарыяланат',
         noParticipants: 'Катышуучулар кийинчерээк жарыяланат',
         noResults: 'Жыйынтыктар мелдеш аяктагандан кийин жеткиликтүү болот',
@@ -1230,10 +1230,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         tournamentLive: 'Мелдеш жүрүп жатат',
         regClosingSoon: 'Каттоо 24 сааттан кийин жабылат!'
     } : {
-        format: 'Формат', participants: 'Участники', prizeFund: 'Призовой фонд',
+        format: 'Формат', participants: 'Участники', pairs: 'Пар', prizeFund: 'Призовой фонд',
         description: 'О турнире', scheduleSoon: 'Расписание будет опубликовано позже',
         noParticipants: 'Участники будут объявлены позже',
-        noResults: 'Результаты будут доступны после завершения турнира',
+        noResults: 'Очки будут начислены после завершения турнира',
         countdownTitle: 'ТУРНИР НАЧИНАЕТСЯ ЧЕРЕЗ',
         countdownDays: 'дней', countdownHours: 'часов', countdownMin: 'минут', countdownSec: 'секунд',
         tournamentLive: 'Турнир идёт',
@@ -1285,7 +1285,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 '<div class="td-hero-stats">' +
                     '<div class="hero-stat">' +
                         '<span class="hero-stat-value">' + ((t.max_participants || 0) - (t.reserved_spots || 0) || t.max_participants || '—') + '</span>' +
-                        '<span class="hero-stat-label">' + L.participants + '</span>' +
+                        '<span class="hero-stat-label">' + ((t.format === 'doubles' || t.format === 'mixed_doubles') ? L.pairs : L.participants) + '</span>' +
                     '</div>' +
                     '<div class="hero-stat">' +
                         '<span class="hero-stat-value">' + (t.prize_fund || '—') + '</span>' +
@@ -1936,11 +1936,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     var participantsGrid = document.getElementById('participantsGrid');
     if (participantsGrid) {
         var maxPart = t.max_participants || 16;
-        var activeRegs = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; })
+        var mainDrawRegs = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; })
+            .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
+        var waitlistRegs = registrations.filter(function(r) { return r.status === 'waitlist'; })
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
 
-        var mainDraw = activeRegs.slice(0, maxPart);
-        var waitlist = activeRegs.slice(maxPart);
+        var mainDraw = mainDrawRegs.slice(0, maxPart);
+        var waitlist = mainDrawRegs.slice(maxPart).concat(waitlistRegs);
 
         if (mainDraw.length > 0) {
             var partHtml = '';
@@ -2097,6 +2099,58 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         }
                         resHtml += '</tbody></table></div>';
                     }
+
+                    resultsPodium.innerHTML = resHtml;
+                } else {
+                    resultsPodium.innerHTML = '<div class="td-no-results"><p>' + L.noResults + '</p></div>';
+                }
+            } else if (t.bracket_type === 'group_league') {
+                // GL results: find PL final (highest round_number among PL- matches)
+                var plMatches = matches.filter(function(m) { return m.round && m.round.indexOf('PL-') === 0 && m.round !== 'PL-3RD'; });
+                var plMaxRound = 0;
+                plMatches.forEach(function(m) { if (m.round_number > plMaxRound) plMaxRound = m.round_number; });
+                var plFinal = plMatches.find(function(m) { return m.round_number === plMaxRound && m.status === 'completed' && m.winner_id; });
+
+                if (plFinal && plFinal.winner_id) {
+                    var winner = playersMap[plFinal.winner_id] || {};
+                    var finalist_id = plFinal.winner_id === plFinal.player1_id ? plFinal.player2_id : plFinal.player1_id;
+                    var finalist = playersMap[finalist_id] || {};
+
+                    var resHtml = '<div class="td-podium">' +
+                        podiumCard(winner, 1, '🥇') +
+                        podiumCard(finalist, 2, '🥈');
+
+                    var plThird = matches.find(function(m) { return m.round === 'PL-3RD' && m.status === 'completed' && m.winner_id; });
+                    if (plThird) {
+                        var thirdPlayer = playersMap[plThird.winner_id] || {};
+                        resHtml += podiumCard(thirdPlayer, 3, '🥉');
+                    }
+
+                    resHtml += '</div>';
+
+                    // Full results table from rating_history
+                    supabaseClient.from('rating_history')
+                        .select('player_id, points_earned')
+                        .eq('tournament_id', t.id)
+                        .order('points_earned', { ascending: false })
+                        .then(function(rhRes) {
+                            if (rhRes.data && rhRes.data.length > 0) {
+                                var tblHtml = '<div style="max-width:600px;margin:24px auto 0;">';
+                                tblHtml += '<table style="width:100%;border-collapse:collapse;">';
+                                tblHtml += '<thead><tr><th style="text-align:center;padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">#</th>' +
+                                    '<th style="padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th>' +
+                                    '<th style="text-align:right;padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">' + (isEn ? 'Points' : (isKg ? 'Упай' : 'Очки')) + '</th></tr></thead><tbody>';
+                                rhRes.data.forEach(function(row, i) {
+                                    var rpName = pName(row.player_id);
+                                    tblHtml += '<tr style="border-bottom:1px solid var(--border, rgba(255,255,255,0.06));">' +
+                                        '<td style="text-align:center;padding:8px;font-weight:600;color:var(--text-secondary);">' + (i + 1) + '</td>' +
+                                        '<td style="padding:8px;">' + rpName + '</td>' +
+                                        '<td style="text-align:right;padding:8px;color:var(--accent);font-weight:600;">+' + (row.points_earned || 0) + '</td></tr>';
+                                });
+                                tblHtml += '</tbody></table></div>';
+                                resultsPodium.innerHTML += tblHtml;
+                            }
+                        });
 
                     resultsPodium.innerHTML = resHtml;
                 } else {

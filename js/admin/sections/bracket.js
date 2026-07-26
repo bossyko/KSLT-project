@@ -89,6 +89,26 @@
     }
 
     /**
+     * Get combined NTRP rating for a doubles team (for seeding).
+     * Uses external_ntrp for external players, ntrp_rating from players table otherwise.
+     */
+    function getTeamNtrp(reg, playersMap) {
+        var captainNtrp = 0;
+        if (reg.player_id && playersMap[reg.player_id]) {
+            captainNtrp = playersMap[reg.player_id].ntrp_rating || 0;
+        } else if (reg.external_ntrp) {
+            captainNtrp = reg.external_ntrp;
+        }
+        var partnerNtrp = 0;
+        if (reg.partner_id && playersMap[reg.partner_id]) {
+            partnerNtrp = playersMap[reg.partner_id].ntrp_rating || 0;
+        } else if (reg.partner_external_ntrp) {
+            partnerNtrp = reg.partner_external_ntrp;
+        }
+        return captainNtrp + partnerNtrp;
+    }
+
+    /**
      * Open modal to assign a partner to a registration (admin action).
      * Supports: KSLT player search or external player name entry.
      */
@@ -1346,6 +1366,12 @@
                 renderBracketManagement(tournamentId);
             });
         }
+
+        // Async: render X-slot assignment dropdowns if IG path is active
+        var xSlotContainer = document.getElementById('adXSlotContainer');
+        if (xSlotContainer) {
+            renderXSlotSection(xSlotContainer, tournamentId);
+        }
     }
 
     // ---- Registrations Panel HTML ----
@@ -1561,7 +1587,7 @@
                     ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(33,150,243,0.15);color:#2196f3;margin-left:4px;">EXT</span>';
             } else {
                 partnerDisplay = '<span style="color:var(--text-dim);font-style:italic;">' + L.doublesNoPartner + '</span>' +
-                    ' <button class="ad-btn-icon ad-btn-add-partner" data-reg-id="' + reg.id + '" style="color:var(--accent);background:none;border:none;cursor:pointer;font-size:0.75rem;padding:2px 6px;" title="' + L.doublesAddPartner + '">+</button>';
+                    '<br><button class="ad-btn-add-partner" data-reg-id="' + reg.id + '" style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 10px;border:1px solid var(--accent);border-radius:4px;background:rgba(204,255,0,0.08);color:var(--accent);cursor:pointer;font-size:0.7rem;font-weight:600;white-space:nowrap;">+ ' + L.doublesAddPartner + '</button>';
             }
             partnerTd = '<td style="font-size:0.85rem;">' + partnerDisplay + '</td>';
 
@@ -2132,6 +2158,9 @@
             });
             html += '</div>'; // /ad-ig-matches-grid
             html += '</div>'; // /ad-ig-section
+
+            // X-slot assignment placeholder (populated async after render)
+            html += '<div id="adXSlotContainer"></div>';
         }
 
         // ---- Playoff bracket (after IG, after groups) ----
@@ -2142,19 +2171,15 @@
             var plDrawSize = 1;
             while (plDrawSize < plR1.length * 2) plDrawSize *= 2;
             if (plDrawSize < 2) plDrawSize = plMatches.length * 2;
-            html += renderPlayoffBracketHtml(plMatches, playersMap, plDrawSize, playerGroupLabel);
+            html += renderPlayoffBracketHtml(plMatches, playersMap, plDrawSize, playerGroupLabel, regsMap, isDbl);
             html += '</div>';
         }
 
         // Action buttons (bottom)
-        var canIG = groupCount % 2 === 0 && groupCount >= 2; // IG only for even group count (2,4,6...)
         html += '<div style="display:flex;justify-content:center;gap:12px;margin-top:24px;padding:16px 0;">';
         if (allGroupCompleted && !hasPlayoff && !hasIG && !isTournamentCompleted) {
-            if (canIG) {
-                html += '<button class="ad-btn ad-btn-primary" id="adBrkPlayoffFormat" style="font-size:1rem;padding:12px 32px;">' + L.playoffFormatTitle + '</button>';
-            } else {
-                html += '<button class="ad-btn ad-btn-primary" id="adBrkGenPlayoff" style="font-size:1rem;padding:12px 32px;">' + L.generatePlayoff + '</button>';
-            }
+            // Always show format modal — it auto-detects IG availability
+            html += '<button class="ad-btn ad-btn-primary" id="adBrkPlayoffFormat" style="font-size:1rem;padding:12px 32px;">' + L.playoffFormatTitle + '</button>';
         }
         if (totalAllCompleted && !isTournamentCompleted) {
             html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize" style="font-size:1rem;padding:12px 32px;">' + L.finalizeTournament + '</button>';
@@ -2165,7 +2190,7 @@
     }
 
     // ---- Render Playoff bracket HTML (reuses bracket logic for SE matches) ----
-    function renderPlayoffBracketHtml(plMatches, playersMap, drawSize, playerGroupLabel) {
+    function renderPlayoffBracketHtml(plMatches, playersMap, drawSize, playerGroupLabel, regsMap, isDbl) {
         playerGroupLabel = playerGroupLabel || {};
         var totalRounds = Math.log2(drawSize);
         var html = '';
@@ -2203,8 +2228,26 @@
                 // Group labels for playoff display
                 var p1GrpLbl = match.player1_id && playerGroupLabel[match.player1_id] ? playerGroupLabel[match.player1_id] : '';
                 var p2GrpLbl = match.player2_id && playerGroupLabel[match.player2_id] ? playerGroupLabel[match.player2_id] : '';
-                var p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : '<span style="color:var(--text-dim);">TBD</span>');
-                var p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : '<span style="color:var(--text-dim);">TBD</span>');
+                // X-slot: R1 empty slot (not BYE) — show [X] marker in accent color
+                var isR1 = match.round_number === 1 && match.round !== 'IG';
+                var isByeMatch = match.score === 'BYE';
+                var isXSlotP1 = isR1 && !match.player1_id && match.status !== 'completed';
+                var isXSlotP2 = isR1 && !match.player2_id && match.status !== 'completed';
+                var xSlotMark = '<span style="color:var(--accent);font-weight:600;">' + L.xSlot + '</span>';
+                var byeMark = '<span style="color:var(--text-dim);font-style:italic;">BYE</span>';
+                var p1Name, p2Name;
+                function emptySlotName(isXSlot, isByeSide) {
+                    if (isByeSide) return byeMark;
+                    if (isXSlot) return xSlotMark;
+                    return '<span style="color:var(--text-dim);">TBD</span>';
+                }
+                if (isDbl && regsMap) {
+                    p1Name = match.player1_id ? getTeamDisplayName(match.player1_id, regsMap, playersMap, true) : emptySlotName(isXSlotP1, isByeMatch && !match.player1_id);
+                    p2Name = match.player2_id ? getTeamDisplayName(match.player2_id, regsMap, playersMap, true) : emptySlotName(isXSlotP2, isByeMatch && !match.player2_id);
+                } else {
+                    p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : emptySlotName(isXSlotP1, isByeMatch && !match.player1_id));
+                    p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : emptySlotName(isXSlotP2, isByeMatch && !match.player2_id));
+                }
 
                 var isCompleted = match.status === 'completed';
                 var isBye = match.score === 'BYE';
@@ -3287,9 +3330,12 @@
             return;
         }
 
-        // Sort by points DESC (seeded first)
+        // Sort by points DESC (seeded first); doubles: NTRP sum, fallback to points
         if (isDbl) {
             approved.sort(function(a, b) {
+                var ntrpA = getTeamNtrp(a, playersMap);
+                var ntrpB = getTeamNtrp(b, playersMap);
+                if (ntrpA || ntrpB) return (ntrpB || 0) - (ntrpA || 0);
                 return getTeamPoints(b, playersMap) - getTeamPoints(a, playersMap);
             });
         } else {
@@ -3879,20 +3925,61 @@
         A.showToast(L.drawGenerated, 'success');
     }
 
-    // ---- Playoff Format Modal (choose direct or IG) ----
+    // ---- Playoff Format Modal (auto-detect IG vs Direct based on group sizes) ----
     function showPlayoffFormatModal(tournament, matches, playersMap, tournamentId) {
+        var groupCount = tournament.group_count || 2;
+        var qualifiers = tournament.qualifiers_per_group || 2;
+        var grpMatches = matches.filter(isGroupMatch);
+
+        // Detect group sizes and IG candidates
+        var has3PlayerGroups = false;
+        var candidateCount = 0;
+        for (var g = 1; g <= groupCount; g++) {
+            var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
+            var pids = [];
+            groupMatchesG.forEach(function(m) {
+                if (m.player1_id && pids.indexOf(m.player1_id) === -1) pids.push(m.player1_id);
+                if (m.player2_id && pids.indexOf(m.player2_id) === -1) pids.push(m.player2_id);
+            });
+            if (pids.length <= 3) {
+                has3PlayerGroups = true;
+                if (pids.length >= 3) candidateCount++;
+            }
+        }
+
+        var directCount = groupCount * qualifiers;
+        var dSize = 2;
+        while (dSize < directCount) dSize *= 2;
+        var freeSlots = dSize - directCount;
+        var autoPassCount = Math.min(candidateCount, freeSlots);
+        var igNeeded = candidateCount > freeSlots;
+        var igMatchEst = igNeeded ? (candidateCount - freeSlots) : 0;
+
         var overlay = document.createElement('div');
         overlay.className = 'ad-confirm-overlay';
+
+        var infoHtml = '<p style="margin-bottom:8px;">' + L.igDirectQualifiers + ': <b>' + directCount + '</b></p>';
+        if (has3PlayerGroups && candidateCount > 0) {
+            infoHtml += '<p style="margin-bottom:8px;">' + L.igCandidates + ': <b>' + candidateCount + '</b></p>';
+            if (autoPassCount > 0) {
+                infoHtml += '<p style="margin-bottom:8px;">' + L.igAutoPass + ': <b>' + autoPassCount + '</b></p>';
+            }
+            if (igNeeded) {
+                infoHtml += '<p>' + L.igMatchLabel + ': <b>~' + igMatchEst + '</b></p>';
+            } else {
+                infoHtml += '<p style="color:var(--accent);">' + L.igNoNeeded + '</p>';
+            }
+        }
+
         overlay.innerHTML =
             '<div class="ad-confirm-modal">' +
                 '<div class="ad-confirm-title">' + L.playoffFormatTitle + '</div>' +
-                '<div class="ad-confirm-text" style="text-align:left;margin-bottom:16px;">' +
-                    '<p style="margin-bottom:8px;color:var(--text-secondary);">' + L.igDirectQualifiers + ': ' + (isEn ? '1st places go directly to playoff' : '1-е места проходят напрямую') + '</p>' +
-                    '<p style="color:var(--text-secondary);">' + L.igAutoLabel + ': ' + (isEn ? '2nd vs 3rd from cross groups' : '2-е vs 3-и из перекрёстных групп') + '</p>' +
-                '</div>' +
+                '<div class="ad-confirm-text" style="text-align:left;margin-bottom:16px;color:var(--text-secondary);">' + infoHtml + '</div>' +
                 '<div class="ad-confirm-actions" style="flex-direction:column;gap:8px;">' +
-                    '<button class="ad-btn ad-btn-primary" id="adFormatDirect" style="width:100%;">' + L.playoffDirect + '</button>' +
-                    '<button class="ad-btn ad-btn-primary" id="adFormatIG" style="width:100%;background:var(--bg-elevated);color:var(--accent);border:1px solid var(--accent);">' + L.playoffWithIG + '</button>' +
+                    (igNeeded
+                        ? '<button class="ad-btn ad-btn-primary" id="adFormatIG" style="width:100%;">' + L.playoffWithIG + '</button>'
+                        : '') +
+                    '<button class="ad-btn ' + (igNeeded ? 'ad-btn-secondary' : 'ad-btn-primary') + '" id="adFormatDirect" style="width:100%;">' + L.playoffDirect + '</button>' +
                     '<button class="ad-btn ad-btn-secondary" id="adFormatCancel" style="width:100%;">' + L.cancel + '</button>' +
                 '</div>' +
             '</div>';
@@ -3910,19 +3997,218 @@
             }, L.generatePlayoff);
         });
 
-        document.getElementById('adFormatIG').addEventListener('click', async function() {
+        var igBtn = document.getElementById('adFormatIG');
+        if (igBtn) {
+            igBtn.addEventListener('click', function() {
+                dismiss();
+                showCandidateSelectionModal(tournament, matches, playersMap, tournamentId);
+            });
+        }
+    }
+
+    // ---- Candidate Selection Modal: admin picks auto-pass / IG / out for each 3rd place ----
+    function showCandidateSelectionModal(tournament, matches, playersMap, tournamentId) {
+        var groupCount = tournament.group_count || 2;
+        var qualifiers = tournament.qualifiers_per_group || 2;
+        var grpMatches = matches.filter(isGroupMatch);
+
+        // Build standings + candidates (same logic as generateIGMatches steps 1-4)
+        var groupStandings = [];
+        var groupSizes = [];
+        for (var g = 1; g <= groupCount; g++) {
+            var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
+            var playerIds = [];
+            groupMatchesG.forEach(function(m) {
+                if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
+                if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
+            });
+            var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
+            var mgp = tournament.manual_group_places || {};
+            if (mgp[String(g)]) {
+                var ov = mgp[String(g)];
+                standings.forEach(function(st) {
+                    if (ov[st.playerId] !== undefined) st.place = ov[st.playerId];
+                });
+            }
+            standings.sort(function(a, b) { return a.place - b.place; });
+            groupStandings.push(standings);
+            groupSizes.push(playerIds.length);
+        }
+
+        var directQualifiers = [];
+        for (var g2 = 0; g2 < groupCount; g2++) {
+            for (var p2 = 0; p2 < Math.min(qualifiers, groupStandings[g2].length); p2++) {
+                directQualifiers.push({
+                    playerId: groupStandings[g2][p2].playerId,
+                    groupIdx: g2,
+                    place: groupStandings[g2][p2].place
+                });
+            }
+        }
+
+        var drawSize = 2;
+        while (drawSize < directQualifiers.length) drawSize *= 2;
+        var freeSlots = drawSize - directQualifiers.length;
+
+        var candidates = [];
+        for (var g3 = 0; g3 < groupCount; g3++) {
+            if (groupSizes[g3] <= 3) {
+                var third = groupStandings[g3].find(function(s) { return s.place === 3; });
+                if (third) {
+                    candidates.push({
+                        playerId: third.playerId,
+                        groupIdx: g3,
+                        wins: third.wins,
+                        losses: third.losses,
+                        setRatio: third.setsWon + third.setsLost > 0 ? third.setsWon / (third.setsWon + third.setsLost) : 0,
+                        gameRatio: third.gamesWon + third.gamesLost > 0 ? third.gamesWon / (third.gamesWon + third.gamesLost) : 0
+                    });
+                }
+            }
+        }
+
+        if (candidates.length === 0) {
+            A.showToast(L.igNoNeeded, 'info');
+            return;
+        }
+
+        // Default actions: if all fit → auto, otherwise best → auto, rest → ig
+        var defaultActions = [];
+        if (candidates.length <= freeSlots) {
+            for (var dc = 0; dc < candidates.length; dc++) defaultActions.push('auto');
+        } else {
+            candidates.sort(function(a, b) {
+                if (b.wins !== a.wins) return b.wins - a.wins;
+                if (b.setRatio !== a.setRatio) return b.setRatio - a.setRatio;
+                return b.gameRatio - a.gameRatio;
+            });
+            var autoCount = Math.max(0, freeSlots - Math.ceil((candidates.length - freeSlots)));
+            for (var dc2 = 0; dc2 < candidates.length; dc2++) {
+                defaultActions.push(dc2 < autoCount ? 'auto' : 'ig');
+            }
+        }
+
+        // Build modal HTML
+        var isDoubles = tournament.format === 'doubles';
+        var regsMap = {};
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-confirm-overlay';
+
+        var rowsHtml = '';
+        for (var ci = 0; ci < candidates.length; ci++) {
+            var c = candidates[ci];
+            var pName = playersMap[c.playerId]
+                ? A.esc(isEn ? (playersMap[c.playerId].name_en || playersMap[c.playerId].name) : playersMap[c.playerId].name)
+                : 'ID:' + c.playerId;
+            var groupLetter = String.fromCharCode(65 + c.groupIdx);
+            rowsHtml +=
+                '<tr style="border-bottom:1px solid var(--border-subtle, #222);">' +
+                    '<td style="padding:8px 10px;color:var(--text-primary, #fff);">' + pName + '</td>' +
+                    '<td style="padding:8px 10px;text-align:center;color:var(--accent, #CCFF00);font-weight:600;">' + groupLetter + '</td>' +
+                    '<td style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);">' + c.wins + '-' + (c.losses || 0) + '</td>' +
+                    '<td style="padding:8px 10px;">' +
+                        '<select data-candidate-idx="' + ci + '" style="padding:5px 10px;font-size:13px;background:var(--bg-primary, #111);color:var(--text-primary, #fff);border:1px solid var(--border-subtle, #333);border-radius:6px;cursor:pointer;outline:none;">' +
+                            '<option value="auto"' + (defaultActions[ci] === 'auto' ? ' selected' : '') + '>' + L.candidateActionAuto + '</option>' +
+                            '<option value="ig"' + (defaultActions[ci] === 'ig' ? ' selected' : '') + '>' + L.candidateActionIG + '</option>' +
+                            '<option value="out">' + L.candidateActionOut + '</option>' +
+                        '</select>' +
+                    '</td>' +
+                '</tr>';
+        }
+
+        overlay.innerHTML =
+            '<div class="ad-confirm-modal" style="max-width:540px;text-align:left;">' +
+                '<div class="ad-confirm-title" style="text-align:center;font-size:1.15rem;margin-bottom:12px;">' + L.candidateSelectionTitle + '</div>' +
+                '<p style="text-align:center;color:var(--text-secondary, #aaa);margin-bottom:16px;font-size:14px;">' +
+                    L.candidateFreeSlots + ': <b style="color:var(--accent, #CCFF00);">' + freeSlots + '</b>' +
+                '</p>' +
+                '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;">' +
+                    '<thead><tr style="border-bottom:2px solid var(--border-subtle, #333);">' +
+                        '<th style="padding:8px 10px;text-align:left;color:var(--text-secondary, #aaa);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">' + (isEn ? 'Player' : 'Игрок') + '</th>' +
+                        '<th style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">' + L.candidateGroup + '</th>' +
+                        '<th style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">' + L.candidateWL + '</th>' +
+                        '<th style="padding:8px 10px;color:var(--text-secondary, #aaa);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">' + (isEn ? 'Action' : 'Действие') + '</th>' +
+                    '</tr></thead>' +
+                    '<tbody>' + rowsHtml + '</tbody>' +
+                '</table>' +
+                '<div id="adCandidateSummary" style="text-align:center;color:var(--text-secondary, #aaa);font-size:13px;margin-bottom:8px;padding:8px;background:var(--bg-primary, #111);border-radius:6px;"></div>' +
+                '<div id="adCandidateError" style="text-align:center;color:var(--danger, #ff4444);font-size:13px;margin-bottom:8px;display:none;"></div>' +
+                '<div class="ad-confirm-actions" style="margin-top:16px;">' +
+                    '<button class="ad-btn ad-btn-primary" id="adCandidateConfirm">' + L.candidateConfirm + '</button>' +
+                    '<button class="ad-btn ad-btn-secondary" id="adCandidateCancel">' + L.cancel + '</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        function dismiss() { overlay.remove(); }
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
+        document.getElementById('adCandidateCancel').addEventListener('click', dismiss);
+
+        // Live summary update
+        function updateSummary() {
+            var selects = overlay.querySelectorAll('select[data-candidate-idx]');
+            var autoC = 0, igC = 0, outC = 0;
+            for (var si = 0; si < selects.length; si++) {
+                var v = selects[si].value;
+                if (v === 'auto') autoC++;
+                else if (v === 'ig') igC++;
+                else outC++;
+            }
+            var igMatches = Math.floor(igC / 2);
+            var igWinners = igMatches;
+            var summaryEl = document.getElementById('adCandidateSummary');
+            var errorEl = document.getElementById('adCandidateError');
+
+            summaryEl.textContent = L.candidateAutoCount + ': ' + autoC +
+                ' | ' + L.candidateIGCount + ': ' + igMatches +
+                ' (' + igC + ' ' + (isEn ? 'players' : 'игроков') + ')' +
+                ' | ' + L.candidateOutCount + ': ' + outC;
+
+            // Validate
+            var err = '';
+            if (igC > 0 && igC % 2 !== 0) {
+                err = L.candidateIGOddError;
+            } else if (autoC + igWinners > freeSlots) {
+                err = L.candidateOverflowError;
+            }
+            errorEl.textContent = err;
+            errorEl.style.display = err ? 'block' : 'none';
+            document.getElementById('adCandidateConfirm').disabled = !!err;
+        }
+        updateSummary();
+
+        var selects = overlay.querySelectorAll('select[data-candidate-idx]');
+        for (var si2 = 0; si2 < selects.length; si2++) {
+            selects[si2].addEventListener('change', updateSummary);
+        }
+
+        // Confirm
+        document.getElementById('adCandidateConfirm').addEventListener('click', async function() {
+            var sels = overlay.querySelectorAll('select[data-candidate-idx]');
+            var manualAutoPass = [];
+            var manualIGParticipants = [];
+            for (var fi = 0; fi < sels.length; fi++) {
+                var idx = parseInt(sels[fi].getAttribute('data-candidate-idx'));
+                var val = sels[fi].value;
+                if (val === 'auto') {
+                    manualAutoPass.push(candidates[idx]);
+                } else if (val === 'ig') {
+                    manualIGParticipants.push(candidates[idx]);
+                }
+                // 'out' → skip
+            }
             dismiss();
-            A.showConfirm(L.igGenerateConfirm, '', async function() {
-                await generateIGMatches(tournament, matches, playersMap);
-                renderBracketManagement(tournamentId, 'bracket');
-            }, L.igGenerate);
+            await generateIGMatches(tournament, matches, playersMap, manualAutoPass, manualIGParticipants);
+            renderBracketManagement(tournamentId, 'bracket');
         });
     }
 
     // ---- Generate Inter-Group (IG) Matches + Playoff Bracket simultaneously ----
-    async function generateIGMatches(tournament, matches, playersMap) {
+    // Accepts manual distribution from showCandidateSelectionModal
+    async function generateIGMatches(tournament, matches, playersMap, manualAutoPass, manualIGParticipants) {
         try {
             var groupCount = tournament.group_count || 2;
+            var qualifiers = tournament.qualifiers_per_group || 2;
             var grpMatches = matches.filter(isGroupMatch);
 
             // 1. Get standings for each group
@@ -3935,7 +4221,6 @@
                     if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
                 });
                 var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
-                // Apply manual overrides
                 var mgpIG = tournament.manual_group_places || {};
                 if (mgpIG[String(g)]) {
                     var ovIG = mgpIG[String(g)];
@@ -3947,56 +4232,51 @@
                 groupStandings.push(standings);
             }
 
-            // 2. Create IG cross-pairs
+            // 2. Collect direct qualifiers: 1st + 2nd from ALL groups
+            var directQualifiers = [];
+            for (var g = 0; g < groupCount; g++) {
+                for (var p = 0; p < Math.min(qualifiers, groupStandings[g].length); p++) {
+                    directQualifiers.push({
+                        playerId: groupStandings[g][p].playerId,
+                        groupIdx: g,
+                        place: groupStandings[g][p].place
+                    });
+                }
+            }
+
+            // 3. Determine draw size
+            var drawSize = 2;
+            while (drawSize < directQualifiers.length) drawSize *= 2;
+
+            // 4. Use manual distribution from modal
+            var autoPassPlayers = manualAutoPass || [];
             var igToInsert = [];
             var igOrder = 0;
 
-            for (var i = 0; i < groupCount - 1; i += 2) {
-                var gA = groupStandings[i];
-                var gB = groupStandings[i + 1];
-                if (!gA || !gB) continue;
-
-                var a2 = gA.find(function(s) { return s.place === 2; });
-                var b3 = gB.find(function(s) { return s.place === 3; });
-                if (a2 && b3) {
-                    igOrder++;
-                    igToInsert.push({
-                        tournament_id: tournament.id,
-                        player1_id: a2.playerId, player2_id: b3.playerId,
-                        round: 'IG', round_number: 0, match_order: igOrder,
-                        group_number: null, status: 'upcoming', seed1: null, seed2: null
-                    });
+            if (manualIGParticipants && manualIGParticipants.length >= 2) {
+                // Cross-group IG pairing: interleave by group to avoid same-group pairs
+                var igSorted = manualIGParticipants.slice();
+                igSorted.sort(function(a, b) { return a.groupIdx - b.groupIdx; });
+                var interleaved = [];
+                var half = Math.ceil(igSorted.length / 2);
+                for (var il = 0; il < half; il++) {
+                    interleaved.push(igSorted[il]);
+                    if (il + half < igSorted.length) interleaved.push(igSorted[il + half]);
                 }
 
-                var b2 = gB.find(function(s) { return s.place === 2; });
-                var a3 = gA.find(function(s) { return s.place === 3; });
-                if (b2 && a3) {
+                for (var ip = 0; ip < interleaved.length - 1; ip += 2) {
                     igOrder++;
                     igToInsert.push({
                         tournament_id: tournament.id,
-                        player1_id: b2.playerId, player2_id: a3.playerId,
+                        player1_id: interleaved[ip].playerId,
+                        player2_id: interleaved[ip + 1].playerId,
                         round: 'IG', round_number: 0, match_order: igOrder,
                         group_number: null, status: 'upcoming', seed1: null, seed2: null
                     });
                 }
             }
 
-            if (igToInsert.length === 0) {
-                A.showToast(isEn ? 'Not enough players for inter-group matches' : 'Недостаточно игроков для межгрупповых матчей', 'error');
-                return;
-            }
-
-            // 3. Build SE playoff bracket simultaneously
-            // Direct qualifiers: 1st places from each group (seeded)
-            var firstPlaces = [];
-            for (var g = 0; g < groupCount; g++) {
-                var first = groupStandings[g].find(function(s) { return s.place === 1; });
-                if (first) firstPlaces.push({ playerId: first.playerId, groupIdx: g });
-            }
-
-            var totalQualified = firstPlaces.length + igToInsert.length;
-            var drawSize = 2;
-            while (drawSize < totalQualified) drawSize *= 2;
+            // 5. Build SE playoff bracket
             var totalRounds = Math.log2(drawSize);
 
             // Seed positions
@@ -4004,10 +4284,15 @@
                 ? SEED_POSITIONS[drawSize]
                 : (drawSize === 16 ? [1, 16, 9, 8, 5, 12, 13, 4] : (drawSize === 8 ? [1, 8, 5, 4] : (drawSize === 4 ? [1, 4, 3, 2] : [1, 2])));
 
-            // Place 1st places at seed positions, rest empty (TBD for IG winners)
+            // Separate 1st-place finishers (seeds) and 2nd-place (rest)
+            var firstPlaces = directQualifiers.filter(function(q) { return q.place === 1; });
+            var secondPlaces = directQualifiers.filter(function(q) { return q.place === 2; });
+
+            // Build draw array
             var draw = new Array(drawSize);
             for (var d = 0; d < drawSize; d++) draw[d] = null;
 
+            // Place 1st places at seed positions
             for (var s = 0; s < firstPlaces.length && s < seedPositions.length; s++) {
                 draw[seedPositions[s] - 1] = {
                     player_id: firstPlaces[s].playerId,
@@ -4016,9 +4301,111 @@
                 };
             }
 
-            // Cross-seeding note: IG winners are placed into R1 empty slots
-            // by tryFillPlayoffFromIG() after IG matches complete.
-            // Principle: IG winner from group pair P faces a seed from a different pair.
+            // Calculate BYE count early to reserve slots opposite top seeds
+            var xSlotCount = autoPassPlayers.length + igToInsert.length;
+            var totalEmpty = drawSize - directQualifiers.length;
+            var byeCount = Math.max(0, totalEmpty - xSlotCount);
+
+            // Reserve BYE positions: opposite top seeds (seed [1] first, then [2], etc.)
+            var byeReserved = {};
+            for (var bri = 0; bri < byeCount && bri < seedPositions.length; bri++) {
+                var seedIdx = seedPositions[bri] - 1; // 0-indexed
+                var oppIdx = (seedIdx % 2 === 0) ? seedIdx + 1 : seedIdx - 1;
+                byeReserved[oppIdx] = true;
+            }
+
+            // Place 2nd places: cross-seeded (avoid same-group in R1 and bracket half)
+            var halfSize = Math.max(drawSize / 2, 2);
+            // Shuffle 2nd places first for randomness
+            for (var i = secondPlaces.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var tmp = secondPlaces[i]; secondPlaces[i] = secondPlaces[j]; secondPlaces[j] = tmp;
+            }
+            // Sort by most-constrained group first
+            var groupCounts = {};
+            directQualifiers.forEach(function(q) {
+                groupCounts[q.groupIdx] = (groupCounts[q.groupIdx] || 0) + 1;
+            });
+            secondPlaces.sort(function(a, b) {
+                return (groupCounts[b.groupIdx] || 0) - (groupCounts[a.groupIdx] || 0);
+            });
+
+            // Place 2nd places avoiding same-group R1 opponents + skip BYE-reserved slots
+            var emptySlots = [];
+            for (var i = 0; i < drawSize; i++) {
+                if (draw[i] === null && !byeReserved[i]) emptySlots.push(i);
+            }
+
+            function getGroupsInHalf(halfIdx) {
+                var groups = [];
+                var start = halfIdx * halfSize;
+                for (var hi = start; hi < start + halfSize; hi++) {
+                    if (draw[hi] && draw[hi].groupIdx >= 0) groups.push(draw[hi].groupIdx);
+                }
+                return groups;
+            }
+
+            for (var a = 0; a < secondPlaces.length; a++) {
+                var player = secondPlaces[a];
+                var bestSlotIdx = -1;
+                var bestScore = -1;
+                for (var si = 0; si < emptySlots.length; si++) {
+                    var slot = emptySlots[si];
+                    var score = 0;
+                    var opponentSlot = (slot % 2 === 0) ? slot + 1 : slot - 1;
+                    var opponent = draw[opponentSlot];
+                    if (opponent && opponent.groupIdx === player.groupIdx) {
+                        score = 0;
+                    } else {
+                        var halfIdx = Math.floor(slot / halfSize);
+                        var groupsInHalf = getGroupsInHalf(halfIdx);
+                        score = (groupsInHalf.indexOf(player.groupIdx) === -1) ? 2 : 1;
+                    }
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestSlotIdx = si;
+                        if (score === 2) break;
+                    }
+                }
+                if (bestSlotIdx === -1) bestSlotIdx = 0;
+
+                // Cross-seeding fix: if bestScore === 0 (all slots cause same-group R1),
+                // try to swap an already-placed player to resolve the conflict
+                if (bestScore === 0 && emptySlots.length > 0) {
+                    var chosenSlot = emptySlots[bestSlotIdx];
+                    var oppSlot = (chosenSlot % 2 === 0) ? chosenSlot + 1 : chosenSlot - 1;
+                    var conflictOpp = draw[oppSlot];
+                    if (conflictOpp && conflictOpp.groupIdx === player.groupIdx && !conflictOpp.seed) {
+                        // Find a placed non-seed player from a different group that can swap
+                        var swapped = false;
+                        for (var sw = 0; sw < drawSize; sw++) {
+                            if (draw[sw] && !draw[sw].seed && draw[sw].groupIdx !== player.groupIdx && sw !== oppSlot) {
+                                var swOpp = (sw % 2 === 0) ? sw + 1 : sw - 1;
+                                var swOppEntry = draw[swOpp];
+                                // Swap candidate (draw[sw]) with conflictOpp (draw[oppSlot])
+                                // Check: draw[sw] at oppSlot won't conflict, conflictOpp at sw won't conflict
+                                var swGroupOk = (!swOppEntry || swOppEntry.groupIdx !== conflictOpp.groupIdx);
+                                var playerOkWithSw = (draw[sw].groupIdx !== player.groupIdx);
+                                if (swGroupOk && playerOkWithSw) {
+                                    // Swap draw[sw] ↔ draw[oppSlot]
+                                    var swapTmp = draw[sw];
+                                    draw[sw] = draw[oppSlot];
+                                    draw[oppSlot] = swapTmp;
+                                    swapped = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                draw[emptySlots[bestSlotIdx]] = {
+                    player_id: player.playerId,
+                    seed: null,
+                    groupIdx: player.groupIdx
+                };
+                emptySlots.splice(bestSlotIdx, 1);
+            }
 
             // Generate R1 matches
             var playoffToInsert = [];
@@ -4027,29 +4414,34 @@
                 plMatchOrder++;
                 var slot1 = draw[d];
                 var slot2 = draw[d + 1];
-                var m = {
+                var isBye = byeReserved[d] || byeReserved[d + 1];
+                var hasPlayer = slot1 || slot2;
+                var mObj = {
                     tournament_id: tournament.id,
                     player1_id: slot1 ? slot1.player_id : null,
                     player2_id: slot2 ? slot2.player_id : null,
                     round: 'R1', round_number: 1, match_order: plMatchOrder,
-                    group_number: null, status: 'upcoming',
+                    group_number: null,
+                    status: (isBye && hasPlayer) ? 'completed' : 'upcoming',
+                    winner_id: (isBye && hasPlayer) ? (slot1 ? slot1.player_id : slot2.player_id) : null,
+                    score: (isBye && hasPlayer) ? 'BYE' : null,
                     seed1: slot1 ? slot1.seed : null,
                     seed2: slot2 ? slot2.seed : null
                 };
-                playoffToInsert.push(m);
+                playoffToInsert.push(mObj);
             }
 
-            // Subsequent rounds (R2, SF, QF, F)
+            // Subsequent rounds
             for (var r = 2; r <= totalRounds; r++) {
                 var matchesInRound = drawSize / Math.pow(2, r);
-                for (var m = 1; m <= matchesInRound; m++) {
+                for (var mr = 1; mr <= matchesInRound; mr++) {
                     var roundPrefix = r === totalRounds ? 'F' :
                                       r === totalRounds - 1 ? 'SF' :
                                       r === totalRounds - 2 ? 'QF' : 'R' + r;
                     playoffToInsert.push({
                         tournament_id: tournament.id,
                         player1_id: null, player2_id: null,
-                        round: roundPrefix, round_number: r, match_order: m,
+                        round: roundPrefix, round_number: r, match_order: mr,
                         group_number: null, status: 'upcoming',
                         seed1: null, seed2: null
                     });
@@ -4065,7 +4457,7 @@
                 seed1: null, seed2: null
             });
 
-            // 4. Insert all matches (IG + playoff)
+            // 7. Insert all matches (IG + playoff)
             var allToInsert = igToInsert.concat(playoffToInsert);
             var insertRes = await A.client.from('matches').insert(allToInsert);
             if (insertRes.error) {
@@ -4073,62 +4465,70 @@
                 return;
             }
 
-            A.showToast(isEn ? 'Bracket created: ' + igToInsert.length + ' IG matches + playoff' : 'Сетка создана: ' + igToInsert.length + ' доп. матчей + плей-офф', 'success');
+            // 8. Auto-advance BYE winners to R2
+            if (byeCount > 0) {
+                var freshRes = await A.client.from('matches')
+                    .select('*')
+                    .eq('tournament_id', tournament.id)
+                    .is('group_number', null)
+                    .neq('round', 'IG')
+                    .order('round_number').order('match_order');
+                var freshPlMatches = freshRes.data || [];
+                var r1Fresh = freshPlMatches.filter(function(m) { return m.round_number === 1; });
+                var r2Fresh = freshPlMatches.filter(function(m) { return m.round_number === 2; });
+
+                for (var bi2 = 0; bi2 < r1Fresh.length; bi2++) {
+                    var bm = r1Fresh[bi2];
+                    if (bm.winner_id && bm.score === 'BYE' && r2Fresh.length > 0) {
+                        var nextIdx = Math.floor(bi2 / 2);
+                        if (nextIdx < r2Fresh.length) {
+                            var nextMatch = r2Fresh[nextIdx];
+                            var upField = (bi2 % 2 === 0) ? 'player1_id' : 'player2_id';
+                            var sdField = (bi2 % 2 === 0) ? 'seed1' : 'seed2';
+                            var upData = {};
+                            upData[upField] = bm.winner_id;
+                            upData[sdField] = bm.seed1 || bm.seed2 || null;
+                            await A.client.from('matches').update(upData).eq('id', nextMatch.id);
+                        }
+                    }
+                }
+            }
+
+            // 9. Store auto-pass and IG info in tournament metadata for X-slot assignment
+            var igMeta = {
+                auto_pass_players: autoPassPlayers.map(function(c) {
+                    return { playerId: c.playerId, groupIdx: c.groupIdx };
+                }),
+                ig_match_count: igToInsert.length,
+                x_slot_count: xSlotCount,
+                bye_count: byeCount
+            };
+            await A.client.from('tournaments').update({ ig_meta: igMeta }).eq('id', tournament.id);
+
+            var msg = isEn
+                ? 'Bracket created: ' + directQualifiers.length + ' direct, ' +
+                  autoPassPlayers.length + ' auto-pass, ' + igToInsert.length + ' IG matches, ' +
+                  byeCount + ' BYEs'
+                : 'Сетка создана: ' + directQualifiers.length + ' прямых, ' +
+                  autoPassPlayers.length + ' авто-проход, ' + igToInsert.length + ' доп. матчей, ' +
+                  byeCount + ' BYE';
+            A.showToast(msg, 'success');
         } catch (err) {
             console.error('Generate IG matches error:', err);
             A.showToast((isEn ? 'Error: ' : 'Ошибка: ') + err.message, 'error');
         }
     }
 
-    // ---- Generate Playoff Draw from Group Winners ----
+    // ---- Generate Playoff Draw from Group Winners (Direct path, no IG) ----
     async function generatePlayoffDraw(tournament, matches, playersMap) {
         try {
             var groupCount = tournament.group_count || 2;
             var qualifiers = tournament.qualifiers_per_group || 2;
             var grpMatches = matches.filter(isGroupMatch);
 
-            // Reload IG matches from DB (fresh data)
-            var igRes = await A.client.from('matches')
-                .select('*')
-                .eq('tournament_id', tournament.id)
-                .eq('round', 'IG');
-            var igMatchesFresh = (igRes.data || []).filter(function(m) { return m.status === 'completed' && m.winner_id; });
-            var hasIGPath = igMatchesFresh.length > 0;
-
-            // 1. Get standings for each group
+            // 1. Get standings for each group — Direct path: top-N from each group
             var allQualified = [];
-
-            if (hasIGPath) {
-                // IG path: 1st places (direct) + IG match winners
-                for (var g = 1; g <= groupCount; g++) {
-                    var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
-                    var playerIds = [];
-                    groupMatchesG.forEach(function(m) {
-                        if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
-                        if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
-                    });
-                    var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
-                    standings.sort(function(a, b) { return a.place - b.place; });
-
-                    // Only 1st place as direct qualifier (seeded)
-                    if (standings.length > 0 && standings[0].place === 1) {
-                        allQualified.push({
-                            playerId: standings[0].playerId,
-                            groupIdx: g - 1,
-                            place: 1
-                        });
-                    }
-                }
-                // Add IG winners as unseeded qualifiers
-                igMatchesFresh.forEach(function(m) {
-                    allQualified.push({
-                        playerId: m.winner_id,
-                        groupIdx: -1,
-                        place: 2
-                    });
-                });
-            } else {
-                // Direct path: top-N from each group
+            {
                 var allGroupStandings = [];
                 for (var g = 1; g <= groupCount; g++) {
                     var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
@@ -4236,6 +4636,15 @@
                 };
             }
 
+            // Reserve BYE positions opposite top seeds BEFORE placing others
+            var byeCountDirect = Math.max(0, drawSize - allQualified.length);
+            var byeReservedDirect = {};
+            for (var bri = 0; bri < byeCountDirect && bri < seedPositions.length; bri++) {
+                var seedIdxD = seedPositions[bri] - 1;
+                var oppIdxD = (seedIdxD % 2 === 0) ? seedIdxD + 1 : seedIdxD - 1;
+                byeReservedDirect[oppIdxD] = true;
+            }
+
             // Sort others: most-represented group first (they need more room),
             // shuffle within same group count for randomness
             var groupCounts = {};
@@ -4254,10 +4663,10 @@
                 return (groupCounts[b.groupIdx] || 0) - (groupCounts[a.groupIdx] || 0);
             });
 
-            // Place others avoiding same-group in R1 AND same bracket half
+            // Place others avoiding same-group in R1 AND same bracket half + skip BYE-reserved
             var emptySlots = [];
             for (var i = 0; i < drawSize; i++) {
-                if (draw[i] === null) emptySlots.push(i);
+                if (draw[i] === null && !byeReservedDirect[i]) emptySlots.push(i);
             }
 
             var halfSize = Math.max(drawSize / 2, 2);
@@ -4306,6 +4715,29 @@
                 }
 
                 if (bestSlotIdx === -1) bestSlotIdx = 0;
+
+                // Cross-seeding fix: if bestScore === 0, try swap to resolve same-group R1
+                if (bestScore === 0 && emptySlots.length > 0) {
+                    var chosenSlotD = emptySlots[bestSlotIdx];
+                    var oppSlotD = (chosenSlotD % 2 === 0) ? chosenSlotD + 1 : chosenSlotD - 1;
+                    var conflictOppD = draw[oppSlotD];
+                    if (conflictOppD && conflictOppD.groupIdx === player.groupIdx && !conflictOppD.seed) {
+                        for (var sw = 0; sw < drawSize; sw++) {
+                            if (draw[sw] && !draw[sw].seed && draw[sw].groupIdx !== player.groupIdx && sw !== oppSlotD) {
+                                var swOppD = (sw % 2 === 0) ? sw + 1 : sw - 1;
+                                var swOppEntryD = draw[swOppD];
+                                var swGroupOkD = (!swOppEntryD || swOppEntryD.groupIdx !== conflictOppD.groupIdx);
+                                if (swGroupOkD) {
+                                    var swapTmpD = draw[sw];
+                                    draw[sw] = draw[oppSlotD];
+                                    draw[oppSlotD] = swapTmpD;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 draw[emptySlots[bestSlotIdx]] = {
                     player_id: player.playerId,
                     seed: null,
@@ -4314,7 +4746,7 @@
                 emptySlots.splice(bestSlotIdx, 1);
             }
 
-            // 4. Generate playoff matches (same logic as SE bracket)
+            // 4. Generate playoff matches
             var matchesToInsert = [];
             var matchOrder = 0;
 
@@ -5319,91 +5751,244 @@
         });
     }
 
-    // ---- Auto-fill R1 with IG winners when all IG matches completed ----
-    // Cross-seeding: IG winners from groups A/B play vs seeds from C/D and vice versa
+    // ---- Handle IG completion: show X-slot assignment UI on re-render ----
+    // No longer auto-fills. The renderBracketManagement re-render will detect
+    // that all IG are done and show the X-slot dropdown UI.
     async function tryFillPlayoffFromIG(tournamentId) {
-        // Load all IG matches
+        // No-op: X-slot assignment is now manual via renderXSlotSection()
+        // The re-render (renderBracketManagement) happens automatically after score save
+    }
+
+    // ---- Render X-slot assignment section (dropdowns for admin to assign players) ----
+    async function renderXSlotSection(container, tournamentId) {
+        // Load tournament meta
+        var trnRes = await A.client.from('tournaments').select('*').eq('id', tournamentId).single();
+        var tournament = trnRes.data;
+        if (!tournament || !tournament.ig_meta) return;
+        var igMeta = tournament.ig_meta;
+
+        // Load IG matches (completed winners)
         var igRes = await A.client.from('matches').select('*')
             .eq('tournament_id', tournamentId).eq('round', 'IG');
         var igAll = igRes.data || [];
-        var allDone = igAll.length > 0 && igAll.every(function(m) { return m.status === 'completed' && m.winner_id; });
-        if (!allDone) return;
+        var allIGDone = igAll.length === 0 || igAll.every(function(m) { return m.status === 'completed' && m.winner_id; });
+        if (!allIGDone && igAll.length > 0) return; // IG still in progress
 
-        // Load R1 matches with seeds
-        var r1Res = await A.client.from('matches').select('*')
-            .eq('tournament_id', tournamentId).eq('round_number', 1)
-            .neq('round', 'IG')
-            .order('match_order');
-        var r1Matches = r1Res.data || [];
+        // Collect available players for X-slots: auto-pass + IG winners
+        var availablePlayers = [];
+        // Auto-pass players
+        (igMeta.auto_pass_players || []).forEach(function(ap) {
+            availablePlayers.push({ playerId: ap.playerId, groupIdx: ap.groupIdx, source: 'auto_pass' });
+        });
+        // IG winners
+        igAll.forEach(function(m) {
+            if (m.winner_id) {
+                availablePlayers.push({ playerId: m.winner_id, groupIdx: -1, source: 'ig_winner' });
+            }
+        });
 
-        // Load tournament to get group standings for seed→group mapping
-        var trnRes = await A.client.from('tournaments').select('*').eq('id', tournamentId).single();
-        var tournament = trnRes.data;
-        var groupCount = tournament ? (tournament.group_count || 2) : 2;
+        if (availablePlayers.length === 0) return;
 
-        // Load group matches to determine which seed is from which group
+        // Build player→group map from group matches
         var grpRes = await A.client.from('matches').select('*')
             .eq('tournament_id', tournamentId)
             .not('group_number', 'is', null);
         var grpMatches = grpRes.data || [];
-
-        // Build player→group map from group matches
         var playerGroup = {};
         grpMatches.forEach(function(m) {
             if (m.player1_id) playerGroup[m.player1_id] = m.group_number;
             if (m.player2_id) playerGroup[m.player2_id] = m.group_number;
         });
 
-        // Sort IG matches by match_order
-        igAll.sort(function(a, b) { return a.match_order - b.match_order; });
-
-        // Categorize IG winners by group pair index
-        // match_order 1,2 → pair 0 (groups 1,2); 3,4 → pair 1 (groups 3,4); etc.
-        var numPairs = Math.ceil(groupCount / 2);
-        var igByPair = {};
-        for (var p = 0; p < numPairs; p++) igByPair[p] = [];
-
-        igAll.forEach(function(m) {
-            var pairIdx = Math.floor((m.match_order - 1) / 2);
-            if (!igByPair[pairIdx]) igByPair[pairIdx] = [];
-            igByPair[pairIdx].push(m.winner_id);
+        // Fix groupIdx for IG winners using playerGroup map
+        availablePlayers.forEach(function(ap) {
+            if (ap.groupIdx === -1 && playerGroup[ap.playerId]) {
+                ap.groupIdx = playerGroup[ap.playerId] - 1;
+            }
         });
 
-        // Fill R1: IG winners should face seeds from a different group pair
-        for (var i = 0; i < r1Matches.length; i++) {
-            var rm = r1Matches[i];
-            var emptyField = null;
-            var seededPlayerId = null;
+        // Load R1 matches to find X-slots (empty slots, not BYE)
+        var r1Res = await A.client.from('matches').select('*')
+            .eq('tournament_id', tournamentId).eq('round_number', 1)
+            .neq('round', 'IG')
+            .order('match_order');
+        var r1Matches = r1Res.data || [];
 
-            if (rm.player1_id && !rm.player2_id) {
-                emptyField = 'player2_id';
-                seededPlayerId = rm.player1_id;
-            } else if (!rm.player1_id && rm.player2_id) {
-                emptyField = 'player1_id';
-                seededPlayerId = rm.player2_id;
+        // X-slots: R1 matches with one empty side (and opponent is filled)
+        var xSlots = [];
+        r1Matches.forEach(function(rm) {
+            if (rm.player1_id && !rm.player2_id && rm.score !== 'BYE') {
+                xSlots.push({ matchId: rm.id, field: 'player2_id', opponentId: rm.player1_id, matchOrder: rm.match_order });
+            } else if (!rm.player1_id && rm.player2_id && rm.score !== 'BYE') {
+                xSlots.push({ matchId: rm.id, field: 'player1_id', opponentId: rm.player2_id, matchOrder: rm.match_order });
+            } else if (!rm.player1_id && !rm.player2_id) {
+                // Both empty — 2 X-slots in same match
+                xSlots.push({ matchId: rm.id, field: 'player1_id', opponentId: null, matchOrder: rm.match_order });
+                xSlots.push({ matchId: rm.id, field: 'player2_id', opponentId: null, matchOrder: rm.match_order });
             }
-            if (!emptyField || !seededPlayerId) continue;
+        });
 
-            var seedGroup = playerGroup[seededPlayerId] || 0;
-            var seedPairIdx = Math.floor((seedGroup - 1) / 2);
-            var winner = null;
+        // Filter: remove X-slots that are already assigned
+        var alreadyAssigned = [];
+        r1Matches.forEach(function(rm) {
+            if (rm.player1_id) alreadyAssigned.push(rm.player1_id);
+            if (rm.player2_id) alreadyAssigned.push(rm.player2_id);
+        });
+        var unassignedPlayers = availablePlayers.filter(function(ap) {
+            return alreadyAssigned.indexOf(ap.playerId) === -1;
+        });
 
-            // Try opposite pairs first (cross-seeding)
-            for (var p = 0; p < numPairs && !winner; p++) {
-                if (p !== seedPairIdx && igByPair[p] && igByPair[p].length > 0) {
-                    winner = igByPair[p].shift();
+        if (unassignedPlayers.length === 0 || xSlots.length === 0) return;
+
+        // Load player names (unassigned + opponents for display)
+        var pIds = unassignedPlayers.map(function(ap) { return ap.playerId; });
+        xSlots.forEach(function(xs) { if (xs.opponentId && pIds.indexOf(xs.opponentId) === -1) pIds.push(xs.opponentId); });
+        var plRes = await A.client.from('players').select('id, name, name_en').in('id', pIds);
+        var plData = plRes.data || [];
+        var plMap = {};
+        plData.forEach(function(p) { plMap[p.id] = p; });
+
+        // Build UI
+        var html = '<div class="ad-xslot-section" style="margin-top:24px;padding:16px;background:var(--bg-elevated);border-radius:12px;border:1px solid var(--border);">';
+        html += '<div class="ad-grp-section-title" style="margin-bottom:8px;">' + L.xSlotAssign + '</div>';
+        html += '<p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:16px;">' + L.xSlotExplanation + '</p>';
+
+        xSlots.forEach(function(xs, idx) {
+            var opponentGroup = xs.opponentId ? (playerGroup[xs.opponentId] || 0) : 0;
+            var opponentName = '';
+            if (xs.opponentId) {
+                var opP = plMap[xs.opponentId] || {};
+                if (!opP.name) {
+                    // Opponent might not be in our plMap, load from alreadyAssigned context
+                    // We'll use a generic label
+                    opponentName = 'M' + xs.matchOrder;
+                } else {
+                    opponentName = isEn ? (opP.name_en || opP.name) : opP.name;
                 }
             }
-            // Fallback: same pair if no opposite available
-            if (!winner && igByPair[seedPairIdx] && igByPair[seedPairIdx].length > 0) {
-                winner = igByPair[seedPairIdx].shift();
-            }
 
-            if (winner) {
-                var upd = {};
-                upd[emptyField] = winner;
-                await A.client.from('matches').update(upd).eq('id', rm.id);
-            }
+            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+            html += '<span style="min-width:80px;color:var(--text-dim);font-size:0.85rem;">' +
+                (isEn ? 'Match ' : 'Матч ') + xs.matchOrder +
+                (opponentName ? ' vs ' + A.esc(opponentName) : '') +
+                '</span>';
+            html += '<select class="ad-input" data-xslot-idx="' + idx + '" data-match-id="' + xs.matchId + '" data-field="' + xs.field + '" data-opponent-group="' + opponentGroup + '" style="flex:1;max-width:300px;">';
+            html += '<option value="">' + L.xSlotSelectPlayer + '</option>';
+            unassignedPlayers.forEach(function(ap) {
+                var pInfo = plMap[ap.playerId] || {};
+                var pName = isEn ? (pInfo.name_en || pInfo.name || ap.playerId) : (pInfo.name || ap.playerId);
+                var pGroup = ap.groupIdx + 1;
+                var disabled = (opponentGroup > 0 && pGroup === opponentGroup) ? ' disabled' : '';
+                var label = pName + ' (' + L.groupLabel + ' ' + pGroup + ')';
+                if (ap.source === 'auto_pass') label += ' [AP]';
+                html += '<option value="' + ap.playerId + '"' + disabled + '>' + A.esc(label) + '</option>';
+            });
+            html += '</select>';
+            html += '</div>';
+        });
+
+        html += '<div style="margin-top:16px;text-align:center;">';
+        html += '<button class="ad-btn ad-btn-primary" id="adXSlotConfirm">' + L.xSlotConfirm + '</button>';
+        html += '</div>';
+        html += '</div>';
+
+        container.insertAdjacentHTML('beforeend', html);
+
+        // Cross-group filter: when a player is selected in one dropdown, disable them in others
+        var allDropdowns = container.querySelectorAll('select[data-xslot-idx]');
+        function updateDropdownAvailability() {
+            var selected = {};
+            allDropdowns.forEach(function(sel) {
+                if (sel.value) selected[sel.value] = true;
+            });
+            allDropdowns.forEach(function(sel) {
+                var opts = sel.querySelectorAll('option');
+                var opponentGroup = parseInt(sel.getAttribute('data-opponent-group')) || 0;
+                opts.forEach(function(opt) {
+                    if (!opt.value) return;
+                    var playerGroupNum = 0;
+                    unassignedPlayers.forEach(function(ap) {
+                        if (ap.playerId === opt.value) playerGroupNum = ap.groupIdx + 1;
+                    });
+                    // Disable if: same group as opponent OR already selected elsewhere
+                    var isSameGroup = opponentGroup > 0 && playerGroupNum === opponentGroup;
+                    var isSelectedElsewhere = selected[opt.value] && sel.value !== opt.value;
+                    opt.disabled = isSameGroup || isSelectedElsewhere;
+                });
+            });
+        }
+        allDropdowns.forEach(function(sel) {
+            sel.addEventListener('change', updateDropdownAvailability);
+        });
+
+        // Confirm button
+        var confirmBtn = document.getElementById('adXSlotConfirm');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', async function() {
+                confirmBtn.disabled = true;
+                var updates = [];
+                allDropdowns.forEach(function(sel) {
+                    if (sel.value) {
+                        var upd = {};
+                        upd[sel.getAttribute('data-field')] = sel.value;
+                        updates.push(
+                            A.client.from('matches').update(upd).eq('id', sel.getAttribute('data-match-id'))
+                        );
+                    }
+                });
+                if (updates.length === 0) {
+                    A.showToast(isEn ? 'Select at least one player' : 'Выберите хотя бы одного игрока', 'error');
+                    confirmBtn.disabled = false;
+                    return;
+                }
+                await Promise.all(updates);
+
+                // Handle BYEs: after X-slot assignment, check R1 matches
+                // Any R1 match with one player filled and one still empty = BYE
+                var r1Fresh = await A.client.from('matches').select('*')
+                    .eq('tournament_id', tournamentId).eq('round_number', 1)
+                    .neq('round', 'IG')
+                    .order('match_order');
+                var r1Data = r1Fresh.data || [];
+                for (var i = 0; i < r1Data.length; i++) {
+                    var rm = r1Data[i];
+                    if (rm.player1_id && !rm.player2_id && rm.status !== 'completed') {
+                        await A.client.from('matches').update({ winner_id: rm.player1_id, status: 'completed', score: 'BYE' }).eq('id', rm.id);
+                    } else if (!rm.player1_id && rm.player2_id && rm.status !== 'completed') {
+                        await A.client.from('matches').update({ winner_id: rm.player2_id, status: 'completed', score: 'BYE' }).eq('id', rm.id);
+                    }
+                }
+
+                // Auto-advance BYE winners to R2
+                r1Fresh = await A.client.from('matches').select('*')
+                    .eq('tournament_id', tournamentId).eq('round_number', 1)
+                    .neq('round', 'IG')
+                    .order('match_order');
+                var r2Res = await A.client.from('matches').select('*')
+                    .eq('tournament_id', tournamentId).eq('round_number', 2)
+                    .order('match_order');
+                var r1List = r1Fresh.data || [];
+                var r2List = r2Res.data || [];
+
+                for (var i = 0; i < r1List.length; i++) {
+                    var m = r1List[i];
+                    if (m.winner_id && m.score === 'BYE' && r2List.length > 0) {
+                        var nextMatchIdx = Math.floor(i / 2);
+                        if (nextMatchIdx < r2List.length) {
+                            var nextMatch = r2List[nextMatchIdx];
+                            var updateField = (i % 2 === 0) ? 'player1_id' : 'player2_id';
+                            var seedField = (i % 2 === 0) ? 'seed1' : 'seed2';
+                            var updData = {};
+                            updData[updateField] = m.winner_id;
+                            updData[seedField] = m.seed1 || m.seed2;
+                            await A.client.from('matches').update(updData).eq('id', nextMatch.id);
+                        }
+                    }
+                }
+
+                A.showToast(L.xSlotSaved, 'success');
+                renderBracketManagement(tournamentId, 'bracket');
+            });
         }
     }
 

@@ -71,10 +71,11 @@
     'td.tournament':    { ru: 'Турнир',            en: 'Tournament',       kg: 'Мелдеш' },
     'td.info':          { ru: 'Информация',        en: 'Info',             kg: 'Маалымат' },
     'td.bracket':       { ru: 'Сетка',             en: 'Bracket',          kg: 'Тор' },
-    'td.results':       { ru: 'Результаты',        en: 'Results',          kg: 'Жыйынтыктар' },
+    'td.results':       { ru: 'Очки',              en: 'Points',           kg: 'Упай' },
     'td.date':          { ru: 'Дата',              en: 'Date',             kg: 'Күнү' },
     'td.location':      { ru: 'Место',             en: 'Location',         kg: 'Орду' },
     'td.participants':  { ru: 'Участники',         en: 'Participants',     kg: 'Катышуучулар' },
+    'td.pairs':         { ru: 'Пар',               en: 'Pairs',            kg: 'Жуптар' },
     'td.regUntil':      { ru: 'Регистрация до',    en: 'Registration until', kg: 'Каттоо мөөнөтү' },
     'td.prizeFund':     { ru: 'Призовой фонд',     en: 'Prize fund',       kg: 'Байге фонду' },
     'td.som':           { ru: 'сом',               en: 'KGS',             kg: 'сом' },
@@ -84,7 +85,7 @@
     'td.getMembership': { ru: 'Оформить членство',  en: 'Get membership',   kg: 'Мүчөлүк алуу' },
     'td.register':      { ru: 'Записаться на турнир', en: 'Register for tournament', kg: 'Мелдешке жазылуу' },
     'td.bracketEmpty':  { ru: 'Сетка пока не сформирована', en: 'Bracket not yet formed', kg: 'Тор азырынча түзүлө элек' },
-    'td.resultsEmpty':  { ru: 'Результаты пока недоступны', en: 'Results not yet available', kg: 'Жыйынтыктар азырынча жок' },
+    'td.resultsEmpty':  { ru: 'Очки пока не начислены', en: 'Points not yet awarded', kg: 'Упай азырынча берилген жок' },
     'td.regApproved':   { ru: 'Вы зарегистрированы ✓', en: 'You are registered ✓', kg: 'Сиз катталдыңыз ✓' },
 
     // === Tournament registration ===
@@ -121,8 +122,8 @@
     'rating.rank':       { ru: '#',                   en: '#',               kg: '#' },
     'rating.player':     { ru: 'Игрок',              en: 'Player',          kg: 'Оюнчу' },
     'rating.pts':        { ru: 'Очки',               en: 'Pts',             kg: 'Упай' },
+    'rating.ntrp':       { ru: 'NTRP',               en: 'NTRP',            kg: 'NTRP' },
     'rating.wl':         { ru: 'В/П',                en: 'W/L',             kg: 'Ж/У' },
-    'rating.form':       { ru: 'Форма',              en: 'Form',            kg: 'Форма' },
     'rating.empty':      { ru: 'Нет игроков',        en: 'No players',      kg: 'Оюнчу жок' },
     'rating.emptyText':  { ru: 'В данной категории пока нет игроков', en: 'No players in this category yet', kg: 'Бул категорияда азырынча оюнчу жок' },
     'rating.guestTitle': { ru: 'Полный рейтинг',     en: 'Full Rating',     kg: 'Толук рейтинг' },
@@ -130,6 +131,12 @@
     'rating.guestBtn':   { ru: 'Регистрация',        en: 'Register',        kg: 'Каттоо' },
     'rating.singles':    { ru: 'Одиночный',          en: 'Singles',         kg: 'Жалгыз' },
     'rating.doubles':    { ru: 'Парный',              en: 'Doubles',        kg: 'Жуп' },
+    'rating.playersCount': { ru: 'игроков',           en: 'players',        kg: 'оюнчу' },
+    'rating.season':     { ru: 'Сезон',               en: 'Season',         kg: 'Сезон' },
+    'rating.noResults':  { ru: 'Ничего не найдено',   en: 'No results',     kg: 'Эч нерсе табылган жок' },
+    'rating.catLabel':   { ru: 'Категория',           en: 'Category',       kg: 'Категория' },
+    'rating.genderLabel': { ru: 'Пол',                en: 'Gender',         kg: 'Жынысы' },
+    'rating.typeLabel':  { ru: 'Тип',                 en: 'Type',           kg: 'Түрү' },
 
     // === News screen ===
     'news.title':       { ru: 'Новости',              en: 'News',            kg: 'Жанылыктар' },
@@ -144,6 +151,8 @@
     'news.views':       { ru: 'просмотров',           en: 'views',           kg: 'көрүү' },
     'news.default':     { ru: 'Новости',              en: 'News',            kg: 'Жанылыктар' },
     'news.detail':      { ru: 'Новость',              en: 'Article',         kg: 'Жанылык' },
+    'news.rateTitle':   { ru: 'Оцените статью',       en: 'Rate this article', kg: 'Макаланы баалаңыз' },
+    'news.loginToRate': { ru: 'Войдите, чтобы оценить', en: 'Log in to rate',  kg: 'Баалоо үчүн кириңиз' },
 
     // === Profile screen ===
     'profile.title':        { ru: 'Профиль',              en: 'Profile',           kg: 'Профиль' },
@@ -389,7 +398,8 @@
     'profile.deleteBtn':      { ru: 'Удалить навсегда', en: 'Delete permanently', kg: 'Биротоло өчүрүү' },
     'profile.deleteConfirm':  { ru: 'Вы уверены? Это нельзя отменить.', en: 'Are you sure? Cannot be undone.', kg: 'Ишенесизби? Жокко чыгаруу мүмкүн эмес.' },
     'profile.deleting':       { ru: 'Удаление...', en: 'Deleting...', kg: 'Өчүрүлүүдө...' },
-    'profile.deletedOk':      { ru: 'Аккаунт помечен на удаление', en: 'Account marked for deletion', kg: 'Аккаунт өчүрүүгө белгиленди' },
+    'profile.deletedOk':      { ru: 'Аккаунт удалён', en: 'Account deleted', kg: 'Аккаунт өчүрүлдү' },
+    'profile.deleteError':    { ru: 'Ошибка удаления аккаунта', en: 'Account deletion error', kg: 'Аккаунтту өчүрүүдө ката' },
 
     // === Player detail — extra ===
     'pd.rating':        { ru: 'Рейтинг',     en: 'Rating',    kg: 'Рейтинг' },
@@ -465,7 +475,31 @@
     'round.quarter': { ru: 'Четвертьфинал', en: 'Quarterfinal', kg: 'Чейрек финал' },
     'round.r16':     { ru: '1/8 финала',  en: 'Round of 16',  kg: '1/8 финал' },
     'round.r32':     { ru: '1/16 финала', en: 'Round of 32',  kg: '1/16 финал' },
-    'round.round':   { ru: 'Раунд',       en: 'Round',        kg: 'Раунд' }
+    'round.round':   { ru: 'Раунд',       en: 'Round',        kg: 'Раунд' },
+
+    // === Tournament bracket — groups / playoff ===
+    'td.groupStage':   { ru: 'Групповой этап',  en: 'Group Stage',    kg: 'Топтук этап' },
+    'td.playoff':      { ru: 'Плей-офф',        en: 'Playoff',        kg: 'Плей-офф' },
+    'td.group':        { ru: 'Группа',           en: 'Group',         kg: 'Топ' },
+    'td.winsShort':    { ru: 'В',                en: 'W',             kg: 'Ж' },
+    'td.lossesShort':  { ru: 'П',                en: 'L',             kg: 'Ж' },
+    'td.posShort':     { ru: 'М',                en: 'Pos',           kg: 'О' },
+    'td.final':        { ru: 'Финал',            en: 'Final',         kg: 'Финал' },
+    'td.semifinal':    { ru: 'Полуфинал',        en: 'Semifinal',     kg: 'Жарым финал' },
+    'td.quarterfinal': { ru: 'Четвертьфинал',    en: 'Quarterfinal',  kg: 'Чейрек финал' },
+    'td.thirdPlace':   { ru: 'За 3-е место',     en: '3rd Place',     kg: '3-орун үчүн' },
+    'td.roundN':       { ru: 'Раунд',            en: 'Round',         kg: 'Раунд' },
+    'td.premierLeague':     { ru: 'Высшая лига',        en: 'Premier League',     kg: 'Жогорку лига' },
+    'td.consolationLeague': { ru: 'Утешительная лига',   en: 'Consolation League', kg: 'Сооротуу лигасы' },
+
+    // === Tournament info — extra fields ===
+    'td.format':       { ru: 'Формат',           en: 'Format',         kg: 'Формат' },
+    'td.bracketType':  { ru: 'Тип сетки',        en: 'Bracket',        kg: 'Тор түрү' },
+    'td.category':     { ru: 'Категория',        en: 'Category',       kg: 'Категория' },
+    'td.venue':        { ru: 'Место проведения', en: 'Venue',          kg: 'Өткөрүлүүчү жер' },
+    'td.navigate':     { ru: 'Навигация',        en: 'Navigate',       kg: 'Навигация' },
+    'td.openIn':       { ru: 'Открыть в',        en: 'Open in',        kg: 'Ачуу' },
+    'td.description':  { ru: 'Описание',         en: 'Description',    kg: 'Сүрөттөмө' }
   };
 
   // === Public API ===

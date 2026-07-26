@@ -378,6 +378,18 @@
     showOnboarding();
   };
 
+  // === Splash Screen ===
+  function hideSplash() {
+    var splash = document.getElementById('splashOverlay');
+    if (!splash) return;
+    splash.classList.add('hide');
+    setTimeout(function() { splash.remove(); }, 900);
+    // Also hide Capacitor native splash
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen) {
+      window.Capacitor.Plugins.SplashScreen.hide();
+    }
+  }
+
   // === Init ===
   function init() {
     // Apply i18n to static DOM elements
@@ -385,6 +397,16 @@
 
     var AUTH = window.KSLT_AUTH;
     var authScreen = document.getElementById('authScreen');
+
+    // Minimum splash display time (let animations play)
+    var splashStart = Date.now();
+    var SPLASH_MIN_MS = 1500;
+
+    function finishInit() {
+      var elapsed = Date.now() - splashStart;
+      var remaining = Math.max(0, SPLASH_MIN_MS - elapsed);
+      setTimeout(hideSplash, remaining);
+    }
 
     if (AUTH) {
       AUTH.setupAuthUI();
@@ -396,11 +418,13 @@
           showOnboarding();
         }
         // Else auth screen stays open (visible by default in HTML)
+        finishInit();
       });
     } else {
       // No auth module — just show home
       authScreen.classList.remove('open');
       loadScreen('screenHome');
+      finishInit();
     }
   }
 

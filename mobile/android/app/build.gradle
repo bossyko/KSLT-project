@@ -18,16 +18,21 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('kslt-release.keystore')
-            storePassword 'kslt2026'
-            keyAlias 'kslt'
-            keyPassword 'kslt2026'
+            def props = new Properties()
+            def propsFile = rootProject.file('local.properties')
+            if (propsFile.exists()) { props.load(new FileInputStream(propsFile)) }
+
+            storeFile file(props.getProperty('RELEASE_STORE_FILE', 'kslt-release.keystore'))
+            storePassword props.getProperty('RELEASE_STORE_PASSWORD', '')
+            keyAlias props.getProperty('RELEASE_KEY_ALIAS', '')
+            keyPassword props.getProperty('RELEASE_KEY_PASSWORD', '')
         }
     }
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
