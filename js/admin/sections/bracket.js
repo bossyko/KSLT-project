@@ -5834,10 +5834,10 @@
                 if (m.player2_id) playerGroup[m.player2_id] = m.group_number;
             });
 
-            // Find X-slots: R1 matches with one empty side (not BYE)
+            // Find X-slots: R1 PLAYOFF matches with one empty side (not BYE)
             var r1Res = await A.client.from('matches').select('*')
                 .eq('tournament_id', tournamentId).eq('round_number', 1)
-                .neq('round', 'IG').order('match_order');
+                .is('group_number', null).neq('round', 'IG').order('match_order');
             var r1Matches = r1Res.data || [];
 
             var xSlots = [];
@@ -5894,10 +5894,10 @@
                 xSlots.splice(bestIdx, 1);
             }
 
-            // Handle BYEs: R1 matches with one filled + one still empty
+            // Handle BYEs: R1 PLAYOFF matches with one filled + one still empty
             var r1Fresh = await A.client.from('matches').select('*')
                 .eq('tournament_id', tournamentId).eq('round_number', 1)
-                .neq('round', 'IG').order('match_order');
+                .is('group_number', null).neq('round', 'IG').order('match_order');
             var r1List = r1Fresh.data || [];
             for (var bi = 0; bi < r1List.length; bi++) {
                 var bm = r1List[bi];
@@ -5911,7 +5911,7 @@
             // Auto-advance BYE winners to R2
             r1Fresh = await A.client.from('matches').select('*')
                 .eq('tournament_id', tournamentId).eq('round_number', 1)
-                .neq('round', 'IG').order('match_order');
+                .is('group_number', null).neq('round', 'IG').order('match_order');
             var r2Res = await A.client.from('matches').select('*')
                 .eq('tournament_id', tournamentId).eq('round_number', 2).order('match_order');
             r1List = r1Fresh.data || [];
@@ -5993,10 +5993,10 @@
             }
         });
 
-        // Load R1 matches to find X-slots (empty slots, not BYE)
+        // Load R1 PLAYOFF matches to find X-slots (exclude group matches)
         var r1Res = await A.client.from('matches').select('*')
             .eq('tournament_id', tournamentId).eq('round_number', 1)
-            .neq('round', 'IG')
+            .is('group_number', null).neq('round', 'IG')
             .order('match_order');
         var r1Matches = r1Res.data || [];
         console.log('[X-slot] R1 matches:', r1Matches.length, r1Matches.map(function(m) { return {id: m.id, p1: m.player1_id, p2: m.player2_id, score: m.score, order: m.match_order, round: m.round, round_number: m.round_number}; }));
@@ -6132,11 +6132,10 @@
                 }
                 await Promise.all(updates);
 
-                // Handle BYEs: after X-slot assignment, check R1 matches
-                // Any R1 match with one player filled and one still empty = BYE
+                // Handle BYEs: after X-slot assignment, check R1 PLAYOFF matches
                 var r1Fresh = await A.client.from('matches').select('*')
                     .eq('tournament_id', tournamentId).eq('round_number', 1)
-                    .neq('round', 'IG')
+                    .is('group_number', null).neq('round', 'IG')
                     .order('match_order');
                 var r1Data = r1Fresh.data || [];
                 for (var i = 0; i < r1Data.length; i++) {
@@ -6151,7 +6150,7 @@
                 // Auto-advance BYE winners to R2
                 r1Fresh = await A.client.from('matches').select('*')
                     .eq('tournament_id', tournamentId).eq('round_number', 1)
-                    .neq('round', 'IG')
+                    .is('group_number', null).neq('round', 'IG')
                     .order('match_order');
                 var r2Res = await A.client.from('matches').select('*')
                     .eq('tournament_id', tournamentId).eq('round_number', 2)
