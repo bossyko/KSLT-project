@@ -1369,7 +1369,6 @@
 
         // Async: render X-slot assignment dropdowns if IG path is active
         var xSlotContainer = document.getElementById('adXSlotContainer');
-        console.log('[X-slot] adXSlotContainer found:', !!xSlotContainer);
         if (xSlotContainer) {
             renderXSlotSection(xSlotContainer, tournamentId);
         }
@@ -5810,22 +5809,20 @@
     // ---- Handle IG completion: auto-fill X-slots with IG winners ----
     async function tryFillPlayoffFromIG(tournamentId) {
         try {
-            console.log('[tryFill] START for', tournamentId);
             // Check if ALL IG matches are done
             var igRes = await A.client.from('matches').select('*')
                 .eq('tournament_id', tournamentId).eq('round', 'IG');
             var igAll = igRes.data || [];
-            if (igAll.length === 0) { console.log('[tryFill] EXIT: no IG matches'); return; }
+            if (igAll.length === 0) return;
             var allDone = igAll.every(function(m) { return m.status === 'completed' && m.winner_id; });
-            if (!allDone) { console.log('[tryFill] EXIT: IG not all done', igAll.map(function(m){return {status:m.status,winner:m.winner_id};})); return; }
+            if (!allDone) return;
 
             // Collect IG winners
             var igWinners = [];
             igAll.forEach(function(m) {
                 if (m.winner_id) igWinners.push(m.winner_id);
             });
-            if (igWinners.length === 0) { console.log('[tryFill] EXIT: no winners'); return; }
-            console.log('[tryFill] igWinners:', igWinners);
+            if (igWinners.length === 0) return;
 
             // Build player→group map from group matches
             var grpRes = await A.client.from('matches').select('player1_id, player2_id, group_number')
@@ -5841,7 +5838,6 @@
                 .eq('tournament_id', tournamentId).eq('round_number', 1)
                 .is('group_number', null).neq('round', 'IG').order('match_order');
             var r1Matches = r1Res.data || [];
-            console.log('[tryFill] R1 playoff matches:', r1Matches.length);
 
             var xSlots = [];
             r1Matches.forEach(function(rm) {
@@ -5853,9 +5849,8 @@
                     xSlots.push({ matchId: rm.id, field: 'player1_id', opponentId: null, matchOrder: rm.match_order });
                 }
             });
-            console.log('[tryFill] xSlots:', xSlots.length, JSON.stringify(xSlots));
 
-            if (xSlots.length === 0) { console.log('[tryFill] EXIT: no xSlots'); return; }
+            if (xSlots.length === 0) return;
 
             // Filter winners not already placed in R1
             var alreadyInR1 = [];
@@ -5866,8 +5861,7 @@
             var unplacedWinners = igWinners.filter(function(wId) {
                 return alreadyInR1.indexOf(wId) === -1;
             });
-            console.log('[tryFill] unplaced:', unplacedWinners.length, 'alreadyInR1:', alreadyInR1.length);
-            if (unplacedWinners.length === 0) { console.log('[tryFill] EXIT: all winners already in R1'); return; }
+            if (unplacedWinners.length === 0) return;
 
             // Multiple winners/slots → leave for manual dropdown (renderXSlotSection)
             if (unplacedWinners.length > 1 || xSlots.length > 1) {
@@ -5945,21 +5939,18 @@
     // ---- Render X-slot assignment section (dropdowns for admin to assign players) ----
     async function renderXSlotSection(container, tournamentId) {
         try {
-        console.log('[X-slot] renderXSlotSection called, container:', !!container, 'tournamentId:', tournamentId);
         // Load tournament meta
         var trnRes = await A.client.from('tournaments').select('*').eq('id', tournamentId).single();
         var tournament = trnRes.data;
-        if (!tournament) { console.log('[X-slot] No tournament found'); return; }
+        if (!tournament) return;
         var igMeta = tournament.ig_meta || {};
-        console.log('[X-slot] igMeta:', JSON.stringify(igMeta));
 
         // Load IG matches (completed winners)
         var igRes = await A.client.from('matches').select('*')
             .eq('tournament_id', tournamentId).eq('round', 'IG');
         var igAll = igRes.data || [];
         var allIGDone = igAll.length === 0 || igAll.every(function(m) { return m.status === 'completed' && m.winner_id; });
-        console.log('[X-slot] igAll:', igAll.length, 'allIGDone:', allIGDone);
-        if (!allIGDone && igAll.length > 0) { console.log('[X-slot] EXIT: IG still in progress'); return; }
+        if (!allIGDone && igAll.length > 0) return;
 
         // Collect available players for X-slots: only IG winners
         // (auto-pass players are already placed directly in the draw)
@@ -5977,8 +5968,7 @@
             }
         });
 
-        console.log('[X-slot] availablePlayers:', availablePlayers.length, JSON.stringify(availablePlayers));
-        if (availablePlayers.length === 0 && igAll.length === 0) { console.log('[X-slot] EXIT: no available players and no IG'); return; }
+        if (availablePlayers.length === 0 && igAll.length === 0) return;
 
         // Build player→group map from group matches
         var grpRes = await A.client.from('matches').select('*')
@@ -6004,7 +5994,6 @@
             .is('group_number', null).neq('round', 'IG')
             .order('match_order');
         var r1Matches = r1Res.data || [];
-        console.log('[X-slot] R1 matches:', r1Matches.length, r1Matches.map(function(m) { return {id: m.id, p1: m.player1_id, p2: m.player2_id, score: m.score, order: m.match_order, round: m.round, round_number: m.round_number}; }));
 
         // X-slots: R1 matches with one empty side (and opponent is filled)
         var xSlots = [];
@@ -6019,7 +6008,6 @@
                 xSlots.push({ matchId: rm.id, field: 'player2_id', opponentId: null, matchOrder: rm.match_order });
             }
         });
-        console.log('[X-slot] xSlots found:', xSlots.length, JSON.stringify(xSlots));
 
         // Filter: remove X-slots that are already assigned
         var alreadyAssigned = [];
@@ -6030,9 +6018,8 @@
         var unassignedPlayers = availablePlayers.filter(function(ap) {
             return alreadyAssigned.indexOf(ap.playerId) === -1;
         });
-        console.log('[X-slot] unassignedPlayers:', unassignedPlayers.length, 'alreadyAssigned:', alreadyAssigned);
 
-        if (unassignedPlayers.length === 0 || xSlots.length === 0) { console.log('[X-slot] EXIT: unassigned=' + unassignedPlayers.length + ' xSlots=' + xSlots.length); return; }
+        if (unassignedPlayers.length === 0 || xSlots.length === 0) return;
 
         // Load player names (unassigned + opponents for display)
         var pIds = unassignedPlayers.map(function(ap) { return ap.playerId; });
