@@ -5807,12 +5807,127 @@
         });
     }
 
-    // ---- Handle IG completion: show X-slot assignment UI on re-render ----
-    // No longer auto-fills. The renderBracketManagement re-render will detect
-    // that all IG are done and show the X-slot dropdown UI.
+    // ---- Handle IG completion: auto-fill X-slots with IG winners ----
     async function tryFillPlayoffFromIG(tournamentId) {
-        // No-op: X-slot assignment is now manual via renderXSlotSection()
-        // The re-render (renderBracketManagement) happens automatically after score save
+        try {
+            // Check if ALL IG matches are done
+            var igRes = await A.client.from('matches').select('*')
+                .eq('tournament_id', tournamentId).eq('round', 'IG');
+            var igAll = igRes.data || [];
+            if (igAll.length === 0) return;
+            var allDone = igAll.every(function(m) { return m.status === 'completed' && m.winner_id; });
+            if (!allDone) return;
+
+            // Collect IG winners
+            var igWinners = [];
+            igAll.forEach(function(m) {
+                if (m.winner_id) igWinners.push(m.winner_id);
+            });
+            if (igWinners.length === 0) return;
+
+            // Build player→group map from group matches
+            var grpRes = await A.client.from('matches').select('player1_id, player2_id, group_number')
+                .eq('tournament_id', tournamentId).not('group_number', 'is', null);
+            var playerGroup = {};
+            (grpRes.data || []).forEach(function(m) {
+                if (m.player1_id) playerGroup[m.player1_id] = m.group_number;
+                if (m.player2_id) playerGroup[m.player2_id] = m.group_number;
+            });
+
+            // Find X-slots: R1 matches with one empty side (not BYE)
+            var r1Res = await A.client.from('matches').select('*')
+                .eq('tournament_id', tournamentId).eq('round_number', 1)
+                .neq('round', 'IG').order('match_order');
+            var r1Matches = r1Res.data || [];
+
+            var xSlots = [];
+            r1Matches.forEach(function(rm) {
+                if (rm.player1_id && !rm.player2_id && rm.score !== 'BYE') {
+                    xSlots.push({ matchId: rm.id, field: 'player2_id', opponentId: rm.player1_id, matchOrder: rm.match_order });
+                } else if (!rm.player1_id && rm.player2_id && rm.score !== 'BYE') {
+                    xSlots.push({ matchId: rm.id, field: 'player1_id', opponentId: rm.player2_id, matchOrder: rm.match_order });
+                } else if (!rm.player1_id && !rm.player2_id) {
+                    xSlots.push({ matchId: rm.id, field: 'player1_id', opponentId: null, matchOrder: rm.match_order });
+                }
+            });
+
+            if (xSlots.length === 0) return;
+
+            // Filter winners not already placed in R1
+            var alreadyInR1 = [];
+            r1Matches.forEach(function(rm) {
+                if (rm.player1_id) alreadyInR1.push(rm.player1_id);
+                if (rm.player2_id) alreadyInR1.push(rm.player2_id);
+            });
+            var unplacedWinners = igWinners.filter(function(wId) {
+                return alreadyInR1.indexOf(wId) === -1;
+            });
+            if (unplacedWinners.length === 0) return;
+
+            // Assign winners to X-slots with cross-group preference
+            for (var w = 0; w < unplacedWinners.length && xSlots.length > 0; w++) {
+                var winnerId = unplacedWinners[w];
+                var winnerGroup = playerGroup[winnerId] || 0;
+                // Find best X-slot: prefer different group from opponent
+                var bestIdx = 0;
+                var bestScore = -1;
+                for (var xs = 0; xs < xSlots.length; xs++) {
+                    var oppGroup = playerGroup[xSlots[xs].opponentId] || 0;
+                    var score = (oppGroup > 0 && oppGroup === winnerGroup) ? 0 : 1;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestIdx = xs;
+                        if (score === 1) break;
+                    }
+                }
+                var slot = xSlots[bestIdx];
+                var upd = {};
+                upd[slot.field] = winnerId;
+                await A.client.from('matches').update(upd).eq('id', slot.matchId);
+                xSlots.splice(bestIdx, 1);
+            }
+
+            // Handle BYEs: R1 matches with one filled + one still empty
+            var r1Fresh = await A.client.from('matches').select('*')
+                .eq('tournament_id', tournamentId).eq('round_number', 1)
+                .neq('round', 'IG').order('match_order');
+            var r1List = r1Fresh.data || [];
+            for (var bi = 0; bi < r1List.length; bi++) {
+                var bm = r1List[bi];
+                if (bm.player1_id && !bm.player2_id && bm.status !== 'completed') {
+                    await A.client.from('matches').update({ winner_id: bm.player1_id, status: 'completed', score: 'BYE' }).eq('id', bm.id);
+                } else if (!bm.player1_id && bm.player2_id && bm.status !== 'completed') {
+                    await A.client.from('matches').update({ winner_id: bm.player2_id, status: 'completed', score: 'BYE' }).eq('id', bm.id);
+                }
+            }
+
+            // Auto-advance BYE winners to R2
+            r1Fresh = await A.client.from('matches').select('*')
+                .eq('tournament_id', tournamentId).eq('round_number', 1)
+                .neq('round', 'IG').order('match_order');
+            var r2Res = await A.client.from('matches').select('*')
+                .eq('tournament_id', tournamentId).eq('round_number', 2).order('match_order');
+            r1List = r1Fresh.data || [];
+            var r2List = r2Res.data || [];
+            for (var bi2 = 0; bi2 < r1List.length; bi2++) {
+                var bm2 = r1List[bi2];
+                if (bm2.winner_id && bm2.score === 'BYE' && r2List.length > 0) {
+                    var nextIdx = Math.floor(bi2 / 2);
+                    if (nextIdx < r2List.length) {
+                        var upField = (bi2 % 2 === 0) ? 'player1_id' : 'player2_id';
+                        var sdField = (bi2 % 2 === 0) ? 'seed1' : 'seed2';
+                        var upData = {};
+                        upData[upField] = bm2.winner_id;
+                        upData[sdField] = bm2.seed1 || bm2.seed2 || null;
+                        await A.client.from('matches').update(upData).eq('id', r2List[nextIdx].id);
+                    }
+                }
+            }
+
+            console.log('[tryFillPlayoffFromIG] Auto-placed', unplacedWinners.length, 'IG winners into X-slots');
+        } catch (err) {
+            console.error('[tryFillPlayoffFromIG] Error:', err);
+        }
     }
 
     // ---- Render X-slot assignment section (dropdowns for admin to assign players) ----
