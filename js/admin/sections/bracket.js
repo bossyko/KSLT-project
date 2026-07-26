@@ -2158,8 +2158,10 @@
             });
             html += '</div>'; // /ad-ig-matches-grid
             html += '</div>'; // /ad-ig-section
+        }
 
-            // X-slot assignment placeholder (populated async after render)
+        // X-slot assignment placeholder (always present when playoff exists, populated async)
+        if (hasPlayoff) {
             html += '<div id="adXSlotContainer"></div>';
         }
 
@@ -5813,6 +5815,7 @@
 
     // ---- Render X-slot assignment section (dropdowns for admin to assign players) ----
     async function renderXSlotSection(container, tournamentId) {
+        try {
         // Load tournament meta
         var trnRes = await A.client.from('tournaments').select('*').eq('id', tournamentId).single();
         var tournament = trnRes.data;
@@ -6045,6 +6048,7 @@
                 renderBracketManagement(tournamentId, 'bracket');
             });
         }
+        } catch(err) { console.error('X-slot render error:', err); }
     }
 
     // ---- Auto-advance winner to next round ----
