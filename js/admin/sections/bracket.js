@@ -3951,24 +3951,15 @@
         var dSize = 2;
         while (dSize < directCount) dSize *= 2;
         var freeSlots = dSize - directCount;
-        var autoPassCount = Math.min(candidateCount, freeSlots);
-        var igNeeded = candidateCount > freeSlots;
-        var igMatchEst = igNeeded ? (candidateCount - freeSlots) : 0;
+        var hasCandidates = has3PlayerGroups && candidateCount > 0;
 
         var overlay = document.createElement('div');
         overlay.className = 'ad-confirm-overlay';
 
         var infoHtml = '<p style="margin-bottom:8px;">' + L.igDirectQualifiers + ': <b>' + directCount + '</b></p>';
-        if (has3PlayerGroups && candidateCount > 0) {
+        if (hasCandidates) {
             infoHtml += '<p style="margin-bottom:8px;">' + L.igCandidates + ': <b>' + candidateCount + '</b></p>';
-            if (autoPassCount > 0) {
-                infoHtml += '<p style="margin-bottom:8px;">' + L.igAutoPass + ': <b>' + autoPassCount + '</b></p>';
-            }
-            if (igNeeded) {
-                infoHtml += '<p>' + L.igMatchLabel + ': <b>~' + igMatchEst + '</b></p>';
-            } else {
-                infoHtml += '<p style="color:var(--accent);">' + L.igNoNeeded + '</p>';
-            }
+            infoHtml += '<p style="margin-bottom:8px;">' + L.candidateFreeSlots + ': <b>' + freeSlots + '</b></p>';
         }
 
         overlay.innerHTML =
@@ -3976,10 +3967,10 @@
                 '<div class="ad-confirm-title">' + L.playoffFormatTitle + '</div>' +
                 '<div class="ad-confirm-text" style="text-align:left;margin-bottom:16px;color:var(--text-secondary);">' + infoHtml + '</div>' +
                 '<div class="ad-confirm-actions" style="flex-direction:column;gap:8px;">' +
-                    (igNeeded
+                    (hasCandidates
                         ? '<button class="ad-btn ad-btn-primary" id="adFormatIG" style="width:100%;">' + L.playoffWithIG + '</button>'
                         : '') +
-                    '<button class="ad-btn ' + (igNeeded ? 'ad-btn-secondary' : 'ad-btn-primary') + '" id="adFormatDirect" style="width:100%;">' + L.playoffDirect + '</button>' +
+                    '<button class="ad-btn ' + (hasCandidates ? 'ad-btn-secondary' : 'ad-btn-primary') + '" id="adFormatDirect" style="width:100%;">' + L.playoffDirect + '</button>' +
                     '<button class="ad-btn ad-btn-secondary" id="adFormatCancel" style="width:100%;">' + L.cancel + '</button>' +
                 '</div>' +
             '</div>';
@@ -5764,8 +5755,8 @@
         // Load tournament meta
         var trnRes = await A.client.from('tournaments').select('*').eq('id', tournamentId).single();
         var tournament = trnRes.data;
-        if (!tournament || !tournament.ig_meta) return;
-        var igMeta = tournament.ig_meta;
+        if (!tournament) return;
+        var igMeta = tournament.ig_meta || {};
 
         // Load IG matches (completed winners)
         var igRes = await A.client.from('matches').select('*')
@@ -5776,7 +5767,7 @@
 
         // Collect available players for X-slots: auto-pass + IG winners
         var availablePlayers = [];
-        // Auto-pass players
+        // Auto-pass players from ig_meta
         (igMeta.auto_pass_players || []).forEach(function(ap) {
             availablePlayers.push({ playerId: ap.playerId, groupIdx: ap.groupIdx, source: 'auto_pass' });
         });
@@ -5787,7 +5778,7 @@
             }
         });
 
-        if (availablePlayers.length === 0) return;
+        if (availablePlayers.length === 0 && igAll.length === 0) return;
 
         // Build player→group map from group matches
         var grpRes = await A.client.from('matches').select('*')
