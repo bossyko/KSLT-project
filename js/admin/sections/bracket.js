@@ -5864,6 +5864,13 @@
             });
             if (unplacedWinners.length === 0) return;
 
+            // Multiple winners/slots → leave for manual dropdown (renderXSlotSection)
+            if (unplacedWinners.length > 1 || xSlots.length > 1) {
+                console.log('[tryFillPlayoffFromIG] Multiple winners/slots (' + unplacedWinners.length + '/' + xSlots.length + ') → manual dropdown');
+                return;
+            }
+
+            // Single winner + single slot → auto-fill (no choice to make)
             // Assign winners to X-slots with cross-group preference
             for (var w = 0; w < unplacedWinners.length && xSlots.length > 0; w++) {
                 var winnerId = unplacedWinners[w];
