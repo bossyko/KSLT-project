@@ -19,6 +19,7 @@
         rating: 'Rating',
         whoWins: 'Who will win?',
         vote: 'Vote',
+        voteCta: 'Click to vote',
         votes: 'votes',
         totalVotes: 'Total votes',
         votingClosed: 'Voting closed',
@@ -33,7 +34,7 @@
         details: 'Details',
         date: 'Date',
         time: 'Time',
-        venue: 'Venue',
+        venue: 'Location',
         h2h: 'Head-to-Head',
         noH2H: 'No previous meetings',
         h2hRecord: 'H2H Record',
@@ -41,7 +42,9 @@
         winner: 'Winner',
         predictionResult: 'of viewers predicted correctly',
         score: 'Score',
-        set: 'Set'
+        set: 'Set',
+        cancelled: 'Battle cancelled',
+        cancelledDesc: 'This battle has been cancelled.'
     } : isKg ? {
         loading: 'Жүктөлүүдө...',
         notFound: 'Баттл табылган жок',
@@ -53,6 +56,7 @@
         rating: 'Рейтинг',
         whoWins: 'Ким жеңет?',
         vote: 'Добуш',
+        voteCta: 'Добуш берүү үчүн басыңыз',
         votes: 'добуш',
         totalVotes: 'Жалпы добуштар',
         votingClosed: 'Добуш берүү жабылды',
@@ -67,7 +71,7 @@
         details: 'Маалымат',
         date: 'Күнү',
         time: 'Убактысы',
-        venue: 'Орду',
+        venue: 'Өткөрүлө турган жер',
         h2h: 'Жолугушуу тарыхы',
         noH2H: 'Мурунку жолугушуулар жок',
         h2hRecord: 'H2H жазуусу',
@@ -75,7 +79,9 @@
         winner: 'Жеңүүчү',
         predictionResult: 'көрүүчүлөр туура болжоду',
         score: 'Эсеп',
-        set: 'Сет'
+        set: 'Сет',
+        cancelled: 'Баттл жокко чыгарылды',
+        cancelledDesc: 'Бул баттл жокко чыгарылды.'
     } : {
         loading: 'Загрузка...',
         notFound: 'Баттл не найден',
@@ -87,6 +93,7 @@
         rating: 'Рейтинг',
         whoWins: 'Кто победит?',
         vote: 'Голос',
+        voteCta: 'Нажмите, чтобы голосовать',
         votes: 'гол.',
         totalVotes: 'Всего голосов',
         votingClosed: 'Голосование закрыто',
@@ -101,7 +108,7 @@
         details: 'Подробности',
         date: 'Дата',
         time: 'Время',
-        venue: 'Площадка',
+        venue: 'Место проведения',
         h2h: 'История встреч',
         noH2H: 'Нет предыдущих встреч',
         h2hRecord: 'Счёт H2H',
@@ -109,7 +116,9 @@
         winner: 'Победитель',
         predictionResult: 'зрителей угадали правильно',
         score: 'Счёт',
-        set: 'Сет'
+        set: 'Сет',
+        cancelled: 'Баттл отменён',
+        cancelledDesc: 'Этот баттл был отменён.'
     };
 
     var CAT_LABELS = {
@@ -118,6 +127,45 @@
         'women-tour': 'Tour', 'women-futures': 'Futures', 'women-challenger': 'Challenger',
         'women-masters': 'Masters', 'women-promasters': 'Pro-Masters'
     };
+
+    function getMapEmbed(url) {
+        if (!url) return null;
+        if (url.indexOf('google.com/maps') !== -1 || url.indexOf('goo.gl/maps') !== -1 || url.indexOf('maps.app.goo.gl') !== -1) {
+            if (url.indexOf('/embed') !== -1) return url;
+            var qMatch = url.match(/[?&]q=([^&]+)/);
+            if (qMatch) return 'https://maps.google.com/maps?q=' + qMatch[1] + '&output=embed';
+            var coordMatch = url.match(/@(-?[\d.]+),(-?[\d.]+)/);
+            if (coordMatch) return 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&output=embed';
+            var placeMatch = url.match(/\/place\/([^/]+)/);
+            if (placeMatch) return 'https://maps.google.com/maps?q=' + placeMatch[1] + '&output=embed';
+            return 'https://maps.google.com/maps?q=' + encodeURIComponent(url) + '&output=embed';
+        }
+        if (url.indexOf('2gis.') !== -1) {
+            var gisMatch = url.match(/\/([\d.]+)%2C([\d.]+)\//);
+            if (!gisMatch) gisMatch = url.match(/\/([\d.]+),([\d.]+)\//);
+            if (gisMatch) return 'https://maps.google.com/maps?q=' + gisMatch[2] + ',' + gisMatch[1] + '&output=embed';
+        }
+        return null;
+    }
+
+    function buildMapLinks(b) {
+        var gm = b.court_google_maps || '';
+        var tg = b.court_twogis || '';
+        if (!gm && !tg) return '';
+        var html = '<div class="ch-detail-map-links">';
+        if (gm) html += '<a href="' + esc(gm) + '" target="_blank" rel="noopener" class="ch-map-link">Google Maps &#8599;</a>';
+        if (tg) html += '<a href="' + esc(tg) + '" target="_blank" rel="noopener" class="ch-map-link">2GIS &#8599;</a>';
+        html += '</div>';
+        return html;
+    }
+
+    function buildMapEmbed(b) {
+        var gm = b.court_google_maps || '';
+        var tg = b.court_twogis || '';
+        var embedUrl = getMapEmbed(gm) || getMapEmbed(tg);
+        if (!embedUrl) return '';
+        return '<div class="ch-detail-map"><iframe src="' + esc(embedUrl) + '" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
+    }
 
     var _userId = null;
     var _battle = null;
@@ -189,6 +237,13 @@
             }
 
             _battle = battleRes.data;
+
+            // Cancelled battle
+            if (_battle.status === 'cancelled') {
+                renderCancelled();
+                return;
+            }
+
             _votes = {};
             if (votesRes.data) {
                 votesRes.data.forEach(function(v) {
@@ -213,6 +268,17 @@
             hero.innerHTML = '<div class="ch-not-found">' +
                 '<h2>' + L.notFound + '</h2>' +
                 '<p>' + L.notFoundDesc + '</p>' +
+                '</div>';
+        }
+    }
+
+    /* ========== CANCELLED ========== */
+    function renderCancelled() {
+        var hero = document.getElementById('challengeHero');
+        if (hero) {
+            hero.innerHTML = '<div class="ch-not-found">' +
+                '<h2>🚫 ' + L.cancelled + '</h2>' +
+                '<p>' + L.cancelledDesc + '</p>' +
                 '</div>';
         }
     }
@@ -266,8 +332,7 @@
                     '</div>' +
                 '</div>' +
                 '<div class="ch-meta">' +
-                    (formattedDate ? '<span class="ch-meta-item">📅 ' + formattedDate + '</span>' : '') +
-                    (time ? '<span class="ch-meta-item">⏰ ' + esc(time) + '</span>' : '') +
+                    (formattedDate || time ? '<span class="ch-meta-item">📅 ' + (formattedDate ? formattedDate : '') + (formattedDate && time ? ', ' : '') + (time ? esc(time) : '') + '</span>' : '') +
                     (venue ? '<span class="ch-meta-item">📍 ' + esc(venue) + '</span>' : '') +
                 '</div>' +
             '</div>';
@@ -337,10 +402,16 @@
                 '</div>' +
                 '<div class="ch-vote-buttons" id="voteButtons">' +
                     '<button class="' + btn1Class + '" id="voteBtn1" data-player="' + c1Id + '"' + (btnDisabled ? ' disabled' : '') + '>' +
-                        btn1Check + '<span class="ch-vote-dot-red">●</span> ' + esc(c1Name) + ' <small>(' + v1 + ' ' + L.votes + ')</small>' +
+                        btn1Check + '<span class="ch-vote-dot-red">●</span>' +
+                        '<span class="ch-vote-name">' + esc(c1Name) + '</span>' +
+                        '<span class="ch-vote-count">' + v1 + ' ' + L.votes + '</span>' +
+                        (!btnDisabled ? '<span class="ch-vote-cta">' + L.voteCta + '</span>' : '') +
                     '</button>' +
                     '<button class="' + btn2Class + '" id="voteBtn2" data-player="' + c2Id + '"' + (btnDisabled ? ' disabled' : '') + '>' +
-                        btn2Check + '<span class="ch-vote-dot-blue">●</span> ' + esc(c2Name) + ' <small>(' + v2 + ' ' + L.votes + ')</small>' +
+                        btn2Check + '<span class="ch-vote-dot-blue">●</span>' +
+                        '<span class="ch-vote-name">' + esc(c2Name) + '</span>' +
+                        '<span class="ch-vote-count">' + v2 + ' ' + L.votes + '</span>' +
+                        (!btnDisabled ? '<span class="ch-vote-cta">' + L.voteCta + '</span>' : '') +
                     '</button>' +
                 '</div>' +
                 '<div class="ch-voting-total">' + L.totalVotes + ': ' + total + '</div>' +
@@ -498,16 +569,39 @@
 
         if (!date && !time && !venue) return;
 
-        section.style.display = '';
-        section.innerHTML =
-            '<div class="ch-details-inner">' +
-                '<h2 class="ch-details-title">' + L.details + '</h2>' +
-                '<div class="ch-details-grid">' +
-                    (date ? '<div class="ch-detail-item"><span class="ch-detail-icon">📅</span><div><div class="ch-detail-label">' + L.date + '</div><div class="ch-detail-value">' + formatDate(date) + '</div></div></div>' : '') +
-                    (time ? '<div class="ch-detail-item"><span class="ch-detail-icon">⏰</span><div><div class="ch-detail-label">' + L.time + '</div><div class="ch-detail-value">' + esc(time) + '</div></div></div>' : '') +
-                    (venue ? '<div class="ch-detail-item"><span class="ch-detail-icon">📍</span><div><div class="ch-detail-label">' + L.venue + '</div><div class="ch-detail-value">' + esc(venue) + '</div></div></div>' : '') +
-                '</div>' +
+        var formattedDate = date ? formatDate(date) : '';
+        var dateTimeStr = (formattedDate ? formattedDate : '') + (formattedDate && time ? ', ' : '') + (time ? esc(time) : '');
+
+        var html = '<div class="ch-details-inner">' +
+            '<h2 class="ch-details-title">' + L.details + '</h2>';
+
+        // Date + time — single row
+        if (dateTimeStr) {
+            html += '<div class="ch-detail-item ch-detail-datetime">' +
+                '<span class="ch-detail-icon">📅</span>' +
+                '<div class="ch-detail-value">' + dateTimeStr + '</div>' +
             '</div>';
+        }
+
+        // Venue block with map links + embedded map
+        if (venue) {
+            html += '<div class="ch-detail-venue">' +
+                '<div class="ch-detail-item">' +
+                    '<span class="ch-detail-icon">📍</span>' +
+                    '<div>' +
+                        '<div class="ch-detail-label">' + L.venue + '</div>' +
+                        '<div class="ch-detail-value">' + esc(venue) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                buildMapLinks(b) +
+                buildMapEmbed(b) +
+            '</div>';
+        }
+
+        html += '</div>';
+
+        section.style.display = '';
+        section.innerHTML = html;
     }
 
     /* ========== H2H ========== */

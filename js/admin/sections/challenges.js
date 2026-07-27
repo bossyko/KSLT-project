@@ -10,12 +10,31 @@
     var isEn = A.isEn;
 
     // ---- State ----
-    var subTab = 'accepted';
+    var subTab = 'pending';
+    var pendingList = [];
     var acceptedList = [];
     var publishedList = [];
     var completedList = [];
     var allPlayers = [];
     var allCourts = [];
+
+    function buildHourOptions() {
+        var html = '';
+        for (var h = 0; h < 24; h++) {
+            var val = (h < 10 ? '0' : '') + h;
+            html += '<option value="' + val + '"' + (h === 10 ? ' selected' : '') + '>' + val + '</option>';
+        }
+        return html;
+    }
+
+    function buildMinuteOptions() {
+        var html = '';
+        for (var m = 0; m < 60; m += 5) {
+            var val = (m < 10 ? '0' : '') + m;
+            html += '<option value="' + val + '"' + (m === 0 ? ' selected' : '') + '>' + val + '</option>';
+        }
+        return html;
+    }
 
     // ---- Entry point ----
     function renderChallengesSection() {
@@ -28,6 +47,7 @@
                 '<button class="ad-btn ad-btn-accent" id="chalCreateBtn">' + L.chalCreate + '</button>' +
             '</div>' +
             '<div class="ad-rat-tabs" id="chalTabs" style="margin-bottom:20px;">' +
+                '<button class="ad-rat-tab' + (subTab === 'pending' ? ' active' : '') + '" data-subtab="pending">' + L.chalPending + '</button>' +
                 '<button class="ad-rat-tab' + (subTab === 'accepted' ? ' active' : '') + '" data-subtab="accepted">' + L.chalAccepted + '</button>' +
                 '<button class="ad-rat-tab' + (subTab === 'published' ? ' active' : '') + '" data-subtab="published">' + L.chalPublished + '</button>' +
                 '<button class="ad-rat-tab' + (subTab === 'completed' ? ' active' : '') + '" data-subtab="completed">' + L.chalCompletedTab + '</button>' +
@@ -54,27 +74,33 @@
     function loadData() {
         Promise.all([
             A.client.from('challenges')
+                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, message, created_at')
+                .eq('status', 'pending')
+                .order('created_at', { ascending: false }),
+            A.client.from('challenges')
                 .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, score_draft')
                 .eq('status', 'accepted')
                 .eq('battle_published', false)
                 .order('accepted_at', { ascending: false }),
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, battle_notified_at, score_draft')
+                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, battle_notified_at, score_draft, banner_url, proposed_court_id')
                 .eq('battle_published', true)
                 .neq('status', 'completed')
+                .neq('status', 'cancelled')
                 .order('battle_published_at', { ascending: false }),
             A.client.from('players').select('id, name, name_en, photo').order('name'),
             A.client.from('courts').select('id, name, name_en, street, street_en, district, district_en, city, city_en').order('name'),
             A.client.from('challenges')
                 .select('id, challenger_player_id, opponent_player_id, status, battle_title, match_id, accepted_at')
-                .eq('status', 'completed')
+                .in('status', ['completed', 'cancelled'])
                 .order('accepted_at', { ascending: false })
         ]).then(function(results) {
-            acceptedList = results[0].data || [];
-            publishedList = results[1].data || [];
-            allPlayers = results[2].data || [];
-            allCourts = results[3].data || [];
-            completedList = results[4].data || [];
+            pendingList = results[0].data || [];
+            acceptedList = results[1].data || [];
+            publishedList = results[2].data || [];
+            allPlayers = results[3].data || [];
+            allCourts = results[4].data || [];
+            completedList = results[5].data || [];
 
             var pMap = {};
             allPlayers.forEach(function(p) { pMap[p.id] = p; });
@@ -85,9 +111,54 @@
     }
 
     function renderSubTab() {
-        if (subTab === 'accepted') renderAccepted();
+        if (subTab === 'pending') renderPending();
+        else if (subTab === 'accepted') renderAccepted();
         else if (subTab === 'published') renderPublished();
         else renderCompleted();
+    }
+
+    // ---- Pending challenges (waiting for opponent response) ----
+    function renderPending() {
+        var el = document.getElementById('chalContent');
+        if (!el) return;
+        var pMap = A._chalPlayersMap || {};
+
+        if (pendingList.length === 0) {
+            el.innerHTML = '<div class="ad-empty-state">' + L.chalNoPending + '</div>';
+            return;
+        }
+
+        var html = '<table class="ad-table"><thead><tr>' +
+            '<th>' + L.chalChallenger + '</th>' +
+            '<th></th>' +
+            '<th>' + L.chalOpponent + '</th>' +
+            '<th>' + L.chalDate + '</th>' +
+            '<th>' + L.chalVenue + '</th>' +
+            '<th>' + (isEn ? 'Sent' : 'Отправлено') + '</th>' +
+            '</tr></thead><tbody>';
+
+        pendingList.forEach(function(c) {
+            var p1 = pMap[c.challenger_player_id] || {};
+            var p2 = pMap[c.opponent_player_id] || {};
+            var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
+            var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+            var date = c.proposed_date || '';
+            var time = c.proposed_time || '';
+            var venue = c.proposed_venue || '-';
+            var sentAt = c.created_at ? formatDate(c.created_at.split('T')[0]) : '-';
+
+            html += '<tr>' +
+                '<td>' + A.esc(p1Name) + '</td>' +
+                '<td style="text-align:center;font-weight:700;color:var(--text-dim);">⚔️</td>' +
+                '<td>' + A.esc(p2Name) + '</td>' +
+                '<td>' + formatDate(date) + (time ? ' ' + time : '') + '</td>' +
+                '<td>' + A.esc(venue) + '</td>' +
+                '<td>' + sentAt + '</td>' +
+                '</tr>';
+        });
+
+        html += '</tbody></table>';
+        el.innerHTML = html;
     }
 
     // ---- Accepted challenges (not yet published) ----
@@ -141,8 +212,19 @@
         });
 
         el.querySelectorAll('[data-delete]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                deleteBattle(btn.dataset.delete);
+            btn.addEventListener('click', async function() {
+                var cId = btn.dataset.delete;
+                var ok = await A.showConfirmAsync(L.chalDelete, L.chalConfirmDelete, L.chalDelete);
+                if (!ok) return;
+                try {
+                    await A.client.from('challenge_predictions').delete().eq('challenge_id', cId);
+                    var res = await A.client.from('challenges').delete().eq('id', cId);
+                    if (res.error) { A.showToast(res.error.message, 'error'); return; }
+                    A.showToast(L.chalDeleted, 'success');
+                    loadData();
+                } catch (e) {
+                    A.showToast('Error: ' + e.message, 'error');
+                }
             });
         });
     }
@@ -193,8 +275,9 @@
                     : '<button class="ad-btn ad-btn-sm" data-notify="' + c.id + '" title="' + L.chalNotify + '">📢 ' + L.chalNotify + '</button>';
             }
 
-            var actions = '<div style="display:flex;gap:10px;align-items:center;width:100%;justify-content:space-between;">';
+            var actions = '<div style="display:flex;gap:6px;align-items:center;width:100%;justify-content:space-between;">';
             if (c.status !== 'completed') {
+                actions += '<button class="ad-btn ad-btn-sm" data-edit="' + c.id + '" title="' + L.chalEdit + '">✏️</button>';
                 actions += '<button class="ad-btn ad-btn-sm ad-btn--accent" data-score="' + c.id + '">' + L.chalEnterScore + '</button>';
             }
             actions += '<button class="ad-btn ad-btn-sm" data-delete="' + c.id + '" title="' + L.chalDelete + '" style="color:#f44336;border-color:rgba(244,67,54,0.3);margin-left:auto;">🗑</button>';
@@ -227,6 +310,14 @@
             });
         });
 
+        el.querySelectorAll('[data-edit]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var cId = btn.dataset.edit;
+                var challenge = publishedList.find(function(c) { return c.id === cId; });
+                if (challenge) openEditBattleModal(challenge);
+            });
+        });
+
         el.querySelectorAll('[data-score]').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var cId = btn.dataset.score;
@@ -245,7 +336,9 @@
 
         el.querySelectorAll('[data-delete]').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                deleteBattle(btn.dataset.delete);
+                var cId = btn.dataset.delete;
+                var challenge = publishedList.find(function(c) { return c.id === cId; });
+                if (challenge) openDeleteOrCancelModal(challenge);
             });
         });
     }
@@ -276,13 +369,14 @@
             var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
             var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
             var date = c.accepted_at ? formatDate(c.accepted_at) : '-';
+            var titleExtra = c.status === 'cancelled' ? ' <span class="ad-badge ad-badge-yellow">' + L.chalCancelledBadge + '</span>' : '';
 
             html += '<tr>' +
-                '<td><a href="../pages/challenge.html?id=' + c.id + '" target="_blank" style="color:var(--accent);font-weight:600;text-decoration:none;">' + A.esc(c.battle_title || '-') + '</a></td>' +
+                '<td><a href="../pages/challenge.html?id=' + c.id + '" target="_blank" style="color:var(--accent);font-weight:600;text-decoration:none;">' + A.esc(c.battle_title || '-') + '</a>' + titleExtra + '</td>' +
                 '<td>' + A.esc(p1Name) + '</td>' +
                 '<td>' + A.esc(p2Name) + '</td>' +
-                '<td id="chalCScore_' + c.id + '">...</td>' +
-                '<td id="chalCWinner_' + c.id + '">...</td>' +
+                '<td id="chalCScore_' + c.id + '">' + (c.status === 'cancelled' ? '—' : '...') + '</td>' +
+                '<td id="chalCWinner_' + c.id + '">' + (c.status === 'cancelled' ? '—' : '...') + '</td>' +
                 '<td>' + date + '</td>' +
                 '</tr>';
         });
@@ -292,7 +386,7 @@
 
         // Load match data for score + winner
         completedList.forEach(function(c) {
-            if (!c.match_id) return;
+            if (!c.match_id || c.status === 'cancelled') return;
             A.client.from('matches').select('score, winner_id').eq('id', c.match_id).single().then(function(res) {
                 if (!res.data) return;
                 var scoreCell = document.getElementById('chalCScore_' + c.id);
@@ -353,7 +447,11 @@
                         '</div>' +
                         '<div class="ad-field-group" style="flex:1;">' +
                             '<label class="ad-field-label">' + L.chalTime + '</label>' +
-                            '<input type="time" class="ad-field-input" id="cbTime">' +
+                            '<div style="display:flex;gap:6px;align-items:center;">' +
+                                '<select class="ad-field-input" id="cbTimeH" style="flex:1;">' + buildHourOptions() + '</select>' +
+                                '<span style="color:var(--text-dim);font-weight:700;">:</span>' +
+                                '<select class="ad-field-input" id="cbTimeM" style="flex:1;">' + buildMinuteOptions() + '</select>' +
+                            '</div>' +
                         '</div>' +
                     '</div>' +
                     // Court / Club
@@ -434,7 +532,9 @@
         document.getElementById('cbSave').addEventListener('click', function() {
             var title = document.getElementById('cbTitle').value.trim();
             var date = document.getElementById('cbDate').value;
-            var time = document.getElementById('cbTime').value;
+            var timeH = document.getElementById('cbTimeH').value;
+            var timeM = document.getElementById('cbTimeM').value;
+            var time = timeH + ':' + timeM;
             var courtName = document.getElementById('cbCourtInput').value.trim();
             var address = document.getElementById('cbAddress').value.trim();
             var venue = courtName + (address ? ', ' + address : '');
@@ -452,7 +552,7 @@
             btn.disabled = true;
             btn.textContent = L.chalCreating;
 
-            createBattle(sel1, sel2, title, date, time, venue, bannerUrl).then(function(ok) {
+            createBattle(sel1, sel2, title, date, time, venue, bannerUrl, selCourt.id).then(function(ok) {
                 overlay.remove();
                 if (ok) {
                     A.showToast(L.chalCreated, 'success');
@@ -622,7 +722,7 @@
     }
 
     // ---- Create battle (insert player if manual + challenge) ----
-    function createBattle(p1, p2, title, date, time, venue, bannerUrl) {
+    function createBattle(p1, p2, title, date, time, venue, bannerUrl, courtId) {
         return ensurePlayer(p1).then(function(p1Id) {
             return ensurePlayer(p2).then(function(p2Id) {
                 var adminId = A.currentUserId;
@@ -634,6 +734,7 @@
                     proposed_date: date || new Date().toISOString().slice(0, 10),
                     proposed_time: time || '18:00',
                     proposed_venue: venue || null,
+                    proposed_court_id: courtId || null,
                     status: 'accepted',
                     accepted_at: new Date().toISOString(),
                     battle_title: title,
@@ -1104,26 +1205,295 @@
         }
     }
 
-    // ---- Delete Battle ----
-    async function deleteBattle(challengeId) {
-        var ok = await A.showConfirmAsync(L.chalDelete, L.chalConfirmDelete, L.chalDelete);
-        if (!ok) return;
+    // ==== EDIT BATTLE MODAL ====
+    function openEditBattleModal(challenge) {
+        var pMap = A._chalPlayersMap || {};
+        var p1 = pMap[challenge.challenger_player_id] || {};
+        var p2 = pMap[challenge.opponent_player_id] || {};
+        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
+        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
 
-        try {
-            // Delete predictions first (foreign key)
-            await A.client.from('challenge_predictions').delete().eq('challenge_id', challengeId);
-            // Delete challenge
-            var res = await A.client.from('challenges').delete().eq('id', challengeId);
-            if (res.error) {
-                A.showToast(res.error.message, 'error');
-                return;
-            }
-            A.showToast(L.chalDeleted, 'success');
-            loadData();
-        } catch (e) {
-            console.error('Delete battle error:', e);
-            A.showToast('Error: ' + e.message, 'error');
+        var selCourt = { id: challenge.proposed_court_id || null, name: '', address: '' };
+        var bannerUrl = challenge.banner_url || '';
+
+        // Parse existing venue: "CourtName, Address"
+        var existingVenue = challenge.counter_venue || challenge.proposed_venue || '';
+        var venueParts = existingVenue.split(', ');
+        var existingCourtName = venueParts[0] || '';
+        var existingAddress = venueParts.slice(1).join(', ') || '';
+
+        // Parse existing date/time
+        var existingDate = challenge.counter_date || challenge.proposed_date || '';
+        var existingTime = challenge.counter_time || challenge.proposed_time || '';
+        var timeH = '10', timeM = '00';
+        if (existingTime) {
+            var tp = existingTime.split(':');
+            timeH = tp[0] || '10';
+            timeM = tp[1] || '00';
         }
+
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-modal-overlay';
+        overlay.innerHTML =
+            '<div class="ad-modal" style="max-width:540px;">' +
+                '<div class="ad-modal-header">' +
+                    '<h3>' + L.chalEditTitle + '</h3>' +
+                    '<button class="ad-modal-close" id="ebClose">&times;</button>' +
+                '</div>' +
+                '<div class="ad-modal-body" style="max-height:70vh;overflow-y:auto;">' +
+                    // Players info (read-only)
+                    '<div style="text-align:center;margin-bottom:16px;padding:12px;background:var(--bg-tertiary);border-radius:8px;">' +
+                        '<span style="font-weight:600;">' + A.esc(p1Name) + '</span>' +
+                        ' <span style="color:var(--accent);font-weight:700;">VS</span> ' +
+                        '<span style="font-weight:600;">' + A.esc(p2Name) + '</span>' +
+                    '</div>' +
+                    // Title
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">' + L.chalBattleTitle + '</label>' +
+                        '<input type="text" class="ad-field-input" id="ebTitle" value="' + A.esc(challenge.battle_title || '') + '" maxlength="100">' +
+                    '</div>' +
+                    // Date + Time
+                    '<div style="display:flex;gap:12px;">' +
+                        '<div class="ad-field-group" style="flex:1;">' +
+                            '<label class="ad-field-label">' + L.chalDate + '</label>' +
+                            '<input type="date" class="ad-field-input" id="ebDate" value="' + existingDate + '">' +
+                        '</div>' +
+                        '<div class="ad-field-group" style="flex:1;">' +
+                            '<label class="ad-field-label">' + L.chalTime + '</label>' +
+                            '<div style="display:flex;gap:6px;align-items:center;">' +
+                                '<select class="ad-field-input" id="ebTimeH" style="flex:1;">' + buildHourOptions() + '</select>' +
+                                '<span style="color:var(--text-dim);font-weight:700;">:</span>' +
+                                '<select class="ad-field-input" id="ebTimeM" style="flex:1;">' + buildMinuteOptions() + '</select>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    // Court / Club
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">' + L.chalCourtOrClub + '</label>' +
+                        '<div style="position:relative;">' +
+                            '<input type="text" class="ad-field-input" id="cbCourtInput" value="' + A.esc(existingCourtName) + '" placeholder="' + L.chalSearchCourt + '" autocomplete="off">' +
+                            '<div class="ad-dropdown-list" id="cbCourtDropdown" style="display:none;"></div>' +
+                        '</div>' +
+                        '<div id="cbCourtSelected" class="ad-chal-selected-hint"></div>' +
+                    '</div>' +
+                    // Address
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">' + L.chalAddress + '</label>' +
+                        '<input type="text" class="ad-field-input" id="ebAddress" value="' + A.esc(existingAddress) + '" placeholder="' + (isEn ? 'Auto-filled from court or enter manually' : 'Автозаполнение из корта или введите вручную') + '">' +
+                    '</div>' +
+                    // Banner
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">' + L.chalBanner + '</label>' +
+                        '<div class="ad-chal-banner-row">' +
+                            '<input type="file" id="ebBannerFile" accept="image/*" style="display:none;">' +
+                            '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="ebBannerBtn">' +
+                                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> ' +
+                                L.chalUploadBanner +
+                            '</button>' +
+                            '<span id="ebBannerName" class="ad-chal-banner-name"></span>' +
+                            '<div id="ebBannerPreview" class="ad-chal-banner-preview"' + (bannerUrl ? '' : ' style="display:none;"') + '>' +
+                                '<img id="ebBannerImg"' + (bannerUrl ? ' src="' + A.esc(bannerUrl) + '"' : '') + '>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-modal-footer">' +
+                    '<button class="ad-btn ad-btn-accent" id="ebSave">' + L.save + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        // Pre-select hour/minute
+        var hSel = document.getElementById('ebTimeH');
+        var mSel = document.getElementById('ebTimeM');
+        if (hSel) hSel.value = timeH;
+        if (mSel) {
+            // Snap to nearest 5-min option
+            var mm = parseInt(timeM) || 0;
+            mm = Math.round(mm / 5) * 5;
+            if (mm === 60) mm = 55;
+            mSel.value = (mm < 10 ? '0' : '') + mm;
+        }
+
+        // Close
+        document.getElementById('ebClose').addEventListener('click', function() { overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+        // Court search
+        setupCourtSearch(function(court) {
+            selCourt = court;
+            if (court.address) {
+                document.getElementById('ebAddress').value = court.address;
+            }
+        });
+
+        // Banner upload
+        document.getElementById('ebBannerBtn').addEventListener('click', function() {
+            document.getElementById('ebBannerFile').click();
+        });
+        document.getElementById('ebBannerFile').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('ebBannerName').textContent = file.name;
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                document.getElementById('ebBannerImg').src = ev.target.result;
+                document.getElementById('ebBannerPreview').style.display = '';
+            };
+            reader.readAsDataURL(file);
+            if (A.uploadImage) {
+                A.uploadImage(file, 'battles').then(function(url) {
+                    if (url) bannerUrl = url;
+                });
+            }
+        });
+
+        // Save
+        document.getElementById('ebSave').addEventListener('click', function() {
+            var title = document.getElementById('ebTitle').value.trim();
+            if (!title) { document.getElementById('ebTitle').focus(); return; }
+
+            var date = document.getElementById('ebDate').value;
+            var th = document.getElementById('ebTimeH').value;
+            var tm = document.getElementById('ebTimeM').value;
+            var time = th + ':' + tm;
+            var courtName = document.getElementById('cbCourtInput').value.trim();
+            var address = document.getElementById('ebAddress').value.trim();
+            var venue = courtName + (address ? ', ' + address : '');
+
+            var btn = document.getElementById('ebSave');
+            btn.disabled = true;
+            btn.textContent = L.chalSaving;
+
+            var updateData = {
+                battle_title: title,
+                counter_date: date || null,
+                counter_time: time || null,
+                counter_venue: venue || null,
+                banner_url: bannerUrl || null
+            };
+            if (selCourt.id) updateData.proposed_court_id = selCourt.id;
+
+            A.client.from('challenges').update(updateData).eq('id', challenge.id).then(function(res) {
+                if (res.error) {
+                    btn.disabled = false;
+                    btn.textContent = L.save;
+                    A.showToast(res.error.message, 'error');
+                    return;
+                }
+                overlay.remove();
+                A.showToast(L.chalSaved, 'success');
+                loadData();
+            });
+        });
+    }
+
+    // ==== DELETE OR CANCEL MODAL ====
+    function openDeleteOrCancelModal(challenge) {
+        var pMap = A._chalPlayersMap || {};
+        var p1 = pMap[challenge.challenger_player_id] || {};
+        var p2 = pMap[challenge.opponent_player_id] || {};
+        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
+        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-modal-overlay';
+        overlay.innerHTML =
+            '<div class="ad-modal" style="max-width:440px;">' +
+                '<div class="ad-modal-header">' +
+                    '<h3>' + L.chalDeleteOrCancel + '</h3>' +
+                    '<button class="ad-modal-close" id="dcClose">&times;</button>' +
+                '</div>' +
+                '<div class="ad-modal-body">' +
+                    // Battle info card
+                    '<div style="text-align:center;margin-bottom:20px;padding:14px;background:var(--bg-tertiary);border-radius:10px;border:1px solid var(--border);">' +
+                        '<div style="font-weight:700;font-size:15px;color:var(--text-primary);">⚔️ ' + A.esc(challenge.battle_title || '') + '</div>' +
+                        '<div style="color:var(--text-secondary);font-size:13px;margin-top:6px;">' + A.esc(p1Name) + ' <span style="color:var(--accent);font-weight:600;">VS</span> ' + A.esc(p2Name) + '</div>' +
+                    '</div>' +
+                    '<p style="color:var(--text-secondary);margin-bottom:16px;font-size:13px;">' + L.chalDeleteOrCancelDesc + '</p>' +
+                    // Cancel battle — card-style button
+                    '<div id="dcCancel" style="cursor:pointer;padding:16px;margin-bottom:10px;border-radius:10px;border:1px solid rgba(255,193,7,0.35);background:rgba(255,193,7,0.06);transition:all 0.2s;">' +
+                        '<div style="display:flex;align-items:center;gap:12px;">' +
+                            '<span style="font-size:24px;">🚫</span>' +
+                            '<div>' +
+                                '<div style="font-weight:600;font-size:14px;color:#ffc107;">' + L.chalCancelBattle + '</div>' +
+                                '<div style="font-size:12px;color:var(--text-secondary);margin-top:3px;line-height:1.4;">' + (isEn ? 'Battle will be unpublished but kept in history' : 'Баттл будет снят с публикации, но сохранён в истории') + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    // Delete forever — card-style button
+                    '<div id="dcDelete" style="cursor:pointer;padding:16px;border-radius:10px;border:1px solid rgba(244,67,54,0.3);background:rgba(244,67,54,0.05);transition:all 0.2s;">' +
+                        '<div style="display:flex;align-items:center;gap:12px;">' +
+                            '<span style="font-size:24px;">🗑</span>' +
+                            '<div>' +
+                                '<div style="font-weight:600;font-size:14px;color:#f44336;">' + L.chalDeleteForever + '</div>' +
+                                '<div style="font-size:12px;color:var(--text-secondary);margin-top:3px;line-height:1.4;">' + (isEn ? 'Battle and all votes will be permanently deleted' : 'Баттл и все голоса будут удалены навсегда') + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        // Hover effects for card buttons
+        ['dcCancel', 'dcDelete'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('mouseenter', function() { el.style.transform = 'scale(1.02)'; el.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)'; });
+            el.addEventListener('mouseleave', function() { el.style.transform = ''; el.style.boxShadow = ''; });
+        });
+
+        document.getElementById('dcClose').addEventListener('click', function() { overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+        // Cancel battle (soft)
+        document.getElementById('dcCancel').addEventListener('click', async function() {
+            var el = document.getElementById('dcCancel');
+            el.style.opacity = '0.6'; el.style.pointerEvents = 'none';
+            try {
+                var res = await A.client.from('challenges').update({
+                    status: 'cancelled',
+                    battle_published: false,
+                    voting_closed: true
+                }).eq('id', challenge.id);
+                if (res.error) {
+                    A.showToast(res.error.message, 'error');
+                    el.style.opacity = ''; el.style.pointerEvents = '';
+                    return;
+                }
+                overlay.remove();
+                A.showToast(L.chalCancelled, 'success');
+                loadData();
+            } catch (e) {
+                console.error('Cancel battle error:', e);
+                A.showToast('Error: ' + e.message, 'error');
+                el.style.opacity = ''; el.style.pointerEvents = '';
+            }
+        });
+
+        // Delete forever (hard)
+        document.getElementById('dcDelete').addEventListener('click', async function() {
+            var el = document.getElementById('dcDelete');
+            el.style.opacity = '0.6'; el.style.pointerEvents = 'none';
+            try {
+                await A.client.from('challenge_predictions').delete().eq('challenge_id', challenge.id);
+                var res = await A.client.from('challenges').delete().eq('id', challenge.id);
+                if (res.error) {
+                    A.showToast(res.error.message, 'error');
+                    el.style.opacity = ''; el.style.pointerEvents = '';
+                    return;
+                }
+                overlay.remove();
+                A.showToast(L.chalDeleted, 'success');
+                loadData();
+            } catch (e) {
+                console.error('Delete battle error:', e);
+                A.showToast('Error: ' + e.message, 'error');
+                el.style.opacity = ''; el.style.pointerEvents = '';
+            }
+        });
     }
 
     // ---- Utils ----
