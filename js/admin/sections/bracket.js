@@ -466,8 +466,14 @@
         var unique = playerIds.filter(function(id, i) { return playerIds.indexOf(id) === i; });
         var currentYear = new Date().getFullYear();
 
+        // Get doubles tournament IDs
+        var dblTrnRes = await A.client.from('tournaments').select('id').in('format', ['doubles', 'mixed_doubles']);
+        var dblTrnIds = (dblTrnRes.data || []).map(function(t) { return t.id; });
+
         for (var i = 0; i < unique.length; i++) {
             var pid = unique[i];
+
+            // Points from rating_history (doubles only)
             var rhRes = await A.client.from('rating_history')
                 .select('points_earned')
                 .eq('player_id', pid)
@@ -478,7 +484,34 @@
             (rhRes.data || []).forEach(function(r) {
                 total += r.points_earned || 0;
             });
-            await A.client.from('players').update({ doubles_points: total }).eq('id', pid);
+
+            // Wins/losses from matches in doubles tournaments
+            var matchRes = await A.client.from('matches')
+                .select('winner_id, tournament_id, played_at')
+                .or('player1_id.eq.' + pid + ',player2_id.eq.' + pid)
+                .not('winner_id', 'is', null)
+                .order('played_at', { ascending: false });
+            var doublesMatches = (matchRes.data || []).filter(function(m) {
+                return dblTrnIds.indexOf(m.tournament_id) !== -1;
+            });
+            var wins = 0;
+            var losses = 0;
+            doublesMatches.forEach(function(m) {
+                if (m.winner_id === pid) wins++;
+                else losses++;
+            });
+
+            // Form: last 5 doubles matches
+            var dblForm = doublesMatches.slice(0, 5).map(function(m) {
+                return m.winner_id === pid ? 'W' : 'L';
+            });
+
+            await A.client.from('players').update({
+                doubles_points: total,
+                doubles_wins: wins,
+                doubles_losses: losses,
+                doubles_form: dblForm
+            }).eq('id', pid);
         }
     }
 
@@ -8287,6 +8320,7 @@
     }
 
     // ---- Export to namespace ----
+    A.recalcDoublesPoints = recalcDoublesPoints;
     A.renderBracketManagement = renderBracketManagement;
 
 })();

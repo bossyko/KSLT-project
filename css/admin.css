@@ -1463,6 +1463,32 @@ select.ad-field-input {
     font-size: 1rem;
 }
 
+/* ---- Reaction Tiles ---- */
+.ad-reaction-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    min-width: 70px;
+}
+.ad-reaction-tile:hover {
+    border-color: rgba(204, 255, 0, 0.3);
+    background: rgba(204, 255, 0, 0.05);
+}
+.ad-reaction-tile.active {
+    border-color: var(--accent);
+    background: rgba(204, 255, 0, 0.1);
+    color: var(--accent);
+}
+
 /* ---- Auto-copied hint ---- */
 .ad-auto-copied {
     border-color: rgba(204, 255, 0, 0.3) !important;
@@ -2900,9 +2926,10 @@ select.ad-field-input {
 }
 
 .ad-crt-stat-title {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-primary);
+    white-space: nowrap;
 }
 
 .ad-crt-stat-total-num {
@@ -3226,15 +3253,43 @@ select.ad-field-input {
     margin-bottom: 18px;
 }
 
-.ad-trn-stats-grid .ad-crt-stat-card:last-child {
-    grid-column: 2 / 4;
-    justify-self: center;
-    width: 50%;
+.ad-stat-collapsible {
+    cursor: pointer;
+}
+
+.ad-stat-collapsible:hover {
+    border-color: var(--accent);
+}
+
+.ad-stat-arrow {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-left: auto;
+    transition: transform 0.2s;
+}
+
+.ad-stat-hidden {
+    display: none !important;
+}
+
+.ad-trn-stats-grid .ad-crt-stat-card:nth-last-child(-n+2) {
     text-align: center;
     padding: 8px 16px;
 }
 
-.ad-trn-stats-grid .ad-crt-stat-card:last-child .ad-crt-stat-header {
+.ad-trn-stats-grid .ad-crt-stat-card:nth-last-child(2) {
+    grid-column: 2 / 3;
+    justify-self: center;
+    width: 100%;
+}
+
+.ad-trn-stats-grid .ad-crt-stat-card:last-child {
+    grid-column: 3 / 4;
+    justify-self: center;
+    width: 100%;
+}
+
+.ad-trn-stats-grid .ad-crt-stat-card:nth-last-child(-n+2) .ad-crt-stat-header {
     justify-content: center;
     margin-bottom: 0;
 }
@@ -3243,8 +3298,11 @@ select.ad-field-input {
     .ad-trn-stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+    .ad-trn-stats-grid .ad-crt-stat-card:nth-last-child(2) {
+        grid-column: 1 / 2;
+    }
     .ad-trn-stats-grid .ad-crt-stat-card:last-child {
-        grid-column: 1 / -1;
+        grid-column: 2 / 3;
     }
 }
 
@@ -3253,6 +3311,7 @@ select.ad-field-input {
         grid-template-columns: 1fr;
         gap: 8px;
     }
+    .ad-trn-stats-grid .ad-crt-stat-card:nth-last-child(2),
     .ad-trn-stats-grid .ad-crt-stat-card:last-child {
         grid-column: auto;
     }
@@ -3666,6 +3725,12 @@ select.ad-field-input {
 .ad-btn-outline:hover {
     background: rgba(255,255,255,0.06);
     color: var(--text-primary);
+}
+
+.ad-btn-xs {
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    border-radius: 4px;
 }
 
 /* Voucher detail modal */

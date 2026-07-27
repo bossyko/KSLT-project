@@ -72,33 +72,45 @@
                 L.trnStatCompleted + ': <span id="adTrnStatCompleted">...</span>' +
             '</div>' +
             '<div class="ad-trn-stats-grid">' +
-                '<div class="ad-crt-stat-card">' +
+                '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
                         '<span class="ad-crt-stat-title">\u2642 ' + L.trnStatMenSingles + '</span>' +
                         '<span class="ad-crt-stat-total-num" id="adTrnTotalMS">...</span>' +
+                        '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +
-                    '<div class="ad-crt-stat-body" id="adTrnBodyMS"></div>' +
+                    '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyMS"></div>' +
                 '</div>' +
-                '<div class="ad-crt-stat-card">' +
+                '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
                         '<span class="ad-crt-stat-title">\u2640 ' + L.trnStatWomenSingles + '</span>' +
                         '<span class="ad-crt-stat-total-num" id="adTrnTotalWS">...</span>' +
+                        '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +
-                    '<div class="ad-crt-stat-body" id="adTrnBodyWS"></div>' +
+                    '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyWS"></div>' +
                 '</div>' +
-                '<div class="ad-crt-stat-card">' +
+                '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
                         '<span class="ad-crt-stat-title">\u2642 ' + L.trnStatMenDoubles + '</span>' +
                         '<span class="ad-crt-stat-total-num" id="adTrnTotalMD">...</span>' +
+                        '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +
-                    '<div class="ad-crt-stat-body" id="adTrnBodyMD"></div>' +
+                    '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyMD"></div>' +
                 '</div>' +
-                '<div class="ad-crt-stat-card">' +
+                '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
                         '<span class="ad-crt-stat-title">\u2640 ' + L.trnStatWomenDoubles + '</span>' +
                         '<span class="ad-crt-stat-total-num" id="adTrnTotalWD">...</span>' +
+                        '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +
-                    '<div class="ad-crt-stat-body" id="adTrnBodyWD"></div>' +
+                    '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyWD"></div>' +
+                '</div>' +
+                '<div class="ad-crt-stat-card ad-stat-collapsible">' +
+                    '<div class="ad-crt-stat-header">' +
+                        '<span class="ad-crt-stat-title">\u26A4 ' + L.trnStatMixedDoubles + '</span>' +
+                        '<span class="ad-crt-stat-total-num" id="adTrnTotalMX">...</span>' +
+                        '<span class="ad-stat-arrow">\u25BC</span>' +
+                    '</div>' +
+                    '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyMX"></div>' +
                 '</div>' +
                 '<div class="ad-crt-stat-card">' +
                     '<div class="ad-crt-stat-header">' +
@@ -130,6 +142,19 @@
                     '</table>' +
                 '</div>' +
             '</div>';
+
+        // Collapsible stat cards
+        var statCards = container.querySelectorAll('.ad-stat-collapsible');
+        for (var sci = 0; sci < statCards.length; sci++) {
+            statCards[sci].addEventListener('click', function() {
+                var body = this.querySelector('.ad-crt-stat-body');
+                var arrow = this.querySelector('.ad-stat-arrow');
+                if (body) {
+                    var isHidden = body.classList.toggle('ad-stat-hidden');
+                    if (arrow) arrow.textContent = isHidden ? '\u25BC' : '\u25B2';
+                }
+            });
+        }
 
         // Add button
         document.getElementById('adTrnAdd').addEventListener('click', function() {
@@ -218,7 +243,8 @@
             { gender: 'men', format: 'singles', totalId: 'adTrnTotalMS', bodyId: 'adTrnBodyMS' },
             { gender: 'women', format: 'singles', totalId: 'adTrnTotalWS', bodyId: 'adTrnBodyWS' },
             { gender: 'men', format: 'doubles', totalId: 'adTrnTotalMD', bodyId: 'adTrnBodyMD' },
-            { gender: 'women', format: 'doubles', totalId: 'adTrnTotalWD', bodyId: 'adTrnBodyWD' }
+            { gender: 'women', format: 'doubles', totalId: 'adTrnTotalWD', bodyId: 'adTrnBodyWD' },
+            { gender: 'mixed', format: 'mixed_doubles', totalId: 'adTrnTotalMX', bodyId: 'adTrnBodyMX' }
         ];
 
         cards.forEach(function(card) {

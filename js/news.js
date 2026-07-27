@@ -76,6 +76,7 @@ function mapDbArticle(row) {
         poll: row.poll || null,
         tags: [],
         reactions: { tennis: 0, fire: 0, clap: 0 },
+        reactions_config: row.reactions_config || null,
         relatedSlugs: [],
         _publishedAt: row.published_at || row.created_at || ''
     };
@@ -497,27 +498,54 @@ function renderTags(article) {
 // REACTIONS
 // ========================================
 
+var EMOJI_MAP = {
+    tennis: { emoji: '&#127934;', label: 'Tennis' },
+    fire:   { emoji: '&#128293;', label: 'Fire' },
+    clap:   { emoji: '&#128079;', label: 'Clap' },
+    star:   { emoji: '&#11088;',  label: 'Star' },
+    heart:  { emoji: '&#10084;&#65039;', label: 'Heart' },
+    like:   { emoji: '&#128077;', label: 'Like' },
+    trophy: { emoji: '&#127942;', label: 'Trophy' },
+    muscle: { emoji: '&#128170;', label: 'Muscle' },
+    target: { emoji: '&#127919;', label: 'Target' },
+    wow:    { emoji: '&#128558;', label: 'Wow' }
+};
+
+var DEFAULT_REACTIONS = ['tennis', 'fire', 'clap'];
+
+function getActiveReactionTypes(article) {
+    var rc = article.reactions_config;
+    if (rc === null || rc === undefined) return DEFAULT_REACTIONS; // backward compat
+    if (Array.isArray(rc) && rc.length === 0) return []; // disabled
+    return rc; // specific types
+}
+
 function renderReactions(article) {
     var container = document.getElementById('newsReactions');
     if (!container) return;
 
+    var activeTypes = getActiveReactionTypes(article);
+    if (!activeTypes.length) {
+        container.innerHTML = '';
+        container.style.display = 'none';
+        return;
+    }
+
     var labels = getLabels();
+    var buttonsHtml = '';
+    activeTypes.forEach(function(type) {
+        var info = EMOJI_MAP[type];
+        if (!info) return;
+        buttonsHtml +=
+            '<button class="news-reaction-btn" data-type="' + type + '">' +
+                '<span class="news-reaction-emoji">' + info.emoji + '</span>' +
+                '<span class="news-reaction-count" id="count-' + type + '">' + (article.reactions[type] || 0) + '</span>' +
+            '</button>';
+    });
+
     container.innerHTML =
         '<h3 class="news-section-title">' + labels.reactionsTitle + '</h3>' +
-        '<div class="news-reactions-list">' +
-            '<button class="news-reaction-btn" data-type="tennis">' +
-                '<span class="news-reaction-emoji">&#127934;</span>' +
-                '<span class="news-reaction-count" id="count-tennis">' + article.reactions.tennis + '</span>' +
-            '</button>' +
-            '<button class="news-reaction-btn" data-type="fire">' +
-                '<span class="news-reaction-emoji">&#128293;</span>' +
-                '<span class="news-reaction-count" id="count-fire">' + article.reactions.fire + '</span>' +
-            '</button>' +
-            '<button class="news-reaction-btn" data-type="clap">' +
-                '<span class="news-reaction-emoji">&#128079;</span>' +
-                '<span class="news-reaction-count" id="count-clap">' + article.reactions.clap + '</span>' +
-            '</button>' +
-        '</div>';
+        '<div class="news-reactions-list">' + buttonsHtml + '</div>';
 }
 
 async function getAuthUser() {
@@ -592,7 +620,7 @@ function addReactionCheck(btn) {
 
 async function initReactions(slug) {
     var container = document.getElementById('newsReactions');
-    if (!container) return;
+    if (!container || container.style.display === 'none') return;
 
     var client = window.supabaseClient;
     if (!client) return;
@@ -600,17 +628,13 @@ async function initReactions(slug) {
     var newsId = await resolveNewsId(slug);
     if (!newsId) return;
 
-    // Load counts from DB
+    // Load counts from DB (dynamic RPC: rows of {reaction_type, count})
     var countsRes = await client.rpc('get_reaction_counts', { p_news_id: newsId });
     if (countsRes.data && countsRes.data.length) {
-        var c = countsRes.data[0];
-        var el;
-        el = document.getElementById('count-tennis');
-        if (el) el.textContent = c.tennis || 0;
-        el = document.getElementById('count-fire');
-        if (el) el.textContent = c.fire || 0;
-        el = document.getElementById('count-clap');
-        if (el) el.textContent = c.clap || 0;
+        countsRes.data.forEach(function(row) {
+            var el = document.getElementById('count-' + row.reaction_type);
+            if (el) el.textContent = row.count || 0;
+        });
     }
 
     // Load user's own reactions

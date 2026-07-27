@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             var raw = this.getAttribute('href');
-            if (!raw || raw.length < 2 || raw.indexOf('/') !== -1) return;
+            if (!raw || raw.length < 2 || raw.charAt(0) !== '#') return;
             e.preventDefault();
             var target = document.querySelector(raw);
             if (target) {

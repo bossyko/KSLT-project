@@ -281,14 +281,14 @@
             return;
         }
 
-        // Translate to all other languages (overwrite existing)
+        // Translate only to empty fields
         var targets = [];
-        if (ruEl && srcLang !== 'ru') targets.push({ el: ruEl, lang: 'ru' });
-        if (enEl && srcLang !== 'en') targets.push({ el: enEl, lang: 'en' });
-        if (kgEl && srcLang !== 'kg') targets.push({ el: kgEl, lang: 'kg' });
+        if (ruEl && srcLang !== 'ru' && !ruVal) targets.push({ el: ruEl, lang: 'ru' });
+        if (enEl && srcLang !== 'en' && !enVal) targets.push({ el: enEl, lang: 'en' });
+        if (kgEl && srcLang !== 'kg' && !kgVal) targets.push({ el: kgEl, lang: 'kg' });
 
         if (targets.length === 0) {
-            showToast(L.allFieldsFilled, 'info');
+            showToast(isEn ? 'All fields are already filled' : 'Все поля уже заполнены', 'info');
             return;
         }
 
@@ -534,17 +534,19 @@
     A.uploadImage = uploadImage;
     A.exportCsv = exportCsv;
 
-    // NTRP select options helper (1.0 - 7.0, step 0.5)
+    // NTRP select options helper (1.0 - 7.0, step 0.25)
     A.ntrpOptions = function(selectedVal, opts) {
         opts = opts || {};
         var min = opts.min || 1.0;
         var max = opts.max || 7.0;
-        var step = opts.step || 0.5;
+        var step = opts.step || 0.25;
         var emptyLabel = opts.emptyLabel || '—';
+        // Round selected value to nearest step
+        var selNum = selectedVal ? Math.round(parseFloat(selectedVal) / step) * step : null;
         var html = '<option value="">' + emptyLabel + '</option>';
         for (var v = min; v <= max + 0.01; v += step) {
-            var val = v.toFixed(1);
-            var sel = (selectedVal && parseFloat(selectedVal).toFixed(1) === val) ? ' selected' : '';
+            var val = v.toFixed(2).replace(/0$/, '');
+            var sel = (selNum !== null && Math.abs(v - selNum) < 0.001) ? ' selected' : '';
             html += '<option value="' + val + '"' + sel + '>' + val + '</option>';
         }
         return html;

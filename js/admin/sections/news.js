@@ -25,6 +25,21 @@
     var newsAllData = [];
     var newsDraftDirty = false;
 
+    var EMOJI_MAP = {
+        tennis: { emoji: '&#127934;', label: 'Tennis' },
+        fire:   { emoji: '&#128293;', label: 'Fire' },
+        clap:   { emoji: '&#128079;', label: 'Clap' },
+        star:   { emoji: '&#11088;',  label: 'Star' },
+        heart:  { emoji: '&#10084;&#65039;', label: 'Heart' },
+        like:   { emoji: '&#128077;', label: 'Like' },
+        trophy: { emoji: '&#127942;', label: 'Trophy' },
+        muscle: { emoji: '&#128170;', label: 'Muscle' },
+        target: { emoji: '&#127919;', label: 'Target' },
+        wow:    { emoji: '&#128558;', label: 'Wow' }
+    };
+    var EMOJI_KEYS = Object.keys(EMOJI_MAP);
+    var DEFAULT_REACTIONS = ['tennis', 'fire', 'clap'];
+
     function renderNewsSection() {
         if (A.isDeepLinked('content')) return;
         renderNewsList();
@@ -481,6 +496,11 @@
         for (var ci = 0; ci < newsContentImages.length; ci++) newsContentImageFiles.push(null);
         newsPollData = (article && article.poll) ? { question: article.poll.question || '', options: (article.poll.options || []).slice() } : null;
 
+        // Reactions config: null → all enabled, [] → disabled, ["tennis","fire"] → specific
+        var rc = article ? article.reactions_config : null;
+        var reactionsEnabled = !Array.isArray(rc) || rc.length > 0;  // null or non-empty = enabled
+        var reactionsTypes = Array.isArray(rc) && rc.length > 0 ? rc : DEFAULT_REACTIONS;
+
         var title = article ? L.editNews : L.addNews;
 
         var imagePreviewHtml = newsImageUrl
@@ -527,9 +547,7 @@
                 '<div class="ad-form-card-title">' + L.engagement + '</div>' +
                 '<div class="ad-engagement-stats">' +
                     '<div class="ad-engagement-item">&#128065; <span id="adEngViews">0</span></div>' +
-                    '<div class="ad-engagement-item">&#127934; <span id="adEngTennis">0</span></div>' +
-                    '<div class="ad-engagement-item">&#128293; <span id="adEngFire">0</span></div>' +
-                    '<div class="ad-engagement-item">&#128079; <span id="adEngClap">0</span></div>' +
+                    '<div id="adEngReactions" style="display:contents"></div>' +
                 '</div>' +
                 '<div id="adNewsPollStats"></div>' +
             '</div>' +
@@ -550,15 +568,14 @@
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
                         '<input type="text" class="ad-field-input" id="adNewsTitleEn" placeholder="' + L.newsTitle + ' (EN)" value="' + A.esc(article ? article.title_en : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-tolang="en">&#127760; ' + L.translateFromAny + '</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="kg">' +
                     '<div class="ad-field">' +
                         '<input type="text" class="ad-field-input" id="adNewsTitleKg" placeholder="' + L.newsTitle + ' (KG)" value="' + A.esc(article ? article.title_kg : '') + '">' +
-                        '<button type="button" class="ad-btn-translate" data-tolang="kg">&#127760; ' + L.translateFromAny + '</button>' +
                     '</div>' +
                 '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adNewsTitle" data-en="adNewsTitleEn" data-kg="adNewsTitleKg">&#127760; ' + L.translateAllBtn + '</button>' +
                 '<div class="ad-field">' +
                     '<label class="ad-field-label">' + L.newsSlug + '</label>' +
                     '<input type="text" class="ad-field-input" id="adNewsSlug" placeholder="my-article-slug" value="' + A.esc(article ? article.slug : '') + '">' +
@@ -582,15 +599,14 @@
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
                         '<textarea class="ad-field-input ad-field-textarea" id="adNewsExcerptEn" placeholder="' + L.newsExcerpt + ' (EN)">' + A.esc(article ? article.excerpt_en : '') + '</textarea>' +
-                        '<button type="button" class="ad-btn-translate" data-tolang="en">&#127760; ' + L.translateFromAny + '</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="kg">' +
                     '<div class="ad-field">' +
                         '<textarea class="ad-field-input ad-field-textarea" id="adNewsExcerptKg" placeholder="' + L.newsExcerpt + ' (KG)">' + A.esc(article ? article.excerpt_kg : '') + '</textarea>' +
-                        '<button type="button" class="ad-btn-translate" data-tolang="kg">&#127760; ' + L.translateFromAny + '</button>' +
                     '</div>' +
                 '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adNewsExcerpt" data-en="adNewsExcerptEn" data-kg="adNewsExcerptKg">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
             // Content
@@ -609,15 +625,14 @@
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
                         '<textarea class="ad-field-input ad-field-textarea ad-field-textarea-lg" id="adNewsContentEn" placeholder="' + L.newsContent + ' (EN)">' + A.esc(article ? article.content_en : '') + '</textarea>' +
-                        '<button type="button" class="ad-btn-translate" data-tolang="en">&#127760; ' + L.translateFromAny + '</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="kg">' +
                     '<div class="ad-field">' +
                         '<textarea class="ad-field-input ad-field-textarea ad-field-textarea-lg" id="adNewsContentKg" placeholder="' + L.newsContent + ' (KG)">' + A.esc(article ? article.content_kg : '') + '</textarea>' +
-                        '<button type="button" class="ad-btn-translate" data-tolang="kg">&#127760; ' + L.translateFromAny + '</button>' +
                     '</div>' +
                 '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adNewsContent" data-en="adNewsContentEn" data-kg="adNewsContentKg">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
             // Content Preview (WYSIWYG with inline photos)
@@ -670,12 +685,40 @@
                 '</button>' +
             '</div>' +
 
+            // Reactions config
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.reactionsSection + '</div>' +
+                '<div id="adNewsReactionsBody" style="' + (reactionsEnabled ? '' : 'display:none') + '">' +
+                    '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">' +
+                        EMOJI_KEYS.map(function(key) {
+                            var info = EMOJI_MAP[key];
+                            return '<button type="button" class="ad-reaction-tile' + (reactionsTypes.indexOf(key) !== -1 ? ' active' : '') + '" data-type="' + key + '">' +
+                                '<span style="font-size:1.5em">' + info.emoji + '</span><span>' + info.label + '</span>' +
+                            '</button>';
+                        }).join('') +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adNewsReactionsToggle">' +
+                    (reactionsEnabled ? L.reactionsDisable : L.reactionsEnable) +
+                '</button>' +
+            '</div>' +
+
             // Actions
             '<div class="ad-btn-row">' +
                 '<button class="ad-btn ad-btn-secondary" id="adNewsSave">' + L.save + '</button>' +
                 '<button class="ad-btn ad-btn-primary" id="adNewsPublish">' + (newsEditingPublishedAt ? L.update : L.publish) + '</button>' +
-                '<span class="ad-draft-status" id="adDraftStatus"></span>' +
                 (newsEditingId ? '<button class="ad-btn ad-btn-danger" id="adNewsDelete">' + L.delete + '</button>' : '') +
+                '<span class="ad-draft-status" id="adDraftStatus">' + (function() {
+                    if (!article) return '';
+                    var ts = article.updated_at || article.published_at || article.created_at;
+                    if (!ts) return '';
+                    var d = new Date(ts);
+                    var dd = String(d.getDate()).padStart(2, '0');
+                    var mo = String(d.getMonth() + 1).padStart(2, '0');
+                    var hh = String(d.getHours()).padStart(2, '0');
+                    var mm = String(d.getMinutes()).padStart(2, '0');
+                    return '\u2713 ' + (isEn ? 'Last saved' : 'Сохранено') + ' ' + dd + '.' + mo + ' ' + hh + ':' + mm;
+                })() + '</span>' +
             '</div>';
 
         // --- Event Listeners ---
@@ -727,49 +770,11 @@
             }
         }, true);
 
-        // Translate buttons (delegate) — universal: find source from other panels
+        // Translate ALL — 3-language "translate to empty" buttons (delegate)
         container.addEventListener('click', function(e) {
-            var btn = e.target.closest('.ad-btn-translate');
+            var btn = e.target.closest('.ad-btn-translate-all');
             if (!btn) return;
-            var toLang = btn.dataset.tolang;
-            var card = btn.closest('.ad-form-card');
-            if (!card) return;
-
-            // Find target field in current panel
-            var currentPanel = btn.closest('.ad-lang-panel');
-            var targetEl = currentPanel ? currentPanel.querySelector('textarea, input.ad-field-input') : null;
-            if (!targetEl) return;
-
-            // Find first non-empty source from other panels
-            var srcText = '';
-            var srcLang = '';
-            card.querySelectorAll('.ad-lang-panel').forEach(function(p) {
-                if (p === currentPanel || srcText) return;
-                var src = p.querySelector('textarea, input.ad-field-input');
-                if (src && src.value.trim()) {
-                    srcText = src.value.trim();
-                    srcLang = p.dataset.langPanel;
-                }
-            });
-
-            if (!srcText) {
-                A.showToast(L.fillAnyLang, 'error');
-                return;
-            }
-
-            var origLabel = btn.textContent;
-            btn.textContent = L.translating;
-            btn.disabled = true;
-
-            translateText(srcText, srcLang, toLang).then(function(result) {
-                targetEl.value = result;
-                btn.textContent = origLabel;
-                btn.disabled = false;
-            }).catch(function() {
-                A.showToast(L.translateError, 'error');
-                btn.textContent = origLabel;
-                btn.disabled = false;
-            });
+            A.translateToEmpty(btn.dataset.ru, btn.dataset.en, btn.dataset.kg, btn);
         });
 
         // Auto-slug from title
@@ -813,7 +818,7 @@
         updateMetaPreview();
 
         // Load engagement stats for existing published articles
-        if (article && article.id && article.published_at && client) {
+        if (article && article.id && article.published_at && A.client) {
             (async function() {
                 var engCard = document.getElementById('adNewsEngagement');
                 if (!engCard) return;
@@ -822,17 +827,18 @@
                 var viewsEl = document.getElementById('adEngViews');
                 if (viewsEl) viewsEl.textContent = article.view_count || 0;
 
-                // Reaction counts
+                // Reaction counts (dynamic RPC: rows of {reaction_type, count})
                 var countsRes = await A.client.rpc('get_reaction_counts', { p_news_id: article.id });
-                if (countsRes.data && countsRes.data.length) {
-                    var c = countsRes.data[0];
-                    var el;
-                    el = document.getElementById('adEngTennis');
-                    if (el) el.textContent = c.tennis || 0;
-                    el = document.getElementById('adEngFire');
-                    if (el) el.textContent = c.fire || 0;
-                    el = document.getElementById('adEngClap');
-                    if (el) el.textContent = c.clap || 0;
+                var engReactionsEl = document.getElementById('adEngReactions');
+                if (countsRes.data && countsRes.data.length && engReactionsEl) {
+                    var html = '';
+                    countsRes.data.forEach(function(row) {
+                        var info = EMOJI_MAP[row.reaction_type];
+                        if (info && row.count > 0) {
+                            html += '<div class="ad-engagement-item">' + info.emoji + ' <span>' + row.count + '</span></div>';
+                        }
+                    });
+                    engReactionsEl.innerHTML = html;
                 }
 
                 // Poll results
@@ -1025,6 +1031,26 @@
             newsPollData.options[idx] = e.target.value;
         });
 
+        // Reactions: master toggle (button like Poll)
+        document.getElementById('adNewsReactionsToggle').addEventListener('click', function() {
+            var body = document.getElementById('adNewsReactionsBody');
+            var isVisible = body.style.display !== 'none';
+            if (isVisible) {
+                body.style.display = 'none';
+                this.textContent = L.reactionsEnable;
+            } else {
+                body.style.display = '';
+                this.textContent = L.reactionsDisable;
+            }
+        });
+
+        // Reactions: tile click toggle
+        container.addEventListener('click', function(e) {
+            var tile = e.target.closest('.ad-reaction-tile');
+            if (!tile) return;
+            tile.classList.toggle('active');
+        });
+
         // Save (draft)
         document.getElementById('adNewsSave').addEventListener('click', function() { saveNewsHandler(false); });
 
@@ -1062,7 +1088,14 @@
                 image: newsImageUrl || null,
                 content_images: newsContentImages.filter(function(ci) { return ci.url && !ci.url.startsWith('blob:'); }),
                 poll: newsPollData,
-                published_at: null
+                published_at: null,
+                reactions_config: (function() {
+                    var body = document.getElementById('adNewsReactionsBody');
+                    if (body && body.style.display === 'none') return [];
+                    var types = [];
+                    document.querySelectorAll('.ad-reaction-tile.active').forEach(function(tile) { types.push(tile.dataset.type); });
+                    return types;
+                })()
             };
         }
 
@@ -1273,6 +1306,19 @@
                 }
             }
 
+            // Collect reactions config
+            var reactionsConfig = null;
+            var reactBody = document.getElementById('adNewsReactionsBody');
+            if (reactBody && reactBody.style.display === 'none') {
+                reactionsConfig = [];
+            } else {
+                var checkedTypes = [];
+                document.querySelectorAll('.ad-reaction-tile.active').forEach(function(tile) {
+                    checkedTypes.push(tile.dataset.type);
+                });
+                reactionsConfig = checkedTypes;
+            }
+
             // Determine published_at (date from field, time preserved internally)
             var pubDateInput = document.getElementById('adNewsPubDate').value; // YYYY-MM-DD or ''
             var publishedAt;
@@ -1314,7 +1360,8 @@
                 category: document.getElementById('adNewsCat').value,
                 author: document.getElementById('adNewsAuthor').value.trim(),
                 executor: document.getElementById('adNewsExecutor').value.trim(),
-                published_at: publishedAt
+                published_at: publishedAt,
+                reactions_config: reactionsConfig
             };
 
             if (!data.title) {
@@ -1344,8 +1391,35 @@
             }
 
             newsDraftDirty = false;
+            // Update editing state for new articles
+            if (!newsEditingId && data.id) {
+                newsEditingId = data.id;
+            }
+            if (doPublish && publishedAt) {
+                newsEditingPublishedAt = publishedAt;
+            }
+
+            // Update content images — replace blob URLs with uploaded URLs
+            newsContentImages = contentImagesFinal.slice();
+            newsContentImageFiles = [];
+            for (var fi = 0; fi < newsContentImages.length; fi++) newsContentImageFiles.push(null);
+
+            // Update cover image URL
+            if (imageUrl) newsImageUrl = imageUrl;
+            newsImageFile = null;
+
             A.showToast(L.saved, 'success');
-            renderNewsList();
+            activeBtn.disabled = false;
+            activeBtn.textContent = doPublish ? L.update : L.save;
+
+            // Show last saved timestamp
+            var statusEl = document.getElementById('adDraftStatus');
+            if (statusEl) {
+                var now = new Date();
+                var hh = String(now.getHours()).padStart(2, '0');
+                var mm = String(now.getMinutes()).padStart(2, '0');
+                statusEl.textContent = '\u2713 ' + L.saved + ' ' + hh + ':' + mm;
+            }
         } catch (e) {
             A.showToast(e.message || 'Error', 'error');
             activeBtn.disabled = false;

@@ -8,6 +8,7 @@
     var A = window.KSLT_ADMIN;
     var L = A.L;
     var isEn = A.isEn;
+    var CU = window.KSLT_COUNTRY;
 
     var plrEditingId = null;
     var plrImageFile = null;
@@ -37,6 +38,84 @@
     function checkScript(value, regex) {
         return !value || regex.test(value);
     }
+
+    // ---- Country Picker ----
+    var PRIORITY_COUNTRIES = ['KG', 'KZ', 'RU', 'UZ'];
+
+    function setupCountryPicker() {
+        var hidden = document.getElementById('adPlrCountry');
+        var input = document.getElementById('adPlrCountryInput');
+        var dropdown = document.getElementById('adPlrCountryDropdown');
+        if (!hidden || !input || !dropdown) return;
+
+        var countries = window.KSLT_COUNTRIES || [];
+        var lang = isEn ? 'en' : 'ru';
+
+        function renderDropdownItems(list) {
+            dropdown.innerHTML = '';
+            if (!list.length) { dropdown.style.display = 'none'; return; }
+            list.forEach(function(c) {
+                var div = document.createElement('div');
+                div.className = 'ad-dropdown-item';
+                div.style.cursor = 'pointer';
+                div.textContent = CU.flagEmoji(c.code) + ' ' + (c[lang] || c.en);
+                div.dataset.code = c.code;
+                div.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    selectCountry(c.code);
+                });
+                dropdown.appendChild(div);
+            });
+            dropdown.style.display = 'block';
+        }
+
+        function selectCountry(code) {
+            hidden.value = code;
+            input.value = CU.renderCountry(code, lang, true);
+            dropdown.style.display = 'none';
+        }
+
+        function filterCountries(query) {
+            if (!query) {
+                // Show priority countries
+                var priority = countries.filter(function(c) {
+                    return PRIORITY_COUNTRIES.indexOf(c.code) !== -1;
+                });
+                renderDropdownItems(priority);
+                return;
+            }
+            var q = query.toLowerCase();
+            var results = countries.filter(function(c) {
+                return c.ru.toLowerCase().indexOf(q) !== -1 ||
+                       c.en.toLowerCase().indexOf(q) !== -1 ||
+                       c.kg.toLowerCase().indexOf(q) !== -1 ||
+                       c.code.toLowerCase().indexOf(q) !== -1;
+            });
+            renderDropdownItems(results.slice(0, 10));
+        }
+
+        input.addEventListener('focus', function() {
+            filterCountries(input.value && !hidden.value ? input.value : '');
+        });
+
+        input.addEventListener('input', function() {
+            hidden.value = '';
+            filterCountries(input.value);
+        });
+
+        input.addEventListener('blur', function() {
+            setTimeout(function() { dropdown.style.display = 'none'; }, 150);
+        });
+
+        // Clear button: if user empties the field
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                dropdown.style.display = 'none';
+                input.blur();
+            }
+        });
+    }
+
     var plrSearchQuery = '';
 
     // ---- Rating state (moved from ratings.js) ----
@@ -191,7 +270,7 @@
         var isAdm = A.currentRole === 'admin';
 
         var query = A.client.from('players')
-            .select('id,name,photo,country,category_id,points,wins,losses,rank_change,banned_until,view_count')
+            .select('id,name,photo,country,category_id,points,doubles_points,wins,losses,rank_change,banned_until,view_count')
             .order('points', { ascending: false });
 
         if (plrFilterCategory) {
@@ -220,9 +299,10 @@
 
         tbody.innerHTML = '';
         items.forEach(function(p) {
+            var plrFlag = CU.flagEmoji(CU.normalizeCountry(p.country)) || '?';
             var thumbHtml = p.photo
                 ? '<img src="' + A.esc(p.photo) + '" class="ad-table-thumb ad-table-thumb-round" alt="">'
-                : '<div class="ad-table-thumb ad-table-thumb-round" style="background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:1.1rem;">' + (p.country || '?') + '</div>';
+                : '<div class="ad-table-thumb ad-table-thumb-round" style="background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:1.1rem;">' + plrFlag + '</div>';
 
             var catObj = A.categoriesMap[p.category_id];
             var catLabel = catObj ? (isEn ? catObj.name_en : catObj.name) : (p.category_id || L.noData);
@@ -231,7 +311,7 @@
                 '<tr data-plr-id="' + p.id + '"' + (isAdm ? ' style="cursor:pointer;"' : '') + '>' +
                     (isAdm ? A.bulkCheckboxTd(p.id) : '') +
                     '<td>' + thumbHtml + '</td>' +
-                    '<td style="font-weight:500;color:var(--text-primary);">' + (p.country || '') + ' ' + (p.name || L.noData) +
+                    '<td style="font-weight:500;color:var(--text-primary);">' + plrFlag + ' ' + (p.name || L.noData) +
                         (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.7rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + L.plrBanned + '</span>' : '') +
                     '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
@@ -363,7 +443,6 @@
                                 '<input type="text" class="ad-field-input" id="adPlrLastNameEn" value="' + A.esc(lnEn) + '">' +
                             '</div>' +
                         '</div>' +
-                        '<button type="button" class="ad-btn-translate" id="adPlrTranslateEn">&#127760; ' + L.translateBtn + '</button>' +
                     '</div>' +
                     '<div class="ad-lang-panel" data-lang-panel="kg">' +
                         '<div class="ad-field-row ad-field-row-2">' +
@@ -376,18 +455,36 @@
                                 '<input type="text" class="ad-field-input" id="adPlrLastNameKg" value="' + A.esc(lnKg) + '">' +
                             '</div>' +
                         '</div>' +
-                        '<button type="button" class="ad-btn-translate" id="adPlrTranslateKg">&#127760; ' + L.translateBtn + '</button>' +
                     '</div>' +
+                    '<button type="button" class="ad-btn-translate-all" id="adPlrTranslateAll">&#127760; ' + L.translateAllBtn + '</button>' +
                 '</div>';
             })() +
 
-            // Motto (single field, max 100 chars)
+            // Motto (RU/EN/KG, max 100 chars each)
             '<div class="ad-form-card">' +
-                '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + L.plrMotto + '</label>' +
-                    '<input type="text" class="ad-field-input" id="adPlrMotto" maxlength="100" placeholder="' + (isEn ? 'e.g. Never give up!' : 'напр. Никогда не сдавайся!') + '" value="' + A.esc(item ? item.bio : '') + '">' +
-                    '<div class="ad-field-hint" style="text-align:right;margin-top:2px;"><span id="adPlrMottoCount">' + ((item && item.bio) ? item.bio.length : 0) + '</span>/100</div>' +
+                '<div class="ad-form-card-title">' + L.plrMotto + '</div>' +
+                '<div class="ad-lang-tabs">' +
+                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
+                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
+                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
+                    '<div class="ad-field">' +
+                        '<input type="text" class="ad-field-input" id="adPlrMotto" maxlength="100" placeholder="' + (isEn ? 'e.g. Never give up!' : 'напр. Никогда не сдавайся!') + '" value="' + A.esc(item ? item.bio : '') + '">' +
+                        '<div class="ad-field-hint" style="text-align:right;margin-top:2px;"><span id="adPlrMottoCount">' + ((item && item.bio) ? item.bio.length : 0) + '</span>/100</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="en">' +
+                    '<div class="ad-field">' +
+                        '<input type="text" class="ad-field-input" id="adPlrMottoEn" maxlength="100" placeholder="Motto (EN)" value="' + A.esc(item ? item.bio_en : '') + '">' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<div class="ad-field">' +
+                        '<input type="text" class="ad-field-input" id="adPlrMottoKg" maxlength="100" placeholder="Motto (KG)" value="' + A.esc(item ? item.bio_kg : '') + '">' +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adPlrMotto" data-en="adPlrMottoEn" data-kg="adPlrMottoKg">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
             // Category + Country
@@ -397,33 +494,72 @@
                         '<label class="ad-field-label">' + L.plrCategory + '</label>' +
                         '<select class="ad-field-input" id="adPlrCat">' + catOptionsHtml + '</select>' +
                     '</div>' +
-                    '<div class="ad-field">' +
+                    '<div class="ad-field" style="position:relative;">' +
                         '<label class="ad-field-label">' + L.plrCountry + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adPlrCountry" placeholder="🇰🇬" value="' + A.esc(item ? item.country : '') + '" style="font-size:1.5rem;text-align:center;">' +
+                        '<input type="hidden" id="adPlrCountry" value="' + A.esc(item ? CU.normalizeCountry(item.country) || '' : '') + '">' +
+                        '<input type="text" class="ad-field-input" id="adPlrCountryInput" placeholder="' + L.plrCountrySearch + '" autocomplete="off" value="' + A.esc(item && item.country ? CU.renderCountry(item.country, isEn ? 'en' : 'ru', true) : '') + '">' +
+                        '<div class="ad-dropdown-list" id="adPlrCountryDropdown" style="display:none;"></div>' +
                     '</div>' +
                     '<div class="ad-field"></div>' +
                 '</div>' +
             '</div>' +
 
-            // Stats: Points, Wins, Losses, Rank Change
+            // Stats: Points, Wins, Losses, Rank Change (readonly by default)
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.thPoints + '</div>' +
+                '<div class="ad-form-card-title" style="display:flex;align-items:center;gap:8px;">' +
+                    L.plrSinglesTitle +
+                    (plrEditingId ? (
+                        '<button type="button" class="ad-btn-translate" id="adPlrUnlockStats" style="margin-top:0;">✏ ' + L.plrManualEdit + '</button>' +
+                        '<button type="button" class="ad-btn-translate" id="adPlrRecalcStats" style="margin-top:0;">🔄 ' + L.plrRecalc + '</button>'
+                    ) : '') +
+                '</div>' +
+                '<div class="ad-field-hint" style="margin-bottom:8px;">' + L.plrRecalcHint + '</div>' +
                 '<div class="ad-field-row ad-field-row-4">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrPoints + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adPlrPoints" min="0" value="' + (item ? (item.points || 0) : '') + '">' +
+                        '<input type="number" class="ad-field-input" id="adPlrPoints" min="0" value="' + (item ? (item.points || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrWins + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adPlrWins" min="0" value="' + (item ? (item.wins || 0) : '') + '">' +
+                        '<input type="number" class="ad-field-input" id="adPlrWins" min="0" value="' + (item ? (item.wins || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrLosses + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adPlrLosses" min="0" value="' + (item ? (item.losses || 0) : '') + '">' +
+                        '<input type="number" class="ad-field-input" id="adPlrLosses" min="0" value="' + (item ? (item.losses || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrRankChange + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adPlrRankChange" value="' + (item ? (item.rank_change || 0) : '') + '">' +
+                        '<input type="number" class="ad-field-input" id="adPlrRankChange" value="' + (item ? (item.rank_change || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+
+            // Doubles Rating (readonly by default)
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title" style="display:flex;align-items:center;gap:8px;">' +
+                    L.plrDoublesTitle +
+                    (plrEditingId ? (
+                        '<button type="button" class="ad-btn-translate" id="adPlrUnlockDoubles" style="margin-top:0;">✏ ' + L.plrManualEdit + '</button>' +
+                        '<button type="button" class="ad-btn-translate" id="adPlrRecalcDoubles" style="margin-top:0;">🔄 ' + L.plrRecalc + '</button>'
+                    ) : '') +
+                '</div>' +
+                '<div class="ad-field-hint" style="margin-bottom:8px;">' + L.plrRecalcHint + '</div>' +
+                '<div class="ad-field-row ad-field-row-4">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrPoints + '</label>' +
+                        '<input type="number" class="ad-field-input ad-plr-doubles-field" id="adPlrDoublesPoints" min="0" value="' + (item ? (item.doubles_points || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrWins + '</label>' +
+                        '<input type="number" class="ad-field-input ad-plr-doubles-field" id="adPlrDoublesWins" min="0" value="' + (item ? (item.doubles_wins || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrLosses + '</label>' +
+                        '<input type="number" class="ad-field-input ad-plr-doubles-field" id="adPlrDoublesLosses" min="0" value="' + (item ? (item.doubles_losses || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrRankChange + '</label>' +
+                        '<input type="number" class="ad-field-input ad-plr-doubles-field" id="adPlrDoublesRankChange" value="' + (item ? (item.doubles_rank_change || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -607,6 +743,68 @@
         var rhNameRegex = isEn ? SCRIPT_EN : SCRIPT_RU;
         attachScriptValidation('adPlrRhName', rhNameRegex, rhNameHint);
 
+        // --- Country picker ---
+        setupCountryPicker();
+
+        // --- Unlock / Recalc buttons for stats ---
+        var unlockStatsBtn = document.getElementById('adPlrUnlockStats');
+        if (unlockStatsBtn) {
+            unlockStatsBtn.addEventListener('click', function() {
+                ['adPlrPoints', 'adPlrWins', 'adPlrLosses', 'adPlrRankChange'].forEach(function(fid) {
+                    var el = document.getElementById(fid);
+                    if (el) { el.removeAttribute('readonly'); el.style.opacity = ''; el.style.cursor = ''; }
+                });
+                A.showToast(isEn ? 'Fields unlocked' : 'Поля разблокированы', 'info');
+            });
+        }
+        var recalcStatsBtn = document.getElementById('adPlrRecalcStats');
+        if (recalcStatsBtn && plrEditingId) {
+            recalcStatsBtn.addEventListener('click', async function() {
+                recalcStatsBtn.disabled = true;
+                await A.recalcPlayerPoints([plrEditingId]);
+                var fresh = await A.client.from('players').select('points,wins,losses,form').eq('id', plrEditingId).single();
+                if (fresh.data) {
+                    var pf = document.getElementById('adPlrPoints');
+                    var wf = document.getElementById('adPlrWins');
+                    var lf = document.getElementById('adPlrLosses');
+                    if (pf) pf.value = fresh.data.points || 0;
+                    if (wf) wf.value = fresh.data.wins || 0;
+                    if (lf) lf.value = fresh.data.losses || 0;
+                }
+                recalcStatsBtn.disabled = false;
+                A.showToast(isEn ? 'Recalculated' : 'Пересчитано', 'success');
+            });
+        }
+
+        // --- Unlock / Recalc buttons for doubles ---
+        var unlockDoublesBtn = document.getElementById('adPlrUnlockDoubles');
+        if (unlockDoublesBtn) {
+            unlockDoublesBtn.addEventListener('click', function() {
+                document.querySelectorAll('.ad-plr-doubles-field').forEach(function(el) {
+                    el.removeAttribute('readonly'); el.style.opacity = ''; el.style.cursor = '';
+                });
+                A.showToast(isEn ? 'Fields unlocked' : 'Поля разблокированы', 'info');
+            });
+        }
+        var recalcDoublesBtn = document.getElementById('adPlrRecalcDoubles');
+        if (recalcDoublesBtn && plrEditingId) {
+            recalcDoublesBtn.addEventListener('click', async function() {
+                recalcDoublesBtn.disabled = true;
+                await A.recalcDoublesPoints([plrEditingId]);
+                var fresh = await A.client.from('players').select('doubles_points,doubles_wins,doubles_losses').eq('id', plrEditingId).single();
+                if (fresh.data) {
+                    var df = document.getElementById('adPlrDoublesPoints');
+                    var dwf = document.getElementById('adPlrDoublesWins');
+                    var dlf = document.getElementById('adPlrDoublesLosses');
+                    if (df) df.value = fresh.data.doubles_points || 0;
+                    if (dwf) dwf.value = fresh.data.doubles_wins || 0;
+                    if (dlf) dlf.value = fresh.data.doubles_losses || 0;
+                }
+                recalcDoublesBtn.disabled = false;
+                A.showToast(isEn ? 'Recalculated' : 'Пересчитано', 'success');
+            });
+        }
+
         // --- Motto character counter ---
         var mottoInput = document.getElementById('adPlrMotto');
         if (mottoInput) {
@@ -638,16 +836,33 @@
             });
         }
 
-        var translateEnBtn = document.getElementById('adPlrTranslateEn');
-        if (translateEnBtn) {
-            translateEnBtn.addEventListener('click', function() {
-                translateNameFields('en', 'adPlrFirstNameEn', 'adPlrLastNameEn', translateEnBtn);
-            });
-        }
-        var translateKgBtn = document.getElementById('adPlrTranslateKg');
-        if (translateKgBtn) {
-            translateKgBtn.addEventListener('click', function() {
-                translateNameFields('kg', 'adPlrFirstNameKg', 'adPlrLastNameKg', translateKgBtn);
+        // Translate All — fill empty EN + KG from RU
+        var translateAllBtn = document.getElementById('adPlrTranslateAll');
+        if (translateAllBtn) {
+            translateAllBtn.addEventListener('click', function() {
+                var fnRu = document.getElementById('adPlrFirstName').value.trim();
+                var lnRu = document.getElementById('adPlrLastName').value.trim();
+                if (!fnRu && !lnRu) { A.showToast(L.fillRuFirst, 'error'); return; }
+
+                var needEn = !document.getElementById('adPlrFirstNameEn').value.trim() && !document.getElementById('adPlrLastNameEn').value.trim();
+                var needKg = !document.getElementById('adPlrFirstNameKg').value.trim() && !document.getElementById('adPlrLastNameKg').value.trim();
+                if (!needEn && !needKg) { A.showToast(isEn ? 'All fields already filled' : 'Все поля уже заполнены', 'info'); return; }
+
+                var origLabel = translateAllBtn.textContent;
+                translateAllBtn.textContent = L.translating;
+                translateAllBtn.disabled = true;
+                var fullName = fnRu + (lnRu ? ' ' + lnRu : '');
+                var promises = [];
+                if (needEn) promises.push(A.translateFromRu(fullName, 'en').then(function(r) { var p = r.split(' '); document.getElementById('adPlrFirstNameEn').value = p[0] || ''; document.getElementById('adPlrLastNameEn').value = p.slice(1).join(' ') || ''; }));
+                if (needKg) promises.push(A.translateFromRu(fullName, 'kg').then(function(r) { var p = r.split(' '); document.getElementById('adPlrFirstNameKg').value = p[0] || ''; document.getElementById('adPlrLastNameKg').value = p.slice(1).join(' ') || ''; }));
+                Promise.all(promises).then(function() {
+                    translateAllBtn.textContent = origLabel;
+                    translateAllBtn.disabled = false;
+                }).catch(function() {
+                    A.showToast(L.translateError, 'error');
+                    translateAllBtn.textContent = origLabel;
+                    translateAllBtn.disabled = false;
+                });
             });
         }
 
@@ -668,6 +883,13 @@
             if (!card) return;
             card.querySelectorAll('.ad-lang-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.lang === lang); });
             card.querySelectorAll('.ad-lang-panel').forEach(function(p) { p.classList.toggle('active', p.dataset.langPanel === lang); });
+        });
+
+        // Translate All — delegate for data-ru/data-en/data-kg buttons (motto etc.)
+        container.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ad-btn-translate-all[data-ru]');
+            if (!btn) return;
+            A.translateToEmpty(btn.dataset.ru, btn.dataset.en, btn.dataset.kg, btn);
         });
 
         // Translate buttons (delegate)
@@ -887,10 +1109,16 @@
                 rank_change: parseInt(document.getElementById('adPlrRankChange').value, 10) || 0,
                 form: formArr,
                 bio: document.getElementById('adPlrMotto').value.trim() || null,
+                bio_en: document.getElementById('adPlrMottoEn').value.trim() || null,
+                bio_kg: document.getElementById('adPlrMottoKg').value.trim() || null,
                 phone: document.getElementById('adPlrPhone').value.trim() || null,
                 email: document.getElementById('adPlrEmail').value.trim() || null,
                 show_phone: document.getElementById('adPlrShowPhone').checked,
-                ntrp_rating: parseFloat(document.getElementById('adPlrNtrp').value) || null
+                ntrp_rating: parseFloat(document.getElementById('adPlrNtrp').value) || null,
+                doubles_points: parseInt(document.getElementById('adPlrDoublesPoints').value, 10) || 0,
+                doubles_wins: parseInt(document.getElementById('adPlrDoublesWins').value, 10) || 0,
+                doubles_losses: parseInt(document.getElementById('adPlrDoublesLosses').value, 10) || 0,
+                doubles_rank_change: parseInt(document.getElementById('adPlrDoublesRankChange').value, 10) || 0
             };
 
             if (!fnRu) {
@@ -1102,7 +1330,7 @@
         if (!container || !A.client) return;
 
         var res = await A.client.from('matches')
-            .select('id, player1_id, player2_id, score, winner_id, round, played_at, created_at, tournament:tournaments(title, title_en)')
+            .select('id, player1_id, player2_id, score, winner_id, round, played_at, created_at, tournament:tournaments(title, title_en, format)')
             .or('player1_id.eq.' + playerId + ',player2_id.eq.' + playerId)
             .not('winner_id', 'is', null)
             .order('played_at', { ascending: false })
@@ -1173,6 +1401,8 @@
                 roundLabel = roundMap[roundLabel] || roundLabel;
             }
 
+            var isDblTrn = m.tournament && (m.tournament.format === 'doubles' || m.tournament.format === 'mixed_doubles');
+
             html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.04);">' +
                 '<td style="padding:6px 8px;white-space:nowrap;">' + dateStr + '</td>' +
                 '<td style="padding:6px 8px;">' +
@@ -1184,6 +1414,7 @@
                 '<td style="padding:6px 8px;text-align:center;font-family:monospace;">' + A.esc(score) + '</td>' +
                 '<td style="padding:6px 8px;text-align:center;">' + resultBadge + '</td>' +
                 '<td style="padding:6px 8px;font-size:0.75rem;color:var(--text-dim);">' +
+                    (isDblTrn ? '<span style="font-size:1.1rem;vertical-align:middle;" title="' + (isEn ? 'Doubles' : 'Парный') + '">\uD83D\uDC65</span> ' : '') +
                     A.esc(trnName) + (roundLabel ? ' <span style="opacity:0.6;">(' + A.esc(roundLabel) + ')</span>' : '') +
                 '</td>' +
             '</tr>';
@@ -1982,35 +2213,43 @@
     async function recalcPlayerPoints(playerIds) {
         var unique = playerIds.filter(function(id, i) { return playerIds.indexOf(id) === i; });
 
+        // Get doubles tournament IDs to exclude from singles count
+        var dblTrnRes = await A.client.from('tournaments').select('id').in('format', ['doubles', 'mixed_doubles']);
+        var dblTrnIds = (dblTrnRes.data || []).map(function(t) { return t.id; });
+
         for (var i = 0; i < unique.length; i++) {
             var pid = unique[i];
 
-            // Tournament wins/losses
-            var trRes = await A.client.from('tournament_results').select('round_reached').eq('player_id', pid);
+            // All completed matches for this player
+            var matchRes = await A.client.from('matches')
+                .select('winner_id, tournament_id, played_at')
+                .or('player1_id.eq.' + pid + ',player2_id.eq.' + pid)
+                .not('winner_id', 'is', null)
+                .order('played_at', { ascending: false });
+
+            // Filter: only singles (exclude doubles tournaments)
+            var singlesMatches = (matchRes.data || []).filter(function(m) {
+                return dblTrnIds.indexOf(m.tournament_id) === -1;
+            });
+
             var wins = 0;
             var losses = 0;
-            (trRes.data || []).forEach(function(r) {
-                if (r.round_reached === 'W') wins++;
+            singlesMatches.forEach(function(m) {
+                if (m.winner_id === pid) wins++;
                 else losses++;
             });
 
-            // Duel wins/losses (match_type = 'duel')
-            var duelWinRes = await A.client.from('matches')
-                .select('id', { count: 'exact', head: true })
-                .eq('match_type', 'duel').eq('status', 'completed').eq('winner_id', pid);
-            var duelTotalRes = await A.client.from('matches')
-                .select('id', { count: 'exact', head: true })
-                .eq('match_type', 'duel').eq('status', 'completed')
-                .or('player1_id.eq.' + pid + ',player2_id.eq.' + pid);
-            var duelWins = duelWinRes.count || 0;
-            var duelTotal = duelTotalRes.count || 0;
-            wins += duelWins;
-            losses += (duelTotal - duelWins);
+            // Form: last 5 singles matches
+            var formArr = singlesMatches.slice(0, 5).map(function(m) {
+                return m.winner_id === pid ? 'W' : 'L';
+            });
 
+            // Points from rating_history (singles only)
             var currentYear = new Date().getFullYear();
             var rhRes = await A.client.from('rating_history')
                 .select('points_earned')
                 .eq('player_id', pid)
+                .neq('is_doubles', true)
                 .gte('recorded_at', currentYear + '-01-01')
                 .lte('recorded_at', currentYear + '-12-31');
             var total = 0;
@@ -2018,7 +2257,9 @@
                 total += r.points_earned || 0;
             });
 
-            await A.client.from('players').update({ points: total, wins: wins, losses: losses }).eq('id', pid);
+            await A.client.from('players').update({
+                points: total, wins: wins, losses: losses, form: formArr
+            }).eq('id', pid);
         }
     }
     A.recalcPlayerPoints = recalcPlayerPoints;
