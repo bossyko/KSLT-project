@@ -672,8 +672,8 @@
             '<div class="ad-tabs ad-trn-nav-tabs">' +
             '<button class="ad-tab" data-trn-nav="edit">' + L.trnTabEdit + '</button>' +
             '<button class="ad-tab' + (navActive === 'regs' ? ' active' : '') + '" data-trn-nav="regs">' + L.trnTabRegs +
-                ' <span class="ad-badge">' + registrations.filter(function(r) { return r.status === 'approved' || r.status === 'draw'; }).length +
-                '/' + (tournament.draw_size || tournament.max_participants || '?') + '</span>' +
+                ' <span class="ad-badge">' + (tournament.max_participants || '?') +
+                '/' + registrations.filter(function(r) { return r.status === 'approved' || r.status === 'draw' || r.status === 'waitlist'; }).length + '</span>' +
             '</button>' +
             '<button class="ad-tab' + (navActive === 'bracket' ? ' active' : '') + '" data-trn-nav="bracket">' + (tournament.bracket_type === 'round_robin' || tournament.bracket_type === 'group_league' ? L.groupLabel : L.trnTabBracket) + '</button>' +
             '<button class="ad-tab' + (navActive === 'schedule' ? ' active' : '') + '" data-trn-nav="schedule">' + L.trnTabSchedule + '</button>' +
