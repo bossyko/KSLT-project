@@ -287,26 +287,30 @@
 
         <!-- TOURNAMENTS HEADER (sticky) -->
         <div class="trn-sticky-header" id="trnStickyHeader">
-            <a href="tournaments-overview-kg.html" class="trn-back-link">&larr; Бардык мелдештер</a>
-            <div class="trn-title-row">
-                <h2>Алдыдагы мелдештер</h2>
-                <div class="tournament-filters">
-                    <label class="trn-filter-label">Статус:
-                        <select class="trn-filter-select" id="statusFilter">
-                            <option value="all" selected>Баары</option>
-                            <option value="open">Каттоо ачык</option>
-                            <option value="soon">Алдыдагы</option>
-                            <option value="past">Аяктаган</option>
-                        </select>
-                    </label>
-                    <label class="trn-filter-label">Жынысы:
-                        <select class="trn-filter-select" id="genderFilter">
-                            <option value="all" selected>Баары</option>
-                            <option value="men">♂ Эркектер</option>
-                            <option value="women">♀ Аялдар</option>
-                        </select>
-                    </label>
-                    <input type="text" class="tournament-search-input" id="tournamentSearch" placeholder="Издөө..." autocomplete="off">
+            <div class="kslt-back-wrap">
+                <a href="tournaments-overview-kg.html" class="kslt-back">&larr; Бардык мелдештер</a>
+            </div>
+            <div class="trn-search-wrap">
+                <svg class="trn-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" class="trn-search-input" id="tournamentSearch" placeholder="Издөө..." autocomplete="off">
+            </div>
+            <div class="trn-filters-row">
+                <div class="trn-filter-group">
+                    <span class="trn-chip-label">СТАТУС</span>
+                    <div class="trn-filter-chips">
+                        <button class="trn-filter-chip active" data-filter="status" data-value="all">Баары</button>
+                        <button class="trn-filter-chip" data-filter="status" data-value="open">Каттоо ачык</button>
+                        <button class="trn-filter-chip" data-filter="status" data-value="soon">Алдыдагы</button>
+                        <button class="trn-filter-chip" data-filter="status" data-value="past">Аяктаган</button>
+                    </div>
+                </div>
+                <div class="trn-filter-group">
+                    <span class="trn-chip-label">ЖЫНЫСЫ</span>
+                    <div class="trn-filter-chips">
+                        <button class="trn-filter-chip active" data-filter="gender" data-value="all">Баары</button>
+                        <button class="trn-filter-chip" data-filter="gender" data-value="men">♂ Эркектер</button>
+                        <button class="trn-filter-chip" data-filter="gender" data-value="women">♀ Аялдар</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -330,24 +334,7 @@
         </section>
 
         <!-- SPONSORS -->
-        <section id="sponsors" class="section-sponsors-compact">
-            <div class="section-header">
-                <h2>Өнөктөштөр жана демөөрчүлөр</h2>
-            </div>
-            <div class="sponsor-hero">
-                <span class="sponsor-hero-label">Башкы демөөрчү</span>
-                <a href="#" class="sponsor-hero-logo">
-                    <img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">
-                </a>
-            </div>
-            <div class="sponsors-cloud">
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>
-            </div>
-        </section>
+        <section id="sponsors" class="section-sponsors-compact"></section>
     </main>
 
     <!-- FOOTER -->
@@ -416,6 +403,8 @@
 
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js"></script>
+    <script src="../js/sponsors-loader.js"></script>
+    <script>if (window.loadSponsors) loadSponsors('sponsors');</script>
     <script src="../js/session-monitor.js"></script>
     <script src="../js/membership.js"></script>
     <script src="../js/auth-nav.js?v=2"></script>

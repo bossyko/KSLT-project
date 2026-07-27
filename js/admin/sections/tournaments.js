@@ -825,6 +825,15 @@
                 '</div>' +
                 '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnSetFormat + '</label>' +
+                        '<select class="ad-field-input" id="adTrnSetFormat">' +
+                            '<option value="standard"' + A.sel(item, 'set_format', 'standard') + '>' + L.formatStandard + '</option>' +
+                            '<option value="short"' + A.sel(item, 'set_format', 'short') + '>' + L.formatShort + '</option>' +
+                        '</select>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-field-row ad-field-row-3">' +
+                    '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnMatchDuration + '</label>' +
                         '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnMatchDuration" placeholder="90" value="' + (item ? (item.match_duration || 90) : 90) + '">' +
                     '</div>' +
@@ -1216,7 +1225,8 @@
             gender: document.getElementById('adTrnGender').value || null,
             ntrp_min: (function() { var v = document.getElementById('adTrnNtrpMin').value; return v ? parseFloat(v) : null; })(),
             ntrp_max: (function() { var v = document.getElementById('adTrnNtrpMax').value; return v ? parseFloat(v) : null; })(),
-            ntrp_combined_max: (function() { var v = document.getElementById('adTrnNtrpCombinedMax').value; return v ? parseFloat(v) : null; })()
+            ntrp_combined_max: (function() { var v = document.getElementById('adTrnNtrpCombinedMax').value; return v ? parseFloat(v) : null; })(),
+            set_format: document.getElementById('adTrnSetFormat').value || 'standard'
         };
     }
 

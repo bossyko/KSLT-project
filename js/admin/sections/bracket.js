@@ -1243,7 +1243,7 @@
                 var match = matches.find(function(m) { return m.id === matchId; });
                 if (match) {
                     var rowPlayer = btn.dataset.rowPlayer || null;
-                    openScoreModal(match, playersMap, tournamentId, rowPlayer, isDbl, regsMap);
+                    openScoreModal(match, playersMap, tournamentId, rowPlayer, isDbl, regsMap, tournament.set_format);
                 }
             });
         });
@@ -2371,9 +2371,17 @@
             // Parse "6/3" or "7/6(7-5)"
             var m = s.match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
             if (!m) return s;
-            var a = m[1], b = m[2];
-            if (needFlip) { var tmp = a; a = b; b = tmp; }
-            return a + ':' + b;
+            var a = m[1], b = m[2], tb1 = m[3], tb2 = m[4];
+            if (needFlip) {
+                var tmp = a; a = b; b = tmp;
+                if (tb1) { tmp = tb1; tb1 = tb2; tb2 = tmp; }
+            }
+            var setStr = a + ':' + b;
+            if (tb1 && tb2) {
+                var loserTb = parseInt(a) > parseInt(b) ? tb2 : tb1;
+                setStr += '<sup>' + loserTb + '</sup>';
+            }
+            return setStr;
         }).join(' ') + suffix;
     }
 
@@ -5359,9 +5367,17 @@
 
     // ---- Score Entry Modal ----
     // Tennis score validation
-    function isValidSet(a, b) {
+    function isValidSet(a, b, format) {
         a = parseInt(a); b = parseInt(b);
         if (isNaN(a) || isNaN(b)) return false;
+        if (format === 'short') {
+            // Short: 6-0..6-4 normal, 6-5 tiebreak. No 7-5 or 7-6.
+            if (a < 0 || b < 0 || a > 6 || b > 6) return false;
+            if ((a === 6 && b <= 4) || (b === 6 && a <= 4)) return true;
+            if ((a === 6 && b === 5) || (b === 6 && a === 5)) return true;
+            return false;
+        }
+        // Standard
         if (a < 0 || b < 0 || a > 7 || b > 7) return false;
         // Normal win: 6-0..6-4
         if ((a === 6 && b <= 4) || (b === 6 && a <= 4)) return true;
@@ -5395,7 +5411,7 @@
         }).join('  ') + suffix;
     }
 
-    function openScoreModal(match, playersMap, tournamentId, rowPlayerId, isDbl, regsMap) {
+    function openScoreModal(match, playersMap, tournamentId, rowPlayerId, isDbl, regsMap, setFormat) {
         // Swap display order if rowPlayer is player2 (so row player always on top)
         var swapped = rowPlayerId && rowPlayerId === match.player2_id;
         var displayP1Id = swapped ? match.player2_id : match.player1_id;
@@ -5554,7 +5570,8 @@
             if (currentSets > 1) { currentSets--; updateSetsVisibility(); }
         });
 
-        // Show/hide tiebreak inputs when 7:6 or 6:7
+        // Show/hide tiebreak inputs based on format
+        var _setFormat = setFormat || 'standard';
         function checkTiebreaks() {
             for (var s = 1; s <= 3; s++) {
                 var p1El = document.getElementById('adS' + s + 'P1');
@@ -5564,7 +5581,10 @@
                 var v2 = parseInt(p2El.value) || 0;
                 var tbWrap = document.getElementById('adS' + s + 'TB1Wrap');
                 if (tbWrap) {
-                    tbWrap.style.display = ((v1 === 7 && v2 === 6) || (v1 === 6 && v2 === 7)) ? 'inline-flex' : 'none';
+                    var isTb = _setFormat === 'short'
+                        ? ((v1 === 6 && v2 === 5) || (v1 === 5 && v2 === 6))
+                        : ((v1 === 7 && v2 === 6) || (v1 === 6 && v2 === 7));
+                    tbWrap.style.display = isTb ? 'inline-flex' : 'none';
                 }
             }
         }
@@ -5727,7 +5747,7 @@
                         A.showToast((isEn ? 'Fill in Set ' : 'Заполните сет ') + s, 'error');
                         return;
                     }
-                    if (!isValidSet(v1, v2)) {
+                    if (!isValidSet(v1, v2, _setFormat)) {
                         A.showToast((isEn ? 'Invalid Set ' : 'Некорректный счёт сета ') + s, 'error');
                         return;
                     }
@@ -5753,7 +5773,10 @@
                 var dbTB1 = swapped ? tb2 : tb1;
                 var dbTB2 = swapped ? tb1 : tb2;
                 var setStr = dbV1 + '/' + dbV2;
-                if (dbTB1 !== '' && dbTB2 !== '' && ((+dbV1 === 7 && +dbV2 === 6) || (+dbV1 === 6 && +dbV2 === 7))) {
+                var hasTb = _setFormat === 'short'
+                    ? ((+dbV1 === 6 && +dbV2 === 5) || (+dbV1 === 5 && +dbV2 === 6))
+                    : ((+dbV1 === 7 && +dbV2 === 6) || (+dbV1 === 6 && +dbV2 === 7));
+                if (dbTB1 !== '' && dbTB2 !== '' && hasTb) {
                     setStr += '(' + dbTB1 + '-' + dbTB2 + ')';
                 }
                 return setStr;

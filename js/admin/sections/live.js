@@ -52,7 +52,7 @@
     function loadData() {
         Promise.all([
             A.client.from('live_matches')
-                .select('id, match_id, player1_id, player2_id, player1_name, player2_name, best_of, youtube_url, umpire_key, status, final_score, tournament_label, sponsor_logo, created_at, sets_data, current_game_p1, current_game_p2, points_p1, points_p2, serving_player, is_tiebreak, tiebreak_p1, tiebreak_p2')
+                .select('id, match_id, player1_id, player2_id, player1_name, player2_name, best_of, set_format, youtube_url, umpire_key, status, final_score, tournament_label, sponsor_logo, created_at, sets_data, current_game_p1, current_game_p2, points_p1, points_p2, serving_player, is_tiebreak, tiebreak_p1, tiebreak_p2')
                 .in('status', ['warmup', 'live', 'paused'])
                 .order('created_at', { ascending: false }),
             A.client.from('live_matches')
@@ -326,11 +326,18 @@
                         '<label class="ad-field-label">' + L.liveYoutube + '</label>' +
                         '<input type="text" class="ad-field-input" id="liveYoutube" placeholder="https://youtube.com/live/...">' +
                     '</div>' +
-                    // Best of + Tournament label row
-                    '<div style="display:flex;gap:12px;">' +
+                    // Best of + Set format + Tournament label row
+                    '<div style="display:flex;gap:12px;flex-wrap:wrap;">' +
                         '<div class="ad-field-group" style="flex:0 0 120px;">' +
                             '<label class="ad-field-label">' + L.liveBestOf + '</label>' +
                             '<select id="liveBestOf" class="ad-field-input"><option value="1">1</option><option value="3" selected>3</option><option value="5">5</option></select>' +
+                        '</div>' +
+                        '<div class="ad-field-group" style="flex:0 0 200px;">' +
+                            '<label class="ad-field-label">' + L.liveSetFormat + '</label>' +
+                            '<select id="liveSetFormat" class="ad-field-input">' +
+                                '<option value="standard">' + L.formatStandard + '</option>' +
+                                '<option value="short">' + L.formatShort + '</option>' +
+                            '</select>' +
                         '</div>' +
                         '<div class="ad-field-group" style="flex:1;">' +
                             '<label class="ad-field-label">' + L.liveTournLabel + '</label>' +
@@ -431,6 +438,7 @@
             var row = {
                 youtube_url: document.getElementById('liveYoutube').value.trim() || null,
                 best_of: parseInt(document.getElementById('liveBestOf').value) || 3,
+                set_format: document.getElementById('liveSetFormat').value || 'standard',
                 tournament_label: document.getElementById('liveTournLabel').value.trim() || null,
                 sponsor_logo: document.getElementById('liveSponsorUrl').value || null,
                 status: 'warmup'

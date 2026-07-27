@@ -142,7 +142,7 @@
         initPaginationClicks();
         await detectAccess();
         await loadPartners();
-        renderSponsors();
+        if (window.loadSponsors) loadSponsors('ptSponsors');
     }
 
     // ---- Detect access level ----
@@ -242,9 +242,10 @@
         ];
 
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
-        var html = '<a href="' + servicesLink + '" class="kslt-back kslt-back-inside">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
 
-        html += '<div class="pt-search-wrap">' +
+        var html =
+            '<a href="' + servicesLink + '" class="kslt-back" style="align-self:flex-start;">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+            '<div class="pt-search-wrap">' +
             '<svg class="pt-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
             '<input type="text" class="pt-search" id="ptSearch" placeholder="' + L.searchPlaceholder + '">' +
             '</div>';
@@ -510,29 +511,7 @@
         });
     }
 
-    // ---- SPONSORS ----
-    function renderSponsors() {
-        var container = document.getElementById('ptSponsors');
-        if (!container) return;
-
-        var title = isEn ? 'Partners & Sponsors' : (isKg ? 'Өнөктөштөр жана демөөрчүлөр' : 'Партнёры и спонсоры');
-        var general = isEn ? 'General sponsor' : (isKg ? 'Баш демөөрчү' : 'Генеральный спонсор');
-        container.innerHTML =
-            '<div class="section-header"><h2>' + title + '</h2></div>' +
-            '<div class="sponsor-hero">' +
-                '<span class="sponsor-hero-label">' + general + '</span>' +
-                '<a href="#" class="sponsor-hero-logo">' +
-                    '<img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">' +
-                '</a>' +
-            '</div>' +
-            '<div class="sponsors-cloud">' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>' +
-            '</div>';
-    }
+    // ---- SPONSORS — loaded via sponsors-loader.js ----
 
     // ---- Invite click delegation ----
     document.addEventListener('click', function(e) {

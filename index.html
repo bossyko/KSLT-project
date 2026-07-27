@@ -342,79 +342,10 @@
                 </div>
             </div>
 
-            <!-- Карусель спонсоров -->
+            <!-- Карусель спонсоров (dynamic from Supabase) -->
             <div class="hero-sponsors-section">
-            <p class="hero-sponsors-title">Наши спонсоры</p>
-            <div class="sponsors-carousel-infinite hero-sponsors-carousel">
-                <div class="carousel-track-infinite">
-                    <!-- Первый набор -->
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>SportMax</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>FitnessPro</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>BankPlus</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>CourtMaster</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>SportShoes</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>WatchTime</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>AudioMax</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>SunStyle</span>
-                    </div>
-                    <!-- Дубликат для бесконечной прокрутки -->
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>SportMax</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>FitnessPro</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>BankPlus</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>CourtMaster</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>SportShoes</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>WatchTime</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>AudioMax</span>
-                    </div>
-                    <div class="carousel-slide-infinite">
-                        <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&h=150&fit=crop&q=80" alt="Спонсор">
-                        <span>SunStyle</span>
-                    </div>
-                </div>
-            </div>
+                <p class="hero-sponsors-title">Наши спонсоры</p>
+                <div class="sponsors-carousel-infinite hero-sponsors-carousel" id="heroSponsorsCarousel"></div>
             </div>
 
         </section>
@@ -626,7 +557,7 @@
         <!-- PLAYERS / FIND PARTNER -->
         <section id="players" class="section-players">
             <div class="section-header">
-                <h2>Найди игрока своего уровня</h2>
+                <h2>Найди игрока своего NTRP</h2>
                 <a href="pages/partners.html" class="link-all">Показать всех →</a>
             </div>
             <div class="players-grid">
@@ -634,7 +565,7 @@
                     <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
                     <div class="player-info">
                         <h4>Артём К.</h4>
-                        <span class="player-level">Уровень 4.0</span>
+                        <span class="player-level">NTRP 4.0</span>
                         <span class="player-location">📍 Бишкек, Асанбай</span>
                         <span class="player-time">🕐 Сегодня, 17:00-19:00</span>
                     </div>
@@ -644,7 +575,7 @@
                     <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
                     <div class="player-info">
                         <h4>Мария С.</h4>
-                        <span class="player-level">Уровень 3.5</span>
+                        <span class="player-level">NTRP 3.5</span>
                         <span class="player-location">📍 Бишкек, Центр</span>
                         <span class="player-time">🕐 Завтра, 10:00-12:00</span>
                     </div>
@@ -654,7 +585,7 @@
                     <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
                     <div class="player-info">
                         <h4>Руслан Б.</h4>
-                        <span class="player-level">Уровень 4.5</span>
+                        <span class="player-level">NTRP 4.5</span>
                         <span class="player-location">📍 Бишкек, Джал</span>
                         <span class="player-time">🕐 Сегодня, 20:00-22:00</span>
                     </div>
@@ -664,7 +595,7 @@
                     <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
                     <div class="player-info">
                         <h4>Айгуль Т.</h4>
-                        <span class="player-level">Уровень 3.0</span>
+                        <span class="player-level">NTRP 3.0</span>
                         <span class="player-location">📍 Бишкек, Восток-5</span>
                         <span class="player-time">🕐 Суббота, 09:00-11:00</span>
                     </div>
@@ -674,7 +605,7 @@
                     <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
                     <div class="player-info">
                         <h4>Данияр М.</h4>
-                        <span class="player-level">Уровень 2.5</span>
+                        <span class="player-level">NTRP 2.5</span>
                         <span class="player-location">📍 Бишкек, Аламедин</span>
                         <span class="player-time">🕐 Завтра, 18:00-20:00</span>
                     </div>
@@ -684,7 +615,7 @@
                     <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
                     <div class="player-info">
                         <h4>Елена В.</h4>
-                        <span class="player-level">Уровень 5.0</span>
+                        <span class="player-level">NTRP 5.0</span>
                         <span class="player-location">📍 Бишкек, Южные ворота</span>
                         <span class="player-time">🕐 Сегодня, 16:00-18:00</span>
                     </div>
@@ -694,7 +625,7 @@
                     <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
                     <div class="player-info">
                         <h4>Тимур А.</h4>
-                        <span class="player-level">Уровень 2.0</span>
+                        <span class="player-level">NTRP 2.0</span>
                         <span class="player-location">📍 Бишкек, Тунгуч</span>
                         <span class="player-time">🕐 Воскресенье, 08:00-10:00</span>
                     </div>
@@ -704,7 +635,7 @@
                     <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
                     <div class="player-info">
                         <h4>Жанара О.</h4>
-                        <span class="player-level">Уровень 3.0</span>
+                        <span class="player-level">NTRP 3.0</span>
                         <span class="player-location">📍 Бишкек, Кок-Жар</span>
                         <span class="player-time">🕐 Суббота, 14:00-16:00</span>
                     </div>
@@ -817,46 +748,8 @@
             </div>
         </section>
 
-        <!-- SPONSORS -->
-        <section id="sponsors" class="section-sponsors-compact">
-            <div class="section-header">
-                <h2>Партнёры и спонсоры</h2>
-                <a href="#become-sponsor" class="link-all">Стать спонсором →</a>
-            </div>
-            <div class="sponsor-hero">
-                <span class="sponsor-hero-label">Генеральный спонсор</span>
-                <a href="https://nurzaman.kg" target="_blank" rel="noopener noreferrer" class="sponsor-hero-logo" title="Nurzaman">
-                    <img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman">
-                </a>
-            </div>
-            <div class="sponsors-cloud">
-                <a href="#" class="sponsor-logo-link" title="Sponsor 1"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Nike" alt="Nike"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 2"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Adidas" alt="Adidas"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 3"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Wilson" alt="Wilson"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 4"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Head" alt="Head"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 5"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Babolat" alt="Babolat"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 6"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Red+Bull" alt="Red Bull"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 7"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Coca-Cola" alt="Coca-Cola"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 8"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Samsung" alt="Samsung"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 9"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Toyota" alt="Toyota"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 10"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Emirates" alt="Emirates"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 11"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Rolex" alt="Rolex"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 12"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Puma" alt="Puma"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 13"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Under+Armour" alt="Under Armour"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 14"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Lacoste" alt="Lacoste"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 15"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Asics" alt="Asics"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 16"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=New+Balance" alt="New Balance"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 17"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Fila" alt="Fila"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 18"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Yonex" alt="Yonex"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 19"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Tecnifibre" alt="Tecnifibre"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 20"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Pepsi" alt="Pepsi"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 21"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Visa" alt="Visa"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 22"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Mastercard" alt="Mastercard"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 23"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Heineken" alt="Heineken"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 24"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=BMW" alt="BMW"></a>
-                <a href="#" class="sponsor-logo-link" title="Sponsor 25"><img src="https://placehold.co/120x40/1a1a2e/ccff00?text=Dunlop" alt="Dunlop"></a>
-            </div>
-        </section>
+        <!-- SPONSORS (dynamic from Supabase) -->
+        <section id="sponsors" class="section-sponsors-compact"></section>
 
         <!-- ABOUT -->
         <section id="about" class="section-about">
@@ -1017,6 +910,11 @@
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
+    <script src="js/sponsors-loader.js"></script>
+    <script>
+    if (window.loadSponsors) loadSponsors('sponsors');
+    if (window.loadSponsorsCarousel) loadSponsorsCarousel('heroSponsorsCarousel');
+    </script>
     <script src="js/session-monitor.js"></script>
     <script src="js/membership.js"></script>
     <script src="js/battle-cards.js?v=6"></script>
@@ -1436,29 +1334,34 @@
 
         Promise.all([
             client.from('categories').select('*').order('sort_order', { ascending: true }),
-            client.from('players').select('id,name,photo,country,points,rank_change,category_id').order('points', { ascending: false })
+            client.from('players').select('id,name,photo,country,points,rank_change,category_id,gender').order('points', { ascending: false })
         ]).then(function(results) {
             var cats = (results[0].data || []);
             var players = (results[1].data || []);
             if (!cats.length) return;
 
-            var menCats = cats.filter(function(c) { return c.gender === 'men' && (c.name || '').toLowerCase() !== 'friendly'; });
-            var womenCats = cats.filter(function(c) { return c.gender === 'women' && (c.name || '').toLowerCase() !== 'friendly'; });
+            // Categories are gender-neutral; player.gender stores 'men'/'women'
+            var allCats = cats.filter(function(c) { return (c.name || '').toLowerCase() !== 'friendly'; });
 
             function buildCol(catList, gender) {
                 var colTitle = gender === 'women'
                     ? '<h3 class="rankings-col-title">\u2640 Женский одиночный рейтинг</h3>'
                     : '<h3 class="rankings-col-title">\u2642 Мужской одиночный рейтинг</h3>';
+                // Only show categories that have players of this gender
+                var catsWithPlayers = catList.filter(function(c) {
+                    return players.some(function(p) { return p.category_id === c.id && p.gender === gender; });
+                });
+                if (!catsWithPlayers.length) return '';
                 var tabs = '<div class="rankings-tabs">';
-                catList.forEach(function(c, i) {
-                    tabs += '<button class="rankings-tab' + (i === 0 ? ' active' : '') + '" data-target="' + c.id + '">' + c.name + '</button>';
+                catsWithPlayers.forEach(function(c, i) {
+                    tabs += '<button class="rankings-tab' + (i === 0 ? ' active' : '') + '" data-target="' + gender + '-' + c.id + '">' + c.name + '</button>';
                 });
                 tabs += '</div>';
 
                 var panels = '';
-                catList.forEach(function(c, ci) {
-                    var catPlayers = players.filter(function(p) { return p.category_id === c.id; }).slice(0, 8);
-                    panels += '<div class="rankings-panel' + (ci === 0 ? ' active' : '') + '" id="' + c.id + '">';
+                catsWithPlayers.forEach(function(c, ci) {
+                    var catPlayers = players.filter(function(p) { return p.category_id === c.id && p.gender === gender; }).slice(0, 8);
+                    panels += '<div class="rankings-panel' + (ci === 0 ? ' active' : '') + '" id="' + gender + '-' + c.id + '">';
                     panels += '<div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">\u0394</span></div>';
                     catPlayers.forEach(function(p, pi) {
                         var blurClass = '';
@@ -1491,7 +1394,7 @@
                 return '<div class="rankings-col">' + colTitle + tabs + panels + '</div>';
             }
 
-            section.innerHTML = buildCol(menCats, 'men') + buildCol(womenCats, 'women');
+            section.innerHTML = buildCol(allCats, 'men') + buildCol(allCats, 'women');
 
             // Re-init tab clicks
             section.querySelectorAll('.rankings-tab').forEach(function(btn) {
