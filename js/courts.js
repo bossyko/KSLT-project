@@ -97,7 +97,15 @@
         noVouchersYet: 'Арзандатуулар жок',
         pickService: 'Кызматты тандаңыз',
         pickSubmit: 'Арзандатуу алуу',
-        noDiscountsConfigured: 'Арзандатуу жок'
+        noDiscountsConfigured: 'Арзандатуу жок',
+        courtTypesTitle: 'Корт түрлөрү',
+        thType: 'Түрү',
+        thSurface: 'Жабуу',
+        thQty: 'Саны',
+        thPrice: 'Баасы',
+        additionalServicesTitle: 'Кошумча кызматтар',
+        thService: 'Кызмат',
+        thServicePrice: 'Баасы'
     } : {
         heroTitle: "Корты KSLT",
         heroSubtitle: "Теннисные корты Бишкека для тренировок и турниров",
@@ -150,7 +158,15 @@
         noVouchersYet: "Скидок пока нет",
         pickService: "Выберите услугу",
         pickSubmit: "Получить скидку",
-        noDiscountsConfigured: "Скидки пока не настроены"
+        noDiscountsConfigured: "Скидки пока не настроены",
+        courtTypesTitle: "Типы кортов",
+        thType: "Тип",
+        thSurface: "Покрытие",
+        thQty: "Кол-во",
+        thPrice: "Цена",
+        additionalServicesTitle: "Дополнительные услуги",
+        thService: "Услуга",
+        thServicePrice: "Цена"
     });
 
     var SURFACE_MAP = { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр' };
@@ -435,6 +451,7 @@
             partner: row.partner || false,
             google_maps_url: row.google_maps_url || '',
             twogis_url: row.twogis_url || '',
+            _additionalServices: row.additional_services || [],
             _isNew: true,
             _isDb: true,
             _typeDesc: typeDesc,
@@ -831,15 +848,18 @@
         var authLink = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
         var typeLabel = court._typeDesc || (court.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor);
 
-        var html = '';
-
-        // Back links
+        // Breadcrumb — render before container so it's outside .ct-container
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
-        html += '<div class="kslt-back-wrap">';
-        html += '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
-        html += '<span class="kslt-back-sep">/</span>';
-        html += '<a href="' + courtsLink + '" class="kslt-back">' + L_labels.backBtn + '</a>';
-        html += '</div>';
+        var breadcrumb = document.createElement('div');
+        breadcrumb.className = 'kslt-back-wrap';
+        breadcrumb.style.padding = '14px 24px';
+        breadcrumb.innerHTML =
+            '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+            '<span class="kslt-back-sep">/</span>' +
+            '<a href="' + courtsLink + '" class="kslt-back">' + L_labels.backBtn + '</a>';
+        container.parentNode.insertBefore(breadcrumb, container);
+
+        var html = '';
 
         // Header
         html += '<div class="ct-detail-header ct-fade-in">' +
@@ -856,13 +876,80 @@
             '</div>' +
         '</div>';
 
-        // Stats
-        html += '<div class="ct-detail-stats ct-fade-in">' +
-            '<div class="ct-detail-stat"><div class="ct-detail-stat-num">' + court.courtsCount + '</div><div class="ct-detail-stat-label">' + L_labels.courts + '</div></div>' +
-            '<div class="ct-detail-stat"><div class="ct-detail-stat-num">' + court.surface + '</div><div class="ct-detail-stat-label">' + L_labels.surface + '</div></div>' +
-            (court.rating ? '<div class="ct-detail-stat"><div class="ct-detail-stat-num">\u2605 ' + court.rating + '</div><div class="ct-detail-stat-label">' + L_labels.rating + '</div></div>' : '') +
-            (court.price ? '<div class="ct-detail-stat"><div class="ct-detail-stat-num">' + court.price + '</div><div class="ct-detail-stat-label">' + L_labels.priceCurrency + '</div></div>' : '') +
+        // Stats — single combined card
+        var allSurfaces = [];
+        var surfaceSeen = {};
+        (court._courtTypes || []).forEach(function(ct) {
+            var sLabel = isEn ? (SURFACE_MAP_EN[ct.surface] || ct.surface) : isKg ? (SURFACE_MAP_KG[ct.surface] || ct.surface) : (SURFACE_MAP[ct.surface] || ct.surface);
+            if (sLabel && !surfaceSeen[sLabel]) { surfaceSeen[sLabel] = true; allSurfaces.push(sLabel); }
+        });
+        var surfacesText = allSurfaces.join(', ') || court.surface;
+        var priceFromText = court.price ? ((isEn ? 'from ' : isKg ? 'дан ' : 'от ') + court.price + ' ' + (isEn ? 'som/hr' : isKg ? 'сом/саат' : 'сом/час')) : '';
+
+        html += '<div class="ct-detail-stats ct-detail-stats-single ct-fade-in">' +
+            '<div class="ct-detail-stat-combined">' +
+                '<span class="ct-stat-item">' + court.courtsCount + ' ' + L_labels.courts + '</span>' +
+                '<span class="ct-stat-sep">\u00b7</span>' +
+                '<span class="ct-stat-item">' + esc(surfacesText) + '</span>' +
+                (priceFromText ? '<span class="ct-stat-sep">\u00b7</span><span class="ct-stat-item">' + priceFromText + '</span>' : '') +
+            '</div>' +
         '</div>';
+
+        // Court Types table
+        if (court._courtTypes && court._courtTypes.length > 0) {
+            var TYPE_LABELS = { indoor: (isEn ? 'Indoor' : isKg ? 'Жабык' : 'Крытый'), outdoor: (isEn ? 'Outdoor' : isKg ? 'Ачык' : 'Открытый') };
+            html += '<div class="ct-section ct-fade-in">' +
+                '<h2 class="ct-section-title">' + (L_labels.courtTypesTitle || 'Типы кортов') + '</h2>' +
+                '<div class="ct-types-table">' +
+                    '<div class="ct-types-header">' +
+                        '<span>' + (L_labels.thType || 'Тип') + '</span>' +
+                        '<span>' + (L_labels.thSurface || 'Покрытие') + '</span>' +
+                        '<span>' + (L_labels.thQty || 'Кол-во') + '</span>' +
+                        '<span>' + (L_labels.thPrice || 'Цена') + '</span>' +
+                    '</div>';
+            court._courtTypes.forEach(function(ct) {
+                var typeLabel = TYPE_LABELS[ct.type] || ct.type || '';
+                var surfaceLabel = isEn ? (SURFACE_MAP_EN[ct.surface] || ct.surface) : isKg ? (SURFACE_MAP_KG[ct.surface] || ct.surface) : (SURFACE_MAP[ct.surface] || ct.surface);
+                var priceText = ct.price ? (ct.price + ' ' + (isEn ? 'som/hr' : isKg ? 'сом/саат' : 'сом/час')) : '—';
+                if (ct.partner && ct.discount) {
+                    priceText += ' <span class="ct-svc-discount">KSLT -' + ct.discount + '%</span>';
+                } else if (ct.partner) {
+                    priceText += ' <span class="ct-svc-discount">KSLT</span>';
+                }
+                html += '<div class="ct-types-row">' +
+                    '<span>' + esc(typeLabel) + '</span>' +
+                    '<span>' + esc(surfaceLabel) + '</span>' +
+                    '<span>' + (ct.count || '—') + '</span>' +
+                    '<span>' + priceText + '</span>' +
+                '</div>';
+            });
+            html += '</div></div>';
+        }
+
+        // Additional Services table
+        if (court._additionalServices && court._additionalServices.length > 0) {
+            html += '<div class="ct-section ct-fade-in">' +
+                '<h2 class="ct-section-title">' + (L_labels.additionalServicesTitle || 'Дополнительные услуги') + '</h2>' +
+                '<div class="ct-services-table">' +
+                    '<div class="ct-services-header">' +
+                        '<span>' + (L_labels.thService || 'Услуга') + '</span>' +
+                        '<span>' + (L_labels.thServicePrice || 'Цена') + '</span>' +
+                    '</div>';
+            court._additionalServices.forEach(function(svc) {
+                var svcName = isEn ? (svc.name_en || svc.name) : isKg ? (svc.name_kg || svc.name) : svc.name;
+                var priceText = svc.price ? (svc.price + ' ' + (isEn ? 'som/hr' : isKg ? 'сом/саат' : 'сом/час')) : '—';
+                if (svc.partner && svc.discount) {
+                    priceText += ' <span class="ct-svc-discount">KSLT -' + svc.discount + '%</span>';
+                } else if (svc.partner) {
+                    priceText += ' <span class="ct-svc-discount">KSLT</span>';
+                }
+                html += '<div class="ct-services-row">' +
+                    '<span>' + esc(svcName || '') + '</span>' +
+                    '<span>' + priceText + '</span>' +
+                '</div>';
+            });
+            html += '</div></div>';
+        }
 
         // About
         if (court.description) {

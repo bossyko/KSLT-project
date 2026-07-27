@@ -16,6 +16,7 @@
     var cchFilterTag = '';
     var cchAchievements = [];
     var cchAchievementsEn = [];
+    var cchAchievementsKg = [];
     var cchPage = 1;
     var cchAllData = [];
     var CCH_PER_PAGE = 15;
@@ -447,20 +448,21 @@
         cchImageUrl = (item && item.photo) ? item.photo : '';
         cchAchievements = (item && item.achievements) ? item.achievements.slice() : [];
         cchAchievementsEn = (item && item.achievements_en) ? item.achievements_en.slice() : [];
+        cchAchievementsKg = (item && item.achievements_kg) ? item.achievements_kg.slice() : [];
         cchPartnerPin = (item && item.partner_pin) ? item.partner_pin : '';
         cchPartnerServices = [];
 
         // Load courts from DB for dropdown
         var courtsList = [];
         if (A.client) {
-            var cRes = await A.client.from('courts').select('id,name,name_en').order('name');
+            var cRes = await A.client.from('courts').select('id,name,name_en,name_kg').order('name');
             if (cRes.data) courtsList = cRes.data;
         }
         var courtOptionsHtml = '<option value="">' + (isEn ? '— Select —' : '— Выберите —') + '</option>';
         courtsList.forEach(function(c) {
             var courtName = isEn ? (c.name_en || c.name) : c.name;
             var sel = (item && item.court === c.name) ? ' selected' : '';
-            courtOptionsHtml += '<option value="' + A.esc(c.id) + '" data-name="' + A.esc(c.name) + '" data-name-en="' + A.esc(c.name_en || '') + '"' + sel + '>' + A.esc(courtName) + '</option>';
+            courtOptionsHtml += '<option value="' + A.esc(c.id) + '" data-name="' + A.esc(c.name) + '" data-name-en="' + A.esc(c.name_en || '') + '" data-name-kg="' + A.esc(c.name_kg || '') + '"' + sel + '>' + A.esc(courtName) + '</option>';
         });
 
         // Helper: strip phone to local digits for display (remove +996 prefix)
@@ -522,6 +524,16 @@
             });
             return html;
         }
+        function renderAchievementsKgHtml() {
+            var html = '';
+            cchAchievementsKg.forEach(function(ach, idx) {
+                html += '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
+                    '<input type="text" class="ad-field-input ad-cch-achievement-kg" data-idx="' + idx + '" value="' + A.esc(ach) + '" style="flex:1;">' +
+                    (cchAchievementsKg.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-kg-remove" data-idx="' + idx + '">&times;</button>' : '') +
+                '</div>';
+            });
+            return html;
+        }
 
         container.innerHTML =
             '<div class="ad-section-header">' +
@@ -547,56 +559,54 @@
                 '</div>' +
             '</div>' +
 
-            // ФИО (Last Name / First Name / Patronymic) — RU
+            // ФИО (Last Name / First Name / Patronymic)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + (isEn ? 'Full Name' : 'ФИО') + '</div>' +
-                '<div style="font-weight:600;margin-bottom:6px;">RU</div>' +
-                '<div class="ad-form-row" style="grid-template-columns:1fr 1fr 1fr;">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.cchLastName + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adCchLastName" value="' + A.esc(item ? item.last_name : '') + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.cchFirstName + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adCchFirstName" value="' + A.esc(item ? item.first_name : '') + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.cchPatronymic + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adCchPatronymic" value="' + A.esc(item ? item.patronymic : '') + '">' +
+                '<div class="ad-lang-tabs">' +
+                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
+                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
+                '</div>' +
+                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
+                    '<div class="ad-form-row" style="grid-template-columns:1fr 1fr 1fr;">' +
+                        '<div class="ad-field"><label class="ad-field-label">' + L.cchLastName + '</label><input type="text" class="ad-field-input" id="adCchLastName" value="' + A.esc(item ? item.last_name : '') + '"></div>' +
+                        '<div class="ad-field"><label class="ad-field-label">' + L.cchFirstName + '</label><input type="text" class="ad-field-input" id="adCchFirstName" value="' + A.esc(item ? item.first_name : '') + '"></div>' +
+                        '<div class="ad-field"><label class="ad-field-label">' + L.cchPatronymic + '</label><input type="text" class="ad-field-input" id="adCchPatronymic" value="' + A.esc(item ? item.patronymic : '') + '"></div>' +
                     '</div>' +
                 '</div>' +
-                '<div style="font-weight:600;margin-top:14px;margin-bottom:6px;">EN' +
-                    '<button type="button" class="ad-btn-translate" data-src="adCchLastName" data-target="adCchLastNameEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
-                '</div>' +
-                '<div class="ad-form-row">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.cchLastName + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adCchLastNameEn" value="' + A.esc(item ? item.last_name_en : '') + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.cchFirstName + ' ' +
-                            '<button type="button" class="ad-btn-translate" data-src="adCchFirstName" data-target="adCchFirstNameEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
-                        '</label>' +
-                        '<input type="text" class="ad-field-input" id="adCchFirstNameEn" value="' + A.esc(item ? item.first_name_en : '') + '">' +
+                '<div class="ad-lang-panel" data-lang-panel="en">' +
+                    '<div class="ad-form-row">' +
+                        '<div class="ad-field"><label class="ad-field-label">' + L.cchLastName + '</label><input type="text" class="ad-field-input" id="adCchLastNameEn" value="' + A.esc(item ? item.last_name_en : '') + '"></div>' +
+                        '<div class="ad-field"><label class="ad-field-label">' + L.cchFirstName + '</label><input type="text" class="ad-field-input" id="adCchFirstNameEn" value="' + A.esc(item ? item.first_name_en : '') + '"></div>' +
                     '</div>' +
                 '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<div class="ad-form-row">' +
+                        '<div class="ad-field"><label class="ad-field-label">' + L.cchLastName + '</label><input type="text" class="ad-field-input" id="adCchLastNameKg" value="' + A.esc(item ? (item.last_name_kg || '') : '') + '"></div>' +
+                        '<div class="ad-field"><label class="ad-field-label">' + L.cchFirstName + '</label><input type="text" class="ad-field-input" id="adCchFirstNameKg" value="' + A.esc(item ? (item.first_name_kg || '') : '') + '"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-group="fio">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
             // Position + Tags
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.cchPosition + '</div>' +
-                '<div class="ad-form-row">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">RU</label>' +
-                        '<input type="text" class="ad-field-input" id="adCchPosition" placeholder="' + (isEn ? 'Head coach' : 'Старший тренер') + '" value="' + A.esc(item ? item.position : '') + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">EN' +
-                            '<button type="button" class="ad-btn-translate" data-src="adCchPosition" data-target="adCchPositionEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
-                        '</label>' +
-                        '<input type="text" class="ad-field-input" id="adCchPositionEn" value="' + A.esc(item ? item.position_en : '') + '">' +
-                    '</div>' +
+                '<div class="ad-lang-tabs">' +
+                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
+                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
+                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
+                    '<input type="text" class="ad-field-input" id="adCchPosition" placeholder="' + (isEn ? 'Head coach' : 'Старший тренер') + '" value="' + A.esc(item ? item.position : '') + '">' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="en">' +
+                    '<input type="text" class="ad-field-input" id="adCchPositionEn" value="' + A.esc(item ? item.position_en : '') + '">' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<input type="text" class="ad-field-input" id="adCchPositionKg" value="' + A.esc(item ? (item.position_kg || '') : '') + '">' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adCchPosition" data-en="adCchPositionEn" data-kg="adCchPositionKg">&#127760; ' + L.translateAllBtn + '</button>' +
                 '<div class="ad-field" style="margin-top:12px;">' +
                     '<label class="ad-field-label">' + L.cchTags + '</label>' +
                     '<div>' + tagsHtml + '</div>' +
@@ -651,48 +661,64 @@
             // Short description
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.cchShortDesc + '</div>' +
-                '<div class="ad-form-row">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">RU</label>' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adCchShortDesc" rows="2">' + A.esc(item ? item.short_desc : '') + '</textarea>' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">EN' +
-                            '<button type="button" class="ad-btn-translate" data-src="adCchShortDesc" data-target="adCchShortDescEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
-                        '</label>' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adCchShortDescEn" rows="2">' + A.esc(item ? item.short_desc_en : '') + '</textarea>' +
-                    '</div>' +
+                '<div class="ad-lang-tabs">' +
+                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
+                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
+                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
+                    '<textarea class="ad-field-input ad-field-textarea" id="adCchShortDesc" rows="2">' + A.esc(item ? item.short_desc : '') + '</textarea>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="en">' +
+                    '<textarea class="ad-field-input ad-field-textarea" id="adCchShortDescEn" rows="2">' + A.esc(item ? item.short_desc_en : '') + '</textarea>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<textarea class="ad-field-input ad-field-textarea" id="adCchShortDescKg" rows="2">' + A.esc(item ? (item.short_desc_kg || '') : '') + '</textarea>' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adCchShortDesc" data-en="adCchShortDescEn" data-kg="adCchShortDescKg">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
             // Bio
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.cchBio + '</div>' +
-                '<div class="ad-form-row">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">RU</label>' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adCchBio" rows="4">' + A.esc(item ? item.bio : '') + '</textarea>' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">EN' +
-                            '<button type="button" class="ad-btn-translate" data-src="adCchBio" data-target="adCchBioEn" data-tolang="en">&#127760; ' + L.translateBtn + '</button>' +
-                        '</label>' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adCchBioEn" rows="4">' + A.esc(item ? item.bio_en : '') + '</textarea>' +
-                    '</div>' +
+                '<div class="ad-lang-tabs">' +
+                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
+                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
+                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
+                    '<textarea class="ad-field-input ad-field-textarea" id="adCchBio" rows="4">' + A.esc(item ? item.bio : '') + '</textarea>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="en">' +
+                    '<textarea class="ad-field-input ad-field-textarea" id="adCchBioEn" rows="4">' + A.esc(item ? item.bio_en : '') + '</textarea>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<textarea class="ad-field-input ad-field-textarea" id="adCchBioKg" rows="4">' + A.esc(item ? (item.bio_kg || '') : '') + '</textarea>' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adCchBio" data-en="adCchBioEn" data-kg="adCchBioKg">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
-            // Achievements RU
+            // Achievements RU / EN / KG
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.cchAchievements + '</div>' +
-                '<div style="font-weight:600;margin-bottom:6px;">RU</div>' +
-                '<div id="adCchAchievements">' + renderAchievementsHtml() + '</div>' +
-                '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchAchAdd">' + L.cchAchievementAdd + '</button>' +
-                '<div style="font-weight:600;margin-top:14px;margin-bottom:6px;">EN' +
-                    '<button type="button" class="ad-btn-translate" id="adCchAchTranslateAll">&#127760; ' + L.translateBtn + '</button>' +
+                '<div class="ad-lang-tabs">' +
+                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
+                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
+                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
-                '<div id="adCchAchievementsEn">' + renderAchievementsEnHtml() + '</div>' +
-                '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchAchAddEn">' + L.cchAchievementAdd + '</button>' +
+                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
+                    '<div id="adCchAchievements">' + renderAchievementsHtml() + '</div>' +
+                    '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchAchAdd">' + L.cchAchievementAdd + '</button>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="en">' +
+                    '<div id="adCchAchievementsEn">' + renderAchievementsEnHtml() + '</div>' +
+                    '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchAchAddEn">' + L.cchAchievementAdd + '</button>' +
+                '</div>' +
+                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                    '<div id="adCchAchievementsKg">' + renderAchievementsKgHtml() + '</div>' +
+                    '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchAchAddKg">' + L.cchAchievementAdd + '</button>' +
+                '</div>' +
+                '<button type="button" class="ad-btn-translate-all" data-group="achievements">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
             // Partner section
@@ -734,6 +760,17 @@
         document.getElementById('adCchBack').addEventListener('click', function() {
             A.setAdminHash('coaches');
             renderCoachesList();
+        });
+
+        // Lang tabs (delegate)
+        container.addEventListener('click', function(e) {
+            var tab = e.target.closest('.ad-lang-tab');
+            if (!tab) return;
+            var lang = tab.dataset.lang;
+            var card = tab.closest('.ad-form-card') || tab.closest('.ad-field');
+            if (!card) return;
+            card.querySelectorAll('.ad-lang-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.lang === lang); });
+            card.querySelectorAll('.ad-lang-panel').forEach(function(p) { p.classList.toggle('active', p.dataset.langPanel === lang); });
         });
 
         // Achievements RU: add/remove/edit
@@ -792,29 +829,107 @@
             cchAchievementsEn[parseInt(e.target.dataset.idx, 10)] = e.target.value;
         });
 
-        // Translate all achievements RU → EN
-        document.getElementById('adCchAchTranslateAll').addEventListener('click', function() {
-            var btn = this;
-            var ruItems = cchAchievements.filter(function(a) { return a.trim(); });
-            if (ruItems.length === 0) { A.showToast(L.fillRuFirst, 'error'); return; }
-            var origLabel = btn.textContent;
-            btn.textContent = L.translating;
-            btn.disabled = true;
-            var joined = ruItems.join('\n');
-            A.translateFromRu(joined, 'en').then(function(result) {
-                var translated = result.split('\n');
-                cchAchievementsEn = [];
-                for (var i = 0; i < ruItems.length; i++) {
-                    cchAchievementsEn.push(translated[i] || '');
-                }
-                renderAchievementsEnUI();
-                btn.textContent = origLabel;
-                btn.disabled = false;
-            }).catch(function() {
-                A.showToast(L.translateError, 'error');
-                btn.textContent = origLabel;
-                btn.disabled = false;
+        // Achievements KG: add/remove/edit
+        function renderAchievementsKgUI() {
+            var el = document.getElementById('adCchAchievementsKg');
+            if (!el) return;
+            var html = '';
+            cchAchievementsKg.forEach(function(ach, idx) {
+                html += '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
+                    '<input type="text" class="ad-field-input ad-cch-achievement-kg" data-idx="' + idx + '" value="' + A.esc(ach) + '" style="flex:1;">' +
+                    (cchAchievementsKg.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-kg-remove" data-idx="' + idx + '">&times;</button>' : '') +
+                '</div>';
             });
+            el.innerHTML = html;
+        }
+        document.getElementById('adCchAchAddKg').addEventListener('click', function() {
+            cchAchievementsKg.push('');
+            renderAchievementsKgUI();
+        });
+        document.getElementById('adCchAchievementsKg').addEventListener('click', function(e) {
+            var rmBtn = e.target.closest('.ad-cch-ach-kg-remove');
+            if (!rmBtn) return;
+            cchAchievementsKg.splice(parseInt(rmBtn.dataset.idx, 10), 1);
+            renderAchievementsKgUI();
+        });
+        document.getElementById('adCchAchievementsKg').addEventListener('input', function(e) {
+            if (!e.target.classList.contains('ad-cch-achievement-kg')) return;
+            cchAchievementsKg[parseInt(e.target.dataset.idx, 10)] = e.target.value;
+        });
+
+        // Translate ALL — delegated handler for "translate to empty" buttons
+        container.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ad-btn-translate-all');
+            if (!btn) return;
+
+            if (btn.dataset.group === 'fio') {
+                var fioFields = [
+                    { ru: 'adCchLastName', en: 'adCchLastNameEn', kg: 'adCchLastNameKg' },
+                    { ru: 'adCchFirstName', en: 'adCchFirstNameEn', kg: 'adCchFirstNameKg' }
+                ];
+                var origLabel = btn.textContent;
+                btn.textContent = L.translating;
+                btn.disabled = true;
+                (async function() {
+                    try {
+                        for (var f = 0; f < fioFields.length; f++) {
+                            var ruEl = document.getElementById(fioFields[f].ru);
+                            var enEl = document.getElementById(fioFields[f].en);
+                            var kgEl = document.getElementById(fioFields[f].kg);
+                            var ruVal = ruEl ? ruEl.value.trim() : '';
+                            // EN: transliterate via API
+                            if (enEl && !enEl.value.trim() && ruVal) {
+                                var enResult = await A.translateFromRu(ruVal, 'en');
+                                enEl.value = enResult;
+                            }
+                            // KG: copy from RU (same Cyrillic script)
+                            if (kgEl && !kgEl.value.trim() && ruVal) {
+                                kgEl.value = ruVal;
+                            }
+                        }
+                    } catch (ex) { /* handled inside */ }
+                    btn.textContent = origLabel;
+                    btn.disabled = false;
+                })();
+                return;
+            }
+
+            if (btn.dataset.group === 'achievements') {
+                var ruItems = cchAchievements.filter(function(a) { return a.trim(); });
+                if (ruItems.length === 0) { A.showToast(L.fillRuFirst, 'error'); return; }
+                var origLabel2 = btn.textContent;
+                btn.textContent = L.translating;
+                btn.disabled = true;
+                var joined = ruItems.join('\n');
+                (async function() {
+                    try {
+                        // EN
+                        if (!cchAchievementsEn.length || cchAchievementsEn.every(function(a) { return !a.trim(); })) {
+                            var enResult = await A.translateFromRu(joined, 'en');
+                            var enTranslated = enResult.split('\n');
+                            cchAchievementsEn = [];
+                            for (var i = 0; i < ruItems.length; i++) cchAchievementsEn.push(enTranslated[i] || '');
+                            renderAchievementsEnUI();
+                        }
+                        // KG
+                        if (!cchAchievementsKg.length || cchAchievementsKg.every(function(a) { return !a.trim(); })) {
+                            var kgResult = await A.translateFromRu(joined, 'kg');
+                            var kgTranslated = kgResult.split('\n');
+                            cchAchievementsKg = [];
+                            for (var j = 0; j < ruItems.length; j++) cchAchievementsKg.push(kgTranslated[j] || '');
+                            renderAchievementsKgUI();
+                        }
+                    } catch (ex) {
+                        A.showToast(L.translateError, 'error');
+                    }
+                    btn.textContent = origLabel2;
+                    btn.disabled = false;
+                })();
+                return;
+            }
+
+            // Standard: data-ru, data-en, data-kg
+            A.translateToEmpty(btn.dataset.ru, btn.dataset.en, btn.dataset.kg, btn);
         });
 
         // Image upload
@@ -1155,6 +1270,7 @@
             var courtOpt = courtSelect.options[courtSelect.selectedIndex];
             var courtName = courtOpt && courtOpt.dataset.name ? courtOpt.dataset.name : '';
             var courtNameEn = courtOpt && courtOpt.dataset.nameEn ? courtOpt.dataset.nameEn : '';
+            var courtNameKg = courtOpt && courtOpt.dataset.nameKg ? courtOpt.dataset.nameKg : '';
 
             // Phone & WhatsApp: add +996 prefix
             var phoneLocal = document.getElementById('adCchPhone').value.replace(/\D/g, '');
@@ -1166,22 +1282,30 @@
                 patronymic: document.getElementById('adCchPatronymic').value.trim() || null,
                 last_name_en: lastNameEn || null,
                 first_name_en: firstNameEn || null,
+                last_name_kg: document.getElementById('adCchLastNameKg').value.trim() || null,
+                first_name_kg: document.getElementById('adCchFirstNameKg').value.trim() || null,
                 name: (lastName + ' ' + firstName).trim(),
                 name_en: (lastNameEn + ' ' + firstNameEn).trim() || null,
+                name_kg: ((document.getElementById('adCchLastNameKg').value.trim() || '') + ' ' + (document.getElementById('adCchFirstNameKg').value.trim() || '')).trim() || null,
                 photo: imageUrl || null,
                 position: document.getElementById('adCchPosition').value.trim() || null,
                 position_en: document.getElementById('adCchPositionEn').value.trim() || null,
+                position_kg: document.getElementById('adCchPositionKg').value.trim() || null,
                 tags: tags,
                 experience: parseInt(document.getElementById('adCchExp').value, 10) || 0,
                 price: parseInt(document.getElementById('adCchPrice').value, 10) || 0,
                 short_desc: document.getElementById('adCchShortDesc').value.trim() || null,
                 short_desc_en: document.getElementById('adCchShortDescEn').value.trim() || null,
+                short_desc_kg: document.getElementById('adCchShortDescKg').value.trim() || null,
                 bio: document.getElementById('adCchBio').value.trim() || null,
                 bio_en: document.getElementById('adCchBioEn').value.trim() || null,
+                bio_kg: document.getElementById('adCchBioKg').value.trim() || null,
                 achievements: achievements,
                 achievements_en: cchAchievementsEn.filter(function(a) { return a.trim(); }),
+                achievements_kg: cchAchievementsKg.filter(function(a) { return a.trim(); }),
                 court: courtName || null,
                 court_en: courtNameEn || null,
+                court_kg: courtNameKg || null,
                 phone: phoneLocal ? '+996' + phoneLocal : null,
                 telegram: document.getElementById('adCchTelegram').value.trim() || null,
                 whatsapp: waLocal ? '+996' + waLocal : null,
@@ -1215,7 +1339,8 @@
             await saveCchPartnerData(coachId);
 
             A.showToast(L.saved, 'success');
-            renderCoachesList();
+            saveBtn.disabled = false;
+            saveBtn.textContent = L.save;
         } catch (e) {
             A.showToast(e.message || 'Error', 'error');
             saveBtn.disabled = false;

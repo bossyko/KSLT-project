@@ -653,13 +653,18 @@
         var coachesLink = isEn ? 'coaches-en.html' : (isKg ? 'coaches-kg.html' : 'coaches.html');
         var authLink = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
 
-        var html = '';
+        // Breadcrumb — render before container so it's outside .co-container
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
-        html += '<div class="kslt-back-wrap">';
-        html += '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
-        html += '<span class="kslt-back-sep">/</span>';
-        html += '<a href="' + coachesLink + '" class="kslt-back">' + L.backBtn + '</a>';
-        html += '</div>';
+        var breadcrumb = document.createElement('div');
+        breadcrumb.className = 'kslt-back-wrap';
+        breadcrumb.style.padding = '14px 24px';
+        breadcrumb.innerHTML =
+            '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+            '<span class="kslt-back-sep">/</span>' +
+            '<a href="' + coachesLink + '" class="kslt-back">' + L.backBtn + '</a>';
+        container.parentNode.insertBefore(breadcrumb, container);
+
+        var html = '';
 
         // Header
         html += '<div class="co-detail-header co-fade-in">' +

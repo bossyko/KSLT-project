@@ -492,6 +492,11 @@
         editCourt: 'Edit Court',
         crtName: 'Name',
         crtType: 'Type',
+        crtCourtType: 'Court Type',
+        crtAdditionalServices: 'Additional Services',
+        crtServiceName: 'Service',
+        crtServicePrice: 'Price (som/hr)',
+        crtDiscount: 'Discount %',
         crtSurface: 'Surface',
         crtCourtsCount: 'Qty',
         crtPrice: 'Price<br><span style="font-size:0.65rem;font-weight:400;color:var(--text-dim);">(som/hr)</span>',
@@ -1657,6 +1662,11 @@
         editCourt: 'Редактировать корт',
         crtName: 'Название',
         crtType: 'Тип',
+        crtCourtType: 'Тип корта',
+        crtAdditionalServices: 'Дополнительные услуги',
+        crtServiceName: 'Услуга',
+        crtServicePrice: 'Цена (сом/час)',
+        crtDiscount: 'Скидка %',
         crtSurface: 'Покрытие',
         crtCourtsCount: 'Кол-во',
         crtPrice: 'Цена<br><span style="font-size:0.65rem;font-weight:400;color:var(--text-dim);">(сом/час)</span>',
@@ -2377,7 +2387,8 @@
     var COURT_SURFACES = {
         hard: isEn ? 'Hard' : 'Хард',
         clay: isEn ? 'Clay' : 'Грунт',
-        carpet: isEn ? 'Carpet' : 'Ковёр'
+        carpet: isEn ? 'Carpet' : 'Ковёр',
+        grass: isEn ? 'Grass' : 'Трава'
     };
 
     var COURT_AMENITIES = [

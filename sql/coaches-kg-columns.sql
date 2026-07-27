@@ -1,0 +1,9 @@
+-- Coaches: add Kyrgyz language columns
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS last_name_kg TEXT;
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS first_name_kg TEXT;
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS name_kg TEXT;
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS position_kg TEXT;
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS short_desc_kg TEXT;
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS bio_kg TEXT;
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS achievements_kg JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS court_kg TEXT;

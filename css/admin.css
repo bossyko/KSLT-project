@@ -1170,7 +1170,7 @@ input[type="date"]::-webkit-datetime-edit {
 /* Court type dynamic rows */
 .ad-court-type-header {
     display: grid;
-    grid-template-columns: 1fr 1fr 70px 100px 60px 32px;
+    grid-template-columns: 1fr 1fr 70px 100px 60px 70px 32px;
     gap: 8px;
     margin-bottom: 6px;
     font-size: 0.72rem;
@@ -1182,10 +1182,18 @@ input[type="date"]::-webkit-datetime-edit {
 
 .ad-court-type-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 70px 100px 60px 32px;
+    grid-template-columns: 1fr 1fr 70px 100px 60px 70px 32px;
     gap: 8px;
     align-items: center;
     margin-bottom: 8px;
+}
+
+.ad-court-svc-header {
+    grid-template-columns: 1fr 100px 60px 70px 32px;
+}
+
+.ad-court-svc-row {
+    grid-template-columns: 1fr 100px 60px 70px 32px;
 }
 
 .ad-ct-partner-wrap {
@@ -1692,7 +1700,7 @@ select.ad-field-input {
     }
 
     .ad-court-type-row {
-        grid-template-columns: 1fr 1fr 60px 80px 40px 32px;
+        grid-template-columns: 1fr 1fr 60px 80px 40px 60px 32px;
         font-size: 0.8rem;
     }
 
