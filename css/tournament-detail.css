@@ -375,6 +375,27 @@
     border-color: var(--border-light);
 }
 
+.td-match-highlight,
+.td-ig-match.td-match-highlight {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 10px rgba(204, 255, 0, 0.25);
+}
+
+.td-match-dimmed,
+.td-ig-match.td-match-dimmed {
+    opacity: 0.3;
+}
+
+tr.td-rr-row-highlight {
+    background: rgba(204, 255, 0, 0.08) !important;
+    outline: 1px solid var(--accent);
+    outline-offset: -1px;
+}
+
+tr.td-rr-row-dimmed {
+    opacity: 0.3;
+}
+
 .td-match.live {
     border-color: rgba(239, 68, 68, 0.5);
     box-shadow: 0 0 12px rgba(239, 68, 68, 0.1);

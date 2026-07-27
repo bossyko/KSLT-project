@@ -27,6 +27,8 @@
     var GUEST_CAT_VISIBLE = 8;
     var GUEST_CAT_BLURRED = 4;
 
+    var CU = window.KSLT_COUNTRY;
+
     // Will be populated from Supabase or static
     var categoriesData = {};
 
@@ -286,7 +288,7 @@
                                 id: p.id,
                                 name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
                                 photo: p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?',
-                                country: p.country || '🇰🇬',
+                                country: (CU ? CU.flagEmoji(CU.normalizeCountry(p.country)) : p.country) || '🇰🇬',
                                 points: isDoubles ? (p.doubles_points || 0) : (p.points || 0),
                                 wins: p.wins || 0,
                                 losses: p.losses || 0,
@@ -581,7 +583,7 @@
                 '</div>' +
                 '<span class="pl-col-online">' + (p.online ? '<span class="pl-online-dot pl-online-pulse"></span>' : '<span class="pl-offline-dot"></span>') + '</span>' +
                 '<span class="pl-col-country">' + p.country + '</span>' +
-                '<span class="pl-col-ntrp">' + (p.ntrp_rating ? '<span class="pl-ntrp-value">' + Number(p.ntrp_rating).toFixed(1) + '</span>' : '<span class="pl-ntrp-na">\u2014</span>') + '</span>' +
+                '<span class="pl-col-ntrp">' + (p.ntrp_rating ? '<span class="pl-ntrp-value">' + (Math.round(Number(p.ntrp_rating) / 0.25) * 0.25).toFixed(2).replace(/0$/, '') + '</span>' : '<span class="pl-ntrp-na">\u2014</span>') + '</span>' +
                 '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
                 '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
                 '<span class="pl-col-form">' + formHtml + '</span>' +
@@ -907,7 +909,7 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
-                '<span class="pl-col-ntrp">' + (p.ntrp_rating ? '<span class="pl-ntrp-value">' + Number(p.ntrp_rating).toFixed(1) + '</span>' : '<span class="pl-ntrp-na">\u2014</span>') + '</span>' +
+                '<span class="pl-col-ntrp">' + (p.ntrp_rating ? '<span class="pl-ntrp-value">' + (Math.round(Number(p.ntrp_rating) / 0.25) * 0.25).toFixed(2).replace(/0$/, '') + '</span>' : '<span class="pl-ntrp-na">\u2014</span>') + '</span>' +
                 '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
                 '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
                 '<span class="pl-col-form">' + formHtml + '</span>' +

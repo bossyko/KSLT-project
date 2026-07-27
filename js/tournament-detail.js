@@ -7,6 +7,12 @@ function esc(str) {
     return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+function tdCountryFlag(val) {
+    var CU = window.KSLT_COUNTRY;
+    if (!CU || !val) return val || '';
+    return CU.flagEmoji(CU.normalizeCountry(val)) || val;
+}
+
 function getMapEmbed(url, fallbackAddress) {
     if (!url) {
         // No URL but have address — embed by address search
@@ -74,9 +80,77 @@ function getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg) {
     return captainName;
 }
 
+// ========================================
+// PLAYER HIGHLIGHT (from player profile)
+// ========================================
+function applyPlayerHighlight() {
+    var pid = window._tdHighlightPlayer;
+    if (!pid) return;
+
+    var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var playerPage = 'player' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + pid;
+    var backLabel = isEn ? 'Back to player profile' : (isKg ? 'Оюнчунун профилине кайтуу' : 'Назад к профилю игрока');
+    var backSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg> ';
+
+    // 1) Replace back links → history.back() to return to player profile
+    function goBackToPlayer(e) {
+        e.preventDefault();
+        history.back();
+    }
+    var heroBackLink = document.querySelector('.td-back-link');
+    if (heroBackLink) {
+        heroBackLink.href = playerPage;
+        heroBackLink.innerHTML = backSvg + backLabel;
+        heroBackLink.addEventListener('click', goBackToPlayer);
+    }
+    var tabsBackLink = document.getElementById('tabsBackLink');
+    var tabsBackText = document.getElementById('tabsBackText');
+    if (tabsBackLink) {
+        tabsBackLink.href = playerPage;
+        if (tabsBackText) tabsBackText.textContent = backLabel;
+        tabsBackLink.addEventListener('click', goBackToPlayer);
+    }
+
+    // 2) Switch to bracket tab and scroll (always)
+    var bracketTab = document.querySelector('.td-tab[data-target="bracket"]');
+    var bracketSection = document.getElementById('bracket');
+    if (bracketTab && bracketSection) {
+        document.querySelectorAll('.td-tab').forEach(function(t) { t.classList.remove('active'); });
+        bracketTab.classList.add('active');
+        setTimeout(function() {
+            var top = bracketSection.getBoundingClientRect().top + window.pageYOffset - 120;
+            window.scrollTo({ top: top, behavior: 'smooth' });
+        }, 300);
+    }
+
+    // 3) Highlight bracket matches + IG matches
+    var matches = document.querySelectorAll('.td-match[data-p1], .td-ig-match[data-p1]');
+    matches.forEach(function(m) {
+        var p1 = m.getAttribute('data-p1');
+        var p2 = m.getAttribute('data-p2');
+        if (p1 === pid || p2 === pid) {
+            m.classList.add('td-match-highlight');
+        } else if (p1 && p2) {
+            m.classList.add('td-match-dimmed');
+        }
+    });
+
+    // 4) Highlight group table rows + dim others
+    var rows = document.querySelectorAll('tr[data-player-id]');
+    rows.forEach(function(row) {
+        if (row.getAttribute('data-player-id') === pid) {
+            row.classList.add('td-rr-row-highlight');
+        } else {
+            row.classList.add('td-rr-row-dimmed');
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const tournamentId = urlParams.get('id');
+    window._tdHighlightPlayer = urlParams.get('player') || '';
 
     // Always preserve ?id= in language switcher
     if (tournamentId) {
@@ -103,6 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         renderParticipants(tournament);
         renderResults(tournament);
         initTabsNavigation();
+        applyPlayerHighlight();
         return;
     }
 
@@ -171,7 +246,7 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
                     id: pid,
                     name: p ? (isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name)) : 'TBD',
                     seed: null,
-                    country: p ? (p.country || '') : ''
+                    country: p ? tdCountryFlag(p.country) : ''
                 });
                 plAddedIds[pid] = true;
             }
@@ -519,7 +594,7 @@ function renderMatch(tournament, match, predOpts) {
     var p1Class = match.winnerId === match.player1Id ? 'winner' : (match.winnerId ? 'loser' : '');
     var p2Class = match.winnerId === match.player2Id ? 'winner' : (match.winnerId ? 'loser' : '');
 
-    var html = '<div class="td-match ' + match.status + '">';
+    var html = '<div class="td-match ' + match.status + '" data-p1="' + (match.player1Id || '') + '" data-p2="' + (match.player2Id || '') + '">';
 
     // Player 1
     html += '<div class="td-match-player ' + p1Class + '">' +
@@ -621,7 +696,7 @@ function renderRoundRobin(tournament) {
             var rowPlayer = getPlayer(tournament, standing.playerId);
             var rowPlayerIndex = group.playerIds.indexOf(standing.playerId);
 
-            html += '<tr>' +
+            html += '<tr data-player-id="' + (standing.playerId || '') + '">' +
                 '<td class="td-rr-rank">' + (rowIdx + 1) + '.</td>' +
                 '<td class="td-rr-player"><strong>' + rowPlayer.name + '</strong></td>';
 
@@ -1412,7 +1487,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         var gIsPL = gst.place <= glPLCut && glAllGroupDone;
                         var gIsCL = gst.place > glPLCut && gst.place <= glQPG && glAllGroupDone;
 
-                        glHtml += '<tr' + (gIsPL && glAllGroupDone ? ' style="background:rgba(204,255,0,0.06);"' : (gIsCL && glAllGroupDone ? ' style="background:rgba(204,255,0,0.03);"' : '')) + '>';
+                        glHtml += '<tr data-player-id="' + gst.playerId + '"' + (gIsPL && glAllGroupDone ? ' style="background:rgba(204,255,0,0.06);"' : (gIsCL && glAllGroupDone ? ' style="background:rgba(204,255,0,0.03);"' : '')) + '>';
                         glHtml += '<td style="text-align:center;font-weight:600;">' + (grow + 1) + '</td>';
                         glHtml += '<td style="white-space:nowrap;">' + gpName + gSeedHtml + '</td>';
 
@@ -1488,7 +1563,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                     id: pid,
                                     name: p ? (isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name)) : 'TBD',
                                     seed: null,
-                                    country: p ? (p.country || '') : ''
+                                    country: p ? tdCountryFlag(p.country) : ''
                                 });
                                 plAddedIds[pid] = true;
                             }
@@ -1595,7 +1670,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         }
 
                         var matchLabel = isEn ? 'Match ' : (isKg ? 'Матч ' : 'Матч ');
-                        bHtml += '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">';
+                        bHtml += '<div class="td-ig-match" data-p1="' + (m.player1_id || '') + '" data-p2="' + (m.player2_id || '') + '" style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">';
                         bHtml += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);">' + matchLabel + (idx + 1) + '</div>';
                         // P1
                         bHtml += '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);' + (isP1Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
@@ -1675,7 +1750,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         var seedHtml = st.seed ? ' <span style="color:var(--accent);font-size:0.7rem;">[' + st.seed + ']</span>' : '';
                         var isQualified = st.place <= qualifiers && allGroupDone;
 
-                        bHtml += '<tr' + (isQualified && allGroupDone ? ' style="background:rgba(204,255,0,0.06);"' : '') + '>';
+                        bHtml += '<tr data-player-id="' + st.playerId + '"' + (isQualified && allGroupDone ? ' style="background:rgba(204,255,0,0.06);"' : '') + '>';
                         bHtml += '<td style="text-align:center;font-weight:600;">' + (row + 1) + '</td>';
                         bHtml += '<td style="white-space:nowrap;">' + stName + seedHtml + '</td>';
 
@@ -1739,7 +1814,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     id: pid,
                     name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
                     seed: null,
-                    country: p.country || ''
+                    country: tdCountryFlag(p.country)
                 });
             });
             matches.forEach(function(m) {
@@ -1842,7 +1917,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     id: pid,
                     name: displayName,
                     seed: null,
-                    country: p.country || ''
+                    country: tdCountryFlag(p.country)
                 });
                 addedIds[pid] = true;
             });
@@ -2211,6 +2286,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
     // Init prediction bar animations
     initPredictionAnimations();
+
+    // Highlight player matches if ?player= param
+    applyPlayerHighlight();
 }
 
 // ========================================

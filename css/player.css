@@ -292,6 +292,11 @@
     background: #ef4444;
 }
 
+.pp-stats.pp-stats-doubles {
+    grid-template-columns: repeat(5, 1fr);
+    margin-bottom: 48px;
+}
+
 /* ---- SECTIONS ---- */
 .pp-section {
     margin-bottom: 48px;
@@ -370,6 +375,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.pp-match-doubles-badge {
+    font-size: 1.1rem;
+    vertical-align: middle;
 }
 
 .pp-match-tournament a {
@@ -1106,6 +1116,13 @@ a.pp-tournament:hover {
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.h2h-partner {
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 2px;
     white-space: nowrap;
     max-width: 100%;
 }
