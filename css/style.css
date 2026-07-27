@@ -348,8 +348,8 @@ nav {
 .sponsor-badge {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+    align-items: center;
+    gap: 2px;
     padding-left: var(--space-sm);
     border-left: 1px solid var(--border-subtle);
 }
@@ -362,9 +362,9 @@ nav {
 }
 
 .sponsor-logo-img {
-    height: 80px;
+    height: 24px;
     width: auto;
-    max-width: 240px;
+    max-width: 120px;
     object-fit: contain;
     opacity: 1;
     transition: all var(--transition-fast);
@@ -2995,8 +2995,10 @@ h2 {
 }
 
 .sponsor-hero-logo img {
-    height: 48px;
+    height: 60px;
     width: auto;
+    max-width: 200px;
+    object-fit: contain;
     filter: brightness(1.1);
 }
 
@@ -3029,10 +3031,21 @@ h2 {
 }
 
 .sponsor-logo-link img {
-    height: 28px;
+    height: 36px;
     width: auto;
-    max-width: 90px;
+    max-width: 120px;
     object-fit: contain;
+}
+
+/* Bigger logos on homepage sponsors section */
+.section-sponsors-compact .sponsor-hero-logo img {
+    height: 72px;
+    max-width: 240px;
+}
+
+.section-sponsors-compact .sponsor-logo-link img {
+    height: 44px;
+    max-width: 140px;
 }
 
 
@@ -3151,10 +3164,12 @@ h2 {
 .carousel-slide-infinite img {
     width: 100%;
     height: 100px;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-subtle);
     background: var(--bg-card);
+    padding: 12px;
+    box-sizing: border-box;
     transition: all var(--transition-fast);
 }
 

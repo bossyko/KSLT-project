@@ -275,24 +275,7 @@
         <section class="news-not-found" id="newsNotFound"></section>
 
         <!-- SPONSORS -->
-        <section id="sponsors" class="section-sponsors-compact">
-            <div class="section-header">
-                <h2>Partners & Sponsors</h2>
-            </div>
-            <div class="sponsor-hero">
-                <span class="sponsor-hero-label">General Sponsor</span>
-                <a href="#" class="sponsor-hero-logo">
-                    <img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">
-                </a>
-            </div>
-            <div class="sponsors-cloud">
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>
-                <a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>
-            </div>
-        </section>
+        <section id="sponsors" class="section-sponsors-compact"></section>
     </main>
 
     <!-- FOOTER -->
@@ -385,6 +368,8 @@
 
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js"></script>
+    <script src="../js/sponsors-loader.js"></script>
+    <script>if (window.loadSponsors) loadSponsors('sponsors');</script>
     <script src="../js/session-monitor.js"></script>
     <script src="../js/auth-nav.js?v=2"></script>
     <script src="../js/script.js"></script>

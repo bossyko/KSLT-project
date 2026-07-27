@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Back links are JS-generated, so we watch DOM for them
     // ========================================
     (function() {
-        var SELECTORS = '.news-back-link, .trn-back-link';
+        var SELECTORS = '.news-back-link';
         var bar = null;
 
         function setup(backLink) {

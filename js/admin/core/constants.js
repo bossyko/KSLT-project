@@ -234,6 +234,9 @@
         doublesExtPartnerNtrp: 'Partner NTRP',
         doublesExtPartnerGender: 'Partner Gender',
         doublesUnpaired: 'Unpaired registrations will be excluded from draw',
+        trnSetFormat: 'Set Format',
+        formatStandard: 'Standard (TB at 6-6)',
+        formatShort: 'Short (TB at 5-5)',
         trnDrawSize: 'Draw Size',
         trnBracketType: 'Bracket Type',
         trnCourtCount: 'Courts',
@@ -1090,6 +1093,20 @@
         chalSaveDraft: 'Save',
         chalDraftSaved: 'Score saved',
         chalScore: 'Score',
+        // Sponsors
+        sponsors: 'Sponsors',
+        addSponsor: 'Add Sponsor',
+        editSponsor: 'Edit Sponsor',
+        sponName: 'Name',
+        sponLogo: 'Logo',
+        sponUrl: 'Website',
+        sponIsHero: 'General sponsor',
+        sponSort: 'Sort order',
+        sponSaved: 'Sponsor saved',
+        sponDeleted: 'Sponsor deleted',
+        sponNoItems: 'No sponsors yet',
+        sponNoItemsText: 'Click "Add Sponsor" to create your first sponsor',
+        sponDeleteConfirm: 'Delete this sponsor?',
         // Live Match
         liveSection: 'Live',
         liveActive: 'Active',
@@ -1099,6 +1116,7 @@
         livePlayer2: 'Player 2',
         liveYoutube: 'YouTube URL',
         liveBestOf: 'Sets',
+        liveSetFormat: 'Set Format',
         liveTournLabel: 'Tournament Label',
         liveModeTournament: 'From tournament match',
         liveModeFree: 'Free match',
@@ -1371,6 +1389,9 @@
         doublesExtPartnerNtrp: 'NTRP партнёра',
         doublesExtPartnerGender: 'Пол партнёра',
         doublesUnpaired: 'Незапаренные заявки будут исключены из жеребьёвки',
+        trnSetFormat: 'Формат сета',
+        formatStandard: 'Стандартный (ТБ при 6-6)',
+        formatShort: 'Короткий (ТБ при 5-5)',
         trnDrawSize: 'Размер сетки',
         trnBracketType: 'Тип сетки',
         trnCourtCount: 'Корты',
@@ -2227,6 +2248,20 @@
         chalSaveDraft: 'Сохранить',
         chalDraftSaved: 'Счёт сохранён',
         chalScore: 'Счёт',
+        // Sponsors
+        sponsors: 'Спонсоры',
+        addSponsor: 'Добавить спонсора',
+        editSponsor: 'Редактировать спонсора',
+        sponName: 'Название',
+        sponLogo: 'Логотип',
+        sponUrl: 'Сайт',
+        sponIsHero: 'Генеральный спонсор',
+        sponSort: 'Порядок сортировки',
+        sponSaved: 'Спонсор сохранён',
+        sponDeleted: 'Спонсор удалён',
+        sponNoItems: 'Спонсоров пока нет',
+        sponNoItemsText: 'Нажмите «Добавить спонсора» чтобы создать первого спонсора',
+        sponDeleteConfirm: 'Удалить этого спонсора?',
         // Live Match
         liveSection: 'Live',
         liveActive: 'Активные',
@@ -2236,6 +2271,7 @@
         livePlayer2: 'Игрок 2',
         liveYoutube: 'YouTube URL',
         liveBestOf: 'Кол-во сетов',
+        liveSetFormat: 'Формат сета',
         liveTournLabel: 'Турнир',
         liveModeTournament: 'Из турнирного матча',
         liveModeFree: 'Свободный матч',
@@ -2377,7 +2413,8 @@
         ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 013-3h14a3 3 0 013 3v0a3 3 0 01-3 3v1a3 3 0 013 3v0a3 3 0 01-3 3H5a3 3 0 01-3-3v0a3 3 0 013-3v-1a3 3 0 01-3-3z"/></svg>',
         settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
         swords: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M9.5 6.5L21 18v3h-3L6.5 9.5"/><path d="M11 5l-6 6"/><path d="M8 8L4 4"/><path d="M5 3L3 5"/></svg>',
-        tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>'
+        tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>',
+        handshake: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 17a1 1 0 01-1 1H6l-4-4 6.768-6.768A2 2 0 0110.18 6.8l.292.124a2 2 0 001.83-.164L14.5 5l5 5-3.5 3.5"/><path d="M15 11l4 4-5 5-4-4"/><path d="M14 21a1 1 0 001-1v-1a1 1 0 00-1-1 1 1 0 01-1-1v-1a1 1 0 00-1-1 1 1 0 01-1-1 1 1 0 00-1-1"/><path d="M5 11l4-4"/></svg>'
     };
 
     var SECTION_ICONS = {
@@ -2391,13 +2428,14 @@
         loyalty: '⭐',
         challenges: '⚔️',
         live: '📡',
+        sponsors: '🤝',
         settings: '⚙️'
     };
 
 
     var ROLE_SECTIONS = {
-        admin:   ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'users', 'finances', 'vouchers', 'loyalty', 'settings'],
-        manager: ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'users', 'finances', 'vouchers', 'loyalty']
+        admin:   ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'sponsors', 'users', 'finances', 'vouchers', 'loyalty', 'settings'],
+        manager: ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'sponsors', 'users', 'finances', 'vouchers', 'loyalty']
     };
 
     /**

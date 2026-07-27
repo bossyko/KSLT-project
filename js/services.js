@@ -112,7 +112,7 @@
     function init() {
         renderHero();
         loadData();
-        renderSponsors();
+        if (window.loadSponsors) loadSponsors('svSponsors');
     }
 
     // Fisher-Yates shuffle
@@ -614,29 +614,6 @@
         });
     }
 
-    // --- Sponsors ---
-    function renderSponsors() {
-        var container = document.getElementById('svSponsors');
-        if (!container) return;
-
-        var title = isEn ? 'Partners & Sponsors' : (isKg ? 'ӨНӨКТӨШТӨР ЖАНА ДЕМӨӨРЧҮЛӨР' : 'ПАРТНЁРЫ И СПОНСОРЫ');
-        var generalLabel = isEn ? 'GENERAL SPONSOR' : (isKg ? 'БАШ ДЕМӨӨРЧҮ' : 'ГЕНЕРАЛЬНЫЙ СПОНСОР');
-
-        container.innerHTML =
-            '<div class="section-header"><h2>' + title + '</h2></div>' +
-            '<div class="sponsor-hero">' +
-                '<span class="sponsor-hero-label">' + generalLabel + '</span>' +
-                '<a href="https://nurzaman.kg" target="_blank" rel="noopener" class="sponsor-hero-logo">' +
-                    '<img src="https://nurzaman.kg/wp-content/themes/nur/img/nur-logonew.png" alt="Nurzaman">' +
-                '</a>' +
-            '</div>' +
-            '<div class="sponsors-cloud">' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>' +
-            '</div>';
-    }
+    // --- Sponsors — loaded via sponsors-loader.js ---
 
 })();

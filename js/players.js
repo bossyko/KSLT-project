@@ -350,7 +350,7 @@
         renderFilters();
         renderPodium(currentTab);
         renderTable(currentTab, 1);
-        renderSponsors();
+        if (window.loadSponsors) loadSponsors('playersSponsors');
         initTabs();
         initSearch();
         initScrollAnimations();
@@ -646,30 +646,8 @@
     }
 
     // ========================================
-    // SPONSORS
+    // SPONSORS — loaded via sponsors-loader.js
     // ========================================
-
-    function renderSponsors() {
-        var container = document.getElementById('playersSponsors');
-        if (!container) return;
-
-        var labels = getLabels();
-        container.innerHTML =
-            '<div class="section-header"><h2>' + labels.sponsorsTitle + '</h2></div>' +
-            '<div class="sponsor-hero">' +
-                '<span class="sponsor-hero-label">' + labels.sponsorsGeneral + '</span>' +
-                '<a href="#" class="sponsor-hero-logo">' +
-                    '<img src="https://placehold.co/200x80/0A0A0A/CCFF00?text=NURZAMAN" alt="Nurzaman">' +
-                '</a>' +
-            '</div>' +
-            '<div class="sponsors-cloud">' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/120x50/1a1a1a/888888?text=Sponsor" alt="Sponsor"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/100x50/1a1a1a/888888?text=Partner" alt="Partner"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/110x50/1a1a1a/888888?text=Brand" alt="Brand"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/130x50/1a1a1a/888888?text=Company" alt="Company"></a>' +
-                '<a href="#" class="sponsor-logo-link"><img src="https://placehold.co/90x50/1a1a1a/888888?text=Logo" alt="Logo"></a>' +
-            '</div>';
-    }
 
     // ========================================
     // CATEGORY PAGE MODE
@@ -716,16 +694,13 @@
         var podiumEl = document.getElementById('playersPodium');
         if (podiumEl) podiumEl.style.display = 'none';
 
-        // Render sticky category bar in filters section (already sticky at top:64px)
+        // Render sticky category bar in filters section (back link + name + search — all inline)
         var filtersEl = document.getElementById('playersFilters');
         if (filtersEl) {
             filtersEl.classList.add('pl-cat-mode');
             filtersEl.innerHTML =
+                '<a href="' + playersPage + '" class="kslt-back" style="align-self:flex-start;">\u2190 ' + labels.catPageBack + '</a>' +
                 '<div class="pl-cat-sticky-bar">' +
-                    '<a href="' + playersPage + '" class="pl-cat-back-link">' +
-                        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>' +
-                        labels.catPageBack +
-                    '</a>' +
                     '<div class="pl-cat-sticky-name">' + esc(cat.name) + ' <span>' + genderIcon + '</span></div>' +
                     '<div class="pl-cat-sticky-search">' +
                         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
@@ -748,7 +723,7 @@
         renderCatTable(tabId, 1);
 
         // Sponsors
-        renderSponsors();
+        if (window.loadSponsors) loadSponsors('playersSponsors');
 
         // Init delegated listeners once
         if (!_catListenersReady) {

@@ -34,6 +34,7 @@
             { key: 'players',   icon: A.ICONS.chart,  label: L.players,   badge: false },
             { key: 'courts',   icon: A.ICONS.location, label: L.courts,  badge: false },
             { key: 'coaches', icon: A.ICONS.coach,    label: L.coaches, badge: false },
+            { key: 'sponsors', icon: A.ICONS.handshake, label: L.sponsors, badge: false },
             { key: '_divider' },
             { key: 'users',     icon: A.ICONS.users,  label: L.users,     badge: false },
             { key: 'finances', icon: A.ICONS.wallet, label: L.finances, badge: false },
@@ -141,7 +142,8 @@
                 coaches:     { edit: A.loadAndEditCoach, view: A.loadAndViewCoach },
                 finances:    { edit: A.loadAndEditFinance },
                 users:       { edit: A.loadAndEditUser },
-                vouchers:    { view: A.loadAndViewVoucher }
+                vouchers:    { view: A.loadAndViewVoucher },
+                sponsors:    { edit: A.loadAndEditSponsor }
             };
             if (deepMap[tab] && deepMap[tab][action]) {
                 deepMap[tab][action](itemId);
@@ -162,7 +164,8 @@
             vouchers: A.renderVouchersList,
             loyalty: A.renderLoyaltySection,
             challenges: A.renderChallengesSection,
-            live: A.renderLiveSection
+            live: A.renderLiveSection,
+            sponsors: A.renderSponsorsList
         };
         if (resetMap[tab]) {
             resetMap[tab]();

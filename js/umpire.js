@@ -11,10 +11,11 @@
 
     var POINTS = ['0', '15', '30', '40'];
 
-    function createInitialState(bestOf) {
+    function createInitialState(bestOf, setFormat) {
         return {
             best_of: bestOf || 3,
             sets_to_win: bestOf === 5 ? 3 : bestOf === 1 ? 1 : 2,
+            set_format: setFormat || 'standard',
             serving_player: 1,
             points_p1: '0',
             points_p2: '0',
@@ -98,17 +99,31 @@
 
         var g1 = state.current_game_p1;
         var g2 = state.current_game_p2;
+        var isShort = state.set_format === 'short';
 
         // Check set win
-        if (g1 >= 6 && g1 - g2 >= 2) {
-            wonSet(state, 1);
-        } else if (g2 >= 6 && g2 - g1 >= 2) {
-            wonSet(state, 2);
-        } else if (g1 === 6 && g2 === 6) {
-            // Tiebreak
-            state.is_tiebreak = true;
-            state.tiebreak_p1 = 0;
-            state.tiebreak_p2 = 0;
+        if (isShort) {
+            // Short format: win at 6 (opponent < 5), tiebreak at 5-5
+            if (g1 >= 6 && g2 < 5) {
+                wonSet(state, 1);
+            } else if (g2 >= 6 && g1 < 5) {
+                wonSet(state, 2);
+            } else if (g1 === 5 && g2 === 5) {
+                state.is_tiebreak = true;
+                state.tiebreak_p1 = 0;
+                state.tiebreak_p2 = 0;
+            }
+        } else {
+            // Standard format: win at 6 with 2-game lead, tiebreak at 6-6
+            if (g1 >= 6 && g1 - g2 >= 2) {
+                wonSet(state, 1);
+            } else if (g2 >= 6 && g2 - g1 >= 2) {
+                wonSet(state, 2);
+            } else if (g1 === 6 && g2 === 6) {
+                state.is_tiebreak = true;
+                state.tiebreak_p1 = 0;
+                state.tiebreak_p2 = 0;
+            }
         }
 
         if (!state.is_tiebreak) {
@@ -226,6 +241,7 @@
             status: state.status,
             winner_player: state.winner_player,
             final_score: state.final_score,
+            set_format: state.set_format || 'standard',
             history: state.history
         };
     }
@@ -234,6 +250,7 @@
         return {
             best_of: dbMatch.best_of || 3,
             sets_to_win: (dbMatch.best_of || 3) === 5 ? 3 : (dbMatch.best_of || 3) === 1 ? 1 : 2,
+            set_format: dbMatch.set_format || 'standard',
             serving_player: dbMatch.serving_player || 1,
             points_p1: dbMatch.points_p1 || '0',
             points_p2: dbMatch.points_p2 || '0',

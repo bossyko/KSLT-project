@@ -116,6 +116,14 @@
     border-bottom-color: var(--border-subtle);
 }
 
+.bo-sticky-header > .kslt-back-wrap {
+    align-self: flex-start;
+    position: static;
+    border-bottom: none;
+    padding: 0;
+    z-index: auto;
+}
+
 .bo-back-link {
     align-self: flex-start;
     display: inline-flex;

@@ -22,6 +22,7 @@
         A.renderPlayersSection();
         A.renderCourtsSection();
         A.renderCoachesSection();
+        A.renderSponsorsSection();
         A.renderFinancesSection();
         A.renderVouchersSection();
         A.renderLoyaltySection();

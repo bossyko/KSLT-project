@@ -628,24 +628,38 @@
     }
 
     function initFilterSearch(grid) {
+        // Chip-based filters
+        var chips = document.querySelectorAll('.trn-filter-chip');
+        chips.forEach(function(chip) {
+            chip.addEventListener('click', function() {
+                var group = chip.dataset.filter; // 'status' or 'gender'
+                var parent = chip.closest('.trn-filter-chips');
+                if (parent) {
+                    parent.querySelectorAll('.trn-filter-chip').forEach(function(c) { c.classList.remove('active'); });
+                }
+                chip.classList.add('active');
+                applyFilters(grid);
+            });
+        });
+
+        // Fallback: dropdown-based filters (for backwards compat)
         var statusSelect = document.getElementById('statusFilter');
         var genderSelect = document.getElementById('genderFilter');
-
-        if (statusSelect) {
-            statusSelect.addEventListener('change', function() { applyFilters(grid); });
-        }
-        if (genderSelect) {
-            genderSelect.addEventListener('change', function() { applyFilters(grid); });
-        }
+        if (statusSelect) statusSelect.addEventListener('change', function() { applyFilters(grid); });
+        if (genderSelect) genderSelect.addEventListener('change', function() { applyFilters(grid); });
     }
 
     function applyFilters(grid) {
         var input = document.getElementById('tournamentSearch');
         var query = input ? input.value.trim().toLowerCase() : '';
+
+        // Read from chips first, fallback to selects
+        var statusChip = document.querySelector('.trn-filter-chip[data-filter="status"].active');
+        var genderChip = document.querySelector('.trn-filter-chip[data-filter="gender"].active');
         var statusSelect = document.getElementById('statusFilter');
         var genderSelect = document.getElementById('genderFilter');
-        var filter = statusSelect ? statusSelect.value : 'all';
-        var genderFilter = genderSelect ? genderSelect.value : 'all';
+        var filter = statusChip ? statusChip.dataset.value : (statusSelect ? statusSelect.value : 'all');
+        var genderFilter = genderChip ? genderChip.dataset.value : (genderSelect ? genderSelect.value : 'all');
 
         // Update section title
         var sectionTitle = document.querySelector('#trnStickyHeader h2');
