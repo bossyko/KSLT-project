@@ -196,5 +196,13 @@ window.courtsLabels = {
     noVouchersYet: "No discounts yet",
     pickService: "Choose a service",
     pickSubmit: "Get Discount",
-    noDiscountsConfigured: "No discounts available"
+    noDiscountsConfigured: "No discounts available",
+    courtTypesTitle: "Court Types",
+    thType: "Type",
+    thSurface: "Surface",
+    thQty: "Qty",
+    thPrice: "Price",
+    additionalServicesTitle: "Additional Services",
+    thService: "Service",
+    thServicePrice: "Price"
 };

@@ -197,5 +197,13 @@ window.courtsLabels = {
     noVouchersYet: 'Арзандатуулар жок',
     pickService: 'Кызматты тандаңыз',
     pickSubmit: 'Арзандатуу алуу',
-    noDiscountsConfigured: 'Арзандатуу жок'
+    noDiscountsConfigured: 'Арзандатуу жок',
+    courtTypesTitle: 'Корт түрлөрү',
+    thType: 'Түрү',
+    thSurface: 'Жабуу',
+    thQty: 'Саны',
+    thPrice: 'Баасы',
+    additionalServicesTitle: 'Кошумча кызматтар',
+    thService: 'Кызмат',
+    thServicePrice: 'Баасы'
 };

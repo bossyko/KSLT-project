@@ -23,6 +23,7 @@
     var crtPage = 1;
     var CRT_PER_PAGE = 10;
     var crtCourtTypes = [];
+    var crtAdditionalServices = [];
     var crtPhones = [];
     var crtPartnerServices = [];
     var crtPartnerPin = '';
@@ -130,7 +131,7 @@
             });
         });
 
-        var surfaceKeys = ['hard', 'clay', 'carpet'];
+        var surfaceKeys = ['hard', 'clay', 'carpet', 'grass'];
         ['outdoor', 'indoor'].forEach(function(type) {
             var el = type === 'outdoor' ? outdoorEl : indoorEl;
             var totalEl = type === 'outdoor' ? totalOutEl : totalInEl;
@@ -520,7 +521,7 @@
         var serverSortCol = (crtSortCol === 'name' || crtSortCol === 'city') ? crtSortCol : 'name';
 
         var query = A.client.from('courts')
-            .select('id,name,court_types,partner,city,promoted,view_count')
+            .select('id,name,court_types,additional_services,partner,city,promoted,view_count')
             .order(serverSortCol, { ascending: crtSortCol === serverSortCol ? crtSortAsc : true });
 
         var result = await query;
@@ -700,6 +701,7 @@
         crtGalleryUrls = (item && item.gallery) ? item.gallery.slice() : [];
         crtGalleryFiles = [];
         crtCourtTypes = (item && item.court_types) ? JSON.parse(JSON.stringify(item.court_types)) : [];
+        crtAdditionalServices = (item && item.additional_services) ? JSON.parse(JSON.stringify(item.additional_services)) : [];
         crtPartnerPin = (item && item.partner_pin) ? item.partner_pin : '';
         crtPartnerServices = [];
 
@@ -785,17 +787,32 @@
 
             // Court Types (dynamic rows with headers)
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.crtType + '</div>' +
+                '<div class="ad-form-card-title">' + L.crtCourtType + '</div>' +
                 '<div class="ad-court-type-header">' +
                     '<span>' + L.crtType + '</span>' +
                     '<span>' + L.crtSurface + '</span>' +
                     '<span>' + L.crtCourtsCount + '</span>' +
                     '<span>' + L.crtPrice + '</span>' +
                     '<span>' + L.crtPartner + '</span>' +
+                    '<span>' + L.crtDiscount + '</span>' +
                     '<span></span>' +
                 '</div>' +
                 '<div id="adCrtTypesRows"></div>' +
                 '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtTypesAdd">' + L.crtAdd + '</button>' +
+            '</div>' +
+
+            // Additional Services (dynamic rows)
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.crtAdditionalServices + '</div>' +
+                '<div class="ad-court-type-header ad-court-svc-header">' +
+                    '<span>' + L.crtServiceName + '</span>' +
+                    '<span>' + L.crtServicePrice + '</span>' +
+                    '<span>' + L.crtPartner + '</span>' +
+                    '<span>' + L.crtDiscount + '</span>' +
+                    '<span></span>' +
+                '</div>' +
+                '<div id="adCrtServicesRows"></div>' +
+                '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtServicesAdd">' + L.crtAdd + '</button>' +
             '</div>' +
 
             // Address form (RU/EN/KG)
@@ -981,16 +998,6 @@
                             '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtResetPin">' + L.crtResetPin + '</button>' +
                         '</div>' +
                     '</div>' +
-                '</div>' +
-                '<div style="margin-top:16px;">' +
-                    '<label class="ad-field-label">' + (isEn ? 'Partner Services' : 'Услуги партнёра') + '</label>' +
-                    '<div class="ad-partner-services-header" style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:4px;font-size:0.75rem;color:var(--text-dim);">' +
-                        '<span>' + L.crtServiceName + '</span>' +
-                        '<span>' + L.crtDiscount + '</span>' +
-                        '<span></span>' +
-                    '</div>' +
-                    '<div id="adCrtPartnerServicesRows"></div>' +
-                    '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtAddService" style="margin-top:8px;">' + L.crtAddService + '</button>' +
                 '</div>' +
             '</div>' +
 
@@ -1191,6 +1198,7 @@
                     '<input type="text" class="ad-field-input ad-ct-count" inputmode="numeric" pattern="[0-9]*" value="' + (ct.count || '') + '">' +
                     '<input type="text" class="ad-field-input ad-ct-price" inputmode="numeric" pattern="[0-9]*" value="' + (ct.price || '') + '">' +
                     '<label class="ad-ct-partner-wrap"><input type="checkbox" class="ad-ct-partner"' + (ct.partner ? ' checked' : '') + '></label>' +
+                    '<input type="text" class="ad-field-input ad-ct-discount" inputmode="numeric" pattern="[0-9]*" placeholder="%" value="' + (ct.discount || '') + '"' + (ct.partner ? '' : ' style="visibility:hidden"') + '>' +
                     (crtCourtTypes.length > 1 ? '<button type="button" class="ad-btn-icon ad-ct-remove">&times;</button>' : '<div></div>') +
                 '</div>';
             });
@@ -1231,20 +1239,12 @@
             }
             if (e.target.classList.contains('ad-ct-partner')) {
                 crtCourtTypes[idx].partner = e.target.checked;
-                var isAnyPartner = crtCourtTypes.some(function(ct) { return ct.partner; });
-                var partnerCard = document.getElementById('adCrtPartnerCard');
-                if (partnerCard) {
-                    partnerCard.style.display = isAnyPartner ? 'block' : 'none';
-                    if (isAnyPartner && !crtPartnerPin) {
-                        crtPartnerPin = String(Math.floor(1000 + Math.random() * 9000));
-                        document.getElementById('adCrtPartnerPin').value = crtPartnerPin;
-                    }
-                    if (isAnyPartner && crtPartnerServices.length === 0) {
-                        crtPartnerServices.push({ id: null, service_name: isEn ? L.crtDefaultService : L.crtDefaultService, service_name_en: '', service_name_kg: '', discount_percent: 0 });
-                        renderCrtPartnerServices();
-                        if (crtEditingId) loadCrtPartnerServices(crtEditingId);
-                    }
+                var discountInput = row.querySelector('.ad-ct-discount');
+                if (discountInput) {
+                    discountInput.style.visibility = e.target.checked ? 'visible' : 'hidden';
+                    if (!e.target.checked) { crtCourtTypes[idx].discount = 0; discountInput.value = ''; }
                 }
+                updatePartnerVisibility();
             }
         });
         document.getElementById('adCrtTypesRows').addEventListener('input', function(e) {
@@ -1262,7 +1262,88 @@
             if (e.target.classList.contains('ad-ct-surface-custom')) {
                 crtCourtTypes[idx].surface = e.target.value.trim();
             }
+            if (e.target.classList.contains('ad-ct-discount')) {
+                e.target.value = e.target.value.replace(/\D/g, '');
+                crtCourtTypes[idx].discount = parseInt(e.target.value, 10) || 0;
+            }
         });
+
+        // Additional Services rows
+        function renderCrtServiceRows() {
+            var rowsEl = document.getElementById('adCrtServicesRows');
+            if (!rowsEl) return;
+            var html = '';
+            crtAdditionalServices.forEach(function(svc, idx) {
+                html += '<div class="ad-court-type-row ad-court-svc-row" data-idx="' + idx + '">' +
+                    '<input type="text" class="ad-field-input ad-svc-name" placeholder="' + L.crtServiceName + '..." value="' + A.esc(svc.name || '') + '">' +
+                    '<input type="text" class="ad-field-input ad-svc-price" inputmode="numeric" pattern="[0-9]*" value="' + (svc.price || '') + '">' +
+                    '<label class="ad-ct-partner-wrap"><input type="checkbox" class="ad-svc-partner"' + (svc.partner ? ' checked' : '') + '></label>' +
+                    '<input type="text" class="ad-field-input ad-svc-discount" inputmode="numeric" pattern="[0-9]*" placeholder="%" value="' + (svc.discount || '') + '"' + (svc.partner ? '' : ' style="visibility:hidden"') + '>' +
+                    '<button type="button" class="ad-btn-icon ad-svc-remove">&times;</button>' +
+                '</div>';
+            });
+            rowsEl.innerHTML = html;
+        }
+        renderCrtServiceRows();
+
+        document.getElementById('adCrtServicesAdd').addEventListener('click', function() {
+            crtAdditionalServices.push({ name: '', name_en: '', name_kg: '', price: 0, partner: false });
+            renderCrtServiceRows();
+        });
+
+        document.getElementById('adCrtServicesRows').addEventListener('click', function(e) {
+            var rmBtn = e.target.closest('.ad-svc-remove');
+            if (!rmBtn) return;
+            var row = rmBtn.closest('.ad-court-svc-row');
+            var idx = parseInt(row.dataset.idx, 10);
+            crtAdditionalServices.splice(idx, 1);
+            renderCrtServiceRows();
+            updatePartnerVisibility();
+        });
+
+        document.getElementById('adCrtServicesRows').addEventListener('change', function(e) {
+            var row = e.target.closest('.ad-court-svc-row');
+            if (!row) return;
+            var idx = parseInt(row.dataset.idx, 10);
+            if (e.target.classList.contains('ad-svc-partner')) {
+                crtAdditionalServices[idx].partner = e.target.checked;
+                var discountInput = row.querySelector('.ad-svc-discount');
+                if (discountInput) {
+                    discountInput.style.visibility = e.target.checked ? 'visible' : 'hidden';
+                    if (!e.target.checked) { crtAdditionalServices[idx].discount = 0; discountInput.value = ''; }
+                }
+                updatePartnerVisibility();
+            }
+        });
+
+        document.getElementById('adCrtServicesRows').addEventListener('input', function(e) {
+            var row = e.target.closest('.ad-court-svc-row');
+            if (!row) return;
+            var idx = parseInt(row.dataset.idx, 10);
+            if (e.target.classList.contains('ad-svc-name')) {
+                crtAdditionalServices[idx].name = e.target.value.trim();
+            }
+            if (e.target.classList.contains('ad-svc-price')) {
+                e.target.value = e.target.value.replace(/\D/g, '');
+                crtAdditionalServices[idx].price = parseInt(e.target.value, 10) || 0;
+            }
+            if (e.target.classList.contains('ad-svc-discount')) {
+                e.target.value = e.target.value.replace(/\D/g, '');
+                crtAdditionalServices[idx].discount = parseInt(e.target.value, 10) || 0;
+            }
+        });
+
+        function updatePartnerVisibility() {
+            var isAnyPartner = crtCourtTypes.some(function(ct) { return ct.partner; }) || crtAdditionalServices.some(function(s) { return s.partner; });
+            var partnerCard = document.getElementById('adCrtPartnerCard');
+            if (partnerCard) {
+                partnerCard.style.display = isAnyPartner ? 'block' : 'none';
+                if (isAnyPartner && !crtPartnerPin) {
+                    crtPartnerPin = String(Math.floor(1000 + Math.random() * 9000));
+                    document.getElementById('adCrtPartnerPin').value = crtPartnerPin;
+                }
+            }
+        }
 
         // Phones: render
         function renderCrtPhones() {
@@ -1398,13 +1479,8 @@
             crtPartnerPin = String(Math.floor(1000 + Math.random() * 9000));
             document.getElementById('adCrtPartnerPin').value = crtPartnerPin;
         });
-        document.getElementById('adCrtAddService').addEventListener('click', function() {
-            crtPartnerServices.push({ id: null, service_name: '', service_name_en: '', service_name_kg: '', discount_percent: 0 });
-            renderCrtPartnerServices();
-        });
-        // Load partner services if editing
+        // Load partner PIN if editing
         if (crtEditingId && item && item.partner) {
-            loadCrtPartnerServices(crtEditingId);
             // Auto-generate PIN if missing
             if (!crtPartnerPin) {
                 crtPartnerPin = String(Math.floor(1000 + Math.random() * 9000));
@@ -1548,47 +1624,48 @@
 
     async function saveCrtPartnerData(courtId) {
         if (!A.client) return;
-        var isPartner = crtCourtTypes.some(function(ct) { return ct.partner; });
-        if (!isPartner) return;
+        var isPartner = crtCourtTypes.some(function(ct) { return ct.partner; }) || crtAdditionalServices.some(function(s) { return s.partner; });
+        if (!isPartner) {
+            // Not a partner — remove all partner_services and pin
+            await A.client.from('partner_services').delete().eq('entity_type', 'court').eq('entity_id', courtId);
+            return;
+        }
 
         // Save partner_pin
         await A.client.from('courts').update({ partner_pin: crtPartnerPin }).eq('id', courtId);
 
-        // Get existing services
-        var existing = await A.client.from('partner_services')
-            .select('id')
-            .eq('entity_type', 'court')
-            .eq('entity_id', courtId);
-        var existingIds = (existing.data || []).map(function(s) { return s.id; });
+        // Build services list from court_types + additional_services with partner=true
+        var newServices = [];
+        var sortIdx = 0;
+        crtCourtTypes.forEach(function(ct) {
+            if (!ct.partner || !ct.discount) return;
+            var typeName = A.COURT_TYPES[ct.type] || ct.type || '';
+            var surfaceName = A.COURT_SURFACES[ct.surface] || ct.surface || '';
+            var name = typeName + (surfaceName ? ' (' + surfaceName + ')' : '');
+            newServices.push({ service_name: name, discount_percent: ct.discount, sort_order: sortIdx++ });
+        });
+        crtAdditionalServices.forEach(function(svc) {
+            if (!svc.partner || !svc.discount) return;
+            newServices.push({ service_name: svc.name || '', discount_percent: svc.discount, sort_order: sortIdx++ });
+        });
 
-        // Determine which to keep
-        var keepIds = crtPartnerServices.filter(function(s) { return s.id; }).map(function(s) { return s.id; });
-        var toDelete = existingIds.filter(function(id) { return keepIds.indexOf(id) === -1; });
+        // Delete all existing partner_services for this court
+        await A.client.from('partner_services').delete().eq('entity_type', 'court').eq('entity_id', courtId);
 
-        // Delete removed
-        if (toDelete.length) {
-            await A.client.from('partner_services').delete().in('id', toDelete);
-        }
-
-        // Upsert remaining
-        for (var i = 0; i < crtPartnerServices.length; i++) {
-            var svc = crtPartnerServices[i];
-            if (!svc.service_name) continue;
-            var row = {
+        // Insert new
+        for (var i = 0; i < newServices.length; i++) {
+            var s = newServices[i];
+            if (!s.service_name) continue;
+            await A.client.from('partner_services').insert({
                 entity_type: 'court',
                 entity_id: courtId,
-                service_name: svc.service_name,
-                service_name_en: svc.service_name_en || null,
-                service_name_kg: svc.service_name_kg || null,
-                discount_percent: svc.discount_percent || 0,
-                sort_order: i,
+                service_name: s.service_name,
+                service_name_en: null,
+                service_name_kg: null,
+                discount_percent: s.discount_percent || 0,
+                sort_order: s.sort_order,
                 is_active: true
-            };
-            if (svc.id) {
-                await A.client.from('partner_services').update(row).eq('id', svc.id);
-            } else {
-                await A.client.from('partner_services').insert(row);
-            }
+            });
         }
     }
 
@@ -1661,7 +1738,8 @@
                 slogan: document.getElementById('adCrtSlogan').value.trim() || null,
                 slogan_en: document.getElementById('adCrtSloganEn').value.trim() || null,
                 slogan_kg: document.getElementById('adCrtSloganKg').value.trim() || null,
-                partner: crtCourtTypes.some(function(ct) { return ct.partner; })
+                additional_services: crtAdditionalServices,
+                partner: crtCourtTypes.some(function(ct) { return ct.partner; }) || crtAdditionalServices.some(function(s) { return s.partner; })
             };
 
             if (!data.name) {
@@ -1691,7 +1769,8 @@
             await saveCrtPartnerData(courtId);
 
             A.showToast(L.saved, 'success');
-            renderCourtsList();
+            saveBtn.disabled = false;
+            saveBtn.textContent = L.save;
         } catch (e) {
             A.showToast(e.message || 'Error', 'error');
             saveBtn.disabled = false;
