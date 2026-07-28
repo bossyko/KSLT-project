@@ -221,7 +221,6 @@
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.players + '</h2>' +
-                (isAdm ? '<button class="ad-btn ad-btn-primary" id="adPlrAdd">+ ' + L.addPlayer + '</button>' : '') +
             '</div>' +
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adPlrSearch" placeholder="' + L.plrSearch + '" value="' + A.esc(plrSearchQuery) + '">' +
@@ -243,12 +242,6 @@
                 '</div>' +
             '</div>';
 
-        var plrAddBtn = document.getElementById('adPlrAdd');
-        if (plrAddBtn) {
-            plrAddBtn.addEventListener('click', function() {
-                renderPlayerForm(null);
-            });
-        }
 
         var searchTimer = null;
         document.getElementById('adPlrSearch').addEventListener('input', function() {
@@ -587,19 +580,19 @@
                 '<div id="adPlrBadgesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
             '</div>' +
 
-            // Contact: Phone, Email, Show Phone
+            // Contact: Phone, Email, Show Phone (read-only)
             '<div class="ad-form-card">' +
                 '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrPhone + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adPlrPhone" placeholder="+996 ..." value="' + A.esc(item ? item.phone : '') + '">' +
+                        '<input type="text" class="ad-field-input" id="adPlrPhone" value="' + A.esc(item ? item.phone || '—' : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrEmail + '</label>' +
-                        '<input type="email" class="ad-field-input" id="adPlrEmail" placeholder="email@example.com" value="' + A.esc(item ? item.email : '') + '">' +
+                        '<input type="email" class="ad-field-input" id="adPlrEmail" value="' + A.esc(item ? item.email || '—' : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                     '<div class="ad-field" style="display:flex;align-items:flex-end;padding-bottom:8px;">' +
-                        '<label class="ad-checkbox-label"><input type="checkbox" id="adPlrShowPhone"' + (item && item.show_phone ? ' checked' : '') + '> ' + L.plrShowPhone + '</label>' +
+                        '<label class="ad-checkbox-label"><input type="checkbox" id="adPlrShowPhone"' + (item && item.show_phone ? ' checked' : '') + ' disabled> ' + L.plrShowPhone + '</label>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -1111,9 +1104,6 @@
                 bio: document.getElementById('adPlrMotto').value.trim() || null,
                 bio_en: document.getElementById('adPlrMottoEn').value.trim() || null,
                 bio_kg: document.getElementById('adPlrMottoKg').value.trim() || null,
-                phone: document.getElementById('adPlrPhone').value.trim() || null,
-                email: document.getElementById('adPlrEmail').value.trim() || null,
-                show_phone: document.getElementById('adPlrShowPhone').checked,
                 ntrp_rating: parseFloat(document.getElementById('adPlrNtrp').value) || null,
                 doubles_points: parseInt(document.getElementById('adPlrDoublesPoints').value, 10) || 0,
                 doubles_wins: parseInt(document.getElementById('adPlrDoublesWins').value, 10) || 0,
