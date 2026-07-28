@@ -115,7 +115,8 @@ window.playerProfileLabels = {
     challengeLoginText: "Чакыруу жөнөтүү үчүн авторизациялануу керек",
     challengeMemberRequired: "Мүчөлүк керек",
     challengeMemberText: "Чакыруу жөнөтүү үчүн KSLT мүчөлүгү талап кылынат",
-    challengeNoPlayer: "Чакыруу жөнөтүү үчүн оюнчу профилин байлаңыз"
+    challengeNoPlayer: "Чакыруу жөнөтүү үчүн оюнчу профилин байлаңыз",
+    challengeDisclaimer: "Чакыруу жөнөтүү менен, Telegram байланышыңыз атаандашка берилиши мүмкүн экенине макулдугуңузду билдиресиз."
 };
 
 var playersData = {

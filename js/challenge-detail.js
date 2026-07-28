@@ -288,12 +288,28 @@
         var hero = document.getElementById('challengeHero');
         if (!hero) return;
 
+        var CU = window.KSLT_COUNTRY;
+
         var c1Name = isEn ? (b.challenger_name_en || b.challenger_name) : (isKg ? (b.challenger_name_kg || b.challenger_name) : b.challenger_name);
         var c2Name = isEn ? (b.opponent_name_en || b.opponent_name) : (isKg ? (b.opponent_name_kg || b.opponent_name) : b.opponent_name);
         var c1Photo = b.challenger_photo || 'https://placehold.co/120x160/1a1a1a/666?text=?';
         var c2Photo = b.opponent_photo || 'https://placehold.co/120x160/1a1a1a/666?text=?';
-        var c1Cat = CAT_LABELS[b.challenger_cat] || b.challenger_cat || '';
-        var c2Cat = CAT_LABELS[b.opponent_cat] || b.opponent_cat || '';
+
+        // Category: challenge-level override → player-level
+        var c1CatId = b.challenger_category || b.challenger_cat || '';
+        var c2CatId = b.opponent_category || b.opponent_cat || '';
+        var c1Cat = CAT_LABELS[c1CatId] || c1CatId || '';
+        var c2Cat = CAT_LABELS[c2CatId] || c2CatId || '';
+
+        // NTRP: challenge-level override → player-level
+        var c1Ntrp = b.challenger_ntrp || b.challenger_player_ntrp || '';
+        var c2Ntrp = b.opponent_ntrp || b.opponent_player_ntrp || '';
+
+        // Country: challenge-level → player-level → default KG
+        var c1CountryCode = b.challenger_country || b.challenger_player_country || '';
+        var c2CountryCode = b.opponent_country || b.opponent_player_country || '';
+        var c1Flag = CU ? CU.flagEmoji(CU.normalizeCountry(c1CountryCode) || 'KG') : '';
+        var c2Flag = CU ? CU.flagEmoji(CU.normalizeCountry(c2CountryCode) || 'KG') : '';
 
         // Date/time/venue — use counter values if available, else proposed
         var date = b.counter_date || b.proposed_date || '';
@@ -309,26 +325,26 @@
                 '<div class="ch-vs-container">' +
                     '<div class="ch-player-card">' +
                         '<img class="ch-player-photo" src="' + esc(c1Photo) + '" alt="' + esc(c1Name) + '">' +
-                        '<div class="ch-player-name">' + esc(c1Name) + '</div>' +
-                        '<div class="ch-player-cat">' + esc(c1Cat) + '</div>' +
+                        '<div class="ch-player-name">' + c1Flag + ' ' + esc(c1Name) + '</div>' +
+                        (c1Cat ? '<div class="ch-player-cat">' + esc(c1Cat) + '</div>' : '') +
+                        (c1Ntrp ? '<div class="ch-player-ntrp">NTRP: ' + esc(String(c1Ntrp)) + '</div>' : '') +
                         '<div class="ch-player-stats">' +
                             '<span class="ch-stat-w">' + L.wins + ': ' + (b.challenger_wins || 0) + '</span>' +
                             '<span class="ch-stat-l">' + L.losses + ': ' + (b.challenger_losses || 0) + '</span>' +
                         '</div>' +
-                        '<div class="ch-player-rating">' + L.rating + ': <strong>' + (b.challenger_points || 0) + '</strong></div>' +
                     '</div>' +
                     '<div class="ch-vs-divider">' +
                         '<span class="ch-vs-text">' + L.vs + '</span>' +
                     '</div>' +
                     '<div class="ch-player-card">' +
                         '<img class="ch-player-photo" src="' + esc(c2Photo) + '" alt="' + esc(c2Name) + '">' +
-                        '<div class="ch-player-name">' + esc(c2Name) + '</div>' +
-                        '<div class="ch-player-cat">' + esc(c2Cat) + '</div>' +
+                        '<div class="ch-player-name">' + c2Flag + ' ' + esc(c2Name) + '</div>' +
+                        (c2Cat ? '<div class="ch-player-cat">' + esc(c2Cat) + '</div>' : '') +
+                        (c2Ntrp ? '<div class="ch-player-ntrp">NTRP: ' + esc(String(c2Ntrp)) + '</div>' : '') +
                         '<div class="ch-player-stats">' +
                             '<span class="ch-stat-w">' + L.wins + ': ' + (b.opponent_wins || 0) + '</span>' +
                             '<span class="ch-stat-l">' + L.losses + ': ' + (b.opponent_losses || 0) + '</span>' +
                         '</div>' +
-                        '<div class="ch-player-rating">' + L.rating + ': <strong>' + (b.opponent_points || 0) + '</strong></div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ch-meta">' +

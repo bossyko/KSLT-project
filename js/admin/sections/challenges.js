@@ -10,7 +10,12 @@
     var isEn = A.isEn;
 
     // ---- State ----
-    var subTab = 'pending';
+    var _chalSubTabs = ['pending', 'accepted', 'published', 'completed'];
+    var subTab = (function() {
+        var params = new URLSearchParams(window.location.search);
+        var t = params.get('chalTab');
+        return _chalSubTabs.indexOf(t) !== -1 ? t : 'pending';
+    })();
     var pendingList = [];
     var acceptedList = [];
     var publishedList = [];
@@ -63,6 +68,10 @@
             if (!btn) return;
             e.stopPropagation();
             subTab = btn.dataset.subtab;
+            // Persist subtab in URL
+            var url = new URL(window.location);
+            url.searchParams.set('chalTab', subTab);
+            history.replaceState(null, '', url);
             var tabs = document.querySelectorAll('#chalTabs .ad-rat-tab');
             tabs.forEach(function(t) { t.classList.toggle('active', t.dataset.subtab === subTab); });
             renderSubTab();
@@ -72,6 +81,9 @@
     }
 
     function loadData() {
+        // Ensure categories are loaded for NTRP/category fields
+        if (A.loadCategories) A.loadCategories();
+
         Promise.all([
             A.client.from('challenges')
                 .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, message, created_at')
@@ -83,12 +95,12 @@
                 .eq('battle_published', false)
                 .order('accepted_at', { ascending: false }),
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, battle_notified_at, score_draft, banner_url, proposed_court_id')
+                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, battle_notified_at, score_draft, banner_url, proposed_court_id, challenger_ntrp, opponent_ntrp, challenger_country, opponent_country, challenger_category, opponent_category, set_format')
                 .eq('battle_published', true)
                 .neq('status', 'completed')
                 .neq('status', 'cancelled')
                 .order('battle_published_at', { ascending: false }),
-            A.client.from('players').select('id, name, name_en, photo').order('name'),
+            A.client.from('players').select('id, name, name_en, photo, ntrp_rating, category_id, country').order('name'),
             A.client.from('courts').select('id, name, name_en, street, street_en, district, district_en, city, city_en').order('name'),
             A.client.from('challenges')
                 .select('id, challenger_player_id, opponent_player_id, status, battle_title, match_id, accepted_at')
@@ -361,6 +373,7 @@
             '<th>' + L.chalScore + '</th>' +
             '<th>' + L.chalWinner + '</th>' +
             '<th>' + L.chalDate + '</th>' +
+            '<th>' + L.chalActions + '</th>' +
             '</tr></thead><tbody>';
 
         completedList.forEach(function(c) {
@@ -378,6 +391,7 @@
                 '<td id="chalCScore_' + c.id + '">' + (c.status === 'cancelled' ? '—' : '...') + '</td>' +
                 '<td id="chalCWinner_' + c.id + '">' + (c.status === 'cancelled' ? '—' : '...') + '</td>' +
                 '<td>' + date + '</td>' +
+                '<td><button class="ad-btn ad-btn-sm ad-btn-danger" data-delete-completed="' + c.id + '" title="' + L.chalDeleteForever + '">🗑</button></td>' +
                 '</tr>';
         });
 
@@ -398,12 +412,113 @@
                 }
             });
         });
+
+        // Delete completed battle buttons
+        el.querySelectorAll('[data-delete-completed]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var cId = btn.dataset.deleteCompleted;
+                var c = completedList.find(function(x) { return x.id === cId; });
+                if (!c) return;
+                var p1 = pMap[c.challenger_player_id] || {};
+                var p2 = pMap[c.opponent_player_id] || {};
+                var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
+                var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+                openDeleteCompletedModal(c, p1Name, p2Name);
+            });
+        });
+    }
+
+    // ==== DELETE COMPLETED BATTLE (full cleanup) ====
+    function openDeleteCompletedModal(challenge, p1Name, p2Name) {
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-modal-overlay';
+        overlay.innerHTML =
+            '<div class="ad-modal" style="max-width:440px;">' +
+                '<div class="ad-modal-header">' +
+                    '<h3>' + L.chalDeleteForever + '</h3>' +
+                    '<button class="ad-modal-close" id="dcCompClose">&times;</button>' +
+                '</div>' +
+                '<div class="ad-modal-body">' +
+                    '<div style="text-align:center;margin-bottom:16px;padding:14px;background:var(--bg-tertiary);border-radius:10px;border:1px solid var(--border);">' +
+                        '<div style="font-weight:700;font-size:15px;">⚔️ ' + A.esc(challenge.battle_title || '-') + '</div>' +
+                        '<div style="color:var(--text-secondary);font-size:13px;margin-top:6px;">' + A.esc(p1Name) + ' <span style="color:var(--accent);font-weight:600;">VS</span> ' + A.esc(p2Name) + '</div>' +
+                    '</div>' +
+                    '<p style="color:#f44336;font-size:13px;line-height:1.5;margin-bottom:12px;text-align:center;">' +
+                        (isEn
+                            ? 'This will permanently delete the battle, all votes, the match record, and revert player win/loss stats.'
+                            : 'Баттл, все голоса, запись матча и статистика побед/поражений игроков будут удалены навсегда.') +
+                    '</p>' +
+                '</div>' +
+                '<div class="ad-modal-footer" style="display:flex;gap:10px;justify-content:center;">' +
+                    '<button class="ad-btn" id="dcCompCancel">' + (isEn ? 'Cancel' : 'Отмена') + '</button>' +
+                    '<button class="ad-btn ad-btn-danger" id="dcCompConfirm">' + L.chalDeleteForever + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        document.getElementById('dcCompClose').addEventListener('click', function() { overlay.remove(); });
+        document.getElementById('dcCompCancel').addEventListener('click', function() { overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+        document.getElementById('dcCompConfirm').addEventListener('click', async function() {
+            var btn = document.getElementById('dcCompConfirm');
+            btn.disabled = true;
+            btn.textContent = isEn ? 'Deleting...' : 'Удаление...';
+
+            try {
+                // 1. If has match_id — get winner/loser, rollback stats, delete match
+                if (challenge.match_id && challenge.status === 'completed') {
+                    var matchRes = await A.client.from('matches').select('winner_id').eq('id', challenge.match_id).single();
+                    if (matchRes.data && matchRes.data.winner_id) {
+                        var winnerId = matchRes.data.winner_id;
+                        var loserId = winnerId === challenge.challenger_player_id
+                            ? challenge.opponent_player_id
+                            : challenge.challenger_player_id;
+
+                        // Rollback winner wins -1
+                        var wRes = await A.client.from('players').select('wins').eq('id', winnerId).single();
+                        if (wRes.data) {
+                            await A.client.from('players').update({ wins: Math.max(0, (wRes.data.wins || 0) - 1) }).eq('id', winnerId);
+                        }
+                        // Rollback loser losses -1
+                        var lRes = await A.client.from('players').select('losses').eq('id', loserId).single();
+                        if (lRes.data) {
+                            await A.client.from('players').update({ losses: Math.max(0, (lRes.data.losses || 0) - 1) }).eq('id', loserId);
+                        }
+                    }
+                    // Delete match record
+                    await A.client.from('matches').delete().eq('id', challenge.match_id);
+                }
+
+                // 2. Delete predictions (votes)
+                await A.client.from('challenge_predictions').delete().eq('challenge_id', challenge.id);
+
+                // 3. Delete challenge
+                var res = await A.client.from('challenges').delete().eq('id', challenge.id);
+                if (res.error) {
+                    A.showToast(res.error.message, 'error');
+                    btn.disabled = false;
+                    btn.textContent = L.chalDeleteForever;
+                    return;
+                }
+
+                overlay.remove();
+                A.showToast(L.chalDeleted, 'success');
+                loadData();
+            } catch (e) {
+                console.error('Delete completed battle error:', e);
+                A.showToast('Error: ' + e.message, 'error');
+                btn.disabled = false;
+                btn.textContent = L.chalDeleteForever;
+            }
+        });
     }
 
     // ==== CREATE BATTLE MODAL ====
     function openCreateBattleModal() {
-        var sel1 = { id: null, name: '' };
-        var sel2 = { id: null, name: '' };
+        var sel1 = { id: null, name: '', ntrp: '', country: '', category: '' };
+        var sel2 = { id: null, name: '', ntrp: '', country: '', category: '' };
         var selCourt = { id: null, name: '', address: '' };
         var bannerUrl = '';
 
@@ -424,6 +539,15 @@
                             '<div class="ad-dropdown-list" id="cbP1Dropdown" style="display:none;"></div>' +
                         '</div>' +
                         '<div id="cbP1Selected" class="ad-chal-selected-hint"></div>' +
+                        '<div style="display:flex;gap:8px;margin-top:6px;">' +
+                            '<select class="ad-field-input" id="cbP1Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(null, { emptyLabel: 'NTRP' }) + '</select>' +
+                            '<select class="ad-field-input" id="cbP1Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions('') + '</select>' +
+                            '<div style="flex:1;min-width:0;position:relative;">' +
+                                '<input type="text" class="ad-field-input" id="cbP1CountryInput" placeholder="' + L.chalCountry + '" autocomplete="off" style="text-overflow:ellipsis;">' +
+                                '<input type="hidden" id="cbP1Country">' +
+                                '<div class="ad-dropdown-list" id="cbP1CountryDd" style="display:none;"></div>' +
+                            '</div>' +
+                        '</div>' +
                     '</div>' +
                     // Player 2
                     '<div class="ad-field-group">' +
@@ -433,6 +557,15 @@
                             '<div class="ad-dropdown-list" id="cbP2Dropdown" style="display:none;"></div>' +
                         '</div>' +
                         '<div id="cbP2Selected" class="ad-chal-selected-hint"></div>' +
+                        '<div style="display:flex;gap:8px;margin-top:6px;">' +
+                            '<select class="ad-field-input" id="cbP2Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(null, { emptyLabel: 'NTRP' }) + '</select>' +
+                            '<select class="ad-field-input" id="cbP2Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions('') + '</select>' +
+                            '<div style="flex:1;min-width:0;position:relative;">' +
+                                '<input type="text" class="ad-field-input" id="cbP2CountryInput" placeholder="' + L.chalCountry + '" autocomplete="off" style="text-overflow:ellipsis;">' +
+                                '<input type="hidden" id="cbP2Country">' +
+                                '<div class="ad-dropdown-list" id="cbP2CountryDd" style="display:none;"></div>' +
+                            '</div>' +
+                        '</div>' +
                     '</div>' +
                     // Title
                     '<div class="ad-field-group">' +
@@ -453,6 +586,14 @@
                                 '<select class="ad-field-input" id="cbTimeM" style="flex:1;">' + buildMinuteOptions() + '</select>' +
                             '</div>' +
                         '</div>' +
+                    '</div>' +
+                    // Set Format
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">' + (isEn ? 'Set Format' : 'Формат сетов') + '</label>' +
+                        '<select class="ad-field-input" id="cbSetFormat">' +
+                            '<option value="standard">' + L.formatStandard + '</option>' +
+                            '<option value="short">' + L.formatShort + '</option>' +
+                        '</select>' +
                     '</div>' +
                     // Court / Club
                     '<div class="ad-field-group">' +
@@ -495,9 +636,23 @@
         document.getElementById('cbClose').addEventListener('click', function() { overlay.remove(); });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
 
-        // Player search setup
-        setupPlayerSearch('cbP1Input', 'cbP1Dropdown', 'cbP1Selected', function(p) { sel1 = p; });
-        setupPlayerSearch('cbP2Input', 'cbP2Dropdown', 'cbP2Selected', function(p) { sel2 = p; });
+        // Player search setup with autofill
+        setupPlayerSearch('cbP1Input', 'cbP1Dropdown', 'cbP1Selected', function(p) {
+            sel1 = { id: p.id, name: p.name, ntrp: sel1.ntrp, country: sel1.country, category: sel1.category };
+            if (p._player) {
+                autofillPlayerExtras(p._player, 'cbP1Ntrp', 'cbP1Cat', 'cbP1Country', 'cbP1CountryInput', sel1);
+            }
+        });
+        setupPlayerSearch('cbP2Input', 'cbP2Dropdown', 'cbP2Selected', function(p) {
+            sel2 = { id: p.id, name: p.name, ntrp: sel2.ntrp, country: sel2.country, category: sel2.category };
+            if (p._player) {
+                autofillPlayerExtras(p._player, 'cbP2Ntrp', 'cbP2Cat', 'cbP2Country', 'cbP2CountryInput', sel2);
+            }
+        });
+
+        // Country search inputs
+        setupCountryInput('cbP1CountryInput', 'cbP1Country', 'cbP1CountryDd');
+        setupCountryInput('cbP2CountryInput', 'cbP2Country', 'cbP2CountryDd');
 
         // Court search setup
         setupCourtSearch(function(court) {
@@ -539,6 +694,16 @@
             var address = document.getElementById('cbAddress').value.trim();
             var venue = courtName + (address ? ', ' + address : '');
 
+            // Auto-capture typed names if not selected from dropdown
+            if (!sel1.name) {
+                var typed1 = document.getElementById('cbP1Input').value.trim();
+                if (typed1) sel1 = { id: null, name: typed1, ntrp: '', country: '', category: '' };
+            }
+            if (!sel2.name) {
+                var typed2 = document.getElementById('cbP2Input').value.trim();
+                if (typed2) sel2 = { id: null, name: typed2, ntrp: '', country: '', category: '' };
+            }
+
             if (!sel1.name || !sel2.name) {
                 A.showToast(L.chalSelectPlayer, 'error');
                 return;
@@ -548,11 +713,21 @@
                 return;
             }
 
+            // Read extra fields
+            sel1.ntrp = document.getElementById('cbP1Ntrp').value || '';
+            sel1.category = document.getElementById('cbP1Cat').value || '';
+            sel1.country = document.getElementById('cbP1Country').value || '';
+            sel2.ntrp = document.getElementById('cbP2Ntrp').value || '';
+            sel2.category = document.getElementById('cbP2Cat').value || '';
+            sel2.country = document.getElementById('cbP2Country').value || '';
+
+            var setFormat = document.getElementById('cbSetFormat').value || 'standard';
+
             var btn = document.getElementById('cbSave');
             btn.disabled = true;
             btn.textContent = L.chalCreating;
 
-            createBattle(sel1, sel2, title, date, time, venue, bannerUrl, selCourt.id).then(function(ok) {
+            createBattle(sel1, sel2, title, date, time, venue, bannerUrl, selCourt.id, setFormat).then(function(ok) {
                 overlay.remove();
                 if (ok) {
                     A.showToast(L.chalCreated, 'success');
@@ -596,7 +771,7 @@
                 var typed = input.value.trim();
                 if (typed.length >= 2) {
                     html += '<div class="ad-dropdown-item ad-dropdown-manual" data-manual="' + A.esc(typed) + '">' +
-                        '+ ' + L.chalAddManual + ': <strong>' + A.esc(typed) + '</strong>' +
+                        '+ ' + L.chalAddManual + ': <strong> ' + A.esc(typed) + '</strong>' +
                     '</div>';
                 }
 
@@ -613,7 +788,7 @@
                                 var pName = isEn ? (p.name_en || p.name) : p.name;
                                 input.value = pName;
                                 selectedEl.textContent = pName + ' (ID: ' + p.id + ')';
-                                onSelect({ id: p.id, name: pName });
+                                onSelect({ id: p.id, name: pName, _player: p });
                             }
                         } else if (manual) {
                             input.value = manual;
@@ -669,7 +844,7 @@
                 var typed = input.value.trim();
                 if (typed.length >= 2) {
                     html += '<div class="ad-dropdown-item ad-dropdown-manual" data-manual="' + A.esc(typed) + '">' +
-                        '+ ' + L.chalAddManual + ': <strong>' + A.esc(typed) + '</strong>' +
+                        '+ ' + L.chalAddManual + ': <strong> ' + A.esc(typed) + '</strong>' +
                     '</div>';
                 }
 
@@ -722,7 +897,7 @@
     }
 
     // ---- Create battle (insert player if manual + challenge) ----
-    function createBattle(p1, p2, title, date, time, venue, bannerUrl, courtId) {
+    function createBattle(p1, p2, title, date, time, venue, bannerUrl, courtId, setFormat) {
         return ensurePlayer(p1).then(function(p1Id) {
             return ensurePlayer(p2).then(function(p2Id) {
                 var adminId = A.currentUserId;
@@ -741,7 +916,14 @@
                     battle_published: true,
                     battle_published_at: new Date().toISOString(),
                     voting_closed: false,
-                    banner_url: bannerUrl || null
+                    banner_url: bannerUrl || null,
+                    challenger_ntrp: p1.ntrp ? parseFloat(p1.ntrp) : null,
+                    opponent_ntrp: p2.ntrp ? parseFloat(p2.ntrp) : null,
+                    challenger_country: p1.country || null,
+                    opponent_country: p2.country || null,
+                    challenger_category: p1.category || null,
+                    opponent_category: p2.category || null,
+                    set_format: setFormat || 'standard'
                 }).select('id').single();
             });
         }).then(function(res) {
@@ -848,12 +1030,34 @@
     }
 
     // ---- Score Modal ----
+    function isValidSet(a, b, format) {
+        a = parseInt(a); b = parseInt(b);
+        if (isNaN(a) || isNaN(b)) return false;
+        if (format === 'short') {
+            if (a < 0 || b < 0 || a > 6 || b > 6) return false;
+            if ((a === 6 && b <= 4) || (b === 6 && a <= 4)) return true;
+            if ((a === 6 && b === 5) || (b === 6 && a === 5)) return true;
+            return false;
+        }
+        if (a < 0 || b < 0 || a > 7 || b > 7) return false;
+        if ((a === 6 && b <= 4) || (b === 6 && a <= 4)) return true;
+        if ((a === 7 && b === 5) || (b === 7 && a === 5)) return true;
+        if ((a === 7 && b === 6) || (b === 7 && a === 6)) return true;
+        return false;
+    }
+
+    function isTiebreakScore(v1, v2, format) {
+        if (format === 'short') return (v1 === 6 && v2 === 5) || (v1 === 5 && v2 === 6);
+        return (v1 === 7 && v2 === 6) || (v1 === 6 && v2 === 7);
+    }
+
     function openScoreModal(challenge) {
         var pMap = A._chalPlayersMap || {};
         var p1 = pMap[challenge.challenger_player_id] || {};
         var p2 = pMap[challenge.opponent_player_id] || {};
         var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
         var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+        var _setFormat = challenge.set_format || 'standard';
 
         // Parse score_draft or existing match score to pre-fill
         var sv = [['','','',''],['','','',''],['','','','']];
@@ -870,7 +1074,7 @@
             var id2 = 'chS' + setNum + 'P2';
             var idTB1 = 'chS' + setNum + 'TB1';
             var idTB2 = 'chS' + setNum + 'TB2';
-            var showTB = (parseInt(vals[0]) === 7 && parseInt(vals[1]) === 6) || (parseInt(vals[0]) === 6 && parseInt(vals[1]) === 7);
+            var showTB = isTiebreakScore(parseInt(vals[0]) || 0, parseInt(vals[1]) || 0, _setFormat);
             return '<div class="ad-score-set-row" data-set="' + setNum + '" id="chSetRow' + setNum + '"' +
                 (setNum > visibleSets ? ' style="display:none"' : '') + '>' +
                 '<label class="ad-field-label" style="min-width:40px;">' + L.chalSet + ' ' + setNum + '</label>' +
@@ -899,6 +1103,7 @@
                         '<div style="font-weight:600;">' + A.esc(p1Name) + '</div>' +
                         '<div style="color:var(--text-secondary);font-size:12px;margin:4px 0;">VS</div>' +
                         '<div style="font-weight:600;">' + A.esc(p2Name) + '</div>' +
+                        '<div style="font-size:11px;color:var(--text-dim);margin-top:6px;">' + (_setFormat === 'short' ? L.formatShort : L.formatStandard) + '</div>' +
                     '</div>' +
                     setRowHtml(1, sv[0]) +
                     setRowHtml(2, sv[1]) +
@@ -961,7 +1166,7 @@
             if (!g1 || !g2 || !tbWrap) return;
             var v1 = parseInt(g1.value) || 0;
             var v2 = parseInt(g2.value) || 0;
-            tbWrap.style.display = (v1 === 7 && v2 === 6) || (v1 === 6 && v2 === 7) ? '' : 'none';
+            tbWrap.style.display = isTiebreakScore(v1, v2, _setFormat) ? '' : 'none';
         }
 
         function focusNext(current) {
@@ -1029,13 +1234,18 @@
                 var g1 = (document.getElementById('chS' + s + 'P1') || {}).value || '';
                 var g2 = (document.getElementById('chS' + s + 'P2') || {}).value || '';
                 if (!g1 || !g2) { A.showToast(isEn ? 'Fill all sets' : 'Заполните все сеты', 'error'); return; }
+                if (!isValidSet(g1, g2, _setFormat)) {
+                    A.showToast((isEn ? 'Invalid score in Set ' : 'Некорректный счёт сета ') + s, 'error');
+                    return;
+                }
+                var v1 = parseInt(g1), v2 = parseInt(g2);
                 var setStr = g1 + '/' + g2;
                 var tb1 = (document.getElementById('chS' + s + 'TB1') || {}).value || '';
                 var tb2 = (document.getElementById('chS' + s + 'TB2') || {}).value || '';
-                if (tb1 && tb2) setStr += '(' + tb1 + '-' + tb2 + ')';
+                if (tb1 && tb2 && isTiebreakScore(v1, v2, _setFormat)) setStr += '(' + tb1 + '-' + tb2 + ')';
                 sets.push(setStr);
-                if (parseInt(g1) > parseInt(g2)) p1Wins++;
-                else if (parseInt(g2) > parseInt(g1)) p2Wins++;
+                if (v1 > v2) p1Wins++;
+                else if (v2 > v1) p2Wins++;
             }
             if (p1Wins < 2 && p2Wins < 2) {
                 A.showToast(isEn ? 'Winner must win 2 sets (2-0 or 2-1)' : 'Победитель должен выиграть 2 сета (2-0 или 2-1)', 'error');
@@ -1241,11 +1451,37 @@
                     '<button class="ad-modal-close" id="ebClose">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body" style="max-height:70vh;overflow-y:auto;">' +
-                    // Players info (read-only)
+                    // Players info (read-only names)
                     '<div style="text-align:center;margin-bottom:16px;padding:12px;background:var(--bg-tertiary);border-radius:8px;">' +
                         '<span style="font-weight:600;">' + A.esc(p1Name) + '</span>' +
                         ' <span style="color:var(--accent);font-weight:700;">VS</span> ' +
                         '<span style="font-weight:600;">' + A.esc(p2Name) + '</span>' +
+                    '</div>' +
+                    // Player 1 extras
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label" style="font-size:11px;color:var(--text-secondary);">' + A.esc(p1Name) + '</label>' +
+                        '<div style="display:flex;gap:8px;">' +
+                            '<select class="ad-field-input" id="ebP1Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(challenge.challenger_ntrp || null, { emptyLabel: 'NTRP' }) + '</select>' +
+                            '<select class="ad-field-input" id="ebP1Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions(challenge.challenger_category || '') + '</select>' +
+                            '<div style="flex:1;position:relative;">' +
+                                '<input type="text" class="ad-field-input" id="ebP1CountryInput" placeholder="' + L.chalCountry + '" autocomplete="off">' +
+                                '<input type="hidden" id="ebP1Country" value="' + A.esc(challenge.challenger_country || '') + '">' +
+                                '<div class="ad-dropdown-list" id="ebP1CountryDd" style="display:none;"></div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    // Player 2 extras
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label" style="font-size:11px;color:var(--text-secondary);">' + A.esc(p2Name) + '</label>' +
+                        '<div style="display:flex;gap:8px;">' +
+                            '<select class="ad-field-input" id="ebP2Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(challenge.opponent_ntrp || null, { emptyLabel: 'NTRP' }) + '</select>' +
+                            '<select class="ad-field-input" id="ebP2Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions(challenge.opponent_category || '') + '</select>' +
+                            '<div style="flex:1;position:relative;">' +
+                                '<input type="text" class="ad-field-input" id="ebP2CountryInput" placeholder="' + L.chalCountry + '" autocomplete="off">' +
+                                '<input type="hidden" id="ebP2Country" value="' + A.esc(challenge.opponent_country || '') + '">' +
+                                '<div class="ad-dropdown-list" id="ebP2CountryDd" style="display:none;"></div>' +
+                            '</div>' +
+                        '</div>' +
                     '</div>' +
                     // Title
                     '<div class="ad-field-group">' +
@@ -1266,6 +1502,14 @@
                                 '<select class="ad-field-input" id="ebTimeM" style="flex:1;">' + buildMinuteOptions() + '</select>' +
                             '</div>' +
                         '</div>' +
+                    '</div>' +
+                    // Set Format
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">' + (isEn ? 'Set Format' : 'Формат сетов') + '</label>' +
+                        '<select class="ad-field-input" id="ebSetFormat">' +
+                            '<option value="standard"' + ((challenge.set_format || 'standard') === 'standard' ? ' selected' : '') + '>' + L.formatStandard + '</option>' +
+                            '<option value="short"' + (challenge.set_format === 'short' ? ' selected' : '') + '>' + L.formatShort + '</option>' +
+                        '</select>' +
                     '</div>' +
                     // Court / Club
                     '<div class="ad-field-group">' +
@@ -1320,6 +1564,24 @@
         document.getElementById('ebClose').addEventListener('click', function() { overlay.remove(); });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
 
+        // Country inputs
+        setupCountryInput('ebP1CountryInput', 'ebP1Country', 'ebP1CountryDd');
+        setupCountryInput('ebP2CountryInput', 'ebP2Country', 'ebP2CountryDd');
+
+        // Pre-fill country display
+        var CU = window.KSLT_COUNTRY;
+        if (CU) {
+            var lang = isEn ? 'en' : 'ru';
+            if (challenge.challenger_country) {
+                var ci1 = document.getElementById('ebP1CountryInput');
+                if (ci1) ci1.value = CU.renderCountry(challenge.challenger_country, lang, true);
+            }
+            if (challenge.opponent_country) {
+                var ci2 = document.getElementById('ebP2CountryInput');
+                if (ci2) ci2.value = CU.renderCountry(challenge.opponent_country, lang, true);
+            }
+        }
+
         // Court search
         setupCourtSearch(function(court) {
             selCourt = court;
@@ -1371,7 +1633,14 @@
                 counter_date: date || null,
                 counter_time: time || null,
                 counter_venue: venue || null,
-                banner_url: bannerUrl || null
+                banner_url: bannerUrl || null,
+                challenger_ntrp: document.getElementById('ebP1Ntrp').value ? parseFloat(document.getElementById('ebP1Ntrp').value) : null,
+                opponent_ntrp: document.getElementById('ebP2Ntrp').value ? parseFloat(document.getElementById('ebP2Ntrp').value) : null,
+                challenger_country: document.getElementById('ebP1Country').value || null,
+                opponent_country: document.getElementById('ebP2Country').value || null,
+                challenger_category: document.getElementById('ebP1Cat').value || null,
+                opponent_category: document.getElementById('ebP2Cat').value || null,
+                set_format: document.getElementById('ebSetFormat').value || 'standard'
             };
             if (selCourt.id) updateData.proposed_court_id = selCourt.id;
 
@@ -1492,6 +1761,110 @@
                 console.error('Delete battle error:', e);
                 A.showToast('Error: ' + e.message, 'error');
                 el.style.opacity = ''; el.style.pointerEvents = '';
+            }
+        });
+    }
+
+    // ---- Helpers: NTRP / Category / Country ----
+
+    function buildCategoryOptions(selectedVal) {
+        var cats = A.cachedCategories || [];
+        var html = '<option value="">' + L.chalCategory + '</option>';
+        cats.forEach(function(c) {
+            var name = isEn ? (c.name_en || c.name) : c.name;
+            var sel = (c.id === selectedVal) ? ' selected' : '';
+            html += '<option value="' + A.esc(c.id) + '"' + sel + '>' + A.esc(name) + '</option>';
+        });
+        return html;
+    }
+
+    function autofillPlayerExtras(player, ntrpId, catId, hiddenCountryId, countryInputId, selObj) {
+        var CU = window.KSLT_COUNTRY;
+        // NTRP — format value to match select options (e.g. 4.5 → "4.5", 4.25 → "4.25")
+        if (player.ntrp_rating) {
+            var ntrpVal = parseFloat(player.ntrp_rating).toFixed(2).replace(/0$/, '');
+            var ntrpEl = document.getElementById(ntrpId);
+            if (ntrpEl) ntrpEl.value = ntrpVal;
+            selObj.ntrp = ntrpVal;
+        }
+        // Category
+        if (player.category_id) {
+            var catEl = document.getElementById(catId);
+            if (catEl) catEl.value = player.category_id;
+            selObj.category = player.category_id;
+        }
+        // Country
+        if (player.country && CU) {
+            var code = CU.normalizeCountry(player.country);
+            if (code) {
+                var hiddenEl = document.getElementById(hiddenCountryId);
+                var inputEl = document.getElementById(countryInputId);
+                if (hiddenEl) hiddenEl.value = code;
+                if (inputEl) {
+                    var lang = isEn ? 'en' : 'ru';
+                    inputEl.value = CU.renderCountry(code, lang, true);
+                }
+                selObj.country = code;
+            }
+        }
+    }
+
+    function setupCountryInput(inputId, hiddenId, dropdownId) {
+        var input = document.getElementById(inputId);
+        var hidden = document.getElementById(hiddenId);
+        var dropdown = document.getElementById(dropdownId);
+        if (!input || !hidden || !dropdown) return;
+
+        var CU = window.KSLT_COUNTRY;
+        var countries = window.KSLT_COUNTRIES || [];
+        var lang = isEn ? 'en' : 'ru';
+
+        function renderItems(list) {
+            dropdown.innerHTML = '';
+            if (!list.length) { dropdown.style.display = 'none'; return; }
+            list.forEach(function(c) {
+                var div = document.createElement('div');
+                div.className = 'ad-dropdown-item';
+                div.style.cursor = 'pointer';
+                div.textContent = (CU ? CU.flagEmoji(c.code) : '') + ' ' + (c[lang] || c.en);
+                div.dataset.code = c.code;
+                div.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    hidden.value = c.code;
+                    input.value = (CU ? CU.renderCountry(c.code, lang, true) : c.code);
+                    dropdown.style.display = 'none';
+                });
+                dropdown.appendChild(div);
+            });
+            dropdown.style.display = 'block';
+        }
+
+        input.addEventListener('focus', function() {
+            var q = input.value.trim().toLowerCase();
+            if (!q) {
+                // Show priority countries
+                renderItems(countries.filter(function(c) { return ['KG','KZ','RU','UZ','TJ','TM'].indexOf(c.code) !== -1; }));
+            }
+        });
+
+        input.addEventListener('input', function() {
+            var q = input.value.trim().toLowerCase();
+            if (!q) {
+                hidden.value = '';
+                renderItems(countries.filter(function(c) { return ['KG','KZ','RU','UZ','TJ','TM'].indexOf(c.code) !== -1; }));
+                return;
+            }
+            var matches = countries.filter(function(c) {
+                return (c.ru || '').toLowerCase().indexOf(q) !== -1 ||
+                       (c.en || '').toLowerCase().indexOf(q) !== -1 ||
+                       c.code.toLowerCase() === q;
+            }).slice(0, 8);
+            renderItems(matches);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
             }
         });
     }
