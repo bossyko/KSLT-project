@@ -758,6 +758,8 @@
         usrPlayerCategory: 'Player Category',
         usrChangeCategory: 'Change',
         usrCategorySaved: 'Category changed',
+        usrProcessPayment: 'Pay',
+        usrPayAmount: 'Amount',
         // Ban / Moderation
         usrModeration: 'Moderation',
         usrBanUser: 'Block User',
@@ -1952,6 +1954,8 @@
         usrPlayerCategory: 'Категория игрока',
         usrChangeCategory: 'Изменить',
         usrCategorySaved: 'Категория изменена',
+        usrProcessPayment: 'Оплатить',
+        usrPayAmount: 'Сумма',
         // Ban / Moderation
         usrModeration: 'Модерация',
         usrBanUser: 'Заблокировать',
@@ -2572,6 +2576,15 @@
         if (!d) return '—';
         var parts = d.split('-');
         return parts[2] + '.' + parts[1] + '.' + parts[0].slice(2);
+    };
+
+    /** Format ISO datetime as "DD.MM.YY HH:MM" */
+    window.KSLT_ADMIN.formatDateTime = function(dt) {
+        if (!dt) return '—';
+        var date = dt.split('T')[0];
+        var time = dt.split('T')[1] ? dt.split('T')[1].substring(0, 5) : '';
+        var parts = date.split('-');
+        return parts[2] + '.' + parts[1] + '.' + parts[0].slice(2) + (time ? ' ' + time : '');
     };
 
     /**

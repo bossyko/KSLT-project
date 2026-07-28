@@ -115,6 +115,11 @@
             var parsed = A.parseHash(window.location.hash.replace('#', ''));
             switchTab(parsed.tab, parsed.action, parsed.itemId);
         });
+
+        window.addEventListener('popstate', function() {
+            var parsed = A.parseHash(window.location.hash.replace('#', ''));
+            switchTab(parsed.tab, parsed.action, parsed.itemId);
+        });
     }
 
     function switchTab(tab, action, itemId) {

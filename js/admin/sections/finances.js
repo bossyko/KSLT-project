@@ -331,7 +331,7 @@
                 : '<span class="ad-pay-badge ad-pay-expired">' + L.payExpired + '</span>';
             var typeBadge = '<span class="ad-pay-badge ad-pay-type-' + p.type + '">' + getTypeLabel(p.type) + '</span>';
             var periodEnd = A.formatPayDate(p.period_end);
-            var createdDate = p.created_at ? A.formatPayDate(p.created_at.slice(0, 10)) : '—';
+            var createdDate = p.created_at ? A.formatDateTime(p.created_at) : '—';
             var methodLabel = A.PAYMENT_METHODS[p.payment_method] || p.payment_method || '—';
 
             html +=
@@ -993,7 +993,7 @@
         filtered.forEach(function(p, i) {
             var isAct = p.period_end >= today;
             var statusLabel = isAct ? L.payActive : L.payExpired;
-            var createdDate = p.created_at ? A.formatPayDate(p.created_at.slice(0, 10)) : '—';
+            var createdDate = p.created_at ? A.formatDateTime(p.created_at) : '—';
             tableRows +=
                 '<tr>' +
                     '<td>' + (i + 1) + '</td>' +

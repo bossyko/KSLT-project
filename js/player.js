@@ -21,6 +21,20 @@
     var _playerName = '';
     var _playerPhoto = '';
 
+    // Detect referrer to show correct "Back" button
+    var _fromPartners = document.referrer && document.referrer.indexOf('partners') !== -1;
+    function getBackLink(categoryKey) {
+        if (_fromPartners) {
+            var partnersPage = isEn ? 'partners-en.html' : isKg ? 'partners-kg.html' : 'partners.html';
+            var backLabel = isEn ? 'Back to partner search' : isKg ? 'Партнёр издөөгө кайтуу' : 'Назад к поиску игрока';
+            return { href: partnersPage, text: backLabel };
+        }
+        var rankingsPage = isEn ? 'players-en.html' : isKg ? 'players-kg.html' : 'players.html';
+        var href = rankingsPage + (categoryKey ? '?tab=' + categoryKey : '');
+        var text = isEn ? 'Back to rankings' : isKg ? 'Рейтингге кайтуу' : 'Назад к рейтингу';
+        return { href: href, text: text };
+    }
+
     // Seeded random for consistent mock data per player
     function seededRandom(seed) {
         var x = Math.sin(seed) * 10000;
@@ -357,13 +371,13 @@
         var titleText = isEn ? 'Register to view player profiles' : (isKg ? 'Оюнчулардын профилин көрүү үчүн катталыңыз' : 'Зарегистрируйтесь для просмотра профилей');
         var descText = isEn ? 'Full stats, match history, achievements and challenges are available after registration' : (isKg ? 'Толук статистика, матч тарыхы, жетишкендиктер жана чакырыктар каттоодон кийин жеткиликтүү' : 'Полная статистика, история матчей, достижения и вызовы доступны после регистрации');
         var btnText = isEn ? 'Sign In / Register' : (isKg ? 'Кирүү / Каттоо' : 'Войти / Регистрация');
-        var backText = isEn ? 'Back to rankings' : (isKg ? 'Рейтингге кайтуу' : 'Назад к рейтингу');
+        var back = getBackLink(null);
 
         document.title = player.name + ' \u2014 KSLT';
 
         el.innerHTML =
             '<div class="kslt-back-wrap">' +
-                '<a href="' + rankingsPage + '" class="kslt-back">\u2190 ' + backText + '</a>' +
+                '<a href="' + back.href + '" class="kslt-back">\u2190 ' + back.text + '</a>' +
             '</div>' +
             '<div class="pp-guest-block">' +
                 '<div class="pp-guest-preview">' +
@@ -395,13 +409,13 @@
         var totalM = (player.wins || 0) + (player.losses || 0);
         var winRate = totalM > 0 ? Math.round(player.wins / totalM * 100) : 0;
         var authPage = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
-        var rankingsPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
+        var back = getBackLink(data.categoryKey);
 
         var html = '';
 
-        // Back link — always go to rankings with correct category tab
+        // Back link — context-aware (rankings or partner search)
         html += '<div class="kslt-back-wrap">';
-        html += '<a href="' + rankingsPage + '?tab=' + data.categoryKey + '" class="kslt-back">\u2190 ' + L.backToRankings + '</a>';
+        html += '<a href="' + back.href + '" class="kslt-back">\u2190 ' + back.text + '</a>';
         html += '</div>';
 
         html += '<div class="pp-container">';
@@ -652,7 +666,7 @@
         if (!container) return;
 
         if (!client) {
-            renderMockMatches(container, data);
+            container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>';
             return;
         }
 
@@ -664,12 +678,12 @@
             .limit(50)
             .then(function(res) {
                 if (res.error || !res.data || res.data.length === 0) {
-                    renderMockMatches(container, data);
+                    container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>';
                     return;
                 }
                 // Filter out duel matches — only tournament matches here
                 var filtered = res.data.filter(function(m) { return !m.match_type || m.match_type === 'tournament'; });
-                if (filtered.length === 0) { renderMockMatches(container, data); return; }
+                if (filtered.length === 0) { container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>'; return; }
                 renderRealMatches(container, filtered);
             });
     }
@@ -818,7 +832,11 @@
                 items.push({ tournament: tr.tournament, round_reached: tr.round_reached, points_earned: tr.points_earned });
             });
 
-            if (items.length === 0) { renderMockTournaments(container, data); return; }
+            if (items.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' +
+                    (isEn ? 'No tournaments yet' : isKg ? 'Турнирлер жок' : 'Нет турниров') + '</div>';
+                return;
+            }
 
             // Split into upcoming and past
             var today = new Date().toISOString().slice(0, 10);
@@ -1343,12 +1361,12 @@
     function renderNotFound() {
         var el = document.getElementById('playerDetail');
         if (!el) return;
-        var rankingsPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
+        var back = getBackLink(null);
         el.innerHTML =
             '<div class="pp-container" style="text-align:center; padding:120px 24px;">' +
             '<h2 style="font-size:1.8rem; margin-bottom:12px;">' + L.playerNotFound + '</h2>' +
             '<p style="color:var(--text-secondary); margin-bottom:24px;">' + L.playerNotFoundText + '</p>' +
-            '<a href="' + rankingsPage + '" class="pp-cta-btn">\u2190 ' + L.backToRankings + '</a>' +
+            '<a href="' + back.href + '" class="pp-cta-btn">\u2190 ' + back.text + '</a>' +
             '</div>';
     }
 
