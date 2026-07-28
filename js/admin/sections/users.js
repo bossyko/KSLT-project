@@ -16,7 +16,6 @@
     var usrDeletedCount = 0, usrDeletedPeriodCount = 0;
     var usrChartInstance = null;
     var usrSortByMembership = 0; // 0=none, 1=asc (expiring soon first), -1=desc
-    var usrHidePlayers = true; // hide users who became players by default
 
     async function renderUsersSection() {
         if (A.isDeepLinked('users')) return;
@@ -112,7 +111,6 @@
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adUsrSearch" placeholder="' + L.usrSearch + '" value="' + A.esc(usrSearchQuery) + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adUsrRoleFilter">' + roleFilterHtml + '</select>' +
-                '<button class="ad-btn ad-btn-sm' + (usrHidePlayers ? ' ad-btn-primary' : ' ad-btn-outline') + '" id="adUsrTogglePlayers" style="white-space:nowrap;">' + (usrHidePlayers ? L.usrHidePlayers : L.usrShowAll) + '</button>' +
             '</div>' +
             '<div class="ad-table-card">' +
                 '<div class="ad-table-wrap">' +
@@ -153,14 +151,6 @@
 
         document.getElementById('adUsrRoleFilter').addEventListener('change', function() {
             usrFilterRole = this.value;
-            loadUsersList();
-        });
-
-        // Toggle: show all vs hide players
-        document.getElementById('adUsrTogglePlayers').addEventListener('click', function() {
-            usrHidePlayers = !usrHidePlayers;
-            this.textContent = usrHidePlayers ? L.usrHidePlayers : L.usrShowAll;
-            this.className = 'ad-btn ad-btn-sm ' + (usrHidePlayers ? 'ad-btn-primary' : 'ad-btn-outline');
             loadUsersList();
         });
 
@@ -230,6 +220,13 @@
         }
         usrMemMap = memMap;
 
+        // Hide role=user with active membership (they are in Players section)
+        items = items.filter(function(u) {
+            if (u.role === 'admin' || u.role === 'manager') return true;
+            var mem = memMap[u.id];
+            return !(mem && mem.status === 'active');
+        });
+
         // Load deleted accounts count
         var delResult = await A.client.from('deleted_accounts').select('id, deleted_at');
         var delAll = delResult.data || [];
@@ -264,11 +261,6 @@
         usrAllItems = periodFiltered;
         items = periodFiltered;
 
-        // Filter out users who became players (if toggle is on)
-        if (usrHidePlayers) {
-            items = items.filter(function(u) { return !u.player_id; });
-        }
-
         // Client-side search
         if (usrSearchQuery) {
             var q = usrSearchQuery.toLowerCase();
@@ -279,18 +271,27 @@
             });
         }
 
-        // Sort by membership expiry if toggled
-        if (usrSortByMembership !== 0) {
-            items.sort(function(a, b) {
+        // Sort: admin/manager always first, then by membership if toggled
+        var rolePriority = { admin: 0, manager: 1 };
+        items.sort(function(a, b) {
+            var ra = rolePriority[a.role] !== undefined ? rolePriority[a.role] : 2;
+            var rb = rolePriority[b.role] !== undefined ? rolePriority[b.role] : 2;
+            if (ra !== rb) return ra - rb;
+
+            // Within same priority — sort by membership expiry if toggled
+            if (usrSortByMembership !== 0) {
                 var ma = memMap[a.id], mb = memMap[b.id];
                 var da = ma && ma.expires_at ? ma.expires_at : '';
                 var db = mb && mb.expires_at ? mb.expires_at : '';
-                if (!da && !db) return 0;
-                if (!da) return 1;
-                if (!db) return -1;
-                return usrSortByMembership === 1 ? (da < db ? -1 : da > db ? 1 : 0) : (da > db ? -1 : da < db ? 1 : 0);
-            });
-        }
+                if (da || db) {
+                    if (!da) return 1;
+                    if (!db) return -1;
+                    var cmp = da < db ? -1 : da > db ? 1 : 0;
+                    return usrSortByMembership === 1 ? cmp : -cmp;
+                }
+            }
+            return 0;
+        });
 
         var table = document.getElementById('adUsrTable');
         if (!table) return;
@@ -370,7 +371,8 @@
                 '<td style="color:var(--text-dim);font-size:0.85rem;">' + regDate + '</td>';
 
             if (canClick) {
-                tr.addEventListener('click', function() {
+                tr.addEventListener('click', function(e) {
+                    if (e.target.closest('.ad-bulk-cell') || e.target.classList.contains('ad-bulk-item')) return;
                     loadAndEditUser(u.id);
                 });
             }
@@ -402,11 +404,14 @@
         } // end if (isAdm)
     }
 
+    var _selectedPeriod = 3; // default period for inline payment
+    var _lastPaymentInfo = ''; // inline payment confirmation message
+
     async function loadAndEditUser(id) {
         if (!A.client) return;
 
         var userRes = await A.client.from('profiles')
-            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at, banned_until, ban_reason, player_id, gender')
+            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at, banned_until, ban_reason, player_id, gender, birth_day, birth_month, birth_year')
             .eq('id', id)
             .single();
 
@@ -426,31 +431,39 @@
 
         var membership = (memRes.data && memRes.data.length > 0) ? memRes.data[0] : null;
 
-        A.setAdminHash('users', 'edit', id);
-        renderUserForm(user, membership);
+        // Load player data (category + ntrp)
+        var playerData = null;
+        if (user.player_id) {
+            var plRes = await A.client.from('players').select('category_id, ntrp_rating').eq('id', user.player_id).single();
+            if (plRes.data) playerData = plRes.data;
+        }
+
+        history.pushState(null, '', '#users/edit/' + id);
+        renderUserForm(user, membership, playerData);
+        window.scrollTo(0, 0);
     }
 
-    async function renderUserForm(user, membership) {
+    async function renderUserForm(user, membership, playerData) {
         var container = document.getElementById('ad-users');
         if (!container) return;
 
         var isAdm = A.currentRole === 'admin';
         var canManageMembership = (A.currentRole === 'admin' || A.currentRole === 'manager');
 
-        var roleLabel = L['role' + user.role.charAt(0).toUpperCase() + user.role.slice(1)] || user.role;
         var tgStatus = user.telegram_chat_id ? L.usrTgConnected : L.usrTgNotConnected;
         var tgColor = user.telegram_chat_id ? '#34c759' : 'var(--text-dim)';
         var lastSeen = user.last_seen ? user.last_seen.split('T')[0] + ' ' + user.last_seen.split('T')[1].substring(0, 5) : '—';
-        var regDate = user.created_at ? user.created_at.split('T')[0] : '—';
+        var regDate = user.created_at ? user.created_at.split('T')[0] + ' ' + user.created_at.split('T')[1].substring(0, 5) : '—';
 
         var initials = (user.full_name || '?').split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
         var avatarHtml = user.avatar_url
             ? '<img src="' + A.esc(user.avatar_url) + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">'
             : '<div style="width:64px;height:64px;border-radius:50%;background:rgba(204,255,0,0.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;">' + initials + '</div>';
 
-        // Membership section (info only — management through Finances)
+        // --- Membership section with inline payment ---
         var memHtml = '';
         if (canManageMembership) {
+            // Status badge
             if (membership && membership.status === 'active') {
                 var expDate = membership.expires_at ? membership.expires_at.split('T')[0] : '—';
                 var daysLeft = '';
@@ -461,94 +474,111 @@
                     daysLeft = diff > 0 ? ' (' + diff + ' ' + (isEn ? 'days left' : 'дн.') + ')' : '';
                 }
                 memHtml =
-                    '<div style="display:flex;align-items:center;gap:8px;">' +
+                    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
                         '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + '</span>' +
                         '<span style="color:var(--text-secondary);font-size:0.85rem;">' + (isEn ? 'until ' : 'до ') + expDate + daysLeft + '</span>' +
                     '</div>';
             } else {
                 memHtml =
-                    '<div style="color:var(--text-dim);">' + L.usrNoMembership + '</div>';
+                    '<div style="color:var(--text-dim);margin-bottom:12px;">' + L.usrNoMembership + '</div>';
             }
-            memHtml += '<div style="margin-top:8px;">' +
-                '<a href="#finances" style="color:var(--accent);font-size:0.85rem;text-decoration:none;" onclick="window.KSLT_ADMIN.switchTab(\'finances\');return false;">→ ' + (isEn ? 'Manage in Finances' : 'Управление в Финансах') + '</a>' +
-            '</div>';
+
+            // Inline payment: period buttons + amount + pay button
+            var periodBtns = [1, 3, 6, 12].map(function(m) {
+                var isActive = _selectedPeriod === m;
+                var style = isActive
+                    ? 'background:var(--accent);color:#000;border-color:var(--accent);'
+                    : '';
+                return '<button class="ad-btn ad-btn-secondary ad-btn-sm adUsrPeriodBtn" data-months="' + m + '" style="' + style + '">' + L['usrMonths' + m] + '</button>';
+            }).join('');
+
+            memHtml +=
+                '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+                    periodBtns +
+                    '<span style="color:var(--text-secondary);font-size:0.85rem;margin-left:4px;">' + L.usrPayAmount + ':</span>' +
+                    '<input type="number" class="ad-field-input" id="adUsrPayAmount" style="width:100px;padding:4px 8px;font-size:0.85rem;" placeholder="0" min="0">' +
+                    '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adUsrPayBtn" disabled style="opacity:0.5;">' + L.usrProcessPayment + '</button>' +
+                '</div>' +
+                '<div id="adUsrPayInfo" style="margin-top:8px;font-size:0.8rem;">' +
+                    (_lastPaymentInfo ? '<span style="color:#34c759;">' + _lastPaymentInfo + '</span>' : '') +
+                '</div>';
+            _lastPaymentInfo = ''; // clear after showing
         }
 
-        // Player category section
+        // --- Player category + NTRP (unified for both existing and new players) ---
         var playerCatHtml = '';
         if (canManageMembership) {
             await A.loadCategories();
             var catGender = userGenderToCategory(user.gender);
+            var catOpts = buildCatOptions(catGender, playerData ? playerData.category_id : null);
+            var ntrpOpts = A.ntrpOptions(playerData ? playerData.ntrp_rating : null);
 
-            if (user.player_id) {
-                // Has player — show current category + change dropdown
-                var plRes = await A.client.from('players').select('category_id').eq('id', user.player_id).single();
-                if (plRes.data) {
-                    var selCatOpts = buildCatOptions(catGender, plRes.data.category_id);
-
-                    playerCatHtml =
-                        '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrPlayerCategory + '</h3>' +
-                        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
-                            '<select class="ad-field-input" id="adUsrPlayerCat" style="width:auto;padding:4px 8px;font-size:0.85rem;">' + selCatOpts + '</select>' +
-                            '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adUsrChangeCat">' + L.usrChangeCategory + '</button>' +
-                        '</div>';
-                }
-            } else {
-                // No player — show "Create player card" button with category picker
-                var newCatOpts = buildCatOptions(catGender, null);
-                playerCatHtml =
-                    '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrPlayerCategory + '</h3>' +
-                    '<div style="color:var(--text-dim);margin-bottom:8px;font-size:0.85rem;">' + L.usrCategoryHint + '</div>' +
-                    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
-                        '<select class="ad-field-input" id="adUsrNewPlayerCat" style="width:auto;padding:4px 8px;font-size:0.85rem;">' + newCatOpts + '</select>' +
-                        '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adUsrCreatePlayer">' + (isEn ? 'Create Player Card' : 'Создать карточку игрока') + '</button>' +
-                    '</div>';
-            }
+            playerCatHtml =
+                '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrPlayerCategory + '</h3>' +
+                '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+                    '🎾 <select class="ad-field-input" id="adUsrPlayerCat" style="width:auto;padding:4px 8px;font-size:0.85rem;">' + catOpts + '</select>' +
+                    '<span style="color:var(--text-secondary);font-size:0.85rem;">NTRP:</span>' +
+                    '<select class="ad-field-input" id="adUsrNtrp" style="width:auto;padding:4px 8px;font-size:0.85rem;">' + ntrpOpts + '</select>' +
+                '</div>';
         }
 
-        // Moderation section (ban/unban) — admin or manager (manager only for role=user)
+        // --- Actions: single row at the bottom ---
         var isSelf = user.id === A.currentUserId;
         var isUserBanned = user.banned_until && new Date(user.banned_until) > new Date();
-        var moderationHtml = '';
         var canModerate = isAdm ? (!isSelf && user.role !== 'admin') : (A.currentRole === 'manager' && !isSelf && user.role === 'user');
+
+        var actionsHtml = '';
+        var actionBtns = [];
+
+        // Save button (profile + category + NTRP) — admin and manager
+        if (canManageMembership) {
+            actionBtns.push('<button class="ad-btn ad-btn-primary ad-btn-sm" id="adUsrSave">' + L.save + '</button>');
+        }
+
+        // Ban / Unban
         if (canModerate) {
             if (isUserBanned) {
-                var isPerm = new Date(user.banned_until).getFullYear() >= 2099;
-                var banDateStr = isPerm ? L.usrBannedForever : (L.usrBannedUntil + ' ' + user.banned_until.split('T')[0]);
-                var banReasonStr = user.ban_reason ? '<div style="color:var(--text-dim);font-size:0.8rem;margin-top:4px;">' + A.esc(user.ban_reason) + '</div>' : '';
-                moderationHtml =
-                    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
-                        '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:0.8rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + L.usrBanned + ': ' + banDateStr + '</span>' +
-                    '</div>' +
-                    banReasonStr +
-                    '<button class="ad-btn ad-btn-sm" id="adUsrUnban" style="margin-top:8px;background:rgba(52,199,89,0.15);color:#34c759;border:1px solid rgba(52,199,89,0.3);">' + L.usrUnbanUser + '</button>';
+                actionBtns.push('<button class="ad-btn ad-btn-sm" id="adUsrUnban" style="background:rgba(52,199,89,0.15);color:#34c759;border:1px solid rgba(52,199,89,0.3);">' + L.usrUnbanUser + '</button>');
             } else {
-                moderationHtml =
-                    '<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrBan">' + L.usrBanUser + '</button>';
+                actionBtns.push('<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrBan">' + L.usrBanUser + '</button>');
             }
         }
 
-        // Role actions — admin, or manager (delete user only)
-        var roleActionsHtml = '';
-        if (isAdm) {
-            if (isSelf) {
-                roleActionsHtml = '<div style="color:var(--text-dim);font-size:0.85rem;font-style:italic;">' + L.usrCannotDeleteSelf + '</div>';
-            } else if (user.role === 'manager') {
-                roleActionsHtml =
-                    '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adUsrRemoveManager">' + L.usrRemoveManager + '</button>' +
-                    '<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrDelete">' + L.usrDeleteUser + '</button>';
+        // Role actions
+        if (isAdm && !isSelf) {
+            if (user.role === 'manager') {
+                actionBtns.push('<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adUsrRemoveManager">' + L.usrRemoveManager + '</button>');
             } else if (user.role === 'user') {
-                roleActionsHtml =
-                    '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adUsrMakeManager">' + L.usrMakeManager + '</button>' +
-                    '<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrDelete">' + L.usrDeleteUser + '</button>';
+                actionBtns.push('<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adUsrMakeManager">' + L.usrMakeManager + '</button>');
             }
-        } else if (A.currentRole === 'manager' && !isSelf && user.role === 'user') {
-            roleActionsHtml =
-                '<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrDelete">' + L.usrDeleteUser + '</button>';
         }
 
-        // Profile readonly for manager
-        var profileReadonly = !isAdm ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '';
+        // Delete
+        var canDelete = isAdm ? (!isSelf) : (A.currentRole === 'manager' && !isSelf && user.role === 'user');
+        if (canDelete) {
+            actionBtns.push('<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrDelete">' + L.usrDeleteUser + '</button>');
+        }
+
+        if (isSelf && isAdm) {
+            actionsHtml = '<div style="color:var(--text-dim);font-size:0.85rem;font-style:italic;">' + L.usrCannotDeleteSelf + '</div>';
+        } else if (actionBtns.length > 0) {
+            actionsHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + actionBtns.join('') + '</div>';
+        }
+
+        // Ban info (shown above actions if banned)
+        var banInfoHtml = '';
+        if (canModerate && isUserBanned) {
+            var isPerm = new Date(user.banned_until).getFullYear() >= 2099;
+            var banDateStr = isPerm ? L.usrBannedForever : (L.usrBannedUntil + ' ' + user.banned_until.split('T')[0]);
+            var banReasonStr = user.ban_reason ? ' — ' + A.esc(user.ban_reason) : '';
+            banInfoHtml =
+                '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
+                    '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:0.8rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + L.usrBanned + ': ' + banDateStr + banReasonStr + '</span>' +
+                '</div>';
+        }
+
+        // Profile editable for admin and manager
+        var profileReadonly = !canManageMembership ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '';
 
         container.innerHTML =
             '<div class="ad-section-header">' +
@@ -590,50 +620,71 @@
                         '<input type="text" class="ad-field-input" value="' + regDate + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                 '</div>' +
-                (isAdm ? '<button class="ad-btn ad-btn-primary" id="adUsrSave" style="margin-top:8px;">' + L.save + '</button>' : '') +
-                // Membership
+                '<div class="ad-field-row">' +
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">' + (isEn ? 'Gender' : 'Пол') + '</label>' +
+                        '<input type="text" class="ad-field-input" value="' + (user.gender === 'male' ? (isEn ? 'Male' : 'Мужской') : user.gender === 'female' ? (isEn ? 'Female' : 'Женский') : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                    '</div>' +
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">' + (isEn ? 'Date of Birth' : 'Дата рождения') + '</label>' +
+                        '<input type="text" class="ad-field-input" value="' + (user.birth_day && user.birth_month && user.birth_year ? (user.birth_day < 10 ? '0' : '') + user.birth_day + '.' + (user.birth_month < 10 ? '0' : '') + user.birth_month + '.' + user.birth_year : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                    '</div>' +
+                '</div>' +
+                // Membership with inline payment
                 (canManageMembership ? '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrMembership + '</h3>' + memHtml : '') +
-                // Player category
+                // Player category + NTRP
                 playerCatHtml +
-                // Moderation (admin or manager for regular users)
-                (moderationHtml ? '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrModeration + '</h3>' + moderationHtml : '') +
-                // Actions (admin, or manager for regular users)
-                (roleActionsHtml ? '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrActions + '</h3>' +
-                '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + roleActionsHtml + '</div>' : '') +
+                // Ban info + Actions (single row)
+                (actionsHtml ? '<div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">' + banInfoHtml + actionsHtml + '</div>' : '') +
             '</div>';
 
-        // Event listeners
+        // ---- Event listeners ----
+
         document.getElementById('adUsrBack').addEventListener('click', function() {
-            A.setAdminHash('users');
+            history.pushState(null, '', '#users');
             renderUsersList();
+            window.scrollTo(0, 0);
         });
 
+        // Save all (profile + category/NTRP + create player if needed)
         var saveBtn = document.getElementById('adUsrSave');
         if (saveBtn) {
             saveBtn.addEventListener('click', function() {
-                saveUserHandler(user.id);
+                saveAllHandler(user);
             });
         }
 
-        // Change player category
-        var changeCatBtn = document.getElementById('adUsrChangeCat');
-        if (changeCatBtn) {
-            changeCatBtn.addEventListener('click', function() {
-                var newCat = document.getElementById('adUsrPlayerCat').value;
-                changePlayerCategory(user.player_id, newCat, user.id);
+        // Period buttons for inline payment
+        var periodBtnsEls = container.querySelectorAll('.adUsrPeriodBtn');
+        periodBtnsEls.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                _selectedPeriod = parseInt(btn.getAttribute('data-months'), 10);
+                // Update button styles
+                periodBtnsEls.forEach(function(b) {
+                    if (parseInt(b.getAttribute('data-months'), 10) === _selectedPeriod) {
+                        b.style.background = 'var(--accent)';
+                        b.style.color = '#000';
+                        b.style.borderColor = 'var(--accent)';
+                    } else {
+                        b.style.background = '';
+                        b.style.color = '';
+                        b.style.borderColor = '';
+                    }
+                });
             });
-        }
+        });
 
-        // Create player card (when player_id is null)
-        var createPlayerBtn = document.getElementById('adUsrCreatePlayer');
-        if (createPlayerBtn) {
-            createPlayerBtn.addEventListener('click', async function() {
-                var catId = document.getElementById('adUsrNewPlayerCat').value;
-                if (!catId) return;
-                createPlayerBtn.disabled = true;
-                createPlayerBtn.textContent = L.saving;
-                await autoCreatePlayer(user, catId);
-                loadAndEditUser(user.id);
+        // Pay button — enabled only when amount is entered
+        var payBtn = document.getElementById('adUsrPayBtn');
+        var payAmountEl = document.getElementById('adUsrPayAmount');
+        if (payBtn && payAmountEl) {
+            payAmountEl.addEventListener('input', function() {
+                var hasValue = payAmountEl.value !== '';
+                payBtn.disabled = !hasValue;
+                payBtn.style.opacity = hasValue ? '1' : '0.5';
+            });
+            payBtn.addEventListener('click', function() {
+                processPayment(user, membership);
             });
         }
 
@@ -676,26 +727,170 @@
         }
     }
 
-    async function saveUserHandler(userId) {
-        var nameEl = document.getElementById('adUsrName');
-        var phoneEl = document.getElementById('adUsrPhone');
-        if (!nameEl) return;
+    async function processPayment(user, membership) {
+        var amountEl = document.getElementById('adUsrPayAmount');
+        var amount = amountEl ? parseFloat(amountEl.value) || 0 : 0;
+
+        if (!_selectedPeriod) return;
+
+        var payBtn = document.getElementById('adUsrPayBtn');
+        if (payBtn) { payBtn.disabled = true; payBtn.textContent = '...'; }
+
+        try {
+            var session = await A.client.auth.getSession();
+            var createdBy = session.data.session ? session.data.session.user.id : null;
+
+            // Calculate dates: if active membership — extend from expires_at, else from today
+            var isExtend = membership && membership.status === 'active' && membership.expires_at;
+            var startDate = isExtend ? new Date(membership.expires_at) : new Date();
+            var endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + _selectedPeriod);
+
+            var startStr = startDate.toISOString().split('T')[0];
+            var endStr = endDate.toISOString().split('T')[0];
+
+            // 1. Create membership
+            var memResult = await A.client.from('memberships').insert({
+                profile_id: user.id,
+                status: 'active',
+                starts_at: startStr + 'T00:00:00.000Z',
+                expires_at: endStr + 'T23:59:59.000Z',
+                note: isEn ? 'Admin: via user page' : 'Админ: через карточку пользователя'
+            }).select('id').single();
+
+            if (memResult.error) {
+                A.showToast(memResult.error.message, 'error');
+                if (payBtn) { payBtn.disabled = false; payBtn.textContent = L.usrProcessPayment; }
+                return;
+            }
+
+            // 2. Create payment record
+            var payResult = await A.client.from('payments').insert({
+                profile_id: user.id,
+                membership_id: memResult.data.id,
+                amount: amount,
+                currency: 'KGS',
+                payment_method: 'cash',
+                status: 'completed',
+                note: null,
+                created_by: createdBy
+            });
+
+            if (payResult.error) {
+                A.showToast(payResult.error.message, 'error');
+                if (payBtn) { payBtn.disabled = false; payBtn.textContent = L.usrProcessPayment; }
+                return;
+            }
+
+            // 3. Loyalty points
+            if (amount > 0 && A.earnLoyaltyPoints) {
+                A.earnLoyaltyPoints(user.id, 'membership', memResult.data.id, null);
+
+                // First membership welcome bonus
+                var existingBonus = await A.client.from('loyalty_transactions')
+                    .select('id')
+                    .eq('profile_id', user.id)
+                    .eq('action', 'first_membership')
+                    .limit(1);
+                if (!existingBonus.data || existingBonus.data.length === 0) {
+                    A.earnLoyaltyPoints(user.id, 'first_membership', memResult.data.id, null);
+                }
+            }
+
+            // 4. TG notification
+            notifyMembershipTg(isExtend ? 'extended' : 'granted', user.id, endStr + 'T23:59:59.000Z');
+
+            A.showToast(isExtend ? L.usrMembershipExtended : L.usrMembershipGiven, 'success');
+
+            // 5. Store inline confirmation for display after reload
+            var now = new Date();
+            var timeStr = (now.getHours() < 10 ? '0' : '') + now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+            var dateStr = (now.getDate() < 10 ? '0' : '') + now.getDate() + '.' + (now.getMonth() + 1 < 10 ? '0' : '') + (now.getMonth() + 1) + '.' + now.getFullYear();
+            _lastPaymentInfo = '✓ ' + (isEn ? 'Payment completed' : 'Оплата проведена') + ' — ' + dateStr + ' ' + timeStr + ', ' + amount + ' KGS';
+
+            // Reload form (will show confirmation via _lastPaymentInfo)
+            loadAndEditUser(user.id);
+        } catch (err) {
+            A.showToast('Error: ' + err.message, 'error');
+            if (payBtn) { payBtn.disabled = false; payBtn.style.opacity = '1'; payBtn.textContent = L.usrProcessPayment; }
+        }
+    }
+
+    async function saveAllHandler(user) {
+        // For new users (no player card) — require payment first
+        if (!user.player_id) {
+            var memCheck = await A.client.from('memberships')
+                .select('id')
+                .eq('profile_id', user.id)
+                .eq('status', 'active')
+                .limit(1);
+            if (!memCheck.data || memCheck.data.length === 0) {
+                A.showConfirm(
+                    isEn ? 'Payment required' : 'Необходима оплата',
+                    isEn ? 'To create a player card, please process membership payment first. Enter the amount and click "Pay".' : 'Для создания карточки игрока сначала проведите оплату членства. Введите сумму и нажмите "Оплатить".',
+                    null,
+                    'OK'
+                );
+                return;
+            }
+        }
 
         var btn = document.getElementById('adUsrSave');
         if (btn) { btn.textContent = L.saving; btn.disabled = true; }
 
-        var result = await A.client.from('profiles').update({
-            full_name: nameEl.value.trim(),
-            phone: phoneEl.value.trim() || null
-        }).eq('id', userId);
+        try {
+            // 1. Save profile (name, phone)
+            var nameEl = document.getElementById('adUsrName');
+            var phoneEl = document.getElementById('adUsrPhone');
+            if (nameEl) {
+                var profResult = await A.client.from('profiles').update({
+                    full_name: nameEl.value.trim(),
+                    phone: phoneEl ? phoneEl.value.trim() || null : null
+                }).eq('id', user.id);
+                if (profResult.error) {
+                    A.showToast(profResult.error.message, 'error');
+                    if (btn) { btn.disabled = false; btn.textContent = L.save; }
+                    return;
+                }
+            }
+
+            // 2. Category + NTRP
+            var catEl = document.getElementById('adUsrPlayerCat');
+            var ntrpEl = document.getElementById('adUsrNtrp');
+            if (catEl) {
+                var catId = catEl.value;
+                var ntrpVal = ntrpEl ? ntrpEl.value : null;
+
+                if (user.player_id) {
+                    // Update existing player
+                    var upd = { category_id: catId };
+                    upd.ntrp_rating = ntrpVal ? parseFloat(ntrpVal) : null;
+                    var plResult = await A.client.from('players').update(upd).eq('id', user.player_id);
+                    if (plResult.error) {
+                        A.showToast(plResult.error.message, 'error');
+                        if (btn) { btn.disabled = false; btn.textContent = L.save; }
+                        return;
+                    }
+                } else if (catId) {
+                    // Create new player card
+                    await autoCreatePlayer(user, catId);
+                    // Reload user to get player_id, then set NTRP
+                    var freshUser = await A.client.from('profiles').select('player_id').eq('id', user.id).single();
+                    if (freshUser.data && freshUser.data.player_id && ntrpVal) {
+                        await A.client.from('players').update({
+                            ntrp_rating: parseFloat(ntrpVal)
+                        }).eq('id', freshUser.data.player_id);
+                    }
+                }
+            }
+
+            A.showToast(L.usrUserSaved, 'success');
+            loadAndEditUser(user.id);
+        } catch (err) {
+            A.showToast('Error: ' + err.message, 'error');
+        }
 
         if (btn) { btn.disabled = false; btn.textContent = L.save; }
-
-        if (result.error) {
-            A.showToast(result.error.message, 'error');
-        } else {
-            A.showToast(L.usrUserSaved, 'success');
-        }
     }
 
     function userGenderToCategory(userGender) {
@@ -825,10 +1020,14 @@
             if (suffix > 20) break; // safety
         }
 
+        // Map profile gender to player gender (male→men, female→women)
+        var playerGender = user.gender === 'female' ? 'women' : 'men';
+
         var insertRes = await A.client.from('players').insert({
             id: finalId,
             name: name,
             category_id: categoryId,
+            gender: playerGender,
             points: 0,
             wins: 0,
             losses: 0,
@@ -848,15 +1047,6 @@
         }
 
         A.showToast(L.usrPlayerCreated, 'success');
-    }
-
-    async function changePlayerCategory(playerId, newCategoryId, profileId) {
-        var result = await A.client.from('players').update({ category_id: newCategoryId }).eq('id', playerId);
-        if (result.error) {
-            A.showToast(result.error.message, 'error');
-        } else {
-            A.showToast(L.usrCategorySaved, 'success');
-        }
     }
 
     async function extendMembership(memId, months) {

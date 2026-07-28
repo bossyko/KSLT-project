@@ -463,7 +463,8 @@
             ntrpHtml = '<div class="pt-ntrp-badge">NTRP ' + Number(p.ntrp_rating).toFixed(1) + '</div>';
         }
 
-        var html = '<div class="pt-card' + (extraClass || '') + '">' +
+        var playerPage = isEn ? 'player-en.html' : isKg ? 'player-kg.html' : 'player.html';
+        var html = '<div class="pt-card' + (extraClass || '') + '" data-player-url="' + playerPage + '?id=' + escHtml(p.id) + '" style="cursor:pointer;">' +
             ntrpHtml +
             '<div class="pt-avatar-wrap">' +
                 avatarHtml +
@@ -524,6 +525,15 @@
     }
 
     // ---- SPONSORS — loaded via sponsors-loader.js ----
+
+    // ---- Card click → player profile ----
+    document.addEventListener('click', function(e) {
+        // Skip if clicking invite button
+        if (e.target.closest('.pt-invite-btn')) return;
+        var card = e.target.closest('.pt-card[data-player-url]');
+        if (!card) return;
+        window.location.href = card.dataset.playerUrl;
+    });
 
     // ---- Invite click delegation ----
     document.addEventListener('click', function(e) {
