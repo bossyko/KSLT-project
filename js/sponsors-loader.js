@@ -19,6 +19,7 @@
         whatsapp: 'WhatsApp',
         instagram: 'Instagram',
         telegram: 'Telegram',
+        phone: isEn ? 'Call' : (isKg ? 'Чалуу' : 'Позвонить'),
         email: isEn ? 'Email' : (isKg ? 'Электрондук почта' : 'Эл. почта'),
         address: isEn ? 'Address' : (isKg ? 'Дарек' : 'Адрес'),
         close: isEn ? 'Close' : (isKg ? 'Жабуу' : 'Закрыть')
@@ -43,7 +44,7 @@
 
     // Check if sponsor has extra contact info beyond just a URL
     function hasContactInfo(s) {
-        return s.whatsapp || s.instagram || s.telegram || s.email || s.address ||
+        return s.phone || s.whatsapp || s.instagram || s.telegram || s.email || s.address ||
                s.description || s.description_en || s.description_kg;
     }
 
@@ -87,6 +88,12 @@
             actions += '<a href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer" class="spon-modal-action">' +
                 '<span class="spon-modal-action-icon">🌐</span>' +
                 '<span>' + modalLabels.website + '</span>' +
+            '</a>';
+        }
+        if (s.phone) {
+            actions += '<a href="tel:' + esc(s.phone.replace(/[^0-9+]/g, '')) + '" class="spon-modal-action spon-action-phone">' +
+                '<span class="spon-modal-action-icon">📞</span>' +
+                '<span>' + modalLabels.phone + ' ' + esc(s.phone) + '</span>' +
             '</a>';
         }
         if (s.whatsapp) {
@@ -160,6 +167,7 @@
         var hasExtra = hasContactInfo(s);
         var hasMultipleLinks = 0;
         if (s.url) hasMultipleLinks++;
+        if (s.phone) hasMultipleLinks++;
         if (s.whatsapp) hasMultipleLinks++;
         if (s.instagram) hasMultipleLinks++;
         if (s.telegram) hasMultipleLinks++;
