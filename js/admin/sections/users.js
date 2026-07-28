@@ -411,7 +411,7 @@
         if (!A.client) return;
 
         var userRes = await A.client.from('profiles')
-            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at, banned_until, ban_reason, player_id, gender, birth_day, birth_month, birth_year')
+            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at, banned_until, ban_reason, player_id, gender, birth_day, birth_month, birth_year, instagram, telegram')
             .eq('id', id)
             .single();
 
@@ -628,6 +628,16 @@
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + (isEn ? 'Date of Birth' : 'Дата рождения') + '</label>' +
                         '<input type="text" class="ad-field-input" value="' + (user.birth_day && user.birth_month && user.birth_year ? (user.birth_day < 10 ? '0' : '') + user.birth_day + '.' + (user.birth_month < 10 ? '0' : '') + user.birth_month + '.' + user.birth_year : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-field-row">' +
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">Instagram</label>' +
+                        '<input type="text" class="ad-field-input" value="' + A.esc(user.instagram || '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                    '</div>' +
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">Telegram</label>' +
+                        '<input type="text" class="ad-field-input" value="' + A.esc(user.telegram || '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                 '</div>' +
                 // Membership with inline payment
