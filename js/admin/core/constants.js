@@ -1145,6 +1145,7 @@
         sponAddress: 'Address',
         sponDescription: 'Description',
         sponContacts: 'Contacts & Social Media',
+        sponPhone: 'Phone',
         // Live Match
         liveSection: 'Live',
         liveActive: 'Active',
@@ -2338,6 +2339,7 @@
         sponAddress: 'Адрес',
         sponDescription: 'Описание',
         sponContacts: 'Контакты и соцсети',
+        sponPhone: 'Телефон',
         // Live Match
         liveSection: 'Live',
         liveActive: 'Активные',

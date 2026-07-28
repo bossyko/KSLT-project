@@ -41,6 +41,7 @@
 
             // Contact icons
             var contacts = [];
+            if (s.phone) contacts.push('📞');
             if (s.whatsapp) contacts.push('WA');
             if (s.instagram) contacts.push('IG');
             if (s.telegram) contacts.push('TG');
@@ -182,6 +183,10 @@
                 '<div class="ad-form-card">' +
                     '<div class="ad-form-card-title">' + L.sponContacts + '</div>' +
                     '<div class="ad-field-row">' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.sponPhone + '</label>' +
+                            '<input type="text" class="ad-field-input" id="spnPhone" value="' + A.esc(isEdit ? (sponsor.phone || '') : '') + '" placeholder="+996555123456">' +
+                        '</div>' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.sponWhatsapp + '</label>' +
                             '<input type="text" class="ad-field-input" id="spnWhatsapp" value="' + A.esc(isEdit ? (sponsor.whatsapp || '') : '') + '" placeholder="+996555123456">' +
@@ -341,6 +346,7 @@
                 url: document.getElementById('spnUrl').value.trim() || null,
                 is_hero: document.getElementById('spnIsHero').checked,
                 sort_order: parseInt(document.getElementById('spnSortOrder').value) || 0,
+                phone: document.getElementById('spnPhone').value.trim() || null,
                 whatsapp: document.getElementById('spnWhatsapp').value.trim() || null,
                 instagram: document.getElementById('spnInstagram').value.trim() || null,
                 telegram: document.getElementById('spnTelegram').value.trim() || null,
