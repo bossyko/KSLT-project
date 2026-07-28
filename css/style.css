@@ -3100,6 +3100,151 @@ h2 {
 }
 
 /* ========================================
+   SPONSOR DETAIL MODAL
+   ======================================== */
+
+.spon-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    padding: 20px;
+}
+
+.spon-modal-overlay.visible {
+    opacity: 1;
+}
+
+.spon-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 32px 28px 24px;
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+    text-align: center;
+    transform: scale(0.95);
+    transition: transform 0.25s ease;
+}
+
+.spon-modal-overlay.visible .spon-modal {
+    transform: scale(1);
+}
+
+.spon-modal-close {
+    position: absolute;
+    top: 12px; right: 16px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+}
+
+.spon-modal-close:hover {
+    color: var(--text-primary);
+}
+
+.spon-modal-logo {
+    margin-bottom: 16px;
+}
+
+.spon-modal-logo img {
+    max-height: 80px;
+    max-width: 200px;
+    object-fit: contain;
+}
+
+.spon-modal-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.spon-modal-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.spon-modal-address {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+}
+
+.spon-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.spon-modal-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.spon-modal-action:hover {
+    background: rgba(204, 255, 0, 0.08);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.spon-modal-action-icon {
+    font-size: 1.1rem;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.spon-modal-close-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    padding: 10px 24px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.spon-modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+}
+
+@media (max-width: 480px) {
+    .spon-modal {
+        padding: 24px 20px 20px;
+    }
+    .spon-modal-logo img {
+        max-height: 60px;
+    }
+}
+
+/* ========================================
    INFINITE SPONSORS CAROUSEL
    Бесконечная автоматическая прокрутка
    ======================================== */

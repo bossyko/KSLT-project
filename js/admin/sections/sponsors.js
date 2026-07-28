@@ -39,11 +39,22 @@
                 : '—';
             var heroHtml = s.is_hero ? '<span style="color:var(--accent)">✓</span>' : '—';
 
+            // Contact icons
+            var contacts = [];
+            if (s.whatsapp) contacts.push('WA');
+            if (s.instagram) contacts.push('IG');
+            if (s.telegram) contacts.push('TG');
+            if (s.email) contacts.push('✉');
+            var contactsHtml = contacts.length
+                ? '<span style="color:var(--text-secondary);font-size:0.75rem">' + contacts.join(' ') + '</span>'
+                : '—';
+
             rows += '<tr>' +
                 A.bulkCheckboxTd(s.id) +
                 '<td>' + logoHtml + '</td>' +
                 '<td>' + A.esc(s.name) + '</td>' +
                 '<td>' + urlHtml + '</td>' +
+                '<td style="text-align:center">' + contactsHtml + '</td>' +
                 '<td style="text-align:center">' + heroHtml + '</td>' +
                 '<td style="text-align:center">' + (s.sort_order || 0) + '</td>' +
                 '<td><button class="ad-btn ad-btn-sm" data-edit="' + s.id + '">' + L.editSponsor + '</button></td>' +
@@ -72,6 +83,7 @@
                         '<th style="width:50px">' + L.sponLogo + '</th>' +
                         '<th>' + L.sponName + '</th>' +
                         '<th>' + L.sponUrl + '</th>' +
+                        '<th style="text-align:center">' + L.sponContacts + '</th>' +
                         '<th style="text-align:center">' + L.sponIsHero + '</th>' +
                         '<th style="text-align:center;width:80px">' + L.sponSort + '</th>' +
                         '<th style="width:120px"></th>' +
@@ -166,7 +178,54 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
-                // Card 2: Logo
+                // Card 2: Contacts & Social Media
+                '<div class="ad-form-card">' +
+                    '<div class="ad-form-card-title">' + L.sponContacts + '</div>' +
+                    '<div class="ad-field-row">' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.sponWhatsapp + '</label>' +
+                            '<input type="text" class="ad-field-input" id="spnWhatsapp" value="' + A.esc(isEdit ? (sponsor.whatsapp || '') : '') + '" placeholder="+996555123456">' +
+                        '</div>' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.sponEmail + '</label>' +
+                            '<input type="email" class="ad-field-input" id="spnEmail" value="' + A.esc(isEdit ? (sponsor.email || '') : '') + '" placeholder="info@company.kg">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="ad-field-row">' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.sponInstagram + '</label>' +
+                            '<input type="text" class="ad-field-input" id="spnInstagram" value="' + A.esc(isEdit ? (sponsor.instagram || '') : '') + '" placeholder="@username">' +
+                        '</div>' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.sponTelegram + '</label>' +
+                            '<input type="text" class="ad-field-input" id="spnTelegram" value="' + A.esc(isEdit ? (sponsor.telegram || '') : '') + '" placeholder="@channel">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.sponAddress + '</label>' +
+                        '<input type="text" class="ad-field-input" id="spnAddress" value="' + A.esc(isEdit ? (sponsor.address || '') : '') + '">' +
+                    '</div>' +
+                '</div>' +
+                // Card 3: Description (RU / EN / KG in one row + translate button)
+                '<div class="ad-form-card">' +
+                    '<div class="ad-form-card-title">' + L.sponDescription + '</div>' +
+                    '<div class="ad-field-row">' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.sponDescription + ' (RU)</label>' +
+                            '<textarea class="ad-field-input" id="spnDescription" rows="3">' + A.esc(isEdit ? (sponsor.description || '') : '') + '</textarea>' +
+                        '</div>' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.sponDescription + ' (EN)</label>' +
+                            '<textarea class="ad-field-input" id="spnDescriptionEn" rows="3">' + A.esc(isEdit ? (sponsor.description_en || '') : '') + '</textarea>' +
+                        '</div>' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.sponDescription + ' (KG)</label>' +
+                            '<textarea class="ad-field-input" id="spnDescriptionKg" rows="3">' + A.esc(isEdit ? (sponsor.description_kg || '') : '') + '</textarea>' +
+                        '</div>' +
+                    '</div>' +
+                    '<button type="button" class="ad-btn-translate-all" data-ru="spnDescription" data-en="spnDescriptionEn" data-kg="spnDescriptionKg">&#127760; ' + L.translateAllBtn + '</button>' +
+                '</div>' +
+                // Card 4: Logo
                 '<div class="ad-form-card">' +
                     '<div class="ad-form-card-title">' + L.sponLogo + '</div>' +
                     '<div class="ad-image-upload' + (hasImage ? ' has-image' : '') + '" id="spnUploadZone">' +
@@ -184,6 +243,13 @@
                     (isEdit ? '<button type="button" class="ad-btn ad-btn-danger" id="spnDeleteBtn">' + L.delete + '</button>' : '') +
                 '</div>' +
             '</form>';
+
+        // ---- Translate button ----
+        container.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ad-btn-translate-all');
+            if (!btn) return;
+            A.translateToEmpty(btn.dataset.ru, btn.dataset.en, btn.dataset.kg, btn);
+        });
 
         // ---- Upload zone click ----
         var uploadZone = document.getElementById('spnUploadZone');
@@ -274,7 +340,15 @@
                 logo: logoUrl || null,
                 url: document.getElementById('spnUrl').value.trim() || null,
                 is_hero: document.getElementById('spnIsHero').checked,
-                sort_order: parseInt(document.getElementById('spnSortOrder').value) || 0
+                sort_order: parseInt(document.getElementById('spnSortOrder').value) || 0,
+                whatsapp: document.getElementById('spnWhatsapp').value.trim() || null,
+                instagram: document.getElementById('spnInstagram').value.trim() || null,
+                telegram: document.getElementById('spnTelegram').value.trim() || null,
+                email: document.getElementById('spnEmail').value.trim() || null,
+                address: document.getElementById('spnAddress').value.trim() || null,
+                description: document.getElementById('spnDescription').value.trim() || null,
+                description_en: document.getElementById('spnDescriptionEn').value.trim() || null,
+                description_kg: document.getElementById('spnDescriptionKg').value.trim() || null
             };
 
             var res;

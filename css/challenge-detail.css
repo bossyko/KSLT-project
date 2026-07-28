@@ -100,6 +100,13 @@
     letter-spacing: 0.5px;
 }
 
+.ch-player-ntrp {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
 .ch-player-stats {
     display: flex;
     gap: var(--space-md);
@@ -147,6 +154,25 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-wrap: wrap;
+}
+.ch-map-links {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    margin-left: 4px;
+}
+.ch-map-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+}
+.ch-map-link:hover {
+    opacity: 0.7;
+    text-decoration: underline;
 }
 
 /* === VOTING SECTION === */
@@ -216,21 +242,57 @@
 
 .ch-vote-btn {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 10px 24px;
-    border-radius: var(--radius-md);
-    border: 2px solid var(--border);
-    background: var(--bg-secondary);
+    gap: 6px;
+    padding: 16px 28px;
+    border-radius: var(--radius-lg);
+    border: 2px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
     color: var(--text-primary);
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.25s;
+    min-width: 180px;
+    position: relative;
+}
+.ch-vote-btn .ch-vote-name {
+    font-size: 1rem;
+    font-weight: 700;
+}
+.ch-vote-btn .ch-vote-count {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-dim);
+}
+.ch-vote-btn .ch-vote-cta {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    opacity: 0.7;
+    transition: opacity 0.2s;
 }
 .ch-vote-btn:hover:not(.disabled) {
     border-color: var(--accent);
-    background: rgba(204, 255, 0, 0.08);
+    background: rgba(204, 255, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(204, 255, 0, 0.15);
+}
+.ch-vote-btn:hover:not(.disabled) .ch-vote-cta {
+    opacity: 1;
+}
+.ch-vote-btn:not(.disabled):not(.selected) {
+    animation: ch-vote-pulse 2.5s ease-in-out infinite;
+}
+@keyframes ch-vote-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0); }
+    50% { box-shadow: 0 0 0 6px rgba(204, 255, 0, 0.08); }
+}
+.ch-vote-btn:active:not(.disabled) {
+    transform: scale(0.96);
 }
 .ch-vote-btn.selected {
     border-color: var(--accent);
@@ -238,10 +300,12 @@
     color: var(--accent);
     box-shadow: 0 0 12px rgba(204, 255, 0, 0.2);
     font-weight: 600;
+    animation: none;
 }
 .ch-vote-btn.disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    animation: none;
 }
 
 .ch-vote-check {
@@ -323,19 +387,16 @@
 .ch-details-inner {
     max-width: 700px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
 }
 
 .ch-details-title {
     font-size: 1.2rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: var(--space-md);
-}
-
-.ch-details-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-md);
+    margin-bottom: 0;
 }
 
 .ch-detail-item {
@@ -359,6 +420,36 @@
     font-size: 0.95rem;
     color: var(--text-primary);
     font-weight: 600;
+}
+
+/* Venue block */
+.ch-detail-venue {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+.ch-detail-venue .ch-detail-item {
+    margin-bottom: 0;
+}
+
+/* Map links */
+.ch-detail-map-links {
+    display: flex;
+    gap: 12px;
+    padding: 0 var(--space-md);
+}
+
+/* Map embed */
+.ch-detail-map {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+.ch-detail-map iframe {
+    width: 100%;
+    height: 300px;
+    border: 0;
+    display: block;
 }
 
 /* === H2H SECTION === */
@@ -557,7 +648,7 @@
     .ch-meta { flex-direction: column; align-items: center; gap: var(--space-sm); }
     .ch-voting { padding: var(--space-lg) 5%; }
     .ch-vote-buttons { flex-direction: column; align-items: center; }
-    .ch-vote-btn { width: 100%; max-width: 280px; justify-content: center; }
+    .ch-vote-btn { width: 100%; max-width: 300px; }
     .ch-details { padding: var(--space-lg) 5%; }
     .ch-h2h { padding: var(--space-lg) 5%; }
     .ch-score { padding: var(--space-lg) 5%; }

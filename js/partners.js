@@ -29,6 +29,10 @@
         levelAdvanced: 'Advanced',
         levelUnknown: 'Level not specified',
         inviteBtn: 'Invite to play',
+        inviteConfirmTitle: 'Send game invitation?',
+        inviteConfirmText: 'By sending an invitation, you agree that your Telegram contact may be shared with the recipient if they accept.',
+        inviteConfirmBtn: 'Send',
+        inviteConfirmCancel: 'Cancel',
         inviteSent: 'Invitation sent!',
         inviteNoTg: 'Player has no Telegram connected',
         inviteError: 'Failed to send invitation',
@@ -63,6 +67,10 @@
         levelAdvanced: 'Алдыңкы',
         levelUnknown: 'Деңгээл көрсөтүлгөн эмес',
         inviteBtn: 'Оюн сунуштоо',
+        inviteConfirmTitle: 'Оюнга чакыруу жөнөтөсүзбү?',
+        inviteConfirmText: 'Чакыруу жөнөтүү менен, кабыл алган учурда Telegram байланышыңыз алуучуга берилиши мүмкүн экенине макулдугуңузду билдиресиз.',
+        inviteConfirmBtn: 'Жөнөтүү',
+        inviteConfirmCancel: 'Жокко чыгаруу',
         inviteSent: 'Чакыруу жөнөтүлдү!',
         inviteNoTg: 'Оюнчунун Telegram\'ы байланган эмес',
         inviteError: 'Чакыруу жөнөтүлгөн жок',
@@ -97,6 +105,10 @@
         levelAdvanced: 'Продвинутый',
         levelUnknown: 'Уровень не указан',
         inviteBtn: 'Предложить игру',
+        inviteConfirmTitle: 'Отправить приглашение на игру?',
+        inviteConfirmText: 'Отправляя приглашение, вы соглашаетесь, что ваш контакт в Telegram может быть передан получателю в случае принятия приглашения.',
+        inviteConfirmBtn: 'Отправить',
+        inviteConfirmCancel: 'Отмена',
         inviteSent: 'Приглашение отправлено!',
         inviteNoTg: 'У игрока не привязан Telegram',
         inviteError: 'Не удалось отправить приглашение',
@@ -535,8 +547,46 @@
             return;
         }
 
-        // Member — send invite
-        sendInvite(playerId, hasTelegram);
+        // Member — show confirmation before sending
+        showInviteConfirm(playerId, hasTelegram);
+    }
+
+    function showInviteConfirm(playerId, hasTelegram) {
+        var old = document.querySelector('.pt-modal-overlay');
+        if (old) old.remove();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'pt-modal-overlay';
+        overlay.innerHTML =
+            '<div class="pt-modal">' +
+                '<button class="pt-modal-close">&times;</button>' +
+                '<div class="pt-modal-icon">&#9888;&#65039;</div>' +
+                '<div class="pt-modal-title">' + L.inviteConfirmTitle + '</div>' +
+                '<div class="pt-modal-text">' + L.inviteConfirmText + '</div>' +
+                '<div style="display:flex;gap:12px;justify-content:center;margin-top:8px;">' +
+                    '<button class="pt-modal-btn pt-confirm-send">' + L.inviteConfirmBtn + '</button>' +
+                    '<button class="pt-modal-btn pt-confirm-cancel" style="background:rgba(255,255,255,0.08);color:var(--text-secondary);">' + L.inviteConfirmCancel + '</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        requestAnimationFrame(function() {
+            overlay.classList.add('visible');
+        });
+
+        overlay.querySelector('.pt-confirm-send').addEventListener('click', function() {
+            closeModal(overlay);
+            sendInvite(playerId, hasTelegram);
+        });
+        overlay.querySelector('.pt-confirm-cancel').addEventListener('click', function() {
+            closeModal(overlay);
+        });
+        overlay.querySelector('.pt-modal-close').addEventListener('click', function() {
+            closeModal(overlay);
+        });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeModal(overlay);
+        });
     }
 
     // ---- Send invite via Edge Function ----

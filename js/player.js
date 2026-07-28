@@ -106,7 +106,8 @@
         challengeLoginText: 'Для отправки вызова необходимо авторизоваться',
         challengeMemberRequired: 'Оформите членство',
         challengeMemberText: 'Для отправки вызова необходимо членство KSLT',
-        challengeNoPlayer: 'Привяжите профиль игрока для отправки вызовов'
+        challengeNoPlayer: 'Привяжите профиль игрока для отправки вызовов',
+        challengeDisclaimer: 'Отправляя вызов, вы соглашаетесь, что ваш контакт в Telegram может быть передан оппоненту.'
     };
 
     // ---- H2H Labels ----
@@ -1580,6 +1581,7 @@
                         '<textarea class="pp-chal-input pp-chal-textarea" id="ppChalMsg" maxlength="150" rows="2"></textarea>' +
                         '<div class="pp-chal-counter"><span id="ppChalMsgCount">0</span>/150</div>' +
                     '</div>' +
+                    '<div style="font-size:0.75rem;color:var(--text-dim);text-align:center;margin:8px 0 4px;">&#9888;&#65039; ' + esc(L.challengeDisclaimer) + '</div>' +
                     '<button class="pp-chal-submit" id="ppChalSubmit">' + L.challengeSend + '</button>' +
                 '</div>' +
             '</div>';

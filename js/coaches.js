@@ -6,6 +6,52 @@
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    function coachMapLinks(coach) {
+        var gm = coach._courtMapGoogle || '';
+        var tg = coach._courtMapTwogis || '';
+        if (!gm && !tg) return '';
+        var html = ' <span class="co-map-links">';
+        if (gm) html += '<a href="' + esc(gm) + '" target="_blank" rel="noopener" class="co-map-link">Google Maps &#8599;</a>';
+        if (gm && tg) html += ' ';
+        if (tg) html += '<a href="' + esc(tg) + '" target="_blank" rel="noopener" class="co-map-link">2GIS &#8599;</a>';
+        html += '</span>';
+        return html;
+    }
+
+    function getMapEmbed(url) {
+        if (!url) return null;
+        if (url.indexOf('google.com/maps') !== -1 || url.indexOf('goo.gl/maps') !== -1 || url.indexOf('maps.app.goo.gl') !== -1) {
+            if (url.indexOf('/embed') !== -1) return url;
+            var qMatch = url.match(/[?&]q=([^&]+)/);
+            if (qMatch) return 'https://maps.google.com/maps?q=' + qMatch[1] + '&output=embed';
+            var coordMatch = url.match(/@(-?[\d.]+),(-?[\d.]+)/);
+            if (coordMatch) return 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&output=embed';
+            var placeMatch = url.match(/\/place\/([^/]+)/);
+            if (placeMatch) return 'https://maps.google.com/maps?q=' + placeMatch[1] + '&output=embed';
+            return 'https://maps.google.com/maps?q=' + encodeURIComponent(url) + '&output=embed';
+        }
+        if (url.indexOf('2gis.') !== -1) {
+            var gisMatch = url.match(/\/([\d.]+)%2C([\d.]+)\//);
+            if (!gisMatch) gisMatch = url.match(/\/([\d.]+),([\d.]+)\//);
+            if (gisMatch) return 'https://maps.google.com/maps?q=' + gisMatch[2] + ',' + gisMatch[1] + '&output=embed';
+        }
+        return null;
+    }
+
+    function coachMapSection(coach) {
+        var gm = coach._courtMapGoogle || '';
+        var tg = coach._courtMapTwogis || '';
+        if (!gm && !tg) return '';
+
+        var html = '<div class="co-section co-fade-in">' +
+            '<h2 class="co-section-title">' + (isEn ? 'Location' : (isKg ? 'Жайгашкан жери' : 'Расположение')) + '</h2>' +
+            '<div class="co-map-links-section">';
+        if (tg) html += '<a href="' + esc(tg) + '" target="_blank" rel="noopener" class="co-map-link-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> 2GIS</a>';
+        if (gm) html += '<a href="' + esc(gm) + '" target="_blank" rel="noopener" class="co-map-link-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps</a>';
+        html += '</div></div>';
+        return html;
+    }
+
     function roundRect(ctx, x, y, w, h, r) {
         ctx.beginPath();
         ctx.moveTo(x + r, y);
@@ -630,8 +676,40 @@
 
         document.title = 'KSLT — ' + coach.name;
         renderDetailHero(coach);
-        renderDetail(coach);
-        initScrollAnimations();
+
+        // Load court map links if coach has court field
+        if (coach.court && coach._isDb) {
+            var cl = window.supabaseClient;
+            if (cl) {
+                cl.from('courts').select('name, name_en, google_maps_url, twogis_url')
+                    .then(function(res) {
+                        if (res.data) {
+                            var courtText = coach.court.toLowerCase().trim();
+                            for (var ci = 0; ci < res.data.length; ci++) {
+                                var ct = res.data[ci];
+                                var ctName = (ct.name || '').toLowerCase().trim();
+                                var ctNameEn = (ct.name_en || '').toLowerCase().trim();
+                                if (ctName === courtText || ctNameEn === courtText) {
+                                    coach._courtMapGoogle = ct.google_maps_url || '';
+                                    coach._courtMapTwogis = ct.twogis_url || '';
+                                    break;
+                                }
+                            }
+                        }
+                        renderDetail(coach);
+                        initScrollAnimations();
+                    }).catch(function() {
+                        renderDetail(coach);
+                        initScrollAnimations();
+                    });
+            } else {
+                renderDetail(coach);
+                initScrollAnimations();
+            }
+        } else {
+            renderDetail(coach);
+            initScrollAnimations();
+        }
         incrementCoachView(id);
     }
 
@@ -674,7 +752,7 @@
                 (coach._promoted ? '<span class="kslt-recommended-detail">' + L.recommendedBadge + '</span>' : '') +
                 '</div>' +
                 (coach.specialization ? '<div class="co-detail-spec">' + coach.specialization + '</div>' : '') +
-                (coach.court ? '<div class="co-detail-court"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + coach.court + '</div>' : '') +
+                (coach.court ? '<div class="co-detail-court"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + coach.court + coachMapLinks(coach) + '</div>' : '') +
             '</div>' +
         '</div>';
 
@@ -716,6 +794,9 @@
                 '<p class="co-bio-text">' + coach.bio + '</p>' +
             '</div>';
         }
+
+        // Map (from court)
+        html += coachMapSection(coach);
 
         // Achievements
         if (coach.achievements && coach.achievements.length) {

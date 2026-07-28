@@ -115,7 +115,8 @@ window.playerProfileLabels = {
     challengeLoginText: "Please sign in to send a challenge",
     challengeMemberRequired: "Membership required",
     challengeMemberText: "KSLT membership is required to send challenges",
-    challengeNoPlayer: "Link your player profile to send challenges"
+    challengeNoPlayer: "Link your player profile to send challenges",
+    challengeDisclaimer: "By sending a challenge, you agree that your Telegram contact may be shared with the opponent."
 };
 
 var playersData = {
