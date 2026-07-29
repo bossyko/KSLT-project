@@ -580,6 +580,21 @@
 
         setLoading(btn, true, L.signingIn, L.signIn);
 
+        // Server-side rate limit check
+        try {
+            var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+                body: JSON.stringify({ action: 'login', key: email })
+            });
+            var rlData = await rlRes.json();
+            if (!rlData.allowed) {
+                setLoading(btn, false, L.signingIn, L.signIn);
+                showMessage(signinForm, L.errTooMany, true);
+                return;
+            }
+        } catch (e) { /* fail open */ }
+
         // Verify Turnstile server-side
         try {
             var captchaRes = await fetch(SUPABASE_URL + '/functions/v1/verify-turnstile', {
@@ -715,6 +730,21 @@
 
         setLoading(btn, true, L.creatingAccount, L.createAccount);
 
+        // Server-side rate limit check
+        try {
+            var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+                body: JSON.stringify({ action: 'signup', key: email })
+            });
+            var rlData = await rlRes.json();
+            if (!rlData.allowed) {
+                setLoading(btn, false, L.creatingAccount, L.createAccount);
+                showMessage(signupForm, L.errTooMany, true);
+                return;
+            }
+        } catch (e) { /* fail open */ }
+
         // Verify Turnstile server-side
         try {
             var captchaRes = await fetch(SUPABASE_URL + '/functions/v1/verify-turnstile', {
@@ -804,6 +834,12 @@
             return;
         }
 
+        // Turnstile CAPTCHA check
+        if (!_turnstileToken) {
+            showMessage(forgotForm, L.errCaptcha, true);
+            return;
+        }
+
         if (!client) {
             showMessage(forgotForm, L.errGeneric, true);
             return;
@@ -811,17 +847,52 @@
 
         setLoading(btn, true, L.sendingLink, L.sendLink);
 
+        // Server-side rate limit check
+        try {
+            var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+                body: JSON.stringify({ action: 'password_reset', key: email })
+            });
+            var rlData = await rlRes.json();
+            if (!rlData.allowed) {
+                setLoading(btn, false, L.sendingLink, L.sendLink);
+                showMessage(forgotForm, L.errTooMany, true);
+                return;
+            }
+        } catch (e) { /* fail open */ }
+
+        // Server-side CAPTCHA verification
+        try {
+            var captchaRes = await fetch(SUPABASE_URL + '/functions/v1/verify-turnstile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+                body: JSON.stringify({ token: _turnstileToken })
+            });
+            var captchaData = await captchaRes.json();
+            if (!captchaData.success) {
+                setLoading(btn, false, L.sendingLink, L.sendLink);
+                showMessage(forgotForm, L.errCaptcha, true);
+                _turnstileToken = null;
+                if (window.turnstile) window.turnstile.reset();
+                return;
+            }
+        } catch (ce) {
+            setLoading(btn, false, L.sendingLink, L.sendLink);
+            showMessage(forgotForm, L.errGeneric, true);
+            return;
+        }
+
+        _turnstileToken = null;
+        if (window.turnstile) window.turnstile.reset();
+
         var result = await client.auth.resetPasswordForEmail(email, {
             redirectTo: basePath + (isKg ? 'auth-kg.html' : isEn ? 'auth-en.html' : 'auth.html')
         });
 
         setLoading(btn, false, L.sendingLink, L.sendLink);
 
-        if (result.error) {
-            showMessage(forgotForm, result.error.message, true);
-            return;
-        }
-
+        // Uniform response: always show success (anti-enumeration)
         document.getElementById('forgotEmailDisplay').textContent = email;
         showScreen('forgotSuccess');
     });

@@ -49,11 +49,13 @@
         playerNotLinked: 'Оюнчу профили байланган эмес',
         playerNotLinkedText: 'Аккаунтуңузду оюнчу профили менен байланыштыруу үчүн администраторго кайрылыңыз',
         changePassword: 'Сыр сөздү өзгөртүү',
+        currentPassword: 'Учурдагы сыр сөз',
         newPassword: 'Жаңы сыр сөз',
         confirmPassword: 'Сыр сөздү тастыктаңыз',
         updatePassword: 'Сыр сөздү жаңылоо',
         updating: 'Жаңылануулда...',
         passwordUpdated: 'Сыр сөз ийгиликтүү жаңыланды',
+        errWrongPw: 'Учурдагы сыр сөз туура эмес',
         language: 'Тил',
         dangerZone: 'Коркунучтуу аймак',
         deleteAccount: 'Аккаунтту жок кылуу',
@@ -231,11 +233,13 @@
         playerNotLinked: 'Player profile not linked',
         playerNotLinkedText: 'Contact admin to link your account with a player profile',
         changePassword: 'Change Password',
+        currentPassword: 'Current Password',
         newPassword: 'New Password',
         confirmPassword: 'Confirm Password',
         updatePassword: 'Update Password',
         updating: 'Updating...',
         passwordUpdated: 'Password updated successfully',
+        errWrongPw: 'Current password is incorrect',
         language: 'Language',
         dangerZone: 'Danger Zone',
         deleteAccount: 'Delete Account',
@@ -413,11 +417,13 @@
         playerNotLinked: 'Профиль игрока не привязан',
         playerNotLinkedText: 'Обратитесь к администратору для привязки аккаунта к профилю игрока',
         changePassword: 'Смена пароля',
+        currentPassword: 'Текущий пароль',
         newPassword: 'Новый пароль',
         confirmPassword: 'Подтвердите пароль',
         updatePassword: 'Обновить пароль',
         updating: 'Обновление...',
         passwordUpdated: 'Пароль успешно обновлён',
+        errWrongPw: 'Неверный текущий пароль',
         language: 'Язык',
         dangerZone: 'Опасная зона',
         deleteAccount: 'Удалить аккаунт',
@@ -2241,17 +2247,38 @@
             return;
         }
         var phone = document.getElementById('profilePhone').value.trim();
+        if (phone && !/^\+996\d{9}$/.test(phone.replace(/[\s\-]/g, ''))) {
+            showMessage('profileMessage', isKg ? 'Формат: +996XXXXXXXXX' : isEn ? 'Format: +996XXXXXXXXX' : 'Формат: +996XXXXXXXXX', true);
+            return;
+        }
+        phone = phone.replace(/[\s\-]/g, '');
         var gender = document.getElementById('profileGender').value;
         var birthDay = document.getElementById('profileBirthDay').value;
         var birthMonth = document.getElementById('profileBirthMonth').value;
         var birthYear = document.getElementById('profileBirthYear').value;
         var instagram = document.getElementById('profileInstagram').value.trim();
         var telegram = document.getElementById('profileTelegram').value.trim();
+
+        // Validate Instagram handle
+        if (instagram && !/^@?[a-zA-Z0-9._]{1,30}$/.test(instagram)) {
+            showMessage('profileMessage', isKg ? 'Instagram: @username (тамгалар, сандар, чекит, _)' : isEn ? 'Instagram: @username (letters, digits, dot, _)' : 'Instagram: @username (буквы, цифры, точка, _)', true);
+            return;
+        }
+        // Validate Telegram handle
+        if (telegram && !/^@?[a-zA-Z0-9_]{5,32}$/.test(telegram)) {
+            showMessage('profileMessage', isKg ? 'Telegram: @username (5-32 белги, тамгалар, сандар, _)' : isEn ? 'Telegram: @username (5-32 chars, letters, digits, _)' : 'Telegram: @username (5-32 символа, буквы, цифры, _)', true);
+            return;
+        }
+
         var showSocials = document.getElementById('profileShowSocials').checked;
         var fullName = firstName + (lastName ? ' ' + lastName : '');
 
         btn.textContent = L.saving;
         btn.disabled = true;
+
+        // Track changed sensitive fields for security notification
+        var oldPhone = (window.ksltProfile && window.ksltProfile.phone) || '';
+        var oldEmail = (window.ksltUser && window.ksltUser.email) || '';
 
         var result = await client.from('profiles').update({
             full_name: fullName,
@@ -2285,6 +2312,25 @@
             window.ksltProfile.telegram = telegram;
             window.ksltProfile.show_socials = showSocials;
             renderSidebar(window.ksltProfile);
+
+            // Security notify if phone changed
+            if (phone !== oldPhone && oldPhone) {
+                try {
+                    var session = await client.auth.getSession();
+                    var token = session.data && session.data.session && session.data.session.access_token;
+                    if (token) {
+                        fetch(SUPABASE_URL + '/functions/v1/security-notify', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                'Content-Type': 'application/json',
+                                'apikey': SUPABASE_ANON_KEY
+                            },
+                            body: JSON.stringify({ event_type: 'phone_changed', metadata: { old_phone: oldPhone, new_phone: phone } })
+                        }).catch(function() {});
+                    }
+                } catch (e) {}
+            }
 
             // Update banner
             var banner = document.querySelector('.db-banner-warning');
@@ -3685,6 +3731,13 @@
             '<div class="db-card db-settings-section">' +
                 '<div class="db-card-title">' + L.changePassword + '</div>' +
                 '<div class="db-field">' +
+                    '<label class="db-field-label">' + L.currentPassword + '</label>' +
+                    '<div class="db-pw-field">' +
+                        '<input class="db-field-input" type="password" id="settingsCurrentPw" placeholder="••••••••" autocomplete="current-password">' +
+                        '<button type="button" class="db-pw-eye" data-target="settingsCurrentPw">' + eyeSvgOpen + '</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="db-field">' +
                     '<label class="db-field-label">' + L.newPassword + '</label>' +
                     '<div class="db-pw-field">' +
                         '<input class="db-field-input" type="password" id="settingsNewPw" placeholder="••••••••" autocomplete="new-password">' +
@@ -3732,6 +3785,7 @@
             special: function(v) { return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(v); }
         };
 
+        var currentPwInput = document.getElementById('settingsCurrentPw');
         var newPwInput = document.getElementById('settingsNewPw');
         var confirmPwInput = document.getElementById('settingsConfirmPw');
         var updateBtn = document.getElementById('settingsUpdatePwBtn');
@@ -3740,8 +3794,11 @@
             var val = newPwInput.value;
             var allPass = Object.keys(pwRules).every(function(k) { return pwRules[k](val); });
             var match = val && confirmPwInput.value && val === confirmPwInput.value;
-            updateBtn.disabled = !(allPass && match);
+            var hasCurrent = currentPwInput.value.length > 0;
+            updateBtn.disabled = !(allPass && match && hasCurrent);
         }
+
+        currentPwInput.addEventListener('input', checkPwReady);
 
         newPwInput.addEventListener('input', function() {
             var val = this.value;
@@ -3773,13 +3830,28 @@
     }
 
     // ---- Update Password ----
+    var _pwChangeAttempts = 0;
+    var _pwChangeLockout = 0;
+
     async function updatePassword() {
         if (!client) return;
 
+        // Rate limit: 3 attempts per 5 minutes
+        if (Date.now() < _pwChangeLockout) {
+            var secsLeft = Math.ceil((_pwChangeLockout - Date.now()) / 1000);
+            showMessage('settingsMessage', (L.errTooManyPw || 'Слишком много попыток. Подождите ' + secsLeft + ' сек.'), true);
+            return;
+        }
+
+        var currentPw = document.getElementById('settingsCurrentPw').value;
         var newPw = document.getElementById('settingsNewPw').value;
         var confirmPw = document.getElementById('settingsConfirmPw').value;
         var btn = document.getElementById('settingsUpdatePwBtn');
 
+        if (!currentPw) {
+            showMessage('settingsMessage', L.currentPassword, true);
+            return;
+        }
         if (newPw.length < 8) {
             showMessage('settingsMessage', L.errPwShort, true);
             return;
@@ -3792,14 +3864,61 @@
         btn.textContent = L.updating;
         btn.disabled = true;
 
+        // Verify current password
+        var email = window.ksltUser && window.ksltUser.email;
+        if (!email) {
+            showMessage('settingsMessage', L.errWrongPw, true);
+            btn.textContent = L.updatePassword;
+            btn.disabled = false;
+            return;
+        }
+
+        var verifyResult = await client.auth.signInWithPassword({ email: email, password: currentPw });
+        if (verifyResult.error) {
+            _pwChangeAttempts++;
+            if (_pwChangeAttempts >= 3) {
+                _pwChangeLockout = Date.now() + 300000; // 5 min
+                _pwChangeAttempts = 0;
+            }
+            showMessage('settingsMessage', L.errWrongPw, true);
+            btn.textContent = L.updatePassword;
+            btn.disabled = false;
+            return;
+        }
+
+        _pwChangeAttempts = 0;
+
         var result = await client.auth.updateUser({ password: newPw });
 
         if (result.error) {
             showMessage('settingsMessage', result.error.message, true);
         } else {
             showMessage('settingsMessage', L.passwordUpdated, false);
+            document.getElementById('settingsCurrentPw').value = '';
             document.getElementById('settingsNewPw').value = '';
             document.getElementById('settingsConfirmPw').value = '';
+
+            // Invalidate all other sessions
+            try {
+                await client.auth.signOut({ scope: 'others' });
+            } catch (e) {}
+
+            // Notify user about password change (email + TG)
+            try {
+                var session = await client.auth.getSession();
+                var token = session.data && session.data.session && session.data.session.access_token;
+                if (token) {
+                    fetch(SUPABASE_URL + '/functions/v1/security-notify', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({ event_type: 'password_changed' })
+                    }).catch(function() {});
+                }
+            } catch (e) {}
         }
 
         btn.textContent = L.updatePassword;
