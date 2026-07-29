@@ -1,7 +1,7 @@
 # KSLT — Техническая документация
 
-> Последнее обновление: 2026-03-24
-> Версия: 2.0
+> Последнее обновление: 2026-07-28
+> Версия: 3.0
 
 ---
 
@@ -29,7 +29,7 @@
 ### Frontend
 - **HTML5** — 80 статических страниц, файловая мультиязычность (`-en`, `-kg` суффиксы)
 - **CSS3** — 22 файла, переменные, glassmorphism, responsive (375/480/768/992px)
-- **Vanilla JavaScript** — 45 файлов, IIFE-модули, JSDoc типизация, без зависимостей
+- **Vanilla JavaScript** — 47 файлов, IIFE-модули, JSDoc типизация, без зависимостей
 - **Supabase JS SDK** — подключение через CDN (unpkg.com)
 - **Chart.js** — аналитические графики в админке (CDN)
 
@@ -38,7 +38,7 @@
 - **Row Level Security (RLS)** — безопасность на уровне строк
 - **Auth** — email/password + Google OAuth
 - **Storage** — аватары пользователей, фото новостей
-- **Edge Functions** — 15 Deno/TypeScript функций
+- **Edge Functions** — 20 Deno/TypeScript функций
 - **RPC** — 28+ SQL-функций вызываемых с фронта
 - **Realtime** — подписки на изменения (live match)
 - **pg_cron** — автоматические задачи по расписанию
@@ -176,22 +176,27 @@ KSLT/
 ├── supabase/
 │   ├── schema.sql                  ← Основная схема БД
 │   ├── seed.sql                    ← Начальные данные
-│   └── functions/                  ← 15 Edge Functions (Deno/TypeScript)
+│   └── functions/                  ← 20 Edge Functions (Deno/TypeScript)
 │       ├── admin-manage-user/      ← create_manager, ban/unban, delete_user
 │       ├── auto-unban/             ← Авто-разбан по pg_cron
 │       ├── battle-announce/        ← Анонс баттла в TG группу
 │       ├── battle-publish/         ← Публикация баттла + TG кнопки голосования
 │       ├── broadcast/              ← Email/TG рассылка (универсальная)
 │       ├── create-challenge/       ← Создание вызова на матч
+│       ├── delete-account/         ← Удаление аккаунта (soft + hard delete)
 │       ├── match-notify/           ← Уведомления о матчах (cron + manual)
 │       ├── membership-expire/      ← Auto-expire + TG notification (cron)
 │       ├── membership-notify/      ← 7-day expiry reminder (cron)
 │       ├── membership-tg-notify/   ← Admin grant/extend/cancel → TG DM
+│       ├── security-notify/        ← Уведомления безопасности (пароль, устройство)
 │       ├── send-email/             ← Отправка email (Resend)
 │       ├── send-game-invite/       ← Приглашение на игру → TG
+│       ├── telegram-auth/          ← Telegram Login Widget верификация (HMAC-SHA-256)
 │       ├── telegram-webhook/       ← Webhook бота (все callbacks)
 │       ├── tournament-notify/      ← Анонс турнира в TG группу
-│       └── tournament-reminder/    ← Напоминание о турнире
+│       ├── tournament-reminder/    ← Напоминание о турнире
+│       ├── tournament-results-notify/ ← Анонс результатов турнира в TG
+│       └── verify-turnstile/       ← Серверная проверка Cloudflare Turnstile CAPTCHA
 │
 ├── tests/
 │   ├── e2e/                        ← 9 Playwright test suites
@@ -408,6 +413,14 @@ deleted_accounts      — лог удалённых аккаунтов
 └── deleted_at
     Trigger: trg_log_deleted_profile BEFORE DELETE ON profiles
 
+user_devices              — известные устройства (fingerprint)
+├── profile_id            → profiles
+├── device_hash           — hash(userAgent + screen)
+├── user_agent            — полный User-Agent строка
+├── last_seen             — последний вход
+└── created_at
+    UNIQUE(profile_id, device_hash)
+
 notification_log      — лог уведомлений (защита от дублей)
 ├── profile_id, type
 └── sent_at
@@ -457,13 +470,17 @@ generate_voucher()           — генерация ваучера со скид
 ### Поток авторизации
 
 ```
-Гость → auth.html → Email/Password или Google OAuth
+Гость → auth.html → Email/Password или Google OAuth или Telegram Login
+  → Turnstile CAPTCHA проверка (серверная)
   → Supabase Auth → JWT токен → localStorage
+  → Device fingerprint → проверка user_devices
+  → Новое устройство? → security-notify (email + TG)
   → Redirect → dashboard.html
 
 Каждая защищённая страница:
   → auth-guard.js → проверка JWT
-  → Нет токена → redirect auth.html
+  → session-monitor.js → таймаут 30 мин / макс 7 дней
+  → Нет токена → redirect auth.html?return=<url>
   → Есть токен → загрузка профиля → auth-ready
 ```
 
@@ -475,6 +492,132 @@ generate_voucher()           — генерация ваучера со скид
 | `auth.js` | Форма логина/регистрации |
 | `auth-guard.js` | Защита роутов, загрузка профиля, функции requireStaff/requireAdmin |
 | `auth-nav.js` | UI навигации: "Войти" ↔ User Dropdown |
+
+### Безопасность и защита
+
+#### Аутентификация
+
+| Механизм | Реализация | Файл |
+|----------|-----------|------|
+| **Email/Password** | Supabase Auth (bcrypt hash) | `auth.js` |
+| **Google OAuth** | Supabase OAuth provider | `auth.js` |
+| **Telegram Login** | HMAC-SHA-256 подпись + auth_date < 24ч | `telegram-auth/index.ts` |
+| **CAPTCHA** | Cloudflare Turnstile (серверная проверка) | `verify-turnstile/index.ts` |
+
+#### Пароли
+
+- Хранение: **bcrypt** в Supabase Auth (таблица `auth.users`, недоступна напрямую)
+- Требования: 8+ символов, заглавная буква (A-Z), цифра (0-9), спецсимвол (!@#$)
+- Одинаковые правила на web и mobile
+- Сброс через email (Supabase resetPasswordForEmail)
+
+#### CAPTCHA (Cloudflare Turnstile)
+
+```
+Форма → Turnstile widget → _turnstileToken (клиент)
+  ↓
+fetch → Edge Function verify-turnstile (серверная проверка)
+  ↓
+Cloudflare API → success/fail
+  ↓
+Только при success → signInWithPassword / signUp
+```
+
+Установлена на: login, signup.
+**TODO:** добавить на форму сброса пароля.
+
+#### Rate Limiting
+
+| Уровень | Механизм | Лимиты |
+|---------|----------|--------|
+| **Клиентский** | `_loginAttempts` + `_lockoutUntil` | 5 попыток → блок 60 сек |
+| **Supabase Auth** | Встроенный rate limit | Дефолтные (настраиваемые в Dashboard) |
+| **Edge Functions** | Supabase Gateway | Per-function limits |
+
+> ⚠️ Клиентский лимит обходится через DevTools/curl. Серверный rate limiting через Edge Function — в планах.
+
+#### Защита от перебора вызовов
+
+| Функция | Лимит | Механизм |
+|---------|-------|----------|
+| Создание вызовов | 5/день | `create-challenge` (серверная проверка) |
+| Приглашения на игру | 5/день | `send-game-invite` (серверная проверка) |
+| Голосование в баттлах | 1 голос | `cast_battle_vote` RPC + UNIQUE constraint |
+
+#### Управление сессиями (`session-monitor.js`)
+
+| Параметр | Значение |
+|----------|----------|
+| Таймаут бездействия | 30 минут |
+| Максимальный возраст сессии | 7 дней |
+| Cross-tab синхронизация | StorageEvent → logout во всех вкладках |
+| JWT expiry | Настраивается в Supabase Dashboard |
+
+#### Fingerprint устройства
+
+```
+Login → simpleHash(userAgent + screenSize) → device_hash
+  ↓
+SELECT user_devices WHERE profile_id + device_hash
+  ↓
+Новое устройство? → security-notify (email + TG)
+  ↓
+UPSERT user_devices (обновляем last_seen)
+```
+
+Таблица `user_devices`: profile_id, device_hash, user_agent, last_seen.
+RLS: пользователь видит/вставляет/обновляет только свои записи.
+
+#### Уведомления безопасности (`security-notify/index.ts`)
+
+| Событие | Email | Telegram |
+|---------|-------|----------|
+| Смена пароля | ✅ | ✅ |
+| Вход с нового устройства | ✅ | ✅ |
+
+Уведомления проверяют `notify_preferences.security` (opt-out).
+
+#### RLS (Row Level Security)
+
+Каждая таблица защищена политиками:
+- **profiles** — SELECT/UPDATE только свой (auth.uid() = id)
+- **user_devices** — SELECT/INSERT/UPDATE только свои
+- **game_invites** — sender видит отправленные, receiver — полученные
+- **challenges** — участники видят свои, staff — все
+- **challenge_predictions** — 1 голос на пользователя
+- **loyalty_*** — staff full CRUD, users read own + redeem
+- **coaches/courts/news/players** — публичное чтение, запись только staff
+- **memberships/payments** — staff full access
+
+#### UNIQUE constraints (защита данных)
+
+| Поле | Таблица | Назначение |
+|------|---------|-----------|
+| phone | profiles | Один телефон = один аккаунт |
+| telegram_chat_id | profiles | Один Telegram = один аккаунт |
+| (profile_id, device_hash) | user_devices | Одно устройство = одна запись |
+| (challenge_id, profile_id) | challenge_predictions | Один голос на баттл |
+
+#### Удаление аккаунта (`delete-account/index.ts`)
+
+1. Soft delete: данные логируются в `deleted_accounts` (trigger)
+2. Hard delete: `auth.admin.deleteUser()` — удаление из Supabase Auth
+3. Каскадное удаление: `ON DELETE CASCADE` на связанных таблицах
+
+#### Известные ограничения и TODO
+
+| Проблема | Приоритет | Статус |
+|----------|-----------|--------|
+| Смена пароля через signInWithPassword (brute force вектор) | КРИТИЧНО | TODO: перейти на нативный Supabase requireCurrentPassword |
+| Сброс пароля без CAPTCHA (email bombing) | КРИТИЧНО | TODO: добавить Turnstile |
+| signOut({ scope: 'others' }) после смены пароля | ВАЖНО | TODO |
+| Серверный rate limiting (Edge Function middleware) | ВАЖНО | TODO |
+| Ужесточить дефолтные Supabase rate limits | СРЕДНЕ | TODO: настройки в Dashboard |
+| Единообразный ответ при сбросе (anti-enumeration) | СРЕДНЕ | TODO |
+| Уведомление при смене телефона/email | НИЗКО | TODO |
+| Валидация формата Instagram/Telegram handles | НИЗКО | TODO |
+| Нет 2FA | НИЗКО | Не планируется на текущем этапе |
+| Нет верификации телефона (OTP/SMS) | НИЗКО | Дорого, не критично |
 
 ---
 
@@ -570,7 +713,7 @@ if (result.data && result.data.length > 0) {
 
 ---
 
-## 7. Edge Functions (15 штук)
+## 7. Edge Functions (20 штук)
 
 | # | Функция | JWT | Триггер | Назначение |
 |---|---------|-----|---------|-----------|
@@ -580,15 +723,20 @@ if (result.data && result.data.length > 0) {
 | 4 | `battle-publish` | Да | Админка | Публикация баттла + inline кнопки голосования |
 | 5 | `broadcast` | Да | Админка | Универсальная Email/TG рассылка |
 | 6 | `create-challenge` | Да | Dashboard | Создание вызова (membership check, 5/day limit) |
-| 7 | `match-notify` | Нет (cron) | pg_cron + manual | Уведомления о матчах |
-| 8 | `membership-expire` | Нет (cron) | pg_cron 09:30 | Auto-expire + TG + Email |
-| 9 | `membership-notify` | Нет (cron) | pg_cron 10:00 | 7-day expiry reminder |
-| 10 | `membership-tg-notify` | Да | Админка | Grant/extend/cancel → TG DM |
-| 11 | `send-email` | Да | Система | Отправка email через Resend |
-| 12 | `send-game-invite` | Да | Dashboard | Приглашение на игру → TG |
-| 13 | `telegram-webhook` | Нет | Telegram | Все callbacks + /start + /notifications |
-| 14 | `tournament-notify` | Да + cron | Админка + pg_cron | Анонс турнира в TG группу |
-| 15 | `tournament-reminder` | Нет (cron) | pg_cron | Напоминание о турнире |
+| 7 | `delete-account` | Да | Dashboard | Soft delete + hard delete auth.users |
+| 8 | `match-notify` | Нет (cron) | pg_cron + manual | Уведомления о матчах |
+| 9 | `membership-expire` | Нет (cron) | pg_cron 09:30 | Auto-expire + TG + Email |
+| 10 | `membership-notify` | Нет (cron) | pg_cron 10:00 | 7-day expiry reminder |
+| 11 | `membership-tg-notify` | Да | Админка | Grant/extend/cancel → TG DM |
+| 12 | `security-notify` | Да | Dashboard/Auth | Уведомление: смена пароля, новое устройство |
+| 13 | `send-email` | Да | Система | Отправка email через Resend |
+| 14 | `send-game-invite` | Да | Dashboard | Приглашение на игру → TG (5/day limit) |
+| 15 | `telegram-auth` | Нет | Auth page | HMAC-SHA-256 верификация Telegram Login Widget |
+| 16 | `telegram-webhook` | Нет | Telegram | Все callbacks + /start + /notifications + battle vote |
+| 17 | `tournament-notify` | Да + cron | Админка + pg_cron | Анонс турнира в TG группу |
+| 18 | `tournament-reminder` | Нет (cron) | pg_cron | Напоминание о турнире |
+| 19 | `tournament-results-notify` | Да | Админка | Анонс результатов турнира в TG |
+| 20 | `verify-turnstile` | Нет | Auth page | Серверная проверка Cloudflare Turnstile CAPTCHA |
 
 ### Паттерн Edge Function
 

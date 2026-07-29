@@ -28,6 +28,8 @@
         ruleSpecial: 'Атайын белги (!@#$)',
         errGeneric: 'Ката кетти. Кайра аракет кылыңыз.',
         errInvalidLogin: 'Туура эмес email же сыр сөз',
+        errCaptcha: 'Текшерүүдөн өтүңүз',
+        errTooMany: 'Өтө көп аракеттер. 60 секунд күтүңүз.',
         errEmailTaken: 'Бул email менен аккаунт бар',
         tgLoggingIn: 'Telegram менен кирүү...',
         tgRegistering: 'Аккаунт түзүлүүдө...',
@@ -62,6 +64,8 @@
         ruleSpecial: 'Special character (!@#$)',
         errGeneric: 'An error occurred. Please try again.',
         errInvalidLogin: 'Invalid email or password',
+        errCaptcha: 'Please complete the verification',
+        errTooMany: 'Too many attempts. Please wait 60 seconds.',
         errEmailTaken: 'An account with this email already exists',
         tgLoggingIn: 'Signing in via Telegram...',
         tgRegistering: 'Creating account...',
@@ -96,6 +100,8 @@
         ruleSpecial: 'Спецсимвол (!@#$)',
         errGeneric: 'Произошла ошибка. Попробуйте снова.',
         errInvalidLogin: 'Неверный email или пароль',
+        errCaptcha: 'Пройдите проверку',
+        errTooMany: 'Слишком много попыток. Подождите 60 сек.',
         errEmailTaken: 'Аккаунт с этим email уже существует',
         tgLoggingIn: 'Вход через Telegram...',
         tgRegistering: 'Создание аккаунта...',
@@ -114,8 +120,62 @@
         redirecting: 'Успешно! Перенаправление...'
     };
 
+    // Turnstile CAPTCHA
+    var _turnstileToken = null;
+    window.onTurnstileSuccess = function(token) { _turnstileToken = token; };
+
+    // Rate limiting (client-side)
+    var _loginAttempts = 0;
+    var _lockoutUntil = 0;
+
     // Use shared Supabase client from supabase-config.js
     var client = window.supabaseClient;
+
+    // ---- Device fingerprint helpers ----
+    function simpleHash(str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            hash |= 0;
+        }
+        return hash.toString(36);
+    }
+
+    function checkDeviceFingerprint(userId) {
+        try {
+            var deviceHash = simpleHash(navigator.userAgent + '|' + screen.width + 'x' + screen.height);
+            client.from('user_devices').select('id').eq('profile_id', userId).eq('device_hash', deviceHash).maybeSingle().then(function(res) {
+                var isNew = !res.data;
+                // Upsert device (update last_seen or insert)
+                client.from('user_devices').upsert({
+                    profile_id: userId,
+                    device_hash: deviceHash,
+                    user_agent: navigator.userAgent.substring(0, 500),
+                    last_seen: new Date().toISOString()
+                }, { onConflict: 'profile_id,device_hash' }).then(function() {});
+                // Notify if new device
+                if (isNew) {
+                    client.auth.getSession().then(function(s) {
+                        var token = s.data && s.data.session && s.data.session.access_token;
+                        if (token) {
+                            fetch(window.SUPABASE_URL + '/functions/v1/security-notify', {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': 'Bearer ' + token,
+                                    'Content-Type': 'application/json',
+                                    'apikey': window.SUPABASE_ANON_KEY
+                                },
+                                body: JSON.stringify({
+                                    event_type: 'new_device_login',
+                                    metadata: { user_agent: navigator.userAgent.substring(0, 500) }
+                                })
+                            }).catch(function() {});
+                        }
+                    });
+                }
+            });
+        } catch (e) { /* non-blocking */ }
+    }
 
     // ---- Return URL (from auth-guard redirect) ----
     var params = new URLSearchParams(window.location.search);
@@ -501,6 +561,18 @@
         var password = document.getElementById('signin-password').value;
         var btn = signinForm.querySelector('.auth-btn');
 
+        // Rate limiting
+        if (Date.now() < _lockoutUntil) {
+            showMessage(signinForm, L.errTooMany, true);
+            return;
+        }
+
+        // Turnstile CAPTCHA check
+        if (!_turnstileToken) {
+            showMessage(signinForm, L.errCaptcha, true);
+            return;
+        }
+
         if (!client) {
             showMessage(signinForm, L.errGeneric, true);
             return;
@@ -508,13 +580,41 @@
 
         setLoading(btn, true, L.signingIn, L.signIn);
 
+        // Verify Turnstile server-side
+        try {
+            var captchaRes = await fetch(SUPABASE_URL + '/functions/v1/verify-turnstile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+                body: JSON.stringify({ token: _turnstileToken })
+            });
+            var captchaData = await captchaRes.json();
+            if (!captchaData.success) {
+                setLoading(btn, false, L.signingIn, L.signIn);
+                showMessage(signinForm, L.errCaptcha, true);
+                _turnstileToken = null;
+                if (window.turnstile) window.turnstile.reset();
+                return;
+            }
+        } catch (e) {
+            // If verification fails, allow login (graceful degradation)
+        }
+
         var result = await client.auth.signInWithPassword({ email: email, password: password });
 
         if (result.error) {
             setLoading(btn, false, L.signingIn, L.signIn);
             showMessage(signinForm, L.errInvalidLogin, true);
+            _turnstileToken = null;
+            if (window.turnstile) window.turnstile.reset();
+            _loginAttempts++;
+            if (_loginAttempts >= 5) {
+                _lockoutUntil = Date.now() + 60000;
+                _loginAttempts = 0;
+            }
             return;
         }
+
+        _loginAttempts = 0;
 
         // Cache profile data for nav dropdown before redirect
         var user = result.data.user;
@@ -532,6 +632,7 @@
             } catch (e) { /* continue with redirect */ }
         }
 
+        checkDeviceFingerprint(user.id);
         localStorage.setItem('kslt_session_start', Date.now().toString());
         showMessage(signinForm, L.redirecting, false);
         setTimeout(function() {
@@ -545,6 +646,12 @@
     signupForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         clearMessages(signupForm);
+
+        // Turnstile CAPTCHA check
+        if (!_turnstileToken) {
+            showMessage(signupForm, L.errCaptcha, true);
+            return;
+        }
 
         var firstName = document.getElementById('signup-firstname').value.trim();
         var lastName = document.getElementById('signup-lastname').value.trim();
@@ -607,6 +714,25 @@
         }
 
         setLoading(btn, true, L.creatingAccount, L.createAccount);
+
+        // Verify Turnstile server-side
+        try {
+            var captchaRes = await fetch(SUPABASE_URL + '/functions/v1/verify-turnstile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+                body: JSON.stringify({ token: _turnstileToken })
+            });
+            var captchaData = await captchaRes.json();
+            if (!captchaData.success) {
+                setLoading(btn, false, L.creatingAccount, L.createAccount);
+                showMessage(signupForm, L.errCaptcha, true);
+                _turnstileToken = null;
+                if (window.turnstile) window.turnstile.reset();
+                return;
+            }
+        } catch (e) {
+            // Graceful degradation — allow signup if verification unavailable
+        }
 
         // Check email uniqueness before signUp
         try {
@@ -834,6 +960,7 @@
                     if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
                 }
             } catch (e) { /* continue */ }
+            checkDeviceFingerprint(result.data.session.user.id);
             // Set session start if not already set (Google OAuth redirect flow)
             if (!localStorage.getItem('kslt_session_start')) {
                 localStorage.setItem('kslt_session_start', Date.now().toString());
@@ -954,6 +1081,7 @@
                             if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
                         }
                     } catch (e) { /* continue */ }
+                    checkDeviceFingerprint(user.id);
                 }
 
                 localStorage.setItem('kslt_session_start', Date.now().toString());
@@ -1055,6 +1183,7 @@
                                 if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
                             }
                         } catch (e) { /* continue */ }
+                        checkDeviceFingerprint(user.id);
                     }
 
                     _pendingTgData = null;
