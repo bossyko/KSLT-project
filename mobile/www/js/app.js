@@ -274,6 +274,81 @@
   }
   initMenuControls();
 
+  // === Notification Bell ===
+  var notifBtn = document.getElementById('notifBtn');
+  var notifDot = document.getElementById('notifDot');
+  var notifOverlay = document.getElementById('notifOverlay');
+  var notifBack = document.getElementById('notifBack');
+  var notifList = document.getElementById('notifList');
+
+  if (notifBtn) {
+    notifBtn.addEventListener('click', function() {
+      notifOverlay.classList.add('open');
+      loadNotifications();
+    });
+  }
+  if (notifBack) {
+    notifBack.addEventListener('click', function() {
+      notifOverlay.classList.remove('open');
+    });
+  }
+
+  function loadNotifications() {
+    var I18N = window.KSLT_I18N;
+    var AUTH = window.KSLT_AUTH;
+    if (!AUTH || !AUTH.currentUser || !supabaseClient) {
+      notifList.innerHTML = '<div class="notif-empty">' + I18N.t('profile.login') + '</div>';
+      return;
+    }
+    notifList.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
+
+    supabaseClient.from('notification_log')
+      .select('*')
+      .eq('profile_id', AUTH.currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(50)
+      .then(function(r) {
+        if (r.error || !r.data || !r.data.length) {
+          notifList.innerHTML = '<div class="notif-empty">' + I18N.t('notif.empty') + '</div>';
+          return;
+        }
+        var html = '';
+        r.data.forEach(function(n) {
+          var d = new Date(n.created_at);
+          var timeStr = d.getDate() + ' ' + I18N.month(d.getMonth()) + ' ' + d.getFullYear() + ', ' + d.getHours() + ':' + String(d.getMinutes()).replace(/^(\d)$/, '0$1');
+          html += '<div class="notif-item' + (n.is_read ? '' : ' unread') + '">' +
+            '<div class="notif-item-type">' + (n.type || 'system') + '</div>' +
+            '<div class="notif-item-text">' + (n.message || n.title || '') + '</div>' +
+            '<div class="notif-item-time">' + timeStr + '</div>' +
+          '</div>';
+        });
+        notifList.innerHTML = html;
+
+        // Mark as read
+        supabaseClient.from('notification_log')
+          .update({ is_read: true })
+          .eq('profile_id', AUTH.currentUser.id)
+          .eq('is_read', false)
+          .then(function() {
+            if (notifDot) notifDot.style.display = 'none';
+          });
+      });
+  }
+
+  APP.checkUnreadNotifications = function() {
+    var AUTH = window.KSLT_AUTH;
+    if (!AUTH || !AUTH.currentUser || !supabaseClient) return;
+    supabaseClient.from('notification_log')
+      .select('id', { count: 'exact', head: true })
+      .eq('profile_id', AUTH.currentUser.id)
+      .eq('is_read', false)
+      .then(function(r) {
+        if (notifDot) {
+          notifDot.style.display = (r.count && r.count > 0) ? '' : 'none';
+        }
+      });
+  };
+
   // === Haptic-style feedback ===
   document.addEventListener('touchstart', function(e) {
     var el = e.target.closest('.card, .tc-card, .tournament-list-item, .news-list-item, .rating-row, .battle-card, .profile-row, .live-list-card');
@@ -416,6 +491,10 @@
           authScreen.classList.remove('open');
           loadScreen('screenHome');
           showOnboarding();
+          // Check unread notifications
+          APP.checkUnreadNotifications();
+          // Init push notifications
+          if (window.KSLT_PUSH) window.KSLT_PUSH.init();
         }
         // Else auth screen stays open (visible by default in HTML)
         finishInit();

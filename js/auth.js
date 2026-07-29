@@ -120,9 +120,9 @@
         redirecting: 'Успешно! Перенаправление...'
     };
 
-    // Turnstile CAPTCHA
-    var _turnstileToken = null;
-    window.onTurnstileSuccess = function(token) { _turnstileToken = token; };
+    // Turnstile CAPTCHA (disabled)
+    // var _turnstileToken = null;
+    // window.onTurnstileSuccess = function(token) { _turnstileToken = token; };
 
     // Rate limiting (client-side)
     var _loginAttempts = 0;
@@ -224,7 +224,7 @@
     var forgotBack = document.getElementById('forgotBack');
     var forgotBackToLogin = document.getElementById('forgotBackToLogin');
     var forgotResend = document.getElementById('forgotResend');
-    var forgotEmailConfirm = document.getElementById('forgot-email-confirm');
+    // var forgotEmailConfirm removed
 
     var signupSuccess = document.getElementById('signupSuccess');
     var signupBackToLogin = document.getElementById('signupBackToLogin');
@@ -468,13 +468,7 @@
         });
     }
 
-    forgotEmailConfirm.addEventListener('input', function() {
-        if (this.value !== document.getElementById('forgot-email').value) {
-            this.setCustomValidity(L.errEmailMatch);
-        } else {
-            this.setCustomValidity('');
-        }
-    });
+    // (email confirm removed)
 
     // ---- Eye toggle ----
     document.querySelectorAll('.auth-eye').forEach(function(btn) {
@@ -512,28 +506,13 @@
         if (detailMsg) detailMsg.remove();
     });
 
-    // ---- Email confirm validation ----
-    var emailField = document.getElementById('signup-email');
-    var emailConfirm = document.getElementById('signup-email-confirm');
-
-    emailConfirm.addEventListener('input', function() {
-        if (this.value !== emailField.value) {
-            this.setCustomValidity(L.errEmailMatch);
-        } else {
-            this.setCustomValidity('');
-        }
-    });
-
     document.getElementById('signup-confirm').addEventListener('input', function() {
         this.setCustomValidity('');
     });
 
-    // ---- Name script validation (RU → Cyrillic, EN → Latin, KG → Kyrgyz) ----
-    var _sRu = /^[а-яА-ЯёЁ\s\-'.]+$/;
-    var _sEn = /^[a-zA-Z\s\-'.]+$/;
-    var _sKg = /^[а-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
-    var _sRe = isKg ? _sKg : isEn ? _sEn : _sRu;
-    var _sHint = isKg ? 'Кыргыз тамгалары гана' : isEn ? 'Latin characters only' : 'Только кириллица';
+    // ---- Name script validation (allow Cyrillic + Kyrgyz + Latin on all versions) ----
+    var _sRe = /^[a-zA-Zа-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
+    var _sHint = isKg ? 'Туура эмес символдор' : isEn ? 'Invalid characters in name' : 'Допустимы буквы, пробел, дефис';
 
     ['signup-firstname', 'signup-lastname'].forEach(function(id) {
         var el = document.getElementById(id);
@@ -542,11 +521,15 @@
         hint.style.cssText = 'color:#ff4444;font-size:0.75rem;margin-top:2px;display:none;';
         hint.textContent = _sHint;
         el.parentNode.appendChild(hint);
+        var _nameTimer = null;
         el.addEventListener('input', function() {
-            var v = el.value.trim();
-            var bad = v.length > 0 && !_sRe.test(v);
-            el.style.borderColor = bad ? '#ff4444' : '';
-            hint.style.display = bad ? '' : 'none';
+            clearTimeout(_nameTimer);
+            _nameTimer = setTimeout(function() {
+                var v = el.value.trim();
+                var bad = v.length > 2 && !_sRe.test(v);
+                el.style.borderColor = bad ? '#ff4444' : '';
+                hint.style.display = bad ? '' : 'none';
+            }, 500);
         });
     });
 
@@ -564,12 +547,6 @@
         // Rate limiting
         if (Date.now() < _lockoutUntil) {
             showMessage(signinForm, L.errTooMany, true);
-            return;
-        }
-
-        // Turnstile CAPTCHA check
-        if (!_turnstileToken) {
-            showMessage(signinForm, L.errCaptcha, true);
             return;
         }
 
@@ -595,32 +572,11 @@
             }
         } catch (e) { /* fail open */ }
 
-        // Verify Turnstile server-side
-        try {
-            var captchaRes = await fetch(SUPABASE_URL + '/functions/v1/verify-turnstile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                body: JSON.stringify({ token: _turnstileToken })
-            });
-            var captchaData = await captchaRes.json();
-            if (!captchaData.success) {
-                setLoading(btn, false, L.signingIn, L.signIn);
-                showMessage(signinForm, L.errCaptcha, true);
-                _turnstileToken = null;
-                if (window.turnstile) window.turnstile.reset();
-                return;
-            }
-        } catch (e) {
-            // If verification fails, allow login (graceful degradation)
-        }
-
         var result = await client.auth.signInWithPassword({ email: email, password: password });
 
         if (result.error) {
             setLoading(btn, false, L.signingIn, L.signIn);
             showMessage(signinForm, L.errInvalidLogin, true);
-            _turnstileToken = null;
-            if (window.turnstile) window.turnstile.reset();
             _loginAttempts++;
             if (_loginAttempts >= 5) {
                 _lockoutUntil = Date.now() + 60000;
@@ -662,30 +618,17 @@
         e.preventDefault();
         clearMessages(signupForm);
 
-        // Turnstile CAPTCHA check
-        if (!_turnstileToken) {
-            showMessage(signupForm, L.errCaptcha, true);
-            return;
-        }
-
         var firstName = document.getElementById('signup-firstname').value.trim();
         var lastName = document.getElementById('signup-lastname').value.trim();
         var email = document.getElementById('signup-email').value.trim();
-        var emailConf = document.getElementById('signup-email-confirm').value.trim();
         var gender = document.querySelector('input[name="gender"]:checked');
         var birthDay = document.getElementById('signup-birth-day').value;
         var birthMonth = document.getElementById('signup-birth-month').value;
-        var birthYear = document.getElementById('signup-birth-year').value;
+        var birthYearEl = document.getElementById('signup-birth-year');
+        var birthYear = birthYearEl ? birthYearEl.value : '';
         var password = document.getElementById('signup-password').value;
         var confirmPw = document.getElementById('signup-confirm').value;
         var btn = signupForm.querySelector('.auth-btn');
-
-        // Validations
-        if (email !== emailConf) {
-            emailConfirm.setCustomValidity(L.errEmailMatch);
-            emailConfirm.reportValidity();
-            return;
-        }
 
         var allRulesPass = Object.keys(rules).every(function(key) { return rules[key](password); });
         if (!allRulesPass) {
@@ -716,12 +659,9 @@
             return;
         }
 
-        // Script validation (RU → Cyrillic, EN → Latin, KG → Kyrgyz Cyrillic)
-        var _scriptRu = /^[а-яА-ЯёЁ\s\-'.]+$/;
-        var _scriptEn = /^[a-zA-Z\s\-'.]+$/;
-        var _scriptKg = /^[а-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
-        var _scriptRe = isKg ? _scriptKg : isEn ? _scriptEn : _scriptRu;
-        var _scriptMsg = isKg ? 'Атыңызды кыргыз тамгалары менен жазыңыз' : isEn ? 'Name must use Latin characters' : 'Имя и фамилия должны быть на кириллице';
+        // Script validation (allow Cyrillic + Kyrgyz + Latin)
+        var _scriptRe = /^[a-zA-Zа-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
+        var _scriptMsg = isKg ? 'Туура эмес символдор' : isEn ? 'Invalid characters in name' : 'Допустимы буквы, пробел, дефис';
 
         if ((firstName && !_scriptRe.test(firstName)) || (lastName && !_scriptRe.test(lastName))) {
             showMessage(signupForm, _scriptMsg, true);
@@ -744,25 +684,6 @@
                 return;
             }
         } catch (e) { /* fail open */ }
-
-        // Verify Turnstile server-side
-        try {
-            var captchaRes = await fetch(SUPABASE_URL + '/functions/v1/verify-turnstile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                body: JSON.stringify({ token: _turnstileToken })
-            });
-            var captchaData = await captchaRes.json();
-            if (!captchaData.success) {
-                setLoading(btn, false, L.creatingAccount, L.createAccount);
-                showMessage(signupForm, L.errCaptcha, true);
-                _turnstileToken = null;
-                if (window.turnstile) window.turnstile.reset();
-                return;
-            }
-        } catch (e) {
-            // Graceful degradation — allow signup if verification unavailable
-        }
 
         // Check email uniqueness before signUp
         try {
@@ -825,20 +746,7 @@
         clearMessages(forgotForm);
 
         var email = document.getElementById('forgot-email').value.trim();
-        var emailConf = forgotEmailConfirm.value.trim();
         var btn = forgotForm.querySelector('.auth-btn');
-
-        if (email !== emailConf) {
-            forgotEmailConfirm.setCustomValidity(L.errEmailMatch);
-            forgotEmailConfirm.reportValidity();
-            return;
-        }
-
-        // Turnstile CAPTCHA check
-        if (!_turnstileToken) {
-            showMessage(forgotForm, L.errCaptcha, true);
-            return;
-        }
 
         if (!client) {
             showMessage(forgotForm, L.errGeneric, true);
@@ -861,30 +769,6 @@
                 return;
             }
         } catch (e) { /* fail open */ }
-
-        // Server-side CAPTCHA verification
-        try {
-            var captchaRes = await fetch(SUPABASE_URL + '/functions/v1/verify-turnstile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                body: JSON.stringify({ token: _turnstileToken })
-            });
-            var captchaData = await captchaRes.json();
-            if (!captchaData.success) {
-                setLoading(btn, false, L.sendingLink, L.sendLink);
-                showMessage(forgotForm, L.errCaptcha, true);
-                _turnstileToken = null;
-                if (window.turnstile) window.turnstile.reset();
-                return;
-            }
-        } catch (ce) {
-            setLoading(btn, false, L.sendingLink, L.sendLink);
-            showMessage(forgotForm, L.errGeneric, true);
-            return;
-        }
-
-        _turnstileToken = null;
-        if (window.turnstile) window.turnstile.reset();
 
         var result = await client.auth.resetPasswordForEmail(email, {
             redirectTo: basePath + (isKg ? 'auth-kg.html' : isEn ? 'auth-en.html' : 'auth.html')

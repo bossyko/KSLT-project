@@ -737,6 +737,18 @@
     html += '<option value="female"' + (p.gender === 'female' ? ' selected' : '') + '>' + I18N.t('profile.genderFemale') + '</option>';
     html += '</select></div>';
 
+    // Instagram
+    html += profField('Instagram', 'profInstagram', p.instagram || '', 'text');
+    // Telegram
+    html += profField('Telegram', 'profTelegram', p.telegram || '', 'text');
+    // Show socials toggle
+    html += '<div class="prof-field">';
+    html += '<label class="prof-notif-toggle" style="padding:0">';
+    html += '<span class="prof-field-label" style="margin-bottom:0">' + I18N.t('profile.showSocials') + '</span>';
+    html += '<input type="checkbox" id="profShowSocials"' + (p.show_socials ? ' checked' : '') + '>';
+    html += '<span class="prof-toggle-switch"></span>';
+    html += '</label></div>';
+
     // Save button
     html += '<button class="pd-challenge-btn" id="profSaveBtn" style="margin-top:16px">' + I18N.t('common.save') + '</button>';
     html += '</div>';
@@ -763,8 +775,32 @@
       var gender = document.getElementById('profGender').value;
       var fullName = (ln + ' ' + fn).trim();
 
+      // Instagram / Telegram
+      var instagram = (document.getElementById('profInstagram').value || '').trim().replace(/^@/, '');
+      var telegram = (document.getElementById('profTelegram').value || '').trim().replace(/^@/, '');
+      var showSocials = document.getElementById('profShowSocials').checked;
+
+      // Validate
+      if (instagram && !/^[a-zA-Z0-9._]{1,30}$/.test(instagram)) {
+        window.KSLT_APP.toast('Instagram: @username (a-z, 0-9, . _)');
+        return;
+      }
+      if (telegram && !/^[a-zA-Z0-9_]{5,32}$/.test(telegram)) {
+        window.KSLT_APP.toast('Telegram: @username (5-32 chars)');
+        return;
+      }
+
+      var oldPhone = _profile.phone || '';
+
       supabaseClient.from('profiles')
-        .update({ full_name: fullName, phone: phone, gender: gender })
+        .update({
+          full_name: fullName,
+          phone: phone,
+          gender: gender,
+          instagram: instagram,
+          telegram: telegram,
+          show_socials: showSocials
+        })
         .eq('id', _profile.id)
         .then(function(r) {
           if (r.error) {
@@ -773,8 +809,33 @@
             _profile.full_name = fullName;
             _profile.phone = phone;
             _profile.gender = gender;
+            _profile.instagram = instagram;
+            _profile.telegram = telegram;
+            _profile.show_socials = showSocials;
             window.KSLT_AUTH.currentProfile = _profile;
             window.KSLT_APP.toast(I18N.t('profile.savedOk'));
+
+            // Security notify if phone changed
+            if (phone !== oldPhone && oldPhone) {
+              try {
+                supabaseClient.auth.getSession().then(function(s) {
+                  var token = s.data && s.data.session && s.data.session.access_token;
+                  if (token) {
+                    var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
+                    var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+                    fetch(SUPABASE_URL + '/functions/v1/security-notify', {
+                      method: 'POST',
+                      headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY
+                      },
+                      body: JSON.stringify({ event_type: 'phone_changed', metadata: { old_phone: oldPhone, new_phone: phone } })
+                    }).catch(function() {});
+                  }
+                });
+              } catch (e) {}
+            }
           }
         });
     });

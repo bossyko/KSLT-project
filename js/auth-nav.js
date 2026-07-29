@@ -113,11 +113,14 @@
                     btn.parentNode.replaceChild(adminDd, btn);
 
                     // Logout handler
-                    adminDd.querySelector('.admin-nav-logout').addEventListener('click', function() {
+                    adminDd.querySelector('.admin-nav-logout').addEventListener('click', async function() {
                         localStorage.removeItem(key);
                         localStorage.removeItem('kslt_role');
                         localStorage.removeItem('kslt_name');
                         localStorage.removeItem('kslt_avatar');
+                        if (window.supabaseClient) {
+                            await window.supabaseClient.auth.signOut();
+                        }
                         window.location.href = prefix + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html'));
                     });
 
@@ -160,11 +163,14 @@
                         }
                     });
 
-                    dropdown.querySelector('#navLogoutBtn').addEventListener('click', function() {
+                    dropdown.querySelector('#navLogoutBtn').addEventListener('click', async function() {
                         localStorage.removeItem(key);
                         localStorage.removeItem('kslt_role');
                         localStorage.removeItem('kslt_name');
                         localStorage.removeItem('kslt_avatar');
+                        if (window.supabaseClient) {
+                            await window.supabaseClient.auth.signOut();
+                        }
                         window.location.href = prefix + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html'));
                     });
                 }
