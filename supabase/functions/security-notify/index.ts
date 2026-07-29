@@ -81,6 +81,12 @@ Deno.serve(async (req) => {
       ruMsg = `${name ? name + ', в' : 'В'} ваш аккаунт KSLT вошли с нового устройства.\nУстройство: ${ua}\nЕсли это не вы — смените пароль.`
       enMsg = `${name ? name + ', s' : 'S'}omeone logged into your KSLT account from a new device.\nDevice: ${ua}\nIf this wasn't you — change your password immediately.`
       emailSubject = 'KSLT — Вход с нового устройства / New device login'
+    } else if (eventType === 'phone_changed') {
+      const oldPhone = body.metadata?.old_phone || '—'
+      const newPhone = body.metadata?.new_phone || '—'
+      ruMsg = `${name ? name + ', н' : 'Н'}омер телефона в вашем аккаунте KSLT был изменён.\nБыло: ${oldPhone}\nСтало: ${newPhone}\nЕсли это не вы — смените пароль.`
+      enMsg = `${name ? name + ', y' : 'Y'}our KSLT phone number has been changed.\nOld: ${oldPhone}\nNew: ${newPhone}\nIf this wasn't you — change your password immediately.`
+      emailSubject = 'KSLT — Телефон изменён / Phone changed'
     }
 
     // Send Telegram
