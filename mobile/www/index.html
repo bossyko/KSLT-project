@@ -517,6 +517,17 @@
   <div id="newsDetail"></div>
 </div>
 
+<!-- Notification overlay -->
+<div class="notif-overlay" id="notifOverlay">
+  <div class="notif-header">
+    <button class="notif-back" id="notifBack">
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <h2 data-i18n="header.notifications">Уведомления</h2>
+  </div>
+  <div class="notif-list" id="notifList"></div>
+</div>
+
 <!-- Supabase SDK -->
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
@@ -535,6 +546,7 @@
 <script src="js/screens/coaches.js"></script>
 <script src="js/screens/courts.js"></script>
 <script src="js/screens/partners.js"></script>
+<script src="js/push.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

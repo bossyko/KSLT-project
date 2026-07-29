@@ -89,6 +89,8 @@
     // Logout
     window.ksltLogout = async function() {
         localStorage.removeItem('kslt_role');
+        localStorage.removeItem('kslt_name');
+        localStorage.removeItem('kslt_avatar');
         if (client) {
             await client.auth.signOut();
         }

@@ -803,6 +803,19 @@
       }
       html += '<div class="nd-body">' + contentHtml + '</div>';
 
+      // Poll block (if news has poll)
+      if (n.poll && n.poll.question && n.poll.options && n.poll.options.length) {
+        html += '<div class="nd-poll" id="ndPoll">';
+        html += '<div class="nd-poll-question">' + esc(n.poll.question) + '</div>';
+        html += '<div class="nd-poll-options" id="ndPollOptions">';
+        n.poll.options.forEach(function(opt, i) {
+          html += '<button class="nd-poll-option" data-index="' + i + '">' + esc(opt) + '</button>';
+        });
+        html += '</div>';
+        html += '<div class="nd-poll-results" id="ndPollResults" style="display:none"></div>';
+        html += '</div>';
+      }
+
       // Reactions block
       html += '<div class="nd-reactions">' +
         '<div class="nd-reactions-title">' + I18N.t('news.rateTitle') + '</div>' +
@@ -816,6 +829,11 @@
       html += '</div>'; // close nd-content
       document.getElementById('newsDetail').innerHTML = html;
       overlay.classList.add('open');
+
+      // Load poll
+      if (n.poll && n.poll.question) {
+        initNewsPoll(nid, n.poll.options.length);
+      }
 
       // Load reaction counts + user reactions
       loadNewsReactions(nid);
@@ -896,6 +914,94 @@
           busy = false;
         });
     });
+  }
+
+  // --- News Polls ---
+  function initNewsPoll(newsId, optionCount) {
+    var pollEl = document.getElementById('ndPoll');
+    if (!pollEl || !supabaseClient) return;
+
+    var optionBtns = pollEl.querySelectorAll('.nd-poll-option');
+    if (!optionBtns.length) return;
+
+    var votes = [];
+    for (var i = 0; i < optionCount; i++) votes.push(0);
+
+    // Load existing results
+    supabaseClient.rpc('get_poll_results', { p_news_id: newsId }).then(function(r) {
+      if (r.data) {
+        r.data.forEach(function(row) {
+          if (row.option_index >= 0 && row.option_index < optionCount) {
+            votes[row.option_index] = row.count || 0;
+          }
+        });
+      }
+
+      // Check if user already voted
+      var auth = window.KSLT_AUTH;
+      var user = auth && auth.currentUser;
+      if (user) {
+        supabaseClient.from('news_poll_votes')
+          .select('option_index')
+          .eq('news_id', newsId)
+          .eq('user_id', user.id)
+          .maybeSingle()
+          .then(function(vr) {
+            if (vr.data) {
+              showPollResults(pollEl, votes, vr.data.option_index);
+            }
+          });
+      }
+    });
+
+    // Click handler
+    optionBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var auth = window.KSLT_AUTH;
+        var currentUser = auth && auth.currentUser;
+        if (!currentUser) {
+          if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('news.loginToRate'));
+          return;
+        }
+
+        var index = parseInt(btn.getAttribute('data-index'));
+        votes[index] = (votes[index] || 0) + 1;
+        showPollResults(pollEl, votes, index);
+
+        supabaseClient.from('news_poll_votes')
+          .insert({ news_id: newsId, user_id: currentUser.id, option_index: index })
+          .then(function(res) {
+            if (res.error) {
+              votes[index]--;
+            }
+          });
+      });
+    });
+  }
+
+  function showPollResults(pollEl, votes, votedIndex) {
+    var optionsEl = pollEl.querySelector('#ndPollOptions');
+    var resultsEl = pollEl.querySelector('#ndPollResults');
+    if (!optionsEl || !resultsEl) return;
+
+    optionsEl.style.display = 'none';
+    resultsEl.style.display = 'block';
+
+    var total = votes.reduce(function(a, b) { return a + b; }, 0);
+    var optionBtns = pollEl.querySelectorAll('.nd-poll-option');
+    var html = '';
+    for (var i = 0; i < votes.length; i++) {
+      var pct = total > 0 ? Math.round(votes[i] / total * 100) : 0;
+      var label = optionBtns[i] ? optionBtns[i].textContent : '';
+      var isVoted = i === votedIndex;
+      html += '<div class="nd-poll-result' + (isVoted ? ' voted' : '') + '">' +
+        '<div class="nd-poll-result-bar" style="width:' + pct + '%"></div>' +
+        '<span class="nd-poll-result-label">' + esc(label) + '</span>' +
+        '<span class="nd-poll-result-pct">' + pct + '%</span>' +
+      '</div>';
+    }
+    html += '<div class="nd-poll-total">' + total + ' ' + I18N.t('news.pollTotal') + '</div>';
+    resultsEl.innerHTML = html;
   }
 
   // Battle detail state

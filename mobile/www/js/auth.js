@@ -15,6 +15,10 @@
     if (!supabaseClient) return Promise.resolve(null);
     return supabaseClient.auth.getSession().then(function(res) {
       if (res.data && res.data.session) {
+        // Check session expiry before proceeding
+        if (AUTH._checkSessionExpiry && AUTH._checkSessionExpiry()) {
+          return null;
+        }
         AUTH.currentUser = res.data.session.user;
         return AUTH.loadProfile(AUTH.currentUser.id).then(function(profile) {
           // Cache membership status
@@ -290,6 +294,9 @@
           return;
         }
         AUTH.currentUser = res.data.user;
+        localStorage.setItem('kslt_session_start', Date.now().toString());
+        localStorage.setItem('kslt_last_activity', Date.now().toString());
+        try { checkDeviceFingerprint(res.data.user.id); } catch(e) {}
         AUTH.loadProfile(res.data.user.id).then(function() {
           authScreen.classList.remove('open');
           if (window.KSLT_APP && window.KSLT_APP.onAuthChange) {
@@ -309,8 +316,8 @@
       errEl.className = 'auth-error';
       errEl.textContent = '';
 
-      if (pass.length < 6) {
-        errEl.textContent = 'Пароль минимум 6 символов';
+      if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass)) {
+        errEl.textContent = 'Пароль: 8+ символов, заглавная, цифра, спецсимвол';
         errEl.className = 'auth-error show';
         return;
       }
@@ -333,6 +340,9 @@
           if (res.data.session) {
             // Session exists — email confirmed or confirmation disabled
             AUTH.currentUser = res.data.user;
+            localStorage.setItem('kslt_session_start', Date.now().toString());
+            localStorage.setItem('kslt_last_activity', Date.now().toString());
+            try { checkDeviceFingerprint(res.data.user.id); } catch(e) {}
             AUTH.loadProfile(res.data.user.id).then(function() {
               authScreen.classList.remove('open');
               if (window.KSLT_APP && window.KSLT_APP.onAuthChange) {
@@ -425,6 +435,9 @@
               AUTH.verifyTelegramOtp(regData.email, regData.hashed_token).then(function(otpRes) {
                 if (otpRes.error) return;
                 AUTH.currentUser = otpRes.data.user;
+                localStorage.setItem('kslt_session_start', Date.now().toString());
+                localStorage.setItem('kslt_last_activity', Date.now().toString());
+                try { checkDeviceFingerprint(otpRes.data.user.id); } catch(e) {}
                 AUTH.loadProfile(otpRes.data.user.id).then(function() {
                   authScreen.classList.remove('open');
                   if (window.KSLT_APP && window.KSLT_APP.onAuthChange) window.KSLT_APP.onAuthChange();
@@ -439,6 +452,9 @@
           AUTH.verifyTelegramOtp(data.email, data.hashed_token).then(function(otpRes) {
             if (otpRes.error) return;
             AUTH.currentUser = otpRes.data.user;
+            localStorage.setItem('kslt_session_start', Date.now().toString());
+            localStorage.setItem('kslt_last_activity', Date.now().toString());
+            try { checkDeviceFingerprint(otpRes.data.user.id); } catch(e) {}
             AUTH.loadProfile(otpRes.data.user.id).then(function() {
               authScreen.classList.remove('open');
               if (window.KSLT_APP && window.KSLT_APP.onAuthChange) window.KSLT_APP.onAuthChange();
@@ -453,5 +469,82 @@
   AUTH.showAuth = function() {
     document.getElementById('authScreen').classList.add('open');
   };
+
+  // ---- Device fingerprint ----
+  function simpleHash(str) {
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return hash.toString(36);
+  }
+
+  function checkDeviceFingerprint(userId) {
+    try {
+      var deviceHash = simpleHash(navigator.userAgent + '|' + screen.width + 'x' + screen.height);
+      supabaseClient.from('user_devices').select('id').eq('profile_id', userId).eq('device_hash', deviceHash).maybeSingle().then(function(res) {
+        var isNew = !res.data;
+        supabaseClient.from('user_devices').upsert({
+          profile_id: userId,
+          device_hash: deviceHash,
+          user_agent: navigator.userAgent.substring(0, 500),
+          last_seen: new Date().toISOString()
+        }, { onConflict: 'profile_id,device_hash' }).then(function() {});
+        if (isNew) {
+          supabaseClient.auth.getSession().then(function(s) {
+            var token = s.data && s.data.session && s.data.session.access_token;
+            if (token) {
+              var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
+              var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+              fetch(SUPABASE_URL + '/functions/v1/security-notify', {
+                method: 'POST',
+                headers: {
+                  'Authorization': 'Bearer ' + token,
+                  'Content-Type': 'application/json',
+                  'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({
+                  event_type: 'new_device_login',
+                  metadata: { user_agent: navigator.userAgent.substring(0, 500) }
+                })
+              }).catch(function() {});
+            }
+          });
+        }
+      });
+    } catch (e) { /* non-blocking */ }
+  }
+
+  AUTH.checkDeviceFingerprint = checkDeviceFingerprint;
+
+  // ---- Session monitor ----
+  var SESSION_IDLE_MS = 30 * 60 * 1000;   // 30 min
+  var SESSION_MAX_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+  function updateActivity() {
+    localStorage.setItem('kslt_last_activity', Date.now().toString());
+  }
+
+  function checkSessionExpiry() {
+    var lastActivity = parseInt(localStorage.getItem('kslt_last_activity')) || Date.now();
+    var sessionStart = parseInt(localStorage.getItem('kslt_session_start')) || Date.now();
+    var now = Date.now();
+
+    if ((now - lastActivity > SESSION_IDLE_MS) || (now - sessionStart > SESSION_MAX_MS)) {
+      AUTH.logout().then(function() {
+        AUTH.showAuth();
+        if (window.KSLT_APP) window.KSLT_APP.toast('Session expired');
+      });
+      return true;
+    }
+    return false;
+  }
+
+  // Track activity on touch/click
+  document.addEventListener('touchstart', updateActivity, { passive: true });
+  document.addEventListener('click', updateActivity, { passive: true });
+
+  AUTH._checkSessionExpiry = checkSessionExpiry;
 
 })();

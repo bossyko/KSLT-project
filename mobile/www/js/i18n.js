@@ -36,6 +36,7 @@
     // === Header ===
     'header.notifications': { ru: 'Уведомления', en: 'Notifications', kg: 'Билдирүүлөр' },
     'header.menu':          { ru: 'Меню',         en: 'Menu',           kg: 'Меню' },
+    'notif.empty':          { ru: 'Нет уведомлений', en: 'No notifications', kg: 'Билдирүү жок' },
 
     // === Home screen ===
     'home.live':            { ru: 'Live',            en: 'Live',             kg: 'Live' },
@@ -153,6 +154,7 @@
     'news.detail':      { ru: 'Новость',              en: 'Article',         kg: 'Жанылык' },
     'news.rateTitle':   { ru: 'Оцените статью',       en: 'Rate this article', kg: 'Макаланы баалаңыз' },
     'news.loginToRate': { ru: 'Войдите, чтобы оценить', en: 'Log in to rate',  kg: 'Баалоо үчүн кириңиз' },
+    'news.pollTotal':   { ru: 'голосов',              en: 'votes',            kg: 'добуш' },
 
     // === Profile screen ===
     'profile.title':        { ru: 'Профиль',              en: 'Profile',           kg: 'Профиль' },
@@ -369,6 +371,7 @@
     'profile.genderNone':     { ru: 'Не указан', en: 'Not specified', kg: 'Көрсөтүлгөн эмес' },
     'profile.genderMale':     { ru: 'Мужской',   en: 'Male',       kg: 'Эркек' },
     'profile.genderFemale':   { ru: 'Женский',   en: 'Female',     kg: 'Аял' },
+    'profile.showSocials':     { ru: 'Показывать соцсети', en: 'Show socials', kg: 'Соц тармактарды көрсөтүү' },
     'profile.savedOk':        { ru: 'Профиль обновлён', en: 'Profile updated', kg: 'Профиль жаңыланды' },
     'profile.savedErr':       { ru: 'Ошибка сохранения', en: 'Save error', kg: 'Сактоо катасы' },
     'profile.fileTooLarge':   { ru: 'Файл слишком большой (макс. 2MB)', en: 'File too large (max 2MB)', kg: 'Файл өтө чоң (макс. 2MB)' },
