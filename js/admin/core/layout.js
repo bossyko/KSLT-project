@@ -35,6 +35,7 @@
             { key: 'courts',   icon: A.ICONS.location, label: L.courts,  badge: false },
             { key: 'coaches', icon: A.ICONS.coach,    label: L.coaches, badge: false },
             { key: 'sponsors', icon: A.ICONS.handshake, label: L.sponsors, badge: false },
+            { key: 'notifications', icon: A.ICONS.bell, label: L.pushNotifications, badge: false },
             { key: '_divider' },
             { key: 'users',     icon: A.ICONS.users,  label: L.users,     badge: false },
             { key: 'finances', icon: A.ICONS.wallet, label: L.finances, badge: false },
@@ -170,7 +171,8 @@
             loyalty: A.renderLoyaltySection,
             challenges: A.renderChallengesSection,
             live: A.renderLiveSection,
-            sponsors: A.renderSponsorsList
+            sponsors: A.renderSponsorsList,
+            notifications: A.renderNotificationsSection
         };
         if (resetMap[tab]) {
             resetMap[tab]();

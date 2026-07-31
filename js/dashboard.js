@@ -776,6 +776,9 @@
             checkNewBadges(profile.player_id);
         }
 
+        // Notification bell
+        initNotificationBell(user);
+
         // Onboarding for first-time users
         showOnboarding(profile);
     };
@@ -3954,6 +3957,133 @@
         var div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
+    }
+
+    // ---- Notification Bell ----
+    var bellUserId = null;
+
+    function initNotificationBell(user) {
+        bellUserId = user.id;
+
+        // Create bell button in sidebar (before nav)
+        var sidebar = document.getElementById('dbSidebar');
+        if (!sidebar) return;
+
+        var userBlock = sidebar.querySelector('.db-sidebar-user');
+        if (!userBlock) return;
+
+        // Check if already exists
+        if (document.getElementById('dbNotifBell')) return;
+
+        var bellBtn = document.createElement('button');
+        bellBtn.id = 'dbNotifBell';
+        bellBtn.className = 'site-notif-btn';
+        bellBtn.title = isKg ? 'Билдирмелер' : isEn ? 'Notifications' : 'Уведомления';
+        bellBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="site-notif-dot" id="dbNotifDot" style="display:none;"></span>';
+        userBlock.style.position = 'relative';
+        userBlock.appendChild(bellBtn);
+
+        // Dropdown container
+        var dropdown = document.createElement('div');
+        dropdown.id = 'dbNotifDropdown';
+        dropdown.className = 'site-notif-dropdown';
+        dropdown.style.display = 'none';
+        userBlock.appendChild(dropdown);
+
+        // Toggle dropdown
+        bellBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var dd = document.getElementById('dbNotifDropdown');
+            if (dd.style.display === 'none') {
+                loadSiteNotifications();
+                dd.style.display = '';
+            } else {
+                dd.style.display = 'none';
+            }
+        });
+
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            var dd = document.getElementById('dbNotifDropdown');
+            if (dd && dd.style.display !== 'none' && !dd.contains(e.target)) {
+                dd.style.display = 'none';
+            }
+        });
+
+        // Initial unread check
+        checkSiteUnread();
+    }
+
+    async function checkSiteUnread() {
+        if (!client || !bellUserId) return;
+
+        var res = await client.from('notification_log')
+            .select('id', { count: 'exact', head: true })
+            .eq('profile_id', bellUserId)
+            .eq('is_read', false);
+
+        var dot = document.getElementById('dbNotifDot');
+        if (dot) {
+            dot.style.display = (res.count && res.count > 0) ? '' : 'none';
+            if (res.count && res.count > 0) dot.textContent = res.count > 9 ? '9+' : res.count;
+        }
+    }
+
+    async function loadSiteNotifications() {
+        var dropdown = document.getElementById('dbNotifDropdown');
+        if (!dropdown || !client || !bellUserId) return;
+
+        dropdown.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-dim);font-size:0.8rem;">...</div>';
+
+        var res = await client.from('notification_log')
+            .select('*')
+            .eq('profile_id', bellUserId)
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+        var items = res.data || [];
+        var noNotifLabel = isKg ? 'Билдирмелер жок' : isEn ? 'No notifications' : 'Нет уведомлений';
+
+        if (items.length === 0) {
+            dropdown.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' + noNotifLabel + '</div>';
+            return;
+        }
+
+        var html = '';
+        var unreadIds = [];
+
+        items.forEach(function(n) {
+            var cls = 'site-notif-item' + (n.is_read ? '' : ' unread');
+            var time = n.created_at ? timeAgo(new Date(n.created_at)) : '';
+            if (!n.is_read) unreadIds.push(n.id);
+            html += '<div class="' + cls + '">' +
+                '<div class="site-notif-item-title">' + escHtml(n.title || '') + '</div>' +
+                '<div class="site-notif-item-msg">' + escHtml(n.message || '') + '</div>' +
+                '<div class="site-notif-item-time">' + time + '</div>' +
+            '</div>';
+        });
+
+        dropdown.innerHTML = html;
+
+        // Mark all as read
+        if (unreadIds.length > 0) {
+            await client.from('notification_log')
+                .update({ is_read: true })
+                .in('id', unreadIds);
+
+            var dot = document.getElementById('dbNotifDot');
+            if (dot) dot.style.display = 'none';
+        }
+    }
+
+    function timeAgo(date) {
+        var now = new Date();
+        var diff = Math.floor((now - date) / 1000);
+        if (diff < 60) return isEn ? 'just now' : 'только что';
+        if (diff < 3600) { var m = Math.floor(diff / 60); return m + (isEn ? 'm ago' : ' мин.'); }
+        if (diff < 86400) { var h = Math.floor(diff / 3600); return h + (isEn ? 'h ago' : ' ч.'); }
+        var d = Math.floor(diff / 86400);
+        return d + (isEn ? 'd ago' : ' дн.');
     }
 
 })();
