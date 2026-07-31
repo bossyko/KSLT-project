@@ -220,14 +220,10 @@
             var levelId = inp.dataset.level;
             var round = inp.dataset.round;
             var pts = parseInt(inp.value, 10) || 0;
-
-            var existing = (cachedRules[levelId] && cachedRules[levelId][round]) ? cachedRules[levelId][round].id : null;
-            var record = { level_id: levelId, round: round, points: pts };
-            if (existing) record.id = existing;
-            toUpsert.push(record);
+            toUpsert.push({ level_id: levelId, round: round, points: pts });
         });
 
-        var res = await A.client.from('points_rules').upsert(toUpsert, { onConflict: 'level_id,round' });
+        var res = await A.client.from('points_rules').upsert(toUpsert, { onConflict: 'level_id,round', ignoreDuplicates: false });
         if (res.error) {
             A.showToast(res.error.message, 'error');
             return;
