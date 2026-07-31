@@ -196,7 +196,8 @@
     }
 
     async function deleteLevel(levelId) {
-        // Delete rules first, then level
+        // Unlink tournaments from this level, then delete rules, then level
+        await A.client.from('tournaments').update({ level_id: null }).eq('level_id', levelId);
         await A.client.from('points_rules').delete().eq('level_id', levelId);
         var res = await A.client.from('tournament_levels').delete().eq('id', levelId);
         if (res.error) {
