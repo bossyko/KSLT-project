@@ -23,22 +23,18 @@
         return;
     }
 
-    // Auth state tracking
-    var authHandled = false;
-    var pendingSession = null;
-
-    async function handleAuth(session) {
-        if (authHandled) return;
-        authHandled = true;
-
+    // Wait for all scripts to load, then check auth
+    window.addEventListener('load', async function() {
         try {
-            if (!session) {
+            var result = await client.auth.getSession();
+
+            if (!result.data || !result.data.session) {
                 var returnUrl = window.location.pathname + window.location.search;
                 window.location.href = authPage + '?return=' + encodeURIComponent(returnUrl);
                 return;
             }
 
-            window.ksltUser = session.user;
+            window.ksltUser = result.data.session.user;
 
             // Load profile
             try {
@@ -65,48 +61,15 @@
             // Show page
             document.body.classList.add('auth-ready');
 
-            // Callback — wait for onAuthReady to be defined (by init.js loaded later)
-            function tryCallback() {
-                if (typeof window.onAuthReady === 'function') {
-                    window.onAuthReady(window.ksltUser, window.ksltProfile);
-                } else {
-                    setTimeout(tryCallback, 50);
-                }
+            // Callback
+            if (typeof window.onAuthReady === 'function') {
+                window.onAuthReady(window.ksltUser, window.ksltProfile);
             }
-            tryCallback();
         } catch (e) {
             console.error('Auth Guard error:', e);
             window.location.href = authPage;
         }
-    }
-
-    // Listen for auth state changes (catches OAuth redirects reliably)
-    client.auth.onAuthStateChange(function(event, session) {
-        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
-            if (session) handleAuth(session);
-        } else if (event === 'SIGNED_OUT') {
-            if (!authHandled) {
-                authHandled = true;
-                var returnUrl = window.location.pathname + window.location.search;
-                window.location.href = authPage + '?return=' + encodeURIComponent(returnUrl);
-            }
-        }
     });
-
-    // Fallback: if no event fires within 3s, check session directly
-    setTimeout(function() {
-        if (!authHandled) {
-            client.auth.getSession().then(function(result) {
-                if (result.data && result.data.session) {
-                    handleAuth(result.data.session);
-                } else if (!authHandled) {
-                    authHandled = true;
-                    var returnUrl = window.location.pathname + window.location.search;
-                    window.location.href = authPage + '?return=' + encodeURIComponent(returnUrl);
-                }
-            });
-        }
-    }, 3000);
 
     // Staff guard (admin + manager can access admin panel)
     window.requireStaff = function() {
