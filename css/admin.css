@@ -362,6 +362,7 @@ body.ad-page {
     user-select: none;
 }
 .ad-col-header:hover { color: var(--accent); }
+.set-level-th:hover .set-del-level { opacity: 1 !important; }
 .ad-col-active { color: var(--accent); }
 .ad-sort-arrow { font-size: 0.6rem; opacity: 0.7; }
 .ad-col-filter-btn {

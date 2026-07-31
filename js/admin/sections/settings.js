@@ -82,8 +82,11 @@
 
             cachedLevels.forEach(function(lv) {
                 var name = isEn ? (lv.name_en || lv.name) : lv.name;
-                html += '<th style="text-align:center;"><span>' + A.esc(name) + '</span>' +
-                    '<button class="ad-btn-icon set-del-level" data-level-id="' + lv.id + '" title="' + L.ratDeleteLevel + '" style="margin-left:4px;font-size:12px;vertical-align:middle;">&times;</button></th>';
+                html += '<th class="set-level-th" style="text-align:center;position:relative;white-space:nowrap;">' +
+                    '<span>' + A.esc(name) + '</span>' +
+                    '<button class="ad-btn-icon set-del-level" data-level-id="' + lv.id + '" title="' + L.ratDeleteLevel + '" ' +
+                    'style="opacity:0;position:absolute;top:2px;right:2px;font-size:11px;width:18px;height:18px;line-height:18px;padding:0;border-radius:50%;background:rgba(255,60,60,0.15);color:#ff4444;transition:opacity .2s;">' +
+                    '&times;</button></th>';
             });
             html += '</tr></thead><tbody>';
 
