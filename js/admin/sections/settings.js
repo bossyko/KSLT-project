@@ -14,7 +14,7 @@
     var _promoCatFilter = '';
 
     // ---- Main render ----
-    function renderSettingsSection() {
+    async function renderSettingsSection() {
         var container = document.getElementById('ad-settings');
         if (!container) return;
 
@@ -55,7 +55,9 @@
             });
         });
 
-        // Render sub-tabs content
+        // Load data then render sub-tabs
+        await A.loadTournamentLevels(true);
+        await A.loadPointsRules();
         renderSetRules();
         renderSetPromotions();
     }
