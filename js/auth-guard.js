@@ -23,8 +23,9 @@
         return;
     }
 
-    // Check auth via onAuthStateChange (reliable, no fixed timeout)
+    // Auth state tracking
     var authHandled = false;
+    var pendingSession = null;
 
     async function handleAuth(session) {
         if (authHandled) return;
@@ -64,10 +65,15 @@
             // Show page
             document.body.classList.add('auth-ready');
 
-            // Callback
-            if (typeof window.onAuthReady === 'function') {
-                window.onAuthReady(window.ksltUser, window.ksltProfile);
+            // Callback — wait for onAuthReady to be defined (by init.js loaded later)
+            function tryCallback() {
+                if (typeof window.onAuthReady === 'function') {
+                    window.onAuthReady(window.ksltUser, window.ksltProfile);
+                } else {
+                    setTimeout(tryCallback, 50);
+                }
             }
+            tryCallback();
         } catch (e) {
             console.error('Auth Guard error:', e);
             window.location.href = authPage;
@@ -80,6 +86,7 @@
             if (session) handleAuth(session);
         } else if (event === 'SIGNED_OUT') {
             if (!authHandled) {
+                authHandled = true;
                 var returnUrl = window.location.pathname + window.location.search;
                 window.location.href = authPage + '?return=' + encodeURIComponent(returnUrl);
             }

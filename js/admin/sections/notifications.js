@@ -42,10 +42,19 @@
                     // Audience
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.pushAudience + '</label>' +
-                        '<div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">' +
-                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;"><input type="radio" name="pushAudience" value="all" checked style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> ' + L.pushAll + '</label>' +
-                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;"><input type="radio" name="pushAudience" value="members" style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> ' + L.pushMembers + '</label>' +
-                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;"><input type="radio" name="pushAudience" value="user" style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> ' + L.pushUser + '</label>' +
+                        '<div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">' +
+                            '<label class="ad-push-audience-opt" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;">' +
+                                '<input type="radio" name="pushAudience" value="all" checked style="margin:0;width:16px;height:16px;accent-color:var(--accent);">' +
+                                '<span>' + L.pushAll + '</span>' +
+                            '</label>' +
+                            '<label class="ad-push-audience-opt" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;">' +
+                                '<input type="radio" name="pushAudience" value="members" style="margin:0;width:16px;height:16px;accent-color:var(--accent);">' +
+                                '<span>' + L.pushMembers + '</span>' +
+                            '</label>' +
+                            '<label class="ad-push-audience-opt" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;">' +
+                                '<input type="radio" name="pushAudience" value="user" style="margin:0;width:16px;height:16px;accent-color:var(--accent);">' +
+                                '<span>' + L.pushUser + '</span>' +
+                            '</label>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
