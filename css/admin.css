@@ -2552,6 +2552,157 @@ select.ad-field-input {
     text-align: right;
 }
 
+/* Import modal */
+.ad-import-modal {
+    max-width: 640px;
+}
+
+.ad-import-modal .ad-field-label {
+    text-transform: none;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    letter-spacing: 0;
+}
+
+.ad-import-dropzone {
+    border: 2px dashed var(--border-subtle);
+    border-radius: 12px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    background: var(--bg-elevated);
+}
+
+.ad-import-dropzone:hover,
+.ad-import-dropzone.drag-over {
+    border-color: var(--accent);
+    background: rgba(204, 255, 0, 0.04);
+}
+
+.ad-import-dropzone-icon {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+    opacity: 0.6;
+}
+
+.ad-import-dropzone-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.ad-import-dropzone-hint {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+}
+
+.ad-import-dropzone-file {
+    display: none;
+}
+
+.ad-import-file-selected {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.ad-import-file-selected .file-name {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.ad-import-file-selected .file-remove {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0;
+}
+
+.ad-import-file-selected .file-remove:hover {
+    color: #ff4444;
+}
+
+.ad-import-map-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.ad-import-map-row label {
+    min-width: 110px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.ad-import-map-row select {
+    flex: 1;
+}
+
+.ad-import-preview-wrap {
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+}
+
+.ad-import-preview {
+    font-size: 0.8rem;
+}
+
+.ad-import-preview th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-elevated);
+    z-index: 1;
+}
+
+.ad-import-status-update {
+    color: #4fc3f7;
+    font-size: 1rem;
+}
+
+.ad-import-status-create {
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+.ad-import-status-error {
+    color: #ff4444;
+    font-size: 1rem;
+}
+
+.ad-import-stats {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    background: var(--bg-elevated);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.ad-import-stats strong {
+    color: var(--text-primary);
+}
+
+.ad-section-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 /* Bracket button in tournament list */
 .ad-brk-btn {
     font-size: 0.75rem !important;

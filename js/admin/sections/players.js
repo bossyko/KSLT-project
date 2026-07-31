@@ -221,6 +221,10 @@
         container.innerHTML =
             '<div class="ad-section-header">' +
                 '<h2 class="ad-section-title">' + L.players + '</h2>' +
+                (isAdm ? '<div class="ad-section-header-actions">' +
+                    '<button class="ad-btn ad-btn-sm" id="adPlrImportBtn">\ud83d\udce5 ' + L.plrImport + '</button>' +
+                    '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adPlrExportBtn">\ud83d\udcca ' + L.plrExport + '</button>' +
+                '</div>' : '') +
             '</div>' +
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adPlrSearch" placeholder="' + L.plrSearch + '" value="' + A.esc(plrSearchQuery) + '">' +
@@ -254,6 +258,11 @@
             plrFilterCategory = this.value;
             loadPlayersList();
         });
+
+        var impBtn = document.getElementById('adPlrImportBtn');
+        if (impBtn) impBtn.addEventListener('click', showImportModal);
+        var expBtn = document.getElementById('adPlrExportBtn');
+        if (expBtn) expBtn.addEventListener('click', exportPlayersExcel);
 
         await loadPlayersList();
     }
@@ -2261,6 +2270,392 @@
             if (tr) tr.remove();
         }
     });
+
+    // ---- Export Players to Excel/CSV ----
+    async function exportPlayersExcel() {
+        if (!A.client) return;
+        var res = await A.client.from('players')
+            .select('id,name,name_en,category_id,points,wins,losses,ntrp_rating,country')
+            .order('points', { ascending: false });
+        var items = res.data || [];
+        if (!items.length) { A.toast(L.plrImportNoData, 'warning'); return; }
+
+        var headers = ['#', L.plrName, isEn ? 'Name EN' : 'Имя EN', L.plrCategory, L.plrPoints, L.plrWins, L.plrLosses, 'NTRP', L.plrCountry];
+        var rows = items.map(function(p, i) {
+            var cat = A.categoriesMap[p.category_id];
+            var catName = cat ? (isEn ? cat.name_en : cat.name) : (p.category_id || '');
+            return [i + 1, p.name || '', p.name_en || '', catName, p.points || 0, p.wins || 0, p.losses || 0, p.ntrp_rating || '', p.country || ''];
+        });
+        var today = new Date().toISOString().slice(0, 10);
+        A.exportCsv('kslt-players-' + today + '.csv', headers, rows);
+    }
+
+    // ---- Import Players from Excel ----
+    function showImportModal() {
+        // Remove existing modal if any
+        var old = document.getElementById('adImportOverlay');
+        if (old) old.remove();
+
+        var overlay = document.createElement('div');
+        overlay.id = 'adImportOverlay';
+        overlay.className = 'ad-modal-overlay';
+        overlay.innerHTML =
+            '<div class="ad-modal ad-import-modal">' +
+                '<div class="ad-modal-header">' +
+                    '<h3>\ud83d\udce5 ' + L.plrImportTitle + '</h3>' +
+                    '<button class="ad-modal-close" id="adImportClose">&times;</button>' +
+                '</div>' +
+                '<div class="ad-modal-body">' +
+                    '<div id="adImportStep1">' +
+                        '<div class="ad-import-dropzone" id="adImportDropzone">' +
+                            '<div class="ad-import-dropzone-icon">\ud83d\udcc2</div>' +
+                            '<div class="ad-import-dropzone-text">' + L.plrImportFile + '</div>' +
+                            '<div class="ad-import-dropzone-hint">' + (isEn ? 'or drag & drop file here' : 'или перетащите файл сюда') + '</div>' +
+                            '<input type="file" id="adImportFileInput" accept=".xlsx,.xls,.csv" class="ad-import-dropzone-file">' +
+                        '</div>' +
+                        '<div id="adImportFileInfo" style="display:none;"></div>' +
+                        '<div id="adImportSheetWrap" style="display:none;margin-top:12px;">' +
+                            '<label class="ad-field-label">' + L.plrImportSheet + '</label>' +
+                            '<select id="adImportSheetSelect" class="ad-field-input"></select>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div id="adImportStep2" style="display:none;">' +
+                        '<h4 style="margin:0 0 16px;color:var(--text-primary);font-size:0.95rem;">' + L.plrImportMapCol + '</h4>' +
+                        '<div id="adImportMapFields"></div>' +
+                    '</div>' +
+                    '<div id="adImportStep3" style="display:none;">' +
+                        '<h4 style="margin:0 0 12px;color:var(--text-primary);font-size:0.95rem;">' + L.plrImportPreview + '</h4>' +
+                        '<div class="ad-import-preview-wrap">' +
+                            '<table class="ad-table ad-import-preview" id="adImportPreviewTable"></table>' +
+                        '</div>' +
+                        '<div class="ad-import-stats" id="adImportStats"></div>' +
+                        '<div style="margin:12px 0;">' +
+                            '<label style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);cursor:pointer;margin-bottom:8px;">' +
+                                '<input type="checkbox" id="adImportChkCreate" checked> ' + L.plrImportCreateNew +
+                            '</label>' +
+                            '<label style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);cursor:pointer;">' +
+                                '<input type="checkbox" id="adImportChkUpdate" checked> ' + L.plrImportUpdatePts +
+                            '</label>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-modal-footer" id="adImportFooter" style="display:none;">' +
+                    '<button class="ad-btn ad-btn-outline" id="adImportCancelBtn">' + (isEn ? 'Cancel' : 'Отмена') + '</button>' +
+                    '<button class="ad-btn" id="adImportDoBtn" style="margin-left:8px;">' + L.plrImportBtn + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        // State
+        var workbook = null;
+        var sheetData = [];
+        var headers = [];
+        var mapping = {};
+        var existingPlayers = [];
+        var parsedRows = [];
+
+        var FIELD_DEFS = [
+            { key: 'name', label: L.plrImportColName, required: true, patterns: ['имя', 'name', 'фио', 'фамилия', 'игрок', 'player'] },
+            { key: 'name_en', label: L.plrImportColNameEn, required: false, patterns: ['name_en', 'name en', 'имя en', 'english'] },
+            { key: 'category', label: L.plrImportColCategory, required: false, patterns: ['категория', 'category', 'разряд', 'cat'] },
+            { key: 'points', label: L.plrImportColPoints, required: false, patterns: ['очки', 'points', 'рейтинг', 'rating', 'баллы'] },
+            { key: 'ntrp', label: L.plrImportColNtrp, required: false, patterns: ['ntrp', 'нтрп'] },
+            { key: 'country', label: L.plrImportColCountry, required: false, patterns: ['страна', 'country', 'код', 'code'] }
+        ];
+
+        // Close modal
+        function closeModal() { overlay.remove(); }
+        document.getElementById('adImportClose').addEventListener('click', closeModal);
+        document.getElementById('adImportCancelBtn').addEventListener('click', closeModal);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+
+        // Step 1: File select (dropzone + drag & drop)
+        var dropzone = document.getElementById('adImportDropzone');
+        var fileInput = document.getElementById('adImportFileInput');
+
+        dropzone.addEventListener('click', function() { fileInput.click(); });
+
+        dropzone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropzone.classList.add('drag-over');
+        });
+        dropzone.addEventListener('dragleave', function() {
+            dropzone.classList.remove('drag-over');
+        });
+        dropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files[0]) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            // Show selected file info
+            var info = document.getElementById('adImportFileInfo');
+            info.innerHTML = '<div class="ad-import-file-selected">' +
+                '<span>\ud83d\udcc4</span>' +
+                '<span class="file-name">' + A.esc(file.name) + '</span>' +
+                '<span style="color:var(--text-dim);font-size:0.75rem;">' + (file.size / 1024).toFixed(1) + ' KB</span>' +
+                '<button class="file-remove" id="adImportFileRemove">&times;</button>' +
+            '</div>';
+            info.style.display = '';
+            dropzone.style.display = 'none';
+
+            document.getElementById('adImportFileRemove').addEventListener('click', function() {
+                info.style.display = 'none';
+                dropzone.style.display = '';
+                fileInput.value = '';
+                document.getElementById('adImportSheetWrap').style.display = 'none';
+            });
+
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    workbook = XLSX.read(ev.target.result, { type: 'array' });
+                } catch (err) {
+                    A.toast('Error reading file: ' + err.message, 'error');
+                    return;
+                }
+                var names = workbook.SheetNames;
+                if (names.length > 1) {
+                    var sel = document.getElementById('adImportSheetSelect');
+                    sel.innerHTML = names.map(function(n) { return '<option>' + A.esc(n) + '</option>'; }).join('');
+                    document.getElementById('adImportSheetWrap').style.display = '';
+                    sel.addEventListener('change', function() { parseSheet(sel.value); });
+                }
+                parseSheet(names[0]);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function parseSheet(name) {
+            var ws = workbook.Sheets[name];
+            var json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+            if (!json.length) { A.toast(L.plrImportNoData, 'warning'); return; }
+            headers = json[0].map(function(h) { return String(h).trim(); });
+            sheetData = json.slice(1).filter(function(row) {
+                return row.some(function(c) { return String(c).trim() !== ''; });
+            });
+            showMappingStep();
+        }
+
+        // Step 2: Column mapping
+        function showMappingStep() {
+            document.getElementById('adImportStep1').style.display = 'none';
+            document.getElementById('adImportStep2').style.display = '';
+
+            var container = document.getElementById('adImportMapFields');
+            container.innerHTML = '';
+
+            FIELD_DEFS.forEach(function(fd) {
+                var row = document.createElement('div');
+                row.className = 'ad-import-map-row';
+
+                var lbl = document.createElement('label');
+                lbl.textContent = fd.label + (fd.required ? ' *' : '');
+
+                var sel = document.createElement('select');
+                sel.className = 'ad-field-input';
+                sel.dataset.field = fd.key;
+                sel.style.cssText = 'flex:1;';
+
+                var noneOpt = '<option value="-1">' + L.plrImportNone + '</option>';
+                var opts = headers.map(function(h, i) {
+                    return '<option value="' + i + '">' + A.esc(h) + '</option>';
+                }).join('');
+                sel.innerHTML = noneOpt + opts;
+
+                // Auto-guess
+                var guessed = autoGuessColumn(fd.patterns);
+                if (guessed !== -1) sel.value = String(guessed);
+
+                row.appendChild(lbl);
+                row.appendChild(sel);
+                container.appendChild(row);
+            });
+
+            // Next button
+            var nextBtn = document.createElement('button');
+            nextBtn.className = 'ad-btn';
+            nextBtn.textContent = L.plrImportPreview + ' \u2192';
+            nextBtn.style.cssText = 'margin-top:12px;';
+            nextBtn.addEventListener('click', function() {
+                // Collect mapping
+                mapping = {};
+                var selects = container.querySelectorAll('select');
+                var nameSet = false;
+                selects.forEach(function(s) {
+                    var v = parseInt(s.value, 10);
+                    if (v >= 0) mapping[s.dataset.field] = v;
+                    if (s.dataset.field === 'name' && v >= 0) nameSet = true;
+                });
+                if (!nameSet) {
+                    A.toast(L.plrImportColName + ' — ' + (isEn ? 'required' : 'обязательно'), 'error');
+                    return;
+                }
+                showPreviewStep();
+            });
+            container.appendChild(nextBtn);
+        }
+
+        function autoGuessColumn(patterns) {
+            for (var i = 0; i < headers.length; i++) {
+                var h = headers[i].toLowerCase();
+                for (var j = 0; j < patterns.length; j++) {
+                    if (h.indexOf(patterns[j]) !== -1) return i;
+                }
+            }
+            return -1;
+        }
+
+        // Step 3: Preview
+        async function showPreviewStep() {
+            document.getElementById('adImportStep2').style.display = 'none';
+            document.getElementById('adImportStep3').style.display = '';
+            document.getElementById('adImportFooter').style.display = '';
+
+            // Load existing players for matching
+            var res = await A.client.from('players').select('id,name,name_en,category_id,points,ntrp_rating');
+            existingPlayers = res.data || [];
+
+            var existingMap = {};
+            existingPlayers.forEach(function(p) {
+                existingMap[p.name.trim().toLowerCase()] = p;
+            });
+
+            parsedRows = [];
+            sheetData.forEach(function(row) {
+                var name = mapping.name !== undefined ? String(row[mapping.name]).trim() : '';
+                if (!name) { parsedRows.push({ name: '', status: 'error', raw: row }); return; }
+
+                var entry = { name: name, raw: row, status: 'create' };
+                if (mapping.name_en !== undefined) entry.name_en = String(row[mapping.name_en]).trim();
+                if (mapping.category !== undefined) entry.categoryText = String(row[mapping.category]).trim();
+                if (mapping.points !== undefined) entry.points = parseFloat(row[mapping.points]) || 0;
+                if (mapping.ntrp !== undefined) entry.ntrp = parseFloat(row[mapping.ntrp]) || 0;
+                if (mapping.country !== undefined) entry.country = String(row[mapping.country]).trim();
+
+                // Match category text to id
+                if (entry.categoryText) {
+                    var catText = entry.categoryText.toLowerCase();
+                    var found = A.cachedCategories.find(function(c) {
+                        return c.name.toLowerCase() === catText || (c.name_en && c.name_en.toLowerCase() === catText);
+                    });
+                    if (found) entry.category_id = found.id;
+                }
+
+                // Match existing player
+                var key = name.trim().toLowerCase();
+                if (existingMap[key]) {
+                    entry.status = 'update';
+                    entry.existingId = existingMap[key].id;
+                    entry.existing = existingMap[key];
+                }
+
+                parsedRows.push(entry);
+            });
+
+            renderPreview();
+
+            document.getElementById('adImportDoBtn').addEventListener('click', doImport);
+        }
+
+        function renderPreview() {
+            var table = document.getElementById('adImportPreviewTable');
+            var countUpdate = 0, countCreate = 0, countError = 0;
+
+            var html = '<thead><tr>' +
+                '<th>' + L.plrName + '</th>' +
+                (mapping.category !== undefined ? '<th>' + L.plrCategory + '</th>' : '') +
+                (mapping.points !== undefined ? '<th>' + L.plrPoints + '</th>' : '') +
+                '<th style="width:40px;">' + L.thStatus + '</th>' +
+            '</tr></thead><tbody>';
+
+            var limit = Math.min(parsedRows.length, 20);
+            for (var i = 0; i < parsedRows.length; i++) {
+                var r = parsedRows[i];
+                if (r.status === 'update') countUpdate++;
+                else if (r.status === 'create') countCreate++;
+                else countError++;
+
+                if (i < limit) {
+                    var statusIcon = r.status === 'update' ? '\ud83d\udd04' : r.status === 'create' ? '\u2795' : '\u26a0\ufe0f';
+                    var statusCls = 'ad-import-status-' + r.status;
+                    html += '<tr>' +
+                        '<td>' + A.esc(r.name || '???') + '</td>' +
+                        (mapping.category !== undefined ? '<td>' + A.esc(r.categoryText || '—') + '</td>' : '') +
+                        (mapping.points !== undefined ? '<td>' + (r.points !== undefined ? r.points : '—') + '</td>' : '') +
+                        '<td><span class="' + statusCls + '">' + statusIcon + '</span></td>' +
+                    '</tr>';
+                }
+            }
+            html += '</tbody>';
+            table.innerHTML = html;
+
+            var total = parsedRows.length;
+            document.getElementById('adImportStats').innerHTML =
+                '<span>' + (isEn ? 'Found' : 'Найдено') + ': <strong>' + total + '</strong> ' + L.plrImportRows + '</span>' +
+                '<span>\ud83d\udd04 ' + L.plrImportUpdated + ': <strong>' + countUpdate + '</strong></span>' +
+                '<span>\u2795 ' + L.plrImportCreated + ': <strong>' + countCreate + '</strong></span>' +
+                '<span>\u26a0\ufe0f ' + (isEn ? 'Errors' : 'Ошибки') + ': <strong>' + countError + '</strong></span>';
+        }
+
+        // Step 4: Do import
+        async function doImport() {
+            var doBtn = document.getElementById('adImportDoBtn');
+            doBtn.disabled = true;
+            doBtn.textContent = '...';
+
+            var createNew = document.getElementById('adImportChkCreate').checked;
+            var updatePts = document.getElementById('adImportChkUpdate').checked;
+            var created = 0, updated = 0, skipped = 0;
+
+            for (var i = 0; i < parsedRows.length; i++) {
+                var r = parsedRows[i];
+                if (r.status === 'error') { skipped++; continue; }
+
+                if (r.status === 'update' && updatePts) {
+                    var upd = {};
+                    if (r.points !== undefined) upd.points = r.points;
+                    if (r.category_id) upd.category_id = r.category_id;
+                    if (r.ntrp) upd.ntrp_rating = r.ntrp;
+                    if (r.name_en) upd.name_en = r.name_en;
+                    if (r.country) upd.country = r.country;
+                    if (Object.keys(upd).length > 0) {
+                        await A.client.from('players').update(upd).eq('id', r.existingId);
+                    }
+                    updated++;
+                } else if (r.status === 'create' && createNew) {
+                    var ins = { name: r.name };
+                    ins.id = A.slugify(r.name);
+                    if (!ins.id) { skipped++; continue; }
+                    if (r.name_en) ins.name_en = r.name_en;
+                    if (r.category_id) ins.category_id = r.category_id;
+                    if (r.points !== undefined) ins.points = r.points;
+                    if (r.ntrp) ins.ntrp_rating = r.ntrp;
+                    if (r.country) ins.country = r.country;
+
+                    var res = await A.client.from('players').insert(ins);
+                    if (res.error) {
+                        // Slug conflict — try with suffix
+                        ins.id = ins.id + '-' + Math.random().toString(36).slice(2, 6);
+                        await A.client.from('players').insert(ins);
+                    }
+                    created++;
+                } else {
+                    skipped++;
+                }
+            }
+
+            A.toast(L.plrImportSuccess + ': ' + L.plrImportUpdated + ' ' + updated + ', ' + L.plrImportCreated + ' ' + created + ', ' + L.plrImportSkipped + ' ' + skipped, 'success');
+            closeModal();
+            loadPlayersList();
+        }
+    }
 
     // ---- Export to namespace ----
     A.renderPlayersSection = renderPlayersSection;
