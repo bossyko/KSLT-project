@@ -190,7 +190,8 @@
             overlay.remove();
             // Reset cache and reload
             A.cachedLevels = [];
-            await A.loadTournamentLevels();
+            await A.loadTournamentLevels(true);
+            await A.loadPointsRules();
             renderSetRules();
         });
     }
@@ -206,7 +207,7 @@
         }
         A.showToast(L.ratLevelDeleted, 'success');
         A.cachedLevels = [];
-        await A.loadTournamentLevels();
+        await A.loadTournamentLevels(true);
         await A.loadPointsRules();
         renderSetRules();
     }
