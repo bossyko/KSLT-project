@@ -4113,3 +4113,69 @@ select.ad-field-input {
     color: #ffc107;
     font-size: 0.85rem;
 }
+
+/* ---- Analytics Dashboard ---- */
+.anl-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.anl-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    text-align: center;
+}
+.anl-card-icon {
+    font-size: 1.8rem;
+    margin-bottom: 6px;
+}
+.anl-card-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+.anl-card-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+.anl-chart-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-bottom: 24px;
+}
+.anl-chart-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+.anl-chart-wrap {
+    height: 260px;
+}
+.anl-top-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.anl-top-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+}
+.anl-top-chart-wrap {
+    height: 180px;
+}
+.anl-empty {
+    color: var(--text-dim);
+    text-align: center;
+    padding: 30px 0;
+    font-size: 0.85rem;
+}

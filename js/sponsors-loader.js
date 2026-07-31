@@ -283,6 +283,18 @@
         });
     }
 
+    // ---- View counter (localStorage dedup) ----
+    function incrementSponsorView(id) {
+        if (!id) return;
+        var key = 'kslt_sponview_' + id;
+        if (localStorage.getItem(key)) return;
+        var cl = window.supabaseClient;
+        if (!cl) return;
+        cl.rpc('increment_sponsor_view', { p_id: id }).then(function() {
+            localStorage.setItem(key, '1');
+        });
+    }
+
     // ---- Click delegation for sponsor modals ----
     document.addEventListener('click', function(e) {
         var link = e.target.closest('[data-sponsor-id]');
@@ -295,7 +307,10 @@
             for (var i = 0; i < data.length; i++) {
                 if (data[i].id === sponsorId) { sponsor = data[i]; break; }
             }
-            if (sponsor) showSponsorModal(sponsor);
+            if (sponsor) {
+                incrementSponsorView(sponsor.id);
+                showSponsorModal(sponsor);
+            }
         });
     });
 

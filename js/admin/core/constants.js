@@ -1193,6 +1193,21 @@
         sponDescription: 'Description',
         sponContacts: 'Contacts & Social Media',
         sponPhone: 'Phone',
+        // Analytics
+        analytics: 'Analytics',
+        analyticsTitle: 'Analytics',
+        anlEntityViews: 'Entity Views',
+        anlPageViews: 'Page Views',
+        anlMostPopular: 'Most Popular',
+        anlTopCourts: 'Top Courts',
+        anlTopCoaches: 'Top Coaches',
+        anlTopNews: 'Top News',
+        anlTopTournaments: 'Top Tournaments',
+        anlTopSponsors: 'Top Sponsors',
+        anlTopPlayers: 'Top Players',
+        anlViewsByType: 'Views by Type',
+        anlPageViewsTable: 'Page Views',
+        anlNoData: 'No data yet',
         // Live Match
         liveSection: 'Live',
         liveActive: 'Active',
@@ -2434,6 +2449,21 @@
         sponDescription: 'Описание',
         sponContacts: 'Контакты и соцсети',
         sponPhone: 'Телефон',
+        // Analytics
+        analytics: 'Аналитика',
+        analyticsTitle: 'Аналитика',
+        anlEntityViews: 'Просмотры объектов',
+        anlPageViews: 'Просмотры страниц',
+        anlMostPopular: 'Самый популярный',
+        anlTopCourts: 'Топ корты',
+        anlTopCoaches: 'Топ тренеры',
+        anlTopNews: 'Топ новости',
+        anlTopTournaments: 'Топ турниры',
+        anlTopSponsors: 'Топ спонсоры',
+        anlTopPlayers: 'Топ игроки',
+        anlViewsByType: 'Просмотры по типу',
+        anlPageViewsTable: 'Просмотры страниц',
+        anlNoData: 'Данных пока нет',
         // Live Match
         liveSection: 'Live',
         liveActive: 'Активные',
@@ -2588,7 +2618,8 @@
         swords: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M9.5 6.5L21 18v3h-3L6.5 9.5"/><path d="M11 5l-6 6"/><path d="M8 8L4 4"/><path d="M5 3L3 5"/></svg>',
         tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>',
         handshake: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 17a1 1 0 01-1 1H6l-4-4 6.768-6.768A2 2 0 0110.18 6.8l.292.124a2 2 0 001.83-.164L14.5 5l5 5-3.5 3.5"/><path d="M15 11l4 4-5 5-4-4"/><path d="M14 21a1 1 0 001-1v-1a1 1 0 00-1-1 1 1 0 01-1-1v-1a1 1 0 00-1-1 1 1 0 01-1-1 1 1 0 00-1-1"/><path d="M5 11l4-4"/></svg>',
-        bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>'
+        bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
+        analytics: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>'
     };
 
     var SECTION_ICONS = {
@@ -2603,14 +2634,15 @@
         challenges: '⚔️',
         live: '📡',
         sponsors: '🤝',
+        analytics: '📈',
         notifications: '🔔',
         settings: '⚙️'
     };
 
 
     var ROLE_SECTIONS = {
-        admin:   ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'sponsors', 'users', 'finances', 'vouchers', 'loyalty', 'notifications', 'settings'],
-        manager: ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'sponsors', 'users', 'finances', 'vouchers', 'loyalty']
+        admin:   ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'sponsors', 'analytics', 'users', 'finances', 'vouchers', 'loyalty', 'notifications', 'settings'],
+        manager: ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'sponsors', 'analytics', 'users', 'finances', 'vouchers', 'loyalty']
     };
 
     /**
