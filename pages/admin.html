@@ -9,7 +9,7 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co https://accounts.google.com https://api.mymemory.translated.net; media-src 'self' https://assets.mixkit.co; frame-src https://maps.google.com https://www.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co https://accounts.google.com https://api.mymemory.translated.net; media-src 'self' https://assets.mixkit.co; frame-src https://maps.google.com https://www.google.com;">
     <title>KSLT — Админ-панель</title>
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="manifest" href="/manifest.json">
@@ -281,6 +281,8 @@
     <!-- Country data + utils -->
     <script src="../data/countries.js"></script>
     <script src="../js/country-utils.js"></script>
+    <!-- SheetJS (Excel parser) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <!-- Admin Core -->
     <script src="../js/admin/core/constants.js"></script>
     <script src="../js/admin/core/utils.js?v=2"></script>
