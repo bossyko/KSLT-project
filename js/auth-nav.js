@@ -91,38 +91,35 @@
                     '<div class="site-notif-dropdown" id="siteNotifDropdown" style="display:none;"></div>';
                 btn.parentNode.insertBefore(bellWrap, btn);
 
-                // Bell logic — wait for supabaseClient (may load after auth-nav)
+                // Bell logic — direct REST API (no supabaseClient dependency)
                 (function() {
                     var userId = session.user && session.user.id;
                     if (!userId) return;
 
-                    function waitForClient(cb) {
-                        if (window.supabaseClient) return cb(window.supabaseClient);
-                        var attempts = 0;
-                        var timer = setInterval(function() {
-                            attempts++;
-                            if (window.supabaseClient) { clearInterval(timer); cb(window.supabaseClient); }
-                            else if (attempts > 50) clearInterval(timer);
-                        }, 100);
-                    }
+                    var API = 'https://qqkzszesviukopgjbead.supabase.co/rest/v1';
+                    var ANON = 'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G';
+                    var TOKEN = session.access_token;
 
-                    waitForClient(function(client) {
+                    function apiHeaders(extra) {
+                        var h = { 'apikey': ANON, 'Authorization': 'Bearer ' + TOKEN };
+                        if (extra) { for (var k in extra) h[k] = extra[k]; }
+                        return h;
+                    }
 
                     var bellBtn = document.getElementById('siteNotifBell');
                     var dropdown = document.getElementById('siteNotifDropdown');
                     var dot = document.getElementById('siteNotifDot');
 
                     // Check unread count
-                    client.from('notification_log')
-                        .select('id', { count: 'exact', head: true })
-                        .eq('profile_id', userId)
-                        .eq('is_read', false)
-                        .then(function(res) {
-                            if (res.count && res.count > 0) {
-                                dot.style.display = '';
-                                dot.textContent = res.count > 9 ? '9+' : res.count;
-                            }
-                        });
+                    fetch(API + '/notification_log?profile_id=eq.' + userId + '&is_read=eq.false&select=id', {
+                        headers: apiHeaders({ 'Prefer': 'count=exact' })
+                    }).then(function(res) {
+                        var count = parseInt(res.headers.get('content-range')?.split('/')[1] || '0', 10);
+                        if (count > 0) {
+                            dot.style.display = '';
+                            dot.textContent = count > 9 ? '9+' : count;
+                        }
+                    }).catch(function() {});
 
                     // Toggle dropdown
                     bellBtn.addEventListener('click', function(e) {
@@ -131,35 +128,36 @@
                             dropdown.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-dim);font-size:0.8rem;">...</div>';
                             dropdown.style.display = '';
                             // Load notifications
-                            client.from('notification_log')
-                                .select('*')
-                                .eq('profile_id', userId)
-                                .order('created_at', { ascending: false })
-                                .limit(20)
-                                .then(function(res) {
-                                    var items = res.data || [];
-                                    var noLabel = isEn ? 'No notifications' : isKg ? 'Билдирмелер жок' : 'Нет уведомлений';
-                                    if (items.length === 0) {
-                                        dropdown.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' + noLabel + '</div>';
-                                        return;
-                                    }
-                                    var unreadIds = [];
-                                    dropdown.innerHTML = items.map(function(n) {
-                                        if (!n.is_read) unreadIds.push(n.id);
-                                        var cls = 'site-notif-item' + (n.is_read ? '' : ' unread');
-                                        var ago = n.created_at ? timeAgo(new Date(n.created_at)) : '';
-                                        return '<div class="' + cls + '">' +
-                                            '<div class="site-notif-item-title">' + esc(n.title || '') + '</div>' +
-                                            '<div class="site-notif-item-msg">' + esc(n.message || '') + '</div>' +
-                                            '<div class="site-notif-item-time">' + ago + '</div>' +
-                                        '</div>';
-                                    }).join('');
-                                    if (unreadIds.length > 0) {
-                                        client.from('notification_log').update({ is_read: true }).in('id', unreadIds).then(function() {
-                                            dot.style.display = 'none';
-                                        });
-                                    }
-                                });
+                            fetch(API + '/notification_log?profile_id=eq.' + userId + '&select=*&order=created_at.desc&limit=20', {
+                                headers: apiHeaders()
+                            }).then(function(r) { return r.json(); }).then(function(items) {
+                                items = items || [];
+                                var noLabel = isEn ? 'No notifications' : isKg ? 'Билдирмелер жок' : 'Нет уведомлений';
+                                if (items.length === 0) {
+                                    dropdown.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' + noLabel + '</div>';
+                                    return;
+                                }
+                                var unreadIds = [];
+                                dropdown.innerHTML = items.map(function(n) {
+                                    if (!n.is_read) unreadIds.push("'" + n.id + "'");
+                                    var cls = 'site-notif-item' + (n.is_read ? '' : ' unread');
+                                    var ago = n.created_at ? timeAgo(new Date(n.created_at)) : '';
+                                    return '<div class="' + cls + '">' +
+                                        '<div class="site-notif-item-title">' + esc(n.title || '') + '</div>' +
+                                        '<div class="site-notif-item-msg">' + esc(n.message || '') + '</div>' +
+                                        '<div class="site-notif-item-time">' + ago + '</div>' +
+                                    '</div>';
+                                }).join('');
+                                if (unreadIds.length > 0) {
+                                    fetch(API + '/notification_log?id=in.(' + unreadIds.join(',') + ')', {
+                                        method: 'PATCH',
+                                        headers: apiHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+                                        body: JSON.stringify({ is_read: true })
+                                    }).then(function() {
+                                        dot.style.display = 'none';
+                                    });
+                                }
+                            }).catch(function() {});
                         } else {
                             dropdown.style.display = 'none';
                         }
@@ -184,7 +182,6 @@
                         d.textContent = s;
                         return d.innerHTML;
                     }
-                    }); // end waitForClient
                 })();
 
                 if (isStaff) {
