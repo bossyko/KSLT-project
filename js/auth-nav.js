@@ -91,11 +91,22 @@
                     '<div class="site-notif-dropdown" id="siteNotifDropdown" style="display:none;"></div>';
                 btn.parentNode.insertBefore(bellWrap, btn);
 
-                // Bell logic
+                // Bell logic — wait for supabaseClient (may load after auth-nav)
                 (function() {
                     var userId = session.user && session.user.id;
-                    var client = window.supabaseClient;
-                    if (!client || !userId) return;
+                    if (!userId) return;
+
+                    function waitForClient(cb) {
+                        if (window.supabaseClient) return cb(window.supabaseClient);
+                        var attempts = 0;
+                        var timer = setInterval(function() {
+                            attempts++;
+                            if (window.supabaseClient) { clearInterval(timer); cb(window.supabaseClient); }
+                            else if (attempts > 50) clearInterval(timer);
+                        }, 100);
+                    }
+
+                    waitForClient(function(client) {
 
                     var bellBtn = document.getElementById('siteNotifBell');
                     var dropdown = document.getElementById('siteNotifDropdown');
@@ -173,6 +184,7 @@
                         d.textContent = s;
                         return d.innerHTML;
                     }
+                    }); // end waitForClient
                 })();
 
                 if (isStaff) {
