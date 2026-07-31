@@ -1,4 +1,4 @@
-package kg.kslt.app;
+package com.kslt.app;
 
 import com.getcapacitor.BridgeActivity;
 

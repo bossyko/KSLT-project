@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'kg.kslt.app',
+  appId: 'com.kslt.app',
   appName: 'KSLT Tennis',
   webDir: 'www',
   server: {

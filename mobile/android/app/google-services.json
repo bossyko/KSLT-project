@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "693072893559",
+    "project_id": "kslt-tennis",
+    "storage_bucket": "kslt-tennis.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:693072893559:android:27ebeb69e08fc244e05872",
+        "android_client_info": {
+          "package_name": "com.kslt.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA85N1F3JFsKI-2jMu0O_I8u5SVUfqJtVY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
