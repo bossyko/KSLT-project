@@ -125,7 +125,7 @@
     var ROUND_LABELS = { W: L.ratW, F: L.ratF, '3RD': L.rat3RD, '4TH': L.rat4TH, SF: L.ratSF, QF: L.ratQF, R16: L.ratR16, R32: L.ratR32, G3: L.ratG3, G4: L.ratG4, G5: L.ratG5, G6: L.ratG6 };
 
     A.loadTournamentLevels = async function() {
-        if (cachedLevels.length > 0) return;
+        if (A.cachedLevels && A.cachedLevels.length > 0) return;
         var res = await A.client.from('tournament_levels').select('*').order('sort_order');
         cachedLevels = res.data || [];
         A.cachedLevels = cachedLevels;
