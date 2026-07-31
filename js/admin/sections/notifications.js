@@ -124,10 +124,18 @@
         var container = document.getElementById('adPushUserResults');
         if (!container || !A.client) return;
 
+        var pattern = '%' + query + '%';
         var res = await A.client.from('profiles')
             .select('id, full_name, email')
-            .or('full_name.ilike.%' + query + '%,email.ilike.%' + query + '%')
+            .or('full_name.ilike.' + pattern + ',email.ilike.' + pattern)
             .limit(10);
+        // Fallback: if or() fails, try ilike on full_name only
+        if (res.error) {
+            res = await A.client.from('profiles')
+                .select('id, full_name, email')
+                .ilike('full_name', pattern)
+                .limit(10);
+        }
 
         var profiles = res.data || [];
         if (profiles.length === 0) {
