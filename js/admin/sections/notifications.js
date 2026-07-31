@@ -42,19 +42,10 @@
                     // Audience
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.pushAudience + '</label>' +
-                        '<div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">' +
-                            '<label class="ad-push-audience-opt" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;">' +
-                                '<input type="radio" name="pushAudience" value="all" checked style="margin:0;width:16px;height:16px;accent-color:var(--accent);">' +
-                                '<span>' + L.pushAll + '</span>' +
-                            '</label>' +
-                            '<label class="ad-push-audience-opt" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;">' +
-                                '<input type="radio" name="pushAudience" value="members" style="margin:0;width:16px;height:16px;accent-color:var(--accent);">' +
-                                '<span>' + L.pushMembers + '</span>' +
-                            '</label>' +
-                            '<label class="ad-push-audience-opt" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;">' +
-                                '<input type="radio" name="pushAudience" value="user" style="margin:0;width:16px;height:16px;accent-color:var(--accent);">' +
-                                '<span>' + L.pushUser + '</span>' +
-                            '</label>' +
+                        '<div id="adPushAudienceWrap" style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;justify-content:center;">' +
+                            '<div class="ad-push-audience-opt active" data-value="all" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--accent,#CCFF00);background:rgba(204,255,0,0.08);cursor:pointer;font-size:0.85rem;color:var(--accent,#CCFF00);transition:all 0.2s;user-select:none;">' + L.pushAll + '</div>' +
+                            '<div class="ad-push-audience-opt" data-value="members" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;user-select:none;">' + L.pushMembers + '</div>' +
+                            '<div class="ad-push-audience-opt" data-value="user" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;user-select:none;">' + L.pushUser + '</div>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -88,28 +79,23 @@
                 '</div>' +
             '</div>';
 
-        // Audience radio toggle + highlight
-        function updateAudienceHighlight() {
-            document.querySelectorAll('.ad-push-audience-opt').forEach(function(label) {
-                var radio = label.querySelector('input[type="radio"]');
-                if (radio && radio.checked) {
-                    label.style.borderColor = 'var(--accent, #CCFF00)';
-                    label.style.background = 'rgba(204, 255, 0, 0.08)';
-                    label.style.color = 'var(--accent, #CCFF00)';
-                } else {
-                    label.style.borderColor = 'var(--border-subtle, rgba(255,255,255,0.12))';
-                    label.style.background = 'transparent';
-                    label.style.color = 'var(--text-secondary, #999)';
-                }
+        // Audience toggle
+        document.querySelectorAll('.ad-push-audience-opt').forEach(function(el) {
+            el.addEventListener('click', function() {
+                document.querySelectorAll('.ad-push-audience-opt').forEach(function(opt) {
+                    opt.classList.remove('active');
+                    opt.style.borderColor = 'var(--border-subtle, rgba(255,255,255,0.12))';
+                    opt.style.background = 'transparent';
+                    opt.style.color = 'var(--text-secondary, #999)';
+                });
+                this.classList.add('active');
+                this.style.borderColor = 'var(--accent, #CCFF00)';
+                this.style.background = 'rgba(204, 255, 0, 0.08)';
+                this.style.color = 'var(--accent, #CCFF00)';
+                var wrap = document.getElementById('adPushUserWrap');
+                if (wrap) wrap.style.display = this.dataset.value === 'user' ? '' : 'none';
             });
-            var checked = document.querySelector('input[name="pushAudience"]:checked');
-            var wrap = document.getElementById('adPushUserWrap');
-            if (wrap) wrap.style.display = (checked && checked.value === 'user') ? '' : 'none';
-        }
-        document.querySelectorAll('input[name="pushAudience"]').forEach(function(r) {
-            r.addEventListener('change', updateAudienceHighlight);
         });
-        updateAudienceHighlight();
 
         // User search autocomplete
         var searchInput = document.getElementById('adPushUserSearch');
@@ -175,8 +161,8 @@
             return;
         }
 
-        var audienceRadio = document.querySelector('input[name="pushAudience"]:checked');
-        var audience = audienceRadio ? audienceRadio.value : 'all';
+        var audienceEl = document.querySelector('.ad-push-audience-opt.active');
+        var audience = audienceEl ? audienceEl.dataset.value : 'all';
         var type = document.getElementById('adPushType').value;
         var userId = null;
 
