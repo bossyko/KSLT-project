@@ -133,6 +133,10 @@
   }
 
   function openCoachDetail(c, isMember) {
+    if (window.KSLT_APP && window.KSLT_APP.incrementView) {
+      window.KSLT_APP.incrementView('increment_coach_view', { p_id: c.id });
+    }
+
     var existing = document.getElementById('coachDetailOverlay');
     if (existing) existing.remove();
 

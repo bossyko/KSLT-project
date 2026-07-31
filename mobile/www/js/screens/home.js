@@ -222,6 +222,10 @@
   HOME.openBattleDetail = openBattleDetail;
   HOME.openNewsDetail = openNewsDetail;
   function openTournamentDetail(tid) {
+    if (window.KSLT_APP && window.KSLT_APP.incrementView) {
+      window.KSLT_APP.incrementView('increment_tournament_view', { p_tournament_id: tid });
+    }
+
     var overlay = document.getElementById('tdOverlay');
     if (!overlay) return;
     // Load tournament + court in parallel
@@ -762,6 +766,10 @@
   }
 
   function openNewsDetail(nid) {
+    if (window.KSLT_APP && window.KSLT_APP.incrementView) {
+      window.KSLT_APP.incrementView('increment_news_view', { p_news_id: nid });
+    }
+
     var overlay = document.getElementById('newsOverlay');
     if (!overlay) return;
     supabaseClient.from('news').select('*').eq('id', nid).single().then(function(r) {

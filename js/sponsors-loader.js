@@ -314,11 +314,24 @@
         });
     });
 
+    // ---- Site visit tracking (once per session) ----
+    function trackSiteVisit() {
+        if (sessionStorage.getItem('kslt_sv')) return;
+        var cl = window.supabaseClient;
+        if (!cl) return;
+        cl.rpc('increment_page_view', { p_page_name: 'site_visit' });
+        sessionStorage.setItem('kslt_sv', '1');
+    }
+
     // Auto-run on page load
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', updateHeaderSponsor);
+        document.addEventListener('DOMContentLoaded', function() {
+            updateHeaderSponsor();
+            trackSiteVisit();
+        });
     } else {
         updateHeaderSponsor();
+        trackSiteVisit();
     }
 
     function esc(str) {
