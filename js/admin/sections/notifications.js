@@ -88,13 +88,28 @@
                 '</div>' +
             '</div>';
 
-        // Audience radio toggle
-        document.querySelectorAll('input[name="pushAudience"]').forEach(function(r) {
-            r.addEventListener('change', function() {
-                var wrap = document.getElementById('adPushUserWrap');
-                if (wrap) wrap.style.display = this.value === 'user' ? '' : 'none';
+        // Audience radio toggle + highlight
+        function updateAudienceHighlight() {
+            document.querySelectorAll('.ad-push-audience-opt').forEach(function(label) {
+                var radio = label.querySelector('input[type="radio"]');
+                if (radio && radio.checked) {
+                    label.style.borderColor = 'var(--accent, #CCFF00)';
+                    label.style.background = 'rgba(204, 255, 0, 0.08)';
+                    label.style.color = 'var(--accent, #CCFF00)';
+                } else {
+                    label.style.borderColor = 'var(--border-subtle, rgba(255,255,255,0.12))';
+                    label.style.background = 'transparent';
+                    label.style.color = 'var(--text-secondary, #999)';
+                }
             });
+            var checked = document.querySelector('input[name="pushAudience"]:checked');
+            var wrap = document.getElementById('adPushUserWrap');
+            if (wrap) wrap.style.display = (checked && checked.value === 'user') ? '' : 'none';
+        }
+        document.querySelectorAll('input[name="pushAudience"]').forEach(function(r) {
+            r.addEventListener('change', updateAudienceHighlight);
         });
+        updateAudienceHighlight();
 
         // User search autocomplete
         var searchInput = document.getElementById('adPushUserSearch');
