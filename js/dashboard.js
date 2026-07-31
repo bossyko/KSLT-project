@@ -776,9 +776,6 @@
             checkNewBadges(profile.player_id);
         }
 
-        // Notification bell
-        initNotificationBell(user);
-
         // Onboarding for first-time users
         showOnboarding(profile);
     };
