@@ -80,6 +80,101 @@
                 var userAvatar = localStorage.getItem('kslt_avatar') || '';
                 var isStaff = role === 'admin' || role === 'manager';
 
+                // ---- Notification Bell (all logged-in users) ----
+                var bellWrap = document.createElement('div');
+                bellWrap.className = 'site-notif-wrap';
+                bellWrap.innerHTML =
+                    '<button class="site-notif-btn" id="siteNotifBell" title="' + (isEn ? 'Notifications' : isKg ? 'Билдирмелер' : 'Уведомления') + '">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>' +
+                        '<span class="site-notif-dot" id="siteNotifDot" style="display:none;"></span>' +
+                    '</button>' +
+                    '<div class="site-notif-dropdown" id="siteNotifDropdown" style="display:none;"></div>';
+                btn.parentNode.insertBefore(bellWrap, btn);
+
+                // Bell logic
+                (function() {
+                    var userId = session.user && session.user.id;
+                    var client = window.supabaseClient;
+                    if (!client || !userId) return;
+
+                    var bellBtn = document.getElementById('siteNotifBell');
+                    var dropdown = document.getElementById('siteNotifDropdown');
+                    var dot = document.getElementById('siteNotifDot');
+
+                    // Check unread count
+                    client.from('notification_log')
+                        .select('id', { count: 'exact', head: true })
+                        .eq('profile_id', userId)
+                        .eq('is_read', false)
+                        .then(function(res) {
+                            if (res.count && res.count > 0) {
+                                dot.style.display = '';
+                                dot.textContent = res.count > 9 ? '9+' : res.count;
+                            }
+                        });
+
+                    // Toggle dropdown
+                    bellBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (dropdown.style.display === 'none') {
+                            dropdown.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-dim);font-size:0.8rem;">...</div>';
+                            dropdown.style.display = '';
+                            // Load notifications
+                            client.from('notification_log')
+                                .select('*')
+                                .eq('profile_id', userId)
+                                .order('created_at', { ascending: false })
+                                .limit(20)
+                                .then(function(res) {
+                                    var items = res.data || [];
+                                    var noLabel = isEn ? 'No notifications' : isKg ? 'Билдирмелер жок' : 'Нет уведомлений';
+                                    if (items.length === 0) {
+                                        dropdown.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' + noLabel + '</div>';
+                                        return;
+                                    }
+                                    var unreadIds = [];
+                                    dropdown.innerHTML = items.map(function(n) {
+                                        if (!n.is_read) unreadIds.push(n.id);
+                                        var cls = 'site-notif-item' + (n.is_read ? '' : ' unread');
+                                        var ago = n.created_at ? timeAgo(new Date(n.created_at)) : '';
+                                        return '<div class="' + cls + '">' +
+                                            '<div class="site-notif-item-title">' + esc(n.title || '') + '</div>' +
+                                            '<div class="site-notif-item-msg">' + esc(n.message || '') + '</div>' +
+                                            '<div class="site-notif-item-time">' + ago + '</div>' +
+                                        '</div>';
+                                    }).join('');
+                                    if (unreadIds.length > 0) {
+                                        client.from('notification_log').update({ is_read: true }).in('id', unreadIds).then(function() {
+                                            dot.style.display = 'none';
+                                        });
+                                    }
+                                });
+                        } else {
+                            dropdown.style.display = 'none';
+                        }
+                    });
+
+                    document.addEventListener('click', function(e) {
+                        if (dropdown.style.display !== 'none' && !bellWrap.contains(e.target)) {
+                            dropdown.style.display = 'none';
+                        }
+                    });
+
+                    function timeAgo(date) {
+                        var diff = Math.floor((new Date() - date) / 1000);
+                        if (diff < 60) return isEn ? 'just now' : 'только что';
+                        if (diff < 3600) return Math.floor(diff / 60) + (isEn ? 'm ago' : ' мин.');
+                        if (diff < 86400) return Math.floor(diff / 3600) + (isEn ? 'h ago' : ' ч.');
+                        return Math.floor(diff / 86400) + (isEn ? 'd ago' : ' дн.');
+                    }
+
+                    function esc(s) {
+                        var d = document.createElement('div');
+                        d.textContent = s;
+                        return d.innerHTML;
+                    }
+                })();
+
                 if (isStaff) {
                     // ---- ADMIN / MANAGER: single "Админка" dropdown ----
                     // Hover → dropdown with admin sections + profile/logout
