@@ -75,6 +75,10 @@
     _rank = 0;
     _categoryLabel = '';
 
+    if (window.KSLT_APP && window.KSLT_APP.incrementView) {
+      window.KSLT_APP.incrementView('increment_player_view', { p_id: playerId });
+    }
+
     var overlay = document.getElementById('playerOverlay');
     if (!overlay) return;
 

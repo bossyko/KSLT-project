@@ -465,10 +465,29 @@
     }
   }
 
+  // === View Tracking ===
+  APP.incrementView = function(rpcName, params) {
+    var key = 'kslt_appview_' + rpcName + '_' + Object.values(params).join('');
+    if (localStorage.getItem(key)) return;
+    params.p_source = 'app';
+    supabaseClient.rpc(rpcName, params).then(function() {
+      localStorage.setItem(key, '1');
+    });
+  };
+
+  function trackAppVisit() {
+    if (sessionStorage.getItem('kslt_av')) return;
+    supabaseClient.rpc('increment_page_view', { p_page_name: 'app_visit' });
+    sessionStorage.setItem('kslt_av', '1');
+  }
+
   // === Init ===
   function init() {
     // Apply i18n to static DOM elements
     if (window.KSLT_I18N) window.KSLT_I18N.updateDOM();
+
+    // Track app visit (once per session)
+    trackAppVisit();
 
     var AUTH = window.KSLT_AUTH;
     var authScreen = document.getElementById('authScreen');

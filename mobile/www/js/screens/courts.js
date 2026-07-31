@@ -167,6 +167,10 @@
   }
 
   function openCourtDetail(c, isMember) {
+    if (window.KSLT_APP && window.KSLT_APP.incrementView) {
+      window.KSLT_APP.incrementView('increment_court_view', { p_id: c.id });
+    }
+
     var existing = document.getElementById('courtDetailOverlay');
     if (existing) existing.remove();
 

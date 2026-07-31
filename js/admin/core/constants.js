@@ -1208,6 +1208,8 @@
         anlViewsByType: 'Views by Type',
         anlPageViewsTable: 'Page Views',
         anlNoData: 'No data yet',
+        anlSiteVisits: 'Site Visits',
+        anlAppVisits: 'App Visits',
         // Live Match
         liveSection: 'Live',
         liveActive: 'Active',
@@ -2464,6 +2466,8 @@
         anlViewsByType: 'Просмотры по типу',
         anlPageViewsTable: 'Просмотры страниц',
         anlNoData: 'Данных пока нет',
+        anlSiteVisits: 'Заходы на сайт',
+        anlAppVisits: 'Заходы в приложение',
         // Live Match
         liveSection: 'Live',
         liveActive: 'Активные',
