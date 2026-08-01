@@ -1724,9 +1724,11 @@
                 '<input type="text" class="ad-field-input ad-filter-search" id="ratSearch" placeholder="' + L.ratSearchPlayer + '">' +
                 '<select class="ad-field-input ad-filter-select" id="ratGenderFilter">' + genderOpts + '</select>' +
                 '<select class="ad-field-input ad-filter-select" id="ratCatFilter">' + catOpts + '</select>' +
+                '<button class="ad-btn ad-btn-sm" id="ratRecalcAllBtn" style="margin-left:auto">' + (isEn ? 'Recalculate all' : 'Пересчитать все') + '</button>' +
             '</div>' +
             '<div id="ratRankingsBody"></div>';
 
+        document.getElementById('ratRecalcAllBtn').addEventListener('click', recalcAllPoints);
         document.getElementById('ratCatFilter').addEventListener('change', function() {
             _ratCatFilter = this.value;
             loadRatRankings();
@@ -2270,6 +2272,24 @@
         }
     }
     A.recalcPlayerPoints = recalcPlayerPoints;
+
+    async function recalcAllPoints() {
+        var btn = document.getElementById('ratRecalcAllBtn');
+        if (btn) { btn.disabled = true; btn.textContent = isEn ? 'Recalculating...' : 'Пересчёт...'; }
+        try {
+            var res = await A.client.from('players').select('id');
+            var ids = (res.data || []).map(function(p) { return p.id; });
+            if (ids.length === 0) { A.showToast(isEn ? 'No players found' : 'Игроки не найдены', 'error'); return; }
+            await recalcPlayerPoints(ids);
+            if (typeof A.recalcDoublesPoints === 'function') await A.recalcDoublesPoints(ids);
+            A.showToast(isEn ? 'All points recalculated (' + ids.length + ' players)' : 'Все очки пересчитаны (' + ids.length + ' игроков)', 'success');
+            loadRatRankings();
+        } catch (err) {
+            A.showToast(err.message, 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = isEn ? 'Recalculate all' : 'Пересчитать все'; }
+        }
+    }
 
     // Delete result row (delegate)
     document.addEventListener('click', function(e) {
