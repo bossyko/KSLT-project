@@ -2254,7 +2254,7 @@
 
             // Points from rating_history (singles only, 2-year window)
             var currentYear = new Date().getFullYear();
-            var oldestYear = getOldestValidYear();
+            var oldestYear = A.getOldestValidYear();
             var rhRes = await A.client.from('rating_history')
                 .select('points_earned')
                 .eq('player_id', pid)
