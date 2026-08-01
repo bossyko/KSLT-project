@@ -2275,14 +2275,22 @@
 
     async function recalcAllPoints() {
         var btn = document.getElementById('ratRecalcAllBtn');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#CCFF00;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle"></span> ' + (isEn ? 'Recalculating...' : 'Пересчёт...'); }
+        var spinner = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#CCFF00;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle"></span> ';
+        function updateBtn(pct) {
+            if (btn) btn.innerHTML = spinner + pct + '%';
+        }
+        if (btn) { btn.disabled = true; updateBtn(0); }
         try {
             var res = await A.client.from('players').select('id');
             var ids = (res.data || []).map(function(p) { return p.id; });
             if (ids.length === 0) { A.showToast(isEn ? 'No players found' : 'Игроки не найдены', 'error'); return; }
-            await recalcPlayerPoints(ids);
-            if (typeof A.recalcDoublesPoints === 'function') await A.recalcDoublesPoints(ids);
-            A.showToast(isEn ? 'All points recalculated (' + ids.length + ' players)' : 'Все очки пересчитаны (' + ids.length + ' игроков)', 'success');
+            var total = ids.length;
+            for (var i = 0; i < total; i++) {
+                await recalcPlayerPoints([ids[i]]);
+                if (typeof A.recalcDoublesPoints === 'function') await A.recalcDoublesPoints([ids[i]]);
+                updateBtn(Math.round((i + 1) / total * 100));
+            }
+            A.showToast(isEn ? 'All points recalculated (' + total + ' players)' : 'Все очки пересчитаны (' + total + ' игроков)', 'success');
             loadRatRankings();
         } catch (err) {
             A.showToast(err.message, 'error');
