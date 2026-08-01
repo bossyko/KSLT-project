@@ -465,6 +465,7 @@
     async function recalcDoublesPoints(playerIds) {
         var unique = playerIds.filter(function(id, i) { return playerIds.indexOf(id) === i; });
         var currentYear = new Date().getFullYear();
+        var oldestYear = A.getOldestValidYear();
 
         // Get doubles tournament IDs
         var dblTrnRes = await A.client.from('tournaments').select('id').in('format', ['doubles', 'mixed_doubles']);
@@ -473,12 +474,12 @@
         for (var i = 0; i < unique.length; i++) {
             var pid = unique[i];
 
-            // Points from rating_history (doubles only)
+            // Points from rating_history (doubles only, 2-year window)
             var rhRes = await A.client.from('rating_history')
                 .select('points_earned')
                 .eq('player_id', pid)
                 .eq('is_doubles', true)
-                .gte('recorded_at', currentYear + '-01-01')
+                .gte('recorded_at', oldestYear + '-01-01')
                 .lte('recorded_at', currentYear + '-12-31');
             var total = 0;
             (rhRes.data || []).forEach(function(r) {

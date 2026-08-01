@@ -2209,6 +2209,13 @@
         loadTournamentResults(tournamentId);
     }
 
+    function getOldestValidYear() {
+        var now = new Date();
+        var year = now.getFullYear();
+        return now.getMonth() >= 8 ? (year - 1) : (year - 2);
+    }
+    A.getOldestValidYear = getOldestValidYear;
+
     async function recalcPlayerPoints(playerIds) {
         var unique = playerIds.filter(function(id, i) { return playerIds.indexOf(id) === i; });
 
@@ -2243,13 +2250,14 @@
                 return m.winner_id === pid ? 'W' : 'L';
             });
 
-            // Points from rating_history (singles only)
+            // Points from rating_history (singles only, 2-year window)
             var currentYear = new Date().getFullYear();
+            var oldestYear = getOldestValidYear();
             var rhRes = await A.client.from('rating_history')
                 .select('points_earned')
                 .eq('player_id', pid)
                 .neq('is_doubles', true)
-                .gte('recorded_at', currentYear + '-01-01')
+                .gte('recorded_at', oldestYear + '-01-01')
                 .lte('recorded_at', currentYear + '-12-31');
             var total = 0;
             (rhRes.data || []).forEach(function(r) {
