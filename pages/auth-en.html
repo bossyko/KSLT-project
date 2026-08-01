@@ -141,6 +141,7 @@
                     <label class="auth-label" for="forgot-email">Email <span class="auth-required">*</span></label>
                     <input class="auth-input" type="email" id="forgot-email" placeholder="you@example.com" required>
                 </div>
+                <div id="forgotTurnstile" style="margin-bottom:16px"></div>
                 <button type="submit" class="auth-btn">Send Reset Link</button>
                 <a href="#" class="auth-back-link" id="forgotBack">Back to Sign In</a>
             </form>
@@ -256,6 +257,7 @@
                     <input type="checkbox" required>
                     <span>I accept the <a href="terms-en.html" target="_blank">Terms of Service</a> and <a href="privacy-policy-en.html" target="_blank">Privacy Policy</a></span>
                 </label>
+                <div id="signupTurnstile" style="margin-bottom:16px"></div>
                 <button type="submit" class="auth-btn">Create Account</button>
                 </div>
             </form>
@@ -355,6 +357,8 @@
         </div>
     </div>
 
+    <!-- Turnstile CAPTCHA -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
     <!-- Supabase SDK -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js"></script>

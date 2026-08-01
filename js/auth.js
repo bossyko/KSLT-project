@@ -120,9 +120,27 @@
         redirecting: 'Успешно! Перенаправление...'
     };
 
-    // Turnstile CAPTCHA (disabled)
-    // var _turnstileToken = null;
-    // window.onTurnstileSuccess = function(token) { _turnstileToken = token; };
+    // Turnstile CAPTCHA
+    var TURNSTILE_SITE_KEY = '0x4AAAAAAEDoNUH1Z2T9Iiab';
+    var _signupToken = null;
+    var _forgotToken = null;
+
+    function initTurnstile() {
+        if (typeof turnstile === 'undefined') return setTimeout(initTurnstile, 300);
+        var su = document.getElementById('signupTurnstile');
+        var fg = document.getElementById('forgotTurnstile');
+        if (su) turnstile.render(su, {
+            sitekey: TURNSTILE_SITE_KEY, theme: 'dark',
+            callback: function(t) { _signupToken = t; },
+            'expired-callback': function() { _signupToken = null; }
+        });
+        if (fg) turnstile.render(fg, {
+            sitekey: TURNSTILE_SITE_KEY, theme: 'dark',
+            callback: function(t) { _forgotToken = t; },
+            'expired-callback': function() { _forgotToken = null; }
+        });
+    }
+    initTurnstile();
 
     // Rate limiting (client-side)
     var _loginAttempts = 0;
@@ -668,6 +686,11 @@
             return;
         }
 
+        if (!_signupToken) {
+            showMessage(signupForm, L.errCaptcha, true);
+            return;
+        }
+
         setLoading(btn, true, L.creatingAccount, L.createAccount);
 
         // Server-side rate limit check
@@ -732,6 +755,8 @@
         }
 
         setLoading(btn, false, L.creatingAccount, L.createAccount);
+        _signupToken = null;
+        if (typeof turnstile !== 'undefined') turnstile.reset('#signupTurnstile');
 
         // Show success screen
         if (signupEmailDisplay) signupEmailDisplay.textContent = email;
@@ -750,6 +775,11 @@
 
         if (!client) {
             showMessage(forgotForm, L.errGeneric, true);
+            return;
+        }
+
+        if (!_forgotToken) {
+            showMessage(forgotForm, L.errCaptcha, true);
             return;
         }
 
@@ -775,6 +805,8 @@
         });
 
         setLoading(btn, false, L.sendingLink, L.sendLink);
+        _forgotToken = null;
+        if (typeof turnstile !== 'undefined') turnstile.reset('#forgotTurnstile');
 
         // Uniform response: always show success (anti-enumeration)
         document.getElementById('forgotEmailDisplay').textContent = email;
