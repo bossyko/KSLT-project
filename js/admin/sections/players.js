@@ -2275,7 +2275,7 @@
 
     async function recalcAllPoints() {
         var btn = document.getElementById('ratRecalcAllBtn');
-        if (btn) { btn.disabled = true; btn.textContent = isEn ? 'Recalculating...' : 'Пересчёт...'; }
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#CCFF00;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle"></span> ' + (isEn ? 'Recalculating...' : 'Пересчёт...'); }
         try {
             var res = await A.client.from('players').select('id');
             var ids = (res.data || []).map(function(p) { return p.id; });
@@ -2287,7 +2287,7 @@
         } catch (err) {
             A.showToast(err.message, 'error');
         } finally {
-            if (btn) { btn.disabled = false; btn.textContent = isEn ? 'Recalculate all' : 'Пересчитать все'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = isEn ? 'Recalculate all' : 'Пересчитать все'; }
         }
     }
 

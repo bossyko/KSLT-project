@@ -2081,6 +2081,9 @@ select.ad-field-input {
     color: var(--text-primary, #fff);
     white-space: nowrap;
 }
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
 @keyframes adFloatUp {
     from { opacity: 0; transform: translateX(-50%) translateY(20px); }
     to   { opacity: 1; transform: translateX(-50%) translateY(0); }
