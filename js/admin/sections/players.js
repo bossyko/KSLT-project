@@ -2211,12 +2211,13 @@
         loadTournamentResults(tournamentId);
     }
 
-    function getOldestValidYear() {
+    function getOldestValidDate() {
         var now = new Date();
         var year = now.getFullYear();
-        return now.getMonth() >= 8 ? (year - 1) : (year - 2);
+        var oldest = now.getMonth() >= 8 ? (year - 2) : (year - 3);
+        return oldest + '-09-01';
     }
-    A.getOldestValidYear = getOldestValidYear;
+    A.getOldestValidDate = getOldestValidDate;
 
     async function recalcPlayerPoints(playerIds) {
         var unique = playerIds.filter(function(id, i) { return playerIds.indexOf(id) === i; });
@@ -2252,15 +2253,13 @@
                 return m.winner_id === pid ? 'W' : 'L';
             });
 
-            // Points from rating_history (singles only, 2-year window)
-            var currentYear = new Date().getFullYear();
-            var oldestYear = A.getOldestValidYear();
+            // Points from rating_history (singles only, 2 tournament-year window)
+            var oldestDate = A.getOldestValidDate();
             var rhRes = await A.client.from('rating_history')
                 .select('points_earned')
                 .eq('player_id', pid)
                 .neq('is_doubles', true)
-                .gte('recorded_at', oldestYear + '-01-01')
-                .lte('recorded_at', currentYear + '-12-31');
+                .gte('recorded_at', oldestDate);
             var total = 0;
             (rhRes.data || []).forEach(function(r) {
                 total += r.points_earned || 0;
