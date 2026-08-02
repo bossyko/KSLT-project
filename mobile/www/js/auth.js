@@ -6,6 +6,9 @@
 
   var AUTH = window.KSLT_AUTH = {};
 
+  var _loginAttempts = 0;
+  var _lockoutUntil = 0;
+
   AUTH.currentUser = null;
   AUTH.currentProfile = null;
   AUTH._membershipStatus = false;  // cached membership check
@@ -237,7 +240,7 @@
 
     // Forgot password form
     if (forgotForm) {
-      forgotForm.addEventListener('submit', function(e) {
+      forgotForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         var email = document.getElementById('forgotEmail').value.trim();
         var errEl = document.getElementById('forgotError');
@@ -250,6 +253,23 @@
         successEl.style.display = 'none';
 
         if (!email) return;
+
+        // Server-side rate limit
+        try {
+          var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
+          var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+          var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+            body: JSON.stringify({ action: 'password_reset', key: email })
+          });
+          var rlData = await rlRes.json();
+          if (!rlData.allowed) {
+            errEl.textContent = 'Слишком много попыток. Подождите.';
+            errEl.className = 'auth-error show';
+            return;
+          }
+        } catch (e) { /* fail open */ }
 
         btn.disabled = true;
         btn.textContent = I18N ? I18N.t('common.loading') : 'Loading...';
@@ -278,7 +298,7 @@
     });
 
     // Login
-    loginForm.addEventListener('submit', function(e) {
+    loginForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       var email = document.getElementById('loginEmail').value.trim();
       var pass = document.getElementById('loginPassword').value;
@@ -286,13 +306,43 @@
       errEl.className = 'auth-error';
       errEl.textContent = '';
 
+      // Client-side rate limit
+      if (Date.now() < _lockoutUntil) {
+        errEl.textContent = 'Слишком много попыток. Подождите минуту.';
+        errEl.className = 'auth-error show';
+        return;
+      }
+
+      // Server-side rate limit
+      try {
+        var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
+        var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+        var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({ action: 'login', key: email })
+        });
+        var rlData = await rlRes.json();
+        if (!rlData.allowed) {
+          errEl.textContent = 'Слишком много попыток. Подождите.';
+          errEl.className = 'auth-error show';
+          return;
+        }
+      } catch (e) { /* fail open */ }
+
       AUTH.login(email, pass).then(function(res) {
         if (res.error) {
+          _loginAttempts++;
+          if (_loginAttempts >= 5) {
+            _lockoutUntil = Date.now() + 60000;
+            _loginAttempts = 0;
+          }
           errEl.textContent = res.error.message === 'Invalid login credentials'
             ? 'Неверный email или пароль' : res.error.message;
           errEl.className = 'auth-error show';
           return;
         }
+        _loginAttempts = 0;
         AUTH.currentUser = res.data.user;
         localStorage.setItem('kslt_session_start', Date.now().toString());
         localStorage.setItem('kslt_last_activity', Date.now().toString());
@@ -307,7 +357,7 @@
     });
 
     // Register
-    regForm.addEventListener('submit', function(e) {
+    regForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       var name = document.getElementById('regName').value.trim();
       var email = document.getElementById('regEmail').value.trim();
@@ -321,6 +371,23 @@
         errEl.className = 'auth-error show';
         return;
       }
+
+      // Server-side rate limit
+      try {
+        var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
+        var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+        var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({ action: 'signup', key: email })
+        });
+        var rlData = await rlRes.json();
+        if (!rlData.allowed) {
+          errEl.textContent = 'Слишком много попыток. Подождите.';
+          errEl.className = 'auth-error show';
+          return;
+        }
+      } catch (e) { /* fail open */ }
 
       AUTH.register(email, pass, name).then(function(res) {
         if (res.error) {
@@ -405,6 +472,112 @@
       });
     }
 
+    // --- Telegram Registration Modal ---
+    var _pendingTgData = null;
+    var tgRegOverlay = document.getElementById('tgRegOverlay');
+    var tgRegClose = document.getElementById('tgRegClose');
+    var tgRegForm = document.getElementById('tgRegForm');
+    var tgRegNameInput = document.getElementById('tgRegName');
+    var tgRegEmailInput = document.getElementById('tgRegEmail');
+    var tgRegError = document.getElementById('tgRegError');
+    var tgRegSubtitle = document.getElementById('tgRegSubtitle');
+
+    function showTgRegModal(tgData) {
+      _pendingTgData = tgData;
+      var tgName = ((tgData.first_name || '') + ' ' + (tgData.last_name || '')).trim();
+      tgRegNameInput.value = tgName || '';
+      tgRegNameInput.placeholder = tgName || 'Иван Иванов';
+      tgRegEmailInput.value = '';
+      tgRegError.className = 'auth-error';
+      tgRegError.textContent = '';
+      tgRegSubtitle.textContent = tgData.username ? '@' + tgData.username : '';
+      tgRegOverlay.classList.add('open');
+    }
+
+    function hideTgRegModal() {
+      tgRegOverlay.classList.remove('open');
+      _pendingTgData = null;
+    }
+
+    if (tgRegClose) tgRegClose.addEventListener('click', hideTgRegModal);
+    if (tgRegOverlay) tgRegOverlay.addEventListener('click', function(e) {
+      if (e.target === tgRegOverlay) hideTgRegModal();
+    });
+
+    if (tgRegForm) {
+      tgRegForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!_pendingTgData) return;
+
+        var fullName = tgRegNameInput.value.trim();
+        var email = tgRegEmailInput.value.trim().toLowerCase();
+        tgRegError.className = 'auth-error';
+        tgRegError.textContent = '';
+
+        if (!fullName) {
+          tgRegError.textContent = 'Введите полное имя';
+          tgRegError.className = 'auth-error show';
+          return;
+        }
+        if (!email) {
+          tgRegError.textContent = 'Введите email';
+          tgRegError.className = 'auth-error show';
+          return;
+        }
+
+        var submitBtn = tgRegForm.querySelector('.auth-submit');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Создание...';
+
+        AUTH.telegramAuth('register', _pendingTgData, {
+          email: email,
+          full_name: fullName,
+          gender: '',
+          birth_day: null,
+          birth_month: null,
+          birth_year: null
+        }).then(function(regData) {
+          if (regData.error === 'email_taken') {
+            tgRegError.textContent = 'Этот email уже зарегистрирован. Войдите и привяжите Telegram.';
+            tgRegError.className = 'auth-error show';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Создать аккаунт';
+            return;
+          }
+          if (regData.error) {
+            tgRegError.textContent = regData.error;
+            tgRegError.className = 'auth-error show';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Создать аккаунт';
+            return;
+          }
+          if (regData.status === 'ok' && regData.hashed_token) {
+            AUTH.verifyTelegramOtp(regData.email, regData.hashed_token).then(function(otpRes) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Создать аккаунт';
+              if (otpRes.error) {
+                tgRegError.textContent = 'Ошибка авторизации. Попробуйте ещё раз.';
+                tgRegError.className = 'auth-error show';
+                return;
+              }
+              AUTH.currentUser = otpRes.data.user;
+              localStorage.setItem('kslt_session_start', Date.now().toString());
+              localStorage.setItem('kslt_last_activity', Date.now().toString());
+              try { checkDeviceFingerprint(otpRes.data.user.id); } catch(ex) {}
+              AUTH.loadProfile(otpRes.data.user.id).then(function() {
+                hideTgRegModal();
+                authScreen.classList.remove('open');
+                if (window.KSLT_APP && window.KSLT_APP.onAuthChange) window.KSLT_APP.onAuthChange();
+              });
+            });
+          } else {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Создать аккаунт';
+          }
+        });
+      });
+    }
+
     // Global TG auth callback for mobile
     window._onMobileTgAuth = function(tgUser) {
       var tgData = {
@@ -421,30 +594,7 @@
 
       AUTH.telegramAuth('login', tgData).then(function(data) {
         if (data.status === 'new_user') {
-          // For mobile: show a simple prompt for email (simplified flow)
-          var email = prompt('Enter your email to complete registration:');
-          if (!email) return;
-
-          AUTH.telegramAuth('register', tgData, { email: email, gender: '', birth_day: null, birth_month: null, birth_year: null }).then(function(regData) {
-            if (regData.error === 'email_taken') {
-              var errEl = document.getElementById('loginError');
-              if (errEl) { errEl.textContent = 'Email already registered. Sign in and link Telegram.'; errEl.className = 'auth-error show'; }
-              return;
-            }
-            if (regData.status === 'ok' && regData.hashed_token) {
-              AUTH.verifyTelegramOtp(regData.email, regData.hashed_token).then(function(otpRes) {
-                if (otpRes.error) return;
-                AUTH.currentUser = otpRes.data.user;
-                localStorage.setItem('kslt_session_start', Date.now().toString());
-                localStorage.setItem('kslt_last_activity', Date.now().toString());
-                try { checkDeviceFingerprint(otpRes.data.user.id); } catch(e) {}
-                AUTH.loadProfile(otpRes.data.user.id).then(function() {
-                  authScreen.classList.remove('open');
-                  if (window.KSLT_APP && window.KSLT_APP.onAuthChange) window.KSLT_APP.onAuthChange();
-                });
-              });
-            }
-          });
+          showTgRegModal(tgData);
           return;
         }
 

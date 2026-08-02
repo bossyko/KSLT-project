@@ -2774,6 +2774,50 @@ a, button, [role="button"] {
 }
 .auth-error.show { display: block; }
 
+/* ===== TELEGRAM REG MODAL ===== */
+.tg-reg-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 600;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: all 0.25s;
+}
+.tg-reg-overlay.open { opacity: 1; visibility: visible; }
+.tg-reg-modal {
+  width: 90%; max-width: 340px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid var(--border);
+  padding: 24px 20px;
+  position: relative;
+  transform: scale(0.9);
+  transition: transform 0.25s;
+}
+.tg-reg-overlay.open .tg-reg-modal { transform: scale(1); }
+.tg-reg-close {
+  position: absolute; top: 12px; right: 12px;
+  background: none; border: none;
+  color: var(--text-muted); font-size: 24px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.tg-reg-title {
+  font-size: 18px; font-weight: 700;
+  color: var(--text); margin: 0 0 4px; text-align: center;
+}
+.tg-reg-subtitle {
+  font-size: 13px; color: var(--text-sec);
+  margin: 0 0 20px; text-align: center;
+}
+.tg-reg-modal .auth-field { margin-bottom: 12px; }
+.tg-reg-modal .auth-label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--text-sec); margin-bottom: 6px;
+}
+.tg-reg-modal .auth-submit { margin-top: 8px; }
+
 /* ===== LOADING SPINNER ===== */
 .spinner {
   width: 24px;

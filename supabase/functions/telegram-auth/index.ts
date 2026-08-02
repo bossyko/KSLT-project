@@ -172,6 +172,7 @@ Deno.serve(async (req) => {
   // ============================================
   if (action === 'register') {
     const email = (body.email as string || '').trim().toLowerCase()
+    const fullName = (body.full_name as string) || ''
     const gender = (body.gender as string) || ''
     const birthDay = body.birth_day as number | null
     const birthMonth = body.birth_month as number | null
@@ -197,7 +198,7 @@ Deno.serve(async (req) => {
       password: randomPassword,
       email_confirm: true,
       user_metadata: {
-        full_name: tgFullName || tgUsername,
+        full_name: fullName || tgFullName || tgUsername,
         gender: gender,
         birth_day: birthDay,
         birth_month: birthMonth,
