@@ -4998,6 +4998,13 @@ h2 {
     transition: all var(--transition-fast);
 }
 
+.auth-social-btn .google-icon {
+    filter: grayscale(1) brightness(0.8);
+    transition: filter var(--transition-fast);
+}
+.auth-social-btn:hover .google-icon {
+    filter: none;
+}
 .auth-social-btn:hover {
     background: var(--surface-glass-hover);
     border-color: var(--border-light);
