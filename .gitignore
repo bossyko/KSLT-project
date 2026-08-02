@@ -11,6 +11,9 @@ coverage/
 .idea/
 .claude/
 
+# Secrets (Firebase, API keys)
+secrets/
+
 # Backups
 *.bak
 

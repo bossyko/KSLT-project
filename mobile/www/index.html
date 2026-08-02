@@ -436,6 +436,27 @@
   <div class="auth-footer">
     Регистрируясь, вы соглашаетесь с<br><a href="https://kslt.kg/pages/terms.html" target="_blank">условиями использования</a> и <a href="https://kslt.kg/pages/privacy-policy.html" target="_blank">политикой конфиденциальности</a>
   </div>
+
+  <!-- Telegram Registration Modal -->
+  <div class="tg-reg-overlay" id="tgRegOverlay">
+    <div class="tg-reg-modal">
+      <button type="button" class="tg-reg-close" id="tgRegClose">&times;</button>
+      <h3 class="tg-reg-title">Завершите регистрацию</h3>
+      <p class="tg-reg-subtitle" id="tgRegSubtitle"></p>
+      <form id="tgRegForm">
+        <div class="auth-field">
+          <label class="auth-label">Полное имя <span style="color:var(--red)">*</span></label>
+          <input class="auth-input" type="text" id="tgRegName" placeholder="Иван Иванов" required>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Email <span style="color:var(--red)">*</span></label>
+          <input class="auth-input" type="email" id="tgRegEmail" placeholder="you@example.com" required>
+        </div>
+        <div class="auth-error" id="tgRegError"></div>
+        <button type="submit" class="auth-submit">Создать аккаунт</button>
+      </form>
+    </div>
+  </div>
 </div>
 
 <!-- Tournament Detail Overlay -->
