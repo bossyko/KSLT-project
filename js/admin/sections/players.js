@@ -272,7 +272,7 @@
         var isAdm = A.currentRole === 'admin';
 
         var query = A.client.from('players')
-            .select('id,name,photo,country,category_id,points,doubles_points,wins,losses,rank_change,banned_until,view_count')
+            .select('id,name,photo,country,category_id,points,wins,losses,rank_change,banned_until,view_count')
             .order('points', { ascending: false });
 
         if (plrFilterCategory) {
@@ -536,7 +536,7 @@
                 '</div>' +
             '</div>' +
 
-            // Doubles Rating (readonly by default)
+            // Парный и микст — только статистика игр, очков нет
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title" style="display:flex;align-items:center;gap:8px;">' +
                     L.plrDoublesTitle +
@@ -546,11 +546,7 @@
                     ) : '') +
                 '</div>' +
                 '<div class="ad-field-hint" style="margin-bottom:8px;">' + L.plrRecalcHint + '</div>' +
-                '<div class="ad-field-row ad-field-row-4">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.plrPoints + '</label>' +
-                        '<input type="number" class="ad-field-input ad-plr-doubles-field" id="adPlrDoublesPoints" min="0" value="' + (item ? (item.doubles_points || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
-                    '</div>' +
+                '<div class="ad-field-row">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrWins + '</label>' +
                         '<input type="number" class="ad-field-input ad-plr-doubles-field" id="adPlrDoublesWins" min="0" value="' + (item ? (item.doubles_wins || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
@@ -558,10 +554,6 @@
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrLosses + '</label>' +
                         '<input type="number" class="ad-field-input ad-plr-doubles-field" id="adPlrDoublesLosses" min="0" value="' + (item ? (item.doubles_losses || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.plrRankChange + '</label>' +
-                        '<input type="number" class="ad-field-input ad-plr-doubles-field" id="adPlrDoublesRankChange" value="' + (item ? (item.doubles_rank_change || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -793,12 +785,10 @@
             recalcDoublesBtn.addEventListener('click', async function() {
                 recalcDoublesBtn.disabled = true;
                 await A.recalcDoublesPoints([plrEditingId]);
-                var fresh = await A.client.from('players').select('doubles_points,doubles_wins,doubles_losses').eq('id', plrEditingId).single();
+                var fresh = await A.client.from('players').select('doubles_wins,doubles_losses').eq('id', plrEditingId).single();
                 if (fresh.data) {
-                    var df = document.getElementById('adPlrDoublesPoints');
                     var dwf = document.getElementById('adPlrDoublesWins');
                     var dlf = document.getElementById('adPlrDoublesLosses');
-                    if (df) df.value = fresh.data.doubles_points || 0;
                     if (dwf) dwf.value = fresh.data.doubles_wins || 0;
                     if (dlf) dlf.value = fresh.data.doubles_losses || 0;
                 }
@@ -1114,10 +1104,9 @@
                 bio_en: document.getElementById('adPlrMottoEn').value.trim() || null,
                 bio_kg: document.getElementById('adPlrMottoKg').value.trim() || null,
                 ntrp_rating: parseFloat(document.getElementById('adPlrNtrp').value) || null,
-                doubles_points: parseInt(document.getElementById('adPlrDoublesPoints').value, 10) || 0,
+
                 doubles_wins: parseInt(document.getElementById('adPlrDoublesWins').value, 10) || 0,
-                doubles_losses: parseInt(document.getElementById('adPlrDoublesLosses').value, 10) || 0,
-                doubles_rank_change: parseInt(document.getElementById('adPlrDoublesRankChange').value, 10) || 0
+                doubles_losses: parseInt(document.getElementById('adPlrDoublesLosses').value, 10) || 0
             };
 
             if (!fnRu) {

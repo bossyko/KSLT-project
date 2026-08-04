@@ -13,7 +13,6 @@
   var currentGender = 'men';
   var currentCatId = 'promasters';
   var currentSearch = '';
-  var currentRatingType = 'singles';
   var GUEST_VISIBLE = 5;
   var GUEST_BLUR = 3;
   var listenersReady = false;
@@ -22,12 +21,6 @@
   var GENDERS = [
     { key: 'men', label: function() { return I18N.t('rating.men'); } },
     { key: 'women', label: function() { return I18N.t('rating.women'); } }
-  ];
-
-  // Type options
-  var TYPES = [
-    { key: 'singles', label: function() { return I18N.t('rating.singles'); } },
-    { key: 'doubles', label: function() { return I18N.t('rating.doubles'); } }
   ];
 
   R.load = function() {
@@ -104,15 +97,6 @@
     });
 
     // Type toggle pills
-    document.querySelectorAll('.rating-toggle-btn[data-type]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        currentRatingType = btn.getAttribute('data-type');
-        document.querySelectorAll('.rating-toggle-btn[data-type]').forEach(function(b) {
-          b.classList.toggle('active', b === btn);
-        });
-        loadPlayers();
-      });
-    });
   }
 
   function getCatLabel(cat) {
@@ -152,7 +136,7 @@
     if (!el) return;
     el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
-    var orderField = currentRatingType === 'doubles' ? 'doubles_points' : 'points';
+    var orderField = 'points';
 
     supabaseClient.from('players')
       .select('*')
@@ -162,9 +146,6 @@
       .then(function(r) {
         if (r.error) console.error('Rating load error:', r.error);
         allPlayers = r.data || [];
-        if (currentRatingType === 'doubles') {
-          allPlayers = allPlayers.filter(function(p) { return (p.doubles_points || 0) > 0; });
-        }
         renderSubtitle();
         renderPodium();
         render();
@@ -194,7 +175,7 @@
     var medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
     var order = [1, 0, 2]; // 2nd, 1st, 3rd
     var sizeClass = ['rp-second', 'rp-first', 'rp-third'];
-    var pts = currentRatingType === 'doubles' ? 'doubles_points' : 'points';
+    var pts = 'points';
 
     var html = '<div class="rating-podium">';
     for (var oi = 0; oi < order.length; oi++) {
@@ -235,7 +216,7 @@
 
     var isGuest = !(window.KSLT_AUTH && window.KSLT_AUTH.currentUser);
     var visibleCount = isGuest ? Math.min(GUEST_VISIBLE + GUEST_BLUR, displayPlayers.length) : displayPlayers.length;
-    var pts = currentRatingType === 'doubles' ? 'doubles_points' : 'points';
+    var pts = 'points';
 
     var html = '<div class="rating-table">';
     html += '<div class="rating-table-head">' +

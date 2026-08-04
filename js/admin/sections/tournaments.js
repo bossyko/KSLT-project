@@ -744,7 +744,7 @@
                             '<option value="mixed_doubles"' + A.sel(item, 'format', 'mixed_doubles') + '>' + L.formatMixedDoubles + '</option>' +
                         '</select>' +
                     '</div>' +
-                    '<div class="ad-field">' +
+                    '<div class="ad-field" id="adTrnLevelWrap">' +
                         '<label class="ad-field-label">' + L.ratTournamentLevel + '</label>' +
                         '<select class="ad-field-input" id="adTrnLevel">' + trnLevelOptionsHtml + '</select>' +
                     '</div>' +
@@ -1018,8 +1018,17 @@
         // + auto-hide Gender when Mixed Doubles (gender = 'mixed' auto)
         function toggleFormatDependentFields() {
             var fmt = document.getElementById('adTrnFormat').value;
+            var isDbl = fmt === 'doubles' || fmt === 'mixed_doubles';
+
             var wrap = document.getElementById('adTrnNtrpCombinedWrap');
-            if (wrap) wrap.style.display = (fmt === 'doubles' || fmt === 'mixed_doubles') ? '' : 'none';
+            if (wrap) wrap.style.display = isDbl ? '' : 'none';
+
+            // Уровень турнира задаёт таблицу очков. Парные и микст очков не дают,
+            // поэтому поле для них не нужно и значение сбрасывается.
+            var lvlWrap = document.getElementById('adTrnLevelWrap');
+            var lvlField = document.getElementById('adTrnLevel');
+            if (lvlWrap) lvlWrap.style.display = isDbl ? 'none' : '';
+            if (isDbl && lvlField) lvlField.value = '';
 
             // Update max participants label: "Макс. участников" ↔ "Макс. пар"
             var maxPartLabel = document.getElementById('adTrnMaxPartLabel');

@@ -497,19 +497,16 @@
         html += '</div></div>';
         html += '</div>'; // .pp-stats singles
 
-        // ---- Doubles Stats (always shown) ----
-        var doublesTitle = isEn ? 'Doubles Rating' : (isKg ? 'Жуптук рейтинг' : 'Парный рейтинг');
+        // ---- Парный разряд: только статистика игр ----
+        // Очки за парные и микст турниры не начисляются, поэтому здесь
+        // нет ни очков, ни изменения места — только сыгранное.
+        var doublesTitle = isEn ? 'Doubles & Mixed' : (isKg ? 'Жуптук жана аралаш' : 'Парный и микст');
         html += '<h3 class="pp-section-title pp-fade-in">' + doublesTitle + '</h3>';
         html += '<div class="pp-stats pp-stats-doubles pp-fade-in">';
-        var dblChange = player.doubles_rank_change || 0;
-        var dblChangeText = dblChange > 0 ? '+' + dblChange : (dblChange < 0 ? '' + dblChange : '\u2014');
-        var dblChangeClass = dblChange > 0 ? 'up' : (dblChange < 0 ? 'down' : 'neutral');
-        var dblPts = player.doubles_points || 0;
         var dblW = player.doubles_wins || 0;
         var dblL = player.doubles_losses || 0;
         var dblTotal = dblW + dblL;
         var dblWinRate = dblTotal > 0 ? Math.round(dblW / dblTotal * 100) : 0;
-        html += statCard(dblPts || '\u2014', L.statsPoints, dblPts ? dblChangeText : '', dblPts ? dblChangeClass : '');
         html += statCard(dblTotal > 0 ? dblW : '\u2014', L.statsWins, '', '');
         html += statCard(dblTotal > 0 ? dblL : '\u2014', L.statsLosses, '', '');
         html += statCard(dblTotal > 0 ? dblWinRate + '%' : '\u2014', L.statsWinRate, '', '');
@@ -1465,10 +1462,8 @@
                             badges: [],
                             online: false,
                             ntrp_rating: p.ntrp_rating || null,
-                            doubles_points: p.doubles_points || 0,
                             doubles_wins: p.doubles_wins || 0,
                             doubles_losses: p.doubles_losses || 0,
-                            doubles_rank_change: p.doubles_rank_change || 0,
                             doubles_form: p.doubles_form || [],
                             bio: p.bio || '',
                             bio_en: p.bio_en || '',
