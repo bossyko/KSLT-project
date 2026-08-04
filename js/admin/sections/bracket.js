@@ -711,6 +711,11 @@
         // Build tabs
         var activeTab = forceTab || (isTournamentCompleted ? 'results' : (hasMatches ? 'bracket' : 'registrations'));
 
+        // Friendly: вкладки «Результаты» нет — очки не начисляются, там одни нули.
+        // Завершённый дружеский турнир открываем на сетке, а не на скрытой вкладке.
+        var isFriendly = isFriendlyTournament(tournament);
+        if (isFriendly && activeTab === 'results') activeTab = hasMatches ? 'bracket' : 'registrations';
+
         // Determine which nav tab is active
         var navActive = (activeTab === 'registrations') ? 'regs' :
                         (activeTab === 'schedule') ? 'schedule' :
@@ -730,7 +735,7 @@
             '</button>' +
             '<button class="ad-tab' + (navActive === 'bracket' ? ' active' : '') + '" data-trn-nav="bracket">' + (tournament.bracket_type === 'round_robin' || tournament.bracket_type === 'group_league' ? L.groupLabel : L.trnTabBracket) + '</button>' +
             '<button class="ad-tab' + (navActive === 'schedule' ? ' active' : '') + '" data-trn-nav="schedule">' + L.trnTabSchedule + '</button>' +
-            '<button class="ad-tab' + (navActive === 'points' ? ' active' : '') + '" data-trn-nav="points">' + L.trnTabPoints + '</button>' +
+            (isFriendly ? '' : '<button class="ad-tab' + (navActive === 'points' ? ' active' : '') + '" data-trn-nav="points">' + L.trnTabPoints + '</button>') +
             (isTournamentCompleted ? '<button class="ad-tab' + (navActive === 'news' ? ' active' : '') + '" data-trn-nav="news">📰 ' + L.trnTabNews + '</button>' : '') +
             '</div>' +
         '</div>'; // /ad-brk-sticky-header
@@ -6344,7 +6349,8 @@
 
             // Load points rules for this tournament's level
             var rulesMap = {};
-            if (tournament.level_id) {
+            // Friendly очков не даёт — правила не грузим, считать нечего
+            if (tournament.level_id && !isFriendlyTournament(tournament)) {
                 var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
                 (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
             }
@@ -6496,7 +6502,8 @@
 
             // Load points rules
             var rulesMap = {};
-            if (tournament.level_id) {
+            // Friendly очков не даёт — правила не грузим, считать нечего
+            if (tournament.level_id && !isFriendlyTournament(tournament)) {
                 var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
                 (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
             }
@@ -6646,7 +6653,8 @@
 
             // Load points rules
             var rulesMap = {};
-            if (tournament.level_id) {
+            // Friendly очков не даёт — правила не грузим, считать нечего
+            if (tournament.level_id && !isFriendlyTournament(tournament)) {
                 var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
                 (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
             }
@@ -7663,7 +7671,8 @@
 
             // Load points rules
             var rulesMap = {};
-            if (tournament.level_id) {
+            // Friendly очков не даёт — правила не грузим, считать нечего
+            if (tournament.level_id && !isFriendlyTournament(tournament)) {
                 var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
                 (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
             }
