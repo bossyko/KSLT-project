@@ -577,6 +577,9 @@
                 '</div>';
         }
 
+        // OTP block info (check async, inject later)
+        var otpBlockId = 'adOtpBlock_' + user.id;
+
         // Profile editable for admin and manager
         var profileReadonly = !canManageMembership ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '';
 
@@ -645,8 +648,60 @@
                 // Player category + NTRP
                 playerCatHtml +
                 // Ban info + Actions (single row)
+                '<div id="' + otpBlockId + '"></div>' +
                 (actionsHtml ? '<div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">' + banInfoHtml + actionsHtml + '</div>' : '') +
             '</div>';
+
+        // ---- OTP block check (async) ----
+        if (canModerate) {
+            (async function() {
+                try {
+                    var identifier = user.email || '';
+                    var { data: blocks } = await A.db.from('otp_blocks')
+                        .select('*')
+                        .like('block_key', identifier + ':%')
+                        .order('updated_at', { ascending: false })
+                        .limit(1);
+
+                    var el = document.getElementById(otpBlockId);
+                    if (!el) return;
+
+                    if (blocks && blocks.length > 0) {
+                        var b = blocks[0];
+                        var isBlocked = b.blocked_until && new Date(b.blocked_until) > new Date() && !b.admin_unblocked;
+                        var escalLabels = ['15 мин', '1 час', '24 часа'];
+                        var statusText = isBlocked
+                            ? (isEn ? 'OTP blocked' : 'OTP заблокирован') + ' (' + escalLabels[b.escalation || 0] + ')'
+                            : (isEn ? 'OTP: no block' : 'OTP: нет блокировки');
+                        var statusColor = isBlocked ? '#ff3b30' : '#34c759';
+
+                        el.innerHTML =
+                            '<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">' +
+                                '<span style="font-size:0.85rem;color:' + statusColor + ';">' + statusText + '</span>' +
+                                (isBlocked
+                                    ? '<button class="ad-btn ad-btn-secondary" id="adUnblockOtp" style="margin-left:auto;font-size:0.8rem;padding:4px 12px;">' + (isEn ? 'Unblock OTP' : 'Разблокировать OTP') + '</button>'
+                                    : '') +
+                            '</div>';
+
+                        if (isBlocked) {
+                            document.getElementById('adUnblockOtp').addEventListener('click', async function() {
+                                this.disabled = true;
+                                this.textContent = '...';
+                                try {
+                                    await A.adminAction('unblock_otp', { user_id: user.id });
+                                    A.toast(isEn ? 'OTP unblocked' : 'OTP разблокирован');
+                                    el.innerHTML = '<div style="margin-top:12px;font-size:0.85rem;color:#34c759;">' + (isEn ? 'OTP: unblocked' : 'OTP: разблокирован') + '</div>';
+                                } catch (e) {
+                                    A.toast(isEn ? 'Error' : 'Ошибка', 'error');
+                                    this.disabled = false;
+                                    this.textContent = isEn ? 'Unblock OTP' : 'Разблокировать OTP';
+                                }
+                            });
+                        }
+                    }
+                } catch (e) { /* otp_blocks table may not exist yet */ }
+            })();
+        }
 
         // ---- Event listeners ----
 
@@ -1030,8 +1085,17 @@
             if (suffix > 20) break; // safety
         }
 
-        // Map profile gender to player gender (male→men, female→women)
-        var playerGender = user.gender === 'female' ? 'women' : 'men';
+        // Пол переносим из профиля (male→men, female→women).
+        // Раньше при пустом поле молча ставился мужской, и женщины без
+        // указанного пола попадали в мужской рейтинг. Лучше не создавать
+        // карточку вовсе, чем создать с неверным полом.
+        var playerGender = user.gender === 'male' ? 'men' : (user.gender === 'female' ? 'women' : null);
+        if (!playerGender) {
+            A.showToast(isEn
+                ? 'Set the gender in the user profile first — the rating is kept separately for men and women'
+                : 'Сначала укажите пол в профиле пользователя — рейтинг ведётся раздельно для мужчин и женщин', 'error');
+            return;
+        }
 
         var insertRes = await A.client.from('players').insert({
             id: finalId,
