@@ -2211,10 +2211,18 @@
         loadTournamentResults(tournamentId);
     }
 
+    /**
+     * Самая ранняя дата, очки за которую ещё считаются.
+     * Теннисный год: 1 сентября — 31 августа. В рейтинге живут два года —
+     * текущий и предыдущий. 1 сентября сгорает год, закончившийся в августе
+     * предыдущего календарного года.
+     *   после 1 сентября:  отсечка = 1 сентября (год - 1)
+     *   до 1 сентября:     отсечка = 1 сентября (год - 2)
+     */
     function getOldestValidDate() {
         var now = new Date();
         var year = now.getFullYear();
-        var oldest = now.getMonth() >= 8 ? (year - 2) : (year - 3);
+        var oldest = now.getMonth() >= 8 ? (year - 1) : (year - 2);
         return oldest + '-09-01';
     }
     A.getOldestValidDate = getOldestValidDate;
