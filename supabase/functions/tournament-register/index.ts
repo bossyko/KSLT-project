@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
 
     const { data: player } = await db
       .from('players')
-      .select('id, name, category_id, gender, points, doubles_points, ntrp_rating, banned_until')
+      .select('id, name, category_id, gender, points, ntrp_rating, banned_until')
       .eq('id', profile.player_id)
       .single()
 

@@ -79,11 +79,11 @@
     function getTeamPoints(reg, playersMap) {
         var captainPts = 0;
         if (reg.player_id && playersMap[reg.player_id]) {
-            captainPts = playersMap[reg.player_id].doubles_points || playersMap[reg.player_id].points || 0;
+            captainPts = playersMap[reg.player_id].points || 0;
         }
         var partnerPts = 0;
         if (reg.partner_id && playersMap[reg.partner_id]) {
-            partnerPts = playersMap[reg.partner_id].doubles_points || playersMap[reg.partner_id].points || 0;
+            partnerPts = playersMap[reg.partner_id].points || 0;
         }
         return captainPts + partnerPts;
     }
@@ -520,9 +520,17 @@
         return !!(tournament && tournament.category_id === 'friendly');
     }
 
-    // Обнуляет очки в результатах дружеского турнира (сами результаты сохраняются)
+    // Рейтинг ведётся только в одиночном разряде. Парные и микст турниры
+    // играются и попадают в историю игр, но очков не дают.
+    function isUnrankedTournament(tournament) {
+        if (!tournament) return false;
+        if (isFriendlyTournament(tournament)) return true;
+        return tournament.format === 'doubles' || tournament.format === 'mixed_doubles';
+    }
+
+    // Обнуляет очки в результатах турнира без рейтинга (сами результаты сохраняются)
     function stripFriendlyPoints(tournament, rows) {
-        if (isFriendlyTournament(tournament)) {
+        if (isUnrankedTournament(tournament)) {
             (rows || []).forEach(function(r) { r.points_earned = 0; });
         }
         return rows;
@@ -533,10 +541,10 @@
         // Delete old entries for this tournament (re-finalization safe)
         await A.client.from('rating_history').delete().eq('tournament_id', tournament.id);
 
-        // Friendly в рейтинг не попадает вообще
-        if (isFriendlyTournament(tournament)) {
-            A.showToast(isEn ? 'Friendly tournament — no rating points awarded'
-                             : 'Friendly — рейтинговые очки не начисляются', 'success');
+        // Турниры без рейтинга — Friendly, парные и микст — в рейтинг не попадают
+        if (isUnrankedTournament(tournament)) {
+            A.showToast(isEn ? 'No rating points awarded for this tournament'
+                             : 'Рейтинговые очки за этот турнир не начисляются', 'success');
             return;
         }
 
@@ -636,7 +644,7 @@
 
         var playersMap = {};
         if (playerIds.length > 0) {
-            var plRes = await A.client.from('players').select('id, name, name_en, points, doubles_points, category_id, gender, ntrp_rating').in('id', playerIds);
+            var plRes = await A.client.from('players').select('id, name, name_en, points, category_id, gender, ntrp_rating').in('id', playerIds);
             (plRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
 
             // Compute rank within category: load all players for relevant categories
@@ -6392,7 +6400,7 @@
             // Load points rules for this tournament's level
             var rulesMap = {};
             // Friendly очков не даёт — правила не грузим, считать нечего
-            if (tournament.level_id && !isFriendlyTournament(tournament)) {
+            if (tournament.level_id && !isUnrankedTournament(tournament)) {
                 var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
                 (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
             }
@@ -6545,7 +6553,7 @@
             // Load points rules
             var rulesMap = {};
             // Friendly очков не даёт — правила не грузим, считать нечего
-            if (tournament.level_id && !isFriendlyTournament(tournament)) {
+            if (tournament.level_id && !isUnrankedTournament(tournament)) {
                 var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
                 (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
             }
@@ -6696,7 +6704,7 @@
             // Load points rules
             var rulesMap = {};
             // Friendly очков не даёт — правила не грузим, считать нечего
-            if (tournament.level_id && !isFriendlyTournament(tournament)) {
+            if (tournament.level_id && !isUnrankedTournament(tournament)) {
                 var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
                 (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
             }
@@ -7714,7 +7722,7 @@
             // Load points rules
             var rulesMap = {};
             // Friendly очков не даёт — правила не грузим, считать нечего
-            if (tournament.level_id && !isFriendlyTournament(tournament)) {
+            if (tournament.level_id && !isUnrankedTournament(tournament)) {
                 var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
                 (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
             }
