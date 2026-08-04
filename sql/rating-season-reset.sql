@@ -8,12 +8,21 @@
 --
 -- После 1 сентября: отсечка = (Y-1)-09-01
 -- До  1 сентября:   отсечка = (Y-2)-09-01
+--
+-- Обновляем игроков по одному в цикле, а не одним UPDATE на всю таблицу.
+-- В базе включена защита от UPDATE без WHERE, а условие вида
+-- «id IS NOT NULL» планировщик выбрасывает, потому что id — первичный ключ,
+-- и защита снова видит запрос без условия. В цикле у каждого обновления
+-- есть настоящее WHERE id = ..., и вопрос снимается.
 
 CREATE OR REPLACE FUNCTION recalc_all_player_points()
 RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
   oldest_date DATE;
   cur_year INT;
+  rec RECORD;
+  singles INT;
+  doubles INT;
 BEGIN
   cur_year := EXTRACT(YEAR FROM NOW());
   IF EXTRACT(MONTH FROM NOW()) >= 9 THEN
@@ -22,27 +31,26 @@ BEGIN
     oldest_date := make_date(cur_year - 2, 9, 1);
   END IF;
 
-  -- Singles points
-  UPDATE players p SET points = COALESCE((
-    SELECT SUM(rh.points_earned) FROM rating_history rh
-    WHERE rh.player_id = p.id
-      AND (rh.is_doubles IS NOT TRUE)
-      AND rh.recorded_at >= oldest_date
-  ), 0);
+  FOR rec IN SELECT id FROM players LOOP
+    SELECT COALESCE(SUM(points_earned), 0) INTO singles
+    FROM rating_history
+    WHERE player_id = rec.id
+      AND (is_doubles IS NOT TRUE)
+      AND recorded_at >= oldest_date;
 
-  -- Doubles points
-  UPDATE players p SET doubles_points = COALESCE((
-    SELECT SUM(rh.points_earned) FROM rating_history rh
-    WHERE rh.player_id = p.id
-      AND rh.is_doubles = TRUE
-      AND rh.recorded_at >= oldest_date
-  ), 0);
+    SELECT COALESCE(SUM(points_earned), 0) INTO doubles
+    FROM rating_history
+    WHERE player_id = rec.id
+      AND is_doubles = TRUE
+      AND recorded_at >= oldest_date;
+
+    UPDATE players
+    SET points = singles, doubles_points = doubles
+    WHERE id = rec.id;
+  END LOOP;
 END;
 $$;
 
--- pg_cron: auto-run on September 1 every year at midnight
-SELECT cron.schedule(
-  'yearly-rating-reset',
-  '0 0 1 9 *',
-  'SELECT recalc_all_player_points()'
-);
+-- Автозапуск 1 сентября снят: смену сезона проводит Edge Function season-reset,
+-- она снимает состояние до пересчёта, вызывает эту функцию, снимает после
+-- и рассылает уведомления. См. sql/season-reset-migration.sql
