@@ -502,7 +502,14 @@
                         '<input type="text" class="ad-field-input" id="adPlrCountryInput" placeholder="' + L.plrCountrySearch + '" autocomplete="off" value="' + A.esc(item && item.country ? CU.renderCountry(item.country, isEn ? 'en' : 'ru', true) : '') + '">' +
                         '<div class="ad-dropdown-list" id="adPlrCountryDropdown" style="display:none;"></div>' +
                     '</div>' +
-                    '<div class="ad-field"></div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrGender + ' *</label>' +
+                        '<select class="ad-field-input" id="adPlrGender">' +
+                            '<option value="">' + L.plrGenderPick + '</option>' +
+                            '<option value="men"' + (item && item.gender === 'men' ? ' selected' : '') + '>\u2642 ' + L.genderMen + '</option>' +
+                            '<option value="women"' + (item && item.gender === 'women' ? ' selected' : '') + '>\u2640 ' + L.genderWomen + '</option>' +
+                        '</select>' +
+                    '</div>' +
                 '</div>' +
             '</div>' +
 
@@ -1095,6 +1102,7 @@
                 photo: imageUrl || null,
                 country: document.getElementById('adPlrCountry').value.trim() || null,
                 category_id: document.getElementById('adPlrCat').value || null,
+                gender: document.getElementById('adPlrGender').value || null,
                 points: parseInt(document.getElementById('adPlrPoints').value, 10) || 0,
                 wins: parseInt(document.getElementById('adPlrWins').value, 10) || 0,
                 losses: parseInt(document.getElementById('adPlrLosses').value, 10) || 0,
@@ -1111,6 +1119,15 @@
 
             if (!fnRu) {
                 A.showToast(isEn ? 'First name is required' : 'Имя обязательно', 'error');
+                saveBtn.disabled = false;
+                saveBtn.textContent = L.save;
+                return;
+            }
+
+            // Без пола игрок не попадёт в рейтинг: мужской и женский считаются
+            // раздельно, и карточка без пола просто нигде не покажется
+            if (!data.gender) {
+                A.showToast(isEn ? 'Gender is required' : 'Укажите пол игрока', 'error');
                 saveBtn.disabled = false;
                 saveBtn.textContent = L.save;
                 return;
