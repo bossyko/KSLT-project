@@ -514,10 +514,31 @@
         }
     }
 
+    // Friendly — турниры для практики: рейтинговые очки не начисляются никогда,
+    // какой бы уровень турнира админ ни выставил
+    function isFriendlyTournament(tournament) {
+        return !!(tournament && tournament.category_id === 'friendly');
+    }
+
+    // Обнуляет очки в результатах дружеского турнира (сами результаты сохраняются)
+    function stripFriendlyPoints(tournament, rows) {
+        if (isFriendlyTournament(tournament)) {
+            (rows || []).forEach(function(r) { r.points_earned = 0; });
+        }
+        return rows;
+    }
+
     // ---- Save Rating History on finalization ----
     async function saveRatingHistory(tournament, results, isDbl) {
         // Delete old entries for this tournament (re-finalization safe)
         await A.client.from('rating_history').delete().eq('tournament_id', tournament.id);
+
+        // Friendly в рейтинг не попадает вообще
+        if (isFriendlyTournament(tournament)) {
+            A.showToast(isEn ? 'Friendly tournament — no rating points awarded'
+                             : 'Friendly — рейтинговые очки не начисляются', 'success');
+            return;
+        }
 
         if (!results || results.length === 0) return;
 
@@ -6403,6 +6424,8 @@
                 toUpsert = expandDoublesResults(toUpsert, regRes2.data || [], true);
             }
 
+            toUpsert = stripFriendlyPoints(tournament, toUpsert);
+
             if (toUpsert.length > 0) {
                 // Clean up old results before inserting (prevents duplicates from re-finalization)
                 await A.client.from('tournament_results').delete().eq('tournament_id', tournament.id);
@@ -6555,6 +6578,8 @@
                     .eq('tournament_id', tournament.id);
                 toUpsert = expandDoublesResults(toUpsert, ficRegRes.data || [], true);
             }
+
+            toUpsert = stripFriendlyPoints(tournament, toUpsert);
 
             if (toUpsert.length > 0) {
                 await A.client.from('tournament_results').delete().eq('tournament_id', tournament.id);
@@ -6754,6 +6779,8 @@
                     .eq('tournament_id', tournament.id);
                 toUpsert = expandDoublesResults(toUpsert, grpRegRes.data || [], true);
             }
+
+            toUpsert = stripFriendlyPoints(tournament, toUpsert);
 
             if (toUpsert.length > 0) {
                 await A.client.from('tournament_results').delete().eq('tournament_id', tournament.id);
@@ -7710,6 +7737,8 @@
                 toUpsert = expandDoublesResults(toUpsert, glRegRes.data || [], true);
             }
 
+            toUpsert = stripFriendlyPoints(tournament, toUpsert);
+
             if (toUpsert.length > 0) {
                 await A.client.from('tournament_results').delete().eq('tournament_id', tournament.id);
                 var insRes = await A.client.from('tournament_results').insert(toUpsert);
@@ -8085,9 +8114,7 @@
 
         // Actions
         var publishBtnLabel = publishedAt ? (isEn ? '📰 Update Publication' : '📰 Обновить публикацию') : '📰 ' + L.trnNewsPublish;
-        var tgBtnLabel = tgSentAt
-            ? '✅ ' + L.trnNewsTgSent + ' ' + (function() { var dd = new Date(tgSentAt); return String(dd.getDate()).padStart(2,'0') + '.' + String(dd.getMonth()+1).padStart(2,'0'); })()
-            : '📢 ' + L.trnNewsSendTg;
+        var tgBtnLabel = tgSentAt ? tgSentLabel() : '📢 ' + L.trnNewsSendTg;
         var tgDisabled = !publishedAt || tgSentAt;
 
         html += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;">' +
@@ -8123,7 +8150,51 @@
 
         // --- Gallery state & rendering ---
         var currentGallery = galleryUrls.slice();
+
+        // --- Отслеживание изменений ---
+        // Рассылку можно повторить только если публикацию реально обновили.
+        // Черновик — заготовка, слепки не трогает.
+        function newsSnapshot() {
+            var d = collectNewsData(false);
+            d.published_at = null; // дата публикации в сравнении не участвует
+            return JSON.stringify(d);
+        }
+        // Дата и время отправки: «04.08 в 14:32»
+        function fmtSent(iso) {
+            var d = new Date(iso);
+            var p = function(n) { return String(n).padStart(2, '0'); };
+            return p(d.getDate()) + '.' + p(d.getMonth() + 1) +
+                (isEn ? ' at ' : ' в ') + p(d.getHours()) + ':' + p(d.getMinutes());
+        }
+        function tgSentLabel() {
+            if (!tgSentAt) return '';
+            return '✅ ' + L.trnNewsTgSent + ' ' + fmtSent(tgSentAt);
+        }
+        var publishedSnapshot = newsSnapshot();                  // что сейчас опубликовано
+        var sentSnapshot = tgSentAt ? publishedSnapshot : null;  // что ушло в последнюю рассылку
+
+        function refreshNewsButtons() {
+            var pubBtn = document.getElementById('adTrnNewsPublish');
+            var tgBtn = document.getElementById('adTrnNewsTg');
+            if (!pubBtn || !tgBtn) return;
+
+            // До первой публикации кнопка публикации всегда доступна
+            if (publishedAt) pubBtn.disabled = (newsSnapshot() === publishedSnapshot);
+
+            // Рассылка: только по опубликованному и только если публикация менялась после отправки
+            var canSend = !!publishedAt && publishedSnapshot !== sentSnapshot;
+            tgBtn.disabled = !canSend;
+            tgBtn.style.opacity = canSend ? '' : '0.5';
+            tgBtn.textContent = canSend
+                ? '📢 ' + (sentSnapshot ? L.trnNewsResendTg : L.trnNewsSendTg)
+                : (tgSentAt ? tgSentLabel() : '📢 ' + L.trnNewsSendTg);
+        }
+
         renderPhotoGrid();
+        refreshNewsButtons();
+
+        // Любая правка в полях формы пересчитывает состояние кнопок
+        container.addEventListener('input', refreshNewsButtons);
 
         function renderPhotoGrid() {
             var grid = document.getElementById('adTrnPhotoGrid');
@@ -8151,6 +8222,7 @@
                     var idx = parseInt(btn.dataset.photoIdx);
                     currentGallery.splice(idx, 1);
                     renderPhotoGrid();
+                    refreshNewsButtons();
                 });
             });
         }
@@ -8171,6 +8243,7 @@
                     if (url) {
                         currentGallery.push(url);
                         renderPhotoGrid();
+                        refreshNewsButtons();
                     }
                 }
                 photoInput.value = '';
@@ -8241,6 +8314,9 @@
             btn.textContent = '📰 ...';
             try {
                 var data = collectNewsData(true);
+                // Публикацию обновили — снимаем серверную отметку о рассылке,
+                // иначе tournament-results-notify вернёт 409 «Already notified»
+                data.results_notified_at = null;
                 if (!data.title) {
                     A.showToast(isEn ? 'Title is required' : 'Заголовок обязателен', 'error');
                     btn.disabled = false;
@@ -8265,16 +8341,15 @@
                     var ds = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
                     statusEl.innerHTML = '<span style="color:var(--accent);font-weight:600;">📰 ' + L.trnNewsPublished + ' ' + ds + '</span>';
                 }
-                // Enable TG button (only if not already sent)
-                if (!tgSentAt) {
-                    var tgBtn = document.getElementById('adTrnNewsTg');
-                    if (tgBtn) { tgBtn.disabled = false; tgBtn.style.opacity = ''; }
-                }
+                // Публикация обновлена — фиксируем новый слепок.
+                // Если он отличается от отправленного, рассылка станет доступна повторно.
+                publishedSnapshot = newsSnapshot();
             } catch (e) {
                 A.showToast(e.message || 'Error', 'error');
             }
             btn.disabled = false;
             btn.textContent = isEn ? '📰 Update Publication' : '📰 Обновить публикацию';
+            refreshNewsButtons();
         });
 
         // --- Send TG ---
@@ -8284,7 +8359,14 @@
                 A.showToast(isEn ? 'Publish the article first' : 'Сначала опубликуйте статью', 'error');
                 return;
             }
-            A.showConfirm(isEn ? 'Telegram' : 'Telegram', isEn ? 'Send results to Telegram group?' : 'Отправить результаты в TG группу?', async function() {
+            // При повторе честно предупреждаем: подписчики получат уведомление второй раз
+            var confirmMsg;
+            if (tgSentAt) {
+                confirmMsg = L.trnNewsResendConfirm.replace('{date}', fmtSent(tgSentAt));
+            } else {
+                confirmMsg = isEn ? 'Send results to Telegram group?' : 'Отправить результаты в TG группу?';
+            }
+            A.showConfirm(isEn ? 'Telegram' : 'Telegram', confirmMsg, async function() {
                 tgBtn.disabled = true;
                 tgBtn.textContent = '📢 ...';
                 try {
@@ -8304,15 +8386,19 @@
                     tgSentAt = new Date().toISOString();
                     A.showToast(isEn ? 'Sent to Telegram!' : 'Отправлено в Telegram!', 'success');
                     var statusEl = document.getElementById('adNewsStatus');
-                    if (statusEl) statusEl.innerHTML = '<span style="color:#4caf50;font-weight:600;">✅ ' + L.trnNewsTgSent + '</span>';
-                    var now = new Date();
-                    var ddmm = String(now.getDate()).padStart(2,'0') + '.' + String(now.getMonth()+1).padStart(2,'0');
-                    tgBtn.textContent = '✅ ' + L.trnNewsTgSent + ' ' + ddmm;
-                    tgBtn.style.opacity = '0.5';
+                    if (statusEl) statusEl.innerHTML = '<span style="color:#4caf50;font-weight:600;">✅ ' + L.trnNewsTgSent + ' ' + fmtSent(tgSentAt) + '</span>';
+                    // Отправили текущую публикацию — кнопка гаснет до следующего обновления
+                    sentSnapshot = publishedSnapshot;
+                    refreshNewsButtons();
                 } catch (e) {
-                    A.showToast(e.message || 'Error', 'error');
-                    tgBtn.disabled = false;
-                    tgBtn.textContent = '📢 ' + L.trnNewsSendTg;
+                    var msg = e.message || 'Error';
+                    if (msg === 'Already notified') {
+                        msg = isEn
+                            ? 'Already sent. Update the publication to send again.'
+                            : 'Рассылка уже отправлена. Чтобы отправить снова, обновите публикацию.';
+                    }
+                    A.showToast(msg, 'error');
+                    refreshNewsButtons();
                 }
             }, isEn ? 'Send' : 'Отправить');
         });
