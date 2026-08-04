@@ -2555,15 +2555,13 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         regBtn.disabled = true;
                         regBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
 
-                        var regStatus = isWaitlist ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
-                        var res = await client.from('tournament_registrations').insert({
-                            tournament_id: tournament.id,
-                            player_id: playerId,
-                            status: regStatus
-                        });
+                        // Статус определяет сервер по правилам допуска
+                        var reg = await ksltCallRegister(client, tournament.id);
+                        var info = ksltRegResultText(reg.data, isEn, isKg);
+                        ksltShowRegModal(info, isEn, isKg);
 
-                        if (res.error) {
-                            alert(res.error.message);
+                        // Заявку не создали вообще — возвращаем кнопку
+                        if (reg.data && reg.data.error && reg.data.error !== 'already_registered') {
                             regBtn.disabled = false;
                             regBtn.textContent = isWaitlist
                                 ? (isEn ? 'Join Waitlist' : (isKg ? 'Күтүү тизмесине кошулуу' : 'Встать в лист ожидания'))
@@ -2571,16 +2569,180 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                             return;
                         }
 
-                        var regMsg = regStatus === 'waitlist'
-                            ? (isEn ? 'On Waitlist — Awaiting Approval' : (isKg ? 'Күтүү тизмесинде — бекитүүнү күтүүдө' : 'В листе ожидания — ожидает одобрения'))
-                            : (isEn ? 'Registration Submitted!' : (isKg ? 'Арыз жөнөтүлдү!' : 'Заявка отправлена!'));
-                        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
-                            regMsg + '</span>';
+                        var toneColor = info.tone === 'error' ? '255,59,48' : (info.tone === 'warning' ? '255,193,7' : '204,255,0');
+                        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(' + toneColor + ',0.15);color:rgb(' + toneColor + ');font-weight:500;">' +
+                            info.short + '</span>';
                     });
                 }
             });
         });
     });
+}
+
+// ========================================
+// REGISTRATION VIA EDGE FUNCTION
+// Решение о допуске принимает сервер: клиент не может ни выбрать себе статус,
+// ни подвинуть чужую заявку. См. supabase/functions/tournament-register
+// ========================================
+
+/**
+ * Отправляет заявку на турнир. Возвращает { ok, data }.
+ * @param {any} client Supabase client
+ * @param {string} tournamentId
+ * @param {Object} [extra] Партнёр для парных: partner_id или partner_external_*
+ */
+async function ksltCallRegister(client, tournamentId, extra) {
+    try {
+        var session = await client.auth.getSession();
+        var token = session.data.session ? session.data.session.access_token : '';
+        var payload = { tournament_id: tournamentId };
+        if (extra) {
+            for (var k in extra) {
+                if (extra[k] !== undefined && extra[k] !== null && extra[k] !== '') payload[k] = extra[k];
+            }
+        }
+        var res = await fetch(SUPABASE_URL + '/functions/v1/tournament-register', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'apikey': SUPABASE_ANON_KEY,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        var data = await res.json();
+        return { ok: res.ok, data: data };
+    } catch (e) {
+        return { ok: false, data: { error: e.message } };
+    }
+}
+
+/**
+ * Человеческий текст по коду ответа функции.
+ * @returns {{title:string, text:string, note:string, tone:string, short:string}}
+ */
+function ksltRegResultText(data, isEn, isKg) {
+    function pick(en, kg, ru) { return isEn ? en : (isKg ? kg : ru); }
+
+    // Отказы до правил допуска
+    var errors = {
+        already_registered: pick('You have already applied for this tournament',
+            'Сиз бул мелдешке буга чейин арыз бергенсиз',
+            'Вы уже подавали заявку на этот турнир'),
+        no_player: pick('Your account is not linked to a player profile',
+            'Аккаунтуңуз оюнчу картасына байланган эмес',
+            'Ваш аккаунт не связан с карточкой игрока'),
+        no_membership: pick('Active KSLT membership required',
+            'KSLT активдүү мүчөлүгү талап кылынат',
+            'Требуется активное членство KSLT'),
+        not_paid: pick('Please pay your membership first',
+            'Адегенде мүчөлүк төлөмүн төлөңүз',
+            'Сначала оплатите членство'),
+        banned: pick('Your account is temporarily blocked',
+            'Аккаунтуңуз убактылуу бөгөттөлгөн',
+            'Ваш аккаунт временно заблокирован'),
+        registration_closed: pick('Registration for this tournament is closed',
+            'Бул мелдешке каттоо жабык',
+            'Регистрация на этот турнир закрыта'),
+        gender_mismatch: pick('This tournament is for another gender category',
+            'Бул мелдеш башка жыныс категориясы үчүн',
+            'Этот турнир для другой гендерной категории'),
+        ntrp_too_low: pick('Your NTRP is below the tournament minimum',
+            'NTRP көрсөткүчүңүз мелдештин минимумунан төмөн',
+            'Ваш NTRP ниже минимального для турнира'),
+        ntrp_too_high: pick('Your NTRP is above the tournament maximum',
+            'NTRP көрсөткүчүңүз мелдештин максимумунан жогору',
+            'Ваш NTRP выше максимального для турнира'),
+        ntrp_combined_exceeded: pick('Combined NTRP of the pair exceeds the tournament limit',
+            'Жуптун жалпы NTRP көрсөткүчү чектен ашты',
+            'Суммарный NTRP пары превышает лимит турнира')
+    };
+
+    if (data && data.error) {
+        return {
+            tone: 'error',
+            title: pick('Application not accepted', 'Арыз кабыл алынган жок', 'Заявка не принята'),
+            text: errors[data.error] || data.error,
+            note: '',
+            short: pick('Not accepted', 'Кабыл алынган жок', 'Не принята')
+        };
+    }
+
+    var status = data && data.status;
+
+    if (status === 'approved') {
+        // Игрок нижней категории предупреждается: место не закреплено
+        var note = (data.reason === 'top_rank')
+            ? pick('Your spot is not locked in: if a player of the tournament category applies, you may be moved to the waiting list.',
+                'Орун бекитилген эмес: мелдеш категориясындагы оюнчу арыз берсе, сиз күтүү тизмесине өтүшүңүз мүмкүн.',
+                'Место не закреплено: если заявку подаст игрок категории турнира, вы можете быть перемещены в лист ожидания.')
+            : '';
+        return {
+            tone: 'success',
+            title: pick('Application accepted', 'Арыз кабыл алынды', 'Заявка принята'),
+            text: pick('You are in the main draw.', 'Сиз негизги сеткадасыз.', 'Вы в основной сетке.'),
+            note: note,
+            short: pick('In the main draw', 'Негизги сеткада', 'В основной сетке')
+        };
+    }
+
+    if (status === 'waitlist') {
+        var reasons = {
+            no_category: pick('Your category is not assigned yet, so the application needs a review.',
+                'Категорияңыз дайындала элек, ошондуктан арыз каралат.',
+                'Вам ещё не присвоена категория, поэтому заявка требует рассмотрения.'),
+            rank_waitlist: pick('You are ranked 11-20 in your category — the application needs approval.',
+                'Категорияңызда 11-20 орундасыз — арыз бекитүүнү талап кылат.',
+                'Вы занимаете с 11 по 20 место в своей категории — заявка требует одобрения.'),
+            draw_full: pick('The main draw is full.', 'Негизги сетка толук.', 'Основная сетка заполнена.')
+        };
+        return {
+            tone: 'warning',
+            title: pick('Application under review', 'Арыз каралууда', 'Заявка на рассмотрении'),
+            text: reasons[data.reason] || pick('The administrator will make a decision.',
+                'Чечимди администратор кабыл алат.', 'Решение примет администратор.'),
+            note: '',
+            short: pick('Under review', 'Каралууда', 'На рассмотрении')
+        };
+    }
+
+    // blocked
+    return {
+        tone: 'error',
+        title: pick('Application not accepted', 'Арыз кабыл алынган жок', 'Заявка не принята'),
+        text: (data && data.block_reason) || pick('You do not meet the tournament entry rules.',
+            'Сиз мелдешке катышуу эрежелерине туура келбейсиз.',
+            'Вы не проходите по правилам допуска на турнир.'),
+        note: '',
+        short: pick('Not accepted', 'Кабыл алынган жок', 'Не принята')
+    };
+}
+
+/** Показывает модалку с результатом подачи заявки. */
+function ksltShowRegModal(info, isEn, isKg) {
+    var colors = { success: '#CCFF00', warning: '#ffc107', error: '#ff3b30' };
+    var color = colors[info.tone] || '#CCFF00';
+    var icons = { success: '✅', warning: '⏳', error: '⛔' };
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1200;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML =
+        '<div style="background:#131313;border:1px solid rgba(255,255,255,0.1);border-radius:16px;max-width:440px;width:100%;padding:28px;text-align:center;">' +
+            '<div style="font-size:2.2rem;margin-bottom:12px;">' + (icons[info.tone] || '') + '</div>' +
+            '<div style="font-size:1.15rem;font-weight:700;color:' + color + ';margin-bottom:10px;">' + info.title + '</div>' +
+            '<div style="color:rgba(255,255,255,0.75);line-height:1.5;">' + info.text + '</div>' +
+            (info.note
+                ? '<div style="margin-top:14px;padding:10px 14px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.25);color:#ffc107;font-size:0.85rem;line-height:1.45;">' + info.note + '</div>'
+                : '') +
+            '<button id="ksltRegModalOk" style="margin-top:20px;padding:10px 32px;border:none;border-radius:8px;background:' + color + ';color:#000;font-weight:600;cursor:pointer;">' +
+                (isEn ? 'Got it' : (isKg ? 'Түшүндүм' : 'Понятно')) +
+            '</button>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+    function close() { overlay.remove(); }
+    document.getElementById('ksltRegModalOk').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
 }
 
 // ========================================
@@ -2654,24 +2816,17 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
         soloBtn.disabled = true;
         soloBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
 
-        var regStatus = onlineSlotsFull ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
-        var res = await client.from('tournament_registrations').insert({
-            tournament_id: tournament.id,
-            player_id: playerId,
-            status: regStatus
-        });
+        var reg = await ksltCallRegister(client, tournament.id);
+        var info = ksltRegResultText(reg.data, isEn, isKg);
 
         overlay.remove();
+        ksltShowRegModal(info, isEn, isKg);
 
-        if (res.error) {
-            alert(res.error.message);
-            return;
-        }
+        if (reg.data && reg.data.error && reg.data.error !== 'already_registered') return;
 
-        var regMsg = regStatus === 'waitlist'
-            ? (isEn ? 'On Waitlist (no partner yet)' : (isKg ? 'Күтүү тизмесинде (өнөктөш жок)' : 'В листе ожидания (без партнёра)'))
-            : (isEn ? 'Registered (no partner yet)' : (isKg ? 'Катталды (өнөктөш жок)' : 'Зарегистрирован (без партнёра)'));
-        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' + regMsg + '</span>';
+        var noPartner = isEn ? ' (no partner yet)' : (isKg ? ' (өнөктөш жок)' : ' (без партнёра)');
+        var toneColor = info.tone === 'error' ? '255,59,48' : (info.tone === 'warning' ? '255,193,7' : '204,255,0');
+        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(' + toneColor + ',0.15);color:rgb(' + toneColor + ');font-weight:500;">' + info.short + noPartner + '</span>';
     });
 
     // Register with partner
@@ -2683,42 +2838,31 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
         regWithBtn.disabled = true;
         regWithBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
 
-        var res;
+        // Добавление партнёра к уже поданной заявке правил допуска не касается
         if (existingRegId) {
-            // Update mode: add partner to existing registration
-            res = await client.from('tournament_registrations').update({ partner_id: partnerId }).eq('id', existingRegId);
-        } else {
-            // New registration
-            var regStatus = onlineSlotsFull ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
-            res = await client.from('tournament_registrations').insert({
-                tournament_id: tournament.id,
-                player_id: playerId,
-                partner_id: partnerId,
-                status: regStatus
-            });
-        }
+            var upd = await client.from('tournament_registrations').update({ partner_id: partnerId }).eq('id', existingRegId);
+            overlay.remove();
+            if (upd.error) { alert(upd.error.message); return; }
 
-        overlay.remove();
-
-        if (res.error) {
-            alert(res.error.message);
-            return;
-        }
-
-        var regMsg = existingRegId
-            ? (isEn ? 'Partner added!' : (isKg ? 'Өнөктөш кошулду!' : 'Партнёр добавлен!'))
-            : (regStatus === 'waitlist'
-                ? (isEn ? 'On Waitlist — Awaiting Approval' : (isKg ? 'Күтүү тизмесинде — бекитүүнү күтүүдө' : 'В листе ожидания — ожидает одобрения'))
-                : (isEn ? 'Registration Submitted!' : (isKg ? 'Арыз жөнөтүлдү!' : 'Заявка отправлена!')));
-        if (existingRegId) {
-            // Remove the "Add Partner" button and update status text
+            var addedMsg = isEn ? 'Partner added!' : (isKg ? 'Өнөктөш кошулду!' : 'Партнёр добавлен!');
             var addPartnerBtnEl = document.getElementById('tdAddPartnerBtn');
             if (addPartnerBtnEl) addPartnerBtnEl.remove();
             var statusEl = document.querySelector('.td-reg-status');
-            if (statusEl) statusEl.textContent = regMsg;
-        } else {
-            regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' + regMsg + '</span>';
+            if (statusEl) statusEl.textContent = addedMsg;
+            return;
         }
+
+        // Новая заявка: суммарный NTRP пары проверяет сервер
+        var reg = await ksltCallRegister(client, tournament.id, { partner_id: partnerId });
+        var info = ksltRegResultText(reg.data, isEn, isKg);
+
+        overlay.remove();
+        ksltShowRegModal(info, isEn, isKg);
+
+        if (reg.data && reg.data.error && reg.data.error !== 'already_registered') return;
+
+        var toneColor = info.tone === 'error' ? '255,59,48' : (info.tone === 'warning' ? '255,193,7' : '204,255,0');
+        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(' + toneColor + ',0.15);color:rgb(' + toneColor + ');font-weight:500;">' + info.short + '</span>';
     });
 
     // Partner search

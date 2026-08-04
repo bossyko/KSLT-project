@@ -1446,6 +1446,10 @@
         var rejected = registrations.filter(function(r) { return r.status === 'rejected'; })
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
         var withdrawn = registrations.filter(function(r) { return r.status === 'withdrawn'; });
+        // Заявки, не прошедшие правила допуска. Хранятся ради статистики:
+        // сколько человек хотело попасть на турнир и почему не пустили.
+        var blocked = registrations.filter(function(r) { return r.status === 'blocked'; })
+            .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
 
         // Doubles: warn about unpaired registrations
         if (isDbl) {
@@ -1459,7 +1463,7 @@
 
         // Add buttons will be placed in the Main Draw header row below
 
-        if (mainDraw.length === 0 && waitlistRegs.length === 0 && rejected.length === 0 && withdrawn.length === 0) {
+        if (mainDraw.length === 0 && waitlistRegs.length === 0 && rejected.length === 0 && withdrawn.length === 0 && blocked.length === 0) {
             html += '<div class="ad-empty-state"><p>' + L.noRegistrations + '</p></div>';
         } else {
             var thCategory = isEn ? 'Category' : 'Категория';
@@ -1565,6 +1569,44 @@
                         '<td>' + A.esc(pName) + '</td>' +
                         '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
                         '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
+                    '</tr>';
+                });
+                html += '</tbody></table></div>';
+            }
+
+            // ---- Заблокированные: не прошли правила допуска ----
+            if (blocked.length > 0) {
+                var blkTitle = isEn ? 'Blocked applications' : 'Заблокированные заявки';
+                var blkHint = isEn
+                    ? 'Did not pass the entry rules. Kept for statistics — shows how many wanted to join.'
+                    : 'Не прошли правила допуска. Сохраняются для статистики — видно, сколько человек хотело участвовать.';
+                html += '<h3 class="ad-reg-section-title" style="margin-top:24px;color:#ff9800;">' + blkTitle +
+                    ' <span class="ad-badge" style="background:rgba(255,152,0,0.15);color:#ff9800;">' + blocked.length + '</span></h3>';
+                html += '<p style="margin:-4px 0 10px;font-size:0.8rem;color:var(--text-dim);">' + blkHint + '</p>';
+                html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                    '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
+                    '<th>' + L.plrName + '</th>' +
+                    '<th>' + (isEn ? 'Category' : 'Категория') + '</th>' +
+                    '<th>' + (isEn ? 'Reason' : 'Причина') + '</th>' +
+                    '<th>' + (isEn ? 'Registered' : 'Регистрация') + '</th>' +
+                '</tr></thead><tbody>';
+                blocked.forEach(function(reg, idx) {
+                    var bPlayer = reg.players || playersMap[reg.player_id] || {};
+                    var bName = isEn ? (bPlayer.name_en || bPlayer.name || reg.player_id) : (bPlayer.name || reg.player_id);
+                    var bCat = bPlayer.category_id || (playersMap[reg.player_id] || {}).category_id || '—';
+                    var bDT = '';
+                    if (reg.registered_at) {
+                        var bd = new Date(reg.registered_at);
+                        bDT = bd.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
+                            ' <span style="color:var(--text-dim);">' +
+                            bd.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit' }) + '</span>';
+                    }
+                    html += '<tr style="opacity:0.75;">' +
+                        '<td style="text-align:center;padding:4px 6px;">' + (idx + 1) + '</td>' +
+                        '<td>' + A.esc(bName) + '</td>' +
+                        '<td style="font-size:0.8rem;">' + A.esc(bCat) + '</td>' +
+                        '<td style="font-size:0.8rem;color:var(--text-secondary);">' + A.esc(reg.block_reason || '—') + '</td>' +
+                        '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + bDT + '</td>' +
                     '</tr>';
                 });
                 html += '</tbody></table></div>';
