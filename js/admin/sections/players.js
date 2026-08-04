@@ -1724,10 +1724,8 @@
                 '<input type="text" class="ad-field-input ad-filter-search" id="ratSearch" placeholder="' + L.ratSearchPlayer + '">' +
                 '<select class="ad-field-input ad-filter-select" id="ratGenderFilter">' + genderOpts + '</select>' +
                 '<select class="ad-field-input ad-filter-select" id="ratCatFilter">' + catOpts + '</select>' +
-                '<button class="ad-btn ad-btn-sm" id="ratRecalcAllBtn" style="margin-left:auto">' + (isEn ? 'Recalculate all' : 'Пересчитать все') + '</button>' +
-                (A.currentRole === 'admin'
-                    ? '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratSeasonResetBtn" style="margin-left:8px;">🗓 ' + (isEn ? 'Season change' : 'Смена сезона') + '</button>'
-                    : '') +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratRecalcAllBtn" style="margin-left:auto">🔄 ' + (isEn ? 'Recalculate all' : 'Пересчитать все') + '</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratSeasonResetBtn" style="margin-left:8px;">🗓 ' + (isEn ? 'Season change' : 'Смена сезона') + '</button>' +
             '</div>' +
             '<div id="ratRankingsBody"></div>';
 
@@ -2296,6 +2294,13 @@
             ? 'Points earned in the season that ended last August will expire. Every player whose points or rank change will get a Telegram message and a push. Proceed?'
             : 'Очки за сезон, закончившийся в прошлом августе, сгорят. Каждому игроку, у кого изменятся очки или место, уйдёт сообщение в Telegram и push. Продолжить?';
 
+        var isSeptember = new Date().getMonth() === 8;
+        if (!isSeptember) {
+            warn = (isEn
+                ? 'It is not September — the season change is not due yet. '
+                : 'Сейчас не сентябрь, смена сезона ещё не наступила. ') + warn;
+        }
+
         A.showConfirm(isEn ? 'Season change' : 'Смена сезона', warn, async function() {
             var btn = document.getElementById('ratSeasonResetBtn');
             if (btn) { btn.disabled = true; btn.textContent = '🗓 ...'; }
@@ -2309,7 +2314,7 @@
                         'apikey': SUPABASE_ANON_KEY,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({ force: !isSeptember })
                 });
                 var result = await res.json();
                 if (!res.ok) throw new Error(result.error || 'HTTP ' + res.status);
@@ -2350,7 +2355,7 @@
         } catch (err) {
             A.showToast(err.message, 'error');
         } finally {
-            if (btn) { btn.disabled = false; btn.innerHTML = isEn ? 'Recalculate all' : 'Пересчитать все'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = '🔄 ' + (isEn ? 'Recalculate all' : 'Пересчитать все'); }
         }
     }
 

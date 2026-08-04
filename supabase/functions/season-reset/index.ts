@@ -45,26 +45,42 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } }
-    })
-    const { data: { user }, error: authErr } = await userClient.auth.getUser()
-    if (authErr || !user) return json({ error: 'Unauthorized' }, 401)
-
     const db = createClient(supabaseUrl, serviceKey)
 
-    const { data: me } = await db
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    // Два способа запуска:
+    //   кнопкой в админке — токен пользователя, проверяем роль
+    //   по расписанию 1 сентября — крон приходит с сервисным ключом,
+    //   токена пользователя у него нет
+    const isServiceCall = authHeader === 'Bearer ' + serviceKey
 
-    if (!me || (me.role !== 'admin' && me.role !== 'manager')) {
-      return json({ error: 'forbidden' }, 403)
+    if (!isServiceCall) {
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } }
+      })
+      const { data: { user }, error: authErr } = await userClient.auth.getUser()
+      if (authErr || !user) return json({ error: 'Unauthorized' }, 401)
+
+      const { data: me } = await db
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!me || (me.role !== 'admin' && me.role !== 'manager')) {
+        return json({ error: 'forbidden' }, 403)
+      }
     }
 
     const body = await req.json().catch(() => ({}))
     const dryRun = body.dry_run === true
+
+    // Смена сезона — сентябрьское событие. В другое время года пересчёт
+    // безвреден (окно считается от даты, досрочно ничего не сгорает), но
+    // случайное нажатие не должно проходить молча.
+    const isSeptember = new Date().getMonth() === 8
+    if (!isSeptember && body.force !== true) {
+      return json({ error: 'not_season_time', hint: 'Смена сезона проводится в сентябре. Для запуска в другое время передайте force.' }, 400)
+    }
 
     // ---- Сезон, который начинается ----
     // До сентября мы ещё в сезоне, начавшемся в прошлом году
