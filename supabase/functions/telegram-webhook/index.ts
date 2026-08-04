@@ -388,138 +388,61 @@
         return
       }
 
-      // 4. Check duplicate registration
-      const { data: existingReg } = await db
-        .from('tournament_registrations')
-        .select('id')
-        .eq('tournament_id', tournamentId)
-        .eq('player_id', profile.player_id)
-        .limit(1)
+      // 4-7. Правила допуска: решение принимает tournament-register.
+      // Здесь логика не дублируется — бот вызывает ту же функцию, что сайт
+      // и приложение, только серверным ключом и с явным игроком.
+      const regRes = await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/tournament-register', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ tournament_id: tournamentId, player_id: profile.player_id })
+      })
+      const regData = await regRes.json()
 
-      if (existingReg && existingReg.length > 0) {
-        await answerCallbackQuery(token, query.id, 'Вы уже записаны на этот турнир')
-        return
-      }
+      // 8. Ответ игроку по решению функции
+      const trnTitle = escapeHtml(tournament.title || '')
 
-      // 5. Category check
-      const isStaff = profile.role === 'admin' || profile.role === 'manager'
-
-      const { data: player } = await db
-        .from('players')
-        .select('id, category_id, points, banned_until, ban_reason')
-        .eq('id', profile.player_id)
-        .single()
-
-      if (!player) {
-        await answerCallbackQuery(token, query.id, 'Карточка игрока не найдена')
-        return
-      }
-
-      // 5.5. Player-level ban check
-      if (player.banned_until && new Date(player.banned_until) > new Date()) {
-        const isPerm = new Date(player.banned_until).getFullYear() >= 2099
-        const banMsg = isPerm
-          ? '⛔ Вы заблокированы навсегда'
-          : '⛔ Вы заблокированы до ' + new Date(player.banned_until).toLocaleDateString('ru-RU')
-        await answerCallbackQuery(token, query.id, banMsg)
-        return
-      }
-
-      // Gender helper
-      function getCatGender(cid: string | null): string | null {
-        return cid ? cid.split('-')[0] : null
-      }
-
-      // Determine registration status (pending vs waitlist)
-      let regStatus = 'pending'
-      const tCatId = tournament.category_id
-      const pCatId = player.category_id
-
-      if (tCatId) {
-        // 1. Gender check: load category gender from categories table
-        const { data: catRow } = await db
-          .from('categories')
-          .select('gender')
-          .eq('id', tCatId)
-          .single()
-        const catGender = catRow?.gender || null // 'men' | 'women' | null
-        const playerGender = getCatGender(pCatId)
-
-        if (catGender && playerGender && catGender !== playerGender) {
-          const genderMsg = catGender === 'men'
-            ? 'Этот турнир только для мужчин'
-            : 'Этот турнир только для женщин'
-          await answerCallbackQuery(token, query.id, genderMsg)
-          return
+      if (regData.error) {
+        const errText: Record<string, string> = {
+          already_registered: 'Вы уже подавали заявку на этот турнир',
+          no_player: 'Карточка игрока не найдена',
+          no_membership: 'Необходимо активное членство KSLT',
+          not_paid: 'Сначала оплатите членство',
+          banned: 'Вы заблокированы для участия в турнирах',
+          registration_closed: 'Регистрация на этот турнир закрыта',
+          gender_mismatch: 'Этот турнир для другой гендерной категории',
+          ntrp_too_low: 'Ваш NTRP ниже минимального для турнира',
+          ntrp_too_high: 'Ваш NTRP выше максимального для турнира',
+          ntrp_combined_exceeded: 'Суммарный NTRP пары превышает лимит'
         }
-
-        // 2. Category match → pending (main draw) or waitlist
-        regStatus = (pCatId === tCatId) ? 'pending' : 'waitlist'
-      }
-
-      // 6. Check membership (staff bypass)
-      if (!isStaff) {
-        const today = new Date().toISOString().split('T')[0]
-        const { data: membership } = await db
-          .from('memberships')
-          .select('id, status')
-          .eq('profile_id', profile.id)
-          .eq('status', 'active')
-          .gte('expires_at', today)
-          .limit(1)
-
-        if (!membership || membership.length === 0) {
-          await answerCallbackQuery(token, query.id, 'Необходимо активное членство KSLT')
-          return
-        }
-      }
-
-      // 6.5. Check online slots (max - reserved)
-      const reservedSpots = tournament.reserved_spots || 0
-      const onlineSlots = (tournament.max_participants || 0) - reservedSpots
-      if (onlineSlots > 0) {
-        const { count: activeCount } = await db
-          .from('tournament_registrations')
-          .select('id', { count: 'exact', head: true })
-          .eq('tournament_id', tournamentId)
-          .in('status', ['approved', 'pending'])
-        if ((activeCount || 0) >= onlineSlots) {
-          await answerCallbackQuery(token, query.id, 'Регистрация заполнена')
-          return
-        }
-      }
-
-      // 7. Register
-      const { error: regError } = await db
-        .from('tournament_registrations')
-        .insert({
-          tournament_id: tournamentId,
-          player_id: profile.player_id,
-          status: regStatus
-        })
-
-      if (regError) {
-        console.error('Registration error:', regError)
-        await answerCallbackQuery(token, query.id, 'Ошибка регистрации')
+        await answerCallbackQuery(token, query.id, errText[regData.error] || 'Заявка не принята')
         return
       }
 
-      // 8. Answer callback + DM based on status
-      if (regStatus === 'waitlist') {
-        await answerCallbackQuery(token, query.id, '⏳ Вы в листе ожидания')
+      if (regData.status === 'approved') {
+        await answerCallbackQuery(token, query.id, '✅ Заявка принята')
         if (shouldNotify(profile.notify_preferences, 'tg', 'tournaments')) {
-          await sendMessage(
-            tgUserId,
-            `⏳ <b>Вы в листе ожидания</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nВаша заявка ожидает одобрения администратора. Следите за обновлениями на сайте.`
-          )
+          const note = regData.reason === 'top_rank'
+            ? '\n\n<i>Место не закреплено: если заявку подаст игрок категории турнира, вы можете быть перемещены в лист ожидания.</i>'
+            : ''
+          await sendMessage(tgUserId, `✅ <b>Заявка принята</b>\n\n🏆 ${trnTitle}\n\nВы в основной сетке.${note}`)
+        }
+      } else if (regData.status === 'waitlist') {
+        const why: Record<string, string> = {
+          no_category: 'Вам ещё не присвоена категория, поэтому заявка требует рассмотрения.',
+          rank_waitlist: 'Вы занимаете с 11 по 20 место в своей категории — заявка требует одобрения.',
+          draw_full: 'Основная сетка заполнена.'
+        }
+        await answerCallbackQuery(token, query.id, '⏳ Заявка на рассмотрении')
+        if (shouldNotify(profile.notify_preferences, 'tg', 'tournaments')) {
+          await sendMessage(tgUserId, `⏳ <b>Заявка принята — на рассмотрении</b>\n\n🏆 ${trnTitle}\n\n${why[regData.reason] || 'Решение примет администратор.'}`)
         }
       } else {
-        await answerCallbackQuery(token, query.id, '✅ Заявка отправлена!')
+        await answerCallbackQuery(token, query.id, '⛔ Заявка не принята')
         if (shouldNotify(profile.notify_preferences, 'tg', 'tournaments')) {
-          await sendMessage(
-            tgUserId,
-            `✅ <b>Заявка на турнир отправлена!</b>\n\n🏆 ${escapeHtml(tournament.title || '')}\n\nСтатус: ожидает подтверждения. Следите за обновлениями на сайте.`
-          )
+          await sendMessage(tgUserId, `⛔ <b>Заявка не принята</b>\n\n🏆 ${trnTitle}\n\n${escapeHtml(regData.block_reason || 'Вы не проходите по правилам допуска.')}`)
         }
       }
     }

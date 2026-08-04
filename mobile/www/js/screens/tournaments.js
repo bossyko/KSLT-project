@@ -546,26 +546,14 @@
         btn.disabled = true;
         btn.textContent = I18N.t('trn.registering');
 
-        var regStatus = isWaitlist ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
-
-        supabaseClient.from('tournament_registrations').insert({
-          tournament_id: t.id,
-          player_id: playerId,
-          status: regStatus
-        }).then(function(r) {
-          if (r.error) {
-            if (r.error.message && r.error.message.indexOf('unique') !== -1) {
-              area.innerHTML = '<div class="td-reg-done">' + I18N.t('trn.alreadyReg') + '</div>';
-            } else {
-              if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('common.error'));
-              btn.disabled = false;
-              btn.textContent = isWaitlist ? I18N.t('trn.joinWaitlist') : I18N.t('trn.register');
-            }
+        // Статус определяет сервер по правилам допуска — те же, что на сайте
+        window.KSLT_REG.submit(t.id).then(function(info) {
+          if (!info.created) {
+            btn.disabled = false;
+            btn.textContent = I18N.t('trn.register');
             return;
           }
-          var msg = regStatus === 'waitlist' ? I18N.t('trn.waitlist') : I18N.t('trn.registered');
-          area.innerHTML = '<div class="td-reg-done">' + msg + '</div>';
-          if (window.KSLT_APP) window.KSLT_APP.toast(msg);
+          area.innerHTML = '<div class="td-reg-done">' + info.short + '</div>';
         });
       });
     });
@@ -631,21 +619,12 @@
         soloBtn.disabled = true;
         soloBtn.textContent = I18N.t('trn.registering');
 
-        var regStatus = onlineSlotsFull ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
-
-        supabaseClient.from('tournament_registrations').insert({
-          tournament_id: tournament.id,
-          player_id: playerId,
-          status: regStatus
-        }).then(function(r) {
-          overlay.remove();
-          if (r.error) {
-            if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('common.error'));
-            return;
-          }
-          var msg = regStatus === 'waitlist' ? I18N.t('trn.waitlistSolo') : I18N.t('trn.regSoloSent');
-          area.innerHTML = '<div class="td-reg-done">' + msg + '</div>';
-          if (window.KSLT_APP) window.KSLT_APP.toast(msg);
+        overlay.remove();
+        // Парные: категории не проверяются, но суммарный NTRP проверяет сервер
+        window.KSLT_REG.submit(tournament.id).then(function(info) {
+          if (!info.created) return;
+          var soloSuffix = ' ' + I18N.t('trn.waitlistSolo').replace(/^.*\(/, '(');
+          area.innerHTML = '<div class="td-reg-done">' + info.short + soloSuffix + '</div>';
         });
       });
     }
@@ -671,21 +650,10 @@
           if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('trn.partnerAdded'));
         });
       } else {
-        var regStatus = onlineSlotsFull ? 'waitlist' : (isExactCategory ? 'pending' : 'waitlist');
-        supabaseClient.from('tournament_registrations').insert({
-          tournament_id: tournament.id,
-          player_id: playerId,
-          partner_id: partnerId,
-          status: regStatus
-        }).then(function(r) {
-          overlay.remove();
-          if (r.error) {
-            if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('common.error'));
-            return;
-          }
-          var msg = regStatus === 'waitlist' ? I18N.t('trn.waitlist') : I18N.t('trn.regSent');
-          area.innerHTML = '<div class="td-reg-done">' + msg + '</div>';
-          if (window.KSLT_APP) window.KSLT_APP.toast(msg);
+        overlay.remove();
+        window.KSLT_REG.submit(tournament.id, { partner_id: partnerId }).then(function(info) {
+          if (!info.created) return;
+          area.innerHTML = '<div class="td-reg-done">' + info.short + '</div>';
         });
       }
     });

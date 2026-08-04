@@ -378,14 +378,34 @@
     <div class="auth-forgot" id="authForgotLink" data-i18n="auth.forgot">Забыли пароль?</div>
   </form>
 
-  <!-- Forgot password form -->
+  <!-- Forgot password form — OTP -->
   <form class="auth-form" id="authForgot">
-    <p class="auth-forgot-text" data-i18n="auth.forgotText">Введите email и мы отправим ссылку для сброса пароля</p>
-    <input class="auth-input" type="email" placeholder="Email" id="forgotEmail" autocomplete="email" required>
+    <p class="auth-forgot-text">Выберите способ получения кода</p>
+    <div class="otp-method-tabs">
+      <button type="button" class="otp-method-tab active" data-method="email">По почте</button>
+      <button type="button" class="otp-method-tab" data-method="phone">По телефону</button>
+    </div>
+    <div id="forgotEmailField">
+      <input class="auth-input" type="email" placeholder="Email" id="forgotEmail" autocomplete="email" required>
+    </div>
+    <div id="forgotPhoneField" style="display:none">
+      <div class="otp-phone-row">
+        <select class="otp-country-select" id="forgotCountry">
+          <option value="+996">🇰🇬 +996</option>
+          <option value="+7">🇷🇺 +7</option>
+          <option value="+7" data-kz>🇰🇿 +7</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+49">🇩🇪 +49</option>
+          <option value="+82">🇰🇷 +82</option>
+          <option value="+90">🇹🇷 +90</option>
+        </select>
+        <input class="auth-input" type="tel" id="forgotPhone" placeholder="555 123 456">
+      </div>
+    </div>
     <div class="auth-error" id="forgotError"></div>
-    <div class="auth-success" id="forgotSuccess" style="display:none"></div>
-    <button class="auth-submit" type="submit" id="forgotSubmitBtn" data-i18n="auth.sendReset">Отправить ссылку</button>
-    <div class="auth-forgot" id="authBackToLogin" data-i18n="auth.backToLogin">Вернуться ко входу</div>
+    <button class="auth-submit" type="submit" id="forgotSubmitBtn">Отправить код</button>
+    <div class="auth-forgot" id="authBackToLogin">Вернуться ко входу</div>
   </form>
 
   <!-- Register form -->
@@ -454,6 +474,45 @@
         </div>
         <div class="auth-error" id="tgRegError"></div>
         <button type="submit" class="auth-submit">Создать аккаунт</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- OTP Code Verification Overlay -->
+  <div class="otp-overlay" id="otpOverlay">
+    <div class="otp-modal">
+      <h3 class="otp-modal-title">Введите код</h3>
+      <p class="otp-modal-subtitle" id="otpSubtitle">Код отправлен на почту</p>
+      <div class="otp-channel-hint" id="otpChannelHint"></div>
+      <div class="otp-error" id="otpError"></div>
+      <div class="otp-inputs" id="otpInputs">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" autocomplete="one-time-code">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-digit">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-digit">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-digit">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-digit">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-digit">
+      </div>
+      <div class="otp-timer" id="otpTimer">Код действителен: <strong>10:00</strong></div>
+      <div class="otp-resend">Не получили? <a href="#" id="otpResend">Отправить повторно</a></div>
+    </div>
+  </div>
+
+  <!-- OTP New Password Overlay -->
+  <div class="otp-pw-overlay" id="otpPwOverlay">
+    <div class="otp-pw-modal">
+      <h3 class="otp-modal-title">Новый пароль</h3>
+      <form id="otpPwForm">
+        <div class="auth-field">
+          <label class="auth-label">Новый пароль <span style="color:var(--red)">*</span></label>
+          <input class="auth-input" type="password" id="otpNewPassword" placeholder="Минимум 8 символов" required minlength="8">
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Подтвердите пароль <span style="color:var(--red)">*</span></label>
+          <input class="auth-input" type="password" id="otpConfirmPassword" placeholder="Повторите пароль" required minlength="8">
+        </div>
+        <div class="auth-error" id="otpPwError"></div>
+        <button type="submit" class="auth-submit">Сохранить пароль</button>
       </form>
     </div>
   </div>
@@ -557,6 +616,7 @@
 <script src="js/supabase-config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/screens/home.js"></script>
+<script src="js/tournament-register.js"></script>
 <script src="js/screens/tournaments.js"></script>
 <script src="js/screens/rating.js"></script>
 <script src="js/screens/news.js"></script>

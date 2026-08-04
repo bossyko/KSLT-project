@@ -114,6 +114,42 @@
     'trn.partnerAdded':   { ru: 'Партнёр добавлен!', en: 'Partner added!', kg: 'Өнөктөш кошулду!' },
     'trn.waitlistSolo':   { ru: 'В листе ожидания (без партнёра)', en: 'On Waitlist (no partner yet)', kg: 'Күтүү тизмесинде (өнөктөш жок)' },
 
+    // === Правила допуска на турнир (ответы функции tournament-register) ===
+    'reg.acceptedTitle':  { ru: 'Заявка принята', en: 'Application accepted', kg: 'Арыз кабыл алынды' },
+    'reg.inMainDraw':     { ru: 'Вы в основной сетке.', en: 'You are in the main draw.', kg: 'Сиз негизги сеткадасыз.' },
+    'reg.shortInDraw':    { ru: 'В основной сетке', en: 'In the main draw', kg: 'Негизги сеткада' },
+    'reg.spotNotLocked':  { ru: 'Место не закреплено: если заявку подаст игрок категории турнира, вы можете быть перемещены в лист ожидания.', en: 'Your spot is not locked in: if a player of the tournament category applies, you may be moved to the waiting list.', kg: 'Орун бекитилген эмес: мелдеш категориясындагы оюнчу арыз берсе, сиз күтүү тизмесине өтүшүңүз мүмкүн.' },
+
+    'reg.reviewTitle':    { ru: 'Заявка принята — на рассмотрении', en: 'Application accepted — under review', kg: 'Арыз кабыл алынды — каралууда' },
+    'reg.shortReview':    { ru: 'На рассмотрении', en: 'Under review', kg: 'Каралууда' },
+    'reg.noCategory':     { ru: 'Вам ещё не присвоена категория, поэтому заявка требует рассмотрения.', en: 'Your category is not assigned yet, so the application needs a review.', kg: 'Категорияңыз дайындала элек, ошондуктан арыз каралат.' },
+    'reg.rankWaitlist':   { ru: 'Вы занимаете с 11 по 20 место в своей категории — заявка требует одобрения.', en: 'You are ranked 11-20 in your category — the application needs approval.', kg: 'Категорияңызда 11-20 орундасыз — арыз бекитүүнү талап кылат.' },
+    'reg.drawFull':       { ru: 'Основная сетка заполнена.', en: 'The main draw is full.', kg: 'Негизги сетка толук.' },
+    'reg.adminDecides':   { ru: 'Решение примет администратор.', en: 'The administrator will make a decision.', kg: 'Чечимди администратор кабыл алат.' },
+
+    'reg.blockedTitle':   { ru: 'Заявка не принята', en: 'Application not accepted', kg: 'Арыз кабыл алынган жок' },
+    'reg.shortBlocked':   { ru: 'Не принята', en: 'Not accepted', kg: 'Кабыл алынган жок' },
+    'reg.blockedGeneric': { ru: 'Вы не проходите по правилам допуска на турнир.', en: 'You do not meet the tournament entry rules.', kg: 'Сиз мелдешке катышуу эрежелерине туура келбейсиз.' },
+
+    'reg.alreadyTitle':   { ru: 'Вы уже подали заявку', en: 'You have already applied', kg: 'Сиз буга чейин арыз бергенсиз' },
+    'reg.stApproved':     { ru: 'Вы в основной сетке.', en: 'You are in the main draw.', kg: 'Сиз негизги сеткадасыз.' },
+    'reg.stDraw':         { ru: 'Вы в основной сетке, жеребьёвка проведена.', en: 'You are in the main draw, the draw has been made.', kg: 'Сиз негизги сеткадасыз, жеребьёвка өттү.' },
+    'reg.stPending':      { ru: 'Заявка ожидает решения администратора.', en: 'The application is awaiting a decision.', kg: 'Арыз чечимди күтүүдө.' },
+    'reg.stWaitlist':     { ru: 'Вы в листе ожидания.', en: 'You are on the waiting list.', kg: 'Сиз күтүү тизмесиндесиз.' },
+    'reg.stRejected':     { ru: 'Заявка отклонена администратором.', en: 'The application was rejected by the administrator.', kg: 'Арызды администратор четке какты.' },
+    'reg.stWithdrawn':    { ru: 'Заявка была отозвана.', en: 'The application was withdrawn.', kg: 'Арыз кайтарылып алынган.' },
+    'reg.stBlocked':      { ru: 'Заявка не прошла правила допуска.', en: 'The application did not pass the entry rules.', kg: 'Арыз катышуу эрежелеринен өткөн жок.' },
+
+    'reg.errNoPlayer':    { ru: 'Ваш аккаунт не связан с карточкой игрока', en: 'Your account is not linked to a player profile', kg: 'Аккаунтуңуз оюнчу картасына байланган эмес' },
+    'reg.errNoMember':    { ru: 'Требуется активное членство KSLT', en: 'Active KSLT membership required', kg: 'KSLT активдүү мүчөлүгү талап кылынат' },
+    'reg.errNotPaid':     { ru: 'Сначала оплатите членство', en: 'Please pay your membership first', kg: 'Адегенде мүчөлүк төлөмүн төлөңүз' },
+    'reg.errBanned':      { ru: 'Ваш аккаунт временно заблокирован', en: 'Your account is temporarily blocked', kg: 'Аккаунтуңуз убактылуу бөгөттөлгөн' },
+    'reg.errClosed':      { ru: 'Регистрация на этот турнир закрыта', en: 'Registration for this tournament is closed', kg: 'Бул мелдешке каттоо жабык' },
+    'reg.errGender':      { ru: 'Этот турнир для другой гендерной категории', en: 'This tournament is for another gender category', kg: 'Бул мелдеш башка жыныс категориясы үчүн' },
+    'reg.errNtrpLow':     { ru: 'Ваш NTRP ниже минимального для турнира', en: 'Your NTRP is below the tournament minimum', kg: 'NTRP көрсөткүчүңүз мелдештин минимумунан төмөн' },
+    'reg.errNtrpHigh':    { ru: 'Ваш NTRP выше максимального для турнира', en: 'Your NTRP is above the tournament maximum', kg: 'NTRP көрсөткүчүңүз мелдештин максимумунан жогору' },
+    'reg.errNtrpComb':    { ru: 'Суммарный NTRP пары превышает лимит турнира', en: 'Combined NTRP of the pair exceeds the tournament limit', kg: 'Жуптун жалпы NTRP көрсөткүчү чектен ашты' },
+
     // === Rating screen ===
     'rating.title':      { ru: 'Рейтинг',           en: 'Rating',          kg: 'Рейтинг' },
     'rating.search':     { ru: 'Поиск игрока...',    en: 'Search player...', kg: 'Оюнчу издөө...' },
@@ -451,6 +487,7 @@
     'common.cancel':     { ru: 'Отмена',    en: 'Cancel',   kg: 'Жокко чыгаруу' },
     'common.loading':    { ru: 'Загрузка...', en: 'Loading...', kg: 'Жүктөлүүдө...' },
     'common.error':      { ru: 'Ошибка',    en: 'Error',    kg: 'Ката' },
+    'common.ok':         { ru: 'Понятно',   en: 'Got it',   kg: 'Түшүндүм' },
     'common.success':    { ru: 'Успешно',   en: 'Success',  kg: 'Ийгиликтүү' },
     'common.notFound':   { ru: 'не найден', en: 'not found', kg: 'табылган жок' },
     'common.tryLater':   { ru: 'Попробуйте позже', en: 'Try again later', kg: 'Кийинчерээк аракет кылыңыз' },

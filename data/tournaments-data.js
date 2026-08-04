@@ -403,7 +403,7 @@ function loadUpcomingTournaments(category) {
                 </button>
                 <a href="tournament.html?id=${category}-${t.id}" class="btn-view-bracket" style="margin-right:auto">Подробнее</a>
                 ${t.status === 'open'
-                    ? '<button class="btn-register">Зарегистрироваться</button>'
+                    ? '<button class="btn-register">Регистрация</button>'
                     : ''}
             </div>
         </div>
@@ -608,16 +608,30 @@ function initCalendarButtons() {
                 return;
             }
 
-            // 3. Logged in → check membership
-            if (typeof window.checkMembership === 'function') {
-                window.checkMembership().then(function(result) {
-                    if (result.active) {
-                        showRegisterModal('allowed');
-                    } else {
-                        showRegisterModal('blocked');
-                    }
-                });
+            // 3. Logged in -> подаём заявку через общий модуль.
+            // Решение принимает сервер, ответ показывается модалкой.
+            var card = regBtn.closest('.tournament-card');
+            var trnId = card && card.dataset ? card.dataset.id : null;
+
+            if (!trnId || !window.KSLT_REG || !window.supabaseClient) {
+                if (typeof window.checkMembership === 'function') {
+                    window.checkMembership().then(function(result) {
+                        showRegisterModal(result.active ? 'allowed' : 'blocked');
+                    });
+                }
+                return;
             }
+
+            var wasLabel = regBtn.textContent;
+            regBtn.disabled = true;
+            regBtn.textContent = 'Отправка...';
+
+            window.KSLT_REG.submit(window.supabaseClient, trnId, { isEn: false, isKg: false })
+                .then(function(info) {
+                    regBtn.disabled = false;
+                    regBtn.textContent = info.created ? info.short : wasLabel;
+                });
+
         }
     });
 }
