@@ -251,7 +251,8 @@
 
         try {
             // Load categories
-            var catResult = await client.from('categories').select('*').order('sort_order', { ascending: true });
+            // Сильные категории сверху: Pro-Masters → Masters → Tour → Challenger → Futures
+            var catResult = await client.from('categories').select('*').order('sort_order', { ascending: false });
             if (catResult.error || !catResult.data || catResult.data.length === 0) return null;
 
             // Load all players, sorted by appropriate points
