@@ -43,24 +43,40 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } }
-    })
-    const { data: { user }, error: authErr } = await userClient.auth.getUser()
-    if (authErr || !user) return json({ error: 'Unauthorized' }, 401)
-
     const db = createClient(supabaseUrl, serviceKey)
 
     const body = await req.json()
     const tournamentId = body.tournament_id
     if (!tournamentId) return json({ error: 'Missing tournament_id' }, 400)
 
-    // ---- Профиль и карточка игрока ----
-    const { data: profile } = await db
-      .from('profiles')
-      .select('id, full_name, player_id, role, gender')
-      .eq('id', user.id)
-      .single()
+    // ---- Кто подаёт заявку ----
+    // Обычный режим: токен пользователя из браузера или приложения.
+    // Серверный режим: телеграм-бот знает игрока по telegram_chat_id, токена
+    // пользователя у него нет — вызывает с сервисным ключом и явным player_id.
+    const isServiceCall = authHeader === 'Bearer ' + serviceKey
+    let profile: any = null
+
+    if (isServiceCall && body.player_id) {
+      const { data } = await db
+        .from('profiles')
+        .select('id, full_name, player_id, role, gender')
+        .eq('player_id', body.player_id)
+        .maybeSingle()
+      profile = data
+    } else {
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } }
+      })
+      const { data: { user }, error: authErr } = await userClient.auth.getUser()
+      if (authErr || !user) return json({ error: 'Unauthorized' }, 401)
+
+      const { data } = await db
+        .from('profiles')
+        .select('id, full_name, player_id, role, gender')
+        .eq('id', user.id)
+        .single()
+      profile = data
+    }
 
     if (!profile) return json({ error: 'profile_not_found' }, 400)
     if (!profile.player_id) return json({ error: 'no_player' }, 400)

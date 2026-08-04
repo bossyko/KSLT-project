@@ -54,7 +54,24 @@
      */
     window.checkMembership = async function() {
         var client = window.supabaseClient;
-        if (!client || !window.ksltUser) {
+        if (!client) {
+            return { active: false, paid: false, membership: null, daysLeft: 0 };
+        }
+
+        // window.ksltUser заполняет auth-guard.js, но он подключён не на всех страницах —
+        // на страницах турниров его нет. Без этого проверка молча возвращала
+        // «членства нет», ни разу не обратившись к базе, и записаться на турнир
+        // не мог никто. Берём сессию сами.
+        if (!window.ksltUser) {
+            try {
+                var sessRes = await client.auth.getSession();
+                if (sessRes.data && sessRes.data.session) {
+                    window.ksltUser = sessRes.data.session.user;
+                }
+            } catch (e) { /* нет сессии — обработается ниже */ }
+        }
+
+        if (!window.ksltUser) {
             return { active: false, paid: false, membership: null, daysLeft: 0 };
         }
 
