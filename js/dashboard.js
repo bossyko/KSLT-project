@@ -997,18 +997,30 @@
         var player = res.data;
         var html = '';
 
-        // KSLT rank
-        if (player.category_id) {
-            var catRes = await client.from('categories').select('name').eq('id', player.category_id).single();
-            var catName = (catRes.data && catRes.data.name) || '';
-            // Calculate rank in category
-            var rankRes = await client.from('players').select('id', { count: 'exact', head: true })
-                .eq('category_id', player.category_id).gt('points', player.points || 0);
-            var rank = (rankRes.count || 0) + 1;
-            html += '<div class="db-sidebar-rating-row">' +
-                '<span class="db-sidebar-rating-label">KSLT</span>' +
-                '<span class="db-sidebar-rating-value">' + escHtml(catName) + ' · #' + rank + '</span>' +
-            '</div>';
+        // Категории игрока с очками и местом в каждой. Играть можно в своей
+        // и на ступень выше, очки в этих категориях считаются раздельно.
+        var pcRes = await client.from('player_categories')
+            .select('category_id, points')
+            .eq('player_id', profile.player_id)
+            .order('points', { ascending: false });
+
+        var myCats = pcRes.data || [];
+        if (myCats.length > 0) {
+            var catsRes = await client.from('categories').select('id, name');
+            var catName = {};
+            (catsRes.data || []).forEach(function(c) { catName[c.id] = c.name; });
+
+            for (var i = 0; i < myCats.length; i++) {
+                var row = myCats[i];
+                var rankRes = await client.from('player_categories')
+                    .select('player_id', { count: 'exact', head: true })
+                    .eq('category_id', row.category_id)
+                    .gt('points', row.points || 0);
+                html += '<div class="db-sidebar-rating-row">' +
+                    '<span class="db-sidebar-rating-label">' + escHtml(catName[row.category_id] || row.category_id) + '</span>' +
+                    '<span class="db-sidebar-rating-value">' + (row.points || 0) + ' · #' + ((rankRes.count || 0) + 1) + '</span>' +
+                '</div>';
+            }
         }
 
         // NTRP rating
@@ -3923,6 +3935,53 @@
 
         btn.textContent = L.updatePassword;
         btn.disabled = false;
+    }
+
+    // ---- Delete Account ----
+    var settingsDeleteBtn = document.getElementById('settingsDeleteBtn');
+    if (settingsDeleteBtn) {
+        settingsDeleteBtn.addEventListener('click', async function() {
+            if (!confirm(L.deleteConfirm)) return;
+            if (!confirm(L.deleteConfirm)) return; // double confirm
+
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            try {
+                var session = await client.auth.getSession();
+                var token = session.data && session.data.session && session.data.session.access_token;
+                if (!token) {
+                    showMessage('settingsMessage', 'Not authenticated', true);
+                    btn.disabled = false;
+                    btn.textContent = L.deleteAccount;
+                    return;
+                }
+
+                var resp = await fetch(SUPABASE_URL + '/functions/v1/delete-account', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY
+                    }
+                });
+
+                var data = await resp.json();
+                if (data.error) {
+                    showMessage('settingsMessage', data.error, true);
+                    btn.disabled = false;
+                    btn.textContent = L.deleteAccount;
+                } else {
+                    await client.auth.signOut();
+                    window.location.href = window.location.origin + '/index.html';
+                }
+            } catch (e) {
+                showMessage('settingsMessage', e.message || 'Error', true);
+                btn.disabled = false;
+                btn.textContent = L.deleteAccount;
+            }
+        });
     }
 
     // ---- Helpers ----

@@ -258,6 +258,16 @@
             var players = plrResult.data || [];
             var categories = catResult.data;
 
+            // Очки по категориям: игрок может стоять в двух — своей и на ступень
+            // выше, если играл там. В каждой таблице он показан со своими очками
+            // именно этой категории.
+            var pcRes = await client.from('player_categories').select('player_id, category_id, points');
+            var pointsIn = {};
+            (pcRes.data || []).forEach(function(r) {
+                if (!pointsIn[r.category_id]) pointsIn[r.category_id] = {};
+                pointsIn[r.category_id][r.player_id] = r.points || 0;
+            });
+
             // Build categoriesData: composite keys men-{catId} / women-{catId}
             // Categories are gender-neutral (masters, tour), player.gender is separate
             // Skip Friendly — no ranking
@@ -267,8 +277,13 @@
                 if (cat.name && cat.name.toLowerCase().indexOf('friendly') !== -1) return;
                 var catName = isEn ? (cat.name_en || cat.name) : (isKg ? (cat.name_kg || cat.name) : cat.name);
                 genders.forEach(function(g) {
+                    var inCat = pointsIn[cat.id] || {};
                     var catPlayers = players.filter(function(p) {
-                        return p.category_id === cat.id && p.gender === g;
+                        if (p.gender !== g) return false;
+                        // Домашняя категория — всегда, чужая — только если там есть очки
+                        return p.category_id === cat.id || inCat[p.id] > 0;
+                    }).sort(function(a, b) {
+                        return (inCat[b.id] || 0) - (inCat[a.id] || 0);
                     });
                     if (catPlayers.length === 0) return;
                     var key = g + '-' + cat.id;
@@ -282,7 +297,7 @@
                                 name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
                                 photo: p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?',
                                 country: (CU ? CU.flagEmoji(CU.normalizeCountry(p.country)) : p.country) || '🇰🇬',
-                                points: p.points || 0,
+                                points: inCat[p.id] || 0,
                                 wins: p.wins || 0,
                                 losses: p.losses || 0,
                                 change: p.rank_change || 0,

@@ -554,6 +554,9 @@
             return {
                 player_id: r.player_id,
                 tournament_name: tournament.title,
+                // Очки идут в категорию турнира, а не игрока: гость из нижней
+                // категории получает очки той, где сыграл
+                category_id: tournament.category_id || null,
                 tournament_id: tournament.id,
                 points_earned: r.points_earned || 0,
                 recorded_at: tournament.date_start,
@@ -3457,9 +3460,22 @@
                 return getTeamPoints(b, playersMap) - getTeamPoints(a, playersMap);
             });
         } else {
+            // Посев по очкам в категории ТУРНИРА: гость из нижней категории
+            // сеется по тому, что набрал здесь, а не по своим домашним очкам
+            var catPoints = {};
+            if (tournament.category_id) {
+                var pcIds = approved.map(function(r) { return r.player_id; }).filter(Boolean);
+                if (pcIds.length > 0) {
+                    var pcRes = await A.client.from('player_categories')
+                        .select('player_id, points')
+                        .eq('category_id', tournament.category_id)
+                        .in('player_id', pcIds);
+                    (pcRes.data || []).forEach(function(r) { catPoints[r.player_id] = r.points || 0; });
+                }
+            }
             approved.sort(function(a, b) {
-                var pA = (a.players ? a.players.points : 0) || 0;
-                var pB = (b.players ? b.players.points : 0) || 0;
+                var pA = catPoints[a.player_id] || 0;
+                var pB = catPoints[b.player_id] || 0;
                 return pB - pA;
             });
         }

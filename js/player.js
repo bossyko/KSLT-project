@@ -444,7 +444,17 @@
 
         // Ratings block — Singles
         html += '<div class="pp-ratings">';
-        html += '<div class="pp-rating-row"><span class="pp-rating-label">KSLT</span><span class="pp-rating-value">' + cat.name + ' · #' + rank + '</span></div>';
+        var myCats = data.categories || [];
+        if (myCats.length > 0) {
+            myCats.forEach(function(c) {
+                html += '<div class="pp-rating-row">' +
+                    '<span class="pp-rating-label">' + esc(c.name) + '</span>' +
+                    '<span class="pp-rating-value">' + c.points + ' \u00b7 #' + c.rank + '</span>' +
+                '</div>';
+            });
+        } else {
+            html += '<div class="pp-rating-row"><span class="pp-rating-label">KSLT</span><span class="pp-rating-value">' + cat.name + ' \u00b7 #' + rank + '</span></div>';
+        }
         if (player.ntrp_rating) {
             var ntrpVal = Math.round(Number(player.ntrp_rating) / 0.25) * 0.25;
             html += '<div class="pp-rating-row"><span class="pp-rating-label">NTRP</span><span class="pp-rating-value">' + ntrpVal.toFixed(2).replace(/0$/, '') + '</span></div>';
@@ -496,36 +506,6 @@
         });
         html += '</div></div>';
         html += '</div>'; // .pp-stats singles
-
-        // ---- Парный разряд: только статистика игр ----
-        // Очки за парные и микст турниры не начисляются, поэтому здесь
-        // нет ни очков, ни изменения места — только сыгранное.
-        var doublesTitle = isEn ? 'Doubles & Mixed' : (isKg ? 'Жуптук жана аралаш' : 'Парный и микст');
-        html += '<h3 class="pp-section-title pp-fade-in">' + doublesTitle + '</h3>';
-        html += '<div class="pp-stats pp-stats-doubles pp-fade-in">';
-        var dblW = player.doubles_wins || 0;
-        var dblL = player.doubles_losses || 0;
-        var dblTotal = dblW + dblL;
-        var dblWinRate = dblTotal > 0 ? Math.round(dblW / dblTotal * 100) : 0;
-        html += statCard(dblTotal > 0 ? dblW : '\u2014', L.statsWins, '', '');
-        html += statCard(dblTotal > 0 ? dblL : '\u2014', L.statsLosses, '', '');
-        html += statCard(dblTotal > 0 ? dblWinRate + '%' : '\u2014', L.statsWinRate, '', '');
-
-        // Doubles streak card with form dots
-        var dblStreak = calcStreak(player.doubles_form || []);
-        var dblStreakLabel = dblStreak.count > 0 ? dblStreak.count + (dblStreak.type === 'up' ? 'W' : 'L') : '\u2014';
-        html += '<div class="pp-stat">';
-        html += '<div class="pp-stat-num">' + dblStreakLabel + '</div>';
-        html += '<div class="pp-stat-label">' + L.statsStreak + '</div>';
-        if (player.doubles_form && player.doubles_form.length > 0) {
-            html += '<div class="pp-form">';
-            player.doubles_form.forEach(function(f) {
-                html += '<span class="pp-form-dot ' + (f === 'W' ? 'win' : 'loss') + '"></span>';
-            });
-            html += '</div>';
-        }
-        html += '</div>';
-        html += '</div>';
 
         // ---- My Games (combined: Matches + Challenges + Tournaments) ----
         html += '<div class="pp-section pp-fade-in">';
@@ -1436,10 +1416,38 @@
                             catName = isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name);
                             catKey = (c.gender === 'female' ? 'women-' : 'men-') + (c.name_en || c.name).toLowerCase().replace(/[^a-z0-9-]/g, '');
                         }
-                        // Calculate rank in category
-                        var rankRes = await client.from('players').select('id', { count: 'exact', head: true })
-                            .eq('category_id', p.category_id).gt('points', p.points || 0);
-                        rank = (rankRes.count || 0) + 1;
+                    }
+
+                    // Все категории игрока с очками и местом в каждой.
+                    // Игрок может стоять в двух: своей и на ступень выше, если
+                    // там играл. Очки в каждой считаются отдельно.
+                    var myCats = [];
+                    var pcRes = await client.from('player_categories')
+                        .select('category_id, points')
+                        .eq('player_id', p.id)
+                        .order('points', { ascending: false });
+
+                    if (pcRes.data && pcRes.data.length > 0) {
+                        var allCatsRes = await client.from('categories').select('id, name, name_en, name_kg');
+                        var catById = {};
+                        (allCatsRes.data || []).forEach(function(c) { catById[c.id] = c; });
+
+                        for (var ci = 0; ci < pcRes.data.length; ci++) {
+                            var row = pcRes.data[ci];
+                            var rankRes = await client.from('player_categories')
+                                .select('player_id', { count: 'exact', head: true })
+                                .eq('category_id', row.category_id)
+                                .gt('points', row.points || 0);
+                            var c2 = catById[row.category_id];
+                            myCats.push({
+                                id: row.category_id,
+                                name: c2 ? (isEn ? (c2.name_en || c2.name) : (isKg ? (c2.name_kg || c2.name) : c2.name)) : row.category_id,
+                                points: row.points || 0,
+                                rank: (rankRes.count || 0) + 1,
+                                isHome: row.category_id === p.category_id
+                            });
+                            if (row.category_id === p.category_id) rank = (rankRes.count || 0) + 1;
+                        }
                     }
                     var playerName = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
                     // If player has no photo, try linked profile avatar
@@ -1470,6 +1478,7 @@
                             bio_kg: p.bio_kg || ''
                         },
                         category: { name: catName || '\u2014', players: [] },
+                        categories: myCats,
                         categoryKey: catKey,
                         rank: rank
                     };

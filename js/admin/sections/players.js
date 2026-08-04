@@ -541,28 +541,10 @@
                         '<input type="number" class="ad-field-input" id="adPlrRankChange" value="' + (item ? (item.rank_change || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
                     '</div>' +
                 '</div>' +
-            '</div>' +
-
-            // Парный и микст — только статистика игр, очков нет
-            '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title" style="display:flex;align-items:center;gap:8px;">' +
-                    L.plrDoublesTitle +
-                    (plrEditingId ? (
-                        '<button type="button" class="ad-btn-translate" id="adPlrUnlockDoubles" style="margin-top:0;">✏ ' + L.plrManualEdit + '</button>' +
-                        '<button type="button" class="ad-btn-translate" id="adPlrRecalcDoubles" style="margin-top:0;">🔄 ' + L.plrRecalc + '</button>'
-                    ) : '') +
-                '</div>' +
-                '<div class="ad-field-hint" style="margin-bottom:8px;">' + L.plrRecalcHint + '</div>' +
-                '<div class="ad-field-row">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.plrWins + '</label>' +
-                        '<input type="number" class="ad-field-input ad-plr-doubles-field" id="adPlrDoublesWins" min="0" value="' + (item ? (item.doubles_wins || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.plrLosses + '</label>' +
-                        '<input type="number" class="ad-field-input ad-plr-doubles-field" id="adPlrDoublesLosses" min="0" value="' + (item ? (item.doubles_losses || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
-                    '</div>' +
-                '</div>' +
+                // Очки по категориям: игрок может играть в своей и на ступень
+                // выше, очки в каждой считаются отдельно. Блок только для чтения,
+                // он выводится из истории результатов.
+                (plrEditingId ? '<div id="adPlrCatsBox" style="margin-top:14px;"></div>' : '') +
             '</div>' +
 
             // NTRP Rating (manual edit by admin)
@@ -644,6 +626,10 @@
                         '<label class="ad-field-label">' + L.rhTournament + '</label>' +
                         '<input type="text" class="ad-field-input" id="adPlrRhName" placeholder="' + L.rhTournament + '">' +
                     '</div>' +
+                    '<div class="ad-field" style="flex:0 0 160px;">' +
+                        '<label class="ad-field-label">' + L.plrCategory + '</label>' +
+                        '<select class="ad-field-input" id="adPlrRhCat">' + catOptionsHtml + '</select>' +
+                    '</div>' +
                     '<div class="ad-field" style="flex:0 0 100px;">' +
                         '<label class="ad-field-label">' + L.rhPoints + '</label>' +
                         '<input type="number" class="ad-field-input" id="adPlrRhPoints" min="0" placeholder="0">' +
@@ -713,9 +699,18 @@
                     return;
                 }
 
+                // Категория обязательна: очки считаются в разрезе категорий,
+                // и запись без неё в рейтинг не попадёт
+                var catVal = document.getElementById('adPlrRhCat').value;
+                if (!catVal) {
+                    A.showToast(isEn ? 'Select the category' : 'Выберите категорию', 'error');
+                    return;
+                }
+
                 var res = await A.client.from('rating_history').insert({
                     player_id: plrEditingId,
                     tournament_name: nameVal,
+                    category_id: catVal,
                     points_earned: ptsVal,
                     recorded_at: dateVal
                 });
@@ -787,21 +782,37 @@
                 A.showToast(isEn ? 'Fields unlocked' : 'Поля разблокированы', 'info');
             });
         }
-        var recalcDoublesBtn = document.getElementById('adPlrRecalcDoubles');
-        if (recalcDoublesBtn && plrEditingId) {
-            recalcDoublesBtn.addEventListener('click', async function() {
-                recalcDoublesBtn.disabled = true;
-                await A.recalcDoublesPoints([plrEditingId]);
-                var fresh = await A.client.from('players').select('doubles_wins,doubles_losses').eq('id', plrEditingId).single();
-                if (fresh.data) {
-                    var dwf = document.getElementById('adPlrDoublesWins');
-                    var dlf = document.getElementById('adPlrDoublesLosses');
-                    if (dwf) dwf.value = fresh.data.doubles_wins || 0;
-                    if (dlf) dlf.value = fresh.data.doubles_losses || 0;
-                }
-                recalcDoublesBtn.disabled = false;
-                A.showToast(isEn ? 'Recalculated' : 'Пересчитано', 'success');
-            });
+
+        // --- Очки по категориям (только чтение) ---
+        if (plrEditingId) {
+            (async function() {
+                var box = document.getElementById('adPlrCatsBox');
+                if (!box) return;
+                var pcRes = await A.client.from('player_categories')
+                    .select('category_id, points')
+                    .eq('player_id', plrEditingId)
+                    .order('points', { ascending: false });
+                var rows = pcRes.data || [];
+                if (rows.length === 0) return;
+
+                var title = isEn ? 'Points by category' : 'Очки по категориям';
+                var homeLabel = isEn ? 'home' : 'домашняя';
+                var html = '<div class="ad-field-label" style="margin-bottom:6px;">' + title + '</div>';
+                html += '<div style="display:flex;flex-direction:column;gap:6px;">';
+                rows.forEach(function(r) {
+                    var cat = A.categoriesMap ? A.categoriesMap[r.category_id] : null;
+                    var name = cat ? (isEn ? (cat.name_en || cat.name) : cat.name) : r.category_id;
+                    var isHome = item && r.category_id === item.category_id;
+                    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:8px;">' +
+                        '<span>' + A.esc(name) +
+                            (isHome ? ' <span style="font-size:0.7rem;color:var(--accent);">' + homeLabel + '</span>' : '') +
+                        '</span>' +
+                        '<span style="font-weight:600;color:var(--accent);">' + (r.points || 0) + '</span>' +
+                    '</div>';
+                });
+                html += '</div>';
+                box.innerHTML = html;
+            })();
         }
 
         // --- Motto character counter ---
@@ -1113,8 +1124,7 @@
                 bio_kg: document.getElementById('adPlrMottoKg').value.trim() || null,
                 ntrp_rating: parseFloat(document.getElementById('adPlrNtrp').value) || null,
 
-                doubles_wins: parseInt(document.getElementById('adPlrDoublesWins').value, 10) || 0,
-                doubles_losses: parseInt(document.getElementById('adPlrDoublesLosses').value, 10) || 0
+
             };
 
             if (!fnRu) {
@@ -2271,21 +2281,36 @@
                 return m.winner_id === pid ? 'W' : 'L';
             });
 
-            // Points from rating_history (singles only, 2 tournament-year window)
-            var oldestDate = A.getOldestValidDate();
-            var rhRes = await A.client.from('rating_history')
-                .select('points_earned')
-                .eq('player_id', pid)
-                .neq('is_doubles', true)
-                .gte('recorded_at', oldestDate);
-            var total = 0;
-            (rhRes.data || []).forEach(function(r) {
-                total += r.points_earned || 0;
+            await A.client.from('players').update({
+                wins: wins, losses: losses, form: formArr
+            }).eq('id', pid);
+        }
+
+        // Раскладка очков по категориям: очки идут в категорию турнира,
+        // поэтому после завершения у игрока может появиться вторая категория.
+        if (unique.length > 0) {
+            var pcRes = await A.client.rpc('recalc_player_categories', { p_ids: unique });
+            if (pcRes && pcRes.error) {
+                A.showToast('recalc_player_categories: ' + pcRes.error.message, 'error');
+                return;
+            }
+
+            // players.points — очки домашней категории. Считать их суммой всего
+            // нельзя: игрок с очками в двух категориях сеялся бы в своей выше,
+            // чем заслужил.
+            var homeRes = await A.client.from('players').select('id, category_id').in('id', unique);
+            var catRes = await A.client.from('player_categories').select('player_id, category_id, points').in('player_id', unique);
+            var byPlayer = {};
+            (catRes.data || []).forEach(function(r) {
+                if (!byPlayer[r.player_id]) byPlayer[r.player_id] = {};
+                byPlayer[r.player_id][r.category_id] = r.points || 0;
             });
 
-            await A.client.from('players').update({
-                points: total, wins: wins, losses: losses, form: formArr
-            }).eq('id', pid);
+            for (var h = 0; h < (homeRes.data || []).length; h++) {
+                var pl = homeRes.data[h];
+                var home = pl.category_id ? ((byPlayer[pl.id] || {})[pl.category_id] || 0) : 0;
+                await A.client.from('players').update({ points: home }).eq('id', pl.id);
+            }
         }
     }
     A.recalcPlayerPoints = recalcPlayerPoints;
