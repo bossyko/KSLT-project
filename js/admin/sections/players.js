@@ -1725,10 +1725,16 @@
                 '<select class="ad-field-input ad-filter-select" id="ratGenderFilter">' + genderOpts + '</select>' +
                 '<select class="ad-field-input ad-filter-select" id="ratCatFilter">' + catOpts + '</select>' +
                 '<button class="ad-btn ad-btn-sm" id="ratRecalcAllBtn" style="margin-left:auto">' + (isEn ? 'Recalculate all' : 'Пересчитать все') + '</button>' +
+                (A.currentRole === 'admin'
+                    ? '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratSeasonResetBtn" style="margin-left:8px;">🗓 ' + (isEn ? 'Season change' : 'Смена сезона') + '</button>'
+                    : '') +
             '</div>' +
             '<div id="ratRankingsBody"></div>';
 
         document.getElementById('ratRecalcAllBtn').addEventListener('click', recalcAllPoints);
+
+        var seasonBtn = document.getElementById('ratSeasonResetBtn');
+        if (seasonBtn) seasonBtn.addEventListener('click', runSeasonReset);
         document.getElementById('ratCatFilter').addEventListener('change', function() {
             _ratCatFilter = this.value;
             loadRatRankings();
@@ -2279,6 +2285,48 @@
         }
     }
     A.recalcPlayerPoints = recalcPlayerPoints;
+
+    /**
+     * Смена сезона: пересчёт очков с новым окном + рассылка уведомлений тем,
+     * у кого изменились очки или место. Проводится раз в год, 1 сентября.
+     * Вся работа на сервере — Edge Function season-reset.
+     */
+    async function runSeasonReset() {
+        var warn = isEn
+            ? 'Points earned in the season that ended last August will expire. Every player whose points or rank change will get a Telegram message and a push. Proceed?'
+            : 'Очки за сезон, закончившийся в прошлом августе, сгорят. Каждому игроку, у кого изменятся очки или место, уйдёт сообщение в Telegram и push. Продолжить?';
+
+        A.showConfirm(isEn ? 'Season change' : 'Смена сезона', warn, async function() {
+            var btn = document.getElementById('ratSeasonResetBtn');
+            if (btn) { btn.disabled = true; btn.textContent = '🗓 ...'; }
+            try {
+                var session = await A.client.auth.getSession();
+                var token = session.data.session ? session.data.session.access_token : '';
+                var res = await fetch(A.client.supabaseUrl + '/functions/v1/season-reset', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+                var result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'HTTP ' + res.status);
+
+                A.showToast(
+                    (isEn ? 'Season ' : 'Сезон ') + result.season + ': ' +
+                    (isEn ? 'changed ' : 'изменилось у ') + result.changed + ', ' +
+                    (isEn ? 'notified ' : 'уведомлено ') + result.notified,
+                    'success'
+                );
+                loadRatRankings();
+            } catch (e) {
+                A.showToast(e.message || 'Error', 'error');
+            }
+            if (btn) { btn.disabled = false; btn.textContent = '🗓 ' + (isEn ? 'Season change' : 'Смена сезона'); }
+        }, isEn ? 'Proceed' : 'Провести');
+    }
 
     async function recalcAllPoints() {
         var btn = document.getElementById('ratRecalcAllBtn');
