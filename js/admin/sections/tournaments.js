@@ -646,7 +646,9 @@
                     '<button class="ad-tab' + (isExisting ? '' : ' disabled') + '"' + (isExisting ? ' data-trn-nav="regs"' : '') + ' ' + (isExisting ? '' : 'disabled') + '>' + L.trnTabRegs + '</button>' +
                     '<button class="ad-tab' + (hasBracket ? '' : ' disabled') + '"' + (hasBracket ? ' data-trn-nav="bracket"' : '') + ' ' + (hasBracket ? '' : 'disabled') + '>' + L.trnTabBracket + '</button>' +
                     '<button class="ad-tab' + (hasBracket ? '' : ' disabled') + '"' + (hasBracket ? ' data-trn-nav="schedule"' : '') + ' ' + (hasBracket ? '' : 'disabled') + '>' + L.trnTabSchedule + '</button>' +
-                    '<button class="ad-tab' + (isExisting ? '' : ' disabled') + '"' + (isExisting ? ' data-trn-nav="points"' : '') + ' ' + (isExisting ? '' : 'disabled') + '>' + L.trnTabPoints + '</button>' +
+                    // Friendly не начисляет очки — вкладка «Результаты» ему не нужна
+                    (item && item.category_id === 'friendly' ? '' :
+                    '<button class="ad-tab' + (isExisting ? '' : ' disabled') + '"' + (isExisting ? ' data-trn-nav="points"' : '') + ' ' + (isExisting ? '' : 'disabled') + '>' + L.trnTabPoints + '</button>') +
                 '</div>' +
             '</div>' +
 
