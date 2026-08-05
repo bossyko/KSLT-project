@@ -37,7 +37,8 @@
   function loadCategories() {
     supabaseClient.from('categories')
       .select('id, name, name_en, name_kg, sort_order')
-      .order('sort_order', { ascending: true })
+      // Как на сайте: сильные категории сверху (js/players.js)
+      .order('sort_order', { ascending: false })
       .then(function(r) {
         if (r.error) { console.error('Categories load error:', r.error); return; }
         categoriesFromDB = (r.data || []).filter(function(c) {
@@ -136,19 +137,35 @@
     if (!el) return;
     el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
-    var orderField = 'points';
 
-    supabaseClient.from('players')
-      .select('*')
+    // Очки берутся из player_categories: игрок может стоять в двух категориях —
+    // своей и на ступень выше, и в каждой таблице показывается со своими очками
+    // именно этой категории. Так же устроен рейтинг на сайте.
+    supabaseClient.from('player_categories')
+      .select('player_id, points')
       .eq('category_id', currentCatId)
-      .eq('gender', currentGender)
-      .order(orderField, { ascending: false })
-      .then(function(r) {
-        if (r.error) console.error('Rating load error:', r.error);
-        allPlayers = r.data || [];
-        renderSubtitle();
-        renderPodium();
-        render();
+      .then(function(pc) {
+        var pointsIn = {};
+        (pc.data || []).forEach(function(row) { pointsIn[row.player_id] = row.points || 0; });
+        var ids = Object.keys(pointsIn);
+
+        return supabaseClient.from('players')
+          .select('*')
+          .eq('gender', currentGender)
+          .then(function(r) {
+            if (r.error) console.error('Rating load error:', r.error);
+            allPlayers = (r.data || [])
+              // Домашняя категория — всегда, чужая — только если там есть очки
+              .filter(function(p) { return p.category_id === currentCatId || pointsIn[p.id] > 0; })
+              .map(function(p) {
+                p.points = pointsIn[p.id] || 0;
+                return p;
+              })
+              .sort(function(a, b) { return b.points - a.points; });
+            renderSubtitle();
+            renderPodium();
+            render();
+          });
       });
   }
 
@@ -174,7 +191,9 @@
 
     var medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
     var order = [1, 0, 2]; // 2nd, 1st, 3rd
-    var sizeClass = ['rp-second', 'rp-first', 'rp-third'];
+    // \u041A\u043B\u0430\u0441\u0441 \u043F\u043E \u043C\u0435\u0441\u0442\u0443 \u0438\u0433\u0440\u043E\u043A\u0430, \u0430 \u043D\u0435 \u043F\u043E \u043F\u043E\u0437\u0438\u0446\u0438\u0438 \u0432 \u0440\u0430\u0437\u043C\u0435\u0442\u043A\u0435: \u043F\u0435\u0440\u0432\u044B\u0439 \u2014 .rp-first,
+    // \u0435\u0433\u043E CSS \u0441\u0442\u0430\u0432\u0438\u0442 \u0432 \u0446\u0435\u043D\u0442\u0440 \u0438 \u0434\u0435\u043B\u0430\u0435\u0442 \u043A\u0440\u0443\u043F\u043D\u0435\u0435 (order \u0432 app.css)
+    var sizeClass = ['rp-first', 'rp-second', 'rp-third'];
     var pts = 'points';
 
     var html = '<div class="rating-podium">';
