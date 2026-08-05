@@ -70,6 +70,7 @@
         role_user: 'Колдонуучу', role_player: 'Оюнчу', role_admin: 'Администратор', role_manager: 'Менеджер',
         category: 'Категория', points: 'Упайлар',
         wins: 'Жеңиштер', losses: 'Жеңилүүлөр', rank: 'Рейтинг өзгөрүшү',
+        catsTitle: 'Категориялар боюнча упайлар', catHome: 'негизги', place: 'Орун',
         socialMedia: 'Социалдык тармактар',
         cropTitle: 'Сүрөттү кыркуу',
         cropApply: 'Колдонуу',
@@ -254,6 +255,7 @@
         role_user: 'User', role_player: 'Player', role_admin: 'Admin', role_manager: 'Manager',
         category: 'Category', points: 'Points',
         wins: 'Wins', losses: 'Losses', rank: 'Rank Change',
+        catsTitle: 'Points by category', catHome: 'home', place: 'Place',
         socialMedia: 'Social Media',
         cropTitle: 'Crop Photo',
         cropApply: 'Apply',
@@ -438,6 +440,7 @@
         role_user: 'Пользователь', role_player: 'Игрок', role_admin: 'Администратор', role_manager: 'Менеджер',
         category: 'Категория', points: 'Очки',
         wins: 'Победы', losses: 'Поражения', rank: 'Изм. рейтинга',
+        catsTitle: 'Очки по категориям', catHome: 'домашняя', place: 'Место',
         socialMedia: 'Соцсети',
         cropTitle: 'Обрезка фото',
         cropApply: 'Применить',
@@ -2648,32 +2651,41 @@
             if (catRes.data) catName = catRes.data.name;
         }
 
-        // Count wins/losses from actual matches
+        var catsHtml = await renderStatsCategories(p);
+
+        // Count wins/losses from actual matches — только для сводного ряда,
+        // у игрока с категориями цифры берутся из player_categories
         var wins = 0, losses = 0;
-        var matchesRes = await client.from('matches')
-            .select('winner_id')
-            .or('player1_id.eq.' + p.id + ',player2_id.eq.' + p.id)
-            .not('winner_id', 'is', null)
-            .neq('score', 'BYE');
-        if (matchesRes.data) {
-            matchesRes.data.forEach(function(m) {
-                if (m.winner_id === p.id) wins++;
-                else losses++;
-            });
+        if (!catsHtml) {
+            var matchesRes = await client.from('matches')
+                .select('winner_id')
+                .or('player1_id.eq.' + p.id + ',player2_id.eq.' + p.id)
+                .not('winner_id', 'is', null)
+                .neq('score', 'BYE');
+            if (matchesRes.data) {
+                matchesRes.data.forEach(function(m) {
+                    if (m.winner_id === p.id) wins++;
+                    else losses++;
+                });
+            }
         }
 
         container.innerHTML =
             '<h2 class="db-section-title">' + L.statsTitle + '</h2>' +
-            '<div class="db-stats-grid">' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + (p.points || 0) + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + wins + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + losses + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
-                '<div class="db-stat-card"><div class="db-stat-value">' + ((p.rank_change || 0) > 0 ? '+' : '') + (p.rank_change || 0) + '</div><div class="db-stat-label">' + L.rank + '</div></div>' +
-            '</div>' +
-            '<div class="db-card">' +
-                '<div class="db-card-title">' + L.category + '</div>' +
-                '<p style="color:var(--accent);font-size:1.1rem;font-weight:600;">' + catName + '</p>' +
-            '</div>' +
+            // Сводный ряд повторяет домашнюю категорию — показываем его только
+            // тем, у кого категорий ещё нет. Так же сделано в админке.
+            (catsHtml ? '' :
+                '<div class="db-stats-grid">' +
+                    '<div class="db-stat-card"><div class="db-stat-value">' + (p.points || 0) + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
+                    '<div class="db-stat-card"><div class="db-stat-value">' + wins + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
+                    '<div class="db-stat-card"><div class="db-stat-value">' + losses + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
+                    '<div class="db-stat-card"><div class="db-stat-value">' + ((p.rank_change || 0) > 0 ? '+' : '') + (p.rank_change || 0) + '</div><div class="db-stat-label">' + L.rank + '</div></div>' +
+                '</div>') +
+            (catsHtml ||
+                '<div class="db-card">' +
+                    '<div class="db-card-title">' + L.category + '</div>' +
+                    '<p style="color:var(--accent);font-size:1.1rem;font-weight:600;">' + catName + '</p>' +
+                '</div>') +
             '<div id="dbRatingChartWrap" style="display:none;">' +
                 '<div class="db-card">' +
                     '<div class="db-card-title">' + L.ratingHistory + '</div>' +
@@ -2689,6 +2701,60 @@
 
         // Render badges card
         renderStatsBadges(profile.player_id);
+    }
+
+    // ---- Points by category (Stats tab) ----
+    // Игрок играет в своей категории и на ступень выше, очки, победы и поражения
+    // в каждой считаются раздельно. Возвращает '' — тогда показывается старый
+    // блок с одной категорией (у игрока ещё нет ни одной записи).
+    async function renderStatsCategories(p) {
+        if (!client) return '';
+
+        var pcRes = await client.from('player_categories')
+            .select('player_id, category_id, points, wins, losses')
+            .order('points', { ascending: false });
+        var allRows = pcRes.data || [];
+        var myRows = allRows.filter(function(r) { return r.player_id === p.id; });
+        if (myRows.length === 0) return '';
+
+        var catsRes = await client.from('categories').select('id, name, name_en, name_kg');
+        var catName = {};
+        (catsRes.data || []).forEach(function(c) {
+            catName[c.id] = isKg ? (c.name_kg || c.name) : (isEn ? (c.name_en || c.name) : c.name);
+        });
+
+        // Место считается так же, как в публичном рейтинге: свой пол, домашняя
+        // категория — всегда, чужая — только если там есть очки
+        var plrRes = await client.from('players').select('id, gender, category_id').eq('gender', p.gender);
+        var sameGender = plrRes.data || [];
+
+        var html = '<div class="db-card"><div class="db-card-title">' + L.catsTitle + '</div>';
+
+        myRows.forEach(function(row) {
+            var pointsIn = {};
+            allRows.forEach(function(r) {
+                if (r.category_id === row.category_id) pointsIn[r.player_id] = r.points || 0;
+            });
+            var place = sameGender.filter(function(o) {
+                if (o.category_id !== row.category_id && !(pointsIn[o.id] > 0)) return false;
+                return (pointsIn[o.id] || 0) > (row.points || 0);
+            }).length + 1;
+
+            var isHome = row.category_id === p.category_id;
+            html += '<div class="db-cat-block">' +
+                '<div class="db-cat-name">' + escHtml(catName[row.category_id] || row.category_id) +
+                    (isHome ? '<span class="db-cat-home">' + L.catHome + '</span>' : '') +
+                '</div>' +
+                '<div class="db-stats-grid db-stats-grid-mini">' +
+                    '<div class="db-stat-card"><div class="db-stat-value">' + (row.points || 0) + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
+                    '<div class="db-stat-card"><div class="db-stat-value">' + (row.wins || 0) + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
+                    '<div class="db-stat-card"><div class="db-stat-value">' + (row.losses || 0) + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
+                    '<div class="db-stat-card"><div class="db-stat-value">#' + place + '</div><div class="db-stat-label">' + L.place + '</div></div>' +
+                '</div>' +
+            '</div>';
+        });
+
+        return html + '</div>';
     }
 
     // ---- Badges Card in Stats ----
