@@ -2645,6 +2645,7 @@
         }
 
         var p = result.data;
+        _statsHomeCategory = p.category_id || null;
         var catName = '-';
         if (p.category_id) {
             var catRes = await client.from('categories').select('name').eq('id', p.category_id).single();
@@ -2689,8 +2690,16 @@
             '<div id="dbRatingChartWrap" style="display:none;">' +
                 '<div class="db-card">' +
                     '<div class="db-card-title">' + L.ratingHistory + '</div>' +
-                    '<div style="position:relative;height:250px;">' +
+                    '<div style="position:relative;height:340px;">' +
                         '<canvas id="dbRatingChart"></canvas>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div id="dbNtrpChartWrap" style="display:none;">' +
+                '<div class="db-card">' +
+                    '<div class="db-card-title">NTRP</div>' +
+                    '<div style="position:relative;height:180px;">' +
+                        '<canvas id="dbNtrpChart"></canvas>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -2701,6 +2710,27 @@
 
         // Render badges card
         renderStatsBadges(profile.player_id);
+    }
+
+    // Домашняя категория игрока — её линия на графике толще остальных
+    var _statsHomeCategory = null;
+
+    // Название, цвет и порядок категорий. Колонка color заводится миграцией
+    // sql/category-colors.sql — пока её нет, запрос с ней падает целиком,
+    // поэтому откатываемся на выборку без цвета.
+    async function loadCategoriesMeta() {
+        var res = await client.from('categories').select('id, name, name_en, name_kg, sort_order, color');
+        if (res.error) res = await client.from('categories').select('id, name, name_en, name_kg, sort_order');
+
+        var map = {};
+        (res.data || []).forEach(function(c) {
+            map[c.id] = {
+                name: isKg ? (c.name_kg || c.name) : (isEn ? (c.name_en || c.name) : c.name),
+                color: c.color || '#8A8A8F',
+                sort: c.sort_order || 0
+            };
+        });
+        return map;
     }
 
     // ---- Points by category (Stats tab) ----
@@ -2717,10 +2747,11 @@
         var myRows = allRows.filter(function(r) { return r.player_id === p.id; });
         if (myRows.length === 0) return '';
 
-        var catsRes = await client.from('categories').select('id, name, name_en, name_kg');
-        var catName = {};
-        (catsRes.data || []).forEach(function(c) {
-            catName[c.id] = isKg ? (c.name_kg || c.name) : (isEn ? (c.name_en || c.name) : c.name);
+        var cats = await loadCategoriesMeta();
+        var catName = {}, catColor = {};
+        Object.keys(cats).forEach(function(id) {
+            catName[id] = cats[id].name;
+            catColor[id] = cats[id].color;
         });
 
         // Место считается так же, как в публичном рейтинге: свой пол, домашняя
@@ -2742,8 +2773,10 @@
 
             var isHome = row.category_id === p.category_id;
             html += '<div class="db-cat-block">' +
-                '<div class="db-cat-name">' + escHtml(catName[row.category_id] || row.category_id) +
-                    (isHome ? '<span class="db-cat-home">' + L.catHome + '</span>' : '') +
+                '<div class="db-cat-name">' +
+                    '<span class="db-cat-dot" style="background:' + escHtml(catColor[row.category_id] || '#8A8A8F') + '"></span>' +
+                    escHtml(catName[row.category_id] || row.category_id) +
+                    (isHome ? ' <span class="db-cat-home">' + L.catHome + '</span>' : '') +
                 '</div>' +
                 '<div class="db-stats-grid db-stats-grid-mini">' +
                     '<div class="db-stat-card"><div class="db-stat-value">' + (row.points || 0) + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
@@ -2875,154 +2908,244 @@
     }
 
     // ---- Rating History Chart ----
+    // ---- Rating chart: линия на категорию ----
+    // Значение линии — очки, набранные в этой категории, по тому же правилу,
+    // что и текущие очки (recalc_player_categories): сезонное окно, одиночные,
+    // категория проставлена. Поэтому конец линии совпадает с цифрой в блоке
+    // «Очки по категориям» выше.
     async function renderRatingChart(playerId, canvasId, wrapId) {
         if (!playerId || !client || typeof Chart === 'undefined') return;
 
-        var res = await client.from('rating_history')
-            .select('*')
-            .eq('player_id', playerId)
-            .order('recorded_at', { ascending: true });
+        var rows = await loadRatingRows(playerId);
+        if (rows.length === 0) return;
 
-        var data = res.data || [];
-        if (data.length === 0) return;
-
-        var wrap = document.getElementById(wrapId);
-        if (wrap) wrap.style.display = '';
-
-        var labels = [];
-        var values = [];
-        var ntrpValues = [];
-        var cumulative = 0;
-        var tooltipNames = [];
-        var hasNtrp = false;
-
-        data.forEach(function(row) {
-            cumulative += row.points_earned;
-            labels.push(row.recorded_at);
-            values.push(cumulative);
-            tooltipNames.push(row.tournament_name + ' (+' + row.points_earned + ')');
-            if (row.ntrp_after != null) {
-                ntrpValues.push(row.ntrp_after);
-                hasNtrp = true;
-            } else {
-                ntrpValues.push(null);
-            }
-        });
+        var cats = await loadCategoriesMeta();
 
         var canvas = document.getElementById(canvasId);
         if (!canvas) return;
 
-        var datasets = [{
-            label: isEn ? 'KSLT Points' : 'КСЛТ очки',
-            data: values,
-            borderColor: '#CCFF00',
-            backgroundColor: 'rgba(204,255,0,0.1)',
-            fill: true,
-            tension: 0.3,
-            pointBackgroundColor: '#CCFF00',
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            borderWidth: 2,
-            yAxisID: 'y'
-        }];
+        var wrap = document.getElementById(wrapId);
+        if (wrap) wrap.style.display = '';
 
-        if (hasNtrp) {
-            datasets.push({
-                label: 'NTRP',
-                data: ntrpValues,
-                borderColor: '#00BFFF',
-                backgroundColor: 'rgba(0,191,255,0.05)',
-                fill: false,
-                tension: 0.3,
-                pointBackgroundColor: '#00BFFF',
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                borderWidth: 2,
-                borderDash: [5, 3],
-                yAxisID: 'y1'
-            });
-        }
+        var series = buildRatingSeries(rows, cats);
+        var top = series.sets.slice().sort(function(a, b) { return b.total - a.total; })[0];
+        var homeCat = _statsHomeCategory;
 
-        var scales = {
-            x: {
-                ticks: { color: '#888', maxRotation: 45 },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-            },
-            y: {
-                beginAtZero: true,
-                ticks: { color: '#CCFF00' },
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                title: { display: hasNtrp, text: 'KSLT', color: '#CCFF00' }
-            }
-        };
-
-        if (hasNtrp) {
-            scales.y1 = {
-                position: 'right',
-                min: 1.0,
-                max: 7.0,
-                ticks: { color: '#00BFFF', stepSize: 0.5 },
-                grid: { display: false },
-                title: { display: true, text: 'NTRP', color: '#00BFFF' }
+        var datasets = series.sets.map(function(s) {
+            var c = cats[s.cat] || { name: s.cat, color: '#8A8A8F' };
+            return {
+                label: c.name,
+                data: s.values,
+                _meta: s.meta,
+                _total: s.total,
+                borderColor: c.color,
+                borderWidth: s.cat === homeCat ? 3 : 2,
+                stepped: 'after',
+                spanGaps: false,
+                fill: s === top ? 'origin' : false,
+                backgroundColor: function(ctx) {
+                    var area = ctx.chart.chartArea;
+                    if (!area) return 'transparent';
+                    var g = ctx.chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
+                    g.addColorStop(0, c.color + '38');
+                    g.addColorStop(1, c.color + '00');
+                    return g;
+                },
+                pointBackgroundColor: s.meta.map(function(m) { return m ? c.color : 'transparent'; }),
+                pointBorderColor: s.meta.map(function(m, i) { return i === s.debut ? '#0d0d10' : 'transparent'; }),
+                pointBorderWidth: s.meta.map(function(m, i) { return i === s.debut ? 3 : 0; }),
+                pointRadius: s.meta.map(function(m, i) { return i === s.debut ? 8 : (m ? 4 : 0); }),
+                pointHoverRadius: s.meta.map(function(m) { return m ? 7 : 0; })
             };
-        }
+        });
 
         new Chart(canvas, {
             type: 'line',
-            data: { labels: labels, datasets: datasets },
+            data: { labels: series.dates, datasets: datasets },
+            plugins: [ratingEndLabels],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', intersect: true },
+                layout: { padding: { right: 16, top: 8 } },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        align: 'end',
+                        labels: { color: '#ccc', usePointStyle: true, pointStyle: 'circle', boxWidth: 8, padding: 16, font: { size: 12 } }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(20,20,24,0.95)',
+                        borderColor: 'rgba(255,255,255,0.12)',
+                        borderWidth: 1,
+                        padding: 12,
+                        titleColor: '#fff',
+                        bodyColor: '#ccc',
+                        displayColors: false,
+                        filter: function(item) { return !!item.dataset._meta[item.dataIndex]; },
+                        callbacks: {
+                            title: function(items) {
+                                var m = items[0].dataset._meta[items[0].dataIndex];
+                                return m ? m.tournament_name : '';
+                            },
+                            label: function(item) {
+                                var m = item.dataset._meta[item.dataIndex];
+                                return [
+                                    item.dataset.label + ' · +' + m.points_earned,
+                                    (isEn ? 'Total in category: ' : isKg ? 'Категорияда бардыгы: ' : 'Всего в категории: ') + item.parsed.y,
+                                    item.label
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#888', maxRotation: 45, font: { size: 11 } },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#888', font: { size: 11 } },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        title: { display: true, text: L.catsTitle, color: '#888', font: { size: 11 } }
+                    }
+                }
+            }
+        });
+
+        renderNtrpChart(rows);
+    }
+
+    // Записи, из которых складываются очки: окно сезона, одиночные, категория есть
+    async function loadRatingRows(playerId) {
+        var now = new Date();
+        var year = now.getFullYear();
+        // Сезон начинается 1 сентября — то же, что oldest_date в recalc_player_categories
+        var oldest = ((now.getMonth() + 1) >= 9 ? year - 1 : year - 2) + '-09-01';
+
+        var res = await client.from('rating_history')
+            .select('recorded_at, points_earned, tournament_name, category_id, is_doubles, ntrp_after')
+            .eq('player_id', playerId)
+            .gte('recorded_at', oldest)
+            .order('recorded_at', { ascending: true });
+
+        return (res.data || []).filter(function(r) {
+            return r.category_id && r.is_doubles !== true;
+        });
+    }
+
+    // Накопление по категории с переносом значения вперёд: между турнирами
+    // линия держит достигнутое, в день турнира делает ступеньку вверх
+    function buildRatingSeries(rows, cats) {
+        var dates = [];
+        rows.forEach(function(r) { if (dates.indexOf(r.recorded_at) === -1) dates.push(r.recorded_at); });
+        dates.sort();
+
+        var byCat = {};
+        rows.forEach(function(r) { (byCat[r.category_id] = byCat[r.category_id] || []).push(r); });
+
+        // Сильные категории первыми, как в рейтинге
+        var order = Object.keys(byCat).sort(function(a, b) {
+            return ((cats[b] && cats[b].sort) || 0) - ((cats[a] && cats[a].sort) || 0);
+        });
+
+        var sets = order.map(function(cat) {
+            var sum = 0, started = false, debut = -1;
+            var values = [], meta = [];
+            dates.forEach(function(d, i) {
+                var hit = null;
+                byCat[cat].forEach(function(r) { if (r.recorded_at === d) hit = r; });
+                if (hit) {
+                    sum += hit.points_earned || 0;
+                    if (!started) debut = i;
+                    started = true;
+                }
+                values.push(started ? sum : null);
+                meta.push(hit);
+            });
+            return { cat: cat, values: values, meta: meta, debut: debut, total: sum };
+        });
+
+        return { dates: dates, sets: sets };
+    }
+
+    // Название категории и её итог у конца линии
+    var ratingEndLabels = {
+        id: 'ratingEndLabels',
+        afterDatasetsDraw: function(chart) {
+            var ctx = chart.ctx;
+            chart.data.datasets.forEach(function(ds, i) {
+                var meta = chart.getDatasetMeta(i);
+                if (meta.hidden) return;
+                var last = meta.data[meta.data.length - 1];
+                if (!last) return;
+                ctx.save();
+                ctx.font = '600 12px Inter, sans-serif';
+                ctx.fillStyle = ds.borderColor;
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(ds.label + ' · ' + ds._total, last.x - 6, last.y - 8);
+                ctx.restore();
+            });
+        }
+    };
+
+    // NTRP живёт отдельно: у него своя шкала, на общем графике он терялся
+    function renderNtrpChart(rows) {
+        var wrap = document.getElementById('dbNtrpChartWrap');
+        var canvas = document.getElementById('dbNtrpChart');
+        if (!wrap || !canvas || typeof Chart === 'undefined') return;
+
+        var labels = [], values = [];
+        rows.forEach(function(r) {
+            if (r.ntrp_after == null) return;
+            labels.push(r.recorded_at);
+            values.push(r.ntrp_after);
+        });
+        if (values.length === 0) return;
+
+        wrap.style.display = '';
+        new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'NTRP',
+                    data: values,
+                    borderColor: '#00BFFF',
+                    backgroundColor: 'rgba(0,191,255,0.08)',
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#00BFFF',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2
+                }]
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            color: '#ccc',
-                            usePointStyle: true,
-                            pointStyle: 'line',
-                            padding: 16,
-                            font: { size: 12 }
-                        }
-                    },
+                    legend: { display: false },
                     tooltip: {
+                        backgroundColor: 'rgba(20,20,24,0.95)',
+                        borderColor: 'rgba(255,255,255,0.12)',
+                        borderWidth: 1,
+                        displayColors: false,
                         callbacks: {
-                            title: function(ctx) {
-                                var isNtrp = ctx[0].dataset.label === 'NTRP';
-                                if (isNtrp) {
-                                    var row = data[ctx[0].dataIndex];
-                                    return row ? row.tournament_name : '';
-                                }
-                                return tooltipNames[ctx[0].dataIndex];
-                            },
-                            label: function(ctx) {
-                                if (ctx.dataset.label === 'NTRP') return 'NTRP: ' + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(2) : '—');
-                                return (isEn ? 'KSLT' : 'КСЛТ') + ': ' + ctx.parsed.y;
-                            },
-                            labelColor: function(ctx) {
-                                var isNtrp = ctx.dataset.label === 'NTRP';
-                                return { borderColor: isNtrp ? '#00BFFF' : '#CCFF00', backgroundColor: isNtrp ? '#00BFFF' : '#CCFF00' };
-                            }
-                        },
-                        backgroundColor: 'rgba(30,30,30,0.95)',
-                        titleColor: function(ctx) {
-                            var dp = ctx.tooltip && ctx.tooltip.dataPoints;
-                            if (dp && dp[0] && dp[0].dataset.label === 'NTRP') return '#00BFFF';
-                            return '#CCFF00';
-                        },
-                        bodyColor: function(ctx) {
-                            var dp = ctx.tooltip && ctx.tooltip.dataPoints;
-                            if (dp && dp[0] && dp[0].dataset.label === 'NTRP') return '#00BFFF';
-                            return '#fff';
-                        },
-                        borderColor: function(ctx) {
-                            var dp = ctx.tooltip && ctx.tooltip.dataPoints;
-                            if (dp && dp[0] && dp[0].dataset.label === 'NTRP') return '#00BFFF';
-                            return '#CCFF00';
-                        },
-                        borderWidth: 1
+                            label: function(item) { return 'NTRP: ' + item.parsed.y.toFixed(2); }
+                        }
                     }
                 },
-                scales: scales
+                scales: {
+                    x: { ticks: { color: '#888', maxRotation: 45, font: { size: 11 } }, grid: { display: false } },
+                    y: {
+                        min: 1.0, max: 7.0,
+                        ticks: { color: '#00BFFF', stepSize: 1, font: { size: 11 } },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    }
+                }
             }
         });
     }
