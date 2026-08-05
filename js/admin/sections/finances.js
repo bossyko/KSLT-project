@@ -34,7 +34,9 @@
             '<option value="expired"' + (finFilterStatus === 'expired' ? ' selected' : '') + '>' + L.payExpired + '</option>';
 
         container.innerHTML =
-            '<div class="ad-section-header" style="position:sticky;top:64px;z-index:10;background:var(--bg-primary);padding:12px 0;">' +
+            // Заголовок был прилипающим с непрозрачным фоном и при прокрутке
+            // закрывал карточки статистики — цифры пропадали, оставались подписи
+            '<div class="ad-section-header" style="padding:12px 0;">' +
                 '<h2>' + L.finances + '</h2>' +
                 '<button class="ad-btn ad-btn-primary" id="adFinAddBtn">+ ' + L.addPayment + '</button>' +
             '</div>' +
