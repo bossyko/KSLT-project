@@ -522,8 +522,11 @@
                         '<button type="button" class="ad-btn-translate" id="adPlrRecalcStats" style="margin-top:0;">🔄 ' + L.plrRecalc + '</button>'
                     ) : '') +
                 '</div>' +
-                '<div class="ad-field-hint" style="margin-bottom:8px;">' + L.plrRecalcHint + '</div>' +
-                '<div class="ad-field-row ad-field-row-4">' +
+                '<div class="ad-field-hint" style="margin-bottom:8px;" id="adPlrStatsHint">' + L.plrRecalcHint + '</div>' +
+                // Строка сводных цифр. Когда у игрока есть категории, она дублирует
+                // домашнюю и скрывается — но поля остаются, их читает сохранение
+                // и они нужны при создании нового игрока.
+                '<div class="ad-field-row ad-field-row-4" id="adPlrStatsRow">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrPoints + '</label>' +
                         '<input type="number" class="ad-field-input" id="adPlrPoints" min="0" value="' + (item ? (item.points || 0) : '') + '"' + (plrEditingId ? ' readonly style="opacity:0.6;cursor:not-allowed;"' : '') + '>' +
@@ -789,7 +792,7 @@
                 var box = document.getElementById('adPlrCatsBox');
                 if (!box) return;
                 var pcRes = await A.client.from('player_categories')
-                    .select('category_id, points')
+                    .select('category_id, points, wins, losses')
                     .eq('player_id', plrEditingId)
                     .order('points', { ascending: false });
                 var rows = pcRes.data || [];
@@ -797,21 +800,45 @@
 
                 var title = isEn ? 'Points by category' : 'Очки по категориям';
                 var homeLabel = isEn ? 'home' : 'домашняя';
-                var html = '<div class="ad-field-label" style="margin-bottom:6px;">' + title + '</div>';
-                html += '<div style="display:flex;flex-direction:column;gap:6px;">';
+                var html = '<div class="ad-field-label" style="margin-bottom:8px;">' + title + '</div>';
+
                 rows.forEach(function(r) {
                     var cat = A.categoriesMap ? A.categoriesMap[r.category_id] : null;
                     var name = cat ? (isEn ? (cat.name_en || cat.name) : cat.name) : r.category_id;
                     var isHome = item && r.category_id === item.category_id;
-                    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:8px;">' +
-                        '<span>' + A.esc(name) +
-                            (isHome ? ' <span style="font-size:0.7rem;color:var(--accent);">' + homeLabel + '</span>' : '') +
-                        '</span>' +
-                        '<span style="font-weight:600;color:var(--accent);">' + (r.points || 0) + '</span>' +
+
+                    html += '<div style="border:1px solid var(--border-subtle);border-radius:10px;padding:12px 14px;margin-bottom:10px;">' +
+                        '<div style="font-weight:600;margin-bottom:10px;">' + A.esc(name) +
+                            (isHome ? ' <span style="font-size:0.7rem;color:var(--accent);font-weight:500;">' + homeLabel + '</span>' : '') +
+                        '</div>' +
+                        '<div class="ad-field-row ad-field-row-4">' +
+                            '<div class="ad-field">' +
+                                '<label class="ad-field-label">' + L.plrPoints + '</label>' +
+                                '<input type="number" class="ad-field-input" value="' + (r.points || 0) + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                            '</div>' +
+                            '<div class="ad-field">' +
+                                '<label class="ad-field-label">' + L.plrWins + '</label>' +
+                                '<input type="number" class="ad-field-input" value="' + (r.wins || 0) + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                            '</div>' +
+                            '<div class="ad-field">' +
+                                '<label class="ad-field-label">' + L.plrLosses + '</label>' +
+                                '<input type="number" class="ad-field-input" value="' + (r.losses || 0) + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                            '</div>' +
+                            '<div class="ad-field">' +
+                                '<label class="ad-field-label">' + L.plrRankChange + '</label>' +
+                                '<input type="text" class="ad-field-input" value="\u2014" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                            '</div>' +
+                        '</div>' +
                     '</div>';
                 });
-                html += '</div>';
+
                 box.innerHTML = html;
+
+                // Сводная строка дублирует домашнюю категорию — прячем
+                var statsRow = document.getElementById('adPlrStatsRow');
+                var statsHint = document.getElementById('adPlrStatsHint');
+                if (statsRow) statsRow.style.display = 'none';
+                if (statsHint) statsHint.style.display = 'none';
             })();
         }
 
