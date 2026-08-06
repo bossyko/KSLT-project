@@ -612,6 +612,50 @@ select.db-field-input {
     background: rgba(204,255,0,0.04);
 }
 
+/* ---- Withdraw from a tournament ---- */
+.db-tournament-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.db-tournament-item .db-tournament-row {
+    flex: 1;
+    min-width: 0;
+}
+
+.db-tournament-withdrawn {
+    opacity: 0.5;
+}
+
+.db-withdraw-btn {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.db-withdraw-btn:hover {
+    color: #ff6b6b;
+    border-color: rgba(255, 107, 107, 0.5);
+}
+
+@media (max-width: 560px) {
+    .db-tournament-item {
+        flex-wrap: wrap;
+    }
+    .db-withdraw-btn {
+        width: 100%;
+    }
+}
+
 .db-tournament-info {
     display: flex;
     flex-direction: column;

@@ -364,26 +364,23 @@
     var ov = openSubOverlay(I18N.t('profile.myTournaments'), '<div class="loading-center"><div class="spinner"></div></div>');
     var content = ov.querySelector('.prof-sub-content');
 
+    // Заявки привязаны к карточке игрока: у профиля без player_id их нет.
+    // Раньше здесь был запрос по несуществующей колонке profile_id, а сортировка
+    // шла по created_at, которой в таблице тоже нет — список всегда был пустым.
     if (!_player) {
-      // Check registrations by profile_id
-      supabaseClient.from('tournament_registrations')
-        .select('*, tournament:tournaments(id, title, date_start, status)')
-        .eq('profile_id', _profile.id)
-        .order('created_at', { ascending: false })
-        .limit(20)
-        .then(function(r) {
-          renderTournamentsList(content, r.data || []);
-        });
-    } else {
-      supabaseClient.from('tournament_registrations')
-        .select('*, tournament:tournaments(id, title, date_start, status)')
-        .eq('player_id', _player.id)
-        .order('created_at', { ascending: false })
-        .limit(20)
-        .then(function(r) {
-          renderTournamentsList(content, r.data || []);
-        });
+      renderTournamentsList(content, []);
+      return;
     }
+
+    supabaseClient.from('tournament_registrations')
+      .select('*, tournament:tournaments(id, title, date_start, status)')
+      .eq('player_id', _player.id)
+      .order('registered_at', { ascending: false })
+      .limit(20)
+      .then(function(r) {
+        if (r.error) console.error('My tournaments load error:', r.error);
+        renderTournamentsList(content, r.data || []);
+      });
   }
 
   function renderTournamentsList(container, regs) {
@@ -395,15 +392,76 @@
     regs.forEach(function(reg) {
       if (!reg.tournament) return;
       var t = reg.tournament;
-      var statusClass = t.status === 'completed' ? 'completed' : 'upcoming';
-      var statusText = t.status === 'completed' ? I18N.t('profile.tCompleted') : (t.status === 'live' ? I18N.t('profile.tLive') : I18N.t('profile.tUpcoming'));
-      html += '<div class="pd-tournament">';
+      var withdrawn = reg.status === 'withdrawn';
+      var statusClass = withdrawn ? 'withdrawn' : (t.status === 'completed' ? 'completed' : 'upcoming');
+      var statusText = withdrawn
+        ? I18N.t('reg.withdrawn')
+        : (t.status === 'completed' ? I18N.t('profile.tCompleted') : (t.status === 'live' ? I18N.t('profile.tLive') : I18N.t('profile.tUpcoming')));
+      html += '<div class="pd-tournament' + (withdrawn ? ' pd-tournament-withdrawn' : '') + '">';
       html += '<div class="pd-tournament-date">' + formatDate(t.date_start) + '</div>';
       html += '<div class="pd-tournament-name">' + esc(t.title) + '</div>';
       html += '<div class="pd-tournament-status ' + statusClass + '">' + statusText + '</div>';
+      if (canWithdraw(reg)) {
+        html += '<button class="pd-withdraw-btn" data-reg="' + reg.id + '">' + I18N.t('reg.withdraw') + '</button>';
+      }
       html += '</div>';
     });
     container.innerHTML = html;
+    bindWithdraw(container);
+  }
+
+  // ---- Снятие заявки ----
+  // Снять можно, пока не проведена жеребьёвка: после неё игрок уже в сетке
+  // и его снимает организатор. Правило «за 3 часа» и штраф — отдельная задача
+  function canWithdraw(reg) {
+    if (!reg || !reg.tournament) return false;
+    if (['approved', 'pending', 'waitlist'].indexOf(reg.status) === -1) return false;
+    if (reg.draw_position != null || reg.group_number != null) return false;
+    var st = reg.tournament.status;
+    return st === 'upcoming' || st === 'registration' || st === 'draft';
+  }
+
+  function bindWithdraw(container) {
+    container.querySelectorAll('.pd-withdraw-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        askWithdraw(btn.getAttribute('data-reg'));
+      });
+    });
+  }
+
+  function askWithdraw(regId) {
+    var ov = document.createElement('div');
+    ov.className = 'rc-confirm';
+    ov.innerHTML =
+      '<div class="rc-confirm-box">' +
+        '<div class="rc-confirm-title">' + I18N.t('reg.withdrawAsk') + '</div>' +
+        '<div class="rc-confirm-actions">' +
+          '<button class="rc-confirm-no">' + I18N.t('reg.withdrawNo') + '</button>' +
+          '<button class="rc-confirm-yes">' + I18N.t('reg.withdrawYes') + '</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+
+    function close() { ov.remove(); }
+    ov.addEventListener('click', function(e) { if (e.target === ov) close(); });
+    ov.querySelector('.rc-confirm-no').addEventListener('click', close);
+
+    ov.querySelector('.rc-confirm-yes').addEventListener('click', function() {
+      var yes = this;
+      yes.disabled = true;
+      supabaseClient.from('tournament_registrations')
+        .update({ status: 'withdrawn' })
+        .eq('id', regId)
+        .then(function(res) {
+          close();
+          if (res.error) {
+            if (window.KSLT_APP) window.KSLT_APP.toast(res.error.message || I18N.t('reg.withdrawError'));
+            return;
+          }
+          if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('reg.withdrawDone'));
+          showMyTournaments();
+        });
+    });
   }
 
   // ---- My Matches ----
