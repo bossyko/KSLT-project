@@ -122,6 +122,15 @@
       html += '</div>';
     }
 
+    // ---- Rating history: линия на категорию ----
+    // Секция скрыта, пока график не найдёт записи — он сам её и откроет
+    if (_player) {
+      html += '<div class="profile-section rc-section" style="display:none;">';
+      html += '<div class="profile-section-title">' + I18N.t('pd.ratingHistory') + '</div>';
+      html += '<div id="profRatingChart"></div>';
+      html += '</div>';
+    }
+
     // ---- Activity ----
     html += '<div class="profile-section">';
     html += '<div class="profile-section-title">' + I18N.t('profile.activity') + '</div>';
@@ -219,6 +228,10 @@
     html += '<div style="height:16px"></div>';
 
     el.innerHTML = html;
+
+    if (_player && window.KSLT_RATING_CHART) {
+      window.KSLT_RATING_CHART.mount('profRatingChart', _player.id, _player.category_id);
+    }
 
     // Bind events
     bindLogout();

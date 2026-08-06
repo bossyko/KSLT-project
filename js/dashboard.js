@@ -2715,18 +2715,17 @@
     // Домашняя категория игрока — её линия на графике толще остальных
     var _statsHomeCategory = null;
 
-    // Название, цвет и порядок категорий. Колонка color заводится миграцией
-    // sql/category-colors.sql — пока её нет, запрос с ней падает целиком,
-    // поэтому откатываемся на выборку без цвета.
+    // Название, цвет и порядок категорий — общий загрузчик с графиком,
+    // чтобы цвет в блоках очков и в линиях был один и тот же
     async function loadCategoriesMeta() {
-        var res = await client.from('categories').select('id, name, name_en, name_kg, sort_order, color');
-        if (res.error) res = await client.from('categories').select('id, name, name_en, name_kg, sort_order');
+        if (window.KSLT_RATING_CHART) return window.KSLT_RATING_CHART.categories(client, isEn, isKg);
 
+        var res = await client.from('categories').select('id, name, name_en, name_kg, sort_order');
         var map = {};
         (res.data || []).forEach(function(c) {
             map[c.id] = {
                 name: isKg ? (c.name_kg || c.name) : (isEn ? (c.name_en || c.name) : c.name),
-                color: c.color || '#8A8A8F',
+                color: '#8A8A8F',
                 sort: c.sort_order || 0
             };
         });
@@ -2908,245 +2907,19 @@
     }
 
     // ---- Rating History Chart ----
-    // ---- Rating chart: линия на категорию ----
-    // Значение линии — очки, набранные в этой категории, по тому же правилу,
-    // что и текущие очки (recalc_player_categories): сезонное окно, одиночные,
-    // категория проставлена. Поэтому конец линии совпадает с цифрой в блоке
-    // «Очки по категориям» выше.
-    async function renderRatingChart(playerId, canvasId, wrapId) {
-        if (!playerId || !client || typeof Chart === 'undefined') return;
-
-        var rows = await loadRatingRows(playerId);
-        if (rows.length === 0) return;
-
-        var cats = await loadCategoriesMeta();
-
-        var canvas = document.getElementById(canvasId);
-        if (!canvas) return;
-
-        var wrap = document.getElementById(wrapId);
-        if (wrap) wrap.style.display = '';
-
-        var series = buildRatingSeries(rows, cats);
-        var top = series.sets.slice().sort(function(a, b) { return b.total - a.total; })[0];
-        var homeCat = _statsHomeCategory;
-
-        var datasets = series.sets.map(function(s) {
-            var c = cats[s.cat] || { name: s.cat, color: '#8A8A8F' };
-            return {
-                label: c.name,
-                data: s.values,
-                _meta: s.meta,
-                _total: s.total,
-                borderColor: c.color,
-                borderWidth: s.cat === homeCat ? 3 : 2,
-                stepped: 'after',
-                spanGaps: false,
-                fill: s === top ? 'origin' : false,
-                backgroundColor: function(ctx) {
-                    var area = ctx.chart.chartArea;
-                    if (!area) return 'transparent';
-                    var g = ctx.chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
-                    g.addColorStop(0, c.color + '38');
-                    g.addColorStop(1, c.color + '00');
-                    return g;
-                },
-                pointBackgroundColor: s.meta.map(function(m) { return m ? c.color : 'transparent'; }),
-                pointBorderColor: s.meta.map(function(m, i) { return i === s.debut ? '#0d0d10' : 'transparent'; }),
-                pointBorderWidth: s.meta.map(function(m, i) { return i === s.debut ? 3 : 0; }),
-                pointRadius: s.meta.map(function(m, i) { return i === s.debut ? 8 : (m ? 4 : 0); }),
-                pointHoverRadius: s.meta.map(function(m) { return m ? 7 : 0; })
-            };
-        });
-
-        new Chart(canvas, {
-            type: 'line',
-            data: { labels: series.dates, datasets: datasets },
-            plugins: [ratingEndLabels],
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'nearest', intersect: true },
-                layout: { padding: { right: 16, top: 8 } },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        align: 'end',
-                        labels: { color: '#ccc', usePointStyle: true, pointStyle: 'circle', boxWidth: 8, padding: 16, font: { size: 12 } }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(20,20,24,0.95)',
-                        borderColor: 'rgba(255,255,255,0.12)',
-                        borderWidth: 1,
-                        padding: 12,
-                        titleColor: '#fff',
-                        bodyColor: '#ccc',
-                        displayColors: false,
-                        filter: function(item) { return !!item.dataset._meta[item.dataIndex]; },
-                        callbacks: {
-                            title: function(items) {
-                                var m = items[0].dataset._meta[items[0].dataIndex];
-                                return m ? m.tournament_name : '';
-                            },
-                            label: function(item) {
-                                var m = item.dataset._meta[item.dataIndex];
-                                return [
-                                    item.dataset.label + ' · +' + m.points_earned,
-                                    (isEn ? 'Total in category: ' : isKg ? 'Категорияда бардыгы: ' : 'Всего в категории: ') + item.parsed.y,
-                                    item.label
-                                ];
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: { color: '#888', maxRotation: 45, font: { size: 11 } },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: '#888', font: { size: 11 } },
-                        grid: { color: 'rgba(255,255,255,0.05)' },
-                        title: { display: true, text: L.catsTitle, color: '#888', font: { size: 11 } }
-                    }
-                }
-            }
-        });
-
-        renderNtrpChart(rows);
-    }
-
-    // Записи, из которых складываются очки: окно сезона, одиночные, категория есть
-    async function loadRatingRows(playerId) {
-        var now = new Date();
-        var year = now.getFullYear();
-        // Сезон начинается 1 сентября — то же, что oldest_date в recalc_player_categories
-        var oldest = ((now.getMonth() + 1) >= 9 ? year - 1 : year - 2) + '-09-01';
-
-        var res = await client.from('rating_history')
-            .select('recorded_at, points_earned, tournament_name, category_id, is_doubles, ntrp_after')
-            .eq('player_id', playerId)
-            .gte('recorded_at', oldest)
-            .order('recorded_at', { ascending: true });
-
-        return (res.data || []).filter(function(r) {
-            return r.category_id && r.is_doubles !== true;
-        });
-    }
-
-    // Накопление по категории с переносом значения вперёд: между турнирами
-    // линия держит достигнутое, в день турнира делает ступеньку вверх
-    function buildRatingSeries(rows, cats) {
-        var dates = [];
-        rows.forEach(function(r) { if (dates.indexOf(r.recorded_at) === -1) dates.push(r.recorded_at); });
-        dates.sort();
-
-        var byCat = {};
-        rows.forEach(function(r) { (byCat[r.category_id] = byCat[r.category_id] || []).push(r); });
-
-        // Сильные категории первыми, как в рейтинге
-        var order = Object.keys(byCat).sort(function(a, b) {
-            return ((cats[b] && cats[b].sort) || 0) - ((cats[a] && cats[a].sort) || 0);
-        });
-
-        var sets = order.map(function(cat) {
-            var sum = 0, started = false, debut = -1;
-            var values = [], meta = [];
-            dates.forEach(function(d, i) {
-                var hit = null;
-                byCat[cat].forEach(function(r) { if (r.recorded_at === d) hit = r; });
-                if (hit) {
-                    sum += hit.points_earned || 0;
-                    if (!started) debut = i;
-                    started = true;
-                }
-                values.push(started ? sum : null);
-                meta.push(hit);
-            });
-            return { cat: cat, values: values, meta: meta, debut: debut, total: sum };
-        });
-
-        return { dates: dates, sets: sets };
-    }
-
-    // Название категории и её итог у конца линии
-    var ratingEndLabels = {
-        id: 'ratingEndLabels',
-        afterDatasetsDraw: function(chart) {
-            var ctx = chart.ctx;
-            chart.data.datasets.forEach(function(ds, i) {
-                var meta = chart.getDatasetMeta(i);
-                if (meta.hidden) return;
-                var last = meta.data[meta.data.length - 1];
-                if (!last) return;
-                ctx.save();
-                ctx.font = '600 12px Inter, sans-serif';
-                ctx.fillStyle = ds.borderColor;
-                ctx.textAlign = 'right';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText(ds.label + ' · ' + ds._total, last.x - 6, last.y - 8);
-                ctx.restore();
-            });
-        }
-    };
-
-    // NTRP живёт отдельно: у него своя шкала, на общем графике он терялся
-    function renderNtrpChart(rows) {
-        var wrap = document.getElementById('dbNtrpChartWrap');
-        var canvas = document.getElementById('dbNtrpChart');
-        if (!wrap || !canvas || typeof Chart === 'undefined') return;
-
-        var labels = [], values = [];
-        rows.forEach(function(r) {
-            if (r.ntrp_after == null) return;
-            labels.push(r.recorded_at);
-            values.push(r.ntrp_after);
-        });
-        if (values.length === 0) return;
-
-        wrap.style.display = '';
-        new Chart(canvas, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'NTRP',
-                    data: values,
-                    borderColor: '#00BFFF',
-                    backgroundColor: 'rgba(0,191,255,0.08)',
-                    fill: true,
-                    tension: 0.3,
-                    pointBackgroundColor: '#00BFFF',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(20,20,24,0.95)',
-                        borderColor: 'rgba(255,255,255,0.12)',
-                        borderWidth: 1,
-                        displayColors: false,
-                        callbacks: {
-                            label: function(item) { return 'NTRP: ' + item.parsed.y.toFixed(2); }
-                        }
-                    }
-                },
-                scales: {
-                    x: { ticks: { color: '#888', maxRotation: 45, font: { size: 11 } }, grid: { display: false } },
-                    y: {
-                        min: 1.0, max: 7.0,
-                        ticks: { color: '#00BFFF', stepSize: 1, font: { size: 11 } },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
-                    }
-                }
-            }
+    // Логика общая с публичным профилем игрока — js/rating-chart.js
+    function renderRatingChart(playerId, canvasId, wrapId) {
+        if (!window.KSLT_RATING_CHART) return;
+        window.KSLT_RATING_CHART.render({
+            client: client,
+            playerId: playerId,
+            homeCategory: _statsHomeCategory,
+            isEn: isEn,
+            isKg: isKg,
+            canvasId: canvasId,
+            wrapId: wrapId,
+            ntrpCanvasId: 'dbNtrpChart',
+            ntrpWrapId: 'dbNtrpChartWrap'
         });
     }
 

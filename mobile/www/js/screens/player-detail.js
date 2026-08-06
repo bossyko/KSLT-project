@@ -234,6 +234,13 @@
     html += '</div></div>';
     html += '</div>'; // .pd-stats
 
+    // ---- Rating history ----
+    // Секция скрыта, пока график не найдёт записи — он сам её и откроет
+    html += '<div class="pd-section rc-section" style="display:none;">';
+    html += '<h3 class="pd-section-title">📈 ' + I18N.t('pd.ratingHistory') + '</h3>';
+    html += '<div id="pdRatingChart"></div>';
+    html += '</div>';
+
     // ---- Matches section ----
     html += '<div class="pd-section">';
     html += '<h3 class="pd-section-title">⚔️ ' + I18N.t('pd.matches') + '</h3>';
@@ -290,6 +297,7 @@
     loadMatches();
     loadTournaments();
     renderAchievements();
+    if (window.KSLT_RATING_CHART) window.KSLT_RATING_CHART.mount('pdRatingChart', p.id, p.category_id);
 
     // Challenge button
     if (access === 'member') {
