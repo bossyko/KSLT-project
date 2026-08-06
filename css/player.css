@@ -302,6 +302,33 @@
     margin-bottom: 48px;
 }
 
+/* ---- Rating history chart ---- */
+.pp-chart-box {
+    position: relative;
+    height: 340px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.pp-chart-box-sm {
+    height: 180px;
+}
+
+.pp-chart-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 20px 0 8px;
+}
+
+@media (max-width: 640px) {
+    .pp-chart-box { height: 260px; padding: 10px; }
+    .pp-chart-box-sm { height: 150px; }
+}
+
 .pp-section-title {
     font-size: 1.3rem;
     font-weight: 700;

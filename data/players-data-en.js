@@ -63,6 +63,7 @@ window.playerProfileLabels = {
     subsectionChallenges: "Challenges",
     sectionMatches: "Match History",
     sectionAchievements: "Achievements",
+    sectionRatingHistory: "Rating history",
     sectionTournaments: "Tournaments",
     sectionChallenges: "Challenges",
     challengeAccepted: "Accepted",

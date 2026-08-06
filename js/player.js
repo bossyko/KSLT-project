@@ -68,6 +68,7 @@
         subsectionChallenges: 'Вызовы',
         sectionMatches: 'История матчей',
         sectionAchievements: 'Достижения',
+        sectionRatingHistory: 'История рейтинга',
         sectionTournaments: 'Турниры',
         sectionChallenges: 'Вызовы',
         challengeAccepted: 'Принят',
@@ -506,6 +507,18 @@
         });
         html += '</div></div>';
         html += '</div>'; // .pp-stats singles
+
+        // ---- Rating history: линия на категорию ----
+        // Секция скрыта, пока не окажется, что игроку есть что показать —
+        // её открывает сам график, когда находит записи
+        html += '<div class="pp-section pp-fade-in" id="ppChartSection" style="display:none;">';
+        html += '<h3 class="pp-section-title">📈 ' + L.sectionRatingHistory + '</h3>';
+        html += '<div class="pp-chart-box"><canvas id="ppRatingChart"></canvas></div>';
+        html += '<div id="ppNtrpWrap" style="display:none;">';
+        html += '<div class="pp-chart-label">NTRP</div>';
+        html += '<div class="pp-chart-box pp-chart-box-sm"><canvas id="ppNtrpChart"></canvas></div>';
+        html += '</div>';
+        html += '</div>';
 
         // ---- My Games (combined: Matches + Challenges + Tournaments) ----
         html += '<div class="pp-section pp-fade-in">';
@@ -1526,9 +1539,27 @@
         document.title = data.player.name + ' \u2014 KSLT';
         renderProfile(data);
         renderBadgesSection();
+        renderRatingChart(data.player);
         initScrollAnimations();
         incrementPlayerView(playerId);
     });
+
+    // ---- Rating history chart ----
+    // Логика общая с кабинетом игрока — js/rating-chart.js
+    function renderRatingChart(player) {
+        if (!window.KSLT_RATING_CHART || !client || !player) return;
+        window.KSLT_RATING_CHART.render({
+            client: client,
+            playerId: player.id,
+            homeCategory: player.category_id,
+            isEn: isEn,
+            isKg: isKg,
+            canvasId: 'ppRatingChart',
+            wrapId: 'ppChartSection',
+            ntrpCanvasId: 'ppNtrpChart',
+            ntrpWrapId: 'ppNtrpWrap'
+        });
+    }
 
     // ================================================
     // CHALLENGE MODAL

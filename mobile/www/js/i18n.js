@@ -332,6 +332,7 @@
     'pd.challenge':      { ru: 'Вызвать на матч',     en: 'Challenge',        kg: 'Матчка чакыруу' },
     'pd.stats':          { ru: 'Статистика',          en: 'Statistics',       kg: 'Статистика' },
     'pd.matches':        { ru: 'Матчи',               en: 'Matches',          kg: 'Матчтар' },
+    'pd.ratingHistory':  { ru: 'История рейтинга',   en: 'Rating history',   kg: 'Рейтинг тарыхы' },
     'pd.tournaments':    { ru: 'Турниры',             en: 'Tournaments',      kg: 'Мелдештер' },
     'pd.badges':         { ru: 'Достижения',          en: 'Achievements',     kg: 'Жетишкендиктер' },
     'pd.showAll':        { ru: 'Показать все',         en: 'Show all',        kg: 'Баарын көрсөтүү' },
