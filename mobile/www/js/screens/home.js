@@ -1394,6 +1394,81 @@
     });
   });
 
+  // ---- Своя заявка на турнир ----
+  function checkMyRegistration(t) {
+    var AUTH = window.KSLT_AUTH;
+    var playerId = AUTH && AUTH.currentProfile && AUTH.currentProfile.player_id;
+    if (!playerId || !t || !t.id) return;
+
+    supabaseClient.from('tournament_registrations')
+      .select('id, status, draw_position, group_number')
+      .eq('tournament_id', t.id)
+      .eq('player_id', playerId)
+      .limit(1)
+      .then(function(r) {
+        var reg = (r.data || [])[0];
+        if (!reg || reg.status === 'withdrawn') return;
+
+        var btn = document.querySelector('#tdInfo .td-register-btn[data-tid]');
+        if (!btn) return;
+
+        // Снять можно, пока не проведена жеребьёвка — после неё снимает организатор
+        var canWithdraw = ['approved', 'pending', 'waitlist'].indexOf(reg.status) !== -1
+          && reg.draw_position == null && reg.group_number == null;
+
+        var html = '<span class="td-reg-badge">' + I18N.t('reg.registered') + '</span>';
+        if (canWithdraw) {
+          html += '<button class="td-withdraw-btn" data-reg="' + reg.id + '" data-tid="' + t.id + '">' +
+            I18N.t('reg.withdraw') + '</button>';
+        }
+        btn.outerHTML = html;
+      });
+  }
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.td-withdraw-btn');
+    if (!btn) return;
+
+    confirmWithdraw(function() {
+      btn.disabled = true;
+      supabaseClient.from('tournament_registrations')
+        .update({ status: 'withdrawn' })
+        .eq('id', btn.getAttribute('data-reg'))
+        .then(function(res) {
+          if (res.error) {
+            btn.disabled = false;
+            if (window.KSLT_APP) window.KSLT_APP.toast(res.error.message || I18N.t('reg.withdrawError'));
+            return;
+          }
+          if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('reg.withdrawDone'));
+          btn.outerHTML = '<span class="td-reg-badge td-reg-badge-off">' + I18N.t('reg.withdrawn') + '</span>';
+        });
+    });
+  });
+
+  // Подтверждение в стиле приложения — нативный confirm() блокирует WebView
+  function confirmWithdraw(onYes) {
+    var ov = document.createElement('div');
+    ov.className = 'rc-confirm';
+    ov.innerHTML =
+      '<div class="rc-confirm-box">' +
+        '<div class="rc-confirm-title">' + I18N.t('reg.withdrawAsk') + '</div>' +
+        '<div class="rc-confirm-actions">' +
+          '<button class="rc-confirm-no">' + I18N.t('reg.withdrawNo') + '</button>' +
+          '<button class="rc-confirm-yes">' + I18N.t('reg.withdrawYes') + '</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+
+    function close() { ov.remove(); }
+    ov.addEventListener('click', function(e) { if (e.target === ov) close(); });
+    ov.querySelector('.rc-confirm-no').addEventListener('click', close);
+    ov.querySelector('.rc-confirm-yes').addEventListener('click', function() {
+      close();
+      onYes();
+    });
+  }
+
   // ============================
   // HELPERS
   // ============================
@@ -1541,6 +1616,9 @@
     info += '<div id="tdParticipants"></div>';
 
     document.getElementById('tdInfo').innerHTML = info;
+
+    // Уже записан? Меняем «Записаться» на статус и кнопку снятия
+    checkMyRegistration(t);
 
     // Bind nav buttons — open external app
     document.querySelectorAll('.td-nav-btn').forEach(function(btn) {

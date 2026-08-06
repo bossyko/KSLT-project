@@ -69,6 +69,14 @@
         showPassword: 'Сыр сөздү көрсөтүү',
         role_user: 'Колдонуучу', role_player: 'Оюнчу', role_admin: 'Администратор', role_manager: 'Менеджер',
         category: 'Категория', points: 'Упайлар',
+        regWithdraw: 'Арызды алуу',
+        regWithdrawn: 'Арыз алынды',
+        regWithdrawTitle: 'Турнирден арызды аласызбы?',
+        regWithdrawText: '{name} турнирине берилген арыз алынат. Каттоо ачык турганда кайра катталса болот.',
+        regWithdrawYes: 'Арызды алуу',
+        regWithdrawNo: 'Жокко чыгаруу',
+        regWithdrawDone: 'Арыз алынды',
+        regWithdrawError: 'Арызды алуу мүмкүн болгон жок',
         wins: 'Жеңиштер', losses: 'Жеңилүүлөр', rank: 'Рейтинг өзгөрүшү',
         catsTitle: 'Категориялар боюнча упайлар', catHome: 'негизги', place: 'Орун',
         socialMedia: 'Социалдык тармактар',
@@ -254,6 +262,14 @@
         showPassword: 'Show password',
         role_user: 'User', role_player: 'Player', role_admin: 'Admin', role_manager: 'Manager',
         category: 'Category', points: 'Points',
+        regWithdraw: 'Withdraw',
+        regWithdrawn: 'Withdrawn',
+        regWithdrawTitle: 'Withdraw from the tournament?',
+        regWithdrawText: 'Your entry for {name} will be withdrawn. You can enter again while registration is open.',
+        regWithdrawYes: 'Withdraw',
+        regWithdrawNo: 'Cancel',
+        regWithdrawDone: 'Entry withdrawn',
+        regWithdrawError: 'Could not withdraw the entry',
         wins: 'Wins', losses: 'Losses', rank: 'Rank Change',
         catsTitle: 'Points by category', catHome: 'home', place: 'Place',
         socialMedia: 'Social Media',
@@ -439,6 +455,14 @@
         showPassword: 'Показать пароль',
         role_user: 'Пользователь', role_player: 'Игрок', role_admin: 'Администратор', role_manager: 'Менеджер',
         category: 'Категория', points: 'Очки',
+        regWithdraw: 'Снять заявку',
+        regWithdrawn: 'Заявка снята',
+        regWithdrawTitle: 'Снять заявку с турнира?',
+        regWithdrawText: 'Заявка на {name} будет снята. Записаться снова можно, пока открыта регистрация.',
+        regWithdrawYes: 'Снять заявку',
+        regWithdrawNo: 'Отмена',
+        regWithdrawDone: 'Заявка снята',
+        regWithdrawError: 'Не удалось снять заявку',
         wins: 'Победы', losses: 'Поражения', rank: 'Изм. рейтинга',
         catsTitle: 'Очки по категориям', catHome: 'домашняя', place: 'Место',
         socialMedia: 'Соцсети',
@@ -2541,9 +2565,9 @@
         try {
             var results = await Promise.all([
                 client.from('tournament_registrations')
-                    .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start, status)')
+                    .select('id, status, draw_position, group_number, tournament:tournaments(id, title, title_en, title_kg, date_start, status)')
                     .eq('player_id', pid)
-                    .in('status', ['approved', 'draw'])
+                    .in('status', ['approved', 'draw', 'withdrawn'])
                     .order('registered_at', { ascending: false })
                     .limit(20),
                 client.from('tournament_results')
@@ -2569,6 +2593,7 @@
                 var tr = resultsMap[reg.tournament.id];
                 items.push({
                     tournament: reg.tournament,
+                    reg: reg,
                     round_reached: tr ? tr.round_reached : null,
                     points_earned: tr ? tr.points_earned : 0
                 });
@@ -2599,7 +2624,11 @@
                     : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован');
                 var pts = item.points_earned > 0 ? ' · +' + item.points_earned + ' pts' : '';
                 var isWinner = item.round_reached === 'W';
+                var reg = item.reg;
+                var withdrawn = reg && reg.status === 'withdrawn';
+                if (withdrawn) result = L.regWithdrawn;
 
+                html += '<div class="db-tournament-item' + (withdrawn ? ' db-tournament-withdrawn' : '') + '">';
                 html += '<a class="db-tournament-row" href="tournament.html' + (isEn ? '-en' : isKg ? '-kg' : '') + '?id=' + t.id + '">';
                 html += '<div class="db-tournament-info">';
                 html += '<span class="db-tournament-name">' + escHtml(tName) + '</span>';
@@ -2607,14 +2636,83 @@
                 html += '</div>';
                 html += '<span class="db-tournament-result' + (isWinner ? ' db-tournament-winner' : '') + '">' + result + pts + '</span>';
                 html += '</a>';
+                if (canWithdraw(item)) {
+                    html += '<button class="db-withdraw-btn" data-reg="' + reg.id + '" data-name="' + escHtml(tName) + '">' + L.regWithdraw + '</button>';
+                }
+                html += '</div>';
             });
             html += '</div>';
             container.innerHTML = html;
+            bindWithdraw(container, profile);
 
         } catch(e) {
             console.warn('[KSLT] tournaments load error:', e);
             container.innerHTML = emptyHtml;
         }
+    }
+
+    // ---- Снятие заявки с турнира ----
+    // Снять можно, пока не проведена жеребьёвка: после неё игрок уже в сетке,
+    // и его снимает организатор. Правило «за 3 часа» и штраф — отдельная задача.
+    function canWithdraw(item) {
+        var reg = item.reg;
+        if (!reg || reg.status === 'withdrawn') return false;
+        if (reg.draw_position != null || reg.group_number != null) return false;
+        if (item.round_reached) return false;
+        var st = item.tournament && item.tournament.status;
+        return st === 'registration' || st === 'upcoming' || st === 'draft';
+    }
+
+    function bindWithdraw(container, profile) {
+        container.querySelectorAll('.db-withdraw-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                showWithdrawModal(btn.dataset.reg, btn.dataset.name, profile);
+            });
+        });
+    }
+
+    function showWithdrawModal(regId, tournamentName, profile) {
+        var old = document.getElementById('dbWithdrawModal');
+        if (old) old.remove();
+
+        var overlay = document.createElement('div');
+        overlay.id = 'dbWithdrawModal';
+        overlay.className = 'db-modal-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+        overlay.innerHTML =
+            '<div style="background:#111111;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px 24px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.5);">' +
+                '<h3 style="margin:0 0 12px;font-size:1.15rem;color:#fff;">' + L.regWithdrawTitle + '</h3>' +
+                '<p style="margin:0 0 24px;color:var(--text-muted);font-size:0.9rem;line-height:1.5;">' +
+                    L.regWithdrawText.replace('{name}', '<strong style="color:#fff;">' + escHtml(tournamentName) + '</strong>') +
+                '</p>' +
+                '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
+                    '<button class="db-btn db-btn-outline" id="dbWithdrawCancel">' + L.regWithdrawNo + '</button>' +
+                    '<button class="db-btn db-btn-danger" id="dbWithdrawOk">' + L.regWithdrawYes + '</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        function close() { overlay.remove(); }
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+        document.getElementById('dbWithdrawCancel').addEventListener('click', close);
+
+        document.getElementById('dbWithdrawOk').addEventListener('click', async function() {
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = L.saving;
+
+            var res = await client.from('tournament_registrations')
+                .update({ status: 'withdrawn' })
+                .eq('id', regId);
+
+            close();
+            if (res.error) {
+                showMessage(null, res.error.message || L.regWithdrawError, true);
+                return;
+            }
+            showMessage(null, L.regWithdrawDone, false);
+            renderTournaments(profile);
+        });
     }
 
     // ---- Render Stats ----

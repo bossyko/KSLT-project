@@ -2453,6 +2453,16 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания' });
                     btnHtml += '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
                         statusLabels[alreadyRegistered.status] + '</span>';
+                    // Снять заявку — пока не проведена жеребьёвка. После неё игрок
+                    // уже в сетке, снимает организатор. Правило «за 3 часа» и штраф — #29
+                    var canWithdraw = (alreadyRegistered.status === 'approved' || alreadyRegistered.status === 'pending' || alreadyRegistered.status === 'waitlist')
+                        && alreadyRegistered.draw_position == null
+                        && alreadyRegistered.group_number == null;
+                    if (canWithdraw) {
+                        btnHtml += ' <button id="tdWithdrawBtn" data-reg="' + alreadyRegistered.id + '" style="margin-left:12px;padding:8px 16px;border:1px solid rgba(255,255,255,0.15);border-radius:8px;background:transparent;color:var(--text-muted);font-weight:500;cursor:pointer;font-size:0.9rem;">' +
+                            (isEn ? 'Withdraw' : (isKg ? 'Арызды алуу' : 'Снять заявку')) + '</button>';
+                    }
+
                     // Doubles without partner: show "Add Partner" button
                     var isTournamentDoublesCheck = tournament.format === 'doubles' || tournament.format === 'mixed_doubles';
                     if (isTournamentDoublesCheck && !alreadyRegistered.partner_id) {
@@ -2532,6 +2542,30 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 if (addPartnerBtn) {
                     addPartnerBtn.addEventListener('click', function() {
                         showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, addPartnerBtn, alreadyRegistered.id, playerNtrp, onlineSlotsFull);
+                    });
+                }
+
+                // Снятие заявки
+                var withdrawBtn = document.getElementById('tdWithdrawBtn');
+                if (withdrawBtn) {
+                    withdrawBtn.addEventListener('click', async function() {
+                        var tName = isEn ? (tournament.title_en || tournament.title) : (isKg ? (tournament.title_kg || tournament.title) : tournament.title);
+                        var ask = isEn ? 'Withdraw your entry for ' + tName + '?'
+                                : (isKg ? tName + ' турнирине берилген арызды аласызбы?'
+                                : 'Снять заявку на турнир ' + tName + '?');
+                        if (!confirm(ask)) return;
+
+                        withdrawBtn.disabled = true;
+                        var upd = await client.from('tournament_registrations')
+                            .update({ status: 'withdrawn' })
+                            .eq('id', withdrawBtn.dataset.reg);
+
+                        if (upd.error) {
+                            withdrawBtn.disabled = false;
+                            alert(upd.error.message || (isEn ? 'Could not withdraw the entry' : (isKg ? 'Арызды алуу мүмкүн болгон жок' : 'Не удалось снять заявку')));
+                            return;
+                        }
+                        window.location.reload();
                     });
                 }
 
