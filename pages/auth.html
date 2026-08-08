@@ -132,34 +132,98 @@
                 <a href="#" class="auth-back-link" id="tgRegBack">Вернуться к входу</a>
             </form>
 
-            <!-- Forgot Password: Step 1 -->
-            <form class="auth-form" id="forgotForm">
+            <!-- Forgot Password: Step 1 — Choose method & enter identifier -->
+            <form class="auth-form" id="forgotStep1">
                 <div class="auth-screen-header">
                     <h2 class="auth-screen-title">Восстановление пароля</h2>
-                    <p class="auth-screen-subtitle">Введите email, указанный при регистрации</p>
+                    <p class="auth-screen-subtitle">Выберите способ получения кода</p>
                 </div>
-                <div class="auth-field">
+                <div class="otp-method-tabs">
+                    <button type="button" class="otp-method-tab active" data-method="email">По почте</button>
+                    <button type="button" class="otp-method-tab" data-method="phone">По телефону</button>
+                </div>
+                <div id="forgotEmailField" class="auth-field">
                     <label class="auth-label" for="forgot-email">Email <span class="auth-required">*</span></label>
                     <input class="auth-input" type="email" id="forgot-email" placeholder="you@example.com" required>
                 </div>
-
+                <div id="forgotPhoneField" class="auth-field" style="display:none">
+                    <label class="auth-label">Телефон <span class="auth-required">*</span></label>
+                    <div class="otp-phone-row">
+                        <select class="otp-country-select" id="forgot-country">
+                            <option value="+996">🇰🇬 +996</option>
+                            <option value="+7">🇷🇺 +7</option>
+                            <option value="+7" data-kz>🇰🇿 +7</option>
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+49">🇩🇪 +49</option>
+                            <option value="+82">🇰🇷 +82</option>
+                            <option value="+90">🇹🇷 +90</option>
+                        </select>
+                        <input class="auth-input" type="tel" id="forgot-phone" placeholder="555 123 456" required>
+                    </div>
+                </div>
                 <div id="forgotTurnstile" style="margin-bottom:16px"></div>
-                <button type="submit" class="auth-btn">Отправить ссылку</button>
+                <button type="submit" class="auth-btn">Отправить код</button>
                 <a href="#" class="auth-back-link" id="forgotBack">Вернуться к входу</a>
             </form>
 
-            <!-- Forgot Password: Step 2 (Confirmation) -->
-            <div class="auth-form" id="forgotSuccess">
+            <!-- Forgot Password: Step 2 — Enter OTP code -->
+            <div class="auth-form" id="otpCodeForm">
                 <div class="auth-screen-header">
                     <div class="auth-icon-wrap">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 8L2 4"/></svg>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
                     </div>
-                    <h2 class="auth-screen-title">Проверьте почту</h2>
-                    <p class="auth-screen-subtitle">Мы отправили ссылку для сброса пароля на <strong id="forgotEmailDisplay"></strong></p>
+                    <h2 class="auth-screen-title">Введите код</h2>
+                    <p class="auth-screen-subtitle">Код отправлен <span id="otpChannelText"></span></p>
                 </div>
-                <button type="button" class="auth-btn" id="forgotBackToLogin">Вернуться к входу</button>
-                <p class="auth-resend">Не получили письмо? <a href="#" id="forgotResend">Отправить повторно</a></p>
+                <div class="otp-channel-hint" id="otpChannelHint"></div>
+                <div class="otp-inputs" id="otpInputs">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" autocomplete="one-time-code">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit">
+                </div>
+                <div class="otp-timer" id="otpTimer">Код действителен: <strong>10:00</strong></div>
+                <p class="auth-resend" id="otpResendWrap">Не получили код? <a href="#" id="otpResend">Отправить повторно</a></p>
+                <a href="#" class="auth-back-link" id="otpBackToForgot">Назад</a>
             </div>
+
+            <!-- Forgot Password: Step 3 — New password -->
+            <form class="auth-form" id="otpNewPasswordForm">
+                <div class="auth-screen-header">
+                    <div class="auth-icon-wrap">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                    </div>
+                    <h2 class="auth-screen-title">Новый пароль</h2>
+                    <p class="auth-screen-subtitle">Придумайте надёжный пароль</p>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label" for="otp-new-password">Новый пароль <span class="auth-required">*</span></label>
+                    <div class="auth-password-wrap">
+                        <input class="auth-input" type="password" id="otp-new-password" placeholder="Минимум 8 символов" required minlength="8">
+                        <button type="button" class="auth-eye" tabindex="-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label" for="otp-confirm-password">Подтвердите пароль <span class="auth-required">*</span></label>
+                    <div class="auth-password-wrap">
+                        <input class="auth-input" type="password" id="otp-confirm-password" placeholder="Повторите пароль" required minlength="8">
+                        <button type="button" class="auth-eye" tabindex="-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    </div>
+                </div>
+                <div class="auth-pw-detail" id="otpPwRules">
+                    <strong>Пароль должен содержать:</strong>
+                    <ul>
+                        <li data-rule="length">Минимум 8 символов</li>
+                        <li data-rule="upper">Заглавную букву (A-Z)</li>
+                        <li data-rule="digit">Цифру (0-9)</li>
+                        <li data-rule="special">Спецсимвол (!@#$...)</li>
+                    </ul>
+                </div>
+                <button type="submit" class="auth-btn">Сохранить пароль</button>
+            </form>
 
             <!-- Sign Up Form -->
             <form class="auth-form" id="signupForm">
