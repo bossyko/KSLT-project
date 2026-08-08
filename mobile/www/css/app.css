@@ -4372,3 +4372,17 @@ select.prof-field-input { color: var(--text); }
   border: 1px solid var(--border);
   border-radius: 8px;
 }
+
+.prof-group-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 16px 16px 8px;
+}
+
+.pd-reenter-btn {
+  color: var(--accent) !important;
+  border-color: rgba(204, 255, 0, 0.4) !important;
+}

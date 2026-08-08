@@ -15,9 +15,27 @@
 -- authenticated, и запрет на колонку сломал бы посев в админке. Поэтому
 -- ограничиваем триггером, который отличает игрока от админа.
 
+-- Когда игрок снялся. Нужно и для истории, и для будущего штрафа (#29):
+-- правило клиента считает часы до жеребьёвки.
+ALTER TABLE tournament_registrations ADD COLUMN IF NOT EXISTS withdrawn_at TIMESTAMPTZ;
+
 CREATE OR REPLACE FUNCTION registrations_guard_self_update()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
+  -- Отметка времени снятия ставится здесь, а не на клиенте: так её нельзя
+  -- подделать и она появляется, откуда бы заявку ни сняли
+  IF NEW.status = 'withdrawn' AND OLD.status IS DISTINCT FROM 'withdrawn' THEN
+    NEW.withdrawn_at := now();
+  ELSIF NEW.status IS DISTINCT FROM 'withdrawn' THEN
+    NEW.withdrawn_at := NULL;
+  END IF;
+
+  -- Сервер ходит под service_role: это наши Edge Functions, у них своя проверка.
+  -- Ограничиваем только браузер с пользовательским токеном.
+  IF auth.uid() IS NULL OR COALESCE(auth.role(), '') = 'service_role' THEN
+    RETURN NEW;
+  END IF;
+
   -- Админ и менеджер правят заявку как раньше
   IF EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'manager')) THEN
     RETURN NEW;
@@ -54,5 +72,6 @@ CREATE TRIGGER registrations_guard_self_update
   BEFORE UPDATE ON tournament_registrations
   FOR EACH ROW EXECUTE FUNCTION registrations_guard_self_update();
 
--- Проверка: колонки на месте, статусы как ожидаем
-SELECT status, count(*) FROM tournament_registrations GROUP BY status ORDER BY 2 DESC;
+-- Проверка: колонка на месте, статусы как ожидаем
+SELECT status, count(*), count(withdrawn_at) AS with_time
+FROM tournament_registrations GROUP BY status ORDER BY 2 DESC;

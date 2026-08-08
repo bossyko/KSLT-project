@@ -70,6 +70,10 @@
         role_user: 'Колдонуучу', role_player: 'Оюнчу', role_admin: 'Администратор', role_manager: 'Менеджер',
         category: 'Категория', points: 'Упайлар',
         regWithdraw: 'Арызды алуу',
+        regAgain: 'Кайра катталуу',
+        regWaitlist: 'Күтүү тизмесинде',
+        tourUpcoming: 'Алдыдагы',
+        tourPlayed: 'Ойнолгон',
         regWithdrawn: 'Арыз алынды',
         regWithdrawTitle: 'Турнирден арызды аласызбы?',
         regWithdrawText: '{name} турнирине берилген арыз алынат. Каттоо ачык турганда кайра катталса болот.',
@@ -263,6 +267,10 @@
         role_user: 'User', role_player: 'Player', role_admin: 'Admin', role_manager: 'Manager',
         category: 'Category', points: 'Points',
         regWithdraw: 'Withdraw',
+        regAgain: 'Enter again',
+        regWaitlist: 'On the waiting list',
+        tourUpcoming: 'Upcoming',
+        tourPlayed: 'Played',
         regWithdrawn: 'Withdrawn',
         regWithdrawTitle: 'Withdraw from the tournament?',
         regWithdrawText: 'Your entry for {name} will be withdrawn. You can enter again while registration is open.',
@@ -456,6 +464,10 @@
         role_user: 'Пользователь', role_player: 'Игрок', role_admin: 'Администратор', role_manager: 'Менеджер',
         category: 'Категория', points: 'Очки',
         regWithdraw: 'Снять заявку',
+        regAgain: 'Записаться снова',
+        regWaitlist: 'В листе ожидания',
+        tourUpcoming: 'Предстоящие',
+        tourPlayed: 'Сыгранные',
         regWithdrawn: 'Заявка снята',
         regWithdrawTitle: 'Снять заявку с турнира?',
         regWithdrawText: 'Заявка на {name} будет снята. Записаться снова можно, пока открыта регистрация.',
@@ -2613,42 +2625,75 @@
                 return;
             }
 
-            var html = '<h2 class="db-section-title">' + L.tournamentsTitle + '</h2>';
-            html += '<div class="db-tournaments-list">';
-            items.forEach(function(item) {
-                var t = item.tournament;
-                var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
-                var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
-                var result = item.round_reached
-                    ? (ROUND_LABELS_DB[item.round_reached] || item.round_reached)
-                    : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован');
-                var pts = item.points_earned > 0 ? ' · +' + item.points_earned + ' pts' : '';
-                var isWinner = item.round_reached === 'W';
-                var reg = item.reg;
-                var withdrawn = reg && reg.status === 'withdrawn';
-                if (withdrawn) result = L.regWithdrawn;
+            // Заявки на будущие турниры — это то, с чем игрок что-то делает;
+            // сыгранное он просто листает. Держим их порознь.
+            var upcoming = items.filter(isUpcoming);
+            var played = items.filter(function(i) { return !isUpcoming(i); });
 
-                html += '<div class="db-tournament-item' + (withdrawn ? ' db-tournament-withdrawn' : '') + '">';
-                html += '<a class="db-tournament-row" href="tournament.html' + (isEn ? '-en' : isKg ? '-kg' : '') + '?id=' + t.id + '">';
-                html += '<div class="db-tournament-info">';
-                html += '<span class="db-tournament-name">' + escHtml(tName) + '</span>';
-                html += '<span class="db-tournament-date">' + dateStr + '</span>';
-                html += '</div>';
-                html += '<span class="db-tournament-result' + (isWinner ? ' db-tournament-winner' : '') + '">' + result + pts + '</span>';
-                html += '</a>';
-                if (canWithdraw(item)) {
-                    html += '<button class="db-withdraw-btn" data-reg="' + reg.id + '" data-name="' + escHtml(tName) + '">' + L.regWithdraw + '</button>';
-                }
-                html += '</div>';
-            });
-            html += '</div>';
+            var html = '<h2 class="db-section-title">' + L.tournamentsTitle + '</h2>';
+            if (upcoming.length > 0) {
+                html += '<div class="db-tournaments-group-title">' + L.tourUpcoming + '</div>';
+                html += '<div class="db-tournaments-list">' + upcoming.map(tournamentRow).join('') + '</div>';
+            }
+            if (played.length > 0) {
+                html += '<div class="db-tournaments-group-title">' + L.tourPlayed + '</div>';
+                html += '<div class="db-tournaments-list">' + played.map(tournamentRow).join('') + '</div>';
+            }
+
             container.innerHTML = html;
             bindWithdraw(container, profile);
+            return;
 
         } catch(e) {
             console.warn('[KSLT] tournaments load error:', e);
             container.innerHTML = emptyHtml;
         }
+    }
+
+    // Турнир ещё впереди, если он не сыгран и результата по нему нет
+    function isUpcoming(item) {
+        if (item.round_reached) return false;
+        var st = item.tournament && item.tournament.status;
+        return st === 'registration_open' || st === 'registration_closed' || st === 'upcoming';
+    }
+
+    // Записаться снова можно, пока регистрация открыта. Сама запись идёт
+    // обычным путём на странице турнира — там все проверки допуска
+    function canReenter(item) {
+        return item.reg && item.reg.status === 'withdrawn'
+            && item.tournament && item.tournament.status === 'registration_open';
+    }
+
+    function tournamentRow(item) {
+        var t = item.tournament;
+        var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
+        var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
+        var reg = item.reg;
+        var withdrawn = reg && reg.status === 'withdrawn';
+        var result = withdrawn
+            ? L.regWithdrawn
+            : (item.round_reached
+                ? (ROUND_LABELS_DB[item.round_reached] || item.round_reached)
+                : (reg && reg.status === 'waitlist' ? L.regWaitlist : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован')));
+        var pts = item.points_earned > 0 ? ' · +' + item.points_earned + ' pts' : '';
+        var isWinner = item.round_reached === 'W';
+        var tPage = 'tournament.html' + (isEn ? '-en' : isKg ? '-kg' : '') + '?id=' + t.id;
+
+        var html = '<div class="db-tournament-item' + (withdrawn ? ' db-tournament-withdrawn' : '') + '">';
+        html += '<a class="db-tournament-row" href="' + tPage + '">';
+        html += '<div class="db-tournament-info">';
+        html += '<span class="db-tournament-name">' + escHtml(tName) + '</span>';
+        html += '<span class="db-tournament-date">' + dateStr + '</span>';
+        html += '</div>';
+        html += '<span class="db-tournament-result' + (isWinner ? ' db-tournament-winner' : '') + '">' + result + pts + '</span>';
+        html += '</a>';
+        if (canWithdraw(item)) {
+            html += '<button class="db-withdraw-btn" data-reg="' + reg.id + '" data-name="' + escHtml(tName) + '">' + L.regWithdraw + '</button>';
+        } else if (canReenter(item)) {
+            html += '<a class="db-withdraw-btn db-reenter-btn" href="' + tPage + '">' + L.regAgain + '</a>';
+        }
+        html += '</div>';
+        return html;
     }
 
     // ---- Снятие заявки с турнира ----

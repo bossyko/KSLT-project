@@ -2064,3 +2064,30 @@ select.db-field-input {
     .db-onboarding-title { font-size: 1.15rem; }
     .db-onboarding-btn { width: 100%; }
 }
+
+.db-tournaments-group-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 20px 0 10px;
+}
+
+.db-tournaments-group-title:first-of-type {
+    margin-top: 0;
+}
+
+.db-reenter-btn {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--accent);
+    border-color: rgba(204, 255, 0, 0.4);
+}
+
+.db-reenter-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(204, 255, 0, 0.06);
+}

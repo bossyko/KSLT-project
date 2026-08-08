@@ -116,7 +116,10 @@ Deno.serve(async (req) => {
       .eq('player_id', player.id)
       .maybeSingle()
 
-    if (existing) {
+    // Снятую заявку не считаем поданной: игрок вправе передумать и записаться
+    // снова. Второй строки не будет — уникальный индекс на (турнир, игрок),
+    // поэтому в конце оживляем ту же запись.
+    if (existing && existing.status !== 'withdrawn') {
       return json({ error: 'already_registered', status: existing.status }, 409)
     }
 
@@ -280,7 +283,13 @@ Deno.serve(async (req) => {
     if (body.partner_external_ntrp) row.partner_external_ntrp = body.partner_external_ntrp
     if (body.partner_gender) row.partner_gender = body.partner_gender
 
-    const { error: insErr } = await db.from('tournament_registrations').insert(row)
+    // Заявка после снятия — обновляем прежнюю строку, иначе вставка упрётся
+    // в уникальный индекс
+    const { error: insErr } = existing
+      ? await db.from('tournament_registrations')
+          .update({ ...row, block_reason: row.block_reason ?? null, registered_at: new Date().toISOString() })
+          .eq('id', existing.id)
+      : await db.from('tournament_registrations').insert(row)
     if (insErr) {
       // Откатываем вытеснение, если саму заявку записать не удалось
       if (displaced) {

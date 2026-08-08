@@ -388,9 +388,23 @@
       container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏆</div><div class="empty-title">' + I18N.t('profile.noTournamentsTitle') + '</div><div class="empty-text">' + I18N.t('profile.noTournaments') + '</div></div>';
       return;
     }
-    var html = '';
+    // Предстоящее и сыгранное — разные вещи: с первым игрок что-то делает,
+    // второе просто листает
+    var upcoming = [], played = [];
     regs.forEach(function(reg) {
       if (!reg.tournament) return;
+      (isUpcoming(reg) ? upcoming : played).push(reg);
+    });
+
+    var html = '';
+    if (upcoming.length) html += '<div class="prof-group-title">' + I18N.t('reg.upcoming') + '</div>' + upcoming.map(tournamentRow).join('');
+    if (played.length) html += '<div class="prof-group-title">' + I18N.t('reg.played') + '</div>' + played.map(tournamentRow).join('');
+    container.innerHTML = html;
+    bindWithdraw(container);
+    bindReenter(container);
+    return;
+
+    function unusedRow(reg) {
       var t = reg.tournament;
       var withdrawn = reg.status === 'withdrawn';
       var statusClass = withdrawn ? 'withdrawn' : (t.status === 'completed' ? 'completed' : 'upcoming');
@@ -405,9 +419,55 @@
         html += '<button class="pd-withdraw-btn" data-reg="' + reg.id + '">' + I18N.t('reg.withdraw') + '</button>';
       }
       html += '</div>';
+    }
+  }
+
+  // Турнир ещё впереди, пока не сыгран
+  function isUpcoming(reg) {
+    var st = reg.tournament && reg.tournament.status;
+    return st === 'registration_open' || st === 'registration_closed' || st === 'upcoming';
+  }
+
+  // Записаться снова можно, пока регистрация открыта. Сама запись — на экране
+  // турнира, там все проверки допуска
+  function canReenter(reg) {
+    return reg.status === 'withdrawn'
+      && reg.tournament && reg.tournament.status === 'registration_open';
+  }
+
+  function tournamentRow(reg) {
+    var t = reg.tournament;
+    var withdrawn = reg.status === 'withdrawn';
+    var statusClass = withdrawn ? 'withdrawn' : (t.status === 'completed' ? 'completed' : 'upcoming');
+    var statusText = withdrawn
+      ? I18N.t('reg.withdrawn')
+      : (t.status === 'completed' ? I18N.t('profile.tCompleted') : (t.status === 'live' ? I18N.t('profile.tLive') : I18N.t('profile.tUpcoming')));
+
+    var html = '<div class="pd-tournament' + (withdrawn ? ' pd-tournament-withdrawn' : '') + '">';
+    html += '<div class="pd-tournament-date">' + formatDate(t.date_start) + '</div>';
+    html += '<div class="pd-tournament-name">' + esc(t.title) + '</div>';
+    html += '<div class="pd-tournament-status ' + statusClass + '">' + statusText + '</div>';
+    if (canWithdraw(reg)) {
+      html += '<button class="pd-withdraw-btn" data-reg="' + reg.id + '">' + I18N.t('reg.withdraw') + '</button>';
+    } else if (canReenter(reg)) {
+      html += '<button class="pd-withdraw-btn pd-reenter-btn" data-tid="' + esc(t.id) + '">' + I18N.t('reg.again') + '</button>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // «Записаться снова» — уводим на экран турнира, повторно проверять допуск
+  // здесь нельзя, этим занимается Edge Function
+  function bindReenter(container) {
+    container.querySelectorAll('.pd-reenter-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var ov = document.getElementById('profSubOverlay');
+        if (ov) ov.remove();
+        if (window.KSLT_HOME && window.KSLT_HOME.openTournamentDetail) {
+          window.KSLT_HOME.openTournamentDetail(btn.getAttribute('data-tid'));
+        }
+      });
     });
-    container.innerHTML = html;
-    bindWithdraw(container);
   }
 
   // ---- Снятие заявки ----
