@@ -2550,10 +2550,20 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 if (withdrawBtn) {
                     withdrawBtn.addEventListener('click', async function() {
                         var tName = isEn ? (tournament.title_en || tournament.title) : (isKg ? (tournament.title_kg || tournament.title) : tournament.title);
-                        var ask = isEn ? 'Withdraw your entry for ' + tName + '?'
-                                : (isKg ? tName + ' турнирине берилген арызды аласызбы?'
-                                : 'Снять заявку на турнир ' + tName + '?');
-                        if (!confirm(ask)) return;
+
+                        // Модалка та же, что у результата регистрации на этой странице
+                        var ok = await window.KSLT_REG.confirm({
+                            icon: '\uD83C\uDFBE',
+                            title: isEn ? 'Withdraw from the tournament?'
+                                : (isKg ? 'Турнирден арызды аласызбы?' : 'Снять заявку с турнира?'),
+                            text: isEn ? 'Your entry for <b>' + tName + '</b> will be withdrawn. You can enter again while registration is open.'
+                                : (isKg ? '<b>' + tName + '</b> турнирине берилген арыз алынат. Каттоо ачык турганда кайра катталса болот.'
+                                : 'Заявка на <b>' + tName + '</b> будет снята. Записаться снова можно, пока открыта регистрация.'),
+                            okText: isEn ? 'Withdraw' : (isKg ? 'Арызды алуу' : 'Снять заявку'),
+                            cancelText: isEn ? 'Cancel' : (isKg ? 'Жокко чыгаруу' : 'Отмена'),
+                            tone: 'error'
+                        });
+                        if (!ok) return;
 
                         withdrawBtn.disabled = true;
                         var upd = await client.from('tournament_registrations')
@@ -2562,7 +2572,12 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
                         if (upd.error) {
                             withdrawBtn.disabled = false;
-                            alert(upd.error.message || (isEn ? 'Could not withdraw the entry' : (isKg ? 'Арызды алуу мүмкүн болгон жок' : 'Не удалось снять заявку')));
+                            window.KSLT_REG.notice({
+                                icon: '\u26A0\uFE0F',
+                                title: isEn ? 'Could not withdraw the entry' : (isKg ? 'Арызды алуу мүмкүн болгон жок' : 'Не удалось снять заявку'),
+                                text: upd.error.message || '',
+                                tone: 'error'
+                            }, isEn, isKg);
                             return;
                         }
                         window.location.reload();
@@ -2707,7 +2722,15 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
         if (existingRegId) {
             var upd = await client.from('tournament_registrations').update({ partner_id: partnerId }).eq('id', existingRegId);
             overlay.remove();
-            if (upd.error) { alert(upd.error.message); return; }
+            if (upd.error) {
+                window.KSLT_REG.notice({
+                    icon: '\u26A0\uFE0F',
+                    title: isEn ? 'Could not add the partner' : (isKg ? 'Өнөктөштү кошуу мүмкүн болгон жок' : 'Не удалось добавить партнёра'),
+                    text: upd.error.message || '',
+                    tone: 'error'
+                }, isEn, isKg);
+                return;
+            }
 
             var addedMsg = isEn ? 'Partner added!' : (isKg ? 'Өнөктөш кошулду!' : 'Партнёр добавлен!');
             var addPartnerBtnEl = document.getElementById('tdAddPartnerBtn');
@@ -2776,11 +2799,16 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
                         var partnerNtrp = parseFloat(item.dataset.ntrp) || 0;
                         var combinedNtrp = captainNtrp + partnerNtrp;
                         if (combinedNtrp > ntrpCombinedMax) {
-                            alert(isEn
-                                ? 'Combined NTRP ' + combinedNtrp.toFixed(1) + ' exceeds the limit ' + ntrpCombinedMax + ' (yours: ' + captainNtrp + ' + partner: ' + partnerNtrp + ')'
-                                : (isKg
-                                    ? 'Жалпы NTRP ' + combinedNtrp.toFixed(1) + ' чектен (' + ntrpCombinedMax + ') ашып кетти (сиздики: ' + captainNtrp + ' + өнөктөш: ' + partnerNtrp + ')'
-                                    : 'Суммарный NTRP ' + combinedNtrp.toFixed(1) + ' превышает лимит ' + ntrpCombinedMax + ' (ваш: ' + captainNtrp + ' + партнёр: ' + partnerNtrp + ')'));
+                            window.KSLT_REG.notice({
+                                icon: '\uD83D\uDCCF',
+                                title: isEn ? 'Combined NTRP is over the limit' : (isKg ? 'Жалпы NTRP чектен ашты' : 'Суммарный NTRP выше лимита'),
+                                text: isEn
+                                    ? combinedNtrp.toFixed(1) + ' against a limit of ' + ntrpCombinedMax + ' — yours ' + captainNtrp + ', partner ' + partnerNtrp
+                                    : (isKg
+                                        ? combinedNtrp.toFixed(1) + ' — чек ' + ntrpCombinedMax + ', сиздики ' + captainNtrp + ', өнөктөш ' + partnerNtrp
+                                        : combinedNtrp.toFixed(1) + ' при лимите ' + ntrpCombinedMax + ' — ваш ' + captainNtrp + ', партнёра ' + partnerNtrp),
+                                tone: 'error'
+                            }, isEn, isKg);
                             return;
                         }
                     }
@@ -2792,7 +2820,12 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
                             var captGender = captRes.data ? captRes.data.gender : '';
                             var partGender = item.dataset.gender;
                             if (captGender && partGender && captGender === partGender) {
-                                alert(isEn ? 'Mixed doubles requires one man and one woman' : (isKg ? 'Микст бир эркек жана бир аял талап кылат' : 'Микст требует одного мужчину и одну женщину'));
+                                window.KSLT_REG.notice({
+                                    icon: '\u26A0\uFE0F',
+                                    title: isEn ? 'Mixed doubles pairs a man with a woman' : (isKg ? 'Микст: бир эркек жана бир аял' : 'Микст — это мужчина и женщина'),
+                                    text: isEn ? 'Pick a partner of the other gender.' : (isKg ? 'Башка жыныстагы өнөктөштү тандаңыз.' : 'Выберите партнёра другого пола.'),
+                                    tone: 'error'
+                                }, isEn, isKg);
                                 return;
                             }
                             selectPartner(item);

@@ -27,7 +27,11 @@
             '.trn-register-modal-note{margin:18px auto 0;max-width:340px;padding:10px 14px;border-radius:8px;background:rgba(204,255,0,0.07);border:1px solid rgba(204,255,0,0.2);color:var(--text-secondary,#aaa);font-size:0.85rem;line-height:1.45}' +
             '.trn-register-modal-btn{display:inline-block;margin-top:24px;padding:12px 32px;border:none;border-radius:8px;font-weight:600;cursor:pointer;background:var(--accent,#CCFF00);color:#000;transition:opacity .2s}' +
             '.trn-register-modal-btn:hover{opacity:0.9}' +
-            '.trn-register-modal-btn.is-error{background:#ff3b30;color:#fff}';
+            '.trn-register-modal-btn.is-error{background:#ff3b30;color:#fff}' +
+            '.trn-register-modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}' +
+            '.trn-register-modal-actions .trn-register-modal-btn{margin-top:24px}' +
+            '.trn-register-modal-btn.is-ghost{background:transparent;border:1px solid var(--border,#2a2a2a);color:var(--text-muted,#888)}' +
+            '.trn-register-modal-btn.is-ghost:hover{color:var(--text-primary,#fff);border-color:var(--text-muted,#888);opacity:1}';
         document.head.appendChild(style);
     }
 
@@ -249,10 +253,68 @@
         return info;
     }
 
+    /**
+     * Подтверждение в том же оформлении, что и остальные модалки страницы.
+     * Нативный confirm() выбивается из дизайна и на разных браузерах выглядит
+     * по-своему.
+     * @returns {Promise<boolean>}
+     */
+    function confirmModal(opts) {
+        injectStyles();
+
+        var old = document.querySelector('.trn-register-modal-overlay');
+        if (old) old.remove();
+
+        return new Promise(function(resolve) {
+            var overlay = document.createElement('div');
+            overlay.className = 'trn-register-modal-overlay';
+            overlay.innerHTML =
+                '<div class="trn-register-modal">' +
+                    '<button class="trn-register-modal-close">&times;</button>' +
+                    (opts.icon ? '<div class="trn-register-modal-icon">' + opts.icon + '</div>' : '') +
+                    '<h3 class="trn-register-modal-title">' + opts.title + '</h3>' +
+                    (opts.text ? '<p class="trn-register-modal-text">' + opts.text + '</p>' : '') +
+                    '<div class="trn-register-modal-actions">' +
+                        '<button class="trn-register-modal-btn is-ghost" data-no>' + opts.cancelText + '</button>' +
+                        '<button class="trn-register-modal-btn' + (opts.tone === 'error' ? ' is-error' : '') + '" data-yes>' + opts.okText + '</button>' +
+                    '</div>' +
+                '</div>';
+
+            document.body.appendChild(overlay);
+            requestAnimationFrame(function() { overlay.classList.add('active'); });
+
+            var answered = false;
+            function close(answer) {
+                if (answered) return;
+                answered = true;
+                overlay.classList.remove('active');
+                setTimeout(function() { overlay.remove(); }, 200);
+                resolve(answer);
+            }
+            overlay.querySelector('.trn-register-modal-close').addEventListener('click', function() { close(false); });
+            overlay.querySelector('[data-no]').addEventListener('click', function() { close(false); });
+            overlay.querySelector('[data-yes]').addEventListener('click', function() { close(true); });
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) close(false); });
+        });
+    }
+
+    /** Короткое сообщение в том же оформлении — вместо alert() */
+    function noticeModal(opts, isEn, isKg) {
+        showModal({
+            icon: opts.icon || '',
+            title: opts.title,
+            text: opts.text || '',
+            note: '',
+            tone: opts.tone || ''
+        }, isEn, isKg);
+    }
+
     window.KSLT_REG = {
         call: callRegister,
         resultText: resultText,
         showModal: showModal,
+        confirm: confirmModal,
+        notice: noticeModal,
         submit: submit
     };
 })();
