@@ -1593,8 +1593,8 @@
             var pid = profile.player_id;
             var results = await Promise.all([
                 client.from('tournament_registrations')
-                    .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start, image, status)')
-                    .eq('player_id', pid).in('status', ['approved', 'draw'])
+                    .select('id, status, draw_position, group_number, tournament:tournaments(id, title, title_en, title_kg, date_start, image, status)')
+                    .eq('player_id', pid).in('status', ['approved', 'draw', 'waitlist', 'pending', 'withdrawn'])
                     .order('registered_at', { ascending: false }).limit(10),
                 client.from('tournament_results')
                     .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start, image)')
@@ -1612,7 +1612,7 @@
                 if (!reg.tournament || seen[reg.tournament.id]) return;
                 seen[reg.tournament.id] = true;
                 var tr = resultsMap[reg.tournament.id];
-                items.push({ tournament: reg.tournament, round_reached: tr ? tr.round_reached : null, points_earned: tr ? tr.points_earned : 0 });
+                items.push({ tournament: reg.tournament, reg: reg, round_reached: tr ? tr.round_reached : null, points_earned: tr ? tr.points_earned : 0 });
             });
             tResults.forEach(function(tr) {
                 if (!tr.tournament || seen[tr.tournament_id]) return;
@@ -1625,33 +1625,21 @@
                 return;
             }
 
-            var html = '<div class="db-tournaments-list">';
-            items.forEach(function(item) {
-                var t = item.tournament;
-                var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
-                var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
-                var result = item.round_reached
-                    ? (ROUND_LABELS_DB[item.round_reached] || item.round_reached)
-                    : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован');
-                var pts = item.points_earned > 0 ? ' \u00B7 +' + item.points_earned + ' pts' : '';
-                var isWinner = item.round_reached === 'W';
-                var tImg = t.image || '';
+            var upcoming = items.filter(isUpcoming);
+            var played = items.filter(function(i) { return !isUpcoming(i); });
 
-                html += '<a class="db-tournament-row" href="tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id + '">';
-                if (tImg) {
-                    html += '<img src="' + escHtml(tImg) + '" alt="" class="db-tournament-photo">';
-                } else {
-                    html += '<div class="db-tournament-photo db-tournament-photo-empty">\uD83C\uDFBE</div>';
-                }
-                html += '<div class="db-tournament-info">';
-                html += '<span class="db-tournament-name">' + escHtml(tName) + '</span>';
-                html += '<span class="db-tournament-date">' + dateStr + '</span>';
-                html += '</div>';
-                html += '<span class="db-tournament-result' + (isWinner ? ' db-tournament-winner' : '') + '">' + result + pts + '</span>';
-                html += '</a>';
-            });
-            html += '</div>';
+            var html = '';
+            if (upcoming.length > 0) {
+                html += '<div class="db-tournaments-group-title">' + L.tourUpcoming + '</div>';
+                html += '<div class="db-tournaments-list">' + upcoming.map(function(i) { return tournamentRow(i, true); }).join('') + '</div>';
+            }
+            if (played.length > 0) {
+                html += '<div class="db-tournaments-group-title">' + L.tourPlayed + '</div>';
+                html += '<div class="db-tournaments-list">' + played.map(function(i) { return tournamentRow(i, true); }).join('') + '</div>';
+            }
+
             container.innerHTML = html;
+            bindWithdraw(container, profile, loadGamesTournaments);
         } catch(e) {
             console.warn('[KSLT] games tournaments error:', e);
             container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC6</div><div class="db-empty-title">' + L.noTournaments + '</div></div>';
@@ -2664,7 +2652,7 @@
             && item.tournament && item.tournament.status === 'registration_open';
     }
 
-    function tournamentRow(item) {
+    function tournamentRow(item, withPhoto) {
         var t = item.tournament;
         var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
         var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
@@ -2677,10 +2665,15 @@
                 : (reg && reg.status === 'waitlist' ? L.regWaitlist : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован')));
         var pts = item.points_earned > 0 ? ' · +' + item.points_earned + ' pts' : '';
         var isWinner = item.round_reached === 'W';
-        var tPage = 'tournament.html' + (isEn ? '-en' : isKg ? '-kg' : '') + '?id=' + t.id;
+        var tPage = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id;
 
         var html = '<div class="db-tournament-item' + (withdrawn ? ' db-tournament-withdrawn' : '') + '">';
         html += '<a class="db-tournament-row" href="' + tPage + '">';
+        if (withPhoto) {
+            html += t.image
+                ? '<img src="' + escHtml(t.image) + '" alt="" class="db-tournament-photo">'
+                : '<div class="db-tournament-photo db-tournament-photo-empty">\uD83C\uDFBE</div>';
+        }
         html += '<div class="db-tournament-info">';
         html += '<span class="db-tournament-name">' + escHtml(tName) + '</span>';
         html += '<span class="db-tournament-date">' + dateStr + '</span>';
@@ -2710,15 +2703,16 @@
         return st === 'registration_open' || st === 'registration_closed' || st === 'upcoming';
     }
 
-    function bindWithdraw(container, profile) {
+    function bindWithdraw(container, profile, refresh) {
         container.querySelectorAll('.db-withdraw-btn').forEach(function(btn) {
+            if (btn.tagName === 'A') return;   // «Записаться снова» — обычная ссылка
             btn.addEventListener('click', function() {
-                showWithdrawModal(btn.dataset.reg, btn.dataset.name, profile);
+                showWithdrawModal(btn.dataset.reg, btn.dataset.name, profile, refresh);
             });
         });
     }
 
-    function showWithdrawModal(regId, tournamentName, profile) {
+    function showWithdrawModal(regId, tournamentName, profile, refresh) {
         var old = document.getElementById('dbWithdrawModal');
         if (old) old.remove();
 
@@ -2758,7 +2752,7 @@
                 return;
             }
             showMessage(null, L.regWithdrawDone, false);
-            renderTournaments(profile);
+            (refresh || renderTournaments)(profile);
         });
     }
 
