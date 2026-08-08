@@ -523,6 +523,11 @@
                 }
 
                 startCountdownTimer();
+
+                // Карточки турниров, куда игрок уже подал заявку, гаснут
+                if (window.KSLT_REG && window.KSLT_REG.markRegistered) {
+                    window.KSLT_REG.markRegistered(client);
+                }
             }
 
             grid.innerHTML = '';

@@ -309,8 +309,71 @@
         }, isEn, isKg);
     }
 
+    /**
+     * Помечает карточки турниров, куда игрок уже подал заявку: кнопка гаснет
+     * и подписывается статусом. Раньше она оставалась активной, и человек
+     * узнавал о своей заявке только по модалке после нажатия.
+     */
+    async function markRegistered(client) {
+        var btns = Array.prototype.slice.call(document.querySelectorAll('.tournament-card[data-id] .btn-register'));
+        if (btns.length === 0 || !client) return;
+
+        var isEn = location.pathname.indexOf('-en') !== -1;
+        var isKg = location.pathname.indexOf('-kg') !== -1;
+
+        try {
+            var session = await client.auth.getSession();
+            if (!session.data.session) return;
+
+            var prof = await client.from('profiles')
+                .select('player_id').eq('id', session.data.session.user.id).single();
+            var playerId = prof.data && prof.data.player_id;
+            if (!playerId) return;
+
+            var ids = [];
+            btns.forEach(function(b) {
+                var card = b.closest('.tournament-card');
+                var id = card && card.dataset ? card.dataset.id : null;
+                if (id && ids.indexOf(id) === -1) ids.push(id);
+            });
+            if (ids.length === 0) return;
+
+            var regs = await client.from('tournament_registrations')
+                .select('tournament_id, status')
+                .eq('player_id', playerId)
+                .in('tournament_id', ids);
+
+            var byTournament = {};
+            (regs.data || []).forEach(function(r) {
+                // Снятую заявку не показываем: игрок вправе записаться снова
+                if (r.status !== 'withdrawn') byTournament[r.tournament_id] = r.status;
+            });
+
+            var labels = {
+                approved: isEn ? 'You are entered' : (isKg ? 'Сиз катталдыңыз' : 'Вы записаны'),
+                pending: isEn ? 'Entry sent' : (isKg ? 'Арыз жөнөтүлдү' : 'Заявка подана'),
+                draw: isEn ? 'You are entered' : (isKg ? 'Сиз катталдыңыз' : 'Вы записаны'),
+                waitlist: isEn ? 'On the waiting list' : (isKg ? 'Күтүү тизмесинде' : 'В листе ожидания'),
+                rejected: isEn ? 'Entry declined' : (isKg ? 'Арыз четке кагылды' : 'Заявка отклонена'),
+                blocked: isEn ? 'Not admitted' : (isKg ? 'Уруксат жок' : 'Не допущен')
+            };
+
+            btns.forEach(function(btn) {
+                var card = btn.closest('.tournament-card');
+                var status = card && byTournament[card.dataset.id];
+                if (!status) return;
+                btn.disabled = true;
+                btn.classList.add('is-registered');
+                btn.textContent = labels[status] || labels.approved;
+            });
+        } catch (e) {
+            console.warn('[KSLT] mark registered:', e.message);
+        }
+    }
+
     window.KSLT_REG = {
         call: callRegister,
+        markRegistered: markRegistered,
         resultText: resultText,
         showModal: showModal,
         confirm: confirmModal,

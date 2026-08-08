@@ -1023,3 +1023,19 @@
 .tournament-card > .to-cd {
     margin: 0 var(--space-md);
 }
+
+/* Заявка уже подана — кнопка гаснет и подписывается статусом */
+.btn-register.is-registered {
+    background: transparent;
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+    color: var(--text-muted, #888);
+    cursor: default;
+    pointer-events: none;
+}
+
+.btn-register.is-registered:hover {
+    background: transparent;
+    color: var(--text-muted, #888);
+    transform: none;
+    box-shadow: none;
+}
