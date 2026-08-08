@@ -1355,42 +1355,24 @@
         return;
       }
 
-      // Real registration
+      // Заявку принимает Edge Function tournament-register — она же решает,
+      // допущен ли игрок: категория, членство, места, бан. Раньше здесь стояла
+      // прямая запись в таблицу, и правила допуска этот экран обходил целиком.
       var tid = regBtn.getAttribute('data-tid');
       if (!tid) return;
-      var playerId = AUTH.currentProfile && AUTH.currentProfile.player_id;
-      if (!playerId) {
-        if (window.KSLT_APP) window.KSLT_APP.toast('Привяжите профиль игрока');
-        return;
-      }
-      regBtn.disabled = true;
-      regBtn.textContent = 'Отправка...';
+      if (!window.KSLT_REG) return;
 
-      // Check if already registered
-      supabaseClient.from('tournament_registrations')
-        .select('id')
-        .eq('tournament_id', tid)
-        .eq('player_id', playerId)
-        .limit(1)
-        .then(function(chk) {
-          if (chk.data && chk.data.length > 0) {
-            regBtn.outerHTML = '<span style="padding:8px 16px;border-radius:8px;background:var(--accent-dim);color:var(--accent);font-weight:500;display:inline-block">Вы уже записаны</span>';
-            return;
-          }
-          supabaseClient.from('tournament_registrations').insert({
-            tournament_id: tid,
-            player_id: playerId,
-            status: 'pending'
-          }).then(function(res) {
-            if (res.error) {
-              if (window.KSLT_APP) window.KSLT_APP.toast('Ошибка: ' + (res.error.message || ''));
-              regBtn.disabled = false;
-              regBtn.textContent = I18N.t('td.register');
-            } else {
-              regBtn.outerHTML = '<span style="padding:8px 16px;border-radius:8px;background:var(--accent-dim);color:var(--accent);font-weight:500;display:inline-block">Заявка отправлена!</span>';
-            }
-          });
-        });
+      regBtn.disabled = true;
+      regBtn.textContent = I18N.t('trn.registering');
+
+      window.KSLT_REG.submit(tid).then(function(info) {
+        if (!info.created) {
+          regBtn.disabled = false;
+          regBtn.textContent = I18N.t('td.register');
+          return;
+        }
+        regBtn.outerHTML = '<span class="td-reg-badge">' + info.short + '</span>';
+      });
     });
   });
 

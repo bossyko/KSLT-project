@@ -2541,102 +2541,6 @@
         'R16': 'R16', 'R32': 'R32', '3RD': '3-е место', '4TH': '4-е место'
     };
 
-    async function renderTournaments(profile) {
-        var container = document.getElementById('db-tournaments');
-        if (!container) return;
-
-        var emptyHtml =
-            '<h2 class="db-section-title">' + L.tournamentsTitle + '</h2>' +
-            '<div class="db-card">' +
-                '<div class="db-empty">' +
-                    '<div class="db-empty-icon">🏆</div>' +
-                    '<div class="db-empty-title">' + L.noTournaments + '</div>' +
-                    '<div class="db-empty-text">' + L.noTournamentsText + '</div>' +
-                '</div>' +
-            '</div>';
-
-        if (!profile || !profile.player_id || !client) {
-            container.innerHTML = emptyHtml;
-            return;
-        }
-
-        var pid = profile.player_id;
-
-        try {
-            var results = await Promise.all([
-                client.from('tournament_registrations')
-                    .select('id, status, draw_position, group_number, tournament:tournaments(id, title, title_en, title_kg, date_start, status)')
-                    .eq('player_id', pid)
-                    .in('status', ['approved', 'draw', 'waitlist', 'pending', 'withdrawn'])
-                    .order('registered_at', { ascending: false })
-                    .limit(20),
-                client.from('tournament_results')
-                    .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start)')
-                    .eq('player_id', pid)
-                    .order('created_at', { ascending: false })
-                    .limit(20)
-            ]);
-
-            var regs = results[0].data || [];
-            var tResults = results[1].data || [];
-
-            // Map results by tournament_id
-            var resultsMap = {};
-            tResults.forEach(function(tr) { resultsMap[tr.tournament_id] = tr; });
-
-            // Merge
-            var items = [];
-            var seen = {};
-            regs.forEach(function(reg) {
-                if (!reg.tournament || seen[reg.tournament.id]) return;
-                seen[reg.tournament.id] = true;
-                var tr = resultsMap[reg.tournament.id];
-                items.push({
-                    tournament: reg.tournament,
-                    reg: reg,
-                    round_reached: tr ? tr.round_reached : null,
-                    points_earned: tr ? tr.points_earned : 0
-                });
-            });
-            tResults.forEach(function(tr) {
-                if (!tr.tournament || seen[tr.tournament_id]) return;
-                seen[tr.tournament_id] = true;
-                items.push({
-                    tournament: tr.tournament,
-                    round_reached: tr.round_reached,
-                    points_earned: tr.points_earned
-                });
-            });
-
-            if (items.length === 0) {
-                container.innerHTML = emptyHtml;
-                return;
-            }
-
-            // Заявки на будущие турниры — это то, с чем игрок что-то делает;
-            // сыгранное он просто листает. Держим их порознь.
-            var upcoming = items.filter(isUpcoming);
-            var played = items.filter(function(i) { return !isUpcoming(i); });
-
-            var html = '<h2 class="db-section-title">' + L.tournamentsTitle + '</h2>';
-            if (upcoming.length > 0) {
-                html += '<div class="db-tournaments-group-title">' + L.tourUpcoming + '</div>';
-                html += '<div class="db-tournaments-list">' + upcoming.map(tournamentRow).join('') + '</div>';
-            }
-            if (played.length > 0) {
-                html += '<div class="db-tournaments-group-title">' + L.tourPlayed + '</div>';
-                html += '<div class="db-tournaments-list">' + played.map(tournamentRow).join('') + '</div>';
-            }
-
-            container.innerHTML = html;
-            bindWithdraw(container, profile);
-            return;
-
-        } catch(e) {
-            console.warn('[KSLT] tournaments load error:', e);
-            container.innerHTML = emptyHtml;
-        }
-    }
 
     // Турнир ещё впереди, если он не сыгран и результата по нему нет
     function isUpcoming(item) {
@@ -2752,7 +2656,7 @@
                 return;
             }
             showMessage(null, L.regWithdrawDone, false);
-            (refresh || renderTournaments)(profile);
+            (refresh || loadGamesTournaments)(profile);
         });
     }
 
