@@ -417,8 +417,9 @@
     if (!reg || !reg.tournament) return false;
     if (['approved', 'pending', 'waitlist'].indexOf(reg.status) === -1) return false;
     if (reg.draw_position != null || reg.group_number != null) return false;
+    // Статусы турнира до начала игры — те же, что на сайте
     var st = reg.tournament.status;
-    return st === 'upcoming' || st === 'registration' || st === 'draft';
+    return st === 'registration_open' || st === 'registration_closed' || st === 'upcoming';
   }
 
   function bindWithdraw(container) {

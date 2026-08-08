@@ -439,7 +439,7 @@
     // Async checks: already registered (self + as partner), player data, membership, all registrations count
     Promise.all([
       supabaseClient.from('tournament_registrations')
-        .select('id, status, partner_id')
+        .select('id, status, partner_id, draw_position, group_number')
         .eq('tournament_id', t.id)
         .eq('player_id', playerId)
         .limit(1),
@@ -489,6 +489,16 @@
         // Doubles without partner: show "Add Partner" button
         if (isDbl && !existingReg.partner_id) {
           html += ' <button class="btn-accent td-register-btn" id="tdAddPartnerBtn" style="margin-top:8px;font-size:0.85rem;padding:8px 16px;">' + I18N.t('trn.addPartner') + '</button>';
+        }
+
+        // Снять заявку — пока не проведена жеребьёвка. После неё игрок уже
+        // в сетке, и его снимает организатор
+        var canWithdraw = ['approved', 'pending', 'waitlist'].indexOf(existingReg.status) !== -1
+          && existingReg.draw_position == null && existingReg.group_number == null
+          && ['registration_open', 'registration_closed', 'upcoming'].indexOf(t.status) !== -1;
+        if (canWithdraw) {
+          html += '<button class="td-withdraw-btn" data-reg="' + existingReg.id + '" style="margin-top:8px;margin-left:0;">' +
+            I18N.t('reg.withdraw') + '</button>';
         }
         area.innerHTML = html;
 

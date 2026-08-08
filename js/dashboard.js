@@ -2567,7 +2567,7 @@
                 client.from('tournament_registrations')
                     .select('id, status, draw_position, group_number, tournament:tournaments(id, title, title_en, title_kg, date_start, status)')
                     .eq('player_id', pid)
-                    .in('status', ['approved', 'draw', 'withdrawn'])
+                    .in('status', ['approved', 'draw', 'waitlist', 'pending', 'withdrawn'])
                     .order('registered_at', { ascending: false })
                     .limit(20),
                 client.from('tournament_results')
@@ -2659,8 +2659,10 @@
         if (!reg || reg.status === 'withdrawn') return false;
         if (reg.draw_position != null || reg.group_number != null) return false;
         if (item.round_reached) return false;
+        // Статусы турнира до начала игры. Снять заявку можно и после закрытия
+        // регистрации — правило привязано к жеребьёвке, а не к дедлайну записи
         var st = item.tournament && item.tournament.status;
-        return st === 'registration' || st === 'upcoming' || st === 'draft';
+        return st === 'registration_open' || st === 'registration_closed' || st === 'upcoming';
     }
 
     function bindWithdraw(container, profile) {
