@@ -28,27 +28,8 @@
 
 .news-hero-bg {
     position: relative;
-    /* Афиша показывается целиком: под ней размытая копия её самой, чтобы
-       по краям не было пустых полос, а вертикальный постер не уезжал
-       на два экрана */
-    height: min(60vh, 560px);
+    height: 420px;
     overflow: hidden;
-    background: #0a0a0c;
-}
-
-.news-hero-bg img {
-    object-fit: contain;
-    position: relative;
-    z-index: 1;
-}
-
-.news-hero-blur {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    filter: blur(28px) brightness(0.5);
-    transform: scale(1.15);
 }
 
 .news-hero-bg img {

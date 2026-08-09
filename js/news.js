@@ -70,10 +70,10 @@ function mapDbArticle(row) {
         slug: row.slug,
         title: title,
         subtitle: excerpt || '',
-        // В карточках — кадрированная обложка, в шапке новости — исходная афиша:
-        // её рисовали, чтобы прочитали даты, состав и телеграм-канал
-        heroImage: row.image_original || row.image || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
-        cardImage: row.image || row.image_original || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
+        heroImage: row.image || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
+        // Кадрирование при загрузке касается только карточек списка;
+        // шапка новости осталась прежней
+        cardImage: row.image || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
         date: dateStr,
         author: row.author || 'KSLT',
         category: row.category || 'announcement',
@@ -338,7 +338,6 @@ function renderHero(article, readTime) {
 
     container.innerHTML =
         '<div class="news-hero-bg">' +
-            '<div class="news-hero-blur" style="background-image:url(' + esc(article.heroImage) + ')"></div>' +
             '<img src="' + esc(article.heroImage) + '" alt="">' +
             '<div class="news-hero-overlay"></div>' +
         '</div>' +
