@@ -778,7 +778,13 @@ body.news-article-page .section-sponsors-compact {
 .news-list-page {
     max-width: 1200px;
     margin: 0 auto;
-    padding: var(--space-lg) 7% var(--space-xl);
+    padding: var(--space-md) 7% var(--space-lg);
+}
+
+/* В режиме списка секция не должна нести отступы, рассчитанные на пустой
+   экран «ничего не найдено» — они складывались с отступами самого списка */
+.news-not-found.news-list-mode {
+    padding: 0;
 }
 
 .news-filters {
@@ -882,7 +888,7 @@ body.news-article-page .section-sponsors-compact {
        а не начинают новый ряд под ней, оставляя пустоту сбоку */
     grid-auto-flow: row dense;
     gap: var(--space-md);
-    margin-bottom: var(--space-xl);
+    margin-bottom: var(--space-lg);
 }
 
 .news-bento-card {

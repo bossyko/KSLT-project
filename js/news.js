@@ -1115,6 +1115,10 @@ function renderNewsList() {
     filtersWrapper.innerHTML = filtersHtml;
     notFound.parentNode.insertBefore(filtersWrapper, notFound);
 
+    // Список живёт в той же секции, что и сообщение «ничего не найдено», а у неё
+    // отступы под пустой экран — 128 точек сверху и снизу. Для списка они лишние.
+    notFound.classList.add('news-list-mode');
+
     notFound.innerHTML =
         '<div class="news-list-page">' +
             '<div class="news-bento" id="newsBento"></div>' +
