@@ -21,7 +21,9 @@
         { cmd: 'insertOrderedList', label: '1. Список', title: 'Нумерованный список' },
         { cmd: 'createLink', label: 'Ссылка', title: 'Вставить ссылку' },
         { cmd: 'unlink', label: 'Убрать ссылку', title: 'Убрать ссылку' },
-        { cmd: 'removeFormat', label: 'Очистить', title: 'Убрать оформление' }
+        { cmd: 'removeFormat', label: 'Очистить', title: 'Убрать оформление' },
+        { cmd: 'insertPhoto', label: '🖼 Фото', title: 'Вставить фото в это место текста' },
+        { cmd: 'insertVideo', label: '▶ Видео', title: 'Вставить видео по ссылке — YouTube, Vimeo, Instagram' }
     ];
 
     /**
@@ -62,8 +64,14 @@
         textarea.style.display = 'none';
 
         // Правки уезжают в скрытое поле — его читает сохранение
+        area.addEventListener('keyup', remember);
+        area.addEventListener('mouseup', remember);
+        area.addEventListener('blur', remember);
+
         area.addEventListener('input', function() {
             textarea.value = A.cleanNewsHtml ? A.cleanNewsHtmlKeepFormatting(area.innerHTML) : area.innerHTML;
+            // Предпросмотр слушает событие поля, а печатают теперь в редакторе
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
         });
 
         // Вставка из Word и Телеграма приходит со своими цветами и фонами
@@ -86,8 +94,25 @@
         });
     }
 
+    var savedRange = null;
+
+    function remember() {
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+    }
+
+    function restore(area, range) {
+        area.focus();
+        if (!range) return;
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
     function run(b, area) {
         area.focus();
+        if (b.cmd === 'insertPhoto') { insertPhoto(area); return; }
+        if (b.cmd === 'insertVideo') { insertVideo(area); return; }
         if (b.cmd === 'createLink') {
             var url = prompt('Адрес ссылки:', 'https://');
             if (!url) return;
@@ -100,6 +125,54 @@
         }
         document.execCommand(b.cmd, false, null);
         area.dispatchEvent(new Event('input'));
+    }
+
+    /** Фото грузится в тот же бакет, что и обложка новости */
+    function insertPhoto(area) {
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.addEventListener('change', async function() {
+            var file = input.files && input.files[0];
+            if (!file || !A.uploadImage) return;
+            var saved = savedRange;
+            var url = await A.uploadImage(file, 'news-');
+            if (!url) return;
+            restore(area, saved);
+            document.execCommand('insertHTML', false,
+                '<figure class="news-figure"><img src="' + url + '" alt=""></figure><p><br></p>');
+            area.dispatchEvent(new Event('input'));
+        });
+        input.click();
+    }
+
+    /**
+     * Видео берём ссылкой, а не файлом: ролик с турнира весит сотни мегабайт,
+     * хранилище проекта на это не рассчитано, да и грузиться у зрителя будет
+     * дольше самой новости. YouTube и Vimeo отдают его сами.
+     */
+    function insertVideo(area) {
+        var url = prompt('Ссылка на видео (YouTube, Vimeo, Instagram):', 'https://');
+        if (!url) return;
+        var embed = toEmbed(url.trim());
+        if (!embed) {
+            alert('Не разобрал ссылку. Поддерживаются YouTube, Vimeo и Instagram.');
+            return;
+        }
+        restore(area, savedRange);
+        document.execCommand('insertHTML', false,
+            '<figure class="news-figure news-figure-video">' + embed + '</figure><p><br></p>');
+        area.dispatchEvent(new Event('input'));
+    }
+
+    function toEmbed(url) {
+        var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
+        if (yt) return '<iframe src="https://www.youtube.com/embed/' + yt[1] + '" frameborder="0" allowfullscreen></iframe>';
+        var vm = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+        if (vm) return '<iframe src="https://player.vimeo.com/video/' + vm[1] + '" frameborder="0" allowfullscreen></iframe>';
+        var ig = url.match(/instagram\.com\/(reel|p)\/([\w-]+)/);
+        if (ig) return '<iframe src="https://www.instagram.com/' + ig[1] + '/' + ig[2] + '/embed" frameborder="0" allowfullscreen></iframe>';
+        return '';
     }
 
     /**

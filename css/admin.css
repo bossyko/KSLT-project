@@ -4239,3 +4239,13 @@ select.ad-field-input {
 .ad-editor-area ol { margin: 0 0 12px; padding-left: 22px; }
 .ad-editor-area li { margin-bottom: 4px; }
 .ad-editor-area a { color: var(--accent, #CCFF00); }
+
+/* Предпросмотр новости — примерно то же, что увидит читатель */
+.ad-news-preview-body { font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary, #ccc); }
+.ad-news-preview-body p { margin: 0 0 12px; }
+.ad-news-preview-body h3 { margin: 18px 0 8px; font-size: 1.05rem; color: var(--accent, #CCFF00); }
+.ad-news-preview-body ul,
+.ad-news-preview-body ol { margin: 0 0 12px; padding-left: 22px; }
+.ad-news-preview-body figure { margin: 14px 0; }
+.ad-news-preview-body figure img { max-width: 100%; border-radius: 10px; display: block; }
+.ad-news-preview-body figure iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 10px; }

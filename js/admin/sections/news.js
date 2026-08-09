@@ -1204,57 +1204,13 @@
             return;
         }
 
-        // Split into paragraphs
-        var paragraphs = text.split(/\n\n+/).filter(function(p) { return p.trim(); });
-
-        // Group content_images by after_paragraph
-        var imgsByPar = {};
-        newsContentImages.forEach(function(item, idx) {
-            var key = item.after_paragraph || 1;
-            if (!imgsByPar[key]) imgsByPar[key] = [];
-            imgsByPar[key].push({ url: item.url, globalIdx: idx });
-        });
-
-        var html = '';
-        paragraphs.forEach(function(para, idx) {
-            var parNum = idx + 1;
-
-            // Paragraph text
-            html += '<div style="padding:10px 12px;margin:2px 0;background:rgba(255,255,255,0.03);border-radius:6px;border-left:3px solid rgba(204,255,0,0.15);font-size:0.9em;color:var(--text-secondary);line-height:1.5">' +
-                '<span style="color:var(--accent);font-size:0.75em;opacity:0.5;margin-right:6px">' + parNum + '</span>' +
-                A.esc(para.length > 200 ? para.substring(0, 200) + '...' : para) +
-            '</div>';
-
-            // Photos after this paragraph
-            if (imgsByPar[parNum]) {
-                imgsByPar[parNum].forEach(function(img, imgIdx) {
-                    html += '<div style="position:relative;display:inline-block;margin:6px 0 6px 24px">' +
-                        '<img src="' + A.esc(img.url) + '" alt="" style="max-width:300px;max-height:200px;border-radius:8px;display:block">' +
-                        '<button type="button" class="ad-preview-img-remove" data-after-paragraph="' + parNum + '" data-img-idx="' + imgIdx + '" ' +
-                            'style="position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.7);color:#fff;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">&times;</button>' +
-                    '</div>';
-                });
-            }
-
-            // Insert photo buttons (file + URL)
-            html += '<div style="text-align:center;padding:4px 0;display:flex;justify-content:center;gap:8px">' +
-                '<button type="button" class="ad-preview-insert-btn" data-after-paragraph="' + parNum + '" ' +
-                    'style="background:none;border:1px dashed rgba(204,255,0,0.25);color:var(--accent);padding:4px 16px;border-radius:6px;cursor:pointer;font-size:0.8em;opacity:0.5;transition:opacity 0.2s"' +
-                    ' onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5">' +
-                    L.insertPhoto +
-                '</button>' +
-                '<button type="button" class="ad-preview-insert-url-btn" data-after-paragraph="' + parNum + '" ' +
-                    'style="background:none;border:1px dashed rgba(204,255,0,0.15);color:var(--text-secondary);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.8em;opacity:0.5;transition:opacity 0.2s"' +
-                    ' onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5">' +
-                    'URL' +
-                '</button>' +
-            '</div>';
-        });
-
-        container.innerHTML = html;
+        // Показываем то же, что увидит читатель. Фото и видео вставляются
+        // прямо в текст кнопками редактора, поэтому отдельных кнопок «+ Фото»
+        // под абзацами больше нет — они появлялись там, где текст ещё резался
+        // на куски по пустым строкам.
+        container.innerHTML = '<div class="ad-news-preview-body">' + text + '</div>';
     }
 
-    // ---- Poll Options (News) ----
     function renderNewsPollOptions() {
         var container = document.getElementById('adNewsPollOptions');
         if (!container || !newsPollData) return;

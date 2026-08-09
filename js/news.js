@@ -49,9 +49,14 @@ function mapDbArticle(row) {
         });
     }
 
-    // Convert plain text content to blocks (paragraphs by double newline)
+    // Текст новости приходит размеченным: его пишут в редакторе админки,
+    // и оттуда идут абзацы, списки, фотографии и видео. Разбирать его на куски
+    // не нужно — отдаём как есть. Старые новости хранились простым текстом
+    // с пустой строкой между абзацами, для них остаётся прежний разбор.
     var contentBlocks = [];
-    if (content) {
+    if (content && /<(p|ul|ol|figure|h[23]|iframe)[\s>]/i.test(content)) {
+        contentBlocks.push({ type: 'html', html: content });
+    } else if (content) {
         content.split(/\n\n+/).forEach(function(para) {
             para = para.trim();
             if (para) {
@@ -417,6 +422,9 @@ function renderBlock(block, index) {
     var style = 'transition-delay: ' + delay + 'ms';
 
     switch (block.type) {
+        case 'html':
+            return '<div class="news-html news-animate" style="' + style + '">' + block.html + '</div>';
+
         case 'paragraph':
             return '<p class="news-paragraph news-animate" style="' + style + '">' + block.text + '</p>';
 

@@ -1370,3 +1370,22 @@ h3.news-heading {
         font-size: 0.82rem;
     }
 }
+
+/* ---- Текст новости из редактора ---- */
+.news-html p { margin: 0 0 var(--space-sm); line-height: 1.75; }
+.news-html h3 { margin: var(--space-md) 0 var(--space-xs); font-size: 1.25rem; }
+.news-html ul,
+.news-html ol { margin: 0 0 var(--space-sm); padding-left: 24px; }
+.news-html li { margin-bottom: 6px; line-height: 1.7; }
+.news-html a { color: var(--accent); }
+
+/* Фото и видео, вставленные внутрь текста */
+.news-html figure { margin: var(--space-md) 0; }
+.news-html figure img { width: 100%; height: auto; border-radius: var(--radius-md); display: block; }
+.news-html figure iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    border-radius: var(--radius-md);
+    display: block;
+}
