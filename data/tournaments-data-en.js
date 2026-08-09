@@ -292,9 +292,12 @@ function loadCategoryData(category) {
     document.title = `KSLT — ${cat.name} Tournaments`;
     if (elRank) elRank.textContent = cat.name;
 
-    loadUpcomingTournaments(category);
-    loadRankings(category);
-    loadPastTournaments(category);
+    // loadUpcomingTournaments(category);
+    // loadRankings(category);
+    // Демонстрационные турниры и рейтинги из прототипа больше не рисуем:
+    // их нет ни в базе, ни в админке, а на странице они висели рядом
+    // с настоящими, и удалить их было нечем. Списки заполняет Supabase.
+    // loadPastTournaments(category);
 }
 
 function loadUpcomingTournaments(category) {

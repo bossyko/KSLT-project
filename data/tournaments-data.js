@@ -354,13 +354,15 @@ function loadCategoryData(category) {
     if (!document.getElementById('tournamentsGrid')) return;
 
     // Load tournaments
-    loadUpcomingTournaments(category);
+    // loadUpcomingTournaments(category);
 
     // Load rankings
-    loadRankings(category);
+    // loadRankings(category);
 
-    // Load past tournaments
-    loadPastTournaments(category);
+    // Демонстрационные турниры и рейтинги из прототипа больше не рисуем:
+    // их нет ни в базе, ни в админке, а на странице они висели рядом
+    // с настоящими, и удалить их было нечем. Списки заполняет Supabase.
+    // loadPastTournaments(category);
 }
 
 function loadUpcomingTournaments(category) {

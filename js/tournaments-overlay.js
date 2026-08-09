@@ -401,8 +401,10 @@
                 });
             } catch(ae) {
                 console.warn('Active tournaments load error:', ae);
-                // Fallback: use category-specific items
-                activeItems = all.filter(function(t) { return t.status !== 'past'; });
+                // Раньше здесь подставлялся демонстрационный набор из прототипа.
+                // На странице появлялись турниры, которых нет ни в базе, ни в
+                // админке, — удалить их было нечем. Пусто честнее.
+                activeItems = supaItems.filter(function(t) { return t.status !== 'past'; });
             }
             // Filter out items whose computed status is 'past' (date_end passed)
             activeItems = activeItems.filter(function(t) { return t.status !== 'past'; });
