@@ -281,19 +281,31 @@
             return;
         }
 
-        // Переводим в пустые. Поле, где лежит копия исходника, тоже считаем
-        // пустым: так бывает после неудачного перевода — раньше туда писался
-        // исходный текст, и повторное нажатие отвечало «всё уже заполнено».
-        function isEmptyTarget(val) { return !val || val === srcText; }
+        // Поле считается требующим перевода, если оно пустое, если в нём лежит
+        // копия исходника (так бывало после неудачного перевода) или если
+        // исходный текст изменился после того, как перевод сделали: иначе
+        // правку в русском приходилось разносить руками, вычищая каждый язык.
+        function needsTranslation(el, val) {
+            if (!val || val === srcText) return true;
+            var was = el.dataset.translatedFrom;
+            return !!was && was !== srcText;
+        }
 
         var targets = [];
-        if (ruEl && srcLang !== 'ru' && isEmptyTarget(ruVal)) targets.push({ el: ruEl, lang: 'ru' });
-        if (enEl && srcLang !== 'en' && isEmptyTarget(enVal)) targets.push({ el: enEl, lang: 'en' });
-        if (kgEl && srcLang !== 'kg' && isEmptyTarget(kgVal)) targets.push({ el: kgEl, lang: 'kg' });
+        if (ruEl && srcLang !== 'ru' && needsTranslation(ruEl, ruVal)) targets.push({ el: ruEl, lang: 'ru' });
+        if (enEl && srcLang !== 'en' && needsTranslation(enEl, enVal)) targets.push({ el: enEl, lang: 'en' });
+        if (kgEl && srcLang !== 'kg' && needsTranslation(kgEl, kgVal)) targets.push({ el: kgEl, lang: 'kg' });
 
         if (targets.length === 0) {
-            showToast(isEn ? 'All fields are already filled' : 'Все поля уже заполнены', 'info');
-            return;
+            // Всё заполнено и исходник с тех пор не менялся — спрашиваем,
+            // а не отказываем: у человека может быть своя причина
+            var again = confirm(isEn
+                ? 'Translations are already filled. Translate again and overwrite them?'
+                : 'Переводы уже заполнены. Перевести заново и заменить их?');
+            if (!again) return;
+            if (enEl && srcLang !== 'en') targets.push({ el: enEl, lang: 'en' });
+            if (kgEl && srcLang !== 'kg') targets.push({ el: kgEl, lang: 'kg' });
+            if (ruEl && srcLang !== 'ru') targets.push({ el: ruEl, lang: 'ru' });
         }
 
         var origLabel = btn.textContent;
@@ -311,6 +323,7 @@
                     continue;
                 }
                 targets[i].el.value = result;
+                targets[i].el.dataset.translatedFrom = srcText;   // чтобы заметить правку исходника
                 // Над полем может стоять визуальный редактор — пусть перерисуется
                 targets[i].el.dispatchEvent(new Event('change'));
             }
