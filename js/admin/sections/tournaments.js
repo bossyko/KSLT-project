@@ -757,6 +757,9 @@
                             '<option value="">—</option>' +
                             '<option value="men"' + A.sel(item, 'gender', 'men') + '>' + L.genderMen + '</option>' +
                             '<option value="women"' + A.sel(item, 'gender', 'women') + '>' + L.genderWomen + '</option>' +
+                            // Микст: поле скрыто и заполняется само, но пункт нужен —
+                            // без него присвоение value = 'mixed' молча не срабатывает
+                            '<option value="mixed"' + A.sel(item, 'gender', 'mixed') + ' hidden>' + L.genderMixed + '</option>' +
                         '</select>' +
                     '</div>' +
                     '<div class="ad-field">' +
@@ -1259,7 +1262,9 @@
             buffer_minutes: parseInt(document.getElementById('adTrnBuffer').value, 10) || 15,
             registration_start: document.getElementById('adTrnRegStart').value || null,
             registration_end: document.getElementById('adTrnRegEnd').value || null,
-            gender: document.getElementById('adTrnGender').value || null,
+            gender: document.getElementById('adTrnFormat').value === 'mixed_doubles'
+                ? 'mixed'
+                : (document.getElementById('adTrnGender').value || null),
             ntrp_min: (function() { var v = document.getElementById('adTrnNtrpMin').value; return v ? parseFloat(v) : null; })(),
             ntrp_max: (function() { var v = document.getElementById('adTrnNtrpMax').value; return v ? parseFloat(v) : null; })(),
             ntrp_combined_max: (function() { var v = document.getElementById('adTrnNtrpCombinedMax').value; return v ? parseFloat(v) : null; })(),
