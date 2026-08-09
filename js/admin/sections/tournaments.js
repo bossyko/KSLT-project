@@ -1458,6 +1458,28 @@
                 return;
             }
 
+            // Без категории турнир проваливается мимо страниц категорий и мимо
+            // правил допуска: проверка в tournament-register стоит под условием
+            // «категория задана», и записаться сможет кто угодно
+            if (!data.category_id) {
+                A.showToast(isEn ? 'Category is required' : 'Категория обязательна', 'error');
+                var catField = document.getElementById('adTrnCat');
+                if (catField) catField.focus();
+                saveBtn.disabled = false;
+                saveBtn.textContent = L.save;
+                return;
+            }
+
+            // Пол нужен рейтингу и допуску: таблицы мужские и женские раздельные
+            if (!data.gender) {
+                A.showToast(isEn ? 'Gender is required' : 'Пол обязателен', 'error');
+                var genderField = document.getElementById('adTrnGender');
+                if (genderField) genderField.focus();
+                saveBtn.disabled = false;
+                saveBtn.textContent = L.save;
+                return;
+            }
+
             // Validate: max_participants <= draw_size for SE/FIC
             if (data.bracket_type && data.bracket_type !== 'round_robin' && data.bracket_type !== 'group_league' && data.draw_size && data.max_participants) {
                 if (data.max_participants > data.draw_size) {
