@@ -203,6 +203,45 @@ def main():
         '',
     ]
     open(os.path.join(BASE, 'sql/fix-news-content.sql'), 'w', encoding='utf-8').write('\n'.join(fixes))
+
+    # Переводы для новостей, которые уже лежат в базе
+    tr_sql = [
+        '-- ============================================',
+        '-- Переводы новостей на английский и кыргызский',
+        '-- Запустить в Supabase SQL Editor целиком.',
+        '-- ============================================',
+        '--',
+        '-- Собрано из import/news-translations.json скриптом',
+        '-- import/build-news-sql.py — правки вносить туда.',
+        '',
+    ]
+    done = 0
+    for n, slug in zip(news, slugs):
+        t = translations.get(n['_id'])
+        if not t:
+            continue
+        done += 1
+        tr_sql.append(
+            'UPDATE news SET ' + ', '.join([
+                'title_en = ' + q(t.get('title_en')),
+                'title_kg = ' + q(t.get('title_kg')),
+                'excerpt_en = ' + q(t.get('excerpt_en')),
+                'excerpt_kg = ' + q(t.get('excerpt_kg')),
+                'content_en = ' + q(t.get('content_en')),
+                'content_kg = ' + q(t.get('content_kg')),
+            ]) + ' WHERE slug = ' + q(slug) + ';'
+        )
+    tr_sql += [
+        '',
+        '-- Проверка: у скольких новостей появились переводы',
+        "SELECT count(*) FILTER (WHERE title_en IS NOT NULL) AS с_английским,",
+        "       count(*) FILTER (WHERE title_kg IS NOT NULL) AS с_кыргызским,",
+        '       count(*) AS всего',
+        'FROM news;',
+        '',
+    ]
+    open(os.path.join(BASE, 'sql/fix-news-translations.sql'), 'w', encoding='utf-8').write('\n'.join(tr_sql))
+    print('переводов в запросе:', done)
     print('новостей в переносе:', len(rows))
     print('с переводами:', sum(1 for n in news if translations.get(n['_id'], {}).get('title_en')))
     print('файл:', out)
