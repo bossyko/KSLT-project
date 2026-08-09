@@ -415,15 +415,35 @@ function renderContent(article) {
         cimgIdx++;
     }
 
-    // Gallery (from gallery column, like courts)
+    // Галерея. Больше двух снимков выкладывать в столбик незачем — читатель
+    // прокручивает их вместо того, чтобы читать. Тогда показываем один крупно,
+    // остальные лентой под ним; по нажатию открывается просмотр во весь экран.
     if (article.gallery && article.gallery.length) {
-        html += '<div class="news-gallery news-animate">';
-        article.gallery.forEach(function(url) {
-            html += '<a href="' + esc(url) + '" class="news-gallery-item" data-lightbox>' +
-                '<img src="' + esc(url) + '" alt="" loading="lazy">' +
-            '</a>';
-        });
-        html += '</div>';
+        if (article.gallery.length > 2) {
+            html += '<div class="news-carousel news-animate">' +
+                '<div class="news-carousel-stage">' +
+                    '<button class="news-carousel-nav news-carousel-prev" aria-label="Предыдущее">&#8249;</button>' +
+                    '<img class="news-carousel-main" src="' + esc(article.gallery[0]) + '" alt="" data-index="0">' +
+                    '<button class="news-carousel-nav news-carousel-next" aria-label="Следующее">&#8250;</button>' +
+                    '<div class="news-carousel-count">1 / ' + article.gallery.length + '</div>' +
+                '</div>' +
+                '<div class="news-carousel-thumbs">' +
+                    article.gallery.map(function(url, i) {
+                        return '<button class="news-carousel-thumb' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">' +
+                            '<img src="' + esc(url) + '" alt="" loading="lazy">' +
+                        '</button>';
+                    }).join('') +
+                '</div>' +
+            '</div>';
+        } else {
+            html += '<div class="news-gallery news-animate">';
+            article.gallery.forEach(function(url) {
+                html += '<a href="' + esc(url) + '" class="news-gallery-item" data-lightbox>' +
+                    '<img src="' + esc(url) + '" alt="" loading="lazy">' +
+                '</a>';
+            });
+            html += '</div>';
+        }
     }
 
     // Poll (from poll column)
@@ -432,7 +452,35 @@ function renderContent(article) {
     }
 
     container.innerHTML = html;
+    initCarousel(container, article.gallery || []);
     initPhotoViewer(container);
+}
+
+/** Лента снимков: стрелки, миниатюры, счётчик. Крупный кадр открывает просмотр. */
+function initCarousel(root, photos) {
+    var wrap = root.querySelector('.news-carousel');
+    if (!wrap || photos.length < 2) return;
+
+    var main = wrap.querySelector('.news-carousel-main');
+    var count = wrap.querySelector('.news-carousel-count');
+    var thumbs = Array.prototype.slice.call(wrap.querySelectorAll('.news-carousel-thumb'));
+    var index = 0;
+
+    function show(i) {
+        index = (i + photos.length) % photos.length;
+        main.src = photos[index];
+        main.dataset.index = index;
+        count.textContent = (index + 1) + ' / ' + photos.length;
+        thumbs.forEach(function(t, n) { t.classList.toggle('active', n === index); });
+        var active = thumbs[index];
+        if (active) active.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+    }
+
+    wrap.querySelector('.news-carousel-prev').addEventListener('click', function() { show(index - 1); });
+    wrap.querySelector('.news-carousel-next').addEventListener('click', function() { show(index + 1); });
+    thumbs.forEach(function(t) {
+        t.addEventListener('click', function() { show(Number(t.dataset.index)); });
+    });
 }
 
 /**
@@ -447,7 +495,7 @@ function initPhotoViewer(root) {
 
     function collect() {
         items = Array.prototype.slice.call(
-            root.querySelectorAll('.news-gallery-item[data-lightbox], .news-html figure img')
+            root.querySelectorAll('.news-gallery-item[data-lightbox], .news-html figure img, .news-carousel-main')
         );
     }
 
@@ -498,7 +546,7 @@ function initPhotoViewer(root) {
     }
 
     root.addEventListener('click', function(e) {
-        var el = e.target.closest('.news-gallery-item[data-lightbox], .news-html figure img');
+        var el = e.target.closest('.news-gallery-item[data-lightbox], .news-html figure img, .news-carousel-main');
         if (!el) return;
         e.preventDefault();
         collect();
