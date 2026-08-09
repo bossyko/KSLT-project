@@ -53,7 +53,9 @@
     max-width: 900px;
     width: 100%;
     margin: 0 auto;
-    padding: var(--space-md) 7% var(--space-xl);
+    /* Небольшой отступ снизу: дальше идёт ещё отступ самой статьи, и вместе
+       они давали пустое поле в четверть экрана между датой и первым абзацем */
+    padding: var(--space-md) 7% var(--space-md);
 }
 
 /* Ссылка «Назад к новостям» переехала в общую полосу .kslt-back-wrap */
@@ -122,7 +124,7 @@
 .news-article-body {
     max-width: 900px;
     margin: 0 auto;
-    padding: var(--space-xl) 7%;
+    padding: var(--space-lg) 7% var(--space-xl);
 }
 
 /* Paragraph */
@@ -607,6 +609,12 @@ body.news-article-page main > section,
 body.news-article-page .section-sponsors-compact {
     background: transparent;
     border-top: none;
+}
+
+/* Общее правило секций добавляет по 70 точек сверху и снизу. Шапке статьи
+   они ни к чему: под ней сразу идёт текст со своим отступом. */
+body.news-article-page .news-hero {
+    padding: 0;
 }
 
 /* === RELATED ARTICLES === */
