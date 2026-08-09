@@ -2591,7 +2591,7 @@
         if (canWithdraw(item)) {
             html += '<button class="db-withdraw-btn" data-reg="' + reg.id + '" data-name="' + escHtml(tName) + '">' + L.regWithdraw + '</button>';
         } else if (canReenter(item)) {
-            html += '<a class="db-withdraw-btn db-reenter-btn" href="' + tPage + '">' + L.regAgain + '</a>';
+            html += '<button class="db-withdraw-btn db-reenter-btn" data-tid="' + escHtml(t.id) + '">' + L.regAgain + '</button>';
         }
         html += '</div>';
         return html;
@@ -2612,10 +2612,29 @@
     }
 
     function bindWithdraw(container, profile, refresh) {
-        container.querySelectorAll('.db-withdraw-btn').forEach(function(btn) {
-            if (btn.tagName === 'A') return;   // «Записаться снова» — обычная ссылка
+        container.querySelectorAll('.db-withdraw-btn[data-reg]').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 showWithdrawModal(btn.dataset.reg, btn.dataset.name, profile, refresh);
+            });
+        });
+
+        // «Записаться снова» — подаём заявку прямо из кабинета. Гонять игрока
+        // на страницу турнира ради одного нажатия незачем, а решение о допуске
+        // всё равно принимает сервер
+        container.querySelectorAll('.db-reenter-btn[data-tid]').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                if (!window.KSLT_REG) return;
+                var wasLabel = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = L.saving;
+
+                var info = await window.KSLT_REG.submit(client, btn.dataset.tid, { isEn: isEn, isKg: isKg });
+                if (info && info.created) {
+                    (refresh || loadGamesTournaments)(profile);
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = wasLabel;
+                }
             });
         });
     }

@@ -458,7 +458,10 @@
         .eq('partner_id', playerId)
         .limit(1) : Promise.resolve({ data: [] })
     ]).then(function(results) {
-      var existingReg = results[0].data && results[0].data[0];
+      // Снятую заявку не считаем действующей — запись открыта снова
+      var existingReg = results[0].data && results[0].data.filter(function(r) {
+        return r.status !== 'withdrawn';
+      })[0];
       var player = results[1].data;
       var membership = results[2];
       var activeRegs = results[3].data || [];

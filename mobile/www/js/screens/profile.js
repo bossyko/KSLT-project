@@ -456,16 +456,24 @@
     return html;
   }
 
-  // «Записаться снова» — уводим на экран турнира, повторно проверять допуск
-  // здесь нельзя, этим занимается Edge Function
+  // «Записаться снова» — подаём заявку прямо отсюда. Решение о допуске
+  // принимает Edge Function, так что гонять игрока на экран турнира незачем
   function bindReenter(container) {
     container.querySelectorAll('.pd-reenter-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        var ov = document.getElementById('profSubOverlay');
-        if (ov) ov.remove();
-        if (window.KSLT_HOME && window.KSLT_HOME.openTournamentDetail) {
-          window.KSLT_HOME.openTournamentDetail(btn.getAttribute('data-tid'));
-        }
+        if (!window.KSLT_REG) return;
+        var wasLabel = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = I18N.t('trn.registering');
+
+        window.KSLT_REG.submit(btn.getAttribute('data-tid')).then(function(info) {
+          if (info && info.created) {
+            showMyTournaments();
+          } else {
+            btn.disabled = false;
+            btn.textContent = wasLabel;
+          }
+        });
       });
     });
   }

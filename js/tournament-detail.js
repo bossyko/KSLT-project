@@ -2380,7 +2380,11 @@ function renderRegistrationButton(tournament, registrations, isEn) {
             var isStaff = profRes.data.role === 'admin' || profRes.data.role === 'manager';
 
             // Check if already registered
-            var alreadyRegistered = registrations.find(function(r) { return r.player_id === playerId; });
+            // Снятая заявка не считается действующей: игрок вправе записаться
+            // снова, и кнопка записи должна вернуться на место
+            var alreadyRegistered = registrations.find(function(r) {
+                return r.player_id === playerId && r.status !== 'withdrawn';
+            });
 
             // Check category match + ban status + NTRP
             client.from('players').select('category_id, banned_until, ban_reason, ntrp_rating').eq('id', playerId).single().then(async function(plRes) {
