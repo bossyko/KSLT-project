@@ -40,8 +40,7 @@
                             '<span class="ad-crop-title">Кадрирование обложки</span>' +
                             '<button type="button" class="ad-crop-close">&times;</button>' +
                         '</div>' +
-                        '<div class="ad-crop-hint">Двигайте и приближайте — в рамке то, что увидят в списке новостей. ' +
-                            'Афиша целиком останется в шапке самой новости.</div>' +
+                        '<div class="ad-crop-hint">Двигайте и приближайте — в рамке то, что увидят в списке новостей.</div>' +
                         '<div class="ad-crop-body"><img class="ad-crop-image" alt=""></div>' +
                         '<div class="ad-crop-footer">' +
                             '<button type="button" class="ad-btn ad-btn-outline ad-crop-cancel">Отмена</button>' +
