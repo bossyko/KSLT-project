@@ -85,6 +85,7 @@ def main():
 
         rows.append(
             '(' + ', '.join([
+                'gen_random_uuid()',
                 q(title),
                 q(t.get('title_en')),
                 q(t.get('title_kg')),
@@ -114,8 +115,11 @@ def main():
         '--',
         '-- ВАЖНО: до запуска залить import/news-images (49 файлов) в бакет `news`',
         '-- в Supabase Storage, сохранив имена файлов. Иначе картинки не откроются.',
+        '--',
+        '-- id генерируем сами: у колонки нет значения по умолчанию.',
         '',
         'INSERT INTO news (',
+        '  id,',
         '  title, title_en, title_kg,',
         '  slug,',
         '  content, content_en, content_kg,',
