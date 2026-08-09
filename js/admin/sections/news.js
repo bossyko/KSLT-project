@@ -777,6 +777,11 @@
             A.translateToEmpty(btn.dataset.ru, btn.dataset.en, btn.dataset.kg, btn);
         });
 
+        // Визуальный редактор поверх полей с текстом — менеджер не видит тегов
+        ['adNewsContent', 'adNewsContentEn', 'adNewsContentKg'].forEach(function(id) {
+            if (A.attachEditor) A.attachEditor(id);
+        });
+
         // Auto-slug from title
         var titleInput = document.getElementById('adNewsTitle');
         var slugInput = document.getElementById('adNewsSlug');

@@ -311,6 +311,8 @@
                     continue;
                 }
                 targets[i].el.value = result;
+                // Над полем может стоять визуальный редактор — пусть перерисуется
+                targets[i].el.dispatchEvent(new Event('change'));
             }
             if (failed.length === targets.length) {
                 showToast(isEn ? 'Translation service did not respond. Fields left empty.'

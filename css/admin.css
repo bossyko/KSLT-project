@@ -4182,3 +4182,60 @@ select.ad-field-input {
     padding: 30px 0;
     font-size: 0.85rem;
 }
+
+/* ---- Визуальный редактор новостей ---- */
+.ad-editor {
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    border-radius: var(--radius-sm, 8px);
+    overflow: hidden;
+    background: var(--bg-elevated, #1a1a1a);
+}
+
+.ad-editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px;
+    border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.ad-editor-btn {
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    color: var(--text-secondary, #aaa);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+}
+
+.ad-editor-btn:hover {
+    color: var(--accent, #CCFF00);
+    background: rgba(204, 255, 0, 0.08);
+}
+
+.ad-editor-area {
+    min-height: 260px;
+    max-height: 520px;
+    overflow-y: auto;
+    padding: 16px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-primary, #fff);
+    outline: none;
+}
+
+.ad-editor-area:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-muted, #777);
+}
+
+.ad-editor-area p { margin: 0 0 12px; }
+.ad-editor-area h3 { margin: 20px 0 10px; font-size: 1.05rem; color: var(--accent, #CCFF00); }
+.ad-editor-area ul,
+.ad-editor-area ol { margin: 0 0 12px; padding-left: 22px; }
+.ad-editor-area li { margin-bottom: 4px; }
+.ad-editor-area a { color: var(--accent, #CCFF00); }
