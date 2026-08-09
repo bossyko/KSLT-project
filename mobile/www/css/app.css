@@ -4398,3 +4398,19 @@ select.prof-field-input { color: var(--text); }
   line-height: 1.5;
   color: var(--text-muted);
 }
+
+/* Текст новости из редактора: списки, подзаголовки, видео */
+.nd-body figure { margin: 14px 0; }
+.nd-body figure img { width: 100%; margin: 0; }
+.nd-body iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: var(--radius-md);
+  display: block;
+}
+.nd-body h3 { margin: 18px 0 8px; font-size: 15px; color: var(--text); }
+.nd-body ul,
+.nd-body ol { margin: 0 0 12px; padding-left: 20px; }
+.nd-body li { margin-bottom: 4px; }
+.nd-body a { color: var(--accent); }
