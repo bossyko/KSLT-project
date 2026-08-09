@@ -363,32 +363,61 @@
         var from = langMap[fromLang] || fromLang;
         var to = langMap[toLang] || toLang;
 
-        // Split long text into chunks (API limit ~500 chars)
-        var lines = text.split('\n');
+        // У сервиса жёсткий предел в 500 знаков на запрос. Раньше текст резался
+        // только по переносам строк, и абзац длиннее предела уезжал целиком —
+        // в ответ приходило «QUERY LENGTH LIMIT EXCEEDED», которое попадало
+        // в поле вместо перевода. Теперь длинные куски дробим по предложениям.
+        var LIMIT = 450;
+
+        function splitLong(piece) {
+            if (piece.length <= LIMIT) return [piece];
+            var parts = [];
+            var rest = piece;
+            while (rest.length > LIMIT) {
+                var cut = rest.lastIndexOf('. ', LIMIT);
+                if (cut < LIMIT / 2) cut = rest.lastIndexOf(' ', LIMIT);
+                if (cut < 1) cut = LIMIT;
+                parts.push(rest.slice(0, cut + 1).trim());
+                rest = rest.slice(cut + 1);
+            }
+            if (rest.trim()) parts.push(rest.trim());
+            return parts;
+        }
+
         var chunks = [];
         var current = '';
-
-        for (var i = 0; i < lines.length; i++) {
-            var next = current ? current + '\n' + lines[i] : lines[i];
-            if (next.length > 450 && current) {
-                chunks.push(current);
-                current = lines[i];
-            } else {
-                current = next;
-            }
-        }
+        text.split('\n').forEach(function(line) {
+            splitLong(line).forEach(function(piece) {
+                var next = current ? current + '\n' + piece : piece;
+                if (next.length > LIMIT && current) {
+                    chunks.push(current);
+                    current = piece;
+                } else {
+                    current = next;
+                }
+            });
+        });
         if (current) chunks.push(current);
+
+        // Сервис отвечает своими сообщениями прямо в поле перевода: про лимит
+        // запроса, про исчерпанную дневную квоту, про неизвестный язык.
+        // Раз это не перевод, в текст новости оно попасть не должно.
+        var SERVICE_ERROR = /QUERY LENGTH LIMIT EXCEEDED|MYMEMORY WARNING|YOU USED ALL AVAILABLE FREE TRANSLATIONS|INVALID (SOURCE|TARGET) LANGUAGE|PLEASE SELECT TWO DISTINCT LANGUAGES/i;
 
         var results = [];
         for (var j = 0; j < chunks.length; j++) {
             var url = 'https://api.mymemory.translated.net/get?q=' +
                 encodeURIComponent(chunks[j]) + '&langpair=' + from + '|' + to;
-            var resp = await fetch(url);
-            var data = await resp.json();
-            if (data.responseData && data.responseData.translatedText) {
-                results.push(data.responseData.translatedText);
-            } else {
-                results.push(chunks[j]);
+            try {
+                var resp = await fetch(url);
+                var data = await resp.json();
+                var out = data.responseData && data.responseData.translatedText;
+                if (!out || SERVICE_ERROR.test(out) || Number(data.responseStatus) !== 200) {
+                    return text;      // отдаём исходник — вызывающий код поймёт, что не вышло
+                }
+                results.push(out);
+            } catch (e) {
+                return text;
             }
         }
 
