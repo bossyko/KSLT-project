@@ -1470,6 +1470,20 @@
                 return;
             }
 
+            // Без числа участников выключается расчёт свободных мест: сетка
+            // примет сколько угодно, а вытеснение в лист ожидания не сработает
+            if (!data.max_participants) {
+                var isDbl = data.format === 'doubles' || data.format === 'mixed_doubles';
+                A.showToast(isEn
+                    ? (isDbl ? 'Max pairs is required' : 'Max participants is required')
+                    : (isDbl ? 'Укажите максимум пар' : 'Укажите максимум участников'), 'error');
+                var maxField = document.getElementById('adTrnMaxPart');
+                if (maxField) maxField.focus();
+                saveBtn.disabled = false;
+                saveBtn.textContent = L.save;
+                return;
+            }
+
             // Пол нужен рейтингу и допуску: таблицы мужские и женские раздельные
             if (!data.gender) {
                 A.showToast(isEn ? 'Gender is required' : 'Пол обязателен', 'error');
