@@ -98,8 +98,11 @@ async function initFromSupabase(client, slug) {
 
             if (result.error) throw result.error;
 
-            // Merge: keep static examples, add DB articles on top
-            if (typeof newsArticleData === 'undefined') window.newsArticleData = {};
+            // Показываем только то, что есть в базе. Раньше сюда подмешивался
+            // демонстрационный набор из data/news-data.js — статьи из прототипа
+            // висели рядом с настоящими, и удалить их через админку было нельзя:
+            // в базе их нет.
+            window.newsArticleData = {};
             (result.data || []).forEach(function(row) {
                 var article = mapDbArticle(row);
                 newsArticleData[article.slug] = article;
@@ -126,7 +129,7 @@ async function initFromSupabase(client, slug) {
                 .order('published_at', { ascending: false })
                 .limit(3);
 
-            if (typeof newsArticleData === 'undefined') window.newsArticleData = {};
+            window.newsArticleData = {};
             newsArticleData[article.slug] = article;
 
             if (relResult.data && relResult.data.length) {
@@ -165,9 +168,9 @@ async function initFromSupabase(client, slug) {
 // ========================================
 
 function initFromStatic(slug) {
-    if (typeof newsArticleData === 'undefined') {
-        window.newsArticleData = {};
-    }
+    // Демонстрационные статьи из прототипа не показываем даже когда база
+    // недоступна: пустая страница честнее выдуманных новостей
+    window.newsArticleData = {};
 
     if (!slug) {
         renderNewsList();
