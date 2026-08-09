@@ -601,7 +601,8 @@ h3.news-heading {
    шли заметные полосы. Фон держит страница, выделяются только карточки. */
 .news-tags,
 .news-reactions,
-.news-related {
+.news-related,
+.news-article-page .section-sponsors-compact {
     background: transparent;
 }
 
@@ -1572,6 +1573,7 @@ h3.news-heading {
 
 .news-carousel-thumbs {
     display: flex;
+    justify-content: center;     /* пока лента короче ширины — держим по центру */
     gap: 8px;
     margin-top: 10px;
     overflow-x: auto;
