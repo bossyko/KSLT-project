@@ -4414,3 +4414,11 @@ select.prof-field-input { color: var(--text); }
 .nd-body ol { margin: 0 0 12px; padding-left: 20px; }
 .nd-body li { margin-bottom: 4px; }
 .nd-body a { color: var(--accent); }
+
+/* Настоящий знак КСЛТ в шапке приложения */
+.header-logo-img {
+  height: 26px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 0 5px rgba(204, 255, 0, 0.3));
+}

@@ -324,6 +324,20 @@ nav {
     filter: drop-shadow(0 0 15px rgba(204, 255, 0, 0.5));
 }
 
+/* Настоящий знак КСЛТ вместо текстовой надписи. Родной зелёный рассчитан на
+   светлый фон tennis.kg, поэтому перекрашен в наш лайм; мягкое свечение
+   держит его в одном ряду с остальной неоновой графикой сайта. */
+.logo-img {
+    height: 34px;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 0 6px rgba(204, 255, 0, 0.35));
+}
+
+.footer-logo .logo-img {
+    height: 30px;
+}
+
 .logo:hover .logo-text {
     filter: drop-shadow(0 0 30px rgba(204, 255, 0, 0.8));
 }
@@ -5194,6 +5208,162 @@ h2 {
     .auth-card {
         padding: 28px 20px;
         border-radius: var(--radius-lg);
+    }
+}
+
+/* OTP Verification */
+.otp-method-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+}
+
+.otp-method-tab {
+    flex: 1;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-family: inherit;
+}
+
+.otp-method-tab.active {
+    background: rgba(204, 255, 0, 0.12);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.otp-method-tab:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.otp-phone-row {
+    display: flex;
+    gap: 8px;
+}
+
+.otp-country-select {
+    width: 110px;
+    min-width: 110px;
+    padding: 12px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.otp-country-select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.otp-phone-row .auth-input {
+    flex: 1;
+}
+
+.otp-inputs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 24px 0;
+}
+
+.otp-digit {
+    width: 48px;
+    height: 56px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'Inter', monospace;
+    background: rgba(255, 255, 255, 0.06);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+
+.otp-digit::-webkit-inner-spin-button,
+.otp-digit::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.otp-digit:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.15);
+}
+
+.otp-digit.filled {
+    border-color: var(--accent);
+    background: rgba(204, 255, 0, 0.08);
+}
+
+.otp-timer {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.otp-timer strong {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.otp-channel-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.otp-channel-hint svg {
+    width: 16px;
+    height: 16px;
+}
+
+@keyframes otp-shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.otp-inputs.shake {
+    animation: otp-shake 0.4s ease-in-out;
+}
+
+.otp-inputs.shake .otp-digit {
+    border-color: #ff6b6b;
+}
+
+@media (max-width: 480px) {
+    .otp-digit {
+        width: 42px;
+        height: 50px;
+        font-size: 1.3rem;
+    }
+    .otp-inputs {
+        gap: 6px;
     }
 }
 
