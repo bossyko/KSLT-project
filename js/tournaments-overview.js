@@ -37,6 +37,7 @@
         heroBadge: 'KSLT',
         viewAll: 'All tournaments',
         details: 'Details',
+        register: 'Register',
         empty: 'No upcoming tournaments',
         format: 'Format',
         participants: 'Players',
@@ -51,6 +52,7 @@
         heroBadge: 'KSLT',
         viewAll: 'Бардык мелдештер',
         details: 'Толугураак',
+        register: 'Каттоо',
         empty: 'Алдыдагы мелдештер жок',
         format: 'Формат',
         participants: 'Катышуучулар',
@@ -65,6 +67,7 @@
         heroBadge: 'KSLT',
         viewAll: 'Все турниры',
         details: 'Подробнее',
+        register: 'Регистрация',
         empty: 'Нет предстоящих турниров',
         format: 'Формат',
         participants: 'Участники',
@@ -379,6 +382,7 @@
                 participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
                 prize: t.prize_fund || '',
                 status: cardStatus,
+                _rawStatus: effectiveStatus,
                 statusText: statusLabels[effectiveStatus] || statusLabels.upcoming,
                 gender: gender,
                 genderLabel: (t.format !== 'mixed_doubles' && cat !== 'friendly' && gender)
@@ -469,6 +473,37 @@
         attachEvents();
         initSearch();
         startCountdownTimer();
+        initRegisterButtons();
+    }
+
+    // ---- Запись на турнир прямо из карточки ----
+    // Решение принимает Edge Function, как и на остальных точках входа
+    function initRegisterButtons() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.to-register');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();          // карточка кликабельна целиком
+
+            if (!window.KSLT_REG || !client) return;
+
+            var wasLabel = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = isEn ? 'Sending...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
+
+            window.KSLT_REG.submit(client, btn.dataset.tid, { isEn: isEn, isKg: isKg }).then(function(info) {
+                if (info && info.created) {
+                    window.KSLT_REG.markRegistered(client);
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = wasLabel;
+                }
+            });
+        }, true);
+
+        if (window.KSLT_REG && window.KSLT_REG.markRegistered) {
+            window.KSLT_REG.markRegistered(client);
+        }
     }
 
     function renderFeatured(t, bgImage, catKey) {
@@ -495,7 +530,12 @@
                     (t.participants ? '<div class="to-featured-detail"><span class="to-label">' + ((t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles') ? L.pairs : L.participants) + '</span><span class="to-value">' + t.participants + '</span></div>' : '') +
                     (t.prize ? '<div class="to-featured-detail"><span class="to-label">' + L.prize + '</span><span class="to-value prize">' + t.prize + '</span></div>' : '') +
                 '</div>' +
-                '<span class="to-featured-link">' + L.details + '</span>' +
+                '<div class="to-featured-actions">' +
+                    '<span class="to-featured-link">' + L.details + '</span>' +
+                    (t._rawStatus === 'registration_open'
+                        ? '<button class="btn-register to-register" data-tid="' + t.id + '">' + L.register + '</button>'
+                        : '') +
+                '</div>' +
             '</div>' +
         '</div>';
     }

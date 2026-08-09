@@ -315,7 +315,7 @@
      * узнавал о своей заявке только по модалке после нажатия.
      */
     async function markRegistered(client) {
-        var btns = Array.prototype.slice.call(document.querySelectorAll('.tournament-card[data-id] .btn-register'));
+        var btns = Array.prototype.slice.call(document.querySelectorAll('.tournament-card[data-id] .btn-register, .btn-register[data-tid]'));
         if (btns.length === 0 || !client) return;
 
         var isEn = location.pathname.indexOf('-en') !== -1;
@@ -330,10 +330,16 @@
             var playerId = prof.data && prof.data.player_id;
             if (!playerId) return;
 
+            // Кнопка либо лежит в карточке с data-id, либо носит id на себе
+            function idOf(btn) {
+                if (btn.dataset && btn.dataset.tid) return btn.dataset.tid;
+                var card = btn.closest('.tournament-card');
+                return card && card.dataset ? card.dataset.id : null;
+            }
+
             var ids = [];
             btns.forEach(function(b) {
-                var card = b.closest('.tournament-card');
-                var id = card && card.dataset ? card.dataset.id : null;
+                var id = idOf(b);
                 if (id && ids.indexOf(id) === -1) ids.push(id);
             });
             if (ids.length === 0) return;
@@ -359,8 +365,7 @@
             };
 
             btns.forEach(function(btn) {
-                var card = btn.closest('.tournament-card');
-                var status = card && byTournament[card.dataset.id];
+                var status = byTournament[idOf(btn)];
                 if (!status) return;
                 btn.disabled = true;
                 btn.classList.add('is-registered');

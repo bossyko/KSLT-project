@@ -883,3 +883,42 @@
 .tournament-card > .to-cd {
     margin: 0 var(--space-md);
 }
+
+/* ---- Запись на турнир прямо из карточки ---- */
+.to-featured-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.to-featured-actions .to-featured-link {
+    margin: 0;
+}
+
+.btn-register.to-register {
+    padding: 10px 22px;
+    border: none;
+    border-radius: var(--radius-full, 999px);
+    background: var(--accent, #CCFF00);
+    color: #000;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+}
+
+.btn-register.to-register:hover {
+    opacity: 0.9;
+}
+
+.btn-register.to-register.is-registered,
+.btn-register.to-register:disabled {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: default;
+    pointer-events: none;
+}
