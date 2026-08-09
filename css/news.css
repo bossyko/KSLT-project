@@ -23,17 +23,13 @@
 /* === HERO === */
 .news-hero {
     position: relative;
-    min-height: 380px;
-    max-height: 500px;
-    display: flex;
-    align-items: flex-end;
     overflow: hidden;
 }
 
 .news-hero-bg {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
+    position: relative;
+    height: 420px;
+    overflow: hidden;
 }
 
 .news-hero-bg img {
@@ -47,7 +43,8 @@
 .news-hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, var(--bg-primary) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.2) 100%);
+    /* Лёгкое затемнение у нижнего края, чтобы афиша переходила в фон страницы */
+    background: linear-gradient(to top, var(--bg-primary) 0%, transparent 35%);
 }
 
 .news-hero-content {
@@ -56,7 +53,7 @@
     max-width: 900px;
     width: 100%;
     margin: 0 auto;
-    padding: 0 7% var(--space-xl);
+    padding: var(--space-md) 7% var(--space-xl);
 }
 
 .news-back-link {
@@ -874,11 +871,11 @@ h3.news-heading {
     height: 180px;
 }
 
+/* Обложки новостей — готовые афиши со своим текстом. Наш заголовок поверх них
+   спорит с надписями на картинке, поэтому текст идёт под изображением, как
+   в маленьких карточках. */
 .news-bento-large .news-bento-img {
-    height: 100%;
-    min-height: 300px;
-    position: absolute;
-    inset: 0;
+    height: 320px;
 }
 
 .news-bento-img img {
@@ -901,7 +898,7 @@ h3.news-heading {
 }
 
 .news-bento-large .news-bento-img-overlay {
-    opacity: 1;
+    opacity: 0;          /* текст больше не лежит на картинке — затемнять нечего */
 }
 
 .news-bento-card:hover .news-bento-img-overlay {
@@ -919,12 +916,7 @@ h3.news-heading {
 }
 
 .news-bento-large .news-bento-content {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
     padding: var(--space-lg);
-    justify-content: flex-end;
 }
 
 .news-bento-content .news-category-badge {

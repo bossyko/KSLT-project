@@ -59,6 +59,31 @@ def slugify(title):
     return s[:80] or 'news'
 
 
+
+def clean_html(html):
+    """Приводит текст из Word к нашей разметке.
+
+    В источнике у абзацев прописаны белый фон и чёрный шрифт — на тёмной теме
+    это белые плашки поверх страницы. Почти всё обёрнуто в <strong>, поэтому
+    новость целиком выглядит жирной. Оставляем только абзацы, переносы,
+    ссылки и списки.
+    """
+    if not html:
+        return html
+
+    h = html
+    h = re.sub(r'\s*style="[^"]*"', '', h)          # инлайновые цвета и фоны
+    h = re.sub(r'</?span[^>]*>', '', h)             # обёртки без смысла
+    h = re.sub(r'</?strong[^>]*>', '', h)           # жирным был весь текст
+    h = re.sub(r'</?b>', '', h)
+    h = re.sub(r'<p>(\s|&nbsp;|<br\s*/?>)*</p>', '', h)   # пустые абзацы-распорки
+    h = re.sub(r'(<br\s*/?>\s*){3,}', '<br><br>', h)
+    h = h.replace('&nbsp;', ' ')
+    h = re.sub(r'[ \t]{2,}', ' ', h)
+    h = re.sub(r'<p>\s+', '<p>', h)
+    h = re.sub(r'\s+</p>', '</p>', h)
+    return h.strip()
+
 def q(value):
     """Строка для SQL. None и пустое — NULL."""
     if value is None or value == '':
@@ -78,6 +103,7 @@ def main():
     translations = json.load(open(tr_path, encoding='utf-8')) if os.path.exists(tr_path) else {}
 
     rows = []
+    slugs = []
     seen_slugs = set()
 
     for n in news:
@@ -90,6 +116,7 @@ def main():
         while slug in seen_slugs:
             slug += '-2'
         seen_slugs.add(slug)
+        slugs.append(slug)
 
         cover = n.get('newsCover')
         gallery = [STORAGE + p.split('/')[-1] for p in (n.get('images') or [])]
@@ -102,7 +129,7 @@ def main():
                 q(t.get('title_en')),
                 q(t.get('title_kg')),
                 q(slug),
-                q(n.get('content')),
+                q(clean_html(n.get('content'))),
                 q(t.get('content_en')),
                 q(t.get('content_kg')),
                 q(subtitle),
@@ -151,6 +178,31 @@ def main():
 
     out = os.path.join(BASE, 'sql/import-news.sql')
     open(out, 'w', encoding='utf-8').write('\n'.join(sql))
+
+    # Новости уже в базе, поэтому рядом кладём обновление текстов —
+    # заново вставлять их только ради чистой разметки незачем
+    fixes = [
+        '-- ============================================',
+        '-- Приведение текстов новостей к нашей разметке',
+        '-- Запустить в Supabase SQL Editor целиком.',
+        '-- ============================================',
+        '--',
+        '-- Тексты пришли из Word: у абзацев прописан белый фон и чёрный шрифт,',
+        '-- на тёмной теме это белые плашки. Плюс почти всё обёрнуто в <strong>.',
+        '-- Здесь та же очистка, что делает import/build-news-sql.py.',
+        '',
+    ]
+    for n, slug in zip(news, slugs):
+        fixes.append('UPDATE news SET content = ' + q(clean_html(n.get('content'))) +
+                     ' WHERE slug = ' + q(slug) + ';')
+    fixes += [
+        '',
+        '-- Проверка: ни одной инлайновой подсветки не осталось',
+        "SELECT count(*) AS с_остатками_word FROM news",
+        "WHERE content LIKE '%style=%' OR content LIKE '%<strong%';",
+        '',
+    ]
+    open(os.path.join(BASE, 'sql/fix-news-content.sql'), 'w', encoding='utf-8').write('\n'.join(fixes))
     print('новостей в переносе:', len(rows))
     print('с переводами:', sum(1 for n in news if translations.get(n['_id'], {}).get('title_en')))
     print('файл:', out)
