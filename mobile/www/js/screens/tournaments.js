@@ -439,7 +439,7 @@
     // Async checks: already registered (self + as partner), player data, membership, all registrations count
     Promise.all([
       supabaseClient.from('tournament_registrations')
-        .select('id, status, partner_id, draw_position, group_number')
+        .select('id, status, partner_id, draw_position, group_number, block_reason')
         .eq('tournament_id', t.id)
         .eq('player_id', playerId)
         .limit(1),
@@ -480,11 +480,19 @@
         var statusLabels = {
           pending: I18N.t('trn.registered'),
           approved: I18N.t('trn.registered'),
+          draw: I18N.t('trn.registered'),
           waitlist: I18N.t('trn.waitlist'),
-          rejected: I18N.t('common.error'),
-          withdrawn: I18N.t('common.error')
+          rejected: I18N.t('reg.refused'),
+          blocked: I18N.t('reg.refused'),
+          withdrawn: I18N.t('reg.withdrawn')
         };
-        var html = '<div class="td-reg-done">' + (statusLabels[existingReg.status] || I18N.t('trn.registered')) + '</div>';
+        // Отказ нельзя подписывать как «вы записаны» — это разные вещи
+        var refused = existingReg.status === 'blocked' || existingReg.status === 'rejected';
+        var html = '<div class="td-reg-done' + (refused ? ' td-reg-refused' : '') + '">' +
+          (statusLabels[existingReg.status] || I18N.t('trn.registered')) + '</div>';
+        if (refused && existingReg.block_reason) {
+          html += '<div class="td-reg-reason">' + esc(existingReg.block_reason) + '</div>';
+        }
 
         // Doubles without partner: show "Add Partner" button
         if (isDbl && !existingReg.partner_id) {

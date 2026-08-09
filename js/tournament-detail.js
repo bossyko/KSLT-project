@@ -2448,14 +2448,23 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
                 if (alreadyRegistered) {
                     var statusLabels = isEn
-                        ? { pending: 'Registration Pending', approved: 'Registered', rejected: 'Registration Rejected', withdrawn: 'Withdrawn', waitlist: 'On Waitlist' }
-                        : (isKg ? { pending: 'Арыз каралууда', approved: 'Сиз катталдыңыз', rejected: 'Арыз четке кагылды', withdrawn: 'Арыз кайтарылды', waitlist: 'Күтүү тизмесинде' }
-                        : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания' });
-                    btnHtml += '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
-                        statusLabels[alreadyRegistered.status] + '</span>';
+                        ? { pending: 'Registration Pending', approved: 'Registered', draw: 'In the draw', rejected: 'Registration Rejected', withdrawn: 'Withdrawn', waitlist: 'On Waitlist', blocked: 'Not admitted' }
+                        : (isKg ? { pending: 'Арыз каралууда', approved: 'Сиз катталдыңыз', draw: 'Сеткада', rejected: 'Арыз четке кагылды', withdrawn: 'Арыз кайтарылды', waitlist: 'Күтүү тизмесинде', blocked: 'Уруксат жок' }
+                        : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', draw: 'Вы в сетке', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания', blocked: 'Не допущен' });
+
+                    // Отказ подписываем красным и показываем причину — она приходит
+                    // из правил допуска и написана человеческим языком
+                    var isRefused = alreadyRegistered.status === 'blocked' || alreadyRegistered.status === 'rejected';
+                    var tone = isRefused ? '255,59,48' : '204,255,0';
+                    btnHtml += '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(' + tone + ',0.15);color:rgb(' + tone + ');font-weight:500;">' +
+                        (statusLabels[alreadyRegistered.status] || statusLabels.approved) + '</span>';
+                    if (isRefused && alreadyRegistered.block_reason) {
+                        btnHtml += '<div style="margin-top:10px;max-width:520px;color:var(--text-muted);font-size:0.85rem;line-height:1.5;">' +
+                            alreadyRegistered.block_reason + '</div>';
+                    }
                     // Снять заявку — пока не проведена жеребьёвка. После неё игрок
                     // уже в сетке, снимает организатор. Правило «за 3 часа» и штраф — #29
-                    var canWithdraw = (alreadyRegistered.status === 'approved' || alreadyRegistered.status === 'pending' || alreadyRegistered.status === 'waitlist')
+                    var canWithdraw = ['approved', 'pending', 'waitlist'].indexOf(alreadyRegistered.status) !== -1
                         && alreadyRegistered.draw_position == null
                         && alreadyRegistered.group_number == null;
                     if (canWithdraw) {

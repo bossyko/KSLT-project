@@ -342,6 +342,7 @@
     'reg.withdrawError': { ru: 'Не удалось снять заявку', en: 'Could not withdraw the entry', kg: 'Арызды алуу мүмкүн болгон жок' },
     'reg.registered':    { ru: 'Вы записаны',         en: 'You are entered',  kg: 'Сиз катталдыңыз' },
     'reg.again':         { ru: 'Записаться снова',    en: 'Enter again',      kg: 'Кайра катталуу' },
+    'reg.refused':       { ru: 'Не допущен',          en: 'Not admitted',     kg: 'Уруксат жок' },
     'reg.upcoming':      { ru: 'Предстоящие',         en: 'Upcoming',         kg: 'Алдыдагы' },
     'reg.played':        { ru: 'Сыгранные',           en: 'Played',           kg: 'Ойнолгон' },
     'pd.tournaments':    { ru: 'Турниры',             en: 'Tournaments',      kg: 'Мелдештер' },

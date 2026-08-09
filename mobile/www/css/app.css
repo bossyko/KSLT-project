@@ -4386,3 +4386,15 @@ select.prof-field-input { color: var(--text); }
   color: var(--accent) !important;
   border-color: rgba(204, 255, 0, 0.4) !important;
 }
+
+.td-reg-refused {
+  background: rgba(255, 59, 48, 0.12) !important;
+  color: #ff6b6b !important;
+}
+
+.td-reg-reason {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}

@@ -72,6 +72,7 @@
         regWithdraw: 'Арызды алуу',
         regAgain: 'Кайра катталуу',
         regWaitlist: 'Күтүү тизмесинде',
+        regRefused: 'Уруксат жок',
         tourUpcoming: 'Алдыдагы',
         tourPlayed: 'Ойнолгон',
         regWithdrawn: 'Арыз алынды',
@@ -269,6 +270,7 @@
         regWithdraw: 'Withdraw',
         regAgain: 'Enter again',
         regWaitlist: 'On the waiting list',
+        regRefused: 'Not admitted',
         tourUpcoming: 'Upcoming',
         tourPlayed: 'Played',
         regWithdrawn: 'Withdrawn',
@@ -466,6 +468,7 @@
         regWithdraw: 'Снять заявку',
         regAgain: 'Записаться снова',
         regWaitlist: 'В листе ожидания',
+        regRefused: 'Не допущен',
         tourUpcoming: 'Предстоящие',
         tourPlayed: 'Сыгранные',
         regWithdrawn: 'Заявка снята',
@@ -1594,7 +1597,7 @@
             var results = await Promise.all([
                 client.from('tournament_registrations')
                     .select('id, status, draw_position, group_number, tournament:tournaments(id, title, title_en, title_kg, date_start, image, status)')
-                    .eq('player_id', pid).in('status', ['approved', 'draw', 'waitlist', 'pending', 'withdrawn'])
+                    .eq('player_id', pid).in('status', ['approved', 'draw', 'waitlist', 'pending', 'withdrawn', 'blocked', 'rejected'])
                     .order('registered_at', { ascending: false }).limit(10),
                 client.from('tournament_results')
                     .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start, image)')
@@ -2562,16 +2565,17 @@
         var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
         var reg = item.reg;
         var withdrawn = reg && reg.status === 'withdrawn';
-        var result = withdrawn
-            ? L.regWithdrawn
+        var refused = reg && (reg.status === 'blocked' || reg.status === 'rejected');
+        var result = withdrawn ? L.regWithdrawn
+            : (refused ? L.regRefused
             : (item.round_reached
                 ? (ROUND_LABELS_DB[item.round_reached] || item.round_reached)
-                : (reg && reg.status === 'waitlist' ? L.regWaitlist : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован')));
+                : (reg && reg.status === 'waitlist' ? L.regWaitlist : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован'))));
         var pts = item.points_earned > 0 ? ' · +' + item.points_earned + ' pts' : '';
         var isWinner = item.round_reached === 'W';
         var tPage = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id;
 
-        var html = '<div class="db-tournament-item' + (withdrawn ? ' db-tournament-withdrawn' : '') + '">';
+        var html = '<div class="db-tournament-item' + (withdrawn || refused ? ' db-tournament-withdrawn' : '') + '">';
         html += '<a class="db-tournament-row" href="' + tPage + '">';
         if (withPhoto) {
             html += t.image

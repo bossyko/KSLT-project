@@ -1383,7 +1383,7 @@
     if (!playerId || !t || !t.id) return;
 
     supabaseClient.from('tournament_registrations')
-      .select('id, status, draw_position, group_number')
+      .select('id, status, draw_position, group_number, block_reason')
       .eq('tournament_id', t.id)
       .eq('player_id', playerId)
       .limit(1)
@@ -1398,7 +1398,13 @@
         var canWithdraw = ['approved', 'pending', 'waitlist'].indexOf(reg.status) !== -1
           && reg.draw_position == null && reg.group_number == null;
 
-        var html = '<span class="td-reg-badge">' + I18N.t('reg.registered') + '</span>';
+        var refused = reg.status === 'blocked' || reg.status === 'rejected';
+        var label = refused ? I18N.t('reg.refused')
+          : (reg.status === 'waitlist' ? I18N.t('trn.waitlist') : I18N.t('reg.registered'));
+        var html = '<span class="td-reg-badge' + (refused ? ' td-reg-badge-off' : '') + '">' + label + '</span>';
+        if (refused && reg.block_reason) {
+          html += '<div class="td-reg-reason">' + esc(reg.block_reason) + '</div>';
+        }
         if (canWithdraw) {
           html += '<button class="td-withdraw-btn" data-reg="' + reg.id + '" data-tid="' + t.id + '">' +
             I18N.t('reg.withdraw') + '</button>';
