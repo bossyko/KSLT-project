@@ -281,11 +281,15 @@
             return;
         }
 
-        // Translate only to empty fields
+        // Переводим в пустые. Поле, где лежит копия исходника, тоже считаем
+        // пустым: так бывает после неудачного перевода — раньше туда писался
+        // исходный текст, и повторное нажатие отвечало «всё уже заполнено».
+        function isEmptyTarget(val) { return !val || val === srcText; }
+
         var targets = [];
-        if (ruEl && srcLang !== 'ru' && !ruVal) targets.push({ el: ruEl, lang: 'ru' });
-        if (enEl && srcLang !== 'en' && !enVal) targets.push({ el: enEl, lang: 'en' });
-        if (kgEl && srcLang !== 'kg' && !kgVal) targets.push({ el: kgEl, lang: 'kg' });
+        if (ruEl && srcLang !== 'ru' && isEmptyTarget(ruVal)) targets.push({ el: ruEl, lang: 'ru' });
+        if (enEl && srcLang !== 'en' && isEmptyTarget(enVal)) targets.push({ el: enEl, lang: 'en' });
+        if (kgEl && srcLang !== 'kg' && isEmptyTarget(kgVal)) targets.push({ el: kgEl, lang: 'kg' });
 
         if (targets.length === 0) {
             showToast(isEn ? 'All fields are already filled' : 'Все поля уже заполнены', 'info');
@@ -297,14 +301,22 @@
         btn.disabled = true;
 
         try {
-            var failed = 0;
+            var failed = [];
             for (var i = 0; i < targets.length; i++) {
                 var result = await translateText(srcText, srcLang, targets[i].lang);
+                // Сервис при отказе возвращает исходную строку. Записать её —
+                // значит выдать непереведённое за перевод, поэтому пропускаем.
+                if (!result || result === srcText) {
+                    failed.push(targets[i].lang.toUpperCase());
+                    continue;
+                }
                 targets[i].el.value = result;
-                if (result === srcText) failed++;
             }
-            if (failed > 0) {
-                showToast(isEn ? 'Some translations may be inaccurate. Check and edit manually.' : 'Некоторые переводы могут быть неточными. Проверьте и отредактируйте вручную.', 'warning');
+            if (failed.length === targets.length) {
+                showToast(isEn ? 'Translation service did not respond. Fields left empty.'
+                               : 'Сервис перевода не ответил. Поля оставлены пустыми — переведите вручную.', 'error');
+            } else if (failed.length) {
+                showToast((isEn ? 'Not translated: ' : 'Не переведено: ') + failed.join(', '), 'warning');
             }
         } catch (e) {
             showToast(L.translateError, 'error');
@@ -521,7 +533,46 @@
     A.showToast = showToast;
     A.showConfirm = showConfirm;
     A.showConfirmAsync = showConfirmAsync;
+
+    /**
+     * Приводит текст новости к нашей разметке.
+     *
+     * Менеджер пишет в обычное поле: может набрать простой текст, а может
+     * вставить из Word или Телеграма — тогда прилетают инлайновые цвета, белый
+     * фон и всё подряд в <strong>. На тёмной теме это выглядит как белые плашки
+     * поверх страницы. Здесь остаются только абзацы, переносы, ссылки и списки,
+     * а простой текст сам раскладывается по абзацам.
+     *
+     * @param {string} html
+     * @returns {string}
+     */
+    function cleanNewsHtml(html) {
+        if (!html) return '';
+        var h = String(html).trim();
+
+        // Текст без единого тега — раскладываем по пустым строкам
+        if (!/<[a-z][\s\S]*>/i.test(h)) {
+            return h.split(/\n\s*\n/)
+                .map(function(block) { return block.trim(); })
+                .filter(Boolean)
+                .map(function(block) { return '<p>' + block.replace(/\n/g, '<br>') + '</p>'; })
+                .join('');
+        }
+
+        h = h.replace(/\s*style="[^"]*"/gi, '');
+        h = h.replace(/\s*class="[^"]*"/gi, '');
+        h = h.replace(/<\/?span[^>]*>/gi, '');
+        h = h.replace(/<\/?(?:strong|b)[^>]*>/gi, '');
+        h = h.replace(/<\/?font[^>]*>/gi, '');
+        h = h.replace(/<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, '');
+        h = h.replace(/(?:<br\s*\/?>\s*){3,}/gi, '<br><br>');
+        h = h.replace(/&nbsp;/g, ' ');
+        h = h.replace(/<p>\s+/gi, '<p>').replace(/\s+<\/p>/gi, '</p>');
+        return h.trim();
+    }
+
     A.esc = esc;
+    A.cleanNewsHtml = cleanNewsHtml;
     A.sel = sel;
     A.transliterate = transliterate;
     A.slugify = slugify;
