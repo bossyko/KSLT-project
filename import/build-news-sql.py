@@ -36,6 +36,14 @@ CATEGORY = {
 }
 DEFAULT_CATEGORY = 'results'
 
+# У одной новости заголовком стоит целое предложение, а подзаголовок пуст.
+# В списке она ломает ряд карточек, поэтому заголовок укорачиваем до названия
+# турнира, а исходное предложение уходит в описание.
+LONG_TITLE = '24 мая на кортах СК Тай-брейк прошел рейтинговый турнир КСЛТ в женском парном разряде в категориях MASTERS и TOUR!'
+TITLE_OVERRIDE = {
+    LONG_TITLE: 'Рейтинговый турнир КСЛТ — женский парный разряд',
+}
+
 TRANSLIT = {
     'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e', 'ж': 'zh',
     'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
@@ -74,6 +82,10 @@ def main():
 
     for n in news:
         title = (n.get('title') or '').strip()
+        subtitle = (n.get('subtitle') or '').strip()
+        if title in TITLE_OVERRIDE:
+            subtitle = subtitle or title      # длинный заголовок становится описанием
+            title = TITLE_OVERRIDE[title]
         slug = slugify(title)
         while slug in seen_slugs:
             slug += '-2'
@@ -93,11 +105,11 @@ def main():
                 q(n.get('content')),
                 q(t.get('content_en')),
                 q(t.get('content_kg')),
-                q(n.get('subtitle')),
+                q(subtitle),
                 q(t.get('excerpt_en')),
                 q(t.get('excerpt_kg')),
                 q(STORAGE + cover.split('/')[-1]) if cover else 'NULL',
-                q(CATEGORY.get(title, DEFAULT_CATEGORY)),
+                q(CATEGORY.get(n.get('title', '').strip(), CATEGORY.get(title, DEFAULT_CATEGORY))),
                 q('КСЛТ'),
                 q(date_to_ts(n['createdAt'])) + '::timestamptz',
                 q(json.dumps(gallery, ensure_ascii=False)) + '::jsonb',
