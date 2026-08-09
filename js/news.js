@@ -402,7 +402,7 @@ function renderContent(article) {
     if (article.gallery && article.gallery.length) {
         html += '<div class="news-gallery news-animate">';
         article.gallery.forEach(function(url) {
-            html += '<a href="' + esc(url) + '" class="news-gallery-item" target="_blank">' +
+            html += '<a href="' + esc(url) + '" class="news-gallery-item" data-lightbox>' +
                 '<img src="' + esc(url) + '" alt="" loading="lazy">' +
             '</a>';
         });
@@ -415,6 +415,79 @@ function renderContent(article) {
     }
 
     container.innerHTML = html;
+    initPhotoViewer(container);
+}
+
+/**
+ * Просмотр фотографии поверх страницы.
+ *
+ * В тексте и в галерее снимки показываются некрупно, чтобы не растаскивать
+ * новость на километр. По нажатию — открываются целиком, как в привычных
+ * приложениях: стрелки листают, Esc и клик по фону закрывают.
+ */
+function initPhotoViewer(root) {
+    var items = [];
+
+    function collect() {
+        items = Array.prototype.slice.call(
+            root.querySelectorAll('.news-gallery-item[data-lightbox], .news-html figure img')
+        );
+    }
+
+    function urlOf(el) {
+        return el.tagName === 'IMG' ? el.src : el.getAttribute('href');
+    }
+
+    function open(index) {
+        var overlay = document.createElement('div');
+        overlay.className = 'news-viewer';
+        overlay.innerHTML =
+            '<button class="news-viewer-close" aria-label="Закрыть">&times;</button>' +
+            '<button class="news-viewer-nav news-viewer-prev" aria-label="Предыдущее">&#8249;</button>' +
+            '<img class="news-viewer-img" src="' + urlOf(items[index]) + '" alt="">' +
+            '<button class="news-viewer-nav news-viewer-next" aria-label="Следующее">&#8250;</button>' +
+            '<div class="news-viewer-count"></div>';
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+
+        var img = overlay.querySelector('.news-viewer-img');
+        var count = overlay.querySelector('.news-viewer-count');
+
+        function show(i) {
+            index = (i + items.length) % items.length;
+            img.src = urlOf(items[index]);
+            count.textContent = (index + 1) + ' / ' + items.length;
+            overlay.querySelectorAll('.news-viewer-nav').forEach(function(b) {
+                b.style.display = items.length > 1 ? '' : 'none';
+            });
+        }
+        function close() {
+            overlay.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) {
+            if (e.key === 'Escape') close();
+            if (e.key === 'ArrowRight') show(index + 1);
+            if (e.key === 'ArrowLeft') show(index - 1);
+        }
+
+        overlay.querySelector('.news-viewer-close').addEventListener('click', close);
+        overlay.querySelector('.news-viewer-prev').addEventListener('click', function(e) { e.stopPropagation(); show(index - 1); });
+        overlay.querySelector('.news-viewer-next').addEventListener('click', function(e) { e.stopPropagation(); show(index + 1); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay || e.target === img) close(); });
+        document.addEventListener('keydown', onKey);
+        show(index);
+    }
+
+    root.addEventListener('click', function(e) {
+        var el = e.target.closest('.news-gallery-item[data-lightbox], .news-html figure img');
+        if (!el) return;
+        e.preventDefault();
+        collect();
+        var i = items.indexOf(el);
+        if (i !== -1) open(i);
+    });
 }
 
 function renderBlock(block, index) {

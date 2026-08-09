@@ -10,6 +10,7 @@
     // Чистка разметки живёт в utils.js. Если оттуда приедет старая версия из
     // кэша, сохранение не должно падать — просто обойдётся без чистки.
     function cleanHtml(value) {
+        if (A.cleanNewsHtmlOnSave) return A.cleanNewsHtmlOnSave(value);
         return A.cleanNewsHtml ? A.cleanNewsHtml(value) : (value || '');
     }
     var L = A.L;

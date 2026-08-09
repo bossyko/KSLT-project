@@ -573,7 +573,36 @@
         return h.trim();
     }
 
+
+    /**
+     * Чистка при сохранении — мягкая.
+     *
+     * Жирный, курсив и пустые строки между абзацами ставит сам менеджер в
+     * редакторе, и сохранение не вправе их выбрасывать: текст после кнопки
+     * «Сохранить» должен выглядеть так же, как до неё. Вычищаем только то,
+     * что приносит вставка из Word: инлайновые цвета, фоны, шрифты и обёртки.
+     *
+     * @param {string} html
+     * @returns {string}
+     */
+    function cleanNewsHtmlOnSave(html) {
+        if (!html) return '';
+        var h = String(html).trim();
+
+        // Простой текст без единого тега — раскладываем по абзацам
+        if (!/<[a-z][\s\S]*>/i.test(h)) return cleanNewsHtml(h);
+
+        h = h.replace(/\s*style="[^"]*"/gi, '');
+        h = h.replace(/\s*class="[^"]*"/gi, '');
+        h = h.replace(/<\/?span[^>]*>/gi, '');
+        h = h.replace(/<\/?font[^>]*>/gi, '');
+        h = h.replace(/<div>/gi, '<p>').replace(/<\/div>/gi, '</p>');
+        h = h.replace(/&nbsp;/g, ' ');
+        return h.trim();
+    }
+
     A.esc = esc;
+    A.cleanNewsHtmlOnSave = cleanNewsHtmlOnSave;
     A.cleanNewsHtml = cleanNewsHtml;
     A.sel = sel;
     A.transliterate = transliterate;

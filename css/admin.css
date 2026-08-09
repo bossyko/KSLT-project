@@ -4249,3 +4249,18 @@ select.ad-field-input {
 .ad-news-preview-body figure { margin: 14px 0; }
 .ad-news-preview-body figure img { max-width: 100%; border-radius: 10px; display: block; }
 .ad-news-preview-body figure iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 10px; }
+
+/* Фото внутри редактора показываем некрупно: это черновик, а не витрина */
+.ad-editor-area figure { margin: 12px 0; }
+.ad-editor-area figure img {
+    max-width: 260px;
+    max-height: 180px;
+    border-radius: 8px;
+    display: block;
+}
+.ad-editor-area figure iframe {
+    width: 320px;
+    height: 180px;
+    border: 0;
+    border-radius: 8px;
+}

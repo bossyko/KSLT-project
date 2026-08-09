@@ -127,20 +127,33 @@
         area.dispatchEvent(new Event('input'));
     }
 
-    /** Фото грузится в тот же бакет, что и обложка новости */
+    /**
+     * Фото грузятся в тот же бакет, что и обложка новости.
+     * Выбирать можно сразу несколько: после турнира их всегда пачка,
+     * и загружать по одной — мучение.
+     */
     function insertPhoto(area) {
         var input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
+        input.multiple = true;
         input.addEventListener('change', async function() {
-            var file = input.files && input.files[0];
-            if (!file || !A.uploadImage) return;
+            var files = Array.prototype.slice.call(input.files || []);
+            if (!files.length || !A.uploadImage) return;
+
             var saved = savedRange;
-            var url = await A.uploadImage(file, 'news-');
-            if (!url) return;
+            var urls = [];
+            for (var i = 0; i < files.length; i++) {
+                var url = await A.uploadImage(files[i], 'news-');
+                if (url) urls.push(url);
+            }
+            if (!urls.length) return;
+
             restore(area, saved);
-            document.execCommand('insertHTML', false,
-                '<figure class="news-figure"><img src="' + url + '" alt=""></figure><p><br></p>');
+            var html = urls.map(function(u) {
+                return '<figure><img src="' + u + '" alt=""></figure>';
+            }).join('') + '<p><br></p>';
+            document.execCommand('insertHTML', false, html);
             area.dispatchEvent(new Event('input'));
         });
         input.click();
@@ -161,7 +174,7 @@
         }
         restore(area, savedRange);
         document.execCommand('insertHTML', false,
-            '<figure class="news-figure news-figure-video">' + embed + '</figure><p><br></p>');
+            '<figure>' + embed + '</figure><p><br></p>');
         area.dispatchEvent(new Event('input'));
     }
 

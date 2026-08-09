@@ -1389,3 +1389,86 @@ h3.news-heading {
     border-radius: var(--radius-md);
     display: block;
 }
+
+/* ---- Просмотр фотографии поверх страницы ---- */
+.news-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.news-viewer-img {
+    max-width: 92vw;
+    max-height: 88vh;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+}
+
+.news-viewer-close,
+.news-viewer-nav {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.news-viewer-close:hover,
+.news-viewer-nav:hover { background: rgba(255, 255, 255, 0.18); }
+
+.news-viewer-close {
+    top: 20px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.news-viewer-nav {
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px;
+    height: 52px;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.news-viewer-prev { left: 24px; }
+.news-viewer-next { right: 24px; }
+
+.news-viewer-count {
+    position: absolute;
+    bottom: 24px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+}
+
+/* Фото внутри текста — некрупно, разворачиваются по нажатию */
+.news-html figure img {
+    max-height: 420px;
+    object-fit: cover;
+    cursor: zoom-in;
+}
+
+@media (max-width: 640px) {
+    .news-viewer { padding: 16px; }
+    .news-viewer-nav { width: 42px; height: 42px; font-size: 1.6rem; }
+    .news-viewer-prev { left: 8px; }
+    .news-viewer-next { right: 8px; }
+}
