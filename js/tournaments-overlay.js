@@ -343,11 +343,14 @@
 
             var all = supaItems.concat(staticItems);
 
-            // Load ALL active tournaments (all categories) for main grid
+            // Действующие турниры этой категории. Раньше сюда грузились все
+            // категории подряд, и на странице Masters висели Tour с Challenger,
+            // хотя заголовок и цифры в шапке — про Masters
             var activeItems = [];
             try {
                 var activeResult = await client.from('tournaments')
                     .select('*')
+                    .eq('category_id', category)
                     .neq('status', 'completed')
                     .neq('status', 'cancelled')
                     .not('published_at', 'is', null)
@@ -403,16 +406,17 @@
             }
             // Filter out items whose computed status is 'past' (date_end passed)
             activeItems = activeItems.filter(function(t) { return t.status !== 'past'; });
-            // Sort: newest first
+            // Ближайшие сверху: это список того, что впереди, а не лента новостей
             activeItems.sort(function(a, b) {
-                return (b._dateSort || '').localeCompare(a._dateSort || '');
+                return (a._dateSort || '').localeCompare(b._dateSort || '');
             });
 
-            // Load ALL completed tournaments (all categories) for past section
+            // Прошедшие — той же категории, по той же причине
             var pastItems = [];
             try {
                 var pastResult = await client.from('tournaments')
                     .select('*')
+                    .eq('category_id', category)
                     .eq('status', 'completed')
                     .not('published_at', 'is', null)
                     .order('date_start', { ascending: false });
