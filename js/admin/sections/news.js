@@ -6,6 +6,12 @@
     'use strict';
 
     var A = window.KSLT_ADMIN;
+
+    // Чистка разметки живёт в utils.js. Если оттуда приедет старая версия из
+    // кэша, сохранение не должно падать — просто обойдётся без чистки.
+    function cleanHtml(value) {
+        return A.cleanNewsHtml ? A.cleanNewsHtml(value) : (value || '');
+    }
     var L = A.L;
     var isEn = A.isEn;
 
@@ -1084,9 +1090,9 @@
                 excerpt: (document.getElementById('adNewsExcerpt') || {}).value || '',
                 excerpt_en: (document.getElementById('adNewsExcerptEn') || {}).value || '',
                 excerpt_kg: (document.getElementById('adNewsExcerptKg') || {}).value || '',
-                content: A.cleanNewsHtml((document.getElementById('adNewsContent') || {}).value || ''),
-                content_en: A.cleanNewsHtml((document.getElementById('adNewsContentEn') || {}).value || ''),
-                content_kg: A.cleanNewsHtml((document.getElementById('adNewsContentKg') || {}).value || ''),
+                content: cleanHtml((document.getElementById('adNewsContent') || {}).value || ''),
+                content_en: cleanHtml((document.getElementById('adNewsContentEn') || {}).value || ''),
+                content_kg: cleanHtml((document.getElementById('adNewsContentKg') || {}).value || ''),
                 category: (document.getElementById('adNewsCat') || {}).value || '',
                 author: (document.getElementById('adNewsAuthor') || {}).value || '',
                 executor: (document.getElementById('adNewsExecutor') || {}).value || '',
@@ -1358,9 +1364,9 @@
                 excerpt_kg: document.getElementById('adNewsExcerptKg').value.trim(),
                 // Разметку чистим на входе: что бы менеджер ни вставил из Word
                 // или Телеграма, в базе лежит одинаковый текст
-                content: A.cleanNewsHtml(document.getElementById('adNewsContent').value),
-                content_en: A.cleanNewsHtml(document.getElementById('adNewsContentEn').value),
-                content_kg: A.cleanNewsHtml(document.getElementById('adNewsContentKg').value),
+                content: cleanHtml(document.getElementById('adNewsContent').value),
+                content_en: cleanHtml(document.getElementById('adNewsContentEn').value),
+                content_kg: cleanHtml(document.getElementById('adNewsContentKg').value),
                 image: imageUrl || null,
                 content_images: contentImagesFinal,
                 poll: pollFinal,
