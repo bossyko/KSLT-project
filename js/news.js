@@ -1007,7 +1007,9 @@ function incrementViewCount(newsId) {
 function renderNewsList() {
     var labels = getLabels();
     var basePage = isEnPage() ? 'news-en.html' : (isKgPage() ? 'news-kg.html' : 'news.html');
-    var PER_PAGE = 6;
+    // Семь на страницу — ровно под сетку: главная карточка, три сбоку и три
+    // в нижнем ряду. При шести нижний ряд оставался с пустым местом.
+    var PER_PAGE = 7;
 
     document.title = 'KSLT — ' + labels.newsListTitle;
 

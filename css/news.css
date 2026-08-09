@@ -856,9 +856,12 @@ body.news-article-page .section-sponsors-compact {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     /* Высота строк по содержимому: мелкие карточки должны оставаться
-       компактными. Крупная занимает две строки и добирает высоту картинкой —
+       компактными. Крупная занимает три строки и добирает высоту картинкой —
        см. .news-bento-large ниже. */
     grid-auto-rows: auto;
+    /* Плотная укладка: карточки заполняют свободные клетки рядом с главной,
+       а не начинают новый ряд под ней, оставляя пустоту сбоку */
+    grid-auto-flow: row dense;
     gap: var(--space-md);
     margin-bottom: var(--space-xl);
 }
