@@ -4247,7 +4247,12 @@ select.ad-field-input {
 .ad-news-preview-body ul,
 .ad-news-preview-body ol { margin: 0 0 12px; padding-left: 22px; }
 .ad-news-preview-body figure { margin: 14px 0; }
-.ad-news-preview-body figure img { max-width: 100%; border-radius: 10px; display: block; }
+.ad-news-preview-body figure img {
+    max-width: 260px;
+    max-height: 180px;
+    border-radius: 10px;
+    display: block;
+}
 .ad-news-preview-body figure iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 10px; }
 
 /* Фото внутри редактора показываем некрупно: это черновик, а не витрина */

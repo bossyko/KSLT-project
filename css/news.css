@@ -832,7 +832,9 @@ h3.news-heading {
 .news-bento {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: auto;
+    /* Строки одной высоты: крупная карточка занимает две, и если соседние
+       справа окажутся ниже, под ними зияет пустота */
+    grid-auto-rows: 1fr;
     gap: var(--space-md);
     margin-bottom: var(--space-xl);
 }
@@ -870,6 +872,10 @@ h3.news-heading {
 .news-bento-card:not(.news-bento-large) .news-bento-img {
     height: 180px;
 }
+
+/* Карточка занимает ячейку целиком, картинка добирает остаток высоты */
+.news-bento-card { height: 100%; }
+.news-bento-card:not(.news-bento-large) .news-bento-content { flex: 1; }
 
 /* Обложки новостей — готовые афиши со своим текстом. Наш заголовок поверх них
    спорит с надписями на картинке, поэтому текст идёт под изображением, как
@@ -1470,10 +1476,14 @@ h3.news-heading {
     font-size: 0.85rem;
 }
 
-/* Фото внутри текста — некрупно, разворачиваются по нажатию */
+/* Фото внутри текста: вписываем целиком, не обрезая — на снимках с турниров
+   по краям стоят люди, и кадрирование отрезает их. Крупный вид — по нажатию. */
 .news-html figure img {
-    max-height: 420px;
-    object-fit: cover;
+    max-height: 520px;
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+    object-fit: contain;
     cursor: zoom-in;
 }
 
