@@ -340,16 +340,23 @@ function renderHero(article, readTime) {
     var labels = getLabels();
     var backUrl = isEnPage() ? 'news-en.html' : (isKgPage() ? 'news-kg.html' : 'news.html');
 
+    // Возврат к списку — отдельной полосой у края страницы, как на страницах
+    // услуг и турниров. Раньше ссылка стояла в одной колонке с заголовком
+    // и налезала на плашку категории.
+    var back = container.parentNode.querySelector('.kslt-back-wrap');
+    if (!back) {
+        back = document.createElement('div');
+        back.className = 'kslt-back-wrap';
+        container.parentNode.insertBefore(back, container);
+    }
+    back.innerHTML = '<a href="' + backUrl + '" class="kslt-back">\u2190 ' + labels.backToNews + '</a>';
+
     container.innerHTML =
         '<div class="news-hero-bg">' +
             '<img src="' + esc(article.heroImage) + '" alt="">' +
             '<div class="news-hero-overlay"></div>' +
         '</div>' +
         '<div class="news-hero-content">' +
-            '<a href="' + backUrl + '" class="news-back-link">' +
-                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg> ' +
-                labels.backToNews +
-            '</a>' +
             '<span class="news-category-badge news-category-' + article.category + '">' + article.categoryLabel + '</span>' +
             '<h1>' + article.title + '</h1>' +
             '<p class="news-subtitle">' + article.subtitle + '</p>' +

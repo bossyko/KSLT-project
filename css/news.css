@@ -56,21 +56,7 @@
     padding: var(--space-md) 7% var(--space-xl);
 }
 
-.news-back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: var(--space-md);
-    transition: color 0.2s;
-}
-
-.news-back-link:hover {
-    color: var(--accent);
-}
+/* Ссылка «Назад к новостям» переехала в общую полосу .kslt-back-wrap */
 
 .news-category-badge {
     display: inline-block;
