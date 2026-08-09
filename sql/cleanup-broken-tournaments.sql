@@ -44,7 +44,7 @@ WHERE category_id IS NULL OR gender IS NULL
 -- Выполнять, только когда ШАГ 4 показал ноль. Иначе миграция упадёт.
 -- После этого правило нельзя будет обойти ни через админку, ни через API.
 --
--- ALTER TABLE tournaments ALTER COLUMN category_id SET NOT NULL;
--- ALTER TABLE tournaments ALTER COLUMN gender SET NOT NULL;
--- ALTER TABLE tournaments ALTER COLUMN date_start SET NOT NULL;
--- ALTER TABLE tournaments ALTER COLUMN max_participants SET NOT NULL;
+ALTER TABLE tournaments ALTER COLUMN category_id SET NOT NULL;
+ALTER TABLE tournaments ALTER COLUMN gender SET NOT NULL;
+ALTER TABLE tournaments ALTER COLUMN date_start SET NOT NULL;
+ALTER TABLE tournaments ALTER COLUMN max_participants SET NOT NULL;
