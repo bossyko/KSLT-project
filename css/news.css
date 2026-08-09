@@ -448,7 +448,7 @@ h3.news-heading {
 .news-reactions {
     max-width: 900px;
     margin: 0 auto;
-    padding: 0 7% var(--space-xl);
+    padding: 0 7% var(--space-lg);
     text-align: center;
 }
 
@@ -617,11 +617,22 @@ body.news-article-page .news-hero {
     padding: 0;
 }
 
+/* Отступы блоков внизу страницы складывались попарно: 80 снизу у одного плюс
+   70–80 сверху у следующего давали по полтора экрана пустоты между реакциями,
+   похожими статьями и спонсорами. */
+body.news-article-page .news-article-body {
+    padding-bottom: var(--space-lg);
+}
+
+body.news-article-page .section-sponsors-compact {
+    padding-top: var(--space-lg);
+}
+
 /* === RELATED ARTICLES === */
 .news-related {
     max-width: 1000px;
     margin: 0 auto;
-    padding: var(--space-xl) 7%;
+    padding: var(--space-lg) 7%;
     border-top: 1px solid var(--border-subtle);
 }
 
