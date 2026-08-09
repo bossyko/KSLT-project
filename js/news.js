@@ -70,7 +70,10 @@ function mapDbArticle(row) {
         slug: row.slug,
         title: title,
         subtitle: excerpt || '',
-        heroImage: row.image || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
+        // В карточках — кадрированная обложка, в шапке новости — исходная афиша:
+        // её рисовали, чтобы прочитали даты, состав и телеграм-канал
+        heroImage: row.image_original || row.image || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
+        cardImage: row.image || row.image_original || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
         date: dateStr,
         author: row.author || 'KSLT',
         category: row.category || 'announcement',
@@ -335,6 +338,7 @@ function renderHero(article, readTime) {
 
     container.innerHTML =
         '<div class="news-hero-bg">' +
+            '<div class="news-hero-blur" style="background-image:url(' + esc(article.heroImage) + ')"></div>' +
             '<img src="' + esc(article.heroImage) + '" alt="">' +
             '<div class="news-hero-overlay"></div>' +
         '</div>' +
@@ -1078,7 +1082,7 @@ function renderNewsList() {
 
             html += '<a href="' + basePage + '?slug=' + article.slug + '" class="' + cardClass + '">' +
                 '<div class="news-bento-img">' +
-                    '<img src="' + esc(article.heroImage) + '" alt="' + esc(article.title) + '" loading="lazy">' +
+                    '<img src="' + esc(article.cardImage || article.heroImage) + '" alt="' + esc(article.title) + '" loading="lazy">' +
                     '<div class="news-bento-img-overlay"></div>' +
                 '</div>' +
                 '<div class="news-bento-content">' +

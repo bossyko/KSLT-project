@@ -19,7 +19,9 @@
     var newsEditingId = null;
     var newsEditingPublishedAt = null;
     var newsImageFile = null;
+    var newsImageOriginalFile = null;
     var newsImageUrl = '';
+    var newsImageOriginalUrl = '';   // афиша без обрезки — для шапки новости
     var newsGalleryUrls = [];
     var newsGalleryFiles = [];
     var newsContentImages = [];
@@ -496,6 +498,7 @@
         newsEditingPublishedAt = (article && article.published_at) ? article.published_at : null;
         newsImageFile = null;
         newsImageUrl = (article && article.image) ? article.image : '';
+        newsImageOriginalUrl = (article && article.image_original) ? article.image_original : '';
         newsGalleryUrls = (article && article.gallery) ? article.gallery.slice() : [];
         newsGalleryFiles = [];
         newsContentImages = (article && article.content_images) ? article.content_images.slice() : [];
@@ -894,10 +897,7 @@
         });
 
         imgInput.addEventListener('change', function() {
-            if (imgInput.files && imgInput.files[0]) {
-                newsImageFile = imgInput.files[0];
-                previewNewsImage(URL.createObjectURL(newsImageFile));
-            }
+            if (imgInput.files && imgInput.files[0]) pickCover(imgInput.files[0]);
         });
 
         // Drag & drop
@@ -907,11 +907,26 @@
             e.preventDefault();
             imgZone.style.borderColor = '';
             if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                newsImageFile = e.dataTransfer.files[0];
                 imgInput.files = e.dataTransfer.files;
-                previewNewsImage(URL.createObjectURL(newsImageFile));
+                pickCover(e.dataTransfer.files[0]);
             }
         });
+
+        // Обложку кадрируем сразу при выборе: в карточках нужна одна пропорция.
+        // Исходник запоминаем — он пойдёт в шапку новости целиком.
+        async function pickCover(file) {
+            newsImageOriginalFile = file;
+            newsImageFile = file;
+
+            if (A.cropCover) {
+                var cropped = await A.cropCover(file);
+                if (cropped) {
+                    newsImageFile = new File([cropped], (file.name || 'cover').replace(/\.\w+$/, '') + '.jpg',
+                        { type: 'image/jpeg' });
+                }
+            }
+            previewNewsImage(URL.createObjectURL(newsImageFile));
+        }
 
         // Remove image
         setupImgRemove();
@@ -1235,8 +1250,14 @@
         activeBtn.textContent = L.saving;
 
         try {
-            // Upload cover image if file selected
+            // Обложка: в базу идут две картинки — кадрированная для карточек
+            // и исходная афиша для шапки новости
             var imageUrl = newsImageUrl;
+            var imageOriginalUrl = newsImageOriginalUrl;
+            if (newsImageOriginalFile && newsImageOriginalFile !== newsImageFile) {
+                var orig = await A.uploadImage(newsImageOriginalFile, 'orig-');
+                if (orig) imageOriginalUrl = orig;
+            }
             if (newsImageFile) {
                 imageUrl = await A.uploadImage(newsImageFile, '');
                 if (!imageUrl) {
@@ -1325,6 +1346,7 @@
                 content_en: cleanHtml(document.getElementById('adNewsContentEn').value),
                 content_kg: cleanHtml(document.getElementById('adNewsContentKg').value),
                 image: imageUrl || null,
+                image_original: imageOriginalUrl || null,
                 content_images: contentImagesFinal,
                 poll: pollFinal,
                 category: document.getElementById('adNewsCat').value,

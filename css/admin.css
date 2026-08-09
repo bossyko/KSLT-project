@@ -4269,3 +4269,64 @@ select.ad-field-input {
     border: 0;
     border-radius: 8px;
 }
+
+/* ---- Кадрирование обложки ---- */
+.ad-crop-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+}
+
+.ad-crop-modal {
+    width: 100%;
+    max-width: 720px;
+    background: var(--bg-card, #141417);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.ad-crop-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.ad-crop-title { font-weight: 600; }
+
+.ad-crop-close {
+    background: none;
+    border: none;
+    color: var(--text-muted, #888);
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.ad-crop-hint {
+    padding: 12px 20px 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-muted, #888);
+}
+
+.ad-crop-body {
+    padding: 16px 20px;
+}
+
+.ad-crop-body img { max-width: 100%; display: block; }
+
+.ad-crop-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 0 20px 20px;
+}
