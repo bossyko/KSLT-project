@@ -22,3 +22,6 @@ test-results/
 tests/reports/html/
 tests/reports/results.json
 .playwright/
+
+# Картинки новостей с tennis.kg — временные, заливаются в Supabase Storage
+import/news-images/
