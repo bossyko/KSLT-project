@@ -28,6 +28,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // SUPABASE FETCH LAYER
 // ========================================
 
+// Фон шапки раздела «Новости». Тот же приём, что на странице турниров:
+// постоянный снимок, а не меняющаяся обложка последней статьи.
+var NEWS_HERO_IMAGE = 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=1920&q=80';
+
 function mapDbArticle(row) {
     var isEn = isEnPage();
     var isKg = isKgPage();
@@ -991,10 +995,13 @@ function renderNewsList() {
     // === HERO ===
     var hero = document.getElementById('newsHero');
     if (hero) {
+        // Постоянный снимок, а не обложка свежей новости: шапка раздела не должна
+        // меняться каждый раз, когда выходит новая статья. Устроено так же,
+        // как на странице турниров — фон, затемнение, текст поверх.
         hero.classList.add('news-hero-list');
         hero.innerHTML =
             '<div class="news-hero-bg">' +
-                '<img src="' + esc(allArticles[0].heroImage) + '" alt="">' +
+                '<img src="' + NEWS_HERO_IMAGE + '" alt="">' +
                 '<div class="news-hero-overlay news-hero-overlay-list"></div>' +
             '</div>' +
             '<div class="news-hero-content news-hero-content-list">' +

@@ -689,27 +689,48 @@ h3.news-heading {
 }
 
 /* === NEWS LIST — HERO === */
+/* Шапка раздела «Новости» — как на странице турниров: снимок во всю ширину,
+   затемнение и текст поверх него, а не под ним */
 .news-hero-list {
-    height: auto;
-    min-height: auto;
-    max-height: none;
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 340px;
     padding-bottom: 0;
+    overflow: hidden;
+}
+
+.news-hero-list .news-hero-bg {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+}
+
+.news-hero-list .news-hero-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .news-hero-overlay-list {
-    background: linear-gradient(to top, var(--bg-primary) 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.6) 100%);
+    /* Ровное затемнение: текст лежит по центру снимка, а не у нижнего края */
+    background: linear-gradient(to top, var(--bg-primary) 0%, rgba(0,0,0,0.72) 45%, rgba(0,0,0,0.6) 100%);
 }
 
 .news-hero-content-list {
+    position: relative;
+    z-index: 1;
+    width: 100%;
     max-width: 1200px;
-    padding: var(--space-2xl) 7% var(--space-xl);
+    margin: 0 auto;
+    padding: var(--space-2xl) 7%;
     display: flex;
     flex-direction: column;
     gap: var(--space-lg);
 }
 
 .news-list-header {
-    text-align: left;
+    text-align: center;
 }
 
 .news-list-label {
@@ -726,10 +747,13 @@ h3.news-heading {
 }
 
 .news-list-header h1 {
-    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-size: clamp(1.8rem, 4vw, 3rem);
     font-weight: 700;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     margin-bottom: 0;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* === NEWS LIST — FILTERS === */
