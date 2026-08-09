@@ -629,7 +629,15 @@ function renderBlock(block, index) {
 
 function renderTags(article) {
     var container = document.getElementById('newsTags');
-    if (!container || !article.tags || !article.tags.length) return;
+    if (!container) return;
+
+    // Тегов у новостей из базы нет вовсе, а блок всё равно занимал место —
+    // сорок точек высоты плюс отступ между текстом статьи и «Оцените статью»
+    if (!article.tags || !article.tags.length) {
+        container.style.display = 'none';
+        return;
+    }
+    container.style.display = '';
 
     var labels = getLabels();
     var html = '<h3 class="news-section-title">' + labels.tagsTitle + '</h3><div class="news-tags-list">';
