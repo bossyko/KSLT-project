@@ -1399,15 +1399,15 @@
                     '<label class="db-field-label">' + L.email + '</label>' +
                     '<input class="db-field-input" type="email" value="' + escHtml(profile.email || '') + '" readonly>' +
                 '</div>' +
-                '<div class="db-field-row">' +
-                    '<div class="db-field">' +
-                        '<label class="db-field-label">' + L.phone + ' <span class="db-required">*</span></label>' +
-                        phoneFieldHtml(profile) +
-                    '</div>' +
-                    '<div class="db-field">' +
-                        '<label class="db-field-label">' + L.gender + ' <span class="db-required">*</span></label>' +
-                        genderSelect +
-                    '</div>' +
+                // Телефон занимает строку целиком: рядом с полом на список
+                // стран оставалась половина ширины, и названия обрезались
+                '<div class="db-field">' +
+                    '<label class="db-field-label">' + L.phone + ' <span class="db-required">*</span></label>' +
+                    phoneFieldHtml(profile) +
+                '</div>' +
+                '<div class="db-field">' +
+                    '<label class="db-field-label">' + L.gender + ' <span class="db-required">*</span></label>' +
+                    genderSelect +
                 '</div>' +
                 '<div class="db-field">' +
                     '<label class="db-field-label">' + L.birthday + ' <span class="db-required">*</span></label>' +
@@ -2324,11 +2324,17 @@
         var phone = window.KSLT_PHONE
             ? KSLT_PHONE.join(phoneCountry, document.getElementById('profilePhone').value)
             : document.getElementById('profilePhone').value.trim();
-        if (phone && !/^\+996\d{9}$/.test(phone.replace(/[\s\-]/g, ''))) {
-            showMessage('profileMessage', isKg ? 'Формат: +996XXXXXXXXX' : isEn ? 'Format: +996XXXXXXXXX' : 'Формат: +996XXXXXXXXX', true);
+        // Проверка была жёстко под Кыргызстан: +996 и ровно девять цифр.
+        // Страну теперь выбирают из списка, и у каждой своя длина номера —
+        // у американского после кода десять цифр, у нашего девять. Поэтому
+        // проверяем разумный диапазон, а не один формат.
+        var phoneDigits = phone.replace(/[^0-9]/g, '');
+        if (phone && (phoneDigits.length < 8 || phoneDigits.length > 15)) {
+            showMessage('profileMessage',
+                isKg ? 'Номер телефонду толук жазыңыз' :
+                isEn ? 'Enter the full phone number' : 'Введите номер телефона полностью', true);
             return;
         }
-        phone = phone.replace(/[\s\-]/g, '');
         var gender = document.getElementById('profileGender').value;
         var birthDay = document.getElementById('profileBirthDay').value;
         var birthMonth = document.getElementById('profileBirthMonth').value;
