@@ -1012,16 +1012,24 @@
       return;
     }
     var ext = file.name.split('.').pop().toLowerCase();
-    var path = 'avatars/' + _profile.id + '.' + ext;
+    // Та же папка, что у кабинета: раньше приложение писало в avatars/<id>.<ext>,
+    // а кабинет в <id>/avatar.jpg, и у человека копились два файла аватара
+    var path = _profile.id + '/avatar.' + ext;
 
     supabaseClient.storage.from('avatars')
-      .upload(path, file, { upsert: true })
+      // Год: адрес аватара получает метку времени ниже, поэтому новая
+      // фотография подхватывается сразу, а старая не скачивается заново при
+      // каждом открытии профиля
+      .upload(path, file, { upsert: true, cacheControl: '31536000' })
       .then(function(r) {
         if (r.error) {
           window.KSLT_APP.toast(I18N.t('profile.avatarErr'));
           return;
         }
-        var publicUrl = supabaseClient.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+        // Путь при смене аватара не меняется, поэтому без метки времени
+        // человек продолжал бы видеть старую фотографию
+        var publicUrl = supabaseClient.storage.from('avatars').getPublicUrl(path).data.publicUrl +
+                        '?t=' + Date.now();
         supabaseClient.from('profiles')
           .update({ avatar_url: publicUrl })
           .eq('id', _profile.id)

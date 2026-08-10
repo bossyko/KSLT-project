@@ -2540,6 +2540,10 @@
 
         var uploadResult = await client.storage.from('avatars').upload(path, blob, {
             upsert: true,
+            // Год: к адресу ниже дописывается метка времени, поэтому новая
+            // фотография видна сразу, а старая не скачивается заново при
+            // каждом открытии кабинета
+            cacheControl: '31536000',
             contentType: 'image/jpeg'
         });
 

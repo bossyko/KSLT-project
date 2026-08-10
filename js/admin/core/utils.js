@@ -513,7 +513,11 @@
         var filename = (prefix || '') + Date.now() + '-' + Math.random().toString(36).substr(2, 8) + '.' + ext;
         try {
             var result = await A.client.storage.from('news').upload(filename, uploadBlob, {
-                cacheControl: '3600',
+                // Имя файла случайное и не переиспользуется: по одному адресу
+                // всегда одна и та же картинка, поэтому кэшируем надолго.
+                // С часовым сроком фотографии новостей скачивались заново по
+                // несколько раз в день у каждого читателя.
+                cacheControl: '31536000',
                 upsert: false,
                 contentType: 'image/' + (ext === 'jpg' ? 'jpeg' : ext)
             });
