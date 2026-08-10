@@ -38,7 +38,9 @@
         cancel: 'Жокко чыгаруу',
         tgConnectTitle: 'Telegram\u2011ботту байлоо',
         tgOpenBot: 'Ботту ачуу',
-        tgSteps: ['«Ботту ачуу» баскычын басыңыз', 'Telegramда «Старт» басыңыз', 'Ушул бетке кайтыңыз — статус өзү жаңырат'],
+        tgSteps: ['Telegramда «Старт» басыңыз', 'Ушул бетке кайтыңыз — статус өзү жаңырат'],
+        tgOpened: 'Telegram жаңы өтмөктө ачылды.',
+        tgOpenAgain: 'Кайра ачуу',
         tgWaiting: 'Байланууну күтүүдө…',
         tgConnectedNow: 'Байланды!',
         tgDisconnectTitle: 'Ботту ажыратуу',
@@ -262,7 +264,9 @@
         cancel: 'Cancel',
         tgConnectTitle: 'Connect the Telegram bot',
         tgOpenBot: 'Open the bot',
-        tgSteps: ['Press «Open the bot»', 'Press «Start» in Telegram', 'Come back to this page — the status updates on its own'],
+        tgSteps: ['Press «Start» in Telegram', 'Come back to this page — the status updates on its own'],
+        tgOpened: 'Telegram has opened in a new tab.',
+        tgOpenAgain: 'Open again',
         tgWaiting: 'Waiting for the connection…',
         tgConnectedNow: 'Connected!',
         tgDisconnectTitle: 'Disconnect the bot',
@@ -486,7 +490,9 @@
         cancel: 'Отмена',
         tgConnectTitle: 'Подключение Telegram\u2011бота',
         tgOpenBot: 'Открыть бота',
-        tgSteps: ['Нажмите «Открыть бота»', 'В Telegram нажмите «Старт»', 'Вернитесь на эту страницу — состояние обновится само'],
+        tgSteps: ['В Telegram нажмите «Старт»', 'Вернитесь на эту страницу — состояние обновится само'],
+        tgOpened: 'Telegram открылся в новой вкладке.',
+        tgOpenAgain: 'Открыть ещё раз',
         tgWaiting: 'Ждём подключения…',
         tgConnectedNow: 'Подключено!',
         tgDisconnectTitle: 'Отключение бота',
@@ -1595,7 +1601,8 @@
                         (profile.telegram_chat_id
                             ? '<span class="db-tg-state">' + L.tgConnected +
                               ' \u00b7 <button type="button" class="db-tg-off" id="tgDisconnect">' + L.tgDisconnect + '</button></span>'
-                            : '<button type="button" class="db-tg-btn" id="tgConnect">\u2709 ' + L.tgConnect + '</button>') +
+                            : '<a href="https://t.me/' + (window.KSLT_TG_BOT || 'KSLTennisBot') + '?start=' + (profile.id || '') +
+                              '" target="_blank" rel="noopener" class="db-tg-btn" id="tgConnect">\u2709 ' + L.tgConnect + '</a>') +
                     '</div>' +
                     (profile.telegram_chat_id
                         ? '<div class="db-tg-note">' + L.tgWhatComes + '</div>'
@@ -1656,15 +1663,14 @@
         var tgOn = document.getElementById('tgConnect');
         if (tgOn) {
             tgOn.addEventListener('click', function() {
-                var botUrl = 'https://t.me/' + (window.KSLT_TG_BOT || 'KSLTennisBot') +
-                             '?start=' + (window.ksltProfile.id || '');
+                // Телеграм открывает сама ссылка — лишнего шага «нажмите ещё
+                // раз» быть не должно. Окно появляется следом и ждёт ответа
+                // бота: человек возвращается на готовое состояние.
+                var botUrl = tgOn.getAttribute('href');
                 var modal = dbModal({
                     title: L.tgConnectTitle,
                     body:
-                        '<p class="db-modal-text">' + L.tgWhy + '</p>' +
-                        '<ul class="db-tg-list">' +
-                            L.tgBenefits.map(function(b) { return '<li>' + b + '</li>'; }).join('') +
-                        '</ul>' +
+                        '<p class="db-modal-text">' + L.tgOpened + '</p>' +
                         '<ol class="db-modal-steps">' +
                             L.tgSteps.map(function(st) { return '<li>' + st + '</li>'; }).join('') +
                         '</ol>' +
@@ -1672,7 +1678,7 @@
                             '<span class="db-modal-spinner"></span>' +
                             '<span id="tgWaitText">' + L.tgWaiting + '</span>' +
                         '</div>',
-                    actions: [{ label: '\u2709 ' + L.tgOpenBot, primary: true, onClick: function() {
+                    actions: [{ label: L.tgOpenAgain, onClick: function() {
                         window.open(botUrl, '_blank', 'noopener');
                     } }]
                 });
