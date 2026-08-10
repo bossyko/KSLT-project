@@ -453,7 +453,7 @@ function renderContent(article) {
 
     container.innerHTML = html;
     initCarousel(container, article.gallery || []);
-    initPhotoViewer(container);
+    initPhotoViewer(container, article.gallery || []);
 }
 
 /** Лента снимков: стрелки, миниатюры, счётчик. Крупный кадр открывает просмотр. */
@@ -489,27 +489,26 @@ function initCarousel(root, photos) {
  * В тексте и в галерее снимки показываются некрупно, чтобы не растаскивать
  * новость на километр. По нажатию — открываются целиком, как в привычных
  * приложениях: стрелки листают, Esc и клик по фону закрывают.
+ *
+ * Что именно листается — зависит от того, куда нажали. Крупный кадр ленты
+ * открывает всю галерею: в разметке он одна картинка, но читатель видит
+ * ленту и ждёт, что пролистает её и на весь экран. Снимки из текста
+ * листаются между собой.
  */
-function initPhotoViewer(root) {
-    var items = [];
-
-    function collect() {
-        items = Array.prototype.slice.call(
-            root.querySelectorAll('.news-gallery-item[data-lightbox], .news-html figure img, .news-carousel-main')
-        );
-    }
+function initPhotoViewer(root, gallery) {
+    var IN_TEXT = '.news-gallery-item[data-lightbox], .news-html figure img';
 
     function urlOf(el) {
         return el.tagName === 'IMG' ? el.src : el.getAttribute('href');
     }
 
-    function open(index) {
+    function open(urls, index) {
         var overlay = document.createElement('div');
         overlay.className = 'news-viewer';
         overlay.innerHTML =
             '<button class="news-viewer-close" aria-label="Закрыть">&times;</button>' +
             '<button class="news-viewer-nav news-viewer-prev" aria-label="Предыдущее">&#8249;</button>' +
-            '<img class="news-viewer-img" src="' + urlOf(items[index]) + '" alt="">' +
+            '<img class="news-viewer-img" src="' + esc(urls[index]) + '" alt="">' +
             '<button class="news-viewer-nav news-viewer-next" aria-label="Следующее">&#8250;</button>' +
             '<div class="news-viewer-count"></div>';
         document.body.appendChild(overlay);
@@ -519,11 +518,11 @@ function initPhotoViewer(root) {
         var count = overlay.querySelector('.news-viewer-count');
 
         function show(i) {
-            index = (i + items.length) % items.length;
-            img.src = urlOf(items[index]);
-            count.textContent = (index + 1) + ' / ' + items.length;
+            index = (i + urls.length) % urls.length;
+            img.src = urls[index];
+            count.textContent = (index + 1) + ' / ' + urls.length;
             overlay.querySelectorAll('.news-viewer-nav').forEach(function(b) {
-                b.style.display = items.length > 1 ? '' : 'none';
+                b.style.display = urls.length > 1 ? '' : 'none';
             });
         }
         function close() {
@@ -546,12 +545,19 @@ function initPhotoViewer(root) {
     }
 
     root.addEventListener('click', function(e) {
-        var el = e.target.closest('.news-gallery-item[data-lightbox], .news-html figure img, .news-carousel-main');
+        var main = e.target.closest('.news-carousel-main');
+        if (main && gallery && gallery.length) {
+            e.preventDefault();
+            open(gallery, Number(main.dataset.index) || 0);
+            return;
+        }
+
+        var el = e.target.closest(IN_TEXT);
         if (!el) return;
         e.preventDefault();
-        collect();
+        var items = Array.prototype.slice.call(root.querySelectorAll(IN_TEXT));
         var i = items.indexOf(el);
-        if (i !== -1) open(i);
+        if (i !== -1) open(items.map(urlOf), i);
     });
 }
 
