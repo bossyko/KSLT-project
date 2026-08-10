@@ -1008,7 +1008,16 @@
         }
     }
 
-    // ---- Payment History (inside membership card) ----
+    /**
+     * Ссылка на платежи в карточке членства.
+     *
+     * Раньше здесь выводились последние пять платежей — те же самые, что в
+     * разделе «Платежи», только урезанные. Человек видел одно и то же дважды
+     * и не понимал, зачем ему второй список.
+     *
+     * Оставляем ссылку: из карточки членства должно быть видно, где искать
+     * платежи, но повторять их незачем.
+     */
     async function renderPaymentHistory(card) {
         if (!client) return;
 
@@ -1016,31 +1025,23 @@
         if (!userRes.data || !userRes.data.user) return;
 
         var result = await client.from('payments')
-            .select('*')
-            .eq('profile_id', userRes.data.user.id)
-            .order('created_at', { ascending: false })
-            .limit(5);
+            .select('id', { count: 'exact', head: true })
+            .eq('profile_id', userRes.data.user.id);
 
-        var payments = result.data || [];
-        if (payments.length === 0) return;
+        if (!result.count) return;
 
-        var methodLabels = { cash: L.payCash, transfer: L.payTransfer, card: L.payCard };
+        card.insertAdjacentHTML('beforeend',
+            '<div class="db-pay-link">' +
+                '<button type="button" class="db-pay-link-btn" data-tab="payments">' +
+                    L.payHistory + ' \u2192' +
+                '</button>' +
+            '</div>');
 
-        var html = '<div class="db-pay-history" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-subtle);">' +
-            '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">' + L.payHistory + '</div>';
-
-        payments.forEach(function(p) {
-            var date = p.created_at ? p.created_at.split('T')[0] : '—';
-            var statusColor = p.status === 'completed' ? 'var(--accent)' : 'var(--text-dim)';
-            html += '<div style="display:grid;grid-template-columns:100px 1fr auto;gap:8px;align-items:center;padding:4px 0;font-size:0.8rem;">' +
-                '<span style="color:var(--text-dim);">' + date + '</span>' +
-                '<span style="font-weight:600;color:' + statusColor + ';">' + (p.amount || 0) + ' ' + (p.currency || 'KGS') + '</span>' +
-                '<span style="color:var(--text-dim);text-align:right;">' + (methodLabels[p.payment_method] || p.payment_method || '—') + '</span>' +
-            '</div>';
+        var link = card.querySelector('.db-pay-link-btn');
+        if (link) link.addEventListener('click', function() {
+            var tab = document.querySelector('.db-sidebar-link[data-tab="payments"]');
+            if (tab) tab.click();
         });
-
-        html += '</div>';
-        card.insertAdjacentHTML('beforeend', html);
     }
 
     // ---- Membership Restrictions ----
