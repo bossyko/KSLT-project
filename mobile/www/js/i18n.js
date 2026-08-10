@@ -356,7 +356,7 @@
 
     // === Auth screen ===
     'auth.skip':         { ru: 'Пропустить',           en: 'Skip',            kg: 'Өткөрүп жиберүү' },
-    'auth.subtitle':     { ru: 'Теннисное сообщество Кыргызстана', en: 'Tennis community of Kyrgyzstan', kg: 'Кыргызстандын теннис коому' },
+    'brand.tagline':     { ru: 'Кыргызстанское Сообщество Любителей Тенниса', en: 'Kyrgyzstan Social Lawn Tennis', kg: 'Кыргызстандын Теннис Сүйүүчүлөрүнүн Коому' },
     'auth.login':        { ru: 'Вход',                 en: 'Log in',           kg: 'Кирүү' },
     'auth.register':     { ru: 'Регистрация',          en: 'Register',         kg: 'Каттоо' },
     'auth.email':        { ru: 'Email',                en: 'Email',             kg: 'Email' },

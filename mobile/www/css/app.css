@@ -25,8 +25,11 @@
 }
 .splash-logo {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 220px;
+  height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   animation: splashBounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 .splash-glow {
@@ -38,31 +41,26 @@
   background: radial-gradient(circle, rgba(204,255,0,0.3) 0%, rgba(204,255,0,0.1) 40%, transparent 70%);
   animation: splashPulse 2s ease-in-out 0.5s infinite;
 }
-.splash-ball {
+/* Экран загрузки всегда тёмный, поэтому знак здесь белыми буквами
+   независимо от выбранной темы */
+.splash-mark {
   position: relative;
   z-index: 1;
-  filter: drop-shadow(0 0 30px rgba(204,255,0,0.5));
+  width: 200px;
+  height: auto;
+  filter: drop-shadow(0 0 26px rgba(204,255,0,0.45));
 }
-.splash-text {
-  font-family: 'Inter', sans-serif;
-  font-size: 42px;
-  font-weight: 900;
-  letter-spacing: 14px;
-  padding-right: -14px;
-  background: linear-gradient(90deg, #fff 0%, #fff 40%, #CCFF00 50%, #fff 60%, #fff 100%);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: splashFadeUp 0.5s ease-out 0.3s both, splashShimmer 2.5s ease-in-out 1s infinite;
-}
+/* Полное название клуба длиннее прежнего «Tennis Community»: разрядка в 5px
+   и заглавные растащили бы его на три строки поперёк экрана */
 .splash-tagline {
   font-family: 'Inter', sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 5px;
-  color: rgba(255,255,255,0.35);
-  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.5;
+  max-width: 260px;
+  text-align: center;
+  color: rgba(255,255,255,0.42);
   animation: splashFadeUp 0.4s ease-out 0.6s both;
 }
 
@@ -188,33 +186,18 @@
 [data-theme="light"] .stat-card {
   border: 1px solid rgba(0,0,0,0.08);
 }
-/* Light theme — dark logos (header + auth) */
-[data-theme="light"] .header-logo-text,
-[data-theme="light"] .auth-logo-text {
-  background: linear-gradient(90deg, #2D6B00 0%, #3A8500 40%, #1A5200 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: none;
+/* У знака КСЛТ буквы белые — на светлом фоне их попросту не видно.
+   Перекрасить SVG из CSS нельзя, он подключён картинкой, поэтому для
+   светлой темы лежит отдельный файл с тёмными буквами. Заставка сюда не
+   входит: она всегда на чёрном. */
+[data-theme="light"] .header-logo-img,
+[data-theme="light"] .auth-logo-img,
+[data-theme="light"] .menu-footer-logo-img {
+  content: url(../img/kslt-logo-light.svg);
 }
-[data-theme="light"] .header-logo-ball,
-[data-theme="light"] .auth-logo-ball {
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.2));
-}
-[data-theme="light"] .header-logo-ball circle,
-[data-theme="light"] .auth-logo-ball circle {
-  fill: #3A8500;
-}
-[data-theme="light"] .header-logo-ball path,
-[data-theme="light"] .auth-logo-ball path {
-  stroke: #fff;
-}
-/* Light theme — dark menu footer logo */
-[data-theme="light"] .menu-footer-logo {
-  color: #1A1A1A;
-}
-[data-theme="light"] .menu-footer-logo span {
-  color: #3A8500;
+[data-theme="light"] .header-logo-img,
+[data-theme="light"] .auth-logo-img {
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.15));
 }
 /* Light theme — white text on dark-green accent */
 [data-theme="light"] .btn-accent,
@@ -297,20 +280,6 @@ a, button, [role="button"] {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-.header-logo-text {
-  font-size: 1.4rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  background: linear-gradient(90deg, #F0FF7A 0%, #CCFF00 40%, #9ED900 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 0 12px rgba(204,255,0,0.5));
-}
-.header-logo-ball {
-  filter: drop-shadow(0 0 10px rgba(204,255,0,0.4));
 }
 .header-actions { display: flex; gap: 8px; align-items: center; }
 .header-btn {
@@ -1423,12 +1392,12 @@ a, button, [role="button"] {
   padding: 20px 16px;
   border-top: 1px solid var(--border);
 }
-.menu-footer-logo {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 4px;
+.menu-footer-logo-img {
+  display: block;
+  height: 20px;
+  width: auto;
+  margin-bottom: 6px;
 }
-.menu-footer-logo span { color: var(--accent); }
 .menu-footer-ver {
   font-size: 11px;
   color: var(--text-dim);
@@ -2564,23 +2533,18 @@ a, button, [role="button"] {
 }
 .auth-screen.open { opacity: 1; visibility: visible; }
 .auth-logo { margin-bottom: 8px; }
-.auth-logo-text {
-  font-size: 2.5rem;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  background: linear-gradient(90deg, #F0FF7A 0%, #CCFF00 40%, #9ED900 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 0 20px rgba(204,255,0,0.5));
-}
-.auth-logo-ball {
-  filter: drop-shadow(0 0 16px rgba(204,255,0,0.4));
+.auth-logo-img {
+  display: block;
+  height: 44px;
+  width: auto;
+  filter: drop-shadow(0 0 18px rgba(204,255,0,0.4));
 }
 .auth-subtitle {
   font-size: 14px;
+  line-height: 1.5;
   color: var(--text-sec);
-  margin-bottom: 40px;
+  margin: 0 auto 40px;
+  max-width: 280px;   /* полное название клуба длинное, переносим по центру */
   text-align: center;
 }
 .auth-tabs {
@@ -2628,6 +2592,23 @@ a, button, [role="button"] {
 }
 .auth-input:focus { border-color: var(--accent); }
 .auth-input::placeholder { color: var(--text-dim); }
+
+/* Подставленные браузером почта и пароль приходят со своим белым фоном и
+   чёрным текстом — на тёмной теме поле превращается в белое пятно. Этот фон
+   не перекрывается обычным background, только тенью внутрь; бесконечный
+   transition не даёт браузеру вернуть свой цвет после клика по полю. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-card) inset;
+  box-shadow: 0 0 0 1000px var(--bg-card) inset;
+  caret-color: var(--text);
+  transition: background-color 100000s ease-in-out 0s;
+}
 .auth-submit {
   width: 100%;
   padding: 14px;
