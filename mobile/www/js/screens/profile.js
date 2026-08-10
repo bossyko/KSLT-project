@@ -1274,12 +1274,21 @@
     var html = '<div style="text-align:center;padding:20px 0">';
     html += '<div style="font-size:56px;margin-bottom:16px">🤖</div>';
 
+    // Раньше было написано только «откройте бота и нажмите /start» — зачем
+    // подключать и что придёт, человек не понимал. Перечисляем до нажатия.
+    var benefits = I18N.t('profile.tgBenefits');
+    var list = Array.isArray(benefits)
+      ? '<ul style="text-align:left;margin:0 0 18px;padding-left:20px;color:var(--text-sec);font-size:13px;line-height:1.7">' +
+          benefits.map(function(b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul>'
+      : '';
+
     if (linked) {
       html += '<h3 style="color:var(--accent);margin-bottom:8px">' + I18N.t('profile.tgConnectedTitle') + '</h3>';
-      html += '<p style="color:var(--text-sec);font-size:13px">' + I18N.t('profile.tgReceive') + ' @' + esc(tgBot) + '</p>';
+      html += '<p style="color:var(--text-sec);font-size:13px">' + I18N.t('profile.tgWhatComes') + '</p>';
     } else {
       html += '<h3 style="color:var(--text);margin-bottom:8px">' + I18N.t('profile.tgConnectTitle') + '</h3>';
-      html += '<p style="color:var(--text-sec);font-size:13px;margin-bottom:16px">' + I18N.t('profile.tgConnectText') + '</p>';
+      html += '<p style="color:var(--text-sec);font-size:13px;margin-bottom:12px">' + I18N.t('profile.tgWhy') + '</p>';
+      html += list;
       html += '<a href="https://t.me/' + esc(tgBot) + '?start=link_' + (_profile ? _profile.id : '') + '" target="_blank" class="pd-challenge-btn" style="display:block;text-decoration:none;text-align:center;background:var(--blue)">' + I18N.t('profile.tgOpenBot') + ' @' + esc(tgBot) + '</a>';
     }
     html += '</div>';

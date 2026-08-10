@@ -2220,3 +2220,60 @@ select:-webkit-autofill {
     padding: 10px 14px;
     margin-bottom: 18px;
 }
+
+/* Подключение телеграма: раньше здесь была одна строка про членство, и
+   человек не понимал, зачем нажимать. Перечисляем, что придёт, до нажатия */
+.db-tg-block {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.db-tg-title {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.db-tg-list {
+    margin: 0 0 14px;
+    padding-left: 18px;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+}
+
+.db-tg-list li::marker { color: var(--accent); }
+
+.db-tg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+    background: rgba(0, 136, 204, 0.15);
+    color: #0088cc;
+    border: 1px solid rgba(0, 136, 204, 0.3);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.db-tg-btn:hover { background: rgba(0, 136, 204, 0.25); }
+
+.db-tg-connected {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4caf50;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.db-tg-connected span { font-size: 1.1rem; }
+
+.db-tg-note {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}

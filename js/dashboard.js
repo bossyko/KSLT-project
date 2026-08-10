@@ -33,6 +33,9 @@
         instagram: 'Instagram', telegram: 'Telegram',
         tgConnected: 'Telegram байланган',
         tgConnect: 'Telegram байлоо',
+        tgWhy: 'Ботту байласаңыз, эмне келет:',
+        tgBenefits: ['Матчтын убактысы жана каршылашы', 'Мелдешке чакыруу жана эскертме', 'Мүчөлүк мөөнөтү бүтөрү жөнүндө', 'Сырсөз алмашкан жөнүндө коопсуздук билдирүүсү', 'Кирүү кодду — кат ордуна, ошол замат'],
+        tgWhatComes: 'Матчтар, чакыруулар, мелдештер жана коопсуздук билдирүүлөрү ушул жерге келет. Кайсынысы керек экенин Жөндөөлөрдөн тандасаңыз болот.',
         tgConnectHint: 'Мүчөлүк мөөнөтү жөнүндө Telegram аркылуу эскертме алыңыз',
         visibleToClub: 'КСЛТ мүчөлөрүнө көрүнөт',
         hiddenFromAll: 'эч кимге көрүнбөйт',
@@ -241,6 +244,9 @@
         instagram: 'Instagram', telegram: 'Telegram',
         tgConnected: 'Telegram connected',
         tgConnect: 'Connect Telegram',
+        tgWhy: 'What you get after connecting the bot:',
+        tgBenefits: ['Match time and opponent', 'Challenges and tournament reminders', 'Membership expiry notice', 'Security alerts when your password changes', 'Sign-in codes — instantly, instead of email'],
+        tgWhatComes: 'Matches, challenges, tournaments and security alerts arrive here. You can choose which ones in Settings.',
         tgConnectHint: 'Get membership expiry reminders via Telegram',
         visibleToClub: 'visible to KSLT members',
         hiddenFromAll: 'hidden from everyone',
@@ -449,6 +455,9 @@
         instagram: 'Instagram', telegram: 'Telegram',
         tgConnected: 'Telegram подключён',
         tgConnect: 'Подключить Telegram',
+        tgWhy: 'Что будет приходить в Telegram:',
+        tgBenefits: ['Время матча и соперник', 'Вызовы на игру и напоминания о турнирах', 'Когда истекает членство', 'Оповещение, если сменили пароль или почту', 'Код для входа — сразу, вместо письма'],
+        tgWhatComes: 'Сюда приходят матчи, вызовы, турниры и оповещения безопасности. Выбрать, что именно получать, можно в Настройках.',
         tgConnectHint: 'Получайте напоминания об истечении членства в Telegram',
         visibleToClub: 'виден членам КСЛТ',
         hiddenFromAll: 'скрыт от всех',
@@ -1533,11 +1542,18 @@
                         '<input class="db-field-input" type="text" id="profileTelegram" value="' + escHtml(profile.telegram || '') + '" placeholder="@username">' +
                     '</div>' +
                 '</div>' +
-                '<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);">' +
+                // Раньше здесь было написано только про напоминания о членстве —
+                // человек не понимал, зачем подключать бота и что он получит.
+                // Перечисляем всё, что приходит, до нажатия, а не после.
+                '<div class="db-tg-block">' +
                     (profile.telegram_chat_id
-                        ? '<div style="display:flex;align-items:center;gap:8px;color:#4caf50;font-size:0.85rem;"><span style="font-size:1.1rem;">&#10003;</span> ' + L.tgConnected + '</div>'
-                        : '<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;">' + L.tgConnectHint + '</div>' +
-                          '<a href="https://t.me/' + (window.KSLT_TG_BOT || 'KSLTennisBot') + '?start=' + (profile.id || '') + '" target="_blank" rel="noopener" class="db-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font-size:0.8rem;background:rgba(0,136,204,0.15);color:#0088cc;border-radius:8px;text-decoration:none;border:1px solid rgba(0,136,204,0.3);">&#9993; ' + L.tgConnect + '</a>'
+                        ? '<div class="db-tg-connected"><span>\u2713</span> ' + L.tgConnected + '</div>' +
+                          '<div class="db-tg-note">' + L.tgWhatComes + '</div>'
+                        : '<div class="db-tg-title">' + L.tgWhy + '</div>' +
+                          '<ul class="db-tg-list">' +
+                              L.tgBenefits.map(function(item) { return '<li>' + item + '</li>'; }).join('') +
+                          '</ul>' +
+                          '<a href="https://t.me/' + (window.KSLT_TG_BOT || 'KSLTennisBot') + '?start=' + (profile.id || '') + '" target="_blank" rel="noopener" class="db-tg-btn">\u2709 ' + L.tgConnect + '</a>'
                     ) +
                 '</div>' +
             '</div>' +

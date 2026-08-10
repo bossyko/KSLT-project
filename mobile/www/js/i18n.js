@@ -467,6 +467,8 @@
     'profile.changingPass':   { ru: 'Сохраняем...', en: 'Saving...', kg: 'Сакталууда...' },
     'profile.passChanged':    { ru: 'Пароль изменён!', en: 'Password changed!', kg: 'Сырсөз өзгөрдү!' },
     'profile.tgConnectedTitle':{ ru: 'Telegram подключён', en: 'Telegram connected', kg: 'Telegram туташкан' },
+    'profile.tgWhy':      { ru: 'Что будет приходить в Telegram:', en: 'What you get after connecting the bot:', kg: 'Ботту байласаңыз, эмне келет:' },
+    'profile.tgWhatComes': { ru: 'Сюда приходят матчи, вызовы, турниры и оповещения безопасности. Выбрать, что именно получать, можно в Настройках.', en: 'Matches, challenges, tournaments and security alerts arrive here. You can choose which ones in Settings.', kg: 'Матчтар, чакыруулар, мелдештер жана коопсуздук билдирүүлөрү ушул жерге келет. Кайсынысы керек экенин Жөндөөлөрдөн тандасаңыз болот.' },
     'profile.tgReceive':      { ru: 'Вы получаете уведомления через бота', en: 'You receive notifications via bot', kg: 'Сиз бот аркылуу билдирүүлөрдү аласыз' },
     'profile.tgConnectTitle': { ru: 'Подключите Telegram', en: 'Connect Telegram', kg: 'Telegram туташтырыңыз' },
     'profile.tgConnectText':  { ru: 'Откройте бота и нажмите /start', en: 'Open bot and press /start', kg: 'Ботту ачып /start басыңыз' },
@@ -583,7 +585,25 @@
 
   // === Public API ===
 
+  // Некоторые подписи — список пунктов, а не строка: например, что приходит
+  // в телеграм после подключения. Возвращаем массив как есть.
+  var LISTS = {
+    'profile.tgBenefits': {
+      ru: ['Время матча и соперник', 'Вызовы на игру и напоминания о турнирах',
+           'Когда истекает членство', 'Оповещение, если сменили пароль или почту',
+           'Код для входа — сразу, вместо письма'],
+      en: ['Match time and opponent', 'Challenges and tournament reminders',
+           'Membership expiry notice', 'Security alerts when your password changes',
+           'Sign-in codes — instantly, instead of email'],
+      kg: ['Матчтын убактысы жана каршылашы', 'Мелдешке чакыруу жана эскертме',
+           'Мүчөлүк мөөнөтү бүтөрү жөнүндө', 'Сырсөз алмашкан жөнүндө коопсуздук билдирүүсү',
+           'Кирүү кодду — кат ордуна, ошол замат']
+    }
+  };
+
   I18N.t = function(key) {
+    if (LISTS[key]) return LISTS[key][_lang] || LISTS[key].ru;
+
     var entry = T[key];
     if (!entry) return key;
     return entry[_lang] || entry['ru'] || key;
