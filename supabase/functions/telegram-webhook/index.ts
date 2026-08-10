@@ -109,6 +109,25 @@
           const updateData: Record<string, unknown> = { telegram_chat_id: chatId }
           if (tgUsername) updateData.telegram_username = tgUsername
 
+          // Заодно заполняем поле соцсети — ту ссылку, что видят другие игроки.
+          // Имя пользователя у нас уже есть, просить вводить его второй раз
+          // незачем: человек подключал бота и не понимал, почему поле рядом
+          // осталось пустым.
+          //
+          // Заполненное вручную не трогаем: там мог быть указан другой аккаунт
+          // осознанно.
+          if (tgUsername) {
+            const { data: current } = await supabase
+              .from('profiles')
+              .select('telegram')
+              .eq('id', profileId)
+              .maybeSingle()
+
+            if (!current?.telegram || current.telegram.trim() === '') {
+              updateData.telegram = '@' + tgUsername
+            }
+          }
+
           const { error } = await supabase
             .from('profiles')
             .update(updateData)
