@@ -2162,7 +2162,8 @@ select:-webkit-autofill {
 }
 
 .db-show-label {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
     color: var(--text-muted);
     transition: color 0.2s;
 }
@@ -2211,9 +2212,9 @@ select:-webkit-autofill {
 /* Кому видны контакты — вопрос неочевидный, и без объяснения человек не
    понимает, что открывает и кому */
 .db-contacts-note {
-    font-size: 0.78rem;
-    line-height: 1.5;
-    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.03);
     border-left: 2px solid var(--accent);
     border-radius: 0 8px 8px 0;
@@ -2230,17 +2231,18 @@ select:-webkit-autofill {
 }
 
 .db-tg-title {
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
 }
 
 .db-tg-list {
-    margin: 0 0 14px;
-    padding-left: 18px;
-    font-size: 0.8rem;
-    line-height: 1.7;
-    color: var(--text-muted);
+    margin: 0 0 16px;
+    padding-left: 20px;
+    font-size: 0.92rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
 }
 
 .db-tg-list li::marker { color: var(--accent); }
@@ -2249,8 +2251,9 @@ select:-webkit-autofill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
-    font-size: 0.82rem;
+    padding: 9px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
     background: rgba(0, 136, 204, 0.15);
     color: #0088cc;
     border: 1px solid rgba(0, 136, 204, 0.3);
@@ -2273,13 +2276,14 @@ select:-webkit-autofill {
 .db-tg-connected span { font-size: 1.1rem; }
 
 .db-tg-note {
-    font-size: 0.78rem;
-    line-height: 1.5;
+    font-size: 0.88rem;
+    line-height: 1.6;
     color: var(--text-muted);
 }
 
 .db-tg-state {
-    font-size: 0.8rem;
+    font-size: 0.88rem;
+    font-weight: 500;
     color: #4caf50;
     white-space: nowrap;
 }
@@ -2302,10 +2306,10 @@ select:-webkit-autofill {
 .db-notif-off input { cursor: not-allowed; }
 
 .db-notif-hint {
-    margin-top: 12px;
-    font-size: 0.78rem;
-    line-height: 1.5;
-    color: var(--text-muted);
+    margin-top: 14px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
 }
 
 /* ============================================
@@ -2356,8 +2360,9 @@ select:-webkit-autofill {
 
 .db-modal-title {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     font-weight: 700;
+    letter-spacing: -0.01em;
     color: var(--text-primary);
 }
 
@@ -2374,17 +2379,17 @@ select:-webkit-autofill {
 .db-modal-close:hover { color: var(--text-primary); }
 
 .db-modal-text {
-    font-size: 0.88rem;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    margin: 0 0 16px;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--text-primary);
+    margin: 0 0 18px;
 }
 
 .db-modal-steps {
-    margin: 0 0 18px;
-    padding-left: 20px;
-    font-size: 0.85rem;
-    line-height: 1.8;
+    margin: 0 0 20px;
+    padding-left: 22px;
+    font-size: 0.95rem;
+    line-height: 1.9;
     color: var(--text-secondary);
 }
 
@@ -2400,12 +2405,12 @@ select:-webkit-autofill {
 .db-modal-wait {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    padding-top: 14px;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 16px;
     border-top: 1px solid var(--border-subtle);
-    font-size: 0.82rem;
-    color: var(--text-muted);
+    font-size: 0.92rem;
+    color: var(--text-secondary);
 }
 
 .db-modal-spinner {
@@ -2421,3 +2426,9 @@ select:-webkit-autofill {
 @keyframes dbSpin { to { transform: rotate(360deg); } }
 
 .db-modal-done { color: #4caf50; }
+
+/* Ключевые слова в окнах выделяем — сплошной серый текст не читается */
+.db-modal-done { font-weight: 600; }
+.db-modal-steps li { padding-left: 4px; }
+.db-modal-steps li::marker { font-size: 1.05em; }
+.db-tg-list li::marker { font-size: 1.1em; }
