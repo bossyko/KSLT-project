@@ -473,6 +473,44 @@
             })() +
 
             // Motto (RU/EN/KG, max 100 chars each)
+            // Контакты одним блоком и сразу под именем: телефон, почта и
+            // соцсети — опорные сведения об игроке, менеджер смотрит на них,
+            // когда звонит или пишет. Раньше они были разнесены на две карточки
+            // и лежали под бейджами.
+            //
+            // Всё берётся из связанного профиля и правится только там: в карточке
+            // игрока этих колонок либо нет, либо их никто не заполняет.
+            (plrEditingId ? (
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + (isEn ? 'Contacts' : 'Контакты') + '</div>' +
+                '<div class="ad-field-row ad-field-row-2">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrPhone + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adPlrPhone" value="' + A.esc(item ? (item._phone || item.phone || '\u2014') : '\u2014') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrEmail + '</label>' +
+                        '<input type="email" class="ad-field-input" id="adPlrEmail" value="' + A.esc(item ? (item._email || item.email || '\u2014') : '\u2014') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-field-row ad-field-row-2">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrTelegram + '</label>' +
+                        '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
+                            (item && item._telegram ? A.esc(withAt(item._telegram)) : '<span style="color:var(--text-dim);">\u2014</span>') +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrInstagram + '</label>' +
+                        '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
+                            (item && item._instagram ? A.esc(withAt(item._instagram)) : '<span style="color:var(--text-dim);">\u2014</span>') +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-field-hint" style="margin-top:4px;">' + (isEn ? 'From the user profile (read-only)' : 'Из профиля пользователя (только чтение)') + '</div>' +
+            '</div>'
+            ) : '') +
+
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.plrMotto + '</div>' +
                 '<div class="ad-lang-tabs">' +
@@ -583,46 +621,6 @@
                 '<div id="adPlrBadgesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
             '</div>' +
 
-            // Contact: Phone, Email, Show Phone (read-only)
-            '<div class="ad-form-card">' +
-                '<div class="ad-field-row ad-field-row-3">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.plrPhone + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adPlrPhone" value="' + A.esc(item ? (item._phone || item.phone || '—') : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.plrEmail + '</label>' +
-                        '<input type="email" class="ad-field-input" id="adPlrEmail" value="' + A.esc(item ? (item._email || item.email || '—') : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
-                    '</div>' +
-                    // Галочка «показывать телефон» убрана: администратору она ни к
-                    // чему — он видит всё независимо от настроек игрока. А включить
-                    // её всё равно было нельзя, поле было заблокировано. Решает
-                    // теперь сам игрок в кабинете и в приложении.
-
-                '</div>' +
-            '</div>' +
-
-            // Social Media (from linked profile, read-only, edit only)
-            (plrEditingId ? (
-            '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.plrSocials + '</div>' +
-                '<div class="ad-field-row ad-field-row-2">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.plrTelegram + '</label>' +
-                        '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
-                            (item._telegram ? A.esc(withAt(item._telegram)) : '<span style="color:var(--text-dim);">\u2014</span>') +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.plrInstagram + '</label>' +
-                        '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
-                            (item._instagram ? A.esc(withAt(item._instagram)) : '<span style="color:var(--text-dim);">\u2014</span>') +
-                        '</div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="ad-field-hint" style="margin-top:4px;">' + (isEn ? 'Linked from user profile (read-only)' : 'Из профиля пользователя (только чтение)') + '</div>' +
-            '</div>'
-            ) : '') +
 
             // Rating History (edit only)
             (plrEditingId ? (
