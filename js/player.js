@@ -264,6 +264,7 @@
         }
 
         box.innerHTML = html + '</div></div>';
+        initScrollAnimations();   // блок пришёл позже остальных — проявляем и его
     }
 
     async function loadPlayerBadges(playerId) {
@@ -1417,18 +1418,26 @@
     }
 
     // ---- Scroll Animations ----
+    // Наблюдатель живёт всё время жизни страницы: блоки, которые приходят
+    // позже — например контакты, — тоже надо проявить. Раньше он создавался
+    // один раз при построении страницы, и поздний блок оставался прозрачным
+    // навсегда, занимая место пустым промежутком.
+    var _fadeObserver = null;
+
     function initScrollAnimations() {
-        var items = document.querySelectorAll('.pp-fade-in');
-        if (!items.length) return;
-        var obs = new IntersectionObserver(function (entries) {
-            entries.forEach(function (e) {
-                if (e.isIntersecting) {
-                    e.target.classList.add('visible');
-                    obs.unobserve(e.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        items.forEach(function (el) { obs.observe(el); });
+        if (!_fadeObserver) {
+            _fadeObserver = new IntersectionObserver(function (entries) {
+                entries.forEach(function (e) {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('visible');
+                        _fadeObserver.unobserve(e.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+        }
+        document.querySelectorAll('.pp-fade-in:not(.visible)').forEach(function (el) {
+            _fadeObserver.observe(el);
+        });
     }
 
     // ---- Update language links with ?id= ----
