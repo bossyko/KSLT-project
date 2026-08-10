@@ -4529,3 +4529,14 @@ select.prof-field-input { color: var(--text); }
 .prof-phone-row { display: flex; gap: 8px; }
 .prof-phone-country { flex: 0 0 46%; min-width: 0; }
 .prof-phone-number { flex: 1 1 auto; min-width: 0; }
+
+/* Переключатель «показывать» у каждого способа связи */
+.prof-show-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.prof-show-toggle input { accent-color: var(--accent); }

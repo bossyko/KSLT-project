@@ -121,7 +121,8 @@
                 // значит и запрашивать незачем
                 access === 'member'
                   ? supabaseClient.from('profiles')
-                      .select('phone, show_phone, telegram, instagram, show_socials')
+                      .select('phone, show_phone, whatsapp_phone, show_whatsapp, ' +
+                              'telegram, show_telegram, instagram, show_instagram')
                       .eq('player_id', playerId).maybeSingle()
                       .then(function(r) { return r.data; })
                   : Promise.resolve(null)
@@ -273,17 +274,22 @@
     if (access === 'member') {
       // Контакты берём из профиля игрока: телефон он вводит в кабинете, там же
       // разрешает показ. Колонки players.phone/show_phone никто не заполнял.
+      // Каждый способ связи открывается отдельно: телеграм может быть рабочий,
+      // WhatsApp личный. WhatsApp живёт на своём номере, если он указан.
       var contacts = _contacts || {};
       var cPhone = contacts.show_phone ? (contacts.phone || '') : '';
-      var cTg = contacts.show_socials ? (contacts.telegram || '') : '';
-      var cIg = contacts.show_socials ? (contacts.instagram || '') : '';
-      var hasContact = cPhone || cTg || cIg;
+      var cWa = contacts.show_whatsapp ? (contacts.whatsapp_phone || contacts.phone || '') : '';
+      var cTg = contacts.show_telegram ? (contacts.telegram || '') : '';
+      var cIg = contacts.show_instagram ? (contacts.instagram || '') : '';
+      var hasContact = cPhone || cWa || cTg || cIg;
       if (hasContact) {
         html += '<div class="pd-section"><h3 class="pd-section-title">📞 ' + I18N.t('pd.contact') + '</h3>';
         html += '<div style="display:flex;flex-direction:column;gap:8px">';
         if (cPhone) {
           html += '<a href="tel:' + esc(cPhone) + '" class="pd-challenge-btn" style="display:block;text-align:center;text-decoration:none;color:#0A0A0A">📱 ' + esc(cPhone) + '</a>';
-          html += '<a href="https://wa.me/' + esc(cPhone.replace(/[^0-9]/g, '')) + '" target="_blank" class="pd-challenge-btn" style="background:#25D366;display:block;text-align:center;text-decoration:none;color:#fff">WhatsApp</a>';
+        }
+        if (cWa) {
+          html += '<a href="https://wa.me/' + esc(cWa.replace(/[^0-9]/g, '')) + '" target="_blank" class="pd-challenge-btn" style="background:#25D366;display:block;text-align:center;text-decoration:none;color:#fff">WhatsApp</a>';
         }
         if (cTg) {
           var tgHandle = cTg.replace('@', '');

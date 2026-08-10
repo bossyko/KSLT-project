@@ -880,11 +880,26 @@
     html += '<input class="prof-field-input prof-phone-number" type="tel" id="profPhone" value="' +
             esc(phoneParts.rest) + '" placeholder="555 123 456" inputmode="tel">';
     html += '</div>';
-    // Решать, показывать ли свой номер другим, должен сам игрок. Раньше
-    // разрешение лежало на карточке и включить его было негде.
-    html += '<label class="prof-checkbox" style="margin-top:10px">' +
-            '<input type="checkbox" id="profShowPhone"' + (p.show_phone ? ' checked' : '') + '>' +
-            '<span>' + I18N.t('profile.showPhone') + '</span></label>';
+    html += showToggle('profShowPhone', p.show_phone);
+    html += '</div>';
+
+    // WhatsApp: свой номер, если отличается от основного. Пустое поле значит
+    // «тот же, что телефон» — вводить номер дважды никого не заставляем.
+    // Разрешение отдельное: номер можно скрыть, а WhatsApp оставить.
+    var waStored = p.whatsapp_phone || '';
+    var waParts = window.KSLT_PHONE
+        ? KSLT_PHONE.split(waStored, p.whatsapp_country || p.phone_country)
+        : { iso: 'KG', rest: waStored };
+    html += '<div class="prof-field">';
+    html += '<label class="prof-field-label">WhatsApp</label>';
+    html += '<div class="prof-phone-row">';
+    if (window.KSLT_PHONE) {
+        html += KSLT_PHONE.selectHtml('profWhatsappCountry', waParts.iso, I18N.lang, 'prof-field-input prof-phone-country');
+    }
+    html += '<input class="prof-field-input prof-phone-number" type="tel" id="profWhatsapp" value="' +
+            esc(waStored ? waParts.rest : '') + '" placeholder="' + I18N.t('profile.whatsappSame') + '" inputmode="tel">';
+    html += '</div>';
+    html += showToggle('profShowWhatsapp', p.show_whatsapp);
     html += '</div>';
 
     // Gender
@@ -896,17 +911,19 @@
     html += '<option value="female"' + (p.gender === 'female' ? ' selected' : '') + '>' + I18N.t('profile.genderFemale') + '</option>';
     html += '</select></div>';
 
-    // Instagram
-    html += profField('Instagram', 'profInstagram', p.instagram || '', 'text');
-    // Telegram
-    html += profField('Telegram', 'profTelegram', p.telegram || '', 'text');
-    // Show socials toggle
+    // Соцсети: у каждой своё разрешение — телеграм может быть рабочий,
+    // инстаграм личный, и открывать их одной галочкой неправильно
     html += '<div class="prof-field">';
-    html += '<label class="prof-notif-toggle" style="padding:0">';
-    html += '<span class="prof-field-label" style="margin-bottom:0">' + I18N.t('profile.showSocials') + '</span>';
-    html += '<input type="checkbox" id="profShowSocials"' + (p.show_socials ? ' checked' : '') + '>';
-    html += '<span class="prof-toggle-switch"></span>';
-    html += '</label></div>';
+    html += '<label class="prof-field-label">Instagram</label>';
+    html += '<input class="prof-field-input" type="text" id="profInstagram" value="' + esc(p.instagram || '') + '" placeholder="@username">';
+    html += showToggle('profShowInstagram', p.show_instagram);
+    html += '</div>';
+
+    html += '<div class="prof-field">';
+    html += '<label class="prof-field-label">Telegram</label>';
+    html += '<input class="prof-field-input" type="text" id="profTelegram" value="' + esc(p.telegram || '') + '" placeholder="@username">';
+    html += showToggle('profShowTelegram', p.show_telegram);
+    html += '</div>';
 
     // Save button
     html += '<button class="pd-challenge-btn" id="profSaveBtn" style="margin-top:16px">' + I18N.t('common.save') + '</button>';
@@ -935,13 +952,19 @@
       var phone = window.KSLT_PHONE
         ? KSLT_PHONE.join(phoneCountry, document.getElementById('profPhone').value)
         : document.getElementById('profPhone').value.trim();
+
+      var waCountryEl = document.getElementById('profWhatsappCountry');
+      var waCountry = waCountryEl ? waCountryEl.value : null;
+      var waRaw = (document.getElementById('profWhatsapp') || {}).value || '';
+      var waNumber = waRaw.trim() && window.KSLT_PHONE
+        ? KSLT_PHONE.join(waCountry, waRaw)
+        : '';
       var gender = document.getElementById('profGender').value;
       var fullName = (ln + ' ' + fn).trim();
 
       // Instagram / Telegram
       var instagram = (document.getElementById('profInstagram').value || '').trim().replace(/^@/, '');
       var telegram = (document.getElementById('profTelegram').value || '').trim().replace(/^@/, '');
-      var showSocials = document.getElementById('profShowSocials').checked;
 
       // Validate
       if (instagram && !/^[a-zA-Z0-9._]{1,30}$/.test(instagram)) {
@@ -961,10 +984,14 @@
           phone: phone,
           phone_country: phoneCountry,
           show_phone: (document.getElementById('profShowPhone') || {}).checked || false,
+          show_whatsapp: (document.getElementById('profShowWhatsapp') || {}).checked || false,
+          show_telegram: (document.getElementById('profShowTelegram') || {}).checked || false,
+          show_instagram: (document.getElementById('profShowInstagram') || {}).checked || false,
+          whatsapp_phone: waNumber || null,
+          whatsapp_country: waNumber ? waCountry : null,
           gender: gender,
           instagram: instagram,
-          telegram: telegram,
-          show_socials: showSocials
+          telegram: telegram
         })
         .eq('id', _profile.id)
         .then(function(r) {
@@ -976,7 +1003,6 @@
             _profile.gender = gender;
             _profile.instagram = instagram;
             _profile.telegram = telegram;
-            _profile.show_socials = showSocials;
             window.KSLT_AUTH.currentProfile = _profile;
             window.KSLT_APP.toast(I18N.t('profile.savedOk'));
 
@@ -1052,6 +1078,13 @@
   }
 
   // ---- Notifications ----
+  /** Переключатель «показывать» рядом с полем связи. */
+  function showToggle(id, checked) {
+    return '<label class="prof-show-toggle">' +
+      '<input type="checkbox" id="' + id + '"' + (checked ? ' checked' : '') + '>' +
+      '<span>' + I18N.t('profile.showShort') + '</span></label>';
+  }
+
   function showNotifications() {
     var ov = openSubOverlay(I18N.t('profile.notifications'), '<div class="loading-center"><div class="spinner"></div></div>');
     var content = ov.querySelector('.prof-sub-content');

@@ -34,8 +34,11 @@
         tgConnected: 'Telegram байланган',
         tgConnect: 'Telegram байлоо',
         tgConnectHint: 'Мүчөлүк мөөнөтү жөнүндө Telegram аркылуу эскертме алыңыз',
+        showToClub: 'Клуб мүчөлөрүнө көрсөтүү',
+        showShort: 'көрсөтүү',
+        whatsappHint: 'Бош — телефон номери менен бирдей',
+        whatsappSame: 'телефон менен бирдей',
         showPhone: 'Клуб мүчөлөрүнө телефонумду көрсөтүү',
-        showSocials: 'Башка колдонуучулар менин социалдык тармактарымды көрө алат',
         save: 'Сактоо', saving: 'Сакталууда...', saved: 'Сакталды!',
         changeAvatar: 'Сүрөттү өзгөртүү', removeAvatar: 'Жок кылуу',
         avatarHint: 'JPG же PNG, макс 2 МБ',
@@ -236,8 +239,11 @@
         tgConnected: 'Telegram connected',
         tgConnect: 'Connect Telegram',
         tgConnectHint: 'Get membership expiry reminders via Telegram',
+        showToClub: 'Show to club members',
+        showShort: 'show',
+        whatsappHint: 'Leave empty if it is the same as your phone',
+        whatsappSame: 'same as phone',
         showPhone: 'Show my phone to club members',
-        showSocials: 'Allow other users to see my social media',
         save: 'Save', saving: 'Saving...', saved: 'Saved!',
         changeAvatar: 'Change Photo', removeAvatar: 'Remove',
         avatarHint: 'JPG or PNG, max 2MB',
@@ -438,8 +444,11 @@
         tgConnected: 'Telegram подключён',
         tgConnect: 'Подключить Telegram',
         tgConnectHint: 'Получайте напоминания об истечении членства в Telegram',
+        showToClub: 'Показывать членам клуба',
+        showShort: 'показывать',
+        whatsappHint: 'Пусто — тот же, что телефон',
+        whatsappSame: 'тот же, что телефон',
         showPhone: 'Показывать мой телефон членам клуба',
-        showSocials: 'Разрешить другим пользователям видеть мои соцсети',
         save: 'Сохранить', saving: 'Сохранение...', saved: 'Сохранено!',
         changeAvatar: 'Изменить фото', removeAvatar: 'Удалить',
         avatarHint: 'JPG или PNG, до 2 МБ',
@@ -1334,6 +1343,35 @@
      * «0555123456» — у каждого по-своему. Восстановление доступа ищет человека
      * по номеру, и такие записи между собой не сходятся.
      */
+    /** Переключатель «показывать» рядом с полем связи. */
+    function showToggle(id, checked) {
+        return '<label class="db-show-toggle" title="' + L.showToClub + '">' +
+            '<input type="checkbox" id="' + id + '"' + (checked ? ' checked' : '') + '>' +
+            '<span>' + L.showShort + '</span>' +
+        '</label>';
+    }
+
+    /**
+     * Номер WhatsApp. Необязательный: пустое поле значит «тот же, что телефон».
+     * Вводить номер дважды никого не заставляем, но у кого WhatsApp на другом
+     * номере — впишет свой.
+     */
+    function whatsappFieldHtml(profile) {
+        var lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
+        var stored = profile.whatsapp_phone || '';
+        var parts = window.KSLT_PHONE
+            ? KSLT_PHONE.split(stored, profile.whatsapp_country || profile.phone_country)
+            : { iso: 'KG', rest: stored };
+
+        return '<div class="db-phone-row">' +
+            (window.KSLT_PHONE
+                ? KSLT_PHONE.selectHtml('profileWhatsappCountry', parts.iso, lang, 'db-field-input db-phone-country')
+                : '') +
+            '<input class="db-field-input db-phone-number" type="tel" id="profileWhatsapp" value="' +
+                escHtml(stored ? parts.rest : '') + '" placeholder="' + L.whatsappSame + '" inputmode="tel">' +
+        '</div>';
+    }
+
     function phoneFieldHtml(profile) {
         var lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
         var parts = window.KSLT_PHONE
@@ -1414,16 +1452,22 @@
                 '</div>' +
                 // Телефон занимает строку целиком: рядом с полом на список
                 // стран оставалась половина ширины, и названия обрезались
+                // Каждый способ связи открывается отдельно: телеграм может быть
+                // рабочий, WhatsApp личный. Переключатель стоит у своего поля.
                 '<div class="db-field">' +
-                    '<label class="db-field-label">' + L.phone + ' <span class="db-required">*</span></label>' +
+                    '<div class="db-contact-head">' +
+                        '<label class="db-field-label">' + L.phone + ' <span class="db-required">*</span></label>' +
+                        showToggle('profileShowPhone', profile.show_phone) +
+                    '</div>' +
                     phoneFieldHtml(profile) +
-                    // Раньше разрешение лежало на карточке игрока, и включить его
-                    // было негде: в админке галочка заблокирована, у игрока её не
-                    // существовало. Решать, показывать ли свой номер, должен он сам.
-                    '<label class="db-checkbox" style="margin-top:10px">' +
-                        '<input type="checkbox" id="profileShowPhone"' + (profile.show_phone ? ' checked' : '') + '>' +
-                        '<span class="db-checkbox-text">' + L.showPhone + '</span>' +
-                    '</label>' +
+                '</div>' +
+                '<div class="db-field">' +
+                    '<div class="db-contact-head">' +
+                        '<label class="db-field-label">WhatsApp</label>' +
+                        showToggle('profileShowWhatsapp', profile.show_whatsapp) +
+                    '</div>' +
+                    whatsappFieldHtml(profile) +
+                    '<div class="db-field-hint">' + L.whatsappHint + '</div>' +
                 '</div>' +
                 '<div class="db-field">' +
                     '<label class="db-field-label">' + L.gender + ' <span class="db-required">*</span></label>' +
@@ -1444,18 +1488,20 @@
                 '<div class="db-card-title">' + L.socialMedia + '</div>' +
                 '<div class="db-field-row">' +
                     '<div class="db-field">' +
-                        '<label class="db-field-label">' + L.instagram + '</label>' +
+                        '<div class="db-contact-head">' +
+                            '<label class="db-field-label">' + L.instagram + '</label>' +
+                            showToggle('profileShowInstagram', profile.show_instagram) +
+                        '</div>' +
                         '<input class="db-field-input" type="text" id="profileInstagram" value="' + escHtml(profile.instagram || '') + '" placeholder="@username">' +
                     '</div>' +
                     '<div class="db-field">' +
-                        '<label class="db-field-label">' + L.telegram + '</label>' +
+                        '<div class="db-contact-head">' +
+                            '<label class="db-field-label">' + L.telegram + '</label>' +
+                            showToggle('profileShowTelegram', profile.show_telegram) +
+                        '</div>' +
                         '<input class="db-field-input" type="text" id="profileTelegram" value="' + escHtml(profile.telegram || '') + '" placeholder="@username">' +
                     '</div>' +
                 '</div>' +
-                '<label class="db-checkbox">' +
-                    '<input type="checkbox" id="profileShowSocials"' + (profile.show_socials ? ' checked' : '') + '>' +
-                    '<span class="db-checkbox-text">' + L.showSocials + '</span>' +
-                '</label>' +
                 '<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);">' +
                     (profile.telegram_chat_id
                         ? '<div style="display:flex;align-items:center;gap:8px;color:#4caf50;font-size:0.85rem;"><span style="font-size:1.1rem;">&#10003;</span> ' + L.tgConnected + '</div>'
@@ -2295,9 +2341,13 @@
             birthYear: (document.getElementById('profileBirthYear') || {}).value || '',
             instagram: (document.getElementById('profileInstagram') || {}).value || '',
             telegram: (document.getElementById('profileTelegram') || {}).value || '',
-            showSocials: (document.getElementById('profileShowSocials') || {}).checked || false,
             showPhone: (document.getElementById('profileShowPhone') || {}).checked || false,
-            phoneCountry: (document.getElementById('profilePhoneCountry') || {}).value || ''
+            showWhatsapp: (document.getElementById('profileShowWhatsapp') || {}).checked || false,
+            showTelegram: (document.getElementById('profileShowTelegram') || {}).checked || false,
+            showInstagram: (document.getElementById('profileShowInstagram') || {}).checked || false,
+            phoneCountry: (document.getElementById('profilePhoneCountry') || {}).value || '',
+            whatsapp: (document.getElementById('profileWhatsapp') || {}).value || '',
+            whatsappCountry: (document.getElementById('profileWhatsappCountry') || {}).value || ''
         };
     }
 
@@ -2373,9 +2423,23 @@
             return;
         }
 
-        var showSocials = document.getElementById('profileShowSocials').checked;
-        var showPhoneEl = document.getElementById('profileShowPhone');
-        var showPhone = showPhoneEl ? showPhoneEl.checked : false;
+        var checkedById = function(id) {
+            var el = document.getElementById(id);
+            return el ? el.checked : false;
+        };
+        var showPhone = checkedById('profileShowPhone');
+        var showWhatsapp = checkedById('profileShowWhatsapp');
+        var showTelegram = checkedById('profileShowTelegram');
+        var showInstagram = checkedById('profileShowInstagram');
+
+        // Номер WhatsApp необязателен: пустое поле значит «тот же, что телефон»
+        var waCountryEl = document.getElementById('profileWhatsappCountry');
+        var waInput = document.getElementById('profileWhatsapp');
+        var waRaw = waInput ? waInput.value.trim() : '';
+        var whatsapp = waRaw && window.KSLT_PHONE
+            ? KSLT_PHONE.join(waCountryEl ? waCountryEl.value : null, waRaw)
+            : '';
+        var whatsappCountry = whatsapp ? (waCountryEl ? waCountryEl.value : null) : null;
         var fullName = firstName + (lastName ? ' ' + lastName : '');
 
         btn.textContent = L.saving;
@@ -2395,8 +2459,12 @@
             birth_year: birthYear ? parseInt(birthYear) : null,
             instagram: instagram,
             telegram: telegram,
-            show_socials: showSocials,
-            show_phone: showPhone
+            show_phone: showPhone,
+            show_whatsapp: showWhatsapp,
+            show_telegram: showTelegram,
+            show_instagram: showInstagram,
+            whatsapp_phone: whatsapp || null,
+            whatsapp_country: whatsappCountry
         }).eq('id', window.ksltUser.id);
 
         if (result.error) {
@@ -2417,8 +2485,11 @@
             window.ksltProfile.birth_year = birthYear ? parseInt(birthYear) : null;
             window.ksltProfile.instagram = instagram;
             window.ksltProfile.telegram = telegram;
-            window.ksltProfile.show_socials = showSocials;
             window.ksltProfile.show_phone = showPhone;
+            window.ksltProfile.show_whatsapp = showWhatsapp;
+            window.ksltProfile.show_telegram = showTelegram;
+            window.ksltProfile.show_instagram = showInstagram;
+            window.ksltProfile.whatsapp_phone = whatsapp || null;
             renderSidebar(window.ksltProfile);
 
             // Security notify if phone changed

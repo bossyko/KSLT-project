@@ -2142,3 +2142,26 @@ select:-webkit-autofill {
     caret-color: var(--text-primary);
     transition: background-color 100000s ease-in-out 0s;
 }
+
+/* Переключатель «показывать» у каждого способа связи: телеграм может быть
+   рабочий, WhatsApp личный — открывать их по одной галочке неправильно */
+.db-contact-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.db-show-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.db-show-toggle input { accent-color: var(--accent); cursor: pointer; }
+.db-show-toggle:hover { color: var(--text-secondary); }

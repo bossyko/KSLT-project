@@ -223,7 +223,8 @@
         if (!client) return null;
         try {
             var res = await client.from('profiles')
-                .select('phone, show_phone, telegram, instagram, show_socials')
+                .select('phone, show_phone, whatsapp_phone, show_whatsapp, ' +
+                        'telegram, show_telegram, instagram, show_instagram')
                 .eq('player_id', playerId)
                 .maybeSingle();
             return res.data || null;
@@ -239,10 +240,17 @@
         var box = document.getElementById('ppContacts');
         if (!box || !contacts || _accessLevel !== 'member') return;
 
+        // Каждый способ связи открывается отдельно: у человека может быть
+        // рабочий телеграм и личный WhatsApp, и смешивать их нельзя
         var phone = contacts.show_phone ? (contacts.phone || '') : '';
-        var tg = contacts.show_socials ? (contacts.telegram || '') : '';
-        var ig = contacts.show_socials ? (contacts.instagram || '') : '';
-        if (!phone && !tg && !ig) return;
+        // WhatsApp живёт на своём номере, если он указан, иначе на основном.
+        // Разрешение отдельное: номер можно скрыть, а WhatsApp оставить.
+        var wa = contacts.show_whatsapp
+            ? (contacts.whatsapp_phone || contacts.phone || '')
+            : '';
+        var tg = contacts.show_telegram ? (contacts.telegram || '') : '';
+        var ig = contacts.show_instagram ? (contacts.instagram || '') : '';
+        if (!phone && !wa && !tg && !ig) return;
 
         var title = isEn ? 'Contacts' : (isKg ? 'Байланыш' : 'Контакты');
         var html = '<div class="pp-section pp-fade-in">' +
@@ -250,9 +258,10 @@
             '<div class="pp-contacts">';
 
         if (phone) {
-            var digits = phone.replace(/[^0-9]/g, '');
             html += '<a href="tel:' + esc(phone) + '" class="pp-contact">\uD83D\uDCF1 ' + esc(phone) + '</a>';
-            html += '<a href="https://wa.me/' + esc(digits) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-wa">WhatsApp</a>';
+        }
+        if (wa) {
+            html += '<a href="https://wa.me/' + esc(wa.replace(/[^0-9]/g, '')) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-wa">WhatsApp</a>';
         }
         if (tg) {
             var handle = tg.replace('@', '');
