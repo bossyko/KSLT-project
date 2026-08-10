@@ -759,7 +759,7 @@
         '<span class="tcv-badge">' + esc(catLabels[n.category] || n.category || 'Новости') + '</span>' +
       '</div>' +
       '<div class="tcv-body">' +
-        '<div class="tcv-name">' + esc(n.title) + '</div>' +
+        '<div class="tcv-name">' + esc(I18N.field(n, 'title')) + '</div>' +
         '<div class="tcv-meta"><span>' + dateStr + '</span></div>' +
       '</div>' +
     '</div>';
@@ -781,13 +781,14 @@
       if (n.image) html += '<div class="nd-hero-img" style="background-image:url(' + n.image + ')"></div>';
       html += '<div class="nd-content">';
       html += '<div class="nd-tag">' + esc(n.category || I18N.t('home.latestNews')) + '</div>';
-      html += '<h1 class="nd-title">' + esc(n.title) + '</h1>';
+      html += '<h1 class="nd-title">' + esc(I18N.field(n, 'title')) + '</h1>';
       html += '<div class="nd-date">' + dateStr + '</div>';
       // Render content blocks if JSON array, otherwise raw HTML
+      var text = I18N.field(n, 'content');
       var contentHtml = '';
-      if (n.content) {
+      if (text) {
         try {
-          var blocks = JSON.parse(n.content);
+          var blocks = JSON.parse(text);
           if (Array.isArray(blocks)) {
             blocks.forEach(function(block) {
               if (block.type === 'text' || block.type === 'paragraph') {
@@ -803,13 +804,16 @@
               }
             });
           } else {
-            contentHtml = n.content;
+            contentHtml = text;
           }
         } catch(e) {
-          contentHtml = n.content;
+          contentHtml = text;
         }
       }
       html += '<div class="nd-body">' + contentHtml + '</div>';
+
+      var gallery = Array.isArray(n.gallery) ? n.gallery.filter(Boolean) : [];
+      if (window.KSLT_NEWS_MEDIA) html += KSLT_NEWS_MEDIA.render(gallery);
 
       // Poll block (if news has poll)
       if (n.poll && n.poll.question && n.poll.options && n.poll.options.length) {
@@ -835,8 +839,10 @@
       '</div>';
 
       html += '</div>'; // close nd-content
-      document.getElementById('newsDetail').innerHTML = html;
+      var detail = document.getElementById('newsDetail');
+      detail.innerHTML = html;
       overlay.classList.add('open');
+      if (window.KSLT_NEWS_MEDIA) KSLT_NEWS_MEDIA.init(detail, gallery);
 
       // Load poll
       if (n.poll && n.poll.question) {

@@ -57,9 +57,12 @@
       });
     }
     if (currentSearch) {
+      // Ищем и по переводу, и по оригиналу: человек с английским языком может
+      // помнить заголовок с сайта, а набрать его по-русски
       filtered = filtered.filter(function(n) {
-        return (n.title || '').toLowerCase().indexOf(currentSearch) !== -1 ||
-               (n.excerpt || '').toLowerCase().indexOf(currentSearch) !== -1;
+        var hay = [n.title, n.excerpt, I18N.field(n, 'title'), I18N.field(n, 'excerpt')]
+          .join(' ').toLowerCase();
+        return hay.indexOf(currentSearch) !== -1;
       });
     }
 
@@ -81,8 +84,8 @@
         '</div>' +
         '<div class="news-list-body">' +
           '<div class="news-list-tag">' + esc(n.category || I18N.t('news.default')) + '</div>' +
-          '<div class="news-list-title">' + esc(n.title) + '</div>' +
-          '<div class="news-list-excerpt">' + esc(n.excerpt || '') + '</div>' +
+          '<div class="news-list-title">' + esc(I18N.field(n, 'title')) + '</div>' +
+          '<div class="news-list-excerpt">' + esc(I18N.field(n, 'excerpt')) + '</div>' +
           '<div class="news-list-footer">' +
             '<span>' + dateStr + '</span>' +
             '<span>' + (n.views || 0) + ' ' + I18N.t('news.views') + '</span>' +

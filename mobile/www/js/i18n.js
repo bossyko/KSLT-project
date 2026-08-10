@@ -591,6 +591,19 @@
     }
   };
 
+  /**
+   * Перевод не из словаря, а из базы.
+   *
+   * Новости менеджер пишет по-русски, переводы лежат соседними колонками:
+   * title_en, title_kg. Пустой перевод показывать нельзя — тогда экран
+   * окажется дырявым, поэтому откатываемся на русский.
+   */
+  I18N.field = function(row, name) {
+    if (!row) return '';
+    if (_lang !== 'ru' && row[name + '_' + _lang]) return row[name + '_' + _lang];
+    return row[name] || '';
+  };
+
   // Month helper
   I18N.month = function(idx) {
     return I18N.t('month.' + idx);
