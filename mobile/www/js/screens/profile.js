@@ -879,7 +879,13 @@
     }
     html += '<input class="prof-field-input prof-phone-number" type="tel" id="profPhone" value="' +
             esc(phoneParts.rest) + '" placeholder="555 123 456" inputmode="tel">';
-    html += '</div></div>';
+    html += '</div>';
+    // Решать, показывать ли свой номер другим, должен сам игрок. Раньше
+    // разрешение лежало на карточке и включить его было негде.
+    html += '<label class="prof-checkbox" style="margin-top:10px">' +
+            '<input type="checkbox" id="profShowPhone"' + (p.show_phone ? ' checked' : '') + '>' +
+            '<span>' + I18N.t('profile.showPhone') + '</span></label>';
+    html += '</div>';
 
     // Gender
     html += '<div class="prof-field">';
@@ -954,6 +960,7 @@
           full_name: fullName,
           phone: phone,
           phone_country: phoneCountry,
+          show_phone: (document.getElementById('profShowPhone') || {}).checked || false,
           gender: gender,
           instagram: instagram,
           telegram: telegram,

@@ -1615,3 +1615,27 @@ a.pp-tournament:hover {
         height: 80px;
     }
 }
+
+/* Контакты игрока — видны только членам клуба и только если он разрешил */
+.pp-contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pp-contact {
+    display: block;
+    padding: 12px 16px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.pp-contact:hover { border-color: var(--accent); }
+.pp-contact-wa:hover { border-color: #25D366; }
+.pp-contact-tg:hover { border-color: #2AABEE; }
+.pp-contact-ig:hover { border-color: #E1306C; }

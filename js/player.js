@@ -213,6 +213,59 @@
     var _earnedBadges = [];
     var _allBadges = [];
 
+    /**
+     * Контакты игрока лежат в его профиле, а не в карточке: телефон он вводит
+     * в кабинете, там же разрешает или запрещает его показывать. Раньше
+     * карточка читала отдельную колонку players.phone, которую никто не
+     * заполнял, — поэтому контактов на сайте не было вовсе.
+     */
+    async function loadPlayerContacts(playerId) {
+        if (!client) return null;
+        try {
+            var res = await client.from('profiles')
+                .select('phone, show_phone, telegram, instagram, show_socials')
+                .eq('player_id', playerId)
+                .maybeSingle();
+            return res.data || null;
+        } catch(e) { return null; }
+    }
+
+    /**
+     * Блок контактов. Показываем только членам клуба: телефон игрока — не то,
+     * что стоит отдавать случайному посетителю. Каждый вид контакта
+     * показывается отдельно, по своему разрешению.
+     */
+    function renderContacts(contacts) {
+        var box = document.getElementById('ppContacts');
+        if (!box || !contacts || _accessLevel !== 'member') return;
+
+        var phone = contacts.show_phone ? (contacts.phone || '') : '';
+        var tg = contacts.show_socials ? (contacts.telegram || '') : '';
+        var ig = contacts.show_socials ? (contacts.instagram || '') : '';
+        if (!phone && !tg && !ig) return;
+
+        var title = isEn ? 'Contacts' : (isKg ? 'Байланыш' : 'Контакты');
+        var html = '<div class="pp-section pp-fade-in">' +
+            '<h3 class="pp-section-title">\uD83D\uDCDE ' + title + '</h3>' +
+            '<div class="pp-contacts">';
+
+        if (phone) {
+            var digits = phone.replace(/[^0-9]/g, '');
+            html += '<a href="tel:' + esc(phone) + '" class="pp-contact">\uD83D\uDCF1 ' + esc(phone) + '</a>';
+            html += '<a href="https://wa.me/' + esc(digits) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-wa">WhatsApp</a>';
+        }
+        if (tg) {
+            var handle = tg.replace('@', '');
+            html += '<a href="https://t.me/' + esc(handle) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-tg">Telegram @' + esc(handle) + '</a>';
+        }
+        if (ig) {
+            var ighandle = ig.replace('@', '');
+            html += '<a href="https://instagram.com/' + esc(ighandle) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-ig">Instagram @' + esc(ighandle) + '</a>';
+        }
+
+        box.innerHTML = html + '</div></div>';
+    }
+
     async function loadPlayerBadges(playerId) {
         if (!client) return [];
         try {
@@ -552,6 +605,9 @@
         html += '</div></div></div>';
 
         html += '</div>'; // .pp-section (My Games)
+
+        // ---- Контакты: только членам клуба и только если игрок разрешил ----
+        html += '<div id="ppContacts"></div>';
 
         // ---- Achievements (bottom of page) ----
         html += '<div class="pp-section pp-fade-in">';
@@ -1538,6 +1594,11 @@
 
         document.title = data.player.name + ' \u2014 KSLT';
         renderProfile(data);
+        // Контакты грузим после определения доступа: гостям и просто
+        // зарегистрированным они не показываются, значит и запрашивать незачем
+        if (_accessLevel === 'member') {
+            loadPlayerContacts(playerId).then(renderContacts);
+        }
         renderBadgesSection();
         renderRatingChart(data.player);
         initScrollAnimations();

@@ -8,6 +8,7 @@
   var PD = window.KSLT_PLAYER_DETAIL = {};
   var _player = null;
   var _playerId = null;
+  var _contacts = null;   // телефон и соцсети из профиля игрока
   var _categoryLabel = '';
   var _rank = 0;
   var _earnedBadges = [];
@@ -115,10 +116,19 @@
               // Load badges + render in parallel
               Promise.all([
                 loadPlayerBadges(playerId),
-                loadAllBadges()
+                loadAllBadges(),
+                // Контакты нужны только членам клуба — остальным их не покажут,
+                // значит и запрашивать незачем
+                access === 'member'
+                  ? supabaseClient.from('profiles')
+                      .select('phone, show_phone, telegram, instagram, show_socials')
+                      .eq('player_id', playerId).maybeSingle()
+                      .then(function(r) { return r.data; })
+                  : Promise.resolve(null)
               ]).then(function(results) {
                 _earnedBadges = results[0];
                 _allBadges = results[1];
+                _contacts = results[2];
                 renderFullProfile(access);
               });
             }
@@ -261,20 +271,26 @@
 
     // ---- Contact info (member only, if player allows) ----
     if (access === 'member') {
-      var hasContact = (p.phone && p.show_phone) || p.telegram || p.instagram;
+      // Контакты берём из профиля игрока: телефон он вводит в кабинете, там же
+      // разрешает показ. Колонки players.phone/show_phone никто не заполнял.
+      var contacts = _contacts || {};
+      var cPhone = contacts.show_phone ? (contacts.phone || '') : '';
+      var cTg = contacts.show_socials ? (contacts.telegram || '') : '';
+      var cIg = contacts.show_socials ? (contacts.instagram || '') : '';
+      var hasContact = cPhone || cTg || cIg;
       if (hasContact) {
         html += '<div class="pd-section"><h3 class="pd-section-title">📞 ' + I18N.t('pd.contact') + '</h3>';
         html += '<div style="display:flex;flex-direction:column;gap:8px">';
-        if (p.phone && p.show_phone) {
-          html += '<a href="tel:' + esc(p.phone) + '" class="pd-challenge-btn" style="display:block;text-align:center;text-decoration:none;color:#0A0A0A">📱 ' + esc(p.phone) + '</a>';
-          html += '<a href="https://wa.me/' + esc(p.phone.replace(/[^0-9]/g, '')) + '" target="_blank" class="pd-challenge-btn" style="background:#25D366;display:block;text-align:center;text-decoration:none;color:#fff">WhatsApp</a>';
+        if (cPhone) {
+          html += '<a href="tel:' + esc(cPhone) + '" class="pd-challenge-btn" style="display:block;text-align:center;text-decoration:none;color:#0A0A0A">📱 ' + esc(cPhone) + '</a>';
+          html += '<a href="https://wa.me/' + esc(cPhone.replace(/[^0-9]/g, '')) + '" target="_blank" class="pd-challenge-btn" style="background:#25D366;display:block;text-align:center;text-decoration:none;color:#fff">WhatsApp</a>';
         }
-        if (p.telegram) {
-          var tgHandle = p.telegram.replace('@', '');
+        if (cTg) {
+          var tgHandle = cTg.replace('@', '');
           html += '<a href="https://t.me/' + esc(tgHandle) + '" target="_blank" class="pd-challenge-btn" style="background:#2AABEE;display:block;text-align:center;text-decoration:none;color:#fff">Telegram @' + esc(tgHandle) + '</a>';
         }
-        if (p.instagram) {
-          html += '<a href="https://instagram.com/' + esc(p.instagram.replace('@', '')) + '" target="_blank" class="pd-challenge-btn" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:block;text-align:center;text-decoration:none;color:#fff">Instagram @' + esc(p.instagram.replace('@', '')) + '</a>';
+        if (cIg) {
+          html += '<a href="https://instagram.com/' + esc(cIg.replace('@', '')) + '" target="_blank" class="pd-challenge-btn" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:block;text-align:center;text-decoration:none;color:#fff">Instagram @' + esc(cIg.replace('@', '')) + '</a>';
         }
         html += '</div></div>';
       }

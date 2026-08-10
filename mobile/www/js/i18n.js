@@ -376,6 +376,7 @@
 
     // === Auth screen ===
     'auth.skip':         { ru: 'Пропустить',           en: 'Skip',            kg: 'Өткөрүп жиберүү' },
+    'profile.showPhone': { ru: 'Показывать мой телефон членам клуба', en: 'Show my phone to club members', kg: 'Клуб мүчөлөрүнө телефонумду көрсөтүү' },
     'news.fullPoster':   { ru: 'Афиша целиком', en: 'Full poster', kg: 'Толук афиша' },
     'brand.tagline':     { ru: 'Кыргызстанское Сообщество Любителей Тенниса', en: 'Kyrgyzstan Social Lawn Tennis', kg: 'Кыргызстандын Теннис Сүйүүчүлөрүнүн Коому' },
     'auth.login':        { ru: 'Вход',                 en: 'Log in',           kg: 'Кирүү' },

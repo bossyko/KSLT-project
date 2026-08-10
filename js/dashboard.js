@@ -34,6 +34,7 @@
         tgConnected: 'Telegram байланган',
         tgConnect: 'Telegram байлоо',
         tgConnectHint: 'Мүчөлүк мөөнөтү жөнүндө Telegram аркылуу эскертме алыңыз',
+        showPhone: 'Клуб мүчөлөрүнө телефонумду көрсөтүү',
         showSocials: 'Башка колдонуучулар менин социалдык тармактарымды көрө алат',
         save: 'Сактоо', saving: 'Сакталууда...', saved: 'Сакталды!',
         changeAvatar: 'Сүрөттү өзгөртүү', removeAvatar: 'Жок кылуу',
@@ -235,6 +236,7 @@
         tgConnected: 'Telegram connected',
         tgConnect: 'Connect Telegram',
         tgConnectHint: 'Get membership expiry reminders via Telegram',
+        showPhone: 'Show my phone to club members',
         showSocials: 'Allow other users to see my social media',
         save: 'Save', saving: 'Saving...', saved: 'Saved!',
         changeAvatar: 'Change Photo', removeAvatar: 'Remove',
@@ -436,6 +438,7 @@
         tgConnected: 'Telegram подключён',
         tgConnect: 'Подключить Telegram',
         tgConnectHint: 'Получайте напоминания об истечении членства в Telegram',
+        showPhone: 'Показывать мой телефон членам клуба',
         showSocials: 'Разрешить другим пользователям видеть мои соцсети',
         save: 'Сохранить', saving: 'Сохранение...', saved: 'Сохранено!',
         changeAvatar: 'Изменить фото', removeAvatar: 'Удалить',
@@ -1404,6 +1407,13 @@
                 '<div class="db-field">' +
                     '<label class="db-field-label">' + L.phone + ' <span class="db-required">*</span></label>' +
                     phoneFieldHtml(profile) +
+                    // Раньше разрешение лежало на карточке игрока, и включить его
+                    // было негде: в админке галочка заблокирована, у игрока её не
+                    // существовало. Решать, показывать ли свой номер, должен он сам.
+                    '<label class="db-checkbox" style="margin-top:10px">' +
+                        '<input type="checkbox" id="profileShowPhone"' + (profile.show_phone ? ' checked' : '') + '>' +
+                        '<span class="db-checkbox-text">' + L.showPhone + '</span>' +
+                    '</label>' +
                 '</div>' +
                 '<div class="db-field">' +
                     '<label class="db-field-label">' + L.gender + ' <span class="db-required">*</span></label>' +
@@ -2275,7 +2285,9 @@
             birthYear: (document.getElementById('profileBirthYear') || {}).value || '',
             instagram: (document.getElementById('profileInstagram') || {}).value || '',
             telegram: (document.getElementById('profileTelegram') || {}).value || '',
-            showSocials: (document.getElementById('profileShowSocials') || {}).checked || false
+            showSocials: (document.getElementById('profileShowSocials') || {}).checked || false,
+            showPhone: (document.getElementById('profileShowPhone') || {}).checked || false,
+            phoneCountry: (document.getElementById('profilePhoneCountry') || {}).value || ''
         };
     }
 
@@ -2354,6 +2366,8 @@
         }
 
         var showSocials = document.getElementById('profileShowSocials').checked;
+        var showPhoneEl = document.getElementById('profileShowPhone');
+        var showPhone = showPhoneEl ? showPhoneEl.checked : false;
         var fullName = firstName + (lastName ? ' ' + lastName : '');
 
         btn.textContent = L.saving;
@@ -2373,7 +2387,8 @@
             birth_year: birthYear ? parseInt(birthYear) : null,
             instagram: instagram,
             telegram: telegram,
-            show_socials: showSocials
+            show_socials: showSocials,
+            show_phone: showPhone
         }).eq('id', window.ksltUser.id);
 
         if (result.error) {
@@ -2395,6 +2410,7 @@
             window.ksltProfile.instagram = instagram;
             window.ksltProfile.telegram = telegram;
             window.ksltProfile.show_socials = showSocials;
+            window.ksltProfile.show_phone = showPhone;
             renderSidebar(window.ksltProfile);
 
             // Security notify if phone changed

@@ -584,9 +584,11 @@
                         '<label class="ad-field-label">' + L.plrEmail + '</label>' +
                         '<input type="email" class="ad-field-input" id="adPlrEmail" value="' + A.esc(item ? item.email || '—' : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
-                    '<div class="ad-field" style="display:flex;align-items:flex-end;padding-bottom:8px;">' +
-                        '<label class="ad-checkbox-label"><input type="checkbox" id="adPlrShowPhone"' + (item && item.show_phone ? ' checked' : '') + ' disabled> ' + L.plrShowPhone + '</label>' +
-                    '</div>' +
+                    // Галочка «показывать телефон» убрана: администратору она ни к
+                    // чему — он видит всё независимо от настроек игрока. А включить
+                    // её всё равно было нельзя, поле было заблокировано. Решает
+                    // теперь сам игрок в кабинете и в приложении.
+
                 '</div>' +
             '</div>' +
 
