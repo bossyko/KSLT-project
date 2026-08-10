@@ -4351,3 +4351,21 @@ select.ad-field-input {
 
 .ad-crop-header { flex-shrink: 0; }
 .ad-crop-hint { flex-shrink: 0; }
+
+/* Телефон: страна списком, номер рядом — как в кабинете игрока */
+.ad-phone-row {
+    display: flex;
+    gap: 8px;
+}
+
+.ad-phone-country {
+    flex: 0 0 auto;
+    width: 48%;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.ad-phone-number {
+    flex: 1 1 auto;
+    min-width: 0;
+}

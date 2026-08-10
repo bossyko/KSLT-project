@@ -147,16 +147,7 @@
                 <div id="forgotPhoneField" class="auth-field" style="display:none">
                     <label class="auth-label">Phone <span class="auth-required">*</span></label>
                     <div class="otp-phone-row">
-                        <select class="otp-country-select" id="forgot-country">
-                            <option value="+996">🇰🇬 +996</option>
-                            <option value="+7">🇷🇺 +7</option>
-                            <option value="+7" data-kz>🇰🇿 +7</option>
-                            <option value="+1">🇺🇸 +1</option>
-                            <option value="+44">🇬🇧 +44</option>
-                            <option value="+49">🇩🇪 +49</option>
-                            <option value="+82">🇰🇷 +82</option>
-                            <option value="+90">🇹🇷 +90</option>
-                        </select>
+                        <select class="otp-country-select" id="forgot-country"><!-- заполняется из js/phone.js --></select>
                         <input class="auth-input" type="tel" id="forgot-phone" placeholder="555 123 456">
                     </div>
                 </div>
@@ -426,7 +417,8 @@
     <!-- Supabase SDK -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js"></script>
-    <script src="../js/auth.js?v=31"></script>
+    <script src="../js/phone.js?v=1"></script>
+    <script src="../js/auth.js?v=32"></script>
     <script>if(new URLSearchParams(window.location.search).get('banned')==='1'){var bn=document.getElementById('banNotice');if(bn)bn.style.display='block';}</script>
 </body>
 </html>

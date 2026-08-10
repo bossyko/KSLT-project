@@ -866,7 +866,20 @@
 
     html += profField(I18N.t('profile.lastName'), 'profLastName', lastName, 'text');
     html += profField(I18N.t('profile.firstName'), 'profFirstName', firstName, 'text');
-    html += profField(I18N.t('profile.phoneLbl'), 'profPhone', p.phone || '', 'tel');
+    // Телефон: страна списком, номер отдельно. Код подставляется по выбору, а не
+    // угадывается по номеру — у России и Казахстана он общий, +7.
+    var phoneParts = window.KSLT_PHONE
+        ? KSLT_PHONE.split(p.phone || '', p.phone_country)
+        : { iso: 'KG', rest: p.phone || '' };
+    html += '<div class="prof-field">';
+    html += '<label class="prof-field-label">' + I18N.t('profile.phoneLbl') + '</label>';
+    html += '<div class="prof-phone-row">';
+    if (window.KSLT_PHONE) {
+        html += KSLT_PHONE.selectHtml('profPhoneCountry', phoneParts.iso, I18N.lang, 'prof-field-input prof-phone-country');
+    }
+    html += '<input class="prof-field-input prof-phone-number" type="tel" id="profPhone" value="' +
+            esc(phoneParts.rest) + '" placeholder="555 123 456" inputmode="tel">';
+    html += '</div></div>';
 
     // Gender
     html += '<div class="prof-field">';
@@ -911,7 +924,11 @@
     document.getElementById('profSaveBtn').addEventListener('click', function() {
       var ln = document.getElementById('profLastName').value.trim();
       var fn = document.getElementById('profFirstName').value.trim();
-      var phone = document.getElementById('profPhone').value.trim();
+      var phoneCountryEl = document.getElementById('profPhoneCountry');
+      var phoneCountry = phoneCountryEl ? phoneCountryEl.value : null;
+      var phone = window.KSLT_PHONE
+        ? KSLT_PHONE.join(phoneCountry, document.getElementById('profPhone').value)
+        : document.getElementById('profPhone').value.trim();
       var gender = document.getElementById('profGender').value;
       var fullName = (ln + ' ' + fn).trim();
 
@@ -936,6 +953,7 @@
         .update({
           full_name: fullName,
           phone: phone,
+          phone_country: phoneCountry,
           gender: gender,
           instagram: instagram,
           telegram: telegram,

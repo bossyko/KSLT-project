@@ -411,7 +411,7 @@
         if (!A.client) return;
 
         var userRes = await A.client.from('profiles')
-            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at, banned_until, ban_reason, player_id, gender, birth_day, birth_month, birth_year, instagram, telegram')
+            .select('id, full_name, email, role, avatar_url, phone, phone_country, telegram_chat_id, last_seen, created_at, banned_until, ban_reason, player_id, gender, birth_day, birth_month, birth_year, instagram, telegram')
             .eq('id', id)
             .single();
 
@@ -610,7 +610,7 @@
                     '</div>' +
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.usrPhone + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adUsrPhone" value="' + A.esc(user.phone || '') + '"' + profileReadonly + '>' +
+                        adminPhoneFieldHtml(user, profileReadonly) +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-field-row">' +
@@ -908,9 +908,16 @@
             var nameEl = document.getElementById('adUsrName');
             var phoneEl = document.getElementById('adUsrPhone');
             if (nameEl) {
+                var phoneCountryEl = document.getElementById('adUsrPhoneCountry');
+                var phoneCountry = phoneCountryEl ? phoneCountryEl.value : null;
+                var phoneValue = phoneEl
+                    ? (window.KSLT_PHONE ? KSLT_PHONE.join(phoneCountry, phoneEl.value) : phoneEl.value.trim())
+                    : '';
+
                 var profResult = await A.client.from('profiles').update({
                     full_name: nameEl.value.trim(),
-                    phone: phoneEl ? phoneEl.value.trim() || null : null
+                    phone: phoneValue || null,
+                    phone_country: phoneValue ? phoneCountry : null
                 }).eq('id', user.id);
                 if (profResult.error) {
                     A.showToast(profResult.error.message, 'error');
@@ -956,6 +963,27 @@
         }
 
         if (btn) { btn.disabled = false; btn.textContent = L.save; }
+    }
+
+    /**
+     * Телефон: страна списком, номер отдельно — так же, как в кабинете игрока.
+     * Код страны подставляется по выбору, а не угадывается по номеру: у России
+     * и Казахстана он общий, +7.
+     */
+    function adminPhoneFieldHtml(user, readonlyAttr) {
+        var lang = A.isEn ? 'en' : 'ru';
+        var parts = window.KSLT_PHONE
+            ? KSLT_PHONE.split(user.phone || '', user.phone_country)
+            : { iso: 'KG', rest: user.phone || '' };
+        var disabled = readonlyAttr ? ' disabled' : '';
+
+        return '<div class="ad-phone-row">' +
+            (window.KSLT_PHONE
+                ? KSLT_PHONE.selectHtml('adUsrPhoneCountry', parts.iso, lang, 'ad-field-input ad-phone-country').replace('<select', '<select' + disabled)
+                : '') +
+            '<input type="text" class="ad-field-input ad-phone-number" id="adUsrPhone" value="' +
+                A.esc(parts.rest) + '" placeholder="555 123 456"' + readonlyAttr + '>' +
+        '</div>';
     }
 
     function userGenderToCategory(userGender) {

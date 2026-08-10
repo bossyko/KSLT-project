@@ -2097,3 +2097,29 @@ select.db-field-input {
     border-color: var(--accent);
     background: rgba(204, 255, 0, 0.06);
 }
+
+/* Телефон: страна списком, номер рядом. Код страны подставляется по выбору,
+   а не угадывается по номеру — у России и Казахстана он общий, +7. */
+.db-phone-row {
+    display: flex;
+    gap: 8px;
+}
+
+.db-phone-country {
+    flex: 0 0 auto;
+    width: 46%;
+    min-width: 0;
+    padding-right: 34px;
+    cursor: pointer;
+}
+
+.db-phone-number {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+@media (max-width: 520px) {
+    /* На узком экране название страны рядом с номером не помещается */
+    .db-phone-row { flex-direction: column; }
+    .db-phone-country { width: 100%; }
+}

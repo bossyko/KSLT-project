@@ -4523,3 +4523,9 @@ select.prof-field-input { color: var(--text); }
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
+
+/* Телефон: страна списком, номер рядом. Код подставляется по выбору, а не
+   угадывается по номеру — у России и Казахстана он общий, +7. */
+.prof-phone-row { display: flex; gap: 8px; }
+.prof-phone-country { flex: 0 0 46%; min-width: 0; }
+.prof-phone-number { flex: 1 1 auto; min-width: 0; }

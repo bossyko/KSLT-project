@@ -1314,6 +1314,28 @@
     }
 
     // ---- Render Profile ----
+    /**
+     * Телефон: страна списком, номер отдельно.
+     *
+     * Раньше это была одна строка, и в базе оказывалось «+996 555 12 34 56»,
+     * «0555123456» — у каждого по-своему. Восстановление доступа ищет человека
+     * по номеру, и такие записи между собой не сходятся.
+     */
+    function phoneFieldHtml(profile) {
+        var lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
+        var parts = window.KSLT_PHONE
+            ? KSLT_PHONE.split(profile.phone || '', profile.phone_country)
+            : { iso: 'KG', rest: profile.phone || '' };
+
+        return '<div class="db-phone-row">' +
+            (window.KSLT_PHONE
+                ? KSLT_PHONE.selectHtml('profilePhoneCountry', parts.iso, lang, 'db-field-input db-phone-country')
+                : '') +
+            '<input class="db-field-input db-phone-number" type="tel" id="profilePhone" value="' +
+                escHtml(parts.rest) + '" placeholder="555 123 456" inputmode="tel">' +
+        '</div>';
+    }
+
     function renderProfile(user, profile) {
         var container = document.getElementById('db-profile');
         if (!container) return;
@@ -1380,7 +1402,7 @@
                 '<div class="db-field-row">' +
                     '<div class="db-field">' +
                         '<label class="db-field-label">' + L.phone + ' <span class="db-required">*</span></label>' +
-                        '<input class="db-field-input" type="tel" id="profilePhone" value="' + escHtml(profile.phone || '') + '" placeholder="+996 ...">' +
+                        phoneFieldHtml(profile) +
                     '</div>' +
                     '<div class="db-field">' +
                         '<label class="db-field-label">' + L.gender + ' <span class="db-required">*</span></label>' +
@@ -2297,7 +2319,11 @@
             alert(msg2);
             return;
         }
-        var phone = document.getElementById('profilePhone').value.trim();
+        var phoneCountryEl = document.getElementById('profilePhoneCountry');
+        var phoneCountry = phoneCountryEl ? phoneCountryEl.value : null;
+        var phone = window.KSLT_PHONE
+            ? KSLT_PHONE.join(phoneCountry, document.getElementById('profilePhone').value)
+            : document.getElementById('profilePhone').value.trim();
         if (phone && !/^\+996\d{9}$/.test(phone.replace(/[\s\-]/g, ''))) {
             showMessage('profileMessage', isKg ? 'Формат: +996XXXXXXXXX' : isEn ? 'Format: +996XXXXXXXXX' : 'Формат: +996XXXXXXXXX', true);
             return;
@@ -2334,6 +2360,7 @@
         var result = await client.from('profiles').update({
             full_name: fullName,
             phone: phone,
+            phone_country: phoneCountry,
             gender: gender,
             birth_day: birthDay ? parseInt(birthDay) : null,
             birth_month: birthMonth ? parseInt(birthMonth) : null,

@@ -182,6 +182,17 @@
             'error-callback': function() { _turnstileBroken = true; }
         });
     }
+    // Список стран берём из общего модуля: он же используется в кабинете,
+    // в админке и в приложении, и расходиться между ними не должен
+    (function fillCountries() {
+        var sel = document.getElementById('forgot-country');
+        if (!sel || !window.KSLT_PHONE) return;
+        var lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
+        sel.innerHTML = KSLT_PHONE.countries.map(function(c) {
+            return '<option value="' + c.iso + '">' + c.flag + '  ' + KSLT_PHONE.name(c, lang) + '  ' + c.code + '</option>';
+        }).join('');
+    })();
+
     initTurnstile();
 
     // Rate limiting (client-side)
@@ -1100,10 +1111,13 @@
         var identifier, identifierType;
 
         if (method === 'phone') {
-            var country = document.getElementById('forgot-country').value;
+            var countryEl = document.getElementById('forgot-country');
             var phone = document.getElementById('forgot-phone').value.trim();
             if (!phone) return;
-            identifier = country + phone.replace(/[\s\-()]/g, '');
+            // Значением стал код страны (KG, RU), а был телефонный префикс
+            identifier = window.KSLT_PHONE
+                ? KSLT_PHONE.join(countryEl.value, phone)
+                : countryEl.value + phone.replace(/[\s\-()]/g, '');
             identifierType = 'phone';
         } else {
             identifier = document.getElementById('forgot-email').value.trim();
