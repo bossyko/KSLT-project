@@ -34,6 +34,15 @@
         tgConnected: 'Telegram байланган',
         tgConnect: 'Telegram байлоо',
         notifTgOff: 'Telegram\u2011боту байланган эмес — билдирүүлөр келбейт. Профилден байласаңыз болот.',
+        close: 'Жабуу',
+        cancel: 'Жокко чыгаруу',
+        tgConnectTitle: 'Telegram\u2011ботту байлоо',
+        tgOpenBot: 'Ботту ачуу',
+        tgSteps: ['«Ботту ачуу» баскычын басыңыз', 'Telegramда «Старт» басыңыз', 'Ушул бетке кайтыңыз — статус өзү жаңырат'],
+        tgWaiting: 'Байланууну күтүүдө…',
+        tgConnectedNow: 'Байланды!',
+        tgDisconnectTitle: 'Ботту ажыратуу',
+        tgDisconnectYes: 'Ажыратуу',
         tgDisconnect: 'ажыратуу',
         tgDisconnectAsk: 'Ботту ажыратасызбы? Telegram аркылуу билдирүүлөр келбей калат.',
         tgWhy: 'Ботту байласаңыз, эмне келет:',
@@ -75,6 +84,7 @@
         language: 'Тил',
         dangerZone: 'Коркунучтуу аймак',
         deleteAccount: 'Аккаунтту жок кылуу',
+        deleteLoses: ['Рейтингдеги орун жана топтолгон упайлар', 'Мелдештердин жана матчтардын тарыхы', 'Топтолгон упайлар менен жеңилдиктер', 'Тиркеме менен сайттагы аккаунт'],
         deleteConfirm: 'Ишенесизби? Бул аракетти кайтаруу мүмкүн эмес.',
         errPwMatch: 'Сыр сөздөр дал келбейт',
         errPwShort: 'Сыр сөз кеминде 8 белгиден турушу керек',
@@ -248,6 +258,15 @@
         tgConnected: 'Telegram connected',
         tgConnect: 'Connect Telegram',
         notifTgOff: 'The Telegram bot is not connected, so nothing will arrive there. You can connect it in your profile.',
+        close: 'Close',
+        cancel: 'Cancel',
+        tgConnectTitle: 'Connect the Telegram bot',
+        tgOpenBot: 'Open the bot',
+        tgSteps: ['Press «Open the bot»', 'Press «Start» in Telegram', 'Come back to this page — the status updates on its own'],
+        tgWaiting: 'Waiting for the connection…',
+        tgConnectedNow: 'Connected!',
+        tgDisconnectTitle: 'Disconnect the bot',
+        tgDisconnectYes: 'Disconnect',
         tgDisconnect: 'disconnect',
         tgDisconnectAsk: 'Disconnect the bot? Telegram notifications will stop arriving.',
         tgWhy: 'What you get after connecting the bot:',
@@ -289,6 +308,7 @@
         language: 'Language',
         dangerZone: 'Danger Zone',
         deleteAccount: 'Delete Account',
+        deleteLoses: ['Your ranking position and points', 'Tournament and match history', 'Loyalty points and discounts', 'Your account on the site and in the app'],
         deleteConfirm: 'Are you sure? This cannot be undone.',
         errPwMatch: 'Passwords do not match',
         errPwShort: 'Password must be at least 8 characters',
@@ -462,6 +482,15 @@
         tgConnected: 'Telegram подключён',
         tgConnect: 'Подключить Telegram',
         notifTgOff: 'Telegram\u2011бот не подключён — сюда ничего не придёт. Подключить его можно в Профиле.',
+        close: 'Закрыть',
+        cancel: 'Отмена',
+        tgConnectTitle: 'Подключение Telegram\u2011бота',
+        tgOpenBot: 'Открыть бота',
+        tgSteps: ['Нажмите «Открыть бота»', 'В Telegram нажмите «Старт»', 'Вернитесь на эту страницу — состояние обновится само'],
+        tgWaiting: 'Ждём подключения…',
+        tgConnectedNow: 'Подключено!',
+        tgDisconnectTitle: 'Отключение бота',
+        tgDisconnectYes: 'Отключить',
         tgDisconnect: 'отключить',
         tgDisconnectAsk: 'Отключить бота? Уведомления в Telegram приходить перестанут.',
         tgWhy: 'Что будет приходить в Telegram:',
@@ -503,6 +532,7 @@
         language: 'Язык',
         dangerZone: 'Опасная зона',
         deleteAccount: 'Удалить аккаунт',
+        deleteLoses: ['Место в рейтинге и набранные очки', 'История турниров и матчей', 'Накопленные баллы и скидки', 'Аккаунт на сайте и в приложении'],
         deleteConfirm: 'Вы уверены? Это действие нельзя отменить.',
         errPwMatch: 'Пароли не совпадают',
         errPwShort: 'Пароль должен быть не менее 8 символов',
@@ -1565,7 +1595,7 @@
                         (profile.telegram_chat_id
                             ? '<span class="db-tg-state">' + L.tgConnected +
                               ' \u00b7 <button type="button" class="db-tg-off" id="tgDisconnect">' + L.tgDisconnect + '</button></span>'
-                            : '<a href="https://t.me/' + (window.KSLT_TG_BOT || 'KSLTennisBot') + '?start=' + (profile.id || '') + '" target="_blank" rel="noopener" class="db-tg-btn">\u2709 ' + L.tgConnect + '</a>') +
+                            : '<button type="button" class="db-tg-btn" id="tgConnect">\u2709 ' + L.tgConnect + '</button>') +
                     '</div>' +
                     (profile.telegram_chat_id
                         ? '<div class="db-tg-note">' + L.tgWhatComes + '</div>'
@@ -1598,20 +1628,86 @@
         // человек блокировал бота в телеграме, а здесь оставалось «подключён»
         var tgOff = document.getElementById('tgDisconnect');
         if (tgOff) {
-            tgOff.addEventListener('click', async function() {
-                if (!confirm(L.tgDisconnectAsk)) return;
-                tgOff.disabled = true;
-                var res = await client.from('profiles')
-                    .update({ telegram_chat_id: null, telegram_username: null })
-                    .eq('id', window.ksltUser.id);
-                if (res.error) {
-                    tgOff.disabled = false;
-                    showMessage('profileMessage', res.error.message, true);
-                    return;
-                }
-                window.ksltProfile.telegram_chat_id = null;
-                window.ksltProfile.telegram_username = null;
-                renderProfile(window.ksltUser, window.ksltProfile);
+            tgOff.addEventListener('click', function() {
+                dbModal({
+                    title: L.tgDisconnectTitle,
+                    body: '<p class="db-modal-text">' + L.tgDisconnectAsk + '</p>',
+                    actions: [
+                        { label: L.cancel },
+                        { label: L.tgDisconnectYes, primary: true, onClick: async function(close) {
+                            var res = await client.from('profiles')
+                                .update({ telegram_chat_id: null, telegram_username: null })
+                                .eq('id', window.ksltUser.id);
+                            close();
+                            if (res.error) { showMessage('profileMessage', res.error.message, true); return; }
+                            window.ksltProfile.telegram_chat_id = null;
+                            window.ksltProfile.telegram_username = null;
+                            renderProfile(window.ksltUser, window.ksltProfile);
+                        } }
+                    ]
+                });
+            });
+        }
+
+        // Подключение. Раньше ссылка просто уводила в телеграм: человек
+        // возвращался, а в кабинете по-прежнему «не подключён», пока он сам не
+        // перезагрузит страницу. Теперь окно ждёт подключения и меняет
+        // состояние само.
+        var tgOn = document.getElementById('tgConnect');
+        if (tgOn) {
+            tgOn.addEventListener('click', function() {
+                var botUrl = 'https://t.me/' + (window.KSLT_TG_BOT || 'KSLTennisBot') +
+                             '?start=' + (window.ksltProfile.id || '');
+                var modal = dbModal({
+                    title: L.tgConnectTitle,
+                    body:
+                        '<p class="db-modal-text">' + L.tgWhy + '</p>' +
+                        '<ul class="db-tg-list">' +
+                            L.tgBenefits.map(function(b) { return '<li>' + b + '</li>'; }).join('') +
+                        '</ul>' +
+                        '<ol class="db-modal-steps">' +
+                            L.tgSteps.map(function(st) { return '<li>' + st + '</li>'; }).join('') +
+                        '</ol>' +
+                        '<div class="db-modal-wait" id="tgWait">' +
+                            '<span class="db-modal-spinner"></span>' +
+                            '<span id="tgWaitText">' + L.tgWaiting + '</span>' +
+                        '</div>',
+                    actions: [{ label: '\u2709 ' + L.tgOpenBot, primary: true, onClick: function() {
+                        window.open(botUrl, '_blank', 'noopener');
+                    } }]
+                });
+
+                // Ждём, пока бот отзовётся: телеграм открывается отдельно, и
+                // вернуться человек может в любой момент
+                var stop = false;
+                modal.el.addEventListener('kslt-closed', function() { stop = true; });
+                var origClose = modal.close;
+                modal.close = function() { stop = true; origClose(); };
+                modal.el.querySelector('.db-modal-close').addEventListener('click', function() { stop = true; });
+                modal.el.addEventListener('click', function(e) { if (e.target === modal.el) stop = true; });
+
+                (async function poll() {
+                    for (var i = 0; i < 100 && !stop; i++) {
+                        await new Promise(function(r) { setTimeout(r, 3000); });
+                        if (stop) return;
+                        var res = await client.from('profiles')
+                            .select('telegram_chat_id, telegram_username')
+                            .eq('id', window.ksltUser.id).single();
+                        if (res.data && res.data.telegram_chat_id) {
+                            window.ksltProfile.telegram_chat_id = res.data.telegram_chat_id;
+                            window.ksltProfile.telegram_username = res.data.telegram_username;
+                            var wait = document.getElementById('tgWait');
+                            if (wait) {
+                                wait.innerHTML = '<span class="db-modal-done">\u2713 ' + L.tgConnectedNow + '</span>';
+                            }
+                            setTimeout(function() {
+                                modal.close();
+                                renderProfile(window.ksltUser, window.ksltProfile);
+                            }, 1200);
+                            return;
+                        }
+                    }
+                })();
             });
         }
 
@@ -2457,6 +2553,60 @@
 
         btn.disabled = !dirty;
         btn.classList.remove('db-btn-saved');
+    }
+
+    /**
+     * Модальное окно кабинета.
+     *
+     * Раньше подтверждения показывались системным confirm() — чужой рамкой
+     * посреди тёмной страницы, — а каждое окно собиралось со своими стилями
+     * прямо в коде.
+     *
+     * @param {{title: string, body: string, actions: Array}} opts
+     * @returns {{el: HTMLElement, close: Function}}
+     */
+    function dbModal(opts) {
+        var back = document.createElement('div');
+        back.className = 'db-modal-back';
+
+        var actions = (opts.actions || []).map(function(a, i) {
+            return '<button type="button" class="db-btn ' + (a.primary ? 'db-btn-primary' : 'db-btn-outline') +
+                   '" data-act="' + i + '">' + a.label + '</button>';
+        }).join('');
+
+        back.innerHTML =
+            '<div class="db-modal" role="dialog" aria-modal="true">' +
+                '<div class="db-modal-head">' +
+                    '<h3 class="db-modal-title">' + opts.title + '</h3>' +
+                    '<button type="button" class="db-modal-close" aria-label="' + L.close + '">&times;</button>' +
+                '</div>' +
+                opts.body +
+                (actions ? '<div class="db-modal-actions">' + actions + '</div>' : '') +
+            '</div>';
+
+        document.body.appendChild(back);
+        document.body.style.overflow = 'hidden';
+
+        function close() {
+            back.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) { if (e.key === 'Escape') close(); }
+
+        back.querySelector('.db-modal-close').addEventListener('click', close);
+        back.addEventListener('click', function(e) { if (e.target === back) close(); });
+        document.addEventListener('keydown', onKey);
+
+        (opts.actions || []).forEach(function(a, i) {
+            var btn = back.querySelector('[data-act="' + i + '"]');
+            if (btn) btn.addEventListener('click', function() {
+                if (a.onClick) a.onClick(close);
+                else close();
+            });
+        });
+
+        return { el: back, close: close };
     }
 
     // ---- Save Profile ----
@@ -4101,6 +4251,33 @@
         document.querySelectorAll('.db-notif-toggle input').forEach(function(cb) {
             cb.addEventListener('change', onNotifToggle);
         });
+
+        // Удаление аккаунта. Привязка стояла на верхнем уровне файла, а раздел
+        // настроек рисуется позже — обработчик не навешивался никогда, и кнопка
+        // просто ничего не делала.
+        var deleteBtn = document.getElementById('settingsDeleteBtn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+                // Спрашивали дважды одним и тем же текстом — человек жал «ОК»
+                // два раза не читая, и защиты в этом не было. Одно окно, но с
+                // перечнем того, что теряется, останавливает лучше.
+                dbModal({
+                    title: L.deleteAccount,
+                    body:
+                        '<p class="db-modal-text">' + L.deleteConfirm + '</p>' +
+                        '<ul class="db-modal-steps">' +
+                            L.deleteLoses.map(function(x) { return '<li>' + x + '</li>'; }).join('') +
+                        '</ul>',
+                    actions: [
+                        { label: L.cancel },
+                        { label: L.deleteAccount, primary: true, onClick: function(close) {
+                            close();
+                            doDeleteAccount(deleteBtn);
+                        } }
+                    ]
+                });
+            });
+        }
     }
 
     // ---- Update Password ----
@@ -4199,14 +4376,8 @@
         btn.disabled = false;
     }
 
-    // ---- Delete Account ----
-    var settingsDeleteBtn = document.getElementById('settingsDeleteBtn');
-    if (settingsDeleteBtn) {
-        settingsDeleteBtn.addEventListener('click', async function() {
-            if (!confirm(L.deleteConfirm)) return;
-            if (!confirm(L.deleteConfirm)) return; // double confirm
-
-            var btn = this;
+    async function doDeleteAccount(btn) {
+        {
             btn.disabled = true;
             btn.textContent = '...';
 
@@ -4243,7 +4414,7 @@
                 btn.disabled = false;
                 btn.textContent = L.deleteAccount;
             }
-        });
+        }
     }
 
     // ---- Helpers ----

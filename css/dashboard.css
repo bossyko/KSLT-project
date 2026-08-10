@@ -2307,3 +2307,117 @@ select:-webkit-autofill {
     line-height: 1.5;
     color: var(--text-muted);
 }
+
+/* ============================================
+   Модальное окно — одно на весь кабинет
+   ============================================
+   Раньше каждое окно собиралось со своими стилями прямо в коде, а
+   подтверждения показывались системным confirm() — чужой рамкой посреди
+   тёмной страницы. */
+
+.db-modal-back {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: dbModalBack 0.2s ease;
+}
+
+@keyframes dbModalBack { from { opacity: 0; } }
+
+.db-modal {
+    width: 100%;
+    max-width: 420px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: var(--bg-card, #111);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 26px 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: dbModalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dbModalIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } }
+
+.db-modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.db-modal-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.db-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 2px 6px;
+    cursor: pointer;
+}
+
+.db-modal-close:hover { color: var(--text-primary); }
+
+.db-modal-text {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0 0 16px;
+}
+
+.db-modal-steps {
+    margin: 0 0 18px;
+    padding-left: 20px;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.db-modal-steps li::marker { color: var(--accent); font-weight: 700; }
+
+.db-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.db-modal-wait {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.db-modal-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: dbSpin 0.8s linear infinite;
+    flex: 0 0 auto;
+}
+
+@keyframes dbSpin { to { transform: rotate(360deg); } }
+
+.db-modal-done { color: #4caf50; }
