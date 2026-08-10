@@ -7,8 +7,8 @@ android {
         applicationId "com.kslt.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -22,10 +22,25 @@ android {
             def propsFile = rootProject.file('local.properties')
             if (propsFile.exists()) { props.load(new FileInputStream(propsFile)) }
 
-            storeFile file(props.getProperty('RELEASE_STORE_FILE', 'kslt-release.keystore'))
-            storePassword props.getProperty('RELEASE_STORE_PASSWORD', '')
-            keyAlias props.getProperty('RELEASE_KEY_ALIAS', '')
-            keyPassword props.getProperty('RELEASE_KEY_PASSWORD', '')
+            // Ключ подписи лежит вне репозитория, путь к нему задаётся в
+            // local.properties. Раньше здесь стояло имя файла по умолчанию —
+            // при пустой настройке сборка молча подписывалась ключом из самого
+            // репозитория, и понять это по сборке было нечем. Теперь лучше
+            // громко упасть, чем выпустить APK не тем ключом.
+            def storePath = props.getProperty('RELEASE_STORE_FILE')
+            def wantsRelease = gradle.startParameter.taskNames.any {
+                it.toLowerCase().contains('release')
+            }
+            if (wantsRelease && !storePath) {
+                throw new GradleException(
+                    'RELEASE_STORE_FILE не задан в local.properties — подписывать релиз нечем')
+            }
+            if (storePath) {
+                storeFile file(storePath)
+                storePassword props.getProperty('RELEASE_STORE_PASSWORD')
+                keyAlias props.getProperty('RELEASE_KEY_ALIAS')
+                keyPassword props.getProperty('RELEASE_KEY_PASSWORD')
+            }
         }
     }
     buildTypes {
