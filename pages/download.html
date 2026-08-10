@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <style>
         .dl-page {
+            position: relative;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -150,10 +151,24 @@
             color: var(--accent);
             font-weight: 600;
         }
+        .dl-top-back {
+            position: absolute;
+            top: 20px; left: 20px;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 14px;
+            border: 1px solid var(--border, rgba(255,255,255,0.12));
+            border-radius: 999px;
+            font-size: 14px;
+            color: var(--text-sec, rgba(255,255,255,0.7));
+            text-decoration: none;
+            background: rgba(255,255,255,0.03);
+        }
+        .dl-top-back:hover { color: var(--accent); border-color: var(--accent); }
     </style>
 </head>
 <body>
     <div class="dl-page">
+        <a href="../index.html" class="dl-top-back">← Назад на сайт</a>
         <div class="dl-card">
             <img src="../app/kslt-icon.png" alt="KSLT Tennis" class="dl-icon">
             <h1 class="dl-title">KSLT Tennis</h1>
