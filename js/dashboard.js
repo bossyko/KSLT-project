@@ -2307,16 +2307,14 @@
 
         var current = getProfileFormValues();
         var snap = window._profileSnapshot;
-        var dirty = current.firstName !== snap.firstName ||
-                    current.lastName !== snap.lastName ||
-                    current.phone !== snap.phone ||
-                    current.gender !== snap.gender ||
-                    current.birthDay !== snap.birthDay ||
-                    current.birthMonth !== snap.birthMonth ||
-                    current.birthYear !== snap.birthYear ||
-                    current.instagram !== snap.instagram ||
-                    current.telegram !== snap.telegram ||
-                    current.showSocials !== snap.showSocials;
+
+        // Сравниваем все поля снимка, а не перечисленные вручную. Раньше список
+        // был написан руками, и добавленные позже — галочка «показывать телефон»
+        // и страна — в него не попали: человек ставил галочку, кнопка оставалась
+        // заблокированной, и сохранить было нечем.
+        var dirty = Object.keys(current).some(function(key) {
+            return current[key] !== snap[key];
+        });
 
         btn.disabled = !dirty;
         btn.classList.remove('db-btn-saved');
