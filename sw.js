@@ -1,4 +1,4 @@
-var CACHE_NAME = 'kslt-v4';
+var CACHE_NAME = 'kslt-v5';
 
 var PRE_CACHE = [
   '/favicon.svg',
