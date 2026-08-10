@@ -335,16 +335,26 @@
         }
     }
 
+    /** Имя пользователя с одной собачкой: в базе оно лежит и с ней, и без. */
+    function withAt(handle) {
+        var h = String(handle || '').trim().replace(/^@+/, '');
+        return h ? '@' + h : '';
+    }
+
     async function loadAndEditPlayer(id) {
         if (!A.client) return;
         var result = await A.client.from('players').select('*').eq('id', id).single();
         if (result.data) {
             // Look up linked profile (gender, socials)
-            var profRes = await A.client.from('profiles').select('gender, telegram, instagram').eq('player_id', id).maybeSingle();
+            var profRes = await A.client.from('profiles').select('gender, telegram, instagram, phone, email').eq('player_id', id).maybeSingle();
             if (profRes.data) {
                 if (profRes.data.gender) result.data._gender = profRes.data.gender;
                 result.data._telegram = profRes.data.telegram || '';
                 result.data._instagram = profRes.data.instagram || '';
+                // Телефон и почта живут в профиле: колонки players.phone/email
+                // никто не заполняет, и в карточке всегда стоял прочерк
+                result.data._phone = profRes.data.phone || '';
+                result.data._email = profRes.data.email || '';
             }
             A.setAdminHash('players', 'edit', id);
             renderPlayerForm(result.data);
@@ -578,11 +588,11 @@
                 '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrPhone + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adPlrPhone" value="' + A.esc(item ? item.phone || '—' : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                        '<input type="text" class="ad-field-input" id="adPlrPhone" value="' + A.esc(item ? (item._phone || item.phone || '—') : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrEmail + '</label>' +
-                        '<input type="email" class="ad-field-input" id="adPlrEmail" value="' + A.esc(item ? item.email || '—' : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                        '<input type="email" class="ad-field-input" id="adPlrEmail" value="' + A.esc(item ? (item._email || item.email || '—') : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                     // Галочка «показывать телефон» убрана: администратору она ни к
                     // чему — он видит всё независимо от настроек игрока. А включить
@@ -600,13 +610,13 @@
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrTelegram + '</label>' +
                         '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
-                            (item._telegram ? '@' + A.esc(item._telegram) : '<span style="color:var(--text-dim);">\u2014</span>') +
+                            (item._telegram ? A.esc(withAt(item._telegram)) : '<span style="color:var(--text-dim);">\u2014</span>') +
                         '</div>' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrInstagram + '</label>' +
                         '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
-                            (item._instagram ? '@' + A.esc(item._instagram) : '<span style="color:var(--text-dim);">\u2014</span>') +
+                            (item._instagram ? A.esc(withAt(item._instagram)) : '<span style="color:var(--text-dim);">\u2014</span>') +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -1192,11 +1202,13 @@
                 // Stay on edit form — re-load fresh data
                 var fresh = await A.client.from('players').select('*').eq('id', plrEditingId).single();
                 if (fresh.data) {
-                    var profRes = await A.client.from('profiles').select('gender, telegram, instagram').eq('player_id', plrEditingId).maybeSingle();
+                    var profRes = await A.client.from('profiles').select('gender, telegram, instagram, phone, email').eq('player_id', plrEditingId).maybeSingle();
                     if (profRes.data) {
                         if (profRes.data.gender) fresh.data._gender = profRes.data.gender;
                         fresh.data._telegram = profRes.data.telegram || '';
                         fresh.data._instagram = profRes.data.instagram || '';
+                        fresh.data._phone = profRes.data.phone || '';
+                        fresh.data._email = profRes.data.email || '';
                     }
                     renderPlayerForm(fresh.data);
                 }
