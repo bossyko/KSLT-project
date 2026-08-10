@@ -376,9 +376,9 @@
 
     // === Auth screen ===
     'auth.skip':         { ru: 'Пропустить',           en: 'Skip',            kg: 'Өткөрүп жиберүү' },
-    'profile.visibleToClub': { ru: 'виден членам клуба', en: 'visible to club members', kg: 'клуб мүчөлөрүнө көрүнөт' },
-    'profile.hiddenFromAll': { ru: 'скрыт', en: 'hidden', kg: 'жашырылган' },
-    'profile.contactsHint': { ru: 'Контакты видят только члены клуба. Гостям и просто зарегистрированным они не показываются.', en: 'Contact details are visible to club members only. Guests and registered users without a membership do not see them.', kg: 'Байланыш маалыматын клубдун мүчөлөрү гана көрөт. Меймандар менен жөн катталгандар аны көрүшпөйт.' },
+    'profile.visibleToClub': { ru: 'виден членам КСЛТ', en: 'visible to KSLT members', kg: 'КСЛТ мүчөлөрүнө көрүнөт' },
+    'profile.hiddenFromAll': { ru: 'скрыт от всех', en: 'hidden from everyone', kg: 'эч кимге көрүнбөйт' },
+    'profile.contactsHint': { ru: 'Контакты видят только члены КСЛТ. Гостям и просто зарегистрированным они не показываются.', en: 'Contact details are visible to club members only. Guests and registered users without a membership do not see them.', kg: 'Байланыш маалыматын клубдун мүчөлөрү гана көрөт. Меймандар менен жөн катталгандар аны көрүшпөйт.' },
     'profile.whatsappSame': { ru: 'тот же, что телефон', en: 'same as phone', kg: 'телефон менен бирдей' },
     'profile.showPhone': { ru: 'Показывать мой телефон членам клуба', en: 'Show my phone to club members', kg: 'Клуб мүчөлөрүнө телефонумду көрсөтүү' },
     'news.fullPoster':   { ru: 'Афиша целиком', en: 'Full poster', kg: 'Толук афиша' },
