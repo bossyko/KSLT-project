@@ -403,6 +403,24 @@ async function sendTg(chatId: number, text: string): Promise<boolean> {
     const data = await res.json()
     if (!data.ok) {
       console.error('TG API error:', data)
+
+      // Человек заблокировал бота — связь больше не работает. Без очистки в
+      // базе остался бы chat_id: уведомления молча пропадают, а в кабинете
+      // написано «подключён», и переподключить не получается.
+      if (data.error_code === 403) {
+        try {
+          const db = createClient(
+            Deno.env.get('SUPABASE_URL')!,
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+          )
+          await db.from('profiles')
+            .update({ telegram_chat_id: null, telegram_username: null })
+            .eq('telegram_chat_id', chatId)
+          console.log(`[match-notify] бот заблокирован у chat_id ${chatId}, связь снята`)
+        } catch (e) {
+          console.error('не удалось снять связь:', e)
+        }
+      }
       return false
     }
     return true

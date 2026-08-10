@@ -33,6 +33,9 @@
         instagram: 'Instagram', telegram: 'Telegram',
         tgConnected: 'Telegram байланган',
         tgConnect: 'Telegram байлоо',
+        notifTgOff: 'Telegram\u2011боту байланган эмес — билдирүүлөр келбейт. Профилден байласаңыз болот.',
+        tgDisconnect: 'ажыратуу',
+        tgDisconnectAsk: 'Ботту ажыратасызбы? Telegram аркылуу билдирүүлөр келбей калат.',
         tgWhy: 'Ботту байласаңыз, эмне келет:',
         tgBenefits: ['Матчтын убактысы жана каршылашы', 'Мелдешке чакыруу жана эскертме', 'Мүчөлүк мөөнөтү бүтөрү жөнүндө', 'Сырсөз алмашкан жөнүндө коопсуздук билдирүүсү', 'Кирүү кодду — кат ордуна, ошол замат'],
         tgWhatComes: 'Матчтар, чакыруулар, мелдештер жана коопсуздук билдирүүлөрү ушул жерге келет. Кайсынысы керек экенин Жөндөөлөрдөн тандасаңыз болот.',
@@ -244,6 +247,9 @@
         instagram: 'Instagram', telegram: 'Telegram',
         tgConnected: 'Telegram connected',
         tgConnect: 'Connect Telegram',
+        notifTgOff: 'The Telegram bot is not connected, so nothing will arrive there. You can connect it in your profile.',
+        tgDisconnect: 'disconnect',
+        tgDisconnectAsk: 'Disconnect the bot? Telegram notifications will stop arriving.',
         tgWhy: 'What you get after connecting the bot:',
         tgBenefits: ['Match time and opponent', 'Challenges and tournament reminders', 'Membership expiry notice', 'Security alerts when your password changes', 'Sign-in codes — instantly, instead of email'],
         tgWhatComes: 'Matches, challenges, tournaments and security alerts arrive here. You can choose which ones in Settings.',
@@ -455,6 +461,9 @@
         instagram: 'Instagram', telegram: 'Telegram',
         tgConnected: 'Telegram подключён',
         tgConnect: 'Подключить Telegram',
+        notifTgOff: 'Telegram\u2011бот не подключён — сюда ничего не придёт. Подключить его можно в Профиле.',
+        tgDisconnect: 'отключить',
+        tgDisconnectAsk: 'Отключить бота? Уведомления в Telegram приходить перестанут.',
         tgWhy: 'Что будет приходить в Telegram:',
         tgBenefits: ['Время матча и соперник', 'Вызовы на игру и напоминания о турнирах', 'Когда истекает членство', 'Оповещение, если сменили пароль или почту', 'Код для входа — сразу, вместо письма'],
         tgWhatComes: 'Сюда приходят матчи, вызовы, турниры и оповещения безопасности. Выбрать, что именно получать, можно в Настройках.',
@@ -1546,14 +1555,24 @@
                 // человек не понимал, зачем подключать бота и что он получит.
                 // Перечисляем всё, что приходит, до нажатия, а не после.
                 '<div class="db-tg-block">' +
+                    // Подпись слева, состояние и действие справа — как у контактов.
+                    // Ползунок тут не годится: подключение уводит в телеграм, где
+                    // надо нажать «Старт». Человек включил бы ползунок, ничего там
+                    // не нажал и вернулся к надписи «подключено» — ровно та ложь,
+                    // от которой мы уходим.
+                    '<div class="db-contact-head">' +
+                        '<label class="db-field-label">Telegram-бот</label>' +
+                        (profile.telegram_chat_id
+                            ? '<span class="db-tg-state">' + L.tgConnected +
+                              ' \u00b7 <button type="button" class="db-tg-off" id="tgDisconnect">' + L.tgDisconnect + '</button></span>'
+                            : '<a href="https://t.me/' + (window.KSLT_TG_BOT || 'KSLTennisBot') + '?start=' + (profile.id || '') + '" target="_blank" rel="noopener" class="db-tg-btn">\u2709 ' + L.tgConnect + '</a>') +
+                    '</div>' +
                     (profile.telegram_chat_id
-                        ? '<div class="db-tg-connected"><span>\u2713</span> ' + L.tgConnected + '</div>' +
-                          '<div class="db-tg-note">' + L.tgWhatComes + '</div>'
+                        ? '<div class="db-tg-note">' + L.tgWhatComes + '</div>'
                         : '<div class="db-tg-title">' + L.tgWhy + '</div>' +
                           '<ul class="db-tg-list">' +
                               L.tgBenefits.map(function(item) { return '<li>' + item + '</li>'; }).join('') +
-                          '</ul>' +
-                          '<a href="https://t.me/' + (window.KSLT_TG_BOT || 'KSLTennisBot') + '?start=' + (profile.id || '') + '" target="_blank" rel="noopener" class="db-tg-btn">\u2709 ' + L.tgConnect + '</a>'
+                          '</ul>'
                     ) +
                 '</div>' +
             '</div>' +
@@ -1574,6 +1593,27 @@
         document.getElementById('avatarInput').addEventListener('change', uploadAvatar);
 
         bindShowToggleLabels();
+
+        // Отключение бота: раньше отвязаться из кабинета было нельзя вовсе —
+        // человек блокировал бота в телеграме, а здесь оставалось «подключён»
+        var tgOff = document.getElementById('tgDisconnect');
+        if (tgOff) {
+            tgOff.addEventListener('click', async function() {
+                if (!confirm(L.tgDisconnectAsk)) return;
+                tgOff.disabled = true;
+                var res = await client.from('profiles')
+                    .update({ telegram_chat_id: null, telegram_username: null })
+                    .eq('id', window.ksltUser.id);
+                if (res.error) {
+                    tgOff.disabled = false;
+                    showMessage('profileMessage', res.error.message, true);
+                    return;
+                }
+                window.ksltProfile.telegram_chat_id = null;
+                window.ksltProfile.telegram_username = null;
+                renderProfile(window.ksltUser, window.ksltProfile);
+            });
+        }
 
         // Track initial values for dirty check
         window._profileSnapshot = getProfileFormValues();
@@ -3504,15 +3544,22 @@
             challenges: L.notifChallenges
         };
 
+        // Без подключённого бота столбец телеграма бесполезен: человек включал
+        // ползунок и ждал сообщений, которым неоткуда взяться. Гасим его и
+        // говорим, что делать.
+        var tgLinked = !!(window.ksltProfile && window.ksltProfile.telegram_chat_id);
+
         var rows = '';
         NOTIF_CATS.forEach(function(cat) {
             var cells = '';
             NOTIF_CHANNELS.forEach(function(ch) {
                 var on = isNotifOn(prefs, ch, cat);
+                var off = (ch === 'tg' && !tgLinked);
                 cells +=
                     '<td style="text-align:center;padding:8px 12px;">' +
-                        '<label class="db-notif-toggle">' +
-                            '<input type="checkbox" data-ch="' + ch + '" data-cat="' + cat + '"' + (on ? ' checked' : '') + '>' +
+                        '<label class="db-notif-toggle' + (off ? ' db-notif-off' : '') + '">' +
+                            '<input type="checkbox" data-ch="' + ch + '" data-cat="' + cat + '"' +
+                                (on && !off ? ' checked' : '') + (off ? ' disabled' : '') + '>' +
                             '<span class="db-notif-slider"></span>' +
                         '</label>' +
                     '</td>';
@@ -3534,6 +3581,8 @@
                 '</tr></thead>' +
                 '<tbody>' + rows + '</tbody>' +
             '</table>' +
+            (tgLinked ? '' :
+                '<div class="db-notif-hint">' + L.notifTgOff + '</div>') +
         '</div>';
     }
 

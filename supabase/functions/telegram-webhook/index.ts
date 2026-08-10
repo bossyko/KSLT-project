@@ -34,6 +34,28 @@
           return new Response('ok', { status: 200 })
         }
 
+        // ---- Человек заблокировал или удалил бота ----
+        //
+        // Телеграм сообщает об этом отдельным событием. Без обработки в базе
+        // оставался chat_id: уведомления молча переставали доходить, а в
+        // кабинете было написано «подключён», и переподключить не получалось.
+        if (body.my_chat_member) {
+          const upd = body.my_chat_member
+          const status = upd.new_chat_member?.status
+          if (status === 'kicked' || status === 'left') {
+            const supabase = createClient(
+              Deno.env.get('SUPABASE_URL')!,
+              Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+            )
+            await supabase
+              .from('profiles')
+              .update({ telegram_chat_id: null, telegram_username: null })
+              .eq('telegram_chat_id', upd.chat.id)
+            console.log(`[telegram-webhook] бот отключён у chat_id ${upd.chat.id}: ${status}`)
+          }
+          return new Response('ok', { status: 200 })
+        }
+
         // ---- Handle message ----
         const message = body.message
         if (!message) {
