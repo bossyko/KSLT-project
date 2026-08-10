@@ -78,7 +78,11 @@
 
         // Handle /start with deep link parameter (profile UUID)
         if (text.startsWith('/start ')) {
-          const profileId = text.replace('/start ', '').trim()
+          // Приложение слало ссылку с приставкой link_, а здесь ждали голый
+          // идентификатор: проверка не проходила, и бот отвечал «Invalid link».
+          // Подключиться из приложения было нельзя вовсе. Приставку снимаем —
+          // так заработают и уже установленные сборки.
+          const profileId = text.replace('/start ', '').trim().replace(/^link_/, '')
 
           // Validate UUID format
           const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

@@ -330,6 +330,14 @@
   }
 
   // ---- Sub-overlay helper ----
+  /** Закрывает окно так же, как кнопка «Назад» — с тем же затуханием. */
+  function closeSubOverlay(overlay) {
+    var ov = overlay || document.getElementById('profSubOverlay');
+    if (!ov) return;
+    ov.classList.remove('open');
+    setTimeout(function() { ov.remove(); }, 300);
+  }
+
   function openSubOverlay(title, contentHtml) {
     var existing = document.getElementById('profSubOverlay');
     if (existing) existing.remove();
@@ -1284,16 +1292,76 @@
 
     if (linked) {
       html += '<h3 style="color:var(--accent);margin-bottom:8px">' + I18N.t('profile.tgConnectedTitle') + '</h3>';
-      html += '<p style="color:var(--text-sec);font-size:13px">' + I18N.t('profile.tgWhatComes') + '</p>';
+      html += '<p style="color:var(--text-sec);font-size:14px;margin-bottom:20px">' + I18N.t('profile.tgWhatComes') + '</p>';
+      // Отключить бота из приложения было нельзя вовсе: человек блокировал его
+      // в телеграме, а здесь оставалось «подключён»
+      html += '<button class="pd-challenge-btn" id="profTgOff" style="background:transparent;border:1px solid var(--border);color:var(--text-sec)">' +
+              I18N.t('profile.tgDisconnect') + '</button>';
     } else {
       html += '<h3 style="color:var(--text);margin-bottom:8px">' + I18N.t('profile.tgConnectTitle') + '</h3>';
-      html += '<p style="color:var(--text-sec);font-size:13px;margin-bottom:12px">' + I18N.t('profile.tgWhy') + '</p>';
+      html += '<p style="color:var(--text-sec);font-size:14px;margin-bottom:12px">' + I18N.t('profile.tgWhy') + '</p>';
       html += list;
-      html += '<a href="https://t.me/' + esc(tgBot) + '?start=link_' + (_profile ? _profile.id : '') + '" target="_blank" class="pd-challenge-btn" style="display:block;text-decoration:none;text-align:center;background:var(--blue)">' + I18N.t('profile.tgOpenBot') + ' @' + esc(tgBot) + '</a>';
+      html += '<a href="https://t.me/' + esc(tgBot) + '?start=' + (_profile ? _profile.id : '') + '" target="_blank" id="profTgOpen" class="pd-challenge-btn" style="display:block;text-decoration:none;text-align:center;background:var(--blue)">' + I18N.t('profile.tgOpenBot') + '</a>';
+      html += '<div id="profTgWait" style="display:none;margin-top:16px;font-size:13px;color:var(--text-sec)">' +
+              I18N.t('profile.tgWaiting') + '</div>';
     }
     html += '</div>';
 
-    openSubOverlay(I18N.t('profile.telegram'), html);
+    var ov = openSubOverlay(I18N.t('profile.telegram'), html);
+
+    var off = ov.querySelector('#profTgOff');
+    if (off) {
+      off.addEventListener('click', function() {
+        off.disabled = true;
+        supabaseClient.from('profiles')
+          .update({ telegram_chat_id: null, telegram_username: null })
+          .eq('id', _profile.id)
+          .then(function(r) {
+            if (r.error) { off.disabled = false; window.KSLT_APP.toast(I18N.t('profile.savedErr')); return; }
+            _profile.telegram_chat_id = null;
+            _profile.telegram_id = null;
+            window.KSLT_AUTH.currentProfile = _profile;
+            closeSubOverlay(ov);
+            renderProfile();
+          });
+      });
+    }
+
+    // Телеграм — отдельное приложение: человек уходит туда и возвращается.
+    // Ждём ответа бота, чтобы состояние обновилось само, без перезапуска.
+    var openBtn = ov.querySelector('#profTgOpen');
+    if (openBtn) {
+      openBtn.addEventListener('click', function() {
+        var wait = ov.querySelector('#profTgWait');
+        if (wait) wait.style.display = '';
+        var stop = false;
+        var stopWatch = setInterval(function() {
+          if (!document.body.contains(ov)) { stop = true; clearInterval(stopWatch); }
+        }, 1000);
+
+        (function poll(tries) {
+          if (stop || tries > 100) { clearInterval(stopWatch); return; }
+          setTimeout(function() {
+            if (stop) return;
+            supabaseClient.from('profiles')
+              .select('telegram_chat_id, telegram_username')
+              .eq('id', _profile.id).single()
+              .then(function(r) {
+                if (r.data && r.data.telegram_chat_id) {
+                  clearInterval(stopWatch);
+                  _profile.telegram_chat_id = r.data.telegram_chat_id;
+                  _profile.telegram_id = r.data.telegram_chat_id;
+                  window.KSLT_AUTH.currentProfile = _profile;
+                  if (wait) wait.innerHTML = '<span style="color:var(--accent)">\u2713 ' + I18N.t('profile.tgConnectedNow') + '</span>';
+                  setTimeout(function() { closeSubOverlay(ov); renderProfile(); }, 1200);
+                } else {
+                  poll(tries + 1);
+                }
+              });
+          }, 3000);
+        })(0);
+      });
+    }
   }
 
   // ---- Delete account ----
