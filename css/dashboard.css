@@ -273,7 +273,11 @@ body.db-page.auth-ready {
     box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
 }
 
-.db-field-input:read-only {
+/* Только для текстовых полей: псевдокласс :read-only срабатывает и на
+   выпадающих списках — они не «редактируемый текст», — и «Пол» с датой
+   рождения выглядели тусклыми, будто недоступны, хотя работают. */
+input.db-field-input:read-only,
+textarea.db-field-input:read-only {
     color: var(--text-muted);
     cursor: default;
     background: var(--bg-secondary);

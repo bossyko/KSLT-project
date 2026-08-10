@@ -50,6 +50,9 @@
         playerNotLinkedText: 'Аккаунтуңузду оюнчу профили менен байланыштыруу үчүн администраторго кайрылыңыз',
         changePassword: 'Сыр сөздү өзгөртүү',
         currentPassword: 'Учурдагы сыр сөз',
+        phCurrentPassword: 'Учурдагы сыр сөзүңүз',
+        phNewPassword: 'Кеминде 8 белги',
+        phConfirmPassword: 'Сыр сөздү кайталаңыз',
         newPassword: 'Жаңы сыр сөз',
         confirmPassword: 'Сыр сөздү тастыктаңыз',
         updatePassword: 'Сыр сөздү жаңылоо',
@@ -248,6 +251,9 @@
         playerNotLinkedText: 'Contact admin to link your account with a player profile',
         changePassword: 'Change Password',
         currentPassword: 'Current Password',
+        phCurrentPassword: 'Your current password',
+        phNewPassword: 'At least 8 characters',
+        phConfirmPassword: 'Repeat the password',
         newPassword: 'New Password',
         confirmPassword: 'Confirm Password',
         updatePassword: 'Update Password',
@@ -446,6 +452,9 @@
         playerNotLinkedText: 'Обратитесь к администратору для привязки аккаунта к профилю игрока',
         changePassword: 'Смена пароля',
         currentPassword: 'Текущий пароль',
+        phCurrentPassword: 'Ваш текущий пароль',
+        phNewPassword: 'Минимум 8 символов',
+        phConfirmPassword: 'Повторите пароль',
         newPassword: 'Новый пароль',
         confirmPassword: 'Подтвердите пароль',
         updatePassword: 'Обновить пароль',
@@ -3773,14 +3782,14 @@
                 '<div class="db-field">' +
                     '<label class="db-field-label">' + L.currentPassword + '</label>' +
                     '<div class="db-pw-field">' +
-                        '<input class="db-field-input" type="password" id="settingsCurrentPw" placeholder="••••••••" autocomplete="current-password">' +
+                        '<input class="db-field-input" type="password" id="settingsCurrentPw" placeholder="' + L.phCurrentPassword + '" autocomplete="current-password">' +
                         '<button type="button" class="db-pw-eye" data-target="settingsCurrentPw">' + eyeSvgOpen + '</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="db-field">' +
                     '<label class="db-field-label">' + L.newPassword + '</label>' +
                     '<div class="db-pw-field">' +
-                        '<input class="db-field-input" type="password" id="settingsNewPw" placeholder="••••••••" autocomplete="new-password">' +
+                        '<input class="db-field-input" type="password" id="settingsNewPw" placeholder="' + L.phNewPassword + '" autocomplete="new-password">' +
                         '<button type="button" class="db-pw-eye" data-target="settingsNewPw">' + eyeSvgOpen + '</button>' +
                     '</div>' +
                 '</div>' +
@@ -3793,21 +3802,16 @@
                 '<div class="db-field">' +
                     '<label class="db-field-label">' + L.confirmPassword + '</label>' +
                     '<div class="db-pw-field">' +
-                        '<input class="db-field-input" type="password" id="settingsConfirmPw" placeholder="••••••••" autocomplete="new-password">' +
+                        '<input class="db-field-input" type="password" id="settingsConfirmPw" placeholder="' + L.phConfirmPassword + '" autocomplete="new-password">' +
                         '<button type="button" class="db-pw-eye" data-target="settingsConfirmPw">' + eyeSvgOpen + '</button>' +
                     '</div>' +
                 '</div>' +
                 '<button class="db-btn db-btn-primary" id="settingsUpdatePwBtn" disabled>' + L.updatePassword + '</button>' +
             '</div>' +
 
-            '<div class="db-card db-settings-section">' +
-                '<div class="db-card-title">' + L.language + '</div>' +
-                '<div class="db-btn-row">' +
-                    '<a href="dashboard.html#settings" class="db-btn ' + (!isEn && !isKg ? 'db-btn-primary' : 'db-btn-outline') + '">Русский</a>' +
-                    '<a href="dashboard-en.html#settings" class="db-btn ' + (isEn ? 'db-btn-primary' : 'db-btn-outline') + '">English</a>' +
-                    '<a href="dashboard-kg.html#settings" class="db-btn ' + (isKg ? 'db-btn-primary' : 'db-btn-outline') + '">Кыргызча</a>' +
-                '</div>' +
-            '</div>' +
+            // Выбор языка убран: он есть в шапке на каждой странице, и второй
+            // переключатель в настройках только заставляет гадать, чем они
+            // отличаются
 
             buildNotifySection() +
 
