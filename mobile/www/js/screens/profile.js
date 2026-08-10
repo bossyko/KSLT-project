@@ -882,6 +882,7 @@
     html += '</div>';
     html += showToggle('profShowPhone', p.show_phone);
     html += '</div>';
+    html += '<div class="prof-contacts-note">' + I18N.t('profile.contactsHint') + '</div>';
 
     // WhatsApp: свой номер, если отличается от основного. Пустое поле значит
     // «тот же, что телефон» — вводить номер дважды никого не заставляем.

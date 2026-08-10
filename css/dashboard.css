@@ -2165,3 +2165,16 @@ select:-webkit-autofill {
 
 .db-show-toggle input { accent-color: var(--accent); cursor: pointer; }
 .db-show-toggle:hover { color: var(--text-secondary); }
+
+/* Кому видны контакты — вопрос неочевидный, и без объяснения человек не
+   понимает, что открывает и кому */
+.db-contacts-note {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+}

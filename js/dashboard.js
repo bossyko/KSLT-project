@@ -34,8 +34,9 @@
         tgConnected: 'Telegram байланган',
         tgConnect: 'Telegram байлоо',
         tgConnectHint: 'Мүчөлүк мөөнөтү жөнүндө Telegram аркылуу эскертме алыңыз',
-        showToClub: 'Клуб мүчөлөрүнө көрсөтүү',
-        showShort: 'көрсөтүү',
+        showToClub: 'Клуб мүчөлөрүнө көрүнөт',
+        showShort: 'клуб мүчөлөрүнө',
+        contactsHint: 'Байланыш маалыматын клубдун мүчөлөрү гана көрөт. Меймандар менен жөн катталгандар аны көрүшпөйт.',
         whatsappHint: 'Бош — телефон номери менен бирдей',
         whatsappSame: 'телефон менен бирдей',
         showPhone: 'Клуб мүчөлөрүнө телефонумду көрсөтүү',
@@ -239,8 +240,9 @@
         tgConnected: 'Telegram connected',
         tgConnect: 'Connect Telegram',
         tgConnectHint: 'Get membership expiry reminders via Telegram',
-        showToClub: 'Show to club members',
-        showShort: 'show',
+        showToClub: 'Visible to club members',
+        showShort: 'to club members',
+        contactsHint: 'Contact details are visible to club members only. Guests and registered users without a membership do not see them.',
         whatsappHint: 'Leave empty if it is the same as your phone',
         whatsappSame: 'same as phone',
         showPhone: 'Show my phone to club members',
@@ -444,8 +446,9 @@
         tgConnected: 'Telegram подключён',
         tgConnect: 'Подключить Telegram',
         tgConnectHint: 'Получайте напоминания об истечении членства в Telegram',
-        showToClub: 'Показывать членам клуба',
-        showShort: 'показывать',
+        showToClub: 'Виден членам клуба',
+        showShort: 'членам клуба',
+        contactsHint: 'Контакты видят только члены клуба. Гостям и просто зарегистрированным они не показываются.',
         whatsappHint: 'Пусто — тот же, что телефон',
         whatsappSame: 'тот же, что телефон',
         showPhone: 'Показывать мой телефон членам клуба',
@@ -1454,6 +1457,7 @@
                 // стран оставалась половина ширины, и названия обрезались
                 // Каждый способ связи открывается отдельно: телеграм может быть
                 // рабочий, WhatsApp личный. Переключатель стоит у своего поля.
+                '<div class="db-contacts-note">' + L.contactsHint + '</div>' +
                 '<div class="db-field">' +
                     '<div class="db-contact-head">' +
                         '<label class="db-field-label">' + L.phone + ' <span class="db-required">*</span></label>' +
