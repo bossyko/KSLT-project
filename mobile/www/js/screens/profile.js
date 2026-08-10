@@ -931,6 +931,7 @@
     html += '</div>';
 
     var ov = openSubOverlay(I18N.t('profile.editProfile'), html);
+    bindShowToggleLabels(ov);
 
     // Avatar upload
     var avatarEl = document.getElementById('profEditAvatar');
@@ -1079,11 +1080,30 @@
   }
 
   // ---- Notifications ----
-  /** Переключатель «показывать» рядом с полем связи. */
+  /**
+   * Переключатель видимости рядом с полем связи. Галочка тут не годится: по
+   * ней не прочитать, что произойдёт. Ползунок показывает состояние сразу, а
+   * подпись меняется вместе с ним.
+   */
   function showToggle(id, checked) {
     return '<label class="prof-show-toggle">' +
-      '<input type="checkbox" id="' + id + '"' + (checked ? ' checked' : '') + '>' +
-      '<span>' + I18N.t('profile.showShort') + '</span></label>';
+      '<span class="prof-show-label" data-for="' + id + '">' +
+        I18N.t(checked ? 'profile.visibleToClub' : 'profile.hiddenFromAll') +
+      '</span>' +
+      '<span class="prof-switch">' +
+        '<input type="checkbox" id="' + id + '"' + (checked ? ' checked' : '') + '>' +
+        '<span class="prof-switch-slider"></span>' +
+      '</span></label>';
+  }
+
+  /** Подпись переключателя следует за его состоянием. */
+  function bindShowToggleLabels(root) {
+    (root || document).querySelectorAll('.prof-show-toggle input').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var label = (root || document).querySelector('.prof-show-label[data-for="' + input.id + '"]');
+        if (label) label.textContent = I18N.t(input.checked ? 'profile.visibleToClub' : 'profile.hiddenFromAll');
+      });
+    });
   }
 
   function showNotifications() {

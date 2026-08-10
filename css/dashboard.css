@@ -2155,16 +2155,58 @@ select:-webkit-autofill {
 .db-show-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.75rem;
-    color: var(--text-muted);
+    gap: 8px;
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
 }
 
-.db-show-toggle input { accent-color: var(--accent); cursor: pointer; }
-.db-show-toggle:hover { color: var(--text-secondary); }
+.db-show-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    transition: color 0.2s;
+}
+
+.db-show-toggle:has(input:checked) .db-show-label { color: var(--accent); }
+
+/* Ползунок: по галочке не прочитать, что произойдёт, а по нему видно
+   состояние сразу */
+.db-switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 18px;
+    flex: 0 0 auto;
+}
+
+.db-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.db-switch-slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    transition: background 0.2s;
+}
+
+.db-switch-slider::before {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+
+.db-switch input:checked + .db-switch-slider { background: var(--accent); }
+.db-switch input:checked + .db-switch-slider::before { transform: translateX(16px); }
 
 /* Кому видны контакты — вопрос неочевидный, и без объяснения человек не
    понимает, что открывает и кому */

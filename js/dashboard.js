@@ -34,6 +34,8 @@
         tgConnected: 'Telegram байланган',
         tgConnect: 'Telegram байлоо',
         tgConnectHint: 'Мүчөлүк мөөнөтү жөнүндө Telegram аркылуу эскертме алыңыз',
+        visibleToClub: 'клуб мүчөлөрүнө көрүнөт',
+        hiddenFromAll: 'жашырылган',
         showToClub: 'Клуб мүчөлөрүнө көрүнөт',
         showShort: 'клуб мүчөлөрүнө',
         contactsHint: 'Байланыш маалыматын клубдун мүчөлөрү гана көрөт. Меймандар менен жөн катталгандар аны көрүшпөйт.',
@@ -240,6 +242,8 @@
         tgConnected: 'Telegram connected',
         tgConnect: 'Connect Telegram',
         tgConnectHint: 'Get membership expiry reminders via Telegram',
+        visibleToClub: 'visible to club members',
+        hiddenFromAll: 'hidden',
         showToClub: 'Visible to club members',
         showShort: 'to club members',
         contactsHint: 'Contact details are visible to club members only. Guests and registered users without a membership do not see them.',
@@ -446,6 +450,8 @@
         tgConnected: 'Telegram подключён',
         tgConnect: 'Подключить Telegram',
         tgConnectHint: 'Получайте напоминания об истечении членства в Telegram',
+        visibleToClub: 'виден членам клуба',
+        hiddenFromAll: 'скрыт',
         showToClub: 'Виден членам клуба',
         showShort: 'членам клуба',
         contactsHint: 'Контакты видят только члены клуба. Гостям и просто зарегистрированным они не показываются.',
@@ -1346,12 +1352,33 @@
      * «0555123456» — у каждого по-своему. Восстановление доступа ищет человека
      * по номеру, и такие записи между собой не сходятся.
      */
-    /** Переключатель «показывать» рядом с полем связи. */
+    /**
+     * Переключатель видимости рядом с полем связи.
+     *
+     * Обычная галочка тут не годилась: по ней не прочитать, что именно
+     * произойдёт. Ползунок сразу показывает состояние, а подпись меняется
+     * вместе с ним — «виден членам клуба» или «скрыт».
+     */
     function showToggle(id, checked) {
-        return '<label class="db-show-toggle" title="' + L.showToClub + '">' +
-            '<input type="checkbox" id="' + id + '"' + (checked ? ' checked' : '') + '>' +
-            '<span>' + L.showShort + '</span>' +
+        return '<label class="db-show-toggle">' +
+            '<span class="db-show-label" data-for="' + id + '">' +
+                (checked ? L.visibleToClub : L.hiddenFromAll) +
+            '</span>' +
+            '<span class="db-switch">' +
+                '<input type="checkbox" id="' + id + '"' + (checked ? ' checked' : '') + '>' +
+                '<span class="db-switch-slider"></span>' +
+            '</span>' +
         '</label>';
+    }
+
+    /** Подпись переключателя следует за его состоянием. */
+    function bindShowToggleLabels() {
+        document.querySelectorAll('.db-show-toggle input').forEach(function(input) {
+            input.addEventListener('change', function() {
+                var label = document.querySelector('.db-show-label[data-for="' + input.id + '"]');
+                if (label) label.textContent = input.checked ? L.visibleToClub : L.hiddenFromAll;
+            });
+        });
     }
 
     /**
@@ -1529,6 +1556,8 @@
             document.getElementById('avatarInput').click();
         });
         document.getElementById('avatarInput').addEventListener('change', uploadAvatar);
+
+        bindShowToggleLabels();
 
         // Track initial values for dirty check
         window._profileSnapshot = getProfileFormValues();
