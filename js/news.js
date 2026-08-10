@@ -78,6 +78,9 @@ function mapDbArticle(row) {
         // Кадрирование при загрузке касается только карточек списка;
         // шапка новости осталась прежней
         cardImage: row.image || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
+        // Афишу рисовали, чтобы её прочитали: даты, состав, телеграм-канал.
+        // В шапке она обрезана по ширине, поэтому исходник открывается по нажатию.
+        imageOriginal: row.image_original || '',
         date: dateStr,
         author: row.author || 'KSLT',
         category: row.category || 'announcement',
@@ -215,6 +218,7 @@ function initFromStatic(slug) {
 function getLabels() {
     return typeof window.newsLabels !== 'undefined' ? window.newsLabels : {
         backToNews: "Назад к новостям",
+        openPoster: "Афиша целиком",
         readTime: "мин чтения",
         relatedTitle: "Похожие статьи",
         reactionsTitle: "Оцените статью",
@@ -351,10 +355,27 @@ function renderHero(article, readTime) {
     }
     back.innerHTML = '<a href="' + backUrl + '" class="kslt-back">\u2190 ' + labels.backToNews + '</a>';
 
+    // Нажатие на кнопку в шапке открывает исходную афишу целиком
+    if (article.imageOriginal) {
+        container.addEventListener('click', function(e) {
+            if (!e.target.closest('.news-hero-zoom')) return;
+            e.preventDefault();
+            openPhotoViewer([article.imageOriginal], 0);
+        });
+    }
+
     container.innerHTML =
         '<div class="news-hero-bg">' +
             '<img src="' + esc(article.heroImage) + '" alt="">' +
             '<div class="news-hero-overlay"></div>' +
+            (article.imageOriginal
+                ? '<button type="button" class="news-hero-zoom" aria-label="' + labels.openPoster + '">' +
+                      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">' +
+                          '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>' +
+                      '</svg>' +
+                      '<span>' + labels.openPoster + '</span>' +
+                  '</button>'
+                : '') +
         '</div>' +
         '<div class="news-hero-content">' +
             '<span class="news-category-badge news-category-' + article.category + '">' + article.categoryLabel + '</span>' +
@@ -502,7 +523,25 @@ function initPhotoViewer(root, gallery) {
         return el.tagName === 'IMG' ? el.src : el.getAttribute('href');
     }
 
-    function open(urls, index) {
+    root.addEventListener('click', function(e) {
+        var main = e.target.closest('.news-carousel-main');
+        if (main && gallery && gallery.length) {
+            e.preventDefault();
+            openPhotoViewer(gallery, Number(main.dataset.index) || 0);
+            return;
+        }
+
+        var el = e.target.closest(IN_TEXT);
+        if (!el) return;
+        e.preventDefault();
+        var items = Array.prototype.slice.call(root.querySelectorAll(IN_TEXT));
+        var i = items.indexOf(el);
+        if (i !== -1) openPhotoViewer(items.map(urlOf), i);
+    });
+}
+
+/** Открывает снимок поверх страницы. Стрелки листают, Esc и клик по фону закрывают. */
+function openPhotoViewer(urls, index) {
         var overlay = document.createElement('div');
         overlay.className = 'news-viewer';
         overlay.innerHTML =
@@ -542,23 +581,6 @@ function initPhotoViewer(root, gallery) {
         overlay.addEventListener('click', function(e) { if (e.target === overlay || e.target === img) close(); });
         document.addEventListener('keydown', onKey);
         show(index);
-    }
-
-    root.addEventListener('click', function(e) {
-        var main = e.target.closest('.news-carousel-main');
-        if (main && gallery && gallery.length) {
-            e.preventDefault();
-            open(gallery, Number(main.dataset.index) || 0);
-            return;
-        }
-
-        var el = e.target.closest(IN_TEXT);
-        if (!el) return;
-        e.preventDefault();
-        var items = Array.prototype.slice.call(root.querySelectorAll(IN_TEXT));
-        var i = items.indexOf(el);
-        if (i !== -1) open(items.map(urlOf), i);
-    });
 }
 
 function renderBlock(block, index) {

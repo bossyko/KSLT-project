@@ -778,7 +778,19 @@
       var d = new Date(n.created_at);
       var dateStr = d.getDate() + ' ' + I18N.month(d.getMonth()) + ' ' + d.getFullYear();
       var html = '';
-      if (n.image) html += '<div class="nd-hero-img" style="background-image:url(' + n.image + ')"></div>';
+      // Шапка режет афишу: вертикальные постеры теряют даты и состав.
+      // Если сохранён исходник — его открывает кнопка поверх обложки.
+      if (n.image) {
+        html += '<div class="nd-hero-img" style="background-image:url(' + n.image + ')">' +
+          (n.image_original
+            ? '<button type="button" class="nd-hero-zoom" data-full="' + esc(n.image_original) + '">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">' +
+                  '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>' +
+                '</svg>' + I18N.t('news.fullPoster') +
+              '</button>'
+            : '') +
+        '</div>';
+      }
       html += '<div class="nd-content">';
       html += '<div class="nd-tag">' + esc(n.category || I18N.t('home.latestNews')) + '</div>';
       html += '<h1 class="nd-title">' + esc(I18N.field(n, 'title')) + '</h1>';
@@ -842,7 +854,13 @@
       var detail = document.getElementById('newsDetail');
       detail.innerHTML = html;
       overlay.classList.add('open');
-      if (window.KSLT_NEWS_MEDIA) KSLT_NEWS_MEDIA.init(detail, gallery);
+      if (window.KSLT_NEWS_MEDIA) {
+        KSLT_NEWS_MEDIA.init(detail, gallery);
+        var zoom = detail.querySelector('.nd-hero-zoom');
+        if (zoom) zoom.addEventListener('click', function() {
+          KSLT_NEWS_MEDIA.open([zoom.dataset.full], 0);
+        });
+      }
 
       // Load poll
       if (n.poll && n.poll.question) {

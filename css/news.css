@@ -47,6 +47,42 @@
     background: linear-gradient(to top, var(--bg-primary) 0%, transparent 35%);
 }
 
+/* Шапка режет афишу по ширине: вертикальные постеры теряют даты и состав.
+   Кнопка открывает исходник целиком — сама по себе такая возможность
+   незаметна, поэтому она подписана, а не спрятана в клик по картинке. */
+.news-hero-zoom {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    background: rgba(10, 10, 10, 0.55);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.news-hero-zoom svg { width: 15px; height: 15px; }
+
+.news-hero-zoom:hover {
+    border-color: var(--accent);
+    background: rgba(10, 10, 10, 0.75);
+}
+
+@media (max-width: 640px) {
+    /* На узком экране подпись съедает место, значка достаточно */
+    .news-hero-zoom { top: 14px; right: 14px; padding: 9px; }
+    .news-hero-zoom span { display: none; }
+}
+
 .news-hero-content {
     position: relative;
     z-index: 1;

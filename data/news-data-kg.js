@@ -4,6 +4,7 @@
 
 window.newsLabels = {
     backToNews: "Жаңылыктарга кайтуу",
+    openPoster: "Толук афиша",
     readTime: "мин окуу",
     relatedTitle: "Байланышкан макалалар",
     reactionsTitle: "Макаланы баалаңыз",

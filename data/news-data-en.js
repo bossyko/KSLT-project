@@ -4,6 +4,7 @@
 
 window.newsLabels = {
     backToNews: "Back to News",
+    openPoster: "Full poster",
     readTime: "min read",
     relatedTitle: "Related Articles",
     reactionsTitle: "React to this article",
