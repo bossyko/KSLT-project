@@ -29,12 +29,12 @@
             border-radius: 24px;
             padding: 48px 32px;
         }
-        .dl-icon {
-            width: 120px;
-            height: 120px;
-            border-radius: 28px;
-            margin: 0 auto 24px;
-            box-shadow: 0 8px 32px rgba(204, 255, 0, 0.15);
+        .dl-logo {
+            width: 190px;
+            height: auto;
+            margin: 0 auto 22px;
+            display: block;
+            filter: drop-shadow(0 0 14px rgba(204, 255, 0, 0.28));
         }
         .dl-title {
             font-size: 28px;
@@ -132,13 +132,6 @@
             color: var(--text);
             flex-shrink: 0;
         }
-        .dl-back {
-            display: inline-block;
-            margin-top: 24px;
-            font-size: 14px;
-            color: var(--accent);
-            text-decoration: none;
-        }
         .dl-android-badge {
             display: inline-flex;
             align-items: center;
@@ -170,7 +163,7 @@
     <div class="dl-page">
         <a href="../index.html" class="dl-top-back">← Назад на сайт</a>
         <div class="dl-card">
-            <img src="../app/kslt-icon.png" alt="KSLT Tennis" class="dl-icon">
+            <img src="../images/kslt-logo.svg" alt="KSLT" class="dl-logo">
             <h1 class="dl-title">KSLT Tennis</h1>
             <p class="dl-version">Версия 1.1</p>
             <div class="dl-android-badge">
@@ -205,8 +198,6 @@
                 <div class="dl-step"><span class="dl-step-num">4</span> Разрешите установку из этого источника</div>
                 <div class="dl-step"><span class="dl-step-num">5</span> Нажмите «Установить»</div>
             </div>
-
-            <a href="../index.html" class="dl-back">← Вернуться на сайт</a>
         </div>
     </div>
 </body>

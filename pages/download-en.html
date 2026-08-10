@@ -13,7 +13,13 @@
     <style>
         .dl-page{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
         .dl-card{max-width:420px;width:100%;text-align:center;background:var(--card-bg);border:1px solid var(--border);border-radius:24px;padding:48px 32px}
-        .dl-icon{width:120px;height:120px;border-radius:28px;margin:0 auto 24px;box-shadow:0 8px 32px rgba(204,255,0,0.15)}
+        .dl-logo {
+            width: 190px;
+            height: auto;
+            margin: 0 auto 22px;
+            display: block;
+            filter: drop-shadow(0 0 14px rgba(204, 255, 0, 0.28));
+        }
         .dl-title{font-size:28px;font-weight:800;color:var(--text);margin:0 0 8px}
         .dl-version{font-size:14px;color:var(--text-muted);margin:0 0 8px}
         .dl-size{font-size:13px;color:var(--text-muted);margin:0 0 32px}
@@ -29,7 +35,6 @@
         .dl-steps-title{font-size:14px;font-weight:600;color:var(--text);margin:0 0 12px}
         .dl-step{display:flex;gap:10px;padding:8px 0;font-size:13px;color:var(--text-muted)}
         .dl-step-num{width:22px;height:22px;background:var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text);flex-shrink:0}
-        .dl-back{display:inline-block;margin-top:24px;font-size:14px;color:var(--accent);text-decoration:none}
         .dl-android-badge{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:4px 12px;background:rgba(204,255,0,0.08);border-radius:20px;font-size:12px;color:var(--accent);font-weight:600}
         .dl-top-back {
             position: absolute;
@@ -50,7 +55,7 @@
     <div class="dl-page">
         <a href="../index-en.html" class="dl-top-back">← Back to website</a>
         <div class="dl-card">
-            <img src="../app/kslt-icon.png" alt="KSLT Tennis" class="dl-icon">
+            <img src="../images/kslt-logo.svg" alt="KSLT" class="dl-logo">
             <h1 class="dl-title">KSLT Tennis</h1>
             <p class="dl-version">Version 1.1</p>
             <div class="dl-android-badge">
@@ -78,7 +83,6 @@
                 <div class="dl-step"><span class="dl-step-num">4</span> Allow installation from this source</div>
                 <div class="dl-step"><span class="dl-step-num">5</span> Tap "Install"</div>
             </div>
-            <a href="../index-en.html" class="dl-back">← Back to website</a>
         </div>
     </div>
 </body>
