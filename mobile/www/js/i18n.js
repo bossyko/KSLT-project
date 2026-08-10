@@ -354,6 +354,26 @@
     'pd.memberCta':      { ru: 'Для вызовов нужно членство KSLT', en: 'KSLT membership required for challenges', kg: 'Чакыруулар үчүн KSLT мүчөлүгү керек' },
     'pd.h2h':            { ru: 'Личные встречи',      en: 'Head to Head',     kg: 'Жеке жолугушуулар' },
 
+    // === Коды подтверждения ===
+    'otp.title':         { ru: 'Введите код',          en: 'Enter the code',     kg: 'Кодду киргизиңиз' },
+    'otp.sentToEmail':   { ru: 'Код отправлен на почту', en: 'Code sent to your email', kg: 'Код почтага жөнөтүлдү' },
+    'otp.sentToTelegram':{ ru: 'Код отправлен в Telegram бот', en: 'Code sent to the Telegram bot', kg: 'Код Telegram ботко жөнөтүлдү' },
+    'otp.validFor':      { ru: 'Код действителен:',    en: 'Code valid for:',    kg: 'Код жарактуу:' },
+    'otp.wrongCode':     { ru: 'Неверный код',         en: 'Wrong code',         kg: 'Туура эмес код' },
+    'otp.attemptsLeft':  { ru: 'попыток осталось',     en: 'attempts left',      kg: 'аракет калды' },
+    'otp.expired':       { ru: 'Код истёк. Запросите новый.', en: 'Code expired. Request a new one.', kg: 'Код мөөнөтү бүттү. Жаңысын сураңыз.' },
+    'otp.exhausted':     { ru: 'Попытки исчерпаны. Запросите новый код.', en: 'Too many attempts. Request a new code.', kg: 'Аракеттер бүттү. Жаңы код сураңыз.' },
+    'otp.resend':        { ru: 'Отправить повторно',   en: 'Resend',             kg: 'Кайра жөнөтүү' },
+    'otp.sending':       { ru: 'Отправка...',          en: 'Sending...',         kg: 'Жөнөтүлүүдө...' },
+    'otp.sent':          { ru: 'Отправлено!',          en: 'Sent!',              kg: 'Жөнөтүлдү!' },
+    'otp.sendCode':      { ru: 'Отправить код',        en: 'Send code',          kg: 'Код жөнөтүү' },
+    'otp.saving':        { ru: 'Сохранение...',        en: 'Saving...',          kg: 'Сакталууда...' },
+    'otp.savePassword':  { ru: 'Сохранить пароль',     en: 'Save password',      kg: 'Сырсөздү сактоо' },
+    'otp.passwordRule':  { ru: 'Пароль: 8+ символов, заглавная, цифра, спецсимвол', en: 'Password: 8+ characters, uppercase, digit, special character', kg: 'Сырсөз: 8+ белги, баш тамга, сан, атайын белги' },
+    'otp.passwordMismatch': { ru: 'Пароли не совпадают', en: 'Passwords do not match', kg: 'Сырсөздөр дал келбейт' },
+    'otp.tooManyTries':  { ru: 'Слишком много попыток. Подождите минуту.', en: 'Too many attempts. Wait a minute.', kg: 'Аракет өтө көп. Бир мүнөт күтүңүз.' },
+    'otp.genericError':  { ru: 'Ошибка. Попробуйте снова.', en: 'Something went wrong. Try again.', kg: 'Ката. Кайра аракет кылыңыз.' },
+
     // === Auth screen ===
     'auth.skip':         { ru: 'Пропустить',           en: 'Skip',            kg: 'Өткөрүп жиберүү' },
     'news.fullPoster':   { ru: 'Афиша целиком', en: 'Full poster', kg: 'Толук афиша' },

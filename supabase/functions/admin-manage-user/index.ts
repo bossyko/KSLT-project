@@ -409,6 +409,39 @@ Deno.serve(async (req) => {
       return json({ success: true, action: 'player_unbanned' })
     }
 
+    // ============================================
+    // ACTION: UNBLOCK OTP
+    // ============================================
+    if (action === 'unblock_otp') {
+      const targetUserId = body.user_id as string
+      if (!targetUserId) return json({ error: 'user_id required' }, 400)
+
+      // Get user email/phone to find block keys
+      const { data: targetProfile } = await db
+        .from('profiles')
+        .select('email, phone')
+        .eq('id', targetUserId)
+        .single()
+
+      if (!targetProfile) return json({ error: 'Profile not found' }, 404)
+
+      // Unblock by email
+      if (targetProfile.email) {
+        await db.from('otp_blocks')
+          .update({ admin_unblocked: true, blocked_until: null })
+          .like('block_key', `${targetProfile.email}:%`)
+      }
+
+      // Unblock by phone
+      if (targetProfile.phone) {
+        await db.from('otp_blocks')
+          .update({ admin_unblocked: true, blocked_until: null })
+          .like('block_key', `${targetProfile.phone}:%`)
+      }
+
+      return json({ success: true, action: 'otp_unblocked' })
+    }
+
     return json({ error: 'Unknown action' }, 400)
 
   } catch (err) {

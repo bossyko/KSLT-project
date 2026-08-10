@@ -5,6 +5,7 @@
   'use strict';
 
   var AUTH = window.KSLT_AUTH = {};
+  var I18N = window.KSLT_I18N;
 
   var _loginAttempts = 0;
   var _lockoutUntil = 0;
@@ -161,12 +162,38 @@
       });
   };
 
-  // Reset password
+  // Reset password (legacy — kept for fallback)
   AUTH.resetPassword = function(email) {
     var siteUrl = 'https://kslt.kg';
     return supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: siteUrl + '/pages/reset-password.html'
     });
+  };
+
+  // Send OTP code
+  AUTH.sendOtp = function(flow, identifier, identifierType, telegramChatId) {
+    var SUPABASE_URL = window.SUPABASE_URL || '';
+    var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+    var body = { flow: flow, identifier: identifier, identifier_type: identifierType };
+    if (telegramChatId) body.telegram_chat_id = telegramChatId;
+    return fetch(SUPABASE_URL + '/functions/v1/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify(body)
+    }).then(function(r) { return r.json(); });
+  };
+
+  // Verify OTP code
+  AUTH.verifyOtp = function(flow, identifier, code, extra) {
+    var SUPABASE_URL = window.SUPABASE_URL || '';
+    var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+    var body = { flow: flow, identifier: identifier, code: code };
+    if (extra) Object.keys(extra).forEach(function(k) { body[k] = extra[k]; });
+    return fetch(SUPABASE_URL + '/functions/v1/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify(body)
+    }).then(function(r) { return r.json(); });
   };
 
   // Setup auth UI handlers
@@ -238,54 +265,319 @@
       backToLogin.addEventListener('click', function() { switchTab('login'); });
     }
 
-    // Forgot password form
+    // --- OTP overlay management ---
+    var _otpFlow = null;
+    var _otpIdentifier = null;
+    var _otpIdentifierType = null;
+    var _otpCallback = null;
+    var _otpTimerInterval = null;
+    var _otpFormData = null;
+    var _otpTelegramChatId = null;
+
+    var otpOverlay = document.getElementById('otpOverlay');
+    var otpPwOverlay = document.getElementById('otpPwOverlay');
+    var otpPwForm = document.getElementById('otpPwForm');
+
+    function setupOtpDigits() {
+      var digits = document.querySelectorAll('#otpInputs .otp-digit');
+      digits.forEach(function(input, idx) {
+        input.value = '';
+        input.classList.remove('filled');
+        input.addEventListener('input', function() {
+          var val = this.value.replace(/\D/g, '');
+          this.value = val ? val[0] : '';
+          this.classList.toggle('filled', !!this.value);
+          if (val && idx < digits.length - 1) digits[idx + 1].focus();
+          var code = '';
+          digits.forEach(function(d) { code += d.value; });
+          if (code.length === 6 && _otpCallback) _otpCallback(code);
+        });
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && !this.value && idx > 0) {
+            digits[idx - 1].focus();
+            digits[idx - 1].value = '';
+            digits[idx - 1].classList.remove('filled');
+          }
+        });
+        input.addEventListener('paste', function(e) {
+          e.preventDefault();
+          var paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+          if (paste.length >= 6) {
+            for (var i = 0; i < 6; i++) {
+              digits[i].value = paste[i] || '';
+              digits[i].classList.toggle('filled', !!digits[i].value);
+            }
+            digits[5].focus();
+            if (_otpCallback) _otpCallback(paste.substring(0, 6));
+          }
+        });
+      });
+    }
+    setupOtpDigits();
+
+    function clearOtpInputs() {
+      document.querySelectorAll('#otpInputs .otp-digit').forEach(function(d) {
+        d.value = ''; d.classList.remove('filled');
+      });
+      var w = document.getElementById('otpInputs');
+      if (w) w.classList.remove('shake');
+    }
+
+    function startOtpTimer(seconds) {
+      clearOtpTimer();
+      var el = document.getElementById('otpTimer');
+      var remaining = seconds;
+      function tick() {
+        var m = Math.floor(remaining / 60);
+        var s = remaining % 60;
+        el.innerHTML = I18N.t('otp.validFor') + ' <strong>' + m + ':' + (s < 10 ? '0' : '') + s + '</strong>';
+        if (remaining <= 0) { clearOtpTimer(); el.innerHTML = '<strong style="color:var(--red)">Код истёк</strong>'; }
+        remaining--;
+      }
+      tick();
+      _otpTimerInterval = setInterval(tick, 1000);
+    }
+
+    function clearOtpTimer() {
+      if (_otpTimerInterval) { clearInterval(_otpTimerInterval); _otpTimerInterval = null; }
+    }
+
+    function showOtpOverlay(flow, identifier, identifierType, channel, callback) {
+      startResendCooldown(60);
+      _otpFlow = flow;
+      _otpIdentifier = identifier;
+      _otpIdentifierType = identifierType;
+      _otpCallback = callback;
+      var sub = document.getElementById('otpSubtitle');
+      if (sub) sub.textContent = I18N.t(channel === 'telegram' ? 'otp.sentToTelegram' : 'otp.sentToEmail');
+      var hint = document.getElementById('otpChannelHint');
+      if (hint) {
+        hint.innerHTML = channel === 'telegram'
+          ? '<svg viewBox="0 0 24 24" fill="#2AABEE" width="16" height="16"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Telegram'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 8L2 4"/></svg> Email';
+      }
+      var errEl = document.getElementById('otpError');
+      if (errEl) errEl.textContent = '';
+      clearOtpInputs();
+      otpOverlay.classList.add('open');
+      startOtpTimer(600);
+      var first = document.querySelector('#otpInputs .otp-digit');
+      if (first) setTimeout(function() { first.focus(); }, 200);
+    }
+
+    function hideOtpOverlay() {
+      otpOverlay.classList.remove('open');
+      clearOtpTimer();
+      _otpCallback = null;
+    }
+
+    function showOtpError(msg) {
+      var el = document.getElementById('otpError');
+      if (el) el.textContent = msg;
+    }
+
+    function shakeOtp() {
+      var w = document.getElementById('otpInputs');
+      if (w) { w.classList.add('shake'); setTimeout(function() { w.classList.remove('shake'); }, 500); }
+    }
+
+    /**
+     * Задержка перед повторной отправкой кода.
+     *
+     * Без неё человек, не увидевший письма, жмёт ссылку подряд, упирается в
+     * серверный лимит в пять запросов и получает блокировку на четверть часа —
+     * то есть наказание за то, что письмо шло медленно.
+     */
+    var otpResendLink = document.getElementById('otpResend');
+    var _resendInterval = null;
+
+    function startResendCooldown(seconds) {
+      if (!otpResendLink) return;
+      clearInterval(_resendInterval);
+      var left = seconds;
+
+      function tick() {
+        if (left <= 0) {
+          clearInterval(_resendInterval);
+          otpResendLink.textContent = I18N.t('otp.resend');
+          otpResendLink.style.pointerEvents = '';
+          otpResendLink.style.opacity = '';
+          return;
+        }
+        otpResendLink.textContent = I18N.t('otp.resend') + ' (' + left + ')';
+        left--;
+      }
+
+      otpResendLink.style.pointerEvents = 'none';
+      otpResendLink.style.opacity = '0.5';
+      tick();
+      _resendInterval = setInterval(tick, 1000);
+    }
+
+    if (otpResendLink) {
+      otpResendLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (!_otpFlow || !_otpIdentifier) return;
+        this.textContent = I18N.t('otp.sending');
+        var self = this;
+        AUTH.sendOtp(_otpFlow, _otpIdentifier, _otpIdentifierType || 'email', _otpTelegramChatId).then(function() {
+          clearOtpInputs();
+          startOtpTimer(600);
+          self.textContent = I18N.t('otp.sent');
+          setTimeout(function() { startResendCooldown(60); }, 1500);
+        });
+      });
+    }
+
+    // Auto-login helper after OTP verification
+    function autoLoginAfterOtp(data, onDone) {
+      if (data.hashed_token && data.email) {
+        supabaseClient.auth.verifyOtp({
+          token_hash: data.hashed_token,
+          type: 'magiclink'
+        }).then(function(otpRes) {
+          if (!otpRes.error && otpRes.data.user) {
+            AUTH.currentUser = otpRes.data.user;
+            localStorage.setItem('kslt_session_start', Date.now().toString());
+            localStorage.setItem('kslt_last_activity', Date.now().toString());
+            try { checkDeviceFingerprint(otpRes.data.user.id); } catch(e) {}
+            AUTH.loadProfile(otpRes.data.user.id).then(function() {
+              onDone();
+            });
+          } else {
+            onDone();
+          }
+        });
+      } else {
+        onDone();
+      }
+    }
+
+    // Method tabs for forgot password
+    var fMethodTabs = document.querySelectorAll('#authForgot .otp-method-tab');
+    var fEmailField = document.getElementById('forgotEmailField');
+    var fPhoneField = document.getElementById('forgotPhoneField');
+    fMethodTabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        fMethodTabs.forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        var m = tab.dataset.method;
+        if (fEmailField) fEmailField.style.display = m === 'email' ? '' : 'none';
+        if (fPhoneField) fPhoneField.style.display = m === 'phone' ? '' : 'none';
+      });
+    });
+
+    // Forgot password form — OTP flow
     if (forgotForm) {
       forgotForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-        var email = document.getElementById('forgotEmail').value.trim();
         var errEl = document.getElementById('forgotError');
-        var successEl = document.getElementById('forgotSuccess');
         var btn = document.getElementById('forgotSubmitBtn');
-        var I18N = window.KSLT_I18N;
-
         errEl.className = 'auth-error';
         errEl.textContent = '';
-        successEl.style.display = 'none';
 
-        if (!email) return;
+        var activeTab = forgotForm.querySelector('.otp-method-tab.active');
+        var method = activeTab ? activeTab.dataset.method : 'email';
+        var identifier, identifierType;
 
-        // Server-side rate limit
-        try {
-          var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
-          var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-          var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-            body: JSON.stringify({ action: 'password_reset', key: email })
-          });
-          var rlData = await rlRes.json();
-          if (!rlData.allowed) {
-            errEl.textContent = 'Слишком много попыток. Подождите.';
-            errEl.className = 'auth-error show';
-            return;
-          }
-        } catch (e) { /* fail open */ }
+        if (method === 'phone') {
+          var country = document.getElementById('forgotCountry').value;
+          var phone = document.getElementById('forgotPhone').value.trim();
+          if (!phone) return;
+          identifier = country + phone.replace(/[\s\-()]/g, '');
+          identifierType = 'phone';
+        } else {
+          identifier = document.getElementById('forgotEmail').value.trim();
+          identifierType = 'email';
+          if (!identifier) return;
+        }
 
         btn.disabled = true;
-        btn.textContent = I18N ? I18N.t('common.loading') : 'Loading...';
+        btn.textContent = I18N.t('otp.sending');
 
-        AUTH.resetPassword(email).then(function(res) {
+        try {
+          var result = await AUTH.sendOtp('forgot_password', identifier, identifierType);
           btn.disabled = false;
-          btn.textContent = I18N ? I18N.t('auth.sendReset') : 'Send link';
+          btn.textContent = I18N.t('otp.sendCode');
 
-          if (res.error) {
-            errEl.textContent = res.error.message;
+          showOtpOverlay('forgot_password', identifier, identifierType, result.channel || 'email', async function(code) {
+            var data = await AUTH.verifyOtp('forgot_password', identifier, code);
+            if (data.error === 'wrong_code') {
+              shakeOtp();
+              showOtpError(data.remaining > 0 ? I18N.t('otp.wrongCode') + ' (' + data.remaining + ' ' + I18N.t('otp.attemptsLeft') + ')' : I18N.t('otp.exhausted'));
+              clearOtpInputs();
+              var first = document.querySelector('#otpInputs .otp-digit');
+              if (first) first.focus();
+              return;
+            }
+            if (data.error === 'code_expired') { showOtpError(I18N.t('otp.expired')); return; }
+            if (data.error === 'code_exhausted') { showOtpError(I18N.t('otp.exhausted')); return; }
+            if (data.error) { showOtpError(I18N.t('otp.genericError')); return; }
+
+            // Code verified — save code for password step
+            _otpFormData = _otpFormData || {};
+            _otpFormData._verifiedCode = code;
+            hideOtpOverlay();
+            otpPwOverlay.classList.add('open');
+          });
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = I18N.t('otp.sendCode');
+          errEl.textContent = I18N.t('otp.genericError');
+          errEl.className = 'auth-error show';
+        }
+      });
+    }
+
+    // New password form submit (after forgot password OTP)
+    if (otpPwForm) {
+      otpPwForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var newPw = document.getElementById('otpNewPassword').value;
+        var confirmPw = document.getElementById('otpConfirmPassword').value;
+        var errEl = document.getElementById('otpPwError');
+        errEl.className = 'auth-error';
+        errEl.textContent = '';
+
+        if (newPw.length < 8 || !/[A-Z]/.test(newPw) || !/[0-9]/.test(newPw) || !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPw)) {
+          errEl.textContent = I18N.t('otp.passwordRule');
+          errEl.className = 'auth-error show';
+          return;
+        }
+        if (newPw !== confirmPw) {
+          errEl.textContent = I18N.t('otp.passwordMismatch');
+          errEl.className = 'auth-error show';
+          return;
+        }
+
+        var btn = otpPwForm.querySelector('.auth-submit');
+        btn.disabled = true;
+        btn.textContent = I18N.t('otp.saving');
+
+        try {
+          var data = await AUTH.verifyOtp('forgot_password', _otpIdentifier, (_otpFormData && _otpFormData._verifiedCode) || '', {
+            new_password: newPw
+          });
+
+          if (data.error) {
+            errEl.textContent = data.error;
             errEl.className = 'auth-error show';
+            btn.disabled = false;
+            btn.textContent = I18N.t('otp.savePassword');
             return;
           }
-          successEl.textContent = I18N ? I18N.t('auth.checkEmail') : 'Check your email';
-          successEl.style.display = 'block';
-        });
+
+          autoLoginAfterOtp(data, function() {
+            otpPwOverlay.classList.remove('open');
+            authScreen.classList.remove('open');
+            if (window.KSLT_APP && window.KSLT_APP.onAuthChange) window.KSLT_APP.onAuthChange();
+          });
+        } catch (err) {
+          errEl.textContent = I18N.t('otp.genericError');
+          errEl.className = 'auth-error show';
+          btn.disabled = false;
+          btn.textContent = I18N.t('otp.savePassword');
+        }
       });
     }
 
@@ -308,7 +600,7 @@
 
       // Client-side rate limit
       if (Date.now() < _lockoutUntil) {
-        errEl.textContent = 'Слишком много попыток. Подождите минуту.';
+        errEl.textContent = I18N.t('otp.tooManyTries');
         errEl.className = 'auth-error show';
         return;
       }
@@ -324,7 +616,7 @@
         });
         var rlData = await rlRes.json();
         if (!rlData.allowed) {
-          errEl.textContent = 'Слишком много попыток. Подождите.';
+          errEl.textContent = I18N.t('otp.tooManyTries');
           errEl.className = 'auth-error show';
           return;
         }
@@ -356,7 +648,7 @@
       });
     });
 
-    // Register
+    // Register — OTP flow
     regForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       var name = document.getElementById('regName').value.trim();
@@ -367,66 +659,46 @@
       errEl.textContent = '';
 
       if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass)) {
-        errEl.textContent = 'Пароль: 8+ символов, заглавная, цифра, спецсимвол';
+        errEl.textContent = I18N.t('otp.passwordRule');
         errEl.className = 'auth-error show';
         return;
       }
 
-      // Server-side rate limit
-      try {
-        var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
-        var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-        var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-          body: JSON.stringify({ action: 'signup', key: email })
-        });
-        var rlData = await rlRes.json();
-        if (!rlData.allowed) {
-          errEl.textContent = 'Слишком много попыток. Подождите.';
-          errEl.className = 'auth-error show';
-          return;
-        }
-      } catch (e) { /* fail open */ }
+      _otpFormData = { email: email, password: pass, full_name: name };
 
-      AUTH.register(email, pass, name).then(function(res) {
-        if (res.error) {
-          errEl.textContent = res.error.message === 'User already registered'
-            ? 'Этот email уже зарегистрирован. Войдите.' : res.error.message;
-          errEl.className = 'auth-error show';
-          return;
-        }
-        // Supabase returns fake success for duplicate email (when confirm email is on)
-        if (res.data.user && res.data.user.identities && res.data.user.identities.length === 0) {
-          errEl.textContent = 'Этот email уже зарегистрирован. Войдите.';
-          errEl.className = 'auth-error show';
-          return;
-        }
-        if (res.data.user) {
-          // Check if email confirmation is required
-          if (res.data.session) {
-            // Session exists — email confirmed or confirmation disabled
-            AUTH.currentUser = res.data.user;
-            localStorage.setItem('kslt_session_start', Date.now().toString());
-            localStorage.setItem('kslt_last_activity', Date.now().toString());
-            try { checkDeviceFingerprint(res.data.user.id); } catch(e) {}
-            AUTH.loadProfile(res.data.user.id).then(function() {
-              authScreen.classList.remove('open');
-              if (window.KSLT_APP && window.KSLT_APP.onAuthChange) {
-                window.KSLT_APP.onAuthChange();
-              }
-            });
-          } else {
-            // No session — email confirmation required
-            var I18N = window.KSLT_I18N;
-            errEl.textContent = I18N ? I18N.t('auth.verifyEmail') : 'Проверьте почту для подтверждения email';
-            errEl.className = 'auth-error show';
-            errEl.style.background = 'rgba(52,199,89,0.1)';
-            errEl.style.borderColor = 'rgba(52,199,89,0.3)';
-            errEl.style.color = '#34c759';
+      try {
+        var result = await AUTH.sendOtp('register', email, 'email');
+
+        showOtpOverlay('register', email, 'email', result.channel || 'email', async function(code) {
+          var data = await AUTH.verifyOtp('register', email, code, {
+            email: _otpFormData.email,
+            password: _otpFormData.password,
+            full_name: _otpFormData.full_name
+          });
+
+          if (data.error === 'wrong_code') {
+            shakeOtp();
+            showOtpError(data.remaining > 0 ? I18N.t('otp.wrongCode') + ' (' + data.remaining + ' ' + I18N.t('otp.attemptsLeft') + ')' : I18N.t('otp.exhausted'));
+            clearOtpInputs();
+            var first = document.querySelector('#otpInputs .otp-digit');
+            if (first) first.focus();
+            return;
           }
-        }
-      });
+          if (data.error === 'code_expired') { showOtpError(I18N.t('otp.expired')); return; }
+          if (data.error === 'code_exhausted') { showOtpError(I18N.t('otp.exhausted')); return; }
+          if (data.error === 'email_taken') { showOtpError('Этот email уже зарегистрирован'); return; }
+          if (data.error) { showOtpError(I18N.t('otp.genericError')); return; }
+
+          hideOtpOverlay();
+          autoLoginAfterOtp(data, function() {
+            authScreen.classList.remove('open');
+            if (window.KSLT_APP && window.KSLT_APP.onAuthChange) window.KSLT_APP.onAuthChange();
+          });
+        });
+      } catch (err) {
+        errEl.textContent = I18N.t('otp.genericError');
+        errEl.className = 'auth-error show';
+      }
     });
 
     // Google
@@ -505,7 +777,7 @@
     });
 
     if (tgRegForm) {
-      tgRegForm.addEventListener('submit', function(e) {
+      tgRegForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         if (!_pendingTgData) return;
 
@@ -529,52 +801,52 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Создание...';
 
-        AUTH.telegramAuth('register', _pendingTgData, {
+        _otpFormData = {
           email: email,
-          full_name: fullName,
-          gender: '',
-          birth_day: null,
-          birth_month: null,
-          birth_year: null
-        }).then(function(regData) {
-          if (regData.error === 'email_taken') {
-            tgRegError.textContent = 'Этот email уже зарегистрирован. Войдите и привяжите Telegram.';
-            tgRegError.className = 'auth-error show';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Создать аккаунт';
-            return;
-          }
-          if (regData.error) {
-            tgRegError.textContent = regData.error;
-            tgRegError.className = 'auth-error show';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Создать аккаунт';
-            return;
-          }
-          if (regData.status === 'ok' && regData.hashed_token) {
-            AUTH.verifyTelegramOtp(regData.email, regData.hashed_token).then(function(otpRes) {
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Создать аккаунт';
-              if (otpRes.error) {
-                tgRegError.textContent = 'Ошибка авторизации. Попробуйте ещё раз.';
-                tgRegError.className = 'auth-error show';
-                return;
-              }
-              AUTH.currentUser = otpRes.data.user;
-              localStorage.setItem('kslt_session_start', Date.now().toString());
-              localStorage.setItem('kslt_last_activity', Date.now().toString());
-              try { checkDeviceFingerprint(otpRes.data.user.id); } catch(ex) {}
-              AUTH.loadProfile(otpRes.data.user.id).then(function() {
-                hideTgRegModal();
-                authScreen.classList.remove('open');
-                if (window.KSLT_APP && window.KSLT_APP.onAuthChange) window.KSLT_APP.onAuthChange();
-              });
+          tg_data: _pendingTgData,
+          full_name: fullName
+        };
+        _otpTelegramChatId = _pendingTgData.id || null;
+
+        try {
+          var result = await AUTH.sendOtp('telegram_register', email, 'email', _otpTelegramChatId);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Создать аккаунт';
+          hideTgRegModal();
+
+          showOtpOverlay('telegram_register', email, 'email', result.channel || 'email', async function(code) {
+            var data = await AUTH.verifyOtp('telegram_register', email, code, {
+              email: _otpFormData.email,
+              tg_data: _otpFormData.tg_data,
+              full_name: _otpFormData.full_name
             });
-          } else {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Создать аккаунт';
-          }
-        });
+
+            if (data.error === 'wrong_code') {
+              shakeOtp();
+              showOtpError(data.remaining > 0 ? I18N.t('otp.wrongCode') + ' (' + data.remaining + ' ' + I18N.t('otp.attemptsLeft') + ')' : I18N.t('otp.exhausted'));
+              clearOtpInputs();
+              var first = document.querySelector('#otpInputs .otp-digit');
+              if (first) first.focus();
+              return;
+            }
+            if (data.error === 'code_expired') { showOtpError(I18N.t('otp.expired')); return; }
+            if (data.error === 'code_exhausted') { showOtpError(I18N.t('otp.exhausted')); return; }
+            if (data.error === 'email_taken') { showOtpError('Этот email уже зарегистрирован'); return; }
+            if (data.error) { showOtpError(I18N.t('otp.genericError')); return; }
+
+            hideOtpOverlay();
+            _pendingTgData = null;
+            autoLoginAfterOtp(data, function() {
+              authScreen.classList.remove('open');
+              if (window.KSLT_APP && window.KSLT_APP.onAuthChange) window.KSLT_APP.onAuthChange();
+            });
+          });
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Создать аккаунт';
+          tgRegError.textContent = 'Ошибка. Попробуйте снова.';
+          tgRegError.className = 'auth-error show';
+        }
       });
     }
 

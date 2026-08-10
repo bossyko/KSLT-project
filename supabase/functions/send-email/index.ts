@@ -12,8 +12,13 @@
 // Deploy: supabase functions deploy send-email --no-verify-jwt
 // Required secrets: RESEND_API_KEY (optional — graceful degradation)
 
-const SITE_URL = 'https://kslt.netlify.app'
-const FROM_EMAIL = 'KSLT <noreply@kslt.kg>'
+// Адрес сайта в ссылках письма. Вынесен в настройку: при переезде на kslt.kg
+// достаточно поменять секрет SITE_URL, не трогая код девяти функций.
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://kslt.netlify.app'
+// Отправитель обязан быть на домене, подтверждённом в Resend, иначе письма
+// отклоняются. Пока подтверждён tennis.kg; когда поднимется kslt.kg — сменить
+// секрет EMAIL_FROM, не трогая код.
+const FROM_EMAIL = Deno.env.get('EMAIL_FROM') || 'KSLT <info@tennis.kg>'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -175,6 +180,7 @@ function renderTemplate(template: string, data: Record<string, any>): string {
     case 'match-schedule': return templateMatchSchedule(data)
     case 'challenge-received': return templateChallengeReceived(data)
     case 'broadcast': return templateBroadcast(data)
+    case 'otp-code': return templateOtpCode(data)
     default:
       console.warn(`[send-email] Unknown template: ${template}`)
       return wrapLayout(`<p style="${S.p}">No template found: ${esc(template)}</p>`)
@@ -304,4 +310,31 @@ function templateBroadcast(d: Record<string, any>): string {
 <div style="${S.p}">${messageHtml}</div>
 ${d.link ? `<hr style="${S.divider}"><a href="${esc(d.link)}" style="${S.btn}">${esc(d.link_text || 'Подробнее')}</a>` : ''}`
   return wrapLayout(content, d.subject || 'Сообщение от KSLT')
+}
+
+// --- 9. OTP Code ---
+// Цифры кода — тёмным по белому, а не акцентным лаймом. Письмо свёрстано
+// тёмным, но Apple Mail в светлой теме выворачивает тёмные цвета в светлые:
+// белый текст становится тёмным и читается, а лайм выворачивать нечего —
+// он остаётся светлым на светлом, и код пропадает. Чёрное с белым читается
+// при любом раскладе, потому что выворачивается целиком.
+function templateOtpCode(d: Record<string, any>): string {
+  const flowLabel =
+    d.flow === 'forgot_password' ? 'сброса пароля' :
+    d.flow === 'register' ? 'регистрации' :
+    d.flow === 'telegram_register' ? 'регистрации' : 'подтверждения'
+  const content = `
+<h1 style="${S.h1}">🔐 Код подтверждения</h1>
+<p style="${S.p}">Ваш код для ${esc(flowLabel)}:</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+<tr><td align="center">
+<div style="display:inline-block;padding:16px 32px;background-color:#ffffff;border:2px solid #CCFF00;border-radius:12px;">
+<span style="font-size:32px;font-weight:700;color:#111111;letter-spacing:8px;font-family:'Courier New',monospace;">${esc(d.code)}</span>
+</div>
+</td></tr>
+</table>
+<p style="${S.muted}">Код действителен <strong style="color:#fff;">10 минут</strong>.</p>
+<hr style="${S.divider}">
+<p style="${S.muted}">Если вы не запрашивали код — просто проигнорируйте это письмо.</p>`
+  return wrapLayout(content, `Ваш код KSLT: ${d.code}`)
 }

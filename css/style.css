@@ -4513,6 +4513,17 @@ h2 {
     font-weight: 700;
 }
 
+/* Выполненное требование отмечается галочкой: раньше крестик стоял всегда,
+   и человек с подходящим паролем видел четыре красных строки */
+.auth-pw-detail li.valid {
+    color: var(--accent);
+}
+
+.auth-pw-detail li.valid::before {
+    content: '✓ ';
+    color: var(--accent);
+}
+
 .pw-rule + .pw-rule,
 .pw-rule-reset + .pw-rule-reset {
     margin-left: 6px;
