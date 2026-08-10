@@ -640,12 +640,22 @@
         ctx.closePath();
     }
 
-    // ---- Script validation (Cyrillic / Latin / Kyrgyz) ----
-    var SCRIPT_RU = /^[а-яА-ЯёЁ\s\-'.]+$/;
-    var SCRIPT_EN = /^[a-zA-Z\s\-'.]+$/;
-    var SCRIPT_KG = /^[а-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
-    var scriptRegex = isKg ? SCRIPT_KG : isEn ? SCRIPT_EN : SCRIPT_RU;
-    var scriptHint = isKg ? 'Кыргыз тамгалары гана' : isEn ? 'Latin characters only' : 'Только кириллица';
+    // ---- Проверка имени ----
+    //
+    // Раньше письменность требовалась по языку страницы: на русской версии
+    // только кириллица, на английской только латиница. Из-за этого человек с
+    // именем Konstantin Han не мог сохранить профиль на русской странице, а
+    // кыргызское имя с буквами ң, ө, ү — ни на русской, ни на английской:
+    // этих букв нет ни в одном из двух алфавитов. На сайте кыргызского клуба.
+    //
+    // Имя принадлежит человеку, а не странице, на которой он его вводит.
+    // Принимаем любую из трёх письменностей и отсекаем только явный мусор —
+    // цифры и посторонние знаки.
+    var SCRIPT_ANY = /^[а-яА-ЯёЁңҢүҮөӨa-zA-Z\s\-'.]+$/;
+    var scriptRegex = SCRIPT_ANY;
+    var scriptHint = isKg ? 'Ат тамгалардан турушу керек' :
+                     isEn ? 'Letters only — no digits or symbols' :
+                            'Только буквы, без цифр и символов';
 
     function attachScriptCheck(inputId) {
         var el = document.getElementById(inputId);
@@ -2322,12 +2332,12 @@
 
         // Script validation
         if (firstName && !scriptRegex.test(firstName)) {
-            var msg = isKg ? 'Атын кыргыз тамгалары менен жазыңыз' : isEn ? 'First name must use Latin characters' : 'Имя должно быть на кириллице';
+            var msg = isKg ? 'Атта тамгалар гана болушу керек' : isEn ? 'The first name may contain letters only' : 'В имени допустимы только буквы';
             alert(msg);
             return;
         }
         if (lastName && !scriptRegex.test(lastName)) {
-            var msg2 = isKg ? 'Фамилиясын кыргыз тамгалары менен жазыңыз' : isEn ? 'Last name must use Latin characters' : 'Фамилия должна быть на кириллице';
+            var msg2 = isKg ? 'Фамилияда тамгалар гана болушу керек' : isEn ? 'The last name may contain letters only' : 'В фамилии допустимы только буквы';
             alert(msg2);
             return;
         }

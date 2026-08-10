@@ -750,14 +750,17 @@
         }
 
         // --- Script validation on name fields ---
-        attachScriptValidation('adPlrFirstName', SCRIPT_RU, 'Только кириллица');
-        attachScriptValidation('adPlrLastName', SCRIPT_RU, 'Только кириллица');
+        // Основное имя — кириллица, но с кыргызскими буквами: ң, ө, ү в русском
+        // алфавите нет, а имена вроде «Жаңыл Өмүрова» встречаются постоянно.
+        // Клуб кыргызский, отклонять такие имена в основном поле нельзя.
+        attachScriptValidation('adPlrFirstName', SCRIPT_KG, 'Только кириллица');
+        attachScriptValidation('adPlrLastName', SCRIPT_KG, 'Только кириллица');
         attachScriptValidation('adPlrFirstNameEn', SCRIPT_EN, 'Latin characters only');
         attachScriptValidation('adPlrLastNameEn', SCRIPT_EN, 'Latin characters only');
         attachScriptValidation('adPlrFirstNameKg', SCRIPT_KG, 'Кыргыз тамгалары гана');
         attachScriptValidation('adPlrLastNameKg', SCRIPT_KG, 'Кыргыз тамгалары гана');
         var rhNameHint = isEn ? 'Latin characters only' : 'Только кириллица';
-        var rhNameRegex = isEn ? SCRIPT_EN : SCRIPT_RU;
+        var rhNameRegex = isEn ? SCRIPT_EN : SCRIPT_KG;
         attachScriptValidation('adPlrRhName', rhNameRegex, rhNameHint);
 
         // --- Country picker ---
