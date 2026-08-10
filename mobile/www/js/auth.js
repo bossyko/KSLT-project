@@ -164,7 +164,7 @@
 
   // Reset password (legacy — kept for fallback)
   AUTH.resetPassword = function(email) {
-    var siteUrl = 'https://kslt.kg';
+    var siteUrl = 'https://bossyko.github.io/KSLT-project';
     return supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: siteUrl + '/pages/reset-password.html'
     });
