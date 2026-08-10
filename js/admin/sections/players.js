@@ -427,6 +427,14 @@
                 var lnKg = namePartsKg.slice(1).join(' ') || '';
                 return '<div class="ad-form-card">' +
                     '<div class="ad-form-card-title">' + L.plrName + '</div>' +
+                    // Имя задаёт сам игрок в своём кабинете, и оттуда оно
+                    // приходит сюда. Правка здесь вернётся к прежнему, как
+                    // только он сохранит профиль, — предупреждаем заранее.
+                    (plrEditingId ? '<div class="ad-field-hint" style="margin-bottom:10px;">' +
+                        (isEn
+                            ? 'The player sets their own name in their account. Edits here are overwritten when they save their profile.'
+                            : 'Имя задаёт сам игрок в своём кабинете. Правка здесь пропадёт, когда он сохранит профиль.') +
+                    '</div>' : '') +
                     '<div class="ad-lang-tabs">' +
                         '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                         '<button class="ad-lang-tab" data-lang="en">EN</button>' +
