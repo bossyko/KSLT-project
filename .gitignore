@@ -28,3 +28,6 @@ import/news-images/
 
 # Адрес и ключ тестовой базы — у каждого свои
 .env.test
+
+# Служебные файлы привязки Supabase CLI
+supabase/.temp/
