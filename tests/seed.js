@@ -150,6 +150,65 @@ async function upsert(table, rows, onConflict) {
     }], 'id');
     console.log('  турнир test-tournament');
 
+    // --- Соперник, матчи и результат -------------------------------------
+    // Без них раздел «Мои игры» пуст, и проверять в нём нечего
+    await upsert('players', [{
+        id: 'test-rival', name: 'Тестовый Соперник',
+        category_id: 'tour', points: 40, gender: 'male'
+    }], 'id');
+
+    var played = new Date(today.getTime() - 7 * 24 * 3600 * 1000).toISOString();
+    await upsert('matches', [
+        {
+            id: '11111111-1111-4111-8111-111111111111',
+            tournament_id: 'test-tournament',
+            player1_id: 'test-player', player2_id: 'test-rival',
+            score: '6/4 6/2', winner_id: 'test-player',
+            round: 'SF', round_number: 2, match_order: 1,
+            played_at: played, status: 'completed', match_type: 'tournament'
+        },
+        {
+            id: '22222222-2222-4222-8222-222222222222',
+            tournament_id: 'test-tournament',
+            player1_id: 'test-rival', player2_id: 'test-player',
+            score: '6/3 7/5', winner_id: 'test-rival',
+            round: 'F', round_number: 3, match_order: 1,
+            played_at: played, status: 'completed', match_type: 'tournament'
+        }
+    ], 'id');
+
+    // Финал проигран: игрок — финалист, соперник — чемпион
+    await upsert('tournament_results', [
+        { tournament_id: 'test-tournament', player_id: 'test-player',
+          round_reached: 'F', points_earned: 60, season: today.getFullYear() },
+        { tournament_id: 'test-tournament', player_id: 'test-rival',
+          round_reached: 'W', points_earned: 100, season: today.getFullYear() }
+    ]);
+    console.log('  два матча и результат турнира');
+
+    // --- Значки ----------------------------------------------------------
+    await upsert('badge_definitions', [
+        { id: 'first_match', name: 'Первый матч', name_en: 'First match', icon: '🎾',
+          description: 'Сыграть первый матч', condition_type: 'matches_played',
+          condition_value: 1, sort_order: 1 },
+        { id: 'first_win', name: 'Первая победа', name_en: 'First win', icon: '🥇',
+          description: 'Выиграть первый матч', condition_type: 'wins',
+          condition_value: 1, sort_order: 2 },
+        { id: 'matches_10', name: 'Десятка', name_en: 'Ten', icon: '🔟',
+          description: 'Сыграть 10 матчей', condition_type: 'matches_played',
+          condition_value: 10, sort_order: 4 },
+        { id: 'finalist', name: 'Финалист', name_en: 'Finalist', icon: '🥈',
+          description: 'Дойти до финала', condition_type: 'finalist',
+          condition_value: 1, sort_order: 15 },
+        { id: 'champion', name: 'Чемпион', name_en: 'Champion', icon: '🏆',
+          description: 'Выиграть турнир', condition_type: 'champion',
+          condition_value: 1, sort_order: 14 },
+        { id: 'member', name: 'Член КСЛТ', name_en: 'KSLT member', icon: '💚',
+          description: 'Действующее членство', condition_type: 'membership',
+          condition_value: 0, sort_order: 22 }
+    ], 'id');
+    console.log('  определения значков');
+
     console.log('\nГотово. Вход для проверок:');
     ACCOUNTS.forEach(a => console.log('  ' + a.email + '  ' + a.password));
 })().catch(e => {

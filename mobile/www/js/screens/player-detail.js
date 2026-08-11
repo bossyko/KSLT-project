@@ -215,7 +215,7 @@
     if (_earnedBadges.length > 0) {
       html += '<div class="pd-badges-row">';
       _earnedBadges.slice(0, 5).forEach(function(pb) {
-        if (pb.badge) html += '<span class="pd-badge" title="' + esc(pb.badge.name || '') + '">' + (pb.badge.icon || '🏅') + '</span>';
+        if (pb.badge) html += '<span class="pd-badge" title="' + esc(badgeName(pb.badge)) + '">' + (pb.badge.icon || '🏅') + '</span>';
       });
       if (_earnedBadges.length > 5) html += '<span class="pd-badge pd-badge-more">+' + (_earnedBadges.length - 5) + '</span>';
       html += '</div>';
@@ -522,7 +522,7 @@
       var earned = earnedIds[b.id];
       html += '<div class="pd-badge-card ' + (earned ? 'earned' : 'locked') + '">';
       html += '<div class="pd-badge-icon">' + (b.icon || '🏅') + '</div>';
-      html += '<div class="pd-badge-name">' + esc(b.name || '') + '</div>';
+      html += '<div class="pd-badge-name">' + esc(badgeName(b)) + '</div>';
       if (earned) {
         html += '<div class="pd-badge-date">' + formatDate(earned.earned_at) + '</div>';
       } else {
@@ -532,6 +532,14 @@
     });
     html += '</div>';
     container.innerHTML = html;
+  }
+
+  /** Название значка на языке приложения: раньше всегда бралось русское. */
+  function badgeName(b) {
+    var lang = I18N.lang || 'ru';
+    if (lang === 'en') return b.name_en || b.name || '';
+    if (lang === 'kg') return b.name_kg || b.name || '';
+    return b.name || '';
   }
 
   // ---- H2H Modal ----

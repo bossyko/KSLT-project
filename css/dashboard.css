@@ -1178,7 +1178,20 @@ select.db-field-input {
 
 .db-subsection-body {
     padding: 0 20px 16px;
-    min-height: 120px;
+}
+
+/*
+ * Заглушка на время загрузки держит высоту, чтобы карточки не прыгали.
+ * Раньше высоту задавали самому телу раздела, и под единственной строкой
+ * матча навсегда оставалась пустая полоса.
+ */
+.db-subsection-loading {
+    display: flex;
+    align-items: center;
+    min-height: 72px;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
 }
 
 .db-subsection-collapsed {
@@ -1250,22 +1263,31 @@ select.db-field-input {
     text-align: center;
 }
 
+/* Итог матча — самая читаемая колонка в таблице, поэтому не мельче
+   соседей и с заметной подложкой */
 .db-match-result {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-weight: 600;
-    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    padding: 3px 9px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm, 6px);
+    font-weight: 700;
+    font-size: 0.82rem;
+    line-height: 1.2;
 }
 
 .db-match-result.win {
-    background: rgba(52,199,89,0.15);
-    color: #34c759;
+    background: rgba(52,199,89,0.18);
+    border-color: rgba(52,199,89,0.4);
+    color: #4ade80;
 }
 
 .db-match-result.loss {
-    background: rgba(255,59,48,0.15);
-    color: #ff3b30;
+    background: rgba(255,59,48,0.18);
+    border-color: rgba(255,59,48,0.4);
+    color: #ff6b62;
 }
 
 .db-match-tournament {
@@ -2452,3 +2474,58 @@ select:-webkit-autofill {
 }
 
 .db-pay-link-btn:hover { text-decoration: underline; }
+
+
+/* ---- Вызовы: исход сыгранного матча и отметка баттла ---- */
+.db-invite-score {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.db-invite-outcome {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: var(--radius-sm, 6px);
+}
+
+.db-invite-outcome.win {
+    background: rgba(52,199,89,0.18);
+    color: #4ade80;
+}
+
+.db-invite-outcome.loss {
+    background: rgba(255,59,48,0.18);
+    color: #ff6b62;
+}
+
+.db-invite-battle {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.db-invite-battle:hover {
+    text-decoration: underline;
+}
+
+/* ---- Достижения: сколько осталось до значка ---- */
+.db-badge-progress {
+    margin-left: 2px;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    background: rgba(255,255,255,0.06);
+    color: var(--text-secondary, var(--text-muted));
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}

@@ -74,11 +74,6 @@
             challenge: 'Вызов',
             prevPage: '\u2190 Назад',
             nextPage: 'Далее \u2192',
-            badgeChampion: 'Чемпион последнего турнира',
-            badgeStreak: 'Серия 5+ побед',
-            badgeTop1: '#1 текущего месяца',
-            badgeNewbie: 'Новичок',
-            badgeBreakthrough: 'Прорыв',
             sponsorsTitle: 'Партнёры и спонсоры',
             sponsorsGeneral: 'Генеральный спонсор',
             viewAll: 'Показать всех',
@@ -303,7 +298,6 @@
                                 change: p.rank_change || 0,
                                 form: p.form || [],
                                 online: false,
-                                badges: p.badges || [],
                                 ntrp_rating: p.ntrp_rating || null,
                                 banned_until: p.banned_until || null
                             };

@@ -24,10 +24,20 @@
 
   function getMonths() { return I18N.months(); }
 
+  // Матчи играются в Бишкеке, и датой матча должен быть бишкекский день.
+  // Телефон в поездке переводил время в свой пояс, и матч, начатый ночью,
+  // показывался вчерашним — при том что дата турнира рядом не сдвигалась
+  var TZ = 'Asia/Bishkek';
+
   function formatDate(dateStr) {
     if (!dateStr) return '—';
     var d = new Date(dateStr);
-    return d.getDate() + ' ' + I18N.month(d.getMonth()) + ' ' + d.getFullYear();
+    if (isNaN(d.getTime())) return '—';
+    var parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: TZ, day: 'numeric', month: 'numeric', year: 'numeric'
+    }).formatToParts(d).forEach(function(x) { parts[x.type] = x.value; });
+    return parseInt(parts.day, 10) + ' ' + I18N.month(parseInt(parts.month, 10) - 1) + ' ' + parts.year;
   }
 
   P.load = function() {
@@ -384,7 +394,6 @@
       .select('*, tournament:tournaments(id, title, date_start, status)')
       .eq('player_id', _player.id)
       .order('registered_at', { ascending: false })
-      .limit(20)
       .then(function(r) {
         if (r.error) console.error('My tournaments load error:', r.error);
         renderTournamentsList(content, r.data || []);
@@ -547,12 +556,15 @@
     var ov = openSubOverlay(I18N.t('profile.myMatches'), '<div class="loading-center"><div class="spinner"></div></div>');
     var content = ov.querySelector('.prof-sub-content');
 
+    // Турнирные матчи: дуэли по вызову живут отдельно, в баттлах.
+    // Ограничение снято — при трёх десятках матчей остальные просто
+    // исчезали, ничем себя не обозначив
     supabaseClient.from('matches')
       .select('*, tournament:tournaments(title)')
       .or('player1_id.eq.' + _player.id + ',player2_id.eq.' + _player.id)
+      .eq('match_type', 'tournament')
       .not('winner_id', 'is', null)
       .order('played_at', { ascending: false })
-      .limit(30)
       .then(function(r) {
         if (!r.data || r.data.length === 0) {
           content.innerHTML = '<div class="empty-state"><div class="empty-icon">⚔️</div><div class="empty-title">' + I18N.t('profile.noMatches') + '</div></div>';
@@ -604,6 +616,14 @@
   }
 
   // ---- Badges ----
+  /** Название значка на языке приложения: раньше всегда бралось русское. */
+  function badgeName(b) {
+    var lang = I18N.lang || 'ru';
+    if (lang === 'en') return b.name_en || b.name || '';
+    if (lang === 'kg') return b.name_kg || b.name || '';
+    return b.name || '';
+  }
+
   function showBadges() {
     var ov = openSubOverlay(I18N.t('profile.achievements'), '<div class="loading-center"><div class="spinner"></div></div>');
     var content = ov.querySelector('.prof-sub-content');
@@ -629,7 +649,7 @@
         var e = earnedIds[b.id];
         html += '<div class="pd-badge-card ' + (e ? 'earned' : 'locked') + '">';
         html += '<div class="pd-badge-icon">' + (b.icon || '🏅') + '</div>';
-        html += '<div class="pd-badge-name">' + esc(b.name || '') + '</div>';
+        html += '<div class="pd-badge-name">' + esc(badgeName(b)) + '</div>';
         if (e) {
           html += '<div class="pd-badge-date">' + formatDate(e.earned_at) + '</div>';
         } else {

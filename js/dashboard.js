@@ -160,6 +160,7 @@
         subChallenges: 'Чакыруулар',
         showAll: 'Баарын көрсөтүү',
         collapseBtn: 'Жыйуу',
+        loadingList: 'Жүктөлүүдө...',
         noMatches: 'Матчтар жок',
         noMatchesText: 'Сиздин матчтарыңыз мелдештерден кийин бул жерде көрүнөт',
         matchDate: 'Күн', matchOpponent: 'Атаандаш', matchScore: 'Эсеп', matchResult: 'Жыйынтык', matchTournament: 'Мелдеш', matchRound: 'Раунд',
@@ -167,6 +168,9 @@
         challengesTitle: 'Матчка чакыруулар',
         chalSent: 'Жөнөтүлдү',
         chalReceived: 'Алынды',
+        chalBattle: 'Баттл',
+        chalWon: 'Жеңиш',
+        chalLost: 'Жеңилүү',
         chalActive: 'Активдүү',
         chalNegotiating: 'Сүйлөшүүдө',
         chalCountered: 'Каршы сунуш',
@@ -386,6 +390,7 @@
         subChallenges: 'Challenges',
         showAll: 'Show all',
         collapseBtn: 'Collapse',
+        loadingList: 'Loading...',
         noMatches: 'No matches yet',
         noMatchesText: 'Your matches will appear here after tournaments',
         matchDate: 'Date', matchOpponent: 'Opponent', matchScore: 'Score', matchResult: 'Result', matchTournament: 'Tournament', matchRound: 'Round',
@@ -393,6 +398,9 @@
         challengesTitle: 'Match Challenges',
         chalSent: 'Sent',
         chalReceived: 'Received',
+        chalBattle: 'Battle',
+        chalWon: 'Won',
+        chalLost: 'Lost',
         chalActive: 'Active',
         chalNegotiating: 'Negotiating',
         chalCountered: 'Counter-proposal',
@@ -605,13 +613,14 @@
         qrDownload: 'Скачать PNG',
         qrCopy: 'Скопировать ссылку',
         qrCopied: 'Скопировано!',
-        games: 'Мои Игры',
-        gamesTitle: 'Мои Игры',
+        games: 'Мои игры',
+        gamesTitle: 'Мои игры',
         subTournaments: 'Турниры',
         subMatches: 'Матчи',
         subChallenges: 'Вызовы',
         showAll: 'Показать все',
         collapseBtn: 'Свернуть',
+        loadingList: 'Загрузка...',
         noMatches: 'Матчей пока нет',
         noMatchesText: 'Ваши матчи появятся здесь после участия в турнирах',
         matchDate: 'Дата', matchOpponent: 'Соперник', matchScore: 'Счёт', matchResult: 'Итог', matchTournament: 'Турнир', matchRound: 'Раунд',
@@ -619,6 +628,9 @@
         challengesTitle: 'Вызовы на матч',
         chalSent: 'Отправлено',
         chalReceived: 'Получено',
+        chalBattle: 'Баттл',
+        chalWon: 'Победа',
+        chalLost: 'Поражение',
         chalActive: 'Активный',
         chalNegotiating: 'Переговоры',
         chalCountered: 'Встречное',
@@ -1819,7 +1831,7 @@
         html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubMatches">';
         html += '<span>\u2694\uFE0F ' + L.subMatches + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
         html += '<div class="db-subsection-body" id="dbSubMatches">';
-        html += '<div id="dbGamesMatches"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
+        html += '<div id="dbGamesMatches"><p class="db-subsection-loading">' + L.loadingList + '</p></div>';
         html += '</div></div>';
 
         // -- Subsection: Challenges --
@@ -1827,7 +1839,7 @@
         html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubChallenges">';
         html += '<span>\uD83E\uDD4A ' + L.subChallenges + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
         html += '<div class="db-subsection-body" id="dbSubChallenges">';
-        html += '<div id="dbGamesChallenges"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
+        html += '<div id="dbGamesChallenges"><p class="db-subsection-loading">' + L.loadingList + '</p></div>';
         html += '</div></div>';
 
         // -- Subsection: Tournaments --
@@ -1835,15 +1847,19 @@
         html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubTournaments">';
         html += '<span>\uD83C\uDFC6 ' + L.subTournaments + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
         html += '<div class="db-subsection-body" id="dbSubTournaments">';
-        html += '<div id="dbGamesTournaments"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
+        html += '<div id="dbGamesTournaments"><p class="db-subsection-loading">' + L.loadingList + '</p></div>';
         html += '</div></div>';
 
-        // -- Achievements (flat, bottom of page) --
+        // -- Subsection: Achievements --
+        // Раньше достижения рисовались голым блоком с наспех прописанными
+        // стилями и выпадали из ряда карточек над ними
         var achLabel = isKg ? 'Жетишкендиктер' : isEn ? 'Achievements' : 'Достижения';
-        html += '<div style="margin-top:var(--space-xl,2rem);">';
-        html += '<h3 style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">\uD83C\uDFC5 ' + achLabel + '</h3>';
-        html += '<div id="dbGamesAchievements"><p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p></div>';
-        html += '</div>';
+        html += '<div class="db-subsection">';
+        html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubAchievements">';
+        html += '<span>\uD83C\uDFC5 ' + achLabel + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
+        html += '<div class="db-subsection-body" id="dbSubAchievements">';
+        html += '<div id="dbGamesAchievements"><p class="db-subsection-loading">' + L.loadingList + '</p></div>';
+        html += '</div></div>';
 
         container.innerHTML = html;
 
@@ -1883,14 +1899,17 @@
 
         try {
             var pid = profile.player_id;
+            // Без ограничения: раньше брали по десять записей на заявки и на
+            // результаты, и турниры постарше просто исчезали из кабинета,
+            // ничем себя не обозначив
             var results = await Promise.all([
                 client.from('tournament_registrations')
                     .select('id, status, draw_position, group_number, tournament:tournaments(id, title, title_en, title_kg, date_start, image, status)')
                     .eq('player_id', pid).in('status', ['approved', 'draw', 'waitlist', 'pending', 'withdrawn', 'blocked', 'rejected'])
-                    .order('registered_at', { ascending: false }).limit(10),
+                    .order('registered_at', { ascending: false }),
                 client.from('tournament_results')
                     .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start, image)')
-                    .eq('player_id', pid).order('created_at', { ascending: false }).limit(10)
+                    .eq('player_id', pid).order('created_at', { ascending: false })
             ]);
 
             var regs = results[0].data || [];
@@ -1920,33 +1939,75 @@
             var upcoming = items.filter(isUpcoming);
             var played = items.filter(function(i) { return !isUpcoming(i); });
 
-            var html = '';
-            if (upcoming.length > 0) {
-                html += '<div class="db-tournaments-group-title">' + L.tourUpcoming + '</div>';
-                html += '<div class="db-tournaments-list">' + upcoming.map(function(i) { return tournamentRow(i, true); }).join('') + '</div>';
-            }
-            if (played.length > 0) {
-                html += '<div class="db-tournaments-group-title">' + L.tourPlayed + '</div>';
-                html += '<div class="db-tournaments-list">' + played.map(function(i) { return tournamentRow(i, true); }).join('') + '</div>';
-            }
-
-            container.innerHTML = html;
-            bindWithdraw(container, profile, loadGamesTournaments);
+            renderGamesTournaments(container, profile, upcoming, played, false);
         } catch(e) {
             console.warn('[KSLT] games tournaments error:', e);
             container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC6</div><div class="db-empty-title">' + L.noTournaments + '</div></div>';
         }
     }
 
+    /** Сколько сыгранных турниров показываем сразу. */
+    var TOURNAMENTS_PAGE = 10;
+
+    function renderGamesTournaments(container, profile, upcoming, played, showAll) {
+        var visible = showAll ? played : played.slice(0, TOURNAMENTS_PAGE);
+
+        var html = '';
+        if (upcoming.length > 0) {
+            html += '<div class="db-tournaments-group-title">' + L.tourUpcoming + '</div>';
+            html += '<div class="db-tournaments-list">' + upcoming.map(function(i) { return tournamentRow(i, true); }).join('') + '</div>';
+        }
+        if (played.length > 0) {
+            html += '<div class="db-tournaments-group-title">' + L.tourPlayed + '</div>';
+            html += '<div class="db-tournaments-list">' + visible.map(function(i) { return tournamentRow(i, true); }).join('') + '</div>';
+            if (played.length > TOURNAMENTS_PAGE) {
+                html += showAll
+                    ? '<button class="db-show-all-btn" id="dbCollapseTournaments">' + L.collapseBtn + '</button>'
+                    : '<button class="db-show-all-btn" id="dbShowAllTournaments">' + L.showAll + ' (' + played.length + ')</button>';
+            }
+        }
+
+        container.innerHTML = html;
+        bindWithdraw(container, profile, loadGamesTournaments);
+
+        var showBtn = document.getElementById('dbShowAllTournaments');
+        if (showBtn) {
+            showBtn.addEventListener('click', function() {
+                renderGamesTournaments(container, profile, upcoming, played, true);
+            });
+        }
+        var colBtn = document.getElementById('dbCollapseTournaments');
+        if (colBtn) {
+            colBtn.addEventListener('click', function() {
+                renderGamesTournaments(container, profile, upcoming, played, false);
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+    }
+
     // ---- Score utils ----
+    /**
+     * \u0414\u0430\u0442\u0430 \u043c\u0430\u0442\u0447\u0430 \u043f\u043e \u0431\u0438\u0448\u043a\u0435\u043a\u0441\u043a\u043e\u043c\u0443 \u0432\u0440\u0435\u043c\u0435\u043d\u0438.
+     *
+     * \u0412 \u0431\u0430\u0437\u0435 \u043c\u043e\u043c\u0435\u043d\u0442 \u043c\u0430\u0442\u0447\u0430 \u0445\u0440\u0430\u043d\u0438\u0442\u0441\u044f \u0441 \u0447\u0430\u0441\u043e\u0432\u044b\u043c \u043f\u043e\u044f\u0441\u043e\u043c, \u0438 \u0431\u0440\u0430\u0443\u0437\u0435\u0440 \u043f\u043e \u0443\u043c\u043e\u043b\u0447\u0430\u043d\u0438\u044e
+     * \u043f\u0435\u0440\u0435\u0432\u043e\u0434\u0438\u0442 \u0435\u0433\u043e \u0432 \u0441\u0432\u043e\u0439. \u041c\u0430\u0442\u0447 16 \u043c\u0430\u0440\u0442\u0430 00:30 \u043f\u043e \u0411\u0438\u0448\u043a\u0435\u043a\u0443 \u0443 \u0438\u0433\u0440\u043e\u043a\u0430 \u0432 \u043f\u043e\u0435\u0437\u0434\u043a\u0435
+     * \u0440\u0438\u0441\u043e\u0432\u0430\u043b\u0441\u044f \u0432\u0447\u0435\u0440\u0430\u0448\u043d\u0438\u043c \u0447\u0438\u0441\u043b\u043e\u043c, \u0445\u043e\u0442\u044f \u0434\u0430\u0442\u0430 \u0442\u0443\u0440\u043d\u0438\u0440\u0430 \u0440\u044f\u0434\u043e\u043c \u043d\u0435 \u0441\u0434\u0432\u0438\u0433\u0430\u043b\u0430\u0441\u044c \u2014
+     * \u043e\u043d\u0430 \u043e\u0431\u044b\u0447\u043d\u0430\u044f \u0434\u0430\u0442\u0430 \u0431\u0435\u0437 \u0432\u0440\u0435\u043c\u0435\u043d\u0438. \u0418\u0433\u0440\u0430\u0435\u043c \u043c\u044b \u0432 \u0411\u0438\u0448\u043a\u0435\u043a\u0435, \u0435\u0433\u043e \u0438 \u043f\u043e\u043a\u0430\u0437\u044b\u0432\u0430\u0435\u043c.
+     */
+    var DB_TZ = 'Asia/Bishkek';
+
     function dbFormatDate(dateStr) {
         if (!dateStr) return '\u2014';
         try {
             var d = new Date(dateStr);
-            var dd = String(d.getDate()).padStart(2, '0');
-            var mm = String(d.getMonth() + 1).padStart(2, '0');
-            var yy = String(d.getFullYear()).slice(2);
-            return isEn ? mm + '/' + dd + '/' + yy : dd + '.' + mm + '.' + yy;
+            if (isNaN(d.getTime())) return '\u2014';
+            var parts = {};
+            new Intl.DateTimeFormat('en-GB', {
+                timeZone: DB_TZ, day: '2-digit', month: '2-digit', year: '2-digit'
+            }).formatToParts(d).forEach(function(p) { parts[p.type] = p.value; });
+            return isEn
+                ? parts.month + '/' + parts.day + '/' + parts.year
+                : parts.day + '.' + parts.month + '.' + parts.year;
         } catch(e) { return '\u2014'; }
     }
 
@@ -1996,6 +2057,49 @@
     // ---- Games: Matches subsection ----
     var _matchesOpponents = {}; // cache: oppId → { name, photo }
 
+    /** Сколько матчей показываем сразу; остальные — по кнопке. */
+    var MATCHES_PAGE = 25;
+
+    /**
+     * Страница турнирных матчей игрока.
+     *
+     * Дуэли отсеиваются запросом, а не после него: раньше база отдавала
+     * последние пятьдесят матчей любого вида, и дуэли выбрасывались уже в
+     * браузере — у игрока с полусотней дуэлей турнирных матчей на экране не
+     * оставалось ни одного. count: 'exact' нужен, чтобы кнопка «Показать все»
+     * называла настоящее число, а не число загруженных.
+     */
+    function fetchMatchesPage(pid, from, to) {
+        return client.from('matches')
+            .select('*, tournament:tournaments(id, title, title_en, title_kg, draw_size)',
+                { count: 'exact' })
+            .or('player1_id.eq.' + pid + ',player2_id.eq.' + pid)
+            .eq('match_type', 'tournament')
+            .not('winner_id', 'is', null)
+            .order('played_at', { ascending: false })
+            .range(from, to);
+    }
+
+    /** Имена и фото соперников — одним запросом на всю пачку матчей. */
+    async function cacheOpponents(matches, pid) {
+        var oppIds = [];
+        matches.forEach(function(m) {
+            var oid = m.player1_id === pid ? m.player2_id : m.player1_id;
+            if (oid && !_matchesOpponents[oid] && oppIds.indexOf(oid) === -1) oppIds.push(oid);
+        });
+        if (oppIds.length === 0) return;
+
+        var oppRes = await client.from('players')
+            .select('id, name, name_en, name_kg, photo')
+            .in('id', oppIds);
+        (oppRes.data || []).forEach(function(p) {
+            _matchesOpponents[p.id] = {
+                name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
+                photo: p.photo || ''
+            };
+        });
+    }
+
     async function loadGamesMatches(profile) {
         var container = document.getElementById('dbGamesMatches');
         if (!container || !profile || !profile.player_id || !client) {
@@ -2005,61 +2109,42 @@
 
         try {
             var pid = profile.player_id;
-            var res = await client.from('matches')
-                .select('*, tournament:tournaments(id, title, title_en, title_kg, draw_size)')
-                .or('player1_id.eq.' + pid + ',player2_id.eq.' + pid)
-                .not('winner_id', 'is', null)
-                .order('played_at', { ascending: false })
-                .limit(50);
-
-            // Filter out duel matches — show only tournament matches
-            if (res.data) {
-                res.data = res.data.filter(function(m) { return !m.match_type || m.match_type === 'tournament'; });
-            }
+            var res = await fetchMatchesPage(pid, 0, MATCHES_PAGE - 1);
 
             if (res.error || !res.data || res.data.length === 0) {
                 container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\u2694\uFE0F</div><div class="db-empty-title">' + L.noMatches + '</div><div class="db-empty-text">' + L.noMatchesText + '</div></div>';
                 return;
             }
 
-            // Bulk load opponent names + photos
-            var oppIds = [];
-            res.data.forEach(function(m) {
-                var oid = m.player1_id === pid ? m.player2_id : m.player1_id;
-                if (oid && oppIds.indexOf(oid) === -1) oppIds.push(oid);
-            });
-
-            if (oppIds.length > 0) {
-                var oppRes = await client.from('players')
-                    .select('id, name, name_en, name_kg, photo')
-                    .in('id', oppIds);
-                if (oppRes.data) {
-                    oppRes.data.forEach(function(p) {
-                        _matchesOpponents[p.id] = {
-                            name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
-                            photo: p.photo || ''
-                        };
-                    });
-                }
-            }
-
-            renderGamesMatchesList(container, res.data, pid, profile, false);
+            await cacheOpponents(res.data, pid);
+            renderGamesMatchesList(container, res.data, pid, profile,
+                res.count == null ? res.data.length : res.count);
         } catch(e) {
             console.warn('[KSLT] games matches error:', e);
         }
     }
 
+    /**
+     * Раунд матча.
+     *
+     * Колонка round в базе заполнена: R1, SF, F, 3RD, GS_*. Раньше её читали
+     * только ради двух особых случаев, а остальное считали из номера раунда и
+     * размера сетки — и совпадало это лишь пока draw_size проставлен. Где он
+     * пуст, подставлялась сетка на 16, и четвертьфинал показывался как R16.
+     * Теперь запись из базы главнее, а вычисление осталось запасным.
+     */
     function getRoundLabel(m) {
-        // Use text 'round' field if present
         if (m.round) {
             if (m.round === '3RD') return '3rd';
             if (m.round.indexOf('GS_') === 0) return 'GS';
+            return m.round;
         }
-        // Derive from round_number + draw_size from tournament
         var rn = m.round_number;
         if (!rn) return '';
-        var ds = (m.tournament && m.tournament.draw_size) ? m.tournament.draw_size : 16;
-        var totalRounds = Math.log2(ds);
+        var ds = (m.tournament && m.tournament.draw_size) ? m.tournament.draw_size : 0;
+        var totalRounds = ds > 1 ? Math.log2(ds) : 0;
+        // Нецелое число раундов — сетка не степень двойки, вычислять нечего
+        if (!totalRounds || totalRounds % 1 !== 0) return 'R' + rn;
         var fromEnd = totalRounds - rn;
         if (fromEnd === 0) return 'F';
         if (fromEnd === 1) return 'SF';
@@ -2069,10 +2154,17 @@
         return 'R' + rn;
     }
 
-    function renderGamesMatchesList(container, matches, pid, profile, showAll) {
-        var LIMIT = 25;
-        var visible = showAll ? matches : matches.slice(0, LIMIT);
-        var hasMore = !showAll && matches.length > LIMIT;
+    /**
+     * Таблица матчей.
+     *
+     * total — сколько матчей у игрока всего по данным базы, а не сколько
+     * загружено. Раньше кнопка называла число загруженных, и при полусотне
+     * матчей «Показать все (50)» показывала ровно те же пятьдесят, молча
+     * пряча остальные.
+     */
+    function renderGamesMatchesList(container, matches, pid, profile, total, collapsed) {
+        var visible = collapsed ? matches.slice(0, MATCHES_PAGE) : matches;
+        var hasMore = visible.length < total;
 
         var html = '<table class="db-matches-table"><thead><tr>';
         html += '<th>' + L.matchDate + '</th>';
@@ -2119,8 +2211,8 @@
         html += '</tbody></table>';
 
         if (hasMore) {
-            html += '<button class="db-show-all-btn" id="dbShowAllMatches">' + L.showAll + ' (' + matches.length + ')</button>';
-        } else if (showAll && matches.length > LIMIT) {
+            html += '<button class="db-show-all-btn" id="dbShowAllMatches">' + L.showAll + ' (' + total + ')</button>';
+        } else if (total > MATCHES_PAGE) {
             html += '<button class="db-show-all-btn" id="dbCollapseMatches">' + L.collapseBtn + '</button>';
         }
 
@@ -2129,12 +2221,30 @@
         // Show all / Collapse
         var showBtn = document.getElementById('dbShowAllMatches');
         if (showBtn) {
-            showBtn.addEventListener('click', function() { renderGamesMatchesList(container, matches, pid, profile, true); });
+            showBtn.addEventListener('click', async function() {
+                // Всё уже в руках — список просто свёрнут
+                if (matches.length >= total) {
+                    renderGamesMatchesList(container, matches, pid, profile, total, false);
+                    return;
+                }
+                showBtn.disabled = true;
+                showBtn.textContent = L.loadingList;
+                try {
+                    var rest = await fetchMatchesPage(pid, matches.length, total - 1);
+                    var all = matches.concat(rest.data || []);
+                    await cacheOpponents(all, pid);
+                    renderGamesMatchesList(container, all, pid, profile, total, false);
+                } catch(e) {
+                    console.warn('[KSLT] games matches page error:', e);
+                    showBtn.disabled = false;
+                    showBtn.textContent = L.showAll + ' (' + total + ')';
+                }
+            });
         }
         var colBtn = document.getElementById('dbCollapseMatches');
         if (colBtn) {
             colBtn.addEventListener('click', function() {
-                renderGamesMatchesList(container, matches, pid, profile, false);
+                renderGamesMatchesList(container, matches, pid, profile, total, true);
                 container.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         }
@@ -2288,6 +2398,8 @@
                 return;
             }
 
+            var chalPage = isEn ? 'challenge-en.html' : (isKg ? 'challenge-kg.html' : 'challenge.html');
+
             var html = '<div class="db-invite-list">';
             for (var i = 0; i < items.length; i++) {
                 var ch = items[i];
@@ -2295,9 +2407,15 @@
                 var partnerName = isSent ? (ch.opponent_name || '\u2014') : (ch.challenger_name || '\u2014');
                 var partnerAvatar = isSent ? ch.opponent_avatar : ch.challenger_avatar;
                 var initials = (partnerName).split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
+                // Ссылка на фото может быть, но не открываться. Раньше в этом
+                // случае оставался значок сломанной картинки: инициалы
+                // подставлялись, только когда ссылки нет вовсе. Подмена
+                // навешивается ниже обработчиком — в разметке она сломалась бы
+                // на фамилии с кавычкой или апострофом
                 var avatarHtml = partnerAvatar
-                    ? '<img src="' + escHtml(partnerAvatar) + '" class="db-invite-avatar" alt="">'
-                    : '<div class="db-invite-avatar-ph">' + initials + '</div>';
+                    ? '<img src="' + escHtml(partnerAvatar) + '" class="db-invite-avatar" alt=""' +
+                      ' data-initials="' + escHtml(initials) + '">'
+                    : '<div class="db-invite-avatar-ph">' + escHtml(initials) + '</div>';
 
                 var dirLabel = isSent ? L.chalSent : L.chalReceived;
                 var statusMap = {
@@ -2317,30 +2435,105 @@
                 var dateStr = '';
                 try {
                     var d = new Date(finalDate);
-                    dateStr = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+                    if (!isNaN(d.getTime())) {
+                        dateStr = d.toLocaleDateString(isEn ? 'en-US' : (isKg ? 'ky-KG' : 'ru-RU'),
+                            { day: 'numeric', month: 'short' });
+                    }
                 } catch(e) {}
 
                 var metaParts = [dirLabel];
                 if (dateStr) metaParts.push(dateStr);
                 if (finalTime) metaParts.push(finalTime);
                 var venueHtml = finalVenue ? '<div class="db-invite-meta" style="font-size:0.75rem;">\uD83D\uDCCD ' + escHtml(finalVenue) + '</div>' : '';
-                var scoreHtml = ch.match_score ? '<div class="db-invite-meta" style="font-size:0.8rem;font-weight:700;">' + escHtml(ch.match_score) + '</div>' : '';
+
+                // Счёт сам по себе не говорит, чей он. Победителя функция
+                // возвращает давно, показывали только цифры
+                var myPid = isSent ? ch.challenger_player_id : ch.opponent_player_id;
+                var outcomeHtml = '';
+                if (ch.match_winner_id && myPid) {
+                    var won = ch.match_winner_id === myPid;
+                    outcomeHtml = '<span class="db-invite-outcome ' + (won ? 'win' : 'loss') + '">' +
+                        (won ? L.chalWon : L.chalLost) + '</span>';
+                }
+                var scoreHtml = ch.match_score
+                    ? '<div class="db-invite-meta db-invite-score">' + escHtml(ch.match_score) + outcomeHtml + '</div>'
+                    : '';
+
+                // Баттл — тот же вызов, только опубликованный на сайте
+                var battleHtml = ch.battle_published
+                    ? '<a class="db-invite-battle" href="' + chalPage + '?id=' + escHtml(ch.id) + '&from=battles">' +
+                      '\uD83D\uDD25 ' + L.chalBattle +
+                      (ch.battle_title ? ' \u00B7 ' + escHtml(ch.battle_title) : '') + '</a>'
+                    : '';
 
                 html += '<div class="db-invite-item">' +
                     avatarHtml +
                     '<div class="db-invite-info">' +
                         '<div class="db-invite-name">' + escHtml(partnerName) + '</div>' +
                         '<div class="db-invite-meta">' + metaParts.join(' \u00B7 ') + '</div>' +
-                        venueHtml + scoreHtml +
+                        venueHtml + scoreHtml + battleHtml +
                     '</div>' +
                     '<div class="db-invite-status ' + st.cls + '">' + st.label + '</div>' +
                 '</div>';
             }
             html += '</div>';
             card.innerHTML = html;
+            bindAvatarFallback(card);
         } catch(e) {
             console.warn('[KSLT] games challenges error:', e);
         }
+    }
+
+    /** Не открылось фото — на его место встают инициалы. */
+    function bindAvatarFallback(root) {
+        root.querySelectorAll('img.db-invite-avatar[data-initials]').forEach(function(img) {
+            img.addEventListener('error', function() {
+                var ph = document.createElement('div');
+                ph.className = 'db-invite-avatar-ph';
+                ph.textContent = img.getAttribute('data-initials') || '';
+                if (img.parentNode) img.parentNode.replaceChild(ph, img);
+            });
+        });
+    }
+
+    /**
+     * Насколько игрок продвинулся к незакрытым значкам.
+     *
+     * Считаем только то, что выражается числом: сыгранные матчи, победы,
+     * турниры и серия побед подряд. Для чемпионства, сенсации и членства
+     * счётчика нет — такие значки просто уходят в конец списка целей.
+     */
+    async function loadBadgeProgress(playerId) {
+        var out = {};
+        try {
+            var res = await Promise.all([
+                client.from('matches')
+                    .select('id', { count: 'exact', head: true })
+                    .or('player1_id.eq.' + playerId + ',player2_id.eq.' + playerId)
+                    .eq('status', 'completed').not('winner_id', 'is', null),
+                client.from('tournament_registrations')
+                    .select('tournament_id', { count: 'exact', head: true })
+                    .eq('player_id', playerId).in('status', ['approved', 'draw']),
+                client.from('players').select('wins, form').eq('id', playerId).single()
+            ]);
+
+            out.matches_played = res[0].count || 0;
+            out.tournaments_played = res[1].count || 0;
+
+            var plr = res[2].data || {};
+            out.wins = plr.wins || 0;
+
+            var streak = 0;
+            (plr.form || []).some(function(r) {
+                if (r !== 'W') return true;
+                streak++;
+                return false;
+            });
+            out.streak = streak;
+        } catch(e) {
+            console.warn('[KSLT] badge progress error:', e);
+        }
+        return out;
     }
 
     // ---- Games: Achievements subsection ----
@@ -2393,25 +2586,45 @@
                 earned.forEach(function(pb) {
                     var b = pb.badge;
                     if (!b) return;
-                    html += '<div class="db-badge-item db-badge-earned" title="' + bName(b) + '">';
-                    html += '<span class="db-badge-icon">' + b.icon + '</span>';
-                    html += '<span class="db-badge-name">' + bName(b) + '</span>';
+                    html += '<div class="db-badge-item db-badge-earned" title="' + escHtml(bDesc(b) || bName(b)) + '">';
+                    html += '<span class="db-badge-icon">' + escHtml(b.icon) + '</span>';
+                    html += '<span class="db-badge-name">' + escHtml(bName(b)) + '</span>';
                     html += '</div>';
                 });
                 html += '</div>';
             }
 
-            // Nearest locked goals
+            // Ближайшие цели. Раньше здесь брались первые три по порядку
+            // сортировки, и игрок, которому до значка оставался один матч,
+            // видел три случайных
             var lockedDefs = allDefs.filter(function(d) { return !earnedMap[d.id] && d.condition_type !== 'manual'; });
+            var progress = await loadBadgeProgress(profile.player_id);
+
+            lockedDefs.forEach(function(d) {
+                var have = progress[d.condition_type];
+                d._have = have;
+                d._need = d.condition_value;
+                // Значки без счётчика (чемпион, сенсация, членство) идут
+                // после измеримых: сказать, сколько до них осталось, нельзя
+                d._left = (have == null || !d.condition_value) ? Infinity : Math.max(0, d.condition_value - have);
+            });
+            lockedDefs.sort(function(a, b) {
+                if (a._left !== b._left) return a._left - b._left;
+                return (a.sort_order || 0) - (b.sort_order || 0);
+            });
+
             var nearest = lockedDefs.slice(0, 3);
             if (nearest.length > 0) {
                 var nextLabel = isKg ? 'Кийинки максаттар' : isEn ? 'Next goals' : 'Следующие цели';
                 html += '<div class="db-badges-next-label">' + nextLabel + '</div>';
                 html += '<div class="db-badges-earned">';
                 nearest.forEach(function(d) {
-                    html += '<div class="db-badge-item db-badge-locked" title="' + bDesc(d) + '">';
-                    html += '<span class="db-badge-icon db-badge-icon-locked">' + d.icon + '</span>';
-                    html += '<span class="db-badge-name">' + bName(d) + '</span>';
+                    var counter = d._left === Infinity ? ''
+                        : '<span class="db-badge-progress">' + d._have + '/' + d._need + '</span>';
+                    html += '<div class="db-badge-item db-badge-locked" title="' + escHtml(bDesc(d) || bName(d)) + '">';
+                    html += '<span class="db-badge-icon db-badge-icon-locked">' + escHtml(d.icon) + '</span>';
+                    html += '<span class="db-badge-name">' + escHtml(bName(d)) + '</span>';
+                    html += counter;
                     html += '</div>';
                 });
                 html += '</div>';
