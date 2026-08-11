@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../fixtures');
 
 /**
  * TC-AUTH: Auth page UI checks (no real login — no test credentials)

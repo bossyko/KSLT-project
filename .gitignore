@@ -25,3 +25,6 @@ tests/reports/results.json
 
 # Картинки новостей с tennis.kg — временные, заливаются в Supabase Storage
 import/news-images/
+
+# Адрес и ключ тестовой базы — у каждого свои
+.env.test

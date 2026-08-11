@@ -1,6 +1,11 @@
 // @ts-check
 const { defineConfig } = require('@playwright/test');
 
+// Тесты ходят в отдельную базу. Проверка стоит здесь, а не внутри тестов,
+// чтобы прогон не начинался вовсе, если база не задана: молча уйти в боевую
+// хуже, чем не запуститься.
+require('./tests/test-db');
+
 module.exports = defineConfig({
     testDir: './tests/e2e',
     timeout: 30000,

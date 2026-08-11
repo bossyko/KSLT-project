@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../fixtures');
 
 /**
  * TC-CSS: CSS files load, no 404 for stylesheets or scripts

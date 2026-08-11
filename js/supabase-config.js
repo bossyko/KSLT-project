@@ -2,10 +2,21 @@
 // KSLT — Supabase Configuration
 // ============================================
 
-/** @type {string} Supabase project URL */
-var SUPABASE_URL = 'https://qqkzszesviukopgjbead.supabase.co';
+/**
+ * Адрес базы.
+ *
+ * Автотесты гоняют сайт против отдельного проекта Supabase, а не боевого: их
+ * тысяча шестьсот, каждый заводит свои данные и тянет картинки. Прогон по
+ * боевой базе оставляет в ней мусор и съедает месячную квоту трафика.
+ *
+ * Переключение — через window.KSLT_DB, который Playwright подставляет до
+ * загрузки страницы. Ничего не подставили — работаем с боевой.
+ */
+var SUPABASE_URL = (window.KSLT_DB && window.KSLT_DB.url) ||
+    'https://qqkzszesviukopgjbead.supabase.co';
 /** @type {string} Supabase anonymous (public) key */
-var SUPABASE_ANON_KEY = 'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G';
+var SUPABASE_ANON_KEY = (window.KSLT_DB && window.KSLT_DB.key) ||
+    'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G';
 
 /** @type {string} Telegram bot username (for deep link: t.me/BOT?start=PROFILE_ID) */
 window.KSLT_TG_BOT = 'KSLTennisBot';
