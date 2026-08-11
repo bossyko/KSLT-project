@@ -163,7 +163,7 @@
         loadingList: 'Жүктөлүүдө...',
         noMatches: 'Матчтар жок',
         noMatchesText: 'Сиздин матчтарыңыз мелдештерден кийин бул жерде көрүнөт',
-        matchDate: 'Күн', matchOpponent: 'Атаандаш', matchScore: 'Эсеп', matchResult: 'Жыйынтык', matchTournament: 'Мелдеш', matchRound: 'Раунд',
+        matchDate: 'Күн', matchOpponent: 'Атаандаш', matchScore: 'Эсеп', matchResult: 'Жыйынтык', matchTournament: 'Мелдеш', matchRound: 'Раунд', matchDoubles: 'Жуптук', matchWith: 'жупташы',
         challenges: 'Сынактар',
         challengesTitle: 'Матчка чакыруулар',
         chalSent: 'Жөнөтүлдү',
@@ -393,7 +393,7 @@
         loadingList: 'Loading...',
         noMatches: 'No matches yet',
         noMatchesText: 'Your matches will appear here after tournaments',
-        matchDate: 'Date', matchOpponent: 'Opponent', matchScore: 'Score', matchResult: 'Result', matchTournament: 'Tournament', matchRound: 'Round',
+        matchDate: 'Date', matchOpponent: 'Opponent', matchScore: 'Score', matchResult: 'Result', matchTournament: 'Tournament', matchRound: 'Round', matchDoubles: 'Doubles', matchWith: 'with',
         challenges: 'Challenges',
         challengesTitle: 'Match Challenges',
         chalSent: 'Sent',
@@ -623,7 +623,7 @@
         loadingList: 'Загрузка...',
         noMatches: 'Матчей пока нет',
         noMatchesText: 'Ваши матчи появятся здесь после участия в турнирах',
-        matchDate: 'Дата', matchOpponent: 'Соперник', matchScore: 'Счёт', matchResult: 'Итог', matchTournament: 'Турнир', matchRound: 'Раунд',
+        matchDate: 'Дата', matchOpponent: 'Соперник', matchScore: 'Счёт', matchResult: 'Итог', matchTournament: 'Турнир', matchRound: 'Раунд', matchDoubles: 'Парный', matchWith: 'в паре с',
         challenges: 'Вызовы',
         challengesTitle: 'Вызовы на матч',
         chalSent: 'Отправлено',
@@ -1784,7 +1784,7 @@
 
             for (var i = 0; i < invites.length; i++) {
                 var inv = invites[i];
-                var initials = (inv.partner_name || '?').split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
+                var initials = dbInitials(inv.partner_name);
                 var avatarHtml = inv.partner_avatar
                     ? '<img src="' + escHtml(inv.partner_avatar) + '" class="db-invite-avatar" alt="">'
                     : '<div class="db-invite-avatar-ph">' + initials + '</div>';
@@ -1899,20 +1899,37 @@
 
         try {
             var pid = profile.player_id;
+            var REG_FIELDS = 'id, status, draw_position, group_number, tournament:tournaments(id, title, title_en, title_kg, date_start, image, status)';
+            var REG_STATUSES = ['approved', 'draw', 'waitlist', 'pending', 'withdrawn', 'blocked', 'rejected'];
+
             // Без ограничения: раньше брали по десять записей на заявки и на
             // результаты, и турниры постарше просто исчезали из кабинета,
-            // ничем себя не обозначив
+            // ничем себя не обозначив.
+            //
+            // Второй запрос — про парные турниры. Заявку подаёт капитан, и
+            // напарник в ней стоит отдельным полем: своих парных турниров он
+            // в кабинете не видел вовсе
             var results = await Promise.all([
                 client.from('tournament_registrations')
-                    .select('id, status, draw_position, group_number, tournament:tournaments(id, title, title_en, title_kg, date_start, image, status)')
-                    .eq('player_id', pid).in('status', ['approved', 'draw', 'waitlist', 'pending', 'withdrawn', 'blocked', 'rejected'])
+                    .select(REG_FIELDS)
+                    .eq('player_id', pid).in('status', REG_STATUSES)
                     .order('registered_at', { ascending: false }),
                 client.from('tournament_results')
                     .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start, image)')
-                    .eq('player_id', pid).order('created_at', { ascending: false })
+                    .eq('player_id', pid).order('created_at', { ascending: false }),
+                client.from('tournament_registrations')
+                    .select(REG_FIELDS)
+                    .eq('partner_id', pid).in('status', REG_STATUSES)
+                    .order('registered_at', { ascending: false })
             ]);
 
-            var regs = results[0].data || [];
+            var own = results[0].data || [];
+            var asPartner = (results[2].data || []).map(function(r) {
+                // Заявку подавал капитан: снимать её напарник не может
+                r.as_partner = true;
+                return r;
+            });
+            var regs = own.concat(asPartner);
             var tResults = results[1].data || [];
             var resultsMap = {};
             tResults.forEach(function(tr) { resultsMap[tr.tournament_id] = tr; });
@@ -2060,8 +2077,37 @@
     /** Сколько матчей показываем сразу; остальные — по кнопке. */
     var MATCHES_PAGE = 25;
 
+    /** tournament_id → напарник капитана в этом турнире. */
+    var _matchPairs = {};
+
+    function isDoubles(t) {
+        return !!t && (t.format === 'doubles' || t.format === 'mixed_doubles');
+    }
+
     /**
-     * Страница турнирных матчей игрока.
+     * Турниры, где игрок заявлен напарником.
+     *
+     * В матче помещаются только двое: player1_id и player2_id — это капитаны
+     * пар. Напарник в матче не упомянут вовсе, и своих парных игр он в
+     * кабинете не видел. Пару восстанавливаем по заявке: она знает и
+     * капитана, и напарника.
+     *
+     * Возвращает { tournament_id: capitan_id }.
+     */
+    async function loadPartnerTournaments(pid) {
+        var out = {};
+        var res = await client.from('tournament_registrations')
+            .select('tournament_id, player_id')
+            .eq('partner_id', pid)
+            .in('status', ['approved', 'draw']);
+        (res.data || []).forEach(function(r) {
+            if (r.tournament_id && r.player_id) out[r.tournament_id] = r.player_id;
+        });
+        return out;
+    }
+
+    /**
+     * Страница турнирных матчей игрока — своих и тех, где он напарник.
      *
      * Дуэли отсеиваются запросом, а не после него: раньше база отдавала
      * последние пятьдесят матчей любого вида, и дуэли выбрасывались уже в
@@ -2069,29 +2115,107 @@
      * оставалось ни одного. count: 'exact' нужен, чтобы кнопка «Показать все»
      * называла настоящее число, а не число загруженных.
      */
-    function fetchMatchesPage(pid, from, to) {
+    function fetchMatchesPage(pid, from, to, myCaptains) {
+        var conds = ['player1_id.eq.' + pid, 'player2_id.eq.' + pid];
+        Object.keys(myCaptains || {}).forEach(function(tid) {
+            var cap = myCaptains[tid];
+            conds.push('and(tournament_id.eq.' + tid + ',player1_id.eq.' + cap + ')');
+            conds.push('and(tournament_id.eq.' + tid + ',player2_id.eq.' + cap + ')');
+        });
+
         return client.from('matches')
-            .select('*, tournament:tournaments(id, title, title_en, title_kg, draw_size)',
+            .select('*, tournament:tournaments(id, title, title_en, title_kg, draw_size, format)',
                 { count: 'exact' })
-            .or('player1_id.eq.' + pid + ',player2_id.eq.' + pid)
+            .or(conds.join(','))
             .eq('match_type', 'tournament')
             .not('winner_id', 'is', null)
             .order('played_at', { ascending: false })
             .range(from, to);
     }
 
+    /** Составы пар в парных турнирах: без них соперник выглядит одиночкой. */
+    async function cachePairs(matches) {
+        var tIds = [];
+        matches.forEach(function(m) {
+            var tid = m.tournament_id;
+            if (isDoubles(m.tournament) && tid && !_matchPairs[tid] && tIds.indexOf(tid) === -1) {
+                tIds.push(tid);
+            }
+        });
+        if (tIds.length === 0) return;
+
+        var res = await client.from('tournament_registrations')
+            .select('tournament_id, player_id, partner_id, partner_external_name')
+            .in('tournament_id', tIds);
+        tIds.forEach(function(tid) { _matchPairs[tid] = {}; });
+        (res.data || []).forEach(function(r) {
+            if (!_matchPairs[r.tournament_id] || !r.player_id) return;
+            _matchPairs[r.tournament_id][r.player_id] = {
+                id: r.partner_id || '',
+                external: r.partner_external_name || ''
+            };
+        });
+    }
+
+    /**
+     * Напарник капитана в конкретном турнире: имя и фото.
+     *
+     * Напарник может быть не из клуба — тогда в заявке от него осталось
+     * только вписанное имя, и фото взять неоткуда.
+     */
+    function partnerInfo(tid, captainId) {
+        var pair = _matchPairs[tid] && _matchPairs[tid][captainId];
+        if (!pair) return null;
+        if (pair.id && _matchesOpponents[pair.id]) {
+            return { name: _matchesOpponents[pair.id].name, photo: _matchesOpponents[pair.id].photo };
+        }
+        if (pair.external) return { name: pair.external, photo: '' };
+        return null;
+    }
+
+    /**
+     * Инициалы для кружка вместо фотографии.
+     *
+     * Две буквы, не одна: по одной букве однофамильцы и тёзки сливаются, а
+     * в паре два кружка выглядели бы одинаково. Больше двух в кружок не
+     * влезает, поэтому у длинных имён берём первое и последнее слово.
+     */
+    function dbInitials(name) {
+        var words = String(name || '').trim().split(/\s+/).filter(Boolean);
+        if (words.length === 0) return '?';
+        if (words.length === 1) return words[0].charAt(0).toUpperCase();
+        return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+    }
+
+    /** Кружок игрока: фото, а без него — инициалы. */
+    function matchAvatar(name, photo, extraClass) {
+        var cls = 'db-match-avatar' + (extraClass ? ' ' + extraClass : '');
+        return photo
+            ? '<img src="' + escHtml(photo) + '" alt="" class="' + cls + '">'
+            : '<div class="' + cls + ' db-match-avatar-ph">' + escHtml(dbInitials(name)) + '</div>';
+    }
+
     /** Имена и фото соперников — одним запросом на всю пачку матчей. */
     async function cacheOpponents(matches, pid) {
-        var oppIds = [];
+        var ids = [];
+        function want(id) {
+            if (id && !_matchesOpponents[id] && ids.indexOf(id) === -1) ids.push(id);
+        }
         matches.forEach(function(m) {
-            var oid = m.player1_id === pid ? m.player2_id : m.player1_id;
-            if (oid && !_matchesOpponents[oid] && oppIds.indexOf(oid) === -1) oppIds.push(oid);
+            want(m.player1_id);
+            want(m.player2_id);
+            var pairs = _matchPairs[m.tournament_id];
+            if (pairs) {
+                [m.player1_id, m.player2_id].forEach(function(cap) {
+                    if (pairs[cap] && pairs[cap].id) want(pairs[cap].id);
+                });
+            }
         });
-        if (oppIds.length === 0) return;
+        if (ids.length === 0) return;
 
         var oppRes = await client.from('players')
             .select('id, name, name_en, name_kg, photo')
-            .in('id', oppIds);
+            .in('id', ids);
         (oppRes.data || []).forEach(function(p) {
             _matchesOpponents[p.id] = {
                 name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
@@ -2109,16 +2233,18 @@
 
         try {
             var pid = profile.player_id;
-            var res = await fetchMatchesPage(pid, 0, MATCHES_PAGE - 1);
+            var myCaptains = await loadPartnerTournaments(pid);
+            var res = await fetchMatchesPage(pid, 0, MATCHES_PAGE - 1, myCaptains);
 
             if (res.error || !res.data || res.data.length === 0) {
                 container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\u2694\uFE0F</div><div class="db-empty-title">' + L.noMatches + '</div><div class="db-empty-text">' + L.noMatchesText + '</div></div>';
                 return;
             }
 
+            await cachePairs(res.data);
             await cacheOpponents(res.data, pid);
             renderGamesMatchesList(container, res.data, pid, profile,
-                res.count == null ? res.data.length : res.count);
+                res.count == null ? res.data.length : res.count, false, myCaptains);
         } catch(e) {
             console.warn('[KSLT] games matches error:', e);
         }
@@ -2162,9 +2288,10 @@
      * матчей «Показать все (50)» показывала ровно те же пятьдесят, молча
      * пряча остальные.
      */
-    function renderGamesMatchesList(container, matches, pid, profile, total, collapsed) {
+    function renderGamesMatchesList(container, matches, pid, profile, total, collapsed, myCaptains) {
         var visible = collapsed ? matches.slice(0, MATCHES_PAGE) : matches;
         var hasMore = visible.length < total;
+        myCaptains = myCaptains || {};
 
         var html = '<table class="db-matches-table"><thead><tr>';
         html += '<th>' + L.matchDate + '</th>';
@@ -2177,12 +2304,38 @@
         html += '</tr></thead><tbody>';
 
         visible.forEach(function(m) {
-            var isP1 = m.player1_id === pid;
-            var oppId = isP1 ? m.player2_id : m.player1_id;
+            // В парном турнире в матче записаны капитаны пар. Своей может
+            // быть та сторона, где стоит не сам игрок, а его капитан
+            var myCap = myCaptains[m.tournament_id];
+            var mineIsP1 = m.player1_id === pid ||
+                (m.player2_id !== pid && !!myCap && m.player1_id === myCap);
+
+            var oppId = mineIsP1 ? m.player2_id : m.player1_id;
             var opp = _matchesOpponents[oppId] || { name: oppId, photo: '' };
-            var isWin = m.winner_id === pid;
+            var isWin = m.winner_id === (mineIsP1 ? m.player1_id : m.player2_id);
             var score = m.score || '';
-            var displayScore = isP1 ? dbFormatScore(score) : dbFormatScore(dbFlipScore(score));
+            var displayScore = mineIsP1 ? dbFormatScore(score) : dbFormatScore(dbFlipScore(score));
+
+            var dbl = isDoubles(m.tournament);
+            var oppMate = dbl ? partnerInfo(m.tournament_id, oppId) : null;
+            // У пары два имени, и в узкой колонке через косую черту они
+            // ломались на три строки. Даём по имени на строку — под два кружка
+            var oppTitle = oppMate
+                ? '<span class="db-match-pair"><span>' + escHtml(opp.name) + '</span>' +
+                  '<span>' + escHtml(oppMate.name) + '</span></span>'
+                : '<span>' + escHtml(opp.name) + '</span>';
+
+            // С кем игрок был в паре. Своя половина пары в матче не записана:
+            // если он капитан — напарника берём из заявки, если напарник —
+            // его парой был капитан, стоящий в матче
+            var myMate = '';
+            if (dbl) {
+                var mySideCap = mineIsP1 ? m.player1_id : m.player2_id;
+                var mine = mySideCap === pid
+                    ? partnerInfo(m.tournament_id, pid)
+                    : _matchesOpponents[mySideCap];
+                myMate = mine ? mine.name : '';
+            }
 
             var tName = '';
             if (m.tournament) {
@@ -2194,18 +2347,30 @@
             var resultCls = isWin ? 'win' : 'loss';
             var resultLabel = isWin ? 'W' : 'L';
 
-            var avatarHtml = opp.photo
-                ? '<img src="' + escHtml(opp.photo) + '" alt="" class="db-match-avatar">'
-                : '<div class="db-match-avatar db-match-avatar-ph">' + escHtml(opp.name.charAt(0)) + '</div>';
+            // У пары кружков два, внахлёст: одно фото на двоих обманывало —
+            // имени рядом стояло два
+            var avatarHtml = matchAvatar(opp.name, opp.photo);
+            if (oppMate) {
+                avatarHtml = '<div class="db-match-avatars">' + avatarHtml +
+                    matchAvatar(oppMate.name, oppMate.photo, 'db-match-avatar-2nd') + '</div>';
+            }
 
             html += '<tr>';
             html += '<td class="db-match-date">' + dateStr + '</td>';
-            html += '<td><div class="db-match-opponent">' + avatarHtml + '<span>' + escHtml(opp.name) + '</span></div></td>';
+            html += '<td><div class="db-match-opponent">' + avatarHtml + oppTitle + '</div></td>';
             html += '<td class="db-match-score">' + displayScore + '</td>';
             html += '<td class="db-match-result-cell"><span class="db-match-result ' + resultCls + '">' + resultLabel + '</span></td>';
-            html += '<td class="db-match-tournament">' + escHtml(tName) + '</td>';
+            html += '<td class="db-match-tournament">' +
+                (dbl ? '<span class="db-match-doubles" title="' + L.matchDoubles + '">\uD83D\uDC65</span> ' : '') +
+                escHtml(tName) +
+                (myMate ? '<div class="db-match-mate">' + L.matchWith +
+                    ' <span class="db-match-mate-name">' + escHtml(myMate) + '</span></div>' : '') +
+                '</td>';
             html += '<td class="db-match-round">' + roundLabel + '</td>';
-            html += '<td><button class="db-match-h2h" data-opp-id="' + escHtml(oppId) + '" data-opp-name="' + escHtml(opp.name) + '" data-opp-photo="' + escHtml(opp.photo) + '" title="Head to Head">H2H</button></td>';
+            // H2H — про личные встречи двоих, у пар состав меняется от турнира
+            html += '<td>' + (dbl ? '' :
+                '<button class="db-match-h2h" data-opp-id="' + escHtml(oppId) + '" data-opp-name="' + escHtml(opp.name) + '" data-opp-photo="' + escHtml(opp.photo) + '" title="Head to Head">H2H</button>') +
+                '</td>';
             html += '</tr>';
         });
         html += '</tbody></table>';
@@ -2224,16 +2389,17 @@
             showBtn.addEventListener('click', async function() {
                 // Всё уже в руках — список просто свёрнут
                 if (matches.length >= total) {
-                    renderGamesMatchesList(container, matches, pid, profile, total, false);
+                    renderGamesMatchesList(container, matches, pid, profile, total, false, myCaptains);
                     return;
                 }
                 showBtn.disabled = true;
                 showBtn.textContent = L.loadingList;
                 try {
-                    var rest = await fetchMatchesPage(pid, matches.length, total - 1);
+                    var rest = await fetchMatchesPage(pid, matches.length, total - 1, myCaptains);
                     var all = matches.concat(rest.data || []);
+                    await cachePairs(all);
                     await cacheOpponents(all, pid);
-                    renderGamesMatchesList(container, all, pid, profile, total, false);
+                    renderGamesMatchesList(container, all, pid, profile, total, false, myCaptains);
                 } catch(e) {
                     console.warn('[KSLT] games matches page error:', e);
                     showBtn.disabled = false;
@@ -2244,7 +2410,7 @@
         var colBtn = document.getElementById('dbCollapseMatches');
         if (colBtn) {
             colBtn.addEventListener('click', function() {
-                renderGamesMatchesList(container, matches, pid, profile, total, true);
+                renderGamesMatchesList(container, matches, pid, profile, total, true, myCaptains);
                 container.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         }
@@ -2406,7 +2572,7 @@
                 var isSent = ch.direction === 'sent';
                 var partnerName = isSent ? (ch.opponent_name || '\u2014') : (ch.challenger_name || '\u2014');
                 var partnerAvatar = isSent ? ch.opponent_avatar : ch.challenger_avatar;
-                var initials = (partnerName).split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
+                var initials = dbInitials(partnerName);
                 // Ссылка на фото может быть, но не открываться. Раньше в этом
                 // случае оставался значок сломанной картинки: инициалы
                 // подставлялись, только когда ссылки нет вовсе. Подмена
@@ -2679,7 +2845,7 @@
                 var partnerName = isSent ? (ch.opponent_name || '—') : (ch.challenger_name || '—');
                 var partnerAvatar = isSent ? ch.opponent_avatar : ch.challenger_avatar;
 
-                var initials = (partnerName).split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
+                var initials = dbInitials(partnerName);
                 var avatarHtml = partnerAvatar
                     ? '<img src="' + escHtml(partnerAvatar) + '" class="db-invite-avatar" alt="">'
                     : '<div class="db-invite-avatar-ph">' + initials + '</div>';
@@ -3203,6 +3369,9 @@
     function canWithdraw(item) {
         var reg = item.reg;
         if (!reg || reg.status === 'withdrawn') return false;
+        // В парном турнире заявка одна на пару, и подаёт её капитан.
+        // Напарник видит турнир, но снять пару с него не может
+        if (reg.as_partner) return false;
         if (reg.draw_position != null || reg.group_number != null) return false;
         if (item.round_reached) return false;
         // Статусы турнира до начала игры. Снять заявку можно и после закрытия

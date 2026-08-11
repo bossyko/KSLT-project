@@ -390,14 +390,25 @@
       return;
     }
 
-    supabaseClient.from('tournament_registrations')
-      .select('*, tournament:tournaments(id, title, date_start, status)')
-      .eq('player_id', _player.id)
-      .order('registered_at', { ascending: false })
-      .then(function(r) {
-        if (r.error) console.error('My tournaments load error:', r.error);
-        renderTournamentsList(content, r.data || []);
+    // В парном турнире заявка одна на пару: капитан в player_id, напарник
+    // отдельным полем. Напарник своих парных турниров не видел вовсе
+    var FIELDS = '*, tournament:tournaments(id, title, date_start, status)';
+    Promise.all([
+      supabaseClient.from('tournament_registrations').select(FIELDS)
+        .eq('player_id', _player.id).order('registered_at', { ascending: false }),
+      supabaseClient.from('tournament_registrations').select(FIELDS)
+        .eq('partner_id', _player.id).order('registered_at', { ascending: false })
+    ]).then(function(rs) {
+      if (rs[0].error) console.error('My tournaments load error:', rs[0].error);
+      var seen = {};
+      var all = (rs[0].data || []).concat(rs[1].data || []).filter(function(r) {
+        var id = r.tournament && r.tournament.id;
+        if (!id || seen[id]) return false;
+        seen[id] = true;
+        return true;
       });
+      renderTournamentsList(content, all);
+    });
   }
 
   function renderTournamentsList(container, regs) {
@@ -558,52 +569,127 @@
 
     // Турнирные матчи: дуэли по вызову живут отдельно, в баттлах.
     // Ограничение снято — при трёх десятках матчей остальные просто
-    // исчезали, ничем себя не обозначив
-    supabaseClient.from('matches')
-      .select('*, tournament:tournaments(title)')
-      .or('player1_id.eq.' + _player.id + ',player2_id.eq.' + _player.id)
-      .eq('match_type', 'tournament')
-      .not('winner_id', 'is', null)
-      .order('played_at', { ascending: false })
-      .then(function(r) {
-        if (!r.data || r.data.length === 0) {
-          content.innerHTML = '<div class="empty-state"><div class="empty-icon">⚔️</div><div class="empty-title">' + I18N.t('profile.noMatches') + '</div></div>';
-          return;
-        }
-        var matches = r.data;
-        // Load all opponent IDs
-        var oppIds = [];
-        matches.forEach(function(m) {
-          var oppId = m.player1_id === _player.id ? m.player2_id : m.player1_id;
-          if (oppIds.indexOf(oppId) === -1) oppIds.push(oppId);
+    // исчезали, ничем себя не обозначив.
+    //
+    // В матче помещаются двое: в парном турнире это капитаны пар, а
+    // напарник не упомянут вовсе. Турниры, где игрок заявлен напарником,
+    // подбираем отдельно и добираем матчи его капитана
+    supabaseClient.from('tournament_registrations')
+      .select('tournament_id, player_id')
+      .eq('partner_id', _player.id)
+      .in('status', ['approved', 'draw'])
+      .then(function(pr) {
+        var conds = ['player1_id.eq.' + _player.id, 'player2_id.eq.' + _player.id];
+        var myCaptains = {};
+        (pr.data || []).forEach(function(r) {
+          if (!r.tournament_id || !r.player_id) return;
+          myCaptains[r.tournament_id] = r.player_id;
+          conds.push('and(tournament_id.eq.' + r.tournament_id + ',player1_id.eq.' + r.player_id + ')');
+          conds.push('and(tournament_id.eq.' + r.tournament_id + ',player2_id.eq.' + r.player_id + ')');
         });
-
-        supabaseClient.from('players').select('id, name').in('id', oppIds).then(function(pr) {
-          var nameMap = {};
-          if (pr.data) pr.data.forEach(function(p) { nameMap[p.id] = p.name; });
-
-          var html = '<div class="pd-matches-list">';
-          matches.forEach(function(m) {
-            var isP1 = m.player1_id === _player.id;
-            var oppId = isP1 ? m.player2_id : m.player1_id;
-            var result = m.winner_id === _player.id ? 'W' : 'L';
-            var score = m.score || '';
-            var displayScore = isP1 ? formatScore(score) : formatScore(flipScore(score));
-
-            html += '<div class="pd-match">';
-            html += '<div class="pd-match-date">' + formatDate(m.played_at).split(' ').slice(0, 2).join(' ') + '</div>';
-            html += '<div class="pd-match-info">';
-            if (m.tournament) html += '<div class="pd-match-tournament">' + esc(m.tournament.title) + '</div>';
-            html += '<div class="pd-match-opp">' + esc(nameMap[oppId] || oppId) + '</div>';
-            html += '</div>';
-            html += '<div class="pd-match-score">' + displayScore + '</div>';
-            html += '<div class="pd-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + result + '</div>';
-            html += '</div>';
-          });
-          html += '</div>';
-          content.innerHTML = html;
-        });
+        loadMatchRows(conds.join(','), myCaptains);
       });
+
+    function loadMatchRows(orFilter, myCaptains) {
+      supabaseClient.from('matches')
+        .select('*, tournament:tournaments(title, format)')
+        .or(orFilter)
+        .eq('match_type', 'tournament')
+        .not('winner_id', 'is', null)
+        .order('played_at', { ascending: false })
+        .then(function(r) {
+          if (!r.data || r.data.length === 0) {
+            content.innerHTML = '<div class="empty-state"><div class="empty-icon">⚔️</div><div class="empty-title">' + I18N.t('profile.noMatches') + '</div></div>';
+            return;
+          }
+          var matches = r.data;
+          // Load all opponent IDs
+          var oppIds = [];
+          matches.forEach(function(m) {
+            [m.player1_id, m.player2_id].forEach(function(id) {
+              if (id && oppIds.indexOf(id) === -1) oppIds.push(id);
+            });
+          });
+
+          // Составы пар: в матче записаны только капитаны. Без заявок не
+          // сказать ни кто играл за соперника, ни с кем был в паре сам игрок
+          var dblTournaments = [];
+          matches.forEach(function(m) {
+            var f = m.tournament && m.tournament.format;
+            if ((f === 'doubles' || f === 'mixed_doubles') && m.tournament_id &&
+                dblTournaments.indexOf(m.tournament_id) === -1) {
+              dblTournaments.push(m.tournament_id);
+            }
+          });
+
+          Promise.all([
+            supabaseClient.from('players').select('id, name').in('id', oppIds),
+            dblTournaments.length
+              ? supabaseClient.from('tournament_registrations')
+                  .select('tournament_id, player_id, partner_id, partner_external_name')
+                  .in('tournament_id', dblTournaments)
+              : Promise.resolve({ data: [] })
+          ]).then(function(loaded) {
+            var nameMap = {};
+            (loaded[0].data || []).forEach(function(p) { nameMap[p.id] = p.name; });
+
+            var pairs = {};
+            (loaded[1].data || []).forEach(function(r) {
+              if (!r.player_id) return;
+              if (!pairs[r.tournament_id]) pairs[r.tournament_id] = {};
+              pairs[r.tournament_id][r.player_id] = r.partner_id || r.partner_external_name || '';
+            });
+
+            // Имя напарника капитана в этом турнире
+            function mateOf(tid, captainId) {
+              var mate = pairs[tid] && pairs[tid][captainId];
+              return mate ? (nameMap[mate] || mate) : '';
+            }
+
+            var html = '<div class="pd-matches-list">';
+            matches.forEach(function(m) {
+              // Своей может быть та сторона, где стоит не сам игрок, а его
+              // капитан по паре
+              var myCap = myCaptains[m.tournament_id];
+              var mineIsP1 = m.player1_id === _player.id ||
+                (m.player2_id !== _player.id && !!myCap && m.player1_id === myCap);
+              var oppId = mineIsP1 ? m.player2_id : m.player1_id;
+              var mySideCap = mineIsP1 ? m.player1_id : m.player2_id;
+              var result = m.winner_id === mySideCap ? 'W' : 'L';
+              var score = m.score || '';
+              var displayScore = mineIsP1 ? formatScore(score) : formatScore(flipScore(score));
+              var dbl = m.tournament &&
+                (m.tournament.format === 'doubles' || m.tournament.format === 'mixed_doubles');
+
+              var oppLabel = esc(nameMap[oppId] || oppId);
+              var myMate = '';
+              if (dbl) {
+                var oppMate = mateOf(m.tournament_id, oppId);
+                if (oppMate) oppLabel += ' / ' + esc(oppMate);
+                // Свою половину пары в матче не найти: капитану напарника
+                // даёт заявка, напарнику парой был сам капитан из матча
+                myMate = mySideCap === _player.id
+                  ? mateOf(m.tournament_id, _player.id)
+                  : (nameMap[mySideCap] || '');
+              }
+
+              html += '<div class="pd-match">';
+              html += '<div class="pd-match-date">' + formatDate(m.played_at).split(' ').slice(0, 2).join(' ') + '</div>';
+              html += '<div class="pd-match-info">';
+              if (m.tournament) html += '<div class="pd-match-tournament">' + (dbl ? '👥 ' : '') + esc(m.tournament.title) + '</div>';
+              html += '<div class="pd-match-opp">' + oppLabel + '</div>';
+              if (myMate) html += '<div class="pd-match-mate">' + esc(I18N.t('profile.matchWith')) +
+                ' <span class="pd-match-mate-name">' + esc(myMate) + '</span></div>';
+              html += '</div>';
+              html += '<div class="pd-match-score">' + displayScore + '</div>';
+              html += '<div class="pd-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + result + '</div>';
+              html += '</div>';
+            });
+            html += '</div>';
+            content.innerHTML = html;
+          });
+        });
+    }
   }
 
   function formatScore(score) {

@@ -183,7 +183,7 @@ async function upsert(table, rows, onConflict) {
           round_reached: 'F', points_earned: 60, season: today.getFullYear() },
         { tournament_id: 'test-tournament', player_id: 'test-rival',
           round_reached: 'W', points_earned: 100, season: today.getFullYear() }
-    ]);
+    ], 'tournament_id,player_id');
     console.log('  два матча и результат турнира');
 
     // --- Значки ----------------------------------------------------------
@@ -208,6 +208,45 @@ async function upsert(table, rows, onConflict) {
           condition_value: 0, sort_order: 22 }
     ], 'id');
     console.log('  определения значков');
+
+    // --- Парный турнир ---------------------------------------------------
+    // В матче помещаются только капитаны пар, напарник в нём не упомянут.
+    // Тестовый игрок здесь именно напарник: без этого не проверить, что он
+    // вообще видит свои парные игры
+    await upsert('players', [
+        { id: 'test-captain', name: 'Тестовый Капитан', category_id: 'tour', points: 30, gender: 'male' },
+        { id: 'test-rival-2', name: 'Второй Соперник', category_id: 'tour', points: 20, gender: 'male' }
+    ], 'id');
+
+    await upsert('tournaments', [{
+        id: 'test-doubles',
+        title: 'Тестовый парный турнир',
+        category_id: 'tour',
+        status: 'completed',
+        date_start: today.toISOString().slice(0, 10),
+        date_end: today.toISOString().slice(0, 10),
+        max_participants: 8,
+        gender: 'men',
+        format: 'doubles',
+        draw_size: 4
+    }], 'id');
+
+    await upsert('tournament_registrations', [
+        { id: 'aaaaaaaa-1111-4111-8111-aaaaaaaaaaaa', tournament_id: 'test-doubles',
+          player_id: 'test-captain', partner_id: 'test-player', status: 'approved' },
+        { id: 'bbbbbbbb-2222-4222-8222-bbbbbbbbbbbb', tournament_id: 'test-doubles',
+          player_id: 'test-rival', partner_id: 'test-rival-2', status: 'approved' }
+    ], 'id');
+
+    await upsert('matches', [{
+        id: '33333333-3333-4333-8333-333333333333',
+        tournament_id: 'test-doubles',
+        player1_id: 'test-captain', player2_id: 'test-rival',
+        score: '6/2 6/4', winner_id: 'test-captain',
+        round: 'F', round_number: 2, match_order: 1,
+        played_at: played, status: 'completed', match_type: 'tournament'
+    }], 'id');
+    console.log('  парный турнир: игрок заявлен напарником');
 
     console.log('\nГотово. Вход для проверок:');
     ACCOUNTS.forEach(a => console.log('  ' + a.email + '  ' + a.password));

@@ -4567,3 +4567,18 @@ select.prof-field-input { color: var(--text); }
   padding: 10px 12px;
   margin: 4px 0 14px;
 }
+
+/* С кем игрок был в паре. Своя половина пары в матче не записана, и без
+   этой строки за ней приходилось идти в сетку турнира */
+.pd-match-mate {
+    margin-top: 3px;
+    font-size: 0.7rem;
+    color: var(--text-dim, rgba(255,255,255,0.38));
+}
+
+.pd-match-mate-name {
+    /* Тот же лайм, что у заглушки фото и кнопки H2H: в одной таблице
+       третий оттенок только дробил бы картинку */
+    color: var(--accent);
+    font-weight: 600;
+}

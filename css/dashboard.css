@@ -1243,6 +1243,33 @@ select.db-field-input {
     flex-shrink: 0;
 }
 
+/* Пара: два кружка внахлёст. Второй перекрывает первый и обведён фоном
+   строки, иначе они сливаются в одно пятно */
+.db-match-avatars {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.db-match-avatar-2nd {
+    /* Нахлёст небольшой: при большем второй кружок съедал буквы первого */
+    margin-left: -5px;
+    box-shadow: 0 0 0 2px var(--bg-elevated);
+}
+
+.db-match-pair {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.35;
+}
+
+/* Имя не переносим: у пары наименьшая ширина ячейки падает до длины слова,
+   и колонка сжималась, ломая имена во всех остальных строках */
+.db-match-opponent > span,
+.db-match-pair > span {
+    white-space: nowrap;
+}
+
 .db-match-avatar-ph {
     display: flex;
     align-items: center;
@@ -2528,4 +2555,28 @@ select:-webkit-autofill {
     font-size: 0.72rem;
     font-weight: 700;
     white-space: nowrap;
+}
+
+/* Парный матч в истории игр: в самом матче записаны только капитаны пар,
+   поэтому без пометки он выглядел бы игрой один на один */
+.db-match-doubles {
+    font-size: 0.8rem;
+    opacity: 0.75;
+}
+
+/* С кем игрок был в паре: своя половина пары в матче не записана, и без
+   этой строки за ней приходилось идти в сетку турнира.
+   Подпись остаётся тусклой, а имя берёт акцент: строка стоит под названием
+   турнира, и двумя оттенками серого они сливались в одно пятно */
+.db-match-mate {
+    margin-top: 3px;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+}
+
+.db-match-mate-name {
+    /* Тот же лайм, что у заглушки фото и кнопки H2H: в одной таблице
+       третий оттенок только дробил бы картинку */
+    color: var(--accent);
+    font-weight: 600;
 }

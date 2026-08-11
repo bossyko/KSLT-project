@@ -213,6 +213,7 @@
     'profile.activity':     { ru: 'Активность',           en: 'Activity',          kg: 'Активдүүлүк' },
     'profile.myTournaments':{ ru: 'Мои турниры',          en: 'My Tournaments',    kg: 'Менин мелдештерим' },
     'profile.myMatches':    { ru: 'Мои матчи',            en: 'My Matches',        kg: 'Менин матчтарым' },
+    'profile.matchWith':    { ru: 'в паре с',            en: 'with',              kg: 'жупташы' },
     'profile.achievements': { ru: 'Достижения',           en: 'Achievements',      kg: 'Жетишкендиктер' },
     'profile.loyalty':      { ru: 'Баллы лояльности',     en: 'Loyalty Points',    kg: 'Лоялдуулук упайлары' },
     'profile.loyaltySub':   { ru: 'Доступно для обмена',  en: 'Available to redeem', kg: 'Алмашууга жеткиликтүү' },
