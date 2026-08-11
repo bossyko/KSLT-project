@@ -61,7 +61,7 @@ test.describe('Dashboard Page — Structure', () => {
 
         test(`${dashPage.name}: Has KSLT logo`, async ({ page }) => {
             await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
-            await expect(page.locator('.logo-text').first()).toBeVisible();
+            await expect(page.locator('.logo-img').first()).toBeVisible();
         });
 
         test(`${dashPage.name}: Has profile section container`, async ({ page }) => {

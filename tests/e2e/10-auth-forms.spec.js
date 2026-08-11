@@ -352,7 +352,7 @@ test.describe('Auth Forms — Forgot Password Form', () => {
             await page.goto(authPage.path, { waitUntil: 'domcontentloaded' });
 
             // The forgot form exists in DOM (may be hidden until activated)
-            const forgotForm = page.locator('#forgotForm');
+            const forgotForm = page.locator('#forgotStep1');
             expect(await forgotForm.count()).toBe(1);
 
             // Check email field inside forgot form

@@ -58,7 +58,7 @@ test.describe('Live Match — Page Structure', () => {
 
         test(`${lp.name}: Has KSLT logo`, async ({ page }) => {
             await page.goto(lp.path, { waitUntil: 'domcontentloaded' });
-            await expect(page.locator('.logo-text').first()).toBeVisible();
+            await expect(page.locator('.logo-img').first()).toBeVisible();
         });
 
         test(`${lp.name}: Has main container for live content`, async ({ page }) => {

@@ -118,7 +118,7 @@ test.describe('Mobile App — Header', () => {
         const header = page.locator('header.header, .header');
         expect(await header.count()).toBeGreaterThanOrEqual(1);
 
-        const logoText = page.locator('.header-logo-text');
+        const logoText = page.locator('.header-logo-img');
         expect(await logoText.count()).toBe(1);
     });
 
@@ -213,7 +213,7 @@ test.describe('Mobile App — Auth Screen', () => {
     test('Auth screen has KSLT logo', async ({ page }) => {
         await page.goto('/mobile/www/index.html', { waitUntil: 'domcontentloaded' });
 
-        const authLogo = page.locator('#authScreen .auth-logo-text');
+        const authLogo = page.locator('#authScreen .auth-logo-img');
         expect(await authLogo.count()).toBe(1);
     });
 
@@ -385,19 +385,21 @@ test.describe('Mobile App — Splash Screen', () => {
         expect(await splash.count()).toBe(1);
     });
 
-    test('Splash screen has KSLT text', async ({ page }) => {
+    test('Splash screen has KSLT logo', async ({ page }) => {
         await page.goto('/mobile/www/index.html', { waitUntil: 'domcontentloaded' });
 
-        const splashText = page.locator('.splash-text');
-        expect(await splashText.count()).toBe(1);
-        expect(await splashText.textContent()).toContain('KSLT');
+        // Знак — картинка, а не надпись: раньше здесь были текст KSLT и мяч
+        const mark = page.locator('.splash-mark');
+        expect(await mark.count()).toBe(1);
+        expect(await mark.getAttribute('src')).toContain('kslt-logo');
     });
 
-    test('Splash screen has tennis ball SVG', async ({ page }) => {
+    test('Splash screen has tagline', async ({ page }) => {
         await page.goto('/mobile/www/index.html', { waitUntil: 'domcontentloaded' });
 
-        const splashBall = page.locator('.splash-ball');
-        expect(await splashBall.count()).toBe(1);
+        const tagline = page.locator('.splash-tagline');
+        expect(await tagline.count()).toBe(1);
+        expect((await tagline.textContent()).trim().length).toBeGreaterThan(0);
     });
 });
 

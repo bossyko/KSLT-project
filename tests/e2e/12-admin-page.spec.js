@@ -62,7 +62,7 @@ test.describe('Admin Page — Structure', () => {
 
         test(`${adminPage.name}: Has KSLT logo`, async ({ page }) => {
             await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
-            await expect(page.locator('.logo-text').first()).toBeVisible();
+            await expect(page.locator('.logo-img').first()).toBeVisible();
         });
 
         test(`${adminPage.name}: Has sidebar element`, async ({ page }) => {
