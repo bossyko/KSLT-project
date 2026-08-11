@@ -559,7 +559,10 @@
                 category_id: tournament.category_id || null,
                 tournament_id: tournament.id,
                 points_earned: r.points_earned || 0,
-                recorded_at: tournament.date_start,
+                // День окончания, а не начала: очки присуждаются по итогу
+                // турнира. Из 45 сыгранных турниров 42 идут больше одного
+                // дня, и на графике рост начинался раньше, чем турнир кончился
+                recorded_at: tournament.date_end || tournament.date_start,
                 is_doubles: isDbl || false
             };
         });

@@ -5560,3 +5560,27 @@ img {
     max-width: 100%;
     height: auto;
 }
+
+
+/* ---- Одно измерение вместо графика ----
+   График из единственной точки в углу пустого поля не сообщает ничего —
+   на его месте показываем само число. Стиль общий: график рисуется и в
+   кабинете, и на странице игрока */
+.rc-single {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.rc-single-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.rc-single-note {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}

@@ -51,14 +51,26 @@
             .gte('recorded_at', oldest)
             .order('recorded_at', { ascending: true });
 
-        return (res.data || []).filter(function(r) {
+        return res.data || [];
+    };
+
+    /**
+     * Строки, из которых складываются очки: одиночные и с категорией.
+     *
+     * Отбор перенесён сюда из загрузки, потому что оценка NTRP пишется
+     * отдельной строкой без категории и без очков — при отборе на входе она
+     * не доходила бы и до графика NTRP.
+     */
+    function pointRows(rows) {
+        return rows.filter(function(r) {
             return r.category_id && r.is_doubles !== true;
         });
-    };
+    }
 
     // ---- Накопление по категории с переносом значения вперёд ----
     // Между турнирами линия держит достигнутое, в день турнира — ступенька вверх
-    API.series = function(rows, cats) {
+    API.series = function(allRows, cats) {
+        var rows = pointRows(allRows);
         var dates = [];
         rows.forEach(function(r) { if (dates.indexOf(r.recorded_at) === -1) dates.push(r.recorded_at); });
         dates.sort();
@@ -124,6 +136,11 @@
         var rows = await API.rows(opts.client, opts.playerId);
         if (rows.length === 0) return false;
 
+        // NTRP рисуется даже тогда, когда очков ещё нет
+        if (opts.ntrpCanvasId) renderNtrp(rows, opts);
+
+        if (pointRows(rows).length === 0) return false;
+
         var canvas = document.getElementById(opts.canvasId);
         if (!canvas) return false;
 
@@ -143,7 +160,10 @@
                 _total: s.total,
                 borderColor: c.color,
                 borderWidth: s.cat === opts.homeCategory ? 3 : 2,
-                stepped: 'after',
+                // Ступенька у даты начисления, а не у предыдущей: с 'after'
+                // Chart.js ставит вертикаль у прошлой точки, и рост очков
+                // выглядел так, будто турнир закончился раньше, чем закончился
+                stepped: 'before',
                 spanGaps: false,
                 fill: s === top ? 'origin' : false,
                 backgroundColor: function(ctx) {
@@ -170,11 +190,15 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: { mode: 'nearest', intersect: true },
-                layout: { padding: { right: 16, top: 8 } },
+                // Подпись линии рисуется у её последнего значения. Линия,
+                // ушедшая вверх, заканчивалась ровно под легендой, и
+                // «Tour · 159» ложилось поверх неё. Легенда уехала вниз,
+                // сверху оставлен запас под подпись
+                layout: { padding: { right: 16, top: 20 } },
                 plugins: {
                     legend: {
-                        position: 'top',
-                        align: 'end',
+                        position: 'bottom',
+                        align: 'start',
                         labels: { color: '#ccc', usePointStyle: true, pointStyle: 'circle', boxWidth: 8, padding: 16, font: { size: 12 } }
                     },
                     tooltip: {
@@ -204,27 +228,66 @@
                 },
                 scales: {
                     x: {
-                        ticks: { color: '#888', maxRotation: 45, font: { size: 11 } },
+                        ticks: {
+                            color: '#888', maxRotation: 45, font: { size: 11 },
+                            // В базе дата лежит как 2026-03-16, а в кабинете
+                            // везде принят вид 16.03.26
+                            callback: function(v, i) { return tickDate(this.getLabelForValue(i)); }
+                        },
                         grid: { color: 'rgba(255,255,255,0.05)' }
                     },
                     y: {
                         beginAtZero: true,
                         ticks: { color: '#888', font: { size: 11 } },
-                        grid: { color: 'rgba(255,255,255,0.05)' },
-                        title: {
-                            display: true,
-                            text: t(opts, 'Очки по категориям', 'Points by category', 'Категориялар боюнча упайлар'),
-                            color: '#888',
-                            font: { size: 11 }
-                        }
+                        // Подпись оси убрана: она повторяла заголовок над
+                        // графиком и съедала ширину повёрнутым текстом
+                        grid: { color: 'rgba(255,255,255,0.05)' }
                     }
                 }
             }
         });
 
-        if (opts.ntrpCanvasId) renderNtrp(rows, opts);
         return true;
     };
+
+    /**
+     * Дата из базы в виде [день, месяц, год].
+     *
+     * recorded_at — дата без времени, «2026-03-16». Через new Date() она
+     * читается как полночь по Гринвичу, и западнее нулевого пояса день
+     * терялся: у турнира 16 марта на оси стояло 15-е. Разбираем строку
+     * как есть, без часовых поясов.
+     */
+    function dateParts(value) {
+        var m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (m) return [m[3], m[2], m[1]];
+
+        var d = new Date(value);
+        if (isNaN(d.getTime())) return null;
+        return [
+            String(d.getDate()).padStart(2, '0'),
+            String(d.getMonth() + 1).padStart(2, '0'),
+            String(d.getFullYear())
+        ];
+    }
+
+    /** Оценка как её выбрали: 3.75, 4.0, 4.25 — а не округлённая до 3.8. */
+    function ntrpText(v) {
+        var n = Number(v);
+        return (Math.round(n * 100) % 100 === 0) ? n.toFixed(1) : String(n);
+    }
+
+    /** Короткая дата для подписей оси: 16.03.26. */
+    function tickDate(value) {
+        var p = dateParts(value);
+        return p ? p[0] + '.' + p[1] + '.' + p[2].slice(2) : String(value || '');
+    }
+
+    /** Дата вида 16.03.2026. */
+    function shortDate(value) {
+        var p = dateParts(value);
+        return p ? p[0] + '.' + p[1] + '.' + p[2] : String(value || '');
+    }
 
     // ---- NTRP отдельно: своя шкала, на общем поле он терялся среди линий ----
     function renderNtrp(rows, opts) {
@@ -241,6 +304,24 @@
         if (values.length === 0) return;
 
         if (wrap) wrap.style.display = '';
+
+        // Одно измерение — это не история, а число. График из единственной
+        // точки в углу пустого поля не сообщал ничего
+        if (values.length === 1) {
+            var host = canvas.parentNode;
+            if (host) {
+                host.style.height = 'auto';
+                host.innerHTML =
+                    '<div class="rc-single">' +
+                        '<span class="rc-single-value">' + ntrpText(values[0]) + '</span>' +
+                        '<span class="rc-single-note">' +
+                            t(opts, 'одно измерение, ', 'single measurement, ', 'бир өлчөө, ') +
+                            shortDate(labels[0]) +
+                        '</span>' +
+                    '</div>';
+            }
+            return;
+        }
         new Chart(canvas, {
             type: 'line',
             data: {
@@ -269,12 +350,18 @@
                         borderWidth: 1,
                         displayColors: false,
                         callbacks: {
-                            label: function(item) { return 'NTRP: ' + item.parsed.y.toFixed(2); }
+                            label: function(item) { return 'NTRP: ' + ntrpText(item.parsed.y); }
                         }
                     }
                 },
                 scales: {
-                    x: { ticks: { color: '#888', maxRotation: 45, font: { size: 11 } }, grid: { display: false } },
+                    x: {
+                        ticks: {
+                            color: '#888', maxRotation: 45, font: { size: 11 },
+                            callback: function(v, i) { return tickDate(this.getLabelForValue(i)); }
+                        },
+                        grid: { display: false }
+                    },
                     y: {
                         min: 1.0, max: 7.0,
                         ticks: { color: '#00BFFF', stepSize: 1, font: { size: 11 } },

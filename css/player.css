@@ -1639,3 +1639,87 @@ a.pp-tournament:hover {
 .pp-contact-wa:hover { border-color: #25D366; }
 .pp-contact-tg:hover { border-color: #2AABEE; }
 .pp-contact-ig:hover { border-color: #E1306C; }
+
+
+/* ---- Статистика по категориям ----
+   Игрок может держать очки сразу в двух категориях и в рейтинге стоит
+   двумя строками. Раньше на странице показывалась только домашняя, и
+   вторая со страницы пропадала */
+.pp-cat-block {
+    margin-bottom: 20px;
+}
+
+.pp-cat-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.pp-cat-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.pp-cat-home {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--accent);
+}
+
+.pp-cat-place {
+    margin-left: auto;
+    padding: 2px 10px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    background: var(--bg-elevated);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+/* Полоса побед: цвета те же, что у значков W и L в таблице матчей */
+.pp-cat-bar {
+    display: flex;
+    height: 6px;
+    margin: 10px 0 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.07);
+}
+
+.pp-cat-bar-w,
+.pp-cat-bar-l {
+    display: block;
+    height: 100%;
+}
+
+.pp-cat-bar-w { background: #4ade80; }
+.pp-cat-bar-l { background: #ff6b62; }
+
+.pp-cat-legend {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.pp-cat-mark {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.pp-cat-mark-w { background: #4ade80; }
+.pp-cat-mark-l { background: #ff6b62; margin-left: 10px; }
+
+.pp-cat-rate {
+    font-weight: 600;
+    color: var(--text-secondary);
+}

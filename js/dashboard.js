@@ -112,6 +112,9 @@
         regWithdrawError: 'Арызды алуу мүмкүн болгон жок',
         wins: 'Жеңиштер', losses: 'Жеңилүүлөр', rank: 'Рейтинг өзгөрүшү',
         catsTitle: 'Категориялар боюнча упайлар', catHome: 'негизги', place: 'Орун',
+        catWins: ['жеңиш', 'жеңиш', 'жеңиш'],
+        catLosses: ['жеңилүү', 'жеңилүү', 'жеңилүү'],
+        catTotal: 'Бардык матчтар', catWinRate: 'жеңиш', catNoMatches: 'матчтар азырынча жок',
         socialMedia: 'Социалдык тармактар',
         cropTitle: 'Сүрөттү кыркуу',
         cropApply: 'Колдонуу',
@@ -146,7 +149,7 @@
         invPending: 'Күтүүдө',
         invNoInvites: 'Чакыруулар жок',
         invNoInvitesText: '«Оюнчу издөө» барагынан оюнга чакыруулар жөнөтүңүз',
-        ratingHistory: 'Рейтинг тарыхы',
+        ratingHistory: 'Упайлар',
         rhTotalPoints: 'Жалпы упайлар',
         qrShare: 'QR код',
         qrTitle: 'Профилди бөлүшүү',
@@ -342,6 +345,9 @@
         regWithdrawError: 'Could not withdraw the entry',
         wins: 'Wins', losses: 'Losses', rank: 'Rank Change',
         catsTitle: 'Points by category', catHome: 'home', place: 'Place',
+        catWins: ['win', 'wins', 'wins'],
+        catLosses: ['loss', 'losses', 'losses'],
+        catTotal: 'Matches played', catWinRate: 'wins', catNoMatches: 'no matches yet',
         socialMedia: 'Social Media',
         cropTitle: 'Crop Photo',
         cropApply: 'Apply',
@@ -376,7 +382,7 @@
         invPending: 'Pending',
         invNoInvites: 'No invitations yet',
         invNoInvitesText: 'Send game invitations from the Player Search page',
-        ratingHistory: 'Rating History',
+        ratingHistory: 'Points',
         rhTotalPoints: 'Total Points',
         qrShare: 'QR Code',
         qrTitle: 'Share Profile',
@@ -572,6 +578,9 @@
         regWithdrawError: 'Не удалось снять заявку',
         wins: 'Победы', losses: 'Поражения', rank: 'Изм. рейтинга',
         catsTitle: 'Очки по категориям', catHome: 'домашняя', place: 'Место',
+        catWins: ['победа', 'победы', 'побед'],
+        catLosses: ['поражение', 'поражения', 'поражений'],
+        catTotal: 'Всего матчей', catWinRate: 'побед', catNoMatches: 'матчей пока нет',
         socialMedia: 'Соцсети',
         cropTitle: 'Обрезка фото',
         cropApply: 'Применить',
@@ -606,7 +615,7 @@
         invPending: 'Ожидает',
         invNoInvites: 'Приглашений пока нет',
         invNoInvitesText: 'Отправляйте приглашения со страницы «Поиск игрока»',
-        ratingHistory: 'История рейтинга',
+        ratingHistory: 'Очки',
         rhTotalPoints: 'Всего очков',
         qrShare: 'QR код',
         qrTitle: 'Поделиться профилем',
@@ -1850,16 +1859,8 @@
         html += '<div id="dbGamesTournaments"><p class="db-subsection-loading">' + L.loadingList + '</p></div>';
         html += '</div></div>';
 
-        // -- Subsection: Achievements --
-        // Раньше достижения рисовались голым блоком с наспех прописанными
-        // стилями и выпадали из ряда карточек над ними
-        var achLabel = isKg ? 'Жетишкендиктер' : isEn ? 'Achievements' : 'Достижения';
-        html += '<div class="db-subsection">';
-        html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubAchievements">';
-        html += '<span>\uD83C\uDFC5 ' + achLabel + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
-        html += '<div class="db-subsection-body" id="dbSubAchievements">';
-        html += '<div id="dbGamesAchievements"><p class="db-subsection-loading">' + L.loadingList + '</p></div>';
-        html += '</div></div>';
+        // Достижения живут в «Статистике»: они про показатели игрока, а не про
+        // сыгранные встречи. Здесь стоял их второй, точно такой же блок
 
         container.innerHTML = html;
 
@@ -1886,7 +1887,6 @@
         loadGamesMatches(profile);
         loadGamesChallenges();
         loadGamesTournaments(profile);
-        loadGamesAchievements(profile);
     }
 
     // ---- Games: Tournaments subsection ----
@@ -2702,107 +2702,6 @@
         return out;
     }
 
-    // ---- Games: Achievements subsection ----
-    async function loadGamesAchievements(profile) {
-        var container = document.getElementById('dbGamesAchievements');
-        if (!container || !client) return;
-
-        var noAchLabel = isKg ? 'Жетишкендиктер жок' : isEn ? 'No achievements yet' : 'Нет достижений';
-
-        if (!profile || !profile.player_id) {
-            container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC5</div><div class="db-empty-title">' + noAchLabel + '</div></div>';
-            return;
-        }
-
-        try {
-            var results = await Promise.all([
-                client.from('badge_definitions').select('*').order('sort_order', { ascending: true }),
-                client.from('player_badges')
-                    .select('badge_id, earned_at, badge:badge_definitions(icon, name, name_en, name_kg, description, description_en, description_kg)')
-                    .eq('player_id', profile.player_id)
-                    .order('earned_at', { ascending: true })
-            ]);
-
-            var allDefs = results[0].data || [];
-            var earned = results[1].data || [];
-            var total = allDefs.length;
-
-            if (total === 0) {
-                container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC5</div><div class="db-empty-title">' + noAchLabel + '</div></div>';
-                return;
-            }
-
-            var earnedMap = {};
-            earned.forEach(function(pb) { earnedMap[pb.badge_id] = pb; });
-            var pct = Math.round(earned.length / total * 100);
-
-            function bName(b) { return isEn ? (b.name_en || b.name) : (isKg ? (b.name_kg || b.name) : b.name); }
-            function bDesc(b) { return isEn ? (b.description_en || b.description) : (isKg ? (b.description_kg || b.description) : b.description); }
-
-            var html = '';
-            // Progress
-            html += '<div class="db-badges-progress">';
-            html += '<div class="db-badges-progress-bar"><div class="db-badges-progress-fill" style="width:' + pct + '%"></div></div>';
-            html += '<span class="db-badges-progress-text">' + earned.length + '/' + total + '</span>';
-            html += '</div>';
-
-            // Earned badges
-            if (earned.length > 0) {
-                html += '<div class="db-badges-earned">';
-                earned.forEach(function(pb) {
-                    var b = pb.badge;
-                    if (!b) return;
-                    html += '<div class="db-badge-item db-badge-earned" title="' + escHtml(bDesc(b) || bName(b)) + '">';
-                    html += '<span class="db-badge-icon">' + escHtml(b.icon) + '</span>';
-                    html += '<span class="db-badge-name">' + escHtml(bName(b)) + '</span>';
-                    html += '</div>';
-                });
-                html += '</div>';
-            }
-
-            // Ближайшие цели. Раньше здесь брались первые три по порядку
-            // сортировки, и игрок, которому до значка оставался один матч,
-            // видел три случайных
-            var lockedDefs = allDefs.filter(function(d) { return !earnedMap[d.id] && d.condition_type !== 'manual'; });
-            var progress = await loadBadgeProgress(profile.player_id);
-
-            lockedDefs.forEach(function(d) {
-                var have = progress[d.condition_type];
-                d._have = have;
-                d._need = d.condition_value;
-                // Значки без счётчика (чемпион, сенсация, членство) идут
-                // после измеримых: сказать, сколько до них осталось, нельзя
-                d._left = (have == null || !d.condition_value) ? Infinity : Math.max(0, d.condition_value - have);
-            });
-            lockedDefs.sort(function(a, b) {
-                if (a._left !== b._left) return a._left - b._left;
-                return (a.sort_order || 0) - (b.sort_order || 0);
-            });
-
-            var nearest = lockedDefs.slice(0, 3);
-            if (nearest.length > 0) {
-                var nextLabel = isKg ? 'Кийинки максаттар' : isEn ? 'Next goals' : 'Следующие цели';
-                html += '<div class="db-badges-next-label">' + nextLabel + '</div>';
-                html += '<div class="db-badges-earned">';
-                nearest.forEach(function(d) {
-                    var counter = d._left === Infinity ? ''
-                        : '<span class="db-badge-progress">' + d._have + '/' + d._need + '</span>';
-                    html += '<div class="db-badge-item db-badge-locked" title="' + escHtml(bDesc(d) || bName(d)) + '">';
-                    html += '<span class="db-badge-icon db-badge-icon-locked">' + escHtml(d.icon) + '</span>';
-                    html += '<span class="db-badge-name">' + escHtml(bName(d)) + '</span>';
-                    html += counter;
-                    html += '</div>';
-                });
-                html += '</div>';
-            }
-
-            container.innerHTML = html;
-        } catch(e) {
-            console.warn('[KSLT] games achievements error:', e);
-            container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC5</div><div class="db-empty-title">' + noAchLabel + '</div></div>';
-        }
-    }
-
     // ---- Challenges section (legacy, kept for reference) ----
     function renderChallenges() {
         var container = document.getElementById('db-challenges');
@@ -3571,6 +3470,25 @@
     // Игрок играет в своей категории и на ступень выше, очки, победы и поражения
     // в каждой считаются раздельно. Возвращает '' — тогда показывается старый
     // блок с одной категорией (у игрока ещё нет ни одной записи).
+    /**
+     * Число со словом в нужном падеже: 1 победа, 2 победы, 5 побед.
+     *
+     * forms — [одна, две, пять]. У английского и кыргызского формы совпадают,
+     * поэтому правило считаем только для русского.
+     */
+    function plural(n, forms) {
+        var word;
+        if (!isEn && !isKg) {
+            var a = Math.abs(n) % 100, b = a % 10;
+            word = (a > 10 && a < 20) ? forms[2]
+                 : (b > 1 && b < 5) ? forms[1]
+                 : (b === 1) ? forms[0] : forms[2];
+        } else {
+            word = n === 1 ? forms[0] : forms[1];
+        }
+        return n + ' ' + word;
+    }
+
     async function renderStatsCategories(p) {
         if (!client) return '';
 
@@ -3618,10 +3536,41 @@
                     '<div class="db-stat-card"><div class="db-stat-value">' + (row.losses || 0) + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
                     '<div class="db-stat-card"><div class="db-stat-value">#' + place + '</div><div class="db-stat-label">' + L.place + '</div></div>' +
                 '</div>' +
+                catBarHtml(row) +
             '</div>';
         });
 
         return html + '</div>';
+    }
+
+    /**
+     * Полоса побед и поражений под плитками категории.
+     *
+     * Четыре цифры одинакового размера не показывали главного — как игрок
+     * выступает. Соотношение видно полоской, а цвета взяты из таблицы
+     * матчей: там зелёный значок — победа, красный — поражение.
+     */
+    function catBarHtml(row) {
+        var w = row.wins || 0, l = row.losses || 0, played = w + l;
+
+        if (!played) {
+            return '<div class="db-cat-bar"></div>' +
+                '<div class="db-cat-legend"><span>' + L.catNoMatches + '</span></div>';
+        }
+
+        var pct = Math.round(w / played * 100);
+        return '<div class="db-cat-bar">' +
+                '<i class="db-cat-bar-w" style="width:' + (w / played * 100) + '%"></i>' +
+                '<i class="db-cat-bar-l" style="width:' + (l / played * 100) + '%"></i>' +
+            '</div>' +
+            '<div class="db-cat-legend">' +
+                '<span>' + L.catTotal + ': ' + played + '</span>' +
+                '<span class="db-cat-record">' +
+                    '<span class="db-cat-mark db-cat-mark-w"></span>' + plural(w, L.catWins) +
+                    '<span class="db-cat-mark db-cat-mark-l"></span>' + plural(l, L.catLosses) +
+                '</span>' +
+                '<span class="db-cat-rate">' + pct + '% ' + L.catWinRate + '</span>' +
+            '</div>';
     }
 
     // ---- Badges Card in Stats ----
@@ -3670,25 +3619,45 @@
                 earned.forEach(function(pb) {
                     var b = pb.badge;
                     if (!b) return;
-                    html += '<div class="db-badge-item db-badge-earned" title="' + bName(b) + '">';
-                    html += '<span class="db-badge-icon">' + b.icon + '</span>';
-                    html += '<span class="db-badge-name">' + bName(b) + '</span>';
+                    html += '<div class="db-badge-item db-badge-earned" title="' + escHtml(bDesc(b) || bName(b)) + '">';
+                    html += '<span class="db-badge-icon">' + escHtml(b.icon) + '</span>';
+                    html += '<span class="db-badge-name">' + escHtml(bName(b)) + '</span>';
                     html += '</div>';
                 });
                 html += '</div>';
             }
 
-            // Nearest locked (3 goals)
+            // Ближайшие цели. Раньше здесь брались первые три по порядку
+            // сортировки, и игрок, которому до значка оставался один матч,
+            // видел три случайных
             var lockedDefs = allDefs.filter(function(d) { return !earnedMap[d.id] && d.condition_type !== 'manual'; });
+            var progress = await loadBadgeProgress(playerId);
+
+            lockedDefs.forEach(function(d) {
+                var have = progress[d.condition_type];
+                d._have = have;
+                d._need = d.condition_value;
+                // Значки без счётчика (чемпион, сенсация, членство) идут
+                // после измеримых: сказать, сколько до них осталось, нельзя
+                d._left = (have == null || !d.condition_value) ? Infinity : Math.max(0, d.condition_value - have);
+            });
+            lockedDefs.sort(function(a, b) {
+                if (a._left !== b._left) return a._left - b._left;
+                return (a.sort_order || 0) - (b.sort_order || 0);
+            });
+
             var nearest = lockedDefs.slice(0, 3);
             if (nearest.length > 0) {
                 var nextLabel = isKg ? 'Кийинки максаттар' : isEn ? 'Next goals' : 'Следующие цели';
                 html += '<div class="db-badges-next-label">' + nextLabel + '</div>';
                 html += '<div class="db-badges-earned">';
                 nearest.forEach(function(d) {
-                    html += '<div class="db-badge-item db-badge-locked" title="' + bDesc(d) + '">';
-                    html += '<span class="db-badge-icon db-badge-icon-locked">' + d.icon + '</span>';
-                    html += '<span class="db-badge-name">' + bName(d) + '</span>';
+                    var counter = d._left === Infinity ? ''
+                        : '<span class="db-badge-progress">' + d._have + '/' + d._need + '</span>';
+                    html += '<div class="db-badge-item db-badge-locked" title="' + escHtml(bDesc(d) || bName(d)) + '">';
+                    html += '<span class="db-badge-icon db-badge-icon-locked">' + escHtml(d.icon) + '</span>';
+                    html += '<span class="db-badge-name">' + escHtml(bName(d)) + '</span>';
+                    html += counter;
                     html += '</div>';
                 });
                 html += '</div>';

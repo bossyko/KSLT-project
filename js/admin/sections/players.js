@@ -607,29 +607,27 @@
             '</div>' +
 
             // NTRP Rating (manual edit by admin)
+            // Кнопка сохранения продублирована здесь: до нижней приходилось
+            // прокручивать всю карточку с матчами и достижениями
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.plrNtrp + '</div>' +
-                '<div class="ad-field" style="max-width:200px;">' +
-                    '<select class="ad-field-input" id="adPlrNtrp">' + A.ntrpOptions(item && item.ntrp_rating) + '</select>' +
+                '<div class="ad-field">' +
+                    // Кнопка в одной строке с самим полем, по его нижнему краю.
+                    // Подсказка ниже — иначе выравнивание считалось бы вместе
+                    // с ней и кнопка уезжала под поле
+                    '<div style="display:flex;gap:12px;align-items:flex-end;max-width:420px;">' +
+                        '<select class="ad-field-input" id="adPlrNtrp" style="max-width:200px;">' +
+                            A.ntrpOptions(item && item.ntrp_rating) + '</select>' +
+                        '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrSaveNtrp">' +
+                            L.save + '</button>' +
+                    '</div>' +
                     '<div class="ad-field-hint">' + L.plrNtrpHint + '</div>' +
                 '</div>' +
             '</div>' +
 
-            // Last Matches (loaded from Supabase, edit only)
-            (plrEditingId ? (
-            '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.plrLastMatches + '</div>' +
-                '<div id="adPlrMatchesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
-            '</div>'
-            ) : '') +
-
-            // Badges (loaded from Supabase)
-            '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + L.plrBadges + '</div>' +
-                '<div id="adPlrBadgesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
-            '</div>' +
-
-
+            // История рейтинга идёт сразу за NTRP: обе про то, как
+            // менялась оценка игрока, и разносить их по разным концам
+            // длинной карточки незачем
             // Rating History (edit only)
             (plrEditingId ? (
             '<div class="ad-form-card">' +
@@ -655,10 +653,28 @@
                         '<label class="ad-field-label">' + L.rhPoints + '</label>' +
                         '<input type="number" class="ad-field-input" id="adPlrRhPoints" min="0" placeholder="0">' +
                     '</div>' +
-                    '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrRhAdd">' + L.rhAdd + '</button>' +
+                    // Отступ снизу как у полей: строка выравнивается по нижнему
+                    // краю вместе с отступами, и без него кнопка съезжала вниз
+                    '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrRhAdd" ' +
+                        'style="margin-bottom:20px;">' + L.rhAdd + '</button>' +
                 '</div>' +
             '</div>'
             ) : '') +
+
+            // Last Matches (loaded from Supabase, edit only)
+            (plrEditingId ? (
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.plrLastMatches + '</div>' +
+                '<div id="adPlrMatchesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
+            '</div>'
+            ) : '') +
+
+            // Badges (loaded from Supabase)
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.plrBadges + '</div>' +
+                '<div id="adPlrBadgesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
+            '</div>' +
+
 
             // Actions
             '<div class="ad-btn-row">' +
@@ -807,6 +823,52 @@
             });
         }
 
+        /**
+         * Полоса побед и поражений — та же, что в кабинете игрока.
+         *
+         * Четыре поля подряд не показывают главного: как игрок выступает.
+         * Цвета взяты из таблицы матчей, где зелёный значок — победа,
+         * красный — поражение.
+         */
+        function catBarHtml(r) {
+            var w = r.wins || 0, l = r.losses || 0, played = w + l;
+            var noMatches = isEn ? 'no matches yet' : 'матчей пока нет';
+
+            if (!played) {
+                return '<div class="ad-cat-bar"></div>' +
+                    '<div class="ad-cat-legend"><span>' + noMatches + '</span></div>';
+            }
+
+            var pct = Math.round(w / played * 100);
+            var total = isEn ? 'Matches played' : 'Всего матчей';
+            var rateWord = isEn ? 'wins' : 'побед';
+
+            return '<div class="ad-cat-bar">' +
+                    '<i class="ad-cat-bar-w" style="width:' + (w / played * 100) + '%"></i>' +
+                    '<i class="ad-cat-bar-l" style="width:' + (l / played * 100) + '%"></i>' +
+                '</div>' +
+                '<div class="ad-cat-legend">' +
+                    '<span>' + total + ': ' + played + '</span>' +
+                    '<span><span class="ad-cat-mark ad-cat-mark-w"></span>' + plural(w, 'wins') +
+                        '<span class="ad-cat-mark ad-cat-mark-l"></span>' + plural(l, 'losses') + '</span>' +
+                    '<span style="font-weight:600;color:var(--text-secondary);">' + pct + '% ' + rateWord + '</span>' +
+                '</div>';
+        }
+
+        /** Число со словом в нужном падеже: 1 победа, 2 победы, 5 побед. */
+        function plural(n, kind) {
+            var forms = isEn
+                ? (kind === 'wins' ? ['win', 'wins'] : ['loss', 'losses'])
+                : (kind === 'wins' ? ['победа', 'победы', 'побед'] : ['поражение', 'поражения', 'поражений']);
+            if (isEn) return n + ' ' + (n === 1 ? forms[0] : forms[1]);
+
+            var a = Math.abs(n) % 100, b = a % 10;
+            var word = (a > 10 && a < 20) ? forms[2]
+                     : (b > 1 && b < 5) ? forms[1]
+                     : (b === 1) ? forms[0] : forms[2];
+            return n + ' ' + word;
+        }
+
         // --- Очки по категориям (только чтение) ---
         if (plrEditingId) {
             (async function() {
@@ -850,6 +912,7 @@
                                 '<input type="text" class="ad-field-input" value="\u2014" readonly style="opacity:0.6;cursor:not-allowed;">' +
                             '</div>' +
                         '</div>' +
+                        catBarHtml(r) +
                     '</div>';
                 });
 
@@ -1024,6 +1087,11 @@
         // Save
         document.getElementById('adPlrSave').addEventListener('click', savePlayerHandler);
 
+        // Та же кнопка рядом с NTRP: сохраняет карточку целиком, просто
+        // не заставляя прокручивать страницу до низа
+        var ntrpSave = document.getElementById('adPlrSaveNtrp');
+        if (ntrpSave) ntrpSave.addEventListener('click', savePlayerHandler);
+
         // Delete
         var delBtn = document.getElementById('adPlrDelete');
         if (delBtn) {
@@ -1085,16 +1153,25 @@
     // ---- Save Player ----
     async function savePlayerHandler() {
         var saveBtn = document.getElementById('adPlrSave');
-        saveBtn.disabled = true;
-        saveBtn.textContent = L.saving;
+        var saveBtn2 = document.getElementById('adPlrSaveNtrp');
+
+        // Кнопок сохранения две — внизу карточки и рядом с NTRP. Обе должны
+        // гаснуть на время записи, иначе вторая выглядит рабочей
+        function setSaving(busy) {
+            [saveBtn, saveBtn2].forEach(function(b) {
+                if (!b) return;
+                b.disabled = busy;
+                b.textContent = busy ? L.saving : L.save;
+            });
+        }
+        setSaving(true);
 
         try {
             var imageUrl = plrImageUrl;
             if (plrImageFile) {
                 imageUrl = await A.uploadImage(plrImageFile, 'plr-');
                 if (!imageUrl) {
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = L.save;
+                    setSaving(false);
                     return;
                 }
             }
@@ -1131,27 +1208,27 @@
             // Script validation
             if (fnRu && !checkScript(fnRu, SCRIPT_RU)) {
                 A.showToast(isEn ? 'RU name must use Cyrillic' : 'Имя (RU) должно быть на кириллице', 'error');
-                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+                setSaving(false); return;
             }
             if (lnRu && !checkScript(lnRu, SCRIPT_RU)) {
                 A.showToast(isEn ? 'RU last name must use Cyrillic' : 'Фамилия (RU) должна быть на кириллице', 'error');
-                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+                setSaving(false); return;
             }
             if (fnEn && !checkScript(fnEn, SCRIPT_EN)) {
                 A.showToast(isEn ? 'EN name must use Latin' : 'Имя (EN) должно быть на латинице', 'error');
-                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+                setSaving(false); return;
             }
             if (lnEn && !checkScript(lnEn, SCRIPT_EN)) {
                 A.showToast(isEn ? 'EN last name must use Latin' : 'Фамилия (EN) должна быть на латинице', 'error');
-                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+                setSaving(false); return;
             }
             if (fnKg && !checkScript(fnKg, SCRIPT_KG)) {
                 A.showToast(isEn ? 'KG name must use Kyrgyz script' : 'Имя (KG) должно быть на кыргызском', 'error');
-                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+                setSaving(false); return;
             }
             if (lnKg && !checkScript(lnKg, SCRIPT_KG)) {
                 A.showToast(isEn ? 'KG last name must use Kyrgyz script' : 'Фамилия (KG) должна быть на кыргызском', 'error');
-                saveBtn.disabled = false; saveBtn.textContent = L.save; return;
+                setSaving(false); return;
             }
 
             var data = {
@@ -1177,8 +1254,7 @@
 
             if (!fnRu) {
                 A.showToast(isEn ? 'First name is required' : 'Имя обязательно', 'error');
-                saveBtn.disabled = false;
-                saveBtn.textContent = L.save;
+                setSaving(false);
                 return;
             }
 
@@ -1186,13 +1262,46 @@
             // раздельно, и карточка без пола просто нигде не покажется
             if (!data.gender) {
                 A.showToast(isEn ? 'Gender is required' : 'Укажите пол игрока', 'error');
-                saveBtn.disabled = false;
-                saveBtn.textContent = L.save;
+                setSaving(false);
                 return;
             }
 
             var result;
             if (plrEditingId) {
+                // Оценку NTRP ставит админ руками, и до сих пор она нигде не
+                // сохранялась: график читал rating_history.ntrp_after, а его
+                // не заполнял никто. Отмечаем изменение отдельной записью.
+                //
+                // Сравниваем с последней записью в истории, а не с карточкой
+                // игрока: список предлагает шаг в четверть балла, а карточка
+                // хранит один знак после запятой, и 4.25 превращается в ней
+                // в 4.3. Сравнение с карточкой то пропускало изменение, то
+                // придумывало его на пустом месте
+                if (data.ntrp_rating != null) {
+                    var lastRes = await A.client.from('rating_history')
+                        .select('ntrp_after')
+                        .eq('player_id', plrEditingId)
+                        .not('ntrp_after', 'is', null)
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                    var prevNtrp = (lastRes.data && lastRes.data.length)
+                        ? Number(lastRes.data[0].ntrp_after) : null;
+
+                    if (prevNtrp === null || Math.abs(prevNtrp - data.ntrp_rating) > 0.001) {
+                        var ntrpRow = await A.client.from('rating_history').insert({
+                            player_id: plrEditingId,
+                            tournament_name: isEn ? 'NTRP rating' : 'Оценка NTRP',
+                            points_earned: 0,
+                            ntrp_before: prevNtrp,
+                            ntrp_after: data.ntrp_rating,
+                            recorded_at: new Date().toISOString().slice(0, 10)
+                        });
+                        if (ntrpRow.error) {
+                            A.showToast('NTRP: ' + ntrpRow.error.message, 'error');
+                        }
+                    }
+                }
+
                 result = await A.client.from('players').update(data).eq('id', plrEditingId);
             } else {
                 data.id = A.slugify(name);
@@ -1201,8 +1310,7 @@
 
             if (result.error) {
                 A.showToast(result.error.message, 'error');
-                saveBtn.disabled = false;
-                saveBtn.textContent = L.save;
+                setSaving(false);
                 return;
             }
 
@@ -1226,8 +1334,7 @@
             }
         } catch (e) {
             A.showToast(e.message || 'Error', 'error');
-            saveBtn.disabled = false;
-            saveBtn.textContent = L.save;
+            setSaving(false);
         }
     }
 
@@ -1503,6 +1610,30 @@
         renderPlrRhChart(data);
     }
 
+    /**
+     * Дата записи в привычном виде: 16.03.2026.
+     *
+     * В базе это дата без времени. Через new Date() она читается как полночь
+     * по Гринвичу, и западнее нулевого пояса день терялся, поэтому разбираем
+     * строку как есть.
+     */
+    function rhDate(value) {
+        var m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+        return m ? m[3] + '.' + m[2] + '.' + m[1] : String(value || '');
+    }
+
+    /**
+     * Оценка как её выбрали: 3.75, 4.0, 4.25.
+     *
+     * Раньше здесь стоял toFixed(1), и выбранные 3.75 показывались как 3.8 —
+     * выглядело так, будто сохранилось не то значение.
+     */
+    function ntrpText(v) {
+        if (v == null) return '';
+        var n = Number(v);
+        return (Math.round(n * 100) % 100 === 0) ? n.toFixed(1) : String(n);
+    }
+
     function renderPlrRhTable(data, playerId) {
         var tableEl = document.getElementById('adPlrRhTable');
         if (!tableEl) return;
@@ -1516,16 +1647,37 @@
             '<th>' + L.rhDate + '</th>' +
             '<th>' + L.rhTournament + '</th>' +
             '<th style="text-align:center;">' + L.rhPoints + '</th>' +
+            '<th style="text-align:center;">' + L.rhNtrp + '</th>' +
             '<th style="width:40px;"></th>' +
             '</tr></thead><tbody>';
+
+        // Оценку NTRP ставит админ руками, и по одной цифре не понять, вверх
+        // она пошла или вниз. Сравниваем с предыдущей записью в хронологии
+        var prevNtrp = null;
+        var ntrpMoves = {};
+        data.forEach(function(row) {
+            if (row.ntrp_after == null) return;
+            ntrpMoves[row.id] = prevNtrp == null ? 0 : row.ntrp_after - prevNtrp;
+            prevNtrp = row.ntrp_after;
+        });
 
         // Show newest first in table
         var reversed = data.slice().reverse();
         reversed.forEach(function(row) {
+            var ntrpCell = '<span style="color:var(--text-dim);">—</span>';
+            if (row.ntrp_after != null) {
+                var move = ntrpMoves[row.id] || 0;
+                var arrow = move > 0 ? '<span style="color:#4ade80;">\u2191</span> '
+                          : move < 0 ? '<span style="color:#ff6b62;">\u2193</span> ' : '';
+                ntrpCell = arrow + '<strong>' + ntrpText(row.ntrp_after) + '</strong>';
+            }
+
             html += '<tr>' +
-                '<td>' + row.recorded_at + '</td>' +
+                '<td>' + A.esc(rhDate(row.recorded_at)) + '</td>' +
                 '<td>' + A.esc(row.tournament_name) + '</td>' +
-                '<td style="text-align:center;color:var(--accent);font-weight:600;">' + row.points_earned + '</td>' +
+                '<td style="text-align:center;color:var(--accent);font-weight:600;">' +
+                    (row.points_earned ? row.points_earned : '<span style="color:var(--text-dim);">—</span>') + '</td>' +
+                '<td style="text-align:center;">' + ntrpCell + '</td>' +
                 '<td><button class="ad-btn-icon ad-rh-del" data-rh-id="' + row.id + '" title="' + L.delete + '">&times;</button></td>' +
                 '</tr>';
         });
@@ -1544,20 +1696,35 @@
         });
     }
 
+    /**
+     * Пересчёт очков игрока после правки истории.
+     *
+     * Раньше здесь суммировались все очки за календарный год — без разбора
+     * категорий, без парных и мимо сезона, который идёт с 1 сентября. Это
+     * расходилось с пересчётом после турнира, где всё считается правильно.
+     * Теперь оба пути ведут через одну и ту же функцию базы, а в карточку
+     * кладутся очки домашней категории: игрок с очками в двух категориях
+     * иначе сеялся бы в своей выше, чем заслужил.
+     */
     async function recalcPointsFromHistory(playerId) {
-        var currentYear = new Date().getFullYear();
-        var res = await A.client.from('rating_history')
-            .select('points_earned')
-            .eq('player_id', playerId)
-            .gte('recorded_at', currentYear + '-01-01')
-            .lte('recorded_at', currentYear + '-12-31');
+        var pcRes = await A.client.rpc('recalc_player_categories', { p_ids: [playerId] });
+        if (pcRes && pcRes.error) {
+            A.showToast('recalc_player_categories: ' + pcRes.error.message, 'error');
+            return;
+        }
+
+        var plr = await A.client.from('players').select('category_id').eq('id', playerId).single();
+        var home = plr.data && plr.data.category_id;
 
         var total = 0;
-        (res.data || []).forEach(function(r) { total += r.points_earned || 0; });
+        if (home) {
+            var cat = await A.client.from('player_categories')
+                .select('points').eq('player_id', playerId).eq('category_id', home).maybeSingle();
+            total = (cat.data && cat.data.points) || 0;
+        }
 
         await A.client.from('players').update({ points: total }).eq('id', playerId);
 
-        // Update the form field if visible
         var ptsField = document.getElementById('adPlrPoints');
         if (ptsField) ptsField.value = total;
     }
@@ -1576,46 +1743,84 @@
 
         var labels = [];
         var values = [];
+        var ntrpValues = [];
         var cumulative = 0;
+        var lastNtrp = null;
         var tooltipNames = [];
 
         data.forEach(function(row) {
             cumulative += row.points_earned;
-            labels.push(row.recorded_at);
+            labels.push(rhDate(row.recorded_at));
             values.push(cumulative);
-            tooltipNames.push(row.tournament_name + ' (+' + row.points_earned + ')');
+
+            // Оценка держится до следующего изменения, иначе линия рвалась бы
+            // на каждой турнирной записи
+            if (row.ntrp_after != null) lastNtrp = Number(row.ntrp_after);
+            ntrpValues.push(lastNtrp);
+
+            tooltipNames.push(row.ntrp_after != null && !row.points_earned
+                ? row.tournament_name + ' (' + Number(row.ntrp_after).toFixed(1) + ')'
+                : row.tournament_name + ' (+' + row.points_earned + ')');
         });
+
+        var hasNtrp = ntrpValues.some(function(v) { return v != null; });
 
         if (plrRhChart) {
             plrRhChart.destroy();
         }
 
+        // Очки и NTRP живут в разных шкалах: очки идут сотнями, оценка —
+        // от единицы до семёрки. На общей оси линия NTRP легла бы вдоль нуля
+        var datasets = [{
+            label: L.rhTotalPoints,
+            data: values,
+            yAxisID: 'y',
+            borderColor: '#CCFF00',
+            backgroundColor: 'rgba(204,255,0,0.1)',
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: '#CCFF00',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 2
+        }];
+
+        if (hasNtrp) {
+            datasets.push({
+                label: 'NTRP',
+                data: ntrpValues,
+                yAxisID: 'yNtrp',
+                borderColor: '#00BFFF',
+                backgroundColor: 'transparent',
+                fill: false,
+                stepped: 'before',
+                spanGaps: true,
+                pointBackgroundColor: '#00BFFF',
+                pointRadius: 3,
+                pointHoverRadius: 6,
+                borderWidth: 2,
+                borderDash: [4, 3]
+            });
+        }
+
         plrRhChart = new Chart(canvasEl, {
             type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: L.rhTotalPoints,
-                    data: values,
-                    borderColor: '#CCFF00',
-                    backgroundColor: 'rgba(204,255,0,0.1)',
-                    fill: true,
-                    tension: 0.3,
-                    pointBackgroundColor: '#CCFF00',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    borderWidth: 2
-                }]
-            },
+            data: { labels: labels, datasets: datasets },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend: {
+                        display: hasNtrp,
+                        position: 'bottom',
+                        labels: { color: '#ccc', usePointStyle: true, pointStyle: 'circle', boxWidth: 8, font: { size: 11 } }
+                    },
                     tooltip: {
                         callbacks: {
                             title: function(ctx) { return tooltipNames[ctx[0].dataIndex]; },
-                            label: function(ctx) { return L.rhTotalPoints + ': ' + ctx.parsed.y; }
+                            label: function(ctx) {
+                                return ctx.dataset.label + ': ' + ctx.parsed.y;
+                            }
                         },
                         backgroundColor: 'rgba(30,30,30,0.95)',
                         titleColor: '#CCFF00',
@@ -1631,8 +1836,16 @@
                     },
                     y: {
                         beginAtZero: true,
-                        ticks: { color: '#888' },
+                        ticks: { color: '#CCFF00' },
                         grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    yNtrp: {
+                        display: hasNtrp,
+                        position: 'right',
+                        min: 1,
+                        max: 7,
+                        ticks: { color: '#00BFFF', stepSize: 1 },
+                        grid: { display: false }
                     }
                 }
             }

@@ -780,6 +780,63 @@ select.db-field-input {
     margin-left: 8px;
 }
 
+/* ---- Полоса побед и поражений ----
+   Четыре цифры одинакового размера не показывали главного — как игрок
+   выступает. Цвета те же, что у значков W и L в таблице матчей, чтобы не
+   заводить второй язык цветов */
+.db-cat-bar {
+    display: flex;
+    height: 6px;
+    margin: 12px 0 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.07);
+}
+
+.db-cat-bar-w,
+.db-cat-bar-l {
+    display: block;
+    height: 100%;
+    transition: width 0.6s ease;
+}
+
+.db-cat-bar-w { background: #4ade80; }
+.db-cat-bar-l { background: #ff6b62; }
+
+.db-cat-legend {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-bottom: 12px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.db-cat-record {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.db-cat-mark {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* Второй квадратик отделяем от предыдущего числа */
+.db-cat-record .db-cat-mark + * { margin-right: 2px; }
+.db-cat-mark-w { background: #4ade80; }
+.db-cat-mark-l { background: #ff6b62; margin-left: 6px; }
+
+.db-cat-rate {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
 /* ---- Settings ---- */
 .db-settings-section {
     margin-bottom: var(--space-lg);

@@ -64,6 +64,7 @@ window.playerProfileLabels = {
     sectionMatches: "Матч тарыхы",
     sectionAchievements: "Жетишкендиктер",
     sectionRatingHistory: "Рейтинг тарыхы",
+    chartPoints: "Упайлар",
     sectionTournaments: "Мелдештер",
     sectionChallenges: "Чакыруулар",
     challengeAccepted: "Кабыл алынды",

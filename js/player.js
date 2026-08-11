@@ -69,6 +69,7 @@
         sectionMatches: 'История матчей',
         sectionAchievements: 'Достижения',
         sectionRatingHistory: 'История рейтинга',
+        chartPoints: 'Очки',
         sectionTournaments: 'Турниры',
         sectionChallenges: 'Вызовы',
         challengeAccepted: 'Принят',
@@ -384,6 +385,67 @@
         return h;
     }
 
+    /** Плитка серии побед с точками формы. */
+    function ppStreakCard(streak, form, label) {
+        var h = '<div class="pp-stat">';
+        h += '<div class="pp-stat-num">' + streak.count + (streak.type === 'up' ? 'W' : 'L') + '</div>';
+        h += '<div class="pp-stat-label">' + label + '</div>';
+        h += '<div class="pp-form">';
+        (form || []).forEach(function(f) {
+            h += '<span class="pp-form-dot ' + (f === 'W' ? 'win' : 'loss') + '"></span>';
+        });
+        return h + '</div></div>';
+    }
+
+    /**
+     * Полоса побед и поражений в категории.
+     *
+     * Та же, что в кабинете и в админке: цвета взяты из таблицы матчей,
+     * зелёный — победа, красный — поражение.
+     */
+    function ppCatBar(w, l) {
+        var played = w + l;
+        var noMatches = isEn ? 'no matches yet' : (isKg ? 'матчтар азырынча жок' : 'матчей пока нет');
+        if (!played) {
+            return '<div class="pp-cat-bar"></div>' +
+                '<div class="pp-cat-legend"><span>' + noMatches + '</span></div>';
+        }
+
+        var pct = Math.round(w / played * 100);
+        var totalWord = isEn ? 'Matches played' : (isKg ? 'Бардык матчтар' : 'Всего матчей');
+        var rateWord = isEn ? 'wins' : (isKg ? 'жеңиш' : 'побед');
+        return '<div class="pp-cat-bar">' +
+                '<i class="pp-cat-bar-w" style="width:' + (w / played * 100) + '%"></i>' +
+                '<i class="pp-cat-bar-l" style="width:' + (l / played * 100) + '%"></i>' +
+            '</div>' +
+            '<div class="pp-cat-legend">' +
+                '<span>' + totalWord + ': ' + played + '</span>' +
+                '<span><span class="pp-cat-mark pp-cat-mark-w"></span>' + plural(w, 'wins') +
+                    '<span class="pp-cat-mark pp-cat-mark-l"></span>' + plural(l, 'losses') + '</span>' +
+                '<span class="pp-cat-rate">' + pct + '% ' + rateWord + '</span>' +
+            '</div>';
+    }
+
+    /** Число со словом в нужном падеже: 1 победа, 2 победы, 5 побед. */
+    function plural(n, kind) {
+        var forms = isEn
+            ? (kind === 'wins' ? ['win', 'wins', 'wins'] : ['loss', 'losses', 'losses'])
+            : isKg
+                ? (kind === 'wins' ? ['жеңиш', 'жеңиш', 'жеңиш'] : ['жеңилүү', 'жеңилүү', 'жеңилүү'])
+                : (kind === 'wins' ? ['победа', 'победы', 'побед'] : ['поражение', 'поражения', 'поражений']);
+
+        var word;
+        if (!isEn && !isKg) {
+            var a = Math.abs(n) % 100, b = a % 10;
+            word = (a > 10 && a < 20) ? forms[2]
+                 : (b > 1 && b < 5) ? forms[1]
+                 : (b === 1) ? forms[0] : forms[2];
+        } else {
+            word = n === 1 ? forms[0] : forms[1];
+        }
+        return n + ' ' + word;
+    }
+
     // ---- Render Hero ----
     function renderHero() {
         var el = document.getElementById('playerHero');
@@ -546,31 +608,57 @@
         // ---- Singles Stats ----
         var singlesTitle = isEn ? 'Singles Rating' : (isKg ? 'Жеке рейтинг' : 'Одиночный рейтинг');
         html += '<h3 class="pp-section-title pp-fade-in">' + singlesTitle + '</h3>';
-        html += '<div class="pp-stats pp-fade-in">';
+
         var changeText = player.change > 0 ? '+' + player.change : (player.change < 0 ? '' + player.change : '\u2014');
         var changeClass = player.change > 0 ? 'up' : (player.change < 0 ? 'down' : 'neutral');
-        html += statCard(player.points, L.statsPoints, changeText, changeClass);
-        html += statCard(player.wins, L.statsWins, '', '');
-        html += statCard(player.losses, L.statsLosses, '', '');
-        html += statCard(winRate + '%', L.statsWinRate, '', '');
 
-        // Streak card with form dots
-        var streakLabel = streak.count + (streak.type === 'up' ? 'W' : 'L');
-        html += '<div class="pp-stat">';
-        html += '<div class="pp-stat-num">' + streakLabel + '</div>';
-        html += '<div class="pp-stat-label">' + L.statsStreak + '</div>';
-        html += '<div class="pp-form">';
-        (player.form || []).forEach(function (f) {
-            html += '<span class="pp-form-dot ' + (f === 'W' ? 'win' : 'loss') + '"></span>';
-        });
-        html += '</div></div>';
-        html += '</div>'; // .pp-stats singles
+        // Игрок может держать очки сразу в двух категориях, и в поиске он
+        // стоит двумя строками. Здесь же показывалась только домашняя, и
+        // вторая со страницы пропадала
+        if (myCats.length > 0) {
+            var homeLabel = isEn ? 'home' : (isKg ? 'негизги' : 'домашняя');
+            myCats.forEach(function(c) {
+                var played = (c.wins || 0) + (c.losses || 0);
+                var rate = played ? Math.round(c.wins / played * 100) : 0;
+
+                html += '<div class="pp-cat-block pp-fade-in">';
+                html += '<div class="pp-cat-head">' +
+                    '<span class="pp-cat-name">' + esc(c.name) + '</span>' +
+                    (c.isHome ? '<span class="pp-cat-home">' + homeLabel + '</span>' : '') +
+                    '<span class="pp-cat-place">#' + c.rank + '</span>' +
+                '</div>';
+                html += '<div class="pp-stats">';
+                html += statCard(c.points, L.statsPoints, c.isHome ? changeText : '', c.isHome ? changeClass : '');
+                html += statCard(c.wins || 0, L.statsWins, '', '');
+                html += statCard(c.losses || 0, L.statsLosses, '', '');
+                html += statCard(rate + '%', L.statsWinRate, '', '');
+                html += '</div>';
+                html += ppCatBar(c.wins || 0, c.losses || 0);
+                html += '</div>';
+            });
+
+            // Серия считается по всем матчам сразу — она не делится по категориям
+            html += '<div class="pp-stats pp-fade-in">';
+            html += ppStreakCard(streak, player.form, L.statsStreak);
+            html += '</div>';
+        } else {
+            html += '<div class="pp-stats pp-fade-in">';
+            html += statCard(player.points, L.statsPoints, changeText, changeClass);
+            html += statCard(player.wins, L.statsWins, '', '');
+            html += statCard(player.losses, L.statsLosses, '', '');
+            html += statCard(winRate + '%', L.statsWinRate, '', '');
+            html += ppStreakCard(streak, player.form, L.statsStreak);
+            html += '</div>';
+        }
 
         // ---- Rating history: линия на категорию ----
         // Секция скрыта, пока не окажется, что игроку есть что показать —
         // её открывает сам график, когда находит записи
         html += '<div class="pp-section pp-fade-in" id="ppChartSection" style="display:none;">';
         html += '<h3 class="pp-section-title">📈 ' + L.sectionRatingHistory + '</h3>';
+        // У графика NTRP подпись была, у графика очков — нет, и понять,
+        // что на нём нарисовано, можно было только по оси
+        html += '<div class="pp-chart-label">' + L.chartPoints + '</div>';
         html += '<div class="pp-chart-box"><canvas id="ppRatingChart"></canvas></div>';
         html += '<div id="ppNtrpWrap" style="display:none;">';
         html += '<div class="pp-chart-label">NTRP</div>';
@@ -1505,7 +1593,7 @@
                     // там играл. Очки в каждой считаются отдельно.
                     var myCats = [];
                     var pcRes = await client.from('player_categories')
-                        .select('category_id, points')
+                        .select('category_id, points, wins, losses')
                         .eq('player_id', p.id)
                         .order('points', { ascending: false });
 
@@ -1525,6 +1613,8 @@
                                 id: row.category_id,
                                 name: c2 ? (isEn ? (c2.name_en || c2.name) : (isKg ? (c2.name_kg || c2.name) : c2.name)) : row.category_id,
                                 points: row.points || 0,
+                                wins: row.wins || 0,
+                                losses: row.losses || 0,
                                 rank: (rankRes.count || 0) + 1,
                                 isHome: row.category_id === p.category_id
                             });

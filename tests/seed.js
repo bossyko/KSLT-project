@@ -117,7 +117,9 @@ async function upsert(table, rows, onConflict) {
             full_name: acc.name,
             email: acc.email,
             role: acc.role,
-            player_id: playerId
+            player_id: playerId,
+            // Без пола админка не даёт сохранить карточку игрока
+            gender: 'male'
         }], 'id');
 
         console.log('  аккаунт ' + acc.email + ' (' + acc.role + ') и карточка ' + playerId);
@@ -247,6 +249,54 @@ async function upsert(table, rows, onConflict) {
         played_at: played, status: 'completed', match_type: 'tournament'
     }], 'id');
     console.log('  парный турнир: игрок заявлен напарником');
+
+    // --- История рейтинга ------------------------------------------------
+    // Очки в двух категориях и в разные дни: только на таких данных видно,
+    // что ступенька на графике встаёт в день начисления, а не раньше
+    await upsert('categories', [
+        { id: 'masters', name: 'Masters', name_en: 'Masters', sort_order: 5, color: '#B57BFF' }
+    ], 'id');
+
+    function daysAgo(n) {
+        return new Date(today.getTime() - n * 24 * 3600 * 1000).toISOString().slice(0, 10);
+    }
+
+    await upsert('rating_history', [
+        { id: 'aa000001-0000-4000-8000-000000000001',
+          player_id: 'test-player', category_id: 'tour', points_earned: 9,
+          tournament_name: 'Тестовый турнир', recorded_at: daysAgo(120),
+          is_doubles: false, ntrp_after: 3.2 },
+        { id: 'aa000001-0000-4000-8000-000000000002',
+          player_id: 'test-player', category_id: 'masters', points_earned: 60,
+          tournament_name: 'Мастерс-этап', recorded_at: daysAgo(60),
+          is_doubles: false, ntrp_after: null },
+        { id: 'aa000001-0000-4000-8000-000000000003',
+          player_id: 'test-player', category_id: 'tour', points_earned: 150,
+          tournament_name: 'Большой этап', recorded_at: daysAgo(10),
+          is_doubles: false, ntrp_after: null }
+    ], 'id');
+
+    await upsert('player_categories', [
+        { player_id: 'test-player', category_id: 'tour', points: 159, wins: 1, losses: 1 },
+        { player_id: 'test-player', category_id: 'masters', points: 60, wins: 0, losses: 0 }
+    ], 'player_id,category_id');
+    // Оценки NTRP: так их теперь пишет админка — без категории и без очков.
+    // Раньше такая строка не доходила бы даже до графика NTRP
+    await upsert('rating_history', [
+        { id: 'aa000002-0000-4000-8000-000000000001',
+          player_id: 'test-player', category_id: null, points_earned: 0,
+          tournament_name: 'Оценка NTRP', recorded_at: daysAgo(80),
+          is_doubles: false, ntrp_after: 3.5 },
+        { id: 'aa000002-0000-4000-8000-000000000002',
+          player_id: 'test-player', category_id: null, points_earned: 0,
+          tournament_name: 'Оценка NTRP', recorded_at: daysAgo(40),
+          is_doubles: false, ntrp_after: 3.7 },
+        { id: 'aa000002-0000-4000-8000-000000000003',
+          player_id: 'test-player', category_id: null, points_earned: 0,
+          tournament_name: 'Оценка NTRP', recorded_at: daysAgo(5),
+          is_doubles: false, ntrp_after: 4.0 }
+    ], 'id');
+    console.log('  история рейтинга в двух категориях и оценки NTRP');
 
     console.log('\nГотово. Вход для проверок:');
     ACCOUNTS.forEach(a => console.log('  ' + a.email + '  ' + a.password));

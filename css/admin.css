@@ -4369,3 +4369,48 @@ select.ad-field-input {
     flex: 1 1 auto;
     min-width: 0;
 }
+
+
+/* ---- Полоса побед и поражений в карточке игрока ----
+   Та же, что в кабинете: четыре поля подряд не показывают, как игрок
+   выступает. Цвета из таблицы матчей — зелёный победа, красный поражение */
+.ad-cat-bar {
+    display: flex;
+    height: 6px;
+    margin: 10px 0 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.07);
+}
+
+.ad-cat-bar-w,
+.ad-cat-bar-l {
+    display: block;
+    height: 100%;
+}
+
+.ad-cat-bar-w { background: #4ade80; }
+.ad-cat-bar-l { background: #ff6b62; }
+
+.ad-cat-legend {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.ad-cat-mark {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.ad-cat-mark-l { margin-left: 10px; }
+.ad-cat-mark-w { background: #4ade80; }
+.ad-cat-mark-l { background: #ff6b62; }
