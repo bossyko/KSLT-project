@@ -267,7 +267,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const id = section.getAttribute('id');
 
             if (scrollY >= top && scrollY < top + height) {
-                navItems.forEach(item => item.classList.remove('active'));
                 // Try direct nav link first
                 let activeLink = document.querySelector('.nav-links > li > a[href="#' + id + '"]');
                 // If not found, check dropdown items and highlight parent
@@ -277,7 +276,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         activeLink = dropdownItem.closest('.nav-dropdown').querySelector('.nav-item');
                     }
                 }
+                // Подсветку переносим, только когда есть куда. Внутренние
+                // страницы отмечают свой пункт прямо в разметке и якорей в
+                // меню не имеют — раньше «Рейтинг» гас сразу после загрузки
                 if (activeLink) {
+                    navItems.forEach(item => item.classList.remove('active'));
                     activeLink.classList.add('active');
                 }
             }

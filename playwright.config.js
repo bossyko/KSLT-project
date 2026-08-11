@@ -8,6 +8,8 @@ require('./tests/test-db');
 
 module.exports = defineConfig({
     testDir: './tests/e2e',
+    // Вход за игрока и администратора: кабинет и админку иначе не проверить
+    globalSetup: require.resolve('./tests/auth-setup'),
     timeout: 30000,
     expect: { timeout: 10000 },
     fullyParallel: true,

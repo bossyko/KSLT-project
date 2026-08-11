@@ -2,10 +2,15 @@
 const { test, expect } = require('../fixtures');
 
 /**
- * TC-DASHBOARD: Dashboard page structure tests
- * Tests public-facing elements load without auth dependency errors
- * Dashboard requires auth, so we test structural HTML elements only
+ * TC-DASHBOARD: разметка кабинета.
+ *
+ * Кабинет закрыт: без входа страница уводит на форму авторизации, и искать
+ * в ней разделы кабинета бессмысленно. Поэтому проверки идут под сессией
+ * тестового игрока — её готовит tests/auth-setup.js.
  */
+
+// Все проверки в файле идут от лица тестового игрока
+test.use({ storageState: require('../auth-setup').playerState });
 
 const DASHBOARD_PAGES = [
     { path: '/pages/dashboard.html', lang: 'RU', name: 'Dashboard RU' },

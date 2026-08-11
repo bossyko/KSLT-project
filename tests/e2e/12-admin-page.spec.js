@@ -2,10 +2,15 @@
 const { test, expect } = require('../fixtures');
 
 /**
- * TC-ADMIN: Admin page structure tests
- * Tests public-facing elements load without auth dependency errors
- * Admin requires staff auth — we test structural HTML elements only
+ * TC-ADMIN: разметка админки.
+ *
+ * Админка закрыта для всех, кроме сотрудников: без входа страница уводит на
+ * форму авторизации. Проверки идут под сессией тестового администратора —
+ * её готовит tests/auth-setup.js.
  */
+
+// Все проверки в файле идут от лица тестового администратора
+test.use({ storageState: require('../auth-setup').adminState });
 
 const ADMIN_PAGES = [
     { path: '/pages/admin.html', lang: 'RU', name: 'Admin RU' },
