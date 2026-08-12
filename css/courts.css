@@ -5,14 +5,15 @@
    ======================================== */
 
 /* ---- HERO ---- */
+/* Высота общая для всех карточек: игрок, тренер, корт, турнир */
 .ct-hero {
     position: relative;
-    min-height: 340px;
+    min-height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 120px 24px 60px;
+    padding: 110px 24px 40px;
     overflow: hidden;
 }
 

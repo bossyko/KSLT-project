@@ -166,6 +166,13 @@
         subChallenges: 'Чакыруулар',
         subBattles: 'Баттлдар',
         subUpcoming: 'Алдыдагы турнирлер',
+        chalAccept: 'Кабыл алуу', chalDecline: 'Четке кагуу', chalCancel: 'Кайра чакыруу',
+        chalCancelledBySelf: 'Өзүңүз кайра чакырдыңыз', chalCancelledByOpp: 'Чакырык кайра алынды',
+        chalDirSent: 'сиз чакырдыңыз', chalDirGot: 'сизди чакырышты', chalSentOn: 'чакырык',
+        chalTheyAccepted: 'Атаандаш кабыл алды', chalYouAccepted: 'Сиз кабыл алдыңыз',
+        chalTheyDeclined: 'Атаандаш четке какты', chalYouDeclined: 'Сиз четке кактыңыз',
+        chalActionDone: 'Бул чакырыкка мурун жооп берилген',
+        chalGone: 'Бул чакырык эми жок',
         tourNoResults: 'Жыйынтык киргизилген жок',
         regRefusedShort: 'Четке кагылган',
         tourStatus: 'Абалы', tourResult: 'Жыйынтык', invDirection: 'Багыты',
@@ -215,6 +222,7 @@
         notifTournaments: 'Мелдештер',
         notifMatches: 'Матчтар',
         notifChallenges: 'Сынактар',
+        notifSite: 'Сайт и приложение',
         notifTelegram: 'Telegram',
         notifEmail: 'Email',
         notifSaved: 'Билдирме жөндөөлөрү сакталды',
@@ -407,6 +415,13 @@
         subChallenges: 'Challenges',
         subBattles: 'Battles',
         subUpcoming: 'Upcoming tournaments',
+        chalAccept: 'Accept', chalDecline: 'Decline', chalCancel: 'Withdraw',
+        chalCancelledBySelf: 'You withdrew it', chalCancelledByOpp: 'Challenge withdrawn',
+        chalDirSent: 'you challenged', chalDirGot: 'you were challenged', chalSentOn: 'sent',
+        chalTheyAccepted: 'Opponent accepted', chalYouAccepted: 'You accepted',
+        chalTheyDeclined: 'Opponent declined', chalYouDeclined: 'You declined',
+        chalActionDone: 'This challenge has already been answered',
+        chalGone: 'This challenge no longer exists',
         tourNoResults: 'Results not entered',
         regRefusedShort: 'Declined',
         tourStatus: 'Status', tourResult: 'Result', invDirection: 'Direction',
@@ -456,6 +471,7 @@
         notifTournaments: 'Tournaments',
         notifMatches: 'Matches',
         notifChallenges: 'Challenges',
+        notifSite: 'Site and app',
         notifTelegram: 'Telegram',
         notifEmail: 'Email',
         notifSaved: 'Notification settings saved',
@@ -648,6 +664,13 @@
         subChallenges: 'Вызовы',
         subBattles: 'Баттлы',
         subUpcoming: 'Предстоящие турниры',
+        chalAccept: 'Принять', chalDecline: 'Отклонить', chalCancel: 'Отозвать',
+        chalCancelledBySelf: 'Вы отозвали', chalCancelledByOpp: 'Вызов отозван',
+        chalDirSent: 'вы вызвали', chalDirGot: 'вас вызвали', chalSentOn: 'вызов от',
+        chalTheyAccepted: 'Соперник принял', chalYouAccepted: 'Вы приняли',
+        chalTheyDeclined: 'Соперник отклонил', chalYouDeclined: 'Вы отклонили',
+        chalActionDone: 'На этот вызов уже ответили',
+        chalGone: 'Этого вызова больше нет',
         tourNoResults: 'Результаты не внесены',
         regRefusedShort: 'Отклонена',
         tourStatus: 'Статус', tourResult: 'Результат', invDirection: 'Направление',
@@ -697,6 +720,7 @@
         notifTournaments: 'Турниры',
         notifMatches: 'Матчи',
         notifChallenges: 'Вызовы',
+        notifSite: 'Сайт и приложение',
         notifTelegram: 'Telegram',
         notifEmail: 'Email',
         notifSaved: 'Настройки уведомлений сохранены',
@@ -936,6 +960,7 @@
     // ---- Auth Ready Callback ----
     /** Вошедший пользователь: нужен при переключении разделов. */
     var _dashUser = null;
+    var _dashProfile = null;
 
     window.onAuthReady = function(user, profile) {
         _dashUser = user;
@@ -947,6 +972,7 @@
         renderMembershipCard().then(function(state) {
             applyMembershipRestrictions(state);
         });
+        _dashProfile = profile;
         renderGames(profile);
         renderStats(profile);
         renderNotifications(user);
@@ -1186,11 +1212,16 @@
         // Категории игрока с очками и местом в каждой. Играть можно в своей
         // и на ступень выше, очки в этих категориях считаются раздельно.
         var pcRes = await client.from('player_categories')
-            .select('category_id, points')
+            .select('category_id, points, closed_at')
             .eq('player_id', profile.player_id)
             .order('points', { ascending: false });
 
-        var myCats = pcRes.data || [];
+        // Закрытые категории остаются в карточке, но приглушёнными: игрок
+        // в них больше не выступает, и строка не должна читаться как
+        // действующая. Friendly в рейтинге не участвует вовсе
+        var myCats = (pcRes.data || []).filter(function(r) {
+            return r.category_id !== 'friendly';
+        });
         if (myCats.length > 0) {
             var catsRes = await client.from('categories').select('id, name');
             var catName = {};
@@ -1202,7 +1233,8 @@
                     .select('player_id', { count: 'exact', head: true })
                     .eq('category_id', row.category_id)
                     .gt('points', row.points || 0);
-                html += '<div class="db-sidebar-rating-row">' +
+                html += '<div class="db-sidebar-rating-row' +
+                        (row.closed_at ? ' db-sidebar-rating-off' : '') + '">' +
                     '<span class="db-sidebar-rating-label">' + escHtml(catName[row.category_id] || row.category_id) + '</span>' +
                     '<span class="db-sidebar-rating-value">' + (row.points || 0) + ' · #' + ((rankRes.count || 0) + 1) + '</span>' +
                 '</div>';
@@ -1432,6 +1464,11 @@
         document.querySelectorAll('.db-section').forEach(function(el) {
             el.classList.toggle('active', el.id === 'db-' + tab);
         });
+
+        // Статус вызова мог измениться, пока раздел был закрыт: ответить
+        // можно из колокольчика и с телефона. Перечитываем при заходе,
+        // иначе приходится обновлять страницу руками
+        if (tab === 'games' && _dashProfile) loadGamesBattles(_dashProfile);
 
     }
 
@@ -1808,7 +1845,7 @@
             }
 
             renderPaged(card, invites, function(rows) {
-                return '<table class="db-matches-table"><thead><tr>' +
+                return '<table class="db-matches-table db-battles-table"><thead><tr>' +
                         '<th>' + L.matchDate + '</th>' +
                         '<th>' + L.matchOpponent + '</th>' +
                         '<th>' + L.invDirection + '</th>' +
@@ -2563,6 +2600,100 @@
         });
     }
 
+    /**
+     * Принять, отклонить, отозвать.
+     *
+     * Все три ответа идут через функции базы: правило «отвечает только
+     * адресат» должно жить там, а не в кнопке. Список к моменту нажатия мог
+     * устареть — на этот случай база отвечает «already_answered», и мы
+     * говорим об этом прямо, а не молчим.
+     */
+    function bindChallengeActions(root, profile) {
+        if (!root || !client) return;
+
+        function act(btn, run) {
+            btn.disabled = true;
+            var was = btn.textContent;
+            btn.textContent = L.saving;
+            run().then(function(res) {
+                var err = (res.error && res.error.message) || (res.data && res.data.error);
+                if (err) {
+                    // Коды базы человеку ничего не говорят: вызов мог быть
+                    // отвечен с другого устройства, просрочен или удалён
+                    showMessage(null, chalErrText(err), true);
+                    btn.disabled = false;
+                    btn.textContent = was;
+                    loadGamesBattles(profile);
+                    return;
+                }
+                announceChallengeAnswered();
+            }).catch(function(e) {
+                console.warn('[KSLT] challenge action:', e);
+                btn.disabled = false;
+                btn.textContent = was;
+            });
+        }
+
+        root.querySelectorAll('.db-chal-yes').forEach(function(b) {
+            b.addEventListener('click', function() {
+                act(b, function() {
+                    return client.rpc('respond_to_challenge', { p_id: b.dataset.id, p_accept: true });
+                });
+            });
+        });
+        root.querySelectorAll('.db-chal-no').forEach(function(b) {
+            b.addEventListener('click', function() {
+                act(b, function() {
+                    return client.rpc('respond_to_challenge', { p_id: b.dataset.id, p_accept: false });
+                });
+            });
+        });
+        root.querySelectorAll('.db-chal-off').forEach(function(b) {
+            b.addEventListener('click', function() {
+                act(b, function() {
+                    return client.rpc('cancel_challenge', { p_id: b.dataset.id });
+                });
+            });
+        });
+    }
+
+    /** Вызов уже отвеченный — вместо кнопок строка с исходом. */
+    async function checkChallengeOpen(n, modal) {
+        if (!client || !modal || !modal.el) return;
+        try {
+            var res = await client.from('challenges')
+                .select('status, expires_at').eq('id', n.action_id).single();
+            var st = res.data && res.data.status;
+            var alive = st === 'active' &&
+                (!res.data.expires_at || new Date(res.data.expires_at) > new Date());
+            if (alive) return;
+
+            var box = modal.el.querySelector('.db-modal-actions');
+            if (!box) return;
+
+            // Исход — значком, теми же цветами, что и в таблице «Баттлы»:
+            // серая строчка внизу выглядела остатком, а не ответом
+            var label = !st ? L.chalGone
+                : st === 'accepted' ? L.chalYouAccepted
+                : st === 'declined' ? L.chalYouDeclined
+                : st === 'cancelled' ? L.chalCancelledByOpp
+                : st === 'completed' ? L.chalCompleted
+                : L.chalExpired;
+            var cls = (st === 'accepted' || st === 'completed') ? 'accepted' : 'declined';
+            box.outerHTML = '<div class="db-modal-answered">' +
+                '<span class="db-status-badge db-invite-' + cls + '">' + escHtml(label) + '</span>' +
+            '</div>';
+        } catch(e) { /* не смогли спросить — кнопки останутся, база всё равно откажет */ }
+    }
+
+    /** Коды отказа от базы — по-человечески. */
+    function chalErrText(err) {
+        if (err === 'already_answered' || err === 'expired') return L.chalActionDone;
+        if (err === 'not_found') return L.chalGone;
+        if (err === 'forbidden') return L.chalActionDone;
+        return err;
+    }
+
     /** Кнопки H2H одинаковы в турнирной таблице и в списке баттлов. */
     function bindH2HButtons(root, pid, profile) {
         if (!root || !pid) return;
@@ -2724,18 +2855,19 @@
             var chalPage = isEn ? 'challenge-en.html' : (isKg ? 'challenge-kg.html' : 'challenge.html');
 
             renderPaged(card, items, function(rows) {
-                return '<table class="db-matches-table"><thead><tr>' +
+                return '<table class="db-matches-table db-battles-table"><thead><tr>' +
                         '<th>' + L.matchDate + '</th>' +
                         '<th>' + L.matchOpponent + '</th>' +
                         '<th style="text-align:center">' + L.matchScore + '</th>' +
                         '<th style="text-align:center">' + L.matchResult + '</th>' +
-                        '<th>' + L.tourStatus + '</th>' +
+                        '<th style="text-align:center">' + L.tourStatus + '</th>' +
                         '<th style="text-align:center">H2H</th>' +
                     '</tr></thead><tbody>' +
                     rows.map(battleRow).join('') +
                     '</tbody></table>';
             }, 0, function(root) {
                 bindH2HButtons(root, myPlayerId, profile);
+                bindChallengeActions(root, profile);
             });
         } catch(e) {
             console.warn('[KSLT] games battles error:', e);
@@ -2747,6 +2879,7 @@
             var partnerAvatar = isSent ? ch.opponent_avatar : ch.challenger_avatar;
 
             var statusMap = {
+                cancelled: { label: L.chalCancelledByOpp, cls: 'declined' },
                 active: { label: L.chalActive, cls: 'pending' },
                 negotiating: { label: L.chalNegotiating, cls: 'pending' },
                 countered: { label: L.chalCountered, cls: 'pending' },
@@ -2757,12 +2890,26 @@
             };
             var st = statusMap[ch.status] || { label: ch.status, cls: 'pending' };
 
-            var finalDate = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_date
-                ? ch.counter_date : ch.proposed_date;
+            // В столбце — когда вызов отправлен: эта дата есть всегда.
+            // Дата самой игры появляется только после того, как менеджер
+            // опубликует баттл, и живёт отдельной строкой ниже — иначе в
+            // одном столбце оказались бы два разных смысла, а до публикации
+            // он просто пустовал (читалась ещё и counter_date, которой
+            // миграция больше не оставила)
+            // В столбце — дата матча. Её задаёт менеджер при публикации
+            // баттла, до этого её просто нет. Дата самого вызова живёт
+            // строкой ниже: два разных смысла в одном столбце на глаз не
+            // различить
             var dateStr = '';
-            if (finalDate) {
-                var d = String(finalDate);
-                dateStr = d.slice(8, 10) + '.' + d.slice(5, 7) + '.' + d.slice(2, 4);
+            if (ch.proposed_date) {
+                var pd = String(ch.proposed_date);
+                dateStr = pd.slice(8, 10) + '.' + pd.slice(5, 7) + '.' + pd.slice(2, 4);
+            }
+
+            var sentStr = '';
+            if (ch.created_at) {
+                var d = String(ch.created_at);
+                sentStr = d.slice(8, 10) + '.' + d.slice(5, 7) + '.' + d.slice(2, 4);
             }
 
             // Счёт сам по себе не говорит, чей он: победителя показываем
@@ -2776,14 +2923,35 @@
             }
 
             // Баттл — тот же вызов, только опубликованный на сайте
-            var sub = '';
+            // Сообщение — единственное, что человек пишет при вызове.
+            // В строке его не было вовсе: приходилось искать в уведомлении
+            // Направление: в таблице его не осталось вовсе, и понять,
+            // сам ты вызвал или тебя, можно было только по кнопке «Отозвать»
+            // Направление и дата вызова — одной строкой: порознь строка
+            // вырастала до четырёх этажей и съедала экран
+            var sub = '<div class="db-match-mate db-chal-dir">' +
+                (isSent ? '\u2197 ' + L.chalDirSent : '\u2199 ' + L.chalDirGot) +
+                (sentStr ? ' \u00B7 ' + sentStr : '') + '</div>';
+            if (ch.message) {
+                sub += '<div class="db-match-mate db-chal-msg">\u00AB' + escHtml(ch.message) + '\u00BB</div>';
+            }
             if (ch.battle_published) {
-                sub = '<a class="db-match-mate db-battle-link" href="' + chalPage +
+                sub += '<a class="db-match-mate db-battle-link" href="' + chalPage +
                     '?id=' + escHtml(ch.id) + '&from=battles">\uD83D\uDD25 ' +
                     escHtml(ch.battle_title || L.chalBattle) + '</a>';
-            } else if (ch.court_name || ch.proposed_venue) {
-                sub = '<div class="db-match-mate">\uD83D\uDCCD ' +
-                    escHtml(ch.court_name || ch.proposed_venue) + '</div>';
+            }
+
+            // Где играем — появляется вместе с публикацией баттла
+            var place = ch.court_name || ch.proposed_venue || '';
+            if (place) {
+                sub += '<div class="db-match-mate">\uD83D\uDCCD ' + escHtml(place) + '</div>';
+            }
+
+
+            // Безличные «Принят» и «Отклонён» не говорят, кто именно ответил,
+            // а в списке лежат обе стороны — и свои вызовы, и чужие
+            if (ch.status === 'cancelled' && isSent) {
+                st = { label: L.chalCancelledBySelf, cls: 'declined' };
             }
 
             var oppPid = isSent ? ch.opponent_player_id : ch.challenger_player_id;
@@ -2796,6 +2964,21 @@
                   '" data-opp-photo="' + escHtml(partnerAvatar || '') + '" title="Head to Head">H2H</button>'
                 : '';
 
+            // Ответ на вызов живёт здесь и в колокольчике. Раньше он жил
+            // только в Telegram, и на сайте кнопок не было вовсе
+            var waiting = ch.status === 'active' &&
+                (!ch.expires_at || new Date(ch.expires_at) > new Date());
+            var actions = '';
+            if (waiting && !isSent) {
+                actions = '<button class="db-chal-btn db-chal-yes" data-id="' + escHtml(ch.id) + '">' +
+                        L.chalAccept + '</button>' +
+                    '<button class="db-chal-btn db-chal-no" data-id="' + escHtml(ch.id) + '">' +
+                        L.chalDecline + '</button>';
+            } else if (waiting && isSent) {
+                actions = '<button class="db-chal-btn db-chal-off" data-id="' + escHtml(ch.id) + '">' +
+                    L.chalCancel + '</button>';
+            }
+
             return '<tr>' +
                 '<td class="db-match-date">' + dateStr + '</td>' +
                 '<td><div class="db-match-opponent">' +
@@ -2804,7 +2987,9 @@
                 '</div></td>' +
                 '<td class="db-match-score">' + escHtml(ch.match_score || '') + '</td>' +
                 '<td class="db-match-result-cell">' + outcome + '</td>' +
-                '<td><span class="db-status-badge db-invite-' + st.cls + '">' + st.label + '</span></td>' +
+                '<td style="text-align:center">' + (actions
+                    ? '<div class="db-chal-actions">' + actions + '</div>'
+                    : '<span class="db-status-badge db-invite-' + st.cls + '">' + st.label + '</span>') + '</td>' +
                 '<td style="text-align:center">' + h2h + '</td>' +
             '</tr>';
         }
@@ -2859,7 +3044,10 @@
 
         try {
             var res = await client.from('notification_log')
-                .select('id, type, title, message, is_read, created_at')
+                // action_* нужны окну: по ним оно рисует «Принять» и
+                // «Отклонить». Без них уведомление о вызове открывалось
+                // просто текстом, и ответить из кабинета было нечем
+                .select('id, type, title, message, is_read, created_at, action_type, action_id')
                 .eq('profile_id', user.id)
                 .order('created_at', { ascending: false })
                 .limit(100);
@@ -2878,7 +3066,10 @@
             // Значок по виду уведомления: список из одинаковых строк читается
             // хуже, а тип подсказывает, о чём речь, ещё до текста
             var ICONS = {
-                tournament: '\uD83C\uDFC6', challenge: '\u2694\uFE0F', match: '\uD83C\uDFBE',
+                // Знак — по типу уведомления, а не буквой в тексте: сменить
+                // его так можно одной строкой, не трогая ни функцию, ни
+                // уже разосланные записи
+                tournament: '\uD83C\uDFC6', challenge: '\uD83D\uDD25', match: '\uD83C\uDFBE',
                 payment: '\uD83D\uDCB3', membership: '\uD83D\uDC9A', system: '\uD83D\uDD14'
             };
 
@@ -2911,12 +3102,23 @@
                 el.addEventListener('click', function() {
                     var n = items.filter(function(x) { return x.id === el.dataset.id; })[0];
                     if (!n) return;
-                    dbModal({
+                    // У вызова ответ прямо в окне: две кнопки вместо похода
+                    // в раздел «Баттлы» за тем же самым
+                    // Кнопки рисуются по факту «это вызов», но ответить могли
+                    // уже с телефона или из колокольчика. Настоящее состояние
+                    // спрашиваем у базы и гасим кнопки, если отвечать нечего
+                    var isChal = n.action_type === 'challenge' && n.action_id;
+                    var modal = dbModal({
                         title: escHtml(n.title || ''),
                         body: '<p style="line-height:1.5;white-space:pre-wrap;">' + escHtml(n.message || '') + '</p>' +
                               '<p style="margin-top:10px;font-size:0.75rem;color:var(--text-dim);">' +
-                              dbFormatDate(n.created_at) + '</p>'
+                              dbFormatDate(n.created_at) + '</p>',
+                        actions: isChal ? [
+                            { label: L.chalDecline, onClick: function(close) { answerChallenge(n, false, modal, close); } },
+                            { label: L.chalAccept, primary: true, onClick: function(close) { answerChallenge(n, true, modal, close); } }
+                        ] : null
                     });
+                    if (isChal) checkChallengeOpen(n, modal);
                     if (!n.is_read) {
                         n.is_read = true;
                         markOneRead(n.id, el);
@@ -2936,6 +3138,46 @@
             console.warn('[KSLT] notifications:', e);
         }
     }
+
+    /**
+     * Ответ на вызов из окна уведомления.
+     *
+     * Уведомление — снимок момента: пока оно висело непрочитанным, на вызов
+     * могли ответить с телефона или у него вышел срок. Правило живёт в базе,
+     * окно только спрашивает и честно передаёт отказ.
+     */
+    async function answerChallenge(n, accept, modal, close) {
+        if (!client) return;
+        var btns = modal && modal.el ? modal.el.querySelectorAll('.db-modal-actions button') : [];
+        btns.forEach(function(b) { b.disabled = true; });
+        try {
+            var res = await client.rpc('respond_to_challenge', { p_id: n.action_id, p_accept: accept });
+            var err = (res.error && res.error.message) || (res.data && res.data.error);
+            if (err) showMessage(null, chalErrText(err), true);
+        } catch(e) {
+            console.warn('[KSLT] challenge answer:', e);
+        }
+        if (close) close();
+        announceChallengeAnswered();
+    }
+
+    /**
+     * Об ответе на вызов узнают все разделы разом.
+     *
+     * Ответить можно из трёх мест — окно уведомления, колокольчик, строка в
+     * «Баттлах». Раньше обновлялось только то, откуда нажали: в остальных
+     * оставался старый статус до перезагрузки страницы.
+     */
+    function announceChallengeAnswered() {
+        try {
+            document.dispatchEvent(new CustomEvent('kslt:challenge-answered'));
+        } catch(e) { /* старый браузер — обойдётся без синхронизации */ }
+    }
+
+    document.addEventListener('kslt:challenge-answered', function() {
+        if (_dashProfile) loadGamesBattles(_dashProfile);
+        if (_dashUser) renderNotifications(_dashUser);
+    });
 
     /**
      * Отметить одно уведомление прочитанным.
@@ -4244,7 +4486,9 @@
 
     // ---- Notification Preferences ----
     var NOTIF_CATS = ['membership', 'tournaments', 'matches', 'challenges'];
-    var NOTIF_CHANNELS = ['tg', 'email'];
+    // Колокольчик показывал всё подряд: переключатели управляли только
+    // Telegram и почтой, а отключить уведомления о чужих баттлах было нечем
+    var NOTIF_CHANNELS = ['site', 'tg', 'email'];
 
     function getNotifyPrefs() {
         var p = window.ksltProfile;
@@ -4275,7 +4519,10 @@
             var cells = '';
             NOTIF_CHANNELS.forEach(function(ch) {
                 var on = isNotifOn(prefs, ch, cat);
-                var off = (ch === 'tg' && !tgLinked);
+                // Telegram больше не возит вызовы: ответ на них живёт на
+                // платформе. Переключатель, который ничего не переключает,
+                // хуже отсутствующего — он обещает
+                var off = (ch === 'tg' && (!tgLinked || cat === 'challenges'));
                 cells +=
                     '<td style="text-align:center;padding:8px 12px;">' +
                         '<label class="db-notif-toggle' + (off ? ' db-notif-off' : '') + '">' +
@@ -4297,6 +4544,7 @@
             '<table style="width:100%;border-collapse:collapse;">' +
                 '<thead><tr>' +
                     '<th></th>' +
+                    '<th style="text-align:center;padding:4px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:500;">' + L.notifSite + '</th>' +
                     '<th style="text-align:center;padding:4px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:500;">' + L.notifTelegram + '</th>' +
                     '<th style="text-align:center;padding:4px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:500;">' + L.notifEmail + '</th>' +
                 '</tr></thead>' +

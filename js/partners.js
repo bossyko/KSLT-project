@@ -256,10 +256,11 @@
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
 
         var html =
-            '<a href="' + servicesLink + '" class="kslt-back" style="align-self:flex-start;">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+            '<a href="' + servicesLink + '" class="kslt-back kslt-back-inline">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
             '<div class="pt-search-wrap">' +
             '<svg class="pt-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-            '<input type="text" class="pt-search" id="ptSearch" placeholder="' + L.searchPlaceholder + '">' +
+            '<input type="search" class="pt-search" id="ptSearch" autocomplete="off" ' +
+                'autocorrect="off" spellcheck="false" placeholder="' + L.searchPlaceholder + '">' +
             '</div>';
 
         html += '<div class="pt-filter-row">';

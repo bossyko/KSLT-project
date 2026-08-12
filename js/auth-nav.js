@@ -133,10 +133,16 @@
                     var dot = document.getElementById('siteNotifDot');
 
                     var L2 = isEn
-                        ? { title: 'New notifications', empty: 'Nothing new', all: 'All notifications' }
+                        ? { title: 'New notifications', empty: 'Nothing new', all: 'All notifications',
+                            accept: 'Accept', decline: 'Decline', done: 'This challenge has already been answered',
+                            gone: 'This challenge no longer exists' }
                         : isKg
-                            ? { title: 'Жаңы билдирмелер', empty: 'Жаңылык жок', all: 'Бардык билдирмелер' }
-                            : { title: 'Новые уведомления', empty: 'Новых нет', all: 'Все уведомления' };
+                            ? { title: 'Жаңы билдирмелер', empty: 'Жаңылык жок', all: 'Бардык билдирмелер',
+                                accept: 'Кабыл алуу', decline: 'Четке кагуу', done: 'Бул чакырыкка мурун жооп берилген',
+                                gone: 'Бул чакырык эми жок' }
+                            : { title: 'Новые уведомления', empty: 'Новых нет', all: 'Все уведомления',
+                                accept: 'Принять', decline: 'Отклонить', done: 'На этот вызов уже ответили',
+                                gone: 'Этого вызова больше нет' };
 
                     /**
                      * Сколько непрочитанных — для точки на колокольчике.
@@ -237,6 +243,14 @@
                                     '<div class="site-notif-item-time" style="padding:0 20px 16px;">' +
                                         (n.created_at ? timeAgo(new Date(n.created_at)) : '') +
                                     '</div>' +
+                                    // Уведомление о вызове несёт сам ответ: гонять
+                                    // человека в кабинет ради двух кнопок незачем
+                                    (n.action_type === 'challenge' && n.action_id
+                                        ? '<div class="site-notif-actions">' +
+                                            '<button class="site-notif-act site-notif-yes" type="button">' + L2.accept + '</button>' +
+                                            '<button class="site-notif-act site-notif-no" type="button">' + L2.decline + '</button>' +
+                                          '</div>'
+                                        : '') +
                                 '</div>' +
                             '</div>';
                         document.body.appendChild(overlay);
@@ -268,6 +282,68 @@
                         overlay.querySelector('.site-notif-close').addEventListener('click', close);
                         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
                         document.addEventListener('keydown', onKey);
+
+                        /**
+                         * Ответ на вызов прямо из уведомления.
+                         *
+                         * Уведомление — снимок момента: пока оно висело
+                         * непрочитанным, на вызов могли ответить с другого
+                         * устройства или у него вышел срок. Правило живёт в
+                         * базе, кнопка только спрашивает — и говорит вслух,
+                         * если ответ уже не нужен.
+                         */
+                        function answer(accept, btn) {
+                            var box = overlay.querySelector('.site-notif-actions');
+                            if (box) box.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+
+                            fetch(DB_URL + '/rest/v1/rpc/respond_to_challenge', {
+                                method: 'POST',
+                                headers: apiHeaders({ 'Content-Type': 'application/json' }),
+                                body: JSON.stringify({ p_id: n.action_id, p_accept: accept })
+                            }).then(function(r) { return r.json(); }).then(function(res) {
+                                var msg;
+                                if (res && res.error) {
+                                    // Вызов мог быть отвечен с другого устройства,
+                                    // просрочен или вовсе удалён — код базы
+                                    // человеку ничего не объясняет
+                                    msg = res.error === 'not_found' ? L2.gone
+                                        : (res.error === 'already_answered' || res.error === 'expired'
+                                            || res.error === 'forbidden') ? L2.done
+                                        : res.error;
+                                } else {
+                                    msg = accept ? L2.accept + ' \u2713' : L2.decline + ' \u2713';
+                                }
+                                if (box) box.outerHTML = '<div class="site-notif-answered">' + esc(msg) + '</div>';
+                                try {
+                                    document.dispatchEvent(new CustomEvent('kslt:challenge-answered'));
+                                } catch(e) {}
+                            }).catch(function(e) {
+                                console.warn('[KSLT] challenge answer:', e);
+                                if (box) box.querySelectorAll('button').forEach(function(b) { b.disabled = false; });
+                            });
+                        }
+
+                        var yes = overlay.querySelector('.site-notif-yes');
+                        var no = overlay.querySelector('.site-notif-no');
+                        if (yes) yes.addEventListener('click', function() { answer(true, yes); });
+                        if (no) no.addEventListener('click', function() { answer(false, no); });
+
+                        // Ответить могли уже из кабинета или с телефона.
+                        // Настоящее состояние спрашиваем у базы: кнопки,
+                        // которым нечего делать, показывать нельзя
+                        if (n.action_type === 'challenge' && n.action_id) {
+                            fetch(API + '/challenges?id=eq.' + n.action_id + '&select=status',
+                                  { headers: apiHeaders() })
+                                .then(function(r) { return r.json(); })
+                                .then(function(rows) {
+                                    var st = rows && rows[0] && rows[0].status;
+                                    if (st === 'active') return;
+                                    var box = overlay.querySelector('.site-notif-actions');
+                                    if (box) box.outerHTML =
+                                        '<div class="site-notif-answered">' + esc(L2.done) + '</div>';
+                                })
+                                .catch(function() {});
+                        }
                     }
 
                     /**

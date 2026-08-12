@@ -4705,6 +4705,17 @@ h2 {
     border-bottom: 1px solid var(--border-subtle);
 }
 
+/* На страницах-списках (тренеры, корты, поиск игрока) возврат не прилипает.
+   Прилипание работает в пределах родителя, а он кончается вместе с блоком
+   фильтров — полоса уезжала при первой же прокрутке, и между баннером и
+   поиском оставалась дыра в сотню пикселей */
+.kslt-back-wrap.kslt-back-flat {
+    position: static;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: none;
+}
+
 .kslt-back-wrap .kslt-back-sep {
     margin: 0 6px;
 }
@@ -5705,4 +5716,125 @@ img {
 .rc-single-note {
     font-size: 0.85rem;
     color: var(--text-muted);
+}
+
+/* ---- Ответ на вызов прямо в уведомлении ----
+   Раньше кнопки «Принять» и «Отклонить» жили только в личке Telegram-бота,
+   и на сайте ответить на вызов было нечем. */
+.site-notif-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 18px;
+}
+
+.site-notif-act {
+    flex: 1;
+    padding: 9px 12px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+    background: none;
+    color: var(--text-muted, #8A8A8F);
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.site-notif-act:disabled { opacity: 0.5; cursor: default; }
+
+.site-notif-yes:hover:not(:disabled) {
+    color: #0A0A0A;
+    background: var(--accent, #CCFF00);
+    border-color: var(--accent, #CCFF00);
+}
+
+.site-notif-no:hover:not(:disabled) {
+    color: #ff6b6b;
+    border-color: rgba(255, 107, 107, 0.5);
+}
+
+.site-notif-answered {
+    padding: 0 20px 18px;
+    font-size: 0.85rem;
+    color: var(--text-muted, #8A8A8F);
+}
+
+/* Возврат внутри прилипающей полосы с поиском и фильтрами: он должен
+   ездить вместе с ней, а не оставаться в баннере наверху */
+.kslt-back.kslt-back-inline {
+    align-self: flex-start;
+    margin: 0;
+}
+
+/* ---- Автоподстановка Chrome ----
+   Браузер узнаёт сохранённое значение и красит поле своим белым фоном
+   поверх наших стилей — на тёмной теме поле вспыхивало белым прямо при
+   вводе. Отменить фон напрямую нельзя, поэтому подменяем его внутренней
+   тенью, а цвет текста задаём через -webkit-text-fill-color. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+    -webkit-text-fill-color: var(--text-primary, #fff);
+    caret-color: var(--text-primary, #fff);
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-elevated, #141414) inset;
+    box-shadow: 0 0 0 1000px var(--bg-elevated, #141414) inset;
+    /* Смена фона у автоподстановки не отменяется — только откладывается */
+    transition: background-color 100000s ease-in-out 0s;
+}
+
+/* Пока открыт список ранее введённых значений, Chrome красит поле не как
+   заполненное, а как «предпросмотр» — у него другие внутренние состояния,
+   и правило выше их не ловит. Они нестандартные, поэтому вынесены в
+   отдельный набор: неизвестный селектор рядом со стандартным обнулил бы
+   всё правило целиком. */
+input:-internal-autofill-selected,
+input:-internal-autofill-previewed {
+    -webkit-text-fill-color: var(--text-primary, #fff) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-elevated, #141414) inset !important;
+    box-shadow: 0 0 0 1000px var(--bg-elevated, #141414) inset !important;
+    background-color: transparent !important;
+}
+
+
+/* ---- Плавающий возврат на страницах-карточках ----
+   Игрок, тренер, корт: ссылка закреплена у левого края под шапкой. В потоке
+   она стояла под баннером и уезжала при первой прокрутке, а прилипание не
+   спасает — оно действует в пределах родителя. Рамки нет: с ней ссылка
+   выглядит кнопкой и спорит с шапкой, которая рядом и тоже обведена. */
+.kslt-back-wrap.kslt-back-float {
+    position: fixed;
+    top: 76px;
+    left: 24px;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: var(--radius-full);
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.kslt-back-wrap.kslt-back-float .kslt-back {
+    font-size: 0.85rem;
+}
+
+/* Ниже 1300 пикселей по бокам нет места — ссылка наехала бы на содержимое.
+   Возвращаем её в поток, строкой над карточкой */
+@media (max-width: 1300px) {
+    .kslt-back-wrap.kslt-back-float {
+        position: static;
+        display: block;
+        padding: 12px calc(max(24px, (100% - 1100px) / 2));
+        border-radius: 0;
+        background: var(--bg-primary);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
 }

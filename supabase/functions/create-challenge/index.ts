@@ -1,13 +1,22 @@
 // ============================================
 // KSLT — Create Challenge Edge Function
-// POST { opponent_player_id, proposed_date, proposed_time, court_id?, venue_text?, message? }
-// JWT auth + membership check + 3/day limit
+// POST { opponent_player_id, message? }
+//
+// Вызов — это намерение сыграть, а не бронь корта. Дату, время и площадку
+// назначает менеджер после того, как соперник согласится, поэтому здесь их
+// не спрашивают: выбранная при отправке дата всё равно устаревает, пока
+// человек думает.
+//
+// Все правила — членство KSLT, три неотвеченных вызова, две недели после
+// отказа — живут в функции базы create_challenge. Правило, которое живёт в
+// Edge Function, обходится прямым запросом к таблице.
+//
+// Telegram отсюда убран. Раньше именно он нёс кнопки «Принять / Отклонить»,
+// а игроку без бота вызов вообще не отправлялся. Теперь ответ живёт на
+// платформе: уведомление с кнопками в кабинете и в колокольчике.
 // ============================================
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const TELEGRAM_API = 'https://api.telegram.org/bot'
-const DAILY_LIMIT = 5
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,7 +29,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // 1. Auth
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return json({ error: 'Unauthorized' }, 401)
@@ -39,190 +47,75 @@ Deno.serve(async (req) => {
       return json({ error: 'Unauthorized' }, 401)
     }
 
+    const { opponent_player_id, message } = await req.json()
+    if (!opponent_player_id) {
+      return json({ error: 'Missing opponent_player_id' }, 400)
+    }
+
+    // Заводим от имени вошедшего: функция сама смотрит, кто её вызвал
+    const { data: created, error: rpcErr } = await userClient.rpc('create_challenge', {
+      p_opponent_player_id: opponent_player_id,
+      p_message: message ? String(message).slice(0, 150) : null
+    })
+
+    if (rpcErr) {
+      console.error('create_challenge failed:', rpcErr)
+      return json({ error: 'DB error' }, 500)
+    }
+    if (created?.error) {
+      // Отказ по правилу — это не сбой: интерфейсу нужен код, чтобы
+      // объяснить человеку, почему нельзя
+      return json(created, 409)
+    }
+
     const db = createClient(supabaseUrl, serviceKey)
 
-    // 2. Get sender profile
     const { data: sender } = await db
       .from('profiles')
-      .select('id, full_name, player_id, telegram_chat_id, role')
+      .select('full_name')
       .eq('id', user.id)
       .single()
 
-    if (!sender) {
-      return json({ error: 'Profile not found' }, 400)
-    }
+    const senderName = sender?.full_name || 'Игрок KSLT'
+    const opponentProfileId = created.opponent_profile_id as string | null
 
-    if (!sender.player_id) {
-      return json({ error: 'no_player' }, 400)
-    }
+    // Уведомление сопернику. Кнопки «Принять» и «Отклонить» интерфейс
+    // рисует сам по типу и ссылке на вызов
+    if (opponentProfileId) {
+      await db.from('notification_log').insert({
+        profile_id: opponentProfileId,
+        type: 'challenge',
+        // Без эмодзи: значок рисует интерфейс по типу уведомления.
+        // Буква в тексте означала бы, что смена знака требует переката
+        // функции и правки всех уже разосланных записей
+        title: 'Вызов на матч',
+        message: message
+          ? `${senderName} вызывает вас на баттл: «${String(message).slice(0, 150)}»`
+          : `${senderName} вызывает вас на баттл`,
+        is_read: false,
+        action_type: 'challenge',
+        action_id: created.challenge_id
+      })
 
-    // 3. Membership check (admin/manager bypass)
-    const isStaff = sender.role === 'admin' || sender.role === 'manager'
-    if (!isStaff) {
-      const today = new Date().toISOString().split('T')[0]
-      const { data: membership } = await db
-        .from('memberships')
-        .select('id')
-        .eq('profile_id', user.id)
-        .eq('status', 'active')
-        .gte('expires_at', today)
-        .limit(1)
+      const { data: opponent } = await db
+        .from('profiles')
+        .select('email, notify_preferences')
+        .eq('id', opponentProfileId)
         .single()
 
-      if (!membership) {
-        return json({ error: 'no_membership' }, 403)
-      }
-    }
-
-    // 4. Parse body
-    const { opponent_player_id, proposed_date, proposed_time, court_id, venue_text, message } = await req.json()
-
-    if (!opponent_player_id || !proposed_date || !proposed_time) {
-      return json({ error: 'Missing required fields: opponent_player_id, proposed_date, proposed_time' }, 400)
-    }
-
-    // 5. Self-check
-    if (sender.player_id === opponent_player_id) {
-      return json({ error: 'self_challenge' }, 400)
-    }
-
-    // 6. Date validation (must be in the future)
-    const proposedDateObj = new Date(proposed_date + 'T' + proposed_time + ':00')
-    if (isNaN(proposedDateObj.getTime()) || proposedDateObj <= new Date()) {
-      return json({ error: 'invalid_date' }, 400)
-    }
-
-    // 7. Daily limit
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-
-    const { count } = await db
-      .from('challenges')
-      .select('id', { count: 'exact', head: true })
-      .eq('challenger_id', user.id)
-      .gte('created_at', todayStart.toISOString())
-
-    if ((count || 0) >= DAILY_LIMIT) {
-      return json({ error: 'daily_limit' }, 429)
-    }
-
-    // 8. Duplicate check (active/negotiating/countered to same opponent)
-    const { data: existing } = await db
-      .from('challenges')
-      .select('id')
-      .eq('challenger_id', user.id)
-      .eq('opponent_player_id', opponent_player_id)
-      .in('status', ['active', 'negotiating', 'countered'])
-      .limit(1)
-
-    if (existing && existing.length > 0) {
-      return json({ error: 'already_pending' }, 409)
-    }
-
-    // 9. Opponent player exists
-    const { data: opponentPlayer } = await db
-      .from('players')
-      .select('id, name')
-      .eq('id', opponent_player_id)
-      .single()
-
-    if (!opponentPlayer) {
-      return json({ error: 'Player not found' }, 404)
-    }
-
-    // 10. Resolve opponent profile (with telegram or email)
-    const { data: opponentProfile } = await db
-      .from('profiles')
-      .select('id, telegram_chat_id, email, full_name, notify_preferences')
-      .eq('player_id', opponent_player_id)
-      .limit(1)
-      .single()
-
-    if (!opponentProfile || (!opponentProfile.telegram_chat_id && !opponentProfile.email)) {
-      return json({ error: 'no_contact' }, 400)
-    }
-
-    // 11. Venue text
-    let venueDisplay = venue_text || ''
-    if (court_id) {
-      const { data: court } = await db.from('courts').select('name').eq('id', court_id).single()
-      if (court) venueDisplay = court.name
-    }
-
-    // 12. Insert challenge
-    const { data: challenge, error: insertErr } = await db
-      .from('challenges')
-      .insert({
-        challenger_id: user.id,
-        challenger_player_id: sender.player_id,
-        opponent_player_id: opponent_player_id,
-        opponent_profile_id: opponentProfile.id,
-        proposed_date: proposed_date,
-        proposed_time: proposed_time,
-        proposed_venue: venueDisplay || null,
-        proposed_court_id: court_id || null,
-        message: message ? message.substring(0, 150) : null,
-        status: 'active'
-      })
-      .select('id')
-      .single()
-
-    if (insertErr) {
-      console.error('Insert error:', insertErr)
-      return json({ error: 'DB error' }, 500)
-    }
-
-    // 13. Telegram notification to opponent (respect opt-out)
-    const senderName = sender.full_name || 'Игрок KSLT'
-    const dateFormatted = formatDate(proposed_date)
-    const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
-
-    if (token && opponentProfile.telegram_chat_id && shouldNotify(opponentProfile.notify_preferences, 'tg', 'challenges')) {
-      const msgParts = [
-        `⚔️ <b>Вызов на матч!</b>`,
-        ``,
-        `${escapeHtml(senderName)} предлагает матч:`,
-        `📅 ${dateFormatted}  ⏰ ${proposed_time}${venueDisplay ? '  📍 ' + escapeHtml(venueDisplay) : ''}`,
-      ]
-      if (message) {
-        msgParts.push(`💬 <i>${escapeHtml(message)}</i>`)
-      }
-
-      await fetch(`${TELEGRAM_API}${token}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: opponentProfile.telegram_chat_id,
-          text: msgParts.join('\n'),
-          parse_mode: 'HTML',
-          reply_markup: {
-            inline_keyboard: [[
-              { text: '✅ Принять', callback_data: `challenge_accept:${challenge.id}` },
-              { text: '🔄 Другое время', callback_data: `challenge_counter:${challenge.id}` },
-              { text: '❌ Отклонить', callback_data: `challenge_decline:${challenge.id}` }
-            ]]
-          }
+      // Почта — вдогонку: она работает, когда человек неделю не заходил.
+      // Отключается тем же переключателем в настройках, что и раньше
+      if (opponent?.email && shouldNotify(opponent.notify_preferences, 'email', 'challenges')) {
+        await callSendEmail(serviceKey, {
+          to: opponent.email,
+          subject: `🔥 Вызов на матч от ${senderName}`,
+          template: 'challenge-received',
+          data: { challenger_name: senderName, message: message || '' }
         })
-      })
+      }
     }
 
-    // 14. Email notification to opponent
-    if (opponentProfile.email && shouldNotify(opponentProfile.notify_preferences, 'email', 'challenges')) {
-      await callSendEmail(serviceKey, {
-        to: opponentProfile.email,
-        subject: `⚔️ Вызов на матч от ${senderName}`,
-        template: 'challenge-received',
-        data: {
-          challenger_name: senderName,
-          date: dateFormatted,
-          time: proposed_time,
-          venue: venueDisplay || '',
-          message: message || ''
-        }
-      })
-    }
-
-    return json({ success: true, challenge_id: challenge.id })
+    return json({ success: true, challenge_id: created.challenge_id })
 
   } catch (err) {
     console.error('Edge function error:', err)
@@ -230,7 +123,7 @@ Deno.serve(async (req) => {
   }
 })
 
-function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
+function shouldNotify(prefs: any, channel: 'tg' | 'email' | 'site', cat: string): boolean {
   if (!prefs) return true
   const ch = prefs[channel]
   if (!ch) return true
@@ -256,17 +149,4 @@ function json(data: Record<string, unknown>, status = 200) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
   })
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
-
-function formatDate(dateStr: string): string {
-  try {
-    const d = new Date(dateStr + 'T00:00:00')
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
-  } catch {
-    return dateStr
-  }
 }

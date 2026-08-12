@@ -4,14 +4,15 @@
    ======================================== */
 
 /* ---- HERO ---- */
+/* Баннер держит карточку игрока, а не надпись по центру: высоту задаёт
+   содержимое. Верхний отступ и минимальная высота — общие для карточек
+   игрока, тренера, корта и турнира */
 .pp-hero {
     position: relative;
-    min-height: 340px;
+    min-height: 300px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 120px 24px 60px;
+    padding: 110px 24px 40px;
     overflow: hidden;
 }
 
@@ -33,6 +34,14 @@
 .pp-hero-content {
     position: relative;
     z-index: 2;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Внутри баннера карточке не нужны ни своя рамка, ни отступ снизу */
+.pp-hero-content .pp-header {
+    margin-bottom: 0;
 }
 
 /* ---- CONTAINER ---- */
@@ -199,6 +208,12 @@
     cursor: pointer;
     text-decoration: none;
     transition: all var(--transition-fast);
+}
+
+/* Значок крупнее текста: на 0.9rem огонь терялся рядом с жирной надписью */
+.pp-action-icon {
+    font-size: 1.25rem;
+    line-height: 1;
 }
 
 .pp-action-primary {
@@ -1407,9 +1422,12 @@ a.pp-tournament:hover {
 }
 .pp-chal-overlay.visible { opacity: 1; }
 
+/* Подсветка работает как тень, а не как неон: широкий мягкий ореол вокруг
+   окна даёт объём, а цвет в нём едва угадывается. Яркое кольцо спорило бы
+   с лаймовой кнопкой, а она здесь главное действие */
 .pp-chal-modal {
     background: rgba(30,30,30,0.95);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(204, 255, 0, 0.16);
     border-radius: 16px;
     padding: 28px 24px;
     max-width: 420px;
@@ -1417,6 +1435,11 @@ a.pp-tournament:hover {
     position: relative;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow:
+        0 30px 90px rgba(0, 0, 0, 0.7),
+        0 0 50px 8px rgba(204, 255, 0, 0.16),
+        0 0 150px 45px rgba(204, 255, 0, 0.09),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .pp-chal-close {
@@ -1438,6 +1461,10 @@ a.pp-tournament:hover {
     font-weight: 600;
     color: #fff;
     margin: 0 0 20px;
+    /* По центру: крестик прижат вправо, и заголовок слева выглядел
+       сдвинутым относительно поля и кнопки под ним */
+    text-align: center;
+    padding: 0 24px;
 }
 
 .pp-chal-form { display: flex; flex-direction: column; gap: 14px; }
@@ -1471,9 +1498,21 @@ a.pp-tournament:hover {
     border-color: var(--accent, #CCFF00);
 }
 
+/* Размер фиксирован: тянущееся поле ломало высоту окна.
+   Высота подобрана под предел в 150 символов — при ширине поля это три
+   строки, берём четыре с запасом, чтобы полосы прокрутки не появлялось */
 .pp-chal-textarea {
-    resize: vertical;
-    min-height: 48px;
+    resize: none;
+    height: 118px;
+    line-height: 1.45;
+    /* Не «прятать лишнее»: при неудачном наборе слов последняя строка
+       уходила бы под край молча. Высоты хватает на все 150 символов,
+       а если текст всё же не влез — лучше полоса, чем пропажа */
+    overflow-y: auto;
+}
+
+.pp-chal-req {
+    color: #ff6b6b;
 }
 
 .pp-chal-counter {
@@ -1502,12 +1541,17 @@ a.pp-tournament:hover {
 }
 
 /* Challenge Toast */
+/* По центру экрана, а не у нижнего края: сообщение относится к окну вызова,
+   которое открыто посередине, и внизу его легко не заметить */
+/* Над окном, а не по центру экрана: окно тоже по центру, и сообщение
+   ложилось прямо на поле ввода */
 .pp-chal-toast {
     position: fixed;
-    bottom: 24px;
+    top: 96px;
     left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    padding: 12px 24px;
+    transform: translate(-50%, -12px) scale(0.98);
+    padding: 14px 26px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     border-radius: 10px;
     font-size: 0.9rem;
     font-weight: 500;
@@ -1518,7 +1562,7 @@ a.pp-tournament:hover {
 }
 .pp-chal-toast.visible {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translate(-50%, 0) scale(1);
 }
 .pp-chal-toast-success {
     background: var(--accent, #CCFF00);
@@ -1760,4 +1804,78 @@ a.pp-tournament:hover {
 /* Запись без турнира: выглядит как остальные, но не ведёт себя как ссылка */
 .pp-tournament-plain {
     cursor: default;
+}
+
+/* Имя соперника — главное в заголовке: видно, кого именно вызываешь */
+.pp-chal-rival {
+    color: var(--accent, #CCFF00);
+}
+
+.pp-chal-submit:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+/* ---- Возврат на странице игрока ----
+   Плавает у левого края под шапкой: виден и поверх баннера, и когда баннер
+   уже прокручен. В потоке он уезжал вместе с баннером, а прилипание не
+   помогает — оно действует только в пределах родителя. */
+.kslt-back-wrap.pp-back-float {
+    position: fixed;
+    top: 76px;
+    left: 24px;
+    z-index: 900;
+    padding: 8px 14px;
+    /* Без рамки: она превращает ссылку в кнопку и спорит с шапкой, которая
+       рядом и тоже обведена. Подложка нужна — поверх фотографии в баннере
+       текст без неё не читается */
+    border: none;
+    border-radius: var(--radius-full);
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.kslt-back-wrap.pp-back-float .kslt-back {
+    font-size: 0.85rem;
+}
+
+/* Ниже 1300 пикселей по бокам не остаётся места: кнопка наехала бы на
+   содержимое. Возвращаем её в поток, над карточкой */
+@media (max-width: 1300px) {
+    .kslt-back-wrap.pp-back-float {
+        position: static;
+        padding: 12px calc(max(24px, (100% - 1100px) / 2));
+        border: none;
+        border-radius: 0;
+        background: var(--bg-primary);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+}
+
+/* Текст в окне-сообщении по центру, как и заголовок над ним */
+.pp-chal-alert-text {
+    margin: 14px 0 0;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.5;
+}
+
+.pp-chal-alert-text:last-child {
+    margin-bottom: 6px;
+}
+
+/* Отказ — красным: удачная отправка и запрет выглядели одинаково белым */
+.pp-chal-title.pp-chal-title-warn {
+    color: #ff6b6b;
+}
+
+
+/* Звать нельзя — кнопка это показывает подписью, но остаётся живой:
+   по нажатию она объясняет причину. Отключённая на телефоне не объяснит
+   ничего, подсказок по наведению там нет */
+.pp-action-btn.pp-action-off {
+    opacity: 0.6;
+    filter: grayscale(0.5);
 }

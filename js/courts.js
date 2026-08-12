@@ -514,18 +514,11 @@
 
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
 
-        // Возврат выносим в общую полосу над фильтрами — так он встаёт по колонке
-        // с содержимым, как на турнирах, новостях и в профиле игрока
-        var backWrap = container.parentNode.querySelector('.kslt-back-wrap');
-        if (!backWrap) {
-            backWrap = document.createElement('div');
-            backWrap.className = 'kslt-back-wrap';
-            container.parentNode.insertBefore(backWrap, container);
-        }
-        backWrap.innerHTML = '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' +
-            (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>';
-
+        // Возврат живёт ВНУТРИ прилипающего блока с поиском и фильтрами.
+        // Стоя над ним, он уезжал при первой же прокрутке
         var html =
+            '<a href="' + servicesLink + '" class="kslt-back kslt-back-inline">\u2190 ' +
+                (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
             '<div class="ct-search-wrap">' +
                 '<svg class="ct-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
                 '<input type="text" class="ct-search-input" id="courtsSearch" placeholder="' + L_labels.searchPlaceholder + '" autocomplete="off">' +
@@ -861,7 +854,9 @@
         // Breadcrumb — render before container so it's outside .ct-container
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
         var breadcrumb = document.createElement('div');
-        breadcrumb.className = 'kslt-back-wrap';
+        // Тот же плавающий возврат, что на странице игрока: один вид на
+        // всех карточках, и он не уезжает вместе с баннером
+        breadcrumb.className = 'kslt-back-wrap kslt-back-float';
         breadcrumb.innerHTML =
             '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
             '<span class="kslt-back-sep">/</span>' +

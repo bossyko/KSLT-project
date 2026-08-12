@@ -96,29 +96,26 @@
         tournamentNames: ['KSLT Open 2026', 'Winter Cup 2025', 'Autumn Classic 2025', 'KSLT Summer Series 2025'],
         tournamentResults: ['Четвертьфинал', 'Полуфинал', '1/8 финала', 'Финалист', 'Победитель'],
         challengeModalTitle: 'Бросить вызов',
-        challengeDate: 'Дата',
-        challengeTime: 'Время',
-        challengeVenue: 'Площадка',
-        challengeMessage: 'Сообщение (необязательно)',
+        challengeMessage: 'Сообщение',
+        challengeMsgHint: 'Например: сыграем в выходные?',
         challengeSend: 'Отправить вызов',
         challengeSending: 'Отправка...',
         challengeSent: 'Вызов отправлен!',
-        challengeSentText: 'Оппонент получит уведомление в Telegram и сможет принять, предложить другое время или отклонить вызов.',
-        challengeNoTg: 'Telegram не подключён',
-        challengeNoTgText: 'У этого игрока не подключён Telegram-бот. Вызов можно отправить только игрокам с подключённым Telegram.',
+        challengeSentText: 'Соперник получит уведомление и сможет принять или отклонить вызов.\nОтвета ждём 10 дней. Дальше вызов сгорает.',
         challengeError: 'Ошибка отправки',
-        challengeLimit: 'Лимит вызовов: 5 в день',
+        challengeLimit: 'Уже три вызова ждут ответа. Дождитесь ответа хотя бы на один.',
+        challengeMatchPending: 'Матч с этим игроком уже назначен. Дождитесь, пока он будет сыгран.',
+        challengeBtnWaiting: 'Вызов отправлен',
+        challengeBtnMatchSet: 'Матч назначен',
+        challengeNotMember: 'Вызвать на баттл может только член KSLT',
         challengePending: 'Активный вызов',
-        challengePendingText: 'У вас уже есть активный вызов этому игроку. Дождитесь ответа или истечения срока (72 часа).',
+        challengePendingText: 'У вас уже есть вызов этому игроку.\nДождитесь ответа или истечения срока \u2014 10\u00A0дней.\nОтозвать вызов можно в кабинете, раздел \u00ABБаттлы\u00BB.',
         challengeSelf: 'Нельзя вызвать самого себя',
-        challengeSelectVenue: 'Выберите корт',
-        challengeOtherVenue: 'Другая площадка',
         challengeLoginRequired: 'Войдите в аккаунт',
         challengeLoginText: 'Для отправки вызова необходимо авторизоваться',
         challengeMemberRequired: 'Оформите членство',
         challengeMemberText: 'Для отправки вызова необходимо членство KSLT',
-        challengeNoPlayer: 'Привяжите профиль игрока для отправки вызовов',
-        challengeDisclaimer: 'Отправляя вызов, вы соглашаетесь, что ваш контакт в Telegram может быть передан оппоненту.'
+        challengeNoPlayer: 'Привяжите профиль игрока для отправки вызовов'
     };
 
     // ---- H2H Labels ----
@@ -435,18 +432,22 @@
     }
 
     // ---- Render Hero ----
+    /**
+     * Пока грузятся данные — только фон.
+     *
+     * Раньше здесь стояло «Профиль игрока»: одна и та же надпись на трёхстах
+     * страницах, треть экрана на то, что человек и так знает — он сам сюда
+     * кликнул. Теперь баннер наполняет карточка игрока.
+     */
     function renderHero() {
         var el = document.getElementById('playerHero');
         if (!el) return;
-        el.innerHTML =
-            '<div class="pp-hero-bg"></div>' +
-            '<div class="pp-hero-content">' +
-            '<h1>' + L.heroTitle + '</h1>' +
-            '</div>';
+        el.innerHTML = '<div class="pp-hero-bg"></div>';
     }
 
     // ---- Access level detection ----
     var _accessLevel = 'guest';
+    var _myPlayerId = null;
 
     async function detectAccess() {
         if (!client) { _accessLevel = 'guest'; return; }
@@ -455,6 +456,13 @@
             if (!res.data || !res.data.session) { _accessLevel = 'guest'; return; }
             // Set ksltUser for membership.js (not set on public pages without auth-guard)
             if (!window.ksltUser) window.ksltUser = res.data.session.user;
+
+            // Своя же карточка: кнопку вызова на ней показывать незачем.
+            // База такой вызов и так отклоняет, но ловить себя на запрете —
+            // плохой способ узнать правило
+            var prof = await client.from('profiles').select('player_id')
+                .eq('id', res.data.session.user.id).single();
+            _myPlayerId = (prof.data && prof.data.player_id) || null;
         } catch(e) { _accessLevel = 'guest'; return; }
 
         _accessLevel = 'registered';
@@ -522,76 +530,100 @@
 
         var html = '';
 
-        // Back link — context-aware (rankings or partner search)
-        html += '<div class="kslt-back-wrap">';
+        // Возврат плавающий, у левого края под шапкой.
+        //
+        // В потоке он стоял под баннером и уезжал при первой прокрутке, а
+        // прилипание тут не спасает: оно действует в пределах родителя.
+        // На узких экранах плавать негде — там он становится обычной
+        // строкой над содержимым (см. css/player.css)
+        html += '<div class="kslt-back-wrap pp-back-float">';
         html += '<a href="' + back.href + '" class="kslt-back">\u2190 ' + back.text + '</a>';
         html += '</div>';
 
         html += '<div class="pp-container">';
 
+        // ---- Карточка игрока — в баннер ----
+        //
+        // Баннер занимал треть экрана и сообщал «Профиль игрока» — одно и то
+        // же на всех страницах. Настоящая карточка при этом пряталась под
+        // ним. На страницах тренера, корта и турнира баннер несёт имя того,
+        // на кого смотришь; здесь он был единственным пустым.
+        var hero = '';
         // ---- Header ----
-        html += '<div class="pp-header pp-fade-in">';
-        html += '<div class="pp-photo-wrap">';
+        hero += '<div class="pp-header pp-fade-in">';
+        hero += '<div class="pp-photo-wrap">';
         var photoUrl = player.photo ? player.photo.replace('w=80&h=80', 'w=240&h=240') : 'https://placehold.co/240x240?text=No+Photo';
-        html += '<img src="' + esc(photoUrl) + '" alt="' + esc(player.name) + '" class="pp-photo">';
-        if (player.online) html += '<div class="pp-online-dot"></div>';
+        hero += '<img src="' + esc(photoUrl) + '" alt="' + esc(player.name) + '" class="pp-photo">';
+        if (player.online) hero += '<div class="pp-online-dot"></div>';
         // Motto under photo
         var motto = isEn ? (player.bio_en || player.bio) : (isKg ? (player.bio_kg || player.bio) : player.bio);
         if (motto) {
-            html += '<div style="text-align:center;font-style:italic;color:var(--text-secondary);font-size:0.85rem;margin-top:10px;opacity:0.8;">&laquo;' + esc(motto) + '&raquo;</div>';
+            hero += '<div style="text-align:center;font-style:italic;color:var(--text-secondary);font-size:0.85rem;margin-top:10px;opacity:0.8;">&laquo;' + esc(motto) + '&raquo;</div>';
         }
-        html += '</div>'; // .pp-photo-wrap
+        hero += '</div>'; // .pp-photo-wrap
 
-        html += '<div class="pp-info">';
-        html += '<h2 class="pp-name">' + player.name + '</h2>';
-        html += '<div class="pp-meta">';
-        if (player.country) html += '<span class="pp-meta-country">' + CU.renderCountry(CU.normalizeCountry(player.country), lang, true) + '</span>';
+        hero += '<div class="pp-info">';
+        hero += '<h2 class="pp-name">' + player.name + '</h2>';
+        hero += '<div class="pp-meta">';
+        if (player.country) hero += '<span class="pp-meta-country">' + CU.renderCountry(CU.normalizeCountry(player.country), lang, true) + '</span>';
         if (player.online) {
-            html += '<span class="pp-meta-online">' + L.online + '</span>';
+            hero += '<span class="pp-meta-online">' + L.online + '</span>';
         }
-        html += '</div>';
+        hero += '</div>';
 
         // Ratings block — Singles
-        html += '<div class="pp-ratings">';
+        hero += '<div class="pp-ratings">';
         var myCats = data.categories || [];
         if (myCats.length > 0) {
             myCats.forEach(function(c) {
-                html += '<div class="pp-rating-row">' +
+                hero += '<div class="pp-rating-row">' +
                     '<span class="pp-rating-label">' + esc(c.name) + '</span>' +
                     '<span class="pp-rating-value">' + c.points + ' \u00b7 #' + c.rank + '</span>' +
                 '</div>';
             });
         } else {
-            html += '<div class="pp-rating-row"><span class="pp-rating-label">KSLT</span><span class="pp-rating-value">' + cat.name + ' \u00b7 #' + rank + '</span></div>';
+            hero += '<div class="pp-rating-row"><span class="pp-rating-label">KSLT</span><span class="pp-rating-value">' + cat.name + ' \u00b7 #' + rank + '</span></div>';
         }
         if (player.ntrp_rating) {
             var ntrpVal = Math.round(Number(player.ntrp_rating) / 0.25) * 0.25;
-            html += '<div class="pp-rating-row"><span class="pp-rating-label">NTRP</span><span class="pp-rating-value">' + ntrpVal.toFixed(2).replace(/0$/, '') + '</span></div>';
+            hero += '<div class="pp-rating-row"><span class="pp-rating-label">NTRP</span><span class="pp-rating-value">' + ntrpVal.toFixed(2).replace(/0$/, '') + '</span></div>';
         }
-        html += '</div>';
+        hero += '</div>';
 
         // Header badges — show all earned badge emoji
         if (_earnedBadges.length > 0) {
-            html += '<div class="pp-badges">';
+            hero += '<div class="pp-badges">';
             _earnedBadges.forEach(function (pb) {
                 var b = pb.badge;
                 if (b) {
-                    html += '<span class="pp-badge" title="' + esc(getBadgeName(b)) + '"><span class="pp-badge-icon">' + b.icon + '</span></span>';
+                    hero += '<span class="pp-badge" title="' + esc(getBadgeName(b)) + '"><span class="pp-badge-icon">' + b.icon + '</span></span>';
                 }
             });
-            html += '</div>';
+            hero += '</div>';
         }
-        html += '</div>'; // .pp-info
+        hero += '</div>'; // .pp-info
 
         // Actions
-        html += '<div class="pp-actions">';
+        hero += '<div class="pp-actions">';
         if (player.online) {
-            html += '<a href="' + authPage + '" class="pp-action-btn pp-action-secondary">\u2709\uFE0F ' + L.message + '</a>';
+            hero += '<a href="' + authPage + '" class="pp-action-btn pp-action-secondary">\u2709\uFE0F ' + L.message + '</a>';
         }
-        html += '<button class="pp-action-btn pp-action-primary" id="ppChallengeBtn">\u2694\uFE0F ' + L.challenge + '</button>';
-        html += '</div>';
+        if (!_myPlayerId || _myPlayerId !== player.id) {
+            // Огонь, а не мяч: кнопка залита лаймом, и жёлто-зелёный мяч на
+            // ней растворяется. Тем же знаком помечены баттлы в кабинете
+            hero += '<button class="pp-action-btn pp-action-primary" id="ppChallengeBtn">' +
+                '<span class="pp-action-icon">\uD83D\uDD25</span> ' + L.challenge + '</button>';
+        }
+        hero += '</div>';
 
-        html += '</div>'; // .pp-header
+        hero += '</div>'; // .pp-header
+
+        var heroEl = document.getElementById('playerHero');
+        if (heroEl) {
+            heroEl.innerHTML = '<div class="pp-hero-bg"></div>' +
+                '<div class="pp-hero-content">' + hero + '</div>';
+        }
+
 
         // ---- Singles Stats ----
         var singlesTitle = isEn ? 'Singles Rating' : (isKg ? 'Жеке рейтинг' : 'Одиночный рейтинг');
@@ -726,8 +758,9 @@
             });
         }
 
-        // Challenge button handler
-        var chalBtn = el.querySelector('#ppChallengeBtn');
+        // Кнопка вызова уехала в баннер вместе с карточкой игрока
+        var chalBtn = document.getElementById('ppChallengeBtn');
+        if (chalBtn) checkChallengeAllowed(data.player, chalBtn);
         if (chalBtn) {
             chalBtn.addEventListener('click', function() {
                 handleChallengeClick(data.player);
@@ -1727,20 +1760,65 @@
     // CHALLENGE MODAL
     // ================================================
     var _challengeSending = false;
+    var _challengeBlocked = null;
+
+    /**
+     * Можно ли вообще звать этого игрока — выясняем до нажатия.
+     *
+     * Раньше человек заполнял сообщение, жал «Отправить» и только тогда
+     * упирался в запрет. Теперь кнопка сразу говорит, почему нельзя.
+     */
+    async function checkChallengeAllowed(player, btn) {
+        if (!client || !_myPlayerId || !player || _myPlayerId === player.id) return;
+        try {
+            var res = await client.from('challenges')
+                .select('status')
+                .or('and(challenger_player_id.eq.' + _myPlayerId + ',opponent_player_id.eq.' + player.id + ')' +
+                    ',and(challenger_player_id.eq.' + player.id + ',opponent_player_id.eq.' + _myPlayerId + ')')
+                .in('status', ['active', 'accepted'])
+                .limit(1);
+            var row = res.data && res.data[0];
+            if (!row) return;
+
+            // Кнопка не отключается, а меняет подпись и объясняет причину
+            // по нажатию. Отключённая на телефоне не объяснит ничего:
+            // подсказки по наведению там нет
+            _challengeBlocked = row.status === 'accepted' ? 'match' : 'pending';
+            btn.classList.add('pp-action-off');
+            btn.innerHTML = '<span class="pp-action-icon">\u23F3</span> ' +
+                (row.status === 'accepted' ? L.challengeBtnMatchSet : L.challengeBtnWaiting);
+        } catch(e) { /* не смогли спросить — кнопка останется живой, откажет база */ }
+    }
 
     function handleChallengeClick(player) {
+        // Вызов уже есть или матч назначен — объясняем, а не открываем форму,
+        // которую всё равно отклонит база
+        if (_challengeBlocked === 'match') {
+            showChallengeAlert('\u26A0\uFE0F ' + L.challengeBtnMatchSet, L.challengeMatchPending, 'warn');
+            return;
+        }
+        if (_challengeBlocked === 'pending') {
+            showChallengeAlert('\u26A0\uFE0F ' + L.challengePending, L.challengePendingText, 'warn');
+            return;
+        }
         if (_accessLevel === 'guest') {
-            showChallengeAlert(L.challengeLoginRequired, L.challengeLoginText);
+            showChallengeAlert(L.challengeLoginRequired, L.challengeLoginText, 'warn');
             return;
         }
         if (_accessLevel === 'registered') {
-            showChallengeAlert(L.challengeMemberRequired, L.challengeMemberText);
+            showChallengeAlert(L.challengeMemberRequired, L.challengeMemberText, 'warn');
             return;
         }
         showChallengeModal(player);
     }
 
-    function showChallengeAlert(title, text) {
+    /**
+     * Окно-сообщение. type = 'warn' — отказ: заголовок красным.
+     *
+     * Отказ и удачная отправка выглядели одинаково белым, и разница между
+     * «вызов ушёл» и «вызов не ушёл» читалась только из текста.
+     */
+    function showChallengeAlert(title, text, type) {
         var old = document.querySelector('.pp-chal-overlay');
         if (old) old.remove();
 
@@ -1749,8 +1827,13 @@
         overlay.innerHTML =
             '<div class="pp-chal-modal">' +
                 '<button class="pp-chal-close">&times;</button>' +
-                '<h3 class="pp-chal-title">' + esc(title) + '</h3>' +
-                '<p style="color:var(--text-muted);margin:var(--space-md) 0;">' + esc(text) + '</p>' +
+                '<h3 class="pp-chal-title' + (type === 'warn' ? ' pp-chal-title-warn' : '') + '">' +
+                    esc(title) + '</h3>' +
+                // Абзацы: каждое предложение — своя мысль, слитым куском
+                // они читаются как одна длинная строка
+                String(text).split('\n').map(function(line) {
+                    return '<p class="pp-chal-alert-text">' + esc(line) + '</p>';
+                }).join('') +
             '</div>';
         document.body.appendChild(overlay);
         requestAnimationFrame(function() { overlay.classList.add('visible'); });
@@ -1761,43 +1844,30 @@
         var old = document.querySelector('.pp-chal-overlay');
         if (old) old.remove();
 
-        var today = new Date().toISOString().split('T')[0];
         var playerName = player.name || '';
 
+        // Ни даты, ни времени, ни площадки. Вызов — это намерение сыграть:
+        // корт назначает менеджер после того, как соперник согласится, и
+        // дата, выбранная при отправке, к тому моменту устаревает. Раньше
+        // это были два обязательных поля на входе — барьер там, где нужно
+        // одно нажатие. Предупреждение про передачу контакта в Telegram
+        // ушло вместе с самим Telegram: ответ живёт на платформе
         var overlay = document.createElement('div');
         overlay.className = 'pp-chal-overlay';
         overlay.innerHTML =
             '<div class="pp-chal-modal">' +
                 '<button class="pp-chal-close">&times;</button>' +
-                '<h3 class="pp-chal-title">\u2694\uFE0F ' + esc(L.challengeModalTitle) + ' ' + esc(playerName) + '</h3>' +
+                '<h3 class="pp-chal-title">\uD83D\uDD25 ' + esc(L.challengeModalTitle) +
+                    ' <span class="pp-chal-rival">' + esc(playerName) + '</span></h3>' +
                 '<div class="pp-chal-form">' +
-                    '<div class="pp-chal-row">' +
-                        '<div class="pp-chal-field">' +
-                            '<label class="pp-chal-label">' + L.challengeDate + ' *</label>' +
-                            '<input type="date" class="pp-chal-input" id="ppChalDate" min="' + today + '" required>' +
-                        '</div>' +
-                        '<div class="pp-chal-field">' +
-                            '<label class="pp-chal-label">' + L.challengeTime + ' *</label>' +
-                            '<input type="time" class="pp-chal-input" id="ppChalTime" required>' +
-                        '</div>' +
-                    '</div>' +
                     '<div class="pp-chal-field">' +
-                        '<label class="pp-chal-label">' + L.challengeVenue + '</label>' +
-                        '<select class="pp-chal-input" id="ppChalCourt">' +
-                            '<option value="">' + L.challengeSelectVenue + '</option>' +
-                            '<option value="other">' + L.challengeOtherVenue + '</option>' +
-                        '</select>' +
-                    '</div>' +
-                    '<div class="pp-chal-field" id="ppChalVenueWrap" style="display:none;">' +
-                        '<input type="text" class="pp-chal-input" id="ppChalVenueText" placeholder="' + L.challengeOtherVenue + '">' +
-                    '</div>' +
-                    '<div class="pp-chal-field">' +
-                        '<label class="pp-chal-label">' + L.challengeMessage + '</label>' +
-                        '<textarea class="pp-chal-input pp-chal-textarea" id="ppChalMsg" maxlength="150" rows="2"></textarea>' +
+                        '<label class="pp-chal-label">' + L.challengeMessage +
+                            ' <span class="pp-chal-req">*</span></label>' +
+                        '<textarea class="pp-chal-input pp-chal-textarea" id="ppChalMsg" maxlength="150" rows="3" ' +
+                            'placeholder="' + esc(L.challengeMsgHint) + '"></textarea>' +
                         '<div class="pp-chal-counter"><span id="ppChalMsgCount">0</span>/150</div>' +
                     '</div>' +
-                    '<div style="font-size:0.75rem;color:var(--text-dim);text-align:center;margin:8px 0 4px;">&#9888;&#65039; ' + esc(L.challengeDisclaimer) + '</div>' +
-                    '<button class="pp-chal-submit" id="ppChalSubmit">' + L.challengeSend + '</button>' +
+                    '<button class="pp-chal-submit" id="ppChalSubmit" disabled>' + L.challengeSend + '</button>' +
                 '</div>' +
             '</div>';
 
@@ -1805,24 +1875,20 @@
         requestAnimationFrame(function() { overlay.classList.add('visible'); });
         attachChalClose(overlay);
 
-        // Load courts into select
-        loadCourtsForChallenge();
-
-        // Court select toggle
-        var courtSel = document.getElementById('ppChalCourt');
-        var venueWrap = document.getElementById('ppChalVenueWrap');
-        if (courtSel) {
-            courtSel.addEventListener('change', function() {
-                venueWrap.style.display = courtSel.value === 'other' ? '' : 'none';
-            });
-        }
-
         // Message counter
         var msgInput = document.getElementById('ppChalMsg');
         var msgCount = document.getElementById('ppChalMsgCount');
+        var sendBtn = document.getElementById('ppChalSubmit');
         if (msgInput && msgCount) {
             msgInput.addEventListener('input', function() {
                 msgCount.textContent = msgInput.value.length;
+                // Вызов без единого слова — это просто дёрганье человека
+                if (sendBtn) sendBtn.disabled = !msgInput.value.trim();
+            });
+            // Сообщение к вызову — одна фраза. Переводы строки выталкивают
+            // текст за края поля при любой его высоте
+            msgInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') e.preventDefault();
             });
         }
 
@@ -1835,31 +1901,11 @@
         }
     }
 
-    function loadCourtsForChallenge() {
-        if (!client) return;
-        client.from('courts').select('id, name').order('name').then(function(res) {
-            var sel = document.getElementById('ppChalCourt');
-            if (!sel || !res.data) return;
-            for (var i = 0; i < res.data.length; i++) {
-                var opt = document.createElement('option');
-                opt.value = res.data[i].id;
-                opt.textContent = res.data[i].name;
-                sel.insertBefore(opt, sel.lastElementChild);
-            }
-        });
-    }
-
     async function submitChallenge(player, overlay) {
         if (_challengeSending) return;
 
-        var dateEl = document.getElementById('ppChalDate');
-        var timeEl = document.getElementById('ppChalTime');
-        var courtEl = document.getElementById('ppChalCourt');
-        var venueEl = document.getElementById('ppChalVenueText');
         var msgEl = document.getElementById('ppChalMsg');
         var submitBtn = document.getElementById('ppChalSubmit');
-
-        if (!dateEl.value || !timeEl.value) return;
 
         _challengeSending = true;
         if (submitBtn) {
@@ -1875,18 +1921,7 @@
                 return;
             }
 
-            var body = {
-                opponent_player_id: _playerId,
-                proposed_date: dateEl.value,
-                proposed_time: timeEl.value
-            };
-
-            if (courtEl.value && courtEl.value !== '' && courtEl.value !== 'other') {
-                body.court_id = courtEl.value;
-            }
-            if (courtEl.value === 'other' && venueEl && venueEl.value.trim()) {
-                body.venue_text = venueEl.value.trim();
-            }
+            var body = { opponent_player_id: _playerId };
             if (msgEl && msgEl.value.trim()) {
                 body.message = msgEl.value.trim();
             }
@@ -1905,18 +1940,20 @@
 
             if (res.ok && data.success) {
                 closeChalModal(overlay);
-                showChallengeAlert('\u2694\uFE0F ' + L.challengeSent, L.challengeSentText);
-            } else if (data.error === 'no_telegram') {
-                closeChalModal(overlay);
-                showChallengeAlert(L.challengeNoTg, L.challengeNoTgText);
+                showChallengeAlert('\uD83D\uDD25 ' + L.challengeSent, L.challengeSentText);
             } else if (data.error === 'already_pending') {
                 closeChalModal(overlay);
-                showChallengeAlert(L.challengePending, L.challengePendingText);
+                showChallengeAlert('\u26A0\uFE0F ' + L.challengePending, L.challengePendingText, 'warn');
             } else {
+                // Отказ по правилу — не сбой: человеку нужно понять, почему
+                // нельзя, а не увидеть «попробуйте позже»
                 var errMsg = L.challengeError;
-                if (data.error === 'daily_limit') errMsg = L.challengeLimit;
+                if (data.error === 'too_many_pending') errMsg = L.challengeLimit;
+                else if (data.error === 'match_pending') errMsg = L.challengeMatchPending;
+                else if (data.error === 'not_member') errMsg = L.challengeNotMember;
                 else if (data.error === 'self_challenge') errMsg = L.challengeSelf;
                 else if (data.error === 'no_player') errMsg = L.challengeNoPlayer;
+                else if (data.error === 'opponent_not_found') errMsg = L.challengeNoPlayer;
                 showChalToast(errMsg, 'error');
             }
         } catch (e) {

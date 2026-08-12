@@ -107,6 +107,28 @@ Deno.serve(async (req) => {
       return json({ error: 'Invalid audience' }, 400)
     }
 
+    // Переключатели в настройках кабинета до сих пор управляли только
+    // Telegram и почтой: колокольчик показывал всё подряд, и отключить,
+    // например, чужие баттлы было нечем. Рассылка «всем» и «членам» теперь
+    // уважает канал «сайт»; адресную одному человеку — нет, она личная
+    const CAT: Record<string, string> = {
+      tournament: 'tournaments', match: 'matches', battle: 'challenges'
+    }
+    const cat = CAT[type || 'system']
+    if (cat && audience !== 'user' && profiles.length > 0) {
+      const ids = profiles.map(p => p.id)
+      const { data: prefs } = await db
+        .from('profiles')
+        .select('id, notify_preferences')
+        .in('id', ids)
+      const off = new Set(
+        (prefs || [])
+          .filter(p => p.notify_preferences?.site?.[cat] === false)
+          .map(p => p.id)
+      )
+      if (off.size > 0) profiles = profiles.filter(p => !off.has(p.id))
+    }
+
     if (profiles.length === 0) {
       return json({ total: 0, notified: 0, fcm_sent: 0 })
     }

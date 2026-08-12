@@ -2947,3 +2947,122 @@ select:-webkit-autofill {
 .db-cat-rate-empty b {
     color: var(--text-muted);
 }
+
+/* ---- Ответ на вызов прямо в строке ----
+   Раньше принять вызов можно было только из Telegram: на сайте кнопок не
+   было вовсе. */
+.db-chal-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.db-chal-btn {
+    padding: 4px 10px;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm, 6px);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.db-chal-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.db-chal-yes:hover:not(:disabled) {
+    color: #0A0A0A;
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.db-chal-no:hover:not(:disabled),
+.db-chal-off:hover:not(:disabled) {
+    color: #ff6b6b;
+    border-color: rgba(255, 107, 107, 0.5);
+}
+
+/* Сообщение вызова в строке: курсивом, чтобы отличалось от названий */
+.db-chal-msg {
+    font-style: italic;
+}
+
+/* Кнопки ответа стоят по центру своей колонки, как и значок статуса */
+.db-chal-actions {
+    justify-content: center;
+}
+
+/* Вызов уже отвечен — вместо кнопок строка с исходом */
+.db-modal-answered {
+    padding: 14px 20px 18px;
+    text-align: right;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Направление вызова: свои и чужие лежат в одном списке */
+.db-chal-dir {
+    text-transform: lowercase;
+    opacity: 0.75;
+}
+
+/* Соперник — самая содержательная колонка: имя, направление, сообщение и
+   место. Правило только для баттлов: в таблице матчей оно раздувало вторую
+   колонку и выталкивало H2H за край */
+/* Первые две колонки одной ширины во всех трёх таблицах «Моих игр» —
+   матчи, баттлы, приглашения. Разделы стоят друг под другом, и столбцы,
+   начинающиеся в разных местах, читаются как сбитая вёрстка */
+/* Жёсткая раскладка: при обычной браузер считает ширины пожеланием и
+   перекраивает колонки под содержимое — длинное название турнира ужимало
+   «Дату», и разделы разъезжались по вертикали */
+.db-matches-table {
+    table-layout: fixed;
+}
+
+.db-matches-table td:nth-child(1),
+.db-matches-table th:nth-child(1) {
+    width: 110px;
+}
+
+.db-matches-table td:nth-child(2),
+.db-matches-table th:nth-child(2) {
+    width: 34%;
+}
+
+/* Закрытая категория — приглушённой строкой: игрок в ней не выступает */
+.db-sidebar-rating-off {
+    opacity: 0.45;
+}
+
+/* Таблицу лучше прокрутить, чем обрезать: на узком экране столбцы всё
+   равно не влезут, а молча пропавший H2H выглядит как поломка */
+.db-subsection-body {
+    overflow-x: auto;
+}
+
+.db-chal-when {
+    opacity: 0.7;
+}
+
+
+/* Длинному содержимому в жёсткой раскладке нужен явный перенос */
+.db-matches-table .db-match-tournament,
+.db-matches-table .db-chal-msg {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db-matches-table .db-match-opponent {
+    min-width: 0;
+}
+
+.db-matches-table .db-match-opponent > span {
+    min-width: 0;
+    overflow: hidden;
+}

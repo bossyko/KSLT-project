@@ -4,11 +4,14 @@
    ======================================== */
 
 /* Hero */
+/* Поиск игрока — рабочий экран, а не витрина: баннер занимал половину
+   высоты окна, и результаты поиска начинались за нижним краем. Высота
+   приведена к общей для карточек — 300 пикселей */
 .pt-hero {
     position: relative;
-    padding: 140px 7% 60px;
+    padding: 92px 7% 24px;
     text-align: center;
-    min-height: 50vh;
+    min-height: 190px;
     display: flex;
     align-items: center;
     justify-content: center;
