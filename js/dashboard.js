@@ -115,6 +115,9 @@
         catWins: ['жеңиш', 'жеңиш', 'жеңиш'],
         catLosses: ['жеңилүү', 'жеңилүү', 'жеңилүү'],
         catTotal: 'Бардык матчтар', catWinRate: 'жеңиш', catNoMatches: 'матчтар азырынча жок',
+        notificationsTab: 'Билдирмелер', notifEmpty: 'Билдирмелер жок',
+        notifEmptyText: 'Мелдештер, чакыруулар жана төлөмдөр жөнүндө кабарлар ушул жерде көрүнөт',
+        catClosed: 'жабык',
         socialMedia: 'Социалдык тармактар',
         cropTitle: 'Сүрөттү кыркуу',
         cropApply: 'Колдонуу',
@@ -348,6 +351,9 @@
         catWins: ['win', 'wins', 'wins'],
         catLosses: ['loss', 'losses', 'losses'],
         catTotal: 'Matches played', catWinRate: 'wins', catNoMatches: 'no matches yet',
+        notificationsTab: 'Notifications', notifEmpty: 'No notifications',
+        notifEmptyText: 'Messages about tournaments, challenges and payments appear here',
+        catClosed: 'closed',
         socialMedia: 'Social Media',
         cropTitle: 'Crop Photo',
         cropApply: 'Apply',
@@ -581,6 +587,9 @@
         catWins: ['победа', 'победы', 'побед'],
         catLosses: ['поражение', 'поражения', 'поражений'],
         catTotal: 'Всего матчей', catWinRate: 'побед', catNoMatches: 'матчей пока нет',
+        notificationsTab: 'Уведомления', notifEmpty: 'Уведомлений пока нет',
+        notifEmptyText: 'Здесь появятся сообщения о турнирах, вызовах и платежах',
+        catClosed: 'закрыта',
         socialMedia: 'Соцсети',
         cropTitle: 'Обрезка фото',
         cropApply: 'Применить',
@@ -910,7 +919,11 @@
     }
 
     // ---- Auth Ready Callback ----
+    /** Вошедший пользователь: нужен при переключении разделов. */
+    var _dashUser = null;
+
     window.onAuthReady = function(user, profile) {
+        _dashUser = user;
         renderSidebar(profile);
         initQrButton(profile);
         loadSidebarRatings(profile);
@@ -921,6 +934,7 @@
         });
         renderGames(profile);
         renderStats(profile);
+        renderNotifications(user);
         renderInvitations();
         renderVouchers();
         renderLoyalty(user);
@@ -1139,6 +1153,7 @@
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="vouchers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>' + L.vouchers + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="loyalty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' + L.loyaltyTab + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="payments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>' + L.payments + '</button></li>' +
+                '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>' + L.notificationsTab + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + L.profile + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</button></li>' +
             '</ul>';
@@ -1403,6 +1418,7 @@
         document.querySelectorAll('.db-section').forEach(function(el) {
             el.classList.toggle('active', el.id === 'db-' + tab);
         });
+
     }
 
     // ---- Profile completeness banner ----
@@ -1920,7 +1936,13 @@
                 client.from('tournament_registrations')
                     .select(REG_FIELDS)
                     .eq('partner_id', pid).in('status', REG_STATUSES)
-                    .order('registered_at', { ascending: false })
+                    .order('registered_at', { ascending: false }),
+                // Записи истории без турнира — их админ добавляет руками
+                client.from('rating_history')
+                    .select('tournament_name, points_earned, recorded_at')
+                    .eq('player_id', pid).is('tournament_id', null)
+                    .not('category_id', 'is', null)
+                    .order('recorded_at', { ascending: false })
             ]);
 
             var own = results[0].data || [];
@@ -1946,6 +1968,16 @@
                 if (!tr.tournament || seen[tr.tournament_id]) return;
                 seen[tr.tournament_id] = true;
                 items.push({ tournament: tr.tournament, round_reached: tr.round_reached, points_earned: tr.points_earned });
+            });
+
+            // Записи, добавленные админом руками: турнира в базе нет, но очки
+            // начислены и игра была. Показываем их названием и очками
+            (results[3].data || []).forEach(function(rh) {
+                items.push({
+                    tournament: { id: '', title: rh.tournament_name, date_start: rh.recorded_at },
+                    points_earned: rh.points_earned || 0,
+                    manual: true
+                });
             });
 
             if (items.length === 0) {
@@ -2702,6 +2734,194 @@
         return out;
     }
 
+    /**
+     * Раздел «Уведомления».
+     *
+     * Колокольчик в шапке показывает последние двадцать и годится, чтобы
+     * заметить новое. Вернуться к сообщению недельной давности через него
+     * нельзя — для этого раздел здесь.
+     */
+    async function renderNotifications(user) {
+        var container = document.getElementById('db-notifications');
+        if (!container || !client || !user) return;
+
+        container.innerHTML = '<h2 class="db-section-title">' + L.notificationsTab + '</h2>' +
+            '<div class="db-card"><p class="db-subsection-loading">' + L.loadingList + '</p></div>';
+
+        try {
+            var res = await client.from('notification_log')
+                .select('id, type, title, message, is_read, created_at')
+                .eq('profile_id', user.id)
+                .order('created_at', { ascending: false })
+                .limit(100);
+
+            var items = res.data || [];
+            if (items.length === 0) {
+                container.innerHTML = '<h2 class="db-section-title">' + L.notificationsTab + '</h2>' +
+                    '<div class="db-card"><div class="db-empty">' +
+                        '<div class="db-empty-icon">\uD83D\uDD14</div>' +
+                        '<div class="db-empty-title">' + L.notifEmpty + '</div>' +
+                        '<div class="db-empty-text">' + L.notifEmptyText + '</div>' +
+                    '</div></div>';
+                return;
+            }
+
+            // Значок по виду уведомления: список из одинаковых строк читается
+            // хуже, а тип подсказывает, о чём речь, ещё до текста
+            var ICONS = {
+                tournament: '\uD83C\uDFC6', challenge: '\u2694\uFE0F', match: '\uD83C\uDFBE',
+                payment: '\uD83D\uDCB3', membership: '\uD83D\uDC9A', system: '\uD83D\uDD14'
+            };
+
+            var unreadCount = items.filter(function(n) { return !n.is_read; }).length;
+            var allReadLabel = isEn ? 'Mark all as read' : (isKg ? 'Баарын окулду деп белгилөө' : 'Отметить все прочитанными');
+
+            var html = '<h2 class="db-section-title">' + L.notificationsTab + '</h2>';
+            if (unreadCount > 0) {
+                html += '<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">' +
+                    '<button class="db-notif-all-read" id="dbNotifAllRead">' + allReadLabel + '</button></div>';
+            }
+            html += '<div class="db-notif-list">';
+            items.forEach(function(n) {
+                html += '<button class="db-notif-item' + (n.is_read ? '' : ' unread') + '" ' +
+                        'type="button" data-id="' + escHtml(n.id) + '">' +
+                    '<div class="db-notif-icon">' + (ICONS[n.type] || ICONS.system) + '</div>' +
+                    '<div class="db-notif-body">' +
+                        '<div class="db-notif-title">' + escHtml(n.title || '') + '</div>' +
+                        '<div class="db-notif-msg">' + escHtml(n.message || '') + '</div>' +
+                        '<div class="db-notif-time">' + dbFormatDate(n.created_at) + '</div>' +
+                    '</div>' +
+                '</button>';
+            });
+            html += '</div>';
+            container.innerHTML = html;
+
+            // Открыл уведомление — оно прочитано. Просто зашёл в раздел —
+            // ничего не изменилось, как со списком писем
+            container.querySelectorAll('.db-notif-item').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var n = items.filter(function(x) { return x.id === el.dataset.id; })[0];
+                    if (!n) return;
+                    dbModal({
+                        title: escHtml(n.title || ''),
+                        body: '<p style="line-height:1.5;white-space:pre-wrap;">' + escHtml(n.message || '') + '</p>' +
+                              '<p style="margin-top:10px;font-size:0.75rem;color:var(--text-dim);">' +
+                              dbFormatDate(n.created_at) + '</p>'
+                    });
+                    if (!n.is_read) {
+                        n.is_read = true;
+                        markOneRead(n.id, el);
+                    }
+                });
+            });
+
+            var allBtn = document.getElementById('dbNotifAllRead');
+            if (allBtn) {
+                allBtn.addEventListener('click', function() {
+                    items.forEach(function(n) { n.is_read = true; });
+                    allBtn.style.display = 'none';
+                    markAllNotificationsRead(user);
+                });
+            }
+        } catch(e) {
+            console.warn('[KSLT] notifications:', e);
+        }
+    }
+
+    /**
+     * Отметить одно уведомление прочитанным.
+     *
+     * Как в почте: открыл список — ничего не изменилось, открыл сообщение —
+     * оно прочитано. Раньше раздел гасил всё разом самим фактом открытия, и
+     * достаточно было заглянуть, чтобы «прочитать» то, чего не читал.
+     */
+    async function markOneRead(id, el) {
+        if (!client || !id) return;
+        try {
+            var res = await client.from('notification_log')
+                .update({ is_read: true }).eq('id', id);
+            if (res.error) {
+                console.warn('[KSLT] notifications:', res.error.message);
+                return;
+            }
+            if (el) el.classList.remove('unread');
+            announceRead({ id: id });
+            refreshNotifDot();
+        } catch(e) {
+            console.warn('[KSLT] notifications:', e);
+        }
+    }
+
+    /** Пересчитать точку на колокольчике после прочтения. */
+    async function refreshNotifDot() {
+        var dot = document.getElementById('siteNotifDot');
+        if (!dot || !client || !_dashUser) return;
+        try {
+            var res = await client.from('notification_log')
+                .select('id').eq('profile_id', _dashUser.id).eq('is_read', false);
+            var n = (res.data || []).length;
+            if (n > 0) {
+                dot.style.display = '';
+                dot.textContent = n > 9 ? '9+' : n;
+            } else {
+                dot.style.display = 'none';
+            }
+        } catch(e) { /* точка не главное — молча оставляем как есть */ }
+    }
+
+    /** Отметить прочитанными все — по кнопке, а не молча. */
+    async function markAllNotificationsRead(user) {
+        if (!client || !user) return;
+        var container = document.getElementById('db-notifications');
+        var res = await client.from('notification_log')
+            .update({ is_read: true })
+            .eq('profile_id', user.id).eq('is_read', false);
+        if (res.error) {
+            console.warn('[KSLT] notifications:', res.error.message);
+            return;
+        }
+        if (container) {
+            container.querySelectorAll('.db-notif-item.unread').forEach(function(el) {
+                el.classList.remove('unread');
+            });
+        }
+        announceRead({ all: true });
+        refreshNotifDot();
+    }
+
+    /**
+     * О прочтении объявляем на весь документ: колокольчик в шапке живёт в
+     * другом скрипте (js/auth-nav.js) и иначе узнавал бы об этом только
+     * после перезагрузки. Слушаем и обратное — прочитанное через колокольчик
+     * должно тут же гаснуть и в списке кабинета.
+     */
+    function announceRead(detail) {
+        try {
+            document.dispatchEvent(new CustomEvent('kslt:notification-read', { detail: detail }));
+        } catch(e) { /* старый браузер — обойдётся без синхронизации */ }
+    }
+
+    document.addEventListener('kslt:notification-read', function(e) {
+        var d = e.detail || {};
+        var container = document.getElementById('db-notifications');
+        if (!container) return;
+        if (d.all) {
+            container.querySelectorAll('.db-notif-item.unread').forEach(function(el) {
+                el.classList.remove('unread');
+            });
+            var allBtn = document.getElementById('dbNotifAllRead');
+            if (allBtn) allBtn.style.display = 'none';
+        } else if (d.id) {
+            var one = container.querySelector('.db-notif-item[data-id="' + d.id + '"]');
+            if (one) one.classList.remove('unread');
+            // Непрочитанных не осталось — кнопке «Отметить все» нечего делать
+            if (!container.querySelector('.db-notif-item.unread')) {
+                var btn = document.getElementById('dbNotifAllRead');
+                if (btn) btn.style.display = 'none';
+            }
+        }
+    });
+
     // ---- Challenges section (legacy, kept for reference) ----
     function renderChallenges() {
         var container = document.getElementById('db-challenges');
@@ -3231,17 +3451,26 @@
         var reg = item.reg;
         var withdrawn = reg && reg.status === 'withdrawn';
         var refused = reg && (reg.status === 'blocked' || reg.status === 'rejected');
+        // Запись, добавленную админом руками, заявкой не называем: её не было
+        var manualLabel = isEn ? 'Participated' : (isKg ? 'Катышкан' : 'Участвовал');
         var result = withdrawn ? L.regWithdrawn
             : (refused ? L.regRefused
             : (item.round_reached
                 ? (ROUND_LABELS_DB[item.round_reached] || item.round_reached)
-                : (reg && reg.status === 'waitlist' ? L.regWaitlist : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован'))));
+                : (item.manual ? manualLabel
+                : (reg && reg.status === 'waitlist' ? L.regWaitlist : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован')))));
         var pts = item.points_earned > 0 ? ' · +' + item.points_earned + ' pts' : '';
         var isWinner = item.round_reached === 'W';
         var tPage = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id;
 
+        // Запись, добавленная админом руками: турнира с таким названием в базе
+        // нет, открывать нечего. Показываем название и очки, но без ссылки
+        var manual = !t.id;
+
         var html = '<div class="db-tournament-item' + (withdrawn || refused ? ' db-tournament-withdrawn' : '') + '">';
-        html += '<a class="db-tournament-row" href="' + tPage + '">';
+        html += manual
+            ? '<div class="db-tournament-row db-tournament-row-plain">'
+            : '<a class="db-tournament-row" href="' + tPage + '">';
         if (withPhoto) {
             html += t.image
                 ? '<img src="' + escHtml(t.image) + '" alt="" class="db-tournament-photo">'
@@ -3252,7 +3481,7 @@
         html += '<span class="db-tournament-date">' + dateStr + '</span>';
         html += '</div>';
         html += '<span class="db-tournament-result' + (isWinner ? ' db-tournament-winner' : '') + '">' + result + pts + '</span>';
-        html += '</a>';
+        html += manual ? '</div>' : '</a>';
         if (canWithdraw(item)) {
             html += '<button class="db-withdraw-btn" data-reg="' + reg.id + '" data-name="' + escHtml(tName) + '">' + L.regWithdraw + '</button>';
         } else if (canReenter(item)) {
@@ -3493,10 +3722,21 @@
         if (!client) return '';
 
         var pcRes = await client.from('player_categories')
-            .select('player_id, category_id, points, wins, losses')
+            .select('player_id, category_id, points, wins, losses, closed_at, closed_reason')
             .order('points', { ascending: false });
         var allRows = pcRes.data || [];
-        var myRows = allRows.filter(function(r) { return r.player_id === p.id; });
+        // Friendly в рейтинге не участвует: турниры и матчи записываются,
+        // очков за них нет
+        var myRows = allRows.filter(function(r) {
+            return r.player_id === p.id && r.category_id !== 'friendly';
+        });
+
+        // Домашняя категория видна и без очков: игрок в ней уже числится,
+        // просто ещё ничего не набрал
+        if (p.category_id && !myRows.some(function(r) { return r.category_id === p.category_id; })) {
+            myRows.push({ player_id: p.id, category_id: p.category_id, points: 0, wins: 0, losses: 0 });
+        }
+
         if (myRows.length === 0) return '';
 
         var cats = await loadCategoriesMeta();
@@ -3529,6 +3769,13 @@
                     '<span class="db-cat-dot" style="background:' + escHtml(catColor[row.category_id] || '#8A8A8F') + '"></span>' +
                     escHtml(catName[row.category_id] || row.category_id) +
                     (isHome ? ' <span class="db-cat-home">' + L.catHome + '</span>' : '') +
+                    // Категория закрыта для новых заявок. Очки и матчи в ней
+                    // остаются, поэтому она видна, но помечена. Причину игрок
+                    // видит у себя: это про него
+                    (row.closed_at
+                        ? ' <span class="db-cat-closed">' + L.catClosed +
+                          (row.closed_reason ? ' \u00b7 ' + escHtml(row.closed_reason) : '') + '</span>'
+                        : '') +
                 '</div>' +
                 '<div class="db-stats-grid db-stats-grid-mini">' +
                     '<div class="db-stat-card"><div class="db-stat-value">' + (row.points || 0) + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
@@ -4804,133 +5051,6 @@
         var div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
-    }
-
-    // ---- Notification Bell ----
-    var bellUserId = null;
-
-    function initNotificationBell(user) {
-        bellUserId = user.id;
-
-        // Create bell button in sidebar (before nav)
-        var sidebar = document.getElementById('dbSidebar');
-        if (!sidebar) return;
-
-        var userBlock = sidebar.querySelector('.db-sidebar-user');
-        if (!userBlock) return;
-
-        // Check if already exists
-        if (document.getElementById('dbNotifBell')) return;
-
-        var bellBtn = document.createElement('button');
-        bellBtn.id = 'dbNotifBell';
-        bellBtn.className = 'site-notif-btn';
-        bellBtn.title = isKg ? 'Билдирмелер' : isEn ? 'Notifications' : 'Уведомления';
-        bellBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="site-notif-dot" id="dbNotifDot" style="display:none;"></span>';
-        userBlock.style.position = 'relative';
-        userBlock.appendChild(bellBtn);
-
-        // Dropdown container
-        var dropdown = document.createElement('div');
-        dropdown.id = 'dbNotifDropdown';
-        dropdown.className = 'site-notif-dropdown';
-        dropdown.style.display = 'none';
-        userBlock.appendChild(dropdown);
-
-        // Toggle dropdown
-        bellBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var dd = document.getElementById('dbNotifDropdown');
-            if (dd.style.display === 'none') {
-                loadSiteNotifications();
-                dd.style.display = '';
-            } else {
-                dd.style.display = 'none';
-            }
-        });
-
-        // Close on outside click
-        document.addEventListener('click', function(e) {
-            var dd = document.getElementById('dbNotifDropdown');
-            if (dd && dd.style.display !== 'none' && !dd.contains(e.target)) {
-                dd.style.display = 'none';
-            }
-        });
-
-        // Initial unread check
-        checkSiteUnread();
-    }
-
-    async function checkSiteUnread() {
-        if (!client || !bellUserId) return;
-
-        var res = await client.from('notification_log')
-            .select('id', { count: 'exact', head: true })
-            .eq('profile_id', bellUserId)
-            .eq('is_read', false);
-
-        var dot = document.getElementById('dbNotifDot');
-        if (dot) {
-            dot.style.display = (res.count && res.count > 0) ? '' : 'none';
-            if (res.count && res.count > 0) dot.textContent = res.count > 9 ? '9+' : res.count;
-        }
-    }
-
-    async function loadSiteNotifications() {
-        var dropdown = document.getElementById('dbNotifDropdown');
-        if (!dropdown || !client || !bellUserId) return;
-
-        dropdown.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-dim);font-size:0.8rem;">...</div>';
-
-        var res = await client.from('notification_log')
-            .select('*')
-            .eq('profile_id', bellUserId)
-            .order('created_at', { ascending: false })
-            .limit(20);
-
-        var items = res.data || [];
-        var noNotifLabel = isKg ? 'Билдирмелер жок' : isEn ? 'No notifications' : 'Нет уведомлений';
-
-        if (items.length === 0) {
-            dropdown.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' + noNotifLabel + '</div>';
-            return;
-        }
-
-        var html = '';
-        var unreadIds = [];
-
-        items.forEach(function(n) {
-            var cls = 'site-notif-item' + (n.is_read ? '' : ' unread');
-            var time = n.created_at ? timeAgo(new Date(n.created_at)) : '';
-            if (!n.is_read) unreadIds.push(n.id);
-            html += '<div class="' + cls + '">' +
-                '<div class="site-notif-item-title">' + escHtml(n.title || '') + '</div>' +
-                '<div class="site-notif-item-msg">' + escHtml(n.message || '') + '</div>' +
-                '<div class="site-notif-item-time">' + time + '</div>' +
-            '</div>';
-        });
-
-        dropdown.innerHTML = html;
-
-        // Mark all as read
-        if (unreadIds.length > 0) {
-            await client.from('notification_log')
-                .update({ is_read: true })
-                .in('id', unreadIds);
-
-            var dot = document.getElementById('dbNotifDot');
-            if (dot) dot.style.display = 'none';
-        }
-    }
-
-    function timeAgo(date) {
-        var now = new Date();
-        var diff = Math.floor((now - date) / 1000);
-        if (diff < 60) return isEn ? 'just now' : 'только что';
-        if (diff < 3600) { var m = Math.floor(diff / 60); return m + (isEn ? 'm ago' : ' мин.'); }
-        if (diff < 86400) { var h = Math.floor(diff / 3600); return h + (isEn ? 'h ago' : ' ч.'); }
-        var d = Math.floor(diff / 86400);
-        return d + (isEn ? 'd ago' : ' дн.');
     }
 
 })();

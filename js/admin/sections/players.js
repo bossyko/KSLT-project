@@ -11,6 +11,10 @@
     var CU = window.KSLT_COUNTRY;
 
     var plrEditingId = null;
+    // Карточка открытого игрока: нужна обработчикам, живущим вне формы —
+    // например удалению записи из истории, после которого блок категорий
+    // надо перерисовать
+    var plrEditingItem = null;
     var plrImageFile = null;
     var plrImageUrl = '';
     var plrFilterCategory = '';
@@ -367,6 +371,9 @@
         if (!container) return;
 
         plrEditingId = item ? item.id : null;
+        plrEditingItem = item || null;
+        plrRhShown = RH_PAGE;
+        plrRhEditingId = null;
         plrImageFile = null;
         plrImageUrl = (item && item.photo) ? item.photo : '';
 
@@ -550,7 +557,16 @@
                 '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrCategory + '</label>' +
-                        '<select class="ad-field-input" id="adPlrCat">' + catOptionsHtml + '</select>' +
+                        // Кнопка рядом: смена категории — отдельное решение, и
+                        // бежать за ним в самый низ страницы незачем.
+                        // Погашена, пока категорию не тронули
+                        '<div style="display:flex;gap:12px;align-items:flex-end;">' +
+                            '<select class="ad-field-input" id="adPlrCat" style="flex:1;">' + catOptionsHtml + '</select>' +
+                            (plrEditingId
+                                ? '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrSaveCat" disabled>' +
+                                  L.save + '</button>'
+                                : '') +
+                        '</div>' +
                     '</div>' +
                     '<div class="ad-field" style="position:relative;">' +
                         '<label class="ad-field-label">' + L.plrCountry + '</label>' +
@@ -618,7 +634,7 @@
                     '<div style="display:flex;gap:12px;align-items:flex-end;max-width:420px;">' +
                         '<select class="ad-field-input" id="adPlrNtrp" style="max-width:200px;">' +
                             A.ntrpOptions(item && item.ntrp_rating) + '</select>' +
-                        '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrSaveNtrp">' +
+                        '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrSaveNtrp" disabled>' +
                             L.save + '</button>' +
                     '</div>' +
                     '<div class="ad-field-hint">' + L.plrNtrpHint + '</div>' +
@@ -633,7 +649,12 @@
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.ratingHistory + '</div>' +
                 '<div id="adPlrRhChartWrap" style="display:none;margin-bottom:16px;">' +
-                    '<canvas id="adPlrRhChart" height="220"></canvas>' +
+                    '<div class="ad-field-label" style="margin-bottom:6px;">' + L.plrPoints + '</div>' +
+                    '<div style="position:relative;height:260px;"><canvas id="adPlrRhChart"></canvas></div>' +
+                '</div>' +
+                '<div id="adPlrNtrpWrap" style="display:none;margin-bottom:16px;">' +
+                    '<div class="ad-field-label" style="margin-bottom:6px;">NTRP</div>' +
+                    '<div style="position:relative;height:150px;"><canvas id="adPlrNtrpChart"></canvas></div>' +
                 '</div>' +
                 '<div id="adPlrRhTable"></div>' +
                 '<div style="margin-top:12px;display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">' +
@@ -647,7 +668,7 @@
                     '</div>' +
                     '<div class="ad-field" style="flex:0 0 160px;">' +
                         '<label class="ad-field-label">' + L.plrCategory + '</label>' +
-                        '<select class="ad-field-input" id="adPlrRhCat">' + catOptionsHtml + '</select>' +
+                        '<select class="ad-field-input" id="adPlrRhCat"></select>' +
                     '</div>' +
                     '<div class="ad-field" style="flex:0 0 100px;">' +
                         '<label class="ad-field-label">' + L.rhPoints + '</label>' +
@@ -744,24 +765,37 @@
                     return;
                 }
 
-                var res = await A.client.from('rating_history').insert({
-                    player_id: plrEditingId,
+                var fields = {
                     tournament_name: nameVal,
                     category_id: catVal,
                     points_earned: ptsVal,
                     recorded_at: dateVal
-                });
+                };
+
+                var res = plrRhEditingId
+                    ? await A.client.from('rating_history').update(fields).eq('id', plrRhEditingId)
+                    : await A.client.from('rating_history').insert(
+                        Object.assign({ player_id: plrEditingId }, fields));
 
                 if (res.error) {
                     A.showToast(res.error.message, 'error');
                     return;
                 }
 
+                // Вышли из режима правки
+                plrRhEditingId = null;
+                this.textContent = L.rhAdd;
+
                 document.getElementById('adPlrRhDate').value = '';
                 document.getElementById('adPlrRhName').value = '';
                 document.getElementById('adPlrRhPoints').value = '';
-                loadPlrRatingHistory(plrEditingId);
+
+                // Порядок важен: сначала пересчёт очков, потом отрисовка.
+                // Раньше обновлений было два подряд и вразнобой — они гонялись
+                // наперегонки, и на экране оставалось то, что успело раньше
                 await recalcPointsFromHistory(plrEditingId);
+                await loadPlrRatingHistory(plrEditingId);
+                await loadPlayerCategoriesAdmin(item);
             });
         }
 
@@ -823,108 +857,10 @@
             });
         }
 
-        /**
-         * Полоса побед и поражений — та же, что в кабинете игрока.
-         *
-         * Четыре поля подряд не показывают главного: как игрок выступает.
-         * Цвета взяты из таблицы матчей, где зелёный значок — победа,
-         * красный — поражение.
-         */
-        function catBarHtml(r) {
-            var w = r.wins || 0, l = r.losses || 0, played = w + l;
-            var noMatches = isEn ? 'no matches yet' : 'матчей пока нет';
 
-            if (!played) {
-                return '<div class="ad-cat-bar"></div>' +
-                    '<div class="ad-cat-legend"><span>' + noMatches + '</span></div>';
-            }
-
-            var pct = Math.round(w / played * 100);
-            var total = isEn ? 'Matches played' : 'Всего матчей';
-            var rateWord = isEn ? 'wins' : 'побед';
-
-            return '<div class="ad-cat-bar">' +
-                    '<i class="ad-cat-bar-w" style="width:' + (w / played * 100) + '%"></i>' +
-                    '<i class="ad-cat-bar-l" style="width:' + (l / played * 100) + '%"></i>' +
-                '</div>' +
-                '<div class="ad-cat-legend">' +
-                    '<span>' + total + ': ' + played + '</span>' +
-                    '<span><span class="ad-cat-mark ad-cat-mark-w"></span>' + plural(w, 'wins') +
-                        '<span class="ad-cat-mark ad-cat-mark-l"></span>' + plural(l, 'losses') + '</span>' +
-                    '<span style="font-weight:600;color:var(--text-secondary);">' + pct + '% ' + rateWord + '</span>' +
-                '</div>';
-        }
-
-        /** Число со словом в нужном падеже: 1 победа, 2 победы, 5 побед. */
-        function plural(n, kind) {
-            var forms = isEn
-                ? (kind === 'wins' ? ['win', 'wins'] : ['loss', 'losses'])
-                : (kind === 'wins' ? ['победа', 'победы', 'побед'] : ['поражение', 'поражения', 'поражений']);
-            if (isEn) return n + ' ' + (n === 1 ? forms[0] : forms[1]);
-
-            var a = Math.abs(n) % 100, b = a % 10;
-            var word = (a > 10 && a < 20) ? forms[2]
-                     : (b > 1 && b < 5) ? forms[1]
-                     : (b === 1) ? forms[0] : forms[2];
-            return n + ' ' + word;
-        }
 
         // --- Очки по категориям (только чтение) ---
-        if (plrEditingId) {
-            (async function() {
-                var box = document.getElementById('adPlrCatsBox');
-                if (!box) return;
-                var pcRes = await A.client.from('player_categories')
-                    .select('category_id, points, wins, losses')
-                    .eq('player_id', plrEditingId)
-                    .order('points', { ascending: false });
-                var rows = pcRes.data || [];
-                if (rows.length === 0) return;
-
-                var title = isEn ? 'Points by category' : 'Очки по категориям';
-                var homeLabel = isEn ? 'home' : 'домашняя';
-                var html = '<div class="ad-field-label" style="margin-bottom:8px;">' + title + '</div>';
-
-                rows.forEach(function(r) {
-                    var cat = A.categoriesMap ? A.categoriesMap[r.category_id] : null;
-                    var name = cat ? (isEn ? (cat.name_en || cat.name) : cat.name) : r.category_id;
-                    var isHome = item && r.category_id === item.category_id;
-
-                    html += '<div style="border:1px solid var(--border-subtle);border-radius:10px;padding:12px 14px;margin-bottom:10px;">' +
-                        '<div style="font-weight:600;margin-bottom:10px;">' + A.esc(name) +
-                            (isHome ? ' <span style="font-size:0.7rem;color:var(--accent);font-weight:500;">' + homeLabel + '</span>' : '') +
-                        '</div>' +
-                        '<div class="ad-field-row ad-field-row-4">' +
-                            '<div class="ad-field">' +
-                                '<label class="ad-field-label">' + L.plrPoints + '</label>' +
-                                '<input type="number" class="ad-field-input" value="' + (r.points || 0) + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
-                            '</div>' +
-                            '<div class="ad-field">' +
-                                '<label class="ad-field-label">' + L.plrWins + '</label>' +
-                                '<input type="number" class="ad-field-input" value="' + (r.wins || 0) + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
-                            '</div>' +
-                            '<div class="ad-field">' +
-                                '<label class="ad-field-label">' + L.plrLosses + '</label>' +
-                                '<input type="number" class="ad-field-input" value="' + (r.losses || 0) + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
-                            '</div>' +
-                            '<div class="ad-field">' +
-                                '<label class="ad-field-label">' + L.plrRankChange + '</label>' +
-                                '<input type="text" class="ad-field-input" value="\u2014" readonly style="opacity:0.6;cursor:not-allowed;">' +
-                            '</div>' +
-                        '</div>' +
-                        catBarHtml(r) +
-                    '</div>';
-                });
-
-                box.innerHTML = html;
-
-                // Сводная строка дублирует домашнюю категорию — прячем
-                var statsRow = document.getElementById('adPlrStatsRow');
-                var statsHint = document.getElementById('adPlrStatsHint');
-                if (statsRow) statsRow.style.display = 'none';
-                if (statsHint) statsHint.style.display = 'none';
-            })();
-        }
+        if (plrEditingId) loadPlayerCategoriesAdmin(item);
 
         // --- Motto character counter ---
         var mottoInput = document.getElementById('adPlrMotto');
@@ -1087,10 +1023,31 @@
         // Save
         document.getElementById('adPlrSave').addEventListener('click', savePlayerHandler);
 
+        // Кнопка у категории: тоже сохраняет карточку целиком и загорается
+        // только при смене значения
+        var catSave = document.getElementById('adPlrSaveCat');
+        var catSelect = document.getElementById('adPlrCat');
+        if (catSave && catSelect) {
+            var catWas = catSelect.value;
+            catSelect.addEventListener('change', function() {
+                catSave.disabled = (catSelect.value === catWas);
+            });
+            catSave.addEventListener('click', savePlayerHandler);
+        }
+
         // Та же кнопка рядом с NTRP: сохраняет карточку целиком, просто
-        // не заставляя прокручивать страницу до низа
+        // не заставляя прокручивать страницу до низа. Пока оценку не
+        // тронули, кнопка погашена — чтобы не нажать её случайно и не
+        // завести в историю запись о том, чего не было
         var ntrpSave = document.getElementById('adPlrSaveNtrp');
-        if (ntrpSave) ntrpSave.addEventListener('click', savePlayerHandler);
+        var ntrpSelect = document.getElementById('adPlrNtrp');
+        if (ntrpSave && ntrpSelect) {
+            var ntrpWas = ntrpSelect.value;
+            ntrpSelect.addEventListener('change', function() {
+                ntrpSave.disabled = (ntrpSelect.value === ntrpWas);
+            });
+            ntrpSave.addEventListener('click', savePlayerHandler);
+        }
 
         // Delete
         var delBtn = document.getElementById('adPlrDelete');
@@ -1154,15 +1111,22 @@
     async function savePlayerHandler() {
         var saveBtn = document.getElementById('adPlrSave');
         var saveBtn2 = document.getElementById('adPlrSaveNtrp');
+        var saveBtn3 = document.getElementById('adPlrSaveCat');
 
         // Кнопок сохранения две — внизу карточки и рядом с NTRP. Обе должны
         // гаснуть на время записи, иначе вторая выглядит рабочей
         function setSaving(busy) {
-            [saveBtn, saveBtn2].forEach(function(b) {
+            [saveBtn, saveBtn2, saveBtn3].forEach(function(b) {
                 if (!b) return;
                 b.disabled = busy;
                 b.textContent = busy ? L.saving : L.save;
             });
+            // Кнопки у полей остаются погашенными и после записи: значения
+            // стали текущими, сохранять больше нечего
+            if (!busy) {
+                if (saveBtn2) saveBtn2.disabled = true;
+                if (saveBtn3) saveBtn3.disabled = true;
+            }
         }
         setSaving(true);
 
@@ -1596,14 +1560,256 @@
         container.innerHTML = html;
     }
 
+
+    /**
+     * Очки по категориям в карточке игрока.
+     *
+     * Вынесено отдельно, чтобы перерисовывать после правки истории: очки
+     * пересчитываются из неё, и без обновления блок показывал старые
+     * цифры до перезагрузки страницы.
+     */
+    /**
+     * Полоса побед и поражений — та же, что в кабинете игрока.
+     *
+     * Четыре поля подряд не показывают главного: как игрок выступает.
+     * Цвета взяты из таблицы матчей, где зелёный значок — победа,
+     * красный — поражение.
+     */
+    function catBarHtml(r) {
+        var w = r.wins || 0, l = r.losses || 0, played = w + l;
+        var noMatches = isEn ? 'no matches yet' : 'матчей пока нет';
+
+        if (!played) {
+            return '<div class="ad-cat-bar"></div>' +
+                '<div class="ad-cat-legend"><span>' + noMatches + '</span></div>';
+        }
+
+        var pct = Math.round(w / played * 100);
+        var total = isEn ? 'Matches played' : 'Всего матчей';
+        var rateWord = isEn ? 'wins' : 'побед';
+
+        return '<div class="ad-cat-bar">' +
+                '<i class="ad-cat-bar-w" style="width:' + (w / played * 100) + '%"></i>' +
+                '<i class="ad-cat-bar-l" style="width:' + (l / played * 100) + '%"></i>' +
+            '</div>' +
+            '<div class="ad-cat-legend">' +
+                '<span>' + total + ': ' + played + '</span>' +
+                '<span><span class="ad-cat-mark ad-cat-mark-w"></span>' + plural(w, 'wins') +
+                    '<span class="ad-cat-mark ad-cat-mark-l"></span>' + plural(l, 'losses') + '</span>' +
+                '<span style="font-weight:600;color:var(--text-secondary);">' + pct + '% ' + rateWord + '</span>' +
+            '</div>';
+    }
+
+    /** Число со словом в нужном падеже: 1 победа, 2 победы, 5 побед. */
+    function plural(n, kind) {
+        var forms = isEn
+            ? (kind === 'wins' ? ['win', 'wins'] : ['loss', 'losses'])
+            : (kind === 'wins' ? ['победа', 'победы', 'побед'] : ['поражение', 'поражения', 'поражений']);
+        if (isEn) return n + ' ' + (n === 1 ? forms[0] : forms[1]);
+
+        var a = Math.abs(n) % 100, b = a % 10;
+        var word = (a > 10 && a < 20) ? forms[2]
+                 : (b > 1 && b < 5) ? forms[1]
+                 : (b === 1) ? forms[0] : forms[2];
+        return n + ' ' + word;
+    }
+
+    /**
+     * Категории, доступные для ручной записи очков.
+     *
+     * Выбрать можно только те, где игрок выступает: свои открытые категории и
+     * домашнюю. Остальные видны, но недоступны — иначе легко начислить очки в
+     * чужую категорию и завести игрока туда, где он не играл. Friendly в
+     * списке нет вовсе: за практику очки не начисляются.
+     */
+    function fillRhCategories(rows, homeId) {
+        var sel = document.getElementById('adPlrRhCat');
+        if (!sel) return;
+
+        // Закрытые тоже доступны: закрытие запрещает новые заявки, а внести
+        // задним числом турнир, который игрок когда-то сыграл, законно
+        var allowed = {};
+        (rows || []).forEach(function(r) {
+            if (r.category_id !== 'friendly') allowed[r.category_id] = true;
+        });
+        if (homeId && homeId !== 'friendly') allowed[homeId] = true;
+
+        var html = '<option value="">' + L.selectCategoryTrn + '</option>';
+        A.cachedCategories.forEach(function(c) {
+            if (c.id === 'friendly') return;
+            var name = isEn ? (c.name_en || c.name) : c.name;
+            var off = !allowed[c.id];
+            html += '<option value="' + c.id + '"' + (off ? ' disabled' : '') + '>' +
+                A.esc(name) + (off ? ' \u00b7 ' + (isEn ? 'no card in this category' : 'нет карточки категории') : '') +
+            '</option>';
+        });
+        sel.innerHTML = html;
+    }
+
+    async function loadPlayerCategoriesAdmin(item) {
+        var box = document.getElementById('adPlrCatsBox');
+        if (!box) return;
+        var pcRes = await A.client.from('player_categories')
+            .select('category_id, points, wins, losses, closed_at, closed_reason')
+            .eq('player_id', plrEditingId)
+            .order('points', { ascending: false });
+        // Friendly в рейтинге не участвует: турниры и матчи записываются,
+        // очков за них нет
+        var rows = (pcRes.data || []).filter(function(r) {
+            return r.category_id !== 'friendly';
+        });
+
+        fillRhCategories(pcRes.data || [], item && item.category_id);
+
+        // Домашняя категория показывается, даже если очков в ней ещё
+        // нет. Строки берутся из заработанного, а только что
+        // назначенная категория пуста — и пропадала из блока, хотя
+        // в рейтинге игрок в ней уже стоит
+        var home = item && item.category_id;
+        if (home && !rows.some(function(r) { return r.category_id === home; })) {
+            rows.push({ category_id: home, points: 0, wins: 0, losses: 0 });
+        }
+
+        if (rows.length === 0) return;
+
+        var title = isEn ? 'Points by category' : 'Очки по категориям';
+        var homeLabel = isEn ? 'home' : 'домашняя';
+        var closedLabel = isEn ? 'closed' : 'закрыта';
+        var closeBtn = isEn ? 'Close' : 'Закрыть';
+        var openBtn = isEn ? 'Reopen' : 'Открыть';
+
+        var openCount = rows.filter(function(r) { return !r.closed_at; }).length;
+
+        var html = '<div class="ad-field-label" style="margin-bottom:8px;">' + title + '</div>';
+        html += '<div class="ad-field-hint" style="margin-bottom:10px;">' +
+            (isEn
+                ? 'A player competes in up to two categories. Closing one stops new entries — points, matches and rating history stay.'
+                : 'Игрок выступает не более чем в двух категориях. Закрытая перестаёт принимать заявки — очки, матчи и история рейтинга остаются.') +
+        '</div>';
+
+        rows.forEach(function(r) {
+            var cat = A.categoriesMap ? A.categoriesMap[r.category_id] : null;
+            var name = cat ? (isEn ? (cat.name_en || cat.name) : cat.name) : r.category_id;
+            var isHome = item && r.category_id === item.category_id;
+            var closed = !!r.closed_at;
+            // Открыть можно, только если действующих меньше двух
+            var canOpen = closed && openCount < 2;
+
+            // Цвет категории тот же, что у точки в кабинете и у линии на
+            // графике: одна категория — один цвет во всех местах
+            var dot = (cat && cat.color) || '#8A8A8F';
+
+            html += '<div class="ad-cat-card' + (closed ? ' ad-cat-card-closed' : '') + '">' +
+                '<div class="ad-cat-title">' +
+                    '<span class="ad-cat-dot" style="background:' + A.esc(dot) + '"></span>' +
+                    '<span style="font-weight:600;">' + A.esc(name) + '</span>' +
+                    (isHome ? '<span style="font-size:0.7rem;color:var(--accent);font-weight:500;">' + homeLabel + '</span>' : '') +
+                    (closed ? '<span class="ad-cat-closed-tag">' + closedLabel + ' \u00b7 ' +
+                        rhDate(r.closed_at) +
+                        (r.closed_reason ? ' \u00b7 ' + A.esc(r.closed_reason) : '') + '</span>' : '') +
+                    (A.currentRole === 'admin' || A.currentRole === 'manager'
+                        ? '<button class="ad-btn ad-btn-sm ' + (closed ? 'ad-btn-secondary' : 'ad-btn-danger') +
+                          ' ad-cat-toggle" data-cat="' + A.esc(r.category_id) + '" data-closed="' + (closed ? '1' : '0') + '"' +
+                          (closed && !canOpen ? ' disabled title="' + (isEn ? 'Two categories are already open' : 'Уже открыты две категории') + '"' : '') + '>' +
+                          (closed ? openBtn : closeBtn) + '</button>'
+                        : '') +
+                '</div>' +
+                '<div class="ad-field-row ad-field-row-4">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrPoints + '</label>' +
+                        '<input type="number" class="ad-field-input" value="' + (r.points || 0) + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrWins + '</label>' +
+                        '<input type="number" class="ad-field-input" value="' + (r.wins || 0) + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrLosses + '</label>' +
+                        '<input type="number" class="ad-field-input" value="' + (r.losses || 0) + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.plrRankChange + '</label>' +
+                        '<input type="text" class="ad-field-input" value="\u2014" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                    '</div>' +
+                '</div>' +
+                catBarHtml(r) +
+            '</div>';
+        });
+
+        box.innerHTML = html;
+
+        // Закрыть и открыть — через функцию базы: то же правило должно
+        // действовать и в обход интерфейса
+        box.querySelectorAll('.ad-cat-toggle').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var closing = btn.dataset.closed !== '1';
+                var reason = null;
+                if (closing) {
+                    reason = await A.showPromptAsync({
+                        title: isEn ? 'Close the category' : 'Закрыть категорию',
+                        text: isEn
+                            ? 'New entries will be blocked. Points, matches and rating history stay.'
+                            : 'Новые заявки приниматься не будут. Очки, матчи и история рейтинга останутся.',
+                        placeholder: isEn ? 'Reason (optional)' : 'Причина (можно не указывать)',
+                        okLabel: isEn ? 'Close' : 'Закрыть'
+                    });
+                    // Отменили окно — ничего не делаем
+                    if (reason === null) return;
+                    if (reason === '') reason = null;
+                }
+                btn.disabled = true;
+
+                var res = await A.client.rpc('set_category_closed', {
+                    p_player_id: plrEditingId,
+                    p_category_id: btn.dataset.cat,
+                    p_closed: closing,
+                    p_reason: reason
+                });
+
+                var err = (res.error && res.error.message) ||
+                    (res.data && res.data.error);
+                if (err) {
+                    A.showToast(err === 'too_many_open'
+                        ? (isEn ? 'Two categories are already open' : 'Уже открыты две категории')
+                        : err === 'forbidden'
+                            ? (isEn ? 'Not enough rights' : 'Недостаточно прав')
+                            : err, 'error');
+                    btn.disabled = false;
+                    return;
+                }
+
+                A.showToast(closing
+                    ? (isEn ? 'Category closed' : 'Категория закрыта')
+                    : (isEn ? 'Category reopened' : 'Категория открыта'), 'success');
+                renderPlayerForm(item);
+            });
+        });
+
+        // Сводная строка дублирует домашнюю категорию — прячем
+        var statsRow = document.getElementById('adPlrStatsRow');
+        var statsHint = document.getElementById('adPlrStatsHint');
+        if (statsRow) statsRow.style.display = 'none';
+        if (statsHint) statsHint.style.display = 'none';
+    }
+
     // ---- Rating History helpers ----
-    var plrRhChart = null;
+    /** По сколько записей показывать в истории рейтинга. */
+    var RH_PAGE = 10;
+    var plrRhShown = RH_PAGE;
+    /** Запись, которую сейчас правят. Пусто — значит, добавляем новую. */
+    var plrRhEditingId = null;
+
 
     async function loadPlrRatingHistory(playerId) {
+        // Второй ключ сортировки обязателен: оценку NTRP можно поменять
+        // несколько раз за день, и все такие записи лежат одной датой.
+        // По одной дате порядок внутри дня какой придётся, и свежая запись
+        // всплывала в середине списка, а на графике линия скакала
         var res = await A.client.from('rating_history')
             .select('*')
             .eq('player_id', playerId)
-            .order('recorded_at', { ascending: true });
+            .order('recorded_at', { ascending: true })
+            .order('created_at', { ascending: true });
 
         var data = res.data || [];
         renderPlrRhTable(data, playerId);
@@ -1661,9 +1867,13 @@
             prevNtrp = row.ntrp_after;
         });
 
-        // Show newest first in table
+        // Показываем последние записи, остальные — по кнопке. У активного
+        // игрока их набираются десятки, и таблица занимала весь экран
         var reversed = data.slice().reverse();
-        reversed.forEach(function(row) {
+        var shown = plrRhShown || RH_PAGE;
+        var visible = reversed.slice(0, shown);
+
+        visible.forEach(function(row) {
             var ntrpCell = '<span style="color:var(--text-dim);">—</span>';
             if (row.ntrp_after != null) {
                 var move = ntrpMoves[row.id] || 0;
@@ -1678,20 +1888,84 @@
                 '<td style="text-align:center;color:var(--accent);font-weight:600;">' +
                     (row.points_earned ? row.points_earned : '<span style="color:var(--text-dim);">—</span>') + '</td>' +
                 '<td style="text-align:center;">' + ntrpCell + '</td>' +
-                '<td><button class="ad-btn-icon ad-rh-del" data-rh-id="' + row.id + '" title="' + L.delete + '">&times;</button></td>' +
+                '<td style="white-space:nowrap;">' +
+                    // Править можно только начисления, заведённые руками.
+                    // Очки за турнир считаются по сетке, а записи об оценке
+                    // NTRP этой формой не правятся: у них нет ни категории,
+                    // ни очков — форма их только испортила бы
+                    (row.tournament_id || row.ntrp_after != null ? '' :
+                        '<button class="ad-btn-icon ad-rh-edit" data-rh-id="' + row.id + '" title="' +
+                        (isEn ? 'Edit' : 'Изменить') + '">\u270E</button>') +
+                    '<button class="ad-btn-icon ad-rh-del" data-rh-id="' + row.id + '" title="' + L.delete + '">&times;</button>' +
+                '</td>' +
                 '</tr>';
         });
 
         html += '</tbody></table></div>';
+
+        // Кнопка справа, под колонкой результата: слева она перебивала
+        // первую колонку таблицы
+        if (reversed.length > visible.length) {
+            var left = reversed.length - visible.length;
+            var step = Math.min(RH_PAGE, left);
+            html += '<div style="display:flex;justify-content:flex-end;margin-top:10px;">' +
+                '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrRhMore">' +
+                (isEn ? 'Show ' + step + ' more' : 'Показать ещё ' + step) +
+                ' \u00b7 ' + (isEn ? 'left' : 'осталось') + ' ' + left + '</button></div>';
+        } else if (reversed.length > RH_PAGE) {
+            html += '<div style="display:flex;justify-content:flex-end;margin-top:10px;">' +
+                '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrRhLess">' +
+                (isEn ? 'Collapse' : 'Свернуть') + '</button></div>';
+        }
+
         tableEl.innerHTML = html;
+
+        var moreBtn = document.getElementById('adPlrRhMore');
+        if (moreBtn) {
+            moreBtn.addEventListener('click', function() {
+                plrRhShown = shown + RH_PAGE;
+                renderPlrRhTable(data, playerId);
+            });
+        }
+        var lessBtn = document.getElementById('adPlrRhLess');
+        if (lessBtn) {
+            lessBtn.addEventListener('click', function() {
+                plrRhShown = RH_PAGE;
+                renderPlrRhTable(data, playerId);
+                tableEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        }
+
+        // Правка ручной записи: подставляем её в форму ниже и переводим
+        // кнопку в режим сохранения
+        tableEl.querySelectorAll('.ad-rh-edit').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var row = data.filter(function(r) { return r.id === btn.dataset.rhId; })[0];
+                if (!row) return;
+
+                document.getElementById('adPlrRhDate').value = row.recorded_at || '';
+                document.getElementById('adPlrRhName').value = row.tournament_name || '';
+                document.getElementById('adPlrRhPoints').value = row.points_earned || 0;
+                var catSel = document.getElementById('adPlrRhCat');
+                if (catSel) catSel.value = row.category_id || '';
+
+                plrRhEditingId = row.id;
+                var addBtn = document.getElementById('adPlrRhAdd');
+                if (addBtn) addBtn.textContent = isEn ? 'Save' : 'Сохранить';
+
+                document.getElementById('adPlrRhName').focus();
+                document.getElementById('adPlrRhName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
 
         // Delete handlers
         tableEl.querySelectorAll('.ad-rh-del').forEach(function(btn) {
             btn.addEventListener('click', async function() {
                 var rhId = btn.dataset.rhId;
                 await A.client.from('rating_history').delete().eq('id', rhId);
-                loadPlrRatingHistory(playerId);
                 await recalcPointsFromHistory(playerId);
+                loadPlrRatingHistory(playerId);
+                loadPlayerCategoriesAdmin(plrEditingItem);
             });
         });
     }
@@ -1729,126 +2003,31 @@
         if (ptsField) ptsField.value = total;
     }
 
+    /**
+     * График истории рейтинга.
+     *
+     * Рисуется тем же модулем, что на странице игрока и в кабинете: линия на
+     * каждую категорию своим цветом, закрытые приглушены, NTRP отдельным
+     * графиком со своей шкалой. Раньше здесь была вторая, своя реализация —
+     * одна линия «всего очков», в которой категории не различались.
+     */
     function renderPlrRhChart(data) {
         var wrapEl = document.getElementById('adPlrRhChartWrap');
-        var canvasEl = document.getElementById('adPlrRhChart');
-        if (!wrapEl || !canvasEl) return;
+        if (!wrapEl || !window.KSLT_RATING_CHART || !plrEditingId) return;
 
-        if (data.length === 0 || typeof Chart === 'undefined') {
-            wrapEl.style.display = 'none';
-            return;
-        }
+        wrapEl.style.display = 'none';
+        var ntrpWrap = document.getElementById('adPlrNtrpWrap');
+        if (ntrpWrap) ntrpWrap.style.display = 'none';
 
-        wrapEl.style.display = '';
-
-        var labels = [];
-        var values = [];
-        var ntrpValues = [];
-        var cumulative = 0;
-        var lastNtrp = null;
-        var tooltipNames = [];
-
-        data.forEach(function(row) {
-            cumulative += row.points_earned;
-            labels.push(rhDate(row.recorded_at));
-            values.push(cumulative);
-
-            // Оценка держится до следующего изменения, иначе линия рвалась бы
-            // на каждой турнирной записи
-            if (row.ntrp_after != null) lastNtrp = Number(row.ntrp_after);
-            ntrpValues.push(lastNtrp);
-
-            tooltipNames.push(row.ntrp_after != null && !row.points_earned
-                ? row.tournament_name + ' (' + Number(row.ntrp_after).toFixed(1) + ')'
-                : row.tournament_name + ' (+' + row.points_earned + ')');
-        });
-
-        var hasNtrp = ntrpValues.some(function(v) { return v != null; });
-
-        if (plrRhChart) {
-            plrRhChart.destroy();
-        }
-
-        // Очки и NTRP живут в разных шкалах: очки идут сотнями, оценка —
-        // от единицы до семёрки. На общей оси линия NTRP легла бы вдоль нуля
-        var datasets = [{
-            label: L.rhTotalPoints,
-            data: values,
-            yAxisID: 'y',
-            borderColor: '#CCFF00',
-            backgroundColor: 'rgba(204,255,0,0.1)',
-            fill: true,
-            tension: 0.3,
-            pointBackgroundColor: '#CCFF00',
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            borderWidth: 2
-        }];
-
-        if (hasNtrp) {
-            datasets.push({
-                label: 'NTRP',
-                data: ntrpValues,
-                yAxisID: 'yNtrp',
-                borderColor: '#00BFFF',
-                backgroundColor: 'transparent',
-                fill: false,
-                stepped: 'before',
-                spanGaps: true,
-                pointBackgroundColor: '#00BFFF',
-                pointRadius: 3,
-                pointHoverRadius: 6,
-                borderWidth: 2,
-                borderDash: [4, 3]
-            });
-        }
-
-        plrRhChart = new Chart(canvasEl, {
-            type: 'line',
-            data: { labels: labels, datasets: datasets },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: hasNtrp,
-                        position: 'bottom',
-                        labels: { color: '#ccc', usePointStyle: true, pointStyle: 'circle', boxWidth: 8, font: { size: 11 } }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            title: function(ctx) { return tooltipNames[ctx[0].dataIndex]; },
-                            label: function(ctx) {
-                                return ctx.dataset.label + ': ' + ctx.parsed.y;
-                            }
-                        },
-                        backgroundColor: 'rgba(30,30,30,0.95)',
-                        titleColor: '#CCFF00',
-                        bodyColor: '#fff',
-                        borderColor: '#CCFF00',
-                        borderWidth: 1
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: { color: '#888', maxRotation: 45 },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: '#CCFF00' },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
-                    },
-                    yNtrp: {
-                        display: hasNtrp,
-                        position: 'right',
-                        min: 1,
-                        max: 7,
-                        ticks: { color: '#00BFFF', stepSize: 1 },
-                        grid: { display: false }
-                    }
-                }
-            }
+        window.KSLT_RATING_CHART.render({
+            client: A.client,
+            playerId: plrEditingId,
+            homeCategory: plrEditingItem && plrEditingItem.category_id,
+            isEn: isEn,
+            canvasId: 'adPlrRhChart',
+            wrapId: 'adPlrRhChartWrap',
+            ntrpCanvasId: 'adPlrNtrpChart',
+            ntrpWrapId: 'adPlrNtrpWrap'
         });
     }
 
@@ -1890,8 +2069,15 @@
                 html += '<td style="font-size:1.3rem;text-align:center;width:40px;">' + def.icon + '</td>';
                 html += '<td style="font-weight:500;">' + A.esc(name) + '</td>';
                 html += '<td style="color:var(--text-muted);font-size:0.82rem;">' + dateStr + '</td>';
+                // Вычисляемые значки ведёт расчёт: снимать их вручную
+                // бессмысленно, они вернутся при первом же пересчёте
+                var byRule = def.condition_type && def.condition_type !== 'manual';
                 if (A.currentRole === 'admin') {
-                    html += '<td><button class="ad-btn-icon ad-badge-del" data-pb-id="' + pb.id + '" title="' + L.badgeRemove + '">&times;</button></td>';
+                    html += '<td>' + (byRule
+                        ? '<span title="' + (isEn ? 'Awarded automatically' : 'Начисляется автоматически') +
+                          '" style="color:var(--text-dim);font-size:0.9rem;">\u2699</span>'
+                        : '<button class="ad-btn-icon ad-badge-del" data-pb-id="' + pb.id + '" title="' + L.badgeRemove + '">&times;</button>') +
+                    '</td>';
                 }
                 html += '</tr>';
             });
@@ -1903,19 +2089,58 @@
 
         // Manual award (admin only)
         if (A.currentRole === 'admin') {
-            // Dropdown with unearned badges
-            var unearnedDefs = allDefs.filter(function(d) { return !earnedMap[d.id]; });
-            var optionsHtml = '<option value="">\u2014 ' + L.badgeManualAward + ' \u2014</option>';
-            unearnedDefs.forEach(function(d) {
-                var name = isEn ? (d.name_en || d.name) : d.name;
-                optionsHtml += '<option value="' + d.id + '">' + d.icon + ' ' + A.esc(name) + '</option>';
+            // Список показывает все значки, чтобы было видно, какие вообще
+            // бывают. Но выбрать можно только те, у которых нет условия:
+            // вычисляемые начисляет расчёт, и выданный руками «Чемпион» он
+            // тут же отбирал — условие-то не выполняется
+            function badgeName(d) { return isEn ? (d.name_en || d.name) : d.name; }
+
+            var manualDefs = allDefs.filter(function(d) {
+                return !d.condition_type || d.condition_type === 'manual';
+            });
+            var autoDefs = allDefs.filter(function(d) {
+                return d.condition_type && d.condition_type !== 'manual';
             });
 
+            var haveLabel = isEn ? 'already earned' : 'уже есть';
+            var manualGroup = isEn ? 'Awarded by hand' : 'Выдаются вручную';
+            var autoGroup = isEn ? 'Calculated automatically' : 'Начисляются автоматически';
+
+            var optionsHtml = '<option value="">\u2014 ' + L.badgeManualAward + ' \u2014</option>';
+
+            if (manualDefs.length) {
+                optionsHtml += '<optgroup label="' + manualGroup + '">';
+                manualDefs.forEach(function(d) {
+                    var has = !!earnedMap[d.id];
+                    optionsHtml += '<option value="' + d.id + '"' + (has ? ' disabled' : '') + '>' +
+                        d.icon + ' ' + A.esc(badgeName(d)) + (has ? ' \u00b7 ' + haveLabel : '') + '</option>';
+                });
+                optionsHtml += '</optgroup>';
+            }
+
+            if (autoDefs.length) {
+                optionsHtml += '<optgroup label="' + autoGroup + '">';
+                autoDefs.forEach(function(d) {
+                    var has = !!earnedMap[d.id];
+                    optionsHtml += '<option value="' + d.id + '" disabled>' +
+                        d.icon + ' ' + A.esc(badgeName(d)) + (has ? ' \u00b7 ' + haveLabel : '') + '</option>';
+                });
+                optionsHtml += '</optgroup>';
+            }
+
+            var unearnedDefs = manualDefs.filter(function(d) { return !earnedMap[d.id]; });
+
             html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">';
-            html += '<select class="ad-field-input" id="adPlrBadgeSelect" style="flex:1;min-width:200px;">' + optionsHtml + '</select>';
+            html += '<select class="ad-field-input" id="adPlrBadgeSelect" style="flex:1;min-width:200px;"' +
+                (unearnedDefs.length ? '' : ' disabled') + '>' + optionsHtml + '</select>';
             html += '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrBadgeAdd">+ ' + L.badgeManualAward + '</button>';
             html += '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrBadgeCheck">' + L.badgeCheckBtn + '</button>';
             html += '</div>';
+            html += '<div class="ad-field-hint" style="margin-top:8px;">' +
+                (isEn
+                    ? 'Only badges without a rule are awarded by hand. The rest are calculated from matches, tournaments and points.'
+                    : 'Руками выдаются только значки без условия. Остальные начисляет расчёт по матчам, турнирам и очкам.') +
+            '</div>';
         }
 
         container.innerHTML = html;

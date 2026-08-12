@@ -935,6 +935,83 @@ nav {
     padding: 0 3px;
     line-height: 1;
 }
+/* Уведомления показываются окном, а не выпадающим списком: в колонке
+   шириной триста пикселей длинное сообщение обрезалось на второй строке */
+.site-notif-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 4000;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.site-notif-overlay.active { opacity: 1; }
+
+.site-notif-modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card, #1a1a2e);
+    border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    overflow: hidden;
+}
+
+.site-notif-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+}
+
+.site-notif-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.site-notif-close {
+    background: none;
+    border: none;
+    color: var(--text-muted, #888);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.site-notif-close:hover { color: var(--text-primary, #fff); }
+
+.site-notif-body {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.site-notif-foot {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+    text-align: center;
+}
+
+.site-notif-foot a {
+    color: var(--accent, #CCFF00);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.site-notif-foot a:hover { text-decoration: underline; }
+
 .site-notif-dropdown {
     position: absolute;
     top: 44px;
@@ -973,6 +1050,51 @@ nav {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+/* Строка списка — кнопка: по ней открывается само уведомление */
+.site-notif-dropdown .site-notif-item,
+.site-notif-modal .site-notif-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.site-notif-dropdown .site-notif-item:hover,
+.site-notif-modal .site-notif-item:hover {
+    background: rgba(255,255,255,0.04);
+}
+
+/* Непрочитанное в выпадающем списке заметно полосой слева */
+.site-notif-dropdown .site-notif-item.unread {
+    border-left: 3px solid var(--accent, #CCFF00);
+    background: rgba(204,255,0,0.04);
+}
+
+.site-notif-dropdown .site-notif-foot {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-card, #1a1a2e);
+    padding: 10px 16px;
+}
+
+/* Текст одного уведомления — целиком, без обрезки */
+.site-notif-full {
+    padding: 18px 20px 8px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--text-secondary, #bbb);
+    white-space: pre-wrap;
+}
+
+.site-notif-modal .site-notif-item {
+    padding: 14px 20px;
 }
 .site-notif-item-time {
     font-size: 0.7rem;

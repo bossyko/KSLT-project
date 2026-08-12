@@ -256,9 +256,18 @@
             // Очки по категориям: игрок может стоять в двух — своей и на ступень
             // выше, если играл там. В каждой таблице он показан со своими очками
             // именно этой категории.
-            var pcRes = await client.from('player_categories').select('player_id, category_id, points');
+            var pcRes = await client.from('player_categories')
+                .select('player_id, category_id, points, closed_at');
             var pointsIn = {};
+            var closedIn = {};
             (pcRes.data || []).forEach(function(r) {
+                // Закрытая категория из рейтинга уходит: игрок в ней больше не
+                // выступает. Очки и история остаются при нём, их видно в кабинете
+                if (r.closed_at) {
+                    if (!closedIn[r.category_id]) closedIn[r.category_id] = {};
+                    closedIn[r.category_id][r.player_id] = true;
+                    return;
+                }
                 if (!pointsIn[r.category_id]) pointsIn[r.category_id] = {};
                 pointsIn[r.category_id][r.player_id] = r.points || 0;
             });
@@ -273,8 +282,10 @@
                 var catName = isEn ? (cat.name_en || cat.name) : (isKg ? (cat.name_kg || cat.name) : cat.name);
                 genders.forEach(function(g) {
                     var inCat = pointsIn[cat.id] || {};
+                    var closedHere = closedIn[cat.id] || {};
                     var catPlayers = players.filter(function(p) {
                         if (p.gender !== g) return false;
+                        if (closedHere[p.id]) return false;
                         // Домашняя категория — всегда, чужая — только если там есть очки
                         return p.category_id === cat.id || inCat[p.id] > 0;
                     }).sort(function(a, b) {

@@ -73,8 +73,9 @@
                             '<th>' + L.pushType + '</th>' +
                             '<th>' + L.pushRecipients + '</th>' +
                             '<th>' + L.pushFcm + '</th>' +
+                            '<th style="width:80px;"></th>' +
                         '</tr></thead>' +
-                        '<tbody id="adPushHistoryBody"><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody id="adPushHistoryBody"><tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -247,7 +248,7 @@
         if (!tbody || !A.client) return;
 
         var res = await A.client.from('push_log')
-            .select('*')
+            .select('id, title, message, type, audience, recipients_count, fcm_sent, created_at, recalled_at')
             .order('created_at', { ascending: false })
             .limit(50);
 
@@ -260,17 +261,126 @@
         var audienceLabels = { all: L.pushAll, members: L.pushMembers, user: L.pushUser };
         var typeLabels = { system: L.pushTypeSystem, tournament: L.pushTypeTournament, match: L.pushTypeMatch, battle: L.pushTypeBattle };
 
+        var isAdmin = A.currentRole === 'admin';
+        var isStaff = isAdmin || A.currentRole === 'manager';
+
+        var recallLabel = A.isEn ? 'Recall' : 'Отозвать';
+        var recallAgainLabel = A.isEn ? 'Recall again' : 'Отозвать повторно';
+        var recalledLabel = A.isEn ? 'recalled' : 'отозвана';
+        var delLabel = A.isEn ? 'Delete broadcast' : 'Удалить рассылку';
+
         tbody.innerHTML = rows.map(function(r) {
             var date = r.created_at ? new Date(r.created_at).toLocaleDateString(A.isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
-            return '<tr>' +
+            var recalled = !!r.recalled_at;
+
+            // Отозвать может менеджер: это про людей — убрать сообщение у
+            // получателей, запись в журнале остаётся с пометкой. Удалить —
+            // только админ: убирает и у людей, и сам след рассылки
+            //
+            // \u041A\u043D\u043E\u043F\u043A\u0430 \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F \u0438 \u0443 \u043E\u0442\u043E\u0437\u0432\u0430\u043D\u043D\u044B\u0445: \u043F\u043E\u043C\u0435\u0442\u043A\u0430 \u0441\u0442\u043E\u0438\u0442, \u0430 \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u044F
+            // \u043C\u043E\u0433\u043B\u0438 \u043D\u0435 \u0443\u0431\u0440\u0430\u0442\u044C\u0441\u044F \u2014 \u0442\u0430\u043A \u0432\u044B\u0448\u043B\u043E \u0441 \u0440\u0430\u0441\u0441\u044B\u043B\u043A\u0430\u043C\u0438, \u043E\u0442\u043E\u0437\u0432\u0430\u043D\u043D\u044B\u043C\u0438 \u0434\u043E
+            // \u0442\u043E\u0433\u043E, \u043A\u0430\u043A \u043F\u043E\u044F\u0432\u0438\u043B\u0430\u0441\u044C \u0441\u0432\u044F\u0437\u044C \u0441 \u0436\u0443\u0440\u043D\u0430\u043B\u043E\u043C. \u041F\u043E\u0432\u0442\u043E\u0440\u043D\u044B\u0439 \u043E\u0442\u0437\u044B\u0432 \u0431\u0435\u0437\u0432\u0440\u0435\u0434\u0435\u043D
+            var actions = '';
+            if (isStaff) {
+                actions += '<button class="ad-btn-icon ad-push-recall" data-id="' + r.id +
+                    '" data-recalled="' + (recalled ? '1' : '') +
+                    '" title="' + (recalled ? recallAgainLabel : recallLabel) + '">\u21A9</button>';
+            }
+            if (isAdmin) {
+                actions += '<button class="ad-btn-icon ad-push-del" data-id="' + r.id +
+                    '" data-recalled="' + (recalled ? '1' : '') +
+                    '" title="' + delLabel + '">&times;</button>';
+            }
+
+            return '<tr' + (recalled ? ' style="opacity:0.55;"' : '') + '>' +
                 '<td style="white-space:nowrap;font-size:0.8rem;">' + date + '</td>' +
-                '<td style="font-weight:500;">' + A.esc(r.title || '') + '</td>' +
+                '<td style="font-weight:500;">' + A.esc(r.title || '') +
+                    (recalled ? ' <span style="font-size:0.7rem;color:var(--text-muted);">\u00b7 ' + recalledLabel + '</span>' : '') +
+                '</td>' +
                 '<td>' + (audienceLabels[r.audience] || r.audience || '—') + '</td>' +
                 '<td>' + (typeLabels[r.type] || r.type || '—') + '</td>' +
                 '<td style="text-align:center;">' + (r.recipients_count || 0) + '</td>' +
                 '<td style="text-align:center;">' + (r.fcm_sent || 0) + '</td>' +
+                '<td style="text-align:right;white-space:nowrap;">' + actions + '</td>' +
             '</tr>';
         }).join('');
+
+        tbody.querySelectorAll('.ad-push-recall').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var ok = await A.showConfirmAsync(
+                    A.isEn ? 'Recall this broadcast?' : 'Отозвать рассылку?',
+                    A.isEn
+                        ? 'The message will disappear for everyone who received it. The journal entry stays, marked as recalled.'
+                        : 'Сообщение исчезнет у всех, кто его получил. Запись в журнале останется с пометкой об отзыве.',
+                    recallLabel);
+                if (!ok) return;
+
+                btn.disabled = true;
+                var res = await A.client.rpc('recall_push', { p_push_id: btn.dataset.id });
+                var err = (res.error && res.error.message) || (res.data && res.data.error);
+                if (err) {
+                    A.showToast(err === 'forbidden'
+                        ? (A.isEn ? 'Not enough rights' : 'Недостаточно прав') : err, 'error');
+                    btn.disabled = false;
+                    return;
+                }
+                // Ноль убранных — не успех: у получателей сообщение осталось,
+                // а запись уже помечена отозванной. Говорим об этом прямо.
+                // У повторного отзыва ноль — норма, там уже всё убрано
+                var removed = (res.data && res.data.removed) || 0;
+                if (removed === 0 && btn.dataset.recalled) {
+                    A.showToast(A.isEn
+                        ? 'Already recalled, nothing left to remove'
+                        : 'Уже отозвана, убирать нечего', 'success');
+                } else if (removed === 0) {
+                    A.showToast(A.isEn
+                        ? 'Marked as recalled, but nothing was removed from recipients'
+                        : 'Помечено отозванной, но у получателей ничего не убралось', 'error');
+                } else {
+                    A.showToast((A.isEn ? 'Recalled, removed: ' : 'Отозвано, убрано: ') + removed, 'success');
+                }
+                loadHistory();
+            });
+        });
+
+        tbody.querySelectorAll('.ad-push-del').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var ok = await A.showConfirmAsync(
+                    A.isEn ? 'Delete the broadcast?' : 'Удалить рассылку?',
+                    A.isEn
+                        ? 'The message will disappear for everyone who received it, and the journal entry will be erased too. This cannot be undone.'
+                        : 'Сообщение исчезнет у всех, кто его получил, и запись в журнале тоже будет стёрта. Отменить это нельзя.',
+                    A.isEn ? 'Delete' : 'Удалить');
+                if (!ok) return;
+
+                btn.disabled = true;
+
+                // Сначала у получателей, потом строка журнала. Иначе получалось
+                // так: запись стёрта, кнопка отзыва пропала вместе с ней, а
+                // уведомление у людей висит, и убрать его больше нечем
+                var rec = await A.client.rpc('recall_push', { p_push_id: btn.dataset.id });
+                var recErr = (rec.error && rec.error.message) || (rec.data && rec.data.error);
+                if (recErr) {
+                    A.showToast(recErr === 'forbidden'
+                        ? (A.isEn ? 'Not enough rights' : 'Недостаточно прав') : recErr, 'error');
+                    btn.disabled = false;
+                    return;
+                }
+
+                var res = await A.client.from('push_log').delete().eq('id', btn.dataset.id);
+                if (res.error) {
+                    A.showToast(res.error.message, 'error');
+                    btn.disabled = false;
+                    return;
+                }
+
+                var removed = (rec.data && rec.data.removed) || 0;
+                A.showToast(
+                    (A.isEn ? 'Deleted, removed from recipients: ' : 'Удалено, убрано у получателей: ') + removed,
+                    (removed === 0 && !btn.dataset.recalled) ? 'error' : 'success');
+                loadHistory();
+            });
+        });
     }
 
     // ---- Export ----

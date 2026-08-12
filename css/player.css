@@ -606,7 +606,10 @@ a.pp-match-opponent-name:hover {
     gap: 8px;
 }
 
-a.pp-tournament {
+/* Селектор по классу, а не по ссылке: запись, добавленную админом руками,
+   открывать нечего, и она рисуется обычным блоком. С a.pp-tournament
+   оформление на неё не действовало, и строка разъезжалась столбиком */
+.pp-tournament {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -621,6 +624,12 @@ a.pp-tournament {
 a.pp-tournament:hover {
     border-color: var(--accent);
     background: rgba(204,255,0,0.04);
+}
+
+/* У записи без турнира ссылки нет — и подсветки при наведении тоже */
+.pp-tournament-plain:hover {
+    border-color: var(--border-subtle);
+    background: var(--surface-glass);
 }
 
 .pp-tournament-photo {
@@ -1667,6 +1676,17 @@ a.pp-tournament:hover {
     color: var(--accent);
 }
 
+/* Закрытая категория: заявок туда больше нет, но очки и матчи заработаны
+   и остаются на виду */
+.pp-cat-closed {
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(255,255,255,0.06);
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 500;
+}
+
 .pp-cat-place {
     margin-left: auto;
     padding: 2px 10px;
@@ -1722,4 +1742,22 @@ a.pp-tournament:hover {
 .pp-cat-rate {
     font-weight: 600;
     color: var(--text-secondary);
+}
+
+
+/* Серия и форма — по всем матчам сразу, а не по категориям. Отдельной
+   строкой перед блоками категорий: внизу карточка висела в одиночестве */
+.pp-form-line {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.pp-form-line .pp-stat {
+    min-width: 160px;
+}
+
+
+/* Запись без турнира: выглядит как остальные, но не ведёт себя как ссылка */
+.pp-tournament-plain {
+    cursor: default;
 }

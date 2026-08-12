@@ -111,18 +111,38 @@ Deno.serve(async (req) => {
       return json({ total: 0, notified: 0, fcm_sent: 0 })
     }
 
-    // 4. Insert notification_log for each recipient
+    // 4. Запись в журнал заводим первой: её идентификатор проставляется
+    // каждому уведомлению, и по нему рассылку можно отозвать — убрать
+    // сообщение у всех, кому оно ушло
+    const { data: logRow } = await db
+      .from('push_log')
+      .insert({
+        admin_id: user.id,
+        title,
+        message,
+        type: type || 'system',
+        audience,
+        recipients_count: profiles.length,
+        fcm_sent: 0
+      })
+      .select('id')
+      .single()
+
+    const pushId = logRow?.id ?? null
+
+    // 5. Insert notification_log for each recipient
     const notifRows = profiles.map(p => ({
       profile_id: p.id,
       type: type || 'system',
       title,
       message,
-      is_read: false
+      is_read: false,
+      push_id: pushId
     }))
 
     await db.from('notification_log').insert(notifRows)
 
-    // 5. Send FCM push to recipients with fcm_token
+    // 6. Send FCM push to recipients with fcm_token
     let fcmSent = 0
     const fcmProjectId = Deno.env.get('FCM_PROJECT_ID')
     const fcmClientEmail = Deno.env.get('FCM_CLIENT_EMAIL')
@@ -166,16 +186,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 6. Log to push_log
-    await db.from('push_log').insert({
-      admin_id: user.id,
-      title,
-      message,
-      type: type || 'system',
-      audience,
-      recipients_count: profiles.length,
-      fcm_sent: fcmSent
-    })
+    // Сколько ушло пушем — известно только сейчас, дописываем в журнал
+    if (pushId) {
+      await db.from('push_log').update({ fcm_sent: fcmSent }).eq('id', pushId)
+    }
 
     return json({
       total: profiles.length,

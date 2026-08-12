@@ -65,9 +65,32 @@
         { key: 'loyalty', icon: '⭐', label: 'Лояльность' }
     ];
 
+    /**
+     * Адрес базы и ключ.
+     *
+     * Раньше и адрес, и ключ, и имя записи с сессией были вписаны сюда
+     * буквами — на боевой проект. Из-за этого шапка не работала ни с какой
+     * другой базой: проверки не видели ни входа, ни колокольчика, а сам
+     * колокольчик из любого окружения ходил в боевую.
+     *
+     * Значения по умолчанию продублированы из js/supabase-config.js, а не
+     * взяты оттуда: шапка на большинстве страниц подключена ВЫШЕ конфига
+     * (иначе меню появлялось бы рывком, после загрузки половины скриптов), и
+     * к моменту её запуска SUPABASE_ANON_KEY ещё не объявлен. Ключ уходил
+     * пустым, база отвечала 401 — колокольчик молча показывал «Новых нет».
+     * Ключ публикуемый, он и так лежит в каждой странице открытым текстом.
+     */
+    var DB_URL = (window.KSLT_DB && window.KSLT_DB.url) ||
+        (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://qqkzszesviukopgjbead.supabase.co');
+    var DB_KEY = (window.KSLT_DB && window.KSLT_DB.key) ||
+        (typeof SUPABASE_ANON_KEY !== 'undefined' && SUPABASE_ANON_KEY
+            ? SUPABASE_ANON_KEY
+            : 'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G');
+    var DB_REF = DB_URL.replace(/^https:\/\//, '').split('.')[0];
+
     // Check Supabase session in localStorage
     try {
-        var key = 'sb-qqkzszesviukopgjbead-auth-token';
+        var key = 'sb-' + DB_REF + '-auth-token';
         var raw = localStorage.getItem(key);
         if (!raw) return;
 
@@ -96,8 +119,8 @@
                     var userId = session.user && session.user.id;
                     if (!userId) return;
 
-                    var API = 'https://qqkzszesviukopgjbead.supabase.co/rest/v1';
-                    var ANON = 'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G';
+                    var API = DB_URL + '/rest/v1';
+                    var ANON = DB_KEY;
                     var TOKEN = session.access_token;
 
                     function apiHeaders(extra) {
@@ -107,66 +130,226 @@
                     }
 
                     var bellBtn = document.getElementById('siteNotifBell');
-                    var dropdown = document.getElementById('siteNotifDropdown');
                     var dot = document.getElementById('siteNotifDot');
 
-                    // Check unread count
-                    fetch(API + '/notification_log?profile_id=eq.' + userId + '&is_read=eq.false&select=id', {
-                        headers: apiHeaders({ 'Prefer': 'count=exact' })
-                    }).then(function(res) {
-                        var count = parseInt(res.headers.get('content-range')?.split('/')[1] || '0', 10);
-                        if (count > 0) {
-                            dot.style.display = '';
-                            dot.textContent = count > 9 ? '9+' : count;
-                        }
-                    }).catch(function() {});
+                    var L2 = isEn
+                        ? { title: 'New notifications', empty: 'Nothing new', all: 'All notifications' }
+                        : isKg
+                            ? { title: 'Жаңы билдирмелер', empty: 'Жаңылык жок', all: 'Бардык билдирмелер' }
+                            : { title: 'Новые уведомления', empty: 'Новых нет', all: 'Все уведомления' };
 
-                    // Toggle dropdown
-                    bellBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        if (dropdown.style.display === 'none') {
-                            dropdown.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-dim);font-size:0.8rem;">...</div>';
-                            dropdown.style.display = '';
-                            // Load notifications
-                            fetch(API + '/notification_log?profile_id=eq.' + userId + '&select=*&order=created_at.desc&limit=20', {
-                                headers: apiHeaders()
-                            }).then(function(r) { return r.json(); }).then(function(items) {
-                                items = items || [];
-                                var noLabel = isEn ? 'No notifications' : isKg ? 'Билдирмелер жок' : 'Нет уведомлений';
-                                if (items.length === 0) {
-                                    dropdown.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' + noLabel + '</div>';
+                    /**
+                     * Сколько непрочитанных — для точки на колокольчике.
+                     *
+                     * Раньше ошибка здесь глушилась пустым catch: если запрос
+                     * не проходил, точка просто не появлялась, и понять почему
+                     * было невозможно. Теперь неудача видна в консоли.
+                     *
+                     * Считаем по числу записей, а не по заголовку: content-range
+                     * приходит только когда браузеру разрешено его читать, и на
+                     * части окружений он оказывался пустым.
+                     */
+                    function refreshCount() {
+                        return fetch(API + '/notification_log?profile_id=eq.' + userId +
+                                     '&is_read=eq.false&select=id', { headers: apiHeaders() })
+                            .then(function(res) {
+                                if (!res.ok) {
+                                    console.warn('[KSLT] notifications: счётчик не получен,', res.status);
                                     return;
                                 }
-                                var unreadIds = [];
-                                dropdown.innerHTML = items.map(function(n) {
-                                    if (!n.is_read) unreadIds.push("'" + n.id + "'");
-                                    var cls = 'site-notif-item' + (n.is_read ? '' : ' unread');
-                                    var ago = n.created_at ? timeAgo(new Date(n.created_at)) : '';
-                                    return '<div class="' + cls + '">' +
-                                        '<div class="site-notif-item-title">' + esc(n.title || '') + '</div>' +
-                                        '<div class="site-notif-item-msg">' + esc(n.message || '') + '</div>' +
-                                        '<div class="site-notif-item-time">' + ago + '</div>' +
-                                    '</div>';
-                                }).join('');
-                                if (unreadIds.length > 0) {
-                                    fetch(API + '/notification_log?id=in.(' + unreadIds.join(',') + ')', {
-                                        method: 'PATCH',
-                                        headers: apiHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
-                                        body: JSON.stringify({ is_read: true })
-                                    }).then(function() {
+                                return res.json().then(function(rows) {
+                                    var count = (rows || []).length;
+                                    if (count > 0) {
+                                        dot.style.display = '';
+                                        dot.textContent = count > 9 ? '9+' : count;
+                                    } else {
                                         dot.style.display = 'none';
-                                    });
+                                    }
+                                });
+                            })
+                            .catch(function(e) { console.warn('[KSLT] notifications:', e); });
+                    }
+
+                    refreshCount();
+
+                    // Уведомление могло прийти, пока страница открыта: раз в
+                    // минуту проверяем заново, иначе о новом узнаёшь только
+                    // после перезагрузки
+                    setInterval(refreshCount, 60000);
+                    document.addEventListener('visibilitychange', function() {
+                        if (!document.hidden) refreshCount();
+                    });
+
+                    /**
+                     * Колокольчик в шапке и раздел «Уведомления» в кабинете —
+                     * разные скрипты, и об одном и том же уведомлении каждый
+                     * знал только своё. Прочитал через колокольчик — в
+                     * кабинете строка оставалась непрочитанной до перезагрузки.
+                     * Теперь о прочтении объявляется, и слушает кто хочет.
+                     */
+                    function announceRead(detail) {
+                        try {
+                            document.dispatchEvent(
+                                new CustomEvent('kslt:notification-read', { detail: detail }));
+                        } catch(e) { /* старый браузер — обойдётся без синхронизации */ }
+                    }
+
+                    document.addEventListener('kslt:notification-read', function(e) {
+                        var d = e.detail || {};
+                        var dd = document.getElementById('siteNotifDropdown');
+                        if (dd) {
+                            if (d.all) {
+                                dd.querySelectorAll('.site-notif-item').forEach(function(el) { el.remove(); });
+                            } else if (d.id) {
+                                var one = dd.querySelector('.site-notif-item[data-id="' + d.id + '"]');
+                                if (one) one.remove();
+                            }
+                        }
+                        refreshCount();
+                    });
+
+                    function itemHtml(n) {
+                        var ago = n.created_at ? timeAgo(new Date(n.created_at)) : '';
+                        return '<button class="site-notif-item' + (n.is_read ? '' : ' unread') + '" ' +
+                                'data-id="' + n.id + '" type="button">' +
+                            '<div class="site-notif-item-title">' + esc(n.title || '') + '</div>' +
+                            '<div class="site-notif-item-msg">' + esc(n.message || '') + '</div>' +
+                            '<div class="site-notif-item-time">' + ago + '</div>' +
+                        '</button>';
+                    }
+
+                    /**
+                     * Одно уведомление целиком. Прочитанным становится именно
+                     * оно, при закрытии — не весь список разом: иначе хватало
+                     * открыть колокольчик, чтобы «прочитать» всё не глядя.
+                     */
+                    function openOne(n, onDone) {
+                        var overlay = document.createElement('div');
+                        overlay.className = 'site-notif-overlay';
+                        overlay.innerHTML =
+                            '<div class="site-notif-modal">' +
+                                '<div class="site-notif-head">' +
+                                    '<span class="site-notif-title">' + esc(n.title || '') + '</span>' +
+                                    '<button class="site-notif-close" type="button">&times;</button>' +
+                                '</div>' +
+                                '<div class="site-notif-body">' +
+                                    '<div class="site-notif-full">' + esc(n.message || '') + '</div>' +
+                                    '<div class="site-notif-item-time" style="padding:0 20px 16px;">' +
+                                        (n.created_at ? timeAgo(new Date(n.created_at)) : '') +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                        document.body.appendChild(overlay);
+                        requestAnimationFrame(function() { overlay.classList.add('active'); });
+
+                        function close() {
+                            overlay.classList.remove('active');
+                            setTimeout(function() { overlay.remove(); }, 200);
+                            document.removeEventListener('keydown', onKey);
+
+                            if (n.is_read) { if (onDone) onDone(); return; }
+
+                            fetch(API + '/notification_log?id=eq.' + n.id, {
+                                method: 'PATCH',
+                                headers: apiHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+                                body: JSON.stringify({ is_read: true })
+                            }).then(function(res) {
+                                if (!res.ok) {
+                                    console.warn('[KSLT] notifications: не отмечено прочитанным,', res.status);
+                                    return;
                                 }
-                            }).catch(function() {});
-                        } else {
+                                n.is_read = true;
+                                announceRead({ id: n.id });
+                                if (onDone) onDone();
+                            }).catch(function(e) { console.warn('[KSLT] notifications:', e); });
+                        }
+                        function onKey(e) { if (e.key === 'Escape') close(); }
+
+                        overlay.querySelector('.site-notif-close').addEventListener('click', close);
+                        overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+                        document.addEventListener('keydown', onKey);
+                    }
+
+                    /**
+                     * Список новых уведомлений — выпадающим под колокольчиком.
+                     * Окном открывается уже само уведомление, по нажатию.
+                     */
+                    function openList() {
+                        var dropdown = document.getElementById('siteNotifDropdown');
+                        if (!dropdown) return;
+
+                        if (dropdown.style.display !== 'none') {
+                            dropdown.style.display = 'none';
+                            return;
+                        }
+
+                        dropdown.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-dim);font-size:0.8rem;">...</div>';
+                        dropdown.style.display = '';
+
+                        // Только непрочитанные: колокольчик — про новое. Вся
+                        // история лежит в кабинете, ссылка на неё внизу
+                        fetch(API + '/notification_log?profile_id=eq.' + userId +
+                              '&is_read=eq.false&select=*&order=created_at.desc&limit=20', {
+                            headers: apiHeaders()
+                        }).then(function(r) {
+                            if (!r.ok) throw new Error('HTTP ' + r.status);
+                            return r.json();
+                        }).then(function(items) {
+                            // При отказе база отвечает объектом с текстом ошибки,
+                            // а не списком. Раньше он молча становился «Новых нет»
+                            if (!Array.isArray(items)) throw new Error('unexpected response');
+                            var foot = '<div class="site-notif-foot">' +
+                                '<a href="' + dashUrl + '#notifications">' + L2.all + '</a></div>';
+
+                            if (items.length === 0) {
+                                dropdown.innerHTML =
+                                    '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' +
+                                    L2.empty + '</div>' + foot;
+                                return;
+                            }
+
+                            dropdown.innerHTML = '<div id="siteNotifItems">' +
+                                items.map(itemHtml).join('') + '</div>' + foot;
+
+                            dropdown.querySelectorAll('.site-notif-item').forEach(function(el) {
+                                el.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    var n = items.filter(function(x) { return x.id === el.dataset.id; })[0];
+                                    if (!n) return;
+                                    openOne(n, function() {
+                                        // Прочитанное уходит из списка и из счётчика
+                                        el.remove();
+                                        refreshCount();
+                                        if (!dropdown.querySelector('.site-notif-item')) {
+                                            dropdown.innerHTML =
+                                                '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' +
+                                                L2.empty + '</div>' + foot;
+                                        }
+                                    });
+                                });
+                            });
+                        }).catch(function(e) {
+                            // Сбой — это не «новых нет». Молчаливая подмена одного
+                            // другим и скрывала пустой ключ на страницах сайта
+                            console.warn('[KSLT] notifications:', e);
+                            dropdown.innerHTML =
+                                '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' +
+                                (isEn ? 'Failed to load' : isKg ? 'Жүктөлгөн жок' : 'Не удалось загрузить') +
+                                '</div>';
+                        });
+                    }
+
+                    // Щелчок мимо — список закрывается
+                    document.addEventListener('click', function(e) {
+                        var dropdown = document.getElementById('siteNotifDropdown');
+                        if (dropdown && dropdown.style.display !== 'none' && !bellWrap.contains(e.target)) {
                             dropdown.style.display = 'none';
                         }
                     });
 
-                    document.addEventListener('click', function(e) {
-                        if (dropdown.style.display !== 'none' && !bellWrap.contains(e.target)) {
-                            dropdown.style.display = 'none';
-                        }
+                    bellBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        openList();
                     });
 
                     function timeAgo(date) {

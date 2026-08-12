@@ -159,6 +159,26 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ---- Категория закрыта для этого игрока ----
+    // По правилам клуба игрок выступает не более чем в двух категориях.
+    // Когда его переводят в новую, прежнюю закрывают: очки и история в ней
+    // остаются, но новых заявок туда больше не принимаем. Уже поданные
+    // заявки не трогаем — записанные турниры игрок доигрывает.
+    // Проверка живёт здесь, а не только в интерфейсе: страницу можно обойти
+    // запросом напрямую.
+    if (!isStaff && tournament.category_id) {
+      const { data: closedCat } = await db
+        .from('player_categories')
+        .select('closed_at')
+        .eq('player_id', player.id)
+        .eq('category_id', tournament.category_id)
+        .maybeSingle()
+
+      if (closedCat && closedCat.closed_at) {
+        return json({ error: 'category_closed', category: tournament.category_id }, 403)
+      }
+    }
+
     const isDoubles = tournament.format === 'doubles' || tournament.format === 'mixed_doubles'
     const isFriendly = tournament.category_id === 'friendly'
 

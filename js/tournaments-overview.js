@@ -7,7 +7,13 @@
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var client = window.supabaseClient;
 
-    // Category order + meta
+    /**
+     * Категории и их порядок.
+     *
+     * Список читается из базы: новая категория должна появляться на странице
+     * сама, а не после правки кода. Здесь лежит запасной набор — на случай,
+     * если база недоступна и страница работает на статических данных.
+     */
     var CATEGORIES = [
         { key: 'promasters', name: 'Pro-Masters' },
         { key: 'masters', name: 'Masters' },
@@ -16,6 +22,27 @@
         { key: 'tour', name: 'Tour' },
         { key: 'friendly', name: 'Friendly' }
     ];
+
+    /** Подменяет запасной набор тем, что заведено в базе. */
+    async function loadCategories() {
+        if (!client) return;
+        try {
+            var res = await client.from('categories')
+                .select('id, name, name_en, name_kg, sort_order, color')
+                .order('sort_order', { ascending: false });
+            if (!res.data || res.data.length === 0) return;
+
+            CATEGORIES = res.data.map(function(c) {
+                return {
+                    key: c.id,
+                    name: isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name),
+                    color: c.color || ''
+                };
+            });
+        } catch(e) {
+            console.warn('[KSLT] categories load error:', e);
+        }
+    }
 
     var months = isEn
         ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -288,6 +315,9 @@
 
     async function loadTournaments() {
         var grouped = null;
+
+        // Категории — до турниров: по ним раскладываются группы
+        await loadCategories();
 
         if (client) {
             try {

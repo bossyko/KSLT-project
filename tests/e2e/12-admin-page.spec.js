@@ -199,3 +199,32 @@ test.describe('Admin Page — Navigation Elements', () => {
         });
     }
 });
+
+/**
+ * Карточка игрока: блок «Очки по категориям».
+ *
+ * Проверка появилась после того, как блок молча пропал: вспомогательные
+ * функции остались в одной области видимости, а вызывающий код переехал в
+ * другую, и весь блок падал с ошибкой. На его месте оставалась сводная
+ * строка — вид правдоподобный, поэтому пропажу заметили не сразу.
+ */
+test.describe('Карточка игрока в админке', () => {
+    test('Блок категорий рисуется и не роняет страницу', async ({ page }) => {
+        const errors = [];
+        page.on('pageerror', e => errors.push(e.message));
+
+        await page.goto('/pages/admin.html#players/edit/test-player', { waitUntil: 'domcontentloaded' });
+        await page.waitForTimeout(7000);
+
+        expect(errors).toEqual([]);
+
+        // У тестового игрока две категории, у каждой — кнопка закрытия
+        const cards = page.locator('.ad-cat-card');
+        expect(await cards.count()).toBeGreaterThanOrEqual(1);
+        expect(await page.locator('.ad-cat-toggle').count()).toBe(await cards.count());
+
+        // Полоса побед и цветная точка категории на месте
+        expect(await page.locator('.ad-cat-dot').count()).toBe(await cards.count());
+        expect(await page.locator('.ad-cat-bar').count()).toBe(await cards.count());
+    });
+});

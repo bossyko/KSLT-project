@@ -4414,3 +4414,57 @@ select.ad-field-input {
 .ad-cat-mark-l { margin-left: 10px; }
 .ad-cat-mark-w { background: #4ade80; }
 .ad-cat-mark-l { background: #ff6b62; }
+
+
+/* Погашенная кнопка должна выглядеть погашенной: без этого она остаётся
+   ярко-лаймовой и приглашает нажать, хотя нажатие ничего не делает */
+.ad-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+}
+
+
+/* ---- Категории игрока в карточке ----
+   Закрытая категория перестаёт принимать заявки, но очки, матчи и история
+   рейтинга в ней остаются — поэтому она не убирается, а притухает */
+.ad-cat-card {
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
+
+.ad-cat-card-closed {
+    border-style: dashed;
+    opacity: 0.72;
+}
+
+.ad-cat-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+/* Цвет категории — тот же, что у точки в кабинете и у линии на графике */
+.ad-cat-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.ad-cat-title .ad-cat-toggle {
+    margin-left: auto;
+}
+
+.ad-cat-closed-tag {
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(255,255,255,0.06);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 500;
+    white-space: nowrap;
+}

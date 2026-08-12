@@ -16,6 +16,16 @@
 
     var FALLBACK_COLOR = '#8A8A8F';
 
+    /** Нарисованные графики по идентификатору холста — чтобы гасить прежний. */
+    var _charts = {};
+
+    function destroyChart(id) {
+        if (id && _charts[id]) {
+            _charts[id].destroy();
+            delete _charts[id];
+        }
+    }
+
     function t(o, ru, en, kg) {
         return o.isKg ? kg : (o.isEn ? en : ru);
     }
@@ -45,11 +55,15 @@
         // Сезон начинается 1 сентября — то же, что oldest_date в recalc_player_categories
         var oldest = ((now.getMonth() + 1) >= 9 ? year - 1 : year - 2) + '-09-01';
 
+        // Второй ключ сортировки: оценку NTRP можно поменять несколько раз за
+        // день, и такие записи лежат одной датой. Без него порядок внутри дня
+        // произвольный, и линия оценки шла зигзагом
         var res = await client.from('rating_history')
             .select('recorded_at, points_earned, tournament_name, category_id, is_doubles, ntrp_after')
             .eq('player_id', playerId)
             .gte('recorded_at', oldest)
-            .order('recorded_at', { ascending: true });
+            .order('recorded_at', { ascending: true })
+            .order('created_at', { ascending: true });
 
         return res.data || [];
     };
@@ -63,7 +77,9 @@
      */
     function pointRows(rows) {
         return rows.filter(function(r) {
-            return r.category_id && r.is_doubles !== true;
+            // Friendly в рейтинге не участвует: очков за него нет, и линии
+            // на графике тоже быть не должно
+            return r.category_id && r.category_id !== 'friendly' && r.is_doubles !== true;
         });
     }
 
@@ -115,6 +131,7 @@
                 if (!last) return;
                 ctx.save();
                 ctx.font = '600 12px Inter, sans-serif';
+                // Подпись в цвет своей линии, включая приглушённый у закрытых
                 ctx.fillStyle = ds.borderColor;
                 ctx.textAlign = 'right';
                 ctx.textBaseline = 'bottom';
@@ -144,7 +161,23 @@
         var canvas = document.getElementById(opts.canvasId);
         if (!canvas) return false;
 
+        // В админке карточка игрока перерисовывается много раз, а Chart.js
+        // на занятом холсте падает. Гасим прежний график, если он был
+        destroyChart(opts.canvasId);
+
         var cats = await API.categories(opts.client, opts.isEn, opts.isKg);
+
+        // Закрытые категории: линия рисуется тише. Игрок в них больше не
+        // выступает, но заработанное никуда не делось и остаётся на графике
+        var closed = {};
+        try {
+            var closedRes = await opts.client.from('player_categories')
+                .select('category_id, closed_at')
+                .eq('player_id', opts.playerId)
+                .not('closed_at', 'is', null);
+            (closedRes.data || []).forEach(function(r) { closed[r.category_id] = true; });
+        } catch(e) { /* колонки может не быть на старой базе — рисуем как обычно */ }
+
         var series = API.series(rows, cats);
         var top = series.sets.slice().sort(function(a, b) { return b.total - a.total; })[0];
 
@@ -158,8 +191,9 @@
                 data: s.values,
                 _meta: s.meta,
                 _total: s.total,
-                borderColor: c.color,
-                borderWidth: s.cat === opts.homeCategory ? 3 : 2,
+                borderColor: closed[s.cat] ? c.color + '66' : c.color,
+                borderWidth: closed[s.cat] ? 2 : (s.cat === opts.homeCategory ? 3 : 2),
+                borderDash: closed[s.cat] ? [5, 4] : undefined,
                 // Ступенька у даты начисления, а не у предыдущей: с 'after'
                 // Chart.js ставит вертикаль у прошлой точки, и рост очков
                 // выглядел так, будто турнир закончился раньше, чем закончился
@@ -182,7 +216,7 @@
             };
         });
 
-        new Chart(canvas, {
+        _charts[opts.canvasId] = new Chart(canvas, {
             type: 'line',
             data: { labels: series.dates, datasets: datasets },
             plugins: [endLabels],
@@ -304,6 +338,7 @@
         if (values.length === 0) return;
 
         if (wrap) wrap.style.display = '';
+        destroyChart(opts.ntrpCanvasId);
 
         // Одно измерение — это не история, а число. График из единственной
         // точки в углу пустого поля не сообщал ничего
@@ -322,7 +357,7 @@
             }
             return;
         }
-        new Chart(canvas, {
+        _charts[opts.ntrpCanvasId] = new Chart(canvas, {
             type: 'line',
             data: {
                 labels: labels,

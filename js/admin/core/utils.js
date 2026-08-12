@@ -222,6 +222,53 @@
     }
 
     /**
+     * Окно с полем ввода — в оформлении админки.
+     *
+     * Заменяет prompt(): тот рисуется браузером, выглядит на каждом по-своему
+     * и выбивается из вида сайта.
+     *
+     * @returns {Promise<string|null>} введённое значение или null, если отменили
+     */
+    function showPromptAsync(opts) {
+        return new Promise(function(resolve) {
+            var overlay = document.createElement('div');
+            overlay.className = 'ad-confirm-overlay';
+            overlay.innerHTML =
+                '<div class="ad-confirm-modal">' +
+                    '<div class="ad-confirm-title">' + (opts.title || '') + '</div>' +
+                    (opts.text ? '<div class="ad-confirm-text">' + opts.text + '</div>' : '') +
+                    '<input type="text" class="ad-field-input" id="adPromptInput" ' +
+                        'placeholder="' + (opts.placeholder || '') + '" ' +
+                        'value="' + (opts.value || '') + '" style="margin-bottom:16px;">' +
+                    '<div class="ad-confirm-actions">' +
+                        '<button class="ad-btn ad-btn-secondary" id="adPromptCancel">' + L.cancel + '</button>' +
+                        '<button class="ad-btn ad-btn-primary" id="adPromptOk">' + (opts.okLabel || L.confirm || 'OK') + '</button>' +
+                    '</div>' +
+                '</div>';
+            document.body.appendChild(overlay);
+
+            var input = document.getElementById('adPromptInput');
+            input.focus();
+
+            var done = false;
+            function finish(value) {
+                if (done) return;
+                done = true;
+                overlay.remove();
+                resolve(value);
+            }
+
+            document.getElementById('adPromptCancel').addEventListener('click', function() { finish(null); });
+            document.getElementById('adPromptOk').addEventListener('click', function() { finish(input.value.trim() || ''); });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') finish(input.value.trim() || '');
+                if (e.key === 'Escape') finish(null);
+            });
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) finish(null); });
+        });
+    }
+
+    /**
      * Promise-based confirm dialog.
      * @param {string} title
      * @param {string} [text]
@@ -581,6 +628,7 @@
     A.showToast = showToast;
     A.showConfirm = showConfirm;
     A.showConfirmAsync = showConfirmAsync;
+    A.showPromptAsync = showPromptAsync;
 
     /**
      * Приводит текст новости к нашей разметке.

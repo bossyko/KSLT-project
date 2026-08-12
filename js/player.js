@@ -385,18 +385,6 @@
         return h;
     }
 
-    /** Плитка серии побед с точками формы. */
-    function ppStreakCard(streak, form, label) {
-        var h = '<div class="pp-stat">';
-        h += '<div class="pp-stat-num">' + streak.count + (streak.type === 'up' ? 'W' : 'L') + '</div>';
-        h += '<div class="pp-stat-label">' + label + '</div>';
-        h += '<div class="pp-form">';
-        (form || []).forEach(function(f) {
-            h += '<span class="pp-form-dot ' + (f === 'W' ? 'win' : 'loss') + '"></span>';
-        });
-        return h + '</div></div>';
-    }
-
     /**
      * Полоса побед и поражений в категории.
      *
@@ -625,7 +613,8 @@
                 html += '<div class="pp-cat-head">' +
                     '<span class="pp-cat-name">' + esc(c.name) + '</span>' +
                     (c.isHome ? '<span class="pp-cat-home">' + homeLabel + '</span>' : '') +
-                    '<span class="pp-cat-place">#' + c.rank + '</span>' +
+                    // У только что назначенной категории места ещё нет
+                    (c.rank ? '<span class="pp-cat-place">#' + c.rank + '</span>' : '') +
                 '</div>';
                 html += '<div class="pp-stats">';
                 html += statCard(c.points, L.statsPoints, c.isHome ? changeText : '', c.isHome ? changeClass : '');
@@ -637,17 +626,12 @@
                 html += '</div>';
             });
 
-            // Серия считается по всем матчам сразу — она не делится по категориям
-            html += '<div class="pp-stats pp-fade-in">';
-            html += ppStreakCard(streak, player.form, L.statsStreak);
-            html += '</div>';
         } else {
             html += '<div class="pp-stats pp-fade-in">';
             html += statCard(player.points, L.statsPoints, changeText, changeClass);
             html += statCard(player.wins, L.statsWins, '', '');
             html += statCard(player.losses, L.statsLosses, '', '');
             html += statCard(winRate + '%', L.statsWinRate, '', '');
-            html += ppStreakCard(streak, player.form, L.statsStreak);
             html += '</div>';
         }
 
@@ -947,10 +931,20 @@
                 .select('tournament_id, round_reached, points_earned, tournament:tournaments(id, title, title_en, title_kg, date_start, image)')
                 .eq('player_id', _playerId)
                 .order('created_at', { ascending: false })
+                .limit(10),
+            // Записи, добавленные админом руками: турнира с таким названием
+            // в базе нет, но игра была и очки начислены
+            client.from('rating_history')
+                .select('tournament_name, points_earned, recorded_at')
+                .eq('player_id', _playerId)
+                .is('tournament_id', null)
+                .not('category_id', 'is', null)
+                .order('recorded_at', { ascending: false })
                 .limit(10)
         ]).then(function(results) {
             var regs = results[0].data || [];
             var tResults = results[1].data || [];
+            var manualRows = results[2].data || [];
 
             // Map results by tournament_id
             var resultsMap = {};
@@ -969,6 +963,14 @@
                 if (!tr.tournament || seen[tr.tournament_id]) return;
                 seen[tr.tournament_id] = true;
                 items.push({ tournament: tr.tournament, round_reached: tr.round_reached, points_earned: tr.points_earned });
+            });
+
+            manualRows.forEach(function(rh) {
+                items.push({
+                    tournament: { id: '', title: rh.tournament_name, date_start: rh.recorded_at },
+                    points_earned: rh.points_earned || 0,
+                    manual: true
+                });
             });
 
             if (items.length === 0) {
@@ -1030,7 +1032,12 @@
             if (item.points_earned > 0) result += ' · +' + item.points_earned;
         }
         var resultClass = isUpcoming ? ' pp-tournament-upcoming' : (item.round_reached === 'W' ? ' pp-tournament-winner' : '');
-        var html = '<a class="pp-tournament" href="' + tPage + '">';
+        // Запись, добавленную админом руками, открывать нечего: такого
+        // турнира в базе нет. Показываем название и очки, но без ссылки
+        var manual = !t.id;
+        var html = manual
+            ? '<div class="pp-tournament pp-tournament-plain">'
+            : '<a class="pp-tournament" href="' + tPage + '">';
         if (tImg) {
             html += '<img src="' + esc(tImg) + '" alt="' + esc(tName) + '" class="pp-tournament-photo">';
         } else {
@@ -1040,7 +1047,7 @@
         if (dateStr) html += '<span class="pp-tournament-date">' + dateStr + '</span>';
         html += '</div>';
         html += '<span class="pp-tournament-result' + resultClass + '">' + result + '</span>';
-        html += '</a>';
+        html += manual ? '</div>' : '</a>';
         return html;
     }
 
@@ -1593,17 +1600,25 @@
                     // там играл. Очки в каждой считаются отдельно.
                     var myCats = [];
                     var pcRes = await client.from('player_categories')
-                        .select('category_id, points, wins, losses')
+                        .select('category_id, points, wins, losses, closed_at')
                         .eq('player_id', p.id)
                         .order('points', { ascending: false });
 
+                    var catById = {};
+                    var allCatsRes = await client.from('categories').select('id, name, name_en, name_kg');
+                    (allCatsRes.data || []).forEach(function(c) { catById[c.id] = c; });
+
                     if (pcRes.data && pcRes.data.length > 0) {
-                        var allCatsRes = await client.from('categories').select('id, name, name_en, name_kg');
-                        var catById = {};
-                        (allCatsRes.data || []).forEach(function(c) { catById[c.id] = c; });
 
                         for (var ci = 0; ci < pcRes.data.length; ci++) {
                             var row = pcRes.data[ci];
+                            // Закрытую категорию посторонним не показываем:
+                            // игрок в ней больше не выступает. Себе он её
+                            // видит в кабинете, вместе с причиной
+                            if (row.closed_at) continue;
+                            // Friendly в рейтинге не участвует: турниры и матчи
+                            // записываются, очков за них нет
+                            if (row.category_id === 'friendly') continue;
                             var rankRes = await client.from('player_categories')
                                 .select('player_id', { count: 'exact', head: true })
                                 .eq('category_id', row.category_id)
@@ -1615,12 +1630,29 @@
                                 points: row.points || 0,
                                 wins: row.wins || 0,
                                 losses: row.losses || 0,
+                                closed: !!row.closed_at,
                                 rank: (rankRes.count || 0) + 1,
                                 isHome: row.category_id === p.category_id
                             });
                             if (row.category_id === p.category_id) rank = (rankRes.count || 0) + 1;
                         }
                     }
+                    // Домашняя категория видна и без очков: игрок в ней уже
+                    // числится и стоит в рейтинге, просто ещё ничего не набрал
+                    var homeClosed = (pcRes.data || []).some(function(r) {
+                        return r.category_id === p.category_id && r.closed_at;
+                    });
+                    if (p.category_id && !homeClosed &&
+                        !myCats.some(function(c) { return c.id === p.category_id; })) {
+                        var hc = catById && catById[p.category_id];
+                        myCats.push({
+                            id: p.category_id,
+                            name: hc ? (isEn ? (hc.name_en || hc.name) : (isKg ? (hc.name_kg || hc.name) : hc.name)) : p.category_id,
+                            points: 0, wins: 0, losses: 0, closed: false,
+                            rank: null, isHome: true
+                        });
+                    }
+
                     var playerName = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
                     // If player has no photo, try linked profile avatar
                     var playerPhoto = p.photo || '';
