@@ -165,3 +165,82 @@ test.describe('Dashboard Page — Navigation Elements', () => {
         });
     }
 });
+
+/**
+ * TC-DASHBOARD-GAMES: состав и порядок подразделов «Мои игры».
+ *
+ * Порядок здесь не украшение: турниры дают рейтинг, матчи их разбирают,
+ * баттлы играются вне зачёта, приглашения ещё даже не игра. Раньше
+ * подразделов было три (матчи, вызовы, турниры), вызовы и баттлы жили
+ * порознь, хотя в базе это одна строка challenges, а приглашения занимали
+ * отдельный пункт бокового меню наравне с турнирами.
+ */
+test.describe('Dashboard Page — My Games subsections', () => {
+    for (const dashPage of DASHBOARD_PAGES) {
+        test(`${dashPage.name}: Five subsections in fixed order`, async ({ page }) => {
+            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+
+            const bodies = page.locator('#db-games .db-subsection-body');
+            await expect(bodies.first()).toBeAttached({ timeout: 15000 });
+            await expect(bodies).toHaveCount(5);
+
+            expect(await bodies.nth(0).getAttribute('id')).toBe('dbSubUpcoming');
+            expect(await bodies.nth(1).getAttribute('id')).toBe('dbSubTournaments');
+            expect(await bodies.nth(2).getAttribute('id')).toBe('dbSubMatches');
+            expect(await bodies.nth(3).getAttribute('id')).toBe('dbSubBattles');
+            expect(await bodies.nth(4).getAttribute('id')).toBe('dbSubInvites');
+        });
+
+        // Пустой блок «Предстоящие турниры» висел бы девять месяцев в году
+        test(`${dashPage.name}: Upcoming block is shown only when it has rows`, async ({ page }) => {
+            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+
+            // Ждём, пока отрисуются прошедшие турниры — к этому моменту
+            // предстоящие уже решили, показываться им или нет
+            await expect(page.locator('#dbGamesTournaments .db-subsection-loading'))
+                .toHaveCount(0, { timeout: 20000 });
+
+            const wrap = page.locator('#dbSubUpcoming').locator('..');
+            const rows = await page.locator('#dbGamesUpcoming tbody tr').count();
+            expect(await wrap.isVisible()).toBe(rows > 0);
+        });
+
+        /**
+         * Каждый подраздел обязан догрузиться.
+         *
+         * Ошибка внутри загрузчика гасится в catch и уходит в консоль — на
+         * экране остаётся вечное «Загрузка...», а набор тестов при этом
+         * зелёный: проверялось только наличие блоков, а не то, что в них
+         * что-то появилось. Так пропустили ReferenceError, из-за которого
+         * матчи и баттлы не отображались вовсе.
+         */
+        test(`${dashPage.name}: Every subsection finishes loading`, async ({ page }) => {
+            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+
+            for (const id of ['dbGamesTournaments', 'dbGamesMatches', 'dbGamesBattles', 'dbGamesInvites']) {
+                await expect(page.locator(`#${id} .db-subsection-loading`),
+                    `${id} застрял на загрузке`).toHaveCount(0, { timeout: 20000 });
+                await expect(page.locator(`#${id}`),
+                    `${id} остался пустым`).not.toBeEmpty();
+            }
+        });
+
+        test(`${dashPage.name}: No separate Invitations tab`, async ({ page }) => {
+            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+
+            await expect(page.locator('.db-sidebar-link').first()).toBeAttached({ timeout: 15000 });
+            expect(await page.locator('[data-tab="invitations"]').count()).toBe(0);
+            expect(await page.locator('#db-invitations').count()).toBe(0);
+        });
+
+        test(`${dashPage.name}: Old #invitations link lands on My Games`, async ({ page }) => {
+            await page.goto(dashPage.path + '#invitations', { waitUntil: 'domcontentloaded' });
+
+            // Раздел «Мои игры» помечен активным ещё в разметке, так что сам
+            // по себе он ничего не доказывает: ждём, пока отработает скрипт
+            await expect(page.locator('.db-sidebar-link').first()).toBeAttached({ timeout: 15000 });
+            await expect.poll(() => page.url(), { timeout: 10000 }).toContain('#games');
+            await expect(page.locator('#db-games')).toHaveClass(/active/);
+        });
+    }
+});

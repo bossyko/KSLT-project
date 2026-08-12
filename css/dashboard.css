@@ -720,8 +720,52 @@ select.db-field-input {
     margin-bottom: var(--space-md);
 }
 
+/* Внутри категории карточки те же, но ниже: категорий у игрока до четырёх,
+   и в полный рост они уводили «Статистику» на два экрана. Состав блока
+   прежний — четыре числа и полоса побед с поражениями. */
 .db-stats-grid-mini {
-    gap: 10px;
+    /* Колонки постоянной ширины и прижаты влево.
+       В четыре равные доли на всю ширину блока числа разъезжались по углам,
+       и середина зияла пустотой. По содержимому — тоже плохо: ширина зависит
+       от самого числа, и у категории с «209» подписи стояли не там, где у
+       категории с «50». Категории сравнивают по вертикали, столбцы должны
+       совпадать. */
+    grid-template-columns: 92px repeat(3, 96px);
+    justify-content: start;
+    align-items: baseline;
+    gap: 0 8px;
+    margin-bottom: 0;
+}
+
+/* Внутри категории у чисел нет своей рамки: блок категории уже обведён, и
+   получалась рамка в рамке. Без неё четыре числа читаются так же, а высота
+   падает ещё на четверть */
+.db-stats-grid-mini .db-stat-card {
+    padding: 2px 0;
+    background: none;
+    border: none;
+    /* Число по центру своей подписи: при выравнивании по левому краю
+       короткий «0» уезжал влево от широкого слова «ПОРАЖЕНИЯ» */
+    text-align: center;
+}
+
+.db-stats-grid-mini .db-stat-value {
+    font-size: 1.05rem;
+    margin-bottom: 1px;
+}
+
+/* Очки — то, ради чего игрок открыл раздел. Победы, поражения и место при
+   них: одинаковый размер у всех четырёх лишал блок главного числа */
+.db-stats-grid-mini .db-stat-card:first-child .db-stat-value {
+    font-size: 1.5rem;
+    line-height: 1.1;
+}
+
+/* Разрядка была рассчитана на крупную подпись под большим числом; на этом
+   размере она только растягивала слова */
+.db-stats-grid-mini .db-stat-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2px;
 }
 
 .db-stat-card {
@@ -750,8 +794,8 @@ select.db-field-input {
 .db-cat-block {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
-    padding: 14px 16px 2px;
-    margin-bottom: 12px;
+    padding: 10px 12px 2px;
+    margin-bottom: 8px;
 }
 
 .db-cat-block:last-child {
@@ -760,7 +804,7 @@ select.db-field-input {
 
 .db-cat-name {
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -799,7 +843,7 @@ select.db-field-input {
 .db-cat-bar {
     display: flex;
     height: 6px;
-    margin: 12px 0 6px;
+    margin: 8px 0 5px;
     border-radius: 3px;
     overflow: hidden;
     background: rgba(255,255,255,0.07);
@@ -821,7 +865,7 @@ select.db-field-input {
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
-    padding-bottom: 12px;
+    padding-bottom: 8px;
     font-size: 0.72rem;
     color: var(--text-muted);
 }
@@ -843,11 +887,6 @@ select.db-field-input {
 .db-cat-record .db-cat-mark + * { margin-right: 2px; }
 .db-cat-mark-w { background: #4ade80; }
 .db-cat-mark-l { background: #ff6b62; margin-left: 6px; }
-
-.db-cat-rate {
-    font-weight: 600;
-    color: var(--text-secondary);
-}
 
 /* ---- Settings ---- */
 .db-settings-section {
@@ -1647,6 +1686,16 @@ select.db-field-input {
     font-size: 0.72rem;
     color: var(--text-muted);
     margin-top: 2px;
+}
+
+/* Статус и H2H стоят одной колонкой справа: H2H появляется только у
+   сыгранных, и без общей колонки строка прыгала бы по ширине */
+.db-invite-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
 }
 
 .db-invite-status {
@@ -2752,4 +2801,149 @@ select:-webkit-autofill {
     margin-top: 5px;
     font-size: 0.72rem;
     color: var(--text-dim);
+}
+
+/* ---- Турниры в «Моих играх»: та же таблица, что и матчи ----
+   Раньше это были высокие карточки с фотографией турнира, а кнопка «Снять
+   заявку» стояла за пределами карточки, справа от неё. Строк по десять на
+   странице — карточками блок уезжал на два экрана. */
+.db-tour-table .db-match-tournament {
+    max-width: none;
+}
+
+.db-tour-link {
+    color: var(--text-primary, #fff);
+    text-decoration: none;
+}
+
+.db-tour-link:hover {
+    color: var(--accent);
+}
+
+.db-tour-status {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Снятая, отклонённая, непрошедшая заявка — тусклее: игра не состоялась */
+.db-tour-status-off {
+    opacity: 0.6;
+}
+
+.db-tour-pts {
+    text-align: right;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.db-tour-table .db-withdraw-btn {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+}
+
+/* ---- Постраничный переключатель ----
+   Один на все подразделы «Моих игр»: высота блока перестаёт зависеть от
+   того, сколько турниров человек отыграл за два сезона. */
+.db-pager {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    padding: 12px 0 2px;
+}
+
+.db-pager-btn {
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm, 6px);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.db-pager-btn:hover:not(:disabled) {
+    color: var(--text-primary, #fff);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.db-pager-btn.active {
+    color: #0A0A0A;
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+.db-pager-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* ---- Значок статуса ----
+   Классы цвета стояли прямо на ячейке таблицы, и «Принято» заливало всю
+   её высоту зелёным прямоугольником во всю колонку. Цвет живёт на значке. */
+.db-status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Соперник ведёт на свою страницу */
+.db-opp-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.db-opp-link:hover {
+    color: var(--accent);
+}
+
+
+/* ---- Строка чисел категории ----
+   Числа слева, итог справа. Раньше всё жалось к левому краю, и правая
+   половина блока пустовала — глазу не за что было зацепиться. */
+.db-cat-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.db-cat-rate {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.db-cat-rate b {
+    display: block;
+    font-size: 1.5rem;
+    line-height: 1.1;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.db-cat-rate span {
+    display: block;
+    margin-top: 1px;
+    font-size: 0.6rem;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* Матчей ещё не было — процента нет, но столбец остаётся на месте */
+.db-cat-rate-empty b {
+    color: var(--text-muted);
 }

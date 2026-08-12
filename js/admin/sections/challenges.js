@@ -467,27 +467,9 @@
             btn.textContent = isEn ? 'Deleting...' : 'Удаление...';
 
             try {
-                // 1. If has match_id — get winner/loser, rollback stats, delete match
+                // 1. Убрать сам матч. Откатывать победы и поражения больше
+                // нечего: баттл не рейтинговая игра и в статистику не идёт
                 if (challenge.match_id && challenge.status === 'completed') {
-                    var matchRes = await A.client.from('matches').select('winner_id').eq('id', challenge.match_id).single();
-                    if (matchRes.data && matchRes.data.winner_id) {
-                        var winnerId = matchRes.data.winner_id;
-                        var loserId = winnerId === challenge.challenger_player_id
-                            ? challenge.opponent_player_id
-                            : challenge.challenger_player_id;
-
-                        // Rollback winner wins -1
-                        var wRes = await A.client.from('players').select('wins').eq('id', winnerId).single();
-                        if (wRes.data) {
-                            await A.client.from('players').update({ wins: Math.max(0, (wRes.data.wins || 0) - 1) }).eq('id', winnerId);
-                        }
-                        // Rollback loser losses -1
-                        var lRes = await A.client.from('players').select('losses').eq('id', loserId).single();
-                        if (lRes.data) {
-                            await A.client.from('players').update({ losses: Math.max(0, (lRes.data.losses || 0) - 1) }).eq('id', loserId);
-                        }
-                    }
-                    // Delete match record
                     await A.client.from('matches').delete().eq('id', challenge.match_id);
                 }
 
@@ -1309,57 +1291,22 @@
                     A.showToast('Error: ' + matchRes.error.message, 'error');
                     return false;
                 }
+                // Победы, поражения и форма игрока остаются турнирными:
+                // баттл — игра показательная, в зачёт она не идёт. Раньше
+                // отсюда шло начисление, и баттлы попадали в статистику
+                // на публичной странице и в списке админки
                 return A.client.from('challenges').update({
                     status: 'completed',
                     match_id: matchRes.data.id,
                     score_draft: null
                 }).eq('id', challenge.id).then(function(updRes) {
-                    if (updRes.error) return false;
-                    // Update player stats
-                    return updateDuelPlayerStats(winnerId, loserId);
+                    return !updRes.error;
                 });
             }).catch(function(err) {
                 console.error('Finalize match error:', err);
                 A.showToast(isEn ? 'Error finalizing match' : 'Ошибка завершения матча', 'error');
                 return false;
             });
-    }
-
-    // Update wins/losses + form for duel result
-    async function updateDuelPlayerStats(winnerId, loserId) {
-        try {
-            // Winner: wins + 1
-            var wRes = await A.client.from('players').select('wins').eq('id', winnerId).single();
-            await A.client.from('players').update({ wins: ((wRes.data || {}).wins || 0) + 1 }).eq('id', winnerId);
-
-            // Loser: losses + 1
-            var lRes = await A.client.from('players').select('losses').eq('id', loserId).single();
-            await A.client.from('players').update({ losses: ((lRes.data || {}).losses || 0) + 1 }).eq('id', loserId);
-
-            // Update form for both
-            await updatePlayerForm(winnerId);
-            await updatePlayerForm(loserId);
-
-            return true;
-        } catch (e) {
-            console.error('updateDuelPlayerStats error:', e);
-            return true; // non-critical, don't block finalization
-        }
-    }
-
-    async function updatePlayerForm(playerId) {
-        var res = await A.client.from('matches')
-            .select('winner_id')
-            .or('player1_id.eq.' + playerId + ',player2_id.eq.' + playerId)
-            .eq('status', 'completed')
-            .order('created_at', { ascending: false })
-            .limit(5);
-
-        var form = (res.data || []).map(function(m) {
-            return m.winner_id === playerId ? 'W' : 'L';
-        });
-
-        await A.client.from('players').update({ form: form }).eq('id', playerId);
     }
 
     // ---- Notify: send TG group announcement with inline voting buttons ----

@@ -161,9 +161,14 @@
         qrCopied: 'Көчүрүлдү!',
         games: 'Менин оюндарым',
         gamesTitle: 'Менин оюндарым',
-        subTournaments: 'Мелдештер',
+        subTournaments: 'Өткөн мелдештер',
         subMatches: 'Матчтар',
         subChallenges: 'Чакыруулар',
+        subBattles: 'Баттлдар',
+        subUpcoming: 'Алдыдагы турнирлер',
+        tourNoResults: 'Жыйынтык киргизилген жок',
+        regRefusedShort: 'Четке кагылган',
+        tourStatus: 'Абалы', tourResult: 'Жыйынтык', invDirection: 'Багыты',
         showAll: 'Баарын көрсөтүү',
         collapseBtn: 'Жыйуу',
         loadingList: 'Жүктөлүүдө...',
@@ -397,9 +402,14 @@
         qrCopied: 'Copied!',
         games: 'My Games',
         gamesTitle: 'My Games',
-        subTournaments: 'Tournaments',
+        subTournaments: 'Past tournaments',
         subMatches: 'Matches',
         subChallenges: 'Challenges',
+        subBattles: 'Battles',
+        subUpcoming: 'Upcoming tournaments',
+        tourNoResults: 'Results not entered',
+        regRefusedShort: 'Declined',
+        tourStatus: 'Status', tourResult: 'Result', invDirection: 'Direction',
         showAll: 'Show all',
         collapseBtn: 'Collapse',
         loadingList: 'Loading...',
@@ -633,9 +643,14 @@
         qrCopied: 'Скопировано!',
         games: 'Мои игры',
         gamesTitle: 'Мои игры',
-        subTournaments: 'Турниры',
+        subTournaments: 'Прошедшие турниры',
         subMatches: 'Матчи',
         subChallenges: 'Вызовы',
+        subBattles: 'Баттлы',
+        subUpcoming: 'Предстоящие турниры',
+        tourNoResults: 'Результаты не внесены',
+        regRefusedShort: 'Отклонена',
+        tourStatus: 'Статус', tourResult: 'Результат', invDirection: 'Направление',
         showAll: 'Показать все',
         collapseBtn: 'Свернуть',
         loadingList: 'Загрузка...',
@@ -935,7 +950,6 @@
         renderGames(profile);
         renderStats(profile);
         renderNotifications(user);
-        renderInvitations();
         renderVouchers();
         renderLoyalty(user);
         renderPayments();
@@ -1149,7 +1163,6 @@
             '<ul class="db-sidebar-nav">' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link active" data-tab="games"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>' + L.games + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>' + L.stats + '</button></li>' +
-                '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="invitations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>' + L.invitations + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="vouchers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>' + L.vouchers + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="loyalty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' + L.loyaltyTab + '</button></li>' +
                 '<li class="db-sidebar-item"><button class="db-sidebar-link" data-tab="payments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>' + L.payments + '</button></li>' +
@@ -1379,7 +1392,6 @@
         container.innerHTML =
             '<button class="db-mobile-tab active" data-tab="games">' + L.games + '</button>' +
             '<button class="db-mobile-tab" data-tab="stats">' + L.stats + '</button>' +
-            '<button class="db-mobile-tab" data-tab="invitations">' + L.invitations + '</button>' +
             '<button class="db-mobile-tab" data-tab="vouchers">' + L.vouchers + '</button>' +
             '<button class="db-mobile-tab" data-tab="loyalty">' + L.loyaltyTab + '</button>' +
             '<button class="db-mobile-tab" data-tab="payments">' + L.payments + '</button>' +
@@ -1408,7 +1420,9 @@
 
     function switchTab(tab) {
         // Backward compat: old tabs redirect to games
-        if (tab === 'tournaments' || tab === 'challenges') { tab = 'games'; window.location.hash = 'games'; }
+        if (tab === 'tournaments' || tab === 'challenges' || tab === 'invitations') {
+            tab = 'games'; window.location.hash = 'games';
+        }
         document.querySelectorAll('.db-sidebar-link').forEach(function(el) {
             el.classList.toggle('active', el.dataset.tab === tab);
         });
@@ -1771,24 +1785,12 @@
 
     }
 
-    // ---- Invitations section ----
-    function renderInvitations() {
-        var container = document.getElementById('db-invitations');
-        if (!container) return;
-
-        container.innerHTML =
-            '<h2 class="db-section-title">' + L.invitationsTitle + '</h2>' +
-            '<div class="db-card" id="dbGameInvites">' +
-                '<p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p>' +
-            '</div>';
-
-        if (client) {
-            loadGameInvites();
-        }
-    }
+    // Отдельного раздела «Приглашения» больше нет: позвать поиграть — это
+    // ещё не игра, и держать ради него пункт меню наравне с турнирами
+    // незачем. Список живёт подразделом в «Моих играх».
 
     async function loadGameInvites() {
-        var card = document.getElementById('dbGameInvites');
+        var card = document.getElementById('dbGamesInvites');
         if (!card || !client) return;
 
         try {
@@ -1797,7 +1799,7 @@
 
             if (invites.length === 0) {
                 card.innerHTML =
-                    '<div class="db-empty" style="padding:var(--space-lg) 0;">' +
+                    '<div class="db-empty" style="padding:16px 0;">' +
                         '<div class="db-empty-icon">&#127934;</div>' +
                         '<div class="db-empty-title">' + L.invNoInvites + '</div>' +
                         '<div class="db-empty-text">' + L.invNoInvitesText + '</div>' +
@@ -1805,75 +1807,79 @@
                 return;
             }
 
-            var html = '<div class="db-invite-list">';
-
-            for (var i = 0; i < invites.length; i++) {
-                var inv = invites[i];
-                var initials = dbInitials(inv.partner_name);
-                var avatarHtml = inv.partner_avatar
-                    ? '<img src="' + escHtml(inv.partner_avatar) + '" class="db-invite-avatar" alt="">'
-                    : '<div class="db-invite-avatar-ph">' + initials + '</div>';
-
-                var dirLabel = inv.direction === 'sent' ? L.invSent : L.invReceived;
-                var statusLabel = inv.status === 'accepted' ? L.invAccepted : inv.status === 'declined' ? L.invDeclined : L.invPending;
-                var statusClass = inv.status === 'accepted' ? 'accepted' : inv.status === 'declined' ? 'declined' : 'pending';
-
-                var dateStr = '';
-                try {
-                    var d = new Date(inv.created_at);
-                    dateStr = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
-                } catch(e) {}
-
-                html += '<div class="db-invite-item">' +
-                    avatarHtml +
-                    '<div class="db-invite-info">' +
-                        '<div class="db-invite-name">' + escHtml(inv.partner_name || '—') + '</div>' +
-                        '<div class="db-invite-meta">' + dirLabel + ' &middot; ' + dateStr + '</div>' +
-                    '</div>' +
-                    '<div class="db-invite-status db-invite-' + statusClass + '">' + statusLabel + '</div>' +
-                '</div>';
-            }
-
-            html += '</div>';
-            card.innerHTML = html;
+            renderPaged(card, invites, function(rows) {
+                return '<table class="db-matches-table"><thead><tr>' +
+                        '<th>' + L.matchDate + '</th>' +
+                        '<th>' + L.matchOpponent + '</th>' +
+                        '<th>' + L.invDirection + '</th>' +
+                        '<th>' + L.tourStatus + '</th>' +
+                    '</tr></thead><tbody>' +
+                    rows.map(inviteRow).join('') +
+                    '</tbody></table>';
+            }, 0);
         } catch(e) {
             console.error('Game invites error:', e);
-            card.innerHTML = '<p style="color:var(--text-muted);">—</p>';
+            card.innerHTML = '<p style="color:var(--text-muted);">\u2014</p>';
+        }
+
+        function inviteRow(inv) {
+            var name = inv.partner_name || '\u2014';
+            var statusLabel = inv.status === 'accepted' ? L.invAccepted
+                : inv.status === 'declined' ? L.invDeclined : L.invPending;
+            var statusClass = inv.status === 'accepted' ? 'accepted'
+                : inv.status === 'declined' ? 'declined' : 'pending';
+
+            var dateStr = '';
+            if (inv.created_at) {
+                var d = String(inv.created_at);
+                dateStr = d.slice(8, 10) + '.' + d.slice(5, 7) + '.' + d.slice(2, 4);
+            }
+
+            return '<tr>' +
+                '<td class="db-match-date">' + dateStr + '</td>' +
+                '<td><div class="db-match-opponent">' +
+                    matchAvatar(name, inv.partner_avatar) +
+                    '<span>' + escHtml(name) + '</span>' +
+                '</div></td>' +
+                '<td class="db-tour-status">' +
+                    (inv.direction === 'sent' ? L.invSent : L.invReceived) + '</td>' +
+                '<td><span class="db-status-badge db-invite-' + statusClass + '">' + statusLabel + '</span></td>' +
+            '</tr>';
         }
     }
-
-    // ================================================
-    // MY GAMES — combined: Tournaments + Matches + Challenges
-    // ================================================
     function renderGames(profile) {
         var container = document.getElementById('db-games');
         if (!container) return;
 
         var html = '<h2 class="db-section-title">' + L.gamesTitle + '</h2>';
 
-        // -- Subsection: Matches (tournament only) --
-        html += '<div class="db-subsection">';
-        html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubMatches">';
-        html += '<span>\u2694\uFE0F ' + L.subMatches + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
-        html += '<div class="db-subsection-body" id="dbSubMatches">';
-        html += '<div id="dbGamesMatches"><p class="db-subsection-loading">' + L.loadingList + '</p></div>';
-        html += '</div></div>';
+        // \u041F\u043E\u0440\u044F\u0434\u043E\u043A \u043E\u0442 \u0433\u043B\u0430\u0432\u043D\u043E\u0433\u043E \u043A \u0432\u0442\u043E\u0440\u043E\u0441\u0442\u0435\u043F\u0435\u043D\u043D\u043E\u043C\u0443: \u0442\u0443\u0440\u043D\u0438\u0440\u044B \u0434\u0430\u044E\u0442 \u0440\u0435\u0439\u0442\u0438\u043D\u0433,
+        // \u043C\u0430\u0442\u0447\u0438 \u2014 \u0438\u0445 \u0440\u0430\u0437\u0431\u043E\u0440, \u0431\u0430\u0442\u0442\u043B\u044B \u0438\u0433\u0440\u0430\u044E\u0442\u0441\u044F \u0432\u043D\u0435 \u0437\u0430\u0447\u0451\u0442\u0430, \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u044F \u0435\u0449\u0451
+        // \u0434\u0430\u0436\u0435 \u043D\u0435 \u0438\u0433\u0440\u0430.
+        //
+        // \u0412\u044B\u0437\u043E\u0432\u043E\u0432 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u044B\u043C \u043F\u043E\u0434\u0440\u0430\u0437\u0434\u0435\u043B\u043E\u043C \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435\u0442. \u0411\u0430\u0442\u0442\u043B \u2014 \u043D\u0435 \u0434\u0440\u0443\u0433\u0430\u044F
+        // \u0441\u0443\u0449\u043D\u043E\u0441\u0442\u044C, \u0430 \u0442\u043E\u0442 \u0436\u0435 \u0432\u044B\u0437\u043E\u0432 \u043F\u043E\u0441\u043B\u0435 \u043F\u0443\u0431\u043B\u0438\u043A\u0430\u0446\u0438\u0438: \u043E\u0434\u043D\u0430 \u0441\u0442\u0440\u043E\u043A\u0430 \u0432
+        // challenges \u0441 \u043F\u0440\u0438\u0437\u043D\u0430\u043A\u043E\u043C battle_published. \u041F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0442\u044C \u044D\u0442\u043E \u0434\u0432\u0443\u043C\u044F
+        // \u0441\u043F\u0438\u0441\u043A\u0430\u043C\u0438 \u0437\u043D\u0430\u0447\u0438\u043B\u043E \u0431\u044B \u0434\u0435\u043B\u0438\u0442\u044C \u043E\u0434\u043D\u0443 \u0438\u0433\u0440\u0443 \u043D\u0430\u0434\u0432\u043E\u0435 \u043F\u043E \u0435\u0451 \u0441\u0442\u0430\u0434\u0438\u0438.
+        function sub(bodyId, icon, title, innerId) {
+            return '<div class="db-subsection">' +
+                '<button class="db-subsection-toggle db-subsection-open" data-target="' + bodyId + '">' +
+                '<span>' + icon + ' ' + title + '</span>' +
+                '<span class="db-toggle-arrow">\u25BC</span></button>' +
+                '<div class="db-subsection-body" id="' + bodyId + '">' +
+                '<div id="' + innerId + '"><p class="db-subsection-loading">' + L.loadingList + '</p></div>' +
+                '</div></div>';
+        }
 
-        // -- Subsection: Challenges --
-        html += '<div class="db-subsection">';
-        html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubChallenges">';
-        html += '<span>\uD83E\uDD4A ' + L.subChallenges + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
-        html += '<div class="db-subsection-body" id="dbSubChallenges">';
-        html += '<div id="dbGamesChallenges"><p class="db-subsection-loading">' + L.loadingList + '</p></div>';
-        html += '</div></div>';
-
-        // -- Subsection: Tournaments --
-        html += '<div class="db-subsection">';
-        html += '<button class="db-subsection-toggle db-subsection-open" data-target="dbSubTournaments">';
-        html += '<span>\uD83C\uDFC6 ' + L.subTournaments + '</span><span class="db-toggle-arrow">\u25BC</span></button>';
-        html += '<div class="db-subsection-body" id="dbSubTournaments">';
-        html += '<div id="dbGamesTournaments"><p class="db-subsection-loading">' + L.loadingList + '</p></div>';
-        html += '</div></div>';
+        // Предстоящие турниры стоят первыми и живут отдельным подразделом:
+        // это единственное здесь, что требует действия — не пропустить, не
+        // забыть сняться. Всё остальное — архив. Внутри общего блока
+        // «Турниры» предстоящее было спрятано, да ещё и сворачивалось
+        html += sub('dbSubUpcoming', '\uD83D\uDCC5', L.subUpcoming, 'dbGamesUpcoming');
+        html += sub('dbSubTournaments', '\uD83C\uDFC6', L.subTournaments, 'dbGamesTournaments');
+        html += sub('dbSubMatches', '\u2694\uFE0F', L.subMatches, 'dbGamesMatches');
+        html += sub('dbSubBattles', '\uD83D\uDD25', L.subBattles, 'dbGamesBattles');
+        html += sub('dbSubInvites', '\uD83C\uDFBE', L.invitations, 'dbGamesInvites');
 
         // Достижения живут в «Статистике»: они про показатели игрока, а не про
         // сыгранные встречи. Здесь стоял их второй, точно такой же блок
@@ -1900,9 +1906,10 @@
         });
 
         // Load data
-        loadGamesMatches(profile);
-        loadGamesChallenges();
         loadGamesTournaments(profile);
+        loadGamesMatches(profile);
+        loadGamesBattles(profile);
+        loadGameInvites();
     }
 
     // ---- Games: Tournaments subsection ----
@@ -1980,15 +1987,18 @@
                 });
             });
 
-            if (items.length === 0) {
-                container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC6</div><div class="db-empty-title">' + L.noTournaments + '</div></div>';
-                return;
-            }
-
+            // Предстоящие — всё, где турнир ещё не начался, с любым статусом
+            // заявки: снятую и отклонённую игрок должен видеть до дня начала,
+            // иначе он не поймёт, почему его там нет.
+            //
+            // Прошедшие — только участие. Раньше сюда падало всё подряд, и
+            // турнир, куда игрока не пустили, стоял рядом с сыгранными,
+            // как будто он в нём играл.
             var upcoming = items.filter(isUpcoming);
-            var played = items.filter(function(i) { return !isUpcoming(i); });
+            var played = items.filter(function(i) { return !isUpcoming(i) && didPlay(i); });
 
-            renderGamesTournaments(container, profile, upcoming, played, false);
+            renderUpcomingTournaments(profile, upcoming);
+            renderGamesTournaments(container, profile, played);
         } catch(e) {
             console.warn('[KSLT] games tournaments error:', e);
             container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83C\uDFC6</div><div class="db-empty-title">' + L.noTournaments + '</div></div>';
@@ -1996,42 +2006,179 @@
     }
 
     /** Сколько сыгранных турниров показываем сразу. */
-    var TOURNAMENTS_PAGE = 10;
+    var GAMES_PAGE = 10;
 
-    function renderGamesTournaments(container, profile, upcoming, played, showAll) {
-        var visible = showAll ? played : played.slice(0, TOURNAMENTS_PAGE);
+    /**
+     * Постраничный список — один на все подразделы «Моих игр».
+     *
+     * «Показать все» на сотне строк проблему не решает, а переносит: блок
+     * становится длинным, и вернуться к нужному месту нечем. Страницами
+     * высота блока постоянна, и до прошлого сезона два нажатия.
+     *
+     * renderRows получает срез и возвращает разметку. Управление рисуется
+     * только когда страниц больше одной.
+     */
+    function renderPaged(container, items, renderRows, page, afterRender) {
+        page = page || 0;
+        var pages = Math.ceil(items.length / GAMES_PAGE) || 1;
+        if (page >= pages) page = pages - 1;
+        var from = page * GAMES_PAGE;
 
-        var html = '';
-        if (upcoming.length > 0) {
-            html += '<div class="db-tournaments-group-title">' + L.tourUpcoming + '</div>';
-            html += '<div class="db-tournaments-list">' + upcoming.map(function(i) { return tournamentRow(i, true); }).join('') + '</div>';
-        }
-        if (played.length > 0) {
-            html += '<div class="db-tournaments-group-title">' + L.tourPlayed + '</div>';
-            html += '<div class="db-tournaments-list">' + visible.map(function(i) { return tournamentRow(i, true); }).join('') + '</div>';
-            if (played.length > TOURNAMENTS_PAGE) {
-                html += showAll
-                    ? '<button class="db-show-all-btn" id="dbCollapseTournaments">' + L.collapseBtn + '</button>'
-                    : '<button class="db-show-all-btn" id="dbShowAllTournaments">' + L.showAll + ' (' + played.length + ')</button>';
+        var html = renderRows(items.slice(from, from + GAMES_PAGE));
+
+        if (pages > 1) {
+            html += '<div class="db-pager">';
+            html += '<button class="db-pager-btn" data-page="' + (page - 1) + '"' +
+                    (page === 0 ? ' disabled' : '') + '>\u2039</button>';
+            for (var i = 0; i < pages; i++) {
+                html += '<button class="db-pager-btn' + (i === page ? ' active' : '') +
+                        '" data-page="' + i + '">' + (i + 1) + '</button>';
             }
+            html += '<button class="db-pager-btn" data-page="' + (page + 1) + '"' +
+                    (page === pages - 1 ? ' disabled' : '') + '>\u203A</button>';
+            html += '</div>';
         }
 
         container.innerHTML = html;
-        bindWithdraw(container, profile, loadGamesTournaments);
+        // Разметка переписывается на каждой странице, значит и обработчики
+        // на строках надо навешивать заново
+        if (afterRender) afterRender(container);
 
-        var showBtn = document.getElementById('dbShowAllTournaments');
-        if (showBtn) {
-            showBtn.addEventListener('click', function() {
-                renderGamesTournaments(container, profile, upcoming, played, true);
+        container.querySelectorAll('.db-pager-btn').forEach(function(btn) {
+            if (btn.disabled) return;
+            btn.addEventListener('click', function() {
+                renderPaged(container, items, renderRows, parseInt(btn.dataset.page, 10), afterRender);
             });
+        });
+    }
+
+
+    /**
+     * Предстоящие турниры.
+     *
+     * Отдельный блок и первым по счёту: это единственное в «Моих играх», где
+     * от игрока что-то требуется — не пропустить и, если передумал, сняться.
+     * Когда заявок нет, блок прячется целиком: пустая рамка висела бы девять
+     * месяцев в году.
+     *
+     * Страниц здесь нет намеренно — записаться можно только в турниры с
+     * открытой регистрацией, их всегда единицы.
+     */
+    function renderUpcomingTournaments(profile, upcoming) {
+        var body = document.getElementById('dbSubUpcoming');
+        var wrap = body && body.parentNode;
+        var container = document.getElementById('dbGamesUpcoming');
+        if (!container || !wrap) return;
+
+        if (upcoming.length === 0) {
+            wrap.style.display = 'none';
+            return;
         }
-        var colBtn = document.getElementById('dbCollapseTournaments');
-        if (colBtn) {
-            colBtn.addEventListener('click', function() {
-                renderGamesTournaments(container, profile, upcoming, played, false);
-                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
+        wrap.style.display = '';
+
+        container.innerHTML =
+            '<table class="db-matches-table db-tour-table"><thead><tr>' +
+                '<th>' + L.matchDate + '</th>' +
+                '<th>' + L.matchTournament + '</th>' +
+                '<th>' + L.tourStatus + '</th>' +
+                '<th></th>' +
+            '</tr></thead><tbody>' +
+            upcoming.map(upcomingRow).join('') +
+            '</tbody></table>';
+
+        bindWithdraw(container, profile, loadGamesTournaments);
+    }
+
+    /** Прошедшие турниры — архив участия, страницами по десять. */
+    function renderGamesTournaments(container, profile, played) {
+        if (!container) return;
+
+        if (played.length === 0) {
+            container.innerHTML = '<div class="db-empty" style="padding:16px 0;">' +
+                '<div class="db-empty-icon">\uD83C\uDFC6</div>' +
+                '<div class="db-empty-title">' + L.noTournaments + '</div></div>';
+            return;
         }
+
+        renderPaged(container, played, function(rows) {
+            return '<table class="db-matches-table db-tour-table"><thead><tr>' +
+                    '<th>' + L.matchDate + '</th>' +
+                    '<th>' + L.matchTournament + '</th>' +
+                    '<th>' + L.tourResult + '</th>' +
+                    '<th style="text-align:right">' + L.points + '</th>' +
+                '</tr></thead><tbody>' +
+                rows.map(playedRow).join('') +
+                '</tbody></table>';
+        }, 0);
+    }
+
+    /** Играл ли он в этом турнире на самом деле. */
+    function didPlay(item) {
+        if (item.round_reached || item.manual) return true;
+        var st = item.reg && item.reg.status;
+        return st === 'approved' || st === 'draw';
+    }
+
+    function tourDate(t) {
+        return t && t.date_start
+            ? t.date_start.slice(8, 10) + '.' + t.date_start.slice(5, 7) + '.' + t.date_start.slice(2, 4)
+            : '';
+    }
+
+    function tourNameCell(t) {
+        var name = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
+        // Записи, добавленные админом руками: турнира с таким названием в базе
+        // нет, открывать нечего
+        if (!t.id) return '<td class="db-match-tournament">' + escHtml(name) + '</td>';
+        var page = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id;
+        return '<td class="db-match-tournament">' +
+            '<a href="' + page + '" class="db-tour-link">' + escHtml(name) + '</a></td>';
+    }
+
+    function upcomingRow(item) {
+        var reg = item.reg;
+        var st = reg && reg.status;
+        var label = st === 'withdrawn' ? L.regWithdrawn
+            : (st === 'blocked' || st === 'rejected') ? L.regRefusedShort
+            : st === 'waitlist' ? L.regWaitlist
+            : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован');
+        var cls = (st === 'withdrawn' || st === 'blocked' || st === 'rejected')
+            ? ' db-tour-status-off' : '';
+
+        var action = '';
+        if (canWithdraw(item)) {
+            action = '<button class="db-withdraw-btn" data-reg="' + reg.id +
+                '" data-name="' + escHtml(item.tournament.title || '') + '">' + L.regWithdraw + '</button>';
+        } else if (canReenter(item)) {
+            action = '<button class="db-withdraw-btn db-reenter-btn" data-tid="' +
+                escHtml(item.tournament.id) + '">' + L.regAgain + '</button>';
+        }
+
+        return '<tr>' +
+            '<td class="db-match-date">' + tourDate(item.tournament) + '</td>' +
+            tourNameCell(item.tournament) +
+            '<td class="db-tour-status' + cls + '">' + label + '</td>' +
+            '<td style="text-align:right">' + action + '</td>' +
+        '</tr>';
+    }
+
+    function playedRow(item) {
+        // Турнир кончился, а результаты не внесли: игрок в нём был, и молча
+        // терять запись нельзя
+        var result = item.round_reached
+            ? (ROUND_LABELS_DB[item.round_reached] || item.round_reached)
+            : (item.manual ? (isEn ? 'Participated' : isKg ? 'Катышкан' : 'Участвовал')
+                           : L.tourNoResults);
+        var isWinner = item.round_reached === 'W';
+        var pts = item.points_earned > 0 ? '+' + item.points_earned : '';
+
+        return '<tr>' +
+            '<td class="db-match-date">' + tourDate(item.tournament) + '</td>' +
+            tourNameCell(item.tournament) +
+            '<td class="db-tour-status' + (isWinner ? ' db-tournament-winner' : '') + '">' +
+                escHtml(result) + '</td>' +
+            '<td class="db-tour-pts">' + pts + '</td>' +
+        '</tr>';
     }
 
     // ---- Score utils ----
@@ -2089,17 +2236,17 @@
     var LH = isKg ? {
         setsWon: 'Утулган сеттер', gamesWon: 'Утулган геймдер',
         last5: 'Акыркы 5 матч', fullProfile: 'Толук профилди ачуу',
-        noMatches: 'Бетме-бет матчтар жок', loading: 'Жүктөлүүдө...',
+        noMatches: 'Бетме-бет матчтар жок', notMet: 'Азырынча беттешкен жок', loading: 'Жүктөлүүдө...',
         matchesLabel: ' матч'
     } : isEn ? {
         setsWon: 'Sets won', gamesWon: 'Games won',
         last5: 'Last 5 matches', fullProfile: 'Open full profile',
-        noMatches: 'No head-to-head matches found', loading: 'Loading...',
+        noMatches: 'No head-to-head matches found', notMet: 'Haven\u2019t met yet', loading: 'Loading...',
         matchesLabel: ' matches'
     } : {
         setsWon: 'Выигранные сеты', gamesWon: 'Выигранные геймы',
         last5: 'Последние 5 матчей', fullProfile: 'Открыть полный профиль',
-        noMatches: 'Матчей между игроками не найдено', loading: 'Загрузка...',
+        noMatches: 'Матчей между игроками не найдено', notMet: 'Ещё не встречались', loading: 'Загрузка...',
         matchesLabel: ' матчей'
     };
 
@@ -2107,7 +2254,6 @@
     var _matchesOpponents = {}; // cache: oppId → { name, photo }
 
     /** Сколько матчей показываем сразу; остальные — по кнопке. */
-    var MATCHES_PAGE = 25;
 
     /** tournament_id → напарник капитана в этом турнире. */
     var _matchPairs = {};
@@ -2220,6 +2366,19 @@
     }
 
     /** Кружок игрока: фото, а без него — инициалы. */
+    /**
+     * Имя соперника ссылкой на его страницу.
+     *
+     * Карточка игрока открыта всем, и соперник в таблице — первое, куда
+     * человек хочет ткнуть: посмотреть, кому проиграл. Раньше это был
+     * простой текст, и приходилось идти в рейтинг и искать по фамилии.
+     */
+    function playerLink(playerId, name) {
+        if (!playerId) return escHtml(name);
+        var page = 'player' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + encodeURIComponent(playerId);
+        return '<a href="' + page + '" class="db-opp-link">' + escHtml(name) + '</a>';
+    }
+
     function matchAvatar(name, photo, extraClass) {
         var cls = 'db-match-avatar' + (extraClass ? ' ' + extraClass : '');
         return photo
@@ -2266,7 +2425,10 @@
         try {
             var pid = profile.player_id;
             var myCaptains = await loadPartnerTournaments(pid);
-            var res = await fetchMatchesPage(pid, 0, MATCHES_PAGE - 1, myCaptains);
+            // Берём всё сразу: список листается страницами на месте, а
+            // догрузка по частям заставляла бы ходить в базу на каждый
+            // переход. Даже у самого играющего человека это сотня строк
+            var res = await fetchMatchesPage(pid, 0, 999, myCaptains);
 
             if (res.error || !res.data || res.data.length === 0) {
                 container.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\u2694\uFE0F</div><div class="db-empty-title">' + L.noMatches + '</div><div class="db-empty-text">' + L.noMatchesText + '</div></div>';
@@ -2275,8 +2437,7 @@
 
             await cachePairs(res.data);
             await cacheOpponents(res.data, pid);
-            renderGamesMatchesList(container, res.data, pid, profile,
-                res.count == null ? res.data.length : res.count, false, myCaptains);
+            renderGamesMatchesList(container, res.data, pid, profile, myCaptains);
         } catch(e) {
             console.warn('[KSLT] games matches error:', e);
         }
@@ -2312,148 +2473,105 @@
         return 'R' + rn;
     }
 
-    /**
-     * Таблица матчей.
-     *
-     * total — сколько матчей у игрока всего по данным базы, а не сколько
-     * загружено. Раньше кнопка называла число загруженных, и при полусотне
-     * матчей «Показать все (50)» показывала ровно те же пятьдесят, молча
-     * пряча остальные.
-     */
-    function renderGamesMatchesList(container, matches, pid, profile, total, collapsed, myCaptains) {
-        var visible = collapsed ? matches.slice(0, MATCHES_PAGE) : matches;
-        var hasMore = visible.length < total;
+    /** Таблица матчей — страницами по десять, как и остальные подразделы. */
+    function renderGamesMatchesList(container, matches, pid, profile, myCaptains) {
         myCaptains = myCaptains || {};
 
-        var html = '<table class="db-matches-table"><thead><tr>';
-        html += '<th>' + L.matchDate + '</th>';
-        html += '<th>' + L.matchOpponent + '</th>';
-        html += '<th style="text-align:center">' + L.matchScore + '</th>';
-        html += '<th style="text-align:center">' + L.matchResult + '</th>';
-        html += '<th>' + L.matchTournament + '</th>';
-        html += '<th style="text-align:center">' + L.matchRound + '</th>';
-        html += '<th style="text-align:center">H2H</th>';
-        html += '</tr></thead><tbody>';
+        renderPaged(container, matches, function(rows) {
+            var html = '<table class="db-matches-table"><thead><tr>';
+            html += '<th>' + L.matchDate + '</th>';
+            html += '<th>' + L.matchOpponent + '</th>';
+            html += '<th style="text-align:center">' + L.matchScore + '</th>';
+            html += '<th style="text-align:center">' + L.matchResult + '</th>';
+            html += '<th>' + L.matchTournament + '</th>';
+            html += '<th style="text-align:center">' + L.matchRound + '</th>';
+            html += '<th style="text-align:center">H2H</th>';
+            html += '</tr></thead><tbody>';
+            rows.forEach(function(m) {
+                // В парном турнире в матче записаны капитаны пар. Своей может
+                // быть та сторона, где стоит не сам игрок, а его капитан
+                var myCap = myCaptains[m.tournament_id];
+                var mineIsP1 = m.player1_id === pid ||
+                    (m.player2_id !== pid && !!myCap && m.player1_id === myCap);
 
-        visible.forEach(function(m) {
-            // В парном турнире в матче записаны капитаны пар. Своей может
-            // быть та сторона, где стоит не сам игрок, а его капитан
-            var myCap = myCaptains[m.tournament_id];
-            var mineIsP1 = m.player1_id === pid ||
-                (m.player2_id !== pid && !!myCap && m.player1_id === myCap);
+                var oppId = mineIsP1 ? m.player2_id : m.player1_id;
+                var opp = _matchesOpponents[oppId] || { name: oppId, photo: '' };
+                var isWin = m.winner_id === (mineIsP1 ? m.player1_id : m.player2_id);
+                var score = m.score || '';
+                var displayScore = mineIsP1 ? dbFormatScore(score) : dbFormatScore(dbFlipScore(score));
 
-            var oppId = mineIsP1 ? m.player2_id : m.player1_id;
-            var opp = _matchesOpponents[oppId] || { name: oppId, photo: '' };
-            var isWin = m.winner_id === (mineIsP1 ? m.player1_id : m.player2_id);
-            var score = m.score || '';
-            var displayScore = mineIsP1 ? dbFormatScore(score) : dbFormatScore(dbFlipScore(score));
+                var dbl = isDoubles(m.tournament);
+                var oppMate = dbl ? partnerInfo(m.tournament_id, oppId) : null;
+                // У пары два имени, и в узкой колонке через косую черту они
+                // ломались на три строки. Даём по имени на строку — под два кружка
+                var oppTitle = oppMate
+                    ? '<span class="db-match-pair"><span>' + playerLink(oppId, opp.name) + '</span>' +
+                      '<span>' + escHtml(oppMate.name) + '</span></span>'
+                    : '<span>' + playerLink(oppId, opp.name) + '</span>';
 
-            var dbl = isDoubles(m.tournament);
-            var oppMate = dbl ? partnerInfo(m.tournament_id, oppId) : null;
-            // У пары два имени, и в узкой колонке через косую черту они
-            // ломались на три строки. Даём по имени на строку — под два кружка
-            var oppTitle = oppMate
-                ? '<span class="db-match-pair"><span>' + escHtml(opp.name) + '</span>' +
-                  '<span>' + escHtml(oppMate.name) + '</span></span>'
-                : '<span>' + escHtml(opp.name) + '</span>';
+                // С кем игрок был в паре. Своя половина пары в матче не записана:
+                // если он капитан — напарника берём из заявки, если напарник —
+                // его парой был капитан, стоящий в матче
+                var myMate = '';
+                if (dbl) {
+                    var mySideCap = mineIsP1 ? m.player1_id : m.player2_id;
+                    var mine = mySideCap === pid
+                        ? partnerInfo(m.tournament_id, pid)
+                        : _matchesOpponents[mySideCap];
+                    myMate = mine ? mine.name : '';
+                }
 
-            // С кем игрок был в паре. Своя половина пары в матче не записана:
-            // если он капитан — напарника берём из заявки, если напарник —
-            // его парой был капитан, стоящий в матче
-            var myMate = '';
-            if (dbl) {
-                var mySideCap = mineIsP1 ? m.player1_id : m.player2_id;
-                var mine = mySideCap === pid
-                    ? partnerInfo(m.tournament_id, pid)
-                    : _matchesOpponents[mySideCap];
-                myMate = mine ? mine.name : '';
-            }
+                var tName = '';
+                if (m.tournament) {
+                    tName = isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title);
+                }
+                var roundLabel = getRoundLabel(m);
 
-            var tName = '';
-            if (m.tournament) {
-                tName = isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title);
-            }
-            var roundLabel = getRoundLabel(m);
+                var dateStr = dbFormatDate(m.played_at || m.created_at);
+                var resultCls = isWin ? 'win' : 'loss';
+                var resultLabel = isWin ? 'W' : 'L';
 
-            var dateStr = dbFormatDate(m.played_at || m.created_at);
-            var resultCls = isWin ? 'win' : 'loss';
-            var resultLabel = isWin ? 'W' : 'L';
+                // У пары кружков два, внахлёст: одно фото на двоих обманывало —
+                // имени рядом стояло два
+                var avatarHtml = matchAvatar(opp.name, opp.photo);
+                if (oppMate) {
+                    avatarHtml = '<div class="db-match-avatars">' + avatarHtml +
+                        matchAvatar(oppMate.name, oppMate.photo, 'db-match-avatar-2nd') + '</div>';
+                }
 
-            // У пары кружков два, внахлёст: одно фото на двоих обманывало —
-            // имени рядом стояло два
-            var avatarHtml = matchAvatar(opp.name, opp.photo);
-            if (oppMate) {
-                avatarHtml = '<div class="db-match-avatars">' + avatarHtml +
-                    matchAvatar(oppMate.name, oppMate.photo, 'db-match-avatar-2nd') + '</div>';
-            }
-
-            html += '<tr>';
-            html += '<td class="db-match-date">' + dateStr + '</td>';
-            html += '<td><div class="db-match-opponent">' + avatarHtml + oppTitle + '</div></td>';
-            html += '<td class="db-match-score">' + displayScore + '</td>';
-            html += '<td class="db-match-result-cell"><span class="db-match-result ' + resultCls + '">' + resultLabel + '</span></td>';
-            html += '<td class="db-match-tournament">' +
-                (dbl ? '<span class="db-match-doubles" title="' + L.matchDoubles + '">\uD83D\uDC65</span> ' : '') +
-                escHtml(tName) +
-                (myMate ? '<div class="db-match-mate">' + L.matchWith +
-                    ' <span class="db-match-mate-name">' + escHtml(myMate) + '</span></div>' : '') +
-                '</td>';
-            html += '<td class="db-match-round">' + roundLabel + '</td>';
-            // H2H — про личные встречи двоих, у пар состав меняется от турнира
-            html += '<td>' + (dbl ? '' :
-                '<button class="db-match-h2h" data-opp-id="' + escHtml(oppId) + '" data-opp-name="' + escHtml(opp.name) + '" data-opp-photo="' + escHtml(opp.photo) + '" title="Head to Head">H2H</button>') +
-                '</td>';
-            html += '</tr>';
+                html += '<tr>';
+                html += '<td class="db-match-date">' + dateStr + '</td>';
+                html += '<td><div class="db-match-opponent">' + avatarHtml + oppTitle + '</div></td>';
+                html += '<td class="db-match-score">' + displayScore + '</td>';
+                html += '<td class="db-match-result-cell"><span class="db-match-result ' + resultCls + '">' + resultLabel + '</span></td>';
+                html += '<td class="db-match-tournament">' +
+                    (dbl ? '<span class="db-match-doubles" title="' + L.matchDoubles + '">\uD83D\uDC65</span> ' : '') +
+                    escHtml(tName) +
+                    (myMate ? '<div class="db-match-mate">' + L.matchWith +
+                        ' <span class="db-match-mate-name">' + escHtml(myMate) + '</span></div>' : '') +
+                    '</td>';
+                html += '<td class="db-match-round">' + roundLabel + '</td>';
+                // H2H — про личные встречи двоих, у пар состав меняется от турнира
+                html += '<td>' + (dbl ? '' :
+                    '<button class="db-match-h2h" data-opp-id="' + escHtml(oppId) + '" data-opp-name="' + escHtml(opp.name) + '" data-opp-photo="' + escHtml(opp.photo) + '" title="Head to Head">H2H</button>') +
+                    '</td>';
+                html += '</tr>';
+            });
+            return html + '</tbody></table>';
+        }, 0, function(root) {
+            bindH2HButtons(root, pid, profile);
         });
-        html += '</tbody></table>';
+    }
 
-        if (hasMore) {
-            html += '<button class="db-show-all-btn" id="dbShowAllMatches">' + L.showAll + ' (' + total + ')</button>';
-        } else if (total > MATCHES_PAGE) {
-            html += '<button class="db-show-all-btn" id="dbCollapseMatches">' + L.collapseBtn + '</button>';
-        }
-
-        container.innerHTML = html;
-
-        // Show all / Collapse
-        var showBtn = document.getElementById('dbShowAllMatches');
-        if (showBtn) {
-            showBtn.addEventListener('click', async function() {
-                // Всё уже в руках — список просто свёрнут
-                if (matches.length >= total) {
-                    renderGamesMatchesList(container, matches, pid, profile, total, false, myCaptains);
-                    return;
-                }
-                showBtn.disabled = true;
-                showBtn.textContent = L.loadingList;
-                try {
-                    var rest = await fetchMatchesPage(pid, matches.length, total - 1, myCaptains);
-                    var all = matches.concat(rest.data || []);
-                    await cachePairs(all);
-                    await cacheOpponents(all, pid);
-                    renderGamesMatchesList(container, all, pid, profile, total, false, myCaptains);
-                } catch(e) {
-                    console.warn('[KSLT] games matches page error:', e);
-                    showBtn.disabled = false;
-                    showBtn.textContent = L.showAll + ' (' + total + ')';
-                }
-            });
-        }
-        var colBtn = document.getElementById('dbCollapseMatches');
-        if (colBtn) {
-            colBtn.addEventListener('click', function() {
-                renderGamesMatchesList(container, matches, pid, profile, total, true, myCaptains);
-                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        }
-
-        // H2H buttons
-        container.querySelectorAll('.db-match-h2h').forEach(function(btn) {
+    /** Кнопки H2H одинаковы в турнирной таблице и в списке баттлов. */
+    function bindH2HButtons(root, pid, profile) {
+        if (!root || !pid) return;
+        root.querySelectorAll('.db-match-h2h').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                var oppId = btn.getAttribute('data-opp-id');
-                var oppName = btn.getAttribute('data-opp-name');
-                var oppPhoto = btn.getAttribute('data-opp-photo');
-                showDashboardH2H(pid, profile, oppId, oppName, oppPhoto);
+                showDashboardH2H(pid, profile,
+                    btn.getAttribute('data-opp-id'),
+                    btn.getAttribute('data-opp-name'),
+                    btn.getAttribute('data-opp-photo'));
             });
         });
     }
@@ -2489,11 +2607,14 @@
             .then(function(res) {
                 var modal = overlay.querySelector('.h2h-modal');
                 if (!modal) return;
-                if (res.error || !res.data || res.data.length === 0) {
+                // Пустая история — не повод прятать окно: «0 — 0» это тоже
+                // ответ на вопрос «как мы с ним играли». Пустой вид оставлен
+                // только на случай настоящего сбоя запроса
+                if (res.error) {
                     renderDashH2HEmpty(overlay);
                     return;
                 }
-                renderDashH2HContent(modal, res.data, pid, profile, oppId, oppName, oppPhoto);
+                renderDashH2HContent(modal, res.data || [], pid, profile, oppId, oppName, oppPhoto);
                 modal.querySelector('.h2h-close').addEventListener('click', closeOverlay);
             });
     }
@@ -2548,7 +2669,10 @@
 
         // Last 5 matches
         var last5 = matches.slice(0, 5);
-        html += '<div class="h2h-matches"><div class="h2h-matches-title">' + LH.last5 + '</div>';
+        html += '<div class="h2h-matches">';
+        html += last5.length
+            ? '<div class="h2h-matches-title">' + LH.last5 + '</div>'
+            : '<div class="h2h-empty" style="padding:12px 0;">' + LH.notMet + '</div>';
         last5.forEach(function(m) {
             var isP1 = m.player1_id === pid;
             var result = m.winner_id === pid ? 'W' : 'L';
@@ -2583,124 +2707,109 @@
     }
 
     // ---- Games: Challenges subsection ----
-    async function loadGamesChallenges() {
-        var card = document.getElementById('dbGamesChallenges');
+    async function loadGamesBattles(profile) {
+        var card = document.getElementById('dbGamesBattles');
         if (!card || !client) return;
+        var myPlayerId = profile && profile.player_id;
 
         try {
             var result = await client.rpc('get_my_challenges');
             var items = result.data || [];
 
             if (!items || items.length === 0) {
-                card.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\u2694\uFE0F</div><div class="db-empty-title">' + L.chalNoChallenges + '</div><div class="db-empty-text">' + L.chalNoChallengesText + '</div></div>';
+                card.innerHTML = '<div class="db-empty" style="padding:16px 0;"><div class="db-empty-icon">\uD83D\uDD25</div><div class="db-empty-title">' + L.chalNoChallenges + '</div><div class="db-empty-text">' + L.chalNoChallengesText + '</div></div>';
                 return;
             }
 
             var chalPage = isEn ? 'challenge-en.html' : (isKg ? 'challenge-kg.html' : 'challenge.html');
 
-            var html = '<div class="db-invite-list">';
-            for (var i = 0; i < items.length; i++) {
-                var ch = items[i];
-                var isSent = ch.direction === 'sent';
-                var partnerName = isSent ? (ch.opponent_name || '\u2014') : (ch.challenger_name || '\u2014');
-                var partnerAvatar = isSent ? ch.opponent_avatar : ch.challenger_avatar;
-                var initials = dbInitials(partnerName);
-                // Ссылка на фото может быть, но не открываться. Раньше в этом
-                // случае оставался значок сломанной картинки: инициалы
-                // подставлялись, только когда ссылки нет вовсе. Подмена
-                // навешивается ниже обработчиком — в разметке она сломалась бы
-                // на фамилии с кавычкой или апострофом
-                var avatarHtml = partnerAvatar
-                    ? '<img src="' + escHtml(partnerAvatar) + '" class="db-invite-avatar" alt=""' +
-                      ' data-initials="' + escHtml(initials) + '">'
-                    : '<div class="db-invite-avatar-ph">' + escHtml(initials) + '</div>';
-
-                var dirLabel = isSent ? L.chalSent : L.chalReceived;
-                var statusMap = {
-                    active: { label: L.chalActive, cls: 'pending' },
-                    negotiating: { label: L.chalNegotiating, cls: 'pending' },
-                    countered: { label: L.chalCountered, cls: 'pending' },
-                    accepted: { label: L.chalAccepted, cls: 'accepted' },
-                    declined: { label: L.chalDeclined, cls: 'declined' },
-                    expired: { label: L.chalExpired, cls: 'declined' },
-                    completed: { label: L.chalCompleted, cls: 'accepted' }
-                };
-                var st = statusMap[ch.status] || { label: ch.status, cls: 'pending' };
-                var finalDate = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_date ? ch.counter_date : ch.proposed_date;
-                var finalTime = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_time ? ch.counter_time : ch.proposed_time;
-                var finalVenue = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_venue ? ch.counter_venue : (ch.court_name || ch.proposed_venue || '');
-
-                var dateStr = '';
-                try {
-                    var d = new Date(finalDate);
-                    if (!isNaN(d.getTime())) {
-                        dateStr = d.toLocaleDateString(isEn ? 'en-US' : (isKg ? 'ky-KG' : 'ru-RU'),
-                            { day: 'numeric', month: 'short' });
-                    }
-                } catch(e) {}
-
-                var metaParts = [dirLabel];
-                if (dateStr) metaParts.push(dateStr);
-                if (finalTime) metaParts.push(finalTime);
-                var venueHtml = finalVenue ? '<div class="db-invite-meta" style="font-size:0.75rem;">\uD83D\uDCCD ' + escHtml(finalVenue) + '</div>' : '';
-
-                // Счёт сам по себе не говорит, чей он. Победителя функция
-                // возвращает давно, показывали только цифры
-                var myPid = isSent ? ch.challenger_player_id : ch.opponent_player_id;
-                var outcomeHtml = '';
-                if (ch.match_winner_id && myPid) {
-                    var won = ch.match_winner_id === myPid;
-                    outcomeHtml = '<span class="db-invite-outcome ' + (won ? 'win' : 'loss') + '">' +
-                        (won ? L.chalWon : L.chalLost) + '</span>';
-                }
-                var scoreHtml = ch.match_score
-                    ? '<div class="db-invite-meta db-invite-score">' + escHtml(ch.match_score) + outcomeHtml + '</div>'
-                    : '';
-
-                // Баттл — тот же вызов, только опубликованный на сайте
-                var battleHtml = ch.battle_published
-                    ? '<a class="db-invite-battle" href="' + chalPage + '?id=' + escHtml(ch.id) + '&from=battles">' +
-                      '\uD83D\uDD25 ' + L.chalBattle +
-                      (ch.battle_title ? ' \u00B7 ' + escHtml(ch.battle_title) : '') + '</a>'
-                    : '';
-
-                html += '<div class="db-invite-item">' +
-                    avatarHtml +
-                    '<div class="db-invite-info">' +
-                        '<div class="db-invite-name">' + escHtml(partnerName) + '</div>' +
-                        '<div class="db-invite-meta">' + metaParts.join(' \u00B7 ') + '</div>' +
-                        venueHtml + scoreHtml + battleHtml +
-                    '</div>' +
-                    '<div class="db-invite-status ' + st.cls + '">' + st.label + '</div>' +
-                '</div>';
-            }
-            html += '</div>';
-            card.innerHTML = html;
-            bindAvatarFallback(card);
+            renderPaged(card, items, function(rows) {
+                return '<table class="db-matches-table"><thead><tr>' +
+                        '<th>' + L.matchDate + '</th>' +
+                        '<th>' + L.matchOpponent + '</th>' +
+                        '<th style="text-align:center">' + L.matchScore + '</th>' +
+                        '<th style="text-align:center">' + L.matchResult + '</th>' +
+                        '<th>' + L.tourStatus + '</th>' +
+                        '<th style="text-align:center">H2H</th>' +
+                    '</tr></thead><tbody>' +
+                    rows.map(battleRow).join('') +
+                    '</tbody></table>';
+            }, 0, function(root) {
+                bindH2HButtons(root, myPlayerId, profile);
+            });
         } catch(e) {
-            console.warn('[KSLT] games challenges error:', e);
+            console.warn('[KSLT] games battles error:', e);
+        }
+
+        function battleRow(ch) {
+            var isSent = ch.direction === 'sent';
+            var partnerName = isSent ? (ch.opponent_name || '\u2014') : (ch.challenger_name || '\u2014');
+            var partnerAvatar = isSent ? ch.opponent_avatar : ch.challenger_avatar;
+
+            var statusMap = {
+                active: { label: L.chalActive, cls: 'pending' },
+                negotiating: { label: L.chalNegotiating, cls: 'pending' },
+                countered: { label: L.chalCountered, cls: 'pending' },
+                accepted: { label: L.chalAccepted, cls: 'accepted' },
+                declined: { label: L.chalDeclined, cls: 'declined' },
+                expired: { label: L.chalExpired, cls: 'declined' },
+                completed: { label: L.chalCompleted, cls: 'accepted' }
+            };
+            var st = statusMap[ch.status] || { label: ch.status, cls: 'pending' };
+
+            var finalDate = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_date
+                ? ch.counter_date : ch.proposed_date;
+            var dateStr = '';
+            if (finalDate) {
+                var d = String(finalDate);
+                dateStr = d.slice(8, 10) + '.' + d.slice(5, 7) + '.' + d.slice(2, 4);
+            }
+
+            // Счёт сам по себе не говорит, чей он: победителя показываем
+            // тем же значком, что и в матчах
+            var myPid = isSent ? ch.challenger_player_id : ch.opponent_player_id;
+            var outcome = '';
+            if (ch.match_winner_id && myPid) {
+                var won = ch.match_winner_id === myPid;
+                outcome = '<span class="db-match-result ' + (won ? 'win' : 'loss') + '">' +
+                    (won ? 'W' : 'L') + '</span>';
+            }
+
+            // Баттл — тот же вызов, только опубликованный на сайте
+            var sub = '';
+            if (ch.battle_published) {
+                sub = '<a class="db-match-mate db-battle-link" href="' + chalPage +
+                    '?id=' + escHtml(ch.id) + '&from=battles">\uD83D\uDD25 ' +
+                    escHtml(ch.battle_title || L.chalBattle) + '</a>';
+            } else if (ch.court_name || ch.proposed_venue) {
+                sub = '<div class="db-match-mate">\uD83D\uDCCD ' +
+                    escHtml(ch.court_name || ch.proposed_venue) + '</div>';
+            }
+
+            var oppPid = isSent ? ch.opponent_player_id : ch.challenger_player_id;
+            // Кнопка активна всегда, а не только у сыгранного баттла: личные
+            // встречи существуют независимо от того, чем кончился этот вызов,
+            // а если их не было — окно честно покажет 0 — 0
+            var h2h = (myPlayerId && oppPid)
+                ? '<button class="db-match-h2h" data-opp-id="' + escHtml(oppPid) +
+                  '" data-opp-name="' + escHtml(partnerName) +
+                  '" data-opp-photo="' + escHtml(partnerAvatar || '') + '" title="Head to Head">H2H</button>'
+                : '';
+
+            return '<tr>' +
+                '<td class="db-match-date">' + dateStr + '</td>' +
+                '<td><div class="db-match-opponent">' +
+                    matchAvatar(partnerName, partnerAvatar) +
+                    '<span>' + playerLink(oppPid, partnerName) + sub + '</span>' +
+                '</div></td>' +
+                '<td class="db-match-score">' + escHtml(ch.match_score || '') + '</td>' +
+                '<td class="db-match-result-cell">' + outcome + '</td>' +
+                '<td><span class="db-status-badge db-invite-' + st.cls + '">' + st.label + '</span></td>' +
+                '<td style="text-align:center">' + h2h + '</td>' +
+            '</tr>';
         }
     }
 
-    /** Не открылось фото — на его место встают инициалы. */
-    function bindAvatarFallback(root) {
-        root.querySelectorAll('img.db-invite-avatar[data-initials]').forEach(function(img) {
-            img.addEventListener('error', function() {
-                var ph = document.createElement('div');
-                ph.className = 'db-invite-avatar-ph';
-                ph.textContent = img.getAttribute('data-initials') || '';
-                if (img.parentNode) img.parentNode.replaceChild(ph, img);
-            });
-        });
-    }
-
-    /**
-     * Насколько игрок продвинулся к незакрытым значкам.
-     *
-     * Считаем только то, что выражается числом: сыгранные матчи, победы,
-     * турниры и серия побед подряд. Для чемпионства, сенсации и членства
-     * счётчика нет — такие значки просто уходят в конец списка целей.
-     */
     async function loadBadgeProgress(playerId) {
         var out = {};
         try {
@@ -2922,104 +3031,6 @@
         }
     });
 
-    // ---- Challenges section (legacy, kept for reference) ----
-    function renderChallenges() {
-        var container = document.getElementById('db-challenges');
-        if (!container) return;
-
-        container.innerHTML =
-            '<h2 class="db-section-title">' + L.challengesTitle + '</h2>' +
-            '<div class="db-card" id="dbChallenges">' +
-                '<p style="color:var(--text-muted);font-size:0.85rem;">' + L.saving + '</p>' +
-            '</div>';
-
-        if (client) {
-            loadChallenges();
-        }
-    }
-
-    async function loadChallenges() {
-        var card = document.getElementById('dbChallenges');
-        if (!card || !client) return;
-
-        try {
-            var result = await client.rpc('get_my_challenges');
-            var items = result.data || [];
-
-            if (!items || items.length === 0) {
-                card.innerHTML =
-                    '<div class="db-empty" style="padding:var(--space-lg) 0;">' +
-                        '<div class="db-empty-icon">&#9876;&#65039;</div>' +
-                        '<div class="db-empty-title">' + L.chalNoChallenges + '</div>' +
-                        '<div class="db-empty-text">' + L.chalNoChallengesText + '</div>' +
-                    '</div>';
-                return;
-            }
-
-            var html = '<div class="db-invite-list">';
-
-            for (var i = 0; i < items.length; i++) {
-                var ch = items[i];
-                var isSent = ch.direction === 'sent';
-                var partnerName = isSent ? (ch.opponent_name || '—') : (ch.challenger_name || '—');
-                var partnerAvatar = isSent ? ch.opponent_avatar : ch.challenger_avatar;
-
-                var initials = dbInitials(partnerName);
-                var avatarHtml = partnerAvatar
-                    ? '<img src="' + escHtml(partnerAvatar) + '" class="db-invite-avatar" alt="">'
-                    : '<div class="db-invite-avatar-ph">' + initials + '</div>';
-
-                var dirLabel = isSent ? L.chalSent : L.chalReceived;
-
-                // Status label + class
-                var statusMap = {
-                    active: { label: L.chalActive, cls: 'pending' },
-                    negotiating: { label: L.chalNegotiating, cls: 'pending' },
-                    countered: { label: L.chalCountered, cls: 'pending' },
-                    accepted: { label: L.chalAccepted, cls: 'accepted' },
-                    declined: { label: L.chalDeclined, cls: 'declined' },
-                    expired: { label: L.chalExpired, cls: 'declined' },
-                    completed: { label: L.chalCompleted, cls: 'accepted' }
-                };
-                var st = statusMap[ch.status] || { label: ch.status, cls: 'pending' };
-
-                // Date/time/venue
-                var finalDate = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_date ? ch.counter_date : ch.proposed_date;
-                var finalTime = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_time ? ch.counter_time : ch.proposed_time;
-                var finalVenue = (ch.status === 'countered' || ch.status === 'accepted') && ch.counter_venue ? ch.counter_venue : (ch.court_name || ch.proposed_venue || '');
-
-                var dateStr = '';
-                try {
-                    var d = new Date(finalDate);
-                    dateStr = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
-                } catch(e) {}
-
-                var metaParts = [dirLabel];
-                if (dateStr) metaParts.push(dateStr);
-                if (finalTime) metaParts.push(finalTime);
-
-                var venueHtml = finalVenue ? '<div class="db-invite-meta" style="font-size:0.75rem;">\uD83D\uDCCD ' + escHtml(finalVenue) + '</div>' : '';
-
-                html += '<div class="db-invite-item">' +
-                    avatarHtml +
-                    '<div class="db-invite-info">' +
-                        '<div class="db-invite-name">' + escHtml(partnerName) + '</div>' +
-                        '<div class="db-invite-meta">' + metaParts.join(' &middot; ') + '</div>' +
-                        venueHtml +
-                    '</div>' +
-                    '<div class="db-invite-status db-invite-' + st.cls + '">' + st.label + '</div>' +
-                '</div>';
-            }
-
-            html += '</div>';
-            card.innerHTML = html;
-        } catch(e) {
-            console.error('Challenges error:', e);
-            card.innerHTML = '<p style="color:var(--text-muted);">—</p>';
-        }
-    }
-
-    // ---- Dirty check ----
     function getProfileFormValues() {
         return {
             firstName: (document.getElementById('profileFirstName') || {}).value || '',
@@ -3075,7 +3086,8 @@
         back.className = 'db-modal-back';
 
         var actions = (opts.actions || []).map(function(a, i) {
-            return '<button type="button" class="db-btn ' + (a.primary ? 'db-btn-primary' : 'db-btn-outline') +
+            var cls = a.danger ? 'db-btn-danger' : (a.primary ? 'db-btn-primary' : 'db-btn-outline');
+            return '<button type="button" class="db-btn ' + cls +
                    '" data-act="' + i + '">' + a.label + '</button>';
         }).join('');
 
@@ -3444,53 +3456,6 @@
             && item.tournament && item.tournament.status === 'registration_open';
     }
 
-    function tournamentRow(item, withPhoto) {
-        var t = item.tournament;
-        var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
-        var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
-        var reg = item.reg;
-        var withdrawn = reg && reg.status === 'withdrawn';
-        var refused = reg && (reg.status === 'blocked' || reg.status === 'rejected');
-        // Запись, добавленную админом руками, заявкой не называем: её не было
-        var manualLabel = isEn ? 'Participated' : (isKg ? 'Катышкан' : 'Участвовал');
-        var result = withdrawn ? L.regWithdrawn
-            : (refused ? L.regRefused
-            : (item.round_reached
-                ? (ROUND_LABELS_DB[item.round_reached] || item.round_reached)
-                : (item.manual ? manualLabel
-                : (reg && reg.status === 'waitlist' ? L.regWaitlist : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован')))));
-        var pts = item.points_earned > 0 ? ' · +' + item.points_earned + ' pts' : '';
-        var isWinner = item.round_reached === 'W';
-        var tPage = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id;
-
-        // Запись, добавленная админом руками: турнира с таким названием в базе
-        // нет, открывать нечего. Показываем название и очки, но без ссылки
-        var manual = !t.id;
-
-        var html = '<div class="db-tournament-item' + (withdrawn || refused ? ' db-tournament-withdrawn' : '') + '">';
-        html += manual
-            ? '<div class="db-tournament-row db-tournament-row-plain">'
-            : '<a class="db-tournament-row" href="' + tPage + '">';
-        if (withPhoto) {
-            html += t.image
-                ? '<img src="' + escHtml(t.image) + '" alt="" class="db-tournament-photo">'
-                : '<div class="db-tournament-photo db-tournament-photo-empty">\uD83C\uDFBE</div>';
-        }
-        html += '<div class="db-tournament-info">';
-        html += '<span class="db-tournament-name">' + escHtml(tName) + '</span>';
-        html += '<span class="db-tournament-date">' + dateStr + '</span>';
-        html += '</div>';
-        html += '<span class="db-tournament-result' + (isWinner ? ' db-tournament-winner' : '') + '">' + result + pts + '</span>';
-        html += manual ? '</div>' : '</a>';
-        if (canWithdraw(item)) {
-            html += '<button class="db-withdraw-btn" data-reg="' + reg.id + '" data-name="' + escHtml(tName) + '">' + L.regWithdraw + '</button>';
-        } else if (canReenter(item)) {
-            html += '<button class="db-withdraw-btn db-reenter-btn" data-tid="' + escHtml(t.id) + '">' + L.regAgain + '</button>';
-        }
-        html += '</div>';
-        return html;
-    }
-
     // ---- Снятие заявки с турнира ----
     // Снять можно, пока не проведена жеребьёвка: после неё игрок уже в сетке,
     // и его снимает организатор. Правило «за 3 часа» и штраф — отдельная задача.
@@ -3536,47 +3501,38 @@
         });
     }
 
+    /**
+     * Снятие заявки — в общем окне кабинета, а не в своём собственном.
+     *
+     * Здесь стояла отдельная разметка с инлайновыми стилями: другой отступ,
+     * другой заголовок, без крестика и без выхода по Escape. Окно на сайте
+     * должно быть одно.
+     */
     function showWithdrawModal(regId, tournamentName, profile, refresh) {
-        var old = document.getElementById('dbWithdrawModal');
-        if (old) old.remove();
+        var modal = dbModal({
+            title: L.regWithdrawTitle,
+            body: '<p class="db-modal-text">' +
+                L.regWithdrawText.replace('{name}',
+                    '<strong>' + escHtml(tournamentName) + '</strong>') + '</p>',
+            actions: [
+                { label: L.regWithdrawNo },
+                { label: L.regWithdrawYes, danger: true, onClick: async function(close) {
+                    var btn = modal.el.querySelector('[data-act="1"]');
+                    if (btn) { btn.disabled = true; btn.textContent = L.saving; }
 
-        var overlay = document.createElement('div');
-        overlay.id = 'dbWithdrawModal';
-        overlay.className = 'db-modal-overlay';
-        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
-        overlay.innerHTML =
-            '<div style="background:#111111;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px 24px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.5);">' +
-                '<h3 style="margin:0 0 12px;font-size:1.15rem;color:#fff;">' + L.regWithdrawTitle + '</h3>' +
-                '<p style="margin:0 0 24px;color:var(--text-muted);font-size:0.9rem;line-height:1.5;">' +
-                    L.regWithdrawText.replace('{name}', '<strong style="color:#fff;">' + escHtml(tournamentName) + '</strong>') +
-                '</p>' +
-                '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
-                    '<button class="db-btn db-btn-outline" id="dbWithdrawCancel">' + L.regWithdrawNo + '</button>' +
-                    '<button class="db-btn db-btn-danger" id="dbWithdrawOk">' + L.regWithdrawYes + '</button>' +
-                '</div>' +
-            '</div>';
-        document.body.appendChild(overlay);
+                    var res = await client.from('tournament_registrations')
+                        .update({ status: 'withdrawn' })
+                        .eq('id', regId);
 
-        function close() { overlay.remove(); }
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
-        document.getElementById('dbWithdrawCancel').addEventListener('click', close);
-
-        document.getElementById('dbWithdrawOk').addEventListener('click', async function() {
-            var btn = this;
-            btn.disabled = true;
-            btn.textContent = L.saving;
-
-            var res = await client.from('tournament_registrations')
-                .update({ status: 'withdrawn' })
-                .eq('id', regId);
-
-            close();
-            if (res.error) {
-                showMessage(null, res.error.message || L.regWithdrawError, true);
-                return;
-            }
-            showMessage(null, L.regWithdrawDone, false);
-            (refresh || loadGamesTournaments)(profile);
+                    close();
+                    if (res.error) {
+                        showMessage(null, res.error.message || L.regWithdrawError, true);
+                        return;
+                    }
+                    showMessage(null, L.regWithdrawDone, false);
+                    (refresh || loadGamesTournaments)(profile);
+                } }
+            ]
         });
     }
 
@@ -3617,22 +3573,15 @@
 
         var catsHtml = await renderStatsCategories(p);
 
-        // Count wins/losses from actual matches — только для сводного ряда,
-        // у игрока с категориями цифры берутся из player_categories
-        var wins = 0, losses = 0;
-        if (!catsHtml) {
-            var matchesRes = await client.from('matches')
-                .select('winner_id')
-                .or('player1_id.eq.' + p.id + ',player2_id.eq.' + p.id)
-                .not('winner_id', 'is', null)
-                .neq('score', 'BYE');
-            if (matchesRes.data) {
-                matchesRes.data.forEach(function(m) {
-                    if (m.winner_id === p.id) wins++;
-                    else losses++;
-                });
-            }
-        }
+        // Сводный ряд — только для игрока без категорий; у остальных цифры
+        // берутся из player_categories.
+        //
+        // Раньше здесь считались ВСЕ матчи подряд, включая баттлы: тот же
+        // игрок на публичной странице и в кабинете видел разные числа, а
+        // показательная игра попадала в рейтинговую статистику. Теперь
+        // берём готовые players.wins/losses — их считает база по одному
+        // правилу: только турнирные встречи
+        var wins = p.wins || 0, losses = p.losses || 0;
 
         container.innerHTML =
             '<h2 class="db-section-title">' + L.statsTitle + '</h2>' +
@@ -3777,11 +3726,14 @@
                           (row.closed_reason ? ' \u00b7 ' + escHtml(row.closed_reason) : '') + '</span>'
                         : '') +
                 '</div>' +
-                '<div class="db-stats-grid db-stats-grid-mini">' +
-                    '<div class="db-stat-card"><div class="db-stat-value">' + (row.points || 0) + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
-                    '<div class="db-stat-card"><div class="db-stat-value">' + (row.wins || 0) + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
-                    '<div class="db-stat-card"><div class="db-stat-value">' + (row.losses || 0) + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
-                    '<div class="db-stat-card"><div class="db-stat-value">#' + place + '</div><div class="db-stat-label">' + L.place + '</div></div>' +
+                '<div class="db-cat-top">' +
+                    '<div class="db-stats-grid db-stats-grid-mini">' +
+                        '<div class="db-stat-card"><div class="db-stat-value">' + (row.points || 0) + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
+                        '<div class="db-stat-card"><div class="db-stat-value">' + (row.wins || 0) + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
+                        '<div class="db-stat-card"><div class="db-stat-value">' + (row.losses || 0) + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
+                        '<div class="db-stat-card"><div class="db-stat-value">#' + place + '</div><div class="db-stat-label">' + L.place + '</div></div>' +
+                    '</div>' +
+                    catRateHtml(row) +
                 '</div>' +
                 catBarHtml(row) +
             '</div>';
@@ -3797,6 +3749,22 @@
      * выступает. Соотношение видно полоской, а цвета взяты из таблицы
      * матчей: там зелёный значок — победа, красный — поражение.
      */
+    /**
+     * Процент побед у правого края строки.
+     *
+     * Он и раньше был в блоке, но мелким текстом под полосой, в одном ряду
+     * с легендой. Правая половина блока при этом пустовала: все числа
+     * стояли слева. Процент — итог категории, ему там и место.
+     */
+    function catRateHtml(row) {
+        var w = row.wins || 0, l = row.losses || 0, played = w + l;
+        var value = played ? Math.round(w / played * 100) + '%' : '\u2014';
+        return '<div class="db-cat-rate' + (played ? '' : ' db-cat-rate-empty') + '">' +
+            '<b>' + value + '</b>' +
+            '<span>' + L.catWinRate + '</span>' +
+        '</div>';
+    }
+
     function catBarHtml(row) {
         var w = row.wins || 0, l = row.losses || 0, played = w + l;
 
@@ -3805,7 +3773,6 @@
                 '<div class="db-cat-legend"><span>' + L.catNoMatches + '</span></div>';
         }
 
-        var pct = Math.round(w / played * 100);
         return '<div class="db-cat-bar">' +
                 '<i class="db-cat-bar-w" style="width:' + (w / played * 100) + '%"></i>' +
                 '<i class="db-cat-bar-l" style="width:' + (l / played * 100) + '%"></i>' +
@@ -3816,7 +3783,6 @@
                     '<span class="db-cat-mark db-cat-mark-w"></span>' + plural(w, L.catWins) +
                     '<span class="db-cat-mark db-cat-mark-l"></span>' + plural(l, L.catLosses) +
                 '</span>' +
-                '<span class="db-cat-rate">' + pct + '% ' + L.catWinRate + '</span>' +
             '</div>';
     }
 

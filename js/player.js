@@ -1142,22 +1142,6 @@
         attachMatchClickHandlers(container);
     }
 
-    function chalWinnerId(score, p1Id, p2Id) {
-        if (!score) return null;
-        var sets = score.trim().split(/\s+/);
-        var s1 = 0, s2 = 0;
-        sets.forEach(function(s) {
-            var m = s.match(/^(\d+)\/(\d+)/);
-            if (m) {
-                if (parseInt(m[1]) > parseInt(m[2])) s1++;
-                else s2++;
-            }
-        });
-        if (s1 > s2) return p1Id;
-        if (s2 > s1) return p2Id;
-        return null;
-    }
-
     function chalWinLoss(score, isChallenger) {
         if (!score) return null;
         var sets = score.trim().split(/\s+/);
@@ -1223,12 +1207,6 @@
                 .or('and(player1_id.eq.' + _playerId + ',player2_id.eq.' + oppId + '),and(player1_id.eq.' + oppId + ',player2_id.eq.' + _playerId + ')')
                 .not('winner_id', 'is', null)
                 .order('played_at', { ascending: false }),
-            client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, score_draft, proposed_date, created_at')
-                .or('and(challenger_player_id.eq.' + _playerId + ',opponent_player_id.eq.' + oppId + '),and(challenger_player_id.eq.' + oppId + ',opponent_player_id.eq.' + _playerId + ')')
-                .eq('status', 'completed')
-                .not('score_draft', 'is', null)
-                .order('created_at', { ascending: false })
         ];
 
         // For doubles: load partner info
@@ -1245,27 +1223,15 @@
                 var modal = overlay.querySelector('.h2h-modal');
                 if (!modal) return;
 
-                var tournamentMatches = results[0].data || [];
-                var chalMatches = results[1].data || [];
-
-                // Convert challenges to match-like format
-                var chalConverted = chalMatches.map(function(c) {
-                    var score = c.score_draft || '';
-                    var winnerId = chalWinnerId(score, c.challenger_player_id, c.opponent_player_id);
-                    return {
-                        id: c.id,
-                        player1_id: c.challenger_player_id,
-                        player2_id: c.opponent_player_id,
-                        score: score,
-                        winner_id: winnerId,
-                        played_at: c.proposed_date || c.created_at,
-                        tournament: null,
-                        _isChallenge: true
-                    };
-                });
-
-                // Merge and sort by date descending
-                var allMatches = tournamentMatches.concat(chalConverted);
+                // Один источник — таблица matches. Баттлы туда попадают
+                // отдельной строкой при вводе счёта, там же стоит winner_id.
+                //
+                // Раньше баттлы добирались вторым запросом, из challenges,
+                // а победителя приходилось угадывать разбором строки счёта.
+                // Два способа посчитать одно и то же: у завершённого баттла
+                // score_draft обнуляется, так что второй запрос давно ничего
+                // не находил, а на старых записях считал встречу дважды.
+                var allMatches = (results[0].data || []).slice();
                 allMatches.sort(function(a, b) {
                     return (b.played_at || '').localeCompare(a.played_at || '');
                 });
@@ -1277,9 +1243,9 @@
 
                 // Build partner info for doubles
                 var doublesInfo = null;
-                if (isDoubles && results[2] && results[2].data) {
+                if (isDoubles && results[1] && results[1].data) {
                     doublesInfo = { myPartner: null, oppPartner: null };
-                    results[2].data.forEach(function(reg) {
+                    results[1].data.forEach(function(reg) {
                         var partnerName = '';
                         if (reg.partner && reg.partner.id) {
                             partnerName = isEn ? (reg.partner.name_en || reg.partner.name) : (isKg ? (reg.partner.name_kg || reg.partner.name) : reg.partner.name);
