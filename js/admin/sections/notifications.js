@@ -57,7 +57,7 @@
                     '<div id="adPushUserResults" style="max-height:150px;overflow-y:auto;"></div>' +
                 '</div>' +
                 '<div style="margin-top:12px;">' +
-                    '<button class="ad-btn ad-btn--accent" id="adPushSendBtn">' + L.pushSend + '</button>' +
+                    '<button class="ad-btn ad-btn-primary" id="adPushSendBtn">' + L.pushSend + '</button>' +
                 '</div>' +
             '</div>' +
 

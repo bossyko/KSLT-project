@@ -112,7 +112,9 @@
 
     var challengePage = isEn ? 'challenge-en.html' : (isKg ? 'challenge-kg.html' : 'challenge.html');
 
-    var emptySvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>';
+    // Пламя, а не лист бумаги: заглушка стояла от общего набора значков и
+    // на странице баттлов читалась как сломанная картинка
+    var emptySvg = '<div class="bo-empty-icon">\uD83D\uDD25</div>';
 
     var _userId = null;
     var _userVotes = {};
@@ -248,8 +250,8 @@
     function isBattleCompleted(b) {
         if (b.status === 'completed') return true;
         if (b.voting_closed) return true;
-        var matchDate = b.counter_date || b.proposed_date || '';
-        var matchTime = b.counter_time || b.proposed_time || '';
+        var matchDate = b.proposed_date || '';
+        var matchTime = b.proposed_time || '';
         if (matchDate && matchTime) {
             var dt = new Date(matchDate + 'T' + matchTime + ':00+06:00');
             if (!isNaN(dt.getTime()) && Date.now() >= dt.getTime()) return true;
@@ -276,7 +278,7 @@
         try {
             // Load all published battles
             var result = await client.from('challenges')
-                .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, challenger_player_id, opponent_player_id, banner_url, battle_published_at')
+                .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, challenger_player_id, opponent_player_id, banner_url, battle_published_at')
                 .eq('battle_published', true)
                 .order('battle_published_at', { ascending: false });
 
@@ -408,9 +410,9 @@
         var p1Cat = CAT_LABELS[p1.category_id] || '';
         var p2Cat = CAT_LABELS[p2.category_id] || '';
 
-        var date = b.counter_date || b.proposed_date || '';
-        var time = b.counter_time || b.proposed_time || '';
-        var venue = b.counter_venue || b.proposed_venue || '';
+        var date = b.proposed_date || '';
+        var time = b.proposed_time || '';
+        var venue = b.proposed_venue || '';
 
         // Votes
         var vData = _votesData[b.id] || { votes: {}, total: 0 };
@@ -519,8 +521,8 @@
         var p1Photo = p1.photo || 'https://placehold.co/36x36/1a1a1a/666?text=?';
         var p2Photo = p2.photo || 'https://placehold.co/36x36/1a1a1a/666?text=?';
 
-        var date = b.counter_date || b.proposed_date || '';
-        var venue = b.counter_venue || b.proposed_venue || '';
+        var date = b.proposed_date || '';
+        var venue = b.proposed_venue || '';
 
         // Votes
         var vData = _votesData[b.id] || { votes: {}, total: 0 };

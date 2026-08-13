@@ -68,8 +68,7 @@ Deno.serve(async (req) => {
       .select(`
         id, status, battle_published, battle_title,
         challenger_player_id, opponent_player_id,
-        proposed_date, proposed_time, proposed_venue,
-        counter_date, counter_time, counter_venue
+        proposed_date, proposed_time, proposed_venue
       `)
       .eq('id', challenge_id)
       .single()
@@ -136,9 +135,11 @@ Deno.serve(async (req) => {
     const challengerName = pMap[challenge.challenger_player_id] || '?'
     const opponentName = pMap[challenge.opponent_player_id] || '?'
 
-    const date = challenge.counter_date || challenge.proposed_date || ''
-    const time = challenge.counter_time || challenge.proposed_time || ''
-    const venue = challenge.counter_venue || challenge.proposed_venue || ''
+    // Дату, время и место назначает менеджер при публикации: у вызова их
+    // больше нет, встречное предложение удалено вместе с ними
+    const date = challenge.proposed_date || ''
+    const time = challenge.proposed_time || ''
+    const venue = challenge.proposed_venue || ''
 
     // Send TG announcement to group with inline voting buttons
     const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
@@ -201,7 +202,52 @@ Deno.serve(async (req) => {
       }
     }
 
-    const debugInfo: any = { success: true, tg_sent: tgSent }
+    // Уведомление на платформе. Публикация до сих пор объявляла баттл
+    // только в Telegram: колокольчик на сайте и в приложении молчал, хотя
+    // платформа у нас основная, а мессенджер — вдогонку.
+    //
+    // Идём тем же путём, что и остальные рассылки: строка в журнале плюс по
+    // строке каждому, связанные push_id. Значит объявление можно отозвать,
+    // и оно уважает переключатель «Вызовы» в настройках
+    let siteNotified = 0
+    try {
+      const noteTitle = '🔥 ' + battleTitle
+      const whenWhere = [date || '', time || '', venue || '']
+        .filter(Boolean).join(' · ')
+      const noteText = `${challengerName} — ${opponentName}` + (whenWhere ? `\n${whenWhere}` : '')
+
+      const { data: pushRow } = await db
+        .from('push_log')
+        .insert({
+          admin_id: user.id, title: noteTitle, message: noteText,
+          type: 'battle', audience: 'all', recipients_count: 0, fcm_sent: 0
+        })
+        .select('id')
+        .single()
+
+      const { data: everyone } = await db
+        .from('profiles')
+        .select('id, notify_preferences')
+
+      const rows = (everyone || [])
+        .filter((p: any) => p.notify_preferences?.site?.challenges !== false)
+        .map((p: any) => ({
+          profile_id: p.id, type: 'battle', title: noteTitle, message: noteText,
+          is_read: false, push_id: pushRow?.id ?? null
+        }))
+
+      if (rows.length > 0) {
+        await db.from('notification_log').insert(rows)
+        siteNotified = rows.length
+        if (pushRow?.id) {
+          await db.from('push_log').update({ recipients_count: rows.length }).eq('id', pushRow.id)
+        }
+      }
+    } catch (err) {
+      console.error('Site notification failed:', err)
+    }
+
+    const debugInfo: any = { success: true, tg_sent: tgSent, site_notified: siteNotified }
     if (!tgSent) {
       debugInfo.debug = {
         has_token: !!token,

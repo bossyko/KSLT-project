@@ -49,11 +49,12 @@
         container.innerHTML =
             '<div class="ad-section-header" style="display:flex;justify-content:space-between;align-items:center;">' +
                 '<h2>' + L.challenges + '</h2>' +
-                '<button class="ad-btn ad-btn-accent" id="chalCreateBtn">' + L.chalCreate + '</button>' +
+                '<button class="ad-btn ad-btn-primary" id="chalCreateBtn">' + L.chalCreate + '</button>' +
             '</div>' +
             '<div class="ad-rat-tabs" id="chalTabs" style="margin-bottom:20px;">' +
                 '<button class="ad-rat-tab' + (subTab === 'pending' ? ' active' : '') + '" data-subtab="pending">' + L.chalPending + '</button>' +
-                '<button class="ad-rat-tab' + (subTab === 'accepted' ? ' active' : '') + '" data-subtab="accepted">' + L.chalAccepted + '</button>' +
+                '<button class="ad-rat-tab' + (subTab === 'accepted' ? ' active' : '') + '" data-subtab="accepted">' + L.chalAccepted +
+                    '<span class="ad-tab-count" id="chalAcceptedCount"></span></button>' +
                 '<button class="ad-rat-tab' + (subTab === 'published' ? ' active' : '') + '" data-subtab="published">' + L.chalPublished + '</button>' +
                 '<button class="ad-rat-tab' + (subTab === 'completed' ? ' active' : '') + '" data-subtab="completed">' + L.chalCompletedTab + '</button>' +
             '</div>' +
@@ -87,23 +88,29 @@
         Promise.all([
             A.client.from('challenges')
                 .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, message, created_at')
-                .eq('status', 'pending')
+                // Вызов заводится со статусом active: 'pending' здесь искали
+                // то, чего в базе не бывает, и вкладка всегда пустовала
+                .eq('status', 'active')
                 .order('created_at', { ascending: false }),
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, score_draft')
+                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, score_draft')
                 .eq('status', 'accepted')
                 .eq('battle_published', false)
                 .order('accepted_at', { ascending: false }),
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, battle_notified_at, score_draft, banner_url, proposed_court_id, challenger_ntrp, opponent_ntrp, challenger_country, opponent_country, challenger_category, opponent_category, set_format')
+                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, battle_notified_at, score_draft, banner_url, proposed_court_id, challenger_ntrp, opponent_ntrp, challenger_country, opponent_country, challenger_category, opponent_category, set_format')
                 .eq('battle_published', true)
                 .neq('status', 'completed')
                 .neq('status', 'cancelled')
                 .order('battle_published_at', { ascending: false }),
             A.client.from('players').select('id, name, name_en, photo, ntrp_rating, category_id, country').order('name'),
+            // Контакты: менеджер связывается с обоими, чтобы выяснить корт и
+            // время. Без них за каждым телефоном приходилось идти в раздел
+            // «Игроки» по одному
+            A.client.from('profiles').select('player_id, phone, telegram, email').not('player_id', 'is', null),
             A.client.from('courts').select('id, name, name_en, street, street_en, district, district_en, city, city_en').order('name'),
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, battle_title, match_id, accepted_at')
+                .select('id, challenger_player_id, opponent_player_id, status, battle_title, match_id, accepted_at, cancel_reason')
                 .in('status', ['completed', 'cancelled'])
                 .order('accepted_at', { ascending: false })
         ]).then(function(results) {
@@ -111,18 +118,45 @@
             acceptedList = results[1].data || [];
             publishedList = results[2].data || [];
             allPlayers = results[3].data || [];
-            allCourts = results[4].data || [];
-            completedList = results[5].data || [];
+            var contacts = results[4].data || [];
+            allCourts = results[5].data || [];
+            completedList = results[6].data || [];
+
+            var cMap = {};
+            contacts.forEach(function(c) { if (c.player_id) cMap[c.player_id] = c; });
+            A._chalContacts = cMap;
 
             var pMap = {};
             allPlayers.forEach(function(p) { pMap[p.id] = p; });
             A._chalPlayersMap = pMap;
 
             renderSubTab();
+            if (A.refreshChallengeBadge) A.refreshChallengeBadge();
         });
     }
 
+    /**
+     * Шапка раздела под текущую вкладку — одно место на все решения о ней.
+     *
+     * «Создать баттл» заводит баттл с нуля, когда вызова не было вовсе. На
+     * «Принятых» она сбивает с толку: там публикуют готовые заявки, и
+     * кнопка в строке делает то же самое. Скрываем её только здесь: если
+     * решать это ещё и при отрисовке, потом не найдёшь, какая из двух
+     * проверок сработала.
+     */
+    function syncHeader() {
+        var btn = document.getElementById('chalCreateBtn');
+        if (btn) btn.style.display = (subTab === 'accepted') ? 'none' : '';
+
+        var count = document.getElementById('chalAcceptedCount');
+        if (count) {
+            count.textContent = acceptedList.length ? acceptedList.length : '';
+            count.style.display = acceptedList.length ? '' : 'none';
+        }
+    }
+
     function renderSubTab() {
+        syncHeader();
         if (subTab === 'pending') renderPending();
         else if (subTab === 'accepted') renderAccepted();
         else if (subTab === 'published') renderPublished();
@@ -184,12 +218,14 @@
             return;
         }
 
+        // Дата и площадка отсюда убраны: у принятого вызова их ещё нет —
+        // их и назначает менеджер при публикации. Вместо пустых столбцов —
+        // контакты, ради которых он сюда и заходит
         var html = '<table class="ad-table"><thead><tr>' +
             '<th>' + L.chalChallenger + '</th>' +
             '<th></th>' +
             '<th>' + L.chalOpponent + '</th>' +
-            '<th>' + L.chalDate + '</th>' +
-            '<th>' + L.chalVenue + '</th>' +
+            '<th>' + L.chalContacts + '</th>' +
             '<th>' + L.chalActions + '</th>' +
             '</tr></thead><tbody>';
 
@@ -198,18 +234,18 @@
             var p2 = pMap[c.opponent_player_id] || {};
             var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
             var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
-            var date = c.counter_date || c.proposed_date || '';
-            var venue = c.counter_venue || c.proposed_venue || '';
 
             html += '<tr>' +
                 '<td>' + A.esc(p1Name) + '</td>' +
                 '<td style="text-align:center;font-weight:700;color:var(--accent);">VS</td>' +
                 '<td>' + A.esc(p2Name) + '</td>' +
-                '<td>' + formatDate(date) + '</td>' +
-                '<td>' + A.esc(venue || '-') + '</td>' +
+                '<td><div class="ad-chal-contacts">' +
+                    contactsCell(c.challenger_player_id, p1Name) +
+                    contactsCell(c.opponent_player_id, p2Name) +
+                '</div></td>' +
                 '<td><div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-                    '<button class="ad-btn ad-btn-sm ad-btn-accent" data-publish="' + c.id + '">' + L.chalPublish + '</button>' +
-                    '<button class="ad-btn ad-btn-sm ad-btn-danger" data-delete="' + c.id + '" title="' + L.chalDelete + '">🗑</button>' +
+                    '<button class="ad-btn ad-btn-sm ad-btn-primary" data-publish="' + c.id + '">' + L.chalPublish + '</button>' +
+                    '<button class="ad-btn ad-btn-sm ad-btn-danger" data-cancel="' + c.id + '">' + L.chalCancelBattle + '</button>' +
                 '</div></td>' +
                 '</tr>';
         });
@@ -219,26 +255,47 @@
 
         el.querySelectorAll('[data-publish]').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                openPublishModal(btn.dataset.publish);
+                var c = acceptedList.filter(function(x) { return x.id === btn.dataset.publish; })[0];
+                if (c) openEditBattleModal(c, true);
             });
         });
 
-        el.querySelectorAll('[data-delete]').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
-                var cId = btn.dataset.delete;
-                var ok = await A.showConfirmAsync(L.chalDelete, L.chalConfirmDelete, L.chalDelete);
-                if (!ok) return;
-                try {
-                    await A.client.from('challenge_predictions').delete().eq('challenge_id', cId);
-                    var res = await A.client.from('challenges').delete().eq('id', cId);
-                    if (res.error) { A.showToast(res.error.message, 'error'); return; }
-                    A.showToast(L.chalDeleted, 'success');
-                    loadData();
-                } catch (e) {
-                    A.showToast('Error: ' + e.message, 'error');
-                }
+        el.querySelectorAll('[data-cancel]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var c = acceptedList.filter(function(x) { return x.id === btn.dataset.cancel; })[0];
+                if (c) openCancelBattleModal(c);
             });
         });
+    }
+
+    /**
+     * Телефон, Telegram и почта одного игрока — двумя ячейками сетки: имя и
+     * значения. Сплошной строкой контакты второго игрока начинались не там,
+     * где у первого, и блок выглядел рассыпанным.
+     */
+    function contactsCell(playerId, name) {
+        var c = (A._chalContacts || {})[playerId] || {};
+        var bits = [];
+
+        if (c.phone) {
+            bits.push('<a href="tel:' + A.esc(c.phone.replace(/[^0-9+]/g, '')) + '">' +
+                A.esc(c.phone) + '</a>');
+        }
+        if (c.telegram) {
+            var tg = String(c.telegram).replace(/^@/, '');
+            bits.push('<a href="https://t.me/' + A.esc(tg) + '" target="_blank" rel="noopener">@' +
+                A.esc(tg) + '</a>');
+        }
+        if (c.email) {
+            bits.push('<a href="mailto:' + A.esc(c.email) + '">' + A.esc(c.email) + '</a>');
+        }
+
+        return '<div class="ad-chal-who">' + A.esc(name) + '</div>' +
+            '<div class="ad-chal-links' + (bits.length ? '' : ' ad-chal-none') + '">' +
+                (bits.length
+                    ? bits.join('<span class="ad-chal-sep">\u00B7</span>')
+                    : L.chalNoContacts) +
+            '</div>';
     }
 
     // ---- Published battles ----
@@ -283,16 +340,20 @@
                     : '<span class="ad-badge" style="opacity:0.5;">—</span>';
             } else {
                 broadcastCell = notified
-                    ? '<span class="ad-badge ad-badge-green" title="' + A.fmtDate(c.battle_notified_at) + '">✅ ' + L.chalNotified + '</span><br><button class="ad-btn ad-btn-sm" data-notify="' + c.id + '" style="margin-top:4px;font-size:0.7rem;" title="' + L.chalNotify + '">📢 ' + (isEn ? 'Resend' : 'Повторить') + '</button>'
-                    : '<button class="ad-btn ad-btn-sm" data-notify="' + c.id + '" title="' + L.chalNotify + '">📢 ' + L.chalNotify + '</button>';
+                    ? '<span class="ad-badge ad-badge-green" title="' + A.fmtDate(c.battle_notified_at) + '">✅ ' + L.chalNotified + '</span><br><button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" style="margin-top:4px;" title="' + L.chalNotify + '">' + (isEn ? 'Resend' : 'Повторить') + '</button>'
+                    : '<button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" title="' + L.chalNotify + '">' + L.chalNotify + '</button>';
             }
 
-            var actions = '<div style="display:flex;gap:6px;align-items:center;width:100%;justify-content:space-between;">';
+            // Один вид на все кнопки строки: правка и отмена — вторичные,
+            // ввод счёта — главное действие. Раньше половина стояла без
+            // вида вовсе, а «Ввести счёт» ссылалась на класс с опечаткой
+            // (ad-btn-primary), которого в стилях нет
+            var actions = '<div class="ad-chal-actions">';
             if (c.status !== 'completed') {
-                actions += '<button class="ad-btn ad-btn-sm" data-edit="' + c.id + '" title="' + L.chalEdit + '">✏️</button>';
-                actions += '<button class="ad-btn ad-btn-sm ad-btn--accent" data-score="' + c.id + '">' + L.chalEnterScore + '</button>';
+                actions += '<button class="ad-btn ad-btn-sm ad-btn-secondary" data-edit="' + c.id + '" title="' + L.chalEdit + '">✏️</button>';
+                actions += '<button class="ad-btn ad-btn-sm ad-btn-primary" data-score="' + c.id + '">' + L.chalEnterScore + '</button>';
             }
-            actions += '<button class="ad-btn ad-btn-sm" data-delete="' + c.id + '" title="' + L.chalDelete + '" style="color:#f44336;border-color:rgba(244,67,54,0.3);margin-left:auto;">🗑</button>';
+            actions += '<button class="ad-btn ad-btn-sm ad-btn-danger" data-cancel="' + c.id + '">' + L.chalCancelBattle + '</button>';
             actions += '</div>';
 
             html += '<tr>' +
@@ -346,11 +407,11 @@
             });
         });
 
-        el.querySelectorAll('[data-delete]').forEach(function(btn) {
+        el.querySelectorAll('[data-cancel]').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                var cId = btn.dataset.delete;
+                var cId = btn.dataset.cancel;
                 var challenge = publishedList.find(function(c) { return c.id === cId; });
-                if (challenge) openDeleteOrCancelModal(challenge);
+                if (challenge) openCancelBattleModal(challenge);
             });
         });
     }
@@ -383,9 +444,15 @@
             var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
             var date = c.accepted_at ? formatDate(c.accepted_at) : '-';
             var titleExtra = c.status === 'cancelled' ? ' <span class="ad-badge ad-badge-yellow">' + L.chalCancelledBadge + '</span>' : '';
+            // Причина отмены — рядом с пометкой: без неё «Отменён» ничего
+            // не объясняет ни менеджеру, ни тому, кто разбирается позже
+            var reasonLine = (c.status === 'cancelled' && c.cancel_reason)
+                ? '<div class="ad-chal-reason">' + A.esc(L.chalCancelReasonLabel) + ' ' +
+                    A.esc(c.cancel_reason) + '</div>'
+                : '';
 
             html += '<tr>' +
-                '<td><a href="../pages/challenge.html?id=' + c.id + '" target="_blank" style="color:var(--accent);font-weight:600;text-decoration:none;">' + A.esc(c.battle_title || '-') + '</a>' + titleExtra + '</td>' +
+                '<td><a href="../pages/challenge.html?id=' + c.id + '" target="_blank" style="color:var(--accent);font-weight:600;text-decoration:none;">' + A.esc(c.battle_title || '-') + '</a>' + titleExtra + reasonLine + '</td>' +
                 '<td>' + A.esc(p1Name) + '</td>' +
                 '<td>' + A.esc(p2Name) + '</td>' +
                 '<td id="chalCScore_' + c.id + '">' + (c.status === 'cancelled' ? '—' : '...') + '</td>' +
@@ -439,18 +506,14 @@
                     '<button class="ad-modal-close" id="dcCompClose">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
-                    '<div style="text-align:center;margin-bottom:16px;padding:14px;background:var(--bg-tertiary);border-radius:10px;border:1px solid var(--border);">' +
-                        '<div style="font-weight:700;font-size:15px;">⚔️ ' + A.esc(challenge.battle_title || '-') + '</div>' +
-                        '<div style="color:var(--text-secondary);font-size:13px;margin-top:6px;">' + A.esc(p1Name) + ' <span style="color:var(--accent);font-weight:600;">VS</span> ' + A.esc(p2Name) + '</div>' +
-                    '</div>' +
-                    '<p style="color:#f44336;font-size:13px;line-height:1.5;margin-bottom:12px;text-align:center;">' +
-                        (isEn
-                            ? 'This will permanently delete the battle, all votes, the match record, and revert player win/loss stats.'
-                            : 'Баттл, все голоса, запись матча и статистика побед/поражений игроков будут удалены навсегда.') +
-                    '</p>' +
+                    // Тот же вид, что и у окна отмены: два соседних действия
+                    // не должны выглядеть по-разному
+                    '<p class="ad-modal-text">\uD83D\uDD25 ' +
+                        A.esc(challenge.battle_title || (p1Name + ' \u2014 ' + p2Name)) + '</p>' +
+                    '<p class="ad-modal-danger">' + L.chalDeleteForeverNote + '</p>' +
                 '</div>' +
-                '<div class="ad-modal-footer" style="display:flex;gap:10px;justify-content:center;">' +
-                    '<button class="ad-btn" id="dcCompCancel">' + (isEn ? 'Cancel' : 'Отмена') + '</button>' +
+                '<div class="ad-modal-footer">' +
+                    '<button class="ad-btn ad-btn-secondary" id="dcCompCancel">' + L.cancel + '</button>' +
                     '<button class="ad-btn ad-btn-danger" id="dcCompConfirm">' + L.chalDeleteForever + '</button>' +
                 '</div>' +
             '</div>';
@@ -608,7 +671,7 @@
                     '</div>' +
                 '</div>' +
                 '<div class="ad-modal-footer">' +
-                    '<button class="ad-btn ad-btn-accent" id="cbSave">' + L.chalCreate + '</button>' +
+                    '<button class="ad-btn ad-btn-primary" id="cbSave">' + L.chalCreate + '</button>' +
                 '</div>' +
             '</div>';
 
@@ -950,45 +1013,6 @@
     }
 
     // ---- Publish Modal ----
-    function openPublishModal(challengeId) {
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-modal-overlay';
-        overlay.innerHTML =
-            '<div class="ad-modal" style="max-width:450px;">' +
-                '<div class="ad-modal-header">' +
-                    '<h3>' + L.chalPublish + '</h3>' +
-                    '<button class="ad-modal-close" id="chalPublishClose">&times;</button>' +
-                '</div>' +
-                '<div class="ad-modal-body">' +
-                    '<div class="ad-field-group">' +
-                        '<label class="ad-field-label">' + L.chalBattleTitle + '</label>' +
-                        '<input type="text" class="ad-field-input" id="chalTitleInput" placeholder="' + (isEn ? 'e.g. Derby of Champions' : 'напр. Дерби Чемпионов') + '" maxlength="100">' +
-                    '</div>' +
-                '</div>' +
-                '<div class="ad-modal-footer">' +
-                    '<button class="ad-btn ad-btn-accent" id="chalPublishBtn">' + L.chalPublish + '</button>' +
-                '</div>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
-
-        document.getElementById('chalPublishClose').addEventListener('click', function() { overlay.remove(); });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
-
-        document.getElementById('chalPublishBtn').addEventListener('click', function() {
-            var title = document.getElementById('chalTitleInput').value.trim();
-            if (!title) { document.getElementById('chalTitleInput').focus(); return; }
-            var btn = document.getElementById('chalPublishBtn');
-            btn.disabled = true;
-            btn.textContent = L.chalPublishing;
-
-            publishBattle(challengeId, title).then(function(ok) {
-                overlay.remove();
-                if (ok) { A.showToast(L.chalPublished2); loadData(); }
-            });
-        });
-    }
-
     function publishBattle(challengeId, title) {
         return A.client.auth.getSession().then(function(sRes) {
             var token = sRes.data.session ? sRes.data.session.access_token : '';
@@ -1098,7 +1122,7 @@
                 '</div>' +
                 '<div class="ad-modal-footer" style="display:flex;gap:10px;">' +
                     '<button class="ad-btn" id="chSaveDraft">' + L.chalSaveDraft + '</button>' +
-                    '<button class="ad-btn ad-btn-accent" id="chFinalizeScore">' + L.chalFinalize + '</button>' +
+                    '<button class="ad-btn ad-btn-primary" id="chFinalizeScore">' + L.chalFinalize + '</button>' +
                 '</div>' +
             '</div>';
 
@@ -1363,25 +1387,41 @@
     }
 
     // ==== EDIT BATTLE MODAL ====
-    function openEditBattleModal(challenge) {
+    /**
+     * Форма баттла — она же форма публикации.
+     *
+     * При публикации спрашивалось одно название, а дату, время, корт, NTRP,
+     * категории и страны приходилось дозаполнять потом, отдельным окном.
+     * Теперь публикация открывает ту же форму, уже заполненную из карточек
+     * игроков: менеджеру остаётся назначить, когда и где играют.
+     */
+    function openEditBattleModal(challenge, isPublish) {
         var pMap = A._chalPlayersMap || {};
         var p1 = pMap[challenge.challenger_player_id] || {};
         var p2 = pMap[challenge.opponent_player_id] || {};
         var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
         var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
 
+        // У принятого вызова этих полей ещё нет — подставляем из карточек
+        var p1Ntrp = challenge.challenger_ntrp || p1.ntrp_rating || null;
+        var p2Ntrp = challenge.opponent_ntrp || p2.ntrp_rating || null;
+        var p1Cat = challenge.challenger_category || p1.category_id || '';
+        var p2Cat = challenge.opponent_category || p2.category_id || '';
+        var p1Country = challenge.challenger_country || p1.country || '';
+        var p2Country = challenge.opponent_country || p2.country || '';
+
         var selCourt = { id: challenge.proposed_court_id || null, name: '', address: '' };
         var bannerUrl = challenge.banner_url || '';
 
         // Parse existing venue: "CourtName, Address"
-        var existingVenue = challenge.counter_venue || challenge.proposed_venue || '';
+        var existingVenue = challenge.proposed_venue || '';
         var venueParts = existingVenue.split(', ');
         var existingCourtName = venueParts[0] || '';
         var existingAddress = venueParts.slice(1).join(', ') || '';
 
         // Parse existing date/time
-        var existingDate = challenge.counter_date || challenge.proposed_date || '';
-        var existingTime = challenge.counter_time || challenge.proposed_time || '';
+        var existingDate = challenge.proposed_date || '';
+        var existingTime = challenge.proposed_time || '';
         var timeH = '10', timeM = '00';
         if (existingTime) {
             var tp = existingTime.split(':');
@@ -1408,11 +1448,11 @@
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label" style="font-size:11px;color:var(--text-secondary);">' + A.esc(p1Name) + '</label>' +
                         '<div style="display:flex;gap:8px;">' +
-                            '<select class="ad-field-input" id="ebP1Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(challenge.challenger_ntrp || null, { emptyLabel: 'NTRP' }) + '</select>' +
-                            '<select class="ad-field-input" id="ebP1Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions(challenge.challenger_category || '') + '</select>' +
+                            '<select class="ad-field-input" id="ebP1Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(p1Ntrp, { emptyLabel: 'NTRP' }) + '</select>' +
+                            '<select class="ad-field-input" id="ebP1Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions(p1Cat) + '</select>' +
                             '<div style="flex:1;position:relative;">' +
                                 '<input type="text" class="ad-field-input" id="ebP1CountryInput" placeholder="' + L.chalCountry + '" autocomplete="off">' +
-                                '<input type="hidden" id="ebP1Country" value="' + A.esc(challenge.challenger_country || '') + '">' +
+                                '<input type="hidden" id="ebP1Country" value="' + A.esc(p1Country) + '">' +
                                 '<div class="ad-dropdown-list" id="ebP1CountryDd" style="display:none;"></div>' +
                             '</div>' +
                         '</div>' +
@@ -1421,11 +1461,11 @@
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label" style="font-size:11px;color:var(--text-secondary);">' + A.esc(p2Name) + '</label>' +
                         '<div style="display:flex;gap:8px;">' +
-                            '<select class="ad-field-input" id="ebP2Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(challenge.opponent_ntrp || null, { emptyLabel: 'NTRP' }) + '</select>' +
-                            '<select class="ad-field-input" id="ebP2Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions(challenge.opponent_category || '') + '</select>' +
+                            '<select class="ad-field-input" id="ebP2Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(p2Ntrp, { emptyLabel: 'NTRP' }) + '</select>' +
+                            '<select class="ad-field-input" id="ebP2Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions(p2Cat) + '</select>' +
                             '<div style="flex:1;position:relative;">' +
                                 '<input type="text" class="ad-field-input" id="ebP2CountryInput" placeholder="' + L.chalCountry + '" autocomplete="off">' +
-                                '<input type="hidden" id="ebP2Country" value="' + A.esc(challenge.opponent_country || '') + '">' +
+                                '<input type="hidden" id="ebP2Country" value="' + A.esc(p2Country) + '">' +
                                 '<div class="ad-dropdown-list" id="ebP2CountryDd" style="display:none;"></div>' +
                             '</div>' +
                         '</div>' +
@@ -1489,7 +1529,8 @@
                     '</div>' +
                 '</div>' +
                 '<div class="ad-modal-footer">' +
-                    '<button class="ad-btn ad-btn-accent" id="ebSave">' + L.save + '</button>' +
+                    '<button class="ad-btn ad-btn-primary" id="ebSave">' +
+                        (isPublish ? L.chalPublish : L.save) + '</button>' +
                 '</div>' +
             '</div>';
 
@@ -1519,13 +1560,16 @@
         var CU = window.KSLT_COUNTRY;
         if (CU) {
             var lang = isEn ? 'en' : 'ru';
-            if (challenge.challenger_country) {
+            // Берём то же значение, что и скрытое поле: раньше здесь стоял
+            // вызов, где страны нет, и видимое поле оставалось пустым, хотя
+            // в скрытом уже лежала страна из карточки игрока
+            if (p1Country) {
                 var ci1 = document.getElementById('ebP1CountryInput');
-                if (ci1) ci1.value = CU.renderCountry(challenge.challenger_country, lang, true);
+                if (ci1) ci1.value = CU.renderCountry(p1Country, lang, true);
             }
-            if (challenge.opponent_country) {
+            if (p2Country) {
                 var ci2 = document.getElementById('ebP2CountryInput');
-                if (ci2) ci2.value = CU.renderCountry(challenge.opponent_country, lang, true);
+                if (ci2) ci2.value = CU.renderCountry(p2Country, lang, true);
             }
         }
 
@@ -1577,9 +1621,11 @@
 
             var updateData = {
                 battle_title: title,
-                counter_date: date || null,
-                counter_time: time || null,
-                counter_venue: venue || null,
+                // Дату, время и место назначает менеджер здесь: у вызова
+                // этих полей больше нет, встречное предложение умерло
+                proposed_date: date || null,
+                proposed_time: time || null,
+                proposed_venue: venue || null,
                 banner_url: bannerUrl || null,
                 challenger_ntrp: document.getElementById('ebP1Ntrp').value ? parseFloat(document.getElementById('ebP1Ntrp').value) : null,
                 opponent_ntrp: document.getElementById('ebP2Ntrp').value ? parseFloat(document.getElementById('ebP2Ntrp').value) : null,
@@ -1598,10 +1644,125 @@
                     A.showToast(res.error.message, 'error');
                     return;
                 }
+                // Публикация — тот же самый набор полей плюс выход баттла
+                // на сайт. Раздельные окна разъезжались: в одном заполняли,
+                // в другом публиковали
+                if (isPublish) {
+                    publishBattle(challenge.id, title).then(function(ok) {
+                        overlay.remove();
+                        if (ok) { A.showToast(L.chalPublished2, 'success'); loadData(); }
+                    });
+                    return;
+                }
+
                 overlay.remove();
                 A.showToast(L.chalSaved, 'success');
                 loadData();
             });
+        });
+    }
+
+    /**
+     * Отмена баттла — с причиной и рассылкой.
+     *
+     * Раньше убрать баттл можно было только удалением: запись исчезала
+     * бесследно, а люди, которым только что объявили о матче, оставались
+     * ждать игру, которой не будет. Теперь запись остаётся со статусом
+     * «Отменён», причина видна, и клубу уходит объяснение.
+     */
+    function openCancelBattleModal(challenge) {
+        var pMap = A._chalPlayersMap || {};
+        var p1 = pMap[challenge.challenger_player_id] || {};
+        var p2 = pMap[challenge.opponent_player_id] || {};
+        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
+        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-modal-overlay';
+        overlay.innerHTML =
+            '<div class="ad-modal" style="max-width:460px;">' +
+                '<div class="ad-modal-header">' +
+                    '<h3>' + L.chalCancelBattle + '</h3>' +
+                    '<button class="ad-modal-close" id="cbxClose">&times;</button>' +
+                '</div>' +
+                '<div class="ad-modal-body">' +
+                    '<p class="ad-modal-text">' +
+                        A.esc(challenge.battle_title || (p1Name + ' \u2014 ' + p2Name)) +
+                    '</p>' +
+                    '<p class="ad-modal-note">' + L.chalCancelNote + '</p>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.chalCancelReason + '</label>' +
+                        '<textarea class="ad-field-input" id="cbxReason" rows="3" maxlength="200" ' +
+                            'placeholder="' + A.esc(L.chalCancelReasonHint) + '"></textarea>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ad-modal-footer">' +
+                    '<button class="ad-btn ad-btn-secondary" id="cbxNo">' + L.cancel + '</button>' +
+                    '<button class="ad-btn ad-btn-danger" id="cbxYes">' + L.chalCancelBattle + '</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        function close() { overlay.remove(); }
+        document.getElementById('cbxClose').addEventListener('click', close);
+        document.getElementById('cbxNo').addEventListener('click', close);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+
+        document.getElementById('cbxYes').addEventListener('click', async function() {
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = L.chalSaving;
+
+            var res = await A.client.rpc('cancel_battle', {
+                p_id: challenge.id,
+                p_reason: document.getElementById('cbxReason').value.trim() || null
+            });
+            var err = (res.error && res.error.message) || (res.data && res.data.error);
+            if (err) {
+                A.showToast(err === 'forbidden'
+                    ? L.chalCancelForbidden
+                    : err === 'not_cancellable' ? L.chalCancelTooLate : err, 'error');
+                btn.disabled = false;
+                btn.textContent = L.chalCancelBattle;
+                return;
+            }
+
+            // В группу Telegram сообщаем отдельно: база до мессенджера не
+            // дотягивается, а объявляли баттл именно там
+            var reason = document.getElementById('cbxReason');
+            announceCancelToTelegram(challenge.id, reason ? reason.value.trim() : '');
+
+            close();
+            A.showToast(L.chalCancelled + ' \u00B7 ' + (res.data.notified || 0), 'success');
+            loadData();
+        });
+    }
+
+    /** Объявление об отмене в группу клуба. Молчание — не ответ. */
+    function announceCancelToTelegram(challengeId, reason) {
+        A.client.auth.getSession().then(function(sRes) {
+            var token = sRes.data.session ? sRes.data.session.access_token : '';
+            return fetch(window.SUPABASE_URL + '/functions/v1/battle-announce', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                    'apikey': window.SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({ challenge_id: challengeId, cancelled: true, reason: reason || null })
+            });
+        }).then(function(res) {
+            return res.json();
+        }).then(function(data) {
+            // Молчаливый отказ мы уже ловили: функция отвечала «баттл не
+            // опубликован» ровно на отмену, и никто об этом не узнавал
+            if (!data || data.error || data.tg_sent === false) {
+                console.warn('[KSLT] cancel announce:', data);
+                A.showToast(L.chalCancelNoTg, 'error');
+            }
+        }).catch(function(e) {
+            console.warn('[KSLT] cancel announce:', e);
+            A.showToast(L.chalCancelNoTg, 'error');
         });
     }
 

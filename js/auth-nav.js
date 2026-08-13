@@ -41,7 +41,7 @@
         { key: 'dashboard', icon: '📊', label: 'Dashboard' },
         { key: 'content', icon: '📰', label: 'News' },
         { key: 'tournaments', icon: '🏆', label: 'Tournaments' },
-        { key: 'challenges', icon: '⚔️', label: 'Battles' },
+        { key: 'challenges', icon: '🔥', label: 'Battles' },
         { key: 'players', icon: '🎾', label: 'Players' },
         { key: 'courts', icon: '🏟️', label: 'Courts' },
         { key: 'coaches', icon: '🎓', label: 'Coaches' },
@@ -54,7 +54,7 @@
         { key: 'dashboard', icon: '📊', label: 'Дашборд' },
         { key: 'content', icon: '📰', label: 'Новости' },
         { key: 'tournaments', icon: '🏆', label: 'Турниры' },
-        { key: 'challenges', icon: '⚔️', label: 'Вызовы' },
+        { key: 'challenges', icon: '🔥', label: 'Вызовы' },
         { key: 'players', icon: '🎾', label: 'Игроки' },
         { key: 'courts', icon: '🏟️', label: 'Корты' },
         { key: 'coaches', icon: '🎓', label: 'Тренеры' },
@@ -317,6 +317,19 @@
                                 try {
                                     document.dispatchEvent(new CustomEvent('kslt:challenge-answered'));
                                 } catch(e) {}
+
+                                // Автору вызова — личное сообщение в Telegram
+                                // и на почту. В колокольчик его кладёт база,
+                                // но до мессенджера она не дотягивается
+                                if (!res || !res.error) {
+                                    fetch(DB_URL + '/functions/v1/challenge-notify', {
+                                        method: 'POST',
+                                        headers: apiHeaders({ 'Content-Type': 'application/json' }),
+                                        body: JSON.stringify({ challenge_id: n.action_id })
+                                    }).catch(function(e) {
+                                        console.warn('[KSLT] challenge-notify:', e);
+                                    });
+                                }
                             }).catch(function(e) {
                                 console.warn('[KSLT] challenge answer:', e);
                                 if (box) box.querySelectorAll('button').forEach(function(b) { b.disabled = false; });

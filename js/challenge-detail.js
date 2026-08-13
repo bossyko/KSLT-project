@@ -312,9 +312,9 @@
         var c2Flag = CU ? CU.flagEmoji(CU.normalizeCountry(c2CountryCode) || 'KG') : '';
 
         // Date/time/venue — use counter values if available, else proposed
-        var date = b.counter_date || b.proposed_date || '';
-        var time = b.counter_time || b.proposed_time || '';
-        var venue = b.counter_venue || b.proposed_venue || '';
+        var date = b.proposed_date || '';
+        var time = b.proposed_time || '';
+        var venue = b.proposed_venue || '';
 
         var formattedDate = date ? formatDate(date) : '';
 
@@ -372,8 +372,8 @@
         var c2Name = isEn ? (b.opponent_name_en || b.opponent_name) : (isKg ? (b.opponent_name_kg || b.opponent_name) : b.opponent_name);
 
         // Auto-close voting when match time arrives (Asia/Bishkek = UTC+6)
-        var matchDate = b.counter_date || b.proposed_date || '';
-        var matchTime = b.counter_time || b.proposed_time || '';
+        var matchDate = b.proposed_date || '';
+        var matchTime = b.proposed_time || '';
         var timeExpired = false;
         if (matchDate && matchTime) {
             var matchDt = new Date(matchDate + 'T' + matchTime + ':00+06:00');
@@ -579,9 +579,9 @@
         var section = document.getElementById('challengeDetails');
         if (!section) return;
 
-        var date = b.counter_date || b.proposed_date || '';
-        var time = b.counter_time || b.proposed_time || '';
-        var venue = b.counter_venue || b.proposed_venue || '';
+        var date = b.proposed_date || '';
+        var time = b.proposed_time || '';
+        var venue = b.proposed_venue || '';
 
         if (!date && !time && !venue) return;
 

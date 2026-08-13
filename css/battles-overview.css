@@ -822,3 +822,11 @@
         height: 48px;
     }
 }
+
+/* Заглушка пустого списка — пламя вместо листа бумаги из общего набора */
+.bo-empty-icon {
+    font-size: 2.4rem;
+    line-height: 1;
+    margin-bottom: var(--space-sm);
+    opacity: 0.45;
+}

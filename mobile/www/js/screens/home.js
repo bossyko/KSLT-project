@@ -1113,9 +1113,9 @@
     html += '</div>';
 
     // Meta (date, time, venue)
-    var date = b.counter_date || b.proposed_date || '';
-    var time = b.counter_time || b.proposed_time || '';
-    var venue = b.counter_venue || b.proposed_venue || '';
+    var date = b.proposed_date || '';
+    var time = b.proposed_time || '';
+    var venue = b.proposed_venue || '';
     if (date || time || venue) {
       html += '<div class="bd-meta">';
       if (date) html += '<span class="bd-meta-item">📅 ' + formatDateShort(date) + '</span>';

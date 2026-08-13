@@ -49,7 +49,7 @@
                 '</div>' +
                 '<div class="ad-modal-footer">' +
                     '<button class="ad-btn" id="adBcCancel">' + L.cancel + '</button>' +
-                    ' <button class="ad-btn ad-btn--accent" id="adBcSend">' + L.broadcastSend + '</button>' +
+                    ' <button class="ad-btn ad-btn-primary" id="adBcSend">' + L.broadcastSend + '</button>' +
                 '</div>' +
             '</div>';
 

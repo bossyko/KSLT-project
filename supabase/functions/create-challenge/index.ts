@@ -99,9 +99,34 @@ Deno.serve(async (req) => {
 
       const { data: opponent } = await db
         .from('profiles')
-        .select('email, notify_preferences')
+        .select('email, notify_preferences, telegram_chat_id')
         .eq('id', opponentProfileId)
         .single()
+
+      // Telegram — дублирующий канал, без кнопок: отвечают на вызов на
+      // платформе. Кнопки здесь означали бы второй механизм ответа, а
+      // именно из-за него ответ и разошёлся с базой в прошлый раз
+      const tgToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
+      if (tgToken && opponent?.telegram_chat_id &&
+          shouldNotify(opponent.notify_preferences, 'tg', 'challenges')) {
+        const lines = [
+          '🔥 <b>Вызов на матч</b>',
+          '',
+          `${escapeHtml(senderName)} вызывает вас на баттл.`
+        ]
+        if (message) lines.push('', `💬 <i>${escapeHtml(String(message).slice(0, 150))}</i>`)
+        lines.push('', 'Принять или отклонить — в личном кабинете KSLT.')
+
+        await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: opponent.telegram_chat_id,
+            text: lines.join('\n'),
+            parse_mode: 'HTML'
+          })
+        }).catch((e) => console.error('TG notify failed:', e))
+      }
 
       // Почта — вдогонку: она работает, когда человек неделю не заходил.
       // Отключается тем же переключателем в настройках, что и раньше
@@ -122,6 +147,10 @@ Deno.serve(async (req) => {
     return json({ error: 'Internal error' }, 500)
   }
 })
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
 
 function shouldNotify(prefs: any, channel: 'tg' | 'email' | 'site', cat: string): boolean {
   if (!prefs) return true

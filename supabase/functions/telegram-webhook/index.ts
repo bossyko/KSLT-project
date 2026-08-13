@@ -481,7 +481,7 @@
       // Step 1: parallel — challenge + existing vote + linked profile
       const [chalRes, existRes, profileRes] = await Promise.all([
         db.from('challenges')
-          .select('id, battle_published, voting_closed, challenger_player_id, opponent_player_id, proposed_date, proposed_time, counter_date, counter_time')
+          .select('id, battle_published, voting_closed, challenger_player_id, opponent_player_id, proposed_date, proposed_time')
           .eq('id', challengeId).single(),
         db.from('challenge_predictions')
           .select('id')
@@ -504,8 +504,8 @@
       }
 
       // Auto-close: check if match time has passed (Asia/Bishkek = UTC+6)
-      const matchDate = challenge.counter_date || challenge.proposed_date
-      const matchTime = challenge.counter_time || challenge.proposed_time
+      const matchDate = challenge.proposed_date
+      const matchTime = challenge.proposed_time
       if (matchDate && matchTime) {
         const matchDt = new Date(`${matchDate}T${matchTime}:00+06:00`)
         if (!isNaN(matchDt.getTime()) && Date.now() >= matchDt.getTime()) {

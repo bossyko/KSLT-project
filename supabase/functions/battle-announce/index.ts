@@ -55,7 +55,9 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json()
-    const { challenge_id } = body
+    // cancelled — та же рассылка, но об отмене: баттл сняли с сайта, и
+    // группа, которой его объявляли, должна узнать об этом тем же каналом
+    const { challenge_id, cancelled, reason } = body
 
     if (!challenge_id) {
       return new Response(JSON.stringify({ error: 'challenge_id required' }), {
@@ -69,8 +71,7 @@ Deno.serve(async (req) => {
       .select(`
         id, status, battle_published, battle_title,
         challenger_player_id, opponent_player_id,
-        proposed_date, proposed_time, proposed_venue,
-        counter_date, counter_time, counter_venue
+        proposed_date, proposed_time, proposed_venue
       `)
       .eq('id', challenge_id)
       .single()
@@ -81,7 +82,10 @@ Deno.serve(async (req) => {
       })
     }
 
-    if (!challenge.battle_published) {
+    // При отмене баттл уже снят с публикации — это и есть отмена. Проверка
+    // «опубликован» здесь отказывала ровно в том случае, ради которого
+    // сообщение и нужно
+    if (!challenge.battle_published && !cancelled) {
       return new Response(JSON.stringify({ error: 'Battle not published yet' }), {
         status: 400, headers: corsHeaders
       })
@@ -99,9 +103,10 @@ Deno.serve(async (req) => {
     const challengerName = pMap[challenge.challenger_player_id] || '?'
     const opponentName = pMap[challenge.opponent_player_id] || '?'
 
-    const date = challenge.counter_date || challenge.proposed_date || ''
-    const time = challenge.counter_time || challenge.proposed_time || ''
-    const venue = challenge.counter_venue || challenge.proposed_venue || ''
+    // Встречного предложения больше нет: дату и место задаёт менеджер
+    const date = challenge.proposed_date || ''
+    const time = challenge.proposed_time || ''
+    const venue = challenge.proposed_venue || ''
     const title = challenge.battle_title || 'Battle'
 
     // Send TG announcement to group with inline voting buttons
@@ -110,9 +115,22 @@ Deno.serve(async (req) => {
 
     let tgSent = false
 
+    if (token && groupChatId && cancelled) {
+      const text =
+        `❌ <b>Баттл отменён</b>\n\n` +
+        `<s>${escHtml(title)}</s>\n` +
+        `${escHtml(challengerName)} — ${escHtml(opponentName)}\n` +
+        (reason ? `\n${escHtml(String(reason))}` : '')
+
+      const ok = await sendTgMessage(token, groupChatId, text, null)
+      return new Response(JSON.stringify({ success: true, tg_sent: ok, cancelled: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
     if (token && groupChatId) {
       const text =
-        `⚔️ <b>${escHtml(title)}</b>\n\n` +
+        `🔥 <b>${escHtml(title)}</b>\n\n` +
         `🔴 ${escHtml(challengerName)} vs 🔵 ${escHtml(opponentName)}\n` +
         (date ? `📅 ${date}` : '') +
         (time ? ` ⏰ ${time}` : '') + '\n' +

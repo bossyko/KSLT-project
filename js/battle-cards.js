@@ -109,7 +109,7 @@
     // ---- Load active published battles ----
     function loadActiveBattles() {
         return client.from('challenges')
-            .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, counter_date, counter_time, counter_venue, challenger_player_id, opponent_player_id, banner_url, battle_published_at')
+            .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, challenger_player_id, opponent_player_id, banner_url, battle_published_at')
             .eq('battle_published', true)
             .neq('status', 'completed')
             .order('battle_published_at', { ascending: false })
@@ -120,7 +120,7 @@
                 // Filter out battles where date has passed
                 var today = new Date().toISOString().substring(0, 10);
                 var battles = res.data.filter(function(b) {
-                    var bd = b.counter_date || b.proposed_date;
+                    var bd = b.proposed_date;
                     if (!bd) return true;
                     return bd >= today;
                 });
@@ -173,9 +173,9 @@
         var p2Name = getPlayerName(p2);
         var p1Photo = p1.photo || 'https://placehold.co/60x60/1a1a1a/666?text=?';
         var p2Photo = p2.photo || 'https://placehold.co/60x60/1a1a1a/666?text=?';
-        var date = battle.counter_date || battle.proposed_date || '';
-        var time = battle.counter_time || battle.proposed_time || '';
-        var venue = battle.counter_venue || battle.proposed_venue || '';
+        var date = battle.proposed_date || '';
+        var time = battle.proposed_time || '';
+        var venue = battle.proposed_venue || '';
 
         // Votes
         var vData = votes[battle.id] || { votes: {}, total: 0 };

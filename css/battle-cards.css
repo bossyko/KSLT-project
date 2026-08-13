@@ -17,10 +17,15 @@
     padding: 0 7% var(--space-lg, 2rem);
 }
 
-/* ---- Grid ---- */
+/* ---- Grid ----
+   Верхняя граница у колонки обязательна: при одном баттле карточка
+   растягивалась на всю ширину страницы, и афиша превращалась в узкую
+   полосу в полторы тысячи пикселей. Когда карточек мало, ряд выравнивается
+   по центру, а не липнет к левому краю */
 .bc-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(340px, 460px));
+    justify-content: center;
     gap: var(--space-lg, 1.5rem);
 }
 
@@ -40,10 +45,13 @@
     box-shadow: 0 8px 24px rgba(204,255,0,0.06);
 }
 
-/* Banner image inside card */
+/* Афиша — по пропорции, а не фиксированной высотой: при широкой карточке
+   120 пикселей превращали постер в полоску, где не разобрать ни лиц, ни
+   надписей */
 .bc-banner {
     width: 100%;
-    height: 120px;
+    aspect-ratio: 16 / 9;
+    height: auto;
     object-fit: cover;
     border-bottom: 1px solid rgba(255,255,255,0.06);
 }

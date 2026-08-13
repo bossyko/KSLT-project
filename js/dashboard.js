@@ -167,7 +167,7 @@
         subBattles: 'Баттлдар',
         subUpcoming: 'Алдыдагы турнирлер',
         chalAccept: 'Кабыл алуу', chalDecline: 'Четке кагуу', chalCancel: 'Кайра чакыруу',
-        chalCancelledBySelf: 'Өзүңүз кайра чакырдыңыз', chalCancelledByOpp: 'Чакырык кайра алынды',
+        chalCancelledBySelf: 'Алынды', chalCancelledByOpp: 'Алынды',
         chalDirSent: 'сиз чакырдыңыз', chalDirGot: 'сизди чакырышты', chalSentOn: 'чакырык',
         chalTheyAccepted: 'Атаандаш кабыл алды', chalYouAccepted: 'Сиз кабыл алдыңыз',
         chalTheyDeclined: 'Атаандаш четке какты', chalYouDeclined: 'Сиз четке кактыңыз',
@@ -416,7 +416,7 @@
         subBattles: 'Battles',
         subUpcoming: 'Upcoming tournaments',
         chalAccept: 'Accept', chalDecline: 'Decline', chalCancel: 'Withdraw',
-        chalCancelledBySelf: 'You withdrew it', chalCancelledByOpp: 'Challenge withdrawn',
+        chalCancelledBySelf: 'Withdrawn', chalCancelledByOpp: 'Withdrawn',
         chalDirSent: 'you challenged', chalDirGot: 'you were challenged', chalSentOn: 'sent',
         chalTheyAccepted: 'Opponent accepted', chalYouAccepted: 'You accepted',
         chalTheyDeclined: 'Opponent declined', chalYouDeclined: 'You declined',
@@ -665,7 +665,7 @@
         subBattles: 'Баттлы',
         subUpcoming: 'Предстоящие турниры',
         chalAccept: 'Принять', chalDecline: 'Отклонить', chalCancel: 'Отозвать',
-        chalCancelledBySelf: 'Вы отозвали', chalCancelledByOpp: 'Вызов отозван',
+        chalCancelledBySelf: 'Отозван', chalCancelledByOpp: 'Отозван',
         chalDirSent: 'вы вызвали', chalDirGot: 'вас вызвали', chalSentOn: 'вызов от',
         chalTheyAccepted: 'Соперник принял', chalYouAccepted: 'Вы приняли',
         chalTheyDeclined: 'Соперник отклонил', chalYouDeclined: 'Вы отклонили',
@@ -2611,7 +2611,7 @@
     function bindChallengeActions(root, profile) {
         if (!root || !client) return;
 
-        function act(btn, run) {
+        function act(btn, run, tellAuthor) {
             btn.disabled = true;
             var was = btn.textContent;
             btn.textContent = L.saving;
@@ -2626,6 +2626,9 @@
                     loadGamesBattles(profile);
                     return;
                 }
+                // Автору сообщаем только про ответ на его вызов. При
+                // отзыве автор — сам нажимающий, ему сообщать нечего
+                if (tellAuthor) notifyChallengeAuthor(btn.dataset.id);
                 announceChallengeAnswered();
             }).catch(function(e) {
                 console.warn('[KSLT] challenge action:', e);
@@ -2638,14 +2641,14 @@
             b.addEventListener('click', function() {
                 act(b, function() {
                     return client.rpc('respond_to_challenge', { p_id: b.dataset.id, p_accept: true });
-                });
+                }, true);
             });
         });
         root.querySelectorAll('.db-chal-no').forEach(function(b) {
             b.addEventListener('click', function() {
                 act(b, function() {
                     return client.rpc('respond_to_challenge', { p_id: b.dataset.id, p_accept: false });
-                });
+                }, true);
             });
         });
         root.querySelectorAll('.db-chal-off').forEach(function(b) {
@@ -2684,6 +2687,31 @@
                 '<span class="db-status-badge db-invite-' + cls + '">' + escHtml(label) + '</span>' +
             '</div>';
         } catch(e) { /* не смогли спросить — кнопки останутся, база всё равно откажет */ }
+    }
+
+    /**
+     * Сообщить автору вызова, что ему ответили.
+     *
+     * В колокольчик уведомление кладёт сама база, вместе со сменой статуса.
+     * Сюда вынесено только то, до чего база не дотягивается: личное
+     * сообщение в Telegram и письмо.
+     */
+    function notifyChallengeAuthor(challengeId) {
+        if (!client || !window.SUPABASE_URL) return;
+        client.auth.getSession().then(function(sRes) {
+            var token = sRes.data.session ? sRes.data.session.access_token : '';
+            return fetch(window.SUPABASE_URL + '/functions/v1/challenge-notify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                    'apikey': window.SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({ challenge_id: challengeId })
+            });
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (!d || d.error) console.warn('[KSLT] challenge-notify:', d);
+        }).catch(function(e) { console.warn('[KSLT] challenge-notify:', e); });
     }
 
     /** Коды отказа от базы — по-человечески. */
@@ -3076,29 +3104,87 @@
             var unreadCount = items.filter(function(n) { return !n.is_read; }).length;
             var allReadLabel = isEn ? 'Mark all as read' : (isKg ? 'Баарын окулду деп белгилөө' : 'Отметить все прочитанными');
 
-            var html = '<h2 class="db-section-title">' + L.notificationsTab + '</h2>';
-            if (unreadCount > 0) {
-                html += '<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">' +
-                    '<button class="db-notif-all-read" id="dbNotifAllRead">' + allReadLabel + '</button></div>';
+            // Таблица, как в «Моих играх»: дата слева, фильтры сверху,
+            // страницы по десять. Раздел жил своей вёрсткой — карточками с
+            // датой справа, — и выглядел чужим среди остальных
+            var TYPES = ['all', 'unread', 'challenge', 'tournament', 'match', 'membership'];
+            var typeLabels = {
+                all: isEn ? 'All' : (isKg ? 'Баары' : 'Все'),
+                unread: isEn ? 'Unread' : (isKg ? 'Окулбаган' : 'Непрочитанные'),
+                challenge: L.notifChallenges,
+                tournament: L.notifTournaments,
+                match: L.notifMatches,
+                membership: L.notifMembership
+            };
+            var have = {};
+            items.forEach(function(n) { have[n.type] = true; });
+
+            var chips = TYPES.filter(function(t) {
+                return t === 'all' || (t === 'unread' ? unreadCount > 0 : have[t]);
+            });
+
+            function pick(list, f) {
+                if (f === 'all') return list;
+                if (f === 'unread') return list.filter(function(n) { return !n.is_read; });
+                return list.filter(function(n) { return n.type === f; });
             }
-            html += '<div class="db-notif-list">';
-            items.forEach(function(n) {
-                html += '<button class="db-notif-item' + (n.is_read ? '' : ' unread') + '" ' +
-                        'type="button" data-id="' + escHtml(n.id) + '">' +
-                    '<div class="db-notif-icon">' + (ICONS[n.type] || ICONS.system) + '</div>' +
-                    '<div class="db-notif-body">' +
+
+            function notifRow(n) {
+                return '<tr class="db-notif-row' + (n.is_read ? '' : ' unread') + '" data-id="' +
+                        escHtml(n.id) + '">' +
+                    '<td class="db-match-date">' + dbFormatDate(n.created_at) + '</td>' +
+                    '<td class="db-notif-type">' + (ICONS[n.type] || ICONS.system) + '</td>' +
+                    '<td>' +
                         '<div class="db-notif-title">' + escHtml(n.title || '') + '</div>' +
                         '<div class="db-notif-msg">' + escHtml(n.message || '') + '</div>' +
-                        '<div class="db-notif-time">' + dbFormatDate(n.created_at) + '</div>' +
-                    '</div>' +
-                '</button>';
-            });
-            html += '</div>';
+                    '</td>' +
+                '</tr>';
+            }
+
+            var html = '<h2 class="db-section-title">' + L.notificationsTab + '</h2>';
+            html += '<div class="db-notif-bar">' +
+                '<div class="db-notif-filters">' +
+                    chips.map(function(t) {
+                        return '<button class="db-chip' + (t === 'all' ? ' active' : '') +
+                            '" data-filter="' + t + '">' + typeLabels[t] + '</button>';
+                    }).join('') +
+                '</div>' +
+                (unreadCount > 0
+                    ? '<button class="db-notif-all-read" id="dbNotifAllRead">' + allReadLabel + '</button>'
+                    : '') +
+            '</div>';
+            html += '<div id="dbNotifTable"></div>';
             container.innerHTML = html;
+
+            function paint(filter) {
+                var box = document.getElementById('dbNotifTable');
+                var list = pick(items, filter);
+                if (list.length === 0) {
+                    box.innerHTML = '<div class="db-empty" style="padding:24px 0;">' +
+                        '<div class="db-empty-title">' + L.notifEmpty + '</div></div>';
+                    return;
+                }
+                renderPaged(box, list, function(rows) {
+                    return '<table class="db-matches-table db-notif-table"><tbody>' +
+                        rows.map(notifRow).join('') + '</tbody></table>';
+                }, 0, bindRows);
+            }
+
+            container.querySelectorAll('.db-chip').forEach(function(chip) {
+                chip.addEventListener('click', function() {
+                    container.querySelectorAll('.db-chip').forEach(function(c) {
+                        c.classList.toggle('active', c === chip);
+                    });
+                    paint(chip.dataset.filter);
+                });
+            });
+
+            paint('all');
 
             // Открыл уведомление — оно прочитано. Просто зашёл в раздел —
             // ничего не изменилось, как со списком писем
-            container.querySelectorAll('.db-notif-item').forEach(function(el) {
+            function bindRows(root) {
+            root.querySelectorAll('.db-notif-row').forEach(function(el) {
                 el.addEventListener('click', function() {
                     var n = items.filter(function(x) { return x.id === el.dataset.id; })[0];
                     if (!n) return;
@@ -3125,6 +3211,7 @@
                     }
                 });
             });
+            }
 
             var allBtn = document.getElementById('dbNotifAllRead');
             if (allBtn) {
@@ -3154,6 +3241,7 @@
             var res = await client.rpc('respond_to_challenge', { p_id: n.action_id, p_accept: accept });
             var err = (res.error && res.error.message) || (res.data && res.data.error);
             if (err) showMessage(null, chalErrText(err), true);
+            else notifyChallengeAuthor(n.action_id);
         } catch(e) {
             console.warn('[KSLT] challenge answer:', e);
         }
@@ -3232,7 +3320,7 @@
             return;
         }
         if (container) {
-            container.querySelectorAll('.db-notif-item.unread').forEach(function(el) {
+            container.querySelectorAll('.db-notif-row.unread').forEach(function(el) {
                 el.classList.remove('unread');
             });
         }
@@ -3257,16 +3345,16 @@
         var container = document.getElementById('db-notifications');
         if (!container) return;
         if (d.all) {
-            container.querySelectorAll('.db-notif-item.unread').forEach(function(el) {
+            container.querySelectorAll('.db-notif-row.unread').forEach(function(el) {
                 el.classList.remove('unread');
             });
             var allBtn = document.getElementById('dbNotifAllRead');
             if (allBtn) allBtn.style.display = 'none';
         } else if (d.id) {
-            var one = container.querySelector('.db-notif-item[data-id="' + d.id + '"]');
+            var one = container.querySelector('.db-notif-row[data-id="' + d.id + '"]');
             if (one) one.classList.remove('unread');
             // Непрочитанных не осталось — кнопке «Отметить все» нечего делать
-            if (!container.querySelector('.db-notif-item.unread')) {
+            if (!container.querySelector('.db-notif-row.unread')) {
                 var btn = document.getElementById('dbNotifAllRead');
                 if (btn) btn.style.display = 'none';
             }
@@ -4519,10 +4607,7 @@
             var cells = '';
             NOTIF_CHANNELS.forEach(function(ch) {
                 var on = isNotifOn(prefs, ch, cat);
-                // Telegram больше не возит вызовы: ответ на них живёт на
-                // платформе. Переключатель, который ничего не переключает,
-                // хуже отсутствующего — он обещает
-                var off = (ch === 'tg' && (!tgLinked || cat === 'challenges'));
+                var off = (ch === 'tg' && !tgLinked);
                 cells +=
                     '<td style="text-align:center;padding:8px 12px;">' +
                         '<label class="db-notif-toggle' + (off ? ' db-notif-off' : '') + '">' +

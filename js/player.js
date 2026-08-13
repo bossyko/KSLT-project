@@ -1140,7 +1140,7 @@
                 oppId = c.challenger_player_id;
             }
 
-            var date = c.counter_date || c.proposed_date || '';
+            var date = c.proposed_date || '';
             var score = c.match_score || '';
             var result = chalWinLoss(score, isChallenger);
 

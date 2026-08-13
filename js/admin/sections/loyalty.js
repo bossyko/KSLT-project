@@ -88,7 +88,7 @@
         var rules = res.data || [];
 
         var html = '<div style="margin-bottom:16px;">' +
-            '<button class="ad-btn ad-btn--accent" id="adLoyAddRule">+ ' + (isEn ? 'Add Rule' : 'Добавить правило') + '</button>' +
+            '<button class="ad-btn ad-btn-primary" id="adLoyAddRule">+ ' + (isEn ? 'Add Rule' : 'Добавить правило') + '</button>' +
             '</div>';
 
         if (rules.length === 0) {
@@ -220,7 +220,7 @@
         var rewards = res.data || [];
 
         var html = '<div style="margin-bottom:16px;">' +
-            '<button class="ad-btn ad-btn--accent" id="adLoyAddReward">+ ' + L.loyAddReward + '</button>' +
+            '<button class="ad-btn ad-btn-primary" id="adLoyAddReward">+ ' + L.loyAddReward + '</button>' +
             '</div>';
 
         if (rewards.length === 0) {
@@ -388,7 +388,7 @@
             '<div class="ad-filter-row">' +
                 '<input type="text" id="adLoySearch" class="ad-field-input ad-filter-search" placeholder="' + L.loySearch + '" value="' + A.esc(loyTxSearch) + '">' +
                 '<select id="adLoyTypeFilter" class="ad-field-input ad-filter-select">' + typeOptions + '</select>' +
-                (isAdm ? '<button class="ad-btn ad-btn--accent" id="adLoyAdjustBtn" style="white-space:nowrap;">' + L.loyAdjustTitle + '</button>' : '') +
+                (isAdm ? '<button class="ad-btn ad-btn-primary" id="adLoyAdjustBtn" style="white-space:nowrap;">' + L.loyAdjustTitle + '</button>' : '') +
             '</div>';
 
         wrap.innerHTML = statsHtml + filtersHtml + '<div id="adLoyTxTable"></div>';

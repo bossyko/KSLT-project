@@ -23,7 +23,7 @@
         container.innerHTML =
             '<div class="ad-section-header" style="display:flex;justify-content:space-between;align-items:center;">' +
                 '<h2>' + L.liveSection + '</h2>' +
-                '<button class="ad-btn ad-btn-accent" id="liveCreateBtn">' + L.liveCreate + '</button>' +
+                '<button class="ad-btn ad-btn-primary" id="liveCreateBtn">' + L.liveCreate + '</button>' +
             '</div>' +
             '<div class="ad-rat-tabs" id="liveTabs" style="margin-bottom:20px;">' +
                 '<button class="ad-rat-tab' + (subTab === 'active' ? ' active' : '') + '" data-subtab="active">' + L.liveActive + '</button>' +
@@ -134,7 +134,7 @@
                 '<td style="' + statusStyle + '">' + statusLabel + '</td>' +
                 '<td>' + (m.youtube_url ? '<span style="color:var(--accent);">✓</span>' : '—') + '</td>' +
                 '<td style="display:flex;gap:6px;flex-wrap:wrap;">' +
-                    '<button class="ad-btn ad-btn-sm ad-btn-accent" data-copy-url="' + A.esc(umpireUrl) + '">' + L.liveUmpireLink + '</button>' +
+                    '<button class="ad-btn ad-btn-sm ad-btn-primary" data-copy-url="' + A.esc(umpireUrl) + '">' + L.liveUmpireLink + '</button>' +
                     '<a href="' + A.esc(pageUrl) + '" target="_blank" class="ad-btn ad-btn-sm ad-btn-outline">' + L.liveOpenPage + '</a>' +
                     '<a href="' + A.esc(scoreboardUrl) + '" target="_blank" class="ad-btn ad-btn-sm ad-btn-outline">' + L.liveScoreboard + '</a>' +
                     '<button class="ad-btn ad-btn-sm ad-btn-danger" data-delete-live="' + m.id + '">' + L.liveDelete + '</button>' +
@@ -196,7 +196,7 @@
                 '<td style="font-family:monospace;">' + A.esc(m.final_score || '—') + '</td>' +
                 '<td>' + date + '</td>' +
                 '<td>' +
-                    (m.match_id ? '<button class="ad-btn ad-btn-sm ad-btn-accent" data-sync-live="' + m.id + '" data-match-id="' + m.match_id + '" data-score="' + A.esc(m.final_score || '') + '">' + L.liveSync + '</button> ' : '') +
+                    (m.match_id ? '<button class="ad-btn ad-btn-sm ad-btn-primary" data-sync-live="' + m.id + '" data-match-id="' + m.match_id + '" data-score="' + A.esc(m.final_score || '') + '">' + L.liveSync + '</button> ' : '') +
                     '<button class="ad-btn ad-btn-sm ad-btn-danger" data-delete-live="' + m.id + '">' + L.liveDelete + '</button>' +
                 '</td>' +
             '</tr>';
@@ -346,7 +346,7 @@
                     '</div>' +
                 '</div>' +
                 '<div class="ad-modal-footer">' +
-                    '<button class="ad-btn ad-btn-accent" id="liveModalSave">' + L.liveCreate + '</button>' +
+                    '<button class="ad-btn ad-btn-primary" id="liveModalSave">' + L.liveCreate + '</button>' +
                 '</div>' +
             '</div>';
 

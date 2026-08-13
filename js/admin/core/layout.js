@@ -59,6 +59,10 @@
             navHtml += '<li class="ad-sidebar-item"><button class="ad-sidebar-link' + isActive + '" data-tab="' + item.key + '">' + item.icon + item.label + badgeHtml + '</button></li>';
         });
 
+        // Принятые вызовы ждут, пока менеджер назначит корт и время.
+        // Без отметки в меню он узнавал об этом, только зайдя в раздел
+        refreshChallengeBadge();
+
         container.innerHTML =
             '<div class="ad-sidebar-user">' +
                 avatarHtml +
@@ -191,7 +195,7 @@
         container.innerHTML =
             '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
                 '<h2 class="ad-section-title" style="margin-bottom:0;">' + L.dashboardTitle + '</h2>' +
-                (isAdm ? '<button class="ad-btn ad-btn--accent" id="adBroadcastBtn" style="white-space:nowrap;">📢 ' + L.broadcastBtn + '</button>' : '') +
+                (isAdm ? '<button class="ad-btn ad-btn-primary" id="adBroadcastBtn" style="white-space:nowrap;">📢 ' + L.broadcastBtn + '</button>' : '') +
             '</div>' +
             // Stat cards (3x3 grid)
             '<div class="ad-stats-grid" id="adStatsGrid">' +
@@ -535,6 +539,34 @@
     }
 
     // ---- Export to namespace ----
+    /**
+     * Сколько принятых вызовов ждут публикации — цифрой у пункта «Вызовы».
+     *
+     * Обновляется и при загрузке админки, и после каждого действия в самом
+     * разделе: принял менеджер решение — цифра меняется сразу.
+     */
+    function refreshChallengeBadge() {
+        if (!A.client) return;
+        A.client.from('challenges')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'accepted')
+            .eq('battle_published', false)
+            .then(function(res) {
+                var n = res.count || 0;
+                var link = document.querySelector('.ad-sidebar-link[data-tab="challenges"]');
+                if (!link) return;
+                var old = link.querySelector('.ad-sidebar-count');
+                if (old) old.remove();
+                if (n === 0) return;
+                var b = document.createElement('span');
+                b.className = 'ad-sidebar-count';
+                b.textContent = n;
+                b.title = L.chalWaitingPublish;
+                link.appendChild(b);
+            });
+    }
+
+    A.refreshChallengeBadge = refreshChallengeBadge;
     A.renderSidebar = renderSidebar;
     A.renderMobileTabs = renderMobileTabs;
     A.renderDashboard = renderDashboard;

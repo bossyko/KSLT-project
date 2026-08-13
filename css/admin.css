@@ -4468,3 +4468,119 @@ select.ad-field-input {
     font-weight: 500;
     white-space: nowrap;
 }
+
+/* ---- Принятые вызовы ждут публикации ----
+   Менеджер узнавал о них, только зайдя в раздел. Цифра у пункта меню и на
+   вкладке говорит, что появилось что-то, требующее его руки. */
+.ad-sidebar-count {
+    margin-left: auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #0A0A0A;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.ad-tab-count:not(:empty) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    margin-left: 6px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #0A0A0A;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+/* Контакты обоих игроков в строке принятого вызова.
+   Имя и значения в своих колонках: при сплошной строке телефоны второго
+   игрока начинались не там, где у первого, и блок выглядел рассыпанным. */
+.ad-chal-contacts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 2px 14px;
+    align-items: baseline;
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+
+.ad-chal-who {
+    color: var(--text-primary, #fff);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ad-chal-links {
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.ad-chal-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    border-bottom: 1px dotted transparent;
+}
+
+.ad-chal-links a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.ad-chal-links .ad-chal-sep {
+    opacity: 0.35;
+    margin: 0 6px;
+}
+
+.ad-chal-none {
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+/* Причина отмены под названием баттла */
+.ad-chal-reason {
+    margin-top: 3px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.ad-modal-note {
+    margin: 0 0 14px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+/* Кнопки в строке баттла — одной высоты, без переносов */
+.ad-chal-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.ad-chal-actions .ad-btn {
+    white-space: nowrap;
+}
+
+/* Предупреждение о необратимом действии */
+.ad-modal-danger {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 59, 48, 0.08);
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    color: #ff6b6b;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}

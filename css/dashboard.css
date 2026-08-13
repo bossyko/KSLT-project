@@ -2717,17 +2717,17 @@ select:-webkit-autofill {
 .db-notif-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
 }
 
 /* Каждое уведомление — своя карточка. Одним списком с тонкими линиями они
    сливались в сплошной текст */
 .db-notif-item {
     display: flex;
-    align-items: flex-start;
-    gap: 14px;
+    align-items: center;
+    gap: 12px;
     width: 100%;
-    padding: 14px 16px;
+    padding: 9px 14px;
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
@@ -2766,8 +2766,8 @@ select:-webkit-autofill {
 
 .db-notif-icon {
     flex-shrink: 0;
-    width: 34px;
-    height: 34px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2785,22 +2785,39 @@ select:-webkit-autofill {
     flex: 1;
 }
 
-.db-notif-title {
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 3px;
+/* Заголовок и дата — одной строкой, дата прижата вправо */
+.db-notif-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
 }
 
+.db-notif-title {
+    font-weight: 600;
+    font-size: 0.88rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Текст в одну строку с обрезкой: целиком он открывается в окне */
 .db-notif-msg {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--text-secondary);
-    line-height: 1.45;
+    line-height: 1.4;
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .db-notif-time {
-    margin-top: 5px;
+    flex-shrink: 0;
     font-size: 0.72rem;
     color: var(--text-dim);
+    white-space: nowrap;
 }
 
 /* ---- Турниры в «Моих играх»: та же таблица, что и матчи ----
@@ -3065,4 +3082,111 @@ select:-webkit-autofill {
 .db-matches-table .db-match-opponent > span {
     min-width: 0;
     overflow: hidden;
+}
+
+
+/* ---- Уведомления: та же таблица, что в «Моих играх» ----
+   Раздел жил своей вёрсткой — карточками с датой справа — и выглядел
+   чужим среди остальных разделов кабинета. */
+.db-notif-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.db-notif-filters {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* Фильтр — теми же таблетками, что и остальные переключатели кабинета */
+.db-chip {
+    padding: 5px 14px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.db-chip:hover {
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.db-chip.active {
+    color: #0A0A0A;
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+.db-notif-table td:nth-child(1) { width: 110px; }
+.db-notif-table td:nth-child(2) { width: 44px; text-align: center; }
+
+.db-notif-type {
+    font-size: 1.05rem;
+}
+
+.db-notif-row {
+    cursor: pointer;
+}
+
+.db-notif-row:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Непрочитанное — лаймовой полосой слева, а не рамкой вокруг строки */
+.db-notif-row.unread td:first-child {
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.db-notif-row.unread .db-notif-title {
+    color: var(--text-primary);
+}
+
+.db-notif-table .db-notif-title {
+    font-weight: 600;
+    font-size: 0.88rem;
+    white-space: normal;
+}
+
+.db-notif-table .db-notif-msg {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* Столбцы статуса и H2H в баттлах: значок статуса налезал на кнопку, когда
+   подпись длинная. Даём каждому свою ширину и запрещаем перенос */
+.db-battles-table td:nth-child(5),
+.db-battles-table th:nth-child(5) {
+    width: 150px;
+    white-space: nowrap;
+}
+
+.db-battles-table td:nth-child(6),
+.db-battles-table th:nth-child(6) {
+    width: 70px;
+}
+
+
+/* Значок статуса не вылезает за свою ячейку, какой бы ни была подпись */
+.db-battles-table .db-status-badge {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
 }
