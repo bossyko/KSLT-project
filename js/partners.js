@@ -51,7 +51,7 @@
         heroTitle: '<span>Оюнчу</span> издөө',
         heroDesc: 'Оюн жана машыгуу үчүн Бишкектеги теннисчилерди табыңыз',
         online: 'Онлайн',
-        offline: 'Оффлайн',
+        offline: 'Офлайн',
         filterAll: 'Баары',
         filterMen: 'Эркектер',
         filterWomen: 'Аялдар',
@@ -85,11 +85,11 @@
         modalRegBtn: 'Мүчөлүктү төлөө',
         modalRegDisclaimer: 'Баскычты басуу менен, <a href="rules-kg.html" target="_blank">эрежелер</a> жана <a href="pricing-kg.html" target="_blank">баалар</a> менен тааныштыгыңызды тастыктайсыз'
     } : {
-        heroTagline: 'KSLT Партнёры',
+        heroTagline: 'КСЛТ Сообщество',
         heroTitle: 'Поиск <span>игрока</span>',
-        heroDesc: 'Найдите теннисистов в Бишкеке для совместных игр и тренировок',
+        heroDesc: 'Найди партнёра по теннису в Бишкеке — для игры и тренировок',
         online: 'Онлайн',
-        offline: 'Оффлайн',
+        offline: 'Офлайн',
         filterAll: 'Все',
         filterMen: 'Мужчины',
         filterWomen: 'Женщины',
