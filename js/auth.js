@@ -802,6 +802,19 @@
         // Send OTP to email
         try {
             var otpResult = await sendOtp('register', email, 'email');
+
+            // Отказ функции проходил мимо: код шёл дальше и открывал экран
+            // ввода кода, которого никто не отправлял
+            if (!otpResult || otpResult.error) {
+                setLoading(btn, false, L.creatingAccount, L.createAccount);
+                showMessage(signupForm,
+                    otpResult && otpResult.error === 'captcha_failed'
+                        ? L.errCaptcha
+                        : L.errGeneric + ' (' + ((otpResult && otpResult.error) || 'no response') + ')',
+                    true);
+                return;
+            }
+
             setLoading(btn, false, L.creatingAccount, L.createAccount);
             _signupToken = null;
             if (typeof turnstile !== 'undefined') turnstile.reset('#signupTurnstile');
@@ -868,8 +881,9 @@
                 setTimeout(function() { window.location.href = getRedirectUrl(); }, 1000);
             });
         } catch (err) {
+            console.error('[KSLT] регистрация:', err);
             setLoading(btn, false, L.creatingAccount, L.createAccount);
-            showMessage(signupForm, L.errGeneric, true);
+            showMessage(signupForm, L.errGeneric + ' (' + (err && err.message ? err.message : 'network') + ')', true);
         }
     });
 
@@ -1003,7 +1017,23 @@
             headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
             body: JSON.stringify(body)
         });
-        return await resp.json();
+
+        // Ответ разбирался вслепую. Если функция не развёрнута или упала,
+        // тело приходит не в JSON, разбор падает, и человек видел
+        // «Произошла ошибка» без единого намёка на причину — а в консоли
+        // не оставалось и того
+        var text = await resp.text();
+        var data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('[KSLT] send-otp ответил не JSON:', resp.status, text.slice(0, 300));
+            throw new Error('send-otp: HTTP ' + resp.status);
+        }
+        if (!resp.ok || data.error) {
+            console.error('[KSLT] send-otp:', resp.status, data);
+        }
+        return data;
     }
 
     // Show OTP code entry screen

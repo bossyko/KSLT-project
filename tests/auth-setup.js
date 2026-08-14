@@ -33,6 +33,17 @@ async function signIn(acc) {
         headers: { 'apikey': db.key, 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: acc.email, password: acc.password })
     });
+    // 402 — не наша ошибка: Supabase ограничил проекты за превышение квоты
+    // организации. Ограничение общее на все проекты, включая тестовый, и
+    // снимается сменой платёжного периода или платным планом
+    if (res.status === 402) {
+        throw new Error(
+            '\n\nSupabase ответил 402: проекты организации ограничены за превышение квоты.\n' +
+            'Прогон невозможен, пока ограничение не снято — ни тестовая база, ни боевая\n' +
+            'запросы не обслуживают. Смотри Dashboard → Organization → Usage.\n'
+        );
+    }
+
     const session = await res.json();
     if (!res.ok || !session.access_token) {
         throw new Error(
