@@ -153,6 +153,37 @@
 }
 
 /* ---- RULES ---- */
+
+/* Документ, который ещё не утвердили. Плашка приглушённая, но заметная:
+   читатель должен понять это раньше, чем начнёт спорить о пунктах. */
+.ip-draft-note {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: rgba(204, 255, 0, 0.06);
+    border: 1px solid rgba(204, 255, 0, 0.28);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 32px;
+}
+
+.ip-draft-note-icon {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.ip-draft-note-text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.ip-draft-note-text strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
 .ip-toc {
     background: var(--surface-glass);
     border: 1px solid var(--border-subtle);

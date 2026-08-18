@@ -19,8 +19,8 @@ const tournamentsData = {
             bgImage: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=1920&q=80'
         },
         challenger: {
-            name: 'Challenger',
-            title: 'Challenger Tournaments',
+            name: 'Challengers',
+            title: 'Challengers Tournaments',
             description: 'Турниры среднего уровня для игроков, стремящихся к росту.',
             stats: { tournaments: 10, participants: '200+', prize: '75K' },
             bgImage: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=1920&q=80'
@@ -40,8 +40,8 @@ const tournamentsData = {
             bgImage: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&q=80'
         },
         friendly: {
-            name: 'Friendly',
-            title: 'Friendly Tournaments',
+            name: 'Friendly Weekend',
+            title: 'Friendly Weekend',
             description: 'Дружеские турниры без рейтинговых очков. Играйте в удовольствие!',
             stats: { tournaments: 20, participants: '400+', prize: '—' },
             bgImage: 'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?w=1920&q=80'

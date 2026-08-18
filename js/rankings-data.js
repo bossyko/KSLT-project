@@ -57,11 +57,14 @@
 
             // Build categoriesData: composite keys men-{catId} / women-{catId}
             // Categories are gender-neutral (masters, tour), player.gender is separate
-            // Skip Friendly — no ranking
+            // Нерейтинговые категории в таблицы не идут. Раньше их узнавали по
+            // слову «friendly» в названии — переименование ломало проверку.
+            // Признак по идентификатору оставлен запасным: он работает и до
+            // того, как в базе появится колонка is_rating.
             var result = {};
             var genders = ['men', 'women'];
             categories.forEach(function(cat) {
-                if (cat.name && cat.name.toLowerCase().indexOf('friendly') !== -1) return;
+                if (cat.is_rating === false || cat.id === 'friendly') return;
                 var catName = isEn ? (cat.name_en || cat.name) : (isKg ? (cat.name_kg || cat.name) : cat.name);
                 genders.forEach(function(g) {
                     var inCat = pointsIn[cat.id] || {};

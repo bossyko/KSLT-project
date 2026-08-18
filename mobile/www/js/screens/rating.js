@@ -36,13 +36,19 @@
   // --- Load categories from Supabase ---
   function loadCategories() {
     supabaseClient.from('categories')
-      .select('id, name, name_en, name_kg, sort_order')
+      // Строка целиком: в таблице шесть строк, зато экран не падает, если
+      // колонка в базе появится позже кода.
+      .select('*')
       // Как на сайте: сильные категории сверху (js/players.js)
       .order('sort_order', { ascending: false })
       .then(function(r) {
         if (r.error) { console.error('Categories load error:', r.error); return; }
+        // Нерейтинговые категории в рейтинг не идут. Раньше их узнавали по
+        // слову «friendly» в названии — переименование ломало проверку.
+        // Признак по идентификатору оставлен запасным: он работает и до того,
+        // как в базе появится колонка is_rating.
         categoriesFromDB = (r.data || []).filter(function(c) {
-          return !(c.name && c.name.toLowerCase().indexOf('friendly') !== -1);
+          return c.is_rating !== false && c.id !== 'friendly';
         });
         if (!currentCatId && categoriesFromDB.length > 0) {
           currentCatId = categoriesFromDB[0].id;

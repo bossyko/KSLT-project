@@ -17,22 +17,32 @@
     var CATEGORIES = [
         { key: 'promasters', name: 'Pro-Masters' },
         { key: 'masters', name: 'Masters' },
-        { key: 'challenger', name: 'Challenger' },
-        { key: 'futures', name: 'Futures' },
         { key: 'tour', name: 'Tour' },
-        { key: 'friendly', name: 'Friendly' }
+        { key: 'challenger', name: 'Challengers' },
+        { key: 'futures', name: 'Futures' },
+        { key: 'friendly', name: 'Friendly Weekend' }
     ];
+
+    /**
+     * Категории, которые не идут в рейтинг. Заполняется из базы, из поля
+     * is_rating. Пока база не ответила — знаем только про дружеские: это
+     * запасное знание на случай, если страница работает на статике.
+     */
+    var NO_RATING = { friendly: true };
 
     /** Подменяет запасной набор тем, что заведено в базе. */
     async function loadCategories() {
         if (!client) return;
         try {
+            // Забираем строку целиком: в таблице шесть строк, экономить не на
+            // чем, зато код не падает, если колонка в базе появится позже.
             var res = await client.from('categories')
-                .select('id, name, name_en, name_kg, sort_order, color')
+                .select('*')
                 .order('sort_order', { ascending: false });
             if (!res.data || res.data.length === 0) return;
 
             CATEGORIES = res.data.map(function(c) {
+                if (c.is_rating === false) NO_RATING[c.id] = true;
                 return {
                     key: c.id,
                     name: isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name),
@@ -72,7 +82,8 @@
         prize: 'Prize',
         men: 'Men',
         women: 'Women',
-        gender: 'Gender'
+        gender: 'Gender',
+        noRating: 'Unranked'
     } : (isKg ? {
         heroTitle: 'Мелдештер',
         heroDesc: 'KSLT мелдештеринин бардык категориялары — башталгычтан профессионал деңгээлге чейин',
@@ -87,7 +98,8 @@
         prize: 'Сыйлык',
         men: 'Эрк',
         women: 'Аял',
-        gender: 'Жынысы'
+        gender: 'Жынысы',
+        noRating: 'Рейтингсиз'
     } : {
         heroTitle: 'Турниры',
         heroDesc: 'Все категории турниров KSLT — от начального до профессионального уровня',
@@ -102,7 +114,8 @@
         prize: 'Призовой',
         men: 'Муж',
         women: 'Жен',
-        gender: 'Пол'
+        gender: 'Пол',
+        noRating: 'Без рейтинга'
     });
 
     var SL = isEn ? {
@@ -415,7 +428,8 @@
                 _rawStatus: effectiveStatus,
                 statusText: statusLabels[effectiveStatus] || statusLabels.upcoming,
                 gender: gender,
-                genderLabel: (t.format !== 'mixed_doubles' && cat !== 'friendly' && gender)
+                noRating: !!NO_RATING[cat],
+                genderLabel: (t.format !== 'mixed_doubles' && !NO_RATING[cat] && gender)
                     ? (gender === 'women' ? ('♀ ' + L.women) : (gender === 'mixed' ? '⚤' : ('♂ ' + L.men)))
                     : '',
                 regLine: regLine,
@@ -547,6 +561,7 @@
                 '<div>' +
                     '<span class="to-featured-date"><span class="to-day">' + t.date.day + '</span><span class="to-month">' + t.date.month + '</span></span>' +
                     (t.genderLabel ? '<span class="to-gender-badge">' + t.genderLabel + '</span>' : '') +
+                    (t.noRating ? '<span class="to-norating-badge">' + L.noRating + '</span>' : '') +
                 '</div>' +
                 getCountdownHtml(t._dateSort, t._startTime) +
                 '<span class="to-featured-status ' + t.status + '">' + t.statusText + '</span>' +
@@ -581,6 +596,7 @@
                     '<span class="to-month">' + t.date.month + '</span>' +
                 '</div>' +
                 (t.genderLabel ? '<span class="to-compact-gender-badge">' + t.genderLabel + '</span>' : '') +
+                (t.noRating ? '<span class="to-compact-norating-badge">' + L.noRating + '</span>' : '') +
             '</div>' +
             '<div class="to-compact-info">' +
                 '<h4>' + t.name + '</h4>' +
