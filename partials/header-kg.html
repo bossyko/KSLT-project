@@ -1,0 +1,235 @@
+    <header class="floating-header header-hybrid">
+        <nav>
+            <div class="nav-left">
+                <a href="{{ROOT}}index-kg.html" class="logo">
+                    <img src="{{ROOT}}images/kslt-logo.svg" alt="KSLT" class="logo-img">
+                </a>
+                <div class="sponsor-badge"></div>
+            </div>
+
+            <ul class="nav-links">
+                <li>
+                    <a href="{{LIVE}}" class="nav-item nav-item-live{{LIVE_ON}}">
+                        <span class="live-dot"></span>
+                        Түз эфир
+                    </a>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="{{P}}tournaments-overview-kg.html" class="nav-item nav-item-dropdown{{ACTIVE:tournaments}}">
+                        Мелдештер
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="{{P}}tournaments-kg.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="{{P}}tournaments-kg.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="{{P}}tournaments-kg.html?category=challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="{{P}}tournaments-kg.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="{{P}}tournaments-kg.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="{{P}}tournaments-kg.html?category=friendly" class="nav-dropdown-item">Достук</a>
+                        <a href="{{P}}battles-overview-kg.html" class="nav-dropdown-item">Баттлдар</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="{{P}}players-kg.html" class="nav-item nav-item-dropdown{{ACTIVE:rankings}}">
+                        Рейтинг
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="{{P}}players-kg.html?tab=men-promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="{{P}}players-kg.html?tab=men-masters" class="nav-dropdown-item">Masters</a>
+                        <a href="{{P}}players-kg.html?tab=men-challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="{{P}}players-kg.html?tab=men-futures" class="nav-dropdown-item">Futures</a>
+                        <a href="{{P}}players-kg.html?tab=men-tour" class="nav-dropdown-item">Tour</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="{{P}}services-kg.html" class="nav-item nav-item-dropdown{{ACTIVE:services}}">
+                        Кызматтар
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="{{P}}courts-kg.html" class="nav-dropdown-item">Теннис корттору</a>
+                        <a href="{{P}}coaches-kg.html" class="nav-dropdown-item">Машыктыруучулар</a>
+                        <a href="{{P}}partners-kg.html" class="nav-dropdown-item">Оюнчу издөө</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="{{P}}news-kg.html" class="nav-item nav-item-dropdown{{ACTIVE:news}}">
+                        Жаңылыктар
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="{{P}}news-kg.html?category=announcement" class="nav-dropdown-item">Жарыялоо</a>
+                        <a href="{{P}}news-kg.html?category=world" class="nav-dropdown-item">Дүйнөлүк теннис</a>
+                        <a href="{{P}}news-kg.html?category=results" class="nav-dropdown-item">Жыйынтыктар</a>
+                        <a href="{{P}}news-kg.html?category=interview" class="nav-dropdown-item">Интервью</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="{{P}}info-kg.html" class="nav-item nav-item-dropdown{{ACTIVE:info}}">
+                        Маалымат
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="{{P}}about-kg.html" class="nav-dropdown-item">Долбоор жөнүндө</a>
+                        <a href="{{P}}rules-kg.html" class="nav-dropdown-item">Эрежелер</a>
+                        <a href="{{P}}faq-kg.html" class="nav-dropdown-item">FAQ</a>
+                        <a href="{{P}}pricing-kg.html" class="nav-dropdown-item">Баалар</a>
+                        <a href="{{P}}offer-kg.html" class="nav-dropdown-item">Ачык оферта</a>
+                        <a href="{{P}}download-kg.html" class="nav-dropdown-item">📲 Тиркемени жүктөө</a>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="nav-right">
+                <a href="{{P}}auth-kg.html" class="btn-auth">Кирүү</a>
+
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-current">KG</span>
+                        <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </button>
+                    <div class="lang-menu">
+                        <a href="{{LANG_RU}}" class="lang-option" data-lang="RU">
+                            <span class="lang-flag">🇷🇺</span>
+                            <span class="lang-name">Русский</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                        <a href="{{LANG_KG}}" class="lang-option active" data-lang="KG">
+                            <span class="lang-flag">🇰🇬</span>
+                            <span class="lang-name">Кыргызча</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                        <a href="{{LANG_EN}}" class="lang-option" data-lang="EN">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="burger-menu" id="burgerMenu">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
+        </nav>
+
+        <div class="mobile-nav" id="mobileNav">
+            <ul class="mobile-nav-links">
+                <li class="mobile-nav-dropdown">
+                    <a href="{{P}}tournaments-overview-kg.html" class="mobile-dropdown-toggle{{ACTIVE:tournaments}}">
+                        Мелдештер
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="{{P}}tournaments-kg.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="{{P}}tournaments-kg.html?category=masters">Masters</a></li>
+                        <li><a href="{{P}}tournaments-kg.html?category=challenger">Challenger</a></li>
+                        <li><a href="{{P}}tournaments-kg.html?category=futures">Futures</a></li>
+                        <li><a href="{{P}}tournaments-kg.html?category=tour">Tour</a></li>
+                        <li><a href="{{P}}tournaments-kg.html?category=friendly">Достук</a></li>
+                        <li><a href="{{P}}battles-overview-kg.html">Баттлдар</a></li>
+                    </ul>
+                </li>
+                <li><a href="{{LIVE}}"{{LIVE_CLASS}}><span class="live-dot"></span> Түз эфир</a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="{{P}}players-kg.html" class="mobile-dropdown-toggle{{ACTIVE:rankings}}">
+                        Рейтинг
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="{{P}}players-kg.html?tab=men-promasters">Pro-Masters</a></li>
+                        <li><a href="{{P}}players-kg.html?tab=men-masters">Masters</a></li>
+                        <li><a href="{{P}}players-kg.html?tab=men-challenger">Challenger</a></li>
+                        <li><a href="{{P}}players-kg.html?tab=men-futures">Futures</a></li>
+                        <li><a href="{{P}}players-kg.html?tab=men-tour">Tour</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="{{P}}services-kg.html" class="mobile-dropdown-toggle{{ACTIVE:services}}">
+                        Кызматтар
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="{{P}}courts-kg.html">Теннис корттору</a></li>
+                        <li><a href="{{P}}coaches-kg.html">Машыктыруучулар</a></li>
+                        <li><a href="{{P}}partners-kg.html">Оюнчу издөө</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="{{P}}news-kg.html" class="mobile-dropdown-toggle{{ACTIVE:news}}">
+                        Жаңылыктар
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="{{P}}news-kg.html?category=announcement">Жарыялоо</a></li>
+                        <li><a href="{{P}}news-kg.html?category=world">Дүйнөлүк теннис</a></li>
+                        <li><a href="{{P}}news-kg.html?category=results">Жыйынтыктар</a></li>
+                        <li><a href="{{P}}news-kg.html?category=interview">Интервью</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="{{P}}info-kg.html" class="mobile-dropdown-toggle{{ACTIVE:info}}">
+                        Маалымат
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="{{P}}about-kg.html">Долбоор жөнүндө</a></li>
+                        <li><a href="{{P}}rules-kg.html">Эрежелер</a></li>
+                        <li><a href="{{P}}faq-kg.html">FAQ</a></li>
+                        <li><a href="{{P}}pricing-kg.html">Баалар</a></li>
+                        <li><a href="{{P}}offer-kg.html">Ачык оферта</a></li>
+                        <li><a href="{{P}}download-kg.html">📲 Тиркемени жүктөө (Android)</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="mobile-nav-bottom">
+                <div class="mobile-lang-list">
+                    <span class="mobile-lang-title">Тил</span>
+                    <a href="{{LANG_RU}}" class="mobile-lang-option" data-lang="RU">
+                        <span class="lang-flag">🇷🇺</span> Русский
+                    </a>
+                    <a href="{{LANG_KG}}" class="mobile-lang-option active" data-lang="KG">
+                        <span class="lang-flag">🇰🇬</span> Кыргызча
+                    </a>
+                    <a href="{{LANG_EN}}" class="mobile-lang-option" data-lang="EN">
+                        <span class="lang-flag">🇺🇸</span> English
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>

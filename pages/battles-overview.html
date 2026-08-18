@@ -31,8 +31,10 @@
 </head>
 <body>
     <!-- HEADER -->
+<!-- HEADER:START -->
     <header class="floating-header header-hybrid">
         <nav>
+            <!-- Левая часть: Логотип + Генеральный спонсор -->
             <div class="nav-left">
                 <a href="../index.html" class="logo">
                     <img src="../images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
@@ -40,6 +42,7 @@
                 <div class="sponsor-badge"></div>
             </div>
 
+            <!-- Центр: Навигация -->
             <ul class="nav-links">
                 <li>
                     <a href="../index.html#live" class="nav-item nav-item-live">
@@ -48,7 +51,7 @@
                     </a>
                 </li>
                 <li class="nav-dropdown">
-                    <a href="tournaments-overview.html" class="nav-item nav-item-dropdown">
+                    <a href="tournaments-overview.html" class="nav-item nav-item-dropdown active">
                         Турниры
                         <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
@@ -124,13 +127,16 @@
                         <a href="faq.html" class="nav-dropdown-item">FAQ</a>
                         <a href="pricing.html" class="nav-dropdown-item">Цены</a>
                         <a href="offer.html" class="nav-dropdown-item">Публичная оферта</a>
-                        <a href="download.html" class="nav-dropdown-item download-app-link">📲 Скачать приложение</a>
+                        <a href="download.html" class="nav-dropdown-item">📲 Скачать приложение</a>
                     </div>
                 </li>
             </ul>
 
+            <!-- Правая часть: Авторизация + Язык -->
             <div class="nav-right">
                 <a href="auth.html" class="btn-auth">Войти</a>
+
+                <!-- Выпадающее меню языков -->
                 <div class="lang-dropdown" id="langDropdown">
                     <button class="lang-toggle" id="langToggle">
                         <span class="lang-current">RU</span>
@@ -158,6 +164,7 @@
                 </div>
             </div>
 
+            <!-- Бургер меню для мобильных -->
             <button class="burger-menu" id="burgerMenu">
                 <span class="burger-line"></span>
                 <span class="burger-line"></span>
@@ -165,10 +172,11 @@
             </button>
         </nav>
 
+        <!-- Мобильная навигация -->
         <div class="mobile-nav" id="mobileNav">
             <ul class="mobile-nav-links">
                 <li class="mobile-nav-dropdown">
-                    <a href="tournaments-overview.html" class="mobile-dropdown-toggle">
+                    <a href="tournaments-overview.html" class="mobile-dropdown-toggle active">
                         Турниры
                         <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
@@ -245,7 +253,7 @@
                         <li><a href="faq.html">FAQ</a></li>
                         <li><a href="pricing.html">Цены</a></li>
                         <li><a href="offer.html">Публичная оферта</a></li>
-                        <li><a href="download.html" class="download-app-link">📲 Скачать приложение (Android)</a></li>
+                        <li><a href="download.html">📲 Скачать приложение (Android)</a></li>
                     </ul>
                 </li>
             </ul>
@@ -265,6 +273,7 @@
             </div>
         </div>
     </header>
+<!-- HEADER:END -->
 
     <main>
         <!-- HERO -->

@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="css/battle-cards.css?v=9">
 </head>
 <body>
+<!-- HEADER:START -->
     <header class="floating-header header-hybrid">
         <nav>
             <div class="nav-left">
@@ -41,7 +42,7 @@
 
             <ul class="nav-links">
                 <li>
-                    <a href="#live" class="nav-item nav-item-live">
+                    <a href="#live" class="nav-item nav-item-live is-live">
                         <span class="live-dot"></span>
                         Түз эфир
                     </a>
@@ -111,7 +112,7 @@
                 </li>
                 <li class="nav-dropdown">
                     <a href="pages/info-kg.html" class="nav-item nav-item-dropdown">
-                        Инфо
+                        Маалымат
                         <span class="indicator-dot"></span>
                         <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
@@ -123,13 +124,13 @@
                         <a href="pages/faq-kg.html" class="nav-dropdown-item">FAQ</a>
                         <a href="pages/pricing-kg.html" class="nav-dropdown-item">Баалар</a>
                         <a href="pages/offer-kg.html" class="nav-dropdown-item">Ачык оферта</a>
-                        <a href="pages/download-kg.html" class="nav-dropdown-item download-app-link">📲 Тиркемени жүктөө</a>
+                        <a href="pages/download-kg.html" class="nav-dropdown-item">📲 Тиркемени жүктөө</a>
                     </div>
                 </li>
             </ul>
 
             <div class="nav-right">
-                <a href="#login" class="btn-auth">Кирүү</a>
+                <a href="pages/auth-kg.html" class="btn-auth">Кирүү</a>
 
                 <div class="lang-dropdown" id="langDropdown">
                     <button class="lang-toggle" id="langToggle">
@@ -185,7 +186,7 @@
                         <li><a href="pages/battles-overview-kg.html">Баттлдар</a></li>
                     </ul>
                 </li>
-                <li><a href="#live"><span class="live-dot"></span> Түз эфир</a></li>
+                <li><a href="#live" class="is-live"><span class="live-dot"></span> Түз эфир</a></li>
                 <li class="mobile-nav-dropdown">
                     <a href="pages/players-kg.html" class="mobile-dropdown-toggle">
                         Рейтинг
@@ -233,7 +234,7 @@
                 </li>
                 <li class="mobile-nav-dropdown">
                     <a href="pages/info-kg.html" class="mobile-dropdown-toggle">
-                        Инфо
+                        Маалымат
                         <span class="indicator-dot"></span>
                         <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
                             <path d="M1 1l4 4 4-4"/>
@@ -245,7 +246,7 @@
                         <li><a href="pages/faq-kg.html">FAQ</a></li>
                         <li><a href="pages/pricing-kg.html">Баалар</a></li>
                         <li><a href="pages/offer-kg.html">Ачык оферта</a></li>
-                        <li><a href="pages/download-kg.html" class="download-app-link">📲 Тиркемени жүктөө (Android)</a></li>
+                        <li><a href="pages/download-kg.html">📲 Тиркемени жүктөө (Android)</a></li>
                     </ul>
                 </li>
             </ul>
@@ -265,6 +266,7 @@
             </div>
         </div>
     </header>
+<!-- HEADER:END -->
 
     <main>
         <section id="home" class="hero">
@@ -612,7 +614,7 @@
         if (!section || !grid) return;
 
         var navLiveDesktop = document.querySelector('.nav-links .nav-item-live');
-        var navLiveMobileLinks = document.querySelectorAll('.mobile-menu a[href="#live"]');
+        var navLiveMobileLinks = document.querySelectorAll('.mobile-nav a[href="#live"]');
 
         function toggleLiveClass(active) {
             if (navLiveDesktop) {

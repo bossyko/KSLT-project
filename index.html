@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="css/battle-cards.css?v=9">
 </head>
 <body>
+<!-- HEADER:START -->
     <header class="floating-header header-hybrid">
         <nav>
             <!-- Левая часть: Логотип + Генеральный спонсор -->
@@ -43,7 +44,7 @@
             <!-- Центр: Навигация -->
             <ul class="nav-links">
                 <li>
-                    <a href="#live" class="nav-item nav-item-live is-live"><!-- DEMO: is-live -->
+                    <a href="#live" class="nav-item nav-item-live is-live">
                         <span class="live-dot"></span>
                         Live
                     </a>
@@ -125,7 +126,7 @@
                         <a href="pages/faq.html" class="nav-dropdown-item">FAQ</a>
                         <a href="pages/pricing.html" class="nav-dropdown-item">Цены</a>
                         <a href="pages/offer.html" class="nav-dropdown-item">Публичная оферта</a>
-                        <a href="pages/download.html" class="nav-dropdown-item download-app-link">📲 Скачать приложение</a>
+                        <a href="pages/download.html" class="nav-dropdown-item">📲 Скачать приложение</a>
                     </div>
                 </li>
             </ul>
@@ -191,7 +192,7 @@
                         <li><a href="pages/battles-overview.html">Баттлы</a></li>
                     </ul>
                 </li>
-                <li><a href="#live" class="is-live"><span class="live-dot"></span> Live</a></li><!-- DEMO: is-live -->
+                <li><a href="#live" class="is-live"><span class="live-dot"></span> Live</a></li>
                 <li class="mobile-nav-dropdown">
                     <a href="pages/players.html" class="mobile-dropdown-toggle">
                         Рейтинг
@@ -251,7 +252,7 @@
                         <li><a href="pages/faq.html">FAQ</a></li>
                         <li><a href="pages/pricing.html">Цены</a></li>
                         <li><a href="pages/offer.html">Публичная оферта</a></li>
-                        <li><a href="pages/download.html" class="download-app-link">📲 Скачать приложение (Android)</a></li>
+                        <li><a href="pages/download.html">📲 Скачать приложение (Android)</a></li>
                     </ul>
                 </li>
             </ul>
@@ -271,6 +272,7 @@
             </div>
         </div>
     </header>
+<!-- HEADER:END -->
 
     <main>
         <!-- HERO с фоновым изображением -->
@@ -790,7 +792,7 @@
         if (!section || !grid) return;
 
         var navLiveDesktop = document.querySelector('.nav-links .nav-item-live');
-        var navLiveMobileLinks = document.querySelectorAll('.mobile-menu a[href="#live"]');
+        var navLiveMobileLinks = document.querySelectorAll('.mobile-nav a[href="#live"]');
 
         function toggleLiveClass(active) {
             if (navLiveDesktop) {

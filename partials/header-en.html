@@ -1,0 +1,235 @@
+    <header class="floating-header header-hybrid">
+        <nav>
+            <div class="nav-left">
+                <a href="{{ROOT}}index-en.html" class="logo">
+                    <img src="{{ROOT}}images/kslt-logo.svg" alt="KSLT" class="logo-img">
+                </a>
+                <div class="sponsor-badge"></div>
+            </div>
+
+            <ul class="nav-links">
+                <li>
+                    <a href="{{LIVE}}" class="nav-item nav-item-live{{LIVE_ON}}">
+                        <span class="live-dot"></span>
+                        Live
+                    </a>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="{{P}}tournaments-overview-en.html" class="nav-item nav-item-dropdown{{ACTIVE:tournaments}}">
+                        Tournaments
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="{{P}}tournaments-en.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="{{P}}tournaments-en.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="{{P}}tournaments-en.html?category=challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="{{P}}tournaments-en.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="{{P}}tournaments-en.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="{{P}}tournaments-en.html?category=friendly" class="nav-dropdown-item">Friendly</a>
+                        <a href="{{P}}battles-overview-en.html" class="nav-dropdown-item">Battles</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="{{P}}players-en.html" class="nav-item nav-item-dropdown{{ACTIVE:rankings}}">
+                        Rankings
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="{{P}}players-en.html?tab=men-promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="{{P}}players-en.html?tab=men-masters" class="nav-dropdown-item">Masters</a>
+                        <a href="{{P}}players-en.html?tab=men-challenger" class="nav-dropdown-item">Challenger</a>
+                        <a href="{{P}}players-en.html?tab=men-futures" class="nav-dropdown-item">Futures</a>
+                        <a href="{{P}}players-en.html?tab=men-tour" class="nav-dropdown-item">Tour</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="{{P}}services-en.html" class="nav-item nav-item-dropdown{{ACTIVE:services}}">
+                        Services
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="{{P}}courts-en.html" class="nav-dropdown-item">Tennis Courts</a>
+                        <a href="{{P}}coaches-en.html" class="nav-dropdown-item">Coaches</a>
+                        <a href="{{P}}partners-en.html" class="nav-dropdown-item">Player Search</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="{{P}}news-en.html" class="nav-item nav-item-dropdown{{ACTIVE:news}}">
+                        News
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="{{P}}news-en.html?category=announcement" class="nav-dropdown-item">Announcements</a>
+                        <a href="{{P}}news-en.html?category=world" class="nav-dropdown-item">World Tennis</a>
+                        <a href="{{P}}news-en.html?category=results" class="nav-dropdown-item">Results</a>
+                        <a href="{{P}}news-en.html?category=interview" class="nav-dropdown-item">Interviews</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="{{P}}info-en.html" class="nav-item nav-item-dropdown{{ACTIVE:info}}">
+                        Info
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="{{P}}about-en.html" class="nav-dropdown-item">About the Project</a>
+                        <a href="{{P}}rules-en.html" class="nav-dropdown-item">Rules</a>
+                        <a href="{{P}}faq-en.html" class="nav-dropdown-item">FAQ</a>
+                        <a href="{{P}}pricing-en.html" class="nav-dropdown-item">Pricing</a>
+                        <a href="{{P}}offer-en.html" class="nav-dropdown-item">Public Offer</a>
+                        <a href="{{P}}download-en.html" class="nav-dropdown-item">📲 Download App</a>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="nav-right">
+                <a href="{{P}}auth-en.html" class="btn-auth">Sign In</a>
+
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-current">EN</span>
+                        <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </button>
+                    <div class="lang-menu">
+                        <a href="{{LANG_RU}}" class="lang-option" data-lang="RU">
+                            <span class="lang-flag">🇷🇺</span>
+                            <span class="lang-name">Русский</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                        <a href="{{LANG_KG}}" class="lang-option" data-lang="KG">
+                            <span class="lang-flag">🇰🇬</span>
+                            <span class="lang-name">Кыргызча</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                        <a href="{{LANG_EN}}" class="lang-option active" data-lang="EN">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-check">✓</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="burger-menu" id="burgerMenu">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
+        </nav>
+
+        <div class="mobile-nav" id="mobileNav">
+            <ul class="mobile-nav-links">
+                <li class="mobile-nav-dropdown">
+                    <a href="{{P}}tournaments-overview-en.html" class="mobile-dropdown-toggle{{ACTIVE:tournaments}}">
+                        Tournaments
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="{{P}}tournaments-en.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="{{P}}tournaments-en.html?category=masters">Masters</a></li>
+                        <li><a href="{{P}}tournaments-en.html?category=challenger">Challenger</a></li>
+                        <li><a href="{{P}}tournaments-en.html?category=futures">Futures</a></li>
+                        <li><a href="{{P}}tournaments-en.html?category=tour">Tour</a></li>
+                        <li><a href="{{P}}tournaments-en.html?category=friendly">Friendly</a></li>
+                        <li><a href="{{P}}battles-overview-en.html">Battles</a></li>
+                    </ul>
+                </li>
+                <li><a href="{{LIVE}}"{{LIVE_CLASS}}><span class="live-dot"></span> Live</a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="{{P}}players-en.html" class="mobile-dropdown-toggle{{ACTIVE:rankings}}">
+                        Rankings
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="{{P}}players-en.html?tab=men-promasters">Pro-Masters</a></li>
+                        <li><a href="{{P}}players-en.html?tab=men-masters">Masters</a></li>
+                        <li><a href="{{P}}players-en.html?tab=men-challenger">Challenger</a></li>
+                        <li><a href="{{P}}players-en.html?tab=men-futures">Futures</a></li>
+                        <li><a href="{{P}}players-en.html?tab=men-tour">Tour</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="{{P}}services-en.html" class="mobile-dropdown-toggle{{ACTIVE:services}}">
+                        Services
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="{{P}}courts-en.html">Tennis Courts</a></li>
+                        <li><a href="{{P}}coaches-en.html">Coaches</a></li>
+                        <li><a href="{{P}}partners-en.html">Player Search</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="{{P}}news-en.html" class="mobile-dropdown-toggle{{ACTIVE:news}}">
+                        News
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="{{P}}news-en.html?category=announcement">Announcements</a></li>
+                        <li><a href="{{P}}news-en.html?category=world">World Tennis</a></li>
+                        <li><a href="{{P}}news-en.html?category=results">Results</a></li>
+                        <li><a href="{{P}}news-en.html?category=interview">Interviews</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="{{P}}info-en.html" class="mobile-dropdown-toggle{{ACTIVE:info}}">
+                        Info
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="{{P}}about-en.html">About the Project</a></li>
+                        <li><a href="{{P}}rules-en.html">Rules</a></li>
+                        <li><a href="{{P}}faq-en.html">FAQ</a></li>
+                        <li><a href="{{P}}pricing-en.html">Pricing</a></li>
+                        <li><a href="{{P}}offer-en.html">Public Offer</a></li>
+                        <li><a href="{{P}}download-en.html">📲 Download App (Android)</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="mobile-nav-bottom">
+                <div class="mobile-lang-list">
+                    <span class="mobile-lang-title">Language</span>
+                    <a href="{{LANG_RU}}" class="mobile-lang-option" data-lang="RU">
+                        <span class="lang-flag">🇷🇺</span> Русский
+                    </a>
+                    <a href="{{LANG_KG}}" class="mobile-lang-option" data-lang="KG">
+                        <span class="lang-flag">🇰🇬</span> Кыргызча
+                    </a>
+                    <a href="{{LANG_EN}}" class="mobile-lang-option active" data-lang="EN">
+                        <span class="lang-flag">🇺🇸</span> English
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
