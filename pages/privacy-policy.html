@@ -25,8 +25,8 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="../css/style.css?v=96">
-    <link rel="stylesheet" href="../css/info-pages.css?v=9">
+    <link rel="stylesheet" href="../css/style.css?v=98">
+    <link rel="stylesheet" href="../css/info-pages.css?v=10">
 </head>
 <body>
     <!-- HEADER -->
@@ -123,9 +123,11 @@
                     <div class="nav-dropdown-menu">
                         <a href="about.html" class="nav-dropdown-item">О проекте</a>
                         <a href="rules.html" class="nav-dropdown-item">Правила</a>
-                        <a href="faq.html" class="nav-dropdown-item">FAQ</a>
                         <a href="pricing.html" class="nav-dropdown-item">Цены</a>
+                        <a href="faq.html" class="nav-dropdown-item">FAQ</a>
                         <a href="offer.html" class="nav-dropdown-item">Публичная оферта</a>
+                        <a href="terms.html" class="nav-dropdown-item">Условия использования</a>
+                        <a href="privacy-policy.html" class="nav-dropdown-item">Политика конфиденциальности</a>
                         <a href="download.html" class="nav-dropdown-item">📲 Скачать приложение</a>
                     </div>
                 </li>
@@ -249,9 +251,11 @@
                     <ul class="mobile-dropdown-menu">
                         <li><a href="about.html">О проекте</a></li>
                         <li><a href="rules.html">Правила</a></li>
-                        <li><a href="faq.html">FAQ</a></li>
                         <li><a href="pricing.html">Цены</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
                         <li><a href="offer.html">Публичная оферта</a></li>
+                        <li><a href="terms.html">Условия использования</a></li>
+                        <li><a href="privacy-policy.html">Политика конфиденциальности</a></li>
                         <li><a href="download.html">📲 Скачать приложение (Android)</a></li>
                     </ul>
                 </li>
@@ -335,8 +339,11 @@
                     <p style="padding-left:20px;"><strong>2.1.3.</strong> <strong>Номер телефона</strong> — опционально. Может использоваться для связи по вопросам участия в турнирах.</p>
                     <p style="padding-left:20px;"><strong>2.1.4.</strong> <strong>Фото профиля (аватар)</strong> — опционально. Загружается пользователем для персонализации профиля.</p>
                     <p style="padding-left:20px;"><strong>2.1.5.</strong> <strong>Рейтинговые данные</strong> — очки, результаты матчей, статистика побед и поражений, категория игрока. Формируются автоматически в ходе участия в турнирах.</p>
+                    <p style="padding-left:20px;"><strong>2.1.6.</strong> <strong>Данные об устройстве</strong> — сокращённая строка браузера (user-agent), разрешение экрана и время последнего входа. Хранится их хеш; используется только для защиты учётной записи: при входе с нового устройства владельцу отправляется уведомление.</p>
+                    <p style="padding-left:20px;"><strong>2.1.7.</strong> <strong>Данные о платежах</strong> — сумма, дата, способ оплаты и период членства. Используются для учёта членства и отчётности.</p>
                     <p><strong>2.2.</strong> При авторизации через сторонние сервисы (Google, Telegram) мы можем получать базовую информацию профиля: имя, email и фото, которые предоставляются данными сервисами в рамках протокола авторизации.</p>
                     <p><strong>2.3.</strong> Мы не собираем данные о платёжных картах. Все финансовые операции обрабатываются через сторонние платёжные системы.</p>
+                    <p><strong>2.4.</strong> В мобильном приложении, если вы разрешили уведомления, сохраняется токен push-уведомлений. Он привязан к устройству, а не к личности, и служит только для доставки сообщений. Отключить уведомления можно в настройках приложения или устройства.</p>
                 </div>
             </div>
 
@@ -369,6 +376,9 @@
                     <p style="padding-left:20px;"><strong>4.1.2.</strong> <strong>Telegram Bot API</strong> — используется для отправки уведомлений и авторизации через Telegram Login Widget. Обрабатываются: Telegram ID, имя пользователя, фото профиля. Политика конфиденциальности: <a href="https://telegram.org/privacy" target="_blank" rel="noopener" style="color: #CCFF00;">telegram.org/privacy</a>.</p>
                     <p style="padding-left:20px;"><strong>4.1.3.</strong> <strong>Google (OAuth 2.0)</strong> — используется для авторизации через аккаунт Google. Передаются: email, имя, фото профиля. Политика конфиденциальности: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color: #CCFF00;">policies.google.com/privacy</a>.</p>
                     <p style="padding-left:20px;"><strong>4.1.4.</strong> <strong>Resend</strong> — сервис email-рассылок. Используется для отправки уведомлений (подтверждение регистрации, напоминания о турнирах, системные сообщения). Обрабатываются: email-адрес, имя получателя. Политика конфиденциальности: <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener" style="color: #CCFF00;">resend.com/legal/privacy-policy</a>.</p>
+                    <p style="padding-left:20px;"><strong>4.1.5.</strong> <strong>Firebase Cloud Messaging (Google)</strong> — доставка push-уведомлений в мобильное приложение. Обрабатывается токен устройства. Политика конфиденциальности: firebase.google.com/support/privacy.</p>
+                    <p style="padding-left:20px;"><strong>4.1.6.</strong> <strong>Google Analytics</strong> — обезличенная статистика посещений сайта. Политика конфиденциальности: policies.google.com/privacy.</p>
+                    <p style="padding-left:20px;"><strong>4.1.7.</strong> <strong>GitHub Pages</strong> — хостинг сайта. При загрузке страниц GitHub обрабатывает технические данные соединения, включая IP-адрес. Политика конфиденциальности: docs.github.com/privacy.</p>
                     <p><strong>4.2.</strong> Мы не продаём и не передаём персональные данные третьим лицам, за исключением случаев, предусмотренных законодательством Кыргызской Республики.</p>
                     <p><strong>4.3.</strong> Все перечисленные сторонние сервисы используются исключительно для обеспечения работоспособности Сервиса и не имеют доступа к данным сверх необходимого для выполнения своих функций.</p>
                 </div>
@@ -416,7 +426,7 @@
                 <div class="ip-rules-list">
                     <p><strong>7.1.</strong> Сервис использует механизм localStorage браузера для хранения данных сессии авторизации. Это необходимо для поддержания входа пользователя в систему между посещениями.</p>
                     <p><strong>7.2.</strong> Мы не используем сторонние cookies для отслеживания или рекламы.</p>
-                    <p><strong>7.3.</strong> Для анализа посещаемости сайта может использоваться Google Analytics. В этом случае собираются обезличенные данные: тип устройства, браузер, страна, просмотренные страницы. Эти данные не позволяют идентифицировать конкретного пользователя.</p>
+                    <p><strong>7.3.</strong> Для анализа посещаемости сайта используется Google Analytics. Собираются обезличенные данные: тип устройства, браузер, страна, просмотренные страницы. Эти данные не позволяют идентифицировать конкретного пользователя.</p>
                     <p><strong>7.4.</strong> Пользователь может отключить сбор аналитических данных, используя расширения для браузера, блокирующие скрипты аналитики.</p>
                 </div>
             </div>
@@ -452,7 +462,7 @@
 
             <!-- Effective date -->
             <div class="ip-rules-section ip-fade-in">
-                <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem; text-align: center; padding: 20px 0;">Дата вступления в силу: 21 июля 2026 г.</p>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem; text-align: center; padding: 20px 0;">Редакция от 18 августа 2026 г.</p>
             </div>
 
         </div>
@@ -488,6 +498,7 @@
                     <li><a href="courts.html">Корты</a></li>
                     <li><a href="coaches.html">Тренеры</a></li>
                     <li><a href="news.html">Новости</a></li>
+                    <li><a href="about.html">О проекте</a></li>
                 </ul>
             </div>
 
@@ -496,11 +507,9 @@
                 <ul class="footer-links">
                     <li><a href="rules.html">Правила лиги</a></li>
                     <li><a href="rules.html#rules-ranking">Система рейтинга</a></li>
-                    <li><a href="about.html">О проекте</a></li>
                     <li><a href="faq.html">FAQ</a></li>
                     <li><a href="pricing.html">Цены</a></li>
-                                    <li><a href="rules.html#rules-sanctions">Дисциплинарное положение</a></li>
-                    <li><a href="offer.html#offer-refusal">Оплата и возврат</a></li>
+                    <li><a href="rules.html#rules-conduct">Дисциплинарное положение</a></li>
 </ul>
             </div>
 
@@ -531,6 +540,7 @@
             <p>© 2026 КСЛТ. Все права защищены.</p>
             <div class="footer-bottom-links">
                 <a href="offer.html">Публичная оферта</a>
+                <a href="terms.html">Условия использования</a>
                 <a href="privacy-policy.html">Политика конфиденциальности</a>
             </div>
             <p class="footer-made">Сделано с ❤️ в Кыргызстане 🇰🇬</p>
