@@ -23,6 +23,20 @@
         pricingDesc: 'Membership fees, tournament participation costs and available packages.',
         offerTitle: 'Public Offer',
         offerDesc: 'Legal terms of service, membership agreement and official documentation.',
+        rulesDesc: 'How tournaments run, how the rating is counted and what happens for violations.',
+        pricingDesc: 'Membership fees, joining fee and tournament entry.',
+        faqDesc: 'How to join, how to find your level and how to enter your first tournament.',
+        appTitle: 'Mobile app',
+        appDesc: 'Tournaments, rating and notifications on your phone. Android and iPhone.',
+        appBtn: 'Download',
+        groupGuide: 'Guide',
+        groupDocs: 'Documents',
+        offerTitle: 'Public Offer',
+        offerSub: 'Service agreement: what is paid for and on what terms.',
+        termsTitle: 'Terms of Use',
+        termsSub: 'How to use the site and the app, accounts, liability.',
+        privacyTitle: 'Privacy Policy',
+        privacySub: 'What data we collect, why, and how to delete it.',
         more: 'Learn more'
     } : isKg ? {
         heroTagline: 'КСЛТ Маалымат',
@@ -43,6 +57,20 @@
         pricingDesc: 'Мүчөлүк төлөмдөр, мелдештерге катышуу наркы жана жеткиликтүү пакеттер.',
         offerTitle: 'Ачык оферта',
         offerDesc: 'Юридикалык шарттар, мүчөлүк келишими жана расмий документация.',
+        rulesDesc: 'Мелдештер кантип өтөт, рейтинг кантип эсептелет жана бузуулар үчүн эмне болот.',
+        pricingDesc: 'Мүчөлүк төлөмдөр, кирүү төлөмү жана мелдешке катышуу.',
+        faqDesc: 'Кантип мүчө болуу, деңгээлди аныктоо жана биринчи мелдешке катышуу.',
+        appTitle: 'Тиркеме',
+        appDesc: 'Мелдештер, рейтинг жана билдирүүлөр телефондо. Android жана iPhone.',
+        appBtn: 'Жүктөө',
+        groupGuide: 'Маалымат',
+        groupDocs: 'Документтер',
+        offerTitle: 'Ачык оферта',
+        offerSub: 'Кызмат көрсөтүү келишими: эмне төлөнөт жана кандай шарттарда.',
+        termsTitle: 'Колдонуу шарттары',
+        termsSub: 'Сайтты жана тиркемени кантип колдонуу, аккаунт, жоопкерчилик.',
+        privacyTitle: 'Купуялык саясаты',
+        privacySub: 'Кандай маалымат чогултабыз, эмне үчүн жана кантип өчүрүү.',
         more: 'Толугураак'
     } : {
         heroTagline: 'КСЛТ Информация',
@@ -60,6 +88,20 @@
         pricingDesc: 'Членские взносы, стоимость участия в турнирах и доступные пакеты.',
         offerTitle: 'Публичная оферта',
         offerDesc: 'Юридические условия, договор членства и официальная документация.',
+        rulesDesc: 'Как проходят турниры, как считается рейтинг и что бывает за нарушения.',
+        pricingDesc: 'Членские взносы, вступительный взнос и участие в турнирах.',
+        faqDesc: 'Как вступить, как определить свой уровень и как попасть на первый турнир.',
+        appTitle: 'Приложение',
+        appDesc: 'Турниры, рейтинг и уведомления в телефоне. Android и iPhone.',
+        appBtn: 'Скачать',
+        groupGuide: 'Справка',
+        groupDocs: 'Документы',
+        offerTitle: 'Публичная оферта',
+        offerSub: 'Договор об оказании услуг: что оплачивается и на каких условиях.',
+        termsTitle: 'Условия использования',
+        termsSub: 'Как пользоваться сайтом и приложением, аккаунт, ответственность.',
+        privacyTitle: 'Политика конфиденциальности',
+        privacySub: 'Какие данные мы собираем, зачем и как их удалить.',
         more: 'Подробнее'
     };
 
@@ -68,19 +110,34 @@
     var faqPage = isEn ? 'faq-en.html' : (isKg ? 'faq-kg.html' : 'faq.html');
     var pricingPage = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
     var offerPage = isEn ? 'offer-en.html' : (isKg ? 'offer-kg.html' : 'offer.html');
+    var termsPage = isEn ? 'terms-en.html' : (isKg ? 'terms-kg.html' : 'terms.html');
+    var privacyPage = isEn ? 'privacy-policy-en.html' : (isKg ? 'privacy-policy-kg.html' : 'privacy-policy.html');
+    var downloadPage = isEn ? 'download-en.html' : (isKg ? 'download-kg.html' : 'download.html');
 
     // SVG icons
     var bookSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
     var helpSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
     var tagSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
     var fileSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
+    var phoneSvg = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>';
+    var shieldSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+    var docSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+    var docLinesSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
     var arrowSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
 
+    // Справка — то, что читают часто. Юридические документы стоят ниже
+    // отдельной группой: оферту открывают раз в жизни, а FAQ — каждый новичок.
     var cards = [
-        { title: L.rulesTitle, desc: L.rulesDesc, href: rulesPage, icon: bookSvg },
-        { title: L.pricingTitle, desc: L.pricingDesc, href: pricingPage, icon: tagSvg },
-        { title: L.faqTitle, desc: L.faqDesc, href: faqPage, icon: helpSvg },
-        { title: L.offerTitle, desc: L.offerDesc, href: offerPage, icon: fileSvg }
+        { title: L.rulesTitle, desc: L.rulesDesc, href: rulesPage, icon: bookSvg, more: L.more },
+        { title: L.pricingTitle, desc: L.pricingDesc, href: pricingPage, icon: tagSvg, more: L.more },
+        { title: L.faqTitle, desc: L.faqDesc, href: faqPage, icon: helpSvg, more: L.more },
+        { title: L.appTitle, desc: L.appDesc, href: downloadPage, icon: phoneSvg, more: L.appBtn }
+    ];
+
+    var docs = [
+        { title: L.offerTitle, sub: L.offerSub, href: offerPage, icon: docSvg },
+        { title: L.termsTitle, sub: L.termsSub, href: termsPage, icon: docLinesSvg },
+        { title: L.privacyTitle, sub: L.privacySub, href: privacyPage, icon: shieldSvg }
     ];
 
     document.addEventListener('DOMContentLoaded', init);
@@ -129,7 +186,8 @@
             '</div>' +
         '</a>';
 
-        // Grid 2x2
+        // Справка
+        html += '<div class="io-group"><h3 class="io-group-title">' + L.groupGuide + '</h3>';
         html += '<div class="io-grid">';
         for (var i = 0; i < cards.length; i++) {
             var c = cards[i];
@@ -137,10 +195,26 @@
                 '<div class="io-card-icon">' + c.icon + '</div>' +
                 '<h3>' + c.title + '</h3>' +
                 '<p>' + c.desc + '</p>' +
-                '<span class="io-card-arrow">' + L.more + ' ' + arrowSvg + '</span>' +
+                '<span class="io-card-arrow">' + c.more + ' ' + arrowSvg + '</span>' +
             '</a>';
         }
-        html += '</div>';
+        html += '</div></div>';
+
+        // Документы
+        html += '<div class="io-group"><h3 class="io-group-title">' + L.groupDocs + '</h3>';
+        html += '<div class="io-doclist">';
+        for (var j = 0; j < docs.length; j++) {
+            var d = docs[j];
+            html += '<a class="io-docrow" href="' + d.href + '">' +
+                '<span class="io-docrow-left">' +
+                    '<span class="io-doc-icon">' + d.icon + '</span>' +
+                    '<span><span class="io-docrow-name">' + d.title + '</span>' +
+                    '<span class="io-docrow-sub">' + d.sub + '</span></span>' +
+                '</span>' +
+                '<span class="io-docrow-arrow">' + arrowSvg + '</span>' +
+            '</a>';
+        }
+        html += '</div></div>';
 
         el.innerHTML = html;
     }

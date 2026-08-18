@@ -371,3 +371,107 @@
     .io-hero-full { font-size: 1.25rem; }
     .io-hero-sub  { font-size: 0.88rem; }
 }
+
+/* ========================================
+   ГРУППЫ И ДОКУМЕНТЫ
+   ========================================
+   Раньше все четыре карточки стояли вровень, и публичная оферта — документ,
+   который открывают раз в жизни, — выглядела так же важно, как FAQ, который
+   читает каждый новичок. Справка стоит карточками, юридические документы —
+   отдельным списком ниже.
+   ======================================== */
+
+.io-group + .io-group { margin-top: 56px; }
+
+.io-group-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 0 0 20px;
+}
+
+/* Крупная иконка водяным знаком: у каждой карточки свой силуэт, и они
+   перестают быть одинаковыми тёмными прямоугольниками */
+.io-card { position: relative; overflow: hidden; }
+
+.io-card .io-card-icon {
+    position: absolute;
+    right: -14px;
+    bottom: -14px;
+    width: 116px;
+    height: 116px;
+    border-radius: 0;
+    background: none;
+    color: rgba(204, 255, 0, 0.07);
+    margin: 0;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.io-card .io-card-icon svg { width: 100%; height: 100%; stroke-width: 1; }
+
+.io-card:hover .io-card-icon {
+    color: rgba(204, 255, 0, 0.16);
+    transform: translate(-6px, -6px) rotate(-6deg);
+}
+
+.io-card h3,
+.io-card p,
+.io-card .io-card-arrow { position: relative; z-index: 1; }
+
+.io-card h3 { margin-top: 4px; }
+
+/* Документы списком: у каждого строка о том, что внутри */
+.io-doclist {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.io-docrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s;
+}
+.io-docrow:last-child { border-bottom: none; }
+.io-docrow:hover { background: rgba(255, 255, 255, 0.02); }
+
+.io-docrow-left { display: flex; align-items: center; gap: 14px; }
+
+.io-doc-icon {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    background: rgba(204, 255, 0, 0.1);
+    color: var(--accent);
+}
+
+.io-docrow-name { font-weight: 600; color: var(--text-primary); font-size: 0.98rem; }
+.io-docrow-sub {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+    font-weight: 400;
+    margin-top: 3px;
+    line-height: 1.5;
+}
+
+.io-docrow-arrow { color: var(--text-dim); flex-shrink: 0; display: flex; transition: color 0.2s; }
+.io-docrow:hover .io-docrow-arrow { color: var(--accent); }
+
+@media (max-width: 640px) {
+    .io-docrow { padding: 18px 18px; }
+    .io-docrow-arrow { display: none; }
+}
