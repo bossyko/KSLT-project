@@ -25,8 +25,8 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="../css/style.css?v=96">
-    <link rel="stylesheet" href="../css/pricing.css">
+    <link rel="stylesheet" href="../css/style.css?v=98">
+    <link rel="stylesheet" href="../css/pricing.css?v=2">
 </head>
 <body>
     <!-- HEADER -->
@@ -123,9 +123,11 @@
                     <div class="nav-dropdown-menu">
                         <a href="about.html" class="nav-dropdown-item">О проекте</a>
                         <a href="rules.html" class="nav-dropdown-item">Правила</a>
-                        <a href="faq.html" class="nav-dropdown-item">FAQ</a>
                         <a href="pricing.html" class="nav-dropdown-item">Цены</a>
+                        <a href="faq.html" class="nav-dropdown-item">FAQ</a>
                         <a href="offer.html" class="nav-dropdown-item">Публичная оферта</a>
+                        <a href="terms.html" class="nav-dropdown-item">Условия использования</a>
+                        <a href="privacy-policy.html" class="nav-dropdown-item">Политика конфиденциальности</a>
                         <a href="download.html" class="nav-dropdown-item">📲 Скачать приложение</a>
                     </div>
                 </li>
@@ -249,9 +251,11 @@
                     <ul class="mobile-dropdown-menu">
                         <li><a href="about.html">О проекте</a></li>
                         <li><a href="rules.html">Правила</a></li>
-                        <li><a href="faq.html">FAQ</a></li>
                         <li><a href="pricing.html">Цены</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
                         <li><a href="offer.html">Публичная оферта</a></li>
+                        <li><a href="terms.html">Условия использования</a></li>
+                        <li><a href="privacy-policy.html">Политика конфиденциальности</a></li>
                         <li><a href="download.html">📲 Скачать приложение (Android)</a></li>
                     </ul>
                 </li>
@@ -286,97 +290,134 @@
 
         <div class="pr-container">
 
-            <!-- PLAN CARD -->
-            <div class="pr-card-wrapper">
-                <div class="pr-card">
-                    <span class="pr-badge">Единый тариф</span>
-                    <div class="pr-plan-name">Ежемесячное членство КСЛТ</div>
-                    <div class="pr-price">
-                        <span class="pr-price-amount">1 000</span>
-                        <span class="pr-price-currency">сом</span>
-                        <span class="pr-price-period">в месяц</span>
+            <!-- ПРАЙС-ЛИСТ -->
+            <div class="pm-card">
+                <div class="pm-head">
+                    <div class="pm-title">Членство КСЛТ</div>
+                    <div class="pm-sub">Членство действует в оплаченный период. Для участия в рейтинговых турнирах нужно действующее членство.</div>
+                </div>
+                <div class="pm-list">
+                    <div class="pm-row">
+                        <span class="pm-name">Вступительный взнос
+                            <span class="pm-note">Разово, при вступлении в КСЛТ. Повторно — только при возвращении после выбывания.</span>
+                        </span>
+                        <div class="pm-right"><span class="pm-val" data-plan="join">уточняется</span></div>
                     </div>
-                    <ul class="pr-features">
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                            Участие во всех турнирах КСЛТ
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                            Полный рейтинг и статистика
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                            Скидки на аренду кортов
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                            Доступ к закрытым мероприятиям
-                        </li>
+                    <div class="pm-row">
+                        <span class="pm-name">Годовое членство<span class="pm-tag">выгоднее</span>
+                            <span class="pm-note">Оплата раз в год.</span>
+                        </span>
+                        <div class="pm-right"><span class="pm-val" data-plan="year">уточняется</span></div>
+                    </div>
+                    <div class="pm-row">
+                        <span class="pm-name">Ежемесячное членство
+                            <span class="pm-note">Оплата каждый месяц.</span>
+                        </span>
+                        <div class="pm-right"><span class="pm-val" data-plan="month">уточняется</span></div>
+                    </div>
+                </div>
+                <div class="pm-foot">
+                    <h4>Что даёт членство</h4>
+                    <ul class="pm-feats">
+                        <li>Участие во всех турнирах КСЛТ</li>
+                        <li>Приоритет при регистрации на турнир</li>
+                        <li>Сниженный турнирный взнос</li>
+                        <li>Место в рейтинге и статистика матчей</li>
+                        <li>Скидки у партнёров КСЛТ</li>
+                        <li>Личный кабинет и уведомления в приложении</li>
                     </ul>
-                    <button class="pr-cta-btn" id="prPayBtn">
-                        Оплатить членство
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
+                    <div class="pm-state" id="prState" hidden></div>
+                    <button class="pm-btn" id="prPayBtn">Оплатить членство</button>
                 </div>
             </div>
 
-            <!-- FAQ -->
+            <!-- Турнирный взнос — не тариф, а факт -->
+            <div class="pm-entry">
+                <span class="pm-entry-name">Участие в турнире
+                    <span class="pm-entry-sub">У каждого турнира свой взнос. Сумма и способ оплаты — в карточке турнира.</span>
+                </span>
+                <span class="pm-entry-val">зависит от турнира</span>
+            </div>
+
+            <!-- ВОПРОСЫ -->
             <h2 class="pr-faq-title">Вопросы о <span>членстве</span></h2>
+            <p class="pr-faq-lead">Только про деньги. Всё остальное — вступление, категории, турниры — на странице <a href="faq.html">FAQ</a>.</p>
 
             <div class="pr-faq-item">
-                <button class="pr-faq-question">
-                    Что даёт членство КСЛТ?
-                    <span class="pr-faq-icon">+</span>
-                </button>
-                <div class="pr-faq-answer">
-                    <div class="pr-faq-answer-inner">
-                        Членство КСЛТ открывает доступ ко всем турнирам сообщества, полной рейтинговой системе, статистике матчей, скидкам на аренду партнёрских кортов и закрытым мероприятиям для членов клуба.
-                    </div>
-                </div>
+                <button class="pr-faq-question">Чем годовое членство отличается от помесячного?<span class="pr-faq-icon">+</span></button>
+                <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
+                    Только периодом оплаты и суммой — членство одно и то же, права одинаковые. Годовое выгоднее в пересчёте на месяц. Членство действует ровно в оплаченный период.
+                </div></div>
             </div>
 
             <div class="pr-faq-item">
-                <button class="pr-faq-question">
-                    Как происходит оплата?
-                    <span class="pr-faq-icon">+</span>
-                </button>
-                <div class="pr-faq-answer">
-                    <div class="pr-faq-answer-inner">
-                        На данный момент оплата принимается через администратора. Свяжитесь с нами через Telegram или по телефону для оформления членства. Онлайн-оплата будет доступна в ближайшее время.
-                    </div>
-                </div>
+                <button class="pr-faq-question">Что будет, если перестать платить?<span class="pr-faq-icon">+</span></button>
+                <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
+                    Членство закончится вместе с оплаченным периодом, и к рейтинговым турнирам вас не допустят. Если взносы не оплачены в течение шести месяцев, участник выбывает из членства КСЛТ, а рейтинг замораживается. Вернуться можно в любой момент — снова оплатив вступительный взнос. Подробнее — <a href="rules.html#rules-membership">Правила, раздел 02</a>.
+                </div></div>
             </div>
 
             <div class="pr-faq-item">
-                <button class="pr-faq-question">
-                    Можно ли продлить членство?
-                    <span class="pr-faq-icon">+</span>
-                </button>
-                <div class="pr-faq-answer">
-                    <div class="pr-faq-answer-inner">
-                        Да, по истечении годового периода вы можете продлить членство на новый срок. Мы заблаговременно напомним вам об окончании подписки.
-                    </div>
-                </div>
+                <button class="pr-faq-question">Вступительный взнос платится каждый раз?<span class="pr-faq-icon">+</span></button>
+                <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
+                    Нет, только один раз при вступлении. Второй раз он понадобится, лишь если вы выбыли из членства и возвращаетесь.
+                </div></div>
             </div>
 
             <div class="pr-faq-item">
-                <button class="pr-faq-question">
-                    Можно ли играть без членства?
-                    <span class="pr-faq-icon">+</span>
-                </button>
-                <div class="pr-faq-answer">
-                    <div class="pr-faq-answer-inner">
-                        Вы можете просматривать информацию на сайте, но для участия в официальных турнирах КСЛТ и получения рейтинга необходимо оформить членство.
-                    </div>
-                </div>
+                <button class="pr-faq-question">Входит ли участие в турнире в членский взнос?<span class="pr-faq-icon">+</span></button>
+                <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
+                    Нет. Турнирный взнос платится отдельно и у каждого турнира свой — он указан в карточке турнира. Членство даёт приоритет при регистрации и сниженный взнос, но не бесплатное участие.
+                </div></div>
             </div>
 
+            <div class="pr-faq-item">
+                <button class="pr-faq-question">Как оплатить сейчас?<span class="pr-faq-icon">+</span></button>
+                <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
+                    Онлайн-оплата подключается. Пока её нет, членство проводит администратор КСЛТ — после оплаты он отмечает её в системе, и членство появляется в вашем личном кабинете.
+                </div></div>
+            </div>
         </div>
-    
+
         <!-- SPONSORS -->
         <section id="sponsors" class="section-sponsors-compact"></section>
     </main>
+
+    <!-- Выбор периода и способа оплаты -->
+    <div class="pmm-overlay" id="payModal" hidden>
+        <div class="pmm">
+            <button class="pmm-close" id="payClose" aria-label="Закрыть">&times;</button>
+            <div class="pmm-title">Оплата членства</div>
+
+            <div class="pmm-label">Период</div>
+            <div class="pmm-opts">
+                <button class="pmm-opt on" data-plan="year">
+                    <span class="pmm-opt-name">Годовое членство
+                        <span class="pmm-opt-sub">Оплата раз в год · выгоднее</span>
+                    </span>
+                    <span class="pmm-opt-val" data-plan-val="year">уточняется</span>
+                </button>
+                <button class="pmm-opt" data-plan="month">
+                    <span class="pmm-opt-name">Ежемесячное членство
+                        <span class="pmm-opt-sub">Оплата каждый месяц</span>
+                    </span>
+                    <span class="pmm-opt-val" data-plan-val="month">уточняется</span>
+                </button>
+            </div>
+
+            <div class="pmm-label">Способ оплаты</div>
+            <div class="pmm-ways">
+                <div class="pmm-way"><span class="pmm-way-soon">скоро</span>MBank · QR</div>
+                <div class="pmm-way"><span class="pmm-way-soon">скоро</span>О!Деньги</div>
+                <div class="pmm-way"><span class="pmm-way-soon">скоро</span>Элкарт</div>
+                <div class="pmm-way"><span class="pmm-way-soon">скоро</span>Visa / MasterCard</div>
+            </div>
+
+            <button class="pmm-go" id="payGo" disabled>Суммы уточняются</button>
+            <span class="pmm-hint">Онлайн-оплата подключается. Пока её нет,<br>членство проводит администратор КСЛТ.</span>
+        </div>
+    </div>
+
 
     <!-- FOOTER -->
 <!-- FOOTER:START -->
@@ -408,6 +449,7 @@
                     <li><a href="courts.html">Корты</a></li>
                     <li><a href="coaches.html">Тренеры</a></li>
                     <li><a href="news.html">Новости</a></li>
+                    <li><a href="about.html">О проекте</a></li>
                 </ul>
             </div>
 
@@ -416,11 +458,9 @@
                 <ul class="footer-links">
                     <li><a href="rules.html">Правила лиги</a></li>
                     <li><a href="rules.html#rules-ranking">Система рейтинга</a></li>
-                    <li><a href="about.html">О проекте</a></li>
                     <li><a href="faq.html">FAQ</a></li>
                     <li><a href="pricing.html">Цены</a></li>
-                                    <li><a href="rules.html#rules-sanctions">Дисциплинарное положение</a></li>
-                    <li><a href="offer.html#offer-refusal">Оплата и возврат</a></li>
+                    <li><a href="rules.html#rules-conduct">Дисциплинарное положение</a></li>
 </ul>
             </div>
 
@@ -451,6 +491,7 @@
             <p>© 2026 КСЛТ. Все права защищены.</p>
             <div class="footer-bottom-links">
                 <a href="offer.html">Публичная оферта</a>
+                <a href="terms.html">Условия использования</a>
                 <a href="privacy-policy.html">Политика конфиденциальности</a>
             </div>
             <p class="footer-made">Сделано с ❤️ в Кыргызстане 🇰🇬</p>
@@ -464,11 +505,12 @@
     <script>if (window.loadSponsors) loadSponsors('sponsors');</script>
     <script src="../js/auth-nav.js?v=20"></script>
     <script src="../js/script.js?v=2"></script>
+    <script src="../js/membership.js"></script>
     <script>
     (function() {
         'use strict';
 
-        // FAQ accordion
+        // ---- Раскрытие ответов ----
         document.querySelectorAll('.pr-faq-question').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var item = btn.closest('.pr-faq-item');
@@ -478,96 +520,115 @@
             });
         });
 
-        // Auth check via localStorage (same pattern as auth-nav.js)
+        // ---- Суммы из базы ----
+        // Пока тарифы не заведены или суммы не утверждены, в строке остаётся
+        // «уточняется», а кнопка в окне неактивна: платить нечего.
+        var PRICES = {};
+
+        async function loadPrices() {
+            if (!window.supabaseClient) return;
+            try {
+                var res = await window.supabaseClient.from('pricing_plans')
+                    .select('*').eq('is_active', true);
+                if (res.error || !res.data) return;
+                res.data.forEach(function(p) {
+                    if (p.amount != null) PRICES[p.kind] = p;
+                });
+                render();
+            } catch (e) {
+                // Таблицы может не быть — страница работает и без неё
+            }
+        }
+
+        function money(p) {
+            return Number(p.amount).toLocaleString('ru-RU') + ' ' + (p.currency || 'сом');
+        }
+
+        function render() {
+            document.querySelectorAll('[data-plan]').forEach(function(el) {
+                var p = PRICES[el.dataset.plan];
+                if (!p) return;
+                el.textContent = money(p);
+                el.classList.add('set');
+            });
+            document.querySelectorAll('[data-plan-val]').forEach(function(el) {
+                var p = PRICES[el.dataset.planVal];
+                if (p) el.textContent = money(p);
+            });
+            var go = document.getElementById('payGo');
+            if (go && (PRICES.year || PRICES.month)) {
+                go.disabled = false;
+                go.textContent = 'Перейти к оплате';
+            }
+        }
+
+        // ---- Окно выбора ----
+        var modal = document.getElementById('payModal');
+        var btn = document.getElementById('prPayBtn');
+
         function isLoggedIn() {
             try {
-                var key = 'sb-qqkzszesviukopgjbead-auth-token';
-                var raw = localStorage.getItem(key);
+                var raw = localStorage.getItem('sb-qqkzszesviukopgjbead-auth-token');
                 if (!raw) return false;
                 var session = JSON.parse(raw);
-                if (session && session.access_token && session.expires_at) {
-                    var now = Math.floor(Date.now() / 1000);
-                    return session.expires_at > now;
-                }
-            } catch (e) {}
-            return false;
+                return !!(session && session.access_token && session.expires_at &&
+                    session.expires_at > Math.floor(Date.now() / 1000));
+            } catch (e) { return false; }
         }
 
-        // Pay button
-        var btn = document.getElementById('prPayBtn');
-        if (btn) {
+        // Гостю кнопка честно говорит, что сначала будет вход: платить может
+        // только тот, кого мы знаем — членство привязывается к профилю.
+        if (btn && !isLoggedIn()) btn.textContent = 'Войти и оплатить';
+
+        // Показываем, есть ли уже действующее членство, и до какого числа
+        async function showState() {
+            if (!isLoggedIn() || !window.checkMembership) return;
+            var state = document.getElementById('prState');
+            try {
+                var m = await window.checkMembership();
+                if (!m.active || !m.membership || m.membership.staff_bypass) return;
+                var till = new Date(m.membership.expires_at).toLocaleDateString('ru-RU',
+                    { day: 'numeric', month: 'long', year: 'numeric' });
+                state.textContent = 'Членство активно до ' + till;
+                state.hidden = false;
+                btn.textContent = 'Продлить членство';
+            } catch (e) { /* нет сети — оставляем как есть */ }
+        }
+
+        if (btn && modal) {
             btn.addEventListener('click', function() {
                 if (!isLoggedIn()) {
-                    window.location.href = 'auth.html';
+                    // pay=1 — вернувшись после входа, человек сразу увидит окно
+                    // оплаты, а не будет искать кнопку заново
+                    window.location.href = 'auth.html?return=' +
+                        encodeURIComponent('/pages/pricing.html?pay=1');
                     return;
                 }
-                showPaymentModal();
-            });
-        }
-
-        function showPaymentModal() {
-            var overlay = document.createElement('div');
-            overlay.className = 'pr-modal-overlay';
-            overlay.innerHTML =
-                '<div class="pr-modal">' +
-                    '<button class="pr-modal-close" id="prModalClose">&times;</button>' +
-                    '<div class="pr-modal-title">Выберите способ оплаты</div>' +
-                    '<div class="pr-modal-text">Ежемесячное членство КСЛТ — <strong style="color:var(--accent)">1 000 сом/мес</strong></div>' +
-
-                    '<div class="pr-pay-label">Банковские карты</div>' +
-                    '<div class="pr-pay-grid">' +
-                        '<div class="pr-pay-method" data-method="visa"><span class="pr-pay-soon">скоро</span><span class="pr-pay-method-icon">💳</span><span class="pr-pay-method-name">Visa / MC</span></div>' +
-                        '<div class="pr-pay-method" data-method="elcart"><span class="pr-pay-soon">скоро</span><span class="pr-pay-method-icon">🏦</span><span class="pr-pay-method-name">Элкарт</span></div>' +
-                    '</div>' +
-
-                    '<div class="pr-pay-label">Мобильные банки</div>' +
-                    '<div class="pr-pay-grid">' +
-                        '<div class="pr-pay-method" data-method="mbank"><span class="pr-pay-soon">скоро</span><span class="pr-pay-method-icon">📱</span><span class="pr-pay-method-name">MBank</span></div>' +
-                        '<div class="pr-pay-method" data-method="bakai"><span class="pr-pay-soon">скоро</span><span class="pr-pay-method-icon">📱</span><span class="pr-pay-method-name">Bakai24</span></div>' +
-                        '<div class="pr-pay-method" data-method="optima"><span class="pr-pay-soon">скоро</span><span class="pr-pay-method-icon">📱</span><span class="pr-pay-method-name">Optima24</span></div>' +
-                        '<div class="pr-pay-method" data-method="demir"><span class="pr-pay-soon">скоро</span><span class="pr-pay-method-icon">📱</span><span class="pr-pay-method-name">Демир24</span></div>' +
-                    '</div>' +
-
-                    '<div class="pr-pay-label">Электронные кошельки</div>' +
-                    '<div class="pr-pay-grid">' +
-                        '<div class="pr-pay-method" data-method="odengi"><span class="pr-pay-soon">скоро</span><span class="pr-pay-method-icon">💰</span><span class="pr-pay-method-name">O! Деньги</span></div>' +
-                        '<div class="pr-pay-method" data-method="balance"><span class="pr-pay-soon">скоро</span><span class="pr-pay-method-icon">💰</span><span class="pr-pay-method-name">Balance.kg</span></div>' +
-                        '<div class="pr-pay-method" data-method="elsom"><span class="pr-pay-soon">скоро</span><span class="pr-pay-method-icon">💰</span><span class="pr-pay-method-name">Элсом</span></div>' +
-                        '<div class="pr-pay-method" data-method="megapay"><span class="pr-pay-soon">скоро</span><span class="pr-pay-method-icon">💰</span><span class="pr-pay-method-name">MegaPay</span></div>' +
-                    '</div>' +
-
-                    '<div class="pr-pay-divider">или</div>' +
-
-                    '<div class="pr-modal-btns">' +
-                        '<a href="https://t.me/kslt_admin" target="_blank" rel="noopener" class="pr-modal-btn pr-modal-btn-telegram">' +
-                            '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>' +
-                            'Написать в Telegram' +
-                        '</a>' +
-                        '<a href="tel:+996555123456" class="pr-modal-btn pr-modal-btn-phone">' +
-                            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' +
-                            '+996 555 123 456' +
-                        '</a>' +
-                    '</div>' +
-                    '<div class="pr-modal-note">Онлайн-оплата появится в ближайшее время. Пока свяжитесь с администратором.</div>' +
-                '</div>';
-
-            document.body.appendChild(overlay);
-
-            function closeModal() { overlay.remove(); }
-
-            document.getElementById('prModalClose').addEventListener('click', closeModal);
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) closeModal();
+                modal.hidden = false;
             });
 
-            // Visual selection (no real action)
-            overlay.querySelectorAll('.pr-pay-method').forEach(function(m) {
-                m.addEventListener('click', function() {
-                    overlay.querySelectorAll('.pr-pay-method').forEach(function(el) { el.classList.remove('selected'); });
-                    m.classList.add('selected');
+            // Вернулись со страницы входа — открываем окно сразу
+            if (isLoggedIn() && new URLSearchParams(location.search).get('pay') === '1') {
+                modal.hidden = false;
+            }
+
+            showState();
+            document.getElementById('payClose').addEventListener('click', function() { modal.hidden = true; });
+            modal.addEventListener('click', function(e) { if (e.target === modal) modal.hidden = true; });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !modal.hidden) modal.hidden = true;
+            });
+
+            var opts = modal.querySelectorAll('.pmm-opt');
+            opts.forEach(function(o) {
+                o.addEventListener('click', function() {
+                    opts.forEach(function(x) { x.classList.remove('on'); });
+                    o.classList.add('on');
                 });
             });
         }
+
+        loadPrices();
     })();
     </script>
 </body>
