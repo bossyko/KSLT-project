@@ -1032,81 +1032,15 @@ function buildH2HMap(h2hRows) {
     return map;
 }
 
-function getH2H(h2hMap, idA, idB) {
-    var a = idA < idB ? idA : idB;
-    var b = idA < idB ? idB : idA;
-    var rec = h2hMap[a + ':' + b];
-    if (!rec) return { winsA: 0, winsB: 0 };
-    return { winsA: rec[idA] || 0, winsB: rec[idB] || 0 };
-}
-
-function getStreak(form) {
-    if (!form || !form.length) return 0;
-    var first = form[0];
-    if (first !== 'W' && first !== 'L') return 0;
-    var count = 0;
-    for (var i = 0; i < form.length; i++) {
-        if (form[i] === first) count++;
-        else break;
-    }
-    return first === 'W' ? count : -count;
-}
-
+// Расчёт прогноза и анимация полос переехали в js/match-prediction.js:
+// тот же вопрос «кто фаворит» задаёт и страница баттла, а две копии одной
+// формулы в разных файлах однажды разойдутся.
 function calculatePrediction(p1Data, p2Data, h2hMap) {
-    var rA = p1Data.points || 0;
-    var rB = p2Data.points || 0;
-
-    // 1. Elo expected (60%)
-    var eloA = 1 / (1 + Math.pow(10, (rB - rA) / 400));
-
-    // 2. Win Rate (20%)
-    var wA = p1Data.wins || 0, lA = p1Data.losses || 0;
-    var wB = p2Data.wins || 0, lB = p2Data.losses || 0;
-    var wrA = (wA + lA) > 0 ? wA / (wA + lA) : 0.5;
-    var wrB = (wB + lB) > 0 ? wB / (wB + lB) : 0.5;
-    var wrExp = (wrA + wrB) > 0 ? wrA / (wrA + wrB) : 0.5;
-
-    // 3. Streak (10%)
-    var sA = getStreak(p1Data.form);
-    var sB = getStreak(p2Data.form);
-    var streakBonus = 0;
-    streakBonus += Math.max(-0.10, Math.min(0.10, sA * 0.03));
-    streakBonus -= Math.max(-0.10, Math.min(0.10, sB * 0.03));
-    var streakA = 0.5 + streakBonus;
-
-    // 4. H2H (10%)
-    var h2h = getH2H(h2hMap, p1Data.id, p2Data.id);
-    var h2hTotal = h2h.winsA + h2h.winsB;
-    var h2hA = 0.5;
-    if (h2hTotal > 0) {
-        var diff = (h2h.winsA - h2h.winsB) / h2hTotal;
-        h2hA = 0.5 + Math.max(-0.05, Math.min(0.05, diff * 0.1));
-    }
-
-    // 5. Composite
-    var finalA = 0.6 * eloA + 0.2 * wrExp + 0.1 * streakA + 0.1 * h2hA;
-
-    // 6. Clamp
-    var pctA = Math.round(Math.max(5, Math.min(95, finalA * 100)));
-    return { p1Pct: pctA, p2Pct: 100 - pctA };
+    return window.KSLT_PREDICTION.calculate(p1Data, p2Data, h2hMap);
 }
 
 function initPredictionAnimations() {
-    var bars = document.querySelectorAll('.td-prediction');
-    if (!bars.length) return;
-    var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-                var fills = entry.target.querySelectorAll('.td-pred-fill');
-                fills.forEach(function(fill) {
-                    fill.style.width = fill.getAttribute('data-width');
-                });
-                entry.target.classList.add('animated');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.3 });
-    bars.forEach(function(bar) { observer.observe(bar); });
+    window.KSLT_PREDICTION.animate('.td-prediction');
 }
 
 // ========================================

@@ -149,6 +149,19 @@
     border: 2px solid rgba(255,255,255,0.12);
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
+
+/* Пара: места на строку не больше, чем у одиночного баттла, поэтому
+   фотографии наезжают друг на друга, а имена идут в две строки */
+.bc-player-photos { display: flex; justify-content: center; }
+.bc-player-photos.bc-pair img { width: 46px; height: 46px; }
+.bc-player-photos.bc-pair img + img { margin-left: -14px; }
+.bc-player-name.bc-pair-names {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.22;
+}
+.bc-player-name.bc-pair-names span { font-size: 0.78rem; }
 .bc-player-name {
     font-size: 0.82rem;
     font-weight: 600;

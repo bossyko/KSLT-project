@@ -1130,6 +1130,51 @@ input[type="date"]::-webkit-datetime-edit {
     font-weight: 700;
 }
 
+/* Переключатель формата баттла: одиночный, парный, микст.
+
+   Вкладками, а не выпадающим списком: вариантов три, они равнозначны, и
+   от выбора зависит, какие поля показать. Список прятал бы это за клик. */
+.ad-seg {
+    display: flex;
+    border: 1px solid var(--ad-border, rgba(255,255,255,0.1));
+    border-radius: 10px;
+    overflow: hidden;
+}
+.ad-seg-btn {
+    flex: 1;
+    padding: 9px 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ad-text-secondary, rgba(255,255,255,0.6));
+    font: 600 0.84rem inherit;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+}
+.ad-seg-btn:hover { color: var(--ad-text, #fff); }
+.ad-seg-btn.on {
+    background: var(--ad-accent, #CCFF00);
+    color: #0A0A0A;
+}
+
+/* Кого ищем в напарники — подсказка у самого поля, а не в сообщении об
+   ошибке после нажатия «Создать» */
+.cb-hint {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ad-text-secondary, rgba(255,255,255,0.6));
+}
+
+.ad-chk {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.ad-chk input { width: 16px; height: 16px; accent-color: var(--ad-accent, #CCFF00); }
+
 .ad-field-hint {
     font-size: 0.72rem;
     color: var(--text-dim);

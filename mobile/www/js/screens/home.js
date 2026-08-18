@@ -1071,7 +1071,7 @@
       _battleVotes = {};
       if (vRes.data) {
         vRes.data.forEach(function(v) {
-          _battleVotes[v.player_id] = parseInt(v.votes) || 0;
+          _battleVotes[v.side] = parseInt(v.votes) || 0;
         });
       }
 
@@ -1103,13 +1103,18 @@
     }
 
     // Title
+    var APP = window.KSLT_APP;
+    var isPair = APP.battleIsPair(b);
+    var fmtLabel = APP.battleFormatLabel(b);
+
     html += '<h2 class="bd-title">' + esc(b.battle_title || c1Name + ' vs ' + c2Name) + '</h2>';
+    if (fmtLabel) html += '<div class="bd-format">' + esc(fmtLabel) + '</div>';
 
     // VS block with stats
     html += '<div class="bd-vs-block">';
-    html += renderBattlePlayer(c1Name, c1Photo, b.challenger_cat, b.challenger_wins, b.challenger_losses, b.challenger_points, CAT);
+    html += battleSide(b, 1, isPair, CAT);
     html += '<div class="bd-vs">VS</div>';
-    html += renderBattlePlayer(c2Name, c2Photo, b.opponent_cat, b.opponent_wins, b.opponent_losses, b.opponent_points, CAT);
+    html += battleSide(b, 2, isPair, CAT);
     html += '</div>';
 
     // Meta (date, time, venue)
@@ -1142,34 +1147,75 @@
     if (_battleUserId && !b.voting_closed && b.status !== 'completed' && !_battleMyVote) {
       var btn1 = document.getElementById('bdVoteBtn1');
       var btn2 = document.getElementById('bdVoteBtn2');
-      if (btn1) btn1.addEventListener('click', function() { castBattleVote(b.id, b.challenger_player_id); });
-      if (btn2) btn2.addEventListener('click', function() { castBattleVote(b.id, b.opponent_player_id); });
+      if (btn1) btn1.addEventListener('click', function() { castBattleVote(b.id, 1); });
+      if (btn2) btn2.addEventListener('click', function() { castBattleVote(b.id, 2); });
     }
   }
 
-  function renderBattlePlayer(name, photo, cat, wins, losses, points, CAT) {
+  /**
+   * Сторона баттла: один человек или пара.
+   *
+   * У пары победы и поражения не показываем: они про рейтинговые одиночные
+   * игры и рядом с парным матчем ничего не значат. Вместо них — счёт в парах
+   * или в миксте, по формату этого баттла.
+   */
+  function battleSide(b, side, isPair, CAT) {
+    var pre = side === 1 ? 'challenger' : 'opponent';
+    var main = renderBattlePlayer(
+        b[pre + '_name'], b[pre + '_photo'], b[pre + '_cat'],
+        isPair ? null : b[pre + '_wins'], isPair ? null : b[pre + '_losses'],
+        isPair ? null : b[pre + '_points'], CAT,
+        isPair ? pairRecord(b, pre, false) : '');
+    if (!isPair) return main;
+
+    var mate = renderBattlePlayer(
+        b[pre + '_partner_display'], b[pre + '_partner_photo'], b[pre + '_partner_cat'],
+        null, null, null, CAT, pairRecord(b, pre, true));
+    return '<div class="bd-pair">' + main + '<span class="bd-pair-plus">+</span>' + mate + '</div>';
+  }
+
+  /** Счёт в парах или в миксте — по формату этого баттла. */
+  function pairRecord(b, pre, isMate) {
+    var suffix = isMate ? '_partner' : '';
+    var w, l;
+    if (b.format === 'mixed_doubles') {
+      w = b[pre + suffix + '_mix_wins'] || 0;
+      l = b[pre + suffix + '_mix_losses'] || 0;
+    } else {
+      w = b[pre + suffix + '_dbl_wins'] || 0;
+      l = b[pre + suffix + '_dbl_losses'] || 0;
+    }
+    if (w + l === 0) return '';
+    return '<div class="bd-pair-record">' + I18N.t('pairs.record') + ' ' + w + '\u2013' + l + '</div>';
+  }
+
+  function renderBattlePlayer(name, photo, cat, wins, losses, points, CAT, extra) {
+    if (!name) return '';
     var html = '<div class="bd-player">';
     html += photo
       ? '<img class="bd-avatar" src="' + photo + '" alt="">'
       : '<div class="bd-avatar-fallback">' + initials(name) + '</div>';
     html += '<div class="bd-player-name">' + esc(name) + '</div>';
     if (cat) html += '<div class="bd-player-cat">' + esc(CAT[cat] || cat) + '</div>';
-    html += '<div class="bd-player-stats">';
-    html += '<span class="bd-stat-w">П: ' + (wins || 0) + '</span>';
-    html += '<span class="bd-stat-l">У: ' + (losses || 0) + '</span>';
-    html += '</div>';
+    if (wins !== null && wins !== undefined) {
+      html += '<div class="bd-player-stats">';
+      html += '<span class="bd-stat-w">П: ' + (wins || 0) + '</span>';
+      html += '<span class="bd-stat-l">У: ' + (losses || 0) + '</span>';
+      html += '</div>';
+    }
     if (points !== undefined && points !== null) {
       html += '<div class="bd-player-rating">Рейтинг: <strong>' + (points || 0) + '</strong></div>';
     }
+    if (extra) html += extra;
     html += '</div>';
     return html;
   }
 
   function renderBattleVoting(b, votes) {
-    var c1Id = b.challenger_player_id;
-    var c2Id = b.opponent_player_id;
-    var v1 = votes[c1Id] || 0;
-    var v2 = votes[c2Id] || 0;
+    // Голос считается по стороне: 1 — первый, 2 — второй. У гостя баттла
+    // идентификатора игрока нет, а сторон всегда ровно две
+    var v1 = votes[1] || 0;
+    var v2 = votes[2] || 0;
     var total = v1 + v2;
     var pct1 = total > 0 ? Math.round(v1 / total * 100) : 50;
     var pct2 = total > 0 ? 100 - pct1 : 50;
@@ -1190,10 +1236,13 @@
     var canVote = _battleUserId && !closed && !_battleMyVote;
     var btnDisabled = closed || _battleMyVote || !_battleUserId;
     html += '<div class="bd-vote-buttons">';
-    html += '<button class="bd-vote-btn' + (_battleMyVote === c1Id ? ' selected' : '') + '" id="bdVoteBtn1"' + (btnDisabled ? ' disabled' : '') + '>';
-    html += (_battleMyVote === c1Id ? '✓ ' : '') + esc(c1Name) + ' <small>(' + v1 + ')</small></button>';
-    html += '<button class="bd-vote-btn' + (_battleMyVote === c2Id ? ' selected' : '') + '" id="bdVoteBtn2"' + (btnDisabled ? ' disabled' : '') + '>';
-    html += (_battleMyVote === c2Id ? '✓ ' : '') + esc(c2Name) + ' <small>(' + v2 + ')</small></button>';
+    var APPv = window.KSLT_APP;
+    var b1 = APPv.battleShortSide(APPv.battleSideNames(b, 1)) || c1Name;
+    var b2 = APPv.battleShortSide(APPv.battleSideNames(b, 2)) || c2Name;
+    html += '<button class="bd-vote-btn' + (_battleMyVote === 1 ? ' selected' : '') + '" id="bdVoteBtn1"' + (btnDisabled ? ' disabled' : '') + '>';
+    html += (_battleMyVote === 1 ? '✓ ' : '') + esc(b1) + ' <small>(' + v1 + ')</small></button>';
+    html += '<button class="bd-vote-btn' + (_battleMyVote === 2 ? ' selected' : '') + '" id="bdVoteBtn2"' + (btnDisabled ? ' disabled' : '') + '>';
+    html += (_battleMyVote === 2 ? '✓ ' : '') + esc(b2) + ' <small>(' + v2 + ')</small></button>';
     html += '</div>';
 
     html += '<div class="bd-vote-total">Всего голосов: ' + total + '</div>';
@@ -1210,20 +1259,20 @@
 
   function loadBattleMyVote(bid) {
     supabaseClient.from('challenge_predictions')
-      .select('predicted_winner_id')
+      .select('predicted_side')
       .eq('challenge_id', bid)
       .eq('voter_type', 'site')
       .eq('voter_id', _battleUserId)
       .maybeSingle()
       .then(function(r) {
         if (r.data) {
-          _battleMyVote = r.data.predicted_winner_id;
+          _battleMyVote = r.data.predicted_side;
           if (_battleData) renderBattleOverlay(_battleData, _battleVotes);
         }
       });
   }
 
-  function castBattleVote(bid, playerId) {
+  function castBattleVote(bid, side) {
     if (!_battleUserId || _battleMyVote) return;
     var btn1 = document.getElementById('bdVoteBtn1');
     var btn2 = document.getElementById('bdVoteBtn2');
@@ -1232,15 +1281,15 @@
 
     supabaseClient.rpc('cast_battle_vote', {
       p_challenge_id: bid,
-      p_player_id: playerId
+      p_side: side
     }).then(function(res) {
       if (res.error) { console.error('Vote:', res.error); return; }
-      _battleMyVote = playerId;
+      _battleMyVote = side;
       // Refresh votes
       supabaseClient.rpc('get_battle_votes', { p_challenge_id: bid }).then(function(vRes) {
         _battleVotes = {};
         if (vRes.data) {
-          vRes.data.forEach(function(v) { _battleVotes[v.player_id] = parseInt(v.votes) || 0; });
+          vRes.data.forEach(function(v) { _battleVotes[v.side] = parseInt(v.votes) || 0; });
         }
         renderBattleOverlay(_battleData, _battleVotes);
         if (window.KSLT_APP) window.KSLT_APP.toast('Голос принят!');

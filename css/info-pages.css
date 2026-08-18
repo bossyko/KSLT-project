@@ -326,7 +326,9 @@
 /* Stats row */
 .ip-stats-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    /* Карточек может стать меньше: пустые счётчики прячутся. Поэтому не
+       фиксированное число колонок, а раскладка по ширине */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 20px;
     margin-top: 28px;
 }
@@ -408,7 +410,7 @@
 /* Team */
 .ip-team-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     margin-top: 28px;
 }
@@ -442,10 +444,15 @@
     margin-bottom: 4px;
 }
 
+.ip-nowrap {
+    white-space: nowrap;
+}
+
 .ip-team-role {
-    color: var(--accent);
+    color: var(--text-secondary);
     font-size: 0.85rem;
-    font-weight: 600;
+    font-style: italic;
+    font-weight: 400;
     margin-bottom: 8px;
 }
 

@@ -26,7 +26,8 @@ test.describe('SEO — Title tags', () => {
             await page.goto(pg.path, { waitUntil: 'domcontentloaded' });
             const title = await page.title();
             expect(title.trim().length).toBeGreaterThan(0);
-            expect(title).toContain('KSLT');
+            // Русская версия сайта пишет аббревиатуру кириллицей — КСЛТ
+            expect(title).toContain(pg.lang === 'ru' ? 'КСЛТ' : 'KSLT');
         });
     }
 });

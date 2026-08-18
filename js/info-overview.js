@@ -9,7 +9,9 @@
     var L = isEn ? {
         heroTagline: 'KSLT Information',
         heroTitle: 'All about <span>KSLT</span>',
-        heroDesc: 'Rules, pricing and everything about our tennis community',
+        heroFull: 'Kyrgyzstan Social Lawn Tennis',
+        heroSub: 'an amateur tennis community platform',
+        heroDesc: 'Rules, ratings, pricing and everything about the community',
         featuredTitle: 'About the Project',
         featuredDesc: 'KSLT is the first tennis community in Kyrgyzstan, uniting amateurs and professionals. Learn about our mission, history and plans.',
         featuredBtn: 'Learn more',
@@ -23,9 +25,13 @@
         offerDesc: 'Legal terms of service, membership agreement and official documentation.',
         more: 'Learn more'
     } : isKg ? {
-        heroTagline: 'KSLT Маалымат',
-        heroTitle: '<span>KSLT</span> жөнүндө баары',
-        heroDesc: 'Эрежелер, баалар жана теннис коомчулугу жөнүндө бардыгы',
+        heroTagline: 'КСЛТ Маалымат',
+        heroTitle: '<span>КСЛТ</span> жөнүндө баары',
+        // Название пишем как имя собственное, с заглавных — как русское и
+        // английское. Официального киргизского названия у нас пока нет,
+        // это перевод и его должна подтвердить Айсулуу
+        heroFull: 'Кыргызстан Теннис Ышкыбоздорунун Коомчулугу',
+        heroDesc: 'Эрежелер, рейтинг, баалар жана коомчулук жөнүндө билүү керек болгон бардыгы',
         featuredTitle: 'Долбоор жөнүндө',
         featuredDesc: 'KSLT — Кыргызстандагы биринчи теннис коомчулугу, ышкыбоздорду жана профессионалдарды бириктирет. Биздин миссия, тарых жана пландар жөнүндө билиңиз.',
         featuredBtn: 'Толугураак',
@@ -39,9 +45,10 @@
         offerDesc: 'Юридикалык шарттар, мүчөлүк келишими жана расмий документация.',
         more: 'Толугураак'
     } : {
-        heroTagline: 'KSLT Информация',
-        heroTitle: 'Всё о <span>KSLT</span>',
-        heroDesc: 'Правила, цены и всё что нужно знать о теннисном сообществе',
+        heroTagline: 'КСЛТ Информация',
+        heroTitle: 'Всё о <span>КСЛТ</span>',
+        heroFull: 'Кыргызстанское Сообщество Любителей Тенниса',
+        heroDesc: 'Правила, рейтинг, цены и всё, что нужно знать о сообществе',
         featuredTitle: 'О проекте',
         featuredDesc: 'KSLT — первое теннисное сообщество в Кыргызстане, объединяющее любителей и профессионалов. Узнайте о нашей миссии, истории и планах.',
         featuredBtn: 'Подробнее',
@@ -93,6 +100,13 @@
             '<div class="io-hero-content">' +
                 '<div class="io-hero-tagline">' + L.heroTagline + '</div>' +
                 '<h1>' + L.heroTitle + '</h1>' +
+                // Расшифровка аббревиатуры прямо под заголовком: человек,
+                // впервые попавший на сайт, из трёх букв ничего не понимает
+                // Полное название — вторым заголовком: аббревиатура сама по
+                // себе ничего не говорит, а название организации это и есть
+                // главное, что человек должен унести со страницы
+                (L.heroFull ? '<h2 class="io-hero-full">' + L.heroFull + '</h2>' : '') +
+                (L.heroSub ? '<div class="io-hero-sub">' + L.heroSub + '</div>' : '') +
                 '<p>' + L.heroDesc + '</p>' +
             '</div>';
     }

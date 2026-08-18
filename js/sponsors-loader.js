@@ -38,7 +38,15 @@
         if (_cache) return Promise.resolve(_cache);
         if (_pending) return _pending;
         _pending = client.from('sponsors').select('*').order('sort_order').then(function(res) {
-            _cache = (res.data && !res.error) ? res.data : [];
+            // Ошибку нельзя выдавать за пустоту: раньше недоступная база и
+            // «спонсоров нет» выглядели одинаково — блок просто исчезал, и
+            // никто не мог отличить поломку от отсутствия спонсоров
+            if (res.error) {
+                console.error('[KSLT] спонсоры не загружены:', res.error.message || res.error);
+                _pending = null;
+                return null;
+            }
+            _cache = res.data || [];
             _pending = null;
             return _cache;
         });
@@ -202,7 +210,19 @@
         var general = lbl.general || defaultLabels.general;
 
         fetchSponsors().then(function(data) {
-            if (!data.length) { container.innerHTML = ''; return; }
+            // Посетителю сообщать не о чем — он пришёл не за спонсорами.
+            // Но состояние оставляем в разметке, чтобы поломку было видно
+            if (data === null) {
+                container.innerHTML = '';
+                container.setAttribute('data-sponsors', 'error');
+                return;
+            }
+            if (!data.length) {
+                container.innerHTML = '';
+                container.setAttribute('data-sponsors', 'empty');
+                return;
+            }
+            container.setAttribute('data-sponsors', 'ok');
 
             var heroes = [];
             var regular = [];
@@ -242,7 +262,7 @@
         if (!container) return;
 
         fetchSponsors().then(function(data) {
-            if (!data.length) {
+            if (!data || !data.length) {
                 var section = container.closest('.hero-sponsors-section');
                 if (section) section.style.display = 'none';
                 return;
@@ -268,6 +288,7 @@
         if (!badge) return;
 
         fetchSponsors().then(function(data) {
+            if (!data) return;
             var hero = null;
             for (var i = 0; i < data.length; i++) {
                 if (data[i].is_hero) { hero = data[i]; break; }
@@ -306,6 +327,7 @@
 
         var sponsorId = link.dataset.sponsorId;
         fetchSponsors().then(function(data) {
+            if (!data) return;
             var sponsor = null;
             for (var i = 0; i < data.length; i++) {
                 if (data[i].id === sponsorId) { sponsor = data[i]; break; }

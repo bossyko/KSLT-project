@@ -3323,18 +3323,40 @@ select:-webkit-autofill {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 12px;
   background: var(--bg-card); border-radius: var(--radius-sm);
-  cursor: pointer;
 }
-.pd-match:active { opacity: 0.85; }
+/* Палец поднимаем только там, где нажатие что-то делает: у парных строк
+   личных встреч нет, и нажимать не на что */
+.pd-match-clickable { cursor: pointer; }
+.pd-match-clickable:active { opacity: 0.85; }
 .pd-match-date {
   font-size: 11px; color: var(--text-muted);
   min-width: 50px; flex-shrink: 0;
 }
 .pd-match-info { flex: 1; min-width: 0; }
+/* Название турнира и метка рода матча. Имя укорачиваем многоточием,
+   метку — никогда, иначе от «дружеский» останется «дру…» */
 .pd-match-tournament {
+  display: flex; align-items: center; min-width: 0;
   font-size: 11px; color: var(--text-dim);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.pd-t-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Метка рода матча. В историю попадает всё сыгранное, а в зачёт — только
+   рейтинговые одиночные. Цветом выделен лишь «рейтинг»: остальные метки
+   поясняют, а не спорят за внимание */
+.match-tag {
+  flex: none;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 9px; font-weight: 700;
+  white-space: nowrap;
+}
+.match-tag-rating   { background: rgba(204,255,0,0.14); color: var(--accent); }
+.match-tag-friendly { background: rgba(255,255,255,0.10); color: var(--text-muted); }
+.match-tag-battle   { background: rgba(255,159,67,0.16); color: #FF9F43; }
+.match-tag-doubles  { background: rgba(59,130,246,0.16); color: #6EA8FE; }
+.match-tag-mixed    { background: rgba(168,85,247,0.18); color: #C084FC; }
 .pd-match-opp {
   font-size: 13px; color: var(--text); font-weight: 500;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -3525,9 +3547,9 @@ select:-webkit-autofill {
 .pd-h2h-match.win .pd-h2h-m-result { background: rgba(46,213,115,0.15); color: var(--green); }
 .pd-h2h-match.loss .pd-h2h-m-result { background: rgba(255,71,87,0.15); color: var(--red); }
 .pd-h2h-m-tournament {
+  display: flex; align-items: center; min-width: 0;
+  max-width: 140px;
   font-size: 11px; color: var(--text-dim);
-  max-width: 100px; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
 }
 
 /* Player empty state */
@@ -3571,6 +3593,55 @@ select:-webkit-autofill {
 }
 .prof-form-label {
   font-size: 12px; color: var(--text-muted);
+}
+/* Пара в баттле: два кружка внахлёст и два имени. Экран узкий, рядом их
+   не поставить — а состав показать надо, иначе половина участников
+   пропадает */
+.battle-fighter-avatars { display: flex; justify-content: center; }
+.battle-fighter-avatars .battle-fighter-avatar + .battle-fighter-avatar { margin-left: -10px; }
+.battle-fighter-name { display: flex; flex-direction: column; gap: 1px; line-height: 1.25; }
+
+/* Состав словами: мужские пары, женские пары, микст */
+.battle-format, .bd-format {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6EA8FE;
+  margin-bottom: 8px;
+}
+
+/* На странице баттла места чуть больше: пара идёт рядом, через плюс */
+.bd-pair { display: flex; align-items: flex-start; justify-content: center; gap: 6px; flex: 1; }
+.bd-pair-plus { color: var(--text-dim); font-weight: 700; align-self: center; }
+.bd-pair-record { font-size: 10px; color: #6EA8FE; font-weight: 600; margin-top: 2px; }
+
+/* Парные и смешанные игры отдельным блоком.
+
+   В рейтинг они не идут — очков за пары не начисляют. Но сыгранное надо
+   где-то показать: иначе история матчей длиннее, чем объясняет статистика.
+   У кого таких игр нет, блока нет: пустые нули читаются как неудача. */
+.prof-pair-block { margin-bottom: 16px; }
+.prof-pair-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 16px 8px;
+}
+.prof-pair-title { font-size: 14px; font-weight: 700; }
+.prof-pair-bar {
+  display: flex; height: 4px; border-radius: 2px; overflow: hidden;
+  margin: 0 16px;
+}
+.prof-pair-w { background: #4ade80; }
+.prof-pair-l { background: #ff6b62; }
+.stats-grid-3 { grid-template-columns: repeat(3, 1fr); margin-bottom: 10px; }
+
+/* Что именно посчитано: победы, поражения и форма — только по рейтинговым
+   одиночным. Стоит сразу под цифрами, там же, где возникает вопрос */
+.prof-stats-note {
+  padding: 0 16px 12px;
+  font-size: 11px; color: var(--text-dim);
+  text-align: center;
 }
 
 /* Stats grid extension */
@@ -4581,4 +4652,150 @@ select.prof-field-input { color: var(--text); }
        третий оттенок только дробил бы картинку */
     color: var(--accent);
     font-weight: 600;
+}
+
+/* ============================================
+   ПОЗДРАВЛЕНИЕ С ДОСТИЖЕНИЕМ
+   Разметку создаёт js/badge-celebration.js
+   ============================================ */
+
+.ach-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  animation: achFade 0.25s ease both;
+  padding: 20px;
+}
+
+.ach-overlay.show { display: flex; }
+
+@keyframes achFade { from { opacity: 0 } to { opacity: 1 } }
+
+.ach-card {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  padding: 30px 24px 24px;
+  text-align: center;
+  background: var(--bg-elevated);
+  border: 1px solid rgba(204, 255, 0, 0.35);
+  border-radius: 24px;
+  box-shadow: 0 0 60px rgba(204, 255, 0, 0.18);
+  animation: achPop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+@keyframes achPop {
+  from { opacity: 0; transform: scale(0.75) translateY(20px) }
+  to   { opacity: 1; transform: scale(1) translateY(0) }
+}
+
+.ach-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  animation: achUp 0.4s ease 0.15s both;
+}
+
+.ach-emoji {
+  display: inline-block;
+  font-size: 62px;
+  line-height: 1;
+  margin: 12px 0 8px;
+  animation: achBadge 0.8s cubic-bezier(0.2, 1.5, 0.4, 1) 0.1s both;
+}
+
+@keyframes achBadge {
+  0%   { opacity: 0; transform: scale(0) rotate(-25deg) }
+  60%  { opacity: 1; transform: scale(1.25) rotate(8deg) }
+  100% { opacity: 1; transform: scale(1) rotate(0) }
+}
+
+/* Волна расходится один раз — ничего не крутится по кругу */
+.ach-halo {
+  position: absolute;
+  left: 50%;
+  top: 88px;
+  width: 110px;
+  height: 110px;
+  margin: -55px 0 0 -55px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  pointer-events: none;
+  animation: achHalo 1s ease-out 0.25s both;
+}
+
+@keyframes achHalo {
+  from { opacity: 0.8; transform: scale(0.4) }
+  to   { opacity: 0;   transform: scale(2.2) }
+}
+
+.ach-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  animation: achUp 0.4s ease 0.3s both;
+}
+
+.ach-desc {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--text-sec);
+  animation: achUp 0.4s ease 0.38s both;
+}
+
+@keyframes achUp {
+  from { opacity: 0; transform: translateY(10px) }
+  to   { opacity: 1; transform: none }
+}
+
+.ach-btn {
+  margin-top: 20px;
+  padding: 13px 34px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  animation: achUp 0.4s ease 0.46s both;
+}
+
+.ach-count {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-dim);
+  animation: achUp 0.4s ease 0.5s both;
+}
+
+/* Теннисные мячи вместо конфетти */
+.ach-fx {
+  position: absolute;
+  inset: -30px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ach-fx.balls i {
+  position: absolute;
+  top: -16px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #e8ff7a, #b9e400 60%, #8fb300);
+  box-shadow: inset -2px -3px 4px rgba(0, 0, 0, 0.25);
+  animation: achFall linear forwards;
+}
+
+@keyframes achFall {
+  from { transform: translateY(0) rotate(0); opacity: 1 }
+  to   { transform: translateY(400px) rotate(540deg); opacity: 0 }
 }

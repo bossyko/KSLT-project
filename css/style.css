@@ -1373,7 +1373,9 @@ main {
 
 /* Сбалансированный стиль секций */
 section {
-    padding: 70px 7%;
+    /* Было 70: на каждый раздел уходило 140 пикселей воздуха — шестая часть
+       экрана. С 48 разделы по-прежнему не слипаются, но помещаются целиком */
+    padding: 48px 7%;
     max-width: 1400px;
     margin: 0 auto;
 }
@@ -1403,16 +1405,19 @@ h2 {
 
 .hero {
     --header-height: 2px;
-    height: calc(100vh - var(--header-height));
-    height: calc(100dvh - var(--header-height));
-    max-height: calc(100vh - var(--header-height));
-    max-height: calc(100dvh - var(--header-height));
+    /* Занимал экран целиком, и до первого блока приходилось скроллить.
+       Теперь высота от содержимого, с потолком — чтобы на больших мониторах
+       не растягивался, а на ноутбуке было видно, что страница продолжается */
+    min-height: min(80vh, 740px);
     margin-top: var(--header-height);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: clamp(8px, 1.5vh, 16px) 5% 0;
+    /* Сверху отступ больше, снизу меньше — так содержимое садится чуть
+       ниже середины. По оптике это ровнее: сверху над блоком нависает
+       шапка сайта, и равные отступы кажутся неравными */
+    padding: clamp(40px, 8vh, 96px) 5% clamp(12px, 2vh, 20px);
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
@@ -1509,7 +1514,7 @@ h2 {
 
 /* Заголовок — массивный, уверенный */
 .hero-title {
-    font-size: clamp(2rem, 6vw, 4.5rem);
+    font-size: clamp(2rem, 4.8vw, 3.7rem);
     font-weight: 900;
     line-height: 0.95;
     letter-spacing: -0.04em;
@@ -1523,23 +1528,50 @@ h2 {
     text-shadow: 0 0 40px var(--accent-glow);
 }
 
+/* Расшифровка под аббревиатурой — тем же приёмом, что на «Инфо» */
+.hero-full {
+    /* Была почти одного роста со слоганом и того же цвета — две белые строки
+       подряд читались как одна. Уменьшаем и приглушаем: это пояснение к
+       аббревиатуре, оно принадлежит заголовку, а не стоит рядом с ним */
+    font-size: clamp(1rem, 1.5vw, 1.12rem);
+    font-weight: 500;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: none;
+    letter-spacing: 0;
+    margin-top: 2px;
+    animation: fadeInUp 0.6s ease 0.12s both;
+}
+
 /* Слоган */
 .hero-slogan {
-    font-size: clamp(1rem, 3vw, 2rem);
-    font-weight: 700;
-    color: var(--accent);
+    /* Тот же размер, что у заголовков разделов (h2, 2rem): слоган и
+       «Ближайшие турниры» — соседи по значимости */
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    font-weight: 800;
+    /* Лайм остаётся только у аббревиатуры. Когда слоган тоже был лаймовым
+       и светился, два пятна тянули взгляд каждое к себе, и заголовок
+       казался крупнее, чем есть */
+    color: var(--text-primary);
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
+    /* Отступ больше остальных: здесь кончается «кто мы» и начинается
+       «зачем». Одинаковые промежутки между всеми строками и делали из них
+       сплошную стену */
+    margin-top: 26px;
     animation: fadeInUp 0.6s ease 0.15s both;
-    text-shadow: 0 0 30px var(--accent-glow);
 }
 
 /* Subtitle — больше воздуха */
 .hero-subtitle {
-    font-size: clamp(0.9rem, 1.8vw, 1.125rem);
+    font-size: clamp(0.95rem, 1.7vw, 1.12rem);
     color: var(--text-secondary);
-    max-width: 520px;
+    max-width: 580px;
+    margin-top: 2px;
     line-height: 1.5;
+    /* Иначе последнее слово строки уезжает вниз в одиночку и отрывается
+       от того, к чему относится */
+    text-wrap: balance;
     font-weight: 400;
     animation: fadeInUp 0.6s ease 0.2s both;
 }
@@ -1608,6 +1640,8 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-wrap: wrap;
+    row-gap: clamp(12px, 2vh, 20px);
     gap: clamp(16px, 4vw, 48px);
     margin-bottom: 0;
     animation: fadeInUp 0.6s ease 0.4s both;
@@ -1650,17 +1684,6 @@ h2 {
     font-weight: 450;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-}
-
-.stat-divider {
-    width: 1px;
-    height: 48px;
-    background: linear-gradient(
-        to bottom,
-        transparent,
-        var(--border-light),
-        transparent
-    );
 }
 
 /* ========================================
@@ -1860,6 +1883,7 @@ h2 {
     opacity: 0.4;
     animation: heroZoom 18s ease-in-out infinite alternate;
     transform-origin: center center;
+    object-position: 50% 30%;
 }
 
 @keyframes heroZoom {
@@ -1874,10 +1898,12 @@ h2 {
 .hero-bg-overlay {
     position: absolute;
     inset: 0;
+    /* Затемнение было 85%: тёмный снимок под ним превращался в чёрное
+       пятно. Текст читается и при 62% — проверено на этой фотографии */
     background: linear-gradient(
         135deg,
-        rgba(0, 0, 0, 0.85) 0%,
-        rgba(0, 0, 0, 0.6) 50%,
+        rgba(0, 0, 0, 0.62) 0%,
+        rgba(0, 0, 0, 0.42) 50%,
         rgba(0, 0, 0, 0.4) 100%
     );
 }
@@ -1894,13 +1920,28 @@ h2 {
    SECTION COMMON STYLES
    ======================================== */
 
+/* Шапка раздела: заголовок и ссылка «все».
+
+   Отступ был 5rem — восемьдесят пикселей пустоты между названием блока и
+   первой карточкой. На каждом разделе это лишний экран прокрутки, а связь
+   заголовка с содержимым читалась хуже: они выглядели двумя разными вещами.
+
+   Заголовок тоже был крупноват: 2rem почти вровень с заголовком страницы,
+   хотя это подпись к ряду карточек, а не название документа. */
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-xl);
+    margin-bottom: var(--space-md);
     flex-wrap: wrap;
     gap: var(--space-sm);
+}
+
+/* Свой нижний отступ заголовку здесь не нужен: расстояние до карточек
+   держит сама шапка, иначе они складываются и получается двойной провал */
+.section-header h2 {
+    font-size: 1.6rem;
+    margin-bottom: 0;
 }
 
 .section-desc {
@@ -2284,7 +2325,9 @@ h2 {
    ======================================== */
 
 .section-badges-cta {
-    padding: var(--space-xl) 7%;
+    /* Это перебивка между разделами, а не раздел: даёт передышку и зовёт
+       зарегистрироваться. Поэтому ниже соседей, а не вровень с ними */
+    padding: 40px 7%;
     background: var(--bg-secondary);
     position: relative;
     overflow: hidden;
@@ -2296,11 +2339,15 @@ h2 {
     text-align: center;
 }
 
+
+/* Перебивке не нужен голос раздела: заголовок мельче, чем у «Ближайших
+   турниров», иначе она спорит с ними за внимание */
 .badges-cta-text h2 {
-    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-size: clamp(1.05rem, 1.8vw, 1.25rem);
     font-weight: 800;
+    letter-spacing: 0;
     color: var(--text-primary);
-    margin-bottom: var(--space-xs);
+    margin-bottom: 6px;
 }
 
 .badges-cta-text p {
@@ -2309,22 +2356,36 @@ h2 {
     margin-bottom: var(--space-lg);
 }
 
+.badges-cta-wrap {
+    position: relative;
+    margin: 20px 0 0;
+}
+
 .badges-cta-cards {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: var(--space-md);
-    margin-bottom: var(--space-lg);
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+}
+
+/* Второй ряд уходит в туман: видно, что достижений больше, но чтобы их
+   открыть — надо играть. Поверх ложится кнопка */
+.badges-cta-locked {
+    margin-top: 12px;
+    filter: blur(2.5px);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 62%);
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 62%);
+    pointer-events: none;
 }
 
 .badge-cta-card {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: var(--space-lg) var(--space-md);
+    padding: 12px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
     transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
@@ -2334,8 +2395,22 @@ h2 {
 }
 
 .badge-cta-emoji {
-    font-size: 2.5rem;
+    font-size: 1.4rem;
     line-height: 1;
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+/* Оживляем без сторонних библиотек: значок подрастает под курсором и получает
+   лаймовый ореол. Настоящий праздник уместен в момент получения достижения,
+   а не по кругу на главной */
+.badge-cta-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(204, 255, 0, 0.35);
+}
+
+.badge-cta-card:hover .badge-cta-emoji {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 10px rgba(204, 255, 0, 0.55));
 }
 
 .badge-cta-name {
@@ -2351,15 +2426,57 @@ h2 {
 }
 
 .badges-cta-btn {
+    position: relative;
+    /* Внутри коробки кнопка обычная, заливная — ровно как в карточке входа */
     display: inline-block;
-    padding: 14px 40px;
+    padding: 13px 36px;
     background: var(--accent);
     color: #000;
-    font-size: 1rem;
-    font-weight: 700;
-    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    font-weight: 800;
+    border-radius: 12px;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 24px rgba(204, 255, 0, 0.2), 0 0 60px rgba(204, 255, 0, 0.06);
+}
+
+/* Коробка вокруг кнопки — тот же вид, что у карточки «Весь рейтинг виден
+   после входа»: тёмный фон, скруглённые углы и бегущий по контуру огонёк */
+.badges-cta-box {
+    position: relative;
+    display: inline-block;
+    margin-top: -46px;
+    padding: 22px 34px;
+    z-index: 2;
+    background: rgba(18, 18, 18, 0.85);
+    border-radius: 24px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.badges-cta-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    padding: 1px;
+    background: conic-gradient(
+        from var(--guest-angle, 0deg),
+        transparent 0%,
+        var(--accent) 10%,
+        transparent 20%,
+        transparent 50%,
+        rgba(204, 255, 0, 0.3) 60%,
+        transparent 70%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: guest-border-spin 4s linear infinite;
+    z-index: -1;
 }
 
 .badges-cta-btn:hover {
@@ -2859,6 +2976,117 @@ h2 {
 
 .section-courts {
     background: var(--bg-primary);
+}
+
+/* ============================================
+   ГЛАВНАЯ — «Где играть и у кого учиться»
+   ============================================
+   Один блок вместо двух разделов: корты и тренеры читаются как одна мысль —
+   вот площадки, вот люди. Четыре карточки в ряд вместо трёх: партнёров
+   больше трёх, и каждому надо дать место. */
+.section-venues {
+    padding: 48px 7%;
+}
+
+/* Подзаголовок ряда стоит ближе к своим карточкам, чем к чужим: сверху
+   отступ больше, снизу меньше — так видно, к чему он относится */
+.vn-row-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 20px 0 10px;
+}
+
+.vn-row-head h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+/* Четыре в ряд. Карточка ужимается: фото ниже, отступы меньше, подписи
+   мельче. Разметка та же, что на страницах кортов и тренеров.
+
+   Селектор с двумя классами не случайно: у .courts-grid стоит автозаполнение
+   по 350 пикселей, и одного .vn-four оно перебивает */
+.courts-grid.vn-four,
+.coaches-grid.vn-four {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Карточка корта на главной — ссылка целиком, а не блок с кнопкой внутри:
+   по ней и так все кликают. Ссылка по умолчанию строчная, поэтому раскладку
+   задаём явно, иначе фотография схлопывается */
+.vn-four .court-card,
+.vn-four .coach-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+}
+.vn-four .court-card img {
+    width: 100%;
+    object-fit: cover;
+}
+.vn-four .court-info,
+.vn-four .coach-info { flex: 1; }
+/* Освободившееся от заголовка место отдаём карточкам: фотография выше,
+   пропорция ближе к 16:9, как на страницах кортов */
+.vn-four .court-card img { height: 168px; }
+.vn-four .court-info { padding: 14px 16px; gap: 4px; }
+.vn-four .court-info h4 { font-size: 1rem; }
+.vn-four .court-info span { font-size: 0.8rem; }
+.vn-four .court-card-actions { padding: 8px 14px 12px; }
+.vn-four .coach-photo { width: 104px; height: 104px; }
+.vn-four .coach-info { padding: 12px 14px 4px; }
+.vn-four .coach-info h4 { font-size: 1rem; }
+.vn-four .coach-info span { font-size: 0.8rem; }
+.vn-four .court-card-details,
+.vn-four .coach-card-details { width: 100%; text-align: center; }
+
+/* Партнёр клуба. Метка на фотографии, а не в углу описания: это первое,
+   что должно быть видно, и оно же объясняет строку про скидку */
+.vn-four .court-card,
+.vn-four .coach-card { position: relative; }
+
+.vn-partner {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    background: rgba(204, 255, 0, 0.92);
+    color: #0A0A0A;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+}
+
+/* Скидка — строкой в описании, а не второй кнопкой: в узкой карточке две
+   круглые кнопки в ряд не помещались и наезжали друг на друга */
+/* Двумя классами: у .court-info span свой цвет, и одного класса он
+   перебивает */
+.vn-four .vn-discount {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* Сбой запроса и пустой список — разные вещи. Ряд остаётся с сообщением,
+   а не исчезает вместе с заголовком */
+.vn-notice {
+    grid-column: 1 / -1;
+    padding: 28px 20px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 1100px) {
+    .vn-four { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .vn-four { grid-template-columns: 1fr; }
 }
 
 .courts-grid {
@@ -3609,9 +3837,28 @@ h2 {
 
 .section-about {
     background: var(--bg-primary);
+}
+
+/* Заголовок и вводный абзац — во всю ширину, над карточками */
+.about-head {
+    margin-bottom: var(--space-lg);
+}
+
+/* Заголовок и вводный абзац — одно целое. Общий отступ у заголовков
+   разделов рассчитан на то, что дальше идут карточки, а не свой же текст */
+.about-head .section-header {
+    margin-bottom: 16px;
+}
+
+.about-body {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.15fr 1fr;
     gap: var(--space-2xl);
+    /* Фотография держит свои пропорции — растянутая на всю высоту, она
+       обрезалась по бокам и теряла круг из людей, ради которого снималась.
+       По высоте с карточками она не сойдётся никогда: снимок вдвое шире,
+       чем высок. Поэтому ставим по центру — так пустота делится поровну
+       сверху и снизу и в глаза не бросается */
     align-items: center;
 }
 
@@ -3619,40 +3866,603 @@ h2 {
     font-size: 1.25rem;
     color: var(--text-secondary);
     line-height: 1.7;
-    margin-bottom: var(--space-xl);
+    /* Ширину ограничиваем не из вредности: строка длиннее ~90 знаков читается
+       тяжело — глаз не находит начало следующей */
+    max-width: 68ch;
+    margin-bottom: 0;
 }
 
 .about-features {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
+    /* Между строками меньше, чем между столбцами: так шесть карточек
+       читаются тремя парами, а не облаком из шести */
+    gap: 28px 40px;
 }
 
 .feature {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xs);
+    gap: 6px;
 }
 
 .feature-icon {
-    font-size: 2rem;
+    font-size: 1.5rem;
+    line-height: 1;
 }
 
 .feature h4 {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .feature p {
-    font-size: 0.875rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
     color: var(--text-dim);
 }
 
 .about-image img {
     width: 100%;
+    height: auto;
+    display: block;
     border-radius: var(--radius-xl);
+}
+
+/* ========================================
+   КАРТОЧКА ТУРНИРА — одна на весь сайт
+   Разметку рисует js/tournament-card.js
+   ======================================== */
+
+.tournaments-grid {
+    display: grid;
+    /* Двенадцать колонок, чтобы делить ряд и пополам, и на трети, и на
+       четверти, оставаясь в одном ритме */
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+}
+
+/* Первая — главная: половина ряда, фотография слева, текст справа */
+.tournaments-grid > :nth-child(1) { grid-column: span 6; }
+.tournaments-grid > :nth-child(2),
+.tournaments-grid > :nth-child(3) { grid-column: span 3; }
+.tournaments-grid > :nth-child(n+4) { grid-column: span 4; }
+
+.tc {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color var(--transition-base), transform var(--transition-base);
+}
+
+.tc:hover {
+    border-color: rgba(204, 255, 0, 0.25);
+    transform: translateY(-3px);
+}
+
+.tc-featured {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    min-height: 252px;
+    max-height: 252px;
+}
+
+.tc-image {
+    position: relative;
+    height: 132px;
+    overflow: hidden;
+    background: #101010;
+}
+
+.tc-featured .tc-image { height: 100%; }
+
+/* Афиша вписывается целиком: вертикальную обрезать нельзя, на ней текст.
+   Поля достраиваем размытой копией её же — получается фон в тех же цветах */
+.tc-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--tc-poster);
+    background-size: cover;
+    background-position: center;
+    filter: blur(24px) brightness(0.5);
+    transform: scale(1.2);
+}
+
+.tc-image img {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.tc-noimage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 2rem;
+    opacity: 0.35;
+}
+
+.tc-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.tc-badge-live { background: var(--accent); color: var(--bg-primary); }
+.tc-badge-open { background: rgba(204, 255, 0, 0.15); color: var(--accent); border: 1px solid var(--accent); }
+.tc-badge-soon { background: rgba(255, 255, 255, 0.12); color: #fff; border: 1px solid rgba(255, 255, 255, 0.35); }
+.tc-badge-closed,
+.tc-badge-done { background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.2); }
+
+.tc-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+}
+
+.tc-featured .tc-body { padding: 16px 24px; justify-content: center; }
+
+.tc-date {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.tc-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.tc-featured .tc-title { font-size: 1.25rem; }
+
+.tc-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.tc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+}
+
+.tc-featured .tc-meta { font-size: 0.9rem; }
+
+.tc-btn {
+    align-self: flex-start;
+    margin-top: 6px;
+    padding: 10px 22px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    color: var(--bg-primary);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* Счётчик появляется за двое суток до старта и тикает каждую секунду */
+.tc-countdown {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.tc-cd-label {
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.tc-countdown small { font-weight: 500; opacity: 0.6; }
+.tc-cd-urgent { color: var(--accent); }
+
+/* Правило по номеру ребёнка сильнее правила по классу — иначе сообщение
+   встаёт в колонку главной карточки и занимает половину ряда */
+.tournaments-grid > .tc-notice {
+    grid-column: 1 / -1;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-dim);
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-lg);
+}
+
+@media (max-width: 992px) {
+    .tournaments-grid > :nth-child(1) { grid-column: span 12; }
+    .tournaments-grid > :nth-child(2),
+    .tournaments-grid > :nth-child(3),
+    .tournaments-grid > :nth-child(n+4) { grid-column: span 6; }
+    .tc-featured { max-height: none; }
+}
+
+@media (max-width: 640px) {
+    .tournaments-grid > * { grid-column: span 12 !important; }
+    .tc-featured { grid-template-columns: 1fr; }
+    .tc-featured .tc-image { height: 180px; }
+}
+
+/* ========================================
+   ПОЗДРАВЛЕНИЕ С ДОСТИЖЕНИЕМ
+   Разметку создаёт js/badge-celebration.js
+   ======================================== */
+
+.ach-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(6px);
+    animation: achFade 0.25s ease both;
+}
+
+.ach-overlay.show { display: flex; }
+
+@keyframes achFade { from { opacity: 0 } to { opacity: 1 } }
+
+.ach-card {
+    position: relative;
+    width: min(92vw, 360px);
+    padding: 34px 28px 26px;
+    text-align: center;
+    background: #121212;
+    border: 1px solid rgba(204, 255, 0, 0.35);
+    border-radius: 24px;
+    box-shadow: 0 0 60px rgba(204, 255, 0, 0.18);
+    animation: achPop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+@keyframes achPop {
+    from { opacity: 0; transform: scale(0.75) translateY(20px) }
+    to   { opacity: 1; transform: scale(1) translateY(0) }
+}
+
+.ach-kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    animation: achUp 0.4s ease 0.15s both;
+}
+
+.ach-emoji {
+    display: inline-block;
+    font-size: 4.4rem;
+    line-height: 1;
+    margin: 14px 0 10px;
+    animation: achBadge 0.8s cubic-bezier(0.2, 1.5, 0.4, 1) 0.1s both;
+}
+
+@keyframes achBadge {
+    0%   { opacity: 0; transform: scale(0) rotate(-25deg) }
+    60%  { opacity: 1; transform: scale(1.25) rotate(8deg) }
+    100% { opacity: 1; transform: scale(1) rotate(0) }
+}
+
+/* Волна расходится один раз — ничего не крутится по кругу */
+.ach-halo {
+    position: absolute;
+    left: 50%;
+    top: 96px;
+    width: 120px;
+    height: 120px;
+    margin: -60px 0 0 -60px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    pointer-events: none;
+    animation: achHalo 1s ease-out 0.25s both;
+}
+
+@keyframes achHalo {
+    from { opacity: 0.8; transform: scale(0.4) }
+    to   { opacity: 0;   transform: scale(2.2) }
+}
+
+.ach-name {
+    font-size: 1.45rem;
+    font-weight: 800;
+    animation: achUp 0.4s ease 0.3s both;
+}
+
+.ach-desc {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    animation: achUp 0.4s ease 0.38s both;
+}
+
+@keyframes achUp {
+    from { opacity: 0; transform: translateY(10px) }
+    to   { opacity: 1; transform: none }
+}
+
+.ach-btn {
+    margin-top: 22px;
+    padding: 12px 34px;
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    color: var(--bg-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    animation: achUp 0.4s ease 0.46s both;
+}
+
+.ach-count {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    animation: achUp 0.4s ease 0.5s both;
+}
+
+/* Теннисные мячи вместо конфетти — свои, узнаваемые */
+.ach-fx {
+    position: absolute;
+    inset: -40px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.ach-fx.balls i {
+    position: absolute;
+    top: -16px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, #e8ff7a, #b9e400 60%, #8fb300);
+    box-shadow: inset -2px -3px 4px rgba(0, 0, 0, 0.25);
+    animation: achFall linear forwards;
+}
+
+@keyframes achFall {
+    from { transform: translateY(0) rotate(0); opacity: 1 }
+    to   { transform: translateY(420px) rotate(540deg); opacity: 0 }
+}
+
+/* ========================================
+   ТОП РЕЙТИНГА НА ГЛАВНОЙ
+   Строки рисует js/home-rankings.js,
+   данные — js/rankings-data.js (общие со страницей рейтинга)
+   ======================================== */
+
+.rk-row {
+    display: grid;
+    grid-template-columns: 26px 1fr 30px 42px 46px 58px 36px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+}
+
+.rk-row + .rk-row { margin-top: 4px; }
+.rk-row:hover { background: rgba(255, 255, 255, 0.04); }
+
+.rk-head {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    padding-bottom: 2px;
+}
+
+.rk-head:hover { background: none; }
+
+.rk-rank {
+    font-weight: 700;
+    color: var(--text-dim);
+    text-align: center;
+}
+
+.rk-rank.top { color: var(--accent); }
+
+.rk-player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.rk-player img {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
     object-fit: cover;
+    flex-shrink: 0;
+}
+
+.rk-player a,
+.rk-player span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: inherit;
+    text-decoration: none;
+}
+
+.rk-player a:hover { color: var(--accent); }
+
+.rk-country { text-align: center; }
+.rk-ntrp { text-align: center; color: var(--text-secondary); }
+.rk-wl { text-align: center; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.rk-points { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rk-change { text-align: center; font-size: 0.8rem; }
+
+.rk-up { color: #2ED573; }
+.rk-down { color: #FF4757; }
+.rk-same { color: var(--text-dim); }
+
+/* Гостю видны первые пять, дальше туман: правило то же, что на странице
+   рейтинга — видно, что список длиннее, но читать его нужно войдя */
+.rk-blur-1 { filter: blur(2px); opacity: 0.55; pointer-events: none; user-select: none; }
+.rk-blur-2 { filter: blur(3.5px); opacity: 0.35; pointer-events: none; user-select: none; }
+
+.rk-empty {
+    padding: 30px 12px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+/* Карточка входа тут перекрывает сразу две колонки, поэтому чуть компактнее
+   обычной */
+/* Затемнение не поднимается выше половины раздела: иначе, когда строк мало
+   или база молчит, оно накрывает заголовки колонок и вкладки категорий */
+#rankings .guest-section-cta {
+    max-height: 45%;
+    align-items: flex-end;
+}
+
+#rankings .guest-cta-card {
+    max-width: 340px;
+    padding: 26px 28px 24px;
+}
+
+#rankings .guest-cta-icon { width: 40px; height: 40px; margin-bottom: 14px; }
+#rankings .guest-cta-title { font-size: 1rem; }
+#rankings .guest-cta-btn { padding: 11px 28px; font-size: 0.9rem; }
+
+/* ========================================
+   НАЙДИ ПАРТНЁРА ПО ИГРЕ — блок на главной
+   Карточку рисует js/home-partners.js, стили самой карточки живут
+   в css/partners.css: она общая со страницей поиска
+   ======================================== */
+
+.pg-sub {
+    margin: -14px 0 20px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+/* На главной их десять, а не сорок, — поэтому карточка крупнее и вытянутее */
+#players .pt-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+}
+
+#players .pt-card {
+    padding: 24px 16px 20px;
+    cursor: pointer;
+}
+
+#players .pt-avatar,
+#players .pt-avatar-placeholder {
+    width: 92px;
+    height: 92px;
+    font-size: 1.8rem;
+}
+
+#players .pt-avatar-wrap { margin-bottom: 14px; }
+#players .pt-name { font-size: 1.02rem; }
+/* Кнопка прижата к низу, чтобы ряд не шёл лесенкой: у кого строк меньше,
+   у того она уезжала вверх. Селектор с идентификатором — он же перебивал
+   правило из partners.css, где это уже было исправлено */
+#players .pt-invite-btn { margin-top: auto; }
+
+/* Форма — последние пять матчей. Цвета те же, что в рейтинге */
+.pg-form {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    margin-top: 6px;
+    min-height: 8px;
+}
+
+.pg-form i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.pg-form .w { background: #22c55e; }
+.pg-form .l { background: #ef4444; }
+
+/* Приглушённая строка — тот спокойный ритм, что был у прежних карточек */
+.pg-record {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+}
+
+/* Парные игры второй строкой. Цвета те же, что у меток в истории матчей, —
+   третий язык для одного и того же заводить незачем */
+.pg-pairs {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 5px;
+}
+.pg-pairs span {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+.pg-pairs .pp-dbl { background: rgba(59,130,246,0.16); color: #6EA8FE; }
+.pg-pairs .pp-mix { background: rgba(168,85,247,0.18); color: #C084FC; }
+
+.pg-empty {
+    grid-column: 1 / -1;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-dim);
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-lg);
+}
+
+/* Карточка входа — того же размера, что в рейтинге */
+#players { position: relative; }
+#players .guest-section-cta { max-height: 55%; align-items: flex-end; }
+#players .guest-cta-card { max-width: 340px; padding: 26px 28px 24px; }
+#players .guest-cta-icon { width: 40px; height: 40px; margin-bottom: 14px; }
+#players .guest-cta-title { font-size: 1rem; }
+#players .guest-cta-btn { padding: 11px 28px; font-size: 0.9rem; }
+
+@media (max-width: 1200px) {
+    #players .pt-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 900px) {
+    #players .pt-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 640px) {
+    #players .pt-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ========================================
@@ -4379,7 +5189,7 @@ h2 {
         max-height: 320px;
     }
 
-    .section-about {
+    .about-body {
         grid-template-columns: 1fr;
     }
 

@@ -70,8 +70,7 @@ Deno.serve(async (req) => {
       .from('challenges')
       .select(`
         id, status, battle_published, battle_title,
-        challenger_player_id, opponent_player_id,
-        proposed_date, proposed_time, proposed_venue
+        challenger_player_id, opponent_player_id
       `)
       .eq('id', challenge_id)
       .single()
@@ -79,15 +78,6 @@ Deno.serve(async (req) => {
     if (chalErr || !challenge) {
       return new Response(JSON.stringify({ error: 'Challenge not found' }), {
         status: 404, headers: corsHeaders
-      })
-    }
-
-    // При отмене баттл уже снят с публикации — это и есть отмена. Проверка
-    // «опубликован» здесь отказывала ровно в том случае, ради которого
-    // сообщение и нужно
-    if (!challenge.battle_published && !cancelled) {
-      return new Response(JSON.stringify({ error: 'Battle not published yet' }), {
-        status: 400, headers: corsHeaders
       })
     }
 
@@ -103,59 +93,42 @@ Deno.serve(async (req) => {
     const challengerName = pMap[challenge.challenger_player_id] || '?'
     const opponentName = pMap[challenge.opponent_player_id] || '?'
 
-    // Встречного предложения больше нет: дату и место задаёт менеджер
-    const date = challenge.proposed_date || ''
-    const time = challenge.proposed_time || ''
-    const venue = challenge.proposed_venue || ''
     const title = challenge.battle_title || 'Battle'
 
-    // Send TG announcement to group with inline voting buttons
+    // Объявление об отмене — единственное, ради чего эту функцию зовут.
+    //
+    // Здесь же лежал второй анонс баттла, с кнопками голосования. Его никто
+    // не вызывал: публикация идёт через battle-publish. И он был сломан —
+    // кнопки подписывались как `battle_vote:UUID:playerid`, а бот понимает
+    // только короткое `bv:UUID:1|2`. Даже подключи его кто-нибудь к кнопке,
+    // объявление ушло бы, а проголосовать было бы нельзя.
+    //
+    // Убран целиком: код, который выглядит рабочим, но не работает, опаснее
+    // отсутствующего. Анонс баттла живёт в одном месте — в battle-publish.
+    if (!cancelled) {
+      return new Response(JSON.stringify({ error: 'Use battle-publish to announce' }), {
+        status: 400, headers: corsHeaders
+      })
+    }
+
     const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
     const groupChatId = Deno.env.get('TELEGRAM_GROUP_CHAT_ID')
 
-    let tgSent = false
-
-    if (token && groupChatId && cancelled) {
-      const text =
-        `❌ <b>Баттл отменён</b>\n\n` +
-        `<s>${escHtml(title)}</s>\n` +
-        `${escHtml(challengerName)} — ${escHtml(opponentName)}\n` +
-        (reason ? `\n${escHtml(String(reason))}` : '')
-
-      const ok = await sendTgMessage(token, groupChatId, text, null)
-      return new Response(JSON.stringify({ success: true, tg_sent: ok, cancelled: true }), {
+    if (!token || !groupChatId) {
+      return new Response(JSON.stringify({ success: true, tg_sent: false, cancelled: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
-    if (token && groupChatId) {
-      const text =
-        `🔥 <b>${escHtml(title)}</b>\n\n` +
-        `🔴 ${escHtml(challengerName)} vs 🔵 ${escHtml(opponentName)}\n` +
-        (date ? `📅 ${date}` : '') +
-        (time ? ` ⏰ ${time}` : '') + '\n' +
-        (venue ? `📍 ${escHtml(venue)}\n` : '') +
-        `\nГолосуйте за победителя! 👇`
+    const text =
+      `❌ <b>Баттл отменён</b>\n\n` +
+      `<s>${escHtml(title)}</s>\n` +
+      `${escHtml(challengerName)} — ${escHtml(opponentName)}\n` +
+      (reason ? `\n${escHtml(String(reason))}` : '')
 
-      const keyboard = {
-        inline_keyboard: [
-          [
-            { text: `🔴 ${challengerName}`, callback_data: `battle_vote:${challenge_id}:${challenge.challenger_player_id}` },
-            { text: `🔵 ${opponentName}`, callback_data: `battle_vote:${challenge_id}:${challenge.opponent_player_id}` }
-          ]
-        ]
-      }
+    const tgSent = await sendTgMessage(token, groupChatId, text)
 
-      tgSent = await sendTgMessage(token, groupChatId, text, keyboard)
-    }
-
-    // Update battle_notified_at
-    await db
-      .from('challenges')
-      .update({ battle_notified_at: new Date().toISOString() })
-      .eq('id', challenge_id)
-
-    return new Response(JSON.stringify({ success: true, tg_sent: tgSent }), {
+    return new Response(JSON.stringify({ success: true, tg_sent: tgSent, cancelled: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
 

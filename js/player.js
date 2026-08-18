@@ -61,6 +61,8 @@
         statsWins: 'Победы',
         statsLosses: 'Поражения',
         statsWinRate: '% Побед',
+        pairsTitle: 'Парные', mixedTitle: 'Микст', pairsTag: 'пары', mixedTag: 'микст',
+        pairsNote: 'в рейтинг не идут', pairsMatches: 'Матчей', pairsWinRate: 'побед',
         statsStreak: 'Серия',
         sectionGames: 'Мои игры',
         subsectionTournaments: 'Турниры',
@@ -77,6 +79,9 @@
         tournament: 'Турнир',
         showAll: 'Показать все',
         collapse: 'Свернуть',
+        tagRating: 'рейтинг', tagFriendly: 'дружеский', tagDoubles: 'пары',
+        tagMixed: 'микст', tagBattle: 'баттл',
+        statsNote: 'Статистика по рейтинговым одиночным турнирам',
         ctaTitle: 'Хочешь <span>сыграть</span>?',
         ctaText: 'Зарегистрируйся в KSLT, чтобы бросить вызов игрокам и участвовать в турнирах',
         ctaBtn: 'Регистрация',
@@ -332,6 +337,37 @@
 
     // Badge emoji map removed — now loaded from badge_definitions
 
+    /**
+     * Какого рода этот матч.
+     *
+     * В историю попадает всё сыгранное, а в статистику — только рейтинговые
+     * одиночные. Без метки это выглядит ошибкой: матчей одиннадцать, побед
+     * четыре. Метка отвечает на вопрос прямо у строки.
+     *
+     * Дуэль в базе — это баттл: счёт вводится в админке только у
+     * опубликованных баттлов, другого пути к match_type = 'duel' нет.
+     */
+    function matchKind(m) {
+        if (m.match_type === 'duel') return 'battle';
+        var t = m.tournament;
+        if (t) {
+            if (t.format === 'mixed_doubles') return 'mixed';
+            if (t.format === 'doubles') return 'doubles';
+            if (t.category_id === 'friendly') return 'friendly';
+        }
+        return 'rating';
+    }
+
+    var KIND_LABEL = {
+        rating: 'tagRating', friendly: 'tagFriendly',
+        doubles: 'tagDoubles', mixed: 'tagMixed', battle: 'tagBattle'
+    };
+
+    function matchKindTag(m) {
+        var kind = matchKind(m);
+        return '<span class="pp-match-tag pp-tag-' + kind + '">' + esc(L[KIND_LABEL[kind]] || '') + '</span>';
+    }
+
     // ---- Score helpers ----
     function formatMatchDate(dateStr) {
         if (!dateStr) return '\u2014';
@@ -369,6 +405,47 @@
 
     function playerPage() {
         return isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
+    }
+
+    /**
+     * Парные и смешанные игры отдельным блоком.
+     *
+     * В рейтинг они не идут — очков за пары не начисляют, места в таблице
+     * нет. Но сыгранное надо где-то показать: иначе история матчей ниже
+     * длиннее, чем объясняет статистика сверху.
+     *
+     * Тот же вид, что в кабинете: страницы про одного человека должны
+     * говорить одно и то же. У кого таких игр нет, блока нет — пустые нули
+     * читаются как неудача.
+     */
+    function pairBlockHtml(title, tagText, tagClass, w, l) {
+        var played = w + l;
+        if (!played) return '';
+        var rate = Math.round(w / played * 100);
+        return '<div class="pp-pair-block pp-fade-in">' +
+            '<div class="pp-pair-head">' +
+                '<span class="pp-pair-title">' + esc(title) + '</span>' +
+                '<span class="pp-pair-tag ' + tagClass + '">' + esc(tagText) + '</span>' +
+                '<span class="pp-pair-note">' + esc(L.pairsNote || '') + '</span>' +
+            '</div>' +
+            '<div class="pp-stats">' +
+                statCard(played, L.pairsMatches, '', '') +
+                statCard(w, L.statsWins, '', '') +
+                statCard(l, L.statsLosses, '', '') +
+                statCard(rate + '%', L.pairsWinRate, '', '') +
+            '</div>' +
+            '<div class="pp-cat-bar">' +
+                '<i class="pp-cat-bar-w" style="width:' + rate + '%"></i>' +
+                '<i class="pp-cat-bar-l" style="width:' + (100 - rate) + '%"></i>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function pairBlocksHtml(p) {
+        return pairBlockHtml(L.pairsTitle, L.pairsTag, 'pp-pair-tag-dbl',
+                             p.doubles_wins || 0, p.doubles_losses || 0) +
+               pairBlockHtml(L.mixedTitle, L.mixedTag, 'pp-pair-tag-mix',
+                             p.mixed_wins || 0, p.mixed_losses || 0);
     }
 
     // ---- Render helpers ----
@@ -667,6 +744,12 @@
             html += '</div>';
         }
 
+        // Без этой строчки цифры выглядят враньём: в истории матчей ниже
+        // одиннадцать игр, а побед и поражений здесь четыре. Дружеские,
+        // парные, микст и баттлы в зачёт не идут
+        html += '<div class="pp-stats-note">' + esc(L.statsNote || '') + '</div>';
+        html += pairBlocksHtml(player);
+
         // ---- Rating history: линия на категорию ----
         // Секция скрыта, пока не окажется, что игроку есть что показать —
         // её открывает сам график, когда находит записи
@@ -826,8 +909,11 @@
             return;
         }
 
+        // Здесь всё сыгранное: рейтинговые и дружеские турниры, парные, микст
+        // и баттлы. В зачёт из этого идут только рейтинговые одиночные —
+        // об этом говорит метка у названия турнира
         client.from('matches')
-            .select('*, match_type, tournament:tournaments(id, title, title_en, title_kg, format)')
+            .select('*, match_type, tournament:tournaments(id, title, title_en, title_kg, format, category_id)')
             .or('player1_id.eq.' + _playerId + ',player2_id.eq.' + _playerId)
             .not('winner_id', 'is', null)
             .order('played_at', { ascending: false })
@@ -837,10 +923,7 @@
                     container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>';
                     return;
                 }
-                // Filter out duel matches — only tournament matches here
-                var filtered = res.data.filter(function(m) { return !m.match_type || m.match_type === 'tournament'; });
-                if (filtered.length === 0) { container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>'; return; }
-                renderRealMatches(container, filtered);
+                renderRealMatches(container, res.data);
             });
     }
 
@@ -863,23 +946,27 @@
             var tName = m.tournament ? (isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title)) : '';
             var tId = m.tournament ? m.tournament.id : '';
 
-            var isDblMatch = m.tournament && (m.tournament.format === 'doubles' || m.tournament.format === 'mixed_doubles');
-            html += '<div class="pp-match pp-match-clickable" data-opponent-id="' + esc(opp.id) + '" data-opponent-name="' + esc(opp.name) + '" data-opponent-photo="' + esc(oppPhoto) + '"' + (isDblMatch ? ' data-is-doubles="1" data-tournament-id="' + esc(tId) + '"' : '') + '>';
+            // Пары и микст в личные встречи не идут: в матче записаны
+            // капитаны, а состав пары меняется от турнира к турниру
+            var kind = matchKind(m);
+            var pairGame = kind === 'doubles' || kind === 'mixed';
+
+            html += '<div class="pp-match' + (pairGame ? '' : ' pp-match-clickable') + '"' +
+                (pairGame ? '' : ' data-opponent-id="' + esc(opp.id) +
+                    '" data-opponent-name="' + esc(opp.name) +
+                    '" data-opponent-photo="' + esc(oppPhoto) + '"') + '>';
             html += '<div class="pp-match-date">' + formatMatchDate(m.played_at) + '</div>';
-            if (tName) {
-                var tPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
-                var isDbl = m.tournament && (m.tournament.format === 'doubles' || m.tournament.format === 'mixed_doubles');
-                html += '<div class="pp-match-tournament">' + (isDbl ? '<span class="pp-match-doubles-badge" title="' + (isEn ? 'Doubles' : (isKg ? 'Жуптук' : 'Парный')) + '">\uD83D\uDC65</span> ' : '') + '<a href="' + tPage + '?id=' + esc(tId) + '">' + esc(tName) + '</a></div>';
-            } else {
-                html += '<div class="pp-match-tournament"></div>';
-            }
+            var tPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
+            html += '<div class="pp-match-tournament">' +
+                (tName ? '<a href="' + tPage + '?id=' + esc(tId) + '">' + esc(tName) + '</a>' : '') +
+                matchKindTag(m) + '</div>';
             html += '<div class="pp-match-opponent">';
             html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(opp.name) + '" class="pp-match-opponent-photo">';
             html += '<span class="pp-match-opponent-name">' + esc(opp.name) + '</span>';
             html += '</div>';
             html += '<div class="pp-match-score">' + displayScore + '</div>';
             html += '<div class="pp-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + (result === 'W' ? L.win : L.loss) + '</div>';
-            html += '<button class="pp-match-h2h" title="Head to Head">H2H</button>';
+            if (!pairGame) html += '<button class="pp-match-h2h" title="Head to Head">H2H</button>';
             html += '</div>';
         });
 
@@ -934,9 +1021,7 @@
                 var oppId = row.getAttribute('data-opponent-id');
                 var oppName = row.getAttribute('data-opponent-name');
                 var oppPhoto = row.getAttribute('data-opponent-photo');
-                var isDoubles = row.getAttribute('data-is-doubles') === '1';
-                var tournamentId = row.getAttribute('data-tournament-id') || '';
-                showH2H(oppId, oppName, oppPhoto, isDoubles, tournamentId);
+                showH2H(oppId, oppName, oppPhoto);
             });
         });
     }
@@ -1201,7 +1286,7 @@
     // ================================================
     // H2H MODAL
     // ================================================
-    function showH2H(oppId, oppName, oppPhoto, isDoubles, tournamentId) {
+    function showH2H(oppId, oppName, oppPhoto) {
         var old = document.querySelector('.h2h-overlay');
         if (old) old.remove();
 
@@ -1234,39 +1319,29 @@
             return;
         }
 
-        var queries = [
-            client.from('matches')
-                .select('id, player1_id, player2_id, score, winner_id, played_at, tournament:tournaments(title, title_en, title_kg, format)')
-                .or('and(player1_id.eq.' + _playerId + ',player2_id.eq.' + oppId + '),and(player1_id.eq.' + oppId + ',player2_id.eq.' + _playerId + ')')
-                .not('winner_id', 'is', null)
-                .order('played_at', { ascending: false }),
-        ];
-
-        // For doubles: load partner info
-        if (isDoubles && tournamentId) {
-            queries.push(
-                client.from('tournament_registrations')
-                    .select('player_id, partner_id, partner_external_name, partner:players!tournament_registrations_partner_id_fkey(id, name, name_en, name_kg, photo)')
-                    .eq('tournament_id', tournamentId)
-                    .in('player_id', [_playerId, oppId])
-            );
-        }
-
-        Promise.all(queries).then(function(results) {
+        // Один источник — таблица matches. Баттлы попадают туда отдельной
+        // строкой при вводе счёта, там же стоит winner_id.
+        //
+        // Раньше баттлы добирались вторым запросом, из challenges, а
+        // победителя приходилось угадывать разбором строки счёта. Два способа
+        // посчитать одно и то же: у завершённого баттла score_draft
+        // обнуляется, так что второй запрос давно ничего не находил, а на
+        // старых записях считал встречу дважды.
+        client.from('matches')
+            .select('id, player1_id, player2_id, score, winner_id, played_at, match_type, tournament:tournaments(title, title_en, title_kg, format, category_id)')
+            .or('and(player1_id.eq.' + _playerId + ',player2_id.eq.' + oppId + '),and(player1_id.eq.' + oppId + ',player2_id.eq.' + _playerId + ')')
+            .not('winner_id', 'is', null)
+            .order('played_at', { ascending: false })
+            .then(function(res) {
                 var modal = overlay.querySelector('.h2h-modal');
                 if (!modal) return;
 
-                // Один источник — таблица matches. Баттлы туда попадают
-                // отдельной строкой при вводе счёта, там же стоит winner_id.
-                //
-                // Раньше баттлы добирались вторым запросом, из challenges,
-                // а победителя приходилось угадывать разбором строки счёта.
-                // Два способа посчитать одно и то же: у завершённого баттла
-                // score_draft обнуляется, так что второй запрос давно ничего
-                // не находил, а на старых записях считал встречу дважды.
-                var allMatches = (results[0].data || []).slice();
-                allMatches.sort(function(a, b) {
-                    return (b.played_at || '').localeCompare(a.played_at || '');
+                // Пары и микст сюда не идут: в матче записаны капитаны, а
+                // состав пары меняется от турнира к турниру — счёт «двое на
+                // двое» выдавался бы за личную встречу двоих
+                var allMatches = (res.data || []).filter(function(m) {
+                    var k = matchKind(m);
+                    return k !== 'doubles' && k !== 'mixed';
                 });
 
                 if (allMatches.length === 0) {
@@ -1274,32 +1349,12 @@
                     return;
                 }
 
-                // Build partner info for doubles
-                var doublesInfo = null;
-                if (isDoubles && results[1] && results[1].data) {
-                    doublesInfo = { myPartner: null, oppPartner: null };
-                    results[1].data.forEach(function(reg) {
-                        var partnerName = '';
-                        if (reg.partner && reg.partner.id) {
-                            partnerName = isEn ? (reg.partner.name_en || reg.partner.name) : (isKg ? (reg.partner.name_kg || reg.partner.name) : reg.partner.name);
-                        } else if (reg.partner_external_name) {
-                            partnerName = reg.partner_external_name;
-                        }
-                        var partnerPhoto = (reg.partner && reg.partner.photo) || '';
-                        if (reg.player_id === _playerId) {
-                            doublesInfo.myPartner = { name: partnerName, photo: partnerPhoto };
-                        } else if (reg.player_id === oppId) {
-                            doublesInfo.oppPartner = { name: partnerName, photo: partnerPhoto };
-                        }
-                    });
-                }
-
-                renderH2HContent(modal, allMatches, oppId, oppName, oppPhoto, doublesInfo);
+                renderH2HContent(modal, allMatches, oppId, oppName, oppPhoto);
                 attachH2HCloseBtn(overlay);
             });
     }
 
-    function renderH2HContent(modal, matches, oppId, oppName, oppPhoto, doublesInfo) {
+    function renderH2HContent(modal, matches, oppId, oppName, oppPhoto) {
         var myWins = 0, oppWins = 0;
         var mySets = 0, oppSets = 0;
         var myGames = 0, oppGames = 0;
@@ -1331,9 +1386,6 @@
         html += '<div class="h2h-player">';
         html += '<img src="' + esc(_playerPhoto) + '" class="h2h-photo" alt="">';
         html += '<div class="h2h-name">' + esc(_playerName) + '</div>';
-        if (doublesInfo && doublesInfo.myPartner && doublesInfo.myPartner.name) {
-            html += '<div class="h2h-partner">+ ' + esc(doublesInfo.myPartner.name) + '</div>';
-        }
         html += '</div>';
         html += '<div class="h2h-center">';
         var totalMatches = matches.length;
@@ -1344,9 +1396,6 @@
         html += '<div class="h2h-player">';
         html += '<img src="' + esc(oppPhoto) + '" class="h2h-photo" alt="">';
         html += '<div class="h2h-name">' + esc(oppName) + '</div>';
-        if (doublesInfo && doublesInfo.oppPartner && doublesInfo.oppPartner.name) {
-            html += '<div class="h2h-partner">+ ' + esc(doublesInfo.oppPartner.name) + '</div>';
-        }
         html += '</div>';
         html += '</div>';
 
@@ -1380,7 +1429,8 @@
 
             html += '<div class="h2h-match">';
             html += '<span class="h2h-match-date">' + formatMatchDate(m.played_at) + '</span>';
-            if (tName) html += '<span class="h2h-match-tournament">' + esc(tName) + '</span>';
+            html += '<span class="h2h-match-tournament"><span class="h2h-tname">' + esc(tName) +
+                '</span>' + matchKindTag(m) + '</span>';
             html += '<span class="h2h-match-score">' + displayScore + '</span>';
             html += '<span class="h2h-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + (result === 'W' ? L.win : L.loss) + '</span>';
             html += '</div>';
@@ -1675,7 +1725,8 @@
                             ntrp_rating: p.ntrp_rating || null,
                             doubles_wins: p.doubles_wins || 0,
                             doubles_losses: p.doubles_losses || 0,
-                            doubles_form: p.doubles_form || [],
+                            mixed_wins: p.mixed_wins || 0,
+                            mixed_losses: p.mixed_losses || 0,
                             bio: p.bio || '',
                             bio_en: p.bio_en || '',
                             bio_kg: p.bio_kg || ''

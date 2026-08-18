@@ -343,8 +343,10 @@ function loadCategoryData(category) {
         if (elPrize) elPrize.textContent = cat.stats.prize;
     }
 
-    // Update page title
-    document.title = `KSLT — ${cat.name} Tournaments`;
+    // Заголовок вкладки. Русская версия пишет аббревиатуру кириллицей —
+    // при переименовании эту строку пропустили, потому что она не в разметке,
+    // а собирается на лету, и глазами её в файлах не видно
+    document.title = `КСЛТ — Турниры ${cat.name}`;
 
     // Update ranking section title
     var elRank = document.getElementById('rankingCategoryName');

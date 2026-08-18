@@ -68,6 +68,9 @@ Deno.serve(async (req) => {
       .select(`
         id, status, battle_published, battle_title,
         challenger_player_id, opponent_player_id,
+        challenger_external_name, opponent_external_name,
+        format, challenger_partner_id, opponent_partner_id,
+        challenger_partner_name, opponent_partner_name,
         proposed_date, proposed_time, proposed_venue
       `)
       .eq('id', challenge_id)
@@ -127,13 +130,34 @@ Deno.serve(async (req) => {
     const { data: players } = await db
       .from('players')
       .select('id, name')
-      .in('id', [challenge.challenger_player_id, challenge.opponent_player_id])
+      .in('id', [
+        challenge.challenger_player_id, challenge.opponent_player_id,
+        challenge.challenger_partner_id, challenge.opponent_partner_id
+      ].filter(Boolean))
 
     const pMap: Record<string, string> = {}
     if (players) players.forEach((p: any) => { pMap[p.id] = p.name })
 
-    const challengerName = pMap[challenge.challenger_player_id] || '?'
-    const opponentName = pMap[challenge.opponent_player_id] || '?'
+    // Сторона баттла — один человек или пара. Гость в players не заведён:
+    // его имя лежит в самом вызове.
+    //
+    // Раньше здесь бралось по одному имени с каждой стороны — у парного
+    // баттла половина участников из объявления просто пропадала бы
+    const isPair = challenge.format && challenge.format !== 'singles'
+
+    const sideName = (who: 'challenger' | 'opponent'): string => {
+      const main = pMap[challenge[`${who}_player_id`]] || challenge[`${who}_external_name`] || '?'
+      if (!isPair) return main
+      const mate = pMap[challenge[`${who}_partner_id`]] || challenge[`${who}_partner_name`] || ''
+      return mate ? `${main} / ${mate}` : main
+    }
+
+    // В кнопку Telegram четыре полных имени не помещаются — там фамилии
+    const shortName = (who: 'challenger' | 'opponent'): string =>
+      sideName(who).split(' / ').map((n) => n.trim().split(/\s+/).pop() || n).join(' / ')
+
+    const challengerName = sideName('challenger')
+    const opponentName = sideName('opponent')
 
     // Дату, время и место назначает менеджер при публикации: у вызова их
     // больше нет, встречное предложение удалено вместе с ними
@@ -162,8 +186,8 @@ Deno.serve(async (req) => {
       const keyboard = {
         inline_keyboard: [
           [
-            { text: `🔴 ${challengerName}`, callback_data: `bv:${challenge_id}:1` },
-            { text: `🔵 ${opponentName}`, callback_data: `bv:${challenge_id}:2` }
+            { text: `🔴 ${shortName('challenger')}`, callback_data: `bv:${challenge_id}:1` },
+            { text: `🔵 ${shortName('opponent')}`, callback_data: `bv:${challenge_id}:2` }
           ],
           [
             { text: '🎾 Подробнее', url: `${SITE_URL}/pages/challenge.html?id=${challenge_id}` }
@@ -187,7 +211,7 @@ Deno.serve(async (req) => {
       const { data: profiles } = await db
         .from('profiles')
         .select('player_id, telegram_chat_id, notify_preferences')
-        .in('player_id', [challenge.challenger_player_id, challenge.opponent_player_id])
+        .in('player_id', [challenge.challenger_player_id, challenge.opponent_player_id].filter(Boolean))
 
       if (profiles) {
         for (const p of profiles) {

@@ -544,35 +544,37 @@
             var pastSection = document.getElementById('past');
             var _pastShown = 0;
 
+            /**
+             * Прошедший турнир — полосой, а не крупной карточкой.
+             *
+             * На прошедший смотрят ради результата: кто играл, чем кончилось.
+             * Крупная карточка отдаёт половину места афише и кнопке
+             * регистрации, которой у завершённого быть не может, — и десяток
+             * таких карточек утапливает предстоящие.
+             *
+             * Разметка та же, что у полос на странице баттлов и в боковой
+             * колонке турниров: .to-compact. Одно правило на весь сайт —
+             * актуальное крупно, история строкой.
+             */
             function renderPastCard(t) {
                 var statusText = t.statusText || (isEn ? 'Completed' : (isKg ? 'Аяктады' : 'Завершён'));
-                return '<div class="tournament-card" data-status="past" data-id="' + t.id + '"' +
+                var meta = [t.location, t.format, t.participants].filter(Boolean).join(' · ');
+                return '<a class="to-compact trn-strip" data-id="' + t.id + '"' +
                     (t.image ? ' style="background-image:url(' + t.image + ')"' : '') + '>' +
-                    '<div class="tournament-card-header">' +
-                        '<span class="tournament-date">' +
-                            '<span class="date-day">' + t.date.day + '</span>' +
-                            '<span class="date-month">' + t.date.month + '</span>' +
-                        '</span>' +
-                        '<span class="tournament-status past">' + statusText + '</span>' +
+                    '<div class="to-compact-left"><div class="to-compact-date">' +
+                        '<span class="to-day">' + t.date.day + '</span>' +
+                        '<span class="to-month">' + t.date.month + '</span>' +
+                    '</div></div>' +
+                    '<div class="to-compact-info">' +
+                        '<h4>' + t.name +
+                            (t.genderLabel ? '<span class="trn-strip-gender">' + t.genderLabel + '</span>' : '') +
+                        '</h4>' +
+                        '<div class="trn-strip-sub">' + meta + '</div>' +
                     '</div>' +
-                    '<div class="tournament-card-body">' +
-                        '<div class="tournament-title-row">' +
-                            '<h3>' + t.name + '</h3>' +
-                            (t.genderLabel ? '<span class="tournament-gender-badge">' + t.genderLabel + '</span>' : '') +
-                        '</div>' +
-                        '<div class="tournament-meta">' +
-                            '<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + t.location + '</span>' +
-                        '</div>' +
-                        '<div class="tournament-details">' +
-                            '<div class="detail-item"><span class="detail-label">' + L.format + '</span><span class="detail-value">' + (t.format || '') + '</span></div>' +
-                            '<div class="detail-item"><span class="detail-label">' + L.participants + '</span><span class="detail-value">' + (t.participants || '') + '</span></div>' +
-                            '<div class="detail-item"><span class="detail-label">' + L.prizeFund + '</span><span class="detail-value prize">' + (t.prize || '') + '</span></div>' +
-                        '</div>' +
+                    '<div class="trn-strip-right">' +
+                        '<span class="trn-strip-badge">' + statusText + '</span>' +
                     '</div>' +
-                    '<div class="tournament-card-footer">' +
-                        '<span class="btn-view-bracket">' + L.details + '</span>' +
-                    '</div>' +
-                '</div>';
+                '</a>';
             }
 
             function renderPastShowMore() {
@@ -583,7 +585,7 @@
                 _pastShown += nextItems.length;
 
                 // Click listeners for new cards
-                pastGrid.querySelectorAll('.tournament-card[data-id]').forEach(function(card) {
+                pastGrid.querySelectorAll('[data-id]').forEach(function(card) {
                     if (card._clickBound) return;
                     card._clickBound = true;
                     card.addEventListener('click', function() {

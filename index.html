@@ -25,8 +25,9 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/style.css?v=56">
-    <link rel="stylesheet" href="css/battle-cards.css?v=7">
+    <link rel="stylesheet" href="css/style.css?v=96">
+    <link rel="stylesheet" href="css/partners.css?v=5">
+    <link rel="stylesheet" href="css/battle-cards.css?v=9">
 </head>
 <body>
     <header class="floating-header header-hybrid">
@@ -34,7 +35,7 @@
             <!-- Левая часть: Логотип + Генеральный спонсор -->
             <div class="nav-left">
                 <a href="index.html" class="logo">
-                    <img src="images/kslt-logo.svg" alt="KSLT" class="logo-img">
+                    <img src="images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
                 </a>
                 <div class="sponsor-badge"></div>
             </div>
@@ -275,20 +276,21 @@
         <!-- HERO с фоновым изображением -->
         <section id="home" class="hero">
             <div class="hero-bg">
-                <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&h=1080&fit=crop&q=80" alt="" class="hero-bg-image">
+                <img src="images/hero-courts.jpg" alt="" class="hero-bg-image">
                 <div class="hero-bg-overlay"></div>
             </div>
             <div class="hero-content">
                 <div class="hero-badge">
                     <span class="badge-dot"></span>
-                    Сезон 2026 открыт
+                    Сезон 2026
                 </div>
                 <h1 class="hero-title">
-                    <span class="highlight">KSLT</span>
+                    <span class="highlight">КСЛТ</span>
                 </h1>
-                <p class="hero-slogan">Твой теннисный бро</p>
+                <p class="hero-full">Кыргызстанское Сообщество Любителей Тенниса</p>
+                <p class="hero-slogan">Искусство становиться первым</p>
                 <p class="hero-subtitle">
-                    Найди партнёра для игры, участвуй в турнирах и прокачивай свой рейтинг в сообществе теннисистов
+                    Присоединяйся к 350+ игрокам: находи партнёров по игре, новых друзей и любимые турниры.
                 </p>
                 <div class="hero-cta">
                     <a href="pages/partners.html" class="btn-primary">
@@ -300,18 +302,24 @@
                 </div>
                 <div class="hero-stats">
                     <div class="stat">
-                        <span class="stat-value" id="statPlayers">—</span>
-                        <span class="stat-label">Игроков</span>
+                        <span class="stat-value" id="statMembers">&mdash;</span>
+                        <span class="stat-label">Членов КСЛТ</span>
                     </div>
-                    <div class="stat-divider"></div>
                     <div class="stat">
-                        <span class="stat-value" id="statTournaments">—</span>
+                        <span class="stat-value" id="statUsers">&mdash;</span>
+                        <span class="stat-label">Участников</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="statTournaments">&mdash;</span>
                         <span class="stat-label">Турниров</span>
                     </div>
-                    <div class="stat-divider"></div>
                     <div class="stat">
-                        <span class="stat-value" id="statCourts">—</span>
+                        <span class="stat-value" id="statCourts">&mdash;</span>
                         <span class="stat-label">Кортов</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="statCoaches">&mdash;</span>
+                        <span class="stat-label">Тренеров</span>
                     </div>
                 </div>
             </div>
@@ -373,59 +381,23 @@
                 <h2>Ближайшие турниры</h2>
                 <a href="pages/tournaments-overview.html" class="link-all">Все турниры →</a>
             </div>
-            <div class="tournaments-grid">
-                <article class="tournament-card tournament-card-featured">
-                    <div class="tournament-image">
-                        <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=500&fit=crop&q=80" alt="Турнир">
-                        <span class="tournament-badge">Главный</span>
-                    </div>
-                    <div class="tournament-info">
-                        <span class="tournament-date">15-17 февраля 2026</span>
-                        <h3>KSLT Open Championship</h3>
-                        <p>Главный турнир сезона с призовым фондом 500,000 сом</p>
-                        <div class="tournament-meta">
-                            <span><strong>64</strong> участника</span>
-                            <span><strong>12</strong> осталось мест</span>
-                        </div>
-                        <a href="#register" class="btn-primary">Регистрация</a>
-                    </div>
-                </article>
-                <article class="tournament-card">
-                    <div class="tournament-image">
-                        <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=400&h=250&fit=crop&q=80" alt="Турнир">
-                    </div>
-                    <div class="tournament-info">
-                        <span class="tournament-date">22 февраля 2026</span>
-                        <h3>Weekend Cup</h3>
-                        <div class="tournament-meta">
-                            <span>32 участника</span>
-                        </div>
-                    </div>
-                </article>
-                <article class="tournament-card">
-                    <div class="tournament-image">
-                        <img src="https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=400&h=250&fit=crop&q=80" alt="Турнир">
-                    </div>
-                    <div class="tournament-info">
-                        <span class="tournament-date">1 марта 2026</span>
-                        <h3>Junior League</h3>
-                        <div class="tournament-meta">
-                            <span>До 18 лет</span>
-                        </div>
-                    </div>
-                </article>
-            </div>
+            <div class="tournaments-grid" id="homeTournaments"></div>
         </section>
 
         <!-- BADGES CTA -->
         <section class="section-badges-cta">
             <div class="badges-cta-inner">
                 <div class="badges-cta-text">
-                    <h2>Участвуй. Побеждай. Зарабатывай бейджи.</h2>
+                    <h2>Играй. Расти. Собирай достижения.</h2>
                     <p id="badgesCtaDesc">Регистрируйся, играй в турнирах и получай награды за достижения</p>
                 </div>
-                <div class="badges-cta-cards" id="badgesCtaCards"></div>
-                <a href="pages/auth.html?tab=register" class="badges-cta-btn" id="badgesCtaBtn">Начать путь к победе</a>
+                <div class="badges-cta-wrap">
+                    <div class="badges-cta-cards" id="badgesCtaCards"></div>
+                    <div class="badges-cta-cards badges-cta-locked" id="badgesCtaLocked"></div>
+                </div>
+                <div class="badges-cta-box">
+                    <a href="pages/auth.html?tab=register" class="badges-cta-btn" id="badgesCtaBtn">Начать путь к победе</a>
+                </div>
             </div>
         </section>
 
@@ -446,61 +418,11 @@
                         <button class="rankings-tab" data-target="men-challenger">Challenger</button>
                         <button class="rankings-tab" data-target="men-tour">Tour</button>
                     </div>
-                    <div class="rankings-panel active" id="men-promasters">
-                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
-                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Алексей Иванов</span></div><span class="country">🇰🇬</span><span class="points">2,450</span><span class="change positive">+2</span></div>
-                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Максим Петров</span></div><span class="country">🇰🇬</span><span class="points">2,380</span><span class="change negative">-1</span></div>
-                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Дмитрий Козлов</span></div><span class="country">🇰🇿</span><span class="points">2,310</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Тимур Асанов</span></div><span class="country">🇰🇬</span><span class="points">2,180</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Руслан Бакиров</span></div><span class="country">🇺🇿</span><span class="points">2,050</span><span class="change positive">+3</span></div>
-                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Эрлан Жумаев</span></div><span class="country">🇰🇬</span><span class="points">1,980</span><span class="change negative">-2</span></div>
-                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Данияр Мамбетов</span></div><span class="country">🇰🇿</span><span class="points">1,920</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Артём Кравцов</span></div><span class="country">🇷🇺</span><span class="points">1,870</span><span class="change">—</span></div>
-                    </div>
-                    <div class="rankings-panel" id="men-masters">
-                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
-                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Бекжан Турсунов</span></div><span class="country">🇰🇬</span><span class="points">1,850</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Нурлан Кыдыров</span></div><span class="country">🇰🇬</span><span class="points">1,780</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Марат Сулейманов</span></div><span class="country">🇰🇿</span><span class="points">1,720</span><span class="change negative">-1</span></div>
-                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Азат Жаныбеков</span></div><span class="country">🇰🇬</span><span class="points">1,690</span><span class="change positive">+2</span></div>
-                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Кенжебек Алиев</span></div><span class="country">🇺🇿</span><span class="points">1,650</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Саламат Орозов</span></div><span class="country">🇰🇬</span><span class="points">1,600</span><span class="change positive">+3</span></div>
-                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Иван Шевченко</span></div><span class="country">🇷🇺</span><span class="points">1,560</span><span class="change negative">-2</span></div>
-                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Алмаз Токтогулов</span></div><span class="country">🇰🇬</span><span class="points">1,520</span><span class="change">—</span></div>
-                    </div>
-                    <div class="rankings-panel" id="men-futures">
-                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
-                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Аскар Болотов</span></div><span class="country">🇰🇬</span><span class="points">980</span><span class="change positive">+4</span></div>
-                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Темирлан Усенов</span></div><span class="country">🇰🇬</span><span class="points">920</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Жандос Касымов</span></div><span class="country">🇰🇿</span><span class="points">870</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Санжар Абдиев</span></div><span class="country">🇰🇬</span><span class="points">840</span><span class="change negative">-2</span></div>
-                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Бакыт Назаров</span></div><span class="country">🇰🇬</span><span class="points">810</span><span class="change positive">+2</span></div>
-                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Кайрат Эсенов</span></div><span class="country">🇺🇿</span><span class="points">780</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Мирлан Шералиев</span></div><span class="country">🇰🇬</span><span class="points">750</span><span class="change negative">-1</span></div>
-                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Нурбек Токтоев</span></div><span class="country">🇰🇬</span><span class="points">720</span><span class="change positive">+1</span></div>
-                    </div>
-                    <div class="rankings-panel" id="men-challenger">
-                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
-                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Элдияр Сатыбалдиев</span></div><span class="country">🇰🇬</span><span class="points">1,420</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Канат Джумагулов</span></div><span class="country">🇰🇬</span><span class="points">1,380</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Алишер Рахимов</span></div><span class="country">🇺🇿</span><span class="points">1,340</span><span class="change negative">-1</span></div>
-                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Улан Кожоев</span></div><span class="country">🇰🇬</span><span class="points">1,290</span><span class="change positive">+3</span></div>
-                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Талант Оморов</span></div><span class="country">🇰🇬</span><span class="points">1,250</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Серик Нурмухамедов</span></div><span class="country">🇰🇿</span><span class="points">1,210</span><span class="change positive">+2</span></div>
-                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Адилет Сыдыков</span></div><span class="country">🇰🇬</span><span class="points">1,180</span><span class="change negative">-1</span></div>
-                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Максат Турдалиев</span></div><span class="country">🇰🇬</span><span class="points">1,150</span><span class="change">—</span></div>
-                    </div>
-                    <div class="rankings-panel" id="men-tour">
-                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
-                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Самат Джолдошев</span></div><span class="country">🇰🇬</span><span class="points">520</span><span class="change positive">+5</span></div>
-                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Арсен Калыков</span></div><span class="country">🇰🇬</span><span class="points">490</span><span class="change positive">+2</span></div>
-                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" alt=""><span>Бегалы Маматов</span></div><span class="country">🇰🇬</span><span class="points">460</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" alt=""><span>Нуржигит Асылбеков</span></div><span class="country">🇰🇿</span><span class="points">430</span><span class="change negative">-1</span></div>
-                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&q=80" alt=""><span>Жаныш Омуралиев</span></div><span class="country">🇰🇬</span><span class="points">400</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" alt=""><span>Тилек Субанов</span></div><span class="country">🇰🇬</span><span class="points">380</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80" alt=""><span>Мурат Байсалов</span></div><span class="country">🇰🇬</span><span class="points">350</span><span class="change negative">-3</span></div>
-                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&q=80" alt=""><span>Чынгыз Касымалиев</span></div><span class="country">🇰🇬</span><span class="points">320</span><span class="change positive">+2</span></div>
-                    </div>
+                    <div class="rankings-panel active" id="men-promasters"></div>
+                    <div class="rankings-panel" id="men-masters"></div>
+                    <div class="rankings-panel" id="men-futures"></div>
+                    <div class="rankings-panel" id="men-challenger"></div>
+                    <div class="rankings-panel" id="men-tour"></div>
                 </div>
 
                 <!-- WOMEN -->
@@ -512,50 +434,10 @@
                         <button class="rankings-tab" data-target="women-challenger">Challenger</button>
                         <button class="rankings-tab" data-target="women-promasters">Pro-Masters</button>
                     </div>
-                    <div class="rankings-panel active" id="women-masters">
-                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
-                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Елена Сидорова</span></div><span class="country">🇰🇬</span><span class="points">2,290</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Ксения Николаева</span></div><span class="country">🇰🇬</span><span class="points">2,180</span><span class="change positive">+3</span></div>
-                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Айжан Токтосунова</span></div><span class="country">🇰🇬</span><span class="points">2,050</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Мадина Кулова</span></div><span class="country">🇰🇿</span><span class="points">1,980</span><span class="change negative">-1</span></div>
-                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Нургуль Аманбаева</span></div><span class="country">🇰🇬</span><span class="points">1,920</span><span class="change positive">+2</span></div>
-                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Динара Исмаилова</span></div><span class="country">🇺🇿</span><span class="points">1,870</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Жибек Касымова</span></div><span class="country">🇰🇬</span><span class="points">1,810</span><span class="change negative">-2</span></div>
-                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Салтанат Эргешова</span></div><span class="country">🇰🇬</span><span class="points">1,760</span><span class="change positive">+1</span></div>
-                    </div>
-                    <div class="rankings-panel" id="women-tour">
-                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
-                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Бегимай Орозова</span></div><span class="country">🇰🇬</span><span class="points">480</span><span class="change positive">+3</span></div>
-                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Аида Жолдошева</span></div><span class="country">🇰🇬</span><span class="points">450</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Камила Рахматова</span></div><span class="country">🇺🇿</span><span class="points">420</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Назгуль Сатыева</span></div><span class="country">🇰🇬</span><span class="points">390</span><span class="change negative">-1</span></div>
-                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Алтынай Бекова</span></div><span class="country">🇰🇬</span><span class="points">360</span><span class="change positive">+2</span></div>
-                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Гулзат Маматова</span></div><span class="country">🇰🇬</span><span class="points">330</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Эльмира Ташиева</span></div><span class="country">🇰🇿</span><span class="points">300</span><span class="change negative">-2</span></div>
-                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Чолпон Абдиева</span></div><span class="country">🇰🇬</span><span class="points">280</span><span class="change positive">+1</span></div>
-                    </div>
-                    <div class="rankings-panel" id="women-challenger">
-                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
-                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Асель Турганбаева</span></div><span class="country">🇰🇬</span><span class="points">1,350</span><span class="change positive">+2</span></div>
-                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Зарина Нуркулова</span></div><span class="country">🇰🇬</span><span class="points">1,290</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Дария Курманова</span></div><span class="country">🇰🇿</span><span class="points">1,240</span><span class="change negative">-1</span></div>
-                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Миргуль Алымова</span></div><span class="country">🇰🇬</span><span class="points">1,200</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Айнура Бектурова</span></div><span class="country">🇰🇬</span><span class="points">1,160</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Толкун Сагынова</span></div><span class="country">🇺🇿</span><span class="points">1,120</span><span class="change positive">+3</span></div>
-                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Нурзат Токтоева</span></div><span class="country">🇰🇬</span><span class="points">1,080</span><span class="change negative">-2</span></div>
-                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Бурул Эшматова</span></div><span class="country">🇰🇬</span><span class="points">1,040</span><span class="change">—</span></div>
-                    </div>
-                    <div class="rankings-panel" id="women-promasters">
-                        <div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">Δ</span></div>
-                        <div class="ranking-row"><span class="rank">1</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Анара Молдобаева</span></div><span class="country">🇰🇬</span><span class="points">2,420</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">2</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Венера Ташматова</span></div><span class="country">🇰🇬</span><span class="points">2,350</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">3</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Гулнара Омурзакова</span></div><span class="country">🇰🇿</span><span class="points">2,280</span><span class="change negative">-1</span></div>
-                        <div class="ranking-row"><span class="rank">4</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Жазгуль Сулайманова</span></div><span class="country">🇰🇬</span><span class="points">2,210</span><span class="change positive">+2</span></div>
-                        <div class="ranking-row"><span class="rank">5</span><div class="player-col"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" alt=""><span>Калыс Абдраимова</span></div><span class="country">🇰🇬</span><span class="points">2,150</span><span class="change">—</span></div>
-                        <div class="ranking-row"><span class="rank">6</span><div class="player-col"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" alt=""><span>Нуржамал Кадырова</span></div><span class="country">🇺🇿</span><span class="points">2,090</span><span class="change positive">+1</span></div>
-                        <div class="ranking-row"><span class="rank">7</span><div class="player-col"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt=""><span>Сезим Тургунова</span></div><span class="country">🇰🇬</span><span class="points">2,030</span><span class="change negative">-2</span></div>
-                        <div class="ranking-row"><span class="rank">8</span><div class="player-col"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&q=80" alt=""><span>Элнура Жусупова</span></div><span class="country">🇰🇬</span><span class="points">1,970</span><span class="change">—</span></div>
-                    </div>
+                    <div class="rankings-panel active" id="women-masters"></div>
+                    <div class="rankings-panel" id="women-tour"></div>
+                    <div class="rankings-panel" id="women-challenger"></div>
+                    <div class="rankings-panel" id="women-promasters"></div>
                 </div>
             </div>
         </section>
@@ -563,195 +445,31 @@
         <!-- PLAYERS / FIND PARTNER -->
         <section id="players" class="section-players">
             <div class="section-header">
-                <h2>Найди игрока своего NTRP</h2>
+                <h2>Найди партнёра по игре</h2>
                 <a href="pages/partners.html" class="link-all">Показать всех →</a>
             </div>
-            <div class="players-grid">
-                <div class="player-card">
-                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
-                    <div class="player-info">
-                        <h4>Артём К.</h4>
-                        <span class="player-level">NTRP 4.0</span>
-                        <span class="player-location">📍 Бишкек, Асанбай</span>
-                        <span class="player-time">🕐 Сегодня, 17:00-19:00</span>
-                    </div>
-                    <a href="pages/auth.html?redirect=partners" class="btn-invite">Пригласить</a>
-                </div>
-                <div class="player-card">
-                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
-                    <div class="player-info">
-                        <h4>Мария С.</h4>
-                        <span class="player-level">NTRP 3.5</span>
-                        <span class="player-location">📍 Бишкек, Центр</span>
-                        <span class="player-time">🕐 Завтра, 10:00-12:00</span>
-                    </div>
-                    <a href="pages/auth.html?redirect=partners" class="btn-invite">Пригласить</a>
-                </div>
-                <div class="player-card">
-                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
-                    <div class="player-info">
-                        <h4>Руслан Б.</h4>
-                        <span class="player-level">NTRP 4.5</span>
-                        <span class="player-location">📍 Бишкек, Джал</span>
-                        <span class="player-time">🕐 Сегодня, 20:00-22:00</span>
-                    </div>
-                    <a href="pages/auth.html?redirect=partners" class="btn-invite">Пригласить</a>
-                </div>
-                <div class="player-card">
-                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
-                    <div class="player-info">
-                        <h4>Айгуль Т.</h4>
-                        <span class="player-level">NTRP 3.0</span>
-                        <span class="player-location">📍 Бишкек, Восток-5</span>
-                        <span class="player-time">🕐 Суббота, 09:00-11:00</span>
-                    </div>
-                    <a href="pages/auth.html?redirect=partners" class="btn-invite">Пригласить</a>
-                </div>
-                <div class="player-card">
-                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
-                    <div class="player-info">
-                        <h4>Данияр М.</h4>
-                        <span class="player-level">NTRP 2.5</span>
-                        <span class="player-location">📍 Бишкек, Аламедин</span>
-                        <span class="player-time">🕐 Завтра, 18:00-20:00</span>
-                    </div>
-                    <a href="pages/auth.html?redirect=partners" class="btn-invite">Пригласить</a>
-                </div>
-                <div class="player-card">
-                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
-                    <div class="player-info">
-                        <h4>Елена В.</h4>
-                        <span class="player-level">NTRP 5.0</span>
-                        <span class="player-location">📍 Бишкек, Южные ворота</span>
-                        <span class="player-time">🕐 Сегодня, 16:00-18:00</span>
-                    </div>
-                    <a href="pages/auth.html?redirect=partners" class="btn-invite">Пригласить</a>
-                </div>
-                <div class="player-card">
-                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
-                    <div class="player-info">
-                        <h4>Тимур А.</h4>
-                        <span class="player-level">NTRP 2.0</span>
-                        <span class="player-location">📍 Бишкек, Тунгуч</span>
-                        <span class="player-time">🕐 Воскресенье, 08:00-10:00</span>
-                    </div>
-                    <a href="pages/auth.html?redirect=partners" class="btn-invite">Пригласить</a>
-                </div>
-                <div class="player-card">
-                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&q=80" alt="Игрок" class="player-photo">
-                    <div class="player-info">
-                        <h4>Жанара О.</h4>
-                        <span class="player-level">NTRP 3.0</span>
-                        <span class="player-location">📍 Бишкек, Кок-Жар</span>
-                        <span class="player-time">🕐 Суббота, 14:00-16:00</span>
-                    </div>
-                    <a href="pages/auth.html?redirect=partners" class="btn-invite">Пригласить</a>
-                </div>
-            </div>
+            <p class="pg-sub">Подбирай по уровню NTRP и играй с теми, кто в форме</p>
+            <div class="pt-grid" id="homePartners"></div>
         </section>
 
         <!-- COURTS -->
-        <section id="courts" class="section-courts">
+                <!-- КОРТЫ И ТРЕНЕРЫ -->
+        <section id="venues" class="section-venues">
             <div class="section-header">
-                <h2>Теннисные корты</h2>
+                <h2>Где играть и у кого учиться</h2>
+            </div>
+
+            <div class="vn-row-head">
+                <h3>Теннисные корты</h3>
                 <a href="pages/courts.html" class="link-all">Все корты →</a>
             </div>
-            <div class="courts-grid">
-                <div class="court-card">
-                    <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600&h=400&fit=crop&q=80" alt="Хард корт">
-                    <div class="court-info">
-                        <h4>Хард корт</h4>
-                        <span class="court-surface">Покрытие: акрил</span>
-                        <span>📍 ул. Ахунбаева 165</span>
-                        <span class="court-price">от 800 сом/час</span>
-                        <span class="court-status available">4 корта свободны</span>
-                    </div>
-                    <div class="court-card-actions">
-                        <a href="pages/courts.html" class="court-card-details">Подробнее →</a>
-                        <span class="court-card-cta">Скидка КСЛТ</span>
-                    </div>
-                </div>
-                <div class="court-card">
-                    <img src="https://images.unsplash.com/photo-1599586120429-48281b6f0ece?w=600&h=400&fit=crop&q=80" alt="Грунтовый корт">
-                    <div class="court-info">
-                        <h4>Грунтовый корт</h4>
-                        <span class="court-surface">Покрытие: грунт (клэй)</span>
-                        <span>📍 мкр. Асанбай 21</span>
-                        <span class="court-price">от 1000 сом/час</span>
-                        <span class="court-status limited">2 корта свободны</span>
-                    </div>
-                    <div class="court-card-actions">
-                        <a href="pages/courts.html" class="court-card-details">Подробнее →</a>
-                        <span class="court-card-cta">Скидка КСЛТ</span>
-                    </div>
-                </div>
-                <div class="court-card">
-                    <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=400&fit=crop&q=80" alt="Крытый корт">
-                    <div class="court-info">
-                        <h4>Крытый корт</h4>
-                        <span class="court-surface">Покрытие: синтетика</span>
-                        <span>📍 пр. Чуй 123</span>
-                        <span class="court-price">от 1200 сом/час</span>
-                        <span class="court-status busy">Все занято</span>
-                    </div>
-                    <div class="court-card-actions">
-                        <a href="pages/courts.html" class="court-card-details">Подробнее →</a>
-                        <span class="court-card-cta">Скидка КСЛТ</span>
-                    </div>
-                </div>
-            </div>
-        </section>
+            <div class="courts-grid vn-four" id="venuesCourts"></div>
 
-        <!-- COACHES -->
-        <section id="coaches" class="section-coaches">
-            <div class="section-header">
-                <h2>Тренеры</h2>
+            <div class="vn-row-head">
+                <h3>Тренеры</h3>
                 <a href="pages/coaches.html" class="link-all">Все тренеры →</a>
             </div>
-            <div class="coaches-grid">
-                <div class="coach-card">
-                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&q=80" alt="Тренер" class="coach-photo">
-                    <div class="coach-info">
-                        <h4>Азамат Жумабеков</h4>
-                        <span class="coach-speciality">Подача и тактика</span>
-                        <span class="coach-experience">Опыт: 12 лет</span>
-                        <span class="coach-level">ITF Level 2</span>
-                        <span class="coach-price">от 1500 сом/час</span>
-                    </div>
-                    <div class="coach-card-actions">
-                        <a href="pages/coaches.html" class="coach-card-details">Подробнее →</a>
-                        <span class="coach-card-cta">Скидка КСЛТ</span>
-                    </div>
-                </div>
-                <div class="coach-card">
-                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&q=80" alt="Тренер" class="coach-photo">
-                    <div class="coach-info">
-                        <h4>Наталья Ким</h4>
-                        <span class="coach-speciality">Детский теннис</span>
-                        <span class="coach-experience">Опыт: 8 лет</span>
-                        <span class="coach-level">ITF Level 1</span>
-                        <span class="coach-price">от 1200 сом/час</span>
-                    </div>
-                    <div class="coach-card-actions">
-                        <a href="pages/coaches.html" class="coach-card-details">Подробнее →</a>
-                        <span class="coach-card-cta">Скидка КСЛТ</span>
-                    </div>
-                </div>
-                <div class="coach-card">
-                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&q=80" alt="Тренер" class="coach-photo">
-                    <div class="coach-info">
-                        <h4>Руслан Абдыкеримов</h4>
-                        <span class="coach-speciality">Физподготовка и техника</span>
-                        <span class="coach-experience">Опыт: 15 лет</span>
-                        <span class="coach-level">ITF Level 3</span>
-                        <span class="coach-price">от 2000 сом/час</span>
-                    </div>
-                    <div class="coach-card-actions">
-                        <a href="pages/coaches.html" class="coach-card-details">Подробнее →</a>
-                        <span class="coach-card-cta">Скидка КСЛТ</span>
-                    </div>
-                </div>
-            </div>
+            <div class="coaches-grid vn-four" id="venuesCoaches"></div>
         </section>
 
         <!-- SPONSORS (dynamic from Supabase) -->
@@ -759,12 +477,16 @@
 
         <!-- ABOUT -->
         <section id="about" class="section-about">
-            <div class="about-content">
-                <h2>О проекте KSLT</h2>
+            <div class="about-head">
+                <div class="section-header">
+                    <h2>О проекте КСЛТ</h2>
+                    <a href="pages/info.html" class="link-all">Всё о КСЛТ →</a>
+                </div>
                 <p class="about-lead">
-                    Kyrgyzstan Social Lawn Tennis — первое теннисное сообщество в Кыргызстане,
-                    объединяющее любителей и профессионалов.
+                    КСЛТ объединяет игроков всех уровней — от новичков до опытных любителей. С 2021 года мы проводим турниры, помогаем находить партнёров по игре и растим большое живое теннисное сообщество.
                 </p>
+            </div>
+            <div class="about-body">
                 <div class="about-features">
                     <div class="feature">
                         <span class="feature-icon">🎾</span>
@@ -779,491 +501,136 @@
                     <div class="feature">
                         <span class="feature-icon">📊</span>
                         <h4>Рейтинг</h4>
-                        <p>Прозрачная система очков и статистика</p>
+                        <p>Система очков и статистика каждого игрока</p>
                     </div>
                     <div class="feature">
                         <span class="feature-icon">🏟️</span>
                         <h4>Корты</h4>
-                        <p>Бронирование кортов в один клик</p>
+                        <p>Полный список кортов Кыргызстана</p>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">🎯</span>
+                        <h4>Тренеры</h4>
+                        <p>Найди тренера под свой уровень</p>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">💚</span>
+                        <h4>Скидки</h4>
+                        <p>Членам КСЛТ — специальные цены на корты и тренировки</p>
                     </div>
                 </div>
+                <div class="about-image">
+                <img src="images/about-community.jpg" alt="Участницы КСЛТ" loading="lazy">
             </div>
-            <div class="about-image">
-                <img src="https://images.unsplash.com/photo-1551773188-0801da12ddae?w=700&h=500&fit=crop&q=80" alt="Теннис">
             </div>
         </section>
     </main>
 
+<!-- FOOTER:START -->
     <footer class="site-footer">
         <div class="footer-content">
-            <!-- Блок KSLT -->
             <div class="footer-block footer-brand">
                 <div class="footer-logo">
-                    <img src="images/kslt-logo.svg" alt="KSLT" class="logo-img">
+                    <img src="images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
                 </div>
-                <p class="footer-desc">Kyrgyzstan Social <Lghjlcvj>/ l</Lghjlcvj>awn Tennis — первое теннисное сообщество в Кыргызстане, объединяющее любителей и профессионалов.</p>
+                <p class="footer-desc">Кыргызстанское Сообщество Любителей Тенниса. Рейтинг, турниры и всё, что нужно игроку.</p>
                 <div class="footer-socials">
                     <a href="https://www.instagram.com/kslt_tennis.kg?igsh=OHNocjZhcHZxcTk0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                        </svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                     </a>
                     <a href="https://t.me/c/1939029205/1" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Telegram">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                        </svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
                     </a>
-                    <a href="#" class="social-link" aria-label="YouTube">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="social-link" aria-label="WhatsApp">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                        </svg>
-
-
-
-посомт
-                    </a>
-                    <a href="#" class="social-link" aria-label="TikTok">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-                        </svg>
+                    <a href="https://www.youtube.com/@%D0%9A%D0%A1%D0%9B%D0%A2-%D0%9A%D1%8B%D1%80%D0%B3%D1%8B%D0%B7%D1%81%D1%82%D0%B0%D0%BD" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                     </a>
                 </div>
             </div>
 
-                <!-- Навигация -->
             <div class="footer-block">
                 <h4>Навигация</h4>
                 <ul class="footer-links">
                     <li><a href="pages/tournaments-overview.html">Турниры</a></li>
                     <li><a href="pages/players.html">Рейтинг</a></li>
                     <li><a href="pages/courts.html">Корты</a></li>
+                    <li><a href="pages/coaches.html">Тренеры</a></li>
                     <li><a href="pages/news.html">Новости</a></li>
                 </ul>
             </div>
 
-            <!-- Игрокам -->
             <div class="footer-block">
                 <h4>Игрокам</h4>
                 <ul class="footer-links">
                     <li><a href="pages/rules.html">Правила лиги</a></li>
-                    <li><a href="pages/players.html">Система рейтинга</a></li>
+                    <li><a href="pages/rules.html#rules-ranking">Система рейтинга</a></li>
                     <li><a href="pages/about.html">О проекте</a></li>
                     <li><a href="pages/faq.html">FAQ</a></li>
-                        <li><a href="pages/pricing.html">Цены</a></li>
-                        <li><a href="pages/offer.html">Публичная оферта</a></li>
-                </ul>
+                    <li><a href="pages/pricing.html">Цены</a></li>
+                                    <li><a href="pages/rules.html#rules-sanctions">Дисциплинарное положение</a></li>
+                    <li><a href="pages/offer.html#offer-refusal">Оплата и возврат</a></li>
+</ul>
             </div>
 
-            <!-- Услуги -->
             <div class="footer-block">
-                <h4>Услуги</h4>
+                <h4>Партнёрам</h4>
                 <ul class="footer-links">
-                    <li><a href="pages/coaches.html">Тренеры</a></li>
                     <li><a href="pages/courts.html">Аренда кортов</a></li>
-                    <li><a href="pages/tournaments-overview.html">Турниры</a></li>
+                    <li><a href="pages/tournaments-overview.html">Организация турниров</a></li>
                 </ul>
             </div>
 
-            <!-- Контакты -->
             <div class="footer-block" id="contacts">
                 <h4>Контакты</h4>
                 <ul class="footer-contacts">
                     <li>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                            <polyline points="22,6 12,13 2,6"/>
-                        </svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
                         <a href="mailto:info@tennis.kg">info@tennis.kg</a>
                     </li>
                     <li>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                        </svg>
-                        <a href="tel:+996555123456">+996 555 123 456</a>
-                    </li>
-                    <li>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                            <circle cx="12" cy="10" r="3"/>
-                        </svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                         <span>г. Бишкек, Кыргызстан</span>
                     </li>
                 </ul>
             </div>
         </div>
 
-
-        <!-- Нижняя строка -->
         <div class="footer-bottom">
-            <p class="footer-copyright">© 2026 KSLT. Все права защищены.</p>
-            <div class="footer-legal">
+            <p>© 2026 КСЛТ. Все права защищены.</p>
+            <div class="footer-bottom-links">
                 <a href="pages/offer.html">Публичная оферта</a>
                 <a href="pages/privacy-policy.html">Политика конфиденциальности</a>
             </div>
-
             <p class="footer-made">Сделано с ❤️ в Кыргызстане 🇰🇬</p>
         </div>
     </footer>
+<!-- FOOTER:END -->
 
     <script src="js/auth-nav.js?v=20"></script>
-    <script src="js/script.js"></script>
+    <script src="js/script.js?v=2"></script>
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
-    <script src="js/sponsors-loader.js?v=2"></script>
+    <script src="js/sponsors-loader.js?v=3"></script>
     <script>
     if (window.loadSponsors) loadSponsors('sponsors');
     if (window.loadSponsorsCarousel) loadSponsorsCarousel('heroSponsorsCarousel');
     </script>
     <script src="js/session-monitor.js"></script>
     <script src="js/membership.js"></script>
-    <script src="js/battle-cards.js?v=7"></script>
+    <script src="js/battle-format.js?v=1"></script>
+    <script src="js/battle-cards.js?v=9"></script>
+    <script src="js/stats.js?v=1"></script>
+    <script src="js/badge-celebration.js?v=2"></script>
+    <script src="js/tournament-card.js?v=2"></script>
+    <script src="js/home-tournaments.js?v=2"></script>
+    <script src="js/home-badges.js?v=1"></script>
+    <script src="js/rankings-data.js?v=1"></script>
+    <script src="js/home-rankings.js?v=1"></script>
+    <script src="js/home-partners.js?v=2"></script>
+    <script src="js/home-courts-coaches.js?v=1"></script>
     <script>
-    // Hero stats from Supabase
-    (function() {
-        var c = window.supabaseClient;
-        if (!c) return;
-        Promise.all([
-            c.from('players').select('id', { count: 'exact', head: true }),
-            c.from('tournaments').select('id', { count: 'exact', head: true }),
-            c.from('courts').select('court_types')
-        ]).then(function(r) {
-            var el;
-            if (r[0].count != null) {
-                el = document.getElementById('statPlayers');
-                if (el) el.textContent = r[0].count.toLocaleString('ru-RU');
-            }
-            if (r[1].count != null) {
-                el = document.getElementById('statTournaments');
-                if (el) el.textContent = r[1].count.toLocaleString('ru-RU');
-            }
-            if (r[2].data) {
-                var total = 0;
-                r[2].data.forEach(function(row) {
-                    (row.court_types || []).forEach(function(ct) { total += (ct.count || 0); });
-                });
-                el = document.getElementById('statCourts');
-                if (el) el.textContent = total;
-            }
-        });
-    })();
-    </script>
-    <script>
-    // Badges CTA — dynamic for authorized users
-    (function() {
-        var client = window.supabaseClient;
-        var el = document.getElementById('badgesCtaCards');
-        var btn = document.getElementById('badgesCtaBtn');
-        var desc = document.getElementById('badgesCtaDesc');
-        if (!el) return;
-
-        var ALL = [
-            {e:'🎾',n:'Первый матч',d:'Сыграй свой первый матч'},
-            {e:'🏅',n:'Первая победа',d:'Одержи первую победу'},
-            {e:'🔟',n:'Десятка',d:'Сыграй 10 матчей'},
-            {e:'💪',n:'Полтинник',d:'Сыграй 50 матчей'},
-            {e:'💯',n:'Сотня',d:'Сыграй 100 матчей'},
-            {e:'⭐',n:'5 побед',d:'Одержи 5 побед'},
-            {e:'🌟',n:'10 побед',d:'Одержи 10 побед'},
-            {e:'🏆',n:'25 побед',d:'Одержи 25 побед'},
-            {e:'👑',n:'50 побед',d:'Одержи 50 побед'},
-            {e:'🔥',n:'Серия 3',d:'Одержи 3 победы подряд'},
-            {e:'⚡',n:'Серия 5',d:'Одержи 5 побед подряд'},
-            {e:'🚀',n:'Серия 10',d:'Одержи 10 побед подряд'},
-            {e:'🎯',n:'Первый турнир',d:'Прими участие в турнире'},
-            {e:'🏆',n:'Чемпион',d:'Выиграй финал турнира'},
-            {e:'🥈',n:'Финалист',d:'Выйди в финал'},
-            {e:'👑',n:'Чемпион х3',d:'Выиграй 3 турнира'},
-            {e:'💎',n:'Безупречный',d:'Выиграй турнир без потери сета'},
-            {e:'😱',n:'Сенсация',d:'Обыграй фаворита с 500+ очками'},
-            {e:'📈',n:'Топ-10',d:'Войди в топ-10 своей категории'},
-            {e:'🥇',n:'Первый номер',d:'Стань №1 в своей категории'},
-            {e:'😤',n:'Доминатор',d:'5+ побед над одним соперником'},
-            {e:'⏰',n:'Пионер',d:'Зарегистрирован в первый год KSLT'},
-            {e:'💚',n:'Член КСЛТ',d:'Активное членство'},
-            {e:'🎖️',n:'Ветеран 3',d:'3 года в KSLT'},
-            {e:'🏅',n:'Ветеран 5',d:'5 лет в KSLT'},
-            {e:'🤝',n:'Принял вызов',d:'Прими 5 вызовов на матч'},
-            {e:'⚔️',n:'Челленджер',d:'Отправь 10 вызовов на матч'}
-        ];
-
-        function renderCard(b) {
-            return '<div class="badge-cta-card">' +
-                '<span class="badge-cta-emoji">' + b.e + '</span>' +
-                '<span class="badge-cta-name">' + b.n + '</span>' +
-                '<span class="badge-cta-desc">' + b.d + '</span>' +
-            '</div>';
-        }
-
-        var isLoggedIn = false;
-        try {
-            var key = 'sb-qqkzszesviukopgjbead-auth-token';
-            var raw = localStorage.getItem(key);
-            if (raw) {
-                var s = JSON.parse(raw);
-                if (s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000)) isLoggedIn = true;
-            }
-        } catch(e) {}
-
-        if (!isLoggedIn || !client) {
-            var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
-            el.innerHTML = shuffled.slice(0, 5).map(renderCard).join('');
-            return;
-        }
-
-        (async function() {
-            var userRes = await client.auth.getUser();
-            if (!userRes.data || !userRes.data.user) return;
-            var uid = userRes.data.user.id;
-
-            var results = await Promise.all([
-                client.from('badge_definitions').select('id, icon, name, name_en, name_kg').order('sort_order'),
-                client.from('profiles').select('player_id').eq('id', uid).single()
-            ]);
-
-            var defs = results[0].data || [];
-            if (!defs.length) {
-                var shuffled = ALL.slice().sort(function() { return Math.random() - 0.5; });
-                el.innerHTML = shuffled.slice(0, 5).map(renderCard).join('');
-                return;
-            }
-
-            var earnedSet = {};
-            if (results[1].data && results[1].data.player_id) {
-                var badgesRes = await client.from('player_badges').select('badge_id').eq('player_id', results[1].data.player_id);
-                (badgesRes.data || []).forEach(function(b) { earnedSet[b.badge_id] = true; });
-            }
-
-            el.classList.add('badges-all');
-            el.innerHTML = defs.map(function(b) {
-                var locked = earnedSet[b.id] ? '' : ' locked';
-                return '<div class="badge-cta-card' + locked + '">' +
-                    '<span class="badge-cta-emoji">' + b.icon + '</span>' +
-                    '<span class="badge-cta-name">' + b.name + '</span>' +
-                '</div>';
-            }).join('');
-
-            if (desc) desc.textContent = 'Играй в турнирах и получай награды за достижения';
-            if (btn) {
-                btn.href = 'pages/dashboard.html';
-                btn.textContent = 'Мои бейджи';
-            }
-        })();
-    })();
-    </script>
-    <script>
-    // Load Supabase courts into main page
-    (function() {
-        var client = window.supabaseClient;
-        if (!client) return;
-        var grid = document.querySelector('.section-courts .courts-grid');
-        if (!grid) return;
-
-        var _courtAccess = 'guest';
-
-        function detectCourtAccess() {
-            if (!client) return Promise.resolve();
-            return client.auth.getSession().then(function(res) {
-                if (!res.data || !res.data.session) return;
-                _courtAccess = 'registered';
-                if (typeof window.checkMembership === 'function') {
-                    return window.checkMembership().then(function(mem) {
-                        if (mem && mem.active) _courtAccess = 'member';
-                    }).catch(function() {});
-                }
-            }).catch(function() {});
-        }
-
-        function showCourtModal(level) {
-            var isGuest = level === 'guest';
-            var title = isGuest ? 'Станьте членом KSLT' : 'Нужно членство';
-            var text = isGuest
-                ? 'Зарегистрируйтесь и оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров'
-                : 'Оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров';
-            var btnText = isGuest ? 'Регистрация' : 'Тарифы';
-            var btnLink = isGuest ? 'pages/auth.html' : 'pages/pricing.html';
-            var svgIcon = isGuest
-                ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
-                : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-            var overlay = document.createElement('div');
-            overlay.className = 'hp-membership-overlay';
-            overlay.innerHTML =
-                '<div class="hp-membership-modal">' +
-                    '<button class="hp-membership-close">&times;</button>' +
-                    '<div class="hp-membership-icon">' + svgIcon + '</div>' +
-                    '<h3>' + title + '</h3>' +
-                    '<p>' + text + '</p>' +
-                    '<a href="' + btnLink + '" class="hp-membership-btn">' + btnText + '</a>' +
-                '</div>';
-            document.body.appendChild(overlay);
-            requestAnimationFrame(function() { overlay.classList.add('visible'); });
-            overlay.querySelector('.hp-membership-close').onclick = function() {
-                overlay.classList.remove('visible');
-                setTimeout(function() { overlay.remove(); }, 300);
-            };
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) {
-                    overlay.classList.remove('visible');
-                    setTimeout(function() { overlay.remove(); }, 300);
-                }
-            });
-        }
-
-        // CTA click delegation
-        grid.addEventListener('click', function(e) {
-            var cta = e.target.closest('.court-card-cta');
-            if (!cta) return;
-            e.preventDefault();
-            e.stopPropagation();
-            if (_courtAccess === 'guest' || _courtAccess === 'registered') {
-                showCourtModal(_courtAccess);
-                return;
-            }
-            var id = cta.getAttribute('data-id');
-            window.location.href = 'pages/court.html?id=' + id;
-        });
-
-        detectCourtAccess();
-
-        client.from('courts').select('*').order('created_at', { ascending: false }).limit(6)
-            .then(function(res) {
-                if (res.error || !res.data || !res.data.length) return;
-                var SURF = { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр' };
-                var html = '';
-                res.data.forEach(function(row) {
-                    var ct = row.court_types || [];
-                    var surfKey = ct.length ? ct[0].surface : '';
-                    var surface = SURF[surfKey] || surfKey;
-                    var total = 0; ct.forEach(function(c) { total += (c.count || 0); });
-                    var minPrice = 0; ct.forEach(function(c) { if (c.price && (!minPrice || c.price < minPrice)) minPrice = c.price; });
-                    var addr = [row.street, row.building, row.city || 'Бишкек'].filter(Boolean).join(', ');
-                    html += '<div class="court-card">' +
-                        '<div style="position:relative;">' +
-                            '<img src="' + (row.photo || 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=400&fit=crop&q=80') + '" alt="' + row.name + '">' +
-                            '<span style="position:absolute;top:8px;left:8px;background:#CCFF00;color:#000;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:100px;text-transform:uppercase;">Новый</span>' +
-                        '</div>' +
-                        '<div class="court-info">' +
-                            '<h4>' + row.name + '</h4>' +
-                            '<span class="court-surface">Покрытие: ' + surface + '</span>' +
-                            (addr ? '<span>\uD83D\uDCCD ' + addr + '</span>' : '') +
-                            (minPrice ? '<span class="court-price">от ' + minPrice + ' сом/час</span>' : '') +
-                            '<span class="court-status available">' + total + ' кортов</span>' +
-                        '</div>' +
-                        '<div class="court-card-actions">' +
-                            '<a href="pages/court.html?id=' + row.id + '" class="court-card-details">Подробнее →</a>' +
-                            '<span class="court-card-cta" data-id="' + row.id + '">Скидка КСЛТ</span>' +
-                        '</div>' +
-                    '</div>';
-                });
-                grid.innerHTML = html;
-            });
-    })();
-    // Load Supabase coaches into main page
-    (function() {
-        var client = window.supabaseClient;
-        if (!client) return;
-        var grid = document.querySelector('.section-coaches .coaches-grid');
-        if (!grid) return;
-
-        var _coachAccess = 'guest';
-
-        function detectCoachAccess() {
-            if (!client) return Promise.resolve();
-            return client.auth.getSession().then(function(res) {
-                if (!res.data || !res.data.session) return;
-                _coachAccess = 'registered';
-                if (typeof window.checkMembership === 'function') {
-                    return window.checkMembership().then(function(mem) {
-                        if (mem && mem.active) _coachAccess = 'member';
-                    }).catch(function() {});
-                }
-            }).catch(function() {});
-        }
-
-        function showCoachModal(level) {
-            var isGuest = level === 'guest';
-            var title = isGuest ? 'Станьте членом KSLT' : 'Нужно членство';
-            var text = isGuest
-                ? 'Зарегистрируйтесь и оформите членство KSLT, чтобы получить скидки у партнёрских тренеров'
-                : 'Оформите членство KSLT, чтобы получить скидки у партнёрских тренеров';
-            var btnText = isGuest ? 'Регистрация' : 'Тарифы';
-            var btnLink = isGuest ? 'pages/auth.html' : 'pages/pricing.html';
-            var svgIcon = isGuest
-                ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
-                : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-            var overlay = document.createElement('div');
-            overlay.className = 'hp-membership-overlay';
-            overlay.innerHTML =
-                '<div class="hp-membership-modal">' +
-                    '<button class="hp-membership-close">&times;</button>' +
-                    '<div class="hp-membership-icon">' + svgIcon + '</div>' +
-                    '<h3>' + title + '</h3>' +
-                    '<p>' + text + '</p>' +
-                    '<a href="' + btnLink + '" class="hp-membership-btn">' + btnText + '</a>' +
-                '</div>';
-            document.body.appendChild(overlay);
-            requestAnimationFrame(function() { overlay.classList.add('visible'); });
-            overlay.querySelector('.hp-membership-close').onclick = function() {
-                overlay.classList.remove('visible');
-                setTimeout(function() { overlay.remove(); }, 300);
-            };
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) {
-                    overlay.classList.remove('visible');
-                    setTimeout(function() { overlay.remove(); }, 300);
-                }
-            });
-        }
-
-        // CTA click delegation
-        grid.addEventListener('click', function(e) {
-            var cta = e.target.closest('.coach-card-cta');
-            if (!cta) return;
-            e.preventDefault();
-            e.stopPropagation();
-            if (_coachAccess === 'guest' || _coachAccess === 'registered') {
-                showCoachModal(_coachAccess);
-                return;
-            }
-            var id = cta.getAttribute('data-id');
-            window.location.href = 'pages/coach.html?id=' + id;
-        });
-
-        detectCoachAccess();
-
-        client.from('coaches').select('*').order('created_at', { ascending: false }).limit(9)
-            .then(function(res) {
-                if (res.error || !res.data || !res.data.length) return;
-                var html = '';
-                res.data.forEach(function(row) {
-                    var name = ((row.last_name || '') + ' ' + (row.first_name || '')).trim() || row.name || '';
-                    var pos = row.position || '';
-                    var exp = row.experience ? 'Опыт: ' + row.experience + ' лет' : '';
-                    var price = row.price ? 'от ' + row.price + ' сом/час' : '';
-                    var photo = row.photo || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&q=80';
-
-                    html += '<div class="coach-card">' +
-                        '<img src="' + photo + '" alt="' + name + '" class="coach-photo">' +
-                        '<div class="coach-info">' +
-                            '<h4>' + name + '</h4>' +
-                            (pos ? '<span class="coach-speciality">' + pos + '</span>' : '') +
-                            (exp ? '<span class="coach-experience">' + exp + '</span>' : '') +
-                            (price ? '<span class="coach-price">' + price + '</span>' : '') +
-                        '</div>' +
-                        '<div class="coach-card-actions">' +
-                            '<a href="pages/coach.html?id=' + row.id + '" class="coach-card-details">Подробнее →</a>' +
-                            '<span class="coach-card-cta" data-id="' + row.id + '">Скидка КСЛТ</span>' +
-                        '</div>' +
-                    '</div>';
-                });
-                grid.innerHTML = html;
-            });
-    })();
+    
+    
     // HTML escape helper
     function esc(str) {
         if (!str) return '';

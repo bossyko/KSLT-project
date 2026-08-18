@@ -365,20 +365,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // --- Rankings: show top 3, blur rest ---
         if (rankingsSection) {
-            var panels = rankingsSection.querySelectorAll('.rankings-panel');
-            panels.forEach(function(panel) {
-                var rows = panel.querySelectorAll('.ranking-row:not(.ranking-header)');
-                for (var i = 3; i < rows.length; i++) {
-                    var blur = Math.min((i - 2) * 2, 8);
-                    var opacity = Math.max(0.7 - (i - 3) * 0.15, 0.15);
-                    rows[i].style.filter = 'blur(' + blur + 'px)';
-                    rows[i].style.opacity = opacity;
-                    rows[i].style.pointerEvents = 'none';
-                    rows[i].style.userSelect = 'none';
-                }
-            });
+            // Строки размывает js/home-rankings.js: он рисует их после ответа
+            // базы, а этот код отрабатывает раньше — размывать было нечего
 
-            var rankTitle = isEn ? 'Sign up for full rankings' : (isKg ? 'Толук рейтинг үчүн катталыңыз' : 'Зарегистрируйтесь для полного рейтинга');
+            var rankTitle = isEn ? 'Full rankings are visible after signing in'
+                : (isKg ? 'Толук рейтинг киргенден кийин көрүнөт' : 'Весь рейтинг виден после входа');
             var rankCta = document.createElement('div');
             rankCta.className = 'guest-section-cta';
             rankCta.innerHTML =

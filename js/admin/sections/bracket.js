@@ -460,57 +460,28 @@
     }
 
     /**
-     * Recalculate doubles_points for a set of player IDs.
+     * Парный счёт игроков турнира.
+     *
+     * Раньше здесь считались победы, поражения, форма и очки за пары —
+     * прямо в браузере, по одному игроку за запрос. Считалось только когда
+     * менеджер сохранял результаты, и только по капитанам: напарник в матче
+     * не записан, и своих парных побед не видел.
+     *
+     * Теперь это делает база, функцией recalc_pair_stats, которую зовёт
+     * триггер после каждого матча. Здесь остался вызов на случай, когда
+     * результаты правят задним числом: триггер отработает на матчах, а эта
+     * строка обновит всех, кого назвал менеджер.
+     *
+     * Очки за пары и форма парных матчей удалены: рейтинг у нас одиночный,
+     * а эти числа никто не показывал.
      */
     async function recalcDoublesPoints(playerIds) {
         var unique = playerIds.filter(function(id, i) { return playerIds.indexOf(id) === i; });
-        var oldestDate = A.getOldestValidDate();
+        if (unique.length === 0) return;
 
-        // Get doubles tournament IDs
-        var dblTrnRes = await A.client.from('tournaments').select('id').in('format', ['doubles', 'mixed_doubles']);
-        var dblTrnIds = (dblTrnRes.data || []).map(function(t) { return t.id; });
-
-        for (var i = 0; i < unique.length; i++) {
-            var pid = unique[i];
-
-            // Points from rating_history (doubles only, 2 tournament-year window)
-            var rhRes = await A.client.from('rating_history')
-                .select('points_earned')
-                .eq('player_id', pid)
-                .eq('is_doubles', true)
-                .gte('recorded_at', oldestDate);
-            var total = 0;
-            (rhRes.data || []).forEach(function(r) {
-                total += r.points_earned || 0;
-            });
-
-            // Wins/losses from matches in doubles tournaments
-            var matchRes = await A.client.from('matches')
-                .select('winner_id, tournament_id, played_at')
-                .or('player1_id.eq.' + pid + ',player2_id.eq.' + pid)
-                .not('winner_id', 'is', null)
-                .order('played_at', { ascending: false });
-            var doublesMatches = (matchRes.data || []).filter(function(m) {
-                return dblTrnIds.indexOf(m.tournament_id) !== -1;
-            });
-            var wins = 0;
-            var losses = 0;
-            doublesMatches.forEach(function(m) {
-                if (m.winner_id === pid) wins++;
-                else losses++;
-            });
-
-            // Form: last 5 doubles matches
-            var dblForm = doublesMatches.slice(0, 5).map(function(m) {
-                return m.winner_id === pid ? 'W' : 'L';
-            });
-
-            await A.client.from('players').update({
-                doubles_points: total,
-                doubles_wins: wins,
-                doubles_losses: losses,
-                doubles_form: dblForm
-            }).eq('id', pid);
+        var res = await A.client.rpc('recalc_pair_stats', { p_ids: unique });
+        if (res.error) {
+            console.error('[KSLT] парный счёт не пересчитан:', res.error.message || res.error);
         }
     }
 

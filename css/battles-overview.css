@@ -195,15 +195,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-md);
     flex-wrap: wrap;
     gap: var(--space-sm);
 }
 
+/* Тот же размер и отступ, что у заголовков на главной: один вид на всех
+   страницах, а не свой на каждой */
 .bo-section-title {
     font-size: 1.6rem;
     font-weight: 700;
     color: var(--text-primary);
+    margin-bottom: 0;
 }
 
 .bo-section-title span {
@@ -321,6 +324,137 @@
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* ============================================
+   ПОЛОСЫ: завершённые и неглавные предстоящие
+   ============================================
+   Разметка взята у турниров — .to-compact и .to-side-stack. Не похожая,
+   а та же самая: правило «актуальное крупно, история строкой» должно
+   работать одинаково на обеих страницах, и правится оно в одном месте.
+
+   Раньше оба раздела рисовались крупными карточками, и завершённые
+   утапливали предстоящие. */
+.bo-strip-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+/* Афиша на фоне полосы приглушается сильнее, чем у турниров: постеры
+   бывают светлыми, и подпись под названием по ним не читалась.
+
+   Затемнения мало — светлое пятно всё равно проступает под мелким текстом,
+   поэтому подписи получают ещё и тень. */
+.bo-strip[style*="background-image"]::before {
+    background: rgba(10, 10, 10, 0.9);
+}
+
+.bo-strip h4,
+.bo-strip .bo-strip-sub,
+.bo-strip .to-compact-date {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.bo-strip-sub {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bo-strip-right { text-align: right; }
+
+.bo-strip-badge {
+    display: inline-block;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+.bo-strip-live {
+    background: rgba(204, 255, 0, 0.16);
+    color: var(--accent);
+    border: 1px solid rgba(204, 255, 0, 0.4);
+}
+
+/* У прошедшего матча цвета спокойные: тревожный оттенок тут ни к чему */
+.bo-strip-done {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+}
+
+.bo-strip-past .to-compact-date .to-day { color: var(--text-secondary); }
+
+.bo-strip-fmt {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    background: rgba(59, 130, 246, 0.16);
+    color: #6EA8FE;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* Пустой раздел занимал пол-экрана. Достаточно строки */
+.bo-empty-slim {
+    padding: 26px 20px;
+    text-align: center;
+    color: var(--text-dim);
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-lg);
+}
+
+.bo-more-wrap { text-align: center; margin-top: var(--space-md); }
+
+.bo-more {
+    padding: 10px 26px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    font: 600 0.9rem inherit;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+.bo-more:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (max-width: 860px) {
+    .bo-strip-grid { grid-template-columns: 1fr; }
+}
+
+/* Пара в крупной карточке: фотографии внахлёст, имена в две строки.
+   Разметка одиночного баттла остаётся нетронутой — у него одно фото и одна
+   строка, как было */
+.bo-player-photos { display: flex; justify-content: center; }
+.bo-player-photos.bo-pair .bo-player-img { width: 62px; height: 62px; }
+.bo-player-photos.bo-pair .bo-player-img + .bo-player-img { margin-left: -18px; }
+.bo-player-name.bo-pair-names {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.25;
+}
+.bo-player-name.bo-pair-names span { font-size: 0.85rem; }
+
+/* Состав словами: мужские пары, женские пары, микст. Пол участников база
+   знает, значит подпись собирается сама */
+.bo-format {
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6EA8FE;
+    margin-bottom: 10px;
 }
 
 .bo-vs-badge {

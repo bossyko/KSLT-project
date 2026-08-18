@@ -87,30 +87,30 @@
 
         Promise.all([
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, message, created_at')
+                .select('id, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, challenger_gender, opponent_gender, challenger_partner_gender, opponent_partner_gender, allow_any_pair, status, proposed_date, proposed_time, proposed_venue, message, created_at')
                 // Вызов заводится со статусом active: 'pending' здесь искали
                 // то, чего в базе не бывает, и вкладка всегда пустовала
                 .eq('status', 'active')
                 .order('created_at', { ascending: false }),
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, score_draft')
+                .select('id, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, challenger_gender, opponent_gender, challenger_partner_gender, opponent_partner_gender, allow_any_pair, status, proposed_date, proposed_time, proposed_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, score_draft')
                 .eq('status', 'accepted')
                 .eq('battle_published', false)
                 .order('accepted_at', { ascending: false }),
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, proposed_date, proposed_time, proposed_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, battle_notified_at, score_draft, banner_url, proposed_court_id, challenger_ntrp, opponent_ntrp, challenger_country, opponent_country, challenger_category, opponent_category, set_format')
+                .select('id, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, challenger_gender, opponent_gender, challenger_partner_gender, opponent_partner_gender, allow_any_pair, status, proposed_date, proposed_time, proposed_venue, battle_title, battle_published, battle_published_at, voting_closed, match_id, accepted_at, battle_notified_at, score_draft, banner_url, proposed_court_id, challenger_ntrp, opponent_ntrp, challenger_country, opponent_country, challenger_category, opponent_category, set_format')
                 .eq('battle_published', true)
                 .neq('status', 'completed')
                 .neq('status', 'cancelled')
                 .order('battle_published_at', { ascending: false }),
-            A.client.from('players').select('id, name, name_en, photo, ntrp_rating, category_id, country').order('name'),
+            A.client.from('players').select('id, name, name_en, photo, ntrp_rating, category_id, country, gender').order('name'),
             // Контакты: менеджер связывается с обоими, чтобы выяснить корт и
             // время. Без них за каждым телефоном приходилось идти в раздел
             // «Игроки» по одному
             A.client.from('profiles').select('player_id, phone, telegram, email').not('player_id', 'is', null),
             A.client.from('courts').select('id, name, name_en, street, street_en, district, district_en, city, city_en').order('name'),
             A.client.from('challenges')
-                .select('id, challenger_player_id, opponent_player_id, status, battle_title, match_id, accepted_at, cancel_reason')
+                .select('id, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, challenger_gender, opponent_gender, challenger_partner_gender, opponent_partner_gender, allow_any_pair, status, battle_title, match_id, accepted_at, cancel_reason')
                 .in('status', ['completed', 'cancelled'])
                 .order('accepted_at', { ascending: false })
         ]).then(function(results) {
@@ -167,7 +167,6 @@
     function renderPending() {
         var el = document.getElementById('chalContent');
         if (!el) return;
-        var pMap = A._chalPlayersMap || {};
 
         if (pendingList.length === 0) {
             el.innerHTML = '<div class="ad-empty-state">' + L.chalNoPending + '</div>';
@@ -184,10 +183,10 @@
             '</tr></thead><tbody>';
 
         pendingList.forEach(function(c) {
-            var p1 = pMap[c.challenger_player_id] || {};
-            var p2 = pMap[c.opponent_player_id] || {};
-            var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-            var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+            var p1 = chalSide(c, 1);
+            var p2 = chalSide(c, 2);
+            var p1Name = chalSideName(c, 1);
+            var p2Name = chalSideName(c, 2);
             var date = c.proposed_date || '';
             var time = c.proposed_time || '';
             var venue = c.proposed_venue || '-';
@@ -211,7 +210,6 @@
     function renderAccepted() {
         var el = document.getElementById('chalContent');
         if (!el) return;
-        var pMap = A._chalPlayersMap || {};
 
         if (acceptedList.length === 0) {
             el.innerHTML = '<div class="ad-empty-state">' + L.chalNoAccepted + '</div>';
@@ -230,10 +228,10 @@
             '</tr></thead><tbody>';
 
         acceptedList.forEach(function(c) {
-            var p1 = pMap[c.challenger_player_id] || {};
-            var p2 = pMap[c.opponent_player_id] || {};
-            var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-            var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+            var p1 = chalSide(c, 1);
+            var p2 = chalSide(c, 2);
+            var p1Name = chalSideName(c, 1);
+            var p2Name = chalSideName(c, 2);
 
             html += '<tr>' +
                 '<td>' + A.esc(p1Name) + '</td>' +
@@ -302,7 +300,6 @@
     function renderPublished() {
         var el = document.getElementById('chalContent');
         if (!el) return;
-        var pMap = A._chalPlayersMap || {};
 
         if (publishedList.length === 0) {
             el.innerHTML = '<div class="ad-empty-state">' + L.chalNoPublished + '</div>';
@@ -320,10 +317,10 @@
             '</tr></thead><tbody>';
 
         publishedList.forEach(function(c) {
-            var p1 = pMap[c.challenger_player_id] || {};
-            var p2 = pMap[c.opponent_player_id] || {};
-            var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-            var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+            var p1 = chalSide(c, 1);
+            var p2 = chalSide(c, 2);
+            var p1Name = chalSideName(c, 1);
+            var p2Name = chalSideName(c, 2);
 
             var statusBadge = c.status === 'completed'
                 ? '<span class="ad-badge ad-badge-green">' + L.chalCompleted + '</span>'
@@ -438,10 +435,10 @@
             '</tr></thead><tbody>';
 
         completedList.forEach(function(c) {
-            var p1 = pMap[c.challenger_player_id] || {};
-            var p2 = pMap[c.opponent_player_id] || {};
-            var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-            var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+            var p1 = chalSide(c, 1);
+            var p2 = chalSide(c, 2);
+            var p1Name = chalSideName(c, 1);
+            var p2Name = chalSideName(c, 2);
             var date = c.accepted_at ? formatDate(c.accepted_at) : '-';
             var titleExtra = c.status === 'cancelled' ? ' <span class="ad-badge ad-badge-yellow">' + L.chalCancelledBadge + '</span>' : '';
             // Причина отмены — рядом с пометкой: без неё «Отменён» ничего
@@ -486,10 +483,10 @@
                 var cId = btn.dataset.deleteCompleted;
                 var c = completedList.find(function(x) { return x.id === cId; });
                 if (!c) return;
-                var p1 = pMap[c.challenger_player_id] || {};
-                var p2 = pMap[c.opponent_player_id] || {};
-                var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-                var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+                var p1 = chalSide(c, 1);
+                var p2 = chalSide(c, 2);
+                var p1Name = chalSideName(c, 1);
+                var p2Name = chalSideName(c, 2);
                 openDeleteCompletedModal(c, p1Name, p2Name);
             });
         });
@@ -562,8 +559,12 @@
 
     // ==== CREATE BATTLE MODAL ====
     function openCreateBattleModal() {
-        var sel1 = { id: null, name: '', ntrp: '', country: '', category: '' };
-        var sel2 = { id: null, name: '', ntrp: '', country: '', category: '' };
+        var sel1 = { id: null, name: '', ntrp: '', country: '', category: '', gender: '' };
+        var sel2 = { id: null, name: '', ntrp: '', country: '', category: '', gender: '' };
+        // Вторые половины пар. В одиночном не используются и в базу не уходят
+        var mate1 = { id: null, name: '', ntrp: '', gender: '' };
+        var mate2 = { id: null, name: '', ntrp: '', gender: '' };
+        var format = 'singles';
         var selCourt = { id: null, name: '', address: '' };
         var bannerUrl = '';
 
@@ -576,6 +577,16 @@
                     '<button class="ad-modal-close" id="cbClose">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body" style="max-height:70vh;overflow-y:auto;">' +
+                    // Формат баттла. Пока стоит одиночный, форма выглядит как
+                    // раньше: поля напарников скрыты и в базу не уходят
+                    '<div class="ad-field-group">' +
+                        '<label class="ad-field-label">' + L.chalFormat + '</label>' +
+                        '<div class="ad-seg" id="cbFormat">' +
+                            '<button type="button" class="ad-seg-btn on" data-format="singles">' + L.chalSingles + '</button>' +
+                            '<button type="button" class="ad-seg-btn" data-format="doubles">' + L.chalDoubles + '</button>' +
+                            '<button type="button" class="ad-seg-btn" data-format="mixed_doubles">' + L.chalMixed + '</button>' +
+                        '</div>' +
+                    '</div>' +
                     // Player 1
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.chalPlayer1 + '</label>' +
@@ -585,6 +596,11 @@
                         '</div>' +
                         '<div id="cbP1Selected" class="ad-chal-selected-hint"></div>' +
                         '<div style="display:flex;gap:8px;margin-top:6px;">' +
+                            '<select class="ad-field-input" id="cbP1Gender" style="width:86px;flex:0 0 86px;">' +
+                                '<option value="">' + L.chalGender + '</option>' +
+                                '<option value="men">' + L.chalMen + '</option>' +
+                                '<option value="women">' + L.chalWomen + '</option>' +
+                            '</select>' +
                             '<select class="ad-field-input" id="cbP1Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(null, { emptyLabel: 'NTRP' }) + '</select>' +
                             '<select class="ad-field-input" id="cbP1Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions('') + '</select>' +
                             '<div style="flex:1;min-width:0;position:relative;">' +
@@ -592,6 +608,23 @@
                                 '<input type="hidden" id="cbP1Country">' +
                                 '<div class="ad-dropdown-list" id="cbP1CountryDd" style="display:none;"></div>' +
                             '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    // Напарник стороны 1: показывается только в парном и миксте
+                    '<div class="ad-field-group cb-partner" id="cbM1Group" style="display:none;">' +
+                        '<label class="ad-field-label">' + L.chalPartner + ' <span class="cb-hint" id="cbM1Hint"></span></label>' +
+                        '<div style="position:relative;">' +
+                            '<input type="text" class="ad-field-input" id="cbM1Input" placeholder="' + L.chalSearchPlayer + '" autocomplete="off">' +
+                            '<div class="ad-dropdown-list" id="cbM1Dropdown" style="display:none;"></div>' +
+                        '</div>' +
+                        '<div id="cbM1Selected" class="ad-chal-selected-hint"></div>' +
+                        '<div style="display:flex;gap:8px;margin-top:6px;">' +
+                            '<select class="ad-field-input" id="cbM1Gender" style="width:86px;flex:0 0 86px;">' +
+                                '<option value="">' + L.chalGender + '</option>' +
+                                '<option value="men">' + L.chalMen + '</option>' +
+                                '<option value="women">' + L.chalWomen + '</option>' +
+                            '</select>' +
+                            '<select class="ad-field-input" id="cbM1Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(null, { emptyLabel: 'NTRP' }) + '</select>' +
                         '</div>' +
                     '</div>' +
                     // Player 2
@@ -603,6 +636,11 @@
                         '</div>' +
                         '<div id="cbP2Selected" class="ad-chal-selected-hint"></div>' +
                         '<div style="display:flex;gap:8px;margin-top:6px;">' +
+                            '<select class="ad-field-input" id="cbP2Gender" style="width:86px;flex:0 0 86px;">' +
+                                '<option value="">' + L.chalGender + '</option>' +
+                                '<option value="men">' + L.chalMen + '</option>' +
+                                '<option value="women">' + L.chalWomen + '</option>' +
+                            '</select>' +
                             '<select class="ad-field-input" id="cbP2Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(null, { emptyLabel: 'NTRP' }) + '</select>' +
                             '<select class="ad-field-input" id="cbP2Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions('') + '</select>' +
                             '<div style="flex:1;min-width:0;position:relative;">' +
@@ -610,6 +648,23 @@
                                 '<input type="hidden" id="cbP2Country">' +
                                 '<div class="ad-dropdown-list" id="cbP2CountryDd" style="display:none;"></div>' +
                             '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    // Напарник стороны 2: показывается только в парном и миксте
+                    '<div class="ad-field-group cb-partner" id="cbM2Group" style="display:none;">' +
+                        '<label class="ad-field-label">' + L.chalPartner + ' <span class="cb-hint" id="cbM2Hint"></span></label>' +
+                        '<div style="position:relative;">' +
+                            '<input type="text" class="ad-field-input" id="cbM2Input" placeholder="' + L.chalSearchPlayer + '" autocomplete="off">' +
+                            '<div class="ad-dropdown-list" id="cbM2Dropdown" style="display:none;"></div>' +
+                        '</div>' +
+                        '<div id="cbM2Selected" class="ad-chal-selected-hint"></div>' +
+                        '<div style="display:flex;gap:8px;margin-top:6px;">' +
+                            '<select class="ad-field-input" id="cbM2Gender" style="width:86px;flex:0 0 86px;">' +
+                                '<option value="">' + L.chalGender + '</option>' +
+                                '<option value="men">' + L.chalMen + '</option>' +
+                                '<option value="women">' + L.chalWomen + '</option>' +
+                            '</select>' +
+                            '<select class="ad-field-input" id="cbM2Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(null, { emptyLabel: 'NTRP' }) + '</select>' +
                         '</div>' +
                     '</div>' +
                     // Title
@@ -669,6 +724,14 @@
                             '</div>' +
                         '</div>' +
                     '</div>' +
+                    // Показательная игра вне правил. Только для парного:
+                    // микст — это мужчина и женщина по самому смыслу слова
+                    '<div class="ad-field-group cb-anypair" id="cbAnyPairGroup" style="display:none;">' +
+                        '<label class="ad-chk">' +
+                            '<input type="checkbox" id="cbAnyPair"> ' + L.chalAnyPair +
+                        '</label>' +
+                        '<div class="ad-field-hint">' + L.chalAnyPairHint + '</div>' +
+                    '</div>' +
                 '</div>' +
                 '<div class="ad-modal-footer">' +
                     '<button class="ad-btn ad-btn-primary" id="cbSave">' + L.chalCreate + '</button>' +
@@ -683,17 +746,114 @@
 
         // Player search setup with autofill
         setupPlayerSearch('cbP1Input', 'cbP1Dropdown', 'cbP1Selected', function(p) {
-            sel1 = { id: p.id, name: p.name, ntrp: sel1.ntrp, country: sel1.country, category: sel1.category };
+            sel1 = { id: p.id, name: p.name, ntrp: sel1.ntrp, country: sel1.country,
+                     category: sel1.category, gender: sel1.gender };
             if (p._player) {
                 autofillPlayerExtras(p._player, 'cbP1Ntrp', 'cbP1Cat', 'cbP1Country', 'cbP1CountryInput', sel1);
             }
         });
         setupPlayerSearch('cbP2Input', 'cbP2Dropdown', 'cbP2Selected', function(p) {
-            sel2 = { id: p.id, name: p.name, ntrp: sel2.ntrp, country: sel2.country, category: sel2.category };
+            sel2 = { id: p.id, name: p.name, ntrp: sel2.ntrp, country: sel2.country,
+                     category: sel2.category, gender: sel2.gender };
             if (p._player) {
                 autofillPlayerExtras(p._player, 'cbP2Ntrp', 'cbP2Cat', 'cbP2Country', 'cbP2CountryInput', sel2);
             }
         });
+
+        // Напарники ищутся так же, как основные игроки, но список сужен по
+        // полу: в парном тот же, в миксте противоположный. Неподходящих в
+        // списке просто нет — ошибиться не через что
+        setupPlayerSearch('cbM1Input', 'cbM1Dropdown', 'cbM1Selected', function(p) {
+            mate1 = { id: p.id, name: p.name, ntrp: mate1.ntrp, gender: mate1.gender };
+            if (p._player && p._player.gender) {
+                var el = document.getElementById('cbM1Gender');
+                if (el) el.value = p._player.gender;
+                mate1.gender = p._player.gender;
+            }
+            if (p._player && p._player.ntrp_rating) {
+                var n = document.getElementById('cbM1Ntrp');
+                var v = parseFloat(p._player.ntrp_rating).toFixed(2).replace(/0$/, '');
+                if (n) n.value = v;
+                mate1.ntrp = v;
+            }
+        }, function() { return allowedGender(1); });
+
+        setupPlayerSearch('cbM2Input', 'cbM2Dropdown', 'cbM2Selected', function(p) {
+            mate2 = { id: p.id, name: p.name, ntrp: mate2.ntrp, gender: mate2.gender };
+            if (p._player && p._player.gender) {
+                var el2 = document.getElementById('cbM2Gender');
+                if (el2) el2.value = p._player.gender;
+                mate2.gender = p._player.gender;
+            }
+            if (p._player && p._player.ntrp_rating) {
+                var n2 = document.getElementById('cbM2Ntrp');
+                var v2 = parseFloat(p._player.ntrp_rating).toFixed(2).replace(/0$/, '');
+                if (n2) n2.value = v2;
+                mate2.ntrp = v2;
+            }
+        }, function() { return allowedGender(2); });
+
+        /**
+         * Какой пол должен быть у напарника этой стороны.
+         *
+         * Считается от пола основного игрока: в парном такой же, в миксте
+         * противоположный. Пока основной не выбран или галочка снимает
+         * проверку — не сужаем, показываем всех.
+         */
+        function allowedGender(side) {
+            if (format === 'singles') return null;
+            var anyPair = document.getElementById('cbAnyPair');
+            if (format === 'doubles' && anyPair && anyPair.checked) return null;
+            var g = side === 1 ? sel1.gender : sel2.gender;
+            if (!g) return null;
+            if (format === 'doubles') return g;
+            return g === 'men' ? 'women' : 'men';
+        }
+
+        /** Подпись у поля напарника: кого именно тут ищем. */
+        function updatePartnerHints() {
+            [1, 2].forEach(function(side) {
+                var hint = document.getElementById('cbM' + side + 'Hint');
+                if (!hint) return;
+                var g = allowedGender(side);
+                hint.textContent = g ? '· ' + (g === 'men' ? L.chalOnlyMen : L.chalOnlyWomen) : '';
+            });
+        }
+
+        /** Показ и скрытие полей под выбранный формат. */
+        function applyFormat() {
+            var pair = format !== 'singles';
+            ['cbM1Group', 'cbM2Group'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.style.display = pair ? '' : 'none';
+            });
+            var any = document.getElementById('cbAnyPairGroup');
+            // Микст исключений не знает: там мужчина и женщина по смыслу слова
+            if (any) any.style.display = format === 'doubles' ? '' : 'none';
+            updatePartnerHints();
+        }
+
+        document.getElementById('cbFormat').addEventListener('click', function(e) {
+            var btn = e.target.closest('.ad-seg-btn');
+            if (!btn) return;
+            format = btn.dataset.format;
+            this.querySelectorAll('.ad-seg-btn').forEach(function(b) {
+                b.classList.toggle('on', b === btn);
+            });
+            applyFormat();
+        });
+
+        // Пол основного игрока задаёт, кого искать в напарники
+        ['cbP1Gender', 'cbP2Gender'].forEach(function(id, i) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('change', function() {
+                if (i === 0) sel1.gender = el.value; else sel2.gender = el.value;
+                updatePartnerHints();
+            });
+        });
+        var anyPairEl = document.getElementById('cbAnyPair');
+        if (anyPairEl) anyPairEl.addEventListener('change', updatePartnerHints);
 
         // Country search inputs
         setupCountryInput('cbP1CountryInput', 'cbP1Country', 'cbP1CountryDd');
@@ -742,11 +902,11 @@
             // Auto-capture typed names if not selected from dropdown
             if (!sel1.name) {
                 var typed1 = document.getElementById('cbP1Input').value.trim();
-                if (typed1) sel1 = { id: null, name: typed1, ntrp: '', country: '', category: '' };
+                if (typed1) sel1 = { id: null, name: typed1, ntrp: '', country: '', category: '', gender: '' };
             }
             if (!sel2.name) {
                 var typed2 = document.getElementById('cbP2Input').value.trim();
-                if (typed2) sel2 = { id: null, name: typed2, ntrp: '', country: '', category: '' };
+                if (typed2) sel2 = { id: null, name: typed2, ntrp: '', country: '', category: '', gender: '' };
             }
 
             if (!sel1.name || !sel2.name) {
@@ -762,9 +922,54 @@
             sel1.ntrp = document.getElementById('cbP1Ntrp').value || '';
             sel1.category = document.getElementById('cbP1Cat').value || '';
             sel1.country = document.getElementById('cbP1Country').value || '';
+            sel1.gender = document.getElementById('cbP1Gender').value || '';
             sel2.ntrp = document.getElementById('cbP2Ntrp').value || '';
             sel2.category = document.getElementById('cbP2Cat').value || '';
             sel2.country = document.getElementById('cbP2Country').value || '';
+            sel2.gender = document.getElementById('cbP2Gender').value || '';
+
+            // Пол спрашиваем только у вписанного руками: у члена клуба он
+            // подставился из карточки. Без него не собрать парный баттл —
+            // проверка состава пары сравнивает именно его
+            if (!sel1.id && !sel1.gender) {
+                A.showToast(L.chalGenderRequired, 'error');
+                document.getElementById('cbP1Gender').focus();
+                return;
+            }
+            if (!sel2.id && !sel2.gender) {
+                A.showToast(L.chalGenderRequired, 'error');
+                document.getElementById('cbP2Gender').focus();
+                return;
+            }
+
+            // Напарники. Вписанного руками добираем из поля: он мог не
+            // выбираться из списка, а просто быть напечатан
+            if (format !== 'singles') {
+                if (!mate1.name) {
+                    var tm1 = document.getElementById('cbM1Input').value.trim();
+                    if (tm1) mate1 = { id: null, name: tm1, ntrp: '', gender: '' };
+                }
+                if (!mate2.name) {
+                    var tm2 = document.getElementById('cbM2Input').value.trim();
+                    if (tm2) mate2 = { id: null, name: tm2, ntrp: '', gender: '' };
+                }
+                mate1.gender = document.getElementById('cbM1Gender').value || '';
+                mate2.gender = document.getElementById('cbM2Gender').value || '';
+                mate1.ntrp = document.getElementById('cbM1Ntrp').value || '';
+                mate2.ntrp = document.getElementById('cbM2Ntrp').value || '';
+
+                if (!mate1.name || !mate2.name) {
+                    A.showToast(L.chalPartnerRequired, 'error');
+                    return;
+                }
+                if ((!mate1.id && !mate1.gender) || (!mate2.id && !mate2.gender)) {
+                    A.showToast(L.chalGenderRequired, 'error');
+                    return;
+                }
+            }
+
+            var anyPair = format === 'doubles' &&
+                !!(document.getElementById('cbAnyPair') || {}).checked;
 
             var setFormat = document.getElementById('cbSetFormat').value || 'standard';
 
@@ -772,7 +977,12 @@
             btn.disabled = true;
             btn.textContent = L.chalCreating;
 
-            createBattle(sel1, sel2, title, date, time, venue, bannerUrl, selCourt.id, setFormat).then(function(ok) {
+            createBattle(sel1, sel2, title, date, time, venue, bannerUrl, selCourt.id, setFormat, {
+                format: format,
+                mate1: format === 'singles' ? null : mate1,
+                mate2: format === 'singles' ? null : mate2,
+                anyPair: anyPair
+            }).then(function(ok) {
                 overlay.remove();
                 if (ok) {
                     A.showToast(L.chalCreated, 'success');
@@ -783,8 +993,44 @@
         });
     }
 
+    /**
+     * Сторона баттла: игрок клуба или вписанный руками гость.
+     *
+     * У гостя строки в players нет — его имя лежит в самом вызове. Раньше
+     * такой человек заводился в базу настоящей карточкой, и это место
+     * обходилось одним взглядом в справочник игроков.
+     */
+    function chalSide(c, n) {
+        var pMap = A._chalPlayersMap || {};
+        var id  = n === 1 ? c.challenger_player_id : c.opponent_player_id;
+        var ext = n === 1 ? c.challenger_external_name : c.opponent_external_name;
+        var p = (id && pMap[id]) || null;
+        if (p && p.name) return p;
+        return { name: ext || '?', name_en: ext || '?', name_kg: ext || '?' };
+    }
+
+    /**
+     * Как называется сторона целиком: один человек или пара через косую.
+     *
+     * В матче записан только капитан — тот, кто стоит в вызове первым.
+     * Победителя выбирают из двух сторон, а не из четверых, поэтому и
+     * подписывать надо стороны.
+     */
+    function chalSideName(c, n) {
+        var pMap = A._chalPlayersMap || {};
+        var side = chalSide(c, n);
+        var name = isEn ? (side.name_en || side.name || '?') : (side.name || '?');
+        if (!c.format || c.format === 'singles') return name;
+
+        var mateId = n === 1 ? c.challenger_partner_id : c.opponent_partner_id;
+        var mateExt = n === 1 ? c.challenger_partner_name : c.opponent_partner_name;
+        var mate = (mateId && pMap[mateId]) || null;
+        var mateName = mate ? (isEn ? (mate.name_en || mate.name) : mate.name) : mateExt;
+        return mateName ? name + ' / ' + mateName : name;
+    }
+
     // ---- Player search dropdown ----
-    function setupPlayerSearch(inputId, dropdownId, selectedId, onSelect) {
+    function setupPlayerSearch(inputId, dropdownId, selectedId, onSelect, genderFn) {
         var input = document.getElementById(inputId);
         var dropdown = document.getElementById(dropdownId);
         var selectedEl = document.getElementById(selectedId);
@@ -798,7 +1044,12 @@
             if (q.length < 1) { dropdown.style.display = 'none'; return; }
 
             debounce = setTimeout(function() {
+                // Кого можно поставить в пару, решает вызывающий: в парном
+                // тот же пол, в миксте противоположный. Неподходящих не
+                // показываем вовсе — так ошибиться не через что
+                var want = genderFn ? genderFn() : null;
                 var matches = allPlayers.filter(function(p) {
+                    if (want && p.gender && p.gender !== want) return false;
                     var n = (p.name || '').toLowerCase();
                     var ne = (p.name_en || '').toLowerCase();
                     return n.indexOf(q) !== -1 || ne.indexOf(q) !== -1;
@@ -942,36 +1193,54 @@
     }
 
     // ---- Create battle (insert player if manual + challenge) ----
-    function createBattle(p1, p2, title, date, time, venue, bannerUrl, courtId, setFormat) {
-        return ensurePlayer(p1).then(function(p1Id) {
-            return ensurePlayer(p2).then(function(p2Id) {
-                var adminId = A.currentUserId;
-                return A.client.from('challenges').insert({
-                    challenger_id: adminId,
-                    challenger_player_id: p1Id,
-                    opponent_player_id: p2Id,
-                    opponent_profile_id: null,
-                    proposed_date: date || new Date().toISOString().slice(0, 10),
-                    proposed_time: time || '18:00',
-                    proposed_venue: venue || null,
-                    proposed_court_id: courtId || null,
-                    status: 'accepted',
-                    accepted_at: new Date().toISOString(),
-                    battle_title: title,
-                    battle_published: true,
-                    battle_published_at: new Date().toISOString(),
-                    voting_closed: false,
-                    banner_url: bannerUrl || null,
-                    challenger_ntrp: p1.ntrp ? parseFloat(p1.ntrp) : null,
-                    opponent_ntrp: p2.ntrp ? parseFloat(p2.ntrp) : null,
-                    challenger_country: p1.country || null,
-                    opponent_country: p2.country || null,
-                    challenger_category: p1.category || null,
-                    opponent_category: p2.category || null,
-                    set_format: setFormat || 'standard'
-                }).select('id').single();
-            });
-        }).then(function(res) {
+    function createBattle(p1, p2, title, date, time, venue, bannerUrl, courtId, setFormat, pair) {
+        var adminId = A.currentUserId;
+        pair = pair || { format: 'singles' };
+        var m1 = pair.mate1 || {};
+        var m2 = pair.mate2 || {};
+        return A.client.from('challenges').insert({
+            challenger_id: adminId,
+            format: pair.format || 'singles',
+            // Напарник, как и основной участник, может быть гостем: тогда у
+            // него только имя, карточки игрока не заводим
+            challenger_partner_id: m1.id || null,
+            challenger_partner_name: m1.id ? null : (m1.name || null),
+            challenger_partner_gender: m1.gender || null,
+            opponent_partner_id: m2.id || null,
+            opponent_partner_name: m2.id ? null : (m2.name || null),
+            opponent_partner_gender: m2.gender || null,
+            allow_any_pair: !!pair.anyPair,
+            // Гость баттла не заводится в базу игроков: его имя живёт в самом
+            // вызове, как external_name в заявке на турнир. Прежде здесь
+            // вызывалась ensurePlayer, и каждый показательный матч оставлял
+            // в players лишнюю карточку — она попадала в поиск партнёра и
+            // в блок «Найди партнёра» на главной, и оставалась там навсегда
+            challenger_player_id: p1.id || null,
+            opponent_player_id: p2.id || null,
+            challenger_external_name: p1.id ? null : (p1.name || null),
+            opponent_external_name: p2.id ? null : (p2.name || null),
+            challenger_gender: p1.gender || null,
+            opponent_gender: p2.gender || null,
+            opponent_profile_id: null,
+            proposed_date: date || new Date().toISOString().slice(0, 10),
+            proposed_time: time || '18:00',
+            proposed_venue: venue || null,
+            proposed_court_id: courtId || null,
+            status: 'accepted',
+            accepted_at: new Date().toISOString(),
+            battle_title: title,
+            battle_published: true,
+            battle_published_at: new Date().toISOString(),
+            voting_closed: false,
+            banner_url: bannerUrl || null,
+            challenger_ntrp: p1.ntrp ? parseFloat(p1.ntrp) : null,
+            opponent_ntrp: p2.ntrp ? parseFloat(p2.ntrp) : null,
+            challenger_country: p1.country || null,
+            opponent_country: p2.country || null,
+            challenger_category: p1.category || null,
+            opponent_category: p2.category || null,
+            set_format: setFormat || 'standard'
+        }).select('id').single().then(function(res) {
             if (res.error) {
                 console.error('Create battle error:', res.error);
                 A.showToast(res.error.message, 'error');
@@ -982,33 +1251,6 @@
             console.error('Create battle error:', err);
             A.showToast('Error creating battle', 'error');
             return false;
-        });
-    }
-
-    function ensurePlayer(p) {
-        if (p.id) return Promise.resolve(p.id);
-
-        var slug = A.slugify(p.name);
-        var id = slug + '-' + Math.random().toString(36).slice(2, 6);
-
-        return A.client.from('players').insert({
-            id: id,
-            name: p.name,
-            name_en: p.name,
-            points: 0,
-            wins: 0,
-            losses: 0,
-            rank_change: 0,
-            form: [],
-            show_phone: false
-        }).select('id').single().then(function(res) {
-            if (res.error) {
-                console.error('Create player error:', res.error);
-                throw new Error(res.error.message);
-            }
-            allPlayers.push({ id: res.data.id, name: p.name, name_en: p.name, photo: null });
-            A._chalPlayersMap[res.data.id] = { id: res.data.id, name: p.name, name_en: p.name };
-            return res.data.id;
         });
     }
 
@@ -1058,11 +1300,10 @@
     }
 
     function openScoreModal(challenge) {
-        var pMap = A._chalPlayersMap || {};
-        var p1 = pMap[challenge.challenger_player_id] || {};
-        var p2 = pMap[challenge.opponent_player_id] || {};
-        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+        // Счёт вводится по сторонам, а не по игрокам: в парном баттле
+        // победителем записывается капитан, но выигрывает пара
+        var p1Name = chalSideName(challenge, 1);
+        var p2Name = chalSideName(challenge, 2);
         var _setFormat = challenge.set_format || 'standard';
 
         // Parse score_draft or existing match score to pre-fill
@@ -1294,6 +1535,15 @@
     }
 
     // Finalize: create match, update challenge, update player stats
+    /** Когда баттл сыграли: назначенные день и час, а без них — сейчас. */
+    function battlePlayedAt(challenge) {
+        var d = challenge.proposed_date;
+        if (!d) return new Date().toISOString();
+        var t = challenge.proposed_time || '12:00';
+        var when = new Date(d + 'T' + (t.length === 5 ? t + ':00' : t));
+        return isNaN(when.getTime()) ? new Date().toISOString() : when.toISOString();
+    }
+
     function finalizeMatch(challenge, score, winnerId, loserId) {
         return A.client.from('challenges')
             .update({ voting_closed: true })
@@ -1307,7 +1557,12 @@
                     status: 'completed',
                     round_number: 0,
                     match_order: 0,
-                    match_type: 'duel'
+                    match_type: 'duel',
+                    // День, когда играли, а не когда занесли счёт. Без даты
+                    // баттл всплывал в начало истории матчей с прочерком:
+                    // сортировка идёт по played_at, а пустое значение в
+                    // Postgres при DESC оказывается впереди всего
+                    played_at: battlePlayedAt(challenge)
                 }).select('id').single();
             }).then(function(matchRes) {
                 if (matchRes.error) {
@@ -1335,11 +1590,10 @@
 
     // ---- Notify: send TG group announcement with inline voting buttons ----
     async function openNotifyModal(challenge) {
-        var pMap = A._chalPlayersMap || {};
-        var p1 = pMap[challenge.challenger_player_id] || {};
-        var p2 = pMap[challenge.opponent_player_id] || {};
-        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+        var p1 = chalSide(challenge, 1);
+        var p2 = chalSide(challenge, 2);
+        var p1Name = chalSideName(challenge, 1);
+        var p2Name = chalSideName(challenge, 2);
 
         // Confirm before sending
         var confirmText = '⚔️ ' + (challenge.battle_title || 'Battle') + '\n' + p1Name + ' vs ' + p2Name;
@@ -1396,11 +1650,10 @@
      * игроков: менеджеру остаётся назначить, когда и где играют.
      */
     function openEditBattleModal(challenge, isPublish) {
-        var pMap = A._chalPlayersMap || {};
-        var p1 = pMap[challenge.challenger_player_id] || {};
-        var p2 = pMap[challenge.opponent_player_id] || {};
-        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+        var p1 = chalSide(challenge, 1);
+        var p2 = chalSide(challenge, 2);
+        var p1Name = chalSideName(challenge, 1);
+        var p2Name = chalSideName(challenge, 2);
 
         // У принятого вызова этих полей ещё нет — подставляем из карточек
         var p1Ntrp = challenge.challenger_ntrp || p1.ntrp_rating || null;
@@ -1671,11 +1924,10 @@
      * «Отменён», причина видна, и клубу уходит объяснение.
      */
     function openCancelBattleModal(challenge) {
-        var pMap = A._chalPlayersMap || {};
-        var p1 = pMap[challenge.challenger_player_id] || {};
-        var p2 = pMap[challenge.opponent_player_id] || {};
-        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+        var p1 = chalSide(challenge, 1);
+        var p2 = chalSide(challenge, 2);
+        var p1Name = chalSideName(challenge, 1);
+        var p2Name = chalSideName(challenge, 2);
 
         var overlay = document.createElement('div');
         overlay.className = 'ad-modal-overlay';
@@ -1768,11 +2020,10 @@
 
     // ==== DELETE OR CANCEL MODAL ====
     function openDeleteOrCancelModal(challenge) {
-        var pMap = A._chalPlayersMap || {};
-        var p1 = pMap[challenge.challenger_player_id] || {};
-        var p2 = pMap[challenge.opponent_player_id] || {};
-        var p1Name = isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?');
-        var p2Name = isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?');
+        var p1 = chalSide(challenge, 1);
+        var p2 = chalSide(challenge, 2);
+        var p1Name = chalSideName(challenge, 1);
+        var p2Name = chalSideName(challenge, 2);
 
         var overlay = document.createElement('div');
         overlay.className = 'ad-modal-overlay';
@@ -1888,6 +2139,13 @@
 
     function autofillPlayerExtras(player, ntrpId, catId, hiddenCountryId, countryInputId, selObj) {
         var CU = window.KSLT_COUNTRY;
+        // Пол. У членов клуба он в карточке, у вписанного руками его спросят
+        // отдельно: проверка состава пары сравнивает именно его
+        if (player.gender) {
+            var genderEl = document.getElementById(ntrpId.replace('Ntrp', 'Gender'));
+            if (genderEl) genderEl.value = player.gender;
+            selObj.gender = player.gender;
+        }
         // NTRP — format value to match select options (e.g. 4.5 → "4.5", 4.25 → "4.25")
         if (player.ntrp_rating) {
             var ntrpVal = parseFloat(player.ntrp_rating).toFixed(2).replace(/0$/, '');

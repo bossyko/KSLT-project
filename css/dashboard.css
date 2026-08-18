@@ -720,6 +720,51 @@ select.db-field-input {
     margin-bottom: var(--space-md);
 }
 
+/* Парные и смешанные игры.
+
+   Тот же язык, что у категорий: числа в ряд, процент справа, полоса под
+   ними. Но без очков и без места — рейтинга в парах не существует, есть
+   только сыгранное. */
+.db-pair-block {
+    margin-top: 22px;
+}
+.db-pair-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.db-pair-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+.db-pair-note {
+    font-size: 0.76rem;
+    color: var(--text-dim);
+}
+.db-pair-tag {
+    font-size: 0.64rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+.db-pair-tag-dbl { background: rgba(59,130,246,0.16); color: #6EA8FE; }
+.db-pair-tag-mix { background: rgba(168,85,247,0.18); color: #C084FC; }
+/* Первая колонка у категорий отведена под очки — здесь её нет, колонок три */
+.db-pair-grid {
+    grid-template-columns: repeat(3, 96px);
+}
+
+/* Что именно посчитано. Стоит под заголовком раздела, а не под карточками:
+   вопрос «почему победы не сходятся с историей» возникает до того, как
+   человек дочитает до конца */
+.db-stats-note {
+    margin: -8px 0 16px;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+}
+
 /* Внутри категории карточки те же, но ниже: категорий у игрока до четырёх,
    и в полный рост они уводили «Статистику» на два экрана. Состав блока
    прежний — четыре числа и полоса побед с поражениями. */
@@ -1770,7 +1815,7 @@ select.db-field-input {
     padding: 6px 14px;
     font-size: 0.82rem;
     font-weight: 600;
-    transition: border-color var(--transition-fast);
+    transition: border-color var(--transition-fast), transform 0.25s ease;
 }
 
 .db-badge-earned {
@@ -1785,6 +1830,25 @@ select.db-field-input {
 
 .db-badge-icon {
     font-size: 1rem;
+    display: inline-block;
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+/* Оживает под курсором — так же, как в перебивке на главной.
+   Закрытые тоже: пусть человек видит, что до них можно дотянуться */
+.db-badge-item:hover {
+    border-color: rgba(204, 255, 0, 0.35);
+    transform: translateY(-2px);
+}
+
+.db-badge-item:hover .db-badge-icon {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 8px rgba(204, 255, 0, 0.5));
+}
+
+.db-badge-item:hover .db-badge-icon-locked {
+    filter: grayscale(0.4) drop-shadow(0 0 8px rgba(204, 255, 0, 0.35));
+    opacity: 0.85;
 }
 
 .db-badge-icon-locked {
@@ -1849,7 +1913,22 @@ select.db-field-input {
     border-radius: var(--radius-md);
     background: var(--surface-glass);
     border: 1px solid var(--border-subtle);
-    transition: border-color var(--transition-fast);
+    transition: border-color var(--transition-fast), transform 0.25s ease;
+}
+
+.db-badge-all-item:hover {
+    border-color: rgba(204, 255, 0, 0.35);
+    transform: translateY(-2px);
+}
+
+.db-badge-all-item:hover .db-badge-all-icon {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 8px rgba(204, 255, 0, 0.5));
+}
+
+.db-badge-all-item:hover .db-badge-icon-locked {
+    filter: grayscale(0.4) drop-shadow(0 0 8px rgba(204, 255, 0, 0.35));
+    opacity: 0.85;
 }
 
 .db-badge-all-earned {
@@ -1865,6 +1944,7 @@ select.db-field-input {
     flex-shrink: 0;
     width: 32px;
     text-align: center;
+    transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .db-badge-all-info {
@@ -2081,7 +2161,11 @@ select.db-field-input {
 }
 .h2h-match:last-child { border-bottom: none; }
 .h2h-match-date { color: var(--text-muted); font-size: 0.8rem; min-width: 70px; }
-.h2h-match-tournament { color: var(--text-dim); font-size: 0.8rem; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Название турнира и метка рода матча. Окно узкое: имя укорачиваем
+   многоточием, метку — никогда, иначе от «дружеский» останется «дру…» */
+.h2h-match-tournament { display: flex; align-items: center; flex: 1; min-width: 0; color: var(--text-dim); font-size: 0.8rem; }
+.h2h-tname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h2h-match-tournament .db-match-tag { flex: none; }
 .h2h-match-score { font-weight: 700; font-family: monospace; }
 .h2h-match-result {
     font-size: 0.75rem; font-weight: 700;
@@ -2675,12 +2759,27 @@ select:-webkit-autofill {
     white-space: nowrap;
 }
 
-/* Парный матч в истории игр: в самом матче записаны только капитаны пар,
-   поэтому без пометки он выглядел бы игрой один на один */
-.db-match-doubles {
-    font-size: 0.8rem;
-    opacity: 0.75;
+/* Метка рода матча.
+
+   В историю попадает всё сыгранное, а в зачёт — только рейтинговые одиночные.
+   Без метки это выглядит как ошибка: матчей одиннадцать, побед в статистике
+   четыре. Цветом выделен только «рейтинг» — остальные метки поясняют, а не
+   спорят за внимание. Раньше здесь стояла одна иконка на парные матчи. */
+.db-match-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    font-size: 0.66rem;
+    font-weight: 700;
+    white-space: nowrap;
+    vertical-align: middle;
 }
+.db-tag-rating   { background: rgba(204,255,0,0.14); color: var(--accent); }
+.db-tag-friendly { background: rgba(255,255,255,0.10); color: var(--text-muted); }
+.db-tag-battle   { background: rgba(255,159,67,0.16); color: #FF9F43; }
+.db-tag-doubles  { background: rgba(59,130,246,0.16); color: #6EA8FE; }
+.db-tag-mixed    { background: rgba(168,85,247,0.18); color: #C084FC; }
 
 /* С кем игрок был в паре: своя половина пары в матче не записана, и без
    этой строки за ней приходилось идти в сетку турнира.

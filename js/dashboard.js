@@ -115,6 +115,8 @@
         catWins: ['жеңиш', 'жеңиш', 'жеңиш'],
         catLosses: ['жеңилүү', 'жеңилүү', 'жеңилүү'],
         catTotal: 'Бардык матчтар', catWinRate: 'жеңиш', catNoMatches: 'матчтар азырынча жок',
+        pairsTitle: 'Жуптук', mixedTitle: 'Аралаш', pairsTag: 'жуптук', mixedTag: 'аралаш',
+        pairsNote: 'рейтингге кирбейт', pairsMatches: 'Матчтар',
         notificationsTab: 'Билдирмелер', notifEmpty: 'Билдирмелер жок',
         notifEmptyText: 'Мелдештер, чакыруулар жана төлөмдөр жөнүндө кабарлар ушул жерде көрүнөт',
         catClosed: 'жабык',
@@ -182,6 +184,8 @@
         noMatches: 'Матчтар жок',
         noMatchesText: 'Сиздин матчтарыңыз мелдештерден кийин бул жерде көрүнөт',
         matchDate: 'Күн', matchOpponent: 'Атаандаш', matchScore: 'Эсеп', matchResult: 'Жыйынтык', matchTournament: 'Мелдеш', matchRound: 'Раунд', matchDoubles: 'Жуптук', matchWith: 'жупташы',
+        tagRating: 'рейтинг', tagFriendly: 'достук', tagDoubles: 'жуптук', tagMixed: 'аралаш', tagBattle: 'баттл',
+        statsNote: 'Статистика рейтингдик жеке мелдештер боюнча',
         challenges: 'Сынактар',
         challengesTitle: 'Матчка чакыруулар',
         chalSent: 'Жөнөтүлдү',
@@ -364,6 +368,8 @@
         catWins: ['win', 'wins', 'wins'],
         catLosses: ['loss', 'losses', 'losses'],
         catTotal: 'Matches played', catWinRate: 'wins', catNoMatches: 'no matches yet',
+        pairsTitle: 'Doubles', mixedTitle: 'Mixed', pairsTag: 'doubles', mixedTag: 'mixed',
+        pairsNote: 'not counted in rating', pairsMatches: 'Matches',
         notificationsTab: 'Notifications', notifEmpty: 'No notifications',
         notifEmptyText: 'Messages about tournaments, challenges and payments appear here',
         catClosed: 'closed',
@@ -431,6 +437,8 @@
         noMatches: 'No matches yet',
         noMatchesText: 'Your matches will appear here after tournaments',
         matchDate: 'Date', matchOpponent: 'Opponent', matchScore: 'Score', matchResult: 'Result', matchTournament: 'Tournament', matchRound: 'Round', matchDoubles: 'Doubles', matchWith: 'with',
+        tagRating: 'rating', tagFriendly: 'friendly', tagDoubles: 'doubles', tagMixed: 'mixed', tagBattle: 'battle',
+        statsNote: 'Statistics from rating singles tournaments only',
         challenges: 'Challenges',
         challengesTitle: 'Match Challenges',
         chalSent: 'Sent',
@@ -613,6 +621,8 @@
         catWins: ['победа', 'победы', 'побед'],
         catLosses: ['поражение', 'поражения', 'поражений'],
         catTotal: 'Всего матчей', catWinRate: 'побед', catNoMatches: 'матчей пока нет',
+        pairsTitle: 'Парные', mixedTitle: 'Микст', pairsTag: 'пары', mixedTag: 'микст',
+        pairsNote: 'в рейтинг не идут', pairsMatches: 'Матчей',
         notificationsTab: 'Уведомления', notifEmpty: 'Уведомлений пока нет',
         notifEmptyText: 'Здесь появятся сообщения о турнирах, вызовах и платежах',
         catClosed: 'закрыта',
@@ -680,6 +690,8 @@
         noMatches: 'Матчей пока нет',
         noMatchesText: 'Ваши матчи появятся здесь после участия в турнирах',
         matchDate: 'Дата', matchOpponent: 'Соперник', matchScore: 'Счёт', matchResult: 'Итог', matchTournament: 'Турнир', matchRound: 'Раунд', matchDoubles: 'Парный', matchWith: 'в паре с',
+        tagRating: 'рейтинг', tagFriendly: 'дружеский', tagDoubles: 'пары', tagMixed: 'микст', tagBattle: 'баттл',
+        statsNote: 'Статистика по рейтинговым одиночным турнирам',
         challenges: 'Вызовы',
         challengesTitle: 'Вызовы на матч',
         chalSent: 'Отправлено',
@@ -2300,6 +2312,37 @@
     }
 
     /**
+     * Какого рода этот матч.
+     *
+     * В истории лежит всё вперемешку, и без метки человек не понимает, почему
+     * матчей одиннадцать, а побед в статистике четыре. Метка отвечает на это
+     * прямо у строки: в зачёт идёт только «рейтинг».
+     *
+     * Дуэль в базе — это баттл: счёт вводится в админке лишь у опубликованных
+     * баттлов, другого пути к match_type = 'duel' нет.
+     */
+    function matchKind(m) {
+        if (m.match_type === 'duel') return 'battle';
+        var t = m.tournament;
+        if (t) {
+            if (t.format === 'mixed_doubles') return 'mixed';
+            if (t.format === 'doubles') return 'doubles';
+            if (t.category_id === 'friendly') return 'friendly';
+        }
+        return 'rating';
+    }
+
+    var KIND_LABEL = {
+        rating: 'tagRating', friendly: 'tagFriendly',
+        doubles: 'tagDoubles', mixed: 'tagMixed', battle: 'tagBattle'
+    };
+
+    function matchKindTag(m) {
+        var kind = matchKind(m);
+        return '<span class="db-match-tag db-tag-' + kind + '">' + escHtml(L[KIND_LABEL[kind]]) + '</span>';
+    }
+
+    /**
      * Турниры, где игрок заявлен напарником.
      *
      * В матче помещаются только двое: player1_id и player2_id — это капитаны
@@ -2322,13 +2365,17 @@
     }
 
     /**
-     * Страница турнирных матчей игрока — своих и тех, где он напарник.
+     * Страница матчей игрока — своих и тех, где он напарник.
      *
-     * Дуэли отсеиваются запросом, а не после него: раньше база отдавала
-     * последние пятьдесят матчей любого вида, и дуэли выбрасывались уже в
-     * браузере — у игрока с полусотней дуэлей турнирных матчей на экране не
-     * оставалось ни одного. count: 'exact' нужен, чтобы кнопка «Показать все»
-     * называла настоящее число, а не число загруженных.
+     * Здесь всё, что человек сыграл: рейтинговые и дружеские турниры, парные,
+     * микст и баттлы. История — это память о сыгранном, а не выписка из
+     * рейтинга; что из этого идёт в зачёт, говорит метка у названия.
+     *
+     * В зачёт (победы, поражения, форма) идут только рейтинговые одиночные —
+     * это считает база, в recalc_player_categories.
+     *
+     * count: 'exact' нужен, чтобы кнопка «Показать все» называла настоящее
+     * число, а не число загруженных.
      */
     function fetchMatchesPage(pid, from, to, myCaptains) {
         var conds = ['player1_id.eq.' + pid, 'player2_id.eq.' + pid];
@@ -2339,13 +2386,47 @@
         });
 
         return client.from('matches')
-            .select('*, tournament:tournaments(id, title, title_en, title_kg, draw_size, format)',
+            .select('*, tournament:tournaments(id, title, title_en, title_kg, draw_size, format, category_id)',
                 { count: 'exact' })
             .or(conds.join(','))
-            .eq('match_type', 'tournament')
             .not('winner_id', 'is', null)
             .order('played_at', { ascending: false })
             .range(from, to);
+    }
+
+    /**
+     * Составы пар в парных баттлах.
+     *
+     * У баттла нет заявки на турнир, поэтому состав пары лежит в самом
+     * вызове. Без него парный баттл в истории выглядел игрой один на один:
+     * соперник без напарника, а строка «в паре с» пустая.
+     *
+     * Ключ — идентификатор матча: именно им вызов на матч и ссылается.
+     */
+    var _battlePairs = {};
+
+    async function cacheBattlePairs(matches) {
+        var ids = [];
+        matches.forEach(function(m) {
+            if (m.match_type === 'duel' && m.id && !_battlePairs[m.id] && ids.indexOf(m.id) === -1) {
+                ids.push(m.id);
+            }
+        });
+        if (ids.length === 0) return;
+
+        var res = await client.from('challenges')
+            .select('match_id, format, challenger_player_id, opponent_player_id, ' +
+                    'challenger_partner_id, opponent_partner_id, ' +
+                    'challenger_partner_name, opponent_partner_name')
+            .in('match_id', ids);
+
+        // Отмечаем все запрошенные, даже пустые: иначе одиночные баттлы
+        // будут спрашиваться заново при каждой подгрузке страницы
+        ids.forEach(function(id) { _battlePairs[id] = null; });
+        (res.data || []).forEach(function(c) {
+            if (!c.match_id || !c.format || c.format === 'singles') return;
+            _battlePairs[c.match_id] = c;
+        });
     }
 
     /** Составы пар в парных турнирах: без них соперник выглядит одиночкой. */
@@ -2370,6 +2451,26 @@
                 external: r.partner_external_name || ''
             };
         });
+    }
+
+    /**
+     * Напарник в парном баттле — по капитану стороны.
+     *
+     * Гость баттла в базе игроков не заведён: у него есть только имя,
+     * записанное в самом вызове, и фото взять неоткуда.
+     */
+    function battleMate(c, capId) {
+        var mateId, mateExt;
+        if (capId === c.challenger_player_id) {
+            mateId = c.challenger_partner_id; mateExt = c.challenger_partner_name;
+        } else if (capId === c.opponent_player_id) {
+            mateId = c.opponent_partner_id; mateExt = c.opponent_partner_name;
+        } else {
+            return null;
+        }
+        if (mateId && _matchesOpponents[mateId]) return _matchesOpponents[mateId];
+        if (mateExt) return { name: mateExt, photo: '' };
+        return null;
     }
 
     /**
@@ -2432,6 +2533,11 @@
         matches.forEach(function(m) {
             want(m.player1_id);
             want(m.player2_id);
+            var bp = _battlePairs[m.id];
+            if (bp) {
+                want(bp.challenger_partner_id);
+                want(bp.opponent_partner_id);
+            }
             var pairs = _matchPairs[m.tournament_id];
             if (pairs) {
                 [m.player1_id, m.player2_id].forEach(function(cap) {
@@ -2473,6 +2579,7 @@
             }
 
             await cachePairs(res.data);
+            await cacheBattlePairs(res.data);
             await cacheOpponents(res.data, pid);
             renderGamesMatchesList(container, res.data, pid, profile, myCaptains);
         } catch(e) {
@@ -2537,8 +2644,13 @@
                 var score = m.score || '';
                 var displayScore = mineIsP1 ? dbFormatScore(score) : dbFormatScore(dbFlipScore(score));
 
-                var dbl = isDoubles(m.tournament);
-                var oppMate = dbl ? partnerInfo(m.tournament_id, oppId) : null;
+                // Пара бывает и в турнире, и в баттле. В турнире состав знает
+                // заявка, в баттле — сам вызов
+                var battlePair = _battlePairs[m.id] || null;
+                var dbl = isDoubles(m.tournament) || !!battlePair;
+                var oppMate = battlePair
+                    ? battleMate(battlePair, oppId)
+                    : (dbl ? partnerInfo(m.tournament_id, oppId) : null);
                 // У пары два имени, и в узкой колонке через косую черту они
                 // ломались на три строки. Даём по имени на строку — под два кружка
                 var oppTitle = oppMate
@@ -2550,7 +2662,13 @@
                 // если он капитан — напарника берём из заявки, если напарник —
                 // его парой был капитан, стоящий в матче
                 var myMate = '';
-                if (dbl) {
+                if (battlePair) {
+                    var mySide = mineIsP1 ? m.player1_id : m.player2_id;
+                    var mineB = mySide === pid
+                        ? battleMate(battlePair, pid)
+                        : _matchesOpponents[mySide];
+                    myMate = mineB ? mineB.name : '';
+                } else if (dbl) {
                     var mySideCap = mineIsP1 ? m.player1_id : m.player2_id;
                     var mine = mySideCap === pid
                         ? partnerInfo(m.tournament_id, pid)
@@ -2582,8 +2700,7 @@
                 html += '<td class="db-match-score">' + displayScore + '</td>';
                 html += '<td class="db-match-result-cell"><span class="db-match-result ' + resultCls + '">' + resultLabel + '</span></td>';
                 html += '<td class="db-match-tournament">' +
-                    (dbl ? '<span class="db-match-doubles" title="' + L.matchDoubles + '">\uD83D\uDC65</span> ' : '') +
-                    escHtml(tName) +
+                    escHtml(tName) + matchKindTag(m) +
                     (myMate ? '<div class="db-match-mate">' + L.matchWith +
                         ' <span class="db-match-mate-name">' + escHtml(myMate) + '</span></div>' : '') +
                     '</td>';
@@ -2759,7 +2876,7 @@
         if (!client) { renderDashH2HEmpty(overlay); return; }
 
         client.from('matches')
-            .select('id, player1_id, player2_id, score, winner_id, played_at, tournament:tournaments(title, title_en, title_kg)')
+            .select('id, player1_id, player2_id, score, winner_id, played_at, match_type, tournament:tournaments(title, title_en, title_kg, format, category_id)')
             .or('and(player1_id.eq.' + pid + ',player2_id.eq.' + oppId + '),and(player1_id.eq.' + oppId + ',player2_id.eq.' + pid + ')')
             .not('winner_id', 'is', null)
             .order('played_at', { ascending: false })
@@ -2773,7 +2890,14 @@
                     renderDashH2HEmpty(overlay);
                     return;
                 }
-                renderDashH2HContent(modal, res.data || [], pid, profile, oppId, oppName, oppPhoto);
+                // Парные и микст сюда не идут: в матче записаны капитаны, а
+                // состав пары меняется от турнира к турниру — счёт «трое на
+                // трое» получался бы личной встречей двоих
+                var personal = (res.data || []).filter(function(m) {
+                    var k = matchKind(m);
+                    return k !== 'doubles' && k !== 'mixed';
+                });
+                renderDashH2HContent(modal, personal, pid, profile, oppId, oppName, oppPhoto);
                 modal.querySelector('.h2h-close').addEventListener('click', closeOverlay);
             });
     }
@@ -2842,7 +2966,8 @@
             }
             html += '<div class="h2h-match">';
             html += '<span class="h2h-match-date">' + dbFormatDate(m.played_at) + '</span>';
-            if (tName) html += '<span class="h2h-match-tournament">' + escHtml(tName) + '</span>';
+            html += '<span class="h2h-match-tournament">' +
+                '<span class="h2h-tname">' + escHtml(tName) + '</span>' + matchKindTag(m) + '</span>';
             html += '<span class="h2h-match-score">' + displayScore + '</span>';
             html += '<span class="h2h-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + result + '</span>';
             html += '</div>';
@@ -3915,6 +4040,10 @@
 
         container.innerHTML =
             '<h2 class="db-section-title">' + L.statsTitle + '</h2>' +
+            // Без этой строчки цифры выглядят враньём: в истории матчей
+            // одиннадцать игр, а побед и поражений здесь считается четыре.
+            // Дружеские, парные, микст и баттлы в зачёт не идут
+            '<div class="db-stats-note">' + L.statsNote + '</div>' +
             // Сводный ряд повторяет домашнюю категорию — показываем его только
             // тем, у кого категорий ещё нет. Так же сделано в админке.
             (catsHtml ? '' :
@@ -3929,6 +4058,7 @@
                     '<div class="db-card-title">' + L.category + '</div>' +
                     '<p style="color:var(--accent);font-size:1.1rem;font-weight:600;">' + catName + '</p>' +
                 '</div>') +
+            pairBlocksHtml(p) +
             '<div id="dbRatingChartWrap" style="display:none;">' +
                 '<div class="db-card">' +
                     '<div class="db-card-title">' + L.ratingHistory + '</div>' +
@@ -3995,6 +4125,51 @@
             word = n === 1 ? forms[0] : forms[1];
         }
         return n + ' ' + word;
+    }
+
+    /**
+     * Парные и смешанные игры — счёт отдельным блоком.
+     *
+     * В рейтинговую статистику они не идут: очков за пары не начисляют, и
+     * места в таблице у них нет. Но сыгранное — это сыгранное, и без этих
+     * чисел история матчей выглядела длиннее, чем статистика объясняет.
+     *
+     * Пары и микст порознь: партнёр в них разный, и складывать их — терять
+     * то немногое, что число говорит.
+     *
+     * У кого таких игр нет, блока тоже нет: пустые нули читаются как
+     * неудача, а человек просто не играл в парах.
+     */
+    function pairBlockHtml(title, tagText, tagClass, w, l) {
+        var played = w + l;
+        if (!played) return '';
+        var rate = Math.round(w / played * 100);
+        return '<div class="db-pair-block">' +
+            '<div class="db-pair-head">' +
+                '<span class="db-pair-title">' + escHtml(title) + '</span>' +
+                '<span class="db-pair-tag ' + tagClass + '">' + escHtml(tagText) + '</span>' +
+                '<span class="db-pair-note">' + escHtml(L.pairsNote) + '</span>' +
+            '</div>' +
+            '<div class="db-cat-top">' +
+                '<div class="db-stats-grid db-stats-grid-mini db-pair-grid">' +
+                    '<div class="db-stat-card"><div class="db-stat-value">' + played + '</div><div class="db-stat-label">' + L.pairsMatches + '</div></div>' +
+                    '<div class="db-stat-card"><div class="db-stat-value">' + w + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
+                    '<div class="db-stat-card"><div class="db-stat-value">' + l + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
+                '</div>' +
+                '<div class="db-cat-rate"><b>' + rate + '%</b><span>' + L.catWinRate + '</span></div>' +
+            '</div>' +
+            '<div class="db-cat-bar">' +
+                '<i class="db-cat-bar-w" style="width:' + rate + '%"></i>' +
+                '<i class="db-cat-bar-l" style="width:' + (100 - rate) + '%"></i>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function pairBlocksHtml(p) {
+        return pairBlockHtml(L.pairsTitle, L.pairsTag, 'db-pair-tag-dbl',
+                             p.doubles_wins || 0, p.doubles_losses || 0) +
+               pairBlockHtml(L.mixedTitle, L.mixedTag, 'db-pair-tag-mix',
+                             p.mixed_wins || 0, p.mixed_losses || 0);
     }
 
     async function renderStatsCategories(p) {

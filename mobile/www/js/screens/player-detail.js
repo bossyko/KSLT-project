@@ -244,6 +244,7 @@
     });
     html += '</div></div>';
     html += '</div>'; // .pd-stats
+    html += window.KSLT_APP.pairBlocks(p, esc);
 
     // ---- Rating history ----
     // Секция скрыта, пока график не найдёт записи — он сам её и откроет
@@ -378,8 +379,11 @@
     var container = document.getElementById('pdMatches');
     if (!container) return;
 
+    // Здесь всё сыгранное: рейтинговые и дружеские турниры, парные, микст и
+    // баттлы. В зачёт из этого идут только рейтинговые одиночные — об этом
+    // говорит метка у названия турнира
     supabaseClient.from('matches')
-      .select('*, tournament:tournaments(id, title)')
+      .select('*, tournament:tournaments(id, title, format, category_id)')
       .or('player1_id.eq.' + _playerId + ',player2_id.eq.' + _playerId)
       .not('winner_id', 'is', null)
       .order('played_at', { ascending: false })
@@ -389,13 +393,7 @@
           container.innerHTML = '<div class="pd-empty-small">' + I18N.t('pd.noMatches') + '</div>';
           return;
         }
-        // Filter tournament matches only
-        var matches = r.data.filter(function(m) { return !m.match_type || m.match_type === 'tournament'; });
-        if (matches.length === 0) {
-          container.innerHTML = '<div class="pd-empty-small">' + I18N.t('pd.noMatches') + '</div>';
-          return;
-        }
-        renderMatches(container, matches);
+        renderMatches(container, r.data);
       });
   }
 
@@ -412,11 +410,18 @@
       var score = m.score || '';
       var displayScore = isP1 ? formatScore(score) : formatScore(flipScore(score));
       var tName = m.tournament ? m.tournament.title : '';
+      var kind = window.KSLT_APP.matchKind(m);
 
-      html += '<div class="pd-match" data-opponent-id="' + esc(oppId) + '">';
+      // Пары и микст в личные встречи не идут: в матче записаны капитаны,
+      // а состав пары меняется от турнира к турниру
+      var pairGame = kind === 'doubles' || kind === 'mixed';
+
+      html += '<div class="pd-match' + (pairGame ? '' : ' pd-match-clickable') + '"' +
+              (pairGame ? '' : ' data-opponent-id="' + esc(oppId) + '"') + '>';
       html += '<div class="pd-match-date">' + formatDateShort(m.played_at) + '</div>';
       html += '<div class="pd-match-info">';
-      if (tName) html += '<div class="pd-match-tournament">' + esc(tName) + '</div>';
+      html += '<div class="pd-match-tournament"><span class="pd-t-name">' + esc(tName) +
+              '</span>' + window.KSLT_APP.matchKindTag(m) + '</div>';
       html += '<div class="pd-match-opp" id="pdOpp_' + esc(oppId) + '">' + I18N.t('common.loading') + '</div>';
       html += '</div>';
       html += '<div class="pd-match-score">' + displayScore + '</div>';
@@ -448,8 +453,9 @@
       });
     }
 
-    // Match click → H2H
-    container.querySelectorAll('.pd-match').forEach(function(row) {
+    // Match click → H2H. У парных строк обработчика нет: там встречались
+    // не двое, и «личная встреча» была бы неправдой
+    container.querySelectorAll('.pd-match-clickable').forEach(function(row) {
       row.addEventListener('click', function() {
         var oppId = row.getAttribute('data-opponent-id');
         if (oppId) openH2H(oppId);
@@ -595,9 +601,11 @@
           return r.data;
         });
 
-    // Load matches between them
+    // Личные встречи: рейтинговые, дружеские и баттлы. Парные и микст сюда
+    // не идут — в матче записаны капитаны, а состав пары каждый раз новый,
+    // и счёт «двое на двое» выдавался бы за встречу двоих
     var matchesPromise = supabaseClient.from('matches')
-      .select('*, tournament:tournaments(title)')
+      .select('*, tournament:tournaments(title, format, category_id)')
       .or(
         'and(player1_id.eq.' + _playerId + ',player2_id.eq.' + opponentId + '),' +
         'and(player1_id.eq.' + opponentId + ',player2_id.eq.' + _playerId + ')'
@@ -605,7 +613,12 @@
       .not('winner_id', 'is', null)
       .order('played_at', { ascending: false })
       .limit(10)
-      .then(function(r) { return r.data || []; });
+      .then(function(r) {
+        return (r.data || []).filter(function(m) {
+          var k = window.KSLT_APP.matchKind(m);
+          return k !== 'doubles' && k !== 'mixed';
+        });
+      });
 
     Promise.all([oppPromise, matchesPromise]).then(function(results) {
       var opp = results[0];
@@ -676,7 +689,8 @@
           html += '<span class="pd-h2h-m-date">' + formatDateShort(m.played_at) + '</span>';
           html += '<span class="pd-h2h-m-score">' + displayScore + '</span>';
           html += '<span class="pd-h2h-m-result">' + result + '</span>';
-          if (tName) html += '<span class="pd-h2h-m-tournament">' + esc(tName) + '</span>';
+          html += '<span class="pd-h2h-m-tournament"><span class="pd-t-name">' + esc(tName) +
+                  '</span>' + window.KSLT_APP.matchKindTag(m) + '</span>';
           html += '</div>';
         });
         html += '</div>';

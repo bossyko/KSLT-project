@@ -18,6 +18,8 @@
         losses: 'L',
         rating: 'Rating',
         whoWins: 'Who will win?',
+        forecast: 'What the numbers say', forecastHint: 'Rating, win rate, current streak and head-to-head',
+        pairRecord: 'In doubles',
         vote: 'Vote',
         voteCta: 'Click to vote',
         votes: 'votes',
@@ -55,6 +57,8 @@
         losses: 'У',
         rating: 'Рейтинг',
         whoWins: 'Ким жеңет?',
+        forecast: 'Сандар эмне дейт', forecastHint: 'Рейтинг, жеңиш пайызы, учурдагы катар жана бетме-бет',
+        pairRecord: 'Жуптукта',
         vote: 'Добуш',
         voteCta: 'Добуш берүү үчүн басыңыз',
         votes: 'добуш',
@@ -92,6 +96,8 @@
         losses: 'Пр',
         rating: 'Рейтинг',
         whoWins: 'Кто победит?',
+        forecast: 'Что говорят числа', forecastHint: 'Рейтинг, процент побед, текущая серия и личные встречи',
+        pairRecord: 'В парах',
         vote: 'Голос',
         voteCta: 'Нажмите, чтобы голосовать',
         votes: 'гол.',
@@ -247,12 +253,13 @@
             _votes = {};
             if (votesRes.data) {
                 votesRes.data.forEach(function(v) {
-                    _votes[v.player_id] = parseInt(v.votes) || 0;
+                    _votes[v.side] = parseInt(v.votes) || 0;
                 });
             }
 
             renderHero(_battle);
             renderVoting(_battle, _votes);
+            if (window.KSLT_PREDICTION) window.KSLT_PREDICTION.animate('.ch-forecast');
             renderDetails(_battle);
             loadH2H(client, _battle);
             loadScore(client, _battle);
@@ -288,29 +295,6 @@
         var hero = document.getElementById('challengeHero');
         if (!hero) return;
 
-        var CU = window.KSLT_COUNTRY;
-
-        var c1Name = isEn ? (b.challenger_name_en || b.challenger_name) : (isKg ? (b.challenger_name_kg || b.challenger_name) : b.challenger_name);
-        var c2Name = isEn ? (b.opponent_name_en || b.opponent_name) : (isKg ? (b.opponent_name_kg || b.opponent_name) : b.opponent_name);
-        var c1Photo = b.challenger_photo || 'https://placehold.co/120x160/1a1a1a/666?text=?';
-        var c2Photo = b.opponent_photo || 'https://placehold.co/120x160/1a1a1a/666?text=?';
-
-        // Category: challenge-level override → player-level
-        var c1CatId = b.challenger_category || b.challenger_cat || '';
-        var c2CatId = b.opponent_category || b.opponent_cat || '';
-        var c1Cat = CAT_LABELS[c1CatId] || c1CatId || '';
-        var c2Cat = CAT_LABELS[c2CatId] || c2CatId || '';
-
-        // NTRP: challenge-level override → player-level
-        var c1Ntrp = b.challenger_ntrp || b.challenger_player_ntrp || '';
-        var c2Ntrp = b.opponent_ntrp || b.opponent_player_ntrp || '';
-
-        // Country: challenge-level → player-level → default KG
-        var c1CountryCode = b.challenger_country || b.challenger_player_country || '';
-        var c2CountryCode = b.opponent_country || b.opponent_player_country || '';
-        var c1Flag = CU ? CU.flagEmoji(CU.normalizeCountry(c1CountryCode) || 'KG') : '';
-        var c2Flag = CU ? CU.flagEmoji(CU.normalizeCountry(c2CountryCode) || 'KG') : '';
-
         // Date/time/venue — use counter values if available, else proposed
         var date = b.proposed_date || '';
         var time = b.proposed_time || '';
@@ -318,34 +302,34 @@
 
         var formattedDate = date ? formatDate(date) : '';
 
+        var BF = window.KSLT_BATTLE_FORMAT;
+        var isPair = BF && BF.isPair(b);
+        var formatLabel = BF ? BF.label(b) : '';
+
+        // Карточка стороны: у одиночного один человек, у пары двое рядом
+        function sideCard(side) {
+            var main = chSidePerson(b, side, false, isPair);
+            if (!isPair) return '<div class="ch-player-card">' + main + '</div>';
+            return '<div class="ch-player-card">' +
+                '<div class="ch-pair">' +
+                    main +
+                    '<div class="ch-pair-plus">+</div>' +
+                    chSidePerson(b, side, true, isPair) +
+                '</div>' +
+            '</div>';
+        }
+
         hero.innerHTML =
             '<div class="ch-hero-inner">' +
                 '<h1 class="ch-battle-title">' + esc(b.battle_title || 'Battle') + '</h1>' +
+                (formatLabel ? '<div class="ch-format">' + esc(formatLabel) + '</div>' : '') +
                 (b.banner_url ? '<div class="ch-banner"><img src="' + esc(b.banner_url) + '" alt="' + esc(b.battle_title || 'Battle') + '"></div>' : '') +
                 '<div class="ch-vs-container">' +
-                    '<div class="ch-player-card">' +
-                        '<img class="ch-player-photo" src="' + esc(c1Photo) + '" alt="' + esc(c1Name) + '">' +
-                        '<div class="ch-player-name">' + c1Flag + ' ' + esc(c1Name) + '</div>' +
-                        (c1Cat ? '<div class="ch-player-cat">' + esc(c1Cat) + '</div>' : '') +
-                        (c1Ntrp ? '<div class="ch-player-ntrp">NTRP: ' + esc(String(c1Ntrp)) + '</div>' : '') +
-                        '<div class="ch-player-stats">' +
-                            '<span class="ch-stat-w">' + L.wins + ': ' + (b.challenger_wins || 0) + '</span>' +
-                            '<span class="ch-stat-l">' + L.losses + ': ' + (b.challenger_losses || 0) + '</span>' +
-                        '</div>' +
-                    '</div>' +
+                    sideCard(1) +
                     '<div class="ch-vs-divider">' +
                         '<span class="ch-vs-text">' + L.vs + '</span>' +
                     '</div>' +
-                    '<div class="ch-player-card">' +
-                        '<img class="ch-player-photo" src="' + esc(c2Photo) + '" alt="' + esc(c2Name) + '">' +
-                        '<div class="ch-player-name">' + c2Flag + ' ' + esc(c2Name) + '</div>' +
-                        (c2Cat ? '<div class="ch-player-cat">' + esc(c2Cat) + '</div>' : '') +
-                        (c2Ntrp ? '<div class="ch-player-ntrp">NTRP: ' + esc(String(c2Ntrp)) + '</div>' : '') +
-                        '<div class="ch-player-stats">' +
-                            '<span class="ch-stat-w">' + L.wins + ': ' + (b.opponent_wins || 0) + '</span>' +
-                            '<span class="ch-stat-l">' + L.losses + ': ' + (b.opponent_losses || 0) + '</span>' +
-                        '</div>' +
-                    '</div>' +
+                    sideCard(2) +
                 '</div>' +
                 '<div class="ch-meta">' +
                     (formattedDate || time ? '<span class="ch-meta-item">📅 ' + (formattedDate ? formattedDate : '') + (formattedDate && time ? ', ' : '') + (time ? esc(time) : '') + '</span>' : '') +
@@ -354,16 +338,131 @@
             '</div>';
     }
 
+    /**
+     * Прогноз по числам — рядом с голосованием зрителей.
+     *
+     * Две полосы об одном и том же вопросе, но с разных сторон: одна про то,
+     * что говорит рейтинг, другая про то, что думают люди. После матча видно,
+     * кто оказался ближе.
+     *
+     * Для парных не считаем: формула берёт очки, победы и форму одного
+     * игрока, а у пары ни очков, ни рейтинга нет. Молчим, а не выдумываем.
+     */
+    function forecastHtml(b, c1Name, c2Name) {
+        if (!window.KSLT_PREDICTION) return '';
+        if (b.format && b.format !== 'singles') return '';
+
+        // Гость баттла в базе не заведён: очков и формы у него нет, считать
+        // не из чего
+        if (!b.challenger_player_id || !b.opponent_player_id) return '';
+
+        var p1 = {
+            id: b.challenger_player_id, points: b.challenger_points,
+            wins: b.challenger_wins, losses: b.challenger_losses, form: b.challenger_form
+        };
+        var p2 = {
+            id: b.opponent_player_id, points: b.opponent_points,
+            wins: b.opponent_wins, losses: b.opponent_losses, form: b.opponent_form
+        };
+        if (!p1.points && !p2.points) return '';
+
+        var pred = window.KSLT_PREDICTION.calculate(p1, p2, _h2hMap);
+
+        return '<div class="ch-forecast">' +
+            '<div class="ch-forecast-head">' +
+                '<span class="ch-forecast-title">' + L.forecast + '</span>' +
+                '<span class="ch-forecast-hint">' + L.forecastHint + '</span>' +
+            '</div>' +
+            '<div class="ch-forecast-names">' +
+                '<span>' + esc(c1Name) + '</span>' +
+                '<span>' + esc(c2Name) + '</span>' +
+            '</div>' +
+            '<div class="ch-forecast-bar">' +
+                '<i class="ch-forecast-left" data-width="' + pred.p1Pct + '%" style="width:0">' +
+                    '<b>' + pred.p1Pct + '%</b></i>' +
+                '<i class="ch-forecast-right" data-width="' + pred.p2Pct + '%" style="width:0">' +
+                    '<b>' + pred.p2Pct + '%</b></i>' +
+            '</div>' +
+        '</div>';
+    }
+
+    /** Личные встречи для прогноза: собираются при загрузке страницы. */
+    var _h2hMap = null;
+
+    /**
+     * Сторона на странице баттла: один игрок или пара.
+     *
+     * У пары места хватает, поэтому обе карточки идут рядом, а не внахлёст:
+     * это главный экран баттла, тут людей и приходят рассматривать.
+     *
+     * Победы и поражения показываем только у одиночного: в парном они про
+     * рейтинговые одиночные игры и рядом с парным матчем ничего не значат.
+     * Вместо них — счёт в парах или в миксте, по формату этого баттла.
+     */
+    function chSidePerson(b, side, isMate, isPair) {
+        var pre = side === 1 ? 'challenger' : 'opponent';
+        var CU = window.KSLT_COUNTRY;
+
+        var name, cat, ntrp, photo, dblW, dblL, mixW, mixL;
+        if (isMate) {
+            name  = b[pre + '_partner_display'];
+            cat   = b[pre + '_partner_cat'];
+            ntrp  = b[pre + '_partner_ntrp'];
+            photo = b[pre + '_partner_photo'];
+            dblW  = b[pre + '_partner_dbl_wins'];  dblL = b[pre + '_partner_dbl_losses'];
+            mixW  = b[pre + '_partner_mix_wins'];  mixL = b[pre + '_partner_mix_losses'];
+        } else {
+            name  = isEn ? (b[pre + '_name_en'] || b[pre + '_name'])
+                  : (isKg ? (b[pre + '_name_kg'] || b[pre + '_name']) : b[pre + '_name']);
+            cat   = CAT_LABELS[b[pre + '_category'] || b[pre + '_cat']] ||
+                    b[pre + '_category'] || b[pre + '_cat'] || '';
+            ntrp  = b[pre + '_ntrp'] || b[pre + '_player_ntrp'];
+            photo = b[pre + '_photo'];
+            dblW  = b[pre + '_dbl_wins'];  dblL = b[pre + '_dbl_losses'];
+            mixW  = b[pre + '_mix_wins'];  mixL = b[pre + '_mix_losses'];
+        }
+        if (!name) return '';
+
+        var flag = '';
+        if (!isMate && CU) {
+            var code = CU.normalizeCountry(b[pre + '_country'] || b[pre + '_player_country'] || '');
+            flag = CU.flagEmoji(code || 'KG');
+        }
+
+        var stats = '';
+        if (isPair) {
+            var w, l;
+            if (b.format === 'mixed_doubles') { w = mixW || 0; l = mixL || 0; }
+            else { w = dblW || 0; l = dblL || 0; }
+            if (w + l > 0) {
+                stats = '<div class="ch-pair-record">' + L.pairRecord + ' ' + w + '\u2013' + l + '</div>';
+            }
+        } else {
+            stats = '<div class="ch-player-stats">' +
+                '<span class="ch-stat-w">' + L.wins + ': ' + (b[pre + '_wins'] || 0) + '</span>' +
+                '<span class="ch-stat-l">' + L.losses + ': ' + (b[pre + '_losses'] || 0) + '</span>' +
+            '</div>';
+        }
+
+        return '<div class="ch-pair-side">' +
+            '<img class="ch-player-photo" src="' + esc(photo || 'https://placehold.co/120x160/1a1a1a/666?text=?') + '" alt="' + esc(name) + '">' +
+            '<div class="ch-player-name">' + (flag ? flag + ' ' : '') + esc(name) + '</div>' +
+            (cat ? '<div class="ch-player-cat">' + esc(cat) + '</div>' : '') +
+            (ntrp ? '<div class="ch-player-ntrp">NTRP: ' + esc(String(ntrp)) + '</div>' : '') +
+            stats +
+        '</div>';
+    }
+
     /* ========== VOTING ========== */
     function renderVoting(b, votes) {
         var section = document.getElementById('challengeVoting');
         if (!section) return;
         section.style.display = '';
 
-        var c1Id = b.challenger_player_id;
-        var c2Id = b.opponent_player_id;
-        var v1 = votes[c1Id] || 0;
-        var v2 = votes[c2Id] || 0;
+        // Голос считается по стороне, а не по игроку: у гостя баттла
+        // идентификатора нет, а сторон всегда ровно две
+        var v1 = votes[1] || 0;
+        var v2 = votes[2] || 0;
         var total = v1 + v2;
         var pct1 = total > 0 ? Math.round(v1 / total * 100) : 50;
         var pct2 = total > 0 ? 100 - pct1 : 50;
@@ -382,13 +481,13 @@
             }
         }
         var closed = b.voting_closed || b.status === 'completed' || timeExpired;
-        var alreadyVoted = !!_myVotePlayerId;
+        var alreadyVoted = !!_myVoteSide;
         var canVote = _userId && !closed && !alreadyVoted;
 
         // Button states: disabled if closed OR already voted
         var btnDisabled = closed || alreadyVoted;
-        var btn1Selected = alreadyVoted && _myVotePlayerId === c1Id;
-        var btn2Selected = alreadyVoted && _myVotePlayerId === c2Id;
+        var btn1Selected = alreadyVoted && _myVoteSide === 1;
+        var btn2Selected = alreadyVoted && _myVoteSide === 2;
 
         var btn1Class = 'ch-vote-btn' + (btnDisabled ? ' disabled' : '') + (btn1Selected ? ' selected' : '');
         var btn2Class = 'ch-vote-btn' + (btnDisabled ? ' disabled' : '') + (btn2Selected ? ' selected' : '');
@@ -399,7 +498,7 @@
         // Voted badge
         var votedBadgeHtml = '';
         if (alreadyVoted) {
-            var votedName = _myVotePlayerId === c1Id ? c1Name : c2Name;
+            var votedName = _myVoteSide === 1 ? c1Name : c2Name;
             var voteLabel = _myVoteSource === 'telegram' ? L.youVotedViaTg : L.youVotedFor;
             var tgIcon = _myVoteSource === 'telegram' ? '<svg class="ch-tg-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> ' : '';
             votedBadgeHtml = '<div class="ch-voted-badge">' + tgIcon + '&#10003; ' + voteLabel + ' <strong>' + esc(votedName) + '</strong></div>';
@@ -407,6 +506,7 @@
 
         section.innerHTML =
             '<div class="ch-voting-inner">' +
+                forecastHtml(b, c1Name, c2Name) +
                 '<h2 class="ch-voting-title">' + L.whoWins + '</h2>' +
                 '<div class="ch-voting-bar">' +
                     '<div class="ch-bar-left" style="width:' + pct1 + '%">' +
@@ -417,13 +517,13 @@
                     '</div>' +
                 '</div>' +
                 '<div class="ch-vote-buttons" id="voteButtons">' +
-                    '<button class="' + btn1Class + '" id="voteBtn1" data-player="' + c1Id + '"' + (btnDisabled ? ' disabled' : '') + '>' +
+                    '<button class="' + btn1Class + '" id="voteBtn1" data-side="1"' + (btnDisabled ? ' disabled' : '') + '>' +
                         btn1Check + '<span class="ch-vote-dot-red">●</span>' +
                         '<span class="ch-vote-name">' + esc(c1Name) + '</span>' +
                         '<span class="ch-vote-count">' + v1 + ' ' + L.votes + '</span>' +
                         (!btnDisabled ? '<span class="ch-vote-cta">' + L.voteCta + '</span>' : '') +
                     '</button>' +
-                    '<button class="' + btn2Class + '" id="voteBtn2" data-player="' + c2Id + '"' + (btnDisabled ? ' disabled' : '') + '>' +
+                    '<button class="' + btn2Class + '" id="voteBtn2" data-side="2"' + (btnDisabled ? ' disabled' : '') + '>' +
                         btn2Check + '<span class="ch-vote-dot-blue">●</span>' +
                         '<span class="ch-vote-name">' + esc(c2Name) + '</span>' +
                         '<span class="ch-vote-count">' + v2 + ' ' + L.votes + '</span>' +
@@ -444,17 +544,17 @@
         if (canVote) {
             var btn1 = document.getElementById('voteBtn1');
             var btn2 = document.getElementById('voteBtn2');
-            if (btn1) btn1.addEventListener('click', function() { castVote(c1Id); });
-            if (btn2) btn2.addEventListener('click', function() { castVote(c2Id); });
+            if (btn1) btn1.addEventListener('click', function() { castVote(1); });
+            if (btn2) btn2.addEventListener('click', function() { castVote(2); });
         }
 
-        // Load user's vote from DB (first render only, when _myVotePlayerId not set yet)
-        if (_userId && !closed && !_myVotePlayerId) {
+        // Load user's vote from DB (first render only, when _myVoteSide not set yet)
+        if (_userId && !closed && !_myVoteSide) {
             loadMyVote();
         }
     }
 
-    var _myVotePlayerId = null;
+    var _myVoteSide = null;
     var _myVoteSource = null; // 'site' or 'telegram'
 
     async function loadMyVote() {
@@ -464,16 +564,16 @@
 
         // 1. Check site vote
         var siteRes = await client.from('challenge_predictions')
-            .select('predicted_winner_id')
+            .select('predicted_side')
             .eq('challenge_id', _challengeId)
             .eq('voter_type', 'site')
             .eq('voter_id', _userId)
             .maybeSingle();
 
         if (siteRes.data) {
-            _myVotePlayerId = siteRes.data.predicted_winner_id;
+            _myVoteSide = siteRes.data.predicted_side;
             _myVoteSource = 'site';
-            lockVoteUI(_myVotePlayerId);
+            lockVoteUI(_myVoteSide);
             return;
         }
 
@@ -486,32 +586,32 @@
 
             if (profileRes.data && profileRes.data.telegram_chat_id) {
                 var tgRes = await client.from('challenge_predictions')
-                    .select('predicted_winner_id')
+                    .select('predicted_side')
                     .eq('challenge_id', _challengeId)
                     .eq('voter_type', 'telegram')
                     .eq('voter_id', profileRes.data.telegram_chat_id)
                     .maybeSingle();
 
                 if (tgRes.data) {
-                    _myVotePlayerId = tgRes.data.predicted_winner_id;
+                    _myVoteSide = tgRes.data.predicted_side;
                     _myVoteSource = 'telegram';
-                    lockVoteUI(_myVotePlayerId);
+                    lockVoteUI(_myVoteSide);
                 }
             }
         } catch(e) {}
     }
 
-    function lockVoteUI(playerId) {
-        _myVotePlayerId = playerId;
+    function lockVoteUI(side) {
+        _myVoteSide = side;
         // Re-render voting section with locked state
         if (_battle && _votes) {
             renderVoting(_battle, _votes);
         }
     }
 
-    function castVote(playerId) {
+    function castVote(side) {
         if (!_userId || !_challengeId) return;
-        if (_myVotePlayerId) return; // Already voted
+        if (_myVoteSide) return; // Already voted
         var client = window.supabaseClient;
         if (!client) return;
 
@@ -522,7 +622,7 @@
 
         client.rpc('cast_battle_vote', {
             p_challenge_id: _challengeId,
-            p_player_id: playerId
+            p_side: side
         }).then(function(res) {
             if (res.error) {
                 console.error('Vote error:', res.error);
@@ -533,7 +633,7 @@
             var result = res.data;
             if (result && result.ok === false) {
                 // Already voted — set flag and re-render locked
-                _myVotePlayerId = playerId;
+                _myVoteSide = side;
                 _myVoteSource = result.error === 'already_voted_tg' ? 'telegram' : 'site';
                 renderVoting(_battle, _votes);
                 if (result.error === 'already_voted_tg') {
@@ -542,14 +642,14 @@
                 return;
             }
             // Success — refresh votes bar, then lock
-            _myVotePlayerId = playerId;
+            _myVoteSide = side;
             _myVoteSource = 'site';
             client.rpc('get_battle_votes', { p_challenge_id: _challengeId })
                 .then(function(vRes) {
                     _votes = {};
                     if (vRes.data) {
                         vRes.data.forEach(function(v) {
-                            _votes[v.player_id] = parseInt(v.votes) || 0;
+                            _votes[v.side] = parseInt(v.votes) || 0;
                         });
                     }
                     // Re-render with updated bar + locked buttons + badge
@@ -652,6 +752,17 @@
             if (m.winner_id === p1) w1++;
             else if (m.winner_id === p2) w2++;
         });
+
+        // Прогноз считает и личные встречи. Страница их уже загрузила —
+        // второй запрос ради тех же матчей был бы расточительством
+        if (p1 && p2) {
+            var key = p1 < p2 ? p1 + ':' + p2 : p2 + ':' + p1;
+            _h2hMap = {};
+            _h2hMap[key] = {};
+            _h2hMap[key][p1] = w1;
+            _h2hMap[key][p2] = w2;
+            if (_battle && _votes) renderVoting(_battle, _votes);
+        }
 
         var listHtml = '';
         if (matches.length === 0) {

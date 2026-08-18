@@ -649,10 +649,60 @@
     background: var(--bg-primary);
 }
 
+/* Прошедшие турниры идут полосами, а не карточками: на завершённый
+   смотрят ради результата, ему не нужны крупная афиша и кнопка
+   регистрации. Две в ряд — столько же, сколько на странице баттлов */
 .past-tournaments-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-lg);
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+/* Постеры бывают светлыми, и подпись по ним не читалась: затемняем фон
+   сильнее и даём тексту тень */
+.trn-strip[style*="background-image"]::before {
+    background: rgba(10, 10, 10, 0.9);
+}
+.trn-strip h4,
+.trn-strip .trn-strip-sub,
+.trn-strip .to-compact-date {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.trn-strip .to-compact-date .to-day { color: var(--text-secondary); }
+
+.trn-strip-sub {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.trn-strip-right { text-align: right; }
+
+.trn-strip-badge {
+    display: inline-block;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    white-space: nowrap;
+}
+
+.trn-strip-gender {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    background: rgba(204, 255, 0, 0.14);
+    color: var(--accent);
+    margin-left: 6px;
+    vertical-align: middle;
 }
 
 /* Show More Button */

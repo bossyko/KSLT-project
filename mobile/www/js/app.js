@@ -465,6 +465,125 @@
     }
   }
 
+  // === Род матча ===
+  //
+  // В историю матчей попадает всё сыгранное, а в статистику — только
+  // рейтинговые одиночные. Без метки это выглядит ошибкой: матчей
+  // одиннадцать, побед четыре. Метка отвечает на вопрос у самой строки.
+  //
+  // Дуэль в базе — это баттл: счёт вводится в админке только у
+  // опубликованных баттлов, другого пути к match_type = 'duel' нет.
+  APP.matchKind = function(m) {
+    if (m.match_type === 'duel') return 'battle';
+    var t = m.tournament;
+    if (t) {
+      if (t.format === 'mixed_doubles') return 'mixed';
+      if (t.format === 'doubles') return 'doubles';
+      if (t.category_id === 'friendly') return 'friendly';
+    }
+    return 'rating';
+  };
+
+  var KIND_KEY = {
+    rating: 'match.tagRating', friendly: 'match.tagFriendly',
+    doubles: 'match.tagDoubles', mixed: 'match.tagMixed', battle: 'match.tagBattle'
+  };
+
+  APP.matchKindTag = function(m) {
+    var kind = APP.matchKind(m);
+    var i18n = window.KSLT_I18N;
+    return '<span class="match-tag match-tag-' + kind + '">' +
+           (i18n ? i18n.t(KIND_KEY[kind]) : kind) + '</span>';
+  };
+
+  // === Состав баттла ===
+  //
+  // Баттл бывает одиночным, парным и смешанным. Участник — член клуба или
+  // гость: у гостя есть только имя, карточки игрока у него нет.
+  //
+  // Состав называем словами: «мужские пары», «женские пары», «микст». Пол
+  // база знает и по нему же проверяет состав при заведении — подпись
+  // собирается сама. Если состав неровный (показательная игра, где проверку
+  // сняли), пишем просто «пары»: соврать нельзя, промолчать можно.
+  APP.battleIsPair = function(b) {
+    return !!b && b.format && b.format !== 'singles';
+  };
+
+  APP.battleFormatLabel = function(b) {
+    if (!APP.battleIsPair(b)) return '';
+    var i18n = window.KSLT_I18N;
+    var t = function(k) { return i18n ? i18n.t(k) : k; };
+    if (b.format === 'mixed_doubles') return t('battle.mixed');
+
+    var all = [b.challenger_gender, b.challenger_partner_gender,
+               b.opponent_gender, b.opponent_partner_gender];
+    if (all.some(function(x) { return !x; })) return t('battle.doubles');
+    if (all.every(function(x) { return x === 'men'; })) return t('battle.menDoubles');
+    if (all.every(function(x) { return x === 'women'; })) return t('battle.womenDoubles');
+    return t('battle.doubles');
+  };
+
+  /** Имена стороны: основной участник и напарник, если он есть. */
+  APP.battleSideNames = function(b, side) {
+    var pre = side === 1 ? 'challenger' : 'opponent';
+    var out = [];
+    var main = (b[pre + '_player'] && b[pre + '_player'].name) ||
+               b[pre + '_name'] || b[pre + '_external_name'];
+    if (main) out.push(main);
+    if (APP.battleIsPair(b)) {
+      var mate = b[pre + '_partner_display'] || b[pre + '_partner_name'];
+      if (mate) out.push(mate);
+    }
+    return out;
+  };
+
+  /** Фамилии через косую — для кнопок, куда полные имена не влезают. */
+  APP.battleShortSide = function(names) {
+    return (names || []).map(function(n) {
+      var parts = String(n).trim().split(/\s+/);
+      return parts[parts.length - 1] || n;
+    }).join(' / ');
+  };
+
+  // === Парные игры ===
+  //
+  // В рейтинг они не идут: очков за пары не начисляют, места в таблице нет.
+  // Но сыгранное надо где-то показать — иначе история матчей длиннее, чем
+  // объясняет статистика. Пары и микст порознь: партнёр в них разный.
+  //
+  // У кого таких игр нет, блока нет: пустые нули читаются как неудача.
+  APP.pairBlocks = function(p, esc) {
+    var i18n = window.KSLT_I18N;
+    var t = function(k) { return i18n ? i18n.t(k) : k; };
+
+    function one(title, cls, w, l) {
+      var played = w + l;
+      if (!played) return '';
+      var rate = Math.round(w / played * 100);
+      return '<div class="prof-pair-block">' +
+        '<div class="prof-pair-head">' +
+          '<span class="prof-pair-title">' + title + '</span>' +
+          '<span class="match-tag ' + cls + '">' + t('pairs.note') + '</span>' +
+        '</div>' +
+        '<div class="stats-grid stats-grid-3">' +
+          '<div class="stat-card"><div class="stat-value">' + played + '</div>' +
+            '<div class="stat-label">' + t('pairs.matches') + '</div></div>' +
+          '<div class="stat-card"><div class="stat-value">' + w + '</div>' +
+            '<div class="stat-label">' + t('profile.wins') + '</div></div>' +
+          '<div class="stat-card"><div class="stat-value">' + l + '</div>' +
+            '<div class="stat-label">' + t('profile.losses') + '</div></div>' +
+        '</div>' +
+        '<div class="prof-pair-bar">' +
+          '<i class="prof-pair-w" style="width:' + rate + '%"></i>' +
+          '<i class="prof-pair-l" style="width:' + (100 - rate) + '%"></i>' +
+        '</div>' +
+      '</div>';
+    }
+
+    return one(t('pairs.title'), 'match-tag-doubles', p.doubles_wins || 0, p.doubles_losses || 0) +
+           one(t('pairs.mixed'), 'match-tag-mixed',   p.mixed_wins   || 0, p.mixed_losses   || 0);
+  };
+
   // === View Tracking ===
   APP.incrementView = function(rpcName, params) {
     var key = 'kslt_appview_' + rpcName + '_' + Object.values(params).join('');
@@ -514,6 +633,11 @@
           APP.checkUnreadNotifications();
           // Init push notifications
           if (window.KSLT_PUSH) window.KSLT_PUSH.init();
+          // Заработал что-то с прошлого раза — поздравляем. Отметка о показе
+          // общая с сайтом, поэтому дважды не всплывёт
+          if (window.KSLT_BADGE_CELEBRATION && profile.player_id) {
+            window.KSLT_BADGE_CELEBRATION.check(profile.player_id);
+          }
         }
         // Else auth screen stays open (visible by default in HTML)
         finishInit();

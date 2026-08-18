@@ -92,15 +92,17 @@
     // ---- Load user's existing votes ----
     function loadUserVotes(battleIds) {
         if (!userId || !battleIds.length) return Promise.resolve({});
+        // Голос хранится стороной: 1 — первый, 2 — второй. Раньше это был
+        // идентификатор игрока, но у гостя баттла его нет
         return client.from('challenge_predictions')
-            .select('challenge_id, predicted_winner_id')
+            .select('challenge_id, predicted_side')
             .eq('voter_type', 'site')
             .eq('voter_id', userId)
             .in('challenge_id', battleIds)
             .then(function(res) {
                 var map = {};
                 (res.data || []).forEach(function(v) {
-                    map[v.challenge_id] = v.predicted_winner_id;
+                    map[v.challenge_id] = v.predicted_side;
                 });
                 return map;
             }).catch(function() { return {}; });
@@ -109,7 +111,7 @@
     // ---- Load active published battles ----
     function loadActiveBattles() {
         return client.from('challenges')
-            .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, challenger_player_id, opponent_player_id, banner_url, battle_published_at')
+            .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, challenger_gender, opponent_gender, challenger_partner_gender, opponent_partner_gender, banner_url, battle_published_at')
             .eq('battle_published', true)
             .neq('status', 'completed')
             .order('battle_published_at', { ascending: false })
@@ -129,8 +131,10 @@
                 // Collect player IDs
                 var pIds = [];
                 battles.forEach(function(b) {
-                    if (pIds.indexOf(b.challenger_player_id) === -1) pIds.push(b.challenger_player_id);
-                    if (pIds.indexOf(b.opponent_player_id) === -1) pIds.push(b.opponent_player_id);
+                    [b.challenger_player_id, b.opponent_player_id,
+                     b.challenger_partner_id, b.opponent_partner_id].forEach(function(id) {
+                        if (id && pIds.indexOf(id) === -1) pIds.push(id);
+                    });
                 });
 
                 return client.from('players').select('id, name, name_en, name_kg, photo').in('id', pIds).then(function(pRes) {
@@ -143,7 +147,7 @@
                             var vm = {};
                             var total = 0;
                             (vRes.data || []).forEach(function(v) {
-                                vm[v.player_id] = parseInt(v.votes) || 0;
+                                vm[v.side] = parseInt(v.votes) || 0;
                                 total += parseInt(v.votes) || 0;
                             });
                             return { challengeId: b.id, votes: vm, total: total };
@@ -165,22 +169,44 @@
             }).catch(function(e) { console.error('Battle cards error:', e); return null; });
     }
 
+    /**
+     * Сторона в карточке: одно фото или два внахлёст.
+     *
+     * Места на строку, поэтому у пары фотографии наезжают друг на друга,
+     * а имена идут в две строки под ними.
+     */
+    function sideHtml(side) {
+        var ph = '<div class="bc-player-photos' + (side.names.length > 1 ? ' bc-pair' : '') + '">';
+        side.photos.forEach(function(src) {
+            ph += '<img src="' + esc(src || 'https://placehold.co/60x60/1a1a1a/666?text=?') + '" alt="">';
+        });
+        ph += '</div>';
+
+        var names = '<span class="bc-player-name' + (side.names.length > 1 ? ' bc-pair-names' : '') + '">';
+        side.names.forEach(function(n) { names += '<span>' + esc(n) + '</span>'; });
+        names += '</span>';
+
+        return '<div class="bc-player">' + ph + names + '</div>';
+    }
+
     // ---- Render compact battle card ----
     function renderBattleCard(battle, players, votes) {
-        var p1 = players[battle.challenger_player_id] || {};
-        var p2 = players[battle.opponent_player_id] || {};
-        var p1Name = getPlayerName(p1);
-        var p2Name = getPlayerName(p2);
-        var p1Photo = p1.photo || 'https://placehold.co/60x60/1a1a1a/666?text=?';
-        var p2Photo = p2.photo || 'https://placehold.co/60x60/1a1a1a/666?text=?';
+        // Сторона баттла — один человек или пара. Собираем в общем месте,
+        // чтобы карточка, страница и объявление говорили одинаково
+        var BF = window.KSLT_BATTLE_FORMAT;
+        var side1 = BF.side(battle, 1, players, getPlayerName);
+        var side2 = BF.side(battle, 2, players, getPlayerName);
+        var p1Name = side1.names.join(' / ');
+        var p2Name = side2.names.join(' / ');
+        var formatLabel = BF.label(battle);
         var date = battle.proposed_date || '';
         var time = battle.proposed_time || '';
         var venue = battle.proposed_venue || '';
 
         // Votes
         var vData = votes[battle.id] || { votes: {}, total: 0 };
-        var v1 = vData.votes[battle.challenger_player_id] || 0;
-        var v2 = vData.votes[battle.opponent_player_id] || 0;
+        var v1 = vData.votes[1] || 0;
+        var v2 = vData.votes[2] || 0;
         var vTotal = vData.total || 0;
         var pct1 = vTotal > 0 ? Math.round(v1 / vTotal * 100) : 50;
         var pct2 = vTotal > 0 ? 100 - pct1 : 50;
@@ -195,27 +221,27 @@
             voteHtml = '<div class="bc-vote-closed-msg">' + L.votingClosed + '</div>';
         } else if (userId && hasVoted) {
             // Already voted — show result, buttons locked
-            var sel1 = myVote === battle.challenger_player_id ? ' bc-vote-selected' : '';
-            var sel2 = myVote === battle.opponent_player_id ? ' bc-vote-selected' : '';
+            var sel1 = myVote === 1 ? ' bc-vote-selected' : '';
+            var sel2 = myVote === 2 ? ' bc-vote-selected' : '';
             voteHtml =
                 '<div class="bc-vote-voted">' + L.yourVote + ':</div>' +
                 '<div class="bc-vote-buttons">' +
                     '<button class="bc-vote-btn bc-vote-btn-p1 bc-vote-locked' + sel1 + '" disabled>' +
-                        esc(p1Name) +
+                        esc(BF.shortSide(side1.names)) +
                     '</button>' +
                     '<button class="bc-vote-btn bc-vote-btn-p2 bc-vote-locked' + sel2 + '" disabled>' +
-                        esc(p2Name) +
+                        esc(BF.shortSide(side2.names)) +
                     '</button>' +
                 '</div>';
         } else if (userId) {
             // Not voted yet — active buttons
             voteHtml =
                 '<div class="bc-vote-buttons">' +
-                    '<button class="bc-vote-btn bc-vote-btn-p1" data-challenge="' + battle.id + '" data-player="' + battle.challenger_player_id + '">' +
-                        esc(p1Name) +
+                    '<button class="bc-vote-btn bc-vote-btn-p1" data-challenge="' + battle.id + '" data-side="1">' +
+                        esc(BF.shortSide(side1.names)) +
                     '</button>' +
-                    '<button class="bc-vote-btn bc-vote-btn-p2" data-challenge="' + battle.id + '" data-player="' + battle.opponent_player_id + '">' +
-                        esc(p2Name) +
+                    '<button class="bc-vote-btn bc-vote-btn-p2" data-challenge="' + battle.id + '" data-side="2">' +
+                        esc(BF.shortSide(side2.names)) +
                     '</button>' +
                 '</div>';
         } else {
@@ -240,20 +266,14 @@
             bannerHtml +
             '<div class="bc-card-inner">' +
                 '<div class="bc-header">' +
-                    '<span class="bc-badge">' + L.battle + '</span>' +
+                    '<span class="bc-badge">' + L.battle + (formatLabel ? ' · ' + esc(formatLabel) : '') + '</span>' +
                     headerMeta +
                 '</div>' +
                 '<div class="bc-title">' + esc(battle.battle_title || 'Battle') + '</div>' +
                 '<div class="bc-vs-row">' +
-                    '<div class="bc-player">' +
-                        '<img src="' + esc(p1Photo) + '" alt="">' +
-                        '<span class="bc-player-name">' + esc(p1Name) + '</span>' +
-                    '</div>' +
+                    sideHtml(side1) +
                     '<span class="bc-vs">' + L.vs + '</span>' +
-                    '<div class="bc-player">' +
-                        '<img src="' + esc(p2Photo) + '" alt="">' +
-                        '<span class="bc-player-name">' + esc(p2Name) + '</span>' +
-                    '</div>' +
+                    sideHtml(side2) +
                 '</div>' +
                 voteHtml +
                 '<div class="bc-vote-bar">' +
@@ -277,7 +297,7 @@
         if (btn.disabled || btn.classList.contains('bc-vote-locked')) return;
 
         var challengeId = btn.dataset.challenge;
-        var playerId = btn.dataset.player;
+        var side = parseInt(btn.dataset.side, 10);
 
         // Already voted — block
         if (userVotes[challengeId]) {
@@ -295,7 +315,7 @@
         // Call RPC
         client.rpc('cast_battle_vote', {
             p_challenge_id: challengeId,
-            p_player_id: playerId
+            p_side: side
         }).then(function(res) {
             if (res.error) {
                 console.error('Vote RPC error:', res.error);
@@ -316,7 +336,7 @@
                 return;
             }
             // Success
-            userVotes[challengeId] = playerId;
+            userVotes[challengeId] = side;
             showToast(L.voteRecorded);
             // Lock buttons permanently
             card.querySelectorAll('.bc-vote-btn').forEach(function(b) {
@@ -344,19 +364,14 @@
             var vm = {};
             var total = 0;
             (vRes.data || []).forEach(function(v) {
-                vm[v.player_id] = parseInt(v.votes) || 0;
+                vm[v.side] = parseInt(v.votes) || 0;
                 total += parseInt(v.votes) || 0;
             });
 
             // Update all cards with this battle ID (homepage + overview might both exist)
             document.querySelectorAll('.bc-card[data-battle="' + challengeId + '"]').forEach(function(card) {
-                var btns = card.querySelectorAll('.bc-vote-btn');
-                var p1Id = btns[0] ? btns[0].dataset.player : null;
-                var p2Id = btns[1] ? btns[1].dataset.player : null;
-                if (!p1Id && !p2Id) return;
-
-                var v1 = vm[p1Id] || 0;
-                var v2 = vm[p2Id] || 0;
+                var v1 = vm[1] || 0;
+                var v2 = vm[2] || 0;
                 var pct1 = total > 0 ? Math.round(v1 / total * 100) : 50;
                 var pct2 = total > 0 ? 100 - pct1 : 50;
 
@@ -373,9 +388,9 @@
                 if (totalEl) totalEl.textContent = total + ' ' + L.votes;
 
                 // Update selected state
-                var votedPlayer = userVotes[challengeId];
+                var votedSide = userVotes[challengeId];
                 card.querySelectorAll('.bc-vote-btn').forEach(function(b) {
-                    b.classList.toggle('bc-vote-selected', b.dataset.player === votedPlayer);
+                    b.classList.toggle('bc-vote-selected', parseInt(b.dataset.side, 10) === votedSide);
                 });
             });
         });

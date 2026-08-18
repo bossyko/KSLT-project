@@ -233,11 +233,134 @@
     padding: 0 8px;
 }
 
+/* Пара на странице баттла.
+
+   Здесь места хватает, поэтому обе карточки идут рядом, а не внахлёст, как
+   на узких карточках: это главный экран баттла, сюда и приходят
+   рассматривать. Ширина у всех четверых одинаковая — иначе длинная фамилия
+   переносится на вторую строку и своя половина уезжает вверх. */
+.ch-pair {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 12px;
+}
+.ch-pair-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 128px;
+}
+.ch-pair .ch-player-photo { width: 100px; height: 132px; }
+.ch-pair .ch-player-name { font-size: 0.96rem; line-height: 1.25; min-height: 2.4em; }
+.ch-pair-plus {
+    color: var(--text-dim);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-top: 56px;
+}
+
+/* Счёт в парах вместо побед и поражений: рейтинговые одиночные числа рядом
+   с парным матчем ничего не значат */
+.ch-pair-record { font-size: 0.72rem; color: #6EA8FE; font-weight: 600; }
+
+/* Состав словами: мужские пары, женские пары, микст */
+.ch-format {
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6EA8FE;
+    margin-bottom: var(--space-lg);
+}
+
+/* Прогноз по числам.
+
+   Стоит над голосованием зрителей и отвечает на тот же вопрос с другой
+   стороны: одна полоса про то, что говорит рейтинг, другая — что думают
+   люди. После матча видно, кто оказался ближе.
+
+   Цвет приглушённый, синий: это справка, а не событие. Голосование остаётся
+   главным на экране — туда человек пришёл нажимать. */
+.ch-forecast {
+    max-width: 620px;
+    margin: 0 auto var(--space-lg);
+    padding: 14px 16px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.02);
+}
+
+.ch-forecast-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.ch-forecast-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.ch-forecast-hint {
+    font-size: 0.74rem;
+    color: var(--text-dim);
+}
+
+.ch-forecast-names {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.ch-forecast-bar {
+    display: flex;
+    height: 22px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+}
+
+.ch-forecast-bar i {
+    display: flex;
+    align-items: center;
+    font-style: normal;
+    /* Полоса выезжает, когда попадает на экран */
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ch-forecast-bar b {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0 8px;
+    white-space: nowrap;
+}
+
+.ch-forecast-left  { background: rgba(96,165,250,0.28); justify-content: flex-start; color: #bfdbfe; }
+.ch-forecast-right { background: rgba(148,163,184,0.22); justify-content: flex-end;  color: #cbd5e1; }
+
+/* Кнопки голосования одинаковой ширины.
+
+   Ширина шла от длины имени: «Жаныбеков» давал кнопку заметно шире, чем
+   «Хан», и вёрстка молча делала ставку за зрителя — крупнее значит главнее.
+   Ставим равные доли, чтобы обе стороны выглядели одинаково. */
 .ch-vote-buttons {
     display: flex;
     justify-content: center;
     gap: var(--space-md);
     margin-bottom: var(--space-md);
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .ch-vote-btn {
@@ -254,7 +377,8 @@
     font-weight: 700;
     cursor: pointer;
     transition: all 0.25s;
-    min-width: 180px;
+    flex: 1 1 0;
+    min-width: 0;
     position: relative;
 }
 .ch-vote-btn .ch-vote-name {

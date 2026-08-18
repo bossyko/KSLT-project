@@ -79,7 +79,8 @@ test.describe('Footer', () => {
         await page.goto('/', { waitUntil: 'domcontentloaded' });
         const footer = page.locator('footer');
         const text = await footer.textContent();
-        expect(text.toLowerCase()).toContain('kslt');
+        // Главная — русская, там аббревиатура кириллицей
+        expect(text.toLowerCase()).toContain('кслт');
     });
 });
 

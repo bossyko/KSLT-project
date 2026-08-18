@@ -481,7 +481,7 @@
       // Step 1: parallel — challenge + existing vote + linked profile
       const [chalRes, existRes, profileRes] = await Promise.all([
         db.from('challenges')
-          .select('id, battle_published, voting_closed, challenger_player_id, opponent_player_id, proposed_date, proposed_time')
+          .select('id, battle_published, voting_closed, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, proposed_date, proposed_time')
           .eq('id', challengeId).single(),
         db.from('challenge_predictions')
           .select('id')
@@ -518,8 +518,10 @@
         await answerCallbackQuery(token, query.id, '✅ Вы уже проголосовали!'); return
       }
 
-      // Resolve player_id from slot
-      const playerId = playerSlot === '1' ? challenge.challenger_player_id : challenge.opponent_player_id
+      // Кнопка и так говорит, за какую сторону голос: bv:UUID:1 или :2.
+      // Раньше сторона превращалась в идентификатор игрока, и голос хранился
+      // им. У гостя баттла идентификатора нет — храним сторону
+      const side = playerSlot === '1' ? 1 : 2
 
       // Cross-check: site vote by linked profile
       if (profileRes.data) {
@@ -541,18 +543,32 @@
           challenge_id: challengeId,
           voter_type: 'telegram',
           voter_id: voterId,
-          predicted_winner_id: playerId
+          predicted_side: side
         }),
         db.from('players')
           .select('id, name')
-          .in('id', [challenge.challenger_player_id, challenge.opponent_player_id])
+          .in('id', [
+            challenge.challenger_player_id, challenge.opponent_player_id,
+            challenge.challenger_partner_id, challenge.opponent_partner_id
+          ].filter(Boolean))
       ])
 
       const pMap: Record<string, string> = {}
       if (playersRes.data) playersRes.data.forEach((p: any) => { pMap[p.id] = p.name })
-      const cName = pMap[challenge.challenger_player_id] || '?'
-      const oName = pMap[challenge.opponent_player_id] || '?'
-      const votedName = pMap[playerId] || '?'
+
+      // Сторона — один человек или пара. Гость в players не заведён, его имя
+      // лежит в вызове. В кнопку четыре полных имени не помещаются: фамилии
+      const isPair = challenge.format && challenge.format !== 'singles'
+      const sideShort = (who: 'challenger' | 'opponent'): string => {
+        const last = (n: string) => n.trim().split(/\s+/).pop() || n
+        const main = pMap[challenge[`${who}_player_id`]] || challenge[`${who}_external_name`] || '?'
+        if (!isPair) return main
+        const mate = pMap[challenge[`${who}_partner_id`]] || challenge[`${who}_partner_name`] || ''
+        return mate ? `${last(main)} / ${last(mate)}` : main
+      }
+      const cName = sideShort('challenger')
+      const oName = sideShort('opponent')
+      const votedName = side === 1 ? cName : oName
 
       await answerCallbackQuery(token, query.id, `✅ Голос за ${votedName} принят!`)
 
@@ -562,13 +578,13 @@
       if (chatId && messageId) {
         const { data: votes } = await db
           .from('challenge_predictions')
-          .select('predicted_winner_id')
+          .select('predicted_side')
           .eq('challenge_id', challengeId)
 
         let v1 = 0, v2 = 0
         if (votes) votes.forEach((v: any) => {
-          if (v.predicted_winner_id === challenge.challenger_player_id) v1++
-          else if (v.predicted_winner_id === challenge.opponent_player_id) v2++
+          if (v.predicted_side === 1) v1++
+          else if (v.predicted_side === 2) v2++
         })
         const total = v1 + v2
         const p1 = total > 0 ? Math.round(v1 / total * 100) : 50
@@ -1004,15 +1020,21 @@
 
         // 2. Create payment record
         if (membership) {
-          await db.from('payments').insert({
+          // Колонка называется payment_method. Раньше здесь стояло method —
+          // база отклоняла вставку, а ответ никто не проверял: членство
+          // выдавалось, а оплата в финансы не попадала
+          const { error: payErr } = await db.from('payments').insert({
             profile_id: req.profile_id,
             membership_id: membership.id,
             amount: req.amount || 0,
             currency: 'KGS',
-            method: 'transfer',
+            payment_method: 'transfer',
             status: 'completed',
             note: 'Telegram bot'
           })
+          if (payErr) {
+            console.error('Payment insert error:', payErr)
+          }
         }
 
         // 3. Auto-create player if no player_id + category selected

@@ -33,6 +33,8 @@
         details: 'Details',
         empty: 'No battles yet',
         emptyCompleted: 'No completed battles',
+        completedBadge: 'Finished', voteBadge: 'Voting',
+        showMore: 'Show {n} more', shownOf: '{n} of {total}',
         winner: 'Winner',
         result: 'Result',
         loginToVote: 'Log in to vote',
@@ -55,6 +57,8 @@
         details: 'Толугураак',
         empty: 'Баттлдар жок',
         emptyCompleted: 'Аяктаган баттлдар жок',
+        completedBadge: 'Аяктады', voteBadge: 'Добуш берүү',
+        showMore: 'Дагы {n} көрсөтүү', shownOf: '{total} ичинен {n}',
         winner: 'Жеңүүчү',
         result: 'Натыйжа',
         loginToVote: 'Добуш берүү үчүн кириңиз',
@@ -77,6 +81,8 @@
         details: 'Подробнее',
         empty: 'Баттлов пока нет',
         emptyCompleted: 'Завершённых баттлов нет',
+        completedBadge: 'Завершён', voteBadge: 'Голосование',
+        showMore: 'Показать ещё {n}', shownOf: 'показано {n} из {total}',
         winner: 'Победитель',
         result: 'Результат',
         loginToVote: 'Войдите, чтобы голосовать',
@@ -278,7 +284,7 @@
         try {
             // Load all published battles
             var result = await client.from('challenges')
-                .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, challenger_player_id, opponent_player_id, banner_url, battle_published_at')
+                .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, challenger_gender, opponent_gender, challenger_partner_gender, opponent_partner_gender, banner_url, battle_published_at, match_id')
                 .eq('battle_published', true)
                 .order('battle_published_at', { ascending: false });
 
@@ -292,8 +298,10 @@
             // Collect player IDs
             var pIds = [];
             battles.forEach(function(b) {
-                if (pIds.indexOf(b.challenger_player_id) === -1) pIds.push(b.challenger_player_id);
-                if (pIds.indexOf(b.opponent_player_id) === -1) pIds.push(b.opponent_player_id);
+                [b.challenger_player_id, b.opponent_player_id,
+                 b.challenger_partner_id, b.opponent_partner_id].forEach(function(id) {
+                    if (id && pIds.indexOf(id) === -1) pIds.push(id);
+                });
             });
 
             // Load players
@@ -306,7 +314,7 @@
                     var vm = {};
                     var total = 0;
                     (vRes.data || []).forEach(function(v) {
-                        vm[v.player_id] = parseInt(v.votes) || 0;
+                        vm[v.side] = parseInt(v.votes) || 0;
                         total += parseInt(v.votes) || 0;
                     });
                     return { challengeId: b.id, votes: vm, total: total };
@@ -320,12 +328,12 @@
             if (_userId) {
                 var battleIds = battles.map(function(b) { return b.id; });
                 var uvRes = await client.from('challenge_predictions')
-                    .select('challenge_id, predicted_winner_id')
+                    .select('challenge_id, predicted_side')
                     .eq('voter_type', 'site')
                     .eq('voter_id', _userId)
                     .in('challenge_id', battleIds);
                 (uvRes.data || []).forEach(function(v) {
-                    _userVotes[v.challenge_id] = v.predicted_winner_id;
+                    _userVotes[v.challenge_id] = v.predicted_side;
                 });
             }
 
@@ -358,7 +366,8 @@
 
         var html = '';
 
-        // Active battles section
+        // Предстоящие: ближайший крупной карточкой, остальные полосами рядом.
+        // Одно правило на весь сайт — актуальное крупно, история строкой
         html += '<div class="bo-section">';
         html += '<div class="bo-section-header">';
         html += '<h2 class="bo-section-title"><span>' + L.activeTitle + '</span></h2>';
@@ -366,47 +375,133 @@
         html += '</div>';
 
         if (!active.length) {
-            html += '<div class="bo-card-grid"><div class="bo-empty">' + emptySvg + '<p>' + L.empty + '</p></div></div>';
+            // Пустой раздел занимал пол-экрана: большая иконка посреди
+            // пустоты читалась как поломка. Достаточно строки
+            html += '<div class="bo-empty-slim">' + L.empty + '</div>';
+        } else if (active.length === 1) {
+            html += renderFeaturedBattle(active[0], false);
         } else {
-            html += '<div class="bo-card-grid">';
-            for (var i = 0; i < active.length; i++) {
-                html += renderFeaturedBattle(active[i], false);
-            }
-            html += '</div>';
+            html += '<div class="to-card-grid">';
+            html += renderFeaturedBattle(active[0], false);
+            html += '<div class="to-side-stack">';
+            for (var i = 1; i < active.length; i++) html += renderStripBattle(active[i], false);
+            html += '</div></div>';
         }
         html += '</div>';
 
-        // Completed battles section
+        // Завершённые: полосами по две в ряд, с подгрузкой по шесть.
+        // Раньше страница рисовала их такими же крупными карточками и
+        // забирала из базы все разом — на полутора сотнях это заметно
         html += '<div class="bo-section">';
         html += '<div class="bo-section-header">';
         html += '<h2 class="bo-section-title"><span>' + L.completedTitle + '</span></h2>';
-        if (completed.length) html += '<span class="bo-section-count">' + completed.length + '</span>';
-        html += '</div>';
-
-        if (!completed.length) {
-            html += '<div class="bo-card-grid"><div class="bo-empty">' + emptySvg + '<p>' + L.emptyCompleted + '</p></div></div>';
-        } else {
-            html += '<div class="bo-card-grid">';
-            for (var j = 0; j < completed.length; j++) {
-                html += renderFeaturedBattle(completed[j], true);
-            }
-            html += '</div>';
+        if (completed.length) {
+            html += '<span class="bo-section-count">' +
+                (completed.length > DONE_FIRST
+                    ? L.shownOf.replace('{n}', Math.min(DONE_FIRST, completed.length)).replace('{total}', completed.length)
+                    : completed.length) + '</span>';
         }
         html += '</div>';
 
+        if (!completed.length) {
+            html += '<div class="bo-empty-slim">' + L.emptyCompleted + '</div>';
+        } else {
+            _doneShown = Math.min(DONE_FIRST, completed.length);
+            html += '<div class="bo-strip-grid" id="boDoneGrid">';
+            for (var j = 0; j < _doneShown; j++) html += renderStripBattle(completed[j], true);
+            html += '</div>';
+            if (completed.length > _doneShown) {
+                html += '<div class="bo-more-wrap"><button class="bo-more" id="boDoneMore">' +
+                    L.showMore.replace('{n}', Math.min(DONE_STEP, completed.length - _doneShown)) +
+                    '</button></div>';
+            }
+        }
+        html += '</div>';
+
+        _doneList = completed;
         container.innerHTML = html;
         attachEvents();
+        attachDoneMore();
         initSearch();
         startCountdownTimer();
+    }
+
+    /** Сторона крупной карточки: одно фото или два внахлёст. */
+    function boSideHtml(side, cat) {
+        var pair = side.names.length > 1;
+        var html = '<div class="bo-player-side">' +
+            '<div class="bo-player-photos' + (pair ? ' bo-pair' : '') + '">';
+        side.photos.forEach(function(src) {
+            html += '<img class="bo-player-img" src="' +
+                esc(src || 'https://placehold.co/80x80/1a1a1a/666?text=?') + '" alt="">';
+        });
+        html += '</div><div class="bo-player-name' + (pair ? ' bo-pair-names' : '') + '">';
+        side.names.forEach(function(n) { html += '<span>' + esc(n) + '</span>'; });
+        html += '</div>';
+        if (cat) html += '<div class="bo-player-cat">' + cat + '</div>';
+        return html + '</div>';
+    }
+
+    // Завершённых со временем станет много: показываем часть, остальное по
+    // кнопке. Столько же, сколько на странице турниров, — одно поведение
+    var DONE_FIRST = 4;
+    var DONE_STEP = 6;
+    var _doneShown = 0;
+    var _doneList = [];
+
+    /**
+     * Полоса баттла — та же разметка, что у турниров: дата слева, название
+     * и состав в середине, метка справа, афиша приглушённым фоном.
+     *
+     * У завершённого вместо метки голосования счёт и победитель: на
+     * сыгранный баттл смотрят ради результата, а не ради состава.
+     */
+    function renderStripBattle(b, isCompleted) {
+        var BF = window.KSLT_BATTLE_FORMAT;
+        var side1 = BF.side(b, 1, _players, getPlayerName);
+        var side2 = BF.side(b, 2, _players, getPlayerName);
+        var fmt = BF.label(b);
+
+        var d = b.proposed_date ? new Date(b.proposed_date + 'T00:00:00') : null;
+        var day = d && !isNaN(d.getTime()) ? d.getDate() : '';
+        var month = d && !isNaN(d.getTime()) ? months[d.getMonth()] : '';
+
+        var names = BF.shortSide(side1.names) + ' vs ' + BF.shortSide(side2.names);
+        var venue = b.proposed_venue || '';
+        var sub = names + (venue ? ' · ' + esc(venue) : '');
+
+        var right = isCompleted
+            ? '<span class="bo-strip-badge bo-strip-done">' + L.completedBadge + '</span>'
+            : '<span class="bo-strip-badge bo-strip-live">' + L.voteBadge + '</span>';
+
+        var bg = b.banner_url ? ' style="background-image:url(' + esc(b.banner_url) + ')"' : '';
+
+        return '<a class="to-compact bo-strip' + (isCompleted ? ' bo-strip-past' : '') + '" href="' +
+                detailUrl(b.id) + '"' + bg + '>' +
+            '<div class="to-compact-left"><div class="to-compact-date">' +
+                '<span class="to-day">' + day + '</span>' +
+                '<span class="to-month">' + month + '</span>' +
+            '</div></div>' +
+            '<div class="to-compact-info">' +
+                '<h4>' + esc(b.battle_title || 'Battle') +
+                    (fmt ? '<span class="bo-strip-fmt">' + esc(fmt) + '</span>' : '') + '</h4>' +
+                '<div class="bo-strip-sub">' + sub + '</div>' +
+            '</div>' +
+            '<div class="bo-strip-right">' + right + '</div>' +
+        '</a>';
     }
 
     function renderFeaturedBattle(b, isCompleted) {
         var p1 = _players[b.challenger_player_id] || {};
         var p2 = _players[b.opponent_player_id] || {};
-        var p1Name = getPlayerName(p1);
-        var p2Name = getPlayerName(p2);
-        var p1Photo = p1.photo || 'https://placehold.co/80x80/1a1a1a/666?text=?';
-        var p2Photo = p2.photo || 'https://placehold.co/80x80/1a1a1a/666?text=?';
+        // Сторона — один человек или пара. Собирает общий модуль, чтобы
+        // страница, карточка на главной и объявление говорили одинаково
+        var BF = window.KSLT_BATTLE_FORMAT;
+        var side1 = BF.side(b, 1, _players, getPlayerName);
+        var side2 = BF.side(b, 2, _players, getPlayerName);
+        var p1Name = side1.names.join(' / ');
+        var p2Name = side2.names.join(' / ');
+        var formatLabel = BF.label(b);
         var p1Cat = CAT_LABELS[p1.category_id] || '';
         var p2Cat = CAT_LABELS[p2.category_id] || '';
 
@@ -416,8 +511,8 @@
 
         // Votes
         var vData = _votesData[b.id] || { votes: {}, total: 0 };
-        var v1 = vData.votes[b.challenger_player_id] || 0;
-        var v2 = vData.votes[b.opponent_player_id] || 0;
+        var v1 = vData.votes[1] || 0;
+        var v2 = vData.votes[2] || 0;
         var vTotal = vData.total || 0;
         var pct1 = vTotal > 0 ? Math.round(v1 / vTotal * 100) : 50;
         var pct2 = vTotal > 0 ? 100 - pct1 : 50;
@@ -442,13 +537,13 @@
             } else if (_userId && myVote) {
                 voteHtml = '<div class="bo-vote-status">' + L.yourVote + '</div>' +
                     '<div class="bo-vote-buttons">' +
-                        '<button class="bo-vote-btn bo-vote-btn-p1 bo-vote-locked' + (myVote === b.challenger_player_id ? ' bo-vote-selected' : '') + '" disabled>' + esc(p1Name) + '</button>' +
-                        '<button class="bo-vote-btn bo-vote-btn-p2 bo-vote-locked' + (myVote === b.opponent_player_id ? ' bo-vote-selected' : '') + '" disabled>' + esc(p2Name) + '</button>' +
+                        '<button class="bo-vote-btn bo-vote-btn-p1 bo-vote-locked' + (myVote === 1 ? ' bo-vote-selected' : '') + '" disabled>' + esc(BF.shortSide(side1.names)) + '</button>' +
+                        '<button class="bo-vote-btn bo-vote-btn-p2 bo-vote-locked' + (myVote === 2 ? ' bo-vote-selected' : '') + '" disabled>' + esc(BF.shortSide(side2.names)) + '</button>' +
                     '</div>';
             } else if (_userId) {
                 voteHtml = '<div class="bo-vote-buttons">' +
-                    '<button class="bo-vote-btn bo-vote-btn-p1" data-challenge="' + b.id + '" data-player="' + b.challenger_player_id + '">' + esc(p1Name) + '</button>' +
-                    '<button class="bo-vote-btn bo-vote-btn-p2" data-challenge="' + b.id + '" data-player="' + b.opponent_player_id + '">' + esc(p2Name) + '</button>' +
+                    '<button class="bo-vote-btn bo-vote-btn-p1" data-challenge="' + b.id + '" data-side="1">' + esc(BF.shortSide(side1.names)) + '</button>' +
+                    '<button class="bo-vote-btn bo-vote-btn-p2" data-challenge="' + b.id + '" data-side="2">' + esc(BF.shortSide(side2.names)) + '</button>' +
                 '</div>';
             } else {
                 voteHtml = '<div class="bo-vote-login">' + L.loginToVote + '</div>';
@@ -480,18 +575,11 @@
                     getCountdownHtml(date, time) +
                 '</div>' +
                 '<div class="bo-featured-title">' + esc(b.battle_title || 'Battle') + '</div>' +
+                (formatLabel ? '<div class="bo-format">' + esc(formatLabel) + '</div>' : '') +
                 '<div class="bo-vs-row">' +
-                    '<div class="bo-player-side">' +
-                        '<img class="bo-player-img" src="' + esc(p1Photo) + '" alt="">' +
-                        '<div class="bo-player-name">' + esc(p1Name) + '</div>' +
-                        (p1Cat ? '<div class="bo-player-cat">' + p1Cat + '</div>' : '') +
-                    '</div>' +
+                    boSideHtml(side1, p1Cat) +
                     '<span class="bo-vs-badge">' + L.vs + '</span>' +
-                    '<div class="bo-player-side">' +
-                        '<img class="bo-player-img" src="' + esc(p2Photo) + '" alt="">' +
-                        '<div class="bo-player-name">' + esc(p2Name) + '</div>' +
-                        (p2Cat ? '<div class="bo-player-cat">' + p2Cat + '</div>' : '') +
-                    '</div>' +
+                    boSideHtml(side2, p2Cat) +
                 '</div>' +
                 voteHtml +
                 '<div class="bo-vote-bar">' +
@@ -526,8 +614,8 @@
 
         // Votes
         var vData = _votesData[b.id] || { votes: {}, total: 0 };
-        var v1 = vData.votes[b.challenger_player_id] || 0;
-        var v2 = vData.votes[b.opponent_player_id] || 0;
+        var v1 = vData.votes[1] || 0;
+        var v2 = vData.votes[2] || 0;
         var vTotal = vData.total || 0;
         var pct1 = vTotal > 0 ? Math.round(v1 / vTotal * 100) : 50;
         var pct2 = vTotal > 0 ? 100 - pct1 : 50;
@@ -574,7 +662,7 @@
         if (btn.disabled || btn.classList.contains('bo-vote-locked')) return;
 
         var challengeId = btn.dataset.challenge;
-        var playerId = btn.dataset.player;
+        var side = parseInt(btn.dataset.side, 10);
 
         if (_userVotes[challengeId]) {
             showToast(L.alreadyVoted);
@@ -587,7 +675,7 @@
 
         client.rpc('cast_battle_vote', {
             p_challenge_id: challengeId,
-            p_player_id: playerId
+            p_side: side
         }).then(function(res) {
             if (res.error) {
                 console.error('Vote error:', res.error);
@@ -601,7 +689,7 @@
                 card.querySelectorAll('.bo-vote-btn').forEach(function(b) { b.classList.add('bo-vote-locked'); });
                 return;
             }
-            _userVotes[challengeId] = playerId;
+            _userVotes[challengeId] = side;
             showToast(L.voteRecorded);
             card.querySelectorAll('.bo-vote-btn').forEach(function(b) { b.classList.add('bo-vote-locked'); });
 
@@ -629,19 +717,14 @@
             var vm = {};
             var total = 0;
             (vRes.data || []).forEach(function(v) {
-                vm[v.player_id] = parseInt(v.votes) || 0;
+                vm[v.side] = parseInt(v.votes) || 0;
                 total += parseInt(v.votes) || 0;
             });
             _votesData[challengeId] = { challengeId: challengeId, votes: vm, total: total };
 
             document.querySelectorAll('[data-battle="' + challengeId + '"]').forEach(function(card) {
-                var btns = card.querySelectorAll('.bo-vote-btn');
-                var p1Id = btns[0] ? btns[0].dataset.player : null;
-                var p2Id = btns[1] ? btns[1].dataset.player : null;
-                if (!p1Id && !p2Id) return;
-
-                var v1 = vm[p1Id] || 0;
-                var v2 = vm[p2Id] || 0;
+                var v1 = vm[1] || 0;
+                var v2 = vm[2] || 0;
                 var pct1 = total > 0 ? Math.round(v1 / total * 100) : 50;
                 var pct2 = total > 0 ? 100 - pct1 : 50;
 
@@ -658,9 +741,9 @@
                 var totalEl = card.querySelector('.bo-total-votes');
                 if (totalEl) totalEl.textContent = total + ' ' + L.votes;
 
-                var votedPlayer = _userVotes[challengeId];
+                var votedSide = _userVotes[challengeId];
                 card.querySelectorAll('.bo-vote-btn').forEach(function(b) {
-                    b.classList.toggle('bo-vote-selected', b.dataset.player === votedPlayer);
+                    b.classList.toggle('bo-vote-selected', parseInt(b.dataset.side, 10) === votedSide);
                 });
             });
         });
@@ -701,6 +784,40 @@
         });
         overlay.querySelectorAll('a').forEach(function(a) {
             a.addEventListener('click', function() { setTimeout(function() { overlay.remove(); }, 200); });
+        });
+    }
+
+    /**
+     * Подгрузка завершённых по кнопке.
+     *
+     * Не номера страниц: список читают сверху вниз, а номер сбивает —
+     * нажал вторую страницу и потерял, где был. Кнопка добавляет снизу,
+     * место чтения не меняется. Так же сделано на странице турниров.
+     */
+    function attachDoneMore() {
+        var btn = document.getElementById('boDoneMore');
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+            var grid = document.getElementById('boDoneGrid');
+            if (!grid) return;
+            var next = _doneList.slice(_doneShown, _doneShown + DONE_STEP);
+            grid.insertAdjacentHTML('beforeend', next.map(function(b) {
+                return renderStripBattle(b, true);
+            }).join(''));
+            _doneShown += next.length;
+
+            var left = _doneList.length - _doneShown;
+            if (left <= 0) {
+                var wrap = btn.closest('.bo-more-wrap');
+                if (wrap) wrap.remove();
+            } else {
+                btn.textContent = L.showMore.replace('{n}', Math.min(DONE_STEP, left));
+            }
+            var counter = document.querySelectorAll('.bo-section-count');
+            if (counter.length > 1) {
+                counter[counter.length - 1].textContent =
+                    L.shownOf.replace('{n}', _doneShown).replace('{total}', _doneList.length);
+            }
         });
     }
 

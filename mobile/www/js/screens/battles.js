@@ -15,7 +15,7 @@
     el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
     supabaseClient.from('challenges')
-      .select('*, challenger:profiles!challenges_challenger_id_fkey(full_name), challenger_player:players!challenges_challenger_player_id_fkey(name), opponent_player:players!challenges_opponent_player_id_fkey(name)')
+      .select('*, challenger:profiles!challenges_challenger_id_fkey(full_name), challenger_player:players!challenges_challenger_player_id_fkey(name), opponent_player:players!challenges_opponent_player_id_fkey(name), challenger_partner:players!challenges_challenger_partner_id_fkey(name), opponent_partner:players!challenges_opponent_partner_id_fkey(name)')
       .eq('battle_published', true)
       .order('created_at', { ascending: false })
       .then(function(r) {
@@ -48,21 +48,40 @@
 
     var html = '';
     filtered.forEach(function(b) {
-      var name1 = (b.challenger_player && b.challenger_player.name) || (b.challenger && b.challenger.full_name) || (I18N.t('home.player') + ' 1');
-      var name2 = (b.opponent_player && b.opponent_player.name) || (I18N.t('home.player') + ' 2');
+      // Сторона — один человек или пара. У пары два кружка и два имени:
+      // раньше здесь бралось по одному, и половина участников пропадала
+      var APP = window.KSLT_APP;
+      var isPair = APP.battleIsPair(b);
+      var names1 = [(b.challenger_player && b.challenger_player.name) ||
+                    b.challenger_external_name ||
+                    (b.challenger && b.challenger.full_name) || (I18N.t('home.player') + ' 1')];
+      var names2 = [(b.opponent_player && b.opponent_player.name) ||
+                    b.opponent_external_name || (I18N.t('home.player') + ' 2')];
+      if (isPair) {
+        var m1 = (b.challenger_partner && b.challenger_partner.name) || b.challenger_partner_name;
+        var m2 = (b.opponent_partner && b.opponent_partner.name) || b.opponent_partner_name;
+        if (m1) names1.push(m1);
+        if (m2) names2.push(m2);
+      }
+      var fmtLabel = APP.battleFormatLabel(b);
+
+      function fighter(names) {
+        var h = '<div class="battle-fighter"><div class="battle-fighter-avatars">';
+        names.forEach(function(n) {
+          h += '<div class="battle-fighter-avatar">' + initials(n) + '</div>';
+        });
+        h += '</div><div class="battle-fighter-name">';
+        names.forEach(function(n) { h += '<span>' + esc(n) + '</span>'; });
+        return h + '</div></div>';
+      }
 
       html += '<div class="battle-card" data-battle-id="' + b.id + '">' +
         '<div class="battle-title">' + esc(b.battle_title || I18N.t('battles.battle')) + '</div>' +
+        (fmtLabel ? '<div class="battle-format">' + esc(fmtLabel) + '</div>' : '') +
         '<div class="battle-vs">' +
-          '<div class="battle-fighter">' +
-            '<div class="battle-fighter-avatar">' + initials(name1) + '</div>' +
-            '<div class="battle-fighter-name">' + esc(name1) + '</div>' +
-          '</div>' +
+          fighter(names1) +
           '<span class="battle-vs-text">VS</span>' +
-          '<div class="battle-fighter">' +
-            '<div class="battle-fighter-avatar">' + initials(name2) + '</div>' +
-            '<div class="battle-fighter-name">' + esc(name2) + '</div>' +
-          '</div>' +
+          fighter(names2) +
         '</div>' +
         '<div class="battle-btn-row">' +
           '<button class="battle-btn primary">' + I18N.t('battles.details') + '</button>' +

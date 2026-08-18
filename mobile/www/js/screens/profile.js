@@ -108,6 +108,12 @@
         });
         html += '</div>';
       }
+
+      // Без этой строчки цифры выглядят враньём: в истории матчей
+      // одиннадцать игр, а побед и поражений здесь четыре. Дружеские,
+      // парные, микст и баттлы в зачёт не идут
+      html += '<div class="prof-stats-note">' + I18N.t('match.statsNote') + '</div>';
+      html += window.KSLT_APP.pairBlocks(_player, esc);
     }
 
     // ---- Rating mini-chart (SVG sparkline from form) ----
@@ -591,10 +597,12 @@
       });
 
     function loadMatchRows(orFilter, myCaptains) {
+      // Здесь всё сыгранное: рейтинговые и дружеские турниры, парные, микст
+      // и баттлы. Что из этого идёт в зачёт, говорит метка у названия —
+      // в победы, поражения и форму попадают только рейтинговые одиночные
       supabaseClient.from('matches')
-        .select('*, tournament:tournaments(title, format)')
+        .select('*, tournament:tournaments(title, format, category_id)')
         .or(orFilter)
-        .eq('match_type', 'tournament')
         .not('winner_id', 'is', null)
         .order('played_at', { ascending: false })
         .then(function(r) {
@@ -676,7 +684,9 @@
               html += '<div class="pd-match">';
               html += '<div class="pd-match-date">' + formatDate(m.played_at).split(' ').slice(0, 2).join(' ') + '</div>';
               html += '<div class="pd-match-info">';
-              if (m.tournament) html += '<div class="pd-match-tournament">' + (dbl ? '👥 ' : '') + esc(m.tournament.title) + '</div>';
+              html += '<div class="pd-match-tournament"><span class="pd-t-name">' +
+                (m.tournament ? esc(m.tournament.title) : '') + '</span>' +
+                window.KSLT_APP.matchKindTag(m) + '</div>';
               html += '<div class="pd-match-opp">' + oppLabel + '</div>';
               if (myMate) html += '<div class="pd-match-mate">' + esc(I18N.t('profile.matchWith')) +
                 ' <span class="pd-match-mate-name">' + esc(myMate) + '</span></div>';

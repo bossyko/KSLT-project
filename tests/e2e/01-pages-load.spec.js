@@ -8,7 +8,7 @@ const { test, expect } = require('../fixtures');
 
 const PUBLIC_PAGES = [
     // Root pages
-    { path: '/', title: 'KSLT', lang: 'ru', name: 'Homepage RU' },
+    { path: '/', title: 'КСЛТ', lang: 'ru', name: 'Homepage RU' },
     { path: '/index-en.html', title: 'KSLT', lang: 'en', name: 'Homepage EN' },
     { path: '/index-kg.html', title: 'KSLT', lang: 'kg', name: 'Homepage KG' },
 

@@ -182,7 +182,11 @@
             .select('*, profiles!profile_id(full_name, email), memberships!membership_id(starts_at, expires_at)')
             .order('created_at', { ascending: false });
         var memPayments = (mpRes.data || []).map(function(p) {
-            var profileName = p.profiles ? (p.profiles.full_name || p.profiles.email || '—') : '—';
+            // Имя берём из самой оплаты: оно записано на дату платежа и не
+            // поедет вслед за сменой фамилии и не пропадёт с удалением аккаунта.
+            // Профиль — запасной вариант для записей старше миграции
+            var profileName = p.payer_name || p.payer_email ||
+                (p.profiles ? (p.profiles.full_name || p.profiles.email || '—') : '—');
             var expiresAt = p.memberships ? p.memberships.expires_at : null;
             return {
                 id: p.id,

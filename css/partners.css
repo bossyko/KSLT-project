@@ -520,17 +520,29 @@
    INVITE BUTTON
    ======================================== */
 
+/* Кнопка прижата к низу карточки.
+
+   Раньше она шла сразу за последней строкой, и у кого строк меньше — кнопка
+   уезжала вверх. Ряд кнопок получался лесенкой, а карточка с кнопкой пониже
+   читалась как более полная. Содержимое у людей разное, кнопка одна и та же —
+   ей и стоять на одном уровне. */
 .pt-invite-btn {
     display: block;
     width: 100%;
-    margin-top: 12px;
+    /* auto прижимает кнопку к низу, прозрачная рамка держит отступ сверху,
+       когда карточка самая высокая и свободного места не осталось */
+    margin-top: auto;
+    border-top: 12px solid transparent;
     padding: 8px 0;
     background: var(--accent);
+    background-clip: padding-box;
     color: #000;
     font-size: 0.78rem;
     font-weight: 700;
     font-family: inherit;
-    border: none;
+    border-right: none;
+    border-bottom: none;
+    border-left: none;
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: background 0.2s, transform 0.15s;
