@@ -25,7 +25,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/style.css?v=96">
+    <link rel="stylesheet" href="css/style.css?v=98">
     <link rel="stylesheet" href="css/partners.css?v=5">
     <link rel="stylesheet" href="css/battle-cards.css?v=9">
 </head>
@@ -123,9 +123,11 @@
                     <div class="nav-dropdown-menu">
                         <a href="pages/about.html" class="nav-dropdown-item">О проекте</a>
                         <a href="pages/rules.html" class="nav-dropdown-item">Правила</a>
-                        <a href="pages/faq.html" class="nav-dropdown-item">FAQ</a>
                         <a href="pages/pricing.html" class="nav-dropdown-item">Цены</a>
+                        <a href="pages/faq.html" class="nav-dropdown-item">FAQ</a>
                         <a href="pages/offer.html" class="nav-dropdown-item">Публичная оферта</a>
+                        <a href="pages/terms.html" class="nav-dropdown-item">Условия использования</a>
+                        <a href="pages/privacy-policy.html" class="nav-dropdown-item">Политика конфиденциальности</a>
                         <a href="pages/download.html" class="nav-dropdown-item">📲 Скачать приложение</a>
                     </div>
                 </li>
@@ -249,9 +251,11 @@
                     <ul class="mobile-dropdown-menu">
                         <li><a href="pages/about.html">О проекте</a></li>
                         <li><a href="pages/rules.html">Правила</a></li>
-                        <li><a href="pages/faq.html">FAQ</a></li>
                         <li><a href="pages/pricing.html">Цены</a></li>
+                        <li><a href="pages/faq.html">FAQ</a></li>
                         <li><a href="pages/offer.html">Публичная оферта</a></li>
+                        <li><a href="pages/terms.html">Условия использования</a></li>
+                        <li><a href="pages/privacy-policy.html">Политика конфиденциальности</a></li>
                         <li><a href="pages/download.html">📲 Скачать приложение (Android)</a></li>
                     </ul>
                 </li>
@@ -475,8 +479,6 @@
         </section>
 
         <!-- SPONSORS (dynamic from Supabase) -->
-        <section id="sponsors" class="section-sponsors-compact"></section>
-
         <!-- ABOUT -->
         <section id="about" class="section-about">
             <div class="about-head">
@@ -485,7 +487,7 @@
                     <a href="pages/info.html" class="link-all">Всё о КСЛТ →</a>
                 </div>
                 <p class="about-lead">
-                    КСЛТ объединяет игроков всех уровней — от новичков до опытных любителей. С 2021 года мы проводим турниры, помогаем находить партнёров по игре и растим большое живое теннисное сообщество.
+                    КСЛТ объединяет игроков всех уровней — от новичков до опытных любителей. С 2021 года мы проводим турниры, помогаем находить партнёров по игре и растим большое живое теннисное сообщество.
                 </p>
             </div>
             <div class="about-body">
@@ -526,6 +528,9 @@
             </div>
             </div>
         </section>
+
+        <section id="sponsors" class="section-sponsors-compact"></section>
+
     </main>
 
 <!-- FOOTER:START -->
@@ -557,6 +562,7 @@
                     <li><a href="pages/courts.html">Корты</a></li>
                     <li><a href="pages/coaches.html">Тренеры</a></li>
                     <li><a href="pages/news.html">Новости</a></li>
+                    <li><a href="pages/about.html">О проекте</a></li>
                 </ul>
             </div>
 
@@ -565,11 +571,9 @@
                 <ul class="footer-links">
                     <li><a href="pages/rules.html">Правила лиги</a></li>
                     <li><a href="pages/rules.html#rules-ranking">Система рейтинга</a></li>
-                    <li><a href="pages/about.html">О проекте</a></li>
                     <li><a href="pages/faq.html">FAQ</a></li>
                     <li><a href="pages/pricing.html">Цены</a></li>
-                                    <li><a href="pages/rules.html#rules-sanctions">Дисциплинарное положение</a></li>
-                    <li><a href="pages/offer.html#offer-refusal">Оплата и возврат</a></li>
+                    <li><a href="pages/rules.html#rules-conduct">Дисциплинарное положение</a></li>
 </ul>
             </div>
 
@@ -600,6 +604,7 @@
             <p>© 2026 КСЛТ. Все права защищены.</p>
             <div class="footer-bottom-links">
                 <a href="pages/offer.html">Публичная оферта</a>
+                <a href="pages/terms.html">Условия использования</a>
                 <a href="pages/privacy-policy.html">Политика конфиденциальности</a>
             </div>
             <p class="footer-made">Сделано с ❤️ в Кыргызстане 🇰🇬</p>
@@ -609,6 +614,7 @@
 
     <script src="js/auth-nav.js?v=20"></script>
     <script src="js/script.js?v=2"></script>
+    <script src="js/scroll-spy.js"></script>
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
