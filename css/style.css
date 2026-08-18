@@ -86,45 +86,6 @@ input, button, select, textarea {
 }
 
 /* ========================================
-   FLOATING HEADER - Glassmorphism Style
-   ======================================== */
-
-/* ========================================
-   HEADER VARIANT 1: FLOATING PILL (Капсула)
-   ======================================== */
-
-.floating-header.header-pill {
-    position: fixed;
-    top: var(--space-md);
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 48px);
-    max-width: 1200px;
-    z-index: 1000;
-
-    background: rgba(20, 20, 20, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-full);
-
-    padding: 0 var(--space-md);
-    transition: all var(--transition-base);
-}
-
-.floating-header.header-pill nav {
-    height: 60px;
-}
-
-.floating-header.header-pill.scrolled {
-    background: rgba(10, 10, 10, 0.95);
-    border-color: var(--border-light);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    top: var(--space-sm);
-    width: calc(100% - 32px);
-}
-
-/* ========================================
    HEADER VARIANT 2: HYBRID (Комбинация)
    На всю ширину + blur + тень + градиентная линия
    ======================================== */
@@ -182,65 +143,6 @@ input, button, select, textarea {
         rgba(204, 255, 0, 0.3) 85%,
         transparent
     );
-}
-
-/* ========================================
-   HEADER VARIANT 3: MINIMAL LINE
-   ======================================== */
-
-.floating-header.header-minimal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: 1000;
-
-    background: transparent;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
-    border-bottom: 1px solid transparent;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-    padding: 0 var(--space-xl);
-}
-
-.floating-header.header-minimal::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 5%;
-    right: 5%;
-    height: 1px;
-    background: linear-gradient(90deg,
-        transparent,
-        var(--border-subtle) 20%,
-        var(--border-subtle) 80%,
-        transparent
-    );
-    opacity: 0;
-    transition: opacity var(--transition-base);
-}
-
-.floating-header.header-minimal.scrolled {
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-}
-
-.floating-header.header-minimal.scrolled::after {
-    opacity: 1;
-}
-
-/* Затухание элементов при скролле */
-.floating-header.header-minimal.scrolled .nav-item,
-.floating-header.header-minimal.scrolled .btn-auth {
-    opacity: 0.85;
-}
-
-.floating-header.header-minimal.scrolled .nav-item:hover,
-.floating-header.header-minimal.scrolled .btn-auth:hover {
-    opacity: 1;
 }
 
 /* ========================================
@@ -3506,16 +3408,6 @@ h2 {
     max-width: 140px;
 }
 
-
-.sponsor-tier {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--accent);
-    font-weight: 600;
-    margin-bottom: var(--space-sm);
-}
-
 /* Главный спонсор */
 .main-sponsor {
     margin-bottom: var(--space-xl);
@@ -4909,10 +4801,6 @@ h2 {
     border-top: 1px solid var(--border-subtle);
 }
 
-.mobile-nav-bottom .lang-switcher {
-    justify-content: center;
-}
-
 .btn-cta-mobile {
     width: 100%;
     justify-content: center;
@@ -5025,17 +4913,6 @@ h2 {
         background: rgba(0, 0, 0, 0.95);
     }
 
-    /* Pill header на мобильных */
-    .floating-header.header-pill {
-        top: var(--space-sm);
-        width: calc(100% - 24px);
-        padding: 0 var(--space-sm);
-    }
-
-    .floating-header.header-pill nav {
-        height: 56px;
-    }
-
     .sticky-back-bar {
         top: 56px;
         padding: 8px 16px;
@@ -5043,11 +4920,6 @@ h2 {
 
     .sticky-back-bar a {
         font-size: 0.82rem;
-    }
-
-    .floating-header.header-pill.scrolled {
-        top: 6px;
-        width: calc(100% - 16px);
     }
 
     .nav-links {
@@ -5249,11 +5121,6 @@ h2 {
 
     .about-features {
         grid-template-columns: 1fr;
-    }
-
-    .sponsors-grid {
-        flex-direction: column;
-        align-items: center;
     }
 
     .hero-visual {
