@@ -112,7 +112,6 @@
     function init() {
         renderHero();
         loadData();
-        if (window.loadSponsors) loadSponsors('svSponsors');
     }
 
     // Fisher-Yates shuffle

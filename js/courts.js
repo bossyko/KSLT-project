@@ -491,7 +491,6 @@
         initPaginationClicks();
         initCtaClicks();
         initScrollAnimations();
-        if (window.loadSponsors) loadSponsors('courtsSponsors');
         detectAccess();
     }
 

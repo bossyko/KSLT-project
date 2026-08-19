@@ -284,7 +284,6 @@
         renderFilters();
         renderPodium(currentTab);
         renderTable(currentTab, 1);
-        if (window.loadSponsors) loadSponsors('playersSponsors');
         initTabs();
         initSearch();
         initScrollAnimations();
@@ -419,11 +418,9 @@
 
         var podiumEl = document.getElementById('playersPodium');
         var filtersEl = document.getElementById('playersFilters');
-        var sponsorsEl = document.getElementById('playersSponsors');
         if (podiumEl) podiumEl.style.display = isSearchMode ? 'none' : '';
         if (filtersEl) filtersEl.style.display = isSearchMode ? 'none' : '';
         if (container) container.style.paddingBottom = isSearchMode ? '16px' : '';
-        if (sponsorsEl) sponsorsEl.style.paddingTop = isSearchMode ? '0' : '';
 
         if (pageItems.length === 0) {
             container.innerHTML = '<div class="pl-no-results">' + labels.noResults + '</div>';
@@ -651,7 +648,6 @@
         renderCatTable(tabId, 1);
 
         // Sponsors
-        if (window.loadSponsors) loadSponsors('playersSponsors');
 
         // Init delegated listeners once
         if (!_catListenersReady) {

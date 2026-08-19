@@ -154,7 +154,6 @@
         initPaginationClicks();
         await detectAccess();
         await loadPartners();
-        if (window.loadSponsors) loadSponsors('ptSponsors');
     }
 
     // ---- Detect access level ----

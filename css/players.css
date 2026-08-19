@@ -1041,9 +1041,6 @@
 }
 
 /* === SPONSORS === */
-.pl-sponsors-section {
-    padding: var(--space-lg) 7%;
-}
 
 /* === SCROLL ANIMATIONS === */
 .pl-animate {
@@ -1354,10 +1351,6 @@
     .pl-filters-section,
     .pl-table-section,
     .pl-pagination-section,
-    .pl-sponsors-section {
-        padding-left: 5%;
-        padding-right: 5%;
-    }
 
     .pl-podium-first .pl-podium-photo {
         width: 80px;
