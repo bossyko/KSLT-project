@@ -6727,3 +6727,11 @@ input:-internal-autofill-previewed {
     .sp-gives { grid-template-columns: 1fr; }
 }
 }
+
+/* Логотип спонсора, у которого нет ни ссылок, ни описания: показываем, но
+   не притворяемся, что на него можно нажать */
+.spon-static {
+    cursor: default;
+    text-decoration: none;
+}
+.sponsors-cloud .spon-static:hover { transform: none; }

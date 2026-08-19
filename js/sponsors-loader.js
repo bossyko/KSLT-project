@@ -94,6 +94,22 @@
         return 'https://t.me/' + handleOf(handle);
     }
 
+    /**
+     * Имя, которое имеет смысл показывать рядом со значком.
+     *
+     * В поле Telegram кладут либо @имя, либо ссылку-приглашение в группу вида
+     * t.me/+OAAcVaEu2oozNGZi или t.me/joinchat/... Первое человеку что-то
+     * говорит, второе — набор букв, который только засоряет карточку.
+     */
+    function readableHandle(value) {
+        var h = handleOf(value);
+        if (!h) return '';
+        if (h.charAt(0) === '+') return '';                  // приглашение в группу
+        if (/^joinchat\//i.test(h)) return '';               // старый вид приглашения
+        if (!/^[A-Za-z0-9._]{3,32}$/.test(h)) return '';      // не похоже на имя
+        return '@' + h;
+    }
+
     /** Что показать рядом с иконкой: адрес сайта без протокола и хвостов. */
     function siteLabel(url) {
         return String(url || '')
@@ -151,11 +167,11 @@
         }
         if (s.instagram) {
             actions += action(igLink(s.instagram), 'spon-action-ig',
-                ICON.instagram, modalLabels.instagram, '@' + handleOf(s.instagram), true);
+                ICON.instagram, modalLabels.instagram, readableHandle(s.instagram), true);
         }
         if (s.telegram) {
             actions += action(tgLink(s.telegram), 'spon-action-tg',
-                ICON.telegram, modalLabels.telegram, '@' + handleOf(s.telegram), true);
+                ICON.telegram, modalLabels.telegram, readableHandle(s.telegram), true);
         }
         if (s.email) {
             actions += action('mailto:' + esc(s.email), 'spon-action-email',
@@ -225,8 +241,10 @@
             return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer" class="' + className + '" title="' + esc(s.name) + '">' +
                 innerHtml + '</a>';
         }
-        // No links at all
-        return '<a href="#" class="' + className + '" title="' + esc(s.name) + '">' + innerHtml + '</a>';
+        // Ни ссылок, ни описания — нажимать не на что. Раньше здесь стояла
+        // ссылка на «#»: она прыгала наверх страницы и цепляла решётку к
+        // адресу, будто что-то произошло
+        return '<span class="' + className + ' spon-static" title="' + esc(s.name) + '">' + innerHtml + '</span>';
     }
 
     /**
@@ -300,7 +318,12 @@
             }
 
             var slides = '';
-            data.forEach(function(s) {
+            // Главный — первым: он платит за первое место, а не за случайное
+            var ordered = data.slice().sort(function(a, b) {
+                if (!!b.is_hero !== !!a.is_hero) return b.is_hero ? 1 : -1;
+                return (b.sort_order || 0) - (a.sort_order || 0);
+            });
+            ordered.forEach(function(s) {
                 var inner = (s.logo ? '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '">' : '') +
                     '<span>' + esc(s.name) + '</span>';
                 slides += buildSponsorElement(s, 'carousel-slide-infinite', inner);
