@@ -70,7 +70,8 @@
 
     var L = isEn ? {
         heroTitle: 'Tournaments',
-        heroDesc: 'All KSLT tournament categories — from beginner to professional level',
+        heroSub: 'All KSLT tournament categories',
+        heroDesc: 'From beginner to professional level',
         heroBadge: 'KSLT',
         viewAll: 'All tournaments',
         details: 'Details',
@@ -86,7 +87,8 @@
         noRating: 'Unranked'
     } : (isKg ? {
         heroTitle: 'Мелдештер',
-        heroDesc: 'KSLT мелдештеринин бардык категориялары — башталгычтан профессионал деңгээлге чейин',
+        heroSub: 'KSLT мелдештеринин бардык категориялары',
+        heroDesc: 'Башталгычтан профессионал деңгээлге чейин',
         heroBadge: 'KSLT',
         viewAll: 'Бардык мелдештер',
         details: 'Толугураак',
@@ -102,7 +104,8 @@
         noRating: 'Рейтингсиз'
     } : {
         heroTitle: 'Турниры',
-        heroDesc: 'Все категории турниров KSLT — от начального до профессионального уровня',
+        heroSub: 'Все категории турниров KSLT',
+        heroDesc: 'От начального до профессионального уровня',
         heroBadge: 'KSLT',
         viewAll: 'Все турниры',
         details: 'Подробнее',
@@ -261,6 +264,7 @@
             '<div class="to-hero-content">' +
                 '<span class="to-hero-badge">' + L.heroBadge + '</span>' +
                 '<h1>' + L.heroTitle + '</h1>' +
+                '<h2 class="to-hero-sub">' + L.heroSub + '</h2>' +
                 '<p>' + L.heroDesc + '</p>' +
                 '<div class="tournament-hero-stats">' +
                     '<div class="hero-stat"><span class="hero-stat-value" id="toStatTotal">&mdash;</span><span class="hero-stat-label">' + SL.totalLabel + '</span></div>' +
@@ -289,7 +293,9 @@
             var el = document.getElementById('toStatTotal');
             if (el) el.textContent = all.length;
 
-            // Unique categories
+            // Считаем все турнирные категории, включая Friendly Weekend.
+            // Рейтинговых пять, но страница про турниры: ниже на ней шесть
+            // блоков, и счётчик «пять» противоречил бы тому, что видно глазами
             var cats = {};
             all.forEach(function(t) {
                 var cat = t.category_id || '';
@@ -316,9 +322,13 @@
             try {
                 var ids = all.map(function(t) { return t.id; });
                 if (ids.length > 0) {
+                    // Считаем только принятые заявки. Раньше в число участников
+                    // попадали снявшиеся, отклонённые и заблокированные —
+                    // получалось 502 человека вместо 453
                     var regs = await client.from('tournament_registrations')
                         .select('*', { count: 'exact', head: true })
-                        .in('tournament_id', ids);
+                        .in('tournament_id', ids)
+                        .eq('status', 'approved');
                     el = document.getElementById('toStatParticipants');
                     if (el) el.textContent = regs.count || 0;
                 }

@@ -63,6 +63,17 @@
     margin-bottom: var(--space-xs);
 }
 
+/* Подзаголовок отдельной строкой: раньше «Все категории турниров KSLT» и
+   «от начального до профессионального уровня» шли одной фразой через тире */
+.to-hero-sub {
+    font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    text-transform: none;
+    letter-spacing: -0.01em;
+}
+
 .to-hero p {
     font-size: 1.05rem;
     color: var(--text-secondary);
