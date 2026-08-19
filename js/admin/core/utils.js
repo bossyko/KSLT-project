@@ -541,9 +541,11 @@
         if (!A.client || !file) return null;
 
         // Validate format
-        var allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        // SVG нужен логотипам: у компаний они почти всегда векторные, а
+        // растровая копия на экранах с высокой плотностью выглядит мыльной
+        var allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
         if (allowed.indexOf(file.type) === -1) {
-            showToast(L.uploadFormatError || 'Формат: JPEG, PNG, WebP, GIF', 'error');
+            showToast(L.uploadFormatError || 'Формат: JPEG, PNG, WebP, GIF, SVG', 'error');
             return null;
         }
 
@@ -557,7 +559,9 @@
         var ext = file.name.split('.').pop().toLowerCase();
 
         // Auto-compress if > 500 KB
-        if (file.size > COMPRESS_THRESHOLD && file.type !== 'image/gif') {
+        // Вектор сжимать нечем: холст превратил бы его в растр и потерял
+        // главное достоинство — чёткость на любом размере
+        if (file.size > COMPRESS_THRESHOLD && file.type !== 'image/gif' && file.type !== 'image/svg+xml') {
             try {
                 var compressed = await compressImage(file, COMPRESS_MAX_WIDTH, COMPRESS_QUALITY);
                 uploadBlob = compressed.blob;

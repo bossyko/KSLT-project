@@ -238,7 +238,7 @@
                     '<div class="ad-image-upload' + (hasImage ? ' has-image' : '') + '" id="spnUploadZone">' +
                         buildImagePreview(spnImageUrl) +
                     '</div>' +
-                    '<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" id="spnLogoFile" style="display:none">' +
+                    '<input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" id="spnLogoFile" style="display:none">' +
                     '<div class="ad-image-url-row">' +
                         '<input type="text" class="ad-field-input" id="spnLogoUrl" placeholder="' + L.orPasteUrl + '" value="' + A.esc(spnImageUrl) + '">' +
                         '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="spnApplyUrl">' + L.applyUrl + '</button>' +
