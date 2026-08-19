@@ -66,22 +66,65 @@
         return s.description || '';
     }
 
-    // Format WhatsApp number for wa.me link
-    function waLink(num) {
-        return 'https://wa.me/' + num.replace(/[^0-9]/g, '');
+    // В админку вставляют по-разному: где-то имя пользователя, где-то ссылку
+    // целиком со всеми метками. Раньше ссылку приклеивали к нашему адресу и
+    // получалось instagram.com/https://instagram.com/... — переход не работал.
+
+    /** Имя пользователя из того, что ввели: хоть @имя, хоть полный адрес. */
+    function handleOf(value) {
+        var v = String(value || '').trim();
+        if (v.indexOf('http') === 0) {
+            v = v.replace(/^https?:\/\/(www\.)?[^/]+\//, '');   // убираем адрес сайта
+        }
+        return v.replace(/^@/, '').replace(/[?#].*$/, '').replace(/\/+$/, '');
     }
 
-    // Format Instagram username for link
+    function waLink(num) {
+        var v = String(num || '');
+        if (v.indexOf('http') === 0) return v;
+        return 'https://wa.me/' + v.replace(/[^0-9]/g, '');
+    }
+
     function igLink(handle) {
-        var clean = handle.replace(/^@/, '');
-        return 'https://instagram.com/' + clean;
+        return 'https://instagram.com/' + handleOf(handle);
     }
 
     // Format Telegram username for link
     function tgLink(handle) {
-        if (handle.indexOf('http') === 0) return handle;
-        var clean = handle.replace(/^@/, '');
-        return 'https://t.me/' + clean;
+        return 'https://t.me/' + handleOf(handle);
+    }
+
+    /** Что показать рядом с иконкой: адрес сайта без протокола и хвостов. */
+    function siteLabel(url) {
+        return String(url || '')
+            .replace(/^https?:\/\//, '')
+            .replace(/^www\./, '')
+            .replace(/\/+$/, '');
+    }
+
+    // Фирменные значки вместо эмодзи: эмодзи рисует операционная система,
+    // на Windows они выглядят иначе, а WhatsApp и Telegram узнаются именно
+    // по своим значкам, а не по трубке и самолётику.
+    var ICON = {
+        site: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+        phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
+        whatsapp: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2A10 10 0 0 0 3.5 17.2L2 22l4.9-1.5A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .9.9-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>',
+        instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"/></svg>',
+        telegram: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.7 19.4c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-4.9 9-8.1c.4-.3-.1-.5-.6-.2L6.2 12.6l-4.8-1.5c-1-.3-1-1 .2-1.5l18.8-7.2c.9-.3 1.7.2 1.4 1.9z"/></svg>',
+        email: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>',
+        pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'
+    };
+
+    /** Строка действия: значок, подпись и сам адрес — чтобы было видно, куда ведёт. */
+    function action(href, cls, icon, label, value, blank) {
+        return '<a href="' + href + '"' + (blank ? ' target="_blank" rel="noopener noreferrer"' : '') +
+            ' class="spon-modal-action' + (cls ? ' ' + cls : '') + '">' +
+            '<span class="spon-modal-action-icon">' + icon + '</span>' +
+            '<span class="spon-modal-action-text">' +
+                '<span class="spon-modal-action-label">' + label + '</span>' +
+                (value ? '<span class="spon-modal-action-value">' + esc(value) + '</span>' : '') +
+            '</span>' +
+        '</a>';
     }
 
     // ---- Sponsor Detail Modal ----
@@ -96,45 +139,33 @@
         var actions = '';
 
         if (s.url) {
-            actions += '<a href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer" class="spon-modal-action">' +
-                '<span class="spon-modal-action-icon">🌐</span>' +
-                '<span>' + modalLabels.website + '</span>' +
-            '</a>';
+            actions += action(esc(s.url), '', ICON.site, modalLabels.website, siteLabel(s.url), true);
         }
         if (s.phone) {
-            actions += '<a href="tel:' + esc(s.phone.replace(/[^0-9+]/g, '')) + '" class="spon-modal-action spon-action-phone">' +
-                '<span class="spon-modal-action-icon">📞</span>' +
-                '<span>' + modalLabels.phone + ' ' + esc(s.phone) + '</span>' +
-            '</a>';
+            actions += action('tel:' + esc(s.phone.replace(/[^0-9+]/g, '')), 'spon-action-phone',
+                ICON.phone, modalLabels.phone, s.phone, false);
         }
         if (s.whatsapp) {
-            actions += '<a href="' + waLink(s.whatsapp) + '" target="_blank" rel="noopener noreferrer" class="spon-modal-action spon-action-wa">' +
-                '<span class="spon-modal-action-icon">📱</span>' +
-                '<span>' + modalLabels.whatsapp + '</span>' +
-            '</a>';
+            actions += action(waLink(s.whatsapp), 'spon-action-wa',
+                ICON.whatsapp, modalLabels.whatsapp, s.whatsapp, true);
         }
         if (s.instagram) {
-            actions += '<a href="' + igLink(s.instagram) + '" target="_blank" rel="noopener noreferrer" class="spon-modal-action spon-action-ig">' +
-                '<span class="spon-modal-action-icon">📷</span>' +
-                '<span>' + modalLabels.instagram + '</span>' +
-            '</a>';
+            actions += action(igLink(s.instagram), 'spon-action-ig',
+                ICON.instagram, modalLabels.instagram, '@' + handleOf(s.instagram), true);
         }
         if (s.telegram) {
-            actions += '<a href="' + tgLink(s.telegram) + '" target="_blank" rel="noopener noreferrer" class="spon-modal-action spon-action-tg">' +
-                '<span class="spon-modal-action-icon">✈️</span>' +
-                '<span>' + modalLabels.telegram + '</span>' +
-            '</a>';
+            actions += action(tgLink(s.telegram), 'spon-action-tg',
+                ICON.telegram, modalLabels.telegram, '@' + handleOf(s.telegram), true);
         }
         if (s.email) {
-            actions += '<a href="mailto:' + esc(s.email) + '" class="spon-modal-action spon-action-email">' +
-                '<span class="spon-modal-action-icon">✉️</span>' +
-                '<span>' + modalLabels.email + '</span>' +
-            '</a>';
+            actions += action('mailto:' + esc(s.email), 'spon-action-email',
+                ICON.email, modalLabels.email, s.email, false);
         }
 
         var addressHtml = '';
         if (s.address) {
-            addressHtml = '<div class="spon-modal-address">📍 ' + esc(s.address) + '</div>';
+            addressHtml = '<div class="spon-modal-address">' +
+                '<span class="spon-modal-address-icon">' + ICON.pin + '</span>' + esc(s.address) + '</div>';
         }
 
         var overlay = document.createElement('div');

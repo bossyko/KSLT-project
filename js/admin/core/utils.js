@@ -375,8 +375,12 @@
                 targets[i].el.dispatchEvent(new Event('change'));
             }
             if (failed.length === targets.length) {
-                showToast(isEn ? 'Translation service did not respond. Fields left empty.'
-                               : 'Сервис перевода не ответил. Поля оставлены пустыми — переведите вручную.', 'error');
+                var why = A.lastTranslateError === 'quota'
+                    ? (isEn ? 'Daily free translation limit reached. It resets in a few hours — or fill the fields manually.'
+                            : 'Дневной лимит бесплатных переводов исчерпан. Он обновится через несколько часов — или заполните поля вручную.')
+                    : (isEn ? 'Translation service did not respond. Fields left empty.'
+                            : 'Сервис перевода не ответил. Поля оставлены пустыми — переведите вручную.');
+                showToast(why, 'error');
             } else if (failed.length) {
                 showToast((isEn ? 'Not translated: ' : 'Не переведено: ') + failed.join(', '), 'warning');
             }
@@ -450,6 +454,7 @@
         // запроса, про исчерпанную дневную квоту, про неизвестный язык.
         // Раз это не перевод, в текст новости оно попасть не должно.
         var SERVICE_ERROR = /QUERY LENGTH LIMIT EXCEEDED|MYMEMORY WARNING|YOU USED ALL AVAILABLE FREE TRANSLATIONS|INVALID (SOURCE|TARGET) LANGUAGE|PLEASE SELECT TWO DISTINCT LANGUAGES/i;
+        var QUOTA_ERROR = /YOU USED ALL AVAILABLE FREE TRANSLATIONS/i;
 
         var results = [];
         for (var j = 0; j < chunks.length; j++) {
@@ -460,14 +465,17 @@
                 var data = await resp.json();
                 var out = data.responseData && data.responseData.translatedText;
                 if (!out || SERVICE_ERROR.test(out) || Number(data.responseStatus) !== 200) {
+                    A.lastTranslateError = QUOTA_ERROR.test(out || '') ? 'quota' : 'service';
                     return text;      // отдаём исходник — вызывающий код поймёт, что не вышло
                 }
                 results.push(out);
             } catch (e) {
+                A.lastTranslateError = 'network';
                 return text;
             }
         }
 
+        A.lastTranslateError = '';
         return results.join('\n');
     }
 

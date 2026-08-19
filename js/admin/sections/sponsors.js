@@ -79,7 +79,7 @@
                     '<span id="spnBulkCount">0</span> ' + L.deleteSelected.toLowerCase() +
                     ' <button class="ad-btn ad-btn-danger ad-btn-sm" id="spnBulkDeleteBtn">' + L.deleteSelected + '</button>' +
                 '</div>' +
-                '<div class="ad-table-wrap"><table class="ad-table">' +
+                '<div class="ad-table-wrap"><table class="ad-table ad-table-sponsors">' +
                     '<thead><tr>' +
                         '<th style="width:36px"><input type="checkbox" id="spnCheckAll"></th>' +
                         '<th style="width:50px">' + L.sponLogo + '</th>' +

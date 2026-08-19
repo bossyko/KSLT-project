@@ -4629,3 +4629,42 @@ select.ad-field-input {
     font-size: 0.82rem;
     line-height: 1.5;
 }
+
+
+/* ========================================
+   ТАБЛИЦА СПОНСОРОВ
+   ========================================
+   Девять колонок, а в них длинные названия и адреса — таблица растягивалась
+   шире экрана и появлялась боковая прокрутка. Раскладка фиксированная,
+   длинное обрезается многоточием: адрес целиком всё равно не читают, для
+   этого есть ссылка.
+   ======================================== */
+
+.ad-table-sponsors {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.ad-table-sponsors th,
+.ad-table-sponsors td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ad-table-sponsors td a {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+}
+
+/* На узком экране прячем то, без чего список читается: сортировку и
+   просмотры смотрят редко, а место они занимают */
+@media (max-width: 900px) {
+    .ad-table-sponsors th:nth-child(7),
+    .ad-table-sponsors td:nth-child(7),
+    .ad-table-sponsors th:nth-child(8),
+    .ad-table-sponsors td:nth-child(8) { display: none; }
+}
