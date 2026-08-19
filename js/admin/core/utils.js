@@ -414,6 +414,11 @@
         var from = langMap[fromLang] || fromLang;
         var to = langMap[toLang] || toLang;
 
+        // Почта в запросе поднимает дневной лимит сервиса с пяти тысяч слов
+        // до пятидесяти. Регистрироваться не нужно — достаточно передавать
+        // рабочий адрес, MyMemory считает квоту по нему.
+        var CONTACT_EMAIL = 'info@tennis.kg';
+
         // У сервиса жёсткий предел в 500 знаков на запрос. Раньше текст резался
         // только по переносам строк, и абзац длиннее предела уезжал целиком —
         // в ответ приходило «QUERY LENGTH LIMIT EXCEEDED», которое попадало
@@ -459,7 +464,8 @@
         var results = [];
         for (var j = 0; j < chunks.length; j++) {
             var url = 'https://api.mymemory.translated.net/get?q=' +
-                encodeURIComponent(chunks[j]) + '&langpair=' + from + '|' + to;
+                encodeURIComponent(chunks[j]) + '&langpair=' + from + '|' + to +
+                '&de=' + encodeURIComponent(CONTACT_EMAIL);
             try {
                 var resp = await fetch(url);
                 var data = await resp.json();
