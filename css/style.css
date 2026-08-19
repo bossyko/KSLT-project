@@ -3862,6 +3862,179 @@ h2 {
 }
 
 /* ========================================
+   ПОЛОСА ПОИСКА И ФИЛЬТРОВ — одна на весь сайт
+   Используется на страницах категорий турниров и на баттлах;
+   остальные разделы переводим на неё по очереди
+   ======================================== */
+
+/* Фильтры — одной полосой
+   ------------------------------------------------------------------
+   Было: залитые чипы и лаймовые подписи «СТАТУС» / «ПОЛ» — на фоне
+   остального сайта чужеродно. Стало: прозрачные чипы с тонкой рамкой,
+   как в «Новостях» и «Рейтинге», активный — лаймовый. */
+.trn-filters {
+    position: sticky;
+    top: 64px;
+    z-index: 30;
+    background: var(--bg-primary);
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: box-shadow 0.2s;
+}
+
+/* Фон полосы — во всю ширину, содержимое — по сетке страницы */
+.trn-filters-inner {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 7%;
+}
+
+.trn-filters.stuck {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* «Все турниры» живёт внутри полосы: над ней ссылка уезжала вверх при
+   первой же прокрутке — ровно тогда, когда она и нужна */
+.trn-back {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+.trn-search-wrap {
+    position: relative;
+    flex: 0 1 320px;
+    min-width: 220px;
+}
+
+.trn-search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    pointer-events: none;
+}
+
+.trn-search-input {
+    width: 100%;
+    padding: 10px 16px 10px 42px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: var(--font-primary);
+    outline: none;
+    transition: all 0.25s;
+}
+
+.trn-search-input::placeholder {
+    color: var(--text-dim);
+}
+
+.trn-search-input:focus {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
+}
+
+.trn-chips {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    /* Без прижатия вправо: на узком экране чипы переносятся строкой ниже,
+       и прижатые они повисали бы у правого края, оторванные от поиска */
+}
+
+.trn-chip {
+    padding: 8px 18px;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-family: var(--font-primary);
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+
+.trn-chip:hover {
+    border-color: var(--border-light);
+    color: var(--text-primary);
+}
+
+.trn-chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 600;
+}
+
+/* Сколько турниров попадёт под фильтр — видно до нажатия */
+.trn-chip-count {
+    margin-left: 6px;
+    opacity: 0.55;
+    font-variant-numeric: tabular-nums;
+}
+
+.trn-chip.active .trn-chip-count {
+    opacity: 0.6;
+}
+
+.trn-chip-div {
+    width: 1px;
+    align-self: stretch;
+    background: var(--border-subtle);
+    margin: 2px 6px;
+}
+
+@media (max-width: 768px) {
+    .trn-filters {
+        padding: 12px 0;
+    }
+
+    .trn-filters-inner {
+        justify-content: center;
+        padding: 0 5%;
+    }
+
+    .trn-search-wrap {
+        flex: 1 1 100%;
+        max-width: 480px;
+    }
+
+    .trn-chips {
+        justify-content: center;
+    }
+
+    .trn-chip {
+        padding: 8px 16px;
+        font-size: 0.82rem;
+    }
+
+}
+
+@media (max-width: 480px) {
+    .trn-chip {
+        padding: 7px 12px;
+        font-size: 0.78rem;
+    }
+
+    .trn-chip-div {
+        display: none;
+    }
+
+}
+
+/* ========================================
    КАРТОЧКА ТУРНИРА — одна на весь сайт
    Разметку рисует js/tournament-card.js
    ======================================== */
@@ -3874,11 +4047,14 @@ h2 {
     gap: 24px;
 }
 
-/* Первая — главная: половина ряда, фотография слева, текст справа */
-.tournaments-grid > :nth-child(1) { grid-column: span 6; }
-.tournaments-grid > :nth-child(2),
-.tournaments-grid > :nth-child(3) { grid-column: span 3; }
-.tournaments-grid > :nth-child(n+4) { grid-column: span 4; }
+/* Первая — главная: половина ряда, фотография слева, текст справа.
+   Правила привязаны к .tc: тот же класс сетки носят страницы категорий,
+   где пока живёт старая карточка, и там «span 6» растягивало её на всю
+   ширину — карточка на три колонки занимала ряд целиком */
+.tournaments-grid > .tc:nth-child(1) { grid-column: span 6; }
+.tournaments-grid > .tc:nth-child(2),
+.tournaments-grid > .tc:nth-child(3) { grid-column: span 3; }
+.tournaments-grid > .tc:nth-child(n+4) { grid-column: span 4; }
 
 .tc {
     display: flex;
@@ -4046,15 +4222,15 @@ h2 {
 }
 
 @media (max-width: 992px) {
-    .tournaments-grid > :nth-child(1) { grid-column: span 12; }
-    .tournaments-grid > :nth-child(2),
-    .tournaments-grid > :nth-child(3),
-    .tournaments-grid > :nth-child(n+4) { grid-column: span 6; }
+    .tournaments-grid > .tc:nth-child(1) { grid-column: span 12; }
+    .tournaments-grid > .tc:nth-child(2),
+    .tournaments-grid > .tc:nth-child(3),
+    .tournaments-grid > .tc:nth-child(n+4) { grid-column: span 6; }
     .tc-featured { max-height: none; }
 }
 
 @media (max-width: 640px) {
-    .tournaments-grid > * { grid-column: span 12 !important; }
+    .tournaments-grid > .tc { grid-column: span 12 !important; }
     .tc-featured { grid-template-columns: 1fr; }
     .tc-featured .tc-image { height: 180px; }
 }

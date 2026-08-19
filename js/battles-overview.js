@@ -24,7 +24,7 @@
 
     var L = isEn ? {
         heroTitle: 'Battles',
-        heroDesc: 'All KSLT battles — player challenges with community voting',
+        heroDesc: 'The challenge is out — the court settles the rest.',
         heroBadge: 'BATTLES',
         activeTitle: 'Upcoming Battles',
         completedTitle: 'Completed Battles',
@@ -48,7 +48,7 @@
         cancel: 'Cancel'
     } : (isKg ? {
         heroTitle: 'Баттлдар',
-        heroDesc: 'KSLT баттлдарынын баары — оюнчулардын чакыруулары жана коомчулуктун добуш берүүсү',
+        heroDesc: 'Чакырык ташталды — калганын корт чечет.',
         heroBadge: 'БАТТЛДАР',
         activeTitle: 'Алдыдагы баттлдар',
         completedTitle: 'Аяктаган баттлдар',
@@ -72,7 +72,7 @@
         cancel: 'Жокко чыгаруу'
     } : {
         heroTitle: 'Баттлы',
-        heroDesc: 'Все баттлы KSLT — вызовы игроков с голосованием сообщества',
+        heroDesc: 'Вызов брошен — остальное решает корт.',
         heroBadge: 'БАТТЛЫ',
         activeTitle: 'Предстоящие баттлы',
         completedTitle: 'Завершённые баттлы',
@@ -236,14 +236,16 @@
     function renderHero() {
         var el = document.getElementById('battlesHero');
         if (!el) return;
-        var heroImg = 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&q=80';
+        // Своё фото вместо стокового
+        var heroImg = '../images/heroes/battles.jpg';
         el.innerHTML =
             '<div class="bo-hero-bg"><img src="' + heroImg + '" alt=""></div>' +
             '<div class="bo-hero-overlay"></div>' +
+            // Лаймовой метки нет: она повторяла заголовок строкой ниже —
+            // как на страницах категорий турниров
             '<div class="bo-hero-content">' +
-                '<span class="bo-hero-badge">' + L.heroBadge + '</span>' +
                 '<h1>' + L.heroTitle + '</h1>' +
-                '<p>' + L.heroDesc + '</p>' +
+                '<p class="bo-hero-sub">' + L.heroDesc + '</p>' +
                 '<div class="bo-hero-stats">' +
                     '<div class="bo-hero-stat"><span class="bo-hero-stat-value" id="boStatTotal">&mdash;</span><span class="bo-hero-stat-label">' + BL.total + '</span></div>' +
                     '<div class="bo-hero-stat"><span class="bo-hero-stat-value" id="boStatUpcoming">&mdash;</span><span class="bo-hero-stat-label">' + BL.upcoming + '</span></div>' +
@@ -360,14 +362,19 @@
         }
     }
 
-    function renderSections(active, completed) {
+    function renderSections(active, completed, only) {
         var container = document.getElementById('battlesContent');
         if (!container) return;
 
         var html = '';
 
         // Предстоящие: ближайший крупной карточкой, остальные полосами рядом.
-        // Одно правило на весь сайт — актуальное крупно, история строкой
+        // Одно правило на весь сайт — актуальное крупно, история строкой.
+        //
+        // Когда выбран фильтр, чужой раздел не рисуем совсем: заголовок
+        // «Предстоящие баттлы» с надписью «пока нет» под фильтром
+        // «Завершённые» выглядит как ошибка, а не как ответ на запрос
+        if (only !== 'past') {
         html += '<div class="bo-section">';
         html += '<div class="bo-section-header">';
         html += '<h2 class="bo-section-title"><span>' + L.activeTitle + '</span></h2>';
@@ -388,10 +395,12 @@
             html += '</div></div>';
         }
         html += '</div>';
+        }
 
         // Завершённые: полосами по две в ряд, с подгрузкой по шесть.
         // Раньше страница рисовала их такими же крупными карточками и
         // забирала из базы все разом — на полутора сотнях это заметно
+        if (only !== 'upcoming') {
         html += '<div class="bo-section">';
         html += '<div class="bo-section-header">';
         html += '<h2 class="bo-section-title"><span>' + L.completedTitle + '</span></h2>';
@@ -419,6 +428,8 @@
         html += '</div>';
 
         _doneList = completed;
+        }
+
         container.innerHTML = html;
         attachEvents();
         attachDoneMore();
@@ -852,45 +863,86 @@
         });
     }
 
-    function initSearch() {
+    /* Поиск и чипы над списком — та же полоса, что на страницах категорий
+       турниров. Раньше здесь был только поиск, а «предстоящие» и
+       «завершённые» человек искал глазами по всей странице. */
+    var _statusFilter = 'all';
+
+    function matchesQuery(b, query) {
+        if (!query) return true;
+        var p1 = _players[b.challenger_player_id];
+        var p2 = _players[b.opponent_player_id];
+        var p1Name = p1 ? (p1.name || '') + ' ' + (p1.name_en || '') + ' ' + (p1.name_kg || '') : '';
+        var p2Name = p2 ? (p2.name || '') + ' ' + (p2.name_en || '') + ' ' + (p2.name_kg || '') : '';
+        var combined = ((b.battle_title || '') + ' ' + p1Name + ' ' + p2Name).toLowerCase();
+        return combined.indexOf(query) !== -1;
+    }
+
+    function applyFilters() {
         var input = document.getElementById('battlesSearch');
-        if (!input) return;
+        var query = input ? input.value.trim().toLowerCase() : '';
 
-        input.addEventListener('input', function() {
-            clearTimeout(_searchTimer);
-            _searchTimer = setTimeout(function() {
-                var query = input.value.trim().toLowerCase();
-                if (!query) {
-                    var active = _allBattles.filter(function(b) { return !isBattleCompleted(b); });
-                    var completed = _allBattles.filter(function(b) { return isBattleCompleted(b); });
-                    renderSections(active, completed);
-                    return;
-                }
-                // Filter by title + player names
-                var filtered = _allBattles.filter(function(b) {
-                    var title = (b.battle_title || '').toLowerCase();
-                    var p1 = _players[b.challenger_player_id];
-                    var p2 = _players[b.opponent_player_id];
-                    var p1Name = p1 ? (p1.name || '') + ' ' + (p1.name_en || '') + ' ' + (p1.name_kg || '') : '';
-                    var p2Name = p2 ? (p2.name || '') + ' ' + (p2.name_en || '') + ' ' + (p2.name_kg || '') : '';
-                    var combined = (title + ' ' + p1Name + ' ' + p2Name).toLowerCase();
-                    return combined.indexOf(query) !== -1;
-                });
+        var found = _allBattles.filter(function(b) { return matchesQuery(b, query); });
+        var active = found.filter(function(b) { return !isBattleCompleted(b); });
+        var completed = found.filter(function(b) { return isBattleCompleted(b); });
 
-                var fActive = filtered.filter(function(b) { return !isBattleCompleted(b); });
-                var fCompleted = filtered.filter(function(b) { return isBattleCompleted(b); });
+        if (_statusFilter === 'upcoming') completed = [];
+        if (_statusFilter === 'past') active = [];
 
-                if (!fActive.length && !fCompleted.length) {
-                    var container = document.getElementById('battlesContent');
-                    if (container) {
-                        container.innerHTML = '<div class="bo-section"><div class="bo-card-grid"><div class="bo-empty">' + emptySvg + '<p>' + L.nothingFound + '</p></div></div></div>';
-                    }
-                    return;
-                }
+        if ((_statusFilter === 'upcoming' && !active.length) ||
+            (_statusFilter === 'past' && !completed.length) ||
+            (!active.length && !completed.length)) {
+            var container = document.getElementById('battlesContent');
+            if (container) {
+                container.innerHTML = '<div class="bo-section"><div class="bo-card-grid"><div class="bo-empty">' +
+                    emptySvg + '<p>' + L.nothingFound + '</p></div></div></div>';
+            }
+            return;
+        }
 
-                renderSections(fActive, fCompleted);
-            }, 200);
+        renderSections(active, completed, _statusFilter === 'all' ? null : _statusFilter);
+    }
+
+    /** Сколько баттлов попадёт под фильтр — видно до нажатия */
+    function renderChipCounts() {
+        var upcoming = _allBattles.filter(function(b) { return !isBattleCompleted(b); }).length;
+        var counts = {
+            all: _allBattles.length,
+            upcoming: upcoming,
+            past: _allBattles.length - upcoming
+        };
+        document.querySelectorAll('.trn-chip-count[data-count]').forEach(function(el) {
+            var v = counts[el.dataset.count];
+            el.textContent = v ? v : '';
         });
+    }
+
+    function initSearch() {
+        // Полоса живёт вне перерисовываемого списка, а renderSections
+        // зовётся на каждый фильтр — без флага обработчики множились
+        if (initSearch._done) { renderChipCounts(); return; }
+        initSearch._done = true;
+
+        var input = document.getElementById('battlesSearch');
+        if (input) {
+            input.addEventListener('input', function() {
+                clearTimeout(_searchTimer);
+                _searchTimer = setTimeout(applyFilters, 200);
+            });
+        }
+
+        document.querySelectorAll('.trn-chip[data-filter="status"]').forEach(function(chip) {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.trn-chip[data-filter="status"]').forEach(function(c) {
+                    c.classList.remove('active');
+                });
+                chip.classList.add('active');
+                _statusFilter = chip.dataset.value;
+                applyFilters();
+            });
+        });
+
+        renderChipCounts();
     }
 
 })();

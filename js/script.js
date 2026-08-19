@@ -9,32 +9,57 @@ document.addEventListener('DOMContentLoaded', function() {
     (function() {
         var path = window.location.pathname.toLowerCase();
 
+        // Категория текущей страницы: у турниров это ?category=, у рейтинга ?tab=
+        var curParams = new URLSearchParams(window.location.search);
+        var curKey = curParams.get('category') || curParams.get('tab') || '';
+
+        /**
+         * Насколько ссылка меню похожа на текущую страницу.
+         *
+         * Раньше у ссылки просто срезали «?...» — и все шесть категорий
+         * турниров превращались в один и тот же tournaments. Совпадал первый
+         * по списку, поэтому на любой категории горел Pro-Masters.
+         *
+         * 2 — то самое; 1 — та же страница, но параметр не проверить; 0 — мимо
+         */
+        function matchScore(href) {
+            href = (href || '').toLowerCase();
+            var file = href.split('?')[0].replace(/-(en|kg)\.html/, '.html').split('/').pop().replace('.html', '');
+            if (!file || path.indexOf(file) === -1) return 0;
+
+            var q = href.indexOf('?') !== -1 ? new URLSearchParams(href.split('?')[1]) : null;
+            var key = q ? (q.get('category') || q.get('tab') || '') : '';
+
+            if (key && curKey) return key === curKey ? 2 : 0;
+            // У ссылки есть категория, а страница показывает раздел целиком —
+            // подсвечивать конкретный пункт не за что
+            if (key && !curKey) return 0;
+            if (!key && curKey) return 1;
+            return 2;
+        }
+
         // For each nav-item, check if current page belongs to it
         document.querySelectorAll('.nav-item, .mobile-dropdown-toggle').forEach(function(navItem) {
             var parent = navItem.closest('.nav-dropdown') || navItem.closest('.mobile-nav-dropdown');
             if (parent) {
-                // Dropdown: check if any child link matches current page
+                // Из всех пунктов берём самый подходящий, а не первый попавшийся
                 var links = parent.querySelectorAll('.nav-dropdown-item, .mobile-dropdown-menu a');
-                for (var i = 0; i < links.length; i++) {
-                    var href = (links[i].getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-(en|kg)\.html/, '.html');
-                    var filename = href.split('/').pop().replace('.html', '');
-                    if (filename && path.indexOf(filename) !== -1) {
-                        navItem.classList.add('is-active');
-                        links[i].classList.add('active');
-                        break;
-                    }
+                var best = null, bestScore = 0;
+                links.forEach(function(link) {
+                    var score = matchScore(link.getAttribute('href'));
+                    if (score > bestScore) { bestScore = score; best = link; }
+                });
+                if (best) {
+                    navItem.classList.add('is-active');
+                    best.classList.add('active');
                 }
                 // Also check if the parent page itself matches (e.g. services.html on services page)
-                var parentHref = (navItem.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-(en|kg)\.html/, '.html');
-                var parentFilename = parentHref.split('/').pop().replace('.html', '');
-                if (parentFilename && path.indexOf(parentFilename) !== -1) {
+                if (matchScore(navItem.getAttribute('href'))) {
                     navItem.classList.add('is-active');
                 }
             } else {
                 // Simple link (no dropdown), e.g. News
-                var href = (navItem.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-(en|kg)\.html/, '.html');
-                var filename = href.split('/').pop().replace('.html', '');
-                if (filename && path.indexOf(filename) !== -1) {
+                if (matchScore(navItem.getAttribute('href'))) {
                     navItem.classList.add('is-active');
                 }
             }
@@ -42,9 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Also handle mobile simple links (not .nav-item class)
         document.querySelectorAll('.mobile-nav-links > li:not(.mobile-nav-dropdown) > a').forEach(function(a) {
-            var href = (a.getAttribute('href') || '').toLowerCase().replace(/\?.*$/, '').replace(/-(en|kg)\.html/, '.html');
-            var filename = href.split('/').pop().replace('.html', '');
-            if (filename && path.indexOf(filename) !== -1) {
+            if (matchScore(a.getAttribute('href'))) {
                 a.classList.add('is-active');
             }
         });

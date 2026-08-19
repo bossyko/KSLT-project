@@ -257,15 +257,18 @@
     function renderHero() {
         var el = document.getElementById('overviewHero');
         if (!el) return;
-        var heroImg = 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=1920&q=80';
+        // Своё фото вместо стокового: снимок с корта, а не картинка из интернета
+        var heroImg = '../images/heroes/tournaments.jpg';
         el.innerHTML =
             '<div class="to-hero-bg"><img src="' + heroImg + '" alt=""></div>' +
             '<div class="to-hero-overlay"></div>' +
+            // Лаймовой метки «KSLT» нет: она повторяла логотип в шапке и
+            // выбивалась из ряда — на страницах категорий такой метки тоже нет
             '<div class="to-hero-content">' +
-                '<span class="to-hero-badge">' + L.heroBadge + '</span>' +
                 '<h1>' + L.heroTitle + '</h1>' +
+                // Одна строка под заголовком, а не две: вторая повторяла
+                // первую другими словами и лишь удлиняла шапку
                 '<h2 class="to-hero-sub">' + L.heroSub + '</h2>' +
-                '<p>' + L.heroDesc + '</p>' +
                 '<div class="tournament-hero-stats">' +
                     '<div class="hero-stat"><span class="hero-stat-value" id="toStatTotal">&mdash;</span><span class="hero-stat-label">' + SL.totalLabel + '</span></div>' +
                     '<div class="hero-stat"><span class="hero-stat-value" id="toStatParticipants">&mdash;</span><span class="hero-stat-label">' + SL.participantsLabel + '</span></div>' +
@@ -414,6 +417,7 @@
             } else {
                 effectiveStatus = computeStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
             }
+            effectiveStatus = settleStatus(t, effectiveStatus);
             var cardStatus = mapStatus(effectiveStatus);
 
             // Registration dates line (show only if reg_end >= today)
@@ -474,6 +478,16 @@
 
         return sliced;
     }
+
+        // Календарь главнее записи в базе: у 77 турниров из 127 статус остался
+        // с прошлого сезона — «регистрация открыта» на мартовском турнире.
+        // Если дата окончания прошла, турнир завершён, что бы ни стояло в поле
+        function settleStatus(t, stored) {
+            var today = new Date().toISOString().substring(0, 10);
+            var end = t.date_end || t.date_start;
+            if (end && end < today && stored !== 'cancelled') return 'completed';
+            return stored;
+        }
 
     function mapStatus(s) {
         if (s === 'registration_open') return 'open';
@@ -573,7 +587,7 @@
                     (t.genderLabel ? '<span class="to-gender-badge">' + t.genderLabel + '</span>' : '') +
                     (t.noRating ? '<span class="to-norating-badge">' + L.noRating + '</span>' : '') +
                 '</div>' +
-                getCountdownHtml(t._dateSort, t._startTime) +
+                (t.status === 'past' ? '' : getCountdownHtml(t._dateSort, t._startTime)) +
                 '<span class="to-featured-status ' + t.status + '">' + t.statusText + '</span>' +
                 '<h3>' + t.name + '</h3>' +
                 '<div class="to-featured-meta">' +
@@ -617,7 +631,9 @@
             '</div>' +
             '<div class="to-compact-right">' +
                 '<span class="to-compact-status ' + t.status + '">' + t.statusText + '</span>' +
-                getCountdownHtml(t._dateSort, t._startTime) +
+                // Отсчёт у завершённого турнира показывал «ИДЁТ СЕЙЧАС»:
+                // дата в прошлом, а функция считает прошлое началом матча
+                (t.status === 'past' ? '' : getCountdownHtml(t._dateSort, t._startTime)) +
             '</div>' +
         '</div>';
     }

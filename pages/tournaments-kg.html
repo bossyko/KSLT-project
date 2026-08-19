@@ -25,9 +25,9 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="../css/style.css?v=108">
-    <link rel="stylesheet" href="../css/tournaments-overview.css?v=2">
-    <link rel="stylesheet" href="../css/tournaments.css?v=5">
+    <link rel="stylesheet" href="../css/style.css?v=110">
+    <link rel="stylesheet" href="../css/tournaments-overview.css?v=10">
+    <link rel="stylesheet" href="../css/tournaments.css?v=14">
 </head>
 <body>
     <!-- HEADER -->
@@ -277,76 +277,80 @@
         <!-- HERO - Dynamic content -->
         <section class="tournament-hero">
             <div class="tournament-hero-bg">
-                <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&q=80" alt="" id="heroBg">
+                <img src="../images/heroes/tour.jpg" alt="" id="heroBg">
                 <div class="tournament-hero-overlay"></div>
             </div>
             <div class="tournament-hero-content">
-                <span class="tournament-category-badge" id="categoryBadge">Tour</span>
-                <h1 id="categoryTitle">Tour Мелдештери</h1>
-                <p id="categoryDescription">Бардык деңгээлдер үчүн ачык мелдештер.</p>
+                <h1 id="categoryTitle">Tour Tournaments</h1>
+                <p class="trn-hero-sub" id="categorySub"></p>
                 <div class="tournament-hero-stats">
                     <div class="hero-stat">
-                        <span class="hero-stat-value" id="statTournaments">12</span>
-                        <span class="hero-stat-label">Мезгилдеги мелдештер</span>
+                        <span class="hero-stat-value" id="statTournaments">&mdash;</span>
+                        <span class="hero-stat-label">мезгилдеги мелдештер</span>
                     </div>
                     <div class="hero-stat">
-                        <span class="hero-stat-value" id="statParticipants">240+</span>
-                        <span class="hero-stat-label">Катышуучулар</span>
+                        <span class="hero-stat-value" id="statParticipants">&mdash;</span>
+                        <span class="hero-stat-label">катышуучу</span>
                     </div>
                     <div class="hero-stat">
-                        <span class="hero-stat-value" id="statPrize">50K</span>
-                        <span class="hero-stat-label">Сыйлык фонду</span>
+                        <span class="hero-stat-value" id="statPrize">&mdash;</span>
+                        <span class="hero-stat-label">сыйлык фонду</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- TOURNAMENTS HEADER (sticky) -->
-        <div class="trn-sticky-header" id="trnStickyHeader">
-            <div class="kslt-back-wrap">
-                <a href="tournaments-overview-kg.html" class="kslt-back">&larr; Бардык мелдештер</a>
-            </div>
-            <div class="trn-search-wrap">
-                <svg class="trn-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" class="trn-search-input" id="tournamentSearch" placeholder="Издөө..." autocomplete="off">
-            </div>
-            <div class="trn-filters-row">
-                <div class="trn-filter-group">
-                    <span class="trn-chip-label">СТАТУС</span>
-                    <div class="trn-filter-chips">
-                        <button class="trn-filter-chip active" data-filter="status" data-value="all">Баары</button>
-                        <button class="trn-filter-chip" data-filter="status" data-value="open">Каттоо ачык</button>
-                        <button class="trn-filter-chip" data-filter="status" data-value="soon">Алдыдагы</button>
-                        <button class="trn-filter-chip" data-filter="status" data-value="past">Аяктаган</button>
-                    </div>
+        <!-- ФИЛЬТРЫ -->
+        <div class="trn-filters" id="trnFilters">
+            <div class="trn-filters-inner">
+                <a href="tournaments-overview-kg.html" class="kslt-back trn-back">&larr; Бардык мелдештер</a>
+                <div class="trn-search-wrap">
+                    <svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" class="trn-search-input" id="tournamentSearch" placeholder="Мелдешти издөө..." autocomplete="off">
                 </div>
-                <div class="trn-filter-group">
-                    <span class="trn-chip-label">ЖЫНЫСЫ</span>
-                    <div class="trn-filter-chips">
-                        <button class="trn-filter-chip active" data-filter="gender" data-value="all">Баары</button>
-                        <button class="trn-filter-chip" data-filter="gender" data-value="men">♂ Эркектер</button>
-                        <button class="trn-filter-chip" data-filter="gender" data-value="women">♀ Аялдар</button>
-                    </div>
+                <div class="trn-chips">
+                    <button class="trn-chip active" data-filter="status" data-value="all">Баары <span class="trn-chip-count" data-count="all"></span></button>
+                    <button class="trn-chip" data-filter="status" data-value="open">Каттоо ачык <span class="trn-chip-count" data-count="open"></span></button>
+                    <button class="trn-chip" data-filter="status" data-value="soon">Алдыдагы <span class="trn-chip-count" data-count="soon"></span></button>
+                    <button class="trn-chip" data-filter="status" data-value="past">Аяктаган <span class="trn-chip-count" data-count="past"></span></button>
+                    <span class="trn-chip-div"></span>
+                    <button class="trn-chip active" data-filter="gender" data-value="all">Баары</button>
+                    <button class="trn-chip" data-filter="gender" data-value="men">&#9794; Эркектер</button>
+                    <button class="trn-chip" data-filter="gender" data-value="women">&#9792; Аялдар</button>
                 </div>
             </div>
         </div>
 
-        <!-- UPCOMING TOURNAMENTS -->
-        <section class="section-tournaments" id="upcoming">
-            <div class="tournaments-grid" id="tournamentsGrid">
-                <!-- Tournaments loaded dynamically -->
+        <!-- Ничего не нашлось: показываем, когда фильтр выбил все блоки -->
+        <div class="trn-noresults" id="trnNoResults" hidden>
+            <div class="trn-block-empty"><strong>Эч нерсе табылган жок</strong>Чыпканы алып салып же сурамды өзгөртүп көрүңүз.</div>
+        </div>
+
+        <!-- ИДУТ СЕЙЧАС — блока нет, пока никто не играет -->
+        <section class="trn-block" id="live" hidden>
+            <div class="trn-block-head">
+                <h2 class="trn-block-title"><span class="trn-live-dot"></span>Азыр жүрүп жатат</h2>
+                <div class="trn-block-sub" id="liveSub"></div>
             </div>
+            <div class="to-card-grid" id="liveGrid"></div>
         </section>
 
-        <!-- PAST TOURNAMENTS -->
-        <section class="section-past-tournaments" id="past">
-            <div class="section-header">
-                <h2>Өткөн мелдештер</h2>
-                <a href="#all-past" class="link-all">Бардык мелдештер →</a>
+        <!-- ПРЕДСТОЯЩИЕ — блока нет, пока не назначено ни одного -->
+        <section class="trn-block" id="upcoming" hidden>
+            <div class="trn-block-head">
+                <h2 class="trn-block-title">Алдыдагы</h2>
+                <div class="trn-block-sub" id="upcomingSub"></div>
             </div>
-            <div class="past-tournaments-grid" id="pastTournamentsGrid">
-                <!-- Past tournaments loaded dynamically -->
+            <div class="to-card-grid" id="tournamentsGrid"></div>
+        </section>
+
+        <!-- ЗАВЕРШЁННЫЕ — раздел на месте всегда, у категории есть архив -->
+        <section class="trn-block" id="past">
+            <div class="trn-block-head">
+                <h2 class="trn-block-title">Аяктаган</h2>
+                <div class="trn-block-sub" id="pastSub"></div>
             </div>
+            <div class="to-past-grid" id="pastTournamentsGrid"></div>
         </section>
 
         <!-- SPONSORS -->
@@ -441,9 +445,10 @@
     <script src="../js/membership.js"></script>
     <script src="../js/tournament-register.js?v=6"></script>
     <script src="../js/auth-nav.js?v=20"></script>
-    <script src="../js/script.js?v=2"></script>
-    <script src="../data/tournaments-data-kg.js?v=4"></script>
-    <script src="../js/tournaments-overlay.js?v=15"></script>
+    <script src="../js/script.js?v=3"></script>
+    <script src="../data/tournaments-data-kg.js?v=7"></script>
+    <script src="../js/tournament-blocks.js?v=2"></script>
+    <script src="../js/tournaments-overlay.js?v=23"></script>
     <script>
     (function(){var h=document.getElementById('trnStickyHeader');if(!h)return;var s=document.createElement('div');s.style.height='1px';h.parentNode.insertBefore(s,h);new IntersectionObserver(function(e){h.classList.toggle('stuck',!e[0].isIntersecting)}).observe(s)})();
     </script>

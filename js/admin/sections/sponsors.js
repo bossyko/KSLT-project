@@ -59,7 +59,7 @@
                 '<td style="text-align:center">' + heroHtml + '</td>' +
                 '<td style="text-align:center">' + (s.sort_order || 0) + '</td>' +
                 '<td style="text-align:center;color:var(--text-dim)">' + (s.view_count || 0) + '</td>' +
-                '<td><button class="ad-btn ad-btn-sm" data-edit="' + s.id + '">' + L.editSponsor + '</button></td>' +
+                '<td><button class="ad-btn ad-btn-sm" data-edit="' + s.id + '">' + L.edit + '</button></td>' +
             '</tr>';
         });
 
@@ -89,7 +89,7 @@
                         '<th style="text-align:center">' + L.sponIsHero + '</th>' +
                         '<th style="text-align:center;width:80px">' + L.sponSort + '</th>' +
                         '<th style="text-align:center;width:50px">&#128065;</th>' +
-                        '<th style="width:120px"></th>' +
+                        '<th style="width:130px"></th>' +
                     '</tr></thead>' +
                     '<tbody>' + rows + '</tbody>' +
                 '</table></div>'

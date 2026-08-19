@@ -19,15 +19,23 @@
     color: var(--accent);
 }
 
-/* Tournament Hero */
+/* Tournament Hero
+   ------------------------------------------------------------------
+   Одна высота у всех категорий. Раньше высоту задавало содержимое:
+   у «Friendly Weekend» прятались цифры, у Pro-Masters заголовок ломался
+   на две строки — и шесть страниц одного раздела выглядели по-разному.
+   Лаймовую метку с названием категории убрали: она повторяла заголовок,
+   который стоит строкой ниже. */
 .tournament-hero {
     position: relative;
-    min-height: 380px;
+    min-height: 460px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 120px 7% 48px;
+    padding: 110px 7% 64px;
     overflow: hidden;
+    /* Воздух между шапкой и полосой фильтров: без него поиск лип к фотографии */
+    margin-bottom: 24px;
 }
 
 .tournament-hero-bg {
@@ -56,37 +64,35 @@
     position: relative;
     z-index: 1;
     text-align: center;
-    max-width: 800px;
-}
-
-.tournament-category-badge {
-    display: inline-block;
-    padding: 8px 24px;
-    background: var(--accent);
-    color: #000;
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    border-radius: var(--radius-full);
-    margin-bottom: var(--space-md);
+    max-width: 980px;
 }
 
 .tournament-hero-content h1 {
-    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
     font-weight: 800;
-    margin-bottom: var(--space-sm);
+    line-height: 1.1;
+    margin-bottom: 18px;
     color: var(--text-primary);
+    /* «Pro-Masters Tournaments» и «Challengers Tournaments» ломались
+       пополам — на широком экране держим строку целой */
+    white-space: nowrap;
 }
 
-.tournament-hero-content p {
-    font-size: 1.1rem;
+/* Фраза категории. Заменила описание в три строки: человек читает шапку
+   секунду, и за эту секунду одна фраза доходит, а абзац — нет.
+   Цвет приглушённый и вес меньше, чем у заголовка: белым и жирным она
+   сливалась с названием категории в одну нечитаемую массу. */
+.trn-hero-sub {
+    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    font-weight: 600;
     color: var(--text-secondary);
-    max-width: 600px;
+    max-width: 720px;
     margin: 0 auto var(--space-lg);
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
+/* Цифры — тем же видом, что на странице «Турниры»: раздел один,
+   и шапки в нём должны читаться одинаково */
 .tournament-hero-stats {
     display: flex;
     justify-content: center;
@@ -109,132 +115,103 @@
     font-size: 0.85rem;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
-/* Section Tournaments */
-.section-tournaments {
-    padding: var(--space-lg) 7% var(--space-xl);
+/* Блоки турниров
+   ------------------------------------------------------------------
+   «Идут сейчас» и «Предстоящие» скрываются целиком, когда пусто: это
+   состояние, а не раздел, и пустая заглушка первым экраном читается как
+   поломка. «Завершённые» остаются всегда — архив есть у каждой категории. */
+.trn-block {
+    padding: var(--space-lg) 7%;
     background: var(--bg-primary);
 }
 
-.trn-sticky-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    position: sticky;
-    top: 64px;
-    z-index: 10;
-    background: var(--bg-primary);
-    padding: 14px 24px;
-    border-bottom: 1px solid var(--border-subtle);
-    transition: box-shadow 0.2s;
+.trn-block:nth-of-type(even) {
+    background: var(--bg-secondary);
 }
 
-.trn-sticky-header.stuck {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+.trn-block[hidden] {
+    display: none;
 }
 
-.trn-sticky-header > .kslt-back-wrap {
-    align-self: flex-start;
-    position: static;
-    border-bottom: none;
-    padding: 0;
-    z-index: auto;
+.trn-block-head {
+    border-left: 3px solid var(--accent);
+    padding-left: 14px;
+    margin-bottom: var(--space-md);
 }
 
-/* Search */
-.trn-search-wrap {
-    position: relative;
-    width: 100%;
-    max-width: 480px;
-}
-
-.trn-search-icon {
-    position: absolute;
-    left: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-dim);
-    pointer-events: none;
-}
-
-.trn-search-input {
-    width: 100%;
-    padding: 14px 20px 14px 50px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-full);
-    color: var(--text-primary);
-    font-size: 1rem;
-    font-family: var(--font-primary);
-    transition: all 0.3s;
-}
-
-.trn-search-input::placeholder {
-    color: var(--text-dim);
-}
-
-.trn-search-input:focus {
-    border-color: var(--accent);
-    background: rgba(255,255,255,0.1);
-    box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
-    outline: none;
-}
-
-/* Filter chips */
-.trn-filters-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px 24px;
-}
-
-.trn-filter-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.trn-chip-label {
-    font-size: 0.78rem;
-    color: var(--accent);
+.trn-block-title {
+    font-size: 1.5rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    flex-shrink: 0;
-}
-
-.trn-filter-chips {
-    display: flex;
-    gap: 6px;
-    flex-wrap: nowrap;
-}
-
-.trn-filter-chip {
-    background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-full);
-    padding: 10px 24px;
-    color: var(--text-secondary);
-    font-size: 0.88rem;
-    font-family: var(--font-primary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.trn-filter-chip:hover {
-    border-color: var(--border-light);
     color: var(--text-primary);
 }
 
-.trn-filter-chip.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #000;
+.trn-block-sub {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.trn-live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff3b30;
+    margin-right: 8px;
+    vertical-align: middle;
+    animation: trnLivePulse 1.6s infinite;
+}
+
+@keyframes trnLivePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Архив — полосами в две колонки. Класс свой, а не общий
+   .past-tournaments-grid: тот жил в разметке из прототипа вместе со старой
+   карточкой, а полосы приехали общие */
+.to-past-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+@media (max-width: 900px) {
+    .to-past-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.trn-noresults {
+    padding: var(--space-lg) 7%;
+}
+
+.trn-noresults[hidden] {
+    display: none;
+}
+
+.trn-block-empty {
+    border: 1px dashed var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.trn-block-empty strong {
+    display: block;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.trn-block-empty a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
 }
 
 /* Tournament Search Input */
@@ -644,11 +621,6 @@
 }
 
 /* Past Tournaments */
-.section-past-tournaments {
-    padding: var(--space-xl) 7%;
-    background: var(--bg-primary);
-}
-
 /* Прошедшие турниры идут полосами, а не карточками: на завершённый
    смотрят ради результата, ему не нужны крупная афиша и кнопка
    регистрации. Две в ряд — столько же, сколько на странице баттлов */
@@ -875,8 +847,13 @@
 
 @media (max-width: 768px) {
     .tournament-hero {
-        min-height: 40vh;
-        padding: 100px 5% 40px;
+        min-height: 320px;
+        padding: 90px 5% 40px;
+    }
+
+    /* В одну строку заголовок помещается только на широком экране */
+    .tournament-hero-content h1 {
+        white-space: normal;
     }
 
     .tournament-hero-stats {
@@ -885,20 +862,6 @@
 
     .hero-stat-value {
         font-size: 2rem;
-    }
-
-    .trn-sticky-header {
-        gap: 10px;
-        padding: 10px 12px;
-    }
-
-    .trn-filter-chips {
-        flex-wrap: wrap;
-    }
-
-    .trn-filter-chip {
-        padding: 8px 16px;
-        font-size: 0.82rem;
     }
 
     .tournaments-grid {
@@ -912,11 +875,6 @@
 }
 
 @media (max-width: 480px) {
-    .trn-filter-chip {
-        padding: 7px 12px;
-        font-size: 0.78rem;
-    }
-
     .tournament-details {
         flex-wrap: wrap;
         gap: var(--space-sm);

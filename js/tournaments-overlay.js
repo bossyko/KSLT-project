@@ -25,73 +25,19 @@
         return 'upcoming';
     }
 
+    /** Сумма в шапке — коротко: 2626000 → «2.6M», 40000 → «40K» */
+    function shortPrize(num) {
+        if (!num) return '0';
+        if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (num >= 1000) return Math.round(num / 1000) + 'K';
+        return String(num);
+    }
+
     // Format prize fund total: 500000 → "500 000 сом", 0 → "0 сом"
     function formatPrize(num) {
         if (!num) return '0 ' + (isEn ? 'som' : 'сом');
         var str = String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         return str + ' ' + (isEn ? 'som' : 'сом');
-    }
-
-    // Countdown helpers
-    var _cdInterval = null;
-    var CL = isEn
-        ? { days: 'd', hours: 'h', min: 'm', sec: 's', live: 'LIVE NOW', prefix: 'STARTS IN' }
-        : (isKg
-            ? { days: 'к', hours: 'с', min: 'м', sec: 'с', live: 'ТҮЗ ЭФИР', prefix: 'БАШТАЛАТ' }
-            : { days: 'д', hours: 'ч', min: 'м', sec: 'с', live: 'ИДЁТ СЕЙЧАС', prefix: 'СТАРТ ЧЕРЕЗ' });
-
-    function getCountdownHtml(dateSort, startTime) {
-        if (!dateSort) return '';
-        var timeStr = startTime || '00:00';
-        var target = new Date(dateSort + 'T' + timeStr + ':00');
-        var now = new Date();
-        var diff = target.getTime() - now.getTime();
-        if (diff <= 0) return '<span class="to-cd to-cd-live"><span class="to-cd-dot"></span>' + CL.live + '</span>';
-        if (diff > 48 * 60 * 60 * 1000) return '';
-        var d = Math.floor(diff / (1000*60*60*24));
-        var h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-        var m = Math.floor((diff % (1000*60*60)) / (1000*60));
-        var s = Math.floor((diff % (1000*60)) / 1000);
-        var urgent = diff < 60 * 60 * 1000 ? ' to-cd-urgent' : '';
-        var parts = '<span class="to-cd-label">' + CL.prefix + '</span>';
-        if (d > 0) parts += '<span class="to-cd-unit">' + d + '<small>' + CL.days + '</small></span>';
-        parts += '<span class="to-cd-unit">' + String(h).padStart(2,'0') + '<small>' + CL.hours + '</small></span>';
-        parts += '<span class="to-cd-unit">' + String(m).padStart(2,'0') + '<small>' + CL.min + '</small></span>';
-        parts += '<span class="to-cd-unit">' + String(s).padStart(2,'0') + '<small>' + CL.sec + '</small></span>';
-        return '<span class="to-cd' + urgent + '" data-cd-date="' + dateSort + '" data-cd-time="' + timeStr + '">' + parts + '</span>';
-    }
-
-    function updateCountdowns() {
-        document.querySelectorAll('.to-cd[data-cd-date]').forEach(function(el) {
-            var dateSort = el.dataset.cdDate;
-            var timeStr = el.dataset.cdTime || '00:00';
-            var target = new Date(dateSort + 'T' + timeStr + ':00');
-            var now = new Date();
-            var diff = target.getTime() - now.getTime();
-            if (diff <= 0) {
-                el.className = 'to-cd to-cd-live';
-                el.innerHTML = '<span class="to-cd-dot"></span>' + CL.live;
-                return;
-            }
-            var d = Math.floor(diff / (1000*60*60*24));
-            var h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-            var m = Math.floor((diff % (1000*60*60)) / (1000*60));
-            var s = Math.floor((diff % (1000*60)) / 1000);
-            if (diff < 60 * 60 * 1000) el.classList.add('to-cd-urgent'); else el.classList.remove('to-cd-urgent');
-            var parts = '<span class="to-cd-label">' + CL.prefix + '</span>';
-            if (d > 0) parts += '<span class="to-cd-unit">' + d + '<small>' + CL.days + '</small></span>';
-            parts += '<span class="to-cd-unit">' + String(h).padStart(2,'0') + '<small>' + CL.hours + '</small></span>';
-            parts += '<span class="to-cd-unit">' + String(m).padStart(2,'0') + '<small>' + CL.min + '</small></span>';
-            parts += '<span class="to-cd-unit">' + String(s).padStart(2,'0') + '<small>' + CL.sec + '</small></span>';
-            el.innerHTML = parts;
-        });
-    }
-
-    function startCountdownTimer() {
-        if (_cdInterval) clearInterval(_cdInterval);
-        if (document.querySelectorAll('.to-cd[data-cd-date]').length > 0) {
-            _cdInterval = setInterval(updateCountdowns, 1000);
-        }
     }
 
     function trackPageView(pageName) {
@@ -115,17 +61,17 @@
     // Load hero stats from Supabase (tournament count, participants, prize fund)
     // Always overwrites static fallback with real data (even if 0)
     var friendlyLabels = isEn ? {
-        total: 'Total this season',
-        upcoming: 'Upcoming',
-        completed: 'Completed'
+        total: 'total this season',
+        upcoming: 'upcoming',
+        completed: 'completed'
     } : (isKg ? {
-        total: 'Мезгилде баары',
-        upcoming: 'Алдыдагы',
-        completed: 'Аяктаган'
+        total: 'мезгилде баары',
+        upcoming: 'алдыдагы',
+        completed: 'аяктаган'
     } : {
-        total: 'Всего за сезон',
-        upcoming: 'Предстоящих',
-        completed: 'Завершённых'
+        total: 'всего за сезон',
+        upcoming: 'предстоящих',
+        completed: 'завершённых'
     });
 
     async function loadHeroStats(category) {
@@ -191,16 +137,21 @@
             });
             if (elCount) elCount.textContent = tournamentCount;
             if (elPrize) {
-                elPrize.textContent = formatPrize(totalPrize);
+                // В шапке — коротко, как на «Турнирах»: «2.6M», а не
+                // «2 626 000 сом». Полная сумма ломала строку цифр
+                elPrize.textContent = shortPrize(totalPrize);
             }
 
             // Count participants from registrations
             try {
                 var ids = tournaments.map(function(t) { return t.id; });
                 if (ids.length > 0) {
+                    // Только принятые заявки: снявшиеся, отклонённые,
+                    // заблокированные и лист ожидания на корт не выходят
                     var regsResult = await client.from('tournament_registrations')
                         .select('*', { count: 'exact', head: true })
-                        .in('tournament_id', ids);
+                        .in('tournament_id', ids)
+                        .eq('status', 'approved');
                     if (elPart) elPart.textContent = regsResult.count || 0;
                 } else {
                     if (elPart) elPart.textContent = '0';
@@ -278,12 +229,20 @@
                 var day = String(d.getDate()).padStart(2, '0');
                 var month = months[d.getMonth()];
 
-                // Auto-compute status (with overrides)
+                // Состояние турнира: сохранённое, если его выставили руками,
+                // иначе считаем по датам.
                 var effectiveStatus;
                 if (t.status === 'cancelled' || t.status === 'registration_closed' || t.status === 'completed') {
                     effectiveStatus = t.status;
                 } else {
                     effectiveStatus = computeStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
+                }
+                // Турнир, который отыграли, — завершён, что бы ни стояло в базе.
+                // Иначе апрельский турнир со стухшим «регистрация закрыта»
+                // навсегда оставался бы среди предстоящих
+                var lastDay = t.date_end || t.date_start;
+                if (lastDay && lastDay < today && effectiveStatus !== 'cancelled') {
+                    effectiveStatus = 'completed';
                 }
                 var cardStatusMap = { registration_open: 'open', completed: 'past', ongoing: 'ongoing', cancelled: 'past', registration_closed: 'closed' };
                 var cardStatus = cardStatusMap[effectiveStatus] || 'soon';
@@ -300,7 +259,7 @@
                 if (t.registration_start && t.registration_end && t.registration_end >= today) {
                     var rs = new Date(t.registration_start + 'T00:00:00');
                     var re = new Date(t.registration_end + 'T00:00:00');
-                    regLine = (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()];
+                    regLine = rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()];
                 }
 
                 // Gender for filtering
@@ -320,6 +279,8 @@
                     statusText: statusLabels[effectiveStatus] || statusLabels.upcoming,
                     genderLabel: genderLabel,
                     _gender: _gender,
+                    _rawStatus: effectiveStatus,
+                    _rawFormat: t.format || '',
                     regLine: regLine,
                     image: t.image_url || t.image || '',
                     _startTime: t.start_time || null,
@@ -327,298 +288,138 @@
                 };
             });
 
-            // Combine: Supabase data first, then static as fallback/demo
-            var monthMap = isEn
-                ? {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
-                : {'Янв':'01','Фев':'02','Мар':'03','Апр':'04','Май':'05','Июн':'06','Июл':'07','Авг':'08','Сен':'09','Окт':'10','Ноя':'11','Дек':'12'};
-
-            var staticGender = 'all';
-            var staticItems = (typeof tournamentsData !== 'undefined' && tournamentsData.upcoming[category] || []).map(function(t) {
-                return Object.assign({}, t, {
-                    _dateSort: '2026-' + (monthMap[t.date.month] || '01') + '-' + t.date.day,
-                    _gender: staticGender,
-                    _fromSupabase: false
-                });
+            // Раскладываем турниры категории по трём блокам из одного запроса.
+            //
+            // Раньше здесь били ещё два запроса — «действующие» и «завершённые»,
+            // и оба смотрели на поле status. А status у 77 турниров отстал от
+            // календаря: апрельский турнир всё ещё числился «регистрация
+            // открыта». Из-за этого он не попадал ни в архив (там ищут
+            // status = completed), ни в предстоящие (оттуда его выбивала дата)
+            // — и просто исчезал со страницы. Теперь состояние считается по
+            // датам, как на странице «Турниры», и запрос нужен один.
+            var liveItems = supaItems.filter(function(t) { return t.status === 'ongoing'; });
+            var upcomingItems = supaItems.filter(function(t) {
+                return t.status !== 'ongoing' && t.status !== 'past';
             });
+            var pastItems = supaItems.filter(function(t) { return t.status === 'past'; });
 
-            var all = supaItems.concat(staticItems);
-
-            // Действующие турниры этой категории. Раньше сюда грузились все
-            // категории подряд, и на странице Masters висели Tour с Challenger,
-            // хотя заголовок и цифры в шапке — про Masters
-            var activeItems = [];
-            try {
-                var activeResult = await client.from('tournaments')
-                    .select('*')
-                    .eq('category_id', category)
-                    .neq('status', 'completed')
-                    .neq('status', 'cancelled')
-                    .not('published_at', 'is', null)
-                    .order('date_start', { ascending: true });
-                var activeData = activeResult.data || [];
-                activeItems = activeData.map(function(t) {
-                    var d = new Date(t.date_start + 'T00:00:00');
-                    var day = String(d.getDate()).padStart(2, '0');
-                    var month = months[d.getMonth()];
-                    var effectiveStatus;
-                    if (t.status === 'registration_closed') {
-                        effectiveStatus = t.status;
-                    } else {
-                        effectiveStatus = computeStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
-                    }
-                    var cardStatusMap = { registration_open: 'open', completed: 'past', ongoing: 'ongoing', cancelled: 'past', registration_closed: 'closed' };
-                    var cardStatus = cardStatusMap[effectiveStatus] || 'soon';
-                    var gender = t.gender || '';
-                    var genderLabel = (t.format !== 'mixed_doubles' && t.category_id !== 'friendly' && (gender === 'men' || gender === 'women'))
-                        ? (gender === 'women'
-                            ? (isEn ? '♀ Women' : (isKg ? '♀ Аялдар' : '♀ Женский'))
-                            : (isEn ? '♂ Men' : (isKg ? '♂ Эркектер' : '♂ Мужской')))
-                        : (gender === 'mixed' ? (isEn ? '⚤ Mixed' : (isKg ? '⚤ Аралаш' : '⚤ Смешанный')) : '');
-                    var regLine = '';
-                    if (t.registration_start && t.registration_end && t.registration_end >= today) {
-                        var rs = new Date(t.registration_start + 'T00:00:00');
-                        var re = new Date(t.registration_end + 'T00:00:00');
-                        regLine = (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + rs.getDate() + ' ' + months[rs.getMonth()] + ' — ' + re.getDate() + ' ' + months[re.getMonth()];
-                    }
-                    return {
-                        id: t.id,
-                        name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
-                        date: { day: day, month: month },
-                        _dateSort: t.date_start,
-                        location: isEn ? (t.location_en || t.location) : (isKg ? (t.location_kg || t.location || '') : (t.location || '')),
-                        format: formatLabels[t.format] || t.format || '',
-                        participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
-                        prize: t.prize_fund ? ((/[а-яa-z]/i.test(String(t.prize_fund))) ? String(t.prize_fund) : formatPrize(parseInt(String(t.prize_fund).replace(/[^\d]/g, ''), 10) || 0)) : '',
-                        status: cardStatus,
-                        statusText: statusLabels[effectiveStatus] || statusLabels.upcoming,
-                        genderLabel: genderLabel,
-                        _gender: gender || 'all',
-                        regLine: regLine,
-                        image: t.image_url || t.image || '',
-                        _startTime: t.start_time || null,
-                        _fromSupabase: true
-                    };
-                });
-            } catch(ae) {
-                console.warn('Active tournaments load error:', ae);
-                // Раньше здесь подставлялся демонстрационный набор из прототипа.
-                // На странице появлялись турниры, которых нет ни в базе, ни в
-                // админке, — удалить их было нечем. Пусто честнее.
-                activeItems = supaItems.filter(function(t) { return t.status !== 'past'; });
-            }
-            // Filter out items whose computed status is 'past' (date_end passed)
-            activeItems = activeItems.filter(function(t) { return t.status !== 'past'; });
             // Ближайшие сверху: это список того, что впереди, а не лента новостей
-            activeItems.sort(function(a, b) {
+            upcomingItems.sort(function(a, b) {
                 return (a._dateSort || '').localeCompare(b._dateSort || '');
             });
+            liveItems.sort(function(a, b) {
+                return (a._dateSort || '').localeCompare(b._dateSort || '');
+            });
+            // Архив наоборот: свежее сверху
+            pastItems.sort(function(a, b) {
+                return (b._dateSort || '').localeCompare(a._dateSort || '');
+            });
 
-            // Прошедшие — той же категории, по той же причине
-            var pastItems = [];
-            try {
-                var pastResult = await client.from('tournaments')
-                    .select('*')
-                    .eq('category_id', category)
-                    .eq('status', 'completed')
-                    .not('published_at', 'is', null)
-                    .order('date_start', { ascending: false });
-                var pastData = pastResult.data || [];
-                pastItems = pastData.map(function(t) {
-                    var d = new Date(t.date_start + 'T00:00:00');
-                    var day = String(d.getDate()).padStart(2, '0');
-                    var month = months[d.getMonth()];
-                    var gender = t.gender || '';
-                    var genderLabel = (t.format !== 'mixed_doubles' && t.category_id !== 'friendly' && (gender === 'men' || gender === 'women'))
-                        ? (gender === 'women'
-                            ? (isEn ? '♀ Women' : (isKg ? '♀ Аялдар' : '♀ Женский'))
-                            : (isEn ? '♂ Men' : (isKg ? '♂ Эркектер' : '♂ Мужской')))
-                        : (gender === 'mixed' ? (isEn ? '⚤ Mixed' : (isKg ? '⚤ Аралаш' : '⚤ Смешанный')) : '');
-                    return {
-                        id: t.id,
-                        name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
-                        date: { day: day, month: month },
-                        _dateSort: t.date_start,
-                        location: isEn ? (t.location_en || t.location) : (isKg ? (t.location_kg || t.location || '') : (t.location || '')),
-                        format: formatLabels[t.format] || t.format || '',
-                        participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
-                        prize: t.prize_fund ? ((/[а-яa-z]/i.test(String(t.prize_fund))) ? String(t.prize_fund) : formatPrize(parseInt(String(t.prize_fund).replace(/[^\d]/g, ''), 10) || 0)) : '',
-                        statusText: statusLabels.completed || (isEn ? 'Completed' : 'Завершён'),
-                        genderLabel: genderLabel,
-                        image: t.image_url || t.image || '',
-                        _fromSupabase: true
-                    };
-                });
-            } catch(pe) {
-                console.warn('Past tournaments load error:', pe);
-            }
-
-            // Re-render main grid (show more: 3 cols × 3 rows = 9 per load)
+            // Три блока вместо одной кучи: идущие сейчас, предстоящие и архив.
+            // Раньше действующие турниры шли сплошным списком без заголовка,
+            // и идущий прямо сегодня терялся между анонсами на октябрь.
+            //
+            // Разметку карточек рисует общий модуль tournament-blocks.js —
+            // тот же, что на странице «Турниры». Раскладка там же: ближайший
+            // турнир крупно слева, остальные полосами справа. Когда турнир
+            // в блоке один, правая половина остаётся пустой — карточка не
+            // растягивается на весь экран.
+            var TB = window.KSLT_TBLOCK;
             var grid = document.getElementById('tournamentsGrid');
-            if (!grid) return;
-            var ITEMS_PER_LOAD = 6;
-            var _activeShown = 0;
-            var upcomingSection = document.getElementById('upcoming');
+            if (!grid || !TB) return;
 
-            function renderActiveCard(t) {
-                var statusText = t.statusText || (t.status === 'open'
-                    ? (isEn ? 'Registration Open' : (isKg ? 'Каттоо ачык' : 'Регистрация открыта'))
-                    : (isEn ? 'Coming Soon' : (isKg ? 'Жакында' : 'Скоро открытие')));
-                return '<div class="tournament-card" data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '" data-id="' + t.id + '"' +
-                    (t.image ? ' style="background-image:url(' + t.image + ')"' : '') + '>' +
-                    '<div class="tournament-card-header">' +
-                        '<span class="tournament-date">' +
-                            '<span class="date-day">' + t.date.day + '</span>' +
-                            '<span class="date-month">' + t.date.month + '</span>' +
-                        '</span>' +
-                        '<span class="tournament-status ' + t.status + '">' + statusText + '</span>' +
-                    '</div>' +
-                    getCountdownHtml(t._dateSort, t._startTime) +
-                    '<div class="tournament-card-body">' +
-                        '<div class="tournament-title-row">' +
-                            '<h3>' + t.name + '</h3>' +
-                            (t.genderLabel ? '<span class="tournament-gender-badge">' + t.genderLabel + '</span>' : '') +
-                        '</div>' +
-                        '<div class="tournament-meta">' +
-                            '<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + t.location + '</span>' +
-                        '</div>' +
-                        '<div class="tournament-details">' +
-                            (t.regLine ? '<div class="detail-item detail-reg"><span class="detail-label">' + (isEn ? 'Registration' : (isKg ? 'Каттоо' : 'Регистрация')) + '</span><span class="detail-value">' + t.regLine.replace(/^(Reg|Рег|Кат): /, '') + '</span></div>' : '') +
-                            '<div class="detail-item"><span class="detail-label">' + L.format + '</span><span class="detail-value">' + (t.format || '') + '</span></div>' +
-                            '<div class="detail-item"><span class="detail-label">' + L.participants + '</span><span class="detail-value">' + (t.participants || '') + '</span></div>' +
-                            '<div class="detail-item"><span class="detail-label">' + L.prizeFund + '</span><span class="detail-value prize">' + (t.prize || '') + '</span></div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="tournament-card-footer">' +
-                        '<button class="btn-calendar" title="' + L.calendar + '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>' +
-                        '<span class="btn-view-bracket">' + L.details + '</span>' +
-                        (t.status === 'open'
-                            ? '<button class="btn-register">' + L.register + '</button>'
-                            : '') +
-                    '</div>' +
-                '</div>';
-            }
+            var heroBg = (document.getElementById('heroBg') || {}).src || '';
+            var PER_LOAD = 6;
+            var _activeShown = Math.min(PER_LOAD, upcomingItems.length);
+            var _pastShown = Math.min(PER_LOAD, pastItems.length);
+            var upcomingSection = document.getElementById('upcoming');
+            var liveSection = document.getElementById('live');
+            var liveGrid = document.getElementById('liveGrid');
+            var pastGrid = document.getElementById('pastTournamentsGrid');
+            var pastSection = document.getElementById('past');
 
             var showMoreLabel = isEn ? 'Show more' : (isKg ? 'Дагы көрсөтүү' : 'Показать ещё');
             var showMoreArrow = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
 
-            function renderActiveShowMore() {
-                var nextItems = activeItems.slice(_activeShown, _activeShown + ITEMS_PER_LOAD);
-                var html = nextItems.map(renderActiveCard).join('');
-                grid.insertAdjacentHTML('beforeend', html);
-                _activeShown += nextItems.length;
+            /** Кнопка «показать ещё» под блоком — одна на блок, перерисовывается вместе с ним */
+            function syncShowMore(section, id, shown, total, onClick) {
+                if (!section) return;
+                var old = section.querySelector('.trn-show-more');
+                if (old) old.remove();
+                if (shown >= total) return;
+                section.insertAdjacentHTML('beforeend',
+                    '<div class="trn-show-more"><button class="trn-show-more-btn" id="' + id + '">' +
+                    showMoreLabel + ' ' + showMoreArrow + '</button></div>');
+                document.getElementById(id).addEventListener('click', onClick);
+            }
 
-                // Click listeners for new cards
-                grid.querySelectorAll('.tournament-card[data-id]').forEach(function(card) {
-                    if (card._clickBound) return;
-                    card._clickBound = true;
-                    card.addEventListener('click', function(e) {
-                        if (e.target.closest('.btn-calendar, .btn-register')) return;
-                        window.location.href = detailPage + '?id=' + this.dataset.id;
-                    });
+            function renderUpcoming() {
+                grid.innerHTML = TB.grid(upcomingItems.slice(0, _activeShown), heroBg);
+                TB.bindLinks(grid);
+                syncShowMore(upcomingSection, 'upcomingShowMore', _activeShown, upcomingItems.length, function() {
+                    _activeShown = Math.min(_activeShown + PER_LOAD, upcomingItems.length);
+                    renderUpcoming();
+                    applyFilters(grid);
                 });
-
-                // Show/hide button
-                var oldBtn = upcomingSection.querySelector('.trn-show-more');
-                if (oldBtn) oldBtn.remove();
-                if (_activeShown < activeItems.length) {
-                    var btnHtml = '<div class="trn-show-more"><button class="trn-show-more-btn" id="activeShowMore">' + showMoreLabel + ' ' + showMoreArrow + '</button></div>';
-                    grid.insertAdjacentHTML('afterend', btnHtml);
-                    document.getElementById('activeShowMore').addEventListener('click', function() {
-                        renderActiveShowMore();
-                    });
-                }
-
-                startCountdownTimer();
-
+                TB.startTimer();
+                TB.initRegister();
                 // Карточки турниров, куда игрок уже подал заявку, гаснут
                 if (window.KSLT_REG && window.KSLT_REG.markRegistered) {
                     window.KSLT_REG.markRegistered(client);
                 }
             }
 
-            grid.innerHTML = '';
-            renderActiveShowMore();
-
-            // Render past tournaments into #pastTournamentsGrid (show more pattern)
-            var pastGrid = document.getElementById('pastTournamentsGrid');
-            var pastSection = document.getElementById('past');
-            var _pastShown = 0;
-
-            /**
-             * Прошедший турнир — полосой, а не крупной карточкой.
-             *
-             * На прошедший смотрят ради результата: кто играл, чем кончилось.
-             * Крупная карточка отдаёт половину места афише и кнопке
-             * регистрации, которой у завершённого быть не может, — и десяток
-             * таких карточек утапливает предстоящие.
-             *
-             * Разметка та же, что у полос на странице баттлов и в боковой
-             * колонке турниров: .to-compact. Одно правило на весь сайт —
-             * актуальное крупно, история строкой.
-             */
-            function renderPastCard(t) {
-                var statusText = t.statusText || (isEn ? 'Completed' : (isKg ? 'Аяктады' : 'Завершён'));
-                var meta = [t.location, t.format, t.participants].filter(Boolean).join(' · ');
-                return '<a class="to-compact trn-strip" data-id="' + t.id + '"' +
-                    (t.image ? ' style="background-image:url(' + t.image + ')"' : '') + '>' +
-                    '<div class="to-compact-left"><div class="to-compact-date">' +
-                        '<span class="to-day">' + t.date.day + '</span>' +
-                        '<span class="to-month">' + t.date.month + '</span>' +
-                    '</div></div>' +
-                    '<div class="to-compact-info">' +
-                        '<h4>' + t.name +
-                            (t.genderLabel ? '<span class="trn-strip-gender">' + t.genderLabel + '</span>' : '') +
-                        '</h4>' +
-                        '<div class="trn-strip-sub">' + meta + '</div>' +
-                    '</div>' +
-                    '<div class="trn-strip-right">' +
-                        '<span class="trn-strip-badge">' + statusText + '</span>' +
-                    '</div>' +
-                '</a>';
+            function renderLive() {
+                if (!liveGrid) return;
+                liveGrid.innerHTML = TB.grid(liveItems, heroBg);
+                TB.bindLinks(liveGrid);
             }
 
-            function renderPastShowMore() {
+            function renderPast() {
                 if (!pastGrid) return;
-                var nextItems = pastItems.slice(_pastShown, _pastShown + ITEMS_PER_LOAD);
-                var html = nextItems.map(renderPastCard).join('');
-                pastGrid.insertAdjacentHTML('beforeend', html);
-                _pastShown += nextItems.length;
-
-                // Click listeners for new cards
-                pastGrid.querySelectorAll('[data-id]').forEach(function(card) {
-                    if (card._clickBound) return;
-                    card._clickBound = true;
-                    card.addEventListener('click', function() {
-                        window.location.href = detailPage + '?id=' + this.dataset.id;
-                    });
-                });
-
-                // Show/hide button
-                var oldBtn = pastSection.querySelector('.trn-show-more');
-                if (oldBtn) oldBtn.remove();
-                if (_pastShown < pastItems.length) {
-                    var btnHtml = '<div class="trn-show-more"><button class="trn-show-more-btn" id="pastShowMore">' + showMoreLabel + ' ' + showMoreArrow + '</button></div>';
-                    pastGrid.insertAdjacentHTML('afterend', btnHtml);
-                    document.getElementById('pastShowMore').addEventListener('click', function() {
-                        renderPastShowMore();
-                    });
+                if (!pastItems.length) {
+                    pastGrid.innerHTML = '<div class="trn-block-empty"><strong>' +
+                        EMPTY.pastTitle + '</strong>' + EMPTY.pastText + '</div>';
+                    return;
                 }
+                // Архив — полосами: на завершённый смотрят ради результата,
+                // ему не нужны крупная афиша и кнопка регистрации
+                pastGrid.innerHTML = pastItems.slice(0, _pastShown).map(function(t) {
+                    return TB.compact(t);
+                }).join('');
+                TB.bindLinks(pastGrid);
+                syncShowMore(pastSection, 'pastShowMore', _pastShown, pastItems.length, function() {
+                    _pastShown = Math.min(_pastShown + PER_LOAD, pastItems.length);
+                    renderPast();
+                    applyFilters(grid);
+                });
             }
 
-            if (pastGrid && pastItems.length > 0) {
-                if (pastSection) pastSection.style.display = '';
-                pastGrid.innerHTML = '';
-                renderPastShowMore();
-            } else if (pastSection && pastItems.length === 0) {
-                pastSection.style.display = 'none';
-            }
+            renderLive();
+            renderUpcoming();
+            renderPast();
+
+            if (liveSection) liveSection.hidden = liveItems.length === 0;
+            if (upcomingSection) upcomingSection.hidden = upcomingItems.length === 0;
+
+            renderBlockSubs(liveItems, upcomingItems, pastItems);
+            renderChipCounts(liveItems, upcomingItems, pastItems);
+
+            // Поиск и фильтры должны видеть весь список, а не подгруженную часть
+            _expandAll = function() {
+                if (_activeShown >= upcomingItems.length && _pastShown >= pastItems.length) return;
+                _activeShown = upcomingItems.length;
+                _pastShown = pastItems.length;
+                renderUpcoming();
+                renderPast();
+            };
 
             // Init search + filter buttons interaction
             initSearch(grid);
             initFilterSearch(grid);
             // Apply current filter state
             applyFilters(grid);
-            startCountdownTimer();
+            if (TB) TB.startTimer();
             initStickyHeader();
 
         } catch (e) {
@@ -627,6 +428,8 @@
     }
 
     var _searchTimer = null;
+    /** Догружает скрытые под «Показать ещё» карточки — фильтр должен видеть весь список */
+    var _expandAll = null;
 
     function initSearch(grid) {
         var input = document.getElementById('tournamentSearch');
@@ -640,61 +443,184 @@
         });
     }
 
+    /* Тексты пустого архива */
+    var EMPTY = isEn ? {
+        pastTitle: 'No tournaments played here yet',
+        pastText: 'The first one will also be the first line in the archive.'
+    } : (isKg ? {
+        pastTitle: 'Бул категорияда азырынча оюн болгон эмес',
+        pastText: 'Биринчи мелдеш архивдин биринчи сабы болот.'
+    } : {
+        pastTitle: 'В этой категории ещё не играли',
+        pastText: 'Первый турнир станет и первой строкой в архиве.'
+    });
+
+    /* Подписи под заголовками блоков */
+    var SUB = isEn ? {
+        liveOne: 'tournament in play — the score updates live',
+        liveMany: 'tournaments in play — the score updates live',
+        upcomingOne: 'tournament ahead',
+        upcomingMany: 'tournaments ahead',
+        nearest: 'nearest',
+        pastOne: 'tournament in the archive',
+        pastMany: 'tournaments in the archive'
+    } : (isKg ? {
+        liveOne: 'мелдеш жүрүп жатат — эсеби түз эфирде',
+        liveMany: 'мелдеш жүрүп жатат — эсеби түз эфирде',
+        upcomingOne: 'мелдеш алдыда',
+        upcomingMany: 'мелдеш алдыда',
+        nearest: 'эң жакыны',
+        pastOne: 'мелдеш архивде',
+        pastMany: 'мелдеш архивде'
+    } : {
+        liveOne: 'турнир в игре — счёт обновляется вживую',
+        liveMany: 'турнира в игре — счёт обновляется вживую',
+        upcomingOne: 'турнир впереди',
+        upcomingMany: 'турнира впереди',
+        nearest: 'ближайший',
+        pastOne: 'турнир в архиве',
+        pastMany: 'турниров в архиве'
+    });
+
+    /** «1 турнир / 2 турнира / 5 турниров» — без склонения строка режет глаз */
+    function plural(n, one, few, many) {
+        if (isEn || isKg) return n === 1 ? one : few;
+        var n10 = n % 10, n100 = n % 100;
+        if (n10 === 1 && n100 !== 11) return one;
+        if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return few;
+        return many;
+    }
+
+    function humanDate(iso) {
+        if (!iso) return '';
+        var months = isEn
+            ? ['January','February','March','April','May','June','July','August','September','October','November','December']
+            : (isKg
+                ? ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь']
+                : ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']);
+        var d = new Date(iso + 'T00:00:00');
+        return isEn ? (months[d.getMonth()] + ' ' + d.getDate())
+                    : (d.getDate() + ' ' + months[d.getMonth()]);
+    }
+
+    function setSub(id, text) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = text;
+    }
+
+    function renderBlockSubs(liveItems, upcomingItems, pastItems) {
+        var n = liveItems.length;
+        setSub('liveSub', n + ' ' + plural(n, SUB.liveOne, SUB.liveMany, SUB.liveMany));
+
+        n = upcomingItems.length;
+        var line = n + ' ' + plural(n, SUB.upcomingOne, SUB.upcomingMany, SUB.upcomingMany);
+        var nearest = upcomingItems[0] && upcomingItems[0]._dateSort;
+        if (nearest) line += ' · ' + SUB.nearest + ' ' + humanDate(nearest);
+        setSub('upcomingSub', line);
+
+        n = pastItems.length;
+        setSub('pastSub', n ? (n + ' ' + plural(n, SUB.pastOne, SUB.pastMany, SUB.pastMany)) : '');
+    }
+
+    /** Сколько турниров попадёт под фильтр — видно до нажатия */
+    function renderChipCounts(liveItems, upcomingItems, pastItems) {
+        var open = upcomingItems.filter(function(t) { return t.status === 'open'; }).length;
+        var counts = {
+            all: liveItems.length + upcomingItems.length + pastItems.length,
+            open: open,
+            soon: upcomingItems.length - open,
+            past: pastItems.length
+        };
+        document.querySelectorAll('.trn-chip-count[data-count]').forEach(function(el) {
+            var v = counts[el.dataset.count];
+            el.textContent = v ? v : '';
+        });
+    }
+
     function initFilterSearch(grid) {
-        // Chip-based filters
-        var chips = document.querySelectorAll('.trn-filter-chip');
-        chips.forEach(function(chip) {
+        document.querySelectorAll('.trn-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
-                var group = chip.dataset.filter; // 'status' or 'gender'
-                var parent = chip.closest('.trn-filter-chips');
-                if (parent) {
-                    parent.querySelectorAll('.trn-filter-chip').forEach(function(c) { c.classList.remove('active'); });
-                }
+                var group = chip.dataset.filter;
+                document.querySelectorAll('.trn-chip[data-filter="' + group + '"]').forEach(function(c) {
+                    c.classList.remove('active');
+                });
                 chip.classList.add('active');
                 applyFilters(grid);
             });
         });
-
-        // Fallback: dropdown-based filters (for backwards compat)
-        var statusSelect = document.getElementById('statusFilter');
-        var genderSelect = document.getElementById('genderFilter');
-        if (statusSelect) statusSelect.addEventListener('change', function() { applyFilters(grid); });
-        if (genderSelect) genderSelect.addEventListener('change', function() { applyFilters(grid); });
     }
 
+    /**
+     * Фильтры поверх трёх блоков.
+     *
+     * Блоки уже разложены по состоянию, поэтому фильтр статуса не столько
+     * отсеивает карточки, сколько оставляет на экране нужный блок: выбрал
+     * «Завершённые» — видишь только архив. Пол и поиск режут карточки внутри
+     * оставшихся блоков; блок, из которого выбило все карточки, прячется —
+     * заголовок над пустотой читается как поломка.
+     */
     function applyFilters(grid) {
         var input = document.getElementById('tournamentSearch');
         var query = input ? input.value.trim().toLowerCase() : '';
 
-        // Read from chips first, fallback to selects
-        var statusChip = document.querySelector('.trn-filter-chip[data-filter="status"].active');
-        var genderChip = document.querySelector('.trn-filter-chip[data-filter="gender"].active');
-        var statusSelect = document.getElementById('statusFilter');
-        var genderSelect = document.getElementById('genderFilter');
-        var filter = statusChip ? statusChip.dataset.value : (statusSelect ? statusSelect.value : 'all');
-        var genderFilter = genderChip ? genderChip.dataset.value : (genderSelect ? genderSelect.value : 'all');
+        var statusChip = document.querySelector('.trn-chip[data-filter="status"].active');
+        var genderChip = document.querySelector('.trn-chip[data-filter="gender"].active');
+        var status = statusChip ? statusChip.dataset.value : 'all';
+        var gender = genderChip ? genderChip.dataset.value : 'all';
 
-        // Update section title
-        var sectionTitle = document.querySelector('#trnStickyHeader h2');
-        if (sectionTitle) {
-            sectionTitle.textContent = (filter === 'past')
-                ? (isEn ? 'Completed Tournaments' : (isKg ? 'Аяктаган мелдештер' : 'Завершённые турниры'))
-                : (isEn ? 'Upcoming Tournaments' : (isKg ? 'Алдыдагы мелдештер' : 'Предстоящие турниры'));
-        }
+        // Ищем по всему списку, а не по первым шести: иначе «женские» находит
+        // пусто только потому, что нужные карточки ещё не подгружены
+        if ((query || gender !== 'all') && _expandAll) _expandAll();
 
-        grid.querySelectorAll('.tournament-card').forEach(function(card) {
-            var status = card.dataset.status;
-            var cardGender = card.dataset.gender || 'all';
-            var statusMatch = (filter === 'all') ? (status !== 'past') : (status === filter);
-            var genderMatch = (genderFilter === 'all') || (cardGender === genderFilter);
-            var title = card.querySelector('h3');
-            var nameMatch = !query || (title && title.textContent.toLowerCase().indexOf(query) !== -1);
-            card.style.display = (statusMatch && genderMatch && nameMatch) ? '' : 'none';
+        var blocks = [
+            { id: 'live',     grid: document.getElementById('liveGrid'),             shown: status === 'all' },
+            { id: 'upcoming', grid: grid,                                            shown: status === 'all' || status === 'open' || status === 'soon' },
+            { id: 'past',     grid: document.getElementById('pastTournamentsGrid'),  shown: status === 'all' || status === 'past' }
+        ];
+
+        blocks.forEach(function(b) {
+            var section = document.getElementById(b.id);
+            if (!section || !b.grid) return;
+
+            var visible = 0;
+            b.grid.querySelectorAll('.to-featured, .to-compact').forEach(function(card) {
+                var cardStatus = card.dataset.status || '';
+                var cardGender = card.dataset.gender || 'all';
+                var statusMatch = (b.id !== 'upcoming') || status === 'all'
+                    || (status === 'open' && cardStatus === 'open')
+                    || (status === 'soon' && cardStatus !== 'open');
+                var genderMatch = (gender === 'all') || (cardGender === gender);
+                var title = card.querySelector('h3, h4');
+                var nameMatch = !query || (title && title.textContent.toLowerCase().indexOf(query) !== -1);
+                var ok = statusMatch && genderMatch && nameMatch;
+                card.style.display = ok ? '' : 'none';
+                if (ok) visible++;
+            });
+
+            var moreBtn = section.querySelector('.trn-show-more');
+            if (moreBtn) moreBtn.style.display = (query || gender !== 'all') ? 'none' : '';
+
+            var empty = b.grid.querySelector('.trn-block-empty');
+            // Архив пустой по-настоящему — заглушка на месте, блок остаётся
+            if (empty && !query && gender === 'all' && status !== 'open' && status !== 'soon') {
+                section.hidden = !b.shown;
+                return;
+            }
+            section.hidden = !b.shown || visible === 0;
         });
+
+        // Все блоки скрыты — молчать нельзя, человек решит, что страница сломалась
+        var none = document.getElementById('trnNoResults');
+        if (none) {
+            none.hidden = blocks.some(function(b) {
+                var section = document.getElementById(b.id);
+                return section && !section.hidden;
+            });
+        }
     }
 
     function initStickyHeader() {
-        var header = document.getElementById('trnStickyHeader');
+        var header = document.getElementById('trnFilters');
         if (!header) return;
         // Insert sentinel before header
         var sentinel = document.createElement('div');

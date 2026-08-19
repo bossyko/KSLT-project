@@ -629,12 +629,30 @@ body.ad-page {
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    border: none;
     transition: var(--transition-fast);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    /* Кнопка без цветной пометки раньше оставалась белой: фона ей никто
+       не задавал, и браузер рисовал свою системную. Тёмный вид по умолчанию —
+       тот же, что у .ad-btn-secondary */
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    font-family: var(--font-primary);
+    white-space: nowrap;
+}
+
+.ad-btn:hover:not(.ad-btn-primary):not(.ad-btn-secondary):not(.ad-btn-danger):not(.ad-btn-warning) {
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+}
+
+.ad-btn-primary,
+.ad-btn-danger,
+.ad-btn-warning {
+    border-color: transparent;
 }
 
 .ad-btn-primary {
@@ -4650,6 +4668,14 @@ select.ad-field-input {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* Столбец действий не режем: кнопка «Редактировать» длиннее ячейки,
+   и общий overflow: hidden отрезал ей хвост */
+.ad-table-sponsors td:last-child,
+.ad-table-sponsors th:last-child {
+    overflow: visible;
+    text-align: right;
 }
 
 .ad-table-sponsors td a {

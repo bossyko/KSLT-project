@@ -8,43 +8,49 @@ const tournamentsData = {
             name: 'Pro-Masters',
             title: 'Pro-Masters Tournaments',
             description: 'Высший уровень турниров для профессионалов и сильнейших любителей.',
+            sub: 'Сюда не записываются — сюда дорастают.',
             stats: { tournaments: 6, participants: '120+', prize: '200K' },
-            bgImage: 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=1920&q=80'
+            bgImage: '../images/heroes/promasters.jpg'
         },
         masters: {
             name: 'Masters',
             title: 'Masters Tournaments',
             description: 'Турниры для продвинутых игроков с высоким уровнем подготовки.',
+            sub: 'Здесь каждый — чей-то самый сложный матч.',
             stats: { tournaments: 8, participants: '180+', prize: '100K' },
-            bgImage: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=1920&q=80'
+            bgImage: '../images/heroes/masters.jpg'
         },
         challenger: {
             name: 'Challengers',
             title: 'Challengers Tournaments',
             description: 'Турниры среднего уровня для игроков, стремящихся к росту.',
+            sub: 'Пора проверить, чего стоит твоя стабильность.',
             stats: { tournaments: 10, participants: '200+', prize: '75K' },
-            bgImage: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=1920&q=80'
+            bgImage: '../images/heroes/challenger.jpg'
         },
         futures: {
             name: 'Futures',
             title: 'Futures Tournaments',
             description: 'Турниры для начинающих и развивающихся игроков.',
+            sub: 'Все когда-то выходили на корт впервые.',
             stats: { tournaments: 15, participants: '300+', prize: '40K' },
-            bgImage: 'https://images.unsplash.com/photo-1560012057-4372e14c5085?w=1920&q=80'
+            bgImage: '../images/heroes/futures.jpg'
         },
         tour: {
             name: 'Tour',
             title: 'Tour Tournaments',
             description: 'Открытые турниры для всех уровней. Получите опыт соревнований и поднимитесь в рейтинге KSLT.',
+            sub: 'Побеждает не сила, а голова.',
             stats: { tournaments: 12, participants: '240+', prize: '50K' },
-            bgImage: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&q=80'
+            bgImage: '../images/heroes/tour.jpg'
         },
         friendly: {
             name: 'Friendly Weekend',
             title: 'Friendly Weekend',
             description: 'Дружеские турниры без рейтинговых очков. Играйте в удовольствие!',
+            sub: 'Счёт забудется, выходные — нет.',
             stats: { tournaments: 20, participants: '400+', prize: '—' },
-            bgImage: 'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?w=1920&q=80'
+            bgImage: '../images/heroes/friendly.jpg'
         }
     },
 
@@ -319,29 +325,23 @@ function loadCategoryData(category) {
     const cat = tournamentsData.categories[category];
     if (!cat) return;
 
-    // Update hero (elements only exist on tournaments.html, not overview)
-    var elBadge = document.getElementById('categoryBadge');
+    // Шапка категории. Метки с названием больше нет — она повторяла
+    // заголовок строкой ниже. Вместо описания в три строки — одна фраза.
     var elTitle = document.getElementById('categoryTitle');
-    var elDesc = document.getElementById('categoryDescription');
+    var elSub = document.getElementById('categorySub');
     var elBg = document.getElementById('heroBg');
-    if (elBadge) elBadge.textContent = cat.name;
     if (elTitle) elTitle.textContent = cat.title;
-    if (elDesc) elDesc.textContent = cat.description;
+    if (elSub) elSub.textContent = cat.sub || cat.description || '';
     if (elBg) elBg.src = cat.bgImage;
 
-    // Hide stats for Friendly, show for others
-    var statsBlock = document.querySelector('.tournament-hero-stats');
-    if (category === 'friendly') {
-        if (statsBlock) statsBlock.style.display = 'none';
-    } else {
-        if (statsBlock) statsBlock.style.display = '';
-        var elStat = document.getElementById('statTournaments');
-        var elPart = document.getElementById('statParticipants');
-        var elPrize = document.getElementById('statPrize');
-        if (elStat) elStat.textContent = cat.stats.tournaments;
-        if (elPart) elPart.textContent = cat.stats.participants;
-        if (elPrize) elPrize.textContent = cat.stats.prize;
-    }
+    // Цифры в шапке. Настоящие подставит tournaments-overlay.js из базы,
+    // эти — чтобы строка не была пустой, пока база отвечает
+    var elStat = document.getElementById('statTournaments');
+    var elPart = document.getElementById('statParticipants');
+    var elPrize = document.getElementById('statPrize');
+    if (elStat) elStat.textContent = cat.stats.tournaments;
+    if (elPart) elPart.textContent = cat.stats.participants;
+    if (elPrize) elPrize.textContent = cat.stats.prize;
 
     // Заголовок вкладки. Русская версия пишет аббревиатуру кириллицей —
     // при переименовании эту строку пропустили, потому что она не в разметке,

@@ -65,6 +65,21 @@
     margin-bottom: var(--space-sm);
 }
 
+/* Метка категории. Раньше базовый вид лежал в tournaments.css и достался
+   этой странице «в наследство» — на страницах категорий метку убрали
+   (она дублировала заголовок), а здесь она нужна и живёт своей жизнью */
+.tournament-category-badge {
+    display: inline-block;
+    padding: 8px 24px;
+    background: var(--accent);
+    color: #000;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-radius: var(--radius-full);
+}
+
 /* Uniform badge size in hero — all same padding/font/height */
 .td-hero-badges .tournament-category-badge {
     padding: 5px 14px;
