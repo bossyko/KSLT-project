@@ -38,6 +38,8 @@
     border: 1px solid rgba(255,255,255,0.08);
     transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
     background: linear-gradient(145deg, #1a1a1a 0%, #222 50%, #1a1a1a 100%);
+    /* Карточка ведёт на баттл целиком, а не только надписью «Подробнее» */
+    cursor: pointer;
 }
 .bc-card:hover {
     border-color: var(--accent, #CCFF00);
@@ -199,9 +201,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.bc-vote-btn:hover {
-    border-color: rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.1);
+/* При наведении сторона подсвечивается своим цветом — тем же, каким она
+   идёт в полосе голосования и на странице баттлов. Раньше обе кнопки
+   светлели одинаково, и было не видно, за кого голосуешь */
+.bc-vote-btn-p1:hover:not(.bc-vote-closed):not(.bc-vote-locked) {
+    border-color: #DC2828;
+    background: rgba(220, 40, 40, 0.12);
+}
+
+.bc-vote-btn-p2:hover:not(.bc-vote-closed):not(.bc-vote-locked) {
+    border-color: #2563EB;
+    background: rgba(37, 99, 235, 0.12);
 }
 .bc-vote-btn-p1.bc-vote-selected {
     background: rgba(220,40,40,0.12);

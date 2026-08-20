@@ -155,7 +155,8 @@
             '<div class="io-hero-bg"><img src="' + heroImg + '" alt=""></div>' +
             '<div class="io-hero-overlay"></div>' +
             '<div class="io-hero-content">' +
-                '<div class="io-hero-tagline">' + L.heroTagline + '</div>' +
+                // Метки над заголовком нет: она повторяла раздел, который
+                // и так подсвечен в меню — как на страницах турниров
                 '<h1>' + L.heroTitle + '</h1>' +
                 // Расшифровка аббревиатуры прямо под заголовком: человек,
                 // впервые попавший на сайт, из трёх букв ничего не понимает

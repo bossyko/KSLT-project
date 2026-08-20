@@ -118,58 +118,6 @@
     letter-spacing: 0.5px;
 }
 
-/* Блоки турниров
-   ------------------------------------------------------------------
-   «Идут сейчас» и «Предстоящие» скрываются целиком, когда пусто: это
-   состояние, а не раздел, и пустая заглушка первым экраном читается как
-   поломка. «Завершённые» остаются всегда — архив есть у каждой категории. */
-.trn-block {
-    padding: var(--space-lg) 7%;
-    background: var(--bg-primary);
-}
-
-.trn-block:nth-of-type(even) {
-    background: var(--bg-secondary);
-}
-
-.trn-block[hidden] {
-    display: none;
-}
-
-.trn-block-head {
-    border-left: 3px solid var(--accent);
-    padding-left: 14px;
-    margin-bottom: var(--space-md);
-}
-
-.trn-block-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.trn-block-sub {
-    font-size: 0.88rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-}
-
-.trn-live-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #ff3b30;
-    margin-right: 8px;
-    vertical-align: middle;
-    animation: trnLivePulse 1.6s infinite;
-}
-
-@keyframes trnLivePulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-}
-
 /* Архив — полосами в две колонки. Класс свой, а не общий
    .past-tournaments-grid: тот жил в разметке из прототипа вместе со старой
    карточкой, а полосы приехали общие */

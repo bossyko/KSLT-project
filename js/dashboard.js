@@ -2244,7 +2244,10 @@
     function dbFormatDate(dateStr) {
         if (!dateStr) return '\u2014';
         try {
-            var d = new Date(dateStr);
+            // «2026-08-21» без времени читается как полночь UTC, и при часовом
+        // поясе западнее нуля дата съезжает на день назад. Полные метки
+        // времени оставляем как есть
+        var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? dateStr + 'T00:00:00' : dateStr);
             if (isNaN(d.getTime())) return '\u2014';
             var parts = {};
             new Intl.DateTimeFormat('en-GB', {
@@ -4422,7 +4425,10 @@
 
     function formatBadgeDate(dateStr) {
         if (!dateStr) return '';
-        var d = new Date(dateStr);
+        // «2026-08-21» без времени читается как полночь UTC, и при часовом
+        // поясе западнее нуля дата съезжает на день назад. Полные метки
+        // времени оставляем как есть
+        var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? dateStr + 'T00:00:00' : dateStr);
         var dd = d.getDate();
         var mm = d.getMonth() + 1;
         return dd + '.' + (mm < 10 ? '0' : '') + mm + '.' + d.getFullYear();

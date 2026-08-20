@@ -77,11 +77,20 @@ test.describe('Challenge Battle — Page Structure', () => {
             expect(await details.count()).toBe(1);
         });
 
-        test(`${cp.name}: Has H2H section container`, async ({ page }) => {
+        // История встреч больше не отдельная секция: она рисуется внутри
+        // блока соперников, сразу под карточками игроков
+        test(`${cp.name}: Has duel section container`, async ({ page }) => {
             await page.goto(cp.path, { waitUntil: 'domcontentloaded' });
 
-            const h2h = page.locator('#challengeH2H, .ch-h2h');
-            expect(await h2h.count()).toBe(1);
+            const duel = page.locator('#challengeDuel, .ch-duel');
+            expect(await duel.count()).toBe(1);
+        });
+
+        test(`${cp.name}: Has forecast section container`, async ({ page }) => {
+            await page.goto(cp.path, { waitUntil: 'domcontentloaded' });
+
+            const forecast = page.locator('#challengeForecast');
+            expect(await forecast.count()).toBe(1);
         });
 
         test(`${cp.name}: Has score section container`, async ({ page }) => {

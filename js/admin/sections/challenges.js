@@ -297,6 +297,14 @@
     }
 
     // ---- Published battles ----
+    /** Дата матча прошла, а счёт так и не ввели */
+    function isBattleOverdue(c) {
+        if (c.status === 'completed' || !c.proposed_date) return false;
+        var when = new Date(c.proposed_date + 'T' + (c.proposed_time || '23:59') + ':00+06:00');
+        if (isNaN(when.getTime())) return false;
+        return Date.now() > when.getTime();
+    }
+
     function renderPublished() {
         var el = document.getElementById('chalContent');
         if (!el) return;
@@ -327,6 +335,14 @@
                 : (c.voting_closed
                     ? '<span class="ad-badge ad-badge-yellow">' + L.chalVotingClosed + '</span>'
                     : '<span class="ad-badge ad-badge-blue">' + L.chalAccepted + '</span>');
+
+            // Публичные страницы считают баттл сыгранным по дате, а вкладки
+            // админки — по полю status, которое меняется только со счётом.
+            // Без пометки такой баттл висит среди опубликованных и теряется
+            if (isBattleOverdue(c)) {
+                statusBadge += '<br><span class="ad-badge ad-badge-red" style="margin-top:4px;display:inline-block;">' +
+                    L.chalOverdue + '</span>';
+            }
 
             // Broadcast status
             var notified = !!c.battle_notified_at;
@@ -1545,11 +1561,11 @@
     }
 
     function finalizeMatch(challenge, score, winnerId, loserId) {
-        return A.client.from('challenges')
-            .update({ voting_closed: true })
-            .eq('id', challenge.id)
-            .then(function() {
-                return A.client.from('matches').insert({
+        // Сначала записываем матч и только потом закрываем голосование.
+        // Раньше флаг ставился первым, и когда вставка матча падала,
+        // голосование оказывалось закрытым при незавершённом баттле:
+        // каждая неудачная попытка отнимала у людей возможность голосовать
+        return A.client.from('matches').insert({
                     player1_id: challenge.challenger_player_id,
                     player2_id: challenge.opponent_player_id,
                     winner_id: winnerId,
@@ -1563,8 +1579,8 @@
                     // сортировка идёт по played_at, а пустое значение в
                     // Postgres при DESC оказывается впереди всего
                     played_at: battlePlayedAt(challenge)
-                }).select('id').single();
-            }).then(function(matchRes) {
+                }).select('id').single()
+            .then(function(matchRes) {
                 if (matchRes.error) {
                     console.error('Match insert error:', matchRes.error);
                     A.showToast('Error: ' + matchRes.error.message, 'error');
@@ -1577,7 +1593,8 @@
                 return A.client.from('challenges').update({
                     status: 'completed',
                     match_id: matchRes.data.id,
-                    score_draft: null
+                    score_draft: null,
+                    voting_closed: true
                 }).eq('id', challenge.id).then(function(updRes) {
                     return !updRes.error;
                 });

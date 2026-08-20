@@ -92,8 +92,10 @@
 }
 
 /* Section blocks */
+/* Тот же вертикальный ритм и та же шапка блока, что на страницах
+   категорий турниров: раздел соседний, стилистика общая */
 .bo-section {
-    padding: var(--space-xl) 7%;
+    padding: var(--space-lg) 7%;
 }
 
 .bo-section:nth-child(odd) {
@@ -102,34 +104,6 @@
 
 .bo-section:nth-child(even) {
     background: var(--bg-secondary);
-}
-
-.bo-section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-md);
-    flex-wrap: wrap;
-    gap: var(--space-sm);
-}
-
-/* Тот же размер и отступ, что у заголовков на главной: один вид на всех
-   страницах, а не свой на каждой */
-.bo-section-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0;
-}
-
-.bo-section-title span {
-    color: var(--accent);
-}
-
-.bo-section-count {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    font-weight: 500;
 }
 
 /* Card grid: uniform 2-column grid */
@@ -822,11 +796,7 @@
         font-size: 0.95rem;
     }
 
-    .bo-section-title {
-        font-size: 1.3rem;
-    }
-
-    .bo-featured {
+        .bo-featured {
         min-height: 280px;
     }
 
@@ -851,11 +821,7 @@
 }
 
 @media (max-width: 375px) {
-    .bo-section-title {
-        font-size: 1.15rem;
-    }
-
-    .bo-featured-link {
+        .bo-featured-link {
         padding: 8px 20px;
         font-size: 0.8rem;
     }

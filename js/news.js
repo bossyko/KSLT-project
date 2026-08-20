@@ -1098,8 +1098,9 @@ function renderNewsList() {
                 '<div class="news-hero-overlay news-hero-overlay-list"></div>' +
             '</div>' +
             '<div class="news-hero-content news-hero-content-list">' +
+                // Лаймовой метки «Новости» нет: она повторяла раздел,
+                // подсвеченный в меню — как на страницах турниров
                 '<div class="news-list-header">' +
-                    '<span class="news-list-label">' + labels.newsListTitle + '</span>' +
                     '<h1>' + labels.newsListSubtitle + '</h1>' +
                 '</div>' +
             '</div>';

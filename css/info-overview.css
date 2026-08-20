@@ -4,11 +4,13 @@
    ======================================== */
 
 /* Hero */
+/* Высота, кегли и отступы — те же, что у «Турниров» и категорий:
+   один сайт, шапки разделов должны читаться одинаково */
 .io-hero {
     position: relative;
-    padding: 120px 7% 48px;
+    padding: 110px 7% 64px;
     text-align: center;
-    min-height: 380px;
+    min-height: 460px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -43,34 +45,12 @@
     z-index: 2;
 }
 
-.io-hero-tagline {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: var(--space-md);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 3px;
-}
-
-.io-hero-tagline::before,
-.io-hero-tagline::after {
-    content: '';
-    width: 40px;
-    height: 2px;
-    background: var(--accent);
-    opacity: 0.5;
-}
-
 .io-hero h1 {
-    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
     font-weight: 800;
     color: var(--text-primary);
-    margin-bottom: var(--space-xs);
-    line-height: 1.15;
+    margin-bottom: 18px;
+    line-height: 1.1;
 }
 
 .io-hero h1 span {
@@ -78,11 +58,12 @@
 }
 
 .io-hero p {
-    font-size: 1.05rem;
+    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    font-weight: 600;
     color: var(--text-secondary);
-    max-width: 560px;
+    max-width: 720px;
     margin: 0 auto;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* Content container */
@@ -254,12 +235,7 @@
         font-size: 1.8rem;
     }
 
-    .io-hero-tagline::before,
-    .io-hero-tagline::after {
-        width: 24px;
-    }
-
-    .io-content {
+        .io-content {
         padding: var(--space-lg) 5%;
     }
 
@@ -290,12 +266,7 @@
         font-size: 0.9rem;
     }
 
-    .io-hero-tagline {
-        font-size: 0.75rem;
-        letter-spacing: 2px;
-    }
-
-    .io-featured {
+        .io-featured {
         min-height: 240px;
     }
 

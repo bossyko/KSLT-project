@@ -6,14 +6,16 @@
 /* ---- HERO ---- */
 /* Высота общая для всех карточек: игрок, тренер, корт, турнир. Было 340,
    380 и 420 — на соседних страницах баннер прыгал по высоте */
+/* Высота, кегли и отступы — те же, что у «Турниров» и категорий:
+   один сайт, шапки разделов должны читаться одинаково */
 .co-hero {
     position: relative;
-    min-height: 300px;
+    min-height: 460px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 110px 24px 40px;
+    padding: 110px 7% 64px;
     overflow: hidden;
 }
 
@@ -40,10 +42,11 @@
 }
 
 .co-hero-title {
-    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
     font-weight: 800;
+    line-height: 1.1;
     letter-spacing: -0.02em;
-    margin-bottom: 12px;
+    margin-bottom: 18px;
 }
 
 .co-hero-title span {
@@ -51,11 +54,12 @@
 }
 
 .co-hero-subtitle {
-    font-size: 1.1rem;
+    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    font-weight: 600;
     color: var(--text-secondary);
-    max-width: 540px;
+    max-width: 720px;
     margin: 0 auto;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* ---- CONTAINER ---- */

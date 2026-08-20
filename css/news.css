@@ -745,11 +745,13 @@ body.news-article-page .section-sponsors-compact {
 /* === NEWS LIST — HERO === */
 /* Шапка раздела «Новости» — как на странице турниров: снимок во всю ширину,
    затемнение и текст поверх него, а не под ним */
+/* Высота — та же, что у «Турниров» и остальных разделов: один сайт,
+   шапки должны читаться одинаково */
 .news-hero-list {
     position: relative;
     display: flex;
     align-items: center;
-    min-height: 340px;
+    min-height: 460px;
     padding-bottom: 0;
     overflow: hidden;
 }
@@ -785,19 +787,6 @@ body.news-article-page .section-sponsors-compact {
 
 .news-list-header {
     text-align: center;
-}
-
-.news-list-label {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--accent);
-    margin-bottom: var(--space-xs);
-    padding: 4px 12px;
-    background: rgba(204, 255, 0, 0.1);
-    border-radius: var(--radius-full);
 }
 
 .news-list-header h1 {

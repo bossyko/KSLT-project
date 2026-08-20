@@ -18,10 +18,14 @@
         losses: 'L',
         rating: 'Rating',
         whoWins: 'Who will win?',
-        forecast: 'What the numbers say', forecastHint: 'Rating, win rate, current streak and head-to-head',
+        forecast: 'Chances by the numbers', forecastHint: 'Rating, win rate, current streak and head-to-head',
         pairRecord: 'In doubles',
         vote: 'Vote',
         voteCta: 'Click to vote',
+        hintPick: 'Pick who takes it — tap a name',
+        hintVoted: 'Your vote is counted',
+        hintLogin: 'Log in and pick who takes it',
+        hintClosed: 'Voting is over — here is what the community thought',
         votes: 'votes',
         totalVotes: 'Total votes',
         votingClosed: 'Voting closed',
@@ -37,8 +41,12 @@
         date: 'Date',
         time: 'Time',
         venue: 'Location',
-        h2h: 'Head-to-Head',
-        noH2H: 'No previous meetings',
+        h2h: 'Head-to-head',
+        h2hMore: 'Show {n} more {word}', h2hWords: ['meeting', 'meetings', 'meetings'],
+        statsNote: 'Wins and losses count ranked tournaments only — battles and friendly matches are not included',
+        kickerOpen: 'Battle · voting is open',
+        kickerSoon: 'Battle · voting closed',
+        kickerDone: 'Battle · played',
         h2hRecord: 'H2H Record',
         result: 'Result',
         winner: 'Winner',
@@ -57,10 +65,14 @@
         losses: 'У',
         rating: 'Рейтинг',
         whoWins: 'Ким жеңет?',
-        forecast: 'Сандар эмне дейт', forecastHint: 'Рейтинг, жеңиш пайызы, учурдагы катар жана бетме-бет',
+        forecast: 'Сандар боюнча мүмкүнчүлүк', forecastHint: 'Рейтинг, жеңиш пайызы, учурдагы катар жана бетме-бет',
         pairRecord: 'Жуптукта',
         vote: 'Добуш',
         voteCta: 'Добуш берүү үчүн басыңыз',
+        hintPick: 'Ким жеңет? Атын басыңыз',
+        hintVoted: 'Добушуңуз эсепке алынды',
+        hintLogin: 'Кирип, ким жеңерин тандаңыз',
+        hintClosed: 'Добуш берүү аяктады — коомчулук ушинтип ойлогон',
         votes: 'добуш',
         totalVotes: 'Жалпы добуштар',
         votingClosed: 'Добуш берүү жабылды',
@@ -77,7 +89,11 @@
         time: 'Убактысы',
         venue: 'Өткөрүлө турган жер',
         h2h: 'Жолугушуу тарыхы',
-        noH2H: 'Мурунку жолугушуулар жок',
+        h2hMore: 'Дагы {n} {word}', h2hWords: ['жолугушуу', 'жолугушуу', 'жолугушуу'],
+        statsNote: 'Жеңиштер менен жеңилүүлөр рейтингдик мелдештер боюнча гана — баттлдар жана достук оюндар кирбейт',
+        kickerOpen: 'Баттл · добуш берүү ачык',
+        kickerSoon: 'Баттл · добуш берүү жабык',
+        kickerDone: 'Баттл · ойнолду',
         h2hRecord: 'H2H жазуусу',
         result: 'Натыйжа',
         winner: 'Жеңүүчү',
@@ -96,10 +112,14 @@
         losses: 'Пр',
         rating: 'Рейтинг',
         whoWins: 'Кто победит?',
-        forecast: 'Что говорят числа', forecastHint: 'Рейтинг, процент побед, текущая серия и личные встречи',
+        forecast: 'Шансы по цифрам', forecastHint: 'Рейтинг, процент побед, текущая серия и личные встречи',
         pairRecord: 'В парах',
         vote: 'Голос',
         voteCta: 'Нажмите, чтобы голосовать',
+        hintPick: 'Выберите, кто победит — нажмите на имя',
+        hintVoted: 'Ваш голос учтён',
+        hintLogin: 'Войдите и выберите, кто победит',
+        hintClosed: 'Голосование завершено — вот как думало сообщество',
         votes: 'гол.',
         totalVotes: 'Всего голосов',
         votingClosed: 'Голосование закрыто',
@@ -116,7 +136,11 @@
         time: 'Время',
         venue: 'Место проведения',
         h2h: 'История встреч',
-        noH2H: 'Нет предыдущих встреч',
+        h2hMore: 'Ещё {n} {word}', h2hWords: ['встреча', 'встречи', 'встреч'],
+        statsNote: 'Победы и поражения — только по рейтинговым турнирам. Баттлы и дружеские матчи в этот счёт не входят',
+        kickerOpen: 'Баттл · голосование открыто',
+        kickerSoon: 'Баттл · голосование закрыто',
+        kickerDone: 'Баттл · сыгран',
         h2hRecord: 'Счёт H2H',
         result: 'Результат',
         winner: 'Победитель',
@@ -258,12 +282,17 @@
             }
 
             renderHero(_battle);
+            renderDuel(_battle);
             renderVoting(_battle, _votes);
+            renderForecast(_battle);
             if (window.KSLT_PREDICTION) window.KSLT_PREDICTION.animate('.ch-forecast');
             renderDetails(_battle);
             loadH2H(client, _battle);
             loadScore(client, _battle);
-        }).catch(function() {
+        }).catch(function(e) {
+            // Раньше сюда молча проваливалась любая ошибка отрисовки, и
+            // человек видел «баттл не найден» вместо существующего баттла
+            console.error('[KSLT] battle render error:', e);
             renderNotFound();
         });
     }
@@ -295,18 +324,57 @@
         var hero = document.getElementById('challengeHero');
         if (!hero) return;
 
-        // Date/time/venue — use counter values if available, else proposed
         var date = b.proposed_date || '';
         var time = b.proposed_time || '';
         var venue = b.proposed_venue || '';
-
         var formattedDate = date ? formatDate(date) : '';
 
         var BF = window.KSLT_BATTLE_FORMAT;
-        var isPair = BF && BF.isPair(b);
         var formatLabel = BF ? BF.label(b) : '';
 
-        // Карточка стороны: у одиночного один человек, у пары двое рядом
+        // Постер больше не висит отдельным прямоугольником посреди пустоты:
+        // он стал фоном шапки, а заголовок и главное о матче лежат поверх.
+        // Нет постера — остаётся ровный тёмный фон, вёрстка не рассыпается
+        var poster = b.banner_url
+            ? '<div class="ch-hero-bg"><img src="' + esc(b.banner_url) + '" alt=""></div>'
+            : '';
+
+        var kicker = b.status === 'completed' ? L.kickerDone
+            : (b.voting_closed ? L.kickerSoon : L.kickerOpen);
+
+        var meta = [];
+        if (formattedDate || time) {
+            meta.push('<span><b>' + esc(formattedDate) + '</b>' + (formattedDate && time ? ', ' : '') + esc(time) + '</span>');
+        }
+        if (venue) meta.push('<span>' + esc(venue) + '</span>');
+        if (formatLabel) meta.push('<span>' + esc(formatLabel) + '</span>');
+
+        hero.innerHTML =
+            poster +
+            '<div class="ch-hero-overlay"></div>' +
+            '<div class="ch-hero-inner">' +
+                '<span class="ch-hero-kicker">' + kicker + '</span>' +
+                '<h1 class="ch-battle-title">' + esc(b.battle_title || 'Battle') + '</h1>' +
+                (meta.length ? '<div class="ch-hero-meta">' + meta.join('') + '</div>' : '') +
+            '</div>';
+        hero.classList.toggle('ch-hero-photo', !!b.banner_url);
+    }
+
+    /**
+     * Соперники отдельным блоком под шапкой.
+     *
+     * Раньше карточки игроков жили внутри шапки вместе с постером и
+     * заголовком — экран получался длинным, и до сути «кто с кем» человек
+     * долистывал. История встреч теперь идёт сразу под ними: она нужна
+     * ровно там, где смотришь на соперников, а не отдельной секцией внизу.
+     */
+    function renderDuel(b) {
+        var section = document.getElementById('challengeDuel');
+        if (!section) return;
+
+        var BF = window.KSLT_BATTLE_FORMAT;
+        var isPair = BF && BF.isPair(b);
+
         function sideCard(side) {
             var main = chSidePerson(b, side, false, isPair);
             if (!isPair) return '<div class="ch-player-card">' + main + '</div>';
@@ -319,27 +387,61 @@
             '</div>';
         }
 
-        hero.innerHTML =
-            '<div class="ch-hero-inner">' +
-                '<h1 class="ch-battle-title">' + esc(b.battle_title || 'Battle') + '</h1>' +
-                (formatLabel ? '<div class="ch-format">' + esc(formatLabel) + '</div>' : '') +
-                (b.banner_url ? '<div class="ch-banner"><img src="' + esc(b.banner_url) + '" alt="' + esc(b.battle_title || 'Battle') + '"></div>' : '') +
-                '<div class="ch-vs-container">' +
-                    sideCard(1) +
-                    '<div class="ch-vs-divider">' +
-                        '<span class="ch-vs-text">' + L.vs + '</span>' +
+        section.style.display = '';
+        section.innerHTML =
+            '<div class="ch-duel-grid">' +
+                '<div class="ch-players">' +
+                    '<div class="ch-vs-container">' +
+                        sideCard(1) +
+                        '<div class="ch-vs-divider"><span class="ch-vs-text">' + L.vs + '</span></div>' +
+                        sideCard(2) +
                     '</div>' +
-                    sideCard(2) +
+                    // Победы и поражения — только по рейтинговым турнирам.
+                    // Баттлы и дружеские в этот счёт не идут, и без подписи
+                    // человек считает, что данные потерялись
+                    (isPair ? '' : '<div class="ch-stats-note">' + L.statsNote + '</div>') +
                 '</div>' +
-                '<div class="ch-meta">' +
-                    (formattedDate || time ? '<span class="ch-meta-item">📅 ' + (formattedDate ? formattedDate : '') + (formattedDate && time ? ', ' : '') + (time ? esc(time) : '') + '</span>' : '') +
-                    (venue ? '<span class="ch-meta-item">📍 ' + esc(venue) + '</span>' : '') +
-                '</div>' +
+                '<div class="ch-aside" id="chAside"></div>' +
             '</div>';
+
+        moveAside(b);
     }
 
     /**
-     * Прогноз по числам — рядом с голосованием зрителей.
+     * Правая колонка: два блока, и только два.
+     *
+     * До матча и пока он идёт — голосование и числа: человек хочет видеть,
+     * за кого проголосовал и что об этом думает статистика. После матча их
+     * место занимают результат и история встреч, куда этот матч уже вошёл.
+     *
+     * Блоки не перерисовываются, а переезжают: так они сохраняют свои
+     * идентификаторы, обработчики голосования и анимацию полос.
+     */
+    function moveAside(b) {
+        var aside = document.getElementById('chAside');
+        if (!aside) return;
+
+        var done = b.status === 'completed';
+        var order = done
+            ? ['challengeScore', 'challengeH2H']
+            : ['challengeVoting', 'challengeForecast'];
+
+        order.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) aside.appendChild(el);
+        });
+
+        // Ненужные в этом состоянии прячем: до матча истории встреч нет —
+        // она интересна как итог, а не как анонс
+        ['challengeVoting', 'challengeForecast', 'challengeScore', 'challengeH2H'].forEach(function(id) {
+            if (order.indexOf(id) !== -1) return;
+            var el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+    }
+
+    /**
+     * Прогноз по числам.
      *
      * Две полосы об одном и том же вопросе, но с разных сторон: одна про то,
      * что говорит рейтинг, другая про то, что думают люди. После матча видно,
@@ -384,6 +486,25 @@
                     '<b>' + pred.p2Pct + '%</b></i>' +
             '</div>' +
         '</div>';
+    }
+
+    /**
+     * «Что говорят числа» — отдельным блоком под голосованием.
+     *
+     * Раньше он стоял над голосованием и отвечал на тот же вопрос раньше,
+     * чем человек успевал ответить сам. Сначала своё мнение, потом сухая
+     * статистика.
+     */
+    function renderForecast(b) {
+        var section = document.getElementById('challengeForecast');
+        if (!section) return;
+        var c1Name = isEn ? (b.challenger_name_en || b.challenger_name) : (isKg ? (b.challenger_name_kg || b.challenger_name) : b.challenger_name);
+        var c2Name = isEn ? (b.opponent_name_en || b.opponent_name) : (isKg ? (b.opponent_name_kg || b.opponent_name) : b.opponent_name);
+        var html = forecastHtml(b, c1Name, c2Name);
+        if (!html) { section.style.display = 'none'; return; }
+        section.style.display = '';
+        section.innerHTML = '<div class="ch-forecast-inner">' + html + '</div>';
+        if (_battle) moveAside(_battle);
     }
 
     /** Личные встречи для прогноза: собираются при загрузке страницы. */
@@ -489,8 +610,9 @@
         var btn1Selected = alreadyVoted && _myVoteSide === 1;
         var btn2Selected = alreadyVoted && _myVoteSide === 2;
 
-        var btn1Class = 'ch-vote-btn' + (btnDisabled ? ' disabled' : '') + (btn1Selected ? ' selected' : '');
-        var btn2Class = 'ch-vote-btn' + (btnDisabled ? ' disabled' : '') + (btn2Selected ? ' selected' : '');
+        // Стороны различаются цветом при наведении — тем же, что в полосе
+        var btn1Class = 'ch-vote-btn ch-vote-p1' + (btnDisabled ? ' disabled' : '') + (btn1Selected ? ' selected' : '');
+        var btn2Class = 'ch-vote-btn ch-vote-p2' + (btnDisabled ? ' disabled' : '') + (btn2Selected ? ' selected' : '');
 
         var btn1Check = btn1Selected ? '<span class="ch-vote-check">&#10003;</span> ' : '';
         var btn2Check = btn2Selected ? '<span class="ch-vote-check">&#10003;</span> ' : '';
@@ -506,8 +628,12 @@
 
         section.innerHTML =
             '<div class="ch-voting-inner">' +
-                forecastHtml(b, c1Name, c2Name) +
                 '<h2 class="ch-voting-title">' + L.whoWins + '</h2>' +
+                // Без подписи блок читался как две карточки с именами:
+                // непонятно, что по ним надо нажать и что это голосование
+                '<div class="ch-voting-hint">' + (closed
+                    ? L.hintClosed
+                    : (alreadyVoted ? L.hintVoted : (_userId ? L.hintPick : L.hintLogin))) + '</div>' +
                 '<div class="ch-voting-bar">' +
                     '<div class="ch-bar-left" style="width:' + pct1 + '%">' +
                         (total > 0 ? '<span>' + pct1 + '%</span>' : '') +
@@ -539,6 +665,8 @@
                 (!_userId && !closed ? '<div class="ch-voting-login"><a href="' + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html')) + '">' + L.loginToVote + '</a></div>' : '') +
                 '<div id="voteStatus">' + votedBadgeHtml + '</div>' +
             '</div>';
+
+        if (_battle) moveAside(_battle);
 
         // Attach vote click handlers only if can vote
         if (canVote) {
@@ -737,10 +865,22 @@
             });
     }
 
+    /** «1 встреча / 2 встречи / 5 встреч» — без склонения строка режет глаз */
+    function h2hWord(n) {
+        var w = L.h2hWords;
+        if (isEn || isKg) return n === 1 ? w[0] : w[1];
+        var n10 = n % 10, n100 = n % 100;
+        if (n10 === 1 && n100 !== 11) return w[0];
+        if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return w[1];
+        return w[2];
+    }
+
+    /** Сколько встреч показываем сразу; остальные — под ссылкой */
+    var H2H_FIRST = 3;
+
     function renderH2H(matches, b) {
         var section = document.getElementById('challengeH2H');
         if (!section) return;
-        section.style.display = '';
 
         var p1 = b.challenger_player_id;
         var p2 = b.opponent_player_id;
@@ -761,44 +901,67 @@
             _h2hMap[key] = {};
             _h2hMap[key][p1] = w1;
             _h2hMap[key][p2] = w2;
-            if (_battle && _votes) renderVoting(_battle, _votes);
+            if (_battle) renderForecast(_battle);
         }
 
-        var listHtml = '';
+        // Соперники ещё не играли — блока нет вовсе. Заголовок с надписью
+        // «встреч не было» занимает место и ничего не сообщает
         if (matches.length === 0) {
-            listHtml = '<div class="ch-h2h-empty">' + L.noH2H + '</div>';
-        } else {
-            var duelLabel = isEn ? '(Duel)' : (isKg ? '(Чакыруу)' : '(Вызов)');
-            listHtml = '<div class="ch-h2h-list">';
-            matches.forEach(function(m) {
-                var winName = m.winner_id === p1 ? c1Name : c2Name;
-                var typeTag = m.match_type === 'duel' ? ' <span style="color:var(--accent);font-size:0.8em;">' + duelLabel + '</span>' : '';
-                listHtml +=
-                    '<div class="ch-h2h-match">' +
-                        '<span class="ch-h2h-date">' + formatDate(m.created_at) + typeTag + '</span>' +
-                        '<span class="ch-h2h-score-text">' + esc(m.score || '-') + '</span>' +
-                        '<span class="ch-h2h-winner">' + esc(winName) + '</span>' +
-                    '</div>';
-            });
-            listHtml += '</div>';
+            section.innerHTML = '';
+            section.style.display = 'none';
+            return;
         }
+        // До матча историю не показываем: она интересна как итог, а не анонс
+        if (!_battle || _battle.status !== 'completed') {
+            section.style.display = 'none';
+            return;
+        }
+        section.style.display = '';
+
+        var duelLabel = isEn ? '(Duel)' : (isKg ? '(Чакыруу)' : '(Вызов)');
+
+        function rowHtml(m, hidden) {
+            var winName = m.winner_id === p1 ? c1Name : c2Name;
+            var typeTag = m.match_type === 'duel'
+                ? ' <span class="ch-h2h-duel">' + duelLabel + '</span>' : '';
+            return '<div class="ch-h2h-match' + (hidden ? ' ch-h2h-hidden' : '') + '">' +
+                '<span class="ch-h2h-date">' + formatDate(m.created_at) + typeTag + '</span>' +
+                '<span class="ch-h2h-score-text">' + esc(m.score || '-') + '</span>' +
+                '<span class="ch-h2h-winner">' + esc(winName) + '</span>' +
+            '</div>';
+        }
+
+        var listHtml = '<div class="ch-h2h-list">';
+        matches.forEach(function(m, i) { listHtml += rowHtml(m, i >= H2H_FIRST); });
+        listHtml += '</div>';
+
+        var rest = matches.length - H2H_FIRST;
+        var moreHtml = rest > 0
+            ? '<button type="button" class="ch-h2h-more" id="chH2HMore">' +
+                  L.h2hMore.replace('{n}', rest).replace('{word}', h2hWord(rest)) + '</button>'
+            : '';
 
         section.innerHTML =
-            '<div class="ch-h2h-inner">' +
-                '<h2 class="ch-h2h-title">' + L.h2h + '</h2>' +
-                '<div class="ch-h2h-summary">' +
-                    '<div class="ch-h2h-score">' +
-                        '<div class="ch-h2h-score-num">' + w1 + '</div>' +
-                        '<div class="ch-h2h-score-label">' + esc(c1Name) + '</div>' +
-                    '</div>' +
-                    '<div class="ch-h2h-score" style="color:var(--text-secondary);font-size:1.5rem;font-weight:700;align-self:center">:</div>' +
-                    '<div class="ch-h2h-score">' +
-                        '<div class="ch-h2h-score-num">' + w2 + '</div>' +
-                        '<div class="ch-h2h-score-label">' + esc(c2Name) + '</div>' +
-                    '</div>' +
+            '<div class="ch-h2h-box">' +
+                '<div class="ch-h2h-head">' +
+                    '<span class="ch-h2h-title">' + L.h2h + '</span>' +
+                    '<span class="ch-h2h-count"><b>' + w1 + '</b> : <b>' + w2 + '</b></span>' +
                 '</div>' +
                 listHtml +
+                moreHtml +
             '</div>';
+
+        if (_battle) moveAside(_battle);
+
+        var moreBtn = document.getElementById('chH2HMore');
+        if (moreBtn) {
+            moreBtn.addEventListener('click', function() {
+                section.querySelectorAll('.ch-h2h-hidden').forEach(function(el) {
+                    el.classList.remove('ch-h2h-hidden');
+                });
+                moreBtn.remove();
+            });
+        }
     }
 
     /* ========== SCORE ========== */
@@ -854,6 +1017,8 @@
                 '<div class="ch-winner-badge">' + L.winner + ': ' + esc(winnerName) + '</div>' +
                 (total > 0 ? '<div class="ch-prediction-result"><strong>' + pctCorrect + '%</strong> ' + L.predictionResult + '</div>' : '') +
             '</div>';
+
+        if (_battle) moveAside(_battle);
     }
 
     /* ========== UTILS ========== */
@@ -866,7 +1031,10 @@
 
     function formatDate(dateStr) {
         if (!dateStr) return '';
-        var d = new Date(dateStr);
+        // «2026-08-21» без времени читается как полночь UTC, и при часовом
+        // поясе западнее нуля дата съезжает на день назад. Полные метки
+        // времени оставляем как есть
+        var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? dateStr + 'T00:00:00' : dateStr);
         if (isNaN(d.getTime())) return dateStr;
         var day = ('0' + d.getDate()).slice(-2);
         var month = ('0' + (d.getMonth() + 1)).slice(-2);

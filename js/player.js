@@ -306,7 +306,10 @@
 
     function formatBadgeDate(dateStr) {
         if (!dateStr) return '';
-        var d = new Date(dateStr);
+        // «2026-08-21» без времени читается как полночь UTC, и при часовом
+        // поясе западнее нуля дата съезжает на день назад. Полные метки
+        // времени оставляем как есть
+        var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? dateStr + 'T00:00:00' : dateStr);
         var dd = d.getDate();
         var mm = d.getMonth() + 1;
         var yy = d.getFullYear();
@@ -371,7 +374,10 @@
     // ---- Score helpers ----
     function formatMatchDate(dateStr) {
         if (!dateStr) return '\u2014';
-        var d = new Date(dateStr);
+        // «2026-08-21» без времени читается как полночь UTC, и при часовом
+        // поясе западнее нуля дата съезжает на день назад. Полные метки
+        // времени оставляем как есть
+        var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? dateStr + 'T00:00:00' : dateStr);
         var months = isEn
             ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
             : ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];

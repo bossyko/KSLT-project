@@ -46,6 +46,21 @@ function isDoublesTournamentPublic(t) {
     return t && (t.format === 'doubles' || t.format === 'mixed_doubles');
 }
 
+/**
+ * Идут ли за турнир рейтинговые очки.
+ *
+ * Не идут за дружеские выходного дня и за все парные — и обычные, и
+ * смешанные: рейтинг у КСЛТ личный, а в паре не разберёшь, чья заслуга.
+ * Показывать таблицу очков там нечестно: она всегда пустая, а человек
+ * думает, что данные потерялись.
+ */
+function isRatingTournament(t) {
+    if (!t) return false;
+    if (t.category_id === 'friendly') return false;
+    if (t.format === 'doubles' || t.format === 'mixed_doubles') return false;
+    return true;
+}
+
 function buildPublicRegsMap(registrations) {
     var map = {};
     registrations.forEach(function(r) {
@@ -1222,27 +1237,39 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
     var L = isEn ? {
         format: 'Format', participants: 'Participants', pairs: 'Pairs', prizeFund: 'Prize Fund',
+        fee: 'Entry fee', feePair: 'Entry fee, per pair', som: 'som',
+        feeYouMember: 'You are a KSLT member — your fee is {sum} {cur}',
+        feeYouGuest: 'Your fee is {sum} {cur}. KSLT membership brings it down to {member} {cur}',
         description: 'About Tournament', scheduleSoon: 'Schedule will be published soon',
         noParticipants: 'Participants will be announced soon',
         noResults: 'Points will be awarded after the tournament ends',
+        noResultsPlain: 'Results will appear after the tournament ends',
         countdownTitle: 'TOURNAMENT STARTS IN',
         countdownDays: 'days', countdownHours: 'hours', countdownMin: 'min', countdownSec: 'sec',
         tournamentLive: 'Tournament in progress',
         regClosingSoon: 'Registration closes in less than 24 hours!'
     } : (isKg ? {
         format: 'Формат', participants: 'Катышуучулар', pairs: 'Жуптар', prizeFund: 'Сыйлык фонду',
+        fee: 'Катышуу акысы', feePair: 'Катышуу акысы, жуптан', som: 'сом',
+        feeYouMember: 'Сиз КСЛТ мүчөсүсүз — сиздин акыңыз {sum} {cur}',
+        feeYouGuest: 'Сиздин акыңыз {sum} {cur}. КСЛТ мүчөлүгү менен {member} {cur} болот',
         description: 'Мелдеш жөнүндө', scheduleSoon: 'Тартип кийинчерээк жарыяланат',
         noParticipants: 'Катышуучулар кийинчерээк жарыяланат',
         noResults: 'Жыйынтыктар мелдеш аяктагандан кийин жеткиликтүү болот',
+        noResultsPlain: 'Жыйынтыктар мелдеш аяктагандан кийин чыгат',
         countdownTitle: 'МЕЛДЕШ БАШТАЛГАНГА',
         countdownDays: 'күн', countdownHours: 'саат', countdownMin: 'мүн', countdownSec: 'сек',
         tournamentLive: 'Мелдеш жүрүп жатат',
         regClosingSoon: 'Каттоо 24 сааттан кийин жабылат!'
     } : {
         format: 'Формат', participants: 'Участники', pairs: 'Пар', prizeFund: 'Призовой фонд',
+        fee: 'Взнос', feePair: 'Взнос, с пары', som: 'сом',
+        feeYouMember: 'Вы член КСЛТ — ваш взнос {sum} {cur}',
+        feeYouGuest: 'Ваш взнос {sum} {cur}. С членством КСЛТ — {member} {cur}',
         description: 'О турнире', scheduleSoon: 'Расписание будет опубликовано позже',
         noParticipants: 'Участники будут объявлены позже',
         noResults: 'Очки будут начислены после завершения турнира',
+        noResultsPlain: 'Результаты появятся после завершения турнира',
         countdownTitle: 'ТУРНИР НАЧИНАЕТСЯ ЧЕРЕЗ',
         countdownDays: 'дней', countdownHours: 'часов', countdownMin: 'минут', countdownSec: 'секунд',
         tournamentLive: 'Турнир идёт',
@@ -1296,21 +1323,81 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         '<span class="hero-stat-value">' + ((t.max_participants || 0) - (t.reserved_spots || 0) || t.max_participants || '—') + '</span>' +
                         '<span class="hero-stat-label">' + ((t.format === 'doubles' || t.format === 'mixed_doubles') ? L.pairs : L.participants) + '</span>' +
                     '</div>' +
-                    '<div class="hero-stat">' +
-                        '<span class="hero-stat-value">' + (t.prize_fund || '—') + '</span>' +
+                    // Призовой фонд без суммы раньше показывался прочерком —
+                    // будто данные потерялись. Нет суммы — нет и блока
+                    (t.prize_fund ? '<div class="hero-stat">' +
+                        '<span class="hero-stat-value">' + t.prize_fund + '</span>' +
                         '<span class="hero-stat-label">' + L.prizeFund + '</span>' +
-                    '</div>' +
+                    '</div>' : '') +
+                    feeStat(t) +
                     '<div class="hero-stat">' +
                         '<span class="hero-stat-value">' + (formatLabels[t.format] || t.format || '—') + '</span>' +
                         '<span class="hero-stat-label">' + L.format + '</span>' +
                     '</div>' +
                 '</div>' +
+                '<div class="td-fee-note" id="tdFeeNote" hidden></div>' +
                 '<div id="tdCountdown"></div>' +
             '</div>';
     }
 
+    /** «1500» → «1 500»: пробел между тысячами, иначе сумма читается с трудом */
+    function money(n) {
+        return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+    }
+
+    /**
+     * Взнос в шапке турнира. Две суммы, если заданы обе; одна, если задана
+     * одна; блока нет, если не задано ничего — про деньги молчим, как и про
+     * призовой фонд, которого нет.
+     */
+    function feeStat(t) {
+        var m = t.fee_member != null ? Number(t.fee_member) : null;
+        var g = t.fee_guest != null ? Number(t.fee_guest) : null;
+        if (m == null && g == null) return '';
+        var pair = (t.format === 'doubles' || t.format === 'mixed_doubles');
+        var value = (m != null && g != null && m !== g)
+            ? money(m) + ' / ' + money(g)
+            : money(m != null ? m : g);
+        return '<div class="hero-stat">' +
+            '<span class="hero-stat-value">' + value + '</span>' +
+            '<span class="hero-stat-label">' + (pair ? L.feePair : L.fee) + '</span>' +
+        '</div>';
+    }
+
+    /**
+     * Своя цена под шапкой.
+     *
+     * Две суммы в шапке — это прайс, а человеку важно, сколько платить ему.
+     * Членство проверяем по действующей записи, а не по роли: роль «игрок»
+     * есть и у тех, кто взнос не платил.
+     */
+    async function renderFeeNote(t) {
+        var box = document.getElementById('tdFeeNote');
+        if (!box) return;
+        var m = t.fee_member != null ? Number(t.fee_member) : null;
+        var g = t.fee_guest != null ? Number(t.fee_guest) : null;
+        if (m == null || g == null || m === g) return;
+        if (typeof window.checkMembership !== 'function') return;
+
+        var info = null;
+        try {
+            info = await window.checkMembership();
+        } catch (e) { return; }
+        // Не вошёл — показывать «ваша цена» не за что, в шапке уже прайс
+        if (!info || !window.ksltUser) return;
+
+        var tpl = info.active ? L.feeYouMember : L.feeYouGuest;
+        box.textContent = tpl
+            .replace('{sum}', money(info.active ? m : g))
+            .replace('{member}', money(m))
+            .replace(/\{cur\}/g, L.som);
+        box.classList.toggle('td-fee-note-member', !!info.active);
+        box.hidden = false;
+    }
+
     // ---- Countdown Timer ----
     initCountdown(t);
+    renderFeeNote(t);
 
     // ---- Description section ----
     var descContent = document.getElementById('descriptionContent');
@@ -2114,7 +2201,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     resultsPodium.innerHTML = resHtml;
                 } else {
-                    resultsPodium.innerHTML = '<div class="td-no-results"><p>' + L.noResults + '</p></div>';
+                    resultsPodium.innerHTML = '<div class="td-no-results"><p>' + (isRatingTournament(t) ? L.noResults : L.noResultsPlain) + '</p></div>';
                 }
             } else if (t.bracket_type === 'group_league') {
                 // GL results: find PL final (highest round_number among PL- matches)
@@ -2140,8 +2227,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     resHtml += '</div>';
 
-                    // Full results table from rating_history
-                    supabaseClient.from('rating_history')
+                    // Таблица очков — только для рейтинговых турниров
+                    if (isRatingTournament(t)) supabaseClient.from('rating_history')
                         .select('player_id, points_earned')
                         .eq('tournament_id', t.id)
                         .order('points_earned', { ascending: false })
@@ -2166,7 +2253,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     resultsPodium.innerHTML = resHtml;
                 } else {
-                    resultsPodium.innerHTML = '<div class="td-no-results"><p>' + L.noResults + '</p></div>';
+                    resultsPodium.innerHTML = '<div class="td-no-results"><p>' + (isRatingTournament(t) ? L.noResults : L.noResultsPlain) + '</p></div>';
                 }
             } else {
                 // SE / RR results
@@ -2202,11 +2289,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     resHtml += '</div>';
                     resultsPodium.innerHTML = resHtml;
                 } else {
-                    resultsPodium.innerHTML = '<div class="td-no-results"><p>' + L.noResults + '</p></div>';
+                    resultsPodium.innerHTML = '<div class="td-no-results"><p>' + (isRatingTournament(t) ? L.noResults : L.noResultsPlain) + '</p></div>';
                 }
             }
         } else {
-            resultsPodium.innerHTML = '<div class="td-no-results"><p>' + L.noResults + '</p></div>';
+            resultsPodium.innerHTML = '<div class="td-no-results"><p>' + (isRatingTournament(t) ? L.noResults : L.noResultsPlain) + '</p></div>';
         }
     }
 

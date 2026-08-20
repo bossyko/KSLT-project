@@ -26,8 +26,13 @@
         heroTitle: 'Battles',
         heroDesc: 'The challenge is out — the court settles the rest.',
         heroBadge: 'BATTLES',
-        activeTitle: 'Upcoming Battles',
-        completedTitle: 'Completed Battles',
+        liveTitle: 'Playing now',
+        subInPlay: 'in play — the score is not saved yet',
+        activeTitle: 'Upcoming battles',
+        completedTitle: 'Completed battles',
+        battleOne: 'battle', battleFew: 'battles', battleMany: 'battles',
+        subAhead: 'ahead', subNearest: 'nearest', subInArchive: 'in the archive',
+        subNoActive: 'No battles announced yet', subNoDone: 'Nothing played yet',
         vs: 'VS',
         votes: 'votes',
         details: 'Details',
@@ -50,8 +55,13 @@
         heroTitle: 'Баттлдар',
         heroDesc: 'Чакырык ташталды — калганын корт чечет.',
         heroBadge: 'БАТТЛДАР',
+        liveTitle: 'Азыр жүрүп жатат',
+        subInPlay: 'жүрүп жатат — эсеби сакталган жок',
         activeTitle: 'Алдыдагы баттлдар',
         completedTitle: 'Аяктаган баттлдар',
+        battleOne: 'баттл', battleFew: 'баттл', battleMany: 'баттл',
+        subAhead: 'алдыда', subNearest: 'эң жакыны', subInArchive: 'архивде',
+        subNoActive: 'Азырынча жарыяланган баттл жок', subNoDone: 'Азырынча оюн болгон жок',
         vs: 'VS',
         votes: 'добуш',
         details: 'Толугураак',
@@ -74,8 +84,13 @@
         heroTitle: 'Баттлы',
         heroDesc: 'Вызов брошен — остальное решает корт.',
         heroBadge: 'БАТТЛЫ',
+        liveTitle: 'Идут сейчас',
+        subInPlay: 'в игре — счёт ещё не сохранён',
         activeTitle: 'Предстоящие баттлы',
         completedTitle: 'Завершённые баттлы',
+        battleOne: 'баттл', battleFew: 'баттла', battleMany: 'баттлов',
+        subAhead: 'впереди', subNearest: 'ближайший', subInArchive: 'в архиве',
+        subNoActive: 'Пока ни одного объявленного', subNoDone: 'Пока ничего не сыграно',
         vs: 'VS',
         votes: 'гол.',
         details: 'Подробнее',
@@ -254,22 +269,19 @@
             '</div>';
     }
 
-    // Battle is completed if: status=completed, voting manually closed, or match date+time has passed
+    /**
+     * Состояние баттла считает общий модуль battle-format.js — одно правило
+     * на главную, страницу баттлов и карточки. Здесь была своя копия, и она
+     * расходилась с главной: та смотрела только на дату, эта — на дату со
+     * временем.
+     */
+    function battleState(b) {
+        var BF = window.KSLT_BATTLE_FORMAT;
+        return BF && BF.state ? BF.state(b) : (b.status === 'completed' ? 'done' : 'upcoming');
+    }
+
     function isBattleCompleted(b) {
-        if (b.status === 'completed') return true;
-        if (b.voting_closed) return true;
-        var matchDate = b.proposed_date || '';
-        var matchTime = b.proposed_time || '';
-        if (matchDate && matchTime) {
-            var dt = new Date(matchDate + 'T' + matchTime + ':00+06:00');
-            if (!isNaN(dt.getTime()) && Date.now() >= dt.getTime()) return true;
-        }
-        // If only date (no time), check if the date has passed (end of day Bishkek)
-        if (matchDate && !matchTime) {
-            var dt2 = new Date(matchDate + 'T23:59:59+06:00');
-            if (!isNaN(dt2.getTime()) && Date.now() >= dt2.getTime()) return true;
-        }
-        return false;
+        return battleState(b) === 'done';
     }
 
     async function loadBattles() {
@@ -362,11 +374,80 @@
         }
     }
 
+    /** «1 баттл / 2 баттла / 5 баттлов» — без склонения строка режет глаз */
+    function plural(n, one, few, many) {
+        if (isEn || isKg) return n === 1 ? one : few;
+        var n10 = n % 10, n100 = n % 100;
+        if (n10 === 1 && n100 !== 11) return one;
+        if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return few;
+        return many;
+    }
+
+    /** Подпись под заголовком блока «Идут сейчас» */
+    function liveSub(list) {
+        var word = plural(list.length, L.battleOne, L.battleFew, L.battleMany);
+        return list.length + ' ' + word + ' ' + L.subInPlay;
+    }
+
+    /** Подпись под заголовком: та же строка-пояснение, что на турнирах */
+    function activeSub(list) {
+        if (!list.length) return L.subNoActive;
+        var word = plural(list.length, L.battleOne, L.battleFew, L.battleMany);
+        var line = list.length + ' ' + word + ' ' + L.subAhead;
+        var nearest = list[0] && list[0].proposed_date;
+        if (nearest) line += ' \u00b7 ' + L.subNearest + ' ' + humanDate(nearest);
+        return line;
+    }
+
+    function doneSub(list) {
+        if (!list.length) return L.subNoDone;
+        var word = plural(list.length, L.battleOne, L.battleFew, L.battleMany);
+        return list.length + ' ' + word + ' ' + L.subInArchive;
+    }
+
+    function humanDate(iso) {
+        var months = isEn
+            ? ['January','February','March','April','May','June','July','August','September','October','November','December']
+            : (isKg
+                ? ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь']
+                : ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']);
+        var d = new Date(iso + 'T00:00:00');
+        if (isNaN(d.getTime())) return '';
+        return isEn ? (months[d.getMonth()] + ' ' + d.getDate()) : (d.getDate() + ' ' + months[d.getMonth()]);
+    }
+
     function renderSections(active, completed, only) {
         var container = document.getElementById('battlesContent');
         if (!container) return;
 
         var html = '';
+
+        // Идут сейчас: время матча наступило, а счёт ещё не сохранён.
+        // Раньше такой баттл проваливался между разделами и пропадал со
+        // страницы совсем — до тех пор, пока судья не занесёт результат.
+        // Блока нет, когда никто не играет: пустой он читается как поломка
+        var live = active.filter(function(b) { return battleState(b) === 'live'; });
+        var soon = active.filter(function(b) { return battleState(b) !== 'live'; });
+
+        if (live.length && only !== 'past') {
+            html += '<div class="bo-section">';
+            html += '<div class="trn-block-head">';
+            html += '<h2 class="trn-block-title"><span class="trn-live-dot"></span>' + L.liveTitle + '</h2>';
+            html += '<div class="trn-block-sub">' + liveSub(live) + '</div>';
+            html += '</div>';
+            if (live.length === 1) {
+                html += renderFeaturedBattle(live[0], false);
+            } else {
+                html += '<div class="to-card-grid">';
+                html += renderFeaturedBattle(live[0], false);
+                html += '<div class="to-side-stack">';
+                for (var k = 1; k < live.length; k++) html += renderStripBattle(live[k], false);
+                html += '</div></div>';
+            }
+            html += '</div>';
+        }
+
+        active = soon;
 
         // Предстоящие: ближайший крупной карточкой, остальные полосами рядом.
         // Одно правило на весь сайт — актуальное крупно, история строкой.
@@ -376,9 +457,9 @@
         // «Завершённые» выглядит как ошибка, а не как ответ на запрос
         if (only !== 'past') {
         html += '<div class="bo-section">';
-        html += '<div class="bo-section-header">';
-        html += '<h2 class="bo-section-title"><span>' + L.activeTitle + '</span></h2>';
-        if (active.length) html += '<span class="bo-section-count">' + active.length + '</span>';
+        html += '<div class="trn-block-head">';
+        html += '<h2 class="trn-block-title">' + L.activeTitle + '</h2>';
+        html += '<div class="trn-block-sub">' + activeSub(active) + '</div>';
         html += '</div>';
 
         if (!active.length) {
@@ -402,14 +483,9 @@
         // забирала из базы все разом — на полутора сотнях это заметно
         if (only !== 'upcoming') {
         html += '<div class="bo-section">';
-        html += '<div class="bo-section-header">';
-        html += '<h2 class="bo-section-title"><span>' + L.completedTitle + '</span></h2>';
-        if (completed.length) {
-            html += '<span class="bo-section-count">' +
-                (completed.length > DONE_FIRST
-                    ? L.shownOf.replace('{n}', Math.min(DONE_FIRST, completed.length)).replace('{total}', completed.length)
-                    : completed.length) + '</span>';
-        }
+        html += '<div class="trn-block-head">';
+        html += '<h2 class="trn-block-title">' + L.completedTitle + '</h2>';
+        html += '<div class="trn-block-sub">' + doneSub(completed) + '</div>';
         html += '</div>';
 
         if (!completed.length) {
@@ -824,9 +900,10 @@
             } else {
                 btn.textContent = L.showMore.replace('{n}', Math.min(DONE_STEP, left));
             }
-            var counter = document.querySelectorAll('.bo-section-count');
-            if (counter.length > 1) {
-                counter[counter.length - 1].textContent =
+            // Подпись под заголовком архива: сколько показано из скольких
+            var subs = document.querySelectorAll('.trn-block-sub');
+            if (subs.length) {
+                subs[subs.length - 1].textContent =
                     L.shownOf.replace('{n}', _doneShown).replace('{total}', _doneList.length);
             }
         });

@@ -59,7 +59,10 @@
 
     function formatDate(dateStr) {
         if (!dateStr) return '';
-        var d = new Date(dateStr);
+        // «2026-08-21» без времени браузер читает как полночь UTC, и при
+        // часовом поясе западнее нуля дата съезжала на день назад: матч
+        // 21 августа показывался двадцатым. Читаем как местную дату
+        var d = new Date(dateStr + 'T00:00:00');
         if (isNaN(d.getTime())) return dateStr;
         return ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth() + 1)).slice(-2);
     }
@@ -476,6 +479,17 @@
                 e.preventDefault();
                 e.stopPropagation();
                 showMapModal(el.dataset.venue);
+            });
+        });
+
+        // Карточка кликабельна целиком, как на страницах турниров. Раньше
+        // работала только надпись «Подробнее», и человек тыкал в постер,
+        // в имена, в счёт — и ничего не происходило
+        container.querySelectorAll('.bc-card[data-battle]').forEach(function(card) {
+            card.addEventListener('click', function(e) {
+                // Голосование, место проведения и сама ссылка — со своим делом
+                if (e.target.closest('.bc-vote-btn, .bc-meta-venue, a')) return;
+                window.location.href = detailUrl(card.dataset.battle);
             });
         });
     }

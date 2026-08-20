@@ -1266,15 +1266,39 @@ input[type="date"]::-webkit-datetime-edit {
     justify-content: center;
 }
 
+/* Незачёркнутый чекбокс рисовался системным — на тёмной админке он белый
+   и выпадает из ряда. Собираем свой, как у остальных галочек */
 .ad-ct-partner-wrap input[type="checkbox"] {
-    accent-color: var(--accent);
+    appearance: none;
+    -webkit-appearance: none;
     width: 20px;
     height: 20px;
     cursor: pointer;
-    border: 2px solid var(--border-subtle);
+    border: 2px solid rgba(255, 255, 255, 0.5);
     border-radius: 4px;
-    appearance: auto;
-    -webkit-appearance: auto;
+    background: transparent;
+    position: relative;
+    transition: var(--transition-fast);
+}
+
+.ad-ct-partner-wrap input[type="checkbox"]:hover {
+    border-color: var(--accent);
+}
+
+.ad-ct-partner-wrap input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.ad-ct-partner-wrap input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 13px;
+    color: #000;
+    font-weight: 700;
 }
 
 /* Phone rows */
@@ -2162,6 +2186,29 @@ select.ad-field-input {
 .ad-badge-accent {
     background: rgba(204,255,0,0.2);
     color: var(--accent);
+}
+
+/* Цветные метки состояния. В разметке они были давно, а в стилях —
+   никогда: все висели одинаково серыми, и «завершён» не отличался от
+   «голосование закрыто» */
+.ad-badge-green {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+}
+
+.ad-badge-yellow {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.ad-badge-blue {
+    background: rgba(96, 165, 250, 0.15);
+    color: #93c5fd;
+}
+
+.ad-badge-red {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
 }
 
 /* Status badges for registrations */

@@ -235,7 +235,8 @@
             '<div class="pt-hero-bg"><img src="' + heroImg + '" alt=""></div>' +
             '<div class="pt-hero-overlay"></div>' +
             '<div class="pt-hero-content">' +
-                '<div class="pt-hero-tagline">' + L.heroTagline + '</div>' +
+                // Метки над заголовком нет: она повторяла раздел, который
+                // и так подсвечен в меню — как на страницах турниров
                 '<h1>' + L.heroTitle + '</h1>' +
                 '<p>' + L.heroDesc + '</p>' +
             '</div>';

@@ -240,7 +240,9 @@ AS $$
 DECLARE
     ids  text[];
     tid  text;
-    mid  integer;
+    -- matches.id — UUID. Пока здесь стояло integer, присваивание mid := NEW.id
+    -- падало с 22P02, и не сохранялся ни один счёт: ни баттла, ни турнира
+    mid  uuid;
 BEGIN
     IF TG_OP = 'DELETE' THEN
         ids := ARRAY(

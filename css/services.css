@@ -4,11 +4,13 @@
    ======================================== */
 
 /* Hero */
+/* Высота, кегли и отступы — те же, что у «Турниров» и категорий:
+   один сайт, шапки разделов должны читаться одинаково */
 .sv-hero {
     position: relative;
-    padding: 120px 7% 48px;
+    padding: 110px 7% 64px;
     text-align: center;
-    min-height: 380px;
+    min-height: 460px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -43,35 +45,12 @@
     z-index: 2;
 }
 
-/* Hero accent line + tagline */
-.sv-hero-tagline {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: var(--space-md);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 3px;
-}
-
-.sv-hero-tagline::before,
-.sv-hero-tagline::after {
-    content: '';
-    width: 40px;
-    height: 2px;
-    background: var(--accent);
-    opacity: 0.5;
-}
-
 .sv-hero h1 {
-    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
     font-weight: 800;
     color: var(--text-primary);
-    margin-bottom: var(--space-xs);
-    line-height: 1.15;
+    margin-bottom: 18px;
+    line-height: 1.1;
 }
 
 .sv-hero h1 span {
@@ -79,11 +58,12 @@
 }
 
 .sv-hero p {
-    font-size: 1.05rem;
+    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    font-weight: 600;
     color: var(--text-secondary);
-    max-width: 560px;
+    max-width: 720px;
     margin: 0 auto;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* Two columns layout */
@@ -596,12 +576,7 @@
         font-size: 1.8rem;
     }
 
-    .sv-hero-tagline::before,
-    .sv-hero-tagline::after {
-        width: 24px;
-    }
-
-    .sv-columns {
+        .sv-columns {
         grid-template-columns: 1fr;
         padding: var(--space-lg) 5%;
     }
@@ -651,12 +626,7 @@
         font-size: 0.9rem;
     }
 
-    .sv-hero-tagline {
-        font-size: 0.75rem;
-        letter-spacing: 2px;
-    }
-
-    .sv-column-title {
+        .sv-column-title {
         font-size: 1.3rem;
     }
 

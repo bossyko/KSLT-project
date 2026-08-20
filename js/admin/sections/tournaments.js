@@ -795,6 +795,21 @@
                         '<div class="ad-field-input ad-trn-status-field" id="adTrnStatusBadge" data-status-class="' + trnStatusBadgeClass + '">' + trnStatusBadgeLabel + '</div>' +
                     '</div>' +
                 '</div>' +
+                // Взносы. Две суммы: членам КСЛТ дешевле. Не заполнил —
+                // на сайте про деньги не пишем вовсе, как и с призовым фондом.
+                // Для парных и смешанных сумма считается с пары
+                '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnFeeMember + '</label>' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnFeeMember" placeholder="0" value="' + (item ? (item.fee_member != null ? item.fee_member : '') : '') + '">' +
+                        '<div class="ad-field-hint" id="adTrnFeeHintMember"></div>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnFeeGuest + '</label>' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnFeeGuest" placeholder="0" value="' + (item ? (item.fee_guest != null ? item.fee_guest : '') : '') + '">' +
+                        '<div class="ad-field-hint" id="adTrnFeeHintGuest"></div>' +
+                    '</div>' +
+                '</div>' +
                 // Meta row 3: Reg start / Reg end / Tournament start / Tournament end
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">' +
                     '<div class="ad-field">' +
@@ -1037,6 +1052,9 @@
             var maxPartLabel = document.getElementById('adTrnMaxPartLabel');
             if (maxPartLabel) maxPartLabel.textContent = (fmt === 'doubles' || fmt === 'mixed_doubles') ? L.trnMaxPairs : L.trnMaxParticipants;
 
+            // Взнос за парный турнир берут с пары, за одиночный — с игрока
+            syncFeeHints();
+
             var genderField = document.getElementById('adTrnGender');
             var genderWrap = genderField ? genderField.closest('.ad-field') : null;
             if (genderWrap) {
@@ -1225,6 +1243,27 @@
         }
     }
 
+    /** Взнос: пусто — значит не задан, а не ноль. Ноль тоже смысл имеет: бесплатно */
+    function feeValue(id) {
+        var el = document.getElementById(id);
+        if (!el) return null;
+        var raw = el.value.replace(/[^\d.]/g, '').trim();
+        if (!raw) return null;
+        var num = parseFloat(raw);
+        return isNaN(num) ? null : num;
+    }
+
+    /** Подпись под полями взноса: с пары или с игрока — зависит от формата */
+    function syncFeeHints() {
+        var fmt = document.getElementById('adTrnFormat');
+        var pair = fmt && (fmt.value === 'doubles' || fmt.value === 'mixed_doubles');
+        var hint = pair ? L.trnFeeHintPair : L.trnFeeHintPlayer;
+        ['adTrnFeeHintMember', 'adTrnFeeHintGuest'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = hint;
+        });
+    }
+
     // ---- Collect Tournament Form Data ----
     function collectTrnFormData() {
         var maxPart = document.getElementById('adTrnMaxPart').value;
@@ -1249,6 +1288,8 @@
             max_participants: maxPart ? parseInt(maxPart, 10) : null,
             reserved_spots: parseInt(document.getElementById('adTrnReservedSpots').value, 10) || 0,
             prize_fund: document.getElementById('adTrnPrize').value.trim() || null,
+            fee_member: feeValue('adTrnFeeMember'),
+            fee_guest: feeValue('adTrnFeeGuest'),
             image: trnImageUrl || null,
             format: document.getElementById('adTrnFormat').value || 'singles',
             level_id: document.getElementById('adTrnLevel').value || null,

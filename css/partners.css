@@ -7,11 +7,13 @@
 /* Поиск игрока — рабочий экран, а не витрина: баннер занимал половину
    высоты окна, и результаты поиска начинались за нижним краем. Высота
    приведена к общей для карточек — 300 пикселей */
+/* Высота, кегли и отступы — те же, что у «Турниров» и категорий:
+   один сайт, шапки разделов должны читаться одинаково */
 .pt-hero {
     position: relative;
-    padding: 92px 7% 24px;
+    padding: 110px 7% 64px;
     text-align: center;
-    min-height: 190px;
+    min-height: 460px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -46,34 +48,12 @@
     z-index: 2;
 }
 
-.pt-hero-tagline {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: var(--space-md);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 3px;
-}
-
-.pt-hero-tagline::before,
-.pt-hero-tagline::after {
-    content: '';
-    width: 40px;
-    height: 2px;
-    background: var(--accent);
-    opacity: 0.5;
-}
-
 .pt-hero h1 {
-    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
     font-weight: 800;
     color: var(--text-primary);
-    margin-bottom: var(--space-xs);
-    line-height: 1.15;
+    margin-bottom: 18px;
+    line-height: 1.1;
 }
 
 .pt-hero h1 span {
@@ -81,9 +61,10 @@
 }
 
 .pt-hero p {
-    font-size: 1.05rem;
+    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    font-weight: 600;
     color: var(--text-secondary);
-    max-width: 560px;
+    max-width: 720px;
     margin: 0 auto;
     line-height: 1.6;
 }
@@ -884,12 +865,7 @@
         font-size: 1.8rem;
     }
 
-    .pt-hero-tagline::before,
-    .pt-hero-tagline::after {
-        width: 24px;
-    }
-
-    .pt-filters {
+        .pt-filters {
         padding: 12px 5%;
     }
 
@@ -916,12 +892,7 @@
         font-size: 0.9rem;
     }
 
-    .pt-hero-tagline {
-        font-size: 0.75rem;
-        letter-spacing: 2px;
-    }
-
-    .pt-filters {
+        .pt-filters {
         gap: 12px;
         padding: 10px 16px;
     }

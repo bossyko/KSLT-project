@@ -281,6 +281,8 @@
                     _gender: _gender,
                     _rawStatus: effectiveStatus,
                     _rawFormat: t.format || '',
+                    feeMember: t.fee_member != null ? Number(t.fee_member) : null,
+                    feeGuest: t.fee_guest != null ? Number(t.fee_guest) : null,
                     regLine: regLine,
                     image: t.image_url || t.image || '',
                     _startTime: t.start_time || null,

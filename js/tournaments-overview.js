@@ -84,7 +84,9 @@
         men: 'Men',
         women: 'Women',
         gender: 'Gender',
-        noRating: 'Unranked'
+        noRating: 'Unranked',
+        fee: 'Fee', feeMember: 'KSLT members', feeGuest: 'non-members',
+        perPair: 'per pair', som: 'som'
     } : (isKg ? {
         heroTitle: 'Мелдештер',
         heroSub: 'KSLT мелдештеринин бардык категориялары',
@@ -101,7 +103,9 @@
         men: 'Эрк',
         women: 'Аял',
         gender: 'Жынысы',
-        noRating: 'Рейтингсиз'
+        noRating: 'Рейтингсиз',
+        fee: 'Взнос', feeMember: 'КСЛТ мүчөлөрүнө', feeGuest: 'калгандарга',
+        perPair: 'жуптан', som: 'сом'
     } : {
         heroTitle: 'Турниры',
         heroSub: 'Все категории турниров KSLT',
@@ -118,7 +122,9 @@
         men: 'Муж',
         women: 'Жен',
         gender: 'Пол',
-        noRating: 'Без рейтинга'
+        noRating: 'Без рейтинга',
+        fee: 'Взнос', feeMember: 'членам КСЛТ', feeGuest: 'остальным',
+        perPair: 'с пары', som: 'сом'
     });
 
     var SL = isEn ? {
@@ -438,6 +444,8 @@
                 _rawFormat: t.format || '',
                 participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
                 prize: t.prize_fund || '',
+                feeMember: t.fee_member != null ? Number(t.fee_member) : null,
+                feeGuest: t.fee_guest != null ? Number(t.fee_guest) : null,
                 status: cardStatus,
                 _rawStatus: effectiveStatus,
                 statusText: statusLabels[effectiveStatus] || statusLabels.upcoming,
@@ -574,6 +582,30 @@
         }
     }
 
+    /** «1500» → «1 500»: пробел между тысячами, иначе сумма читается с трудом */
+    function money(n) {
+        return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+    }
+
+    /**
+     * Взнос на карточке. Две суммы, если заведены обе; одна, если задана
+     * только она; ничего, если не задано ничего — про деньги молчим, как и
+     * про призовой фонд, которого нет.
+     */
+    function feeDetail(t) {
+        var m = t.feeMember, g = t.feeGuest;
+        if (m == null && g == null) return '';
+        var value = (m != null && g != null && m !== g)
+            ? money(m) + ' / ' + money(g)
+            : money(m != null ? m : g);
+        var pair = (t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles') ? ' (' + L.perPair + ')' : '';
+        var title = (m != null && g != null && m !== g)
+            ? money(m) + ' ' + L.som + ' — ' + L.feeMember + ', ' + money(g) + ' ' + L.som + ' — ' + L.feeGuest + pair
+            : money(m != null ? m : g) + ' ' + L.som + pair;
+        return '<div class="to-featured-detail" title="' + title + '"><span class="to-label">' + L.fee + '</span>' +
+            '<span class="to-value to-fee">' + value + '</span></div>';
+    }
+
     function renderFeatured(t, bgImage, catKey) {
         var linkHref = tournamentPage + '?id=' + t.id;
 
@@ -598,6 +630,7 @@
                     (t.format ? '<div class="to-featured-detail"><span class="to-label">' + L.format + '</span><span class="to-value">' + t.format + '</span></div>' : '') +
                     (t.participants ? '<div class="to-featured-detail"><span class="to-label">' + ((t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles') ? L.pairs : L.participants) + '</span><span class="to-value">' + t.participants + '</span></div>' : '') +
                     (t.prize ? '<div class="to-featured-detail"><span class="to-label">' + L.prize + '</span><span class="to-value prize">' + t.prize + '</span></div>' : '') +
+                    feeDetail(t) +
                 '</div>' +
                 '<div class="to-featured-actions">' +
                     '<span class="to-featured-link">' + L.details + '</span>' +

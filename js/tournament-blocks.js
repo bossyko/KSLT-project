@@ -22,15 +22,21 @@
     var L = isEn ? {
         details: 'Details', register: 'Register', format: 'Format',
         participants: 'Players', pairs: 'Pairs', prize: 'Prize',
-        reg: 'Reg', noRating: 'Unranked'
+        reg: 'Reg', noRating: 'Unranked',
+        fee: 'Fee', feeMember: 'KSLT members', feeGuest: 'non-members',
+        perPair: 'per pair', som: 'som'
     } : (isKg ? {
         details: 'Толугураак', register: 'Каттоо', format: 'Формат',
         participants: 'Катышуучулар', pairs: 'Жуптар', prize: 'Сыйлык',
-        reg: 'Кат', noRating: 'Рейтингсиз'
+        reg: 'Кат', noRating: 'Рейтингсиз',
+        fee: 'Взнос', feeMember: 'КСЛТ мүчөлөрүнө', feeGuest: 'калгандарга',
+        perPair: 'жуптан', som: 'сом'
     } : {
         details: 'Подробнее', register: 'Регистрация', format: 'Формат',
         participants: 'Участники', pairs: 'Пар', prize: 'Призовой',
-        reg: 'Рег', noRating: 'Без рейтинга'
+        reg: 'Рег', noRating: 'Без рейтинга',
+        fee: 'Взнос', feeMember: 'членам КСЛТ', feeGuest: 'остальным',
+        perPair: 'с пары', som: 'сом'
     });
 
     var CL = isEn
@@ -110,6 +116,33 @@
             '<span class="to-value' + (cls ? ' ' + cls : '') + '">' + value + '</span></div>';
     }
 
+    /** «1500» → «1 500»: пробел между тысячами, иначе сумма читается с трудом */
+    function money(n) {
+        return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+    }
+
+    /**
+     * Взнос на карточке. Две суммы, если заведены обе; одна, если админ
+     * задал только её; ничего, если не задал ни одной — про деньги молчим,
+     * как и про призовой фонд, которого нет.
+     */
+    function feeValue(t) {
+        var m = t.feeMember, g = t.feeGuest;
+        if (m == null && g == null) return '';
+        if (m != null && g != null && m !== g) return money(m) + ' / ' + money(g);
+        return money(m != null ? m : g);
+    }
+
+    function feeTitle(t) {
+        var m = t.feeMember, g = t.feeGuest;
+        var pair = (t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles') ? ' (' + L.perPair + ')' : '';
+        if (m != null && g != null && m !== g) {
+            return money(m) + ' ' + L.som + ' — ' + L.feeMember + ', ' + money(g) + ' ' + L.som + ' — ' + L.feeGuest + pair;
+        }
+        var one = m != null ? m : g;
+        return one == null ? '' : money(one) + ' ' + L.som + pair;
+    }
+
     function playersLabel(t) {
         return (t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles') ? L.pairs : L.participants;
     }
@@ -137,6 +170,8 @@
                     detail(L.format, t.format) +
                     detail(playersLabel(t), t.participants) +
                     detail(L.prize, t.prize, 'prize') +
+                    (feeValue(t) ? '<div class="to-featured-detail" title="' + feeTitle(t) + '"><span class="to-label">' + L.fee + '</span>' +
+                        '<span class="to-value to-fee">' + feeValue(t) + '</span></div>' : '') +
                 '</div>' +
                 '<div class="to-featured-actions">' +
                     '<span class="to-featured-link">' + L.details + '</span>' +

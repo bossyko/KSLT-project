@@ -57,6 +57,30 @@
     color: var(--accent);
 }
 
+/* Своя цена под шапкой: две суммы выше — это прайс, а здесь то,
+   сколько платить именно этому человеку */
+.td-fee-note {
+    display: inline-block;
+    margin-top: var(--space-sm);
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.td-fee-note[hidden] {
+    display: none;
+}
+
+.td-fee-note-member {
+    background: rgba(204, 255, 0, 0.12);
+    border-color: rgba(204, 255, 0, 0.35);
+    color: var(--accent);
+}
+
 .td-hero-badges {
     display: flex;
     flex-wrap: wrap;

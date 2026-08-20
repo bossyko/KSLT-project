@@ -304,6 +304,12 @@
     letter-spacing: 1px;
 }
 
+/* Взнос на карточке: две суммы через дробь, лаймом не выделяем —
+   это не достоинство турнира, а справка */
+.to-featured-detail .to-fee {
+    white-space: nowrap;
+}
+
 .to-gender-badge {
     display: inline-block;
     font-size: 0.78rem;

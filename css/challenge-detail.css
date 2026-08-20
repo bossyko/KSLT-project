@@ -2,20 +2,168 @@
    CHALLENGE BATTLE PAGE STYLES (ch- prefix)
    ======================================== */
 
-/* === HERO: VS Layout === */
+/* === ШАПКА: постер фоном, заголовок поверх ===
+   Раньше постер висел отдельным прямоугольником посреди пустоты и ничего
+   не держал. Теперь он фон шапки, как на страницах разделов; нет постера —
+   остаётся ровный тёмный фон, вёрстка не рассыпается */
 .ch-hero {
     position: relative;
     z-index: 0;
-    padding: var(--space-xl) 7%;
+    min-height: 460px;
+    display: flex;
+    align-items: flex-end;
+    padding: 110px 7% 40px;
     overflow: hidden;
     background: linear-gradient(135deg, rgba(10,10,10,0.95) 0%, rgba(20,20,20,0.9) 100%);
     border-bottom: 1px solid var(--border);
 }
 
+.ch-hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.ch-hero-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ch-hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.35) 100%);
+}
+
 .ch-hero-inner {
-    max-width: 1000px;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1400px;
     margin: 0 auto;
+}
+
+.ch-hero-kicker {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+
+.ch-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.ch-hero-meta b {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* === СОПЕРНИКИ === */
+.ch-duel {
+    padding: var(--space-lg) 7%;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Слева соперники, справа два блока — страница перестала быть втрое
+   длиннее нужного. Колонки одной высоты: карточка игроков растягивается
+   под правую, а не оставляет под собой пустоту */
+.ch-duel-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.ch-players {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    padding: 22px;
+}
+
+/* Сноска под карточками игроков: объясняет, что за счёт под именами */
+.ch-stats-note {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--text-dim);
     text-align: center;
+}
+
+.ch-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+}
+
+/* Блоки внутри колонки — обычные коробки, без своих отступов секции.
+   Сбрасываем и margin с max-width: у любой section на сайте стоит
+   «margin: 0 auto», а автоматическое поле по поперечной оси отменяет
+   растяжение — история встреч сжималась по содержимому и была уже
+   результата над ней */
+.ch-aside > section {
+    padding: 0;
+    border: none;
+    background: none;
+    margin: 0;
+    max-width: none;
+    width: 100%;
+}
+
+/* Оба блока одной высоты, вместе — ровно во всю колонку. Иначе один
+   висит коротышкой, а карточка соперников слева заканчивается раньше */
+.ch-aside > section {
+    flex: 1 1 0;
+    display: flex;
+    min-height: 0;
+}
+
+.ch-aside > section > div {
+    flex: 1;
+}
+
+.ch-aside .ch-voting-inner,
+.ch-aside .ch-forecast-inner,
+.ch-aside .ch-score-inner,
+.ch-aside .ch-h2h-box {
+    max-width: none;
+    margin: 0;
+}
+
+@media (max-width: 900px) {
+    .ch-duel-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* === ЧТО ГОВОРЯТ ЧИСЛА === */
+.ch-forecast-sec {
+    padding: var(--space-lg) 7%;
+    border-bottom: 1px solid var(--border);
+}
+
+.ch-forecast-inner {
+    max-width: 700px;
+    margin: 0 auto;
 }
 
 .ch-back-link {
@@ -32,27 +180,11 @@
 .ch-back-link:hover { color: var(--accent); }
 
 .ch-battle-title {
-    font-size: 2rem;
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
     font-weight: 800;
     color: var(--text-primary);
-    margin-bottom: var(--space-lg);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    line-height: 1.2;
-}
-
-/* Banner */
-.ch-banner {
-    max-width: 800px;
-    margin: 0 auto var(--space-lg);
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-}
-.ch-banner img {
-    width: 100%;
-    height: auto;
-    display: block;
+    margin-bottom: 14px;
+    line-height: 1.1;
 }
 
 .ch-vs-container {
@@ -192,6 +324,15 @@
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--space-md);
+}
+
+/* Подпись под заголовком голосования: объясняет, что имена ниже — это
+   кнопки, а не просто список */
+.ch-voting-hint {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
 }
 
 .ch-voting-bar {
@@ -400,10 +541,22 @@
     transition: opacity 0.2s;
 }
 .ch-vote-btn:hover:not(.disabled) {
-    border-color: var(--accent);
-    background: rgba(204, 255, 0, 0.1);
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(204, 255, 0, 0.15);
+}
+
+/* Каждая сторона светится своим цветом — тем же, каким она идёт в полосе
+   голосования и на странице баттлов. Раньше обе подсвечивались лаймом,
+   и было не видно, за кого голосуешь */
+.ch-vote-btn.ch-vote-p1:hover:not(.disabled) {
+    border-color: #DC2828;
+    background: rgba(220, 40, 40, 0.12);
+    box-shadow: 0 4px 16px rgba(220, 40, 40, 0.18);
+}
+
+.ch-vote-btn.ch-vote-p2:hover:not(.disabled) {
+    border-color: #2563EB;
+    background: rgba(37, 99, 235, 0.12);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.18);
 }
 .ch-vote-btn:hover:not(.disabled) .ch-vote-cta {
     opacity: 1;
@@ -504,12 +657,14 @@
 
 /* === DETAILS SECTION === */
 .ch-details {
-    padding: var(--space-xl) 7%;
+    padding: var(--space-lg) 7%;
     border-bottom: 1px solid var(--border);
 }
 
+/* По той же сетке, что соперники выше: раньше блок центрировался в
+   семистах пикселях и его левый край не совпадал ни с чем на странице */
 .ch-details-inner {
-    max-width: 700px;
+    max-width: 1400px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -576,71 +731,85 @@
     display: block;
 }
 
-/* === H2H SECTION === */
-.ch-h2h {
-    padding: var(--space-xl) 7%;
-    border-bottom: 1px solid var(--border);
+/* === ИСТОРИЯ ВСТРЕЧ ===
+   Живёт под карточками игроков, а не отдельной секцией внизу: она нужна
+   ровно там, где смотришь на соперников. Показываем три последних,
+   остальные — по кнопке */
+.ch-h2h-box {
+    margin-top: var(--space-md);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    background: var(--surface-glass);
 }
 
-.ch-h2h-inner {
-    max-width: 700px;
-    margin: 0 auto;
+.ch-h2h-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
 }
 
 .ch-h2h-title {
-    font-size: 1.2rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: var(--space-md);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
 }
 
-.ch-h2h-summary {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-xl);
-    margin-bottom: var(--space-md);
-    padding: var(--space-md);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
-}
-.ch-h2h-score {
-    text-align: center;
-}
-.ch-h2h-score-num {
-    font-size: 2rem;
+.ch-h2h-count {
+    font-size: 1.1rem;
     font-weight: 800;
-    color: var(--accent);
-}
-.ch-h2h-score-label {
-    font-size: 0.8rem;
     color: var(--text-secondary);
+}
+
+.ch-h2h-count b {
+    color: var(--accent);
 }
 
 .ch-h2h-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
+    /* Нажали «ещё встречи» — список прокручивается внутри, а колонка
+       остаётся той же высоты и не разъезжается с соседней */
+    max-height: 168px;
+    overflow-y: auto;
 }
 
 .ch-h2h-match {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-sm) var(--space-md);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    font-size: 0.9rem;
-}
-.ch-h2h-date {
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.88rem;
     color: var(--text-secondary);
+}
+
+.ch-h2h-match:first-child {
+    border-top: none;
+}
+
+.ch-h2h-hidden {
+    display: none;
+}
+
+.ch-h2h-date {
     min-width: 90px;
 }
+
+.ch-h2h-duel {
+    color: var(--accent);
+    font-size: 0.8em;
+}
+
 .ch-h2h-score-text {
     font-weight: 700;
     color: var(--text-primary);
 }
+
 .ch-h2h-winner {
     color: var(--accent);
     font-weight: 600;
@@ -648,16 +817,27 @@
     text-align: right;
 }
 
-.ch-h2h-empty {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    padding: var(--space-md);
+.ch-h2h-more {
+    margin-top: 10px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--accent);
+    font-family: var(--font-primary);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-/* === SCORE SECTION (result) === */
+.ch-h2h-more:hover {
+    text-decoration: underline;
+}
+
+/* === РЕЗУЛЬТАТ ===
+   Стоит сразу под шапкой, когда матч сыгран: это первое, за чем приходят
+   на страницу отыгранного баттла. Раньше лежал в самом низу, под картой */
 .ch-score {
-    padding: var(--space-xl) 7%;
+    padding: var(--space-lg) 7%;
     border-bottom: 1px solid var(--border);
 }
 
@@ -665,13 +845,19 @@
     max-width: 700px;
     margin: 0 auto;
     text-align: center;
+    border: 1px solid rgba(204, 255, 0, 0.3);
+    background: rgba(204, 255, 0, 0.07);
+    border-radius: var(--radius-lg);
+    padding: 22px;
 }
 
 .ch-score-title {
-    font-size: 1.3rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: var(--space-md);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
 }
 
 .ch-score-display {
@@ -679,11 +865,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-md);
-    margin-bottom: var(--space-md);
-    padding: var(--space-lg);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
+    margin-bottom: 12px;
 }
 
 .ch-score-player {
@@ -774,11 +956,11 @@
     .ch-vote-buttons { flex-direction: column; align-items: center; }
     .ch-vote-btn { width: 100%; max-width: 300px; }
     .ch-details { padding: var(--space-lg) 5%; }
-    .ch-h2h { padding: var(--space-lg) 5%; }
+    .ch-duel { padding: var(--space-md) 5%; }
     .ch-score { padding: var(--space-lg) 5%; }
     .ch-score-display { flex-direction: column; gap: var(--space-sm); }
     .ch-score-player { min-width: auto; }
-    .ch-h2h-summary { gap: var(--space-md); }
+    .ch-hero { min-height: 340px; padding: 90px 5% 30px; }
 }
 
 @media (max-width: 480px) {
