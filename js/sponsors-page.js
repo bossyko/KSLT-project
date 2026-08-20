@@ -10,8 +10,9 @@
 (function() {
     'use strict';
 
-    /** Сколько мест показываем всего — заполненных и свободных вместе. */
-    var SLOTS = 4;
+    /** Свободных мест не дорисовываем: в ряду настоящих логотипов пустая
+     *  плитка читалась как незагрузившаяся картинка, а не как приглашение */
+    var FREE_SLOTS = 0;
 
     document.addEventListener('DOMContentLoaded', function() {
         var box = document.getElementById('snLogos');
@@ -45,7 +46,7 @@
                 : '<div class="sn-logo filled">' + inner + '</div>';
         });
 
-        for (var i = list.length; i < SLOTS; i++) {
+        for (var i = 0; i < FREE_SLOTS; i++) {
             html += '<div class="sn-logo">место для вашего логотипа</div>';
         }
 

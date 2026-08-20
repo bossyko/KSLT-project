@@ -2012,20 +2012,26 @@ h2 {
     box-shadow: 0 0 15px rgba(255, 59, 48, 0.5);
 }
 
+/* Карточка живого матча компактнее: в ней всего два имени и счёт, а
+   занимала она столько же места, сколько карточка турнира с афишей */
 .live-matches {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-lg);
+    /* Ширину карточки ограничиваем: при одном матче она растягивалась на всю
+       страницу, и два имени со счётом тонули в пустоте. Теперь карточки
+       выстраиваются слева направо и держат свой размер */
+    grid-template-columns: repeat(auto-fill, minmax(340px, 440px));
+    justify-content: start;
+    gap: var(--space-md);
 }
 
 .live-match {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: var(--space-lg);
+    padding: 16px 18px;
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: 10px;
 }
 
 .match-status {
@@ -2052,20 +2058,21 @@ h2 {
 .match-players {
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
+    gap: 6px;
 }
 
 .match-players .player {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: 10px;
 }
 
 .match-players .player img {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     object-fit: cover;
+    flex-shrink: 0;
 }
 
 .player-name {
@@ -2078,10 +2085,11 @@ h2 {
 }
 
 .player-score {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    min-width: 60px;
+    letter-spacing: 1px;
+    min-width: 54px;
     text-align: right;
 }
 
@@ -5666,13 +5674,33 @@ h2 {
 }
 
 /* ---- GLOBAL BACK LINK (detail pages) ---- */
+/* Хлебные крошки живут по той же сетке, что и содержимое страницы:
+   у них был свой контейнер в 1100, и ссылка «назад» стояла правее всего,
+   что под ней */
+/* Хлебные крошки живут по той же сетке, что и содержимое страницы:
+   у них был свой контейнер в 1100, и ссылка «назад» стояла правее всего,
+   что под ней. Фон при этом должен идти во всю ширину, поэтому его
+   растягивает подложка */
 .kslt-back-wrap {
     position: sticky;
     top: 64px;
     z-index: 10;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 16px 7%;
+    box-sizing: border-box;
+}
+
+.kslt-back-wrap::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -100vw;
+    right: -100vw;
     background: var(--bg-primary);
-    padding: 16px calc(max(24px, (100% - 1100px) / 2));
     border-bottom: 1px solid var(--border-subtle);
+    z-index: -1;
 }
 
 /* На страницах-списках (тренеры, корты, поиск игрока) возврат не прилипает.

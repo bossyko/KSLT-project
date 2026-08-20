@@ -257,10 +257,13 @@
                     // Source dropdown
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.liveSource + '</label>' +
+                        // Турнир и баттл идут первыми: трансляцию готовят
+                        // заранее, и она почти всегда привязана к анонсу.
+                        // Свободный матч — редкий случай, он в конце списка
                         '<select id="liveSource" class="ad-field-input">' +
-                            '<option value="free">' + L.liveSourceFree + '</option>' +
                             '<option value="tournament">' + L.liveSourceTournament + '</option>' +
                             '<option value="battle">' + L.liveSourceBattle + '</option>' +
+                            '<option value="free">' + L.liveSourceFree + '</option>' +
                         '</select>' +
                     '</div>' +
                     // Tournament selectors (hidden by default)
@@ -377,6 +380,10 @@
             if (mode === 'tournament' && !cachedTournaments.length) loadTournaments();
             if (mode === 'battle' && !cachedBattles.length) loadBattles();
         });
+
+        // Первый пункт списка теперь «турнир», и форма должна открываться
+        // сразу в этом виде: иначе видны поля свободного матча, а выбран турнир
+        sourceSelect.dispatchEvent(new Event('change'));
 
         // Tournament → load matches
         document.getElementById('liveTournSelect').addEventListener('change', function() {

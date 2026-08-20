@@ -25,8 +25,8 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="../css/style.css?v=111">
-    <link rel="stylesheet" href="../css/sponsors.css?v=5">
+    <link rel="stylesheet" href="../css/style.css?v=115">
+    <link rel="stylesheet" href="../css/sponsors.css?v=8">
 </head>
 <body>
 
@@ -470,12 +470,9 @@
         <div class="sn-wrap">
             <span class="sn-eyebrow">С нами</span>
             <h2 class="sn-h2">Нас уже поддерживают</h2>
-            <div class="sn-logos">
-                <div class="sn-logo">логотип из базы</div>
-                <div class="sn-logo">логотип из базы</div>
-                <div class="sn-logo">место для вашего</div>
-                <div class="sn-logo">место для вашего</div>
-            </div>
+            <!-- Логотипы подтягиваются из раздела «Спонсоры» в админке:
+                 добавили спонсора — он появился и здесь -->
+            <div class="sn-logos" id="snLogos"></div>
         </div>
     </section>
 
@@ -616,7 +613,7 @@
     <script src="../js/supabase-config.js"></script>
     <script src="../js/sponsors-loader.js?v=5"></script>
     <script src="../js/auth-nav.js?v=20"></script>
-    <script src="../js/script.js?v=3"></script>
-    <script src="../js/sponsors-page.js?v=1"></script>
+    <script src="../js/script.js?v=4"></script>
+    <script src="../js/sponsors-page.js?v=4"></script>
 </body>
 </html>

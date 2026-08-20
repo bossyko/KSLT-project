@@ -25,7 +25,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/style.css?v=111">
+    <link rel="stylesheet" href="css/style.css?v=115">
     <link rel="stylesheet" href="css/partners.css?v=5">
     <link rel="stylesheet" href="css/battle-cards.css?v=11">
 </head>
@@ -44,7 +44,7 @@
             <!-- Центр: Навигация -->
             <ul class="nav-links">
                 <li>
-                    <a href="#live" class="nav-item nav-item-live is-live">
+                    <a href="#live" class="nav-item nav-item-live">
                         <span class="live-dot"></span>
                         Live
                     </a>
@@ -194,7 +194,7 @@
                         <li><a href="pages/battles-overview.html">Баттлы</a></li>
                     </ul>
                 </li>
-                <li><a href="#live" class="is-live"><span class="live-dot"></span> Live</a></li>
+                <li><a href="#live"><span class="live-dot"></span> Live</a></li>
                 <li class="mobile-nav-dropdown">
                     <a href="pages/players.html" class="mobile-dropdown-toggle">
                         Рейтинг
@@ -640,7 +640,7 @@
 <!-- FOOTER:END -->
 
     <script src="js/auth-nav.js?v=20"></script>
-    <script src="js/script.js?v=3"></script>
+    <script src="js/script.js?v=4"></script>
     <script src="js/scroll-spy.js"></script>
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -907,6 +907,17 @@
                         grid.innerHTML = html;
                         section.style.display = '';
                         toggleLiveClass(true);
+
+                        // Пришли по ссылке Live из шапки другой страницы:
+                        // сама прокрутка браузера не срабатывает, потому что
+                        // в момент загрузки раздела на странице ещё нет
+                        if (!section._jumped && window.location.hash === '#live') {
+                            section._jumped = true;
+                            // Отступ на высоту закреплённой шапки: без него
+                            // она наезжала на заголовок раздела
+                            var y = section.getBoundingClientRect().top + window.scrollY - 90;
+                            window.scrollTo({ top: y, behavior: 'smooth' });
+                        }
                     });
                 });
         }

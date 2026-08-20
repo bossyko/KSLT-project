@@ -119,8 +119,11 @@ function fill(tpl, page) {
         .replace(/\{\{LANG_KG\}\}/g, `${name}-kg.html`)
         .replace(/\{\{LANG_EN\}\}/g, `${name}-en.html`)
         .replace(/\{\{LIVE\}\}/g, live)
-        .replace(/\{\{LIVE_ON\}\}/g, page.name === 'index' ? ' is-live' : '')
-        .replace(/\{\{LIVE_CLASS\}\}/g, page.name === 'index' ? ' class="is-live"' : '');
+        // Огонёк Live больше не проставляется при сборке: он горел на главной
+        // всегда, даже когда никто не играл. Теперь его зажигает script.js,
+        // спросив базу, — и делает это на всех страницах, а не только тут
+        .replace(/\{\{LIVE_ON\}\}/g, '')
+        .replace(/\{\{LIVE_CLASS\}\}/g, '');
 
     for (const s of SECTIONS) {
         out = out.replace(new RegExp(`\\{\\{ACTIVE:${s}\\}\\}`, 'g'),

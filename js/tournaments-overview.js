@@ -520,7 +520,7 @@
 
             html += '<div class="to-category-block" data-cat="' + cat.key + '">';
             html += '<div class="to-category-header">';
-            html += '<h2 class="to-category-title"><span>' + cat.name + '</span></h2>';
+            html += '<h2 class="to-category-title">' + cat.name + '</h2>';
             html += '<a href="' + tournamentsPage + '?category=' + cat.key + '" class="to-view-all">' + L.viewAll + ' ' + arrowSvg + '</a>';
             html += '</div>';
 
@@ -747,7 +747,7 @@
 
             html += '<div class="to-category-block" data-cat="' + cat.key + '">';
             html += '<div class="to-category-header">';
-            html += '<h2 class="to-category-title"><span>' + cat.name + '</span></h2>';
+            html += '<h2 class="to-category-title">' + cat.name + '</h2>';
             html += '<a href="' + tournamentsPage + '?category=' + cat.key + '" class="to-view-all">' + L.viewAll + ' ' + arrowSvg + '</a>';
             html += '</div>';
 

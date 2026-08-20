@@ -521,4 +521,33 @@ document.addEventListener('DOMContentLoaded', function() {
         navigator.serviceWorker.register('/sw.js').catch(function() {});
     }
 
+    // Огонёк Live в шапке
+    //
+    // Раньше класс подставлялся при сборке страниц и только на главной:
+    // огонёк горел там всегда, даже когда никто не играл, и не загорался
+    // на остальных страницах, даже когда матч шёл. Теперь спрашиваем базу
+    // — одним лёгким запросом без данных, только счётчик.
+    (function() {
+        var links = document.querySelectorAll('.nav-item-live, .mobile-nav a[href*="#live"]');
+        if (!links.length) return;
+
+        function paint(on) {
+            links.forEach(function(a) { a.classList.toggle('is-live', on); });
+        }
+
+        // До ответа базы не горим: пусть лучше загорится с задержкой,
+        // чем будет светить впустую
+        paint(false);
+
+        var client = window.supabaseClient;
+        if (!client) return;
+
+        client.from('live_matches')
+            .select('id', { count: 'exact', head: true })
+            .in('status', ['warmup', 'live', 'paused'])
+            .then(function(res) {
+                if (!res.error) paint((res.count || 0) > 0);
+            });
+    })();
+
 });

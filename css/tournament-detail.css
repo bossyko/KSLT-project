@@ -255,12 +255,22 @@
 }
 
 /* === STICKY TABS BAR === */
+/* Полоса во всю ширину, содержимое — по сетке страницы: раньше вкладки
+   центрировались сами по себе и не совпадали ни с заголовками разделов,
+   ни со ссылкой «назад» слева от них */
 .td-tabs-bar {
     position: sticky;
     top: 64px;
     z-index: 50;
     background: var(--bg-primary, #0a0a0a);
     border-bottom: 1px solid var(--border-subtle);
+    /* Вкладки прижаты влево и начинаются там же, где заголовки разделов.
+       Раньше полоса разносила ссылку «назад» и вкладки по краям, и вкладки
+       висели правее всего содержимого страницы */
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 28px;
     padding: 0 7%;
     /* Override global nav styles */
     height: auto;
@@ -278,8 +288,9 @@
     font-size: 0.85rem;
     font-weight: 600;
     padding: 8px 0 4px;
-    max-width: 1400px;
-    margin: 0 auto;
+    max-width: none;
+    margin: 0;
+    flex-shrink: 0;
     transition: color 0.2s;
 }
 
@@ -298,8 +309,9 @@
 .td-tabs {
     display: flex;
     gap: 0;
-    max-width: 1400px;
-    margin: 0 auto;
+    max-width: none;
+    margin: 0;
+    padding: 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -307,6 +319,11 @@
 
 .td-tabs::-webkit-scrollbar {
     display: none;
+}
+
+/* Первая вкладка начинается ровно там же, где заголовки разделов ниже */
+.td-tab:first-child {
+    padding-left: 0;
 }
 
 .td-tab {

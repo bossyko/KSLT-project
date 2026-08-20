@@ -936,6 +936,25 @@ body.ad-page {
     margin-bottom: 20px;
 }
 
+/* Формы баттлов и трансляций собраны на этом классе, а в стилях его не
+   было вовсе: подписи липли к полям, поля — друг к другу */
+.ad-field-group {
+    margin-bottom: 20px;
+}
+
+.ad-field-group > .ad-field-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ad-field-group + .ad-field-group {
+    margin-top: 0;
+}
+
 .ad-field-label {
     display: block;
     font-size: 0.8rem;

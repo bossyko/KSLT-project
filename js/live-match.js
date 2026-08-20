@@ -245,7 +245,10 @@
 
         // Back to list link
         var pageSuffix = isEn ? '-en' : isKg ? '-kg' : '';
-        var backHtml = '<a href="live-match' + pageSuffix + '.html" class="lm-back-link">← ' + L.backToList + '</a>';
+        // Ведём на раздел Live главной, а не на список трансляций: список
+        // живёт там, и это же место открывает Live в шапке
+        var backHtml = '<a href="../index' + pageSuffix + '.html#live" class="lm-back-link">← ' +
+            L.backToList + '</a>';
 
         // YouTube embed
         var ytId = extractYoutubeId(m.youtube_url);
