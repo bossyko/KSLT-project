@@ -24,6 +24,9 @@
 
     var GUEST_VISIBLE_ROWS = 8;
     var GUEST_BLURRED_ROWS = 4;
+    // В поиске открытых строк меньше: этого хватает, чтобы человек узнал
+    // того, кого искал, а остальное остаётся поводом завести аккаунт
+    var GUEST_SEARCH_VISIBLE = 3;
     var GUEST_CAT_VISIBLE = 8;
     var GUEST_CAT_BLURRED = 4;
 
@@ -80,7 +83,7 @@
             noResults: 'Игроки не найдены',
             authRequired: 'Требуется авторизация',
             guestTitle: 'Зарегистрируйтесь для полного доступа',
-            guestText: 'Полный рейтинг, поиск игроков и статистика доступны после регистрации',
+            guestText: 'Полный рейтинг, профили игроков и статистика доступны после регистрации',
             guestBtn: 'Войти / Регистрация',
             catPageBack: 'Назад к рейтингу',
             catPagePlayers: 'Игроков',
@@ -92,6 +95,20 @@
             catPageLosses: 'П',
             catPageTournamentsCol: 'Турниры'
         };
+    }
+
+    function searchLockedTitle() {
+        if (isEnPage()) return 'Sign in to see all results';
+        if (isKgPage()) return 'Бардык натыйжаларды көрүү үчүн кириңиз';
+        return 'Войдите, чтобы увидеть всех найденных';
+    }
+
+    // Вторая строка не повторяет заголовок, а добавляет: что именно
+    // откроется после входа
+    function hiddenFoundText() {
+        if (isEnPage()) return 'Player profiles and statistics open after sign-in';
+        if (isKgPage()) return 'Оюнчулардын профилдери жана статистикасы кирүүдөн кийин ачылат';
+        return 'Профили игроков и статистика открываются после входа';
     }
 
     function isEnPage() {
@@ -321,19 +338,12 @@
             .replace('{count}', totalPlayers)
             .replace('{online}', onlineCount);
 
-        var searchHtml = isLoggedIn() ?
-            '<div class="pl-search-wrap">' +
-                '<svg class="pl-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-                '<input type="text" class="pl-search-input" id="playersSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
-            '</div>' : '';
-
         container.innerHTML =
             '<div class="pl-hero-bg"></div>' +
             '<div class="pl-hero-overlay"></div>' +
             '<div class="pl-hero-content">' +
                 '<h1 class="pl-hero-title">' + labels.title + '</h1>' +
                 '<p class="pl-hero-subtitle">' + subtitle + '</p>' +
-                searchHtml +
             '</div>';
     }
 
@@ -405,6 +415,10 @@
         '</div>';
 
         html += '<div class="pl-category-row">';
+        html += '<div class="trn-search-wrap">' +
+            '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+            '<input type="text" class="trn-search-input" id="playersSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off" value="' + esc(searchQuery) + '">' +
+        '</div>';
         html += '<div class="pl-category-pills" id="categoryPills">';
         var cats = currentGender === 'men' ? menCats : womenCats;
         for (var i = 0; i < cats.length; i++) {
@@ -431,12 +445,15 @@
         isSearchMode = !!searchQuery;
 
         var items = filtered;
-        var pageItems = items.slice(0, PER_PAGE);
+        var pageItems = isSearchMode ? items : items.slice(0, PER_PAGE);
 
         var podiumEl = document.getElementById('playersPodium');
         var filtersEl = document.getElementById('playersFilters');
         if (podiumEl) podiumEl.style.display = isSearchMode ? 'none' : '';
-        if (filtersEl) filtersEl.style.display = isSearchMode ? 'none' : '';
+        if (filtersEl) {
+            filtersEl.style.display = '';
+            filtersEl.classList.toggle('pl-filters-searching', isSearchMode);
+        }
         if (container) container.style.paddingBottom = isSearchMode ? '16px' : '';
 
         if (pageItems.length === 0) {
@@ -446,8 +463,9 @@
         }
 
         var logged = isLoggedIn();
-        var isGuest = !logged && !isSearchMode;
-        var totalVisible = isGuest ? Math.min(pageItems.length, GUEST_VISIBLE_ROWS + GUEST_BLURRED_ROWS) : pageItems.length;
+        var isGuest = !logged;
+        var clearRows = isSearchMode ? GUEST_SEARCH_VISIBLE : GUEST_VISIBLE_ROWS;
+        var totalVisible = isGuest ? Math.min(pageItems.length, clearRows + GUEST_BLURRED_ROWS) : pageItems.length;
 
         var html = '<div class="pl-table">';
 
@@ -473,8 +491,8 @@
             var rankClass = rank <= 3 ? ' pl-rank-top' : '';
 
             var blurClass = '';
-            if (isGuest && i >= GUEST_VISIBLE_ROWS) {
-                var blurLevel = i - GUEST_VISIBLE_ROWS + 1;
+            if (isGuest && i >= clearRows) {
+                var blurLevel = i - clearRows + 1;
                 blurClass = ' pl-row-blur pl-row-blur-' + blurLevel;
             }
 
@@ -535,8 +553,10 @@
         html += '</div>';
 
         // Guest CTA banner
-        if (isGuest && pageItems.length > GUEST_VISIBLE_ROWS) {
+        if (isGuest && pageItems.length > clearRows) {
             var authUrl = getAuthUrl();
+            var ctaTitle = isSearchMode ? searchLockedTitle() : labels.guestTitle;
+            var ctaText = isSearchMode ? hiddenFoundText() : labels.guestText;
             html += '<div class="pl-guest-overlay">' +
                 '<div class="pl-guest-cta">' +
                     '<div class="pl-guest-icon">' +
@@ -546,8 +566,8 @@
                             '<circle cx="12" cy="16" r="1"/>' +
                         '</svg>' +
                     '</div>' +
-                    '<h3 class="pl-guest-title">' + labels.guestTitle + '</h3>' +
-                    '<p class="pl-guest-text">' + labels.guestText + '</p>' +
+                    '<h3 class="pl-guest-title">' + ctaTitle + '</h3>' +
+                    '<p class="pl-guest-text">' + ctaText + '</p>' +
                     '<a href="' + authUrl + '" class="pl-guest-btn">' + labels.guestBtn + '</a>' +
                 '</div>' +
             '</div>';
@@ -651,10 +671,15 @@
             filtersEl.className = 'trn-filters pl-cat-mode';
             filtersEl.innerHTML =
                 '<div class="trn-filters-inner">' +
-                    '<a href="' + playersPage + '" class="kslt-back trn-back">\u2190 ' + labels.catPageBack + '</a>' +
-                    '<div class="trn-search-wrap">' +
-                        '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-                        '<input type="text" class="trn-search-input" id="catSearchSticky" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
+                    // Левая часть одним блоком: так строка делится на три
+                    // равные колонки и переключатель пола встаёт ровно под
+                    // вершиной пьедестала
+                    '<div class="pl-cat-bar-left">' +
+                        '<a href="' + playersPage + '" class="kslt-back trn-back">\u2190 ' + labels.catPageBack + '</a>' +
+                        '<div class="trn-search-wrap">' +
+                            '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                            '<input type="text" class="trn-search-input" id="catSearchSticky" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
+                        '</div>' +
                     '</div>' +
                     // Переключатель пола показываем только там, где есть обе
                     // половины: женских Pro-Masters и Challengers у клуба нет
@@ -780,7 +805,8 @@
         var playerPage = isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
 
         // Guest: limit visible rows
-        var totalVisible = isGuest ? Math.min(pageItems.length, GUEST_CAT_VISIBLE + GUEST_CAT_BLURRED) : pageItems.length;
+        var clearRows = catSearchQuery ? GUEST_SEARCH_VISIBLE : GUEST_CAT_VISIBLE;
+        var totalVisible = isGuest ? Math.min(pageItems.length, clearRows + GUEST_CAT_BLURRED) : pageItems.length;
 
         var headerRow = '<div class="pl-row pl-row-header pl-cat-row">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
@@ -805,10 +831,10 @@
             var rankClass = rank <= 3 ? ' pl-rank-top' : '';
             var rowClass = '';
 
-            // Blur for guests after GUEST_CAT_VISIBLE rows
+            // Blur for guests after clearRows
             var blurClass = '';
-            if (isGuest && i >= GUEST_CAT_VISIBLE) {
-                var blurLevel = i - GUEST_CAT_VISIBLE + 1;
+            if (isGuest && i >= clearRows) {
+                var blurLevel = i - clearRows + 1;
                 blurClass = ' pl-row-blur pl-row-blur-' + blurLevel;
             }
 
@@ -862,8 +888,10 @@
         html += '</div>'; // close pl-table
 
         // Guest CTA overlay (same pattern as main ranking page)
-        if (isGuest && pageItems.length > GUEST_CAT_VISIBLE) {
+        if (isGuest && pageItems.length > clearRows) {
             var authUrl = getAuthUrl();
+            var ctaTitle = catSearchQuery ? searchLockedTitle() : labels.guestTitle;
+            var ctaText = catSearchQuery ? hiddenFoundText() : labels.guestText;
             html += '<div class="pl-guest-overlay">' +
                 '<div class="pl-guest-cta">' +
                     '<div class="pl-guest-icon">' +
@@ -873,8 +901,8 @@
                             '<circle cx="12" cy="16" r="1"/>' +
                         '</svg>' +
                     '</div>' +
-                    '<h3 class="pl-guest-title">' + labels.guestTitle + '</h3>' +
-                    '<p class="pl-guest-text">' + labels.guestText + '</p>' +
+                    '<h3 class="pl-guest-title">' + ctaTitle + '</h3>' +
+                    '<p class="pl-guest-text">' + ctaText + '</p>' +
                     '<a href="' + authUrl + '" class="pl-guest-btn">' + labels.guestBtn + '</a>' +
                 '</div>' +
             '</div>';
@@ -1045,19 +1073,13 @@
     }
 
     function initCatSearch() {
-        var guestModalShown = false;
-
         function handleSearch(e) {
             if (e.target.id !== 'catSearch' && e.target.id !== 'catSearchSticky') return;
 
-            // Guest: show modal on first input
-            if (!isLoggedIn()) {
-                if (!guestModalShown) {
-                    guestModalShown = true;
-                    showSearchAuthModal();
-                }
-                return;
-            }
+            // Поиск работает у всех. Гостю закрыт не сам поиск, а объём
+            // выдачи: он видит первых найденных, а сколько осталось за
+            // порогом — написано под таблицей. Раньше поле у гостя молчало
+            // после первого же окна, и человек печатал в пустоту
 
             // Sync both inputs
             var val = e.target.value;
@@ -1075,51 +1097,6 @@
         }
 
         document.addEventListener('input', handleSearch);
-    }
-
-    function showSearchAuthModal() {
-        var labels = getLabels();
-        var authUrl = getAuthUrl();
-        var isEn = isEnPage();
-        var isKg = isKgPage();
-
-        var overlay = document.createElement('div');
-        overlay.className = 'pl-search-modal-overlay';
-        overlay.innerHTML =
-            '<div class="pl-search-modal">' +
-                '<button class="pl-search-modal-close">&times;</button>' +
-                '<div class="pl-search-modal-icon">' +
-                    '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-                '</div>' +
-                '<h3>' + labels.guestTitle + '</h3>' +
-                '<p>' + (isEn ? 'Sign up to search players and access full rankings' : (isKg ? 'Оюнчуларды издөө жана толук рейтингге кирүү үчүн катталыңыз' : 'Зарегистрируйтесь, чтобы искать игроков и получить полный доступ к рейтингу')) + '</p>' +
-                '<a href="' + authUrl + '" class="pl-search-modal-btn">' + labels.guestBtn + '</a>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
-        requestAnimationFrame(function() { overlay.classList.add('visible'); });
-
-        // Clear search input
-        var input = document.getElementById('catSearch');
-        if (input) input.value = '';
-
-        // Close handlers
-        var closeBtn = overlay.querySelector('.pl-search-modal-close');
-        closeBtn.addEventListener('click', function() { closeModal(overlay); });
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) closeModal(overlay);
-        });
-        document.addEventListener('keydown', function handler(e) {
-            if (e.key === 'Escape') {
-                closeModal(overlay);
-                document.removeEventListener('keydown', handler);
-            }
-        });
-
-        function closeModal(el) {
-            el.classList.remove('visible');
-            setTimeout(function() { if (el.parentNode) el.remove(); }, 300);
-        }
     }
 
     // ========================================

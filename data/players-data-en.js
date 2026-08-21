@@ -33,7 +33,7 @@ window.playersLabels = {
     noResults: "No players found",
     authRequired: "Sign in required",
     guestTitle: "Sign up for full access",
-    guestText: "Full rankings, player search and statistics are available after registration",
+    guestText: "Full rankings, player profiles and statistics are available after registration",
     guestBtn: "Sign In / Register",
     catPageBack: "Back to rankings",
     catPagePlayers: "Players",

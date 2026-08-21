@@ -467,11 +467,46 @@
     color: #000;
 }
 
+/* Три колонки поровну: центральная всегда ровно по середине страницы —
+   там же, где пьедестал и вкладки полов. Раньше края стояли на absolute,
+   и категории уезжали от центра тем сильнее, чем шире поиск */
 .pl-category-row {
     position: relative;
-    display: flex;
+    display: grid;
+    /* minmax(0, 1fr), а не голый 1fr: иначе колонка не может стать уже
+       своего содержимого, поле поиска раздвигает левую сторону и центр
+       уезжает вправо от вершины пьедестала */
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    justify-content: center;
+    gap: 24px;
+}
+
+/* Поиск слева, «Показать всех» справа, категории по центру. Поле того же
+   размера, что в полосе фильтров на страницах категорий: одна мерка на
+   весь сайт */
+.pl-category-row .trn-search-wrap {
+    position: relative;
+    justify-self: start;
+    width: 100%;
+    max-width: 320px;
+}
+
+/* Во время поиска ищем по всем игрокам сразу, поэтому вкладки полов и
+   категории уходят — иначе они обещают фильтр, которого нет */
+.pl-filters-searching .pl-gender-tabs,
+.pl-filters-searching .pl-category-pills,
+.pl-filters-searching .pl-view-all {
+    display: none;
+}
+
+/* В поиске центральная и правая колонки пусты — поле занимает всю строку
+   и встаёт по центру */
+.pl-filters-searching .pl-category-row {
+    grid-template-columns: 1fr;
+}
+
+.pl-filters-searching .pl-category-row .trn-search-wrap {
+    justify-self: center;
 }
 
 .pl-category-pills {
@@ -482,8 +517,7 @@
 }
 
 .pl-view-all {
-    position: absolute;
-    right: 0;
+    justify-self: end;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -1128,6 +1162,51 @@
 }
 
 /* In category mode — always visible bar with back link */
+/* Полоса на странице категории: те же три равные колонки, что и в строке
+   фильтров на общем рейтинге. Слева «назад» с поиском, по центру
+   переключатель пола — ровно под вершиной пьедестала, справа название */
+.trn-filters.pl-cat-mode .trn-filters-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 24px;
+}
+
+.pl-cat-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.trn-filters.pl-cat-mode .trn-chips {
+    justify-self: center;
+}
+
+.trn-filters.pl-cat-mode .trn-cat-name {
+    justify-self: end;
+}
+
+/* Без переключателя пола (Pro-Masters, Challenger) центральной колонке
+   нечего держать — остаются края */
+.trn-filters.pl-cat-mode .trn-filters-inner:not(:has(.trn-chips)) {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+@media (max-width: 992px) {
+    .trn-filters.pl-cat-mode .trn-filters-inner {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 12px;
+    }
+
+    .pl-cat-bar-left {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
 .pl-filters-section.pl-cat-mode {
     padding: 10px 7%;
     top: 64px;
@@ -1308,6 +1387,22 @@
 /* === RESPONSIVE === */
 
 /* Tablet */
+/* На узком экране строка раскладывается сверху вниз: поиск, категории,
+   ссылка. Абсолютные края тут наложились бы друг на друга */
+@media (max-width: 992px) {
+    .pl-category-row {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 12px;
+    }
+
+    .pl-category-row .trn-search-wrap {
+        justify-self: center;
+        width: 100%;
+        max-width: 320px;
+    }
+}
+
 @media (max-width: 992px) {
     .pl-row {
         grid-template-columns: 40px 1fr 55px 50px 50px 70px 60px 90px 50px 80px;
