@@ -10,14 +10,17 @@
 
     var L = isEn ? {
         heroTagline: 'KSLT Services',
-        heroTitle: 'Your tennis <span>starts here</span>',
-        heroDesc: 'Best courts and professional coaches in Bishkek',
+        heroTitle: 'Your tennis starts here',
+        heroDesc: 'Best courts and professional coaches in Kyrgyzstan',
         courtsTitle: 'Courts',
         coachesTitle: 'Coaches',
         partnersTitle: 'Player Search',
+        invite: 'Invite to play', online: 'online recently',
+        seenNow: 'Online', seenToday: 'Was here today', seenYesterday: 'Was here yesterday',
+        seenDays: 'Was here {n} d. ago', seenLong: 'Has not been here for a while',
         viewAllCourts: 'All courts',
         viewAllCoaches: 'All coaches',
-        viewAllPartners: 'All partners',
+        viewAllPartners: 'All players',
         details: 'Details',
         surface: 'Surface',
         price: 'Price',
@@ -36,14 +39,17 @@
         levelUnknown: 'Level not specified'
     } : isKg ? {
         heroTagline: 'KSLT Кызматтар',
-        heroTitle: 'Сенин теннисиң <span>ушул жерден башталат</span>',
-        heroDesc: 'Бишкектеги мыкты корттор жана кесипкөй машыктыруучулар',
+        heroTitle: 'Сенин теннисиң ушул жерден башталат',
+        heroDesc: 'Кыргызстандагы мыкты корттор жана кесипкөй машыктыруучулар',
         courtsTitle: 'Корттор',
         coachesTitle: 'Машыктыруучулар',
         partnersTitle: 'Оюнчу издөө',
+        invite: 'Оюнга чакыруу', online: 'жакында кирген',
+        seenNow: 'Тармакта', seenToday: 'Бүгүн кирген', seenYesterday: 'Кечээ кирген',
+        seenDays: '{n} күн мурун', seenLong: 'Көптөн бери кирген жок',
         viewAllCourts: 'Бардык корттор',
         viewAllCoaches: 'Бардык машыктыруучулар',
-        viewAllPartners: 'Бардык өнөктөштөр',
+        viewAllPartners: 'Бардык оюнчулар',
         details: 'Толугураак',
         surface: 'Жабуу',
         price: 'Баа',
@@ -62,14 +68,17 @@
         levelUnknown: 'Деңгээл көрсөтүлгөн эмес'
     } : {
         heroTagline: 'KSLT Услуги',
-        heroTitle: 'Ваш теннис <span>начинается здесь</span>',
-        heroDesc: 'Лучшие корты и профессиональные тренеры Бишкека',
+        heroTitle: 'Ваш теннис начинается здесь',
+        heroDesc: 'Лучшие корты и профессиональные тренеры Кыргызстана',
         courtsTitle: 'Корты',
         coachesTitle: 'Тренеры',
         partnersTitle: 'Поиск игрока',
+        invite: 'Предложить игру', online: 'недавно заходил',
+        seenNow: 'В сети', seenToday: 'Был сегодня', seenYesterday: 'Был вчера',
+        seenDays: 'Был {n} дн. назад', seenLong: 'Давно не заходил',
         viewAllCourts: 'Все корты',
         viewAllCoaches: 'Все тренеры',
-        viewAllPartners: 'Все партнёры',
+        viewAllPartners: 'Все игроки',
         details: 'Подробнее',
         surface: 'Покрытие',
         price: 'Цена',
@@ -97,6 +106,19 @@
     var _courts = [];
     var _coaches = [];
     var _partners = [];
+
+    /** Сколько игроков показываем в ленте на «Услугах» */
+    var PARTNERS_IN_STRIP = 10;
+
+    /** Тасуем список, не трогая исходный массив */
+    function shuffle(list) {
+        var out = list.slice();
+        for (var i = out.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var t = out[i]; out[i] = out[j]; out[j] = t;
+        }
+        return out;
+    }
 
     var ONLINE_THRESHOLD = 5 * 60 * 1000;
 
@@ -129,7 +151,7 @@
     function renderHero() {
         var el = document.getElementById('svHero');
         if (!el) return;
-        var heroImg = 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&q=80';
+        var heroImg = '../images/heroes/services.jpg';
         el.innerHTML =
             '<div class="sv-hero-bg"><img src="' + heroImg + '" alt=""></div>' +
             '<div class="sv-hero-overlay"></div>' +
@@ -186,6 +208,21 @@
                 var pResult = await client.rpc('get_public_partners');
                 if (pResult.data && pResult.data.length > 0) {
                     partners = shuffle(pResult.data).slice(0, 10);
+
+                    // Рейтинг и пол лежат в карточках игроков, а не в профилях:
+                    // тем же вторым запросом их берёт страница «Поиск игрока»
+                    var ids = partners.map(function(x) { return x.id; });
+                    var plRes = await client.from('players')
+                        .select('id, ntrp_rating, gender')
+                        .in('id', ids);
+                    var plMap = {};
+                    (plRes.data || []).forEach(function(x) { plMap[x.id] = x; });
+                    partners.forEach(function(x) {
+                        var pl = plMap[x.id];
+                        if (!pl) return;
+                        x.ntrp_rating = pl.ntrp_rating;
+                        if (pl.gender) x.gender = pl.gender;
+                    });
                 }
             } catch(e) {
                 console.error('Supabase partners error:', e);
@@ -194,7 +231,10 @@
 
         _courts = courts || [];
         _coaches = coaches || [];
-        _partners = partners || [];
+        // Игроков в базе три сотни, а в ленту помещается десяток. Берём их
+        // вперемешку и не больше десяти: при каждом заходе на странице
+        // оказываются разные люди, а не одни и те же первые по алфавиту
+        _partners = shuffle(partners || []).slice(0, PARTNERS_IN_STRIP);
 
         // Load max discounts for partner courts + coaches
         if (client && (_courts.length || _coaches.length)) {
@@ -284,7 +324,7 @@
         // Courts column
         html += '<div class="sv-section" data-type="courts">';
         html += '<div class="sv-column-header">';
-        html += '<h2 class="sv-column-title"><span>' + L.courtsTitle + '</span></h2>';
+        html += '<h2 class="sv-column-title">' + L.courtsTitle + '</h2>';
         html += '<a href="' + courtsPage + '" class="sv-view-all">' + L.viewAllCourts + ' ' + arrowSvg + '</a>';
         html += '</div>';
         if (_courts.length === 0) {
@@ -302,7 +342,7 @@
         // Coaches column
         html += '<div class="sv-section" data-type="coaches">';
         html += '<div class="sv-column-header">';
-        html += '<h2 class="sv-column-title"><span>' + L.coachesTitle + '</span></h2>';
+        html += '<h2 class="sv-column-title">' + L.coachesTitle + '</h2>';
         html += '<a href="' + coachesPage + '" class="sv-view-all">' + L.viewAllCoaches + ' ' + arrowSvg + '</a>';
         html += '</div>';
         if (_coaches.length === 0) {
@@ -320,16 +360,17 @@
         // Partners section (centered below)
         html += '<div class="sv-section sv-partners-section" data-type="partners">';
         html += '<div class="sv-column-header">';
-        html += '<h2 class="sv-column-title"><span>' + L.partnersTitle + '</span></h2>';
+        html += '<h2 class="sv-column-title">' + L.partnersTitle + '</h2>';
         html += '<a href="' + partnersPage + '" class="sv-view-all">' + L.viewAllPartners + ' ' + arrowSvg + '</a>';
         html += '</div>';
         if (_partners.length === 0) {
             html += '<div class="sv-empty">' + emptySvg + '<p>' + L.emptyPartners + '</p></div>';
         } else {
-            html += '<div class="sv-card-grid">';
-            html += renderFeaturedPartner(_partners[0]);
-            if (_partners.length > 1) {
-                html += renderCarousel(_partners.slice(1), 'partners');
+            // Десять игроков вперемешку, новые при каждой загрузке. Без
+            // движения: бегущая лента мешала прочитать карточку и нажать
+            html += '<div class="sv-players-box">';
+            for (var pi = 0; pi < _partners.length; pi++) {
+                html += renderCompactPartner(_partners[pi], pi);
             }
             html += '</div>';
         }
@@ -337,13 +378,16 @@
 
         container.innerHTML = html;
         attachEvents();
+        revealTelegramMarks();
 
-        // Normalize carousel speed: ~4s per item so all scroll at the same rate
+        // Скорость ленты как у спонсоров на главной: там на карточку уходит
+        // примерно двенадцать секунд, и имена успеваешь прочитать. Было
+        // четыре — лента пролетала мимо
         var carousels = container.querySelectorAll('.sv-carousel');
         carousels.forEach(function(car) {
             var itemCount = car.children.length / 2;
             if (itemCount > 0) {
-                car.style.animationDuration = (itemCount * 4) + 's';
+                car.style.animationDuration = (itemCount * 12) + 's';
             }
         });
 
@@ -542,7 +586,13 @@
         '</a>';
     }
 
-    // --- Compact Partner (card for carousel) ---
+    /**
+     * Карточка игрока: категория крупно в углу, зелёная точка у тех, кто
+     * заходил недавно, и кнопка «Предложить игру».
+     *
+     * Раньше это была ровная плитка с именем и подписью — блок читался как
+     * таблица, и по нему было не понять, с кем стоит играть.
+     */
     function renderCompactPartner(p, idx) {
         var name = getPartnerName(p);
         var level = getPartnerLevel(p);
@@ -550,19 +600,73 @@
 
         var avatarHtml;
         if (p.avatar_url) {
-            avatarHtml = '<img class="sv-compact-avatar" src="' + p.avatar_url + '" alt="" loading="lazy">';
+            avatarHtml = '<img class="sv-player-ava" src="' + p.avatar_url + '" alt="" loading="lazy">';
         } else {
-            avatarHtml = '<div class="sv-compact-initials">' + getInitials(name) + '</div>';
+            avatarHtml = '<div class="sv-player-ava sv-player-initials">' + getInitials(name) + '</div>';
         }
 
-        return '<div class="sv-compact" data-type="partners" data-idx="' + idx + '">' +
-            '<div class="sv-compact-partner-head">' +
+        // Пол, уровень игры и когда человек последний раз заходил — то, по
+        // чему решают, звать его или нет. Без этого карточка была витриной
+        // В профилях пол пишут как female/male, в карточках игроков — women/men
+        var g = String(p.gender || '');
+        var genderMark = (g === 'female' || g === 'women') ? '\u2640'
+            : ((g === 'male' || g === 'men') ? '\u2642' : '');
+        var playLevel = levelLabel(p.play_level);
+        var seen = lastSeenLabel(p.last_seen);
+
+        return '<div class="sv-player" data-type="partners" data-idx="' + idx + '">' +
+            '<span class="sv-player-cat">' + level + '</span>' +
+            (p.ntrp_rating ? '<span class="sv-player-ntrp">' + p.ntrp_rating +
+                '<small>NTRP</small></span>' : '') +
+            '<div class="sv-player-ava-wrap">' +
                 avatarHtml +
-                (online ? '<span class="sv-compact-online-dot"></span>' : '') +
+                (online ? '<span class="sv-player-dot" title="' + L.online + '"></span>' : '') +
             '</div>' +
-            '<h4>' + name + '</h4>' +
-            '<div class="sv-compact-sub">' + level + '</div>' +
+            '<div class="sv-player-name">' +
+                (genderMark ? '<span class="sv-player-gender">' + genderMark + '</span> ' : '') + name +
+            '</div>' +
+            (playLevel ? '<div class="sv-player-level">' + playLevel + '</div>' : '') +
+            '<div class="sv-player-seen' + (online ? ' is-online' : '') + '">' + seen + '</div>' +
+            // Значок Telegram виден только членам КСЛТ: гостю знать, у кого
+            // есть телеграм, незачем — это личные данные человека
+            '<button class="sv-player-btn" type="button">' +
+                (p.has_telegram ? '<span class="sv-tg-mark" hidden>' + tgIconSmall + '</span>' : '') +
+                L.invite +
+            '</button>' +
         '</div>';
+    }
+
+    var tgIconSmall = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:5px;vertical-align:-2px"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>';
+
+    /**
+     * Значки Telegram открываем только тем, у кого действующее членство.
+     * Проверяем один раз после отрисовки: до ответа значки скрыты.
+     */
+    function revealTelegramMarks() {
+        var marks = document.querySelectorAll('.sv-tg-mark');
+        if (!marks.length || typeof window.checkMembership !== 'function') return;
+        window.checkMembership().then(function(info) {
+            if (!info || !info.active) return;
+            marks.forEach(function(el) { el.hidden = false; });
+        }).catch(function() {});
+    }
+
+    /** Уровень игры словами; не задан — строку не рисуем вовсе */
+    function levelLabel(lvl) {
+        var map = { beginner: L.levelBeginner, intermediate: L.levelIntermediate, advanced: L.levelAdvanced };
+        return map[lvl] || '';
+    }
+
+    /** «В сети», «был вчера», «был 3 дня назад» — насколько человек живой */
+    function lastSeenLabel(lastSeen) {
+        if (!lastSeen) return L.seenLong;
+        var diff = Date.now() - new Date(lastSeen).getTime();
+        if (diff < ONLINE_THRESHOLD) return L.seenNow;
+        var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        if (days < 1) return L.seenToday;
+        if (days === 1) return L.seenYesterday;
+        if (days < 30) return L.seenDays.replace('{n}', days);
+        return L.seenLong;
     }
 
     // --- Re-render a single section ---
@@ -594,7 +698,18 @@
         if (!container) return;
 
         container.addEventListener('click', function(e) {
-            // Compact card click → swap with featured
+            // Карточка в ленте открывает свою страницу. Раньше клик менял её
+            // местами с крупной карточкой сверху — человек нажимал на корт и
+            // оставался на той же странице, гадая, что произошло
+            // Игрок: и карточка, и кнопка ведут на страницу поиска игрока,
+            // там уже можно предложить игру
+            var player = e.target.closest('.sv-player');
+            if (player) {
+                e.preventDefault();
+                window.location.href = partnersPage;
+                return;
+            }
+
             var compact = e.target.closest('.sv-compact');
             if (compact) {
                 e.preventDefault();
@@ -603,13 +718,12 @@
                 if (!type || isNaN(idx)) return;
 
                 var items = type === 'courts' ? _courts : (type === 'coaches' ? _coaches : _partners);
-                if (idx > 0 && idx < items.length) {
-                    var temp = items[0];
-                    items[0] = items[idx];
-                    items[idx] = temp;
-                    renderSection(type);
-                }
-                return;
+                var item = items[idx];
+                if (!item) return;
+
+                if (type === 'courts') window.location.href = courtPage + '?id=' + item.id;
+                else if (type === 'coaches') window.location.href = coachPage + '?id=' + item.id;
+                else window.location.href = partnersPage;
             }
         });
     }

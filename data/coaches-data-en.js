@@ -206,7 +206,7 @@ var coachesData = [
 ];
 
 window.coachesLabels = {
-    heroTitle: "KSLT Coaches",
+    heroTitle: "Coaches",
     heroSubtitle: "Professional coaches for players of all levels",
     filterAll: "All",
     filterAdults: "Adults",

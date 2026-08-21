@@ -18,7 +18,7 @@ window.newsLabels = {
     sponsorsTitle: "Өнөктөштөр жана демөөрчүлөр",
     sponsorsGeneral: "Башкы демөөрчү",
     newsListTitle: "Жаңылыктар",
-    newsListSubtitle: "Кыргызстандагы теннис дүйнөсүнөн акыркы жаңылыктар",
+    newsListSubtitle: "Теннис дүйнөсүнөн акыркы жаңылыктар",
     featuredLabel: "Башкы",
     readMore: "Толугураак окуу",
     allArticles: "Бардык макалалар",

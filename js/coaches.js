@@ -69,7 +69,7 @@
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var L = window.coachesLabels || (isKg ? {
-        heroTitle: 'KSLT Машыктыруучулары',
+        heroTitle: 'Машыктыруучулар',
         heroSubtitle: 'Бардык деңгээлдеги оюнчулар үчүн кесипкөй машыктыруучулар',
         filterAll: 'Баары',
         filterAdults: 'Чоңдор',
@@ -119,7 +119,7 @@
         pickSubmit: 'Арзандатуу алуу',
         noDiscountsConfigured: 'Арзандатуу жок'
     } : {
-        heroTitle: "Тренеры KSLT",
+        heroTitle: "Тренеры",
         heroSubtitle: "Профессиональные тренеры для игроков всех уровней",
         filterAll: "Все",
         filterAdults: "Взрослые",
@@ -335,9 +335,11 @@
         var hero = document.getElementById('coachesHero');
         if (!hero) return;
         hero.innerHTML =
-            '<div class="co-hero-bg" style="background-image: url(\'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1400&q=80\')"></div>' +
+            '<div class="co-hero-bg" style="background-image: url(\'../images/heroes/coaches.jpg\')"></div>' +
+            // Название без лаймовой подсветки: заголовки разделов на сайте
+            // белые, и «KSLT» тут выбивался цветом из общего ряда
             '<div class="co-hero-content">' +
-                '<h1 class="co-hero-title">' + L.heroTitle.replace('KSLT', '<span>KSLT</span>') + '</h1>' +
+                '<h1 class="co-hero-title">' + L.heroTitle + '</h1>' +
                 '<p class="co-hero-subtitle">' + L.heroSubtitle + '</p>' +
             '</div>';
     }
@@ -356,21 +358,23 @@
         ];
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
 
-        // Возврат живёт ВНУТРИ прилипающего блока с поиском и фильтрами.
-        // Стоя над ним, он уезжал при первой же прокрутке: прилипает блок,
-        // а ссылка оставалась снаружи
+        // Полоса та же, что на страницах категорий турниров и на кортах:
+        // общий вид на весь сайт. Ссылка «назад» внутри полосы — снаружи
+        // она уезжала при первой же прокрутке
+        container.className = 'trn-filters';
         var html =
-            '<a href="' + servicesLink + '" class="kslt-back kslt-back-inline">\u2190 ' +
-                (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
-            '<div class="co-search-wrap">' +
-                '<svg class="co-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-                '<input type="text" class="co-search-input" id="coachesSearch" placeholder="' + L.searchPlaceholder + '" autocomplete="off">' +
-            '</div>' +
-            '<div class="co-filters">';
+            '<div class="trn-filters-inner">' +
+                '<a href="' + servicesLink + '" class="kslt-back trn-back">\u2190 ' +
+                    (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+                '<div class="trn-search-wrap">' +
+                    '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                    '<input type="text" class="trn-search-input" id="coachesSearch" placeholder="' + L.searchPlaceholder + '" autocomplete="off">' +
+                '</div>' +
+                '<div class="trn-chips">';
         filters.forEach(function(f) {
-            html += '<button class="co-filter-btn' + (f.key === 'all' ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
+            html += '<button class="trn-chip co-filter-btn' + (f.key === 'all' ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
         });
-        html += '</div>';
+        html += '</div></div>';
         container.innerHTML = html;
 
         // Detect stuck state

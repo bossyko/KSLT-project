@@ -232,7 +232,7 @@ function getLabels() {
         sponsorsTitle: "Партнёры и спонсоры",
         sponsorsGeneral: "Генеральный спонсор",
         newsListTitle: "Новости",
-        newsListSubtitle: "Последние новости из мира тенниса в Кыргызстане",
+        newsListSubtitle: "Последние новости из мира тенниса",
         featuredLabel: "Главное",
         readMore: "Читать",
         allArticles: "Все статьи",
@@ -1125,21 +1125,24 @@ function renderNewsList() {
     });
 
     // Build filters + grid + pagination shell
-    var chipsHtml = '<button class="news-filter-btn' + (currentFilter === 'all' ? ' active' : '') + '" data-cat="all">' + labels.filterAll + '</button>';
+    // Полоса та же, что на турнирах, кортах и тренерах: общий вид на весь сайт
+    var chipsHtml = '<button class="trn-chip news-filter-btn' + (currentFilter === 'all' ? ' active' : '') + '" data-cat="all">' + labels.filterAll + '</button>';
     categories.forEach(function(cat) {
-        chipsHtml += '<button class="news-filter-btn' + (currentFilter === cat.key ? ' active' : '') + '" data-cat="' + cat.key + '">' + cat.label + '</button>';
+        chipsHtml += '<button class="trn-chip news-filter-btn' + (currentFilter === cat.key ? ' active' : '') + '" data-cat="' + cat.key + '">' + cat.label + '</button>';
     });
 
     var filtersHtml =
-        '<div class="nw-search-wrap">' +
-            '<svg class="nw-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-            '<input type="text" class="nw-search-input" id="newsSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
-        '</div>' +
-        '<div class="news-filter-chips">' + chipsHtml + '</div>';
+        '<div class="trn-filters-inner">' +
+            '<div class="trn-search-wrap">' +
+                '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                '<input type="text" class="trn-search-input" id="newsSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
+            '</div>' +
+            '<div class="trn-chips">' + chipsHtml + '</div>' +
+        '</div>';
 
     // Insert filters as direct child of <main> so sticky works through sponsors
     var filtersWrapper = document.createElement('div');
-    filtersWrapper.className = 'news-filters';
+    filtersWrapper.className = 'trn-filters';
     filtersWrapper.id = 'newsFilters';
     filtersWrapper.innerHTML = filtersHtml;
     notFound.parentNode.insertBefore(filtersWrapper, notFound);

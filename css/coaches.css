@@ -32,7 +32,9 @@
     inset: 0;
     background-size: cover;
     background-position: center;
-    opacity: 0.35;
+    /* Было 0.35 — снимок превращался в тёмное пятно. Читаемость текста
+       держит затемнение поверх, а не убитая насмерть фотография */
+    opacity: 0.75;
 }
 
 .co-hero-content {

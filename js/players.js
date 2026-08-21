@@ -143,6 +143,17 @@
         return count;
     }
 
+    /**
+     * У женщин три категории: Masters, Tour и Futures — так у клуба.
+     * Pro-Masters и Challengers женскими не бывают, и показывать их пустыми
+     * нельзя: человек решит, что туда просто некого записать.
+     */
+    var WOMEN_CATEGORIES = ['women-masters', 'women-tour', 'women-futures'];
+
+    function isWomenCategory(key) {
+        return WOMEN_CATEGORIES.indexOf(key) !== -1;
+    }
+
     function getCategory(tab) {
         return categoriesData[tab] || categoriesData['men-promasters'] || { players: [] };
     }
@@ -267,6 +278,12 @@
         var params = new URLSearchParams(window.location.search);
         var tabParam = params.get('tab');
 
+        // Прямая ссылка на женские Pro-Masters или Challengers ведёт в
+        // Masters: таких категорий у женщин нет
+        if (tabParam && tabParam.indexOf('women-') === 0 && !isWomenCategory(tabParam)) {
+            tabParam = 'women-masters';
+        }
+
         // Category page mode: ?tab=men-tour → full page for that category
         if (tabParam && categoriesData[tabParam]) {
             isCategoryMode = true;
@@ -376,7 +393,7 @@
             if (categoriesData.hasOwnProperty(key)) {
                 var cat = categoriesData[key];
                 if (cat.gender === 'men') menCats.push({ key: key, name: cat.name });
-                else womenCats.push({ key: key, name: cat.name });
+                else if (isWomenCategory(key)) womenCats.push({ key: key, name: cat.name });
             }
         }
 
@@ -591,7 +608,6 @@
         var labels = getLabels();
         var isEn = isEnPage();
         var isKg = isKgPage();
-        var genderIcon = cat.gender === 'men' ? '\u2642' : '\u2640';
         var playersPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
 
         // Extract base category ID (e.g. "men-promasters" → "promasters")
@@ -613,24 +629,42 @@
         }
 
         // Render hero
-        renderCatHero(cat, genderIcon, labels, playersPage, tournamentsCount);
+        renderCatHero(cat, labels, playersPage, tournamentsCount);
 
-        // Hide podium
+        var hasWomenHalf = isWomenCategory('women-' + baseCatId);
+
+        // Пьедестал тройки — такой же, как на главной странице рейтинга.
+        // Раньше на страницах категорий он прятался, и первое, что видел
+        // человек, был безликий список
         var podiumEl = document.getElementById('playersPodium');
-        if (podiumEl) podiumEl.style.display = 'none';
+        if (podiumEl) {
+            podiumEl.style.display = '';
+            renderPodium(tabId, true);
+        }
 
         // Render sticky category bar in filters section (back link + name + search — all inline)
         var filtersEl = document.getElementById('playersFilters');
         if (filtersEl) {
-            filtersEl.classList.add('pl-cat-mode');
+            // Полоса та же, что на турнирах, кортах и тренерах: ссылка назад,
+            // поиск и название — одной строкой. Раньше они стояли на трёх
+            // разных уровнях и не совпадали ни с чем на странице
+            filtersEl.className = 'trn-filters pl-cat-mode';
             filtersEl.innerHTML =
-                '<a href="' + playersPage + '" class="kslt-back" style="align-self:flex-start;">\u2190 ' + labels.catPageBack + '</a>' +
-                '<div class="pl-cat-sticky-bar">' +
-                    '<div class="pl-cat-sticky-name">' + esc(cat.name) + ' <span>' + genderIcon + '</span></div>' +
-                    '<div class="pl-cat-sticky-search">' +
-                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-                        '<input type="text" id="catSearchSticky" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
+                '<div class="trn-filters-inner">' +
+                    '<a href="' + playersPage + '" class="kslt-back trn-back">\u2190 ' + labels.catPageBack + '</a>' +
+                    '<div class="trn-search-wrap">' +
+                        '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                        '<input type="text" class="trn-search-input" id="catSearchSticky" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
                     '</div>' +
+                    // Переключатель пола показываем только там, где есть обе
+                    // половины: женских Pro-Masters и Challengers у клуба нет
+                    (hasWomenHalf ? '<div class="trn-chips">' +
+                        '<button class="trn-chip pl-cat-gender-btn' + (cat.gender === 'men' ? ' active' : '') + '" data-gender="men">' +
+                            (isEnPage() ? 'Men' : (isKgPage() ? 'Эркектер' : 'Мужчины')) + '</button>' +
+                        '<button class="trn-chip pl-cat-gender-btn' + (cat.gender === 'women' ? ' active' : '') + '" data-gender="women">' +
+                            (isEnPage() ? 'Women' : (isKgPage() ? 'Аялдар' : 'Женщины')) + '</button>' +
+                    '</div>' : '') +
+                    '<span class="trn-cat-name">' + esc(cat.name) + '</span>' +
                 '</div>';
 
             // Sentinel before filters — when scrolled past hero, add .stuck
@@ -674,7 +708,7 @@
         });
     }
 
-    function renderCatHero(cat, genderIcon, labels, playersPage, tournamentsCount) {
+    function renderCatHero(cat, labels, playersPage, tournamentsCount) {
         var container = document.getElementById('playersHero');
         if (!container) return;
 
@@ -687,26 +721,14 @@
 
         var onlineLabel = isEnPage() ? 'Online' : (isKgPage() ? 'Онлайн' : 'Онлайн');
 
-        var logged = isLoggedIn();
-        var searchHtml =
-            '<div class="pl-search-wrap pl-cat-search-wrap">' +
-                '<svg class="pl-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-                '<input type="text" class="pl-search-input" id="catSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
-            '</div>';
-
-        var menLabel = isEnPage() ? 'Men' : (isKgPage() ? 'Эркектер' : 'Мужчины');
-        var womenLabel = isEnPage() ? 'Women' : (isKgPage() ? 'Аялдар' : 'Женщины');
-        var genderToggleHtml =
-            '<div class="pl-gender-tabs" style="margin-top:16px">' +
-                '<button class="pl-cat-gender-btn pl-gender-tab' + (cat.gender === 'men' ? ' active' : '') + '" data-gender="men">' + menLabel + '</button>' +
-                '<button class="pl-cat-gender-btn pl-gender-tab' + (cat.gender === 'women' ? ' active' : '') + '" data-gender="women">' + womenLabel + '</button>' +
-            '</div>';
+        // Ни поиска, ни переключателя пола в шапке нет: и то и другое живёт
+        // в липкой полосе и здесь только дублировалось
 
         container.innerHTML =
             '<div class="pl-hero-bg"></div>' +
             '<div class="pl-hero-overlay"></div>' +
             '<div class="pl-cat-hero-content">' +
-                '<h1 class="pl-cat-title">' + esc(cat.name) + ' <span class="pl-cat-gender">' + genderIcon + '</span></h1>' +
+                '<h1 class="pl-cat-title">' + esc(cat.name) + '</h1>' +
                 '<div class="pl-cat-stats">' +
                     '<div class="pl-cat-stat">' +
                         '<div class="pl-cat-stat-value">' + playerCount + '</div>' +
@@ -721,8 +743,6 @@
                         '<div class="pl-cat-stat-label">' + onlineLabel + '</div>' +
                     '</div>' +
                 '</div>' +
-                genderToggleHtml +
-                searchHtml +
             '</div>';
     }
 

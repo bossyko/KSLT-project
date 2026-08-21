@@ -18,7 +18,7 @@ window.newsLabels = {
     sponsorsTitle: "Partners & Sponsors",
     sponsorsGeneral: "General Sponsor",
     newsListTitle: "News",
-    newsListSubtitle: "Latest tennis news from Kyrgyzstan",
+    newsListSubtitle: "Latest news from the world of tennis",
     featuredLabel: "Featured",
     readMore: "Read article",
     allArticles: "All Articles",

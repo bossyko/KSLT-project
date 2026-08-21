@@ -206,7 +206,7 @@ var coachesData = [
 ];
 
 window.coachesLabels = {
-    heroTitle: 'KSLT Машыктыруучулары',
+    heroTitle: 'Машыктыруучулар',
     heroSubtitle: 'Бардык деңгээлдеги оюнчулар үчүн кесипкөй машыктыруучулар',
     filterAll: 'Баары',
     filterAdults: 'Чоңдор',

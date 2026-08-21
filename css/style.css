@@ -3353,7 +3353,8 @@ h2 {
 
 .section-sponsors-compact {
     background: var(--bg-secondary);
-    padding-bottom: 5px !important;
+    /* Было 5 — логотипы упирались в нижний край полосы */
+    padding-bottom: 32px !important;
 }
 
 .section-sponsors-compact .section-header {
@@ -3995,6 +3996,29 @@ h2 {
 
 .trn-chip.active .trn-chip-count {
     opacity: 0.6;
+}
+
+/* Выпадающий список внутри полосы фильтров — например NTRP на поиске
+   игрока: выглядит как чип, а не как поле из другой оперы */
+.trn-chips select {
+    padding: 8px 18px;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-family: var(--font-primary);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* Название категории в полосе — справа от поиска, тем же ростом, что чипы */
+.trn-cat-name {
+    margin-left: auto;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
 }
 
 .trn-chip-div {

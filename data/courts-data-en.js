@@ -146,8 +146,8 @@ var courtsData = [
 ];
 
 window.courtsLabels = {
-    heroTitle: "KSLT Courts",
-    heroSubtitle: "Tennis courts in Bishkek for training and tournaments",
+    heroTitle: "Courts",
+    heroSubtitle: "Where to play in Kyrgyzstan: surface, prices, booking",
     filterAll: "All",
     filterIndoor: "Indoor",
     filterOutdoor: "Outdoor",

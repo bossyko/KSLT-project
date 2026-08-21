@@ -46,8 +46,8 @@
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var L_labels = window.courtsLabels || (isKg ? {
-        heroTitle: 'KSLT Корттору',
-        heroSubtitle: 'Бишкектеги теннис корттору машыгуу жана мелдештер үчүн',
+        heroTitle: 'Корттор',
+        heroSubtitle: 'Кыргызстанда кайда ойноо керек: жабуу, баа, ижара',
         filterAll: 'Баары',
         filterIndoor: 'Жабык',
         filterOutdoor: 'Ачык',
@@ -107,8 +107,8 @@
         thService: 'Кызмат',
         thServicePrice: 'Баасы'
     } : {
-        heroTitle: "Корты KSLT",
-        heroSubtitle: "Теннисные корты Бишкека для тренировок и турниров",
+        heroTitle: "Корты",
+        heroSubtitle: "Где играть в Кыргызстане: покрытие, цены, аренда",
         filterAll: "Все",
         filterIndoor: "Крытые",
         filterOutdoor: "Открытые",
@@ -498,9 +498,9 @@
         var hero = document.getElementById('courtsHero');
         if (!hero) return;
         hero.innerHTML =
-            '<div class="ct-hero-bg" style="background-image: url(\'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=1400&q=80\')"></div>' +
+            '<div class="ct-hero-bg" style="background-image: url(\'../images/heroes/courts.jpg\')"></div>' +
             '<div class="ct-hero-content">' +
-                '<h1 class="ct-hero-title">' + L_labels.heroTitle.replace('KSLT', '<span>KSLT</span>') + '</h1>' +
+                '<h1 class="ct-hero-title">' + L_labels.heroTitle + '</h1>' +
                 '<p class="ct-hero-subtitle">' + L_labels.heroSubtitle + '</p>' +
             '</div>';
     }
@@ -509,37 +509,31 @@
         var container = document.getElementById('courtsFilters');
         if (!container) return;
 
-        container.className = 'ct-filters-wrap';
+        // Полоса та же, что на страницах категорий турниров: общий вид на
+        // весь сайт. Классы trn- лежат в style.css
+        container.className = 'trn-filters';
 
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
 
         // Возврат живёт ВНУТРИ прилипающего блока с поиском и фильтрами.
         // Стоя над ним, он уезжал при первой же прокрутке
         var html =
-            '<a href="' + servicesLink + '" class="kslt-back kslt-back-inline">\u2190 ' +
-                (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
-            '<div class="ct-search-wrap">' +
-                '<svg class="ct-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-                '<input type="text" class="ct-search-input" id="courtsSearch" placeholder="' + L_labels.searchPlaceholder + '" autocomplete="off">' +
-            '</div>' +
-            '<div class="ct-filters-row">' +
-                '<div class="ct-filter-group">' +
-                    '<span class="ct-filter-label">' + L_labels.filterType + '</span>' +
-                    '<div class="ct-filter-chips">' +
-                        '<button class="ct-filter-btn active" data-filter-type="all">' + L_labels.filterAll + '</button>' +
-                        '<button class="ct-filter-btn" data-filter-type="indoor">' + L_labels.filterIndoor + '</button>' +
-                        '<button class="ct-filter-btn" data-filter-type="outdoor">' + L_labels.filterOutdoor + '</button>' +
-                    '</div>' +
+            '<div class="trn-filters-inner">' +
+                '<a href="' + servicesLink + '" class="kslt-back trn-back">\u2190 ' +
+                    (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+                '<div class="trn-search-wrap">' +
+                    '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                    '<input type="text" class="trn-search-input" id="courtsSearch" placeholder="' + L_labels.searchPlaceholder + '" autocomplete="off">' +
                 '</div>' +
-                '<div class="ct-filter-divider"></div>' +
-                '<div class="ct-filter-group">' +
-                    '<span class="ct-filter-label">' + L_labels.filterSurface + '</span>' +
-                    '<div class="ct-filter-chips">' +
-                        '<button class="ct-filter-btn active" data-filter-surface="all">' + L_labels.filterAll + '</button>' +
-                        '<button class="ct-filter-btn" data-filter-surface="hard">' + L_labels.filterHard + '</button>' +
-                        '<button class="ct-filter-btn" data-filter-surface="clay">' + L_labels.filterClay + '</button>' +
-                        '<button class="ct-filter-btn" data-filter-surface="carpet">' + L_labels.filterCarpet + '</button>' +
-                    '</div>' +
+                '<div class="trn-chips">' +
+                    '<button class="trn-chip active ct-filter-btn" data-filter-type="all">' + L_labels.filterAll + '</button>' +
+                    '<button class="trn-chip ct-filter-btn" data-filter-type="indoor">' + L_labels.filterIndoor + '</button>' +
+                    '<button class="trn-chip ct-filter-btn" data-filter-type="outdoor">' + L_labels.filterOutdoor + '</button>' +
+                    '<span class="trn-chip-div"></span>' +
+                    '<button class="trn-chip active ct-filter-btn" data-filter-surface="all">' + L_labels.filterAll + '</button>' +
+                    '<button class="trn-chip ct-filter-btn" data-filter-surface="hard">' + L_labels.filterHard + '</button>' +
+                    '<button class="trn-chip ct-filter-btn" data-filter-surface="clay">' + L_labels.filterClay + '</button>' +
+                    '<button class="trn-chip ct-filter-btn" data-filter-surface="carpet">' + L_labels.filterCarpet + '</button>' +
                 '</div>' +
             '</div>';
         container.innerHTML = html;
@@ -792,15 +786,17 @@
         document.addEventListener('click', function(e) {
             if (!e.target.classList.contains('ct-filter-btn')) return;
 
+            // Группы больше нет — чипы идут одной строкой, поэтому снимаем
+            // отметку у соседей по признаку, а не по общему предку
             if (e.target.hasAttribute('data-filter-type')) {
                 currentTypeFilter = e.target.getAttribute('data-filter-type');
-                e.target.closest('.ct-filter-group').querySelectorAll('.ct-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                document.querySelectorAll('[data-filter-type]').forEach(function(b) { b.classList.remove('active'); });
                 e.target.classList.add('active');
                 _currentPage = 1;
                 renderGrid();
             } else if (e.target.hasAttribute('data-filter-surface')) {
                 currentSurfaceFilter = e.target.getAttribute('data-filter-surface');
-                e.target.closest('.ct-filter-group').querySelectorAll('.ct-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                document.querySelectorAll('[data-filter-surface]').forEach(function(b) { b.classList.remove('active'); });
                 e.target.classList.add('active');
                 _currentPage = 1;
                 renderGrid();

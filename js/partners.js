@@ -10,8 +10,8 @@
 
     var L = isEn ? {
         heroTagline: 'KSLT Partners',
-        heroTitle: 'Player <span>Search</span>',
-        heroDesc: 'Connect with tennis players in Bishkek for games and practice',
+        heroTitle: 'Player search',
+        heroDesc: 'Who to play with today: players of your level nearby',
         online: 'Online',
         offline: 'Offline',
         filterAll: 'All',
@@ -48,8 +48,8 @@
         modalRegDisclaimer: 'By paying, you agree to the <a href="rules-en.html" target="_blank">rules</a> and <a href="pricing-en.html" target="_blank">pricing</a> of KSLT'
     } : isKg ? {
         heroTagline: 'KSLT Өнөктөштөр',
-        heroTitle: '<span>Оюнчу</span> издөө',
-        heroDesc: 'Оюн жана машыгуу үчүн Бишкектеги теннисчилерди табыңыз',
+        heroTitle: 'Оюнчу издөө',
+        heroDesc: 'Бүгүн ким менен ойноо: жаныңыздагы деңгээлиңиздеги оюнчулар',
         online: 'Онлайн',
         offline: 'Офлайн',
         filterAll: 'Баары',
@@ -86,8 +86,8 @@
         modalRegDisclaimer: 'Баскычты басуу менен, <a href="rules-kg.html" target="_blank">эрежелер</a> жана <a href="pricing-kg.html" target="_blank">баалар</a> менен тааныштыгыңызды тастыктайсыз'
     } : {
         heroTagline: 'КСЛТ Сообщество',
-        heroTitle: 'Поиск <span>игрока</span>',
-        heroDesc: 'Найди партнёра по теннису в Бишкеке — для игры и тренировок',
+        heroTitle: 'Поиск игрока',
+        heroDesc: 'С кем сыграть сегодня: игроки твоего уровня рядом',
         online: 'Онлайн',
         offline: 'Офлайн',
         filterAll: 'Все',
@@ -230,7 +230,7 @@
     function renderHero() {
         var el = document.getElementById('ptHero');
         if (!el) return;
-        var heroImg = 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=1920&q=80';
+        var heroImg = '../images/heroes/partners.jpg';
         el.innerHTML =
             '<div class="pt-hero-bg"><img src="' + heroImg + '" alt=""></div>' +
             '<div class="pt-hero-overlay"></div>' +
@@ -255,18 +255,22 @@
 
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
 
+        // Полоса та же, что на страницах категорий турниров, кортов и
+        // тренеров: общий вид на весь сайт
+        el.className = 'trn-filters';
         var html =
-            '<a href="' + servicesLink + '" class="kslt-back kslt-back-inline">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
-            '<div class="pt-search-wrap">' +
-            '<svg class="pt-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-            '<input type="search" class="pt-search" id="ptSearch" autocomplete="off" ' +
+            '<div class="trn-filters-inner">' +
+            '<a href="' + servicesLink + '" class="kslt-back trn-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+            '<div class="trn-search-wrap">' +
+            '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+            '<input type="search" class="trn-search-input" id="ptSearch" autocomplete="off" ' +
                 'autocorrect="off" spellcheck="false" placeholder="' + L.searchPlaceholder + '">' +
             '</div>';
 
-        html += '<div class="pt-filter-row">';
+        html += '<div class="trn-chips">';
         for (var i = 0; i < filters.length; i++) {
             var f = filters[i];
-            html += '<button class="pt-filter-btn' + (f.key === _currentFilter ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
+            html += '<button class="trn-chip pt-filter-btn' + (f.key === _currentFilter ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
         }
         var ntrpRanges = [
             { value: '', label: isEn ? 'All NTRP' : (isKg ? 'Баары NTRP' : 'Все NTRP') },
@@ -281,7 +285,7 @@
             html += '<option value="' + ntrpRanges[n].value + '">' + ntrpRanges[n].label + '</option>';
         }
         html += '</select>';
-        html += '</div>';
+        html += '</div></div>';
 
         el.innerHTML = html;
 
