@@ -14,7 +14,8 @@
     var inPages = window.location.pathname.indexOf('/pages/') !== -1;
     var prefix = inPages ? '' : 'pages/';
     var dashUrl = prefix + (isEn ? 'dashboard-en.html' : (isKg ? 'dashboard-kg.html' : 'dashboard.html'));
-    var adminUrl = prefix + (isEn ? 'admin-en.html' : 'admin.html');
+    // Админка одна и только на русском
+    var adminUrl = prefix + 'admin.html';
 
     var L = isEn ? {
         profile: 'My Profile',

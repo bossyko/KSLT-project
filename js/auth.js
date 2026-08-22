@@ -259,7 +259,7 @@
         if (returnUrl) return returnUrl;
         var role = localStorage.getItem('kslt_role');
         if (role === 'admin' || role === 'manager') {
-            return isEn ? 'admin-en.html' : 'admin.html';
+            return 'admin.html';   // админка только на русском
         }
         return 'dashboard.html';
     }

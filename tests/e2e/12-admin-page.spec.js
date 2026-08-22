@@ -12,9 +12,10 @@ const { test, expect } = require('../fixtures');
 // Все проверки в файле идут от лица тестового администратора
 test.use({ storageState: require('../auth-setup').adminState });
 
+// Админка ведётся только на русском: английская страница оставлена
+// перенаправлением, проверять в ней нечего
 const ADMIN_PAGES = [
     { path: '/pages/admin.html', lang: 'RU', name: 'Admin RU' },
-    { path: '/pages/admin-en.html', lang: 'EN', name: 'Admin EN' },
 ];
 
 // Helper: filter out non-critical JS errors
@@ -176,11 +177,12 @@ test.describe('Admin Page — Navigation Elements', () => {
             expect(await navLinks.count()).toBeGreaterThanOrEqual(1);
         });
 
-        test(`${adminPage.name}: Has language dropdown`, async ({ page }) => {
+        // Админка ведётся только на русском, выбора языка в ней быть не должно
+        test(`${adminPage.name}: Нет переключателя языка`, async ({ page }) => {
             await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
 
             const langDropdown = page.locator('#langDropdown, .lang-dropdown');
-            expect(await langDropdown.count()).toBe(1);
+            expect(await langDropdown.count()).toBe(0);
         });
 
         test(`${adminPage.name}: Has burger menu button`, async ({ page }) => {
