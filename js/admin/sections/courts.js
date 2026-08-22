@@ -482,6 +482,7 @@
         });
 
         await loadCourtsList();
+        await loadKnownCities();
     }
 
     async function syncAllExpiredPromoted() {
@@ -835,6 +836,71 @@
         return '@' + v.replace(/^@/, '');
     }
 
+    // Города, уже заведённые в базе: название на трёх языках. Заполняется
+    // при открытии раздела, используется подсказкой в поле города
+    var crtKnownCities = [];
+
+    async function loadKnownCities() {
+        if (!A.client) return;
+        var res = await A.client.from('courts').select('city, city_en, city_kg');
+        if (res.error || !res.data) return;
+
+        var seen = {};
+        crtKnownCities = [];
+        res.data.forEach(function(row) {
+            var name = (row.city || '').trim();
+            if (!name || seen[name.toLowerCase()]) return;
+            seen[name.toLowerCase()] = true;
+            crtKnownCities.push({ ru: name, en: (row.city_en || '').trim(), kg: (row.city_kg || '').trim() });
+        });
+        crtKnownCities.sort(function(a, b) { return a.ru.localeCompare(b.ru, 'ru'); });
+    }
+
+    /**
+     * Приводит название города к общему виду: без приставок «г.» и лишних
+     * пробелов, с заглавной буквы. После дефиса тоже заглавная, чтобы
+     * «джалал-абад» стал «Джалал-Абад», а «ошская область» осталась
+     * областью, а не «Ошской Областью».
+     */
+    /**
+     * Числовое поле: только цифры и не больше разумного предела. Скидка в
+     * 150% или цена в миллион попадали в базу молча, а потом всплывали
+     * в ваучере.
+     */
+    function clampNumberInput(input, max) {
+        var digits = input.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+        var n = parseInt(digits, 10);
+        if (isNaN(n)) { input.value = ''; return 0; }
+        if (n > max) n = max;
+        input.value = String(n);
+        return n;
+    }
+
+    function normalizeCity(value) {
+        var v = String(value || '').trim().replace(/\s+/g, ' ');
+        if (!v) return '';
+        v = v.replace(/^(г\.|гор\.|город|с\.|село|пос\.|посёлок|поселок)\s+/i, '').trim();
+        if (!v) return '';
+        v = v.toLowerCase();
+        return v.replace(/(^|[-\s])([a-zа-яё])/g, function(all, sep, ch) {
+            return sep + ch.toUpperCase();
+        }).replace(/(\s)([А-ЯЁ])/g, function(all, sep, ch) {
+            // Второе слово — со строчной: «Ошская область», «Чуйская долина»
+            return sep + ch.toLowerCase();
+        });
+    }
+
+    /** Похожий город из уже заведённых: «каракол» ↔ «Кара-Кол». */
+    function similarCity(name) {
+        var key = String(name || '').toLowerCase().replace(/[^a-zа-яё0-9]/g, '');
+        if (!key) return null;
+        for (var i = 0; i < crtKnownCities.length; i++) {
+            var known = crtKnownCities[i].ru.toLowerCase().replace(/[^a-zа-яё0-9]/g, '');
+            if (known === key && crtKnownCities[i].ru !== name) return crtKnownCities[i];
+        }
+        return null;
+    }
+
     function renderCourtForm(item) {
         var container = document.getElementById('ad-courts');
         if (!container) return;
@@ -985,7 +1051,10 @@
                         '</div>' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.crtCity + '</label>' +
-                            '<input type="text" class="ad-field-input" id="adCrtCity" value="' + A.esc(item ? item.city : 'Бишкек') + '">' +
+                            '<input type="text" class="ad-field-input" id="adCrtCity" list="adCrtCityList" autocomplete="off" value="' + A.esc(item ? item.city : 'Бишкек') + '">' +
+                            '<datalist id="adCrtCityList">' +
+                                crtKnownCities.map(function(c) { return '<option value="' + A.esc(c.ru) + '">'; }).join('') +
+                            '</datalist>' +
                         '</div>' +
                         '<div class="ad-field" style="max-width:100px;">' +
                             '<label class="ad-field-label">' + L.crtPostalCode + '</label>' +
@@ -1406,19 +1475,16 @@
             if (!row) return;
             var idx = parseInt(row.dataset.idx, 10);
             if (e.target.classList.contains('ad-ct-count')) {
-                e.target.value = e.target.value.replace(/\D/g, '');
-                crtCourtTypes[idx].count = parseInt(e.target.value, 10) || 0;
+                crtCourtTypes[idx].count = clampNumberInput(e.target, 99);
             }
             if (e.target.classList.contains('ad-ct-price')) {
-                e.target.value = e.target.value.replace(/\D/g, '');
-                crtCourtTypes[idx].price = parseInt(e.target.value, 10) || 0;
+                crtCourtTypes[idx].price = clampNumberInput(e.target, 999999);
             }
             if (e.target.classList.contains('ad-ct-surface-custom')) {
                 crtCourtTypes[idx].surface = e.target.value.trim();
             }
             if (e.target.classList.contains('ad-ct-discount')) {
-                e.target.value = e.target.value.replace(/\D/g, '');
-                crtCourtTypes[idx].discount = parseInt(e.target.value, 10) || 0;
+                crtCourtTypes[idx].discount = clampNumberInput(e.target, 100);
             }
         });
 
@@ -1478,12 +1544,10 @@
                 crtAdditionalServices[idx].name = e.target.value.trim();
             }
             if (e.target.classList.contains('ad-svc-price')) {
-                e.target.value = e.target.value.replace(/\D/g, '');
-                crtAdditionalServices[idx].price = parseInt(e.target.value, 10) || 0;
+                crtAdditionalServices[idx].price = clampNumberInput(e.target, 999999);
             }
             if (e.target.classList.contains('ad-svc-discount')) {
-                e.target.value = e.target.value.replace(/\D/g, '');
-                crtAdditionalServices[idx].discount = parseInt(e.target.value, 10) || 0;
+                crtAdditionalServices[idx].discount = clampNumberInput(e.target, 100);
             }
         });
 
@@ -1583,6 +1647,39 @@
                 }
                 storePhone(idx);
             });
+        }
+
+        var cityInput = document.getElementById('adCrtCity');
+        if (cityInput) {
+            cityInput.addEventListener('change', applyCityChoice);
+            cityInput.addEventListener('blur', applyCityChoice);
+        }
+
+        function applyCityChoice() {
+            var input = document.getElementById('adCrtCity');
+            if (!input) return;
+
+            var value = normalizeCity(input.value);
+            if (!value) { input.value = ''; return; }
+
+            // Тот же город, записанный иначе: «Кара-Кол» вместо «Каракол».
+            // Берём написание, которое уже в базе — иначе в фильтре
+            // появится второй город с одним кортом
+            var twin = similarCity(value);
+            if (twin) value = twin.ru;
+
+            input.value = value;
+
+            var known = null;
+            crtKnownCities.forEach(function(c) { if (c.ru === value) known = c; });
+            if (!known) return;
+
+            // Переводы подставляем от уже заведённого города: вручную их
+            // забывали заполнить, и на английской версии фильтр разъезжался
+            var en = document.getElementById('adCrtCityEn');
+            var kg = document.getElementById('adCrtCityKg');
+            if (en && known.en && !en.value.trim()) en.value = known.en;
+            if (kg && known.kg && !kg.value.trim()) kg.value = known.kg;
         }
 
         var waInput = document.getElementById('adCrtWhatsapp');
@@ -1925,8 +2022,58 @@
         return true;
     }
 
+    /** Почта: браузерная проверка не срабатывает — сохраняем скриптом. */
+    function validateEmail() {
+        var input = document.getElementById('adCrtEmail');
+        if (!input) return true;
+        var v = input.value.trim();
+        if (!v) return true;
+        if (/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(v)) {
+            input.classList.remove('ad-input-error');
+            var hint = input.parentNode.querySelector('.ad-input-hint');
+            if (hint) hint.remove();
+            return true;
+        }
+        input.classList.add('ad-input-error');
+        var box = input.parentNode;
+        var h = box.querySelector('.ad-input-hint');
+        if (!h) {
+            h = document.createElement('div');
+            h.className = 'ad-input-hint';
+            box.appendChild(h);
+        }
+        h.textContent = isEn ? 'Check the email address' : 'Проверьте адрес почты';
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        input.focus();
+        A.showToast(isEn ? 'Check the email address' : 'Проверьте адрес почты', 'error');
+        return false;
+    }
+
+    /**
+     * Адрес страницы корта делается из названия и должен быть единственным
+     * на весь сайт. Два корта с одним названием раньше упирались в отказ
+     * базы: человек видел техническую ошибку про дубликат ключа.
+     */
+    async function uniqueCourtId(name) {
+        var base = A.slugify(name) || 'court';
+        if (!A.client) return base;
+
+        var res = await A.client.from('courts').select('id').like('id', base + '%');
+        if (res.error || !res.data || !res.data.length) return base;
+
+        var taken = {};
+        res.data.forEach(function(row) { taken[row.id] = true; });
+        if (!taken[base]) return base;
+
+        for (var n = 2; n < 100; n++) {
+            if (!taken[base + '-' + n]) return base + '-' + n;
+        }
+        return base + '-' + Date.now();
+    }
+
     async function saveCourtHandler() {
         if (!validatePhones()) return;
+        if (!validateEmail()) return;
 
         var saveBtn = document.getElementById('adCrtSave');
         saveBtn.disabled = true;
@@ -1982,7 +2129,7 @@
                 district: document.getElementById('adCrtDistrict').value.trim() || null,
                 district_en: document.getElementById('adCrtDistrictEn').value.trim() || null,
                 district_kg: document.getElementById('adCrtDistrictKg').value.trim() || null,
-                city: document.getElementById('adCrtCity').value.trim() || null,
+                city: normalizeCity(document.getElementById('adCrtCity').value) || null,
                 city_en: document.getElementById('adCrtCityEn').value.trim() || null,
                 city_kg: document.getElementById('adCrtCityKg').value.trim() || null,
                 postal_code: document.getElementById('adCrtPostal').value.trim() || null,
@@ -2012,7 +2159,7 @@
             if (crtEditingId) {
                 result = await A.client.from('courts').update(data).eq('id', crtEditingId);
             } else {
-                data.id = A.slugify(name);
+                data.id = await uniqueCourtId(name);
                 result = await A.client.from('courts').insert(data);
             }
 
@@ -2026,6 +2173,8 @@
             // Save partner services
             var courtId = crtEditingId || data.id;
             await saveCrtPartnerData(courtId);
+
+            await loadKnownCities();
 
             A.showToast(L.saved, 'success');
             saveBtn.disabled = false;
