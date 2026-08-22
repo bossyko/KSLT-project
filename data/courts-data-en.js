@@ -176,6 +176,8 @@ window.courtsLabels = {
     filterType: "Court type",
     filterSurface: "Surface",
     filterCarpet: "Carpet",
+    filterGrass: "Grass",
+    filterCity: "City",
     searchPlaceholder: "Search court...",
     recommendedBadge: "Recommended by KSLT",
     discountTitle: "KSLT Member Discounts",

@@ -177,6 +177,8 @@ window.courtsLabels = {
     filterType: 'Корт түрү',
     filterSurface: 'Жабуу',
     filterCarpet: 'Килем',
+    filterGrass: 'Чөп',
+    filterCity: 'Шаар',
     searchPlaceholder: 'Корт издөө...',
     recommendedBadge: 'KSLT сунуштайт',
     discountTitle: 'KSLT мүчөлөрүнө арзандатуу',

@@ -77,6 +77,8 @@
         filterType: 'Корт түрү',
         filterSurface: 'Жабуу',
         filterCarpet: 'Килем',
+        filterGrass: 'Чөп',
+        filterCity: 'Шаар',
         searchPlaceholder: 'Корт издөө...',
         recommendedBadge: 'KSLT сунуштайт',
         discountTitle: 'KSLT мүчөлөрүнө арзандатуу',
@@ -138,6 +140,8 @@
         filterType: "Тип корта",
         filterSurface: "Покрытие",
         filterCarpet: "Ковёр",
+        filterGrass: "Трава",
+        filterCity: "Город",
         searchPlaceholder: "Поиск корта...",
         recommendedBadge: "Рекомендован KSLT",
         discountTitle: "Скидки для членов KSLT",
@@ -169,15 +173,16 @@
         thServicePrice: "Цена"
     });
 
-    var SURFACE_MAP = { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр' };
-    var SURFACE_MAP_EN = { hard: 'Hard', clay: 'Clay', carpet: 'Carpet' };
-    var SURFACE_MAP_KG = { hard: 'Катуу', clay: 'Топурак', carpet: 'Килем' };
+    var SURFACE_MAP = { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр', grass: 'Трава' };
+    var SURFACE_MAP_EN = { hard: 'Hard', clay: 'Clay', carpet: 'Carpet', grass: 'Grass' };
+    var SURFACE_MAP_KG = { hard: 'Катуу', clay: 'Топурак', carpet: 'Килем', grass: 'Чөп' };
 
     var staticData = window.courtsData || [];
     var data = staticData.slice(); // will be replaced after Supabase load
 
     var currentTypeFilter = 'all';
     var currentSurfaceFilter = 'all';
+    var currentCityFilter = 'all';
     var _searchQuery = '';
 
     var _accessLevel = 'guest';
@@ -286,7 +291,10 @@
         detectAccess();
         loadSupabaseCourts(function(dbCourts) {
             if (dbCourts.length) {
-                data = dbCourts.concat(staticData);
+                // База — единственный источник. Заготовки из data/courts-data.js
+                // остаются только на случай, когда база недоступна: иначе на
+                // сайте живут пять выдуманных кортов, которых нет в админке
+                data = dbCourts;
                 // Re-check if current detail is from DB
                 var params = new URLSearchParams(window.location.search);
                 var id = params.get('id');
@@ -307,7 +315,8 @@
         initListPage();
         loadSupabaseCourts(function(dbCourts) {
             if (dbCourts.length) {
-                data = sortPromotedFirst(dbCourts).concat(staticData);
+                data = sortPromotedFirst(dbCourts);
+                refreshDropdowns();
                 loadMaxDiscounts(function() {
                     renderGrid();
                 });
@@ -371,8 +380,8 @@
         var primaryType = hasIndoor ? 'indoor' : 'outdoor';
 
         // Surface from first court type
-        var surfaceKey = courtTypes.length ? courtTypes[0].surface : 'hard';
-        var surface = isEn ? (SURFACE_MAP_EN[surfaceKey] || surfaceKey) : isKg ? (SURFACE_MAP_KG[surfaceKey] || surfaceKey) : (SURFACE_MAP[surfaceKey] || surfaceKey);
+        var surfaceKey = courtTypes.length ? (courtTypes[0].surface || '') : '';
+        var surface = surfaceKey ? (isEn ? (SURFACE_MAP_EN[surfaceKey] || surfaceKey) : isKg ? (SURFACE_MAP_KG[surfaceKey] || surfaceKey) : (SURFACE_MAP[surfaceKey] || surfaceKey)) : '';
 
         // Total courts count
         var totalCourts = 0;
@@ -454,6 +463,7 @@
             _additionalServices: row.additional_services || [],
             _isNew: true,
             _isDb: true,
+            city: isEn ? (row.city_en || row.city || '') : (isKg ? (row.city_kg || row.city || '') : (row.city || '')),
             _typeDesc: typeDesc,
             _promoted: row.promoted || false
         };
@@ -505,6 +515,76 @@
             '</div>';
     }
 
+    /**
+     * Города и покрытия — выпадающими списками, а не рядом кнопок: рядом
+     * они не помещались в строку, а городов со временем станет больше.
+     * В списке только то, что есть у кортов на самом деле, и рядом счётчик.
+     */
+    function dropdownOptions(kind) {
+        var counts = {};
+        var order = [];
+
+        if (kind === 'city') {
+            applyFilters('city').forEach(function(c) {
+                if (!c.city) return;
+                if (counts[c.city] === undefined) { counts[c.city] = 0; order.push(c.city); }
+                counts[c.city]++;
+            });
+            order.sort(function(a, b) { return counts[b] - counts[a]; });
+            return order.map(function(city) {
+                return { value: city, label: city, count: counts[city] };
+            });
+        }
+
+        var labels = {
+            hard: L_labels.filterHard,
+            clay: L_labels.filterClay,
+            carpet: L_labels.filterCarpet,
+            grass: L_labels.filterGrass
+        };
+        var pool = applyFilters('surface');
+        ['hard', 'clay', 'carpet', 'grass'].forEach(function(key) {
+            var n = pool.filter(function(c) { return hasSurface(c, key); }).length;
+            if (n) order.push({ value: key, label: labels[key], count: n });
+        });
+        return order;
+    }
+
+    function dropdownHtml(kind) {
+        var options = dropdownOptions(kind);
+        if (!options.length) return '';
+
+        var allLabel = kind === 'city' ? L_labels.filterCity : L_labels.filterSurface;
+        var current = kind === 'city' ? currentCityFilter : currentSurfaceFilter;
+
+        if (current !== 'all' && !options.some(function(o) { return o.value === current; })) {
+            var labelsMap = {
+                hard: L_labels.filterHard, clay: L_labels.filterClay,
+                carpet: L_labels.filterCarpet, grass: L_labels.filterGrass
+            };
+            options = options.concat([{ value: current, label: labelsMap[current] || current, count: 0 }]);
+        }
+
+        var title = allLabel;
+        options.forEach(function(o) { if (o.value === current) title = o.label; });
+
+        var items = '<button class="ct-dd-item' + (current === 'all' ? ' active' : '') +
+            '" data-dd-value="all">' + allLabel + '</button>';
+        options.forEach(function(o) {
+            items += '<button class="ct-dd-item' + (o.value === current ? ' active' : '') +
+                '" data-dd-value="' + esc(o.value) + '">' + esc(o.label) +
+                '<span class="ct-dd-count">' + o.count + '</span></button>';
+        });
+
+        return '<div class="ct-dd" data-dd="' + kind + '">' +
+            '<button class="trn-chip ct-dd-toggle' + (current !== 'all' ? ' active' : '') + '">' +
+                esc(title) +
+                '<svg class="ct-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' +
+            '</button>' +
+            '<div class="ct-dd-menu">' + items + '</div>' +
+        '</div>';
+    }
+
     function renderFilters() {
         var container = document.getElementById('courtsFilters');
         if (!container) return;
@@ -525,15 +605,13 @@
                     '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
                     '<input type="text" class="trn-search-input" id="courtsSearch" placeholder="' + L_labels.searchPlaceholder + '" autocomplete="off">' +
                 '</div>' +
-                '<div class="trn-chips">' +
+                '<div class="trn-chips" id="courtsChips">' +
                     '<button class="trn-chip active ct-filter-btn" data-filter-type="all">' + L_labels.filterAll + '</button>' +
                     '<button class="trn-chip ct-filter-btn" data-filter-type="indoor">' + L_labels.filterIndoor + '</button>' +
                     '<button class="trn-chip ct-filter-btn" data-filter-type="outdoor">' + L_labels.filterOutdoor + '</button>' +
                     '<span class="trn-chip-div"></span>' +
-                    '<button class="trn-chip active ct-filter-btn" data-filter-surface="all">' + L_labels.filterAll + '</button>' +
-                    '<button class="trn-chip ct-filter-btn" data-filter-surface="hard">' + L_labels.filterHard + '</button>' +
-                    '<button class="trn-chip ct-filter-btn" data-filter-surface="clay">' + L_labels.filterClay + '</button>' +
-                    '<button class="trn-chip ct-filter-btn" data-filter-surface="carpet">' + L_labels.filterCarpet + '</button>' +
+                    dropdownHtml('city') +
+                    dropdownHtml('surface') +
                 '</div>' +
             '</div>';
         container.innerHTML = html;
@@ -548,42 +626,54 @@
         observer.observe(sentinel);
     }
 
-    function renderGrid() {
-        var container = document.getElementById('courtsGrid');
-        if (!container) return;
+    function hasSurface(c, key) {
+        if (c._courtTypes) return c._courtTypes.some(function(ct) { return ct.surface === key; });
+        var surfMap = { hard: ['Хард', 'Hard'], clay: ['Грунт', 'Clay'], carpet: ['Ковёр', 'Carpet'], grass: ['Трава', 'Grass'] };
+        return (surfMap[key] || []).indexOf(c.surface) !== -1;
+    }
 
+    /**
+     * Отбор кортов по всем фильтрам сразу. skip нужен для счётчиков в
+     * выпадающих списках: считая города, собственный фильтр города не
+     * применяем — иначе в списке останется один пункт, тот же самый.
+     */
+    function applyFilters(skip) {
         var filtered = data;
 
-        // Filter by search query
         if (_searchQuery) {
             var q = _searchQuery.toLowerCase();
             filtered = filtered.filter(function(c) {
                 return (c.name && c.name.toLowerCase().indexOf(q) !== -1) ||
                        (c.address && c.address.toLowerCase().indexOf(q) !== -1) ||
-                       (c.surface && c.surface.toLowerCase().indexOf(q) !== -1);
+                       (c.surface && c.surface.toLowerCase().indexOf(q) !== -1) ||
+                       (c.city && c.city.toLowerCase().indexOf(q) !== -1);
             });
         }
 
-        // Filter by type
-        if (currentTypeFilter === 'indoor') {
-            filtered = filtered.filter(function(c) {
-                return c.type === 'indoor' || c._hasIndoor;
-            });
-        } else if (currentTypeFilter === 'outdoor') {
-            filtered = filtered.filter(function(c) {
-                return c.type === 'outdoor' || c._hasOutdoor;
-            });
+        if (skip !== 'type') {
+            if (currentTypeFilter === 'indoor') {
+                filtered = filtered.filter(function(c) { return c.type === 'indoor' || c._hasIndoor; });
+            } else if (currentTypeFilter === 'outdoor') {
+                filtered = filtered.filter(function(c) { return c.type === 'outdoor' || c._hasOutdoor; });
+            }
         }
 
-        // Filter by surface
-        if (currentSurfaceFilter !== 'all') {
-            filtered = filtered.filter(function(c) {
-                if (c._courtTypes) return c._courtTypes.some(function(ct) { return ct.surface === currentSurfaceFilter; });
-                var surfMap = { hard: ['Хард', 'Hard'], clay: ['Грунт', 'Clay'], carpet: ['Ковёр', 'Carpet'] };
-                var variants = surfMap[currentSurfaceFilter] || [];
-                return variants.indexOf(c.surface) !== -1;
-            });
+        if (skip !== 'city' && currentCityFilter !== 'all') {
+            filtered = filtered.filter(function(c) { return c.city === currentCityFilter; });
         }
+
+        if (skip !== 'surface' && currentSurfaceFilter !== 'all') {
+            filtered = filtered.filter(function(c) { return hasSurface(c, currentSurfaceFilter); });
+        }
+
+        return filtered;
+    }
+
+    function renderGrid() {
+        var container = document.getElementById('courtsGrid');
+        if (!container) return;
+
+        var filtered = applyFilters();
 
         var start = (_currentPage - 1) * PER_PAGE;
         var pageItems = filtered.slice(start, start + PER_PAGE);
@@ -609,7 +699,7 @@
                         '<div class="ct-card-name">' + c.name + '</div>' +
                         (c.partner ? '<span class="ct-card-partner">' + L_labels.partnerBadge + '</span>' : '') +
                     '</div>' +
-                    '<div class="ct-card-type">' + typeLabel + ' \u00b7 ' + c.surface + '</div>' +
+                    '<div class="ct-card-type">' + typeLabel + (c.surface ? ' \u00b7 ' + c.surface : '') + '</div>' +
                     '<div class="ct-card-desc">' + (c.shortDesc || '') + '</div>' +
                     '<div class="ct-card-stats">' +
                         '<div class="ct-card-stat"><div class="ct-card-stat-num">' + c.courtsCount + '</div><div class="ct-card-stat-label">' + L_labels.courts + '</div></div>' +
@@ -618,7 +708,10 @@
                     (c.price ? '<div class="ct-card-price">' + L_labels.priceFrom + ' <strong>' + c.price + '</strong> ' + L_labels.priceCurrency + '</div>' : '') +
                     '<div class="ct-card-actions">' +
                         '<span class="ct-card-btn">' + L_labels.detailsBtn + ' \u2192</span>' +
-                        '<span class="ct-card-cta" data-id="' + c.id + '">' + L_labels.bookBtn + '</span>' +
+                        // Кнопка скидки только у партнёров: у остальных она вела
+                        // в тупик — гостя звали оформить членство, а член клуба
+                        // упирался в «скидки не настроены»
+                        (c.partner ? '<span class="ct-card-cta" data-id="' + c.id + '">' + L_labels.bookBtn + '</span>' : '') +
                     '</div>' +
                 '</div>' +
             '</a>';
@@ -778,6 +871,7 @@
         searchInput.addEventListener('input', function() {
             _searchQuery = searchInput.value.trim();
             _currentPage = 1;
+            refreshDropdowns();
             renderGrid();
         });
     }
@@ -793,13 +887,56 @@
                 document.querySelectorAll('[data-filter-type]').forEach(function(b) { b.classList.remove('active'); });
                 e.target.classList.add('active');
                 _currentPage = 1;
+                refreshDropdowns();
                 renderGrid();
-            } else if (e.target.hasAttribute('data-filter-surface')) {
-                currentSurfaceFilter = e.target.getAttribute('data-filter-surface');
-                document.querySelectorAll('[data-filter-surface]').forEach(function(b) { b.classList.remove('active'); });
-                e.target.classList.add('active');
-                _currentPage = 1;
-                renderGrid();
+            }
+        });
+
+        initDropdowns();
+    }
+
+    function refreshDropdowns() {
+        var chips = document.getElementById('courtsChips');
+        if (!chips) return;
+
+        chips.querySelectorAll('.ct-dd').forEach(function(el) { el.remove(); });
+        chips.insertAdjacentHTML('beforeend', dropdownHtml('city') + dropdownHtml('surface'));
+    }
+
+    function initDropdowns() {
+        document.addEventListener('click', function(e) {
+            var toggle = e.target.closest('.ct-dd-toggle');
+            var item = e.target.closest('.ct-dd-item');
+
+            // Клик мимо — закрываем открытое
+            if (!toggle && !item) {
+                document.querySelectorAll('.ct-dd.open').forEach(function(d) { d.classList.remove('open'); });
+                return;
+            }
+
+            if (toggle) {
+                var dd = toggle.closest('.ct-dd');
+                var wasOpen = dd.classList.contains('open');
+                document.querySelectorAll('.ct-dd.open').forEach(function(d) { d.classList.remove('open'); });
+                dd.classList.toggle('open', !wasOpen);
+                return;
+            }
+
+            var wrap = item.closest('.ct-dd');
+            var kind = wrap.getAttribute('data-dd');
+            var value = item.getAttribute('data-dd-value');
+            if (kind === 'city') currentCityFilter = value;
+            else currentSurfaceFilter = value;
+
+            wrap.classList.remove('open');
+            _currentPage = 1;
+            refreshDropdowns();
+            renderGrid();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.ct-dd.open').forEach(function(d) { d.classList.remove('open'); });
             }
         });
     }
@@ -867,7 +1004,7 @@
                 '<div class="ct-detail-title-row"><h1>' + court.name + '</h1>' +
                 (court._promoted ? '<span class="kslt-recommended-detail">' + L_labels.recommendedBadge + '</span>' : '') +
                 '</div>' +
-                '<div class="ct-detail-type">' + typeLabel + ' \u00b7 ' + court.surface +
+                '<div class="ct-detail-type">' + typeLabel + (court.surface ? ' \u00b7 ' + court.surface : '') +
                     (court.partner ? ' \u00b7 <span style="background:var(--accent);color:#000;font-size:0.72rem;padding:2px 8px;border-radius:100px;font-weight:700;">' + L_labels.partnerBadge + '</span>' : '') +
                 '</div>' +
                 (court.address ? '<div class="ct-detail-address"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + court.address + '</div>' : '') +
