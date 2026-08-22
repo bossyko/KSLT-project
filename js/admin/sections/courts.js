@@ -661,6 +661,12 @@
                     '<span>' + partnerHtml + '</span>' +
                     '<span style="color:var(--text-dim);">' + L.crtPromoted + '</span>' +
                     '<span>' + promotedHtml + '</span>' +
+                    '<span style="color:var(--text-dim);">' + (isEn ? 'Phone' : 'Телефон') + '</span>' +
+                    '<span style="color:var(--text-secondary);">' + A.esc(item.phone || '—') + '</span>' +
+                    '<span style="color:var(--text-dim);">WhatsApp</span>' +
+                    '<span style="color:var(--text-secondary);">' + A.esc(item.whatsapp || '—') + '</span>' +
+                    '<span style="color:var(--text-dim);">Instagram</span>' +
+                    '<span style="color:var(--text-secondary);">' + A.esc(item.instagram || '—') + '</span>' +
                 '</div>' +
             '</div>' +
 
@@ -691,6 +697,144 @@
     }
 
     // ---- Court Form ----
+    // Номер показываем без кода страны — код стоит отдельной плашкой
+    function phoneDigits(value) {
+        if (!value) return '';
+        var d = String(value).replace(/^\+?996\s*/, '').replace(/\D/g, '').substr(0, 9);
+        if (!d) return '';
+        var out = d.substr(0, 3);
+        if (d.length > 3) out += ' ' + d.substr(3, 2);
+        if (d.length > 5) out += '-' + d.substr(5, 2);
+        if (d.length > 7) out += '-' + d.substr(7, 2);
+        return out;
+    }
+
+    /**
+     * В поле номера пускаем только цифры и держим их в формате страны.
+     * Раньше можно было ввести что угодно: буквы вырезались при сохранении,
+     * и в базу уходил обрубок вроде «+713235».
+     */
+    /**
+     * Приводит поле к формату страны. Возвращает страну, на которую нужно
+     * переключить выбор: номер могли вставить целиком, вместе с чужим кодом.
+     */
+    function reformatPhoneInput(input, iso, pickerEl) {
+        if (!window.KSLT_PHONE) return iso;
+        var caretAtEnd = input.selectionStart === input.value.length;
+        var raw = input.value;
+
+        var parsed = KSLT_PHONE.parseInput(raw, iso);
+        var usedIso = parsed.iso;
+
+        if (parsed.switched && pickerEl) {
+            KSLT_PHONE.setPicker(pickerEl, usedIso);
+            input.placeholder = KSLT_PHONE.placeholder(usedIso);
+        } else if (parsed.switched) {
+            usedIso = iso;                       // переключать нечего — держим прежнюю
+        }
+
+        input.value = KSLT_PHONE.format(usedIso, parsed.digits);
+        if (caretAtEnd) input.setSelectionRange(input.value.length, input.value.length);
+
+        // Говорим, почему набранное не появилось: молча вырезать символы —
+        // значит оставить человека в недоумении
+        var country = KSLT_PHONE.byIso(usedIso);
+        var hadJunk = /[^0-9\s+()\-]/.test(raw);
+        var tooLong = parsed.digits.length > country.len;
+
+        if (hadJunk) {
+            phoneWarn(input, isEn ? 'Digits only' : 'Только цифры');
+        } else if (tooLong) {
+            phoneWarn(input, (isEn ? 'Number is longer than ' : 'В номере больше ') + country.len + (isEn ? ' digits' : ' цифр'));
+        } else if (parsed.switched) {
+            phoneWarn(input, (isEn ? 'Country set from the number' : 'Страна определена по номеру'));
+        } else {
+            phoneWarn(input, '');
+        }
+
+        return usedIso;
+    }
+
+    function phoneWarnCheckFull(input, iso) {
+        if (!window.KSLT_PHONE) return;
+        var country = KSLT_PHONE.byIso(iso);
+        var n = input.value.replace(/[^0-9]/g, '').length;
+        if (n && n < country.len) {
+            phoneWarn(input, (isEn ? 'Number is short: ' : 'Номер короткий: нужно ') + country.len + (isEn ? ' digits needed' : ' цифр'));
+        } else {
+            phoneWarn(input, '');
+        }
+    }
+
+    var _phoneWarnTimers = {};
+
+    function phoneWarn(input, text, sticky) {
+        var row = input.closest('.ad-field') || input.parentNode;
+        var hint = row.querySelector('.ad-input-hint');
+
+        if (!text) {
+            input.classList.remove('ad-input-error');
+            if (hint) hint.remove();
+            return;
+        }
+
+        input.classList.add('ad-input-error');
+        if (!hint) {
+            hint = document.createElement('div');
+            hint.className = 'ad-input-hint';
+            row.appendChild(hint);
+        }
+        hint.textContent = text;
+
+        // Подсказка при наборе живёт недолго — она про то, что человек делает
+        // сейчас. А та, что не пустила сохранение, висит до исправления
+        var key = input.dataset.idx || input.id || 'wa';
+        clearTimeout(_phoneWarnTimers[key]);
+        if (!sticky) {
+            _phoneWarnTimers[key] = setTimeout(function() { phoneWarn(input, ''); }, 2500);
+        }
+    }
+
+    function whatsappRowHtml(item) {
+        var stored = item ? (item.whatsapp || '') : '';
+        var parts = window.KSLT_PHONE
+            ? KSLT_PHONE.split(stored)
+            : { iso: 'KG', rest: stored.replace(/\D/g, '') };
+
+        return '<div style="display:flex;gap:6px;">' +
+            (window.KSLT_PHONE
+                ? KSLT_PHONE.pickerHtml(parts.iso, isEn ? 'en' : 'ru', 'ad-crt-wa-country')
+                : '') +
+            '<input type="text" inputmode="numeric" class="ad-field-input" id="adCrtWhatsapp" value="' +
+                A.esc(window.KSLT_PHONE ? KSLT_PHONE.format(parts.iso, parts.rest) : parts.rest) +
+                '" placeholder="' + (window.KSLT_PHONE ? KSLT_PHONE.placeholder(parts.iso) : '000 000 000') + '" style="flex:1;">' +
+        '</div>';
+    }
+
+    function phoneFull(value) {
+        var d = String(value || '').replace(/\D/g, '');
+        if (d.length < 9) return null;
+        d = d.substr(-9);
+        return '+996 ' + d.substr(0, 3) + ' ' + d.substr(3, 2) + ' ' + d.substr(5, 2) + ' ' + d.substr(7, 2);
+    }
+
+    // Принимаем и «@name», и «name», и ссылку целиком
+    function whatsappValue() {
+        var num = document.getElementById('adCrtWhatsapp');
+        if (!num || !num.value.trim()) return null;
+        var picker = document.querySelector('.ad-crt-wa-country');
+        if (window.KSLT_PHONE && picker) return KSLT_PHONE.join(picker.dataset.iso, num.value) || null;
+        return phoneFull(num.value);
+    }
+
+    function instagramHandle(value) {
+        var v = String(value || '').trim();
+        if (!v) return null;
+        var m = v.match(/instagram\.com\/([\w.]+)/i);
+        if (m) return '@' + m[1];
+        return '@' + v.replace(/^@/, '');
+    }
+
     function renderCourtForm(item) {
         var container = document.getElementById('ad-courts');
         if (!container) return;
@@ -905,6 +1049,16 @@
                 '<div class="ad-form-card-title">' + (isEn ? 'Contacts' : 'Контакты') + '</div>' +
                 '<div id="adCrtPhones"></div>' +
                 '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtAddPhone">' + L.crtAddPhone + '</button>' +
+                '<div class="ad-form-row" style="margin-top:12px;">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">WhatsApp</label>' +
+                        whatsappRowHtml(item) +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">Instagram</label>' +
+                        '<input type="text" class="ad-field-input" id="adCrtInstagram" placeholder="@tclubkg" value="' + A.esc(item ? (item.instagram || '') : '') + '">' +
+                    '</div>' +
+                '</div>' +
                 '<div class="ad-field" style="margin-top:12px;max-width:400px;">' +
                     '<label class="ad-field-label">' + L.crtEmail + '</label>' +
                     '<input type="email" class="ad-field-input" id="adCrtEmail" placeholder="info@example.com" value="' + A.esc(item ? item.email : '') + '">' +
@@ -1351,25 +1505,25 @@
             if (!phonesEl) return;
             var html = '';
             crtPhones.forEach(function(ph, idx) {
-                var label = idx === 0 ? L.crtMobile : (idx === 1 ? L.crtLandline : (isEn ? 'Phone ' + (idx + 1) : 'Телефон ' + (idx + 1)));
-                var placeholder = idx === 0 ? '555 12-34-56' : (idx === 1 ? '312 12-34-56' : '555 12-34-56');
-                // Strip +996 prefix and format for display
-                var rawDigits = ph.replace(/^\+?996\s*/, '').replace(/\D/g, '');
-                if (rawDigits.length > 9) rawDigits = rawDigits.substr(0, 9);
-                var displayVal = '';
-                if (rawDigits.length > 0) displayVal = rawDigits.substr(0, 3);
-                if (rawDigits.length > 3) displayVal += ' ' + rawDigits.substr(3, 2);
-                if (rawDigits.length > 5) displayVal += '-' + rawDigits.substr(5, 2);
-                if (rawDigits.length > 7) displayVal += '-' + rawDigits.substr(7, 2);
+                var label = idx === 0 ? (isEn ? 'Phone' : 'Телефон') : (isEn ? 'Additional phone' : 'Доп. телефон');
+                var parts = window.KSLT_PHONE
+                    ? KSLT_PHONE.split(ph)
+                    : { iso: 'KG', rest: String(ph || '').replace(/\D/g, '') };
+
+                var shown = window.KSLT_PHONE ? KSLT_PHONE.format(parts.iso, parts.rest) : parts.rest;
+                var hint = window.KSLT_PHONE ? KSLT_PHONE.placeholder(parts.iso) : '000 000 000';
+
                 html += '<div class="ad-phone-row">' +
                     '<div class="ad-field" style="flex:1;">' +
                         '<label class="ad-field-label">' + label + '</label>' +
                         '<div style="display:flex;gap:6px;">' +
-                            '<div class="ad-phone-prefix">🇰🇬 +996</div>' +
-                            '<input type="text" class="ad-field-input ad-crt-phone" data-idx="' + idx + '" placeholder="' + placeholder + '" value="' + A.esc(displayVal) + '" style="flex:1;">' +
+                            (window.KSLT_PHONE
+                                ? KSLT_PHONE.pickerHtml(parts.iso, isEn ? 'en' : 'ru', 'ad-crt-phone-country" data-idx="' + idx)
+                                : '') +
+                            '<input type="text" inputmode="numeric" class="ad-field-input ad-crt-phone" data-idx="' + idx + '" placeholder="' + hint + '" value="' + A.esc(shown) + '" style="flex:1;">' +
                         '</div>' +
                     '</div>' +
-                    (idx >= 2 ? '<button type="button" class="ad-btn-icon ad-phone-remove" data-idx="' + idx + '" style="margin-bottom:4px;">&times;</button>' : '') +
+                    (idx >= 1 ? '<button type="button" class="ad-btn-icon ad-phone-remove" data-idx="' + idx + '" title="' + (isEn ? 'Remove' : 'Убрать') + '">&times;</button>' : '') +
                 '</div>';
             });
             phonesEl.innerHTML = html;
@@ -1390,21 +1544,63 @@
         document.getElementById('adCrtPhones').addEventListener('input', function(e) {
             if (!e.target.classList.contains('ad-crt-phone')) return;
             var idx = parseInt(e.target.dataset.idx, 10);
-            // Strip non-digits
-            var digits = e.target.value.replace(/\D/g, '');
-            // Limit to 9 digits (KG local number after +996)
-            if (digits.length > 9) digits = digits.substr(0, 9);
-            // Format: XXX XX-XX-XX
-            var formatted = '';
-            if (digits.length > 0) formatted = digits.substr(0, 3);
-            if (digits.length > 3) formatted += ' ' + digits.substr(3, 2);
-            if (digits.length > 5) formatted += '-' + digits.substr(5, 2);
-            if (digits.length > 7) formatted += '-' + digits.substr(7, 2);
-            // Update input display
-            e.target.value = formatted;
-            // Store with +996 prefix
-            crtPhones[idx] = digits ? '+996 ' + formatted : '';
+            reformatPhoneInput(e.target, phoneIso(idx), document.querySelector('.ad-crt-phone-country[data-idx="' + idx + '"]'));
+            storePhone(idx);
         });
+
+        function phoneIso(idx) {
+            var picker = document.querySelector('.ad-crt-phone-country[data-idx="' + idx + '"]');
+            return picker ? picker.dataset.iso : 'KG';
+        }
+
+        // Номер собираем вместе с кодом выбранной страны
+        function storePhone(idx) {
+            var input = document.querySelector('.ad-crt-phone[data-idx="' + idx + '"]');
+            if (!input) return;
+            crtPhones[idx] = window.KSLT_PHONE
+                ? (KSLT_PHONE.join(phoneIso(idx), input.value) || '')
+                : (input.value.replace(/\D/g, '') ? '+996' + input.value.replace(/\D/g, '') : '');
+        }
+
+        if (window.KSLT_PHONE) {
+            KSLT_PHONE.initPickers(function(root, iso) {
+                if (root.classList.contains('ad-crt-wa-country')) {
+                    // Формат номера у каждой страны свой — подсказка и уже
+                    // введённые цифры перестраиваются под выбранную
+                    var wa = document.getElementById('adCrtWhatsapp');
+                    if (wa) {
+                        wa.placeholder = KSLT_PHONE.placeholder(iso);
+                        reformatPhoneInput(wa, iso);
+                    }
+                    return;
+                }
+                if (!root.classList.contains('ad-crt-phone-country')) return;
+                var idx = parseInt(root.dataset.idx, 10);
+                var input = document.querySelector('.ad-crt-phone[data-idx="' + idx + '"]');
+                if (input) {
+                    input.placeholder = KSLT_PHONE.placeholder(iso);
+                    reformatPhoneInput(input, iso);
+                }
+                storePhone(idx);
+            });
+        }
+
+        var waInput = document.getElementById('adCrtWhatsapp');
+        if (waInput) {
+            waInput.addEventListener('input', function() {
+                var picker = document.querySelector('.ad-crt-wa-country');
+                reformatPhoneInput(waInput, picker ? picker.dataset.iso : 'KG', picker);
+            });
+            waInput.addEventListener('blur', function() {
+                var picker = document.querySelector('.ad-crt-wa-country');
+                phoneWarnCheckFull(waInput, picker ? picker.dataset.iso : 'KG');
+            });
+        }
+
+        document.getElementById('adCrtPhones').addEventListener('blur', function(e) {
+            if (!e.target.classList.contains('ad-crt-phone')) return;
+            phoneWarnCheckFull(e.target, phoneIso(parseInt(e.target.dataset.idx, 10)));
+        }, true);
 
         // Gallery: render thumbnails
         renderCrtGallery();
@@ -1670,7 +1866,68 @@
     }
 
     // ---- Save Court ----
+    /**
+     * Номера проверяем перед записью, а не только при наборе: подсказка под
+     * полем ничего не запрещает. Особенно это заметно при смене страны —
+     * кыргызские девять цифр остаются в поле, а России нужно десять.
+     */
+    function validatePhones() {
+        if (!window.KSLT_PHONE) return true;
+        var bad = null;
+
+        document.querySelectorAll('.ad-crt-phone').forEach(function(input) {
+            var idx = parseInt(input.dataset.idx, 10);
+            var picker = document.querySelector('.ad-crt-phone-country[data-idx="' + idx + '"]');
+            var iso = picker ? picker.dataset.iso : 'KG';
+            var n = input.value.replace(/[^0-9]/g, '').length;
+            var need = KSLT_PHONE.byIso(iso).len;
+            if (n && n !== need) {
+                phoneWarn(input, (isEn ? 'Number is incomplete: ' : 'Неполный номер: нужно ') + need + (isEn ? ' digits needed' : ' цифр'), true);
+                if (!bad) bad = input;
+            }
+        });
+
+        var wa = document.getElementById('adCrtWhatsapp');
+        if (wa) {
+            var waPicker = document.querySelector('.ad-crt-wa-country');
+            var waIso = waPicker ? waPicker.dataset.iso : 'KG';
+            var waN = wa.value.replace(/[^0-9]/g, '').length;
+            var waNeed = KSLT_PHONE.byIso(waIso).len;
+            if (waN && waN !== waNeed) {
+                phoneWarn(wa, (isEn ? 'Number is incomplete: ' : 'Неполный номер: нужно ') + waNeed + (isEn ? ' digits needed' : ' цифр'), true);
+                if (!bad) bad = wa;
+            }
+        }
+
+        // Один и тот же номер в двух полях — на карточке корта он выведется
+        // дважды через запятую
+        if (!bad) {
+            var seen = {};
+            document.querySelectorAll('.ad-crt-phone').forEach(function(input) {
+                var idx = parseInt(input.dataset.idx, 10);
+                var picker = document.querySelector('.ad-crt-phone-country[data-idx="' + idx + '"]');
+                var full = KSLT_PHONE.join(picker ? picker.dataset.iso : 'KG', input.value);
+                if (!full) return;
+                if (seen[full]) {
+                    phoneWarn(input, isEn ? 'This number is already listed' : 'Этот номер уже есть выше', true);
+                    if (!bad) bad = input;
+                }
+                seen[full] = true;
+            });
+        }
+
+        if (bad) {
+            bad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            bad.focus();
+            A.showToast(isEn ? 'Check the phone numbers' : 'Проверьте номера телефонов', 'error');
+            return false;
+        }
+        return true;
+    }
+
     async function saveCourtHandler() {
+        if (!validatePhones()) return;
+
         var saveBtn = document.getElementById('adCrtSave');
         saveBtn.disabled = true;
         saveBtn.textContent = L.saving;
@@ -1730,6 +1987,8 @@
                 city_kg: document.getElementById('adCrtCityKg').value.trim() || null,
                 postal_code: document.getElementById('adCrtPostal').value.trim() || null,
                 phone: phonesStr || null,
+                whatsapp: whatsappValue(),
+                instagram: instagramHandle(document.getElementById('adCrtInstagram').value),
                 email: document.getElementById('adCrtEmail').value.trim() || null,
                 description: document.getElementById('adCrtDesc').value.trim() || null,
                 description_en: document.getElementById('adCrtDescEn').value.trim() || null,
