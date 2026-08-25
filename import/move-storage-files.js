@@ -271,3 +271,80 @@ async function cleanupStorageRoot(options) {
     else console.log('Готово. Удалено из корня: ' + removed);
     return { removed: removed, missing: missing.length };
 }
+
+/**
+ * Удаляет содержимое папки — по умолчанию archive.
+ *
+ * В archive лежит то, на что никто не ссылается: пробные загрузки при
+ * настройке админки, по два мегабайта штука. Перед удалением ещё раз
+ * сверяемся с базой: если на файл вдруг появилась ссылка, он остаётся.
+ *
+ *     await purgeFolder('archive', { dryRun: true })
+ *     await purgeFolder('archive')
+ */
+async function purgeFolder(folder, options) {
+    var opts = options || {};
+    var dryRun = opts.dryRun === true;
+    var BUCKET = 'news';
+    var target = folder || 'archive';
+
+    var client = window.KSLT_ADMIN ? window.KSLT_ADMIN.client : window.supabaseClient;
+    if (!client) { console.error('Нет клиента Supabase — открой страницу админки'); return; }
+
+    // Ссылки из базы: вдруг на файл уже кто-то ссылается
+    var linked = {};
+    for (var t of ['news', 'sponsors', 'coaches', 'courts', 'players', 'tournaments']) {
+        var res = await client.from(t).select('*');
+        if (res.error) continue;
+        (res.data || []).forEach(function(row) {
+            var text = JSON.stringify(row);
+            (text.match(/\/public\/news\/([^"'\s\\)]+)/g) || []).forEach(function(m) {
+                linked[decodeURIComponent(m.replace('/public/news/', ''))] = true;
+            });
+        });
+    }
+
+    var files = [];
+    for (var page = 0; page < 50; page++) {
+        var list = await client.storage.from(BUCKET).list(target, { limit: 100, offset: page * 100 });
+        if (list.error) { console.error(list.error.message); return; }
+        if (!list.data || !list.data.length) break;
+        list.data.forEach(function(f) { if (f.id) files.push(f); });
+        if (list.data.length < 100) break;
+    }
+
+    var toRemove = [], keep = [];
+    files.forEach(function(f) {
+        (linked[target + '/' + f.name] ? keep : toRemove).push(f);
+    });
+
+    var size = Math.round(toRemove.reduce(function(a, f) {
+        return a + ((f.metadata && f.metadata.size) || 0);
+    }, 0) / 1048576 * 10) / 10;
+
+    console.log('В папке ' + target + ': ' + files.length + ' файлов');
+    console.log('  к удалению: ' + toRemove.length + ' (' + size + ' МБ)');
+    if (keep.length) console.log('  на них появились ссылки, оставляем: ' + keep.length);
+
+    if (dryRun) { console.log('Пробный прогон — ничего не удалял.'); return { toRemove: toRemove.length, keep: keep.length }; }
+    if (!toRemove.length) { console.log('Удалять нечего.'); return; }
+
+    var removed = 0;
+    for (var k = 0; k < toRemove.length; k += 20) {
+        var chunk = toRemove.slice(k, k + 20).map(function(f) { return target + '/' + f.name; });
+        var del = await client.storage.from(BUCKET).remove(chunk);
+        if (del.error) { console.error('не удалилось: ' + del.error.message); break; }
+
+        var done = (del.data || []).length;
+        if (done === 0) {
+            console.error('Хранилище не удалило ни одного файла. Ошибки нет, значит ' +
+                          'нет правила на удаление — прогони sql/storage-delete-policy.sql');
+            break;
+        }
+        removed += done;
+        console.log('  удалено ' + removed + ' из ' + toRemove.length);
+    }
+
+    console.log(removed ? ('Готово. Удалено: ' + removed + ' (' + size + ' МБ)') : 'Ничего не удалено.');
+    return { removed: removed };
+}
