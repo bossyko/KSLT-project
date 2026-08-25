@@ -968,3 +968,16 @@
     cursor: default;
     pointer-events: none;
 }
+
+/* На телефоне и планшете однострочная подпись обрезалась почти вдвое: от
+   «ТЕСТ второй категории — Tour мужской одиночный» оставалось меньше
+   половины. Даём две строки, многоточие остаётся */
+@media (max-width: 1024px) {
+    .to-compact-info h4 {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.25;
+    }
+}

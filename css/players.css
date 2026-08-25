@@ -1195,10 +1195,28 @@
 }
 
 @media (max-width: 992px) {
-    .trn-filters.pl-cat-mode .trn-filters-inner {
+    /* Второй селектор — для страниц без переключателя пола: у правила выше
+       приоритет больше, и без него полоса оставалась в две колонки */
+    .trn-filters.pl-cat-mode .trn-filters-inner,
+    .trn-filters.pl-cat-mode .trn-filters-inner:not(:has(.trn-chips)) {
         grid-template-columns: 1fr;
         justify-items: center;
         gap: 12px;
+    }
+
+    /* Поиск во всю ширину: на телефоне он главный способ найти игрока */
+    .trn-filters.pl-cat-mode .trn-search-wrap,
+    .pl-cat-bar-left {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Название категории по центру: у края оно смотрелось оторванным.
+       margin-left: auto тянется из общей полосы фильтров — снимаем */
+    .trn-filters.pl-cat-mode .trn-cat-name,
+    .trn-filters.pl-cat-mode .trn-chips {
+        justify-self: center;
+        margin-left: 0;
     }
 
     .pl-cat-bar-left {
@@ -1451,10 +1469,16 @@
         padding: 120px 5% 40px;
     }
 
+    /* Отступы по краям экрана. Селектор был оборван запятой — секции
+       забирали размеры фотографии пьедестала, и таблица игроков
+       схлопывалась в полоску шириной 20 пикселей */
     .pl-podium-section,
     .pl-filters-section,
     .pl-table-section,
-    .pl-pagination-section,
+    .pl-pagination-section {
+        padding-left: 5%;
+        padding-right: 5%;
+    }
 
     .pl-podium-first .pl-podium-photo {
         width: 80px;
@@ -1765,5 +1789,23 @@
     .pl-podium-third .pl-podium-photo {
         width: 40px;
         height: 40px;
+    }
+}
+
+/* Кнопка в гостевой плашке: на телефоне «Войти / Регистрация» не влезало
+   в отведённые 240 пикселей — боковые отступы съедали половину */
+/* «Войти / Регистрация» не влезало в плашку: боковые отступы по 40 съедали
+   половину ширины. Текст в одну строку, отступы поменьше */
+.pl-guest-btn {
+    max-width: 100%;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+    .pl-guest-btn {
+        padding: 13px 20px;
+        font-size: 0.88rem;
     }
 }

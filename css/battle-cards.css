@@ -301,6 +301,11 @@
 }
 .bc-meta-item {
     white-space: nowrap;
+    /* Длинное название площадки на телефоне вылезало за край карточки.
+       Пусть лучше обрежется многоточием */
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .bc-meta-venue {
     cursor: pointer;

@@ -2943,6 +2943,23 @@ h2 {
     grid-template-columns: repeat(4, 1fr);
 }
 
+/* Четыре в ряд — только пока для них есть место. На планшете два,
+   на телефоне тоже два: четыре ужимались до полосок в полсотни пикселей,
+   где название корта переносилось по одной букве */
+@media (max-width: 1024px) {
+    .courts-grid.vn-four,
+    .coaches-grid.vn-four {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .courts-grid.vn-four,
+    .coaches-grid.vn-four {
+        gap: 12px;
+    }
+}
+
 /* Карточка корта на главной — ссылка целиком, а не блок с кнопкой внутри:
    по ней и так все кликают. Ссылка по умолчанию строчная, поэтому раскладку
    задаём явно, иначе фотография схлопывается */
@@ -5720,8 +5737,12 @@ h2 {
     position: absolute;
     top: 0;
     bottom: 0;
-    left: -100vw;
-    right: -100vw;
+    /* Ровно ширина экрана, от его левого края. Раньше подложку растягивали
+       на 100vw в каждую сторону, и документ становился вдвое шире окна:
+       на телефоне страница уезжала вбок */
+    left: 50%;
+    width: 100vw;
+    margin-left: -50vw;
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border-subtle);
     z-index: -1;

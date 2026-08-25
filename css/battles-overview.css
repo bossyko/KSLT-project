@@ -337,6 +337,15 @@
 }
 .bo-player-name.bo-pair-names span { font-size: 0.85rem; }
 
+/* Имена в парах не помещались в отведённые 100 пикселей и обрезались
+   без многоточия — оно стоит на родителе, а обрезался вложенный span */
+.bo-player-name.bo-pair-names span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
 /* Состав словами: мужские пары, женские пары, микст. Пол участников база
    знает, значит подпись собирается сама */
 .bo-format {
@@ -843,4 +852,17 @@
     line-height: 1;
     margin-bottom: var(--space-sm);
     opacity: 0.45;
+}
+
+/* На телефоне и планшете однострочная подпись обрезалась почти вдвое: от
+   «ТЕСТ второй категории — Tour мужской одиночный» оставалось меньше
+   половины. Даём две строки, многоточие остаётся */
+@media (max-width: 1024px) {
+    .bo-strip-sub {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.25;
+    }
 }
