@@ -1,0 +1,952 @@
+[
+ {
+  "id": "mezhdunarodnyy-prazdnik-tennisa-kia-open-2023-master-20250427",
+  "title": "Международный праздник тенниса KIA OPEN - 2023! — Masters, микст",
+  "slug_новости": "mezhdunarodnyy-prazdnik-tennisa-kia-open-2023",
+  "дата": "2025-04-27",
+  "категория": "masters",
+  "разряд": "mixed_doubles",
+  "пол": "mixed",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/515940ad-4019-48b0-8dc2-9934ff62d698.jpg",
+  "площадка": null,
+  "участников": 74,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Арсен Умурзаков",
+     "Дарья Мальбекова"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Азамат Джумабаев",
+     "Альбина Сулайманова"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Эрлан Шекербеков",
+     "Лариса Янчарук"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mezhdunarodnyy-prazdnik-tennisa-kia-open-2023-future-20250427",
+  "title": "Международный праздник тенниса KIA OPEN - 2023! — Futures, парный, мужской",
+  "slug_новости": "mezhdunarodnyy-prazdnik-tennisa-kia-open-2023",
+  "дата": "2025-04-27",
+  "категория": "futures",
+  "разряд": "doubles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/515940ad-4019-48b0-8dc2-9934ff62d698.jpg",
+  "площадка": null,
+  "участников": 74,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Анвар Муртазаев",
+     "Мухтор Асадов"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Абдикиим Махмутов",
+     "Сергей Пыжик"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Болот Давлятов",
+     "Шумкар Абдразак уулу"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mega-cup-2026-futures-parnyy-20260125",
+  "title": "MEGA CUP — 2026 — Futures, парный",
+  "slug_новости": "mega-cup-2026",
+  "дата": "2026-01-25",
+  "категория": "futures",
+  "разряд": "doubles",
+  "пол": "mixed",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787668255921-ncpfwz0k.jpg",
+  "площадка": "t-club",
+  "участников": 6,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Хамит Каракетов",
+     "Жанат Кыдралиев"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Эрбол Кылычев",
+     "Эльдияр Боруев"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Азамат Джумабаев",
+     "Айгерим Алижанова"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mega-cup-2026-masters-parnyy-20260125",
+  "title": "MEGA CUP — 2026 — Masters, парный",
+  "slug_новости": "mega-cup-2026",
+  "дата": "2026-01-25",
+  "категория": "masters",
+  "разряд": "doubles",
+  "пол": "mixed",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787668255921-ncpfwz0k.jpg",
+  "площадка": "t-club",
+  "участников": 6,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Малик Камалов",
+     "Анастасия Трофимушкина"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Кирилл Леонтьев",
+     "Арсен Умурзаков"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Азиз Базаков",
+     "Азим Исаков"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "night-friends-cup-20260228",
+  "title": "NIGHT FRIENDS' CUP",
+  "slug_новости": "night-friends-cup",
+  "дата": "2026-02-28",
+  "категория": "friendly",
+  "разряд": "doubles",
+  "пол": "mixed",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/kslt-2026-02-28-night-friends-cup.jpg",
+  "площадка": "tay-breyk",
+  "участников": 6,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Анастасия Трофимушкина",
+     "Азим Исаков"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Эрбол Кылычев",
+     "Закир Назаров"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Фуркат Садыков",
+     "Сардар Умаров"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "lady-s-cup-futures-parnyy-zhenskiy-20260315",
+  "title": "LADY’S CUP — Futures, парный, женский",
+  "slug_новости": "lady-s-cup",
+  "дата": "2026-03-15",
+  "категория": "futures",
+  "разряд": "doubles",
+  "пол": "women",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/kslt-2026-03-15-ladys-cup.jpg",
+  "площадка": "t-club",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Александра-Елизавета Пономарева",
+     "Бурул Ракишева"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Калима Аскарова",
+     "Азиза Мусаева"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "lady-s-cup-masters-parnyy-zhenskiy-20260315",
+  "title": "LADY’S CUP — Masters, парный, женский",
+  "slug_новости": "lady-s-cup",
+  "дата": "2026-03-15",
+  "категория": "masters",
+  "разряд": "doubles",
+  "пол": "women",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/kslt-2026-03-15-ladys-cup.jpg",
+  "площадка": "t-club",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Роза Исабекова",
+     "Света Покарел"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Анастасия Аджибекова",
+     "Адель Джайлоева"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "friends-cup-2026-tour-parnyy-zhenskiy-20260413",
+  "title": "FRIENDS’ CUP 2026 — Tour, парный, женский",
+  "slug_новости": "friends-cup-2026",
+  "дата": "2026-04-13",
+  "категория": "tour",
+  "разряд": "doubles",
+  "пол": "women",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/0af74dc6-1ea2-4d97-b82b-d1814aa1f7dc.jpeg",
+  "площадка": "t-club",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Анастасия Аджибекова",
+     "Адель Джайлоева"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Наталья Тимирбаева",
+     "Екатерина Титова"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "friends-cup-2026-futures-parnyy-zhenskiy-20260413",
+  "title": "FRIENDS’ CUP 2026 — Futures, парный, женский",
+  "slug_новости": "friends-cup-2026",
+  "дата": "2026-04-13",
+  "категория": "futures",
+  "разряд": "doubles",
+  "пол": "women",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/0af74dc6-1ea2-4d97-b82b-d1814aa1f7dc.jpeg",
+  "площадка": "t-club",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Яна Ересько",
+     "Валерия Пак"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Акжолтой Исабекова",
+     "Гульсан Галиева"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "friends-cup-2026-masters-parnyy-20260413",
+  "title": "FRIENDS’ CUP 2026 — Masters, парный",
+  "slug_новости": "friends-cup-2026",
+  "дата": "2026-04-13",
+  "категория": "masters",
+  "разряд": "doubles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/0af74dc6-1ea2-4d97-b82b-d1814aa1f7dc.jpeg",
+  "площадка": "t-club",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Руслан Кульджаев",
+     "Хамит Каракетов"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Азим Исаков",
+     "Владислав Ким"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "friends-cup-2026-tour-parnyy-20260413",
+  "title": "FRIENDS’ CUP 2026 — Tour, парный",
+  "slug_новости": "friends-cup-2026",
+  "дата": "2026-04-13",
+  "категория": "tour",
+  "разряд": "doubles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/0af74dc6-1ea2-4d97-b82b-d1814aa1f7dc.jpeg",
+  "площадка": "t-club",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Эрбол Кылычев",
+     "Адиль Валимамедов"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Фуркат Садыков",
+     "Аширали Юсупов"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mayskiy-chempionat-kslt-itogi-futures-odinochnyy-muz-20260510",
+  "title": "МАЙСКИЙ ЧЕМПИОНАТ КСЛТ — ИТОГИ — Futures, одиночный, мужской",
+  "slug_новости": "mayskiy-chempionat-kslt-itogi",
+  "дата": "2026-05-10",
+  "категория": "futures",
+  "разряд": "singles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787666005475-xoyqew4z.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 3,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Таалай Есенаманов"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Алан Аджибеков"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Ибрагим Кошойбеков"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mayskiy-chempionat-kslt-itogi-masters-odinochnyy-muz-20260510",
+  "title": "МАЙСКИЙ ЧЕМПИОНАТ КСЛТ — ИТОГИ — Masters, одиночный, мужской",
+  "slug_новости": "mayskiy-chempionat-kslt-itogi",
+  "дата": "2026-05-10",
+  "категория": "masters",
+  "разряд": "singles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787666005475-xoyqew4z.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 3,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Рамиль Мифтахутдинов"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Рашид Сейитов"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Ильдияр Мураталиев"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mayskiy-chempionat-kslt-itogi-tour-odinochnyy-muzhsk-20260510",
+  "title": "МАЙСКИЙ ЧЕМПИОНАТ КСЛТ — ИТОГИ — Tour, одиночный, мужской",
+  "slug_новости": "mayskiy-chempionat-kslt-itogi",
+  "дата": "2026-05-10",
+  "категория": "tour",
+  "разряд": "singles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787666005475-xoyqew4z.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 3,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Азамат Джумабаев"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Владислав Ким"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Закир Назаров"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mayskiy-chempionat-kslt-itogi-futures-parnyy-muzhsko-20260510",
+  "title": "МАЙСКИЙ ЧЕМПИОНАТ КСЛТ — ИТОГИ — Futures, парный, мужской",
+  "slug_новости": "mayskiy-chempionat-kslt-itogi",
+  "дата": "2026-05-10",
+  "категория": "futures",
+  "разряд": "doubles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787666005475-xoyqew4z.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Темирбек Мусаев",
+     "Александр Фомин"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Канат Абдрахманов",
+     "Кайрат Каракеев"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mayskiy-chempionat-kslt-itogi-masters-parnyy-muzhsko-20260510",
+  "title": "МАЙСКИЙ ЧЕМПИОНАТ КСЛТ — ИТОГИ — Masters, парный, мужской",
+  "slug_новости": "mayskiy-chempionat-kslt-itogi",
+  "дата": "2026-05-10",
+  "категория": "masters",
+  "разряд": "doubles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787666005475-xoyqew4z.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Азамат Джумабаев",
+     "Руслан Кульджаев"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Роман Долгушин",
+     "Абдикиим Махмутов"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mayskiy-chempionat-kslt-itogi-tour-parnyy-zhenskiy-20260510",
+  "title": "МАЙСКИЙ ЧЕМПИОНАТ КСЛТ — ИТОГИ — Tour, парный, женский",
+  "slug_новости": "mayskiy-chempionat-kslt-itogi",
+  "дата": "2026-05-10",
+  "категория": "tour",
+  "разряд": "doubles",
+  "пол": "women",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787666005475-xoyqew4z.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Барно Турсунова",
+     "Валерия Пак"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Айсулуу Чокоева",
+     "Зулайка Таласбек кызы"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mayskiy-chempionat-kslt-itogi-futures-parnyy-zhenski-20260510",
+  "title": "МАЙСКИЙ ЧЕМПИОНАТ КСЛТ — ИТОГИ — Futures, парный, женский",
+  "slug_новости": "mayskiy-chempionat-kslt-itogi",
+  "дата": "2026-05-10",
+  "категория": "futures",
+  "разряд": "doubles",
+  "пол": "women",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787666005475-xoyqew4z.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Яна Ересько",
+     "Роза Исабекова"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Нармина Ахматова",
+     "Татьяна Машенская"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "reytingovye-turniry-kslt-zhenskiy-odinochnyy-futures-20260516",
+  "title": "РЕЙТИНГОВЫЕ ТУРНИРЫ КСЛТ — ЖЕНСКИЙ ОДИНОЧНЫЙ FUTURES И TOUR",
+  "slug_новости": "reytingovye-turniry-kslt-zhenskiy-odinochnyy-futures-i-tour",
+  "дата": "2026-05-16",
+  "категория": "futures",
+  "разряд": "singles",
+  "пол": "women",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/kslt-2026-05-16-women-futures-tour.jpg",
+  "площадка": "tay-breyk",
+  "участников": 3,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Зарима Байгубатова"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Шоола Байсаева"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Нуржамал Джаныбекова"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "reytingovyy-turnir-futures-tay-breyk-20260517",
+  "title": "РЕЙТИНГОВЫЙ ТУРНИР FUTURES — ТАЙ-БРЕЙК",
+  "slug_новости": "reytingovyy-turnir-futures-tay-breyk",
+  "дата": "2026-05-17",
+  "категория": "futures",
+  "разряд": "singles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/kslt-2026-05-17-futures.jpg",
+  "площадка": "tay-breyk",
+  "участников": 3,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Азат Сакебаев"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Марк Гаррета Наво"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Александр Габагуев"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "druzheskiy-parnyy-turnir-tay-breyk-27-maya-zhenskiy-20260527",
+  "title": "ДРУЖЕСКИЙ ПАРНЫЙ ТУРНИР — ТАЙ-БРЕЙК, 27 МАЯ — женский",
+  "slug_новости": "druzheskiy-parnyy-turnir-tay-breyk-27-maya",
+  "дата": "2026-05-27",
+  "категория": "friendly",
+  "разряд": "doubles",
+  "пол": "women",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/kslt-2026-05-27-friendly-doubles.jpg",
+  "площадка": "tay-breyk",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Екатерина Титова",
+     "Асель Макаева"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Анастасия Трофимушкина",
+     "Гульмира Орозалиева"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "druzheskiy-parnyy-turnir-tay-breyk-27-maya-muzhskoy-20260527",
+  "title": "ДРУЖЕСКИЙ ПАРНЫЙ ТУРНИР — ТАЙ-БРЕЙК, 27 МАЯ — мужской",
+  "slug_новости": "druzheskiy-parnyy-turnir-tay-breyk-27-maya",
+  "дата": "2026-05-27",
+  "категория": "friendly",
+  "разряд": "doubles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/kslt-2026-05-27-friendly-doubles.jpg",
+  "площадка": "tay-breyk",
+  "участников": 6,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Хамит Каракетов",
+     "Владислав Ким"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Азамат Джумабаев",
+     "Иван Корабельников"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Илья Великородный",
+     "Эрлан Сыдыков"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "booblik-open-2026-futures-parnyy-zhenskiy-20260614",
+  "title": "BOOBLIK OPEN 2026 — Futures, парный, женский",
+  "slug_новости": "booblik-open-2026",
+  "дата": "2026-06-14",
+  "категория": "futures",
+  "разряд": "doubles",
+  "пол": "women",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787665925220-l7k5vg4e.jpg",
+  "площадка": "tay-breyk",
+  "участников": 6,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Азиза Мусаева",
+     "Зулайка Таласбек кызы"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Нармина Ахматова",
+     "Айжан Темиралиева"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Калима Аскарова",
+     "Асель Ашимова"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "booblik-open-2026-futures-parnyy-muzhskoy-20260614",
+  "title": "BOOBLIK OPEN 2026 — Futures, парный, мужской",
+  "slug_новости": "booblik-open-2026",
+  "дата": "2026-06-14",
+  "категория": "futures",
+  "разряд": "doubles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/1787665925220-l7k5vg4e.jpg",
+  "площадка": "tay-breyk",
+  "участников": 6,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Владислав Ким",
+     "Закир Назаров"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Даниил Бондарь",
+     "Санжар Султанов"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Александр Габагуев",
+     "Арген Шакидиев"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "summer-breeze-cup-2026-druzheskiy-parnyy-20260724",
+  "title": "SUMMER BREEZE CUP – 2026 — дружеский, парный",
+  "slug_новости": "summer-breeze-cup-2026",
+  "дата": "2026-07-24",
+  "категория": "friendly",
+  "разряд": "doubles",
+  "пол": "mixed",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/e7dfac4f-7a10-46eb-aae1-369171ff2110.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 6,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Мухтор Асадов",
+     "Айгерим Алижанова"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Азим Исаков",
+     "Анастасия Трофимушкина"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Максим Кан",
+     "Камила Ерходжаева"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "summer-breeze-cup-2026-druzheskiy-mikst-dopolnitelny-20260724",
+  "title": "SUMMER BREEZE CUP – 2026 — дружеский, микст, дополнительный",
+  "slug_новости": "summer-breeze-cup-2026",
+  "дата": "2026-07-24",
+  "категория": "friendly",
+  "разряд": "mixed_doubles",
+  "пол": "mixed",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/e7dfac4f-7a10-46eb-aae1-369171ff2110.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Александр Фомин",
+     "Айдай Орозбаева"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Глеб Эртман",
+     "Анастасия Эртман"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "summer-breeze-cup-2026-druzheskiy-parnyy-muzhskoy-20260724",
+  "title": "SUMMER BREEZE CUP – 2026 — дружеский, парный, мужской",
+  "slug_новости": "summer-breeze-cup-2026",
+  "дата": "2026-07-24",
+  "категория": "friendly",
+  "разряд": "doubles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/e7dfac4f-7a10-46eb-aae1-369171ff2110.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 6,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Фархат Достанов",
+     "Резван Касанов"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Атхам Исраилов",
+     "Искендер Сейдиматов"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Улугбек Салымбеков",
+     "Арсен Умурзаков"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "summer-breeze-cup-2026-druzheskiy-parnyy-muzhskoy-do-20260724",
+  "title": "SUMMER BREEZE CUP – 2026 — дружеский, парный, мужской, дополнительный",
+  "slug_новости": "summer-breeze-cup-2026",
+  "дата": "2026-07-24",
+  "категория": "friendly",
+  "разряд": "doubles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/e7dfac4f-7a10-46eb-aae1-369171ff2110.jpg",
+  "площадка": "kapriz-issyk-kul-resort-hotel",
+  "участников": 4,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Амир Бажанов",
+     "Аймен Азыгалиев"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Бакыт Кайыпов",
+     "Рамиль Мифтахутдинов"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "druzheskiy-parnyy-turnir-brk-group-zhenskiy-20260808",
+  "title": "ДРУЖЕСКИЙ ПАРНЫЙ ТУРНИР — BRK GROUP — женский",
+  "slug_новости": "druzheskiy-parnyy-turnir-brk-group",
+  "дата": "2026-08-08",
+  "категория": "friendly",
+  "разряд": "doubles",
+  "пол": "women",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/kslt-2026-08-08-brk-group.jpg",
+  "площадка": "tay-breyk",
+  "участников": 6,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Асель Ашимова",
+     "Зарима Байгубатова"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Калича Тайгуронова",
+     "Наталия Цурбан"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Валерия Пак",
+     "Калима Аскарова"
+    ]
+   }
+  ],
+  "дубли": [
+   "druzheskij-parnyj-turnir"
+  ]
+ },
+ {
+  "id": "druzheskiy-parnyy-turnir-brk-group-muzhskoy-20260808",
+  "title": "ДРУЖЕСКИЙ ПАРНЫЙ ТУРНИР — BRK GROUP — мужской",
+  "slug_новости": "druzheskiy-parnyy-turnir-brk-group",
+  "дата": "2026-08-08",
+  "категория": "friendly",
+  "разряд": "doubles",
+  "пол": "men",
+  "обложка": "https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/kslt-2026-08-08-brk-group.jpg",
+  "площадка": "tay-breyk",
+  "участников": 6,
+  "места": [
+   {
+    "место": 1,
+    "кто": [
+     "Айдар Усманов",
+     "Эльдияр Боруев"
+    ]
+   },
+   {
+    "место": 2,
+    "кто": [
+     "Искендер Курманов",
+     "Замир Борубаев"
+    ]
+   },
+   {
+    "место": 3,
+    "кто": [
+     "Кайрат Каракеев",
+     "Алымбек Ороков"
+    ]
+   }
+  ],
+  "дубли": [
+   "druzheskij-parnyj-turnir"
+  ]
+ }
+]

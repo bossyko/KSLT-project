@@ -874,8 +874,19 @@ body.news-article-page .section-sponsors-compact {
     min-height: 320px;
 }
 
+/* Афишу вписываем целиком, а не обрезаем: у крупной карточки блок широкий
+   и высокий, а афиши вертикальные — от «МАЙСКИЙ ЧЕМПИОНАТ» оставалась одна
+   середина без дат и разрядов. Тот же приём, что для фотографий внутри
+   новости */
 .news-bento-large .news-bento-img img {
     height: 100%;
+    object-fit: contain;
+    background: var(--bg-elevated);
+}
+
+/* Приближение при наведении на вписанной афише выглядит дёрганьем */
+.news-bento-card.news-bento-large:hover .news-bento-img img {
+    transform: none;
 }
 
 /* Текст прижимается к низу карточки, под картинкой */

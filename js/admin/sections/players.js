@@ -121,6 +121,9 @@
     }
 
     var plrSearchQuery = '';
+    // Игроков триста с лишним — тянуть их одним куском незачем
+    var PLR_PER_PAGE = 25;
+    var plrPage = 1;
 
     // ---- Rating state (moved from ratings.js) ----
     var cachedLevels = [];
@@ -254,12 +257,14 @@
         var searchTimer = null;
         document.getElementById('adPlrSearch').addEventListener('input', function() {
             plrSearchQuery = this.value;
+            plrPage = 1;
             clearTimeout(searchTimer);
             searchTimer = setTimeout(function() { loadPlayersList(); }, 300);
         });
 
         document.getElementById('adPlrCatFilter').addEventListener('change', function() {
             plrFilterCategory = this.value;
+            plrPage = 1;
             loadPlayersList();
         });
 
@@ -276,7 +281,7 @@
         var isAdm = A.currentRole === 'admin';
 
         var query = A.client.from('players')
-            .select('id,name,photo,country,category_id,points,wins,losses,rank_change,banned_until,view_count')
+            .select('id,name,photo,country,category_id,points,wins,losses,rank_change,banned_until,view_count', { count: 'exact' })
             .order('points', { ascending: false });
 
         if (plrFilterCategory) {
@@ -286,7 +291,16 @@
             query = query.ilike('name', '%' + plrSearchQuery + '%');
         }
 
-        var result = await query;
+        // Страницу берём у базы, а не режем всё загруженное: так не тянем
+        // три сотни строк ради двадцати пяти видимых
+        var from = (plrPage - 1) * PLR_PER_PAGE;
+        var result = await query.range(from, from + PLR_PER_PAGE - 1);
+
+        // Ушли за последнюю страницу (например, сузили поиск) — вернёмся
+        if (!(result.data || []).length && result.count && plrPage > 1) {
+            plrPage = Math.max(1, Math.ceil(result.count / PLR_PER_PAGE));
+            return loadPlayersList();
+        }
 
         var table = document.getElementById('adPlrTable');
         if (!table) return;
@@ -300,6 +314,9 @@
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noPlayers + '</div>' +
                     '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noPlayersText + '</div>' +
                 '</td></tr>';
+            // Иначе под пустой таблицей остаются кнопки страниц от прошлого отбора
+            var stale = document.getElementById('adPlrPagination');
+            if (stale) stale.remove();
             return;
         }
 
@@ -337,6 +354,48 @@
 
             A.setupBulkDelete({ tableId: 'adPlrTable', tableName: 'players', reloadFn: loadPlayersList });
         }
+
+        renderPlrPagination(result.count || items.length);
+    }
+
+    function renderPlrPagination(totalItems) {
+        var existing = document.getElementById('adPlrPagination');
+        if (existing) existing.remove();
+
+        var totalPages = Math.max(1, Math.ceil(totalItems / PLR_PER_PAGE));
+        if (totalPages <= 1) return;
+
+        var wrap = document.createElement('div');
+        wrap.id = 'adPlrPagination';
+        wrap.className = 'ad-crt-pagination';
+
+        // Страниц много — показываем соседние, а не весь ряд из тринадцати
+        var pages = [];
+        for (var p = 1; p <= totalPages; p++) {
+            if (p === 1 || p === totalPages || Math.abs(p - plrPage) <= 2) pages.push(p);
+            else if (pages[pages.length - 1] !== '…') pages.push('…');
+        }
+
+        var html = '<button class="ad-crt-page-btn" data-page="' + (plrPage - 1) + '"' + (plrPage <= 1 ? ' disabled' : '') + '>&laquo;</button>';
+        pages.forEach(function(p) {
+            if (p === '…') { html += '<span class="ad-crt-page-info">…</span>'; return; }
+            html += '<button class="ad-crt-page-btn' + (p === plrPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
+        });
+        html += '<button class="ad-crt-page-btn" data-page="' + (plrPage + 1) + '"' + (plrPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+
+        wrap.innerHTML = html;
+
+        var tableCard = document.querySelector('#adPlrTable') && document.querySelector('#adPlrTable').closest('.ad-table-card');
+        if (tableCard) tableCard.after(wrap);
+
+        wrap.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ad-crt-page-btn');
+            if (!btn || btn.disabled) return;
+            plrPage = parseInt(btn.dataset.page, 10);
+            loadPlayersList();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
     }
 
     /** Имя пользователя с одной собачкой: в базе оно лежит и с ней, и без. */

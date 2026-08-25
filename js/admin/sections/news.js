@@ -32,6 +32,8 @@
     var newsSortAsc = false;
     var newsFilters = { category: [], published_at: [] };
     var newsAllData = [];
+    var NEWS_PER_PAGE = 15;
+    var newsPage = 1;
     var newsDraftDirty = false;
 
     var EMOJI_MAP = {
@@ -126,6 +128,7 @@
         var searchTimer = null;
         document.getElementById('adNewsSearch').addEventListener('input', function() {
             newsSearchQuery = this.value;
+            newsPage = 1;
             clearTimeout(searchTimer);
             searchTimer = setTimeout(loadNewsList, 300);
         });
@@ -303,6 +306,7 @@
                     if (checked) arr.push(cb.value);
                 });
                 newsFilters[col] = arr;
+                newsPage = 1;
                 applyNewsFilters();
                 updateNewsColHeaders();
             });
@@ -324,6 +328,7 @@
                 if (selectAllCb) {
                     selectAllCb.checked = arr.length === itemCbs.length;
                 }
+                newsPage = 1;
                 applyNewsFilters();
                 updateNewsColHeaders();
             });
@@ -373,7 +378,43 @@
             });
         }
 
-        renderNewsRows(filtered);
+        var totalPages = Math.max(1, Math.ceil(filtered.length / NEWS_PER_PAGE));
+        if (newsPage > totalPages) newsPage = totalPages;
+        var start = (newsPage - 1) * NEWS_PER_PAGE;
+
+        renderNewsRows(filtered.slice(start, start + NEWS_PER_PAGE));
+        renderNewsPagination(filtered.length, totalPages);
+    }
+
+    function renderNewsPagination(totalItems, totalPages) {
+        var existing = document.getElementById('adNewsPagination');
+        if (existing) existing.remove();
+
+        if (totalPages <= 1) return;
+
+        var wrap = document.createElement('div');
+        wrap.id = 'adNewsPagination';
+        wrap.className = 'ad-crt-pagination';
+
+        var html = '<button class="ad-crt-page-btn" data-page="' + (newsPage - 1) + '"' + (newsPage <= 1 ? ' disabled' : '') + '>&laquo;</button>';
+        for (var p = 1; p <= totalPages; p++) {
+            html += '<button class="ad-crt-page-btn' + (p === newsPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
+        }
+        html += '<button class="ad-crt-page-btn" data-page="' + (newsPage + 1) + '"' + (newsPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+
+        wrap.innerHTML = html;
+
+        var tableCard = document.querySelector('#adNewsTable') && document.querySelector('#adNewsTable').closest('.ad-table-card');
+        if (tableCard) tableCard.after(wrap);
+
+        wrap.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ad-crt-page-btn');
+            if (!btn || btn.disabled) return;
+            newsPage = parseInt(btn.dataset.page, 10);
+            applyNewsFilters();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
     }
 
     async function loadNewsList() {
