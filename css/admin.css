@@ -3232,10 +3232,14 @@ select.ad-field-input {
 }
 
 .ad-crt-stat-total-num {
-    font-size: 1.4rem;
+    /* Раньше 1.4rem: число выходило вдвое крупнее подписи рядом и лезло
+       в глаза сильнее, чем сам разряд, к которому относится */
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
+    margin-left: auto;
+    padding-left: 8px;
 }
 
 .ad-crt-stat-body {
@@ -3543,6 +3547,12 @@ select.ad-field-input {
 .ad-trn-stats-header span {
     font-weight: 700;
     color: var(--accent);
+}
+
+/* Число вплотную к подписи читается как одно слово: «Дружеские9».
+   Между ними нужен воздух */
+.ad-crt-stat-title {
+    margin-right: 4px;
 }
 
 .ad-trn-stats-grid {

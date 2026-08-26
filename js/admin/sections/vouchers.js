@@ -361,6 +361,12 @@
             if (isAdmin && v.status === 'active') {
                 actionHtml += ' <button class="ad-btn-icon ad-btn-danger-icon" data-vch-cancel="' + v.id + '" title="' + L.vchCancel + '">✕</button>';
             }
+            // Удаляем начисто только то, что уже не действует: выданный
+            // ваучер — обязательство перед человеком, его сначала отменяют
+            if (isAdmin && (v.status === 'cancelled' || v.status === 'expired')) {
+                actionHtml += ' <button class="ad-btn-icon ad-btn-danger-icon" data-vch-delete="' + v.id + '" title="' +
+                    (isEn ? 'Delete' : 'Удалить') + '">🗑</button>';
+            }
 
             html +=
                 '<tr>' +
@@ -390,6 +396,12 @@
             var cancelBtn = e.target.closest('[data-vch-cancel]');
             if (cancelBtn) {
                 cancelVoucher(cancelBtn.dataset.vchCancel);
+                return;
+            }
+
+            var deleteBtn = e.target.closest('[data-vch-delete]');
+            if (deleteBtn) {
+                deleteVoucher(deleteBtn.dataset.vchDelete);
             }
         });
     }
@@ -433,15 +445,62 @@
     async function cancelVoucher(id) {
         if (A.currentRole !== 'admin') return;
 
-        A.showConfirm(L.vchCancelConfirm, async function() {
-            var result = await A.client.from('discount_vouchers').update({ status: 'cancelled' }).eq('id', id).eq('status', 'active');
+        // У окна подтверждения три части: заголовок, пояснение и действие.
+        // Пояснение пропускали, и на его месте печаталась сама функция
+        A.showConfirm(L.vchCancelConfirm, L.deleteConfirmText, async function() {
+            // select() после update: без него ответ приходит пустым и «успехом»
+            // считается даже случай, когда правила доступа ничего не изменили
+            var result = await A.client.from('discount_vouchers')
+                .update({ status: 'cancelled' })
+                .eq('id', id)
+                .eq('status', 'active')
+                .select('id');
+
             if (result.error) {
                 A.showToast(result.error.message, 'error');
                 return;
             }
+            if (!result.data || !result.data.length) {
+                A.showToast(isEn ? 'Nothing changed: no permission or the discount is not active'
+                                 : 'Ничего не изменилось: нет прав или скидка уже не активна', 'error');
+                return;
+            }
+
             A.showToast(L.vchCancelled, 'success');
             loadVouchersData();
         });
+    }
+
+    /** Удаление насовсем — только для отменённых и истёкших. */
+    async function deleteVoucher(id) {
+        if (A.currentRole !== 'admin') return;
+
+        A.showConfirm(
+            isEn ? 'Delete this discount?' : 'Удалить эту скидку?',
+            isEn ? 'The record will be removed permanently.' : 'Запись исчезнет без возможности вернуть.',
+            async function() {
+                var result = await A.client.from('discount_vouchers')
+                    .delete()
+                    .eq('id', id)
+                    .in('status', ['cancelled', 'expired'])
+                    .select('id');
+
+                if (result.error) {
+                    A.showToast(result.error.message, 'error');
+                    return;
+                }
+                // Пустой ответ без ошибки — обычное дело при запрете правилами
+                // доступа. Молчать об этом нельзя: человек решит, что удалилось
+                if (!result.data || !result.data.length) {
+                    A.showToast(isEn ? 'Nothing deleted: no permission or the discount is still active'
+                                     : 'Ничего не удалено: нет прав или скидка ещё действует', 'error');
+                    return;
+                }
+
+                A.showToast(isEn ? 'Discount deleted' : 'Скидка удалена', 'success');
+                loadVouchersData();
+            }
+        );
     }
 
     function viewVoucherDetail(voucher) {

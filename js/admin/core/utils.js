@@ -200,6 +200,10 @@
      * @param {function} [onCancel] - Called when user cancels
      */
     function showConfirm(title, text, onConfirm, confirmLabel, onCancel) {
+        // Одно окно за раз. Иначе повторные нажатия складывают их стопкой:
+        // закрываешь верхнее, под ним такое же — и кажется, что оно замерло
+        document.querySelectorAll('.ad-confirm-overlay').forEach(function(el) { el.remove(); });
+
         var btnLabel = confirmLabel || L.delete;
         var btnClass = confirmLabel ? 'ad-btn-primary' : 'ad-btn-danger';
         var overlay = document.createElement('div');
@@ -216,8 +220,19 @@
         document.body.appendChild(overlay);
 
         function dismiss() { overlay.remove(); if (onCancel) onCancel(); }
-        document.getElementById('adConfirmCancel').addEventListener('click', dismiss);
-        document.getElementById('adConfirmOk').addEventListener('click', async function() { await onConfirm(); overlay.remove(); });
+        overlay.querySelector('#adConfirmCancel').addEventListener('click', dismiss);
+        // Ошибку внутри действия надо показать, а не проглотить: раньше окно
+        // просто оставалось на экране и выглядело замершим — «кнопка не
+        // реагирует», хотя на самом деле код упал
+        overlay.querySelector('#adConfirmOk').addEventListener('click', async function() {
+            try {
+                await onConfirm();
+            } catch (e) {
+                console.error('[KSLT] действие не выполнилось:', e);
+                showToast((e && e.message) || 'Не удалось выполнить действие', 'error');
+            }
+            overlay.remove();
+        });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
     }
 

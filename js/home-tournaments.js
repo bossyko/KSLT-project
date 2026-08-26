@@ -11,7 +11,7 @@
 //   3. Регистрация открыта
 //   4. Предстоящие по возрастанию даты
 //   5. При равных датах — кто раньше заведён в базу
-//   6. Если впереди нет ничего — последний завершённый
+//   6. Если впереди нет ничего — недавно сыгранные, от свежих к старым
 
 (function() {
     'use strict';
@@ -62,10 +62,15 @@
         var future = all.filter(function(t) { return TC.status(t) !== 'done'; });
 
         if (!future.length) {
-            // Впереди пусто — показываем последний сыгранный
+            // Впереди пусто — показываем недавно сыгранные, от свежих к
+            // старым. Раньше брали только один, и раздел выглядел так,
+            // будто у клуба всего один турнир за всю историю
             var done = all.filter(function(t) { return TC.status(t) === 'done'; })
-                .sort(function(a, b) { return (b.date_end || '').localeCompare(a.date_end || ''); });
-            return done.slice(0, 1);
+                .sort(function(a, b) {
+                    var d = (b.date_end || b.date_start || '').localeCompare(a.date_end || a.date_start || '');
+                    return d || (b.created_at || '').localeCompare(a.created_at || '');
+                });
+            return done.slice(0, LIMIT);
         }
 
         future.sort(function(a, b) {

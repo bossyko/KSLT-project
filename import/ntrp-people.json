@@ -1,0 +1,1808 @@
+[
+ {
+  "имя": "Атхам Исраилов",
+  "ntrp": "5.5",
+  "пол": "men",
+  "id": "atham-israilov",
+  "вБазе": true
+ },
+ {
+  "имя": "Антон Севальнев",
+  "ntrp": "5",
+  "пол": "men",
+  "id": "anton-sevalnev",
+  "вБазе": false
+ },
+ {
+  "имя": "Александр Логвиненко",
+  "ntrp": "5",
+  "пол": "men",
+  "id": "aleksandr-logvinenko",
+  "вБазе": false
+ },
+ {
+  "имя": "Эрлан Шекербеков",
+  "ntrp": "5",
+  "пол": "men",
+  "id": "erlan-shekerbekov",
+  "вБазе": true
+ },
+ {
+  "имя": "Азиз Базаков",
+  "ntrp": "5",
+  "пол": "men",
+  "id": "aziz-bazakov",
+  "вБазе": true
+ },
+ {
+  "имя": "Руфат Мирджалиев",
+  "ntrp": "5",
+  "пол": "men",
+  "id": "rufat-mirdzhaliev",
+  "вБазе": false
+ },
+ {
+  "имя": "Эльдар Сафиуллин",
+  "ntrp": "5",
+  "пол": "men",
+  "id": "eldar-safiullin",
+  "вБазе": false
+ },
+ {
+  "имя": "Роман Долгушин",
+  "ntrp": "5",
+  "пол": "men",
+  "id": "roman-dolgushin",
+  "вБазе": true
+ },
+ {
+  "имя": "Арсен Умурзаков",
+  "ntrp": "4.5",
+  "пол": "men",
+  "id": "arsen-umurzakov",
+  "вБазе": true
+ },
+ {
+  "имя": "Никита Бойков",
+  "ntrp": "4.5",
+  "пол": "men",
+  "id": "nikita-boykov",
+  "вБазе": false
+ },
+ {
+  "имя": "Батурхан Усенов",
+  "ntrp": "4.5",
+  "пол": "men",
+  "id": "baturhan-usenov",
+  "вБазе": false
+ },
+ {
+  "имя": "Кирилл Леонтьев",
+  "ntrp": "4.5",
+  "пол": "men",
+  "id": "kirill-leontev",
+  "вБазе": true
+ },
+ {
+  "имя": "Эрмек Аратов",
+  "ntrp": "5",
+  "пол": "men",
+  "id": "ermek-aratov",
+  "вБазе": false
+ },
+ {
+  "имя": "Михаил Чертков",
+  "ntrp": "4.25",
+  "пол": "men",
+  "id": "mihail-chertkov",
+  "вБазе": false
+ },
+ {
+  "имя": "Руслан Кульджаев",
+  "ntrp": "4.25",
+  "пол": "men",
+  "id": "ruslan-kuldzhaev",
+  "вБазе": true
+ },
+ {
+  "имя": "Азим Исаков",
+  "ntrp": "4.25",
+  "пол": "men",
+  "id": "azim-isakov",
+  "вБазе": true
+ },
+ {
+  "имя": "Илан Аатабаев",
+  "ntrp": "4.25",
+  "пол": "men",
+  "id": "ilan-aatabaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Фуркат Садыков",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "furkat-sadykov",
+  "вБазе": true
+ },
+ {
+  "имя": "Рашид Сейитов",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "rashid-seyitov",
+  "вБазе": true
+ },
+ {
+  "имя": "Рамиль Мифтахутдинов",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "ramil-miftahutdinov",
+  "вБазе": true
+ },
+ {
+  "имя": "Игорь Муратов",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "igor-muratov",
+  "вБазе": false
+ },
+ {
+  "имя": "Константин Лазарев",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "konstantin-lazarev",
+  "вБазе": false
+ },
+ {
+  "имя": "Автандил Эрнэст",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "avtandil-ernest",
+  "вБазе": false
+ },
+ {
+  "имя": "Роман Гуди",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "roman-gudi",
+  "вБазе": false
+ },
+ {
+  "имя": "Рустам Фаизов",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "rustam-faizov",
+  "вБазе": false
+ },
+ {
+  "имя": "Улугбек Салымбеков",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "ulugbek-salymbekov",
+  "вБазе": true
+ },
+ {
+  "имя": "Данияр Атаханов",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "daniyar-atahanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Азис Мырзаев",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "azis-myrzaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Илья Великородный",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "ilya-velikorodnyy",
+  "вБазе": true
+ },
+ {
+  "имя": "Анвар Аскаров",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "anvar-askarov",
+  "вБазе": false
+ },
+ {
+  "имя": "Сергей Соколов",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "sergey-sokolov",
+  "вБазе": false
+ },
+ {
+  "имя": "Бакыт Кайыпов",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "bakyt-kayypov",
+  "вБазе": true
+ },
+ {
+  "имя": "Азамат Джумабаев",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "azamat-dzhumabaev",
+  "вБазе": true
+ },
+ {
+  "имя": "Алмазбек Эмильканов",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "almazbek-emilkanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Евгений Цой",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "evgeniy-tsoy",
+  "вБазе": false
+ },
+ {
+  "имя": "Рустам Сулейманов",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "rustam-suleymanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Равиль Мифтахутдинов",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "ravil-miftahutdinov",
+  "вБазе": false
+ },
+ {
+  "имя": "Даниэль Гублер",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "daniel-gubler",
+  "вБазе": false
+ },
+ {
+  "имя": "Эрбол Кылычев",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "erbol-kylychev",
+  "вБазе": true
+ },
+ {
+  "имя": "Дмитрий Бондарев",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "dmitriy-bondarev",
+  "вБазе": false
+ },
+ {
+  "имя": "Дастан Омуралиев",
+  "ntrp": "4",
+  "пол": "men",
+  "id": "dastan-omuraliev",
+  "вБазе": false
+ },
+ {
+  "имя": "Канат Абдрахманов",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "kanat-abdrahmanov",
+  "вБазе": true
+ },
+ {
+  "имя": "Александр Фомин",
+  "ntrp": "3.7",
+  "пол": "men",
+  "id": "aleksandr-fomin",
+  "вБазе": true
+ },
+ {
+  "имя": "Равиль Рахматулин",
+  "ntrp": "3.7",
+  "пол": "men",
+  "id": "ravil-rahmatulin",
+  "вБазе": false
+ },
+ {
+  "имя": "Закир Назаров",
+  "ntrp": "3.7",
+  "пол": "men",
+  "id": "zakir-nazarov",
+  "вБазе": true
+ },
+ {
+  "имя": "Владислав Ким",
+  "ntrp": "3.7",
+  "пол": "men",
+  "id": "vladislav-kim",
+  "вБазе": true
+ },
+ {
+  "имя": "Хамит Каракетов",
+  "ntrp": "3.7",
+  "пол": "men",
+  "id": "hamit-karaketov",
+  "вБазе": true
+ },
+ {
+  "имя": "Эрлан Сыдыков",
+  "ntrp": "3.7",
+  "пол": "men",
+  "id": "erlan-sydykov",
+  "вБазе": true
+ },
+ {
+  "имя": "Эрнест Такиров",
+  "ntrp": "3.7",
+  "пол": "men",
+  "id": "ernest-takirov",
+  "вБазе": false
+ },
+ {
+  "имя": "Искендер Курманов",
+  "ntrp": "3.7",
+  "пол": "men",
+  "id": "iskender-kurmanov",
+  "вБазе": true
+ },
+ {
+  "имя": "Арслан Джороев",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "arslan-dzhoroev",
+  "вБазе": false
+ },
+ {
+  "имя": "Сейтек Чалбаев",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "seytek-chalbaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Хангану Игорь",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "hanganu-igor",
+  "вБазе": false
+ },
+ {
+  "имя": "Улукбек Бекбосунов",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "ulukbek-bekbosunov",
+  "вБазе": false
+ },
+ {
+  "имя": "Абдикиим Махмутов",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "abdikiim-mahmutov",
+  "вБазе": true
+ },
+ {
+  "имя": "Фаррух Мавлитов",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "farruh-mavlitov",
+  "вБазе": false
+ },
+ {
+  "имя": "Аванес Балян",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "avanes-balyan",
+  "вБазе": false
+ },
+ {
+  "имя": "Эркин Исаков",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "erkin-isakov",
+  "вБазе": false
+ },
+ {
+  "имя": "Виталий Качала",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "vitaliy-kachala",
+  "вБазе": false
+ },
+ {
+  "имя": "Андрей Лебедев",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "andrey-lebedev",
+  "вБазе": false
+ },
+ {
+  "имя": "Иван Корабельников",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "ivan-korabelnikov",
+  "вБазе": true
+ },
+ {
+  "имя": "Абдурахман Ниязов",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "abdurahman-niyazov",
+  "вБазе": false
+ },
+ {
+  "имя": "Сынгыз Исматов",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "syngyz-ismatov",
+  "вБазе": false
+ },
+ {
+  "имя": "Айбек Жолдошбеков",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "aybek-zholdoshbekov",
+  "вБазе": false
+ },
+ {
+  "имя": "Эдиль Джаныбеков",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "edil-dzhanybekov",
+  "вБазе": false
+ },
+ {
+  "имя": "Темирбек Мусаев",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "temirbek-musaev",
+  "вБазе": true
+ },
+ {
+  "имя": "Данил Бондарь",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "danil-bondar",
+  "вБазе": false
+ },
+ {
+  "имя": "Ян Сказка",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "yan-skazka",
+  "вБазе": false
+ },
+ {
+  "имя": "Кадырбек Адиев",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "kadyrbek-adiev",
+  "вБазе": false
+ },
+ {
+  "имя": "Этан Патэк",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "etan-patek",
+  "вБазе": false
+ },
+ {
+  "имя": "Алымбек Ороков",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "alymbek-orokov",
+  "вБазе": true
+ },
+ {
+  "имя": "Денис Энс",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "denis-ens",
+  "вБазе": false
+ },
+ {
+  "имя": "Денис Ли",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "denis-li",
+  "вБазе": false
+ },
+ {
+  "имя": "Закир Гудаджанов",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "zakir-gudadzhanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Сардар Умаров",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "sardar-umarov",
+  "вБазе": true
+ },
+ {
+  "имя": "Евгений Каранский",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "evgeniy-karanskiy",
+  "вБазе": false
+ },
+ {
+  "имя": "Эрмамат Матосмонов",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "ermamat-matosmonov",
+  "вБазе": false
+ },
+ {
+  "имя": "Искендер Сейдиматов",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "iskender-seydimatov",
+  "вБазе": true
+ },
+ {
+  "имя": "Мурат Норузбаев",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "murat-noruzbaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Эсен Азимов",
+  "ntrp": "3.5",
+  "пол": "men",
+  "id": "esen-azimov",
+  "вБазе": false
+ },
+ {
+  "имя": "Станислав Данилевич",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "stanislav-danilevich",
+  "вБазе": false
+ },
+ {
+  "имя": "Дильшат Бажанов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "dilshat-bazhanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Камиль Якупов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "kamil-yakupov",
+  "вБазе": false
+ },
+ {
+  "имя": "Ярослав Миронов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "yaroslav-mironov",
+  "вБазе": false
+ },
+ {
+  "имя": "Керимбаев Эркин",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "kerimbaev-erkin",
+  "вБазе": false
+ },
+ {
+  "имя": "Санжар Масадыков",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "sanzhar-masadykov",
+  "вБазе": false
+ },
+ {
+  "имя": "Нурлан Азыгалиев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "nurlan-azygaliev",
+  "вБазе": false
+ },
+ {
+  "имя": "Медер Абакиров",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "meder-abakirov",
+  "вБазе": false
+ },
+ {
+  "имя": "Камиль Атыканов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "kamil-atykanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Мирлан Кубатов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "mirlan-kubatov",
+  "вБазе": false
+ },
+ {
+  "имя": "Александр Дьяченко",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "aleksandr-dyachenko",
+  "вБазе": false
+ },
+ {
+  "имя": "Азат Базаркулов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "azat-bazarkulov",
+  "вБазе": false
+ },
+ {
+  "имя": "Виталий Валяев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "vitaliy-valyaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Мурат Алайчыев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "murat-alaychyev",
+  "вБазе": false
+ },
+ {
+  "имя": "Азамат Араев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "azamat-araev",
+  "вБазе": false
+ },
+ {
+  "имя": "Ильяс Дадыбаев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "ilyas-dadybaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Таалай Есенаманов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "taalay-esenamanov",
+  "вБазе": true
+ },
+ {
+  "имя": "Азиз Бурханов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "aziz-burhanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Кирилл Вайс",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "kirill-vays",
+  "вБазе": false
+ },
+ {
+  "имя": "Ильзат Хусаинов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "ilzat-husainov",
+  "вБазе": false
+ },
+ {
+  "имя": "Станислав Шумилин",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "stanislav-shumilin",
+  "вБазе": false
+ },
+ {
+  "имя": "Леонид Цой",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "leonid-tsoy",
+  "вБазе": false
+ },
+ {
+  "имя": "Дмитрий Дискин",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "dmitriy-diskin",
+  "вБазе": false
+ },
+ {
+  "имя": "Эрмек Абакиров",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "ermek-abakirov",
+  "вБазе": false
+ },
+ {
+  "имя": "Сергей Левин",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "sergey-levin",
+  "вБазе": false
+ },
+ {
+  "имя": "Чингис Чукин",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "chingis-chukin",
+  "вБазе": false
+ },
+ {
+  "имя": "Темирлан Миргазы",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "temirlan-mirgazy",
+  "вБазе": false
+ },
+ {
+  "имя": "Мирлан Усенканов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "mirlan-usenkanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Акылбек Тентиев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "akylbek-tentiev",
+  "вБазе": false
+ },
+ {
+  "имя": "Влад Афонин",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "vlad-afonin",
+  "вБазе": false
+ },
+ {
+  "имя": "Денис Реннер",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "denis-renner",
+  "вБазе": false
+ },
+ {
+  "имя": "Азат Мукаев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "azat-mukaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Алан Аджибеков",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "alan-adzhibekov",
+  "вБазе": true
+ },
+ {
+  "имя": "Аскар Жумагулов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "askar-zhumagulov",
+  "вБазе": false
+ },
+ {
+  "имя": "Азамат Нурдинов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "azamat-nurdinov",
+  "вБазе": false
+ },
+ {
+  "имя": "Замир Борубаев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "zamir-borubaev",
+  "вБазе": true
+ },
+ {
+  "имя": "Арген Шакидиев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "argen-shakidiev",
+  "вБазе": true
+ },
+ {
+  "имя": "Амир Бажанов",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "amir-bazhanov",
+  "вБазе": true
+ },
+ {
+  "имя": "Эльдияр Боруев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "eldiyar-boruev",
+  "вБазе": true
+ },
+ {
+  "имя": "Нурбек Нурбеков",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "nurbek-nurbekov",
+  "вБазе": false
+ },
+ {
+  "имя": "Амир Канаев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "amir-kanaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Жанат Кыдралиев",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "zhanat-kydraliev",
+  "вБазе": true
+ },
+ {
+  "имя": "Дмитрий Дудрин",
+  "ntrp": "3",
+  "пол": "men",
+  "id": "dmitriy-dudrin",
+  "вБазе": false
+ },
+ {
+  "имя": "Иван Швыров",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "ivan-shvyrov",
+  "вБазе": false
+ },
+ {
+  "имя": "Шавкат Михманов",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "shavkat-mihmanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Игорь Кан",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "igor-kan",
+  "вБазе": false
+ },
+ {
+  "имя": "Аман Канаев",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "aman-kanaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Сардар Артыкбаев",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "sardar-artykbaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Адилет Айтиев",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "adilet-aytiev",
+  "вБазе": false
+ },
+ {
+  "имя": "Бекзат Именов",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "bekzat-imenov",
+  "вБазе": false
+ },
+ {
+  "имя": "Владислав Абросимов",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "vladislav-abrosimov",
+  "вБазе": false
+ },
+ {
+  "имя": "Фарух Сулейманов",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "faruh-suleymanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Алексей Пьянков",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "aleksey-pyankov",
+  "вБазе": false
+ },
+ {
+  "имя": "Атай Бегалиев",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "atay-begaliev",
+  "вБазе": false
+ },
+ {
+  "имя": "Азат Мусаев",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "azat-musaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Константин Ким",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "konstantin-kim",
+  "вБазе": false
+ },
+ {
+  "имя": "Нур Тулебаев",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "nur-tulebaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Дмитрий Пак",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "dmitriy-pak",
+  "вБазе": false
+ },
+ {
+  "имя": "Санжар Эргешалиев",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "sanzhar-ergeshaliev",
+  "вБазе": false
+ },
+ {
+  "имя": "Азат Сакебаев",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "azat-sakebaev",
+  "вБазе": true
+ },
+ {
+  "имя": "Джантай Оторбаев",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "dzhantay-otorbaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Элнур Омурзаков",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "elnur-omurzakov",
+  "вБазе": false
+ },
+ {
+  "имя": "Аллаяр Насыров",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "allayar-nasyrov",
+  "вБазе": false
+ },
+ {
+  "имя": "Дильшат Нурдинов",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "dilshat-nurdinov",
+  "вБазе": false
+ },
+ {
+  "имя": "Султан Ибрагимов",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "sultan-ibragimov",
+  "вБазе": false
+ },
+ {
+  "имя": "Нурмамат уулу Бекмамат",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "nurmamat-uulu-bekmamat",
+  "вБазе": false
+ },
+ {
+  "имя": "Рустам Ушур",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "rustam-ushur",
+  "вБазе": false
+ },
+ {
+  "имя": "Аскар Абасканов",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "askar-abaskanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Ярослав Бредихин",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "yaroslav-bredihin",
+  "вБазе": false
+ },
+ {
+  "имя": "Бекжан Кылычбеков",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "bekzhan-kylychbekov",
+  "вБазе": false
+ },
+ {
+  "имя": "Ахмеджан Аджуев",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "ahmedzhan-adzhuev",
+  "вБазе": false
+ },
+ {
+  "имя": "Никита Потримайло",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "nikita-potrimaylo",
+  "вБазе": false
+ },
+ {
+  "имя": "Бахрам Мамбетов",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "bahram-mambetov",
+  "вБазе": false
+ },
+ {
+  "имя": "Адиль Валимамедов",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "adil-valimamedov",
+  "вБазе": true
+ },
+ {
+  "имя": "Тимур Узагалиев",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "timur-uzagaliev",
+  "вБазе": false
+ },
+ {
+  "имя": "Денис Асанов",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "denis-asanov",
+  "вБазе": false
+ },
+ {
+  "имя": "Александр Ким",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "aleksandr-kim",
+  "вБазе": false
+ },
+ {
+  "имя": "Имар Камалов",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "imar-kamalov",
+  "вБазе": false
+ },
+ {
+  "имя": "Нурмат Сакебаев",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "nurmat-sakebaev",
+  "вБазе": false
+ },
+ {
+  "имя": "Тилеген Мамыркалиев",
+  "ntrp": "2",
+  "пол": "men",
+  "id": "tilegen-mamyrkaliev",
+  "вБазе": false
+ },
+ {
+  "имя": "Искендер Кадыров",
+  "ntrp": "2.5",
+  "пол": "men",
+  "id": "iskender-kadyrov",
+  "вБазе": false
+ },
+ {
+  "имя": "Нелли Буюклянова",
+  "ntrp": null,
+  "пол": "women",
+  "id": "nelli-buyuklyanova",
+  "вБазе": false
+ },
+ {
+  "имя": "Арина Беляева",
+  "ntrp": null,
+  "пол": "women",
+  "id": "arina-belyaeva",
+  "вБазе": false
+ },
+ {
+  "имя": "Альбина Сулайманова",
+  "ntrp": null,
+  "пол": "women",
+  "id": "albina-sulaymanova",
+  "вБазе": true
+ },
+ {
+  "имя": "Софья Благовисная",
+  "ntrp": "4.5",
+  "пол": "women",
+  "id": "sofya-blagovisnaya",
+  "вБазе": false
+ },
+ {
+  "имя": "Анастасия Трофимушкина",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "anastasiya-trofimushkina",
+  "вБазе": true
+ },
+ {
+  "имя": "Роза Исабекова",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "roza-isabekova",
+  "вБазе": true
+ },
+ {
+  "имя": "Айсулуу Чокоева",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "aysuluu-chokoeva",
+  "вБазе": true
+ },
+ {
+  "имя": "Лейли Благовисная",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "leyli-blagovisnaya",
+  "вБазе": false
+ },
+ {
+  "имя": "Асель Макаева",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "asel-makaeva",
+  "вБазе": true
+ },
+ {
+  "имя": "Наталья Клименко",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "natalya-klimenko",
+  "вБазе": false
+ },
+ {
+  "имя": "Лариса Янчарук",
+  "ntrp": null,
+  "пол": "women",
+  "id": "larisa-yancharuk",
+  "вБазе": true
+ },
+ {
+  "имя": "Татьяна Нечаева",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "tat-yana-nechaeva",
+  "вБазе": true
+ },
+ {
+  "имя": "Гульмира Орозалиева",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "gulmira-orozalieva",
+  "вБазе": true
+ },
+ {
+  "имя": "Ширин Каримова",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "shirin-karimova",
+  "вБазе": false
+ },
+ {
+  "имя": "Марианна Проскурина",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "marianna-proskurina",
+  "вБазе": false
+ },
+ {
+  "имя": "Айдай Орозбаева",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "ayday-orozbaeva",
+  "вБазе": true
+ },
+ {
+  "имя": "Яна Белекова",
+  "ntrp": "4",
+  "пол": "women",
+  "id": "yana-belekova",
+  "вБазе": false
+ },
+ {
+  "имя": "Барно Турсунова",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "barno-tursunova",
+  "вБазе": true
+ },
+ {
+  "имя": "Валерия Хегай",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "valeriya-hegay",
+  "вБазе": false
+ },
+ {
+  "имя": "Елена Кан",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "elena-kan",
+  "вБазе": false
+ },
+ {
+  "имя": "Лилия Рахматулина",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "liliya-rahmatulina",
+  "вБазе": false
+ },
+ {
+  "имя": "Татьяна Андреевская",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "tatyana-andreevskaya",
+  "вБазе": false
+ },
+ {
+  "имя": "Асель Исабекова",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "asel-isabekova",
+  "вБазе": false
+ },
+ {
+  "имя": "Анастасия Аджибекова",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "anastasiya-adzhibekova",
+  "вБазе": true
+ },
+ {
+  "имя": "Адель Джайлоева",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "adel-dzhayloeva",
+  "вБазе": true
+ },
+ {
+  "имя": "Екатериа Титова",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "ekateria-titova",
+  "вБазе": false
+ },
+ {
+  "имя": "Валерия Пак",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "valeriya-pak",
+  "вБазе": true
+ },
+ {
+  "имя": "Наталья Темирбаева",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "natalya-temirbaeva",
+  "вБазе": false
+ },
+ {
+  "имя": "Елизавета-Александра Пономарева",
+  "ntrp": "3.5",
+  "пол": "women",
+  "id": "elizaveta-aleksandra-ponomareva",
+  "вБазе": false
+ },
+ {
+  "имя": "Александра Мучкина",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "aleksandra-muchkina",
+  "вБазе": false
+ },
+ {
+  "имя": "Назгуль Керималиева",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "nazgul-kerimalieva",
+  "вБазе": false
+ },
+ {
+  "имя": "Айдана Актанова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "aydana-aktanova",
+  "вБазе": false
+ },
+ {
+  "имя": "Айсулуу Орокова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "aysuluu-orokova",
+  "вБазе": false
+ },
+ {
+  "имя": "Амина Курбанова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "amina-kurbanova",
+  "вБазе": false
+ },
+ {
+  "имя": "Малика Шамиль",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "malika-shamil",
+  "вБазе": false
+ },
+ {
+  "имя": "Алтынай Омуралиева",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "altynay-omuralieva",
+  "вБазе": false
+ },
+ {
+  "имя": "Акжолтой Болотбекова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "akzholtoy-bolotbekova",
+  "вБазе": false
+ },
+ {
+  "имя": "Керемет Бегматова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "keremet-begmatova",
+  "вБазе": false
+ },
+ {
+  "имя": "Бермет Самсалиева",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "bermet-samsalieva",
+  "вБазе": false
+ },
+ {
+  "имя": "Мария Гурина",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "mariya-gurina",
+  "вБазе": false
+ },
+ {
+  "имя": "Калича Тайгурова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "kalicha-taygurova",
+  "вБазе": false
+ },
+ {
+  "имя": "Елизавета Пилипенко",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "elizaveta-pilipenko",
+  "вБазе": false
+ },
+ {
+  "имя": "Айгерим Сариева",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "aygerim-sarieva",
+  "вБазе": false
+ },
+ {
+  "имя": "Дарья Зинина",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "darya-zinina",
+  "вБазе": false
+ },
+ {
+  "имя": "Света Похарел",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "sveta-poharel",
+  "вБазе": false
+ },
+ {
+  "имя": "Ольга Петровская",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "olga-petrovskaya",
+  "вБазе": false
+ },
+ {
+  "имя": "Зулайка Таласбек кызы",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "zulayka-talasbek-kyzy",
+  "вБазе": true
+ },
+ {
+  "имя": "Наталия Цурбан",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "nataliya-tsurban",
+  "вБазе": true
+ },
+ {
+  "имя": "Мээрим Жумабекова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "meerim-zhumabekova",
+  "вБазе": false
+ },
+ {
+  "имя": "Калима Аскарова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "kalima-askarova",
+  "вБазе": true
+ },
+ {
+  "имя": "Наталья Сейтмуратова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "natalya-seytmuratova",
+  "вБазе": false
+ },
+ {
+  "имя": "Светлана Ханаженко",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "svetlana-hanazhenko",
+  "вБазе": false
+ },
+ {
+  "имя": "Аделя Камчыбекова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "adelya-kamchybekova",
+  "вБазе": false
+ },
+ {
+  "имя": "Нэлла Котельникова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "nella-kotelnikova",
+  "вБазе": false
+ },
+ {
+  "имя": "Айдина Айтматова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "aydina-aytmatova",
+  "вБазе": false
+ },
+ {
+  "имя": "Зарима Байгубатова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "zarima-baygubatova",
+  "вБазе": true
+ },
+ {
+  "имя": "Акжолтой Исабекова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "akzholtoy-isabekova",
+  "вБазе": true
+ },
+ {
+  "имя": "Асель Абдыгулова",
+  "ntrp": "3",
+  "пол": "women",
+  "id": "asel-abdygulova",
+  "вБазе": false
+ },
+ {
+  "имя": "Айгерим Алижанова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "aygerim-alizhanova",
+  "вБазе": true
+ },
+ {
+  "имя": "Бурул Ракишева",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "burul-rakisheva",
+  "вБазе": true
+ },
+ {
+  "имя": "Айчурок Марат кызы",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "aychurok-marat-kyzy",
+  "вБазе": false
+ },
+ {
+  "имя": "Айдай Сталбекова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "ayday-stalbekova",
+  "вБазе": false
+ },
+ {
+  "имя": "Касиет Самсалиева",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "kasiet-samsalieva",
+  "вБазе": false
+ },
+ {
+  "имя": "Салия Устемирова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "saliya-ustemirova",
+  "вБазе": false
+ },
+ {
+  "имя": "Асель Орокова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "asel-orokova",
+  "вБазе": false
+ },
+ {
+  "имя": "Амаль Бреннеман",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "amal-brenneman",
+  "вБазе": false
+ },
+ {
+  "имя": "Айжан Темиралиева",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "ayzhan-temiralieva",
+  "вБазе": true
+ },
+ {
+  "имя": "Мадина Кадырова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "madina-kadyrova",
+  "вБазе": false
+ },
+ {
+  "имя": "Диана Эсенбекова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "diana-esenbekova",
+  "вБазе": false
+ },
+ {
+  "имя": "Шоола Байсаева",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "shoola-baysaeva",
+  "вБазе": true
+ },
+ {
+  "имя": "Татьяна Машенская",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "tatyana-mashenskaya",
+  "вБазе": true
+ },
+ {
+  "имя": "Александра Панфилова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "aleksandra-panfilova",
+  "вБазе": false
+ },
+ {
+  "имя": "Яна Ересько",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "yana-eresko",
+  "вБазе": true
+ },
+ {
+  "имя": "Аида Ногойбаева",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "aida-nogoybaeva",
+  "вБазе": false
+ },
+ {
+  "имя": "Алия Абасканова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "aliya-abaskanova",
+  "вБазе": false
+ },
+ {
+  "имя": "Ахматова Нармина",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "narmina-ahmatova",
+  "вБазе": true
+ },
+ {
+  "имя": "Нуржамал Джанибекова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "nurzhamal-dzhanibekova",
+  "вБазе": false
+ },
+ {
+  "имя": "Азиза Мусаева",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "aziza-musaeva",
+  "вБазе": true
+ },
+ {
+  "имя": "Кызжибек Батырканова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "kyzzhibek-batyrkanova",
+  "вБазе": false
+ },
+ {
+  "имя": "Айзана Тогузбаева",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "ayzana-toguzbaeva",
+  "вБазе": false
+ },
+ {
+  "имя": "Зухра Муралиева",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "zuhra-muralieva",
+  "вБазе": false
+ },
+ {
+  "имя": "Дениз Рахматова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "deniz-rahmatova",
+  "вБазе": false
+ },
+ {
+  "имя": "Диана Иманахунова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "diana-imanahunova",
+  "вБазе": false
+ },
+ {
+  "имя": "Асель Ашимова",
+  "ntrp": "2.5",
+  "пол": "women",
+  "id": "asel-ashimova",
+  "вБазе": true
+ },
+ {
+  "имя": "Айсулуу Эркулова",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "aysuluu-erkulova",
+  "вБазе": false
+ },
+ {
+  "имя": "Чолпон Нарбаева",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "cholpon-narbaeva",
+  "вБазе": false
+ },
+ {
+  "имя": "Фейруза Икрам",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "feyruza-ikram",
+  "вБазе": false
+ },
+ {
+  "имя": "Наргиза Сакебаева",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "nargiza-sakebaeva",
+  "вБазе": false
+ },
+ {
+  "имя": "Айша Турдумамбетова",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "aysha-turdumambetova",
+  "вБазе": false
+ },
+ {
+  "имя": "Элина Саманова",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "elina-samanova",
+  "вБазе": false
+ },
+ {
+  "имя": "Аиша Нурбекова",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "aisha-nurbekova",
+  "вБазе": false
+ },
+ {
+  "имя": "Айканыш Табалдыева",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "aykanysh-tabaldyeva",
+  "вБазе": false
+ },
+ {
+  "имя": "Азиза Самратова",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "aziza-samratova",
+  "вБазе": false
+ },
+ {
+  "имя": "Екатерина Шумилина",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "ekaterina-shumilina",
+  "вБазе": false
+ },
+ {
+  "имя": "Василя Искендирова",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "vasilya-iskendirova",
+  "вБазе": false
+ },
+ {
+  "имя": "Альбина Исабекова",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "albina-isabekova",
+  "вБазе": false
+ },
+ {
+  "имя": "Алтынай Джаманбаева",
+  "ntrp": "2",
+  "пол": "women",
+  "id": "altynay-dzhamanbaeva",
+  "вБазе": false
+ }
+]
