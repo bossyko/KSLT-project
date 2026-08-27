@@ -162,7 +162,7 @@ function generateTournament(config) {
         prize: config.prize || "—",
         status: config.status || "upcoming",
         description: config.description || "",
-        bgImage: config.bgImage || "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&q=80",
+        bgImage: config.bgImage || "../images/heroes/tournaments.jpg",
         players: players,
         results: null
     };

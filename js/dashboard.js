@@ -87,7 +87,7 @@
         dangerZone: 'Коркунучтуу аймак',
         deleteAccount: 'Аккаунтту жок кылуу',
         deleteLoses: ['Рейтингдеги орун жана топтолгон упайлар', 'Мелдештердин жана матчтардын тарыхы', 'Топтолгон упайлар менен жеңилдиктер', 'Тиркеме менен сайттагы аккаунт'],
-        deleteConfirm: 'Аккаунт жалпы тизмелерден дароо жоголот, бирок 30 күн ичинде кайтарууга болот: кириңиз — калыбына келтирүүнү сунуштайбыз. Мөөнөт бүткөндөн кийин биротоло өчүрүлөт.',
+        deleteConfirm: 'Аккаунт дароо жашырылат. Ойлонууга 30 күнүңүз бар — жөн эле кириңиз, биз аны кайтарууну сунуштайбыз. Андан кийин биротоло өчөт.',
         errPwMatch: 'Сыр сөздөр дал келбейт',
         errPwShort: 'Сыр сөз кеминде 8 белгиден турушу керек',
         pwRuleLength: 'Кеминде 8 белги',
@@ -152,6 +152,11 @@
         invAccepted: 'Кабыл алынды',
         invDeclined: 'Четке кагылды',
         invPending: 'Күтүүдө',
+        invAccept: 'Кабыл алуу', invDecline: 'Четке кагуу',
+        invContactsTitle: 'Байланыш маалыматтары',
+        invShareWarn: 'Кабыл алсаңыз, байланыш маалыматтарыңыз менен алмашасыз',
+        invShowContacts: 'Байланыштарды көрүү',
+        invNoContacts: 'Байланыш маалыматтары көрсөтүлгөн эмес',
         invNoInvites: 'Чакыруулар жок',
         invNoInvitesText: '«Оюнчу издөө» барагынан оюнга чакыруулар жөнөтүңүз',
         ratingHistory: 'Упайлар',
@@ -340,7 +345,7 @@
         dangerZone: 'Danger Zone',
         deleteAccount: 'Delete Account',
         deleteLoses: ['Your ranking position and points', 'Tournament and match history', 'Loyalty points and discounts', 'Your account on the site and in the app'],
-        deleteConfirm: 'Your account disappears from public lists right away, but you have 30 days to change your mind: sign in and we will offer to restore it. After that it is erased for good.',
+        deleteConfirm: 'Your account is hidden right away. You have 30 days to change your mind — just sign in and we will offer to bring it back. After that it is gone for good.',
         errPwMatch: 'Passwords do not match',
         errPwShort: 'Password must be at least 8 characters',
         pwRuleLength: 'At least 8 characters',
@@ -405,6 +410,11 @@
         invAccepted: 'Accepted',
         invDeclined: 'Declined',
         invPending: 'Pending',
+        invAccept: 'Accept', invDecline: 'Decline',
+        invContactsTitle: 'Contacts',
+        invShareWarn: 'If you accept, you will exchange contact details',
+        invShowContacts: 'Show contacts',
+        invNoContacts: 'No contacts provided',
         invNoInvites: 'No invitations yet',
         invNoInvitesText: 'Send game invitations from the Player Search page',
         ratingHistory: 'Points',
@@ -593,7 +603,7 @@
         dangerZone: 'Опасная зона',
         deleteAccount: 'Удалить аккаунт',
         deleteLoses: ['Место в рейтинге и набранные очки', 'История турниров и матчей', 'Накопленные баллы и скидки', 'Аккаунт на сайте и в приложении'],
-        deleteConfirm: 'Аккаунт исчезнет из общих списков сразу, но 30 дней его можно вернуть: войдите — и мы предложим восстановить. По истечении срока он удаляется насовсем.',
+        deleteConfirm: 'Аккаунт скроется сразу. У вас будет 30 дней, чтобы передумать — просто войдите, и мы предложим его вернуть. Потом он удалится навсегда.',
         errPwMatch: 'Пароли не совпадают',
         errPwShort: 'Пароль должен быть не менее 8 символов',
         pwRuleLength: 'Минимум 8 символов',
@@ -658,6 +668,11 @@
         invAccepted: 'Принято',
         invDeclined: 'Отклонено',
         invPending: 'Ожидает',
+        invAccept: 'Принять', invDecline: 'Отклонить',
+        invContactsTitle: 'Контакты',
+        invShareWarn: 'Приняв приглашение, вы обменяетесь контактами',
+        invShowContacts: 'Показать контакты',
+        invNoContacts: 'Контакты не указаны',
         invNoInvites: 'Приглашений пока нет',
         invNoInvitesText: 'Отправляйте приглашения со страницы «Поиск игрока»',
         ratingHistory: 'Очки',
@@ -1838,6 +1853,86 @@
     // ещё не игра, и держать ради него пункт меню наравне с турнирами
     // незачем. Список живёт подразделом в «Моих играх».
 
+    /**
+     * Карточка контактов собеседника. Показываем всё, что он заполнил:
+     * галочки «показывать другим» тут не при чём — они про открытый показ
+     * всему клубу, а здесь согласие дано адресно, одному человеку.
+     */
+    // Знаки сетей рисованные, а не эмодзи: эмодзи у каждой системы свои, и
+    // на части устройств вместо телеграма выходил синий квадрат. Те же
+    // значки стоят на карточке игрока
+    var CONTACT_ICON = {
+        phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+        whatsapp: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 0 1 6.988 2.896 9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.82 11.82 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.88 11.88 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 0 0-3.48-8.413Z"/></svg>',
+        telegram: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>',
+        instagram: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98C.014 8.333 0 8.741 0 12s.014 3.668.072 4.948c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.668-.014 4.948-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>'
+    };
+
+    function inviteContactsHtml(cn) {
+        if (!cn) return '<p class="db-modal-text">' + L.invNoContacts + '</p>';
+        // Четвёртым идёт метка сети: по ней плашка красится своим цветом,
+        // а не общим лаймом — так строка узнаётся раньше, чем прочитана
+        var rows = [];
+        if (cn.phone) rows.push([CONTACT_ICON.phone, escHtml(cn.phone), 'tel:' + cn.phone, 'phone']);
+        if (cn.whatsapp) rows.push([CONTACT_ICON.whatsapp, escHtml(cn.whatsapp), 'https://wa.me/' + String(cn.whatsapp).replace(/[^0-9]/g, ''), 'wa']);
+        if (cn.telegram) rows.push([CONTACT_ICON.telegram, '@' + escHtml(String(cn.telegram).replace('@', '')), 'https://t.me/' + String(cn.telegram).replace('@', ''), 'tg']);
+        if (cn.instagram) rows.push([CONTACT_ICON.instagram, '@' + escHtml(String(cn.instagram).replace('@', '')), 'https://instagram.com/' + String(cn.instagram).replace('@', ''), 'ig']);
+        if (!rows.length) return '<p class="db-modal-text">' + L.invNoContacts + '</p>';
+
+        return '<div class="db-inv-contacts">' +
+            (cn.full_name ? '<div class="db-inv-contacts-name">' + escHtml(cn.full_name) + '</div>' : '') +
+            rows.map(function(r) {
+                return '<a class="db-inv-contact db-inv-contact--' + r[3] + '" href="' + r[2] + '" target="_blank" rel="noopener">' +
+                    '<span class="db-inv-contact-label">' + r[0] + '</span>' +
+                    '<span>' + r[1] + '</span></a>';
+            }).join('') +
+        '</div>';
+    }
+
+    function showInviteContacts(contacts) {
+        dbModal({
+            title: L.invContactsTitle,
+            body: inviteContactsHtml(contacts),
+            actions: [{ label: L.close, primary: true }]
+        });
+    }
+
+    /**
+     * Принять или отклонить приглашение. Идём через функцию на сервере, а
+     * не напрямую в базу: она заодно оповещает отправителя. Раньше об
+     * ответе сообщал только Телеграм-бот, и после переезда ответа на сайт
+     * отправитель не узнавал ничего, пока сам не заглянет в кабинет
+     */
+    async function respondInvite(inviteId, accept) {
+        var session = await client.auth.getSession();
+        var token = session.data.session && session.data.session.access_token;
+        var res;
+        try {
+            var resp = await fetch(SUPABASE_URL + '/functions/v1/respond-game-invite', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ invite_id: inviteId, accept: accept })
+            });
+            res = { data: await resp.json() };
+        } catch (e) {
+            res = { error: { message: e.message || 'Error' } };
+        }
+        if (res.error || (res.data && res.data.error)) {
+            dbModal({
+                title: L.invAccept,
+                body: '<p class="db-modal-text">' + escHtml((res.error && res.error.message) || (res.data && res.data.error) || 'Error') + '</p>',
+                actions: [{ label: L.close, primary: true }]
+            });
+            return;
+        }
+        if (accept && res.data && res.data.contacts) showInviteContacts(res.data.contacts);
+        loadGameInvites();
+    }
+
     async function loadGameInvites() {
         var card = document.getElementById('dbGamesInvites');
         if (!card || !client) return;
@@ -1857,15 +1952,49 @@
             }
 
             renderPaged(card, invites, function(rows) {
-                return '<table class="db-matches-table db-battles-table"><thead><tr>' +
+                return '<table class="db-matches-table db-battles-table db-invites-table"><thead><tr>' +
                         '<th>' + L.matchDate + '</th>' +
                         '<th>' + L.matchOpponent + '</th>' +
-                        '<th>' + L.invDirection + '</th>' +
                         '<th>' + L.tourStatus + '</th>' +
+                        '<th></th>' +
                     '</tr></thead><tbody>' +
                     rows.map(inviteRow).join('') +
                     '</tbody></table>';
             }, 0);
+
+            card.addEventListener('click', async function(e) {
+                var acc = e.target.closest('.db-inv-accept');
+                var dec = e.target.closest('.db-inv-decline');
+                var con = e.target.closest('.db-inv-contacts');
+                if (acc) {
+                    // Предупреждаем до согласия: обмен взаимный, и человек
+                    // должен понимать, что отдаёт свои контакты тоже
+                    dbModal({
+                        title: L.invAccept,
+                        body: '<p class="db-modal-text">' + L.invShareWarn + '</p>',
+                        actions: [
+                            { label: L.cancel },
+                            { label: L.invAccept, primary: true, onClick: function(close) {
+                                close();
+                                respondInvite(acc.dataset.inv, true);
+                            } }
+                        ]
+                    });
+                } else if (dec) {
+                    respondInvite(dec.dataset.inv, false);
+                } else if (con) {
+                    var r = await client.rpc('get_invite_contacts', { p_invite_id: con.dataset.inv });
+                    if (r.error || (r.data && r.data.error)) {
+                        dbModal({
+                            title: L.invContactsTitle,
+                            body: '<p class="db-modal-text">' + escHtml((r.error && r.error.message) || r.data.error) + '</p>',
+                            actions: [{ label: L.close, primary: true }]
+                        });
+                        return;
+                    }
+                    showInviteContacts(r.data && r.data.contacts);
+                }
+            });
         } catch(e) {
             console.error('Game invites error:', e);
             card.innerHTML = '<p style="color:var(--text-muted);">\u2014</p>';
@@ -1884,15 +2013,32 @@
                 dateStr = d.slice(8, 10) + '.' + d.slice(5, 7) + '.' + d.slice(2, 4);
             }
 
+            // Полученное приглашение можно принять или отклонить прямо здесь.
+            // Раньше это делалось только кнопками в Телеграм-боте, и человек
+            // без Телеграма ответить не мог вовсе
+            var actions = '';
+            if (inv.direction === 'received' && inv.status === 'pending') {
+                actions = '<button class="db-btn db-btn-sm db-inv-accept" data-inv="' + inv.id + '">' + L.invAccept + '</button>' +
+                          ' <button class="db-btn db-btn-sm db-btn-ghost db-inv-decline" data-inv="' + inv.id + '">' + L.invDecline + '</button>';
+            } else if (inv.status === 'accepted') {
+                actions = '<button class="db-btn db-btn-sm db-btn-ghost db-inv-contacts" data-inv="' + inv.id + '">' + L.invShowContacts + '</button>';
+            }
+
+            // Направление показываем стрелкой у имени, а не отдельной
+            // колонкой: пять колонок не помещались, кнопка «Отклонить»
+            // вылезала за край, а подписи статусов обрезались многоточием
+            var isSent = inv.direction === 'sent';
+            var arrow = '<span class="db-inv-dir" title="' + (isSent ? L.invSent : L.invReceived) + '">' +
+                        (isSent ? '\u2197' : '\u2199') + '</span>';
+
             return '<tr>' +
                 '<td class="db-match-date">' + dateStr + '</td>' +
                 '<td><div class="db-match-opponent">' +
                     matchAvatar(name, inv.partner_avatar) +
-                    '<span>' + escHtml(name) + '</span>' +
+                    '<span>' + escHtml(name) + '</span>' + arrow +
                 '</div></td>' +
-                '<td class="db-tour-status">' +
-                    (inv.direction === 'sent' ? L.invSent : L.invReceived) + '</td>' +
                 '<td><span class="db-status-badge db-invite-' + statusClass + '">' + statusLabel + '</span></td>' +
+                '<td class="db-inv-actions">' + actions + '</td>' +
             '</tr>';
         }
     }

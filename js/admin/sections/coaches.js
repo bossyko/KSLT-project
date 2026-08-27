@@ -1341,6 +1341,9 @@
             A.showToast(L.saved, 'success');
             saveBtn.disabled = false;
             saveBtn.textContent = L.save;
+            // Форма короткая — после сохранения показываем список, чтобы
+            // сразу было видно новую запись
+            renderCoachesList();
         } catch (e) {
             A.showToast(e.message || 'Error', 'error');
             saveBtn.disabled = false;

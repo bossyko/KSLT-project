@@ -25,8 +25,8 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/style.css?v=123">
-    <link rel="stylesheet" href="css/partners.css?v=6">
+    <link rel="stylesheet" href="css/style.css?v=126">
+    <link rel="stylesheet" href="css/partners.css?v=8">
     <link rel="stylesheet" href="css/battle-cards.css?v=12">
 </head>
 <body>
@@ -309,11 +309,11 @@
                 <div class="hero-stats">
                     <div class="stat">
                         <span class="stat-value" id="statMembers">&mdash;</span>
-                        <span class="stat-label">Членов КСЛТ</span>
+                        <span class="stat-label">Членов клуба</span>
                     </div>
                     <div class="stat">
                         <span class="stat-value" id="statUsers">&mdash;</span>
-                        <span class="stat-label">Участников</span>
+                        <span class="stat-label">Зарегистрировано</span>
                     </div>
                     <div class="stat">
                         <span class="stat-value" id="statTournaments">&mdash;</span>
@@ -321,7 +321,7 @@
                     </div>
                     <div class="stat">
                         <span class="stat-value" id="statCourts">&mdash;</span>
-                        <span class="stat-label">Кортов</span>
+                        <span class="stat-label">Теннисных центров</span>
                     </div>
                     <div class="stat">
                         <span class="stat-value" id="statCoaches">&mdash;</span>
@@ -332,7 +332,7 @@
             <div class="hero-visual">
                 <div class="hero-image-container">
                     <img
-                        src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=750&fit=crop&q=80"
+                        src="images/heroes/tournaments.jpg"
                         alt="Теннисист"
                         class="hero-image"
                     >
@@ -384,7 +384,7 @@
         <!-- TOURNAMENTS -->
         <section id="tournaments" class="section-tournaments">
             <div class="section-header">
-                <h2>Ближайшие турниры</h2>
+                <h2>Турниры</h2>
                 <a href="pages/tournaments-overview.html" class="link-all">Все турниры →</a>
             </div>
             <div class="tournaments-grid" id="homeTournaments"></div>
@@ -639,7 +639,9 @@
     </footer>
 <!-- FOOTER:END -->
 
-    <script src="js/auth-nav.js?v=20"></script>
+    <script src="js/contact-icons.js?v=1"></script>
+
+    <script src="js/auth-nav.js?v=17"></script>
     <script src="js/script.js?v=4"></script>
     <script src="js/scroll-spy.js"></script>
     <!-- Supabase: capture OAuth tokens from redirect -->
@@ -654,16 +656,16 @@
     <script src="js/membership.js"></script>
     <script src="js/battle-format.js?v=2"></script>
     <script src="js/battle-cards.js?v=11"></script>
-    <script src="js/stats.js?v=1"></script>
+    <script src="js/stats.js?v=2"></script>
     <script src="js/badge-celebration.js?v=2"></script>
     <script src="js/tournament-slots.js?v=5"></script>
     <script src="js/tournament-card.js?v=3"></script>
-    <script src="js/home-tournaments.js?v=5"></script>
+    <script src="js/home-tournaments.js?v=6"></script>
     <script src="js/home-badges.js?v=1"></script>
-    <script src="js/rankings-data.js?v=1"></script>
+    <script src="js/rankings-data.js?v=2"></script>
     <script src="js/home-rankings.js?v=1"></script>
-    <script src="js/home-partners.js?v=2"></script>
-    <script src="js/home-courts-coaches.js?v=1"></script>
+    <script src="js/home-partners.js?v=11"></script>
+    <script src="js/home-courts-coaches.js?v=11"></script>
     <script>
     
     
@@ -695,8 +697,7 @@
                             dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric' }) + '-' + d2.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
                         }
                     }
-                    var rawImg = t.image || 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=500&fit=crop&q=80';
-                    var img = rawImg.indexOf('unsplash.com') !== -1 ? rawImg : rawImg;
+                    var img = t.image || 'images/heroes/tournaments.jpg';
                     var gender = (t.category_id || '').split('-')[0];
                     var genderLabel = gender === 'women' ? '♀ Женский' : (gender === 'men' ? '♂ Мужской' : '');
                     html += '<a href="pages/tournament.html?id=' + t.id + '" class="tournament-card' + (isFeatured ? ' tournament-card-featured' : '') + '">' +

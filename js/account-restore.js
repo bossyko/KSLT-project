@@ -17,7 +17,7 @@
     var TEXT = {
         ru: {
             title: 'Аккаунт помечен на удаление',
-            body: 'Вы просили удалить учётную запись. Она будет удалена насовсем {date} — до этого дня всё можно вернуть.',
+            body: 'Вы удалили аккаунт. До {date} его ещё можно вернуть — потом он исчезнет насовсем.',
             keep: 'Оставить аккаунт',
             leave: 'Всё равно удалить',
             done: 'Аккаунт восстановлен',
@@ -25,7 +25,7 @@
         },
         en: {
             title: 'Account scheduled for deletion',
-            body: 'You asked to delete your account. It will be erased for good on {date} — until then everything can be restored.',
+            body: 'You deleted your account. You can bring it back until {date} — after that it is gone for good.',
             keep: 'Keep my account',
             leave: 'Delete anyway',
             done: 'Account restored',
@@ -33,7 +33,7 @@
         },
         kg: {
             title: 'Аккаунт өчүрүүгө белгиленген',
-            body: 'Сиз аккаунтуңузду өчүрүүнү сурадыңыз. Ал {date} биротоло өчүрүлөт — ага чейин баарын кайтарууга болот.',
+            body: 'Сиз аккаунтуңузду өчүрдүңүз. Аны {date} чейин кайтарууга болот — андан кийин биротоло жоголот.',
             keep: 'Аккаунтту калтыруу',
             leave: 'Баары бир өчүрүү',
             done: 'Аккаунт калыбына келтирилди',

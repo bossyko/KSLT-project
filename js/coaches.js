@@ -170,7 +170,9 @@
         noDiscountsConfigured: "Скидки пока не настроены"
     });
 
-    var staticData = window.coachesData || [];
+    // Заготовок больше нет: при сбое базы показывались выдуманные тренеры,
+    // которых нет в админке, — их нельзя было ни изменить, ни удалить
+    var loadFailed = false;
     var coachPage = window.location.pathname.indexOf('coach.html') !== -1 || window.location.pathname.indexOf('coach-en.html') !== -1 || window.location.pathname.indexOf('coach-kg.html') !== -1;
     var isListPage = window.location.pathname.indexOf('coaches.html') !== -1 || window.location.pathname.indexOf('coaches-en.html') !== -1 || window.location.pathname.indexOf('coaches-kg.html') !== -1;
     var isDetailPage = coachPage && !isListPage;
@@ -246,7 +248,9 @@
             id: row.id,
             _isDb: true,
             name: name,
-            photo: row.photo || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&q=80',
+            // Своя картинка вместо чужой со стоков: внешний сервер отвечает
+            // не всегда, и на месте фотографии оставалась пустая рамка
+            photo: row.photo || '../images/heroes/coaches.jpg',
             specialization: spec,
             tags: row.tags || [],
             experience: row.experience || 0,
@@ -293,20 +297,22 @@
         if (client) {
             client.from('coaches').select('*').order('created_at', { ascending: false })
                 .then(function(res) {
-                    if (res.data && res.data.length) {
-                        // База — единственный источник. Заготовки из
-                        // data/coaches-data.js остаются на случай, когда она
-                        // недоступна: иначе к настоящим тренерам подмешиваются
-                        // выдуманные, которых нет в админке
-                        var dbCoaches = res.data.map(function(row) { return mapDbCoach(row); });
+                    // База ответила — показываем ровно то, что в ней есть.
+                    // Пустой список и недоступная база — разные вещи: раньше
+                    // при пустой базе подставлялись заготовки, и на странице
+                    // висели выдуманные тренеры, которых нет в админке. Их
+                    // нельзя было ни изменить, ни удалить
+                    if (!res.error) {
+                        var dbCoaches = (res.data || []).map(function(row) { return mapDbCoach(row); });
                         sortPromotedFirst(dbCoaches).forEach(function(c) { allData.push(c); });
                     } else {
-                        staticData.forEach(function(c) { allData.push(c); });
+                        console.error('[KSLT] тренеры не загружены:', res.error.message || res.error);
+                        loadFailed = true;
                     }
                     init();
                 });
         } else {
-            allData = staticData.slice();
+            loadFailed = true;
             init();
         }
     }
@@ -406,6 +412,28 @@
             filtered = filtered.filter(function(c) {
                 return (c.tags || []).indexOf(_currentFilter) !== -1;
             });
+        }
+
+        // Пустой список — не повод показывать голую страницу. Тренеров в
+        // клубе пока нет, и человек должен понять это, а не решить, что
+        // страница сломалась
+        if (filtered.length === 0) {
+            var emptyText;
+            if (loadFailed) {
+                emptyText = isEn ? 'Could not load the coaches. Please refresh the page.'
+                    : (isKg ? 'Машыктыруучулардын тизмеси жүктөлгөн жок. Баракты жаңылаңыз.'
+                    : 'Не удалось загрузить список тренеров. Обновите страницу.');
+            } else if (_searchQuery || _currentFilter !== 'all') {
+                emptyText = isEn ? 'No coaches match your search' : (isKg ? 'Издөө боюнча машыктыруучу табылган жок' : 'По вашему запросу тренеров не нашлось');
+            } else {
+                emptyText = isEn ? 'The list of coaches will appear soon' : (isKg ? 'Машыктыруучулардын тизмеси жакында пайда болот' : 'Список тренеров скоро появится');
+            }
+            container.innerHTML = '<div class="co-empty">' +
+                '<div class="co-empty-icon">' + (loadFailed ? '\u26A0\uFE0F' : '\uD83C\uDFBE') + '</div>' +
+                '<p>' + emptyText + '</p>' +
+            '</div>';
+            renderPagination(0, 1);
+            return;
         }
 
         var start = (_currentPage - 1) * PER_PAGE;
@@ -727,7 +755,7 @@
         var hero = document.getElementById('coachDetailHero');
         if (!hero) return;
         hero.innerHTML =
-            '<div class="co-hero-bg" style="background-image: url(\'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1400&q=80\')"></div>' +
+            '<div class="co-hero-bg" style="background-image: url(\'../images/heroes/coaches.jpg\')"></div>' +
             '<div class="co-hero-content">' +
                 '<h1 class="co-hero-title">' + coach.name + '</h1>' +
                 '<p class="co-hero-subtitle">' + coach.specialization + '</p>' +

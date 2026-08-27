@@ -30,11 +30,12 @@
         levelUnknown: 'Level not specified',
         inviteBtn: 'Invite to play',
         inviteConfirmTitle: 'Send game invitation?',
-        inviteConfirmText: 'By sending an invitation, you agree that your Telegram contact may be shared with the recipient if they accept.',
+        inviteConfirmText: 'If the player accepts, you will exchange contacts: they will see yours, you will see theirs.',
         inviteConfirmBtn: 'Send',
         inviteConfirmCancel: 'Cancel',
         inviteSent: 'Invitation sent!',
-        inviteNoTg: 'Player has no Telegram connected',
+        inviteNoAccount: 'This player is not on the platform yet',
+        inviteNoContacts: 'This player has not provided any contacts',
         inviteError: 'Failed to send invitation',
         inviteLimit: 'Daily invite limit reached (5/day)',
         invitePending: 'Invitation already sent',
@@ -68,11 +69,12 @@
         levelUnknown: 'Деңгээл көрсөтүлгөн эмес',
         inviteBtn: 'Оюн сунуштоо',
         inviteConfirmTitle: 'Оюнга чакыруу жөнөтөсүзбү?',
-        inviteConfirmText: 'Чакыруу жөнөтүү менен, кабыл алган учурда Telegram байланышыңыз алуучуга берилиши мүмкүн экенине макулдугуңузду билдиресиз.',
+        inviteConfirmText: 'Оюнчу кабыл алса, байланыш маалыматтарыңыз менен алмашасыз: ал сиздикин, сиз анын маалыматын көрөсүз.',
         inviteConfirmBtn: 'Жөнөтүү',
         inviteConfirmCancel: 'Жокко чыгаруу',
         inviteSent: 'Чакыруу жөнөтүлдү!',
-        inviteNoTg: 'Оюнчунун Telegram\'ы байланган эмес',
+        inviteNoAccount: 'Бул оюнчу платформада катталган эмес',
+        inviteNoContacts: 'Бул оюнчу байланыш маалыматын көрсөткөн эмес',
         inviteError: 'Чакыруу жөнөтүлгөн жок',
         inviteLimit: 'Күнүмдүк чакыруу лимити (5/күн)',
         invitePending: 'Чакыруу мурунтан жөнөтүлгөн',
@@ -106,11 +108,12 @@
         levelUnknown: 'Уровень не указан',
         inviteBtn: 'Предложить игру',
         inviteConfirmTitle: 'Отправить приглашение на игру?',
-        inviteConfirmText: 'Отправляя приглашение, вы соглашаетесь, что ваш контакт в Telegram может быть передан получателю в случае принятия приглашения.',
+        inviteConfirmText: 'Если игрок примет приглашение, вы обменяетесь контактами: он увидит ваши, вы — его.',
         inviteConfirmBtn: 'Отправить',
         inviteConfirmCancel: 'Отмена',
         inviteSent: 'Приглашение отправлено!',
-        inviteNoTg: 'У игрока не привязан Telegram',
+        inviteNoAccount: 'Игрок ещё не зарегистрирован на платформе',
+        inviteNoContacts: 'Игрок не указал контактов — обменяться будет нечем',
         inviteError: 'Не удалось отправить приглашение',
         inviteLimit: 'Лимит приглашений на сегодня (5/день)',
         invitePending: 'Приглашение уже отправлено',
@@ -145,6 +148,7 @@
 
     // Access level: 'guest' | 'registered' | 'member'
     var _accessLevel = 'guest';
+    var _myPlayerId = null;
 
     document.addEventListener('DOMContentLoaded', init);
 
@@ -180,7 +184,10 @@
         // Check role from profile
         try {
             var uid = (await client.auth.getUser()).data.user.id;
-            var profileRes = await client.from('profiles').select('role').eq('id', uid).single();
+            var profileRes = await client.from('profiles').select('role, player_id').eq('id', uid).single();
+            // Свою карточку из поиска убираем: искать партнёра среди себя
+            // незачем, а нажатие давало непонятную ошибку от сервера
+            if (profileRes.data) _myPlayerId = profileRes.data.player_id || null;
             if (profileRes.data && (profileRes.data.role === 'admin' || profileRes.data.role === 'manager')) {
                 _accessLevel = 'member';
                 return;
@@ -345,7 +352,8 @@
                 (ntrpRes.data || []).forEach(function(p) { ntrpMap[p.id] = p.ntrp_rating; });
                 result.data.forEach(function(p) { p.ntrp_rating = ntrpMap[p.id] || null; });
 
-                var shuffled = shuffle(result.data);
+                var visible = result.data.filter(function(p) { return p.id !== _myPlayerId; });
+                var shuffled = shuffle(visible);
                 var onlineArr = [];
                 var offlineArr = [];
                 for (var i = 0; i < shuffled.length; i++) {
@@ -546,12 +554,11 @@
         if (!btn) return;
         e.preventDefault();
         var playerId = btn.dataset.playerId;
-        var hasTg = btn.dataset.hasTg === '1';
-        handleInviteClick(playerId, hasTg);
+        handleInviteClick(playerId);
     });
 
     // ---- Handle invite click by access level ----
-    function handleInviteClick(playerId, hasTelegram) {
+    function handleInviteClick(playerId) {
         if (_accessLevel === 'guest') {
             showModal(L.modalGuestTitle, L.modalGuestText, L.modalGuestBtn, authPage);
             return;
@@ -563,10 +570,10 @@
         }
 
         // Member — show confirmation before sending
-        showInviteConfirm(playerId, hasTelegram);
+        showInviteConfirm(playerId);
     }
 
-    function showInviteConfirm(playerId, hasTelegram) {
+    function showInviteConfirm(playerId) {
         var old = document.querySelector('.pt-modal-overlay');
         if (old) old.remove();
 
@@ -591,7 +598,7 @@
 
         overlay.querySelector('.pt-confirm-send').addEventListener('click', function() {
             closeModal(overlay);
-            sendInvite(playerId, hasTelegram);
+            sendInvite(playerId);
         });
         overlay.querySelector('.pt-confirm-cancel').addEventListener('click', function() {
             closeModal(overlay);
@@ -605,14 +612,13 @@
     }
 
     // ---- Send invite via Edge Function ----
-    async function sendInvite(playerId, hasTelegram) {
+    async function sendInvite(playerId) {
         if (_sendingInvite) return;
 
-        if (!hasTelegram) {
-            showToast(L.inviteNoTg, 'info');
-            return;
-        }
-
+        // Телеграм больше не обязателен. Раньше без него отправка
+        // запрещалась, потому что принять приглашение можно было только
+        // кнопками в боте. Теперь оно живёт в кабинете и в приложении, а
+        // Телеграм с почтой лишь оповещают — кому что доступно
         _sendingInvite = true;
 
         try {
@@ -641,7 +647,8 @@
                 var errMsg = L.inviteError;
                 if (data.error === 'daily_limit') errMsg = L.inviteLimit;
                 else if (data.error === 'already_pending') errMsg = L.invitePending;
-                else if (data.error === 'no_telegram') errMsg = L.inviteNoTg;
+                else if (data.error === 'no_account') errMsg = L.inviteNoAccount;
+                else if (data.error === 'receiver_no_contacts') errMsg = L.inviteNoContacts;
                 else if (data.error === 'self_invite') errMsg = L.inviteSelf;
                 showToast(errMsg, data.error === 'daily_limit' || data.error === 'already_pending' ? 'info' : 'error');
             }

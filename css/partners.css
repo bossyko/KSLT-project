@@ -573,9 +573,11 @@
 
 .pt-modal {
     position: relative;
-    background: rgba(18, 18, 18, 0.92);
-    border: 1px solid var(--border-subtle);
-    border-radius: 20px;
+    /* Как у остальных окон сайта: плотная подложка и приглушённая рамка
+       цветом клуба. Прозрачный фон просвечивал страницу насквозь */
+    background: var(--bg-elevated);
+    border: 1px solid rgba(204, 255, 0, 0.28);
+    border-radius: var(--radius-lg);
     padding: 40px 32px 32px;
     max-width: 400px;
     width: 100%;

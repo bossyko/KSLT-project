@@ -2179,6 +2179,10 @@
             A.showToast(L.saved, 'success');
             saveBtn.disabled = false;
             saveBtn.textContent = L.save;
+            // Возвращаемся к списку: форма короткая, заполнил — и готово.
+            // Раньше она оставалась открытой, и было непонятно, сохранилось
+            // ли вообще — люди жали «Сохранить» второй раз
+            renderCourtsList();
         } catch (e) {
             A.showToast(e.message || 'Error', 'error');
             saveBtn.disabled = false;

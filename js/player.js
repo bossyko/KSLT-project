@@ -237,6 +237,15 @@
      * что стоит отдавать случайному посетителю. Каждый вид контакта
      * показывается отдельно, по своему разрешению.
      */
+    // Знаки сетей. Рисованные, а не эмодзи: эмодзи у каждой системы свои,
+    // и на части устройств вместо телеграма выходил синий квадрат
+    var ICON = {
+        phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+        whatsapp: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 0 1 6.988 2.896 9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.82 11.82 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.88 11.88 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 0 0-3.48-8.413Z"/></svg>',
+        telegram: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>',
+        instagram: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98C.014 8.333 0 8.741 0 12s.014 3.668.072 4.948c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.668-.014 4.948-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>'
+    };
+
     function renderContacts(contacts) {
         var box = document.getElementById('ppContacts');
         if (!box || !contacts || _accessLevel !== 'member') return;
@@ -258,19 +267,26 @@
             '<h3 class="pp-section-title">\uD83D\uDCDE ' + title + '</h3>' +
             '<div class="pp-contacts">';
 
+        // Плашка на каждый способ связи: знак сети и имя рядом. Раньше это
+        // была строка во всю ширину с одним словом «Instagram @имя» —
+        // выглядела как пустая полоса и не читалась как ссылка
         if (phone) {
-            html += '<a href="tel:' + esc(phone) + '" class="pp-contact">\uD83D\uDCF1 ' + esc(phone) + '</a>';
+            html += '<a href="tel:' + esc(phone) + '" class="pp-contact">' + ICON.phone +
+                '<span>' + esc(window.KSLT_PHONE && window.KSLT_PHONE.pretty ? window.KSLT_PHONE.pretty(phone) : phone) + '</span></a>';
         }
         if (wa) {
-            html += '<a href="https://wa.me/' + esc(wa.replace(/[^0-9]/g, '')) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-wa">WhatsApp</a>';
+            html += '<a href="https://wa.me/' + esc(wa.replace(/[^0-9]/g, '')) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-wa">' +
+                ICON.whatsapp + '<span>WhatsApp</span></a>';
         }
         if (tg) {
             var handle = tg.replace('@', '');
-            html += '<a href="https://t.me/' + esc(handle) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-tg">Telegram @' + esc(handle) + '</a>';
+            html += '<a href="https://t.me/' + esc(handle) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-tg">' +
+                ICON.telegram + '<span>@' + esc(handle) + '</span></a>';
         }
         if (ig) {
             var ighandle = ig.replace('@', '');
-            html += '<a href="https://instagram.com/' + esc(ighandle) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-ig">Instagram @' + esc(ighandle) + '</a>';
+            html += '<a href="https://instagram.com/' + esc(ighandle) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-ig">' +
+                ICON.instagram + '<span>@' + esc(ighandle) + '</span></a>';
         }
 
         box.innerHTML = html + '</div></div>';
@@ -669,13 +685,16 @@
         var myCats = data.categories || [];
         if (myCats.length > 0) {
             myCats.forEach(function(c) {
+                // Место показываем, только когда оно есть. У игрока без
+                // очков рейтинга ещё нет, и вместо номера выходило «#null»
+                var placeStr = c.rank ? ' \u00b7 #' + c.rank : '';
                 hero += '<div class="pp-rating-row">' +
                     '<span class="pp-rating-label">' + esc(c.name) + '</span>' +
-                    '<span class="pp-rating-value">' + c.points + ' \u00b7 #' + c.rank + '</span>' +
+                    '<span class="pp-rating-value">' + c.points + placeStr + '</span>' +
                 '</div>';
             });
         } else {
-            hero += '<div class="pp-rating-row"><span class="pp-rating-label">KSLT</span><span class="pp-rating-value">' + cat.name + ' \u00b7 #' + rank + '</span></div>';
+            hero += '<div class="pp-rating-row"><span class="pp-rating-label">KSLT</span><span class="pp-rating-value">' + cat.name + (rank ? ' \u00b7 #' + rank : '') + '</span></div>';
         }
         if (player.ntrp_rating) {
             var ntrpVal = Math.round(Number(player.ntrp_rating) / 0.25) * 0.25;
@@ -701,11 +720,21 @@
         if (player.online) {
             hero += '<a href="' + authPage + '" class="pp-action-btn pp-action-secondary">\u2709\uFE0F ' + L.message + '</a>';
         }
-        if (!_myPlayerId || _myPlayerId !== player.id) {
+        // Вызвать можно только члена клуба. У фоновой карточки нет человека
+        // по ту сторону: она перенесена из списков NTRP и ждёт, когда её
+        // владелец заведёт учётную запись и оплатит членство
+        var isBackground = player.is_member === false;
+        if ((!_myPlayerId || _myPlayerId !== player.id) && !isBackground) {
             // Огонь, а не мяч: кнопка залита лаймом, и жёлто-зелёный мяч на
             // ней растворяется. Тем же знаком помечены баттлы в кабинете
             hero += '<button class="pp-action-btn pp-action-primary" id="ppChallengeBtn">' +
                 '<span class="pp-action-icon">\uD83D\uDD25</span> ' + L.challenge + '</button>';
+        }
+        if (isBackground) {
+            var bgNote = isEn ? 'This player is in the club database but has not joined yet'
+                : (isKg ? 'Бул оюнчу клубдун базасында бар, бирок азырынча мүчө эмес'
+                : 'Игрок есть в базе клуба, но членство пока не оформлено');
+            hero += '<div class="pp-not-member">' + bgNote + '</div>';
         }
         hero += '</div>';
 
@@ -1746,7 +1775,8 @@
                             bio: p.bio || '',
                             bio_en: p.bio_en || '',
                             bio_kg: p.bio_kg || '',
-                            account_deleted_at: p.account_deleted_at || null
+                            account_deleted_at: p.account_deleted_at || null,
+                            is_member: !!p.is_member
                         },
                         category: { name: catName || '\u2014', players: [] },
                         categories: myCats,

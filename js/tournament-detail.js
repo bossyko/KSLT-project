@@ -177,24 +177,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Try static data first
-    if (typeof tournamentDetailData !== 'undefined' && tournamentDetailData[tournamentId]) {
-        const tournament = tournamentDetailData[tournamentId];
-
-        renderHero(tournament);
-
-        if (tournament.bracketType === 'single_elimination') {
-            renderSingleEliminationBracket(tournament);
-        } else if (tournament.bracketType === 'round_robin') {
-            renderRoundRobin(tournament);
-        }
-
-        renderParticipants(tournament);
-        renderResults(tournament);
-        initTabsNavigation();
-        applyPlayerHighlight();
-        return;
-    }
+    // Заготовки турниров из data/tournament-detail-data.js убраны. Страница
+    // смотрела в них раньше базы, и настоящий турнир мог подмениться
+    // выдуманным, если совпал адрес. Ровно так же вели себя тренеры:
+    // при пустой базе показывались люди, которых нет в админке
 
     // Try Supabase
     var client = window.supabaseClient;
@@ -1305,7 +1291,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // ---- Render Hero ----
     var hero = document.getElementById('tournamentHero');
     if (hero) {
-        var bgImage = t.image || 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&q=80';
+        // Афиши у турниров теперь свои; на случай, когда её не завели,
+        // подставляем картинку раздела, а не снимок с чужого сайта
+        var bgImage = t.image || '../images/heroes/tournaments.jpg';
         hero.innerHTML =
             '<div class="td-hero-bg">' +
                 '<img src="' + esc(bgImage) + '" alt="">' +
@@ -3099,7 +3087,7 @@ function renderLockedPage(tournamentId) {
     if (hero) {
         hero.innerHTML =
             '<div class="td-hero-bg">' +
-                '<img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1920&q=80" alt="">' +
+                '<img src="../images/heroes/tournaments.jpg" alt="">' +
                 '<div class="td-hero-overlay"></div>' +
             '</div>' +
             '<div class="td-hero-content td-hero-locked">' +

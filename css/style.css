@@ -868,9 +868,12 @@ nav {
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    background: var(--bg-card, #1a1a2e);
-    border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
-    border-radius: 16px;
+    /* Тот же вид, что у остальных окон сайта: приподнятая подложка,
+       крупное скругление и рамка цветом клуба — приглушённым, чтобы
+       обводка не спорила с содержимым */
+    background: var(--bg-elevated);
+    border: 1px solid rgba(204, 255, 0, 0.28);
+    border-radius: var(--radius-lg);
     box-shadow: 0 20px 60px rgba(0,0,0,0.6);
     overflow: hidden;
 }
@@ -6791,16 +6794,26 @@ img {
 
 .site-notif-act {
     flex: 1;
-    padding: 9px 12px;
+    padding: 10px 14px;
     font-family: inherit;
     font-size: 0.85rem;
     font-weight: 500;
-    border-radius: 8px;
+    /* Скругление как у кнопок сайта, а не восемь пикселей из ниоткуда */
+    border-radius: var(--radius-full);
     cursor: pointer;
-    border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+    border: 1px solid var(--border-light);
     background: none;
-    color: var(--text-muted, #8A8A8F);
+    color: var(--text-muted);
     transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+/* Согласие — цветом клуба сразу, а не только при наведении: выбор здесь
+   неравный, и главное действие должно читаться без наведения мыши */
+.site-notif-yes {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 600;
 }
 
 .site-notif-act:disabled { opacity: 0.5; cursor: default; }
@@ -7084,7 +7097,7 @@ input:-internal-autofill-previewed {
     width: 100%;
     max-width: 460px;
     padding: var(--space-md);
-    border: 1px solid var(--border-light);
+    border: 1px solid rgba(204, 255, 0, 0.28);
     border-radius: var(--radius-lg);
     background: var(--bg-elevated);
     box-shadow: var(--shadow-lg);
@@ -7147,3 +7160,49 @@ input:-internal-autofill-previewed {
     .ar-btn { width: 100%; }
     .ar-note { text-align: center; }
 }
+
+/* Контакты прямо в уведомлении: принял приглашение — и они тут же,
+   без похода в кабинет */
+.site-notif-contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 20px 16px;
+}
+
+.site-notif-contact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.site-notif-contact-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    transition: color 0.2s;
+}
+
+.site-notif-contact-icon svg { width: 18px; height: 18px; }
+
+.site-notif-contact-val { flex: 1; }
+
+/* Каждая сеть подсвечивается своим цветом — плашка узнаётся быстрее,
+   чем по надписи */
+.site-notif-contact:hover { border-color: var(--accent); }
+.site-notif-contact:hover .site-notif-contact-icon { color: var(--accent); }
+.site-notif-contact--wa:hover { border-color: #25D366; }
+.site-notif-contact--wa:hover .site-notif-contact-icon { color: #25D366; }
+.site-notif-contact--tg:hover { border-color: #2AABEE; }
+.site-notif-contact--tg:hover .site-notif-contact-icon { color: #2AABEE; }
+.site-notif-contact--ig:hover { border-color: #E1306C; }
+.site-notif-contact--ig:hover .site-notif-contact-icon { color: #E1306C; }

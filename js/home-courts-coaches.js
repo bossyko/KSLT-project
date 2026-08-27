@@ -31,6 +31,11 @@
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    // Фотографий у кортов и тренеров пока нет: реестр собирали из 2ГИС и
+    // гидов. Без запасной картинки на месте снимка зияла пустая рамка
+    var COURT_PHOTO = 'images/heroes/courts.jpg';
+    var COACH_PHOTO = 'images/heroes/coaches.jpg';
+
 
     var L = isEn ? {
         partner: 'KSLT partner', discount: 'Discount for KSLT members',
@@ -147,7 +152,7 @@
 
         return '<a class="court-card" href="' + href + '">' +
             badge(row) +
-            '<img src="' + esc(row.photo || '') + '" alt="' + esc(localized(row, 'name')) + '" loading="lazy">' +
+            '<img src="' + esc(row.photo || COURT_PHOTO) + '" alt="' + esc(localized(row, 'name')) + '" loading="lazy">' +
             '<div class="court-info">' +
                 '<h4>' + esc(localized(row, 'name')) + '</h4>' +
                 (line ? '<span class="court-surface">' + esc(line) + '</span>' : '') +
@@ -170,7 +175,7 @@
 
         return '<a class="coach-card" href="' + href + '">' +
             badge(row) +
-            '<img class="coach-photo" src="' + esc(row.photo || '') + '" alt="' + esc(name) + '" loading="lazy">' +
+            '<img class="coach-photo" src="' + esc(row.photo || COACH_PHOTO) + '" alt="' + esc(name) + '" loading="lazy">' +
             '<div class="coach-info">' +
                 '<h4>' + esc(name) + '</h4>' +
                 (localized(row, 'position') ? '<span class="coach-speciality">' + esc(localized(row, 'position')) + '</span>' : '') +

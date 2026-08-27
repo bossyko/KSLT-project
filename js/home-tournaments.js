@@ -1,5 +1,5 @@
 // ============================================
-// Главная — блок «Ближайшие турниры»
+// Главная — блок «Турниры»
 // ============================================
 //
 // Раньше здесь лежали четыре карточки, вписанные в разметку руками, с
@@ -12,6 +12,10 @@
 //   4. Предстоящие по возрастанию даты
 //   5. При равных датах — кто раньше заведён в базу
 //   6. Если впереди нет ничего — недавно сыгранные, от свежих к старым
+//
+// Раздел назывался «Ближайшие турниры», но показывает и завершённые,
+// и те, что идут сейчас. Название спорило с содержимым, поэтому просто
+// «Турниры».
 
 (function() {
     'use strict';
@@ -71,6 +75,31 @@
                 });
         });
 
+    /**
+     * Событие турнира — название без хвоста про разряд, плюс дата.
+     * «SUMMER BREEZE CUP – 2026 — дружеский, парный, мужской» и
+     * «... — дружеский, микст» это один турнир в двух разрядах.
+     */
+    function eventKey(t) {
+        var base = (t.title || '').split(' — ')[0].trim().toLowerCase();
+        return base + '|' + (t.date_start || '');
+    }
+
+    /**
+     * Оставляем по одной карточке на турнир. Разряды заводятся отдельными
+     * записями — так считаются очки и строятся сетки, — но на главной
+     * шесть плиток с одним и тем же названием выглядели как сбой.
+     */
+    function oneCardPerEvent(list) {
+        var seen = {};
+        return list.filter(function(t) {
+            var k = eventKey(t);
+            if (seen[k]) return false;
+            seen[k] = true;
+            return true;
+        });
+    }
+
     /** Отбираем шесть по договорённому порядку. */
     function pick(all) {
         var future = all.filter(function(t) { return TC.status(t) !== 'done'; });
@@ -84,7 +113,7 @@
                     var d = (b.date_end || b.date_start || '').localeCompare(a.date_end || a.date_start || '');
                     return d || (b.created_at || '').localeCompare(a.created_at || '');
                 });
-            return done.slice(0, LIMIT);
+            return oneCardPerEvent(done).slice(0, LIMIT);
         }
 
         future.sort(function(a, b) {
@@ -96,7 +125,7 @@
             return (a.created_at || '').localeCompare(b.created_at || '');
         });
 
-        return future.slice(0, LIMIT);
+        return oneCardPerEvent(future).slice(0, LIMIT);
     }
 
     /** Турниров нет вовсе — заголовку не о чем говорить, прячем раздел. */

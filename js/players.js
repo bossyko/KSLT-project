@@ -483,18 +483,35 @@
             (logged ? '<span class="pl-col-actions">' + labels.actions + '</span>' : '') +
         '</div>';
 
+        // Место в рейтинге получают только члены клуба: иначе первым в
+        // таблице оказывается тот, кто в клубе не состоит, и она перестаёт
+        // отвечать на вопрос «кто первый в КСЛТ». Фоновым — прочерк
+        var memberRank = 0;
+        var rankByPlayer = {};
+        if (!isSearchMode) {
+            items.forEach(function(pl) {
+                if (pl.isMember !== false) { memberRank++; rankByPlayer[pl.id] = memberRank; }
+            });
+        }
+
         // Rows
         for (var i = 0; i < totalVisible; i++) {
             var item = pageItems[i];
             var p = isSearchMode ? item.player : item;
-            var rank = isSearchMode ? item.rankInCategory : (i + 1);
-            var rankClass = rank <= 3 ? ' pl-rank-top' : '';
+            var rank = isSearchMode ? item.rankInCategory : (rankByPlayer[p.id] || null);
+            var rankClass = rank && rank <= 3 ? ' pl-rank-top' : '';
 
             var blurClass = '';
             if (isGuest && i >= clearRows) {
                 var blurLevel = i - clearRows + 1;
                 blurClass = ' pl-row-blur pl-row-blur-' + blurLevel;
             }
+
+            // Фоновая карточка — человек есть в списках клуба, но членство
+            // не оплачено. Показываем приглушённо: строка видна, играть с
+            // ним нельзя. Место в рейтинге такие не занимают
+            var isBg = p.isMember === false;
+            if (isBg) blurClass += ' pl-row-guest';
 
             var badgesHtml = getPlayerBadgesHtml(p.id, 3);
 
@@ -516,7 +533,9 @@
             }
 
             var actionsHtml = '';
-            if (logged) {
+            // Вызвать можно только члена клуба: у фоновой карточки нет
+            // человека по ту сторону — вызов уйдёт в пустоту
+            if (logged && !isBg) {
                 var authUrl = getAuthUrl();
                 if (p.online) {
                     actionsHtml += '<a href="' + authUrl + '" class="pl-btn-message" title="' + labels.message + '">\u2709\ufe0f</a>';
@@ -525,7 +544,7 @@
             }
 
             html += '<div class="pl-row pl-animate' + blurClass + '" style="transition-delay:' + Math.min(i * 30, 300) + 'ms">' +
-                '<span class="pl-col-rank' + rankClass + '">' + rank + '</span>' +
+                '<span class="pl-col-rank' + rankClass + '">' + (rank || '\u2014') + '</span>' +
                 '<div class="pl-col-player">' +
                     '<img src="' + esc(p.photo) + '" alt="" class="pl-player-photo">' +
                     '<div class="pl-player-info">' +
@@ -534,6 +553,9 @@
                                 ? '<a href="#" class="pl-player-name" data-guest-profile="1">' + p.name + '</a>'
                                 : '<a href="' + (isEnPage() ? 'player-en.html' : (isKgPage() ? 'player-kg.html' : 'player.html')) + '?id=' + p.id + '" class="pl-player-name">' + p.name + '</a>') +
                             (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
+                            (isBg ? '<span class="pl-guest-mark" title="' +
+                                (isEnPage() ? 'In the club database, membership not paid' : (isKgPage() ? 'Клубдун базасында бар, мүчөлүк төлөнгөн эмес' : 'Есть в базе клуба, членство не оплачено')) + '">' +
+                                (isEnPage() ? 'not a member' : (isKgPage() ? 'мүчө эмес' : 'не член клуба')) + '</span>' : '') +
                             (p.banned_until && new Date(p.banned_until) > new Date() ? '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + (isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.')) + '</span>' : '') +
                         '</div>' +
                         catLabel +

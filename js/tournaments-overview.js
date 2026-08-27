@@ -526,6 +526,10 @@
 
         CATEGORIES.forEach(function(cat) {
             var items = grouped[cat.key] || [];
+            // Пустую категорию не показываем вовсе. Пять блоков подряд с
+            // надписью «турниров нет» говорят не о клубе, а о том, что
+            // страницу забыли наполнить
+            if (items.length === 0) return;
             var catData = (typeof tournamentsData !== 'undefined' && tournamentsData.categories[cat.key]) || {};
             var bgImage = catData.bgImage || '';
             _bgImages[cat.key] = bgImage;
@@ -536,26 +540,27 @@
             html += '<a href="' + tournamentsPage + '?category=' + cat.key + '" class="to-view-all">' + L.viewAll + ' ' + arrowSvg + '</a>';
             html += '</div>';
 
-            if (items.length === 0) {
-                html += '<div class="to-card-grid"><div class="to-empty">' + emptySvg + '<p>' + L.empty + '</p></div></div>';
-            } else {
-                html += '<div class="to-card-grid">';
-                // Featured card — use category image (more reliable for overview)
-                var featuredBg = items[0].image || bgImage;
-                html += renderFeatured(items[0], featuredBg, cat.key);
-                // Side stack (items 1-3)
-                if (items.length > 1) {
-                    html += '<div class="to-side-stack">';
-                    for (var i = 1; i < items.length; i++) {
-                        html += renderCompact(items[i], cat.key, i);
-                    }
-                    html += '</div>';
+            html += '<div class="to-card-grid">';
+            var featuredBg = items[0].image || bgImage;
+            html += renderFeatured(items[0], featuredBg, cat.key);
+            if (items.length > 1) {
+                html += '<div class="to-side-stack">';
+                for (var i = 1; i < items.length; i++) {
+                    html += renderCompact(items[i], cat.key, i);
                 }
                 html += '</div>';
             }
+            html += '</div>';
 
             html += '</div>';
         });
+
+        // Все категории пусты — одна заглушка вместо пяти подряд
+        if (!html) {
+            html = '<div class="to-category-block"><div class="to-card-grid">' +
+                   '<div class="to-empty">' + emptySvg + '<p>' + L.empty + '</p></div>' +
+                   '</div></div>';
+        }
 
         container.innerHTML = html;
         attachEvents();

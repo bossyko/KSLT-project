@@ -1307,3 +1307,23 @@
 }
 
 /* === SPONSORS === */
+
+/* Пусто: тренеров ещё не завели или поиск ничего не нашёл.
+   Раньше при пустой базе подставлялись заготовки, и на странице висели
+   выдуманные люди — теперь честно говорим, что списка пока нет */
+.co-empty {
+    padding: var(--space-xl) var(--space-md);
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.co-empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.co-empty p {
+    margin: 0;
+    font-size: 0.95rem;
+}

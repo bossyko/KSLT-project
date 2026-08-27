@@ -27,8 +27,8 @@
         experience: 'Experience',
         level: 'Level',
         years: 'years',
-        emptyCourts: 'No courts available',
-        emptyCoaches: 'No coaches available',
+        emptyCourts: 'Courts will be added soon',
+        emptyCoaches: 'Coaches will be added soon',
         emptyPartners: 'No partners available',
         from: 'from',
         online: 'Online',
@@ -56,8 +56,8 @@
         experience: 'Тажрыйба',
         level: 'Деңгээл',
         years: 'жыл',
-        emptyCourts: 'Жеткиликтүү корттор жок',
-        emptyCoaches: 'Жеткиликтүү машыктыруучулар жок',
+        emptyCourts: 'Корттор жакында кошулат',
+        emptyCoaches: 'Машыктыруучулар жакында кошулат',
         emptyPartners: 'Жеткиликтүү өнөктөштөр жок',
         from: 'дан',
         online: 'Онлайн',
@@ -85,8 +85,8 @@
         experience: 'Опыт',
         level: 'Уровень',
         years: 'лет',
-        emptyCourts: 'Нет доступных кортов',
-        emptyCoaches: 'Нет доступных тренеров',
+        emptyCourts: 'Корты скоро появятся',
+        emptyCoaches: 'Тренеры скоро появятся',
         emptyPartners: 'Нет доступных партнёров',
         from: 'от',
         online: 'Онлайн',
@@ -96,6 +96,12 @@
         levelAdvanced: 'Продвинутый',
         levelUnknown: 'Уровень не указан'
     };
+
+    // Фотографий у кортов и тренеров пока нет: реестр собирали из 2ГИС и
+    // гидов. Без запасной картинки на месте снимка оставалась пустая рамка —
+    // на главной и здесь это выглядело как поломка
+    var COURT_PHOTO = '../images/heroes/courts.jpg';
+    var COACH_PHOTO = '../images/heroes/coaches.jpg';
 
     var courtPage = isEn ? 'court-en.html' : (isKg ? 'court-kg.html' : 'court.html');
     var coachPage = isEn ? 'coach-en.html' : (isKg ? 'coach-kg.html' : 'coach.html');
@@ -431,7 +437,7 @@
         var addr = getCourtAddress(c);
         var surface = getCourtSurface(c);
         var price = getCourtMinPrice(c);
-        var photo = c.photo || '';
+        var photo = c.photo || COURT_PHOTO;
         var href = courtPage + '?id=' + c.id;
 
         var discountHtml = c._maxDiscount ? '<span class="sv-discount-overlay">\uD83C\uDFF7\uFE0F ' + (isEn ? 'up to' : isKg ? 'чейин' : 'до') + ' -' + c._maxDiscount + '%</span>' : '';
@@ -460,7 +466,7 @@
         var name = getCoachName(ch);
         var spec = getCoachSpec(ch);
         var level = getCoachLevel(ch);
-        var photo = ch.photo || '';
+        var photo = ch.photo || COACH_PHOTO;
         var href = coachPage + '?id=' + ch.id;
         var exp = ch.experience ? ch.experience + ' ' + L.years : '';
         var price = ch.price ? ch.price + ' сом/ч' : '';
@@ -492,7 +498,7 @@
         var name = isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name);
         var addr = getCourtAddress(c);
         var price = getCourtMinPrice(c);
-        var photo = c.photo || '';
+        var photo = c.photo || COURT_PHOTO;
 
         var discountSm = c._maxDiscount ? '<span class="sv-discount-overlay-sm">-' + c._maxDiscount + '%</span>' : '';
 
@@ -514,7 +520,7 @@
         var name = getCoachName(ch);
         var spec = getCoachSpec(ch);
         var price = ch.price ? ch.price + ' сом/ч' : '';
-        var photo = ch.photo || '';
+        var photo = ch.photo || COACH_PHOTO;
         var discountSm = ch._maxDiscount ? '<span class="sv-discount-overlay-sm">-' + ch._maxDiscount + '%</span>' : '';
 
         return '<div class="sv-compact" data-type="coaches" data-idx="' + idx + '">' +

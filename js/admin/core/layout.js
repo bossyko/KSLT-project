@@ -199,12 +199,15 @@
             '</div>' +
             // Stat cards (3x3 grid)
             '<div class="ad-stats-grid" id="adStatsGrid">' +
-                // Row 1: Members, Overdue, Approaching
+                // Row 1: Members, Accounts, Background cards
                 renderStatCard(L.iconUsers, '...', L.statMembersDetail) +
+                renderStatCard(L.iconAccounts, '...', L.statUsersDetail) +
+                renderStatCard(L.iconBackground, '...', L.statBackgroundDetail) +
+                // Row 2: Overdue, Approaching, Pending regs
                 renderStatCard(L.iconOverdue, '...', L.statOverdueDetail, 'ad-stat-card--danger', 'adDashOverdue') +
                 renderStatCard(L.iconApproaching, '...', L.statApproachingDetail, 'ad-stat-card--warning', 'adDashApproaching') +
-                // Row 2: Pending regs, Tournaments, News
                 renderStatCard(L.iconPending, '...', L.statPendingDetail, 'ad-stat-card--warning', 'adDashPendingRegs') +
+                // Row 3: Tournaments, News, Courts
                 renderStatCard(L.iconTournaments, '...', L.statTournamentsDetail) +
                 renderStatCard(L.iconNews, '...', L.statNewsDetail) +
                 // Row 3: Courts, Coaches, Challenges
@@ -303,8 +306,8 @@
 
         var results = await Promise.allSettled([
             // Counts
-            A.client.from('players').select('id', { count: 'exact', head: true }),                                                       // [0] members
-            A.client.from('profiles').select('id', { count: 'exact', head: true }),                                                      // [1] users
+            A.client.from('players').select('id', { count: 'exact', head: true }),                                                       // [0] все карточки игроков
+            A.client.from('profiles').select('id', { count: 'exact', head: true }),                                                      // [1] учётные записи
             A.client.from('memberships').select('id', { count: 'exact', head: true }).eq('status', 'active').lt('expires_at', today),     // [2] overdue
             A.client.from('memberships').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('expires_at', today).lte('expires_at', todayPlus10), // [3] approaching
             A.client.from('tournament_registrations').select('id', { count: 'exact', head: true }).eq('status', 'pending'),               // [4] pending regs
@@ -335,14 +338,26 @@
                 .order('date_start', { ascending: false }).limit(10),                                                                  // [15] recent tournaments
             A.client.from('news').select('id, title, category, executor, published_at, created_at, view_count')
                 .order('created_at', { ascending: false }).limit(10),                                                                   // [16] recent news
-            A.client.from('challenges').select('id', { count: 'exact', head: true }).in('status', ['active', 'negotiating', 'countered']) // [17] active challenges
+            A.client.from('challenges').select('id', { count: 'exact', head: true }).in('status', ['active', 'negotiating', 'countered']), // [17] active challenges
+            // Члены клуба — те, у кого членство действует. Карточки игроков
+            // сюда не годятся: их 292, и почти все перенесены из списков NTRP,
+            // где человека на платформе нет вовсе
+            A.client.from('memberships').select('id', { count: 'exact', head: true })
+                .eq('status', 'active').gte('expires_at', today),                                                                       // [18] действующие членства
+            A.client.from('profiles').select('id', { count: 'exact', head: true })
+                .not('player_id', 'is', null)                                                                                           // [19] учётные записи, привязанные к карточке
         ]);
 
         // --- Stat cards ---
         var grid = document.getElementById('adStatsGrid');
         if (grid) {
-            var membersCount = getCount(results[0]);
+            var playersCount = getCount(results[0]);
             var usersCount = getCount(results[1]);
+            var membersCount = getCount(results[18]);
+            var linkedCount = getCount(results[19]);
+            // Фоновые — карточки без своего человека на платформе. Считаем
+            // как остаток: всего карточек минус те, что уже кем-то заняты
+            var backgroundCount = Math.max(0, playersCount - linkedCount);
             var overdueCount = getCount(results[2]);
             var approachingCount = getCount(results[3]);
             var pendingCount = getCount(results[4]);
@@ -355,11 +370,16 @@
             var challengesCount = getCount(results[17]);
 
             grid.innerHTML =
-                // Row 1
-                renderStatCard(L.iconUsers, membersCount + ' / ' + usersCount, L.statMembersDetail) +
+                // Row 1: три разных числа вместо одного «292 / 6».
+                // Раньше подпись «членов / пользователей» врала дважды: 292 —
+                // это карточки рейтинга, а не члены, и шестёрка не дополняла
+                // их, а сидела внутри — пятеро из шести привязаны к карточкам
+                renderStatCard(L.iconUsers, membersCount, L.statMembersDetail) +
+                renderStatCard(L.iconAccounts, usersCount, L.statUsersDetail) +
+                renderStatCard(L.iconBackground, backgroundCount, L.statBackgroundDetail) +
+                // Row 2
                 renderStatCard(L.iconOverdue, overdueCount, L.statOverdueDetail, 'ad-stat-card--danger', 'adDashOverdue') +
                 renderStatCard(L.iconApproaching, approachingCount, L.statApproachingDetail, 'ad-stat-card--warning', 'adDashApproaching') +
-                // Row 2
                 renderStatCard(L.iconPending, pendingCount, L.statPendingDetail, 'ad-stat-card--warning', 'adDashPendingRegs') +
                 renderStatCard(L.iconTournaments, pastTrn + ' / ' + upcomingTrn, L.statTournamentsDetail) +
                 renderStatCard(L.iconNews, newsCount, L.statNewsDetail) +

@@ -2591,9 +2591,11 @@ select:-webkit-autofill {
     max-width: 420px;
     max-height: 85vh;
     overflow-y: auto;
-    background: var(--bg-card, #111);
-    border: 1px solid var(--border-subtle);
-    border-radius: 16px;
+    /* Один вид у всех окон сайта: приподнятая подложка и рамка цветом
+       клуба, приглушённым — обводка не должна спорить с содержимым */
+    background: var(--bg-elevated);
+    border: 1px solid rgba(204, 255, 0, 0.28);
+    border-radius: var(--radius-lg);
     padding: 26px 24px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     animation: dbModalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -3288,4 +3290,153 @@ select:-webkit-autofill {
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: middle;
+}
+
+/* ============================================
+   Приглашения поиграть
+   ============================================
+   Принять или отклонить можно прямо в кабинете. Раньше это делалось
+   только кнопками в Телеграм-боте, и человек без Телеграма ответить
+   не мог вовсе. */
+
+/* Ширины заданы явно, иначе имя соперника растягивает таблицу за край
+   карточки. Колонка действий шире содержимого и прижата вправо — так
+   кнопка стоит у края, а не посреди строки */
+.db-invites-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.db-invites-table th:nth-child(1),
+.db-invites-table td:nth-child(1) { width: 76px; }
+
+.db-invites-table th:nth-child(3),
+.db-invites-table td:nth-child(3) { width: 104px; }
+
+.db-invites-table th:nth-child(4),
+.db-invites-table td:nth-child(4) { width: 210px; }
+
+.db-invites-table .db-match-opponent span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Направление — стрелкой у имени: вошло вместо целой колонки */
+.db-inv-dir {
+    flex-shrink: 0;
+    margin-left: 6px;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
+/* Кнопки кабинета выложены как блоки, поэтому выравнивание текстом на
+   них не действует — прижимаем саму строку кнопок к правому краю */
+.db-inv-actions {
+    white-space: nowrap;
+}
+
+.db-inv-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.db-btn-sm {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    border-radius: var(--radius-full);
+    line-height: 1.2;
+}
+
+/* Согласие — цветом клуба, отказ — тихой обводкой: одинаково заметные
+   кнопки заставляли выбирать между двумя равными, хотя выбор неравный */
+.db-invites-table .db-inv-accept {
+    background: var(--accent);
+    color: #000;
+    border: 1px solid var(--accent);
+    font-weight: 600;
+}
+
+.db-btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+}
+
+.db-btn-ghost:hover {
+    border-color: var(--border-light);
+    color: var(--text-secondary);
+}
+
+@media (max-width: 720px) {
+    /* На узком экране колонки делит браузер: жёсткие ширины не помещаются */
+    .db-invites-table { table-layout: auto; }
+    .db-invites-table th:nth-child(3),
+    .db-invites-table td:nth-child(3),
+    .db-invites-table th:nth-child(4),
+    .db-invites-table td:nth-child(4) { width: auto; }
+    .db-inv-actions { justify-content: flex-start; }
+    .db-btn-sm { padding: 5px 10px; font-size: 0.72rem; }
+}
+
+/* Карточка контактов собеседника — то, чем обменялись по согласию */
+.db-inv-contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.db-inv-contacts-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.db-inv-contact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+}
+
+/* Каждая сеть подсвечивается своим цветом, а не общим лаймом: строка
+   узнаётся по цвету раньше, чем прочитана. Так же сделано на карточке
+   игрока и в уведомлении из колокольчика */
+.db-inv-contact:hover { border-color: var(--accent); }
+.db-inv-contact:hover .db-inv-contact-label { color: var(--accent); }
+
+.db-inv-contact--wa:hover { border-color: #25D366; }
+.db-inv-contact--wa:hover .db-inv-contact-label { color: #25D366; }
+
+.db-inv-contact--tg:hover { border-color: #2AABEE; }
+.db-inv-contact--tg:hover .db-inv-contact-label { color: #2AABEE; }
+
+.db-inv-contact--ig:hover { border-color: #E1306C; }
+.db-inv-contact--ig:hover .db-inv-contact-label { color: #E1306C; }
+
+/* Раньше слева стояла подпись «Telegram», «Instagram» — колонка текста
+   рядом с самим именем читалась тяжело. Теперь знак сети */
+.db-inv-contact-label {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.db-inv-contact-label svg {
+    width: 18px;
+    height: 18px;
+}
+
+@media (max-width: 640px) {
+    .db-inv-actions { text-align: left; }
+    .db-inv-contact-label svg { width: 16px; height: 16px; }
 }

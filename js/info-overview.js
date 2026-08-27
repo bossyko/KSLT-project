@@ -150,7 +150,7 @@
     function renderHero() {
         var el = document.getElementById('ioHero');
         if (!el) return;
-        var heroImg = 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=1920&q=80';
+        var heroImg = '../images/heroes/services.jpg';
         el.innerHTML =
             '<div class="io-hero-bg"><img src="' + heroImg + '" alt=""></div>' +
             '<div class="io-hero-overlay"></div>' +
@@ -173,7 +173,7 @@
         var el = document.getElementById('ioContent');
         if (!el) return;
 
-        var featuredImg = 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1200&q=80';
+        var featuredImg = '../images/heroes/services.jpg';
         var html = '';
 
         // Featured card — About

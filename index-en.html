@@ -25,8 +25,8 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/style.css?v=123">
-    <link rel="stylesheet" href="css/partners.css?v=5">
+    <link rel="stylesheet" href="css/style.css?v=126">
+    <link rel="stylesheet" href="css/partners.css?v=8">
     <link rel="stylesheet" href="css/battle-cards.css?v=11">
 </head>
 <body>
@@ -302,11 +302,11 @@
                 <div class="hero-stats">
                     <div class="stat">
                         <span class="stat-value" id="statMembers">&mdash;</span>
-                        <span class="stat-label">KSLT Members</span>
+                        <span class="stat-label">Club Members</span>
                     </div>
                     <div class="stat">
                         <span class="stat-value" id="statUsers">&mdash;</span>
-                        <span class="stat-label">Participants</span>
+                        <span class="stat-label">Registered</span>
                     </div>
                     <div class="stat">
                         <span class="stat-value" id="statTournaments">&mdash;</span>
@@ -314,7 +314,7 @@
                     </div>
                     <div class="stat">
                         <span class="stat-value" id="statCourts">&mdash;</span>
-                        <span class="stat-label">Courts</span>
+                        <span class="stat-label">Tennis Venues</span>
                     </div>
                     <div class="stat">
                         <span class="stat-value" id="statCoaches">&mdash;</span>
@@ -324,7 +324,7 @@
             </div>
             <div class="hero-visual">
                 <div class="hero-image-container">
-                    <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&h=750&fit=crop&q=80" alt="Tennis Player" class="hero-image">
+                    <img src="images/heroes/tournaments.jpg" alt="Tennis Player" class="hero-image">
                     <div class="floating-card card-rating">
                         <div class="card-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -361,7 +361,7 @@
 
         <section id="tournaments" class="section-tournaments">
             <div class="section-header">
-                <h2>Upcoming Tournaments</h2>
+                <h2>Tournaments</h2>
                 <a href="pages/tournaments-overview-en.html" class="link-all">All Tournaments →</a>
             </div>
             <div class="tournaments-grid" id="homeTournaments"></div>
@@ -596,7 +596,9 @@
     </footer>
 <!-- FOOTER:END -->
 
-    <script src="js/auth-nav.js?v=12"></script>
+    <script src="js/contact-icons.js?v=1"></script>
+
+    <script src="js/auth-nav.js?v=17"></script>
     <script src="js/script.js?v=2"></script>
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -610,16 +612,16 @@
     <script src="js/membership.js"></script>
     <script src="js/battle-format.js?v=2"></script>
     <script src="js/battle-cards.js?v=11"></script>
-    <script src="js/stats.js?v=1"></script>
+    <script src="js/stats.js?v=2"></script>
     <script src="js/badge-celebration.js?v=2"></script>
     <script src="js/tournament-slots.js?v=5"></script>
     <script src="js/tournament-card.js?v=3"></script>
-    <script src="js/home-tournaments.js?v=5"></script>
+    <script src="js/home-tournaments.js?v=6"></script>
     <script src="js/home-badges.js?v=1"></script>
-    <script src="js/rankings-data.js?v=1"></script>
+    <script src="js/rankings-data.js?v=2"></script>
     <script src="js/home-rankings.js?v=1"></script>
-    <script src="js/home-partners.js?v=2"></script>
-    <script src="js/home-courts-coaches.js?v=1"></script>
+    <script src="js/home-partners.js?v=11"></script>
+    <script src="js/home-courts-coaches.js?v=11"></script>
     <script>
     
     
@@ -651,7 +653,7 @@
                             dateStr = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ' - ' + d2.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
                         }
                     }
-                    var img = t.image || 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=500&fit=crop&q=80';
+                    var img = t.image || 'images/heroes/tournaments.jpg';
                     var title = t.title_en || t.title || '';
                     var desc = t.description_en || t.description || '';
                     var gender = (t.category_id || '').split('-')[0];

@@ -1657,3 +1657,23 @@
         right: 0;
     }
 }
+
+/* Пусто: связь с базой оборвалась, поиск ничего не нашёл или кортов ещё
+   не завели. Раньше при сбое подставлялись пять выдуманных кортов —
+   человек мог поехать по адресу, которого не существует */
+.ct-empty {
+    padding: var(--space-xl) var(--space-md);
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.ct-empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.ct-empty p {
+    margin: 0;
+    font-size: 0.95rem;
+}

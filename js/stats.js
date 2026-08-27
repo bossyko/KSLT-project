@@ -56,8 +56,14 @@
         el.textContent = value.toLocaleString(LOCALE);
     }
 
+    var today = new Date().toISOString().split('T')[0];
+
     Promise.all([
-        client.from('players').select('id', { count: 'exact', head: true }),
+        // Члены клуба — по действующим членствам, а не по карточкам игроков.
+        // Карточек 292, но почти все перенесены из списков NTRP: человека на
+        // платформе нет, членство никто не оплачивал
+        client.from('memberships').select('id', { count: 'exact', head: true })
+            .eq('status', 'active').gte('expires_at', today),
         client.from('profiles').select('id', { count: 'exact', head: true }),
         client.from('tournaments').select('id', { count: 'exact', head: true })
             .eq('status', 'completed').gte('date_start', SITE_START),
@@ -71,18 +77,10 @@
         apply('statTournaments', r[2].error,
               ARCHIVE_TOURNAMENTS + (r[2].count || 0));
 
-        // Считаем корты, а не площадки: у одного клуба их несколько.
-        // Так же устроен счётчик на главной
-        var courts = null;
-        if (r[3].data) {
-            courts = 0;
-            r[3].data.forEach(function(row) {
-                (row.court_types || []).forEach(function(ct) {
-                    courts += (ct.count || 0);
-                });
-            });
-        }
-        apply('statCourts', r[3].error, courts);
+        // Считаем теннисные центры, а не отдельные площадки. Число площадок
+        // проставлено лишь у половины записей, поэтому их сумма выходила
+        // меньше числа самих центров — тридцать один против тридцати
+        apply('statCourts', r[3].error, r[3].data ? r[3].data.length : null);
 
         apply('statCoaches', r[4].error, r[4].count);
     });

@@ -192,8 +192,16 @@
     var SURFACE_MAP_EN = { hard: 'Hard', clay: 'Clay', carpet: 'Carpet', grass: 'Grass' };
     var SURFACE_MAP_KG = { hard: 'Катуу', clay: 'Топурак', carpet: 'Килем', grass: 'Чөп' };
 
-    var staticData = window.courtsData || [];
-    var data = staticData.slice(); // will be replaced after Supabase load
+    // Фотографий у кортов пока нет ни у одного: реестр собирали из 2ГИС и
+    // гидов, снимки добавим по мере получения. До тех пор общая картинка
+    // раздела — иначе на карточке зияет пустая рамка
+    var FALLBACK_PHOTO = '../images/heroes/courts.jpg';
+
+    // Заготовок больше нет. Раньше при сбое базы показывались пять
+    // выдуманных кортов — человек мог поехать по адресу, которого не
+    // существует. Честное «не загрузилось» вредит меньше
+    var data = [];
+    var loadFailed = false;
 
     var currentTypeFilter = 'all';
     var currentSurfaceFilter = 'all';
@@ -304,7 +312,8 @@
     if (isDetailPage) {
         initDetailPage();
         detectAccess();
-        loadSupabaseCourts(function(dbCourts) {
+        loadSupabaseCourts(function(dbCourts, failed) {
+            loadFailed = !!failed;
             if (dbCourts.length) {
                 // База — единственный источник. Заготовки из data/courts-data.js
                 // остаются только на случай, когда база недоступна: иначе на
@@ -328,9 +337,13 @@
         });
     } else {
         initListPage();
-        loadSupabaseCourts(function(dbCourts) {
-            if (dbCourts.length) {
-                data = sortPromotedFirst(dbCourts);
+        loadSupabaseCourts(function(dbCourts, failed) {
+            // Пустая база и недоступная база — разные вещи. Пусто — значит
+            // кортов нет; связи нет — показываем заготовки, чтобы страница
+            // не выглядела сломанной
+            loadFailed = !!failed;
+            data = sortPromotedFirst(dbCourts);
+            {
                 refreshDropdowns();
                 loadMaxDiscounts(function() {
                     renderGrid();
@@ -341,22 +354,31 @@
 
     /* ===== SUPABASE LOADING ===== */
 
+    /**
+     * Вторым доводом отдаём признак «не дозвонились до базы». Пустой список
+     * сам по себе ничего не говорит: он бывает и когда кортов правда нет,
+     * и когда связь оборвалась, а вести себя в этих случаях надо по-разному
+     */
     function loadSupabaseCourts(callback) {
         var client = window.supabaseClient || null;
         if (!client) {
-            callback([]);
+            callback([], true);
             return;
         }
         try {
             client.from('courts').select('*').order('created_at', { ascending: false })
                 .then(function(result) {
-                    if (result.error || !result.data) { callback([]); return; }
+                    if (result.error || !result.data) {
+                        console.error('[KSLT] корты не загружены:', result.error && result.error.message);
+                        callback([], true);
+                        return;
+                    }
                     var mapped = result.data.map(function(row) { return mapDbCourt(row); });
-                    callback(mapped);
+                    callback(mapped, false);
                 })
-                .catch(function() { callback([]); });
+                .catch(function() { callback([], true); });
         } catch (e) {
-            callback([]);
+            callback([], true);
         }
     }
 
@@ -456,7 +478,10 @@
         return {
             id: row.id,
             name: name,
-            photo: row.photo || 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&q=80',
+            // Своя картинка вместо чужой со стоков: снимков у кортов пока нет
+            // ни у одного, а внешний сервер отвечает не всегда — из двадцати
+            // карточек грузилось двенадцать, остальные зияли пустыми рамками
+            photo: row.photo || FALLBACK_PHOTO,
             gallery: row.gallery || [],
             type: primaryType,
             _hasIndoor: hasIndoor,
@@ -692,6 +717,29 @@
 
         var filtered = applyFilters();
 
+        // Пусто по трём разным причинам, и человеку важно понимать, по какой:
+        // связь оборвалась, поиск ничего не нашёл или кортов ещё не завели
+        if (filtered.length === 0) {
+            var text;
+            if (loadFailed) {
+                text = isEn ? 'Could not load the courts. Please refresh the page.'
+                    : (isKg ? 'Корттордун тизмеси жүктөлгөн жок. Баракты жаңылаңыз.'
+                    : 'Не удалось загрузить список кортов. Обновите страницу.');
+            } else if (_searchQuery || currentTypeFilter !== 'all' || currentSurfaceFilter !== 'all' || currentCityFilter !== 'all') {
+                text = isEn ? 'No courts match your search'
+                    : (isKg ? 'Издөө боюнча корт табылган жок' : 'По вашему запросу кортов не нашлось');
+            } else {
+                text = isEn ? 'The list of courts will appear soon'
+                    : (isKg ? 'Корттордун тизмеси жакында пайда болот' : 'Список кортов скоро появится');
+            }
+            container.innerHTML = '<div class="ct-empty">' +
+                '<div class="ct-empty-icon">' + (loadFailed ? '\u26A0\uFE0F' : '\uD83C\uDFBE') + '</div>' +
+                '<p>' + text + '</p>' +
+            '</div>';
+            renderPagination(0, 1);
+            return;
+        }
+
         var start = (_currentPage - 1) * PER_PAGE;
         var pageItems = filtered.slice(start, start + PER_PAGE);
 
@@ -706,7 +754,7 @@
 
             html += '<a href="' + detailBase + '?id=' + c.id + '" class="ct-card ct-fade-in' + (c._promoted ? ' kslt-promoted-card' : '') + '">' +
                 '<div class="ct-card-img-wrap">' +
-                    '<img src="' + esc(c.photo) + '" alt="' + esc(c.name) + '" class="ct-card-img" loading="lazy">' +
+                    '<img src="' + esc(c.photo || FALLBACK_PHOTO) + '" alt="' + esc(c.name) + '" class="ct-card-img" loading="lazy">' +
                     newBadge +
                     promoBadge +
                     discountBadge +
@@ -984,8 +1032,12 @@
         var hero = document.getElementById('courtDetailHero');
         if (!hero) return;
         var subtitle = court.address || '';
+        // Фотографий у кортов пока нет ни у одного: реестр собирали из 2ГИС
+        // и гидов, снимки будем добавлять по мере получения. Пока подставляем
+        // общую картинку раздела — иначе шапка карточки просто чёрная
+        var heroBg = court.photo || FALLBACK_PHOTO;
         hero.innerHTML =
-            '<div class="ct-hero-bg" style="background-image: url(\'' + esc(court.photo) + '\')"></div>' +
+            '<div class="ct-hero-bg" style="background-image: url(\'' + esc(heroBg) + '\')"></div>' +
             '<div class="ct-hero-content">' +
                 '<h1 class="ct-hero-title">' + court.name + '</h1>' +
                 '<p class="ct-hero-subtitle">' + subtitle + '</p>' +
@@ -1016,7 +1068,7 @@
 
         // Header
         html += '<div class="ct-detail-header ct-fade-in">' +
-            '<img src="' + esc(court.photo) + '" alt="' + esc(court.name) + '" class="ct-detail-photo">' +
+            '<img src="' + esc(court.photo || FALLBACK_PHOTO) + '" alt="' + esc(court.name) + '" class="ct-detail-photo">' +
             '<div class="ct-detail-info">' +
                 '<div class="ct-detail-title-row"><h1>' + court.name + '</h1>' +
                 (court._promoted ? '<span class="kslt-recommended-detail">' + L_labels.recommendedBadge + '</span>' : '') +

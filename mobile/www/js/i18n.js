@@ -510,7 +510,7 @@
     'restore.fail':           { ru: 'Не получилось вернуть аккаунт', en: 'Could not restore the account', kg: 'Аккаунтту кайтаруу мүмкүн болгон жок' },
     'profile.phoneTaken':     { ru: 'Этот номер уже привязан к другому аккаунту', en: 'This phone number is already linked to another account', kg: 'Бул номер башка аккаунтка байланган' },
     'profile.deleteTitle':    { ru: 'Удаление аккаунта', en: 'Delete Account', kg: 'Аккаунтту өчүрүү' },
-    'profile.deleteText':     { ru: 'Аккаунт сразу пропадёт из общих списков, а данные удалятся через 30 дней. Всё это время можно войти и вернуть его обратно.', en: 'Your account disappears from public lists right away, and data is erased after 30 days. Until then you can sign in and bring it back.', kg: 'Аккаунт жалпы тизмелерден дароо жоголот, маалыматтар 30 күндөн кийин өчүрүлөт. Ушул убакытта кирип, кайтарууга болот.' },
+    'profile.deleteText':     { ru: 'Аккаунт скроется сразу. У вас будет 30 дней, чтобы передумать — просто войдите, и мы предложим его вернуть. Потом он удалится навсегда.', en: 'Your account is hidden right away. You have 30 days to change your mind — just sign in and we will offer to bring it back. After that it is gone for good.', kg: 'Аккаунт дароо жашырылат. Ойлонууга 30 күнүңүз бар — жөн эле кириңиз, биз аны кайтарууну сунуштайбыз. Андан кийин биротоло өчөт.' },
     'profile.deleteBtn':      { ru: 'Удалить навсегда', en: 'Delete permanently', kg: 'Биротоло өчүрүү' },
     'profile.deleteConfirm':  { ru: 'Удалить аккаунт? Вернуть его можно в течение 30 дней.', en: 'Delete your account? You can bring it back within 30 days.', kg: 'Аккаунтту өчүрөсүзбү? 30 күн ичинде кайтарууга болот.' },
     'profile.deleting':       { ru: 'Удаление...', en: 'Deleting...', kg: 'Өчүрүлүүдө...' },

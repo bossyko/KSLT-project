@@ -1463,6 +1463,11 @@
                 var mm = String(now.getMinutes()).padStart(2, '0');
                 statusEl.textContent = '\u2713 ' + L.saved + ' ' + hh + ':' + mm;
             }
+
+            // Опубликовали — работа со статьёй закончена, показываем список.
+            // При промежуточном сохранении остаёмся в форме: статью пишут
+            // долго и сохраняются по ходу, уводить оттуда нельзя
+            if (doPublish) renderNewsList();
         } catch (e) {
             A.showToast(e.message || 'Error', 'error');
             activeBtn.disabled = false;

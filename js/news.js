@@ -30,7 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Фон шапки раздела «Новости». Тот же приём, что на странице турниров:
 // постоянный снимок, а не меняющаяся обложка последней статьи.
-var NEWS_HERO_IMAGE = 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=1920&q=80';
+// Своя картинка вместо стоковой: обложки новостей теперь настоящие,
+// и подложка раздела должна быть нашей же
+var NEWS_HERO_IMAGE = '../images/heroes/tournaments.jpg';
 
 function mapDbArticle(row) {
     var isEn = isEnPage();

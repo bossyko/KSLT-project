@@ -7,6 +7,7 @@
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
   const TELEGRAM_API = 'https://api.telegram.org/bot'
+  const SITE_URL = 'https://kslt.netlify.app'
   const DAILY_LIMIT = 30
 
   const corsHeaders = {
@@ -57,14 +58,18 @@
       // 3. Check active membership (admin/manager bypass)
       const isAdmin = senderProfile.role === 'admin' || senderProfile.role === 'manager'
       if (!isAdmin) {
-        const now = new Date().toISOString()
+        // Срок членства лежит в expires_at. Поля end_date в таблице нет
+        // вовсе: запрос по нему молча возвращал пусто, и приглашение не мог
+        // отправить никто — даже с оплаченным членством
+        const today = new Date().toISOString().slice(0, 10)
         const { data: membership } = await db
           .from('memberships')
           .select('id')
           .eq('profile_id', user.id)
-          .gte('end_date', now)
+          .eq('status', 'active')
+          .gte('expires_at', today)
           .limit(1)
-          .single()
+          .maybeSingle()
 
         if (!membership) {
           return json({ error: 'no_membership' }, 403)
@@ -128,8 +133,21 @@
         .limit(1)
         .single()
 
-      if (!receiverProfile || (!receiverProfile.telegram_chat_id && !receiverProfile.email)) {
-        return json({ error: 'no_contact' }, 400)
+      // Учётной записи нет — приглашать некого: человек не на платформе,
+      // ответить ему негде. Телеграм и почта тут больше ни при чём: раньше
+      // без них отправка запрещалась, потому что всё держалось на боте.
+      // Теперь приглашение живёт в кабинете и в приложении, а Телеграм с
+      // почтой лишь оповещают
+      if (!receiverProfile) {
+        return json({ error: 'no_account' }, 400)
+      }
+
+      // Смысл приглашения — обменяться контактами. Если у человека не
+      // заполнено ничего, соглашаться ему нечем: собеседник получит пустую
+      // карточку. Лучше сказать об этом сразу, чем заставлять ждать ответа
+      const receiverHasContacts = !!(receiverProfile.phone || receiverProfile.telegram || receiverProfile.instagram)
+      if (!receiverHasContacts) {
+        return json({ error: 'receiver_no_contacts' }, 400)
       }
 
       // 9. Insert invite
@@ -149,12 +167,29 @@
         return json({ error: 'DB error' }, 500)
       }
 
-      // 10. Send Telegram to receiver (respect opt-out)
       const senderName = senderProfile.full_name || 'Игрок KSLT'
+
+      // Запись для колокольчика на сайте. Её не было вовсе: приглашение
+      // уходило в Телеграм и на почту, а человек, вошедший на сайт, не
+      // видел никакого знака — колокольчик молчал
+      await db.from('notification_log').insert({
+        profile_id: receiverProfile.id,
+        type: 'game_invite',
+        title: 'Приглашение на игру',
+        message: `${senderName} предлагает сыграть в теннис`,
+        is_read: false,
+        action_type: 'game_invite',
+        action_id: invite.id
+      }).then(function () {}, function (e: unknown) { console.error('notification_log:', e) })
+
+      // 10. Send Telegram to receiver (respect opt-out)
       const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
 
+      // Телеграм только зовёт на сайт: отвечают там, где человек видит, на
+      // что соглашается. Личные данные через бота больше не ходят — раньше
+      // он сам раздавал ссылки на переписку, минуя всякое согласие
       if (token && receiverProfile.telegram_chat_id && shouldNotify(receiverProfile.notify_preferences, 'tg', 'challenges')) {
-        const msgText = `🎾 <b>Приглашение на игру!</b>\n\n${senderName} предлагает вам сыграть в теннис.\n\nПримите приглашение, чтобы обменяться контактами.`
+        const msgText = `🎾 <b>Приглашение на игру!</b>\n\n${senderName} предлагает вам сыграть в теннис.\n\nОткройте приложение или сайт, чтобы принять или отклонить.`
 
         await fetch(`${TELEGRAM_API}${token}/sendMessage`, {
           method: 'POST',
@@ -165,27 +200,38 @@
             parse_mode: 'HTML',
             reply_markup: {
               inline_keyboard: [[
-                { text: '✅ Принять', callback_data: `invite_accept:${invite.id}` },
-                { text: '❌ Отклонить', callback_data: `invite_decline:${invite.id}` }
+                { text: '🎾 Открыть приглашение', url: `${SITE_URL}/pages/dashboard.html#games` }
               ]]
             }
           })
         })
       }
 
+      // Push в приложение — доходит и при погашенном экране
+      try {
+        await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/send-push', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: '🎾 Приглашение на игру',
+            message: `${senderName} предлагает сыграть в теннис`,
+            type: 'challenges',
+            audience: 'user',
+            user_id: receiverProfile.id
+          })
+        })
+      } catch { /* доставка не должна ронять само приглашение */ }
+
       // 11. Send email to receiver
       if (receiverProfile.email && shouldNotify(receiverProfile.notify_preferences, 'email', 'challenges')) {
+        // Свой шаблон, а не «вызов на матч»: у приглашения нет ни даты, ни
+        // корта — о них договариваются сами, — и в письме оставались пустые
+        // строки под календарь и часы
         await callSendEmail(serviceKey, {
           to: receiverProfile.email,
           subject: `🎾 Приглашение на игру от ${senderName}`,
-          template: 'challenge-received',
-          data: {
-            challenger_name: senderName,
-            date: '',
-            time: '',
-            venue: '',
-            message: 'Приглашение на игру в теннис. Ответьте через Telegram-бота или личный кабинет.'
-          }
+          template: 'game-invite',
+          data: { sender_name: senderName }
         })
       }
 

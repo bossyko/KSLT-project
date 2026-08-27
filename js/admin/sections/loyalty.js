@@ -69,6 +69,16 @@
         renderSubTab();
     }
 
+    /**
+     * Данные грузятся с задержкой, а человек за это время успевает
+     * переключить вкладку. Раньше запоздавший ответ дорисовывал разметку
+     * поверх чужой и навешивал обработчики на кнопки, которых уже нет —
+     * в консоль сыпалось «Cannot read properties of null».
+     */
+    function stillOn(sub) {
+        return loySubTab === sub && !!document.getElementById('adLoyContent');
+    }
+
     function renderSubTab() {
         if (loySubTab === 'rules') renderRules();
         else if (loySubTab === 'rewards') renderRewards();
@@ -85,6 +95,7 @@
         wrap.innerHTML = '<div class="ad-loading">...</div>';
 
         var res = await A.client.from('loyalty_rules').select('*').order('action');
+        if (!stillOn('rules')) return;
         var rules = res.data || [];
 
         var html = '<div style="margin-bottom:16px;">' +
@@ -217,6 +228,7 @@
         wrap.innerHTML = '<div class="ad-loading">...</div>';
 
         var res = await A.client.from('loyalty_rewards').select('*').order('cost');
+        if (!stillOn('rewards')) return;
         var rewards = res.data || [];
 
         var html = '<div style="margin-bottom:16px;">' +
@@ -353,6 +365,7 @@
             .select('*, profiles!profile_id(full_name, email)')
             .order('created_at', { ascending: false });
 
+        if (!stillOn('transactions')) return;
         loyTxAllData = res.data || [];
 
         // Stat cards

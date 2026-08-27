@@ -96,7 +96,11 @@
                                 form: p.form || [],
                                 online: false,
                                 ntrp_rating: p.ntrp_rating || null,
-                                banned_until: p.banned_until || null
+                                banned_until: p.banned_until || null,
+                                // Член клуба или фоновая карточка из списков
+                                // NTRP. Фоновые показываем приглушённо: они
+                                // есть в базе клуба, но членство не оплачено
+                                isMember: !!p.is_member
                             };
                         })
                     };

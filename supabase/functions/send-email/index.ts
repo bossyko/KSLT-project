@@ -179,6 +179,10 @@ function renderTemplate(template: string, data: Record<string, any>): string {
     case 'membership-expired': return templateMembershipExpired(data)
     case 'match-schedule': return templateMatchSchedule(data)
     case 'challenge-received': return templateChallengeReceived(data)
+    case 'game-invite': return templateGameInvite(data)
+    case 'game-invite-answered': return templateGameInviteAnswered(data)
+    case 'challenge-answered': return templateChallengeAnswered(data)
+    case 'security-alert': return templateSecurityAlert(data)
     case 'broadcast': return templateBroadcast(data)
     case 'otp-code': return templateOtpCode(data)
     default:
@@ -288,6 +292,88 @@ ${matchesHtml}
 }
 
 // --- 7. Challenge Received ---
+/**
+ * Оповещение о действии с учётной записью: вход с нового устройства,
+ * смена пароля, почты или телефона. Шаблона тоже не было — письма о
+ * безопасности уходили с той же строкой об отсутствии шаблона.
+ */
+function templateSecurityAlert(d: Record<string, any>): string {
+  const content = `
+<h1 style="${S.h1}">🔐 Безопасность аккаунта</h1>
+${d.name ? `<p style="${S.p}">${esc(d.name)}, здравствуйте.</p>` : ''}
+<p style="${S.p}">${esc(d.message_ru || 'В вашей учётной записи произошло изменение.')}</p>
+<hr style="${S.divider}">
+<p style="${S.p}">Если это были вы — ничего делать не нужно. Если нет,
+смените пароль и напишите нам.</p>
+<a href="${SITE_URL}/pages/dashboard.html#settings" style="${S.btn}">Открыть настройки</a>`
+  return wrapLayout(content, esc(d.message_ru || 'Безопасность аккаунта'))
+}
+
+/**
+ * Ответ на вызов. Шаблона не было вовсе: challenge-notify его звал, а в
+ * списке он отсутствовал — и человеку уходило письмо со строкой
+ * «No template found: challenge-answered» вместо текста.
+ */
+function templateChallengeAnswered(d: Record<string, any>): string {
+  const yes = d.accepted === true || d.accepted === 'true'
+  const who = esc(d.opponent_name || 'Соперник')
+  const content = yes
+    ? `
+<h1 style="${S.h1}">🔥 Вызов принят!</h1>
+<p style="${S.p}"><strong style="color:#fff;">${who}</strong> принял ваш вызов.</p>
+<p style="${S.p}">Договоритесь о дате, времени и корте — и выходите на матч.</p>
+<hr style="${S.divider}">
+<a href="${SITE_URL}/pages/dashboard.html#games" style="${S.btn}">Открыть кабинет</a>`
+    : `
+<h1 style="${S.h1}">Вызов отклонён</h1>
+<p style="${S.p}"><strong style="color:#fff;">${who}</strong> отказался от матча.</p>
+<p style="${S.p}">Ничего страшного — предложите игру другому сопернику.</p>
+<hr style="${S.divider}">
+<a href="${SITE_URL}/pages/players.html" style="${S.btn}">Найти соперника</a>`
+  return wrapLayout(content, yes ? `${d.opponent_name} принял вызов` : `${d.opponent_name} отклонил вызов`)
+}
+
+/**
+ * Приглашение поиграть — не то же, что вызов на матч. Раньше оно уходило
+ * по шаблону вызова: человек получал письмо «⚔️ Вызов на матч!» с пустыми
+ * датой и временем, потому что у приглашения их нет и быть не может —
+ * когда и где играть, договариваются сами.
+ */
+function templateGameInvite(d: Record<string, any>): string {
+  const content = `
+<h1 style="${S.h1}">🎾 Приглашение на игру</h1>
+<p style="${S.p}"><strong style="color:#fff;">${esc(d.sender_name)}</strong> предлагает вам сыграть в теннис.</p>
+<p style="${S.p}">Примите приглашение — и вы обменяетесь контактами:
+он увидит ваши, вы&nbsp;— его. Дальше договоритесь сами.</p>
+<hr style="${S.divider}">
+<p style="${S.p}">Ответить можно в приложении или в личном кабинете.</p>
+<a href="${SITE_URL}/pages/dashboard.html#games" style="${S.btn}">Открыть приглашение</a>`
+  return wrapLayout(content, `${d.sender_name} предлагает сыграть`)
+}
+
+/**
+ * Ответ на приглашение поиграть — отправителю. Раньше об ответе сообщал
+ * только Телеграм-бот, и человек без Телеграма не узнавал ничего.
+ */
+function templateGameInviteAnswered(d: Record<string, any>): string {
+  const yes = d.accepted === true || d.accepted === 'true'
+  const who = esc(d.opponent_name || 'Игрок')
+  const content = yes
+    ? `
+<h1 style="${S.h1}">🎾 Приглашение принято</h1>
+<p style="${S.p}"><strong style="color:#fff;">${who}</strong> согласился сыграть.</p>
+<p style="${S.p}">Откройте кабинет — там его контакты. Дальше договоритесь сами.</p>
+<hr style="${S.divider}">
+<a href="${SITE_URL}/pages/dashboard.html#games" style="${S.btn}">Открыть кабинет</a>`
+    : `
+<h1 style="${S.h1}">Приглашение отклонено</h1>
+<p style="${S.p}"><strong style="color:#fff;">${who}</strong> отказался от игры.</p>
+<p style="${S.p}">Ничего страшного — предложите игру другому.</p>
+<hr style="${S.divider}">
+<a href="${SITE_URL}/pages/partners.html" style="${S.btn}">Найти партнёра</a>`
+  return wrapLayout(content, yes ? `${d.opponent_name} согласился сыграть` : `${d.opponent_name} отказался`)
+}
+
 function templateChallengeReceived(d: Record<string, any>): string {
   const content = `
 <h1 style="${S.h1}">⚔️ Вызов на матч!</h1>
@@ -296,7 +382,7 @@ function templateChallengeReceived(d: Record<string, any>): string {
 ${d.venue ? `<p style="${S.infoRow}">📍 ${esc(d.venue)}</p>` : ''}
 ${d.message ? `<p style="${S.p};font-style:italic;">💬 ${esc(d.message)}</p>` : ''}
 <hr style="${S.divider}">
-<p style="${S.p}">Ответьте на вызов через Telegram-бота или в личном кабинете.</p>
+<p style="${S.p}">Ответить можно в приложении или в личном кабинете.</p>
 <a href="${SITE_URL}/pages/dashboard.html" style="${S.btn}">Открыть кабинет</a>`
   return wrapLayout(content, `Вызов от ${d.challenger_name}`)
 }

@@ -222,7 +222,15 @@
         return
       }
 
-      // Route: invite_accept/decline:{uuid}
+      // Приглашения поиграть через бота больше не принимаются: он сам
+      // раздавал ссылки на переписку, минуя согласие. Теперь отвечают на
+      // сайте или в приложении, где видно, какими контактами обмениваются.
+      // Кнопки из старых сообщений могут прийти ещё какое-то время
+      if (/^invite_(accept|decline):/.test(data)) {
+        await answerCallbackQuery(token, query.id, 'Откройте приглашение в приложении или на сайте')
+        return
+      }
+
       const messageId = query.message?.message_id
       const match = data.match(/^invite_(accept|decline):(.+)$/)
       if (!match || !chatId) {

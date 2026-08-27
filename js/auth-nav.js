@@ -136,14 +136,20 @@
                     var L2 = isEn
                         ? { title: 'New notifications', empty: 'Nothing new', all: 'All notifications',
                             accept: 'Accept', decline: 'Decline', done: 'This challenge has already been answered',
-                            gone: 'This challenge no longer exists' }
+                            gone: 'This challenge no longer exists',
+                            noContacts: 'The player has not provided any contacts',
+                            showContacts: 'Show contacts' }
                         : isKg
                             ? { title: 'Жаңы билдирмелер', empty: 'Жаңылык жок', all: 'Бардык билдирмелер',
                                 accept: 'Кабыл алуу', decline: 'Четке кагуу', done: 'Бул чакырыкка мурун жооп берилген',
-                                gone: 'Бул чакырык эми жок' }
+                                gone: 'Бул чакырык эми жок',
+                                noContacts: 'Оюнчу байланыш маалыматын көрсөткөн эмес',
+                                showContacts: 'Байланыштарды көрүү' }
                             : { title: 'Новые уведомления', empty: 'Новых нет', all: 'Все уведомления',
                                 accept: 'Принять', decline: 'Отклонить', done: 'На этот вызов уже ответили',
-                                gone: 'Этого вызова больше нет' };
+                                gone: 'Этого вызова больше нет',
+                                noContacts: 'Игрок не указал контактов',
+                                showContacts: 'Показать контакты' };
 
                     /**
                      * Сколько непрочитанных — для точки на колокольчике.
@@ -246,10 +252,18 @@
                                     '</div>' +
                                     // Уведомление о вызове несёт сам ответ: гонять
                                     // человека в кабинет ради двух кнопок незачем
-                                    (n.action_type === 'challenge' && n.action_id
+                                    ((n.action_type === 'challenge' || n.action_type === 'game_invite') && n.action_id
                                         ? '<div class="site-notif-actions">' +
                                             '<button class="site-notif-act site-notif-yes" type="button">' + L2.accept + '</button>' +
                                             '<button class="site-notif-act site-notif-no" type="button">' + L2.decline + '</button>' +
+                                          '</div>'
+                                        : '') +
+                                    // Весть о согласии: отвечать нечего, но
+                                    // контакты нужны здесь же — иначе человека
+                                    // приходится гнать в кабинет
+                                    (n.action_type === 'game_invite_accepted' && n.action_id
+                                        ? '<div class="site-notif-actions">' +
+                                            '<button class="site-notif-act site-notif-yes site-notif-show" type="button">' + L2.showContacts + '</button>' +
                                           '</div>'
                                         : '') +
                                 '</div>' +
@@ -297,6 +311,13 @@
                             var box = overlay.querySelector('.site-notif-actions');
                             if (box) box.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
 
+                            // Приглашение поиграть отвечает своя функция: она
+                            // же отдаёт контакты и оповещает отправителя
+                            if (n.action_type === 'game_invite') {
+                                answerInvite(accept, box);
+                                return;
+                            }
+
                             fetch(DB_URL + '/rest/v1/rpc/respond_to_challenge', {
                                 method: 'POST',
                                 headers: apiHeaders({ 'Content-Type': 'application/json' }),
@@ -337,7 +358,82 @@
                             });
                         }
 
-                        var yes = overlay.querySelector('.site-notif-yes');
+                        /**
+                         * Контакты собеседника. Знаки сетей рисованные, а не
+                         * эмодзи: у каждой системы они свои, и на части
+                         * устройств вместо телеграма выходил синий квадрат.
+                         * Те же знаки стоят на карточке игрока и в кабинете
+                         */
+                        function contactsHtml(c, headline) {
+                            var ICON = window.KSLT_CONTACT_ICONS || {};
+                            var rows = [];
+                            if (c.phone) rows.push([ICON.phone, c.phone, 'tel:' + c.phone, 'phone']);
+                            if (c.whatsapp) rows.push([ICON.whatsapp, c.whatsapp, 'https://wa.me/' + String(c.whatsapp).replace(/[^0-9]/g, ''), 'wa']);
+                            if (c.telegram) rows.push([ICON.telegram, '@' + String(c.telegram).replace('@', ''), 'https://t.me/' + String(c.telegram).replace('@', ''), 'tg']);
+                            if (c.instagram) rows.push([ICON.instagram, '@' + String(c.instagram).replace('@', ''), 'https://instagram.com/' + String(c.instagram).replace('@', ''), 'ig']);
+                            var inner = rows.length
+                                ? rows.map(function(r) {
+                                    return '<a class="site-notif-contact site-notif-contact--' + r[3] + '" href="' + r[2] + '" target="_blank" rel="noopener">' +
+                                           '<span class="site-notif-contact-icon">' + (r[0] || '') + '</span>' +
+                                           '<span class="site-notif-contact-val">' + esc(r[1]) + '</span></a>';
+                                  }).join('')
+                                : '<div class="site-notif-answered">' + esc(L2.noContacts) + '</div>';
+                            return '<div class="site-notif-contacts">' +
+                                (headline ? '<div class="site-notif-answered">' + esc(headline) + '</div>' : '') +
+                                inner + '</div>';
+                        }
+
+                        /**
+                         * Ответ на приглашение поиграть. Принял — сразу
+                         * показываем контакты: гонять человека в кабинет ради
+                         * них незачем, он уже согласился.
+                         */
+                        function answerInvite(accept, box) {
+                            fetch(DB_URL + '/functions/v1/respond-game-invite', {
+                                method: 'POST',
+                                headers: apiHeaders({ 'Content-Type': 'application/json' }),
+                                body: JSON.stringify({ invite_id: n.action_id, accept: accept })
+                            }).then(function(r) { return r.json(); }).then(function(res) {
+                                if (res && res.error) {
+                                    var msg = res.error === 'not_found' ? L2.gone
+                                        : (res.error === 'already_answered' || res.error === 'not_yours') ? L2.done
+                                        : res.error;
+                                    if (box) box.outerHTML = '<div class="site-notif-answered">' + esc(msg) + '</div>';
+                                    return;
+                                }
+                                if (accept && res.contacts) {
+                                    if (box) box.outerHTML = contactsHtml(res.contacts, L2.accept + ' \u2713');
+                                } else if (box) {
+                                    box.outerHTML = '<div class="site-notif-answered">' + esc(L2.decline + ' \u2713') + '</div>';
+                                }
+                            }).catch(function(e) {
+                                console.warn('[KSLT] invite answer:', e);
+                                if (box) box.querySelectorAll('button').forEach(function(b) { b.disabled = false; });
+                            });
+                        }
+
+                        var show = overlay.querySelector('.site-notif-show');
+                        if (show) {
+                            show.addEventListener('click', function() {
+                                var box = overlay.querySelector('.site-notif-actions');
+                                if (box) box.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+                                fetch(DB_URL + '/rest/v1/rpc/get_invite_contacts', {
+                                    method: 'POST',
+                                    headers: apiHeaders({ 'Content-Type': 'application/json' }),
+                                    body: JSON.stringify({ p_invite_id: n.action_id })
+                                }).then(function(r) { return r.json(); }).then(function(res) {
+                                    if (!res || res.error || !res.contacts) {
+                                        if (box) box.outerHTML = '<div class="site-notif-answered">' + esc(L2.gone) + '</div>';
+                                        return;
+                                    }
+                                    if (box) box.outerHTML = contactsHtml(res.contacts);
+                                }).catch(function() {
+                                    if (box) box.querySelectorAll('button').forEach(function(b) { b.disabled = false; });
+                                });
+                            });
+                        }
+
+                        var yes = overlay.querySelector('.site-notif-yes:not(.site-notif-show)');
                         var no = overlay.querySelector('.site-notif-no');
                         if (yes) yes.addEventListener('click', function() { answer(true, yes); });
                         if (no) no.addEventListener('click', function() { answer(false, no); });

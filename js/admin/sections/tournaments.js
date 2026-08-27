@@ -1635,11 +1635,33 @@
     // ---- Delete Tournament ----
     async function deleteTournamentHandler() {
         if (!trnEditingId) return;
+
+        // Кому турнир начислял очки — узнаём до удаления: записи истории
+        // уходят вместе с ним, и потом спрашивать будет уже не у кого
+        var affected = [];
+        try {
+            var rh = await A.client.from('rating_history')
+                .select('player_id')
+                .eq('tournament_id', trnEditingId);
+            affected = [...new Set((rh.data || []).map(function(r) { return r.player_id; }))];
+        } catch (e) { /* пересчёт не критичен для самого удаления */ }
+
         var result = await A.client.from('tournaments').delete().eq('id', trnEditingId);
         if (result.error) {
             A.showToast(result.error.message, 'error');
             return;
         }
+
+        // Очки по категориям собираются из истории. Записи удалились вместе
+        // с турниром, но сумма в player_categories осталась прежней — её
+        // надо пересобрать, иначе игрок стоит в рейтинге выше, чем заслужил
+        if (affected.length) {
+            var recalc = await A.client.rpc('recalc_player_categories', { p_ids: affected });
+            if (recalc.error) {
+                A.showToast('Очки не пересчитались: ' + recalc.error.message, 'error');
+            }
+        }
+
         A.showToast(isEn ? 'Deleted' : 'Удалено', 'success');
         renderTournamentsList();
     }
