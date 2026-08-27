@@ -21,6 +21,11 @@
 | `clear-test-tournaments.sql` | удаление 127 отладочных турниров |
 | `clear-test-players.sql` | чистка рейтинга: из 301 игрока осталось пятеро живых |
 | `clear-orphan-matches.sql` | матчи, оставшиеся без турнира и без баттла |
+| `clear-test-coaches.sql` | шестеро отладочных тренеров |
+| `clear-orphan-services.sql` | услуги партнёров без владельца |
+| `clear-test-memberships.sql` | из 29 членств осталось по одному на человека |
+| `account-deletion-delay.sql` | отсрочка 30 дней при удалении учётной записи, метка на карточке игрока, ежедневная уборка |
+| `phone-unique-index.sql` | один номер — одна учётная запись, независимо от написания |
 | `women-three-categories.sql` | у женщин три категории вместо пяти |
 | `storage-delete-policy.sql` | право удалять файлы хранилища |
 | `storage-policies-cleanup.sql` | тринадцать правил доступа свели к четырём |

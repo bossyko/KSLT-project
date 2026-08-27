@@ -308,8 +308,13 @@
             A.client.from('memberships').select('id', { count: 'exact', head: true }).eq('status', 'active').lt('expires_at', today),     // [2] overdue
             A.client.from('memberships').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('expires_at', today).lte('expires_at', todayPlus10), // [3] approaching
             A.client.from('tournament_registrations').select('id', { count: 'exact', head: true }).eq('status', 'pending'),               // [4] pending regs
-            A.client.from('tournaments').select('id', { count: 'exact', head: true }).lt('date_start', today),                           // [5] past tournaments
-            A.client.from('tournaments').select('id', { count: 'exact', head: true }).gte('date_start', today),                          // [6] upcoming tournaments
+            // Считаем по состоянию турнира, а не по дате начала. По дате
+            // идущий сейчас турнир попадал в прошедшие (начался вчера), а в
+            // предстоящие шли черновики, которых ещё никто не видел
+            A.client.from('tournaments').select('id', { count: 'exact', head: true }).eq('status', 'completed'),                          // [5] past tournaments
+            A.client.from('tournaments').select('id', { count: 'exact', head: true })
+                .not('published_at', 'is', null)
+                .not('status', 'in', '("completed","cancelled")'),                                                                       // [6] upcoming tournaments
             A.client.from('news').select('id', { count: 'exact', head: true }).not('published_at', 'is', null),                           // [7] published news
             A.client.from('courts').select('id', { count: 'exact', head: true }),                                                        // [8] courts
             A.client.from('coaches').select('id', { count: 'exact', head: true }),                                                       // [9] coaches

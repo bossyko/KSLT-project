@@ -31,7 +31,7 @@
     client.from('tournaments')
         .select('id, title, title_en, title_kg, description, description_en, description_kg, ' +
                 'date_start, date_end, registration_start, registration_end, image, ' +
-                'category_id, max_participants, location, location_en, status, start_time, ' +
+                'category_id, max_participants, reserved_spots, format, location, location_en, status, start_time, ' +
                 'published_at, created_at')
         .order('date_start', { ascending: true })
         .then(function(res) {
@@ -51,10 +51,24 @@
             var picked = pick(all);
             if (!picked.length) { hideSection(); return; }
 
-            grid.innerHTML = picked.map(function(t, i) {
-                return TC.render(t, { featured: i === 0 });
-            }).join('');
-            TC.startTicker();
+            // Заявки грузим отдельно и только по показанным турнирам:
+            // без них на карточке стояла бы вместимость из формы создания,
+            // одинаковая с первого дня записи до последнего
+            var ids = picked.map(function(t) { return t.id; });
+            client.from('tournament_registrations')
+                .select('tournament_id')
+                .in('tournament_id', ids)
+                .in('status', (window.KSLT_SLOTS || {}).MAIN_DRAW || ['approved', 'pending', 'draw'])
+                .then(function(regs) {
+                    var taken = {};
+                    (regs.data || []).forEach(function(r) {
+                        taken[r.tournament_id] = (taken[r.tournament_id] || 0) + 1;
+                    });
+                    grid.innerHTML = picked.map(function(t, i) {
+                        return TC.render(t, { featured: i === 0, taken: taken[t.id] || 0 });
+                    }).join('');
+                    TC.startTicker();
+                });
         });
 
     /** Отбираем шесть по договорённому порядку. */

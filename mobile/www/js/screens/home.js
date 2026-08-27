@@ -240,7 +240,17 @@
         ? supabaseClient.from('courts').select('id, name, street, building, city, google_maps_url, twogis_url, photo').eq('id', t.court_id).single()
         : Promise.resolve({ data: null });
 
-      courtP.then(function(cRes) {
+      // Заявки, занимающие место в основной сетке. Без них в шапке стояла
+      // вместимость из формы создания — число, которое не меняется весь
+      // набор и потому ничего не говорит человеку
+      var takenP = supabaseClient.from('tournament_registrations')
+        .select('id', { count: 'exact', head: true })
+        .eq('tournament_id', tid)
+        .in('status', (window.KSLT_SLOTS || {}).MAIN_DRAW || ['approved', 'pending', 'draw']);
+
+      Promise.all([courtP, takenP]).then(function(res) {
+        var cRes = res[0];
+        t._taken = res[1] && res[1].count != null ? res[1].count : 0;
         var court = cRes.data;
         renderTournamentInfo(overlay, t, court);
 
@@ -1585,7 +1595,8 @@
     var statusMap = { upcoming: I18N.t('tournaments.registration'), live: I18N.t('tournaments.inProgress'), completed: I18N.t('tournaments.finished') };
     if (t.status) badges += '<span class="td-badge status-' + t.status + '">' + (statusMap[t.status] || t.status) + '</span>';
     document.getElementById('tdBadges').innerHTML = badges;
-    document.getElementById('tdDetails').textContent = dateStr + (t.location ? ' · ' + t.location : '') + (t.max_participants ? ' · ' + t.max_participants + ' ' + I18N.t('tournaments.players') : '');
+    var slotsLine = window.KSLT_SLOTS && KSLT_SLOTS.line(t, t._taken, t.status);
+    document.getElementById('tdDetails').textContent = dateStr + (t.location ? ' · ' + t.location : '') + (slotsLine ? ' · ' + slotsLine.text : '');
 
     // Format labels
     var formatLabels = { singles: I18N.t('td.format') === 'Format' ? 'Singles' : 'Одиночный', doubles: I18N.t('td.format') === 'Format' ? 'Doubles' : 'Парный', mixed_doubles: I18N.t('td.format') === 'Format' ? 'Mixed Doubles' : 'Микст' };
@@ -1597,7 +1608,8 @@
     if (t.format) info += tdInfoRow('🎾', I18N.t('td.format'), formatLabels[t.format] || t.format);
     if (t.bracket_type) info += tdInfoRow('📊', I18N.t('td.bracketType'), bracketLabels[t.bracket_type] || t.bracket_type);
     var _isDbl = t.format === 'doubles' || t.format === 'mixed_doubles';
-    if (t.max_participants) info += tdInfoRow('👥', _isDbl ? I18N.t('td.pairs') : I18N.t('td.participants'), t.max_participants + ' ' + I18N.t('td.max'));
+    var slotsStat = window.KSLT_SLOTS && KSLT_SLOTS.stat(t, t._taken, t.status);
+    if (slotsStat) info += tdInfoRow('👥', slotsStat.label, String(slotsStat.value));
     if (t.registration_end) {
       var dl = new Date(t.registration_end + 'T00:00:00');
       info += tdInfoRow('⏰', I18N.t('td.regUntil'), dl.getDate() + ' ' + I18N.month(dl.getMonth()) + ' ' + dl.getFullYear());

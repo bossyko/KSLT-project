@@ -294,12 +294,15 @@
             client.from('coaches').select('*').order('created_at', { ascending: false })
                 .then(function(res) {
                     if (res.data && res.data.length) {
+                        // База — единственный источник. Заготовки из
+                        // data/coaches-data.js остаются на случай, когда она
+                        // недоступна: иначе к настоящим тренерам подмешиваются
+                        // выдуманные, которых нет в админке
                         var dbCoaches = res.data.map(function(row) { return mapDbCoach(row); });
-                        var sorted = sortPromotedFirst(dbCoaches);
-                        sorted.forEach(function(c) { allData.push(c); });
+                        sortPromotedFirst(dbCoaches).forEach(function(c) { allData.push(c); });
+                    } else {
+                        staticData.forEach(function(c) { allData.push(c); });
                     }
-                    // Append static data
-                    staticData.forEach(function(c) { allData.push(c); });
                     init();
                 });
         } else {

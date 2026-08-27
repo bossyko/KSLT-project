@@ -70,6 +70,15 @@
                 L.trnStatUpcoming + ': <span id="adTrnStatUpcoming">...</span>' +
                 '<span style="color:var(--text-dim);">|</span>' +
                 L.trnStatCompleted + ': <span id="adTrnStatCompleted">...</span>' +
+                '<span style="color:var(--text-dim);">|</span>' +
+                L.trnStatCancelled + ': <span id="adTrnStatCancelled">...</span>' +
+                // Черновики в общий счёт не идут: турнира ещё нет, его никто
+                // не видел. Но и прятать совсем нельзя — про недоделанное
+                // забывают, поэтому показываем отдельно и только когда есть
+                '<span id="adTrnStatDraftsWrap" style="display:none;">' +
+                    '<span style="color:var(--text-dim);">|</span>' +
+                    L.trnStatDrafts + ': <span id="adTrnStatDrafts">0</span>' +
+                '</span>' +
             '</div>' +
             '<div class="ad-trn-stats-grid">' +
                 '<div class="ad-crt-stat-card ad-stat-collapsible">' +
@@ -222,22 +231,38 @@
     }
 
     function updateTournamentStats() {
-        var total = trnAllData.length;
+        // «Всего» — заведённые и объявленные турниры: предстоящие плюс
+        // прошедшие плюс отменённые. Черновики сюда не входят, поэтому
+        // три числа справа всегда складываются в общее — расхождение
+        // сразу видно и означает ошибку, а не хитрый подсчёт.
+        // Раньше «Всего» брало вообще все строки, вместе с черновиками
         var upcoming = 0;
         var completed = 0;
+        var cancelled = 0;
+        var drafts = 0;
         trnAllData.forEach(function(t) {
             var isDraft = !t.published_at && (!t.status || t.status === 'upcoming');
-            if (isDraft) return; // skip drafts
+            if (isDraft) { drafts++; return; }
             if (t.status === 'completed') { completed++; return; }
-            if (t.status !== 'cancelled') upcoming++;
+            if (t.status === 'cancelled') { cancelled++; return; }
+            // Всё остальное ещё не сыграно: объявлен, запись открыта,
+            // запись закрыта, идёт прямо сейчас
+            upcoming++;
         });
+        var total = upcoming + completed + cancelled;
 
         var elTotal = document.getElementById('adTrnStatTotal');
         var elUp = document.getElementById('adTrnStatUpcoming');
         var elComp = document.getElementById('adTrnStatCompleted');
+        var elCanc = document.getElementById('adTrnStatCancelled');
+        var elDrafts = document.getElementById('adTrnStatDrafts');
+        var elDraftsWrap = document.getElementById('adTrnStatDraftsWrap');
         if (elTotal) elTotal.textContent = total;
         if (elUp) elUp.textContent = upcoming;
         if (elComp) elComp.textContent = completed;
+        if (elCanc) elCanc.textContent = cancelled;
+        if (elDrafts) elDrafts.textContent = drafts;
+        if (elDraftsWrap) elDraftsWrap.style.display = drafts > 0 ? '' : 'none';
 
         var cards = [
             { gender: 'men', format: 'singles', totalId: 'adTrnTotalMS', bodyId: 'adTrnBodyMS' },
@@ -1313,6 +1338,9 @@
         };
     }
 
+    // Сколько суток заявка может ждать решения, прежде чем её пометят
+    var STALE_REG_DAYS = 3;
+
     // ---- Load & Render Registrations Block on Tournament Form ----
     async function loadTrnRegistrations(tournamentId) {
         var block = document.getElementById('adTrnRegBlock');
@@ -1330,6 +1358,12 @@
         var mainDraw = active.slice(0, maxPart);
         var waitlist = active.slice(maxPart);
 
+        var staleEdge = Date.now() - STALE_REG_DAYS * 24 * 60 * 60 * 1000;
+        var staleCount = active.filter(function(r) {
+            return r.status === 'pending' && r.registered_at &&
+                   new Date(r.registered_at).getTime() < staleEdge;
+        }).length;
+
         var thName = isEn ? 'Name' : 'ФИО';
         var thCat = isEn ? 'Category' : 'Категория';
         var thDate = isEn ? 'Date' : 'Дата';
@@ -1345,7 +1379,9 @@
 
         // Left column: Main Draw
         html += '<div>';
-        html += '<h4 class="ad-reg-section-title">' + L.regMainDraw + ' <span class="ad-badge">' + mainDraw.length + '/' + maxPart + '</span></h4>';
+        html += '<h4 class="ad-reg-section-title">' + L.regMainDraw + ' <span class="ad-badge">' + mainDraw.length + '/' + maxPart + '</span>' +
+            (staleCount > 0 ? ' <span style="color:#FFB020;font-size:0.8rem;font-weight:500;">\u23F3 ' + L.regStaleCount.replace('{n}', staleCount) + '</span>' : '') +
+        '</h4>';
         if (mainDraw.length > 0) {
             html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
                 regTHead.replace('GRP', 'main') +
@@ -1428,17 +1464,26 @@
             ? catParts.slice(1).map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-')
             : catId || '—';
         var regDT = '';
+        var stale = false;
         if (reg.registered_at) {
             var d = new Date(reg.registered_at);
             regDT = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
                 ' <span style="color:var(--text-dim);">' +
                 d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
+            // Заявка держит место в сетке с момента подачи. Если её долго не
+            // разбирать, турнир выглядит полным, а живых участников мало —
+            // поэтому нерешённые старше трёх суток помечаем
+            stale = reg.status === 'pending' &&
+                    (Date.now() - d.getTime()) > STALE_REG_DAYS * 24 * 60 * 60 * 1000;
         }
-        return '<tr>' +
+        var staleMark = stale
+            ? ' <span title="' + L.regStaleHint + '" style="color:#FFB020;">\u23F3</span>'
+            : '';
+        return '<tr' + (stale ? ' style="background:rgba(255,176,32,0.07);"' : '') + '>' +
             '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"></td>' +
             '<td>' + num + '</td>' +
             '<td>' + photoHtml + '</td>' +
-            '<td>' + A.esc(pName) + '</td>' +
+            '<td>' + A.esc(pName) + staleMark + '</td>' +
             '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
             '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
         '</tr>';

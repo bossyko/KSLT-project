@@ -372,9 +372,13 @@
                     var regCounts = {};
                     try {
                         if (tIds.length > 0) {
+                            // Считаем только одобренные заявки. Раньше в счёт шли
+                            // все подряд — снявшиеся, отклонённые, лист ожидания,
+                            // и на карточке стояло больше народу, чем играло
                             var regsResult = await client.from('tournament_registrations')
                                 .select('tournament_id')
-                                .in('tournament_id', tIds);
+                                .in('tournament_id', tIds)
+                                .in('status', (window.KSLT_SLOTS || {}).MAIN_DRAW || ['approved', 'pending', 'draw']);
                             if (regsResult.data) {
                                 regsResult.data.forEach(function(r) {
                                     regCounts[r.tournament_id] = (regCounts[r.tournament_id] || 0) + 1;
@@ -443,6 +447,14 @@
                 format: formatLabels[t.format] || t.format || '',
                 _rawFormat: t.format || '',
                 participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
+                // Свободные места считает общий модуль — он же на главной
+                // и на странице турнира, поэтому цифры везде совпадают
+                slots: window.KSLT_SLOTS
+                    ? window.KSLT_SLOTS.line(t, regCounts[t.id] || 0, cardStatus)
+                    : null,
+                slotsStat: window.KSLT_SLOTS
+                    ? window.KSLT_SLOTS.stat(t, regCounts[t.id] || 0, cardStatus)
+                    : null,
                 prize: t.prize_fund || '',
                 feeMember: t.fee_member != null ? Number(t.fee_member) : null,
                 feeGuest: t.fee_guest != null ? Number(t.fee_guest) : null,
@@ -628,7 +640,7 @@
                 '<div class="to-featured-details">' +
                     (t.regLine ? '<div class="to-featured-detail"><span class="to-label">' + (isEn ? 'Reg' : (isKg ? 'Кат' : 'Рег')) + '</span><span class="to-value">' + t.regLine + '</span></div>' : '') +
                     (t.format ? '<div class="to-featured-detail"><span class="to-label">' + L.format + '</span><span class="to-value">' + t.format + '</span></div>' : '') +
-                    (t.participants ? '<div class="to-featured-detail"><span class="to-label">' + ((t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles') ? L.pairs : L.participants) + '</span><span class="to-value">' + t.participants + '</span></div>' : '') +
+                    (t.slotsStat ? '<div class="to-featured-detail"><span class="to-label">' + t.slotsStat.label + '</span><span class="to-value' + (t.slotsStat.tight ? ' to-slots-tight' : '') + '">' + t.slotsStat.value + '</span></div>' : '') +
                     (t.prize ? '<div class="to-featured-detail"><span class="to-label">' + L.prize + '</span><span class="to-value prize">' + t.prize + '</span></div>' : '') +
                     feeDetail(t) +
                 '</div>' +
@@ -660,6 +672,7 @@
                 '<div class="to-compact-sub">' +
                     '<span>' + pinSvg + ' ' + t.location + '</span>' +
                     (t.regLine ? '<span class="to-compact-reg">' + (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + t.regLine + '</span>' : '') +
+                    (t.slots ? '<span class="to-compact-slots' + (t.slots.tight ? ' to-slots-tight' : '') + '">' + t.slots.text + '</span>' : '') +
                 '</div>' +
             '</div>' +
             '<div class="to-compact-right">' +

@@ -1,8 +1,14 @@
 // ============================================
-// KSLT — Delete Account Edge Function
-// Self-service account deletion by authenticated user
-// Soft-deletes profile, cleans up related data,
-// then hard-deletes auth user via service role
+// KSLT — управление своей учётной записью
+//
+// Два действия, оба от имени самого человека:
+//   delete  — пометить на удаление. Запись пропадает из общих списков,
+//             но 30 дней её можно вернуть: люди передумывают, а стёртое
+//             не восстановишь. По истечении срока убирает уборщик.
+//   restore — вернуть помеченную обратно, пока срок не вышел.
+//
+// Раньше здесь было одно действие: пометка и сразу же безвозвратное
+// удаление учётной записи входа. Вернуться было нельзя.
 // ============================================
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -11,6 +17,9 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+// Сколько дней учётная запись ждёт перед окончательным удалением
+const GRACE_DAYS = 30
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -43,13 +52,38 @@ Deno.serve(async (req) => {
 
     const userId = user.id
 
+    let body: Record<string, unknown> = {}
+    try { body = await req.json() } catch { /* тело необязательно */ }
+    const action = String(body.action || 'delete')
+
     // Service role client for privileged operations
     const db = createClient(supabaseUrl, serviceKey)
 
-    // 1. Soft-delete profile (set deleted_at timestamp)
+    if (action === 'restore') {
+      // Возвращаем только пока срок не вышел. После него записи уже нет,
+      // и восстанавливать нечего
+      const { data, error } = await db.from('profiles')
+        .update({ deleted_at: null })
+        .eq('id', userId)
+        .not('deleted_at', 'is', null)
+        .select('id')
+      if (error) {
+        console.error('Restore profile error:', error)
+        return json({ error: 'Failed to restore profile' }, 500)
+      }
+      if (!data || data.length === 0) {
+        return json({ error: 'Nothing to restore' }, 404)
+      }
+      return json({ success: true, action: 'account_restored' })
+    }
+
+    // ---- Пометка на удаление ----
+    const now = new Date()
+    const purgeAt = new Date(now.getTime() + GRACE_DAYS * 24 * 60 * 60 * 1000)
+
     const { error: profileErr } = await db
       .from('profiles')
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: now.toISOString() })
       .eq('id', userId)
 
     if (profileErr) {
@@ -57,7 +91,8 @@ Deno.serve(async (req) => {
       return json({ error: 'Failed to update profile' }, 500)
     }
 
-    // 2. Delete notification preferences
+    // Уведомления выключаем сразу: человек попросил его не беспокоить,
+    // а не «беспокоить ещё месяц». Настройки восстановит сам, если вернётся
     const { error: notifErr } = await db
       .from('notification_preferences')
       .delete()
@@ -65,29 +100,22 @@ Deno.serve(async (req) => {
 
     if (notifErr) {
       console.error('Notification preferences cleanup error:', notifErr)
-      // Non-critical — continue with deletion
+      // Не критично — продолжаем
     }
 
-    // 3. Delete loyalty transactions
-    const { error: loyaltyErr } = await db
-      .from('loyalty_transactions')
-      .delete()
-      .eq('profile_id', userId)
+    // Учётную запись входа не трогаем: без неё человек не сможет вернуться,
+    // и вся отсрочка теряет смысл. Её удалит уборщик, когда выйдет срок.
+    // Выходим со всех устройств — на сайте это выглядит как обычный выход
+    await db.auth.admin.signOut(userId, 'global').catch(function (e: unknown) {
+      console.error('Sign out error:', e)
+    })
 
-    if (loyaltyErr) {
-      console.error('Loyalty transactions cleanup error:', loyaltyErr)
-      // Non-critical — continue with deletion
-    }
-
-    // 4. Hard-delete auth user (removes from auth.users)
-    const { error: deleteErr } = await db.auth.admin.deleteUser(userId)
-
-    if (deleteErr) {
-      console.error('Auth user delete error:', deleteErr)
-      return json({ error: 'Failed to delete auth user' }, 500)
-    }
-
-    return json({ success: true, action: 'account_deleted' })
+    return json({
+      success: true,
+      action: 'account_marked_for_deletion',
+      purge_at: purgeAt.toISOString(),
+      grace_days: GRACE_DAYS
+    })
 
   } catch (err) {
     console.error('Edge function error:', err)

@@ -46,6 +46,9 @@
       .then(function(r) {
         if (r.data) {
           AUTH.currentProfile = r.data;
+          // Учётная запись помечена на удаление — предлагаем вернуть,
+          // пока не вышли 30 дней
+          if (window.KSLT_ACCOUNT_RESTORE) window.KSLT_ACCOUNT_RESTORE.check(r.data);
           // Update last_seen
           supabaseClient.from('profiles')
             .update({ last_seen: new Date().toISOString() })

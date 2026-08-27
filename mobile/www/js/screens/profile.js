@@ -1104,7 +1104,18 @@
 
       var oldPhone = _profile.phone || '';
 
-      supabaseClient.from('profiles')
+      // Занятый номер ловим до сохранения: в базе запрет стоит на едином
+      // виде номера, и её ошибка выглядела бы как «Ошибка сохранения»
+      var phoneCheck = phone
+        ? supabaseClient.rpc('is_phone_taken', { p_phone: phone })
+        : Promise.resolve({ data: false });
+
+      phoneCheck.then(function(chk) {
+        if (chk && chk.data === true) {
+          window.KSLT_APP.toast(I18N.t('profile.phoneTaken'));
+          return null;
+        }
+        return supabaseClient.from('profiles')
         .update({
           full_name: fullName,
           phone: phone,
@@ -1119,10 +1130,13 @@
           instagram: instagram,
           telegram: telegram
         })
-        .eq('id', _profile.id)
+        .eq('id', _profile.id);
+      })
         .then(function(r) {
+          if (!r) return;   // номер занят — сообщение уже показано
           if (r.error) {
-            window.KSLT_APP.toast(I18N.t('profile.savedErr'));
+            var dup = r.error.code === '23505' && String(r.error.message || '').indexOf('phone') !== -1;
+            window.KSLT_APP.toast(I18N.t(dup ? 'profile.phoneTaken' : 'profile.savedErr'));
           } else {
             _profile.full_name = fullName;
             _profile.phone = phone;
@@ -1505,7 +1519,8 @@
             'Authorization': 'Bearer ' + token,
             'apikey': SUPABASE_ANON_KEY,
             'Content-Type': 'application/json'
-          }
+          },
+          body: JSON.stringify({ action: 'delete' })
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {

@@ -87,7 +87,7 @@
         dangerZone: 'Коркунучтуу аймак',
         deleteAccount: 'Аккаунтту жок кылуу',
         deleteLoses: ['Рейтингдеги орун жана топтолгон упайлар', 'Мелдештердин жана матчтардын тарыхы', 'Топтолгон упайлар менен жеңилдиктер', 'Тиркеме менен сайттагы аккаунт'],
-        deleteConfirm: 'Ишенесизби? Бул аракетти кайтаруу мүмкүн эмес.',
+        deleteConfirm: 'Аккаунт жалпы тизмелерден дароо жоголот, бирок 30 күн ичинде кайтарууга болот: кириңиз — калыбына келтирүүнү сунуштайбыз. Мөөнөт бүткөндөн кийин биротоло өчүрүлөт.',
         errPwMatch: 'Сыр сөздөр дал келбейт',
         errPwShort: 'Сыр сөз кеминде 8 белгиден турушу керек',
         pwRuleLength: 'Кеминде 8 белги',
@@ -340,7 +340,7 @@
         dangerZone: 'Danger Zone',
         deleteAccount: 'Delete Account',
         deleteLoses: ['Your ranking position and points', 'Tournament and match history', 'Loyalty points and discounts', 'Your account on the site and in the app'],
-        deleteConfirm: 'Are you sure? This cannot be undone.',
+        deleteConfirm: 'Your account disappears from public lists right away, but you have 30 days to change your mind: sign in and we will offer to restore it. After that it is erased for good.',
         errPwMatch: 'Passwords do not match',
         errPwShort: 'Password must be at least 8 characters',
         pwRuleLength: 'At least 8 characters',
@@ -593,7 +593,7 @@
         dangerZone: 'Опасная зона',
         deleteAccount: 'Удалить аккаунт',
         deleteLoses: ['Место в рейтинге и набранные очки', 'История турниров и матчей', 'Накопленные баллы и скидки', 'Аккаунт на сайте и в приложении'],
-        deleteConfirm: 'Вы уверены? Это действие нельзя отменить.',
+        deleteConfirm: 'Аккаунт исчезнет из общих списков сразу, но 30 дней его можно вернуть: войдите — и мы предложим восстановить. По истечении срока он удаляется насовсем.',
         errPwMatch: 'Пароли не совпадают',
         errPwShort: 'Пароль должен быть не менее 8 символов',
         pwRuleLength: 'Минимум 8 символов',
@@ -3659,6 +3659,22 @@
         btn.textContent = L.saving;
         btn.disabled = true;
 
+        // Занятый номер ловим до сохранения. В базе запрет стоит на едином
+        // виде номера, а не на написании: «0700123456» и «+996 700 12-34-56» —
+        // один и тот же телефон, и ошибка базы показалась бы человеку
+        // непонятной строкой про индекс
+        if (phone) {
+            try {
+                var taken = await client.rpc('is_phone_taken', { p_phone: phone });
+                if (taken.data === true) {
+                    showMessage('profileMessage', L.errPhoneTaken, true);
+                    btn.textContent = L.save;
+                    btn.disabled = false;
+                    return;
+                }
+            } catch (e) { /* проверка не прошла — запрет базы всё равно сработает */ }
+        }
+
         // Track changed sensitive fields for security notification
         var oldPhone = (window.ksltProfile && window.ksltProfile.phone) || '';
         var oldEmail = (window.ksltUser && window.ksltUser.email) || '';
@@ -5482,7 +5498,8 @@
                         'Authorization': 'Bearer ' + token,
                         'Content-Type': 'application/json',
                         'apikey': SUPABASE_ANON_KEY
-                    }
+                    },
+                    body: JSON.stringify({ action: 'delete' })
                 });
 
                 var data = await resp.json();

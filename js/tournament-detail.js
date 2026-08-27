@@ -1152,6 +1152,24 @@ function computeStatus(regStart, regEnd, dateStart, dateEnd) {
     return 'upcoming';
 }
 
+/**
+ * Места в шапке турнира. Пока свободных много — показываем вместимость,
+ * с двух третей заполнения переходим на остаток: та же граница, что на
+ * карточках, чтобы человек не видел на странице другую цифру.
+ */
+function heroSlots(t, registrations, L) {
+    if (!window.KSLT_SLOTS) return '';
+    var main = window.KSLT_SLOTS.MAIN_DRAW;
+    var taken = (registrations || []).filter(function(r) { return main.indexOf(r.status) !== -1; }).length;
+    var st = window.KSLT_SLOTS.stat(t, taken, t.status);
+    if (!st) return '';
+
+    return '<div class="hero-stat' + (st.tight ? ' hero-stat-tight' : '') + '">' +
+               '<span class="hero-stat-value">' + st.value + '</span>' +
+               '<span class="hero-stat-label">' + st.label + '</span>' +
+           '</div>';
+}
+
 function renderSupabaseTournament(t, matches, registrations, playersMap, courtData, h2hMap) {
     h2hMap = h2hMap || {};
     matches = matches || [];
@@ -1319,10 +1337,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     '</div>' +
                 '</div>' +
                 '<div class="td-hero-stats">' +
-                    '<div class="hero-stat">' +
-                        '<span class="hero-stat-value">' + ((t.max_participants || 0) - (t.reserved_spots || 0) || t.max_participants || '—') + '</span>' +
-                        '<span class="hero-stat-label">' + ((t.format === 'doubles' || t.format === 'mixed_doubles') ? L.pairs : L.participants) + '</span>' +
-                    '</div>' +
+                    heroSlots(t, registrations, L) +
                     // Призовой фонд без суммы раньше показывался прочерком —
                     // будто данные потерялись. Нет суммы — нет и блока
                     (t.prize_fund ? '<div class="hero-stat">' +

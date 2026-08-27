@@ -99,9 +99,35 @@
         allData = allData.concat(newData);
       }
 
-      render();
-      if (cb) cb();
+      // Заявки грузим отдельно: в самой записи турнира их нет, а без них
+      // на карточке стояло «0/16» — счётчик не работал вовсе
+      loadRegCounts(newData, function() {
+        render();
+        if (cb) cb();
+      });
     });
+  }
+
+  /** Считает занятые места в основной сетке по списку турниров. */
+  function loadRegCounts(items, done) {
+    var ids = (items || []).map(function(t) { return t.id; });
+    if (!ids.length || !window.KSLT_SLOTS) { done(); return; }
+
+    supabaseClient.from('tournament_registrations')
+      .select('tournament_id')
+      .in('tournament_id', ids)
+      .in('status', KSLT_SLOTS.MAIN_DRAW)
+      .then(function(r) {
+        var taken = {};
+        (r.data || []).forEach(function(x) {
+          taken[x.tournament_id] = (taken[x.tournament_id] || 0) + 1;
+        });
+        allData.forEach(function(t) {
+          if (taken[t.id] != null) t._taken = taken[t.id];
+          else if (t._taken == null && ids.indexOf(t.id) !== -1) t._taken = 0;
+        });
+        done();
+      });
   }
 
   // ============================
@@ -185,7 +211,8 @@
 
     // Details row
     var details = [];
-    if (t.max_participants) details.push('👥 ' + (t.registered_count || 0) + '/' + t.max_participants);
+    var slots = window.KSLT_SLOTS && KSLT_SLOTS.line(t, t._taken, t.status);
+    if (slots) details.push('👥 ' + esc(slots.text));
     if (t.prize_fund && t.prize_fund !== '0') details.push('💰 ' + esc(t.prize_fund) + ' сом');
     if (formatText) details.push(formatText);
 
@@ -361,9 +388,19 @@
     if (!overlay) return;
     var monthsLow = getMonths().map(function(m) { return m.toLowerCase(); });
 
-    supabaseClient.from('tournaments').select('*').eq('id', tid).single().then(function(r) {
+    Promise.all([
+      supabaseClient.from('tournaments').select('*').eq('id', tid).single(),
+      // Занятые места в основной сетке — иначе в шапке стоит вместимость
+      // из формы создания, которая не меняется весь набор
+      supabaseClient.from('tournament_registrations')
+        .select('id', { count: 'exact', head: true })
+        .eq('tournament_id', tid)
+        .in('status', (window.KSLT_SLOTS || {}).MAIN_DRAW || ['approved', 'pending', 'draw'])
+    ]).then(function(res) {
+      var r = res[0];
       if (!r.data) return;
       var t = r.data;
+      t._taken = res[1] && res[1].count != null ? res[1].count : 0;
       var d = new Date(t.date_start);
       var dateStr = d.getDate() + ' ' + monthsLow[d.getMonth()] + ' ' + d.getFullYear();
 
@@ -373,12 +410,14 @@
       var statusMap = { upcoming: I18N.t('tournaments.registration'), live: I18N.t('tournaments.inProgress'), completed: I18N.t('tournaments.finished') };
       if (t.status) badges += '<span class="td-badge status-' + t.status + '">' + (statusMap[t.status] || t.status) + '</span>';
       document.getElementById('tdBadges').innerHTML = badges;
-      document.getElementById('tdDetails').textContent = dateStr + (t.location ? ' · ' + t.location : '') + (t.max_participants ? ' · ' + t.max_participants + ' игроков' : '');
+      var slotsLine = window.KSLT_SLOTS && KSLT_SLOTS.line(t, t._taken, t.status);
+      document.getElementById('tdDetails').textContent = dateStr + (t.location ? ' · ' + t.location : '') + (slotsLine ? ' · ' + slotsLine.text : '');
 
       var info = '<div class="td-info-section">';
       info += tdInfoRow('📅', 'Дата', dateStr + (t.start_time ? ', ' + t.start_time : ''));
       if (t.location) info += tdInfoRow('📍', 'Место', t.location);
-      if (t.max_participants) info += tdInfoRow('👥', 'Участники', t.max_participants + ' макс.');
+      var slotsStat = window.KSLT_SLOTS && KSLT_SLOTS.stat(t, t._taken, t.status);
+      if (slotsStat) info += tdInfoRow('👥', slotsStat.label, String(slotsStat.value));
       if (t.registration_end) {
         var dl = new Date(t.registration_end);
         info += tdInfoRow('⏰', 'Регистрация до', dl.getDate() + ' ' + monthsLow[dl.getMonth()] + ' ' + dl.getFullYear());

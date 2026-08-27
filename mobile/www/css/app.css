@@ -2828,7 +2828,7 @@ select:-webkit-autofill {
 }
 .otp-overlay.open { opacity: 1; visibility: visible; }
 .otp-modal {
-  background: var(--card-bg); border-radius: 16px; padding: 28px 24px;
+  background: var(--bg-card); border-radius: 16px; padding: 28px 24px;
   width: 90%; max-width: 360px; text-align: center;
   transform: scale(0.9); transition: transform 0.3s ease;
 }
@@ -2894,7 +2894,7 @@ select:-webkit-autofill {
 }
 .otp-pw-overlay.open { opacity: 1; visibility: visible; }
 .otp-pw-modal {
-  background: var(--card-bg); border-radius: 16px; padding: 28px 24px;
+  background: var(--bg-card); border-radius: 16px; padding: 28px 24px;
   width: 90%; max-width: 360px;
   transform: scale(0.9); transition: transform 0.3s ease;
 }
@@ -4798,4 +4798,27 @@ select.prof-field-input { color: var(--text); }
 @keyframes achFall {
   from { transform: translateY(0) rotate(0); opacity: 1 }
   to   { transform: translateY(400px) rotate(540deg); opacity: 0 }
+}
+
+/* Окно возврата учётной записи, помеченной на удаление.
+   Свои классы, а не общие с окном ввода кода: два окна с одинаковыми
+   именами путались друг с другом при поиске по разметке */
+.ar-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85); z-index: 1200;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: all 0.3s ease;
+}
+.ar-overlay.open { opacity: 1; visibility: visible; }
+.ar-modal {
+  background: var(--bg-card); border-radius: 16px; padding: 28px 24px;
+  width: 90%; max-width: 360px; text-align: center;
+  transform: scale(0.9); transition: transform 0.3s ease;
+}
+.ar-overlay.open .ar-modal { transform: scale(1); }
+.ar-modal-title {
+  font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 0 0 6px;
+}
+.ar-modal-subtitle {
+  font-size: 13px; color: var(--text-sec); margin: 0 0 20px; line-height: 1.4;
 }

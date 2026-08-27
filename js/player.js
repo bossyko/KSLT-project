@@ -222,9 +222,12 @@
         try {
             var res = await client.from('profiles')
                 .select('phone, show_phone, whatsapp_phone, show_whatsapp, ' +
-                        'telegram, show_telegram, instagram, show_instagram')
+                        'telegram, show_telegram, instagram, show_instagram, deleted_at')
                 .eq('player_id', playerId)
                 .maybeSingle();
+            // Человек уходит из клуба — контактов не даём, даже если
+            // разрешения на показ остались включёнными
+            if (res.data && res.data.deleted_at) return null;
             return res.data || null;
         } catch(e) { return null; }
     }
@@ -647,6 +650,13 @@
 
         hero += '<div class="pp-info">';
         hero += '<h2 class="pp-name">' + player.name + '</h2>';
+        // Карточка остаётся и после ухода человека: результаты и очки
+        // принадлежат турнирам, где он играл. Но связи с учётной записью
+        // больше нет — об этом и говорит метка
+        if (player.account_deleted_at) {
+            var goneText = isEn ? 'Account deleted' : (isKg ? 'Аккаунт өчүрүлгөн' : 'Аккаунт удалён');
+            hero += '<div class="pp-account-gone">' + goneText + '</div>';
+        }
         hero += '<div class="pp-meta">';
         if (player.country) hero += '<span class="pp-meta-country">' + CU.renderCountry(CU.normalizeCountry(player.country), lang, true) + '</span>';
         if (player.online) {
@@ -1735,7 +1745,8 @@
                             mixed_losses: p.mixed_losses || 0,
                             bio: p.bio || '',
                             bio_en: p.bio_en || '',
-                            bio_kg: p.bio_kg || ''
+                            bio_kg: p.bio_kg || '',
+                            account_deleted_at: p.account_deleted_at || null
                         },
                         category: { name: catName || '\u2014', players: [] },
                         categories: myCats,

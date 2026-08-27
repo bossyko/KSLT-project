@@ -430,6 +430,13 @@
     font-family: inherit;
     cursor: pointer;
     transition: all 0.2s;
+    /* Длинные фамилии распирали кнопку, и пара кнопок вылезала за край
+       карточки: по умолчанию элемент в строке не сжимается меньше своего
+       содержимого. Теперь имя обрезается многоточием */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .bo-vote-btn:hover:not(:disabled) {

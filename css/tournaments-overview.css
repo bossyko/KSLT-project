@@ -603,6 +603,17 @@
     font-size: 0.72rem;
 }
 
+.to-compact-slots {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* Осталась треть мест или запись закрыта — цифру видно сразу */
+.to-slots-tight {
+    color: #FFB020 !important;
+    font-weight: 600;
+}
+
 .to-compact-right {
     display: flex;
     flex-direction: column;

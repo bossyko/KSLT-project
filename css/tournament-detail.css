@@ -1881,3 +1881,8 @@ tr.td-rr-row-dimmed {
     background: rgba(204, 255, 0, 0.08) !important;
 }
 
+
+/* Мест осталось мало — цифра в шапке турнира становится предупреждением */
+.hero-stat-tight .hero-stat-value {
+    color: #FFB020;
+}
