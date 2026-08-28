@@ -217,7 +217,11 @@
             message: `${senderName} предлагает сыграть в теннис`,
             type: 'challenges',
             audience: 'user',
-            user_id: receiverProfile.id
+            user_id: receiverProfile.id,
+            // Запись в колокольчике уже заведена выше — со своими кнопками.
+            // Без этого рядом с ней вставала бы вторая, пустая
+            skip_log: true,
+            action_type: 'game_invite'
           })
         })
       } catch { /* доставка не должна ронять само приглашение */ }

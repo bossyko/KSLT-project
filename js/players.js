@@ -165,10 +165,14 @@
      * Pro-Masters и Challengers женскими не бывают, и показывать их пустыми
      * нельзя: человек решит, что туда просто некого записать.
      */
-    var WOMEN_CATEGORIES = ['women-masters', 'women-tour', 'women-futures'];
-
+    // Какие разряды у женщин — в общем своде правил (js/kslt-rules.js),
+    // оттуда же их берёт приложение. Раньше список лежал здесь, а в
+    // приложении свой, и они разошлись
     function isWomenCategory(key) {
-        return WOMEN_CATEGORIES.indexOf(key) !== -1;
+        var R = window.KSLT_RULES;
+        if (!R) return false;
+        var parts = R.splitKey(key);
+        return parts.gender === 'women' && R.allowsCategory('women', parts.id);
     }
 
     function getCategory(tab) {

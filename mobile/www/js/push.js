@@ -53,8 +53,19 @@
 
     // Tapped notification (app was in background)
     plugin.addListener('pushNotificationActionPerformed', function(action) {
-      var data = action.notification && action.notification.data;
-      if (data && data.screen && window.KSLT_APP) {
+      var data = (action.notification && action.notification.data) || {};
+
+      // Приглашение поиграть — открываем сразу список, а не профиль: человек
+      // нажал на уведомление, чтобы ответить, а не чтобы искать, где ответить
+      if (data.action_type && data.action_type.indexOf('game_invite') === 0) {
+        if (window.KSLT_APP) window.KSLT_APP.switchScreen('profile');
+        setTimeout(function() {
+          if (window.KSLT_INVITES) window.KSLT_INVITES.openList();
+        }, 300);
+        return;
+      }
+
+      if (data.screen && window.KSLT_APP) {
         window.KSLT_APP.switchScreen(data.screen);
       }
     });

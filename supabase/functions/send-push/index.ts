@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // 1. JWT Auth — admin only
+    // 1. Кто зовёт: админ с сайта или своя же функция со служебным ключом
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return json({ error: 'Unauthorized' }, 401)
@@ -39,29 +39,50 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } }
-    })
-
-    const { data: { user }, error: authErr } = await userClient.auth.getUser()
-    if (authErr || !user) {
-      return json({ error: 'Unauthorized' }, 401)
-    }
-
     const db = createClient(supabaseUrl, serviceKey)
 
-    const { data: caller } = await db
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    // Свои же функции зовут отсюда push: приглашение поиграть, ответ на него,
+    // запись на турнир, сброс сезона. Они ходят со служебным ключом, а он не
+    // принадлежит никакому человеку — getUser() на нём падает, и все эти
+    // оповещения молча упирались в 401. Пропускаем служебный ключ первым,
+    // как это давно сделано в send-email
+    const isInternal = !!serviceKey && authHeader.includes(serviceKey)
 
-    if (!caller || caller.role !== 'admin') {
-      return json({ error: 'Forbidden: admin only' }, 403)
+    // Кто отправил — идёт в журнал рассылок. У служебного вызова человека
+    // нет: рассылку завела сама платформа, а не администратор
+    let callerId: string | null = null
+
+    if (!isInternal) {
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } }
+      })
+
+      const { data: { user }, error: authErr } = await userClient.auth.getUser()
+      if (authErr || !user) {
+        return json({ error: 'Unauthorized' }, 401)
+      }
+
+      const { data: caller } = await db
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      // Рассылку всему клубу из админки по-прежнему шлёт только админ
+      if (!caller || caller.role !== 'admin') {
+        return json({ error: 'Forbidden: admin only' }, 403)
+      }
+
+      callerId = user.id
     }
 
     // 2. Parse body
-    const { title, message, type, audience, user_id } = await req.json()
+    // skip_log — для тех, кто уже завёл запись в колокольчике сам: приглашение
+    // поиграть пишет её со своими кнопками «Принять/Отклонить», и вторая,
+    // пустая, висела бы рядом дубликатом.
+    // action_type доезжает до приложения в теле push: по нему нажатие на
+    // уведомление открывает нужный экран, а не просто запускает программу
+    const { title, message, type, audience, user_id, skip_log, action_type } = await req.json()
 
     if (!title || !message || !audience) {
       return json({ error: 'Missing title, message, or audience' }, 400)
@@ -139,7 +160,7 @@ Deno.serve(async (req) => {
     const { data: logRow } = await db
       .from('push_log')
       .insert({
-        admin_id: user.id,
+        admin_id: callerId,
         title,
         message,
         type: type || 'system',
@@ -162,7 +183,9 @@ Deno.serve(async (req) => {
       push_id: pushId
     }))
 
-    await db.from('notification_log').insert(notifRows)
+    if (!skip_log) {
+      await db.from('notification_log').insert(notifRows)
+    }
 
     // 6. Send FCM push to recipients with fcm_token
     let fcmSent = 0
@@ -190,7 +213,9 @@ Deno.serve(async (req) => {
                 message: {
                   token: p.fcm_token,
                   notification: { title, body: message },
-                  data: { type: type || 'system' }
+                  data: action_type
+                    ? { type: type || 'system', action_type: String(action_type) }
+                    : { type: type || 'system' }
                 }
               })
             })

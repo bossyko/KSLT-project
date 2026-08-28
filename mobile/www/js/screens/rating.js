@@ -8,7 +8,8 @@
 
   var R = window.KSLT_RATING = {};
   var allPlayers = [];
-  var categoriesFromDB = [];
+  var allCategories = [];      // всё, что лежит в таблице categories
+  var categoriesFromDB = [];   // из них — положенные текущему полу
 
   var currentGender = 'men';
   var currentCatId = 'promasters';
@@ -16,6 +17,26 @@
   var GUEST_VISIBLE = 5;
   var GUEST_BLUR = 3;
   var listenersReady = false;
+  // Сколько строк показано сейчас. Раньше рисовали всех разом — под три
+  // сотни человек на телефоне, и список заметно подвисал
+  var shown = 0;
+
+  /**
+   * Оставляем разряды, положенные текущему полу. Если выбранного среди них
+   * нет — переходим на первый: иначе после переключения на женщин экран
+   * оставался в мужском разряде и показывал пустоту.
+   */
+  function applyCategoriesForGender() {
+    var RULES = window.KSLT_RULES;
+    categoriesFromDB = RULES
+      ? RULES.categoriesFor(currentGender, allCategories)
+      : (allCategories || []).filter(function(c) {
+          return c.is_rating !== false && c.id !== 'friendly';
+        });
+
+    var found = categoriesFromDB.some(function(c) { return c.id === currentCatId; });
+    if (!found && categoriesFromDB.length) currentCatId = categoriesFromDB[0].id;
+  }
 
   // Gender options
   var GENDERS = [
@@ -43,16 +64,14 @@
       .order('sort_order', { ascending: false })
       .then(function(r) {
         if (r.error) { console.error('Categories load error:', r.error); return; }
-        // Нерейтинговые категории в рейтинг не идут. Раньше их узнавали по
-        // слову «friendly» в названии — переименование ломало проверку.
-        // Признак по идентификатору оставлен запасным: он работает и до того,
-        // как в базе появится колонка is_rating.
-        categoriesFromDB = (r.data || []).filter(function(c) {
-          return c.is_rating !== false && c.id !== 'friendly';
-        });
-        if (!currentCatId && categoriesFromDB.length > 0) {
-          currentCatId = categoriesFromDB[0].id;
-        }
+        // Строки таблицы держим как есть, отбор — общим сводом правил:
+        // у женщин разрядов три, у мужчин пять, а в базе пола у категорий
+        // нет вовсе. Раньше приложение показывало женщинам все пять
+        allCategories = r.data || [];
+        // Кладём в свод: оттуда названия разрядов берут карточка игрока и
+        // поиск партнёра, не ходя в базу второй раз
+        if (window.KSLT_RULES) window.KSLT_RULES.rememberCategories(allCategories);
+        applyCategoriesForGender();
         updateAllBtnLabels();
         loadPlayers();
       });
@@ -99,6 +118,8 @@
         document.querySelectorAll('.rating-toggle-btn[data-gender]').forEach(function(b) {
           b.classList.toggle('active', b === btn);
         });
+        applyCategoriesForGender();
+        updateAllBtnLabels();
         loadPlayers();
       });
     });
@@ -132,6 +153,7 @@
       clearTimeout(timer);
       timer = setTimeout(function() {
         currentSearch = q;
+        shown = 0;   // новый поиск — снова с начала списка
         render();
       }, 300);
     });
@@ -141,6 +163,7 @@
   function loadPlayers() {
     var el = document.getElementById('ratingContent');
     if (!el) return;
+    shown = 0;   // новая подборка — список начинаем сначала
     el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
 
@@ -155,8 +178,11 @@
         (pc.data || []).forEach(function(row) { pointsIn[row.player_id] = row.points || 0; });
         var ids = Object.keys(pointsIn);
 
+        // Берём только то, что видно на экране. Строка целиком весила
+        // вчетверо больше — половину съедали created_at и updated_at,
+        // которые здесь никому не нужны
         return supabaseClient.from('players')
-          .select('*')
+          .select('id, name, name_en, photo, category_id, ntrp_rating, wins, losses, is_member')
           .eq('gender', currentGender)
           .then(function(r) {
             if (r.error) console.error('Rating load error:', r.error);
@@ -189,7 +215,9 @@
     var container = document.getElementById('ratingPodium');
     if (!container) return;
 
-    var top3 = allPlayers.slice(0, 3);
+    // На пьедестал встают только члены клуба — как и места в таблице.
+    // Иначе на первой ступени оказывается человек, который в КСЛТ не состоит
+    var top3 = allPlayers.filter(function(p) { return p.is_member !== false; }).slice(0, 3);
     if (top3.length === 0) {
       container.innerHTML = '';
       return;
@@ -240,7 +268,16 @@
     }
 
     var isGuest = !(window.KSLT_AUTH && window.KSLT_AUTH.currentUser);
-    var visibleCount = isGuest ? Math.min(GUEST_VISIBLE + GUEST_BLUR, displayPlayers.length) : displayPlayers.length;
+    var RULES = window.KSLT_RULES;
+    var PAGE = (RULES && RULES.PAGE_SIZE) || 30;
+
+    // Гостю показываем начало списка, остальное под замком. Вошедшему —
+    // страницами: в Futures под две сотни человек, и рисовать их разом на
+    // телефоне незачем
+    if (!shown) shown = PAGE;
+    var visibleCount = isGuest
+      ? Math.min(GUEST_VISIBLE + GUEST_BLUR, displayPlayers.length)
+      : Math.min(shown, displayPlayers.length);
     var pts = 'points';
 
     var html = '<div class="rating-table">';
@@ -252,22 +289,38 @@
       '<span class="rt-col-wl">' + I18N.t('rating.wl') + '</span>' +
     '</div>';
 
+    // Место в рейтинге получают только члены клуба: иначе первым в таблице
+    // оказывается тот, кто в клубе не состоит, и она перестаёт отвечать на
+    // вопрос «кто первый в КСЛТ». Фоновым — прочерк. Так же на сайте
+    var rankByPlayer = RULES
+      ? RULES.rankMembers(displayPlayers)
+      : (function() {
+          var n = 0, out = {};
+          displayPlayers.forEach(function(pl) {
+            if (pl.is_member !== false) { n++; out[pl.id] = n; }
+          });
+          return out;
+        })();
+
     for (var i = 0; i < visibleCount; i++) {
       var p = displayPlayers[i];
-      var rank = i + 1;
-      var blurClass = '';
+      var isBg = RULES ? RULES.isBackground(p) : (p.is_member === false);
+      var rank = rankByPlayer[p.id] || null;
+      var blurClass = isBg ? ' rr-guest' : '';
       if (isGuest && i >= GUEST_VISIBLE) {
         var blurLevel = i - GUEST_VISIBLE + 1;
-        blurClass = ' rr-blur rr-blur-' + Math.min(blurLevel, 4);
+        blurClass += ' rr-blur rr-blur-' + Math.min(blurLevel, 4);
       }
 
       var rowClickAttr = (!isGuest && p.id) ? ' data-player-id="' + p.id + '" style="cursor:pointer"' : '';
 
       html += '<div class="rating-row' + blurClass + '"' + rowClickAttr + '>' +
-        '<span class="rr-rank' + (rank <= 3 ? ' top' : '') + '">' + rank + '</span>' +
+        '<span class="rr-rank' + (rank && rank <= 3 ? ' top' : '') + '">' + (rank || '—') + '</span>' +
         '<div class="rr-player">' +
           (p.photo ? '<img class="rr-avatar-img" src="' + esc(p.photo) + '" alt="">' : '<div class="rr-avatar">' + initials(p.name) + '</div>') +
-          '<span class="rr-name">' + esc(p.name) + '</span>' +
+          '<span class="rr-name">' + esc(p.name) +
+            (isBg ? '<span class="rr-guest-mark">' + I18N.t('rating.notMember') + '</span>' : '') +
+          '</span>' +
         '</div>' +
         '<span class="rr-pts">' + (p[pts] || 0) + '</span>' +
         '<span class="rr-ntrp">' + (p.ntrp_rating || '—') + '</span>' +
@@ -275,6 +328,12 @@
       '</div>';
     }
     html += '</div>';
+
+    if (!isGuest && displayPlayers.length > visibleCount) {
+      html += '<button class="rr-more-btn" id="ratingMore">' +
+        I18N.t('rating.showMore') + ' ' +
+        Math.min(PAGE, displayPlayers.length - visibleCount) + '</button>';
+    }
 
     // Guest overlay
     if (isGuest && displayPlayers.length > GUEST_VISIBLE) {
@@ -304,6 +363,14 @@
           if (pid && window.KSLT_PLAYER_DETAIL) window.KSLT_PLAYER_DETAIL.open(pid);
         });
       });
+
+      var moreBtn = document.getElementById('ratingMore');
+      if (moreBtn) {
+        moreBtn.addEventListener('click', function() {
+          shown += PAGE;
+          render();
+        });
+      }
     }
   }
 

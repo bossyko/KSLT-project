@@ -76,56 +76,14 @@
         });
 
     /**
-     * Событие турнира — название без хвоста про разряд, плюс дата.
-     * «SUMMER BREEZE CUP – 2026 — дружеский, парный, мужской» и
-     * «... — дружеский, микст» это один турнир в двух разрядах.
+     * Отбираем шесть по договорённому порядку.
+     *
+     * Само правило — в общем своде (js/kslt-rules.js): по одной карточке на
+     * турнир, а если впереди пусто — недавно сыгранные. Приложение берёт
+     * его оттуда же, иначе главная у них расходится, как и было.
      */
-    function eventKey(t) {
-        var base = (t.title || '').split(' — ')[0].trim().toLowerCase();
-        return base + '|' + (t.date_start || '');
-    }
-
-    /**
-     * Оставляем по одной карточке на турнир. Разряды заводятся отдельными
-     * записями — так считаются очки и строятся сетки, — но на главной
-     * шесть плиток с одним и тем же названием выглядели как сбой.
-     */
-    function oneCardPerEvent(list) {
-        var seen = {};
-        return list.filter(function(t) {
-            var k = eventKey(t);
-            if (seen[k]) return false;
-            seen[k] = true;
-            return true;
-        });
-    }
-
-    /** Отбираем шесть по договорённому порядку. */
     function pick(all) {
-        var future = all.filter(function(t) { return TC.status(t) !== 'done'; });
-
-        if (!future.length) {
-            // Впереди пусто — показываем недавно сыгранные, от свежих к
-            // старым. Раньше брали только один, и раздел выглядел так,
-            // будто у клуба всего один турнир за всю историю
-            var done = all.filter(function(t) { return TC.status(t) === 'done'; })
-                .sort(function(a, b) {
-                    var d = (b.date_end || b.date_start || '').localeCompare(a.date_end || a.date_start || '');
-                    return d || (b.created_at || '').localeCompare(a.created_at || '');
-                });
-            return oneCardPerEvent(done).slice(0, LIMIT);
-        }
-
-        future.sort(function(a, b) {
-            var d = ORDER[TC.status(a)] - ORDER[TC.status(b)];
-            if (d) return d;
-            d = (a.date_start || '').localeCompare(b.date_start || '');
-            if (d) return d;
-            // Даты совпали — первым идёт тот, кого раньше завели в базу
-            return (a.created_at || '').localeCompare(b.created_at || '');
-        });
-
-        return oneCardPerEvent(future).slice(0, LIMIT);
+        return window.KSLT_RULES.pickTournaments(all, TC.status, LIMIT, ORDER);
     }
 
     /** Турниров нет вовсе — заголовку не о чем говорить, прячем раздел. */

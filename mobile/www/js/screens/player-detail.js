@@ -51,12 +51,19 @@
     return score.replace(/(\d+)\/(\d+)/g, '$2/$1');
   }
 
-  var CAT_MAP = {
-    'men-tour': 'Tour', 'men-futures': 'Futures', 'men-challenger': 'Challenger',
-    'men-masters': 'Masters', 'men-promasters': 'Pro-Masters',
-    'women-tour': 'Tour Ж', 'women-futures': 'Futures Ж', 'women-challenger': 'Challenger Ж',
-    'women-masters': 'Masters Ж', 'women-promasters': 'Pro-Masters Ж'
-  };
+  // Названия разрядов — из общего свода правил (js/kslt-rules.js). Здесь
+  // лежала своя карта с ключами вида «men-tour», каких в базе нет вовсе:
+  // совпадений не было никогда, и на экран шло сырое «masters».
+  //
+  // Если человек открыл карточку раньше, чем заглянул в рейтинг, свод ещё
+  // пуст — тогда подтягиваем шесть строк сами, один раз за запуск
+  function ensureCategories() {
+    var R = window.KSLT_RULES;
+    if (!R || R.knownCategories().length) return Promise.resolve();
+    return supabaseClient.from('categories').select('*').then(function(r) {
+      R.rememberCategories(r.data || []);
+    });
+  }
 
   // ---- Access check ----
   function getAccessLevel() {
@@ -90,6 +97,7 @@
     var access = getAccessLevel();
 
     // Load player data
+    ensureCategories();
     supabaseClient.from('players')
       .select('*')
       .eq('id', playerId)
@@ -100,7 +108,9 @@
           return;
         }
         _player = r.data;
-        _categoryLabel = CAT_MAP[_player.category_id] || _player.category_id || '';
+        _categoryLabel = window.KSLT_RULES
+          ? window.KSLT_RULES.categoryLabel(_player.category_id, I18N.currentLang)
+          : (_player.category_id || '');
 
         // Load rank (count players with more points in same category)
         supabaseClient.from('players')
@@ -304,9 +314,16 @@
     }
 
     // ---- Challenge button (member only) ----
-    if (access === 'member') {
+    // Фоновая карточка — человек есть в списках клуба, но членства не платил
+    // и профиля на платформе у него нет. Вызывать и звать некого: и вызов, и
+    // приглашение ушли бы в пустоту
+    var isBackground = _player.is_member === false;
+    if (access === 'member' && !isBackground) {
       html += '<div class="pd-challenge-wrap">';
       html += '<button class="pd-challenge-btn" id="pdChallengeBtn">⚔️ ' + I18N.t('pd.challenge') + '</button>';
+      // Баттл зовёт на поединок того, кого ты уже знаешь. Приглашение решает
+      // другую задачу — найти, с кем вообще выйти на корт
+      html += '<button class="pd-invite-btn" id="pdInviteBtn">🎾 ' + I18N.t('inv.btn') + '</button>';
       html += '</div>';
     } else if (access === 'registered') {
       html += '<div class="pd-cta-membership">';
@@ -328,6 +345,12 @@
       if (chalBtn) {
         chalBtn.addEventListener('click', function() {
           handleChallenge();
+        });
+      }
+      var invBtn = document.getElementById('pdInviteBtn');
+      if (invBtn) {
+        invBtn.addEventListener('click', function() {
+          if (window.KSLT_INVITES) window.KSLT_INVITES.send(_player.id);
         });
       }
     }

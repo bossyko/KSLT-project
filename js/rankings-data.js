@@ -67,6 +67,11 @@
                 if (cat.is_rating === false || cat.id === 'friendly') return;
                 var catName = isEn ? (cat.name_en || cat.name) : (isKg ? (cat.name_kg || cat.name) : cat.name);
                 genders.forEach(function(g) {
+                    // Разряды заданы списком, а не наличием людей: у мужчин
+                    // их пять, у женщин три. Pro-Masters пока пуст, но он
+                    // есть — раньше пустой разряд пропадал из переключателя
+                    if (window.KSLT_RULES && !window.KSLT_RULES.allowsCategory(g, cat.id)) return;
+
                     var inCat = pointsIn[cat.id] || {};
                     var closedHere = closedIn[cat.id] || {};
                     var catPlayers = players.filter(function(p) {
@@ -77,7 +82,6 @@
                     }).sort(function(a, b) {
                         return (inCat[b.id] || 0) - (inCat[a.id] || 0);
                     });
-                    if (catPlayers.length === 0) return;
                     var key = g + '-' + cat.id;
                     result[key] = {
                         name: catName,

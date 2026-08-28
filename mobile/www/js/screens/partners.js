@@ -33,16 +33,38 @@
     if (!el || !supabaseClient) return;
     el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
-    // Load all players with NTRP rating for partner matching
-    supabaseClient.from('players')
-      .select('id, name, photo, category_id, ntrp_rating, points, wins, losses, bio')
-      .not('ntrp_rating', 'is', null)
-      .order('ntrp_rating', { ascending: true })
-      .then(function(r) {
-        allPartners = r.data || [];
+    // Только члены клуба — тем же запросом, что и на сайте. Раньше сюда
+    // попадали все, у кого проставлен NTRP, в том числе фоновые карточки:
+    // человека по ту сторону нет, а карточка выглядела живой
+    supabaseClient.rpc('get_public_partners').then(function(r) {
+      var rows = r.data || [];
+      if (r.error) { console.error('Partners load error:', r.error); }
+
+      // NTRP в запросе нет — он живёт в карточке игрока
+      var ids = rows.map(function(p) { return p.id; });
+      var withNtrp = ids.length
+        ? supabaseClient.from('players').select('id, ntrp_rating, category_id').in('id', ids)
+        : Promise.resolve({ data: [] });
+
+      return withNtrp.then(function(nr) {
+        var map = {};
+        (nr.data || []).forEach(function(p) { map[p.id] = p; });
+        allPartners = rows.map(function(p) {
+          var extra = map[p.id] || {};
+          return {
+            id: p.id,
+            name: p.full_name,
+            photo: p.avatar_url,
+            ntrp_rating: extra.ntrp_rating,
+            category_id: extra.category_id
+          };
+        }).sort(function(a, b) {
+          return (parseFloat(a.ntrp_rating) || 99) - (parseFloat(b.ntrp_rating) || 99);
+        });
         renderPartners();
         initPartnerSearch();
       });
+    });
   };
 
   function initPartnerSearch() {
@@ -71,6 +93,7 @@
 
     var AUTH = window.KSLT_AUTH;
     var isGuest = !(AUTH && AUTH.currentUser);
+    var isMember = !isGuest && !!AUTH._membershipStatus;
 
     // Filter by NTRP
     var filtered = allPartners;
@@ -98,7 +121,6 @@
 
     for (var i = 0; i < visibleCount; i++) {
       var p = filtered[i];
-      var CAT_MAP = {'men-tour':'Tour','men-futures':'Futures','men-challenger':'Challenger','men-masters':'Masters','men-promasters':'Pro-Masters','women-tour':'Tour Ж','women-futures':'Futures Ж','women-challenger':'Challenger Ж'};
 
       html += '<div class="partner-card"' + (isGuest ? '' : ' data-player-id="' + p.id + '"') + '>';
       html += '<div class="partner-avatar">';
@@ -108,9 +130,18 @@
       html += '<div class="coach-card-name">' + esc(p.name) + '</div>';
       html += '<div class="coach-card-meta">';
       if (p.ntrp_rating) html += '<span>NTRP ' + Number(p.ntrp_rating).toFixed(1) + '</span>';
-      if (p.category_id) html += '<span>' + esc(CAT_MAP[p.category_id] || p.category_id) + '</span>';
+      // Название разряда — из общего свода, а не из своей копии карты
+      if (p.category_id) html += '<span>' + esc(window.KSLT_RULES
+        ? window.KSLT_RULES.categoryLabel(p.category_id, I18N.currentLang)
+        : p.category_id) + '</span>';
       html += '</div>';
       html += '</div>';
+      // Предложить игру можно прямо отсюда, не заходя в карточку: экран для
+      // того и открывают — найти, с кем выйти на корт
+      if (isMember) {
+        html += '<button class="partner-invite-btn" data-invite="' + esc(p.id) + '">' +
+                I18N.t('inv.btn') + '</button>';
+      }
       html += '</div>';
     }
 
@@ -130,6 +161,15 @@
       var loginBtn = document.getElementById('partnersLoginBtn');
       if (loginBtn) loginBtn.addEventListener('click', function() { if (AUTH) AUTH.showAuth(); });
     }
+
+    // Кнопка приглашения перехватывает нажатие: иначе вместе с ней
+    // открывалась бы и карточка игрока под ней
+    el.querySelectorAll('.partner-invite-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (window.KSLT_INVITES) window.KSLT_INVITES.send(btn.getAttribute('data-invite'));
+      });
+    });
 
     // Click → open player detail
     el.querySelectorAll('.partner-card[data-player-id]').forEach(function(card) {

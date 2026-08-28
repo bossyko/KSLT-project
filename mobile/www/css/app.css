@@ -231,7 +231,11 @@ body {
   height: 100vh;
   height: 100dvh;
   width: 100%;
-  max-width: 440px;
+  /* Раскрытый складной телефон — уже почти планшет по ширине, и меняется
+     она прямо на ходу. Жёсткие 440 давали там узкую полоску на чёрном.
+     Планшеты мы не поддерживаем, поэтому дальше 600 не растягиваемся:
+     строки во весь десятидюймовый экран читать невозможно */
+  max-width: 600px;
   margin: 0 auto;
   position: relative;
 }
@@ -4821,4 +4825,162 @@ select.prof-field-input { color: var(--text); }
 }
 .ar-modal-subtitle {
   font-size: 13px; color: var(--text-sec); margin: 0 0 20px; line-height: 1.4;
+}
+
+/* ============================================
+   Приглашение поиграть
+   ============================================
+   Окно, список приглашений и карточка контактов. Вид тот же, что на сайте:
+   тёмная подложка, лаймовая главная кнопка, второстепенная — прозрачная с
+   рамкой. Плашки контактов красятся цветом своей сети, а не общим лаймом:
+   строка узнаётся раньше, чем прочитана. */
+
+.gi-overlay {
+  position: fixed; inset: 0; z-index: 1250;
+  background: rgba(0,0,0,0.72);
+  -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease;
+}
+.gi-overlay.open { opacity: 1; visibility: visible; }
+.gi-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px 20px;
+  width: 100%; max-width: 360px;
+  transform: scale(0.92); transition: transform .25s ease;
+  max-height: 82vh; overflow-y: auto;
+}
+.gi-overlay.open .gi-box { transform: scale(1); }
+.gi-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
+.gi-body { margin-bottom: 18px; }
+.gi-text { font-size: 13.5px; color: var(--text-sec); line-height: 1.6; margin: 0; }
+
+.gi-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.gi-btn {
+  border: none; border-radius: 999px; padding: 11px 20px;
+  font-size: 14px; font-family: inherit; cursor: pointer;
+  transition: opacity .2s ease;
+}
+.gi-btn:active { opacity: .75; }
+.gi-btn-primary { background: var(--accent); color: #0A0A0A; font-weight: 700; }
+.gi-btn-ghost {
+  background: transparent; color: var(--text-sec);
+  border: 1px solid var(--border);
+}
+.gi-btn-sm { padding: 8px 16px; font-size: 13px; }
+
+/* На узком экране кнопки идут в столбик, снизу вверх по важности:
+   в строку они налезают друг на друга и подписи обрезаются */
+@media (max-width: 380px) {
+  .gi-actions { flex-direction: column-reverse; }
+  .gi-actions .gi-btn { width: 100%; }
+}
+
+/* ---- Карточка контактов ---- */
+.gi-contacts { display: flex; flex-direction: column; gap: 8px; }
+.gi-contacts-name {
+  font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;
+}
+.gi-contact {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--text-primary); text-decoration: none; font-size: 14px;
+}
+.gi-contact-icon { display: flex; width: 18px; height: 18px; flex-shrink: 0; }
+.gi-contact-icon svg { width: 18px; height: 18px; }
+.gi-contact--phone { color: var(--accent); border-color: rgba(204,255,0,0.35); }
+.gi-contact--wa    { color: #25D366; border-color: rgba(37,211,102,0.35); }
+.gi-contact--tg    { color: #2AABEE; border-color: rgba(42,171,238,0.35); }
+.gi-contact--ig    { color: #E1306C; border-color: rgba(225,48,108,0.35); }
+
+/* ---- Список приглашений ---- */
+.gi-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px; margin-bottom: 10px;
+}
+.gi-card-head { display: flex; align-items: center; gap: 12px; }
+.gi-card-avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; object-fit: cover;
+}
+.gi-card-avatar--letters {
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.08); color: var(--text-sec);
+  font-size: 14px; font-weight: 600;
+}
+.gi-card-who { flex: 1; min-width: 0; }
+.gi-card-name {
+  font-size: 14.5px; font-weight: 600; color: var(--text-primary);
+  display: flex; align-items: center; gap: 6px; min-width: 0;
+}
+/* Обрезаем сам текст, а не строку: строка выложена флексом, и многоточие
+   на ней не срабатывает — длинное имя лезло под плашку статуса */
+.gi-card-name-text {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+/* Направление — стрелкой у имени, а не колонкой: на узком экране пятая
+   колонка не помещается, и подписи статусов обрезались */
+.gi-card-dir { color: var(--text-muted); font-size: 12px; flex-shrink: 0; }
+.gi-card-date { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.gi-card-actions {
+  display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;
+}
+
+.gi-status {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .4px; padding: 5px 10px; border-radius: 999px; flex-shrink: 0;
+}
+.gi-status--pending  { background: rgba(204,255,0,0.12); color: var(--accent); }
+.gi-status--accepted { background: rgba(52,199,89,0.14); color: #34C759; }
+.gi-status--declined { background: rgba(255,69,58,0.14); color: #FF453A; }
+
+/* ---- Кнопка на карточке игрока ---- */
+.pd-invite-btn {
+  width: 100%; margin-top: 10px; padding: 14px;
+  background: transparent; border: 1px solid var(--accent);
+  border-radius: 999px; color: var(--accent);
+  font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer;
+}
+.pd-invite-btn:active { opacity: .75; }
+
+/* ---- Фоновая карточка в рейтинге ----
+   Человек есть в списках клуба, но членство не оплачено. Строка видна —
+   приглушённо, места в рейтинге не занимает, играть с ним нельзя */
+.rating-row.rr-guest { opacity: .45; }
+.rr-guest-mark {
+  display: inline-block; margin-left: 6px;
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .3px;
+  color: var(--text-muted); border: 1px solid var(--border);
+  border-radius: 999px; padding: 1px 6px; vertical-align: middle;
+}
+
+/* Кнопка приглашения на карточке поиска игрока. Карточка выложена в строку,
+   поэтому кнопка прижимается к правому краю и не растягивает её по высоте */
+.partner-invite-btn {
+  margin-left: auto; flex-shrink: 0;
+  padding: 8px 14px; border-radius: 999px;
+  background: transparent; border: 1px solid var(--accent);
+  color: var(--accent); font-size: 12.5px; font-weight: 600;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+}
+.partner-invite-btn:active { opacity: .7; }
+
+/* Кнопка «Показать ещё» под таблицей рейтинга. Список отдаётся частями:
+   в Futures под две сотни человек, и рисовать их разом телефону тяжело */
+.rr-more-btn {
+  display: block; width: calc(100% - 32px); margin: 12px 16px 0;
+  padding: 12px; border-radius: 999px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-sec); font-size: 13.5px; font-family: inherit; cursor: pointer;
+}
+.rr-more-btn:active { opacity: .7; }
+
+/* Раскрытый складной телефон: места по ширине больше, поэтому карточки
+   турниров и новостей идут крупнее, а поля по краям заметнее */
+@media (min-width: 500px) {
+  .tournament-scroll { padding-left: 20px; padding-right: 20px; }
+  .rating-table, .rr-more-btn { margin-left: 20px; margin-right: 20px; }
+  .rr-more-btn { width: calc(100% - 40px); }
 }

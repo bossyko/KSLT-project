@@ -173,18 +173,21 @@
     var el = document.getElementById('homeTournament');
     if (!supabaseClient) return;
 
-    var today = new Date().toISOString().split('T')[0];
+    // Берём и прошедшие тоже: если впереди пусто, показываем недавно
+    // сыгранные — так же, как на сайте. Раньше здесь стояло условие
+    // «дата от сегодня», и раздел пропадал целиком, хотя турниры у клуба
+    // есть, просто все уже прошли
     supabaseClient.from('tournaments')
       .select('*')
-      .gte('date_start', today)
-      .order('date_start', { ascending: true })
-      .limit(3)
+      .order('date_start', { ascending: false })
+      .limit(40)
       .then(function(r) {
         if (r.error) console.error('Tournaments:', r.error);
-        if (!r.data || r.data.length === 0) { el.innerHTML = ''; return; }
+        var picked = pickHomeTournaments(r.data || []);
+        if (!picked.length) { el.innerHTML = ''; return; }
         var html = '<div class="section-title"><h2>' + I18N.t('home.upcoming') + '</h2><span class="see-all" data-nav="screenTournaments">' + I18N.t('home.all') + '</span></div>';
         html += '<div class="tournament-scroll">';
-        r.data.forEach(function(t) { html += renderTournamentCard(t); });
+        picked.forEach(function(t) { html += renderTournamentCard(t); });
         html += '</div>';
         el.innerHTML = html;
         el.querySelectorAll('.tournament-card-v').forEach(function(card) {
@@ -193,6 +196,30 @@
           });
         });
       });
+  }
+
+
+  /**
+   * Что показать в разделе турниров. Правило — в общем своде правил, там же
+   * его берёт сайт: предстоящие вперёд, а если их нет — недавно сыгранные,
+   * по одной карточке на турнир.
+   */
+  function tournamentState(t) {
+    var st = String(t.status || '').toLowerCase();
+    if (st === 'cancelled') return 'cancelled';
+    if (st === 'completed' || st === 'done') return 'done';
+    if (st === 'live' || st === 'ongoing') return 'live';
+    var today = new Date().toISOString().slice(0, 10);
+    var end = t.date_end || t.date_start || '';
+    if (end && end < today) return 'done';
+    if (st === 'registration_closed' || st === 'closed') return 'closed';
+    return 'open';
+  }
+
+  function pickHomeTournaments(list) {
+    var R = window.KSLT_RULES;
+    if (!R) return list.slice(0, 3);
+    return R.pickTournaments(list, tournamentState, 3);
   }
 
   function renderTournamentCard(t) {

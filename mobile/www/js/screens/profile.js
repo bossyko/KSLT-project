@@ -163,6 +163,12 @@
         I18N.t('profile.myMatches'), '', '', true, 'profMatchesRow');
     }
 
+    // Приглашения поиграть — свой раздел, а не вперемешку с вызовами:
+    // баттл зовёт на поединок, приглашение ищет, с кем выйти на корт
+    html += profileRow('cyan',
+      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 000 20M2 12h20"/></svg>',
+      I18N.t('inv.title'), '', '', true, 'profInvitesRow');
+
     // Badges
     html += profileRow('purple',
       '<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
@@ -329,6 +335,9 @@
   function bindRowOverlays() {
     bindRowClick('profTournamentsRow', showMyTournaments);
     bindRowClick('profMatchesRow', showMyMatches);
+    bindRowClick('profInvitesRow', function() {
+      if (window.KSLT_INVITES) window.KSLT_INVITES.openList();
+    });
     bindRowClick('profBadgesRow', showBadges);
     bindRowClick('profLoyaltyRow', showLoyalty);
     bindRowClick('profVouchersRow', showVouchers);

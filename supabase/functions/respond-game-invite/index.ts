@@ -126,7 +126,11 @@ Deno.serve(async (req) => {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        title, message: text, type: 'challenges', audience: 'user', user_id: sender?.id
+        title, message: text, type: 'challenges', audience: 'user', user_id: sender?.id,
+        // Колокольчику запись уже заведена выше, со своим типом. Вторая,
+        // пустая, висела бы рядом дубликатом
+        skip_log: true,
+        action_type: accept ? 'game_invite_accepted' : 'game_invite_declined'
       })
     }).catch(() => {})
 
