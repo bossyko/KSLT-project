@@ -15,7 +15,7 @@
     el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
     supabaseClient.from('challenges')
-      .select('*, challenger:profiles!challenges_challenger_id_fkey(full_name), challenger_player:players!challenges_challenger_player_id_fkey(name), opponent_player:players!challenges_opponent_player_id_fkey(name), challenger_partner:players!challenges_challenger_partner_id_fkey(name), opponent_partner:players!challenges_opponent_partner_id_fkey(name)')
+      .select('*, challenger:profiles!challenges_challenger_id_fkey(full_name), challenger_player:players!challenges_challenger_player_id_fkey(name, photo), opponent_player:players!challenges_opponent_player_id_fkey(name, photo), challenger_partner:players!challenges_challenger_partner_id_fkey(name, photo), opponent_partner:players!challenges_opponent_partner_id_fkey(name, photo)')
       .eq('battle_published', true)
       .order('created_at', { ascending: false })
       .then(function(r) {
@@ -52,26 +52,38 @@
       // раньше здесь бралось по одному, и половина участников пропадала
       var APP = window.KSLT_APP;
       var isPair = APP.battleIsPair(b);
-      var names1 = [(b.challenger_player && b.challenger_player.name) ||
-                    b.challenger_external_name ||
-                    (b.challenger && b.challenger.full_name) || (I18N.t('home.player') + ' 1')];
-      var names2 = [(b.opponent_player && b.opponent_player.name) ||
-                    b.opponent_external_name || (I18N.t('home.player') + ' 2')];
+      // Имя и лицо идут парой: на сайте в карточке баттла фотографии
+      // игроков, а здесь стояли лаймовые кружки с буквами и читались как
+      // мячи, а не как люди
+      var side1 = [{
+        name: (b.challenger_player && b.challenger_player.name) ||
+              b.challenger_external_name ||
+              (b.challenger && b.challenger.full_name) || (I18N.t('home.player') + ' 1'),
+        photo: (b.challenger_player && b.challenger_player.photo) || ''
+      }];
+      var side2 = [{
+        name: (b.opponent_player && b.opponent_player.name) ||
+              b.opponent_external_name || (I18N.t('home.player') + ' 2'),
+        photo: (b.opponent_player && b.opponent_player.photo) || ''
+      }];
       if (isPair) {
-        var m1 = (b.challenger_partner && b.challenger_partner.name) || b.challenger_partner_name;
-        var m2 = (b.opponent_partner && b.opponent_partner.name) || b.opponent_partner_name;
-        if (m1) names1.push(m1);
-        if (m2) names2.push(m2);
+        var p1 = b.challenger_partner, p2 = b.opponent_partner;
+        var m1 = (p1 && p1.name) || b.challenger_partner_name;
+        var m2 = (p2 && p2.name) || b.opponent_partner_name;
+        if (m1) side1.push({ name: m1, photo: (p1 && p1.photo) || '' });
+        if (m2) side2.push({ name: m2, photo: (p2 && p2.photo) || '' });
       }
       var fmtLabel = APP.battleFormatLabel(b);
 
-      function fighter(names) {
+      function fighter(side) {
         var h = '<div class="battle-fighter"><div class="battle-fighter-avatars">';
-        names.forEach(function(n) {
-          h += '<div class="battle-fighter-avatar">' + initials(n) + '</div>';
+        side.forEach(function(p) {
+          h += p.photo
+            ? '<img class="battle-fighter-avatar battle-fighter-photo" src="' + esc(p.photo) + '" alt="">'
+            : '<div class="battle-fighter-avatar">' + initials(p.name) + '</div>';
         });
         h += '</div><div class="battle-fighter-name">';
-        names.forEach(function(n) { h += '<span>' + esc(n) + '</span>'; });
+        side.forEach(function(p) { h += '<span>' + esc(p.name) + '</span>'; });
         return h + '</div></div>';
       }
 
@@ -79,9 +91,9 @@
         '<div class="battle-title">' + esc(b.battle_title || I18N.t('battles.battle')) + '</div>' +
         (fmtLabel ? '<div class="battle-format">' + esc(fmtLabel) + '</div>' : '') +
         '<div class="battle-vs">' +
-          fighter(names1) +
+          fighter(side1) +
           '<span class="battle-vs-text">VS</span>' +
-          fighter(names2) +
+          fighter(side2) +
         '</div>' +
         '<div class="battle-btn-row">' +
           '<button class="battle-btn primary">' + I18N.t('battles.details') + '</button>' +

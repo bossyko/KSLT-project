@@ -191,8 +191,20 @@
     if (window.KSLT_PARTNERS) window.KSLT_PARTNERS.filter(val);
   });
 
+  setupChipFilter('partnerGenderChips', function(val) {
+    if (window.KSLT_PARTNERS) window.KSLT_PARTNERS.filterGender(val);
+  });
+
   setupChipFilter('courtTypeChips', function(val) {
     if (window.KSLT_COURTS) window.KSLT_COURTS.filter(val);
+  });
+
+  setupChipFilter('courtCityChips', function(val) {
+    if (window.KSLT_COURTS) window.KSLT_COURTS.filterCity(val);
+  });
+
+  setupChipFilter('courtSurfaceChips', function(val) {
+    if (window.KSLT_COURTS) window.KSLT_COURTS.filterSurface(val);
   });
 
   // Gender toggle — handled in rating.js (initGenderToggle)

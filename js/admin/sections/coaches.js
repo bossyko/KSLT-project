@@ -497,8 +497,11 @@
         var tagsHtml = '';
         Object.keys(COACH_TAGS).forEach(function(key) {
             var checked = currentTags.indexOf(key) !== -1 ? ' checked' : '';
-            tagsHtml += '<label style="display:inline-flex;align-items:center;gap:6px;margin-right:16px;margin-bottom:8px;cursor:pointer;">' +
-                '<input type="checkbox" class="ad-cch-tag" value="' + key + '"' + checked + ' style="width:18px;height:18px;accent-color:var(--accent);appearance:auto;-webkit-appearance:auto;">' +
+            // Общий вид флажков живёт в .ad-checkbox-label (css/admin.css).
+            // Здесь стоял свой набор стилей с appearance:auto — он возвращал
+            // белый флажок из браузера и перебивал тёмную тему
+            tagsHtml += '<label class="ad-checkbox-label ad-checkbox-inline">' +
+                '<input type="checkbox" class="ad-cch-tag" value="' + key + '"' + checked + '>' +
                 '<span>' + COACH_TAGS[key] + '</span>' +
             '</label>';
         });

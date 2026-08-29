@@ -62,7 +62,13 @@
     if (!el) return;
 
     if (allCoaches.length === 0) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-icon">👨‍🏫</div><div class="empty-title">' + I18N.t('coaches.empty') + '</div></div>';
+      // Мяч, а не человечек: эмодзи «учитель» на тёмном фоне выходит
+      // мутным пятном и читается как сбой. На сайте здесь тот же мяч
+      el.innerHTML = '<div class="empty-state">' +
+        '<div class="empty-icon">\uD83C\uDFBE</div>' +
+        '<div class="empty-title">' + I18N.t('coaches.empty') + '</div>' +
+        '<div class="empty-text">' + I18N.t('coaches.emptySoon') + '</div>' +
+      '</div>';
       return;
     }
 

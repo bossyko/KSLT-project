@@ -220,6 +220,41 @@
         return R.oneCardPerEvent(future).slice(0, max);
     };
 
+    // ---- Ссылки на сети --------------------------------------------
+
+    /**
+     * Имя пользователя из чего угодно.
+     *
+     * Люди вписывают в поле что придётся: «@ivanov», «ivanov», целую
+     * ссылку с хвостом вида ?utm_source=ig_web_button_share_sheet. Если
+     * такое просто показать, приписав собаку, выходит
+     * «@https://instagram.com/ivanov?utm_source=…» — так у нас и было в
+     * карточке спонсора.
+     */
+    R.handle = function (value) {
+        var v = String(value || '').trim();
+        if (!v) return '';
+
+        // Ссылка — берём последний кусок пути, без хвоста с метками
+        if (/^https?:\/\//i.test(v) || v.indexOf('/') !== -1) {
+            v = v.split(/[?#]/)[0];                 // отрезаем хвост
+            v = v.replace(/\/+$/, '');              // и косые в конце
+            v = v.slice(v.lastIndexOf('/') + 1);
+        }
+        return v.replace(/^@+/, '');
+    };
+
+    /** Куда вести по нажатию. */
+    R.socialUrl = function (kind, value) {
+        var h = R.handle(value);
+        if (!h) return '';
+        if (kind === 'tg') return 'https://t.me/' + h;
+        if (kind === 'ig') return 'https://instagram.com/' + h;
+        if (kind === 'wa') return 'https://wa.me/' + String(value).replace(/[^0-9]/g, '');
+        if (kind === 'phone') return 'tel:' + value;
+        return value;
+    };
+
     // ---- Показ списками --------------------------------------------
 
     /**

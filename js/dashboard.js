@@ -1870,10 +1870,13 @@
         // Четвёртым идёт метка сети: по ней плашка красится своим цветом,
         // а не общим лаймом — так строка узнаётся раньше, чем прочитана
         var rows = [];
+        // Имя пользователя — общим правилом (js/kslt-rules.js): в поле
+        // попадает и «@ivanov», и целая ссылка с хвостом utm_source
+        var R = window.KSLT_RULES;
         if (cn.phone) rows.push([CONTACT_ICON.phone, escHtml(cn.phone), 'tel:' + cn.phone, 'phone']);
-        if (cn.whatsapp) rows.push([CONTACT_ICON.whatsapp, escHtml(cn.whatsapp), 'https://wa.me/' + String(cn.whatsapp).replace(/[^0-9]/g, ''), 'wa']);
-        if (cn.telegram) rows.push([CONTACT_ICON.telegram, '@' + escHtml(String(cn.telegram).replace('@', '')), 'https://t.me/' + String(cn.telegram).replace('@', ''), 'tg']);
-        if (cn.instagram) rows.push([CONTACT_ICON.instagram, '@' + escHtml(String(cn.instagram).replace('@', '')), 'https://instagram.com/' + String(cn.instagram).replace('@', ''), 'ig']);
+        if (cn.whatsapp) rows.push([CONTACT_ICON.whatsapp, escHtml(cn.whatsapp), R.socialUrl('wa', cn.whatsapp), 'wa']);
+        if (cn.telegram) rows.push([CONTACT_ICON.telegram, '@' + escHtml(R.handle(cn.telegram)), R.socialUrl('tg', cn.telegram), 'tg']);
+        if (cn.instagram) rows.push([CONTACT_ICON.instagram, '@' + escHtml(R.handle(cn.instagram)), R.socialUrl('ig', cn.instagram), 'ig']);
         if (!rows.length) return '<p class="db-modal-text">' + L.invNoContacts + '</p>';
 
         return '<div class="db-inv-contacts">' +

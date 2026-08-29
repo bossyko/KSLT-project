@@ -98,11 +98,14 @@
     var ICON = window.KSLT_CONTACT_ICONS || {};
     if (!cn) return '<p class="gi-text">' + I('inv.noContacts') + '</p>';
 
+    // Имя пользователя вытаскиваем общим правилом: люди вписывают в поле и
+    // «@ivanov», и целую ссылку с хвостом — показывать это как есть нельзя
+    var R = window.KSLT_RULES;
     var rows = [];
     if (cn.phone) rows.push([ICON.phone, esc(cn.phone), 'tel:' + cn.phone, 'phone']);
-    if (cn.whatsapp) rows.push([ICON.whatsapp, esc(cn.whatsapp), 'https://wa.me/' + String(cn.whatsapp).replace(/[^0-9]/g, ''), 'wa']);
-    if (cn.telegram) rows.push([ICON.telegram, '@' + esc(String(cn.telegram).replace('@', '')), 'https://t.me/' + String(cn.telegram).replace('@', ''), 'tg']);
-    if (cn.instagram) rows.push([ICON.instagram, '@' + esc(String(cn.instagram).replace('@', '')), 'https://instagram.com/' + String(cn.instagram).replace('@', ''), 'ig']);
+    if (cn.whatsapp) rows.push([ICON.whatsapp, esc(cn.whatsapp), R.socialUrl('wa', cn.whatsapp), 'wa']);
+    if (cn.telegram) rows.push([ICON.telegram, '@' + esc(R.handle(cn.telegram)), R.socialUrl('tg', cn.telegram), 'tg']);
+    if (cn.instagram) rows.push([ICON.instagram, '@' + esc(R.handle(cn.instagram)), R.socialUrl('ig', cn.instagram), 'ig']);
     if (!rows.length) return '<p class="gi-text">' + I('inv.noContacts') + '</p>';
 
     return '<div class="gi-contacts">' +

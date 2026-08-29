@@ -10,6 +10,7 @@
   var allPartners = [];
   var GUEST_VISIBLE = 5;
   var currentNtrp = 'all';
+  var currentGender = 'all';
   var currentPartnerSearch = '';
 
   function esc(s) {
@@ -55,6 +56,7 @@
             id: p.id,
             name: p.full_name,
             photo: p.avatar_url,
+            gender: p.gender,
             ntrp_rating: extra.ntrp_rating,
             category_id: extra.category_id
           };
@@ -87,6 +89,11 @@
     renderPartners();
   };
 
+  PR.filterGender = function(g) {
+    currentGender = g;
+    renderPartners();
+  };
+
   function renderPartners() {
     var el = document.getElementById('partnersList');
     if (!el) return;
@@ -95,13 +102,21 @@
     var isGuest = !(AUTH && AUTH.currentUser);
     var isMember = !isGuest && !!AUTH._membershipStatus;
 
-    // Filter by NTRP
     var filtered = allPartners;
+
+    // Пол — как на сайте
+    if (currentGender !== 'all') {
+      filtered = filtered.filter(function(p) { return p.gender === currentGender; });
+    }
+
+    // Уровень задан промежутком («2.5-3.5»), а не одним числом: так он
+    // назван словами — начинающий, средний, продвинутый, сильный
     if (currentNtrp !== 'all') {
-      var nVal = parseFloat(currentNtrp);
+      var parts = String(currentNtrp).split('-');
+      var lo = parseFloat(parts[0]), hi = parseFloat(parts[1]);
       filtered = filtered.filter(function(p) {
         var r = parseFloat(p.ntrp_rating);
-        return r >= nVal - 0.5 && r <= nVal + 0.5;
+        return !isNaN(r) && r >= lo && r <= hi;
       });
     }
     // Filter by name search
@@ -196,45 +211,43 @@
         .select('*')
         .order('sort_order', { ascending: true })
         .then(function(r) {
-          if (r.data && r.data.length > 0) {
-            renderSponsors(el, r.data);
-          } else {
-            renderStaticSponsors(el);
-          }
+          // Пусто или база не ответила — молчим. Раньше здесь показывался
+          // вшитый «Nurzaman» из времён, когда базы ещё не было: он выдавал
+          // за спонсора того, кого в списке давно нет
+          if (r.data && r.data.length > 0) renderSponsors(el, r.data);
+          else el.innerHTML = '';
         })
-        .catch(function() {
-          renderStaticSponsors(el);
-        });
+        .catch(function() { el.innerHTML = ''; });
     } else {
-      renderStaticSponsors(el);
+      el.innerHTML = '';
     }
   };
 
   function renderSponsors(el, sponsors) {
     var html = '<div class="sponsors-grid">';
     sponsors.forEach(function(s) {
-      html += '<div class="sponsor-card">';
+      html += '<div class="sponsor-card" data-sponsor="' + esc(s.id) + '">';
       if (s.logo) html += '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '" class="sponsor-logo">';
       html += '<div class="sponsor-name">' + esc(s.name) + '</div>';
       if (s.description) html += '<div class="sponsor-desc">' + esc(s.description) + '</div>';
-      if (s.url) html += '<a href="' + esc(s.url) + '" target="_blank" class="sponsor-link">Подробнее ↗</a>';
       html += '</div>';
     });
     html += '</div>';
     el.innerHTML = html;
+
+    // Открываем окно, а не чужой сайт: ссылка «Подробнее» выбрасывала из
+    // приложения сразу, минуя рассказ о том, кто это
+    var byId = {};
+    sponsors.forEach(function(s) { byId[s.id] = s; });
+    el.addEventListener('click', function(e) {
+      var card = e.target.closest('[data-sponsor]');
+      if (!card) return;
+      if (window.KSLT_HOME_BLOCKS) {
+        window.KSLT_HOME_BLOCKS.showSponsor(byId[card.getAttribute('data-sponsor')]);
+      }
+    });
   }
 
-  function renderStaticSponsors(el) {
-    el.innerHTML =
-      '<div class="sponsors-grid">' +
-        '<div class="sponsor-card">' +
-          '<div class="sponsor-logo-placeholder">NURZAMAN</div>' +
-          '<div class="sponsor-name">Nurzaman</div>' +
-          '<div class="sponsor-desc">Генеральный спонсор КСЛТ</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="pd-empty-small" style="margin-top:16px">Хотите стать спонсором? Свяжитесь с нами</div>';
-  }
 
   // ============================
   // INFO overlays (About, Rules, FAQ)

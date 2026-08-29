@@ -202,12 +202,32 @@
   }
 
   // --- Subtitle ---
+  /**
+   * Подпись под заголовком — про клуб целиком, как на сайте: там вверху
+   * «Рейтинг KSLT · 292 игрока · Сезон 2026», и только ниже переключатели.
+   * Раньше здесь стоял счёт текущей категории, и на пустом Pro-Masters
+   * экран встречал надписью «0 игроков» — будто ничего не загрузилось.
+   */
+  var _clubTotal = null;
+
   function renderSubtitle() {
     var el = document.getElementById('ratingSubtitle');
     if (!el) return;
-    var count = allPlayers.length;
     var season = new Date().getFullYear();
-    el.textContent = count + ' ' + I18N.t('rating.playersCount') + ' · ' + I18N.t('rating.season') + ' ' + season;
+
+    function paint(n) {
+      el.textContent = n + ' ' + I18N.t('rating.playersCount') + ' · ' +
+                       I18N.t('rating.season') + ' ' + season;
+    }
+
+    if (_clubTotal !== null) { paint(_clubTotal); return; }
+
+    supabaseClient.from('players')
+      .select('id', { count: 'exact', head: true })
+      .then(function(r) {
+        _clubTotal = r.count || allPlayers.length;
+        paint(_clubTotal);
+      });
   }
 
   // --- Podium (top 3) ---

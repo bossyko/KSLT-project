@@ -13,6 +13,7 @@
 // прибавляем архив клуба, а из базы берём только турниры от дня отсечки:
 // иначе старый турнир, заведённый задним числом ради истории, посчитался бы
 // дважды — и связать это с правкой годичной давности не смог бы никто.
+// День отсечки живёт в функции get_club_stats (sql/public-club-stats.sql).
 
 (function() {
     'use strict';
@@ -25,7 +26,6 @@
     // прибавятся ещё раз. Насколько — неизвестно, пока Айсулуу не назовёт
     // число турниров до 2025 года. Тогда заменить здесь.
     var ARCHIVE_TOURNAMENTS = 300;
-    var SITE_START = '2025-01-01';
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var LOCALE = isEn ? 'en-US' : 'ru-RU';
@@ -56,32 +56,32 @@
         el.textContent = value.toLocaleString(LOCALE);
     }
 
-    var today = new Date().toISOString().split('T')[0];
+    // Числа берём одной функцией на сервере.
+    //
+    // Считать их запросами со страницы больше нельзя: memberships, profiles
+    // и coaches закрыты правилами доступа, и гость получал ноль. Карточки
+    // прятались, и первый же посетитель видел клуб вдвое меньше, чем он
+    // есть, — из пяти чисел оставались два.
+    //
+    // Функция отдаёт только итоги: ни одной строки с личными данными.
+    client.rpc('get_club_stats').then(function(res) {
+        var d = (res.data && res.data[0]) || null;
+        if (res.error || !d) {
+            console.error('[KSLT] цифры:', (res.error && res.error.message) || 'пусто');
+            return;
+        }
 
-    Promise.all([
-        // Члены клуба — по действующим членствам, а не по карточкам игроков.
-        // Карточек 292, но почти все перенесены из списков NTRP: человека на
-        // платформе нет, членство никто не оплачивал
-        client.from('memberships').select('id', { count: 'exact', head: true })
-            .eq('status', 'active').gte('expires_at', today),
-        client.from('profiles').select('id', { count: 'exact', head: true }),
-        client.from('tournaments').select('id', { count: 'exact', head: true })
-            .eq('status', 'completed').gte('date_start', SITE_START),
-        client.from('courts').select('court_types'),
-        client.from('coaches').select('id', { count: 'exact', head: true })
-    ]).then(function(r) {
-        apply('statMembers', r[0].error, r[0].count);
-        apply('statUsers', r[1].error, r[1].count);
+        apply('statMembers', null, d.members);
+        apply('statUsers', null, d.users);
 
         // Турниры не прячем никогда: архив клуба сам по себе больше нуля
-        apply('statTournaments', r[2].error,
-              ARCHIVE_TOURNAMENTS + (r[2].count || 0));
+        apply('statTournaments', null, ARCHIVE_TOURNAMENTS + (d.tournaments || 0));
 
-        // Считаем теннисные центры, а не отдельные площадки. Число площадок
-        // проставлено лишь у половины записей, поэтому их сумма выходила
-        // меньше числа самих центров — тридцать один против тридцати
-        apply('statCourts', r[3].error, r[3].data ? r[3].data.length : null);
+        // Считаем теннисные центры, а не отдельные площадки: число площадок
+        // проставлено лишь у половины записей, и их сумма выходила меньше
+        // числа самих центров — тридцать один против тридцати
+        apply('statCourts', null, d.courts);
 
-        apply('statCoaches', r[4].error, r[4].count);
+        apply('statCoaches', null, d.coaches);
     });
 })();

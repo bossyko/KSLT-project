@@ -405,6 +405,42 @@
 
         btn.textContent = origLabel;
         btn.disabled = false;
+
+        // Переводить больше нечего — гасим кнопку. Загорится снова, когда
+        // исходный текст поправят: следит за этим watchSource, один на всю
+        // админку. Раньше кнопка оставалась живой всегда, и было непонятно,
+        // сработала она или нет
+        settleTranslateButton(btn, [ruEl, enEl, kgEl]);
+    }
+
+    /**
+     * Погасить кнопку перевода, когда все языки заполнены, и зажечь её
+     * обратно, как только исходный текст изменят.
+     *
+     * Живёт в одном месте и применяется ко всем кнопкам админки: раньше
+     * каждый раздел решал это сам, и вели они себя по-разному.
+     */
+    function settleTranslateButton(btn, fields) {
+        var live = fields.filter(Boolean);
+        if (!live.length) return;
+
+        var filled = live.every(function (el) { return el.value.trim(); });
+        if (!filled) return;
+
+        btn.disabled = true;
+        btn.classList.add('is-done');
+        var doneLabel = isEn ? 'Translated' : 'Переведено';
+        var was = btn.textContent;
+        btn.textContent = '\u2713 ' + doneLabel;
+
+        // Правка в любом из полей означает, что перевод устарел
+        function wake() {
+            btn.disabled = false;
+            btn.classList.remove('is-done');
+            btn.textContent = was;
+            live.forEach(function (el) { el.removeEventListener('input', wake); });
+        }
+        live.forEach(function (el) { el.addEventListener('input', wake); });
     }
 
     /**
@@ -737,6 +773,7 @@
     A.formatDateLocal = formatDateLocal;
     A.translateFromRu = translateFromRu;
     A.translateToEmpty = translateToEmpty;
+    A.settleTranslateButton = settleTranslateButton;
     A.translateText = translateText;
     A.setupBulkDelete = setupBulkDelete;
     A.bulkCheckboxTd = bulkCheckboxTd;

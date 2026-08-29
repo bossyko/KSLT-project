@@ -39,10 +39,96 @@
   }
 
   HB.load = function () {
+    renderHero();
     loadBadges();
     loadAbout();
     loadSponsors();
+
+    // Свежие тексты подтягиваем следом. Экран уже нарисован тем, что
+    // запомнили в прошлый раз, и перерисуется, только если что-то и
+    // правда поменяли в админке
+    if (window.KSLT_CONTENT) {
+      window.KSLT_CONTENT.refresh(supabaseClient, renderHero);
+    }
   };
+
+  // ---- Заглавный экран ------------------------------------------------
+
+  /**
+   * Первое, что видит человек: куда он попал и что здесь делать.
+   *
+   * Раньше приложение открывалось сразу списком турниров — без единого
+   * слова о клубе. Тексты и картинка берутся из базы, поэтому меняются
+   * через админку и попадают и на сайт, и сюда, без новой сборки.
+   */
+  function renderHero() {
+    var el = document.getElementById('homeHero');
+    if (!el) return;
+
+    var C = window.KSLT_CONTENT;
+    function txt(key, fallback) { return C ? C.get(key, fallback) : fallback; }
+
+    var img = txt('hero.image', '');
+    // Путь в базе записан относительно сайта: приложение лежит отдельно,
+    // поэтому короткие пути достраиваем до полного адреса
+    if (img && img.indexOf('http') !== 0) {
+      img = (window.KSLT_SITE_URL || 'https://kslt.netlify.app') + '/' + img.replace(/^\/+/, '');
+    }
+
+    var stats = _stats;   // считаются один раз, ниже
+
+    el.innerHTML =
+      '<div class="hh"' + (img ? ' style="background-image:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.88)),url(' + img + ')"' : '') + '>' +
+        '<div class="hh-season">' + esc(txt('hero.season', 'Сезон 2026')) + '</div>' +
+        '<div class="hh-mark">КСЛТ</div>' +
+        '<div class="hh-sub">' + esc(txt('hero.tagline', 'Кыргызстанское Сообщество Любителей Тенниса')) + '</div>' +
+        '<div class="hh-claim">' + esc(txt('hero.claim', 'ИСКУССТВО СТАНОВИТЬСЯ ПЕРВЫМ')) + '</div>' +
+        '<div class="hh-text">' + esc(txt('hero.text', I18N.t('home.heroText'))) + '</div>' +
+        '<button class="hh-btn" id="hhFind">' + esc(txt('hero.button', 'Найти игрока')) + ' →</button>' +
+        (stats ? statsHtml(stats) : '<div class="hh-stats" id="hhStats"></div>') +
+      '</div>';
+
+    var btn = document.getElementById('hhFind');
+    if (btn) btn.addEventListener('click', function () {
+      if (window.KSLT_APP) window.KSLT_APP.switchScreen('screenPartners');
+    });
+
+    if (!stats) loadStats();
+  }
+
+  /**
+   * Числа клуба. Считает их функция в базе — та же, что на сайте, чтобы
+   * им неоткуда было разойтись.
+   */
+  var _stats = null;
+
+  function loadStats() {
+    if (!supabaseClient) return;
+    supabaseClient.rpc('get_club_stats').then(function (r) {
+      var d = (r.data && r.data[0]) || null;
+      if (!d) return;
+      _stats = d;
+      var box = document.getElementById('hhStats');
+      if (box) box.outerHTML = statsHtml(d);
+    });
+  }
+
+  function statsHtml(d) {
+    var ARCHIVE = 300;   // турниры до 2025 года в базе не заведены
+    var cards = [
+      [d.members, I18N.t('home.stMembers')],
+      [d.users, I18N.t('home.stUsers')],
+      [ARCHIVE + (d.tournaments || 0), I18N.t('home.stTournaments')],
+      [d.courts, I18N.t('home.stCourts')]
+    ];
+    // Тренеров нет — карточку не рисуем: «ноль тренеров» хуже молчания
+    if (d.coaches) cards.push([d.coaches, I18N.t('home.stCoaches')]);
+
+    return '<div class="hh-stats">' + cards.map(function (c) {
+      return '<div class="hh-stat"><span class="hh-stat-num">' + c[0] + '</span>' +
+             '<span class="hh-stat-cap">' + c[1] + '</span></div>';
+    }).join('') + '</div>';
+  }
 
   // ---- Достижения -----------------------------------------------------
 
@@ -86,8 +172,12 @@
       // превращается в бесконечную прокрутку вбок
       list = list.slice(0, 12);
 
-      var html = '<div class="section-title"><h2>' + I18N.t('home.badgesTitle') + '</h2>' +
+      // Заголовок короткий, лозунг — подписью под ним: «Играй. Расти.
+      // Собирай достижения» рядом со словом «Все» не помещался и лез в
+      // две строки, наезжая на него
+      var html = '<div class="section-title"><h2>' + I18N.t('home.badgesShort') + '</h2>' +
         '<span class="see-all" data-nav="badges">' + I18N.t('home.all') + '</span></div>';
+      html += '<div class="hb-motto">' + I18N.t('home.badgesTitle') + '</div>';
       html += '<div class="hb-badges-scroll">';
       list.forEach(function (b) {
         var got = !!mine[b.id];
@@ -142,8 +232,10 @@
     items.forEach(function (it) {
       html += '<div class="hb-about-item">' +
         '<div class="hb-about-icon">' + it[0] + '</div>' +
-        '<div class="hb-about-name">' + I18N.t('home.' + it[1]) + '</div>' +
-        '<div class="hb-about-desc">' + I18N.t('home.' + it[1] + 'Text') + '</div>' +
+        '<div>' +
+          '<div class="hb-about-name">' + I18N.t('home.' + it[1]) + '</div>' +
+          '<div class="hb-about-desc">' + I18N.t('home.' + it[1] + 'Text') + '</div>' +
+        '</div>' +
       '</div>';
     });
     html += '</div>';
@@ -162,7 +254,7 @@
     if (!el || !supabaseClient) return;
 
     supabaseClient.from('sponsors')
-      .select('id, name, logo, url')
+      .select('id, name, logo, url, description, description_en, description_kg, phone, whatsapp, telegram, instagram, address')
       .order('sort_order', { ascending: true })
       .then(function (r) {
         var list = r.data || [];
@@ -170,21 +262,83 @@
 
         var html = '<div class="section-title"><h2>' + I18N.t('home.sponsorsTitle') + '</h2>' +
           '<span class="see-all" data-nav="screenSponsors">' + I18N.t('home.all') + '</span></div>';
-        html += '<div class="hb-sponsors">';
-        list.forEach(function (s) {
-          html += '<div class="hb-sponsor" data-sponsor="' + esc(s.id) + '">' +
+        // Список выводим дважды: лента едет непрерывно и в момент, когда
+        // сдвинулась на половину, вторая копия оказывается ровно на месте
+        // первой — стык не виден, движение не прерывается
+        function tile(s) {
+          return '<div class="hb-sponsor" data-sponsor="' + esc(s.id) + '">' +
             (s.logo
               ? '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '" loading="lazy">'
               : '<span>' + esc(s.name) + '</span>') +
           '</div>';
-        });
-        html += '</div>';
+        }
+        html += '<div class="hb-sponsors"><div class="hb-sponsors-track">' +
+          list.map(tile).join('') + list.map(tile).join('') +
+        '</div></div>';
         el.innerHTML = html;
 
         var all = el.querySelector('[data-nav]');
         if (all) all.addEventListener('click', function () {
           if (window.KSLT_APP) window.KSLT_APP.switchScreen('screenSponsors');
         });
+
+        // Плитка открывает окно, а не выкидывает из приложения. Человек
+        // сначала видит, кто это и чем занимается, и сам решает, идти ли
+        var byId = {};
+        list.forEach(function (s) { byId[s.id] = s; });
+        el.addEventListener('click', function (e) {
+          var t = e.target.closest('[data-sponsor]');
+          if (!t) return;
+          HB.showSponsor(byId[t.getAttribute('data-sponsor')]);
+        });
       });
   }
+
+  /**
+   * Карточка спонсора: кто это, чем занимается и как связаться.
+   *
+   * Раньше нажатие сразу уводило на чужой сайт — человек уходил из
+   * приложения, не поняв, куда попал. А на главной плитки не нажимались
+   * вовсе.
+   */
+  HB.showSponsor = function (s) {
+    if (!s || !window.KSLT_INVITES) return;
+
+    var ICON = window.KSLT_CONTACT_ICONS || {};
+    var body = '';
+
+    if (s.logo) body += '<div class="hb-sp-logo"><img src="' + esc(s.logo) + '" alt=""></div>';
+    body += '<div class="hb-sp-name">' + esc(s.name) + '</div>';
+
+    var about = field(s, 'description');
+    if (about) body += '<p class="gi-text">' + esc(about) + '</p>';
+
+    // Способы связи — теми же значками и цветами, что у контактов игрока
+    var R = window.KSLT_RULES;
+    var rows = [];
+    if (s.phone) rows.push([ICON.phone, esc(s.phone), 'tel:' + s.phone, 'phone']);
+    if (s.whatsapp) rows.push([ICON.whatsapp, esc(s.whatsapp), R.socialUrl('wa', s.whatsapp), 'wa']);
+    if (s.telegram) rows.push([ICON.telegram, '@' + esc(R.handle(s.telegram)), R.socialUrl('tg', s.telegram), 'tg']);
+    if (s.instagram) rows.push([ICON.instagram, '@' + esc(R.handle(s.instagram)), R.socialUrl('ig', s.instagram), 'ig']);
+
+    if (rows.length) {
+      body += '<div class="gi-contacts">' + rows.map(function (r) {
+        return '<a class="gi-contact gi-contact--' + r[3] + '" href="' + r[2] + '" target="_blank" rel="noopener">' +
+          '<span class="gi-contact-icon">' + r[0] + '</span><span>' + r[1] + '</span></a>';
+      }).join('') + '</div>';
+    }
+
+    if (s.address) body += '<div class="hb-sp-addr">' + esc(s.address) + '</div>';
+
+    var actions = [{ label: I18N.t('inv.close'), primary: !s.url }];
+    if (s.url) {
+      actions.push({ label: I18N.t('home.sponsorSite'), primary: true, onClick: function (close) {
+        window.open(s.url, '_blank', 'noopener');
+        close();
+      } });
+    }
+
+    window.KSLT_INVITES.modal({ title: I18N.t('home.sponsorTitle'), body: body, actions: actions });
+  };
+
 })();

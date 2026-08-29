@@ -18,6 +18,9 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
+// Файлы, которые обязаны совпадать в сайте и приложении
+const SHARED = ['kslt-rules.js', 'site-content.js', 'contact-icons.js', 'tournament-slots.js'];
+
 const SITE = path.join(ROOT, 'js', 'kslt-rules.js');
 const APP = path.join(ROOT, 'mobile', 'www', 'js', 'kslt-rules.js');
 
@@ -32,13 +35,18 @@ function fail(msg) {
 
 const siteSrc = fs.readFileSync(SITE, 'utf8');
 
-if (!fs.existsSync(APP)) {
-    fail('в приложении нет копии правил: mobile/www/js/kslt-rules.js');
-} else if (fs.readFileSync(APP, 'utf8') !== siteSrc) {
-    fail('правила сайта и приложения разошлись — скопируйте js/kslt-rules.js в mobile/www/js/');
-} else {
-    console.log('  ✓ правила сайта и приложения совпадают');
-}
+SHARED.forEach(function (name) {
+    const a = path.join(ROOT, 'js', name);
+    const b = path.join(ROOT, 'mobile', 'www', 'js', name);
+    if (!fs.existsSync(a)) return;
+    if (!fs.existsSync(b)) {
+        fail('в приложении нет копии: mobile/www/js/' + name);
+    } else if (fs.readFileSync(a, 'utf8') !== fs.readFileSync(b, 'utf8')) {
+        fail(name + ': сайт и приложение разошлись — скопируйте js/' + name + ' в mobile/www/js/');
+    } else {
+        console.log('  ✓ ' + name + ' — совпадает');
+    }
+});
 
 // ---- Никто не завёл вторую копию правил? ------------------------------
 

@@ -7,6 +7,8 @@
 
   var CT = window.KSLT_COURTS = {};
   var allCourts = [];
+  var currentCity = 'all';
+  var currentSurface = 'all';
   var currentCourtFilter = 'all';
   var GUEST_VISIBLE = 5;
 
@@ -61,6 +63,8 @@
 
           return {
             id: row.id,
+            city: row.city || 'Бишкек',
+            surfaces: types.map(function(t) { return t.surface; }).filter(Boolean),
             name: row.name || I18N.t('courts.court'),
             photo: row.photo || '',
             totalCourts: totalCourts,
@@ -89,15 +93,63 @@
     render();
   };
 
+  // Город и покрытие — как на сайте: там их два выпадающих списка,
+  // здесь полосы кнопок, потому что на телефоне так удобнее
+  CT.filterCity = function(v) { currentCity = v; render(); };
+  CT.filterSurface = function(v) { currentSurface = v; render(); };
+
+  /** Полосы города и покрытия собираем из самих кортов, а не задаём списком:
+   *  появится корт в новом городе — кнопка появится сама. */
+  function renderExtraChips() {
+    var cityBox = document.getElementById('courtCityChips');
+    var surfBox = document.getElementById('courtSurfaceChips');
+    if (!cityBox || !surfBox) return;
+
+    function chips(box, values, current, labelOf) {
+      if (values.length < 2) { box.innerHTML = ''; return; }   // выбирать не из чего
+      var html = '<button class="filter-chip' + (current === 'all' ? ' active' : '') +
+                 '" data-filter="all">' + I18N.t('courts.all') + '</button>';
+      values.forEach(function(v) {
+        html += '<button class="filter-chip' + (current === v ? ' active' : '') +
+                '" data-filter="' + esc(v) + '">' + esc(labelOf(v)) + '</button>';
+      });
+      box.innerHTML = html;
+    }
+
+    var cities = [];
+    var surfaces = [];
+    allCourts.forEach(function(c) {
+      if (c.city && cities.indexOf(c.city) === -1) cities.push(c.city);
+      (c.surfaces || []).forEach(function(sf) {
+        if (sf && surfaces.indexOf(sf) === -1) surfaces.push(sf);
+      });
+    });
+    cities.sort();
+    surfaces.sort();
+
+    chips(cityBox, cities, currentCity, function(v) { return v; });
+    chips(surfBox, surfaces, currentSurface, function(v) { return SURFACE_MAP[v] || v; });
+  }
+
   function render() {
     var el = document.getElementById('courtsList');
     if (!el) return;
 
+    renderExtraChips();
+
     var courtsToShow = allCourts;
     if (currentCourtFilter === 'indoor') {
-      courtsToShow = allCourts.filter(function(c) { return c.hasIndoor; });
+      courtsToShow = courtsToShow.filter(function(c) { return c.hasIndoor; });
     } else if (currentCourtFilter === 'outdoor') {
-      courtsToShow = allCourts.filter(function(c) { return c.hasOutdoor; });
+      courtsToShow = courtsToShow.filter(function(c) { return c.hasOutdoor; });
+    }
+    if (currentCity !== 'all') {
+      courtsToShow = courtsToShow.filter(function(c) { return c.city === currentCity; });
+    }
+    if (currentSurface !== 'all') {
+      courtsToShow = courtsToShow.filter(function(c) {
+        return (c.surfaces || []).indexOf(currentSurface) !== -1;
+      });
     }
 
     if (courtsToShow.length === 0) {

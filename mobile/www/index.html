@@ -49,14 +49,19 @@
 
     <!-- HOME -->
     <div class="screen active" id="screenHome">
+      <!-- Заглавный экран: куда попал и что тут делать. Содержимое из базы,
+           меняется через админку без пересборки приложения -->
+      <div id="homeHero"></div>
       <div id="homeLive"></div>
       <div id="homeBattles"></div>
       <div id="homeTournament"></div>
+      <!-- Спонсоры между турнирами и новостями: их видят все, кто открыл
+           приложение, а не только те, кто долистал до низа -->
+      <div id="homeSponsors"></div>
       <div id="homeNews"></div>
       <!-- Постоянные разделы: держат главную, пока сезон не начался -->
       <div id="homeBadges"></div>
       <div id="homeAbout"></div>
-      <div id="homeSponsors"></div>
     </div>
 
     <!-- TOURNAMENTS -->
@@ -172,12 +177,19 @@
           <input type="text" id="partnerSearch" placeholder="Поиск по имени..." data-i18n-ph="partners.search">
         </div>
       </div>
+      <!-- Отбор тот же, что на сайте: сначала пол, потом уровень словами.
+           Голые числа 2.5 / 3.0 новичку ничего не говорят -->
+      <div class="filters-row" id="partnerGenderChips">
+        <button class="filter-chip active" data-gender="all" data-i18n="partners.fAll">Все</button>
+        <button class="filter-chip" data-gender="male" data-i18n="partners.fMen">Мужчины</button>
+        <button class="filter-chip" data-gender="female" data-i18n="partners.fWomen">Женщины</button>
+      </div>
       <div class="filters-row" id="partnerNtrpChips">
-        <button class="filter-chip active" data-filter="all">Все</button>
-        <button class="filter-chip" data-filter="2.5">2.5</button>
-        <button class="filter-chip" data-filter="3.0">3.0</button>
-        <button class="filter-chip" data-filter="3.5">3.5</button>
-        <button class="filter-chip" data-filter="4.0">4.0+</button>
+        <button class="filter-chip active" data-filter="all" data-i18n="partners.lvlAll">Все уровни</button>
+        <button class="filter-chip" data-filter="1-2.5" data-i18n="partners.lvl1">Начинающий</button>
+        <button class="filter-chip" data-filter="2.5-3.5" data-i18n="partners.lvl2">Средний</button>
+        <button class="filter-chip" data-filter="3.5-4.5" data-i18n="partners.lvl3">Продвинутый</button>
+        <button class="filter-chip" data-filter="4.5-5.5" data-i18n="partners.lvl4">Сильный</button>
       </div>
       <div class="animate-in" id="partnersList"></div>
     </div>
@@ -211,6 +223,9 @@
         <button class="filter-chip" data-filter="indoor">Indoor</button>
         <button class="filter-chip" data-filter="outdoor">Outdoor</button>
       </div>
+      <!-- Город и покрытие — как на сайте. Собираются из самих кортов -->
+      <div class="filters-row" id="courtCityChips"></div>
+      <div class="filters-row" id="courtSurfaceChips"></div>
       <div class="animate-in" id="courtsList"></div>
     </div>
 
@@ -608,6 +623,7 @@
 <script src="js/phone.js"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/kslt-rules.js"></script>
+<script src="js/site-content.js"></script>
 <script src="js/tournament-slots.js"></script>
 <script src="js/contact-icons.js"></script>
 <script src="js/game-invites.js"></script>
