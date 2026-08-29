@@ -77,10 +77,11 @@
     'menu.terms':   { ru: 'Условия использования', en: 'Terms of Service', kg: 'Колдонуу шарттары' },
     'menu.privacy': { ru: 'Политика конфиденциальности', en: 'Privacy Policy', kg: 'Купуялык саясаты' },
     'menu.offer':   { ru: 'Публичная оферта', en: 'Public Offer', kg: 'Ачык оферта' },
-    'auth.agree':   { ru: 'Регистрируясь, вы соглашаетесь с', en: 'By registering you agree to the', kg: 'Катталуу менен сиз кабыл аласыз' },
-    'auth.terms':   { ru: 'условиями использования', en: 'Terms of Service', kg: 'колдонуу шарттарын' },
-    'auth.and':     { ru: ' и ', en: ' and ', kg: ' жана ' },
-    'auth.privacy': { ru: 'политикой конфиденциальности', en: 'Privacy Policy', kg: 'купуялык саясатын' },
+    // Ключ auth.terms уже занят под всю фразу целиком (ниже в этом файле),
+    // поэтому у ссылок свои имена — иначе одно перебивает другое
+    'auth.linkTerms':   { ru: 'условиями использования', en: 'Terms of Service', kg: 'колдонуу шарттарын' },
+    'auth.linkPrivacy': { ru: 'политикой конфиденциальности', en: 'Privacy Policy', kg: 'купуялык саясатын' },
+    'auth.linkAnd':     { ru: ' и ', en: ' and ', kg: ' жана ' },
     'home.heroText': { ru: 'Присоединяйся к 350+ игрокам: находи партнёров по игре, новых друзей и любимые турниры.',
                        en: 'Join 350+ players: find playing partners, new friends and your favourite tournaments.',
                        kg: '350+ оюнчуга кошулуңуз: оюн боюнча өнөктөш, жаңы достор жана сүйүктүү мелдештер.' },
@@ -571,7 +572,11 @@
     'profile.phoneTaken':     { ru: 'Этот номер уже привязан к другому аккаунту', en: 'This phone number is already linked to another account', kg: 'Бул номер башка аккаунтка байланган' },
     'profile.deleteTitle':    { ru: 'Удаление аккаунта', en: 'Delete Account', kg: 'Аккаунтту өчүрүү' },
     'profile.deleteText':     { ru: 'Аккаунт скроется сразу. У вас будет 30 дней, чтобы передумать — просто войдите, и мы предложим его вернуть. Потом он удалится навсегда.', en: 'Your account is hidden right away. You have 30 days to change your mind — just sign in and we will offer to bring it back. After that it is gone for good.', kg: 'Аккаунт дароо жашырылат. Ойлонууга 30 күнүңүз бар — жөн эле кириңиз, биз аны кайтарууну сунуштайбыз. Андан кийин биротоло өчөт.' },
-    'profile.deleteBtn':      { ru: 'Удалить навсегда', en: 'Delete permanently', kg: 'Биротоло өчүрүү' },
+    // Не «навсегда»: рядом написано, что 30 дней можно передумать, и
+    // кнопка спорила с собственным описанием
+    'profile.deleteBtn':      { ru: 'Удалить аккаунт', en: 'Delete account', kg: 'Аккаунтту өчүрүү' },
+    'profile.deleteCancel':   { ru: 'Отмена',          en: 'Cancel',         kg: 'Жокко чыгаруу' },
+    'profile.deleteAsk':      { ru: 'Удалить аккаунт?', en: 'Delete account?', kg: 'Аккаунтту өчүрөбүзбү?' },
     'profile.deleteConfirm':  { ru: 'Удалить аккаунт? Вернуть его можно в течение 30 дней.', en: 'Delete your account? You can bring it back within 30 days.', kg: 'Аккаунтту өчүрөсүзбү? 30 күн ичинде кайтарууга болот.' },
     'profile.deleting':       { ru: 'Удаление...', en: 'Deleting...', kg: 'Өчүрүлүүдө...' },
     'profile.deletedOk':      { ru: 'Аккаунт помечен на удаление', en: 'Account scheduled for deletion', kg: 'Аккаунт өчүрүүгө белгиленди' },

@@ -146,6 +146,9 @@
       AUTH.currentUser = null;
       AUTH.currentProfile = null;
       AUTH._membershipStatus = false;
+      // Вышел — значит при следующем входе окно про удаление спросим
+      // заново. Приложение не перезагружается, само оно не забудет
+      if (window.KSLT_ACCOUNT_RESTORE) window.KSLT_ACCOUNT_RESTORE.reset();
     });
   };
 

@@ -12,7 +12,18 @@
 
   var AR = window.KSLT_ACCOUNT_RESTORE = {};
   var GRACE_DAYS = 30;
-  var shown = false;
+
+  // Кому окно уже показали в этом заходе.
+  //
+  // Приложение за весь запуск не перезагружается, и простая отметка «уже
+  // показывали» переживала выход и повторный вход: сервер честно отвечал
+  // «помечен на удаление», а окно молчало, и человек попадал прямо в
+  // кабинет. Поэтому помним не «показывали вообще», а кому именно, и
+  // забываем при выходе.
+  var shownFor = null;
+
+  /** Человек вышел — в следующий раз спросим снова. */
+  AR.reset = function () { shownFor = null; };
 
   function t(key) {
     return window.KSLT_I18N ? window.KSLT_I18N.t(key) : key;
@@ -32,8 +43,9 @@
    * Зовём после загрузки профиля — отдельного запроса не делаем.
    */
   AR.check = function (profile) {
-    if (shown || !profile || !profile.deleted_at) return;
-    shown = true;
+    if (!profile || !profile.deleted_at) return;
+    if (shownFor === profile.id) return;
+    shownFor = profile.id;
 
     var ov = document.createElement('div');
     ov.className = 'ar-overlay';

@@ -837,11 +837,27 @@
       // Render content blocks if JSON array, otherwise raw HTML
       var text = I18N.field(n, 'content');
       var contentHtml = '';
+
+      // Снимки, расставленные по номерам абзацев. Сайт умеет это давно, а
+      // приложение показывало только обложку и галерею в конце: как только
+      // в новость вставят фотографию между абзацами, она бы молча пропала
+      var inline = (n.content_images || [])
+        .filter(function(ci) { return ci && ci.url; })
+        .map(function(ci) {
+          return { url: ci.url, after: parseInt(ci.after_paragraph, 10) || 1 };
+        })
+        .sort(function(a, b) { return a.after - b.after; });
+      var inlineIdx = 0;
+
+      function photo(url) {
+        return '<figure class="nd-figure"><img src="' + esc(url) + '" loading="lazy" alt=""></figure>';
+      }
+
       if (text) {
         try {
           var blocks = JSON.parse(text);
           if (Array.isArray(blocks)) {
-            blocks.forEach(function(block) {
+            blocks.forEach(function(block, index) {
               if (block.type === 'text' || block.type === 'paragraph') {
                 contentHtml += '<p style="margin-bottom:12px;line-height:1.6">' + (block.text || block.content || '') + '</p>';
               } else if (block.type === 'image') {
@@ -853,6 +869,12 @@
               } else {
                 contentHtml += '<p>' + (block.text || block.content || '') + '</p>';
               }
+
+              // Снимок ставится после абзаца с этим номером, счёт с единицы
+              while (inlineIdx < inline.length && inline[inlineIdx].after === index + 1) {
+                contentHtml += photo(inline[inlineIdx].url);
+                inlineIdx++;
+              }
             });
           } else {
             contentHtml = text;
@@ -860,6 +882,12 @@
         } catch(e) {
           contentHtml = text;
         }
+      }
+
+      // Снимки, для которых абзаца не нашлось, — в конец текста, как на сайте
+      while (inlineIdx < inline.length) {
+        contentHtml += photo(inline[inlineIdx].url);
+        inlineIdx++;
       }
       html += '<div class="nd-body">' + contentHtml + '</div>';
 

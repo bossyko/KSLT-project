@@ -1510,14 +1510,36 @@
     html += '<h3 style="color:var(--red);margin-bottom:8px">' + I18N.t('profile.deleteTitle') + '</h3>';
     html += '<p style="color:var(--text-sec);font-size:13px;margin-bottom:24px">' + I18N.t('profile.deleteText') + '</p>';
     html += '<button class="pd-challenge-btn" id="profDeleteConfirm" style="background:var(--red)">' + I18N.t('profile.deleteBtn') + '</button>';
+    html += '<button class="gi-btn gi-btn-ghost" id="profDeleteCancel" style="width:100%;margin-top:10px">' + I18N.t('profile.deleteCancel') + '</button>';
     html += '</div>';
 
     var ov = openSubOverlay(I18N.t('profile.deleteAccount'), html);
 
+    document.getElementById('profDeleteCancel').addEventListener('click', function() {
+      closeSubOverlay(ov);
+    });
+
     document.getElementById('profDeleteConfirm').addEventListener('click', function() {
-      if (!confirm(I18N.t('profile.deleteConfirm'))) return;
-      this.disabled = true;
-      this.textContent = I18N.t('profile.deleting');
+      var btn = this;
+      // Спрашиваем своим окном, а не системным: то выглядит чужим и в
+      // приложении способно подвесить экран, пока его не закроют
+      if (!window.KSLT_INVITES) return;
+      window.KSLT_INVITES.modal({
+        title: I18N.t('profile.deleteAsk'),
+        body: '<p class="gi-text">' + I18N.t('profile.deleteConfirm') + '</p>',
+        actions: [
+          { label: I18N.t('profile.deleteCancel') },
+          { label: I18N.t('profile.deleteBtn'), primary: true, onClick: function(close) {
+            close();
+            doDelete(btn);
+          } }
+        ]
+      });
+    });
+
+    function doDelete(btn) {
+      btn.disabled = true;
+      btn.textContent = I18N.t('profile.deleting');
 
       // Call Edge Function for full account deletion
       supabaseClient.auth.getSession().then(function(sess) {
@@ -1542,11 +1564,11 @@
         .catch(function(err) {
           console.error('Delete account error:', err);
           if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('profile.deleteError') || 'Error');
-          document.getElementById('profDeleteConfirm').disabled = false;
-          document.getElementById('profDeleteConfirm').textContent = I18N.t('profile.deleteBtn');
+          btn.disabled = false;
+          btn.textContent = I18N.t('profile.deleteBtn');
         });
       });
-    });
+    }
   }
 
   // ---- Helper ----

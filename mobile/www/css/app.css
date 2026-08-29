@@ -5206,3 +5206,7 @@ select.prof-field-input { color: var(--text); }
 .info-doc p, .info-doc li { font-size: 13px; line-height: 1.6; color: var(--text-sec); }
 .info-doc ul, .info-doc ol { padding-left: 20px; margin: 8px 0; }
 .info-doc a { color: var(--accent); }
+
+/* Снимок внутри текста новости — по номеру абзаца, как на сайте */
+.nd-figure { margin: 16px 0; }
+.nd-figure img { width: 100%; border-radius: 10px; display: block; }
