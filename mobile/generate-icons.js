@@ -2,7 +2,14 @@ const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
 
-const SVG = path.join(__dirname, 'icons/variant-1-ball.svg');
+// Значок собирается из настоящего логотипа КСЛТ (www/img/kslt-logo.svg).
+// Раньше здесь стоял черновой набросок с мячиком и латинскими буквами —
+// с логотипом клуба он не имел ничего общего.
+//
+// Бегущий игрок, а не надпись: Android обрезает значок по кругу, и широкое
+// «КСЛТ» уходит под обрез. Надпись осталась на заставке, где есть место.
+const SVG = path.join(__dirname, 'icons/kslt-icon.svg');
+const SVG_FG = path.join(__dirname, 'icons/kslt-icon-foreground.svg');
 const RES = path.join(__dirname, 'android/app/src/main/res');
 
 // Android mipmap sizes
@@ -25,6 +32,7 @@ const fgSizes = {
 
 async function generate() {
   const svgBuffer = fs.readFileSync(SVG);
+  const fgBuffer = fs.readFileSync(SVG_FG);
 
   for (const [folder, size] of Object.entries(sizes)) {
     const dir = path.join(RES, folder);
@@ -51,7 +59,7 @@ async function generate() {
   // Foreground for adaptive icons
   for (const [folder, size] of Object.entries(fgSizes)) {
     const dir = path.join(RES, folder);
-    await sharp(svgBuffer)
+    await sharp(fgBuffer)
       .resize(size, size)
       .png()
       .toFile(path.join(dir, 'ic_launcher_foreground.png'));

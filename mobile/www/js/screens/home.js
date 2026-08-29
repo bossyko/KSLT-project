@@ -12,6 +12,8 @@
     loadBattles();
     loadUpcomingTournaments();
     loadLatestNews();
+    // Живое сверху, постоянное ниже: достижения, «О проекте», спонсоры
+    if (window.KSLT_HOME_BLOCKS) window.KSLT_HOME_BLOCKS.load();
   };
 
   // ============================

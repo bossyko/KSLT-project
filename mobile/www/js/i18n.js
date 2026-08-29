@@ -49,6 +49,32 @@
     'home.all':             { ru: 'Все',             en: 'All',              kg: 'Баары' },
     // Раздел показывает и завершённые, и те, что идут сейчас — название
     // спорило с содержимым. На сайте переименован так же
+    // === Постоянные разделы главной ===
+    'home.badgesTitle': { ru: 'Играй. Расти. Собирай достижения',
+                          en: 'Play. Grow. Collect achievements',
+                          kg: 'Ойно. Өс. Жетишкендиктерди чогулт' },
+    'home.badgesCta':   { ru: 'Начать путь к победе', en: 'Start your path to victory', kg: 'Жеңишке жол баштаңыз' },
+
+    'home.aboutTitle':  { ru: 'О проекте КСЛТ', en: 'About KSLT', kg: 'KSLT жөнүндө' },
+    'home.aboutText':   { ru: 'КСЛТ объединяет игроков всех уровней — от новичков до опытных любителей. С 2021 года мы проводим турниры, помогаем находить партнёров по игре и растим большое живое теннисное сообщество.',
+                          en: 'KSLT brings together players of all levels — from beginners to seasoned amateurs. Since 2021 we have been running tournaments, helping players find partners and growing a large, living tennis community.',
+                          kg: 'KSLT бардык деңгээлдеги оюнчуларды бириктирет — жаңы баштагандан тажрыйбалуу ышкыбоздорго чейин. 2021-жылдан бери мелдеш өткөрүп, оюн боюнча өнөктөш табууга жардам берип, чоң теннис коомчулугун өстүрүп келебиз.' },
+
+    'home.about1':      { ru: 'Турниры',   en: 'Tournaments', kg: 'Мелдештер' },
+    'home.about1Text':  { ru: 'Регулярные соревнования для всех уровней', en: 'Regular competitions for all levels', kg: 'Бардык деңгээлдер үчүн туруктуу мелдештер' },
+    'home.about2':      { ru: 'Сообщество', en: 'Community',  kg: 'Коомчулук' },
+    'home.about2Text':  { ru: 'Найди партнёра для игры в любое время', en: 'Find a partner to play any time', kg: 'Каалаган убакта оюнга өнөктөш табыңыз' },
+    'home.about3':      { ru: 'Рейтинг',   en: 'Rating',      kg: 'Рейтинг' },
+    'home.about3Text':  { ru: 'Система очков и статистика каждого игрока', en: 'Points system and stats for every player', kg: 'Упай системасы жана ар бир оюнчунун статистикасы' },
+    'home.about4':      { ru: 'Корты',     en: 'Courts',      kg: 'Корттор' },
+    'home.about4Text':  { ru: 'Полный список кортов Кыргызстана', en: 'Full list of courts in Kyrgyzstan', kg: 'Кыргызстандагы корттордун толук тизмеси' },
+    'home.about5':      { ru: 'Тренеры',   en: 'Coaches',     kg: 'Машыктыруучулар' },
+    'home.about5Text':  { ru: 'Найди тренера под свой уровень', en: 'Find a coach for your level', kg: 'Деңгээлиңизге ылайык машыктыруучу табыңыз' },
+    'home.about6':      { ru: 'Скидки',    en: 'Discounts',   kg: 'Арзандатуулар' },
+    'home.about6Text':  { ru: 'Членам КСЛТ — специальные цены на корты и тренировки', en: 'Special prices on courts and training for KSLT members', kg: 'KSLT мүчөлөрүнө корт жана машыгуу боюнча атайын баа' },
+
+    'home.sponsorsTitle': { ru: 'Спонсоры КСЛТ', en: 'KSLT Sponsors', kg: 'KSLT демөөрчүлөрү' },
+
     'home.upcoming':        { ru: 'Турниры',          en: 'Tournaments',        kg: 'Мелдештер' },
     'home.latestNews':      { ru: 'Новости',         en: 'News',             kg: 'Жанылыктар' },
     'home.loginToWatch':    { ru: 'Войдите, чтобы смотреть трансляцию', en: 'Log in to watch the stream', kg: 'Көрүү үчүн кириңиз' },
