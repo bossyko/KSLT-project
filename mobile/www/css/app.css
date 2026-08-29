@@ -5192,3 +5192,17 @@ select.prof-field-input { color: var(--text); }
   font-size: 12px; color: var(--text-sec); line-height: 1.45;
 }
 @media (min-width: 500px) { .hb-motto { padding-left: 20px; padding-right: 20px; } }
+
+/* Ссылки на документы под формой регистрации. Раньше это были обычные
+   ссылки в браузер — теперь кнопки, открывающие документ внутри */
+.auth-doc-link {
+  background: none; border: none; padding: 0;
+  color: var(--accent); font: inherit; text-decoration: underline;
+  cursor: pointer;
+}
+/* Правовой документ в окне: набран как на сайте, но под ширину телефона */
+.info-doc h2 { font-size: 15px; margin: 18px 0 8px; color: var(--text); }
+.info-doc h3 { font-size: 13.5px; margin: 14px 0 6px; color: var(--text); }
+.info-doc p, .info-doc li { font-size: 13px; line-height: 1.6; color: var(--text-sec); }
+.info-doc ul, .info-doc ol { padding-left: 20px; margin: 8px 0; }
+.info-doc a { color: var(--accent); }

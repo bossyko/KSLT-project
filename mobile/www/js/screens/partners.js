@@ -329,6 +329,31 @@
     );
   };
 
+  /**
+   * Правовой документ: условия, политика, оферта.
+   *
+   * Текст берётся из базы — тот же, что на сайте. Раньше эти три ссылки на
+   * экране регистрации уводили в браузер: человек уходил из приложения
+   * ровно в тот момент, когда решал, соглашаться ли. Магазины на это
+   * смотрят отдельно, политика должна открываться внутри.
+   */
+  window.KSLT_INFO.showDocument = function(slug) {
+    var I18N = window.KSLT_I18N;
+    showInfoOverlay(I18N.t('common.loading'),
+      '<div class="loading-center"><div class="spinner"></div></div>');
+
+    if (!window.KSLT_CONTENT) return;
+
+    window.KSLT_CONTENT.document(supabaseClient, slug, function(doc) {
+      var ov = document.getElementById('infoOverlay');
+      if (!ov || !doc) return;
+      var title = ov.querySelector('.td-topbar-title');
+      var body = ov.querySelector('.info-doc');
+      if (title) title.textContent = doc.title || '';
+      if (body) body.innerHTML = doc.body || '';
+    });
+  };
+
   function showInfoOverlay(title, contentHtml) {
     var existing = document.getElementById('infoOverlay');
     if (existing) existing.remove();
@@ -344,7 +369,7 @@
         '<span class="td-topbar-title">' + esc(title) + '</span>' +
         '<span style="width:60px"></span>' +
       '</div>' +
-      '<div style="padding:16px">' + contentHtml + '</div>';
+      '<div class="info-doc" style="padding:16px">' + contentHtml + '</div>';
 
     document.getElementById('app').appendChild(overlay);
     requestAnimationFrame(function() { overlay.classList.add('open'); });

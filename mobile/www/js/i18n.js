@@ -74,6 +74,13 @@
     'home.about6':      { ru: 'Скидки',    en: 'Discounts',   kg: 'Арзандатуулар' },
     'home.about6Text':  { ru: 'Членам КСЛТ — специальные цены на корты и тренировки', en: 'Special prices on courts and training for KSLT members', kg: 'KSLT мүчөлөрүнө корт жана машыгуу боюнча атайын баа' },
 
+    'menu.terms':   { ru: 'Условия использования', en: 'Terms of Service', kg: 'Колдонуу шарттары' },
+    'menu.privacy': { ru: 'Политика конфиденциальности', en: 'Privacy Policy', kg: 'Купуялык саясаты' },
+    'menu.offer':   { ru: 'Публичная оферта', en: 'Public Offer', kg: 'Ачык оферта' },
+    'auth.agree':   { ru: 'Регистрируясь, вы соглашаетесь с', en: 'By registering you agree to the', kg: 'Катталуу менен сиз кабыл аласыз' },
+    'auth.terms':   { ru: 'условиями использования', en: 'Terms of Service', kg: 'колдонуу шарттарын' },
+    'auth.and':     { ru: ' и ', en: ' and ', kg: ' жана ' },
+    'auth.privacy': { ru: 'политикой конфиденциальности', en: 'Privacy Policy', kg: 'купуялык саясатын' },
     'home.heroText': { ru: 'Присоединяйся к 350+ игрокам: находи партнёров по игре, новых друзей и любимые турниры.',
                        en: 'Join 350+ players: find playing partners, new friends and your favourite tournaments.',
                        kg: '350+ оюнчуга кошулуңуз: оюн боюнча өнөктөш, жаңы достор жана сүйүктүү мелдештер.' },

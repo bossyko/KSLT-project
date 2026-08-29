@@ -293,11 +293,26 @@ test.describe('Mobile App — Auth Screen', () => {
         expect(await tgBtn.count()).toBeGreaterThanOrEqual(1);
     });
 
-    test('Auth screen has terms/privacy links with target=_blank', async ({ page }) => {
+    /**
+     * Условия и политика открываются внутри приложения, а не ссылкой в
+     * браузер. Раньше здесь стояли обычные ссылки с target=_blank: человек
+     * уходил из приложения ровно в тот момент, когда решал, соглашаться ли.
+     * Магазины на это смотрят отдельно — политика должна открываться внутри.
+     */
+    test('Условия и политика открываются внутри, а не в браузере', async ({ page }) => {
         await page.goto('/mobile/www/index.html', { waitUntil: 'domcontentloaded' });
 
-        const termsLinks = page.locator('#authScreen .auth-footer a[target="_blank"]');
-        expect(await termsLinks.count()).toBeGreaterThanOrEqual(2);
+        const кнопки = page.locator('#authScreen .auth-footer .auth-doc-link');
+        expect(await кнопки.count()).toBeGreaterThanOrEqual(2);
+
+        // Ни одной ссылки наружу под формой регистрации остаться не должно
+        const наружу = page.locator('#authScreen .auth-footer a[target="_blank"]');
+        expect(await наружу.count()).toBe(0);
+
+        // Каждая кнопка знает, какой документ открывает
+        const метки = await кнопки.evaluateAll(els => els.map(e => e.dataset.doc));
+        expect(метки).toContain('terms');
+        expect(метки).toContain('privacy');
     });
 });
 

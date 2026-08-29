@@ -289,7 +289,7 @@
         </section>
 
         <!-- OFFER CONTENT -->
-        <div class="ip-container">
+        <div class="ip-container" data-document="offer">
 
             <!-- Preamble -->
             <div class="ip-rules-section ip-fade-in">
@@ -506,6 +506,7 @@
 
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js"></script>
+    <script src="../js/site-content.js?v=2"></script>
     <script src="../js/sponsors-loader.js?v=5"></script>
     <script src="../js/contact-icons.js?v=1"></script>
     <script src="../js/auth-nav.js?v=17"></script>
@@ -532,6 +533,26 @@
             });
         }, { threshold: 0.1 });
         document.querySelectorAll('.ip-fade-in').forEach(function(el) { observer.observe(el); });
+    </script>
+    <script>
+        // Текст документа приходит из базы: правится один раз и меняется
+        // и здесь, и в приложении. В разметке остаётся та же редакция —
+        // она видна, пока база не ответила
+        document.addEventListener('DOMContentLoaded', function () {
+            var box = document.querySelector('[data-document]');
+            if (!box || !window.KSLT_CONTENT || !window.supabaseClient) return;
+            window.KSLT_CONTENT.document(window.supabaseClient, box.dataset.document, function (doc) {
+                if (!doc || !doc.body) return;
+                box.innerHTML = doc.body;
+                box.dataset.fromDb = '1';   // отметка: текст пришёл из базы
+                // Блоки на этих страницах проявляются по мере прокрутки, и
+                // наблюдатель уже отработал по прежней разметке. Новые он не
+                // видел — без этого текст лежал на странице невидимым
+                box.querySelectorAll('.ip-fade-in').forEach(function (el) {
+                    el.classList.add('visible');
+                });
+            });
+        });
     </script>
 </body>
 </html>

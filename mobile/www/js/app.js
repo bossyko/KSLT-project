@@ -238,6 +238,18 @@
     menuOverlay.classList.remove('open');
     if (window.KSLT_INFO) window.KSLT_INFO.showFaq();
   });
+  // Условия и политика на экране регистрации: открываем внутри окном, а
+  // не ссылкой в браузер — человек не должен уходить из приложения ровно
+  // в тот момент, когда решает, соглашаться ли
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('.auth-doc-link, .menu-item[data-doc]');
+    if (!link) return;
+    var menu = document.getElementById('menuOverlay');
+    if (menu) menu.classList.remove('open');
+    e.preventDefault();
+    if (window.KSLT_INFO) window.KSLT_INFO.showDocument(link.getAttribute('data-doc'));
+  });
+
   var menuPricing = document.getElementById('menuPricing');
   if (menuPricing) menuPricing.addEventListener('click', function() {
     menuOverlay.classList.remove('open');
