@@ -1672,7 +1672,27 @@
       info += tdInfoRow('⏰', I18N.t('td.regUntil'), dl.getDate() + ' ' + I18N.month(dl.getMonth()) + ' ' + dl.getFullYear());
     }
     if (t.prize_fund && t.prize_fund !== '0') info += tdInfoRow('💰', I18N.t('td.prizeFund'), t.prize_fund + ' ' + I18N.t('td.som'));
-    if (t.category_id) info += tdInfoRow('🏷', I18N.t('td.category'), t.category_id);
+
+    // Взнос: на сайте он показан двумя числами — членам и гостям. В
+    // приложении его не было вовсе, а это первое, что спрашивают
+    var feeM = t.fee_member != null ? Number(t.fee_member) : null;
+    var feeG = t.fee_guest != null ? Number(t.fee_guest) : null;
+    if (feeM !== null || feeG !== null) {
+      var fee = [];
+      if (feeM !== null) fee.push(I18N.t('td.feeMember') + ' ' + feeM + ' ' + I18N.t('td.som'));
+      if (feeG !== null && feeG !== feeM) fee.push(I18N.t('td.feeGuest') + ' ' + feeG + ' ' + I18N.t('td.som'));
+      info += tdInfoRow('🎟', I18N.t('td.fee'), fee.join(' · '));
+    }
+
+    // Где играем. На сайте под этим целый раздел с адресом корта
+    if (t.location) info += tdInfoRow('📍', I18N.t('td.venue'), I18N.field(t, 'location'));
+    if (t.category_id) {
+      // Название разряда — из общего свода, а не сырой идентификатор из базы
+      var catName = window.KSLT_RULES
+        ? window.KSLT_RULES.categoryLabel(t.category_id, I18N.currentLang)
+        : t.category_id;
+      info += tdInfoRow('🏷', I18N.t('td.category'), catName);
+    }
     info += '</div>';
 
     // Description

@@ -5210,3 +5210,14 @@ select.prof-field-input { color: var(--text); }
 /* Снимок внутри текста новости — по номеру абзаца, как на сайте */
 .nd-figure { margin: 16px 0; }
 .nd-figure img { width: 100%; border-radius: 10px; display: block; }
+
+/* Парный и микст на карточке игрока. Отдельно от одиночного счёта: очки за
+   них не начисляются, и мешать их в общую статистику нельзя */
+.pd-pairs { display: flex; gap: 10px; padding: 0 16px; margin-top: 12px; }
+.pd-pair {
+  flex: 1; padding: 12px 10px; text-align: center;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+}
+.pd-pair-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; }
+.pd-pair-score { font-size: 20px; font-weight: 800; color: var(--text); margin-top: 4px; }
+.pd-pair-cap { font-size: 10px; color: var(--text-muted); margin-top: 2px; }

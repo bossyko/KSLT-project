@@ -42,6 +42,10 @@
             position: row.position || '',
             experience: row.experience || 0,
             price: row.price || 0,
+            member_price: row.member_price || 0,
+            students: row.students || 0,
+            specialization: row.specialization || '',
+            specialization_en: row.specialization_en || '',
             court: row.court || '',
             tags: row.tags || [],
             shortDesc: row.short_desc || '',
@@ -169,6 +173,12 @@
     html += '<div class="pd-stats" style="grid-template-columns:repeat(2,1fr)">';
     if (c.experience) html += '<div class="pd-stat"><div class="pd-stat-num">' + c.experience + '</div><div class="pd-stat-label">' + I18N.t('coach.yearsExp') + '</div></div>';
     if (c.price) html += '<div class="pd-stat"><div class="pd-stat-num">' + c.price + '</div><div class="pd-stat-label">' + I18N.t('coach.pricePerH') + '</div></div>';
+    // Цена членам клуба ниже — на сайте она показана, в приложении не была.
+    // Это прямой довод оплатить членство, и он терялся
+    if (c.member_price && c.member_price !== c.price) {
+      html += '<div class="pd-stat"><div class="pd-stat-num" style="color:var(--accent)">' + c.member_price + '</div><div class="pd-stat-label">' + I18N.t('coach.priceMember') + '</div></div>';
+    }
+    if (c.students) html += '<div class="pd-stat"><div class="pd-stat-num">' + c.students + '</div><div class="pd-stat-label">' + I18N.t('coach.students') + '</div></div>';
     html += '</div>';
 
     // Court

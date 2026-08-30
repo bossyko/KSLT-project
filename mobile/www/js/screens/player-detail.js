@@ -254,6 +254,26 @@
     });
     html += '</div></div>';
     html += '</div>'; // .pd-stats
+
+    // Парный и микст. На сайте они показаны отдельными блоками: очки за них
+    // не начисляются, но сыгранное — сыграно, и человек хочет это видеть.
+    // В приложении их не было вовсе
+    var dblW = p.doubles_wins || 0, dblL = p.doubles_losses || 0;
+    var mixW = p.mixed_wins || 0, mixL = p.mixed_losses || 0;
+    if (dblW || dblL || mixW || mixL) {
+      html += '<div class="pd-pairs">';
+      if (dblW || dblL) {
+        html += '<div class="pd-pair"><div class="pd-pair-title">' + I18N.t('pd.doubles') + '</div>' +
+                '<div class="pd-pair-score">' + dblW + ' / ' + dblL + '</div>' +
+                '<div class="pd-pair-cap">' + I18N.t('pd.winsLosses') + '</div></div>';
+      }
+      if (mixW || mixL) {
+        html += '<div class="pd-pair"><div class="pd-pair-title">' + I18N.t('pd.mixed') + '</div>' +
+                '<div class="pd-pair-score">' + mixW + ' / ' + mixL + '</div>' +
+                '<div class="pd-pair-cap">' + I18N.t('pd.winsLosses') + '</div></div>';
+      }
+      html += '</div>';
+    }
     html += window.KSLT_APP.pairBlocks(p, esc);
 
     // ---- Rating history ----

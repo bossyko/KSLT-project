@@ -163,6 +163,14 @@
         I18N.t('profile.myMatches'), '', '', true, 'profMatchesRow');
     }
 
+    // Мои баттлы. В кабинете на сайте этот раздел есть, в приложении не
+    // было: человек отправлял вызов и больше не видел, что с ним стало
+    if (_player) {
+      html += profileRow('red',
+        '<svg viewBox="0 0 24 24"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 3h2v2"/></svg>',
+        I18N.t('profile.myBattles'), '', '', true, 'profBattlesRow');
+    }
+
     // Приглашения поиграть — свой раздел, а не вперемешку с вызовами:
     // баттл зовёт на поединок, приглашение ищет, с кем выйти на корт
     html += profileRow('cyan',
@@ -335,6 +343,7 @@
   function bindRowOverlays() {
     bindRowClick('profTournamentsRow', showMyTournaments);
     bindRowClick('profMatchesRow', showMyMatches);
+    bindRowClick('profBattlesRow', showMyBattles);
     bindRowClick('profInvitesRow', function() {
       if (window.KSLT_INVITES) window.KSLT_INVITES.openList();
     });
@@ -390,6 +399,75 @@
     });
 
     return overlay;
+  }
+
+  /**
+   * Мои баттлы: вызовы, которые я отправил или получил.
+   *
+   * Берём той же функцией, что и кабинет на сайте, — иначе состояния
+   * разойдутся, как уже расходились категории и фильтры.
+   */
+  function showMyBattles() {
+    var ov = openSubOverlay(I18N.t('profile.myBattles'),
+      '<div class="loading-center"><div class="spinner"></div></div>');
+    var content = ov.querySelector('.prof-sub-content');
+
+    supabaseClient.rpc('get_my_challenges').then(function(r) {
+      var list = r.data || [];
+      if (r.error || !list.length) {
+        content.innerHTML = '<div class="empty-state">' +
+          '<div class="empty-icon">\uD83D\uDD25</div>' +
+          '<div class="empty-title">' + I18N.t('profile.noBattles') + '</div>' +
+          '<div class="empty-text">' + I18N.t('profile.noBattlesText') + '</div>' +
+        '</div>';
+        return;
+      }
+
+      // Состояния теми же словами, что в кабинете
+      var STATUS = {
+        cancelled:   ['profile.chalCancelled', 'declined'],
+        active:      ['profile.chalActive',    'pending'],
+        negotiating: ['profile.chalNegotiating','pending'],
+        countered:   ['profile.chalCountered', 'pending'],
+        accepted:    ['profile.chalAccepted',  'accepted'],
+        declined:    ['profile.chalDeclined',  'declined'],
+        expired:     ['profile.chalExpired',   'declined'],
+        completed:   ['profile.chalCompleted', 'accepted']
+      };
+
+      content.innerHTML = list.map(function(ch) {
+        var isSent = ch.direction === 'sent';
+        var who = (isSent ? ch.opponent_name : ch.challenger_name) || '\u2014';
+        var photo = isSent ? ch.opponent_avatar : ch.challenger_avatar;
+        var st = STATUS[ch.status] || ['profile.chalActive', 'pending'];
+
+        var d = ch.created_at ? String(ch.created_at) : '';
+        var when = d ? d.slice(8, 10) + '.' + d.slice(5, 7) + '.' + d.slice(2, 4) : '';
+
+        return '<div class="gi-card" data-battle="' + esc(ch.id) + '">' +
+          '<div class="gi-card-head">' +
+            (photo
+              ? '<img class="gi-card-avatar" src="' + esc(photo) + '" alt="">'
+              : '<div class="gi-card-avatar gi-card-avatar--letters">' + esc(initials(who)) + '</div>') +
+            '<div class="gi-card-who">' +
+              '<div class="gi-card-name"><span class="gi-card-name-text">' + esc(who) + '</span>' +
+                '<span class="gi-card-dir">' + (isSent ? '\u2197' : '\u2199') + '</span></div>' +
+              '<div class="gi-card-date">' + when + '</div>' +
+            '</div>' +
+            '<span class="gi-status gi-status--' + st[1] + '">' + I18N.t(st[0]) + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      // Открываем сам баттл — тем же окном, что и с главной
+      content.addEventListener('click', function(e) {
+        var card = e.target.closest('[data-battle]');
+        if (!card) return;
+        if (window.KSLT_HOME && window.KSLT_HOME.openBattleDetail) {
+          window.KSLT_HOME.openBattleDetail(card.getAttribute('data-battle'));
+        }
+      });
+    });
   }
 
   // ---- My Tournaments ----

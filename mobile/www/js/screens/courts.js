@@ -74,6 +74,11 @@
             surface: types.length > 0 ? (SURFACE_MAP[types[0].surface] || types[0].surface) : '',
             address: address,
             phone: row.phone || '',
+            whatsapp: row.whatsapp || '',
+            instagram: row.instagram || '',
+            schedule: row.schedule || '',
+            schedule_en: row.schedule_en || '',
+            services: row.additional_services || [],
             description: row.description || '',
             amenities: row.amenities || [],
             gallery: row.gallery || [],
@@ -303,11 +308,42 @@
       html += '</div></div>';
     }
 
-    // Contact (member only)
-    if (isMember && c.phone) {
-      html += '<div class="pd-section"><h3 class="pd-section-title">📞 ' + I18N.t('court.contact') + '</h3>';
-      html += '<a href="tel:' + esc(c.phone) + '" class="pd-challenge-btn" style="display:block;text-align:center;text-decoration:none">' + esc(c.phone) + '</a>';
+    // Часы работы. На сайте они есть, в приложении не было — а это второе,
+    // что спрашивают после адреса
+    var schedule = (I18N.currentLang === 'en' && c.schedule_en) || c.schedule;
+    if (schedule) {
+      html += '<div class="pd-section"><h3 class="pd-section-title">🕘 ' + I18N.t('court.schedule') + '</h3>';
+      html += '<div class="pd-empty-small" style="color:var(--text-sec)">' + esc(schedule) + '</div>';
       html += '</div>';
+    }
+
+    // Дополнительные услуги: прокат, раздевалки, тренировки со стенкой
+    if (c.services && c.services.length) {
+      html += '<div class="pd-section"><h3 class="pd-section-title">➕ ' + I18N.t('court.services') + '</h3><div class="coach-tags">';
+      c.services.forEach(function(sv) {
+        var name = typeof sv === 'string' ? sv
+          : ((I18N.currentLang === 'en' && sv.service_name_en) || sv.service_name || '');
+        var price = (sv && sv.price) ? ' — ' + sv.price : '';
+        if (name) html += '<span class="coach-tag">' + esc(name + price) + '</span>';
+      });
+      html += '</div></div>';
+    }
+
+    // Связь — членам клуба. Значки те же, что у контактов игрока, и имя
+    // пользователя достаём общим правилом: в поле попадает и ссылка целиком
+    if (isMember && (c.phone || c.whatsapp || c.instagram)) {
+      var ICON = window.KSLT_CONTACT_ICONS || {};
+      var R = window.KSLT_RULES;
+      var rows = [];
+      if (c.phone) rows.push([ICON.phone, esc(c.phone), 'tel:' + c.phone, 'phone']);
+      if (c.whatsapp) rows.push([ICON.whatsapp, esc(c.whatsapp), R.socialUrl('wa', c.whatsapp), 'wa']);
+      if (c.instagram) rows.push([ICON.instagram, '@' + esc(R.handle(c.instagram)), R.socialUrl('ig', c.instagram), 'ig']);
+
+      html += '<div class="pd-section"><h3 class="pd-section-title">📞 ' + I18N.t('court.contact') + '</h3>';
+      html += '<div class="gi-contacts">' + rows.map(function(r) {
+        return '<a class="gi-contact gi-contact--' + r[3] + '" href="' + r[2] + '" target="_blank" rel="noopener">' +
+          '<span class="gi-contact-icon">' + r[0] + '</span><span>' + r[1] + '</span></a>';
+      }).join('') + '</div></div>';
     } else if (!isMember && c.phone) {
       html += '<div class="pd-cta-membership"><p>' + I18N.t('court.contactLocked') + '</p></div>';
     }
