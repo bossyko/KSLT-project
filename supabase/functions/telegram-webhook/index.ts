@@ -781,12 +781,10 @@
             .eq('id', req.id)
 
           // Load categories filtered by gender
-          const gender = profile.gender // 'male' | 'female' | null
+          const gender = profile.gender // 'men' | 'women' | null — словарь общий
           let catQuery = db.from('categories').select('id, name').order('name')
-          if (gender === 'male') {
-            catQuery = catQuery.eq('gender', 'men')
-          } else if (gender === 'female') {
-            catQuery = catQuery.eq('gender', 'women')
+          if (gender === 'men' || gender === 'women') {
+            catQuery = catQuery.eq('gender', gender)
           }
 
           const { data: categories } = await catQuery

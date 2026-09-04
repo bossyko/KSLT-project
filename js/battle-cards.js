@@ -114,7 +114,7 @@
     // ---- Load active published battles ----
     function loadActiveBattles() {
         return client.from('challenges')
-            .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, challenger_gender, opponent_gender, challenger_partner_gender, opponent_partner_gender, banner_url, battle_published_at')
+            .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, challenger_gender, opponent_gender, challenger_partner_gender, opponent_partner_gender, banner_url, battle_published_at, challenger_country, opponent_country, challenger_partner_country, opponent_partner_country, challenger_photo, opponent_photo, challenger_partner_photo, opponent_partner_photo')
             .eq('battle_published', true)
             .neq('status', 'completed')
             .order('battle_published_at', { ascending: false })
@@ -140,7 +140,7 @@
                     });
                 });
 
-                return client.from('players').select('id, name, name_en, name_kg, photo').in('id', pIds).then(function(pRes) {
+                return client.from('players').select('id, name, name_en, name_kg, photo, country').in('id', pIds).then(function(pRes) {
                     var pMap = {};
                     (pRes.data || []).forEach(function(p) { pMap[p.id] = p; });
 
@@ -185,8 +185,17 @@
         });
         ph += '</div>';
 
+        // Флаг рядом с именем: страну игрока клуба берём из его карточки,
+        // приглашённого — из самого вызова. Раньше страна хранилась, но на
+        // карточке не показывалась вовсе
+        var CU = window.KSLT_COUNTRY;
         var names = '<span class="bc-player-name' + (side.names.length > 1 ? ' bc-pair-names' : '') + '">';
-        side.names.forEach(function(n) { names += '<span>' + esc(n) + '</span>'; });
+        side.names.forEach(function(n, i) {
+            var код = (side.countries || [])[i];
+            // Страны нет — считаем, что игрок из Кыргызстана: так же на странице баттла
+            var флаг = CU ? CU.flagEmoji(CU.normalizeCountry(код || '') || 'KG') : '';
+            names += '<span>' + (флаг ? '<span class="bc-flag">' + флаг + '</span>\u00A0' : '') + esc(n) + '</span>';
+        });
         names += '</span>';
 
         return '<div class="bc-player">' + ph + names + '</div>';
@@ -488,7 +497,11 @@
         container.querySelectorAll('.bc-card[data-battle]').forEach(function(card) {
             card.addEventListener('click', function(e) {
                 // Голосование, место проведения и сама ссылка — со своим делом
-                if (e.target.closest('.bc-vote-btn, .bc-meta-venue, a')) return;
+                // Исключаем всю полосу с кнопками, а не сами кнопки: у
+                // выключенной кнопки в стилях стоит «нажатия не принимать»,
+                // палец проходит сквозь неё в карточку, и человек, уже
+                // отдавший голос, вместо ничего уезжал на страницу баттла
+                if (e.target.closest('.bc-vote-buttons, .bc-vote-btn, .bc-meta-venue, a')) return;
                 window.location.href = detailUrl(card.dataset.battle);
             });
         });

@@ -198,7 +198,7 @@ INSERT INTO public.site_documents (slug, title, body, title_en, body_en, title_k
             <div class="ip-about-section ip-fade-in">
                 <h2 class="ip-about-section-title">10. Связь с нами</h2>
                 <p class="ip-about-text">
-                    Вопросы по настоящим Условиям, жалобы и обращения — на почту <a href="mailto:info@tennis.kg">info@tennis.kg</a> либо через контакты, указанные внизу страницы.
+                    Вопросы по настоящим Условиям, жалобы и обращения — на почту <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> либо через контакты, указанные внизу страницы.
                 </p>
             </div>', 'Terms of Service', '<!-- 1. General Provisions -->
             <div class="ip-about-section ip-fade-in">
@@ -333,7 +333,7 @@ INSERT INTO public.site_documents (slug, title, body, title_en, body_en, title_k
             <div class="ip-about-section ip-fade-in">
                 <h2 class="ip-about-section-title">10. <span>Contact</span></h2>
                 <p class="ip-about-text">
-                    For any questions regarding these terms of service, please contact us at: <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a>
+                    For any questions regarding these terms of service, please contact us at: <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a>
                 </p>
                 <p class="ip-about-text">
                     Bishkek, Kyrgyzstan
@@ -474,7 +474,7 @@ INSERT INTO public.site_documents (slug, title, body, title_en, body_en, title_k
             <div class="ip-about-section ip-fade-in">
                 <h2 class="ip-about-section-title">10. <span>Байланыш</span></h2>
                 <p class="ip-about-text">
-                    Колдонуу шарттарына байланыштуу бардык суроолор боюнча байланышыңыз: <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a>
+                    Колдонуу шарттарына байланыштуу бардык суроолор боюнча байланышыңыз: <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a>
                 </p>
                 <p class="ip-about-text">
                     Бишкек, Кыргызстан
@@ -602,10 +602,10 @@ INSERT INTO public.site_documents (slug, title, body, title_en, body_en, title_k
                     <p><strong>6.1.</strong> Пользователь имеет право:</p>
                     <p style="padding-left:20px;"><strong>6.1.1.</strong> <strong>Просматривать свои данные</strong> — вся информация профиля доступна в личном кабинете (Dashboard) на сайте и в мобильном приложении.</p>
                     <p style="padding-left:20px;"><strong>6.1.2.</strong> <strong>Изменять свои данные</strong> — имя, фамилию, фото профиля, номер телефона можно изменить в настройках профиля.</p>
-                    <p style="padding-left:20px;"><strong>6.1.3.</strong> <strong>Удалить свой аккаунт</strong> — самостоятельно в личном кабинете, раздел «Настройки», либо запросом на email <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a>. Аккаунт сразу перестаёт отображаться в Сервисе, окончательное удаление данных происходит через 30 календарных дней. Всё это время удаление можно отменить.</p>
+                    <p style="padding-left:20px;"><strong>6.1.3.</strong> <strong>Удалить свой аккаунт</strong> — самостоятельно в личном кабинете, раздел «Настройки», либо запросом на email <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a>. Аккаунт сразу перестаёт отображаться в Сервисе, окончательное удаление данных происходит через 30 календарных дней. Всё это время удаление можно отменить.</p>
                     <p style="padding-left:20px;"><strong>6.1.4.</strong> <strong>Отказаться от уведомлений</strong> — пользователь может в любой момент отключить email-уведомления и Telegram-уведомления в настройках профиля по отдельным категориям (турниры, платежи, новости, системные).</p>
-                    <p style="padding-left:20px;"><strong>6.1.5.</strong> <strong>Запросить выгрузку данных</strong> — пользователь может запросить копию всех своих персональных данных, направив запрос на <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a>.</p>
-                    <p><strong>6.2.</strong> Для реализации своих прав пользователь может обратиться по электронной почте <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a> с указанием email-адреса, привязанного к аккаунту.</p>
+                    <p style="padding-left:20px;"><strong>6.1.5.</strong> <strong>Запросить выгрузку данных</strong> — пользователь может запросить копию всех своих персональных данных, направив запрос на <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a>.</p>
+                    <p><strong>6.2.</strong> Для реализации своих прав пользователь может обратиться по электронной почте <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a> с указанием email-адреса, привязанного к аккаунту.</p>
                 </div>
             </div>
 
@@ -645,7 +645,7 @@ INSERT INTO public.site_documents (slug, title, body, title_en, body_en, title_k
                 </h2>
                 <div class="ip-rules-list">
                     <p><strong>9.1.</strong> По всем вопросам, связанным с обработкой персональных данных, вы можете обратиться:</p>
-                    <p style="padding-left:20px;"><strong>Email:</strong> <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a></p>
+                    <p style="padding-left:20px;"><strong>Email:</strong> <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a></p>
                     <p style="padding-left:20px;"><strong>Организация:</strong> КСЛТ (Кыргызстанское Сообщество Любителей Тенниса)</p>
                     <p style="padding-left:20px;"><strong>Адрес:</strong> г. Бишкек, Кыргызская Республика</p>
                     <p style="padding-left:20px;"><strong>Сайт:</strong> <a href="https://kslt.kg" style="color: #CCFF00;">kslt.kg</a></p>
@@ -768,10 +768,10 @@ INSERT INTO public.site_documents (slug, title, body, title_en, body_en, title_k
                     <p><strong>6.1.</strong> The User has the right to:</p>
                     <p style="padding-left:20px;"><strong>6.1.1.</strong> <strong>View their data</strong> — all profile information is available in the personal Dashboard on the website and in the mobile application.</p>
                     <p style="padding-left:20px;"><strong>6.1.2.</strong> <strong>Edit their data</strong> — name, last name, profile photo, and phone number can be changed in profile settings.</p>
-                    <p style="padding-left:20px;"><strong>6.1.3.</strong> <strong>Delete their account</strong> — directly in the dashboard under «Settings», or by request to <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a>. The account stops being shown in the Service immediately; data is erased for good after 30 calendar days. The deletion can be cancelled at any point during this period.</p>
+                    <p style="padding-left:20px;"><strong>6.1.3.</strong> <strong>Delete their account</strong> — directly in the dashboard under «Settings», or by request to <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a>. The account stops being shown in the Service immediately; data is erased for good after 30 calendar days. The deletion can be cancelled at any point during this period.</p>
                     <p style="padding-left:20px;"><strong>6.1.4.</strong> <strong>Opt out of notifications</strong> — the user can disable email and Telegram notifications at any time in profile settings by individual category (tournaments, payments, news, system).</p>
-                    <p style="padding-left:20px;"><strong>6.1.5.</strong> <strong>Request data export</strong> — the user can request a copy of all their personal data by sending a request to <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a>.</p>
-                    <p><strong>6.2.</strong> To exercise their rights, the user may contact us via email at <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a>, specifying the email address linked to their account.</p>
+                    <p style="padding-left:20px;"><strong>6.1.5.</strong> <strong>Request data export</strong> — the user can request a copy of all their personal data by sending a request to <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a>.</p>
+                    <p><strong>6.2.</strong> To exercise their rights, the user may contact us via email at <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a>, specifying the email address linked to their account.</p>
                 </div>
             </div>
 
@@ -811,7 +811,7 @@ INSERT INTO public.site_documents (slug, title, body, title_en, body_en, title_k
                 </h2>
                 <div class="ip-rules-list">
                     <p><strong>9.1.</strong> For any questions regarding the processing of personal data, you may contact us:</p>
-                    <p style="padding-left:20px;"><strong>Email:</strong> <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a></p>
+                    <p style="padding-left:20px;"><strong>Email:</strong> <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a></p>
                     <p style="padding-left:20px;"><strong>Organization:</strong> KSLT (Kyrgyzstan Social Lawn Tennis)</p>
                     <p style="padding-left:20px;"><strong>Address:</strong> Bishkek, Kyrgyz Republic</p>
                     <p style="padding-left:20px;"><strong>Website:</strong> <a href="https://kslt.kg" style="color: #CCFF00;">kslt.kg</a></p>
@@ -934,10 +934,10 @@ INSERT INTO public.site_documents (slug, title, body, title_en, body_en, title_k
                     <p><strong>6.1.</strong> Колдонуучунун укуктары:</p>
                     <p style="padding-left:20px;"><strong>6.1.1.</strong> <strong>Өз маалыматтарын көрүү</strong> — профилдин бардык маалыматы сайттагы жана мобилдик тиркемедеги жеке кабинетте (Dashboard) жеткиликтүү.</p>
                     <p style="padding-left:20px;"><strong>6.1.2.</strong> <strong>Өз маалыматтарын өзгөртүү</strong> — аты-жөнү, профиль сүрөтү, телефон номерин профиль жөндөөлөрүндө өзгөртүүгө болот.</p>
-                    <p style="padding-left:20px;"><strong>6.1.3.</strong> <strong>Аккаунтун жок кылуу</strong> — жеке кабинеттеги «Жөндөөлөр» бөлүмүндө өз алдынча, же <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a> дарегине суроо-талап жөнөтүү аркылуу. Аккаунт Сервисте дароо көрсөтүлбөй калат, маалыматтар 30 календардык күндөн кийин биротоло өчүрүлөт. Ушул мөөнөт ичинде жок кылууну жокко чыгарууга болот.</p>
+                    <p style="padding-left:20px;"><strong>6.1.3.</strong> <strong>Аккаунтун жок кылуу</strong> — жеке кабинеттеги «Жөндөөлөр» бөлүмүндө өз алдынча, же <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a> дарегине суроо-талап жөнөтүү аркылуу. Аккаунт Сервисте дароо көрсөтүлбөй калат, маалыматтар 30 календардык күндөн кийин биротоло өчүрүлөт. Ушул мөөнөт ичинде жок кылууну жокко чыгарууга болот.</p>
                     <p style="padding-left:20px;"><strong>6.1.4.</strong> <strong>Билдирүүлөрдөн баш тартуу</strong> — колдонуучу каалаган убакта профиль жөндөөлөрүндө email-билдирүүлөрдү жана Telegram-билдирүүлөрдү өзүнчө категориялар боюнча (мелдештер, төлөмдөр, жаңылыктар, тутумдук) өчүрө алат.</p>
-                    <p style="padding-left:20px;"><strong>6.1.5.</strong> <strong>Маалыматтарды жүктөп алууну суроо</strong> — колдонуучу бардык жеке маалыматтарынын көчүрмөсүн <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a> дарегине суроо-талап жөнөтүп алууга болот.</p>
-                    <p><strong>6.2.</strong> Укуктарын ишке ашыруу үчүн колдонуучу <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a> электрондук почтасына аккаунтка байланышкан email-дарегин көрсөтүп кайрыла алат.</p>
+                    <p style="padding-left:20px;"><strong>6.1.5.</strong> <strong>Маалыматтарды жүктөп алууну суроо</strong> — колдонуучу бардык жеке маалыматтарынын көчүрмөсүн <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a> дарегине суроо-талап жөнөтүп алууга болот.</p>
+                    <p><strong>6.2.</strong> Укуктарын ишке ашыруу үчүн колдонуучу <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a> электрондук почтасына аккаунтка байланышкан email-дарегин көрсөтүп кайрыла алат.</p>
                 </div>
             </div>
 
@@ -977,7 +977,7 @@ INSERT INTO public.site_documents (slug, title, body, title_en, body_en, title_k
                 </h2>
                 <div class="ip-rules-list">
                     <p><strong>9.1.</strong> Жеке маалыматтарды иштетүүгө байланышкан бардык суроолор боюнча кайрылсаңыз болот:</p>
-                    <p style="padding-left:20px;"><strong>Email:</strong> <a href="mailto:info@tennis.kg" style="color: #CCFF00;">info@tennis.kg</a></p>
+                    <p style="padding-left:20px;"><strong>Email:</strong> <a href="mailto:kslt.kyrgyzstan@gmail.com" style="color: #CCFF00;">kslt.kyrgyzstan@gmail.com</a></p>
                     <p style="padding-left:20px;"><strong>Уюм:</strong> KSLT (Kyrgyzstan Social Lawn Tennis)</p>
                     <p style="padding-left:20px;"><strong>Дарек:</strong> Бишкек ш., Кыргыз Республикасы</p>
                     <p style="padding-left:20px;"><strong>Сайт:</strong> <a href="https://kslt.kg" style="color: #CCFF00;">kslt.kg</a></p>

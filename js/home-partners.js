@@ -80,11 +80,17 @@
                 p.mixed_losses = s.mixed_losses || 0;
             });
 
+            var guest = await isGuest();
+
+            // Себя из списка убираем: искать партнёра среди самого себя
+            // незачем, а нажатие слало приглашение самому себе
+            var своя = window.KSLT_INVITE ? window.KSLT_INVITE.myPlayerId() : null;
+            if (своя) list = list.filter(function(p) { return p.id !== своя; });
+
             var withPhoto = list.filter(function(p) { return !!p.avatar_url; });
             var pool = withPhoto.length >= SHOW ? withPhoto : list;
 
             var picked = shuffle(pool).slice(0, SHOW);
-            var guest = isGuest();
 
             grid.innerHTML = picked.map(function(p, i) { return card(p, i, guest); }).join('');
             bindClicks(guest);
@@ -94,12 +100,21 @@
         }
     }
 
-    function isGuest() {
+    /**
+     * Гость перед нами или свой.
+     *
+     * Спрашиваем у общего модуля приглашений — он же решает это на странице
+     * поиска. Раньше блок считал сам, заглядывая в хранилище по ключу с
+     * зашитым адресом базы: на любой другой базе получался вечный гость,
+     * и карточки закрывались мутным окном даже вошедшему.
+     */
+    async function isGuest() {
+        if (window.KSLT_INVITE) {
+            return (await window.KSLT_INVITE.access()) === 'guest';
+        }
         try {
-            var raw = localStorage.getItem('sb-qqkzszesviukopgjbead-auth-token');
-            if (!raw) return true;
-            var s = JSON.parse(raw);
-            return !(s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000));
+            var res = await client.auth.getSession();
+            return !(res.data && res.data.session);
         } catch (e) { return true; }
     }
 
@@ -202,8 +217,10 @@
                 return;
             }
             if (invite) {
-                window.location.href = (isEn ? 'pages/partners-en.html'
-                    : (isKg ? 'pages/partners-kg.html' : 'pages/partners.html')) + '?invite=' + encodeURIComponent(id);
+                // Отправляем прямо отсюда. Раньше уводили на страницу поиска
+                // со ссылкой `?invite=`, которую там никто не читал: человек
+                // просто оказывался в списке, а запрос не уходил
+                if (window.KSLT_INVITE) window.KSLT_INVITE.click(id);
                 return;
             }
             window.location.href = playerPage + '?id=' + encodeURIComponent(id);

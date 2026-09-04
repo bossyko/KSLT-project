@@ -364,22 +364,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // GUEST RESTRICTIONS (Rankings + Players)
     // ========================================
 
-    (function() {
+    (async function() {
         var rankingsSection = document.getElementById('rankings');
         var playersSection = document.getElementById('players');
         if (!rankingsSection && !playersSection) return;
 
-        function isLoggedIn() {
+        /**
+         * Гость перед нами или свой.
+         *
+         * Спрашиваем у самой сессии. Раньше заглядывали в хранилище по ключу
+         * с зашитым адресом базы — на любой другой базе выходил вечный гость,
+         * и окно «зарегистрируйтесь» накрывало карточки даже вошедшему,
+         * перехватывая нажатия на «Пригласить».
+         */
+        async function isLoggedIn() {
+            var client = window.supabaseClient;
+            if (!client) return false;
             try {
-                var key = 'sb-qqkzszesviukopgjbead-auth-token';
-                var raw = localStorage.getItem(key);
-                if (!raw) return false;
-                var data = JSON.parse(raw);
-                return data && data.access_token && data.expires_at > Math.floor(Date.now() / 1000);
+                var res = await client.auth.getSession();
+                return !!(res.data && res.data.session);
             } catch (e) { return false; }
         }
 
-        if (isLoggedIn()) return;
+        if (await isLoggedIn()) return;
 
         var isEn = window.location.pathname.indexOf('-en') !== -1;
         var isKg = window.location.pathname.indexOf('-kg') !== -1;

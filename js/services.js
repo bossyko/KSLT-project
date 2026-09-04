@@ -615,8 +615,7 @@
         // чему решают, звать его или нет. Без этого карточка была витриной
         // В профилях пол пишут как female/male, в карточках игроков — women/men
         var g = String(p.gender || '');
-        var genderMark = (g === 'female' || g === 'women') ? '\u2640'
-            : ((g === 'male' || g === 'men') ? '\u2642' : '');
+        var genderMark = g === 'women' ? '\u2640' : (g === 'men' ? '\u2642' : '');
         var playLevel = levelLabel(p.play_level);
         var seen = lastSeenLabel(p.last_seen);
 

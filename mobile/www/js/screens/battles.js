@@ -15,7 +15,7 @@
     el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
     supabaseClient.from('challenges')
-      .select('*, challenger:profiles!challenges_challenger_id_fkey(full_name), challenger_player:players!challenges_challenger_player_id_fkey(name, photo), opponent_player:players!challenges_opponent_player_id_fkey(name, photo), challenger_partner:players!challenges_challenger_partner_id_fkey(name, photo), opponent_partner:players!challenges_opponent_partner_id_fkey(name, photo)')
+      .select('*, challenger:profiles!challenges_challenger_id_fkey(full_name), challenger_player:players!challenges_challenger_player_id_fkey(name, photo, country), opponent_player:players!challenges_opponent_player_id_fkey(name, photo, country), challenger_partner:players!challenges_challenger_partner_id_fkey(name, photo, country), opponent_partner:players!challenges_opponent_partner_id_fkey(name, photo, country)')
       .eq('battle_published', true)
       .order('created_at', { ascending: false })
       .then(function(r) {
@@ -55,23 +55,35 @@
       // Имя и лицо идут парой: на сайте в карточке баттла фотографии
       // игроков, а здесь стояли лаймовые кружки с буквами и читались как
       // мячи, а не как люди
+      // Приглашённого человека в базе нет: его снимок и страна лежат в самом
+      // вызове. У игрока клуба берём из карточки
       var side1 = [{
         name: (b.challenger_player && b.challenger_player.name) ||
               b.challenger_external_name ||
               (b.challenger && b.challenger.full_name) || (I18N.t('home.player') + ' 1'),
-        photo: (b.challenger_player && b.challenger_player.photo) || ''
+        photo: (b.challenger_player && b.challenger_player.photo) || b.challenger_photo || '',
+        country: (b.challenger_player && b.challenger_player.country) || b.challenger_country || ''
       }];
       var side2 = [{
         name: (b.opponent_player && b.opponent_player.name) ||
               b.opponent_external_name || (I18N.t('home.player') + ' 2'),
-        photo: (b.opponent_player && b.opponent_player.photo) || ''
+        photo: (b.opponent_player && b.opponent_player.photo) || b.opponent_photo || '',
+        country: (b.opponent_player && b.opponent_player.country) || b.opponent_country || ''
       }];
       if (isPair) {
         var p1 = b.challenger_partner, p2 = b.opponent_partner;
         var m1 = (p1 && p1.name) || b.challenger_partner_name;
         var m2 = (p2 && p2.name) || b.opponent_partner_name;
-        if (m1) side1.push({ name: m1, photo: (p1 && p1.photo) || '' });
-        if (m2) side2.push({ name: m2, photo: (p2 && p2.photo) || '' });
+        if (m1) side1.push({
+          name: m1,
+          photo: (p1 && p1.photo) || b.challenger_partner_photo || '',
+          country: (p1 && p1.country) || b.challenger_partner_country || ''
+        });
+        if (m2) side2.push({
+          name: m2,
+          photo: (p2 && p2.photo) || b.opponent_partner_photo || '',
+          country: (p2 && p2.country) || b.opponent_partner_country || ''
+        });
       }
       var fmtLabel = APP.battleFormatLabel(b);
 
@@ -83,7 +95,10 @@
             : '<div class="battle-fighter-avatar">' + initials(p.name) + '</div>';
         });
         h += '</div><div class="battle-fighter-name">';
-        side.forEach(function(p) { h += '<span>' + esc(p.name) + '</span>'; });
+        side.forEach(function(p) {
+          var флаг = флагом(p.country);
+          h += '<span>' + (флаг ? флаг + '\u00A0' : '') + esc(p.name) + '</span>';
+        });
         return h + '</div></div>';
       }
 
@@ -111,6 +126,13 @@
         }
       });
     });
+  }
+
+  /** Флаг по коду страны — общий с сайтом разбор. Страны нет — Кыргызстан. */
+  function флагом(код) {
+    var CU = window.KSLT_COUNTRY;
+    if (!CU) return '';
+    return CU.flagEmoji(CU.normalizeCountry(код || '') || 'KG');
   }
 
   function initials(name) {

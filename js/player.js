@@ -1685,7 +1685,7 @@
                         if (catRes.data) {
                             var c = catRes.data;
                             catName = isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name);
-                            catKey = (c.gender === 'female' ? 'women-' : 'men-') + (c.name_en || c.name).toLowerCase().replace(/[^a-z0-9-]/g, '');
+                            catKey = (c.gender === 'women' ? 'women-' : 'men-') + (c.name_en || c.name).toLowerCase().replace(/[^a-z0-9-]/g, '');
                         }
                     }
 

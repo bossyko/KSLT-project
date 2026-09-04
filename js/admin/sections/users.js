@@ -626,7 +626,7 @@
                 '<div class="ad-field-row">' +
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + (isEn ? 'Gender' : 'Пол') + '</label>' +
-                        '<input type="text" class="ad-field-input" value="' + (user.gender === 'male' ? (isEn ? 'Male' : 'Мужской') : user.gender === 'female' ? (isEn ? 'Female' : 'Женский') : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                        '<input type="text" class="ad-field-input" value="' + (user.gender === 'men' ? (isEn ? 'Male' : 'Мужской') : user.gender === 'women' ? (isEn ? 'Female' : 'Женский') : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + (isEn ? 'Date of Birth' : 'Дата рождения') + '</label>' +
@@ -987,10 +987,9 @@
     }
 
     function userGenderToCategory(userGender) {
-        // profiles.gender: 'male'/'female' → categories.gender: 'men'/'women'
-        if (userGender === 'female') return 'women';
-        if (userGender === 'male') return 'men';
-        return null; // no filter
+        // Словарь один на весь проект: men/women и в учётной записи, и в
+        // карточке игрока, и у категорий. Переводить больше нечего
+        return (userGender === 'men' || userGender === 'women') ? userGender : null;
     }
 
     function buildCatOptions(filterGender, selectedId) {
@@ -1113,11 +1112,11 @@
             if (suffix > 20) break; // safety
         }
 
-        // Пол переносим из профиля (male→men, female→women).
+        // Пол переносим из профиля как есть — словарь общий.
         // Раньше при пустом поле молча ставился мужской, и женщины без
         // указанного пола попадали в мужской рейтинг. Лучше не создавать
         // карточку вовсе, чем создать с неверным полом.
-        var playerGender = user.gender === 'male' ? 'men' : (user.gender === 'female' ? 'women' : null);
+        var playerGender = (user.gender === 'men' || user.gender === 'women') ? user.gender : null;
         if (!playerGender) {
             A.showToast(isEn
                 ? 'Set the gender in the user profile first — the rating is kept separately for men and women'

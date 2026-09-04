@@ -1119,8 +1119,8 @@
     html += '<label class="prof-field-label">' + I18N.t('profile.gender') + '</label>';
     html += '<select class="prof-field-input" id="profGender">';
     html += '<option value="">' + I18N.t('profile.genderNone') + '</option>';
-    html += '<option value="male"' + (p.gender === 'male' ? ' selected' : '') + '>' + I18N.t('profile.genderMale') + '</option>';
-    html += '<option value="female"' + (p.gender === 'female' ? ' selected' : '') + '>' + I18N.t('profile.genderFemale') + '</option>';
+    html += '<option value="men"' + (p.gender === 'men' ? ' selected' : '') + '>' + I18N.t('profile.genderMale') + '</option>';
+    html += '<option value="women"' + (p.gender === 'women' ? ' selected' : '') + '>' + I18N.t('profile.genderFemale') + '</option>';
     html += '</select></div>';
 
     // Соцсети: у каждой своё разрешение — телеграм может быть рабочий,

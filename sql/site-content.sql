@@ -1,87 +1,87 @@
--- ============================================================
--- Содержимое заглавного экрана — одно на сайт и приложение
--- ============================================================
+-- -- ============================================================
+-- -- Содержимое заглавного экрана — одно на сайт и приложение
+-- -- ============================================================
+-- --
+-- -- Картинка и тексты первого экрана лежали в коде: в index.html на трёх
+-- -- языках и отдельной копией в приложении. Поменять их можно было только
+-- -- правкой кода, выкладкой сайта и новой сборкой приложения — то есть
+-- -- через магазин, с ожиданием проверки.
+-- --
+-- -- Теперь они живут здесь. Меняешь в админке — подхватывают оба, без
+-- -- пересборки.
+-- --
+-- -- Устроено как набор пар «ключ — значение»: заводить колонку под каждую
+-- -- новую надпись пришлось бы миграцией, а так достаточно строки.
+-- --
+-- -- Файл меняет базу. Читающие запросы — в site-content-check.sql.
 --
--- Картинка и тексты первого экрана лежали в коде: в index.html на трёх
--- языках и отдельной копией в приложении. Поменять их можно было только
--- правкой кода, выкладкой сайта и новой сборкой приложения — то есть
--- через магазин, с ожиданием проверки.
+-- CREATE TABLE IF NOT EXISTS public.site_content (
+--     key         text PRIMARY KEY,
+--     value       text,
+--     value_en    text,
+--     value_kg    text,
+--     updated_at  timestamptz DEFAULT now()
+-- );
 --
--- Теперь они живут здесь. Меняешь в админке — подхватывают оба, без
--- пересборки.
+-- COMMENT ON TABLE public.site_content IS
+--     'Тексты и картинки, которые редактируются без выкладки. Читают сайт и приложение.';
 --
--- Устроено как набор пар «ключ — значение»: заводить колонку под каждую
--- новую надпись пришлось бы миграцией, а так достаточно строки.
+-- -- Показывать могут все: это надписи на первом экране, не личные данные
+-- ALTER TABLE public.site_content ENABLE ROW LEVEL SECURITY;
 --
--- Файл меняет базу. Читающие запросы — в site-content-check.sql.
-
-CREATE TABLE IF NOT EXISTS public.site_content (
-    key         text PRIMARY KEY,
-    value       text,
-    value_en    text,
-    value_kg    text,
-    updated_at  timestamptz DEFAULT now()
-);
-
-COMMENT ON TABLE public.site_content IS
-    'Тексты и картинки, которые редактируются без выкладки. Читают сайт и приложение.';
-
--- Показывать могут все: это надписи на первом экране, не личные данные
-ALTER TABLE public.site_content ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "site_content видно всем" ON public.site_content;
-CREATE POLICY "site_content видно всем"
-    ON public.site_content FOR SELECT
-    USING (true);
-
--- Менять — только персоналу клуба
-DROP POLICY IF EXISTS "site_content меняет персонал" ON public.site_content;
-CREATE POLICY "site_content меняет персонал"
-    ON public.site_content FOR ALL
-    USING (is_staff())
-    WITH CHECK (is_staff());
-
--- ---- Что сейчас вшито в код, то и кладём ----
--- Значения взяты со страницы index.html слово в слово, чтобы после
--- перехода на базу на экране ничего не изменилось.
-
-INSERT INTO public.site_content (key, value, value_en, value_kg) VALUES
-    ('hero.image',
-     'images/hero-courts.jpg', NULL, NULL),
-
-    ('hero.season',
-     'Сезон 2026', 'Season 2026', '2026 сезону'),
-
-    ('hero.tagline',
-     'Кыргызстанское Сообщество Любителей Тенниса',
-     'Kyrgyzstan Social Lawn Tennis',
-     'Кыргызстандын Теннис Сүйүүчүлөрүнүн Коомчулугу'),
-
-    ('hero.claim',
-     'ИСКУССТВО СТАНОВИТЬСЯ ПЕРВЫМ',
-     'THE ART OF BECOMING FIRST',
-     'БИРИНЧИ БОЛУУ ӨНӨРҮ'),
-
-    ('hero.text',
-     'Присоединяйся к 350+ игрокам: находи партнёров по игре, новых друзей и любимые турниры.',
-     'Join 350+ players: find playing partners, new friends and your favourite tournaments.',
-     '350+ оюнчуга кошулуңуз: оюн боюнча өнөктөш, жаңы достор жана сүйүктүү мелдештер.'),
-
-    ('hero.button',
-     'Найти игрока', 'Find a player', 'Оюнчу табуу')
-ON CONFLICT (key) DO NOTHING;   -- повторный запуск ничего не затрёт
-
--- Кто и когда правил — пригодится, когда надпись поменяется, а никто не
--- вспомнит когда
-CREATE OR REPLACE FUNCTION public.site_content_touch()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-    NEW.updated_at := now();
-    RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS site_content_touch ON public.site_content;
-CREATE TRIGGER site_content_touch
-    BEFORE UPDATE ON public.site_content
-    FOR EACH ROW EXECUTE FUNCTION public.site_content_touch();
+-- DROP POLICY IF EXISTS "site_content видно всем" ON public.site_content;
+-- CREATE POLICY "site_content видно всем"
+--     ON public.site_content FOR SELECT
+--     USING (true);
+--
+-- -- Менять — только персоналу клуба
+-- DROP POLICY IF EXISTS "site_content меняет персонал" ON public.site_content;
+-- CREATE POLICY "site_content меняет персонал"
+--     ON public.site_content FOR ALL
+--     USING (is_staff())
+--     WITH CHECK (is_staff());
+--
+-- -- ---- Что сейчас вшито в код, то и кладём ----
+-- -- Значения взяты со страницы index.html слово в слово, чтобы после
+-- -- перехода на базу на экране ничего не изменилось.
+--
+-- INSERT INTO public.site_content (key, value, value_en, value_kg) VALUES
+--     ('hero.image',
+--      'images/hero-courts.jpg', NULL, NULL),
+--
+--     ('hero.season',
+--      'Сезон 2026', 'Season 2026', '2026 сезону'),
+--
+--     ('hero.tagline',
+--      'Кыргызстанское Сообщество Любителей Тенниса',
+--      'Kyrgyzstan Social Lawn Tennis',
+--      'Кыргызстандын Теннис Сүйүүчүлөрүнүн Коомчулугу'),
+--
+--     ('hero.claim',
+--      'ИСКУССТВО СТАНОВИТЬСЯ ПЕРВЫМ',
+--      'THE ART OF BECOMING FIRST',
+--      'БИРИНЧИ БОЛУУ ӨНӨРҮ'),
+--
+--     ('hero.text',
+--      'Присоединяйся к 350+ игрокам: находи партнёров по игре, новых друзей и любимые турниры.',
+--      'Join 350+ players: find playing partners, new friends and your favourite tournaments.',
+--      '350+ оюнчуга кошулуңуз: оюн боюнча өнөктөш, жаңы достор жана сүйүктүү мелдештер.'),
+--
+--     ('hero.button',
+--      'Найти игрока', 'Find a player', 'Оюнчу табуу')
+-- ON CONFLICT (key) DO NOTHING;   -- повторный запуск ничего не затрёт
+--
+-- -- Кто и когда правил — пригодится, когда надпись поменяется, а никто не
+-- -- вспомнит когда
+-- CREATE OR REPLACE FUNCTION public.site_content_touch()
+-- RETURNS trigger LANGUAGE plpgsql AS $$
+-- BEGIN
+--     NEW.updated_at := now();
+--     RETURN NEW;
+-- END;
+-- $$;
+--
+-- DROP TRIGGER IF EXISTS site_content_touch ON public.site_content;
+-- CREATE TRIGGER site_content_touch
+--     BEFORE UPDATE ON public.site_content
+--     FOR EACH ROW EXECUTE FUNCTION public.site_content_touch();

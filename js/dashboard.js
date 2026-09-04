@@ -844,7 +844,7 @@
     window.isProfileComplete = function() {
         var p = window.ksltProfile;
         return p && p.full_name && p.full_name.trim() !== '' &&
-               p.gender && (p.gender === 'male' || p.gender === 'female') &&
+               p.gender && (p.gender === 'men' || p.gender === 'women') &&
                p.phone && p.phone.trim() !== '';
     };
 
@@ -1503,7 +1503,7 @@
     function getProfileBanner(profile) {
         var missing = [];
         if (!profile.full_name || !profile.full_name.trim()) missing.push(L.fieldName);
-        if (!profile.gender || (profile.gender !== 'male' && profile.gender !== 'female')) missing.push(L.fieldGender);
+        if (!profile.gender || (profile.gender !== 'men' && profile.gender !== 'women')) missing.push(L.fieldGender);
         if (!profile.phone || !profile.phone.trim()) missing.push(L.fieldPhone);
 
         if (missing.length === 0) return '';
@@ -1604,8 +1604,8 @@
         var genderSelect =
             '<select class="db-field-input" id="profileGender">' +
                 '<option value=""' + (!profile.gender ? ' selected' : '') + '>' + L.selectGender + '</option>' +
-                '<option value="male"' + (profile.gender === 'male' ? ' selected' : '') + '>' + L.male + '</option>' +
-                '<option value="female"' + (profile.gender === 'female' ? ' selected' : '') + '>' + L.female + '</option>' +
+                '<option value="men"' + (profile.gender === 'men' ? ' selected' : '') + '>' + L.male + '</option>' +
+                '<option value="women"' + (profile.gender === 'women' ? ' selected' : '') + '>' + L.female + '</option>' +
             '</select>';
 
         // Birthday selects

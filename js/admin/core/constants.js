@@ -570,6 +570,9 @@
         crtCustomAmenity: 'Custom amenity',
         crtAddCustom: '+ Add custom',
         crtAddByUrl: '+ By URL',
+        chalPhoto: 'Photo',
+        chalPhotoUploading: 'Uploading…',
+        chalPhotoError: 'Could not upload the photo',
         translateAllBtn: 'Translate to empty',
         allFieldsFilled: 'All fields are already filled',
         // Coaches
@@ -1871,6 +1874,9 @@
         crtCustomAmenity: 'Своё удобство',
         crtAddCustom: '+ Добавить своё',
         crtAddByUrl: '+ По ссылке',
+        chalPhoto: 'Фото',
+        chalPhotoUploading: 'Загрузка…',
+        chalPhotoError: 'Не удалось загрузить снимок',
         translateAllBtn: 'Перевести в пустые',
         allFieldsFilled: 'Все поля уже заполнены',
         // Coaches

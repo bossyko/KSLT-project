@@ -129,8 +129,6 @@
 
     var authPage = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
     var pricingPage = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
-    var FUNCTIONS_URL = 'https://qqkzszesviukopgjbead.supabase.co/functions/v1';
-    var ANON_KEY = 'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G';
     var _partners = [];
     var _currentFilter = 'all';
     var _ntrpFilter = null;
@@ -161,7 +159,18 @@
     }
 
     // ---- Detect access level ----
+    // Считает общий модуль приглашений: раньше то же самое было написано
+    // здесь ещё раз, и два счёта могли разойтись
     async function detectAccess() {
+        if (window.KSLT_INVITE) {
+            _accessLevel = await window.KSLT_INVITE.access();
+            _myPlayerId = window.KSLT_INVITE.myPlayerId();
+            return;
+        }
+        await detectAccessСвоими();
+    }
+
+    async function detectAccessСвоими() {
         // Check real Supabase session (not just localStorage)
         var loggedIn = false;
         if (client) {
@@ -256,8 +265,8 @@
 
         var filters = [
             { key: 'all', label: L.filterAll },
-            { key: 'male', label: L.filterMen },
-            { key: 'female', label: L.filterWomen }
+            { key: 'men', label: L.filterMen },
+            { key: 'women', label: L.filterWomen }
         ];
 
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
@@ -554,250 +563,11 @@
         if (!btn) return;
         e.preventDefault();
         var playerId = btn.dataset.playerId;
-        handleInviteClick(playerId);
+        if (window.KSLT_INVITE) window.KSLT_INVITE.click(playerId);
     });
 
-    // ---- Handle invite click by access level ----
-    function handleInviteClick(playerId) {
-        if (_accessLevel === 'guest') {
-            showModal(L.modalGuestTitle, L.modalGuestText, L.modalGuestBtn, authPage);
-            return;
-        }
-
-        if (_accessLevel === 'registered') {
-            showPaymentModal();
-            return;
-        }
-
-        // Member — show confirmation before sending
-        showInviteConfirm(playerId);
-    }
-
-    function showInviteConfirm(playerId) {
-        var old = document.querySelector('.pt-modal-overlay');
-        if (old) old.remove();
-
-        var overlay = document.createElement('div');
-        overlay.className = 'pt-modal-overlay';
-        overlay.innerHTML =
-            '<div class="pt-modal">' +
-                '<button class="pt-modal-close">&times;</button>' +
-                '<div class="pt-modal-icon">&#9888;&#65039;</div>' +
-                '<div class="pt-modal-title">' + L.inviteConfirmTitle + '</div>' +
-                '<div class="pt-modal-text">' + L.inviteConfirmText + '</div>' +
-                '<div style="display:flex;gap:12px;justify-content:center;margin-top:8px;">' +
-                    '<button class="pt-modal-btn pt-confirm-send">' + L.inviteConfirmBtn + '</button>' +
-                    '<button class="pt-modal-btn pt-confirm-cancel" style="background:rgba(255,255,255,0.08);color:var(--text-secondary);">' + L.inviteConfirmCancel + '</button>' +
-                '</div>' +
-            '</div>';
-        document.body.appendChild(overlay);
-
-        requestAnimationFrame(function() {
-            overlay.classList.add('visible');
-        });
-
-        overlay.querySelector('.pt-confirm-send').addEventListener('click', function() {
-            closeModal(overlay);
-            sendInvite(playerId);
-        });
-        overlay.querySelector('.pt-confirm-cancel').addEventListener('click', function() {
-            closeModal(overlay);
-        });
-        overlay.querySelector('.pt-modal-close').addEventListener('click', function() {
-            closeModal(overlay);
-        });
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) closeModal(overlay);
-        });
-    }
-
-    // ---- Send invite via Edge Function ----
-    async function sendInvite(playerId) {
-        if (_sendingInvite) return;
-
-        // Телеграм больше не обязателен. Раньше без него отправка
-        // запрещалась, потому что принять приглашение можно было только
-        // кнопками в боте. Теперь оно живёт в кабинете и в приложении, а
-        // Телеграм с почтой лишь оповещают — кому что доступно
-        _sendingInvite = true;
-
-        try {
-            var session = await client.auth.getSession();
-            var token = session.data.session ? session.data.session.access_token : null;
-            if (!token) {
-                showToast(L.inviteError, 'error');
-                return;
-            }
-
-            var res = await fetch(FUNCTIONS_URL + '/send-game-invite', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-                    'apikey': ANON_KEY
-                },
-                body: JSON.stringify({ receiver_player_id: playerId })
-            });
-
-            var data = await res.json();
-
-            if (res.ok && data.success) {
-                showToast(L.inviteSent, 'success');
-            } else {
-                var errMsg = L.inviteError;
-                if (data.error === 'daily_limit') errMsg = L.inviteLimit;
-                else if (data.error === 'already_pending') errMsg = L.invitePending;
-                else if (data.error === 'no_account') errMsg = L.inviteNoAccount;
-                else if (data.error === 'receiver_no_contacts') errMsg = L.inviteNoContacts;
-                else if (data.error === 'self_invite') errMsg = L.inviteSelf;
-                showToast(errMsg, data.error === 'daily_limit' || data.error === 'already_pending' ? 'info' : 'error');
-            }
-        } catch(e) {
-            console.error('Invite error:', e);
-            showToast(L.inviteError, 'error');
-        } finally {
-            _sendingInvite = false;
-        }
-    }
-
-    // ---- Modal ----
-    function showModal(title, text, btnLabel, btnHref, disclaimer) {
-        // Remove existing
-        var old = document.querySelector('.pt-modal-overlay');
-        if (old) old.remove();
-
-        var disclaimerHtml = disclaimer ? '<div class="pt-modal-disclaimer">' + disclaimer + '</div>' : '';
-
-        var overlay = document.createElement('div');
-        overlay.className = 'pt-modal-overlay';
-        overlay.innerHTML =
-            '<div class="pt-modal">' +
-                '<button class="pt-modal-close">&times;</button>' +
-                '<div class="pt-modal-icon">&#127934;</div>' +
-                '<div class="pt-modal-title">' + title + '</div>' +
-                '<div class="pt-modal-text">' + text + '</div>' +
-                '<a href="' + btnHref + '" class="pt-modal-btn">' + btnLabel + '</a>' +
-                disclaimerHtml +
-            '</div>';
-        document.body.appendChild(overlay);
-
-        // Animate in
-        requestAnimationFrame(function() {
-            overlay.classList.add('visible');
-        });
-
-        // Close handlers
-        overlay.querySelector('.pt-modal-close').addEventListener('click', function() {
-            closeModal(overlay);
-        });
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) closeModal(overlay);
-        });
-    }
-
-    function closeModal(overlay) {
-        overlay.classList.remove('visible');
-        setTimeout(function() { overlay.remove(); }, 250);
-    }
-
-    // ---- Payment Modal (for registered non-members) ----
-    function showPaymentModal() {
-        var old = document.querySelector('.pt-modal-overlay');
-        if (old) old.remove();
-
-        var rulesPage = isEn ? 'rules-en.html' : (isKg ? 'rules-kg.html' : 'rules.html');
-        var pricePage = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
-
-        var title = isEn ? 'Become a KSLT Member' : (isKg ? 'КСЛТ мүчөсү болуңуз' : 'Станьте членом КСЛТ');
-        var subtitle = isEn
-            ? 'Monthly membership — <strong style="color:var(--accent)">1,000 KGS/mo</strong>'
-            : (isKg ? 'Ай сайынкы мүчөлүк — <strong style="color:var(--accent)">1 000 сом/ай</strong>' : 'Ежемесячное членство — <strong style="color:var(--accent)">1 000 сом/мес</strong>');
-        var cardsLabel = isEn ? 'Bank cards' : (isKg ? 'Банк карталары' : 'Банковские карты');
-        var mobileLabel = isEn ? 'Mobile banks' : (isKg ? 'Мобилдик банктар' : 'Мобильные банки');
-        var walletsLabel = isEn ? 'E-wallets' : (isKg ? 'Электрондук капчыктар' : 'Электронные кошельки');
-        var orLabel = isEn ? 'or' : (isKg ? 'же' : 'или');
-        var tgBtn = isEn ? 'Message in Telegram' : (isKg ? 'Telegram\'га жазуу' : 'Написать в Telegram');
-        var noteText = isEn
-            ? 'Online payment coming soon. Contact the admin for now.'
-            : (isKg ? 'Онлайн төлөм жакында ишке кирет. Азырынча администраторго кайрылыңыз.' : 'Онлайн-оплата появится в ближайшее время. Пока свяжитесь с администратором.');
-        var disclaimer = isEn
-            ? 'By paying, you agree to the <a href="' + rulesPage + '" target="_blank">rules</a> and <a href="' + pricePage + '" target="_blank">pricing</a> of KSLT'
-            : (isKg ? 'Баскычты басуу менен, <a href="' + rulesPage + '" target="_blank">эрежелер</a> жана <a href="' + pricePage + '" target="_blank">баалар</a> менен тааныштыгыңызды тастыктайсыз' : 'Нажимая кнопку, вы подтверждаете, что ознакомлены с <a href="' + rulesPage + '" target="_blank">правилами</a> и <a href="' + pricePage + '" target="_blank">тарифами</a> КСЛТ');
-        var soonLabel = isEn ? 'soon' : (isKg ? 'жакында' : 'скоро');
-
-        var overlay = document.createElement('div');
-        overlay.className = 'pt-modal-overlay';
-        overlay.innerHTML =
-            '<div class="pt-modal pt-modal-pay">' +
-                '<button class="pt-modal-close">&times;</button>' +
-                '<div class="pt-modal-title">' + title + '</div>' +
-                '<div class="pt-modal-text" style="margin-bottom:16px;">' + subtitle + '</div>' +
-
-                '<div class="pt-pay-label">' + cardsLabel + '</div>' +
-                '<div class="pt-pay-grid">' +
-                    '<div class="pt-pay-method"><span class="pt-pay-soon">' + soonLabel + '</span><span class="pt-pay-icon">&#128179;</span><span class="pt-pay-name">Visa / MC</span></div>' +
-                    '<div class="pt-pay-method"><span class="pt-pay-soon">' + soonLabel + '</span><span class="pt-pay-icon">&#127974;</span><span class="pt-pay-name">Элкарт</span></div>' +
-                '</div>' +
-
-                '<div class="pt-pay-label">' + mobileLabel + '</div>' +
-                '<div class="pt-pay-grid">' +
-                    '<div class="pt-pay-method"><span class="pt-pay-soon">' + soonLabel + '</span><span class="pt-pay-icon">&#128241;</span><span class="pt-pay-name">MBank</span></div>' +
-                    '<div class="pt-pay-method"><span class="pt-pay-soon">' + soonLabel + '</span><span class="pt-pay-icon">&#128241;</span><span class="pt-pay-name">Bakai24</span></div>' +
-                    '<div class="pt-pay-method"><span class="pt-pay-soon">' + soonLabel + '</span><span class="pt-pay-icon">&#128241;</span><span class="pt-pay-name">Optima24</span></div>' +
-                    '<div class="pt-pay-method"><span class="pt-pay-soon">' + soonLabel + '</span><span class="pt-pay-icon">&#128241;</span><span class="pt-pay-name">Демир24</span></div>' +
-                '</div>' +
-
-                '<div class="pt-pay-label">' + walletsLabel + '</div>' +
-                '<div class="pt-pay-grid">' +
-                    '<div class="pt-pay-method"><span class="pt-pay-soon">' + soonLabel + '</span><span class="pt-pay-icon">&#128176;</span><span class="pt-pay-name">O! Деньги</span></div>' +
-                    '<div class="pt-pay-method"><span class="pt-pay-soon">' + soonLabel + '</span><span class="pt-pay-icon">&#128176;</span><span class="pt-pay-name">Balance.kg</span></div>' +
-                    '<div class="pt-pay-method"><span class="pt-pay-soon">' + soonLabel + '</span><span class="pt-pay-icon">&#128176;</span><span class="pt-pay-name">Элсом</span></div>' +
-                    '<div class="pt-pay-method"><span class="pt-pay-soon">' + soonLabel + '</span><span class="pt-pay-icon">&#128176;</span><span class="pt-pay-name">MegaPay</span></div>' +
-                '</div>' +
-
-                '<div class="pt-pay-divider">' + orLabel + '</div>' +
-
-                '<a href="https://t.me/kslt_admin" target="_blank" rel="noopener" class="pt-pay-tg-btn">&#9993; ' + tgBtn + '</a>' +
-
-                '<div class="pt-modal-note">' + noteText + '</div>' +
-                '<div class="pt-modal-disclaimer">' + disclaimer + '</div>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
-
-        requestAnimationFrame(function() {
-            overlay.classList.add('visible');
-        });
-
-        overlay.querySelector('.pt-modal-close').addEventListener('click', function() {
-            closeModal(overlay);
-        });
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) closeModal(overlay);
-        });
-    }
-
-    // ---- Toast ----
-    var _toastTimer = null;
-    function showToast(message, type) {
-        // Remove existing
-        var old = document.querySelector('.pt-toast');
-        if (old) old.remove();
-        if (_toastTimer) clearTimeout(_toastTimer);
-
-        var toast = document.createElement('div');
-        toast.className = 'pt-toast' + (type ? ' ' + type : '');
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        requestAnimationFrame(function() {
-            toast.classList.add('visible');
-        });
-
-        _toastTimer = setTimeout(function() {
-            toast.classList.remove('visible');
-            setTimeout(function() { toast.remove(); }, 300);
-        }, 3000);
-    }
+    // Приглашение — общий модуль js/invite-player.js: тот же код работает
+    // в блоке на главной. Раньше он жил здесь, и главная умела только
+    // увести сюда со ссылкой, которую никто не читал
 
 })();

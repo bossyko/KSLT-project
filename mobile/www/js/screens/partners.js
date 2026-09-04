@@ -50,6 +50,11 @@
       return withNtrp.then(function(nr) {
         var map = {};
         (nr.data || []).forEach(function(p) { map[p.id] = p; });
+        // Себя из списка убираем: искать партнёра среди самого себя незачем
+        var AUTH = window.KSLT_AUTH;
+        var своя = (AUTH && AUTH.currentProfile) ? AUTH.currentProfile.player_id : null;
+        if (своя) rows = rows.filter(function(p) { return p.id !== своя; });
+
         allPartners = rows.map(function(p) {
           var extra = map[p.id] || {};
           return {

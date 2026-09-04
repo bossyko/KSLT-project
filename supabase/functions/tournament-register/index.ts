@@ -347,11 +347,11 @@ type Decision = {
   text?: string
 }
 
+// Пол во всём проекте пишется одним словарём: men/women. Раньше учётные
+// записи хранили male/female, и здесь стоял перевод — теперь переводить нечего
 function normalizeGender(g: string | null): string | null {
   if (!g) return null
-  if (g === 'male') return 'men'
-  if (g === 'female') return 'women'
-  return g
+  return (g === 'men' || g === 'women') ? g : null
 }
 
 async function loadPartnerNtrp(db: any, partnerId: string): Promise<number> {

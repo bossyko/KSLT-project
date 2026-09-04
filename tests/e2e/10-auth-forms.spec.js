@@ -229,8 +229,8 @@ test.describe('Auth Forms — Registration Form', () => {
             await page.locator('#signupShowForm').click();
             await page.waitForTimeout(200);
 
-            const maleRadio = page.locator('#signupForm input[name="gender"][value="male"]');
-            const femaleRadio = page.locator('#signupForm input[name="gender"][value="female"]');
+            const maleRadio = page.locator('#signupForm input[name="gender"][value="men"]');
+            const femaleRadio = page.locator('#signupForm input[name="gender"][value="women"]');
             expect(await maleRadio.count()).toBe(1);
             expect(await femaleRadio.count()).toBe(1);
         });

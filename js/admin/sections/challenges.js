@@ -575,8 +575,8 @@
 
     // ==== CREATE BATTLE MODAL ====
     function openCreateBattleModal() {
-        var sel1 = { id: null, name: '', ntrp: '', country: '', category: '', gender: '' };
-        var sel2 = { id: null, name: '', ntrp: '', country: '', category: '', gender: '' };
+        var sel1 = { id: null, name: '', ntrp: '', country: '', gender: '' };
+        var sel2 = { id: null, name: '', ntrp: '', country: '', gender: '' };
         // Вторые половины пар. В одиночном не используются и в базу не уходят
         var mate1 = { id: null, name: '', ntrp: '', gender: '' };
         var mate2 = { id: null, name: '', ntrp: '', gender: '' };
@@ -611,20 +611,7 @@
                             '<div class="ad-dropdown-list" id="cbP1Dropdown" style="display:none;"></div>' +
                         '</div>' +
                         '<div id="cbP1Selected" class="ad-chal-selected-hint"></div>' +
-                        '<div style="display:flex;gap:8px;margin-top:6px;">' +
-                            '<select class="ad-field-input" id="cbP1Gender" style="width:86px;flex:0 0 86px;">' +
-                                '<option value="">' + L.chalGender + '</option>' +
-                                '<option value="men">' + L.chalMen + '</option>' +
-                                '<option value="women">' + L.chalWomen + '</option>' +
-                            '</select>' +
-                            '<select class="ad-field-input" id="cbP1Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(null, { emptyLabel: 'NTRP' }) + '</select>' +
-                            '<select class="ad-field-input" id="cbP1Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions('') + '</select>' +
-                            '<div style="flex:1;min-width:0;position:relative;">' +
-                                '<input type="text" class="ad-field-input" id="cbP1CountryInput" placeholder="' + L.chalCountry + '" autocomplete="off" style="text-overflow:ellipsis;">' +
-                                '<input type="hidden" id="cbP1Country">' +
-                                '<div class="ad-dropdown-list" id="cbP1CountryDd" style="display:none;"></div>' +
-                            '</div>' +
-                        '</div>' +
+                        extrasRow('cbP1', { withGender: true }) +
                     '</div>' +
                     // Напарник стороны 1: показывается только в парном и миксте
                     '<div class="ad-field-group cb-partner" id="cbM1Group" style="display:none;">' +
@@ -634,14 +621,7 @@
                             '<div class="ad-dropdown-list" id="cbM1Dropdown" style="display:none;"></div>' +
                         '</div>' +
                         '<div id="cbM1Selected" class="ad-chal-selected-hint"></div>' +
-                        '<div style="display:flex;gap:8px;margin-top:6px;">' +
-                            '<select class="ad-field-input" id="cbM1Gender" style="width:86px;flex:0 0 86px;">' +
-                                '<option value="">' + L.chalGender + '</option>' +
-                                '<option value="men">' + L.chalMen + '</option>' +
-                                '<option value="women">' + L.chalWomen + '</option>' +
-                            '</select>' +
-                            '<select class="ad-field-input" id="cbM1Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(null, { emptyLabel: 'NTRP' }) + '</select>' +
-                        '</div>' +
+                        extrasRow('cbM1', { withGender: true }) +
                     '</div>' +
                     // Player 2
                     '<div class="ad-field-group">' +
@@ -651,20 +631,7 @@
                             '<div class="ad-dropdown-list" id="cbP2Dropdown" style="display:none;"></div>' +
                         '</div>' +
                         '<div id="cbP2Selected" class="ad-chal-selected-hint"></div>' +
-                        '<div style="display:flex;gap:8px;margin-top:6px;">' +
-                            '<select class="ad-field-input" id="cbP2Gender" style="width:86px;flex:0 0 86px;">' +
-                                '<option value="">' + L.chalGender + '</option>' +
-                                '<option value="men">' + L.chalMen + '</option>' +
-                                '<option value="women">' + L.chalWomen + '</option>' +
-                            '</select>' +
-                            '<select class="ad-field-input" id="cbP2Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(null, { emptyLabel: 'NTRP' }) + '</select>' +
-                            '<select class="ad-field-input" id="cbP2Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions('') + '</select>' +
-                            '<div style="flex:1;min-width:0;position:relative;">' +
-                                '<input type="text" class="ad-field-input" id="cbP2CountryInput" placeholder="' + L.chalCountry + '" autocomplete="off" style="text-overflow:ellipsis;">' +
-                                '<input type="hidden" id="cbP2Country">' +
-                                '<div class="ad-dropdown-list" id="cbP2CountryDd" style="display:none;"></div>' +
-                            '</div>' +
-                        '</div>' +
+                        extrasRow('cbP2', { withGender: true }) +
                     '</div>' +
                     // Напарник стороны 2: показывается только в парном и миксте
                     '<div class="ad-field-group cb-partner" id="cbM2Group" style="display:none;">' +
@@ -674,14 +641,7 @@
                             '<div class="ad-dropdown-list" id="cbM2Dropdown" style="display:none;"></div>' +
                         '</div>' +
                         '<div id="cbM2Selected" class="ad-chal-selected-hint"></div>' +
-                        '<div style="display:flex;gap:8px;margin-top:6px;">' +
-                            '<select class="ad-field-input" id="cbM2Gender" style="width:86px;flex:0 0 86px;">' +
-                                '<option value="">' + L.chalGender + '</option>' +
-                                '<option value="men">' + L.chalMen + '</option>' +
-                                '<option value="women">' + L.chalWomen + '</option>' +
-                            '</select>' +
-                            '<select class="ad-field-input" id="cbM2Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(null, { emptyLabel: 'NTRP' }) + '</select>' +
-                        '</div>' +
+                        extrasRow('cbM2', { withGender: true }) +
                     '</div>' +
                     // Title
                     '<div class="ad-field-group">' +
@@ -762,18 +722,22 @@
 
         // Player search setup with autofill
         setupPlayerSearch('cbP1Input', 'cbP1Dropdown', 'cbP1Selected', function(p) {
-            sel1 = { id: p.id, name: p.name, ntrp: sel1.ntrp, country: sel1.country,
-                     category: sel1.category, gender: sel1.gender };
+            sel1 = { id: p.id, name: p.name, ntrp: sel1.ntrp,
+                     country: sel1.country, gender: sel1.gender };
             if (p._player) {
-                autofillPlayerExtras(p._player, 'cbP1Ntrp', 'cbP1Cat', 'cbP1Country', 'cbP1CountryInput', sel1);
+                autofillPlayerExtras(p._player, 'cbP1Ntrp', 'cbP1Country', sel1);
             }
+            // Выбрали из базы — снимок не нужен, аватарка придёт из профиля
+            togglePhotoField('cbP1', !!p.id);
         });
         setupPlayerSearch('cbP2Input', 'cbP2Dropdown', 'cbP2Selected', function(p) {
-            sel2 = { id: p.id, name: p.name, ntrp: sel2.ntrp, country: sel2.country,
-                     category: sel2.category, gender: sel2.gender };
+            sel2 = { id: p.id, name: p.name, ntrp: sel2.ntrp,
+                     country: sel2.country, gender: sel2.gender };
             if (p._player) {
-                autofillPlayerExtras(p._player, 'cbP2Ntrp', 'cbP2Cat', 'cbP2Country', 'cbP2CountryInput', sel2);
+                autofillPlayerExtras(p._player, 'cbP2Ntrp', 'cbP2Country', sel2);
             }
+            // Выбрали из базы — снимок не нужен, аватарка придёт из профиля
+            togglePhotoField('cbP2', !!p.id);
         });
 
         // Напарники ищутся так же, как основные игроки, но список сужен по
@@ -792,6 +756,7 @@
                 if (n) n.value = v;
                 mate1.ntrp = v;
             }
+            togglePhotoField('cbM1', !!p.id);
         }, function() { return allowedGender(1); });
 
         setupPlayerSearch('cbM2Input', 'cbM2Dropdown', 'cbM2Selected', function(p) {
@@ -807,6 +772,7 @@
                 if (n2) n2.value = v2;
                 mate2.ntrp = v2;
             }
+            togglePhotoField('cbM2', !!p.id);
         }, function() { return allowedGender(2); });
 
         /**
@@ -871,9 +837,10 @@
         var anyPairEl = document.getElementById('cbAnyPair');
         if (anyPairEl) anyPairEl.addEventListener('change', updatePartnerHints);
 
-        // Country search inputs
-        setupCountryInput('cbP1CountryInput', 'cbP1Country', 'cbP1CountryDd');
-        setupCountryInput('cbP2CountryInput', 'cbP2Country', 'cbP2CountryDd');
+        // Загрузка снимка для тех, кого нет в базе. Кладём туда же, куда и
+        // афиши баттлов; ссылка ложится в сам вызов, карточки игрока не
+        // заводим — он не член клуба
+        ['cbP1', 'cbP2', 'cbM1', 'cbM2'].forEach(setupPhotoUpload);
 
         // Court search setup
         setupCourtSearch(function(court) {
@@ -918,11 +885,11 @@
             // Auto-capture typed names if not selected from dropdown
             if (!sel1.name) {
                 var typed1 = document.getElementById('cbP1Input').value.trim();
-                if (typed1) sel1 = { id: null, name: typed1, ntrp: '', country: '', category: '', gender: '' };
+                if (typed1) sel1 = { id: null, name: typed1, ntrp: '', country: '', gender: '' };
             }
             if (!sel2.name) {
                 var typed2 = document.getElementById('cbP2Input').value.trim();
-                if (typed2) sel2 = { id: null, name: typed2, ntrp: '', country: '', category: '', gender: '' };
+                if (typed2) sel2 = { id: null, name: typed2, ntrp: '', country: '', gender: '' };
             }
 
             if (!sel1.name || !sel2.name) {
@@ -936,11 +903,9 @@
 
             // Read extra fields
             sel1.ntrp = document.getElementById('cbP1Ntrp').value || '';
-            sel1.category = document.getElementById('cbP1Cat').value || '';
             sel1.country = document.getElementById('cbP1Country').value || '';
             sel1.gender = document.getElementById('cbP1Gender').value || '';
             sel2.ntrp = document.getElementById('cbP2Ntrp').value || '';
-            sel2.category = document.getElementById('cbP2Cat').value || '';
             sel2.country = document.getElementById('cbP2Country').value || '';
             sel2.gender = document.getElementById('cbP2Gender').value || '';
 
@@ -1099,7 +1064,10 @@
                             if (p) {
                                 var pName = isEn ? (p.name_en || p.name) : p.name;
                                 input.value = pName;
-                                selectedEl.textContent = pName + ' (ID: ' + p.id + ')';
+                                // Разряд и NTRP — строкой, только посмотреть.
+                                // Видно, того ли человека взял, но в баттл они
+                                // не пишутся: разряд живёт в карточке игрока
+                                selectedEl.textContent = pName + подписьИгрока(p);
                                 onSelect({ id: p.id, name: pName, _player: p });
                             }
                         } else if (manual) {
@@ -1235,6 +1203,14 @@
             opponent_player_id: p2.id || null,
             challenger_external_name: p1.id ? null : (p1.name || null),
             opponent_external_name: p2.id ? null : (p2.name || null),
+            // Снимок только для тех, кого нет в базе: у своих аватарка
+            // берётся из профиля, и вторая ссылка её бы перебивала
+            challenger_photo: p1.id ? null : (val('cbP1Photo') || null),
+            opponent_photo: p2.id ? null : (val('cbP2Photo') || null),
+            challenger_partner_photo: m1.id ? null : (val('cbM1Photo') || null),
+            opponent_partner_photo: m2.id ? null : (val('cbM2Photo') || null),
+            challenger_partner_country: m1.id ? null : (val('cbM1Country') || null),
+            opponent_partner_country: m2.id ? null : (val('cbM2Country') || null),
             challenger_gender: p1.gender || null,
             opponent_gender: p2.gender || null,
             opponent_profile_id: null,
@@ -1253,8 +1229,6 @@
             opponent_ntrp: p2.ntrp ? parseFloat(p2.ntrp) : null,
             challenger_country: p1.country || null,
             opponent_country: p2.country || null,
-            challenger_category: p1.category || null,
-            opponent_category: p2.category || null,
             set_format: setFormat || 'standard'
         }).select('id').single().then(function(res) {
             if (res.error) {
@@ -1680,6 +1654,13 @@
         var p1Country = challenge.challenger_country || p1.country || '';
         var p2Country = challenge.opponent_country || p2.country || '';
 
+        // Снимок просим только у того, кого нет в базе клуба: у своих
+        // аватарка берётся из карточки
+        var p1Ручной = !challenge.challenger_player_id;
+        var p2Ручной = !challenge.opponent_player_id;
+        var p1Photo = challenge.challenger_photo || '';
+        var p2Photo = challenge.opponent_photo || '';
+
         var selCourt = { id: challenge.proposed_court_id || null, name: '', address: '' };
         var bannerUrl = challenge.banner_url || '';
 
@@ -1717,28 +1698,14 @@
                     // Player 1 extras
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label" style="font-size:11px;color:var(--text-secondary);">' + A.esc(p1Name) + '</label>' +
-                        '<div style="display:flex;gap:8px;">' +
-                            '<select class="ad-field-input" id="ebP1Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(p1Ntrp, { emptyLabel: 'NTRP' }) + '</select>' +
-                            '<select class="ad-field-input" id="ebP1Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions(p1Cat) + '</select>' +
-                            '<div style="flex:1;position:relative;">' +
-                                '<input type="text" class="ad-field-input" id="ebP1CountryInput" placeholder="' + L.chalCountry + '" autocomplete="off">' +
-                                '<input type="hidden" id="ebP1Country" value="' + A.esc(p1Country) + '">' +
-                                '<div class="ad-dropdown-list" id="ebP1CountryDd" style="display:none;"></div>' +
-                            '</div>' +
-                        '</div>' +
+                        extrasRow('ebP1', { ntrp: p1Ntrp, country: p1Country,
+                                      photo: p1Photo, showPhoto: p1Ручной }) +
                     '</div>' +
                     // Player 2 extras
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label" style="font-size:11px;color:var(--text-secondary);">' + A.esc(p2Name) + '</label>' +
-                        '<div style="display:flex;gap:8px;">' +
-                            '<select class="ad-field-input" id="ebP2Ntrp" style="width:100px;flex:0 0 100px;">' + A.ntrpOptions(p2Ntrp, { emptyLabel: 'NTRP' }) + '</select>' +
-                            '<select class="ad-field-input" id="ebP2Cat" style="flex:0 0 auto;max-width:140px;">' + buildCategoryOptions(p2Cat) + '</select>' +
-                            '<div style="flex:1;position:relative;">' +
-                                '<input type="text" class="ad-field-input" id="ebP2CountryInput" placeholder="' + L.chalCountry + '" autocomplete="off">' +
-                                '<input type="hidden" id="ebP2Country" value="' + A.esc(p2Country) + '">' +
-                                '<div class="ad-dropdown-list" id="ebP2CountryDd" style="display:none;"></div>' +
-                            '</div>' +
-                        '</div>' +
+                        extrasRow('ebP2', { ntrp: p2Ntrp, country: p2Country,
+                                      photo: p2Photo, showPhoto: p2Ручной }) +
                     '</div>' +
                     // Title
                     '<div class="ad-field-group">' +
@@ -1822,26 +1789,9 @@
         document.getElementById('ebClose').addEventListener('click', function() { overlay.remove(); });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
 
-        // Country inputs
-        setupCountryInput('ebP1CountryInput', 'ebP1Country', 'ebP1CountryDd');
-        setupCountryInput('ebP2CountryInput', 'ebP2Country', 'ebP2CountryDd');
-
-        // Pre-fill country display
-        var CU = window.KSLT_COUNTRY;
-        if (CU) {
-            var lang = isEn ? 'en' : 'ru';
-            // Берём то же значение, что и скрытое поле: раньше здесь стоял
-            // вызов, где страны нет, и видимое поле оставалось пустым, хотя
-            // в скрытом уже лежала страна из карточки игрока
-            if (p1Country) {
-                var ci1 = document.getElementById('ebP1CountryInput');
-                if (ci1) ci1.value = CU.renderCountry(p1Country, lang, true);
-            }
-            if (p2Country) {
-                var ci2 = document.getElementById('ebP2CountryInput');
-                if (ci2) ci2.value = CU.renderCountry(p2Country, lang, true);
-            }
-        }
+        // Снимок ручного игрока — можно добавить и после создания баттла
+        if (p1Ручной) setupPhotoUpload('ebP1');
+        if (p2Ручной) setupPhotoUpload('ebP2');
 
         // Court search
         setupCourtSearch(function(court) {
@@ -1901,11 +1851,13 @@
                 opponent_ntrp: document.getElementById('ebP2Ntrp').value ? parseFloat(document.getElementById('ebP2Ntrp').value) : null,
                 challenger_country: document.getElementById('ebP1Country').value || null,
                 opponent_country: document.getElementById('ebP2Country').value || null,
-                challenger_category: document.getElementById('ebP1Cat').value || null,
-                opponent_category: document.getElementById('ebP2Cat').value || null,
                 set_format: document.getElementById('ebSetFormat').value || 'standard'
             };
             if (selCourt.id) updateData.proposed_court_id = selCourt.id;
+            // Снимок только у ручных: своим он приходит из карточки, и
+            // затирать её вызовом нельзя
+            if (p1Ручной) updateData.challenger_photo = val('ebP1Photo') || null;
+            if (p2Ручной) updateData.opponent_photo = val('ebP2Photo') || null;
 
             A.client.from('challenges').update(updateData).eq('id', challenge.id).then(function(res) {
                 if (res.error) {
@@ -2005,6 +1957,79 @@
             A.showToast(L.chalCancelled + ' \u00B7 ' + (res.data.notified || 0), 'success');
             loadData();
         });
+    }
+
+    /** Значение поля по имени; пусто, если поля нет. */
+    function val(id) {
+        var el = document.getElementById(id);
+        return el ? (el.value || '').trim() : '';
+    }
+
+    /**
+     * Загрузка снимка в рамку.
+     *
+     * Рамка — тот же блок, что в карточке игрока и в новостях: щелчок по
+     * ней открывает выбор файла, крестик убирает снимок. Раньше здесь были
+     * кнопка и кружок в тридцать четыре пикселя сбоку — ряд из-за них не
+     * помещался, а вертикального фото со страницы баттла было не разглядеть.
+     */
+    function setupPhotoUpload(prefix) {
+        var wrap = document.getElementById(prefix + 'PhotoWrap');
+        var file = document.getElementById(prefix + 'PhotoFile');
+        var hidden = document.getElementById(prefix + 'Photo');
+        if (!wrap || !file || !hidden || wrap.dataset.ready) return;
+        wrap.dataset.ready = '1';
+
+        wrap.addEventListener('click', function (e) {
+            if (e.target.closest('.ad-image-upload-remove')) {
+                e.stopPropagation();
+                hidden.value = '';
+                file.value = '';
+                wrap.classList.remove('has-image');
+                wrap.innerHTML = photoPlaceholderHtml();
+                return;
+            }
+            file.click();
+        });
+
+        file.addEventListener('change', function () {
+            var f = file.files && file.files[0];
+            if (!f || !A.uploadImage) return;
+            wrap.classList.add('cb-photo-busy');
+            wrap.innerHTML = '<div class="ad-image-upload-placeholder cb-photo-hint">' +
+                             L.chalPhotoUploading + '</div>';
+            A.uploadImage(f, 'battles').then(function (url) {
+                wrap.classList.remove('cb-photo-busy');
+                hidden.value = url || '';
+                wrap.classList.add('has-image');
+                wrap.innerHTML = photoPreviewHtml(url);
+            }).catch(function () {
+                wrap.classList.remove('cb-photo-busy');
+                wrap.innerHTML = photoPlaceholderHtml();
+                A.showToast(L.chalPhotoError, 'error');
+            });
+        });
+    }
+
+    /**
+     * Показать рамку снимка или спрятать её.
+     *
+     * Снимок нужен только тому, кого нет в базе клуба: у своих аватарка
+     * подтягивается из профиля, и вторая рамка рядом только путала бы.
+     */
+    function togglePhotoField(prefix, изБазы) {
+        var wrap = document.getElementById(prefix + 'PhotoWrap');
+        var extras = document.getElementById(prefix + 'Extras');
+        if (!wrap) return;
+        wrap.style.display = изБазы ? 'none' : '';
+        // Без рамки поля встают в один ряд, с рамкой — в два
+        if (extras) extras.classList.toggle('cb-extras-flat', !!изБазы);
+        if (изБазы) {
+            var hidden = document.getElementById(prefix + 'Photo');
+            if (hidden) hidden.value = '';
+            wrap.classList.remove('has-image');
+            wrap.innerHTML = photoPlaceholderHtml();
+        }
     }
 
     /** Объявление об отмене в группу клуба. Молчание — не ответ. */
@@ -2143,25 +2168,118 @@
 
     // ---- Helpers: NTRP / Category / Country ----
 
-    function buildCategoryOptions(selectedVal) {
-        var cats = A.cachedCategories || [];
-        var html = '<option value="">' + L.chalCategory + '</option>';
-        cats.forEach(function(c) {
-            var name = isEn ? (c.name_en || c.name) : c.name;
-            var sel = (c.id === selectedVal) ? ' selected' : '';
-            html += '<option value="' + A.esc(c.id) + '"' + sel + '>' + A.esc(name) + '</option>';
+    /**
+     * Ряд под именем игрока: снимок, пол, NTRP и страна.
+     *
+     * Один сборщик на все шесть мест — двух игроков и двух напарников при
+     * создании, двух игроков при правке. Раньше каждое место было написано
+     * отдельно, и они незаметно разошлись: у напарника не было ни страны,
+     * ни снимка, а у основного игрока висел ещё и разряд, из-за которого
+     * ряд переставал помещаться.
+     *
+     * Разряд убран совсем: у игрока клуба он в карточке и показывается
+     * строкой над рядом, а гостю разряда не ставим.
+     *
+     * Свойства:
+     *   withGender — спрашивать пол (при создании нужен, при правке нет)
+     *   ntrp, country, photo — что подставить
+     *   showPhoto — показывать ли рамку снимка сразу
+     */
+    function extrasRow(prefix, opts) {
+        opts = opts || {};
+        var скрыть = opts.showPhoto ? '' : ' style="display:none;"';
+        var есть = !!opts.photo;
+
+        var рамка =
+            '<div class="ad-image-upload cb-photo' + (есть ? ' has-image' : '') + '" ' +
+                 'id="' + prefix + 'PhotoWrap"' + скрыть + '>' +
+                (есть ? photoPreviewHtml(opts.photo) : photoPlaceholderHtml()) +
+            '</div>' +
+            '<input type="file" id="' + prefix + 'PhotoFile" accept="image/*" style="display:none;">' +
+            '<input type="hidden" id="' + prefix + 'Photo" value="' + A.esc(opts.photo || '') + '">';
+
+        var пол = opts.withGender
+            ? '<select class="ad-field-input" id="' + prefix + 'Gender">' +
+                  '<option value="">' + L.chalGender + '</option>' +
+                  '<option value="men">' + L.chalMen + '</option>' +
+                  '<option value="women">' + L.chalWomen + '</option>' +
+              '</select>'
+            : '';
+
+        // Без рамки снимка поля встают в один ряд, с рамкой — в два
+        return '<div class="cb-extras' + (opts.showPhoto ? '' : ' cb-extras-flat') +
+               '" id="' + prefix + 'Extras">' +
+            рамка +
+            '<div class="cb-extras-fields">' +
+                '<div class="cb-extras-pair">' +
+                    пол +
+                    '<select class="ad-field-input" id="' + prefix + 'Ntrp">' +
+                        A.ntrpOptions(opts.ntrp || null, { emptyLabel: 'NTRP' }) +
+                    '</select>' +
+                '</div>' +
+                '<select class="ad-field-input cb-country" id="' + prefix + 'Country">' +
+                    buildCountryOptions(opts.country || '') +
+                '</select>' +
+            '</div>' +
+        '</div>';
+    }
+
+    /** Разряд и NTRP игрока клуба — подпись под полем поиска. */
+    function подписьИгрока(p) {
+        var части = [];
+        if (p.category_id) {
+            var cat = (A.cachedCategories || []).find(function (c) { return c.id === p.category_id; });
+            if (cat) части.push(isEn ? (cat.name_en || cat.name) : cat.name);
+        }
+        if (p.ntrp_rating) части.push('NTRP ' + parseFloat(p.ntrp_rating));
+        return части.length ? ' \u00B7 ' + части.join(' \u00B7 ') : '';
+    }
+
+    function photoPlaceholderHtml() {
+        return '<div class="ad-image-upload-placeholder cb-photo-hint">' +
+                   '<div class="cb-photo-icon">\uD83D\uDCF7</div>' +
+                   '<div>' + L.chalPhoto + '</div>' +
+               '</div>';
+    }
+
+    function photoPreviewHtml(url) {
+        return '<img class="ad-image-upload-preview cb-photo-img" src="' + A.esc(url) + '" alt="">' +
+               '<button type="button" class="ad-image-upload-remove cb-photo-x">&times;</button>';
+    }
+
+    /**
+     * Список стран — обычная выпадашка на все 197.
+     *
+     * Было поле с подсказками: чтобы сменить страну, приходилось стирать
+     * набранное. И гостя из страны, которой нет среди подсказок, вписать
+     * было нечем.
+     */
+    function buildCountryOptions(selectedVal) {
+        var CU = window.KSLT_COUNTRY;
+        var список = window.KSLT_COUNTRIES || [];
+        var lang = isEn ? 'en' : 'ru';
+        var html = '<option value="">' + L.chalCountry + '</option>';
+        список.forEach(function (c) {
+            var флаг = CU ? CU.flagEmoji(c.code) : '';
+            var sel = (c.code === selectedVal) ? ' selected' : '';
+            html += '<option value="' + c.code + '"' + sel + '>' +
+                    флаг + ' ' + A.esc(c[lang] || c.en) + '</option>';
         });
         return html;
     }
 
-    function autofillPlayerExtras(player, ntrpId, catId, hiddenCountryId, countryInputId, selObj) {
+    function autofillPlayerExtras(player, ntrpId, countryId, selObj) {
         var CU = window.KSLT_COUNTRY;
         // Пол. У членов клуба он в карточке, у вписанного руками его спросят
         // отдельно: проверка состава пары сравнивает именно его
         if (player.gender) {
             var genderEl = document.getElementById(ntrpId.replace('Ntrp', 'Gender'));
-            if (genderEl) genderEl.value = player.gender;
-            selObj.gender = player.gender;
+            // Ставим, только если такое значение в списке есть: от чужого
+            // выпадашка молча схлопывается в пустую, без надписи «Пол»
+            if (genderEl && genderEl.querySelector('option[value="' + player.gender + '"]')) {
+                genderEl.value = player.gender;
+                selObj.gender = player.gender;
+            }
         }
         // NTRP — format value to match select options (e.g. 4.5 → "4.5", 4.25 → "4.25")
         if (player.ntrp_rating) {
@@ -2170,86 +2288,16 @@
             if (ntrpEl) ntrpEl.value = ntrpVal;
             selObj.ntrp = ntrpVal;
         }
-        // Category
-        if (player.category_id) {
-            var catEl = document.getElementById(catId);
-            if (catEl) catEl.value = player.category_id;
-            selObj.category = player.category_id;
-        }
-        // Country
+        // Страна. Разряд не трогаем: в баттле его больше не задают — у
+        // игрока клуба он в карточке, а гостю разряда не ставим
         if (player.country && CU) {
             var code = CU.normalizeCountry(player.country);
             if (code) {
-                var hiddenEl = document.getElementById(hiddenCountryId);
-                var inputEl = document.getElementById(countryInputId);
-                if (hiddenEl) hiddenEl.value = code;
-                if (inputEl) {
-                    var lang = isEn ? 'en' : 'ru';
-                    inputEl.value = CU.renderCountry(code, lang, true);
-                }
+                var countryEl = document.getElementById(countryId);
+                if (countryEl) countryEl.value = code;
                 selObj.country = code;
             }
         }
-    }
-
-    function setupCountryInput(inputId, hiddenId, dropdownId) {
-        var input = document.getElementById(inputId);
-        var hidden = document.getElementById(hiddenId);
-        var dropdown = document.getElementById(dropdownId);
-        if (!input || !hidden || !dropdown) return;
-
-        var CU = window.KSLT_COUNTRY;
-        var countries = window.KSLT_COUNTRIES || [];
-        var lang = isEn ? 'en' : 'ru';
-
-        function renderItems(list) {
-            dropdown.innerHTML = '';
-            if (!list.length) { dropdown.style.display = 'none'; return; }
-            list.forEach(function(c) {
-                var div = document.createElement('div');
-                div.className = 'ad-dropdown-item';
-                div.style.cursor = 'pointer';
-                div.textContent = (CU ? CU.flagEmoji(c.code) : '') + ' ' + (c[lang] || c.en);
-                div.dataset.code = c.code;
-                div.addEventListener('mousedown', function(e) {
-                    e.preventDefault();
-                    hidden.value = c.code;
-                    input.value = (CU ? CU.renderCountry(c.code, lang, true) : c.code);
-                    dropdown.style.display = 'none';
-                });
-                dropdown.appendChild(div);
-            });
-            dropdown.style.display = 'block';
-        }
-
-        input.addEventListener('focus', function() {
-            var q = input.value.trim().toLowerCase();
-            if (!q) {
-                // Show priority countries
-                renderItems(countries.filter(function(c) { return ['KG','KZ','RU','UZ','TJ','TM'].indexOf(c.code) !== -1; }));
-            }
-        });
-
-        input.addEventListener('input', function() {
-            var q = input.value.trim().toLowerCase();
-            if (!q) {
-                hidden.value = '';
-                renderItems(countries.filter(function(c) { return ['KG','KZ','RU','UZ','TJ','TM'].indexOf(c.code) !== -1; }));
-                return;
-            }
-            var matches = countries.filter(function(c) {
-                return (c.ru || '').toLowerCase().indexOf(q) !== -1 ||
-                       (c.en || '').toLowerCase().indexOf(q) !== -1 ||
-                       c.code.toLowerCase() === q;
-            }).slice(0, 8);
-            renderItems(matches);
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
-            }
-        });
     }
 
     // ---- Utils ----

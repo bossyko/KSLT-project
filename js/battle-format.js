@@ -80,18 +80,26 @@
         var mateId = side === 1 ? b.challenger_partner_id : b.opponent_partner_id;
         var mateExt = side === 1 ? b.challenger_partner_name : b.opponent_partner_name;
 
-        var out = { names: [], photos: [] };
+        // Введённый вручную человек в базе не заводится — его снимок и страна
+        // лежат в самом вызове. Для игрока клуба берём из профиля
+        var mainPhoto = side === 1 ? b.challenger_photo : b.opponent_photo;
+        var matePhoto = side === 1 ? b.challenger_partner_photo : b.opponent_partner_photo;
+        var mainCountry = side === 1 ? b.challenger_country : b.opponent_country;
+        var mateCountry = side === 1 ? b.challenger_partner_country : b.opponent_partner_country;
 
-        function push(id, ext) {
+        var out = { names: [], photos: [], countries: [] };
+
+        function push(id, ext, ownPhoto, ownCountry) {
             var p = id ? players[id] : null;
             var n = (p && nameOf(p)) || ext || '';
             if (!n) return;
             out.names.push(n);
-            out.photos.push((p && p.photo) || '');
+            out.photos.push((p && p.photo) || ownPhoto || '');
+            out.countries.push((p && p.country) || ownCountry || '');
         }
 
-        push(mainId, mainExt);
-        if (BF.isPair(b)) push(mateId, mateExt);
+        push(mainId, mainExt, mainPhoto, mainCountry);
+        if (BF.isPair(b)) push(mateId, mateExt, matePhoto, mateCountry);
         return out;
     };
 

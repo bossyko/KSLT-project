@@ -109,7 +109,7 @@ async function upsert(table, rows, onConflict) {
             name: acc.name,
             category_id: 'tour',
             points: acc.role === 'admin' ? 120 : 60,
-            gender: 'male'
+            gender: 'men'
         }], 'id');
 
         await upsert('profiles', [{
@@ -119,7 +119,7 @@ async function upsert(table, rows, onConflict) {
             role: acc.role,
             player_id: playerId,
             // Без пола админка не даёт сохранить карточку игрока
-            gender: 'male'
+            gender: 'men'
         }], 'id');
 
         console.log('  аккаунт ' + acc.email + ' (' + acc.role + ') и карточка ' + playerId);
@@ -156,7 +156,7 @@ async function upsert(table, rows, onConflict) {
     // Без них раздел «Мои игры» пуст, и проверять в нём нечего
     await upsert('players', [{
         id: 'test-rival', name: 'Тестовый Соперник',
-        category_id: 'tour', points: 40, gender: 'male'
+        category_id: 'tour', points: 40, gender: 'men'
     }], 'id');
 
     var played = new Date(today.getTime() - 7 * 24 * 3600 * 1000).toISOString();
@@ -216,8 +216,8 @@ async function upsert(table, rows, onConflict) {
     // Тестовый игрок здесь именно напарник: без этого не проверить, что он
     // вообще видит свои парные игры
     await upsert('players', [
-        { id: 'test-captain', name: 'Тестовый Капитан', category_id: 'tour', points: 30, gender: 'male' },
-        { id: 'test-rival-2', name: 'Второй Соперник', category_id: 'tour', points: 20, gender: 'male' }
+        { id: 'test-captain', name: 'Тестовый Капитан', category_id: 'tour', points: 30, gender: 'men' },
+        { id: 'test-rival-2', name: 'Второй Соперник', category_id: 'tour', points: 20, gender: 'men' }
     ], 'id');
 
     await upsert('tournaments', [{

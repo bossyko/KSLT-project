@@ -19,7 +19,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 // Файлы, которые обязаны совпадать в сайте и приложении
-const SHARED = ['kslt-rules.js', 'site-content.js', 'contact-icons.js', 'tournament-slots.js'];
+const SHARED = ['kslt-rules.js', 'site-content.js', 'contact-icons.js', 'tournament-slots.js', 'country-utils.js'];
 
 const SITE = path.join(ROOT, 'js', 'kslt-rules.js');
 const APP = path.join(ROOT, 'mobile', 'www', 'js', 'kslt-rules.js');

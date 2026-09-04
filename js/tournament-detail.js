@@ -2428,8 +2428,6 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 var trnGender = tournament.gender;
                 if (trnGender && trnGender !== 'mixed') {
                     var pGender = playerGenderProfile;
-                    if (pGender === 'male') pGender = 'men';
-                    if (pGender === 'female') pGender = 'women';
                     if (pGender && pGender !== trnGender) {
                         genderBlocked = true;
                     }

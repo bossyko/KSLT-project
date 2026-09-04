@@ -20,6 +20,11 @@ const SITE_URL = Deno.env.get('SITE_URL') || 'https://kslt.netlify.app'
 // секрет EMAIL_FROM, не трогая код.
 const FROM_EMAIL = Deno.env.get('EMAIL_FROM') || 'KSLT <info@tennis.kg>'
 
+// Куда отвечать. Отправлять с gmail.com нельзя — чужой домен в Resend не
+// подтвердить, письма будут отклонены. Поэтому уходит письмо с домена клуба,
+// а нажатие «Ответить» ведёт на почтовый ящик, который читают
+const REPLY_TO = Deno.env.get('EMAIL_REPLY_TO') || 'kslt.kyrgyzstan@gmail.com'
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -67,6 +72,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: FROM_EMAIL,
+        reply_to: REPLY_TO,
         to: Array.isArray(to) ? to : [to],
         subject,
         html: htmlBody
@@ -118,17 +124,17 @@ function wrapLayout(content: string, preheader?: string): string {
 <html lang="ru">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>KSLT</title></head>
-<body style="margin:0;padding:0;background-color:#0a0a0a;font-family:'Inter',Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background-color:#f4f5f7;font-family:'Inter',Arial,Helvetica,sans-serif;">
 ${preheader ? `<div style="display:none;max-height:0;overflow:hidden;">${esc(preheader)}</div>` : ''}
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f5f7;">
 <tr><td align="center" style="padding:32px 16px;">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#1a1a1a;border-radius:12px;overflow:hidden;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;">
 <!-- Header -->
-<tr><td style="background-color:#1a1a1a;padding:24px 32px;border-bottom:1px solid #2a2a2a;">
+<tr><td style="background-color:#ffffff;padding:24px 32px;border-bottom:1px solid #e6e8eb;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 <tr>
-<td><span style="font-size:20px;font-weight:700;color:#CCFF00;letter-spacing:1px;">KSLT</span>
-<span style="font-size:12px;color:#888;margin-left:8px;">Kyrgyzstan Social Lawn Tennis</span></td>
+<td><span style="font-size:20px;font-weight:700;color:#4e6b00;letter-spacing:1px;">KSLT</span>
+<span style="font-size:12px;color:#7a828c;margin-left:8px;">Kyrgyzstan Social Lawn Tennis</span></td>
 </tr></table>
 </td></tr>
 <!-- Content -->
@@ -136,11 +142,13 @@ ${preheader ? `<div style="display:none;max-height:0;overflow:hidden;">${esc(pre
 ${content}
 </td></tr>
 <!-- Footer -->
-<tr><td style="padding:20px 32px;border-top:1px solid #2a2a2a;background-color:#111;">
+<tr><td style="padding:20px 32px;border-top:1px solid #e6e8eb;background-color:#fafbfc;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-<td style="font-size:12px;color:#666;line-height:1.4;">
-<a href="${SITE_URL}" style="color:#CCFF00;text-decoration:none;">kslt.netlify.app</a><br>
-<a href="${SITE_URL}/pages/dashboard.html#notifications" style="color:#666;text-decoration:underline;">Настройки уведомлений</a>
+<td style="font-size:12px;color:#7a828c;line-height:1.4;">
+<a href="${SITE_URL}" style="color:#4e6b00;text-decoration:none;">kslt.netlify.app</a><br>
+<a href="${SITE_URL}/pages/dashboard.html#notifications" style="color:#7a828c;text-decoration:underline;">Настройки уведомлений</a>
+<div style="margin-top:10px;color:#8a919b;">Ответить на это письмо можно — оно придёт на
+<a href="mailto:${REPLY_TO}" style="color:#7a828c;text-decoration:underline;">${REPLY_TO}</a></div>
 </td>
 </tr></table>
 </td></tr>
@@ -154,16 +162,16 @@ ${content}
 // ============================================
 
 const S = {
-  h1: 'font-size:22px;font-weight:700;color:#fff;margin:0 0 16px 0;',
-  h2: 'font-size:18px;font-weight:600;color:#fff;margin:0 0 12px 0;',
-  p: 'font-size:14px;color:#ccc;line-height:1.6;margin:0 0 12px 0;',
-  accent: 'color:#CCFF00;',
-  muted: 'font-size:13px;color:#888;',
-  btn: 'display:inline-block;padding:12px 24px;background-color:#CCFF00;color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;',
-  btnOutline: 'display:inline-block;padding:10px 20px;border:1px solid #CCFF00;color:#CCFF00;font-size:13px;font-weight:500;text-decoration:none;border-radius:8px;',
-  divider: 'border:0;border-top:1px solid #2a2a2a;margin:20px 0;',
-  tag: 'display:inline-block;padding:4px 10px;background-color:#2a2a2a;color:#CCFF00;font-size:12px;font-weight:500;border-radius:4px;',
-  infoRow: 'font-size:14px;color:#ccc;line-height:1.8;margin:0;',
+  h1: 'font-size:22px;font-weight:700;color:#14161a;margin:0 0 16px 0;',
+  h2: 'font-size:18px;font-weight:600;color:#14161a;margin:0 0 12px 0;',
+  p: 'font-size:14px;color:#3f4650;line-height:1.6;margin:0 0 12px 0;',
+  accent: 'color:#4e6b00;',
+  muted: 'font-size:13px;color:#7a828c;',
+  btn: 'display:inline-block;padding:12px 24px;background-color:#CCFF00;color:#14161a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;',
+  btnOutline: 'display:inline-block;padding:10px 20px;border:1px solid #9fc400;color:#4e6b00;font-size:13px;font-weight:500;text-decoration:none;border-radius:8px;',
+  divider: 'border:0;border-top:1px solid #e6e8eb;margin:20px 0;',
+  tag: 'display:inline-block;padding:4px 10px;background-color:#f0f8cc;color:#4e6b00;font-size:12px;font-weight:500;border-radius:4px;',
+  infoRow: 'font-size:14px;color:#3f4650;line-height:1.8;margin:0;',
 }
 
 // ============================================
@@ -265,9 +273,9 @@ function templateMatchSchedule(d: Record<string, any>): string {
   if (d.matches && Array.isArray(d.matches)) {
     for (const m of d.matches) {
       matchesHtml += `<tr>
-        <td style="padding:8px 12px;border-bottom:1px solid #2a2a2a;color:#ccc;font-size:13px;">${esc(m.time)}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid #2a2a2a;color:#fff;font-size:13px;">${esc(m.opponent)}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid #2a2a2a;color:#888;font-size:13px;">${esc(m.court || '')}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e6e8eb;color:#3f4650;font-size:13px;">${esc(m.time)}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e6e8eb;color:#14161a;font-size:13px;">${esc(m.opponent)}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e6e8eb;color:#7a828c;font-size:13px;">${esc(m.court || '')}</td>
       </tr>`
     }
   }
@@ -279,10 +287,10 @@ ${d.player_name ? `<p style="${S.p}">👤 ${esc(d.player_name)}</p>` : ''}
 ${d.date ? `<p style="${S.infoRow}">📅 ${esc(d.date)}</p>` : ''}
 <hr style="${S.divider}">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
-<tr style="background-color:#2a2a2a;">
-  <th style="padding:8px 12px;text-align:left;color:#CCFF00;font-size:12px;font-weight:600;">Время</th>
-  <th style="padding:8px 12px;text-align:left;color:#CCFF00;font-size:12px;font-weight:600;">Соперник</th>
-  <th style="padding:8px 12px;text-align:left;color:#CCFF00;font-size:12px;font-weight:600;">Корт</th>
+<tr style="background-color:#f4f5f7;">
+  <th style="padding:8px 12px;text-align:left;color:#4e6b00;font-size:12px;font-weight:600;">Время</th>
+  <th style="padding:8px 12px;text-align:left;color:#4e6b00;font-size:12px;font-weight:600;">Соперник</th>
+  <th style="padding:8px 12px;text-align:left;color:#4e6b00;font-size:12px;font-weight:600;">Корт</th>
 </tr>
 ${matchesHtml}
 </table>
@@ -320,13 +328,13 @@ function templateChallengeAnswered(d: Record<string, any>): string {
   const content = yes
     ? `
 <h1 style="${S.h1}">🔥 Вызов принят!</h1>
-<p style="${S.p}"><strong style="color:#fff;">${who}</strong> принял ваш вызов.</p>
+<p style="${S.p}"><strong style="color:#14161a;">${who}</strong> принял ваш вызов.</p>
 <p style="${S.p}">Договоритесь о дате, времени и корте — и выходите на матч.</p>
 <hr style="${S.divider}">
 <a href="${SITE_URL}/pages/dashboard.html#games" style="${S.btn}">Открыть кабинет</a>`
     : `
 <h1 style="${S.h1}">Вызов отклонён</h1>
-<p style="${S.p}"><strong style="color:#fff;">${who}</strong> отказался от матча.</p>
+<p style="${S.p}"><strong style="color:#14161a;">${who}</strong> отказался от матча.</p>
 <p style="${S.p}">Ничего страшного — предложите игру другому сопернику.</p>
 <hr style="${S.divider}">
 <a href="${SITE_URL}/pages/players.html" style="${S.btn}">Найти соперника</a>`
@@ -342,7 +350,7 @@ function templateChallengeAnswered(d: Record<string, any>): string {
 function templateGameInvite(d: Record<string, any>): string {
   const content = `
 <h1 style="${S.h1}">🎾 Приглашение на игру</h1>
-<p style="${S.p}"><strong style="color:#fff;">${esc(d.sender_name)}</strong> предлагает вам сыграть в теннис.</p>
+<p style="${S.p}"><strong style="color:#14161a;">${esc(d.sender_name)}</strong> предлагает вам сыграть в теннис.</p>
 <p style="${S.p}">Примите приглашение — и вы обменяетесь контактами:
 он увидит ваши, вы&nbsp;— его. Дальше договоритесь сами.</p>
 <hr style="${S.divider}">
@@ -361,13 +369,13 @@ function templateGameInviteAnswered(d: Record<string, any>): string {
   const content = yes
     ? `
 <h1 style="${S.h1}">🎾 Приглашение принято</h1>
-<p style="${S.p}"><strong style="color:#fff;">${who}</strong> согласился сыграть.</p>
+<p style="${S.p}"><strong style="color:#14161a;">${who}</strong> согласился сыграть.</p>
 <p style="${S.p}">Откройте кабинет — там его контакты. Дальше договоритесь сами.</p>
 <hr style="${S.divider}">
 <a href="${SITE_URL}/pages/dashboard.html#games" style="${S.btn}">Открыть кабинет</a>`
     : `
 <h1 style="${S.h1}">Приглашение отклонено</h1>
-<p style="${S.p}"><strong style="color:#fff;">${who}</strong> отказался от игры.</p>
+<p style="${S.p}"><strong style="color:#14161a;">${who}</strong> отказался от игры.</p>
 <p style="${S.p}">Ничего страшного — предложите игру другому.</p>
 <hr style="${S.divider}">
 <a href="${SITE_URL}/pages/partners.html" style="${S.btn}">Найти партнёра</a>`
@@ -377,7 +385,7 @@ function templateGameInviteAnswered(d: Record<string, any>): string {
 function templateChallengeReceived(d: Record<string, any>): string {
   const content = `
 <h1 style="${S.h1}">⚔️ Вызов на матч!</h1>
-<p style="${S.p}"><strong style="color:#fff;">${esc(d.challenger_name)}</strong> предлагает матч:</p>
+<p style="${S.p}"><strong style="color:#14161a;">${esc(d.challenger_name)}</strong> предлагает матч:</p>
 <p style="${S.infoRow}">📅 ${esc(d.date)}  ⏰ ${esc(d.time)}</p>
 ${d.venue ? `<p style="${S.infoRow}">📍 ${esc(d.venue)}</p>` : ''}
 ${d.message ? `<p style="${S.p};font-style:italic;">💬 ${esc(d.message)}</p>` : ''}
@@ -414,12 +422,12 @@ function templateOtpCode(d: Record<string, any>): string {
 <p style="${S.p}">Ваш код для ${esc(flowLabel)}:</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
 <tr><td align="center">
-<div style="display:inline-block;padding:16px 32px;background-color:#ffffff;border:2px solid #CCFF00;border-radius:12px;">
+<div style="display:inline-block;padding:16px 32px;background-color:#f9ffe0;border:2px solid #9fc400;border-radius:12px;">
 <span style="font-size:32px;font-weight:700;color:#111111;letter-spacing:8px;font-family:'Courier New',monospace;">${esc(d.code)}</span>
 </div>
 </td></tr>
 </table>
-<p style="${S.muted}">Код действителен <strong style="color:#fff;">10 минут</strong>.</p>
+<p style="${S.muted}">Код действителен <strong style="color:#14161a;">10 минут</strong>.</p>
 <hr style="${S.divider}">
 <p style="${S.muted}">Если вы не запрашивали код — просто проигнорируйте это письмо.</p>`
   return wrapLayout(content, `Ваш код KSLT: ${d.code}`)

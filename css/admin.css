@@ -4140,6 +4140,93 @@ select.ad-field-input {
     color: var(--accent);
     min-height: 18px;
 }
+/* ---- Баттл: ряд под именем игрока ----
+   Снимок слева, поля справа. С рамкой поля встают в два ряда, без неё —
+   в один: у игрока клуба снимка не просят, места хватает. */
+.cb-extras {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    align-items: flex-start;
+}
+.cb-extras-fields {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.cb-extras-pair {
+    display: flex;
+    gap: 8px;
+}
+.cb-extras-pair > select {
+    flex: 1 1 0;
+    min-width: 0;
+}
+.cb-extras .cb-country {
+    width: 100%;
+}
+
+/* Без рамки снимка — всё в одну строку */
+.cb-extras-flat .cb-extras-fields {
+    flex-direction: row;
+    align-items: flex-start;
+}
+.cb-extras-flat .cb-extras-pair {
+    flex: 0 0 auto;
+}
+.cb-extras-flat .cb-extras-pair > select:first-child {
+    flex: 0 0 112px;
+}
+.cb-extras-flat .cb-extras-pair > select:last-child {
+    flex: 0 0 100px;
+}
+.cb-extras-flat .cb-country {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Рамка снимка — вертикальная, как фото на странице баттла */
+.cb-photo {
+    width: 84px;
+    height: 112px;
+    flex: 0 0 84px;
+    border-radius: 10px;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cb-photo-hint {
+    padding: 0;
+    font-size: 0.62rem;
+    line-height: 1.3;
+    text-align: center;
+}
+.cb-photo-icon {
+    font-size: 1.4rem;
+}
+.cb-photo-img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    max-height: none;
+    object-fit: cover;
+}
+.cb-photo-x {
+    width: 22px;
+    height: 22px;
+    top: 4px;
+    right: 4px;
+    font-size: 0.8rem;
+}
+.cb-photo-busy {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 .ad-chal-banner-row {
     display: flex;
     align-items: center;

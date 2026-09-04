@@ -82,10 +82,12 @@
         return json({ error: 'receiver_player_id required' }, 400)
       }
 
-      // 5. Prevent self-invite (disabled for testing)
-      // if (senderProfile.player_id === receiver_player_id) {
-      //   return json({ error: 'self_invite' }, 400)
-      // }
+      // 5. Себе приглашение не отправить.
+      //    Проверку когда-то отключили на время испытаний и забыли вернуть:
+      //    человек звал сам себя и получал собственное приглашение
+      if (senderProfile.player_id && senderProfile.player_id === receiver_player_id) {
+        return json({ error: 'self_invite' }, 400)
+      }
 
       // 6. Daily limit check
       const todayStart = new Date()

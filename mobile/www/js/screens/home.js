@@ -1232,13 +1232,15 @@
         b[pre + '_name'], b[pre + '_photo'], b[pre + '_cat'],
         isPair ? null : b[pre + '_wins'], isPair ? null : b[pre + '_losses'],
         isPair ? null : b[pre + '_points'], CAT,
-        isPair ? pairRecord(b, pre, false) : '');
+        isPair ? pairRecord(b, pre, false) : '',
+        b[pre + '_country'] || b[pre + '_player_country']);
     if (!isPair) return main;
 
     var mate = renderBattlePlayer(
         b[pre + '_partner_display'], b[pre + '_partner_photo'], b[pre + '_partner_cat'],
-        null, null, null, CAT, pairRecord(b, pre, true));
-    return '<div class="bd-pair">' + main + '<span class="bd-pair-plus">+</span>' + mate + '</div>';
+        null, null, null, CAT, pairRecord(b, pre, true),
+        b[pre + '_partner_country']);
+    return '<div class="bd-pair">' + main + '<span class="bd-pair-plus">/</span>' + mate + '</div>';
   }
 
   /** Счёт в парах или в миксте — по формату этого баттла. */
@@ -1256,13 +1258,16 @@
     return '<div class="bd-pair-record">' + I18N.t('pairs.record') + ' ' + w + '\u2013' + l + '</div>';
   }
 
-  function renderBattlePlayer(name, photo, cat, wins, losses, points, CAT, extra) {
+  function renderBattlePlayer(name, photo, cat, wins, losses, points, CAT, extra, country) {
     if (!name) return '';
+    // Страны нет — считаем, что игрок из Кыргызстана: то же правило на сайте
+    var CU = window.KSLT_COUNTRY;
+    var флаг = CU ? CU.flagEmoji(CU.normalizeCountry(country || '') || 'KG') : '';
     var html = '<div class="bd-player">';
     html += photo
       ? '<img class="bd-avatar" src="' + photo + '" alt="">'
       : '<div class="bd-avatar-fallback">' + initials(name) + '</div>';
-    html += '<div class="bd-player-name">' + esc(name) + '</div>';
+    html += '<div class="bd-player-name">' + (флаг ? флаг + '\u00A0' : '') + esc(name) + '</div>';
     if (cat) html += '<div class="bd-player-cat">' + esc(CAT[cat] || cat) + '</div>';
     if (wins !== null && wins !== undefined) {
       html += '<div class="bd-player-stats">';

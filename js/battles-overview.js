@@ -298,7 +298,7 @@
         try {
             // Load all published battles
             var result = await client.from('challenges')
-                .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, challenger_gender, opponent_gender, challenger_partner_gender, opponent_partner_gender, banner_url, battle_published_at, match_id')
+                .select('id, battle_title, status, voting_closed, proposed_date, proposed_time, proposed_venue, challenger_player_id, opponent_player_id, challenger_external_name, opponent_external_name, format, challenger_partner_id, opponent_partner_id, challenger_partner_name, opponent_partner_name, challenger_gender, opponent_gender, challenger_partner_gender, opponent_partner_gender, banner_url, battle_published_at, match_id, challenger_country, opponent_country, challenger_partner_country, opponent_partner_country, challenger_photo, opponent_photo, challenger_partner_photo, opponent_partner_photo')
                 .eq('battle_published', true)
                 .order('battle_published_at', { ascending: false });
 
@@ -319,7 +319,7 @@
             });
 
             // Load players
-            var pRes = await client.from('players').select('id, name, name_en, name_kg, photo, category_id').in('id', pIds);
+            var pRes = await client.from('players').select('id, name, name_en, name_kg, photo, category_id, country').in('id', pIds);
             (pRes.data || []).forEach(function(p) { _players[p.id] = p; });
 
             // Load votes for all battles
@@ -523,7 +523,12 @@
                 esc(src || 'https://placehold.co/80x80/1a1a1a/666?text=?') + '" alt="">';
         });
         html += '</div><div class="bo-player-name' + (pair ? ' bo-pair-names' : '') + '">';
-        side.names.forEach(function(n) { html += '<span>' + esc(n) + '</span>'; });
+        var CU = window.KSLT_COUNTRY;
+        side.names.forEach(function(n, i) {
+            // Страны нет — считаем, что игрок из Кыргызстана: одно правило везде
+            var флаг = CU ? CU.flagEmoji(CU.normalizeCountry((side.countries || [])[i] || '') || 'KG') : '';
+            html += '<span>' + (флаг ? флаг + '\u00A0' : '') + esc(n) + '</span>';
+        });
         html += '</div>';
         if (cat) html += '<div class="bo-player-cat">' + cat + '</div>';
         return html + '</div>';
@@ -689,12 +694,15 @@
     }
 
     function renderCompactBattle(b, isCompleted) {
-        var p1 = _players[b.challenger_player_id] || {};
-        var p2 = _players[b.opponent_player_id] || {};
-        var p1Name = getPlayerName(p1);
-        var p2Name = getPlayerName(p2);
-        var p1Photo = p1.photo || 'https://placehold.co/36x36/1a1a1a/666?text=?';
-        var p2Photo = p2.photo || 'https://placehold.co/36x36/1a1a1a/666?text=?';
+        // Стороны собирает общий модуль — иначе приглашённый со стороны
+        // человек оставался без имени и снимка
+        var BF = window.KSLT_BATTLE_FORMAT;
+        var side1 = BF.side(b, 1, _players, getPlayerName);
+        var side2 = BF.side(b, 2, _players, getPlayerName);
+        var p1Name = BF.shortSide(side1.names);
+        var p2Name = BF.shortSide(side2.names);
+        var p1Photo = side1.photos[0] || 'https://placehold.co/36x36/1a1a1a/666?text=?';
+        var p2Photo = side2.photos[0] || 'https://placehold.co/36x36/1a1a1a/666?text=?';
 
         var date = b.proposed_date || '';
         var venue = b.proposed_venue || '';

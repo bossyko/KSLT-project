@@ -249,15 +249,20 @@
 
     /* ========== LOAD ========== */
     function loadBattle(client, id) {
-        // Check auth in parallel
-        client.auth.getUser().then(function(res) {
-            if (res.data && res.data.user) _userId = res.data.user.id;
-        });
-
+        // Кто пришёл — узнаём до отрисовки, а не параллельно с ней.
+        //
+        // Раньше проверка входа шла сама по себе и никто её не ждал: страница
+        // успевала нарисоваться раньше ответа и показывала «Войдите, чтобы
+        // голосовать» вошедшему человеку. Голосовать он не мог, хотя право
+        // имел
         Promise.all([
+            client.auth.getUser().then(function(res) {
+                if (res.data && res.data.user) _userId = res.data.user.id;
+            }).catch(function() {}),
             client.rpc('get_battle_public', { p_challenge_id: id }),
             client.rpc('get_battle_votes', { p_challenge_id: id })
-        ]).then(function(results) {
+        ]).then(function(all) {
+            var results = [all[1], all[2]];
             var battleRes = results[0];
             var votesRes = results[1];
 
@@ -381,7 +386,7 @@
             return '<div class="ch-player-card">' +
                 '<div class="ch-pair">' +
                     main +
-                    '<div class="ch-pair-plus">+</div>' +
+                    '<div class="ch-pair-plus">/</div>' +
                     chSidePerson(b, side, true, isPair) +
                 '</div>' +
             '</div>';
@@ -450,6 +455,23 @@
      * Для парных не считаем: формула берёт очки, победы и форму одного
      * игрока, а у пары ни очков, ни рейтинга нет. Молчим, а не выдумываем.
      */
+    /**
+     * Имя стороны — одиночка или пара.
+     *
+     * В голосовании, прогнозе и счёте раньше брали только первого игрока:
+     * у пары второй пропадал, и «Хан / Иванов» превращалось в «Хан».
+     * В паре пишем фамилии через косую — так же, как на карточке баттла.
+     */
+    function sideLabel(b, side) {
+        var pre = side === 1 ? 'challenger' : 'opponent';
+        var main = isEn ? (b[pre + '_name_en'] || b[pre + '_name'])
+                 : (isKg ? (b[pre + '_name_kg'] || b[pre + '_name']) : b[pre + '_name']);
+        var mate = b[pre + '_partner_display'];
+        if (!mate) return main;
+        var BF = window.KSLT_BATTLE_FORMAT;
+        return BF ? BF.shortSide([main, mate]) : (main + ' / ' + mate);
+    }
+
     function forecastHtml(b, c1Name, c2Name) {
         if (!window.KSLT_PREDICTION) return '';
         if (b.format && b.format !== 'singles') return '';
@@ -498,8 +520,8 @@
     function renderForecast(b) {
         var section = document.getElementById('challengeForecast');
         if (!section) return;
-        var c1Name = isEn ? (b.challenger_name_en || b.challenger_name) : (isKg ? (b.challenger_name_kg || b.challenger_name) : b.challenger_name);
-        var c2Name = isEn ? (b.opponent_name_en || b.opponent_name) : (isKg ? (b.opponent_name_kg || b.opponent_name) : b.opponent_name);
+        var c1Name = sideLabel(b, 1);
+        var c2Name = sideLabel(b, 2);
         var html = forecastHtml(b, c1Name, c2Name);
         if (!html) { section.style.display = 'none'; return; }
         section.style.display = '';
@@ -544,9 +566,12 @@
         }
         if (!name) return '';
 
+        // Флаг ставим и напарнику: в паре у второго человека страна своя
         var flag = '';
-        if (!isMate && CU) {
-            var code = CU.normalizeCountry(b[pre + '_country'] || b[pre + '_player_country'] || '');
+        if (CU) {
+            var code = CU.normalizeCountry(isMate
+                ? (b[pre + '_partner_country'] || '')
+                : (b[pre + '_country'] || b[pre + '_player_country'] || ''));
             flag = CU.flagEmoji(code || 'KG');
         }
 
@@ -567,7 +592,7 @@
 
         return '<div class="ch-pair-side">' +
             '<img class="ch-player-photo" src="' + esc(photo || 'https://placehold.co/120x160/1a1a1a/666?text=?') + '" alt="' + esc(name) + '">' +
-            '<div class="ch-player-name">' + (flag ? flag + ' ' : '') + esc(name) + '</div>' +
+            '<div class="ch-player-name">' + (flag ? flag + '\u00A0' : '') + esc(name) + '</div>' +
             (cat ? '<div class="ch-player-cat">' + esc(cat) + '</div>' : '') +
             (ntrp ? '<div class="ch-player-ntrp">NTRP: ' + esc(String(ntrp)) + '</div>' : '') +
             stats +
@@ -588,8 +613,8 @@
         var pct1 = total > 0 ? Math.round(v1 / total * 100) : 50;
         var pct2 = total > 0 ? 100 - pct1 : 50;
 
-        var c1Name = isEn ? (b.challenger_name_en || b.challenger_name) : (isKg ? (b.challenger_name_kg || b.challenger_name) : b.challenger_name);
-        var c2Name = isEn ? (b.opponent_name_en || b.opponent_name) : (isKg ? (b.opponent_name_kg || b.opponent_name) : b.opponent_name);
+        var c1Name = sideLabel(b, 1);
+        var c2Name = sideLabel(b, 2);
 
         // Auto-close voting when match time arrives (Asia/Bishkek = UTC+6)
         var matchDate = b.proposed_date || '';
@@ -884,8 +909,8 @@
 
         var p1 = b.challenger_player_id;
         var p2 = b.opponent_player_id;
-        var c1Name = isEn ? (b.challenger_name_en || b.challenger_name) : (isKg ? (b.challenger_name_kg || b.challenger_name) : b.challenger_name);
-        var c2Name = isEn ? (b.opponent_name_en || b.opponent_name) : (isKg ? (b.opponent_name_kg || b.opponent_name) : b.opponent_name);
+        var c1Name = sideLabel(b, 1);
+        var c2Name = sideLabel(b, 2);
 
         var w1 = 0, w2 = 0;
         matches.forEach(function(m) {
@@ -985,8 +1010,8 @@
         section.style.display = '';
 
         var p1 = b.challenger_player_id;
-        var c1Name = isEn ? (b.challenger_name_en || b.challenger_name) : (isKg ? (b.challenger_name_kg || b.challenger_name) : b.challenger_name);
-        var c2Name = isEn ? (b.opponent_name_en || b.opponent_name) : (isKg ? (b.opponent_name_kg || b.opponent_name) : b.opponent_name);
+        var c1Name = sideLabel(b, 1);
+        var c2Name = sideLabel(b, 2);
 
         var winnerName = match.winner_id === p1 ? c1Name : c2Name;
         var isP1Winner = match.winner_id === p1;
