@@ -3771,13 +3771,12 @@
             .order('round_number').order('match_order');
         var freshMatches = freshRes.data || [];
 
-        // Advance BYE winners (winner only, no loser for BYE)
+        // Прошедших без игры двигает та же база: у такого матча сразу стоит
+        // победитель, и триггер срабатывает при его записи
         var r1Fresh = freshMatches.filter(function(m) { return m.round_number === 1; });
         for (var i = 0; i < r1Fresh.length; i++) {
             var m = r1Fresh[i];
             if (m.winner_id && m.score === 'BYE') {
-                await advanceFicPlayer(m, m.winner_id, tournament.id, freshMatches, true);
-                // Re-fetch after each advance to keep data fresh
                 freshRes = await A.client.from('matches')
                     .select('*')
                     .eq('tournament_id', tournament.id)
@@ -3803,65 +3802,6 @@
         await A.client.from('tournaments').update({ status: 'registration_closed' }).eq('id', tournament.id);
 
         A.showToast(L.drawGenerated, 'success');
-    }
-
-    // ---- FIC: Advance Player (winner + loser) ----
-    async function advanceFicPlayer(match, winnerId, tournamentId, allMatches, isWinnerOnly) {
-        var roundNumber = match.round_number;
-        var matchOrder = match.match_order;
-
-        // Determine drawSize from R1 match count
-        var r1Count = allMatches.filter(function(m) { return m.round_number === 1; }).length;
-        var drawSize = r1Count * 2;
-        var totalRounds = Math.log2(drawSize);
-        var quarterDraw = drawSize / 4; // N/4
-
-        // Final round — no advancement (these are place-deciding matches)
-        if (roundNumber >= totalRounds) return;
-
-        var nextRound = roundNumber + 1;
-
-        // Winner → (R+1, ceil(M/2)), slot = M odd ? p1 : p2
-        var nextWinnerOrder = Math.ceil(matchOrder / 2);
-        var winnerSlot = (matchOrder % 2 !== 0) ? 'player1_id' : 'player2_id';
-        var winnerSeedSlot = (matchOrder % 2 !== 0) ? 'seed1' : 'seed2';
-
-        // Find the winner's seed
-        var winnerSeed = null;
-        if (winnerId === match.player1_id) winnerSeed = match.seed1;
-        else if (winnerId === match.player2_id) winnerSeed = match.seed2;
-
-        // Find next winner match
-        var nextWinnerMatch = allMatches.find(function(m) {
-            return m.round_number === nextRound && m.match_order === nextWinnerOrder;
-        });
-
-        if (nextWinnerMatch) {
-            var wUpdate = {};
-            wUpdate[winnerSlot] = winnerId;
-            wUpdate[winnerSeedSlot] = winnerSeed;
-            await A.client.from('matches').update(wUpdate).eq('id', nextWinnerMatch.id);
-        }
-
-        // Loser → (R+1, ceil(M/2) + N/4), same slot
-        if (!isWinnerOnly) {
-            var loserId = winnerId === match.player1_id ? match.player2_id : match.player1_id;
-            if (loserId) {
-                var loserSeed = loserId === match.player1_id ? match.seed1 : match.seed2;
-                var nextLoserOrder = Math.ceil(matchOrder / 2) + quarterDraw;
-
-                var nextLoserMatch = allMatches.find(function(m) {
-                    return m.round_number === nextRound && m.match_order === nextLoserOrder;
-                });
-
-                if (nextLoserMatch) {
-                    var lUpdate = {};
-                    lUpdate[winnerSlot] = loserId; // same slot as winner (odd→p1, even→p2)
-                    lUpdate[winnerSeedSlot] = loserSeed;
-                    await A.client.from('matches').update(lUpdate).eq('id', nextLoserMatch.id);
-                }
-            }
-        }
     }
 
     // ---- Round-Robin Rounds (circle method) ----
@@ -5901,24 +5841,14 @@
                 return;
             }
 
-            // Handle IG match: auto-fill R1 when all IG done
+            // Кто выходит в следующий круг, решает база: триггер на матче
+            // зовёт advance_bracket_winner. Раньше это считалось здесь, и
+            // сетка двигалась, только пока открыта эта страница
+            //
+            // Допматчи остались за менеджером: там из нескольких вариантов
+            // выбирает человек, и это задумано так
             if (match.round === 'IG') {
                 await tryFillPlayoffFromIG(tournamentId);
-            }
-            // Skip advanceWinner for group matches
-            else if (!match.group_number) {
-                var isFicMatch = match.round && match.round.indexOf('FIC-') === 0;
-                var isLeague = isPLMatch(match) || isCLMatch(match);
-                if (isFicMatch) {
-                    var ficRes = await A.client.from('matches').select('*')
-                        .eq('tournament_id', tournamentId)
-                        .order('round_number').order('match_order');
-                    await advanceFicPlayer(match, winnerId, tournamentId, ficRes.data || [], false);
-                } else if (isLeague) {
-                    await advanceLeagueWinner(match, winnerId, tournamentId);
-                } else {
-                    await advanceWinner(match, winnerId, tournamentId);
-                }
             }
 
             overlay.remove();
@@ -6292,76 +6222,6 @@
             });
         }
         } catch(err) { console.error('X-slot render error:', err); }
-    }
-
-    // ---- Auto-advance winner to next round ----
-    async function advanceWinner(match, winnerId, tournamentId) {
-        var roundNumber = match.round_number;
-        var matchOrder = match.match_order;
-        var nextRound = roundNumber + 1;
-
-        // Skip 3rd place match — it doesn't advance anywhere
-        if (match.round === '3RD') return;
-
-        // Find next match: match_order = ceil(matchOrder / 2)
-        var nextMatchOrder = Math.ceil(matchOrder / 2);
-
-        console.log('[advanceWinner] match:', match.round, 'rn:', roundNumber, 'mo:', matchOrder, '→ next rn:', nextRound, 'mo:', nextMatchOrder);
-
-        var nextRes = await A.client.from('matches')
-            .select('*')
-            .eq('tournament_id', tournamentId)
-            .eq('round_number', nextRound)
-            .eq('match_order', nextMatchOrder)
-            .is('group_number', null)
-            .neq('round', 'IG')
-            .neq('round', '3RD')
-            .maybeSingle();
-
-        console.log('[advanceWinner] nextRes:', nextRes.data ? nextRes.data.round + ' id:' + nextRes.data.id : 'NULL', 'error:', nextRes.error);
-
-        if (!nextRes.data) return; // Final match or error
-
-        var nextMatch = nextRes.data;
-        // If matchOrder is odd → player1, even → player2
-        var isSlot1 = (matchOrder % 2 !== 0);
-        var updateField = isSlot1 ? 'player1_id' : 'player2_id';
-        var seedField = isSlot1 ? 'seed1' : 'seed2';
-
-        // Carry over the seed of the winner
-        var winnerSeed = null;
-        if (match.winner_id === match.player1_id) winnerSeed = match.seed1;
-        else if (match.winner_id === match.player2_id) winnerSeed = match.seed2;
-
-        var update = {};
-        update[updateField] = winnerId;
-        update[seedField] = winnerSeed;
-
-        await A.client.from('matches').update(update).eq('id', nextMatch.id);
-
-        // SF match: also place LOSER into 3rd place match
-        if (match.round === 'SF') {
-            var loserId = winnerId === match.player1_id ? match.player2_id : match.player1_id;
-            var loserSeed = loserId === match.player1_id ? match.seed1 : match.seed2;
-
-            // Find 3rd place match
-            var thirdRes = await A.client.from('matches')
-                .select('*')
-                .eq('tournament_id', tournamentId)
-                .eq('round', '3RD')
-                .maybeSingle();
-
-            if (thirdRes.data) {
-                var thirdMatch = thirdRes.data;
-                // SF match 1 (match_order=1) loser → player1, SF match 2 loser → player2
-                var tField = matchOrder === 1 ? 'player1_id' : 'player2_id';
-                var tSeedField = matchOrder === 1 ? 'seed1' : 'seed2';
-                var tUpdate = {};
-                tUpdate[tField] = loserId;
-                tUpdate[tSeedField] = loserSeed;
-                await A.client.from('matches').update(tUpdate).eq('id', thirdMatch.id);
-            }
-        }
     }
 
     // ---- Finalize Tournament ----
@@ -7281,67 +7141,6 @@
                     updateData[seedField] = (i % 2 === 0) ? m.seed1 : m.seed2;
                     await A.client.from('matches').update(updateData).eq('id', nextMatch.id);
                 }
-            }
-        }
-    }
-
-    // ---- Advance winner within a league bracket ----
-    async function advanceLeagueWinner(match, winnerId, tournamentId) {
-        var prefix = getLeaguePrefix(match);
-        if (!prefix) return;
-
-        var roundNumber = match.round_number;
-        var matchOrder = match.match_order;
-
-        // Skip 3rd place match
-        if (match.round === prefix + '-3RD') return;
-
-        var nextRound = roundNumber + 1;
-        var nextMatchOrder = Math.ceil(matchOrder / 2);
-
-        // Find next match in same league
-        var nextRes = await A.client.from('matches').select('*')
-            .eq('tournament_id', tournamentId)
-            .eq('round_number', nextRound)
-            .eq('match_order', nextMatchOrder)
-            .like('round', prefix + '-%')
-            .neq('round', prefix + '-3RD')
-            .maybeSingle();
-
-        if (!nextRes.data) return;
-
-        var nextMatch = nextRes.data;
-        var isSlot1 = (matchOrder % 2 !== 0);
-        var updateField = isSlot1 ? 'player1_id' : 'player2_id';
-        var seedField = isSlot1 ? 'seed1' : 'seed2';
-
-        var winnerSeed = null;
-        if (match.winner_id === match.player1_id) winnerSeed = match.seed1;
-        else if (match.winner_id === match.player2_id) winnerSeed = match.seed2;
-
-        var update = {};
-        update[updateField] = winnerId;
-        update[seedField] = winnerSeed;
-
-        await A.client.from('matches').update(update).eq('id', nextMatch.id);
-
-        // SF match: place LOSER into 3rd place match
-        if (match.round === prefix + '-SF') {
-            var loserId = winnerId === match.player1_id ? match.player2_id : match.player1_id;
-            var loserSeed = loserId === match.player1_id ? match.seed1 : match.seed2;
-
-            var thirdRes = await A.client.from('matches').select('*')
-                .eq('tournament_id', tournamentId)
-                .eq('round', prefix + '-3RD')
-                .maybeSingle();
-
-            if (thirdRes.data) {
-                var tField = matchOrder === 1 ? 'player1_id' : 'player2_id';
-                var tSeedField = matchOrder === 1 ? 'seed1' : 'seed2';
-                var tUpdate = {};
-                tUpdate[tField] = loserId;
-                tUpdate[tSeedField] = loserSeed;
-                await A.client.from('matches').update(tUpdate).eq('id', thirdRes.data.id);
             }
         }
     }

@@ -200,15 +200,17 @@
     border-color: #2563EB;
 }
 
+/* Имя переносится, а не обрезается многоточием: «Айсулуу Чокоева»
+   превращалась в «Айсулуу Чоко…», и карточка переставала отвечать на
+   вопрос, кто играет */
 .bo-player-name {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-primary);
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 140px;
+    line-height: 1.25;
+    max-width: 150px;
+    overflow-wrap: break-word;
 }
 
 .bo-player-cat {
@@ -337,13 +339,11 @@
 }
 .bo-player-name.bo-pair-names span { font-size: 0.85rem; }
 
-/* Имена в парах не помещались в отведённые 100 пикселей и обрезались
-   без многоточия — оно стоит на родителе, а обрезался вложенный span */
+/* Имя в паре переносится на вторую строку, а не режется многоточием:
+   «Василий Просто Василий» превращался в «Василий Просто …» */
 .bo-player-name.bo-pair-names span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     max-width: 100%;
+    overflow-wrap: break-word;
 }
 
 /* Состав словами: мужские пары, женские пары, микст. Пол участников база

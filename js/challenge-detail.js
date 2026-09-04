@@ -639,8 +639,8 @@
         var btn1Class = 'ch-vote-btn ch-vote-p1' + (btnDisabled ? ' disabled' : '') + (btn1Selected ? ' selected' : '');
         var btn2Class = 'ch-vote-btn ch-vote-p2' + (btnDisabled ? ' disabled' : '') + (btn2Selected ? ' selected' : '');
 
-        var btn1Check = btn1Selected ? '<span class="ch-vote-check">&#10003;</span> ' : '';
-        var btn2Check = btn2Selected ? '<span class="ch-vote-check">&#10003;</span> ' : '';
+        var btn1Check = btn1Selected ? '<span class="ch-vote-check">&#10003;</span>' : '';
+        var btn2Check = btn2Selected ? '<span class="ch-vote-check">&#10003;</span>' : '';
 
         // Voted badge
         var votedBadgeHtml = '';

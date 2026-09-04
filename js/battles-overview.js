@@ -435,14 +435,16 @@
             html += '<h2 class="trn-block-title"><span class="trn-live-dot"></span>' + L.liveTitle + '</h2>';
             html += '<div class="trn-block-sub">' + liveSub(live) + '</div>';
             html += '</div>';
+            // Все идущие баттлы — одинаковыми карточками, как на главной.
+            // Раньше первый шёл крупным, остальные узкими полосами сбоку, а
+            // полоса растягивалась на высоту соседа: когда она одна,
+            // получалась пустая коробка с тонкой строчкой посередине
             if (live.length === 1) {
                 html += renderFeaturedBattle(live[0], false);
             } else {
                 html += '<div class="to-card-grid">';
-                html += renderFeaturedBattle(live[0], false);
-                html += '<div class="to-side-stack">';
-                for (var k = 1; k < live.length; k++) html += renderStripBattle(live[k], false);
-                html += '</div></div>';
+                for (var k = 0; k < live.length; k++) html += renderFeaturedBattle(live[k], false);
+                html += '</div>';
             }
             html += '</div>';
         }
@@ -470,10 +472,8 @@
             html += renderFeaturedBattle(active[0], false);
         } else {
             html += '<div class="to-card-grid">';
-            html += renderFeaturedBattle(active[0], false);
-            html += '<div class="to-side-stack">';
-            for (var i = 1; i < active.length; i++) html += renderStripBattle(active[i], false);
-            html += '</div></div>';
+            for (var i = 0; i < active.length; i++) html += renderFeaturedBattle(active[i], false);
+            html += '</div>';
         }
         html += '</div>';
         }
