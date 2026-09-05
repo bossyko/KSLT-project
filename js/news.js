@@ -91,6 +91,10 @@ function mapDbArticle(row) {
         // Наша обложка, а не присланная афиша: поверх неё ложится знак КСЛТ
         // и тень по низу — иначе кадр читается как чужая случайная картинка
         ownCover: своя,
+        // Мировая новость ведёт прямо к статье: своей страницы у неё нет,
+        // наполнить её нечем — чужой текст мы не перепечатываем
+        sourceUrl: row.source_url || '',
+        sourceName: row.source_name || '',
         // Афишу рисовали, чтобы её прочитали: даты, состав, телеграм-канал.
         // В шапке она обрезана по ширине, поэтому исходник открывается по нажатию.
         imageOriginal: row.image_original || '',
@@ -1004,7 +1008,10 @@ function renderRelated(article) {
         var rel = newsArticleData[relSlug];
         if (!rel) return;
 
-        html += '<a href="' + basePage + '?slug=' + rel.slug + '" class="news-related-card">' +
+        var relВнешняя = !!rel.sourceUrl;
+        html += '<a href="' + esc(relВнешняя ? rel.sourceUrl : (basePage + '?slug=' + rel.slug)) + '"' +
+                (relВнешняя ? ' target="_blank" rel="noopener"' : '') +
+                ' class="news-related-card' + (relВнешняя ? ' news-outside' : '') + '">' +
             '<div class="news-related-img' + (rel.ownCover ? ' news-own-cover' : '') + '">' +
                 '<img src="' + esc(rel.heroImage) + '" alt="' + esc(rel.title) + '" loading="lazy">' +
             '</div>' +
@@ -1216,7 +1223,12 @@ function renderNewsList() {
             var isLarge = естьКрупная && i === 0;
             var cardClass = isLarge ? 'news-bento-card news-bento-large' : 'news-bento-card';
 
-            html += '<a href="' + basePage + '?slug=' + article.slug + '" class="' + cardClass + '">' +
+            var внешняя = !!article.sourceUrl;
+            var адрес = внешняя ? article.sourceUrl : (basePage + '?slug=' + article.slug);
+            var наружу = внешняя ? ' target="_blank" rel="noopener"' : '';
+
+            html += '<a href="' + esc(адрес) + '"' + наружу + ' class="' + cardClass +
+                    (внешняя ? ' news-outside' : '') + '">' +
                 '<div class="news-bento-img' + (article.ownCover ? ' news-own-cover' : '') + '">' +
                     '<img src="' + esc(article.cardImage || article.heroImage) + '" alt="' + esc(article.title) + '" loading="lazy">' +
                     '<div class="news-bento-img-overlay"></div>' +

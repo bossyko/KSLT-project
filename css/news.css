@@ -1607,3 +1607,16 @@ body.news-article-page .section-sponsors-compact {
     object-fit: cover;
     background: none;
 }
+
+/* Карточка мировой новости уводит на сайт источника, а не на нашу страницу:
+   наполнить свою нечем — чужой текст мы не перепечатываем. Стрелка
+   предупреждает, что уйдём наружу: без неё переход в новую вкладку
+   выглядит поломкой. */
+.news-outside .news-bento-content h2::after,
+.news-outside .news-bento-content h3::after,
+.news-outside .news-related-info h3::after {
+    content: ' \2197';
+    color: var(--accent);
+    font-weight: 700;
+    white-space: nowrap;
+}

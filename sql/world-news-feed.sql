@@ -152,41 +152,7 @@ COMMIT;
 -- ============================================================
 -- Расписание
 -- ============================================================
--- Сбор — раз в три часа. Предложение — дважды в день, в 10:00 и 18:00 по
--- Бишкеку, то есть в 04:00 и 12:00 по Гринвичу.
-
-CREATE EXTENSION IF NOT EXISTS pg_cron;
-
-SELECT cron.unschedule('news-fetch')
- WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'news-fetch');
-SELECT cron.unschedule('news-offer-morning')
- WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'news-offer-morning');
-SELECT cron.unschedule('news-offer-evening')
- WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'news-offer-evening');
-
-SELECT cron.schedule('news-fetch', '13 */3 * * *', $$
-  SELECT net.http_post(
-    url := current_setting('app.settings.supabase_url') || '/functions/v1/news-fetch',
-    headers := jsonb_build_object(
-      'Authorization', 'Bearer ' || current_setting('app.settings.cron_secret'),
-      'Content-Type', 'application/json'),
-    body := '{}'::jsonb);
-$$);
-
-SELECT cron.schedule('news-offer-morning', '0 4 * * *', $$
-  SELECT net.http_post(
-    url := current_setting('app.settings.supabase_url') || '/functions/v1/news-offer',
-    headers := jsonb_build_object(
-      'Authorization', 'Bearer ' || current_setting('app.settings.cron_secret'),
-      'Content-Type', 'application/json'),
-    body := '{}'::jsonb);
-$$);
-
-SELECT cron.schedule('news-offer-evening', '0 12 * * *', $$
-  SELECT net.http_post(
-    url := current_setting('app.settings.supabase_url') || '/functions/v1/news-offer',
-    headers := jsonb_build_object(
-      'Authorization', 'Bearer ' || current_setting('app.settings.cron_secret'),
-      'Content-Type', 'application/json'),
-    body := '{}'::jsonb);
-$$);
+-- Задания живут в отдельном файле: cron-secret-vault.sql. Там же лежит
+-- разбор, почему ключ берётся из хранилища секретов, а не из настройки
+-- базы — её в Supabase больше не завести, и на этом полгода молча падали
+-- шесть прежних заданий.

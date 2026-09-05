@@ -83,6 +83,14 @@ Deno.serve(async (req) => {
     if (ok) ушло++
   }
 
+  // Помечаем предложенной, только если сообщение и правда кому-то дошло.
+  // Иначе находка считалась бы показанной и не всплыла бы сутки, хотя её
+  // никто не видел: телеграм мог ответить ошибкой на все отправки разом.
+  if (ушло === 0) {
+    return json({ ok: false, suggestion: s.id, sent: 0, staff: staff.length,
+                  note: 'телеграм не принял ни одной отправки, находку не помечаем' })
+  }
+
   await db.from('news_suggestions').update({
     status: 'offered',
     offered_at: new Date().toISOString(),

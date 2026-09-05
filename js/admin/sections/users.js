@@ -359,13 +359,21 @@
 
             var regDate = u.created_at ? u.created_at.split('T')[0] : '—';
 
+            // Персоналу без привязки к Телеграму не дойдут спорные счета,
+            // заявки на турнир и предложения новостей. Подключить за него
+            // нельзя — только напомнить, поэтому метка стоит рядом с ролью.
+            var безТелеграма = (u.role === 'admin' || u.role === 'manager') && !u.telegram_chat_id
+                ? '<span title="Телеграм не подключён — уведомления не приходят" ' +
+                  'style="margin-left:6px;cursor:help;">\u26A0\uFE0F</span>'
+                : '';
+
             var canClick = isAdm || A.currentRole === 'manager';
             var tr = document.createElement('tr');
             if (canClick) tr.style.cursor = 'pointer';
             tr.innerHTML =
                 '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml + '<span>' + (name || email) + onlineDot + '</span>' + (u.player_id ? '<span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:0.7rem;font-weight:600;background:rgba(204,255,0,0.12);color:var(--accent);" title="Player ID: ' + A.esc(u.player_id) + '">&#127934;</span>' : '') + '</div></td>' +
                 '<td style="color:var(--text-dim);font-size:0.85rem;">' + email + '</td>' +
-                '<td>' + roleBadge + '</td>' +
+                '<td>' + roleBadge + безТелеграма + '</td>' +
                 '<td>' + banBadge + '</td>' +
                 '<td>' + memBadge + '</td>' +
                 '<td style="color:var(--text-dim);font-size:0.85rem;">' + regDate + '</td>';
@@ -689,10 +697,10 @@
                                 this.textContent = '...';
                                 try {
                                     await A.adminAction('unblock_otp', { user_id: user.id });
-                                    A.toast(isEn ? 'OTP unblocked' : 'OTP разблокирован');
+                                    A.showToast(isEn ? 'OTP unblocked' : 'OTP разблокирован');
                                     el.innerHTML = '<div style="margin-top:12px;font-size:0.85rem;color:#34c759;">' + (isEn ? 'OTP: unblocked' : 'OTP: разблокирован') + '</div>';
                                 } catch (e) {
-                                    A.toast(isEn ? 'Error' : 'Ошибка', 'error');
+                                    A.showToast(isEn ? 'Error' : 'Ошибка', 'error');
                                     this.disabled = false;
                                     this.textContent = isEn ? 'Unblock OTP' : 'Разблокировать OTP';
                                 }

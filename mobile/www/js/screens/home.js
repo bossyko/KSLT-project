@@ -854,6 +854,17 @@
     supabaseClient.from('news').select('*').eq('id', nid).single().then(function(r) {
       if (!r.data) return;
       var n = r.data;
+
+      // У мировой новости своей страницы нет: чужой текст мы не
+      // перепечатываем, и внутри был бы тот же заголовок со ссылкой.
+      // Открываем статью у источника — за этим человек и нажимал.
+      // '_system' открывает системный браузер — так в приложении уже
+      // открываются сайты спонсоров
+      if (n.source_url) {
+        window.open(n.source_url, '_system');
+        return;
+      }
+
       var d = new Date(n.created_at);
       var dateStr = d.getDate() + ' ' + I18N.month(d.getMonth()) + ' ' + d.getFullYear();
       var html = '';

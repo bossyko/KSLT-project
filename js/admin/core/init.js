@@ -15,6 +15,7 @@
         A.currentUserId = user.id;
 
         A.renderSidebar(profile);
+        A.renderTelegramStrip();
         A.renderMobileTabs();
         A.renderDashboard();
         A.renderNewsSection();

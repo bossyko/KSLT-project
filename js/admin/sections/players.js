@@ -2952,7 +2952,7 @@
             .select('id,name,name_en,category_id,points,wins,losses,ntrp_rating,country')
             .order('points', { ascending: false });
         var items = res.data || [];
-        if (!items.length) { A.toast(L.plrImportNoData, 'warning'); return; }
+        if (!items.length) { A.showToast(L.plrImportNoData, 'warning'); return; }
 
         var headers = ['#', L.plrName, isEn ? 'Name EN' : 'Имя EN', L.plrCategory, L.plrPoints, L.plrWins, L.plrLosses, 'NTRP', L.plrCountry];
         var rows = items.map(function(p, i) {
@@ -3091,7 +3091,7 @@
                 try {
                     workbook = XLSX.read(ev.target.result, { type: 'array' });
                 } catch (err) {
-                    A.toast('Error reading file: ' + err.message, 'error');
+                    A.showToast('Error reading file: ' + err.message, 'error');
                     return;
                 }
                 var names = workbook.SheetNames;
@@ -3109,7 +3109,7 @@
         function parseSheet(name) {
             var ws = workbook.Sheets[name];
             var json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-            if (!json.length) { A.toast(L.plrImportNoData, 'warning'); return; }
+            if (!json.length) { A.showToast(L.plrImportNoData, 'warning'); return; }
             headers = json[0].map(function(h) { return String(h).trim(); });
             sheetData = json.slice(1).filter(function(row) {
                 return row.some(function(c) { return String(c).trim() !== ''; });
@@ -3168,7 +3168,7 @@
                     if (s.dataset.field === 'name' && v >= 0) nameSet = true;
                 });
                 if (!nameSet) {
-                    A.toast(L.plrImportColName + ' — ' + (isEn ? 'required' : 'обязательно'), 'error');
+                    A.showToast(L.plrImportColName + ' — ' + (isEn ? 'required' : 'обязательно'), 'error');
                     return;
                 }
                 showPreviewStep();
@@ -3325,7 +3325,7 @@
                 }
             }
 
-            A.toast(L.plrImportSuccess + ': ' + L.plrImportUpdated + ' ' + updated + ', ' + L.plrImportCreated + ' ' + created + ', ' + L.plrImportSkipped + ' ' + skipped, 'success');
+            A.showToast(L.plrImportSuccess + ': ' + L.plrImportUpdated + ' ' + updated + ', ' + L.plrImportCreated + ' ' + created + ', ' + L.plrImportSkipped + ' ' + skipped, 'success');
             closeModal();
             loadPlayersList();
         }

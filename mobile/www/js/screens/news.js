@@ -91,7 +91,9 @@
         '</div>' +
         '<div class="news-list-body">' +
           '<div class="news-list-tag">' + esc(n.category || I18N.t('news.default')) + '</div>' +
-          '<div class="news-list-title">' + esc(I18N.field(n, 'title')) + '</div>' +
+          '<div class="news-list-title">' + esc(I18N.field(n, 'title')) +
+            // Стрелка предупреждает, что уйдём на сайт источника
+            (n.source_url ? ' <span style="color:var(--accent)">\u2197</span>' : '') + '</div>' +
           '<div class="news-list-excerpt">' + esc(I18N.field(n, 'excerpt')) + '</div>' +
           '<div class="news-list-footer">' +
             '<span>' + dateStr + '</span>' +
