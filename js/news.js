@@ -71,15 +71,26 @@ function mapDbArticle(row) {
         });
     }
 
+    // Своей картинки может не быть — мировые новости приходят без неё. Тогда
+    // ставим обложку из своего набора, по номеру новости. Раньше тут стояла
+    // заглушка с чужого сайта: серый прямоугольник и запрос наружу.
+    var своя = !row.image;
+    var обложка = row.image || (window.KSLT_NEWS_COVERS
+        ? window.KSLT_NEWS_COVERS.путь(row.id || row.slug, '../')
+        : '');
+
     return {
         _dbId: row.id || null,
         slug: row.slug,
         title: title,
         subtitle: excerpt || '',
-        heroImage: row.image || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
+        heroImage: обложка,
         // Кадрирование при загрузке касается только карточек списка;
         // шапка новости осталась прежней
-        cardImage: row.image || 'https://placehold.co/1200x600/1a1a1a/CCFF00?text=KSLT',
+        cardImage: обложка,
+        // Наша обложка, а не присланная афиша: поверх неё ложится знак КСЛТ
+        // и тень по низу — иначе кадр читается как чужая случайная картинка
+        ownCover: своя,
         // Афишу рисовали, чтобы её прочитали: даты, состав, телеграм-канал.
         // В шапке она обрезана по ширине, поэтому исходник открывается по нажатию.
         imageOriginal: row.image_original || '',
@@ -367,7 +378,7 @@ function renderHero(article, readTime) {
     }
 
     container.innerHTML =
-        '<div class="news-hero-bg">' +
+        '<div class="news-hero-bg' + (article.ownCover ? ' news-own-cover' : '') + '">' +
             '<img src="' + esc(article.heroImage) + '" alt="">' +
             '<div class="news-hero-overlay"></div>' +
             (article.imageOriginal
@@ -994,7 +1005,7 @@ function renderRelated(article) {
         if (!rel) return;
 
         html += '<a href="' + basePage + '?slug=' + rel.slug + '" class="news-related-card">' +
-            '<div class="news-related-img">' +
+            '<div class="news-related-img' + (rel.ownCover ? ' news-own-cover' : '') + '">' +
                 '<img src="' + esc(rel.heroImage) + '" alt="' + esc(rel.title) + '" loading="lazy">' +
             '</div>' +
             '<div class="news-related-info">' +
@@ -1182,15 +1193,31 @@ function renderNewsList() {
         var start = (currentPage - 1) * PER_PAGE;
         var pageItems = filtered.slice(start, start + PER_PAGE);
 
+        // Крупное место наверху отдаём новости со своей афишей. Мировые новости
+        // приходят без картинки, и в высокий проём наша широкая обложка входит
+        // сильным приближением — от кадра остаётся середина. Да и само место
+        // разумнее отдавать своему, а не пересказу чужой заметки.
+        // Если своих афиш на странице нет вовсе — крупной карточки не будет,
+        // все пойдут мелкими, ряд от этого не разъезжается.
+        var своя = -1;
+        for (var i = 0; i < pageItems.length; i++) {
+            if (!pageItems[i].ownCover) { своя = i; break; }
+        }
+        if (своя > 0) {
+            pageItems = pageItems.slice();
+            pageItems.unshift(pageItems.splice(своя, 1)[0]);
+        }
+        var естьКрупная = своя !== -1;
+
         // Bento grid
         var html = '';
         pageItems.forEach(function(article, i) {
             var readTime = calculateReadTime(article);
-            var isLarge = i === 0;
+            var isLarge = естьКрупная && i === 0;
             var cardClass = isLarge ? 'news-bento-card news-bento-large' : 'news-bento-card';
 
             html += '<a href="' + basePage + '?slug=' + article.slug + '" class="' + cardClass + '">' +
-                '<div class="news-bento-img">' +
+                '<div class="news-bento-img' + (article.ownCover ? ' news-own-cover' : '') + '">' +
                     '<img src="' + esc(article.cardImage || article.heroImage) + '" alt="' + esc(article.title) + '" loading="lazy">' +
                     '<div class="news-bento-img-overlay"></div>' +
                 '</div>' +

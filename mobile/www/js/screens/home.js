@@ -823,14 +823,18 @@
   function renderNewsCard(n) {
     var d = new Date(n.created_at);
     var dateStr = d.getDate() + ' ' + I18N.month(d.getMonth());
-    var imgStyle = n.image
-      ? 'background-image:url(' + n.image + ');background-size:cover;background-position:center'
+    // Без своей картинки берём обложку из набора — та же, что на сайте
+    var своя = !n.image;
+    var картинка = n.image || (window.KSLT_NEWS_COVERS
+      ? window.KSLT_NEWS_COVERS.путь(n.id, '') : '');
+    var imgStyle = картинка
+      ? 'background-image:url(' + картинка + ');background-size:cover;background-position:center'
       : 'background:linear-gradient(135deg,#1a1a2e,#16213e)';
     var catLabels = { announcement: 'Анонс', tournament: 'Турнир', club: 'Клуб', rating: 'Рейтинг', news: 'Новости' };
 
     return '<div class="tournament-card-v news-card-v" data-news-id="' + n.id + '">' +
-      '<div class="tcv-img" style="' + imgStyle + '">' +
-        (n.image ? '' : '<span class="tcv-img-icon">📰</span>') +
+      '<div class="tcv-img' + (своя ? ' news-own-cover' : '') + '" style="' + imgStyle + '">' +
+        (картинка ? '' : '<span class="tcv-img-icon">📰</span>') +
         '<span class="tcv-badge">' + esc(catLabels[n.category] || n.category || 'Новости') + '</span>' +
       '</div>' +
       '<div class="tcv-body">' +
@@ -855,8 +859,11 @@
       var html = '';
       // Шапка режет афишу: вертикальные постеры теряют даты и состав.
       // Если сохранён исходник — его открывает кнопка поверх обложки.
-      if (n.image) {
-        html += '<div class="nd-hero-img" style="background-image:url(' + n.image + ')">' +
+      var обложка = n.image || (window.KSLT_NEWS_COVERS
+        ? window.KSLT_NEWS_COVERS.путь(n.id, '') : '');
+      if (обложка) {
+        html += '<div class="nd-hero-img' + (n.image ? '' : ' news-own-cover') +
+          '" style="background-image:url(' + обложка + ')">' +
           (n.image_original
             ? '<button type="button" class="nd-hero-zoom" data-full="' + esc(n.image_original) + '">' +
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">' +

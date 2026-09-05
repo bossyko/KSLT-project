@@ -1427,6 +1427,32 @@ a, button, [role="button"] {
   position: relative;
 }
 .news-list-img-icon { font-size: 48px; opacity: 0.25; }
+
+/* ---- Своя обложка ----
+   Мировые новости приходят без картинки, место закрывает снимок из набора
+   images/news-covers. Знак КСЛТ и тень по низу — чтобы кадр читался как наш.
+   Разметка общая с сайтом: тот же класс, тот же выбор по номеру новости. */
+.news-own-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0) 45%);
+  pointer-events: none;
+}
+.news-own-cover::before {
+  content: '';
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  width: 42px;
+  height: 14px;
+  background: url('../img/kslt-logo.svg') no-repeat center / contain;
+  opacity: 0.75;
+  z-index: 1;
+  pointer-events: none;
+}
+/* Карточка на главной и шапка открытой новости позиционируются сами не всегда */
+.tcv-img.news-own-cover, .nd-hero-img.news-own-cover { position: relative; }
 .news-list-body { padding: 14px; }
 .news-list-tag {
   font-size: 10px;

@@ -77,10 +77,17 @@
     filtered.forEach(function(n) {
       var d = new Date(n.created_at);
       var dateStr = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-      var bgStyle = n.image ? 'background-image:url(' + n.image + ');background-size:cover;background-position:center' : '';
+      // Мировые новости приходят без картинки — ставим обложку из своего
+      // набора, ту же, что и на сайте (js/news-covers.js)
+      var своя = !n.image;
+      var картинка = n.image || (window.KSLT_NEWS_COVERS
+        ? window.KSLT_NEWS_COVERS.путь(n.id, '') : '');
+      var bgStyle = картинка
+        ? 'background-image:url(' + картинка + ');background-size:cover;background-position:center' : '';
       html += '<div class="news-list-item" data-news-id="' + n.id + '">' +
-        '<div class="news-list-img"' + (bgStyle ? ' style="' + bgStyle + '"' : '') + '>' +
-          (n.image ? '' : '<span class="news-list-img-icon">📰</span>') +
+        '<div class="news-list-img' + (своя ? ' news-own-cover' : '') + '"' +
+          (bgStyle ? ' style="' + bgStyle + '"' : '') + '>' +
+          (картинка ? '' : '<span class="news-list-img-icon">📰</span>') +
         '</div>' +
         '<div class="news-list-body">' +
           '<div class="news-list-tag">' + esc(n.category || I18N.t('news.default')) + '</div>' +
