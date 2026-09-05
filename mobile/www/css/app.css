@@ -5221,3 +5221,330 @@ select.prof-field-input { color: var(--text); }
 .pd-pair-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; }
 .pd-pair-score { font-size: 20px; font-weight: 800; color: var(--text); margin-top: 4px; }
 .pd-pair-cap { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* ============================================
+   СЧЁТ МАТЧА — окно ввода и подтверждения
+   ============================================
+   Снизу вверх, как остальные окна приложения: так привычнее на телефоне,
+   до кнопок дотягивается большой палец. */
+
+.msa-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 3000;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.msa-overlay.open { opacity: 1; }
+
+.msa-sheet {
+    width: 100%;
+    max-width: 520px;
+    background: var(--bg-card);
+    border-radius: 18px 18px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    transform: translateY(24px);
+    transition: transform 0.25s;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.msa-overlay.open .msa-sheet { transform: translateY(0); }
+
+.msa-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    position: sticky;
+    top: 0;
+    background: var(--bg-card);
+}
+
+.msa-close {
+    background: none;
+    border: 0;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 0 4px;
+}
+
+.msa-body { padding: 16px 18px 22px; }
+
+.msa-trn {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.msa-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    margin-bottom: 14px;
+}
+
+.msa-vs img,
+.msa-vs .msa-noface {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.msa-noface {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-elevated, rgba(255,255,255,0.06));
+    color: var(--text-muted);
+    font-style: normal;
+    font-weight: 700;
+}
+
+.msa-vs b {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    overflow-wrap: break-word;
+}
+
+.msa-vs span {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.78rem;
+    flex: 0 0 auto;
+}
+
+.msa-when {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+
+.msa-date {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.msa-table { width: 100%; border-collapse: collapse; }
+
+.msa-table th {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 0 0 8px;
+    text-align: center;
+}
+
+.msa-table th:first-child { text-align: left; }
+.msa-table td { padding: 8px 0; border-top: 1px solid var(--border); }
+
+.msa-name {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.msa-cell { width: 58px; text-align: center; }
+
+.msa-in {
+    width: 46px;
+    height: 44px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: inherit;
+}
+
+.msa-in:focus { outline: none; border-color: var(--accent); }
+
+.msa-score {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+    margin: 4px 0 12px;
+}
+
+.msa-hint {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin: 12px 0 16px;
+}
+
+.msa-center { text-align: center; }
+
+.msa-send {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    border: 0;
+}
+
+.msa-send + .msa-send { margin-top: 10px; }
+
+.msa-ghost {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.msa-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%);
+    background: var(--bg-elevated, #222);
+    color: var(--text-primary);
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    z-index: 4000;
+}
+
+/* Полоса «ждёт ответа» над списком матчей */
+.msa-todo {
+    border: 1px solid rgba(204, 255, 0, 0.3);
+    background: rgba(204, 255, 0, 0.04);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.msa-todo-title {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.msa-todo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+}
+
+.msa-todo-row + .msa-todo-row { border-top: 1px solid var(--border); }
+
+.msa-todo-main { flex: 1; min-width: 0; }
+
+.msa-todo-name {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.msa-todo-sub {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    margin-top: 2px;
+}
+
+.msa-todo-btn {
+    padding: 8px 13px;
+    border-radius: 9px;
+    border: 0;
+    background: var(--accent);
+    color: #0a0a0a;
+    font-weight: 700;
+    font-size: 0.78rem;
+    font-family: inherit;
+    flex: 0 0 auto;
+}
+
+.msa-todo-wait {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    flex: 0 0 auto;
+}
+
+/* Уведомление, ведущее к делу, — заметно отличается от простой вести */
+.notif-item-live {
+    cursor: pointer;
+    border-left: 2px solid var(--accent);
+}
+
+/* Исход крупно над счётом */
+.msa-outcome {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin: 6px 0 2px;
+}
+
+.msa-won { color: var(--accent); }
+.msa-lost { color: var(--text-muted); }
+
+/* Свой матч в сетке приложения: выделен и с кнопкой счёта — так же, как
+   в сетке на сайте. Раньше сетка в приложении была картинкой без действий */
+.mob-match-mine {
+    border: 1px solid var(--accent);
+    background: rgba(204, 255, 0, 0.04);
+}
+
+.mob-match-act {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #0a0a0a;
+    font-weight: 700;
+    font-size: 0.8rem;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.mob-match-wait {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+}

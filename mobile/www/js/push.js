@@ -65,6 +65,17 @@
         return;
       }
 
+      // Счёт матча — открываем сразу окно нужного матча. Без номера открыть
+      // было бы нечего, поэтому он и едет в теле push
+      if (data.action_type === 'match_score' && data.action_id) {
+        if (window.KSLT_MATCH_SCORE) {
+          setTimeout(function() { window.KSLT_MATCH_SCORE.open(data.action_id); }, 300);
+        } else if (window.KSLT_APP) {
+          window.KSLT_APP.switchScreen('profile');
+        }
+        return;
+      }
+
       if (data.screen && window.KSLT_APP) {
         window.KSLT_APP.switchScreen(data.screen);
       }

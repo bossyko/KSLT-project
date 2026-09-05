@@ -82,6 +82,13 @@ ALTER TABLE public.challenges DROP CONSTRAINT IF EXISTS challenges_format_check;
 ALTER TABLE public.challenges ADD CONSTRAINT challenges_format_check
     CHECK (format IN ('singles', 'doubles', 'mixed_doubles'));
 
+-- ---- Уведомление, ведущее к делу (из challenges-rework.sql) ----
+-- Без этих двух столбцов строка в колокольчике не знает, к чему ведёт,
+-- и нажатие открывает раздел вместо нужного матча.
+ALTER TABLE public.notification_log
+    ADD COLUMN IF NOT EXISTS action_type text,
+    ADD COLUMN IF NOT EXISTS action_id   uuid;
+
 COMMIT;
 
 -- ============================================================

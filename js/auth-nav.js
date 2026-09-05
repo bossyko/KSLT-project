@@ -138,18 +138,24 @@
                             accept: 'Accept', decline: 'Decline', done: 'This challenge has already been answered',
                             gone: 'This challenge no longer exists',
                             noContacts: 'The player has not provided any contacts',
-                            showContacts: 'Show contacts' }
+                            showContacts: 'Show contacts', openScore: 'Open the score' }
                         : isKg
                             ? { title: 'Жаңы билдирмелер', empty: 'Жаңылык жок', all: 'Бардык билдирмелер',
                                 accept: 'Кабыл алуу', decline: 'Четке кагуу', done: 'Бул чакырыкка мурун жооп берилген',
                                 gone: 'Бул чакырык эми жок',
                                 noContacts: 'Оюнчу байланыш маалыматын көрсөткөн эмес',
-                                showContacts: 'Байланыштарды көрүү' }
+                                showContacts: 'Байланыштарды көрүү', openScore: 'Эсепти ачуу' }
                             : { title: 'Новые уведомления', empty: 'Новых нет', all: 'Все уведомления',
                                 accept: 'Принять', decline: 'Отклонить', done: 'На этот вызов уже ответили',
                                 gone: 'Этого вызова больше нет',
                                 noContacts: 'Игрок не указал контактов',
-                                showContacts: 'Показать контакты' };
+                                showContacts: 'Показать контакты', openScore: 'Открыть счёт' };
+
+                    /** Куда вести, если окно счёта на этой странице не подключено. */
+                    function кабинет() {
+                        var в = window.location.pathname.indexOf('/pages/') !== -1 ? '' : 'pages/';
+                        return в + 'dashboard' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html#games';
+                    }
 
                     /**
                      * Сколько непрочитанных — для точки на колокольчике.
@@ -266,6 +272,13 @@
                                             '<button class="site-notif-act site-notif-yes site-notif-show" type="button">' + L2.showContacts + '</button>' +
                                           '</div>'
                                         : '') +
+                                    // Счёт матча: ведём прямо в окно ввода или
+                                    // подтверждения, чтобы не искать матч руками
+                                    (n.action_type === 'match_score' && n.action_id
+                                        ? '<div class="site-notif-actions">' +
+                                            '<button class="site-notif-act site-notif-yes site-notif-score" type="button">' + L2.openScore + '</button>' +
+                                          '</div>'
+                                        : '') +
                                 '</div>' +
                             '</div>';
                         document.body.appendChild(overlay);
@@ -293,6 +306,20 @@
                             }).catch(function(e) { console.warn('[KSLT] notifications:', e); });
                         }
                         function onKey(e) { if (e.key === 'Escape') close(); }
+
+                        var кнопкаСчёта = overlay.querySelector('.site-notif-score');
+                        if (кнопкаСчёта) {
+                            кнопкаСчёта.addEventListener('click', function() {
+                                close();
+                                if (window.KSLT_MATCH_SCORE) {
+                                    window.KSLT_MATCH_SCORE.open(n.action_id);
+                                } else {
+                                    // Окно живёт не на всех страницах: уводим туда,
+                                    // где оно есть
+                                    window.location.href = кабинет();
+                                }
+                            });
+                        }
 
                         overlay.querySelector('.site-notif-close').addEventListener('click', close);
                         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });

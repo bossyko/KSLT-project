@@ -209,6 +209,15 @@
         return
       }
 
+      // Route: мировые новости — «Опубликовать» / «Пропустить».
+      // Шлём предложение всем менеджерам сразу, поэтому первый нажавший
+      // решает, а остальным бот говорит, что уже обработано
+      const newsMatch = data.match(/^news_(pub|skip):([0-9a-f-]+)$/)
+      if (newsMatch) {
+        await handleNewsDecision(query, newsMatch[1], newsMatch[2])
+        return
+      }
+
       // Route: battle_noop (info button, no action)
       if (data.startsWith('battle_noop:') || data.startsWith('bn:')) {
         await answerCallbackQuery(token, query.id, '📊 Голосование активно')
@@ -351,6 +360,107 @@
     }
 
     // ---- Tournament Registration Callback Handler ----
+    /**
+     * Решение по мировой новости.
+     *
+     * Публикуем заголовок со ссылкой на первоисточник — чужой текст не
+     * перепечатываем, картинки не берём вовсе. Это агрегация ссылок, и
+     * именно так её и оформляем: в теле статьи одна строка и ссылка.
+     */
+    async function handleNewsDecision(
+      query: { id: string; from: { id: number }; message?: { chat: { id: number }; message_id: number } },
+      действие: string,
+      id: string
+    ) {
+      const token = Deno.env.get('TELEGRAM_BOT_TOKEN')!
+      const chatId = query.message?.chat?.id
+      const messageId = query.message?.message_id
+
+      // Своё подключение: общей переменной в этом файле нет, каждая ветка
+      // заводит собственное — так здесь заведено
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      )
+
+      const { data: s } = await supabase
+        .from('news_suggestions')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (!s) {
+        await answerCallbackQuery(token, query.id, 'Новость не найдена')
+        return
+      }
+
+      // Кто-то из менеджеров уже ответил
+      if (s.status === 'published' || s.status === 'skipped') {
+        await answerCallbackQuery(token, query.id,
+          s.status === 'published' ? 'Уже опубликовано' : 'Уже пропущено')
+        if (chatId && messageId) await editMessageReplyMarkup(token, chatId, messageId)
+        return
+      }
+
+      // Кто нажал — для следа в записи
+      const { data: кто } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('telegram_chat_id', String(query.from.id))
+        .maybeSingle()
+
+      if (действие === 'skip') {
+        await supabase.from('news_suggestions').update({
+          status: 'skipped',
+          decided_by: кто?.id || null,
+          decided_at: new Date().toISOString()
+        }).eq('id', id)
+        await answerCallbackQuery(token, query.id, 'Пропущено')
+        if (chatId && messageId) await editMessageReplyMarkup(token, chatId, messageId)
+        return
+      }
+
+      // ---- Публикуем ----
+      const источник = s.source_name || 'источник'
+      const тело =
+        '<p>' + экранировать(s.title) + '</p>' +
+        '<p><a href="' + экранировать(s.link) + '" target="_blank" rel="noopener">' +
+        'Читать целиком на ' + экранировать(источник) + '</a></p>'
+
+      const slug = 'world-' + String(s.id).slice(0, 8) + '-' + Date.now().toString(36)
+
+      const { error } = await supabase.from('news').insert({
+        id: slug,
+        slug,
+        title: s.title,
+        content: тело,
+        excerpt: 'Источник: ' + источник,
+        category: 'world',
+        author: 'КСЛТ',
+        published_at: new Date().toISOString()
+      })
+
+      if (error) {
+        console.error('[news] публикация не удалась:', error)
+        await answerCallbackQuery(token, query.id, 'Не удалось опубликовать')
+        return
+      }
+
+      await supabase.from('news_suggestions').update({
+        status: 'published',
+        decided_by: кто?.id || null,
+        decided_at: new Date().toISOString(),
+        news_id: slug
+      }).eq('id', id)
+
+      await answerCallbackQuery(token, query.id, 'Опубликовано')
+      if (chatId && messageId) await editMessageReplyMarkup(token, chatId, messageId)
+    }
+
+    function экранировать(v: string): string {
+      return String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    }
+
     async function handleTournamentRegister(
       query: { id: string; data?: string; from: { id: number }; message?: { chat: { id: number }; message_id: number } },
       tournamentId: string

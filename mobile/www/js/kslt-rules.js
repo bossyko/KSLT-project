@@ -261,6 +261,54 @@
      * Сколько строк рейтинга показывать сразу. Остальные — по кнопке:
      * телефон грузил всех разом, а людей под три сотни.
      */
+    /**
+     * Что делать вошедшему с этим матчем.
+     *
+     * Одно правило на сайт и приложение: раньше такие мелочи писались в
+     * каждом месте заново и незаметно расходились.
+     *
+     *   enter   — счёта нет, можно вписать
+     *   confirm — счёт вписал соперник, ждёт ответа
+     *   wait    — счёт вписал ты сам, ждём соперника
+     *   done    — счёт окончательный
+     *   none    — матч не твой или соперник ещё не определён
+     */
+    R.matchScoreState = function (match, myPlayerId, myUserId) {
+        if (!match || !myPlayerId) return 'none';
+
+        // В паре в записи матча стоит капитан, а напарник не значится вовсе.
+        // Поэтому принимаем не один номер, а список: свой и капитанов тех
+        // пар, где человек напарник
+        var мои = Array.isArray(myPlayerId) ? myPlayerId : [myPlayerId];
+        if (мои.indexOf(match.player1_id) === -1 && мои.indexOf(match.player2_id) === -1) return 'none';
+        if (!match.player1_id || !match.player2_id) return 'none';
+        if (match.score_status === 'pending') {
+            return match.score_submitted_by === myUserId ? 'wait' : 'confirm';
+        }
+        if (match.score_status === 'confirmed' || match.score_status === 'disputed') return 'done';
+        return match.winner_id ? 'done' : 'enter';
+    };
+
+    /**
+     * Счёт по сетам в строку вида «6/3 6/4».
+     *
+     * Пары «геймы первого, геймы второго»; пустой сет пропускаем — играли
+     * не всегда все три. Равный счёт в сете вернёт ошибку: победителя из
+     * него не вывести, а его считает база.
+     */
+    R.buildScore = function (пары) {
+        var сеты = [];
+        for (var i = 0; i < пары.length; i++) {
+            var a = String(пары[i][0] == null ? '' : пары[i][0]).trim();
+            var b = String(пары[i][1] == null ? '' : пары[i][1]).trim();
+            if (a === '' && b === '') continue;
+            if (a === '' || b === '' || a === b) return { ok: false, error: 'bad' };
+            сеты.push(a + '/' + b);
+        }
+        if (!сеты.length) return { ok: false, error: 'empty' };
+        return { ok: true, score: сеты.join(' ') };
+    };
+
     R.PAGE_SIZE = 30;
 
     window.KSLT_RULES = R;

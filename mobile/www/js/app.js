@@ -340,13 +340,27 @@
         r.data.forEach(function(n) {
           var d = new Date(n.created_at);
           var timeStr = d.getDate() + ' ' + I18N.month(d.getMonth()) + ' ' + d.getFullYear() + ', ' + d.getHours() + ':' + String(d.getMinutes()).replace(/^(\d)$/, '0$1');
-          html += '<div class="notif-item' + (n.is_read ? '' : ' unread') + '">' +
+          // Уведомление про счёт ведёт прямо в окно ввода или подтверждения:
+          // раньше строки были неживые, и человек, пришедший по push, должен
+          // был сам искать матч в кабинете
+          var ведёт = (n.action_type === 'match_score' && n.action_id) ? n.action_id : '';
+          html += '<div class="notif-item' + (n.is_read ? '' : ' unread') +
+                  (ведёт ? ' notif-item-live" data-match="' + ведёт : '') + '">' +
             '<div class="notif-item-type">' + (n.type || 'system') + '</div>' +
             '<div class="notif-item-text">' + (n.message || n.title || '') + '</div>' +
             '<div class="notif-item-time">' + timeStr + '</div>' +
           '</div>';
         });
         notifList.innerHTML = html;
+
+        notifList.querySelectorAll('[data-match]').forEach(function(el) {
+          el.addEventListener('click', function() {
+            var MS = window.KSLT_MATCH_SCORE;
+            if (!MS) return;
+            notifOverlay.classList.remove('open');
+            MS.open(el.dataset.match);
+          });
+        });
 
         // Mark as read
         supabaseClient.from('notification_log')

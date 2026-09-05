@@ -732,6 +732,9 @@
 
         // Bracket / Group panel
         html += '<div class="ad-brk-panel" id="adBrkBracketPanel" style="padding-top:8px;' + (activeTab !== 'bracket' ? 'display:none;' : '') + '">';
+        // Счета, которые вписали сами игроки: ждущие подтверждения и спорные.
+        // Менеджер и так заходит в сетку, отдельной вкладки не нужно
+        html += renderScoreQueue(matches, playersMap, isDbl, regsMap);
         if (hasMatches) {
             if (tournament.bracket_type === 'group_league') {
                 html += renderGroupLeaguePanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap);
@@ -1998,6 +2001,58 @@
         if (isPLMatch(m)) return 'PL';
         if (isCLMatch(m)) return 'CL';
         return null;
+    }
+
+    /**
+     * Счета от игроков: что ждёт подтверждения и с чем не согласились.
+     *
+     * Раньше счёт мог появиться только от менеджера, и следить было не за
+     * чем. Теперь его вписывают сами игроки — и менеджеру нужно видеть две
+     * вещи: где ещё нет ответа второго и где спор.
+     *
+     * Пусто — блока нет вовсе.
+     */
+    function renderScoreQueue(matches, playersMap, isDbl, regsMap) {
+        var ждут = matches.filter(function (m) { return m.score_status === 'pending'; });
+        var спорные = matches.filter(function (m) { return m.score_status === 'disputed'; });
+        if (!ждут.length && !спорные.length) return '';
+
+        function имя(id) {
+            if (!id) return '—';
+            if (isDbl) return getTeamDisplayName(id, regsMap, playersMap, true).replace(/<[^>]*>/g, '');
+            var p = playersMap[id] || {};
+            return isEn ? (p.name_en || p.name || id) : (p.name || id);
+        }
+
+        function строки(список, вид) {
+            return список.map(function (m) {
+                return '<div class="ad-sq-row ad-sq-' + вид + '">' +
+                    '<span class="ad-sq-pair">' + A.esc(имя(m.player1_id)) + ' \u2014 ' +
+                        A.esc(имя(m.player2_id)) + '</span>' +
+                    '<span class="ad-sq-score">' + A.esc(String(m.score || '').replace(/\//g, ':')) + '</span>' +
+                    (m.score_dispute_note
+                        ? '<span class="ad-sq-note">' + A.esc(m.score_dispute_note) + '</span>' : '') +
+                    '<button class="ad-btn ad-btn-sm ad-sq-fix" data-match-edit="' + m.id + '">' +
+                        (isEn ? 'Edit' : 'Править') + '</button>' +
+                '</div>';
+            }).join('');
+        }
+
+        var html = '<div class="ad-score-queue">';
+        if (спорные.length) {
+            html += '<div class="ad-sq-title ad-sq-title-hot">' +
+                (isEn ? 'Disputed scores' : 'Спорные счета') + ' (' + спорные.length + ')</div>' +
+                строки(спорные, 'hot');
+        }
+        if (ждут.length) {
+            html += '<div class="ad-sq-title">' +
+                (isEn ? 'Waiting for confirmation' : 'Ждут подтверждения') + ' (' + ждут.length + ')</div>' +
+                '<div class="ad-sq-hint">' + (isEn
+                    ? 'The opponent has not answered yet. Open the score and save it — that closes the match and moves the bracket on.'
+                    : 'Соперник ещё не ответил. Откройте счёт и сохраните — это закроет матч и двинет сетку.') + '</div>' +
+                строки(ждут, 'wait');
+        }
+        return html + '</div>';
     }
 
     function renderGroupPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap) {
@@ -5832,7 +5887,12 @@
                 score: scoreStr,
                 winner_id: winnerId,
                 status: 'completed',
-                played_at: new Date().toISOString()
+                played_at: new Date().toISOString(),
+                // Счёт от менеджера окончательный: подтверждать его некому и
+                // незачем. Заодно это способ закрыть матч, который игроки
+                // вписали, но второй так и не подтвердил — иначе сетка стоит
+                score_status: 'confirmed',
+                score_confirmed_at: new Date().toISOString()
             };
 
             var res = await A.client.from('matches').update(updateData).eq('id', match.id);

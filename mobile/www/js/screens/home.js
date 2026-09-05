@@ -355,7 +355,15 @@
       });
     }
 
-    var html = '<div class="mob-match-card">';
+    // Свой матч выделяем и даём кнопку: то же, что в сетке на сайте.
+    // Без этого в приложении зайти в счёт можно было только из «Моих
+    // матчей», а сетка оставалась мёртвой картинкой
+    var MS = window.KSLT_MATCH_SCORE;
+    var состояние = MS ? MS.stateOf(m) : 'none';
+    var своё = состояние === 'enter' || состояние === 'confirm' || состояние === 'wait';
+
+    var html = '<div class="mob-match-card' + (своё ? ' mob-match-mine' : '') + '"' +
+               (своё ? ' data-match="' + m.id + '"' : '') + '>';
     html += '<div class="mob-match-row' + (p1Win ? ' winner' : '') + '">';
     html += seed1Html;
     html += '<span class="mob-match-name">' + p1Name + '</span>';
@@ -366,6 +374,14 @@
     html += '<span class="mob-match-name">' + p2Name + '</span>';
     if (sets.length) html += '<div class="mob-match-sets">' + sets2Html + '</div>';
     html += '</div>';
+
+    if (состояние === 'enter' || состояние === 'confirm') {
+      html += '<button class="mob-match-act" data-score="' + m.id + '">' +
+              (состояние === 'enter' ? I18N.t('score.enter') : I18N.t('score.confirm')) + '</button>';
+    } else if (состояние === 'wait') {
+      html += '<div class="mob-match-wait">' + I18N.t('score.sentShort') + '</div>';
+    }
+
     html += '</div>';
     return html;
   }
@@ -423,7 +439,13 @@
       supabaseClient.from('players').select('id, name, photo').in('id', pIds).then(function(pRes) {
         var playersMap = {};
         (pRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
-        renderBracketContent(container, tournament, matches, regsMap, playersMap, isDbl);
+        // Список своих карточек нужен до отрисовки: в паре в матче стоит
+        // капитан, и без него напарник не увидит ни выделения, ни кнопки
+        var MS = window.KSLT_MATCH_SCORE;
+        var готово = MS && MS.loadMyIds ? MS.loadMyIds() : Promise.resolve();
+        готово.then(function () {
+          renderBracketContent(container, tournament, matches, regsMap, playersMap, isDbl);
+        });
       });
     });
   }
@@ -564,6 +586,7 @@
     html += '</div>';
     container.innerHTML = html;
     bindRoundPills(container);
+    bindScoreButtons(container);
   }
 
   // ============================
@@ -575,6 +598,7 @@
     html += '</div>';
     container.innerHTML = html;
     bindRoundPills(container);
+    bindScoreButtons(container);
   }
 
   function renderPlayoffWithPills(container, matches, regsMap, playersMap, isDbl, prefix) {
@@ -630,6 +654,18 @@
     });
 
     return html;
+  }
+
+  /** Кнопки счёта в списке круга. Зовут то же окно, что и «Мои матчи». */
+  function bindScoreButtons(container) {
+    container.querySelectorAll('[data-score]').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (window.KSLT_MATCH_SCORE) {
+          window.KSLT_MATCH_SCORE.open(btn.dataset.score);
+        }
+      });
+    });
   }
 
   function bindRoundPills(container) {

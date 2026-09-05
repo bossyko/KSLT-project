@@ -595,7 +595,9 @@ function renderMatch(tournament, match, predOpts) {
     var p1Class = match.winnerId === match.player1Id ? 'winner' : (match.winnerId ? 'loser' : '');
     var p2Class = match.winnerId === match.player2Id ? 'winner' : (match.winnerId ? 'loser' : '');
 
-    var html = '<div class="td-match ' + match.status + '" data-p1="' + (match.player1Id || '') + '" data-p2="' + (match.player2Id || '') + '">';
+    // Номер матча нужен кнопке «вписать счёт»: по нему открывается окно
+    var html = '<div class="td-match ' + match.status + '" data-p1="' + (match.player1Id || '') + '" data-p2="' + (match.player2Id || '') + '"' +
+        (match.matchId ? ' data-match-id="' + match.matchId + '"' : '') + '>';
 
     // Player 1
     html += '<div class="td-match-player ' + p1Class + '">' +
@@ -1806,6 +1808,14 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                     if (cellOutcome) score += ' ' + cellOutcome;
                                     var isWin = match.winner_id === st.playerId;
                                     bHtml += '<td style="text-align:center;font-size:0.8rem;white-space:nowrap;' + (isWin ? 'color:var(--accent);font-weight:600;' : 'color:var(--text-dim);') + '">' + score + '</td>';
+                                } else if (match) {
+                                    // Матч есть, счёта ещё нет: клетка несёт номер и имя
+                                    // соперника — по ним свой матч заполняется прямо отсюда
+                                    var противName = pName(oppId).replace(/<[^>]*>/g, '');
+                                    var противФам = противName.trim().split(/\s+/).pop();
+                                    bHtml += '<td class="td-grp-cell" data-match-id="' + match.id +
+                                             '" data-opp="' + противФам +
+                                             '" style="text-align:center;color:var(--text-dim);">—</td>';
                                 } else {
                                     bHtml += '<td style="text-align:center;color:var(--text-dim);">—</td>';
                                 }

@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
     // пустая, висела бы рядом дубликатом.
     // action_type доезжает до приложения в теле push: по нему нажатие на
     // уведомление открывает нужный экран, а не просто запускает программу
-    const { title, message, type, audience, user_id, skip_log, action_type } = await req.json()
+    const { title, message, type, audience, user_id, skip_log, action_type, action_id } = await req.json()
 
     if (!title || !message || !audience) {
       return json({ error: 'Missing title, message, or audience' }, 400)
@@ -213,8 +213,12 @@ Deno.serve(async (req) => {
                 message: {
                   token: p.fcm_token,
                   notification: { title, body: message },
+                  // action_id — номер того, о чём весть: по нему нажатие на push
+                  // открывает нужный матч или вызов, а не просто раздел
                   data: action_type
-                    ? { type: type || 'system', action_type: String(action_type) }
+                    ? (action_id
+                        ? { type: type || 'system', action_type: String(action_type), action_id: String(action_id) }
+                        : { type: type || 'system', action_type: String(action_type) })
                     : { type: type || 'system' }
                 }
               })

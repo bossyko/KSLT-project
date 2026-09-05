@@ -1,0 +1,251 @@
+/* ============================================
+   СЧЁТ МАТЧА — окно ввода и подтверждения
+   ============================================
+   Своим файлом, а не внутри partners.css: окно нужно и на странице турнира,
+   и в кабинете, а тот partners.css не грузит — стили просто не доезжали, и
+   окно выходило без оформления, под боковым меню.
+
+   Подложку и рамку берём общие с окнами приглашений, чтобы все окна сайта
+   выглядели одинаково. */
+
+.ms-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    /* В кабинете боковое меню поднято на 10000 и накрывало окно: нажать
+       «отправить» было невозможно */
+    z-index: 10050;
+}
+
+.ms-modal {
+    background: var(--bg-elevated);
+    border: 1px solid rgba(204, 255, 0, 0.28);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.ms-modal { max-width: 460px; }
+
+.ms-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.ms-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.ms-close {
+    background: none;
+    border: 0;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.ms-body { padding: 18px 20px 20px; }
+
+.ms-loading {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.ms-trn {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+/* Пара соперников: лица по краям, имена внутри, VS посередине */
+.ms-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-tertiary);
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.ms-vs img,
+.ms-vs .ms-noface {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: 0 0 40px;
+}
+
+.ms-noface {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    font-style: normal;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.ms-vs b {
+    color: var(--text-primary);
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-align: center;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+.ms-vs span {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex: 0 0 auto;
+}
+
+.ms-when {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+
+.ms-date {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 7px 10px;
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.ms-table { width: 100%; border-collapse: collapse; }
+
+.ms-table th {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 0 0 8px;
+    text-align: center;
+}
+
+.ms-table th:first-child { text-align: left; }
+.ms-table td { padding: 7px 0; border-top: 1px solid var(--border-subtle); }
+
+.ms-p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.ms-p img,
+.ms-p .ms-noface {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    font-size: 0.7rem;
+}
+
+.ms-cell { width: 60px; text-align: center; }
+
+.ms-in {
+    width: 46px;
+    height: 40px;
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 700;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit;
+}
+
+.ms-in:focus { outline: none; border-color: var(--accent); }
+
+/* Счёт, который прислал соперник: читается сразу, крупно */
+.ms-score-big {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+    margin: 4px 0 14px;
+}
+
+.ms-hint {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin: 12px 0 16px;
+    line-height: 1.45;
+}
+
+.ms-hint-center { text-align: center; }
+
+.ms-send {
+    width: 100%;
+    padding: 14px;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    background: var(--accent);
+    color: #0a0a0a;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+}
+
+.ms-send:disabled { opacity: 0.6; cursor: default; }
+
+.ms-ghost {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+
+.ms-row2 { display: flex; gap: 10px; }
+
+@media (max-width: 480px) {
+    .ms-cell { width: 48px; }
+    .ms-in { width: 40px; }
+    .ms-vs b { font-size: 0.85rem; }
+}
+
+/* Исход крупно над счётом: подтверждающий видит сразу, выиграл он или нет,
+   а не считает в уме, где его геймы */
+.ms-outcome {
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin: 6px 0 2px;
+}
+
+.ms-won { color: var(--accent); }
+.ms-lost { color: var(--text-muted); }

@@ -1886,3 +1886,66 @@ tr.td-rr-row-dimmed {
 .hero-stat-tight .hero-stat-value {
     color: #FFB020;
 }
+
+/* ---- Свой матч в сетке: кнопка счёта или подпись ---- */
+.td-match-act {
+    display: block;
+    width: 100%;
+    padding: 6px;
+    border: 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-family: inherit;
+}
+
+.td-match-enter {
+    background: var(--accent);
+    color: #0a0a0a;
+    cursor: pointer;
+}
+
+.td-match-enter:hover { filter: brightness(1.08); }
+
+.td-match-wait {
+    text-align: center;
+    color: var(--text-dim);
+    background: rgba(255, 255, 255, 0.03);
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* Своя клетка в таблице группы: нажимается и ведёт в окно счёта.
+   Фамилия соперника стоит подложкой — приглушённой, второй строкой: в
+   турнирной таблице фамилий не пишут, но без неё две соседние свои клетки
+   сливаются в одну полосу, и непонятно, где какой матч. */
+.td-grp-mine {
+    cursor: pointer;
+    background: rgba(204, 255, 0, 0.14);
+    border: 1px solid var(--accent);
+    padding: 4px 6px !important;
+    line-height: 1.15;
+}
+
+.td-grp-mine:hover { background: rgba(204, 255, 0, 0.22); }
+
+.td-grp-act {
+    display: block;
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.td-grp-opp {
+    display: block;
+    color: var(--text-dim);
+    font-size: 0.62rem;
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

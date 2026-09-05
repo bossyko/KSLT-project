@@ -655,6 +655,92 @@
   }
 
   // ---- My Matches ----
+  /**
+   * Матчи, ждущие ответа.
+   *
+   * Полоса над списком сыгранного. Пусто — полосы нет вовсе: пустая рамка
+   * ради пустоты занимает место и ничего не говорит.
+   */
+  function показатьДела(content) {
+    var MS = window.KSLT_MATCH_SCORE;
+    if (!MS || !_player) return;
+
+    MS.loadMyIds().then(function (мои) {
+    supabaseClient.from('matches')
+      .select('id, player1_id, player2_id, winner_id, score, score_status, score_submitted_by, played_at, ' +
+              'tournament:tournaments(title, title_en, title_kg)')
+      .or('player1_id.in.(' + мои.join(',') + '),player2_id.in.(' + мои.join(',') + ')')
+      .or('winner_id.is.null,score_status.eq.pending')
+      .then(function (r) {
+        var дела = (r.data || []).map(function (m) {
+          return { m: m, что: MS.stateOf(m) };
+        }).filter(function (x) {
+          return x.что === 'enter' || x.что === 'confirm' || x.что === 'wait';
+        });
+        if (!дела.length) return;
+
+        var ids = [];
+        дела.forEach(function (x) {
+          [x.m.player1_id, x.m.player2_id].forEach(function (id) {
+            if (id && мои.indexOf(id) === -1 && ids.indexOf(id) === -1) ids.push(id);
+          });
+        });
+
+        supabaseClient.from('players').select('id, name, photo').in('id', ids).then(function (pr) {
+          var byId = {};
+          (pr.data || []).forEach(function (p) { byId[p.id] = p; });
+
+          var html = '<div class="msa-todo"><div class="msa-todo-title">' +
+                     I18N.t('score.todo') + '</div>';
+          дела.forEach(function (x) {
+            var m = x.m;
+            var чужой = мои.indexOf(m.player1_id) !== -1 ? m.player2_id : m.player1_id;
+            var соперник = byId[чужой] || {};
+            var действие = x.что === 'wait'
+              ? '<span class="msa-todo-wait">' + I18N.t('score.waiting') + '</span>'
+              : '<button class="msa-todo-btn" data-match="' + m.id + '">' +
+                (x.что === 'confirm' ? I18N.t('score.confirm') : I18N.t('score.enter')) + '</button>';
+            var подпись = x.что === 'confirm'
+              ? I18N.t('score.entered') + ' ' + esc(String(m.score || '').replace(/\//g, ':'))
+              : esc(нужныйТурнир(m.tournament));
+
+            html += '<div class="msa-todo-row">' +
+              '<div class="msa-todo-main">' +
+                '<div class="msa-todo-name">' + esc(соперник.name || '?') + '</div>' +
+                '<div class="msa-todo-sub">' + подпись + '</div>' +
+              '</div>' + действие +
+            '</div>';
+          });
+          html += '</div>';
+
+          // Ставим рядом с содержимым, а не внутрь: список сыгранного
+          // дорисовывается позже и затирал бы полосу целиком
+          var старая = document.getElementById('msaTodo');
+          if (старая) старая.remove();
+
+          var полоса = document.createElement('div');
+          полоса.innerHTML = html;
+          var узел = полоса.firstChild;
+          узел.id = 'msaTodo';
+          content.parentNode.insertBefore(узел, content);
+
+          узел.querySelectorAll('[data-match]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              MS.open(btn.dataset.match, function () { showMyMatches(); });
+            });
+          });
+        });
+      });
+    });
+  }
+
+  function нужныйТурнир(t) {
+    if (!t) return I18N.t('score.battle');
+    if (I18N.lang === 'en') return t.title_en || t.title || '';
+    if (I18N.lang === 'kg') return t.title_kg || t.title || '';
+    return t.title || '';
+  }
+
   function showMyMatches() {
     if (!_player) return;
     var ov = openSubOverlay(I18N.t('profile.myMatches'), '<div class="loading-center"><div class="spinner"></div></div>');
@@ -682,6 +768,11 @@
         });
         loadMatchRows(conds.join(','), myCaptains);
       });
+
+    // Над архивом — то, что ждёт ответа прямо сейчас: вписать счёт или
+    // ответить на вписанный соперником. В архив такие матчи не попадают
+    // вовсе: победителя у них ещё нет
+    показатьДела(content);
 
     function loadMatchRows(orFilter, myCaptains) {
       // Здесь всё сыгранное: рейтинговые и дружеские турниры, парные, микст
