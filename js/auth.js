@@ -10,6 +10,20 @@
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
 
     // Labels
+    /**
+     * Похоже ли это на адрес почты.
+     *
+     * Браузерная проверка type="email" пропускает почти всё: ей довольно
+     * «собаки» без пробелов. Адрес bossyko@gmail.comвавыпвыр она считает
+     * верным, и человек уходит ждать письмо, которое никуда не ушло.
+     *
+     * Держимся латиницы: домены в кириллице бывают, но у наших писем и
+     * рассылки их не будет, а опечатку раскладкой ловить важнее.
+     */
+    function похоже_на_почту(адрес) {
+        return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(адрес || '');
+    }
+
     var L = isKg ? {
         signingIn: 'Кирүү...',
         signIn: 'Кирүү',
@@ -29,6 +43,7 @@
         errGeneric: 'Ката кетти. Кайра аракет кылыңыз.',
         errInvalidLogin: 'Туура эмес email же сыр сөз',
         errCaptcha: 'Текшерүүдөн өтүңүз',
+        errEmailBad: 'Почта введена неверно',
         errTooMany: 'Өтө көп аракеттер. 60 секунд күтүңүз.',
         errEmailTaken: 'Бул email менен аккаунт бар',
         tgLoggingIn: 'Telegram менен кирүү...',
@@ -77,6 +92,7 @@
         errGeneric: 'An error occurred. Please try again.',
         errInvalidLogin: 'Invalid email or password',
         errCaptcha: 'Please complete the verification',
+        errEmailBad: 'Check the email address',
         errTooMany: 'Too many attempts. Please wait 60 seconds.',
         errEmailTaken: 'An account with this email already exists',
         tgLoggingIn: 'Signing in via Telegram...',
@@ -125,6 +141,7 @@
         errGeneric: 'Произошла ошибка. Попробуйте снова.',
         errInvalidLogin: 'Неверный email или пароль',
         errCaptcha: 'Пройдите проверку',
+        errEmailBad: 'Проверьте адрес почты',
         errTooMany: 'Слишком много попыток. Подождите 60 сек.',
         errEmailTaken: 'Аккаунт с этим email уже существует',
         tgLoggingIn: 'Вход через Telegram...',
@@ -628,6 +645,11 @@
         var password = document.getElementById('signin-password').value;
         var btn = signinForm.querySelector('.auth-btn');
 
+        if (!похоже_на_почту(email)) {
+            showMessage(signinForm, L.errEmailBad, true);
+            return;
+        }
+
         // Rate limiting
         if (Date.now() < _lockoutUntil) {
             showMessage(signinForm, L.errTooMany, true);
@@ -713,6 +735,12 @@
         var password = document.getElementById('signup-password').value;
         var confirmPw = document.getElementById('signup-confirm').value;
         var btn = signupForm.querySelector('.auth-btn');
+
+        if (!похоже_на_почту(email)) {
+            showMessage(signupForm, L.errEmailBad, true);
+            document.getElementById('signup-email').focus();
+            return;
+        }
 
         var allRulesPass = Object.keys(rules).every(function(key) { return rules[key](password); });
         if (!allRulesPass) {
@@ -1153,6 +1181,10 @@
             identifier = document.getElementById('forgot-email').value.trim();
             identifierType = 'email';
             if (!identifier) return;
+            if (!похоже_на_почту(identifier)) {
+                showMessage(forgotStep1, L.errEmailBad, true);
+                return;
+            }
         }
 
         var btn = forgotStep1.querySelector('.auth-btn');

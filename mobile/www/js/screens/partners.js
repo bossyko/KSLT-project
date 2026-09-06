@@ -315,7 +315,7 @@
           '<li style="padding:8px 0;font-size:14px">✅ ' + I18N.t('pricing.feat6') + '</li>' +
         '</ul>' +
         '<p style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:16px">' + I18N.t('pricing.howToPay') + '</p>' +
-        '<a href="https://wa.me/996555000000" target="_blank" class="pd-challenge-btn" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px;color:#0A0A0A">WhatsApp</a>' +
+        // WhatsApp убран: номер был выдуманный и оказался чужим настоящим
         '<a href="https://t.me/kslt_admin" target="_blank" class="pd-challenge-btn" style="background:#2AABEE;display:block;text-align:center;text-decoration:none;color:#fff">Telegram</a>' +
       '</div>'
     );

@@ -5574,3 +5574,62 @@ select.prof-field-input { color: var(--text); }
     font-size: 0.76rem;
     color: var(--text-muted);
 }
+
+/* Подпись блока в сетке «все места». Столбцами её на телефоне не нарисуешь,
+   поэтому круг остаётся вкладкой, а внутри матчи разложены по блокам:
+   иначе шестнадцать матчей круга идут одним списком и непонятно, где борьба
+   за победу, а где за седьмое место. */
+.fic-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--accent);
+  margin: 14px 0 6px;
+}
+.round-panel .fic-group-title:first-child { margin-top: 4px; }
+
+/* Крестик в окнах ввода кода и нового пароля. Без него из окна нельзя было
+   выйти вовсе: ни кнопки, ни нажатия мимо — приходилось закрывать
+   приложение целиком. */
+.otp-modal, .otp-pw-modal { position: relative; }
+.otp-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: none;
+  color: var(--text-sec);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+.otp-close:active { color: var(--text-primary); }
+
+/* Полоса «вышла новая версия». Приложение обновляется вручную, и человек
+   иначе никак не узнает, что его сборка устарела. */
+.app-update-bar {
+  position: fixed;
+  left: 12px; right: 12px; bottom: 76px;
+  z-index: 9000;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  font-size: 13px;
+  color: var(--text-primary);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+.app-update-bar span { flex: 1; }
+.app-update-bar a {
+  color: #0A0A0A; background: var(--accent);
+  padding: 6px 12px; border-radius: 999px;
+  font-weight: 700; text-decoration: none; white-space: nowrap;
+}
+.app-update-bar button {
+  border: 0; background: none; color: var(--text-sec);
+  font-size: 20px; line-height: 1; padding: 0 2px;
+}

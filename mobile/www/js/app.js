@@ -5,6 +5,11 @@
   'use strict';
 
   var APP = window.KSLT_APP = {};
+
+  // Номер этой сборки. Держим рядом с versionCode из android/app/build.gradle:
+  // по нему приложение понимает, не устарело ли оно. Поднимать вместе с ним.
+  APP.BUILD = 2;
+  APP.BUILD_NAME = '1.1';
   var currentScreen = 'screenHome';
   var loadedScreens = {};
 
@@ -639,12 +644,59 @@
   }
 
   // === Init ===
+  /**
+   * Не устарела ли сборка.
+   *
+   * Приложение ставится файлом и само не обновляется. Узнать о новой сборке
+   * человеку было неоткуда: тестировщица месяц работала на августовской и
+   * жаловалась на давно исправленное. Теперь последняя сборка записана в
+   * базе, и если своя старее — показываем полоску со ссылкой.
+   *
+   * Молчим при любой ошибке: не смогли спросить — не мешаем работать.
+   */
+  function проверитьОбновление() {
+    if (!window.supabaseClient) return;
+    supabaseClient.from('app_releases')
+      .select('version_code, version_name, url, notes')
+      .eq('platform', 'android')
+      .order('version_code', { ascending: false })
+      .limit(1)
+      .then(function(r) {
+        var последняя = r && r.data && r.data[0];
+        if (!последняя || последняя.version_code <= APP.BUILD) return;
+        показатьПолосуОбновления(последняя);
+      })
+      .catch(function() {});
+  }
+
+  function показатьПолосуОбновления(сборка) {
+    if (document.getElementById('appUpdateBar')) return;
+    var полоса = document.createElement('div');
+    полоса.id = 'appUpdateBar';
+    полоса.className = 'app-update-bar';
+    var текст = I18N.t('app.updateReady').replace('{v}', сборка.version_name);
+    полоса.innerHTML =
+      '<span>' + текст + '</span>' +
+      (сборка.url
+        ? '<a href="' + сборка.url + '" target="_blank" rel="noopener">' + I18N.t('app.updateGet') + '</a>'
+        : '') +
+      '<button type="button" aria-label="' + I18N.t('common.close') + '">&times;</button>';
+    document.body.appendChild(полоса);
+    полоса.querySelector('button').addEventListener('click', function() { полоса.remove(); });
+  }
+
   function init() {
     // Apply i18n to static DOM elements
     if (window.KSLT_I18N) window.KSLT_I18N.updateDOM();
 
     // Track app visit (once per session)
     trackAppVisit();
+
+    // Номер сборки в меню берём отсюда же, чтобы не разошёлся с проверкой
+    var верс = document.getElementById('menuVersion');
+    if (верс) верс.textContent = APP.BUILD_NAME;
+
+    проверитьОбновление();
 
     var AUTH = window.KSLT_AUTH;
     var authScreen = document.getElementById('authScreen');

@@ -4,6 +4,21 @@
 (function() {
   'use strict';
 
+  /**
+   * Похоже ли это на адрес почты.
+   *
+   * Браузерная проверка type="email" пропускает почти всё: ей довольно
+   * «собаки» без пробелов. Адрес вида name@gmail.comвавыпвыр она считает
+   * верным, и человек уходит ждать письмо, которого не будет.
+   *
+   * Держимся латиницы: домены в кириллице бывают, но у нашей почты их нет,
+   * а опечатку раскладкой ловить важнее. Такая же проверка на сайте.
+   */
+  function похоже_на_почту(адрес) {
+    return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(адрес || '');
+  }
+
+
   var AUTH = window.KSLT_AUTH = {};
   var I18N = window.KSLT_I18N;
 
@@ -371,6 +386,22 @@
       if (first) setTimeout(function() { first.focus(); }, 200);
     }
 
+    // Крестик и нажатие по затемнению закрывают окно. Раньше выхода не было
+    // совсем, и человек с занятой почтой перезапускал приложение.
+    var otpCloseBtn = document.getElementById('otpClose');
+    if (otpCloseBtn) otpCloseBtn.addEventListener('click', function() { hideOtpOverlay(); });
+    if (otpOverlay) otpOverlay.addEventListener('click', function(e) {
+        if (e.target === otpOverlay) hideOtpOverlay();
+    });
+
+    var otpPwCloseBtn = document.getElementById('otpPwClose');
+    if (otpPwCloseBtn) otpPwCloseBtn.addEventListener('click', function() {
+        otpPwOverlay.classList.remove('open');
+    });
+    if (otpPwOverlay) otpPwOverlay.addEventListener('click', function(e) {
+        if (e.target === otpPwOverlay) otpPwOverlay.classList.remove('open');
+    });
+
     function hideOtpOverlay() {
       otpOverlay.classList.remove('open');
       clearOtpTimer();
@@ -496,6 +527,10 @@
           identifier = document.getElementById('forgotEmail').value.trim();
           identifierType = 'email';
           if (!identifier) return;
+          if (!похоже_на_почту(identifier)) {
+            KSLT_APP.toast(I18N.t('auth.emailBad'));
+            return;
+          }
         }
 
         btn.disabled = true;
@@ -604,6 +639,12 @@
       errEl.className = 'auth-error';
       errEl.textContent = '';
 
+      if (!похоже_на_почту(email)) {
+        errEl.textContent = I18N.t('auth.emailBad');
+        errEl.className = 'auth-error show';
+        return;
+      }
+
       // Client-side rate limit
       if (Date.now() < _lockoutUntil) {
         errEl.textContent = I18N.t('otp.tooManyTries');
@@ -663,6 +704,12 @@
       var errEl = document.getElementById('regError');
       errEl.className = 'auth-error';
       errEl.textContent = '';
+
+      if (!похоже_на_почту(email)) {
+        errEl.textContent = I18N.t('auth.emailBad');
+        errEl.className = 'auth-error show';
+        return;
+      }
 
       if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass)) {
         errEl.textContent = I18N.t('otp.passwordRule');

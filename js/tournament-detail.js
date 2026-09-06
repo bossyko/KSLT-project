@@ -400,143 +400,32 @@ function renderHero(tournament) {
 // FIC SECTIONS (public)
 // ========================================
 
+function выровнятьМатчиЗаМеста(корень) {
+    if (!корень) return;
+    корень.querySelectorAll('.td-fic-section').forEach(function(блок) {
+        var сетка = блок.querySelector('.td-bracket');
+        if (!сетка) return;
+        var столбцы = столбцыСетки(сетка);
+        блок.querySelectorAll('.td-place-match').forEach(function(матч) {
+            var круг = parseInt(матч.getAttribute('data-round'), 10);
+            var цель = столбцы[круг - 1];
+            if (цель) матч.style.marginLeft = (цель.offsetLeft - сетка.offsetLeft) + 'px';
+        });
+    });
+}
+
+function столбцыСетки(сетка) {
+    return Array.prototype.filter.call(сетка.children, function(e) {
+        return e.classList.contains('td-bracket-round');
+    });
+}
+
 function getFicSectionsPublic(drawSize, isEn) {
-    if (drawSize === 8) {
-        return [
-            {
-                label: isEn ? 'Main Draw (1-2)' : 'Основная сетка (1-2 место)',
-                rounds: [
-                    { roundNum: 1, matchStart: 1, matchEnd: 4, name: isEn ? 'Round 1' : 'Раунд 1' },
-                    { roundNum: 2, matchStart: 1, matchEnd: 2, name: isEn ? 'Semifinal' : 'Полуфинал' },
-                    { roundNum: 3, matchStart: 1, matchEnd: 1, name: isEn ? 'Final' : 'Финал' }
-                ],
-                placeMatch: { roundNum: 3, matchOrder: 3, label: isEn ? '3rd-4th Place' : 'За 3-4 место' }
-            },
-            {
-                label: isEn ? '5-8 Place' : '5-8 место',
-                rounds: [
-                    { roundNum: 2, matchStart: 3, matchEnd: 4, name: isEn ? 'Semifinal 5-8' : 'Полуфинал 5-8' },
-                    { roundNum: 3, matchStart: 2, matchEnd: 2, name: isEn ? 'Final 5-6' : 'Финал 5-6' }
-                ],
-                placeMatch: { roundNum: 3, matchOrder: 4, label: isEn ? '7th-8th Place' : 'За 7-8 место' }
-            }
-        ];
-    }
-    if (drawSize === 16) {
-        return [
-            {
-                label: isEn ? 'Main Draw (1-2)' : 'Основная сетка (1-2 место)',
-                rounds: [
-                    { roundNum: 1, matchStart: 1, matchEnd: 8, name: isEn ? 'Round 1' : 'Раунд 1' },
-                    { roundNum: 2, matchStart: 1, matchEnd: 4, name: isEn ? 'Quarterfinal' : 'Четвертьфинал' },
-                    { roundNum: 3, matchStart: 1, matchEnd: 2, name: isEn ? 'Semifinal' : 'Полуфинал' },
-                    { roundNum: 4, matchStart: 1, matchEnd: 1, name: isEn ? 'Final' : 'Финал' }
-                ],
-                placeMatch: { roundNum: 4, matchOrder: 5, label: isEn ? '3rd-4th Place' : 'За 3-4 место' }
-            },
-            {
-                label: isEn ? '5-8 Place' : '5-8 место',
-                rounds: [
-                    { roundNum: 3, matchStart: 5, matchEnd: 6, name: isEn ? 'Semifinal 5-8' : 'Полуфинал 5-8' },
-                    { roundNum: 4, matchStart: 3, matchEnd: 3, name: isEn ? 'Final 5-6' : 'Финал 5-6' }
-                ],
-                placeMatch: { roundNum: 4, matchOrder: 7, label: isEn ? '7th-8th Place' : 'За 7-8 место' }
-            },
-            {
-                label: isEn ? '9-12 Place' : '9-12 место',
-                rounds: [
-                    { roundNum: 2, matchStart: 5, matchEnd: 8, name: isEn ? 'Round 2 (9-16)' : 'Раунд 2 (9-16)' },
-                    { roundNum: 3, matchStart: 3, matchEnd: 4, name: isEn ? 'Semifinal 9-12' : 'Полуфинал 9-12' },
-                    { roundNum: 4, matchStart: 2, matchEnd: 2, name: isEn ? 'Final 9-10' : 'Финал 9-10' }
-                ],
-                placeMatch: { roundNum: 4, matchOrder: 6, label: isEn ? '11th-12th Place' : 'За 11-12 место' }
-            },
-            {
-                label: isEn ? '13-16 Place' : '13-16 место',
-                rounds: [
-                    { roundNum: 3, matchStart: 7, matchEnd: 8, name: isEn ? 'Semifinal 13-16' : 'Полуфинал 13-16' },
-                    { roundNum: 4, matchStart: 4, matchEnd: 4, name: isEn ? 'Final 13-14' : 'Финал 13-14' }
-                ],
-                placeMatch: { roundNum: 4, matchOrder: 8, label: isEn ? '15th-16th Place' : 'За 15-16 место' }
-            }
-        ];
-    }
-    if (drawSize === 32) {
-        return [
-            {
-                label: isEn ? 'Main Draw (1-2)' : 'Основная сетка (1-2 место)',
-                rounds: [
-                    { roundNum: 1, matchStart: 1, matchEnd: 16, name: isEn ? 'Round 1' : 'Раунд 1' },
-                    { roundNum: 2, matchStart: 1, matchEnd: 8, name: isEn ? 'Round 2' : 'Раунд 2' },
-                    { roundNum: 3, matchStart: 1, matchEnd: 4, name: isEn ? 'Quarterfinal' : 'Четвертьфинал' },
-                    { roundNum: 4, matchStart: 1, matchEnd: 2, name: isEn ? 'Semifinal' : 'Полуфинал' },
-                    { roundNum: 5, matchStart: 1, matchEnd: 1, name: isEn ? 'Final' : 'Финал' }
-                ],
-                placeMatch: { roundNum: 5, matchOrder: 9, label: isEn ? '3rd-4th Place' : 'За 3-4 место' }
-            },
-            {
-                label: isEn ? '5-8 Place' : '5-8 место',
-                rounds: [
-                    { roundNum: 4, matchStart: 5, matchEnd: 6, name: isEn ? 'Semifinal 5-8' : 'Полуфинал 5-8' },
-                    { roundNum: 5, matchStart: 3, matchEnd: 3, name: isEn ? 'Final 5-6' : 'Финал 5-6' }
-                ],
-                placeMatch: { roundNum: 5, matchOrder: 11, label: isEn ? '7th-8th Place' : 'За 7-8 место' }
-            },
-            {
-                label: isEn ? '9-12 Place' : '9-12 место',
-                rounds: [
-                    { roundNum: 3, matchStart: 5, matchEnd: 8, name: isEn ? 'QF 9-16' : 'ЧФ 9-16' },
-                    { roundNum: 4, matchStart: 3, matchEnd: 4, name: isEn ? 'Semifinal 9-12' : 'Полуфинал 9-12' },
-                    { roundNum: 5, matchStart: 2, matchEnd: 2, name: isEn ? 'Final 9-10' : 'Финал 9-10' }
-                ],
-                placeMatch: { roundNum: 5, matchOrder: 10, label: isEn ? '11th-12th Place' : 'За 11-12 место' }
-            },
-            {
-                label: isEn ? '13-16 Place' : '13-16 место',
-                rounds: [
-                    { roundNum: 4, matchStart: 7, matchEnd: 8, name: isEn ? 'Semifinal 13-16' : 'Полуфинал 13-16' },
-                    { roundNum: 5, matchStart: 4, matchEnd: 4, name: isEn ? 'Final 13-14' : 'Финал 13-14' }
-                ],
-                placeMatch: { roundNum: 5, matchOrder: 12, label: isEn ? '15th-16th Place' : 'За 15-16 место' }
-            },
-            {
-                label: isEn ? '17-20 Place' : '17-20 место',
-                rounds: [
-                    { roundNum: 2, matchStart: 9, matchEnd: 16, name: isEn ? 'Round 2 (17-32)' : 'Раунд 2 (17-32)' },
-                    { roundNum: 3, matchStart: 9, matchEnd: 12, name: isEn ? 'QF 17-24' : 'ЧФ 17-24' },
-                    { roundNum: 4, matchStart: 9, matchEnd: 10, name: isEn ? 'Semifinal 17-20' : 'Полуфинал 17-20' },
-                    { roundNum: 5, matchStart: 5, matchEnd: 5, name: isEn ? 'Final 17-18' : 'Финал 17-18' }
-                ],
-                placeMatch: { roundNum: 5, matchOrder: 13, label: isEn ? '19th-20th Place' : 'За 19-20 место' }
-            },
-            {
-                label: isEn ? '21-24 Place' : '21-24 место',
-                rounds: [
-                    { roundNum: 4, matchStart: 13, matchEnd: 14, name: isEn ? 'Semifinal 21-24' : 'Полуфинал 21-24' },
-                    { roundNum: 5, matchStart: 7, matchEnd: 7, name: isEn ? 'Final 21-22' : 'Финал 21-22' }
-                ],
-                placeMatch: { roundNum: 5, matchOrder: 15, label: isEn ? '23rd-24th Place' : 'За 23-24 место' }
-            },
-            {
-                label: isEn ? '25-28 Place' : '25-28 место',
-                rounds: [
-                    { roundNum: 3, matchStart: 13, matchEnd: 16, name: isEn ? 'QF 25-32' : 'ЧФ 25-32' },
-                    { roundNum: 4, matchStart: 11, matchEnd: 12, name: isEn ? 'Semifinal 25-28' : 'Полуфинал 25-28' },
-                    { roundNum: 5, matchStart: 6, matchEnd: 6, name: isEn ? 'Final 25-26' : 'Финал 25-26' }
-                ],
-                placeMatch: { roundNum: 5, matchOrder: 14, label: isEn ? '27th-28th Place' : 'За 27-28 место' }
-            },
-            {
-                label: isEn ? '29-32 Place' : '29-32 место',
-                rounds: [
-                    { roundNum: 4, matchStart: 15, matchEnd: 16, name: isEn ? 'Semifinal 29-32' : 'Полуфинал 29-32' },
-                    { roundNum: 5, matchStart: 8, matchEnd: 8, name: isEn ? 'Final 29-30' : 'Финал 29-30' }
-                ],
-                placeMatch: { roundNum: 5, matchOrder: 16, label: isEn ? '31st-32nd Place' : 'За 31-32 место' }
-            }
-        ];
-    }
-    return [];
+    // Таблица блоков живёт в общем своде правил: её же читают админка и
+    // приложение, иначе третья копия рано или поздно разойдётся
+    return (window.KSLT_RULES && window.KSLT_RULES.ficSections)
+        ? window.KSLT_RULES.ficSections(drawSize, isEn ? 'en' : 'ru')
+        : [];
 }
 
 // ========================================
@@ -1873,6 +1762,22 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 bHtml += '<div class="td-fic-section-title">' + section.label + '</div>';
                 bHtml += '<div class="td-bracket-scroll"><div class="td-bracket">';
 
+                // Круги у всех блоков общие: полуфинал за 5-8 место должен
+                // стоять под общим полуфиналом, а «за 3-4», «финал 5-6» и
+                // «за 7-8» — в одном ряду с финалом. Поэтому недостающие
+                // слева круги закрываем пустыми столбцами той же ширины:
+                // без них каждый блок начинался заново от левого края.
+                var первыйКруг = section.rounds[0].roundNum;
+                for (var пусто = 1; пусто < первыйКруг; пусто++) {
+                    bHtml += '<div class="td-bracket-round td-round-spacer">' +
+                             '<div class="td-round-title">&nbsp;</div>' +
+                             '<div class="td-bracket-matches"></div></div>';
+                    // И столбец под соединительные линии: в основной сетке
+                    // он есть между кругами, и без него блоки за места
+                    // расходились с ней на его ширину
+                    bHtml += '<div class="td-connector-column"></div>';
+                }
+
                 section.rounds.forEach(function(rd, ri) {
                     var roundMatches = matches.filter(function(m) {
                         return m.round_number === rd.roundNum &&
@@ -1914,7 +1819,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                m.match_order === section.placeMatch.matchOrder;
                     });
                     if (pm) {
-                        bHtml += '<div style="margin-top:12px;max-width:200px;">';
+                        // Сдвиг считаем после отрисовки, по месту: между
+                        // кругами стоят столбцы с линиями, и на глаз ширину
+                        // не угадать — матч за место уезжал левее финала.
+                        bHtml += '<div class="td-place-match" data-round="' +
+                                 section.placeMatch.roundNum + '" ' +
+                                 'style="margin-top:12px;max-width:200px;">';
                         bHtml += '<div class="td-round-title">' + section.placeMatch.label + '</div>';
                         bHtml += renderMatch(ficTournObj, {
                             matchId: pm.id, player1Id: pm.player1_id, player2Id: pm.player2_id,
@@ -1928,6 +1838,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             });
 
             bracketContainer.innerHTML = bHtml;
+
+            // Ставим матчи за места под их круг: измеряем, где стоит нужный
+            // столбец, и сдвигаем на столько же. Считать в уме нельзя —
+            // между кругами есть столбцы с соединительными линиями.
+            выровнятьМатчиЗаМеста(bracketContainer);
 
             } else {
 

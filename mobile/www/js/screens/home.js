@@ -594,11 +594,80 @@
   // ============================
   function renderMobilePlayoff(container, tournament, matches, regsMap, playersMap, isDbl) {
     var html = '<div style="padding:16px">';
-    html += renderPlayoffWithPills(container, matches, regsMap, playersMap, isDbl, '');
+    if (tournament && tournament.bracket_type === 'fic') {
+      html += renderFicMobile(tournament, matches, regsMap, playersMap, isDbl);
+    } else {
+      html += renderPlayoffWithPills(container, matches, regsMap, playersMap, isDbl, '');
+    }
     html += '</div>';
     container.innerHTML = html;
     bindRoundPills(container);
     bindScoreButtons(container);
+  }
+
+  /**
+   * Сетка «все места» на телефоне.
+   *
+   * Столбцами её тут не нарисуешь — в мобильных приложениях ATP и WTA широкую
+   * сетку тоже не ставят. Поэтому круги остаются вкладками, но внутри круга
+   * матчи разложены по блокам: основная сетка, за 5-8, за 9-12 и так далее.
+   *
+   * Без этого все шестнадцать матчей круга шли одним списком вперемешку, и
+   * нельзя было понять, где борьба за победу, а где за седьмое место.
+   *
+   * Таблица блоков берётся из общего свода правил — та же, что на сайте.
+   */
+  function renderFicMobile(tournament, matches, regsMap, playersMap, isDbl) {
+    var блоки = (window.KSLT_RULES && window.KSLT_RULES.ficSections)
+      ? window.KSLT_RULES.ficSections(tournament.draw_size || 16, I18N.lang === 'en' ? 'en' : 'ru')
+      : [];
+    if (!блоки.length) {
+      return renderPlayoffWithPills(null, matches, regsMap, playersMap, isDbl, '');
+    }
+
+    // Собираем круги: в каком круге какие блоки участвуют
+    var круги = {};
+    блоки.forEach(function(блок) {
+      блок.rounds.forEach(function(rd) {
+        (круги[rd.roundNum] = круги[rd.roundNum] || []).push({ блок: блок, круг: rd });
+      });
+      if (блок.placeMatch) {
+        (круги[блок.placeMatch.roundNum] = круги[блок.placeMatch.roundNum] || [])
+          .push({ блок: блок, место: блок.placeMatch });
+      }
+    });
+
+    var номера = Object.keys(круги).map(Number).sort(function(a, b) { return b - a; });
+    if (!номера.length) return '';
+
+    var html = '<div class="round-pills">';
+    номера.forEach(function(n, i) {
+      var подпись = (круги[n][0].круг && круги[n][0].круг.name) || ('Круг ' + n);
+      html += '<button class="round-pill' + (i === 0 ? ' active' : '') +
+              '" data-rpill="fic" data-round="' + n + '">' + подпись + '</button>';
+    });
+    html += '</div>';
+
+    номера.forEach(function(n, i) {
+      html += '<div class="round-panel" data-rpill="fic" data-round-panel="' + n + '"' +
+              (i !== 0 ? ' style="display:none"' : '') + '>';
+      круги[n].forEach(function(часть) {
+        var свои = matches.filter(function(m) {
+          if (m.round_number !== n) return false;
+          if (часть.место) return m.match_order === часть.место.matchOrder;
+          return m.match_order >= часть.круг.matchStart && m.match_order <= часть.круг.matchEnd;
+        }).sort(function(a, b) { return a.match_order - b.match_order; });
+        if (!свои.length) return;
+
+        var подпись = часть.место ? часть.место.label : (часть.блок.label + ' · ' + часть.круг.name);
+        html += '<div class="fic-group-title">' + esc(подпись) + '</div>';
+        свои.forEach(function(m) {
+          html += renderMatchCard(m, regsMap, playersMap, isDbl);
+        });
+      });
+      html += '</div>';
+    });
+    return html;
   }
 
   function renderPlayoffWithPills(container, matches, regsMap, playersMap, isDbl, prefix) {

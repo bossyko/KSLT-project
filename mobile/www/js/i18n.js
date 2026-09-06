@@ -35,6 +35,9 @@
     'menu.faq':         { ru: 'FAQ',           en: 'FAQ',           kg: 'FAQ' },
     'menu.pricing':     { ru: 'Членство',     en: 'Membership',    kg: 'Мүчөлүк' },
     'menu.contact':     { ru: 'Связаться',    en: 'Contact',       kg: 'Байланыш' },
+    'app.updateReady':   { ru: 'Вышла новая версия {v}', en: 'Version {v} is available', kg: 'Жаңы версия {v} чыкты' },
+    'app.updateGet':     { ru: 'Обновить', en: 'Update', kg: 'Жаңыртуу' },
+    'common.close':      { ru: 'Закрыть', en: 'Close', kg: 'Жабуу' },
     'menu.version':     { ru: 'Версия',       en: 'Version',       kg: 'Версия' },
 
     // === Header ===
@@ -480,6 +483,7 @@
     'otp.sendCode':      { ru: 'Отправить код',        en: 'Send code',          kg: 'Код жөнөтүү' },
     'otp.saving':        { ru: 'Сохранение...',        en: 'Saving...',          kg: 'Сакталууда...' },
     'otp.savePassword':  { ru: 'Сохранить пароль',     en: 'Save password',      kg: 'Сырсөздү сактоо' },
+    'auth.emailBad':     { ru: 'Проверьте адрес почты', en: 'Check the email address', kg: 'Почта дарегин текшериңиз' },
     'otp.passwordRule':  { ru: 'Пароль: 8+ символов, заглавная, цифра, спецсимвол', en: 'Password: 8+ characters, uppercase, digit, special character', kg: 'Сырсөз: 8+ белги, баш тамга, сан, атайын белги' },
     'otp.passwordMismatch': { ru: 'Пароли не совпадают', en: 'Passwords do not match', kg: 'Сырсөздөр дал келбейт' },
     'otp.tooManyTries':  { ru: 'Слишком много попыток. Подождите минуту.', en: 'Too many attempts. Wait a minute.', kg: 'Аракет өтө көп. Бир мүнөт күтүңүз.' },

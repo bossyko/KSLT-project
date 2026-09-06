@@ -1149,9 +1149,13 @@
   // ---- Edit Profile ----
   function showEditProfile() {
     var p = _profile;
-    var nameParts = (p.full_name || '').split(' ');
-    var lastName = nameParts[0] || '';
-    var firstName = nameParts.slice(1).join(' ') || '';
+    // На сайте при регистрации имя складывается как «Имя Фамилия», а здесь
+    // первое слово брали за фамилию — и в поле «Фамилия» у человека стояло
+    // его имя. Сохранение переворачивало ФИО обратно, поэтому в базе всё
+    // выглядело верно и ошибку никто не ловил.
+    var nameParts = (p.full_name || '').trim().split(/\s+/);
+    var firstName = nameParts[0] || '';
+    var lastName = nameParts.slice(1).join(' ') || '';
 
     var html = '<div class="prof-edit-form">';
 
@@ -1264,7 +1268,7 @@
         ? KSLT_PHONE.join(waCountry, waRaw)
         : '';
       var gender = document.getElementById('profGender').value;
-      var fullName = (ln + ' ' + fn).trim();
+      var fullName = (fn + ' ' + ln).trim();   // «Имя Фамилия», как на сайте
 
       // Instagram / Telegram
       var instagram = (document.getElementById('profInstagram').value || '').trim().replace(/^@/, '');
