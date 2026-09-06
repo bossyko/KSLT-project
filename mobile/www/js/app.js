@@ -8,8 +8,8 @@
 
   // Номер этой сборки. Держим рядом с versionCode из android/app/build.gradle:
   // по нему приложение понимает, не устарело ли оно. Поднимать вместе с ним.
-  APP.BUILD = 2;
-  APP.BUILD_NAME = '1.1';
+  APP.BUILD = 3;
+  APP.BUILD_NAME = '1.2';
   var currentScreen = 'screenHome';
   var loadedScreens = {};
 
