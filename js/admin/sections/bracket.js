@@ -679,7 +679,13 @@
         var hasMatches = matches.length > 0;
         var isRegOpen = tournament.status === 'registration_open';
         var canGenerate = !hasMatches && registrations.filter(function(r) { return r.status === 'approved'; }).length >= 2;
-        var allCompleted = hasMatches && matches.every(function(m) { return m.status === 'completed'; });
+        // Пустые клетки в счёт не идут: сетка строится на степень двойки, и
+        // при 22 участниках из 32 мест десять выдуманные. Такие матчи никем
+        // не заполнятся никогда, а турнир из-за них нельзя было завершить.
+        var allCompleted = hasMatches && matches.every(function(m) {
+            if (!m.player1_id && !m.player2_id) return true;
+            return m.status === 'completed';
+        });
         var anyCompleted = hasMatches && matches.some(function(m) { return m.status === 'completed'; });
         var isTournamentCompleted = tournament.status === 'completed';
 
@@ -777,7 +783,11 @@
         // Матчи за места ставим под их круг: считаем по месту, а не в уме —
         // между кругами есть узкие столбцы с линиями, и на глаз ширину
         // не угадать
-        выровнятьМатчиЗаМеста(container);
+        // Ждём, пока браузер разложит столбцы: сразу после отрисовки их
+        // ширина ещё не окончательная, и сдвиг брался от старых позиций.
+        requestAnimationFrame(function() {
+            выровнятьМатчиЗаМеста(container);
+        });
 
         // Navigation tabs — switch panels without re-render
         container.querySelectorAll('[data-trn-nav]').forEach(function(tab) {
@@ -795,6 +805,15 @@
                 // Toggle panels
                 document.getElementById('adBrkRegPanel').style.display = panelTab === 'registrations' ? '' : 'none';
                 document.getElementById('adBrkBracketPanel').style.display = panelTab === 'bracket' ? '' : 'none';
+                // У завершённого турнира админка открывается на «Результатах»,
+                // и сетка в этот момент спрятана: у скрытого блока все размеры
+                // нулевые, и матчи за места вставали слева. Считаем сдвиг
+                // заново, когда сетку показали.
+                if (panelTab === 'bracket') {
+                    requestAnimationFrame(function() {
+                        выровнятьМатчиЗаМеста(container);
+                    });
+                }
                 var schedPanel = document.getElementById('adBrkSchedulePanel');
                 if (schedPanel) schedPanel.style.display = panelTab === 'schedule' ? '' : 'none';
                 var resPanel = document.getElementById('adBrkResultsPanel');
@@ -1296,6 +1315,32 @@
                     var rowPlayer = btn.dataset.rowPlayer || null;
                     openScoreModal(match, playersMap, tournamentId, rowPlayer, isDbl, regsMap, tournament.set_format);
                 }
+            });
+        });
+
+        // Проход без игры: отмечаем победителем того, кто есть, и база
+        // сама уводит его в следующий круг.
+        container.querySelectorAll('[data-match-bye]').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var matchId = btn.dataset.matchBye;
+                var match = matches.find(function(m) { return m.id === matchId; });
+                if (!match) return;
+                var кто = match.player1_id || match.player2_id;
+                if (!кто) return;
+                btn.disabled = true;
+                var r = await A.client.from('matches').update({
+                    winner_id: кто,
+                    score: 'BYE',
+                    status: 'completed',
+                    played_at: new Date().toISOString()
+                }).eq('id', matchId);
+                if (r.error) {
+                    btn.disabled = false;
+                    A.showToast(r.error.message, 'error');
+                    return;
+                }
+                A.showToast(isEn ? 'Advanced' : 'Проведён дальше', 'success');
+                renderBracketManagement(tournamentId, 'bracket');
             });
         });
 
@@ -2909,8 +2954,14 @@
 
         var isCompleted = match.status === 'completed';
         var isBye = match.score === 'BYE';
-        var p1Winner = isCompleted && match.winner_id === match.player1_id;
-        var p2Winner = isCompleted && match.winner_id === match.player2_id;
+        // Проход без игры подсвечиваем по самой клетке, а не по записи в базе:
+        // соперника нет — значит идёт дальше тот, кто стоит. Иначе у клетки
+        // с непроставленным победителем имя оставалось тёмным, будто человек
+        // проиграл.
+        var проходП1 = !!match.player1_id && !match.player2_id && (isBye || isCompleted);
+        var проходП2 = !!match.player2_id && !match.player1_id && (isBye || isCompleted);
+        var p1Winner = (isCompleted && match.winner_id === match.player1_id) || проходП1;
+        var p2Winner = (isCompleted && match.winner_id === match.player2_id) || проходП2;
         var canEdit = match.player1_id && match.player2_id && !isBye;
 
         var matchClass = 'ad-brk-match';
@@ -2927,8 +2978,11 @@
         }
 
         var p1Class = 'ad-brk-player' + (p1Winner ? ' winner' : (p2Winner ? ' loser' : ''));
+        // Номер сеяного пишем только рядом с человеком. Пустой слот — это
+        // «соперника нет», и подпись «[22] BYE» вводила в заблуждение:
+        // выглядело так, будто двадцать второй сеяный куда-то делся.
         html += '<div class="' + p1Class + '">' +
-            (match.seed1 ? '<span class="ad-brk-seed">[' + match.seed1 + ']</span>' : '') +
+            (match.player1_id && match.seed1 ? '<span class="ad-brk-seed">[' + match.seed1 + ']</span>' : '') +
             '<span class="ad-brk-name">' + p1Name + '</span>' +
             '<span class="ad-brk-sets">';
         setData.p1.forEach(function(s) { html += '<span class="ad-brk-set">' + s + '</span>'; });
@@ -2936,16 +2990,28 @@
 
         var p2Class = 'ad-brk-player' + (p2Winner ? ' winner' : (p1Winner ? ' loser' : ''));
         html += '<div class="' + p2Class + '">' +
-            (match.seed2 ? '<span class="ad-brk-seed">[' + match.seed2 + ']</span>' : '') +
+            (match.player2_id && match.seed2 ? '<span class="ad-brk-seed">[' + match.seed2 + ']</span>' : '') +
             '<span class="ad-brk-name">' + p2Name + '</span>' +
             '<span class="ad-brk-sets">';
         setData.p2.forEach(function(s) { html += '<span class="ad-brk-set">' + s + '</span>'; });
         html += '</span></div>';
         if (setData.outcome) html += '<span class="ad-brk-outcome">' + setData.outcome + '</span>';
 
+        // Полоса действия есть всегда, даже пустая. Иначе блоки получаются
+        // разной высоты — у пары с проходом кнопки нет, — и позиция матчей
+        // в следующем круге накапливает расхождение от круга к кругу.
         if (canEdit) {
             html += '<button class="ad-brk-edit" data-match-edit="' + match.id + '">' +
                 (isCompleted ? (isEn ? 'Edit' : 'Изм.') : (isEn ? 'Score' : 'Счёт')) + '</button>';
+        } else if (!isCompleted && ((match.player1_id && !match.player2_id) ||
+                                    (!match.player1_id && match.player2_id))) {
+            // Проход без игры: соперника нет, вписывать нечего, а человека
+            // надо отправить в следующий круг. Раньше такой матч оставался
+            // без всякой кнопки, и сетка на нём вставала.
+            html += '<button class="ad-brk-edit" data-match-bye="' + match.id + '">' +
+                (isEn ? 'Advance' : 'Провести дальше') + '</button>';
+        } else {
+            html += '<div class="ad-brk-edit ad-brk-edit-empty">&nbsp;</div>';
         }
 
         html += '</div>';
@@ -2969,6 +3035,10 @@
         });
     }
 
+    /** Есть ли в матче хоть один игрок. Пустые не рисуем: сетка строится на
+     *  степень двойки, и при 24 участниках из 32 мест восемь пустуют. */
+    function живой(m) { return !!(m && (m.player1_id || m.player2_id)); }
+
     function renderFicBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap) {
         var drawSize = tournament.draw_size || 16;
         var sections = getFicSections(drawSize, isEn ? 'en' : 'ru');
@@ -2989,12 +3059,29 @@
             return { p1: p1Sets, p2: p2Sets, outcome: ex.outcome };
         }
 
+        // Сколько человек на самом деле в сетке
+        var вСетке = {};
+        matches.forEach(function(m) {
+            if (m.round_number !== 1) return;
+            if (m.player1_id) вСетке[m.player1_id] = 1;
+            if (m.player2_id) вСетке[m.player2_id] = 1;
+        });
+        var участников = Object.keys(вСетке).length || (tournament.draw_size || 0);
+
         sections.forEach(function(section) {
+            // Прячем только те ветки, чьих мест в этом турнире не бывает:
+            // сетка строится на степень двойки, и при 22 участниках из 32
+            // мест десять выдуманные — ветки «25-28» и «29-32» пустуют
+            // всегда. Ветки, где игроков ещё нет, но они там будут,
+            // показываем: иначе половина сетки исчезает на середине турнира.
+            if (section.первоеМесто > участников) return;
+
             html += '<div class="ad-fic-section">';
             html += '<div class="ad-fic-section-title">' + section.label + '</div>';
 
             // Mini SE bracket for this section
-            html += '<div class="ad-brk-scroll"><div class="ad-brk-grid">';
+            html += '<div class="ad-brk-scroll"><div class="ad-brk-grid' +
+                    (drawSize >= 64 ? ' ad-brk-grid--big' : '') + '">';
 
             // Круги у всех блоков общие: полуфинал за 5-8 место стоит под
             // общим полуфиналом, а матчи за места — в одном ряду с финалом.
@@ -3020,10 +3107,13 @@
                 html += '<div class="ad-brk-matches">';
 
                 roundMatches.forEach(function(match) {
+                    // Пустые клетки внутри живой ветки показываем как есть:
+                    // там стоит BYE, и видно, что соперника не будет.
                     html += renderFicMatchCard(match, playersMap, parseSets, isDbl, regsMap);
                 });
 
                 html += '</div></div>';
+
 
                 // Connector column between rounds (not after last)
                 if (ri < section.rounds.length - 1) {
@@ -3046,17 +3136,21 @@
 
             html += '</div></div>'; // /ad-brk-grid /ad-brk-scroll
 
-            // Place match (separate block under section bracket)
+            // Матч за место — под сеткой ветки, в столбце своего круга.
+            // Сдвиг считаем после отрисовки: между кругами стоят узкие
+            // столбцы с линиями, и на глаз их ширину не угадать.
             if (section.placeMatch) {
-                var pm = matches.find(function(m) {
+                var pmЗдесь = matches.find(function(m) {
                     return m.round_number === section.placeMatch.roundNum &&
                            m.match_order === section.placeMatch.matchOrder;
                 });
-                if (pm) {
+                if (pmЗдесь && живой(pmЗдесь)) {
                     html += '<div class="ad-brk-place" data-round="' +
-                            section.placeMatch.roundNum + '" style="margin-top:12px;max-width:220px;">';
-                    html += '<div class="ad-brk-title" style="font-size:0.8rem;margin-bottom:8px;">' + section.placeMatch.label + '</div>';
-                    html += renderFicMatchCard(pm, playersMap, parseSets, isDbl, regsMap);
+                            section.placeMatch.roundNum +
+                            '" style="margin-top:12px;max-width:220px;">';
+                    html += '<div class="ad-brk-title" style="font-size:0.8rem;margin-bottom:8px;">' +
+                            section.placeMatch.label + '</div>';
+                    html += renderFicMatchCard(pmЗдесь, playersMap, parseSets, isDbl, regsMap);
                     html += '</div>';
                 }
             }
@@ -3602,76 +3696,58 @@
     // ---- Generate FIC (Full Individual Consolation) Draw ----
     async function generateFicDraw(tournament, approved, playersMap) {
         var drawSize = tournament.draw_size || 16;
-        var totalRounds = Math.log2(drawSize);
+        var totalRounds = Math.round(Math.log(drawSize) / Math.log(2));
         var halfDraw = drawSize / 2;
+        var D = window.KSLT_DRAW;
 
-        // Determine seed count (same logic as SE)
-        var seedCount = drawSize >= 32 ? 8 : (drawSize >= 16 ? 4 : 2);
-        seedCount = Math.min(seedCount, approved.length);
-
-        var seedPositions = (typeof SEED_POSITIONS !== 'undefined' && SEED_POSITIONS[drawSize])
-            ? SEED_POSITIONS[drawSize]
-            : (drawSize === 8 ? [1, 8, 5, 4] : [1, 16, 9, 8]);
-
-        // Build draw array
-        var draw = new Array(drawSize);
-        for (var i = 0; i < drawSize; i++) draw[i] = null;
-
-        // Place seeded players
-        for (var s = 0; s < seedCount && s < seedPositions.length; s++) {
-            draw[seedPositions[s] - 1] = {
-                player_id: approved[s].player_id,
-                seed: s + 1,
-                reg_id: approved[s].id
-            };
+        if (!D) {
+            A.showToast('Не загружен js/bracket-draw.js', 'error');
+            return;
         }
 
-        // Fisher-Yates shuffle for unseeded
-        var unseeded = approved.slice(seedCount);
-        for (var i = unseeded.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var tmp = unseeded[i];
-            unseeded[i] = unseeded[j];
-            unseeded[j] = tmp;
+        // Зерно жеребьёвки заводим один раз и храним с турниром: пересборка
+        // сетки должна давать ту же расстановку, а не новую.
+        var зерно = tournament.draw_seed;
+        if (!зерно) {
+            зерно = D.новоеЗерно();
+            await A.client.from('tournaments').update({ draw_seed: зерно }).eq('id', tournament.id);
+            tournament.draw_seed = зерно;
         }
 
-        // Fill empty slots
-        var emptySlots = [];
-        for (var i = 0; i < drawSize; i++) {
-            if (draw[i] === null) emptySlots.push(i);
-        }
-        for (var i = 0; i < unseeded.length && i < emptySlots.length; i++) {
-            draw[emptySlots[i]] = {
-                player_id: unseeded[i].player_id,
-                seed: null,
-                reg_id: unseeded[i].id
-            };
-        }
+        // Раскладка по линиям сетки: сеяные на постоянных местах, проходы
+        // без игры верхним сеяным, остальные по свободным линиям тем же
+        // жребием. Считает общий файл, его же проверяет tools/check-draw.js.
+        var участники = approved.map(function(r) {
+            return { player_id: r.player_id, reg_id: r.id };
+        });
+        var линии = D.разложить(drawSize, участники, зерно);
+        var сеяных = Math.min(D.сколькоСеяных(drawSize), участники.length);
 
-        // Generate ALL matches for all rounds
-        // FIC: every round has N/2 matches (everyone plays every round)
+        var посевПоИгроку = {};
+        участники.forEach(function(у, i) {
+            if (i < сеяных) посевПоИгроку[у.player_id] = i + 1;
+        });
+
         var matchesToInsert = [];
 
-        // Round 1: from draw positions
+        // Первый круг: пары по линиям
         for (var i = 0; i < drawSize; i += 2) {
-            var slot1 = draw[i];
-            var slot2 = draw[i + 1];
-            var matchOrder = (i / 2) + 1;
-
+            var slot1 = линии[i];
+            var slot2 = линии[i + 1];
             matchesToInsert.push({
                 tournament_id: tournament.id,
                 player1_id: slot1 ? slot1.player_id : null,
                 player2_id: slot2 ? slot2.player_id : null,
                 round: 'FIC-R1',
                 round_number: 1,
-                match_order: matchOrder,
+                match_order: (i / 2) + 1,
                 status: 'upcoming',
-                seed1: slot1 ? slot1.seed : null,
-                seed2: slot2 ? slot2.seed : null
+                seed1: slot1 ? (посевПоИгроку[slot1.player_id] || null) : null,
+                seed2: slot2 ? (посевПоИгроку[slot2.player_id] || null) : null
             });
         }
 
-        // Rounds 2..totalRounds: N/2 empty matches each
+        // Остальные круги — пустые клетки, их заполнит перевод по матчам
         for (var r = 2; r <= totalRounds; r++) {
             for (var m = 1; m <= halfDraw; m++) {
                 matchesToInsert.push({
@@ -3688,21 +3764,6 @@
             }
         }
 
-        // Handle BYEs in first round
-        for (var i = 0; i < matchesToInsert.length; i++) {
-            var match = matchesToInsert[i];
-            if (match.round_number !== 1) continue;
-
-            if (match.player1_id && !match.player2_id) {
-                match.winner_id = match.player1_id;
-                match.status = 'completed';
-                match.score = 'BYE';
-            } else if (!match.player1_id && match.player2_id) {
-                match.winner_id = match.player2_id;
-                match.status = 'completed';
-                match.score = 'BYE';
-            }
-        }
 
         // Insert matches into DB
         var insertRes = await A.client.from('matches').insert(matchesToInsert);
@@ -3718,27 +3779,37 @@
             .order('round_number').order('match_order');
         var freshMatches = freshRes.data || [];
 
-        // Прошедших без игры двигает та же база: у такого матча сразу стоит
-        // победитель, и триггер срабатывает при его записи
-        var r1Fresh = freshMatches.filter(function(m) { return m.round_number === 1; });
-        for (var i = 0; i < r1Fresh.length; i++) {
-            var m = r1Fresh[i];
-            if (m.winner_id && m.score === 'BYE') {
-                freshRes = await A.client.from('matches')
-                    .select('*')
-                    .eq('tournament_id', tournament.id)
-                    .order('round_number').order('match_order');
-                freshMatches = freshRes.data || [];
-            }
+        // Проходы без игры отмечаем отдельным изменением, а не при вставке:
+        // расстановка в базе срабатывает на изменение матча, и записанный
+        // сразу победитель никуда не двигался.
+        var проходы = freshMatches.filter(function(m) {
+            return m.round_number === 1 && !m.winner_id &&
+                   ((m.player1_id && !m.player2_id) || (!m.player1_id && m.player2_id));
+        });
+        for (var i = 0; i < проходы.length; i++) {
+            await A.client.from('matches').update({
+                winner_id: проходы[i].player1_id || проходы[i].player2_id,
+                score: 'BYE',
+                status: 'completed',
+                played_at: new Date().toISOString()
+            }).eq('id', проходы[i].id);
+        }
+        if (проходы.length) {
+            freshRes = await A.client.from('matches')
+                .select('*')
+                .eq('tournament_id', tournament.id)
+                .order('round_number').order('match_order');
+            freshMatches = freshRes.data || [];
         }
 
-        // Update tournament_registrations with seed_number and draw_position
+        // Посев и линия сетки — в заявку, чтобы их было видно в списке
         for (var i = 0; i < drawSize; i++) {
-            if (draw[i]) {
+            var слот = линии[i];
+            if (слот) {
                 await A.client.from('tournament_registrations').update({
-                    seed_number: draw[i].seed,
+                    seed_number: посевПоИгроку[слот.player_id] || null,
                     draw_position: i + 1
-                }).eq('id', draw[i].reg_id);
+                }).eq('id', слот.reg_id);
             }
         }
 
@@ -6360,15 +6431,6 @@
                 (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
             }
 
-            // Bit-reversal for place determination from final round
-            function bitReverse(num, bits) {
-                var result = 0;
-                for (var i = 0; i < bits; i++) {
-                    result = (result << 1) | (num & 1);
-                    num >>= 1;
-                }
-                return result;
-            }
 
             // Map place → points round_key
             function placeToRoundKey(place) {
@@ -6393,9 +6455,12 @@
             finalRoundMatches.forEach(function(m) {
                 if (m.status !== 'completed' || !m.winner_id) return;
 
-                var idx = m.match_order - 1;
-                var placeGroup = bitReverse(idx, totalRounds - 1);
-                var winnerPlace = placeGroup * 2 + 1;
+                // Место читается прямо по номеру матча последнего круга:
+                // первый разыгрывает места 1-2, второй 3-4, третий 5-6 и так
+                // далее. Раньше здесь стоял переворот битов — он был написан
+                // под прежнюю нумерацию, и места выходили не те: третье
+                // доставалось человеку из нижней ветки, а 7-8 пропадали.
+                var winnerPlace = (m.match_order - 1) * 2 + 1;
                 var loserPlace = winnerPlace + 1;
 
                 var loserId = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;

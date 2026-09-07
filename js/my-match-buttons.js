@@ -106,11 +106,18 @@
             });
         });
 
+        // Гасим чужое, только если своё вообще есть. Иначе в турнире, где
+        // человек не играл, гасла вся сетка — он открывал посмотреть
+        // результаты и видел тёмное поле.
+        var естьСвои = Array.prototype.some.call(
+            document.querySelectorAll('.td-match[data-match-id]'),
+            function (el) { return !!_мои[el.dataset.matchId]; });
+
         document.querySelectorAll('.td-match[data-match-id]').forEach(function (el) {
             var состояние = _мои[el.dataset.matchId];
             if (!состояние) {
                 // Чужие пары приглушаем, чтобы свои читались с одного взгляда
-                if (!el.classList.contains('td-match-dimmed') &&
+                if (естьСвои && !el.classList.contains('td-match-dimmed') &&
                     el.dataset.p1 && el.dataset.p2) {
                     el.classList.add('td-match-dimmed');
                 }

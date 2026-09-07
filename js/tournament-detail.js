@@ -474,6 +474,17 @@ function renderSingleEliminationBracket(tournament, predOpts) {
 function renderMatch(tournament, match, predOpts) {
     var p1 = getPlayer(tournament, match.player1Id);
     var p2 = getPlayer(tournament, match.player2Id);
+
+    // Пустая клетка бывает двух родов: BYE — соперника не будет вовсе,
+    // TBD — он ещё не определился и приедет из прошлого круга.
+    var этоПроход = (match.status === 'completed' || match.score === 'BYE' ||
+                     match.roundNum === 1);
+    if (!match.player1Id && match.player2Id && этоПроход) {
+        p1 = { name: 'BYE', seed: null, country: '' };
+    }
+    if (!match.player2Id && match.player1Id && этоПроход) {
+        p2 = { name: 'BYE', seed: null, country: '' };
+    }
     var rawScores = match.score ? match.score.split(' ') : [];
     var matchOutcome = '';
     if (rawScores.length > 0 && TD_OUTCOMES.indexOf(rawScores[rawScores.length - 1]) !== -1) {
@@ -1723,6 +1734,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 bHtml += '</div>'; // close td-groups-grid
                 bracketContainer.innerHTML = bHtml;
 
+
             } else if (t.bracket_type === 'fic') {
 
             // ---- FIC (Full Individual Consolation) bracket ----
@@ -1757,7 +1769,21 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             };
 
             var bHtml = '';
+            // Сколько человек на самом деле в сетке
+            var вСетке = {};
+            matches.forEach(function(m) {
+                if (m.round_number !== 1) return;
+                if (m.player1_id) вСетке[m.player1_id] = 1;
+                if (m.player2_id) вСетке[m.player2_id] = 1;
+            });
+            var участниковВСетке = Object.keys(вСетке).length || drawSize;
+
             ficSections.forEach(function(section) {
+                // Прячем только ветки, чьих мест в турнире не бывает: сетка
+                // строится на степень двойки, и при 22 участниках из 32 мест
+                // десять выдуманные.
+                if (section.первоеМесто > участниковВСетке) return;
+
                 bHtml += '<div class="td-fic-section">';
                 bHtml += '<div class="td-fic-section-title">' + section.label + '</div>';
                 bHtml += '<div class="td-bracket-scroll"><div class="td-bracket">';
@@ -1791,7 +1817,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     roundMatches.forEach(function(m) {
                         bHtml += renderMatch(ficTournObj, {
                             matchId: m.id, player1Id: m.player1_id, player2Id: m.player2_id,
-                            score: m.score || '', winnerId: m.winner_id, status: m.status || 'upcoming'
+                            score: m.score || '', winnerId: m.winner_id,
+                            status: m.status || 'upcoming', roundNum: m.round_number
                         }, predOpts);
                     });
                     bHtml += '</div></div>';
@@ -1828,7 +1855,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         bHtml += '<div class="td-round-title">' + section.placeMatch.label + '</div>';
                         bHtml += renderMatch(ficTournObj, {
                             matchId: pm.id, player1Id: pm.player1_id, player2Id: pm.player2_id,
-                            score: pm.score || '', winnerId: pm.winner_id, status: pm.status || 'upcoming'
+                            score: pm.score || '', winnerId: pm.winner_id,
+                            status: pm.status || 'upcoming', roundNum: pm.round_number
                         }, predOpts);
                         bHtml += '</div>';
                     }
@@ -1842,7 +1870,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             // Ставим матчи за места под их круг: измеряем, где стоит нужный
             // столбец, и сдвигаем на столько же. Считать в уме нельзя —
             // между кругами есть столбцы с соединительными линиями.
-            выровнятьМатчиЗаМеста(bracketContainer);
+            // Ждём, пока браузер разложит столбцы: они резиновые, и сразу
+            // после отрисовки их ширина ещё не окончательная — сдвиг
+            // считался от старых позиций, и матч за место уезжал влево.
+            requestAnimationFrame(function() {
+                выровнятьМатчиЗаМеста(bracketContainer);
+            });
 
             } else {
 
@@ -2090,9 +2123,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                 var ficPlaces = []; // {place, playerId}
                 ficFinalMatches.forEach(function(m) {
-                    var idx = m.match_order - 1;
-                    var placeGroup = ficBitReverse(idx, totalRounds - 1);
-                    var winnerPlace = placeGroup * 2 + 1;
+                    // Место читается прямо по номеру матча последнего круга:
+                    // первый разыгрывает места 1-2, второй 3-4, третий 5-6.
+                    // Переворот битов был написан под прежнюю нумерацию, и
+                    // третье место доставалось человеку из нижней ветки.
+                    var winnerPlace = (m.match_order - 1) * 2 + 1;
                     var loserPlace = winnerPlace + 1;
                     var loserId = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
 

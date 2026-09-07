@@ -5077,3 +5077,74 @@ select.ad-field-input {
     line-height: 1.45;
     margin-bottom: 6px;
 }
+
+/* Полоса прокрутки под сеткой в админке — тот же вид, что на сайте. */
+.ad-brk-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(204, 255, 0, 0.35) transparent;
+}
+.ad-brk-scroll::-webkit-scrollbar { height: 8px; }
+.ad-brk-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 4px;
+}
+.ad-brk-scroll::-webkit-scrollbar-thumb {
+    background: rgba(204, 255, 0, 0.35);
+    border-radius: 4px;
+}
+.ad-brk-scroll::-webkit-scrollbar-thumb:hover { background: rgba(204, 255, 0, 0.55); }
+
+
+
+/* ---- Одинаковая высота блоков сетки ----
+   Высота была разная: у пары с проходом нет кнопки счёта, у матча с W/O
+   появляется лишняя строка, у матча в три сета третья колонка счёта.
+   Пока высоты разные, любое выравнивание накапливает расхождение от круга
+   к кругу, и соединители упираются мимо блоков.
+
+   Блок теперь всегда одного набора: две строки участников плюс полоса
+   действия, пустая там, где действия нет. */
+.ad-brk-match {
+    min-height: 76px;
+    display: flex;
+    flex-direction: column;
+}
+.ad-brk-match .ad-brk-player {
+    min-height: 27px;
+    box-sizing: border-box;
+}
+.ad-brk-edit,
+.ad-brk-edit-empty {
+    min-height: 22px;
+    box-sizing: border-box;
+}
+/* Пустая полоса: место держит, вид не занимает */
+.ad-brk-edit-empty {
+    background: none;
+    border-top: 1px solid var(--border, rgba(255,255,255,0.06));
+    pointer-events: none;
+}
+/* Исход матча пишем поверх строки счёта, а не отдельной строкой —
+   иначе блок с W/O выше остальных */
+.ad-brk-outcome {
+    position: absolute;
+    right: 8px;
+    bottom: 24px;
+    font-size: 0.62rem;
+}
+.ad-brk-match { position: relative; }
+
+/* Сетка на 64 в админке: то же, что на сайте — закреплённые заголовки
+   кругов и блоки поуже, чтобы влезало по ширине. */
+.ad-brk-round .ad-brk-title {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-card, #111);
+    padding: 6px 0;
+}
+.ad-brk-grid--big .ad-brk-match {
+    width: 176px;
+    font-size: 0.72rem;
+}
+.ad-brk-grid--big .ad-brk-round { min-width: 186px; }

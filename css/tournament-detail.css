@@ -1956,3 +1956,115 @@ tr.td-rr-row-dimmed {
 .td-round-spacer {
     flex-shrink: 0;
 }
+
+/* Полоса прокрутки под сеткой. Своего вида ей не задавали, и браузер рисовал
+   системную — светло-серую поперёк тёмной страницы. Заметно это только на
+   узком экране, когда сетка не помещается по ширине. */
+.td-bracket-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(204, 255, 0, 0.35) transparent;
+}
+.td-bracket-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+.td-bracket-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 4px;
+}
+.td-bracket-scroll::-webkit-scrollbar-thumb {
+    background: rgba(204, 255, 0, 0.35);
+    border-radius: 4px;
+}
+.td-bracket-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(204, 255, 0, 0.55);
+}
+
+
+
+/* ---- Одинаковая высота блоков сетки ----
+   Та же беда, что в админке: блок с W/O был выше, блок без счёта ниже,
+   и позиция матчей следующего круга накапливала расхождение. */
+.td-match {
+    min-height: 62px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+.td-match .td-match-player {
+    min-height: 30px;
+    box-sizing: border-box;
+}
+/* W/O и прочие исходы: стояли поверх блока и налезали на фамилию.
+   Возвращаем в строку счёта — высоту это не меняет, потому что строка
+   там есть всегда. */
+.td-match-outcome {
+    position: static;
+    font-size: 0.62rem;
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+/* ---- Сетка на 64: помещается на экран ----
+   Шесть колонок и тридцать две пары в первом круге по высоте не влезают.
+   Заголовки кругов закрепляем, чтобы при прокрутке было видно, где ты
+   находишься, а саму сетку уменьшаем — иначе её не увидеть целиком. */
+.td-bracket-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+.td-bracket-round .td-round-title {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-primary);
+    padding: 6px 0;
+}
+.td-bracket--big {
+    transform-origin: top left;
+}
+.td-bracket--big .td-match {
+    width: 168px;
+    font-size: 0.72rem;
+}
+.td-bracket--big .td-bracket-round { min-width: 178px; }
+
+/* ---- Сетка помещается на экран ----
+   Прокрутки вдоль не нужно: сетка ужимается по ширине окна. Блоки уже,
+   шрифт мельче, промежутки короче — целиком видно и на ноутбуке. */
+.td-bracket-scroll {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+.td-bracket {
+    min-width: 0;
+    width: 100%;
+}
+.td-bracket-round {
+    min-width: 0;
+    flex: 1 1 0;
+}
+.td-bracket .td-match {
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.72rem;
+}
+.td-bracket .td-player-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.td-connector-column {
+    width: 18px;
+    flex: 0 0 18px;
+}
+
+/* Рамка при нажатии на вкладку была системной, синей — чужой цвет посреди
+   чёрно-лаймовой страницы. Оставляем её только для тех, кто ходит с
+   клавиатуры: им она нужна, чтобы видеть, где находишься. */
+.td-tab:focus { outline: none; }
+.td-tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
