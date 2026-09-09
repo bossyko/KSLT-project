@@ -280,6 +280,83 @@ $$;
 COMMENT ON FUNCTION public.fic_заменить_дальше(text, integer, text, text) IS
     'При смене победителя переставляет игрока во всех матчах позже по сетке: иначе в дальних кругах остаётся прежний.';
 
+CREATE OR REPLACE FUNCTION public.fic_итоги(p_турнир text)
+RETURNS TABLE(круг integer, номер integer, итог integer)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_сетка  integer;
+    v_кругов integer;
+    v_вкруге integer;
+    v_круг   integer;
+    v_ном    integer;
+    v_куда   integer;
+    v_итог   integer[];
+    м        record;
+BEGIN
+    -- Сколько человек окажется в каждой клетке. Один счёт на всю сетку, из
+    -- которого выводится всё: есть ли клетка вообще (итог 0), проход это
+    -- (итог 1) или настоящая пара (итог 2).
+    --
+    -- Считаем от первого круга вперёд. В первом круге — сколько вписано
+    -- жребием. Дальше победитель приедет из любой клетки, где в итоге будет
+    -- хоть один, а проигравший — только из той, где будет двое: у прохода
+    -- без игры проигравшего не бывает.
+    --
+    -- Тот же счёт делает браузер в js/bracket-draw.js. Раньше это считалось
+    -- в трёх местах и по-разному, и правила расходились.
+
+    -- Считаем в памяти, без временных таблиц: функция зовётся сама из себя
+    -- через триггер, а временная таблица одна на сеанс — вторая попытка её
+    -- создать падала с ошибкой.
+
+    SELECT count(*) * 2 INTO v_сетка FROM matches
+     WHERE tournament_id = p_турнир AND round_number = 1;
+    IF v_сетка IS NULL OR v_сетка < 2 THEN RETURN; END IF;
+    v_кругов := log(2, v_сетка::numeric)::int;
+    v_вкруге := v_сетка / 2;
+
+    v_итог := array_fill(0, ARRAY[v_кругов, v_вкруге]);
+
+    FOR м IN SELECT match_order, player1_id, player2_id FROM matches
+              WHERE tournament_id = p_турнир AND round_number = 1
+    LOOP
+        v_итог[1][м.match_order] :=
+            (CASE WHEN м.player1_id IS NOT NULL THEN 1 ELSE 0 END)
+          + (CASE WHEN м.player2_id IS NOT NULL THEN 1 ELSE 0 END);
+    END LOOP;
+
+    FOR v_круг IN 2..v_кругов LOOP
+        FOR v_ном IN 1..v_вкруге LOOP
+            IF v_итог[v_круг - 1][v_ном] >= 1 THEN
+                v_куда := public.fic_адрес(v_сетка, v_круг - 1, v_ном, true);
+                IF v_куда IS NOT NULL THEN
+                    v_итог[v_круг][v_куда] := v_итог[v_круг][v_куда] + 1;
+                END IF;
+            END IF;
+            IF v_итог[v_круг - 1][v_ном] >= 2 THEN
+                v_куда := public.fic_адрес(v_сетка, v_круг - 1, v_ном, false);
+                IF v_куда IS NOT NULL THEN
+                    v_итог[v_круг][v_куда] := v_итог[v_круг][v_куда] + 1;
+                END IF;
+            END IF;
+        END LOOP;
+    END LOOP;
+
+    FOR v_круг IN 1..v_кругов LOOP
+        FOR v_ном IN 1..v_вкруге LOOP
+            круг := v_круг; номер := v_ном; итог := v_итог[v_круг][v_ном];
+            RETURN NEXT;
+        END LOOP;
+    END LOOP;
+END;
+$$;
+
+COMMENT ON FUNCTION public.fic_итоги(text) IS
+    'Сколько человек окажется в каждой клетке: 0 — клетки нет, 1 — проход, 2 — пара. Единственный счёт, по которому решают и закрытие проходов, и пересборка.';
+
 CREATE OR REPLACE FUNCTION public.fic_закрыть_проходы(p_турнир text)
 RETURNS integer
 LANGUAGE plpgsql
@@ -296,25 +373,22 @@ BEGIN
      WHERE tournament_id = p_турнир AND round_number = 1;
     IF v_сетка IS NULL OR v_сетка < 2 THEN RETURN 0; END IF;
 
-    -- Идём кругами: закрытие одного прохода может открыть следующий
+    -- Проход — это клетка, в которой в итоге окажется ровно один человек.
+    -- Больше здесь ничего не решается: счёт берём готовый, из fic_итоги.
+    --
+    -- Идём кругами: закрытие одного прохода может открыть следующий.
     LOOP
+        WITH itg AS (SELECT * FROM public.fic_итоги(p_турнир))
         UPDATE matches t
            SET winner_id = COALESCE(t.player1_id, t.player2_id),
                score = 'BYE', status = 'completed', played_at = now()
+          FROM itg
          WHERE t.tournament_id = p_турнир
            AND t.winner_id IS NULL
            AND (t.player1_id IS NULL) <> (t.player2_id IS NULL)
-           -- Только там, где второму взяться неоткуда: ни один несыгранный
-           -- матч предыдущего круга сюда уже не приведёт
-           AND NOT EXISTS (
-               SELECT 1 FROM matches f
-                WHERE f.tournament_id = p_турнир
-                  AND f.round_number = t.round_number - 1
-                  AND f.winner_id IS NULL
-                  AND (f.player1_id IS NOT NULL OR f.player2_id IS NOT NULL)
-                  AND (public.fic_адрес(v_сетка, f.round_number, f.match_order, true) = t.match_order
-                    OR public.fic_адрес(v_сетка, f.round_number, f.match_order, false) = t.match_order)
-           );
+           AND itg.круг = t.round_number
+           AND itg.номер = t.match_order
+           AND itg.итог = 1;
         GET DIAGNOSTICS n = ROW_COUNT;
         всего := всего + n;
         EXIT WHEN n = 0;

@@ -1620,3 +1620,50 @@ body.news-article-page .section-sponsors-compact {
     font-weight: 700;
     white-space: nowrap;
 }
+
+/* === СНИМКИ В ТЕКСТЕ === */
+/* Несколько снимков подряд собираются в галерею — крупный кадр и лента
+   миниатюр, это делает news.js. Здесь остаётся одиночный снимок: он идёт
+   во всю ширину колонки, как и раньше. */
+.news-html figure:has(> img) img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    display: block;
+}
+
+/* === ЛЕНТА МИНИАТЮР: ЛИСТАНИЕ === */
+/* Когда снимков много, лента шире экрана. Стрелки по краям листают её; если
+   всё помещается, они прячутся и не мешают. */
+.news-thumbs-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.news-thumbs-row .news-carousel-thumbs {
+    flex: 1 1 auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+.news-thumbs-row .news-carousel-thumbs::-webkit-scrollbar { display: none; }
+
+.news-thumbs-nav {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    line-height: 1;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+.news-thumbs-nav:hover:not(:disabled) { background: rgba(0, 0, 0, 0.8); }
+.news-thumbs-nav:disabled { opacity: 0.3; cursor: default; }
+
+.news-thumbs-row.news-thumbs-fits .news-thumbs-nav { display: none; }

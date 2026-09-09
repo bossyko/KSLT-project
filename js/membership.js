@@ -52,6 +52,33 @@
      * Staff (admin/manager) bypass — always returns active.
      * @returns {Promise<CheckMembershipResult>}
      */
+    // ---- Бесплатный период ----
+    //
+    // До назначенной даты платформа открыта всем, кто вошёл: членство не
+    // спрашиваем. Дата лежит в базе, в app_settings, и меняется в админке —
+    // так она действует и на сайте, и в установленном приложении, без новой
+    // сборки. Пусто — обычный порядок, доступ по членству.
+    var _бесплатноДо;      // undefined — ещё не спрашивали, null — не задано
+
+    window.бесплатныйДоступДо = async function() {
+        if (_бесплатноДо !== undefined) return _бесплатноДо;
+        _бесплатноДо = null;
+        try {
+            var r = await window.supabaseClient
+                .from('app_settings').select('value').eq('key', 'free_access_until').maybeSingle();
+            if (r.data && r.data.value) _бесплатноДо = String(r.data.value).replace(/"/g, '');
+        } catch (e) { /* нет настройки — работаем по членству */ }
+        return _бесплатноДо;
+    };
+
+    /** Идёт ли сейчас бесплатный период. */
+    window.бесплатныйПериод = async function() {
+        var до = await window.бесплатныйДоступДо();
+        if (!до) return false;
+        var сегодня = new Date().toISOString().split('T')[0];
+        return сегодня <= до;
+    };
+
     window.checkMembership = async function() {
         var client = window.supabaseClient;
         if (!client) {
@@ -89,6 +116,15 @@
         }
         if (role === 'admin' || role === 'manager') {
             return { active: true, paid: true, membership: { staff_bypass: true }, daysLeft: 999 };
+        }
+
+        // Бесплатный период: вошёл — значит доступ есть
+        if (await window.бесплатныйПериод()) {
+            var до = await window.бесплатныйДоступДо();
+            var осталось = Math.max(0, Math.ceil(
+                (new Date(до).getTime() - Date.now()) / 86400000));
+            return { active: true, paid: false, daysLeft: осталось,
+                     membership: { free_period: true, until: до } };
         }
 
         var today = new Date().toISOString().split('T')[0];

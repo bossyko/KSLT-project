@@ -409,7 +409,12 @@ function выровнятьМатчиЗаМеста(корень) {
         блок.querySelectorAll('.td-place-match').forEach(function(матч) {
             var круг = parseInt(матч.getAttribute('data-round'), 10);
             var цель = столбцы[круг - 1];
-            if (цель) матч.style.marginLeft = (цель.offsetLeft - сетка.offsetLeft) + 'px';
+            if (!цель) return;
+            // Дальше правого края не уводим: иначе на большой сетке карточка
+            // уезжает за экран.
+            var сдвиг = цель.offsetLeft - сетка.offsetLeft;
+            var предел = Math.max(0, блок.clientWidth - матч.offsetWidth - 8);
+            матч.style.marginLeft = Math.min(сдвиг, предел) + 'px';
         });
     });
 }
@@ -471,14 +476,35 @@ function renderSingleEliminationBracket(tournament, predOpts) {
     container.innerHTML = html;
 }
 
+var tdИтоги = {};
+
+/** Есть ли в блоке хоть один человек. */
+function ficВБлокеЕстьЛюди(section, matches) {
+    var клетки = section.rounds.map(function(rd) {
+        return [rd.roundNum, rd.matchStart, rd.matchEnd];
+    });
+    if (section.placeMatch) {
+        клетки.push([section.placeMatch.roundNum,
+                     section.placeMatch.matchOrder, section.placeMatch.matchOrder]);
+    }
+    return matches.some(function(m) {
+        if (!m.player1_id && !m.player2_id) return false;
+        return клетки.some(function(к) {
+            return m.round_number === к[0] && m.match_order >= к[1] && m.match_order <= к[2];
+        });
+    });
+}
+
 function renderMatch(tournament, match, predOpts) {
     var p1 = getPlayer(tournament, match.player1Id);
     var p2 = getPlayer(tournament, match.player2Id);
 
     // Пустая клетка бывает двух родов: BYE — соперника не будет вовсе,
-    // TBD — он ещё не определился и приедет из прошлого круга.
-    var этоПроход = (match.status === 'completed' || match.score === 'BYE' ||
-                     match.roundNum === 1);
+    // TBD — он ещё не определился и приедет из прошлого круга. Решает общий
+    // счёт: проход там, где в клетке в итоге окажется ровно один человек.
+    var этоПроход = tdИтоги[match.roundNum + ':' + match.matchOrder] === 1;
+    // «BYE» пишем только напротив человека: в пустой клетке писать нечего.
+    этоПроход = этоПроход && !!(match.player1Id || match.player2Id);
     if (!match.player1Id && match.player2Id && этоПроход) {
         p1 = { name: 'BYE', seed: null, country: '' };
     }
@@ -1741,6 +1767,19 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var drawSize = t.draw_size || 16;
             var ficSections = getFicSectionsPublic(drawSize, isEn);
 
+            // Сколько человек окажется в каждой клетке — общий счёт из
+            // bracket-draw.js, тот же, по которому решает база. Из него
+            // видно, где настоящий проход, а где ещё ждут соперника.
+            tdИтоги = (window.KSLT_DRAW && window.KSLT_DRAW.итоги)
+                ? window.KSLT_DRAW.итоги(drawSize, matches.map(function(m) {
+                    return {
+                        круг: m.round_number,
+                        номер: m.match_order,
+                        людей: (m.player1_id ? 1 : 0) + (m.player2_id ? 1 : 0)
+                    };
+                }))
+                : {};
+
             // Build players array
             var ficPlayersArr = [];
             Object.keys(playersMap).forEach(function(pid) {
@@ -1783,6 +1822,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 // строится на степень двойки, и при 22 участниках из 32 мест
                 // десять выдуманные.
                 if (section.первоеМесто > участниковВСетке) return;
+                // И пока в блоке никого нет — тоже не рисуем: блоки
+                // появляются по мере игры.
+                if (!ficВБлокеЕстьЛюди(section, matches)) return;
 
                 bHtml += '<div class="td-fic-section">';
                 bHtml += '<div class="td-fic-section-title">' + section.label + '</div>';
@@ -1796,7 +1838,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var первыйКруг = section.rounds[0].roundNum;
                 for (var пусто = 1; пусто < первыйКруг; пусто++) {
                     bHtml += '<div class="td-bracket-round td-round-spacer">' +
-                             '<div class="td-round-title">&nbsp;</div>' +
+                             '<div class="td-round-title" style="visibility:hidden;">&nbsp;</div>' +
                              '<div class="td-bracket-matches"></div></div>';
                     // И столбец под соединительные линии: в основной сетке
                     // он есть между кругами, и без него блоки за места
@@ -1818,7 +1860,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         bHtml += renderMatch(ficTournObj, {
                             matchId: m.id, player1Id: m.player1_id, player2Id: m.player2_id,
                             score: m.score || '', winnerId: m.winner_id,
-                            status: m.status || 'upcoming', roundNum: m.round_number
+                            status: m.status || 'upcoming', roundNum: m.round_number,
+                            matchOrder: m.match_order
                         }, predOpts);
                     });
                     bHtml += '</div></div>';
@@ -1856,7 +1899,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         bHtml += renderMatch(ficTournObj, {
                             matchId: pm.id, player1Id: pm.player1_id, player2Id: pm.player2_id,
                             score: pm.score || '', winnerId: pm.winner_id,
-                            status: pm.status || 'upcoming', roundNum: pm.round_number
+                            status: pm.status || 'upcoming', roundNum: pm.round_number,
+                            matchOrder: pm.match_order
                         }, predOpts);
                         bHtml += '</div>';
                     }

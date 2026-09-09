@@ -50,8 +50,15 @@ BEGIN
     END IF;
     v_кругов := log(2, v_сетка::numeric)::int;
 
+    -- Сколько человек окажется в каждой клетке. Считаем один раз и до
+    -- чистки: счёт зависит только от первого круга, который мы не трогаем.
+    DROP TABLE IF EXISTS _itog;
+    CREATE TEMP TABLE _itog ON COMMIT DROP AS
+        SELECT * FROM public.fic_итоги(p_турнир);
+
     -- Запоминаем, что было: пару, счёт и победителя каждой клетки
-    CREATE TEMP TABLE было ON COMMIT DROP AS
+    DROP TABLE IF EXISTS bylo;
+    CREATE TEMP TABLE bylo ON COMMIT DROP AS
     SELECT round_number, match_order, player1_id, player2_id,
            winner_id, score, status, played_at
       FROM matches
@@ -100,48 +107,46 @@ BEGIN
             END IF;
         END LOOP;
 
-        -- Круг заполнен — возвращаем счета тем клеткам, где стоят те же двое
+        -- Круг заполнен — возвращаем счета тем клеткам, где стоят те же двое.
+        -- Отметку «проход» не возвращаем: это не результат матча, а вывод из
+        -- счёта клеток, и ставится он ниже сам. Пока мы её восстанавливали,
+        -- клетка, ошибочно закрытая проходом, воскресала при каждой
+        -- пересборке — там же те самые двое.
         UPDATE matches m
-           SET winner_id = б.winner_id, score = б.score,
-               status = б.status, played_at = б.played_at
-          FROM было б
+           SET winner_id = b.winner_id, score = b.score,
+               status = b.status, played_at = b.played_at
+          FROM bylo b
          WHERE m.tournament_id = p_турнир
            AND m.round_number = v_круг + 1
-           AND б.round_number = m.round_number
-           AND б.match_order  = m.match_order
-           AND б.winner_id IS NOT NULL
-           AND ((б.player1_id = m.player1_id AND б.player2_id = m.player2_id)
-             OR (б.player1_id = m.player2_id AND б.player2_id = m.player1_id));
+           AND b.round_number = m.round_number
+           AND b.match_order  = m.match_order
+           AND b.winner_id IS NOT NULL
+           AND b.score IS DISTINCT FROM 'BYE'
+           AND ((b.player1_id = m.player1_id AND b.player2_id = m.player2_id)
+             OR (b.player1_id = m.player2_id AND b.player2_id = m.player1_id));
 
-        -- Проход без игры ставим только там, где соперника не будет вовсе:
-        -- то есть ни один несыгранный матч этого круга сюда уже не приведёт.
-        -- Иначе клетка, ждущая второго участника, получала отметку BYE и
-        -- кнопку счёта у неё отбирало.
+        -- Проход — клетка, в которой в итоге окажется ровно один человек.
+        -- Счёт берём готовый, из fic_итоги: своей проверки здесь нет.
         UPDATE matches t
            SET winner_id = COALESCE(t.player1_id, t.player2_id),
                score = 'BYE', status = 'completed', played_at = now()
          WHERE t.tournament_id = p_турнир AND t.round_number = v_круг + 1
            AND t.winner_id IS NULL
            AND (t.player1_id IS NULL) <> (t.player2_id IS NULL)
-           AND NOT EXISTS (
-               SELECT 1 FROM matches f
-                WHERE f.tournament_id = p_турнир
-                  AND f.round_number = v_круг
-                  AND f.winner_id IS NULL
-                  AND (f.player1_id IS NOT NULL OR f.player2_id IS NOT NULL)
-                  AND (public.fic_адрес(v_сетка, v_круг, f.match_order, true) = t.match_order
-                    OR public.fic_адрес(v_сетка, v_круг, f.match_order, false) = t.match_order)
-           );
+           AND EXISTS (SELECT 1 FROM _itog itg
+                        WHERE itg.круг = t.round_number
+                          AND itg.номер = t.match_order
+                          AND itg.итог = 1);
     END LOOP;
 
     SELECT count(*) INTO v_сохранено FROM matches
      WHERE tournament_id = p_турнир AND round_number > 1 AND winner_id IS NOT NULL;
-    SELECT count(*) INTO v_снято FROM было б
-     WHERE б.winner_id IS NOT NULL
+    SELECT count(*) INTO v_снято FROM bylo b
+     WHERE b.winner_id IS NOT NULL
        AND NOT EXISTS (SELECT 1 FROM matches m
                         WHERE m.tournament_id = p_турнир
-                          AND m.round_number = б.round_number
-                          AND m.match_order = б.match_order
+                          AND m.round_number = b.round_number
+                          AND m.match_order = b.match_order
                           AND m.winner_id IS NOT NULL);
 
     RETURN jsonb_build_object('ok', true, 'сетка', v_сетка, 'кругов', v_кругов,

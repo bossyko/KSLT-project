@@ -57,7 +57,17 @@
 
       // 3. Check active membership (admin/manager bypass)
       const isAdmin = senderProfile.role === 'admin' || senderProfile.role === 'manager'
-      if (!isAdmin) {
+      // Бесплатный период: членство не спрашиваем, пока дата не прошла
+      const { data: настройка } = await db
+        .from('app_settings')
+        .select('value')
+        .eq('key', 'free_access_until')
+        .maybeSingle()
+      const доступДо = настройка?.value ? String(настройка.value).replace(/"/g, '') : ''
+      const бесплатныйПериод = !!доступДо &&
+        new Date().toISOString().slice(0, 10) <= доступДо
+
+      if (!isAdmin && !бесплатныйПериод) {
         // Срок членства лежит в expires_at. Поля end_date в таблице нет
         // вовсе: запрос по нему молча возвращал пусто, и приглашение не мог
         // отправить никто — даже с оплаченным членством

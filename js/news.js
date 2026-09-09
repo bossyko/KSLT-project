@@ -42,10 +42,10 @@ function mapDbArticle(row) {
     var excerpt = isEn ? (row.excerpt_en || row.excerpt) : (isKg ? (row.excerpt_kg || row.excerpt) : row.excerpt);
 
     var catLabels = isEn
-        ? { results: 'Report', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' }
+        ? { results: 'Results', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' }
         : (isKg
-            ? { results: 'Репортаж', interview: 'Интервью', announcement: 'Жарыялоо', world: 'Дүйнөлүк теннис' }
-            : { results: 'Репортаж', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' });
+            ? { results: 'Жыйынтыктар', interview: 'Интервью', announcement: 'Жарыялоо', world: 'Дүйнөлүк теннис' }
+            : { results: 'Результаты', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' });
 
     var dateStr = '';
     if (row.published_at) {
@@ -345,7 +345,12 @@ function initScrollAnimations() {
                 observer.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    // Порог по доле блока не годится: тело статьи — один большой кусок
+    // разметки высотой в десять экранов, и десятая часть его в окно не
+    // помещается никогда. Такой блок так и оставался прозрачным, а вместе с
+    // ним пропадал весь текст новости с фотографиями. Считаем показанным,
+    // как только он краем попал в окно.
+    }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
 
     elements.forEach(function(el) { observer.observe(el); });
 }
@@ -490,13 +495,69 @@ function renderContent(article) {
     }
 
     container.innerHTML = html;
+    собратьСнимкиВГалерею(container);
     initCarousel(container, article.gallery || []);
     initPhotoViewer(container, article.gallery || []);
 }
 
 /** Лента снимков: стрелки, миниатюры, счётчик. Крупный кадр открывает просмотр. */
+/**
+ * Снимки, идущие в тексте подряд, показываем галереей: крупный кадр и лента
+ * миниатюр под ним. Раньше они шли лентой в столбик на всю ширину, и читатель
+ * прокручивал десяток фотографий вместо того, чтобы читать.
+ *
+ * Одиночный снимок остаётся снимком: галерея из одного кадра ни к чему.
+ */
+function собратьСнимкиВГалерею(root) {
+    root.querySelectorAll('.news-html').forEach(function(тело) {
+        var дети = Array.prototype.slice.call(тело.children);
+        var набор = [];
+
+        function закрыть() {
+            if (набор.length < 2) { набор = []; return; }
+            var адреса = набор.map(function(f) { return f.querySelector('img').src; });
+            var блок = document.createElement('div');
+            блок.className = 'news-carousel';
+            блок.dataset.photos = JSON.stringify(адреса);
+            блок.innerHTML =
+                '<div class="news-carousel-stage">' +
+                    '<button class="news-carousel-nav news-carousel-prev" aria-label="Предыдущее">&#8249;</button>' +
+                    '<img class="news-carousel-main" src="' + esc(адреса[0]) + '" alt="" data-index="0">' +
+                    '<button class="news-carousel-nav news-carousel-next" aria-label="Следующее">&#8250;</button>' +
+                    '<div class="news-carousel-count">1 / ' + адреса.length + '</div>' +
+                '</div>' +
+                '<div class="news-carousel-thumbs">' +
+                    адреса.map(function(url, i) {
+                        return '<button class="news-carousel-thumb' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">' +
+                            '<img src="' + esc(url) + '" alt="" loading="lazy">' +
+                        '</button>';
+                    }).join('') +
+                '</div>';
+            набор[0].parentNode.insertBefore(блок, набор[0]);
+            набор.forEach(function(f) { f.remove(); });
+            набор = [];
+        }
+
+        дети.forEach(function(эл) {
+            var этоСнимок = эл.tagName === 'FIGURE' && эл.querySelector('img') &&
+                            !эл.textContent.trim();
+            if (этоСнимок) { набор.push(эл); return; }
+            закрыть();
+        });
+        закрыть();
+    });
+}
+
 function initCarousel(root, photos) {
-    var wrap = root.querySelector('.news-carousel');
+    // Каруселей на странице может быть несколько: галерея новости и наборы
+    // снимков внутри текста. Заводим каждую по её собственным адресам.
+    Array.prototype.forEach.call(root.querySelectorAll('.news-carousel'), function(wrap) {
+        var свои = wrap.dataset.photos ? JSON.parse(wrap.dataset.photos) : photos;
+        завестиКарусель(wrap, свои || []);
+    });
+}
+
+function завестиКарусель(wrap, photos) {
     if (!wrap || photos.length < 2) return;
 
     var main = wrap.querySelector('.news-carousel-main');
@@ -519,6 +580,52 @@ function initCarousel(root, photos) {
     thumbs.forEach(function(t) {
         t.addEventListener('click', function() { show(Number(t.dataset.index)); });
     });
+
+    листалкаМиниатюр(wrap);
+}
+
+/**
+ * Стрелки у ленты миниатюр. Когда снимков много, лента не помещается, и
+ * пролистать её пальцем на настольном браузере нечем — крутить колесо вбок
+ * умеют не все. Стрелки появляются, только если лента шире окна.
+ */
+function листалкаМиниатюр(wrap) {
+    var лента = wrap.querySelector('.news-carousel-thumbs');
+    if (!лента || лента.parentNode.classList.contains('news-thumbs-row')) return;
+
+    var ряд = document.createElement('div');
+    ряд.className = 'news-thumbs-row';
+    лента.parentNode.insertBefore(ряд, лента);
+
+    var назад = document.createElement('button');
+    назад.className = 'news-thumbs-nav news-thumbs-back';
+    назад.type = 'button';
+    назад.innerHTML = '&#8249;';
+
+    var вперёд = document.createElement('button');
+    вперёд.className = 'news-thumbs-nav news-thumbs-fwd';
+    вперёд.type = 'button';
+    вперёд.innerHTML = '&#8250;';
+
+    ряд.appendChild(назад);
+    ряд.appendChild(лента);
+    ряд.appendChild(вперёд);
+
+    function шаг(сторона) {
+        лента.scrollBy({ left: сторона * Math.round(лента.clientWidth * 0.8), behavior: 'smooth' });
+    }
+    назад.addEventListener('click', function() { шаг(-1); });
+    вперёд.addEventListener('click', function() { шаг(1); });
+
+    function обновить() {
+        var влезает = лента.scrollWidth <= лента.clientWidth + 1;
+        ряд.classList.toggle('news-thumbs-fits', влезает);
+        назад.disabled = лента.scrollLeft <= 0;
+        вперёд.disabled = лента.scrollLeft + лента.clientWidth >= лента.scrollWidth - 1;
+    }
+    лента.addEventListener('scroll', обновить);
+    window.addEventListener('resize', обновить);
+    setTimeout(обновить, 0);
 }
 
 /**
@@ -542,10 +649,14 @@ function initPhotoViewer(root, gallery) {
 
     root.addEventListener('click', function(e) {
         var main = e.target.closest('.news-carousel-main');
-        if (main && gallery && gallery.length) {
-            e.preventDefault();
-            openPhotoViewer(gallery, Number(main.dataset.index) || 0);
-            return;
+        if (main) {
+            var wrap = main.closest('.news-carousel');
+            var свои = (wrap && wrap.dataset.photos) ? JSON.parse(wrap.dataset.photos) : gallery;
+            if (свои && свои.length) {
+                e.preventDefault();
+                openPhotoViewer(свои, Number(main.dataset.index) || 0);
+                return;
+            }
         }
 
         var el = e.target.closest(IN_TEXT);
@@ -606,7 +717,10 @@ function renderBlock(block, index) {
 
     switch (block.type) {
         case 'html':
-            return '<div class="news-html news-animate" style="' + style + '">' + block.html + '</div>';
+            // Тело статьи не прячем до прокрутки: это один блок высотой в
+            // десять экранов, и появление по прокрутке для него не
+            // срабатывало — текст с фотографиями просто оставался невидимым.
+            return '<div class="news-html">' + block.html + '</div>';
 
         case 'paragraph':
             return '<p class="news-paragraph news-animate" style="' + style + '">' + block.text + '</p>';
@@ -1133,10 +1247,10 @@ function renderNewsList() {
 
     // Ensure all known categories are shown in filter chips (even if no articles yet)
     var catLabelsAll = isEnPage()
-        ? { results: 'Report', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' }
+        ? { results: 'Results', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' }
         : (isKgPage()
-            ? { results: 'Репортаж', interview: 'Интервью', announcement: 'Жарыялоо', world: 'Дүйнөлүк теннис' }
-            : { results: 'Репортаж', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' });
+            ? { results: 'Жыйынтыктар', interview: 'Интервью', announcement: 'Жарыялоо', world: 'Дүйнөлүк теннис' }
+            : { results: 'Результаты', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' });
     var existingKeys = categories.map(function(c) { return c.key; });
     knownCats.forEach(function(k) {
         if (existingKeys.indexOf(k) === -1) {

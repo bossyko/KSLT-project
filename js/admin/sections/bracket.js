@@ -1344,6 +1344,53 @@
             });
         });
 
+        // Снятие результата: матч возвращается в «не сыгран»
+        container.querySelectorAll('[data-match-clear]').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var matchId = btn.dataset.matchClear;
+                var зависимые = await затронутыеМатчи(matchId);
+                if (зависимые === null) return;
+                var согласен = await спроситьПравку(зависимые,
+                    isEn ? 'Clearing the result' : 'Снятие результата');
+                if (!согласен) return;
+                btn.disabled = true;
+                var пр = await A.client.rpc('fic_правка', {
+                    p_матч: matchId, p_победитель: null, p_счёт: null
+                });
+                if (пр.error) {
+                    btn.disabled = false;
+                    A.showToast(пр.error.message, 'error');
+                    return;
+                }
+                предложитьОткат(tournamentId, (пр.data && пр.data.затронуто) || 0);
+            });
+        });
+
+        // Отмена прохода: клетку открываем заново и пересобираем сетку по
+        // настоящим счетам — иначе тот, кого уже провели дальше, останется
+        // стоять в следующем круге.
+        container.querySelectorAll('[data-match-unbye]').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var matchId = btn.dataset.matchUnbye;
+                btn.disabled = true;
+                var r = await A.client.from('matches').update({
+                    winner_id: null, score: null, status: 'upcoming', played_at: null
+                }).eq('id', matchId);
+                if (r.error) {
+                    btn.disabled = false;
+                    A.showToast(r.error.message, 'error');
+                    return;
+                }
+                var п = await A.client.rpc('fic_пересобрать', { p_турнир: tournamentId });
+                if (п.error) {
+                    A.showToast(п.error.message, 'error');
+                    return;
+                }
+                A.showToast(isEn ? 'Undone' : 'Проход отменён', 'success');
+                renderBracketManagement(tournamentId, 'bracket');
+            });
+        });
+
         // Manual group place selects
         container.querySelectorAll('.ad-grp-place-select').forEach(function(sel) {
             sel.addEventListener('change', async function() {
@@ -1440,7 +1487,19 @@
         if (finBtn) {
             finBtn.addEventListener('click', function() {
                 A.showConfirm(L.finalizeConfirm, '', async function() {
-                    await finalizeTournament(tournament, matches, playersMap);
+                    // Подсчёт очков идёт несколько секунд, и всё это время
+                    // кнопка оставалась живой: второе нажатие запускало счёт
+                    // заново поверх первого.
+                    finBtn.disabled = true;
+                    finBtn.textContent = isEn ? 'Counting points…' : 'Считаю очки…';
+                    try {
+                        await finalizeTournament(tournament, matches, playersMap);
+                    } catch (e) {
+                        finBtn.disabled = false;
+                        finBtn.textContent = L.finalizeTournament;
+                        A.showToast(e && e.message ? e.message : String(e), 'error');
+                        return;
+                    }
                     renderBracketManagement(tournamentId);
                 }, L.finalizeTournament);
             });
@@ -2954,6 +3013,13 @@
 
         var isCompleted = match.status === 'completed';
         var isBye = match.score === 'BYE';
+        // «BYE» пишем там, где соперника не будет вовсе: в клетке окажется
+        // ровно один человек. Пока ждём второго — слот пустой, иначе
+        // выходило, будто половина сетки прошла без игры.
+        var ждём = ждётСоперника(match);
+        var этоПроход = итогКлетки(match) === 1;
+        if (!match.player1_id) p1Name = (этоПроход && match.player2_id) ? 'BYE' : '';
+        if (!match.player2_id) p2Name = (этоПроход && match.player1_id) ? 'BYE' : '';
         // Проход без игры подсвечиваем по самой клетке, а не по записи в базе:
         // соперника нет — значит идёт дальше тот, кто стоит. Иначе у клетки
         // с непроставленным победителем имя оставалось тёмным, будто человек
@@ -2962,7 +3028,9 @@
         var проходП2 = !!match.player2_id && !match.player1_id && (isBye || isCompleted);
         var p1Winner = (isCompleted && match.winner_id === match.player1_id) || проходП1;
         var p2Winner = (isCompleted && match.winner_id === match.player2_id) || проходП2;
-        var canEdit = match.player1_id && match.player2_id && !isBye;
+        // Счёт правим у любой пары, даже если клетку по ошибке закрыли
+        // проходом: иначе такую ошибку из админки не исправить.
+        var canEdit = match.player1_id && match.player2_id;
 
         var matchClass = 'ad-brk-match';
         if (isCompleted) matchClass += ' completed';
@@ -3001,15 +3069,27 @@
         // разной высоты — у пары с проходом кнопки нет, — и позиция матчей
         // в следующем круге накапливает расхождение от круга к кругу.
         if (canEdit) {
+            // Обе кнопки — в одну полосу. Второй строкой карточка становится
+            // выше соседних, а вся раскладка держится на одинаковой высоте:
+            // соединительные линии считаются от середины блока.
+            var снятие = isCompleted && !isBye;
+            if (снятие) html += '<div class="ad-brk-actions">';
             html += '<button class="ad-brk-edit" data-match-edit="' + match.id + '">' +
                 (isCompleted ? (isEn ? 'Edit' : 'Изм.') : (isEn ? 'Score' : 'Счёт')) + '</button>';
-        } else if (!isCompleted && ((match.player1_id && !match.player2_id) ||
-                                    (!match.player1_id && match.player2_id))) {
-            // Проход без игры: соперника нет, вписывать нечего, а человека
-            // надо отправить в следующий круг. Раньше такой матч оставался
-            // без всякой кнопки, и сетка на нём вставала.
-            html += '<button class="ad-brk-edit" data-match-bye="' + match.id + '">' +
-                (isEn ? 'Advance' : 'Провести дальше') + '</button>';
+            if (снятие) {
+                html += '<button class="ad-brk-edit ad-brk-clear" data-match-clear="' +
+                    match.id + '">' + (isEn ? 'Clear' : 'Снять') + '</button>';
+                html += '</div>';
+            }
+        } else if (этоПроход) {
+            // Настоящий проход: соперника не будет вовсе, человек идёт дальше
+            // сам. Кнопок здесь нет — ни провести, ни отменить: отменять
+            // нечего, клетка тут же закроется снова.
+            html += '<div class="ad-brk-edit ad-brk-edit-empty">&nbsp;</div>';
+        } else if (isCompleted && isBye && (match.player1_id || match.player2_id)) {
+            // Проход поставлен руками — его можно снять.
+            html += '<button class="ad-brk-edit" data-match-unbye="' + match.id + '">' +
+                (isEn ? 'Undo' : 'Отменить проход') + '</button>';
         } else {
             html += '<div class="ad-brk-edit ad-brk-edit-empty">&nbsp;</div>';
         }
@@ -3030,7 +3110,12 @@
             });
             блок.querySelectorAll('.ad-brk-place').forEach(function(матч) {
                 var цель = столбцы[parseInt(матч.getAttribute('data-round'), 10) - 1];
-                if (цель) матч.style.marginLeft = (цель.offsetLeft - сетка.offsetLeft) + 'px';
+                if (!цель) return;
+                // Дальше правого края не уводим: в сетке на 64 столбец финала
+                // стоит так далеко, что карточка уезжала за экран и обрезалась.
+                var сдвиг = цель.offsetLeft - сетка.offsetLeft;
+                var предел = Math.max(0, блок.clientWidth - матч.offsetWidth - 8);
+                матч.style.marginLeft = Math.min(сдвиг, предел) + 'px';
             });
         });
     }
@@ -3039,8 +3124,114 @@
      *  степень двойки, и при 24 участниках из 32 мест восемь пустуют. */
     function живой(m) { return !!(m && (m.player1_id || m.player2_id)); }
 
+    // Сколько человек окажется в каждой клетке. Считает общий файл
+    // bracket-draw.js — тот же счёт, что и в базе. Здесь только храним
+    // ответ на время отрисовки.
+    var итоги = {};
+
+    function собратьИтоги(matches, drawSize) {
+        итоги = {};
+        var D = window.KSLT_DRAW;
+        if (!D || !D.итоги) return;
+        итоги = D.итоги(drawSize, matches.map(function(m) {
+            return {
+                круг: m.round_number,
+                номер: m.match_order,
+                людей: (m.player1_id ? 1 : 0) + (m.player2_id ? 1 : 0)
+            };
+        }));
+    }
+
+    /** Сколько человек в клетке окажется в итоге. */
+    function итогКлетки(m) {
+        var и = итоги[m.round_number + ':' + m.match_order];
+        return и === undefined ? 2 : и;
+    }
+
+    /** Ждём ли ещё людей в эту клетку. */
+    function ждётСоперника(m) {
+        var стоит = (m.player1_id ? 1 : 0) + (m.player2_id ? 1 : 0);
+        return итогКлетки(m) > стоит;
+    }
+
+    /** Есть ли в блоке хоть один человек: пустые блоки не показываем, они
+     *  появятся сами, когда туда приедет первый проигравший. */
+    function вБлокеЕстьЛюди(section, matches) {
+        var клетки = [];
+        section.rounds.forEach(function(rd) {
+            клетки.push([rd.roundNum, rd.matchStart, rd.matchEnd]);
+        });
+        if (section.placeMatch) {
+            клетки.push([section.placeMatch.roundNum,
+                         section.placeMatch.matchOrder, section.placeMatch.matchOrder]);
+        }
+        return matches.some(function(m) {
+            if (!m.player1_id && !m.player2_id) return false;
+            return клетки.some(function(к) {
+                return m.round_number === к[0] && m.match_order >= к[1] && m.match_order <= к[2];
+            });
+        });
+    }
+
+    // Кого уже провели, но он не доехал: победитель проставлен, а в клетке
+    // следующего круга его нет.
+    var _подтолкнули = {};
+
+    function отставшиеОтСетки(matches, drawSize) {
+        var D = window.KSLT_DRAW;
+        if (!D || !D.адрес) return [];
+        var по = {};
+        matches.forEach(function(m) { по[m.round_number + ':' + m.match_order] = m; });
+        var кругов = Math.round(Math.log(drawSize) / Math.log(2));
+        var список = [];
+        matches.forEach(function(m) {
+            if (!m.winner_id || m.round_number >= кругов) return;
+            var куда = D.адрес(drawSize, m.round_number, m.match_order, true);
+            if (!куда) return;
+            var цель = по[(m.round_number + 1) + ':' + куда];
+            if (!цель) return;
+            if (цель.player1_id !== m.winner_id && цель.player2_id !== m.winner_id) {
+                список.push(m.id);
+            }
+        });
+        return список;
+    }
+
+    /** Есть ли клетки, где человек стоит один и соперника не будет: их
+     *  закрываем сами, без кнопок. */
+    function естьНезакрытыеПроходы(matches) {
+        return matches.some(function(m) {
+            if (m.winner_id) return false;
+            var стоит = (m.player1_id ? 1 : 0) + (m.player2_id ? 1 : 0);
+            return стоит === 1 && итогКлетки(m) === 1;
+        });
+    }
+
     function renderFicBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap) {
         var drawSize = tournament.draw_size || 16;
+        собратьИтоги(matches, drawSize);
+
+        // Проход без игры проводим сами: человеку нечего решать, соперника
+        // не будет. Закрываем в базе и перерисовываем.
+        if (естьНезакрытыеПроходы(matches)) {
+            A.client.rpc('fic_закрыть_проходы', { p_турнир: tournament.id })
+                .then(function(r) {
+                    if (!r.error) renderBracketManagement(tournament.id, 'bracket');
+                });
+        }
+
+        // Самоисправление: победитель есть, а в своей клетке следующего круга
+        // он не стоит. Так бывало после старых правок — человек оставался на
+        // месте, и сетка вставала. Подталкиваем его один раз за отрисовку.
+        var отставшие = отставшиеОтСетки(matches, drawSize);
+        if (отставшие.length && !_подтолкнули[tournament.id]) {
+            _подтолкнули[tournament.id] = true;
+            Promise.all(отставшие.map(function(id) {
+                return A.client.rpc('advance_bracket_winner', { p_match_id: id });
+            })).then(function() {
+                renderBracketManagement(tournament.id, 'bracket');
+            });
+        }
         var sections = getFicSections(drawSize, isEn ? 'en' : 'ru');
         var html = '';
 
@@ -3075,6 +3266,9 @@
             // всегда. Ветки, где игроков ещё нет, но они там будут,
             // показываем: иначе половина сетки исчезает на середине турнира.
             if (section.первоеМесто > участников) return;
+            // И пока в блоке нет ни одного человека — тоже не рисуем: блоки
+            // появляются по мере игры, а не висят пустыми с самого начала.
+            if (!вБлокеЕстьЛюди(section, matches)) return;
 
             html += '<div class="ad-fic-section">';
             html += '<div class="ad-fic-section-title">' + section.label + '</div>';
@@ -3090,7 +3284,7 @@
             // расходятся с основной сеткой на её ширину.
             for (var пусто = 1; пусто < section.rounds[0].roundNum; пусто++) {
                 html += '<div class="ad-brk-round">' +
-                        '<div class="ad-brk-title">&nbsp;</div>' +
+                        '<div class="ad-brk-title" style="visibility:hidden;">&nbsp;</div>' +
                         '<div class="ad-brk-matches"></div></div>' +
                         '<div class="ad-brk-connector"></div>';
             }
@@ -5467,9 +5661,106 @@
         }).join('  ') + suffix;
     }
 
+    // ---- Правка результата задним числом ----
+    //
+    // Судья правит счёт, и вместе с победителем меняется всё, что дальше по
+    // сетке. Раньше новый человек ехал вперёд, а счета матчей, которых он не
+    // играл, оставались на месте — просто с другим именем. Теперь так: перед
+    // правкой показываем список затронутого, после подтверждения зависимые
+    // матчи очищаются, и есть один шаг назад.
+
+    async function затронутыеМатчи(matchId) {
+        var r = await A.client.rpc('fic_затронутые', { p_матч: matchId });
+        if (r.error) { A.showToast(r.error.message, 'error'); return null; }
+        return r.data || [];
+    }
+
+    /** Окно со списком затронутого. Возвращает true, если судья согласился. */
+    function спроситьПравку(список, заголовок) {
+        return new Promise(function(resolve) {
+            var строки = список.map(function(z) {
+                return '<tr>' +
+                    '<td>' + A.esc(z.круг + '-' + z.номер) + '</td>' +
+                    '<td>' + A.esc(z.игрок_1) + ' — ' + A.esc(z.игрок_2) + '</td>' +
+                    '<td>' + A.esc(z.счёт || '—') + '</td>' +
+                    '<td>' + A.esc(z.победитель || '—') + '</td>' +
+                '</tr>';
+            }).join('');
+            var overlay = document.createElement('div');
+            overlay.className = 'ad-modal-overlay';
+            overlay.innerHTML =
+                '<div class="ad-modal" style="max-width:640px;">' +
+                    '<div class="ad-modal-header"><h3>' + A.esc(заголовок) + '</h3></div>' +
+                    '<div class="ad-modal-body">' +
+                        '<p style="margin-bottom:12px;">' +
+                        (isEn ? 'Scores below will be cleared and the player from this match replaced. Opponents from other matches stay in place.'
+                              : 'У этих матчей снимется счёт, а игрок из этого матча заменится. Соперники, пришедшие из других матчей, останутся на местах.') +
+                        '</p>' +
+                        (список.length
+                            ? '<table class="ad-table"><thead><tr>' +
+                              '<th>' + (isEn ? 'Cell' : 'Клетка') + '</th>' +
+                              '<th>' + (isEn ? 'Pair' : 'Пара') + '</th>' +
+                              '<th>' + (isEn ? 'Score' : 'Счёт') + '</th>' +
+                              '<th>' + (isEn ? 'Winner' : 'Победитель') + '</th>' +
+                              '</tr></thead><tbody>' + строки + '</tbody></table>'
+                            : '<p>' + (isEn ? 'Nothing depends on this match.'
+                                            : 'От этого матча ничего не зависит.') + '</p>') +
+                    '</div>' +
+                    '<div class="ad-modal-footer">' +
+                        '<button class="ad-btn" data-нет>' + (isEn ? 'Cancel' : 'Отмена') + '</button>' +
+                        '<button class="ad-btn ad-btn-primary" data-да>' +
+                        (isEn ? 'Apply' : 'Применить') + '</button>' +
+                    '</div>' +
+                '</div>';
+            document.body.appendChild(overlay);
+            overlay.querySelector('[data-нет]').addEventListener('click', function() {
+                overlay.remove(); resolve(false);
+            });
+            overlay.querySelector('[data-да]').addEventListener('click', function() {
+                overlay.remove(); resolve(true);
+            });
+        });
+    }
+
+    /** Окно после правки: с кнопкой вернуть всё как было. */
+    function предложитьОткат(tournamentId, сколько) {
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-modal-overlay';
+        overlay.innerHTML =
+            '<div class="ad-modal" style="max-width:420px;">' +
+                '<div class="ad-modal-header"><h3>' +
+                (isEn ? 'Bracket rebuilt' : 'Сетка пересобрана') + '</h3></div>' +
+                '<div class="ad-modal-body"><p>' +
+                (isEn ? 'Cleared matches: ' : 'Очищено матчей: ') + сколько +
+                '</p></div>' +
+                '<div class="ad-modal-footer">' +
+                    '<button class="ad-btn" data-откат>' +
+                    (isEn ? 'Undo' : 'Отменить правку') + '</button>' +
+                    '<button class="ad-btn ad-btn-primary" data-ок>' +
+                    (isEn ? 'Done' : 'Хорошо') + '</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+        overlay.querySelector('[data-ок]').addEventListener('click', function() {
+            overlay.remove();
+            renderBracketManagement(tournamentId, 'bracket');
+        });
+        overlay.querySelector('[data-откат]').addEventListener('click', async function() {
+            var r = await A.client.rpc('fic_откатить', { p_турнир: tournamentId });
+            overlay.remove();
+            if (r.error) { A.showToast(r.error.message, 'error'); return; }
+            A.showToast(isEn ? 'Reverted' : 'Вернули как было', 'success');
+            renderBracketManagement(tournamentId, 'bracket');
+        });
+    }
+
     function openScoreModal(match, playersMap, tournamentId, rowPlayerId, isDbl, regsMap, setFormat) {
         // Swap display order if rowPlayer is player2 (so row player always on top)
-        var swapped = rowPlayerId && rowPlayerId === match.player2_id;
+        // Цифры в окне всегда со стороны победителя. Если матч уже сыгран —
+        // показываем в том же порядке, чтобы правка выглядела так же, как ввод.
+        var swapped = match.winner_id
+            ? (match.winner_id === match.player2_id)
+            : !!(rowPlayerId && rowPlayerId === match.player2_id);
         var displayP1Id = swapped ? match.player2_id : match.player1_id;
         var displayP2Id = swapped ? match.player1_id : match.player2_id;
         var displaySeed1 = swapped ? match.seed2 : match.seed1;
@@ -5528,10 +5819,11 @@
             var idTB1 = 'adS' + setNum + 'TB1';
             var idTB2 = 'adS' + setNum + 'TB2';
             return '<div class="ad-score-set-row" data-set="' + setNum + '" id="adSetRow' + setNum + '">' +
-                '<label class="ad-field-label" style="min-width:40px;">Set ' + setNum + '</label>' +
-                '<input type="text" inputmode="numeric" maxlength="1" class="ad-field-input ad-score-input ad-set-game" id="' + id1 + '" value="' + vals[0] + '">' +
+                '<label class="ad-field-label" style="min-width:64px;" id="adSetLabel' + setNum + '">' +
+                    (isEn ? 'Set ' : 'Сет ') + setNum + '</label>' +
+                '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-set-game" id="' + id1 + '" value="' + vals[0] + '">' +
                 '<span style="font-weight:600;">:</span>' +
-                '<input type="text" inputmode="numeric" maxlength="1" class="ad-field-input ad-score-input ad-set-game" id="' + id2 + '" value="' + vals[1] + '">' +
+                '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-set-game" id="' + id2 + '" value="' + vals[1] + '">' +
                 '<span class="ad-tb-wrap" id="' + idTB1 + 'Wrap" style="display:none;">' +
                     '<span style="font-size:11px;color:var(--text-secondary);margin-left:8px;">TB</span>' +
                     '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-tb-input" id="' + idTB1 + '" value="' + vals[2] + '">' +
@@ -5554,6 +5846,9 @@
                         '<div style="font-weight:600;">' + A.esc(p1Name) + (displaySeed1 ? ' <span style="color:var(--accent);font-size:11px;">[' + displaySeed1 + ']</span>' : '') + '</div>' +
                         '<div style="color:var(--text-secondary);font-size:12px;margin:4px 0;">' + L.vsLabel + '</div>' +
                         '<div style="font-weight:600;">' + A.esc(p2Name) + (displaySeed2 ? ' <span style="color:var(--accent);font-size:11px;">[' + displaySeed2 + ']</span>' : '') + '</div>' +
+                        '<div style="color:var(--text-secondary);font-size:11px;margin-top:8px;">' +
+                            (isEn ? 'Enter the score from the winner\'s side'
+                                  : 'Счёт пиши со стороны победителя') + '</div>' +
                     '</div>' +
                     '<div id="adSetsContainer">' +
                         setRowHtml(1, sv[0]) +
@@ -5563,6 +5858,8 @@
                     '<div id="adSetButtons" style="display:flex;gap:8px;justify-content:center;margin-top:8px;">' +
                         '<button class="ad-btn ad-btn-secondary" id="adAddSet" style="font-size:0.8rem;padding:4px 12px;">' + L.addSet + '</button>' +
                         '<button class="ad-btn ad-btn-secondary" id="adRemoveSet" style="font-size:0.8rem;padding:4px 12px;">' + L.removeSet + '</button>' +
+                        '<button class="ad-btn ad-btn-secondary" id="adSuperTb" style="font-size:0.8rem;padding:4px 12px;">' +
+                            (isEn ? '+ Super TB' : '+ Супер ТБ') + '</button>' +
                     '</div>' +
                     '<div style="margin-top:16px;">' +
                         '<label class="ad-field-label" style="text-align:center;display:block;margin-bottom:6px;">' + L.matchOutcome + '</label>' +
@@ -5584,6 +5881,10 @@
                     '</div>' +
                     '<div style="margin-top:12px;text-align:center;">' +
                         '<label class="ad-field-label">' + L.matchWinner + '</label>' +
+                        '<div style="display:flex;gap:8px;justify-content:center;margin-top:6px;">' +
+                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP1Id + '" style="font-size:0.85rem;padding:6px 14px;">' + A.esc(p1Name) + '</button>' +
+                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP2Id + '" style="font-size:0.85rem;padding:6px 14px;">' + A.esc(p2Name) + '</button>' +
+                        '</div>' +
                         '<div id="adWinnerDisplay" style="padding:8px;font-size:0.95rem;"></div>' +
                         '<input type="hidden" id="adScoreWinner" value="' + (match.winner_id || '') + '">' +
                         '<input type="hidden" id="adSelectedOutcome" value="' + (existingOutcome || '') + '">' +
@@ -5597,6 +5898,7 @@
         document.body.appendChild(overlay);
 
         var currentSets = visibleSets;
+        setTimeout(function() { нарисоватьСупер(); }, 0);
 
         function updateSetsVisibility() {
             for (var s = 1; s <= 3; s++) {
@@ -5619,6 +5921,95 @@
             updateState();
         }
 
+        // ---- Кто сверху ----
+        //
+        // Счёт на бумаге записан со стороны победителя, а в клетке порядок
+        // свой. Раньше приходилось вводить зеркально. Теперь имя можно
+        // поставить наверх, и первые цифры будут его.
+        var _p1 = displayP1Id, _p2 = displayP2Id;
+        var _имя1 = p1Name, _имя2 = p2Name, _посев1 = displaySeed1, _посев2 = displaySeed2;
+
+        function нарисоватьИмена() {
+            var верх = document.getElementById('adNameTop');
+            var низ = document.getElementById('adNameBottom');
+            верх.innerHTML = A.esc(_имя1) + (_посев1 ? ' <span style="color:var(--accent);font-size:11px;">[' + _посев1 + ']</span>' : '');
+            низ.innerHTML = A.esc(_имя2) + (_посев2 ? ' <span style="color:var(--accent);font-size:11px;">[' + _посев2 + ']</span>' : '');
+        }
+
+        function поменятьМестами() {
+            swapped = !swapped;
+            var t;
+            t = _p1; _p1 = _p2; _p2 = t;
+            t = _имя1; _имя1 = _имя2; _имя2 = t;
+            t = _посев1; _посев1 = _посев2; _посев2 = t;
+            // Цифры едут вместе с именами: что набрано, остаётся у своего игрока
+            for (var s = 1; s <= 3; s++) {
+                var a = document.getElementById('adS' + s + 'P1');
+                var b = document.getElementById('adS' + s + 'P2');
+                var ta = document.getElementById('adS' + s + 'TB1');
+                var tb = document.getElementById('adS' + s + 'TB2');
+                var v = a.value; a.value = b.value; b.value = v;
+                v = ta.value; ta.value = tb.value; tb.value = v;
+            }
+            нарисоватьИмена();
+            обновитьКнопкиСнятия();
+            updateState();
+        }
+
+        // Победителя называет человек, а не счёт: нажал на имя — оно и
+        // записано. Цифры при этом всегда со стороны победителя, разворот в
+        // порядок базы делаем сами при сохранении.
+        overlay.querySelectorAll('.ad-winner-btn').forEach(function(кн) {
+            кн.addEventListener('click', function() {
+                overlay.querySelectorAll('.ad-winner-btn').forEach(function(x) {
+                    x.classList.remove('active');
+                });
+                кн.classList.add('active');
+                document.getElementById('adScoreWinner').value = кн.dataset.winner;
+                updateState();
+            });
+        });
+
+        /** Кнопки «кто снялся» подписаны именами — их порядок тоже меняется. */
+        function обновитьКнопкиСнятия() {
+            var кнопки = overlay.querySelectorAll('.ad-retired-btn');
+            if (кнопки.length === 2) {
+                кнопки[0].dataset.retired = _p1;
+                кнопки[0].textContent = _имя1;
+                кнопки[1].dataset.retired = _p2;
+                кнопки[1].textContent = _имя2;
+            }
+        }
+
+        // ---- Супер тай-брейк ----
+        //
+        // Иногда третий сет не играют, а разыгрывают решающий тай-брейк до
+        // десяти с разницей в два. В таблице ТБШ он записан обычным сетом:
+        // «3/6 6/4 10/5». Так и храним.
+        var _суперТБ = (function() {
+            var третий = existingSets[2];
+            if (!третий) return false;
+            var м = третий.match(/^(\d+)\/(\d+)$/);
+            return !!(м && (+м[1] >= 10 || +м[2] >= 10));
+        })();
+
+        function нарисоватьСупер() {
+            var подпись = document.getElementById('adSetLabel3');
+            if (подпись) подпись.textContent = _суперТБ ? (isEn ? 'Super TB' : 'Супер ТБ')
+                                                        : (isEn ? 'Set 3' : 'Сет 3');
+            var кн = document.getElementById('adSuperTb');
+            if (кн) кн.classList.toggle('active', _суперТБ);
+            var обёртка = document.getElementById('adS3TB1Wrap');
+            if (обёртка && _суперТБ) обёртка.style.display = 'none';
+        }
+
+        document.getElementById('adSuperTb').addEventListener('click', function() {
+            _суперТБ = !_суперТБ;
+            if (_суперТБ && currentSets < 3) currentSets = 3;
+            updateSetsVisibility();
+            нарисоватьСупер();
+        });
+
         document.getElementById('adAddSet').addEventListener('click', function() {
             if (currentSets < 3) { currentSets++; updateSetsVisibility(); }
         });
@@ -5636,6 +6027,7 @@
                 var v1 = parseInt(p1El.value) || 0;
                 var v2 = parseInt(p2El.value) || 0;
                 var tbWrap = document.getElementById('adS' + s + 'TB1Wrap');
+                if (tbWrap && s === 3 && _суперТБ) { tbWrap.style.display = 'none'; continue; }
                 if (tbWrap) {
                     var isTb = _setFormat === 'short'
                         ? ((v1 === 6 && v2 === 5) || (v1 === 5 && v2 === 6))
@@ -5647,58 +6039,55 @@
 
         function updateState() {
             checkTiebreaks();
-
-            var curOutcome = document.getElementById('adSelectedOutcome').value;
             var winnerDisplay = document.getElementById('adWinnerDisplay');
-            var winnerId = '';
+            var поле = document.getElementById('adScoreWinner');
+            var outcome = document.getElementById('adSelectedOutcome').value;
 
-            if (curOutcome) {
-                // Non-normal outcome: winner = NOT the retired player
+            // При снятии победитель понятен сам: это тот, кто не снялся
+            if (outcome) {
                 var retiredId = document.getElementById('adRetiredPlayer').value;
                 if (retiredId) {
-                    winnerId = retiredId === match.player1_id ? match.player2_id : match.player1_id;
-                    var winnerP = playersMap[winnerId] || {};
-                    var winnerName = isEn ? (winnerP.name_en || winnerP.name || '?') : (winnerP.name || '?');
-                    winnerDisplay.innerHTML = '<span style="color:var(--accent);font-weight:600;">' + A.esc(winnerName) + '</span>';
-                } else {
-                    winnerDisplay.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem;">' + L.whoRetired + '</span>';
-                }
-            } else {
-                // Normal: determine from sets (display order)
-                var dP1Sets = 0, dP2Sets = 0;
-                for (var s = 1; s <= currentSets; s++) {
-                    var v1 = parseInt(document.getElementById('adS' + s + 'P1').value) || 0;
-                    var v2 = parseInt(document.getElementById('adS' + s + 'P2').value) || 0;
-                    if (v1 > v2) dP1Sets++; else if (v2 > v1) dP2Sets++;
-                }
-
-                var neededToWin = currentSets === 1 ? 1 : 2;
-
-                // Map display winner back to DB player IDs
-                if (dP1Sets >= neededToWin) {
-                    winnerId = displayP1Id;
-                    winnerDisplay.innerHTML = '<span style="color:var(--accent);font-weight:600;">' + A.esc(p1Name) + '</span>';
-                } else if (dP2Sets >= neededToWin) {
-                    winnerId = displayP2Id;
-                    winnerDisplay.innerHTML = '<span style="color:var(--accent);font-weight:600;">' + A.esc(p2Name) + '</span>';
-                } else {
-                    var totalPlayed = dP1Sets + dP2Sets;
-                    var label = totalPlayed > 0 ? (dP1Sets + ':' + dP2Sets) : (isEn ? 'Enter score' : 'Введите счёт');
-                    winnerDisplay.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem;">' + label + '</span>';
+                    поле.value = retiredId === _p1 ? _p2 : _p1;
                 }
             }
-            document.getElementById('adScoreWinner').value = winnerId;
+
+            var кто = поле.value;
+            overlay.querySelectorAll('.ad-winner-btn').forEach(function(кн) {
+                кн.classList.toggle('active', кн.dataset.winner === кто);
+            });
+
+            if (кто) {
+                var п = playersMap[кто] || {};
+                var имя = isDbl
+                    ? getTeamDisplayName(кто, regsMap, playersMap, true).replace(/<[^>]*>/g, '')
+                    : (isEn ? (п.name_en || п.name || '?') : (п.name || '?'));
+                winnerDisplay.innerHTML = '<span style="color:var(--accent);font-weight:600;">' +
+                    A.esc(имя) + '</span>';
+            } else {
+                winnerDisplay.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem;">' +
+                    (isEn ? 'Tap the winner' : 'Нажми на имя победителя') + '</span>';
+            }
         }
 
         function bindInputEvents() {
             overlay.querySelectorAll('.ad-set-game').forEach(function(input) {
                 input.removeEventListener('input', input._handler);
                 input._handler = function() {
-                    var v = input.value.replace(/[^0-7]/g, '');
-                    if (v.length > 1) v = v.charAt(v.length - 1);
+                    // В обычном сете цифра одна и не больше семи. В решающем
+                    // тай-брейке счёт двузначный и любой: 10/8, 11/9, 12/10 —
+                    // раньше маска выбрасывала всё, что больше семёрки, и
+                    // ввести супертай было нельзя.
+                    var этоСупер = _суперТБ && /^adS3P[12]$/.test(input.id);
+                    var v;
+                    if (этоСупер) {
+                        v = input.value.replace(/[^0-9]/g, '').slice(0, 2);
+                    } else {
+                        v = input.value.replace(/[^0-7]/g, '');
+                        if (v.length > 1) v = v.charAt(v.length - 1);
+                    }
                     input.value = v;
                     updateState();
-                    if (v.length === 1) {
+                    if (!этоСупер && v.length === 1) {
                         var allInputs = Array.from(overlay.querySelectorAll('.ad-set-game:not([style*="display: none"] *), .ad-tb-input'));
                         var visibleInputs = allInputs.filter(function(el) { return el.offsetParent !== null; });
                         var idx = visibleInputs.indexOf(input);
@@ -5803,7 +6192,15 @@
                         A.showToast((isEn ? 'Fill in Set ' : 'Заполните сет ') + s, 'error');
                         return;
                     }
-                    if (!isValidSet(v1, v2, _setFormat)) {
+                    var этоСупер = (s === 3 && _суперТБ);
+                    if (этоСупер) {
+                        var a = +v1, b = +v2;
+                        if (!(Math.max(a, b) >= 10 && Math.abs(a - b) >= 2)) {
+                            A.showToast(isEn ? 'Super tiebreak: to 10, margin 2'
+                                             : 'Супер тай-брейк: до 10, разница в два', 'error');
+                            return;
+                        }
+                    } else if (!isValidSet(v1, v2, _setFormat)) {
                         A.showToast((isEn ? 'Invalid Set ' : 'Некорректный счёт сета ') + s, 'error');
                         return;
                     }
@@ -5823,11 +6220,13 @@
                 if (v1 === '' || v2 === '') return null;
                 var tb1 = document.getElementById('adS' + num + 'TB1').value;
                 var tb2 = document.getElementById('adS' + num + 'TB2').value;
-                // Swap back to DB player order
-                var dbV1 = swapped ? v2 : v1;
-                var dbV2 = swapped ? v1 : v2;
-                var dbTB1 = swapped ? tb2 : tb1;
-                var dbTB2 = swapped ? tb1 : tb2;
+                // В окне цифры со стороны победителя; в базе первым идёт
+                // player1. Разворачиваем, если победил второй.
+                var зеркало = winnerId && winnerId === match.player2_id;
+                var dbV1 = зеркало ? v2 : v1;
+                var dbV2 = зеркало ? v1 : v2;
+                var dbTB1 = зеркало ? tb2 : tb1;
+                var dbTB2 = зеркало ? tb1 : tb2;
                 var setStr = dbV1 + '/' + dbV2;
                 var hasTb = _setFormat === 'short'
                     ? ((+dbV1 === 6 && +dbV2 === 5) || (+dbV1 === 5 && +dbV2 === 6))
@@ -5857,6 +6256,25 @@
                 score_status: 'confirmed',
                 score_confirmed_at: new Date().toISOString()
             };
+
+            // Победитель поменялся у уже сыгранного матча — это пересборка:
+            // показываем, что будет стёрто, и спрашиваем. Всё остальное —
+            // обычная запись счёта.
+            var меняемПобедителя = match.winner_id && match.winner_id !== winnerId;
+            if (меняемПобедителя) {
+                var зависимые = await затронутыеМатчи(match.id);
+                if (зависимые === null) return;
+                var согласен = await спроситьПравку(зависимые,
+                    isEn ? 'Changing the winner' : 'Смена победителя');
+                if (!согласен) return;
+                var пр = await A.client.rpc('fic_правка', {
+                    p_матч: match.id, p_победитель: winnerId, p_счёт: scoreStr
+                });
+                if (пр.error) { A.showToast(пр.error.message, 'error'); return; }
+                overlay.remove();
+                предложитьОткат(tournamentId, (пр.data && пр.data.затронуто) || 0);
+                return;
+            }
 
             var res = await A.client.from('matches').update(updateData).eq('id', match.id);
             if (res.error) {

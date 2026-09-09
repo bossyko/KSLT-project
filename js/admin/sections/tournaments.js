@@ -455,12 +455,36 @@
                     '<td style="text-align:center;">' + dateStartStr + '</td>' +
                     '<td style="text-align:center;">' + dateEndStr + '</td>' +
                     '<td style="text-align:center;">' + (t.max_participants || L.noData) + '</td>' +
-                    '<td>' + (t.bracket_type ? '<button class="ad-btn ad-btn-sm ad-btn-secondary ad-brk-btn" data-brk-id="' + t.id + '">' + L.bracketTab + '</button>' : '') + '</td>' +
+                    '<td>' + (t.bracket_type ? '<button class="ad-btn ad-btn-sm ad-btn-secondary ad-brk-btn" data-brk-id="' + t.id + '">' + L.bracketTab + '</button>' : '') +
+                        // Открыть турнир людям или убрать с глаз — решение
+                        // менеджера, а не побочный итог сохранения формы
+                        ' <button class="ad-btn ad-btn-sm ad-btn-secondary ad-pub-btn" data-pub-id="' + t.id + '" data-pub-on="' + (t.published_at ? '1' : '') + '">' +
+                        (t.published_at ? (isEn ? 'Unpublish' : 'Снять с публикации')
+                                        : (isEn ? 'Publish' : 'Опубликовать')) + '</button>' +
+                    '</td>' +
                 '</tr>';
         });
 
         // Click bracket button / row
-        tbody.onclick = function(e) {
+        tbody.onclick = async function(e) {
+            var pubBtn = e.target.closest('.ad-pub-btn');
+            if (pubBtn) {
+                e.stopPropagation();
+                var открыт = !!pubBtn.dataset.pubOn;
+                pubBtn.disabled = true;
+                var r = await A.client.from('tournaments')
+                    .update({ published_at: открыт ? null : new Date().toISOString() })
+                    .eq('id', pubBtn.dataset.pubId);
+                if (r.error) {
+                    pubBtn.disabled = false;
+                    A.showToast(r.error.message, 'error');
+                    return;
+                }
+                A.showToast(открыт ? (isEn ? 'Hidden from the site' : 'Убран с сайта')
+                                   : (isEn ? 'Published' : 'Опубликован'), 'success');
+                loadTournamentsList();
+                return;
+            }
             var brkBtn = e.target.closest('.ad-brk-btn');
             if (brkBtn) {
                 e.stopPropagation();
@@ -1531,8 +1555,10 @@
 
             var data = collectTrnFormData();
 
-            // Auto-detect: if already published → keep published; if new/draft → publish now
-            data.published_at = trnEditingPublishedAt || new Date().toISOString();
+            // Сохранение больше не публикует само: турнир открывают людям
+            // отдельной кнопкой в списке. Раньше любой первый «Сохранить»
+            // сразу выкладывал турнир на сайт, даже с пустой сеткой.
+            data.published_at = trnEditingPublishedAt || null;
 
             // Preserve special statuses that shouldn't be overwritten by date-based computation
             var protectedStatuses = ['completed', 'registration_closed', 'cancelled'];

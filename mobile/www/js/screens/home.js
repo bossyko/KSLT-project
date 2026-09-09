@@ -657,6 +657,8 @@
           if (часть.место) return m.match_order === часть.место.matchOrder;
           return m.match_order >= часть.круг.matchStart && m.match_order <= часть.круг.matchEnd;
         }).sort(function(a, b) { return a.match_order - b.match_order; });
+        // Пустые куски не показываем: блок появляется, когда в нём есть люди
+        свои = свои.filter(function(m) { return m.player1_id || m.player2_id; });
         if (!свои.length) return;
 
         var подпись = часть.место ? часть.место.label : (часть.блок.label + ' · ' + часть.круг.name);

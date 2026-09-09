@@ -56,12 +56,65 @@
   /** Оживляет разметку: листание ленты и просмотр во весь экран. */
   M.init = function(root, gallery) {
     if (!root) return;
+    собратьСнимкиВТексте(root);
     initCarousel(root, gallery || []);
     initViewer(root, gallery || []);
   };
 
+  /**
+   * Снимки, идущие в тексте подряд, показываем галереей — крупный кадр и
+   * лента миниатюр, как на сайте. Раньше они шли столбиком на всю ширину, и
+   * человек прокручивал десяток фотографий вместо того, чтобы читать.
+   *
+   * Одиночный снимок остаётся снимком: галерея из одного кадра ни к чему.
+   */
+  function собратьСнимкиВТексте(root) {
+    var тело = root.querySelector('.nd-body');
+    if (!тело) return;
+
+    var дети = Array.prototype.slice.call(тело.children);
+    var набор = [];
+
+    function закрыть() {
+      if (набор.length < 2) { набор = []; return; }
+      var адреса = набор.map(function(f) { return f.querySelector('img').src; });
+      var блок = document.createElement('div');
+      блок.className = 'nm-carousel';
+      блок.dataset.photos = JSON.stringify(адреса);
+      блок.innerHTML =
+        '<div class="nm-stage">' +
+          '<img class="nm-main" src="' + esc(адреса[0]) + '" alt="" data-index="0">' +
+          '<div class="nm-count">1 / ' + адреса.length + '</div>' +
+        '</div>' +
+        '<div class="nm-thumbs">' +
+          адреса.map(function(url, i) {
+            return '<button type="button" class="nm-thumb' + (i === 0 ? ' active' : '') +
+              '" data-index="' + i + '"><img src="' + esc(url) + '" alt="" loading="lazy"></button>';
+          }).join('') +
+        '</div>';
+      набор[0].parentNode.insertBefore(блок, набор[0]);
+      набор.forEach(function(f) { f.remove(); });
+      набор = [];
+    }
+
+    дети.forEach(function(эл) {
+      var снимок = эл.tagName === 'FIGURE' && эл.querySelector('img') && !эл.textContent.trim();
+      if (снимок) { набор.push(эл); return; }
+      закрыть();
+    });
+    закрыть();
+  }
+
   function initCarousel(root, photos) {
-    var wrap = root.querySelector('.nm-carousel');
+    // Каруселей может быть несколько: галерея новости и наборы снимков в
+    // тексте. У каждой свои адреса.
+    Array.prototype.forEach.call(root.querySelectorAll('.nm-carousel'), function(wrap) {
+      var свои = wrap.dataset.photos ? JSON.parse(wrap.dataset.photos) : photos;
+      завестиОдну(wrap, свои || []);
+    });
+  }
+
+  function завестиОдну(wrap, photos) {
     if (!wrap || photos.length < 2) return;
 
     var main = wrap.querySelector('.nm-main');
@@ -100,10 +153,14 @@
 
     root.addEventListener('click', function(e) {
       var main = e.target.closest('.nm-main');
-      if (main && gallery.length) {
-        e.preventDefault();
-        open(gallery, Number(main.dataset.index) || 0);
-        return;
+      if (main) {
+        var wrap = main.closest('.nm-carousel');
+        var свои = (wrap && wrap.dataset.photos) ? JSON.parse(wrap.dataset.photos) : gallery;
+        if (свои && свои.length) {
+          e.preventDefault();
+          open(свои, Number(main.dataset.index) || 0);
+          return;
+        }
       }
 
       var el = e.target.closest(IN_TEXT);

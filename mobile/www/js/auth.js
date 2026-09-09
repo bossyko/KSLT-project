@@ -167,10 +167,42 @@
     });
   };
 
+  // ---- Бесплатный период ----
+  //
+  // До назначенной даты платформа открыта всем, кто вошёл. Дату ставит
+  // администратор в админке, она лежит в базе — поэтому действует и здесь,
+  // без новой сборки приложения.
+  AUTH._бесплатноДо = undefined;
+
+  AUTH.бесплатныйПериод = function() {
+    if (AUTH._бесплатноДо !== undefined) return Promise.resolve(проверить(AUTH._бесплатноДо));
+    return supabaseClient.from('app_settings').select('value').eq('key', 'free_access_until')
+      .maybeSingle()
+      .then(function(r) {
+        AUTH._бесплатноДо = (r.data && r.data.value)
+          ? String(r.data.value).replace(/"/g, '') : null;
+        return проверить(AUTH._бесплатноДо);
+      })
+      .catch(function() { AUTH._бесплатноДо = null; return false; });
+
+    function проверить(до) {
+      if (!до) return false;
+      return new Date().toISOString().split('T')[0] <= до;
+    }
+  };
+
   // Check membership
   AUTH.checkMembership = function() {
     if (!AUTH.currentProfile) return Promise.resolve(null);
     var uid = AUTH.currentProfile.id;
+    // В бесплатный период членство не спрашиваем: вошёл — значит доступ есть
+    return AUTH.бесплатныйПериод().then(function(бесплатно) {
+      if (бесплатно) return { free_period: true, status: 'active' };
+      return запросЧленства(uid);
+    });
+  };
+
+  function запросЧленства(uid) {
     return supabaseClient.from('memberships')
       .select('*')
       .eq('profile_id', uid)

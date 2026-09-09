@@ -273,7 +273,9 @@
     var basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
 
     function getRedirectUrl() {
-        if (returnUrl) return returnUrl;
+        // Обратный адрес не должен вести на саму страницу входа: иначе она
+        // уводит на себя же, и вкладка перезагружается без конца.
+        if (returnUrl && returnUrl.indexOf('auth') === -1) return returnUrl;
         var role = localStorage.getItem('kslt_role');
         if (role === 'admin' || role === 'manager') {
             return 'admin.html';   // админка только на русском
@@ -1445,6 +1447,23 @@
         }
 
         var result = await client.auth.getSession();
+
+        // Вход из хранилища браузера может оказаться мёртвым: аккаунт удалили,
+        // ключ сменили, срок истёк. getSession об этом не знает — он читает
+        // localStorage и не спрашивает сервер. Раньше страница входа видела
+        // такой вход, уводила на защищённую страницу, та не находила профиль и
+        // возвращала обратно — и так без конца, вкладка перезагружалась сама.
+        // Поэтому спрашиваем сервер: жив ли этот человек.
+        if (result.data && result.data.session) {
+            var проверка = await client.auth.getUser();
+            if (проверка.error || !проверка.data || !проверка.data.user) {
+                await client.auth.signOut().catch(function() {});
+                ['kslt_session_start', 'kslt_name', 'kslt_avatar', 'kslt_role']
+                    .forEach(function(k) { localStorage.removeItem(k); });
+                return;   // остаёмся на странице входа
+            }
+        }
+
         if (result.data && result.data.session && !isRecoveryFlow) {
             // Load profile to get role before redirect (important for Google OAuth)
             try {

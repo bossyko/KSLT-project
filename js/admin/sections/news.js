@@ -1266,6 +1266,111 @@
         // под абзацами больше нет — они появлялись там, где текст ещё резался
         // на куски по пустым строкам.
         container.innerHTML = '<div class="ad-news-preview-body">' + text + '</div>';
+        собратьГалереиВПредпросмотре(container);
+    }
+
+    /**
+     * Предпросмотр показывает то же, что читатель. На публичной странице
+     * снимки, идущие подряд, собираются в галерею — крупный кадр и лента
+     * миниатюр. Здесь делаем так же, иначе редактор и сайт расходятся.
+     */
+    function собратьГалереиВПредпросмотре(корень) {
+        var тело = корень.querySelector('.ad-news-preview-body');
+        if (!тело) return;
+
+        var дети = Array.prototype.slice.call(тело.children);
+        var набор = [];
+
+        function закрыть() {
+            if (набор.length < 2) { набор = []; return; }
+            var адреса = набор.map(function(f) { return f.querySelector('img').src; });
+            var блок = document.createElement('div');
+            блок.className = 'ad-prev-carousel';
+            блок.innerHTML =
+                '<div class="ad-prev-stage">' +
+                    '<button class="ad-prev-nav ad-prev-back" type="button">&#8249;</button>' +
+                    '<img class="ad-prev-main" src="' + A.esc(адреса[0]) + '" alt="">' +
+                    '<button class="ad-prev-nav ad-prev-fwd" type="button">&#8250;</button>' +
+                    '<div class="ad-prev-count">1 / ' + адреса.length + '</div>' +
+                '</div>' +
+                '<div class="ad-prev-thumbs">' +
+                    адреса.map(function(url, i) {
+                        return '<button class="ad-prev-thumb' + (i === 0 ? ' active' : '') +
+                            '" type="button" data-index="' + i + '">' +
+                            '<img src="' + A.esc(url) + '" alt=""></button>';
+                    }).join('') +
+                '</div>';
+            набор[0].parentNode.insertBefore(блок, набор[0]);
+            набор.forEach(function(f) { f.remove(); });
+            завести(блок, адреса);
+            набор = [];
+        }
+
+        дети.forEach(function(эл) {
+            var снимок = эл.tagName === 'FIGURE' && эл.querySelector('img') && !эл.textContent.trim();
+            if (снимок) { набор.push(эл); return; }
+            закрыть();
+        });
+        закрыть();
+
+        function завести(блок, адреса) {
+            var главный = блок.querySelector('.ad-prev-main');
+            var счёт = блок.querySelector('.ad-prev-count');
+            var миниатюры = Array.prototype.slice.call(блок.querySelectorAll('.ad-prev-thumb'));
+            var i = 0;
+            function показать(n) {
+                i = (n + адреса.length) % адреса.length;
+                главный.src = адреса[i];
+                счёт.textContent = (i + 1) + ' / ' + адреса.length;
+                миниатюры.forEach(function(t, k) { t.classList.toggle('active', k === i); });
+            }
+            блок.querySelector('.ad-prev-back').addEventListener('click', function() { показать(i - 1); });
+            блок.querySelector('.ad-prev-fwd').addEventListener('click', function() { показать(i + 1); });
+            миниатюры.forEach(function(t) {
+                t.addEventListener('click', function() { показать(Number(t.dataset.index)); });
+            });
+            листалка(блок);
+        }
+
+        /** Стрелки у ленты миниатюр — как на публичной странице. Появляются
+         *  только тогда, когда лента не помещается по ширине. */
+        function листалка(блок) {
+            var лента = блок.querySelector('.ad-prev-thumbs');
+            if (!лента) return;
+
+            var ряд = document.createElement('div');
+            ряд.className = 'ad-prev-thumbs-row';
+            лента.parentNode.insertBefore(ряд, лента);
+
+            var назад = document.createElement('button');
+            назад.className = 'ad-prev-thumbs-nav';
+            назад.type = 'button';
+            назад.innerHTML = '&#8249;';
+
+            var вперёд = document.createElement('button');
+            вперёд.className = 'ad-prev-thumbs-nav';
+            вперёд.type = 'button';
+            вперёд.innerHTML = '&#8250;';
+
+            ряд.appendChild(назад);
+            ряд.appendChild(лента);
+            ряд.appendChild(вперёд);
+
+            function шаг(с) {
+                лента.scrollBy({ left: с * Math.round(лента.clientWidth * 0.8), behavior: 'smooth' });
+            }
+            назад.addEventListener('click', function() { шаг(-1); });
+            вперёд.addEventListener('click', function() { шаг(1); });
+
+            function обновить() {
+                ряд.classList.toggle('ad-prev-thumbs-fits',
+                    лента.scrollWidth <= лента.clientWidth + 1);
+                назад.disabled = лента.scrollLeft <= 0;
+                вперёд.disabled = лента.scrollLeft + лента.clientWidth >= лента.scrollWidth - 1;
+            }
+            лента.addEventListener('scroll', обновить);
+            setTimeout(обновить, 0);
+        }
     }
 
     function renderNewsPollOptions() {

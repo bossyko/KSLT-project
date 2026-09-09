@@ -147,7 +147,7 @@
         newsStatPopular: 'Most Popular',
         newsStatLastDate: 'Last',
         newsStatNoArticles: 'No articles yet',
-        catResults: 'Report',
+        catResults: 'Results',
         catInterview: 'Interview',
         catAnnouncement: 'Announcement',
         catWorld: 'World Tennis',
@@ -1451,7 +1451,7 @@
         newsStatPopular: 'Популярные',
         newsStatLastDate: 'Последняя',
         newsStatNoArticles: 'Статей пока нет',
-        catResults: 'Репортаж',
+        catResults: 'Результаты',
         catInterview: 'Интервью',
         catAnnouncement: 'Анонс',
         catWorld: 'Мировой теннис',
@@ -2621,7 +2621,7 @@
 
     // Category map
     var CATEGORIES = {
-        results: isEn ? 'Report' : 'Репортаж',
+        results: isEn ? 'Results' : 'Результаты',
         interview: isEn ? 'Interview' : 'Интервью',
         announcement: isEn ? 'Announcement' : 'Анонс',
         world: isEn ? 'World Tennis' : 'Мировой теннис'

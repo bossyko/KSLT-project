@@ -26,7 +26,8 @@
 
         var tabs = [
             { key: 'rules', label: L.setSubRules },
-            { key: 'promotions', label: L.setSubPromo }
+            { key: 'promotions', label: L.setSubPromo },
+            { key: 'access', label: isEn ? 'Access' : 'Доступ' }
         ];
 
         var html = '<div class="ad-rat-tabs" id="setTabs">';
@@ -60,6 +61,82 @@
         await A.loadPointsRules();
         renderSetRules();
         renderSetPromotions();
+        renderSetAccess();
+    }
+
+    // ---- Доступ: бесплатный период ----
+    //
+    // До назначенной даты платформа открыта всем, кто зарегистрировался:
+    // членство КСЛТ не спрашивается. Дата хранится в базе, поэтому действует
+    // сразу и на сайте, и в установленном приложении — без новой сборки.
+    // Пустая дата возвращает обычный порядок, доступ по членству.
+    async function renderSetAccess() {
+        var panel = document.getElementById('setPanelAccess');
+        if (!panel) return;
+
+        var r = await A.client.from('app_settings')
+            .select('value, updated_at').eq('key', 'free_access_until').maybeSingle();
+        var дата = (r.data && r.data.value) ? String(r.data.value).replace(/"/g, '') : '';
+        var когда = (r.data && r.data.updated_at)
+            ? new Date(r.data.updated_at).toLocaleString(isEn ? 'en-US' : 'ru-RU') : '';
+
+        var сегодня = new Date().toISOString().split('T')[0];
+        var идёт = дата && сегодня <= дата;
+
+        panel.innerHTML =
+            '<div class="ad-card" style="max-width:520px;">' +
+                '<h3 style="margin-bottom:8px;">' +
+                    (isEn ? 'Free access for everyone' : 'Бесплатный доступ для всех') + '</h3>' +
+                '<p style="color:var(--text-secondary);line-height:1.6;margin-bottom:16px;">' +
+                    (isEn
+                        ? 'Until this date every signed-in user gets full access without a KSLT membership. Clear the date to return to memberships.'
+                        : 'До этой даты полный доступ есть у каждого, кто вошёл, — членство КСЛТ не спрашивается. Пустая дата возвращает обычный порядок.') +
+                '</p>' +
+                '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">' +
+                    '<div>' +
+                        '<label class="ad-field-label">' + (isEn ? 'Free until' : 'Бесплатно до') + '</label>' +
+                        '<input type="date" class="ad-field-input" id="setFreeUntil" value="' + дата + '">' +
+                    '</div>' +
+                    '<button class="ad-btn ad-btn-primary" id="setFreeSave">' +
+                        (isEn ? 'Save' : 'Сохранить') + '</button>' +
+                    (дата ? '<button class="ad-btn ad-btn-secondary" id="setFreeClear">' +
+                        (isEn ? 'Turn off' : 'Выключить') + '</button>' : '') +
+                '</div>' +
+                '<p style="margin-top:14px;color:' + (идёт ? 'var(--accent)' : 'var(--text-secondary)') + ';">' +
+                    (идёт
+                        ? (isEn ? 'Free access is on until ' : 'Бесплатный доступ идёт до ') + дата
+                        : (дата
+                            ? (isEn ? 'The date has passed — access is by membership' : 'Дата прошла — доступ по членству')
+                            : (isEn ? 'Access is by membership' : 'Доступ по членству'))) +
+                '</p>' +
+                (когда ? '<p style="color:var(--text-muted);font-size:0.8rem;">' +
+                    (isEn ? 'Changed: ' : 'Менялось: ') + когда + '</p>' : '') +
+            '</div>';
+
+        async function сохранить(значение) {
+            var кнопки = panel.querySelectorAll('button');
+            кнопки.forEach(function(b) { b.disabled = true; });
+            var res = await A.client.from('app_settings')
+                .update({ value: значение === null ? null : JSON.stringify(значение),
+                          updated_at: new Date().toISOString(),
+                          updated_by: (window.ksltUser && window.ksltUser.id) || null })
+                .eq('key', 'free_access_until');
+            if (res.error) {
+                кнопки.forEach(function(b) { b.disabled = false; });
+                A.showToast(res.error.message, 'error');
+                return;
+            }
+            A.showToast(isEn ? 'Saved' : 'Сохранено', 'success');
+            renderSetAccess();
+        }
+
+        var save = document.getElementById('setFreeSave');
+        if (save) save.addEventListener('click', function() {
+            var v = document.getElementById('setFreeUntil').value;
+            сохранить(v || null);
+        });
+        var clear = document.getElementById('setFreeClear');
+        if (clear) clear.addEventListener('click', function() { сохранить(null); });
     }
 
     // ---- Points Rules Sub-tab ----

@@ -124,7 +124,20 @@ Deno.serve(async (req) => {
     }
 
     // ---- Членство и оплата (staff пропускаем) ----
-    if (!isStaff) {
+    //
+    // Бесплатный период: пока дата в настройках не прошла, членство не
+    // спрашиваем ни у кого, кто вошёл. Дату ставит администратор в админке,
+    // Настройки → Доступ.
+    const { data: настройка } = await db
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'free_access_until')
+      .maybeSingle()
+    const доступДо = настройка?.value ? String(настройка.value).replace(/"/g, '') : ''
+    const бесплатныйПериод = !!доступДо &&
+      new Date().toISOString().split('T')[0] <= доступДо
+
+    if (!isStaff && !бесплатныйПериод) {
       const today = new Date().toISOString().split('T')[0]
       const { data: memberships } = await db
         .from('memberships')

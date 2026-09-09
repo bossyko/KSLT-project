@@ -2529,6 +2529,29 @@ select.ad-field-input {
 }
 
 /* Edit button under match */
+/* Две кнопки в одной полосе: высота карточки не должна меняться от того,
+   сыгран матч или нет — от неё считаются соединительные линии. */
+.ad-brk-actions {
+    display: flex;
+}
+.ad-brk-actions .ad-brk-edit {
+    flex: 1 1 0;
+    min-width: 0;
+}
+.ad-brk-actions .ad-brk-edit + .ad-brk-edit {
+    border-left: 1px solid var(--border, rgba(255,255,255,0.06));
+}
+
+/* Снятие результата не должно спорить по яркости с «Изм.»: действие редкое. */
+.ad-brk-clear {
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.03);
+}
+.ad-brk-clear:hover {
+    color: #ff8a8a;
+    background: rgba(255,138,138,0.10);
+}
+
 .ad-brk-edit {
     display: block;
     width: 100%;
@@ -4509,6 +4532,23 @@ select.ad-field-input {
 .ad-news-preview-body figure iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 10px; }
 
 /* Фото внутри редактора показываем некрупно: это черновик, а не витрина */
+/* Снимки в редакторе идут в строку, а не столбиком: несколько фотографий
+   подряд — это ряд, а не вертикальная лента на весь экран. Подписи и текст
+   внутри figure остаются в полную ширину. */
+.ad-editor-area figure:has(> img),
+.ad-news-preview-body figure:has(> img) {
+    display: inline-block;
+    width: calc(33.333% - 10px);
+    margin: 5px;
+    vertical-align: top;
+}
+.ad-editor-area figure:has(> img) img,
+.ad-news-preview-body figure:has(> img) img {
+    width: 100%;
+    max-width: none;
+    height: auto;
+}
+
 .ad-editor-area figure { margin: 12px 0; }
 .ad-editor-area figure img {
     max-width: 260px;
@@ -5148,3 +5188,129 @@ select.ad-field-input {
     font-size: 0.72rem;
 }
 .ad-brk-grid--big .ad-brk-round { min-width: 186px; }
+
+
+/* Имена в окне счёта: нажатие поднимает человека наверх, его цифры первые */
+.ad-score-name {
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.ad-score-name:hover {
+    background: rgba(204,255,0,0.10);
+}
+#adNameTop {
+    background: rgba(204,255,0,0.08);
+}
+
+
+/* Победителя называет человек: нажал на имя — оно и записано */
+.ad-winner-btn.active {
+    background: var(--accent);
+    color: #111;
+    border-color: var(--accent);
+}
+
+/* === ПРЕДПРОСМОТР НОВОСТИ: ГАЛЕРЕЯ === */
+/* Читатель видит снимки галереей — крупный кадр и лента миниатюр. В
+   предпросмотре должно быть то же самое, иначе редактор и сайт расходятся. */
+.ad-prev-carousel {
+    margin: 16px 0;
+}
+.ad-prev-stage {
+    position: relative;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+}
+.ad-prev-main {
+    max-width: 100%;
+    max-height: 380px;
+    display: block;
+}
+.ad-prev-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.ad-prev-nav:hover { background: rgba(0, 0, 0, 0.8); }
+.ad-prev-back { left: 10px; }
+.ad-prev-fwd { right: 10px; }
+.ad-prev-count {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 0.72rem;
+}
+.ad-prev-thumbs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 8px 0 2px;
+}
+.ad-prev-thumb {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 48px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    background: none;
+    cursor: pointer;
+}
+.ad-prev-thumb.active { border-color: var(--accent, #CCFF00); }
+.ad-prev-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Лента миниатюр в предпросмотре листается стрелками — как на сайте */
+.ad-prev-thumbs-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.ad-prev-thumbs-row .ad-prev-thumbs {
+    flex: 1 1 auto;
+    scrollbar-width: none;
+}
+.ad-prev-thumbs-row .ad-prev-thumbs::-webkit-scrollbar { display: none; }
+.ad-prev-thumbs-nav {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+.ad-prev-thumbs-nav:hover:not(:disabled) { background: rgba(0, 0, 0, 0.8); }
+.ad-prev-thumbs-nav:disabled { opacity: 0.3; cursor: default; }
+.ad-prev-thumbs-row.ad-prev-thumbs-fits .ad-prev-thumbs-nav { display: none; }
