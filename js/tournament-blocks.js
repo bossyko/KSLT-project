@@ -24,19 +24,19 @@
         participants: 'Players', pairs: 'Pairs', prize: 'Prize',
         reg: 'Reg', noRating: 'Unranked',
         fee: 'Fee', feeMember: 'KSLT members', feeGuest: 'non-members',
-        perPair: 'per pair', som: 'som'
+        perPair: 'per player', som: 'som'
     } : (isKg ? {
         details: 'Толугураак', register: 'Каттоо', format: 'Формат',
         participants: 'Катышуучулар', pairs: 'Жуптар', prize: 'Сыйлык',
         reg: 'Кат', noRating: 'Рейтингсиз',
         fee: 'Взнос', feeMember: 'КСЛТ мүчөлөрүнө', feeGuest: 'калгандарга',
-        perPair: 'жуптан', som: 'сом'
+        perPair: 'оюнчудан', som: 'сом'
     } : {
         details: 'Подробнее', register: 'Регистрация', format: 'Формат',
         participants: 'Участники', pairs: 'Пар', prize: 'Призовой',
         reg: 'Рег', noRating: 'Без рейтинга',
         fee: 'Взнос', feeMember: 'членам КСЛТ', feeGuest: 'остальным',
-        perPair: 'с пары', som: 'сом'
+        perPair: 'с участника', som: 'сом'
     });
 
     var CL = isEn

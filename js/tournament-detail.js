@@ -1198,7 +1198,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
     var L = isEn ? {
         format: 'Format', participants: 'Participants', pairs: 'Pairs', prizeFund: 'Prize Fund',
-        fee: 'Entry fee', feePair: 'Entry fee, per pair', som: 'som',
+        fee: 'Entry fee', feePair: 'Entry fee per player', som: 'som',
         feeYouMember: 'You are a KSLT member — your fee is {sum} {cur}',
         feeYouGuest: 'Your fee is {sum} {cur}. KSLT membership brings it down to {member} {cur}',
         description: 'About Tournament', scheduleSoon: 'Schedule will be published soon',
@@ -1211,7 +1211,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         regClosingSoon: 'Registration closes in less than 24 hours!'
     } : (isKg ? {
         format: 'Формат', participants: 'Катышуучулар', pairs: 'Жуптар', prizeFund: 'Сыйлык фонду',
-        fee: 'Катышуу акысы', feePair: 'Катышуу акысы, жуптан', som: 'сом',
+        fee: 'Катышуу акысы', feePair: 'Катышуу акысы оюнчудан', som: 'сом',
         feeYouMember: 'Сиз КСЛТ мүчөсүсүз — сиздин акыңыз {sum} {cur}',
         feeYouGuest: 'Сиздин акыңыз {sum} {cur}. КСЛТ мүчөлүгү менен {member} {cur} болот',
         description: 'Мелдеш жөнүндө', scheduleSoon: 'Тартип кийинчерээк жарыяланат',
@@ -1224,7 +1224,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         regClosingSoon: 'Каттоо 24 сааттан кийин жабылат!'
     } : {
         format: 'Формат', participants: 'Участники', pairs: 'Пар', prizeFund: 'Призовой фонд',
-        fee: 'Взнос', feePair: 'Взнос, с пары', som: 'сом',
+        fee: 'Взнос', feePair: 'Взнос с участника', som: 'сом',
         feeYouMember: 'Вы член КСЛТ — ваш взнос {sum} {cur}',
         feeYouGuest: 'Ваш взнос {sum} {cur}. С членством КСЛТ — {member} {cur}',
         description: 'О турнире', scheduleSoon: 'Расписание будет опубликовано позже',
@@ -1367,6 +1367,85 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             descContent.innerHTML = '<div class="td-description-text">' + descText.replace(/\n/g, '<br>') + '</div>';
         } else {
             descContent.innerHTML = '<div class="td-no-results"><p>' + (isEn ? 'No description available.' : (isKg ? 'Сүрөттөмө жок.' : 'Описание отсутствует.')) + '</p></div>';
+        }
+    }
+
+    // ---- Расписание запусков ----
+    //
+    // Тот же порядок, что видит менеджер в админке: по кортам, от раннего
+    // запуска к позднему. Только смотреть — время и пары здесь не правятся.
+    var scheduleContainer = document.getElementById('scheduleContainer');
+    if (scheduleContainer) {
+        var расписанные = matches.filter(function(m) {
+            return m.scheduled_time && m.score !== 'BYE' && (m.player1_id || m.player2_id);
+        });
+
+        if (!расписанные.length) {
+            var нетРасписания = isEn ? 'The schedule is not published yet'
+                : (isKg ? 'Жадыбал азырынча жарыяланган жок' : 'Расписание пока не опубликовано');
+            scheduleContainer.innerHTML = '<div class="td-no-results"><p>' + нетРасписания + '</p></div>';
+            var вкладкаРасп = document.querySelector('.td-tab[data-target="schedule"]');
+            if (вкладкаРасп) вкладкаРасп.style.display = 'none';
+            var шапкаРасп = document.getElementById('schedule');
+            if (шапкаРасп) шапкаРасп.style.display = 'none';
+        } else {
+            var буквы = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+            // Одна очередь, как у ведущего в админке. По кортам больше не
+            // делим: корт заранее известен только у первых запусков, дальше
+            // его ставят по ходу дня — какой освободится, тот и будет
+            var очередь = расписанные.slice().sort(function(a, b) {
+                var д = String(a.scheduled_day || '').localeCompare(String(b.scheduled_day || ''));
+                if (д) return д;
+                var в = String(a.scheduled_time || '').localeCompare(String(b.scheduled_time || ''));
+                if (в) return в;
+                return String(a.court || '').localeCompare(String(b.court || ''), undefined, { numeric: true });
+            });
+
+            var подписи = isEn
+                ? { court: 'Court', time: 'Time', round: 'Round', status: 'Status', group: 'Group',
+                    done: 'Done', live: 'Live', soon: 'Upcoming' }
+                : (isKg
+                    ? { court: 'Корт', time: 'Убакыт', round: 'Раунд', status: 'Абалы', group: 'Топ',
+                        done: 'Аяктады', live: 'Live', soon: 'Күтүүдө' }
+                    : { court: 'Корт', time: 'Время', round: 'Раунд', status: 'Статус', group: 'Группа',
+                        done: 'Завершён', live: 'Идёт', soon: 'Ожидает' });
+
+            var расписаниеHtml = '<div class="td-sched-court">' +
+                '<table class="td-sched-table"><thead><tr>' +
+                    '<th>№</th>' +
+                    '<th>' + подписи.time + '</th>' +
+                    '<th>' + подписи.round + '</th>' +
+                    '<th colspan="3">' + (isEn ? 'Match' : (isKg ? 'Оюн' : 'Игра')) + '</th>' +
+                    '<th>' + подписи.court + '</th>' +
+                    '<th>' + подписи.status + '</th>' +
+                '</tr></thead><tbody>';
+
+            очередь.forEach(function(m, i) {
+                var круг = m.round || '';
+                if (m.group_number) круг = подписи.group + ' ' + (буквы[m.group_number - 1] || m.group_number);
+
+                var состояние = m.status === 'completed' ? подписи.done
+                    : (m.status === 'live' ? подписи.live : подписи.soon);
+                var классСост = m.status === 'completed' ? 'td-sched-done'
+                    : (m.status === 'live' ? 'td-sched-live' : 'td-sched-soon');
+
+                расписаниеHtml += '<tr' + (m.status === 'live' ? ' class="td-sched-row-live"' : '') + '>' +
+                    '<td class="td-sched-num">' + (i + 1) + '</td>' +
+                    '<td class="td-sched-time">' + esc(String(m.scheduled_time).slice(0, 5)) + '</td>' +
+                    '<td><span class="td-sched-round">' + esc(круг) + '</span></td>' +
+                    '<td class="td-sched-p">' + pName(m.player1_id) + '</td>' +
+                    '<td class="td-sched-vs">vs</td>' +
+                    '<td class="td-sched-p">' + pName(m.player2_id) + '</td>' +
+                    '<td class="td-sched-court-cell">' +
+                        (m.court ? подписи.court + ' ' + esc(String(m.court)) : '\u2014') + '</td>' +
+                    '<td><span class="td-sched-status ' + классСост + '">' + состояние + '</span></td>' +
+                '</tr>';
+            });
+
+            расписаниеHtml += '</tbody></table></div>';
+
+            scheduleContainer.innerHTML = расписаниеHtml;
         }
     }
 

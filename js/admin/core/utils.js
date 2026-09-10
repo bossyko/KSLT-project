@@ -237,6 +237,32 @@
     }
 
     /**
+     * Окно-сообщение с одной кнопкой — в оформлении админки.
+     *
+     * Для случаев, где выбирать нечего, а всплывашка слишком мимолётна:
+     * например, заявка ушла в лист ожидания, и это надо заметить.
+     */
+    function showNotice(title, text, okLabel) {
+        document.querySelectorAll('.ad-confirm-overlay').forEach(function(el) { el.remove(); });
+
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-confirm-overlay';
+        overlay.innerHTML =
+            '<div class="ad-confirm-modal">' +
+                '<div class="ad-confirm-title">' + title + '</div>' +
+                '<div class="ad-confirm-text">' + text + '</div>' +
+                '<div class="ad-confirm-actions">' +
+                    '<button class="ad-btn ad-btn-primary" id="adNoticeOk">' +
+                        (okLabel || (L.ok || 'Понятно')) + '</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        overlay.querySelector('#adNoticeOk').addEventListener('click', function() { overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+    }
+
+    /**
      * Окно с полем ввода — в оформлении админки.
      *
      * Заменяет prompt(): тот рисуется браузером, выглядит на каждом по-своему
@@ -696,6 +722,7 @@
     // ---- Export to namespace ----
     A.showToast = showToast;
     A.showConfirm = showConfirm;
+    A.showNotice = showNotice;
     A.showConfirmAsync = showConfirmAsync;
     A.showPromptAsync = showPromptAsync;
 

@@ -2099,3 +2099,104 @@ tr.td-rr-row-dimmed {
     outline-offset: 2px;
     border-radius: 6px;
 }
+
+/* ---- Расписание запусков ----
+   Тот же порядок, что у ведущего в админке: одна очередь, от раннего запуска
+   к позднему. Корт известен только у первых — дальше прочерк, его поставят по
+   ходу дня. Здесь только смотрят, поэтому ни полей, ни кнопок. */
+.td-sched-court {
+    max-width: 1000px;
+    margin: 0 auto var(--space-xl);
+}
+
+.td-sched-court-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.td-sched-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.td-sched-court-cell {
+    white-space: nowrap;
+    color: var(--text-secondary);
+}
+
+.td-sched-table th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    font-weight: 600;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.td-sched-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.td-sched-num {
+    width: 36px;
+    color: var(--text-dim);
+    text-align: center;
+}
+
+.td-sched-time {
+    width: 64px;
+    font-weight: 700;
+}
+
+.td-sched-round {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.td-sched-p {
+    /* Пара пишется целиком, поэтому строка переносится, а не обрезается */
+    line-height: 1.35;
+}
+
+.td-sched-vs {
+    width: 34px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+}
+
+.td-sched-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.td-sched-done { background: rgba(52, 199, 89, 0.12); color: #34c759; }
+.td-sched-live { background: rgba(255, 179, 0, 0.15); color: #ffb300; }
+.td-sched-soon { background: rgba(255, 255, 255, 0.06); color: var(--text-secondary); }
+
+.td-sched-row-live td { background: rgba(255, 179, 0, 0.04); }
+
+@media (max-width: 768px) {
+    .td-sched-table { font-size: 0.82rem; }
+    .td-sched-table td, .td-sched-table th { padding: 8px 6px; }
+    .td-sched-vs { width: 24px; }
+}

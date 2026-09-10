@@ -121,6 +121,38 @@
             '\u26A0 ' + (одиночный || '—') + '</button></td>';
     }
 
+    /**
+     * Групповой матч ни на что дальше не влияет: в группе каждая пара играет
+     * с каждой, и результат одной встречи не переносит людей в другие клетки.
+     * Правка сетки — про олимпийку, где победитель едет дальше; в группе её
+     * применять нельзя, иначе стираются чужие матчи с теми же номерами.
+     */
+    function групповой(m) {
+        return !!(m && m.group_number);
+    }
+
+    /** Число без лишних нулей: 8.75 остаётся 8.75, а 7.00 показывается как 7. */
+    function дробь(n) {
+        return String(Math.round((Number(n) || 0) * 100) / 100);
+    }
+
+    /** Время отправки в виде «09:40». Пусто, если не отправляли. */
+    function часы(когда) {
+        if (!когда) return '';
+        var д = new Date(когда);
+        if (isNaN(д.getTime())) return '';
+        return ('0' + д.getHours()).slice(-2) + ':' + ('0' + д.getMinutes()).slice(-2);
+    }
+
+    /** Дата и время отправки: «10.09.26 00:42», по местным часам. */
+    function датаВремя(когда) {
+        if (!когда) return '';
+        var д = new Date(когда);
+        if (isNaN(д.getTime())) return '';
+        return ('0' + д.getDate()).slice(-2) + '.' + ('0' + (д.getMonth() + 1)).slice(-2) + '.' +
+               String(д.getFullYear()).slice(2) + ' ' + часы(когда);
+    }
+
     /** Первый номер пары — больший из двух рейтингов. */
     function сильнейшийВПаре(reg, playersMap) {
         var свой = reg.player_id && playersMap[reg.player_id]
@@ -195,37 +227,49 @@
         var isMixed = tournament.format === 'mixed_doubles';
 
         // Collect already-used player IDs in this tournament
+        // Снятые заявки не занимают человека: он снова свободен для пары
         var usedIds = {};
         registrations.forEach(function(r) {
+            if (r.status === 'withdrawn' || r.status === 'rejected') return;
             if (r.player_id) usedIds[r.player_id] = true;
             if (r.partner_id) usedIds[r.partner_id] = true;
         });
 
+        // Сначала выбор, кого добавляем: игрока с карточкой или гостя. Раньше
+        // оба способа стояли на экране разом, и было непонятно, что заполнять
         var modalHtml =
             '<div style="display:flex;flex-direction:column;gap:12px;min-width:320px;">' +
-                '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + L.doublesPartnerSearch + '</label>' +
-                    '<input type="text" class="ad-field-input" id="adPartnerSearch" placeholder="' + (isEn ? 'Type name...' : 'Введите имя...') + '" autocomplete="off">' +
-                    '<div id="adPartnerResults" style="max-height:180px;overflow-y:auto;margin-top:4px;"></div>' +
-                    '<input type="hidden" id="adPartnerSelectedId" value="">' +
+                '<div class="ad-mode-switch" id="adPartnerMode">' +
+                    '<button type="button" class="on" data-mode="db">' + L.regAddFromDb.replace('+ ', '') + '</button>' +
+                    '<button type="button" data-mode="guest">' + L.regGuest + '</button>' +
                 '</div>' +
-                '<hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:4px 0;">' +
-                '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + (isEn ? 'Or external partner' : 'Или внешний партнёр') + '</label>' +
-                    '<input type="text" class="ad-field-input" id="adPartnerExtName" placeholder="' + L.doublesExtPartnerName + '">' +
-                '</div>' +
-                '<div style="display:flex;gap:12px;">' +
-                    '<div class="ad-field" style="flex:1;">' +
-                        '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adPartnerExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
+                '<div id="adPartnerDbBlock">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.doublesPartnerSearch + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adPartnerSearch" placeholder="' + (isEn ? 'Type name...' : 'Введите имя...') + '" autocomplete="off">' +
+                        '<div id="adPartnerResults" style="max-height:180px;overflow-y:auto;margin-top:4px;"></div>' +
+                        '<input type="hidden" id="adPartnerSelectedId" value="">' +
                     '</div>' +
-                    '<div class="ad-field" style="flex:1;">' +
-                        '<label class="ad-field-label">' + L.doublesExtPartnerGender + '</label>' +
-                        '<select class="ad-field-input" id="adPartnerExtGender">' +
-                            '<option value="">—</option>' +
-                            '<option value="men">' + L.genderMen + '</option>' +
-                            '<option value="women">' + L.genderWomen + '</option>' +
-                        '</select>' +
+                    '<div id="adPartnerCard" style="display:none;margin-top:8px;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:8px;font-size:0.85rem;color:var(--text-secondary);"></div>' +
+                '</div>' +
+                '<div id="adPartnerGuestBlock" style="display:none;">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.doublesExtPartnerName + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adPartnerExtName" placeholder="' + L.doublesExtPartnerName + '">' +
+                    '</div>' +
+                    '<div style="display:flex;gap:12px;margin-top:10px;">' +
+                        '<div class="ad-field" style="flex:1;">' +
+                            '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + '</label>' +
+                            '<input type="number" class="ad-field-input" id="adPartnerExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
+                        '</div>' +
+                        '<div class="ad-field" style="flex:1;">' +
+                            '<label class="ad-field-label">' + L.doublesExtPartnerGender + '</label>' +
+                            '<select class="ad-field-input" id="adPartnerExtGender">' +
+                                '<option value="">—</option>' +
+                                '<option value="men">' + L.genderMen + '</option>' +
+                                '<option value="women">' + L.genderWomen + '</option>' +
+                            '</select>' +
+                        '</div>' +
                     '</div>' +
                 '</div>' +
             '</div>';
@@ -299,7 +343,9 @@
                     partnerNtrp = pnRes.data ? ntrpПары(pnRes.data) : null;
                 }
                 if (!validateNtrpCombined(captainNtrp, partnerNtrp, tournament.ntrp_combined_max)) {
-                    A.showToast(L.doublesNtrpCombinedError, 'error');
+                    A.showToast(L.doublesNtrpCombinedError + ': ' +
+                        дробь(Number(captainNtrp) + Number(partnerNtrp)) + ' \u203A ' +
+                        дробь(tournament.ntrp_combined_max), 'error');
                     return;
                 }
             }
@@ -316,6 +362,32 @@
             var resultsDiv = document.getElementById('adPartnerResults');
             var hiddenInput = document.getElementById('adPartnerSelectedId');
             if (!searchInput) return;
+
+            // Переключение способа: у гостя чистим выбранного игрока и наоборот,
+            // иначе сохранится не то, что человек видел на экране
+            var переключатель = document.getElementById('adPartnerMode');
+            if (переключатель) {
+                переключатель.querySelectorAll('button').forEach(function(кн) {
+                    кн.addEventListener('click', function() {
+                        переключатель.querySelectorAll('button').forEach(function(x) {
+                            x.classList.toggle('on', x === кн);
+                        });
+                        var гость = кн.dataset.mode === 'guest';
+                        document.getElementById('adPartnerDbBlock').style.display = гость ? 'none' : '';
+                        document.getElementById('adPartnerGuestBlock').style.display = гость ? '' : 'none';
+                        if (гость) {
+                            hiddenInput.value = '';
+                            searchInput.value = '';
+                            resultsDiv.innerHTML = '';
+                            document.getElementById('adPartnerCard').style.display = 'none';
+                        } else {
+                            document.getElementById('adPartnerExtName').value = '';
+                            document.getElementById('adPartnerExtNtrp').value = '';
+                            document.getElementById('adPartnerExtGender').value = '';
+                        }
+                    });
+                });
+            }
 
             var searchTimeout;
             searchInput.addEventListener('input', function() {
@@ -356,6 +428,19 @@
                             // Clear external fields
                             var extNameEl = document.getElementById('adPartnerExtName');
                             if (extNameEl) extNameEl.value = '';
+
+                            // У игрока с карточкой пол и рейтинг брать неоткуда,
+                            // кроме карточки — показываем, что подтянулось
+                            var выбран = players.find(function(x) { return x.id === item.dataset.playerId; });
+                            var карточка = document.getElementById('adPartnerCard');
+                            if (выбран && карточка) {
+                                var пол = выбран.gender === 'women' ? L.genderWomen
+                                    : (выбран.gender === 'men' ? L.genderMen : '\u2014');
+                                var рейтинг = ntrpПары(выбран) ? 'NTRP ' + ntrpПары(выбран) : L.dblNtrpNeedTitle;
+                                карточка.innerHTML = A.esc(isEn ? (выбран.name_en || выбран.name) : выбран.name) +
+                                    ' \u00B7 ' + пол + ' \u00B7 ' + рейтинг;
+                                карточка.style.display = '';
+                            }
                         });
                     });
                 }, 300);
@@ -365,33 +450,55 @@
 
     // ---- Replace Player Modal ----
     // target: 'player' (main) or 'partner' (doubles partner)
+    /** Имя стороны заявки: игрок с карточкой, гость или общее слово. */
+    function имяСтороны(reg, сторона, playersMap) {
+        playersMap = playersMap || {};
+        if (!reg) return '\u2014';
+        if (сторона === 'partner') {
+            var п = reg.partner_id && playersMap[reg.partner_id];
+            if (п) return isEn ? (п.name_en || п.name) : п.name;
+            return reg.partner_external_name || L.regReplacePartner;
+        }
+        var и = reg.player_id && playersMap[reg.player_id];
+        if (и) return isEn ? (и.name_en || и.name) : и.name;
+        return reg.external_name || L.regReplaceMain;
+    }
+
     function openReplaceModal(regId, target, tournament, tournamentId, registrations) {
         var reg = registrations.find(function(r) { return r.id === regId; });
         if (!reg) return;
 
+        // Тот же выбор, что при добавлении: игрок с карточкой или гость.
+        // Место в сетке при замене остаётся за заявкой — меняется только тот,
+        // кто выйдет на корт
         var modalHtml =
             '<div style="display:flex;flex-direction:column;gap:12px;min-width:340px;">' +
-                // From database search
-                '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + L.regFromDb + '</label>' +
-                    '<input type="text" class="ad-field-input" id="adReplaceSearch" placeholder="' + L.regSearchPlayer + '" autocomplete="off">' +
-                    '<div id="adReplaceResults" style="max-height:180px;overflow-y:auto;margin-top:4px;"></div>' +
-                    '<input type="hidden" id="adReplaceSelectedId" value="">' +
+                '<div class="ad-mode-switch" id="adReplaceMode">' +
+                    '<button type="button" class="on" data-mode="db">' + L.regAddFromDb.replace('+ ', '') + '</button>' +
+                    '<button type="button" data-mode="guest">' + L.regGuest + '</button>' +
                 '</div>' +
-                '<hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:4px 0;">' +
-                // External player
-                '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + L.regOrExternal + '</label>' +
-                    '<input type="text" class="ad-field-input" id="adReplaceExtName" placeholder="' + L.regExternalName + '">' +
-                '</div>' +
-                '<div style="display:flex;gap:12px;">' +
-                    '<div class="ad-field" style="flex:1;">' +
-                        '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adReplaceExtCountry" placeholder="🇰🇬" style="font-size:1.3rem;text-align:center;">' +
+                '<div id="adReplaceDbBlock">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.regFromDb + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adReplaceSearch" placeholder="' + L.regSearchPlayer + '" autocomplete="off">' +
+                        '<div id="adReplaceResults" style="max-height:180px;overflow-y:auto;margin-top:4px;"></div>' +
+                        '<input type="hidden" id="adReplaceSelectedId" value="">' +
                     '</div>' +
-                    '<div class="ad-field" style="flex:1;">' +
-                        '<label class="ad-field-label">' + L.regExternalNtrp + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adReplaceExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
+                '</div>' +
+                '<div id="adReplaceGuestBlock" style="display:none;">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.regExternalName + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adReplaceExtName" placeholder="' + L.regExternalName + '">' +
+                    '</div>' +
+                    '<div style="display:flex;gap:12px;margin-top:10px;">' +
+                        '<div class="ad-field" style="flex:1;">' +
+                            '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
+                            '<input type="text" class="ad-field-input" id="adReplaceExtCountry" placeholder="🇰🇬" style="font-size:1.3rem;text-align:center;">' +
+                        '</div>' +
+                        '<div class="ad-field" style="flex:1;">' +
+                            '<label class="ad-field-label">' + L.regExternalNtrp + '</label>' +
+                            '<input type="number" class="ad-field-input" id="adReplaceExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
+                        '</div>' +
                     '</div>' +
                 '</div>' +
             '</div>';
@@ -449,6 +556,31 @@
             var resultsDiv = document.getElementById('adReplaceResults');
             var hiddenInput = document.getElementById('adReplaceSelectedId');
             if (!searchInput) return;
+
+            // Переключение способа замены: чужие поля чистим, чтобы сохранилось
+            // ровно то, что человек видел на экране
+            var режим = document.getElementById('adReplaceMode');
+            if (режим) {
+                режим.querySelectorAll('button').forEach(function(кн) {
+                    кн.addEventListener('click', function() {
+                        режим.querySelectorAll('button').forEach(function(x) {
+                            x.classList.toggle('on', x === кн);
+                        });
+                        var гость = кн.dataset.mode === 'guest';
+                        document.getElementById('adReplaceDbBlock').style.display = гость ? 'none' : '';
+                        document.getElementById('adReplaceGuestBlock').style.display = гость ? '' : 'none';
+                        if (гость) {
+                            hiddenInput.value = '';
+                            searchInput.value = '';
+                            resultsDiv.innerHTML = '';
+                        } else {
+                            document.getElementById('adReplaceExtName').value = '';
+                            document.getElementById('adReplaceExtCountry').value = '';
+                            document.getElementById('adReplaceExtNtrp').value = '';
+                        }
+                    });
+                });
+            }
 
             var searchTimeout;
             searchInput.addEventListener('input', function() {
@@ -725,9 +857,18 @@
             }
         }
 
+        // Пометка «Задолженность» — про неоплаченное членство. Пока идёт
+        // бесплатный период, платить не за что, и метка стояла бы у всех
+        var бесплатно = false;
+        try {
+            var нс = await A.client.from('app_settings').select('value').eq('key', 'free_access_until').maybeSingle();
+            var до = нс.data && нс.data.value ? String(нс.data.value).replace(/"/g, '') : '';
+            бесплатно = !!до && до !== 'null' && new Date().toISOString().slice(0, 10) <= до;
+        } catch (e) { /* настройки нет — работаем по членству */ }
+
         // Load membership status for debt labels
         var debtPlayerIds = {};
-        var regPlayerIds = registrations.map(function(r) { return r.player_id; }).filter(Boolean);
+        var regPlayerIds = бесплатно ? [] : registrations.map(function(r) { return r.player_id; }).filter(Boolean);
         if (regPlayerIds.length > 0) {
             // Get profile_ids linked to these player_ids
             var profRes = await A.client.from('profiles').select('id, player_id').in('player_id', regPlayerIds);
@@ -834,7 +975,11 @@
 
         // Registrations panel
         html += '<div class="ad-brk-panel" id="adBrkRegPanel" style="padding-top:8px;' + (activeTab !== 'registrations' ? 'display:none;' : '') + '">';
-        html += renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds, isDbl, regsMap);
+        // Сетка сформирована — состав больше не трогаем: заявка это и есть
+        // место в сетке, и убрать её значит оставить в матчах игрока, которого
+        // в заявках уже нет
+        var сеткаЕсть = matches.length > 0;
+        html += renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds, isDbl, regsMap, сеткаЕсть);
         html += '</div>';
 
         // Bracket / Group panel
@@ -860,7 +1005,7 @@
         // Schedule panel
         if (hasMatches) {
             html += '<div class="ad-brk-panel" id="adBrkSchedulePanel" style="' + (activeTab !== 'schedule' ? 'display:none;' : '') + '">';
-            html += renderSchedulePanel(matches, playersMap, tournament);
+            html += renderSchedulePanel(matches, playersMap, tournament, regsMap);
             html += '</div>';
         }
 
@@ -942,6 +1087,156 @@
             A.loadAndEditTournament(tournamentId);
         });
 
+        // ---- Перестановка запусков ----
+        //
+        // Меняем местами сами игры: время и корт остаются на месте, переезжает
+        // пара. Так порядок правится одним нажатием, а подменить игрока в уже
+        // расставленной сетке нельзя — это дело жеребьёвки, а не расписания.
+        container.querySelectorAll('.ad-sched-up, .ad-sched-down').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var строка = btn.closest('tr');
+                var соседняя = btn.classList.contains('ad-sched-up')
+                    ? строка.previousElementSibling : строка.nextElementSibling;
+                if (!соседняя || !соседняя.dataset.matchId) return;
+
+                var я = matches.find(function(m) { return m.id === строка.dataset.matchId; });
+                var он = matches.find(function(m) { return m.id === соседняя.dataset.matchId; });
+                if (!я || !он) return;
+
+                btn.disabled = true;
+                var r1 = await A.client.from('matches')
+                    .update({ scheduled_time: он.scheduled_time, court: он.court }).eq('id', я.id);
+                var r2 = await A.client.from('matches')
+                    .update({ scheduled_time: я.scheduled_time, court: я.court }).eq('id', он.id);
+                if (r1.error || r2.error) {
+                    btn.disabled = false;
+                    A.showToast((r1.error || r2.error).message, 'error');
+                    return;
+                }
+                // Перестановка — то же изменение расписания, что правка времени.
+                // В базу она уходит сразу, поэтому и отметку о сохранении
+                // двигаем сразу: подпись под таблицей не должна врать
+                await A.client.from('tournaments')
+                    .update({ schedule_saved_at: new Date().toISOString() })
+                    .eq('id', tournamentId);
+                renderBracketManagement(tournamentId, 'schedule');
+            });
+        });
+
+        // ---- Статус игры прямо в очереди ----
+        //
+        // «Ожидает» и «играют» ставит человек, ведущий турнир. «Сыгран»
+        // приходит сам вместе со счётом — руками его не выставляем
+        container.querySelectorAll('.ad-sched-status').forEach(function(кн) {
+            кн.addEventListener('click', async function() {
+                var переключатель = кн.closest('.ad-sched-switch');
+                var статус = кн.dataset.status;
+                if (кн.classList.contains('on')) return;
+
+                var r = await A.client.from('matches')
+                    .update({ status: статус }).eq('id', переключатель.dataset.match);
+                if (r.error) { A.showToast(r.error.message, 'error'); return; }
+
+                переключатель.querySelectorAll('.ad-sched-status').forEach(function(x) {
+                    x.classList.toggle('on', x === кн);
+                });
+                var строка = кн.closest('tr');
+                if (строка) строка.classList.toggle('ad-sched-row-live', статус === 'live');
+
+                // Пара вышла на корт — звать её больше некуда. Вернули «Ждёт» —
+                // «На корт» снова живая, а «Готовьтесь» только если не звали
+                if (строка) {
+                    var готовьтесь = строка.querySelector('.ad-call-ready');
+                    var наКорт = строка.querySelector('.ad-call-go');
+                    if (наКорт) наКорт.disabled = (статус === 'live');
+                    if (готовьтесь) {
+                        готовьтесь.disabled = (статус === 'live') ||
+                            готовьтесь.classList.contains('ad-call-done');
+                    }
+                }
+            });
+        });
+
+        // ---- Зов на корт ----
+        //
+        // Освободился корт — человек ставит его паре и зовёт. Уходит пуш и
+        // телеграм всем четверым, а не крик через весь клуб
+        container.querySelectorAll('.ad-call-ready, .ad-call-go').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var кнС = document.getElementById('adSchedSave');
+                if (кнС && !кнС.disabled) {
+                    A.showToast(L.schedSaveFirst, 'warning');
+                    return;
+                }
+                var зовём = btn.classList.contains('ad-call-go');
+
+                // Звать на корт без номера незачем: «пройдите на корт» — а на
+                // какой? Корт ставится по ходу дня, и к зову он уже известен
+                if (зовём) {
+                    var полеКорта = btn.closest('tr').querySelector('.ad-sched-court');
+                    var корт = полеКорта ? полеКорта.value : '';
+                    if (!корт) { A.showToast(L.schedCourtFirst, 'warning'); return; }
+                }
+
+                btn.disabled = true;
+                try {
+                    var sess = await A.client.auth.getSession();
+                    var res = await fetch(SUPABASE_URL + '/functions/v1/match-notify', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': 'Bearer ' + (sess.data.session ? sess.data.session.access_token : '')
+                        },
+                        body: JSON.stringify({ match_id: btn.dataset.match, kind: зовём ? 'go' : 'ready' })
+                    });
+                    var д = await res.json();
+                    if (!res.ok || д.error) {
+                        A.showToast(д.error || 'Ошибка', 'error');
+                        // Матч успели сыграть, пока страница висела открытой:
+                        // закрываем обе кнопки, чтобы не звать людей зря
+                        if (res.status === 409) {
+                            btn.parentNode.querySelectorAll('button').forEach(function(б) {
+                                б.disabled = true;
+                                б.classList.add('ad-call-done');
+                            });
+                            return;
+                        }
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    var время = часы(д.at || new Date().toISOString());
+                    btn.classList.add('ad-call-done');
+                    if (зовём) {
+                        // Позвали — кнопка становится «Ещё раз» и помнит время
+                        btn.classList.remove('ad-btn-primary');
+                        btn.classList.add('ad-btn-secondary');
+                        btn.textContent = L.schedCallAgain + ' ' + время;
+                        btn.title = L.schedCalled + ' ' + время;
+                        var рядом = btn.parentNode.querySelector('.ad-call-ready');
+                        if (рядом && !рядом.disabled) {
+                            рядом.disabled = true;
+                            рядом.classList.add('ad-call-done');
+                            рядом.title = L.schedCalled + ' ' + время;
+                        }
+                    } else {
+                        // Предупредили — второй раз не шлём
+                        btn.textContent = '\u2713 ' + время;
+                        btn.title = L.schedCalledReady + ' ' + время;
+                    }
+
+                    if (д.already) { A.showToast(L.schedCalledAlready, 'info'); return; }
+                    A.showToast((зовём ? L.schedCalled : L.schedCalledReady) +
+                        ' \u00B7 ' + ((д.sent || 0) + (д.push_sent || 0)), 'success');
+                } catch (e) {
+                    A.showToast(String(e), 'error');
+                }
+                // «Готовьтесь» больше не оживает: предупреждение одно
+                if (зовём) setTimeout(function() { btn.disabled = false; }, 3000);
+            });
+        });
+
         // ---- Schedule save handler ----
         var saveSchedBtn = document.getElementById('adSchedSave');
         if (saveSchedBtn) {
@@ -952,17 +1247,13 @@
                     var matchId = row.dataset.matchId;
                     var timeInput = row.querySelector('.ad-sched-time');
                     var courtEl = row.querySelector('.ad-sched-court');
-                    var p1Select = row.querySelector('[data-side="p1"]');
-                    var p2Select = row.querySelector('[data-side="p2"]');
                     if (!timeInput) return; // completed match, skip
 
+                    // Только время и корт: кто с кем играет, расписание не решает
                     var updateData = {
                         scheduled_time: timeInput.value || null,
                         court: courtEl ? (courtEl.value || null) : null
                     };
-                    // Only update players if dropdowns exist (group matches)
-                    if (p1Select) updateData.player1_id = p1Select.value || null;
-                    if (p2Select) updateData.player2_id = p2Select.value || null;
 
                     updates.push(
                         A.client.from('matches').update(updateData).eq('id', matchId)
@@ -971,17 +1262,75 @@
                 if (updates.length) {
                     saveSchedBtn.disabled = true;
                     await Promise.all(updates);
+                    await A.client.from('tournaments')
+                        .update({ schedule_saved_at: new Date().toISOString() })
+                        .eq('id', tournamentId);
                     A.showToast(L.schedSaved);
                     renderBracketManagement(tournamentId, 'schedule');
                 }
             });
         }
 
+        // Время вводится руками в 24-часовом виде: цифры, двоеточие ставится
+        // само, часы не больше 23, минуты не больше 59. Ни списков, ни
+        // подсказок браузера — на площадке это только мешает
+        container.querySelectorAll('.ad-sched-time').forEach(function(поле) {
+            поле.addEventListener('focus', function() { поле.select(); });
+
+            поле.addEventListener('input', function() {
+                var цифры = поле.value.replace(/\D/g, '').slice(0, 4);
+                if (цифры.length >= 1) {
+                    // Первая цифра больше двух — это сразу час: 9 → 09
+                    if (Number(цифры[0]) > 2) цифры = '0' + цифры.slice(0, 3);
+                }
+                if (цифры.length >= 2 && Number(цифры.slice(0, 2)) > 23) цифры = '23' + цифры.slice(2);
+                if (цифры.length >= 4 && Number(цифры.slice(2, 4)) > 59) цифры = цифры.slice(0, 2) + '59';
+                поле.value = цифры.length > 2 ? цифры.slice(0, 2) + ':' + цифры.slice(2) : цифры;
+            });
+
+            поле.addEventListener('blur', function() {
+                var цифры = поле.value.replace(/\D/g, '');
+                if (!цифры) { поле.value = ''; return; }
+                // Одна цифра — это час: «9» значит 09:00, а не 90-й час
+                if (цифры.length === 1) цифры = '0' + цифры;
+                while (цифры.length < 4) цифры += '0';
+                var ч = Math.min(23, Number(цифры.slice(0, 2)));
+                var м = Math.min(59, Number(цифры.slice(2, 4)));
+                поле.value = ('0' + ч).slice(-2) + ':' + ('0' + м).slice(-2);
+            });
+        });
+
+        // Кнопка сохранения оживает от правки времени или корта. Стрелки и
+        // статус пишутся в базу сразу — им сохранение не нужно
+        container.querySelectorAll('.ad-sched-time, .ad-sched-court').forEach(function(поле) {
+            var оживить = function() {
+                var кн = document.getElementById('adSchedSave');
+                if (кн) кн.disabled = false;
+                // Пока правки не сохранены, звать нельзя: людям уйдёт время и
+                // корт из базы, а на экране у ведущего уже другие
+                container.querySelectorAll('.ad-call-ready, .ad-call-go').forEach(function(б) {
+                    б.disabled = true;
+                });
+            };
+            поле.addEventListener('input', оживить);
+            поле.addEventListener('change', оживить);
+        });
+
         // ---- Schedule notify handler ----
         var notifySchedBtn = document.getElementById('adSchedNotify');
         if (notifySchedBtn) {
             notifySchedBtn.addEventListener('click', function() {
-                A.showConfirm(L.schedNotifyConfirm, '', async function() {
+                // Разослать несохранённое расписание — значит разослать то,
+                // чего в базе нет: людям придёт одно, а на площадке другое
+                var кнС = document.getElementById('adSchedSave');
+                if (кнС && !кнС.disabled) {
+                    A.showToast(L.schedSaveFirst, 'warning');
+                    return;
+                }
+                var уже = notifySchedBtn.dataset.sent
+                    ? '<p style="margin:0 0 8px;">' + L.schedNotifiedAt + ' ' +
+                      A.esc(notifySchedBtn.dataset.sent) + '</p>' : '';
+                A.showConfirm(L.schedNotifyConfirm, уже, async function() {
                     notifySchedBtn.disabled = true;
                     notifySchedBtn.textContent = '📢 ...';
                     try {
@@ -1005,7 +1354,25 @@
                         } else {
                             A.showToast(L.schedNotifySent + ' (' + result.sent + ')', 'success');
                         }
-                        notifySchedBtn.textContent = '📢 ' + L.schedNotifySent;
+                        // Отметка не записалась — дата пропадёт при обновлении
+                        // страницы, и лучше узнать об этом сразу
+                        if (result.saved === false) {
+                            A.showToast('Отметка о рассылке не сохранилась: ' +
+                                (result.save_error || '—'), 'warning');
+                        }
+
+                        // Кнопка остаётся живой: расписание меняется, и повтор нужен
+                        var отправлено = датаВремя(result.at || new Date().toISOString());
+                        notifySchedBtn.dataset.sent = отправлено;
+                        notifySchedBtn.disabled = false;
+                        notifySchedBtn.textContent = '📢 ' + L.schedNotify;
+                        var подпись = notifySchedBtn.parentNode.querySelector('.ad-sched-sent');
+                        if (!подпись) {
+                            подпись = document.createElement('span');
+                            подпись.className = 'ad-sched-sent';
+                            notifySchedBtn.parentNode.insertBefore(подпись, notifySchedBtn);
+                        }
+                        подпись.textContent = L.schedNotifiedAt + ' ' + отправлено;
                     } catch (err) {
                         A.showToast(err.message || 'Error', 'error');
                         notifySchedBtn.disabled = false;
@@ -1206,16 +1573,32 @@
                             // NTRP combined check
                             if (tournament.ntrp_combined_max && extNtrp && insertData.partner_external_ntrp) {
                                 if (!validateNtrpCombined(extNtrp, insertData.partner_external_ntrp, tournament.ntrp_combined_max)) {
-                                    A.showToast(L.doublesNtrpCombinedError, 'error');
+                                    A.showToast(L.doublesNtrpCombinedError + ': ' +
+                                        дробь(Number(extNtrp) + Number(insertData.partner_external_ntrp)) + ' \u203A ' +
+                                        дробь(tournament.ntrp_combined_max), 'error');
                                     return;
                                 }
                             }
                         }
                     }
 
+                    // Мест столько, сколько выставлено в турнире. Сверх этого
+                    // заявка не пропадает, а встаёт в лист ожидания
+                    var всегоМест = tournament.max_participants || 0;
+                    var занято = registrations.filter(function(r) {
+                        return r.status === 'approved' || r.status === 'pending' || r.status === 'draw';
+                    }).length;
+                    var вСетку = !всегоМест || занято < всегоМест;
+                    if (!вСетку) insertData.status = 'waitlist';
+
                     var insRes = await A.client.from('tournament_registrations').insert(insertData);
                     if (insRes.error) { A.showToast(insRes.error.message, 'error'); return; }
-                    A.showToast(L.regExternalAdded);
+                    if (вСетку) {
+                        A.showToast(L.regExternalAdded);
+                    } else {
+                        A.showNotice(L.regWaitlistTitle,
+                            '<p style="margin:0;">' + A.esc(extName) + ' \u2014 ' + L.regAddedToWaitlist + '</p>');
+                    }
                     renderBracketManagement(tournamentId, 'registrations');
                 }, isEn ? 'Add' : 'Добавить');
             });
@@ -1225,7 +1608,23 @@
         var dbBtn = document.getElementById('adBrkAddFromDb');
         if (dbBtn) {
             dbBtn.addEventListener('click', function() {
-                var existingIds = registrations.map(function(r) { return r.player_id; }).filter(Boolean);
+                // Снятая заявка не считается: строка остаётся в базе со статусом
+                // «снят», и раньше из-за неё человека нельзя было вернуть —
+                // поиск говорил «уже зарегистрирован»
+                var живые = registrations.filter(function(r) {
+                    return r.status !== 'withdrawn' && r.status !== 'rejected';
+                });
+                var existingIds = живые.map(function(r) { return r.player_id; }).filter(Boolean);
+                var снятые = {};
+                registrations.forEach(function(r) {
+                    if (r.player_id && (r.status === 'withdrawn' || r.status === 'rejected')) {
+                        снятые[r.player_id] = r.id;
+                    }
+                });
+                // Мужской или женский турнир — тогда чужой пол подсвечиваем и
+                // спрашиваем подтверждение. В миксте оба пола свои
+                var полТурнира = (tournament.gender === 'men' || tournament.gender === 'women')
+                    ? tournament.gender : null;
 
                 // Create modal overlay
                 var overlay = document.createElement('div');
@@ -1242,6 +1641,20 @@
                         '</div>' +
                     '</div>';
                 document.body.appendChild(overlay);
+
+                var добавлено = 0;
+
+                // Мест столько, сколько выставлено в турнире. Сверх этого
+                // заявка не пропадает, а становится в лист ожидания — так же,
+                // как при подаче с сайта
+                function местоЕсть() {
+                    var всего = tournament.max_participants || 0;
+                    if (!всего) return true;
+                    var занято = живые.filter(function(r) {
+                        return r.status === 'approved' || r.status === 'pending' || r.status === 'draw';
+                    }).length + добавлено;
+                    return занято < всего;
+                }
 
                 var searchInput = document.getElementById('adDbSearchInput');
                 var resultsDiv = document.getElementById('adDbSearchResults');
@@ -1262,7 +1675,7 @@
                     if (q.length < 2) { resultsDiv.innerHTML = ''; return; }
                     debounceTimer = setTimeout(async function() {
                         var res = await A.client.from('players')
-                            .select('id, name, name_en, photo, category_id, ntrp_singles')
+                            .select('id, name, name_en, photo, category_id, ntrp_singles, gender')
                             .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
                             .limit(10);
                         var players = res.data || [];
@@ -1276,15 +1689,21 @@
                             var alreadyIn = existingIds.indexOf(p.id) !== -1;
                             var catLabel = p.category_id ? p.category_id.charAt(0).toUpperCase() + p.category_id.slice(1) : '—';
                             var ntrpLabel = p.ntrp_singles ? ('NTRP ' + p.ntrp_singles) : '';
+                            // Пол показываем всегда: раньше менеджер не видел,
+                            // кого добавляет, и женщина уходила в мужской турнир
+                            var полLabel = p.gender === 'women' ? L.genderWomen
+                                : (p.gender === 'men' ? L.genderMen : '');
+                            var чужой = полТурнира && p.gender && p.gender !== полТурнира;
                             var photoHtml = p.photo
                                 ? '<img src="' + A.esc(p.photo) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">'
                                 : '<div style="width:32px;height:32px;border-radius:50%;background:var(--card-bg);display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:14px;">—</div>';
                             var nameDisplay = isEn ? (p.name_en || p.name) : p.name;
-                            html += '<div data-player-id="' + p.id + '" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:' + (alreadyIn ? 'default' : 'pointer') + ';opacity:' + (alreadyIn ? '0.5' : '1') + ';" ' + (alreadyIn ? '' : 'data-can-add="1"') + '>' +
+                            html += '<div data-player-id="' + p.id + '" data-gender="' + (p.gender || '') + '" data-player-name="' + A.esc(nameDisplay) + '" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:' + (alreadyIn ? 'default' : 'pointer') + ';opacity:' + (alreadyIn ? '0.5' : '1') + ';" ' + (alreadyIn ? '' : 'data-can-add="1"') + '>' +
                                 photoHtml +
                                 '<div style="flex:1;">' +
                                     '<div style="font-weight:500;color:var(--text-primary);">' + A.esc(nameDisplay) + '</div>' +
-                                    '<div style="font-size:0.8rem;color:var(--text-secondary);">' + catLabel + (ntrpLabel ? ' · ' + ntrpLabel : '') + '</div>' +
+                                    '<div style="font-size:0.8rem;color:' + (чужой ? '#ffb300' : 'var(--text-secondary)') + ';">' +
+                                        (полLabel ? полLabel + ' · ' : '') + catLabel + (ntrpLabel ? ' · ' + ntrpLabel : '') + '</div>' +
                                 '</div>' +
                                 (alreadyIn ? '<span style="font-size:0.75rem;color:var(--accent);">' + L.regAlreadyRegistered + '</span>' : '') +
                             '</div>';
@@ -1295,15 +1714,52 @@
                         resultsDiv.querySelectorAll('[data-can-add="1"]').forEach(function(row) {
                             row.addEventListener('mouseenter', function() { row.style.background = 'rgba(255,255,255,0.05)'; });
                             row.addEventListener('mouseleave', function() { row.style.background = ''; });
-                            row.addEventListener('click', async function() {
+                            row.addEventListener('click', function() {
+                                var playerId = row.dataset.playerId;
+                                var пол = row.dataset.gender;
+
+
+                                // Чужой пол — спрашиваем нашим окном, а не
+                                // системным: то и выглядит чужим, и имя в нём
+                                // терялось
+                                if (полТурнира && пол && пол !== полТурнира) {
+                                    var имя = row.dataset.playerName || '';
+                                    A.showConfirm(L.regGenderWarnTitle,
+                                        '<p style="margin:0;">' + A.esc(имя) + ' — ' +
+                                        (пол === 'women' ? L.genderWomen : L.genderMen) + '. ' +
+                                        L.regGenderWarn + '</p>',
+                                        function() { добавить(); }, L.regGenderWarnOk);
+                                    return;
+                                }
+                                добавить();
+                            });
+
+                            async function добавить() {
                                 var playerId = row.dataset.playerId;
                                 row.style.opacity = '0.5';
                                 row.style.pointerEvents = 'none';
-                                var insRes = await A.client.from('tournament_registrations').insert({
-                                    tournament_id: tournamentId,
-                                    player_id: playerId,
-                                    status: 'approved'
-                                });
+                                // Был снят — возвращаем прежнюю строку: вставка
+                                // упёрлась бы в запрет повторной заявки
+                                var вСетку = местоЕсть();
+                                var insRes = снятые[playerId]
+                                    ? await A.client.from('tournament_registrations').update({
+                                        status: вСетку ? 'approved' : 'waitlist',
+                                        group_number: null,
+                                        seed_number: null,
+                                        draw_position: null,
+                                        // Возвращается один человек, а не прежняя
+                                        // пара: напарника он подберёт заново
+                                        partner_id: null,
+                                        partner_external_name: null,
+                                        partner_external_ntrp: null,
+                                        partner_gender: null,
+                                        registered_at: new Date().toISOString()
+                                    }).eq('id', снятые[playerId])
+                                    : await A.client.from('tournament_registrations').insert({
+                                        tournament_id: tournamentId,
+                                        player_id: playerId,
+                                        status: вСетку ? 'approved' : 'waitlist'
+                                    });
                                 if (insRes.error) {
                                     A.showToast(insRes.error.message, 'error');
                                     row.style.opacity = '1';
@@ -1311,12 +1767,27 @@
                                     return;
                                 }
                                 existingIds.push(playerId);
+                                добавлено++;
                                 addedAny = true;
-                                A.showToast(isEn ? 'Player added' : 'Игрок добавлен');
+                                if (вСетку) {
+                                    A.showToast(isEn ? 'Player added' : 'Игрок добавлен');
+                                } else {
+                                    // Лист ожидания — новость не мимолётная,
+                                    // показываем окном, а не всплывашкой. Окно
+                                    // поиска закрываем само: два окна разом не
+                                    // живут, и второе снесло бы первое рывком
+                                    overlay.remove();
+                                    A.showNotice(L.regWaitlistTitle,
+                                        '<p style="margin:0;">' + A.esc(row.dataset.playerName || '') +
+                                        ' \u2014 ' + L.regAddedToWaitlist + '</p>');
+                                }
+                                // Список под окном перерисовываем сразу: раньше
+                                // изменения были видны только после перезагрузки
+                                renderBracketManagement(tournamentId, 'registrations');
                                 row.removeAttribute('data-can-add');
                                 row.querySelector('[style*="flex:1"]').insertAdjacentHTML('afterend',
                                     '<span style="font-size:0.75rem;color:var(--accent);">' + L.regAlreadyRegistered + '</span>');
-                            });
+                            }
                         });
                     }, 300);
                 });
@@ -1379,8 +1850,10 @@
                             '<div class="ad-confirm-modal">' +
                                 '<div class="ad-confirm-title">' + L.regReplaceWho + '</div>' +
                                 '<div class="ad-confirm-actions" style="gap:8px;">' +
-                                    '<button class="ad-btn ad-btn-primary" id="adReplaceMainBtn">' + L.regReplaceMain + '</button>' +
-                                    '<button class="ad-btn ad-btn-secondary" id="adReplacePartnerBtn">' + L.regReplacePartner + '</button>' +
+                                    '<button class="ad-btn ad-btn-primary" id="adReplaceMainBtn">' +
+                                        A.esc(имяСтороны(reg, 'player', playersMap)) + '</button>' +
+                                    '<button class="ad-btn ad-btn-secondary" id="adReplacePartnerBtn">' +
+                                        A.esc(имяСтороны(reg, 'partner', playersMap)) + '</button>' +
                                 '</div>' +
                             '</div>';
                         document.body.appendChild(choiceOverlay);
@@ -1457,6 +1930,17 @@
         container.querySelectorAll('[data-match-clear]').forEach(function(btn) {
             btn.addEventListener('click', async function() {
                 var matchId = btn.dataset.matchClear;
+                var этот = matches.find(function(m) { return m.id === matchId; });
+                if (групповой(этот)) {
+                    // В группе снимаем результат прямо у матча: зависимых нет
+                    btn.disabled = true;
+                    var сн = await A.client.from('matches').update({
+                        winner_id: null, score: null, status: 'upcoming', played_at: null
+                    }).eq('id', matchId);
+                    if (сн.error) { btn.disabled = false; A.showToast(сн.error.message, 'error'); return; }
+                    renderBracketManagement(tournamentId, 'bracket');
+                    return;
+                }
                 var зависимые = await затронутыеМатчи(matchId);
                 if (зависимые === null) return;
                 var согласен = await спроситьПравку(зависимые,
@@ -1639,13 +2123,21 @@
     }
 
     // ---- Registrations Panel HTML ----
-    function renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds, isDbl, regsMap) {
+    function renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds, isDbl, regsMap, заморожено) {
         var html = '';
+        if (заморожено) {
+            html += '<div class="ad-sched-note">' + L.regFrozen + '</div>';
+        }
         var maxPart = tournament.max_participants || 16;
         debtPlayerIds = debtPlayerIds || {};
 
         // Split by status (not overflow)
-        var mainDraw = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; })
+        // «draw» — заявка, уже попавшая в сетку при жеребьёвке. Это та же
+        // основная сетка: без неё раздел «Заявки» оказывался пустым, хотя в
+        // счётчике стояло 12 из 12
+        var mainDraw = registrations.filter(function(r) {
+                return r.status === 'approved' || r.status === 'pending' || r.status === 'draw';
+            })
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
         var waitlistRegs = registrations.filter(function(r) { return r.status === 'waitlist'; })
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
@@ -1679,7 +2171,7 @@
             if (isDbl) {
                 // Doubles: # | NTRP | Имя | NTRP | Партнёр | Общий NTRP | Регистрация | Действия
                 var thCombinedNtrp = isEn ? 'Total NTRP' : 'Общий NTRP';
-                regTableHead = '<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"></th>' +
+                regTableHead = '<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></th>' +
                     '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
                     '<th style="text-align:center;width:50px;">NTRP</th>' +
                     '<th>' + L.plrName + '</th>' +
@@ -1687,17 +2179,17 @@
                     '<th>' + L.doublesPartner + '</th>' +
                     '<th style="text-align:center;width:80px;">' + thCombinedNtrp + '</th>' +
                     '<th>' + thRegTime + '</th>' +
-                    '<th style="width:100px;text-align:center;">' + thActions + '</th>';
+                    '<th style="width:150px;text-align:center;">' + thActions + '</th>';
             } else {
                 // Singles: # | Ранг | Имя | Категория | Регистрация | Действия
                 var thRank = isEn ? 'Rank' : 'Ранг';
-                regTableHead = '<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"></th>' +
+                regTableHead = '<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></th>' +
                     '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
                     '<th style="width:32px;text-align:center;padding:4px 6px;">' + thRank + '</th>' +
                     '<th>' + L.plrName + '</th>' +
                     '<th>' + thCategory + '</th>' +
                     '<th>' + thRegTime + '</th>' +
-                    '<th style="width:100px;text-align:center;">' + thActions + '</th>';
+                    '<th style="width:150px;text-align:center;">' + thActions + '</th>';
             }
 
             // Overflow warning
@@ -1735,7 +2227,8 @@
                 badgeText += ' (' + reservedSpots + ' ' + (isEn ? 'reserved' : 'резерв') + ')';
             }
             html += '<h3 class="ad-reg-section-title">' + L.regMainDraw + ' <span class="ad-badge">' + badgeText + '</span></h3>';
-            html += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">' +
+            html += заморожено ? '' :
+                '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">' +
                 '<button id="adBrkAddFromDb" style="padding:6px 14px;border:1px solid var(--accent);border-radius:6px;background:rgba(204,255,0,0.1);color:var(--accent);cursor:pointer;font-size:0.85rem;font-weight:600;">' + L.regAddFromDb + '</button>' +
                 '<button id="adBrkAddExternal" style="padding:6px 14px;border:1px solid var(--accent);border-radius:6px;background:rgba(204,255,0,0.1);color:var(--accent);cursor:pointer;font-size:0.85rem;font-weight:600;">' + L.regAddExternal + '</button>' +
             '</div>';
@@ -1744,7 +2237,7 @@
                     regTableHead.replace('GRP', 'main') +
                 '</tr></thead><tbody>';
                 mainDraw.forEach(function(reg, idx) {
-                    html += renderRegRow(reg, idx + 1, playersMap, 'main', debtPlayerIds, isDbl);
+                    html += renderRegRow(reg, idx + 1, playersMap, 'main', debtPlayerIds, isDbl, заморожено);
                 });
                 html += '</tbody></table></div>';
             } else {
@@ -1758,7 +2251,7 @@
                     regTableHead.replace('GRP', 'wait') +
                 '</tr></thead><tbody>';
                 waitlistRegs.forEach(function(reg, idx) {
-                    html += renderRegRow(reg, idx + 1, playersMap, 'wait', debtPlayerIds, isDbl);
+                    html += renderRegRow(reg, idx + 1, playersMap, 'wait', debtPlayerIds, isDbl, заморожено);
                 });
                 html += '</tbody></table></div>';
             } else {
@@ -1851,13 +2344,13 @@
         return html;
     }
 
-    function renderRegRow(reg, num, playersMap, group, debtPlayerIds, isDbl) {
+    function renderRegRow(reg, num, playersMap, group, debtPlayerIds, isDbl, заморожено) {
         debtPlayerIds = debtPlayerIds || {};
         var isExternal = reg.is_external;
         var player = isExternal ? null : (reg.players || playersMap[reg.player_id] || {});
         var pmEntry = isExternal ? {} : (playersMap[reg.player_id] || {});
         var pName = isExternal
-            ? (reg.external_name || (isEn ? 'External' : 'Внешний'))
+            ? (reg.external_name || (isEn ? 'Guest' : 'Гость'))
             : (isEn ? (player.name_en || player.name || reg.player_id) : (player.name || reg.player_id));
         var seedHtml = reg.seed_number ? ' <span class="ad-badge ad-badge-accent">[' + reg.seed_number + ']</span>' : '';
         var hasDebt = !isExternal && debtPlayerIds[reg.player_id];
@@ -1887,16 +2380,19 @@
                 ' <span style="color:var(--text-dim);">' +
                 d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
         }
-        var actionsTd = '<td style="text-align:center;white-space:nowrap;">';
+        // Сетка сформирована — кнопки на месте, но нажать нельзя: состав
+        // менять уже поздно, сначала пересоздают жеребьёвку
+        var стоп = заморожено ? ' disabled style="opacity:0.35;cursor:not-allowed;' : ' style="';
+        var actionsTd = '<td style="text-align:center;white-space:nowrap;"><div style="display:flex;gap:6px;justify-content:center;align-items:center;">';
         if (group === 'main') {
-            actionsTd += '<button class="ad-btn-icon ad-btn-replace" data-reg-id="' + reg.id + '" title="' + L.regReplace + '" style="color:#42a5f5;background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 6px;">🔄</button>';
-            actionsTd += '<button class="ad-btn-icon ad-btn-to-waitlist" data-reg-id="' + reg.id + '" title="' + L.regMoveToWaitlist + '" style="color:#FFA726;background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 6px;">⏏</button>';
+            actionsTd += '<button class="ad-reg-act ad-btn-replace" data-reg-id="' + reg.id + '" title="' + L.regReplace + '"' + стоп + 'color:#42a5f5;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReplaceShort + '</button>';
+            actionsTd += '<button class="ad-reg-act ad-btn-to-waitlist" data-reg-id="' + reg.id + '" title="' + L.regMoveToWaitlist + '"' + стоп + 'color:#FFA726;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regMoveToWaitlistShort + '</button>';
         } else if (group === 'wait') {
-            actionsTd += '<button class="ad-btn-icon ad-btn-replace" data-reg-id="' + reg.id + '" title="' + L.regReplace + '" style="color:#42a5f5;background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 6px;">🔄</button>';
-            actionsTd += '<button class="ad-btn-icon ad-btn-approve" data-reg-id="' + reg.id + '" title="' + L.regMoveToMain + '" style="color:#4caf50;background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 6px;">✓</button>' +
-                '<button class="ad-btn-icon ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '" style="color:#f44336;background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 6px;">✕</button>';
+            actionsTd += '<button class="ad-reg-act ad-btn-replace" data-reg-id="' + reg.id + '" title="' + L.regReplace + '"' + стоп + 'color:#42a5f5;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReplaceShort + '</button>';
+            actionsTd += '<button class="ad-reg-act ad-btn-approve" data-reg-id="' + reg.id + '" title="' + L.regMoveToMain + '"' + стоп + 'color:#4caf50;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regMoveToMainShort + '</button>' +
+                '<button class="ad-reg-act ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '"' + стоп + 'color:#f44336;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReject + '</button>';
         }
-        actionsTd += '</td>';
+        actionsTd += '</div></td>';
 
         // Partner column for doubles
         var partnerTd = '';
@@ -1914,13 +2410,17 @@
                     ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(33,150,243,0.15);color:#2196f3;margin-left:4px;">EXT</span>';
             } else {
                 partnerDisplay = '<span style="color:var(--text-dim);font-style:italic;">' + L.doublesNoPartner + '</span>' +
-                    '<br><button class="ad-btn-add-partner" data-reg-id="' + reg.id + '" style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 10px;border:1px solid var(--accent);border-radius:4px;background:rgba(204,255,0,0.08);color:var(--accent);cursor:pointer;font-size:0.7rem;font-weight:600;white-space:nowrap;">+ ' + L.doublesAddPartner + '</button>';
+                    '<br><button class="ad-btn-add-partner" data-reg-id="' + reg.id + '"' + (заморожено ? ' disabled' : '') + ' style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 10px;border:1px solid var(--accent);border-radius:4px;background:rgba(204,255,0,0.08);color:var(--accent);cursor:pointer;font-size:0.7rem;font-weight:600;white-space:nowrap;">+ ' + L.doublesAddPartner + '</button>';
             }
             partnerTd = '<td style="font-size:0.85rem;">' + partnerDisplay + '</td>';
 
             // Combined NTRP column — always calculate, missing = 0
+            // Сумму показываем как есть, до сотых: у турнира лимит вроде
+            // 8.75, а округление до десятых превращало её в 8.8 — и пара
+            // выглядела как не проходящая по допуску
             var combinedNtrp = (playerNtrp || 0) + (partnerNtrp || 0);
-            combinedNtrpTd = '<td style="text-align:center;font-size:0.85rem;font-weight:600;color:var(--accent);">' + combinedNtrp.toFixed(1) + '</td>';
+            combinedNtrpTd = '<td style="text-align:center;font-size:0.85rem;font-weight:600;color:var(--accent);">' +
+                дробь(combinedNtrp) + '</td>';
         }
 
         var rowStyle = hasDebt ? ' style="background:rgba(244,67,54,0.04);"' : '';
@@ -1940,7 +2440,7 @@
             }
 
             return '<tr' + rowStyle + '>' +
-                '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"></td>' +
+                '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></td>' +
                 '<td style="text-align:center;padding:4px 6px;">' + num + '</td>' +
                 playerNtrpTd +
                 '<td>' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</td>' +
@@ -1953,7 +2453,7 @@
         } else {
             // Singles row: # | Ранг | Имя | Категория | Регистрация | Действия
             return '<tr' + rowStyle + '>' +
-                '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"></td>' +
+                '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></td>' +
                 '<td style="text-align:center;padding:4px 6px;">' + num + '</td>' +
                 '<td style="text-align:center;padding:4px 6px;font-size:0.65rem;color:var(--accent);font-weight:600;">' + rankVal + '</td>' +
                 '<td>' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</td>' +
@@ -1964,266 +2464,143 @@
         }
     }
 
-    // ---- Schedule Panel HTML (tables by court, inline-edit) ----
-    function renderSchedulePanel(matches, playersMap, tournament) {
+    // ---- Расписание запусков: одна очередь ----
+    //
+    // Раньше таблица делилась по кортам, и жеребьёвка привязывала корт к
+    // группе: одна пара выходила три раза подряд на своём корте, а соседние
+    // стояли пустыми. В день турнира ведут очередь — кто следующий, тот и
+    // идёт на первый освободившийся корт.
+    //
+    // Поэтому здесь один список по времени. Время первых запусков (по числу
+    // кортов) точное, дальше ориентировочное: игры кончаются кто когда.
+    function renderSchedulePanel(matches, playersMap, tournament, regsMap) {
+        var парный = isDoublesTournament(tournament);
         var courtCount = (tournament && tournament.court_count) || 2;
         var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-        // All matches with scheduled_time (skip BYEs)
-        var allScheduled = matches.filter(function(m) {
+        var очередь = matches.filter(function(m) {
             return m.scheduled_time && m.score !== 'BYE';
         });
 
-        if (!allScheduled.length) {
-            return '<div class="ad-empty-state"><p>' + (isEn ? 'No schedule assigned yet.' : 'Расписание ещё не назначено.') + '</p></div>';
+        if (!очередь.length) {
+            return '<div class="ad-empty-state"><p>' +
+                (isEn ? 'No schedule assigned yet.' : 'Расписание ещё не назначено.') + '</p></div>';
         }
 
-        // Split into group and playoff matches
-        var groupScheduled = allScheduled.filter(function(m) { return m.group_number && m.group_number > 0; });
-        var playoffScheduled = allScheduled.filter(function(m) { return !m.group_number || m.group_number <= 0; });
-
-        // Group matches by court
-        var byCourt = {};
-        groupScheduled.forEach(function(m) {
-            var c = m.court || '1';
-            if (!byCourt[c]) byCourt[c] = [];
-            byCourt[c].push(m);
+        очередь.sort(function(a, b) {
+            var t = String(a.scheduled_time).localeCompare(String(b.scheduled_time));
+            if (t) return t;
+            var c = String(a.court || '').localeCompare(String(b.court || ''), undefined, { numeric: true });
+            if (c) return c;
+            return (a.match_order || 0) - (b.match_order || 0);
         });
 
-        // Sort courts numerically
-        var courtKeys = Object.keys(byCourt).sort(function(a, b) { return parseInt(a, 10) - parseInt(b, 10); });
-
-        // Build per-group player list directly from matches (most reliable source)
-        var groupPlayerIds = {};
-        matches.forEach(function(m) {
-            if (!m.group_number) return;
-            var g = m.group_number;
-            if (!groupPlayerIds[g]) groupPlayerIds[g] = {};
-            if (m.player1_id) groupPlayerIds[g][m.player1_id] = true;
-            if (m.player2_id) groupPlayerIds[g][m.player2_id] = true;
-        });
-        // Convert to sorted player arrays
-        var groupPlayerOpts = {};
-        Object.keys(groupPlayerIds).forEach(function(g) {
-            var players = Object.keys(groupPlayerIds[g])
-                .map(function(id) { return playersMap[id]; })
-                .filter(Boolean);
-            players.sort(function(a, b) {
-                var na = isEn ? (a.name_en || a.name) : a.name;
-                var nb = isEn ? (b.name_en || b.name) : b.name;
-                return na.localeCompare(nb);
-            });
-            groupPlayerOpts[g] = players;
-        });
-        // Build HTML options per group
-        function buildGroupOpts(groupNum) {
-            var opts = '<option value="">—</option>';
-            var players = groupPlayerOpts[groupNum] || [];
-            players.forEach(function(p) {
-                var pName = isEn ? (p.name_en || p.name) : p.name;
-                opts += '<option value="' + p.id + '">' + A.esc(pName) + '</option>';
-            });
-            return opts;
-        }
-        // Fallback: all players (for playoff or non-group matches)
-        function buildAllOpts() {
-            var opts = '<option value="">—</option>';
-            var sorted = Object.keys(playersMap).map(function(id) { return playersMap[id]; })
-                .sort(function(a, b) {
-                    var na = isEn ? (a.name_en || a.name) : a.name;
-                    var nb = isEn ? (b.name_en || b.name) : b.name;
-                    return na.localeCompare(nb);
-                });
-            sorted.forEach(function(p) {
-                var pName = isEn ? (p.name_en || p.name) : p.name;
-                opts += '<option value="' + p.id + '">' + A.esc(pName) + '</option>';
-            });
-            return opts;
-        }
-
-        // Build court options
-        var courtOpts = '';
+        var courtOpts = '<option value="">—</option>';
         for (var ci = 1; ci <= courtCount; ci++) {
             courtOpts += '<option value="' + ci + '">' + L.schedCourtTitle + ' ' + ci + '</option>';
         }
 
-        // Detect court→group mapping (for 1:1 scenario)
-        function detectCourtGroup(courtMatches) {
-            var groups = {};
-            courtMatches.forEach(function(m) {
-                if (m.group_number) groups[m.group_number] = (groups[m.group_number] || 0) + 1;
-            });
-            var gKeys = Object.keys(groups);
-            if (gKeys.length === 1) return parseInt(gKeys[0], 10);
-            return null;
-        }
+        var html = '<div class="ad-sched-note">' + L.schedApproxNote + '</div>';
 
-        var html = '';
+        html += '<div class="ad-sched-section"><table class="ad-table ad-sched-table">' +
+            '<thead><tr>' +
+                '<th class="sched-num">№</th>' +
+                '<th class="sched-time">' + L.schedTime + '</th>' +
+                '<th class="sched-round">' + L.schedRound + '</th>' +
+                '<th class="sched-p">' + (isEn ? 'Pair 1' : 'Пара 1') + '</th>' +
+                '<th class="sched-vs"></th>' +
+                '<th class="sched-p">' + (isEn ? 'Pair 2' : 'Пара 2') + '</th>' +
+                '<th class="sched-court">' + L.schedCourt + '</th>' +
+                '<th class="sched-status">' + L.thStatus + '</th>' +
+                '<th class="sched-call">' + L.schedCallHead + '</th>' +
+            '</tr></thead><tbody>';
 
-        courtKeys.forEach(function(courtKey) {
-            var courtMatches = byCourt[courtKey];
-            // Sort by scheduled_time
-            courtMatches.sort(function(a, b) {
-                if (a.scheduled_time < b.scheduled_time) return -1;
-                if (a.scheduled_time > b.scheduled_time) return 1;
-                return a.match_order - b.match_order;
-            });
+        очередь.forEach(function(m, idx) {
+            var сыгран = m.status === 'completed';
+            var время = m.scheduled_time ? m.scheduled_time.slice(0, 5) : '';
 
-            // Court title with optional group label
-            var courtGroup = detectCourtGroup(courtMatches);
-            var titleExtra = courtGroup ? ' (' + L.groupLabel + ' ' + (groupLetters[courtGroup - 1] || courtGroup) + ')' : '';
-            html += '<div class="ad-sched-section">';
-            html += '<div class="ad-sched-court-title">' + L.schedCourtTitle + ' ' + courtKey + titleExtra + '</div>';
+            var круг = m.round || '';
+            if (m.group_number) круг = L.groupLabel + ' ' + (groupLetters[m.group_number - 1] || m.group_number);
 
-            html += '<table class="ad-table ad-sched-table" style="margin-top:4px;">' +
-                '<thead><tr>' +
-                    '<th class="sched-num">№</th>' +
-                    '<th class="sched-time">' + L.schedTime + '</th>' +
-                    '<th class="sched-round">' + L.schedRound + '</th>' +
-                    '<th class="sched-p">' + (isEn ? 'Player 1' : 'Игрок 1') + '</th>' +
-                    '<th class="sched-vs"></th>' +
-                    '<th class="sched-p">' + (isEn ? 'Player 2' : 'Игрок 2') + '</th>' +
-                    '<th class="sched-court">' + L.schedCourt + '</th>' +
-                    '<th class="sched-status">' + L.status + '</th>' +
-                '</tr></thead><tbody>';
+            var стрелки = сыгран ? '' :
+                '<div class="ad-sched-move">' +
+                    (idx > 0 ? '<button class="ad-sched-up" data-match="' + m.id + '" title="' + L.schedUp + '">\u25B2</button>' : '') +
+                    (idx < очередь.length - 1 ? '<button class="ad-sched-down" data-match="' + m.id + '" title="' + L.schedDown + '">\u25BC</button>' : '') +
+                '</div>';
 
-            courtMatches.forEach(function(m, idx) {
-                var isDone = m.status === 'completed';
-                var disabledAttr = isDone ? ' disabled' : '';
-                var time = m.scheduled_time ? m.scheduled_time.slice(0, 5) : '';
+            var времяHtml = сыгран
+                ? '<span style="font-weight:600;">' + (время || '\u2014') + '</span>'
+                : '<input type="text" class="ad-sched-time" value="' + время + '" placeholder="00:00" ' +
+                  'maxlength="5" inputmode="numeric" autocomplete="off">';
 
-                // Round label
-                var round = m.round || '';
-                if (m.group_number) {
-                    round = L.groupLabel + ' ' + (groupLetters[m.group_number - 1] || m.group_number);
-                }
+            var пара1 = m.player1_id ? getTeamDisplayName(m.player1_id, regsMap, playersMap, парный) : '\u2014';
+            var пара2 = m.player2_id ? getTeamDisplayName(m.player2_id, regsMap, playersMap, парный) : '\u2014';
 
-                // Status
-                var statusClass = isDone ? 'ad-badge-success' : (m.status === 'live' ? 'ad-badge-warning' : 'ad-badge-dim');
-                var statusText = isDone ? (isEn ? 'Done' : 'Завершён') :
-                                 m.status === 'live' ? 'Live' :
-                                 (isEn ? 'Upcoming' : 'Ожидает');
+            var кортHtml = сыгран
+                ? '<span>' + (m.court ? L.schedCourtTitle + ' ' + A.esc(String(m.court)) : '\u2014') + '</span>'
+                : '<select class="ad-sched-court">' +
+                    courtOpts.replace('value="' + m.court + '"', 'value="' + m.court + '" selected') +
+                  '</select>';
 
-                // Time input
-                var timeHtml = isDone
-                    ? '<span style="font-weight:600;">' + (time || '—') + '</span>'
-                    : '<input type="text" class="ad-sched-time" value="' + time + '" placeholder="HH:MM" maxlength="5" pattern="[0-2][0-9]:[0-5][0-9]"' + disabledAttr + '>';
+            // Сыгранным статус ставит счёт: руками его не выставляем, иначе в
+            // таблице группы окажется результат, которого не было
+            var статусHtml = сыгран
+                ? '<span class="ad-badge ad-badge-success">' + L.schedStDone + '</span>'
+                : '<div class="ad-sched-switch" data-match="' + m.id + '">' +
+                    '<button type="button" class="ad-sched-status' + (m.status === 'live' ? '' : ' on') + '" data-status="upcoming">' + L.schedStSoon + '</button>' +
+                    '<button type="button" class="ad-sched-status' + (m.status === 'live' ? ' on' : '') + '" data-status="live">' + L.schedStLive + '</button>' +
+                  '</div>';
 
-                // Player selects
-                var p1Select, p2Select;
-                if (isDone) {
-                    var p1 = playersMap[m.player1_id];
-                    var p2 = playersMap[m.player2_id];
-                    p1Select = '<span>' + (p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : '—') + '</span>';
-                    p2Select = '<span>' + (p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : '—') + '</span>';
-                } else {
-                    var opts = m.group_number ? buildGroupOpts(m.group_number) : buildAllOpts();
-                    p1Select = '<select class="ad-sched-player" data-side="p1">' + opts.replace(
-                        'value="' + m.player1_id + '"',
-                        'value="' + m.player1_id + '" selected'
-                    ) + '</select>';
-                    p2Select = '<select class="ad-sched-player" data-side="p2">' + opts.replace(
-                        'value="' + m.player2_id + '"',
-                        'value="' + m.player2_id + '" selected'
-                    ) + '</select>';
-                }
+            // «Готовьтесь» уходит один раз и потом только показывает время.
+            // «На корт» можно повторить — вдруг пару не услышали
+            var предупредили = часы(m.called_ready_at);
+            var позвали = часы(m.called_go_at);
+            // Звать имеет смысл только тех, кто ещё ждёт: игра идёт — люди на
+            // корте, а «Готовьтесь» после зова опоздало, они уже идут
+            var играют = m.status === 'live';
+            var готовоЗакрыто = предупредили || позвали || играют;
+            var зовHtml = сыгран ? '' :
+                '<div class="ad-sched-call">' +
+                    '<button class="ad-btn ad-btn-sm ad-btn-secondary ad-call-ready' +
+                        ((предупредили || позвали) ? ' ad-call-done' : '') + '" data-match="' + m.id + '"' +
+                        (готовоЗакрыто ? ' disabled' : '') +
+                        (предупредили ? ' title="' + L.schedCalledReady + ' ' + предупредили + '"' : '') + '>' +
+                        (предупредили ? '\u2713 ' + предупредили : L.schedCallReady) + '</button>' +
+                    '<button class="ad-btn ad-btn-sm ' + (позвали ? 'ad-btn-secondary ad-call-done' : 'ad-btn-primary') +
+                        ' ad-call-go" data-match="' + m.id + '"' +
+                        (играют ? ' disabled' : '') +
+                        (позвали ? ' title="' + L.schedCalled + ' ' + позвали + '"' : '') + '>' +
+                        (позвали ? L.schedCallAgain + ' ' + позвали : L.schedCallGo) + '</button>' +
+                '</div>';
 
-                // Court select
-                var courtHtml = isDone
-                    ? '<span>' + L.schedCourtTitle + ' ' + (m.court || '1') + '</span>'
-                    : '<select class="ad-sched-court">' + courtOpts.replace(
-                        'value="' + (m.court || '1') + '"',
-                        'value="' + (m.court || '1') + '" selected'
-                    ) + '</select>';
-
-                html += '<tr data-match-id="' + m.id + '">' +
-                    '<td style="text-align:center;color:var(--text-dim);">' + (idx + 1) + '</td>' +
-                    '<td>' + timeHtml + '</td>' +
-                    '<td><span class="ad-badge">' + round + '</span></td>' +
-                    '<td>' + p1Select + '</td>' +
-                    '<td class="sched-vs">vs</td>' +
-                    '<td>' + p2Select + '</td>' +
-                    '<td>' + courtHtml + '</td>' +
-                    '<td><span class="ad-badge ' + statusClass + '">' + statusText + '</span></td>' +
-                '</tr>';
-            });
-
-            html += '</tbody></table></div>';
+            html += '<tr data-match-id="' + m.id + '"' + (m.status === 'live' ? ' class="ad-sched-row-live"' : '') + '>' +
+                '<td style="text-align:center;color:var(--text-dim);">' + (idx + 1) + стрелки + '</td>' +
+                '<td>' + времяHtml + '</td>' +
+                '<td><span class="ad-badge">' + круг + '</span></td>' +
+                '<td>' + пара1 + '</td>' +
+                '<td class="sched-vs">vs</td>' +
+                '<td>' + пара2 + '</td>' +
+                '<td>' + кортHtml + '</td>' +
+                '<td class="sched-status">' + статусHtml + '</td>' +
+                '<td class="sched-call">' + зовHtml + '</td>' +
+            '</tr>';
         });
 
-        // ---- Playoff section (flat list, no court grouping) ----
-        if (playoffScheduled.length) {
-            playoffScheduled.sort(function(a, b) {
-                if (a.round_number !== b.round_number) return a.round_number - b.round_number;
-                return a.match_order - b.match_order;
-            });
+        html += '</tbody></table></div>';
 
-            html += '<div class="ad-sched-section">';
-            html += '<div class="ad-sched-court-title">' + L.playoffTitle + '</div>';
-            html += '<table class="ad-table ad-sched-table" style="margin-top:4px;">' +
-                '<thead><tr>' +
-                    '<th class="sched-num">№</th>' +
-                    '<th class="sched-time">' + L.schedTime + '</th>' +
-                    '<th class="sched-round">' + L.schedRound + '</th>' +
-                    '<th class="sched-p">' + (isEn ? 'Player 1' : 'Игрок 1') + '</th>' +
-                    '<th class="sched-vs"></th>' +
-                    '<th class="sched-p">' + (isEn ? 'Player 2' : 'Игрок 2') + '</th>' +
-                    '<th class="sched-court">' + L.schedCourt + '</th>' +
-                    '<th class="sched-status">' + L.status + '</th>' +
-                '</tr></thead><tbody>';
-
-            var allOpts = buildAllOpts();
-
-            playoffScheduled.forEach(function(m, idx) {
-                var isDone = m.status === 'completed';
-                var disabledAttr = isDone ? ' disabled' : '';
-                var time = m.scheduled_time ? m.scheduled_time.slice(0, 5) : '';
-
-                // Round label (SF, F, 3RD, etc.)
-                var round = m.round || '';
-
-                // Status
-                var statusClass = isDone ? 'ad-badge-success' : (m.status === 'live' ? 'ad-badge-warning' : 'ad-badge-dim');
-                var statusText = isDone ? (isEn ? 'Done' : 'Завершён') :
-                                 m.status === 'live' ? 'Live' :
-                                 (isEn ? 'Upcoming' : 'Ожидает');
-
-                // Time input
-                var timeHtml = isDone
-                    ? '<span style="font-weight:600;">' + (time || '—') + '</span>'
-                    : '<input type="text" class="ad-sched-time" value="' + time + '" placeholder="HH:MM" maxlength="5" pattern="[0-2][0-9]:[0-5][0-9]"' + disabledAttr + '>';
-
-                // Player display (not editable — determined by bracket advancement)
-                var p1 = playersMap[m.player1_id];
-                var p2 = playersMap[m.player2_id];
-                var p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (m.player1_id ? 'TBD' : '—');
-                var p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (m.player2_id ? 'TBD' : '—');
-
-                // Court — free text input (manager fills manually)
-                var courtVal = m.court || '';
-                var courtHtml = isDone
-                    ? '<span>' + (courtVal ? L.schedCourtTitle + ' ' + courtVal : '—') + '</span>'
-                    : '<input type="text" class="ad-sched-court" value="' + courtVal + '" placeholder="—" maxlength="3"' + disabledAttr + '>';
-
-                html += '<tr data-match-id="' + m.id + '">' +
-                    '<td style="text-align:center;color:var(--text-dim);">' + (idx + 1) + '</td>' +
-                    '<td>' + timeHtml + '</td>' +
-                    '<td><span class="ad-badge">' + round + '</span></td>' +
-                    '<td>' + p1Name + '</td>' +
-                    '<td class="sched-vs">vs</td>' +
-                    '<td>' + p2Name + '</td>' +
-                    '<td>' + courtHtml + '</td>' +
-                    '<td><span class="ad-badge ' + statusClass + '">' + statusText + '</span></td>' +
-                '</tr>';
-            });
-
-            html += '</tbody></table></div>';
-        }
-
-        // Save + Notify buttons
-        html += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">' +
-            '<button class="ad-btn ad-btn-secondary" id="adSchedNotify">📢 ' + L.schedNotify + '</button>' +
-            '<button class="ad-btn ad-btn-primary" id="adSchedSave">' + L.schedSave + '</button>' +
+        // Когда рассылали расписание в прошлый раз. Повторять можно — очередь
+        // меняется, — но вслепую жать не приходится
+        var рассылали = датаВремя(tournament.schedule_notified_at);
+        var сохраняли = датаВремя(tournament.schedule_saved_at);
+        html += '<div class="ad-sched-foot">' +
+            '<div class="ad-sched-stamps">' +
+                (сохраняли ? '<span class="ad-sched-sent">' + L.schedSavedAt + ' ' + сохраняли + '</span>' : '') +
+                (рассылали ? '<span class="ad-sched-sent">' + L.schedNotifiedAt + ' ' + рассылали + '</span>' : '') +
+            '</div>' +
+            '<button class="ad-btn ad-btn-secondary" id="adSchedNotify"' +
+                (рассылали ? ' data-sent="' + рассылали + '"' : '') + '>\uD83D\uDCE2 ' + L.schedNotify + '</button>' +
+            // Сохранять нечего, пока время и корты не трогали
+            '<button class="ad-btn ad-btn-primary" id="adSchedSave" disabled>' + L.schedSave + '</button>' +
         '</div>';
 
         return html;
@@ -3722,12 +4099,43 @@
         A.showToast(isEn ? 'Participants removed' : 'Участники удалены', 'success');
     }
 
+    // Сносит матчи турнира и убеждается, что их не осталось.
+    //
+    // Молчаливый недосмотр здесь дорого стоит: если старые матчи уцелеют,
+    // новая сетка ляжет поверх старой, и в таблице групп одна пара окажется
+    // сразу в двух группах. Поэтому сначала отпускаем записи, которые держат
+    // матчи, а после удаления пересчитываем — и если что-то осталось, лучше
+    // остановиться и сказать об этом, чем рисовать кашу.
+    async function снестиМатчиТурнира(tournamentId) {
+        var спис = await A.client.from('matches').select('id').eq('tournament_id', tournamentId);
+        if (спис.error) return { ok: false, message: спис.error.message };
+        var ids = (спис.data || []).map(function(m) { return m.id; });
+        if (!ids.length) return { ok: true };
+
+        // Трансляция живёт своей жизнью: не удаляем её, а отвязываем от матча
+        await A.client.from('live_matches').update({ match_id: null }).in('match_id', ids);
+
+        var delRes = await A.client.from('matches').delete().eq('tournament_id', tournamentId);
+        if (delRes.error) return { ok: false, message: delRes.error.message };
+
+        var сколько = await A.client.from('matches')
+            .select('id', { count: 'exact', head: true })
+            .eq('tournament_id', tournamentId);
+        if (сколько.error) return { ok: false, message: сколько.error.message };
+        if (сколько.count) {
+            return { ok: false, message: (isEn
+                ? 'Old matches were not deleted: ' + сколько.count + ' left. Draw stopped.'
+                : 'Старые матчи не удалились: осталось ' + сколько.count + '. Жеребьёвка остановлена.') };
+        }
+        return { ok: true };
+    }
+
     // ---- Regenerate Draw ----
     async function regenerateDraw(tournament, tournamentId) {
         try {
             // 1. Delete all matches
-            var delRes = await A.client.from('matches').delete().eq('tournament_id', tournamentId);
-            if (delRes.error) { A.showToast(delRes.error.message, 'error'); return; }
+            var снос = await снестиМатчиТурнира(tournamentId);
+            if (!снос.ok) { A.showToast(снос.message, 'error'); return; }
 
             // 2. Reset registrations: draw → approved, clear group_number & seed_number
             await A.client.from('tournament_registrations').update({
@@ -3769,6 +4177,18 @@
 
     // ---- Generate Bracket Draw ----
     async function generateBracketDraw(tournament, registrations, playersMap) {
+        // Сетку рисуем только на пустом месте: остатки прежней дадут кашу,
+        // где одна пара стоит сразу в двух группах
+        var было = await A.client.from('matches')
+            .select('id', { count: 'exact', head: true })
+            .eq('tournament_id', tournament.id);
+        if (было.count) {
+            A.showToast(isEn
+                ? 'Matches already exist (' + было.count + '). Delete the draw first.'
+                : 'Матчи уже есть (' + было.count + '). Сначала снеси прежнюю сетку.', 'error');
+            return;
+        }
+
         var drawSize = tournament.draw_size || 16;
         var bracketType = tournament.bracket_type || 'single_elimination';
         var courtCount = tournament.court_count || 2;
@@ -5409,17 +5829,24 @@
         await Promise.all(plSchedUpdates);
     }
 
-    // ---- Auto Schedule for Group Stage (Smart: 3 scenarios) ----
+    // ---- Расписание группового этапа: общая очередь ----
+    //
+    // Раньше корт закреплялся за группой: при трёх группах и четырёх кортах
+    // одна пара выходила три раза подряд на своём корте, а свободный корт
+    // стоял пустым. Теперь очередь общая: игры идут волнами по числу кортов,
+    // корты раздаются по кругу, а пара не попадает в две волны подряд, если
+    // есть кем её заменить.
+    //
+    // Время первой волны точное, дальше — ориентировочное: матч кончается
+    // когда кончается. Об этом сказано в самом расписании и в рассылке.
     async function assignGroupSchedule(tournament) {
         var courtCount = tournament.court_count || 2;
         var matchDuration = tournament.match_duration || 90;
         var bufferMinutes = tournament.buffer_minutes || 15;
         var startTime = tournament.start_time ? tournament.start_time.slice(0, 5) : '09:00';
         var scheduledDay = tournament.date_start || null;
-        var groupCount = tournament.group_count || 2;
         var interval = matchDuration + bufferMinutes;
 
-        // Fetch fresh group matches
         var res = await A.client.from('matches')
             .select('*')
             .eq('tournament_id', tournament.id)
@@ -5429,110 +5856,95 @@
         if (!allMatches.length) return;
 
         function timeToMin(t) {
-            var parts = t.split(':');
+            var parts = String(t).split(':');
             return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
         }
         function minToTime(m) {
-            var h = Math.floor(m / 60);
-            var mm = m % 60;
+            var h = Math.floor(m / 60), mm = m % 60;
             return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
         }
+        function занятые(матч) {
+            return [матч.player1_id, матч.player2_id].filter(Boolean);
+        }
+        function пересекается(матч, кто) {
+            return занятые(матч).some(function(id) { return кто.indexOf(id) !== -1; });
+        }
 
-        var maxRound = 0;
-        allMatches.forEach(function(m) { if (m.round_number > maxRound) maxRound = m.round_number; });
+        // Порядок ожидания: круг за кругом, а внутри круга — по очереди из
+        // разных групп, чтобы соседние запуски не были из одной
+        var ждут = [];
+        var кругов = 0;
+        allMatches.forEach(function(m) { if (m.round_number > кругов) кругов = m.round_number; });
+        for (var круг = 1; круг <= кругов; круг++) {
+            var вКруге = allMatches.filter(function(m) { return m.round_number === круг; });
+            var поГруппам = {};
+            вКруге.forEach(function(m) {
+                var g = m.group_number || 0;
+                if (!поГруппам[g]) поГруппам[g] = [];
+                поГруппам[g].push(m);
+            });
+            var группы = Object.keys(поГруппам);
+            var осталось = true;
+            var шаг = 0;
+            while (осталось) {
+                осталось = false;
+                группы.forEach(function(g) {
+                    var список = поГруппам[g];
+                    if (шаг < список.length) { ждут.push(список[шаг]); осталось = true; }
+                });
+                шаг++;
+            }
+        }
 
         var schedUpdates = [];
+        var текущее = timeToMin(startTime);
+        var прошлаяВолна = [];
+        var волн = 0;
 
-        if (groupCount === courtCount) {
-            // ---- Scenario 1: 1:1 — each group on its own court ----
-            for (var g = 1; g <= groupCount; g++) {
-                var gMatches = allMatches
-                    .filter(function(m) { return m.group_number === g; })
-                    .sort(function(a, b) { return a.round_number - b.round_number || a.match_order - b.match_order; });
-                var currentMin = timeToMin(startTime);
-                gMatches.forEach(function(m) {
-                    schedUpdates.push(
-                        A.client.from('matches').update({
-                            scheduled_time: minToTime(currentMin),
-                            scheduled_day: scheduledDay,
-                            court: String(g)
-                        }).eq('id', m.id)
-                    );
-                    currentMin += interval;
-                });
-            }
-        } else if (groupCount < courtCount) {
-            // ---- Scenario 3: Spread — more courts than groups ----
-            var courtsPerGroup = Math.floor(courtCount / groupCount);
-            var extraCourts = courtCount % groupCount;
-            var courtAssign = {};
-            var courtIdx = 1;
-            for (var g = 1; g <= groupCount; g++) {
-                var nCourts = courtsPerGroup + (g <= extraCourts ? 1 : 0);
-                courtAssign[g] = [];
-                for (var c = 0; c < nCourts; c++) {
-                    courtAssign[g].push(courtIdx++);
+        while (ждут.length) {
+            var волна = [];
+            var игроки = [];
+
+            while (волна.length < courtCount && ждут.length) {
+                // Сначала ищем тех, кто не играл в прошлой волне
+                var i = -1;
+                for (var k = 0; k < ждут.length; k++) {
+                    if (!пересекается(ждут[k], игроки) && !пересекается(ждут[k], прошлаяВолна)) { i = k; break; }
                 }
-            }
-            // For each RR round, distribute group matches across assigned courts
-            for (var rr = 1; rr <= maxRound; rr++) {
-                for (var g = 1; g <= groupCount; g++) {
-                    var rrMatches = allMatches.filter(function(m) {
-                        return m.round_number === rr && m.group_number === g;
-                    });
-                    var courts = courtAssign[g];
-                    // Determine wave time: all courts for the same group+round start at the same wave
-                    // Wave = within one RR round, how many waves needed for this group
-                    for (var mi = 0; mi < rrMatches.length; mi++) {
-                        var waveIdx = Math.floor(mi / courts.length);
-                        var cIdx = mi % courts.length;
-                        var waveTime = timeToMin(startTime) + (rr - 1) * interval;
-                        // Add wave offset within same RR round
-                        waveTime += waveIdx * interval;
-                        schedUpdates.push(
-                            A.client.from('matches').update({
-                                scheduled_time: minToTime(waveTime),
-                                scheduled_day: scheduledDay,
-                                court: String(courts[cIdx])
-                            }).eq('id', rrMatches[mi].id)
-                        );
+                // Все оставшиеся играли только что — берём любого, кто не занят
+                // в этой же волне: подряд лучше, чем простаивающий корт
+                if (i === -1) {
+                    for (var k2 = 0; k2 < ждут.length; k2++) {
+                        if (!пересекается(ждут[k2], игроки)) { i = k2; break; }
                     }
                 }
+                if (i === -1) break;
+
+                var матч = ждут.splice(i, 1)[0];
+                волна.push(матч);
+                игроки = игроки.concat(занятые(матч));
             }
-        } else {
-            // ---- Scenario 2: Waves — more groups than courts ----
-            var currentMin = timeToMin(startTime);
-            for (var rr = 1; rr <= maxRound; rr++) {
-                var roundMatches = [];
-                for (var g = 1; g <= groupCount; g++) {
-                    var gRoundM = allMatches.filter(function(m) {
-                        return m.round_number === rr && m.group_number === g;
-                    });
-                    gRoundM.forEach(function(m) { roundMatches.push(m); });
-                }
-                if (!roundMatches.length) continue;
 
-                // Interleave: alternate groups to spread rest evenly
-                if (rr % 2 === 0) roundMatches.reverse();
+            if (!волна.length) break;
 
-                // Distribute in waves of courtCount
-                for (var i = 0; i < roundMatches.length; i++) {
-                    var waveIndex = Math.floor(i / courtCount);
-                    var courtIndex = i % courtCount;
-                    var matchTime = currentMin + waveIndex * interval;
+            // Корт проставляем только первым запускам — по числу кортов.
+            // Дальше заранее не угадать: освободиться может любой, и ставит
+            // его ведущий турнира, когда это случится
+            var перваяВолна = (волн === 0);
 
-                    schedUpdates.push(
-                        A.client.from('matches').update({
-                            scheduled_time: minToTime(matchTime),
-                            scheduled_day: scheduledDay,
-                            court: String(courtIndex + 1)
-                        }).eq('id', roundMatches[i].id)
-                    );
-                }
+            волна.forEach(function(m, idx) {
+                schedUpdates.push(
+                    A.client.from('matches').update({
+                        scheduled_time: minToTime(текущее),
+                        scheduled_day: scheduledDay,
+                        court: перваяВолна ? String((idx % courtCount) + 1) : null
+                    }).eq('id', m.id)
+                );
+            });
 
-                var totalWaves = Math.ceil(roundMatches.length / courtCount);
-                currentMin += totalWaves * interval;
-            }
+            волн++;
+            прошлаяВолна = игроки;
+            текущее += interval;
         }
 
         await Promise.all(schedUpdates);
@@ -5976,7 +6388,9 @@
         var overlay = document.createElement('div');
         overlay.className = 'ad-modal-overlay';
         overlay.innerHTML =
-            '<div class="ad-modal" style="max-width:400px;">' +
+            // Окно чуть шире: в парном турнире в заголовке два имени через
+            // косую черту, и в 400 точек они не помещались
+            '<div class="ad-modal" style="max-width:460px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.enterScore + '</h3>' +
                     '<button class="ad-modal-close" id="adScoreClose">&times;</button>' +
@@ -6013,17 +6427,19 @@
                     '</div>' +
                     '<div id="adRetiredBlock" style="margin-top:12px;text-align:center;display:' + (existingOutcome ? 'block' : 'none') + ';">' +
                         '<label class="ad-field-label">' + L.whoRetired + '</label>' +
-                        '<div style="display:flex;gap:8px;justify-content:center;margin-top:4px;">' +
-                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP1Id ? ' active' : '') + '" data-retired="' + displayP1Id + '" style="font-size:0.85rem;padding:6px 14px;">' + A.esc(p1Name) + '</button>' +
-                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP2Id ? ' active' : '') + '" data-retired="' + displayP2Id + '" style="font-size:0.85rem;padding:6px 14px;">' + A.esc(p2Name) + '</button>' +
+                        '<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">' +
+                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP1Id ? ' active' : '') + '" data-retired="' + displayP1Id + '" style="font-size:0.85rem;padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p1Name) + '</button>' +
+                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP2Id ? ' active' : '') + '" data-retired="' + displayP2Id + '" style="font-size:0.85rem;padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p2Name) + '</button>' +
                         '</div>' +
                         '<input type="hidden" id="adRetiredPlayer" value="' + (existingRetiredId || '') + '">' +
                     '</div>' +
                     '<div style="margin-top:12px;text-align:center;">' +
                         '<label class="ad-field-label">' + L.matchWinner + '</label>' +
-                        '<div style="display:flex;gap:8px;justify-content:center;margin-top:6px;">' +
-                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP1Id + '" style="font-size:0.85rem;padding:6px 14px;">' + A.esc(p1Name) + '</button>' +
-                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP2Id + '" style="font-size:0.85rem;padding:6px 14px;">' + A.esc(p2Name) + '</button>' +
+                        // В столбик и во всю ширину: имена пары в строку не
+                        // помещались и вылезали за края окна
+                        '<div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">' +
+                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP1Id + '" style="font-size:0.85rem;padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p1Name) + '</button>' +
+                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP2Id + '" style="font-size:0.85rem;padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p2Name) + '</button>' +
                         '</div>' +
                         '<div id="adWinnerDisplay" style="padding:8px;font-size:0.95rem;"></div>' +
                         '<input type="hidden" id="adScoreWinner" value="' + (match.winner_id || '') + '">' +
@@ -6400,7 +6816,7 @@
             // Победитель поменялся у уже сыгранного матча — это пересборка:
             // показываем, что будет стёрто, и спрашиваем. Всё остальное —
             // обычная запись счёта.
-            var меняемПобедителя = match.winner_id && match.winner_id !== winnerId;
+            var меняемПобедителя = match.winner_id && match.winner_id !== winnerId && !групповой(match);
             if (меняемПобедителя) {
                 var зависимые = await затронутыеМатчи(match.id);
                 if (зависимые === null) return;

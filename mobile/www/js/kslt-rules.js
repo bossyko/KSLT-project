@@ -184,9 +184,13 @@
     /**
      * Что показать в блоке турниров.
      *
-     * Впереди пусто — берём недавно сыгранные, от свежих к старым. Без
-     * этого запасного хода раздел выглядит заброшенным: в приложении там
-     * была пустота, хотя у клуба турниры есть, просто все уже прошли.
+     * Мест всегда шесть, и они всегда заняты. Сначала идут ближайшие — живой,
+     * открытый на запись, скоро, запись закрыта, — а оставшиеся места
+     * добираем недавно сыгранными, от свежих к старым. Появился новый турнир
+     * впереди — он встаёт на своё место, а самый давний сыгранный уходит.
+     *
+     * Раньше сыгранные показывались, только когда впереди пусто, и блок с
+     * двумя турнирами стоял наполовину пустым.
      *
      * statusOf(t) — откуда узнать состояние; у сайта и приложения оно
      * считается по-своему, поэтому приходит снаружи.
@@ -198,17 +202,6 @@
         var max = limit || 6;
 
         var future = list.filter(function (t) { return statusOf(t) !== 'done'; });
-
-        if (!future.length) {
-            var done = list.filter(function (t) { return statusOf(t) === 'done'; })
-                .sort(function (a, b) {
-                    var d = String(b.date_end || b.date_start || '')
-                        .localeCompare(String(a.date_end || a.date_start || ''));
-                    return d || String(b.created_at || '').localeCompare(String(a.created_at || ''));
-                });
-            return R.oneCardPerEvent(done).slice(0, max);
-        }
-
         future.sort(function (a, b) {
             var d = ORDER[statusOf(a)] - ORDER[statusOf(b)];
             if (d) return d;
@@ -217,7 +210,15 @@
             // Даты совпали — первым идёт тот, кого раньше завели в базу
             return String(a.created_at || '').localeCompare(String(b.created_at || ''));
         });
-        return R.oneCardPerEvent(future).slice(0, max);
+
+        var done = list.filter(function (t) { return statusOf(t) === 'done'; })
+            .sort(function (a, b) {
+                var d = String(b.date_end || b.date_start || '')
+                    .localeCompare(String(a.date_end || a.date_start || ''));
+                return d || String(b.created_at || '').localeCompare(String(a.created_at || ''));
+            });
+
+        return R.oneCardPerEvent(future.concat(done)).slice(0, max);
     };
 
     // ---- Ссылки на сети --------------------------------------------

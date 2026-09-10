@@ -472,8 +472,26 @@
                 e.stopPropagation();
                 var открыт = !!pubBtn.dataset.pubOn;
                 pubBtn.disabled = true;
+
+                var данные = { published_at: открыт ? null : new Date().toISOString() };
+
+                // При публикации состояние турнира пересчитываем по датам:
+                // оно могло застрять с прошлой жеребьёвки и висеть как
+                // «регистрация закрыта», хотя срок записи ещё идёт
+                if (!открыт) {
+                    var т = await A.client.from('tournaments')
+                        .select('registration_start, registration_end, date_start, date_end, status')
+                        .eq('id', pubBtn.dataset.pubId).single();
+                    var д = т.data || {};
+                    var неприкосновенные = ['completed', 'cancelled'];
+                    if (неприкосновенные.indexOf(д.status) === -1) {
+                        данные.status = A.computeTournamentStatus(
+                            д.registration_start, д.registration_end, д.date_start, д.date_end);
+                    }
+                }
+
                 var r = await A.client.from('tournaments')
-                    .update({ published_at: открыт ? null : new Date().toISOString() })
+                    .update(данные)
                     .eq('id', pubBtn.dataset.pubId);
                 if (r.error) {
                     pubBtn.disabled = false;

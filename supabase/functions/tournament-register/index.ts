@@ -165,11 +165,28 @@ Deno.serve(async (req) => {
     }
 
     // ---- Пол ----
+    //
+    // Проверяем обоих: в парном турнире напарник — такой же участник, и до
+    // сих пор он проходил без единой проверки. Менеджера и админа не держим:
+    // они ставят замены осознанно, и в админке их об этом спрашивают.
     const playerGender = normalizeGender(player.gender || profile.gender)
+    const partnerGender = await loadPartnerGender(db, body)
+
     if (tournament.gender && tournament.gender !== 'mixed') {
       if (playerGender && playerGender !== tournament.gender) {
         return json({ error: 'gender_mismatch' }, 403)
       }
+      if (!isStaff && partnerGender && partnerGender !== tournament.gender) {
+        return json({ error: 'partner_gender_mismatch' }, 403)
+      }
+    }
+
+    // Микст: пара — мужчина и женщина. Однополую заводит только менеджер.
+    // Игрок при этом не заперт: можно подать заявку без напарника, а пару
+    // ему подберут и впишут потом
+    if (!isStaff && tournament.format === 'mixed_doubles' &&
+        playerGender && partnerGender && playerGender === partnerGender) {
+      return json({ error: 'mixed_pair_same_gender' }, 403)
     }
 
     // ---- Категория закрыта для этого игрока ----
@@ -362,6 +379,18 @@ type Decision = {
 
 // Пол во всём проекте пишется одним словарём: men/women. Раньше учётные
 // записи хранили male/female, и здесь стоял перевод — теперь переводить нечего
+/**
+ * Пол напарника: у игрока с карточкой берём из карточки, у гостя — из того,
+ * что указал заявитель. Не указал — считаем неизвестным и не придираемся.
+ */
+async function loadPartnerGender(db: any, body: any): Promise<string | null> {
+  if (body.partner_id) {
+    const { data } = await db.from('players').select('gender').eq('id', body.partner_id).maybeSingle()
+    return normalizeGender(data?.gender || null)
+  }
+  return normalizeGender(body.partner_gender || null)
+}
+
 function normalizeGender(g: string | null): string | null {
   if (!g) return null
   return (g === 'men' || g === 'women') ? g : null

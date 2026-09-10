@@ -2580,6 +2580,8 @@ h2 {
 
 .rankings-col {
     min-width: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .rankings-col-title {
@@ -2633,6 +2635,7 @@ h2 {
 
 .rankings-panel.active {
     display: block;
+    flex: 1;
 }
 
 .rankings-panel .ranking-row {
@@ -4202,8 +4205,26 @@ h2 {
 .tc-featured {
     display: grid;
     grid-template-columns: 1.1fr 1fr;
-    min-height: 252px;
-    max-height: 252px;
+}
+
+/* Первый ряд — одной высоты. Главная карточка была ниже соседних, и ряд
+   выглядел ступенькой; а если её не ограничить, длинное описание растягивает
+   весь ряд втрое. Поэтому высота задана всем троим, а описание обрезается */
+.tournaments-grid > .tc:nth-child(-n+3) {
+    height: 332px;
+}
+
+.tc-featured .tc-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Текстовая половина главной карточки не должна вылезать за её край:
+   иначе кнопка «Подробнее» срезается нижней границей */
+.tc-featured .tc-body {
+    overflow: hidden;
 }
 
 .tc-image {
@@ -4531,10 +4552,14 @@ h2 {
 
 .rk-row {
     display: grid;
-    grid-template-columns: 26px 1fr 30px 42px 46px 58px 36px;
+    /* NTRP теперь двойной — «3.5 / 3.5». В прежние 42px он не влезал, падал
+       на вторую строку и делал строки разной высоты, а таблицы мужчин и
+       женщин — разного роста */
+    grid-template-columns: 26px 1fr 30px 66px 46px 58px 36px;
     align-items: center;
     gap: 8px;
     padding: 8px 10px;
+    min-height: 44px;
     border-radius: 10px;
     font-size: 0.88rem;
 }
@@ -4587,7 +4612,7 @@ h2 {
 .rk-player a:hover { color: var(--accent); }
 
 .rk-country { text-align: center; }
-.rk-ntrp { text-align: center; color: var(--text-secondary); }
+.rk-ntrp { text-align: center; color: var(--text-secondary); white-space: nowrap; }
 
 /* Подпись под названием столбца NTRP: какое число одиночное, какое парное */
 .pl-col-sub {

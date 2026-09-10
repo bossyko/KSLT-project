@@ -226,6 +226,7 @@ ${d.player_name ? `<p style="${S.p}">Привет, ${esc(d.player_name)}!</p>` :
 ${d.venue ? `<p style="${S.infoRow}">📍 ${esc(d.venue)}</p>` : ''}
 ${d.start_time ? `<p style="${S.infoRow}">⏰ Начало: ${esc(d.start_time)}</p>` : ''}
 <hr style="${S.divider}">
+${d.board ? `<p style="${S.muted}">Ваши игры отмечены ▶. Точно ко времени идут первые запуски — по числу кортов. Дальше время ориентировочное: игра начнётся, как освободится корт.</p>` : ''}
 <p style="${S.p}">Удачи на корте! 🎾</p>
 <a href="${SITE_URL}/pages/tournament.html?id=${d.tournament_id}" style="${S.btnOutline}">Подробнее</a>`
   return wrapLayout(content, `Турнир ${d.title} — ${daysLabel}`)
@@ -272,16 +273,20 @@ function templateMatchSchedule(d: Record<string, any>): string {
   let matchesHtml = ''
   if (d.matches && Array.isArray(d.matches)) {
     for (const m of d.matches) {
+      // Общая доска запусков: свои игры выделяем, иначе в длинном списке
+      // человеку придётся искать себя глазами
+      const фон = m.mine ? 'background-color:#f6ffd9;' : ''
+      const жирный = m.mine ? 'font-weight:700;' : ''
       matchesHtml += `<tr>
-        <td style="padding:8px 12px;border-bottom:1px solid #e6e8eb;color:#3f4650;font-size:13px;">${esc(m.time)}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid #e6e8eb;color:#14161a;font-size:13px;">${esc(m.opponent)}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid #e6e8eb;color:#7a828c;font-size:13px;">${esc(m.court || '')}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e6e8eb;color:#3f4650;font-size:13px;${фон}${жирный}">${m.mine ? '▶ ' : ''}${esc(m.time)}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e6e8eb;color:#14161a;font-size:13px;${фон}${жирный}">${esc(m.opponent)}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e6e8eb;color:#7a828c;font-size:13px;${фон}">${esc(m.court || '')}</td>
       </tr>`
     }
   }
 
   const content = `
-<h1 style="${S.h1}">📋 Расписание матчей</h1>
+<h1 style="${S.h1}">📋 ${d.board ? 'Расписание запусков' : 'Расписание матчей'}</h1>
 ${d.player_name ? `<p style="${S.p}">👤 ${esc(d.player_name)}</p>` : ''}
 <h2 style="${S.h2}">${esc(d.tournament_title)}</h2>
 ${d.date ? `<p style="${S.infoRow}">📅 ${esc(d.date)}</p>` : ''}
@@ -289,7 +294,7 @@ ${d.date ? `<p style="${S.infoRow}">📅 ${esc(d.date)}</p>` : ''}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
 <tr style="background-color:#f4f5f7;">
   <th style="padding:8px 12px;text-align:left;color:#4e6b00;font-size:12px;font-weight:600;">Время</th>
-  <th style="padding:8px 12px;text-align:left;color:#4e6b00;font-size:12px;font-weight:600;">Соперник</th>
+  <th style="padding:8px 12px;text-align:left;color:#4e6b00;font-size:12px;font-weight:600;">${d.board ? 'Игра' : 'Соперник'}</th>
   <th style="padding:8px 12px;text-align:left;color:#4e6b00;font-size:12px;font-weight:600;">Корт</th>
 </tr>
 ${matchesHtml}

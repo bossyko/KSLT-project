@@ -86,7 +86,7 @@
         gender: 'Gender',
         noRating: 'Unranked',
         fee: 'Fee', feeMember: 'KSLT members', feeGuest: 'non-members',
-        perPair: 'per pair', som: 'som'
+        perPair: 'per player', som: 'som'
     } : (isKg ? {
         heroTitle: 'Мелдештер',
         heroSub: 'KSLT мелдештеринин бардык категориялары',
@@ -105,7 +105,7 @@
         gender: 'Жынысы',
         noRating: 'Рейтингсиз',
         fee: 'Взнос', feeMember: 'КСЛТ мүчөлөрүнө', feeGuest: 'калгандарга',
-        perPair: 'жуптан', som: 'сом'
+        perPair: 'оюнчудан', som: 'сом'
     } : {
         heroTitle: 'Турниры',
         heroSub: 'Все категории турниров KSLT',
@@ -124,7 +124,7 @@
         gender: 'Пол',
         noRating: 'Без рейтинга',
         fee: 'Взнос', feeMember: 'членам КСЛТ', feeGuest: 'остальным',
-        perPair: 'с пары', som: 'сом'
+        perPair: 'с участника', som: 'сом'
     });
 
     var SL = isEn ? {
