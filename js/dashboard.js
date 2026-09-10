@@ -82,6 +82,7 @@
         linkOther: 'Башка карта тандоо',
         linkTaken: 'Бул картаны башка аккаунт алып койгон',
         linkDone: 'Карта байланды',
+        linkRejected: 'Өтүнүч четке кагылды. Башка карта тандаңыз же менеджерге кайрылыңыз',
         changePassword: 'Сыр сөздү өзгөртүү',
         currentPassword: 'Учурдагы сыр сөз',
         phCurrentPassword: 'Учурдагы сыр сөзүңүз',
@@ -350,6 +351,7 @@
         linkOther: 'Pick another card',
         linkTaken: 'This card is already taken by another account',
         linkDone: 'Card linked',
+        linkRejected: 'The request was rejected. Pick another card or contact a club manager',
         changePassword: 'Change Password',
         currentPassword: 'Current Password',
         phCurrentPassword: 'Your current password',
@@ -618,6 +620,7 @@
         linkOther: 'Выбрать другую карточку',
         linkTaken: 'Эту карточку уже забрал другой аккаунт',
         linkDone: 'Карточка привязана',
+        linkRejected: 'Заявку отклонили. Выберите карточку заново или напишите менеджеру клуба',
         changePassword: 'Смена пароля',
         currentPassword: 'Текущий пароль',
         phCurrentPassword: 'Ваш текущий пароль',
@@ -2088,13 +2091,16 @@
         var box = document.getElementById('dbLinkCard');
         if (!box || !client) return;
 
-        var заявка = null;
+        // Берём последнюю заявку любого исхода: если её отклонили, человек
+        // должен об этом узнать, а не увидеть пустой поиск как ни в чём не бывало
         var res = await client.from('player_link_requests')
-            .select('id, player_id, status, created_at')
+            .select('id, player_id, status, note, created_at')
             .eq('profile_id', profile.id)
-            .eq('status', 'pending')
-            .maybeSingle();
-        if (res.data) заявка = res.data;
+            .order('created_at', { ascending: false })
+            .limit(1);
+        var последняя = (res.data || [])[0] || null;
+        var заявка = (последняя && последняя.status === 'pending') ? последняя : null;
+        var отказ = (последняя && последняя.status === 'rejected') ? последняя : null;
 
         if (заявка) {
             var кто = await client.from('players').select('name').eq('id', заявка.player_id).maybeSingle();
@@ -2105,19 +2111,24 @@
                     '<button class="db-link-other" id="dbLinkOther">' + L.linkOther + '</button>' +
                 '</div>';
             var other = document.getElementById('dbLinkOther');
-            if (other) other.addEventListener('click', function() { нарисоватьПоиск(box, profile); });
+            if (other) other.addEventListener('click', function() { нарисоватьПоиск(box, profile, null); });
             return;
         }
 
-        нарисоватьПоиск(box, profile);
+        нарисоватьПоиск(box, profile, отказ);
     }
 
-    function нарисоватьПоиск(box, profile) {
+    function нарисоватьПоиск(box, profile, отказ) {
+        var шапкаОтказа = отказ
+            ? '<div class="db-link-rejected">\u26A0 ' + L.linkRejected +
+              (отказ.note ? ' \u00B7 ' + escHtml(отказ.note) : '') + '</div>'
+            : '';
         box.innerHTML =
             '<div class="db-link-card">' +
+                шапкаОтказа +
                 '<div class="db-link-title">\uD83C\uDFBE ' + L.linkTitle + '</div>' +
                 '<div class="db-link-text">' + L.linkText + '</div>' +
-                '<input type="text" class="db-input db-link-input" id="dbLinkSearch" placeholder="' + L.linkSearch + '" autocomplete="off">' +
+                '<input type="text" class="db-field-input db-link-input" id="dbLinkSearch" placeholder="' + L.linkSearch + '" autocomplete="off">' +
                 '<div class="db-link-results" id="dbLinkResults"></div>' +
             '</div>';
 
@@ -2133,15 +2144,34 @@
         });
     }
 
+    /**
+     * Через гугл имя приходит латиницей, а карточки в базе на русском.
+     * Поэтому ищем и по тому, что набрали, и по обратной раскладке: набрал
+     * «Dolgushin» — найдём «Долгушин».
+     */
+    var ЛАТ = {a:'а',b:'б',v:'в',g:'г',d:'д',e:'е',z:'з',i:'и',y:'й',k:'к',l:'л',m:'м',
+               n:'н',o:'о',p:'п',r:'р',s:'с',t:'т',u:'у',f:'ф',h:'х',c:'ц'};
+    var ПАРЫ = [['sch','щ'],['sh','ш'],['ch','ч'],['zh','ж'],['ts','ц'],['yu','ю'],['ya','я'],['yo','ё'],['kh','х'],['ee','и']];
+
+    function влатиницу(s) {
+        var t = String(s).toLowerCase();
+        if (!/[a-z]/.test(t)) return null;
+        ПАРЫ.forEach(function(п) { t = t.split(п[0]).join(п[1]); });
+        return t.replace(/[a-z]/g, function(ч) { return ЛАТ[ч] || ч; });
+    }
+
     async function искатьКарточки(q, список, profile) {
         // Занятые карточки не показываем вовсе: has_account стоит у тех, за
         // кем уже есть учётная запись
-        var res = await client.from('players')
+        var кириллица = влатиницу(q);
+        var запрос = client.from('players')
             .select('id, name, category_id, ntrp_singles, photo')
-            .ilike('name', '%' + q + '%')
             .eq('is_guest', false)
             .eq('has_account', false)
             .limit(8);
+        var res = await (кириллица
+            ? запрос.or('name.ilike.%' + q + '%,name.ilike.%' + кириллица + '%')
+            : запрос.ilike('name', '%' + q + '%'));
 
         var люди = res.data || [];
         if (!люди.length) {

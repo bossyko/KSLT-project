@@ -3604,3 +3604,14 @@ select:-webkit-autofill {
     font-size: 0.85rem;
     padding: 6px 2px;
 }
+
+/* Заявку отклонили — человек должен это увидеть, а не пустой поиск */
+.db-link-rejected {
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #ff6b60;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}

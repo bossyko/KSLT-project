@@ -1128,11 +1128,23 @@
             imgInput.click();
         });
 
-        imgInput.addEventListener('change', function() {
-            if (imgInput.files && imgInput.files[0]) {
-                trnImageFile = imgInput.files[0];
-                previewTrnImage(URL.createObjectURL(trnImageFile));
+        // Афишу кадрируем так же, как обложку новости: рисуют их какими
+        // угодно, а в карточке турнира нужна одна пропорция. Менеджер сам
+        // двигает и приближает картинку и видит, что попадёт на сайт
+        async function выбратьАфишу(file) {
+            trnImageFile = file;
+            if (A.cropCover) {
+                var обрезанная = await A.cropCover(file);
+                if (обрезанная) {
+                    trnImageFile = new File([обрезанная],
+                        (file.name || 'poster').replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+                }
             }
+            previewTrnImage(URL.createObjectURL(trnImageFile));
+        }
+
+        imgInput.addEventListener('change', function() {
+            if (imgInput.files && imgInput.files[0]) выбратьАфишу(imgInput.files[0]);
         });
 
         // Drag & drop
@@ -1142,9 +1154,8 @@
             e.preventDefault();
             imgZone.style.borderColor = '';
             if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                trnImageFile = e.dataTransfer.files[0];
                 imgInput.files = e.dataTransfer.files;
-                previewTrnImage(URL.createObjectURL(trnImageFile));
+                выбратьАфишу(e.dataTransfer.files[0]);
             }
         });
 

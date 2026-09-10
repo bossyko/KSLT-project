@@ -106,7 +106,9 @@
                 '<button class="ad-btn ad-btn-sm" id="adUsrPrdApply" style="display:' + (usrPeriodMode === 'custom' ? 'inline-flex' : 'none') + ';">' + L.usrPrdApply + '</button>' +
                 '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adUsrPdfBtn" title="' + L.usrPdfExport + '">📄 PDF</button>' +
                 '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adUsrExcelBtn" title="' + L.usrExcelExport + '">📊 Excel</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adLinkHistoryBtn">' + L.linkHistory + '</button>' +
             '</div>' +
+            '<div id="adLinkHistory" style="display:none;margin-bottom:16px;"></div>' +
 
             // Заявки на привязку карточки: игрок нашёл себя в базе клуба и
             // просит отдать ему карточку. Отдаём руками — по имени карточку
@@ -134,6 +136,7 @@
             '</div>';
 
         нарисоватьЗаявкиНаКарточку();
+        подключитьИсторию(container);
 
         var addMgrBtn = document.getElementById('adUsrAddManager');
         if (addMgrBtn) {
@@ -1918,7 +1921,10 @@
         box.innerHTML =
             '<div class="ad-table-card" style="border-color:rgba(255,179,0,0.35);">' +
                 '<div class="ad-table-card-header">' +
-                    '<div class="ad-table-card-title">\u26A0 ' + L.linkRequests + ' — ' + заявки.length + '</div>' +
+                    // Строка должна бросаться в глаза: это единственное здесь,
+                    // что требует решения человека
+                    '<div class="ad-table-card-title" style="color:#ffb300;">\u26A0 ' +
+                        L.linkRequests + ' — ' + заявки.length + '</div>' +
                 '</div>' +
                 '<div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
                     '<th>' + L.thUser + '</th><th>' + L.linkCard + '</th><th>' + L.thDate + '</th><th></th>' +
@@ -1931,11 +1937,72 @@
                 btn.disabled = true;
                 var r = await A.client.rpc('решить_привязку', { p_request_id: btn.dataset.id, p_approve: одобрить });
                 var д = r.data || {};
+                if (д.error === 'already_decided') {
+                    // Игрок успел передумать и выбрать другую карточку: та
+                    // заявка закрыта, и решать надо уже по новой
+                    A.showToast(L.linkStale, 'warning');
+                    нарисоватьЗаявкиНаКарточку();
+                    return;
+                }
                 if (д.error) { A.showToast(д.error, 'error'); btn.disabled = false; return; }
                 A.showToast(одобрить ? L.linkApproved : L.linkRejected, 'success');
                 нарисоватьЗаявкиНаКарточку();
                 renderUsersList();
             });
+        });
+    }
+
+    function подключитьИсторию(box) {
+        var btn = box.querySelector('#adLinkHistoryBtn');
+        if (!btn) return;
+        btn.addEventListener('click', async function() {
+            var окно = box.querySelector('#adLinkHistory');
+            if (окно.style.display !== 'none') { окно.style.display = 'none'; return; }
+            окно.style.display = '';
+            окно.innerHTML = '<div style="padding:10px;color:var(--text-dim);">…</div>';
+
+            var res = await A.client.from('player_link_requests')
+                .select('id, profile_id, player_id, status, note, created_at, decided_at')
+                .neq('status', 'pending')
+                .order('decided_at', { ascending: false })
+                .limit(30);
+            var строки = res.data || [];
+            if (!строки.length) {
+                окно.innerHTML = '<div style="padding:10px;color:var(--text-dim);">' + L.linkHistoryEmpty + '</div>';
+                return;
+            }
+
+            var профили = {}, карточки = {};
+            var pr = await A.client.from('profiles').select('id, full_name, email')
+                .in('id', строки.map(function(z) { return z.profile_id; }));
+            (pr.data || []).forEach(function(p) { профили[p.id] = p; });
+            var pl = await A.client.from('players').select('id, name')
+                .in('id', строки.map(function(z) { return z.player_id; }));
+            (pl.data || []).forEach(function(p) { карточки[p.id] = p; });
+
+            var подпись = {
+                approved: { текст: L.linkStApproved, цвет: '#34c759' },
+                rejected: { текст: L.linkStRejected, цвет: '#ff3b30' },
+                withdrawn: { текст: L.linkStWithdrawn, цвет: 'var(--text-dim)' }
+            };
+
+            окно.innerHTML = '<div class="ad-table-card"><div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
+                '<th>' + L.thUser + '</th><th>' + L.linkCard + '</th><th>' + L.thStatus + '</th><th>' + L.thDate + '</th>' +
+            '</tr></thead><tbody>' + строки.map(function(z) {
+                var ч = профили[z.profile_id] || {};
+                var к = карточки[z.player_id] || {};
+                var п = подпись[z.status] || { текст: z.status, цвет: 'var(--text-secondary)' };
+                var когда = z.decided_at || z.created_at;
+                return '<tr>' +
+                    '<td>' + A.esc(ч.full_name || '—') +
+                        '<div style="font-size:0.75rem;color:var(--text-dim);">' + A.esc(ч.email || '') + '</div></td>' +
+                    '<td>' + A.esc(к.name || z.player_id) + '</td>' +
+                    '<td style="color:' + п.цвет + ';font-weight:600;">' + п.текст +
+                        (z.note ? '<div style="font-size:0.75rem;color:var(--text-dim);font-weight:400;">' + A.esc(z.note) + '</div>' : '') + '</td>' +
+                    '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
+                        (когда ? new Date(когда).toLocaleDateString(isEn ? 'en-GB' : 'ru-RU') : '—') + '</td>' +
+                '</tr>';
+            }).join('') + '</tbody></table></div></div>';
         });
     }
 
