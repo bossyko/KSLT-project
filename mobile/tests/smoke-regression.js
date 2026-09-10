@@ -339,8 +339,8 @@ else fail('ntrp_combined_max not checked');
 if (trnCode.indexOf('captainNtrp') !== -1) ok('captainNtrp computed from player data');
 else fail('captainNtrp missing');
 
-if (trnCode.indexOf('ntrp_rating') !== -1) ok('ntrp_rating loaded from players table');
-else fail('ntrp_rating not loaded');
+if (trnCode.indexOf('ntrp_singles') !== -1) ok('ntrp_singles loaded from players table');
+else fail('ntrp_singles not loaded');
 
 if (trnCode.indexOf('ntrpExceed') !== -1) ok('NTRP exceed alert uses i18n key');
 else fail('NTRP exceed alert missing');

@@ -49,10 +49,38 @@
         });
     }
 
+    /**
+     * Шапка разряда: название и обложка. В разметке они стоят статикой —
+     * «Tour Tournaments» и tour.jpg, — и на всех разрядах была одна и та же
+     * картинка с чужим названием. Ставим по разряду из адреса.
+     */
+    function оформитьШапку(category) {
+        var подписи = {
+            promasters: 'Pro-Masters', masters: 'Masters', tour: 'Tour',
+            challenger: 'Challengers', futures: 'Futures', friendly: isEn ? 'Friendly' : (isKg ? 'Достук' : 'Дружеские')
+        };
+        var имя = подписи[category] || category;
+
+        var заголовок = document.getElementById('categoryTitle');
+        if (заголовок) {
+            заголовок.textContent = isEn ? (имя + ' Tournaments')
+                : (isKg ? (имя + ' турнирлери') : ('Турниры ' + имя));
+        }
+
+        var фон = document.getElementById('heroBg');
+        if (фон) {
+            var путь = '../images/heroes/' + category + '.jpg';
+            // Обложки нет — пусть остаётся общая, это лучше битой картинки
+            фон.onerror = function() { фон.onerror = null; фон.src = '../images/heroes/tournaments.jpg'; };
+            фон.src = путь;
+        }
+    }
+
     // Run after static data has rendered
     window.addEventListener('load', function() {
         var urlParams = new URLSearchParams(window.location.search);
         var category = urlParams.get('category') || 'tour';
+        оформитьШапку(category);
         overlaySupabaseTournaments(category);
         loadHeroStats(category);
         trackPageView('tournaments-' + category);
@@ -142,22 +170,15 @@
                 elPrize.textContent = shortPrize(totalPrize);
             }
 
-            // Count participants from registrations
+            // Игроки разряда — те, кто стоит в его таблице рейтинга, а не те,
+            // кто подавал заявки на турниры. Заявок было 22 при 68 игроках в
+            // Futures: цифра отвечала на другой вопрос
             try {
-                var ids = tournaments.map(function(t) { return t.id; });
-                if (ids.length > 0) {
-                    // Только принятые заявки: снявшиеся, отклонённые,
-                    // заблокированные и лист ожидания на корт не выходят
-                    var regsResult = await client.from('tournament_registrations')
-                        .select('*', { count: 'exact', head: true })
-                        .in('tournament_id', ids)
-                        .eq('status', 'approved');
-                    if (elPart) elPart.textContent = regsResult.count || 0;
-                } else {
-                    if (elPart) elPart.textContent = '0';
-                }
+                var счёт = window.KSLT_RANKINGS && window.KSLT_RANKINGS.countByCategory
+                    ? await window.KSLT_RANKINGS.countByCategory() : null;
+                if (elPart) elPart.textContent = (счёт && счёт[category]) || 0;
             } catch (re) {
-                console.warn('Registrations count unavailable:', re.message);
+                console.warn('Rating count unavailable:', re.message);
                 if (elPart) elPart.textContent = '0';
             }
 

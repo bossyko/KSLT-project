@@ -216,9 +216,12 @@
     html += '<span class="pd-category">' + esc(_categoryLabel) + ' · #' + _rank + '</span>';
     html += '</div>';
 
-    // NTRP
-    if (p.ntrp_rating) {
-      html += '<div class="pd-ntrp">NTRP <strong>' + Number(p.ntrp_rating).toFixed(1) + '</strong></div>';
+    // NTRP: одиночный разряд и парные турниры, с подписями
+    var ntrpСтрока = (window.KSLT_RULES && window.KSLT_RULES.ntrpСтрока)
+      ? window.KSLT_RULES.ntrpСтрока(p.ntrp_singles, p.ntrp_doubles,
+                                     I18N.lang === 'en' ? 'en' : 'ru') : '';
+    if (ntrpСтрока) {
+      html += '<div class="pd-ntrp">NTRP <strong>' + ntrpСтрока + '</strong></div>';
     }
 
     // Header badges
@@ -334,11 +337,10 @@
     }
 
     // ---- Challenge button (member only) ----
-    // Фоновая карточка — человек есть в списках клуба, но членства не платил
-    // и профиля на платформе у него нет. Вызывать и звать некого: и вызов, и
-    // приглашение ушли бы в пустоту
-    var isBackground = _player.is_member === false;
-    if (access === 'member' && !isBackground) {
+    // Звать можно только того, у кого есть учётная запись: карточка из
+    // списков клуба вызова и приглашения не получит — по ту сторону никого нет
+    var естьЧеловек = _player.has_account === true;
+    if (access === 'member' && естьЧеловек) {
       html += '<div class="pd-challenge-wrap">';
       html += '<button class="pd-challenge-btn" id="pdChallengeBtn">⚔️ ' + I18N.t('pd.challenge') + '</button>';
       // Баттл зовёт на поединок того, кого ты уже знаешь. Приглашение решает

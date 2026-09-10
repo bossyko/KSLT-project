@@ -100,31 +100,37 @@ function getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg) {
 // ========================================
 function applyPlayerHighlight() {
     var pid = window._tdHighlightPlayer;
-    if (!pid) return;
+    // Нажали на название турнира — открываем сетку и всё. Нажали на матч в
+    // истории игрока — сетку и обводим его матчи, остальные не трогаем
+    var сразуВСетку = window._tdOpenBracket || !!pid;
+    if (!сразуВСетку) return;
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var playerPage = 'player' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + pid;
-    var backLabel = isEn ? 'Back to player profile' : (isKg ? 'Оюнчунун профилине кайтуу' : 'Назад к профилю игрока');
-    var backSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg> ';
 
-    // 1) Replace back links → history.back() to return to player profile
-    function goBackToPlayer(e) {
-        e.preventDefault();
-        history.back();
-    }
-    var heroBackLink = document.querySelector('.td-back-link');
-    if (heroBackLink) {
-        heroBackLink.href = playerPage;
-        heroBackLink.innerHTML = backSvg + backLabel;
-        heroBackLink.addEventListener('click', goBackToPlayer);
-    }
-    var tabsBackLink = document.getElementById('tabsBackLink');
-    var tabsBackText = document.getElementById('tabsBackText');
-    if (tabsBackLink) {
-        tabsBackLink.href = playerPage;
-        if (tabsBackText) tabsBackText.textContent = backLabel;
-        tabsBackLink.addEventListener('click', goBackToPlayer);
+    // 1) Пришли из карточки игрока — «назад» возвращает туда же
+    if (pid) {
+        var backLabel = isEn ? 'Back to player profile' : (isKg ? 'Оюнчунун профилине кайтуу' : 'Назад к профилю игрока');
+        var backSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg> ';
+
+        var goBackToPlayer = function(e) {
+            e.preventDefault();
+            history.back();
+        };
+        var heroBackLink = document.querySelector('.td-back-link');
+        if (heroBackLink) {
+            heroBackLink.href = playerPage;
+            heroBackLink.innerHTML = backSvg + backLabel;
+            heroBackLink.addEventListener('click', goBackToPlayer);
+        }
+        var tabsBackLink = document.getElementById('tabsBackLink');
+        var tabsBackText = document.getElementById('tabsBackText');
+        if (tabsBackLink) {
+            tabsBackLink.href = playerPage;
+            if (tabsBackText) tabsBackText.textContent = backLabel;
+            tabsBackLink.addEventListener('click', goBackToPlayer);
+        }
     }
 
     // 2) Switch to bracket tab and scroll (always)
@@ -133,31 +139,53 @@ function applyPlayerHighlight() {
     if (bracketTab && bracketSection) {
         document.querySelectorAll('.td-tab').forEach(function(t) { t.classList.remove('active'); });
         bracketTab.classList.add('active');
-        setTimeout(function() {
-            var top = bracketSection.getBoundingClientRect().top + window.pageYOffset - 120;
-            window.scrollTo({ top: top, behavior: 'smooth' });
-        }, 300);
+
+        // Сетка рисуется не сразу, и раньше мы прокручивали по её месту через
+        // треть секунды — а она в тот момент ещё пустая, стоит у самого верха.
+        // Страница так и оставалась на начале турнира. Теперь ждём, пока в
+        // сетке появятся матчи, и прокручиваем по её настоящему месту; ещё
+        // раз поправляемся, когда догрузятся картинки и высота устоится.
+        var попытка = 0;
+        (function прокрутить() {
+            // #bracket — это заголовок раздела, матчи лежат ниже, отдельным
+            // блоком. Поэтому ждём их по всей странице, а не внутри заголовка
+            var готова = document.querySelector('.td-match, .td-ig-match, tr[data-player-id]');
+            var куда = bracketSection.getBoundingClientRect().top + window.pageYOffset - 120;
+            if (готова && куда > 0) {
+                // Прыгаем сразу, без плавности: человек пришёл по ссылке
+                // «показать мои игры», и ему нужна сетка, а не проезд по
+                // всей странице. Плавную прокрутку браузер к тому же
+                // отменяет, если в этот момент страница ещё достраивается
+                window.scrollTo(0, куда);
+                setTimeout(function() {
+                    var снова = bracketSection.getBoundingClientRect().top + window.pageYOffset - 120;
+                    if (снова > 0 && Math.abs(снова - window.pageYOffset) > 40) {
+                        window.scrollTo(0, снова);
+                    }
+                }, 800);
+                return;
+            }
+            if (++попытка < 40) setTimeout(прокрутить, 100);
+        })();
     }
 
-    // 3) Highlight bracket matches + IG matches
+    if (!pid) return;
+
+    // 3) Матчи игрока обводим. Остальные не гасим: раньше приглушённая сетка
+    //    выглядела сломанной, а клетки без второго игрока — проходы — на её
+    //    фоне читались как подсвеченные, хотя к игроку отношения не имели
     var matches = document.querySelectorAll('.td-match[data-p1], .td-ig-match[data-p1]');
     matches.forEach(function(m) {
         var p1 = m.getAttribute('data-p1');
         var p2 = m.getAttribute('data-p2');
-        if (p1 === pid || p2 === pid) {
-            m.classList.add('td-match-highlight');
-        } else if (p1 && p2) {
-            m.classList.add('td-match-dimmed');
-        }
+        if (p1 === pid || p2 === pid) m.classList.add('td-match-highlight');
     });
 
-    // 4) Highlight group table rows + dim others
+    // 4) Его строка в групповой таблице — так же, обводкой
     var rows = document.querySelectorAll('tr[data-player-id]');
     rows.forEach(function(row) {
         if (row.getAttribute('data-player-id') === pid) {
             row.classList.add('td-rr-row-highlight');
-        } else {
-            row.classList.add('td-rr-row-dimmed');
         }
     });
 }
@@ -166,6 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const tournamentId = urlParams.get('id');
     window._tdHighlightPlayer = urlParams.get('player') || '';
+    window._tdOpenBracket = urlParams.get('tab') === 'bracket';
 
     // Always preserve ?id= in language switcher
     if (tournamentId) {
@@ -2415,7 +2444,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
             });
 
             // Check category match + ban status + NTRP
-            client.from('players').select('category_id, banned_until, ban_reason, ntrp_rating').eq('id', playerId).single().then(async function(plRes) {
+            client.from('players').select('category_id, banned_until, ban_reason, ntrp_singles, ntrp_doubles').eq('id', playerId).single().then(async function(plRes) {
                 if (!plRes.data) return;
 
                 // Get player gender from profile
@@ -2438,7 +2467,12 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 }
 
                 // NTRP check (singles)
-                var playerNtrp = plRes.data.ntrp_rating;
+                var playerNtrp = plRes.data.ntrp_singles;
+                // В парном турнире считаемся парным рейтингом, а если его у
+                // человека нет — одиночным
+                var playerNtrpПары = (window.KSLT_RULES && window.KSLT_RULES.ntrpПары)
+                    ? window.KSLT_RULES.ntrpПары(plRes.data.ntrp_singles, plRes.data.ntrp_doubles)
+                    : plRes.data.ntrp_singles;
                 if (playerNtrp && tournament.ntrp_min && playerNtrp < tournament.ntrp_min) {
                     ntrpBlocked = true;
                 }
@@ -2580,7 +2614,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 var addPartnerBtn = document.getElementById('tdAddPartnerBtn');
                 if (addPartnerBtn) {
                     addPartnerBtn.addEventListener('click', function() {
-                        showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, addPartnerBtn, alreadyRegistered.id, playerNtrp, onlineSlotsFull);
+                        showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, addPartnerBtn, alreadyRegistered.id, playerNtrpПары, onlineSlotsFull);
                     });
                 }
 
@@ -2640,7 +2674,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     regBtn.addEventListener('click', async function() {
                         if (isTournamentDoubles) {
                             // Show doubles registration modal
-                            showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, regBtn, null, playerNtrp, onlineSlotsFull);
+                            showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, regBtn, null, playerNtrpПары, onlineSlotsFull);
                             return;
                         }
 
@@ -2806,7 +2840,7 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
 
         searchTimeout = setTimeout(async function() {
             var res = await client.from('players')
-                .select('id, name, name_en, name_kg, gender, ntrp_rating')
+                .select('id, name, name_en, name_kg, gender, ntrp_singles, ntrp_doubles')
                 .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
                 .neq('id', playerId)
                 .limit(8);
@@ -2822,10 +2856,13 @@ function showDoublesRegistrationModal(client, tournament, playerId, isExactCateg
             players.forEach(function(p) {
                 var displayName = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
                 var genderIcon = p.gender === 'men' ? ' ♂' : (p.gender === 'women' ? ' ♀' : '');
-                html += '<div class="td-partner-item" data-id="' + p.id + '" data-name="' + esc(displayName) + '" data-gender="' + (p.gender || '') + '" data-ntrp="' + (p.ntrp_rating || '') + '" ' +
+                // Турнир парный, значит и рейтинг берём парный
+                var pNtrp = (window.KSLT_RULES && window.KSLT_RULES.ntrpПары)
+                    ? window.KSLT_RULES.ntrpПары(p.ntrp_singles, p.ntrp_doubles) : p.ntrp_singles;
+                html += '<div class="td-partner-item" data-id="' + p.id + '" data-name="' + esc(displayName) + '" data-gender="' + (p.gender || '') + '" data-ntrp="' + (pNtrp || '') + '" ' +
                     'style="padding:8px 12px;cursor:pointer;border-radius:6px;font-size:0.9rem;color:var(--text-primary);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);">' +
                     '<span>' + esc(displayName) + genderIcon + '</span>' +
-                    (p.ntrp_rating ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + p.ntrp_rating + '</span>' : '') +
+                    (pNtrp ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + pNtrp + '</span>' : '') +
                 '</div>';
             });
             resultsDiv.innerHTML = html;

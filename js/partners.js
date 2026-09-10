@@ -356,10 +356,10 @@
             if (result.data && result.data.length > 0) {
                 // Load NTRP ratings from players table
                 var playerIds = result.data.map(function(p) { return p.id; });
-                var ntrpRes = await client.from('players').select('id, ntrp_rating').in('id', playerIds);
+                var ntrpRes = await client.from('players').select('id, ntrp_singles').in('id', playerIds);
                 var ntrpMap = {};
-                (ntrpRes.data || []).forEach(function(p) { ntrpMap[p.id] = p.ntrp_rating; });
-                result.data.forEach(function(p) { p.ntrp_rating = ntrpMap[p.id] || null; });
+                (ntrpRes.data || []).forEach(function(p) { ntrpMap[p.id] = p.ntrp_singles; });
+                result.data.forEach(function(p) { p.ntrp_singles = ntrpMap[p.id] || null; });
 
                 var visible = result.data.filter(function(p) { return p.id !== _myPlayerId; });
                 var shuffled = shuffle(visible);
@@ -389,7 +389,7 @@
         }
         if (_ntrpFilter) {
             list = list.filter(function(p) {
-                return p.ntrp_rating && p.ntrp_rating >= _ntrpFilter.min && p.ntrp_rating < _ntrpFilter.max;
+                return p.ntrp_singles && p.ntrp_singles >= _ntrpFilter.min && p.ntrp_singles < _ntrpFilter.max;
             });
         }
         if (_searchQuery) {
@@ -481,8 +481,8 @@
         }
 
         var ntrpHtml = '';
-        if (p.ntrp_rating) {
-            ntrpHtml = '<div class="pt-ntrp-badge">NTRP ' + Number(p.ntrp_rating).toFixed(1) + '</div>';
+        if (p.ntrp_singles) {
+            ntrpHtml = '<div class="pt-ntrp-badge">NTRP ' + Number(p.ntrp_singles).toFixed(1) + '</div>';
         }
 
         var playerPage = isEn ? 'player-en.html' : isKg ? 'player-kg.html' : 'player.html';

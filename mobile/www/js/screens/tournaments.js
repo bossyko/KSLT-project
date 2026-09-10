@@ -483,7 +483,7 @@
         .eq('player_id', playerId)
         .limit(1),
       supabaseClient.from('players')
-        .select('category_id, banned_until, ban_reason, ntrp_rating, gender')
+        .select('category_id, banned_until, ban_reason, ntrp_singles, ntrp_doubles, gender')
         .eq('id', playerId)
         .single(),
       AUTH.checkMembership(),
@@ -555,7 +555,9 @@
         // Bind "Add Partner" handler
         var addPartnerBtn = document.getElementById('tdAddPartnerBtn');
         if (addPartnerBtn) {
-          var captainNtrp = player ? parseFloat(player.ntrp_rating) || 0 : 0;
+          // Турнир парный: берём парный рейтинг, нет его — одиночный
+          var captainNtrp = player
+            ? (window.KSLT_RULES.ntrpПары(player.ntrp_singles, player.ntrp_doubles) || 0) : 0;
           addPartnerBtn.addEventListener('click', function() {
             showDoublesModal(t, playerId, false, area, null, captainNtrp, onlineSlotsFull, existingReg.id);
           });
@@ -581,7 +583,8 @@
         isExactCategory = false;
       }
 
-      var captainNtrp = player ? parseFloat(player.ntrp_rating) || 0 : 0;
+      var captainNtrp = player
+        ? (window.KSLT_RULES.ntrpПары(player.ntrp_singles, player.ntrp_doubles) || 0) : 0;
 
       // 7. Online slots full → waitlist UI
       if (onlineSlotsFull) {
@@ -733,7 +736,7 @@
 
       searchTimeout = setTimeout(function() {
         supabaseClient.from('players')
-          .select('id, name, name_en, name_kg, gender, ntrp_rating')
+          .select('id, name, name_en, name_kg, gender, ntrp_singles, ntrp_doubles')
           .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
           .neq('id', playerId)
           .limit(8)
@@ -748,10 +751,12 @@
             players.forEach(function(p) {
               var displayName = p.name || '';
               var genderIcon = p.gender === 'men' ? ' ♂' : (p.gender === 'women' ? ' ♀' : '');
-              html += '<div class="mob-partner-item" data-id="' + p.id + '" data-name="' + esc(displayName) + '" data-gender="' + (p.gender || '') + '" data-ntrp="' + (p.ntrp_rating || '') + '" ' +
+              // Партнёра подбираем в парный турнир — и рейтинг показываем парный
+              var pNtrp = window.KSLT_RULES.ntrpПары(p.ntrp_singles, p.ntrp_doubles);
+              html += '<div class="mob-partner-item" data-id="' + p.id + '" data-name="' + esc(displayName) + '" data-gender="' + (p.gender || '') + '" data-ntrp="' + (pNtrp || '') + '" ' +
                 'style="padding:10px 12px;cursor:pointer;border-radius:8px;font-size:0.9rem;color:#fff;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);">' +
                 '<span>' + esc(displayName) + genderIcon + '</span>' +
-                (p.ntrp_rating ? '<span style="color:rgba(255,255,255,0.4);font-size:0.75rem;">NTRP ' + p.ntrp_rating + '</span>' : '') +
+                (pNtrp ? '<span style="color:rgba(255,255,255,0.4);font-size:0.75rem;">NTRP ' + pNtrp + '</span>' : '') +
               '</div>';
             });
             resultsDiv.innerHTML = html;

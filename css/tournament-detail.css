@@ -1208,23 +1208,49 @@ tr.td-rr-row-dimmed {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: var(--space-md) var(--space-xl) 0;
+    padding: var(--space-md) var(--space-sm) 0;
     transition: all 0.2s;
+    /* Три равные колонки, как в рейтинге: ширина не зависит от длины фамилии */
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 230px;
+    position: relative;
 }
 
-/* Pedestal block */
+/* Тумба. Она подложка под именем, а не отдельный блок под ним: раньше
+   имя стояло над пустой тумбой, и пьедестал выглядел иначе, чем в рейтинге */
 .td-podium-card::after {
     content: '';
     display: block;
     width: 100%;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    margin-top: var(--space-sm);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 0;
 }
 
-/* Olympic order: 3rd LEFT, 1st CENTER, 2nd RIGHT */
+.td-podium-medal,
+.td-podium-photo-wrap,
+.td-podium-place,
+.td-podium-name,
+.td-podium-country,
+.td-podium-prize {
+    position: relative;
+    z-index: 1;
+}
+
+/* Порядок как в рейтинге: слева второе, в середине первое, справа третье.
+   Здесь было наоборот — второе справа, третье слева, — и одно и то же место
+   на двух страницах оказывалось по разные стороны */
 .td-podium-1 { order: 1; z-index: 3; margin: 0 -8px; }
-.td-podium-2 { order: 2; z-index: 2; }
-.td-podium-3 { order: 0; z-index: 1; }
+.td-podium-2 { order: 0; z-index: 2; }
+.td-podium-3 { order: 2; z-index: 1; }
+
+.td-podium-1 { padding-bottom: var(--space-lg); }
+.td-podium-2,
+.td-podium-3 { padding-bottom: var(--space-md); }
 
 .td-podium-1::after {
     height: 120px;
@@ -1238,6 +1264,7 @@ tr.td-rr-row-dimmed {
     background: linear-gradient(to top, rgba(192, 192, 192, 0.06), transparent);
     border: 1px solid var(--border-subtle);
     border-bottom: none;
+    border-right: none;
 }
 
 .td-podium-3::after {
@@ -1245,6 +1272,7 @@ tr.td-rr-row-dimmed {
     background: linear-gradient(to top, rgba(205, 127, 50, 0.06), transparent);
     border: 1px solid var(--border-subtle);
     border-bottom: none;
+    border-left: none;
 }
 
 .td-podium-photo-wrap {
@@ -1298,6 +1326,9 @@ tr.td-rr-row-dimmed {
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 4px;
+    line-height: 1.25;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .td-podium-1 .td-podium-name { font-size: 1.15rem; }

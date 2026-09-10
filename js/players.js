@@ -4,6 +4,24 @@
 // ========================================
 
 (function() {
+    /** Ячейка NTRP в списке: «4.5 / 4» — одиночный и парный. */
+    /** Подпись к числу очков на подиуме — на языке страницы. */
+    function подписьОчков() {
+        return isEnPage() ? 'pts' : (isKgPage() ? 'упай' : 'очков');
+    }
+
+    /** Подпись к столбцу NTRP: в ячейке два числа, надо сказать какие. */
+    function ntrpПодпись() {
+        return isEnPage() ? 'sng / dbl' : (isKgPage() ? 'жеке / жуп' : 'од. / пар.');
+    }
+
+    function ntrpЯчейка(p) {
+        var R = window.KSLT_RULES;
+        var к = (R && R.ntrpКоротко) ? R.ntrpКоротко(p.ntrp_singles, p.ntrp_doubles) : '';
+        return к ? '<span class="pl-ntrp-value">' + к + '</span>'
+                 : '<span class="pl-ntrp-na">\u2014</span>';
+    }
+
     function esc(str) {
         if (!str) return '';
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -382,7 +400,7 @@
                     (p.online ? '<span class="pl-online-dot pl-online-pulse"></span>' : '') +
                 '</div>' +
                 '<div class="pl-podium-name">' + p.name + '</div>' +
-                '<div class="pl-podium-points">' + p.points.toLocaleString() + ' pts</div>' +
+                '<div class="pl-podium-points">' + p.points.toLocaleString() + ' ' + подписьОчков() + '</div>' +
                 (badgesHtml ? '<div class="pl-podium-badges">' + badgesHtml + '</div>' : '') +
             '</div>';
         }
@@ -479,7 +497,8 @@
             '<span class="pl-col-player">' + labels.player + '</span>' +
             '<span class="pl-col-online">' + labels.online + '</span>' +
             '<span class="pl-col-country">' + labels.country + '</span>' +
-            '<span class="pl-col-ntrp">' + (labels.ntrp || 'NTRP') + '</span>' +
+            '<span class="pl-col-ntrp">' + (labels.ntrp || 'NTRP') +
+                '<span class="pl-col-sub">' + ntrpПодпись() + '</span></span>' +
             '<span class="pl-col-points">' + labels.points + '</span>' +
             '<span class="pl-col-record">' + labels.record + '</span>' +
             '<span class="pl-col-form">' + labels.form + '</span>' +
@@ -537,14 +556,15 @@
             }
 
             var actionsHtml = '';
-            // Вызвать можно только члена клуба: у фоновой карточки нет
-            // человека по ту сторону — вызов уйдёт в пустоту
-            if (logged && !isBg) {
-                var authUrl = getAuthUrl();
+            // Звать можно только того, у кого есть учётная запись: карточка
+            // из списков клуба вызова не получит — по ту сторону никого нет.
+            // Ведём на карточку игрока: там кнопка вызова и работает
+            if (logged && p.hasAccount) {
+                var картаИгрока = (isEnPage() ? 'player-en.html' : (isKgPage() ? 'player-kg.html' : 'player.html')) + '?id=' + p.id;
                 if (p.online) {
-                    actionsHtml += '<a href="' + authUrl + '" class="pl-btn-message" title="' + labels.message + '">\u2709\ufe0f</a>';
+                    actionsHtml += '<a href="' + картаИгрока + '" class="pl-btn-message" title="' + labels.message + '">\u2709\ufe0f</a>';
                 }
-                actionsHtml += '<a href="' + authUrl + '" class="pl-btn-challenge" title="' + labels.challenge + '">\u2694\ufe0f</a>';
+                actionsHtml += '<a href="' + картаИгрока + '" class="pl-btn-challenge" title="' + labels.challenge + '">\u2694\ufe0f</a>';
             }
 
             html += '<div class="pl-row pl-animate' + blurClass + '" style="transition-delay:' + Math.min(i * 30, 300) + 'ms">' +
@@ -567,7 +587,7 @@
                 '</div>' +
                 '<span class="pl-col-online">' + (p.online ? '<span class="pl-online-dot pl-online-pulse"></span>' : '<span class="pl-offline-dot"></span>') + '</span>' +
                 '<span class="pl-col-country">' + p.country + '</span>' +
-                '<span class="pl-col-ntrp">' + (p.ntrp_rating ? '<span class="pl-ntrp-value">' + (Math.round(Number(p.ntrp_rating) / 0.25) * 0.25).toFixed(2).replace(/0$/, '') + '</span>' : '<span class="pl-ntrp-na">\u2014</span>') + '</span>' +
+                '<span class="pl-col-ntrp">' + ntrpЯчейка(p) + '</span>' +
                 '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
                 '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
                 '<span class="pl-col-form">' + formHtml + '</span>' +
@@ -837,7 +857,8 @@
         var headerRow = '<div class="pl-row pl-row-header pl-cat-row">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
             '<span class="pl-col-player">' + labels.player + '</span>' +
-            '<span class="pl-col-ntrp">' + (labels.ntrp || 'NTRP') + '</span>' +
+            '<span class="pl-col-ntrp">' + (labels.ntrp || 'NTRP') +
+                '<span class="pl-col-sub">' + ntrpПодпись() + '</span></span>' +
             '<span class="pl-col-points">' + labels.points + '</span>' +
             '<span class="pl-col-record">' + labels.record + '</span>' +
             '<span class="pl-col-form">' + labels.form + '</span>' +
@@ -903,7 +924,7 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
-                '<span class="pl-col-ntrp">' + (p.ntrp_rating ? '<span class="pl-ntrp-value">' + (Math.round(Number(p.ntrp_rating) / 0.25) * 0.25).toFixed(2).replace(/0$/, '') + '</span>' : '<span class="pl-ntrp-na">\u2014</span>') + '</span>' +
+                '<span class="pl-col-ntrp">' + ntrpЯчейка(p) + '</span>' +
                 '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
                 '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
                 '<span class="pl-col-form">' + formHtml + '</span>' +

@@ -108,6 +108,11 @@
                 '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adUsrExcelBtn" title="' + L.usrExcelExport + '">📊 Excel</button>' +
             '</div>' +
 
+            // Заявки на привязку карточки: игрок нашёл себя в базе клуба и
+            // просит отдать ему карточку. Отдаём руками — по имени карточку
+            // не проверить, а с ней уходят рейтинг и вся история
+            '<div id="adUsrLinkRequests"></div>' +
+
             '<div class="ad-filter-row">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adUsrSearch" placeholder="' + L.usrSearch + '" value="' + A.esc(usrSearchQuery) + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adUsrRoleFilter">' + roleFilterHtml + '</select>' +
@@ -127,6 +132,8 @@
                     '</table>' +
                 '</div>' +
             '</div>';
+
+        нарисоватьЗаявкиНаКарточку();
 
         var addMgrBtn = document.getElementById('adUsrAddManager');
         if (addMgrBtn) {
@@ -328,7 +335,11 @@
             // Membership badge with expiry date
             var mem = memMap[u.id];
             var memBadge;
-            if (mem && mem.status === 'active') {
+            if (u.role === 'admin' || u.role === 'manager') {
+                // У сотрудников клуба членства нет и быть не может: под этой
+                // почтой они ведут клуб, а не играют. Срок писать нечему
+                memBadge = '<span style="color:var(--text-dim);font-size:0.8rem;">' + L.usrStaffNoMembership + '</span>';
+            } else if (mem && mem.status === 'active') {
                 var expDate = mem.expires_at ? mem.expires_at.split('T')[0].split('-') : null;
                 var expFormatted = expDate ? expDate[2] + '.' + expDate[1] + '.' + expDate[0] : '';
                 memBadge = '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + (expFormatted ? ' ' + (isEn ? 'until' : 'до') + ' ' + expFormatted : '') + '</span>';
@@ -442,7 +453,7 @@
         // Load player data (category + ntrp)
         var playerData = null;
         if (user.player_id) {
-            var plRes = await A.client.from('players').select('category_id, ntrp_rating').eq('id', user.player_id).single();
+            var plRes = await A.client.from('players').select('category_id, ntrp_singles').eq('id', user.player_id).single();
             if (plRes.data) playerData = plRes.data;
         }
 
@@ -457,6 +468,11 @@
 
         var isAdm = A.currentRole === 'admin';
         var canManageMembership = (A.currentRole === 'admin' || A.currentRole === 'manager');
+        // Членство и карточка игрока — только у игроков. Сотрудник клуба под
+        // своей рабочей почтой не член КСЛТ: он клуб ведёт, а не выступает,
+        // и срока у него нет — ни платить, ни продлевать нечего
+        var сотрудник = (user.role === 'admin' || user.role === 'manager');
+        var вестиЧленство = canManageMembership && !сотрудник;
 
         var tgStatus = user.telegram_chat_id ? L.usrTgConnected : L.usrTgNotConnected;
         var tgColor = user.telegram_chat_id ? '#34c759' : 'var(--text-dim)';
@@ -470,7 +486,9 @@
 
         // --- Membership section with inline payment ---
         var memHtml = '';
-        if (canManageMembership) {
+        if (сотрудник) {
+            memHtml = '<div style="color:var(--text-dim);margin-bottom:12px;">' + L.usrStaffNoMembershipHint + '</div>';
+        } else if (вестиЧленство) {
             // Status badge
             if (membership && membership.status === 'active') {
                 var expDate = membership.expires_at ? membership.expires_at.split('T')[0] : '—';
@@ -515,11 +533,11 @@
 
         // --- Player category + NTRP (unified for both existing and new players) ---
         var playerCatHtml = '';
-        if (canManageMembership) {
+        if (вестиЧленство) {
             await A.loadCategories();
             var catGender = userGenderToCategory(user.gender);
             var catOpts = buildCatOptions(catGender, playerData ? playerData.category_id : null);
-            var ntrpOpts = A.ntrpOptions(playerData ? playerData.ntrp_rating : null);
+            var ntrpOpts = A.ntrpOptions(playerData ? playerData.ntrp_singles : null);
 
             playerCatHtml =
                 '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrPlayerCategory + '</h3>' +
@@ -944,7 +962,7 @@
                 if (user.player_id) {
                     // Update existing player
                     var upd = { category_id: catId };
-                    upd.ntrp_rating = ntrpVal ? parseFloat(ntrpVal) : null;
+                    upd.ntrp_singles = ntrpVal ? parseFloat(ntrpVal) : null;
                     var plResult = await A.client.from('players').update(upd).eq('id', user.player_id);
                     if (plResult.error) {
                         A.showToast(plResult.error.message, 'error');
@@ -958,7 +976,7 @@
                     var freshUser = await A.client.from('profiles').select('player_id').eq('id', user.id).single();
                     if (freshUser.data && freshUser.data.player_id && ntrpVal) {
                         await A.client.from('players').update({
-                            ntrp_rating: parseFloat(ntrpVal)
+                            ntrp_singles: parseFloat(ntrpVal)
                         }).eq('id', freshUser.data.player_id);
                     }
                 }
@@ -1855,6 +1873,72 @@
     }
 
     // ---- Export to namespace ----
+    /**
+     * Заявки на привязку карточки игрока. Показываем только открытые: решённые
+     * уходят из списка сразу, чтобы он не превращался в архив.
+     */
+    async function нарисоватьЗаявкиНаКарточку() {
+        var box = document.getElementById('adUsrLinkRequests');
+        if (!box || !A.client) return;
+
+        var res = await A.client.from('player_link_requests')
+            .select('id, profile_id, player_id, created_at')
+            .eq('status', 'pending')
+            .order('created_at', { ascending: true });
+
+        var заявки = res.data || [];
+        if (!заявки.length) { box.innerHTML = ''; return; }
+
+        var профили = {}, карточки = {};
+        var pr = await A.client.from('profiles').select('id, full_name, email, phone')
+            .in('id', заявки.map(function(z) { return z.profile_id; }));
+        (pr.data || []).forEach(function(p) { профили[p.id] = p; });
+        var pl = await A.client.from('players').select('id, name, category_id, ntrp_singles')
+            .in('id', заявки.map(function(z) { return z.player_id; }));
+        (pl.data || []).forEach(function(p) { карточки[p.id] = p; });
+
+        var строки = заявки.map(function(z) {
+            var ч = профили[z.profile_id] || {};
+            var к = карточки[z.player_id] || {};
+            var ntrp = к.ntrp_singles ? ' · NTRP ' + к.ntrp_singles : '';
+            return '<tr>' +
+                '<td>' + A.esc(ч.full_name || '—') + '<div style="font-size:0.75rem;color:var(--text-dim);">' +
+                    A.esc(ч.email || '') + (ч.phone ? ' · ' + A.esc(ч.phone) : '') + '</div></td>' +
+                '<td>' + A.esc(к.name || z.player_id) +
+                    '<div style="font-size:0.75rem;color:var(--text-dim);">' + A.esc((к.category_id || '') + ntrp) + '</div></td>' +
+                '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
+                    new Date(z.created_at).toLocaleDateString(isEn ? 'en-GB' : 'ru-RU') + '</td>' +
+                '<td style="text-align:right;white-space:nowrap;">' +
+                    '<button class="ad-btn ad-btn-primary ad-btn-sm ad-link-yes" data-id="' + z.id + '">' + L.linkApprove + '</button> ' +
+                    '<button class="ad-btn ad-btn-secondary ad-btn-sm ad-link-no" data-id="' + z.id + '">' + L.linkReject + '</button>' +
+                '</td>' +
+            '</tr>';
+        }).join('');
+
+        box.innerHTML =
+            '<div class="ad-table-card" style="border-color:rgba(255,179,0,0.35);">' +
+                '<div class="ad-table-card-header">' +
+                    '<div class="ad-table-card-title">\u26A0 ' + L.linkRequests + ' — ' + заявки.length + '</div>' +
+                '</div>' +
+                '<div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
+                    '<th>' + L.thUser + '</th><th>' + L.linkCard + '</th><th>' + L.thDate + '</th><th></th>' +
+                '</tr></thead><tbody>' + строки + '</tbody></table></div>' +
+            '</div>';
+
+        box.querySelectorAll('.ad-link-yes, .ad-link-no').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var одобрить = btn.classList.contains('ad-link-yes');
+                btn.disabled = true;
+                var r = await A.client.rpc('решить_привязку', { p_request_id: btn.dataset.id, p_approve: одобрить });
+                var д = r.data || {};
+                if (д.error) { A.showToast(д.error, 'error'); btn.disabled = false; return; }
+                A.showToast(одобрить ? L.linkApproved : L.linkRejected, 'success');
+                нарисоватьЗаявкиНаКарточку();
+                renderUsersList();
+            });
+        });
+    }
+
     A.renderUsersSection = renderUsersSection;
     A.renderUsersList = renderUsersList;
     A.loadAndEditUser = loadAndEditUser;

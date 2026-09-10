@@ -44,7 +44,7 @@
       // NTRP в запросе нет — он живёт в карточке игрока
       var ids = rows.map(function(p) { return p.id; });
       var withNtrp = ids.length
-        ? supabaseClient.from('players').select('id, ntrp_rating, category_id').in('id', ids)
+        ? supabaseClient.from('players').select('id, ntrp_singles, category_id').in('id', ids)
         : Promise.resolve({ data: [] });
 
       return withNtrp.then(function(nr) {
@@ -62,11 +62,11 @@
             name: p.full_name,
             photo: p.avatar_url,
             gender: p.gender,
-            ntrp_rating: extra.ntrp_rating,
+            ntrp_singles: extra.ntrp_singles,
             category_id: extra.category_id
           };
         }).sort(function(a, b) {
-          return (parseFloat(a.ntrp_rating) || 99) - (parseFloat(b.ntrp_rating) || 99);
+          return (parseFloat(a.ntrp_singles) || 99) - (parseFloat(b.ntrp_singles) || 99);
         });
         renderPartners();
         initPartnerSearch();
@@ -120,7 +120,7 @@
       var parts = String(currentNtrp).split('-');
       var lo = parseFloat(parts[0]), hi = parseFloat(parts[1]);
       filtered = filtered.filter(function(p) {
-        var r = parseFloat(p.ntrp_rating);
+        var r = parseFloat(p.ntrp_singles);
         return !isNaN(r) && r >= lo && r <= hi;
       });
     }
@@ -149,7 +149,7 @@
       html += '<div class="partner-info">';
       html += '<div class="coach-card-name">' + esc(p.name) + '</div>';
       html += '<div class="coach-card-meta">';
-      if (p.ntrp_rating) html += '<span>NTRP ' + Number(p.ntrp_rating).toFixed(1) + '</span>';
+      if (p.ntrp_singles) html += '<span>NTRP ' + Number(p.ntrp_singles).toFixed(1) + '</span>';
       // Название разряда — из общего свода, а не из своей копии карты
       if (p.category_id) html += '<span>' + esc(window.KSLT_RULES
         ? window.KSLT_RULES.categoryLabel(p.category_id, I18N.currentLang)

@@ -25,10 +25,10 @@
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
 
     var L = isEn
-        ? { rank: '#', player: 'Player', country: 'Ctry', ntrp: 'NTRP', wl: 'W/L', points: 'Pts', change: 'Δ', empty: 'No players in this category yet' }
+        ? { rank: '#', player: 'Player', country: 'Ctry', ntrp: 'NTRP', ntrpSub: 'sng / dbl', wl: 'W/L', points: 'Pts', change: 'Δ', empty: 'No players in this category yet' }
         : (isKg
-            ? { rank: '#', player: 'Оюнчу', country: 'Өлк.', ntrp: 'NTRP', wl: 'Ж/Ж', points: 'Упай', change: 'Δ', empty: 'Бул категорияда оюнчулар жок' }
-            : { rank: '#', player: 'Игрок', country: 'Стр.', ntrp: 'NTRP', wl: 'В/П', points: 'Очки', change: 'Δ', empty: 'В этой категории пока нет игроков' });
+            ? { rank: '#', player: 'Оюнчу', country: 'Өлк.', ntrp: 'NTRP', ntrpSub: 'жеке / жуп', wl: 'Ж/Ж', points: 'Упай', change: 'Δ', empty: 'Бул категорияда оюнчулар жок' }
+            : { rank: '#', player: 'Игрок', country: 'Стр.', ntrp: 'NTRP', ntrpSub: 'од. / пар.', wl: 'В/П', points: 'Очки', change: 'Δ', empty: 'В этой категории пока нет игроков' });
 
     var playerPage = isEn ? 'pages/player-en.html' : (isKg ? 'pages/player-kg.html' : 'pages/player.html');
 
@@ -77,7 +77,8 @@
             '<span class="rk-rank">' + L.rank + '</span>' +
             '<span>' + L.player + '</span>' +
             '<span class="rk-country">' + L.country + '</span>' +
-            '<span class="rk-ntrp">' + L.ntrp + '</span>' +
+            '<span class="rk-ntrp">' + L.ntrp +
+                '<span class="pl-col-sub">' + (L.ntrpSub || '') + '</span></span>' +
             '<span class="rk-wl">' + L.wl + '</span>' +
             '<span class="rk-points">' + L.points + '</span>' +
             '<span class="rk-change">' + L.change + '</span>' +
@@ -100,9 +101,9 @@
                    : (ch < 0 ? '<span class="rk-down">' + ch + '</span>'
                              : '<span class="rk-same">—</span>');
 
-        var ntrp = p.ntrp_rating
-            ? (Math.round(Number(p.ntrp_rating) / 0.25) * 0.25).toFixed(2).replace(/0$/, '')
-            : '—';
+        // Два числа: одиночный разряд и парные турниры
+        var R = window.KSLT_RULES;
+        var ntrp = (R && R.ntrpКоротко && R.ntrpКоротко(p.ntrp_singles, p.ntrp_doubles)) || '—';
 
         // Гостю имя не ссылка: страница игрока ему всё равно закрыта
         var name = guest

@@ -221,6 +221,11 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
+    /* Три равные колонки: раньше ширина шла от длины имени, и «Каныкей
+       Турсунбаева» вылезала за свою тумбу, а очки ломались на две строки */
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 230px;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0;
     transform: translateY(30px);
@@ -248,7 +253,9 @@
 /* === 1st Place (center) — tallest === */
 .pl-podium-first {
     z-index: 3;
-    padding: var(--space-lg) var(--space-xl) 0;
+    /* Боковые отступы поменьше: с прежними внутри тумбы оставалось так мало
+       места, что «Джайлоева» ломалась пополам */
+    padding: var(--space-lg) var(--space-sm) 0;
     margin: 0 -8px;
 }
 
@@ -272,7 +279,7 @@
 /* === 2nd Place (left) === */
 .pl-podium-second {
     z-index: 2;
-    padding: var(--space-md) var(--space-lg) 0;
+    padding: var(--space-md) var(--space-sm) 0;
 }
 
 .pl-podium-second::after {
@@ -295,7 +302,7 @@
 /* === 3rd Place (right) === */
 .pl-podium-third {
     z-index: 1;
-    padding: var(--space-md) var(--space-lg) 0;
+    padding: var(--space-md) var(--space-sm) 0;
 }
 
 .pl-podium-third::after {
@@ -388,6 +395,9 @@
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 4px;
+    line-height: 1.25;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .pl-podium-first .pl-podium-name {
@@ -403,6 +413,9 @@
 .pl-podium-points {
     font-weight: 800;
     color: var(--accent);
+    /* Число с подписью держим одной строкой: «1 420» и «очков» на разных
+       строках читаются как два разных числа */
+    white-space: nowrap;
 }
 
 .pl-podium-first .pl-podium-points {
@@ -581,7 +594,7 @@
 
 .pl-row {
     display: grid;
-    grid-template-columns: 50px 1fr 65px 60px 55px 80px 70px 100px 60px 90px;
+    grid-template-columns: 50px 1fr 65px 60px 78px 80px 70px 100px 60px 90px;
     align-items: center;
     padding: 12px 16px;
     gap: 8px;
@@ -1355,7 +1368,7 @@
 
 /* Category table — compact grid (no online, country, actions) */
 .pl-cat-row {
-    grid-template-columns: 44px 1fr 55px 72px 60px 88px 52px;
+    grid-template-columns: 44px 1fr 78px 72px 60px 88px 52px;
 }
 
 /* Guest profile link in category table */
@@ -1423,7 +1436,7 @@
 
 @media (max-width: 992px) {
     .pl-row {
-        grid-template-columns: 40px 1fr 55px 50px 50px 70px 60px 90px 50px 80px;
+        grid-template-columns: 40px 1fr 55px 50px 70px 70px 60px 90px 50px 80px;
         padding: 10px 12px;
         gap: 6px;
     }
@@ -1459,7 +1472,7 @@
 
 @media (max-width: 992px) {
     .pl-cat-row {
-        grid-template-columns: 40px 1fr 50px 64px 54px 80px 46px;
+        grid-template-columns: 40px 1fr 70px 64px 54px 80px 46px;
     }
 }
 

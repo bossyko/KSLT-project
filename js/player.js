@@ -13,6 +13,7 @@
     }
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var _бесплатныйПериод = false;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
     var CU = window.KSLT_COUNTRY;
     var lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
@@ -696,9 +697,15 @@
         } else {
             hero += '<div class="pp-rating-row"><span class="pp-rating-label">KSLT</span><span class="pp-rating-value">' + cat.name + (rank ? ' \u00b7 #' + rank : '') + '</span></div>';
         }
-        if (player.ntrp_rating) {
-            var ntrpVal = Math.round(Number(player.ntrp_rating) / 0.25) * 0.25;
-            hero += '<div class="pp-rating-row"><span class="pp-rating-label">NTRP</span><span class="pp-rating-value">' + ntrpVal.toFixed(2).replace(/0$/, '') + '</span></div>';
+        // NTRP теперь двумя числами: одиночный разряд и парные турниры.
+        // Строку с подписями собирает общий свод правил — тот же, что в
+        // приложении, чтобы вид не разошёлся.
+        var ntrpСтрока = (window.KSLT_RULES && window.KSLT_RULES.ntrpСтрока)
+            ? window.KSLT_RULES.ntrpСтрока(player.ntrp_singles, player.ntrp_doubles,
+                                           isEn ? 'en' : 'ru')
+            : '';
+        if (ntrpСтрока) {
+            hero += '<div class="pp-rating-row"><span class="pp-rating-label">NTRP</span><span class="pp-rating-value">' + ntrpСтрока + '</span></div>';
         }
         hero += '</div>';
 
@@ -720,11 +727,14 @@
         if (player.online) {
             hero += '<a href="' + authPage + '" class="pp-action-btn pp-action-secondary">\u2709\uFE0F ' + L.message + '</a>';
         }
-        // Вызвать можно только члена клуба. У фоновой карточки нет человека
-        // по ту сторону: она перенесена из списков NTRP и ждёт, когда её
-        // владелец заведёт учётную запись и оплатит членство
-        var isBackground = player.is_member === false;
-        if ((!_myPlayerId || _myPlayerId !== player.id) && !isBackground) {
+        // Вызвать можно только того, за кем есть человек: перенесённая из
+        // списков NTRP карточка ждёт, когда её владелец заведёт учётную
+        // запись, и вызов ей получить некому.
+        // Приписку «членство не оформлено» в бесплатный период не показываем:
+        // платить сейчас не за что.
+        var естьЧеловек = player.has_account === true;
+        var isBackground = !естьЧеловек && !_бесплатныйПериод;
+        if ((!_myPlayerId || _myPlayerId !== player.id) && естьЧеловек) {
             // Огонь, а не мяч: кнопка залита лаймом, и жёлто-зелёный мяч на
             // ней растворяется. Тем же знаком помечены баттлы в кабинете
             hero += '<button class="pp-action-btn pp-action-primary" id="ppChallengeBtn">' +
@@ -963,11 +973,30 @@
             .not('winner_id', 'is', null)
             .order('played_at', { ascending: false })
             .limit(50)
-            .then(function(res) {
+            .then(async function(res) {
                 if (res.error || !res.data || res.data.length === 0) {
                     container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>';
                     return;
                 }
+
+                // Имена соперников забираем одним запросом до отрисовки. Раньше
+                // каждое имя догружалось по одному и попадало в список только
+                // при следующей отрисовке — до неё в строке стоял внутренний
+                // адрес карточки, вроде «erlan-shekerbekov»
+                var чужие = [];
+                res.data.forEach(function(m) {
+                    var o = m.player1_id === _playerId ? m.player2_id : m.player1_id;
+                    if (o && !_playerCache[o] && чужие.indexOf(o) === -1) чужие.push(o);
+                });
+                if (чужие.length) {
+                    var сп = await client.from('players')
+                        .select('id, name, name_en, name_kg, photo').in('id', чужие);
+                    (сп.data || []).forEach(function(p) {
+                        var имя = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
+                        _playerCache[p.id] = { id: p.id, name: имя || p.id, photo: p.photo || '' };
+                    });
+                }
+
                 renderRealMatches(container, res.data);
             });
     }
@@ -997,13 +1026,14 @@
             var pairGame = kind === 'doubles' || kind === 'mixed';
 
             html += '<div class="pp-match' + (pairGame ? '' : ' pp-match-clickable') + '"' +
+                (tId ? ' data-tournament-id="' + esc(tId) + '"' : '') +
                 (pairGame ? '' : ' data-opponent-id="' + esc(opp.id) +
                     '" data-opponent-name="' + esc(opp.name) +
                     '" data-opponent-photo="' + esc(oppPhoto) + '"') + '>';
             html += '<div class="pp-match-date">' + formatMatchDate(m.played_at) + '</div>';
             var tPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
             html += '<div class="pp-match-tournament">' +
-                (tName ? '<a href="' + tPage + '?id=' + esc(tId) + '">' + esc(tName) + '</a>' : '') +
+                (tName ? '<a href="' + tPage + '?id=' + esc(tId) + '&tab=bracket">' + esc(tName) + '</a>' : '') +
                 matchKindTag(m) + '</div>';
             html += '<div class="pp-match-opponent">';
             html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(opp.name) + '" class="pp-match-opponent-photo">';
@@ -1058,6 +1088,18 @@
     }
 
     function attachMatchClickHandlers(container) {
+        // Строка матча выглядит нажимаемой — пусть и ведёт куда-то: в сетку
+        // турнира, где матчи этого игрока обведены. Кнопка H2H и ссылка на
+        // турнир внутри строки работают по-своему, их не перехватываем
+        container.querySelectorAll('.pp-match[data-tournament-id]').forEach(function(row) {
+            row.addEventListener('click', function(e) {
+                if (e.target.closest('.pp-match-h2h') || e.target.closest('a')) return;
+                var tPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
+                window.location.href = tPage + '?id=' + encodeURIComponent(row.getAttribute('data-tournament-id')) +
+                    '&player=' + encodeURIComponent(_playerId);
+            });
+        });
+
         container.querySelectorAll('.pp-match-h2h').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -1186,7 +1228,7 @@
         var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
         var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
         var tImg = t.image || '';
-        var tPage = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id + '&player=' + _playerId;
+        var tPage = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id + '&tab=bracket';
         var result;
         if (isUpcoming) {
             result = LH.registered;
@@ -1662,6 +1704,10 @@
         var playerId = params.get('id');
         _playerId = playerId;
 
+        // Пока идёт бесплатный период, клуб открыт всем: приписка «членство
+        // не оформлено» на карточке в это время неверна
+        _бесплатныйПериод = window.бесплатныйПериод ? await window.бесплатныйПериод() : false;
+
         renderHero();
         updateLangLinks(playerId);
 
@@ -1675,6 +1721,9 @@
         if (client) {
             try {
                 var plrRes = await client.from('players').select('*').eq('id', playerId).single();
+                // Карточка есть только у членов клуба. Гость заведён в базе,
+                // чтобы стоять в турнирной сетке, но страницы у него нет
+                if (plrRes.data && plrRes.data.is_guest) { renderNotFound(); return; }
                 if (plrRes.data) {
                     var p = plrRes.data;
                     var catName = '';
@@ -1767,7 +1816,7 @@
                             form: p.form || [],
                             badges: [],
                             online: false,
-                            ntrp_rating: p.ntrp_rating || null,
+                            ntrp_singles: p.ntrp_singles || null,
                             doubles_wins: p.doubles_wins || 0,
                             doubles_losses: p.doubles_losses || 0,
                             mixed_wins: p.mixed_wins || 0,

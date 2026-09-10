@@ -170,6 +170,7 @@
     // Очки берутся из player_categories: игрок может стоять в двух категориях —
     // своей и на ступень выше, и в каждой таблице показывается со своими очками
     // именно этой категории. Так же устроен рейтинг на сайте.
+    AUTH.бесплатныйПериод().then(function(бесплатно) {
     supabaseClient.from('player_categories')
       .select('player_id, points')
       .eq('category_id', currentCatId)
@@ -182,23 +183,33 @@
         // вчетверо больше — половину съедали created_at и updated_at,
         // которые здесь никому не нужны
         return supabaseClient.from('players')
-          .select('id, name, name_en, photo, category_id, ntrp_rating, wins, losses, is_member')
+          .select('id, name, name_en, photo, category_id, ntrp_singles, ntrp_doubles, wins, losses, is_member, is_guest')
           .eq('gender', currentGender)
           .then(function(r) {
             if (r.error) console.error('Rating load error:', r.error);
             allPlayers = (r.data || [])
               // Домашняя категория — всегда, чужая — только если там есть очки
+              // Гость играет турниры, но в рейтинге его нет: он не член клуба
+              .filter(function(p) { return !p.is_guest; })
               .filter(function(p) { return p.category_id === currentCatId || pointsIn[p.id] > 0; })
               .map(function(p) {
                 p.points = pointsIn[p.id] || 0;
+                // Пока идёт бесплатный период, клуб открыт всем: места в
+                // рейтинге получают все, а не только оплатившие членство
+                if (бесплатно) p.is_member = true;
                 return p;
               })
-              .sort(function(a, b) { return b.points - a.points; });
+              .sort(function(a, b) {
+                // Очки равны — выше тот, у кого одиночный NTRP больше
+                return (b.points - a.points)
+                    || ((Number(b.ntrp_singles) || 0) - (Number(a.ntrp_singles) || 0));
+              });
             renderSubtitle();
             renderPodium();
             render();
           });
       });
+    });
   }
 
   // --- Subtitle ---
@@ -262,7 +273,7 @@
           '<img class="rp-photo" src="' + esc(photo) + '" alt="' + esc(p.name) + '">' +
         '</div>' +
         '<div class="rp-name">' + esc(shortName(p.name)) + '</div>' +
-        '<div class="rp-pts">' + (p[pts] || 0) + ' pts</div>' +
+        '<div class="rp-pts">' + (p[pts] || 0) + ' ' + I18N.t('rating.ptsShort') + '</div>' +
       '</div>';
     }
     html += '</div>';
@@ -343,7 +354,8 @@
           '</span>' +
         '</div>' +
         '<span class="rr-pts">' + (p[pts] || 0) + '</span>' +
-        '<span class="rr-ntrp">' + (p.ntrp_rating || '—') + '</span>' +
+        '<span class="rr-ntrp">' + ((RULES && RULES.ntrpКоротко
+            && RULES.ntrpКоротко(p.ntrp_singles, p.ntrp_doubles)) || '—') + '</span>' +
         '<span class="rr-wl">' + (p.wins || 0) + '/' + (p.losses || 0) + '</span>' +
       '</div>';
     }

@@ -1406,6 +1406,26 @@ body.news-article-page .section-sponsors-compact {
 }
 
 /* ---- Текст новости из редактора ---- */
+/* Текст статьи — основным цветом и без полупрозрачности. Раньше тело
+   проявлялось по прокрутке, и на длинной статье оставалось тусклым.
+   Сглаживание возвращаем обычное: antialiased на тёмном фоне делает светлые
+   буквы тоньше, и белый текст читается как серый. Кегль чуть крупнее —
+   статью читают подряд, а не проглядывают. */
+.news-html,
+.news-html p,
+.news-html li,
+.news-html figure {
+    color: var(--text-primary, #fff);
+    opacity: 1;
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+}
+
+.news-html {
+    font-size: 1.06rem;
+    line-height: 1.8;
+}
+
 .news-html p { margin: 0 0 var(--space-sm); line-height: 1.75; }
 .news-html h3 { margin: var(--space-md) 0 var(--space-xs); font-size: 1.25rem; }
 .news-html ul,

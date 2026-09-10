@@ -89,19 +89,57 @@
     }
 
     /**
-     * Get combined NTRP rating for a doubles team (for seeding).
-     * Uses external_ntrp for external players, ntrp_rating from players table otherwise.
+     * Сумма NTRP пары — по ней сеются пары в парном турнире. У своих берём
+     * парный рейтинг (нет его — одиночный), у приглашённых — то число, что
+     * вписали руками при заявке.
      */
+    function ntrpПары(p) {
+        return window.KSLT_RULES.ntrpПары(p.ntrp_singles, p.ntrp_doubles) || 0;
+    }
+
+    /**
+     * Парный рейтинг не проставлен. Заявку это не отменяет: пара играет, а в
+     * сумму пока идёт одиночный. Но менеджер должен вписать парный руками —
+     * поэтому такая заявка помечена и требует действия.
+     */
+    function безПарного(p) {
+        return !!(p && p.id) && (p.ntrp_doubles === null || p.ntrp_doubles === undefined);
+    }
+
+    /** Клетка NTRP в заявке: число, а если парного нет — кнопка «вписать». */
+    function ячейкаNtrpПары(p) {
+        var стиль = 'text-align:center;font-size:0.85rem;color:#ce93d8;font-weight:600;';
+        if (!p || !p.id) return '<td style="' + стиль + '">—</td>';
+        if (!безПарного(p)) return '<td style="' + стиль + '">' + ntrpПары(p) + '</td>';
+        var одиночный = ntrpПары(p);
+        return '<td style="text-align:center;padding:4px;">' +
+            '<button class="ad-ntrp-fix" data-player-id="' + A.esc(p.id) + '"' +
+            ' data-player-name="' + A.esc(p.name || p.id) + '"' +
+            ' data-singles="' + (p.ntrp_singles || '') + '"' +
+            ' title="' + L.dblNtrpNeedHint + '"' +
+            ' style="padding:2px 8px;border:1px solid #ffb300;border-radius:4px;background:rgba(255,179,0,0.12);color:#ffb300;cursor:pointer;font-size:0.75rem;font-weight:700;white-space:nowrap;">' +
+            '\u26A0 ' + (одиночный || '—') + '</button></td>';
+    }
+
+    /** Первый номер пары — больший из двух рейтингов. */
+    function сильнейшийВПаре(reg, playersMap) {
+        var свой = reg.player_id && playersMap[reg.player_id]
+            ? ntrpПары(playersMap[reg.player_id]) : (reg.external_ntrp || 0);
+        var партнёр = reg.partner_id && playersMap[reg.partner_id]
+            ? ntrpПары(playersMap[reg.partner_id]) : (reg.partner_external_ntrp || 0);
+        return Math.max(Number(свой) || 0, Number(партнёр) || 0);
+    }
+
     function getTeamNtrp(reg, playersMap) {
         var captainNtrp = 0;
         if (reg.player_id && playersMap[reg.player_id]) {
-            captainNtrp = playersMap[reg.player_id].ntrp_rating || 0;
+            captainNtrp = ntrpПары(playersMap[reg.player_id]);
         } else if (reg.external_ntrp) {
             captainNtrp = reg.external_ntrp;
         }
         var partnerNtrp = 0;
         if (reg.partner_id && playersMap[reg.partner_id]) {
-            partnerNtrp = playersMap[reg.partner_id].ntrp_rating || 0;
+            partnerNtrp = ntrpПары(playersMap[reg.partner_id]);
         } else if (reg.partner_external_ntrp) {
             partnerNtrp = reg.partner_external_ntrp;
         }
@@ -112,6 +150,47 @@
      * Open modal to assign a partner to a registration (admin action).
      * Supports: KSLT player search or external player name entry.
      */
+    /**
+     * Окно «вписать парный рейтинг». Заявку не трогаем: она принята и стоит в
+     * списке. Здесь менеджер ставит человеку парный NTRP, после чего пара
+     * считается по нему, а пометка с заявки уходит.
+     */
+    function открытьОкноПарного(playerId, playerName, singles, tournamentId) {
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-confirm-overlay';
+        overlay.innerHTML =
+            '<div class="ad-confirm-modal">' +
+                '<div class="ad-confirm-title">' + L.dblNtrpNeedTitle + '</div>' +
+                '<div class="ad-confirm-text" style="text-align:left;margin-bottom:14px;color:var(--text-secondary);">' +
+                    A.esc(playerName) +
+                    (singles ? ' \u00b7 ' + L.plrNtrpSingles + ' ' + A.esc(singles) : '') +
+                '</div>' +
+                '<div class="ad-field" style="text-align:left;">' +
+                    '<label class="ad-field-label">' + L.plrNtrpDoubles + '</label>' +
+                    '<select class="ad-field-input" id="adDblNtrpValue">' + A.ntrpOptions(null) + '</select>' +
+                '</div>' +
+                '<div class="ad-confirm-actions" style="gap:8px;margin-top:16px;">' +
+                    '<button class="ad-btn ad-btn-primary" id="adDblNtrpSave">' + L.save + '</button>' +
+                    '<button class="ad-btn ad-btn-secondary" id="adDblNtrpCancel">' + L.cancel + '</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        function dismiss() { overlay.remove(); }
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
+        document.getElementById('adDblNtrpCancel').addEventListener('click', dismiss);
+
+        document.getElementById('adDblNtrpSave').addEventListener('click', async function() {
+            var знач = parseFloat(document.getElementById('adDblNtrpValue').value);
+            if (!знач) { A.showToast(L.dblNtrpNeedTitle, 'error'); return; }
+            var res = await A.client.from('players').update({ ntrp_doubles: знач }).eq('id', playerId);
+            if (res.error) { A.showToast(res.error.message, 'error'); return; }
+            dismiss();
+            A.showToast(L.saved, 'success');
+            renderBracketManagement(tournamentId, 'registrations');
+        });
+    }
+
     function openPartnerModal(regId, tournament, tournamentId, registrations) {
         var isMixed = tournament.format === 'mixed_doubles';
 
@@ -209,15 +288,15 @@
                 var reg = registrations.find(function(r) { return r.id === regId; });
                 var captainNtrp = null;
                 if (reg && reg.player_id) {
-                    var cnRes = await A.client.from('players').select('ntrp_rating').eq('id', reg.player_id).single();
-                    captainNtrp = cnRes.data ? cnRes.data.ntrp_rating : null;
+                    var cnRes = await A.client.from('players').select('ntrp_singles, ntrp_doubles').eq('id', reg.player_id).single();
+                    captainNtrp = cnRes.data ? ntrpПары(cnRes.data) : null;
                 } else if (reg) {
                     captainNtrp = reg.external_ntrp;
                 }
                 var partnerNtrp = selectedId ? null : extNtrp;
                 if (selectedId) {
-                    var pnRes = await A.client.from('players').select('ntrp_rating').eq('id', selectedId).single();
-                    partnerNtrp = pnRes.data ? pnRes.data.ntrp_rating : null;
+                    var pnRes = await A.client.from('players').select('ntrp_singles, ntrp_doubles').eq('id', selectedId).single();
+                    partnerNtrp = pnRes.data ? ntrpПары(pnRes.data) : null;
                 }
                 if (!validateNtrpCombined(captainNtrp, partnerNtrp, tournament.ntrp_combined_max)) {
                     A.showToast(L.doublesNtrpCombinedError, 'error');
@@ -246,7 +325,7 @@
 
                 searchTimeout = setTimeout(async function() {
                     var res = await A.client.from('players')
-                        .select('id, name, name_en, gender, ntrp_rating, category_id')
+                        .select('id, name, name_en, gender, ntrp_singles, ntrp_doubles, category_id')
                         .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
                         .limit(10);
                     var players = (res.data || []).filter(function(p) { return !usedIds[p.id]; });
@@ -264,7 +343,7 @@
                         html += '<div class="ad-partner-search-item" data-player-id="' + p.id + '" ' +
                             'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.9rem;display:flex;justify-content:space-between;align-items:center;">' +
                             '<span>' + A.esc(pName) + ' ' + genderIcon + '</span>' +
-                            (p.ntrp_rating ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + p.ntrp_rating + '</span>' : '') +
+                            (ntrpПары(p) ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + ntrpПары(p) + '</span>' : '') +
                         '</div>';
                     });
                     resultsDiv.innerHTML = html;
@@ -379,7 +458,7 @@
 
                 searchTimeout = setTimeout(async function() {
                     var res = await A.client.from('players')
-                        .select('id, name, name_en, photo, category_id, ntrp_rating')
+                        .select('id, name, name_en, photo, category_id, ntrp_singles')
                         .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
                         .limit(10);
                     var players = res.data || [];
@@ -394,7 +473,7 @@
                     players.forEach(function(p) {
                         var pName = isEn ? (p.name_en || p.name) : p.name;
                         var catLabel = p.category_id ? p.category_id.charAt(0).toUpperCase() + p.category_id.slice(1) : '';
-                        var ntrpLabel = p.ntrp_rating ? ('NTRP ' + p.ntrp_rating) : '';
+                        var ntrpLabel = p.ntrp_singles ? ('NTRP ' + p.ntrp_singles) : '';
                         var meta = [catLabel, ntrpLabel].filter(Boolean).join(' · ');
                         html += '<div class="ad-replace-search-item" data-player-id="' + p.id + '" ' +
                             'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.9rem;display:flex;justify-content:space-between;align-items:center;">' +
@@ -621,7 +700,7 @@
 
         var playersMap = {};
         if (playerIds.length > 0) {
-            var plRes = await A.client.from('players').select('id, name, name_en, points, category_id, gender, ntrp_rating').in('id', playerIds);
+            var plRes = await A.client.from('players').select('id, name, name_en, points, category_id, gender, ntrp_singles, ntrp_doubles').in('id', playerIds);
             (plRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
 
             // Compute rank within category: load all players for relevant categories
@@ -682,10 +761,32 @@
         // Пустые клетки в счёт не идут: сетка строится на степень двойки, и
         // при 22 участниках из 32 мест десять выдуманные. Такие матчи никем
         // не заполнятся никогда, а турнир из-за них нельзя было завершить.
-        var allCompleted = hasMatches && matches.every(function(m) {
-            if (!m.player1_id && !m.player2_id) return true;
-            return m.status === 'completed';
-        });
+        // Турнир доигран, когда сыграны все клетки, которые вообще будут
+        // заполнены, а не только те, где сейчас стоят люди. В сетке «все
+        // места» половина клеток пустует до последнего круга: пока считали по
+        // текущим, кнопка «Завершить» появлялась на середине турнира, и его
+        // можно было закрыть, не доиграв.
+        var allCompleted = hasMatches && (function() {
+            var D = window.KSLT_DRAW;
+            if (tournament.bracket_type === 'fic' && D && D.итоги) {
+                var размер = tournament.draw_size || 16;
+                var и = D.итоги(размер, matches.map(function(m) {
+                    return {
+                        круг: m.round_number, номер: m.match_order,
+                        людей: (m.player1_id ? 1 : 0) + (m.player2_id ? 1 : 0)
+                    };
+                }));
+                return matches.every(function(m) {
+                    var сколько = и[m.round_number + ':' + m.match_order];
+                    if (!сколько) return true;          // такой клетки в турнире нет
+                    return m.status === 'completed';
+                });
+            }
+            return matches.every(function(m) {
+                if (!m.player1_id && !m.player2_id) return true;
+                return m.status === 'completed';
+            });
+        })();
         var anyCompleted = hasMatches && matches.some(function(m) { return m.status === 'completed'; });
         var isTournamentCompleted = tournament.status === 'completed';
 
@@ -1161,7 +1262,7 @@
                     if (q.length < 2) { resultsDiv.innerHTML = ''; return; }
                     debounceTimer = setTimeout(async function() {
                         var res = await A.client.from('players')
-                            .select('id, name, name_en, photo, category_id, ntrp_rating')
+                            .select('id, name, name_en, photo, category_id, ntrp_singles')
                             .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
                             .limit(10);
                         var players = res.data || [];
@@ -1174,7 +1275,7 @@
                         players.forEach(function(p) {
                             var alreadyIn = existingIds.indexOf(p.id) !== -1;
                             var catLabel = p.category_id ? p.category_id.charAt(0).toUpperCase() + p.category_id.slice(1) : '—';
-                            var ntrpLabel = p.ntrp_rating ? ('NTRP ' + p.ntrp_rating) : '';
+                            var ntrpLabel = p.ntrp_singles ? ('NTRP ' + p.ntrp_singles) : '';
                             var photoHtml = p.photo
                                 ? '<img src="' + A.esc(p.photo) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">'
                                 : '<div style="width:32px;height:32px;border-radius:50%;background:var(--card-bg);display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:14px;">—</div>';
@@ -1242,6 +1343,14 @@
                 floatingBar.remove();
                 renderBracketManagement(tournamentId, 'registrations');
             }, L.regRemoveSelected);
+        });
+
+        // Кнопка «вписать парный рейтинг» в клетке NTRP
+        container.querySelectorAll('.ad-ntrp-fix').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                открытьОкноПарного(btn.dataset.playerId, btn.dataset.playerName,
+                                   btn.dataset.singles, tournamentId);
+            });
         });
 
         // Add Partner buttons (doubles only)
@@ -1599,6 +1708,26 @@
                 '</div>';
             }
 
+            // Сколько заявок ждут парный рейтинг: менеджер должен вписать
+            // его руками, иначе пара считается по одиночному
+            if (isDbl) {
+                var ждут = {};
+                registrations.forEach(function(r) {
+                    if (r.status === 'withdrawn') return;
+                    [r.player_id, r.partner_id].forEach(function(id) {
+                        if (id && playersMap[id] && безПарного(playersMap[id])) ждут[id] = true;
+                    });
+                });
+                var ждутЧисло = Object.keys(ждут).length;
+                if (ждутЧисло > 0) {
+                    html += '<div style="margin-bottom:12px;padding:10px 14px;border:1px solid rgba(255,179,0,0.35);' +
+                        'border-radius:8px;background:rgba(255,179,0,0.08);color:#ffb300;font-size:0.88rem;font-weight:600;">' +
+                        '\u26A0 ' + L.dblNtrpNeedTitle + ': ' + ждутЧисло +
+                        '<div style="font-weight:400;color:var(--text-secondary);font-size:0.82rem;margin-top:4px;">' +
+                        L.dblNtrpNeedHint + '</div></div>';
+                }
+            }
+
             // ---- Main Draw ----
             var reservedSpots = tournament.reserved_spots || 0;
             var badgeText = mainDraw.length + '/' + maxPart;
@@ -1739,7 +1868,8 @@
             ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(33,150,243,0.15);color:#2196f3;margin-left:4px;">' + (reg.external_country || 'EXT') + '</span>'
             : '';
         // NTRP for main player
-        var playerNtrp = isExternal ? (reg.external_ntrp || null) : (pmEntry.ntrp_rating || null);
+        var playerNtrp = isExternal ? (reg.external_ntrp || null)
+            : (isDbl ? (ntrpПары(pmEntry) || null) : (pmEntry.ntrp_singles || null));
         var ntrpBadge = playerNtrp
             ? ' <span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(156,39,176,0.15);color:#ce93d8;margin-left:4px;">' + playerNtrp + '</span>'
             : '';
@@ -1776,7 +1906,7 @@
             var partnerNtrp = null;
             if (reg.partner_id) {
                 var pp = playersMap[reg.partner_id];
-                partnerNtrp = pp ? (pp.ntrp_rating || null) : null;
+                partnerNtrp = pp ? (ntrpПары(pp) || null) : null;
                 partnerDisplay = pp ? A.esc(isEn ? (pp.name_en || pp.name) : pp.name) : '?';
             } else if (reg.partner_external_name) {
                 partnerNtrp = reg.partner_external_ntrp || null;
@@ -1796,15 +1926,18 @@
         var rowStyle = hasDebt ? ' style="background:rgba(244,67,54,0.04);"' : '';
         if (isDbl) {
             // Doubles row: # | NTRP | Имя | NTRP | Партнёр | Общий NTRP | Регистрация | Действия
-            var playerNtrpTd = '<td style="text-align:center;font-size:0.85rem;color:#ce93d8;font-weight:600;">' + (playerNtrp || '—') + '</td>';
-            var partnerNtrpVal = '—';
+            // У своих показываем парный рейтинг, а если он не проставлен —
+            // кнопку «вписать». У приглашённых число вбито руками при заявке
+            var playerNtrpTd = isExternal
+                ? '<td style="text-align:center;font-size:0.85rem;color:#ce93d8;font-weight:600;">' + (playerNtrp || '—') + '</td>'
+                : ячейкаNtrpПары(pmEntry);
+            var partnerNtrpTd;
             if (reg.partner_id) {
-                var ppn = playersMap[reg.partner_id];
-                partnerNtrpVal = ppn && ppn.ntrp_rating ? ppn.ntrp_rating : '—';
-            } else if (reg.partner_external_ntrp) {
-                partnerNtrpVal = reg.partner_external_ntrp;
+                partnerNtrpTd = ячейкаNtrpПары(playersMap[reg.partner_id]);
+            } else {
+                partnerNtrpTd = '<td style="text-align:center;font-size:0.85rem;color:#ce93d8;font-weight:600;">' +
+                    (reg.partner_external_ntrp || '\u2014') + '</td>';
             }
-            var partnerNtrpTd = '<td style="text-align:center;font-size:0.85rem;color:#ce93d8;font-weight:600;">' + partnerNtrpVal + '</td>';
 
             return '<tr' + rowStyle + '>' +
                 '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"></td>' +
@@ -3665,7 +3798,14 @@
             approved.sort(function(a, b) {
                 var ntrpA = getTeamNtrp(a, playersMap);
                 var ntrpB = getTeamNtrp(b, playersMap);
-                if (ntrpA || ntrpB) return (ntrpB || 0) - (ntrpA || 0);
+                if (ntrpA || ntrpB) {
+                    if ((ntrpB || 0) !== (ntrpA || 0)) return (ntrpB || 0) - (ntrpA || 0);
+                    // Суммы равны — выше та пара, у кого сильнее первый номер:
+                    // 4.5 и 3 играют сильнее, чем 4 и 3.5, хотя сумма одна
+                    var стA = сильнейшийВПаре(a, playersMap);
+                    var стB = сильнейшийВПаре(b, playersMap);
+                    if (стB !== стA) return стB - стA;
+                }
                 return getTeamPoints(b, playersMap) - getTeamPoints(a, playersMap);
             });
         } else {
@@ -6294,7 +6434,10 @@
 
             overlay.remove();
             A.showToast(L.saved, 'success');
-            renderBracketManagement(tournamentId);
+            // Остаёмся в сетке: у завершённого турнира админка открывается на
+            // «Результатах», и после каждого сохранения счёта вкладка
+            // переключалась сама.
+            renderBracketManagement(tournamentId, 'bracket');
         });
     }
 

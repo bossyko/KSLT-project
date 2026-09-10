@@ -238,6 +238,7 @@
     'rating.rank':       { ru: '#',                   en: '#',               kg: '#' },
     'rating.player':     { ru: 'Игрок',              en: 'Player',          kg: 'Оюнчу' },
     'rating.pts':        { ru: 'Очки',               en: 'Pts',             kg: 'Упай' },
+    'rating.ptsShort':   { ru: 'очков',             en: 'pts',             kg: 'упай' },
     'rating.ntrp':       { ru: 'NTRP',               en: 'NTRP',            kg: 'NTRP' },
     'rating.wl':         { ru: 'В/П',                en: 'W/L',             kg: 'Ж/У' },
     'rating.empty':      { ru: 'Нет игроков',        en: 'No players',      kg: 'Оюнчу жок' },

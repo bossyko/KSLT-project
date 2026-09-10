@@ -103,7 +103,7 @@
                 .neq('status', 'completed')
                 .neq('status', 'cancelled')
                 .order('battle_published_at', { ascending: false }),
-            A.client.from('players').select('id, name, name_en, photo, ntrp_rating, category_id, country, gender').order('name'),
+            A.client.from('players').select('id, name, name_en, photo, ntrp_singles, ntrp_doubles, category_id, country, gender').order('name'),
             // Контакты: менеджер связывается с обоими, чтобы выяснить корт и
             // время. Без них за каждым телефоном приходилось идти в раздел
             // «Игроки» по одному
@@ -725,7 +725,7 @@
             sel1 = { id: p.id, name: p.name, ntrp: sel1.ntrp,
                      country: sel1.country, gender: sel1.gender };
             if (p._player) {
-                autofillPlayerExtras(p._player, 'cbP1Ntrp', 'cbP1Country', sel1);
+                autofillPlayerExtras(p._player, 'cbP1Ntrp', 'cbP1Country', sel1, format !== 'singles');
             }
             // Выбрали из базы — снимок не нужен, аватарка придёт из профиля
             togglePhotoField('cbP1', !!p.id);
@@ -734,7 +734,7 @@
             sel2 = { id: p.id, name: p.name, ntrp: sel2.ntrp,
                      country: sel2.country, gender: sel2.gender };
             if (p._player) {
-                autofillPlayerExtras(p._player, 'cbP2Ntrp', 'cbP2Country', sel2);
+                autofillPlayerExtras(p._player, 'cbP2Ntrp', 'cbP2Country', sel2, format !== 'singles');
             }
             // Выбрали из базы — снимок не нужен, аватарка придёт из профиля
             togglePhotoField('cbP2', !!p.id);
@@ -750,9 +750,10 @@
                 if (el) el.value = p._player.gender;
                 mate1.gender = p._player.gender;
             }
-            if (p._player && p._player.ntrp_rating) {
+            var m1Ntrp = p._player ? ntrpДляБаттла(p._player, true) : null;
+            if (m1Ntrp) {
                 var n = document.getElementById('cbM1Ntrp');
-                var v = parseFloat(p._player.ntrp_rating).toFixed(2).replace(/0$/, '');
+                var v = parseFloat(m1Ntrp).toFixed(2).replace(/0$/, '');
                 if (n) n.value = v;
                 mate1.ntrp = v;
             }
@@ -766,9 +767,10 @@
                 if (el2) el2.value = p._player.gender;
                 mate2.gender = p._player.gender;
             }
-            if (p._player && p._player.ntrp_rating) {
+            var m2Ntrp = p._player ? ntrpДляБаттла(p._player, true) : null;
+            if (m2Ntrp) {
                 var n2 = document.getElementById('cbM2Ntrp');
-                var v2 = parseFloat(p._player.ntrp_rating).toFixed(2).replace(/0$/, '');
+                var v2 = parseFloat(m2Ntrp).toFixed(2).replace(/0$/, '');
                 if (n2) n2.value = v2;
                 mate2.ntrp = v2;
             }
@@ -1647,8 +1649,9 @@
         var p2Name = chalSideName(challenge, 2);
 
         // У принятого вызова этих полей ещё нет — подставляем из карточек
-        var p1Ntrp = challenge.challenger_ntrp || p1.ntrp_rating || null;
-        var p2Ntrp = challenge.opponent_ntrp || p2.ntrp_rating || null;
+        var парныйБаттл = challenge.format === 'doubles' || challenge.format === 'mixed_doubles';
+        var p1Ntrp = challenge.challenger_ntrp || ntrpДляБаттла(p1, парныйБаттл) || null;
+        var p2Ntrp = challenge.opponent_ntrp || ntrpДляБаттла(p2, парныйБаттл) || null;
         var p1Cat = challenge.challenger_category || p1.category_id || '';
         var p2Cat = challenge.opponent_category || p2.category_id || '';
         var p1Country = challenge.challenger_country || p1.country || '';
@@ -2231,7 +2234,10 @@
             var cat = (A.cachedCategories || []).find(function (c) { return c.id === p.category_id; });
             if (cat) части.push(isEn ? (cat.name_en || cat.name) : cat.name);
         }
-        if (p.ntrp_rating) части.push('NTRP ' + parseFloat(p.ntrp_rating));
+        // В подсказке поиска показываем оба числа: одиночный / парный —
+        // так видно и то, и другое, каким бы ни был формат баттла
+        var коротко = window.KSLT_RULES.ntrpКоротко(p.ntrp_singles, p.ntrp_doubles);
+        if (коротко) части.push('NTRP ' + коротко);
         return части.length ? ' \u00B7 ' + части.join(' \u00B7 ') : '';
     }
 
@@ -2268,7 +2274,18 @@
         return html;
     }
 
-    function autofillPlayerExtras(player, ntrpId, countryId, selObj) {
+    /**
+     * Какой рейтинг подставлять в баттл: в парном и миксте — парный, в
+     * одиночном — одиночный. Нет парного — берём одиночный, иначе поле
+     * осталось бы пустым.
+     */
+    function ntrpДляБаттла(player, парный) {
+        var R = window.KSLT_RULES;
+        if (парный) return R.ntrpПары(player.ntrp_singles, player.ntrp_doubles);
+        return player.ntrp_singles || null;
+    }
+
+    function autofillPlayerExtras(player, ntrpId, countryId, selObj, парный) {
         var CU = window.KSLT_COUNTRY;
         // Пол. У членов клуба он в карточке, у вписанного руками его спросят
         // отдельно: проверка состава пары сравнивает именно его
@@ -2282,8 +2299,9 @@
             }
         }
         // NTRP — format value to match select options (e.g. 4.5 → "4.5", 4.25 → "4.25")
-        if (player.ntrp_rating) {
-            var ntrpVal = parseFloat(player.ntrp_rating).toFixed(2).replace(/0$/, '');
+        var ntrpИсходное = ntrpДляБаттла(player, парный);
+        if (ntrpИсходное) {
+            var ntrpVal = parseFloat(ntrpИсходное).toFixed(2).replace(/0$/, '');
             var ntrpEl = document.getElementById(ntrpId);
             if (ntrpEl) ntrpEl.value = ntrpVal;
             selObj.ntrp = ntrpVal;

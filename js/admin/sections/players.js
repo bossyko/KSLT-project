@@ -281,7 +281,7 @@
         var isAdm = A.currentRole === 'admin';
 
         var query = A.client.from('players')
-            .select('id,name,photo,country,category_id,points,wins,losses,rank_change,banned_until,view_count', { count: 'exact' })
+            .select('id,name,photo,country,category_id,points,wins,losses,rank_change,banned_until,view_count,is_guest', { count: 'exact' })
             .order('points', { ascending: false });
 
         if (plrFilterCategory) {
@@ -336,6 +336,8 @@
                     '<td>' + thumbHtml + '</td>' +
                     '<td style="font-weight:500;color:var(--text-primary);">' + plrFlag + ' ' + (p.name || L.noData) +
                         (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.7rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + L.plrBanned + '</span>' : '') +
+                        // Гость виден сразу в списке: у него нет карточки на сайте
+                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.7rem;font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-dim);margin-left:4px;">' + (isEn ? 'Guest' : 'Гость') + '</span>' : '') +
                     '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + (p.points || 0) + '</td>' +
@@ -642,6 +644,15 @@
                         '</select>' +
                     '</div>' +
                 '</div>' +
+                // Гость: играет турниры, но в рейтинг и в список игроков не
+                // попадает, и карточки у него нет
+                '<div class="ad-field" style="margin-top:12px;">' +
+                    '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;">' +
+                        '<input type="checkbox" id="adPlrGuest"' + (item && item.is_guest ? ' checked' : '') + '>' +
+                        '<span>' + L.plrGuest + '</span>' +
+                    '</label>' +
+                    '<div class="ad-field-hint">' + L.plrGuestHint + '</div>' +
+                '</div>' +
             '</div>' +
 
             // Stats: Points, Wins, Losses, Rank Change (readonly by default)
@@ -690,9 +701,19 @@
                     // Кнопка в одной строке с самим полем, по его нижнему краю.
                     // Подсказка ниже — иначе выравнивание считалось бы вместе
                     // с ней и кнопка уезжала под поле
-                    '<div style="display:flex;gap:12px;align-items:flex-end;max-width:420px;">' +
-                        '<select class="ad-field-input" id="adPlrNtrp" style="max-width:200px;">' +
-                            A.ntrpOptions(item && item.ntrp_rating) + '</select>' +
+                    // Рейтингов два: одиночный и парный. Оба стоят рядом,
+                    // кнопка сохранения у них общая
+                    '<div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">' +
+                        '<div>' +
+                            '<div class="ad-field-label">' + L.plrNtrpSingles + '</div>' +
+                            '<select class="ad-field-input" id="adPlrNtrp" style="max-width:200px;">' +
+                                A.ntrpOptions(item && item.ntrp_singles) + '</select>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div class="ad-field-label">' + L.plrNtrpDoubles + '</div>' +
+                            '<select class="ad-field-input" id="adPlrNtrpDoubles" style="max-width:200px;">' +
+                                A.ntrpOptions(item && item.ntrp_doubles) + '</select>' +
+                        '</div>' +
                         '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrSaveNtrp" disabled>' +
                             L.save + '</button>' +
                     '</div>' +
@@ -1100,10 +1121,17 @@
         // завести в историю запись о том, чего не было
         var ntrpSave = document.getElementById('adPlrSaveNtrp');
         var ntrpSelect = document.getElementById('adPlrNtrp');
+        var ntrpDbl = document.getElementById('adPlrNtrpDoubles');
         if (ntrpSave && ntrpSelect) {
             var ntrpWas = ntrpSelect.value;
+            var ntrpDblWas = ntrpDbl ? ntrpDbl.value : '';
+            function ntrpИзменился() {
+                ntrpSave.disabled = (ntrpSelect.value === ntrpWas)
+                    && (!ntrpDbl || ntrpDbl.value === ntrpDblWas);
+            }
+            if (ntrpDbl) ntrpDbl.addEventListener('change', ntrpИзменился);
             ntrpSelect.addEventListener('change', function() {
-                ntrpSave.disabled = (ntrpSelect.value === ntrpWas);
+                ntrpИзменился();
             });
             ntrpSave.addEventListener('click', savePlayerHandler);
         }
@@ -1270,9 +1298,12 @@
                 bio: document.getElementById('adPlrMotto').value.trim() || null,
                 bio_en: document.getElementById('adPlrMottoEn').value.trim() || null,
                 bio_kg: document.getElementById('adPlrMottoKg').value.trim() || null,
-                ntrp_rating: parseFloat(document.getElementById('adPlrNtrp').value) || null,
-
-
+                ntrp_singles: parseFloat(document.getElementById('adPlrNtrp').value) || null,
+                ntrp_doubles: (function() {
+                    var el = document.getElementById('adPlrNtrpDoubles');
+                    return el ? (parseFloat(el.value) || null) : null;
+                })(),
+                is_guest: !!(document.getElementById('adPlrGuest') || {}).checked
             };
 
             if (!fnRu) {
@@ -1300,7 +1331,7 @@
                 // хранит один знак после запятой, и 4.25 превращается в ней
                 // в 4.3. Сравнение с карточкой то пропускало изменение, то
                 // придумывало его на пустом месте
-                if (data.ntrp_rating != null) {
+                if (data.ntrp_singles != null) {
                     var lastRes = await A.client.from('rating_history')
                         .select('ntrp_after')
                         .eq('player_id', plrEditingId)
@@ -1310,13 +1341,13 @@
                     var prevNtrp = (lastRes.data && lastRes.data.length)
                         ? Number(lastRes.data[0].ntrp_after) : null;
 
-                    if (prevNtrp === null || Math.abs(prevNtrp - data.ntrp_rating) > 0.001) {
+                    if (prevNtrp === null || Math.abs(prevNtrp - data.ntrp_singles) > 0.001) {
                         var ntrpRow = await A.client.from('rating_history').insert({
                             player_id: plrEditingId,
                             tournament_name: isEn ? 'NTRP rating' : 'Оценка NTRP',
                             points_earned: 0,
                             ntrp_before: prevNtrp,
-                            ntrp_after: data.ntrp_rating,
+                            ntrp_after: data.ntrp_singles,
                             recorded_at: new Date().toISOString().slice(0, 10)
                         });
                         if (ntrpRow.error) {
@@ -2326,7 +2357,12 @@
         if (!body) return;
         body.innerHTML = '<div style="padding:20px;opacity:0.5;">Loading...</div>';
 
-        var query = A.client.from('players').select('*, categories(name, name_en)').order('points', { ascending: false });
+        // Связей между игроком и разрядами теперь две — домашняя и таблица
+        // очков по разрядам, — и база не знает, какую подставить. Указываем
+        // домашнюю явно, иначе запрос отвечает ошибкой и список пуст
+        var query = A.client.from('players')
+            .select('*, categories!players_category_id_fkey(name, name_en)')
+            .order('points', { ascending: false });
         if (_ratCatFilter) query = query.eq('category_id', _ratCatFilter);
         if (_ratGenderFilter) query = query.eq('gender', _ratGenderFilter);
         var res = await query;
@@ -2371,11 +2407,40 @@
         players.forEach(function(p) { playerNameMap[p.id] = isEn ? (p.name_en || p.name) : p.name; });
         var playerEditBase = '#players/edit/';
 
+        // Игрок стоит в своём разряде и в тех, где набирал очки. Так же
+        // устроен рейтинг на сайте: в каждой таблице у него очки именно
+        // этого разряда, а не общая сумма
+        var pcRes = await A.client.from('player_categories')
+            .select('player_id, category_id, points, closed_at');
+        var очкиРазряда = {};
+        (pcRes.data || []).forEach(function(r) {
+            if (r.closed_at) return;
+            if (!очкиРазряда[r.category_id]) очкиРазряда[r.category_id] = {};
+            очкиРазряда[r.category_id][r.player_id] = r.points || 0;
+        });
+
         var groups = {};
-        players.forEach(function(p) {
-            var catId = p.category_id || 'none';
+        function вГруппу(catId, p, очки) {
             if (!groups[catId]) groups[catId] = [];
-            groups[catId].push(p);
+            groups[catId].push({ игрок: p, очки: очки });
+        }
+        players.forEach(function(p) {
+            var добавлен = {};
+            Object.keys(очкиРазряда).forEach(function(catId) {
+                var о = очкиРазряда[catId][p.id];
+                if (о === undefined) return;
+                if (_ratCatFilter && catId !== _ratCatFilter) return;
+                вГруппу(catId, p, о);
+                добавлен[catId] = true;
+            });
+            // Домашний разряд показываем всегда, даже пока очков в нём нет
+            var домашний = p.category_id || 'none';
+            if (!добавлен[домашний] && (!_ratCatFilter || домашний === _ratCatFilter)) {
+                вГруппу(домашний, p, очкиРазряда[домашний] ? (очкиРазряда[домашний][p.id] || 0) : 0);
+            }
+        });
+        Object.keys(groups).forEach(function(catId) {
+            groups[catId].sort(function(a, b) { return b.очки - a.очки; });
         });
 
         var sortedCatIds = Object.keys(groups).sort(function(a, b) {
@@ -2393,7 +2458,9 @@
             }
 
             if (!_ratCatFilter) {
-                html += '<h3 class="ad-rat-cat-title">' + (catName || 'N/A') + '</h3>';
+                // Игроки без домашнего разряда шли под подписью «N/A» —
+                // непонятно, что это за список. Пишем по-русски
+                html += '<h3 class="ad-rat-cat-title">' + (catName || L.ratNoCategory) + '</h3>';
             }
 
             html += '<div class="ad-table-card"><div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
@@ -2405,7 +2472,8 @@
                 '<th style="width:80px;text-align:center;">' + L.thChange + '</th>' +
             '</tr></thead><tbody>';
 
-            catPlayers.forEach(function(p, i) {
+            catPlayers.forEach(function(запись, i) {
+                var p = запись.игрок;
                 var pMatches = _ratPlayerMatches[p.id] || [];
                 var wl = _ratWL[p.id] || { w: 0, l: 0 };
                 if (pMatches.length === 0 && (p.wins || p.losses)) {
@@ -2430,7 +2498,7 @@
                 html += '<tr>' +
                     '<td>' + (i + 1) + '</td>' +
                     '<td><a href="' + playerEditBase + p.id + '" class="ad-rat-player-link">' + A.esc(name) + '</a></td>' +
-                    '<td><strong>' + (p.points || 0) + '</strong></td>' +
+                    '<td><strong>' + (запись.очки || 0) + '</strong></td>' +
                     '<td>' + wl.w + '/' + wl.l + '</td>' +
                     '<td class="ad-rat-form-cell">' + formHtml + '</td>' +
                     '<td style="text-align:center;"><span class="' + changeClass + '">' + changeStr + '</span></td>' +
@@ -2949,7 +3017,7 @@
     async function exportPlayersExcel() {
         if (!A.client) return;
         var res = await A.client.from('players')
-            .select('id,name,name_en,category_id,points,wins,losses,ntrp_rating,country')
+            .select('id,name,name_en,category_id,points,wins,losses,ntrp_singles,country')
             .order('points', { ascending: false });
         var items = res.data || [];
         if (!items.length) { A.showToast(L.plrImportNoData, 'warning'); return; }
@@ -2958,7 +3026,7 @@
         var rows = items.map(function(p, i) {
             var cat = A.categoriesMap[p.category_id];
             var catName = cat ? (isEn ? cat.name_en : cat.name) : (p.category_id || '');
-            return [i + 1, p.name || '', p.name_en || '', catName, p.points || 0, p.wins || 0, p.losses || 0, p.ntrp_rating || '', p.country || ''];
+            return [i + 1, p.name || '', p.name_en || '', catName, p.points || 0, p.wins || 0, p.losses || 0, p.ntrp_singles || '', p.country || ''];
         });
         var today = new Date().toISOString().slice(0, 10);
         A.exportCsv('kslt-players-' + today + '.csv', headers, rows);
@@ -3193,7 +3261,7 @@
             document.getElementById('adImportFooter').style.display = '';
 
             // Load existing players for matching
-            var res = await A.client.from('players').select('id,name,name_en,category_id,points,ntrp_rating');
+            var res = await A.client.from('players').select('id,name,name_en,category_id,points,ntrp_singles');
             existingPlayers = res.data || [];
 
             var existingMap = {};
@@ -3296,7 +3364,7 @@
                     var upd = {};
                     if (r.points !== undefined) upd.points = r.points;
                     if (r.category_id) upd.category_id = r.category_id;
-                    if (r.ntrp) upd.ntrp_rating = r.ntrp;
+                    if (r.ntrp) upd.ntrp_singles = r.ntrp;
                     if (r.name_en) upd.name_en = r.name_en;
                     if (r.country) upd.country = r.country;
                     if (Object.keys(upd).length > 0) {
@@ -3310,7 +3378,7 @@
                     if (r.name_en) ins.name_en = r.name_en;
                     if (r.category_id) ins.category_id = r.category_id;
                     if (r.points !== undefined) ins.points = r.points;
-                    if (r.ntrp) ins.ntrp_rating = r.ntrp;
+                    if (r.ntrp) ins.ntrp_singles = r.ntrp;
                     if (r.country) ins.country = r.country;
 
                     var res = await A.client.from('players').insert(ins);

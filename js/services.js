@@ -219,14 +219,14 @@
                     // тем же вторым запросом их берёт страница «Поиск игрока»
                     var ids = partners.map(function(x) { return x.id; });
                     var plRes = await client.from('players')
-                        .select('id, ntrp_rating, gender')
+                        .select('id, ntrp_singles, gender')
                         .in('id', ids);
                     var plMap = {};
                     (plRes.data || []).forEach(function(x) { plMap[x.id] = x; });
                     partners.forEach(function(x) {
                         var pl = plMap[x.id];
                         if (!pl) return;
-                        x.ntrp_rating = pl.ntrp_rating;
+                        x.ntrp_singles = pl.ntrp_singles;
                         if (pl.gender) x.gender = pl.gender;
                     });
                 }
@@ -621,7 +621,7 @@
 
         return '<div class="sv-player" data-type="partners" data-idx="' + idx + '">' +
             '<span class="sv-player-cat">' + level + '</span>' +
-            (p.ntrp_rating ? '<span class="sv-player-ntrp">' + p.ntrp_rating +
+            (p.ntrp_singles ? '<span class="sv-player-ntrp">' + p.ntrp_singles +
                 '<small>NTRP</small></span>' : '') +
             '<div class="sv-player-ava-wrap">' +
                 avatarHtml +

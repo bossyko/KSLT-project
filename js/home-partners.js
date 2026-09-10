@@ -63,14 +63,14 @@
             // Рейтинговые поля лежат в карточке игрока: NTRP, победы, форма
             var ids = list.map(function(p) { return p.id; });
             var stats = await client.from('players')
-                .select('id, ntrp_rating, wins, losses, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses')
+                .select('id, ntrp_singles, wins, losses, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses')
                 .in('id', ids);
 
             var byId = {};
             (stats.data || []).forEach(function(p) { byId[p.id] = p; });
             list.forEach(function(p) {
                 var s = byId[p.id] || {};
-                p.ntrp_rating = s.ntrp_rating || null;
+                p.ntrp_singles = s.ntrp_singles || null;
                 p.wins = s.wins || 0;
                 p.losses = s.losses || 0;
                 p.form = s.form || [];
@@ -183,8 +183,8 @@
 
         return '<div class="pt-card' + blur + '"' +
                 (guest ? '' : ' data-player-id="' + esc(p.id) + '"') + '>' +
-            (p.ntrp_rating
-                ? '<div class="pt-ntrp-badge">NTRP ' + Number(p.ntrp_rating).toFixed(1) + '</div>'
+            (p.ntrp_singles
+                ? '<div class="pt-ntrp-badge">NTRP ' + Number(p.ntrp_singles).toFixed(1) + '</div>'
                 : '') +
             '<div class="pt-avatar-wrap">' +
                 (p.avatar_url

@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
 
     const { data: player } = await db
       .from('players')
-      .select('id, name, category_id, gender, points, ntrp_rating, banned_until')
+      .select('id, name, category_id, gender, points, ntrp_singles, ntrp_doubles, banned_until')
       .eq('id', profile.player_id)
       .single()
 
@@ -202,13 +202,13 @@ Deno.serve(async (req) => {
         const partnerNtrp = body.partner_id
           ? await loadPartnerNtrp(db, body.partner_id)
           : Number(body.partner_external_ntrp || 0)
-        const combined = Number(player.ntrp_rating || 0) + Number(partnerNtrp || 0)
+        const combined = ntrpПары(player) + Number(partnerNtrp || 0)
         if (combined > Number(tournament.ntrp_combined_max)) {
           return json({ error: 'ntrp_combined_exceeded', combined, limit: tournament.ntrp_combined_max }, 403)
         }
       }
     } else {
-      const ntrp = Number(player.ntrp_rating || 0)
+      const ntrp = Number(player.ntrp_singles || 0)
       if (ntrp) {
         if (tournament.ntrp_min && ntrp < Number(tournament.ntrp_min)) {
           return json({ error: 'ntrp_too_low' }, 403)
@@ -367,9 +367,17 @@ function normalizeGender(g: string | null): string | null {
   return (g === 'men' || g === 'women') ? g : null
 }
 
+// В парном турнире человек считается парным рейтингом. Нет его — берём
+// одиночный, иначе игрок без парной оценки уходил бы в сумму нулём
+function ntrpПары(p: { ntrp_singles?: number | null; ntrp_doubles?: number | null } | null): number {
+  const пар = Number(p?.ntrp_doubles || 0)
+  if (пар > 0) return пар
+  return Number(p?.ntrp_singles || 0)
+}
+
 async function loadPartnerNtrp(db: any, partnerId: string): Promise<number> {
-  const { data } = await db.from('players').select('ntrp_rating').eq('id', partnerId).single()
-  return Number(data?.ntrp_rating || 0)
+  const { data } = await db.from('players').select('ntrp_singles, ntrp_doubles').eq('id', partnerId).single()
+  return ntrpПары(data)
 }
 
 /**

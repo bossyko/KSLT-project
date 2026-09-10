@@ -72,6 +72,16 @@
         noStatsText: 'Статистиканы көрүү үчүн аккаунтуңузду оюнчу профили менен байланыштырыңыз',
         playerNotLinked: 'Оюнчу профили байланган эмес',
         playerNotLinkedText: 'Аккаунтуңузду оюнчу профили менен байланыштыруу үчүн администраторго кайрылыңыз',
+        linkTitle: 'Өз картаңызды табыңыз',
+        linkText: 'Клуб оюнчулардын карталарын мурда түзгөн. Өзүңүздүкүн табыңыз — анда рейтингиңиз, упайыңыз жана оюн тарыхыңыз. Байланышты клубдун менеджери ырастайт.',
+        linkSearch: 'Фамилияңызды жазыңыз',
+        linkItsMe: 'Бул мен',
+        linkNothing: 'Эч ким табылган жок',
+        linkPending: 'Өтүнүч жөнөтүлдү',
+        linkPendingText: 'Клубдун менеджери ырастаганын күтүп жатабыз.',
+        linkOther: 'Башка карта тандоо',
+        linkTaken: 'Бул картаны башка аккаунт алып койгон',
+        linkDone: 'Карта байланды',
         changePassword: 'Сыр сөздү өзгөртүү',
         currentPassword: 'Учурдагы сыр сөз',
         phCurrentPassword: 'Учурдагы сыр сөзүңүз',
@@ -330,6 +340,16 @@
         noStatsText: 'Link your account with a player profile to see stats',
         playerNotLinked: 'Player profile not linked',
         playerNotLinkedText: 'Contact admin to link your account with a player profile',
+        linkTitle: 'Find your player card',
+        linkText: 'The club created player cards in advance. Find yours — it holds your rating, points and match history. A club manager confirms the link.',
+        linkSearch: 'Type your last name',
+        linkItsMe: 'This is me',
+        linkNothing: 'Nobody found',
+        linkPending: 'Request sent',
+        linkPendingText: 'Waiting for a club manager to confirm the card is yours.',
+        linkOther: 'Pick another card',
+        linkTaken: 'This card is already taken by another account',
+        linkDone: 'Card linked',
         changePassword: 'Change Password',
         currentPassword: 'Current Password',
         phCurrentPassword: 'Your current password',
@@ -588,6 +608,16 @@
         noStatsText: 'Свяжите аккаунт с профилем игрока для просмотра статистики',
         playerNotLinked: 'Профиль игрока не привязан',
         playerNotLinkedText: 'Обратитесь к администратору для привязки аккаунта к профилю игрока',
+        linkTitle: 'Найдите свою карточку',
+        linkText: 'Клуб завёл карточки игроков заранее. Найдите свою — в ней ваш рейтинг, очки и история игр. Привязку подтвердит менеджер клуба.',
+        linkSearch: 'Введите свою фамилию',
+        linkItsMe: 'Это я',
+        linkNothing: 'Никого не нашли',
+        linkPending: 'Заявка отправлена',
+        linkPendingText: 'Ждём, пока менеджер клуба подтвердит, что карточка ваша.',
+        linkOther: 'Выбрать другую карточку',
+        linkTaken: 'Эту карточку уже забрал другой аккаунт',
+        linkDone: 'Карточка привязана',
         changePassword: 'Смена пароля',
         currentPassword: 'Текущий пароль',
         phCurrentPassword: 'Ваш текущий пароль',
@@ -1230,7 +1260,7 @@
         var container = document.getElementById('dbSidebarRatings');
         if (!container || !profile.player_id || !client) return;
 
-        var res = await client.from('players').select('points, category_id, ntrp_rating').eq('id', profile.player_id).single();
+        var res = await client.from('players').select('points, category_id, ntrp_singles, ntrp_doubles').eq('id', profile.player_id).single();
         if (!res.data) return;
 
         var player = res.data;
@@ -1268,11 +1298,14 @@
             }
         }
 
-        // NTRP rating
-        if (player.ntrp_rating) {
+        // NTRP: одиночный разряд и парные турниры, с подписями
+        var R = window.KSLT_RULES;
+        var ntrpСтрока = (R && R.ntrpСтрока)
+            ? R.ntrpСтрока(player.ntrp_singles, player.ntrp_doubles, isEn ? 'en' : 'ru') : '';
+        if (ntrpСтрока) {
             html += '<div class="db-sidebar-rating-row">' +
                 '<span class="db-sidebar-rating-label">NTRP</span>' +
-                '<span class="db-sidebar-rating-value">' + player.ntrp_rating.toFixed(1) + '</span>' +
+                '<span class="db-sidebar-rating-value">' + ntrpСтрока + '</span>' +
             '</div>';
         }
 
@@ -2042,6 +2075,106 @@
             '</tr>';
         }
     }
+    // ================================================
+    // ПРИВЯЗКА КАРТОЧКИ ИГРОКА
+    // ================================================
+    //
+    // Карточки клуб завёл заранее, и при регистрации человек должен забрать
+    // свою, а не создавать новую. Само «это я» ничего не доказывает — имя и
+    // матчи видны всем, — поэтому выбор уходит заявкой, а привязывает
+    // менеджер в админке.
+
+    async function нарисоватьПривязку(profile) {
+        var box = document.getElementById('dbLinkCard');
+        if (!box || !client) return;
+
+        var заявка = null;
+        var res = await client.from('player_link_requests')
+            .select('id, player_id, status, created_at')
+            .eq('profile_id', profile.id)
+            .eq('status', 'pending')
+            .maybeSingle();
+        if (res.data) заявка = res.data;
+
+        if (заявка) {
+            var кто = await client.from('players').select('name').eq('id', заявка.player_id).maybeSingle();
+            box.innerHTML =
+                '<div class="db-link-card db-link-card-pending">' +
+                    '<div class="db-link-title">\u23F3 ' + L.linkPending + '</div>' +
+                    '<div class="db-link-text">' + escHtml((кто.data && кто.data.name) || '') + ' \u00B7 ' + L.linkPendingText + '</div>' +
+                    '<button class="db-link-other" id="dbLinkOther">' + L.linkOther + '</button>' +
+                '</div>';
+            var other = document.getElementById('dbLinkOther');
+            if (other) other.addEventListener('click', function() { нарисоватьПоиск(box, profile); });
+            return;
+        }
+
+        нарисоватьПоиск(box, profile);
+    }
+
+    function нарисоватьПоиск(box, profile) {
+        box.innerHTML =
+            '<div class="db-link-card">' +
+                '<div class="db-link-title">\uD83C\uDFBE ' + L.linkTitle + '</div>' +
+                '<div class="db-link-text">' + L.linkText + '</div>' +
+                '<input type="text" class="db-input db-link-input" id="dbLinkSearch" placeholder="' + L.linkSearch + '" autocomplete="off">' +
+                '<div class="db-link-results" id="dbLinkResults"></div>' +
+            '</div>';
+
+        var поле = document.getElementById('dbLinkSearch');
+        var список = document.getElementById('dbLinkResults');
+        var таймер = null;
+
+        поле.addEventListener('input', function() {
+            clearTimeout(таймер);
+            var q = поле.value.trim();
+            if (q.length < 2) { список.innerHTML = ''; return; }
+            таймер = setTimeout(function() { искатьКарточки(q, список, profile); }, 300);
+        });
+    }
+
+    async function искатьКарточки(q, список, profile) {
+        // Занятые карточки не показываем вовсе: has_account стоит у тех, за
+        // кем уже есть учётная запись
+        var res = await client.from('players')
+            .select('id, name, category_id, ntrp_singles, photo')
+            .ilike('name', '%' + q + '%')
+            .eq('is_guest', false)
+            .eq('has_account', false)
+            .limit(8);
+
+        var люди = res.data || [];
+        if (!люди.length) {
+            список.innerHTML = '<div class="db-link-empty">' + L.linkNothing + '</div>';
+            return;
+        }
+
+        var R = window.KSLT_RULES;
+        список.innerHTML = люди.map(function(p) {
+            var разряд = p.category_id ? (R && R.categoryLabel ? R.categoryLabel(p.category_id, isEn ? 'en' : 'ru') : p.category_id) : '';
+            var ntrp = (R && R.ntrpКоротко) ? R.ntrpКоротко(p.ntrp_singles, null) : '';
+            var подпись = [разряд, ntrp ? 'NTRP ' + ntrp : ''].filter(Boolean).join(' \u00B7 ');
+            return '<div class="db-link-row">' +
+                '<div class="db-link-person">' +
+                    '<div class="db-link-name">' + escHtml(p.name) + '</div>' +
+                    (подпись ? '<div class="db-link-meta">' + escHtml(подпись) + '</div>' : '') +
+                '</div>' +
+                '<button class="db-link-take" data-player-id="' + escHtml(p.id) + '">' + L.linkItsMe + '</button>' +
+            '</div>';
+        }).join('');
+
+        список.querySelectorAll('.db-link-take').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                btn.disabled = true;
+                var r = await client.rpc('запросить_привязку', { p_player_id: btn.dataset.playerId });
+                var д = r.data || {};
+                if (д.error === 'player_taken') { showMessage('', L.linkTaken, true); btn.disabled = false; return; }
+                if (д.error) { showMessage('', д.error, true); btn.disabled = false; return; }
+                нарисоватьПривязку(profile);
+            });
+        });
+    }
+
     function renderGames(profile) {
         var container = document.getElementById('db-games');
         if (!container) return;
@@ -2070,6 +2203,12 @@
         // это единственное здесь, что требует действия — не пропустить, не
         // забыть сняться. Всё остальное — архив. Внутри общего блока
         // «Турниры» предстоящее было спрятано, да ещё и сворачивалось
+        // Карточка игрока ещё не привязана — первым делом предлагаем найти
+        // свою: без неё в кабинете нет ни рейтинга, ни истории. Сотрудникам
+        // клуба не предлагаем: под рабочей почтой они не играют
+        var сотрудник = profile.role === 'admin' || profile.role === 'manager';
+        if (!profile.player_id && !сотрудник) html += '<div id="dbLinkCard"></div>';
+
         html += sub('dbSubUpcoming', '\uD83D\uDCC5', L.subUpcoming, 'dbGamesUpcoming');
         html += sub('dbSubTournaments', '\uD83C\uDFC6', L.subTournaments, 'dbGamesTournaments');
         html += sub('dbSubMatches', '\u2694\uFE0F', L.subMatches, 'dbGamesMatches');
@@ -2080,6 +2219,8 @@
         // сыгранные встречи. Здесь стоял их второй, точно такой же блок
 
         container.innerHTML = html;
+
+        if (!profile.player_id && !сотрудник) нарисоватьПривязку(profile);
 
         // Toggle handlers
         container.querySelectorAll('.db-subsection-toggle').forEach(function(btn) {

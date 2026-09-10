@@ -33,7 +33,14 @@
             var plrResult = await client.from('players').select('*').order('points', { ascending: false });
             if (plrResult.error) return null;
 
-            var players = plrResult.data || [];
+            // Гости в рейтинге и в списке игроков не показываются: они не
+            // члены клуба, их карточка нужна только чтобы стоять в сетке.
+            var players = (plrResult.data || []).filter(function(p) { return !p.is_guest; });
+
+            // Пока идёт бесплатный период, клуб открыт всем: места в рейтинге
+            // получают все карточки, а не только оплатившие членство. Кончится
+            // период — вернётся прежний порядок, ничего доделывать не нужно
+            var бесплатно = window.бесплатныйПериод ? await window.бесплатныйПериод() : false;
             var categories = catResult.data;
 
             // Очки по категориям: игрок может стоять в двух — своей и на ступень
@@ -80,7 +87,11 @@
                         // Домашняя категория — всегда, чужая — только если там есть очки
                         return p.category_id === cat.id || inCat[p.id] > 0;
                     }).sort(function(a, b) {
-                        return (inCat[b.id] || 0) - (inCat[a.id] || 0);
+                        var очки = (inCat[b.id] || 0) - (inCat[a.id] || 0);
+                        if (очки) return очки;
+                        // Очки равны — выше тот, у кого одиночный NTRP больше.
+                        // Парный здесь не смотрим: рейтинг одиночный
+                        return (Number(b.ntrp_singles) || 0) - (Number(a.ntrp_singles) || 0);
                     });
                     var key = g + '-' + cat.id;
                     result[key] = {
@@ -99,12 +110,17 @@
                                 change: p.rank_change || 0,
                                 form: p.form || [],
                                 online: false,
-                                ntrp_rating: p.ntrp_rating || null,
+                                ntrp_singles: p.ntrp_singles || null,
+                                ntrp_doubles: p.ntrp_doubles || null,
                                 banned_until: p.banned_until || null,
                                 // Член клуба или фоновая карточка из списков
                                 // NTRP. Фоновые показываем приглушённо: они
-                                // есть в базе клуба, но членство не оплачено
-                                isMember: !!p.is_member
+                                // есть в базе клуба, но членство не оплачено.
+                                // В бесплатный период таких нет — все равны
+                                isMember: бесплатно || !!p.is_member,
+                                // Есть ли за карточкой человек с учётной
+                                // записью: только такого можно звать на матч
+                                hasAccount: !!p.has_account
                             };
                         })
                     };
@@ -120,4 +136,47 @@
 
 
     window.KSLT_RANKINGS = { load: load };
+
+    /**
+     * Сколько человек стоит в рейтинге: по разрядам и всего.
+     *
+     * Считаем по тому же правилу, что и таблицы: игрок виден в своём разряде и
+     * в тех, где у него есть очки. Кто играет в двух — считается в каждом,
+     * потому что это две разные таблицы и два разных места.
+     *
+     * Возвращает { promasters: 18, ..., всего: 348 }.
+     */
+    window.KSLT_RANKINGS.countByCategory = async function() {
+        var client = window.supabaseClient;
+        if (!client) return null;
+
+        var res = await client.from('players').select('id, category_id, is_guest');
+        var pc = await client.from('player_categories').select('player_id, category_id, points, closed_at');
+
+        var в = {};
+        function добавить(cat, id) {
+            if (!cat) return;
+            if (!в[cat]) в[cat] = {};
+            в[cat][id] = true;
+        }
+        (res.data || []).forEach(function(p) {
+            if (p.is_guest) return;
+            добавить(p.category_id, p.id);
+        });
+        var гости = {};
+        (res.data || []).forEach(function(p) { if (p.is_guest) гости[p.id] = true; });
+        (pc.data || []).forEach(function(r) {
+            if (r.closed_at || !(r.points > 0) || гости[r.player_id]) return;
+            добавить(r.category_id, r.player_id);
+        });
+
+        var итог = { всего: 0 };
+        Object.keys(в).forEach(function(cat) {
+            if (cat === 'friendly') return;
+            итог[cat] = Object.keys(в[cat]).length;
+            итог.всего += итог[cat];
+        });
+        return итог;
+    };
+
 })();

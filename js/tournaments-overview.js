@@ -327,20 +327,15 @@
             el = document.getElementById('toStatPrize');
             if (el) el.textContent = formatPrize(totalPrize);
 
-            // Participants
+            // Игроки в рейтинге, сложенные по всем разрядам. Кто играет в
+            // двух — считается дважды: это два разных места в двух таблицах.
+            // Раньше здесь стояло число принятых заявок на турниры, а это
+            // ответ на другой вопрос
             try {
-                var ids = all.map(function(t) { return t.id; });
-                if (ids.length > 0) {
-                    // Считаем только принятые заявки. Раньше в число участников
-                    // попадали снявшиеся, отклонённые и заблокированные —
-                    // получалось 502 человека вместо 453
-                    var regs = await client.from('tournament_registrations')
-                        .select('*', { count: 'exact', head: true })
-                        .in('tournament_id', ids)
-                        .eq('status', 'approved');
-                    el = document.getElementById('toStatParticipants');
-                    if (el) el.textContent = regs.count || 0;
-                }
+                var счёт = window.KSLT_RANKINGS && window.KSLT_RANKINGS.countByCategory
+                    ? await window.KSLT_RANKINGS.countByCategory() : null;
+                el = document.getElementById('toStatParticipants');
+                if (el) el.textContent = (счёт && счёт.всего) || 0;
             } catch(e) {}
         } catch(e) {}
     }

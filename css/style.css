@@ -473,7 +473,11 @@ nav {
     min-width: 260px;
     white-space: nowrap;
     background: rgba(20, 20, 20, 0.95);
-    backdrop-filter: blur(20px);
+    /* Размытие включаем только у открытого меню. У закрытого оно всё равно
+       обрабатывалось браузером и приглушало то, что попадало под его полосу,
+       — из-за этого первые строки статьи выглядели тусклыми, хотя текст
+       белый и ничего поверх него нет. */
+    backdrop-filter: none;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 8px;
@@ -487,6 +491,7 @@ nav {
 .nav-dropdown:hover .nav-dropdown-menu {
     opacity: 1;
     visibility: visible;
+    backdrop-filter: blur(20px);
     transform: translateX(-50%) translateY(0);
 }
 
@@ -4583,6 +4588,16 @@ h2 {
 
 .rk-country { text-align: center; }
 .rk-ntrp { text-align: center; color: var(--text-secondary); }
+
+/* Подпись под названием столбца NTRP: какое число одиночное, какое парное */
+.pl-col-sub {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: 0.55;
+}
 .rk-wl { text-align: center; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .rk-points { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
 .rk-change { text-align: center; font-size: 0.8rem; }
