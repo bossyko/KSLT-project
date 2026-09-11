@@ -5715,3 +5715,117 @@ select.ad-field-input {
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
 }
+
+/* ============================================
+   Выгрузка турнирных таблиц: файл и печать
+   ============================================ */
+
+/* Кнопки стоят над таблицей справа, в одной строке с «+ Из базы / + Гость» */
+.ad-export-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.ad-print-title {
+    display: none;
+}
+
+/* На печать уходит только нужная вкладка. Остальное — меню, шапка сайта,
+   кнопки — на бумаге бесполезно и съедает первую страницу */
+@media print {
+    body.ad-printing * {
+        visibility: hidden;
+    }
+
+    body.ad-printing .ad-print-area,
+    body.ad-printing .ad-print-area * {
+        visibility: visible;
+    }
+
+    body.ad-printing .ad-print-area {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 0;
+        background: #fff;
+        color: #000;
+    }
+
+    /* Кнопки выгрузки, служебные колонки и рабочие подсказки на лист не идут:
+       «сеяных расставлено», «заявки без пары» нужны менеджеру за экраном, а на
+       бумаге занимают полстраницы */
+    body.ad-printing .ad-export-bar,
+    body.ad-printing .ad-reg-act,
+    body.ad-printing .ad-reg-check,
+    body.ad-printing .ad-reg-check-all,
+    body.ad-printing .ad-no-print,
+    body.ad-printing .ad-alert,
+    body.ad-printing .ad-sched-note,
+    body.ad-printing button {
+        display: none !important;
+    }
+
+    /* Всё чёрным по белому. На экране часть подписей намеренно приглушена —
+       время подачи, прочерки в посеве — и на печати они выцветали до
+       нечитаемого серого */
+    body.ad-printing .ad-print-area,
+    body.ad-printing .ad-print-area * {
+        color: #000 !important;
+        background: transparent !important;
+        text-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    body.ad-printing .ad-print-title {
+        display: block;
+        font-size: 16pt;
+        font-weight: 700;
+        margin-bottom: 12pt;
+        color: #000;
+    }
+
+    /* Тёмная тема на бумаге — это залитый чёрным лист и пустой картридж */
+    body.ad-printing .ad-print-area .ad-table,
+    body.ad-printing .ad-print-area .ad-table-card,
+    body.ad-printing .ad-print-area th,
+    body.ad-printing .ad-print-area td,
+    body.ad-printing .ad-print-area h3,
+    body.ad-printing .ad-print-area h4 {
+        background: #fff !important;
+        color: #000 !important;
+        border-color: #999 !important;
+    }
+
+    body.ad-printing .ad-print-area th,
+    body.ad-printing .ad-print-area td {
+        padding: 4pt 6pt;
+        font-size: 9pt;
+        border-bottom: 0.5pt solid #999;
+    }
+
+    body.ad-printing .ad-print-area th {
+        font-weight: 700;
+        border-bottom: 1pt solid #000;
+    }
+
+    /* Заголовок раздела — «Основная сетка», «Лист ожидания»: на листе это
+       единственный признак, где кончается состав и начинается очередь */
+    body.ad-printing .ad-print-area h3,
+    body.ad-printing .ad-print-area h4 {
+        font-size: 11pt;
+        margin: 10pt 0 4pt;
+    }
+
+    /* Строку не рвём между страницами: половина пары на одном листе,
+       половина на другом — так расписание не читается */
+    body.ad-printing .ad-print-area tr {
+        break-inside: avoid;
+    }
+
+    @page {
+        margin: 12mm;
+    }
+}

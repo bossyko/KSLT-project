@@ -1338,8 +1338,17 @@
             '</div>' +
         '</div>'; // /ad-brk-sticky-header
 
+        // Ручная копия: заявки, сетка и расписание уезжают в файл или на
+        // бумагу. На корте интернет пропадает, а лист с расписанием — нет
+        var названиеТурнира = isEn ? (tournament.title_en || tournament.title) : tournament.title;
+        function шапкаВыгрузки(панельId, что) {
+            if (!A.экспорт) return '';
+            return '<div class="ad-export-bar">' + A.экспорт.кнопки(панельId, что) + '</div>';
+        }
+
         // Registrations panel
         html += '<div class="ad-brk-panel" id="adBrkRegPanel" style="padding-top:8px;' + (activeTab !== 'registrations' ? 'display:none;' : '') + '">';
+        html += шапкаВыгрузки('adBrkRegPanel', L.trnTabRegs);
         // Сетка сформирована — состав больше не трогаем: заявка это и есть
         // место в сетке, и убрать её значит оставить в матчах игрока, которого
         // в заявках уже нет
@@ -1349,6 +1358,8 @@
 
         // Bracket / Group panel
         html += '<div class="ad-brk-panel" id="adBrkBracketPanel" style="padding-top:8px;' + (activeTab !== 'bracket' ? 'display:none;' : '') + '">';
+        if (hasMatches) html += шапкаВыгрузки('adBrkBracketPanel',
+            (tournament.bracket_type === 'round_robin' || tournament.bracket_type === 'group_league') ? L.groupLabel : L.trnTabBracket);
         // Счета, которые вписали сами игроки: ждущие подтверждения и спорные.
         // Менеджер и так заходит в сетку, отдельной вкладки не нужно
         html += renderScoreQueue(matches, playersMap, isDbl, regsMap);
@@ -1370,6 +1381,7 @@
         // Schedule panel
         if (hasMatches) {
             html += '<div class="ad-brk-panel" id="adBrkSchedulePanel" style="' + (activeTab !== 'schedule' ? 'display:none;' : '') + '">';
+            html += шапкаВыгрузки('adBrkSchedulePanel', L.trnTabSchedule);
             html += renderSchedulePanel(matches, playersMap, tournament, regsMap);
             html += '</div>';
         }
@@ -1390,6 +1402,10 @@
         }
 
         container.innerHTML = html;
+
+        // Кнопки выгрузки: читают таблицы своей панели, поэтому вешаем их
+        // сразу после отрисовки — до того, как менеджер что-то нажмёт
+        if (A.экспорт) A.экспорт.оживить(container, названиеТурнира);
 
         // Матчи за места ставим под их круг: считаем по месту, а не в уме —
         // между кругами есть узкие столбцы с линиями, и на глаз ширину
@@ -2969,7 +2985,12 @@
         var pName = isExternal
             ? (reg.external_name || (isEn ? 'Guest' : 'Гость'))
             : (isEn ? (player.name_en || player.name || reg.player_id) : (player.name || reg.player_id));
-        var seedHtml = reg.seed_number ? ' <span class="ad-badge ad-badge-accent">[' + reg.seed_number + ']</span>' : '';
+        // Значок посева рядом с именем нужен только там, где нет своей колонки:
+        // в рейтинговых турнирах посев ставит рейтинг, и показать его больше
+        // негде. Где менеджер сеет руками, колонка «Посев» уже есть — значок
+        // дублировал её и переносил фамилию на третью строку, раздувая таблицу
+        var seedHtml = (reg.seed_number && !нормаПосева)
+            ? ' <span class="ad-badge ad-badge-accent">[' + reg.seed_number + ']</span>' : '';
         var hasDebt = !isExternal && debtPlayerIds[reg.player_id];
         var debtBadge = hasDebt
             ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(244,67,54,0.15);color:#f44336;margin-left:4px;">' + L.regDebt + '</span>'

@@ -113,7 +113,7 @@
 
 - **`check_and_award_badges(player_id)`** — SQL функция, проверяет все условия и выдаёт заслуженные бейджи. Возвращает массив ID новых бейджей.
 - **`trigger_check_badges`** — триггер на `players` таблице, вызывает `check_and_award_badges` при изменении wins/losses/form/points.
-- **SQL миграция** — `sql/badges-migration.sql`
+- **SQL миграция** — `sql/схема/badges-migration.sql`
 
 ### Файлы фронтенда
 

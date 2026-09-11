@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       if (logErr) {
         return json({
           error: 'log_failed: ' + logErr.message,
-          hint: 'Прогоните sql/season-reset-migration.sql — таблица журнала не создана',
+          hint: 'Прогоните sql/схема/season-reset-migration.sql — таблица журнала не создана',
           season,
           changed: changed.length,
           notified: 0

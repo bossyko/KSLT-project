@@ -1526,7 +1526,7 @@
                 result = await A.client.from('news').insert(data);
             }
 
-            // Колонку под исходную афишу добавляет миграция sql/news-original-cover.sql.
+            // Колонку под исходную афишу добавляет миграция sql/схема/news-original-cover.sql.
             // Пока её нет, сохранение целиком отбивалось из-за одного поля —
             // повторяем без него, чтобы не терять набранную новость.
             if (result.error && /image_original/.test(result.error.message || '')) {

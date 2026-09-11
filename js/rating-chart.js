@@ -31,7 +31,7 @@
     }
 
     // ---- Категории: название, цвет, порядок ----
-    // Колонка color заводится миграцией sql/category-colors.sql. Пока её нет,
+    // Колонка color заводится миграцией sql/схема/category-colors.sql. Пока её нет,
     // запрос с ней падает целиком, поэтому откатываемся на выборку без цвета.
     API.categories = async function(client, isEn, isKg) {
         var res = await client.from('categories').select('id, name, name_en, name_kg, sort_order, color');

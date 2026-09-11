@@ -33,7 +33,7 @@
 
 | Место | Что делает |
 |---|---|
-| `sql/rating-season-reset.sql` | функция `recalc_all_player_points()` — пересчёт всех игроков |
+| `sql/функции/rating-season-reset.sql` | функция `recalc_all_player_points()` — пересчёт всех игроков |
 | там же, `cron.schedule` | автозапуск 1 сентября каждого года |
 | `js/admin/sections/players.js` → `getOldestValidDate()` | та же отсечка на клиенте, при сохранении результатов турнира |
 
