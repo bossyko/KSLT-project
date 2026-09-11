@@ -1106,14 +1106,14 @@
                 dsWrap.style.display = 'none';
                 gcWrap.style.display = '';
                 qWrap.style.display = '';
-                // Что после групп — вопрос только для плей-офф. В «Группы + Лиги»
-                // выбора нет: там всегда две лиги, и никто не выбывает
+                // Что делать со свободными местами — вопрос только для плей-офф.
+                // В «Группы + Лиги» выбора нет: там играют все
                 if (poWrap) poWrap.style.display = '';
             } else if (bt === 'group_league') {
+                if (poWrap) poWrap.style.display = 'none';
                 dsWrap.style.display = 'none';
                 gcWrap.style.display = '';
                 qWrap.style.display = '';
-                if (poWrap) poWrap.style.display = 'none';
             } else {
                 if (poWrap) poWrap.style.display = 'none';
                 dsWrap.style.display = '';
@@ -1161,18 +1161,21 @@
             if (свободно === 0) {
                 текст += ' ' + L.hintNoExtra;
             } else {
+                // Претендентов ровно столько, сколько групп: по одному месту
+                // ниже проходного. Играть некому — места закроются проходом
+                // без игры, даже если выбраны доп. матчи
                 var формат = document.getElementById('adTrnPlayoffFormat').value;
-                if (формат === 'direct') {
-                    текст += ' ' + L.hintFreeBye.replace('{free}', свободно);
-                } else {
-                    // Претендентов ровно столько, сколько групп: третьи места.
-                    // Сильнейшие проходят без игры, остальные играют матч
-                    var матчей = Math.max(0, Math.min(групп, свободно * 2) - свободно);
+                var матчей = формат === 'direct'
+                    ? 0
+                    : Math.max(0, Math.min(групп, свободно * 2) - свободно);
+                if (матчей > 0) {
                     текст += ' ' + L.hintFreeExtra
                         .replace('{free}', свободно)
                         .replace('{games}', матчей);
-                    if (групп < свободно) текст += ' ' + L.hintNotEnough;
+                } else {
+                    текст += ' ' + L.hintFreeBye.replace('{free}', свободно);
                 }
+                if (формат !== 'direct' && групп < свободно) текст += ' ' + L.hintNotEnough;
             }
 
             подсказка.style.display = '';

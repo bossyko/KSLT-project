@@ -58,6 +58,12 @@ DELETE FROM public.bracket_undo
  WHERE tournament_id IN ('b8a6de7b-a146-4168-aaea-b56fb5dbd135',
                          '7094e2bd-02e6-476b-9e0c-efc7bffc8418');
 
+-- Очки, если их успели начислить: турнир играется заново, и прежние
+-- начисления к новому результату отношения не имеют
+DELETE FROM public.rating_history
+ WHERE tournament_id IN ('b8a6de7b-a146-4168-aaea-b56fb5dbd135',
+                         '7094e2bd-02e6-476b-9e0c-efc7bffc8418');
+
 -- Заявки: снимаем следы жеребьёвки и возвращаем в строй выбывших.
 -- Лист ожидания оставляем как есть — это не след проверок, а очередь
 UPDATE public.tournament_registrations

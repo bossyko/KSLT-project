@@ -1180,6 +1180,17 @@
             .order('match_order', { ascending: true });
         var matches = matchRes.data || [];
 
+        // Группа доиграла — её места окончательны, и ждать остальные группы
+        // незачем: ставим людей в слоты плей-офф, которые их ждут
+        if (await заполнитьСлоты(tournament, matches)) {
+            var свежие = await A.client.from('matches')
+                .select('*')
+                .eq('tournament_id', tournamentId)
+                .order('round_number', { ascending: true })
+                .order('match_order', { ascending: true });
+            matches = свежие.data || matches;
+        }
+
         // Load players map for display (include partner_ids)
         var playerIds = [];
         registrations.forEach(function(r) {
@@ -3545,6 +3556,12 @@
             st.forEach(function(s) { playerGroupLabel[s.playerId] = letter + s.place; });
         }
 
+        // Правило выхода — над таблицами. Раньше о нём нигде не говорилось:
+        // подсветка показывала, кто прошёл, но не объясняла, почему именно
+        // столько. Менеджер знал правило из настроек, игрок — ниоткуда
+        html += '<div class="ad-sched-note" style="margin-bottom:12px;">' +
+            L.groupRule.replace('{n}', qualifiers).replace('{groups}', groupCount) + '</div>';
+
         // ---- Group tables (FIRST) ----
         for (var g = 1; g <= groupCount; g++) {
             var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
@@ -3694,16 +3711,21 @@
             html += '<div class="ad-ig-matches-grid">';
             igMatches.sort(function(a, b) { return a.match_order - b.match_order; });
             igMatches.forEach(function(m) {
-                var p1Name, p2Name;
-                if (isDbl) {
-                    p1Name = getTeamDisplayName(m.player1_id, regsMap, playersMap, true);
-                    p2Name = getTeamDisplayName(m.player2_id, regsMap, playersMap, true);
-                } else {
-                    var p1 = playersMap[m.player1_id] || {};
-                    var p2 = playersMap[m.player2_id] || {};
-                    p1Name = A.esc(isEn ? (p1.name_en || p1.name || '?') : (p1.name || '?'));
-                    p2Name = A.esc(isEn ? (p2.name_en || p2.name || '?') : (p2.name || '?'));
+                // Пока группы не доиграны, участников нет — показываем метку
+                // слота: «B3» значит третье место группы B. Раньше здесь
+                // выводилось «BYE», будто играть некому
+                function имяУчастникаДоп(id, метка) {
+                    if (!id) {
+                        return метка
+                            ? '<span style="color:var(--text-secondary);">' + A.esc(метка) + '</span>'
+                            : '<span style="color:var(--text-dim);">' + L.byeLabel + '</span>';
+                    }
+                    if (isDbl) return getTeamDisplayName(id, regsMap, playersMap, true);
+                    var и = playersMap[id] || {};
+                    return A.esc(isEn ? (и.name_en || и.name || '?') : (и.name || '?'));
                 }
+                var p1Name = имяУчастникаДоп(m.player1_id, m.slot1_label);
+                var p2Name = имяУчастникаДоп(m.player2_id, m.slot2_label);
                 var p1Label = playerGroupLabel[m.player1_id] || '';
                 var p2Label = playerGroupLabel[m.player2_id] || '';
                 var isCompleted = m.status === 'completed';
@@ -3813,8 +3835,21 @@
             // Always show format modal — it auto-detects IG availability
             html += '<button class="ad-btn ad-btn-primary" id="adBrkPlayoffFormat" style="font-size:1rem;padding:12px 32px;">' + L.playoffFormatTitle + '</button>';
         }
-        if (totalAllCompleted && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize" style="font-size:1rem;padding:12px 32px;">' + L.finalizeTournament + '</button>';
+        if (!isTournamentCompleted) {
+            // Кнопку показываем всегда. Раньше она просто не появлялась, пока
+            // не записан последний счёт, и менеджер гадал, чего не хватает
+            var незаписано = matches.filter(function(m) {
+                return m.status !== 'completed' && m.player1_id && m.player2_id;
+            }).length;
+            html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize"' +
+                (totalAllCompleted ? '' : ' disabled title="' + L.finalizeLeft.replace('{n}', незаписано) + '"') +
+                ' style="font-size:1rem;padding:12px 32px;' +
+                (totalAllCompleted ? '' : 'opacity:0.45;cursor:not-allowed;') + '">' +
+                L.finalizeTournament + '</button>';
+            if (!totalAllCompleted && незаписано > 0) {
+                html += '<div class="ad-sched-note" style="margin-top:10px;flex-basis:100%;">' +
+                    L.finalizeLeft.replace('{n}', незаписано) + '</div>';
+            }
         }
         html += '</div>';
 
@@ -3868,17 +3903,21 @@
                 var xSlotMark = '<span style="color:var(--accent);font-weight:600;">' + L.xSlot + '</span>';
                 var byeMark = '<span style="color:var(--text-dim);font-style:italic;">BYE</span>';
                 var p1Name, p2Name;
-                function emptySlotName(isXSlot, isByeSide) {
+                function emptySlotName(isXSlot, isByeSide, метка) {
                     if (isByeSide) return byeMark;
+                    // Слот знает, кого ждёт: «A1» — победитель группы A.
+                    // Это понятнее, чем безликое TBD, и видно сразу после
+                    // жеребьёвки, когда групп ещё никто не доиграл
+                    if (метка) return '<span style="color:var(--text-secondary);">' + A.esc(метка) + '</span>';
                     if (isXSlot) return xSlotMark;
                     return '<span style="color:var(--text-dim);">TBD</span>';
                 }
                 if (isDbl && regsMap) {
-                    p1Name = match.player1_id ? getTeamDisplayName(match.player1_id, regsMap, playersMap, true) : emptySlotName(isXSlotP1, isByeMatch && !match.player1_id);
-                    p2Name = match.player2_id ? getTeamDisplayName(match.player2_id, regsMap, playersMap, true) : emptySlotName(isXSlotP2, isByeMatch && !match.player2_id);
+                    p1Name = match.player1_id ? getTeamDisplayName(match.player1_id, regsMap, playersMap, true) : emptySlotName(isXSlotP1, isByeMatch && !match.player1_id, match.slot1_label);
+                    p2Name = match.player2_id ? getTeamDisplayName(match.player2_id, regsMap, playersMap, true) : emptySlotName(isXSlotP2, isByeMatch && !match.player2_id, match.slot2_label);
                 } else {
-                    p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : emptySlotName(isXSlotP1, isByeMatch && !match.player1_id));
-                    p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : emptySlotName(isXSlotP2, isByeMatch && !match.player2_id));
+                    p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : emptySlotName(isXSlotP1, isByeMatch && !match.player1_id, match.slot1_label));
+                    p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : emptySlotName(isXSlotP2, isByeMatch && !match.player2_id, match.slot2_label));
                 }
 
                 var isCompleted = match.status === 'completed';
@@ -3897,6 +3936,9 @@
                     html += '<div class="ad-brk-schedule">' + schedInfo + '</div>';
                 }
                 // Player 1 with group label (always render placeholders for alignment)
+                // Место под посев держим всегда, даже когда его нет: иначе
+                // имена в соседних строках начинаются с разных мест и сетка
+                // читается лесенкой
                 var p1SeedHtml = '<span class="ad-brk-seed">' + (match.seed1 ? '[' + match.seed1 + ']' : '') + '</span>';
                 var p1LblHtml = '<span class="ad-brk-grp-label">' + (p1GrpLbl || '') + '</span>';
                 html += '<div class="ad-brk-player' + (p1Winner ? ' winner' : (p2Winner ? ' loser' : '')) + '">' +
@@ -5671,6 +5713,13 @@
         }
         await Promise.all(regUpdates);
 
+        // Сетка плей-офф создаётся здесь же, пустой: имён пока нет, но
+        // известно, кто куда придёт. Дальше она заполняется сама, по мере
+        // того как группы доигрывают
+        if (tournament.bracket_type === 'round_robin') {
+            await создатьПустойПлейофф(tournament, groupCount);
+        }
+
         // Auto-assign schedule
         await assignGroupSchedule(tournament, matchesToInsert.length);
 
@@ -5678,6 +5727,279 @@
         await A.client.from('tournaments').update({ status: 'registration_closed' }).eq('id', tournament.id);
 
         A.showToast(L.drawGenerated, 'success');
+    }
+
+    /**
+     * Пустая сетка плей-офф — сразу после жеребьёвки групп.
+     *
+     * Раньше её собирали в конце, когда доиграна последняя группа: до этого
+     * никто не знал ни своих соперников, ни того, кому достанется проход без
+     * игры. А всё известно заранее: сколько групп, сколько выходит, какой
+     * формат — из настроек турнира.
+     *
+     * Игроков не ставим, ставим метки: «A1» — победитель группы A, «B2» —
+     * второе место группы B, «IG1» — победитель первого доп. матча. Когда
+     * группа доигрывает, `заполнитьСлоты` подставляет имена.
+     *
+     * Расстановка та же, что и при ручной сборке: победители групп идут на
+     * позиции посева, слабейшие — к верхним сеяным, земляки не сводятся.
+     */
+    async function создатьПустойПлейофф(tournament, groupCount) {
+        var qualifiers = tournament.qualifiers_per_group || 2;
+        var букв = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+        // Прямые: места 1..qualifiers из каждой группы
+        var прямые = [];
+        for (var м = 1; м <= qualifiers; м++) {
+            for (var г = 0; г < groupCount; г++) {
+                прямые.push({ метка: (букв[г] || (г + 1)) + м, группа: г, место: м });
+            }
+        }
+        if (прямые.length < 2) return;
+
+        var размер = 2;
+        while (размер < прямые.length) размер *= 2;
+        var свободно = размер - прямые.length;
+
+        // Доп. матчи: разыгрывают свободные места между теми, кто не прошёл.
+        // Сильнейшие из них проходят без игры — как сеяные в квалификации
+        // Что делать со свободными местами, решает настройка турнира. По
+        // умолчанию их разыгрывают доп. матчами: место должно достаться за
+        // победу. Клуб может выбрать «Прямой» — тогда сильнейшие просто
+        // проходят первый круг без игры
+        var формат = tournament.playoff_format || 'ig';
+        var допМатчи = [];
+        var черезДоп = [];
+        if (формат !== 'direct' && свободно > 0) {
+            // Претенденты — те, кто занял место сразу под проходным. Кто из
+            // них сильнее, до конца групп неизвестно, поэтому метки не
+            // привязаны к группе: Q1 — лучший из них, Q2 — следующий и так
+            // далее. Иначе мы бы решили за результат: отправили бы в доп.
+            // матч того, кто на деле оказался сильнейшим
+            var всегоПретендентов = groupCount;
+            var матчей = Math.max(0, Math.min(всегоПретендентов, свободно * 2) - свободно);
+            var безИгры = свободно - матчей;
+
+            var номерQ = 1;
+            for (var б = 0; б < безИгры; б++) {
+                черезДоп.push({ метка: 'Q' + номерQ, группа: -1 });
+                номерQ++;
+            }
+            // Остальные играют между собой: сильнейший из оставшихся со
+            // слабейшим, как в квалификации
+            var очередь = [];
+            for (var о = 0; о < матчей * 2; о++) { очередь.push('Q' + номерQ); номерQ++; }
+            for (var д = 0; д < матчей; д++) {
+                var сильный = очередь[д];
+                var слабый = очередь[очередь.length - 1 - д];
+                if (!сильный || !слабый || сильный === слабый) break;
+                допМатчи.push({ первый: { метка: сильный }, второй: { метка: слабый }, номер: д + 1 });
+                черезДоп.push({ метка: 'IG' + (д + 1), группа: -1 });
+            }
+        }
+
+        var все = прямые.concat(черезДоп);
+        var byeCount = Math.max(0, размер - все.length);
+
+        var позицииПосева = (typeof SEED_POSITIONS !== 'undefined' && SEED_POSITIONS[размер])
+            ? SEED_POSITIONS[размер]
+            : (размер === 16 ? [1, 16, 9, 8, 5, 12, 13, 4]
+                : (размер === 8 ? [1, 8, 5, 4] : (размер === 4 ? [1, 4, 3, 2] : [1, 2])));
+
+        var сетка = new Array(размер);
+        for (var и = 0; и < размер; и++) сетка[и] = null;
+
+        // Победители групп — на позиции посева
+        var первыеМеста = все.filter(function(у) { return у.место === 1; });
+        var остальные = все.filter(function(у) { return у.место !== 1; });
+        for (var с = 0; с < первыеМеста.length && с < позицииПосева.length; с++) {
+            сетка[позицииПосева[с] - 1] = { метка: первыеМеста[с].метка, группа: первыеМеста[с].группа, посев: с + 1 };
+        }
+
+        // Проход без игры — соперникам верхних сеяных
+        var занятоBye = {};
+        for (var б2 = 0; б2 < byeCount && б2 < позицииПосева.length; б2++) {
+            var идх = позицииПосева[б2] - 1;
+            занятоBye[(идх % 2 === 0) ? идх + 1 : идх - 1] = true;
+        }
+
+        // Слабейшие первыми, и на самые трудные места — как в ручной сборке
+        остальные.sort(function(a, b) { return (b.место || 99) - (a.место || 99); });
+
+        var свободныеСлоты = [];
+        for (var сл = 0; сл < размер; сл++) {
+            if (!сетка[сл] && !занятоBye[сл]) свободныеСлоты.push(сл);
+        }
+        var силаСлота = {};
+        свободныеСлоты.forEach(function(слот) {
+            var сосед = сетка[(слот % 2 === 0) ? слот + 1 : слот - 1];
+            силаСлота[слот] = сосед && сосед.посев ? сосед.посев : 999;
+        });
+        свободныеСлоты.sort(function(a, b) { return силаСлота[a] - силаСлота[b]; });
+
+        остальные.forEach(function(у) {
+            // Земляков не сводим: они уже играли в группе
+            var выбран = -1;
+            for (var к = 0; к < свободныеСлоты.length; к++) {
+                var слот = свободныеСлоты[к];
+                var сосед = сетка[(слот % 2 === 0) ? слот + 1 : слот - 1];
+                if (сосед && у.группа >= 0 && сосед.группа === у.группа) continue;
+                выбран = к;
+                break;
+            }
+            if (выбран === -1) выбран = 0;
+            if (!свободныеСлоты.length) return;
+            сетка[свободныеСлоты[выбран]] = { метка: у.метка, группа: у.группа, посев: null };
+            свободныеСлоты.splice(выбран, 1);
+        });
+
+        // ---- Матчи ----
+        var кВставке = [];
+        var порядок = 0;
+
+        допМатчи.forEach(function(дм) {
+            порядок++;
+            кВставке.push({
+                tournament_id: tournament.id,
+                player1_id: null, player2_id: null,
+                slot1_label: дм.первый.метка, slot2_label: дм.второй.метка,
+                round: 'IG', round_number: 1, match_order: порядок,
+                group_number: null, status: 'upcoming'
+            });
+        });
+
+        var кругов = Math.log2(размер);
+        порядок = 0;
+        for (var сл2 = 0; сл2 < размер; сл2 += 2) {
+            порядок++;
+            var л = сетка[сл2], пр = сетка[сл2 + 1];
+            кВставке.push({
+                tournament_id: tournament.id,
+                player1_id: null, player2_id: null,
+                slot1_label: л ? л.метка : null,
+                slot2_label: пр ? пр.метка : null,
+                round: 'R1', round_number: 1, match_order: порядок,
+                group_number: null, status: 'upcoming',
+                seed1: л ? л.посев : null, seed2: пр ? пр.посев : null
+            });
+        }
+
+        for (var р = 2; р <= кругов; р++) {
+            var вКруге = размер / Math.pow(2, р);
+            for (var м2 = 1; м2 <= вКруге; м2++) {
+                кВставке.push({
+                    tournament_id: tournament.id,
+                    player1_id: null, player2_id: null,
+                    round: р === кругов ? 'F' : (р === кругов - 1 ? 'SF' : (р === кругов - 2 ? 'QF' : 'R' + р)),
+                    round_number: р, match_order: м2,
+                    group_number: null, status: 'upcoming'
+                });
+            }
+        }
+
+        // Матч за третье место
+        кВставке.push({
+            tournament_id: tournament.id,
+            player1_id: null, player2_id: null,
+            round: '3RD', round_number: кругов, match_order: 99,
+            group_number: null, status: 'upcoming'
+        });
+
+        var ответ = await A.client.from('matches').insert(кВставке);
+        if (ответ.error) {
+            console.warn('[KSLT] пустую сетку плей-офф создать не удалось:', ответ.error.message);
+        }
+    }
+
+    /**
+     * Поставить людей в слоты, которые их ждут.
+     *
+     * Слот помечен «A1» или «IG2»: победитель группы A, победитель второго
+     * доп. матча. Как только источник известен — группа доиграна или доп.
+     * матч сыгран, — метка превращается в имя.
+     *
+     * Возвращает true, если что-то заполнили: тогда сетку нужно перечитать.
+     */
+    async function заполнитьСлоты(tournament, matches) {
+        var сМетками = matches.filter(function(m) {
+            return (m.slot1_label && !m.player1_id) || (m.slot2_label && !m.player2_id);
+        });
+        if (!сМетками.length) return false;
+
+        var букв = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        var кто = {};
+
+        // Места в доигранных группах
+        var grpMatches = matches.filter(isGroupMatch);
+        var groupCount = tournament.group_count || 2;
+        for (var г = 1; г <= groupCount; г++) {
+            var мг = grpMatches.filter(function(m) { return m.group_number === г; });
+            if (!мг.length) continue;
+            if (!мг.every(function(m) { return m.status === 'completed'; })) continue;
+
+            var игроки = [];
+            мг.forEach(function(m) {
+                if (m.player1_id && игроки.indexOf(m.player1_id) === -1) игроки.push(m.player1_id);
+                if (m.player2_id && игроки.indexOf(m.player2_id) === -1) игроки.push(m.player2_id);
+            });
+            calculateGroupStandings(игроки, мг, {}).forEach(function(ст) {
+                кто[(букв[г - 1] || г) + ст.place] = ст.playerId;
+            });
+        }
+
+        // Претенденты по силе: Q1 — лучший из тех, кто не прошёл напрямую.
+        // Ранжировать их можно только когда доиграны все группы: пока хоть
+        // одна в игре, порядок может перевернуться
+        var qualifiers = tournament.qualifiers_per_group || 2;
+        var всеГруппыСыграны = true;
+        var претенденты = [];
+        for (var гп = 1; гп <= groupCount; гп++) {
+            var мгп = grpMatches.filter(function(m) { return m.group_number === гп; });
+            if (!мгп.length) continue;
+            if (!мгп.every(function(m) { return m.status === 'completed'; })) { всеГруппыСыграны = false; break; }
+
+            var игрокиП = [];
+            мгп.forEach(function(m) {
+                if (m.player1_id && игрокиП.indexOf(m.player1_id) === -1) игрокиП.push(m.player1_id);
+                if (m.player2_id && игрокиП.indexOf(m.player2_id) === -1) игрокиП.push(m.player2_id);
+            });
+            calculateGroupStandings(игрокиП, мгп, {}).forEach(function(ст) {
+                if (ст.place === qualifiers + 1) претенденты.push(ст);
+            });
+        }
+        if (всеГруппыСыграны && претенденты.length) {
+            претенденты.sort(function(a, b) {
+                if (b.wins !== a.wins) return b.wins - a.wins;
+                var aс = a.setsWon + a.setsLost > 0 ? a.setsWon / (a.setsWon + a.setsLost) : 0;
+                var bс = b.setsWon + b.setsLost > 0 ? b.setsWon / (b.setsWon + b.setsLost) : 0;
+                if (bс !== aс) return bс - aс;
+                var aг = a.gamesWon + a.gamesLost > 0 ? a.gamesWon / (a.gamesWon + a.gamesLost) : 0;
+                var bг = b.gamesWon + b.gamesLost > 0 ? b.gamesWon / (b.gamesWon + b.gamesLost) : 0;
+                return bг - aг;
+            });
+            претенденты.forEach(function(ст, и) { кто['Q' + (и + 1)] = ст.playerId; });
+        }
+
+        // Победители доп. матчей
+        matches.filter(isIGMatch).forEach(function(m, i) {
+            if (m.status === 'completed' && m.winner_id) {
+                кто['IG' + (m.match_order || (i + 1))] = m.winner_id;
+            }
+        });
+
+        var правки = [];
+        сМетками.forEach(function(m) {
+            var изменения = {};
+            if (m.slot1_label && !m.player1_id && кто[m.slot1_label]) изменения.player1_id = кто[m.slot1_label];
+            if (m.slot2_label && !m.player2_id && кто[m.slot2_label]) изменения.player2_id = кто[m.slot2_label];
+            if (Object.keys(изменения).length) {
+                правки.push(A.client.from('matches').update(изменения).eq('id', m.id));
+            }
+        });
+
+        if (!правки.length) return false;
+        await Promise.all(правки);
+        return true;
     }
 
     // ---- Playoff Format Modal (auto-detect IG vs Direct based on group sizes) ----
