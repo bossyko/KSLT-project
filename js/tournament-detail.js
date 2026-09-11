@@ -257,7 +257,7 @@ function getStatusLabel(status) {
 // LEAGUE BRACKET PUBLIC RENDER
 // ========================================
 
-function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg, predOpts) {
+function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg, predOpts, имяУчастника) {
     // Determine draw size from R1 matches
     var r1Matches = leagueMatches.filter(function(m) { return m.round_number === 1; });
     var drawSize = 2;
@@ -274,7 +274,11 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
                 var p = playersMap[pid];
                 plPlayersArr.push({
                     id: pid,
-                    name: p ? (isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name)) : 'TBD',
+                    // В парном турнире на корт выходят двое: страница передаёт,
+                    // как назвать участника, и тогда в сетке видно обоих
+                    name: имяУчастника
+                        ? имяУчастника(pid)
+                        : (p ? (isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name)) : 'TBD'),
                     seed: null,
                     country: p ? tdCountryFlag(p.country) : ''
                 });
@@ -524,6 +528,23 @@ function ficВБлокеЕстьЛюди(section, matches) {
     });
 }
 
+/**
+ * Фамилии для подписи под полосой прогноза.
+ *
+ * В одиночном это одна фамилия, в парном — обе через косую черту. Разметку
+ * сначала убираем: имя пары приходит с тегами, и резать его по словам нельзя.
+ */
+function краткоеИмя(имя) {
+    var текст = String(имя || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!текст) return '';
+    if (текст.indexOf('/') !== -1) {
+        return текст.split('/').map(function (часть) {
+            return часть.trim().split(' ').pop();
+        }).filter(Boolean).join(' / ');
+    }
+    return текст.split(' ').pop() || '';
+}
+
 function renderMatch(tournament, match, predOpts) {
     var p1 = getPlayer(tournament, match.player1Id);
     var p2 = getPlayer(tournament, match.player2Id);
@@ -591,9 +612,11 @@ function renderMatch(tournament, match, predOpts) {
         if (p1Data && p2Data && (p1Data.points || p2Data.points)) {
             var pred = calculatePrediction(p1Data, p2Data, predOpts.h2hMap);
             var isLeftFav = pred.p1Pct >= pred.p2Pct;
-            // Short surname for bar label
-            var p1Short = (p1.name || '').split(' ').pop() || '';
-            var p2Short = (p2.name || '').split(' ').pop() || '';
+            // Подпись под полосой — фамилии. Имя пары приходит с разметкой
+            // (два игрока, каждый в своём теге), и «последнее слово» цепляло
+            // кусок тега: на экране появлялось «Кульджаев</span>»
+            var p1Short = краткоеИмя(p1.name);
+            var p2Short = краткоеИмя(p2.name);
             html += '<div class="td-prediction">' +
                 '<div class="td-pred-names">' +
                     '<span class="td-pred-name">' + esc(p1Short) + '</span>' +
@@ -1240,8 +1263,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         regClosingSoon: 'Регистрация закроется менее чем через 24 часа!'
     });
 
-    // Prediction options for renderMatch
-    var predOpts = {
+    // Прогноз показываем только в одиночных.
+    //
+    // В парном он считается по рейтингу капитана — а на корт выходят двое, и
+    // сила пары складывается из обоих. Полоса выглядела уверенно, а опиралась
+    // на половину данных, поэтому в парных её не показываем вовсе.
+    var predOpts = isDbl ? null : {
         playersMap: playersMap,
         h2hMap: h2hMap,
         label: isEn ? 'KSLT AI Prediction' : (isKg ? 'KSLT AI Болжолу' : 'Прогноз KSLT AI'),
@@ -1476,13 +1503,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     // Premier League
                     glHtml += '<div class="td-league-bracket">';
                     glHtml += '<h3 class="td-league-title td-league-title-premier">' + (isEn ? 'Premier League' : (isKg ? 'Жогорку лига' : 'Высшая лига')) + '</h3>';
-                    glHtml += renderLeagueBracketPublic(glPLMatches, playersMap, 'PL', isEn, isKg, predOpts);
+                    glHtml += renderLeagueBracketPublic(glPLMatches, playersMap, 'PL', isEn, isKg, predOpts, pName);
                     glHtml += '</div>';
 
                     // Consolation League
                     glHtml += '<div class="td-league-bracket">';
                     glHtml += '<h3 class="td-league-title td-league-title-consolation">' + (isEn ? 'Consolation League' : (isKg ? 'Сооротуу лигасы' : 'Утешительная лига')) + '</h3>';
-                    glHtml += renderLeagueBracketPublic(glCLMatches, playersMap, 'CL', isEn, isKg, predOpts);
+                    glHtml += renderLeagueBracketPublic(glCLMatches, playersMap, 'CL', isEn, isKg, predOpts, pName);
                     glHtml += '</div>';
 
                     glHtml += '</div>'; // /td-dual-league
@@ -1624,7 +1651,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                 var p = playersMap[pid];
                                 plPlayersArr.push({
                                     id: pid,
-                                    name: p ? (isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name)) : 'TBD',
+                                    // В парном на корт выходят двое: берём имя пары,
+                                    // а не одного капитана — иначе по сетке непонятно,
+                                    // кто вообще играет
+                                    name: pName(pid),
                                     seed: null,
                                     country: p ? tdCountryFlag(p.country) : ''
                                 });
@@ -1696,7 +1726,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     // 3rd place — separate block under bracket
                     if (thirdMatch) {
-                        bHtml += '<div style="margin-top:20px;max-width:200px;">';
+                        // Справа под сеткой — там же, где он стоит в админке.
+                        // Слева он читался как отдельный первый круг
+                        bHtml += '<div style="margin-top:20px;max-width:200px;margin-left:auto;">';
                         bHtml += '<div class="td-round-title">' + (isEn ? '3rd Place' : (isKg ? '3-орун үчүн' : 'За 3-е место')) + '</div>';
                         bHtml += renderMatch(plTournObj, {
                             matchId: thirdMatch.id, player1Id: thirdMatch.player1_id, player2Id: thirdMatch.player2_id,

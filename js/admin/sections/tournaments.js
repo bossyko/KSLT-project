@@ -948,11 +948,22 @@
                         '<label class="ad-field-label">' + L.trnQualifiers + '</label>' +
                         '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnQualifiers" placeholder="2" value="' + (item && item.qualifiers_per_group ? item.qualifiers_per_group : '2') + '">' +
                     '</div>' +
+                    '<div class="ad-field" id="adTrnPlayoffWrap" style="display:none;">' +
+                        '<label class="ad-field-label">' + L.trnPlayoffFormat + '</label>' +
+                        '<select class="ad-field-input" id="adTrnPlayoffFormat">' +
+                            '<option value="ig"' + A.sel(item, 'playoff_format', 'ig') + '>' + L.playoffIg + '</option>' +
+                            '<option value="direct"' + A.sel(item, 'playoff_format', 'direct') + '>' + L.playoffDirectShort + '</option>' +
+                        '</select>' +
+                    '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnCourtCount + '</label>' +
                         '<input type="number" class="ad-field-input" id="adTrnCourtCount" min="1" max="10" value="' + (item ? (item.court_count || 2) : 2) + '">' +
                     '</div>' +
                 '</div>' +
+                // Расклад прямо под настройками: сколько выйдет, какая сетка,
+                // сколько мест придётся доигрывать. Иначе менеджер узнаёт об
+                // этом только в день турнира, когда менять уже поздно
+                '<div id="adTrnDrawHint" class="ad-sched-note" style="display:none;margin-top:-4px;"></div>' +
                 '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnSetFormat + '</label>' +
@@ -1090,22 +1101,96 @@
             var dsWrap = document.getElementById('adTrnDrawSizeWrap');
             var gcWrap = document.getElementById('adTrnGroupCountWrap');
             var qWrap = document.getElementById('adTrnQualifiersWrap');
+            var poWrap = document.getElementById('adTrnPlayoffWrap');
             if (bt === 'round_robin') {
                 dsWrap.style.display = 'none';
                 gcWrap.style.display = '';
                 qWrap.style.display = '';
+                // Что после групп — вопрос только для плей-офф. В «Группы + Лиги»
+                // выбора нет: там всегда две лиги, и никто не выбывает
+                if (poWrap) poWrap.style.display = '';
             } else if (bt === 'group_league') {
                 dsWrap.style.display = 'none';
                 gcWrap.style.display = '';
                 qWrap.style.display = '';
+                if (poWrap) poWrap.style.display = 'none';
             } else {
+                if (poWrap) poWrap.style.display = 'none';
                 dsWrap.style.display = '';
                 gcWrap.style.display = 'none';
                 qWrap.style.display = 'none';
             }
         }
-        document.getElementById('adTrnBracketType').addEventListener('change', toggleBracketFields);
+        /**
+         * Расклад турнира словами: сколько выйдет из групп, какая будет сетка
+         * и сколько мест придётся доигрывать.
+         *
+         * Считаем по тем же правилам, что и жеребьёвка, — чтобы менеджер видел
+         * последствия настройки сразу, а не в день турнира.
+         */
+        function обновитьРасклад() {
+            var подсказка = document.getElementById('adTrnDrawHint');
+            if (!подсказка) return;
+
+            var тип = document.getElementById('adTrnBracketType').value;
+            var групп = parseInt(document.getElementById('adTrnGroupCount').value, 10) || 0;
+            var выходят = parseInt(document.getElementById('adTrnQualifiers').value, 10) || 0;
+
+            if ((тип !== 'round_robin' && тип !== 'group_league') || групп < 2 || выходят < 1) {
+                подсказка.style.display = 'none';
+                return;
+            }
+
+            var вышло = групп * выходят;
+
+            if (тип === 'group_league') {
+                подсказка.style.display = '';
+                подсказка.textContent = L.hintLeagues
+                    .replace('{pl}', вышло);
+                return;
+            }
+
+            var сетка = 2;
+            while (сетка < вышло) сетка *= 2;
+            var свободно = сетка - вышло;
+
+            var текст = L.hintDraw
+                .replace('{out}', вышло)
+                .replace('{size}', сетка);
+
+            if (свободно === 0) {
+                текст += ' ' + L.hintNoExtra;
+            } else {
+                var формат = document.getElementById('adTrnPlayoffFormat').value;
+                if (формат === 'direct') {
+                    текст += ' ' + L.hintFreeBye.replace('{free}', свободно);
+                } else {
+                    // Претендентов ровно столько, сколько групп: третьи места.
+                    // Сильнейшие проходят без игры, остальные играют матч
+                    var матчей = Math.max(0, Math.min(групп, свободно * 2) - свободно);
+                    текст += ' ' + L.hintFreeExtra
+                        .replace('{free}', свободно)
+                        .replace('{games}', матчей);
+                    if (групп < свободно) текст += ' ' + L.hintNotEnough;
+                }
+            }
+
+            подсказка.style.display = '';
+            подсказка.textContent = текст;
+        }
+
+        document.getElementById('adTrnBracketType').addEventListener('change', function() {
+            toggleBracketFields();
+            обновитьРасклад();
+        });
+        ['adTrnGroupCount', 'adTrnQualifiers', 'adTrnPlayoffFormat'].forEach(function(id) {
+            var поле = document.getElementById(id);
+            if (поле) поле.addEventListener('input', обновитьРасклад);
+            if (поле) поле.addEventListener('change', обновитьРасклад);
+        });
+
         toggleBracketFields();
+        обновитьРасклад();
 
         // Toggle combined NTRP max based on format (doubles/mixed only)
         // + auto-hide Gender when Mixed Doubles (gender = 'mixed' auto)
@@ -1380,6 +1465,8 @@
             format: document.getElementById('adTrnFormat').value || 'singles',
             level_id: document.getElementById('adTrnLevel').value || null,
             bracket_type: document.getElementById('adTrnBracketType').value || null,
+            playoff_format: document.getElementById('adTrnBracketType').value === 'round_robin'
+                ? (document.getElementById('adTrnPlayoffFormat').value || 'ig') : null,
             draw_size: (function() { var v = document.getElementById('adTrnDrawSize').value; return v ? parseInt(v, 10) : null; })(),
             group_count: (function() { var v = document.getElementById('adTrnGroupCount').value; return v ? parseInt(v, 10) : null; })(),
             qualifiers_per_group: (function() { var v = document.getElementById('adTrnQualifiers').value; return v ? parseInt(v, 10) : 2; })(),

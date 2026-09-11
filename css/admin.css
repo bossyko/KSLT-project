@@ -2513,12 +2513,23 @@ select.ad-field-input {
     flex-shrink: 0;
 }
 
+/* Имя в сетке.
+   В парном турнире тут два человека, и обрезать многоточием нельзя: по
+   «Азамат Джумабаев /…» непонятно, кто вообще выходит на корт. Поэтому имена
+   переносятся на вторую строку, а не прячутся. */
 .ad-brk-name {
     flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: break-word;
+    line-height: 1.25;
     color: var(--text-secondary, #aaa);
+}
+
+/* Строка игрока тянется по содержимому: пара занимает две строки, одиночка
+   одну — и высота карточки подстраивается сама */
+.ad-brk-player {
+    align-items: flex-start;
 }
 
 /* Set scores for each player */
