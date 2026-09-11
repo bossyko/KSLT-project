@@ -54,3 +54,4 @@ archive/
 
 # Файл блокировки Deno — появляется от локальных проверок функций
 deno.lock
+tools/_ntrp-plan.json

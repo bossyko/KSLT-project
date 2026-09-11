@@ -74,44 +74,78 @@
     // HELPERS
     // ========================================
 
+    /**
+     * Подписи страницы рейтинга на трёх языках.
+     *
+     * Раньше здесь ждали `window.playersLabels`, но такой переменной нет ни на
+     * одной странице — и рейтинг на английской и киргизской версиях выводил
+     * всё по-русски: «373 игроков», «Мужчины», «Показать всех».
+     *
+     * Слова взяты те же, что в таблице рейтинга на главной: игрок должен
+     * видеть одну и ту же подпись в обоих местах.
+     */
     function getLabels() {
-        return typeof window.playersLabels !== 'undefined' ? window.playersLabels : {
+        var isEn = isEnPage();
+        var isKg = isKgPage();
+
+        if (isEn) return {
+            title: 'KSLT Rankings',
+            subtitle: '{count} players \u00b7 {online} online \u00b7 Season 2026',
+            searchPlaceholder: 'Search player...',
+            men: 'Men', women: 'Women',
+            rank: '#', player: 'Player', country: 'Ctry', points: 'Pts',
+            record: 'W/L', form: 'Form', change: '\u0394',
+            actions: 'Challenge', ntrp: 'NTRP', online: 'Online',
+            message: 'Message', challenge: 'Challenge',
+            prevPage: '\u2190 Back', nextPage: 'Next \u2192',
+            viewAll: 'Show all',
+            noResults: 'No players found',
+            guestTitle: 'Sign up for full access',
+            guestText: 'Full rankings, player profiles and statistics open after registration',
+            guestBtn: 'Sign in / Sign up',
+            catPageBack: 'Back to rankings',
+            catPagePlayers: 'Players',
+            catPageTournaments: 'Tournaments played'
+        };
+
+        if (isKg) return {
+            title: 'KSLT рейтинги',
+            subtitle: '{count} оюнчу \u00b7 {online} онлайн \u00b7 2026-сезон',
+            searchPlaceholder: 'Оюнчуну издөө...',
+            men: 'Эркектер', women: 'Аялдар',
+            rank: '#', player: 'Оюнчу', country: 'Өлк.', points: 'Упай',
+            record: 'Ж/Ж', form: 'Форма', change: '\u0394',
+            actions: 'Чакыруу', ntrp: 'NTRP', online: 'Онлайн',
+            message: 'Жазуу', challenge: 'Чакыруу',
+            prevPage: '\u2190 Артка', nextPage: 'Кийинки \u2192',
+            viewAll: 'Баарын көрсөтүү',
+            noResults: 'Оюнчулар табылган жок',
+            guestTitle: 'Толук кирүү үчүн катталыңыз',
+            guestText: 'Толук рейтинг, оюнчулардын профилдери жана статистикасы каттоодон кийин ачылат',
+            guestBtn: 'Кирүү / Катталуу',
+            catPageBack: 'Рейтингге кайтуу',
+            catPagePlayers: 'Оюнчулар',
+            catPageTournaments: 'Аяктаган мелдештер'
+        };
+
+        return {
             title: 'Рейтинг KSLT',
             subtitle: '{count} игроков \u00b7 {online} онлайн \u00b7 Сезон 2026',
             searchPlaceholder: 'Поиск игрока...',
-            men: 'Мужчины',
-            women: 'Женщины',
-            rank: '#',
-            player: 'Игрок',
-            country: 'Страна',
-            points: 'Очки',
-            record: 'W/L',
-            form: 'Форма',
-            change: '\u0394',
-            actions: 'Вызов',
-            ntrp: 'NTRP',
-            online: 'Онлайн',
-            message: 'Написать',
-            challenge: 'Вызов',
-            prevPage: '\u2190 Назад',
-            nextPage: 'Далее \u2192',
-            sponsorsTitle: 'Партнёры и спонсоры',
-            sponsorsGeneral: 'Генеральный спонсор',
+            men: 'Мужчины', women: 'Женщины',
+            rank: '#', player: 'Игрок', country: 'Стр.', points: 'Очки',
+            record: 'В/П', form: 'Форма', change: '\u0394',
+            actions: 'Вызов', ntrp: 'NTRP', online: 'Онлайн',
+            message: 'Написать', challenge: 'Вызов',
+            prevPage: '\u2190 Назад', nextPage: 'Далее \u2192',
             viewAll: 'Показать всех',
             noResults: 'Игроки не найдены',
-            authRequired: 'Требуется авторизация',
             guestTitle: 'Зарегистрируйтесь для полного доступа',
             guestText: 'Полный рейтинг, профили игроков и статистика доступны после регистрации',
             guestBtn: 'Войти / Регистрация',
             catPageBack: 'Назад к рейтингу',
             catPagePlayers: 'Игроков',
-            catPageTournaments: 'Завершённых турниров',
-            catPageLogin: 'Войдите, чтобы просматривать профили игроков',
-            catPageRegister: 'Зарегистрируйтесь для доступа',
-            catPageMemberOnly: 'Полный доступ для членов КСЛТ',
-            catPageWins: 'П',
-            catPageLosses: 'П',
-            catPageTournamentsCol: 'Турниры'
+            catPageTournaments: 'Завершённых турниров'
         };
     }
 
@@ -159,11 +193,31 @@
         return html;
     }
 
+    /**
+     * Все игроки — по людям, а не по строкам рейтинга.
+     *
+     * Один человек стоит сразу в нескольких категориях: в Masters со своими
+     * очками, в Tour со своими. Для таблицы это разные строки и смешивать их
+     * нельзя, а для счётчика в шапке — один игрок. Раньше списки категорий
+     * просто склеивались, и в шапке выходило 515 при 374 живых карточках.
+     *
+     * Гостей в списках нет вовсе: их отсеивает загрузчик рейтинга. А те, кто
+     * зарегистрировался и ещё не играл, считаются — они уже игроки клуба.
+     */
     function getAllPlayers() {
         var all = [];
+        var виденные = {};
         for (var key in categoriesData) {
-            if (categoriesData.hasOwnProperty(key)) {
-                all = all.concat(categoriesData[key].players);
+            if (!categoriesData.hasOwnProperty(key)) continue;
+            var список = categoriesData[key].players || [];
+            for (var i = 0; i < список.length; i++) {
+                var игрок = список[i];
+                var id = игрок && игрок.id;
+                if (id) {
+                    if (виденные[id]) continue;
+                    виденные[id] = true;
+                }
+                all.push(игрок);
             }
         }
         return all;
@@ -354,7 +408,10 @@
         if (!container) return;
 
         var labels = getLabels();
-        var totalPlayers = getAllPlayers().length;
+        // Число игроков берём у загрузчика: он считает карточки клуба целиком,
+        // включая тех, кто записался и ещё не играл — в разряды они не попадают
+        var поКарточкам = window.KSLT_RANKINGS && window.KSLT_RANKINGS.всегоИгроков;
+        var totalPlayers = поКарточкам || getAllPlayers().length;
         var onlineCount = countOnline();
         var subtitle = labels.subtitle
             .replace('{count}', totalPlayers)
