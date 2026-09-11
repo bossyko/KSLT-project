@@ -971,10 +971,6 @@
                         '<label class="ad-field-label">' + L.trnStartTime + '</label>' +
                         '<input type="time" class="ad-field-input" id="adTrnStartTime" value="' + (item && item.start_time ? item.start_time.slice(0, 5) : '09:00') + '">' +
                     '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnBuffer + '</label>' +
-                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnBuffer" placeholder="15" value="' + (item ? (item.buffer_minutes || 15) : 15) + '">' +
-                    '</div>' +
                 '</div>' +
             '</div>' +
 
@@ -1074,11 +1070,6 @@
             this.value = this.value.replace(/[^0-9]/g, '');
         });
 
-        // Buffer — only digits
-        var bufferInput = document.getElementById('adTrnBuffer');
-        bufferInput.addEventListener('input', function() {
-            this.value = this.value.replace(/[^0-9]/g, '');
-        });
         matchDurInput.addEventListener('wheel', function(e) { e.preventDefault(); });
         matchDurInput.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
@@ -1395,7 +1386,6 @@
             court_count: parseInt(document.getElementById('adTrnCourtCount').value, 10) || 2,
             match_duration: parseInt(document.getElementById('adTrnMatchDuration').value, 10) || 90,
             start_time: document.getElementById('adTrnStartTime').value || null,
-            buffer_minutes: parseInt(document.getElementById('adTrnBuffer').value, 10) || 15,
             registration_start: document.getElementById('adTrnRegStart').value || null,
             registration_end: document.getElementById('adTrnRegEnd').value || null,
             gender: document.getElementById('adTrnFormat').value === 'mixed_doubles'

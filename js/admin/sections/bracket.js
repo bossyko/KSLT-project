@@ -1346,6 +1346,20 @@
             return '<div class="ad-export-bar">' + A.экспорт.кнопки(панельId, что) + '</div>';
         }
 
+        /** Свести кнопки выгрузки сетки в одну строку с «Пересоздать жеребьёвку». */
+        function собратьКнопкиСетки(место) {
+            var панель = место.querySelector('#adBrkBracketPanel');
+            if (!панель) return;
+            var полоса = панель.querySelector('.ad-export-bar');
+            var пересоздать = панель.querySelector('#adBrkRegenerate');
+            // Кнопки пересоздания нет — сетку уже играют, полоса остаётся своя
+            if (!полоса || !пересоздать) return;
+
+            var строка = пересоздать.parentElement;
+            while (полоса.firstChild) строка.insertBefore(полоса.firstChild, пересоздать);
+            полоса.remove();
+        }
+
         // Registrations panel
         html += '<div class="ad-brk-panel" id="adBrkRegPanel" style="padding-top:8px;' + (activeTab !== 'registrations' ? 'display:none;' : '') + '">';
         html += шапкаВыгрузки('adBrkRegPanel', L.trnTabRegs);
@@ -1406,6 +1420,11 @@
         // Кнопки выгрузки: читают таблицы своей панели, поэтому вешаем их
         // сразу после отрисовки — до того, как менеджер что-то нажмёт
         if (A.экспорт) A.экспорт.оживить(container, названиеТурнира);
+
+        // У сетки уже есть своя строка действий — «Пересоздать жеребьёвку».
+        // Кнопки выгрузки ставим в неё же: две полосы кнопок одна над другой
+        // занимали место и выглядели как разные разделы
+        собратьКнопкиСетки(container);
 
         // Матчи за места ставим под их круг: считаем по месту, а не в уме —
         // между кругами есть узкие столбцы с линиями, и на глаз ширину
@@ -3287,6 +3306,120 @@
     }
 
     // ---- Group Panel HTML (Round-Robin) ----
+    /**
+     * Каким будет плей-офф — видно сразу после жеребьёвки групп.
+     *
+     * Размер сетки и свободные места считаются из настроек: сколько групп и
+     * сколько выходит из каждой. Пары первого круга собираются тем же
+     * правилом, что и настоящая жеребьёвка: победители групп — сеяные и
+     * расходятся по позициям посева, проход без игры достаётся первым из них,
+     * остальные занимают оставшиеся места.
+     *
+     * Слоты подписаны «A1», «B2» — место в своей группе. Как только группа
+     * доиграна, вместо подписи встаёт имя: ждать остальные группы не нужно.
+     */
+    function предпросмотрПлейофф(tournament, grpMatches, playersMap, groupCount, qualifiers, regsMap, isDbl) {
+        var букв = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+        // Кто уже известен: в доигранной группе места окончательны
+        var именаСлотов = {};
+        for (var g = 1; g <= groupCount; g++) {
+            var матчиГруппы = grpMatches.filter(function(m) { return m.group_number === g; });
+            if (!матчиГруппы.length) continue;
+            var всеСыграны = матчиГруппы.every(function(m) { return m.status === 'completed'; });
+            if (!всеСыграны) continue;
+
+            var игроки = [];
+            матчиГруппы.forEach(function(m) {
+                if (m.player1_id && игроки.indexOf(m.player1_id) === -1) игроки.push(m.player1_id);
+                if (m.player2_id && игроки.indexOf(m.player2_id) === -1) игроки.push(m.player2_id);
+            });
+            var места = calculateGroupStandings(игроки, матчиГруппы, playersMap);
+            места.forEach(function(м) {
+                именаСлотов[(букв[g - 1] || g) + м.place] = м.playerId;
+            });
+        }
+
+        // Слоты: сначала победители групп — они сеяные, потом вторые места и дальше
+        var слоты = [];
+        for (var место = 1; место <= qualifiers; место++) {
+            for (var гр = 1; гр <= groupCount; гр++) {
+                слоты.push((букв[гр - 1] || гр) + место);
+            }
+        }
+        if (слоты.length < 2) return '';
+
+        var размер = 2;
+        while (размер < слоты.length) размер *= 2;
+
+        var позицииПосева = (typeof SEED_POSITIONS !== 'undefined' && SEED_POSITIONS[размер])
+            ? SEED_POSITIONS[размер]
+            : (размер === 16 ? [1, 16, 9, 8, 5, 12, 13, 4]
+                : (размер === 8 ? [1, 8, 5, 4] : (размер === 4 ? [1, 4, 3, 2] : [1, 2])));
+
+        var сетка = new Array(размер);
+        var сеяных = Math.min(groupCount, позицииПосева.length);
+        for (var с = 0; с < сеяных; с++) сетка[позицииПосева[с] - 1] = слоты[с];
+
+        // Свободные места отдаём соперникам верхних сеяных: так сильнейшие
+        // проходят первый круг без игры — правило то же, что в жеребьёвке
+        var свободно = Math.max(0, размер - слоты.length);
+        var проходБезИгры = {};
+        for (var b = 0; b < свободно && b < позицииПосева.length; b++) {
+            var и = позицииПосева[b] - 1;
+            проходБезИгры[(и % 2 === 0) ? и + 1 : и - 1] = true;
+        }
+
+        var остальные = слоты.slice(сеяных);
+        for (var п = 0; п < размер && остальные.length; п++) {
+            if (сетка[п] || проходБезИгры[п]) continue;
+            сетка[п] = остальные.shift();
+        }
+
+        function подпись(слот) {
+            if (!слот) return '<span style="color:var(--text-dim);">' + L.byeLabel + '</span>';
+            var id = именаСлотов[слот];
+            if (!id) return '<span style="color:var(--text-secondary);">' + слот + '</span>';
+            // Имена берём тем же способом, что и настоящая сетка: в парном
+            // турнире показываются оба, в одиночном — игрок
+            var имя;
+            if (isDbl && regsMap) {
+                имя = getTeamDisplayName(id, regsMap, playersMap, true);
+            } else {
+                var и = playersMap[id];
+                имя = A.esc(и ? (isEn ? (и.name_en || и.name) : и.name) : id);
+            }
+            return '<b>' + имя + '</b> <span style="color:var(--text-dim);font-size:0.75rem;">' + слот + '</span>';
+        }
+
+        var сыгранныхГрупп = 0;
+        for (var гг = 1; гг <= groupCount; гг++) {
+            var мг = grpMatches.filter(function(m) { return m.group_number === гг; });
+            if (мг.length && мг.every(function(m) { return m.status === 'completed'; })) сыгранныхГрупп++;
+        }
+
+        var html = '<div class="ad-grp-playoff-section" style="margin-top:24px;">';
+        html += '<div class="ad-grp-section-title">' + L.playoffPreviewTitle + '</div>';
+        html += '<p style="margin:-4px 0 12px;font-size:0.8rem;color:var(--text-dim);">' +
+            L.playoffPreviewHint
+                .replace('{done}', сыгранныхГрупп)
+                .replace('{all}', groupCount)
+                .replace('{size}', размер)
+                .replace('{free}', свободно) + '</p>';
+
+        html += '<div class="ad-table-card"><table class="ad-table"><tbody>';
+        for (var м = 0; м < размер; м += 2) {
+            html += '<tr>' +
+                '<td style="width:36px;text-align:center;color:var(--text-dim);">' + (м / 2 + 1) + '</td>' +
+                '<td>' + подпись(сетка[м]) + '</td>' +
+                '<td style="width:40px;text-align:center;color:var(--text-dim);">vs</td>' +
+                '<td>' + подпись(сетка[м + 1]) + '</td>' +
+            '</tr>';
+        }
+        html += '</tbody></table></div></div>';
+        return html;
+    }
+
     // ---- Helpers to distinguish group vs playoff matches ----
     function isGroupMatch(m) { return m.group_number && m.group_number > 0; }
     function isIGMatch(m) { return m.round === 'IG'; }
@@ -3597,6 +3730,17 @@
             });
             html += '</div>'; // /ad-ig-matches-grid
             html += '</div>'; // /ad-ig-section
+        }
+
+        // Плей-офф ещё не создан — показываем, каким он будет.
+        //
+        // Раньше сетка появлялась только после последней группы, и до этого
+        // никто не знал ни своих соперников, ни того, кому достанется проход
+        // без игры. А расклад известен сразу после жеребьёвки: сколько групп
+        // и сколько выходит — оттуда и размер сетки, и число свободных мест.
+        if (!hasPlayoff && !hasIG && !isTournamentCompleted) {
+            html += предпросмотрПлейофф(tournament, grpMatches, playersMap,
+                                        groupCount, qualifiers, regsMap, isDbl);
         }
 
         // X-slot assignment placeholder (always present when playoff exists, populated async)
@@ -6469,7 +6613,6 @@
     async function assignPlayoffSchedule(tournament) {
         var courtCount = tournament.court_count || 2;
         var matchDuration = tournament.match_duration || 90;
-        var bufferMinutes = tournament.buffer_minutes || 15;
         var scheduledDay = tournament.date_start || null;
 
         // Fetch playoff matches
@@ -6500,7 +6643,7 @@
             return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
         }
 
-        var currentMin = timeToMin(lastGroupTime.slice(0, 5)) + matchDuration + bufferMinutes;
+        var currentMin = timeToMin(lastGroupTime.slice(0, 5)) + matchDuration;
 
         // Group by round_number
         var roundsMap = {};
@@ -6523,7 +6666,7 @@
             for (var i = 0; i < playable.length; i++) {
                 var waveIndex = Math.floor(i / courtCount);
                 var courtIndex = i % courtCount;
-                var matchTime = waveStartMin + waveIndex * (matchDuration + bufferMinutes);
+                var matchTime = waveStartMin + waveIndex * matchDuration;
                 var timeStr = minToTime(matchTime);
 
                 // Remember final's time for 3rd place
@@ -6538,7 +6681,7 @@
                 );
 
                 var waveEnd = matchTime + matchDuration;
-                if (waveEnd + bufferMinutes > currentMin) currentMin = waveEnd + bufferMinutes;
+                if (waveEnd > currentMin) currentMin = waveEnd;
             }
         }
 
@@ -6570,10 +6713,12 @@
     async function assignGroupSchedule(tournament) {
         var courtCount = tournament.court_count || 2;
         var matchDuration = tournament.match_duration || 90;
-        var bufferMinutes = tournament.buffer_minutes || 15;
         var startTime = tournament.start_time ? tournament.start_time.slice(0, 5) : '09:00';
         var scheduledDay = tournament.date_start || null;
-        var interval = matchDuration + bufferMinutes;
+        // Волны идут встык: время матча и есть шаг расписания. Перерыв между
+        // запусками убрали — менеджеры не понимали, зачем он, а на корте
+        // задержки всё равно свои, и они в расписании не видны
+        var interval = matchDuration;
 
         var res = await A.client.from('matches')
             .select('*')
@@ -6682,7 +6827,6 @@
     async function assignSchedule(tournament) {
         var courtCount = tournament.court_count || 2;
         var matchDuration = tournament.match_duration || 90;
-        var bufferMinutes = tournament.buffer_minutes || 15;
         var startTime = tournament.start_time ? tournament.start_time.slice(0, 5) : '09:00';
         var scheduledDay = tournament.date_start || null;
         var drawSize = tournament.draw_size || 16;
@@ -6739,7 +6883,7 @@
                 var waveIndex = Math.floor(i / courtCount);
                 var courtIndex = i % courtCount;
 
-                var matchTime = waveStartMin + waveIndex * (matchDuration + bufferMinutes);
+                var matchTime = waveStartMin + waveIndex * matchDuration;
                 // Court number only for first wave of each round
                 var courtNum = (waveIndex === 0) ? (courtIndex + 1) : null;
 
@@ -6754,8 +6898,8 @@
                 if (waveEnd > lastWaveEndMin) lastWaveEndMin = waveEnd;
             }
 
-            // Next round starts after last wave + buffer
-            currentStartMin = lastWaveEndMin + bufferMinutes;
+            // Следующий круг начинается сразу за последней волной
+            currentStartMin = lastWaveEndMin;
         }
 
         // Handle 3rd place match — same time as Final
@@ -6787,7 +6931,6 @@
     async function assignFicSchedule(tournament) {
         var courtCount = tournament.court_count || 2;
         var matchDuration = tournament.match_duration || 90;
-        var bufferMinutes = tournament.buffer_minutes || 15;
         var startTime = tournament.start_time ? tournament.start_time.slice(0, 5) : '09:00';
         var scheduledDay = tournament.date_start || null;
         var drawSize = tournament.draw_size || 16;
@@ -6826,7 +6969,7 @@
         for (var i = 0; i < playableR1.length; i++) {
             var waveIndex = Math.floor(i / courtCount);
             var courtIndex = i % courtCount;
-            var matchTime = currentStartMin + waveIndex * (matchDuration + bufferMinutes);
+            var matchTime = currentStartMin + waveIndex * matchDuration;
             var courtNum = (waveIndex === 0) ? (courtIndex + 1) : null;
 
             updates.push({
@@ -6874,7 +7017,7 @@
                     feeder2End = matchEndTime[f2] || lastR1End;
                 }
 
-                var earliestStart = Math.max(feeder1End, feeder2End) + bufferMinutes;
+                var earliestStart = Math.max(feeder1End, feeder2End);
                 matchEndTime[r + '-' + mo] = earliestStart + matchDuration;
 
                 updates.push({
