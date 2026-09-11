@@ -72,8 +72,65 @@
                         return TC.render(t, { featured: i === 0, taken: taken[t.id] || 0 });
                     }).join('');
                     TC.startTicker();
+                    записьСКарточки(client, picked);
                 });
         });
+
+    /**
+     * Запись прямо с карточки на главной. Одиночный турнир отправляет заявку
+     * сразу, парный открывает окно выбора напарника — заявку в паре подаёт
+     * один за двоих.
+     */
+    function записьСКарточки(client, турниры) {
+        if (записьСКарточки._done) return;
+        записьСКарточки._done = true;
+
+        var поId = {};
+        турниры.forEach(function(t) { поId[t.id] = t; });
+
+        var isEn = location.pathname.indexOf('-en') !== -1;
+        var isKg = location.pathname.indexOf('-kg') !== -1;
+
+        // Состояние уже поданных заявок: кнопка сразу скажет «вы в сетке»
+        if (window.KSLT_REG) window.KSLT_REG.markRegistered(client);
+
+        document.addEventListener('click', async function(e) {
+            var btn = e.target.closest('.tc .to-register');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            var сессия = await client.auth.getSession();
+            if (!сессия.data.session) {
+                if (window.KSLT_REG) window.KSLT_REG.предложитьВойти(isEn, isKg);
+                return;
+            }
+
+            if (btn.dataset.doubles && window.KSLT_DOUBLES) {
+                var профиль = await client.from('profiles')
+                    .select('full_name, player_id').eq('id', сессия.data.session.user.id).single();
+                window.KSLT_DOUBLES.открыть({
+                    client: client,
+                    tournament: поId[btn.dataset.tid] || { id: btn.dataset.tid },
+                    playerId: профиль.data ? профиль.data.player_id : null,
+                    playerName: профиль.data ? профиль.data.full_name : '',
+                    onDone: function() { window.KSLT_REG.markRegistered(client); }
+                });
+                return;
+            }
+
+            var прежний = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = isEn ? 'Sending...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
+            var info = await window.KSLT_REG.submit(client, btn.dataset.tid, { isEn: isEn, isKg: isKg });
+            if (info && info.created) {
+                window.KSLT_REG.markRegistered(client);
+            } else {
+                btn.disabled = false;
+                btn.textContent = прежний;
+            }
+        }, true);
+    }
 
     /**
      * Отбираем шесть по договорённому порядку.

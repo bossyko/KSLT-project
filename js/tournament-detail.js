@@ -1015,6 +1015,9 @@ function incrementTournamentView(client, id) {
 }
 
 function loadFromSupabase(client, id) {
+    // Запоминаем, чем грузили: после подачи заявки страницу надо перечитать,
+    // чтобы человек увидел себя в участниках, а не жал обновление руками
+    window.ksltReload = function() { loadFromSupabase(client, id); };
     client.from('tournaments').select('*').eq('id', id).single()
         .then(function(result) {
             if (result.error || !result.data) {
@@ -2230,6 +2233,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // раньше смотрела только на сырое поле t.status. Из-за этого турнир с
     // выставленными датами показывал «Регистрация открыта», но кнопки не давал.
     if (t.status === 'registration_open' || effectiveStatus === 'registration_open') {
+        // Запоминаем турнир: блок заявки перерисовывается после подачи и
+        // снятия, и ему нужны эти данные без повторной загрузки страницы
+        window.ksltTournament = t;
         renderRegistrationButton(t, registrations, isEn);
     }
 
@@ -2496,9 +2502,64 @@ function renderVenueSection(court, isEn) {
 // PLAYER REGISTRATION BUTTON
 // ========================================
 
+/**
+ * Перерисовать блок заявки на странице турнира.
+ *
+ * После подачи или снятия менялся только текст кнопки, а «Снять заявку» и
+ * «Добавить партнёра» появлялись лишь после обновления страницы. Перечитываем
+ * заявки и собираем блок заново — человек видит своё состояние сразу.
+ */
+async function обновитьБлокЗаявки() {
+    var client = window.supabaseClient;
+    var t = window.ksltTournament;
+    if (!client || !t) { window.location.reload(); return; }
+
+    // Перечитываем страницу целиком: она сама соберёт и блок заявки, и список
+    // участников. Раньше я рисовал блок здесь и следом вызывал перезагрузку —
+    // блок рисовался дважды, и статус задваивался
+    if (window.ksltReload) {
+        window.ksltReload();
+        return;
+    }
+
+    var res = await client.from('tournament_registrations')
+        .select('*').eq('tournament_id', t.id);
+    var isEn = window.location.pathname.indexOf('-en') !== -1;
+    renderRegistrationButton(t, res.data || [], isEn);
+}
+
+/** Кнопка записи для гостя: ведёт ко входу, а не в пустоту. */
+function гостюКнопкуЗаписи(isEn, isKg) {
+    var heroContent = document.querySelector('.td-hero-content');
+    if (!heroContent || document.getElementById('tdRegisterBtn')) return;
+    document.querySelectorAll('.td-register-wrap, .td-registration-area')
+        .forEach(function(эл) { эл.remove(); });
+
+    var подпись = isEn ? 'Register for Tournament'
+        : (isKg ? 'Мелдешке каттоо' : 'Записаться на турнир');
+
+    heroContent.insertAdjacentHTML('beforeend',
+        '<div class="td-register-wrap" style="margin-top:20px;">' +
+            '<button class="td-register-btn" id="tdRegisterBtn" style="padding:10px 24px;border:none;' +
+            'border-radius:8px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;' +
+            'font-size:1rem;">' + подпись + '</button>' +
+        '</div>');
+
+    document.getElementById('tdRegisterBtn').addEventListener('click', function() {
+        if (window.KSLT_REG && window.KSLT_REG.предложитьВойти) {
+            window.KSLT_REG.предложитьВойти(isEn, isKg);
+        }
+    });
+}
+
 function renderRegistrationButton(tournament, registrations, isEn) {
     var client = window.supabaseClient;
     if (!client) return;
+
+    // Блок один на странице. Вставляют его два пути — загрузка страницы и
+    // обновление после заявки, — поэтому прежний убираем всегда
+    document.querySelectorAll('.td-register-wrap, .td-registration-area')
+        .forEach(function(эл) { эл.remove(); });
 
     // isKg объявлялся только в renderVenueSection — здесь его не было,
     // и первое же обращение роняло функцию с ReferenceError внутри .then(),
@@ -2507,19 +2568,31 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
     // Check if user is logged in and has a player_id
     client.auth.getUser().then(function(userRes) {
-        if (!userRes.data || !userRes.data.user) return;
+        if (!userRes.data || !userRes.data.user) {
+            // Гостю тоже показываем кнопку: раньше на странице турнира с
+            // открытой регистрацией не было вообще ничего, и человек не
+            // понимал, куда нажимать. По нажатию предлагаем войти
+            гостюКнопкуЗаписи(isEn, isKg);
+            return;
+        }
         var userId = userRes.data.user.id;
 
-        client.from('profiles').select('player_id, role').eq('id', userId).single().then(function(profRes) {
+        client.from('profiles').select('player_id, role, full_name').eq('id', userId).single().then(function(profRes) {
             if (!profRes.data || !profRes.data.player_id) return;
             var playerId = profRes.data.player_id;
             var isStaff = profRes.data.role === 'admin' || profRes.data.role === 'manager';
+            window.ksltProfileName = profRes.data.full_name || '';
 
             // Check if already registered
             // Снятая заявка не считается действующей: игрок вправе записаться
             // снова, и кнопка записи должна вернуться на место
+            // Заявка общая для пары: напарник видит её наравне с тем, кто
+            // подал, — иначе первый номер снимет заявку, и второй останется
+            // ни с чем, даже не узнав об этом
             var alreadyRegistered = registrations.find(function(r) {
                 return r.player_id === playerId && r.status !== 'withdrawn';
+            }) || registrations.find(function(r) {
+                return r.partner_id === playerId && r.status !== 'withdrawn';
             });
 
             // Check category match + ban status + NTRP
@@ -2532,9 +2605,6 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
                 var genderBlocked = false;
                 var ntrpBlocked = false;
-                var isExactCategory = true;
-                var tCatId = tournament.category_id;
-                var pCatId = plRes.data.category_id;
 
                 // Gender check: use tournament.gender field
                 var trnGender = tournament.gender;
@@ -2547,11 +2617,6 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
                 // NTRP check (singles)
                 var playerNtrp = plRes.data.ntrp_singles;
-                // В парном турнире считаемся парным рейтингом, а если его у
-                // человека нет — одиночным
-                var playerNtrpПары = (window.KSLT_RULES && window.KSLT_RULES.ntrpПары)
-                    ? window.KSLT_RULES.ntrpПары(plRes.data.ntrp_singles, plRes.data.ntrp_doubles)
-                    : plRes.data.ntrp_singles;
                 if (playerNtrp && tournament.ntrp_min && playerNtrp < tournament.ntrp_min) {
                     ntrpBlocked = true;
                 }
@@ -2559,15 +2624,19 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     ntrpBlocked = true;
                 }
 
-                if (tCatId) {
-                    // Category match → pending (main draw) or waitlist
-                    isExactCategory = (pCatId === tCatId);
-                }
-
                 // Check membership (staff bypass)
+                //
+                // Пока идёт бесплатный период, членство не спрашиваем: страница
+                // предлагала оплатить, хотя вход открыт всем. То же правило
+                // действует и в функции записи — здесь оно просто повторяется,
+                // чтобы человек не видел лишнего окна
                 var membershipOk = isStaff;
                 var paidOk = isStaff;
-                if (!isStaff && window.checkMembership) {
+                var бесплатно = window.бесплатныйПериод ? await window.бесплатныйПериод() : false;
+                if (бесплатно) {
+                    membershipOk = true;
+                    paidOk = true;
+                } else if (!isStaff && window.checkMembership) {
                     var memResult = await window.checkMembership();
                     membershipOk = memResult && memResult.active;
                     paidOk = memResult && memResult.paid;
@@ -2579,30 +2648,52 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 var heroContent = document.querySelector('.td-hero-content');
                 if (!heroContent) return;
 
-                var btnHtml = '<div class="td-registration-area" style="margin-top:var(--space-md);">';
-
-                // Check online slots (max - reserved)
-                var onlineSlots = (tournament.max_participants || 0) - (tournament.reserved_spots || 0);
-                var activeRegCount = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; }).length;
-                var onlineSlotsFull = onlineSlots > 0 && activeRegCount >= onlineSlots;
+                // Сверху статус, под ним пояснение, ещё ниже — кнопки. Так
+                // читается сверху вниз: что со мной, почему, что могу сделать
+                var btnHtml = '<div class="td-registration-area" style="margin-top:var(--space-md);' +
+                    'display:flex;flex-direction:column;align-items:flex-start;gap:10px;">';
 
                 // Ban check
                 var playerBanned = plRes.data.banned_until && new Date(plRes.data.banned_until) > new Date();
 
                 if (alreadyRegistered) {
+                    // Подписи те же, что на карточках турниров: человек должен
+                    // видеть одно и то же слово везде — «Вы в основной сетке»,
+                    // а не «зарегистрированы» здесь и «в сетке» там
                     var statusLabels = isEn
-                        ? { pending: 'Registration Pending', approved: 'Registered', draw: 'In the draw', rejected: 'Registration Rejected', withdrawn: 'Withdrawn', waitlist: 'On Waitlist', blocked: 'Not admitted' }
-                        : (isKg ? { pending: 'Арыз каралууда', approved: 'Сиз катталдыңыз', draw: 'Сеткада', rejected: 'Арыз четке кагылды', withdrawn: 'Арыз кайтарылды', waitlist: 'Күтүү тизмесинде', blocked: 'Уруксат жок' }
-                        : { pending: 'Заявка на рассмотрении', approved: 'Вы зарегистрированы', draw: 'Вы в сетке', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания', blocked: 'Не допущен' });
+                        ? { pending: 'Entry under review', approved: 'You are in the draw', draw: 'You are in the draw', rejected: 'Entry declined', withdrawn: 'Withdrawn', waitlist: 'On the waiting list', blocked: 'Not admitted' }
+                        : (isKg ? { pending: 'Арыз каралууда', approved: 'Сиз негизги сеткадасыз', draw: 'Сиз негизги сеткадасыз', rejected: 'Арыз четке кагылды', withdrawn: 'Арыз кайтарылды', waitlist: 'Күтүү тизмесинде', blocked: 'Уруксат жок' }
+                        : { pending: 'Заявка на рассмотрении', approved: 'Вы в основной сетке', draw: 'Вы в основной сетке', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания', blocked: 'Не допущен' });
 
                     // Отказ подписываем красным и показываем причину — она приходит
                     // из правил допуска и написана человеческим языком
                     var isRefused = alreadyRegistered.status === 'blocked' || alreadyRegistered.status === 'rejected';
-                    var tone = isRefused ? '255,59,48' : '204,255,0';
-                    btnHtml += '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(' + tone + ',0.15);color:rgb(' + tone + ');font-weight:500;">' +
-                        (statusLabels[alreadyRegistered.status] || statusLabels.approved) + '</span>';
+                    // Пара с неподтверждённым гостем: место за ней держится, но
+                    // говорить «вы в сетке» рано — решает менеджер
+                    var ждётГостя = alreadyRegistered.partner_external_name && !alreadyRegistered.guest_confirmed;
+                    var ожидание = alreadyRegistered.status === 'waitlist' || alreadyRegistered.status === 'pending';
+                    var подписьСтатуса = ждётГостя
+                        ? (isEn ? 'Entry under review' : (isKg ? 'Арыз каралууда' : 'Заявка на рассмотрении'))
+                        : (statusLabels[alreadyRegistered.status] || statusLabels.approved);
+                    // Вид состояния общий на весь сайт — класс из style.css.
+                    // Раньше цвета были прописаны прямо здесь, и страница
+                    // турнира расходилась с карточками
+                    var видСтатуса = isRefused ? 'kslt-status-refused'
+                        : ((ждётГостя || ожидание) ? 'kslt-status-wait' : 'kslt-status-draw');
+                    btnHtml += '<span class="kslt-status ' + видСтатуса + '">' + подписьСтатуса + '</span>';
+                    if (ждётГостя) {
+                        var местоТекст = alreadyRegistered.status === 'waitlist'
+                            ? (isEn ? 'On the waiting list' : (isKg ? 'Күтүү тизмесинде' : 'В листе ожидания'))
+                            : (isEn ? 'In the main draw' : (isKg ? 'Негизги сеткада' : 'В основной сетке'));
+                        btnHtml += '<div style="flex-basis:100%;max-width:520px;color:var(--text-muted);font-size:0.85rem;line-height:1.5;">' +
+                            местоТекст + ' \u00B7 ' +
+                            (isEn ? 'the guest partner is confirmed by the manager'
+                                  : (isKg ? 'конок өнөктөштү менеджер ырастайт'
+                                          : 'напарника-гостя подтверждает менеджер')) +
+                        '</div>';
+                    }
                     if (isRefused && alreadyRegistered.block_reason) {
-                        btnHtml += '<div style="margin-top:10px;max-width:520px;color:var(--text-muted);font-size:0.85rem;line-height:1.5;">' +
+                        btnHtml += '<div style="flex-basis:100%;max-width:520px;color:var(--text-muted);font-size:0.85rem;line-height:1.5;">' +
                             alreadyRegistered.block_reason + '</div>';
                     }
                     // Снять заявку — пока не проведена жеребьёвка. После неё игрок
@@ -2610,16 +2701,52 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     var canWithdraw = ['approved', 'pending', 'waitlist'].indexOf(alreadyRegistered.status) !== -1
                         && alreadyRegistered.draw_position == null
                         && alreadyRegistered.group_number == null;
+                    var кнопкиHtml = '';
                     if (canWithdraw) {
-                        btnHtml += ' <button id="tdWithdrawBtn" data-reg="' + alreadyRegistered.id + '" style="margin-left:12px;padding:8px 16px;border:1px solid rgba(255,255,255,0.15);border-radius:8px;background:transparent;color:var(--text-muted);font-weight:500;cursor:pointer;font-size:0.9rem;">' +
-                            (isEn ? 'Withdraw' : (isKg ? 'Арызды алуу' : 'Снять заявку')) + '</button>';
+                        // В паре снимают себя, а не заявку: место остаётся
+                        // второму, и он ищет нового напарника
+                        var вПаре = !!(alreadyRegistered.partner_id || alreadyRegistered.partner_external_name);
+                        кнопкиHtml += '<button id="tdWithdrawBtn" data-reg="' + alreadyRegistered.id + '"' +
+                            (вПаре ? ' data-leave="1"' : '') +
+                            ' style="padding:8px 16px;border:1px solid rgba(255,255,255,0.15);border-radius:8px;background:transparent;color:var(--text-muted);font-weight:500;cursor:pointer;font-size:0.9rem;">' +
+                            (вПаре
+                                ? (isEn ? 'Leave the pair' : (isKg ? 'Жуптан чыгуу' : 'Выйти из пары'))
+                                : (isEn ? 'Withdraw' : (isKg ? 'Арызды алуу' : 'Снять заявку'))) + '</button>';
                     }
 
-                    // Doubles without partner: show "Add Partner" button
+                    // В паре напарник либо есть, либо нет — и кнопка должна
+                    // говорить об этом честно. Гость тоже напарник: с ним
+                    // «добавить» звучало так, будто места ещё свободны
+                    // Заявка вне турнира: менеджер отказал или игрок снялся сам.
+                    // Менять на ней напарника нечего — места у пары нет. Раньше
+                    // кнопка «Заменить напарника» всё равно висела, замена молча
+                    // проходила, а заявка как была отклонена, так и оставалась
+                    var мертва = alreadyRegistered.status === 'rejected' ||
+                        alreadyRegistered.status === 'withdrawn';
+
                     var isTournamentDoublesCheck = tournament.format === 'doubles' || tournament.format === 'mixed_doubles';
-                    if (isTournamentDoublesCheck && !alreadyRegistered.partner_id) {
-                        btnHtml += ' <button id="tdAddPartnerBtn" style="margin-left:12px;padding:8px 16px;border:1px solid var(--accent);border-radius:8px;background:transparent;color:var(--accent);font-weight:500;cursor:pointer;font-size:0.9rem;">' +
-                            (isEn ? 'Add Partner' : (isKg ? 'Өнөктөш кошуу' : 'Добавить партнёра')) + '</button>';
+                    if (isTournamentDoublesCheck && !мертва) {
+                        var естьНапарник = alreadyRegistered.partner_id || alreadyRegistered.partner_external_name;
+                        кнопкиHtml += '<button id="tdAddPartnerBtn" style="padding:8px 16px;border:1px solid var(--accent);border-radius:8px;background:transparent;color:var(--accent);font-weight:500;cursor:pointer;font-size:0.9rem;">' +
+                            (естьНапарник
+                                ? (isEn ? 'Change partner' : (isKg ? 'Өнөктөштү алмаштыруу' : 'Заменить напарника'))
+                                : (isEn ? 'Add Partner' : (isKg ? 'Өнөктөш кошуу' : 'Добавить партнёра'))) + '</button>';
+                    }
+
+                    // Отказ менеджера окончателен: подать заявку заново игрок не
+                    // может. Вернуть её вправе только тот, кто отказал — иначе
+                    // решение клуба ничего не значило бы
+                    if (alreadyRegistered.status === 'rejected') {
+                        btnHtml += '<div style="flex-basis:100%;max-width:520px;color:var(--text-muted);' +
+                            'font-size:0.85rem;line-height:1.5;">' +
+                            (isEn ? 'The club closed this entry. To return to the tournament, contact a manager'
+                                  : (isKg ? 'Арызды клуб жапты. Мелдешке кайра кирүү үчүн менеджерге кайрылыңыз'
+                                          : 'Заявку закрыл клуб. Чтобы вернуться в турнир, обратитесь к менеджеру')) +
+                        '</div>';
+                    }
+
+                    if (кнопкиHtml) {
+                        btnHtml += '<div style="display:flex;gap:12px;flex-wrap:wrap;">' + кнопкиHtml + '</div>';
                     }
                 } else if (playerBanned) {
                     var isPerm = new Date(plRes.data.banned_until).getFullYear() >= 2099;
@@ -2693,7 +2820,20 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 var addPartnerBtn = document.getElementById('tdAddPartnerBtn');
                 if (addPartnerBtn) {
                     addPartnerBtn.addEventListener('click', function() {
-                        showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, addPartnerBtn, alreadyRegistered.id, playerNtrpПары, onlineSlotsFull);
+                        // То же окно, что при записи: «Из базы», «Гость» или
+                        // «Пока без». Старое умело только искать по базе
+                        if (window.KSLT_DOUBLES) {
+                            window.KSLT_DOUBLES.открыть({
+                                client: client,
+                                tournament: tournament,
+                                playerId: playerId,
+                                playerName: (window.ksltProfileName || ''),
+                                // Заявка уже подана: меняем напарника, а не
+                                // подаём заново — место и очередь остаются
+                                заменить: true,
+                                onDone: function() { обновитьБлокЗаявки(); }
+                            });
+                        }
                     });
                 }
 
@@ -2704,20 +2844,58 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         var tName = isEn ? (tournament.title_en || tournament.title) : (isKg ? (tournament.title_kg || tournament.title) : tournament.title);
 
                         // Модалка та же, что у результата регистрации на этой странице
+                        var выходИзПары = !!withdrawBtn.dataset.leave;
                         var ok = await window.KSLT_REG.confirm({
                             icon: '\uD83C\uDFBE',
-                            title: isEn ? 'Withdraw from the tournament?'
-                                : (isKg ? 'Турнирден арызды аласызбы?' : 'Снять заявку с турнира?'),
-                            text: isEn ? 'Your entry for <b>' + tName + '</b> will be withdrawn. You can enter again while registration is open.'
-                                : (isKg ? '<b>' + tName + '</b> турнирине берилген арыз алынат. Каттоо ачык турганда кайра катталса болот.'
-                                : 'Заявка на <b>' + tName + '</b> будет снята. Записаться снова можно, пока открыта регистрация.'),
-                            okText: isEn ? 'Withdraw' : (isKg ? 'Арызды алуу' : 'Снять заявку'),
+                            title: выходИзПары
+                                ? (isEn ? 'Leave the pair?' : (isKg ? 'Жуптан чыгасызбы?' : 'Выйти из пары?'))
+                                : (isEn ? 'Withdraw from the tournament?'
+                                    : (isKg ? 'Турнирден арызды аласызбы?' : 'Снять заявку с турнира?')),
+                            text: выходИзПары
+                                ? (isEn ? 'You leave, your partner keeps the place in <b>' + tName + '</b> and looks for a new partner.'
+                                    : (isKg ? 'Сиз чыгасыз, өнөктөшүңүз <b>' + tName + '</b> турниринде орун сактап, жаңы өнөктөш издейт.'
+                                    : 'Вы выходите, напарник остаётся в <b>' + tName + '</b> с вашим общим местом и ищет нового напарника.'))
+                                : (isEn ? 'Your entry for <b>' + tName + '</b> will be withdrawn. You can enter again while registration is open.'
+                                    : (isKg ? '<b>' + tName + '</b> турнирине берилген арыз алынат. Каттоо ачык турганда кайра катталса болот.'
+                                    : 'Заявка на <b>' + tName + '</b> будет снята. Записаться снова можно, пока открыта регистрация.')),
+                            okText: выходИзПары
+                                ? (isEn ? 'Leave' : (isKg ? 'Чыгуу' : 'Выйти'))
+                                : (isEn ? 'Withdraw' : (isKg ? 'Арызды алуу' : 'Снять заявку')),
                             cancelText: isEn ? 'Cancel' : (isKg ? 'Жокко чыгаруу' : 'Отмена'),
                             tone: 'error'
                         });
                         if (!ok) return;
 
                         withdrawBtn.disabled = true;
+
+                        // В паре выходит только сам игрок: заявка и место
+                        // остаются второму. Решает сервер — там же правила
+                        if (withdrawBtn.dataset.leave) {
+                            var сессия = await client.auth.getSession();
+                            var ответ = await fetch(SUPABASE_URL + '/functions/v1/tournament-register', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'apikey': SUPABASE_ANON_KEY,
+                                    'Authorization': 'Bearer ' + (сессия.data.session ? сессия.data.session.access_token : '')
+                                },
+                                body: JSON.stringify({ tournament_id: tournament.id, leave_pair: true })
+                            });
+                            var д = await ответ.json();
+                            if (!ответ.ok || д.error) {
+                                withdrawBtn.disabled = false;
+                                window.KSLT_REG.notice({
+                                    icon: '\u26A0\uFE0F',
+                                    title: isEn ? 'Could not leave the pair' : (isKg ? 'Жуптан чыгуу мүмкүн болгон жок' : 'Не удалось выйти из пары'),
+                                    text: д.error || '',
+                                    tone: 'error'
+                                }, isEn, isKg);
+                                return;
+                            }
+                            обновитьБлокЗаявки();
+                            return;
+                        }
+
                         var upd = await client.from('tournament_registrations')
                             .update({ status: 'withdrawn' })
                             .eq('id', withdrawBtn.dataset.reg);
@@ -2732,7 +2910,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                             }, isEn, isKg);
                             return;
                         }
-                        window.location.reload();
+                        обновитьБлокЗаявки();
                     });
                 }
 
@@ -2752,8 +2930,15 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 if (regBtn) {
                     regBtn.addEventListener('click', async function() {
                         if (isTournamentDoubles) {
-                            // Show doubles registration modal
-                            showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, regBtn, null, playerNtrpПары, onlineSlotsFull);
+                            // Окно то же, что на карточках турниров: одно место,
+                            // где живут «из базы», «гость» и «пока без напарника»
+                            window.KSLT_DOUBLES.открыть({
+                                client: client,
+                                tournament: tournament,
+                                playerId: playerId,
+                                playerName: (window.ksltProfileName || ''),
+                                onDone: function() { обновитьБлокЗаявки(); }
+                            });
                             return;
                         }
 
@@ -2770,251 +2955,16 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                             return;
                         }
 
-                        var toneColor = info.tone === 'error' ? '255,59,48' : '204,255,0';
-                        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(' + toneColor + ',0.15);color:rgb(' + toneColor + ');font-weight:500;">' +
-                            info.short + '</span>';
+                        // Перерисовываем блок целиком: рядом со статусом должны
+                        // сразу появиться «Снять заявку» и «Добавить партнёра»,
+                        // а не после того, как человек обновит страницу
+                        обновитьБлокЗаявки();
                     });
                 }
             });
         });
     });
 }
-
-// ========================================
-// DOUBLES REGISTRATION MODAL
-// ========================================
-
-function showDoublesRegistrationModal(client, tournament, playerId, isExactCategory, isEn, isKg, regBtn, existingRegId, captainNtrp, onlineSlotsFull) {
-    // Create modal overlay
-    var overlay = document.createElement('div');
-    overlay.className = 'td-doubles-modal-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;';
-
-    var isMixed = tournament.format === 'mixed_doubles';
-    var soloLabel = isEn ? 'Register without partner (add later)' : (isKg ? 'Өнөктөшсүз каттоо (кийин кошуу)' : 'Записаться без партнёра (добавить позже)');
-    var searchLabel = isEn ? 'Search partner by name...' : (isKg ? 'Өнөктөштү аты боюнча издөө...' : 'Поиск партнёра по имени...');
-    var registerLabel = existingRegId
-        ? (isEn ? 'Save' : (isKg ? 'Сактоо' : 'Сохранить'))
-        : (isEn ? 'Register' : (isKg ? 'Каттоо' : 'Записаться'));
-    var cancelLabel = isEn ? 'Cancel' : (isKg ? 'Жокко чыгаруу' : 'Отмена');
-
-    // NTRP combined hint
-    var ntrpHint = '';
-    if (tournament.ntrp_combined_max && captainNtrp) {
-        var remaining = tournament.ntrp_combined_max - captainNtrp;
-        ntrpHint = '<div style="padding:8px 12px;margin-bottom:12px;border-radius:8px;background:rgba(204,255,0,0.08);border:1px solid rgba(204,255,0,0.2);font-size:0.85rem;color:var(--text-secondary);">' +
-            (isEn ? 'NTRP limit: ' + tournament.ntrp_combined_max + ' (yours: ' + captainNtrp + ', partner max: ' + remaining.toFixed(1) + ')'
-                : (isKg ? 'NTRP чеги: ' + tournament.ntrp_combined_max + ' (сиздики: ' + captainNtrp + ', өнөктөш макс: ' + remaining.toFixed(1) + ')'
-                : 'Лимит NTRP: ' + tournament.ntrp_combined_max + ' (ваш: ' + captainNtrp + ', партнёр макс: ' + remaining.toFixed(1) + ')')) +
-        '</div>';
-    }
-
-    var modalHtml = '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto;">' +
-        '<h3 style="color:var(--text-primary);margin:0 0 16px;font-size:1.1rem;">' +
-            (isEn ? 'Partner Selection' : (isKg ? 'Өнөктөштү тандоо' : 'Выбор партнёра')) +
-        '</h3>' +
-        ntrpHint +
-        '<div style="margin-bottom:12px;">' +
-            '<input type="text" id="tdPartnerSearch" placeholder="' + searchLabel + '" ' +
-                'style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;box-sizing:border-box;" autocomplete="off">' +
-            '<div id="tdPartnerResults" style="max-height:200px;overflow-y:auto;margin-top:4px;"></div>' +
-            '<input type="hidden" id="tdPartnerSelectedId" value="">' +
-            '<div id="tdPartnerSelectedName" style="display:none;padding:8px 12px;margin-top:4px;border-radius:8px;background:rgba(204,255,0,0.1);color:var(--accent);font-size:0.9rem;"></div>' +
-        '</div>' +
-        '<div style="display:flex;gap:12px;margin-top:16px;">' +
-            '<button id="tdDoublesCancel" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text-secondary);cursor:pointer;">' + cancelLabel + '</button>' +
-            (existingRegId ? '' :
-            '<button id="tdDoublesRegSolo" style="flex:1;padding:10px;border:none;border-radius:8px;background:rgba(204,255,0,0.2);color:var(--accent);cursor:pointer;font-size:0.85rem;">' +
-                (isEn ? 'Solo' : (isKg ? 'Жалгыз' : 'Без партнёра')) +
-            '</button>') +
-            '<button id="tdDoublesRegWithPartner" style="flex:1;padding:10px;border:none;border-radius:8px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;" disabled>' + registerLabel + '</button>' +
-        '</div>' +
-    '</div>';
-
-    overlay.innerHTML = modalHtml;
-    document.body.appendChild(overlay);
-
-    // Close on overlay click
-    overlay.addEventListener('click', function(e) {
-        if (e.target === overlay) overlay.remove();
-    });
-
-    // Cancel button
-    document.getElementById('tdDoublesCancel').addEventListener('click', function() {
-        overlay.remove();
-    });
-
-    // Solo registration (not shown in update mode)
-    var soloBtn = document.getElementById('tdDoublesRegSolo');
-    if (soloBtn) soloBtn.addEventListener('click', async function() {
-        var soloBtn = document.getElementById('tdDoublesRegSolo');
-        soloBtn.disabled = true;
-        soloBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
-
-        overlay.remove();
-        var info = await window.KSLT_REG.submit(client, tournament.id, { isEn: isEn, isKg: isKg });
-
-        if (!info.created) return;
-
-        var noPartner = isEn ? ' (no partner yet)' : (isKg ? ' (өнөктөш жок)' : ' (без партнёра)');
-        var toneColor = info.tone === 'error' ? '255,59,48' : '204,255,0';
-        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(' + toneColor + ',0.15);color:rgb(' + toneColor + ');font-weight:500;">' + info.short + noPartner + '</span>';
-    });
-
-    // Register with partner
-    document.getElementById('tdDoublesRegWithPartner').addEventListener('click', async function() {
-        var partnerId = document.getElementById('tdPartnerSelectedId').value;
-        if (!partnerId) return;
-
-        var regWithBtn = document.getElementById('tdDoublesRegWithPartner');
-        regWithBtn.disabled = true;
-        regWithBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
-
-        // Добавление партнёра к уже поданной заявке правил допуска не касается
-        if (existingRegId) {
-            var upd = await client.from('tournament_registrations').update({ partner_id: partnerId }).eq('id', existingRegId);
-            overlay.remove();
-            if (upd.error) {
-                window.KSLT_REG.notice({
-                    icon: '\u26A0\uFE0F',
-                    title: isEn ? 'Could not add the partner' : (isKg ? 'Өнөктөштү кошуу мүмкүн болгон жок' : 'Не удалось добавить партнёра'),
-                    text: upd.error.message || '',
-                    tone: 'error'
-                }, isEn, isKg);
-                return;
-            }
-
-            var addedMsg = isEn ? 'Partner added!' : (isKg ? 'Өнөктөш кошулду!' : 'Партнёр добавлен!');
-            var addPartnerBtnEl = document.getElementById('tdAddPartnerBtn');
-            if (addPartnerBtnEl) addPartnerBtnEl.remove();
-            var statusEl = document.querySelector('.td-reg-status');
-            if (statusEl) statusEl.textContent = addedMsg;
-            return;
-        }
-
-        // Новая заявка: суммарный NTRP пары проверяет сервер
-        overlay.remove();
-        var info = await window.KSLT_REG.submit(client, tournament.id, {
-            isEn: isEn, isKg: isKg, extra: { partner_id: partnerId }
-        });
-
-        if (!info.created) return;
-
-        var toneColor = info.tone === 'error' ? '255,59,48' : '204,255,0';
-        regBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(' + toneColor + ',0.15);color:rgb(' + toneColor + ');font-weight:500;">' + info.short + '</span>';
-    });
-
-    // Partner search
-    var searchInput = document.getElementById('tdPartnerSearch');
-    var resultsDiv = document.getElementById('tdPartnerResults');
-    var hiddenInput = document.getElementById('tdPartnerSelectedId');
-    var selectedNameDiv = document.getElementById('tdPartnerSelectedName');
-    var regWithBtn = document.getElementById('tdDoublesRegWithPartner');
-    var searchTimeout;
-
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        var q = searchInput.value.trim();
-        if (q.length < 2) { resultsDiv.innerHTML = ''; return; }
-
-        searchTimeout = setTimeout(async function() {
-            var res = await client.from('players')
-                .select('id, name, name_en, name_kg, gender, ntrp_singles, ntrp_doubles')
-                .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
-                .neq('id', playerId)
-                .limit(8);
-
-            var players = res.data || [];
-            if (players.length === 0) {
-                resultsDiv.innerHTML = '<div style="padding:8px;color:var(--text-dim);font-size:0.85rem;">' +
-                    (isEn ? 'No players found' : (isKg ? 'Оюнчулар табылган жок' : 'Игроков не найдено')) + '</div>';
-                return;
-            }
-
-            var html = '';
-            players.forEach(function(p) {
-                var displayName = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
-                var genderIcon = p.gender === 'men' ? ' ♂' : (p.gender === 'women' ? ' ♀' : '');
-                // Турнир парный, значит и рейтинг берём парный
-                var pNtrp = (window.KSLT_RULES && window.KSLT_RULES.ntrpПары)
-                    ? window.KSLT_RULES.ntrpПары(p.ntrp_singles, p.ntrp_doubles) : p.ntrp_singles;
-                html += '<div class="td-partner-item" data-id="' + p.id + '" data-name="' + esc(displayName) + '" data-gender="' + (p.gender || '') + '" data-ntrp="' + (pNtrp || '') + '" ' +
-                    'style="padding:8px 12px;cursor:pointer;border-radius:6px;font-size:0.9rem;color:var(--text-primary);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);">' +
-                    '<span>' + esc(displayName) + genderIcon + '</span>' +
-                    (pNtrp ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + pNtrp + '</span>' : '') +
-                '</div>';
-            });
-            resultsDiv.innerHTML = html;
-
-            resultsDiv.querySelectorAll('.td-partner-item').forEach(function(item) {
-                item.addEventListener('click', function() {
-                    // Combined NTRP validation for doubles
-                    var ntrpCombinedMax = tournament.ntrp_combined_max;
-                    if (ntrpCombinedMax && captainNtrp) {
-                        var partnerNtrp = parseFloat(item.dataset.ntrp) || 0;
-                        var combinedNtrp = captainNtrp + partnerNtrp;
-                        if (combinedNtrp > ntrpCombinedMax) {
-                            window.KSLT_REG.notice({
-                                icon: '\uD83D\uDCCF',
-                                title: isEn ? 'Combined NTRP is over the limit' : (isKg ? 'Жалпы NTRP чектен ашты' : 'Суммарный NTRP выше лимита'),
-                                text: isEn
-                                    ? combinedNtrp.toFixed(1) + ' against a limit of ' + ntrpCombinedMax + ' — yours ' + captainNtrp + ', partner ' + partnerNtrp
-                                    : (isKg
-                                        ? combinedNtrp.toFixed(1) + ' — чек ' + ntrpCombinedMax + ', сиздики ' + captainNtrp + ', өнөктөш ' + partnerNtrp
-                                        : combinedNtrp.toFixed(1) + ' при лимите ' + ntrpCombinedMax + ' — ваш ' + captainNtrp + ', партнёра ' + partnerNtrp),
-                                tone: 'error'
-                            }, isEn, isKg);
-                            return;
-                        }
-                    }
-
-                    // Gender validation for mixed doubles
-                    if (isMixed) {
-                        // We need to check captain's gender
-                        client.from('players').select('gender').eq('id', playerId).single().then(function(captRes) {
-                            var captGender = captRes.data ? captRes.data.gender : '';
-                            var partGender = item.dataset.gender;
-                            if (captGender && partGender && captGender === partGender) {
-                                window.KSLT_REG.notice({
-                                    icon: '\u26A0\uFE0F',
-                                    title: isEn ? 'Mixed doubles pairs a man with a woman' : (isKg ? 'Микст: бир эркек жана бир аял' : 'Микст — это мужчина и женщина'),
-                                    text: isEn ? 'Pick a partner of the other gender.' : (isKg ? 'Башка жыныстагы өнөктөштү тандаңыз.' : 'Выберите партнёра другого пола.'),
-                                    tone: 'error'
-                                }, isEn, isKg);
-                                return;
-                            }
-                            selectPartner(item);
-                        });
-                    } else {
-                        selectPartner(item);
-                    }
-                });
-            });
-        }, 300);
-    });
-
-    function selectPartner(item) {
-        hiddenInput.value = item.dataset.id;
-        searchInput.style.display = 'none';
-        resultsDiv.innerHTML = '';
-        selectedNameDiv.style.display = 'block';
-        selectedNameDiv.textContent = item.dataset.name;
-        selectedNameDiv.innerHTML += ' <span style="cursor:pointer;margin-left:8px;color:var(--text-dim);" id="tdPartnerClear">✕</span>';
-        regWithBtn.disabled = false;
-
-        document.getElementById('tdPartnerClear').addEventListener('click', function() {
-            hiddenInput.value = '';
-            searchInput.style.display = '';
-            searchInput.value = '';
-            selectedNameDiv.style.display = 'none';
-            regWithBtn.disabled = true;
-        });
-    }
-}
-
-// ========================================
-// COUNTDOWN TIMER
-// ========================================
 
 function initCountdown(t) {
     var container = document.getElementById('tdCountdown');

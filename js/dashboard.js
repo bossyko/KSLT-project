@@ -77,6 +77,12 @@
         linkSearch: 'Фамилияңызды жазыңыз',
         linkItsMe: 'Бул мен',
         linkNothing: 'Эч ким табылган жок',
+        cardFoundTitle: 'Балким, бул сиздин картыңыз',
+        cardFoundYes: 'Ооба, бул мен',
+        cardFoundNo: 'Жок, мен эмес',
+        cyrTitle: 'Атыңызды кириллица менен жазыңыз',
+        cyrText: 'Клубдун тизмелеринде аттар кириллица менен. Атыңызды профильде оңдоңуз — рейтингде туура көрүнөт.',
+        pointsShort: 'упай',
         linkPending: 'Өтүнүч жөнөтүлдү',
         linkPendingText: 'Клубдун менеджери ырастаганын күтүп жатабыз.',
         linkOther: 'Башка карта тандоо',
@@ -346,6 +352,12 @@
         linkSearch: 'Type your last name',
         linkItsMe: 'This is me',
         linkNothing: 'Nobody found',
+        cardFoundTitle: 'This may be your player card',
+        cardFoundYes: 'Yes, that is me',
+        cardFoundNo: 'No, not me',
+        cyrTitle: 'Write your name in Cyrillic',
+        cyrText: 'Club lists use Cyrillic names. Fix your name in the profile so it matches the rankings.',
+        pointsShort: 'pts',
         linkPending: 'Request sent',
         linkPendingText: 'Waiting for a club manager to confirm the card is yours.',
         linkOther: 'Pick another card',
@@ -615,6 +627,12 @@
         linkSearch: 'Введите свою фамилию',
         linkItsMe: 'Это я',
         linkNothing: 'Никого не нашли',
+        cardFoundTitle: 'Кажется, это ваша карточка',
+        cardFoundYes: 'Да, это я',
+        cardFoundNo: 'Нет, не я',
+        cyrTitle: 'Напишите имя по-русски',
+        cyrText: 'В списках клуба имена кириллицей. Поправьте имя в профиле — так вас найдут в рейтинге и в турнирах.',
+        pointsShort: 'очков',
         linkPending: 'Заявка отправлена',
         linkPendingText: 'Ждём, пока менеджер клуба подтвердит, что карточка ваша.',
         linkOther: 'Выбрать другую карточку',
@@ -1046,6 +1064,9 @@
         if (profile.player_id) {
             checkNewBadges(profile.player_id);
         }
+
+        // Карточка игрока: заводим или предлагаем свою, если её ещё нет
+        if (!profile.player_id) карточкаИгрока(profile);
 
         // Onboarding for first-time users
         showOnboarding(profile);
@@ -2087,6 +2108,100 @@
     // матчи видны всем, — поэтому выбор уходит заявкой, а привязывает
     // менеджер в админке.
 
+    /**
+     * Карточка игрока для того, кто только зарегистрировался.
+     *
+     * Спрашиваем у сервера: есть ли похожая карточка в клубе. Нашлась — не
+     * присваиваем молча, а показываем «кажется, это вы»: там чужой рейтинг и
+     * история, ошибиться нельзя. Не нашлась — сервер заводит новую, и человек
+     * сразу может записываться на турниры.
+     */
+    async function карточкаИгрока(profile) {
+        if (!client) return;
+        try {
+            var сессия = await client.auth.getSession();
+            if (!сессия.data.session) return;
+
+            var res = await fetch(SUPABASE_URL + '/functions/v1/ensure-player-card', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + сессия.data.session.access_token
+                },
+                body: JSON.stringify({})
+            });
+            var д = await res.json();
+
+            if (д.status === 'candidate' && д.candidate) {
+                предложитьКарточку(д.candidate);
+            } else if (д.status === 'created') {
+                profile.player_id = д.player_id;
+                // Имя латиницей: в списках клуба имена по-русски, попросим
+                // поправить — но мягко, запрещать нечего
+                if (д.latin) попроситьКириллицу();
+            }
+        } catch (e) {
+            console.warn('[KSLT] карточка игрока:', e.message);
+        }
+    }
+
+    /** «Кажется, это ваша карточка» — с рейтингом и очками, чтобы узнать себя. */
+    function предложитьКарточку(карточка) {
+        var box = document.getElementById('dbLinkCard');
+        if (!box) return;
+
+        var подпись = [карточка.category_id, карточка.points ? карточка.points + ' ' + L.pointsShort : '']
+            .filter(Boolean).join(' \u00B7 ');
+
+        box.innerHTML =
+            '<div class="db-link-card">' +
+                '<div class="db-link-title">' + L.cardFoundTitle + '</div>' +
+                '<div class="db-link-text"><b>' + escHtml(карточка.name) + '</b>' +
+                    (подпись ? ' \u00B7 ' + escHtml(подпись) : '') + '</div>' +
+                '<div class="db-link-actions">' +
+                    '<button class="db-link-take" id="dbCardYes">' + L.cardFoundYes + '</button>' +
+                    '<button class="db-link-other" id="dbCardNo">' + L.cardFoundNo + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.getElementById('dbCardYes').addEventListener('click', async function() {
+            var кн = this;
+            кн.disabled = true;
+            var сессия = await client.auth.getSession();
+            var res = await fetch(SUPABASE_URL + '/functions/v1/ensure-player-card', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + сессия.data.session.access_token
+                },
+                body: JSON.stringify({ confirm_player_id: карточка.id })
+            });
+            var д = await res.json();
+            if (д.ok) {
+                location.reload();
+            } else {
+                кн.disabled = false;
+            }
+        });
+
+        document.getElementById('dbCardNo').addEventListener('click', function() {
+            box.innerHTML = '';
+        });
+    }
+
+    /** Просьба написать имя по-русски — мягкая, с полем прямо в кабинете. */
+    function попроситьКириллицу() {
+        var box = document.getElementById('dbLinkCard');
+        if (!box) return;
+        box.innerHTML =
+            '<div class="db-link-card">' +
+                '<div class="db-link-title">' + L.cyrTitle + '</div>' +
+                '<div class="db-link-text">' + L.cyrText + '</div>' +
+            '</div>';
+    }
+
     async function нарисоватьПривязку(profile) {
         var box = document.getElementById('dbLinkCard');
         if (!box || !client) return;
@@ -2508,8 +2623,14 @@
             : (st === 'blocked' || st === 'rejected') ? L.regRefusedShort
             : st === 'waitlist' ? L.regWaitlist
             : (isEn ? 'Registered' : isKg ? 'Катталган' : 'Зарегистрирован');
-        var cls = (st === 'withdrawn' || st === 'blocked' || st === 'rejected')
-            ? ' db-tour-status-off' : '';
+
+        // Статус заявки один на весь сайт: тот же вид, что на карточке турнира
+        // и на его странице. Раньше кабинет красил по-своему, и лист ожидания
+        // здесь ничем не отличался от «Зарегистрирован»
+        var отказ = st === 'withdrawn' || st === 'blocked' || st === 'rejected';
+        var видСтатуса = отказ ? 'kslt-status-refused'
+            : (st === 'waitlist' || st === 'pending') ? 'kslt-status-wait'
+            : 'kslt-status-draw';
 
         var action = '';
         if (canWithdraw(item)) {
@@ -2523,7 +2644,8 @@
         return '<tr>' +
             '<td class="db-match-date">' + tourDate(item.tournament) + '</td>' +
             tourNameCell(item.tournament) +
-            '<td class="db-tour-status' + cls + '">' + label + '</td>' +
+            '<td class="db-tour-status"><span class="kslt-status ' + видСтатуса + '">' +
+                label + '</span></td>' +
             '<td style="text-align:right">' + action + '</td>' +
         '</tr>';
     }
@@ -4240,10 +4362,12 @@
         return st === 'registration_open' || st === 'registration_closed' || st === 'upcoming';
     }
 
-    // Записаться снова можно, пока регистрация открыта. Сама запись идёт
-    // обычным путём на странице турнира — там все проверки допуска
+    // Записаться снова можно только после своего снятия, пока регистрация
+    // открыта. После отказа менеджера — нельзя: заявку закрыл клуб, и вернуть
+    // её может только он. Иначе игрок давил бы кнопку без конца
     function canReenter(item) {
-        return item.reg && item.reg.status === 'withdrawn'
+        var st = item.reg && item.reg.status;
+        return st === 'withdrawn'
             && item.tournament && item.tournament.status === 'registration_open';
     }
 
@@ -4252,7 +4376,11 @@
     // и его снимает организатор. Правило «за 3 часа» и штраф — отдельная задача.
     function canWithdraw(item) {
         var reg = item.reg;
-        if (!reg || reg.status === 'withdrawn') return false;
+        // Заявки вне турнира снимать нечего: снялся сам, отказал менеджер или
+        // не пустили правила. Раньше у отклонённой висела живая кнопка «Снять
+        // заявку», и нажатие делало вид, что что-то происходит
+        if (!reg || reg.status === 'withdrawn' || reg.status === 'rejected' ||
+            reg.status === 'blocked') return false;
         // В парном турнире заявка одна на пару, и подаёт её капитан.
         // Напарник видит турнир, но снять пару с него не может
         if (reg.as_partner) return false;

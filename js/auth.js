@@ -826,7 +826,13 @@
             gender: gender ? gender.value : '',
             birth_day: birthDay ? parseInt(birthDay) : null,
             birth_month: birthMonth ? parseInt(birthMonth) : null,
-            birth_year: birthYear ? parseInt(birthYear) : null
+            birth_year: birthYear ? parseInt(birthYear) : null,
+            // Уровень игры: по нему считается допуск в парные турниры. Не
+            // указал — карточка заведётся без рейтинга, клуб проставит сам
+            ntrp: (function() {
+                var поле = document.getElementById('signup-ntrp');
+                return поле && поле.value ? Number(поле.value) : null;
+            })()
         };
 
         // Send OTP to email
@@ -864,7 +870,8 @@
                         gender: _otpFormData.gender,
                         birth_day: _otpFormData.birth_day,
                         birth_month: _otpFormData.birth_month,
-                        birth_year: _otpFormData.birth_year
+                        birth_year: _otpFormData.birth_year,
+                        ntrp: _otpFormData.ntrp
                     })
                 });
                 var data = await resp.json();

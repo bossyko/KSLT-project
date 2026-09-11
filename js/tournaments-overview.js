@@ -464,6 +464,10 @@
                 regLine: regLine,
                 image: t.image_url || t.image || '',
                 _startTime: t.start_time || null,
+                // Исходная запись: по ней собирается карточка с афишей сбоку —
+                // та же, что на главной. Ей нужны поля базы, а не наши подписи
+                _row: t,
+                _taken: regCounts[t.id] || 0,
                 _fromSupabase: true
             });
         });
@@ -519,7 +523,17 @@
 
         var html = '';
 
-        CATEGORIES.forEach(function(cat) {
+        // Разряды с живыми турнирами идут первыми: человек заходит сюда, чтобы
+        // записаться, и не должен пролистывать архив в поисках открытой
+        // регистрации. Внутри группы порядок разрядов прежний
+        var живой = function(ключ) {
+            return (grouped[ключ] || []).some(function(t) { return t.status !== 'past'; });
+        };
+        var порядок = CATEGORIES.slice().sort(function(a, b) {
+            return (живой(b.key) ? 1 : 0) - (живой(a.key) ? 1 : 0);
+        });
+
+        порядок.forEach(function(cat) {
             var items = grouped[cat.key] || [];
             // Пустую категорию не показываем вовсе. Пять блоков подряд с
             // надписью «турниров нет» говорят не о клубе, а о том, что
@@ -564,6 +578,41 @@
         initRegisterButtons();
     }
 
+
+    /**
+     * Окно парной заявки для кнопки в карточке. Данные турнира и имя игрока
+     * подтягиваем на месте: карточка знает только его номер.
+     */
+    async function открытьПарнуюЗаявку(btn) {
+        var client = window.supabaseClient || (typeof supabase !== 'undefined' && window.SUPABASE_URL
+            ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
+        if (!client || !window.KSLT_DOUBLES) return;
+
+        var сессия = await client.auth.getSession();
+        if (!сессия.data.session) {
+            if (window.KSLT_REG && window.KSLT_REG.предложитьВойти) {
+                window.KSLT_REG.предложитьВойти(isEn, isKg);
+            }
+            return;
+        }
+
+        var профиль = await client.from('profiles')
+            .select('full_name, player_id').eq('id', сессия.data.session.user.id).single();
+        var турнир = await client.from('tournaments')
+            .select('id, title, title_en, title_kg, format, gender, ntrp_combined_max').eq('id', btn.dataset.tid).single();
+        if (!турнир.data) return;
+
+        window.KSLT_DOUBLES.открыть({
+            client: client,
+            tournament: турнир.data,
+            playerId: профиль.data ? профиль.data.player_id : null,
+            playerName: профиль.data ? профиль.data.full_name : '',
+            onDone: function(info) {
+                if (info && info.created && window.KSLT_REG) window.KSLT_REG.markRegistered(client);
+            }
+        });
+    }
+
     // ---- Запись на турнир прямо из карточки ----
     // Решение принимает Edge Function, как и на остальных точках входа
     function initRegisterButtons() {
@@ -572,6 +621,13 @@
             if (!btn) return;
             e.preventDefault();
             e.stopPropagation();          // карточка кликабельна целиком
+
+            // Парный: открываем окно выбора напарника прямо здесь — уводить
+            // человека на страницу турнира ради одной кнопки незачем
+            if (btn.dataset.doubles) {
+                открытьПарнуюЗаявку(btn);
+                return;
+            }
 
             if (!window.KSLT_REG || !client) return;
 
@@ -604,61 +660,77 @@
      * только она; ничего, если не задано ничего — про деньги молчим, как и
      * про призовой фонд, которого нет.
      */
-    function feeDetail(t) {
-        var m = t.feeMember, g = t.feeGuest;
-        if (m == null && g == null) return '';
-        var value = (m != null && g != null && m !== g)
-            ? money(m) + ' / ' + money(g)
-            : money(m != null ? m : g);
-        var pair = (t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles') ? ' (' + L.perPair + ')' : '';
-        var title = (m != null && g != null && m !== g)
-            ? money(m) + ' ' + L.som + ' — ' + L.feeMember + ', ' + money(g) + ' ' + L.som + ' — ' + L.feeGuest + pair
-            : money(m != null ? m : g) + ' ' + L.som + pair;
-        return '<div class="to-featured-detail" title="' + title + '"><span class="to-label">' + L.fee + '</span>' +
-            '<span class="to-value to-fee">' + value + '</span></div>';
+    function renderFeatured(t, bgImage, catKey) {
+        // Разметку собирает общий модуль: страница только готовит данные.
+        // Раньше карточка была написана здесь заново и постепенно разошлась
+        // с такой же карточкой на страницах категорий
+        var F = window.KSLT_TFEATURED;
+        return F.карточка({
+            id: t.id,
+            href: tournamentPage + '?id=' + t.id,
+            name: t.name,
+            image: bgImage,
+            status: t.status,
+            statusText: t.statusText,
+            date: t.date,
+            genderLabel: t.genderLabel,
+            noRating: t.noRating,
+            location: t.location,
+            regLine: t.regLine,
+            format: t.format,
+            prize: t.prize,
+            участники: t.slotsStat || null,
+            взнос: взносДляКарточки(t),
+            регПодпись: isEn ? 'Reg' : (isKg ? 'Кат' : 'Рег'),
+            форматПодпись: L.format,
+            призПодпись: L.prize,
+            взносПодпись: L.fee,
+            _rawStatus: t._rawStatus,
+            _dateSort: t._dateSort,
+            _startTime: t._startTime,
+            _gender: t._gender,
+            _row: t._row,
+            _taken: t._taken,
+            // Такая же карточка, как на страницах категорий: афиша сбоку,
+            // справа даты, отсчёт и кнопка
+            боком: true
+        });
     }
 
-    function renderFeatured(t, bgImage, catKey) {
-        var linkHref = tournamentPage + '?id=' + t.id;
+    /** Взнос для карточки: сумма и расшифровка в подсказке. */
+    function взносДляКарточки(t) {
+        var m = t.feeMember, g = t.feeGuest;
+        if (m == null && g == null) return null;
+        var двойной = (m != null && g != null && m !== g);
+        var пара = (t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles') ? ' (' + L.perPair + ')' : '';
+        return {
+            value: двойной ? money(m) + ' / ' + money(g) : money(m != null ? m : g),
+            title: двойной
+                ? money(m) + ' ' + L.som + ' — ' + L.feeMember + ', ' + money(g) + ' ' + L.som + ' — ' + L.feeGuest + пара
+                : money(m != null ? m : g) + ' ' + L.som + пара
+        };
+    }
 
-        return '<div class="to-featured" data-href="' + linkHref + '">' +
-            (bgImage
-                ? '<div class="to-featured-bg"><img src="' + bgImage + '" alt="" loading="lazy"></div><div class="to-featured-overlay"></div>'
-                : '<div class="to-featured-overlay" style="background:var(--bg-card)"></div>') +
-            '<div class="to-featured-content">' +
-                '<div>' +
-                    '<span class="to-featured-date"><span class="to-day">' + t.date.day + '</span><span class="to-month">' + t.date.month + '</span></span>' +
-                    (t.genderLabel ? '<span class="to-gender-badge">' + t.genderLabel + '</span>' : '') +
-                    (t.noRating ? '<span class="to-norating-badge">' + L.noRating + '</span>' : '') +
-                '</div>' +
-                (t.status === 'past' ? '' : getCountdownHtml(t._dateSort, t._startTime)) +
-                '<span class="to-featured-status ' + t.status + '">' + t.statusText + '</span>' +
-                '<h3>' + t.name + '</h3>' +
-                '<div class="to-featured-meta">' +
-                    '<span>' + pinSvg + ' ' + t.location + '</span>' +
-                '</div>' +
-                '<div class="to-featured-details">' +
-                    (t.regLine ? '<div class="to-featured-detail"><span class="to-label">' + (isEn ? 'Reg' : (isKg ? 'Кат' : 'Рег')) + '</span><span class="to-value">' + t.regLine + '</span></div>' : '') +
-                    (t.format ? '<div class="to-featured-detail"><span class="to-label">' + L.format + '</span><span class="to-value">' + t.format + '</span></div>' : '') +
-                    (t.slotsStat ? '<div class="to-featured-detail"><span class="to-label">' + t.slotsStat.label + '</span><span class="to-value' + (t.slotsStat.tight ? ' to-slots-tight' : '') + '">' + t.slotsStat.value + '</span></div>' : '') +
-                    (t.prize ? '<div class="to-featured-detail"><span class="to-label">' + L.prize + '</span><span class="to-value prize">' + t.prize + '</span></div>' : '') +
-                    feeDetail(t) +
-                '</div>' +
-                '<div class="to-featured-actions">' +
-                    '<span class="to-featured-link">' + L.details + '</span>' +
-                    (t._rawStatus === 'registration_open'
-                        ? '<button class="btn-register to-register" data-tid="' + t.id + '">' + L.register + '</button>'
-                        : '') +
-                '</div>' +
-            '</div>' +
-        '</div>';
+
+    /** Парный или микст: заявку с двумя людьми собирают на странице турнира. */
+    function парный(t) {
+        return t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles';
     }
 
     function renderCompact(t, catKey, idx) {
         var compactHref = tournamentPage + '?id=' + t.id;
 
-        return '<div class="to-compact" data-cat="' + catKey + '" data-idx="' + idx + '" data-href="' + compactHref + '"' +
-            (t.image ? ' style="background-image:url(' + t.image + ')"' : '') + '>' +
+        // Живым турнирам афишу даём миниатюрой: пёстрая картинка фоном не
+        // даёт прочитать название. Завершённым фон оставляем, но глушим
+        var прошёл = t.status === 'past';
+        var афиша = t.image
+            ? (прошёл ? ' style="background-image:url(' + t.image + ')"'
+                      : ' style="--poster:url(' + t.image + ')"')
+            : '';
+
+        return '<div class="to-compact ' + (прошёл ? 'to-compact-past' : 'to-compact-thumb') +
+            '" data-cat="' + catKey + '" data-idx="' + idx + '" data-href="' + compactHref + '"' +
+            афиша + '>' +
             '<div class="to-compact-left">' +
                 '<div class="to-compact-date">' +
                     '<span class="to-day">' + t.date.day + '</span>' +
@@ -677,6 +749,15 @@
             '</div>' +
             '<div class="to-compact-right">' +
                 '<span class="to-compact-status ' + t.status + '">' + t.statusText + '</span>' +
+                // Запись прямо отсюда: раньше в боковой карточке был только
+                // статус «регистрация открыта», а записаться было негде —
+                // приходилось открывать турнир ради одной кнопки
+                (t._rawStatus === 'registration_open'
+                    ? '<button class="btn-register to-register to-compact-regbtn" data-tid="' + t.id + '"' +
+                        // В парном нужен напарник — заявку собирают на странице
+                        // турнира, отсюда только ведём туда
+                        (парный(t) ? ' data-doubles="1"' : '') + '>' + L.register + '</button>'
+                    : '') +
                 // Отсчёт у завершённого турнира показывал «ИДЁТ СЕЙЧАС»:
                 // дата в прошлом, а функция считает прошлое началом матча
                 (t.status === 'past' ? '' : getCountdownHtml(t._dateSort, t._startTime)) +
@@ -684,34 +765,16 @@
         '</div>';
     }
 
-    function renderCardGrid(catKey) {
-        var items = _grouped[catKey];
-        var bgImage = _bgImages[catKey] || '';
-        if (!items || !items.length) return;
-
-        var block = document.querySelector('.to-category-block[data-cat="' + catKey + '"]');
-        if (!block) return;
-
-        var grid = block.querySelector('.to-card-grid');
-        if (!grid) return;
-
-        var featuredBg = items[0].image || bgImage;
-        var html = renderFeatured(items[0], featuredBg, catKey);
-        if (items.length > 1) {
-            html += '<div class="to-side-stack">';
-            for (var i = 1; i < items.length; i++) {
-                html += renderCompact(items[i], catKey, i);
-            }
-            html += '</div>';
-        }
-        grid.innerHTML = html;
-    }
-
     function attachEvents() {
         var container = document.getElementById('overviewCategories');
         if (!container) return;
 
         container.addEventListener('click', function(e) {
+            // Кнопки внутри карточки живут своей жизнью: запись отправляет
+            // заявку, а карточка целиком ведёт на страницу турнира. Без этой
+            // проверки нажатие на «Регистрацию» просто уводило со страницы
+            if (e.target.closest('.btn-register, .btn-calendar')) return;
+
             // Any card with data-href → navigate
             var card = e.target.closest('.to-featured[data-href], .to-compact[data-href]');
             if (card) {

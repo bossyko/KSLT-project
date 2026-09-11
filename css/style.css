@@ -4207,11 +4207,53 @@ h2 {
     grid-template-columns: 1.1fr 1fr;
 }
 
+/* Текстовый блок тянется на всё, что осталось от афиши: иначе он держал свою
+   высоту, и «по центру» с «прижать вниз» ничего не меняли */
+.tournaments-grid > .tc:nth-child(-n+3):not(.tc-featured) .tc-body {
+    flex: 1 1 auto;
+}
+
+/* У завершённых в плитке кнопки нет, и снизу оставалась дыра в треть карточки.
+   Ставим текст по центру свободного места — так пустота делится поровну */
+.tournaments-grid > .tc:nth-child(-n+3):not(.tc-featured) .tc-body {
+    justify-content: center;
+}
+
+.tournaments-grid > .tc:nth-child(-n+3):not(.tc-featured):has(.tc-btn) .tc-body {
+    justify-content: flex-start;
+}
+
+/* В плитке места мало. Отсчёт важнее адреса — его оставляем, а строку с
+   кортом прячем: она есть на странице турнира */
+.tc:not(.tc-featured) .tc-meta span:not(.tc-slots) {
+    display: none;
+}
+
+.tc:not(.tc-featured) .tc-meta span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc:not(.tc-featured) .tc-btn {
+    margin-top: auto;
+}
+
+/* Состояние заявки — по центру карточки: это не действие, а сообщение о том,
+   что с тобой, и по краю оно читалось как недожатая кнопка */
+.tc .btn-register.is-registered,
+.tc .btn-register.is-pending-guest,
+.tc .btn-register.is-refused {
+    align-self: center;
+    text-align: center;
+}
+
 /* Первый ряд — одной высоты. Главная карточка была ниже соседних, и ряд
    выглядел ступенькой; а если её не ограничить, длинное описание растягивает
-   весь ряд втрое. Поэтому высота задана всем троим, а описание обрезается */
+   весь ряд втрое. Поэтому высота задана всем троим, а описание обрезается.
+   380 вместо 332: в плитке теперь есть кнопка записи, и она не помещалась */
 .tournaments-grid > .tc:nth-child(-n+3) {
-    height: 332px;
+    height: 380px;
 }
 
 .tc-featured .tc-desc {
@@ -4227,14 +4269,20 @@ h2 {
     overflow: hidden;
 }
 
+/* Вертикальные афиши в плитке высотой 132 превращались в узкую полоску:
+   вписанная целиком, картинка занимала треть ширины. Даём блоку больше
+   высоты — афиша читается, а горизонтальные ничего не теряют */
 .tc-image {
     position: relative;
-    height: 132px;
+    /* Высота ряда фиксированная: под афишу отдаём столько, чтобы ниже
+       поместились дата, отсчёт, название и кнопка записи */
+    height: 150px;
+    flex: 0 0 150px;
     overflow: hidden;
     background: #101010;
 }
 
-.tc-featured .tc-image { height: 100%; }
+.tc-featured .tc-image { height: 100%; flex: 1 1 auto; }
 
 /* Афиша вписывается целиком: вертикальную обрезать нельзя, на ней текст.
    Поля достраиваем размытой копией её же — получается фон в тех же цветах */
@@ -4357,24 +4405,43 @@ h2 {
 }
 
 /* Счётчик появляется за двое суток до старта и тикает каждую секунду */
+/* Завершённый турнир тусклее живого. Не прячем: под наведением возвращаем
+   полную яркость — в архиве смотрят итоги, сетку и фотографии */
+.tc-past {
+    opacity: 0.7;
+}
+
+.tc-past:hover {
+    opacity: 1;
+}
+
+/* Отсчёт красной плашкой — как на страницах турниров и категорий. Белым он
+   терялся среди прочего текста, хотя это самое срочное на карточке */
 .tc-countdown {
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     gap: 6px;
-    font-size: 0.78rem;
+    align-self: flex-start;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.9), rgba(185, 28, 28, 0.95));
+    border: 1px solid rgba(255, 100, 100, 0.3);
+    font-size: 0.75rem;
     font-weight: 700;
-    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: #fff;
 }
 
 .tc-cd-label {
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--text-dim);
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .tc-countdown small { font-weight: 500; opacity: 0.6; }
-.tc-cd-urgent { color: var(--accent); }
+.tc-cd-urgent { box-shadow: 0 0 0 2px rgba(255, 100, 100, 0.25); }
 
 /* Правило по номеру ребёнка сильнее правила по классу — иначе сообщение
    встаёт в колонку главной карточки и занимает половину ряда */
@@ -7257,3 +7324,176 @@ input:-internal-autofill-previewed {
 .site-notif-contact--tg:hover .site-notif-contact-icon { color: #2AABEE; }
 .site-notif-contact--ig:hover { border-color: #E1306C; }
 .site-notif-contact--ig:hover .site-notif-contact-icon { color: #E1306C; }
+
+/* ========================================
+   НОВОСТИ НА ГЛАВНОЙ
+   Три последние статьи. Данные — js/home-news.js,
+   обложки общие с разделом новостей
+   ======================================== */
+
+/* Отступы у раздела общие, как у остальных: своя ширина ломала ряд — карточки
+   уходили в край, а соседние разделы держали поля */
+
+
+.hn-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
+}
+
+.hn-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.hn-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+}
+
+.hn-img {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-elevated);
+    overflow: hidden;
+}
+
+.hn-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Наша обложка, а не присланная афиша: приглушаем, чтобы она читалась как
+   фон карточки, а не как случайная картинка */
+.hn-own-cover img {
+    opacity: 0.85;
+}
+
+.hn-cat {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(10, 10, 10, 0.75);
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.hn-body {
+    padding: var(--space-md) var(--space-lg) var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.hn-body h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hn-body p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hn-date {
+    margin-top: auto;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+}
+
+@media (max-width: 900px) {
+    .hn-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Подсказка под полем в форме входа: пояснение, а не ошибка */
+.auth-hint {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+
+/* ========================================
+   СОСТОЯНИЕ ЗАЯВКИ — ОДИН ВИД НА ВЕСЬ САЙТ
+   Карточка на главной, карточка в списках, страница турнира.
+   Правится здесь, отображается везде
+   ======================================== */
+
+.kslt-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.kslt-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+/* В сетке — свой лайм: человек играет */
+.kslt-status-draw {
+    background: rgba(204, 255, 0, 0.14);
+    border-color: rgba(204, 255, 0, 0.45);
+    color: var(--accent);
+}
+
+/* Очередь и рассмотрение — янтарный: место есть, но решение ещё не принято */
+.kslt-status-wait {
+    background: rgba(255, 179, 0, 0.14);
+    border-color: rgba(255, 179, 0, 0.45);
+    color: #ffb300;
+}
+
+/* Отказ — красный, молчать о нём нельзя */
+.kslt-status-refused {
+    background: rgba(244, 67, 54, 0.14);
+    border-color: rgba(244, 67, 54, 0.45);
+    color: #f44336;
+}
+
+/* На карточках состояние стоит вместо кнопки записи */
+.tc .kslt-status,
+.to-compact .kslt-status,
+.to-featured .kslt-status {
+    align-self: center;
+    text-align: center;
+}

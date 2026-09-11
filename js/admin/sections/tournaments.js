@@ -65,11 +65,15 @@
                 '<h2 class="ad-section-title">' + L.tournaments + '</h2>' +
             '</div>' +
             '<div class="ad-trn-stats-header">' +
+                // Считаем только сыгранное: предстоящий турнир может не
+                // состояться, и включать его в «всего» — обманывать себя
                 L.trnStatTotal + ': <span id="adTrnStatTotal">...</span>' +
                 '<span style="color:var(--text-dim);">|</span>' +
-                L.trnStatUpcoming + ': <span id="adTrnStatUpcoming">...</span>' +
+                L.trnStatRating + ': <span id="adTrnStatRating">...</span>' +
                 '<span style="color:var(--text-dim);">|</span>' +
-                L.trnStatCompleted + ': <span id="adTrnStatCompleted">...</span>' +
+                L.trnStatFriendly + ': <span id="adTrnStatFriendly">...</span>' +
+                '<span style="color:var(--text-dim);">|</span>' +
+                L.trnStatUpcoming + ': <span id="adTrnStatUpcoming">...</span>' +
                 '<span style="color:var(--text-dim);">|</span>' +
                 L.trnStatCancelled + ': <span id="adTrnStatCancelled">...</span>' +
                 // Черновики в общий счёт не идут: турнира ещё нет, его никто
@@ -91,27 +95,11 @@
                 '</div>' +
                 '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
-                        '<span class="ad-crt-stat-title">\u2640 ' + L.trnStatWomenSingles + '</span>' +
-                        '<span class="ad-crt-stat-total-num" id="adTrnTotalWS">...</span>' +
-                        '<span class="ad-stat-arrow">\u25BC</span>' +
-                    '</div>' +
-                    '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyWS"></div>' +
-                '</div>' +
-                '<div class="ad-crt-stat-card ad-stat-collapsible">' +
-                    '<div class="ad-crt-stat-header">' +
                         '<span class="ad-crt-stat-title">\u2642 ' + L.trnStatMenDoubles + '</span>' +
                         '<span class="ad-crt-stat-total-num" id="adTrnTotalMD">...</span>' +
                         '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +
                     '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyMD"></div>' +
-                '</div>' +
-                '<div class="ad-crt-stat-card ad-stat-collapsible">' +
-                    '<div class="ad-crt-stat-header">' +
-                        '<span class="ad-crt-stat-title">\u2640 ' + L.trnStatWomenDoubles + '</span>' +
-                        '<span class="ad-crt-stat-total-num" id="adTrnTotalWD">...</span>' +
-                        '<span class="ad-stat-arrow">\u25BC</span>' +
-                    '</div>' +
-                    '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyWD"></div>' +
                 '</div>' +
                 '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
@@ -121,12 +109,23 @@
                     '</div>' +
                     '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyMX"></div>' +
                 '</div>' +
-                '<div class="ad-crt-stat-card">' +
+                '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
-                        '<span class="ad-crt-stat-title">\uD83E\uDD1D ' + L.trnStatFriendly + '</span>' +
-                        '<span class="ad-crt-stat-total-num" id="adTrnTotalFR">...</span>' +
+                        '<span class="ad-crt-stat-title">\u2640 ' + L.trnStatWomenSingles + '</span>' +
+                        '<span class="ad-crt-stat-total-num" id="adTrnTotalWS">...</span>' +
+                        '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +
+                    '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyWS"></div>' +
                 '</div>' +
+                '<div class="ad-crt-stat-card ad-stat-collapsible">' +
+                    '<div class="ad-crt-stat-header">' +
+                        '<span class="ad-crt-stat-title">\u2640 ' + L.trnStatWomenDoubles + '</span>' +
+                        '<span class="ad-crt-stat-total-num" id="adTrnTotalWD">...</span>' +
+                        '<span class="ad-stat-arrow">\u25BC</span>' +
+                    '</div>' +
+                    '<div class="ad-crt-stat-body ad-stat-hidden" id="adTrnBodyWD"></div>' +
+                '</div>' +
+
             '</div>' +
             '<div class="ad-filter-row ad-filter-sticky" id="adTrnFilterRow">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adTrnSearch" placeholder="' + L.trnSearch + '">' +
@@ -152,16 +151,22 @@
                 '</div>' +
             '</div>';
 
-        // Collapsible stat cards
+        // Карточки статистики раскрываются все разом: разряды сравнивают между
+        // собой, а по одной раскрытой карточке сравнивать не с чем — соседние
+        // при этом стоят пустыми и высокими
         var statCards = container.querySelectorAll('.ad-stat-collapsible');
         for (var sci = 0; sci < statCards.length; sci++) {
             statCards[sci].addEventListener('click', function() {
-                var body = this.querySelector('.ad-crt-stat-body');
-                var arrow = this.querySelector('.ad-stat-arrow');
-                if (body) {
-                    var isHidden = body.classList.toggle('ad-stat-hidden');
-                    if (arrow) arrow.textContent = isHidden ? '\u25BC' : '\u25B2';
-                }
+                var своё = this.querySelector('.ad-crt-stat-body');
+                if (!своё) return;
+                var раскрыть = своё.classList.contains('ad-stat-hidden');
+                statCards.forEach(function(карточка) {
+                    var body = карточка.querySelector('.ad-crt-stat-body');
+                    var arrow = карточка.querySelector('.ad-stat-arrow');
+                    if (!body) return;
+                    body.classList.toggle('ad-stat-hidden', !раскрыть);
+                    if (arrow) arrow.textContent = раскрыть ? '\u25B2' : '\u25BC';
+                });
             });
         }
 
@@ -249,17 +254,26 @@
             // запись закрыта, идёт прямо сейчас
             upcoming++;
         });
-        var total = upcoming + completed + cancelled;
+        // «Всего» — сыгранные турниры. Предстоящие и отменённые стоят рядом
+        // своими числами, так что ничего не теряется
+        var total = completed;
+        var рейтинговых = 0, дружеских = 0;
+        trnAllData.forEach(function(t) {
+            if (t.status !== 'completed') return;
+            if (t.category_id === 'friendly') дружеских++; else рейтинговых++;
+        });
 
         var elTotal = document.getElementById('adTrnStatTotal');
         var elUp = document.getElementById('adTrnStatUpcoming');
-        var elComp = document.getElementById('adTrnStatCompleted');
         var elCanc = document.getElementById('adTrnStatCancelled');
         var elDrafts = document.getElementById('adTrnStatDrafts');
         var elDraftsWrap = document.getElementById('adTrnStatDraftsWrap');
+        var elRating = document.getElementById('adTrnStatRating');
+        var elFriendly = document.getElementById('adTrnStatFriendly');
         if (elTotal) elTotal.textContent = total;
+        if (elRating) elRating.textContent = рейтинговых;
+        if (elFriendly) elFriendly.textContent = дружеских;
         if (elUp) elUp.textContent = upcoming;
-        if (elComp) elComp.textContent = completed;
         if (elCanc) elCanc.textContent = cancelled;
         if (elDrafts) elDrafts.textContent = drafts;
         if (elDraftsWrap) elDraftsWrap.style.display = drafts > 0 ? '' : 'none';
@@ -308,9 +322,6 @@
             bodyEl.innerHTML = html;
         });
 
-        var friendlyTotal = trnAllData.filter(function(t) { return t.category_id === 'friendly'; }).length;
-        var elFR = document.getElementById('adTrnTotalFR');
-        if (elFR) elFR.textContent = friendlyTotal;
     }
 
     // ---- Tournament Column Header ----
@@ -458,8 +469,12 @@
                     '<td>' + (t.bracket_type ? '<button class="ad-btn ad-btn-sm ad-btn-secondary ad-brk-btn" data-brk-id="' + t.id + '">' + L.bracketTab + '</button>' : '') +
                         // Открыть турнир людям или убрать с глаз — решение
                         // менеджера, а не побочный итог сохранения формы
-                        ' <button class="ad-btn ad-btn-sm ad-btn-secondary ad-pub-btn" data-pub-id="' + t.id + '" data-pub-on="' + (t.published_at ? '1' : '') + '">' +
+                        ' <button class="ad-btn ad-btn-sm ad-btn-secondary ad-pub-btn" data-pub-id="' + t.id + '" data-pub-on="' + (t.published_at ? '1' : '') + '" title="' +
                         (t.published_at ? (isEn ? 'Unpublish' : 'Снять с публикации')
+                                        : (isEn ? 'Publish' : 'Опубликовать')) + '">' +
+                        // Коротко: «Снять с публикации» распирало колонку, и таблица
+                        // уезжала вбок. Полная подпись осталась подсказкой
+                        (t.published_at ? (isEn ? 'Unpublish' : 'Снять')
                                         : (isEn ? 'Publish' : 'Опубликовать')) + '</button>' +
                     '</td>' +
                 '</tr>';
@@ -506,7 +521,9 @@
             var brkBtn = e.target.closest('.ad-brk-btn');
             if (brkBtn) {
                 e.stopPropagation();
-                A.renderBracketManagement(brkBtn.dataset.brkId);
+                // Кнопка называется «Сетка» — на сетку и открываем. Раньше
+                // завершённый турнир уводил на «Очки», хотя жали другое
+                A.renderBracketManagement(brkBtn.dataset.brkId, 'bracket');
                 return;
             }
             if (e.target.closest('.ad-bulk-cell')) return;

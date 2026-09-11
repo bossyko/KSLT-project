@@ -57,14 +57,17 @@
     function оформитьШапку(category) {
         var подписи = {
             promasters: 'Pro-Masters', masters: 'Masters', tour: 'Tour',
-            challenger: 'Challengers', futures: 'Futures', friendly: isEn ? 'Friendly' : (isKg ? 'Достук' : 'Дружеские')
+            challenger: 'Challengers', futures: 'Futures', friendly: 'Friendly Weekend'
         };
         var имя = подписи[category] || category;
 
         var заголовок = document.getElementById('categoryTitle');
         if (заголовок) {
-            заголовок.textContent = isEn ? (имя + ' Tournaments')
-                : (isKg ? (имя + ' турнирлери') : ('Турниры ' + имя));
+            // «Friendly Weekend» — название самого разряда, как в админке и на
+            // карточках. «Турниры Дружеские» звучало переводом с чужого языка
+            заголовок.textContent = category === 'friendly' ? имя
+                : (isEn ? (имя + ' Tournaments')
+                    : (isKg ? (имя + ' турнирлери') : ('Турниры ' + имя)));
         }
 
         var фон = document.getElementById('heroBg');
@@ -307,6 +310,10 @@
                     regLine: regLine,
                     image: t.image_url || t.image || '',
                     _startTime: t.start_time || null,
+                    // Исходная запись для карточки с афишей сбоку: ей нужны
+                    // поля базы, а не наши готовые подписи
+                    _row: t,
+                    _taken: regCounts[t.id] || 0,
                     _fromSupabase: true
                 };
             });

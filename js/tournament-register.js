@@ -114,8 +114,39 @@
                 'Ваш NTRP выше максимального для турнира'),
             ntrp_combined_exceeded: pick('Combined NTRP of the pair exceeds the tournament limit',
                 'Жуптун жалпы NTRP көрсөткүчү чектен ашты',
-                'Суммарный NTRP пары превышает лимит турнира')
+                'Суммарный NTRP пары превышает лимит турнира'),
+            partner_taken: pick('This player is already in another pair of this tournament',
+                'Бул оюнчу мелдештин башка жубунда',
+                'Этот игрок уже в другой паре этого турнира'),
+            entry_rejected: pick('The club closed your entry for this tournament. To return, contact a manager',
+                'Клуб бул мелдешке арызыңызды жапты. Кайра кирүү үчүн менеджерге кайрылыңыз',
+                'Клуб закрыл вашу заявку на этот турнир. Чтобы вернуться, обратитесь к менеджеру'),
+            entry_not_active: pick('This entry is out of the tournament — there is no partner to change. Apply again while registration is open',
+                'Бул арыз мелдештен тышкары — өнөктөштү алмаштырууга болбойт. Каттоо ачык болсо, кайра арыз бериңиз',
+                'Заявка вне турнира — менять напарника не на чем. Подайте заявку заново, пока регистрация открыта')
         };
+
+        // Напарника заменили: заявка та же, место то же — говорим именно это,
+        // а не «вы уже подали заявку»
+        if (data && data.partner_changed) {
+            var гость = !!data.guest;
+            return {
+                tone: 'success',
+                icon: гость ? '\u23F3' : '\u2705',
+                title: pick('Partner changed', 'Өнөктөш алмаштырылды', 'Напарник заменён'),
+                text: гость
+                    ? pick('Your partner is a guest: the place is held, but the manager confirms the pair.',
+                           'Өнөктөшүңүз конок: орун сакталат, бирок жупту менеджер ырастайт.',
+                           'Напарник — гость: место за вами, но пару подтверждает менеджер.')
+                    : pick('Your place in the tournament stays.',
+                           'Мелдештеги орунуңуз сакталат.',
+                           'Ваше место в турнире сохраняется.'),
+                note: '',
+                short: гость
+                    ? pick('Under review', 'Каралууда', 'На рассмотрении')
+                    : pick('Partner changed', 'Өнөктөш алмаштырылды', 'Напарник заменён')
+            };
+        }
 
         // Заявка уже подана — показываем её текущий статус, а не общий отказ
         if (data && data.error === 'already_registered') {
@@ -248,15 +279,88 @@
     }
 
     /**
+     * Окно «войдите, чтобы записаться». Кнопка ведёт на страницу входа и
+     * возвращает обратно, чтобы человек не искал турнир заново.
+     */
+    function предложитьВойти(isEn, isKg) {
+        function pick(en, kg, ru) { return isEn ? en : (isKg ? kg : ru); }
+        injectStyles();
+
+        var old = document.querySelector('.trn-register-modal-overlay');
+        if (old) old.remove();
+
+        var путьВхода = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+        var вПапке = window.location.pathname.indexOf('/pages/') !== -1;
+        var адрес = (вПапке ? '' : 'pages/') + путьВхода +
+            '?return=' + encodeURIComponent(window.location.href);
+
+        var overlay = document.createElement('div');
+        overlay.className = 'trn-register-modal-overlay';
+        overlay.innerHTML =
+            '<div class="trn-register-modal">' +
+                '<button class="trn-register-modal-close">&times;</button>' +
+                '<div class="trn-register-modal-icon">\uD83D\uDD11</div>' +
+                '<h3 class="trn-register-modal-title">' +
+                    pick('Sign in to register', 'Катталуу үчүн кириңиз', 'Войдите, чтобы записаться') + '</h3>' +
+                '<p class="trn-register-modal-text">' +
+                    pick('Entries are accepted from registered players. It takes a minute.',
+                         'Арыздар катталган оюнчулардан кабыл алынат. Бир мүнөт талап кылынат.',
+                         'Заявки принимаем от зарегистрированных игроков. Это займёт минуту.') + '</p>' +
+                '<button class="trn-register-modal-btn">' +
+                    pick('Sign in / Sign up', 'Кирүү / Каттоо', 'Войти / Регистрация') + '</button>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(function() { overlay.classList.add('active'); });
+
+        function close() {
+            overlay.classList.remove('active');
+            setTimeout(function() { overlay.remove(); }, 200);
+        }
+        overlay.querySelector('.trn-register-modal-close').addEventListener('click', close);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+        overlay.querySelector('.trn-register-modal-btn').addEventListener('click', function() {
+            window.location.href = адрес;
+        });
+    }
+
+    /**
      * Подаёт заявку и показывает результат. Используется и карточкой, и страницей турнира.
      * @returns {Promise<Object>} info из resultText — вызывающий код может обновить кнопку
      */
+    /**
+     * Пара с гостем занимает место, но ждёт решения менеджера: клуб не знает
+     * ни его рейтинга, ни того, придёт ли он. Дописываем это в окно, иначе
+     * человек уверен, что уже играет.
+     */
+    function приписатьПроГостя(info, isEn, isKg) {
+        var текст = isEn
+            ? 'Your partner is a guest: the place is held, but the manager confirms the pair.'
+            : (isKg
+                ? 'Өнөктөшүңүз конок: орун сакталат, бирок жупту менеджер ырастайт.'
+                : 'Напарник — гость: место за вами, но пару подтверждает менеджер.');
+        info.note = info.note ? (info.note + ' ' + текст) : текст;
+        info.short = isEn ? 'Under review' : (isKg ? 'Каралууда' : 'На рассмотрении');
+        return info;
+    }
+
     async function submit(client, tournamentId, opts) {
         opts = opts || {};
         var isEn = !!opts.isEn;
         var isKg = !!opts.isKg;
+
+        // Не вошёл — предлагаем войти, а не отказываем. Раньше человек видел
+        // «Заявка не принята: Unauthorized» и не понимал, что делать
+        var сессия = await client.auth.getSession();
+        if (!сессия.data.session) {
+            предложитьВойти(isEn, isKg);
+            return { created: false, needAuth: true };
+        }
+
         var reg = await callRegister(client, tournamentId, opts.extra);
         var info = resultText(reg.data, isEn, isKg);
+        var сГостем = opts.extra && opts.extra.partner_external_name;
+        if (сГостем && !(reg.data && reg.data.error)) приписатьПроГостя(info, isEn, isKg);
         showModal(info, isEn, isKg);
         info.created = !(reg.data && reg.data.error && reg.data.error !== 'already_registered');
         return info;
@@ -353,32 +457,62 @@
             });
             if (ids.length === 0) return;
 
+            // Заявка бывает и на напарника: в паре её подаёт один за двоих,
+            // а состояние должны видеть оба
             var regs = await client.from('tournament_registrations')
-                .select('tournament_id, status')
-                .eq('player_id', playerId)
+                .select('tournament_id, status, partner_external_name, guest_confirmed')
+                .or('player_id.eq.' + playerId + ',partner_id.eq.' + playerId)
                 .in('tournament_id', ids);
 
             var byTournament = {};
             (regs.data || []).forEach(function(r) {
                 // Снятую заявку не показываем: игрок вправе записаться снова
-                if (r.status !== 'withdrawn') byTournament[r.tournament_id] = r.status;
+                if (r.status === 'withdrawn') return;
+                byTournament[r.tournament_id] = r;
             });
 
             var labels = {
-                approved: isEn ? 'You are entered' : (isKg ? 'Сиз катталдыңыз' : 'Вы записаны'),
+                approved: isEn ? 'You are in the draw' : (isKg ? 'Сиз негизги сеткадасыз' : 'Вы в основной сетке'),
+                draw: isEn ? 'You are in the draw' : (isKg ? 'Сиз негизги сеткадасыз' : 'Вы в основной сетке'),
                 pending: isEn ? 'Entry sent' : (isKg ? 'Арыз жөнөтүлдү' : 'Заявка подана'),
-                draw: isEn ? 'You are entered' : (isKg ? 'Сиз катталдыңыз' : 'Вы записаны'),
                 waitlist: isEn ? 'On the waiting list' : (isKg ? 'Күтүү тизмесинде' : 'В листе ожидания'),
                 rejected: isEn ? 'Entry declined' : (isKg ? 'Арыз четке кагылды' : 'Заявка отклонена'),
                 blocked: isEn ? 'Not admitted' : (isKg ? 'Уруксат жок' : 'Не допущен')
             };
+            var ждётГостя = isEn ? 'Entry under review' : (isKg ? 'Арыз каралууда' : 'Заявка на рассмотрении');
 
             btns.forEach(function(btn) {
-                var status = byTournament[idOf(btn)];
-                if (!status) return;
+                var заявка = byTournament[idOf(btn)];
+                if (!заявка) return;
                 btn.disabled = true;
-                btn.classList.add('is-registered');
-                btn.textContent = labels[status] || labels.approved;
+                // Вид состояния — общий на весь сайт, в style.css. Здесь только
+                // выбираем, какое оно: раньше цвета жили в трёх местах и
+                // расходились между карточкой и страницей турнира
+                btn.classList.remove('btn-register', 'to-register', 'tc-btn', 'to-compact-regbtn');
+                btn.classList.add('kslt-status');
+                // Пара с неподтверждённым гостем ждёт решения менеджера — место
+                // за ней держится, но говорить «вы в сетке» рано
+                var ждёт = заявка.partner_external_name && !заявка.guest_confirmed;
+                btn.textContent = ждёт ? ждётГостя : (labels[заявка.status] || labels.approved);
+
+                // Цвет по смыслу: в сетке — наш лайм, ждёт решения или стоит в
+                // очереди — янтарный, отказ — красный. Серым всё подряд читалось
+                // как «кнопка выключена», и человек не понимал, что с ним
+                if (заявка.status === 'rejected' || заявка.status === 'blocked') {
+                    btn.classList.add('kslt-status-refused');
+                } else if (ждёт || заявка.status === 'waitlist' || заявка.status === 'pending') {
+                    btn.classList.add('kslt-status-wait');
+                } else {
+                    btn.classList.add('kslt-status-draw');
+                }
+
+                // Строка мест рядом со статусом сбивала с толку: «лист ожидания»
+                // там про свободные места, а не про эту заявку
+                var карточка = btn.closest('.tc, .to-compact, .to-featured, .tournament-card');
+                if (карточка) {
+                    карточка.querySelectorAll('.tc-slots, .to-compact-slots, .to-slots-tight')
+                        .forEach(function(эл) { эл.style.display = 'none'; });
+                }
             });
         } catch (e) {
             console.warn('[KSLT] mark registered:', e.message);
@@ -387,6 +521,7 @@
 
     window.KSLT_REG = {
         call: callRegister,
+        предложитьВойти: предложитьВойти,
         markRegistered: markRegistered,
         resultText: resultText,
         showModal: showModal,

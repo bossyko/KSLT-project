@@ -644,9 +644,11 @@ body.ad-page {
     white-space: nowrap;
 }
 
+/* При наведении подсвечиваем нашим лаймом, а не серым: серый на тёмном
+   читается как белая рамка и выглядит чужим */
 .ad-btn:hover:not(.ad-btn-primary):not(.ad-btn-secondary):not(.ad-btn-danger):not(.ad-btn-warning) {
-    border-color: var(--text-secondary);
-    color: var(--text-primary);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .ad-btn-primary,
@@ -678,8 +680,8 @@ body.ad-page {
 }
 
 .ad-btn-secondary:hover {
-    border-color: var(--text-secondary);
-    color: var(--text-primary);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .ad-btn-danger {
@@ -2904,11 +2906,20 @@ select.ad-field-input {
 }
 
 /* Score input row */
+/* Строка сета по центру окна: подпись «Сет 1» держит свою ширину слева, но
+   сами поля стоят посередине — на них и смотрят */
 .ad-score-set-row {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     margin-bottom: 10px;
+}
+
+/* Подсветка поля счёта тоньше: широкое кольцо на маленьком поле выглядело
+   толще самого поля */
+.ad-score-input:focus {
+    box-shadow: 0 0 0 2px rgba(204, 255, 0, 0.14) !important;
 }
 
 .ad-score-input {
@@ -3609,11 +3620,23 @@ select.ad-field-input {
     margin-right: 4px;
 }
 
+/* Карточек пять, а колонок было четыре — пятая уезжала во второй ряд и
+   вставала не под первой. Раскладываем по месту: на широком экране все пять
+   в ряд, на узком переносятся слева направо без дыр */
+/* Три колонки: сверху мужские — одиночные, парные и смешанные, снизу женские.
+   Так разряды сравниваются по вертикали, а смешанные стоят особняком */
 .ad-trn-stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
     gap: 12px;
     margin-bottom: 18px;
+}
+
+@media (max-width: 900px) {
+    .ad-trn-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .ad-stat-collapsible {
@@ -3635,48 +3658,14 @@ select.ad-field-input {
     display: none !important;
 }
 
-.ad-trn-stats-grid .ad-crt-stat-card:nth-last-child(-n+2) {
-    text-align: center;
-    padding: 8px 16px;
-}
-
-.ad-trn-stats-grid .ad-crt-stat-card:nth-last-child(2) {
-    grid-column: 2 / 3;
-    justify-self: center;
-    width: 100%;
-}
-
-.ad-trn-stats-grid .ad-crt-stat-card:last-child {
-    grid-column: 3 / 4;
-    justify-self: center;
-    width: 100%;
-}
-
-.ad-trn-stats-grid .ad-crt-stat-card:nth-last-child(-n+2) .ad-crt-stat-header {
-    justify-content: center;
-    margin-bottom: 0;
-}
-
-@media (max-width: 992px) {
-    .ad-trn-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .ad-trn-stats-grid .ad-crt-stat-card:nth-last-child(2) {
-        grid-column: 1 / 2;
-    }
-    .ad-trn-stats-grid .ad-crt-stat-card:last-child {
-        grid-column: 2 / 3;
-    }
-}
+/* Прежняя раскладка прибивала две последние карточки к колонкам 2 и 3 —
+   тогда там стояли «смешанные» и «дружеские». Теперь порядок другой, и
+   женские карточки должны просто вставать под мужскими */
 
 @media (max-width: 768px) {
     .ad-trn-stats-grid {
         grid-template-columns: 1fr;
         gap: 8px;
-    }
-    .ad-trn-stats-grid .ad-crt-stat-card:nth-last-child(2),
-    .ad-trn-stats-grid .ad-crt-stat-card:last-child {
-        grid-column: auto;
     }
 }
 
@@ -3800,29 +3789,49 @@ select.ad-field-input {
     border-bottom: 2px solid rgba(204, 255, 0, 0.2);
 }
 
+/* Раздача ширин долями резала содержимое: «Корт 1» превращался в «Корт», а
+   «Готовьтесь» — в «отовьтесь». Теперь ширину диктует само содержимое, а
+   служебным колонкам заданы минимумы. Пары ужимаются последними */
 .ad-sched-table {
-    table-layout: fixed;
+    table-layout: auto;
     width: 100%;
 }
 
 .ad-sched-table th,
 .ad-sched-table td {
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    /* Отступы общей таблицы здесь слишком щедрые: строка широкая, и при
+       стопроцентном масштабе она уезжала вбок */
+    padding: 8px 6px;
 }
 
 /* Девятый столбец — кнопки зова. Прежние доли складывались ровно в сто
    процентов, и на кнопки места не оставалось: столбец был, а ширины у него нет */
-.ad-sched-table .sched-num    { width: 4%; text-align: center; white-space: nowrap; overflow: visible; }
-.ad-sched-table .sched-time   { width: 8%; }
-.ad-sched-table .sched-round  { width: 9%; }
-.ad-sched-table .sched-p      { width: 18%; }
-.ad-sched-table .sched-vs     { width: 3%; text-align: center; padding-left: 0; padding-right: 0; color: var(--text-dim); }
-.ad-sched-table .sched-court  { width: 8%; }
-.ad-sched-table .sched-status { width: 13%; }
-.ad-sched-table .sched-call   { width: 19%; }
+/* Служебным колонкам — минимум по содержимому. Без него при гибкой раскладке
+   они схлопывались, и «09:00» превращалось в «09:», а «Корт 1» — в «К» */
+.ad-sched-table .sched-num    { width: 1%; min-width: 32px; text-align: center; }
+.ad-sched-table .sched-time   { width: 1%; min-width: 76px; }
+.ad-sched-table .sched-round  { width: 1%; min-width: 74px; }
+.ad-sched-table .sched-vs     { width: 1%; text-align: center; padding-left: 0; padding-right: 0; color: var(--text-dim); }
+.ad-sched-table .sched-court  { width: 1%; min-width: 84px; }
+.ad-sched-table .sched-status { width: 1%; }
+.ad-sched-table .sched-call   { width: 1%; }
+
+/* Пары забирают всё оставшееся место и ужимаются первыми — длинные ФИО
+   лучше обрезать, чем ломать всю строку */
+.ad-sched-table .sched-p {
+    width: 50%;
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .ad-sched-table th { text-align: center; }
+
+/* Узкое окно — таблица едет вбок, а не крошится */
+.ad-sched-wrap {
+    overflow-x: auto;
+}
 
 /* Поля и переключатель — одного роста с кнопками «Готовьтесь» и «На корт»:
    строка читается как один ряд, а не как лесенка */
@@ -3838,9 +3847,11 @@ select.ad-field-input {
     box-sizing: border-box;
 }
 
-.ad-sched-time   { width: 100%; }
+/* Поля держат свой размер сами: при гибкой таблице «сто процентов» означало
+   «сколько дадут», а давали мало */
+.ad-sched-time   { width: 66px; }
 .ad-sched-player { width: 100%; }
-.ad-sched-court  { width: 100%; }
+.ad-sched-court  { width: 78px; }
 
 .ad-sched-time:focus,
 .ad-sched-player:focus,
@@ -5377,7 +5388,7 @@ select.ad-field-input {
 
 .ad-sched-call {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     justify-content: flex-end;
     white-space: nowrap;
 }
@@ -5406,6 +5417,13 @@ select.ad-field-input {
     color: var(--text-dim);
 }
 
+/* В расписании кнопок много, а строка одна — держим их компактными, иначе
+   таблица уезжает вбок */
+.ad-sched-call .ad-btn-sm {
+    padding: 6px 9px;
+    font-size: 0.72rem;
+}
+
 /* Уже отправляли: кнопка тише, уже и подписана временем */
 .ad-sched-call .ad-call-done {
     padding: 6px 10px;
@@ -5415,6 +5433,15 @@ select.ad-field-input {
 
 .ad-sched-call .ad-call-done:disabled {
     cursor: default;
+}
+
+/* Сыгранные запуски тускнеют, но остаются читаемыми */
+.ad-sched-row-done td {
+    opacity: 0.45;
+}
+
+.ad-sched-row-done:hover td {
+    opacity: 0.75;
 }
 
 .ad-sched-row-live td {
@@ -5428,6 +5455,159 @@ select.ad-field-input {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border-subtle);
     color: var(--text-primary);
+}
+
+/* Список турниров: кнопки действий в один ряд, а название переносится по
+   словам. Жёсткую ширину названию не задаём — от неё таблица переставала
+   помещаться и уезжала вбок */
+/* Кнопки действий — в два ряда: так колонка вдвое у́же, а освободившееся
+   место достаётся названию турнира, ради которого в список и заходят */
+#adTrnTable td:last-child {
+    white-space: nowrap;
+    width: 1%;
+}
+
+#adTrnTable td:last-child .ad-btn {
+    display: block;
+    width: 100%;
+    margin: 0 0 4px;
+}
+
+#adTrnTable td:last-child .ad-btn:last-child {
+    margin-bottom: 0;
+}
+
+/* При стопроцентном масштабе таблица не помещалась и уезжала вбок. Сжимаем
+   то, что занимает место зря: отступы, разряд и даты */
+#adTrnTable th,
+#adTrnTable td {
+    padding: 9px 8px;
+}
+
+#adTrnTable .ad-cat-badge,
+#adTrnTable .ad-status-badge {
+    white-space: nowrap;
+    font-size: 0.68rem;
+    padding: 3px 8px;
+}
+
+#adTrnTable .ad-btn-sm {
+    padding: 5px 10px;
+    font-size: 0.72rem;
+}
+
+/* Новости: заголовку — всё свободное место, служебным колонкам — минимум.
+   Раньше заголовок ломался на три строки, а числа занимали половину ширины */
+#adNewsTable td:nth-child(3) {
+    white-space: normal;
+}
+
+#adNewsTable th:nth-child(n+5),
+#adNewsTable td:nth-child(n+5) {
+    width: 1%;
+    white-space: nowrap;
+}
+
+/* Кольцо фокуса у кнопок админки. Браузер рисует своё — синее в строке,
+   белое в окнах, — и оно выбивается из оформления. Мыши кольцо не нужно,
+   клавиатуре нужно: оставляем его только для неё и в нашем цвете */
+.ad-btn:focus,
+.ad-reg-act:focus,
+.ad-btn-icon:focus {
+    outline: none;
+}
+
+.ad-btn:focus-visible,
+.ad-reg-act:focus-visible,
+.ad-btn-icon:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Окно-предупреждение: заголовок красный, а не лаймовый — лайм в админке
+   означает «всё хорошо, жми», и на отказе он сбивает с толку */
+.ad-confirm-warn .ad-confirm-title {
+    color: #f44336;
+}
+
+.ad-confirm-warn {
+    border-color: rgba(244, 67, 54, 0.35);
+}
+
+/* Окно «Кого заменить?»: игроки рядом, пара отдельной строкой снизу */
+.ad-replace-who {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.ad-replace-who-row {
+    display: flex;
+    gap: 14px;
+}
+
+/* Имена длинные, и без воздуха текст упирался в края кнопки */
+.ad-replace-who .ad-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px 22px;
+    line-height: 1.25;
+}
+
+.ad-replace-who-row .ad-btn {
+    flex: 1;
+    min-width: 0;
+}
+
+/* «Пара» — не на всю ширину и по центру: это отдельный выбор, а не главное
+   действие, и растянутая кнопка забирала всё внимание */
+.ad-replace-who > .ad-btn {
+    align-self: center;
+    min-width: 180px;
+}
+
+/* Посев в заявках. Родной список рисуется белым прямоугольником и выбивается
+   из тёмной таблицы — оформляем как остальные поля админки */
+.ad-reg-seed {
+    width: 60px;
+    padding: 5px 8px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    text-align-last: center;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+/* Список раскрывается системным окном — там цвет наш не применяется,
+   поэтому пункты держим читаемыми на тёмном */
+.ad-reg-seed option {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.ad-reg-seed:hover:not(:disabled) {
+    border-color: var(--accent);
+}
+
+.ad-reg-seed:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(204, 255, 0, 0.15);
+}
+
+.ad-reg-seed:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
 /* Действия в строке заявки — словами, а не значками. Отдельный класс:
@@ -5495,9 +5675,9 @@ select.ad-field-input {
 }
 
 .ad-sched-switch button {
-    padding: 6px 12px;
+    padding: 6px 9px;
     white-space: nowrap;
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     font-weight: 600;
     border: none;
     background: transparent;

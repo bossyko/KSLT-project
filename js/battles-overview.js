@@ -566,9 +566,15 @@
             ? '<span class="bo-strip-badge bo-strip-done">' + L.completedBadge + '</span>'
             : '<span class="bo-strip-badge bo-strip-live">' + L.voteBadge + '</span>';
 
-        var bg = b.banner_url ? ' style="background-image:url(' + esc(b.banner_url) + ')"' : '';
+        // Так же, как в турнирах: у живого баттла баннер миниатюрой, у
+        // завершённого — фоном под сильным затемнением
+        var bg = b.banner_url
+            ? (isCompleted ? ' style="background-image:url(' + esc(b.banner_url) + ')"'
+                           : ' style="--poster:url(' + esc(b.banner_url) + ')"')
+            : '';
 
-        return '<a class="to-compact bo-strip' + (isCompleted ? ' bo-strip-past' : '') + '" href="' +
+        return '<a class="to-compact ' + (isCompleted ? 'to-compact-past' : 'to-compact-thumb') +
+            ' bo-strip' + (isCompleted ? ' bo-strip-past' : '') + '" href="' +
                 detailUrl(b.id) + '"' + bg + '>' +
             '<div class="to-compact-left"><div class="to-compact-date">' +
                 '<span class="to-day">' + day + '</span>' +

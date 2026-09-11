@@ -450,6 +450,190 @@
 
     // ---- Replace Player Modal ----
     // target: 'player' (main) or 'partner' (doubles partner)
+    /**
+     * Привязать поиск игрока к паре «поле ввода — список результатов».
+     *
+     * Тот же поиск нужен в трёх окнах: добавить партнёра, заменить одного,
+     * заменить пару целиком. Раньше он был написан заново в каждом.
+     */
+    function привязатьПоиск(поле, список, скрытое, занятые) {
+        if (!поле) return;
+        var таймер;
+        поле.addEventListener('input', function() {
+            clearTimeout(таймер);
+            var q = поле.value.trim();
+            if (скрытое) скрытое.value = '';
+            if (q.length < 2) { список.innerHTML = ''; return; }
+
+            таймер = setTimeout(async function() {
+                var res = await A.client.from('players')
+                    .select('id, name, name_en, gender, ntrp_singles, ntrp_doubles')
+                    .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
+                    .limit(10);
+                var найдены = (res.data || []).filter(function(p) { return !(занятые && занятые[p.id]); });
+                if (!найдены.length) {
+                    список.innerHTML = '<div style="padding:8px;color:var(--text-dim);font-size:0.85rem;">' +
+                        (isEn ? 'No players found' : 'Игроков не найдено') + '</div>';
+                    return;
+                }
+                var html = '';
+                найдены.forEach(function(p) {
+                    var имя = isEn ? (p.name_en || p.name) : p.name;
+                    var пол = p.gender === 'men' ? '\u2642' : (p.gender === 'women' ? '\u2640' : '');
+                    html += '<div class="ad-partner-search-item" data-player-id="' + p.id + '" ' +
+                        'data-player-name="' + A.esc(имя) + '" ' +
+                        'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.9rem;' +
+                        'display:flex;justify-content:space-between;align-items:center;">' +
+                        '<span>' + A.esc(имя) + ' ' + пол + '</span>' +
+                        (ntrpПары(p) ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + ntrpПары(p) + '</span>' : '') +
+                    '</div>';
+                });
+                список.innerHTML = html;
+
+                список.querySelectorAll('.ad-partner-search-item').forEach(function(строка) {
+                    строка.addEventListener('click', function() {
+                        if (скрытое) скрытое.value = строка.dataset.playerId;
+                        поле.value = строка.dataset.playerName;
+                        список.innerHTML = '';
+                    });
+                });
+            }, 300);
+        });
+    }
+
+    /**
+     * Записать замену в историю турнира.
+     *
+     * Нужна админке: через неделю никто не вспомнит, почему в группе играл
+     * человек, которого нет в первоначальных заявках. Игрокам не показываем.
+     */
+    async function записатьЗамену(tournamentId, regId, сторона, прежний, новый, имяПрежнего, имяНового) {
+        try {
+            var сессия = await A.client.auth.getSession();
+            await A.client.from('registration_changes').insert({
+                tournament_id: tournamentId,
+                registration_id: regId,
+                side: сторона,
+                old_player_id: прежний || null,
+                new_player_id: новый || null,
+                old_name: имяПрежнего || null,
+                new_name: имяНового || null,
+                changed_by: сессия.data.session ? сессия.data.session.user.id : null
+            });
+        } catch (e) {
+            console.warn('[KSLT] замену не записали в историю:', e.message);
+        }
+    }
+
+    /**
+     * Сказать людям о замене: новому — что он заявлен, снятому — что его
+     * заменили, напарнику — с кем он теперь играет.
+     *
+     * Ошибку не показываем окном: замена уже прошла, и падать из-за
+     * недошедшего уведомления неправильно — пишем в консоль.
+     */
+    async function сообщитьОЗамене(tournamentId, regId, прежний, новый, имяГостя) {
+        try {
+            var сессия = await A.client.auth.getSession();
+            await fetch(SUPABASE_URL + '/functions/v1/match-notify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + (сессия.data.session ? сессия.data.session.access_token : '')
+                },
+                body: JSON.stringify({
+                    replacement: {
+                        tournament_id: tournamentId,
+                        registration_id: regId,
+                        old_player_id: прежний || null,
+                        new_player_id: новый || null,
+                        new_name: имяГостя || null
+                    }
+                })
+            });
+        } catch (e) {
+            console.warn('[KSLT] уведомление о замене не ушло:', e.message);
+        }
+    }
+
+    /**
+     * Сказать игроку и его напарнику, что менеджер тронул их заявку.
+     *
+     * Без этого человек заходил на страницу турнира и видел прежнее
+     * состояние: сняли с сетки — а он до последнего собирался играть.
+     *
+     * Событие: waitlist | draw | rejected | withdrawn | guest_ok | guest_removed.
+     * Уведомление не должно ломать саму операцию — она уже прошла, поэтому
+     * ошибку пишем только в консоль.
+     */
+    async function сообщитьОЗаявке(regId, событие) {
+        try {
+            var сессия = await A.client.auth.getSession();
+            await fetch(SUPABASE_URL + '/functions/v1/match-notify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + (сессия.data.session ? сессия.data.session.access_token : '')
+                },
+                body: JSON.stringify({ entry: { registration_id: regId, event: событие } })
+            });
+        } catch (e) {
+            console.warn('[KSLT] уведомление о заявке не ушло:', e.message);
+        }
+    }
+
+    /** То же для списка заявок сразу — например, когда поднялась вся очередь. */
+    async function сообщитьОЗаявках(ids, событие) {
+        for (var i = 0; i < ids.length; i++) await сообщитьОЗаявке(ids[i], событие);
+    }
+
+    /** Есть ли ещё место в основной сетке. Без предела мест считаем, что есть. */
+    async function естьМесто(tournamentId) {
+        var т = await A.client.from('tournaments')
+            .select('max_participants').eq('id', tournamentId).single();
+        var всего = (т.data && т.data.max_participants) || 0;
+        if (!всего) return true;
+
+        var занято = await A.client.from('tournament_registrations')
+            .select('id', { count: 'exact', head: true })
+            .eq('tournament_id', tournamentId)
+            .in('status', ['approved', 'pending', 'draw']);
+        return (занято.count || 0) < всего;
+    }
+
+    /**
+     * Поднять первых из листа ожидания, пока в основной сетке есть места.
+     *
+     * Очередь честная — по времени подачи. Menеджер может протолкнуть кого-то
+     * руками, но обычный ход событий не должен требовать его внимания.
+     */
+    async function поднятьИзОчереди(tournamentId) {
+        var т = await A.client.from('tournaments')
+            .select('max_participants').eq('id', tournamentId).single();
+        var всего = (т.data && т.data.max_participants) || 0;
+        if (!всего) return;
+
+        var занято = await A.client.from('tournament_registrations')
+            .select('id', { count: 'exact', head: true })
+            .eq('tournament_id', tournamentId)
+            .in('status', ['approved', 'pending', 'draw']);
+        var свободно = всего - (занято.count || 0);
+        if (свободно <= 0) return;
+
+        var очередь = await A.client.from('tournament_registrations')
+            .select('id').eq('tournament_id', tournamentId).eq('status', 'waitlist')
+            .order('registered_at', { ascending: true }).limit(свободно);
+        var ids = (очередь.data || []).map(function(r) { return r.id; });
+        if (!ids.length) return;
+
+        await A.client.from('tournament_registrations')
+            .update({ status: 'approved' }).in('id', ids);
+
+        await сообщитьОЗаявках(ids, 'draw');
+    }
+
     /** Имя стороны заявки: игрок с карточкой, гость или общее слово. */
     function имяСтороны(reg, сторона, playersMap) {
         playersMap = playersMap || {};
@@ -464,7 +648,118 @@
         return reg.external_name || L.regReplaceMain;
     }
 
-    function openReplaceModal(regId, target, tournament, tournamentId, registrations) {
+    /**
+     * Заменить пару целиком — одним окном, а не двумя заходами.
+     *
+     * Место в сетке принадлежит заявке: группа, посев и позиция остаются, а на
+     * корт выходят другие люди. В матчах переписываем первого номера — именно
+     * он там записан.
+     */
+    function openReplacePairModal(regId, tournament, tournamentId, registrations, playersMap) {
+        var reg = registrations.find(function(r) { return r.id === regId; });
+        if (!reg) return;
+
+        var занятые = {};
+        registrations.forEach(function(r) {
+            if (r.id === regId) return;
+            if (r.status === 'withdrawn' || r.status === 'rejected') return;
+            if (r.player_id) занятые[r.player_id] = true;
+            if (r.partner_id) занятые[r.partner_id] = true;
+        });
+
+        var поле = function(подпись, id) {
+            return '<div class="ad-field">' +
+                '<label class="ad-field-label">' + подпись + '</label>' +
+                '<input type="text" class="ad-field-input" id="' + id + 'Search" placeholder="' +
+                    (isEn ? 'Type name...' : 'Введите имя...') + '" autocomplete="off">' +
+                '<div id="' + id + 'Results" style="max-height:150px;overflow-y:auto;margin-top:4px;"></div>' +
+                '<input type="hidden" id="' + id + 'Id" value="">' +
+            '</div>';
+        };
+
+        var html =
+            '<div style="display:flex;flex-direction:column;gap:14px;min-width:340px;">' +
+                '<div style="color:var(--text-secondary);font-size:0.85rem;">' +
+                    L.regReplacePairHint + '</div>' +
+                поле(L.regReplaceMain, 'adPairFirst') +
+                поле(L.regReplacePartner, 'adPairSecond') +
+            '</div>';
+
+        A.showConfirm(L.regReplacePair, html, async function() {
+            var первый = document.getElementById('adPairFirstId').value.trim();
+            var второй = document.getElementById('adPairSecondId').value.trim();
+            if (!первый || !второй) {
+                A.showToast(L.regReplacePairNeedBoth, 'error');
+                return;
+            }
+            if (первый === второй) {
+                A.showToast(L.regReplacePairSame, 'error');
+                return;
+            }
+
+            // Сыгранную пару не меняем: её счета принадлежат тем, кто играл
+            var прежний = reg.player_id;
+            var вМатчах = 0;
+            if (прежний) {
+                var мРес = await A.client.from('matches')
+                    .select('id, status, score')
+                    .eq('tournament_id', tournamentId)
+                    .or('player1_id.eq.' + прежний + ',player2_id.eq.' + прежний);
+                var мои = мРес.data || [];
+                if (мои.some(function(m) { return m.status === 'completed' && m.score && m.score !== 'BYE'; })) {
+                    A.showToast(L.regReplacePlayed, 'error');
+                    return;
+                }
+                вМатчах = мои.length;
+            }
+
+            var правка = await A.client.from('tournament_registrations').update({
+                player_id: первый,
+                is_external: false,
+                external_name: null,
+                external_country: null,
+                external_ntrp: null,
+                partner_id: второй,
+                partner_external_name: null,
+                partner_external_ntrp: null,
+                partner_gender: null
+            }).eq('id', regId);
+            if (правка.error) { A.showToast(правка.error.message, 'error'); return; }
+
+            if (вМатчах && прежний) {
+                var м1 = await A.client.from('matches').update({ player1_id: первый })
+                    .eq('tournament_id', tournamentId).eq('player1_id', прежний);
+                var м2 = await A.client.from('matches').update({ player2_id: первый })
+                    .eq('tournament_id', tournamentId).eq('player2_id', прежний);
+                if (м1.error || м2.error) {
+                    A.showToast((м1.error || м2.error).message, 'error');
+                    return;
+                }
+            }
+
+            A.showToast(L.regReplacePairDone, 'success');
+            записатьЗамену(tournamentId, regId, 'pair', прежний, первый,
+                имяСтороны(reg, 'player', playersMap), null);
+            if (reg.partner_id) {
+                записатьЗамену(tournamentId, regId, 'partner', reg.partner_id, второй,
+                    имяСтороны(reg, 'partner', playersMap), null);
+            }
+            сообщитьОЗамене(tournamentId, regId, прежний, первый, null);
+            if (reg.partner_id) сообщитьОЗамене(tournamentId, regId, reg.partner_id, второй, null);
+            renderBracketManagement(tournamentId, 'registrations');
+        }, isEn ? 'Save' : 'Сохранить');
+
+        setTimeout(function() {
+            привязатьПоиск(document.getElementById('adPairFirstSearch'),
+                           document.getElementById('adPairFirstResults'),
+                           document.getElementById('adPairFirstId'), занятые);
+            привязатьПоиск(document.getElementById('adPairSecondSearch'),
+                           document.getElementById('adPairSecondResults'),
+                           document.getElementById('adPairSecondId'), занятые);
+        }, 100);
+    }
+
+    function openReplaceModal(regId, target, tournament, tournamentId, registrations, playersMap) {
         var reg = registrations.find(function(r) { return r.id === regId; });
         if (!reg) return;
 
@@ -544,9 +839,55 @@
                 }
             }
 
+            // ---- Замена на месте, когда сетка уже есть ----
+            //
+            // Место в сетке принадлежит заявке, а не человеку: группа, посев и
+            // позиция остаются. Но в матчах записан игрок, поэтому его надо
+            // переписать и там, иначе в таблице группы останется прежнее имя.
+            //
+            // Меняем только пока эта сторона не сыграла: у сыгранных матчей
+            // счёт принадлежит тем, кто играл, и передавать его новым нельзя.
+            var прежний = target === 'partner' ? reg.partner_id : reg.player_id;
+            var новый = selectedId || null;
+            var вМатчах = 0;
+
+            if (прежний && target !== 'partner') {
+                var мРес = await A.client.from('matches')
+                    .select('id, status, score')
+                    .eq('tournament_id', tournamentId)
+                    .or('player1_id.eq.' + прежний + ',player2_id.eq.' + прежний);
+                var мои = мРес.data || [];
+                var сыграно = мои.filter(function(m) {
+                    return m.status === 'completed' && m.score && m.score !== 'BYE';
+                });
+                if (сыграно.length) {
+                    A.showToast(L.regReplacePlayed, 'error');
+                    return;
+                }
+                вМатчах = мои.length;
+            }
+
             var upRes = await A.client.from('tournament_registrations').update(updateData).eq('id', regId);
             if (upRes.error) { A.showToast(upRes.error.message, 'error'); return; }
+
+            // Первый номер стоит в матчах — переписываем обе стороны
+            if (вМатчах && прежний && новый) {
+                var м1 = await A.client.from('matches').update({ player1_id: новый })
+                    .eq('tournament_id', tournamentId).eq('player1_id', прежний);
+                var м2 = await A.client.from('matches').update({ player2_id: новый })
+                    .eq('tournament_id', tournamentId).eq('player2_id', прежний);
+                if (м1.error || м2.error) {
+                    A.showToast((м1.error || м2.error).message, 'error');
+                    return;
+                }
+            }
+
             A.showToast(isEn ? 'Player replaced' : 'Игрок заменён', 'success');
+            записатьЗамену(tournamentId, regId, target === 'partner' ? 'partner' : 'player',
+                прежний, новый,
+                прежний ? имяСтороны(reg, target === 'partner' ? 'partner' : 'player', playersMap) : null,
+                новый ? null : extName);
+            сообщитьОЗамене(tournamentId, regId, прежний, новый, extName);
             renderBracketManagement(tournamentId, 'registrations');
         }, isEn ? 'Save' : 'Сохранить');
 
@@ -698,6 +1039,28 @@
 
     // Friendly — турниры для практики: рейтинговые очки не начисляются никогда,
     // какой бы уровень турнира админ ни выставил
+    /**
+     * Сколько сеяных нужно турниру.
+     *
+     * В групповых — по числу групп: сеяные разводятся по одному в группу.
+     * В олимпийке — четверть сетки, как в правилах ATP и WTA: 8 участников —
+     * двое сеяных, 16 — четверо, 32 — восемь.
+     */
+    function нормаСеяных(tournament) {
+        if (!tournament) return 0;
+        var тип = tournament.bracket_type;
+        if (тип === 'round_robin' || тип === 'group_league') {
+            return tournament.group_count || 2;
+        }
+        var размер = tournament.draw_size || 16;
+        return Math.max(2, Math.floor(размер / 4));
+    }
+
+    /** Посев ставит менеджер руками только в нерейтинговых турнирах. */
+    function посевРуками(tournament) {
+        return isFriendlyTournament(tournament);
+    }
+
     function isFriendlyTournament(tournament) {
         return !!(tournament && tournament.category_id === 'friendly');
     }
@@ -943,6 +1306,8 @@
 
         // Build tabs
         var activeTab = forceTab || (isTournamentCompleted ? 'results' : (hasMatches ? 'bracket' : 'registrations'));
+        // Сетки ещё нет — показывать нечего, отправляем на заявки
+        if (activeTab === 'bracket' && !hasMatches) activeTab = 'registrations';
 
         // Friendly: вкладки «Результаты» нет — очки не начисляются, там одни нули.
         // Завершённый дружеский турнир открываем на сетке, а не на скрытой вкладке.
@@ -1475,6 +1840,7 @@
                 var regId = btn.dataset.regId;
                 btn.disabled = true;
                 await A.client.from('tournament_registrations').update({ status: 'approved' }).eq('id', regId);
+                await сообщитьОЗаявке(regId, 'draw');
                 A.showToast(L.regMovedToMain);
                 renderBracketManagement(tournamentId, 'registrations');
             });
@@ -1486,6 +1852,12 @@
                 var regId = btn.dataset.regId;
                 btn.disabled = true;
                 await A.client.from('tournament_registrations').update({ status: 'rejected' }).eq('id', regId);
+                await сообщитьОЗаявке(regId, 'rejected');
+
+                // Отказать можно и тому, кто стоял в сетке: место освободилось,
+                // и первый из очереди занимает его сам
+                await поднятьИзОчереди(tournamentId);
+
                 A.showToast(L.regRejected);
                 renderBracketManagement(tournamentId, 'registrations');
             });
@@ -1497,7 +1869,38 @@
                 var regId = btn.dataset.regId;
                 btn.disabled = true;
                 await A.client.from('tournament_registrations').update({ status: 'waitlist' }).eq('id', regId);
+                await сообщитьОЗаявке(regId, 'waitlist');
+
+                // Место освободилось — первый из очереди занимает его сам.
+                // Раньше место просто повисало, и лист ожидания стоял, пока
+                // менеджер не вспоминал поднять кого-то руками
+                await поднятьИзОчереди(tournamentId);
+
                 A.showToast(L.regMovedToWaitlist);
+                renderBracketManagement(tournamentId, 'registrations');
+            });
+        });
+
+        // ---- Вернуть заявку в турнир ----
+        //
+        // Отказ бывает ошибочным, и до сих пор исправить его было нечем: и
+        // отклонённые, и снятые оставались вне игры навсегда. Возвращаем со
+        // своим прежним временем подачи — очередь не переписываем.
+        //
+        // Куда вернётся, решают места: свободно — в основную сетку, занято —
+        // в лист ожидания. Отдать чужое место было бы нечестно.
+        container.querySelectorAll('.ad-btn-restore').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var regId = btn.dataset.regId;
+                btn.disabled = true;
+
+                var куда = (await естьМесто(tournamentId)) ? 'approved' : 'waitlist';
+                var r = await A.client.from('tournament_registrations')
+                    .update({ status: куда }).eq('id', regId);
+                if (r.error) { A.showToast(r.error.message, 'error'); btn.disabled = false; return; }
+
+                await сообщитьОЗаявке(regId, куда === 'approved' ? 'draw' : 'waitlist');
+                A.showToast(куда === 'approved' ? L.regRestoredDraw : L.regRestoredWait, 'success');
                 renderBracketManagement(tournamentId, 'registrations');
             });
         });
@@ -1794,6 +2197,59 @@
             });
         }
 
+        // ---- Гость в паре: подтвердить или убрать ----
+        container.querySelectorAll('.ad-btn-guest-ok').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                btn.disabled = true;
+                var r = await A.client.from('tournament_registrations')
+                    .update({ guest_confirmed: true }).eq('id', btn.dataset.regId);
+                if (r.error) { A.showToast(r.error.message, 'error'); btn.disabled = false; return; }
+                await сообщитьОЗаявке(btn.dataset.regId, 'guest_ok');
+                A.showToast(L.regGuestConfirmed, 'success');
+                renderBracketManagement(tournamentId, 'registrations');
+            });
+        });
+
+        container.querySelectorAll('.ad-btn-guest-drop').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                A.showConfirm(L.regGuestDrop, '<p style="margin:0;">' + L.regGuestDropHint + '</p>',
+                    async function() {
+                        var r = await A.client.from('tournament_registrations').update({
+                            partner_external_name: null,
+                            partner_external_ntrp: null,
+                            partner_gender: null,
+                            guest_confirmed: false
+                        }).eq('id', btn.dataset.regId);
+                        if (r.error) { A.showToast(r.error.message, 'error'); return; }
+                        await сообщитьОЗаявке(btn.dataset.regId, 'guest_removed');
+                        A.showToast(L.regGuestDropped, 'success');
+                        renderBracketManagement(tournamentId, 'registrations');
+                    }, L.regGuestDropShort);
+            });
+        });
+
+        // ---- Посев руками ----
+        //
+        // Один номер — одна заявка. Если номер занят, меняем владельцев
+        // местами: менеджер обычно и хочет «сделать эту пару первой», а не
+        // получить двух первых
+        container.querySelectorAll('.ad-reg-seed').forEach(function(поле) {
+            поле.addEventListener('change', async function() {
+                var regId = поле.dataset.regId;
+                var номер = поле.value ? Number(поле.value) : null;
+                поле.disabled = true;
+
+                var ответ = await A.client.from('tournament_registrations')
+                    .update({ seed_number: номер }).eq('id', regId);
+                if (ответ.error) {
+                    A.showToast(ответ.error.message, 'error');
+                    поле.disabled = false;
+                    return;
+                }
+                renderBracketManagement(tournamentId, 'registrations');
+            });
+        });
+
         // Floating bar: remove button
         floatingBar.querySelector('.ad-reg-floating-remove').addEventListener('click', function() {
             var checked = container.querySelectorAll('.ad-reg-check:checked');
@@ -1849,30 +2305,40 @@
                         choiceOverlay.innerHTML =
                             '<div class="ad-confirm-modal">' +
                                 '<div class="ad-confirm-title">' + L.regReplaceWho + '</div>' +
-                                '<div class="ad-confirm-actions" style="gap:8px;">' +
-                                    '<button class="ad-btn ad-btn-primary" id="adReplaceMainBtn">' +
-                                        A.esc(имяСтороны(reg, 'player', playersMap)) + '</button>' +
-                                    '<button class="ad-btn ad-btn-secondary" id="adReplacePartnerBtn">' +
-                                        A.esc(имяСтороны(reg, 'partner', playersMap)) + '</button>' +
+                                // Игроки рядом, пара — отдельной строкой снизу:
+                                // это выбор другого уровня, а не третий игрок
+                                '<div class="ad-replace-who">' +
+                                    '<div class="ad-replace-who-row">' +
+                                        '<button class="ad-btn ad-btn-secondary" id="adReplaceMainBtn">' +
+                                            A.esc(имяСтороны(reg, 'player', playersMap)) + '</button>' +
+                                        '<button class="ad-btn ad-btn-secondary" id="adReplacePartnerBtn">' +
+                                            A.esc(имяСтороны(reg, 'partner', playersMap)) + '</button>' +
+                                    '</div>' +
+                                    '<button class="ad-btn ad-btn-primary" id="adReplacePairBtn">' +
+                                        L.regReplacePair + '</button>' +
                                 '</div>' +
                             '</div>';
                         document.body.appendChild(choiceOverlay);
                         choiceOverlay.addEventListener('click', function(e) { if (e.target === choiceOverlay) choiceOverlay.remove(); });
                         document.getElementById('adReplaceMainBtn').addEventListener('click', function() {
                             choiceOverlay.remove();
-                            openReplaceModal(regId, 'player', tournament, tournamentId, registrations);
+                            openReplaceModal(regId, 'player', tournament, tournamentId, registrations, playersMap);
+                        });
+                        document.getElementById('adReplacePairBtn').addEventListener('click', function() {
+                            choiceOverlay.remove();
+                            openReplacePairModal(regId, tournament, tournamentId, registrations, playersMap);
                         });
                         document.getElementById('adReplacePartnerBtn').addEventListener('click', function() {
                             choiceOverlay.remove();
-                            openReplaceModal(regId, 'partner', tournament, tournamentId, registrations);
+                            openReplaceModal(regId, 'partner', tournament, tournamentId, registrations, playersMap);
                         });
                     } else {
                         // No partner yet — replace main player
-                        openReplaceModal(regId, 'player', tournament, tournamentId, registrations);
+                        openReplaceModal(regId, 'player', tournament, tournamentId, registrations, playersMap);
                     }
                 } else {
                     // Singles: replace main player directly
-                    openReplaceModal(regId, 'player', tournament, tournamentId, registrations);
+                    openReplaceModal(regId, 'player', tournament, tournamentId, registrations, playersMap);
                 }
             });
         });
@@ -1882,6 +2348,10 @@
         if (genBtn) {
             genBtn.addEventListener('click', function() {
                 A.showConfirm(L.generateDrawConfirm, '', async function() {
+                    // Пока идёт жеребьёвка, кнопку гасим и подписываем: запрос
+                    // не мгновенный, и второе нажатие успевало уйти в базу
+                    genBtn.disabled = true;
+                    genBtn.textContent = L.drawRunning;
                     await generateBracketDraw(tournament, registrations, playersMap);
                     renderBracketManagement(tournamentId);
                 }, L.generateDraw);
@@ -2040,6 +2510,8 @@
         if (regenBtn) {
             regenBtn.addEventListener('click', function() {
                 A.showConfirm(L.regenerateConfirm, '', async function() {
+                    regenBtn.disabled = true;
+                    regenBtn.textContent = L.drawRunning;
                     await regenerateDraw(tournament, tournamentId);
                 }, L.regenerateDraw);
             });
@@ -2115,11 +2587,81 @@
             });
         }
 
+        // История замен: кого на кого меняли в этом турнире
+        var местоИстории = document.getElementById('adRegChanges');
+        if (местоИстории) отрисоватьИсториюЗамен(местоИстории, tournamentId);
+
         // Async: render X-slot assignment dropdowns if IG path is active
         var xSlotContainer = document.getElementById('adXSlotContainer');
         if (xSlotContainer) {
             renderXSlotSection(xSlotContainer, tournamentId);
         }
+    }
+
+    /**
+     * История замен в заявках — только для админки.
+     *
+     * Показываем последние двадцать: кого на кого, когда и кто менял. Пусто —
+     * блока нет вовсе, чтобы не занимать место у турниров без замен.
+     */
+    async function отрисоватьИсториюЗамен(место, tournamentId) {
+        var res = await A.client.from('registration_changes')
+            .select('*')
+            .eq('tournament_id', tournamentId)
+            .order('created_at', { ascending: false })
+            .limit(20);
+        var строки = res.data || [];
+        if (res.error || !строки.length) { место.innerHTML = ''; return; }
+
+        var ids = [];
+        строки.forEach(function(r) {
+            if (r.old_player_id) ids.push(r.old_player_id);
+            if (r.new_player_id) ids.push(r.new_player_id);
+        });
+        var кто = {};
+        if (ids.length) {
+            var plRes = await A.client.from('players').select('id, name').in('id', ids);
+            (plRes.data || []).forEach(function(p) { кто[p.id] = p.name; });
+        }
+
+        var авторы = {};
+        var авторIds = строки.map(function(r) { return r.changed_by; }).filter(Boolean);
+        if (авторIds.length) {
+            var prRes = await A.client.from('profiles').select('id, full_name').in('id', авторIds);
+            (prRes.data || []).forEach(function(p) { авторы[p.id] = p.full_name; });
+        }
+
+        var подписьСтороны = {
+            player: L.regReplaceMain,
+            partner: L.regReplacePartner,
+            pair: L.regReplacePair
+        };
+
+        var html = '<h3 class="ad-reg-section-title" style="margin-top:24px;">' + L.regChangesTitle +
+            ' <span class="ad-badge">' + строки.length + '</span></h3>' +
+            '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                '<th style="width:150px;">' + L.regChangesWhen + '</th>' +
+                '<th style="width:120px;">' + L.regChangesSide + '</th>' +
+                '<th>' + L.regChangesWho + '</th>' +
+                '<th style="width:180px;">' + L.regChangesBy + '</th>' +
+            '</tr></thead><tbody>';
+
+        строки.forEach(function(r) {
+            var было = кто[r.old_player_id] || r.old_name || '\u2014';
+            var стало = кто[r.new_player_id] || r.new_name || '\u2014';
+            html += '<tr>' +
+                '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
+                    датаВремя(r.created_at) + '</td>' +
+                '<td style="font-size:0.8rem;">' + (подписьСтороны[r.side] || r.side) + '</td>' +
+                '<td>' + A.esc(было) + ' <span style="color:var(--text-dim);">\u2192</span> ' +
+                    '<span style="color:var(--accent);">' + A.esc(стало) + '</span></td>' +
+                '<td style="font-size:0.8rem;color:var(--text-secondary);">' +
+                    A.esc(авторы[r.changed_by] || '\u2014') + '</td>' +
+            '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        место.innerHTML = html;
     }
 
     // ---- Registrations Panel HTML ----
@@ -2164,6 +2706,19 @@
         if (mainDraw.length === 0 && waitlistRegs.length === 0 && rejected.length === 0 && withdrawn.length === 0 && blocked.length === 0) {
             html += '<div class="ad-empty-state"><p>' + L.noRegistrations + '</p></div>';
         } else {
+            // Посев ставит менеджер руками — колонка есть только там, где это
+            // нужно: в рейтинговых турнирах сеет рейтинг, а не человек
+            var руками = посевРуками(tournament);
+            var норма = нормаСеяных(tournament);
+            var thSeed = руками
+                ? '<th style="width:78px;text-align:center;">' + L.regSeedCol + '</th>' : '';
+
+            // Какие номера уже разобраны
+            var занятыеНомера = {};
+            registrations.forEach(function(r) {
+                if (r.seed_number) занятыеНомера[Number(r.seed_number)] = true;
+            });
+
             var thCategory = isEn ? 'Category' : 'Категория';
             var thRegTime = isEn ? 'Registered' : 'Регистрация';
             var thActions = isEn ? 'Actions' : 'Действия';
@@ -2178,6 +2733,7 @@
                     '<th style="text-align:center;width:50px;">NTRP</th>' +
                     '<th>' + L.doublesPartner + '</th>' +
                     '<th style="text-align:center;width:80px;">' + thCombinedNtrp + '</th>' +
+                    thSeed +
                     '<th>' + thRegTime + '</th>' +
                     '<th style="width:150px;text-align:center;">' + thActions + '</th>';
             } else {
@@ -2188,6 +2744,7 @@
                     '<th style="width:32px;text-align:center;padding:4px 6px;">' + thRank + '</th>' +
                     '<th>' + L.plrName + '</th>' +
                     '<th>' + thCategory + '</th>' +
+                    thSeed +
                     '<th>' + thRegTime + '</th>' +
                     '<th style="width:150px;text-align:center;">' + thActions + '</th>';
             }
@@ -2220,6 +2777,32 @@
                 }
             }
 
+            // Пары с гостем ждут решения: место за ними держится, но клуб не
+            // знает ни рейтинга гостя, ни того, придёт ли он
+            var сГостем = registrations.filter(function(r) {
+                return r.partner_external_name && !r.guest_confirmed &&
+                    r.status !== 'withdrawn' && r.status !== 'rejected';
+            });
+            if (сГостем.length) {
+                html += '<div class="ad-alert ad-alert-warning" style="margin-bottom:12px;">' +
+                    '\u26A0 ' + L.regGuestWait + ': ' + сГостем.length +
+                    '<div style="font-weight:400;color:var(--text-secondary);font-size:0.82rem;margin-top:4px;">' +
+                    L.regGuestWaitHint + '</div></div>';
+            }
+
+            // Сколько сеяных уже расставлено. Пока не добрали — жеребьёвка
+            // не запустится, и лучше сказать об этом заранее
+            if (руками && норма > 0) {
+                var расставлено = mainDraw.filter(function(r) { return r.seed_number; }).length;
+                var хватает = расставлено >= норма;
+                html += '<div class="ad-alert ' + (хватает ? 'ad-alert-info' : 'ad-alert-warning') +
+                    '" style="margin-bottom:12px;">' +
+                    (хватает ? '\u2713 ' : '\u26A0 ') +
+                    L.regSeedCount.replace('{n}', расставлено).replace('{m}', норма) +
+                    (хватает ? '' : ' \u00B7 ' + L.regSeedHint) +
+                '</div>';
+            }
+
             // ---- Main Draw ----
             var reservedSpots = tournament.reserved_spots || 0;
             var badgeText = mainDraw.length + '/' + maxPart;
@@ -2237,7 +2820,8 @@
                     regTableHead.replace('GRP', 'main') +
                 '</tr></thead><tbody>';
                 mainDraw.forEach(function(reg, idx) {
-                    html += renderRegRow(reg, idx + 1, playersMap, 'main', debtPlayerIds, isDbl, заморожено);
+                    html += renderRegRow(reg, idx + 1, playersMap, 'main', debtPlayerIds, isDbl,
+                                         заморожено, руками ? норма : 0, занятыеНомера);
                 });
                 html += '</tbody></table></div>';
             } else {
@@ -2251,7 +2835,8 @@
                     regTableHead.replace('GRP', 'wait') +
                 '</tr></thead><tbody>';
                 waitlistRegs.forEach(function(reg, idx) {
-                    html += renderRegRow(reg, idx + 1, playersMap, 'wait', debtPlayerIds, isDbl, заморожено);
+                    html += renderRegRow(reg, idx + 1, playersMap, 'wait', debtPlayerIds, isDbl,
+                                         заморожено, руками ? норма : 0, занятыеНомера);
                 });
                 html += '</tbody></table></div>';
             } else {
@@ -2259,35 +2844,64 @@
             }
 
             // ---- Rejected (admin only) ----
-            if (A.currentRole === 'admin' && rejected.length > 0) {
-                var rejTitle = isEn ? 'Rejected' : 'Отклонённые';
-                html += '<h3 class="ad-reg-section-title" style="margin-top:24px;color:#f44336;">' + rejTitle + ' <span class="ad-badge" style="background:rgba(244,67,54,0.15);color:#f44336;">' + rejected.length + '</span></h3>';
+            // ---- Вне турнира: отказ менеджера и снявшиеся сами ----
+            //
+            // Раньше отклонённые висели списком без единой кнопки, а снятые не
+            // показывались вовсе — заявка просто исчезала с глаз, и вернуть её
+            // было нечем. Оба случая означают одно: пары в турнире нет. Значит
+            // и место им одно, с обратным ходом, если отказали по ошибке.
+            var внеТурнира = rejected.concat(withdrawn)
+                .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
+
+            if (внеТурнира.length > 0) {
+                html += '<h3 class="ad-reg-section-title" style="margin-top:24px;color:#f44336;">' + L.regOut +
+                    ' <span class="ad-badge" style="background:rgba(244,67,54,0.15);color:#f44336;">' +
+                    внеТурнира.length + '</span></h3>';
+                html += '<p style="margin:-4px 0 10px;font-size:0.8rem;color:var(--text-dim);">' + L.regOutHint + '</p>';
                 html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
-                    regTableHead.replace('GRP', 'rejected').replace('<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="rejected"></th>', '') +
+                    '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
+                    '<th>' + L.plrName + '</th>' +
+                    (isDbl ? '<th>' + L.doublesPartner + '</th>' : '<th>' + (isEn ? 'Category' : 'Категория') + '</th>') +
+                    '<th>' + L.regOutWhy + '</th>' +
+                    '<th>' + (isEn ? 'Registered' : 'Регистрация') + '</th>' +
+                    '<th style="width:110px;text-align:center;">' + thActions + '</th>' +
                 '</tr></thead><tbody>';
-                rejected.forEach(function(reg, idx) {
+
+                внеТурнира.forEach(function(reg, idx) {
                     var player = reg.players || playersMap[reg.player_id] || {};
-                    var pmEntry = playersMap[reg.player_id] || {};
                     var pName = isEn ? (player.name_en || player.name || reg.player_id) : (player.name || reg.player_id);
-                    var catId = player.category_id || pmEntry.category_id || '';
-                    var catParts = catId.split('-');
-                    var catLabel = catParts.length > 1
-                        ? catParts.slice(1).map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-')
-                        : catId || '—';
-                    var rankVal = pmEntry.rank || '—';
+                    // Напарника может и не быть — тогда прочерк. `имяСтороны`
+                    // в этом случае отдаёт подпись кнопки «Напарник», и в
+                    // таблице выходило слово вместо имени
+                    var вторая = isDbl
+                        ? ((reg.partner_id || reg.partner_external_name)
+                            ? имяСтороны(reg, 'partner', playersMap) : '\u2014')
+                        : (function() {
+                            var catId = player.category_id || (playersMap[reg.player_id] || {}).category_id || '';
+                            var ч = catId.split('-');
+                            return ч.length > 1
+                                ? ч.slice(1).map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-')
+                                : (catId || '\u2014');
+                        })();
+                    var причина = reg.status === 'rejected' ? L.regOutByManager : L.regOutByPlayer;
                     var regDT = '';
                     if (reg.registered_at) {
                         var d = new Date(reg.registered_at);
                         regDT = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
                             ' <span style="color:var(--text-dim);">' +
-                            d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
+                            d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit' }) + '</span>';
                     }
-                    html += '<tr style="opacity:0.6;">' +
+                    html += '<tr style="opacity:0.65;">' +
                         '<td style="text-align:center;padding:4px 6px;">' + (idx + 1) + '</td>' +
-                        '<td style="text-align:center;padding:4px 6px;font-size:0.65rem;color:var(--accent);font-weight:600;">' + rankVal + '</td>' +
                         '<td>' + A.esc(pName) + '</td>' +
-                        '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
+                        '<td style="font-size:0.8rem;">' + A.esc(вторая) + '</td>' +
+                        '<td style="font-size:0.8rem;color:var(--text-secondary);">' + A.esc(причина) + '</td>' +
                         '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
+                        '<td style="text-align:center;">' +
+                            '<button class="ad-reg-act ad-btn-restore" data-reg-id="' + reg.id + '"' +
+                            ' title="' + L.regRestoreTitle + '" style="color:#4caf50;background:none;border:none;' +
+                            'cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regRestore + '</button>' +
+                        '</td>' +
                     '</tr>';
                 });
                 html += '</tbody></table></div>';
@@ -2332,6 +2946,9 @@
             }
         }
 
+        // История замен — грузится отдельно, чтобы не задерживать таблицу
+        html += '<div id="adRegChanges"></div>';
+
         // Generate draw button
         if (canGenerate && tournament.bracket_type) {
             var drawSize = tournament.draw_size || 16;
@@ -2344,7 +2961,7 @@
         return html;
     }
 
-    function renderRegRow(reg, num, playersMap, group, debtPlayerIds, isDbl, заморожено) {
+    function renderRegRow(reg, num, playersMap, group, debtPlayerIds, isDbl, заморожено, нормаПосева, занятыеНомера) {
         debtPlayerIds = debtPlayerIds || {};
         var isExternal = reg.is_external;
         var player = isExternal ? null : (reg.players || playersMap[reg.player_id] || {});
@@ -2380,15 +2997,51 @@
                 ' <span style="color:var(--text-dim);">' +
                 d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
         }
-        // Сетка сформирована — кнопки на месте, но нажать нельзя: состав
-        // менять уже поздно, сначала пересоздают жеребьёвку
+        // Посев руками: список чисел до нормы. Больше нормы номеров не бывает —
+        // сеяных ровно столько, сколько мест под них в сетке
+        var посевTd = '';
+        if (нормаПосева) {
+            // Занятые номера не показываем вовсе: так двух первых не бывает по
+            // устройству, а не по проверке. Чтобы отдать номер другой паре,
+            // сначала снимают его прочерком — тогда он снова появится у всех
+            var опции = '<option value="">\u2014</option>';
+            for (var с = 1; с <= нормаПосева; с++) {
+                var свой = Number(reg.seed_number) === с;
+                if (!свой && занятыеНомера && занятыеНомера[с]) continue;
+                опции += '<option value="' + с + '"' + (свой ? ' selected' : '') + '>' + с + '</option>';
+            }
+            посевTd = '<td style="text-align:center;">' +
+                '<select class="ad-reg-seed" data-reg-id="' + reg.id + '"' +
+                (заморожено ? ' disabled' : '') + '>' + опции + '</select></td>';
+        }
+
+        // Сетка сформирована — состав закрыт: снимать и одобрять поздно, место
+        // в сетке уже разыграно. А замена на месте разрешена: человек выбыл,
+        // вместо него выходит другой, место и посев остаются за заявкой
         var стоп = заморожено ? ' disabled style="opacity:0.35;cursor:not-allowed;' : ' style="';
+        var стопЗамены = ' style="';
         var actionsTd = '<td style="text-align:center;white-space:nowrap;"><div style="display:flex;gap:6px;justify-content:center;align-items:center;">';
+
+        // Гость ждёт решения: подтвердить пару или убрать напарника. Заявку
+        // целиком не снимаем — первый номер не виноват, найдёт другого
+        if (reg.partner_external_name && !reg.guest_confirmed) {
+            actionsTd += '<button class="ad-reg-act ad-btn-guest-ok" data-reg-id="' + reg.id + '"' +
+                ' title="' + L.regGuestOk + '" style="color:#4caf50;font-size:0.8rem;font-weight:600;">' +
+                L.regGuestOkShort + '</button>' +
+                '<button class="ad-reg-act ad-btn-guest-drop" data-reg-id="' + reg.id + '"' +
+                ' title="' + L.regGuestDrop + '" style="color:#f44336;font-size:0.8rem;font-weight:600;">' +
+                L.regGuestDropShort + '</button>';
+        }
+
         if (group === 'main') {
-            actionsTd += '<button class="ad-reg-act ad-btn-replace" data-reg-id="' + reg.id + '" title="' + L.regReplace + '"' + стоп + 'color:#42a5f5;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReplaceShort + '</button>';
+            actionsTd += '<button class="ad-reg-act ad-btn-replace" data-reg-id="' + reg.id + '" title="' + L.regReplace + '"' + стопЗамены + 'color:#42a5f5;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReplaceShort + '</button>';
             actionsTd += '<button class="ad-reg-act ad-btn-to-waitlist" data-reg-id="' + reg.id + '" title="' + L.regMoveToWaitlist + '"' + стоп + 'color:#FFA726;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regMoveToWaitlistShort + '</button>';
+            // Отказ из сетки: человек не придёт совсем. Раньше его можно было
+            // только задвинуть в очередь, где он никого не ждал, либо снести
+            // скопом — и заявка пропадала из всех списков без следа
+            actionsTd += '<button class="ad-reg-act ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '"' + стоп + 'color:#f44336;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReject + '</button>';
         } else if (group === 'wait') {
-            actionsTd += '<button class="ad-reg-act ad-btn-replace" data-reg-id="' + reg.id + '" title="' + L.regReplace + '"' + стоп + 'color:#42a5f5;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReplaceShort + '</button>';
+            actionsTd += '<button class="ad-reg-act ad-btn-replace" data-reg-id="' + reg.id + '" title="' + L.regReplace + '"' + стопЗамены + 'color:#42a5f5;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReplaceShort + '</button>';
             actionsTd += '<button class="ad-reg-act ad-btn-approve" data-reg-id="' + reg.id + '" title="' + L.regMoveToMain + '"' + стоп + 'color:#4caf50;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regMoveToMainShort + '</button>' +
                 '<button class="ad-reg-act ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '"' + стоп + 'color:#f44336;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReject + '</button>';
         }
@@ -2447,6 +3100,7 @@
                 partnerNtrpTd +
                 partnerTd +
                 combinedNtrpTd +
+                посевTd +
                 '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
                 actionsTd +
             '</tr>';
@@ -2458,6 +3112,7 @@
                 '<td style="text-align:center;padding:4px 6px;font-size:0.65rem;color:var(--accent);font-weight:600;">' + rankVal + '</td>' +
                 '<td>' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</td>' +
                 '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
+                посевTd +
                 '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
                 actionsTd +
             '</tr>';
@@ -2502,7 +3157,7 @@
 
         var html = '<div class="ad-sched-note">' + L.schedApproxNote + '</div>';
 
-        html += '<div class="ad-sched-section"><table class="ad-table ad-sched-table">' +
+        html += '<div class="ad-sched-section ad-sched-wrap"><table class="ad-table ad-sched-table">' +
             '<thead><tr>' +
                 '<th class="sched-num">№</th>' +
                 '<th class="sched-time">' + L.schedTime + '</th>' +
@@ -2573,7 +3228,11 @@
                         (позвали ? L.schedCallAgain + ' ' + позвали : L.schedCallGo) + '</button>' +
                 '</div>';
 
-            html += '<tr data-match-id="' + m.id + '"' + (m.status === 'live' ? ' class="ad-sched-row-live"' : '') + '>' +
+            // Сыгранные гаснут: очередь читается вперёд, а прошедшее не
+            // мешает. Совсем не прячем — время и пары ещё смотрят
+            var классСтроки = сыгран ? ' class="ad-sched-row-done"'
+                : (m.status === 'live' ? ' class="ad-sched-row-live"' : '');
+            html += '<tr data-match-id="' + m.id + '"' + классСтроки + '>' +
                 '<td style="text-align:center;color:var(--text-dim);">' + (idx + 1) + стрелки + '</td>' +
                 '<td>' + времяHtml + '</td>' +
                 '<td><span class="ad-badge">' + круг + '</span></td>' +
@@ -4065,38 +4724,27 @@
         return html;
     }
 
-    // ---- Remove Registrations + Auto-Promote from Waitlist ----
+    /**
+     * Отказать сразу нескольким заявкам — той же кнопкой, что раньше «удаляла».
+     *
+     * Статус ставим тот же, что при отказе по одной: отказ менеджера и уход
+     * игрока — разные события, и в списке «Вне турнира» они подписаны по-разному.
+     * Раньше здесь ставился withdrawn, и снятые менеджером выглядели так, будто
+     * ушли сами.
+     *
+     * Очередь двигает общая `поднятьИзОчереди`. Свой подъём тут поднимал из
+     * `pending`, хотя очередь давно живёт в `waitlist`, а `pending` — это заявка
+     * на рассмотрении, которая место уже занимает. То есть поднимал не тех.
+     */
     async function removeRegistrations(regIds, tournamentId) {
-        // Set selected to withdrawn
-        var res = await A.client.from('tournament_registrations').update({ status: 'withdrawn' }).in('id', regIds);
+        var res = await A.client.from('tournament_registrations')
+            .update({ status: 'rejected' }).in('id', regIds);
         if (res.error) { A.showToast(res.error.message, 'error'); return; }
 
-        // Auto-promote: load tournament max_participants, then check if main draw has room
-        var trnRes = await A.client.from('tournaments').select('max_participants, reserved_spots').eq('id', tournamentId).single();
-        var maxPart = (trnRes.data && trnRes.data.max_participants) || 16;
+        await сообщитьОЗаявках(regIds, 'rejected');
+        await поднятьИзОчереди(tournamentId);
 
-        // Count current approved
-        var appRes = await A.client.from('tournament_registrations')
-            .select('id', { count: 'exact', head: true })
-            .eq('tournament_id', tournamentId)
-            .eq('status', 'approved');
-        var approvedCount = appRes.count || 0;
-
-        // If there's room, promote from pending (waitlist) ordered by registered_at
-        var slotsAvailable = maxPart - approvedCount;
-        if (slotsAvailable > 0) {
-            var pendRes = await A.client.from('tournament_registrations')
-                .select('id')
-                .eq('tournament_id', tournamentId)
-                .eq('status', 'pending')
-                .order('registered_at', { ascending: true })
-                .limit(slotsAvailable);
-            var toPromote = (pendRes.data || []).map(function(r) { return r.id; });
-            if (toPromote.length > 0) {
-                await A.client.from('tournament_registrations').update({ status: 'approved' }).in('id', toPromote);
-            }
-        }
-        A.showToast(isEn ? 'Participants removed' : 'Участники удалены', 'success');
+        A.showToast(isEn ? 'Entries rejected' : 'Заявкам отказано', 'success');
     }
 
     // Сносит матчи турнира и убеждается, что их не осталось.
@@ -4132,6 +4780,11 @@
 
     // ---- Regenerate Draw ----
     async function regenerateDraw(tournament, tournamentId) {
+        if (жеребимСейчас) {
+            A.showToast(L.drawInProgress, 'warning');
+            return;
+        }
+        жеребимСейчас = true;
         try {
             // 1. Delete all matches
             var снос = await снестиМатчиТурнира(tournamentId);
@@ -4163,20 +4816,41 @@
             playerIds = playerIds.filter(function(id, i) { return playerIds.indexOf(id) === i; });
             var playersMap = {};
             if (playerIds.length > 0) {
-                var plRes = await A.client.from('players').select('id, name, name_en, points').in('id', playerIds);
+                var plRes = await A.client.from('players')
+                    .select('id, name, name_en, points, ntrp_singles, ntrp_doubles').in('id', playerIds);
                 (plRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
             }
 
-            await generateBracketDraw(freshTournament, registrations, playersMap);
+            await генерироватьСетку(freshTournament, registrations, playersMap);
             renderBracketManagement(tournamentId);
         } catch (err) {
             console.error('Regenerate draw error:', err);
             A.showToast((isEn ? 'Error: ' : 'Ошибка: ') + err.message, 'error');
+        } finally {
+            жеребимСейчас = false;
         }
     }
 
     // ---- Generate Bracket Draw ----
+    // Жеребьёвка идёт прямо сейчас. Два запуска подряд складывали две
+    // раскладки в одну сетку: заявки оставались от последней, а матчи — от
+    // обеих, и пара оказывалась сразу в двух группах
+    var жеребимСейчас = false;
+
     async function generateBracketDraw(tournament, registrations, playersMap) {
+        if (жеребимСейчас) {
+            A.showToast(L.drawInProgress, 'warning');
+            return;
+        }
+        жеребимСейчас = true;
+        try {
+            return await генерироватьСетку(tournament, registrations, playersMap);
+        } finally {
+            жеребимСейчас = false;
+        }
+    }
+
+    async function генерироватьСетку(tournament, registrations, playersMap) {
         // Сетку рисуем только на пустом месте: остатки прежней дадут кашу,
         // где одна пара стоит сразу в двух группах
         var было = await A.client.from('matches')
@@ -4213,6 +4887,34 @@
             return;
         }
 
+        // ---- Ручной посев в нерейтинговых турнирах ----
+        //
+        // Здесь рейтинга нет, поэтому сеет человек: он знает, кто на площадке
+        // сильнее. Пока сеяных меньше нормы, жеребить нечего — сеяные должны
+        // разойтись по группам по одному
+        if (посевРуками(tournament)) {
+            var норма = нормаСеяных(tournament);
+            var сеяные = approved.filter(function(r) { return r.seed_number; })
+                .sort(function(a, b) { return Number(a.seed_number) - Number(b.seed_number); });
+
+            if (сеяные.length < норма) {
+                // Отказ окном, а не всплывашкой: жеребьёвку жмут раз в турнир,
+                // и причину надо прочесть, а не поймать взглядом
+                A.showNotice(L.regSeedNotEnoughTitle,
+                    '<p style="margin:0;">' + L.regSeedNotEnough
+                        .replace('{n}', сеяные.length).replace('{m}', норма) + '</p>',
+                    null, 'warn');
+                return;
+            }
+
+            var прочие = approved.filter(function(r) { return !r.seed_number; });
+            for (var пi = прочие.length - 1; пi > 0; пi--) {
+                var пj = Math.floor(Math.random() * (пi + 1));
+                var пt = прочие[пi]; прочие[пi] = прочие[пj]; прочие[пj] = пt;
+            }
+            approved = сеяные.concat(прочие);
+        } else
+
         // Sort by points DESC (seeded first); doubles: NTRP sum, fallback to points
         if (isDbl) {
             approved.sort(function(a, b) {
@@ -4245,7 +4947,12 @@
             approved.sort(function(a, b) {
                 var pA = catPoints[a.player_id] || 0;
                 var pB = catPoints[b.player_id] || 0;
-                return pB - pA;
+                if (pB !== pA) return pB - pA;
+                // Очки равны — выше тот, у кого сильнее одиночный NTRP.
+                // То же правило, что в таблице рейтинга
+                var nA = Number((playersMap[a.player_id] || {}).ntrp_singles || 0);
+                var nB = Number((playersMap[b.player_id] || {}).ntrp_singles || 0);
+                return nB - nA;
             });
         }
 
@@ -6371,7 +7078,7 @@
             var idTB1 = 'adS' + setNum + 'TB1';
             var idTB2 = 'adS' + setNum + 'TB2';
             return '<div class="ad-score-set-row" data-set="' + setNum + '" id="adSetRow' + setNum + '">' +
-                '<label class="ad-field-label" style="min-width:64px;" id="adSetLabel' + setNum + '">' +
+                '<label class="ad-field-label" style="min-width:52px;text-align:right;" id="adSetLabel' + setNum + '">' +
                     (isEn ? 'Set ' : 'Сет ') + setNum + '</label>' +
                 '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-set-game" id="' + id1 + '" value="' + vals[0] + '">' +
                 '<span style="font-weight:600;">:</span>' +

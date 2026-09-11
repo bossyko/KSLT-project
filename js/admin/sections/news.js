@@ -61,11 +61,13 @@
         var container = document.getElementById('ad-content');
         if (!container) return;
 
-        function colHeader(col, label, filterable) {
+        function colHeader(col, label, filterable, подсказка) {
             var isActive = newsSortCol === col;
             var hasFilter = filterable && newsFilters[col] && newsFilters[col].length > 0;
             var cls = 'ad-col-header' + (isActive || hasFilter ? ' ad-col-active' : '');
-            return '<th><div class="' + cls + '" data-col="' + col + '">' +
+            // Колонки со значками без подписи непонятны — вешаем всплывающую
+            var title = подсказка ? ' title="' + A.esc(подсказка) + '"' : '';
+            return '<th' + title + '><div class="' + cls + '" data-col="' + col + '"' + title + '>' +
                 '<span>' + label + '</span>' +
                 (isActive ? '<span class="ad-sort-arrow">' + (newsSortAsc ? '↑' : '↓') + '</span>' : '') +
                 '<span class="ad-col-filter-btn' + (hasFilter ? ' ad-col-filtered' : '') + '">▼</span>' +
@@ -111,9 +113,11 @@
                             '<th>' + L.thExecutor + '</th>' +
                             colHeader('published_at', L.thStatus, true) +
                             colHeader('created_at', L.thPublished, false) +
-                            colHeader('view_count', '&#128065;', false) +
-                            colHeader('reactions', L.thReactions, false) +
-                            colHeader('votes', L.thVotes, false) +
+                            // Значки вместо слов: колонки с числами узкие, а
+                            // подписи распирали их и съедали место у заголовка
+                            colHeader('view_count', '&#128065;', false, L.thViews) +
+                            colHeader('reactions', '&#128077;', false, L.thReactions) +
+                            colHeader('votes', '&#128499;&#65039;', false, L.thVotes) +
                         '</tr></thead>' +
                         '<tbody><tr><td colspan="10" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
@@ -229,7 +233,8 @@
         dd.style.left = Math.max(0, rect.left - cardRect.left) + 'px';
         dd.style.top = (rect.bottom - cardRect.top + 4) + 'px';
 
-        var colLabels = { title: L.thTitle, category: L.thCategory, published_at: L.thStatus, created_at: L.thPublished, view_count: '&#128065;', reactions: L.thReactions, votes: L.thVotes };
+        // В списке колонок оставляем слова: там их выбирают по названию
+        var colLabels = { title: L.thTitle, category: L.thCategory, published_at: L.thStatus, created_at: L.thPublished, view_count: L.thViews, reactions: L.thReactions, votes: L.thVotes };
         var isDateCol = col === 'created_at';
         var isNumericCol = col === 'view_count' || col === 'reactions' || col === 'votes';
         var filterable = col === 'category' || col === 'published_at';

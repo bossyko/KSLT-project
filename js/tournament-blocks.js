@@ -147,48 +147,65 @@
         return (t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles') ? L.pairs : L.participants;
     }
 
+
+    /** Парный или микст: заявку с двумя людьми собирают на странице турнира. */
+    function парный(t) {
+        return t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles';
+    }
+
     /** Крупная карточка: ближайший турнир блока */
     function featured(t, bgImage) {
-        var bg = bgImage || t.image || '';
-        return '<div class="to-featured" data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '"' +
-            ' data-href="' + detailPage + '?id=' + t.id + '">' +
-            (bg
-                ? '<div class="to-featured-bg"><img src="' + bg + '" alt="" loading="lazy"></div><div class="to-featured-overlay"></div>'
-                : '<div class="to-featured-overlay" style="background:var(--bg-card)"></div>') +
-            '<div class="to-featured-content">' +
-                '<div>' +
-                    '<span class="to-featured-date"><span class="to-day">' + t.date.day + '</span><span class="to-month">' + t.date.month + '</span></span>' +
-                    (t.genderLabel ? '<span class="to-gender-badge">' + t.genderLabel + '</span>' : '') +
-                    (t.noRating ? '<span class="to-norating-badge">' + L.noRating + '</span>' : '') +
-                '</div>' +
-                countdown(t) +
-                '<span class="to-featured-status ' + t.status + '">' + t.statusText + '</span>' +
-                '<h3>' + t.name + '</h3>' +
-                (t.location ? '<div class="to-featured-meta"><span>' + pinSvg + ' ' + t.location + '</span></div>' : '') +
-                '<div class="to-featured-details">' +
-                    detail(L.reg, t.regLine) +
-                    detail(L.format, t.format) +
-                    detail(playersLabel(t), t.participants) +
-                    detail(L.prize, t.prize, 'prize') +
-                    (feeValue(t) ? '<div class="to-featured-detail" title="' + feeTitle(t) + '"><span class="to-label">' + L.fee + '</span>' +
-                        '<span class="to-value to-fee">' + feeValue(t) + '</span></div>' : '') +
-                '</div>' +
-                '<div class="to-featured-actions">' +
-                    '<span class="to-featured-link">' + L.details + '</span>' +
-                    (t._rawStatus === 'registration_open'
-                        ? '<button class="btn-register to-register" data-tid="' + t.id + '">' + L.register + '</button>'
-                        : '') +
-                '</div>' +
-            '</div>' +
-        '</div>';
+        // Та же карточка, что на странице «Турниры»: разметку собирает общий
+        // модуль, а страница только готовит данные под неё
+        var F = window.KSLT_TFEATURED;
+        var взнос = feeValue(t);
+        return F.карточка({
+            id: t.id,
+            href: detailPage + '?id=' + t.id,
+            name: t.name,
+            image: bgImage || t.image || '',
+            status: t.status,
+            statusText: t.statusText,
+            date: t.date,
+            genderLabel: t.genderLabel,
+            noRating: t.noRating,
+            location: t.location,
+            regLine: t.regLine,
+            format: t.format,
+            prize: t.prize,
+            участники: t.participants ? { label: playersLabel(t), value: t.participants } : null,
+            взнос: взнос ? { value: взнос, title: feeTitle(t) } : null,
+            регПодпись: L.reg,
+            форматПодпись: L.format,
+            призПодпись: L.prize,
+            взносПодпись: L.fee,
+            _rawStatus: t._rawStatus,
+            _dateSort: t._dateSort,
+            _startTime: t._startTime,
+            _gender: t._gender,
+            _row: t._row,
+            _taken: t._taken,
+            // На страницах категорий живой турнир показываем афишей сбоку:
+            // здесь его читают перед регистрацией, и детали важнее картинки
+            боком: true
+        });
     }
 
     /** Полоса: всё, что не первое в блоке, и весь архив */
     function compact(t, extraAttrs) {
-        return '<div class="to-compact"' + (extraAttrs || '') +
+        // Афиша живого турнира — миниатюрой слева, у архивного остаётся фоном
+        // под сильным затемнением: там важнее компактность строки
+        var прошёл = t.status === 'past';
+        var афиша = t.image
+            ? (прошёл ? ' style="background-image:url(' + t.image + ')"'
+                      : ' style="--poster:url(' + t.image + ')"')
+            : '';
+
+        return '<div class="to-compact ' + (прошёл ? 'to-compact-past' : 'to-compact-thumb') + '"' +
+            (extraAttrs || '') +
             ' data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '"' +
             ' data-href="' + detailPage + '?id=' + t.id + '"' +
-            (t.image ? ' style="background-image:url(' + t.image + ')"' : '') + '>' +
+            афиша + '>' +
             '<div class="to-compact-left">' +
                 '<div class="to-compact-date">' +
                     '<span class="to-day">' + t.date.day + '</span>' +
@@ -206,6 +223,15 @@
             '</div>' +
             '<div class="to-compact-right">' +
                 '<span class="to-compact-status ' + t.status + '">' + t.statusText + '</span>' +
+                // Запись прямо отсюда: раньше в боковой карточке был только
+                // статус «регистрация открыта», а записаться было негде —
+                // приходилось открывать турнир ради одной кнопки
+                (t._rawStatus === 'registration_open'
+                    ? '<button class="btn-register to-register to-compact-regbtn" data-tid="' + t.id + '"' +
+                        // В парном нужен напарник — заявку собирают на странице
+                        // турнира, отсюда только ведём туда
+                        (парный(t) ? ' data-doubles="1"' : '') + '>' + L.register + '</button>'
+                    : '') +
                 countdown(t) +
             '</div>' +
         '</div>';
@@ -238,6 +264,41 @@
         });
     }
 
+
+    /**
+     * Окно парной заявки для кнопки в карточке. Данные турнира и имя игрока
+     * подтягиваем на месте: карточка знает только его номер.
+     */
+    async function открытьПарнуюЗаявку(btn) {
+        var client = window.supabaseClient || (typeof supabase !== 'undefined' && window.SUPABASE_URL
+            ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
+        if (!client || !window.KSLT_DOUBLES) return;
+
+        var сессия = await client.auth.getSession();
+        if (!сессия.data.session) {
+            if (window.KSLT_REG && window.KSLT_REG.предложитьВойти) {
+                window.KSLT_REG.предложитьВойти(isEn, isKg);
+            }
+            return;
+        }
+
+        var профиль = await client.from('profiles')
+            .select('full_name, player_id').eq('id', сессия.data.session.user.id).single();
+        var турнир = await client.from('tournaments')
+            .select('id, title, title_en, title_kg, format, gender, ntrp_combined_max').eq('id', btn.dataset.tid).single();
+        if (!турнир.data) return;
+
+        window.KSLT_DOUBLES.открыть({
+            client: client,
+            tournament: турнир.data,
+            playerId: профиль.data ? профиль.data.player_id : null,
+            playerName: профиль.data ? профиль.data.full_name : '',
+            onDone: function(info) {
+                if (info && info.created && window.KSLT_REG) window.KSLT_REG.markRegistered(client);
+            }
+        });
+    }
+
     /** Запись на турнир прямо из карточки. Решение принимает Edge Function */
     function initRegister() {
         if (initRegister._done) return;
@@ -247,6 +308,13 @@
             if (!btn) return;
             e.preventDefault();
             e.stopPropagation();          // карточка кликабельна целиком
+
+            // Парный: открываем окно выбора напарника прямо здесь — уводить
+            // человека на страницу турнира ради одной кнопки незачем
+            if (btn.dataset.doubles) {
+                открытьПарнуюЗаявку(btn);
+                return;
+            }
 
             var client = window.supabaseClient;
             if (!window.KSLT_REG || !client) return;

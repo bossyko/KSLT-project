@@ -225,6 +225,11 @@
         // просто оставалось на экране и выглядело замершим — «кнопка не
         // реагирует», хотя на самом деле код упал
         overlay.querySelector('#adConfirmOk').addEventListener('click', async function() {
+            // Кнопку гасим сразу: два быстрых нажатия запускали действие дважды.
+            // На жеребьёвке это стоило дорого — две раскладки складывались в
+            // одну сетку, и пары оказывались сразу в двух группах
+            if (this.disabled) return;
+            this.disabled = true;
             try {
                 await onConfirm();
             } catch (e) {
@@ -242,17 +247,22 @@
      * Для случаев, где выбирать нечего, а всплывашка слишком мимолётна:
      * например, заявка ушла в лист ожидания, и это надо заметить.
      */
-    function showNotice(title, text, okLabel) {
+    /**
+     * @param {string} вид — 'info' (по умолчанию) или 'warn'. Предупреждение
+     *        рисуем красным: лаймовый в админке означает «всё хорошо, жми»,
+     *        и на отказе он читается как приглашение продолжить.
+     */
+    function showNotice(title, text, okLabel, вид) {
         document.querySelectorAll('.ad-confirm-overlay').forEach(function(el) { el.remove(); });
 
         var overlay = document.createElement('div');
         overlay.className = 'ad-confirm-overlay';
         overlay.innerHTML =
-            '<div class="ad-confirm-modal">' +
+            '<div class="ad-confirm-modal' + (вид === 'warn' ? ' ad-confirm-warn' : '') + '">' +
                 '<div class="ad-confirm-title">' + title + '</div>' +
                 '<div class="ad-confirm-text">' + text + '</div>' +
                 '<div class="ad-confirm-actions">' +
-                    '<button class="ad-btn ad-btn-primary" id="adNoticeOk">' +
+                    '<button class="ad-btn ' + (вид === 'warn' ? 'ad-btn-danger' : 'ad-btn-primary') + '" id="adNoticeOk">' +
                         (okLabel || (L.ok || 'Понятно')) + '</button>' +
                 '</div>' +
             '</div>';

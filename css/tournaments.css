@@ -212,11 +212,13 @@
     color: inherit;
 }
 
+/* Афиши пёстрые и с крупными надписями: при 0.78 они просвечивали ровно под
+   названием турнира. Архиву картинка важна как пятно цвета, не более */
 .tournament-card[style*="background-image"]::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(10, 10, 10, 0.78);
+    background: rgba(10, 10, 10, 0.93);
     border-radius: inherit;
     z-index: 0;
 }
@@ -581,7 +583,7 @@
 /* Постеры бывают светлыми, и подпись по ним не читалась: затемняем фон
    сильнее и даём тексту тень */
 .trn-strip[style*="background-image"]::before {
-    background: rgba(10, 10, 10, 0.9);
+    background: rgba(10, 10, 10, 0.93);
 }
 .trn-strip h4,
 .trn-strip .trn-strip-sub,
@@ -981,17 +983,20 @@
 }
 
 /* Заявка уже подана — кнопка гаснет и подписывается статусом */
+/* «Вы в основной сетке» — это хорошая новость, а не выключенная кнопка.
+   Серый цвет читался как «недоступно», и человек не понимал, записан он или нет */
 .btn-register.is-registered {
-    background: transparent;
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
-    color: var(--text-muted, #888);
+    background: rgba(204, 255, 0, 0.14);
+    border: 1px solid rgba(204, 255, 0, 0.45);
+    color: var(--accent, #CCFF00);
+    font-weight: 700;
     cursor: default;
     pointer-events: none;
 }
 
 .btn-register.is-registered:hover {
-    background: transparent;
-    color: var(--text-muted, #888);
+    background: rgba(204, 255, 0, 0.14);
+    color: var(--accent, #CCFF00);
     transform: none;
     box-shadow: none;
 }

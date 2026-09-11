@@ -2925,8 +2925,13 @@ select:-webkit-autofill {
    Раньше это были высокие карточки с фотографией турнира, а кнопка «Снять
    заявку» стояла за пределами карточки, справа от неё. Строк по десять на
    странице — карточками блок уезжал на два экрана. */
+/* Название целиком: у клуба два турнира с общим началом и разным хвостом
+   («…Futures» и «…Masters»). В обрезанном виде строки неразличимы, и человек
+   снимает заявку не с того турнира */
 .db-tour-table .db-match-tournament {
     max-width: none;
+    white-space: normal;
+    overflow: visible;
 }
 
 .db-tour-link {
@@ -2944,9 +2949,16 @@ select:-webkit-autofill {
     color: var(--text-muted);
 }
 
-/* Снятая, отклонённая, непрошедшая заявка — тусклее: игра не состоялась */
-.db-tour-status-off {
-    opacity: 0.6;
+/* Статус заявки берём общий (.kslt-status), только ужимаем под строку таблицы */
+.db-tour-table .kslt-status {
+    padding: 5px 11px;
+    font-size: 0.75rem;
+    gap: 6px;
+}
+
+.db-tour-table .kslt-status::before {
+    width: 6px;
+    height: 6px;
 }
 
 .db-tour-pts {
@@ -3572,6 +3584,14 @@ select:-webkit-autofill {
     font-size: 0.78rem;
     color: var(--text-dim);
     margin-top: 2px;
+}
+
+/* Две кнопки в ряд: «это я» и «не я» */
+.db-link-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
 }
 
 .db-link-take,

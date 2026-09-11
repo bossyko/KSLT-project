@@ -232,8 +232,27 @@
     gap: var(--space-md);
 }
 
+/* В боковой колонке места мало: статус и отсчёт уводим под текст, чтобы
+   название занимало всю ширину и не обрывалось на «Дружеский турнир в…» */
+.to-side-stack .to-compact-thumb {
+    grid-template-columns: auto minmax(0, 1fr);
+}
+
+.to-side-stack .to-compact .to-compact-right {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.to-side-stack .to-compact-info h4 {
+    -webkit-line-clamp: 3;
+}
+
+/* Боковые карточки держат свою высоту. Растянутые на всю высоту большой
+   афиши, они разъезжались: колонки сжимались, название обрезалось, а адрес
+   расползался на три строки */
 .to-side-stack .to-compact {
-    flex: 1;
+    flex: 0 0 auto;
 }
 
 /* Featured card (big) */
@@ -489,13 +508,63 @@
     background-position: center;
 }
 
+/* Архивные карточки тусклее живых, при наведении — полная яркость */
+.to-compact-past,
+.to-featured[data-status="past"] {
+    opacity: 0.7;
+}
+
+.to-compact-past:hover,
+.to-featured[data-status="past"]:hover {
+    opacity: 1;
+}
+
+/* Завершённые: афиша остаётся фоном, но глушим её почти полностью — иначе
+   крупные надписи с самой афиши просвечивают ровно под названием турнира */
 .to-compact[style*="background-image"]::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(10, 10, 10, 0.75);
+    background: rgba(10, 10, 10, 0.955);
     border-radius: inherit;
     z-index: 0;
+}
+
+/* Живые турниры и баттлы: афиша миниатюрой слева, текст на чистом фоне.
+   Так вид не зависит от того, какую картинку загрузили */
+.to-compact-thumb {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-md, 14px);
+    align-items: center;
+    /* Слева место под афишу: она лежит отдельным слоем и тянется во всю высоту */
+    padding-left: calc(210px + var(--space-md, 14px));
+    overflow: hidden;
+}
+
+/* Афиша во всю высоту строки. Маленький квадрат читался хуже: на полосе видно
+   и цвет, и часть надписи с самой афиши */
+/* Афиша прижата к левому краю и тянется во всю высоту карточки. В сетке это
+   не выходило: строки у карточки неявные, и «от первой до последней» для них
+   не работает — картинка обрывалась на середине */
+.to-compact-thumb::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 210px;
+    background-image: var(--poster);
+    background-size: cover;
+    background-position: center;
+}
+
+/* Афиши нет — миниатюру не рисуем и место под неё не держим */
+.to-compact-thumb:not([style*="--poster"]) {
+    grid-template-columns: auto 1fr auto;
+}
+
+.to-compact-thumb:not([style*="--poster"])::before {
+    display: none;
 }
 
 .to-compact > * {
@@ -569,14 +638,17 @@
     min-width: 0;
 }
 
+/* Название — до двух строк. Обрезка в одну строку съедала половину имени
+   турнира: «Дружеский т…» не говорит ни о чём */
 .to-compact-info h4 {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .to-compact-sub {
@@ -991,4 +1063,96 @@
         -webkit-box-orient: vertical;
         line-height: 1.25;
     }
+}
+
+/* Живой турнир — карточка с афишей сбоку, как на главной. Обёртка нужна,
+   чтобы карточка занимала ту же ячейку сетки, что и прежняя большая.
+   Высоту ограничиваем: вертикальная афиша тянула карточку почти на экран */
+.to-featured-side {
+    display: flex;
+    max-height: 420px;
+}
+
+.to-featured-side .tc {
+    width: 100%;
+}
+
+/* Состояние турнира — плашкой поверх афиши, как в большой карточке. Внизу
+   рядом с кнопкой оно читалось как ещё одна кнопка */
+.to-compact-thumb {
+    position: relative;
+}
+
+/* Считаем от самой карточки, а не от блока справа: у него своя точка отсчёта,
+   и плашка оставалась внизу рядом с кнопкой */
+.to-compact-thumb .to-compact-right {
+    position: static;
+}
+
+.to-compact-thumb .to-compact-status {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    max-width: calc(210px - 20px);
+    font-size: 0.62rem;
+    line-height: 1.2;
+    white-space: normal;
+    text-align: center;
+}
+
+/* Отсчёт в боковой карточке — сверху, над кнопкой: он важнее, чем действие,
+   и внизу под кнопкой читался как приписка */
+.to-compact-thumb .to-compact-right {
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+}
+
+/* Кнопка записи в боковой карточке: раньше там висел только статус
+   «регистрация открыта», а записаться было негде */
+.to-compact-regbtn {
+    padding: 7px 16px;
+    border-radius: 999px;
+    border: none;
+    background: var(--accent);
+    color: #0A0A0A;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.to-compact-regbtn:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+.to-compact-regbtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* В боковой карточке состояние заявки тоже по центру своей колонки */
+.to-compact .btn-register.is-registered,
+.to-compact .btn-register.is-pending-guest,
+.to-compact .btn-register.is-refused,
+.to-featured .btn-register.is-registered,
+.to-featured .btn-register.is-pending-guest,
+.to-featured .btn-register.is-refused {
+    align-self: center;
+    text-align: center;
+}
+
+/* Отказ — красным: молчать о нём нельзя */
+.btn-register.is-refused {
+    background: rgba(244, 67, 54, 0.14) !important;
+    border-color: rgba(244, 67, 54, 0.45) !important;
+    color: #f44336 !important;
+}
+
+/* Заявка с гостем ждёт решения менеджера: не зелёная «вы в сетке», но и не
+   отказ — янтарная, как всё, что требует внимания */
+.btn-register.is-pending-guest {
+    background: rgba(255, 179, 0, 0.14) !important;
+    border-color: rgba(255, 179, 0, 0.4) !important;
+    color: #ffb300 !important;
 }

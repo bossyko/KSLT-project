@@ -217,6 +217,7 @@ Deno.serve(async (req) => {
     // ============================================
     // FLOW: REGISTER
     // ============================================
+
     if (flow === 'register') {
       const email = (body.email as string || identifier).trim().toLowerCase()
       const password = body.password as string
@@ -225,6 +226,7 @@ Deno.serve(async (req) => {
       const birthDay = body.birth_day as number | null
       const birthMonth = body.birth_month as number | null
       const birthYear = body.birth_year as number | null
+      const ntrp = body.ntrp != null ? Number(body.ntrp) : null
 
       if (!password) {
         return json({ error: 'Password required' }, 400)
@@ -254,6 +256,10 @@ Deno.serve(async (req) => {
       if (!newUser?.user) {
         return json({ error: 'Failed to create user' }, 500)
       }
+
+      // Карточка игрока: без неё человек не может подать ни одной заявки, а
+      // сам завести её не в состоянии — заводим здесь же
+      await завестиКарточку(db, newUser.user.id, fullName, gender, ntrp)
 
       // Generate magic link for auto-login
       const { data: magicLink, error: magicErr } = await db.auth.admin.generateLink({
@@ -386,3 +392,84 @@ Deno.serve(async (req) => {
     return json({ error: 'Internal error' }, 500)
   }
 })
+
+// ============================================
+// Карточка игрока при регистрации
+// ============================================
+
+/**
+ * Карточка игрока для нового участника.
+ *
+ * Карточки всегда заводил клуб вручную, и человек, только что прошедший
+ * регистрацию, упирался в стену: «аккаунт не связан с карточкой игрока»,
+ * а выйти из этого сам не мог.
+ *
+ * Если карточка с таким именем уже есть и она свободна — не создаём вторую,
+ * а привязываем существующую: у людей, игравших раньше, там рейтинг и история.
+ * Иначе заводим новую с тем, что человек указал о себе.
+ */
+async function завестиКарточку(db: any, profileId: string, fullName: string, gender: string, ntrp: number | null) {
+  const имя = (fullName || '').trim()
+  if (!имя) return
+
+  try {
+    // Сравниваем не буквами, а звучанием: в базе карточки кириллицей, а
+    // регистрируются часто латиницей. «Konstantin Han» и «Константин Хан»
+    // должны узнаваться как один человек, иначе у половины клуба появятся
+    // вторые карточки. Порядок слов тоже не важен: «Хан Константин» — он же
+    const ключ = (n: string) => транслит(n).split('-').filter(Boolean).sort().join('-')
+    const мой = ключ(имя)
+
+    const { data: все } = await db.from('players').select('id, name, name_en')
+    const похожие = (все || []).filter((p: any) =>
+      ключ(p.name || '') === мой || (p.name_en ? ключ(p.name_en) === мой : false))
+
+    for (const карточка of похожие) {
+      const { data: занята } = await db
+        .from('profiles').select('id').eq('player_id', карточка.id).is('deleted_at', null).maybeSingle()
+      if (!занята) {
+        await db.from('profiles').update({ player_id: карточка.id }).eq('id', profileId)
+        return
+      }
+    }
+
+    // Своей карточки нет — заводим. Латиницей из имени, как остальные
+    const основа = транслит(имя)
+    let id = основа
+    for (let i = 2; i < 20; i++) {
+      const { data: есть } = await db.from('players').select('id').eq('id', id).maybeSingle()
+      if (!есть) break
+      id = основа + '-' + i
+    }
+
+    // Латиницей написанное имя кладём и в английское поле: в списках клуба
+    // имена кириллицей, и менеджеру будет с чем сверять
+    const латиницей = !/[а-яё]/i.test(имя)
+    const строка: Record<string, unknown> = { id, name: имя }
+    if (латиницей) строка.name_en = имя
+    if (gender === 'men' || gender === 'women') строка.gender = gender
+    if (ntrp) строка.ntrp_singles = ntrp
+
+    const { error } = await db.from('players').insert(строка)
+    if (error) {
+      console.error('карточку не завели:', error.message)
+      return
+    }
+    await db.from('profiles').update({ player_id: id }).eq('id', profileId)
+  } catch (e) {
+    // Регистрацию не роняем: человек вошёл, карточку допишет менеджер
+    console.error('карточку не завели:', String(e))
+  }
+}
+
+/** Имя латиницей для адреса карточки: «Максим Серко» → «maksim-serko». */
+function транслит(имя: string): string {
+  const карта: Record<string, string> = {
+    а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i',
+    й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't',
+    у: 'u', ф: 'f', х: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '',
+    э: 'e', ю: 'yu', я: 'ya'
+  }
+  return имя.toLowerCase().split('').map((с) => карта[с] !== undefined ? карта[с] : с)
+    .join('').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'player'
+}

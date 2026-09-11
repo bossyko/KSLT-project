@@ -168,7 +168,10 @@
         if (slots) meta.push('<span class="tc-slots' + (slots.tight ? ' tc-slots-tight' : '') + '">' + esc(slots.text) + '</span>');
         if (t.location) meta.push('<span>' + esc(isEn ? (t.location_en || t.location) : t.location) + '</span>');
 
-        var html = '<a class="tc' + (opts.featured ? ' tc-featured' : '') + '" href="' + href + '">' +
+        // Завершённые и отменённые приглушаем: живое должно тянуть взгляд
+        // первым, а архив — не спорить за внимание
+        var тускло = (s === 'done' || s === 'cancelled') ? ' tc-past' : '';
+        var html = '<a class="tc' + (opts.featured ? ' tc-featured' : '') + тускло + '" href="' + href + '">' +
             imageBlock(t, s) +
             '<div class="tc-body">' +
                 '<span class="tc-date">' + esc(dateText(t)) + '</span>' +
@@ -181,7 +184,17 @@
             html += '<p class="tc-desc">' + esc(d) + '</p>';
         }
         if (meta.length) html += '<div class="tc-meta">' + meta.join('') + '</div>';
-        if (opts.featured) html += '<span class="tc-btn">' + esc(buttonFor(s)) + '</span>';
+
+        // Записаться можно с любой карточки, а не только с главной в блоке:
+        // рядом стояли две карточки открытых турниров, и кнопка была у одной
+        var парный = t.format === 'doubles' || t.format === 'mixed_doubles';
+        if (s === 'open') {
+            html += '<button type="button" class="tc-btn btn-register to-register" data-tid="' +
+                esc(t.id) + '"' + (парный ? ' data-doubles="1"' : '') + '>' +
+                esc(L.btnOpen) + '</button>';
+        } else if (opts.featured) {
+            html += '<span class="tc-btn">' + esc(buttonFor(s)) + '</span>';
+        }
 
         html += '</div></a>';
         return html;
