@@ -528,6 +528,58 @@ document.addEventListener('DOMContentLoaded', function() {
         navigator.serviceWorker.register('/sw.js').catch(function() {});
     }
 
+    // Разделы подвала на телефоне складываются в гармошку
+    //
+    // Четыре списка ссылок подряд занимали три четверти экрана, а нажимают
+    // их единицы. Оставляем видимыми заголовки, содержимое раскрывается по
+    // нажатию — как в подвале Apple и ATP. На широком экране подвал прежний.
+    (function() {
+        var подвал = document.querySelector('footer .footer-content');
+        if (!подвал) return;
+
+        var УЗКО = 640;
+        var разделы = [].slice.call(подвал.querySelectorAll('.footer-block'))
+            .filter(function(б) { return !б.classList.contains('footer-brand') && б.querySelector('h4'); });
+        if (!разделы.length) return;
+
+        разделы.forEach(function(раздел) {
+            var заголовок = раздел.querySelector('h4');
+            заголовок.setAttribute('role', 'button');
+            заголовок.setAttribute('tabindex', '0');
+            заголовок.setAttribute('aria-expanded', 'false');
+
+            function переключить() {
+                if (window.innerWidth > УЗКО) return;
+                var открыт = раздел.classList.toggle('открыт');
+                заголовок.setAttribute('aria-expanded', открыт ? 'true' : 'false');
+            }
+
+            заголовок.addEventListener('click', переключить);
+            заголовок.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); переключить(); }
+            });
+        });
+
+        // Класс ставит скрипт, а не разметка: без него списки видны всегда,
+        // и подвал не превратится в четыре мёртвых заголовка
+        function пересобрать() {
+            var узко = window.innerWidth <= УЗКО;
+            подвал.classList.toggle('footer-acc', узко);
+            if (узко) return;
+            разделы.forEach(function(раздел) {
+                раздел.classList.remove('открыт');
+                раздел.querySelector('h4').setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        пересобрать();
+        var таймер;
+        window.addEventListener('resize', function() {
+            clearTimeout(таймер);
+            таймер = setTimeout(пересобрать, 150);
+        });
+    })();
+
     // Огонёк Live в шапке
     //
     // Раньше класс подставлялся при сборке страниц и только на главной:

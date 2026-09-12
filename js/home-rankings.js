@@ -34,7 +34,31 @@
 
     start();
 
+    /**
+     * Переключатель пола — на телефоне.
+     *
+     * Две таблицы рядом туда не помещаются, а листать их одну под другой
+     * долго. Кнопки просто помечают, какую колонку показывать: правила
+     * рейтинга не меняются, это только про вид.
+     */
+    function включитьПереключательПола() {
+        var полоса = document.querySelector('.rk-gender-switch');
+        var колонки = document.querySelector('.rankings-columns');
+        if (!полоса || !колонки) return;
+
+        колонки.setAttribute('data-пол', 'men');
+        полоса.addEventListener('click', function (e) {
+            var кнопка = e.target.closest('.rk-gender');
+            if (!кнопка) return;
+            полоса.querySelectorAll('.rk-gender').forEach(function (к) {
+                к.classList.toggle('active', к === кнопка);
+            });
+            колонки.setAttribute('data-пол', кнопка.dataset['пол']);
+        });
+    }
+
     async function start() {
+        включитьПереключательПола();
         if (!window.KSLT_RANKINGS) return;
 
         var data = null;

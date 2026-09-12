@@ -171,11 +171,19 @@
             });
         });
 
+        // Водяной знак — картинкой, а не фоном: фоновую графику браузер
+        // печатает только с включённой галочкой в диалоге, и подложка чаще
+        // всего просто не попадала бы в файл
+        var знак = document.createElement('div');
+        знак.className = 'ad-print-watermark';
+        знак.innerHTML = '<img src="../images/kslt-logo.svg" alt="">';
+
         var шапка = document.createElement('div');
         шапка.className = 'ad-print-title';
         шапка.textContent = название + ' — ' + что;
 
         панель.prepend(шапка);
+        панель.prepend(знак);
         document.body.classList.add('ad-printing');
         панель.classList.add('ad-print-area');
 
@@ -183,6 +191,7 @@
             document.body.classList.remove('ad-printing');
             панель.classList.remove('ad-print-area');
             шапка.remove();
+            знак.remove();
             спрятанные.forEach(function (td) { td.classList.remove('ad-no-print'); });
             спрятанные = [];
             window.removeEventListener('afterprint', прибрать);

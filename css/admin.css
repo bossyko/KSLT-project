@@ -5805,6 +5805,34 @@ select.ad-field-input {
         color: #000;
     }
 
+    /* Водяной знак: логотип клуба бледной подложкой по центру листа.
+       Позиция fixed — тогда он повторяется на каждой странице, а не только
+       на первой. Поверх него спокойно ложатся таблицы и сетка. */
+    body.ad-printing .ad-print-watermark {
+        display: block;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60%;
+        max-width: 120mm;
+        opacity: 0.06;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    body.ad-printing .ad-print-watermark img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    /* Содержимое — над знаком */
+    body.ad-printing .ad-print-area > *:not(.ad-print-watermark) {
+        position: relative;
+        z-index: 1;
+    }
+
     /* Тёмная тема на бумаге — это залитый чёрным лист и пустой картридж */
     body.ad-printing .ad-print-area .ad-table,
     body.ad-printing .ad-print-area .ad-table-card,
@@ -5841,6 +5869,89 @@ select.ad-field-input {
        половина на другом — так расписание не читается */
     body.ad-printing .ad-print-area tr {
         break-inside: avoid;
+    }
+
+    /* Сетка на бумаге.
+
+       Рамки матчей и соединительные линии сделаны под тёмную тему — светлые
+       и полупрозрачные. На белом листе они исчезали, и сетка печаталась
+       столбиком текста: непонятно, кто с кем играет. Здесь задаём им чёрный
+       цвет явно. */
+    body.ad-printing .ad-print-area .ad-brk-match {
+        border: 0.8pt solid #333 !important;
+        border-radius: 4pt;
+        background: #fff !important;
+        break-inside: avoid;
+    }
+
+    /* Обе строки матча одной высоты: на экране пустой слот держит место под
+       пару, и на бумаге ячейки получались разными — верхняя узкой, нижняя
+       вдвое выше */
+    body.ad-printing .ad-print-area .ad-brk-player {
+        border-bottom: 0.5pt solid #999 !important;
+        min-height: 0 !important;
+        height: 20pt;
+        align-items: center;
+        box-sizing: border-box;
+    }
+
+    /* Матч не растягивается по высоте колонки: flex тянул его на всю
+       свободную высоту, и под именами оставалось пустое место */
+    body.ad-printing .ad-print-area .ad-brk-match {
+        height: auto !important;
+        min-height: 0 !important;
+        align-self: flex-start;
+    }
+
+    body.ad-printing .ad-print-area .ad-brk-match > * {
+        flex: none !important;
+    }
+
+    body.ad-printing .ad-print-area .ad-brk-player:last-of-type {
+        border-bottom: none !important;
+    }
+
+    /* Соединительные линии рисуем границей, а не фоном: браузер печатает
+       фоновую графику только если в диалоге включить «Фоновая графика», и по
+       умолчанию она выключена — линии просто пропадали из PDF. Границы
+       печатаются всегда. */
+    body.ad-printing .ad-print-area .ad-brk-conn-top::after,
+    body.ad-printing .ad-print-area .ad-brk-conn-bottom::after,
+    body.ad-printing .ad-print-area .ad-brk-conn-mid::after {
+        background: none !important;
+        height: 0 !important;
+        border-top: 0.8pt solid #333 !important;
+    }
+
+    body.ad-printing .ad-print-area .ad-brk-conn-top::before,
+    body.ad-printing .ad-print-area .ad-brk-conn-bottom::before {
+        background: none !important;
+        width: 0 !important;
+        border-left: 0.8pt solid #333 !important;
+    }
+
+    /* И заодно просим браузер печатать цвета как на экране — если галочка
+       всё-таки включена, подсветки и заливки не будут выглядеть случайно */
+    body.ad-printing .ad-print-area {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Счёт и номер посева — тоже чёрным: на экране они лаймовые */
+    body.ad-printing .ad-print-area .ad-brk-seed,
+    body.ad-printing .ad-print-area .ad-brk-set,
+    body.ad-printing .ad-print-area .ad-brk-schedule {
+        color: #000 !important;
+    }
+
+    /* Круг целиком не разрывается между страницами, если помещается */
+    body.ad-printing .ad-print-area .ad-brk-round {
+        break-inside: avoid;
+    }
+
+    /* Победителя видно и на бумаге: заливки нет, зато имя жирное */
+    body.ad-printing .ad-print-area .ad-brk-player.winner .ad-brk-name {
+        font-weight: 700 !important;
     }
 
     @page {

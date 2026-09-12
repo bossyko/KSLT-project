@@ -125,6 +125,17 @@ input, button, select, textarea {
     transition: all var(--transition-base);
 }
 
+/* На телефоне шапка не полагается на размытие.
+   Она держалась на `backdrop-filter`, а фон был прозрачным на 60%. В Safari
+   размытие срывается, когда за элементом идёт анимированная картинка —
+   и шапка просто исчезала на фоне тёмного первого экрана. */
+@media (max-width: 768px) {
+    .floating-header.header-hybrid {
+        background: rgba(5, 5, 5, 0.92);
+        border-bottom: 1px solid rgba(204, 255, 0, 0.22);
+    }
+}
+
 .floating-header.header-hybrid.scrolled {
     background: rgba(5, 5, 5, 0.85);
     backdrop-filter: blur(24px);
@@ -2572,6 +2583,33 @@ h2 {
 }
 
 /* Rankings: columns, tabs, panels */
+/* Переключатель пола — только на телефоне: на широком экране обе таблицы
+   стоят рядом, и выбирать нечего */
+.rk-gender-switch {
+    display: none;
+    gap: 8px;
+    margin: 0 0 14px;
+}
+
+.rk-gender {
+    flex: 1;
+    padding: 9px 14px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rk-gender.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+}
+
 .rankings-columns {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -2677,6 +2715,14 @@ h2 {
         rgba(14, 14, 14, 0.7) 30%,
         var(--bg-secondary) 70%
     );
+}
+
+/* Игроки уместились в один ряд: накладка накрыла бы его целиком, и в блоке
+   осталась бы одна кнопка. Опускаем её на середину карточек — верхняя
+   половина игроков видна, нижняя уходит в туман. Точную высоту ставит
+   home-partners.js: только он знает, где кончается ряд */
+.guest-section-cta.guest-cta-half {
+    max-height: none;
 }
 
 .guest-cta-card {
@@ -2807,7 +2853,10 @@ h2 {
 }
 
 @media (max-width: 768px) {
-    .guest-cta-card {
+    /* Тот же вес, что у базового правила рейтинга: иначе отступы карточки
+       на телефоне не применялись */
+    .guest-cta-card,
+    #rankings .guest-cta-card {
         padding: 28px 24px 24px;
     }
     .guest-cta-title {
@@ -3042,11 +3091,16 @@ h2 {
     font-size: 0.9rem;
 }
 
+/* Селекторы из двух классов: базовое правило задано как
+   `.courts-grid.vn-four`, и одного `.vn-four` оно перебивало — на телефоне
+   сетка оставалась в четыре колонки по полсотни пикселей */
 @media (max-width: 1100px) {
-    .vn-four { grid-template-columns: repeat(2, 1fr); }
+    .courts-grid.vn-four,
+    .coaches-grid.vn-four { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
-    .vn-four { grid-template-columns: 1fr; }
+    .courts-grid.vn-four,
+    .coaches-grid.vn-four { grid-template-columns: 1fr; }
 }
 
 .courts-grid {
@@ -3719,6 +3773,12 @@ h2 {
     );
 }
 
+/* Пауза по касанию: на телефоне навести курсор нечем, и дорожка не
+   останавливалась никогда — в плитку-ссылку попасть было невозможно */
+.carousel-track-infinite.is-paused {
+    animation-play-state: paused;
+}
+
 .carousel-track-infinite {
     display: flex;
     width: max-content;
@@ -3809,7 +3869,10 @@ h2 {
     }
 
     .carousel-track-infinite {
-        animation-duration: 20s;
+        /* На телефоне дорожка короче, и при том же времени логотипы
+           пролетали за четыре секунды вместо минуты. Замедляем, а не
+           ускоряем: читать надо успевать. */
+        animation-duration: 110s;
     }
 }
 
@@ -3819,7 +3882,7 @@ h2 {
     }
 
     .carousel-track-infinite {
-        animation-duration: 15s;
+        animation-duration: 110s;
     }
 
     .players-grid {
@@ -4077,7 +4140,10 @@ h2 {
         padding: 0 5%;
     }
 
-    .trn-search-wrap {
+    /* На странице рейтинга у этого же блока есть правило с родителем, оно
+       весит больше и оставляло поиск шириной 320 даже там, где места хватает */
+    .trn-search-wrap,
+    .pl-category-row .trn-search-wrap {
         flex: 1 1 100%;
         max-width: 480px;
     }
@@ -4462,10 +4528,129 @@ h2 {
     .tc-featured { max-height: none; }
 }
 
+/* На телефоне карточки шли по одной на всю ширину — ряд из четырёх штук
+   растягивался на четыре экрана. Ставим по две: афиша сверху, короткая
+   подпись снизу, как на витринах магазинов. */
 @media (max-width: 640px) {
-    .tournaments-grid > .tc { grid-column: span 12 !important; }
+    .tournaments-grid > .tc { grid-column: span 6 !important; }
     .tc-featured { grid-template-columns: 1fr; }
-    .tc-featured .tc-image { height: 180px; }
+    .tc-featured .tc-image { height: 130px; }
+    .tc-image { height: 130px; }
+
+    /* Больше четырёх на главной не показываем */
+    .tournaments-grid > .tc:nth-child(n+5) { display: none; }
+
+    /* Название — две строки. Селектор с родителем: у карточки есть своё
+       правило, и одиночный класс ему проигрывал — заголовок оставался
+       нулевой высоты и пропадал совсем */
+    .tournaments-grid .tc .tc-title,
+    .tournaments-grid .tc-featured .tc-title {
+        font-size: 0.88rem;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin: 4px 0 6px;
+        max-height: none;
+    }
+
+    /* Описание убираем у всех карточек, включая крупную: у неё своё правило
+       с родителем, и одиночный класс ему проигрывал */
+    .tournaments-grid .tc .tc-desc,
+    .tournaments-grid .tc-featured .tc-desc,
+    .tc-text, .tc-venue, .tc-place { display: none; }
+
+    /* Место проведения на карточке не показываем: оно приходит подписью без
+       класса и занимало три строки из четырёх. Всё это есть на странице
+       турнира, а в плитке важнее название и свободные места */
+    .tournaments-grid .tc .tc-meta > span:not([class]) { display: none; }
+
+    /* Дата и отсчёт в одну строку и мельче: вдвоём они занимали три */
+    .tc-date { font-size: 0.68rem; }
+    .tc-countdown { font-size: 0.62rem; padding: 3px 6px; }
+    .tc-meta { font-size: 0.68rem; margin-top: auto; }
+
+    /* Значок состояния вылезал за карточку: он ставится от левого края и
+       растёт по содержимому, а в колонке 170 пикселей «Регистрация открыта»
+       длиннее самой карточки. Ужимаем и не даём выйти за границы */
+    .tc-status, .tc-badge {
+        top: 6px;
+        left: 6px;
+        right: 6px;
+        width: fit-content;
+        max-width: calc(100% - 12px);
+        font-size: 0.58rem;
+        padding: 3px 7px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Кнопка была шире карточки: ширина считалась без внутренних отступов */
+    .tournaments-grid .tc .tc-btn,
+    .tournaments-grid .tc .btn-register {
+        box-sizing: border-box;
+        /* Кнопка растянута на всю карточку, а надпись у неё — обычный span:
+           без выравнивания «Смотреть сетку» прижималось к левому краю */
+        text-align: center;
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* Афиши одной высоты: у крупной карточки своё правило, и ряд выходил
+       ступенькой */
+    .tournaments-grid .tc .tc-image,
+    .tournaments-grid .tc-featured .tc-image {
+        height: 120px;
+        flex: 0 0 120px;
+    }
+
+    /* Карточки были вытянутыми: между строчками копился воздух, и четыре
+       плитки занимали два экрана. Ужимаем отступы и промежутки — содержимое
+       то же, но ряд помещается целиком */
+    .tournaments-grid .tc .tc-body {
+        padding: 8px 9px 10px;
+        gap: 0;
+    }
+
+    .tournaments-grid .tc .tc-date { margin: 0 0 4px; }
+    .tournaments-grid .tc .tc-countdown { margin: 0 0 5px; }
+    .tournaments-grid .tc .tc-title { margin: 0 0 5px; }
+    .tournaments-grid .tc .tc-slots { margin: 0 0 6px; font-size: 0.7rem; }
+    .tournaments-grid .tc .tc-meta { margin: 0 0 6px; }
+
+    .tournaments-grid .tc .tc-btn,
+    .tournaments-grid .tc .btn-register {
+        margin-top: auto;
+        padding: 7px 8px;
+    }
+
+    /* На широком экране первым трём карточкам задана высота 380px, чтобы ряд
+       не шёл ступенькой. На телефоне эта высота — чистый воздух: содержимого
+       на 170px, остальное пустота. Пусть карточка будет по содержимому */
+    .tournaments-grid > .tc:nth-child(-n+3) { height: auto; }
+
+    /* Отсчёт в одну строку: «Старт через» и цифры переносились по слогам */
+    .tournaments-grid .tc .tc-cd-label { display: none; }
+    .tournaments-grid .tc .tc-countdown {
+        display: inline-flex;
+        gap: 4px;
+        padding: 3px 7px;
+        white-space: nowrap;
+    }
+
+    /* Карточки в ряду одной высоты: содержимое тянется, кнопка внизу */
+    .tournaments-grid > .tc { align-self: stretch; }
+    .tc-body { display: flex; flex-direction: column; flex: 1; padding: 10px 10px 12px; }
+    .tc .btn-primary, .tc-btn {
+        width: 100%;
+        padding: 8px;
+        font-size: 0.76rem;
+        margin-top: 8px;
+    }
 }
 
 /* ========================================
@@ -5342,7 +5527,10 @@ h2 {
    ======================================== */
 
 @media (max-width: 1200px) {
-    .floating-header {
+    /* Селектор из двух классов: базовое правило шапки тоже такое, и
+       правило на один класс ему проигрывало — мобильные отступы молча не
+       применялись, шапка держала 80 пикселей полей с каждой стороны */
+    .floating-header.header-hybrid {
         padding: 0 var(--space-lg);
     }
 }
@@ -5387,11 +5575,13 @@ h2 {
 }
 
 @media (max-width: 768px) {
-    .floating-header {
-        padding: 0 var(--space-md);
+    .floating-header.header-hybrid {
+        padding: 0 20px;
     }
 
-    .floating-header.scrolled {
+    /* Тот же вес, что у базового правила: иначе фон при прокрутке на
+       телефоне не применялся */
+    .floating-header.header-hybrid.scrolled {
         background: rgba(0, 0, 0, 0.95);
     }
 
@@ -5453,12 +5643,17 @@ h2 {
         padding-top: 0;
     }
 
+    /* Первый экран на телефоне не запираем в высоту окна.
+       Заголовок, кнопка, пять цифр в три ряда и полоса спонсоров в один
+       экран не помещаются, а `overflow: hidden` не давал им выйти за край —
+       содержимое наезжало само на себя и страница не прокручивалась. */
     .hero {
         padding: clamp(4px, 1vh, 8px) 5% 0;
-        height: calc(100vh - 2px);
-        height: calc(100dvh - 2px);
-        max-height: calc(100vh - 2px);
-        max-height: calc(100dvh - 2px);
+        height: auto;
+        max-height: none;
+        min-height: calc(100vh - 2px);
+        min-height: calc(100dvh - 2px);
+        overflow: visible;
     }
 
     .hero-content {
@@ -5534,8 +5729,12 @@ h2 {
    ======================================== */
 
 @media (max-width: 992px) {
+    /* Двенадцать колонок оставляем и на телефоне: карточки делят ряд
+       пополам (span 6), то есть по две в ряд. Одна колонка здесь ломала
+       расчёт — карточка на «span 6» растягивалась на всю ширину */
     .tournaments-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 12px;
     }
 
     .tournament-card-featured {
@@ -5558,7 +5757,11 @@ h2 {
 
 @media (max-width: 768px) {
     section {
-        padding: var(--space-xl) 5%;
+        /* Было --space-xl (80px): между разделами копилось 160 пикселей пустоты —
+           пол-экрана телефона уходило в никуда. 40 хватает, чтобы разделы
+           читались раздельно. По бокам 5% давали 19 пикселей — карточки почти
+           упирались в край экрана */
+        padding: 40px 26px;
     }
 
     .section-header {
@@ -5579,7 +5782,10 @@ h2 {
         grid-template-columns: 1fr;
     }
 
-    .ranking-row {
+    /* Тот же вес, что у правила внутри панели рейтинга: без этого на
+       телефоне оставалось пять колонок вместо четырёх, и строка не влезала */
+    .ranking-row,
+    .rankings-panel .ranking-row {
         grid-template-columns: 40px 1fr 70px 50px;
         padding: var(--space-sm) var(--space-md);
     }
@@ -6725,8 +6931,8 @@ h2 {
    375px — Ultra-small phones (iPhone SE)
    ======================================== */
 @media (max-width: 375px) {
-    .floating-header {
-        padding: 0 var(--space-sm);
+    .floating-header.header-hybrid {
+        padding: 0 16px;
     }
 
     nav {
@@ -7432,6 +7638,15 @@ input:-internal-autofill-previewed {
     }
 }
 
+/* На компьютере новостей три, как было: сетка в три колонки, и четвёртая
+   карточка вставала бы одна во втором ряду. На телефоне она нужна — там
+   новости идут по две в два ряда */
+@media (min-width: 641px) {
+    .hn-grid > .hn-card:nth-child(n+4) {
+        display: none;
+    }
+}
+
 /* Подсказка под полем в форме входа: пояснение, а не ошибка */
 .auth-hint {
     margin-top: 6px;
@@ -7496,4 +7711,616 @@ input:-internal-autofill-previewed {
 .to-featured .kslt-status {
     align-self: center;
     text-align: center;
+}
+
+
+/* ============================================
+   ТЕЛЕФОН: последние правила
+   ============================================
+   Стоят в конце файла намеренно. Базовые правила этих же блоков
+   объявлены ниже по файлу, и при равном весе побеждало последнее —
+   мобильные объявления молча не применялись. */
+
+/* ---- Телефон: рейтинг одной таблицей ----
+   Две колонки, мужская и женская, рядом не помещаются, а десять столбцов в
+   строке ужимали имя до многоточия. Оставляем то, ради чего сюда приходят:
+   место, имя, NTRP и очки. Пол переключается кнопками. */
+@media (max-width: 768px) {
+    .rk-gender-switch {
+        display: flex;
+    }
+
+    .rankings-columns {
+        grid-template-columns: 1fr;
+    }
+
+    /* Показываем только выбранный пол */
+    .rankings-columns[data-пол="men"] .rankings-col:nth-child(2),
+    .rankings-columns[data-пол="women"] .rankings-col:nth-child(1) {
+        display: none;
+    }
+
+    /* Заголовок колонки не нужен: пол и так выбран кнопкой выше */
+    .rankings-col-title {
+        display: none;
+    }
+
+    .rk-country,
+    .rk-wl,
+    .rk-change {
+        display: none;
+    }
+
+    .rk-row {
+        grid-template-columns: 34px 1fr 54px 58px;
+    }
+
+    .rk-name {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+    }
+}
+
+/* ---- Телефон: карточки турниров на главной ----
+   На главной живёт другая карточка, `.tournament-card`, и крупная первая
+   занимала ряд целиком: внутри неё два столбца, фотография и текст, и на
+   390 пикселях от текста оставалась полоска. Здесь все карточки одинаковые,
+   по две в ряд, фотография сверху. */
+@media (max-width: 768px) {
+    .tournaments-grid .tournament-card-featured {
+        grid-column: span 1;
+        display: flex;
+        flex-direction: column;
+        max-height: none;
+    }
+
+    .tournaments-grid .tournament-card-featured .tournament-image {
+        height: 110px;
+    }
+
+    /* Больше четырёх на главной не показываем: дальше — ссылка в раздел */
+    .tournaments-grid > .tournament-card:nth-child(n+5) {
+        display: none;
+    }
+
+    .tournament-card .tournament-info {
+        padding: 10px 12px 12px;
+    }
+
+    /* Карточка на телефоне: крупная афиша и короткая подпись.
+       Полное название занимало шесть строк, описание — ещё пять, и от
+       карточки оставалась колонка текста без картинки. */
+    .tournament-card .tournament-title {
+        font-size: 0.92rem;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Описание на телефоне не показываем: название и дата уже всё сказали,
+       подробности — на странице турнира */
+    .tournament-card .tournament-desc,
+    .tournament-card .tournament-description {
+        display: none;
+    }
+
+    .tournament-card .tournament-date {
+        font-size: 0.7rem;
+    }
+
+    /* Карточки одной высоты: иначе ряд идёт лесенкой */
+    .tournaments-grid > .tournament-card {
+        align-self: stretch;
+    }
+
+    .tournament-card .tournament-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .tournament-card .tournament-meta {
+        margin-top: auto;
+        font-size: 0.72rem;
+    }
+
+    /* Кнопка во всю ширину карточки и мельче: она была шире колонки */
+    .tournament-card .btn-primary,
+    .tournament-card .tournament-btn {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 0.78rem;
+        text-align: center;
+    }
+
+    /* У новостей та же беда: подпись длиннее обложки */
+    .hn-card h3 {
+        font-size: 0.9rem;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .hn-card p {
+        display: none;
+    }
+
+    /* Новости на телефоне шли колонкой по одной: четыре карточки занимали
+       полтора экрана. Ставим две в ряд, как турниры */
+    .hn-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .hn-card h3 {
+        font-size: 0.85rem;
+        padding: 0 9px;
+        margin: 8px 0 0;
+    }
+
+    /* Дата и прочие подписи под обложкой — мельче, отступы теснее */
+    .hn-card .hn-body,
+    .hn-card .hn-meta,
+    .hn-card time {
+        font-size: 0.7rem;
+    }
+
+    .hn-card .hn-body { padding: 8px 9px 10px; }
+
+    /* Награды: по две в ряд карточки шли лесенкой на три ряда, и кнопка
+       «Начать путь к победе» оказывалась глубоко за экраном. Ставим три
+       в ряд — открытые достижения укладываются в два ряда, под ними
+       размытый ряд и кнопка поверх него */
+    .badges-cta-cards {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .badge-cta-card {
+        padding: 9px 5px;
+        gap: 3px;
+    }
+
+    .badge-cta-emoji { font-size: 1.5rem; }
+
+    .badge-cta-name {
+        font-size: 0.68rem;
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    /* Пояснение к значку на трёх колонках не читается — остаётся название */
+    .badge-cta-desc { display: none; }
+
+    /* Из закрытых показываем один ряд: он и так под туманом, а лишние ряды
+       только растягивали блок */
+    .badges-cta-locked .badge-cta-card:nth-child(n+4) { display: none; }
+
+    .badges-cta-box {
+        margin-top: -38px;
+        padding: 16px 20px;
+    }
+
+    /* Фильтры рейтинга: пять кнопок требовали 416 пикселей при 338 доступных,
+       и «Pro-Masters» срывалась одна на вторую строку. Ужимаем кнопки и держим
+       их одной лентой — на узком телефоне она прокручивается вбок */
+    .rankings-tabs {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+        gap: 3px;
+    }
+
+    .rankings-tabs::-webkit-scrollbar { display: none; }
+
+    .rankings-tab {
+        flex: 0 0 auto;
+        /* По бокам тесно, чтобы все пять помещались в строку, а по высоте
+           наоборот просторнее: 30 пикселей для пальца мало, 36 — рабочий
+           размер, и ширина строки от этого не растёт */
+        padding: 10px 8px;
+        font-size: 0.72rem;
+    }
+
+    /* Кнопка «наверх» стояла в 32 пикселях от края и налезала на содержимое —
+       на телефоне край дороже */
+    .scroll-to-top {
+        right: 16px;
+        bottom: 20px;
+    }
+
+    /* «Давай сыграем»: на телефоне карточки шли по одной в столбик, десять
+       штук растягивались на три экрана. Ставим три в ряд и оставляем два
+       ряда — дальше приглашает кнопка входа. Селектор с идентификатором,
+       иначе его перебьёт правило блока на широком экране */
+    #players .pt-grid {
+        /* minmax(0, 1fr), а не 1fr: колонка не сжимается ниже своего
+           содержимого, и кнопка «Пригласить» выталкивала третью карточку
+           за правый край экрана */
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    #players .pt-card { min-width: 0; }
+
+    #players .pt-name,
+    #players .pt-category {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+
+    #players .pt-grid > .pt-card:nth-child(n+7) { display: none; }
+
+    #players .pt-card {
+        padding: 10px 6px 12px;
+    }
+
+    #players .pt-avatar,
+    #players .pt-avatar-placeholder {
+        width: 52px;
+        height: 52px;
+        font-size: 1rem;
+    }
+
+    #players .pt-avatar-wrap { margin-bottom: 8px; }
+    #players .pt-name { font-size: 0.78rem; }
+    #players .pt-category { font-size: 0.66rem; }
+    #players .pt-ntrp-badge { font-size: 0.6rem; padding: 2px 6px; }
+
+    /* Счёт побед и поражений словами на три колонки не помещается —
+       остаётся полоска формы */
+    #players .pg-record { display: none; }
+
+    /* Приглашение войти занимало полэкрана: значок 40 пикселей, крупный
+       заголовок и кнопка в 28 пикселей отступов по бокам. На телефоне
+       это карточка-подсказка, а не главный герой блока */
+    .guest-cta-card {
+        padding: 18px 16px 16px;
+        border-radius: 18px;
+    }
+
+    .guest-cta-icon {
+        width: 32px;
+        height: 32px;
+        margin-bottom: 10px;
+    }
+
+    .guest-cta-title {
+        font-size: 0.88rem;
+        margin-bottom: 12px;
+    }
+
+    .guest-cta-btn {
+        padding: 10px 22px;
+        font-size: 0.8rem;
+        border-radius: 10px;
+    }
+
+    #players .guest-cta-icon { width: 32px; height: 32px; margin-bottom: 10px; }
+    #players .guest-cta-title { font-size: 0.88rem; }
+    #players .guest-cta-btn { padding: 10px 22px; font-size: 0.8rem; }
+    #rankings .guest-cta-icon { width: 32px; height: 32px; margin-bottom: 10px; }
+    #rankings .guest-cta-title { font-size: 0.88rem; }
+    #rankings .guest-cta-btn { padding: 10px 22px; font-size: 0.8rem; }
+
+    /* «О проекте»: шесть пунктов шли столбиком по 84 пикселя — на них одних
+       уходило полтора экрана. Ставим по два в ряд и прижимаем значок к тексту */
+    .about-features {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .feature {
+        gap: 6px;
+    }
+
+    .feature-icon { font-size: 1.1rem; }
+    .feature h4 { font-size: 0.8rem; margin: 0 0 2px; line-height: 1.2; }
+    .feature p { font-size: 0.68rem; line-height: 1.3; margin: 0; }
+
+    /* Футер шёл сплошной колонкой на 1116 пикселей: пять блоков подряд с
+       промежутком в 40. Ставим разделы по два в ряд — «Навигация» рядом с
+       «Игрокам», «Спонсорам» рядом с «Контактами», — а шапку с логотипом
+       оставляем во всю ширину */
+    .footer-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 14px;
+    }
+
+    .footer-brand {
+        grid-column: 1 / -1;
+    }
+
+    /* «Контакты» — последний блок, и с широкого экрана ему досталось
+       растягивание во всю ширину: он вставал один под «Спонсорами»
+       вместо того, чтобы встать рядом */
+    .footer-block:last-child {
+        grid-column: auto;
+        margin-top: 0;
+    }
+
+    .footer-block h4 {
+        font-size: 0.78rem;
+        margin-bottom: 6px;
+    }
+
+    /* Гармошка: видны только заголовки, списки раскрываются по нажатию.
+       Класс footer-acc ставит script.js — если он не отработал, подвал
+       остаётся обычным, со всеми ссылками на виду */
+    .footer-acc {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .footer-acc .footer-block:not(.footer-brand) {
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        padding: 0;
+    }
+
+    .footer-acc .footer-block h4 {
+        position: relative;
+        margin: 0;
+        /* Строка была 45 пикселей — под палец хватает и 40 */
+        padding: 11px 26px 11px 0;
+        cursor: pointer;
+        user-select: none;
+        text-align: left;
+        /* Размер был как у ссылок, но жирность 700, заглавные и разрядка
+           делали заголовки тяжелее всего подвала */
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        color: var(--text-secondary);
+    }
+
+    /* Стрелка вниз, а у раскрытого раздела — вверх */
+    .footer-acc .footer-block h4::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 6px;
+        width: 7px;
+        height: 7px;
+        margin-top: -5px;
+        border-right: 1.5px solid currentColor;
+        border-bottom: 1.5px solid currentColor;
+        transform: rotate(45deg);
+        transition: transform 0.2s ease;
+        opacity: 0.6;
+    }
+
+    .footer-acc .footer-block.открыт h4::after {
+        margin-top: -2px;
+        transform: rotate(-135deg);
+    }
+
+    .footer-acc .footer-block:not(.footer-brand) .footer-links,
+    .footer-acc .footer-block:not(.footer-brand) .footer-contacts {
+        display: none;
+    }
+
+    .footer-acc .footer-block.открыт .footer-links,
+    .footer-acc .footer-block.открыт .footer-contacts {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 0 12px;
+        /* Выравнивание влево: по центру ссылки выглядели случайной кучкой,
+           а в подвале весь текст по центру — наследство широкого экрана */
+        text-align: left;
+    }
+
+    .footer-acc .footer-block.открыт .footer-links a,
+    .footer-acc .footer-block.открыт .footer-contacts a,
+    .footer-acc .footer-block.открыт .footer-contacts span {
+        text-align: left;
+    }
+
+    .footer-links { gap: 2px; }
+
+    .footer-links a,
+    .footer-contacts a,
+    .footer-contacts span {
+        font-size: 0.76rem;
+        line-height: 1.5;
+    }
+
+    .footer-desc { font-size: 0.74rem; line-height: 1.4; }
+
+    /* Нижняя полоса: три строки по центру превращались в 157 пикселей */
+    .footer-bottom {
+        gap: 6px;
+        padding: 12px 0 14px;
+        font-size: 0.7rem;
+    }
+
+    /* Оферта, условия и политика шли от левого края и упирались в него:
+       строка не была выровнена и не знала про поля экрана */
+    .footer-bottom-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 4px 10px;
+        padding: 0 16px;
+        font-size: 0.7rem;
+        text-align: center;
+    }
+
+    /* Точки между ссылками ставятся через ::before. При переносе строки они
+       оставались висеть у края — на трёх ссылках подряд это выглядело как
+       мусор. На телефоне строки и так разделены промежутком */
+    .footer-bottom-links a + a::before {
+        content: none;
+    }
+
+    /* Спонсоры лежали «облаком»: логотипы разной ширины — от 44 до 140
+       пикселей — вставали по два-три в ряд, и блок шёл лесенкой на четыре
+       ряда. Ставим сетку по четыре, ячейки одного размера, картинка внутри
+       вписывается целиком и не растягивается */
+    .sponsors-cloud {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px 8px;
+        align-items: center;
+    }
+
+    /* Логотипы без плашек: ровность ряда держит сама сетка — ячейки одного
+       размера, картинка вписана и центрирована. Рамки только добавляли шум */
+    .sponsor-logo-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 46px;
+        padding: 4px;
+    }
+
+    /* Селектор с двумя классами: у блока на главной задано height 44 и
+       max-width 140, и картинка вылезала за свою ячейку */
+    .section-sponsors-compact .sponsor-logo-link img,
+    .sponsors-cloud .sponsor-logo-link img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+    }
+
+    /* «Стань спонсором»: блок вытянулся на 772 пикселя — вступление крупным
+       шрифтом, четыре обещания столбиком и 120 пикселей отступов секции */
+    .sp-offer-wrap {
+        padding: 28px 19px 32px;
+    }
+
+    .sp-offer {
+        padding: 16px 14px;
+    }
+
+    .sp-offer h3 { font-size: 1rem; }
+
+    .sp-offer-lead {
+        font-size: 0.78rem;
+        line-height: 1.4;
+    }
+
+    .sp-nums {
+        gap: 10px;
+    }
+
+    .sp-nums > * { font-size: 0.64rem; line-height: 1.25; }
+
+    /* Числа стояли в 27 пикселей — на телефоне они кричали громче заголовка */
+    .sp-num-val { font-size: 1.25rem; line-height: 1.2; }
+    .sp-num-cap { font-size: 0.66rem; line-height: 1.25; }
+
+    /* Что получает спонсор — по два в ряд вместо столбика */
+    .sp-gives {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 10px;
+        font-size: 0.68rem;
+    }
+
+    .sp-cta-btn {
+        padding: 11px 20px;
+        font-size: 0.8rem;
+    }
+
+    /* Между фотографией и пунктами зияло 128 пикселей: это промежуток между
+       колонками с широкого экрана, а на телефоне колонка одна, и он стал
+       вертикальной дырой */
+    .about-body {
+        gap: 16px;
+    }
+
+    /* Вступление шло крупным шрифтом в семь строк */
+    .about-lead {
+        font-size: 0.85rem;
+        line-height: 1.45;
+    }
+
+    /* Корты и тренеры на главной: правило .courts-grid из мобильного блока
+       схлопывало их в одну колонку и перебивало .vn-four — четыре карточки
+       занимали два с лишним экрана. Ставим две в ряд и оставляем два ряда */
+    .courts-grid.vn-four,
+    .coaches-grid.vn-four {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .vn-four .court-card img { height: 92px; }
+    .vn-four .court-info { padding: 8px 9px; gap: 2px; }
+    .vn-four .court-info h4 { font-size: 0.8rem; line-height: 1.25; }
+    .vn-four .court-info span { font-size: 0.68rem; }
+    .vn-four .court-card-actions { padding: 6px 9px 10px; }
+
+    /* У карточки тренера оставались отступы широкого экрана: 40 пикселей по
+       кругу и 24 между строками — больше половины её высоты уходило в пустоту */
+    .vn-four .coach-card {
+        padding: 10px 8px 8px;
+        gap: 6px;
+    }
+
+    .vn-four .coach-photo { width: 72px; height: 72px; }
+    .vn-four .coach-info { padding: 8px 9px 2px; }
+    .vn-four .coach-info h4 { font-size: 0.8rem; line-height: 1.25; }
+    .vn-four .coach-info span { font-size: 0.68rem; }
+
+    /* Строки в карточке тренера стояли просторно, как на широком экране:
+       специализация, возраст, цена и скидка давали по 33–49 пикселей каждая */
+    .vn-four .coach-info h4,
+    .vn-four .coach-speciality,
+    .vn-four .coach-experience,
+    .vn-four .coach-price,
+    .vn-four .vn-discount {
+        margin: 0 0 2px;
+        line-height: 1.25;
+    }
+
+    .vn-four .coach-info .vn-discount { font-size: 0.62rem; }
+
+    /* Кнопка «Подробнее» была во всю карточку и занимала столько же места,
+       сколько название */
+    .vn-four .court-card-details,
+    .vn-four .coach-card-details {
+        padding: 6px 8px;
+        font-size: 0.7rem;
+        line-height: 1.2;
+    }
+
+    .vn-four .court-card-actions,
+    .vn-four .coach-card-actions { padding: 4px 9px 9px; }
+
+    .vn-partner {
+        top: 6px;
+        left: 6px;
+        font-size: 0.55rem;
+        padding: 2px 6px;
+    }
+
+    #players .pt-invite-btn {
+        padding: 7px 4px;
+        font-size: 0.62rem;
+        letter-spacing: 0;
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Шапка на телефоне висит поверх страницы, и название «КСЛТ» уезжало
+       под неё: первый экран начинался с половины буквы. Отводим под шапку
+       её высоту с запасом, а низ ужимаем — содержимое и так длиннее экрана */
+    .hero {
+        padding-top: 78px;
+        padding-bottom: 12px;
+        min-height: 0;
+    }
 }

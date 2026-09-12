@@ -918,9 +918,19 @@
         padding: var(--space-md);
     }
 
-    .pt-avatar, .pt-avatar-placeholder {
+    /* Селекторы с идентификатором: базовые правила рейтинга написаны как
+       `#players .pt-avatar`, и правило на один класс им проигрывало —
+       аватар оставался 92 пикселя в карточке шириной 134, и всё, что рядом,
+       вылезало за край */
+    .pt-avatar, .pt-avatar-placeholder,
+    #players .pt-avatar, #players .pt-avatar-placeholder {
         width: 60px;
         height: 60px;
+        font-size: 1.2rem;
+    }
+
+    .pt-card, #players .pt-card {
+        padding: 16px 12px;
     }
 }
 

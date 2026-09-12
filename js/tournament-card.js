@@ -192,7 +192,9 @@
             html += '<button type="button" class="tc-btn btn-register to-register" data-tid="' +
                 esc(t.id) + '"' + (парный ? ' data-doubles="1"' : '') + '>' +
                 esc(L.btnOpen) + '</button>';
-        } else if (opts.featured) {
+        } else {
+            // Кнопка у каждой карточки, а не только у главной: рядом стояли два
+            // идущих турнира, и «Смотреть сетку» было лишь у одного
             html += '<span class="tc-btn">' + esc(buttonFor(s)) + '</span>';
         }
 

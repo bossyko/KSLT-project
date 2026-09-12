@@ -93,12 +93,69 @@
             var picked = shuffle(pool).slice(0, SHOW);
 
             grid.innerHTML = picked.map(function(p, i) { return card(p, i, guest); }).join('');
+            приглашениеПоМесту();
             bindClicks(guest);
         } catch (e) {
             console.error('[KSLT] партнёры:', e);
             grid.innerHTML = '<div class="pg-empty">' + L.empty + '</div>';
         }
     }
+
+    /**
+     * Приглашение войти: поверх карточек или под ними.
+     *
+     * Обычно оно лежит накладкой на нижних карточках — видно первый ряд, а
+     * дальше туман с кнопкой. Но когда в сообществе всего один-два открытых
+     * игрока, ряд целиком уходит под эту накладку, и в блоке остаётся одна
+     * кнопка. В таком случае ставим приглашение обычным блоком под сеткой.
+     *
+     * Три — это первый ряд на телефоне, самый тесный случай.
+     */
+    function приглашениеПоМесту() {
+        var приглашение = section.querySelector('.guest-section-cta');
+        if (!приглашение) return;
+
+        var карточки = grid.querySelectorAll('.pt-card');
+        if (!карточки.length) return;
+
+        // Рядов считаем по верхней кромке: у карточек одного ряда она общая
+        var кромки = {};
+        for (var i = 0; i < карточки.length; i++) кромки[карточки[i].offsetTop] = 1;
+        var рядов = Object.keys(кромки).length;
+
+        if (рядов > 1) {
+            приглашение.classList.remove('guest-cta-half');
+            приглашение.style.top = '';
+            section.style.paddingBottom = '';
+            return;
+        }
+
+        // Один ряд: накладка опускается на его середину — игроки видны
+        // наполовину, и сразу понятно, что дальше нужен вход
+        приглашение.classList.add('guest-cta-half');
+        section.style.paddingBottom = '';
+        var середина = Math.round(grid.offsetTop + grid.offsetHeight / 2);
+        приглашение.style.top = середина + 'px';
+
+        // От середины ряда до низа секции карточке приглашения может не
+        // хватить места — тогда она вылезала вверх и закрывала игроков
+        // целиком. Недостающее добираем нижним отступом секции
+        var карточка = приглашение.querySelector('.guest-cta-card');
+        if (!карточка) return;
+        var доступно = section.offsetHeight - середина;
+        var нужно = карточка.offsetHeight + 24;
+        if (нужно > доступно) {
+            var было = parseFloat(getComputedStyle(section).paddingBottom) || 0;
+            section.style.paddingBottom = Math.round(было + нужно - доступно) + 'px';
+        }
+    }
+
+    // Ряды пересобираются при смене ширины окна — с ними и накладка
+    var таймер;
+    window.addEventListener('resize', function () {
+        clearTimeout(таймер);
+        таймер = setTimeout(приглашениеПоМесту, 150);
+    });
 
     /**
      * Гость перед нами или свой.
