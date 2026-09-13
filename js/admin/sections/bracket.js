@@ -44,7 +44,14 @@
         }
 
         if (partnerName) {
-            return '<span class="ad-team-name">' + captainName + ' / ' + partnerName + '</span>';
+            // Имена в отдельных обёртках: в сетке плей-офф напарник встаёт
+            // на свою строку, в таблицах и списках пара остаётся в одну
+            // строку через косую черту. Решает это стиль, а не разметка
+            return '<span class="ad-team-name">' +
+                '<span class="ad-team-p">' + captainName + '</span>' +
+                '<span class="ad-team-sep"> / </span>' +
+                '<span class="ad-team-p">' + partnerName + '</span>' +
+                '</span>';
         }
         return captainName;
     }
@@ -411,10 +418,9 @@
                     var html = '';
                     players.forEach(function(p) {
                         var pName = isEn ? (p.name_en || p.name) : p.name;
-                        var genderIcon = p.gender === 'men' ? '♂' : (p.gender === 'women' ? '♀' : '');
                         html += '<div class="ad-partner-search-item" data-player-id="' + p.id + '" ' +
                             'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.9rem;display:flex;justify-content:space-between;align-items:center;">' +
-                            '<span>' + A.esc(pName) + ' ' + genderIcon + '</span>' +
+                            '<span>' + A.esc(pName) + '</span>' +
                             (ntrpПары(p) ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + ntrpПары(p) + '</span>' : '') +
                         '</div>';
                     });
@@ -479,12 +485,11 @@
                 var html = '';
                 найдены.forEach(function(p) {
                     var имя = isEn ? (p.name_en || p.name) : p.name;
-                    var пол = p.gender === 'men' ? '\u2642' : (p.gender === 'women' ? '\u2640' : '');
                     html += '<div class="ad-partner-search-item" data-player-id="' + p.id + '" ' +
                         'data-player-name="' + A.esc(имя) + '" ' +
                         'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.9rem;' +
                         'display:flex;justify-content:space-between;align-items:center;">' +
-                        '<span>' + A.esc(имя) + ' ' + пол + '</span>' +
+                        '<span>' + A.esc(имя) + '</span>' +
                         (ntrpПары(p) ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + ntrpПары(p) + '</span>' : '') +
                     '</div>';
                 });
@@ -2416,6 +2421,57 @@
             });
         });
 
+        // Встреча, которой нет в базе: заводим её и сразу открываем счёт
+        //
+        // Состав и порядок игроков в готовых матчах не трогаем — здесь
+        // создаётся ровно та пара, на чью клетку нажали.
+        container.querySelectorAll('[data-match-new]').forEach(function(cell) {
+            cell.addEventListener('click', async function() {
+                var части = cell.dataset.matchNew.split('|');
+                var первый = части[0], второй = части[1], группа = parseInt(части[2], 10);
+
+                // Клетка есть с обеих сторон матрицы, и пара могла завестись
+                // с соседней. Ищем её в любом порядке игроков — иначе
+                // появится вторая запись той же встречи
+                var уже = matches.find(function(m) {
+                    return m.group_number === группа &&
+                        ((m.player1_id === первый && m.player2_id === второй) ||
+                         (m.player1_id === второй && m.player2_id === первый));
+                });
+                if (уже) {
+                    openScoreModal(уже, playersMap, tournamentId, cell.dataset.rowPlayer || null,
+                        isDbl, regsMap, tournament.set_format);
+                    return;
+                }
+
+                // Номер по порядку — следующий за последним в этой группе
+                var вГруппе = matches.filter(function(m) { return m.group_number === группа; });
+                var последний = вГруппе.reduce(function(мах, m) {
+                    return Math.max(мах, m.match_order || 0);
+                }, 0);
+
+                var ответ = await A.client.from('matches').insert({
+                    tournament_id: tournamentId,
+                    player1_id: первый,
+                    player2_id: второй,
+                    round: 'G' + группа,
+                    round_number: последний + 1,
+                    match_order: последний + 1,
+                    group_number: группа,
+                    status: 'upcoming'
+                }).select().single();
+
+                if (ответ.error) {
+                    A.showToast(ответ.error.message, 'error');
+                    return;
+                }
+
+                matches.push(ответ.data);
+                openScoreModal(ответ.data, playersMap, tournamentId, cell.dataset.rowPlayer || null,
+                    isDbl, regsMap, tournament.set_format);
+            });
+        });
+
         // Проход без игры: отмечаем победителем того, кто есть, и база
         // сама уводит его в следующий круг.
         container.querySelectorAll('[data-match-bye]').forEach(function(btn) {
@@ -3541,6 +3597,18 @@
             if (m.player2_id) вПлейофф[m.player2_id] = true;
         });
 
+        // Кто играет дополнительный матч
+        //
+        // Третьих мест больше, чем свободных слотов: сильнейшие проходят
+        // без игры, остальные разыгрывают места между собой. В таблице
+        // группы это не было видно — человек не понимал, почему один
+        // третий уже в сетке, а другому ещё играть
+        var вДопМатчах = {};
+        matches.filter(isIGMatch).forEach(function(m) {
+            if (m.player1_id) вДопМатчах[m.player1_id] = m.match_order || 1;
+            if (m.player2_id) вДопМатчах[m.player2_id] = m.match_order || 1;
+        });
+
         // Build playerGroupLabel map: playerId → "A1", "B2", "C3" etc.
         var playerGroupLabel = {};
         for (var g = 1; g <= groupCount; g++) {
@@ -3577,6 +3645,27 @@
             // Calculate standings
             var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
             var groupHasResults = groupMatchesG.some(function(m) { return m.status === 'completed'; });
+            // Группа доиграна — места окончательные. Пока нет, они
+            // предварительные: показываем их приглушённо, чтобы
+            // промежуточный расклад не принимали за итог
+            var сыграноВГруппе = groupMatchesG.filter(function(m) {
+                return m.status === 'completed' && m.score;
+            }).length;
+
+            // Считаем по парам, а не по записям: у пары может остаться пустой
+            // дубль — вторая запись той же встречи. Она ничего не значит,
+            // но из-за неё группа выглядела недоигранной, места оставались
+            // приглушёнными, а плей-офф не получал победителей
+            var парыГруппы = {};
+            groupMatchesG.forEach(function(m) {
+                if (!m.player1_id || !m.player2_id) return;
+                var ключ = [m.player1_id, m.player2_id].sort().join('|');
+                var сыграна = m.status === 'completed' && !!m.score;
+                парыГруппы[ключ] = парыГруппы[ключ] || сыграна;
+            });
+            var всегоПар = Object.keys(парыГруппы).length;
+            var сыгранныхПар = Object.keys(парыГруппы).filter(function(k) { return парыГруппы[k]; }).length;
+            var группаДоиграна = всегоПар > 0 && сыгранныхПар === всегоПар;
 
             // Apply manual group place overrides
             var manualPlaces = tournament.manual_group_places || {};
@@ -3590,14 +3679,24 @@
                 });
             }
 
-            // Detect tie groups (players with same wins)
+            // Кого система развести не смогла
+            //
+            // Равные победы сами по себе не повод спрашивать менеджера: за
+            // ними идут личная встреча, доля сетов и доля геймов, и обычно
+            // они всё решают. Раньше поле выбора показывалось при любом
+            // равенстве побед — группа выглядела незакрытой, хотя места уже
+            // стояли верно.
+            //
+            // Спрашиваем только когда совпало всё: и победы, и сеты, и геймы.
+            var доля = function(в, п) { return (в + п) > 0 ? (в / (в + п)).toFixed(4) : '0'; };
             var tieGroups = {};
             standings.forEach(function(st) {
-                var key = st.wins;
+                var key = st.wins + '|' +
+                    доля(st.setsWon, st.setsLost) + '|' +
+                    доля(st.gamesWon, st.gamesLost);
                 if (!tieGroups[key]) tieGroups[key] = [];
                 tieGroups[key].push(st.playerId);
             });
-            // Only keep groups with 2+ players
             var tiedPlayerIds = {};
             Object.keys(tieGroups).forEach(function(key) {
                 if (tieGroups[key].length >= 2) {
@@ -3605,18 +3704,31 @@
                 }
             });
 
-            // Stable order: by seed (ascending), unseeded keep draw order
+            // Порядок строк не зависит от результатов
+            //
+            // Раньше при равных посевах строки шли в порядке появления в
+            // матчах. Стоило поправить счёт или победителя — матч уходил в
+            // конец выборки, и пары в таблице менялись местами прямо под
+            // руками. Сортируем по посеву, а дальше по имени: этот порядок
+            // не меняется, что бы ни происходило со счётом
             standings.sort(function(a, b) {
                 var sa = a.seed || 9999;
                 var sb = b.seed || 9999;
                 if (sa !== sb) return sa - sb;
-                return playerIds.indexOf(a.playerId) - playerIds.indexOf(b.playerId);
+                var иа = (playersMap[a.playerId] || {}).name || '';
+                var иб = (playersMap[b.playerId] || {}).name || '';
+                return иа.localeCompare(иб, 'ru');
             });
 
             // Build matrix table
             var letter = groupLetters[g - 1] || String(g);
             html += '<div class="ad-grp-block">';
-            html += '<div class="ad-grp-title">' + L.groupLabel + ' ' + letter + '</div>';
+            html += '<div class="ad-grp-title">' + L.groupLabel + ' ' + letter +
+                (группаДоиграна ? '' :
+                    '<span class="ad-grp-draft">' +
+                    (isEn ? 'provisional, ' + сыгранныхПар + ' of ' + всегоПар + ' played'
+                          : 'предварительно, сыграно ' + сыгранныхПар + ' из ' + всегоПар) +
+                    '</span>') + '</div>';
             html += '<div class="ad-table-wrap" style="overflow-x:auto;">';
             html += '<table class="ad-table ad-grp-matrix">';
 
@@ -3648,12 +3760,18 @@
                 // Добран сверх нормы: место ниже проходного, а в сетке стоит
                 var добран = isQualified && st.place > qualifiers;
 
-                html += '<tr' + (isQualified && hasPlayoff ? ' style="background:rgba(204,255,0,0.06);"' : '') + '>';
+                html += '<tr' + (isQualified && hasPlayoff && группаДоиграна
+                    ? ' style="background:rgba(204,255,0,0.06);"' : '') + '>';
                 html += '<td style="font-weight:600;text-align:center;">' + (row + 1) + '</td>';
+                var номерДопа = вДопМатчах[st.playerId];
                 html += '<td style="white-space:nowrap;">' + pName + seedHtml +
                     (isQualified && hasPlayoff ? ' <span style="color:var(--accent);font-size:0.65rem;">&#9654;</span>' : '') +
                     (добран ? ' <span class="ad-badge" style="background:rgba(204,255,0,0.15);color:var(--accent);font-size:0.6rem;" title="' +
-                        L.qualAddedHint + '">' + L.qualAdded + '</span>' : '') + '</td>';
+                        L.qualAddedHint + '">' + L.qualAdded + '</span>' : '') +
+                    (номерДопа ? ' <span class="ad-badge ad-badge-ig" title="' +
+                        (isEn ? 'Plays an additional match for a spot in the draw'
+                              : 'Играет дополнительный матч за место в сетке') + '">' +
+                        (isEn ? 'extra match ' : 'доп. матч ') + номерДопа + '</span>' : '') + '</td>';
 
                 for (var col = 0; col < standings.length; col++) {
                     if (row === col) {
@@ -3664,7 +3782,10 @@
                         var match = findGroupMatch(groupMatchesG, st.playerId, opponentId);
                         if (match && match.status === 'completed' && match.score) {
                             var scoreDisplay = formatGroupScore(match, st.playerId);
-                            var isWin = match.winner_id === st.playerId;
+                            // Победа определяется по счёту — так же, как в
+                            // колонке «П». По отметке клетка оставалась без
+                            // заливки у того, кто выиграл по цифрам
+                            var isWin = ктоВыиграл(match) === st.playerId;
                             html += '<td class="ad-grp-score ' + (isWin ? 'ad-grp-win' : 'ad-grp-loss') + '" ' +
                                 'data-match-edit="' + match.id + '" data-row-player="' + st.playerId + '" style="cursor:pointer;text-align:center;">' +
                                 scoreDisplay + '</td>';
@@ -3672,7 +3793,17 @@
                             html += '<td class="ad-grp-score ad-grp-pending" data-match-edit="' + match.id + '" data-row-player="' + st.playerId + '" ' +
                                 'style="cursor:pointer;text-align:center;">—</td>';
                         } else {
-                            html += '<td class="ad-grp-score" style="text-align:center;">—</td>';
+                            // Встречи нет в базе, но по кругу она должна быть:
+                            // на Futures в двух группах одна пара оказалась
+                            // заведена дважды, а другой пары не было вовсе, и
+                            // счёт вписать было некуда. Клетку открываем —
+                            // матч заведётся в момент сохранения счёта
+                            html += '<td class="ad-grp-score ad-grp-pending" ' +
+                                'data-match-new="' + st.playerId + '|' + opponentId + '|' + g + '" ' +
+                                'data-row-player="' + st.playerId + '" ' +
+                                'title="' + (isEn ? 'No match yet — will be created with the score'
+                                                 : 'Матча ещё нет — заведётся вместе со счётом') + '" ' +
+                                'style="cursor:pointer;text-align:center;">—</td>';
                         }
                     }
                 }
@@ -3680,8 +3811,11 @@
                 html += '<td class="ad-grp-pts" style="text-align:center;font-weight:600;">' + st.wins + '</td>';
                 if (!groupHasResults) {
                     html += '<td class="ad-grp-place" style="text-align:center;font-weight:700;">—</td>';
-                } else if (tiedPlayerIds[st.playerId] && !isTournamentCompleted) {
-                    // Tied player — render select
+                } else if (tiedPlayerIds[st.playerId] && !isTournamentCompleted && группаДоиграна) {
+                    // Ничья по победам — место выбирает менеджер. Поле выбора
+                    // показываем только у доигранной группы: пока матчи идут,
+                    // равенство побед промежуточное, а лаймовая рамка поля
+                    // выглядела так, будто группа уже закончила
                     var tiedGroup = tiedPlayerIds[st.playerId];
                     var tiedStandings = standings.filter(function(s) { return tiedGroup.indexOf(s.playerId) !== -1; });
                     var minPlace = Math.min.apply(null, tiedStandings.map(function(s) { return s.place; }));
@@ -3695,8 +3829,9 @@
                     }
                     html += '</select></td>';
                 } else {
-                    var placeAccent = st.place <= qualifiers;
-                    html += '<td class="ad-grp-place" style="text-align:center;font-weight:700;' +
+                    var placeAccent = st.place <= qualifiers && группаДоиграна;
+                    html += '<td class="ad-grp-place' + (группаДоиграна ? '' : ' ad-grp-place-draft') +
+                        '" style="text-align:center;font-weight:700;' +
                         (placeAccent ? 'color:var(--accent);' : '') + '">' + st.place + '</td>';
                 }
                 html += '</tr>';
@@ -4121,8 +4256,9 @@
         });
 
         completedMatches.forEach(function(m) {
-            if (stats[m.winner_id]) stats[m.winner_id].wins++;
-            var loserId = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
+            var победитель = ктоВыиграл(m);
+            if (stats[победитель]) stats[победитель].wins++;
+            var loserId = победитель === m.player1_id ? m.player2_id : m.player1_id;
             if (stats[loserId]) stats[loserId].losses++;
 
             // Sets & games
@@ -4155,8 +4291,9 @@
             } else if (cluster.length === 2) {
                 // Head-to-head
                 var h2h = findGroupMatch(completedMatches, cluster[0].playerId, cluster[1].playerId);
-                if (h2h && h2h.winner_id) {
-                    if (h2h.winner_id === cluster[0].playerId) {
+                var h2hПобедитель = ктоВыиграл(h2h);
+                if (h2h && h2hПобедитель) {
+                    if (h2hПобедитель === cluster[0].playerId) {
                         cluster[0].place = place;
                         cluster[1].place = place + 1;
                     } else {
@@ -4198,6 +4335,34 @@
     }
 
     // ---- Resolve 3+ way tie (recalc stats among tied players only) ----
+    /**
+     * Кто выиграл матч: сперва по счёту, и только потом по отметке.
+     *
+     * В таблице показаны цифры, и человек считает победы по ним. Если
+     * отметка победителя разошлась со счётом — а такое случалось, пока окно
+     * ввода переворачивало цифры не в ту сторону, — в колонке «П» появлялась
+     * победа у того, у кого 3:6, и места в группе вставали неверно.
+     *
+     * Отметка остаётся решающей там, где счёт не решает: снятие, неявка,
+     * отказ — или когда сеты поровну.
+     */
+    function ктоВыиграл(m) {
+        if (!m) return null;
+        // Снятие, неявка, отказ: счёт остаётся в пользу того, кто снялся
+        if (/[A-Za-zА-Яа-я]/.test(String(m.score || ''))) return m.winner_id;
+
+        var сетовП1 = 0, сетовП2 = 0;
+        String(m.score || '').split(' ').forEach(function(сет) {
+            var ч = сет.match(/^(\d+)\/(\d+)/);
+            if (!ч) return;
+            if (+ч[1] > +ч[2]) сетовП1++;
+            else if (+ч[2] > +ч[1]) сетовП2++;
+        });
+        if (сетовП1 > сетовП2) return m.player1_id;
+        if (сетовП2 > сетовП1) return m.player2_id;
+        return m.winner_id;
+    }
+
     function resolveMultiWayTie(cluster, allCompletedMatches, startPlace) {
         var tiedIds = cluster.map(function(c) { return c.playerId; });
 
@@ -4213,7 +4378,8 @@
         });
 
         subMatches.forEach(function(m) {
-            if (subStats[m.winner_id]) subStats[m.winner_id].wins++;
+            var победительМ = ктоВыиграл(m);
+            if (subStats[победительМ]) subStats[победительМ].wins++;
 
             [m.player1_id, m.player2_id].forEach(function(pid) {
                 if (!subStats[pid]) return;
@@ -5602,6 +5768,51 @@
         return rounds;
     }
 
+    /**
+     * Круг в каждой группе должен быть полным и без повторов.
+     *
+     * Возвращает текст ошибки, если в какой-то группе пара встречается
+     * дважды или какой-то пары нет вовсе. Если всё в порядке — ничего.
+     *
+     * Проверяем до записи в базу: исправить набор матчей потом можно
+     * только вручную, запросом, и уже поверх сыгранных результатов.
+     */
+    function проверитьКругГрупп(матчи, groupCount) {
+        for (var g = 1; g <= groupCount; g++) {
+            var мг = матчи.filter(function(m) { return m.group_number === g; });
+            if (!мг.length) continue;
+
+            var игроки = [];
+            мг.forEach(function(m) {
+                if (m.player1_id && игроки.indexOf(m.player1_id) === -1) игроки.push(m.player1_id);
+                if (m.player2_id && игроки.indexOf(m.player2_id) === -1) игроки.push(m.player2_id);
+            });
+
+            var счёт = {};
+            for (var i = 0; i < мг.length; i++) {
+                var m = мг[i];
+                if (!m.player1_id || !m.player2_id) continue;
+                var ключ = [m.player1_id, m.player2_id].sort().join('|');
+                счёт[ключ] = (счёт[ключ] || 0) + 1;
+            }
+
+            var буква = groupLetters[g - 1] || String(g);
+            var надо = игроки.length * (игроки.length - 1) / 2;
+
+            for (var к in счёт) {
+                if (счёт[к] > 1) {
+                    return (isEn ? 'Draw cancelled: in group ' : 'Жеребьёвка отменена: в группе ') +
+                        буква + (isEn ? ' a pair is listed twice' : ' пара встречается дважды');
+                }
+            }
+            if (Object.keys(счёт).length !== надо) {
+                return (isEn ? 'Draw cancelled: group ' : 'Жеребьёвка отменена: в группе ') + буква +
+                    (isEn ? ' is missing a match' : ' не хватает встречи');
+            }
+        }
+        return null;
+    }
+
     // ---- Generate Group Draw (Round-Robin) ----
     async function generateGroupDraw(tournament, approvedSorted, playersMap) {
         var groupCount = tournament.group_count || 2;
@@ -5688,6 +5899,22 @@
                     });
                 }
             }
+        }
+
+        // Сверяем набор пар до записи в базу
+        //
+        // На Futures в двух группах из шести третья встреча оказалась
+        // заведена не с той парой: одна пара стояла дважды, другой не было
+        // вовсе. В таблице это выглядит как глухой прочерк — счёт вписать
+        // некуда, а места считаются так, будто круг доигран.
+        //
+        // Поэтому перед записью проверяем каждую группу: у скольких пар
+        // сколько матчей. Должно быть ровно по одному на пару.
+        var беда = проверитьКругГрупп(matchesToInsert, groupCount);
+        if (беда) {
+            A.showToast(беда, 'error');
+            console.error('[KSLT] жеребьёвка остановлена:', беда, matchesToInsert);
+            return;
         }
 
         // Insert matches
@@ -5935,7 +6162,20 @@
         for (var г = 1; г <= groupCount; г++) {
             var мг = grpMatches.filter(function(m) { return m.group_number === г; });
             if (!мг.length) continue;
-            if (!мг.every(function(m) { return m.status === 'completed'; })) continue;
+
+            // Доигранность считаем по парам, а не по записям: у пары может
+            // остаться пустой дубль — вторая запись той же встречи. Из-за
+            // неё группа выглядела недоигранной, и победители не вставали
+            // в плей-офф, хотя все встречи были сыграны
+            var парыГр = {};
+            мг.forEach(function(m) {
+                if (!m.player1_id || !m.player2_id) return;
+                var к = [m.player1_id, m.player2_id].sort().join('|');
+                парыГр[к] = парыГр[к] || (m.status === 'completed');
+            });
+            var ключиПар = Object.keys(парыГр);
+            if (!ключиПар.length) continue;
+            if (!ключиПар.every(function(к) { return парыГр[к]; })) continue;
 
             var игроки = [];
             мг.forEach(function(m) {
@@ -5956,7 +6196,18 @@
         for (var гп = 1; гп <= groupCount; гп++) {
             var мгп = grpMatches.filter(function(m) { return m.group_number === гп; });
             if (!мгп.length) continue;
-            if (!мгп.every(function(m) { return m.status === 'completed'; })) { всеГруппыСыграны = false; break; }
+
+            // Считаем по парам, а не по записям: пустой двойник встречи
+            // делал группу «недоигранной», третьи места не ранжировались,
+            // и слоты Q вместе с доп. матчами оставались пустыми
+            var парыП = {};
+            мгп.forEach(function(m) {
+                if (!m.player1_id || !m.player2_id) return;
+                var к = [m.player1_id, m.player2_id].sort().join('|');
+                парыП[к] = парыП[к] || (m.status === 'completed');
+            });
+            var ключиП = Object.keys(парыП);
+            if (!ключиП.length || !ключиП.every(function(к) { return парыП[к]; })) { всеГруппыСыграны = false; break; }
 
             var игрокиП = [];
             мгп.forEach(function(m) {
@@ -7799,7 +8050,9 @@
                     x.classList.remove('active');
                 });
                 кн.classList.add('active');
-                document.getElementById('adScoreWinner').value = кн.dataset.winner;
+                var полеПобедителя = document.getElementById('adScoreWinner');
+                полеПобедителя.dataset.выбралРуками = '1';
+                полеПобедителя.value = кн.dataset.winner;
                 updateState();
             });
         });
@@ -7871,6 +8124,28 @@
             }
         }
 
+        /**
+         * Кто впереди по набранным сетам. Возвращает id или null, если
+         * счёт неполный либо сеты поровну.
+         *
+         * Цифры в окне пишутся со стороны победителя, но отметить его
+         * нужно нажатием — и здесь легко промахнуться. На Futures так
+         * вышло в трёх матчах: 6:1, а победа у соперника.
+         */
+        function ктоВпередиПоСчёту() {
+            var сетовСверху = 0, сетовСнизу = 0;
+            for (var i = 1; i <= currentSets; i++) {
+                var a = document.getElementById('adS' + i + 'P1');
+                var b = document.getElementById('adS' + i + 'P2');
+                if (!a || !b || a.value === '' || b.value === '') continue;
+                if (+a.value > +b.value) сетовСверху++;
+                else if (+b.value > +a.value) сетовСнизу++;
+            }
+            if (сетовСверху === сетовСнизу) return null;
+            // Сверху в окне стоит тот, кого показываем первым
+            return сетовСверху > сетовСнизу ? _p1 : _p2;
+        }
+
         function updateState() {
             checkTiebreaks();
             var winnerDisplay = document.getElementById('adWinnerDisplay');
@@ -7883,6 +8158,12 @@
                 if (retiredId) {
                     поле.value = retiredId === _p1 ? _p2 : _p1;
                 }
+            } else {
+                // Обычный матч: отмечаем того, кто впереди по сетам.
+                // Руками переставить всё равно можно — при сохранении
+                // спросим, если выбор разойдётся со счётом
+                var поСчёту = ктоВпередиПоСчёту();
+                if (поСчёту && !поле.dataset.выбралРуками) поле.value = поСчёту;
             }
 
             var кто = поле.value;
@@ -8047,6 +8328,29 @@
                 return;
             }
 
+            // Победитель обязан совпадать со счётом
+            //
+            // Счёт пишется со стороны победителя, а отмечают его нажатием —
+            // и если промахнуться, в базу уходит 4:6 с победой того, кто
+            // проиграл. На Futures так вышло в трёх матчах: цифры говорили
+            // одно, отметка — другое, и места в группе считались неверно.
+            //
+            // Снятие, неявку и отказ не трогаем: там победитель определяется
+            // не счётом, а тем, кто вышел на корт.
+            if (!outcome) {
+                var поСчёту = ктоВпередиПоСчёту();
+                if (поСчёту && поСчёту !== winnerId) {
+                    var имяПоСчёту = isDbl
+                        ? getTeamDisplayName(поСчёту, regsMap, playersMap, true).replace(/<[^>]*>/g, '')
+                        : ((playersMap[поСчёту] || {}).name || '?');
+                    A.showToast(isEn
+                        ? 'Score says ' + имяПоСчёту + ' won. Fix the score or tap the right winner.'
+                        : 'По счёту выиграл ' + имяПоСчёту + '. Поправьте счёт или отметьте победителя верно',
+                        'error');
+                    return;
+                }
+            }
+
             // Build score string (swap back to DB order if display was swapped)
             function buildSet(num) {
                 var v1 = document.getElementById('adS' + num + 'P1').value;
@@ -8054,9 +8358,14 @@
                 if (v1 === '' || v2 === '') return null;
                 var tb1 = document.getElementById('adS' + num + 'TB1').value;
                 var tb2 = document.getElementById('adS' + num + 'TB2').value;
-                // В окне цифры со стороны победителя; в базе первым идёт
-                // player1. Разворачиваем, если победил второй.
-                var зеркало = winnerId && winnerId === match.player2_id;
+                // В базе первым идёт player1 матча. Разворачиваем по тому,
+                // кто сейчас показан сверху в окне, а не по тому, кого
+                // отметили победителем.
+                //
+                // Раньше смотрели на победителя: сменил его нажатием, имена
+                // при этом остались на местах — и цифры переворачивались
+                // впустую. В базу уходило 6/3 с победой того, у кого 3.
+                var зеркало = _p1 === match.player2_id;
                 var dbV1 = зеркало ? v2 : v1;
                 var dbV2 = зеркало ? v1 : v2;
                 var dbTB1 = зеркало ? tb2 : tb1;
@@ -9490,6 +9799,27 @@
 
             var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
             var groupHasResults = groupMatchesG.some(function(m) { return m.status === 'completed'; });
+            // Группа доиграна — места окончательные. Пока нет, они
+            // предварительные: показываем их приглушённо, чтобы
+            // промежуточный расклад не принимали за итог
+            var сыграноВГруппе = groupMatchesG.filter(function(m) {
+                return m.status === 'completed' && m.score;
+            }).length;
+
+            // Считаем по парам, а не по записям: у пары может остаться пустой
+            // дубль — вторая запись той же встречи. Она ничего не значит,
+            // но из-за неё группа выглядела недоигранной, места оставались
+            // приглушёнными, а плей-офф не получал победителей
+            var парыГруппы = {};
+            groupMatchesG.forEach(function(m) {
+                if (!m.player1_id || !m.player2_id) return;
+                var ключ = [m.player1_id, m.player2_id].sort().join('|');
+                var сыграна = m.status === 'completed' && !!m.score;
+                парыГруппы[ключ] = парыГруппы[ключ] || сыграна;
+            });
+            var всегоПар = Object.keys(парыГруппы).length;
+            var сыгранныхПар = Object.keys(парыГруппы).filter(function(k) { return парыГруппы[k]; }).length;
+            var группаДоиграна = всегоПар > 0 && сыгранныхПар === всегоПар;
 
             var manualPlaces = tournament.manual_group_places || {};
             var gKey = String(g);
@@ -9500,9 +9830,14 @@
                 });
             }
 
+            // Спрашиваем менеджера только когда расчёт не развёл: совпали
+            // и победы, и доля сетов, и доля геймов (см. такой же разбор
+            // в групповой сетке выше)
+            var доляЛ = function(в, п) { return (в + п) > 0 ? (в / (в + п)).toFixed(4) : '0'; };
             var tieGroups = {};
             standings.forEach(function(st) {
-                var key = st.wins; if (!tieGroups[key]) tieGroups[key] = [];
+                var key = st.wins + '|' + доляЛ(st.setsWon, st.setsLost) + '|' + доляЛ(st.gamesWon, st.gamesLost);
+                if (!tieGroups[key]) tieGroups[key] = [];
                 tieGroups[key].push(st.playerId);
             });
             var tiedPlayerIds = {};
@@ -9520,7 +9855,12 @@
 
             var letter = groupLetters[g - 1] || String(g);
             html += '<div class="ad-grp-block">';
-            html += '<div class="ad-grp-title">' + L.groupLabel + ' ' + letter + '</div>';
+            html += '<div class="ad-grp-title">' + L.groupLabel + ' ' + letter +
+                (группаДоиграна ? '' :
+                    '<span class="ad-grp-draft">' +
+                    (isEn ? 'provisional, ' + сыгранныхПар + ' of ' + всегоПар + ' played'
+                          : 'предварительно, сыграно ' + сыгранныхПар + ' из ' + всегоПар) +
+                    '</span>') + '</div>';
             html += '<div class="ad-table-wrap" style="overflow-x:auto;">';
             html += '<table class="ad-table ad-grp-matrix">';
             html += '<thead><tr>';
@@ -9562,7 +9902,10 @@
                         var match = findGroupMatch(groupMatchesG, st.playerId, opponentId);
                         if (match && match.status === 'completed' && match.score) {
                             var scoreDisplay = formatGroupScore(match, st.playerId);
-                            var isWin = match.winner_id === st.playerId;
+                            // Победа определяется по счёту — так же, как в
+                            // колонке «П». По отметке клетка оставалась без
+                            // заливки у того, кто выиграл по цифрам
+                            var isWin = ктоВыиграл(match) === st.playerId;
                             html += '<td class="ad-grp-score ' + (isWin ? 'ad-grp-win' : 'ad-grp-loss') + '" ' +
                                 'data-match-edit="' + match.id + '" data-row-player="' + st.playerId + '" style="cursor:pointer;text-align:center;">' +
                                 scoreDisplay + '</td>';
@@ -9570,7 +9913,17 @@
                             html += '<td class="ad-grp-score ad-grp-pending" data-match-edit="' + match.id + '" data-row-player="' + st.playerId + '" ' +
                                 'style="cursor:pointer;text-align:center;">—</td>';
                         } else {
-                            html += '<td class="ad-grp-score" style="text-align:center;">—</td>';
+                            // Встречи нет в базе, но по кругу она должна быть:
+                            // на Futures в двух группах одна пара оказалась
+                            // заведена дважды, а другой пары не было вовсе, и
+                            // счёт вписать было некуда. Клетку открываем —
+                            // матч заведётся в момент сохранения счёта
+                            html += '<td class="ad-grp-score ad-grp-pending" ' +
+                                'data-match-new="' + st.playerId + '|' + opponentId + '|' + g + '" ' +
+                                'data-row-player="' + st.playerId + '" ' +
+                                'title="' + (isEn ? 'No match yet — will be created with the score'
+                                                 : 'Матча ещё нет — заведётся вместе со счётом') + '" ' +
+                                'style="cursor:pointer;text-align:center;">—</td>';
                         }
                     }
                 }
@@ -9578,7 +9931,9 @@
                 html += '<td class="ad-grp-pts" style="text-align:center;font-weight:600;">' + st.wins + '</td>';
                 if (!groupHasResults) {
                     html += '<td class="ad-grp-place" style="text-align:center;font-weight:700;">—</td>';
-                } else if (tiedPlayerIds[st.playerId] && !isTournamentCompleted) {
+                } else if (tiedPlayerIds[st.playerId] && !isTournamentCompleted && группаДоиграна) {
+                    // Поле выбора места — только у доигранной группы: пока
+                    // матчи идут, равенство побед промежуточное
                     var tiedGroup = tiedPlayerIds[st.playerId];
                     var tiedStandings = standings.filter(function(s) { return tiedGroup.indexOf(s.playerId) !== -1; });
                     var minPlace = Math.min.apply(null, tiedStandings.map(function(s) { return s.place; }));
@@ -9593,8 +9948,9 @@
                     html += '</select></td>';
                 } else {
                     var glQualifiers2 = tournament.qualifiers_per_group || 2;
-                    var placeAccent = st.place <= glQualifiers2;
-                    html += '<td class="ad-grp-place" style="text-align:center;font-weight:700;' +
+                    var placeAccent = st.place <= glQualifiers2 && группаДоиграна;
+                    html += '<td class="ad-grp-place' + (группаДоиграна ? '' : ' ad-grp-place-draft') +
+                        '" style="text-align:center;font-weight:700;' +
                         (placeAccent ? 'color:var(--accent);' : '') + '">' + st.place + '</td>';
                 }
                 html += '</tr>';

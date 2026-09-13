@@ -323,8 +323,8 @@
 
         // Gender dropdown
         var genderOpts = '<option value="">' + L.ratAllGenders + '</option>' +
-            '<option value="men">\u2642 ' + L.genderMen + '</option>' +
-            '<option value="women">\u2640 ' + L.genderWomen + '</option>';
+            '<option value="men">' + L.genderMen + '</option>' +
+            '<option value="women">' + L.genderWomen + '</option>';
 
         // Category dropdown
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';

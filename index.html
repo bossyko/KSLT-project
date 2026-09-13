@@ -25,7 +25,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/style.css?v=194">
+    <link rel="stylesheet" href="css/style.css?v=227">
     <link rel="stylesheet" href="css/partners.css?v=11">
     <link rel="stylesheet" href="css/battle-cards.css?v=12">
 </head>
@@ -185,6 +185,7 @@
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/tournaments-overview.html" class="mobile-dropdown-self">Все турниры</a></li>
                         <li><a href="pages/tournaments.html?category=promasters">Pro-Masters</a></li>
                         <li><a href="pages/tournaments.html?category=masters">Masters</a></li>
                         <li><a href="pages/tournaments.html?category=tour">Tour</a></li>
@@ -204,6 +205,7 @@
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/players.html" class="mobile-dropdown-self">Весь рейтинг</a></li>
                         <li><a href="pages/players.html?tab=men-promasters">Pro-Masters</a></li>
                         <li><a href="pages/players.html?tab=men-masters">Masters</a></li>
                         <li><a href="pages/players.html?tab=men-tour">Tour</a></li>
@@ -220,6 +222,7 @@
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/services.html" class="mobile-dropdown-self">Все услуги</a></li>
                         <li><a href="pages/courts.html">Теннисные корты</a></li>
                         <li><a href="pages/coaches.html">Тренеры</a></li>
                         <li><a href="pages/partners.html">Поиск игрока</a></li>
@@ -234,6 +237,7 @@
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/news.html" class="mobile-dropdown-self">Все новости</a></li>
                         <li><a href="pages/news.html?category=announcement">Анонс</a></li>
                         <li><a href="pages/news.html?category=world">Мировой теннис</a></li>
                         <li><a href="pages/news.html?category=results">Результаты</a></li>
@@ -429,7 +433,7 @@
             <div class="rankings-columns">
                 <!-- MEN -->
                 <div class="rankings-col">
-                    <h3 class="rankings-col-title">♂ Мужской одиночный рейтинг</h3>
+                    <h3 class="rankings-col-title">Мужской одиночный рейтинг</h3>
                     <div class="rankings-tabs" data-group="men">
                         <button class="rankings-tab active" data-target="men-promasters">Pro-Masters</button>
                         <button class="rankings-tab" data-target="men-masters">Masters</button>
@@ -446,7 +450,7 @@
 
                 <!-- WOMEN -->
                 <div class="rankings-col">
-                    <h3 class="rankings-col-title">♀ Женский одиночный рейтинг</h3>
+                    <h3 class="rankings-col-title">Женский одиночный рейтинг</h3>
                     <div class="rankings-tabs" data-group="women">
                         <button class="rankings-tab active" data-target="women-masters">Masters</button>
                         <button class="rankings-tab" data-target="women-tour">Tour</button>
@@ -720,7 +724,7 @@
                     }
                     var img = t.image || 'images/heroes/tournaments.jpg';
                     var gender = (t.category_id || '').split('-')[0];
-                    var genderLabel = gender === 'women' ? '♀ Женский' : (gender === 'men' ? '♂ Мужской' : '');
+                    var genderLabel = gender === 'women' ? 'Женский' : (gender === 'men' ? 'Мужской' : '');
                     html += '<a href="pages/tournament.html?id=' + t.id + '" class="tournament-card' + (isFeatured ? ' tournament-card-featured' : '') + '">' +
                         '<div class="tournament-image">' +
                             '<img src="' + esc(img) + '" alt="' + esc(t.title || '') + '">' +
@@ -775,8 +779,8 @@
 
             function buildCol(catList, gender) {
                 var colTitle = gender === 'women'
-                    ? '<h3 class="rankings-col-title">\u2640 Женский одиночный рейтинг</h3>'
-                    : '<h3 class="rankings-col-title">\u2642 Мужской одиночный рейтинг</h3>';
+                    ? '<h3 class="rankings-col-title">Женский одиночный рейтинг</h3>'
+                    : '<h3 class="rankings-col-title">Мужской одиночный рейтинг</h3>';
                 // Only show categories that have players of this gender
                 var catsWithPlayers = catList.filter(function(c) {
                     return players.some(function(p) { return p.category_id === c.id && p.gender === gender; });

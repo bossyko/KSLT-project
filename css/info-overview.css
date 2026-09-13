@@ -226,10 +226,7 @@
    ======================================== */
 
 @media (max-width: 768px) {
-    .io-hero {
-        padding: 100px 5% 36px;
-        min-height: 320px;
-    }
+    
 
     .io-hero h1 {
         font-size: 1.8rem;

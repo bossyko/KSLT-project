@@ -661,10 +661,7 @@
         padding: 12px 0;
     }
 
-    .co-hero {
-        min-height: 280px;
-        padding: 100px 20px 48px;
-    }
+    
     .co-container {
         padding: 40px 16px 60px;
     }
@@ -725,10 +722,7 @@
 }
 
 @media (max-width: 375px) {
-    .co-hero {
-        padding: 100px 16px 40px;
-        min-height: 240px;
-    }
+    
     .co-hero-title {
         font-size: 1.6rem;
     }

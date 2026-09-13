@@ -274,9 +274,9 @@
                 var gender = t.gender || '';
                 var genderLabel = (t.format !== 'mixed_doubles' && category !== 'friendly' && (gender === 'men' || gender === 'women'))
                     ? (gender === 'women'
-                        ? (isEn ? '♀ Women' : (isKg ? '♀ Аялдар' : '♀ Женский'))
-                        : (isEn ? '♂ Men' : (isKg ? '♂ Эркектер' : '♂ Мужской')))
-                    : (gender === 'mixed' ? (isEn ? '⚤ Mixed' : (isKg ? '⚤ Аралаш' : '⚤ Смешанный')) : '');
+                        ? (isEn ? 'Women' : (isKg ? 'Аялдар' : 'Женский'))
+                        : (isEn ? 'Men' : (isKg ? 'Эркектер' : 'Мужской')))
+                    : (gender === 'mixed' ? (isEn ? 'Mixed' : (isKg ? 'Аралаш' : 'Смешанный')) : '');
 
                 // Registration dates line (show only if reg_end >= today)
                 var regLine = '';

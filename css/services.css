@@ -605,10 +605,7 @@
 }
 
 @media (max-width: 768px) {
-    .sv-hero {
-        padding: 100px 5% 36px;
-        min-height: 320px;
-    }
+    
 
     .sv-hero h1 {
         font-size: 1.8rem;
@@ -651,10 +648,7 @@
 }
 
 @media (max-width: 480px) {
-    .sv-hero {
-        padding: 90px 5% 28px;
-        min-height: 280px;
-    }
+    
 
     .sv-hero h1 {
         font-size: 1.5rem;

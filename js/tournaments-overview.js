@@ -459,7 +459,7 @@
                 gender: gender,
                 noRating: !!NO_RATING[cat],
                 genderLabel: (t.format !== 'mixed_doubles' && !NO_RATING[cat] && gender)
-                    ? (gender === 'women' ? ('♀ ' + L.women) : (gender === 'mixed' ? '⚤' : ('♂ ' + L.men)))
+                    ? (gender === 'women' ? L.women : (gender === 'mixed' ? formatLabels.mixed_doubles : L.men))
                     : '',
                 regLine: regLine,
                 image: t.image_url || t.image || '',
@@ -516,6 +516,43 @@
         return 'soon';
     }
 
+    /**
+     * Карточки категории на телефоне — те же, что на главной.
+     *
+     * На широком экране категория показана крупной афишей и стопкой строк
+     * рядом: там есть место под описание, адрес и взнос. На телефоне эта
+     * раскладка разъезжалась — текст налезал на афишу, а карточки шли
+     * разной высоты. Рисуем общим модулем, тем же, что собирает карточки
+     * на главной: один вид на весь сайт, правка в одном месте.
+     *
+     * Четыре турнира — две в ряд, два ряда. Пятая карточка оставила бы
+     * дыру в ряду, а остальные и так за ссылкой «Все турниры».
+     *
+     * Модулю нужна запись из базы, а не наши подписи, — она лежит в _row.
+     */
+    var узкийЭкран = window.matchMedia ? window.matchMedia('(max-width: 768px)') : null;
+
+    function телефон() {
+        return !!(узкийЭкран && узкийЭкран.matches && window.KSLT_TCARD);
+    }
+
+    function карточкиТелефона(items, фонКатегории) {
+        var html = '<div class="tournaments-grid to-phone-cards">';
+        items.slice(0, 4).forEach(function(it) {
+            if (!it._row) return;
+            // У части турниров своей афиши нет — на широком экране для них
+            // берётся фоновая картинка категории. Общий модуль про этот
+            // запас не знает, поэтому подставляем сами. Исходную запись не
+            // трогаем: она общая с остальной страницей
+            var запись = it._row;
+            if (!запись.image && !запись.image_url && фонКатегории) {
+                запись = Object.assign({}, запись, { image: фонКатегории });
+            }
+            html += window.KSLT_TCARD.render(запись, { taken: it._taken });
+        });
+        return html + '</div>';
+    }
+
     function renderCategories(grouped) {
         var container = document.getElementById('overviewCategories');
         if (!container) return;
@@ -549,17 +586,21 @@
             html += '<a href="' + tournamentsPage + '?category=' + cat.key + '" class="to-view-all">' + L.viewAll + ' ' + arrowSvg + '</a>';
             html += '</div>';
 
-            html += '<div class="to-card-grid">';
-            var featuredBg = items[0].image || bgImage;
-            html += renderFeatured(items[0], featuredBg, cat.key);
-            if (items.length > 1) {
-                html += '<div class="to-side-stack">';
-                for (var i = 1; i < items.length; i++) {
-                    html += renderCompact(items[i], cat.key, i);
+            if (телефон()) {
+                html += карточкиТелефона(items, bgImage);
+            } else {
+                html += '<div class="to-card-grid">';
+                var featuredBg = items[0].image || bgImage;
+                html += renderFeatured(items[0], featuredBg, cat.key);
+                if (items.length > 1) {
+                    html += '<div class="to-side-stack">';
+                    for (var i = 1; i < items.length; i++) {
+                        html += renderCompact(items[i], cat.key, i);
+                    }
+                    html += '</div>';
                 }
                 html += '</div>';
             }
-            html += '</div>';
 
             html += '</div>';
         });
@@ -576,6 +617,22 @@
         initSearch();
         startCountdownTimer();
         initRegisterButtons();
+        // У карточек с главной свой счётчик до старта
+        if (телефон() && window.KSLT_TCARD.startTicker) window.KSLT_TCARD.startTicker();
+
+        // Ширину окна меняют редко, но при повороте телефона категория
+        // должна пересобраться: иначе на альбомной останутся плитки, а на
+        // компьютере после сужения — крупные афиши
+        if (узкийЭкран && !renderCategories._следим) {
+            renderCategories._следим = true;
+            var былоУзко = узкийЭкран.matches;
+            window.addEventListener('resize', function() {
+                var стало = узкийЭкран.matches;
+                if (стало === былоУзко) return;
+                былоУзко = стало;
+                renderCategories(_grouped);
+            });
+        }
     }
 
 

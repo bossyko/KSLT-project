@@ -1026,8 +1026,7 @@
         A.cachedCategories.forEach(function(c) {
             if (filterGender && c.gender && c.gender !== filterGender) return;
             var sel = (selectedId && c.id === selectedId) ? ' selected' : '';
-            var gIcon = c.gender === 'women' ? '♀ ' : '♂ ';
-            opts += '<option value="' + c.id + '"' + sel + '>' + gIcon + (isEn ? c.name_en : c.name) + '</option>';
+            opts += '<option value="' + c.id + '"' + sel + '>' + (isEn ? c.name_en : c.name) + '</option>';
         });
         return opts;
     }

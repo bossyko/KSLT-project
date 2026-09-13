@@ -87,7 +87,7 @@
             '<div class="ad-trn-stats-grid">' +
                 '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
-                        '<span class="ad-crt-stat-title">\u2642 ' + L.trnStatMenSingles + '</span>' +
+                        '<span class="ad-crt-stat-title">' + L.trnStatMenSingles + '</span>' +
                         '<span class="ad-crt-stat-total-num" id="adTrnTotalMS">...</span>' +
                         '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +
@@ -95,7 +95,7 @@
                 '</div>' +
                 '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
-                        '<span class="ad-crt-stat-title">\u2642 ' + L.trnStatMenDoubles + '</span>' +
+                        '<span class="ad-crt-stat-title">' + L.trnStatMenDoubles + '</span>' +
                         '<span class="ad-crt-stat-total-num" id="adTrnTotalMD">...</span>' +
                         '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +
@@ -103,7 +103,7 @@
                 '</div>' +
                 '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
-                        '<span class="ad-crt-stat-title">\u26A4 ' + L.trnStatMixedDoubles + '</span>' +
+                        '<span class="ad-crt-stat-title">' + L.trnStatMixedDoubles + '</span>' +
                         '<span class="ad-crt-stat-total-num" id="adTrnTotalMX">...</span>' +
                         '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +
@@ -111,7 +111,7 @@
                 '</div>' +
                 '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
-                        '<span class="ad-crt-stat-title">\u2640 ' + L.trnStatWomenSingles + '</span>' +
+                        '<span class="ad-crt-stat-title">' + L.trnStatWomenSingles + '</span>' +
                         '<span class="ad-crt-stat-total-num" id="adTrnTotalWS">...</span>' +
                         '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +
@@ -119,7 +119,7 @@
                 '</div>' +
                 '<div class="ad-crt-stat-card ad-stat-collapsible">' +
                     '<div class="ad-crt-stat-header">' +
-                        '<span class="ad-crt-stat-title">\u2640 ' + L.trnStatWomenDoubles + '</span>' +
+                        '<span class="ad-crt-stat-title">' + L.trnStatWomenDoubles + '</span>' +
                         '<span class="ad-crt-stat-total-num" id="adTrnTotalWD">...</span>' +
                         '<span class="ad-stat-arrow">\u25BC</span>' +
                     '</div>' +

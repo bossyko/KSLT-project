@@ -1478,9 +1478,7 @@
 
 /* Mobile landscape */
 @media (max-width: 768px) {
-    .pl-hero {
-        padding: 120px 5% 40px;
-    }
+    
 
     /* Отступы по краям экрана. Селектор был оборван запятой — секции
        забирали размеры фотографии пьедестала, и таблица игроков
@@ -1656,9 +1654,7 @@
         font-size: 1.8rem;
     }
 
-    .pl-hero {
-        padding: 110px 4% 30px;
-    }
+    
 
     .pl-hero-title {
         font-size: 1.8rem;
@@ -1752,9 +1748,7 @@
 }
 
 @media (max-width: 375px) {
-    .pl-hero {
-        padding: 100px 4% 24px;
-    }
+    
     .pl-hero-title {
         font-size: 1.5rem;
     }

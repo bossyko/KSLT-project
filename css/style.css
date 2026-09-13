@@ -4064,6 +4064,12 @@ h2 {
 }
 
 .trn-chip {
+    /* Единая высота у всех чипов в ряду: знаки ♂ и ♀ тянут строку вверх,
+       и чипы пола выходили на три пикселя выше соседних */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.15;
     padding: 8px 18px;
     background: transparent;
     border: 1px solid var(--border-subtle);
@@ -4087,6 +4093,12 @@ h2 {
     border-color: var(--accent);
     color: #000;
     font-weight: 600;
+}
+
+/* Короткая подпись чипа — только для телефона: на широком экране
+   показываем полное слово */
+.trn-chip-short {
+    display: none;
 }
 
 /* Сколько турниров попадёт под фильтр — видно до нажатия */
@@ -4135,9 +4147,15 @@ h2 {
         padding: 12px 0;
     }
 
+    /* Влево, как всё остальное содержимое страницы: по центру «Все турниры»
+       висела посреди полосы и читалась как заголовок, а не как ссылка назад */
     .trn-filters-inner {
-        justify-content: center;
+        justify-content: flex-start;
         padding: 0 5%;
+    }
+
+    .trn-back {
+        flex: 1 1 100%;
     }
 
     /* На странице рейтинга у этого же блока есть правило с родителем, оно
@@ -4149,7 +4167,19 @@ h2 {
     }
 
     .trn-chips {
-        justify-content: center;
+        justify-content: flex-start;
+    }
+
+    /* Разделитель групп на телефоне — не чёрточка, а перенос строки: фильтры
+       состояния идут своей строкой, пол — своей. Вперемешку «Все» от пола
+       оказывалось между «Завершённые» и «Мужские», и было не понять,
+       к чему оно относится */
+    .trn-chip-div {
+        flex: 1 1 100%;
+        width: auto;
+        height: 0;
+        margin: 0;
+        background: none;
     }
 
     .trn-chip {
@@ -4157,18 +4187,76 @@ h2 {
         font-size: 0.82rem;
     }
 
-}
-
-@media (max-width: 480px) {
-    .trn-chip {
-        padding: 7px 12px;
-        font-size: 0.78rem;
+    .trn-chips {
+        gap: 6px;
     }
 
-    .trn-chip-div {
+    /* Короткие подписи: полными четыре фильтра состояния занимали 448
+       пикселей при полосе в 351, и «Завершённые» уходили на вторую строку.
+       Ужимать шрифт бесполезно — чипы стали бы мелкими для пальца */
+    .trn-chip-full {
         display: none;
     }
 
+    .trn-chip-short {
+        display: inline;
+    }
+
+}
+
+@media (max-width: 480px) {
+    /* Поля потеснее и счётчик вплотную: четыре фильтра состояния должны
+       встать одной строкой. С прежними 12 они занимали 359 пикселей при
+       полосе в 351 — «Прошедшие» срывались вниз. Теперь 326 */
+    .trn-chip {
+        padding: 7px 10px;
+        min-height: 34px;
+        font-size: 0.78rem;
+    }
+
+    .trn-chip-count {
+        margin-left: 3px;
+    }
+
+}
+
+/* ========================================
+   ОБЛОЖКА РАЗДЕЛА НА ТЕЛЕФОНЕ — один размер на весь сайт
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Все шапки разделов одной высоты: переход между разделами не должен
+       прыгать, а длина названия — менять размер обложки. Было от 265 до 460
+       в зависимости от раздела.
+
+       Название стоит вверху, под шапкой сайта, цифры (если они есть) — у
+       нижнего края: между ними видна фотография. Раскладку внутри задаёт
+       файл раздела, здесь только размеры.
+
+       Страницы отдельных карточек — турнира, корта, тренера, новости —
+       живут по своим правилам: там афиша объекта, а не шапка раздела. */
+    /* Класс написан дважды не по ошибке: у каждого раздела свой файл, и он
+       подключается после style.css — при равном весе побеждала бы его
+       собственная высота для широкого экрана */
+    .pl-hero.pl-hero,
+    .ct-hero.ct-hero,
+    .co-hero.co-hero,
+    .ip-hero.ip-hero,
+    .io-hero.io-hero,
+    .sv-hero.sv-hero,
+    .pr-hero.pr-hero {
+        min-height: 275px;
+        padding: 92px 5% 30px;
+    }
+}
+
+@media (max-width: 375px) {
+    /* На узком телефоне полоса всего 324 пикселя, и со счётчиками строка
+       не сходится. Цифры не теряются: то же число стоит в подзаголовке
+       блока — «8 турниров в архиве» */
+    .trn-chip[data-filter="status"] .trn-chip-count {
+        display: none;
+    }
 }
 
 /* ========================================
@@ -5350,9 +5438,23 @@ h2 {
     transition: all var(--transition-fast);
 }
 
-.mobile-nav-links a:hover {
-    background: var(--surface-glass-hover);
-    color: var(--text-primary);
+/* Подсветка пункта меню — одна на все строки: и обычные ссылки, и
+   раскрывающиеся разделы, и вложенные категории. Раньше раскрывающиеся
+   светились лаймовым, а обычные серым — в одном списке два разных вида */
+.mobile-nav-links a:hover,
+.mobile-nav-links a:focus-visible,
+.mobile-dropdown-menu li a:hover {
+    background: rgba(204, 255, 0, 0.08);
+    color: var(--accent);
+}
+
+.mobile-nav-links a:focus {
+    outline: none;
+}
+
+.mobile-nav-links a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
 }
 
 .mobile-nav-links .indicator-dot {
@@ -5406,6 +5508,37 @@ h2 {
     cursor: pointer;
 }
 
+/* Раскрывающийся пункт меню: своя подсветка вместо системной обводки
+   ----------------------------------------------------------------
+   После нажатия браузер рисовал вокруг пункта синюю рамку — чужую для
+   тёмной лаймовой темы. Убираем её и даём свой вид: при наведении и
+   в раскрытом состоянии пункт подсвечивается лаймовым, как везде.
+   Для клавиатуры обводка остаётся — иначе не видно, где находишься. */
+.mobile-dropdown-toggle:focus {
+    outline: none;
+}
+
+.mobile-dropdown-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.mobile-dropdown-toggle:hover,
+.mobile-nav-dropdown.active > .mobile-dropdown-toggle {
+    background: rgba(204, 255, 0, 0.08);
+    color: var(--accent);
+}
+
+/* Точка «идёт сейчас» стоит вплотную к названию, а не посреди строки:
+   она относится к разделу, а не к пустому месту рядом */
+.mobile-dropdown-toggle {
+    gap: 8px;
+}
+
+.mobile-dropdown-toggle .indicator-dot {
+    margin-right: auto;
+}
+
 .mobile-nav-arrow {
     transition: transform 0.3s ease;
     opacity: 0.5;
@@ -5441,6 +5574,14 @@ h2 {
 .mobile-nav-dropdown.active .mobile-dropdown-menu li a {
     opacity: 1;
     transform: translateX(0);
+}
+
+/* Первый пункт ведёт на сам раздел, а не в его часть: нажатие на название
+   выше только раскрывает список, и попасть на страницу «Турниры» из меню
+   было нельзя. Выделяем цветом — это не ещё одна категория */
+.mobile-dropdown-menu li a.mobile-dropdown-self {
+    color: var(--accent);
+    font-weight: 600;
 }
 
 .mobile-nav-dropdown.active .mobile-dropdown-menu li:nth-child(1) a { transition-delay: 0.05s; }
@@ -7788,53 +7929,6 @@ input:-internal-autofill-previewed {
         padding: 10px 12px 12px;
     }
 
-    /* Карточка на телефоне: крупная афиша и короткая подпись.
-       Полное название занимало шесть строк, описание — ещё пять, и от
-       карточки оставалась колонка текста без картинки. */
-    .tournament-card .tournament-title {
-        font-size: 0.92rem;
-        line-height: 1.25;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    /* Описание на телефоне не показываем: название и дата уже всё сказали,
-       подробности — на странице турнира */
-    .tournament-card .tournament-desc,
-    .tournament-card .tournament-description {
-        display: none;
-    }
-
-    .tournament-card .tournament-date {
-        font-size: 0.7rem;
-    }
-
-    /* Карточки одной высоты: иначе ряд идёт лесенкой */
-    .tournaments-grid > .tournament-card {
-        align-self: stretch;
-    }
-
-    .tournament-card .tournament-info {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
-
-    .tournament-card .tournament-meta {
-        margin-top: auto;
-        font-size: 0.72rem;
-    }
-
-    /* Кнопка во всю ширину карточки и мельче: она была шире колонки */
-    .tournament-card .btn-primary,
-    .tournament-card .tournament-btn {
-        width: 100%;
-        padding: 8px 10px;
-        font-size: 0.78rem;
-        text-align: center;
-    }
 
     /* У новостей та же беда: подпись длиннее обложки */
     .hn-card h3 {
@@ -8028,6 +8122,136 @@ input:-internal-autofill-previewed {
     .feature h4 { font-size: 0.8rem; margin: 0 0 2px; line-height: 1.2; }
     .feature p { font-size: 0.68rem; line-height: 1.3; margin: 0; }
 
+    /* ─────────────────────────────────────────────────────────────
+       Стандарт заголовка раздела на телефоне
+       ─────────────────────────────────────────────────────────────
+       Разделы главной шли по 25.6 пикселя весом 800, а категории на
+       странице турниров — по 20.8 весом 700. Рядом это читалось как два
+       разных сайта: «СПОНСОРЫ КСЛТ» выглядели важнее, чем «PRO-MASTERS».
+
+       За образец взят вид со страницы турниров. Правило общее: заголовок
+       любого раздела на телефоне — 1.3rem, вес 700. */
+    .section-header h2,
+    section > h2,
+    .badges-cta-text h2,
+    .sp-offer h3 {
+        /* Плавно вместе с шириной экрана: на 320 — 18.4, на 390 — 19.5,
+           на 430 и шире — 21. Фиксированные 1.3rem на узком телефоне
+           смотрелись тяжело, а на крупном терялись.
+
+           Мелкий текст плавным не делаем — там разница в пиксель не видна,
+           зато строки в таблицах начинают переноситься по-разному */
+        font-size: clamp(1.15rem, 5vw, 1.32rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+    }
+
+    /* Шапка раздела: заголовок слева, ссылка «Все турниры» справа —
+       как на широком экране. В столбик она уезжала под заголовок и
+       прижималась к левому краю, будто это ещё один подзаголовок.
+       Строка с переносом: если заголовок длинный, ссылка опускается
+       под него, но остаётся у правого края */
+    .section-header {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px 10px;
+    }
+
+    .section-header .link-all,
+    .section-header > a {
+        margin-left: auto;
+        font-size: 0.78rem;
+        white-space: nowrap;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       Стандарт статистики на обложках страниц
+       ─────────────────────────────────────────────────────────────
+       Цифры стояли по 40 пикселей с промежутком в 80: четыре показателя
+       занимали 248 пикселей — больше половины обложки.
+
+       Размеры заданы через clamp, а не числом: между 320 и 640 пикселями
+       ширины они меняются плавно, а не прыгают на границе медиазапроса.
+       Средняя величина — доля ширины экрана (vw), крайние — пределы.
+
+       Правило общее для всех обложек: турниры, страница турнира, баттлы,
+       главная. Новую обложку с цифрами достаточно назвать одним из этих
+       классов — размеры подхватятся сами.
+
+       Селекторы с родителем не для красоты: те же размеры заданы в
+       tournaments.css, tournaments-overview.css и battles-overview.css,
+       а эти файлы подключаются после style.css и при равном весе
+       побеждают. */
+    .hero-stats,
+    .tournament-hero .tournament-hero-stats,
+    .to-hero .tournament-hero-stats,
+    .td-hero .td-hero-stats,
+    .bo-hero .bo-hero-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: clamp(8px, 2.5vw, 14px);
+        justify-items: center;
+    }
+
+    /* Колонок столько, сколько показателей, но не больше трёх. В жёсткой
+       сетке 2×2 три цифры вставали криво: две сверху, третья одна посреди
+       пустой строки. Четыре по-прежнему идут 2×2 */
+    .hero-stats:has(> :nth-child(3):last-child),
+    .tournament-hero .tournament-hero-stats:has(> :nth-child(3):last-child),
+    .to-hero .tournament-hero-stats:has(> :nth-child(3):last-child),
+    .td-hero .td-hero-stats:has(> :nth-child(3):last-child),
+    .bo-hero .bo-hero-stats:has(> :nth-child(3):last-child) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Четыре показателя тоже идут строкой: сеткой 2×2 они занимали половину
+       обложки, а в ряд читаются одним взглядом */
+    .hero-stats:has(> :nth-child(4):last-child),
+    .tournament-hero .tournament-hero-stats:has(> :nth-child(4):last-child),
+    .to-hero .tournament-hero-stats:has(> :nth-child(4):last-child),
+    .td-hero .td-hero-stats:has(> :nth-child(4):last-child),
+    .bo-hero .bo-hero-stats:has(> :nth-child(4):last-child) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .hero-stats:has(> :only-child),
+    .tournament-hero .tournament-hero-stats:has(> :only-child),
+    .to-hero .tournament-hero-stats:has(> :only-child),
+    .td-hero .td-hero-stats:has(> :only-child),
+    .bo-hero .bo-hero-stats:has(> :only-child) {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .hero-stats .hero-stat-value,
+    .tournament-hero-stats .hero-stat-value,
+    .td-hero-stats .hero-stat-value,
+    .bo-hero-stats .bo-hero-stat-value,
+    .bo-hero-stats .hero-stat-value {
+        font-size: clamp(1.35rem, 6.4vw, 1.9rem);
+        line-height: 1.1;
+    }
+
+    .hero-stats .hero-stat-label,
+    .tournament-hero-stats .hero-stat-label,
+    .td-hero-stats .hero-stat-label,
+    .bo-hero-stats .bo-hero-stat-label,
+    .bo-hero-stats .hero-stat-label {
+        font-size: clamp(0.6rem, 2.7vw, 0.72rem);
+        line-height: 1.25;
+        letter-spacing: 0.04em;
+        text-align: center;
+    }
+
     /* Футер шёл сплошной колонкой на 1116 пикселей: пять блоков подряд с
        промежутком в 40. Ставим разделы по два в ряд — «Навигация» рядом с
        «Игрокам», «Спонсорам» рядом с «Контактами», — а шапку с логотипом
@@ -8206,7 +8430,6 @@ input:-internal-autofill-previewed {
         padding: 16px 14px;
     }
 
-    .sp-offer h3 { font-size: 1rem; }
 
     .sp-offer-lead {
         font-size: 0.78rem;
@@ -8323,4 +8546,49 @@ input:-internal-autofill-previewed {
         padding-bottom: 12px;
         min-height: 0;
     }
+}
+
+
+/* ============================================================
+   Полосы прокрутки — один вид на всём сайте
+   ============================================================
+   Где бы ни появилась прокрутка — сетка турнира, таблица группы,
+   расписание, список участников, лента фильтров, — полоса выглядит
+   одинаково: тонкая, дорожка чуть светлее фона, ползунок лаймовый.
+
+   Раньше каждый блок стилизовал её по-своему: у сетки была одна полоса,
+   у таблицы группы — другая, где-то оставалась системная светлая. Новый
+   прокручиваемый блок ничего объявлять не должен — он получает этот вид
+   сам. */
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(204, 255, 0, 0.35) rgba(255, 255, 255, 0.04);
+}
+
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: rgba(204, 255, 0, 0.35);
+    border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: rgba(204, 255, 0, 0.6);
+}
+
+/* Скрытая полоса остаётся скрытой: ленты вкладок и фильтров листают
+   пальцем, полоса там только мешает */
+.rankings-tabs::-webkit-scrollbar,
+.td-tabs::-webkit-scrollbar,
+.hn-scroll::-webkit-scrollbar {
+    display: none;
 }

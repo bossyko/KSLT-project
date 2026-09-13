@@ -796,22 +796,43 @@
 }
 
 @media (max-width: 768px) {
+    /* Обложка по общему стандарту: сверху место под шапку, снизу — коротко.
+       Было 320 пикселей высоты и 40 снизу — под цифрами оставалась пустая
+       треть экрана. Размеры самих цифр берутся из style.css */
+    /* Одна высота у всех категорий и у обзора турниров: при переходе
+       обложка не должна прыгать, а длина названия — менять её размер.
+       Содержимое стоит у нижнего края с отступом в 30 */
     .tournament-hero {
-        min-height: 320px;
-        padding: 90px 5% 40px;
+        min-height: 275px;
+        padding: 92px 5% 30px;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+    }
+
+    /* Название вверху, цифры внизу, фотография между ними: собранные в
+       кучу посреди обложки они оставляли пустую полосу и сверху, и снизу */
+    .tournament-hero-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    /* На большинстве категорий подзаголовка нет, а отступ под него в 40
+       пикселей оставался — из-за него цифры отъезжали вниз от заголовка
+       и жались к нижнему краю обложки */
+    .trn-hero-sub:empty {
+        display: none;
+    }
+
+    .trn-hero-sub:empty + .tournament-hero-stats {
+        margin-top: 22px;
     }
 
     /* В одну строку заголовок помещается только на широком экране */
     .tournament-hero-content h1 {
         white-space: normal;
-    }
-
-    .tournament-hero-stats {
-        gap: var(--space-lg);
-    }
-
-    .hero-stat-value {
-        font-size: 2rem;
     }
 
     .tournaments-grid {
@@ -999,4 +1020,62 @@
     color: var(--accent, #CCFF00);
     transform: none;
     box-shadow: none;
+}
+
+/* ============================================================
+   Телефон
+   ============================================================
+   Правила живут здесь, рядом со своим компонентом, а не в style.css:
+   этот файл подключается после него, и правка выигрывает по порядку —
+   без подпорок в селекторе и без !important. */
+
+@media (max-width: 768px) {
+
+    /* Карточка на телефоне: крупная афиша и короткая подпись.
+       Полное название занимало шесть строк, описание — ещё пять, и от
+       карточки оставалась колонка текста без картинки */
+    .tournament-card .tournament-title {
+        font-size: 0.92rem;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Описание на телефоне не показываем: название и дата уже всё сказали,
+       подробности — на странице турнира */
+    .tournament-card .tournament-desc,
+    .tournament-card .tournament-description {
+        display: none;
+    }
+
+    .tournament-card .tournament-date {
+        font-size: 0.7rem;
+    }
+
+    /* Карточки одной высоты: иначе ряд идёт лесенкой */
+    .tournaments-grid > .tournament-card {
+        align-self: stretch;
+    }
+
+    .tournament-card .tournament-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .tournament-card .tournament-meta {
+        margin-top: auto;
+        font-size: 0.72rem;
+    }
+
+    /* Кнопка во всю ширину карточки и мельче: она была шире колонки */
+    .tournament-card .btn-primary,
+    .tournament-card .tournament-btn {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 0.78rem;
+        text-align: center;
+    }
 }

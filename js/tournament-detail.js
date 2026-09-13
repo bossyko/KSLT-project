@@ -891,13 +891,24 @@ function initTabsNavigation() {
         tabsBackLink.href = heroBackLink.href;
         tabsBackText.textContent = heroBackLink.textContent.trim();
 
-        // Show back link when hero back link scrolls out of view
-        var backObserver = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                tabsBackLink.classList.toggle('visible', !entry.isIntersecting);
-            });
-        }, { threshold: 0, rootMargin: '-64px 0px 0px 0px' });
-        backObserver.observe(heroBackLink);
+        // Возврат к категории появляется в полосе, когда такая же ссылка в
+        // обложке уходит за верх экрана.
+        //
+        // Раньше за этим следил IntersectionObserver, привязанный к ссылке в
+        // обложке. Но обложка перерисовывается, когда догружаются данные
+        // турнира: наблюдаемый элемент выбрасывается из страницы, событий
+        // больше нет, и ссылка в полосе не появлялась вовсе. Поэтому смотрим
+        // на положение самой обложки и ищем её заново при каждой проверке
+        var проверитьВозврат = function() {
+            var обложка = document.querySelector('.td-hero');
+            var ссылка = document.querySelector('.td-hero .td-back-link') || обложка;
+            if (!ссылка) return;
+            var ушла = ссылка.getBoundingClientRect().bottom < 64;
+            tabsBackLink.classList.toggle('visible', ушла);
+        };
+
+        проверитьВозврат();
+        window.addEventListener('scroll', проверитьВозврат, { passive: true });
     }
 
     // --- Helpers ---
@@ -913,6 +924,35 @@ function initTabsNavigation() {
 
     var SCROLL_OFFSET = 120; // 64px header + ~50px tabs + 6px gap
 
+    /**
+     * Лента вкладок едет за разделом, который читают.
+     *
+     * На телефоне шесть вкладок не помещаются в ширину: видно три, остальные
+     * за краем. Пока листаешь страницу, подсветка уходила за границу ленты, и
+     * приходилось искать её пальцем. Теперь активная вкладка сама подъезжает
+     * в середину — как в приложениях с лентой разделов.
+     *
+     * Только вбок и только внутри ленты: страница от этого не дёргается.
+     */
+    var лента = tabsBar.querySelector('.td-tabs') || tabsBar;
+
+    function показатьАктивную() {
+        var активная = лента.querySelector('.td-tab.active');
+        if (!активная || лента.scrollWidth <= лента.clientWidth) return;
+
+        // Считаем по месту на экране, а не по offsetLeft: у вкладок он
+        // отсчитывается от липкой полосы, и со ссылкой возврата слева
+        // середина уезжала на её ширину
+        var рЛ = лента.getBoundingClientRect();
+        var рА = активная.getBoundingClientRect();
+        var середина = лента.scrollLeft + (рА.left - рЛ.left) - (рЛ.width - рА.width) / 2;
+        var предел = лента.scrollWidth - лента.clientWidth;
+        var куда = Math.max(0, Math.min(предел, Math.round(середина)));
+        if (Math.abs(лента.scrollLeft - куда) < 4) return;
+
+        лента.scrollTo({ left: куда, behavior: 'smooth' });
+    }
+
     // --- Tab click → scroll to section header ---
     tabsBar.addEventListener('click', function(e) {
         var tab = e.target.closest('.td-tab');
@@ -920,6 +960,10 @@ function initTabsNavigation() {
 
         tabsBar.querySelectorAll('.td-tab').forEach(function(t) { t.classList.remove('active'); });
         tab.classList.add('active');
+        показатьАктивную();
+        // Ещё раз, когда плавная прокрутка страницы утихнет: она успевает
+        // перебить движение ленты, и крайняя вкладка не доезжала
+        setTimeout(показатьАктивную, 700);
 
         var targetId = tab.dataset.target;
         var targetSection = document.getElementById(targetId);
@@ -937,6 +981,7 @@ function initTabsNavigation() {
                 tabsBar.querySelectorAll('.td-tab').forEach(function(t) {
                     t.classList.toggle('active', t.dataset.target === id);
                 });
+                показатьАктивную();
             }
         });
     }, { rootMargin: '-140px 0px -60% 0px' });
@@ -1087,7 +1132,7 @@ function loadFromSupabase(client, id) {
                 playerIds = playerIds.filter(function(v, i) { return playerIds.indexOf(v) === i; });
 
                 if (playerIds.length > 0) {
-                    var playersPromise = client.from('players').select('id, name, name_en, photo, points, country, category_id, wins, losses, form').in('id', playerIds);
+                    var playersPromise = client.from('players').select('id, name, name_en, photo, points, country, category_id, wins, losses, form, ntrp_singles, ntrp_doubles').in('id', playerIds);
                     var h2hPromise = client.from('matches')
                         .select('player1_id, player2_id, winner_id')
                         .not('winner_id', 'is', null)
@@ -1210,11 +1255,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // Gender badge (from tournament.gender field)
     var gender = t.gender || '';
     var genderLabel = gender === 'women'
-        ? (isEn ? '♀ Women' : (isKg ? '♀ Аялдар' : '♀ Женский'))
+        ? (isEn ? 'Women' : (isKg ? 'Аялдар' : 'Женский'))
         : gender === 'men'
-        ? (isEn ? '♂ Men' : (isKg ? '♂ Эркектер' : '♂ Мужской'))
+        ? (isEn ? 'Men' : (isKg ? 'Эркектер' : 'Мужской'))
         : gender === 'mixed'
-        ? (isEn ? '⚤ Mixed' : (isKg ? '⚤ Аралаш' : '⚤ Смешанный'))
+        ? (isEn ? 'Mixed' : (isKg ? 'Аралаш' : 'Смешанный'))
         : '';
 
     var backUrl = isEn
@@ -1441,11 +1486,15 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     : { court: 'Корт', time: 'Время', round: 'Раунд', status: 'Статус', group: 'Группа',
                         done: 'Завершён', live: 'Идёт', soon: 'Ожидает' });
 
+            var естьГруппы = очередь.some(function(m) { return !!m.group_number; });
+
             var расписаниеHtml = '<div class="td-sched-court">' +
                 '<table class="td-sched-table"><thead><tr>' +
                     '<th>№</th>' +
                     '<th>' + подписи.time + '</th>' +
-                    '<th>' + подписи.round + '</th>' +
+                    // Заголовок по содержимому: в групповых турнирах в этой
+                    // колонке стоит «Группа A», а не круг сетки
+                    '<th>' + (естьГруппы ? подписи.group : подписи.round) + '</th>' +
                     '<th colspan="3">' + (isEn ? 'Match' : (isKg ? 'Оюн' : 'Игра')) + '</th>' +
                     '<th>' + подписи.court + '</th>' +
                     '<th>' + подписи.status + '</th>' +
@@ -1463,11 +1512,17 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 расписаниеHtml += '<tr' + (m.status === 'live' ? ' class="td-sched-row-live"' : '') + '>' +
                     '<td class="td-sched-num">' + (i + 1) + '</td>' +
                     '<td class="td-sched-time">' + esc(String(m.scheduled_time).slice(0, 5)) + '</td>' +
-                    '<td><span class="td-sched-round">' + esc(круг) + '</span></td>' +
+                    // Короткая подпись для телефона: там колонка узкая, и вместо
+                    // «Группа A» показываем только букву — её берёт стиль из
+                    // data-short
+                    '<td><span class="td-sched-round" data-short="' +
+                        esc(m.group_number ? (буквы[m.group_number - 1] || m.group_number) : круг) +
+                        '">' + esc(круг) + '</span></td>' +
                     '<td class="td-sched-p">' + pName(m.player1_id) + '</td>' +
                     '<td class="td-sched-vs">vs</td>' +
                     '<td class="td-sched-p">' + pName(m.player2_id) + '</td>' +
-                    '<td class="td-sched-court-cell">' +
+                    '<td class="td-sched-court-cell" data-short="' +
+                        (m.court ? esc(String(m.court)) : '\u2014') + '">' +
                         (m.court ? подписи.court + ' ' + esc(String(m.court)) : '\u2014') + '</td>' +
                     '<td><span class="td-sched-status ' + классСост + '">' + состояние + '</span></td>' +
                 '</tr>';
@@ -1710,6 +1765,24 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         bHtml += '<div class="td-bracket-matches">';
                         round.matches.forEach(function(match) { bHtml += renderMatch(plTournObj, match, predOpts); });
                         bHtml += '</div>';
+
+                        // Матч за третье место — в колонке финала, но ниже
+                        // самого финала, а не рядом с ним.
+                        //
+                        // Внутри контейнера матчей он делил место с финалом:
+                        // финал уезжал вверх и переставал попадать на свою
+                        // соединительную линию
+                        if (isLastRound && thirdMatch) {
+                            bHtml += '<div class="td-third-place">';
+                            bHtml += '<div class="td-round-title">' +
+                                (isEn ? '3rd Place' : (isKg ? '3-орун үчүн' : 'За 3-е место')) + '</div>';
+                            bHtml += renderMatch(plTournObj, {
+                                matchId: thirdMatch.id, player1Id: thirdMatch.player1_id, player2Id: thirdMatch.player2_id,
+                                score: thirdMatch.score || '', winnerId: thirdMatch.winner_id, status: thirdMatch.status || 'upcoming'
+                            }, predOpts);
+                            bHtml += '</div>';
+                        }
+
                         bHtml += '</div>';
                         if (ri < plRounds.length - 1) {
                             var pc = Math.floor(round.matches.length / 2);
@@ -1724,26 +1797,15 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     });
                     bHtml += '</div></div>';
 
-                    // 3rd place — separate block under bracket
-                    if (thirdMatch) {
-                        // Справа под сеткой — там же, где он стоит в админке.
-                        // Слева он читался как отдельный первый круг
-                        bHtml += '<div style="margin-top:20px;max-width:200px;margin-left:auto;">';
-                        bHtml += '<div class="td-round-title">' + (isEn ? '3rd Place' : (isKg ? '3-орун үчүн' : 'За 3-е место')) + '</div>';
-                        bHtml += renderMatch(plTournObj, {
-                            matchId: thirdMatch.id, player1Id: thirdMatch.player1_id, player2Id: thirdMatch.player2_id,
-                            score: thirdMatch.score || '', winnerId: thirdMatch.winner_id, status: thirdMatch.status || 'upcoming'
-                        }, predOpts);
-                        bHtml += '</div>';
-                    }
-
                     bHtml += '<div style="margin-bottom:32px;"></div>';
                 }
 
                 // Inter-group matches section
                 if (hasIG) {
                     bHtml += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Additional Matches' : (isKg ? 'Кошумча матчтар' : 'Дополнительные матчи')) + '</h3>';
-                    bHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:32px;">';
+                    // Класс нужен, чтобы на телефоне поставить карточки по две
+                    // в ряд: минимум в 220 пикселей оставлял их по одной
+                    bHtml += '<div class="td-ig-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:32px;">';
                     igMatches.sort(function(a, b) { return a.match_order - b.match_order; });
                     igMatches.forEach(function(m, idx) {
                         var p1Name = pName(m.player1_id);
@@ -2177,11 +2239,32 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     }
 
     // ---- Participants from registrations ----
+    // Раздел «Очки» — только у турниров с рейтингом
+    //
+    // На дружеских и парных очки не начисляются, и вкладка вела в пустой
+    // раздел с надписью «результатов пока нет». Человек ждал, что там
+    // что-то появится, а появиться было нечему
+    (function() {
+        if (isRatingTournament(t)) return;
+        var вкладка = document.querySelector('.td-tab[data-target="results"]');
+        if (вкладка) вкладка.remove();
+        var заголовок = document.getElementById('results');
+        if (заголовок) {
+            var раздел = заголовок.nextElementSibling;
+            заголовок.remove();
+            if (раздел && раздел.querySelector('#resultsPodium')) раздел.remove();
+        }
+    })();
+
     var participantsGrid = document.getElementById('participantsGrid');
     if (participantsGrid) {
         var maxPart = t.max_participants || 16;
-        var mainDrawRegs = registrations.filter(function(r) { return r.status === 'approved' || r.status === 'pending'; })
-            .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
+        // После жеребьёвки заявка получает состояние draw — и раздел
+        // «Участники» оставался пустым, хотя в турнире 18 пар. Берём все
+        // живые заявки: одобренные, ожидающие проверки и попавшие в сетку
+        var mainDrawRegs = registrations.filter(function(r) {
+            return r.status === 'approved' || r.status === 'pending' || r.status === 'draw';
+        }).sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
         var waitlistRegs = registrations.filter(function(r) { return r.status === 'waitlist'; })
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
 
@@ -2193,7 +2276,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var mainDrawLabel = isEn ? 'Main Draw' : (isKg ? 'Негизги тор' : 'Основная сетка');
             var waitlistLabel = isEn ? 'Waitlist' : (isKg ? 'Күтүү тизмеси' : 'Лист ожидания');
             var thName = isEn ? 'Name' : (isKg ? 'Аты-жөнү' : 'ФИО');
-            var thCat = isEn ? 'Category' : (isKg ? 'Категория' : 'Категория');
+            var thCat = 'NTRP';
             var thDate = isEn ? 'Date' : (isKg ? 'Датасы' : 'Дата');
             var thTime = isEn ? 'Time' : (isKg ? 'Убактысы' : 'Время');
 
@@ -2207,8 +2290,24 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var photoHtml = photo
                     ? '<img class="td-reg-photo" src="' + esc(photo) + '" alt="">'
                     : '<div class="td-reg-photo td-reg-photo-empty">—</div>';
-                var catId = p.category_id || '';
-                var catLabel = catId ? catId.charAt(0).toUpperCase() + catId.slice(1) : '—';
+                // Вместо категории — NTRP: в списке заявок важен уровень игры,
+                // а не разряд. У пары показываем обоих через косую черту.
+                // В парном турнире берём парный рейтинг, в одиночном — одиночный
+                function ntrpИгрока(id) {
+                    var и = playersMap[id];
+                    if (!и) return null;
+                    var знач = isDbl ? (и.ntrp_doubles || и.ntrp_singles) : и.ntrp_singles;
+                    return знач ? Number(знач).toFixed(1) : null;
+                }
+
+                var catLabel;
+                if (isDbl) {
+                    var н1 = ntrpИгрока(reg.player_id);
+                    var н2 = ntrpИгрока(reg.partner_id);
+                    catLabel = (н1 || н2) ? ((н1 || '—') + ' / ' + (н2 || '—')) : '—';
+                } else {
+                    catLabel = ntrpИгрока(reg.player_id) || '—';
+                }
                 var regDate = '', regTime = '';
                 if (reg.registered_at) {
                     var d = new Date(reg.registered_at);

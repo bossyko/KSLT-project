@@ -780,9 +780,20 @@
 }
 
 @media (max-width: 768px) {
+    /* Обложка по общему стандарту — тому же, что на страницах категорий
+       турниров: сверху место под шапку, снизу коротко, лишней высоты нет */
     .bo-hero {
-        padding: 90px 5% 40px;
-        min-height: 320px;
+        padding: 92px 5% 30px;
+        min-height: 275px;
+        align-items: stretch;
+    }
+
+    /* Название вверху, цифры внизу — так же, как на страницах категорий */
+    .bo-hero-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     .bo-hero h1 {
@@ -804,11 +815,6 @@
 }
 
 @media (max-width: 480px) {
-    .bo-hero {
-        padding: 85px 5% 30px;
-        min-height: 300px;
-    }
-
     .bo-hero h1 {
         font-size: 1.5rem;
     }

@@ -639,8 +639,8 @@
                         '<label class="ad-field-label">' + L.plrGender + ' *</label>' +
                         '<select class="ad-field-input" id="adPlrGender">' +
                             '<option value="">' + L.plrGenderPick + '</option>' +
-                            '<option value="men"' + (item && item.gender === 'men' ? ' selected' : '') + '>\u2642 ' + L.genderMen + '</option>' +
-                            '<option value="women"' + (item && item.gender === 'women' ? ' selected' : '') + '>\u2640 ' + L.genderWomen + '</option>' +
+                            '<option value="men"' + (item && item.gender === 'men' ? ' selected' : '') + '>' + L.genderMen + '</option>' +
+                            '<option value="women"' + (item && item.gender === 'women' ? ' selected' : '') + '>' + L.genderWomen + '</option>' +
                         '</select>' +
                     '</div>' +
                 '</div>' +
@@ -2304,8 +2304,8 @@
         if (!panel) return;
 
         var genderOpts = '<option value="">' + L.ratAllGenders + '</option>' +
-            '<option value="men">\u2642 ' + L.genderMen + '</option>' +
-            '<option value="women">\u2640 ' + L.genderWomen + '</option>';
+            '<option value="men">' + L.genderMen + '</option>' +
+            '<option value="women">' + L.genderWomen + '</option>';
 
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
@@ -2572,8 +2572,8 @@
         if (!panel) return;
 
         var genderOpts = '<option value="">' + L.ratAllGenders + '</option>' +
-            '<option value="men">\u2642 ' + L.genderMen + '</option>' +
-            '<option value="women">\u2640 ' + L.genderWomen + '</option>';
+            '<option value="men">' + L.genderMen + '</option>' +
+            '<option value="women">' + L.genderWomen + '</option>';
 
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
@@ -2646,10 +2646,9 @@
             var date = t.date_start ? t.date_start.substring(0, 10) : '';
             var cat = A.categoriesMap[t.category_id];
             var catName = cat ? (isEn ? (cat.name_en || cat.name) : cat.name) : '';
-            var genderIcon = t.gender === 'women' ? '\u2640 ' : (t.gender === 'men' ? '\u2642 ' : '');
             html += '<tr class="ad-rat-trn-row" data-trn-id="' + t.id + '" style="cursor:pointer;">' +
                 '<td>' + date + '</td>' +
-                '<td><span class="ad-rat-trn-link">' + genderIcon + A.esc(title) + '</span></td>' +
+                '<td><span class="ad-rat-trn-link">' + A.esc(title) + '</span></td>' +
                 '<td>' + A.esc(catName) + '</td>' +
             '</tr>';
         });

@@ -1156,3 +1156,189 @@
     border-color: rgba(255, 179, 0, 0.4) !important;
     color: #ffb300 !important;
 }
+
+/* ============================================================
+   Телефон
+   ============================================================
+   Правила живут здесь, а не в style.css: этот файл подключается после
+   него, и мобильная правка выигрывает по порядку — без подпорок вида
+   main .to-featured и без !important. */
+
+@media (max-width: 768px) {
+
+    /* Обложка той же высоты, что у страниц категорий: раздел один, и
+       переход с обзора в категорию не должен прыгать. Содержимое стоит
+       у нижнего края с отступом в 30 — так цифры не жмутся ни к заголовку,
+       ни к самому низу, а сверху остаётся видна фотография */
+    .to-hero {
+        padding: 92px 5% 30px;
+        min-height: 275px;
+        align-items: stretch;
+        margin-bottom: 0;
+    }
+
+    /* Подпись идёт вплотную к названию: со своим отступом обложка обзора
+       вырастала на 7 пикселей выше остальных в разделе */
+    .to-hero-sub {
+        margin-bottom: 0;
+    }
+
+    /* Название вверху, цифры внизу — так же, как на страницах категорий */
+    .to-hero-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    /* Поиск шёл через 25 пикселей от обложки и добавлял свои 24 сверху */
+    .to-search-wrap {
+        padding: 12px 19px 14px;
+    }
+
+    /* Поле было 50 пикселей высотой с отступами по 14 — на телефоне оно
+       выглядело тяжелее всего, что под ним.
+
+       Шрифт остаётся 16: при меньшем Safari на iPhone сам увеличивает
+       страницу, как только ставишь курсор в поле, и обратно уже не выйти */
+    .to-search-input {
+        padding: 10px 42px 10px 16px;
+        font-size: 16px;
+    }
+
+    /* Лупа стояла в потоке перед полем: right только отодвигал её влево от
+       собственного места, до края поля оставалось 37 пикселей */
+    .to-search-icon {
+        position: absolute;
+        /* Отсчёт от верха обёртки, а не от её середины: сверху у неё 12
+           пикселей отступа, снизу 14 — центр обёртки ниже центра поля,
+           и лупа сползала к нижнему краю. 12 + (42 - 17) / 2 */
+        top: 24px;
+        right: 30px;
+        transform: none;
+        /* Свой отступ сверху в 14 пикселей остался от раскладки в потоке
+           и утягивал лупу под середину поля */
+        margin: 0;
+        width: 17px;
+        height: 17px;
+    }
+
+    /* Заголовок категории нёс снизу отступ в 20 пикселей: из-за него
+       ссылка «Все турниры», выровненная по центру строки, вставала ниже
+       заголовка, а под шапкой зияла пустота. Отступ отдаём самой шапке */
+    .to-category-title {
+        margin: 0;
+    }
+
+    .to-category-header {
+        margin-bottom: 10px;
+    }
+
+    /* Карточки на телефоне рисует общий модуль — те же, что на главной.
+       Сетка двенадцатиколоночная, как там: карточка занимает шесть колонок,
+       то есть половину ряда. Остальные размеры карточка несёт с собой */
+    .to-phone-cards {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 10px;
+    }
+
+    /* ─── Категория читается как две карточки в ряд, два ряда ───
+       Карточка занимала весь экран: 380 пикселей минимальной высоты,
+       заголовок налезал на описание, и одна категория шла четырьмя
+       экранами */
+    .to-card-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    /* Высота задана прямо: ряд сетки растягивался до 632 пикселей —
+       фоновая картинка тянула его за собой, хотя текста в карточке
+       на 190. Плитка одного размера, фото внутри обрезается по cover */
+    .to-featured,
+    .to-featured-side {
+        min-height: 0;
+        height: 200px;
+    }
+
+    .to-featured-content {
+        padding: 9px 9px 11px;
+    }
+
+    .to-featured-content h3 {
+        font-size: 0.82rem;
+        line-height: 1.25;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* На двух колонках в карточке остаются дата, состояние, название и
+       кнопка. Описание, место, взнос и призовой фонд — на странице турнира */
+    .to-featured-desc,
+    .to-featured-venue,
+    .to-featured-details,
+    .to-featured-meta {
+        display: none;
+    }
+
+    .to-featured-status {
+        font-size: 0.58rem;
+        padding: 2px 7px;
+    }
+
+    .to-featured-date {
+        font-size: 0.6rem;
+        padding: 5px 7px;
+    }
+
+    .to-featured-date .to-day { font-size: 0.95rem; }
+    .to-featured-date .to-month { font-size: 0.55rem; }
+
+    .to-featured-actions a,
+    .to-featured-actions button {
+        padding: 7px 10px;
+        font-size: 0.7rem;
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Рядом с главной карточкой стояла стопка из трёх компактных строк —
+       она держала ряд в 632 пикселя, а её карточки на узкой колонке
+       разъезжались. display: contents растворяет стопку: её карточки
+       становятся плитками той же сетки, и категория встаёт как 2×2 */
+    .to-side-stack {
+        display: contents;
+    }
+
+    .to-side-stack .to-compact {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        height: 200px;
+        padding: 9px;
+        gap: 4px;
+        overflow: hidden;
+    }
+
+    /* Строчная раскладка «картинка — текст — метки» на плитке не нужна:
+       фон карточки уже несёт картинку */
+    .to-side-stack .to-compact-thumb { display: none; }
+
+    .to-side-stack .to-compact-info h4 {
+        font-size: 0.78rem;
+        line-height: 1.2;
+        -webkit-line-clamp: 2;
+    }
+
+    .to-side-stack .to-compact-info span,
+    .to-side-stack .to-compact-right {
+        font-size: 0.6rem;
+    }
+
+    .to-side-stack .to-compact .to-compact-right {
+        gap: 4px;
+    }
+}

@@ -396,6 +396,31 @@
     display: flex;
     flex-direction: column;
     min-width: 210px;
+    /* Матч за третье место висит под колонкой финала на отдельном слое */
+    position: relative;
+}
+
+/* Матч за третье место — под финалом, в его же колонке.
+   Абсолютно, а не в потоке: в потоке он отнимал высоту у списка матчей,
+   финал уезжал вверх и переставал попадать на свою соединительную линию. */
+.td-third-place {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 14px;
+}
+
+/* Блок за третье место висит отдельным слоем и места в потоке не занимает —
+   иначе он отнимал бы высоту у колонки и финал сходил со своей линии.
+   Поэтому сетке нужен нижний отступ под него, иначе он наезжает на
+   следующий раздел. */
+.td-bracket:has(.td-third-place) {
+    padding-bottom: 130px;
+}
+
+.td-third-place .td-round-title {
+    margin-bottom: 6px;
 }
 
 .td-round-title {
@@ -1993,27 +2018,8 @@ tr.td-rr-row-dimmed {
     flex-shrink: 0;
 }
 
-/* Полоса прокрутки под сеткой. Своего вида ей не задавали, и браузер рисовал
-   системную — светло-серую поперёк тёмной страницы. Заметно это только на
-   узком экране, когда сетка не помещается по ширине. */
-.td-bracket-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(204, 255, 0, 0.35) transparent;
-}
-.td-bracket-scroll::-webkit-scrollbar {
-    height: 8px;
-}
-.td-bracket-scroll::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 4px;
-}
-.td-bracket-scroll::-webkit-scrollbar-thumb {
-    background: rgba(204, 255, 0, 0.35);
-    border-radius: 4px;
-}
-.td-bracket-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(204, 255, 0, 0.55);
-}
+/* Вид полосы прокрутки задан один раз для всего сайта — см. style.css,
+   раздел «Полосы прокрутки». Здесь ничего объявлять не нужно. */
 
 
 
@@ -2074,7 +2080,11 @@ tr.td-rr-row-dimmed {
    же правило и запрещало — сетку нельзя было ни прочитать, ни сдвинуть. */
 @media (min-width: 1024px) {
 .td-bracket-scroll {
-    overflow-x: hidden;
+    /* Не hidden, а visible: при hidden по одной оси браузер сам делает
+       вторую прокручиваемой — внутри сетки появлялась вертикальная полоса,
+       и сетка жила в собственном окошке. Прокрутки здесь не нужно вовсе:
+       по ширине колонки ужимаются сами, по высоте листается страница */
+    overflow: visible;
     max-width: 100%;
 }
 .td-bracket {
@@ -2142,9 +2152,12 @@ tr.td-rr-row-dimmed {
    Тот же порядок, что у ведущего в админке: одна очередь, от раннего запуска
    к позднему. Корт известен только у первых — дальше прочерк, его поставят по
    ходу дня. Здесь только смотрят, поэтому ни полей, ни кнопок. */
+/* Расписание идёт по той же ширине, что таблицы групп: 1400 и по левому
+   краю. Раньше оно было в колонке 1000 пикселей по центру — и на широком
+   экране висело отдельным островом, сдвинутым вправо от всего остального. */
 .td-sched-court {
-    max-width: 1000px;
-    margin: 0 auto var(--space-xl);
+    max-width: 1400px;
+    margin: 0 0 var(--space-xl);
 }
 
 .td-sched-court-title {
@@ -2237,4 +2250,494 @@ tr.td-rr-row-dimmed {
     .td-sched-table { font-size: 0.82rem; }
     .td-sched-table td, .td-sched-table th { padding: 8px 6px; }
     .td-sched-vs { width: 24px; }
+}
+
+/* ============================================================
+   Телефон
+   ============================================================
+   Правила живут здесь, рядом со своим компонентом: файл подключается
+   после style.css, и правка выигрывает по порядку — без подпорок. */
+
+@media (max-width: 768px) {
+
+    /* Обложка занимала 645 пикселей из 844 — три четверти экрана, хотя
+       содержимого в ней на 388. Остальное давали отступы: 80 сверху,
+       40 снизу и по 40 между блоками.
+
+       Сверху оставляем 74 — под шапку, которая висит поверх страницы */
+    .td-hero-content {
+        padding: 74px 0 18px;
+    }
+
+    .td-back-link { margin-bottom: 14px; }
+    .td-hero-badges { margin-bottom: 10px; }
+
+    .td-hero-content h1 {
+        font-size: 1.25rem;
+        line-height: 1.25;
+        margin-bottom: 10px;
+    }
+
+    .td-hero-meta { margin-bottom: 14px; }
+
+    /* Возврат к категории остаётся на месте — прижат слева и не уезжает.
+       Чтобы он занимал меньше из 390 пикселей, оставляем стрелку и короткую
+       подпись, а ленте вкладок отдаём всё остальное */
+    .td-tabs-back {
+        flex: 0 0 auto;
+        font-size: 0.76rem;
+        gap: 4px;
+        padding-right: 10px;
+        margin-right: 2px;
+        border-right: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .td-tabs-back span {
+        max-width: 62px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Лента вкладок прокручивается вбок, а активная сама подъезжает в
+       середину — за это отвечает tournament-detail.js */
+    .td-tabs {
+        flex: 1 1 auto;
+        min-width: 0;
+        gap: 14px;
+        scrollbar-width: none;
+        scroll-behavior: smooth;
+    }
+
+    .td-tabs::-webkit-scrollbar { display: none; }
+
+    .td-tab {
+        flex: 0 0 auto;
+        font-size: 0.8rem;
+        padding: 10px 2px;
+    }
+
+    /* ─── Сетка плей-офф на телефоне ───
+       Клетки были рассчитаны на широкий экран: колонка 200 пикселей,
+       строка игрока 32, шрифт 12.8. В 390 помещались полтора круга,
+       остальное — прокруткой вбок. Ужимаем, чтобы за раз читалось два
+       круга целиком */
+    /* Ширину колонки держит flex-basis, одного width мало */
+    .td-bracket-round {
+        flex: 0 0 150px;
+        width: 150px;
+        min-width: 150px;
+    }
+
+    /* А вот заголовку круга flex-basis задавать нельзя: внутри колонки
+       он означает высоту, и «РАУНД 1» превращался в чёрный блок на 150
+       пикселей. Заголовку — только ширина */
+    .td-round-title {
+        flex: 0 0 auto;
+        width: 150px;
+        min-width: 150px;
+    }
+
+    /* Клетки одной высоты — иначе соединительные линии разъезжаются.
+       Пара занимает две строки, одиночка одну; чтобы высота у всех была
+       общей, имя ограничиваем двумя строками и обрезаем многоточием.
+       До этого длинные пары вытягивали карточку на три строки, соседние
+       оставались низкими, и линии проходили прямо по именам */
+    .td-match-player {
+        padding: 4px 7px;
+        font-size: 0.7rem;
+        /* Высота задана жёстко, а не минимумом: у одиночного имени строка
+           выходила 30 пикселей, у пары — 37, и клетки всё равно разъезжались */
+        height: 38px;
+        min-height: 38px;
+        align-items: center;
+    }
+
+    .td-match-player .td-player-name {
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .td-round-title {
+        font-size: 0.62rem;
+        margin-bottom: 6px;
+    }
+
+    .td-bracket-match { margin-bottom: 8px; }
+
+    /* Карточка не шире своей колонки: при круге в 150 пикселей она выходила
+       на 170 и заезжала на полосу с соединительными линиями — линия шла
+       прямо по именам */
+    /* Ширина карточки задана числом в нескольких местах (170 в медиа для
+       планшета, 168 у крупной сетки) — поэтому не проценты, а число: иначе
+       правило ниже по файлу всё равно вернёт 170 */
+    .td-match,
+    .td-bracket--big .td-match {
+        box-sizing: border-box;
+        width: 150px;
+        min-width: 150px;
+        max-width: 150px;
+    }
+
+    .td-connector-column {
+        width: 18px;
+        min-width: 18px;
+        flex: 0 0 18px;
+    }
+
+    /* Дополнительные матчи — по две карточки в ряд.
+       В разметке у сетки минимум колонки 220 пикселей, поэтому на 390
+       помещалась одна, и два матча занимали пол-экрана */
+    .td-ig-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+    }
+
+    .td-ig-match,
+    .td-ig-card {
+        font-size: 0.68rem;
+    }
+
+    .td-ig-match > div:first-child {
+        padding: 4px 8px !important;
+        font-size: 0.58rem !important;
+    }
+
+    .td-ig-match .td-match-player,
+    .td-ig-match > div:not(:first-child) {
+        padding: 5px 8px !important;
+    }
+
+    /* Текст описания турнира — 0.88rem, как имена в списке участников.
+       Был 16 пикселей и выглядел заметно крупнее соседних разделов */
+    #descriptionContent,
+    #descriptionContent p,
+    #descriptionContent li {
+        font-size: 0.82rem;
+        line-height: 1.5;
+    }
+
+    /* Полоса прокрутки у таблиц групп была светлой, системной — в тёмной
+       теме она выглядела чужой заплаткой. Делаем тонкой и приглушённой */
+    /* Между последней строкой расписания и спонсорами зияло 120 пикселей */
+    .td-section:has(#scheduleContainer),
+    .td-section:has(#participantsGrid) {
+        padding-bottom: 14px;
+    }
+
+    .td-sched-court { margin-bottom: 0; }
+
+    /* ─── Участники и лист ожидания ───
+       Таблица была 620 пикселей при 390 доступных. Убираем номер строки и
+       время подачи, оставляем фото, имя, категорию и дату. Фото остаётся
+       в раскладке заранее: когда появятся настоящие снимки, менять ничего
+       не придётся */
+    .td-reg-table td:first-child,
+    .td-reg-table thead th:first-child,
+    .td-reg-table td:last-child,
+    .td-reg-table thead th:last-child {
+        display: none;
+    }
+
+    /* Обёртки ограничиваем по ширине экрана: без этого таблица растягивала
+       их до 620 пикселей и просто уходила за край — ровно как было с
+       таблицами групп */
+    .td-reg-columns,
+    .td-reg-columns > div,
+    .td-reg-table-wrap {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .td-reg-table {
+        width: 100%;
+        /* Снимаем min-width: 620 из основных правил — из-за него таблица
+           держала свою ширину и уходила за край экрана */
+        min-width: 0;
+        table-layout: fixed;
+    }
+
+    /* Основной текст на телефоне — 0.82rem (см. стандарт размеров).
+       Размер задан ячейкам, а не таблице: правило на ячейках сильнее */
+    .td-reg-table th,
+    .td-reg-table td {
+        font-size: 0.82rem;
+    }
+
+    /* NTRP и дата — подписи: 0.72rem по стандарту */
+    .td-reg-table td:nth-child(4),
+    .td-reg-table td:nth-child(5) {
+        font-size: 0.72rem;
+    }
+
+    /* Шапка на месте — без неё непонятно, что за цифры в колонках.
+       Раньше она налезала сама на себя из-за длинного слова «Категория»;
+       теперь там короткое «NTRP», и подписи помещаются */
+    .td-reg-table thead th {
+        font-size: 0.54rem;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 4px 5px;
+    }
+
+    .td-reg-table td,
+    .td-reg-table th {
+        padding: 6px 5px;
+    }
+
+    .td-reg-photo {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+    }
+
+    /* Имя пары занимает две строки — это его нормальный вид, а не перенос */
+    .td-reg-table td:nth-child(3) {
+        line-height: 1.25;
+        word-break: break-word;
+    }
+
+    /* При fixed ширину задают заголовки */
+    .td-reg-table thead th:nth-child(2) { width: 38px; }
+    .td-reg-table thead th:nth-child(4) { width: 62px; }
+    .td-reg-table thead th:nth-child(5) { width: 54px; }
+
+    /* NTRP и дата: размер задан выше, здесь только ширина и цвет.
+       Раньше размер повторялся и тут — и держал 9.6 пикселя */
+    .td-reg-table td:nth-child(4) {
+        width: 62px;
+        color: var(--text-secondary);
+    }
+
+    .td-reg-table td:nth-child(5) {
+        width: 54px;
+        white-space: nowrap;
+        color: var(--text-dim);
+    }
+
+    .td-participants-subtitle {
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    .td-reg-columns {
+        display: block;
+    }
+
+    .td-reg-columns > div + div {
+        margin-top: 18px;
+    }
+
+    /* Между последней группой и «Расписанием запусков» зияло 64 пикселя:
+       нижний отступ раздела плюс промежуток сетки групп */
+    .td-section:has(.td-groups-grid) {
+        padding-bottom: 14px;
+    }
+
+    .td-groups-grid {
+        gap: 14px;
+    }
+
+    /* Таблицы групп прокручиваются вбок.
+       Обёртка с прокруткой сама была шире экрана — 563 пикселя при 390, —
+       поэтому прокручивать было нечего: таблица просто уходила за край */
+    .td-groups-grid { min-width: 0; }
+
+    .td-groups-grid > div,
+    .td-groups-grid > div > div {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .td-group-table {
+        min-width: 480px;
+    }
+
+    .td-ig-title,
+    .td-ig-match-title {
+        font-size: 0.62rem;
+    }
+
+    /* ─── Расписание запусков вписано в экран ───
+       Таблица была 500 пикселей при 390 доступных: номер, время, раунд,
+       две пары, корт и состояние. Убираем то, что можно узнать иначе, и
+       сокращаем подписи — прокрутка не нужна, весь игровой день виден */
+
+    /* Номер строки и состояние: номер ничего не добавляет, состояние видно
+       по счёту и подсветке живого матча */
+    .td-sched-table .td-sched-num,
+    .td-sched-table thead th:first-child,
+    .td-sched-table .td-sched-status,
+    .td-sched-table thead th:last-child,
+    .td-sched-table td:last-child {
+        display: none;
+    }
+
+    /* «Группа A» → «A», «Корт 1» → «1»: полные подписи в узкой колонке
+       переносились по слогам */
+    .td-sched-round,
+    .td-sched-court-cell {
+        font-size: 0;
+    }
+
+    .td-sched-round::after,
+    .td-sched-court-cell::after {
+        content: attr(data-short);
+        font-size: 0.68rem;
+    }
+
+    /* Без table-layout: fixed — заголовок «Игра» объединяет три ячейки,
+       и нумерация столбцов с ним не совпадает. Ширины задаём ячейкам,
+       остаток забирают имена */
+    .td-sched-table {
+        width: 100%;
+    }
+
+    .td-sched-table .td-sched-time {
+        width: 44px;
+        font-size: 0.7rem;
+        white-space: nowrap;
+    }
+
+    .td-sched-table .td-sched-vs {
+        width: 16px;
+        font-size: 0.6rem;
+        text-align: center;
+    }
+
+    .td-sched-table .td-sched-court-cell {
+        width: 22px;
+        text-align: center;
+    }
+
+    .td-sched-table td:nth-child(3) { width: 24px; text-align: center; }
+
+    .td-sched-table .td-sched-p {
+        font-size: 0.68rem;
+        line-height: 1.2;
+        word-break: break-word;
+    }
+
+    .td-sched-table td,
+    .td-sched-table th {
+        padding: 6px 4px;
+    }
+
+    /* Любая таблица на странице прокручивается вбок: расписание и очки
+       шире экрана, и без этого их нельзя было досмотреть */
+    .td-table-wrap,
+    .td-sched-wrap,
+    .td-points-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Карточка места занимала 477 пикселей — больше половины экрана, хотя
+       в ней всего название, адрес и две ссылки. Виноваты отступы в 40
+       пикселей по кругу и крупное название */
+    /* У карточки промежуток между колонками 40 пикселей. На широком экране
+       он разводит текст и карту, а на телефоне колонка одна — и он падает
+       вниз пустой полосой между кнопками и картой */
+    .td-venue-card {
+        gap: 10px;
+    }
+
+    .td-venue-info {
+        padding: 12px 14px 0;
+        /* Свой промежуток между строками в 16 пикселей — поверх него ещё
+           и отступы у самих строк. На четыре строки текста выходило
+           больше пустоты, чем букв */
+        gap: 2px;
+    }
+
+    .td-venue-name {
+        font-size: 1rem;
+        line-height: 1.25;
+        margin-bottom: 4px;
+    }
+
+    .td-venue-address {
+        font-size: 0.78rem;
+        margin-bottom: 0;
+    }
+
+    /* Между адресом и ссылками было 26 пикселей, между названием и
+       адресом — 16: на четыре строки текста приходилось больше отступов,
+       чем самого текста */
+    .td-venue-links { margin-top: 8px; gap: 8px; }
+
+    .td-venue-links a {
+        padding: 6px 12px;
+        font-size: 0.76rem;
+    }
+
+    /* Карта на телефоне нужна для ориентира, а не для изучения района.
+       Высота держалась на min-height, поэтому одной height было мало */
+    .td-venue-map,
+    .td-venue-map iframe {
+        height: 150px;
+        min-height: 150px;
+    }
+
+    /* Заголовки разделов — по общему стандарту телефона: 1.3rem, вес 700
+       (см. style.css, «Стандарт заголовка раздела»). Здесь они шли по 24
+       пикселя, то есть крупнее, чем на главной и в категориях турниров */
+    .td-section-header h2,
+    .td-section h2,
+    .td-tab-content h2,
+    .td-content h2 {
+        /* Тот же плавный размер, что у заголовков разделов на главной */
+        font-size: clamp(1.15rem, 5vw, 1.32rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+    }
+
+    /* Подзаголовки внутри раздела — «Плей-офф», «Групповой этап» */
+    .td-section-header h3,
+    .td-section h3,
+    .td-tab-content h3,
+    .td-content h3 {
+        font-size: 1rem;
+        line-height: 1.25;
+    }
+
+    /* Показатели по центру обложки: прижатые к левому краю, они спорили
+       с названием турнира, которое тоже идёт слева */
+    .td-hero-stats {
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* Цифры под названием — 25 пикселей по общему стандарту обложек. Но
+       стандарт рассчитан на две колонки в два ряда, а здесь три показателя
+       в одну строку, и один из них — длинная пара «2 500 / 3 000». Рядом с
+       названием турнира они кричали громче него, поэтому мельче */
+    .td-hero-stats .hero-stat-value {
+        font-size: clamp(1rem, 4.4vw, 1.35rem);
+        line-height: 1.15;
+    }
+
+    .td-hero-stats .hero-stat-label {
+        font-size: clamp(0.6rem, 2.7vw, 0.7rem);
+    }
+
+    .td-hero-stats { gap: 10px; }
+
+    /* Счётчик до старта: цифры в трёх коробках по 60 пикселей занимали
+       125 пикселей высоты — столько же, сколько название турнира */
+    .td-countdown { margin-top: 12px; }
+    .td-cd-title { margin-bottom: 6px; font-size: 0.62rem; letter-spacing: 1.5px; }
+    .td-cd-boxes { gap: 6px; }
+
+    .td-cd-box {
+        padding: 6px 10px;
+        min-width: 48px;
+        border-radius: 8px;
+    }
 }

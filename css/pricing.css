@@ -521,10 +521,7 @@
 
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
-    .pr-hero {
-        min-height: 260px;
-        padding: 100px 20px 48px;
-    }
+    
     .pr-container {
         padding: 40px 16px 60px;
     }
@@ -560,10 +557,7 @@
 }
 
 @media (max-width: 375px) {
-    .pr-hero {
-        padding: 100px 16px 40px;
-        min-height: 220px;
-    }
+    
     .pr-hero-title {
         font-size: 1.6rem;
     }

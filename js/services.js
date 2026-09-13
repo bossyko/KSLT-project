@@ -615,7 +615,6 @@
         // чему решают, звать его или нет. Без этого карточка была витриной
         // В профилях пол пишут как female/male, в карточках игроков — women/men
         var g = String(p.gender || '');
-        var genderMark = g === 'women' ? '\u2640' : (g === 'men' ? '\u2642' : '');
         var playLevel = levelLabel(p.play_level);
         var seen = lastSeenLabel(p.last_seen);
 
@@ -628,7 +627,7 @@
                 (online ? '<span class="sv-player-dot" title="' + L.online + '"></span>' : '') +
             '</div>' +
             '<div class="sv-player-name">' +
-                (genderMark ? '<span class="sv-player-gender">' + genderMark + '</span> ' : '') + name +
+                name +
             '</div>' +
             (playLevel ? '<div class="sv-player-level">' + playLevel + '</div>' : '') +
             '<div class="sv-player-seen' + (online ? ' is-online' : '') + '">' + seen + '</div>' +

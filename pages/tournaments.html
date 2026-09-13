@@ -25,9 +25,9 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="../css/style.css?v=194">
-    <link rel="stylesheet" href="../css/tournaments-overview.css?v=35">
-    <link rel="stylesheet" href="../css/tournaments.css?v=17">
+    <link rel="stylesheet" href="../css/style.css?v=227">
+    <link rel="stylesheet" href="../css/tournaments-overview.css?v=48">
+    <link rel="stylesheet" href="../css/tournaments.css?v=24">
 </head>
 <body>
     <!-- HEADER -->
@@ -186,6 +186,7 @@
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
+                        <li><a href="tournaments-overview.html" class="mobile-dropdown-self">Все турниры</a></li>
                         <li><a href="tournaments.html?category=promasters">Pro-Masters</a></li>
                         <li><a href="tournaments.html?category=masters">Masters</a></li>
                         <li><a href="tournaments.html?category=tour">Tour</a></li>
@@ -205,6 +206,7 @@
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
+                        <li><a href="players.html" class="mobile-dropdown-self">Весь рейтинг</a></li>
                         <li><a href="players.html?tab=men-promasters">Pro-Masters</a></li>
                         <li><a href="players.html?tab=men-masters">Masters</a></li>
                         <li><a href="players.html?tab=men-tour">Tour</a></li>
@@ -221,6 +223,7 @@
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
+                        <li><a href="services.html" class="mobile-dropdown-self">Все услуги</a></li>
                         <li><a href="courts.html">Теннисные корты</a></li>
                         <li><a href="coaches.html">Тренеры</a></li>
                         <li><a href="partners.html">Поиск игрока</a></li>
@@ -235,6 +238,7 @@
                         </svg>
                     </a>
                     <ul class="mobile-dropdown-menu">
+                        <li><a href="news.html" class="mobile-dropdown-self">Все новости</a></li>
                         <li><a href="news.html?category=announcement">Анонс</a></li>
                         <li><a href="news.html?category=world">Мировой теннис</a></li>
                         <li><a href="news.html?category=results">Результаты</a></li>
@@ -316,13 +320,13 @@
                 </div>
                 <div class="trn-chips">
                     <button class="trn-chip active" data-filter="status" data-value="all">Все <span class="trn-chip-count" data-count="all"></span></button>
-                    <button class="trn-chip" data-filter="status" data-value="open">Рег. открыта <span class="trn-chip-count" data-count="open"></span></button>
-                    <button class="trn-chip" data-filter="status" data-value="soon">Предстоящие <span class="trn-chip-count" data-count="soon"></span></button>
-                    <button class="trn-chip" data-filter="status" data-value="past">Завершённые <span class="trn-chip-count" data-count="past"></span></button>
+                    <button class="trn-chip" data-filter="status" data-value="open"><span class="trn-chip-full">Рег. открыта</span><span class="trn-chip-short">Открыта</span> <span class="trn-chip-count" data-count="open"></span></button>
+                    <button class="trn-chip" data-filter="status" data-value="soon"><span class="trn-chip-full">Предстоящие</span><span class="trn-chip-short">Скоро</span> <span class="trn-chip-count" data-count="soon"></span></button>
+                    <button class="trn-chip" data-filter="status" data-value="past"><span class="trn-chip-full">Завершённые</span><span class="trn-chip-short">Прошедшие</span> <span class="trn-chip-count" data-count="past"></span></button>
                     <span class="trn-chip-div"></span>
                     <button class="trn-chip active" data-filter="gender" data-value="all">Все</button>
-                    <button class="trn-chip" data-filter="gender" data-value="men">&#9794; Мужские</button>
-                    <button class="trn-chip" data-filter="gender" data-value="women">&#9792; Женские</button>
+                    <button class="trn-chip" data-filter="gender" data-value="men">Мужские</button>
+                    <button class="trn-chip" data-filter="gender" data-value="women">Женские</button>
                 </div>
             </div>
         </div>
@@ -460,7 +464,7 @@
     <script src="../js/tournament-featured.js?v=3"></script>
     <script src="../js/tournament-blocks.js?v=11"></script>
     <script src="../js/rankings-data.js?v=11"></script>
-    <script src="../js/tournaments-overlay.js?v=27"></script>
+    <script src="../js/tournaments-overlay.js?v=29"></script>
     <script>
     (function(){var h=document.getElementById('trnStickyHeader');if(!h)return;var s=document.createElement('div');s.style.height='1px';h.parentNode.insertBefore(s,h);new IntersectionObserver(function(e){h.classList.toggle('stuck',!e[0].isIntersecting)}).observe(s)})();
     </script>
