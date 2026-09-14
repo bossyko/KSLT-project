@@ -4083,9 +4083,22 @@ h2 {
     transition: all var(--transition-fast);
 }
 
+/* Подсветка по общему правилу сайта: лаймовая, а не белая */
 .trn-chip:hover {
-    border-color: var(--border-light);
-    color: var(--text-primary);
+    background: rgba(204, 255, 0, 0.08);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Системную синюю рамку после нажатия убираем, но с клавиатуры
+   фокус должен быть виден — лаймовой обводкой */
+.trn-chip:focus {
+    outline: none;
+}
+
+.trn-chip:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
 }
 
 .trn-chip.active {
@@ -4256,6 +4269,437 @@ h2 {
        блока — «8 турниров в архиве» */
     .trn-chip[data-filter="status"] .trn-chip-count {
         display: none;
+    }
+}
+
+
+/* ========================================
+   ВЫПАДАЮЩИЙ ФИЛЬТР В ПОЛОСЕ — один на весь сайт
+   Кнопка выглядит как чип, по нажатию — список значений со счётчиками.
+   Пользуются корты (город, покрытие), тренеры (возраст, занятия,
+   уровень), поиск игрока и новости. Классы .ct-dd оставлены как
+   синонимы: так размечены корты.
+
+   Написано mobile-first: база описывает телефон, широкий экран
+   добавляется через min-width. На телефоне список выравнивается по краям
+   полосы фильтров, а не по краям своей кнопки — иначе у правой кнопки он
+   вылезал за экран
+   ======================================== */
+
+.f-dd,
+.ct-dd {
+    position: static;
+}
+
+.f-dd-toggle,
+.ct-dd-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.f-dd-arrow,
+.ct-dd-arrow {
+    transition: transform var(--transition-fast);
+    opacity: 0.7;
+}
+
+.f-dd.open .f-dd-arrow,
+.ct-dd.open .ct-dd-arrow {
+    transform: rotate(180deg);
+}
+
+/* Ряд чипов — точка отсчёта для списка. Ширина во всю полосу: на поиске
+   игрока содержимое центрируется, и ряд получался по ширине текста */
+.trn-chips {
+    position: relative;
+    width: 100%;
+}
+
+.f-dd-menu,
+.ct-dd-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: auto;
+    z-index: 60;
+    min-width: 190px;
+    max-width: calc(100vw - 40px);
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 6px;
+    background: var(--bg-elevated, #141414);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md, 12px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    display: none;
+}
+
+/* Влево раскрывается только список с соседями слева: когда он в полосе
+   один, кнопка стоит слева, и меню должно держаться её */
+.f-dd:last-child:not(:first-child) .f-dd-menu,
+.ct-dd:last-child:not(:first-child) .ct-dd-menu {
+    left: auto;
+    right: 0;
+}
+
+.f-dd.open .f-dd-menu,
+.ct-dd.open .ct-dd-menu {
+    display: block;
+}
+
+.f-dd-item,
+.ct-dd-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 9px 12px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-family: var(--font-primary);
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.f-dd-item:hover,
+.ct-dd-item:hover {
+    background: rgba(204, 255, 0, 0.08);
+    color: var(--accent);
+}
+
+.f-dd-item.active,
+.ct-dd-item.active {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.f-dd-count,
+.ct-dd-count {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.f-dd-item.active .f-dd-count,
+.ct-dd-item.active .ct-dd-count {
+    color: var(--accent);
+    opacity: 0.7;
+}
+
+/* Шире телефона: место есть, и список держится своей кнопки */
+@media (min-width: 641px) {
+    .f-dd,
+    .ct-dd {
+        position: relative;
+    }
+
+    .trn-chips {
+        width: auto;
+    }
+
+    .f-dd-menu,
+    .ct-dd-menu,
+    .f-dd:last-child:not(:first-child) .f-dd-menu,
+    .ct-dd:last-child:not(:first-child) .ct-dd-menu {
+        left: 0;
+        right: auto;
+        max-width: none;
+    }
+}
+
+/* ========================================
+   ОКНО ПРИГЛАШЕНИЯ — одно на весь сайт
+   Зовёт гостя зарегистрироваться, а зарегистрированного — оформить
+   членство. Показывается на поиске игрока, на главной и на странице
+   игрока, поэтому живёт здесь, а не в файле раздела
+   ======================================== */
+
+.pt-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.pt-modal-overlay.visible {
+    opacity: 1;
+}
+
+.pt-modal {
+    position: relative;
+    /* Как у остальных окон сайта: плотная подложка и приглушённая рамка
+       цветом клуба. Прозрачный фон просвечивал страницу насквозь */
+    background: var(--bg-elevated);
+    border: 1px solid rgba(204, 255, 0, 0.28);
+    border-radius: 16px;
+    padding: 22px 18px 20px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transform: translateY(20px);
+    transition: transform 0.25s ease;
+}
+
+.pt-modal-overlay.visible .pt-modal {
+    transform: translateY(0);
+}
+
+.pt-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.06);
+    border: none;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.pt-modal-close:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.pt-modal-icon {
+    font-size: 1.7rem;
+    margin-bottom: 10px;
+}
+
+.pt-modal-title {
+    font-size: clamp(1.05rem, 4.6vw, 1.2rem);
+    line-height: 1.25;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.pt-modal-text {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.35;
+    margin-bottom: 18px;
+}
+
+.pt-modal-btn {
+    display: inline-block;
+    padding: 10px 22px;
+    background: var(--accent);
+    color: #000;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.pt-modal-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.pt-modal-disclaimer {
+    margin-top: 12px;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.pt-modal-disclaimer a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Payment modal — wider */
+.pt-modal-pay {
+    max-width: 480px;
+    padding: 32px 28px 28px;
+    text-align: left;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.pt-modal-pay .pt-modal-title {
+    text-align: center;
+}
+
+.pt-modal-pay .pt-modal-text {
+    text-align: center;
+}
+
+.pt-pay-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-top: 14px;
+    margin-bottom: 8px;
+}
+
+.pt-pay-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+}
+
+.pt-pay-method {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    cursor: default;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.pt-pay-icon {
+    font-size: 1.3rem;
+}
+
+.pt-pay-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.pt-pay-soon {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(204, 255, 0, 0.1);
+    padding: 1px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.pt-pay-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.pt-pay-divider::before,
+.pt-pay-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
+}
+
+.pt-pay-tg-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #000;
+    font-size: 0.88rem;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.pt-pay-tg-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.pt-modal-note {
+    margin-top: 12px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.4;
+}
+
+.pt-modal-pay .pt-modal-disclaimer {
+    text-align: center;
+    margin-top: 10px;
+}
+
+
+/* Шире телефона: места больше, окно дышит свободнее */
+@media (min-width: 769px) {
+    .pt-modal {
+        padding: 40px 32px 32px;
+        border-radius: var(--radius-lg);
+        max-width: 400px;
+    }
+
+    .pt-modal-icon {
+        font-size: 2.4rem;
+        margin-bottom: 16px;
+    }
+
+    .pt-modal-title {
+        font-size: 1.25rem;
+    }
+
+    .pt-modal-text {
+        font-size: 0.88rem;
+        line-height: 1.55;
+        margin-bottom: 24px;
+    }
+
+    .pt-modal-btn {
+        padding: 11px 32px;
+        font-size: 0.88rem;
+    }
+
+    .pt-modal-close {
+        top: 14px;
+        right: 14px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .pt-modal-disclaimer {
+        margin-top: 16px;
+        font-size: 0.7rem;
     }
 }
 
@@ -7203,6 +7647,15 @@ section {
     overflow-x: hidden;
 }
 
+/* Полоса фильтров — исключение: из неё выпадают списки. Правило выше
+   задаёт overflow только по горизонтали, а браузер делает вторую ось
+   прокручиваемой — и список обрезался краем полосы, выглядело так,
+   будто он прячется за карточками */
+section.trn-filters,
+section.pt-filters {
+    overflow: visible;
+}
+
 /* Fix players-grid cascade: 480px rule was overridden by later 768px rule */
 @media (max-width: 480px) {
     .players-grid {
@@ -8289,6 +8742,12 @@ input:-internal-autofill-previewed {
     .footer-acc .footer-block:not(.footer-brand) {
         border-top: 1px solid rgba(255, 255, 255, 0.07);
         padding: 0;
+    }
+
+    /* Значки соцсетей упирались в первую линию гармошки — она шла прямо
+       по их нижнему краю */
+    .footer-acc .footer-brand {
+        padding-bottom: 18px;
     }
 
     .footer-acc .footer-block h4 {

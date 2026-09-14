@@ -1260,10 +1260,30 @@ function renderNewsList() {
 
     // Build filters + grid + pagination shell
     // Полоса та же, что на турнирах, кортах и тренерах: общий вид на весь сайт
-    var chipsHtml = '<button class="trn-chip news-filter-btn' + (currentFilter === 'all' ? ' active' : '') + '" data-cat="all">' + labels.filterAll + '</button>';
-    categories.forEach(function(cat) {
-        chipsHtml += '<button class="trn-chip news-filter-btn' + (currentFilter === cat.key ? ' active' : '') + '" data-cat="' + cat.key + '">' + cat.label + '</button>';
-    });
+    // Категории — выпадающим списком, тем же, что на кортах, тренерах и
+    // поиске игрока: пять чипов занимали на телефоне две строки
+    var всеКатегории = [{ key: 'all', label: labels.filterAll }].concat(categories);
+
+    function разметкаКатегорий() {
+        var подпись = labels.filterAll;
+        всеКатегории.forEach(function(c) { if (c.key === currentFilter) подпись = c.label; });
+
+        var пункты = '';
+        всеКатегории.forEach(function(c) {
+            пункты += '<button class="f-dd-item news-filter-btn' + (c.key === currentFilter ? ' active' : '') +
+                '" data-cat="' + c.key + '" data-dd-value="' + c.key + '">' + c.label + '</button>';
+        });
+
+        return '<div class="f-dd" data-dd="category">' +
+            '<button class="trn-chip f-dd-toggle' + (currentFilter !== 'all' ? ' active' : '') + '">' +
+                подпись +
+                '<svg class="f-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' +
+            '</button>' +
+            '<div class="f-dd-menu">' + пункты + '</div>' +
+        '</div>';
+    }
+
+    var chipsHtml = разметкаКатегорий();
 
     var filtersHtml =
         '<div class="trn-filters-inner">' +
@@ -1395,13 +1415,32 @@ function renderNewsList() {
 
     // Filters
     document.getElementById('newsFilters').addEventListener('click', function(e) {
-        var btn = e.target.closest('.news-filter-btn');
-        if (!btn) return;
-        document.querySelectorAll('.news-filter-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        currentFilter = btn.dataset.cat;
+        var кнопка = e.target.closest('.f-dd-toggle');
+        var пункт = e.target.closest('.news-filter-btn');
+
+        if (кнопка) {
+            var список = кнопка.closest('.f-dd');
+            var былОткрыт = список.classList.contains('open');
+            document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
+            if (!былОткрыт) список.classList.add('open');
+            return;
+        }
+
+        if (!пункт) return;
+
+        currentFilter = пункт.dataset.cat;
         currentPage = 1;
+        // Перерисовываем только сам список: полоса целиком унесла бы с собой
+        // поле поиска вместе с набранным текстом
+        var полоса = document.querySelector('#newsFilters .trn-chips');
+        if (полоса) полоса.innerHTML = разметкаКатегорий();
         renderGrid();
+    });
+
+    // Закрыть открытый список, если нажали мимо
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.f-dd')) return;
+        document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
     });
 
     // Pagination
@@ -1417,8 +1456,7 @@ function renderNewsList() {
             currentPage = parseInt(btn.dataset.page);
         }
         renderGrid();
-        var bentoEl = document.getElementById('newsBento');
-        if (bentoEl) bentoEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.KSLT_прокрутитьКСписку(document.getElementById('newsBento'));
     });
 }
 

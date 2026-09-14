@@ -521,6 +521,25 @@
 
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
+
+    /* Раздел «Инфо» по общей шкале: название страницы шло 32-м кеглем,
+       заголовки внутри — 24-м */
+    .pr-hero-title {
+        font-size: clamp(1.35rem, 5.8vw, 1.7rem);
+        line-height: 1.2;
+    }
+
+    .pr-faq-title,
+    .pr-section-title {
+        font-size: clamp(1.15rem, 5vw, 1.32rem);
+        line-height: 1.25;
+    }
+
+    .pr-faq-lead,
+    .pr-faq-answer-inner {
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
     
     .pr-container {
         padding: 40px 16px 60px;
@@ -666,15 +685,19 @@
     transform: rotate(-45deg);
 }
 
+/* Главное действие карточки — лаймовая заливка, как «Регистрация» и
+   «Подробнее» на остальном сайте. Прозрачная с серой рамкой она
+   загоралась только при наведении, а на телефоне наведения нет:
+   кнопка выглядела выключенной */
 .pm-btn {
     display: block;
     width: 100%;
     margin-top: 26px;
     padding: 16px 24px;
     border-radius: var(--radius-full);
-    border: 1px solid var(--border-light);
-    background: transparent;
-    color: var(--text-secondary);
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #000;
     font-family: inherit;
     font-size: 1rem;
     font-weight: 700;
@@ -682,7 +705,21 @@
     text-align: center;
     transition: all var(--transition-base);
 }
-.pm-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.pm-btn:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.pm-btn:focus {
+    outline: none;
+}
+
+.pm-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
 
 /* Турнирный взнос — не тариф, а факт: у каждого турнира он свой */
 .pm-entry {
@@ -848,6 +885,15 @@
     max-width: 640px;
     margin: -18px auto 32px;
 }
+
+/* Это правило стоит ниже мобильного блока и перебивало его — размер для
+   телефона задаём здесь же */
+@media (max-width: 768px) {
+    .pr-faq-lead {
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+}
 .pr-faq-lead a { color: var(--accent); }
 
 /* Между строкой турнирного взноса и вопросами нужен воздух */
@@ -866,3 +912,65 @@
     text-align: center;
 }
 .pm-state[hidden] { display: none; }
+
+/* ========================================
+   Телефон: карточка членства по общей шкале
+
+   Блок объявлен ниже мобильного, поэтому правки здесь: название карточки
+   шло 20-м кеглем, пункты — 15.2, сумма — 24. На фоне заголовков разделов
+   в 19.5 карточка выглядела крупнее самой страницы
+   ======================================== */
+
+@media (max-width: 768px) {
+    .pm-title {
+        font-size: clamp(1.05rem, 4.6vw, 1.2rem);
+        line-height: 1.25;
+    }
+
+    .pm-sub {
+        font-size: 0.82rem;
+        line-height: 1.45;
+    }
+
+    .pm-val {
+        font-size: 0.88rem;
+    }
+
+    /* Сумма — как цифры на обложках: заметно, но не громче заголовка */
+    .pm-val.set {
+        font-size: 1.2rem;
+    }
+
+    .pm-note {
+        font-size: 0.78rem;
+    }
+
+    .pm-list li,
+    .pm-list p {
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+
+    /* Что даёт членство — список выгод */
+    .pm-feats,
+    .pm-feats li,
+    .pm-feat {
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+
+    .pm-btn {
+        font-size: 0.88rem;
+        padding: 11px 20px;
+    }
+
+    .pm-entry-val {
+        font-size: 0.88rem;
+    }
+
+    /* Подпись под названием страницы — как в остальных разделах */
+    .pr-hero-subtitle {
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+}

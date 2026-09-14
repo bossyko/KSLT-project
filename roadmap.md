@@ -226,6 +226,31 @@
 - [x] CI/CD: GitHub Actions — E2E tests on push/PR (test.yml) + auto-deploy to Netlify (deploy.yml)
 - [x] API documentation v2.0 (31 tables, 28 RPCs, 15 Edge Functions, RLS matrix, Telegram bot, cron jobs)
 
+## При переезде на рабочий домен
+
+- [ ] **Универсальные ссылки: открывать приложение вместо сайта.** Ссылка на
+  профиль игрока, турнир или новость из Телеграма должна открывать
+  установленное приложение, а не браузер — как делают Zara, Instagram и
+  прочие. Если приложения нет, открывается сайт, ничего не ломается.
+
+  Что нужно сделать:
+  1. Положить на сайт два файла подтверждения владения:
+     `.well-known/assetlinks.json` (Android) и
+     `.well-known/apple-app-site-association` (iOS). Отдаются по HTTPS,
+     без переадресаций, с типом `application/json`.
+  2. В приложении прописать, какие адреса оно перехватывает:
+     `intent-filter` с `autoVerify` в `AndroidManifest.xml`,
+     Associated Domains в проекте Xcode.
+  3. Научить приложение открывать нужный экран по такой ссылке —
+     плагин `@capacitor/app`, событие `appUrlOpen`: разобрать адрес и
+     перевести на свой экран (профиль игрока, турнир, новость).
+  4. Проверить на живом телефоне: ссылка из Телеграма, из почты и
+     набранная руками в браузере.
+
+  Почему не сейчас: подтверждение владения привязано к домену и к
+  подписи выложенного приложения. До переезда на `kslt.kg` и публикации в
+  магазинах настраивать нечего.
+
 ## Идеи для реализации
 
 - Online payments: provider integration (Mbank / PayBox), payment page, webhooks

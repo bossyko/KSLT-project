@@ -596,14 +596,6 @@
     }
 }
 
-@media (max-width: 1100px) {
-    .sv-players-box { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-
-@media (max-width: 700px) {
-    .sv-players-box { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
 @media (max-width: 768px) {
     
 
@@ -717,6 +709,30 @@
     margin-top: 14px;
 }
 
+/* Одна карточка в ряду — рамку и фон убираем: пустая коробка во всю
+   ширину читается как поломка, будто остальное не загрузилось.
+   Появится второй игрок — рамка вернётся сама */
+.sv-players-box:has(> :only-child) {
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+/* Узкие экраны — ниже базового правила, а не выше: при равном весе
+   побеждает то, что идёт последним, и пять колонок перебивали две —
+   карточка на телефоне сжималась до 51 пикселя */
+@media (max-width: 1100px) {
+    .sv-players-box { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+    .sv-players-box {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        padding: 12px;
+    }
+}
+
 .sv-player {
     position: relative;
     width: auto;
@@ -809,9 +825,15 @@
     font-size: 0.92rem;
     font-weight: 700;
     margin-bottom: 4px;
-    white-space: nowrap;
+    /* Длинное имя переносим на вторую строку, а не обрезаем многоточием:
+       «Татьяна Неча…» не говорит, кому предлагаешь игру. Дальше двух строк
+       не пускаем — иначе карточки в ряду разъедутся по высоте */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
 }
 
 .sv-player-gender {

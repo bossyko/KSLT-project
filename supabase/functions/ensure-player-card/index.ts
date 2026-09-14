@@ -48,12 +48,19 @@ Deno.serve(async (req) => {
 
     const { data: профиль } = await db
       .from('profiles')
-      .select('id, full_name, gender, player_id')
+      .select('id, full_name, gender, player_id, role')
       .eq('id', user.id)
       .single()
 
     if (!профиль) return json({ error: 'profile_not_found' }, 404)
     if (профиль.player_id) return json({ ok: true, player_id: профиль.player_id, status: 'already' })
+
+    // Рабочие учётные записи карточку игрока не заводят: администратор и
+    // менеджер ведут клуб, а играют под своим личным аккаунтом. Иначе
+    // рабочая учётка появлялась бы в рейтинге и в поиске партнёра
+    if (профиль.role === 'admin' || профиль.role === 'manager') {
+      return json({ ok: true, status: 'staff' })
+    }
 
     // Человек подтвердил, что нашлась именно его карточка
     if (body.confirm_player_id) {

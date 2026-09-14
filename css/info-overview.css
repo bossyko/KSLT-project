@@ -228,8 +228,10 @@
 @media (max-width: 768px) {
     
 
+    /* Та же шкала, что на остальных страницах раздела «Инфо» */
     .io-hero h1 {
-        font-size: 1.8rem;
+        font-size: clamp(1.35rem, 5.8vw, 1.7rem);
+        line-height: 1.2;
     }
 
         .io-content {
@@ -241,7 +243,37 @@
     }
 
     .io-featured-content h2 {
-        font-size: 1.3rem;
+        font-size: clamp(1.15rem, 5vw, 1.32rem);
+        line-height: 1.25;
+    }
+
+    .io-featured-content p {
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    /* Карточки раздела — компактнее: одна занимала 165 пикселей, и до
+       документов приходилось прокручивать пол-экрана. Значок мельче,
+       поля уже, подписи по общей шкале */
+    .io-card {
+        padding: 14px;
+    }
+
+
+    .io-card p {
+        font-size: 0.8rem;
+        line-height: 1.4;
+        margin-bottom: 8px;
+    }
+
+    .io-card-arrow {
+        font-size: 0.75rem;
+    }
+
+    /* Обложка раздела — общий размер, как у остальных страниц «Инфо» */
+    .io-hero.io-hero {
+        min-height: 275px;
+        padding: 92px 5% 30px;
     }
 
     .io-grid {
@@ -253,10 +285,6 @@
     .io-hero {
         padding: 90px 5% 28px;
         min-height: 280px;
-    }
-
-    .io-hero h1 {
-        font-size: 1.5rem;
     }
 
     .io-hero p {
@@ -271,9 +299,6 @@
         padding: var(--space-md);
     }
 
-    .io-featured-content h2 {
-        font-size: 1.15rem;
-    }
 
     .io-card {
         padding: var(--space-md);
@@ -333,6 +358,16 @@
     max-width: 62ch;
     margin: 20px auto 0;
     text-wrap: balance;
+}
+
+/* Это правило стоит ниже мобильного блока и перебивало его: на телефоне
+   подпись держала 20 пикселей отступа, и обложка была выше остальных
+   страниц раздела */
+@media (max-width: 768px) {
+    .io-hero-content > p {
+        font-size: 0.88rem;
+        margin-top: 10px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -442,4 +477,59 @@
 @media (max-width: 640px) {
     .io-docrow { padding: 18px 18px; }
     .io-docrow-arrow { display: none; }
+}
+
+/* ========================================
+   Телефон: размеры карточек и списка документов
+
+   Правила ниже стоят в конце файла не случайно: карточки, метки групп и
+   список документов объявлены после мобильного блока, и при равном весе
+   побеждало бы объявление, а не наша правка
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Название карточки шло 16-м кеглем, как основной текст на странице */
+    .io-card h3 {
+        font-size: 0.92rem;
+        margin-top: 2px;
+        margin-bottom: 4px;
+    }
+
+    /* Метка группы была мельче подписей внутри карточек — читалась как
+       подпись к подписи, хотя она над ними главная */
+    .io-group-title {
+        font-size: 0.85rem;
+        margin: 0 0 12px;
+    }
+
+    .io-group + .io-group {
+        margin-top: 32px;
+    }
+
+    /* Строка документа занимала 20 на 24 пикселя полей — три документа
+       не помещались на экран */
+    .io-docrow {
+        padding: 12px 14px;
+        gap: 12px;
+    }
+
+    .io-docrow-name {
+        font-size: 0.88rem;
+    }
+
+    .io-docrow-sub {
+        font-size: 0.78rem;
+        line-height: 1.35;
+        margin-top: 2px;
+    }
+
+    .io-docrow-left {
+        gap: 10px;
+    }
+
+    .io-doc-icon {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+    }
 }

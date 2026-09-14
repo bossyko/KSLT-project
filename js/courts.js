@@ -823,8 +823,7 @@
                 _currentPage = parseInt(btn.dataset.page);
             }
             renderGrid();
-            var gridEl = document.getElementById('courtsGrid');
-            if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.KSLT_прокрутитьКСписку(document.getElementById('courtsGrid'));
         });
     }
 
@@ -1083,7 +1082,20 @@
             '</div>' +
         '</div>';
 
-        // Stats — single combined card
+        // «1 корт», «2 корта», «5 кортов» — на карточке стояло жёсткое «кортов»,
+    // и выходило «1 кортов»
+    function словоКорты(n) {
+        if (isEn) return n === 1 ? 'court' : 'courts';
+        if (isKg) return 'корт';
+        var сотня = n % 100;
+        if (сотня >= 11 && сотня <= 14) return 'кортов';
+        var последняя = n % 10;
+        if (последняя === 1) return 'корт';
+        if (последняя >= 2 && последняя <= 4) return 'корта';
+        return 'кортов';
+    }
+
+    // Stats — single combined card
         var allSurfaces = [];
         var surfaceSeen = {};
         (court._courtTypes || []).forEach(function(ct) {
@@ -1093,14 +1105,21 @@
         var surfacesText = allSurfaces.join(', ') || court.surface;
         var priceFromText = court.price ? ((isEn ? 'from ' : isKg ? 'дан ' : 'от ') + court.price + ' ' + (isEn ? 'som/hr' : isKg ? 'сом/саат' : 'сом/час')) : '';
 
-        html += '<div class="ct-detail-stats ct-detail-stats-single ct-fade-in">' +
-            '<div class="ct-detail-stat-combined">' +
-                '<span class="ct-stat-item">' + court.courtsCount + ' ' + L_labels.courts + '</span>' +
-                '<span class="ct-stat-sep">\u00b7</span>' +
-                '<span class="ct-stat-item">' + esc(surfacesText) + '</span>' +
-                (priceFromText ? '<span class="ct-stat-sep">\u00b7</span><span class="ct-stat-item">' + priceFromText + '</span>' : '') +
-            '</div>' +
-        '</div>';
+        // Показываем только то, что известно. Раньше строка собиралась жёстко,
+        // и у корта без данных выходило «0 кортов ·» — ноль и висячая точка
+        var показатели = [];
+        if (court.courtsCount) показатели.push(esc(court.courtsCount + ' ' + словоКорты(court.courtsCount)));
+        if (surfacesText) показатели.push(esc(surfacesText));
+        if (priceFromText) показатели.push(esc(priceFromText));
+
+        if (показатели.length) {
+            html += '<div class="ct-detail-stats ct-detail-stats-single ct-fade-in">' +
+                '<div class="ct-detail-stat-combined">' +
+                    показатели.map(function(т) { return '<span class="ct-stat-item">' + т + '</span>'; })
+                        .join('<span class="ct-stat-sep">\u00b7</span>') +
+                '</div>' +
+            '</div>';
+        }
 
         // Court Types table
         if (court._courtTypes && court._courtTypes.length > 0) {

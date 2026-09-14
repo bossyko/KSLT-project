@@ -132,6 +132,14 @@
     /** Своя карточка игрока — чтобы не приглашать самого себя. */
     INV.myPlayerId = function () { return _myPlayerId; };
 
+    /* Окно «нужна регистрация» для гостя — то же, что на кнопке приглашения.
+       Зовётся при нажатии на карточку игрока: гостя незачем уводить на
+       страницу профиля, где всё равно только замок */
+    INV.окноРегистрации = function (заголовок, текст) {
+        showModal(заголовок || L.modalGuestTitle, текст || L.modalGuestText,
+            L.modalGuestBtn, путь(authFile) + '?tab=register');
+    };
+
     /** Нажали «Пригласить». Дальше всё решает уровень доступа. */
     INV.click = async function (playerId) {
         await INV.access();
@@ -262,10 +270,11 @@
             '</div>';
         document.body.appendChild(overlay);
 
-        // Animate in
-        requestAnimationFrame(function() {
-            overlay.classList.add('visible');
-        });
+        // Появление. Через requestAnimationFrame — когда вкладка на виду;
+        // если она в фоне, кадр не приходит, и окно осталось бы прозрачным.
+        // Поэтому дублируем таймером
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+        setTimeout(function() { overlay.classList.add('visible'); }, 60);
 
         // Close handlers
         overlay.querySelector('.pt-modal-close').addEventListener('click', function() {

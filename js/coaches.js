@@ -72,6 +72,9 @@
         heroTitle: 'Машыктыруучулар',
         heroSubtitle: 'Бардык деңгээлдеги оюнчулар үчүн кесипкөй машыктыруучулар',
         filterAll: 'Баары',
+        ddAge: 'Жашы',
+        ddForm: 'Сабак',
+        ddLevel: 'Деңгээл',
         filterAdults: 'Чоңдор',
         filterKids: 'Балдар',
         filterGroup: 'Топтук',
@@ -122,6 +125,9 @@
         heroTitle: "Тренеры",
         heroSubtitle: "Профессиональные тренеры для игроков всех уровней",
         filterAll: "Все",
+        ddAge: "Возраст",
+        ddForm: "Занятия",
+        ddLevel: "Уровень",
         filterAdults: "Взрослые",
         filterKids: "Дети",
         filterGroup: "Групповые",
@@ -192,7 +198,11 @@
     var _toastTimer = null;
     var PER_PAGE = 20;
     var _currentPage = 1;
+    // Три признака выбираются независимо: возраст, форма занятий, уровень.
+    // Раньше был один фильтр на всё — семь чипов в три строки, и выбрать
+    // «дети + индивидуально» было нельзя
     var _currentFilter = 'all';
+    var _ddFilters = { age: 'all', form: 'all', level: 'all' };
     var _searchQuery = '';
 
     async function detectAccess() {
@@ -353,18 +363,58 @@
             '</div>';
     }
 
+    // Три выпадающих списка вместо семи чипов: столько же признаков,
+    // но одна строка вместо трёх. Вид тот же, что у фильтров на кортах
+    function ddГруппы() {
+        return [
+            { kind: 'age', title: L.ddAge, options: [
+                { value: 'adults', label: L.filterAdults },
+                { value: 'kids', label: L.filterKids }
+            ] },
+            { kind: 'form', title: L.ddForm, options: [
+                { value: 'group', label: L.filterGroup },
+                { value: 'individual', label: L.filterIndividual }
+            ] },
+            { kind: 'level', title: L.ddLevel, options: [
+                { value: 'beginner', label: L.filterBeginner },
+                { value: 'advanced', label: L.filterAdvanced }
+            ] }
+        ];
+    }
+
+    // Сколько тренеров попадёт под значение — видно до нажатия
+    function ddСчёт(value) {
+        return (allData || []).filter(function(c) {
+            return (c.tags || []).indexOf(value) !== -1;
+        }).length;
+    }
+
+    function ddРазметка(g) {
+        var выбрано = _ddFilters[g.kind];
+        var подпись = g.title;
+        g.options.forEach(function(o) { if (o.value === выбрано) подпись = o.label; });
+
+        var пункты = '<button class="f-dd-item' + (выбрано === 'all' ? ' active' : '') +
+            '" data-dd-value="all">' + L.filterAll + '</button>';
+        g.options.forEach(function(o) {
+            пункты += '<button class="f-dd-item' + (o.value === выбрано ? ' active' : '') +
+                '" data-dd-value="' + o.value + '">' + o.label +
+                '<span class="f-dd-count">' + ddСчёт(o.value) + '</span></button>';
+        });
+
+        return '<div class="f-dd" data-dd="' + g.kind + '">' +
+            '<button class="trn-chip f-dd-toggle' + (выбрано !== 'all' ? ' active' : '') + '">' +
+                подпись +
+                '<svg class="f-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' +
+            '</button>' +
+            '<div class="f-dd-menu">' + пункты + '</div>' +
+        '</div>';
+    }
+
     function renderFilters() {
         var container = document.getElementById('coachesFilters');
         if (!container) return;
-        var filters = [
-            { key: 'all', label: L.filterAll },
-            { key: 'adults', label: L.filterAdults },
-            { key: 'kids', label: L.filterKids },
-            { key: 'group', label: L.filterGroup },
-            { key: 'individual', label: L.filterIndividual },
-            { key: 'beginner', label: L.filterBeginner },
-            { key: 'advanced', label: L.filterAdvanced }
-        ];
+        var группы = ddГруппы();
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
 
         // Полоса та же, что на страницах категорий турниров и на кортах:
@@ -380,9 +430,7 @@
                     '<input type="text" class="trn-search-input" id="coachesSearch" placeholder="' + L.searchPlaceholder + '" autocomplete="off">' +
                 '</div>' +
                 '<div class="trn-chips">';
-        filters.forEach(function(f) {
-            html += '<button class="trn-chip co-filter-btn' + (f.key === 'all' ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
-        });
+        группы.forEach(function(g) { html += ddРазметка(g); });
         html += '</div></div>';
         container.innerHTML = html;
 
@@ -408,11 +456,13 @@
                        (c.specialization && c.specialization.toLowerCase().indexOf(q) !== -1);
             });
         }
-        if (_currentFilter !== 'all') {
+        Object.keys(_ddFilters).forEach(function(kind) {
+            var value = _ddFilters[kind];
+            if (value === 'all') return;
             filtered = filtered.filter(function(c) {
-                return (c.tags || []).indexOf(_currentFilter) !== -1;
+                return (c.tags || []).indexOf(value) !== -1;
             });
-        }
+        });
 
         // Пустой список — не повод показывать голую страницу. Тренеров в
         // клубе пока нет, и человек должен понять это, а не решить, что
@@ -423,7 +473,7 @@
                 emptyText = isEn ? 'Could not load the coaches. Please refresh the page.'
                     : (isKg ? 'Машыктыруучулардын тизмеси жүктөлгөн жок. Баракты жаңылаңыз.'
                     : 'Не удалось загрузить список тренеров. Обновите страницу.');
-            } else if (_searchQuery || _currentFilter !== 'all') {
+            } else if (_searchQuery || естьВыбранныйФильтр()) {
                 emptyText = isEn ? 'No coaches match your search' : (isKg ? 'Издөө боюнча машыктыруучу табылган жок' : 'По вашему запросу тренеров не нашлось');
             } else {
                 emptyText = isEn ? 'The list of coaches will appear soon' : (isKg ? 'Машыктыруучулардын тизмеси жакында пайда болот' : 'Список тренеров скоро появится');
@@ -517,8 +567,7 @@
                 _currentPage = parseInt(btn.dataset.page);
             }
             renderGrid();
-            var gridEl = document.getElementById('coachesGrid');
-            if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.KSLT_прокрутитьКСписку(document.getElementById('coachesGrid'));
         });
     }
 
@@ -676,13 +725,48 @@
         });
     }
 
+    function перерисоватьСписки() {
+        var полоса = document.querySelector('#coachesFilters .trn-chips');
+        if (!полоса) return;
+        var html = '';
+        ddГруппы().forEach(function(g) { html += ddРазметка(g); });
+        полоса.innerHTML = html;
+    }
+
+    function естьВыбранныйФильтр() {
+        return Object.keys(_ddFilters).some(function(k) { return _ddFilters[k] !== 'all'; });
+    }
+
+    // Открыть список, выбрать значение, закрыть по клику мимо —
+    // тот же порядок, что у фильтров на кортах
     function initFilterClicks() {
         document.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('co-filter-btn')) return;
-            document.querySelectorAll('.co-filter-btn').forEach(function(b) { b.classList.remove('active'); });
-            e.target.classList.add('active');
-            _currentPage = 1;
-            renderGrid(e.target.getAttribute('data-filter'));
+            var кнопка = e.target.closest ? e.target.closest('.f-dd-toggle') : null;
+            var пункт = e.target.closest ? e.target.closest('.f-dd-item') : null;
+
+            if (кнопка) {
+                var список = кнопка.closest('.f-dd');
+                var былОткрыт = список.classList.contains('open');
+                document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
+                if (!былОткрыт) список.classList.add('open');
+                return;
+            }
+
+            if (пункт) {
+                var обёртка = пункт.closest('.f-dd');
+                var вид = обёртка.getAttribute('data-dd');
+                _ddFilters[вид] = пункт.getAttribute('data-dd-value');
+                обёртка.classList.remove('open');
+                _currentPage = 1;
+                // Перерисовываем только сами списки: полоса целиком унесла бы
+                // с собой поле поиска — вместе с набранным текстом и его
+                // обработчиком, привязанным при первой отрисовке
+                перерисоватьСписки();
+                renderGrid();
+                return;
+            }
+
+            document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
         });
     }
 

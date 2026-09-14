@@ -1251,9 +1251,12 @@ body.news-article-page .section-sponsors-compact {
         min-height: 275px;
     }
 
-    /* Article page */
-    .news-hero {
-        height: 55vh;
+    /* Обложка отдельной новости: высота по содержимому. Жёсткие 55vh
+       обрезали всё, что ниже картинки, — заголовок и дату статьи просто
+       не было видно, страница открывалась «без обложки» */
+    .news-hero:not(:has(.news-hero-content-list)) {
+        height: auto;
+        overflow: visible;
     }
 
     .news-hero-content {
@@ -1317,24 +1320,69 @@ body.news-article-page .section-sponsors-compact {
 
 @media (max-width: 480px) {
     /* List page */
+    /* Две в ряд, как карточки турниров, кортов и тренеров на телефоне.
+       Одна в ряд растягивала новость на весь экран, и до третьей нужно
+       было прокрутить полторы страницы */
     .news-bento {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
     }
 
+    /* Главная новость остаётся во всю ширину — она и должна бросаться
+       в глаза первой */
     .news-bento-large {
-        grid-column: span 1;
+        grid-column: span 2;
     }
 
+    /* Карточка — колонка flex, и обёртке картинки досталось flex: 1 1 0.
+       В колонке базис заменяет высоту, поэтому обложка схлопывалась в ноль:
+       на второй и следующих страницах главная новость шла без картинки */
     .news-bento-large .news-bento-img {
-        height: 200px;
+        flex: 0 0 180px;
+        height: 180px;
     }
 
     .news-bento-card:not(.news-bento-large) .news-bento-img {
-        height: 160px;
+        flex: 0 0 100px;
+        height: 100px;
+    }
+
+    .news-bento-content {
+        padding: 10px;
     }
 
     .news-bento-content h2 {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+    }
+
+    /* Заголовок и текст в узкой колонке: раньше они шли размером с
+       главную новость и занимали по шесть строк */
+    .news-bento-card:not(.news-bento-large) .news-bento-content h3 {
+        font-size: 0.82rem;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .news-bento-card:not(.news-bento-large) .news-bento-content p {
+        font-size: 0.72rem;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .news-bento-card:not(.news-bento-large) .news-category-badge {
+        font-size: 0.58rem;
+        padding: 2px 6px;
+    }
+
+    .news-bento-card:not(.news-bento-large) .news-bento-meta,
+    .news-bento-card:not(.news-bento-large) .news-meta {
+        font-size: 0.62rem;
     }
 
     .news-list-header h1 {

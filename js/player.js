@@ -595,6 +595,11 @@
 
         document.title = player.name + ' \u2014 KSLT';
 
+        // Пустую обложку гостю не показываем: надписей в ней нет, а первый
+        // экран она съедает целиком — и заглушка уезжает вниз
+        var обложка = document.getElementById('playerHero');
+        if (обложка) обложка.style.display = 'none';
+
         el.innerHTML =
             '<div class="kslt-back-wrap">' +
                 '<a href="' + back.href + '" class="kslt-back">\u2190 ' + back.text + '</a>' +
@@ -615,6 +620,16 @@
                     '<a href="' + authPage + '?tab=register" class="pp-guest-btn">' + btnText + '</a>' +
                 '</div>' +
             '</div>';
+
+        // Поверх заглушки — то же предложение окном. По ссылке из Телеграма
+        // человек попадает сразу сюда, и окно объясняет, что дальше.
+        // Окно закрывается: под ним видно, чей это профиль, а кнопка
+        // регистрации остаётся на самой странице
+        if (window.KSLT_INVITE && window.KSLT_INVITE.окноРегистрации) {
+            setTimeout(function() {
+                window.KSLT_INVITE.окноРегистрации(titleText, descText);
+            }, 400);
+        }
     }
 
     // ---- Render Profile ----

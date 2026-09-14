@@ -1081,8 +1081,7 @@
                 }
 
                 renderCatTable(currentTab, catCurrentPage);
-                var tableEl = document.getElementById('playersTable');
-                if (tableEl) tableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                window.KSLT_прокрутитьКСписку(document.getElementById('playersTable'));
             }
         });
     }
@@ -1131,8 +1130,7 @@
                     currentPage = parseInt(pageBtn.dataset.page);
                 }
                 renderTable(currentTab, currentPage);
-                var tableEl = document.getElementById('playersTable');
-                if (tableEl) tableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                window.KSLT_прокрутитьКСписку(document.getElementById('playersTable'));
             }
         });
     }

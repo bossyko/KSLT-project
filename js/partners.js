@@ -259,15 +259,58 @@
     }
 
     // ---- Filters ----
+
+    // Диапазоны NTRP и выбранный из них — нужны при перерисовке списков
+    var _ntrpRanges = [];
+    var _ntrpValue = '';
+
+    function ддГруппа(kind) {
+        if (kind === 'gender') {
+            return {
+                title: L.filterAll,
+                current: _currentFilter,
+                options: [
+                    { value: 'all', label: L.filterAll },
+                    { value: 'men', label: L.filterMen },
+                    { value: 'women', label: L.filterWomen }
+                ]
+            };
+        }
+        return {
+            title: _ntrpRanges.length ? _ntrpRanges[0].label : 'NTRP',
+            current: _ntrpValue,
+            options: _ntrpRanges
+        };
+    }
+
+    function ddРазметка(kind) {
+        var g = ддГруппа(kind);
+        var подпись = g.title;
+        g.options.forEach(function(o) { if (o.value === g.current) подпись = o.label; });
+
+        var пункты = '';
+        g.options.forEach(function(o) {
+            пункты += '<button class="f-dd-item' + (o.value === g.current ? ' active' : '') +
+                '" data-dd-value="' + o.value + '">' + o.label + '</button>';
+        });
+
+        var выбрано = (kind === 'gender') ? (_currentFilter !== 'all') : !!_ntrpValue;
+        return '<div class="f-dd" data-dd="' + kind + '">' +
+            '<button class="trn-chip f-dd-toggle' + (выбрано ? ' active' : '') + '">' +
+                подпись +
+                '<svg class="f-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' +
+            '</button>' +
+            '<div class="f-dd-menu">' + пункты + '</div>' +
+        '</div>';
+    }
+
+    function ддРазметкаВсех() {
+        return ddРазметка('gender') + ddРазметка('ntrp');
+    }
+
     function renderFilters() {
         var el = document.getElementById('ptFilters');
         if (!el) return;
-
-        var filters = [
-            { key: 'all', label: L.filterAll },
-            { key: 'men', label: L.filterMen },
-            { key: 'women', label: L.filterWomen }
-        ];
 
         var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
 
@@ -283,11 +326,6 @@
                 'autocorrect="off" spellcheck="false" placeholder="' + L.searchPlaceholder + '">' +
             '</div>';
 
-        html += '<div class="trn-chips">';
-        for (var i = 0; i < filters.length; i++) {
-            var f = filters[i];
-            html += '<button class="trn-chip pt-filter-btn' + (f.key === _currentFilter ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
-        }
         var ntrpRanges = [
             { value: '', label: isEn ? 'All NTRP' : (isKg ? 'Баары NTRP' : 'Все NTRP') },
             { value: '1-2.5', min: 1, max: 2.5, label: isEn ? 'Beginner (1.0\u20132.5)' : (isKg ? 'Башталгыч (1.0\u20132.5)' : 'Начинающий (1.0\u20132.5)') },
@@ -296,12 +334,10 @@
             { value: '4.5-5.5', min: 4.5, max: 5.5, label: isEn ? 'Strong (4.5\u20135.5)' : (isKg ? 'К\u04af\u0447\u0442\u04af\u04af (4.5\u20135.5)' : 'Сильный (4.5\u20135.5)') },
             { value: '5.5-7', min: 5.5, max: 7, label: isEn ? 'Expert (5.5\u20137.0)' : (isKg ? 'Эксперт (5.5\u20137.0)' : 'Эксперт (5.5\u20137.0)') }
         ];
-        html += '<select class="pt-ntrp-select" id="ptNtrpFilter">';
-        for (var n = 0; n < ntrpRanges.length; n++) {
-            html += '<option value="' + ntrpRanges[n].value + '">' + ntrpRanges[n].label + '</option>';
-        }
-        html += '</select>';
-        html += '</div></div>';
+        // Пол и NTRP — выпадающими списками в одну строку: чипы с системным
+        // полем выбора занимали две, и поле выглядело чужим на тёмной теме
+        _ntrpRanges = ntrpRanges;
+        html += '<div class="trn-chips">' + ddРазметка('gender') + ddРазметка('ntrp') + '</div></div>';
 
         el.innerHTML = html;
 
@@ -311,28 +347,45 @@
             renderGrid();
         });
 
-        document.getElementById('ptNtrpFilter').addEventListener('change', function(e) {
-            var val = e.target.value;
-            if (!val) {
-                _ntrpFilter = null;
-            } else {
-                var found = ntrpRanges.filter(function(r) { return r.value === val; })[0];
-                _ntrpFilter = found ? { min: found.min, max: found.max } : null;
+        el.addEventListener('click', function(e) {
+            var кнопка = e.target.closest('.f-dd-toggle');
+            var пункт = e.target.closest('.f-dd-item');
+
+            if (кнопка) {
+                var список = кнопка.closest('.f-dd');
+                var былОткрыт = список.classList.contains('open');
+                document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
+                if (!былОткрыт) список.classList.add('open');
+                return;
             }
+
+            if (!пункт) return;
+
+            var обёртка = пункт.closest('.f-dd');
+            var вид = обёртка.getAttribute('data-dd');
+            var значение = пункт.getAttribute('data-dd-value');
+
+            if (вид === 'gender') {
+                _currentFilter = значение;
+            } else {
+                var найден = _ntrpRanges.filter(function(r) { return r.value === значение; })[0];
+                _ntrpValue = значение;
+                _ntrpFilter = (найден && найден.min != null) ? { min: найден.min, max: найден.max } : null;
+            }
+
+            обёртка.classList.remove('open');
             _currentPage = 1;
+            // Перерисовываем только списки: полоса целиком унесла бы с собой
+            // поле поиска вместе с набранным текстом и его обработчиком
+            var полоса = el.querySelector('.trn-chips');
+            if (полоса) полоса.innerHTML = ддРазметкаВсех();
             renderGrid();
         });
 
-        el.addEventListener('click', function(e) {
-            var btn = e.target.closest('.pt-filter-btn');
-            if (!btn) return;
-            _currentFilter = btn.dataset.filter;
-            _currentPage = 1;
-            var btns = el.querySelectorAll('.pt-filter-btn');
-            for (var j = 0; j < btns.length; j++) {
-                btns[j].classList.toggle('active', btns[j].dataset.filter === _currentFilter);
-            }
-            renderGrid();
+        // Закрыть открытый список, если нажали мимо него
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.f-dd')) return;
+            document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
         });
 
         // Detect stuck state
@@ -541,8 +594,7 @@
                 _currentPage = parseInt(btn.dataset.page);
             }
             renderGrid();
-            var gridEl = document.getElementById('ptGrid');
-            if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.KSLT_прокрутитьКСписку(document.getElementById('ptGrid'));
         });
     }
 
@@ -554,6 +606,15 @@
         if (e.target.closest('.pt-invite-btn')) return;
         var card = e.target.closest('.pt-card[data-player-url]');
         if (!card) return;
+
+        // Гостя не уводим: на странице профиля его ждёт только замок, а
+        // вернувшись, он теряет место в списке. Показываем то же
+        // предложение прямо здесь
+        if (_accessLevel === 'guest' && window.KSLT_INVITE) {
+            window.KSLT_INVITE.окноРегистрации(L.guestTitle, L.guestText);
+            return;
+        }
+
         window.location.href = card.dataset.playerUrl;
     });
 
