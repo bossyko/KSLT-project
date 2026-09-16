@@ -280,7 +280,22 @@
         if (role === 'admin' || role === 'manager') {
             return 'admin.html';   // админка только на русском
         }
-        return 'dashboard.html';
+        return наЯзыке('dashboard.html');
+    }
+
+    /**
+     * Адрес страницы на языке человека.
+     *
+     * Язык запоминается при каждом переключении и лежит в профиле. После
+     * нового входа человек должен попасть туда же, где закончил: выбрал
+     * английский вчера — сегодня открывается английский кабинет, а не
+     * русский только потому, что вход был с русской страницы.
+     */
+    function наЯзыке(файл) {
+        var язык = localStorage.getItem('kslt_lang_saved');
+        if (язык === 'en') return файл.replace('.html', '-en.html');
+        if (язык === 'kg') return файл.replace('.html', '-kg.html');
+        return файл;
     }
 
     // ---- Populate birthday day select (1-31) ----
@@ -702,11 +717,14 @@
         }
         if (user) {
             try {
-                var profileRes = await client.from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single();
+                var profileRes = await client.from('profiles').select('full_name, avatar_url, role, lang').eq('id', user.id).single();
                 if (profileRes.data) {
                     if (profileRes.data.full_name) localStorage.setItem('kslt_name', profileRes.data.full_name);
                     if (profileRes.data.avatar_url) localStorage.setItem('kslt_avatar', profileRes.data.avatar_url);
                     if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
+                    // Язык, который человек выбрал в прошлый раз: по нему
+                    // откроется кабинет и придут уведомления
+                    if (profileRes.data.lang) localStorage.setItem('kslt_lang_saved', profileRes.data.lang);
                 }
             } catch (e) { /* continue with redirect */ }
         }
@@ -903,11 +921,14 @@
                     if (!loginResult.error && loginResult.data.user) {
                         var user = loginResult.data.user;
                         try {
-                            var profileRes = await client.from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single();
+                            var profileRes = await client.from('profiles').select('full_name, avatar_url, role, lang').eq('id', user.id).single();
                             if (profileRes.data) {
                                 if (profileRes.data.full_name) localStorage.setItem('kslt_name', profileRes.data.full_name);
                                 if (profileRes.data.avatar_url) localStorage.setItem('kslt_avatar', profileRes.data.avatar_url);
                                 if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
+                    // Язык, который человек выбрал в прошлый раз: по нему
+                    // откроется кабинет и придут уведомления
+                    if (profileRes.data.lang) localStorage.setItem('kslt_lang_saved', profileRes.data.lang);
                             }
                         } catch (e) { /* continue */ }
                         checkDeviceFingerprint(user.id);
@@ -1046,6 +1067,10 @@
             identifier: identifier,
             identifier_type: identifierType
         };
+        // Язык страницы: при регистрации профиля ещё нет, и сервер не знает,
+        // на каком языке писать. Код придёт на том, с которого человек
+        // регистрируется
+        body.lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
         if (telegramChatId) body.telegram_chat_id = telegramChatId;
         if (flow === 'forgot_password' && _forgotToken) body.turnstile_token = _forgotToken;
 
@@ -1327,11 +1352,14 @@
                     if (!otpResult.error && otpResult.data.user) {
                         var user = otpResult.data.user;
                         try {
-                            var profileRes = await client.from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single();
+                            var profileRes = await client.from('profiles').select('full_name, avatar_url, role, lang').eq('id', user.id).single();
                             if (profileRes.data) {
                                 if (profileRes.data.full_name) localStorage.setItem('kslt_name', profileRes.data.full_name);
                                 if (profileRes.data.avatar_url) localStorage.setItem('kslt_avatar', profileRes.data.avatar_url);
                                 if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
+                    // Язык, который человек выбрал в прошлый раз: по нему
+                    // откроется кабинет и придут уведомления
+                    if (profileRes.data.lang) localStorage.setItem('kslt_lang_saved', profileRes.data.lang);
                             }
                         } catch (e) { /* continue */ }
                         checkDeviceFingerprint(user.id);
@@ -1475,11 +1503,14 @@
             // Load profile to get role before redirect (important for Google OAuth)
             try {
                 var uid = result.data.session.user.id;
-                var profileRes = await client.from('profiles').select('full_name, avatar_url, role').eq('id', uid).single();
+                var profileRes = await client.from('profiles').select('full_name, avatar_url, role, lang').eq('id', uid).single();
                 if (profileRes.data) {
                     if (profileRes.data.full_name) localStorage.setItem('kslt_name', profileRes.data.full_name);
                     if (profileRes.data.avatar_url) localStorage.setItem('kslt_avatar', profileRes.data.avatar_url);
                     if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
+                    // Язык, который человек выбрал в прошлый раз: по нему
+                    // откроется кабинет и придут уведомления
+                    if (profileRes.data.lang) localStorage.setItem('kslt_lang_saved', profileRes.data.lang);
                 }
             } catch (e) { /* continue */ }
             checkDeviceFingerprint(result.data.session.user.id);
@@ -1596,11 +1627,14 @@
                 var user = otpResult.data.user;
                 if (user) {
                     try {
-                        var profileRes = await client.from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single();
+                        var profileRes = await client.from('profiles').select('full_name, avatar_url, role, lang').eq('id', user.id).single();
                         if (profileRes.data) {
                             if (profileRes.data.full_name) localStorage.setItem('kslt_name', profileRes.data.full_name);
                             if (profileRes.data.avatar_url) localStorage.setItem('kslt_avatar', profileRes.data.avatar_url);
                             if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
+                    // Язык, который человек выбрал в прошлый раз: по нему
+                    // откроется кабинет и придут уведомления
+                    if (profileRes.data.lang) localStorage.setItem('kslt_lang_saved', profileRes.data.lang);
                         }
                     } catch (e) { /* continue */ }
                     checkDeviceFingerprint(user.id);
@@ -1715,11 +1749,14 @@
                         if (!loginResult.error && loginResult.data.user) {
                             var user = loginResult.data.user;
                             try {
-                                var profileRes = await client.from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single();
+                                var profileRes = await client.from('profiles').select('full_name, avatar_url, role, lang').eq('id', user.id).single();
                                 if (profileRes.data) {
                                     if (profileRes.data.full_name) localStorage.setItem('kslt_name', profileRes.data.full_name);
                                     if (profileRes.data.avatar_url) localStorage.setItem('kslt_avatar', profileRes.data.avatar_url);
                                     if (profileRes.data.role) localStorage.setItem('kslt_role', profileRes.data.role);
+                    // Язык, который человек выбрал в прошлый раз: по нему
+                    // откроется кабинет и придут уведомления
+                    if (profileRes.data.lang) localStorage.setItem('kslt_lang_saved', profileRes.data.lang);
                                 }
                             } catch (e) { /* continue */ }
                             checkDeviceFingerprint(user.id);

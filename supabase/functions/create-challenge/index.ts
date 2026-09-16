@@ -18,6 +18,73 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// ============================================
+// ТЕКСТЫ УВЕДОМЛЕНИЙ
+// ============================================
+//
+// Лежат в таблице notification_texts — по одной строке на сообщение, три
+// языка в колонках. В базе, а не в коде: переводы вычитывают люди со
+// стороны, и правку в таблице видно сразу, без выкладки функции.
+//
+// Читаем один раз и держим в памяти: функция живёт между вызовами, и
+// ходить в базу за каждой строчкой незачем.
+
+type Язык = 'ru' | 'en' | 'kg'
+
+let _тексты: Record<string, Record<string, string>> | null = null
+
+async function загрузитьТексты(supabase: any) {
+  // Пустое не запоминаем: одна неудачная попытка — и бот до перезапуска
+  // отвечал бы ключами вместо текста
+  if (_тексты && Object.keys(_тексты).length) return _тексты
+  try {
+    const { data, error } = await supabase.from('notification_texts').select('key, ru, kg, en')
+    if (error) { console.error('тексты не прочитались:', error.message); return _тексты || {} }
+    const свежие: Record<string, Record<string, string>> = {}
+    for (const строка of (data || [])) {
+      свежие[строка.key] = { ru: строка.ru, kg: строка.kg, en: строка.en }
+    }
+    if (Object.keys(свежие).length) _тексты = свежие
+    else console.error('таблица notification_texts пуста')
+  } catch (e) {
+    console.error('тексты не прочитались:', e)
+  }
+  return _тексты || {}
+}
+
+/** Текст на языке человека. Нет перевода — русский. Нет строки — ключ. */
+function т(ключ: string, язык: Язык = 'ru', подстановки: Record<string, string | number> = {}): string {
+  const строка = _тексты?.[ключ]
+  if (!строка) return ключ
+  let текст = строка[язык] || строка.ru || ключ
+  for (const имя in подстановки) {
+    текст = текст.split('{' + имя + '}').join(String(подстановки[имя]))
+  }
+  return текст
+}
+
+/** Язык из уже загруженного профиля. */
+function языкИз(профиль: any): Язык {
+  const язык = профиль?.lang
+  return (язык === 'en' || язык === 'kg') ? язык : 'ru'
+}
+
+/** Язык владельца чата. */
+async function языкЧата(supabase: any, chatId: number): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('telegram_chat_id', chatId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
+
+/** Язык по идентификатору профиля. */
+async function языкПрофиля(supabase: any, profileId: string): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('id', profileId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -69,6 +136,7 @@ Deno.serve(async (req) => {
     }
 
     const db = createClient(supabaseUrl, serviceKey)
+    await загрузитьТексты(db)
 
     const { data: sender } = await db
       .from('profiles')
@@ -82,26 +150,28 @@ Deno.serve(async (req) => {
     // Уведомление сопернику. Кнопки «Принять» и «Отклонить» интерфейс
     // рисует сам по типу и ссылке на вызов
     if (opponentProfileId) {
+      // Язык соперника: вызов придёт на его языке
+      const { data: opponent } = await db
+        .from('profiles')
+        .select('email, notify_preferences, telegram_chat_id, lang')
+        .eq('id', opponentProfileId)
+        .single()
+      const языкСоперника = языкИз(opponent)
+
       await db.from('notification_log').insert({
         profile_id: opponentProfileId,
         type: 'challenge',
         // Без эмодзи: значок рисует интерфейс по типу уведомления.
         // Буква в тексте означала бы, что смена знака требует переката
         // функции и правки всех уже разосланных записей
-        title: 'Вызов на матч',
+        title: т('challenge_title', языкСоперника),
         message: message
-          ? `${senderName} вызывает вас на баттл: «${String(message).slice(0, 150)}»`
-          : `${senderName} вызывает вас на баттл`,
+          ? т('challenge_with_message', языкСоперника, { 'имя': senderName, 'сообщение': String(message).slice(0, 150) })
+          : т('challenge_no_message', языкСоперника, { 'имя': senderName }),
         is_read: false,
         action_type: 'challenge',
         action_id: created.challenge_id
       })
-
-      const { data: opponent } = await db
-        .from('profiles')
-        .select('email, notify_preferences, telegram_chat_id')
-        .eq('id', opponentProfileId)
-        .single()
 
       // Telegram — дублирующий канал, без кнопок: отвечают на вызов на
       // платформе. Кнопки здесь означали бы второй механизм ответа, а
@@ -109,13 +179,9 @@ Deno.serve(async (req) => {
       const tgToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
       if (tgToken && opponent?.telegram_chat_id &&
           shouldNotify(opponent.notify_preferences, 'tg', 'challenges')) {
-        const lines = [
-          '🔥 <b>Вызов на матч</b>',
-          '',
-          `${escapeHtml(senderName)} вызывает вас на баттл.`
-        ]
+        const lines = [т('challenge_tg', языкСоперника, { 'имя': escapeHtml(senderName) })]
         if (message) lines.push('', `💬 <i>${escapeHtml(String(message).slice(0, 150))}</i>`)
-        lines.push('', 'Принять или отклонить — в личном кабинете KSLT.')
+        lines.push('', т('challenge_tg_tail', языкСоперника))
 
         await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
           method: 'POST',
@@ -133,9 +199,9 @@ Deno.serve(async (req) => {
       if (opponent?.email && shouldNotify(opponent.notify_preferences, 'email', 'challenges')) {
         await callSendEmail(serviceKey, {
           to: opponent.email,
-          subject: `🔥 Вызов на матч от ${senderName}`,
+          subject: т('mail_challenge_subject', языкСоперника, { 'имя': senderName }),
           template: 'challenge-received',
-          data: { challenger_name: senderName, message: message || '' }
+          data: { challenger_name: senderName, message: message || '', lang: языкСоперника }
         })
       }
     }

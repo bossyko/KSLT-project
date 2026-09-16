@@ -14,6 +14,73 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// ============================================
+// ТЕКСТЫ УВЕДОМЛЕНИЙ
+// ============================================
+//
+// Лежат в таблице notification_texts — по одной строке на сообщение, три
+// языка в колонках. В базе, а не в коде: переводы вычитывают люди со
+// стороны, и правку в таблице видно сразу, без выкладки функции.
+//
+// Читаем один раз и держим в памяти: функция живёт между вызовами, и
+// ходить в базу за каждой строчкой незачем.
+
+type Язык = 'ru' | 'en' | 'kg'
+
+let _тексты: Record<string, Record<string, string>> | null = null
+
+async function загрузитьТексты(supabase: any) {
+  // Пустое не запоминаем: одна неудачная попытка — и бот до перезапуска
+  // отвечал бы ключами вместо текста
+  if (_тексты && Object.keys(_тексты).length) return _тексты
+  try {
+    const { data, error } = await supabase.from('notification_texts').select('key, ru, kg, en')
+    if (error) { console.error('тексты не прочитались:', error.message); return _тексты || {} }
+    const свежие: Record<string, Record<string, string>> = {}
+    for (const строка of (data || [])) {
+      свежие[строка.key] = { ru: строка.ru, kg: строка.kg, en: строка.en }
+    }
+    if (Object.keys(свежие).length) _тексты = свежие
+    else console.error('таблица notification_texts пуста')
+  } catch (e) {
+    console.error('тексты не прочитались:', e)
+  }
+  return _тексты || {}
+}
+
+/** Текст на языке человека. Нет перевода — русский. Нет строки — ключ. */
+function т(ключ: string, язык: Язык = 'ru', подстановки: Record<string, string | number> = {}): string {
+  const строка = _тексты?.[ключ]
+  if (!строка) return ключ
+  let текст = строка[язык] || строка.ru || ключ
+  for (const имя in подстановки) {
+    текст = текст.split('{' + имя + '}').join(String(подстановки[имя]))
+  }
+  return текст
+}
+
+/** Язык из уже загруженного профиля. */
+function языкИз(профиль: any): Язык {
+  const язык = профиль?.lang
+  return (язык === 'en' || язык === 'kg') ? язык : 'ru'
+}
+
+/** Язык владельца чата. */
+async function языкЧата(supabase: any, chatId: number): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('telegram_chat_id', chatId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
+
+/** Язык по идентификатору профиля. */
+async function языкПрофиля(supabase: any, profileId: string): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('id', profileId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
+
 const TELEGRAM_API = 'https://api.telegram.org/bot'
 const SITE_URL = 'https://kslt.netlify.app'
 
@@ -47,6 +114,7 @@ Deno.serve(async (req) => {
     if (!inviteId) return json({ error: 'invite_id required' }, 400)
 
     const db = createClient(supabaseUrl, serviceKey)
+    await загрузитьТексты(db)
 
     const { data: invite } = await db
       .from('game_invites')
@@ -70,7 +138,7 @@ Deno.serve(async (req) => {
 
     const { data: sender } = await db
       .from('profiles')
-      .select('id, full_name, email, telegram_chat_id, notify_preferences, phone, whatsapp_phone, telegram, instagram, avatar_url')
+      .select('id, full_name, email, telegram_chat_id, notify_preferences, phone, whatsapp_phone, telegram, instagram, avatar_url, lang')
       .eq('id', invite.sender_id)
       .single()
 
@@ -84,10 +152,11 @@ Deno.serve(async (req) => {
 
     // ---- Оповещаем отправителя ----
     const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
-    const title = accept ? '🎾 Приглашение принято' : 'Приглашение отклонено'
-    const text = accept
-      ? `${myName} принял ваше приглашение сыграть. Откройте кабинет — там его контакты.`
-      : `${myName} отказался от игры.`
+    // Пишем отправителю — значит на его языке, а не на языке того, кто отвечает
+    const языкОтправителя = языкИз(sender)
+    const заголовокОтвета = т(accept ? 'invite_accepted_title' : 'invite_declined_title', языкОтправителя)
+    const title = accept ? '🎾 ' + заголовокОтвета : заголовокОтвета
+    const text = т(accept ? 'invite_accepted_text' : 'invite_declined_text', языкОтправителя, { 'имя': myName })
 
     // Колокольчик на сайте: значок рисует интерфейс по типу уведомления,
     // поэтому в заголовке эмодзи не нужен
@@ -97,7 +166,7 @@ Deno.serve(async (req) => {
     await db.from('notification_log').insert({
       profile_id: invite.sender_id,
       type: 'game_invite',
-      title: accept ? 'Приглашение принято' : 'Приглашение отклонено',
+      title: заголовокОтвета,
       message: text,
       is_read: false,
       action_type: accept ? 'game_invite_accepted' : 'game_invite_declined',
@@ -114,7 +183,7 @@ Deno.serve(async (req) => {
           parse_mode: 'HTML',
           reply_markup: accept ? {
             inline_keyboard: [[
-              { text: '🎾 Открыть кабинет', url: `${SITE_URL}/pages/dashboard.html#games` }
+              { text: т('btn_open_dashboard', языкОтправителя), url: `${SITE_URL}/pages/dashboard.html#games` }
             ]]
           } : undefined
         })
@@ -142,7 +211,7 @@ Deno.serve(async (req) => {
           to: sender.email,
           subject: title,
           template: 'game-invite-answered',
-          data: { opponent_name: myName, accepted: accept }
+          data: { opponent_name: myName, accepted: accept, lang: языкОтправителя }
         })
       }).catch(() => {})
     }

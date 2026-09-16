@@ -14,6 +14,73 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// ============================================
+// ТЕКСТЫ УВЕДОМЛЕНИЙ
+// ============================================
+//
+// Лежат в таблице notification_texts — по одной строке на сообщение, три
+// языка в колонках. В базе, а не в коде: переводы вычитывают люди со
+// стороны, и правку в таблице видно сразу, без выкладки функции.
+//
+// Читаем один раз и держим в памяти: функция живёт между вызовами, и
+// ходить в базу за каждой строчкой незачем.
+
+type Язык = 'ru' | 'en' | 'kg'
+
+let _тексты: Record<string, Record<string, string>> | null = null
+
+async function загрузитьТексты(supabase: any) {
+  // Пустое не запоминаем: одна неудачная попытка — и бот до перезапуска
+  // отвечал бы ключами вместо текста
+  if (_тексты && Object.keys(_тексты).length) return _тексты
+  try {
+    const { data, error } = await supabase.from('notification_texts').select('key, ru, kg, en')
+    if (error) { console.error('тексты не прочитались:', error.message); return _тексты || {} }
+    const свежие: Record<string, Record<string, string>> = {}
+    for (const строка of (data || [])) {
+      свежие[строка.key] = { ru: строка.ru, kg: строка.kg, en: строка.en }
+    }
+    if (Object.keys(свежие).length) _тексты = свежие
+    else console.error('таблица notification_texts пуста')
+  } catch (e) {
+    console.error('тексты не прочитались:', e)
+  }
+  return _тексты || {}
+}
+
+/** Текст на языке человека. Нет перевода — русский. Нет строки — ключ. */
+function т(ключ: string, язык: Язык = 'ru', подстановки: Record<string, string | number> = {}): string {
+  const строка = _тексты?.[ключ]
+  if (!строка) return ключ
+  let текст = строка[язык] || строка.ru || ключ
+  for (const имя in подстановки) {
+    текст = текст.split('{' + имя + '}').join(String(подстановки[имя]))
+  }
+  return текст
+}
+
+/** Язык из уже загруженного профиля. */
+function языкИз(профиль: any): Язык {
+  const язык = профиль?.lang
+  return (язык === 'en' || язык === 'kg') ? язык : 'ru'
+}
+
+/** Язык владельца чата. */
+async function языкЧата(supabase: any, chatId: number): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('telegram_chat_id', chatId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
+
+/** Язык по идентификатору профиля. */
+async function языкПрофиля(supabase: any, profileId: string): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('id', profileId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
+
 const TELEGRAM_API = 'https://api.telegram.org/bot'
 const SITE_URL = 'https://kslt.netlify.app'
 
@@ -109,6 +176,7 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
+await загрузитьТексты(db)
 
     const groupChatId = Deno.env.get('TELEGRAM_GROUP_CHAT_ID')
     if (!groupChatId) {
@@ -222,7 +290,7 @@ Deno.serve(async (req) => {
         if (playerIds.length > 0) {
           const { data: profiles } = await db
             .from('profiles')
-            .select('player_id, full_name, telegram_chat_id, email, notify_preferences')
+            .select('player_id, full_name, telegram_chat_id, email, notify_preferences, lang')
             .in('player_id', playerIds)
 
           for (const p of (profiles || [])) {
@@ -247,7 +315,10 @@ Deno.serve(async (req) => {
             if (p.email && shouldNotify(p.notify_preferences, 'email', 'tournaments')) {
               const emailOk = await callSendEmail(serviceKey, {
                 to: p.email,
-                subject: `🔔 Турнир ${daysLabel}: ${t.title}`,
+                subject: т('mail_trn_soon_subject', языкИз(p), {
+                  'когда': т(is3d ? 'mail_trn_when_3days' : 'mail_trn_when_tomorrow', языкИз(p)),
+                  'турнир': t.title
+                }),
                 template: 'tournament-reminder',
                 data: {
                   title: t.title || '',
@@ -256,7 +327,8 @@ Deno.serve(async (req) => {
                   start_time: t.start_time || '',
                   player_name: name,
                   days: is3d ? 3 : 1,
-                  tournament_id: t.id
+                  tournament_id: t.id,
+                  lang: языкИз(p)
                 }
               })
               if (emailOk) emailQueued++

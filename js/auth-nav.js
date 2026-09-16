@@ -28,6 +28,46 @@
         if (уведомления) уведомления.style.display = 'none';
     }
 
+    /**
+     * Язык человека — тот, на котором он сейчас читает сайт.
+     *
+     * Уведомления шлёт сервер, и языка страницы он не видит: бот отвечал
+     * по-английски человеку, который весь сайт смотрит по-русски. Поэтому
+     * язык храним в профиле и обновляем при каждом заходе.
+     *
+     * Отдельный обработчик на переключатель не нужен: он ведёт на страницу
+     * другого языка, а значит следующая же загрузка всё и запишет. Так же
+     * ловится выбор в кабинете и в приложении.
+     *
+     * Лишний раз базу не трогаем: последнее записанное значение лежит
+     * рядом, в браузере.
+     */
+    function запомнитьЯзык(session) {
+        var язык = isKg ? 'kg' : (isEn ? 'en' : 'ru');
+        // Своё имя, не kslt_lang: под тем приложение держит свой язык
+        // (mobile/www/js/i18n.js), и мы бы принимали его выбор за отметку
+        // «уже записано в базу»
+        if (localStorage.getItem('kslt_lang_saved') === язык) return;
+
+        var id = session.user && session.user.id;
+        if (!id) return;
+
+        fetch(DB_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(id), {
+            method: 'PATCH',
+            headers: {
+                'apikey': DB_KEY,
+                'Authorization': 'Bearer ' + session.access_token,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ lang: язык })
+        }).then(function(ответ) {
+            // Поля может ещё не быть — миграция выкладывается отдельно.
+            // Тогда просто ничего не запоминаем и пробуем в следующий раз
+            if (ответ.ok) localStorage.setItem('kslt_lang_saved', язык);
+        }).catch(function() {});
+    }
+
     var btn = document.querySelector('.btn-auth');
     if (!btn) return;
 
@@ -131,6 +171,8 @@
                 var userName = localStorage.getItem('kslt_name') || (isEn ? 'User' : (isKg ? 'Колдонуучу' : 'Пользователь'));
                 var userAvatar = localStorage.getItem('kslt_avatar') || '';
                 var isStaff = role === 'admin' || role === 'manager';
+
+                запомнитьЯзык(session);
 
                 // ---- Notification Bell (all logged-in users) ----
                 var bellWrap = document.createElement('div');

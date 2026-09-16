@@ -4,7 +4,74 @@
   // JWT auth + membership check + 5/day limit
   // ============================================
 
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+// ============================================
+// ТЕКСТЫ УВЕДОМЛЕНИЙ
+// ============================================
+//
+// Лежат в таблице notification_texts — по одной строке на сообщение, три
+// языка в колонках. В базе, а не в коде: переводы вычитывают люди со
+// стороны, и правку в таблице видно сразу, без выкладки функции.
+//
+// Читаем один раз и держим в памяти: функция живёт между вызовами, и
+// ходить в базу за каждой строчкой незачем.
+
+type Язык = 'ru' | 'en' | 'kg'
+
+let _тексты: Record<string, Record<string, string>> | null = null
+
+async function загрузитьТексты(supabase: any) {
+  // Пустое не запоминаем: одна неудачная попытка — и бот до перезапуска
+  // отвечал бы ключами вместо текста
+  if (_тексты && Object.keys(_тексты).length) return _тексты
+  try {
+    const { data, error } = await supabase.from('notification_texts').select('key, ru, kg, en')
+    if (error) { console.error('тексты не прочитались:', error.message); return _тексты || {} }
+    const свежие: Record<string, Record<string, string>> = {}
+    for (const строка of (data || [])) {
+      свежие[строка.key] = { ru: строка.ru, kg: строка.kg, en: строка.en }
+    }
+    if (Object.keys(свежие).length) _тексты = свежие
+    else console.error('таблица notification_texts пуста')
+  } catch (e) {
+    console.error('тексты не прочитались:', e)
+  }
+  return _тексты || {}
+}
+
+/** Текст на языке человека. Нет перевода — русский. Нет строки — ключ. */
+function т(ключ: string, язык: Язык = 'ru', подстановки: Record<string, string | number> = {}): string {
+  const строка = _тексты?.[ключ]
+  if (!строка) return ключ
+  let текст = строка[язык] || строка.ru || ключ
+  for (const имя in подстановки) {
+    текст = текст.split('{' + имя + '}').join(String(подстановки[имя]))
+  }
+  return текст
+}
+
+/** Язык из уже загруженного профиля. */
+function языкИз(профиль: any): Язык {
+  const язык = профиль?.lang
+  return (язык === 'en' || язык === 'kg') ? язык : 'ru'
+}
+
+/** Язык владельца чата. */
+async function языкЧата(supabase: any, chatId: number): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('telegram_chat_id', chatId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
+
+/** Язык по идентификатору профиля. */
+async function языкПрофиля(supabase: any, profileId: string): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('id', profileId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
 
   const TELEGRAM_API = 'https://api.telegram.org/bot'
   const SITE_URL = 'https://kslt.netlify.app'
@@ -43,6 +110,7 @@
 
       // Service client for DB operations
       const db = createClient(supabaseUrl, serviceKey)
+    await загрузитьТексты(db)
 
       // 2. Get sender profile
       const { data: senderProfile } = await db
@@ -140,7 +208,7 @@
       // Get receiver profile (may not exist)
       const { data: receiverProfile } = await db
         .from('profiles')
-        .select('id, telegram_chat_id, email, full_name, phone, telegram, instagram, notify_preferences')
+        .select('id, telegram_chat_id, email, full_name, phone, telegram, instagram, notify_preferences, lang')
         .eq('player_id', receiver_player_id)
         .limit(1)
         .single()
@@ -150,6 +218,10 @@
       // без них отправка запрещалась, потому что всё держалось на боте.
       // Теперь приглашение живёт в кабинете и в приложении, а Телеграм с
       // почтой лишь оповещают
+      // Язык того, кому пишем: приглашение придёт на его языке, а не на
+      // языке отправителя
+      const языкПолучателя = языкИз(receiverProfile)
+
       if (!receiverProfile) {
         return json({ error: 'no_account' }, 400)
       }
@@ -187,8 +259,8 @@
       await db.from('notification_log').insert({
         profile_id: receiverProfile.id,
         type: 'game_invite',
-        title: 'Приглашение на игру',
-        message: `${senderName} предлагает сыграть в теннис`,
+        title: т('invite_title', языкПолучателя),
+        message: т('invite_short', языкПолучателя, { 'имя': senderName }),
         is_read: false,
         action_type: 'game_invite',
         action_id: invite.id
@@ -201,7 +273,7 @@
       // что соглашается. Личные данные через бота больше не ходят — раньше
       // он сам раздавал ссылки на переписку, минуя всякое согласие
       if (token && receiverProfile.telegram_chat_id && shouldNotify(receiverProfile.notify_preferences, 'tg', 'challenges')) {
-        const msgText = `🎾 <b>Приглашение на игру!</b>\n\n${senderName} предлагает вам сыграть в теннис.\n\nОткройте приложение или сайт, чтобы принять или отклонить.`
+        const msgText = т('invite_tg', языкПолучателя, { 'имя': senderName })
 
         await fetch(`${TELEGRAM_API}${token}/sendMessage`, {
           method: 'POST',
@@ -212,7 +284,7 @@
             parse_mode: 'HTML',
             reply_markup: {
               inline_keyboard: [[
-                { text: '🎾 Открыть приглашение', url: `${SITE_URL}/pages/dashboard.html#games` }
+                { text: т('btn_open_invite', языкПолучателя), url: `${SITE_URL}/pages/dashboard.html#games` }
               ]]
             }
           })
@@ -225,8 +297,8 @@
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            title: '🎾 Приглашение на игру',
-            message: `${senderName} предлагает сыграть в теннис`,
+            title: '🎾 ' + т('invite_title', языкПолучателя),
+            message: т('invite_short', языкПолучателя, { 'имя': senderName }),
             type: 'challenges',
             audience: 'user',
             user_id: receiverProfile.id,
@@ -245,9 +317,9 @@
         // строки под календарь и часы
         await callSendEmail(serviceKey, {
           to: receiverProfile.email,
-          subject: `🎾 Приглашение на игру от ${senderName}`,
+          subject: т('mail_invite_subject', языкПолучателя, { 'имя': senderName }),
           template: 'game-invite',
-          data: { sender_name: senderName }
+          data: { sender_name: senderName, lang: языкПолучателя }
         })
       }
 

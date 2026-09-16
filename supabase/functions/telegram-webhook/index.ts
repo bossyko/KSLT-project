@@ -14,8 +14,86 @@
         // Required secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_MANAGER_CHAT_ID
     
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+        // ============================================
+        // ТЕКСТЫ УВЕДОМЛЕНИЙ
+        // ============================================
+        //
+        // Лежат в таблице notification_texts — по одной строке на сообщение, три
+        // языка в колонках. В базе, а не в коде: переводы вычитывают люди со
+        // стороны, и правку в таблице видно сразу, без выкладки функции.
+        //
+        // Читаем один раз и держим в памяти: функция живёт между вызовами, и
+        // ходить в базу за каждой строчкой незачем.
+
+        type Язык = 'ru' | 'en' | 'kg'
+
+        let _тексты: Record<string, Record<string, string>> | null = null
+
+        async function загрузитьТексты(supabase: any) {
+          // Пустое не запоминаем: одна неудачная попытка — и бот до перезапуска
+          // отвечал бы ключами вместо текста
+          if (_тексты && Object.keys(_тексты).length) return _тексты
+          try {
+            const { data, error } = await supabase.from('notification_texts').select('key, ru, kg, en')
+            if (error) { console.error('тексты не прочитались:', error.message); return _тексты || {} }
+            const свежие: Record<string, Record<string, string>> = {}
+            for (const строка of (data || [])) {
+              свежие[строка.key] = { ru: строка.ru, kg: строка.kg, en: строка.en }
+            }
+            if (Object.keys(свежие).length) _тексты = свежие
+            else console.error('таблица notification_texts пуста')
+          } catch (e) {
+            console.error('тексты не прочитались:', e)
+          }
+          return _тексты || {}
+        }
+
+        /** Текст на языке человека. Нет перевода — русский. Нет строки — ключ. */
+        function т(ключ: string, язык: Язык = 'ru', подстановки: Record<string, string | number> = {}): string {
+          const строка = _тексты?.[ключ]
+          if (!строка) return ключ
+          let текст = строка[язык] || строка.ru || ключ
+          for (const имя in подстановки) {
+            текст = текст.split('{' + имя + '}').join(String(подстановки[имя]))
+          }
+          return текст
+        }
+
+        /** Язык из уже загруженного профиля. */
+        function языкИз(профиль: any): Язык {
+          const язык = профиль?.lang
+          return (язык === 'en' || язык === 'kg') ? язык : 'ru'
+        }
+
+        /** Язык владельца чата. */
+        async function языкЧата(supabase: any, chatId: number): Promise<Язык> {
+          try {
+            const { data } = await supabase.from('profiles').select('lang').eq('telegram_chat_id', chatId).maybeSingle()
+            return языкИз(data)
+          } catch { return 'ru' }
+        }
+
+        /** Язык по идентификатору профиля. */
+        async function языкПрофиля(supabase: any, profileId: string): Promise<Язык> {
+          try {
+            const { data } = await supabase.from('profiles').select('lang').eq('id', profileId).maybeSingle()
+            return языкИз(data)
+          } catch { return 'ru' }
+        }
+        // Тексты уведомлений — общий файл на все функции: бот, письма, push.
+        // Держать их у себя больше нельзя: одно и то же сообщение звучало
+        // в разных местах по-разному, а перевести разом было невозможно
     
         const TELEGRAM_API = 'https://api.telegram.org/bot'
+
+        /** Клиент базы под правами сервиса — нужен там, где его ещё не создали. */
+        function создатьКлиент() {
+          return createClient(
+            Deno.env.get('SUPABASE_URL')!,
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+          )
+        }
     
         const MEMBERSHIP_PRICES: Record<number, number> = {
           1: 1000,
@@ -27,6 +105,12 @@
         Deno.serve(async (req) => {
           try {
             const body = await req.json()
+
+            // Тексты уведомлений — из базы, один раз на жизнь функции.
+            // Загружаем до всех ветвлений: раньше загрузка стояла внутри
+            // одной ветки, и на простое /start бот отвечал ключом вместо
+            // сообщения — строк в памяти ещё не было
+            await загрузитьТексты(создатьКлиент())
     
             // ---- Handle callback_query (inline keyboard buttons) ----
             if (body.callback_query) {
@@ -87,7 +171,7 @@
               // Validate UUID format
               const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
               if (!uuidRegex.test(profileId)) {
-                await sendMessage(chatId, 'Ссылка не подходит. Нажмите «Подключить Telegram» в личном кабинете КСЛТ.')
+                await sendMessage(chatId, т('link_bad', await языкЧата(создатьКлиент(), chatId)))
                 return new Response('ok', { status: 200 })
               }
     
@@ -125,17 +209,17 @@
     
               if (error) {
                 console.error('DB error:', error)
-                await sendMessage(chatId, 'Не получилось подключить аккаунт. Попробуйте ещё раз чуть позже.')
+                await sendMessage(chatId, т('link_error', await языкПрофиля(supabase, profileId)))
                 return new Response('ok', { status: 200 })
               }
     
               const firstName = message.from?.first_name || ''
+              // Язык берём из профиля, который только что подключили: человек
+              // выбрал его на сайте, и бот должен говорить на нём же
+              const языкНового = await языкПрофиля(supabase, profileId)
               await sendMessage(
                 chatId,
-                // Бот говорит по-русски, как и всё остальное в нём. Эти три
-                // сообщения остались на английском с первых дней, и человек,
-                // подключивший Telegram из кабинета, получал ответ на чужом языке
-                `${firstName ? firstName + ', ' : ''}ваш Telegram подключён к КСЛТ ✅\n\nСюда будут приходить приглашения на игру, вызовы и напоминания о членстве.`
+                т('link_ok', языкНового, { 'имя': firstName ? firstName + ', ' : '' })
               )
     
               return new Response('ok', { status: 200 })
@@ -149,15 +233,19 @@
               )
               const { data: existing } = await supabase
                 .from('profiles')
-                .select('id')
+                .select('id, lang')
                 .eq('telegram_chat_id', chatId)
                 .limit(1)
                 .single()
-    
+
+              // Человек уже подключён — говорим на его языке. Ещё нет —
+              // по-русски: языка мы про него пока не знаем
+              const языкСтарта: Язык = (existing?.lang === 'en' || existing?.lang === 'kg') ? existing.lang : 'ru'
+
               if (existing) {
-                await sendMessage(chatId, 'Ваш Telegram подключён к KSLT ✅\n\nВы будете получать уведомления о приглашениях на игру и напоминания здесь.')
+                await sendMessage(chatId, т('link_again', языкСтарта))
               } else {
-                await sendMessage(chatId, 'Добро пожаловать в KSLT Tennis Bot! 🎾\n\nЧтобы подключить аккаунт, нажмите «Подключить Telegram» в личном кабинете:\nhttps://kslt.netlify.app/pages/dashboard.html')
+                await sendMessage(chatId, т('welcome', 'ru', { 'ссылка': 'https://kslt.netlify.app/pages/dashboard.html' }))
               }
               return new Response('ok', { status: 200 })
             }
@@ -176,7 +264,7 @@
     
     
             // Unknown command
-            await sendMessage(chatId, 'Нажмите /start или подключите аккаунт через личный кабинет KSLT.\n\nКоманды:\n/membership — заявка на членство\n/notifications — настройки уведомлений')
+            await sendMessage(chatId, т('unknown_cmd', await языкЧата(создатьКлиент(), chatId)))
     
             return new Response('ok', { status: 200 })
           } catch (err) {
@@ -349,12 +437,14 @@
             await answerCallbackQuery(token, query.id, 'Принято!')
           } else {
             // Declined
-            await sendMessage(chatId, 'Приглашение отклонено.')
+            await sendMessage(chatId, т('invite_declined_you', await языкЧата(создатьКлиент(), chatId)))
     
             if (senderProfile.telegram_chat_id && shouldNotify(senderProfile.notify_preferences, 'tg', 'challenges')) {
               await sendMessage(
                 senderProfile.telegram_chat_id,
-                `${receiverProfile.full_name} отклонил(а) приглашение на игру.`
+                т('invite_declined_sender',
+                  await языкЧата(создатьКлиент(), senderProfile.telegram_chat_id),
+                  { 'имя': receiverProfile.full_name })
               )
             }
     
@@ -608,7 +698,7 @@
               const note = regData.reason === 'top_rank'
                 ? '\n\n<i>Место не закреплено: если заявку подаст игрок категории турнира, вы можете быть перемещены в лист ожидания.</i>'
                 : ''
-              await sendMessage(tgUserId, `✅ <b>Заявка принята</b>\n\n🏆 ${trnTitle}\n\nВы в основной сетке.${note}`)
+              await sendMessage(tgUserId, т('trn_accepted', await языкЧата(supabase, tgUserId), { 'турнир': trnTitle }) + note)
             }
           } else if (regData.status === 'waitlist') {
             const why: Record<string, string> = {
@@ -618,12 +708,20 @@
             }
             await answerCallbackQuery(token, query.id, '⏳ Заявка на рассмотрении')
             if (shouldNotify(profile.notify_preferences, 'tg', 'tournaments')) {
-              await sendMessage(tgUserId, `⏳ <b>Заявка принята — на рассмотрении</b>\n\n🏆 ${trnTitle}\n\n${why[regData.reason] || 'Решение примет администратор.'}`)
+              const языкЗаявки = await языкЧата(supabase, tgUserId)
+              await sendMessage(tgUserId, т('trn_pending', языкЗаявки, {
+                'турнир': trnTitle,
+                'причина': why[regData.reason] || т('trn_admin_decides', языкЗаявки)
+              }))
             }
           } else {
             await answerCallbackQuery(token, query.id, '⛔ Заявка не принята')
             if (shouldNotify(profile.notify_preferences, 'tg', 'tournaments')) {
-              await sendMessage(tgUserId, `⛔ <b>Заявка не принята</b>\n\n🏆 ${trnTitle}\n\n${escapeHtml(regData.block_reason || 'Вы не проходите по правилам допуска.')}`)
+              const языкОтказа = await языкЧата(supabase, tgUserId)
+              await sendMessage(tgUserId, т('trn_blocked', языкОтказа, {
+                'турнир': trnTitle,
+                'причина': escapeHtml(regData.block_reason || т('trn_rules', языкОтказа))
+              }))
             }
           }
         }
@@ -801,7 +899,7 @@
             .single()
     
           if (!profile) {
-            await sendMessage(chatId, 'Сначала привяжите Telegram к аккаунту KSLT:\nhttps://kslt.netlify.app/pages/dashboard.html')
+            await sendMessage(chatId, т('link_first', await языкЧата(создатьКлиент(), chatId), { 'ссылка': 'https://kslt.netlify.app/pages/dashboard.html' }))
             return
           }
     
@@ -817,7 +915,7 @@
     
           if (activeMem && activeMem.length > 0) {
             const expDate = formatDateRu(activeMem[0].expires_at?.split('T')[0])
-            await sendMessage(chatId, `У вас уже есть активное членство KSLT до ${expDate} ✅`)
+            await sendMessage(chatId, т('mem_active', await языкЧата(supabase, chatId), { 'дата': expDate }))
             return
           }
     
@@ -832,9 +930,9 @@
           if (pendingReq && pendingReq.length > 0) {
             const st = pendingReq[0].status
             if (st === 'pending_approval') {
-              await sendMessage(chatId, 'У вас уже есть активная заявка на рассмотрении. Ожидайте подтверждения.')
+              await sendMessage(chatId, т('mem_pending', await языкЧата(supabase, chatId)))
             } else if (st === 'pending_receipt') {
-              await sendMessage(chatId, 'У вас есть незавершённая заявка. Отправьте скриншот чека об оплате.')
+              await sendMessage(chatId, т('mem_unfinished', await языкЧата(supabase, chatId)))
             } else {
               // Reset stale request (select_period / select_category)
               await db.from('membership_requests').delete().eq('id', pendingReq[0].id)
@@ -930,7 +1028,7 @@
                 .update({ months, amount: price, status: 'pending_receipt', updated_at: new Date().toISOString() })
                 .eq('id', req.id)
     
-              await sendMessage(chatId, `💰 К оплате: <b>${price} сом</b> за ${months} мес.\n\nРеквизиты для оплаты:\nhttps://kslt.netlify.app/pages/pricing.html\n\n📸 Отправьте скриншот чека об оплате в этот чат.`)
+              await sendMessage(chatId, т('mem_price', await языкЧата(supabase, chatId), { 'сумма': price, 'месяцев': months, 'ссылка': 'https://kslt.netlify.app/pages/pricing.html' }))
               await answerCallbackQuery(token, query.id, `${months} мес — ${price} сом`)
             } else {
               // No player card → need category selection
@@ -951,7 +1049,7 @@
                 await db.from('membership_requests')
                   .update({ status: 'pending_receipt', updated_at: new Date().toISOString() })
                   .eq('id', req.id)
-                await sendMessage(chatId, `💰 К оплате: <b>${price} сом</b> за ${months} мес.\n\nРеквизиты для оплаты:\nhttps://kslt.netlify.app/pages/pricing.html\n\n📸 Отправьте скриншот чека об оплате в этот чат.`)
+                await sendMessage(chatId, т('mem_price', await языкЧата(supabase, chatId), { 'сумма': price, 'месяцев': months, 'ссылка': 'https://kslt.netlify.app/pages/pricing.html' }))
                 await answerCallbackQuery(token, query.id, `${months} мес — ${price} сом`)
                 return
               }
@@ -1014,7 +1112,7 @@
               .update({ category_id: categoryId, status: 'pending_receipt', updated_at: new Date().toISOString() })
               .eq('id', req.id)
     
-            await sendMessage(chatId, `💰 К оплате: <b>${req.amount} сом</b> за ${req.months} мес.\n\nРеквизиты для оплаты:\nhttps://kslt.netlify.app/pages/pricing.html\n\n📸 Отправьте скриншот чека об оплате в этот чат.`)
+            await sendMessage(chatId, т('mem_price', await языкЧата(создатьКлиент(), chatId), { 'сумма': req.amount, 'месяцев': req.months, 'ссылка': 'https://kslt.netlify.app/pages/pricing.html' }))
             await answerCallbackQuery(token, query.id, 'Отправьте скриншот чека')
             return
           }
@@ -1112,7 +1210,7 @@
             } catch { /* ignore */ }
           }
     
-          await sendMessage(chatId, '✅ Заявка отправлена на рассмотрение. Ожидайте подтверждения.')
+          await sendMessage(chatId, т('mem_sent', await языкЧата(создатьКлиент(), chatId)))
         }
     
         async function processMembershipApproval(
@@ -1153,7 +1251,7 @@
           // Get user profile
           const { data: profile } = await db
             .from('profiles')
-            .select('id, full_name, player_id, gender, telegram_chat_id, notify_preferences')
+            .select('id, full_name, player_id, gender, telegram_chat_id, notify_preferences, lang')
             .eq('id', req.profile_id)
             .single()
     
@@ -1213,10 +1311,13 @@
     
             // 5. Notify user via TG (respect opt-out)
             if (profile.telegram_chat_id && shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
-              const expDateStr = expiresAt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+              // Дату пишем на языке человека: 15 сентября, September 15, 15-сентябрь
+              const языкЧлена: Язык = (profile.lang === 'en' || profile.lang === 'kg') ? profile.lang : 'ru'
+              const местность = языкЧлена === 'en' ? 'en-US' : (языкЧлена === 'kg' ? 'ky-KG' : 'ru-RU')
+              const expDateStr = expiresAt.toLocaleDateString(местность, { day: 'numeric', month: 'long', year: 'numeric' })
               await sendMessage(
                 profile.telegram_chat_id,
-                `✅ <b>Членство KSLT активировано!</b>\n\nДействует до: ${expDateStr}\nДобро пожаловать! 🎾`
+                т('mem_approved', языкЧлена, { 'дата': expDateStr })
               )
             }
     
@@ -1249,7 +1350,7 @@
             if (profile.telegram_chat_id && shouldNotify(profile.notify_preferences, 'tg', 'membership')) {
               await sendMessage(
                 profile.telegram_chat_id,
-                '❌ Заявка на членство отклонена.\n\nОбратитесь к менеджеру для уточнения.'
+                т('mem_rejected', (profile.lang === 'en' || profile.lang === 'kg') ? profile.lang : 'ru')
               )
             }
     
@@ -1346,7 +1447,7 @@
             .single()
     
           if (!profile) {
-            await sendMessage(chatId, 'Привяжите Telegram к аккаунту KSLT через личный кабинет.')
+            await sendMessage(chatId, т('link_via_dashboard', await языкЧата(создатьКлиент(), chatId)))
             return
           }
     

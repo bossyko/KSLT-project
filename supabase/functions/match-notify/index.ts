@@ -11,7 +11,74 @@
   // Deploy: supabase functions deploy match-notify --no-verify-jwt
   // Required secrets: TELEGRAM_BOT_TOKEN, CRON_SECRET
 
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+// ============================================
+// ТЕКСТЫ УВЕДОМЛЕНИЙ
+// ============================================
+//
+// Лежат в таблице notification_texts — по одной строке на сообщение, три
+// языка в колонках. В базе, а не в коде: переводы вычитывают люди со
+// стороны, и правку в таблице видно сразу, без выкладки функции.
+//
+// Читаем один раз и держим в памяти: функция живёт между вызовами, и
+// ходить в базу за каждой строчкой незачем.
+
+type Язык = 'ru' | 'en' | 'kg'
+
+let _тексты: Record<string, Record<string, string>> | null = null
+
+async function загрузитьТексты(supabase: any) {
+  // Пустое не запоминаем: одна неудачная попытка — и бот до перезапуска
+  // отвечал бы ключами вместо текста
+  if (_тексты && Object.keys(_тексты).length) return _тексты
+  try {
+    const { data, error } = await supabase.from('notification_texts').select('key, ru, kg, en')
+    if (error) { console.error('тексты не прочитались:', error.message); return _тексты || {} }
+    const свежие: Record<string, Record<string, string>> = {}
+    for (const строка of (data || [])) {
+      свежие[строка.key] = { ru: строка.ru, kg: строка.kg, en: строка.en }
+    }
+    if (Object.keys(свежие).length) _тексты = свежие
+    else console.error('таблица notification_texts пуста')
+  } catch (e) {
+    console.error('тексты не прочитались:', e)
+  }
+  return _тексты || {}
+}
+
+/** Текст на языке человека. Нет перевода — русский. Нет строки — ключ. */
+function т(ключ: string, язык: Язык = 'ru', подстановки: Record<string, string | number> = {}): string {
+  const строка = _тексты?.[ключ]
+  if (!строка) return ключ
+  let текст = строка[язык] || строка.ru || ключ
+  for (const имя in подстановки) {
+    текст = текст.split('{' + имя + '}').join(String(подстановки[имя]))
+  }
+  return текст
+}
+
+/** Язык из уже загруженного профиля. */
+function языкИз(профиль: any): Язык {
+  const язык = профиль?.lang
+  return (язык === 'en' || язык === 'kg') ? язык : 'ru'
+}
+
+/** Язык владельца чата. */
+async function языкЧата(supabase: any, chatId: number): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('telegram_chat_id', chatId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
+
+/** Язык по идентификатору профиля. */
+async function языкПрофиля(supabase: any, profileId: string): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('id', profileId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
 
   const TELEGRAM_API = 'https://api.telegram.org/bot'
   const SITE_URL = 'https://kslt.netlify.app'
@@ -50,6 +117,7 @@
         return jsonResponse({ error: 'Unauthorized' }, 401)
       }
       const db = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+      await загрузитьТексты(db)
       const { data: profile } = await db
         .from('profiles')
         .select('role')
@@ -421,7 +489,7 @@
 
     const { data: players } = await db.from('players').select('id, name').in('id', кому)
     const { data: profiles } = await db
-      .from('profiles').select('id, player_id, telegram_chat_id, email, notify_preferences').in('player_id', кому)
+      .from('profiles').select('id, player_id, telegram_chat_id, email, notify_preferences, lang').in('player_id', кому)
 
     const playerMap: Record<string, any> = {}
     for (const p of (players || [])) playerMap[p.id] = p
@@ -526,7 +594,7 @@
 
     // Load players, profiles, tournaments
     const { data: players } = await db.from('players').select('id, name').in('id', playerIds)
-    const { data: profiles } = await db.from('profiles').select('id, player_id, telegram_chat_id, email, notify_preferences').in('player_id', playerIds)
+    const { data: profiles } = await db.from('profiles').select('id, player_id, telegram_chat_id, email, notify_preferences, lang').in('player_id', playerIds)
 
     const playerMap: Record<string, any> = {}
     for (const p of (players || [])) playerMap[p.id] = p
@@ -562,8 +630,9 @@
           const pr = profileMap[кому]
           if (!pr) continue
 
+          const языкИгрока = языкИз(pr)
           const строки = [
-            `\u{1F3BE} <b>Ваш матч скоро!</b>`,
+            т('match_soon_tg', языкИгрока),
             '',
             `\u{1F3C6} ${esc(t?.title || '')}`,
             `\u{23F0} ${match.scheduled_time}`,
@@ -571,7 +640,7 @@
             courtStr ? `\u{1F4CD} ${courtStr}` : '',
             `\u{1F19A} ${esc(соперник)}`,
             '',
-            '\u{1F4AA} Удачи!'
+            т('match_good_luck', языкИгрока)
           ].filter((x) => x !== '')
 
           if (pr.telegram_chat_id && shouldNotify(pr.notify_preferences, 'tg', 'matches')) {
@@ -582,7 +651,7 @@
           if (pr.email && shouldNotify(pr.notify_preferences, 'email', 'matches')) {
             const ok = await callSendEmail(serviceKey, {
               to: pr.email,
-              subject: `\u{1F3BE} Ваш матч скоро: ${t?.title || ''}`,
+              subject: т('mail_match_soon_subject', языкИгрока, { 'турнир': t?.title || '' }),
               template: 'match-schedule',
               data: {
                 player_name: playerMap[кому]?.name || '',
@@ -593,7 +662,8 @@
                   opponent: соперник,
                   court: courtStr,
                   launch: запуск || null
-                }]
+                }],
+                lang: языкИгрока
               }
             })
             if (ok) emailSent++
@@ -601,12 +671,12 @@
 
           // Пуш в приложение: короткой строкой, без разметки
           if (pr.id) {
-            const краткоЗапуск = запуск ? `запуск №${запуск}, ` : ''
+            const краткоЗапуск = запуск ? т('match_launch_short', языкИгрока, { 'номер': запуск }) + ', ' : ''
             const ok = await sendPush(
               serviceKey,
               pr.id,
-              'Ваш матч скоро',
-              `${match.scheduled_time} \u00B7 ${краткоЗапуск}${courtStr || 'корт уточняется'} \u00B7 ${соперник}`,
+              т('match_soon_title', языкИгрока),
+              `${match.scheduled_time} \u00B7 ${краткоЗапуск}${courtStr || т('match_court_tbd', языкИгрока)} \u00B7 ${соперник}`,
               match.tournament_id
             )
             if (ok) pushSent++
@@ -664,7 +734,7 @@
     const playerIds = [...new Set(matches.flatMap((m: any) => matchRecipients(m, partnerOf)))]
 
     const { data: players } = await db.from('players').select('id, name').in('id', playerIds)
-    const { data: profiles } = await db.from('profiles').select('id, player_id, telegram_chat_id, email, notify_preferences').in('player_id', playerIds)
+    const { data: profiles } = await db.from('profiles').select('id, player_id, telegram_chat_id, email, notify_preferences, lang').in('player_id', playerIds)
 
     const playerMap: Record<string, any> = {}
     for (const p of (players || [])) playerMap[p.id] = p

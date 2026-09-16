@@ -1,3 +1,70 @@
+
+// ============================================
+// ТЕКСТЫ УВЕДОМЛЕНИЙ
+// ============================================
+//
+// Лежат в таблице notification_texts — по одной строке на сообщение, три
+// языка в колонках. В базе, а не в коде: переводы вычитывают люди со
+// стороны, и правку в таблице видно сразу, без выкладки функции.
+//
+// Читаем один раз и держим в памяти: функция живёт между вызовами, и
+// ходить в базу за каждой строчкой незачем.
+
+type Язык = 'ru' | 'en' | 'kg'
+
+let _тексты: Record<string, Record<string, string>> | null = null
+
+async function загрузитьТексты(supabase: any) {
+  // Пустое не запоминаем: одна неудачная попытка — и бот до перезапуска
+  // отвечал бы ключами вместо текста
+  if (_тексты && Object.keys(_тексты).length) return _тексты
+  try {
+    const { data, error } = await supabase.from('notification_texts').select('key, ru, kg, en')
+    if (error) { console.error('тексты не прочитались:', error.message); return _тексты || {} }
+    const свежие: Record<string, Record<string, string>> = {}
+    for (const строка of (data || [])) {
+      свежие[строка.key] = { ru: строка.ru, kg: строка.kg, en: строка.en }
+    }
+    if (Object.keys(свежие).length) _тексты = свежие
+    else console.error('таблица notification_texts пуста')
+  } catch (e) {
+    console.error('тексты не прочитались:', e)
+  }
+  return _тексты || {}
+}
+
+/** Текст на языке человека. Нет перевода — русский. Нет строки — ключ. */
+function т(ключ: string, язык: Язык = 'ru', подстановки: Record<string, string | number> = {}): string {
+  const строка = _тексты?.[ключ]
+  if (!строка) return ключ
+  let текст = строка[язык] || строка.ru || ключ
+  for (const имя in подстановки) {
+    текст = текст.split('{' + имя + '}').join(String(подстановки[имя]))
+  }
+  return текст
+}
+
+/** Язык из уже загруженного профиля. */
+function языкИз(профиль: any): Язык {
+  const язык = профиль?.lang
+  return (язык === 'en' || язык === 'kg') ? язык : 'ru'
+}
+
+/** Язык владельца чата. */
+async function языкЧата(supabase: any, chatId: number): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('telegram_chat_id', chatId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
+
+/** Язык по идентификатору профиля. */
+async function языкПрофиля(supabase: any, profileId: string): Promise<Язык> {
+  try {
+    const { data } = await supabase.from('profiles').select('lang').eq('id', profileId).maybeSingle()
+    return языкИз(data)
+  } catch { return 'ru' }
+}
 // ============================================
 // KSLT — Send Email Edge Function (Resend)
 // ============================================
@@ -14,6 +81,7 @@
 
 // Адрес сайта в ссылках письма. Вынесен в настройку: при переезде на kslt.kg
 // достаточно поменять секрет SITE_URL, не трогая код девяти функций.
+
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://kslt.netlify.app'
 // Отправитель обязан быть на домене, подтверждённом в Resend, иначе письма
 // отклоняются. Пока подтверждён tennis.kg; когда поднимется kslt.kg — сменить
@@ -24,6 +92,8 @@ const FROM_EMAIL = Deno.env.get('EMAIL_FROM') || 'KSLT <info@tennis.kg>'
 // подтвердить, письма будут отклонены. Поэтому уходит письмо с домена клуба,
 // а нажатие «Ответить» ведёт на почтовый ящик, который читают
 const REPLY_TO = Deno.env.get('EMAIL_REPLY_TO') || 'kslt.kyrgyzstan@gmail.com'
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -37,6 +107,12 @@ Deno.serve(async (req) => {
   if (!serviceKey || !authHeader.includes(serviceKey)) {
     return json({ error: 'Unauthorized — service role only' }, 401)
   }
+
+  // Тексты писем лежат в базе — читаем один раз на жизнь функции
+  await загрузитьТексты(createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    serviceKey
+  ))
 
   try {
     const { to, subject, template, data, html: rawHtml } = await req.json()
@@ -216,56 +292,90 @@ ${d.max_participants ? `<p style="${S.infoRow}">👥 Мест: ${d.max_participa
 
 // --- 2. Tournament Reminder ---
 function templateTournamentReminder(d: Record<string, any>): string {
-  const daysLabel = d.days === 3 ? 'через 3 дня' : 'завтра'
+  const язык = языкПисьма(d)
+  const когда = т(d.days === 3 ? 'mail_trn_when_3days' : 'mail_trn_when_tomorrow', язык)
+  const заголовок = т('mail_trn_soon_subject', язык, { 'когда': когда, 'турнир': esc(d.title) })
+  const тело = т('mail_trn_soon_body', язык, {
+    'имя': d.player_name ? esc(d.player_name) : '',
+    'даты': esc(d.dates),
+    'место': d.venue ? esc(d.venue) : '—'
+  })
   const content = `
-<h1 style="${S.h1}">🔔 Турнир ${daysLabel}!</h1>
-${d.player_name ? `<p style="${S.p}">Привет, ${esc(d.player_name)}!</p>` : ''}
-<p style="${S.p}">Вы записаны на турнир:</p>
+<h1 style="${S.h1}">🔔 ${esc(когда)}</h1>
+${тело.split('\n\n').map((абзац) => `<p style="${S.p}">${абзац.split('\n').join('<br>')}</p>`).join('')}
 <h2 style="${S.h2}">${esc(d.title)}</h2>
-<p style="${S.infoRow}">📅 ${esc(d.dates)}</p>
-${d.venue ? `<p style="${S.infoRow}">📍 ${esc(d.venue)}</p>` : ''}
-${d.start_time ? `<p style="${S.infoRow}">⏰ Начало: ${esc(d.start_time)}</p>` : ''}
+${d.start_time ? `<p style="${S.infoRow}">⏰ ${т('mail_trn_start', язык)}: ${esc(d.start_time)}</p>` : ''}
 <hr style="${S.divider}">
-${d.board ? `<p style="${S.muted}">Ваши игры отмечены ▶. Точно ко времени идут первые запуски — по числу кортов. Дальше время ориентировочное: игра начнётся, как освободится корт.</p>` : ''}
-<p style="${S.p}">Удачи на корте! 🎾</p>
-<a href="${SITE_URL}/pages/tournament.html?id=${d.tournament_id}" style="${S.btnOutline}">Подробнее</a>`
-  return wrapLayout(content, `Турнир ${d.title} — ${daysLabel}`)
+${d.board ? `<p style="${S.muted}">${т('mail_trn_queue_note', язык)}</p>` : ''}
+<p style="${S.p}">${т('mail_trn_good_luck', язык)}</p>
+<a href="${SITE_URL}/pages/tournament.html?id=${d.tournament_id}" style="${S.btnOutline}">${кнопка('tournament', язык)}</a>`
+  return wrapLayout(content, заголовок)
 }
 
 // --- 3. Membership Approved ---
 function templateMembershipApproved(d: Record<string, any>): string {
-  const actionLabel = d.action === 'granted' ? 'выдано' : d.action === 'extended' ? 'продлено' : 'обновлено'
+  const язык = языкПисьма(d)
+  const заголовок = т('mail_mem_ok_subject', язык)
+  const тело = т('mail_mem_ok_body', язык, {
+    'имя': d.name ? esc(d.name) : '',
+    'дата': d.expires_at ? esc(d.expires_at) : ''
+  })
   const content = `
-<h1 style="${S.h1}">✅ Членство ${actionLabel}!</h1>
-${d.name ? `<p style="${S.p}">${esc(d.name)}, ваше членство KSLT ${actionLabel}.</p>` : `<p style="${S.p}">Ваше членство KSLT ${actionLabel}.</p>`}
-${d.expires_at ? `<p style="${S.infoRow}">📅 Действует до: <strong style="${S.accent}">${esc(d.expires_at)}</strong></p>` : ''}
+<h1 style="${S.h1}">✅ ${esc(заголовок)}</h1>
+${тело.split('\n\n').map((абзац) => `<p style="${S.p}">${абзац}</p>`).join('')}
 <hr style="${S.divider}">
-<p style="${S.p}">Теперь вам доступны все преимущества клуба: рейтинг, вызовы на матч, скидки у партнёров.</p>
-<a href="${SITE_URL}/pages/dashboard.html" style="${S.btn}">Личный кабинет</a>`
-  return wrapLayout(content, `Членство KSLT ${actionLabel}`)
+<a href="${SITE_URL}/pages/dashboard.html" style="${S.btn}">${кнопка('dashboard', язык)}</a>`
+  return wrapLayout(content, заголовок)
+}
+
+
+// Подписи кнопок в письмах. Отдельно от словаря: это не сообщения, а
+// органы управления — короткие и повторяются во многих письмах
+const КНОПКИ: Record<string, Record<string, string>> = {
+  dashboard: { ru: 'Личный кабинет', kg: 'Жеке кабинет', en: 'My dashboard' },
+  renew:     { ru: 'Продлить членство', kg: 'Мүчөлүктү узартуу', en: 'Renew membership' },
+  open:      { ru: 'Открыть', kg: 'Ачуу', en: 'Open' },
+  tournament:{ ru: 'Страница турнира', kg: 'Турнир барагы', en: 'Tournament page' }
+}
+
+/** Язык письма: его присылает функция, которая заказала письмо. */
+function языкПисьма(d: Record<string, any>): Язык {
+  return (d.lang === 'en' || d.lang === 'kg') ? d.lang : 'ru'
+}
+
+/** Подпись кнопки на языке письма. */
+function кнопка(ключ: string, язык: Язык): string {
+  return КНОПКИ[ключ]?.[язык] || КНОПКИ[ключ]?.ru || ''
 }
 
 // --- 4. Membership Expiring ---
 function templateMembershipExpiring(d: Record<string, any>): string {
+  const язык = языкПисьма(d)
+  const заголовок = т('mail_mem_soon_subject', язык)
+  const тело = т('mail_mem_soon_body', язык, {
+    'имя': d.name ? esc(d.name) : '',
+    'дата': esc(d.expires_at),
+    'сумма': d.price || 1000
+  })
   const content = `
-<h1 style="${S.h1}">⏰ Членство истекает через 7 дней</h1>
-${d.name ? `<p style="${S.p}">Здравствуйте, ${esc(d.name)}!</p>` : ''}
-<p style="${S.p}">Ваше членство KSLT истекает <strong style="${S.accent}">${esc(d.expires_at)}</strong>.</p>
-<p style="${S.p}">Для продления оплатите 1000 сом/мес.</p>
+<h1 style="${S.h1}">${esc(заголовок)}</h1>
+${тело.split('\n\n').map((абзац) => `<p style="${S.p}">${абзац}</p>`).join('')}
 <hr style="${S.divider}">
-<a href="${SITE_URL}/pages/pricing.html" style="${S.btn}">Продлить членство</a>`
-  return wrapLayout(content, `Членство KSLT истекает ${d.expires_at}`)
+<a href="${SITE_URL}/pages/pricing.html" style="${S.btn}">${кнопка('renew', язык)}</a>`
+  return wrapLayout(content, заголовок)
 }
 
 // --- 5. Membership Expired ---
 function templateMembershipExpired(d: Record<string, any>): string {
+  const язык = языкПисьма(d)
+  const заголовок = т('mail_mem_end_subject', язык)
+  const тело = т('mail_mem_end_body', язык, { 'имя': d.name ? esc(d.name) : '' })
   const content = `
-<h1 style="${S.h1}">❌ Членство истекло</h1>
-${d.name ? `<p style="${S.p}">${esc(d.name)}, ваше членство KSLT истекло.</p>` : `<p style="${S.p}">Ваше членство KSLT истекло.</p>`}
-<p style="${S.p}">Для продления используйте Telegram-бота или оплатите на сайте.</p>
+<h1 style="${S.h1}">${esc(заголовок)}</h1>
+${тело.split('\n\n').map((абзац) => `<p style="${S.p}">${абзац}</p>`).join('')}
 <hr style="${S.divider}">
-<a href="${SITE_URL}/pages/pricing.html" style="${S.btn}">Продлить</a>`
-  return wrapLayout(content, 'Членство KSLT истекло')
+<a href="${SITE_URL}/pages/pricing.html" style="${S.btn}">${кнопка('renew', язык)}</a>`
+  return wrapLayout(content, заголовок)
 }
 
 // --- 6. Match Schedule ---
@@ -311,15 +421,19 @@ ${matchesHtml}
  * безопасности уходили с той же строкой об отсутствии шаблона.
  */
 function templateSecurityAlert(d: Record<string, any>): string {
+  const язык = языкПисьма(d)
+  const заголовок = т('mail_security_subject', язык)
+  // Что именно случилось, присылает вызывающая функция: смена пароля,
+  // новое устройство, смена почты. Своего текста нет — берём общий
+  const тело = т('mail_security_body', язык, { 'имя': d.name ? esc(d.name) : '' })
+  const абзацы = тело.split('\n\n')
+  if (d.message_ru && язык === 'ru') абзацы[1] = esc(d.message_ru)
   const content = `
-<h1 style="${S.h1}">🔐 Безопасность аккаунта</h1>
-${d.name ? `<p style="${S.p}">${esc(d.name)}, здравствуйте.</p>` : ''}
-<p style="${S.p}">${esc(d.message_ru || 'В вашей учётной записи произошло изменение.')}</p>
+<h1 style="${S.h1}">🔐 ${esc(заголовок)}</h1>
+${абзацы.map((абзац) => `<p style="${S.p}">${абзац}</p>`).join('')}
 <hr style="${S.divider}">
-<p style="${S.p}">Если это были вы — ничего делать не нужно. Если нет,
-смените пароль и напишите нам.</p>
-<a href="${SITE_URL}/pages/dashboard.html#settings" style="${S.btn}">Открыть настройки</a>`
-  return wrapLayout(content, esc(d.message_ru || 'Безопасность аккаунта'))
+<a href="${SITE_URL}/pages/dashboard.html#settings" style="${S.btn}">${кнопка('open', язык)}</a>`
+  return wrapLayout(content, заголовок)
 }
 
 /**
@@ -353,15 +467,15 @@ function templateChallengeAnswered(d: Record<string, any>): string {
  * когда и где играть, договариваются сами.
  */
 function templateGameInvite(d: Record<string, any>): string {
+  const язык = языкПисьма(d)
+  const заголовок = т('mail_invite_subject', язык, { 'имя': esc(d.sender_name) })
+  const тело = т('mail_invite_body', язык)
   const content = `
-<h1 style="${S.h1}">🎾 Приглашение на игру</h1>
-<p style="${S.p}"><strong style="color:#14161a;">${esc(d.sender_name)}</strong> предлагает вам сыграть в теннис.</p>
-<p style="${S.p}">Примите приглашение — и вы обменяетесь контактами:
-он увидит ваши, вы&nbsp;— его. Дальше договоритесь сами.</p>
+<h1 style="${S.h1}">${esc(заголовок)}</h1>
+${тело.split('\n\n').map((абзац) => `<p style="${S.p}">${абзац}</p>`).join('')}
 <hr style="${S.divider}">
-<p style="${S.p}">Ответить можно в приложении или в личном кабинете.</p>
-<a href="${SITE_URL}/pages/dashboard.html#games" style="${S.btn}">Открыть приглашение</a>`
-  return wrapLayout(content, `${d.sender_name} предлагает сыграть`)
+<a href="${SITE_URL}/pages/dashboard.html#games" style="${S.btn}">${кнопка('open', язык)}</a>`
+  return wrapLayout(content, заголовок)
 }
 
 /**
@@ -388,16 +502,18 @@ function templateGameInviteAnswered(d: Record<string, any>): string {
 }
 
 function templateChallengeReceived(d: Record<string, any>): string {
+  const язык = языкПисьма(d)
+  const заголовок = т('mail_challenge_subject', язык, { 'имя': esc(d.challenger_name) })
+  const тело = т('mail_challenge_body', язык, {
+    'дата': esc(d.date), 'время': esc(d.time), 'место': d.venue ? esc(d.venue) : '—'
+  })
   const content = `
-<h1 style="${S.h1}">⚔️ Вызов на матч!</h1>
-<p style="${S.p}"><strong style="color:#14161a;">${esc(d.challenger_name)}</strong> предлагает матч:</p>
-<p style="${S.infoRow}">📅 ${esc(d.date)}  ⏰ ${esc(d.time)}</p>
-${d.venue ? `<p style="${S.infoRow}">📍 ${esc(d.venue)}</p>` : ''}
+<h1 style="${S.h1}">${esc(заголовок)}</h1>
+${тело.split('\n\n').map((абзац) => `<p style="${S.infoRow}">${абзац.split('\n').join('<br>')}</p>`).join('')}
 ${d.message ? `<p style="${S.p};font-style:italic;">💬 ${esc(d.message)}</p>` : ''}
 <hr style="${S.divider}">
-<p style="${S.p}">Ответить можно в приложении или в личном кабинете.</p>
-<a href="${SITE_URL}/pages/dashboard.html" style="${S.btn}">Открыть кабинет</a>`
-  return wrapLayout(content, `Вызов от ${d.challenger_name}`)
+<a href="${SITE_URL}/pages/dashboard.html" style="${S.btn}">${кнопка('dashboard', язык)}</a>`
+  return wrapLayout(content, заголовок)
 }
 
 // --- 8. Broadcast ---
@@ -418,13 +534,18 @@ ${d.link ? `<hr style="${S.divider}"><a href="${esc(d.link)}" style="${S.btn}">$
 // он остаётся светлым на светлом, и код пропадает. Чёрное с белым читается
 // при любом раскладе, потому что выворачивается целиком.
 function templateOtpCode(d: Record<string, any>): string {
-  const flowLabel =
-    d.flow === 'forgot_password' ? 'сброса пароля' :
-    d.flow === 'register' ? 'регистрации' :
-    d.flow === 'telegram_register' ? 'регистрации' : 'подтверждения'
+  // Язык письма приходит от той функции, которая его заказала: она знает,
+  // кому пишет. Нет языка — русский
+  const язык: Язык = (d.lang === 'en' || d.lang === 'kg') ? d.lang : 'ru'
+  const flowLabel = d.flow === 'forgot_password'
+    ? т('mail_otp_flow_forgot', язык)
+    : т('mail_otp_flow_register', язык)
+  const заголовок = т('mail_otp_subject', язык)
+  const строкаКода = язык === 'en' ? `Your code for ${esc(flowLabel)}:`
+    : (язык === 'kg' ? `${esc(flowLabel)} үчүн кодуңуз:` : `Ваш код для ${esc(flowLabel)}:`)
   const content = `
-<h1 style="${S.h1}">🔐 Код подтверждения</h1>
-<p style="${S.p}">Ваш код для ${esc(flowLabel)}:</p>
+<h1 style="${S.h1}">🔐 ${esc(заголовок)}</h1>
+<p style="${S.p}">${строкаКода}</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
 <tr><td align="center">
 <div style="display:inline-block;padding:16px 32px;background-color:#f9ffe0;border:2px solid #9fc400;border-radius:12px;">
@@ -432,8 +553,12 @@ function templateOtpCode(d: Record<string, any>): string {
 </div>
 </td></tr>
 </table>
-<p style="${S.muted}">Код действителен <strong style="color:#14161a;">10 минут</strong>.</p>
+<p style="${S.muted}">${язык === 'en' ? 'The code is valid for <strong style="color:#14161a;">10 minutes</strong>.'
+    : (язык === 'kg' ? 'Код <strong style="color:#14161a;">10 мүнөт</strong> жарактуу.'
+    : 'Код действителен <strong style="color:#14161a;">10 минут</strong>.')}</p>
 <hr style="${S.divider}">
-<p style="${S.muted}">Если вы не запрашивали код — просто проигнорируйте это письмо.</p>`
-  return wrapLayout(content, `Ваш код KSLT: ${d.code}`)
+<p style="${S.muted}">${язык === 'en' ? 'If you did not request it, please disregard this email.'
+    : (язык === 'kg' ? 'Эгер сиз код сурабаган болсоңуз, бул катка көңүл бурбаңыз.'
+    : 'Если вы не запрашивали код — не обращайте внимания на это письмо.')}</p>`
+  return wrapLayout(content, `${esc(заголовок)}: ${d.code}`)
 }
