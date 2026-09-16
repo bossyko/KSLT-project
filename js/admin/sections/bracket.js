@@ -1061,13 +1061,78 @@
         return Math.max(2, Math.floor(размер / 4));
     }
 
-    /** Посев ставит менеджер руками только в нерейтинговых турнирах. */
+    /**
+     * Где посев ставит менеджер.
+     *
+     * Колонка «Посев» нужна там, где сеять по рейтингу нечем: в дружеских
+     * турнирах очки не начисляются, а в парных и миксте рейтинга нет вовсе —
+     * он ведётся только в одиночном разряде. Признак рейтингового турнира в
+     * базе — проставленный уровень: у дружеских он пуст.
+     *
+     * Руками — не значит обязательно: сколько сеяных менеджер проставит,
+     * столько и будет, остальных доберёт жеребьёвка.
+     */
     function посевРуками(tournament) {
-        return isFriendlyTournament(tournament);
+        if (!tournament) return false;
+        if (isFriendlyTournament(tournament)) return true;
+        if (!tournament.level_id) return true;
+        return tournament.format !== 'singles';
     }
 
     function isFriendlyTournament(tournament) {
         return !!(tournament && tournament.category_id === 'friendly');
+    }
+
+    /**
+     * Сортирует заявки по силе — сильнейшие первыми. Меняет сам список.
+     *
+     * В паре мерим суммой NTRP: рейтинг ведётся только в одиночном разряде,
+     * и парных очков у пары нет. В одиночном — очками в категории ТУРНИРА:
+     * гость из нижней категории сеется по тому, что набрал здесь, а не по
+     * своим домашним очкам.
+     */
+    async function посилеОтсортировать(список, tournament, playersMap, isDbl) {
+        if (!список || список.length < 2) return список;
+
+        if (isDbl) {
+            список.sort(function(a, b) {
+                var ntrpA = getTeamNtrp(a, playersMap);
+                var ntrpB = getTeamNtrp(b, playersMap);
+                if (ntrpA || ntrpB) {
+                    if ((ntrpB || 0) !== (ntrpA || 0)) return (ntrpB || 0) - (ntrpA || 0);
+                    // Суммы равны — выше та пара, у кого сильнее первый номер:
+                    // 4.5 и 3 играют сильнее, чем 4 и 3.5, хотя сумма одна
+                    var стA = сильнейшийВПаре(a, playersMap);
+                    var стB = сильнейшийВПаре(b, playersMap);
+                    if (стB !== стA) return стB - стA;
+                }
+                return getTeamPoints(b, playersMap) - getTeamPoints(a, playersMap);
+            });
+            return список;
+        }
+
+        var catPoints = {};
+        if (tournament.category_id) {
+            var pcIds = список.map(function(r) { return r.player_id; }).filter(Boolean);
+            if (pcIds.length > 0) {
+                var pcRes = await A.client.from('player_categories')
+                    .select('player_id, points')
+                    .eq('category_id', tournament.category_id)
+                    .in('player_id', pcIds);
+                (pcRes.data || []).forEach(function(r) { catPoints[r.player_id] = r.points || 0; });
+            }
+        }
+        список.sort(function(a, b) {
+            var pA = catPoints[a.player_id] || 0;
+            var pB = catPoints[b.player_id] || 0;
+            if (pB !== pA) return pB - pA;
+            // Очки равны — выше тот, у кого сильнее одиночный NTRP.
+            // То же правило, что в таблице рейтинга
+            var nA = Number((playersMap[a.player_id] || {}).ntrp_singles || 0);
+            var nB = Number((playersMap[b.player_id] || {}).ntrp_singles || 0);
+            return nB - nA;
+        });
+        return список;
     }
 
     // Рейтинг ведётся только в одиночном разряде. Парные и микст турниры
@@ -2892,14 +2957,14 @@
                     L.regGuestWaitHint + '</div></div>';
             }
 
-            // Сколько сеяных уже расставлено. Пока не добрали — жеребьёвка
-            // не запустится, и лучше сказать об этом заранее
+            // Сколько сеяных уже расставлено. Проставлять всех необязательно —
+            // недостающих доберёт жеребьёвка, но менеджеру видно, сколько ещё
+            // в его воле
             if (руками && норма > 0) {
                 var расставлено = mainDraw.filter(function(r) { return r.seed_number; }).length;
                 var хватает = расставлено >= норма;
-                html += '<div class="ad-alert ' + (хватает ? 'ad-alert-info' : 'ad-alert-warning') +
-                    '" style="margin-bottom:12px;">' +
-                    (хватает ? '\u2713 ' : '\u26A0 ') +
+                html += '<div class="ad-alert ad-alert-info" style="margin-bottom:12px;">' +
+                    (хватает ? '\u2713 ' : '\u00B7 ') +
                     L.regSeedCount.replace('{n}', расставлено).replace('{m}', норма) +
                     (хватает ? '' : ' \u00B7 ' + L.regSeedHint) +
                 '</div>';
@@ -5323,73 +5388,33 @@
             return;
         }
 
-        // ---- Ручной посев в нерейтинговых турнирах ----
+        // ---- Порядок посева ----
         //
-        // Здесь рейтинга нет, поэтому сеет человек: он знает, кто на площадке
-        // сильнее. Пока сеяных меньше нормы, жеребить нечего — сеяные должны
-        // разойтись по группам по одному
+        // Где сеет человек, его выбор главнее любого расчёта: он знает, кто
+        // на площадке сильнее. Но проставить сеяных — право, а не обязанность:
+        // сколько поставил, столько и берём, недостающих добираем сами.
+        // Не поставил никого — сеем целиком по силе, как в рейтинговом.
         if (посевРуками(tournament)) {
             var норма = нормаСеяных(tournament);
             var сеяные = approved.filter(function(r) { return r.seed_number; })
                 .sort(function(a, b) { return Number(a.seed_number) - Number(b.seed_number); });
+            var прочие = approved.filter(function(r) { return !r.seed_number; });
 
             if (сеяные.length < норма) {
-                // Отказ окном, а не всплывашкой: жеребьёвку жмут раз в турнир,
-                // и причину надо прочесть, а не поймать взглядом
-                A.showNotice(L.regSeedNotEnoughTitle,
-                    '<p style="margin:0;">' + L.regSeedNotEnough
-                        .replace('{n}', сеяные.length).replace('{m}', норма) + '</p>',
-                    null, 'warn');
-                return;
+                // Добираем сильнейшими из оставшихся — тем же мерилом, каким
+                // сеется рейтинговый турнир
+                await посилеОтсортировать(прочие, tournament, playersMap, isDbl);
+                сеяные = сеяные.concat(прочие.splice(0, норма - сеяные.length));
             }
 
-            var прочие = approved.filter(function(r) { return !r.seed_number; });
+            // Кто не сеян — жеребится: в дружеском турнире мерить их нечем
             for (var пi = прочие.length - 1; пi > 0; пi--) {
                 var пj = Math.floor(Math.random() * (пi + 1));
                 var пt = прочие[пi]; прочие[пi] = прочие[пj]; прочие[пj] = пt;
             }
             approved = сеяные.concat(прочие);
-        } else
-
-        // Sort by points DESC (seeded first); doubles: NTRP sum, fallback to points
-        if (isDbl) {
-            approved.sort(function(a, b) {
-                var ntrpA = getTeamNtrp(a, playersMap);
-                var ntrpB = getTeamNtrp(b, playersMap);
-                if (ntrpA || ntrpB) {
-                    if ((ntrpB || 0) !== (ntrpA || 0)) return (ntrpB || 0) - (ntrpA || 0);
-                    // Суммы равны — выше та пара, у кого сильнее первый номер:
-                    // 4.5 и 3 играют сильнее, чем 4 и 3.5, хотя сумма одна
-                    var стA = сильнейшийВПаре(a, playersMap);
-                    var стB = сильнейшийВПаре(b, playersMap);
-                    if (стB !== стA) return стB - стA;
-                }
-                return getTeamPoints(b, playersMap) - getTeamPoints(a, playersMap);
-            });
         } else {
-            // Посев по очкам в категории ТУРНИРА: гость из нижней категории
-            // сеется по тому, что набрал здесь, а не по своим домашним очкам
-            var catPoints = {};
-            if (tournament.category_id) {
-                var pcIds = approved.map(function(r) { return r.player_id; }).filter(Boolean);
-                if (pcIds.length > 0) {
-                    var pcRes = await A.client.from('player_categories')
-                        .select('player_id, points')
-                        .eq('category_id', tournament.category_id)
-                        .in('player_id', pcIds);
-                    (pcRes.data || []).forEach(function(r) { catPoints[r.player_id] = r.points || 0; });
-                }
-            }
-            approved.sort(function(a, b) {
-                var pA = catPoints[a.player_id] || 0;
-                var pB = catPoints[b.player_id] || 0;
-                if (pB !== pA) return pB - pA;
-                // Очки равны — выше тот, у кого сильнее одиночный NTRP.
-                // То же правило, что в таблице рейтинга
-                var nA = Number((playersMap[a.player_id] || {}).ntrp_singles || 0);
-                var nB = Number((playersMap[b.player_id] || {}).ntrp_singles || 0);
-                return nB - nA;
-            });
+            await посилеОтсортировать(approved, tournament, playersMap, isDbl);
         }
 
         // Dispatch to group draw for round_robin
