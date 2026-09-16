@@ -33,6 +33,21 @@
             var plrResult = await client.from('players_public').select('*').order('points', { ascending: false });
             if (plrResult.error) return null;
 
+            // Бан гостю не показываем: наказание — дело клуба, а не витрина
+            // для прохожих. Вошедшему метка нужна — он видит, кого сейчас
+            // нельзя звать на игру, — поэтому дочитываем её отдельно.
+            // В публичной витрине этой колонки нет вовсе
+            var баны = {};
+            try {
+                var сессия = await client.auth.getSession();
+                if (сессия.data && сессия.data.session) {
+                    var бРес = await client.from('players').select('id, banned_until');
+                    (бРес.data || []).forEach(function(p) {
+                        if (p.banned_until) баны[p.id] = p.banned_until;
+                    });
+                }
+            } catch (e) { /* не вошёл или запрет — метки просто не будет */ }
+
             // Гости в рейтинге и в списке игроков не показываются: они не
             // члены клуба, их карточка нужна только чтобы стоять в сетке.
             var players = (plrResult.data || []).filter(function(p) { return !p.is_guest; });
@@ -119,7 +134,7 @@
                                 online: false,
                                 ntrp_singles: p.ntrp_singles || null,
                                 ntrp_doubles: p.ntrp_doubles || null,
-                                banned_until: p.banned_until || null,
+                                banned_until: баны[p.id] || null,
                                 // Член клуба или фоновая карточка из списков
                                 // NTRP. Фоновые показываем приглушённо: они
                                 // есть в базе клуба, но членство не оплачено.
