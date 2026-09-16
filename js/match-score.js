@@ -106,7 +106,7 @@
         var m = res.data;
 
         var ids = [m.player1_id, m.player2_id].filter(Boolean);
-        var pl = await client.from('players').select('id, name, name_en, photo').in('id', ids);
+        var pl = await client.from('players_public').select('id, name, name_en, photo').in('id', ids);
         var byId = {};
         (pl.data || []).forEach(function (p) { byId[p.id] = p; });
 

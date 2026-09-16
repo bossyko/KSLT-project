@@ -96,7 +96,7 @@
         }
 
         var ids = [m.player1_id, m.player2_id].filter(Boolean);
-        return client.from('players').select('id, name, name_en, photo').in('id', ids)
+        return client.from('players_public').select('id, name, name_en, photo').in('id', ids)
           .then(function (pr) {
             var byId = {};
             (pr.data || []).forEach(function (p) { byId[p.id] = p; });

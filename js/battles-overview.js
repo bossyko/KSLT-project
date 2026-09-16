@@ -319,7 +319,7 @@
             });
 
             // Load players
-            var pRes = await client.from('players').select('id, name, name_en, name_kg, photo, category_id, country').in('id', pIds);
+            var pRes = await client.from('players_public').select('id, name, name_en, name_kg, photo, category_id, country').in('id', pIds);
             (pRes.data || []).forEach(function(p) { _players[p.id] = p; });
 
             // Load votes for all battles

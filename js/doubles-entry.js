@@ -195,7 +195,7 @@
             if (q.length < 2) { список.innerHTML = ''; return; }
 
             таймер = setTimeout(async function () {
-                var res = await client.from('players')
+                var res = await client.from('players_public')
                     .select('id, name, name_en, gender, ntrp_singles, ntrp_doubles')
                     .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
                     .limit(8);

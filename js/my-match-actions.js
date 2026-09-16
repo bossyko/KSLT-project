@@ -82,7 +82,7 @@
                 if (id && ids.indexOf(id) === -1) ids.push(id);
             });
         });
-        var pl = await client.from('players').select('id, name, name_en, photo').in('id', ids);
+        var pl = await client.from('players_public').select('id, name, name_en, photo').in('id', ids);
         var byId = {};
         (pl.data || []).forEach(function (p) { byId[p.id] = p; });
 

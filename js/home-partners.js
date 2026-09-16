@@ -62,7 +62,7 @@
 
             // Рейтинговые поля лежат в карточке игрока: NTRP, победы, форма
             var ids = list.map(function(p) { return p.id; });
-            var stats = await client.from('players')
+            var stats = await client.from('players_public')
                 .select('id, ntrp_singles, wins, losses, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses')
                 .in('id', ids);
 

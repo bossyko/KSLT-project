@@ -409,7 +409,7 @@
             if (result.data && result.data.length > 0) {
                 // Load NTRP ratings from players table
                 var playerIds = result.data.map(function(p) { return p.id; });
-                var ntrpRes = await client.from('players').select('id, ntrp_singles').in('id', playerIds);
+                var ntrpRes = await client.from('players_public').select('id, ntrp_singles').in('id', playerIds);
                 var ntrpMap = {};
                 (ntrpRes.data || []).forEach(function(p) { ntrpMap[p.id] = p.ntrp_singles; });
                 result.data.forEach(function(p) { p.ntrp_singles = ntrpMap[p.id] || null; });

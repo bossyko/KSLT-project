@@ -30,7 +30,7 @@
             if (catResult.error || !catResult.data || catResult.data.length === 0) return null;
 
             // Рейтинг только одиночный: парные и микст очков не дают
-            var plrResult = await client.from('players').select('*').order('points', { ascending: false });
+            var plrResult = await client.from('players_public').select('*').order('points', { ascending: false });
             if (plrResult.error) return null;
 
             // Гости в рейтинге и в списке игроков не показываются: они не
@@ -157,7 +157,7 @@
         var client = window.supabaseClient;
         if (!client) return null;
 
-        var res = await client.from('players').select('id, category_id, is_guest');
+        var res = await client.from('players_public').select('id, category_id, is_guest');
         var pc = await client.from('player_categories').select('player_id, category_id, points, closed_at');
 
         var в = {};

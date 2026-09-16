@@ -499,11 +499,29 @@ nav {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
+/* Между кнопкой и меню десять пикселей пустоты: курсор шёл к пункту, по
+   дороге терял наведение, и меню закрывалось прямо под пальцем — щелчок
+   попадал уже по странице. Мостик закрывает разрыв, а задержка даёт время
+   вернуться, если рука дрогнула */
+.nav-dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -14px;
+    left: 0;
+    right: 0;
+    height: 14px;
+}
+
+.nav-dropdown-menu {
+    transition-delay: 0.18s;
+}
+
 .nav-dropdown:hover .nav-dropdown-menu {
     opacity: 1;
     visibility: visible;
     backdrop-filter: blur(20px);
     transform: translateX(-50%) translateY(0);
+    transition-delay: 0s;
 }
 
 .nav-dropdown-item {

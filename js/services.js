@@ -218,7 +218,7 @@
                     // Рейтинг и пол лежат в карточках игроков, а не в профилях:
                     // тем же вторым запросом их берёт страница «Поиск игрока»
                     var ids = partners.map(function(x) { return x.id; });
-                    var plRes = await client.from('players')
+                    var plRes = await client.from('players_public')
                         .select('id, ntrp_singles, gender')
                         .in('id', ids);
                     var plMap = {};

@@ -408,7 +408,11 @@
 
     async function loadAndEditPlayer(id) {
         if (!A.client) return;
-        var result = await A.client.from('players').select('*').eq('id', id).single();
+        // Поля перечисляем: звёздочка просит и закрытые колонки — почту с
+        // телефоном, которые всё равно живут в profiles и берутся оттуда ниже
+        var result = await A.client.from('players')
+            .select('id, name, name_en, name_kg, photo, country, category_id, points, wins, losses, rank_change, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses, ntrp_singles, ntrp_doubles, gender, bio, bio_en, bio_kg, is_online, is_member, is_guest, has_account, view_count, view_count_app, created_at, updated_at, banned_until, ban_reason')
+            .eq('id', id).single();
         if (result.data) {
             // Look up linked profile (gender, socials)
             var profRes = await A.client.from('profiles').select('gender, telegram, instagram, phone, email').eq('player_id', id).maybeSingle();
@@ -1371,7 +1375,9 @@
             A.showToast(L.saved, 'success');
             if (plrEditingId) {
                 // Stay on edit form — re-load fresh data
-                var fresh = await A.client.from('players').select('*').eq('id', plrEditingId).single();
+                var fresh = await A.client.from('players')
+                    .select('id, name, name_en, name_kg, photo, country, category_id, points, wins, losses, rank_change, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses, ntrp_singles, ntrp_doubles, gender, bio, bio_en, bio_kg, is_online, is_member, is_guest, has_account, view_count, view_count_app, created_at, updated_at, banned_until, ban_reason')
+                    .eq('id', plrEditingId).single();
                 if (fresh.data) {
                     var profRes = await A.client.from('profiles').select('gender, telegram, instagram, phone, email').eq('player_id', plrEditingId).maybeSingle();
                     if (profRes.data) {

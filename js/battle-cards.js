@@ -140,7 +140,7 @@
                     });
                 });
 
-                return client.from('players').select('id, name, name_en, name_kg, photo, country').in('id', pIds).then(function(pRes) {
+                return client.from('players_public').select('id, name, name_en, name_kg, photo, country').in('id', pIds).then(function(pRes) {
                     var pMap = {};
                     (pRes.data || []).forEach(function(p) { pMap[p.id] = p; });
 

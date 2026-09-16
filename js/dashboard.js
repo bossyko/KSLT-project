@@ -1761,13 +1761,14 @@
         var btn = document.getElementById('profileSaveBtn');
         if (btn && !btn.disabled) return 'profile';
 
-        // Набранный пароль не хранится нигде: уйдёшь — набирать заново
-        var набран = ['settingsCurrentPw', 'settingsNewPw', 'settingsConfirmPw']
-            .some(function(id) {
-                var поле = document.getElementById(id);
-                return !!(поле && поле.value);
-            });
-        if (набран) return 'password';
+        // Набранный пароль не хранится нигде: уйдёшь — набирать заново.
+        //
+        // Смотрим только на новый пароль и подтверждение. «Текущий» браузер
+        // подставляет сам, из своей памяти, — человек его не набирал, а окно
+        // выскакивало при каждом переключении вкладки и не давало работать.
+        var новый = document.getElementById('settingsNewPw');
+        var повтор = document.getElementById('settingsConfirmPw');
+        if ((новый && новый.value) || (повтор && повтор.value)) return 'password';
 
         return '';
     }
@@ -2077,7 +2078,7 @@
                             '<label class="db-field-label">' + L.instagram + '</label>' +
                             showToggle('profileShowInstagram', profile.show_instagram) +
                         '</div>' +
-                        '<input class="db-field-input" type="text" id="profileInstagram" value="' + escHtml(profile.instagram || '') + '" placeholder="@username">' +
+                        '<input class="db-field-input" type="text" id="profileInstagram" value="' + escHtml(profile.instagram || '') + '" placeholder="@username" autocomplete="off" data-lpignore="true">' +
                     '</div>' +
                     '<div class="db-field">' +
                         '<div class="db-contact-head">' +
@@ -4527,12 +4528,12 @@
 
         // Validate Instagram handle
         if (instagram && !/^@?[a-zA-Z0-9._]{1,30}$/.test(instagram)) {
-            showMessage('profileMessage', isKg ? 'Instagram: @username (тамгалар, сандар, чекит, _)' : isEn ? 'Instagram: @username (letters, digits, dot, _)' : 'Instagram: @username (буквы, цифры, точка, _)', true);
+            ошибкаПоля('profileInstagram', isKg ? 'Instagram: @username (тамгалар, сандар, чекит, _)' : isEn ? 'Instagram: @username (letters, digits, dot, _)' : 'Instagram: @username (буквы, цифры, точка, _)');
             return;
         }
         // Validate Telegram handle
         if (telegram && !/^@?[a-zA-Z0-9_]{5,32}$/.test(telegram)) {
-            showMessage('profileMessage', isKg ? 'Telegram: @username (5-32 белги, тамгалар, сандар, _)' : isEn ? 'Telegram: @username (5-32 chars, letters, digits, _)' : 'Telegram: @username (5-32 символа, буквы, цифры, _)', true);
+            ошибкаПоля('profileTelegram', isKg ? 'Telegram: @username (5-32 белги, тамгалар, сандар, _)' : isEn ? 'Telegram: @username (5-32 chars, letters, digits, _)' : 'Telegram: @username (5-32 символа, буквы, цифры, _)');
             return;
         }
 
@@ -5049,7 +5050,11 @@
 
         if (!client) return;
 
-        var result = await client.from('players').select('*').eq('id', profile.player_id).single();
+        // Поля перечисляем: звёздочка просит и закрытые колонки — почту,
+        // телефон, отметку об удалении, — а их база больше никому не отдаёт
+        var result = await client.from('players')
+            .select('id, name, name_en, name_kg, photo, country, category_id, points, wins, losses, rank_change, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses, ntrp_singles, ntrp_doubles, gender, bio, bio_en, bio_kg, is_online, is_member, is_guest, has_account, view_count, view_count_app, created_at, updated_at, banned_until, ban_reason')
+            .eq('id', profile.player_id).single();
 
         if (!result.data) {
             container.innerHTML = '<h2 class="db-section-title">' + L.statsTitle + '</h2><div class="db-card"><div class="db-empty"><div class="db-empty-icon">📊</div><div class="db-empty-title">' + L.noStats + '</div></div></div>';
@@ -6476,7 +6481,7 @@
                 '<div class="db-field">' +
                     '<label class="db-field-label">' + L.currentPassword + '</label>' +
                     '<div class="db-pw-field">' +
-                        '<input class="db-field-input" type="password" id="settingsCurrentPw" placeholder="' + L.phCurrentPassword + '" autocomplete="current-password">' +
+                        '<input class="db-field-input" type="password" id="settingsCurrentPw" placeholder="' + L.phCurrentPassword + '" autocomplete="off" data-lpignore="true">' +
                         '<button type="button" class="db-pw-eye" data-target="settingsCurrentPw">' + eyeSvgOpen + '</button>' +
                     '</div>' +
                 '</div>' +
@@ -6737,6 +6742,26 @@
     }
 
     // ---- Helpers ----
+    /**
+     * Ошибка в поле: подсвечиваем само поле и подводим к нему взгляд.
+     *
+     * Всплывашка уезжала к шапке сайта, и человек видел «Instagram: @username»
+     * не понимая, где это поле и что с ним не так. Особенно когда значение
+     * подставил браузер, а не он сам.
+     */
+    function ошибкаПоля(id, текст) {
+        var поле = document.getElementById(id);
+        showMessage(null, текст, true);
+        if (!поле) return;
+        поле.classList.add('db-field-bad');
+        поле.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        поле.focus();
+        поле.addEventListener('input', function снять() {
+            поле.classList.remove('db-field-bad');
+            поле.removeEventListener('input', снять);
+        });
+    }
+
     function showMessage(containerId, text, isError) {
         // Remove any existing toast
         var prev = document.querySelector('.db-toast');

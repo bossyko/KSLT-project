@@ -1132,7 +1132,7 @@ function loadFromSupabase(client, id) {
                 playerIds = playerIds.filter(function(v, i) { return playerIds.indexOf(v) === i; });
 
                 if (playerIds.length > 0) {
-                    var playersPromise = client.from('players').select('id, name, name_en, photo, points, country, category_id, wins, losses, form, ntrp_singles, ntrp_doubles').in('id', playerIds);
+                    var playersPromise = client.from('players_public').select('id, name, name_en, photo, points, country, category_id, wins, losses, form, ntrp_singles, ntrp_doubles').in('id', playerIds);
                     var h2hPromise = client.from('matches')
                         .select('player1_id, player2_id, winner_id')
                         .not('winner_id', 'is', null)
@@ -2727,6 +2727,9 @@ function renderRegistrationButton(tournament, registrations, isEn) {
             });
 
             // Check category match + ban status + NTRP
+            // Своя карточка вошедшего: бан и категория нужны, чтобы объяснить
+            // отказ до нажатия. Гостю это чтение не выполняется — он сюда не
+            // доходит, — поэтому берём саму таблицу, не публичную вьюху
             client.from('players').select('category_id, banned_until, ban_reason, ntrp_singles, ntrp_doubles').eq('id', playerId).single().then(async function(plRes) {
                 if (!plRes.data) return;
 

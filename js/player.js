@@ -975,7 +975,7 @@
         if (_playerCache[id]) return _playerCache[id];
         // Async load into cache for next render
         if (client) {
-            client.from('players').select('id, name, name_en, name_kg, photo').eq('id', id).single()
+            client.from('players_public').select('id, name, name_en, name_kg, photo').eq('id', id).single()
                 .then(function(res) {
                     if (res.data) {
                         var n = isEn ? (res.data.name_en || res.data.name) : (isKg ? (res.data.name_kg || res.data.name) : res.data.name);
@@ -1020,7 +1020,7 @@
                     if (o && !_playerCache[o] && чужие.indexOf(o) === -1) чужие.push(o);
                 });
                 if (чужие.length) {
-                    var сп = await client.from('players')
+                    var сп = await client.from('players_public')
                         .select('id, name, name_en, name_kg, photo').in('id', чужие);
                     (сп.data || []).forEach(function(p) {
                         var имя = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
@@ -1754,7 +1754,7 @@
         // Supabase first — always prefer live data
         if (client) {
             try {
-                var plrRes = await client.from('players').select('*').eq('id', playerId).single();
+                var plrRes = await client.from('players_public').select('*').eq('id', playerId).single();
                 // Карточка есть только у членов клуба. Гость заведён в базе,
                 // чтобы стоять в турнирной сетке, но страницы у него нет
                 if (plrRes.data && plrRes.data.is_guest) { renderNotFound(); return; }
