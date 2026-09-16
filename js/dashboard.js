@@ -97,6 +97,15 @@
         linkDone: 'Карта байланды',
         linkRejected: 'Өтүнүч четке кагылды. Башка карта тандаңыз же менеджерге кайрылыңыз',
         changePassword: 'Сыр сөздү өзгөртүү',
+        devicesTitle: 'Түзмөктөр жана кирүү',
+        devicesThis: 'ушул түзмөк',
+        devicesNever: 'кирүү белгиленген жок',
+        devicesEmpty: 'Түзмөктөр азырынча жок',
+        devicesLogoutAll: 'Бардык түзмөктөрдөн чыгуу',
+        devicesAskTitle: 'Бардык түзмөктөрдөн чыгуу?',
+        devicesAskText: 'Компьютерде, планшетте, телефондо жана ушул түзмөктө кайрадан кирүүгө туура келет.',
+        devicesApp: 'КСЛТ колдонмосу',
+        devicesShowAll: 'Баарын көрсөтүү',
         currentPassword: 'Учурдагы сыр сөз',
         phCurrentPassword: 'Учурдагы сыр сөзүңүз',
         phNewPassword: 'Кеминде 8 белги',
@@ -382,6 +391,15 @@
         linkDone: 'Card linked',
         linkRejected: 'The request was rejected. Pick another card or contact a club manager',
         changePassword: 'Change Password',
+        devicesTitle: 'Devices and sign-in',
+        devicesThis: 'this device',
+        devicesNever: 'no sign-in recorded',
+        devicesEmpty: 'No devices yet',
+        devicesLogoutAll: 'Sign out on all devices',
+        devicesAskTitle: 'Sign out everywhere?',
+        devicesAskText: 'You will have to sign in again on your computer, tablet, phone and on this device.',
+        devicesApp: 'KSLT app',
+        devicesShowAll: 'Show all',
         currentPassword: 'Current Password',
         phCurrentPassword: 'Your current password',
         phNewPassword: 'At least 8 characters',
@@ -667,6 +685,15 @@
         linkDone: 'Карточка привязана',
         linkRejected: 'Заявку отклонили. Выберите карточку заново или напишите менеджеру клуба',
         changePassword: 'Смена пароля',
+        devicesTitle: 'Устройства и вход',
+        devicesThis: 'это устройство',
+        devicesNever: 'вход не отмечен',
+        devicesEmpty: 'Устройств пока нет',
+        devicesLogoutAll: 'Выйти на всех устройствах',
+        devicesAskTitle: 'Выйти на всех устройствах?',
+        devicesAskText: 'Придётся входить заново на компьютере, планшете, телефоне и на этом устройстве.',
+        devicesApp: 'Приложение КСЛТ',
+        devicesShowAll: 'Показать все',
         currentPassword: 'Текущий пароль',
         phCurrentPassword: 'Ваш текущий пароль',
         phNewPassword: 'Минимум 8 символов',
@@ -6104,6 +6131,183 @@
         renderPayTable();
     }
 
+
+    /**
+     * Устройства, с которых заходили в учётную запись.
+     *
+     * Данные собирались давно — при каждом входе пишется отпечаток браузера
+     * и время, — но человеку их нигде не показывали. А это первое, что нужно,
+     * когда телефон потеряли: увидеть чужой вход и выйти везде разом.
+     *
+     * Выйти выборочно нельзя: Supabase отзывает либо текущую сессию, либо
+     * все. Кнопка «убрать устройство» удалила бы строку из списка, а сессия
+     * на том планшете продолжила бы жить — обманывать так не станем.
+     */
+    var ПОКАЗЫВАЕМ = 5;
+
+    async function рисоватьУстройства() {
+        var место = document.getElementById('dbDevicesCard');
+        if (!место || !client) return;
+
+        var сессия = await client.auth.getUser();
+        if (!сессия.data || !сессия.data.user) return;
+
+        var res = await client.from('user_devices')
+            .select('device_hash, user_agent, last_seen')
+            .eq('profile_id', сессия.data.user.id)
+            .order('last_seen', { ascending: false });
+
+        var устройства = res.data || [];
+        var мой = отпечатокУстройства();
+
+        var html = '<div class="db-card-title">' + L.devicesTitle + '</div>';
+
+        if (!устройства.length) {
+            html += '<div class="db-devices-empty">' + L.devicesEmpty + '</div>';
+        } else {
+            html += '<div class="db-devices">';
+            устройства.forEach(function(у, i) {
+                var это = у.device_hash === мой;
+                var классы = 'db-device';
+                if (это) классы += ' is-current';
+                // Сеанс живёт 8 часов бездействия (js/session-monitor.js). Значит
+                // устройство, откуда заходили раньше, точно уже не в сеансе —
+                // приглушаем, чтобы взгляд цеплялся за живое
+                else if (!сеансЖив(у.last_seen)) классы += ' is-idle';
+                if (i >= ПОКАЗЫВАЕМ) классы += ' is-more';
+                html += '<div class="' + классы + '">' +
+                    '<span class="db-device-icon">' + значокУстройства(у.user_agent) + '</span>' +
+                    '<span class="db-device-name">' + escHtml(названиеУстройства(у.user_agent)) +
+                        (это ? ' <span class="db-device-current">· ' + L.devicesThis + '</span>' : '') +
+                    '</span>' +
+                    '<span class="db-device-time">' + когдаЗаходили(у.last_seen) + '</span>' +
+                '</div>';
+            });
+            html += '</div>';
+
+            // Список растёт сам собой: в отпечаток входит версия браузера, и
+            // после обновления Chrome появляется ещё одна строка. Показываем
+            // пять последних, остальные — по кнопке
+            if (устройства.length > ПОКАЗЫВАЕМ) {
+                html += '<button class="db-btn db-btn-outline db-btn-sm db-devices-more" id="dbDevicesMore">' +
+                    L.devicesShowAll + ' (' + устройства.length + ')</button>';
+            }
+        }
+
+        html += '<button class="db-btn db-btn-outline db-devices-logout" id="dbLogoutEverywhere">' +
+            L.devicesLogoutAll + '</button>';
+
+        место.innerHTML = html;
+
+        var ещё = document.getElementById('dbDevicesMore');
+        if (ещё) {
+            ещё.addEventListener('click', function() {
+                место.querySelectorAll('.db-device.is-more').forEach(function(с) {
+                    с.classList.remove('is-more');
+                });
+                ещё.remove();
+            });
+        }
+
+        var кнопка = document.getElementById('dbLogoutEverywhere');
+        if (кнопка) {
+            кнопка.addEventListener('click', function() {
+                dbModal({
+                    title: L.devicesAskTitle,
+                    body: '<p class="db-modal-text">' + L.devicesAskText + '</p>',
+                    actions: [
+                        {
+                            label: L.devicesLogoutAll,
+                            primary: true,
+                            onClick: async function(закрыть) {
+                                закрыть();
+                                // scope: 'global' отзывает все сессии человека —
+                                // и на других устройствах, и здесь
+                                await client.auth.signOut({ scope: 'global' }).catch(function() {});
+                                ['kslt_name', 'kslt_avatar', 'kslt_role', 'kslt_session_start', 'kslt_lang_saved']
+                                    .forEach(function(к) { localStorage.removeItem(к); });
+                                window.location.href = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+                            }
+                        },
+                        { label: L.cancel || 'Отмена', onClick: function(закрыть) { закрыть(); } }
+                    ]
+                });
+            });
+        }
+    }
+
+    /**
+     * Отпечаток этого браузера. Считаем в точности как при входе
+     * (js/auth.js, simpleHash): иначе «это устройство» не совпало бы
+     * ни с одной строкой в списке, и человек решил бы, что зашёл чужой.
+     */
+    function отпечатокУстройства() {
+        var строка = navigator.userAgent + '|' + screen.width + 'x' + screen.height;
+        var hash = 0;
+        for (var i = 0; i < строка.length; i++) {
+            hash = ((hash << 5) - hash) + строка.charCodeAt(i);
+            hash |= 0;
+        }
+        return hash.toString(36);
+    }
+
+    /** Человеческое название вместо строки браузера в 200 знаков. */
+    function названиеУстройства(агент) {
+        агент = агент || '';
+        if (/KSLT|Capacitor|wv\)/i.test(агент)) return L.devicesApp;
+
+        var браузер = /Edg\//.test(агент) ? 'Edge'
+            : /OPR\/|Opera/.test(агент) ? 'Opera'
+            : /Firefox/.test(агент) ? 'Firefox'
+            : /Chrome/.test(агент) ? 'Chrome'
+            : /Safari/.test(агент) ? 'Safari' : '';
+
+        var система = /iPhone/.test(агент) ? 'iPhone'
+            : /iPad/.test(агент) ? 'iPad'
+            : /Android/.test(агент) ? 'Android'
+            : /Mac OS X|Macintosh/.test(агент) ? 'Mac'
+            : /Windows/.test(агент) ? 'Windows'
+            : /Linux/.test(агент) ? 'Linux' : '';
+
+        if (браузер && система) return браузер + ' \u00b7 ' + система;
+        return браузер || система || '—';
+    }
+
+    /**
+     * Мог ли сеанс на этом устройстве быть ещё живым.
+     *
+     * Времени выхода мы нигде не храним: чаще всего человек просто закрывает
+     * вкладку, и сказать о том некому. Зато известно правило — восемь часов
+     * бездействия, и человека выкидывает. Значит вход старше восьми часов
+     * означает завершённый сеанс наверняка.
+     */
+    function сеансЖив(когда) {
+        if (!когда) return false;
+        return (Date.now() - new Date(когда).getTime()) < 8 * 60 * 60 * 1000;
+    }
+
+    function значокУстройства(агент) {
+        агент = агент || '';
+        if (/iPhone|Android|Mobile|KSLT|Capacitor/i.test(агент)) return '\uD83D\uDCF1';
+        if (/iPad|Tablet/i.test(агент)) return '\uD83D\uDCDF';
+        return '\uD83D\uDCBB';
+    }
+
+    /** «сегодня, 14:20», «вчера», «12 сентября». */
+    function когдаЗаходили(когда) {
+        if (!когда) return L.devicesNever;
+        var д = new Date(когда);
+        var сейчас = new Date();
+        var язык = isEn ? 'en-US' : (isKg ? 'ky-KG' : 'ru-RU');
+        var время = д.toLocaleTimeString(язык, { hour: '2-digit', minute: '2-digit' });
+
+        var сутки = 24 * 60 * 60 * 1000;
+        var началоСегодня = new Date(сейчас.getFullYear(), сейчас.getMonth(), сейчас.getDate()).getTime();
+        if (д.getTime() >= началоСегодня) return (isEn ? 'today, ' : (isKg ? 'бүгүн, ' : 'сегодня, ')) + время;
+        if (д.getTime() >= началоСегодня - сутки) return isEn ? 'yesterday' : (isKg ? 'кечээ' : 'вчера');
+        return д.toLocaleDateString(язык, { day: 'numeric', month: 'long' });
+    }
+
     // ---- Render Settings ----
     function renderSettings(user) {
         var container = document.getElementById('db-settings');
@@ -6152,6 +6356,8 @@
             // переключатель в настройках только заставляет гадать, чем они
             // отличаются
 
+            '<div class="db-card db-settings-section" id="dbDevicesCard"></div>' +
+
             buildNotifySection() +
 
             '<div class="db-card db-danger-zone">' +
@@ -6159,6 +6365,8 @@
                 '<p class="db-danger-text">' + L.deleteConfirm + '</p>' +
                 '<button class="db-btn db-btn-danger" id="settingsDeleteBtn">' + L.deleteAccount + '</button>' +
             '</div>';
+
+        рисоватьУстройства();
 
         // Password rules validation
         var pwRules = {

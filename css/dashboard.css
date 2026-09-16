@@ -4939,3 +4939,124 @@ select:-webkit-autofill {
         font-size: 0.72rem;
     }
 }
+
+/* ============================================
+   УСТРОЙСТВА И ВХОД
+   ============================================ */
+
+/* Отпечатки устройств собирались давно, но человеку не показывались.
+   А это первое, что нужно, когда телефон потеряли */
+
+.db-devices {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 14px;
+}
+
+.db-device {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 2px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.db-device:last-child {
+    border-bottom: none;
+}
+
+.db-device-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.db-device-name {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+/* Отметка «это устройство»: без неё человек пугается, что кнопка выхода
+   оборвёт сессию где-то ещё, но не здесь */
+.db-device-current {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.db-device-time {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* Вход был больше восьми часов назад — сеанс там точно оборвался.
+   Приглушаем, чтобы живое было видно сразу */
+.db-device.is-idle .db-device-name,
+.db-device.is-idle .db-device-icon {
+    color: var(--text-muted);
+    opacity: 0.65;
+}
+
+/* Шестое и дальше — до нажатия «Показать все» */
+.db-device.is-more {
+    display: none;
+}
+
+.db-devices-more {
+    margin-bottom: 14px;
+}
+
+/* Раскрытие списка — мелкая ступень, а не действие в полную ширину.
+   Через идентификатор: в блоке настроек кнопки размером правит
+   #db-settings .db-btn, и обычный класс его не перебивает */
+#db-settings .db-devices-more {
+    min-height: 32px;
+    padding: 7px 14px;
+    font-size: 0.75rem;
+}
+
+.db-devices-empty {
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.db-devices-logout {
+    width: 100%;
+}
+
+/* ============================================
+   ОКНО ПОДТВЕРЖДЕНИЯ НА ТЕЛЕФОНЕ
+   ============================================ */
+
+/* Заголовок 1.3rem ломался на две строки, а кнопки жались к правому краю
+   узкими плашками. На телефоне подтверждение читают и нажимают быстро:
+   заголовок в строку, кнопки во всю ширину, главная сверху */
+
+@media (max-width: 992px) {
+    .db-modal {
+        padding: 18px 16px;
+    }
+
+    .db-modal-title {
+        font-size: 1.05rem;
+    }
+
+    .db-modal-text {
+        font-size: 0.82rem;
+    }
+
+    .db-modal-actions {
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 14px;
+    }
+
+    .db-modal-actions .db-btn {
+        width: 100%;
+        min-height: 40px;
+        padding: 11px 16px;
+        font-size: 0.82rem;
+    }
+}
