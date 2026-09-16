@@ -688,9 +688,9 @@
         padding: 2px 6px;
     }
 
+    /* Размер кнопки теперь общий — вторая ступень в style.css. Здесь
+       остаётся только разрядка: на узкой карточке она растягивала слово */
     .pt-invite-btn, #players .pt-invite-btn {
-        padding: 9px 8px;
-        font-size: 0.72rem;
         letter-spacing: 0;
     }
 }

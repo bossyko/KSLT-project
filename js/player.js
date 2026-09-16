@@ -58,6 +58,7 @@
         online: 'Онлайн',
         message: 'Написать',
         challenge: 'Вызвать на матч',
+        invite: 'Пригласить поиграть',
         statsPoints: 'Рейтинг',
         statsWins: 'Победы',
         statsLosses: 'Поражения',
@@ -754,6 +755,12 @@
             // ней растворяется. Тем же знаком помечены баттлы в кабинете
             hero += '<button class="pp-action-btn pp-action-primary" id="ppChallengeBtn">' +
                 '<span class="pp-action-icon">\uD83D\uDD25</span> ' + L.challenge + '</button>';
+
+            // Позвать поиграть — то же приглашение, что в поиске игрока.
+            // Со страницы игрока его было не отправить: человек находил
+            // соперника, открывал карточку и упирался в тупик
+            hero += '<button class="pp-action-btn pp-action-secondary" id="ppInviteBtn">' +
+                '<span class="pp-action-icon">\uD83C\uDFBE</span> ' + (L.invite || 'Пригласить поиграть') + '</button>';
         }
         if (isBackground) {
             var bgNote = isEn ? 'This player is in the club database but has not joined yet'
@@ -917,6 +924,15 @@
         if (chalBtn) {
             chalBtn.addEventListener('click', function() {
                 handleChallengeClick(data.player);
+            });
+        }
+
+        // Приглашение поиграть — общий механизм из invite-player.js: он же
+        // проверяет уровень доступа и показывает окно гостю
+        var invBtn = document.getElementById('ppInviteBtn');
+        if (invBtn) {
+            invBtn.addEventListener('click', function() {
+                if (window.KSLT_INVITE) window.KSLT_INVITE.click(data.player.id);
             });
         }
 
@@ -1599,8 +1615,11 @@
             '<span class="pp-badges-progress-text">' + progressLabel + '</span>' +
             '</div>';
 
-        // Visible logic: all earned always visible, locked limited to 4 initially
-        var LOCKED_VISIBLE = 4;
+        // Пока достижений нет, показываем четыре ближайших: человеку видно,
+        // за что их дают. Как только появилось хоть одно — страница
+        // показывает заслуги, а не список того, чего ещё нет. Остальные
+        // прячутся под кнопку «Показать все».
+        var LOCKED_VISIBLE = earned.length > 0 ? 0 : 4;
 
         // All earned badges (always visible)
         earned.forEach(function(item) {
@@ -1777,10 +1796,11 @@
                             // Friendly в рейтинге не участвует: турниры и матчи
                             // записываются, очков за них нет
                             if (row.category_id === 'friendly') continue;
-                            var rankRes = await client.from('player_categories')
-                                .select('player_id', { count: 'exact', head: true })
-                                .eq('category_id', row.category_id)
-                                .gt('points', row.points || 0);
+                            // Место считаем так же, как рейтинг: среди игроков
+                            // того же пола. Категория в базе общая на оба
+                            var место = window.KSLT_RULES && KSLT_RULES.местоВКатегории
+                                ? await KSLT_RULES.местоВКатегории(client, row.category_id, row.points, p.gender)
+                                : null;
                             var c2 = catById[row.category_id];
                             myCats.push({
                                 id: row.category_id,
@@ -1789,10 +1809,10 @@
                                 wins: row.wins || 0,
                                 losses: row.losses || 0,
                                 closed: !!row.closed_at,
-                                rank: (rankRes.count || 0) + 1,
+                                rank: место,
                                 isHome: row.category_id === p.category_id
                             });
-                            if (row.category_id === p.category_id) rank = (rankRes.count || 0) + 1;
+                            if (row.category_id === p.category_id) rank = место;
                         }
                     }
                     // Домашняя категория видна и без очков: игрок в ней уже
@@ -1832,6 +1852,14 @@
                             badges: [],
                             online: false,
                             ntrp_singles: p.ntrp_singles || null,
+                            // Парный NTRP забыли перенести, и шапка печатала
+                            // «4 одиночка» даже там, где в базе стоит и пара
+                            ntrp_doubles: p.ntrp_doubles || null,
+                            // За кем стоит живой человек: от этого зависят
+                            // кнопки «Вызвать» и «Пригласить». Поле не
+                            // переносилось, has_account всегда выходил
+                            // пустым — и кнопок не было ни у кого
+                            has_account: p.has_account === true,
                             doubles_wins: p.doubles_wins || 0,
                             doubles_losses: p.doubles_losses || 0,
                             mixed_wins: p.mixed_wins || 0,

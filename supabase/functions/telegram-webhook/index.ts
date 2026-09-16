@@ -87,7 +87,7 @@
               // Validate UUID format
               const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
               if (!uuidRegex.test(profileId)) {
-                await sendMessage(chatId, 'Invalid link. Please use the button from your KSLT dashboard.')
+                await sendMessage(chatId, 'Ссылка не подходит. Нажмите «Подключить Telegram» в личном кабинете КСЛТ.')
                 return new Response('ok', { status: 200 })
               }
     
@@ -125,14 +125,17 @@
     
               if (error) {
                 console.error('DB error:', error)
-                await sendMessage(chatId, 'Error connecting account. Please try again later.')
+                await sendMessage(chatId, 'Не получилось подключить аккаунт. Попробуйте ещё раз чуть позже.')
                 return new Response('ok', { status: 200 })
               }
     
               const firstName = message.from?.first_name || ''
               await sendMessage(
                 chatId,
-                `${firstName ? firstName + ', ' : ''}your Telegram is now connected to KSLT! ✅\n\nYou will receive membership expiry reminders here.`
+                // Бот говорит по-русски, как и всё остальное в нём. Эти три
+                // сообщения остались на английском с первых дней, и человек,
+                // подключивший Telegram из кабинета, получал ответ на чужом языке
+                `${firstName ? firstName + ', ' : ''}ваш Telegram подключён к КСЛТ ✅\n\nСюда будут приходить приглашения на игру, вызовы и напоминания о членстве.`
               )
     
               return new Response('ok', { status: 200 })

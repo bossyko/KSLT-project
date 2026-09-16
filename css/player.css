@@ -1998,3 +1998,206 @@ a.pp-tournament:hover {
     line-height: 1.4;
     max-width: 340px;
 }
+
+/* ============================================
+   СТРАНИЦА ИГРОКА НА ТЕЛЕФОНЕ
+   ============================================ */
+
+/* Карточка турнира растягивалась до 659 пикселей при контейнере в 358:
+   у flex-элемента min-width по умолчанию auto, и название не давало
+   строке сжаться. Лишнее пряталось за краем, а само название обрезалось
+   многоточием — «МАЙСКИЙ ЧЕМПИОНАТ КСЛТ — ИТО…».
+
+   Разрешаем сжиматься и показываем название двумя строками целиком. */
+
+@media (max-width: 768px) {
+    .pp-tournament {
+        min-width: 0;
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    .pp-tournament-info {
+        min-width: 0;
+    }
+
+    .pp-tournament-name {
+        font-size: 0.85rem;
+        line-height: 1.25;
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .pp-tournament-date {
+        font-size: 0.72rem;
+    }
+
+    .pp-tournament-photo {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+    }
+
+    /* Карточка матча была 199 пикселей при полях 16×20 — вдвое выше такой
+       же записи в кабинете. Размеры по общей шкале, а дата и турнир
+       встают в одну строку: каждый занимал свою и растил карточку */
+    .pp-match {
+        padding: 10px 12px;
+        gap: 4px 8px;
+        /* Три колонки: счёт слева, полоса результата посередине, H2H
+           справа. Раньше кнопка занимала отдельную строку и растила
+           карточку на два десятка пикселей */
+        grid-template-columns: auto 1fr auto;
+    }
+
+    .pp-match.pp-match-clickable {
+        grid-template-columns: auto 1fr auto;
+    }
+
+    .pp-match-date {
+        grid-column: 1;
+        font-size: 0.72rem;
+    }
+
+    .pp-match-tournament {
+        grid-column: 2 / -1;
+        justify-self: end;
+        text-align: right;
+        font-size: 0.72rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .pp-match-opponent {
+        grid-column: 1 / -1;
+    }
+
+    .pp-match-score {
+        grid-column: 1;
+    }
+
+    .pp-match-result {
+        grid-column: 2;
+    }
+
+    .pp-match-h2h {
+        grid-column: 3;
+        justify-self: end;
+        align-self: center;
+    }
+
+    .pp-match-opponent-name {
+        font-size: 0.85rem;
+    }
+
+    .pp-match-score {
+        font-size: 0.85rem;
+    }
+
+    .pp-section-title {
+        font-size: 1.3rem;
+    }
+}
+
+/* ============================================
+   ШАПКА ИГРОКА: ЗНАЧЕНИЯ В ОДНУ КОЛОНКУ
+   ============================================ */
+
+/* «MASTERS 660 · #5» и «NTRP 4 одиночка» шли каждая своей строкой по
+   центру, и значения начинались на разной вертикали — 660 правее, чем
+   «4 одиночка». Собираем в сетку из двух колонок: слева метки, справа
+   значения, и цифры встают друг под другом. */
+
+.pp-ratings {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: center;
+    align-items: baseline;
+    gap: 4px 10px;
+}
+
+/* Строка растворяется в сетке, её метка и значение становятся ячейками */
+.pp-rating-row {
+    display: contents;
+}
+
+.pp-rating-label {
+    justify-self: end;
+    text-align: right;
+}
+
+.pp-rating-value {
+    justify-self: start;
+}
+
+/* Ссылка «назад» стояла в 40 пикселях от края и висела сама по себе.
+   Прижимаем к общему краю страницы — к той же вертикали, где начинаются
+   заголовки разделов ниже.
+
+   И делаем липкой под шапкой, как полоса фильтров на разделах: вернуться
+   к рейтингу можно с любого места страницы, а не только с самого верха.
+   Подложка непрозрачная — под ссылкой едет содержимое */
+@media (max-width: 768px) {
+    .kslt-back-wrap.pp-back-float {
+        position: sticky;
+        top: 64px;
+        z-index: 40;
+        padding: 10px 16px;
+        background: var(--bg-primary);
+        border-bottom: 1px solid var(--border-subtle);
+    }
+}
+
+/* ============================================
+   КАРТОЧКА ДОСТИЖЕНИЯ НА ТЕЛЕФОНЕ
+   ============================================ */
+
+/* Была 78 пикселей при полях 16×18 и значке в 24 — вдвое крупнее записи
+   матча рядом. Приводим к общей шкале: имя 0.85rem, подпись 0.72rem */
+
+@media (max-width: 768px) {
+    .pp-achievement {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+
+    .pp-achievement-icon {
+        font-size: 20px;
+    }
+
+    .pp-achievement-name {
+        font-size: 0.85rem;
+    }
+
+    .pp-achievement-desc {
+        font-size: 0.72rem;
+    }
+
+    .pp-badges-expand {
+        padding: 8px 12px;
+        font-size: 0.78rem;
+    }
+}
+
+/* ============================================
+   ВОЗДУХ ВНИЗУ СТРАНИЦЫ
+   ============================================ */
+
+/* Между последним блоком и спонсорами набегало 108 пикселей: 48 от
+   отступа секции и ещё 60 снизу у контейнера. На широком экране это
+   дыхание, на телефоне — пустой экран */
+
+@media (max-width: 768px) {
+    .pp-section {
+        margin-bottom: 24px;
+    }
+
+    .pp-container {
+        padding-bottom: 24px;
+    }
+}

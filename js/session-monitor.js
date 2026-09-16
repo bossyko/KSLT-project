@@ -6,7 +6,17 @@
  * Include on all pages after supabase-config.js
  */
 (function() {
-    var TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes inactivity
+    // Сколько можно бездействовать до выхода.
+    //
+    // Полчаса выгоняли человека посреди дня: открыл сетку турнира, ушёл
+    // играть, вернулся к телефону — а он на странице входа. Для теннисного
+    // клуба это строже, чем нужно: под рукой остаётся заявка на турнир и
+    // свой профиль, а не деньги.
+    //
+    // В админке всё по-прежнему: там правят турниры, счета и членство, и
+    // забытый открытым ноутбук — настоящий риск.
+    var ЭТО_АДМИНКА = /\/admin(-en|-kg)?\.html/.test(window.location.pathname);
+    var TIMEOUT_MS = ЭТО_АДМИНКА ? 30 * 60 * 1000 : 8 * 60 * 60 * 1000;
     var CHECK_INTERVAL_MS = 60 * 1000; // check every 1 minute
     var MAX_SESSION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days max session
     var SESSION_START_KEY = 'kslt_session_start';

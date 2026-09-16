@@ -6,6 +6,28 @@
 (function() {
     'use strict';
 
+    /**
+     * В шапке три раскрывающихся блока: колокольчик, меню под аватаром и
+     * боковое меню. Открываться должен один — второй ложился поверх
+     * первого, и закрыть его можно было только нажатием мимо.
+     *
+     * Клик по любой кнопке в шапке не считается кликом «мимо»: они в одном
+     * контейнере, поэтому соседей гасим руками.
+     */
+    function закрытьСоседей() {
+        var бургер = document.getElementById('burgerMenu');
+        var боковое = document.getElementById('mobileNav');
+        if (бургер) бургер.classList.remove('active');
+        if (боковое) боковое.classList.remove('active');
+
+        document.querySelectorAll('.user-dropdown.open').forEach(function(эл) {
+            эл.classList.remove('open');
+        });
+
+        var уведомления = document.getElementById('siteNotifDropdown');
+        if (уведомления) уведомления.style.display = 'none';
+    }
+
     var btn = document.querySelector('.btn-auth');
     if (!btn) return;
 
@@ -22,16 +44,22 @@
         loyalty: 'Points',
         settings: 'Settings',
         admin: 'Admin',
+        payments: 'Payments',
+        vouchers: 'Discounts',
         logout: 'Sign Out'
     } : isKg ? {
         profile: 'Менин профилим',
         loyalty: 'Баллдар',
+        payments: 'Төлөмдөр',
+        vouchers: 'Арзандатуулар',
         settings: 'Жөндөөлөр',
         admin: 'Админка',
         logout: 'Чыгуу'
     } : {
         profile: 'Мой профиль',
         loyalty: 'Баллы',
+        payments: 'Платежи',
+        vouchers: 'Скидки',
         settings: 'Настройки',
         admin: 'Админка',
         logout: 'Выйти'
@@ -562,6 +590,7 @@
 
                     bellBtn.addEventListener('click', function(e) {
                         e.stopPropagation();
+                        закрытьСоседей();
                         openList();
                     });
 
@@ -643,7 +672,11 @@
                         '</button>' +
                         '<div class="user-dropdown-menu">' +
                             '<div class="user-dropdown-header">' + userName + '</div>' +
-                            '<a href="' + dashUrl + '" class="user-dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + L.profile + '</a>' +
+                            // «Мой профиль» ведёт на профиль, а не в кабинет вообще:
+                            // раньше название обещало одно, а открывались «Мои игры»
+                            '<a href="' + dashUrl + '#profile" class="user-dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + L.profile + '</a>' +
+                            '<a href="' + dashUrl + '#payments" class="user-dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>' + L.payments + '</a>' +
+                            '<a href="' + dashUrl + '#vouchers" class="user-dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 12a2 2 0 010-4V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 010 4 2 2 0 010 4v2a2 2 0 002 2h12a2 2 0 002-2v-2a2 2 0 010-4z"/></svg>' + L.vouchers + '</a>' +
                             '<a href="' + dashUrl + '#loyalty" class="user-dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' + L.loyalty + '</a>' +
                             '<a href="' + dashUrl + '#settings" class="user-dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>' + L.settings + '</a>' +
                             '<div class="user-dropdown-divider"></div>' +
@@ -654,6 +687,7 @@
 
                     dropdown.querySelector('.user-dropdown-toggle').addEventListener('click', function(e) {
                         e.stopPropagation();
+                        закрытьСоседей();
                         dropdown.classList.toggle('open');
                     });
 
@@ -661,6 +695,17 @@
                         if (!dropdown.contains(e.target)) {
                             dropdown.classList.remove('open');
                         }
+                    });
+
+                    // Выбрали пункт — меню закрывается. На чужой странице это
+                    // происходило само: страница уходила вместе с меню. А в
+                    // самом кабинете пункты ведут на свой же адрес с якорем
+                    // (dashboard.html#profile), страница не перезагружается —
+                    // и меню оставалось висеть поверх выбранного раздела
+                    dropdown.querySelectorAll('.user-dropdown-item').forEach(function(пункт) {
+                        пункт.addEventListener('click', function() {
+                            dropdown.classList.remove('open');
+                        });
                     });
 
                     dropdown.querySelector('#navLogoutBtn').addEventListener('click', async function() {

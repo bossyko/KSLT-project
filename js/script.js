@@ -198,6 +198,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (burgerMenu && mobileNav) {
         burgerMenu.addEventListener('click', function() {
+            // Меню под аватаром и список уведомлений закрываем: три
+            // раскрывающихся блока в одной шапке накладывались друг на друга
+            document.querySelectorAll('.user-dropdown.open').forEach(function(эл) {
+                эл.classList.remove('open');
+            });
+            var уведомления = document.getElementById('siteNotifDropdown');
+            if (уведомления) уведомления.style.display = 'none';
             this.classList.toggle('active');
             mobileNav.classList.toggle('active');
         });

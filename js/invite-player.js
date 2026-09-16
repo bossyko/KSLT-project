@@ -308,8 +308,8 @@
         var orLabel = isEn ? 'or' : (isKg ? 'же' : 'или');
         var tgBtn = isEn ? 'Message in Telegram' : (isKg ? 'Telegram\'га жазуу' : 'Написать в Telegram');
         var noteText = isEn
-            ? 'Online payment coming soon. Contact the admin for now.'
-            : (isKg ? 'Онлайн төлөм жакында ишке кирет. Азырынча администраторго кайрылыңыз.' : 'Онлайн-оплата появится в ближайшее время. Пока свяжитесь с администратором.');
+            ? 'Online payment on the site is coming soon. For now, membership is arranged through the KSLT manager.'
+            : (isKg ? 'Сайтта төлөм жакында пайда болот. Азырынча мүчөлүк КСЛТ менеджери аркылуу тариздөлөт.' : 'Оплата на сайте скоро появится. Пока членство оформляется через менеджера КСЛТ.');
         var disclaimer = isEn
             ? 'By paying, you agree to the <a href="' + rulesPage + '" target="_blank">rules</a> and <a href="' + pricePage + '" target="_blank">pricing</a> of KSLT'
             : (isKg ? 'Баскычты басуу менен, <a href="' + rulesPage + '" target="_blank">эрежелер</a> жана <a href="' + pricePage + '" target="_blank">баалар</a> менен тааныштыгыңызды тастыктайсыз' : 'Нажимая кнопку, вы подтверждаете, что ознакомлены с <a href="' + rulesPage + '" target="_blank">правилами</a> и <a href="' + pricePage + '" target="_blank">тарифами</a> КСЛТ');

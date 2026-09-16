@@ -277,8 +277,12 @@
     P.selectHtml = function(id, selectedIso, lang, className) {
         var options = P.countries.map(function(c) {
             var sel = c.iso === (selectedIso || DEFAULT_ISO) ? ' selected' : '';
+            // Только флаг и код. Название страны не помещалось в узкое поле
+            // и обрезалось на полуслове — а флага с кодом хватает, чтобы
+            // узнать страну и в закрытом поле, и в раскрытом списке.
+            // Казахстан и Россию с общим +7 различает флаг
             return '<option value="' + c.iso + '"' + sel + '>' +
-                c.flag + '  ' + P.name(c, lang) + '  ' + c.code +
+                c.flag + '  ' + c.code +
             '</option>';
         }).join('');
         return '<select id="' + id + '" class="' + (className || '') + '">' + options + '</select>';

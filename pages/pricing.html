@@ -25,7 +25,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="../css/style.css?v=237">
+    <link rel="stylesheet" href="../css/style.css?v=247">
     <link rel="stylesheet" href="../css/pricing.css?v=8">
 </head>
 <body>
@@ -379,7 +379,7 @@
             <div class="pr-faq-item">
                 <button class="pr-faq-question">Как оплатить сейчас?<span class="pr-faq-icon">+</span></button>
                 <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
-                    Онлайн-оплата подключается. Пока её нет, членство проводит администратор КСЛТ — после оплаты он отмечает её в системе, и членство появляется в вашем личном кабинете.
+                    Оплата на сайте скоро появится. Пока членство оформляется через менеджера КСЛТ: после оплаты он отмечает её в системе, и членство появляется в вашем личном кабинете.
                 </div></div>
             </div>
         </div>
@@ -419,7 +419,7 @@
             </div>
 
             <button class="pmm-go" id="payGo" disabled>Суммы уточняются</button>
-            <span class="pmm-hint">Онлайн-оплата подключается. Пока её нет,<br>членство проводит администратор КСЛТ.</span>
+            <span class="pmm-hint">Оплата на сайте скоро появится.<br>Пока членство оформляется через менеджера КСЛТ.</span>
         </div>
     </div>
 
@@ -509,8 +509,8 @@
     <script src="../js/sponsors-loader.js?v=5"></script>
     <script>if (window.loadSponsors) loadSponsors('sponsors');</script>
     <script src="../js/contact-icons.js?v=1"></script>
-    <script src="../js/auth-nav.js?v=17"></script>
-    <script src="../js/script.js?v=8"></script>
+    <script src="../js/auth-nav.js?v=21"></script>
+    <script src="../js/script.js?v=10"></script>
     <script src="../js/membership.js?v=3"></script>
     <script>
     (function() {
@@ -582,9 +582,11 @@
             } catch (e) { return false; }
         }
 
-        // Гостю кнопка честно говорит, что сначала будет вход: платить может
-        // только тот, кого мы знаем — членство привязывается к профилю.
-        if (btn && !isLoggedIn()) btn.textContent = 'Войти и оплатить';
+        // Пока онлайн-оплаты нет, вход ничего не решает: и гость, и вошедший
+        // видят одно и то же окно с порядком оформления через менеджера.
+        // Гнать человека логиниться, чтобы он там узнал, что платить негде, —
+        // значит вводить в заблуждение. Когда оплата появится, вернём вход
+        if (btn && !isLoggedIn()) btn.textContent = 'Как оформить членство';
 
         // Показываем, есть ли уже действующее членство, и до какого числа
         async function showState() {
@@ -603,13 +605,6 @@
 
         if (btn && modal) {
             btn.addEventListener('click', function() {
-                if (!isLoggedIn()) {
-                    // pay=1 — вернувшись после входа, человек сразу увидит окно
-                    // оплаты, а не будет искать кнопку заново
-                    window.location.href = 'auth.html?return=' +
-                        encodeURIComponent('/pages/pricing.html?pay=1');
-                    return;
-                }
                 modal.hidden = false;
             });
 

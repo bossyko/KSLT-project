@@ -27,7 +27,7 @@
         memberGet: 'Мүчөлүк алуу',
         firstName: 'Аты', lastName: 'Фамилиясы',
         email: 'Email', phone: 'Телефон', gender: 'Жынысы',
-        birthday: 'Туулган күнү', birthDay: 'Күн', birthMonth: 'Ай', birthYear: 'Жыл (милдеттүү эмес)',
+        birthday: 'Туулган күнү', birthDay: 'Күн', birthMonth: 'Ай', birthYear: 'Жыл',
         months: ['','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
         male: 'Эркек', female: 'Аял', selectGender: '— Тандаңыз —',
         instagram: 'Instagram', telegram: 'Telegram',
@@ -57,6 +57,13 @@
         showShort: 'клуб мүчөлөрүнө',
         contactsHint: 'Байланыш маалыматын клубдун мүчөлөрү гана көрөт. Меймандар менен жөн катталгандар аны көрүшпөйт.',
         whatsappHint: 'Бош — телефон номери менен бирдей',
+        unsavedTitle: 'Өзгөрүүлөр сакталган жок',
+        unsavedText: 'Профилде сакталбаган өзгөрүүлөр бар. Сактайбызбы?',
+        unsavedSave: 'Сактоо', unsavedDrop: 'Сактабастан чыгуу',
+        unsavedPwTitle: 'Сыр сөз өзгөртүлгөн жок',
+        unsavedPwText: 'Терилген сыр сөз эч жерде сакталбайт. Чыксаңыз, кайра теришиңиз керек.',
+        unsavedStay: 'Калуу', unsavedLeave: 'Чыгуу',
+        whatsappCopy: 'Телефон номери менен бирдей',
         whatsappSame: 'телефон менен бирдей',
         showPhone: 'Клуб мүчөлөрүнө телефонумду көрсөтүү',
         save: 'Сактоо', saving: 'Сакталууда...', saved: 'Сакталды!',
@@ -180,6 +187,9 @@
         rhTotalPoints: 'Жалпы упайлар',
         qrShare: 'QR код',
         qrTitle: 'Профилди бөлүшүү',
+        profileNoCard: 'Оюнчу карточкасы аккаунтка азырынча байланган жок',
+        profileOpenPublic: 'Менин баракчам',
+        profileWinLoss: 'Жеңиш — жеңилүү',
         qrDownload: 'PNG жүктөө',
         qrCopy: 'Шилтемени көчүрүү',
         qrCopied: 'Көчүрүлдү!',
@@ -302,7 +312,7 @@
         memberGet: 'Get Membership',
         firstName: 'First Name', lastName: 'Last Name',
         email: 'Email', phone: 'Phone', gender: 'Gender',
-        birthday: 'Date of Birth', birthDay: 'Day', birthMonth: 'Month', birthYear: 'Year (optional)',
+        birthday: 'Date of Birth', birthDay: 'Day', birthMonth: 'Month', birthYear: 'Year',
         months: ['','January','February','March','April','May','June','July','August','September','October','November','December'],
         male: 'Male', female: 'Female', selectGender: '— Select —',
         instagram: 'Instagram', telegram: 'Telegram',
@@ -332,6 +342,13 @@
         showShort: 'to club members',
         contactsHint: 'Contact details are visible only to KSLT members with an active membership. Guests and registered users without one do not see them.',
         whatsappHint: 'Leave empty if it is the same as your phone',
+        unsavedTitle: 'Unsaved changes',
+        unsavedText: 'Your profile has changes that are not saved yet. Save them?',
+        unsavedSave: 'Save', unsavedDrop: 'Leave without saving',
+        unsavedPwTitle: 'Password not changed',
+        unsavedPwText: 'The password you typed is not stored anywhere. Leave, and you will have to type it again.',
+        unsavedStay: 'Stay', unsavedLeave: 'Leave',
+        whatsappCopy: 'Same as my phone',
         whatsappSame: 'same as phone',
         showPhone: 'Show my phone to club members',
         save: 'Save', saving: 'Saving...', saved: 'Saved!',
@@ -455,6 +472,9 @@
         rhTotalPoints: 'Total Points',
         qrShare: 'QR Code',
         qrTitle: 'Share Profile',
+        profileNoCard: 'No player card linked to this account yet',
+        profileOpenPublic: 'My public page',
+        profileWinLoss: 'Wins — losses',
         qrDownload: 'Download PNG',
         qrCopy: 'Copy Link',
         qrCopied: 'Copied!',
@@ -577,7 +597,7 @@
         memberGet: 'Оформить',
         firstName: 'Имя', lastName: 'Фамилия',
         email: 'Email', phone: 'Телефон', gender: 'Пол',
-        birthday: 'Дата рождения', birthDay: 'День', birthMonth: 'Месяц', birthYear: 'Год (необяз.)',
+        birthday: 'Дата рождения', birthDay: 'День', birthMonth: 'Месяц', birthYear: 'Год',
         months: ['','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
         male: 'Мужской', female: 'Женский', selectGender: '— Выберите —',
         instagram: 'Instagram', telegram: 'Telegram',
@@ -607,6 +627,13 @@
         showShort: 'членам клуба',
         contactsHint: 'Контакты видят только члены КСЛТ с действующим членством. Гостям и просто зарегистрированным они не показываются.',
         whatsappHint: 'Пусто — тот же, что телефон',
+        unsavedTitle: 'Изменения не сохранены',
+        unsavedText: 'В профиле есть правки, которых ещё нет в базе. Сохранить их?',
+        unsavedSave: 'Сохранить', unsavedDrop: 'Уйти без сохранения',
+        unsavedPwTitle: 'Пароль не изменён',
+        unsavedPwText: 'Набранный пароль нигде не хранится. Уйдёте — набирать заново.',
+        unsavedStay: 'Остаться', unsavedLeave: 'Уйти',
+        whatsappCopy: 'Тот же, что телефон',
         whatsappSame: 'тот же, что телефон',
         showPhone: 'Показывать мой телефон членам клуба',
         save: 'Сохранить', saving: 'Сохранение...', saved: 'Сохранено!',
@@ -730,6 +757,9 @@
         rhTotalPoints: 'Всего очков',
         qrShare: 'QR код',
         qrTitle: 'Поделиться профилем',
+        profileNoCard: 'Карточка игрока пока не привязана к аккаунту',
+        profileOpenPublic: 'Моя страница',
+        profileWinLoss: 'Победы — поражения',
         qrDownload: 'Скачать PNG',
         qrCopy: 'Скопировать ссылку',
         qrCopied: 'Скопировано!',
@@ -1047,6 +1077,7 @@
         loadSidebarRatings(profile);
         renderMobileTabs();
         renderProfile(user, profile);
+        карточкаВПрофиле(profile);
         renderMembershipCard().then(function(state) {
             applyMembershipRestrictions(state);
         });
@@ -1279,6 +1310,95 @@
             '</ul>';
     }
 
+    /* Карточка игрока в начале «Моего профиля»: фото, имя, категория, очки с
+       местом в рейтинге, NTRP, счёт побед, QR и ссылка на публичную
+       страницу. На телефоне боковое меню скрыто, и всё это было негде
+       посмотреть — человек видел только форму редактирования */
+    async function карточкаВПрофиле(profile) {
+        var место = document.getElementById('dbProfileCard');
+        if (!место) return;
+
+        var страницаИгрока = isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
+
+        if (!profile.player_id) {
+            место.innerHTML = '<div class="db-card db-profile-card">' +
+                '<div class="db-profile-card-empty">' + L.profileNoCard + '</div>' +
+            '</div>';
+            return;
+        }
+
+        var буквы = (profile.full_name || '?').split(' ')
+            .map(function(n) { return n.charAt(0); }).join('').toUpperCase();
+        var фото = profile.avatar_url
+            ? '<img src="' + escHtml(profile.avatar_url) + '" alt="" class="db-profile-card-photo">'
+            : '<div class="db-profile-card-photo db-profile-card-initials">' + буквы + '</div>';
+
+        var строки = '';
+        if (client) {
+            var игрок = await client.from('players')
+                .select('points, category_id, ntrp_singles, ntrp_doubles, wins, losses, gender')
+                .eq('id', profile.player_id).single();
+
+            if (игрок.data) {
+                var катРес = await client.from('player_categories')
+                    .select('category_id, points, closed_at')
+                    .eq('player_id', profile.player_id)
+                    .order('points', { ascending: false });
+
+                var мои = (катРес.data || []).filter(function(r) { return r.category_id !== 'friendly'; });
+                if (мои.length) {
+                    var имена = {};
+                    var спрКат = await client.from('categories').select('id, name');
+                    (спрКат.data || []).forEach(function(c) { имена[c.id] = c.name; });
+
+                    for (var i = 0; i < мои.length; i++) {
+                        var р = мои[i];
+                        // Место — тем же счётом, что и в рейтинге: среди
+                        // игроков того же пола
+                        var место = window.KSLT_RULES && KSLT_RULES.местоВКатегории
+                            ? await KSLT_RULES.местоВКатегории(client, р.category_id, р.points, игрок.data.gender)
+                            : null;
+                        строки += '<div class="db-profile-card-row' + (р.closed_at ? ' is-off' : '') + '">' +
+                            '<span>' + escHtml(имена[р.category_id] || р.category_id) + '</span>' +
+                            '<span>' + (р.points || 0) + (место ? ' \u00b7 #' + место : '') + '</span>' +
+                        '</div>';
+                    }
+                }
+
+                var R = window.KSLT_RULES;
+                var ntrp = (R && R.ntrpСтрока)
+                    ? R.ntrpСтрока(игрок.data.ntrp_singles, игрок.data.ntrp_doubles, isEn ? 'en' : 'ru') : '';
+                if (ntrp) {
+                    строки += '<div class="db-profile-card-row"><span>NTRP</span><span>' + ntrp + '</span></div>';
+                }
+
+                var побед = игрок.data.wins || 0;
+                var поражений = игрок.data.losses || 0;
+                if (побед || поражений) {
+                    строки += '<div class="db-profile-card-row"><span>' + L.profileWinLoss + '</span>' +
+                        '<span>' + побед + ' \u2014 ' + поражений + '</span></div>';
+                }
+            }
+        }
+
+        место.innerHTML =
+            '<div class="db-card db-profile-card">' +
+                '<div class="db-profile-card-head">' +
+                    фото +
+                    '<div class="db-profile-card-name">' + escHtml(profile.full_name || '') + '</div>' +
+                '</div>' +
+                (строки ? '<div class="db-profile-card-rows">' + строки + '</div>' : '') +
+                '<div class="db-profile-card-actions">' +
+                    '<button class="db-btn db-btn-outline" id="dbProfileQr">' + L.qrShare + '</button>' +
+                    '<a class="db-btn db-btn-outline" href="' + страницаИгрока + '?id=' +
+                        encodeURIComponent(profile.player_id) + '">' + L.profileOpenPublic + '</a>' +
+                '</div>' +
+            '</div>';
+
+        var кнопкаQr = document.getElementById('dbProfileQr');
+        if (кнопкаQr) кнопкаQr.addEventListener('click', function() { showQrModal(profile); });
+    }
+
     // ---- Sidebar Ratings (KSLT rank + NTRP) ----
     async function loadSidebarRatings(profile) {
         var container = document.getElementById('dbSidebarRatings');
@@ -1308,16 +1428,18 @@
             var catName = {};
             (catsRes.data || []).forEach(function(c) { catName[c.id] = c.name; });
 
+            var полИгрока = (await client.from('players').select('gender')
+                .eq('id', profile.player_id).maybeSingle()).data;
+
             for (var i = 0; i < myCats.length; i++) {
                 var row = myCats[i];
-                var rankRes = await client.from('player_categories')
-                    .select('player_id', { count: 'exact', head: true })
-                    .eq('category_id', row.category_id)
-                    .gt('points', row.points || 0);
+                var место = window.KSLT_RULES && KSLT_RULES.местоВКатегории
+                    ? await KSLT_RULES.местоВКатегории(client, row.category_id, row.points, полИгрока && полИгрока.gender)
+                    : null;
                 html += '<div class="db-sidebar-rating-row' +
                         (row.closed_at ? ' db-sidebar-rating-off' : '') + '">' +
                     '<span class="db-sidebar-rating-label">' + escHtml(catName[row.category_id] || row.category_id) + '</span>' +
-                    '<span class="db-sidebar-rating-value">' + (row.points || 0) + ' · #' + ((rankRes.count || 0) + 1) + '</span>' +
+                    '<span class="db-sidebar-rating-value">' + (row.points || 0) + (место ? ' · #' + место : '') + '</span>' +
                 '</div>';
             }
         }
@@ -1358,18 +1480,30 @@
         overlay.id = 'dbQrModal';
         overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;animation:dbModalFadeIn 0.25s ease forwards;';
 
+        // На телефоне окно занимало почти весь экран: квадрат 200 плюс
+        // белые поля вокруг, плюс отступы окна в 32. Читается код и
+        // меньшего размера — камере хватает 150
+        var телефон = window.innerWidth <= 560;
+        var размерQR = телефон ? 150 : 200;
+        var поляОкна = телефон ? 20 : 32;
+        var стильКнопки = телефон
+            ? ' style="padding:9px 14px;font-size:0.78rem;white-space:nowrap;"'
+            : '';
+
         overlay.innerHTML =
             '<style>@keyframes dbModalFadeIn{to{opacity:1}}@keyframes dbModalSlideIn{to{transform:translateY(0) scale(1)}}</style>' +
-            '<div style="background:rgba(26,26,30,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;text-align:center;max-width:340px;width:90%;position:relative;transform:translateY(20px) scale(0.95);animation:dbModalSlideIn 0.25s ease forwards;">' +
-                '<button id="dbQrClose" style="position:absolute;top:12px;right:16px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.5rem;cursor:pointer;">&times;</button>' +
-                '<div style="font-size:1.5rem;font-weight:700;color:#CCFF00;margin-bottom:4px;">KSLT</div>' +
-                '<div style="font-size:0.85rem;color:#888;margin-bottom:20px;">' + L.qrTitle + '</div>' +
-                '<div id="dbQrCode" style="display:inline-block;padding:12px;background:#fff;border-radius:8px;margin-bottom:16px;"></div>' +
-                '<div style="font-weight:600;font-size:1rem;color:#fff;margin-bottom:4px;">' + escHtml(profile.full_name || '') + '</div>' +
-                '<div id="dbQrCategory" style="font-size:0.85rem;color:var(--accent);margin-bottom:20px;"></div>' +
+            '<div style="background:rgba(26,26,30,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:' + поляОкна + 'px;text-align:center;max-width:340px;width:90%;position:relative;transform:translateY(20px) scale(0.95);animation:dbModalSlideIn 0.25s ease forwards;">' +
+                '<button id="dbQrClose" style="position:absolute;top:8px;right:12px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.4rem;cursor:pointer;">&times;</button>' +
+                '<div style="font-size:' + (телефон ? '1.15rem' : '1.5rem') + ';font-weight:700;color:#CCFF00;margin-bottom:2px;">KSLT</div>' +
+                '<div style="font-size:0.75rem;color:#888;margin-bottom:' + (телефон ? '12' : '20') + 'px;">' + L.qrTitle + '</div>' +
+                '<div id="dbQrCode" style="display:inline-block;padding:' + (телефон ? '8' : '12') + 'px;background:#fff;border-radius:8px;margin-bottom:' + (телефон ? '10' : '16') + 'px;"></div>' +
+                '<div style="font-weight:600;font-size:' + (телефон ? '0.88rem' : '1rem') + ';color:#fff;margin-bottom:2px;">' + escHtml(profile.full_name || '') + '</div>' +
+                '<div id="dbQrCategory" style="font-size:0.75rem;color:var(--accent);margin-bottom:' + (телефон ? '12' : '20') + 'px;"></div>' +
+                // Кнопки под размер окна: общие поля 12×32 на телефоне
+                // разгоняли «Скачать PNG» на две строки
                 '<div style="display:flex;gap:8px;justify-content:center;">' +
-                    '<button class="db-btn db-btn-primary" id="dbQrDownload">' + L.qrDownload + '</button>' +
-                    '<button class="db-btn db-btn-outline" id="dbQrCopy">' + L.qrCopy + '</button>' +
+                    '<button class="db-btn db-btn-primary" id="dbQrDownload"' + стильКнопки + '>' + L.qrDownload + '</button>' +
+                    '<button class="db-btn db-btn-outline" id="dbQrCopy"' + стильКнопки + '>' + L.qrCopy + '</button>' +
                 '</div>' +
             '</div>';
 
@@ -1379,8 +1513,8 @@
         var qrEl = document.getElementById('dbQrCode');
         var qr = new QRCode(qrEl, {
             text: playerUrl,
-            width: 200,
-            height: 200,
+            width: размерQR,
+            height: размерQR,
             colorDark: '#000000',
             colorLight: '#ffffff',
             correctLevel: QRCode.CorrectLevel.H
@@ -1505,14 +1639,26 @@
         var container = document.getElementById('dbMobileTabs');
         if (!container) return;
 
+        // Плитками — то, за чем в кабинет заходят каждый день. Личное и
+        // денежное (профиль, платежи, скидки, баллы, настройки) живёт в меню
+        // под аватаром: раньше половина разделов была и там, и тут
+        var значок = {
+            games: '\uD83C\uDFBE',
+            stats: '\uD83D\uDCCA',
+            notifications: '\uD83D\uDD14'
+        };
+
+        function плитка(ключ, подпись, активна) {
+            return '<button class="db-mobile-tab' + (активна ? ' active' : '') + '" data-tab="' + ключ + '">' +
+                '<span class="db-mobile-tab-icon">' + значок[ключ] + '</span>' +
+                '<span class="db-mobile-tab-label">' + подпись + '</span>' +
+            '</button>';
+        }
+
         container.innerHTML =
-            '<button class="db-mobile-tab active" data-tab="games">' + L.games + '</button>' +
-            '<button class="db-mobile-tab" data-tab="stats">' + L.stats + '</button>' +
-            '<button class="db-mobile-tab" data-tab="vouchers">' + L.vouchers + '</button>' +
-            '<button class="db-mobile-tab" data-tab="loyalty">' + L.loyaltyTab + '</button>' +
-            '<button class="db-mobile-tab" data-tab="payments">' + L.payments + '</button>' +
-            '<button class="db-mobile-tab" data-tab="profile">' + L.profile + '</button>' +
-            '<button class="db-mobile-tab" data-tab="settings">' + L.settings + '</button>';
+            плитка('games', L.games, true) +
+            плитка('stats', L.stats, false) +
+            плитка('notifications', L.notificationsTab, false);
     }
 
     // ---- Init Tabs ----
@@ -1524,13 +1670,122 @@
             var link = e.target.closest('[data-tab]');
             if (!link) return;
             var tab = link.dataset.tab;
-            switchTab(tab);
-            window.location.hash = tab;
+            спроситьПроНесохранённое(function() {
+                switchTab(tab);
+                window.location.hash = tab;
+            });
         });
+
+        // Уход по ссылке — меню под аватаром, шапка, боковое меню. Кнопка
+        // «Сохранить» стоит в самом низу формы, и до неё легко не дойти:
+        // человек правит телефон, тут же нажимает «Платежи» — и правка
+        // пропадает молча
+        document.addEventListener('click', function(e) {
+            var ссылка = e.target.closest('a[href]');
+            if (!ссылка || ссылка.target === '_blank') return;
+            if (ссылка.dataset.tab) return;                 // вкладки выше
+            var адрес = ссылка.getAttribute('href');
+            if (!адрес || адрес.charAt(0) === '#') return;  // якорь на месте
+            if (!естьНесохранённое()) return;
+
+            e.preventDefault();
+            спроситьПроНесохранённое(function() {
+                window.location.href = ссылка.href;
+            });
+        }, true);
 
         window.addEventListener('hashchange', function() {
             var hash = window.location.hash.replace('#', '') || 'games';
             switchTab(hash);
+        });
+    }
+
+    /**
+     * Что осталось несохранённым: 'profile', 'password' или пусто.
+     *
+     * Переключатели уведомлений в этот список не входят: они уходят в базу
+     * сразу по нажатию, терять там нечего.
+     */
+    function естьНесохранённое() {
+        var btn = document.getElementById('profileSaveBtn');
+        if (btn && !btn.disabled) return 'profile';
+
+        // Набранный пароль не хранится нигде: уйдёшь — набирать заново
+        var набран = ['settingsCurrentPw', 'settingsNewPw', 'settingsConfirmPw']
+            .some(function(id) {
+                var поле = document.getElementById(id);
+                return !!(поле && поле.value);
+            });
+        if (набран) return 'password';
+
+        return '';
+    }
+
+    /**
+     * Спрашиваем про несохранённое и уводим дальше — сохранив или нет.
+     *
+     * Ответ «Сохранить» ждёт конца сохранения: иначе переход успевал
+     * случиться раньше запроса к базе и правка терялась ровно так же.
+     */
+    function спроситьПроНесохранённое(дальше) {
+        var что = естьНесохранённое();
+        if (!что) { дальше(); return; }
+
+        // Пароль сохранять за человека нельзя: он проходит проверку по
+        // правилам и меняется отдельной кнопкой. Здесь только честно
+        // предупреждаем, что набранное пропадёт
+        if (что === 'password') {
+            dbModal({
+                title: L.unsavedPwTitle,
+                body: '<p class="db-modal-text">' + L.unsavedPwText + '</p>',
+                actions: [
+                    { label: L.unsavedStay, primary: true, onClick: function(закрыть) { закрыть(); } },
+                    {
+                        label: L.unsavedLeave,
+                        onClick: function(закрыть) {
+                            ['settingsCurrentPw', 'settingsNewPw', 'settingsConfirmPw']
+                                .forEach(function(id) {
+                                    var поле = document.getElementById(id);
+                                    if (поле) поле.value = '';
+                                });
+                            закрыть();
+                            дальше();
+                        }
+                    }
+                ]
+            });
+            return;
+        }
+
+        dbModal({
+            title: L.unsavedTitle,
+            body: '<p class="db-modal-text">' + L.unsavedText + '</p>',
+            actions: [
+                {
+                    label: L.unsavedSave,
+                    primary: true,
+                    onClick: async function(закрыть) {
+                        await saveProfile();
+                        закрыть();
+                        дальше();
+                    }
+                },
+                {
+                    label: L.unsavedDrop,
+                    onClick: function(закрыть) {
+                        // Форму собираем заново из того, что лежит в базе:
+                        // иначе человек вернётся во вкладку и увидит свою
+                        // правку на месте, решив, что она сохранилась
+                        if (window.ksltUser && window.ksltProfile) {
+                            renderProfile(window.ksltUser, window.ksltProfile);
+                        }
+                        var btn = document.getElementById('profileSaveBtn');
+                        if (btn) btn.disabled = true;
+                        закрыть();
+                        дальше();
+                    }
+                }
+            ]
         });
     }
 
@@ -1657,13 +1912,24 @@
             ? '<img src="' + escHtml(profile.avatar_url) + '" class="db-avatar-preview" id="avatarPreview" alt="">'
             : '<div class="db-avatar-preview-placeholder" id="avatarPreview">' + initials + '</div>';
 
-        // Gender select
+        // Пол — двумя кнопками вместо списка: выбор из двух значений не
+        // стоит трёх касаний (открыть список, выбрать, закрыть). Выбранная
+        // подсвечена, нажатие на другую меняет ответ.
+        //
+        // Само значение лежит в скрытом поле с прежним id: остальной код
+        // читает profileGender.value и менять его незачем
+        function кнопкаПола(значение, подпись) {
+            return '<button type="button" class="db-choice' +
+                (profile.gender === значение ? ' active' : '') +
+                '" data-gender="' + значение + '">' + подпись + '</button>';
+        }
+
         var genderSelect =
-            '<select class="db-field-input" id="profileGender">' +
-                '<option value=""' + (!profile.gender ? ' selected' : '') + '>' + L.selectGender + '</option>' +
-                '<option value="men"' + (profile.gender === 'men' ? ' selected' : '') + '>' + L.male + '</option>' +
-                '<option value="women"' + (profile.gender === 'women' ? ' selected' : '') + '>' + L.female + '</option>' +
-            '</select>';
+            '<div class="db-choice-row" id="profileGenderRow">' +
+                кнопкаПола('men', L.male) +
+                кнопкаПола('women', L.female) +
+            '</div>' +
+            '<input type="hidden" id="profileGender" value="' + escHtml(profile.gender || '') + '">';
 
         // Birthday selects
         var dayOpts = '<option value="">' + L.birthDay + '</option>';
@@ -1680,6 +1946,7 @@
         container.innerHTML =
             '<h2 class="db-section-title">' + L.profileTitle + '</h2>' +
             getProfileBanner(profile) +
+            '<div id="dbProfileCard"></div>' +
             '<div id="profileMessage"></div>' +
 
             // Personal info card
@@ -1724,10 +1991,15 @@
                         '<label class="db-field-label">WhatsApp</label>' +
                         showToggle('profileShowWhatsapp', profile.show_whatsapp) +
                     '</div>' +
+                    // Ни подсказки, ни кнопки: подпись в пустом поле —
+                    // «тот же, что телефон» — говорит всё сама. Строка под
+                    // полем читалась как пояснение, и никто не догадывался,
+                    // что по ней можно нажать
                     whatsappFieldHtml(profile) +
-                    '<div class="db-field-hint">' + L.whatsappHint + '</div>' +
                 '</div>' +
-                '<div class="db-field">' +
+                // Метка и кнопки в одной строке: ответ из двух слов не
+                // стоит отдельной строки под заголовком
+                '<div class="db-field db-field-inline">' +
                     '<label class="db-field-label">' + L.gender + ' <span class="db-required">*</span></label>' +
                     genderSelect +
                 '</div>' +
@@ -1736,7 +2008,11 @@
                     '<div class="db-field-row db-field-row-3">' +
                         '<select class="db-field-input" id="profileBirthDay">' + dayOpts + '</select>' +
                         '<select class="db-field-input" id="profileBirthMonth">' + monthOpts + '</select>' +
-                        '<input class="db-field-input" type="number" id="profileBirthYear" value="' + yearVal + '" placeholder="' + L.birthYear + '" min="1940" max="2015">' +
+                        // Без min и max: браузер прятал значение, не попавшее
+                        // в рамки, и поле выглядело пустым — год 1900 из
+                        // старых карточек так и пропадал с глаз. Границы
+                        // проверяем сами при сохранении и говорим, что не так
+                        '<input class="db-field-input" type="number" id="profileBirthYear" value="' + yearVal + '" placeholder="' + L.birthYear + '" inputmode="numeric">' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -1801,6 +2077,23 @@
             document.getElementById('avatarInput').click();
         });
         document.getElementById('avatarInput').addEventListener('change', uploadAvatar);
+
+        // Пол: нажатая кнопка подсвечена, значение уходит в скрытое поле
+        var рядПола = document.getElementById('profileGenderRow');
+        if (рядПола) {
+            рядПола.addEventListener('click', function(e) {
+                var кнопка = e.target.closest('[data-gender]');
+                if (!кнопка) return;
+                рядПола.querySelectorAll('.db-choice').forEach(function(к) {
+                    к.classList.toggle('active', к === кнопка);
+                });
+                document.getElementById('profileGender').value = кнопка.dataset.gender;
+                // Кнопка «Сохранить» просыпается от изменений в полях, а
+                // нажатие по кнопке таким изменением не считается
+                document.getElementById('profileGender')
+                    .dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        }
 
         bindShowToggleLabels();
 
@@ -1892,6 +2185,7 @@
 
         // Track initial values for dirty check
         window._profileSnapshot = getProfileFormValues();
+        запомнитьСохранённое();
 
         // Listen for changes on all editable fields
         var formFields = document.querySelectorAll('#db-profile .db-field-input, #db-profile input[type="checkbox"]');
@@ -2280,10 +2574,20 @@
         // кем уже есть учётная запись
         var кириллица = влатиницу(q);
         var запрос = client.from('players')
-            .select('id, name, category_id, ntrp_singles, photo')
+            .select('id, name, category_id, ntrp_singles, ntrp_doubles, photo')
             .eq('is_guest', false)
             .eq('has_account', false)
             .limit(8);
+
+        // Свою карточку человек ищет среди карточек своего пола: имена в
+        // Кыргызстане часто звучат одинаково у мужчин и женщин, и в списке
+        // «кажется, это вы» оказывались чужие. Пол берём из профиля —
+        // при регистрации он обязателен.
+        //
+        // Это только здесь: в поиске напарника и в турнирах пол не
+        // ограничиваем — там как раз ищут и мужчин, и женщин.
+        var свойПол = profile && profile.gender;
+        if (свойПол) запрос = запрос.eq('gender', свойПол);
         var res = await (кириллица
             ? запрос.or('name.ilike.%' + q + '%,name.ilike.%' + кириллица + '%')
             : запрос.ilike('name', '%' + q + '%'));
@@ -2297,7 +2601,7 @@
         var R = window.KSLT_RULES;
         список.innerHTML = люди.map(function(p) {
             var разряд = p.category_id ? (R && R.categoryLabel ? R.categoryLabel(p.category_id, isEn ? 'en' : 'ru') : p.category_id) : '';
-            var ntrp = (R && R.ntrpКоротко) ? R.ntrpКоротко(p.ntrp_singles, null) : '';
+            var ntrp = (R && R.ntrpКоротко) ? R.ntrpКоротко(p.ntrp_singles, p.ntrp_doubles) : '';
             var подпись = [разряд, ntrp ? 'NTRP ' + ntrp : ''].filter(Boolean).join(' \u00B7 ');
             return '<div class="db-link-row">' +
                 '<div class="db-link-person">' +
@@ -3670,6 +3974,10 @@
 
             var unreadCount = items.filter(function(n) { return !n.is_read; }).length;
             var allReadLabel = isEn ? 'Mark all as read' : (isKg ? 'Баарын окулду деп белгилөө' : 'Отметить все прочитанными');
+            // На телефоне полная подпись не помещается рядом с фильтрами и
+            // сбрасывает кнопку во второй ряд. Короткая живёт в той же
+            // кнопке, показывает её узкий экран
+            var allReadShort = isEn ? 'Read all' : (isKg ? 'Баарын окуу' : 'Прочитать все');
 
             // Таблица, как в «Моих играх»: дата слева, фильтры сверху,
             // страницы по десять. Раздел жил своей вёрсткой — карточками с
@@ -3717,7 +4025,10 @@
                     }).join('') +
                 '</div>' +
                 (unreadCount > 0
-                    ? '<button class="db-notif-all-read" id="dbNotifAllRead">' + allReadLabel + '</button>'
+                    ? '<button class="db-notif-all-read" id="dbNotifAllRead">' +
+                        '<span class="db-label-wide">' + allReadLabel + '</span>' +
+                        '<span class="db-label-narrow">' + allReadShort + '</span>' +
+                      '</button>'
                     : '') +
             '</div>';
             html += '<div id="dbNotifTable"></div>';
@@ -3966,6 +4277,31 @@
 
         btn.disabled = !dirty;
         btn.classList.remove('db-btn-saved');
+        отметитьПоля();
+    }
+
+    /**
+     * Что в полях уже сохранено, а что человек только что набрал.
+     *
+     * Заполненное и сохранённое поле показываем приглушённо: видно, что
+     * там лежит готовый ответ и трогать его незачем. Как только значение
+     * поменяли — поле снова обычное, и на фоне остальных сразу заметно,
+     * что именно изменилось и что уйдёт в базу при сохранении.
+     */
+    function запомнитьСохранённое() {
+        document.querySelectorAll('#db-profile .db-field-input').forEach(function(поле) {
+            поле.dataset.saved = поле.value || '';
+        });
+        отметитьПоля();
+    }
+
+    function отметитьПоля() {
+        document.querySelectorAll('#db-profile .db-field-input').forEach(function(поле) {
+            var сохранено = поле.dataset.saved !== undefined &&
+                            поле.value !== '' &&
+                            поле.value === поле.dataset.saved;
+            поле.classList.toggle('is-saved', сохранено);
+        });
     }
 
     /**
@@ -4064,6 +4400,19 @@
         var birthYear = document.getElementById('profileBirthYear').value;
         var instagram = document.getElementById('profileInstagram').value.trim();
         var telegram = document.getElementById('profileTelegram').value.trim();
+
+        // Год рождения: границы проверяем здесь, а не атрибутами поля
+        if (birthYear) {
+            var год = parseInt(birthYear, 10);
+            var нынешний = new Date().getFullYear();
+            if (isNaN(год) || год < 1930 || год > нынешний) {
+                showMessage('profileMessage',
+                    isKg ? 'Туулган жылы: 1930 менен ' + нынешний + ' аралыгында'
+                    : isEn ? 'Year of birth: between 1930 and ' + нынешний
+                    : 'Год рождения: от 1930 до ' + нынешний, true);
+                return;
+            }
+        }
 
         // Validate Instagram handle
         if (instagram && !/^@?[a-zA-Z0-9._]{1,30}$/.test(instagram)) {
@@ -4190,6 +4539,11 @@
             btn.textContent = '✓ ' + L.saved;
             btn.classList.add('db-btn-saved');
             btn.disabled = true;
+
+            // Сохранённое стало новой точкой отсчёта: поля гаснут, а уход
+            // со страницы больше не спрашивает про несохранённое
+            window._profileSnapshot = getProfileFormValues();
+            запомнитьСохранённое();
 
             // Flash cards green
             var cards = document.querySelectorAll('#db-profile .db-card');
@@ -4339,7 +4693,49 @@
         }
 
         renderSidebar(window.ksltProfile);
+        новоеФотоВезде(publicUrl);
         showMessage('profileMessage', L.saved, false);
+    }
+
+    /**
+     * Новое фото показываем сразу во всех местах страницы.
+     *
+     * Раньше менялось только превью в форме и боковое меню: карточка игрока
+     * над формой и кружок в шапке оставались со старым снимком, пока
+     * человек не перезагрузит страницу. Выглядело так, будто загрузка не
+     * сработала, и фото отправляли второй раз.
+     */
+    function новоеФотоВезде(адрес) {
+        var карточка = document.querySelector('#dbProfileCard .db-profile-card-photo');
+        if (карточка) {
+            if (карточка.tagName === 'IMG') {
+                карточка.src = адрес;
+            } else {
+                // До первой загрузки на месте фото стоят буквы имени
+                var img = document.createElement('img');
+                img.src = адрес;
+                img.alt = '';
+                img.className = 'db-profile-card-photo';
+                карточка.replaceWith(img);
+            }
+        }
+
+        // Кружок в шапке рисуется из localStorage — там же лежит и старый
+        // адрес, иначе после перехода на другую страницу вернулся бы он
+        localStorage.setItem('kslt_avatar', адрес);
+        var вШапке = document.querySelector('.user-dropdown-avatar');
+        if (вШапке && вШапке.tagName === 'IMG') {
+            вШапке.src = адрес;
+        } else {
+            var заглушка = document.querySelector('.user-dropdown-avatar-ph');
+            if (заглушка) {
+                var кружок = document.createElement('img');
+                кружок.src = адрес;
+                кружок.alt = '';
+                кружок.className = 'user-dropdown-avatar';
+                заглушка.replaceWith(кружок);
+            }
+        }
     }
 
     // ---- Render Tournaments ----
@@ -4517,10 +4913,12 @@
                     '<div class="db-stat-card"><div class="db-stat-value">' + losses + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
                     '<div class="db-stat-card"><div class="db-stat-value">' + ((p.rank_change || 0) > 0 ? '+' : '') + (p.rank_change || 0) + '</div><div class="db-stat-label">' + L.rank + '</div></div>' +
                 '</div>') +
+            // Категория без очков — одна строка, а не карточка с заголовком:
+            // ради одного слова блок занимал 113 пикселей высоты
             (catsHtml ||
-                '<div class="db-card">' +
-                    '<div class="db-card-title">' + L.category + '</div>' +
-                    '<p style="color:var(--accent);font-size:1.1rem;font-weight:600;">' + catName + '</p>' +
+                '<div class="db-card db-card-line">' +
+                    '<span class="db-card-line-label">' + L.category + '</span>' +
+                    '<span class="db-card-line-value">' + catName + '</span>' +
                 '</div>') +
             pairBlocksHtml(p) +
             '<div id="dbRatingChartWrap" style="display:none;">' +
@@ -4831,6 +5229,10 @@
             var nearest = lockedDefs.slice(0, 3);
             if (nearest.length > 0) {
                 var nextLabel = isKg ? 'Кийинки максаттар' : isEn ? 'Next goals' : 'Следующие цели';
+                // Обёртка нужна, чтобы прятать цели при развороте полного
+                // списка: ближайшие три и так стоят в нём первыми, и рядом
+                // они читались как повтор
+                html += '<div id="dbBadgesNext">';
                 html += '<div class="db-badges-next-label">' + nextLabel + '</div>';
                 html += '<div class="db-badges-earned">';
                 nearest.forEach(function(d) {
@@ -4843,6 +5245,7 @@
                     html += '</div>';
                 });
                 html += '</div>';
+                html += '</div>'; // #dbBadgesNext
             }
 
             // "All achievements" expandable grid
@@ -4872,10 +5275,12 @@
             // Expand/collapse toggle
             var expandBtn = document.getElementById('dbBadgesExpandBtn');
             var allGrid = document.getElementById('dbBadgesAll');
+            var nextWrap = document.getElementById('dbBadgesNext');
             var expanded = false;
             expandBtn.addEventListener('click', function() {
                 expanded = !expanded;
                 allGrid.style.display = expanded ? '' : 'none';
+                if (nextWrap) nextWrap.style.display = expanded ? 'none' : '';
                 expandBtn.textContent = expanded ? collapseLabel : (allLabel + ' (' + total + ')');
                 expandBtn.classList.toggle('active', expanded);
             });
@@ -4937,20 +5342,24 @@
             expiresStr = new Date(v.expires_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         }
         var isHidden = !!hiddenType;
-        var h = '<div class="db-invite-card" style="padding:14px 16px;' + (isHidden ? 'display:none;' : '') + '"' +
+        // Размеры вынесены в классы: на телефоне карточка перестраивается,
+        // а в разметке их было не достать
+        var h = '<div class="db-invite-card db-voucher-item"' + (isHidden ? ' style="display:none;"' : '') +
             (isHidden ? ' data-vg-hidden="' + hiddenType + '"' : '') + '>' +
-            '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">' +
-                '<div style="flex:1;">' +
-                    '<div style="font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:4px;">' + dbEsc(v.entity_name) + '</div>' +
-                    '<div style="font-size:0.8rem;color:rgba(255,255,255,0.5);">' + dbEsc(v.service_name) + ' &middot; -' + v.discount_percent + '%</div>' +
-                    '<div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:4px;">' + dateStr +
-                        (expiresStr ? ' &middot; ' + L.voucherExpires + ': ' + expiresStr : '') +
-                    '</div>' +
+            '<div class="db-voucher-row">' +
+                '<div class="db-voucher-main">' +
+                    '<div class="db-voucher-name">' + dbEsc(v.entity_name) + '</div>' +
+                    '<div class="db-voucher-service">' + dbEsc(v.service_name) + ' &middot; -' + v.discount_percent + '%</div>' +
                 '</div>' +
-                '<div style="display:flex;align-items:center;gap:8px;">' +
-                    '<span class="' + statusClass + '" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;">' + statusLabel + '</span>';
+                // Срок — соседом, а не внутри левого блока: на телефоне он
+                // встаёт в свой ряд рядом с кнопкой
+                '<div class="db-voucher-dates">' + dateStr +
+                    (expiresStr ? ' &middot; ' + L.voucherExpires + ': ' + expiresStr : '') +
+                '</div>' +
+                '<div class="db-voucher-side">' +
+                    '<span class="' + statusClass + ' db-voucher-status">' + statusLabel + '</span>';
         if (v.status === 'active') {
-            h += '<button class="db-voucher-qr-btn" data-token="' + v.qr_token + '" data-service="' + dbEsc(v.service_name || '') + '" data-entity="' + dbEsc(v.entity_name || '') + '" data-discount="' + (v.discount_percent || '') + '" data-expires="' + (v.expires_at || '') + '" style="background:var(--accent);color:#000;border:none;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">' + L.voucherShowQR + '</button>';
+            h += '<button class="db-voucher-qr-btn" data-token="' + v.qr_token + '" data-service="' + dbEsc(v.service_name || '') + '" data-entity="' + dbEsc(v.entity_name || '') + '" data-discount="' + (v.discount_percent || '') + '" data-expires="' + (v.expires_at || '') + '">' + L.voucherShowQR + '</button>';
         }
         h += '</div></div></div>';
         return h;
@@ -5251,7 +5660,7 @@
                 var on = isNotifOn(prefs, ch, cat);
                 var off = (ch === 'tg' && !tgLinked);
                 cells +=
-                    '<td style="text-align:center;padding:8px 12px;">' +
+                    '<td class="db-notify-cell">' +
                         '<label class="db-notif-toggle' + (off ? ' db-notif-off' : '') + '">' +
                             '<input type="checkbox" data-ch="' + ch + '" data-cat="' + cat + '"' +
                                 (on && !off ? ' checked' : '') + (off ? ' disabled' : '') + '>' +
@@ -5261,19 +5670,19 @@
             });
             rows +=
                 '<tr>' +
-                    '<td style="padding:8px 12px;color:var(--text-secondary);font-size:0.9rem;">' + catLabels[cat] + '</td>' +
+                    '<td class="db-notify-name">' + catLabels[cat] + '</td>' +
                     cells +
                 '</tr>';
         });
 
         return '<div class="db-card db-settings-section">' +
             '<div class="db-card-title">' + L.notifications + '</div>' +
-            '<table style="width:100%;border-collapse:collapse;">' +
+            '<table class="db-notify-table">' +
                 '<thead><tr>' +
                     '<th></th>' +
-                    '<th style="text-align:center;padding:4px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:500;">' + L.notifSite + '</th>' +
-                    '<th style="text-align:center;padding:4px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:500;">' + L.notifTelegram + '</th>' +
-                    '<th style="text-align:center;padding:4px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:500;">' + L.notifEmail + '</th>' +
+                    '<th class="db-notify-head">' + L.notifSite + '</th>' +
+                    '<th class="db-notify-head">' + L.notifTelegram + '</th>' +
+                    '<th class="db-notify-head">' + L.notifEmail + '</th>' +
                 '</tr></thead>' +
                 '<tbody>' + rows + '</tbody>' +
             '</table>' +
@@ -5369,25 +5778,27 @@
             var expiryHtml = '';
             if (nextExpiry) {
                 var daysUntil = Math.ceil((nextExpiry.date - now) / 86400000);
-                expiryHtml = '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:8px;">' +
+                expiryHtml = '<div class="db-loy-expiry">' +
                     L.loyNextExpiry + ': ' + nextExpiry.points + ' ' + L.loyPointsIn + ' ' + daysUntil + ' ' + L.loyDays +
                     '</div>';
             }
 
+            // Размеры — в классах: на телефоне блок баланса занимал 203
+            // пикселя, из них цифра в 48 и поля по 28 сверху
             var balanceHtml =
-                '<div style="text-align:center;padding:28px 16px 20px;background:linear-gradient(135deg, rgba(204,255,0,0.08) 0%, rgba(204,255,0,0.02) 100%);border-radius:12px;border:1px solid rgba(204,255,0,0.15);">' +
-                    '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.4);margin-bottom:8px;">' + L.loyBalance + '</div>' +
-                    '<div style="font-size:3rem;font-weight:800;color:#CCFF00;line-height:1;">' + balance + '</div>' +
-                    '<div style="font-size:0.8rem;color:rgba(255,255,255,0.35);margin-top:4px;">' + L.loyPoints + '</div>' +
+                '<div class="db-loy-balance">' +
+                    '<div class="db-loy-balance-label">' + L.loyBalance + '</div>' +
+                    '<div class="db-loy-balance-value">' + balance + '</div>' +
+                    '<div class="db-loy-balance-unit">' + L.loyPoints + '</div>' +
                     expiryHtml +
-                    (rewards.length > 0 ? '<button style="margin-top:20px;background:#CCFF00;color:#000;border:none;padding:10px 28px;border-radius:8px;font-weight:700;font-size:0.9rem;cursor:pointer;" id="dbLoyRedeemBtn">' + L.loyRedeemTitle + '</button>' : '') +
+                    (rewards.length > 0 ? '<button class="db-loy-redeem" id="dbLoyRedeemBtn">' + L.loyRedeemTitle + '</button>' : '') +
                 '</div>';
 
             // History table
-            var historyHtml = '<h3 style="margin:20px 0 12px;font-size:1rem;">' + L.loyHistory + '</h3>';
+            var historyHtml = '<h3 class="db-loy-history-title">' + L.loyHistory + '</h3>';
 
             if (loyAllTx.length === 0) {
-                historyHtml += '<div class="db-empty" style="padding:24px 0;">' +
+                historyHtml += '<div class="db-empty">' +
                     '<div class="db-empty-icon">⭐</div>' +
                     '<div class="db-empty-title">' + L.loyNoHistory + '</div>' +
                     '<div class="db-empty-text">' + L.loyNoHistoryText + '</div>' +
@@ -5423,7 +5834,7 @@
         var start = (loyPage - 1) * LOY_PER_PAGE;
         var page = loyAllTx.slice(start, start + LOY_PER_PAGE);
 
-        var html = '<div class="db-table-wrap" style="overflow-x:auto;"><table class="db-matches-table" style="width:100%;"><thead><tr>' +
+        var html = '<div class="db-table-wrap"><table class="db-matches-table db-loy-table"><thead><tr>' +
             '<th>' + L.loyDate + '</th>' +
             '<th>' + L.loyAction + '</th>' +
             '<th>' + L.loyPointsCol + '</th>' +
@@ -5449,10 +5860,10 @@
                 ptsPrefix = '-';
             }
 
-            html += '<tr>' +
-                '<td style="font-size:0.8rem;color:var(--text-muted);">' + dateStr + '</td>' +
-                '<td><span style="font-size:0.75rem;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);">' + dbEsc(typeLabel) + '</span> ' + dbEsc(actionLabel) + '</td>' +
-                '<td style="font-weight:600;' + ptsStyle + '">' + ptsPrefix + Math.abs(t.points) + '</td>' +
+            html += '<tr class="db-loy-row">' +
+                '<td class="db-loy-date">' + dateStr + '</td>' +
+                '<td class="db-loy-action"><span class="db-loy-type">' + dbEsc(typeLabel) + '</span> ' + dbEsc(actionLabel) + '</td>' +
+                '<td class="db-loy-points" style="' + ptsStyle + '">' + ptsPrefix + Math.abs(t.points) + '</td>' +
             '</tr>';
         });
 
@@ -5485,31 +5896,29 @@
         overlay.className = 'db-modal-overlay';
         overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
 
-        var html = '<div style="background:#111111;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px 24px;max-width:420px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);">' +
-            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
-                '<h3 style="margin:0;font-size:1.15rem;color:#fff;">' + L.loyRedeemTitle + '</h3>' +
-                '<button class="db-loy-close" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:1.2rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>' +
+        // Размеры — в классах: окно собиралось инлайн-стилями, и телефон до
+        // них не доставал
+        var html = '<div class="db-redeem-modal">' +
+            '<div class="db-redeem-head">' +
+                '<h3 class="db-redeem-title">' + L.loyRedeemTitle + '</h3>' +
+                '<button class="db-loy-close">✕</button>' +
             '</div>' +
-            '<div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px;">' +
-                '<div style="font-size:2.2rem;font-weight:700;color:#CCFF00;">' + balance + '</div>' +
-                '<div style="font-size:0.8rem;color:rgba(255,255,255,0.45);margin-top:4px;">' + L.loyBalance + '</div>' +
+            '<div class="db-redeem-balance">' +
+                '<div class="db-redeem-balance-value">' + balance + '</div>' +
+                '<div class="db-redeem-balance-label">' + L.loyBalance + '</div>' +
             '</div>';
 
         rewards.forEach(function(rw) {
             var title = isEn ? (rw.title_en || rw.title) : rw.title;
             var canRedeem = balance >= rw.cost;
-            var btnStyle = canRedeem
-                ? 'background:#CCFF00;color:#000;cursor:pointer;font-weight:700;'
-                : 'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.3);cursor:not-allowed;';
 
-            html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:8px;">' +
-                '<div>' +
-                    '<div style="font-weight:600;color:#fff;font-size:0.95rem;">' + dbEsc(title) + '</div>' +
-                    '<div style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-top:2px;">' + rw.cost + ' ' + L.loyPoints + '</div>' +
+            html += '<div class="db-redeem-item">' +
+                '<div class="db-redeem-item-main">' +
+                    '<div class="db-redeem-item-title">' + dbEsc(title) + '</div>' +
+                    '<div class="db-redeem-item-cost">' + rw.cost + ' ' + L.loyPoints + '</div>' +
                 '</div>' +
-                '<button class="db-loy-redeem-item" data-rwid="' + rw.id + '" data-rwcost="' + rw.cost + '" data-rwcode="' + rw.code + '"' +
-                    (!canRedeem ? ' disabled' : '') +
-                    ' style="border:none;padding:8px 18px;border-radius:8px;font-size:0.8rem;' + btnStyle + '">' + L.loyRedeemBtn + '</button>' +
+                '<button class="db-loy-redeem-item' + (canRedeem ? '' : ' is-off') + '" data-rwid="' + rw.id + '" data-rwcost="' + rw.cost + '" data-rwcode="' + rw.code + '"' +
+                    (!canRedeem ? ' disabled' : '') + '>' + L.loyRedeemBtn + '</button>' +
             '</div>';
         });
 
@@ -5626,26 +6035,30 @@
                 }
             });
 
-            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">' +
-                '<div class="db-card" style="text-align:center;padding:20px 16px;">' +
-                    '<div style="font-size:2rem;font-weight:700;color:var(--accent);">' + total + '</div>' +
-                    '<div style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;">' + L.payHistory + '</div>' +
+            // Плитки те же, что в статистике: свои размеры прямо в разметке
+            // жили отдельной жизнью и на телефоне выходили вдвое крупнее
+            html += '<div class="db-stats-grid" style="margin-bottom:16px;">' +
+                '<div class="db-stat-card">' +
+                    '<div class="db-stat-value">' + total + '</div>' +
+                    '<div class="db-stat-label">' + L.payHistory + '</div>' +
                 '</div>' +
-                '<div class="db-card" style="text-align:center;padding:20px 16px;">' +
-                    '<div style="font-size:2rem;font-weight:700;color:var(--accent);">' + totalAmount.toLocaleString() + '</div>' +
-                    '<div style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;">' + L.payAmount + ' (KGS)</div>' +
+                '<div class="db-stat-card">' +
+                    '<div class="db-stat-value">' + totalAmount.toLocaleString() + '</div>' +
+                    '<div class="db-stat-label">' + L.payAmount + ' (KGS)</div>' +
                 '</div>' +
             '</div>';
 
             // Table
-            html += '<div class="db-card" style="overflow-x:auto;">' +
-                '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
-                '<thead><tr style="border-bottom:1px solid var(--border-subtle);">' +
-                    '<th style="text-align:left;padding:8px;color:var(--text-dim);font-weight:600;">' + L.payDate + '</th>' +
-                    '<th style="text-align:right;padding:8px;color:var(--text-dim);font-weight:600;">' + L.payAmount + '</th>' +
-                    '<th style="text-align:left;padding:8px;color:var(--text-dim);font-weight:600;">' + L.payMethod + '</th>' +
-                    '<th style="text-align:left;padding:8px;color:var(--text-dim);font-weight:600;">' + L.payStatus + '</th>' +
-                    '<th style="text-align:left;padding:8px;color:var(--text-dim);font-weight:600;">' + L.payNote + '</th>' +
+            // Таблица общая — та же, что в матчах и уведомлениях. На телефоне
+            // строки превращаются в карточки, здесь про это знать не нужно
+            html += '<div class="db-card db-pay-card">' +
+                '<table class="db-matches-table db-pay-table">' +
+                '<thead><tr>' +
+                    '<th>' + L.payDate + '</th>' +
+                    '<th style="text-align:right">' + L.payAmount + '</th>' +
+                    '<th>' + L.payMethod + '</th>' +
+                    '<th>' + L.payStatus + '</th>' +
+                    '<th>' + L.payNote + '</th>' +
                 '</tr></thead><tbody>';
 
             pageData.forEach(function(p) {
@@ -5656,12 +6069,12 @@
                 var statusText = statusLabels[p.status] || p.status || '—';
                 var note = p.note ? escHtml(p.note) : '—';
 
-                html += '<tr style="border-bottom:1px solid var(--border-subtle);">' +
-                    '<td style="padding:8px;color:var(--text-secondary);">' + date + '</td>' +
-                    '<td style="padding:8px;text-align:right;font-weight:600;">' + amount + '</td>' +
-                    '<td style="padding:8px;color:var(--text-secondary);">' + method + '</td>' +
-                    '<td style="padding:8px;"><span style="color:' + statusColor + ';font-weight:600;">' + statusText + '</span></td>' +
-                    '<td style="padding:8px;color:var(--text-dim);font-size:0.8rem;">' + note + '</td>' +
+                html += '<tr class="db-pay-row">' +
+                    '<td class="db-pay-date">' + date + '</td>' +
+                    '<td class="db-pay-amount">' + amount + '</td>' +
+                    '<td class="db-pay-method">' + method + '</td>' +
+                    '<td class="db-pay-status"><span style="color:' + statusColor + ';font-weight:600;">' + statusText + '</span></td>' +
+                    '<td class="db-pay-note">' + note + '</td>' +
                 '</tr>';
             });
 
@@ -5743,7 +6156,7 @@
 
             '<div class="db-card db-danger-zone">' +
                 '<div class="db-card-title">' + L.dangerZone + '</div>' +
-                '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">' + L.deleteConfirm + '</p>' +
+                '<p class="db-danger-text">' + L.deleteConfirm + '</p>' +
                 '<button class="db-btn db-btn-danger" id="settingsDeleteBtn">' + L.deleteAccount + '</button>' +
             '</div>';
 
