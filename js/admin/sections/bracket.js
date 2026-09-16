@@ -5778,6 +5778,8 @@
      * только вручную, запросом, и уже поверх сыгранных результатов.
      */
     function проверитьКругГрупп(матчи, groupCount) {
+        var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
         for (var g = 1; g <= groupCount; g++) {
             var мг = матчи.filter(function(m) { return m.group_number === g; });
             if (!мг.length) continue;
