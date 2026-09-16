@@ -138,6 +138,14 @@
         tourPlayed: 'Ойнолгон',
         regWithdrawn: 'Арыз алынды',
         regWithdrawTitle: 'Турнирден арызды аласызбы?',
+        regWithPartner: 'жупта: {имя}',
+        regWithdrawGuest: 'Арыз толугу менен алынат: {имя} — конок, клубда картасы жок, ошондуктан орун ага калбайт.',
+        regGuestMark: '(конок)',
+        regByPartner: '— арызды өнөктөш берген',
+        regLeavePairTitle: 'Жуптан чыгасызбы?',
+        regLeavePairText: 'Сиз жуптан чыгасыз. Орун {имя} үчүн сакталат — ал башка өнөктөш табат.',
+        regLeavePairYes: 'Жуптан чыгуу',
+        regLeavePairDone: 'Сиз жуптан чыктыңыз',
         regWithdrawText: '{name} турнирине берилген арыз алынат. Каттоо ачык турганда кайра катталса болот.',
         regWithdrawYes: 'Арызды алуу',
         regWithdrawNo: 'Жокко чыгаруу',
@@ -432,6 +440,14 @@
         tourPlayed: 'Played',
         regWithdrawn: 'Withdrawn',
         regWithdrawTitle: 'Withdraw from the tournament?',
+        regWithPartner: 'in a pair with {имя}',
+        regWithdrawGuest: 'The entry is withdrawn entirely: {имя} is a guest without a club card, so the place cannot stay with them.',
+        regGuestMark: '(guest)',
+        regByPartner: '— entered by your partner',
+        regLeavePairTitle: 'Leave the pair?',
+        regLeavePairText: 'You leave the pair. The place stays with {имя} — they can find another partner.',
+        regLeavePairYes: 'Leave the pair',
+        regLeavePairDone: 'You left the pair',
         regWithdrawText: 'Your entry for {name} will be withdrawn. You can enter again while registration is open.',
         regWithdrawYes: 'Withdraw',
         regWithdrawNo: 'Cancel',
@@ -726,6 +742,14 @@
         tourPlayed: 'Сыгранные',
         regWithdrawn: 'Заявка снята',
         regWithdrawTitle: 'Снять заявку с турнира?',
+        regWithPartner: 'в паре с {имя}',
+        regWithdrawGuest: 'Заявка снимется целиком: {имя} — гость, карточки в клубе у него нет, и место за ним удержать нельзя.',
+        regGuestMark: '(гость)',
+        regByPartner: '— заявку подал напарник',
+        regLeavePairTitle: 'Выйти из пары?',
+        regLeavePairText: 'Вы выйдете из пары. Место останется за {имя} — напарника можно будет найти другого.',
+        regLeavePairYes: 'Выйти из пары',
+        regLeavePairDone: 'Вы вышли из пары',
         regWithdrawText: 'Заявка на {name} будет снята. Записаться снова можно, пока открыта регистрация.',
         regWithdrawYes: 'Снять заявку',
         regWithdrawNo: 'Отмена',
@@ -2734,7 +2758,14 @@
 
         try {
             var pid = profile.player_id;
-            var REG_FIELDS = 'id, status, draw_position, group_number, tournament:tournaments(id, title, title_en, title_kg, date_start, image, status)';
+            _мойИгрок = pid;
+            // Напарник и формат турнира: без них в кабинете не видно, с кем
+            // человек играет, а снятие заявки уводило с турнира обоих
+            var REG_FIELDS = 'id, status, draw_position, group_number, player_id, ' +
+                'partner_id, partner_external_name, ' +
+                'partner:players!tournament_registrations_partner_id_fkey(id, name, name_en), ' +
+                'capitan:players!tournament_registrations_player_id_fkey(id, name, name_en), ' +
+                'tournament:tournaments(id, title, title_en, title_kg, date_start, image, status, format)';
             var REG_STATUSES = ['approved', 'draw', 'waitlist', 'pending', 'withdrawn', 'blocked', 'rejected'];
 
             // Без ограничения: раньше брали по десять записей на заявки и на
@@ -2937,14 +2968,48 @@
             : '';
     }
 
-    function tourNameCell(t) {
+    function tourNameCell(t, item) {
         var name = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
         // Записи, добавленные админом руками: турнира с таким названием в базе
         // нет, открывать нечего
         if (!t.id) return '<td class="db-match-tournament">' + escHtml(name) + '</td>';
         var page = 'tournament' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + t.id;
         return '<td class="db-match-tournament">' +
-            '<a href="' + page + '" class="db-tour-link">' + escHtml(name) + '</a></td>';
+            '<a href="' + page + '" class="db-tour-link">' + escHtml(name) + '</a>' +
+            (item ? напарникВЗаявке(item, _мойИгрок) : '') + '</td>';
+    }
+
+    // Чья карточка открыта: по ней понимаем, кто в паре напарник, а кто
+    // подал заявку
+    var _мойИгрок = null;
+
+    /**
+     * С кем игрок выходит в паре. Пусто — если турнир одиночный или пары нет.
+     *
+     * Кабинет этого не показывал вовсе: человек подавал заявку с напарником,
+     * а потом шёл смотреть состав на страницу турнира, чтобы вспомнить, с кем
+     * играет.
+     */
+    function напарникВЗаявке(item, мойИгрок) {
+        var reg = item && item.reg;
+        if (!reg) return '';
+        var парный = item.tournament &&
+            (item.tournament.format === 'doubles' || item.tournament.format === 'mixed_doubles');
+        if (!парный) return '';
+
+        var имя = function(p) { return p ? (isEn ? (p.name_en || p.name) : p.name) : ''; };
+        // Заявку мог подать напарник — тогда в паре со мной он, а не тот, кто
+        // записан вторым номером
+        var яКапитан = !мойИгрок || reg.player_id === мойИгрок;
+        var сКем = яКапитан
+            ? (имя(reg.partner) || reg.partner_external_name || '')
+            : имя(reg.capitan);
+        if (!сКем) return '';
+
+        var подпись = L.regWithPartner.replace('{имя}', escHtml(сКем));
+        if (яКапитан && !reg.partner_id && reg.partner_external_name) подпись += ' ' + L.regGuestMark;
+        if (!яКапитан) подпись += ' ' + L.regByPartner;
+        return '<div class="db-tour-partner">' + подпись + '</div>';
     }
 
     function upcomingRow(item) {
@@ -2965,16 +3030,35 @@
 
         var action = '';
         if (canWithdraw(item)) {
+            // Кому останется место, если человек выйдет из пары. Напарник-гость
+            // не в счёт: держать место за тем, кого клуб не знает, нельзя
+            var остаётся = '';
+            var гостьВПаре = '';
+            if (reg.player_id === _мойИгрок) {
+                остаётся = reg.partner ? (isEn ? (reg.partner.name_en || reg.partner.name) : reg.partner.name) : '';
+                // Гость попал в турнир только как чей-то напарник: сам он не
+                // записывался, карточки у него нет, и место за ним не держим
+                if (!остаётся) гостьВПаре = reg.partner_external_name || '';
+            } else if (reg.capitan) {
+                остаётся = isEn ? (reg.capitan.name_en || reg.capitan.name) : reg.capitan.name;
+            }
             action = '<button class="db-withdraw-btn" data-reg="' + reg.id +
-                '" data-name="' + escHtml(item.tournament.title || '') + '">' + L.regWithdraw + '</button>';
+                '" data-tid="' + escHtml(item.tournament.id) + '"' +
+                (остаётся ? ' data-pair="' + escHtml(остаётся) + '"' : '') +
+                (гостьВПаре ? ' data-guest="' + escHtml(гостьВПаре) + '"' : '') +
+                ' data-name="' + escHtml(item.tournament.title || '') + '">' +
+                (остаётся ? L.regLeavePairYes : L.regWithdraw) + '</button>';
         } else if (canReenter(item)) {
+            var парный = item.tournament.format === 'doubles' ||
+                         item.tournament.format === 'mixed_doubles';
             action = '<button class="db-withdraw-btn db-reenter-btn" data-tid="' +
-                escHtml(item.tournament.id) + '">' + L.regAgain + '</button>';
+                escHtml(item.tournament.id) + '"' +
+                (парный ? ' data-pair-format="1"' : '') + '>' + L.regAgain + '</button>';
         }
 
         return '<tr>' +
             '<td class="db-match-date">' + tourDate(item.tournament) + '</td>' +
-            tourNameCell(item.tournament) +
+            tourNameCell(item.tournament, item) +
             '<td class="db-tour-status"><span class="kslt-status ' + видСтатуса + '">' +
                 label + '</span></td>' +
             '<td style="text-align:right">' + action + '</td>' +
@@ -4804,9 +4888,8 @@
         // заявку», и нажатие делало вид, что что-то происходит
         if (!reg || reg.status === 'withdrawn' || reg.status === 'rejected' ||
             reg.status === 'blocked') return false;
-        // В парном турнире заявка одна на пару, и подаёт её капитан.
-        // Напарник видит турнир, но снять пару с него не может
-        if (reg.as_partner) return false;
+        // Напарник тоже распоряжается заявкой — но выходит из пары, а не
+        // снимает её целиком: место остаётся тому, кто подавал
         if (reg.draw_position != null || reg.group_number != null) return false;
         if (item.round_reached) return false;
         // Статусы турнира до начала игры. Снять заявку можно и после закрытия
@@ -4818,7 +4901,14 @@
     function bindWithdraw(container, profile, refresh) {
         container.querySelectorAll('.db-withdraw-btn[data-reg]').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                showWithdrawModal(btn.dataset.reg, btn.dataset.name, profile, refresh);
+                // Пара — двое: выход одного не должен уводить второго. Снимаем
+                // заявку целиком только там, где за ней больше никого нет
+                if (btn.dataset.pair) {
+                    showLeavePairModal(btn.dataset.tid, btn.dataset.pair, profile, refresh);
+                } else {
+                    showWithdrawModal(btn.dataset.reg, btn.dataset.name, profile, refresh,
+                        btn.dataset.guest);
+                }
             });
         });
 
@@ -4828,6 +4918,27 @@
         container.querySelectorAll('.db-reenter-btn[data-tid]').forEach(function(btn) {
             btn.addEventListener('click', async function() {
                 if (!window.KSLT_REG) return;
+
+                // В парный турнир заявку без напарника не подают: открываем то
+                // же окно выбора, что и на странице турнира. Раньше кабинет
+                // записывал одиночкой, и человек оставался в парном без пары
+                if (btn.dataset.pairFormat && window.KSLT_DOUBLES) {
+                    var t = await client.from('tournaments')
+                        .select('id, title, format, ntrp_combined_max')
+                        .eq('id', btn.dataset.tid).single();
+                    if (t.data) {
+                        window.KSLT_DOUBLES.открыть({
+                            client: client,
+                            tournament: t.data,
+                            playerName: profile && profile.full_name,
+                            onDone: function(info) {
+                                if (info && info.created) (refresh || loadGamesTournaments)(profile);
+                            }
+                        });
+                        return;
+                    }
+                }
+
                 var wasLabel = btn.textContent;
                 btn.disabled = true;
                 btn.textContent = L.saving;
@@ -4844,18 +4955,58 @@
     }
 
     /**
+     * Выход из пары.
+     *
+     * Заявка в парном турнире одна на двоих, и раньше кабинет просто помечал
+     * её снятой: уходили оба, хотя нажимал один. Теперь зовём ту же проверку,
+     * что и страница турнира, — место остаётся второму номеру, со временем
+     * подачи и очередью.
+     */
+    function showLeavePairModal(tournamentId, ктоОстаётся, profile, refresh) {
+        var modal = dbModal({
+            title: L.regLeavePairTitle,
+            body: '<p class="db-modal-text">' +
+                L.regLeavePairText.replace('{имя}',
+                    '<strong>' + escHtml(ктоОстаётся) + '</strong>') + '</p>',
+            actions: [
+                { label: L.regWithdrawNo },
+                { label: L.regLeavePairYes, danger: true, onClick: async function(close) {
+                    var btn = modal.el.querySelector('[data-act="1"]');
+                    if (btn) { btn.disabled = true; btn.textContent = L.saving; }
+
+                    var ответ = await window.KSLT_REG.call(client, tournamentId, { leave_pair: true });
+                    close();
+                    if (!ответ || !ответ.data || ответ.data.error) {
+                        showMessage(null, (ответ && ответ.data && ответ.data.error) || L.regWithdrawError, true);
+                        return;
+                    }
+                    showMessage(null, L.regLeavePairDone, false);
+                    (refresh || loadGamesTournaments)(profile);
+                } }
+            ]
+        });
+    }
+
+    /**
      * Снятие заявки — в общем окне кабинета, а не в своём собственном.
      *
      * Здесь стояла отдельная разметка с инлайновыми стилями: другой отступ,
      * другой заголовок, без крестика и без выхода по Escape. Окно на сайте
      * должно быть одно.
      */
-    function showWithdrawModal(regId, tournamentName, profile, refresh) {
+    function showWithdrawModal(regId, tournamentName, profile, refresh, гость) {
+        // Напарник-гость уходит вместе с заявкой: он попал в турнир как чей-то
+        // напарник, сам не записывался, и держать место за ним не за что.
+        // Говорим об этом заранее — иначе человек ждёт, что гость останется
+        var проГостя = гость
+            ? '<p class="db-modal-text">' +
+                L.regWithdrawGuest.replace('{имя}', '<strong>' + escHtml(гость) + '</strong>') + '</p>'
+            : '';
         var modal = dbModal({
             title: L.regWithdrawTitle,
             body: '<p class="db-modal-text">' +
                 L.regWithdrawText.replace('{name}',
-                    '<strong>' + escHtml(tournamentName) + '</strong>') + '</p>',
+                    '<strong>' + escHtml(tournamentName) + '</strong>') + '</p>' + проГостя,
             actions: [
                 { label: L.regWithdrawNo },
                 { label: L.regWithdrawYes, danger: true, onClick: async function(close) {

@@ -13,14 +13,18 @@
 -- В форме две подкатегории — NTRP 7 (+0.25) и NTRP 7.5. Турнир на них не
 -- делится, поэтому заявки идут в один общий список.
 --
--- Имена сверены с карточками игроков: из 48 человек нашлись 40. Трое были
+-- Имена сверены с карточками игроков: из 48 человек нашлись 42. Трое были
 -- записаны с опечаткой и привязаны по совпадению: Норузбаев Мурат — это
 -- Мурат Норзубаев, Табалдыев Раимбек — Раимбек Табалдиев, Табалдыева
 -- Айканыш — Табалдиева Айканыш.
 --
--- Восьмерых в клубе нет — им заводим карточки гостя: в рейтинг такие не
+-- Шестерых в клубе нет — им заводим карточки гостя: в рейтинг такие не
 -- идут, но в паре и в сетке они живые игроки, а не строка с именем.
 -- Категория futures — по турниру, NTRP не ставим, его определит клуб.
+--
+-- Пара «Каракөз и Жакшылык» записалась одними именами, без фамилий, и
+-- сверка их не нашла — сперва завели дублями. На деле это Каракоз
+-- Болотбекова и Жакшылык Айтбаев, карточки в клубе есть.
 --
 -- «Определяется», «Ищу», «Нет» напарником не считаются: у восьми заявок
 -- партнёр пустой, и в админке рядом будет кнопка «+ Добавить партнёра».
@@ -42,9 +46,7 @@ VALUES
        ('aydar-aydarov', 'Айдар Айдаров', 'men', '🇰🇬', 'futures', false, true, false),
        ('ariana-kasymbekova', 'Ариана Касымбекова', 'women', '🇰🇬', 'futures', false, true, false),
        ('aynel-kazybaeva', 'Айнель Казыбаева', 'women', '🇰🇬', 'futures', false, true, false),
-       ('aazhara-koychumanova', 'Аажара Койчуманова', 'women', '🇰🇬', 'futures', false, true, false),
-       ('karakoz', 'Каракөз', 'women', '🇰🇬', 'futures', false, true, false),
-       ('zhakshylyk', 'Жакшылык', 'men', '🇰🇬', 'futures', false, true, false)
+       ('aazhara-koychumanova', 'Аажара Койчуманова', 'women', '🇰🇬', 'futures', false, true, false)
 ON CONFLICT (id) DO NOTHING;
 
 -- ---- Заявки ----
@@ -80,7 +82,7 @@ VALUES
        ('c0a30bae-30ee-4a38-a26a-4c6b339bd695', 'leonid-tsoy', NULL, false, NULL, NULL, NULL, 'waitlist', TIMESTAMPTZ '2026-09-10 14:40:30'),
        ('c0a30bae-30ee-4a38-a26a-4c6b339bd695', 'nursultan-ulukbekov', NULL, false, 'aazhara-koychumanova', NULL, NULL, 'waitlist', TIMESTAMPTZ '2026-09-14 12:33:30'),
        ('c0a30bae-30ee-4a38-a26a-4c6b339bd695', 'tabaldieva-aykanysh', NULL, false, NULL, NULL, NULL, 'waitlist', TIMESTAMPTZ '2026-09-14 14:50:18'),
-       ('c0a30bae-30ee-4a38-a26a-4c6b339bd695', 'karakoz', NULL, false, 'zhakshylyk', NULL, NULL, 'waitlist', TIMESTAMPTZ '2026-09-14 14:51:36'),
+       ('c0a30bae-30ee-4a38-a26a-4c6b339bd695', 'karakoz-bolotbekova', NULL, false, 'zhakshylyk-aytbaev', NULL, NULL, 'waitlist', TIMESTAMPTZ '2026-09-14 14:51:36'),
        ('c0a30bae-30ee-4a38-a26a-4c6b339bd695', 'azat-bazarkulov', NULL, false, NULL, NULL, NULL, 'waitlist', TIMESTAMPTZ '2026-09-15 08:21:51'),
        ('c0a30bae-30ee-4a38-a26a-4c6b339bd695', 'ahmedzhan-adzhuev', NULL, false, NULL, NULL, NULL, 'waitlist', TIMESTAMPTZ '2026-09-15 13:04:28'),
        ('c0a30bae-30ee-4a38-a26a-4c6b339bd695', 'evgeniy-gorskih', NULL, false, NULL, NULL, NULL, 'waitlist', TIMESTAMPTZ '2026-09-16 13:27:44');

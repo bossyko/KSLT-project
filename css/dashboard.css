@@ -2622,9 +2622,11 @@ select:-webkit-autofill {
     margin-bottom: 16px;
 }
 
+/* Размер окна — как в админке: 1.1rem заголовок, 0.9rem текст. Прежние
+   1.3 и 1 были крупнее всего остального на сайте, и окно выпирало */
 .db-modal-title {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--text-primary);
@@ -2643,8 +2645,8 @@ select:-webkit-autofill {
 .db-modal-close:hover { color: var(--text-primary); }
 
 .db-modal-text {
-    font-size: 1rem;
-    line-height: 1.65;
+    font-size: 0.9rem;
+    line-height: 1.6;
     color: var(--text-primary);
     margin: 0 0 18px;
 }
@@ -2664,6 +2666,13 @@ select:-webkit-autofill {
     gap: 10px;
     justify-content: flex-end;
     flex-wrap: wrap;
+}
+
+/* Кнопки окна — в одну ступень с кнопками админки: 10×20 при кегле 0.85.
+   Общие 12×32 при 0.9 делали окно шире содержимого */
+.db-modal-actions .db-btn {
+    padding: 10px 20px;
+    font-size: 0.85rem;
 }
 
 .db-modal-wait {
@@ -4946,6 +4955,14 @@ select:-webkit-autofill {
 
 /* Отпечатки устройств собирались давно, но человеку не показывались.
    А это первое, что нужно, когда телефон потеряли */
+
+/* С кем игрок выходит в паре — строкой под названием турнира. Раньше этого
+   не было видно вовсе, и человек шёл смотреть состав на страницу турнира */
+.db-tour-partner {
+    margin-top: 2px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
 
 .db-devices {
     display: flex;

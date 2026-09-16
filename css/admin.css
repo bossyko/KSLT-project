@@ -5642,18 +5642,27 @@ select.ad-field-input {
 /* Действия в строке заявки — словами, а не значками. Отдельный класс:
    у .ad-btn-icon ширина жёстко 32px, и надписи наезжали друг на друга */
 .ad-reg-act {
-    padding: 4px 8px;
+    padding: 4px 7px;
     border: none;
     border-radius: 6px;
     background: transparent;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     white-space: nowrap;
     cursor: pointer;
+    transition: background 0.12s, box-shadow 0.12s;
 }
 
+/* Наведение видно сразу: четыре действия стоят рядом, и человек должен
+   понимать, на какое он нажмёт, ещё до нажатия. Обводка — цветом самой
+   кнопки, чтобы «Отклонить» не путали с «Снять» */
 .ad-reg-act:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.10);
+    box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.ad-reg-act:active:not(:disabled) {
+    background: rgba(255, 255, 255, 0.18);
 }
 
 /* Выбор способа в окнах: «Из базы» или «Гость». Тот же вид, что у статуса

@@ -40,14 +40,17 @@
         search: pick('Type name...', 'Атын жазыңыз...', 'Введите имя...'),
         guestName: pick('Guest name', 'Коноктун аты', 'Имя гостя'),
         guestNtrp: pick('NTRP', 'NTRP', 'NTRP'),
-        guestGender: pick('Gender', 'Жынысы', 'Пол'),
+        guestGender: pick('Gender *', 'Жынысы *', 'Пол *'),
         men: pick('Men', 'Эркек', 'Мужской'),
         women: pick('Women', 'Аял', 'Женский'),
         send: pick('Send entry', 'Арыз жөнөтүү', 'Подать заявку'),
         cancel: pick('Cancel', 'Жокко чыгаруу', 'Отмена'),
-        needPartner: pick('Choose a partner or fill in the guest',
-                          'Өнөктөштү тандаңыз же конокту толтуруңуз',
-                          'Выберите напарника или заполните гостя'),
+        needPartner: pick('Choose a partner from the club',
+                          'Клубдан өнөктөш тандаңыз',
+                          'Выберите напарника из базы'),
+        needName: pick('Enter the guest name', 'Коноктун атын жазыңыз', 'Введите имя гостя'),
+        needGender: pick('Choose the guest gender', 'Коноктун жынысын тандаңыз', 'Укажите пол гостя'),
+        needNtrp: pick('Enter the guest NTRP', 'Коноктун NTRP көрсөтүңүз', 'Укажите NTRP гостя'),
         guestNote: pick('A pair with a guest keeps its place, but the manager confirms it.',
                         'Конок менен жуп ордун сактайт, бирок менеджер ырастайт.',
                         'Пара с гостем занимает место, но её подтверждает менеджер.'),
@@ -96,17 +99,25 @@
                 '<div class="de-block" data-block="guest" hidden>' +
                     '<input type="text" class="de-input de-guest-name" placeholder="' + L.guestName + '">' +
                     '<div class="de-two">' +
+                        // Страна списком, а не вводом: флаг с клавиатуры не
+                        // наберёшь, а руками легко ошибиться. По умолчанию наш —
+                        // приезжие редки, и обычно трогать поле не придётся
+                        '<select class="de-input de-guest-country" style="max-width:120px">' +
+                            (window.KSLT_COUNTRY && window.KSLT_COUNTRY.вариантыСтран
+                                ? window.KSLT_COUNTRY.вариантыСтран('🇰🇬', isEn ? 'en' : (isKg ? 'kg' : 'ru'))
+                                : '<option value="🇰🇬" selected>🇰🇬</option>') +
+                        '</select>' +
                         '<select class="de-input de-guest-ntrp">' +
-                            '<option value="">' + L.guestNtrp + '</option>' +
+                            '<option value="">' + L.guestNtrp + ' *</option>' +
                             // Других значений в NTRP не бывает: список снимает
                             // вопрос про точку, запятую и «45» вместо 4.5
                             [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7].map(function (v) {
                                 return '<option value="' + v + '">' + v.toFixed(1) + '</option>';
                             }).join('') +
                         '</select>' +
-                        // Пол выбирается любой: пара с гостем всё равно ждёт
-                        // решения менеджера, а в дружеский турнир женщину
-                        // заявляют и намеренно — запрещать за него не нам
+                        // Пол обязателен у любого гостя: без него пару не
+                        // проверить, а когда гость заведёт карточку, пол
+                        // придётся угадывать по имени
                         '<select class="de-input de-guest-gender">' +
                             '<option value="">' + L.guestGender + '</option>' +
                             '<option value="men">' + L.men + '</option>' +
@@ -162,6 +173,7 @@
                     overlay.querySelector('.de-guest-name').value = '';
                     overlay.querySelector('.de-guest-ntrp').value = '';
                     overlay.querySelector('.de-guest-gender').value = '';
+                    overlay.querySelector('.de-guest-country').value = '🇰🇬';
                 }
             });
         });
@@ -211,6 +223,35 @@
             }, 300);
         });
 
+        // Незаполненные поля называем прямо и все разом: раньше кнопка просто
+        // дёргалась, и человек гадал, чего от него хотят, а потом заполнял по
+        // одному полю за попытку
+        function пометить(поле, текст) {
+            поле.classList.add('de-bad');
+            var строка = document.createElement('p');
+            строка.className = 'de-bad-note';
+            строка.textContent = текст;
+            (поле.parentNode.classList.contains('de-two') ? поле.parentNode : поле)
+                .insertAdjacentElement('afterend', строка);
+        }
+
+        /** Показать все пробелы сразу. Курсор — в первый. */
+        function ошибки(список) {
+            снятьОшибки();
+            список.forEach(function (п) { пометить(п.поле, п.текст); });
+            if (список.length) список[0].поле.focus();
+            return список.length > 0;
+        }
+
+        function снятьОшибки() {
+            overlay.querySelectorAll('.de-bad').forEach(function (п) { п.classList.remove('de-bad'); });
+            overlay.querySelectorAll('.de-bad-note').forEach(function (п) { п.remove(); });
+        }
+
+        // Исправил — подсветку убираем сразу, не дожидаясь второй попытки
+        overlay.addEventListener('input', снятьОшибки);
+        overlay.addEventListener('change', снятьОшибки);
+
         // Отправка
         overlay.querySelector('.de-send').addEventListener('click', async function () {
             var кнопка = this;
@@ -222,17 +263,27 @@
             if (режим === 'solo') {
                 // Заявка без напарника: место занято, пару соберут позже
             } else if (режим === 'guest') {
-                var имя = overlay.querySelector('.de-guest-name').value.trim();
-                if (!имя) { кнопка.classList.add('de-shake'); setTimeout(function(){ кнопка.classList.remove('de-shake'); }, 400); return; }
-                extra.partner_external_name = имя;
-                var ntrp = overlay.querySelector('.de-guest-ntrp').value;
-                if (ntrp) extra.partner_external_ntrp = Number(ntrp);
-                var пол = overlay.querySelector('.de-guest-gender').value;
-                if (пол) extra.partner_gender = пол;
-                // Микст без пола партнёра не проверить — просим указать
-                if (микст && !пол) { кнопка.classList.add('de-shake'); setTimeout(function(){ кнопка.classList.remove('de-shake'); }, 400); return; }
+                var полеИмени = overlay.querySelector('.de-guest-name');
+                // NTRP и пол спрашиваем у любого гостя. Пустой NTRP молча
+                // считался нулём, и лимит суммы пары обходился сам собой; а
+                // пол понадобится, когда гость заведёт себе карточку —
+                // угадывать его по имени мы не станем
+                var полеNtrp = overlay.querySelector('.de-guest-ntrp');
+                var полеПолаГостя = overlay.querySelector('.de-guest-gender');
+
+                var пробелы = [];
+                if (!полеИмени.value.trim()) пробелы.push({ поле: полеИмени, текст: L.needName });
+                if (!полеNtrp.value) пробелы.push({ поле: полеNtrp, текст: L.needNtrp });
+                if (!полеПолаГостя.value) пробелы.push({ поле: полеПолаГостя, текст: L.needGender });
+                if (ошибки(пробелы)) return;
+
+                extra.partner_external_name = полеИмени.value.trim();
+                extra.partner_external_ntrp = Number(полеNtrp.value);
+                var страна = overlay.querySelector('.de-guest-country').value.trim();
+                if (страна) extra.partner_external_country = страна;
+                extra.partner_gender = полеПолаГостя.value;
             } else {
-                if (!скрытое.value) { кнопка.classList.add('de-shake'); setTimeout(function(){ кнопка.classList.remove('de-shake'); }, 400); return; }
+                if (ошибки(скрытое.value ? [] : [{ поле: поиск, текст: L.needPartner }])) return;
                 extra.partner_id = скрытое.value;
             }
 
@@ -293,8 +344,8 @@
             '.de-cancel{background:transparent;border:1px solid var(--border-subtle,#262626);color:var(--text-secondary,#aaa)}',
             '.de-send{background:var(--accent,#CCFF00);color:#0A0A0A}',
             '.de-send:disabled{opacity:.6;cursor:default}',
-            '.de-shake{animation:de-shake .35s}',
-            '@keyframes de-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}'
+            '.de-input.de-bad{border-color:#f44336;box-shadow:0 0 0 2px rgba(244,67,54,.15)}',
+            '.de-bad-note{margin:6px 0 0;font-size:.78rem;color:#f44336}'
         ].join('');
         document.head.appendChild(css);
     }

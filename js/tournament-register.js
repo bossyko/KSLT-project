@@ -97,6 +97,12 @@
             gender_mismatch: pick('This tournament is for another gender category',
                 'Бул мелдеш башка жыныс категориясы үчүн',
                 'Этот турнир для другой гендерной категории'),
+            partner_gender_required: pick('Choose the guest gender',
+                'Коноктун жынысын тандаңыз',
+                'Укажите пол гостя'),
+            partner_ntrp_required: pick('Enter the guest NTRP',
+                'Коноктун NTRP көрсөтүңүз',
+                'Укажите NTRP гостя'),
             partner_gender_mismatch: pick('Your partner does not fit this tournament by gender',
                 'Өнөктөшүңүз бул мелдешке жынысы боюнча туура келбейт',
                 'Напарник не подходит турниру по полу'),
@@ -344,6 +350,17 @@
         return info;
     }
 
+    function приписатьПроСостав(info, isEn, isKg) {
+        var текст = isEn
+            ? 'The lineup does not match the tournament by gender: the place is held, the manager decides.'
+            : (isKg
+                ? 'Курам мелдешке жынысы боюнча дал келбейт: орун сакталат, чечимди менеджер кабыл алат.'
+                : 'Состав не совпадает с турниром по полу: место за вами, решение принимает менеджер.');
+        info.note = info.note ? (info.note + ' ' + текст) : текст;
+        info.short = isEn ? 'Under review' : (isKg ? 'Каралууда' : 'На рассмотрении');
+        return info;
+    }
+
     async function submit(client, tournamentId, opts) {
         opts = opts || {};
         var isEn = !!opts.isEn;
@@ -361,6 +378,10 @@
         var info = resultText(reg.data, isEn, isKg);
         var сГостем = opts.extra && opts.extra.partner_external_name;
         if (сГостем && !(reg.data && reg.data.error)) приписатьПроГостя(info, isEn, isKg);
+        // Состав не сошёлся с турниром: заявка принята, место держится, но
+        // играть пару пустят только с одобрения клуба — сказать об этом надо
+        // сразу, а не оставлять человека в уверенности, что он в сетке
+        if (reg.data && reg.data.gender_review) приписатьПроСостав(info, isEn, isKg);
         showModal(info, isEn, isKg);
         info.created = !(reg.data && reg.data.error && reg.data.error !== 'already_registered');
         return info;

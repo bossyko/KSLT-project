@@ -266,7 +266,7 @@
                     '</div>' +
                     '<div style="display:flex;gap:12px;margin-top:10px;">' +
                         '<div class="ad-field" style="flex:1;">' +
-                            '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + '</label>' +
+                            '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + ' *</label>' +
                             '<input type="number" class="ad-field-input" id="adPartnerExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
                         '</div>' +
                         '<div class="ad-field" style="flex:1;">' +
@@ -764,6 +764,91 @@
         }, 100);
     }
 
+    /**
+     * Решение по заявке, которая ждёт клуб.
+     *
+     * Показывает, что именно не так — гость без карточки, состав по полу или
+     * то и другое разом, — и даёт поправить данные гостя до одобрения: NTRP
+     * игрок вписывает сам, и проверить его может только человек.
+     *
+     * Одобрение снимает обе пометки: заявка идёт в жеребьёвку. Отказ снимает
+     * заявку с турнира, и место уходит первому в очереди.
+     */
+    function открытьОкноРешения(regId, tournament, tournamentId, registrations, playersMap) {
+        var reg = (registrations || []).find(function(r) { return r.id === regId; });
+        if (!reg) return;
+
+        var гость = reg.partner_external_name && !reg.guest_confirmed;
+        var поСоставу = reg.gender_confirmed === false;
+
+        var кто = reg.player_id
+            ? ((playersMap[reg.player_id] || {}).name || reg.player_id)
+            : (reg.external_name || '—');
+        var напарник = reg.partner_id
+            ? ((playersMap[reg.partner_id] || {}).name || reg.partner_id)
+            : (reg.partner_external_name || '—');
+
+        var причины = '';
+        if (гость) причины += '<li>' + L.regReviewWhyGuest + '</li>';
+        if (поСоставу) причины += '<li>' + L.regReviewWhyGender + '</li>';
+
+        var выборПола = function(id, значение) {
+            return '<select class="ad-field-input" id="' + id + '">' +
+                '<option value=""' + (значение ? '' : ' selected') + '>—</option>' +
+                '<option value="men"' + (значение === 'men' ? ' selected' : '') + '>' + L.genderMen + '</option>' +
+                '<option value="women"' + (значение === 'women' ? ' selected' : '') + '>' + L.genderWomen + '</option>' +
+            '</select>';
+        };
+
+        var html =
+            '<div style="display:flex;flex-direction:column;gap:12px;min-width:340px;text-align:left;">' +
+                '<div style="font-size:0.9rem;color:var(--text-primary);">' +
+                    A.esc(кто) + ' \u2014 ' + A.esc(напарник) +
+                '</div>' +
+                '<ul style="margin:0;padding-left:18px;color:var(--text-secondary);font-size:0.82rem;line-height:1.5;">' +
+                    причины +
+                '</ul>' +
+                (гость
+                    ? '<div style="display:flex;gap:12px;">' +
+                        '<div class="ad-field" style="flex:1;">' +
+                            '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + ' *</label>' +
+                            '<input type="number" class="ad-field-input" id="adReviewNtrp" min="1.0" max="7.0" step="0.5" value="' +
+                                (reg.partner_external_ntrp || '') + '">' +
+                        '</div>' +
+                        '<div class="ad-field" style="flex:1;">' +
+                            '<label class="ad-field-label">' + L.doublesExtPartnerGender + '</label>' +
+                            выборПола('adReviewGender', reg.partner_gender) +
+                        '</div>' +
+                    '</div>'
+                    : '') +
+            '</div>';
+
+        A.showConfirm(L.regReviewTitle, html, async function() {
+            var правки = { guest_confirmed: true, gender_confirmed: true };
+
+            if (гость) {
+                var ntrp = parseFloat(document.getElementById('adReviewNtrp').value);
+                var пол = document.getElementById('adReviewGender').value;
+                if (!ntrp) { A.showToast(L.regNtrpRequired, 'error'); return; }
+                if (!пол) { A.showToast(L.regGenderRequired, 'error'); return; }
+                правки.partner_external_ntrp = ntrp;
+                правки.partner_gender = пол;
+            }
+
+            // Одобрение снимает все пометки, даже если состав так и остался
+            // несходящимся: менеджер видит пару перед собой и допускает её
+            // сознательно. Пересчитывать за него — значит отменять решение,
+            // и кнопка «Решить» оставалась на месте после одобрения
+
+            var r = await A.client.from('tournament_registrations').update(правки).eq('id', regId);
+            if (r.error) { A.showToast(r.error.message, 'error'); return; }
+
+            await сообщитьОЗаявке(regId, гость ? 'guest_ok' : 'gender_ok');
+            A.showToast(L.regReviewDone, 'success');
+            renderBracketManagement(tournamentId, 'registrations');
+        }, L.regReviewApprove);
+    }
+
     function openReplaceModal(regId, target, tournament, tournamentId, registrations, playersMap) {
         var reg = registrations.find(function(r) { return r.id === regId; });
         if (!reg) return;
@@ -790,14 +875,25 @@
                         '<label class="ad-field-label">' + L.regExternalName + '</label>' +
                         '<input type="text" class="ad-field-input" id="adReplaceExtName" placeholder="' + L.regExternalName + '">' +
                     '</div>' +
+                    // Страна, NTRP и пол — одним рядом и одного размера.
+                    // Страна стояла отдельной широкой полосой с крошечным
+                    // флагом посередине и была выше соседнего поля
                     '<div style="display:flex;gap:12px;margin-top:10px;">' +
                         '<div class="ad-field" style="flex:1;">' +
                             '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
-                            '<input type="text" class="ad-field-input" id="adReplaceExtCountry" placeholder="🇰🇬" style="font-size:1.3rem;text-align:center;">' +
+                            полеСтраны('adReplaceExtCountry') +
                         '</div>' +
                         '<div class="ad-field" style="flex:1;">' +
-                            '<label class="ad-field-label">' + L.regExternalNtrp + '</label>' +
+                            '<label class="ad-field-label">' + L.regExternalNtrp + ' *</label>' +
                             '<input type="number" class="ad-field-input" id="adReplaceExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
+                        '</div>' +
+                        '<div class="ad-field" style="flex:1;">' +
+                            '<label class="ad-field-label">' + L.regExternalGender + ' *</label>' +
+                            '<select class="ad-field-input" id="adReplaceExtGender">' +
+                                '<option value="">—</option>' +
+                                '<option value="men">' + L.genderMen + '</option>' +
+                                '<option value="women">' + L.genderWomen + '</option>' +
+                            '</select>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -808,11 +904,14 @@
             var extName = document.getElementById('adReplaceExtName').value.trim();
             var extCountry = document.getElementById('adReplaceExtCountry').value.trim() || null;
             var extNtrp = parseFloat(document.getElementById('adReplaceExtNtrp').value) || null;
+            var extGender = document.getElementById('adReplaceExtGender').value;
 
             if (!selectedId && !extName) {
                 A.showToast(isEn ? 'Select a player or enter external name' : 'Выберите игрока или введите имя', 'error');
                 return;
             }
+            if (!selectedId && !extGender) { A.showToast(L.regGenderRequired, 'error'); return; }
+            if (!selectedId && !extNtrp) { A.showToast(L.regNtrpRequired, 'error'); return; }
 
             var updateData = {};
 
@@ -822,10 +921,14 @@
                     updateData.partner_id = selectedId;
                     updateData.partner_external_name = null;
                     updateData.partner_external_ntrp = null;
+                    updateData.partner_gender = null;
+                    updateData.partner_external_country = null;
                 } else {
                     updateData.partner_id = null;
                     updateData.partner_external_name = extName;
                     updateData.partner_external_ntrp = extNtrp;
+                    updateData.partner_gender = extGender;
+                    updateData.partner_external_country = extCountry;
                 }
             } else {
                 // Replace main player
@@ -835,14 +938,26 @@
                     updateData.external_name = null;
                     updateData.external_country = null;
                     updateData.external_ntrp = null;
+                    updateData.external_gender = null;
                 } else {
                     updateData.player_id = null;
                     updateData.is_external = true;
                     updateData.external_name = extName;
                     updateData.external_country = extCountry;
                     updateData.external_ntrp = extNtrp;
+                    updateData.external_gender = extGender;
                 }
             }
+
+            // Состав после замены сверяем заново: менеджер мог поставить в
+            // микст второго мужчину, и такая пара снова ждёт решения
+            var полПервого = target === 'partner'
+                ? полЗаявки(reg, 'player', playersMap)
+                : (selectedId ? (playersMap[selectedId] || {}).gender : extGender);
+            var полВторого = target === 'partner'
+                ? (selectedId ? (playersMap[selectedId] || {}).gender : extGender)
+                : полЗаявки(reg, 'partner', playersMap);
+            updateData.gender_confirmed = составСошёлся(tournament, полПервого, полВторого);
 
             // ---- Замена на месте, когда сетка уже есть ----
             //
@@ -1077,6 +1192,78 @@
         if (isFriendlyTournament(tournament)) return true;
         if (!tournament.level_id) return true;
         return tournament.format !== 'singles';
+    }
+
+    /**
+     * Сошёлся ли состав заявки с турниром по полу.
+     *
+     * В мужском или женском турнире оба участника должны совпадать с ним.
+     * В миксте пара обязана быть разнополой. Неизвестный пол не считаем
+     * нарушением: проверять нечего, а держать заявку из-за пустоты нечестно.
+     */
+    /**
+     * Ждёт ли заявка решения клуба.
+     *
+     * Две причины: гость без карточки — клуб не знает ни его рейтинга, ни
+     * того, придёт ли он; и состав, не сошедшийся с турниром по полу. Обе
+     * держат место за заявкой, но в сетку её не пускают.
+     */
+    function нужноРешение(reg) {
+        if (!reg) return false;
+        if (reg.status === 'withdrawn' || reg.status === 'rejected') return false;
+        if (reg.partner_external_name && !reg.guest_confirmed) return true;
+        return reg.gender_confirmed === false;
+    }
+
+    /**
+     * Выпадающий список стран. Ввод флага руками — прямой путь к опечатке:
+     * эмодзи с клавиатуры не наберёшь. Список общий, из js/country-utils.js.
+     */
+    function полеСтраны(id, выбран) {
+        var CU = window.KSLT_COUNTRY;
+        var варианты = CU && CU.вариантыСтран
+            ? CU.вариантыСтран(выбран || '🇰🇬', isEn ? 'en' : 'ru')
+            : '<option value="🇰🇬" selected>🇰🇬</option>';
+        return '<select class="ad-field-input" id="' + id + '">' + варианты + '</select>';
+    }
+
+    /** Кто в заявке — для окна подтверждения: «Иванов и Петрова». */
+    function ктоВЗаявке(regId, registrations, playersMap) {
+        var reg = (registrations || []).find(function(r) { return r.id === regId; });
+        if (!reg) return '';
+        var имя = function(id, внешнее) {
+            if (id) return (playersMap[id] || {}).name || id;
+            return внешнее || '';
+        };
+        var первый = имя(reg.player_id, reg.external_name);
+        var второй = имя(reg.partner_id, reg.partner_external_name);
+        return второй ? (первый + ' \u0438 ' + второй) : первый;
+    }
+
+    /** Пол стороны заявки: у игрока из карточки, у гостя — из самой заявки. */
+    function полЗаявки(reg, сторона, playersMap) {
+        if (!reg) return null;
+        if (сторона === 'partner') {
+            if (reg.partner_id) return (playersMap[reg.partner_id] || {}).gender || null;
+            return reg.partner_gender || null;
+        }
+        if (reg.player_id) return (playersMap[reg.player_id] || {}).gender || null;
+        return reg.external_gender || null;
+    }
+
+    function составСошёлся(tournament, полПервого, полВторого) {
+        if (!tournament) return true;
+        var турнир = tournament.gender;
+
+        if (турнир === 'men' || турнир === 'women') {
+            if (полПервого && полПервого !== турнир) return false;
+            if (полВторого && полВторого !== турнир) return false;
+            return true;
+        }
+        if (tournament.format === 'mixed_doubles') {
+            if (полПервого && полВторого && полПервого === полВторого) return false;
+        }
+        return true;
     }
 
     function isFriendlyTournament(tournament) {
@@ -1964,36 +2151,51 @@
 
         // Waitlist: reject buttons
         container.querySelectorAll('.ad-btn-reject').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
+            btn.addEventListener('click', function() {
                 var regId = btn.dataset.regId;
-                btn.disabled = true;
-                await A.client.from('tournament_registrations').update({ status: 'rejected' }).eq('id', regId);
-                await сообщитьОЗаявке(regId, 'rejected');
+                // Спрашиваем, кого именно отклоняем: четыре кнопки стоят
+                // рядом, и промахнуться легко, а отказ уводит человека с
+                // турнира и отдаёт место очереди
+                A.showConfirm(L.regAskTitle,
+                    '<p style="margin:0;">' + L.regAskReject.replace('{кто}',
+                        A.esc(ктоВЗаявке(regId, registrations, playersMap))) + '</p>',
+                    async function() {
+                        btn.disabled = true;
+                        await A.client.from('tournament_registrations')
+                            .update({ status: 'rejected' }).eq('id', regId);
+                        await сообщитьОЗаявке(regId, 'rejected');
 
-                // Отказать можно и тому, кто стоял в сетке: место освободилось,
-                // и первый из очереди занимает его сам
-                await поднятьИзОчереди(tournamentId);
+                        // Отказать можно и тому, кто стоял в сетке: место
+                        // освободилось, и первый из очереди занимает его сам
+                        await поднятьИзОчереди(tournamentId);
 
-                A.showToast(L.regRejected);
-                renderBracketManagement(tournamentId, 'registrations');
+                        A.showToast(L.regRejected);
+                        renderBracketManagement(tournamentId, 'registrations');
+                    }, L.regReject);
             });
         });
 
         // Main draw: move to waitlist buttons
         container.querySelectorAll('.ad-btn-to-waitlist').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
+            btn.addEventListener('click', function() {
                 var regId = btn.dataset.regId;
-                btn.disabled = true;
-                await A.client.from('tournament_registrations').update({ status: 'waitlist' }).eq('id', regId);
-                await сообщитьОЗаявке(regId, 'waitlist');
+                A.showConfirm(L.regAskTitle,
+                    '<p style="margin:0;">' + L.regAskWaitlist.replace('{кто}',
+                        A.esc(ктоВЗаявке(regId, registrations, playersMap))) + '</p>',
+                    async function() {
+                        btn.disabled = true;
+                        await A.client.from('tournament_registrations')
+                            .update({ status: 'waitlist' }).eq('id', regId);
+                        await сообщитьОЗаявке(regId, 'waitlist');
 
-                // Место освободилось — первый из очереди занимает его сам.
-                // Раньше место просто повисало, и лист ожидания стоял, пока
-                // менеджер не вспоминал поднять кого-то руками
-                await поднятьИзОчереди(tournamentId);
+                        // Место освободилось — первый из очереди занимает его
+                        // сам. Раньше место повисало, и очередь стояла, пока
+                        // менеджер не вспоминал поднять кого-то руками
+                        await поднятьИзОчереди(tournamentId);
 
-                A.showToast(L.regMovedToWaitlist);
-                renderBracketManagement(tournamentId, 'registrations');
+                        A.showToast(L.regMovedToWaitlist);
+                        renderBracketManagement(tournamentId, 'registrations');
+                    }, L.regMoveToWaitlistShort);
             });
         });
 
@@ -2031,14 +2233,23 @@
                             '<label class="ad-field-label">' + L.regExternalName + ' *</label>' +
                             '<input type="text" class="ad-field-input" id="adExtName" placeholder="' + (isEn ? 'John Smith' : 'Иванов Иван') + '">' +
                         '</div>' +
+                        // Страна, NTRP и пол — одним рядом и одного размера
                         '<div style="display:flex;gap:12px;">' +
                             '<div class="ad-field" style="flex:1;">' +
                                 '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
-                                '<input type="text" class="ad-field-input" id="adExtCountry" placeholder="🇰🇬" style="font-size:1.3rem;text-align:center;">' +
+                                полеСтраны('adExtCountry') +
                             '</div>' +
                             '<div class="ad-field" style="flex:1;">' +
-                                '<label class="ad-field-label">' + L.regExternalNtrp + '</label>' +
+                                '<label class="ad-field-label">' + L.regExternalNtrp + ' *</label>' +
                                 '<input type="number" class="ad-field-input" id="adExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
+                            '</div>' +
+                            '<div class="ad-field" style="flex:1;">' +
+                                '<label class="ad-field-label">' + L.regExternalGender + ' *</label>' +
+                                '<select class="ad-field-input" id="adExtGender">' +
+                                    '<option value="">—</option>' +
+                                    '<option value="men">' + L.genderMen + '</option>' +
+                                    '<option value="women">' + L.genderWomen + '</option>' +
+                                '</select>' +
                             '</div>' +
                         '</div>' +
                         (isDbl ? (
@@ -2049,11 +2260,15 @@
                         '</div>' +
                         '<div style="display:flex;gap:12px;">' +
                             '<div class="ad-field" style="flex:1;">' +
-                                '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + '</label>' +
+                                '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
+                                полеСтраны('adExtPartnerCountry') +
+                            '</div>' +
+                            '<div class="ad-field" style="flex:1;">' +
+                                '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + ' *</label>' +
                                 '<input type="number" class="ad-field-input" id="adExtPartnerNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
                             '</div>' +
                             '<div class="ad-field" style="flex:1;">' +
-                                '<label class="ad-field-label">' + L.doublesExtPartnerGender + '</label>' +
+                                '<label class="ad-field-label">' + L.doublesExtPartnerGender + ' *</label>' +
                                 '<select class="ad-field-input" id="adExtPartnerGender">' +
                                     '<option value="">—</option>' +
                                     '<option value="men">' + L.genderMen + '</option>' +
@@ -2068,6 +2283,9 @@
                     if (!extName) { A.showToast(isEn ? 'Name is required' : 'Имя обязательно', 'error'); return; }
                     var extCountry = document.getElementById('adExtCountry').value.trim() || null;
                     var extNtrp = parseFloat(document.getElementById('adExtNtrp').value) || null;
+                    var extGender = document.getElementById('adExtGender').value;
+                    if (!extGender) { A.showToast(L.regGenderRequired, 'error'); return; }
+                    if (!extNtrp) { A.showToast(L.regNtrpRequired, 'error'); return; }
 
                     var insertData = {
                         tournament_id: tournamentId,
@@ -2076,6 +2294,8 @@
                         external_name: extName,
                         external_country: extCountry,
                         external_ntrp: extNtrp,
+                        external_gender: extGender,
+                        gender_confirmed: составСошёлся(tournament, extGender, null),
                         status: 'approved'
                     };
 
@@ -2085,9 +2305,21 @@
                         var partnerNtrpEl = document.getElementById('adExtPartnerNtrp');
                         var partnerGenderEl = document.getElementById('adExtPartnerGender');
                         if (partnerNameEl && partnerNameEl.value.trim()) {
+                            if (!partnerGenderEl || !partnerGenderEl.value) {
+                                A.showToast(L.regGenderRequired, 'error'); return;
+                            }
+                            if (!partnerNtrpEl || !parseFloat(partnerNtrpEl.value)) {
+                                A.showToast(L.regNtrpRequired, 'error'); return;
+                            }
+                            var partnerCountryEl = document.getElementById('adExtPartnerCountry');
                             insertData.partner_external_name = partnerNameEl.value.trim();
                             insertData.partner_external_ntrp = partnerNtrpEl ? (parseFloat(partnerNtrpEl.value) || null) : null;
-                            insertData.partner_gender = partnerGenderEl ? (partnerGenderEl.value || null) : null;
+                            insertData.partner_gender = partnerGenderEl.value;
+                            insertData.partner_external_country = partnerCountryEl ? (partnerCountryEl.value.trim() || null) : null;
+                            // Состав не сошёлся с турниром — заявку берём, но
+                            // место держим до решения. То же правило, что при
+                            // подаче игроком
+                            insertData.gender_confirmed = составСошёлся(tournament, extGender, partnerGenderEl.value);
 
                             // NTRP combined check
                             if (tournament.ntrp_combined_max && extNtrp && insertData.partner_external_ntrp) {
@@ -2313,34 +2545,10 @@
             });
         }
 
-        // ---- Гость в паре: подтвердить или убрать ----
-        container.querySelectorAll('.ad-btn-guest-ok').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
-                btn.disabled = true;
-                var r = await A.client.from('tournament_registrations')
-                    .update({ guest_confirmed: true }).eq('id', btn.dataset.regId);
-                if (r.error) { A.showToast(r.error.message, 'error'); btn.disabled = false; return; }
-                await сообщитьОЗаявке(btn.dataset.regId, 'guest_ok');
-                A.showToast(L.regGuestConfirmed, 'success');
-                renderBracketManagement(tournamentId, 'registrations');
-            });
-        });
-
-        container.querySelectorAll('.ad-btn-guest-drop').forEach(function(btn) {
+        // ---- Решение по заявке: одно окно на все причины ----
+        container.querySelectorAll('.ad-btn-review').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                A.showConfirm(L.regGuestDrop, '<p style="margin:0;">' + L.regGuestDropHint + '</p>',
-                    async function() {
-                        var r = await A.client.from('tournament_registrations').update({
-                            partner_external_name: null,
-                            partner_external_ntrp: null,
-                            partner_gender: null,
-                            guest_confirmed: false
-                        }).eq('id', btn.dataset.regId);
-                        if (r.error) { A.showToast(r.error.message, 'error'); return; }
-                        await сообщитьОЗаявке(btn.dataset.regId, 'guest_removed');
-                        A.showToast(L.regGuestDropped, 'success');
-                        renderBracketManagement(tournamentId, 'registrations');
-                    }, L.regGuestDropShort);
+                открытьОкноРешения(btn.dataset.regId, tournament, tournamentId, registrations, playersMap);
             });
         });
 
@@ -2950,11 +3158,15 @@
                 return r.partner_external_name && !r.guest_confirmed &&
                     r.status !== 'withdrawn' && r.status !== 'rejected';
             });
-            if (сГостем.length) {
+            // Заявки, ждущие решения клуба. Причин две — гость без карточки
+            // и состав, не сошедшийся с турниром по полу, — но плашка одна:
+            // менеджеру важно, сколько заявок ждёт его, а не по какой статье
+            var ждут = registrations.filter(нужноРешение);
+            if (ждут.length) {
                 html += '<div class="ad-alert ad-alert-warning" style="margin-bottom:12px;">' +
-                    '\u26A0 ' + L.regGuestWait + ': ' + сГостем.length +
+                    '\u26A0 ' + L.regReview + ': ' + ждут.length +
                     '<div style="font-weight:400;color:var(--text-secondary);font-size:0.82rem;margin-top:4px;">' +
-                    L.regGuestWaitHint + '</div></div>';
+                    L.regReviewHint + '</div></div>';
             }
 
             // Сколько сеяных уже расставлено. Проставлять всех необязательно —
@@ -3192,17 +3404,21 @@
         // вместо него выходит другой, место и посев остаются за заявкой
         var стоп = заморожено ? ' disabled style="opacity:0.35;cursor:not-allowed;' : ' style="';
         var стопЗамены = ' style="';
-        var actionsTd = '<td style="text-align:center;white-space:nowrap;"><div style="display:flex;gap:6px;justify-content:center;align-items:center;">';
+        // Кнопок бывает четыре: решить, заменить, снять, отклонить. Держим их
+        // одной строкой — столбиком они разъезжались на три этажа и строка
+        // таблицы прыгала. Помещаются за счёт мелкого кегля, см. .ad-reg-act
+        var actionsTd = '<td style="text-align:center;"><div style="display:flex;gap:2px;' +
+            'justify-content:flex-end;align-items:center;white-space:nowrap;">';
 
         // Гость ждёт решения: подтвердить пару или убрать напарника. Заявку
         // целиком не снимаем — первый номер не виноват, найдёт другого
-        if (reg.partner_external_name && !reg.guest_confirmed) {
-            actionsTd += '<button class="ad-reg-act ad-btn-guest-ok" data-reg-id="' + reg.id + '"' +
-                ' title="' + L.regGuestOk + '" style="color:#4caf50;font-size:0.8rem;font-weight:600;">' +
-                L.regGuestOkShort + '</button>' +
-                '<button class="ad-reg-act ad-btn-guest-drop" data-reg-id="' + reg.id + '"' +
-                ' title="' + L.regGuestDrop + '" style="color:#f44336;font-size:0.8rem;font-weight:600;">' +
-                L.regGuestDropShort + '</button>';
+        // Заявка ждёт решения — одна кнопка на все причины. Раньше их было
+        // три: подтвердить гостя, убрать гостя, одобрить состав. Менеджер
+        // выбирал между кнопками, не видя, что именно не так с заявкой
+        if (нужноРешение(reg)) {
+            actionsTd += '<button class="ad-reg-act ad-btn-review" data-reg-id="' + reg.id + '"' +
+                ' title="' + L.regReviewTitle + '" style="color:#FFA726;font-size:0.8rem;font-weight:600;">' +
+                L.regReviewBtn + '</button>';
         }
 
         if (group === 'main') {
@@ -4807,7 +5023,11 @@
             return {
                 круг: m.round_number,
                 номер: m.match_order,
-                людей: (m.player1_id ? 1 : 0) + (m.player2_id ? 1 : 0)
+                // Метка — обещание человека: он приедет, когда доиграет его
+                // группа или доп. матч. Клетка с меткой ждёт соперника, а не
+                // считается проходом без игры
+                людей: (m.player1_id || m.slot1_label ? 1 : 0) +
+                       (m.player2_id || m.slot2_label ? 1 : 0)
             };
         }));
     }
@@ -5372,6 +5592,18 @@
         // Get approved registrations
         var isDbl = isDoublesTournament(tournament);
         var approved = registrations.filter(function(r) { return r.status === 'approved'; });
+
+        // Состав, не сошедшийся с турниром, ждёт решения клуба: место за ним
+        // держится, но в сетку он не идёт. Иначе в микст попадёт пара одного
+        // пола, и сетка соберётся по составу, которого клуб не одобрял
+        var ждутРешения = approved.filter(function(r) { return r.gender_confirmed === false; });
+        if (ждутРешения.length) {
+            A.showNotice(L.regGenderReview,
+                '<p style="margin:0;">' + L.regGenderReviewHint + '</p>' +
+                '<p style="margin:8px 0 0;">' + L.regGenderReview + ': ' + ждутРешения.length + '</p>',
+                null, 'warn');
+            return;
+        }
 
         // Doubles: filter out unpaired registrations
         if (isDbl) {

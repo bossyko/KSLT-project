@@ -100,7 +100,10 @@
         // Только там, где страница сама попросила: на «Турнирах» все разряды
         // должны выглядеть одинаково, и вытянутая афиша ломала бы ряд
         if (!t.боком || !TC || !t._row || t.status === 'past') return '';
-        return '<div class="to-featured-side">' +
+        // Состояние и пол — на обёртке: по ним фильтрует страница. Без них
+        // блок с единственным турниром считался пустым и прятался целиком
+        return '<div class="to-featured-side" data-status="' + esc(t.status) + '"' +
+            ' data-gender="' + esc(t._gender || 'all') + '">' +
             TC.render(t._row, { featured: true, taken: t._taken }) +
         '</div>';
     }

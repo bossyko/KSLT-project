@@ -89,11 +89,52 @@
         return flag + ' ' + name;
     }
 
+
+    /**
+     * Страны, которые встречаются в клубе.
+     *
+     * Ввод флага руками — прямой путь к опечатке: эмодзи не наберёшь с
+     * клавиатуры, а код из двух букв легко спутать. Поэтому список: короткий,
+     * свой первым, соседи следом, дальше те, откуда к нам приезжали.
+     */
+    var СТРАНЫ = [
+        { code: 'KG', ru: 'Кыргызстан',   en: 'Kyrgyzstan',   kg: 'Кыргызстан' },
+        { code: 'KZ', ru: 'Казахстан',    en: 'Kazakhstan',   kg: 'Казакстан' },
+        { code: 'UZ', ru: 'Узбекистан',   en: 'Uzbekistan',   kg: 'Өзбекстан' },
+        { code: 'TJ', ru: 'Таджикистан',  en: 'Tajikistan',   kg: 'Тажикстан' },
+        { code: 'TM', ru: 'Туркменистан', en: 'Turkmenistan', kg: 'Түркмөнстан' },
+        { code: 'RU', ru: 'Россия',       en: 'Russia',       kg: 'Россия' },
+        { code: 'AZ', ru: 'Азербайджан',  en: 'Azerbaijan',   kg: 'Азербайжан' },
+        { code: 'TR', ru: 'Турция',       en: 'Turkey',       kg: 'Түркия' },
+        { code: 'CN', ru: 'Китай',        en: 'China',        kg: 'Кытай' },
+        { code: 'KR', ru: 'Южная Корея',  en: 'South Korea',  kg: 'Түштүк Корея' },
+        { code: 'IN', ru: 'Индия',        en: 'India',        kg: 'Индия' },
+        { code: 'PK', ru: 'Пакистан',     en: 'Pakistan',     kg: 'Пакистан' },
+        { code: 'DE', ru: 'Германия',     en: 'Germany',      kg: 'Германия' },
+        { code: 'GB', ru: 'Великобритания', en: 'United Kingdom', kg: 'Улуу Британия' },
+        { code: 'US', ru: 'США',          en: 'USA',          kg: 'АКШ' }
+    ];
+
+    /**
+     * Готовые пункты списка: «🇰🇬 Кыргызстан». Значение — флаг, как и хранится
+     * в заявке, чтобы читающей стороне ничего не переводить.
+     */
+    function вариантыСтран(выбран, lang) {
+        lang = lang || 'ru';
+        return СТРАНЫ.map(function (с) {
+            var флаг = flagEmoji(с.code);
+            var выбрано = (выбран === флаг || выбран === с.code) ? ' selected' : '';
+            return '<option value="' + флаг + '"' + выбрано + '>' + флаг + ' ' + (с[lang] || с.en) + '</option>';
+        }).join('');
+    }
+
     // Export
     window.KSLT_COUNTRY = {
         flagEmoji: flagEmoji,
         normalizeCountry: normalizeCountry,
         countryName: countryName,
-        renderCountry: renderCountry
+        renderCountry: renderCountry,
+        страны: СТРАНЫ,
+        вариантыСтран: вариантыСтран
     };
 })();

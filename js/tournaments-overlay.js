@@ -613,7 +613,9 @@
             if (!section || !b.grid) return;
 
             var visible = 0;
-            b.grid.querySelectorAll('.to-featured, .to-compact').forEach(function(card) {
+            // Карточка с афишей сбоку — тоже карточка: когда турнир в блоке
+            // один, рисуется именно она, и без неё блок считался пустым
+            b.grid.querySelectorAll('.to-featured, .to-featured-side, .to-compact').forEach(function(card) {
                 var cardStatus = card.dataset.status || '';
                 var cardGender = card.dataset.gender || 'all';
                 var statusMatch = (b.id !== 'upcoming') || status === 'all'

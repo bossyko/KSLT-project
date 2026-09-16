@@ -1,6 +1,7 @@
   // ============================================
   // KSLT — Tournament Registration Edge Function
-  // POST { tournament_id, partner_id?, partner_external_name?, partner_external_ntrp?, partner_gender? }
+  // POST { tournament_id, partner_id?, partner_external_name?, partner_external_ntrp?,
+  //        partner_gender?, partner_external_country? }
   //
   // Решает судьбу заявки по правилам допуска и возвращает результат клиенту.
   // Вся логика здесь, а не на клиенте: вытеснение меняет чужую заявку,
@@ -169,7 +170,7 @@
       // ---- Турнир ----
       const { data: tournament } = await db
         .from('tournaments')
-        .select('id, title, category_id, gender, format, status, max_participants, reserved_spots, ntrp_min, ntrp_max, ntrp_combined_max')
+        .select('id, title, category_id, gender, format, status, max_participants, reserved_spots, ntrp_min, ntrp_max, ntrp_combined_max, level_id')
         .eq('id', tournamentId)
         .single()
 
@@ -199,7 +200,7 @@
           .not('status', 'in', '("withdrawn","rejected")')
           .maybeSingle()
         if (какНапарник) {
-          if (body.leave_pair) return await выйтиИзПары(db, какНапарник, player.id)
+          if (body.leave_pair) return await выйтиИзПары(db, какНапарник, player.id, serviceKey)
           return await сменитьНапарника(db, какНапарник, body, player, tournament)
         }
         // Живой заявки нет. Раньше второй номер в этом месте молча проваливался
@@ -233,7 +234,7 @@
           return await сменитьНапарника(db, existing, body, player, tournament)
         }
         if (body.leave_pair) {
-          return await выйтиИзПары(db, existing, player.id)
+          return await выйтиИзПары(db, existing, player.id, serviceKey)
         }
         return json({ error: 'already_registered', status: existing.status }, 409)
       }
@@ -287,26 +288,43 @@
       const playerGender = normalizeGender(player.gender || profile.gender)
       const partnerGender = await loadPartnerGender(db, body)
 
+      // Пол гостя спрашиваем всегда: без него пару не проверить, а когда
+      // гость заведёт карточку, пол придётся угадывать по имени
+      if (body.partner_external_name && !partnerGender) {
+        return json({ error: 'partner_gender_required' }, 400)
+      }
+      // NTRP — тоже: пустое поле считалось нулём, и лимит суммы пары
+      // обходился сам собой. Значение проверит менеджер, но оно должно быть
+      if (!isStaff && body.partner_external_name && !body.partner_external_ntrp) {
+        return json({ error: 'partner_ntrp_required' }, 400)
+      }
+
+      // Состав не сошёлся с турниром — это ещё не отказ.
+      //
+      // В рейтинговом одиночном отказ: очки идут в мужской или женский
+      // рейтинг, и чужой пол там невозможен. В остальных турнирах заявку
+      // принимаем, но помечаем: место держится по времени подачи, как у
+      // всех, а в сетку она не пойдёт, пока менеджер не решит. Женскую пару
+      // в мужской парный или двух мужчин в микст заявляют осознанно, и
+      // решать это человеку, а не проверке.
+      const рейтинговый = tournament.format === 'singles' &&
+                          tournament.category_id !== 'friendly' && !!tournament.level_id
+      let полСошёлся = true
+
       if (tournament.gender && tournament.gender !== 'mixed') {
         if (playerGender && playerGender !== tournament.gender) {
-          return json({ error: 'gender_mismatch' }, 403)
+          if (рейтинговый) return json({ error: 'gender_mismatch' }, 403)
+          полСошёлся = false
         }
-        // Проверяем только напарника с карточкой: у него пол известен точно.
-        // Гостя не запрещаем — такая пара всё равно ждёт решения менеджера, и
-        // в дружеский турнир женщину заявляют намеренно
-        if (!isStaff && body.partner_id && partnerGender && partnerGender !== tournament.gender) {
-          return json({ error: 'partner_gender_mismatch' }, 403)
+        if (!isStaff && partnerGender && partnerGender !== tournament.gender) {
+          полСошёлся = false
         }
       }
 
-      // Микст: пара — мужчина и женщина. Однополую заводит только менеджер.
-      // Игрок при этом не заперт: можно подать заявку без напарника, а пару
-      // ему подберут и впишут потом
-      // В миксте однополая пара запрещена, но гостя опять же пропускаем на
-      // рассмотрение: менеджер решит
-      if (!isStaff && body.partner_id && tournament.format === 'mixed_doubles' &&
+      // Микст: пара — мужчина и женщина
+      if (!isStaff && tournament.format === 'mixed_doubles' &&
           playerGender && partnerGender && playerGender === partnerGender) {
-        return json({ error: 'mixed_pair_same_gender' }, 403)
+        полСошёлся = false
       }
 
       // ---- Категория закрыта для этого игрока ----
@@ -465,8 +483,11 @@
       row.partner_id = body.partner_id || null
       row.partner_external_name = body.partner_external_name || null
       row.partner_external_ntrp = body.partner_external_ntrp || null
+      row.partner_external_country = body.partner_external_country || null
       row.partner_gender = body.partner_gender || null
       row.guest_confirmed = false
+      // false — состав ждёт решения менеджера. Место при этом за парой
+      row.gender_confirmed = полСошёлся
 
       // Заявка после снятия или отказа — обновляем прежнюю строку, иначе
       // вставка упрётся в уникальный индекс
@@ -499,12 +520,22 @@
         await notifyDisplaced(db, serviceKey, displaced.player_id, tournament.title)
       }
 
+      // ---- Состав ждёт решения ----
+      //
+      // Игроку — что заявка принята и рассматривается: место за ним, и
+      // молчать об этом нельзя. Клубу — что решение за ним, иначе заявка
+      // провисит до жеребьёвки
+      if (!полСошёлся) {
+        await сообщитьОРассмотрении(db, serviceKey, player, body, tournament)
+      }
+
       return json({
         status: decision.status,
         reason: decision.reason,
         rank: playerRank,
         block_reason: decision.text || null,
         displaced: displaced ? displaced.name : null,
+        gender_review: !полСошёлся,
       })
 
     } catch (e) {
@@ -644,6 +675,78 @@
     } catch { /* см. выше */ }
   }
 
+  /**
+   * Состав заявки не сошёлся с турниром по полу.
+   *
+   * Двоим участникам — что заявка принята и ждёт решения. Админам и
+   * менеджерам — что решать им. Отправка не должна ронять регистрацию:
+   * заявка уже записана, и молчание уведомления её не отменяет.
+   */
+  async function сообщитьОРассмотрении(db: any, serviceKey: string, player: any, body: any, tournament: any) {
+    const кому = [player.id, body.partner_id].filter(Boolean)
+    const { data: профили } = await db
+      .from('profiles')
+      .select('id, telegram_chat_id, notify_preferences')
+      .in('player_id', кому)
+
+    const игроку = {
+      title: 'Заявка на рассмотрении',
+      message: `Состав вашей заявки на «${tournament.title}» не совпадает с турниром по полу. ` +
+        `Место за вами держится, решение примет менеджер клуба.`,
+    }
+    for (const пр of (профили || [])) {
+      await отправить(пр, игроку.title, игроку.message, serviceKey)
+    }
+
+    const { data: клуб } = await db
+      .from('profiles')
+      .select('id, telegram_chat_id, notify_preferences')
+      .in('role', ['admin', 'manager'])
+
+    const напарник = body.partner_external_name ||
+      (body.partner_id ? await имяИгрока(db, body.partner_id) : null)
+    const клубу = {
+      title: 'Заявка требует решения',
+      message: `«${tournament.title}»: ${player.name}` +
+        (напарник ? ` и ${напарник}` : '') +
+        ` — состав не совпадает с турниром по полу. Место держится до вашего решения.`,
+    }
+    for (const пр of (клуб || [])) {
+      await отправить(пр, клубу.title, клубу.message, serviceKey)
+    }
+  }
+
+  async function имяИгрока(db: any, id: string): Promise<string | null> {
+    try {
+      const { data } = await db.from('players').select('name').eq('id', id).maybeSingle()
+      return data?.name || null
+    } catch { return null }
+  }
+
+  async function отправить(проф: any, title: string, message: string, serviceKey: string) {
+    const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
+    if (token && проф.telegram_chat_id && shouldNotify(проф.notify_preferences, 'tg', 'tournaments')) {
+      try {
+        await fetch(`${TELEGRAM_API}${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: проф.telegram_chat_id,
+            text: `\u{23F3} <b>${escapeHtml(title)}</b>\n\n${escapeHtml(message)}`,
+            parse_mode: 'HTML',
+          })
+        })
+      } catch { /* уведомление не должно ронять регистрацию */ }
+    }
+    try {
+      await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/send-push', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, message, type: 'tournaments', audience: 'user', user_id: проф.id })
+      })
+    } catch { /* см. выше */ }
+  }
+
   function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
     if (!prefs) return true
     const ch = prefs[channel]
@@ -707,6 +810,7 @@
     const { error } = await db.from('tournament_registrations').update({
       partner_id: body.partner_id || null,
       partner_external_name: body.partner_external_name || null,
+      partner_external_country: body.partner_external_country || null,
       partner_external_ntrp: body.partner_external_ntrp || null,
       partner_gender: body.partner_gender || null,
       // Нового гостя менеджер подтверждает заново
@@ -735,7 +839,7 @@
    * занимает его место и остаётся в заявке один. Выходит напарник — первый
    * остаётся один. Ушли оба — заявка снимается.
    */
-  async function выйтиИзПары(db: any, reg: any, playerId: string) {
+  async function выйтиИзПары(db: any, reg: any, playerId: string, serviceKey?: string) {
     const яКапитан = reg.player_id === playerId
 
     if (яКапитан) {
@@ -749,6 +853,9 @@
           guest_confirmed: false
         }).eq('id', reg.id)
         if (error) return jsonResp({ error: error.message }, 500)
+        // Оставшийся должен узнать, что играть теперь не с кем: место за ним,
+        // но напарника надо искать заново
+        await сообщитьОбУходе(db, reg.partner_id, reg.tournament_id, serviceKey)
         return jsonResp({ ok: true, left: true, stays: 'partner' })
       }
       // Напарника нет или он гость — заявке больше некому принадлежать
@@ -763,5 +870,22 @@
       guest_confirmed: false
     }).eq('id', reg.id)
     if (error) return jsonResp({ error: error.message }, 500)
+    await сообщитьОбУходе(db, reg.player_id, reg.tournament_id, serviceKey)
     return jsonResp({ ok: true, left: true, stays: 'captain' })
+  }
+
+  /** Напарник вышел из пары: место за оставшимся, но играть не с кем. */
+  async function сообщитьОбУходе(db: any, playerId: string, tournamentId: string, serviceKey?: string) {
+    if (!playerId || !serviceKey) return
+    try {
+      const { data: проф } = await db.from('profiles')
+        .select('id, telegram_chat_id, notify_preferences')
+        .eq('player_id', playerId).maybeSingle()
+      if (!проф) return
+      const { data: t } = await db.from('tournaments')
+        .select('title').eq('id', tournamentId).maybeSingle()
+      await отправить(проф, 'Напарник вышел из пары',
+        `Место на «${t?.title || ''}» осталось за вами — найдите другого напарника, ` +
+        `иначе пара в сетку не попадёт.`, serviceKey)
+    } catch { /* уведомление не должно ронять выход из пары */ }
   }

@@ -283,7 +283,7 @@ async function языкПрофиля(supabase: any, profileId: string): Promise
   // подтверждает или убирает гостя. Раньше игрок об этом не узнавал: заходил
   // на страницу турнира и видел старое состояние, будто ничего не случилось.
   //
-  // event: waitlist | draw | rejected | guest_ok | guest_removed
+  // event: waitlist | draw | rejected | guest_ok | guest_removed | gender_ok
   async function notifyEntry(db: any, з: any): Promise<Response> {
     const { data: reg } = await db
       .from('tournament_registrations')
@@ -325,6 +325,11 @@ async function языкПрофиля(supabase: any, profileId: string): Promise
         значок: '\u{2705}',
         заголовок: 'Пара подтверждена',
         строка: 'Менеджер подтвердил вашего напарника-гостя'
+      },
+      gender_ok: {
+        значок: '\u{2705}',
+        заголовок: 'Состав одобрен',
+        строка: 'Менеджер одобрил ваш состав — заявка участвует в жеребьёвке'
       },
       guest_removed: {
         значок: '\u{26A0}\u{FE0F}',
