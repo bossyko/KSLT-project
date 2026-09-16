@@ -317,7 +317,23 @@ Open the app or the website to accept or decline.'),
   ('match_launch_short', 'запуск №{номер}', '№{номер} чыгуу', 'wave {номер}'),
   ('trn_reg_open_tg', '🎾 <b>Регистрация открыта!</b>', '🎾 <b>Катталуу ачылды!</b>', '🎾 <b>Registration is open</b>'),
   ('btn_register', '✅ Записаться', '✅ Катталуу', '✅ Enter'),
-  ('btn_site', '🔗 На сайт', '🔗 Сайтка', '🔗 Website')
+  ('btn_site', '🔗 На сайт', '🔗 Сайтка', '🔗 Website'),
+  ('trn_higher_category', 'Турнир категории {турнир}. Игрок категории {игрок} — участие в турнирах категорией ниже не допускается.', 'Турнир категориясы — {турнир}. Оюнчунун категориясы — {игрок}: төмөнкү категориядагы турнирлерге катышууга болбойт.', 'This is a {турнир} tournament. Your category is {игрок}: entering tournaments of a lower category is not allowed.'),
+  ('trn_rank_too_low', 'Турнир категории {турнир}. Принимаются первые {предел} рейтинга {игрок}, место игрока — {место}.', 'Турнир категориясы — {турнир}. {игрок} рейтингинин алгачкы {предел} оюнчусу кабыл алынат, сиздин оруунуңуз — {место}.', 'This is a {турнир} tournament. Only the top {предел} of the {игрок} rating are accepted; your position is {место}.'),
+  ('trn_category_too_low', 'Турнир категории {турнир}. Категория {игрок} ниже допустимой — принимаются только на одну ступень ниже.', 'Турнир категориясы — {турнир}. {игрок} категориясы уруксат берилгенден төмөн — бир гана бир баскыч төмөн кабыл алынат.', 'This is a {турнир} tournament. The {игрок} category is too low — only one step below is accepted.'),
+  ('trn_waitlist_title', 'Заявка перемещена в лист ожидания', 'Арыз күтүү тизмесине которулду', 'Your entry has been moved to the waiting list'),
+  ('unban_done', '✅ Срок вашей блокировки истёк. Вы разблокированы.
+
+Добро пожаловать обратно в КСЛТ!', '✅ Бөгөттөө мөөнөтү бүттү. Бөгөт алынды.
+
+КСЛТка кайра кош келиңиз!', '✅ Your suspension has ended. The restriction has been lifted.
+
+Welcome back to KSLT.'),
+  ('battle_published', '⚔️ Ваш баттл «{название}» опубликован!
+Зрители уже голосуют.', '⚔️ «{название}» баттлыңыз жарыяланды!
+Көрүүчүлөр добуш берип жатышат.', '⚔️ Your battle “{название}” has been published.
+Viewers are already voting.'),
+  ('battle_open_page', '🎾 Посмотреть страницу баттла', '🎾 Баттл барагын көрүү', '🎾 View the battle page')
 ON CONFLICT (key) DO UPDATE
   SET ru = EXCLUDED.ru,
       kg = EXCLUDED.kg,
@@ -331,7 +347,7 @@ COMMIT;
 -- ============================================================
 
 SELECT count(*) AS всего FROM public.notification_texts;
--- Ожидаем 78.
+-- Ожидаем 85.
 
 SELECT count(*) AS без_кыргызского FROM public.notification_texts WHERE kg IS NULL OR kg = '';
 SELECT count(*) AS без_английского  FROM public.notification_texts WHERE en IS NULL OR en = '';

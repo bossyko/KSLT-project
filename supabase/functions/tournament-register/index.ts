@@ -16,6 +16,73 @@
 
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+  // ============================================
+  // ТЕКСТЫ УВЕДОМЛЕНИЙ
+  // ============================================
+  //
+  // Лежат в таблице notification_texts — по одной строке на сообщение, три
+  // языка в колонках. В базе, а не в коде: переводы вычитывают люди со
+  // стороны, и правку в таблице видно сразу, без выкладки функции.
+  //
+  // Читаем один раз и держим в памяти: функция живёт между вызовами, и
+  // ходить в базу за каждой строчкой незачем.
+
+  type Язык = 'ru' | 'en' | 'kg'
+
+  let _тексты: Record<string, Record<string, string>> | null = null
+
+  async function загрузитьТексты(supabase: any) {
+    // Пустое не запоминаем: одна неудачная попытка — и бот до перезапуска
+    // отвечал бы ключами вместо текста
+    if (_тексты && Object.keys(_тексты).length) return _тексты
+    try {
+      const { data, error } = await supabase.from('notification_texts').select('key, ru, kg, en')
+      if (error) { console.error('тексты не прочитались:', error.message); return _тексты || {} }
+      const свежие: Record<string, Record<string, string>> = {}
+      for (const строка of (data || [])) {
+        свежие[строка.key] = { ru: строка.ru, kg: строка.kg, en: строка.en }
+      }
+      if (Object.keys(свежие).length) _тексты = свежие
+      else console.error('таблица notification_texts пуста')
+    } catch (e) {
+      console.error('тексты не прочитались:', e)
+    }
+    return _тексты || {}
+  }
+
+  /** Текст на языке человека. Нет перевода — русский. Нет строки — ключ. */
+  function т(ключ: string, язык: Язык = 'ru', подстановки: Record<string, string | number> = {}): string {
+    const строка = _тексты?.[ключ]
+    if (!строка) return ключ
+    let текст = строка[язык] || строка.ru || ключ
+    for (const имя in подстановки) {
+      текст = текст.split('{' + имя + '}').join(String(подстановки[имя]))
+    }
+    return текст
+  }
+
+  /** Язык из уже загруженного профиля. */
+  function языкИз(профиль: any): Язык {
+    const язык = профиль?.lang
+    return (язык === 'en' || язык === 'kg') ? язык : 'ru'
+  }
+
+  /** Язык владельца чата. */
+  async function языкЧата(supabase: any, chatId: number): Promise<Язык> {
+    try {
+      const { data } = await supabase.from('profiles').select('lang').eq('telegram_chat_id', chatId).maybeSingle()
+      return языкИз(data)
+    } catch { return 'ru' }
+  }
+
+  /** Язык по идентификатору профиля. */
+  async function языкПрофиля(supabase: any, profileId: string): Promise<Язык> {
+    try {
+      const { data } = await supabase.from('profiles').select('lang').eq('id', profileId).maybeSingle()
+      return языкИз(data)
+    } catch { return 'ru' }
+  }
+
   const TELEGRAM_API = 'https://api.telegram.org/bot'
 
   // Заявки, занимающие место в основной сетке
@@ -44,6 +111,7 @@
       const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
       const db = createClient(supabaseUrl, serviceKey)
+      await загрузитьТексты(db)
 
       const body = await req.json()
       const tournamentId = body.tournament_id
@@ -59,7 +127,7 @@
       if (isServiceCall && body.player_id) {
         const { data } = await db
           .from('profiles')
-          .select('id, full_name, player_id, role, gender')
+          .select('id, full_name, player_id, role, gender, lang')
           .eq('player_id', body.player_id)
           .maybeSingle()
         profile = data
@@ -72,13 +140,16 @@
 
         const { data } = await db
           .from('profiles')
-          .select('id, full_name, player_id, role, gender')
+          .select('id, full_name, player_id, role, gender, lang')
           .eq('id', user.id)
           .single()
         profile = data
       }
 
       if (!profile) return json({ error: 'profile_not_found' }, 400)
+
+      // Причины отказа и лист ожидания — на языке того, кто подаёт заявку
+      const языкЗаявителя = языкИз(profile)
       if (!profile.player_id) return json({ error: 'no_player' }, 400)
 
       const isStaff = profile.role === 'admin' || profile.role === 'manager'
@@ -311,7 +382,10 @@
           decision = {
             status: 'blocked',
             reason: 'higher_category',
-            text: `Турнир категории ${nameOf[tournament.category_id]}. Игрок категории ${nameOf[player.category_id!]} — участие в турнирах категорией ниже не допускается.`
+            text: т('trn_higher_category', языкЗаявителя, {
+              'турнир': nameOf[tournament.category_id],
+              'игрок': nameOf[player.category_id!]
+            })
           }
         } else if (pSort === tSort - 1) {
           playerRank = await computeRank(db, player, tournament.gender)
@@ -323,14 +397,22 @@
             decision = {
               status: 'blocked',
               reason: 'rank_too_low',
-              text: `Турнир категории ${nameOf[tournament.category_id]}. Принимаются первые ${WAITLIST_RANK_LIMIT} рейтинга ${nameOf[player.category_id!]}, место игрока — ${playerRank}.`
+              text: т('trn_rank_too_low', языкЗаявителя, {
+                'турнир': nameOf[tournament.category_id],
+                'предел': WAITLIST_RANK_LIMIT,
+                'игрок': nameOf[player.category_id!],
+                'место': playerRank
+              })
             }
           }
         } else {
           decision = {
             status: 'blocked',
             reason: 'category_too_low',
-            text: `Турнир категории ${nameOf[tournament.category_id]}. Категория ${nameOf[player.category_id!]} ниже допустимой — принимаются только на одну ступень ниже.`
+            text: т('trn_category_too_low', языкЗаявителя, {
+              'турнир': nameOf[tournament.category_id],
+              'игрок': nameOf[player.category_id!]
+            })
           }
         }
       }
