@@ -181,9 +181,14 @@
       }
 
       // ---- Уже подавал? ----
+      //
+      // Берём строку целиком, а не id со статусом. Выход из пары смотрит на
+      // player_id и partner_id этой записи: с урезанным набором полей
+      // player_id был undefined, подавший не признавался капитаном, и вместо
+      // себя он вычёркивал из заявки напарника
       const { data: existing } = await db
         .from('tournament_registrations')
-        .select('id, status')
+        .select('*')
         .eq('tournament_id', tournamentId)
         .eq('player_id', player.id)
         .maybeSingle()
