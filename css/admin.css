@@ -3806,6 +3806,64 @@ select.ad-field-input {
     text-transform: lowercase;
 }
 
+/* Строка действий расписания: сессии слева, выгрузка справа */
+.ad-sched-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.ad-sched-actions-right {
+    margin-left: auto;
+}
+
+.ad-sched-actions .ad-export-bar {
+    margin: 0;
+}
+
+/* Окно «Сессии»: группа и её время прихода — строкой */
+.ad-sess-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.ad-sess-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 10px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+}
+
+.ad-sess-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ad-sess-pick {
+    padding: 4px 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.ad-sess-pick:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
 /* Перетаскивание строк очереди: берём строку мышью и опускаем на место */
 .ad-sched-table tr[draggable="true"] {
     cursor: grab;

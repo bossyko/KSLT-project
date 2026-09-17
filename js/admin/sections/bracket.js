@@ -1945,18 +1945,20 @@
         }
 
 
-        /** Свести кнопки выгрузки сетки в одну строку с «Пересоздать жеребьёвку». */
+        /**
+         * Полосу выгрузки ставим в строку действий панели.
+         *
+         * Рисуется она выше — так собирается панель, — а место ей справа от
+         * кнопок действия: две полосы кнопок одна над другой занимали место
+         * и разрывали примечание с таблицей.
+         */
         function собратьКнопкиСетки(место) {
             var панель = место.querySelector('#adBrkBracketPanel');
             if (!панель) return;
             var полоса = панель.querySelector('.ad-export-bar');
-            var пересоздать = панель.querySelector('#adBrkRegenerate');
-            // Кнопки пересоздания нет — сетку уже играют, полоса остаётся своя
-            if (!полоса || !пересоздать) return;
-
-            var строка = пересоздать.parentElement;
-            while (полоса.firstChild) строка.insertBefore(полоса.firstChild, пересоздать);
-            полоса.remove();
+            var справа = панель.querySelector('.ad-sched-actions-right');
+            if (!полоса || !справа) return;
+            справа.appendChild(полоса);
         }
 
         // Registrations panel
@@ -1994,6 +1996,9 @@
         // Schedule panel
         if (hasMatches) {
             html += '<div class="ad-brk-panel" id="adBrkSchedulePanel" style="' + (activeTab !== 'schedule' ? 'display:none;' : '') + '">';
+            // Кнопки выгрузки рисуем здесь, а ставим ниже — в одну строку с
+            // «Сессиями»: две полосы кнопок одна над другой занимали место,
+            // а примечание о времени запусков оказывалось между ними
             html += шапкаВыгрузки('adBrkSchedulePanel', L.trnTabSchedule);
             html += renderSchedulePanel(matches, playersMap, tournament, regsMap);
             html += '</div>';
@@ -2097,6 +2102,23 @@
         // все подряд. Фильтр прячет чужие строки, порядок переставляет их на
         // экране — номера запусков и время при этом не меняются: их правят
         // стрелками и вводом времени, как раньше
+        // Полосу выгрузки переносим в строку действий: рисуется она выше,
+        // потому что так собирается панель
+        (function() {
+            var панель = container.querySelector('#adBrkSchedulePanel');
+            if (!панель) return;
+            var полоса = панель.querySelector('.ad-export-bar');
+            var место = панель.querySelector('.ad-sched-actions-right');
+            if (полоса && место) место.appendChild(полоса);
+        })();
+
+        var кнопкаСессий = container.querySelector('#adSchedSessions');
+        if (кнопкаСессий) {
+            кнопкаСессий.addEventListener('click', function() {
+                открытьОкноСессий(tournament, matches, tournamentId);
+            });
+        }
+
         var фильтрКруга = container.querySelector('.ad-sched-round-filter');
         if (фильтрКруга) {
             фильтрКруга.addEventListener('change', function() {
@@ -4041,6 +4063,14 @@
 
         var html = '<div class="ad-sched-note">' + L.schedApproxNote + '</div>';
 
+        // Строка действий: сессии слева, выгрузка справа
+        html += '<div class="ad-sched-actions">';
+        if (очередь.some(function(m) { return m.group_number; })) {
+            html += '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adSchedSessions">' +
+                L.sessTitle + '</button>';
+        }
+        html += '<div class="ad-sched-actions-right"></div></div>';
+
         html += '<div class="ad-sched-section ad-sched-wrap"><table class="ad-table ad-sched-table">' +
             '<thead><tr>' +
                 '<th class="sched-num">№</th>' +
@@ -4343,12 +4373,6 @@
         // Overall completion (IG must also be complete if present)
         var totalAllCompleted = allGroupCompleted && (!hasIG || allIGCompleted) && (!hasPlayoff || allPlayoffCompleted);
 
-        // Top buttons (only regenerate before any results)
-        if (!anyGroupCompleted && !isTournamentCompleted) {
-            html += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;">';
-            html += '<button class="ad-btn ad-btn-secondary" id="adBrkRegenerate">' + L.regenerateDraw + '</button>';
-            html += '</div>';
-        }
 
         // Кто на самом деле попал в плей-офф.
         //
@@ -4398,6 +4422,15 @@
         // столько. Менеджер знал правило из настроек, игрок — ниоткуда
         html += '<div class="ad-sched-note" style="margin-bottom:12px;">' +
             L.groupRule.replace('{n}', qualifiers).replace('{groups}', groupCount) + '</div>';
+
+        // Строка действий под примечанием: пересоздание слева, выгрузка
+        // справа — тем же порядком, что и в расписании запусков
+        html += '<div class="ad-sched-actions">';
+        if (!anyGroupCompleted && !isTournamentCompleted) {
+            html += '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adBrkRegenerate">' +
+                L.regenerateDraw + '</button>';
+        }
+        html += '<div class="ad-sched-actions-right"></div></div>';
 
         // ---- Group tables (FIRST) ----
         for (var g = 1; g <= groupCount; g++) {
@@ -8483,6 +8516,258 @@
     //
     // Время первой волны точное, дальше — ориентировочное: матч кончается
     // когда кончается. Об этом сказано в самом расписании и в рассылке.
+    /**
+     * Разложить матчи по волнам: сколько кортов — столько игр за раз.
+     *
+     * Порядок ожидания приходит готовым, здесь только развод по времени:
+     * в одной волне не ставим того, кто уже занят, и по возможности не
+     * ставим того, кто играл в прошлой волне — иначе человек выходит на
+     * корт без передышки.
+     *
+     * Возвращает список {id, время, корт}: кто и когда выходит. Ничего не
+     * пишет — записью занимается тот, кто позвал.
+     */
+    function разложитьПоВолнам(ждут, стартМин, кортов, шагМин) {
+        function занятые(матч) {
+            return [матч.player1_id, матч.player2_id].filter(Boolean);
+        }
+        function пересекается(матч, кто) {
+            return занятые(матч).some(function(id) { return кто.indexOf(id) !== -1; });
+        }
+        function времяИз(м) {
+            var ч = Math.floor(м / 60), мм = м % 60;
+            return (ч < 10 ? '0' : '') + ч + ':' + (мм < 10 ? '0' : '') + мм;
+        }
+
+        var очередь = ждут.slice();
+        var расклад = [];
+        var текущее = стартМин;
+        var прошлаяВолна = [];
+        var волн = 0;
+
+        while (очередь.length) {
+            var волна = [];
+            var игроки = [];
+
+            while (волна.length < кортов && очередь.length) {
+                var и = -1;
+                for (var k = 0; k < очередь.length; k++) {
+                    if (!пересекается(очередь[k], игроки) && !пересекается(очередь[k], прошлаяВолна)) { и = k; break; }
+                }
+                if (и === -1) {
+                    for (var k2 = 0; k2 < очередь.length; k2++) {
+                        if (!пересекается(очередь[k2], игроки)) { и = k2; break; }
+                    }
+                }
+                if (и === -1) break;
+
+                var матч = очередь.splice(и, 1)[0];
+                волна.push(матч);
+                игроки = игроки.concat(занятые(матч));
+            }
+
+            if (!волна.length) break;
+
+            var перваяВолна = (волн === 0);
+            волна.forEach(function(m, idx) {
+                расклад.push({
+                    id: m.id,
+                    время: времяИз(текущее),
+                    корт: перваяВолна ? String((idx % кортов) + 1) : null
+                });
+            });
+
+            волн++;
+            прошлаяВолна = игроки;
+            текущее += шагМин;
+        }
+
+        return { расклад: расклад, конец: текущее };
+    }
+
+    /**
+     * Порядок ожидания в группах: круг за кругом, а внутри круга — по
+     * очереди из разных групп, чтобы соседние запуски не были из одной.
+     */
+    function очередьГрупповых(матчи) {
+        var ждут = [];
+        var кругов = 0;
+        матчи.forEach(function(m) { if (m.round_number > кругов) кругов = m.round_number; });
+
+        for (var круг = 1; круг <= кругов; круг++) {
+            var вКруге = матчи.filter(function(m) { return m.round_number === круг; });
+            var поГруппам = {};
+            вКруге.forEach(function(m) {
+                var g = m.group_number || 0;
+                if (!поГруппам[g]) поГруппам[g] = [];
+                поГруппам[g].push(m);
+            });
+            var группы = Object.keys(поГруппам);
+            var осталось = true;
+            var шаг = 0;
+            while (осталось) {
+                осталось = false;
+                группы.forEach(function(g) {
+                    var список = поГруппам[g];
+                    if (шаг < список.length) { ждут.push(список[шаг]); осталось = true; }
+                });
+                шаг++;
+            }
+        }
+        return ждут;
+    }
+
+    /**
+     * Окно «Сессии»: развести группы по времени прихода.
+     *
+     * При семи группах все приходят к девяти и половину дня сидят у корта.
+     * Клуб делит день на сессии: часть групп утром, часть после обеда.
+     *
+     * Меняется только время и корт у групповых матчей. Сетка, счёт и
+     * заявки не трогаются.
+     */
+    function открытьОкноСессий(tournament, matches, tournamentId) {
+        var групповые = matches.filter(isGroupMatch);
+        if (!групповые.length) {
+            A.showToast(L.sessNoGroups, 'error');
+            return;
+        }
+
+        var буквы = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        var номера = [];
+        групповые.forEach(function(m) {
+            if (m.group_number && номера.indexOf(m.group_number) === -1) номера.push(m.group_number);
+        });
+        номера.sort(function(a, b) { return a - b; });
+
+        var кортов = tournament.court_count || 2;
+        var шаг = tournament.match_duration || 90;
+        var старт1 = tournament.start_time ? tournament.start_time.slice(0, 5) : '09:00';
+
+        var html =
+            '<div style="display:flex;gap:16px;margin-bottom:14px;">' +
+                '<div class="ad-field" style="flex:1;">' +
+                    '<label class="ad-field-label">' + L.sessFirst + '</label>' +
+                    '<input type="text" class="ad-field-input" id="adSess1" value="' + старт1 + '" maxlength="5" placeholder="09:00">' +
+                '</div>' +
+                '<div class="ad-field" style="flex:1;">' +
+                    '<label class="ad-field-label">' + L.sessSecond + '</label>' +
+                    '<input type="text" class="ad-field-input" id="adSess2" maxlength="5" placeholder="12:30">' +
+                '</div>' +
+            '</div>' +
+            '<div class="ad-sess-list">' +
+                номера.map(function(г) {
+                    return '<label class="ad-sess-row">' +
+                        '<span class="ad-sess-name">' + L.groupLabel + ' ' + (буквы[г - 1] || г) + '</span>' +
+                        '<select class="ad-sess-pick" data-group="' + г + '">' +
+                            '<option value="1">' + L.sessFirstShort + '</option>' +
+                            '<option value="2">' + L.sessSecondShort + '</option>' +
+                        '</select>' +
+                    '</label>';
+                }).join('') +
+            '</div>' +
+            '<div class="ad-qual-note" id="adSessHint" style="margin-top:12px;"></div>';
+
+        A.showConfirm(L.sessTitle, html, async function() {
+            var поле1 = document.getElementById('adSess1');
+            var поле2 = document.getElementById('adSess2');
+            var мин1 = вМинуты(поле1 && поле1.value);
+            var мин2 = вМинуты(поле2 && поле2.value);
+            if (мин1 === null) { A.showToast(L.sessBadTime, 'error'); return; }
+
+            var сессияГруппы = {};
+            document.querySelectorAll('.ad-sess-pick').forEach(function(п) {
+                сессияГруппы[п.dataset.group] = п.value;
+            });
+
+            var перваяСессия = групповые.filter(function(m) {
+                return (сессияГруппы[String(m.group_number)] || '1') === '1';
+            });
+            var втораяСессия = групповые.filter(function(m) {
+                return сессияГруппы[String(m.group_number)] === '2';
+            });
+
+            if (втораяСессия.length && мин2 === null) { A.showToast(L.sessBadTime, 'error'); return; }
+
+            var итог1 = разложитьПоВолнам(очередьГрупповых(перваяСессия), мин1, кортов, шаг);
+            var расклад = итог1.расклад;
+            if (втораяСессия.length) {
+                расклад = расклад.concat(
+                    разложитьПоВолнам(очередьГрупповых(втораяСессия), мин2, кортов, шаг).расклад);
+            }
+
+            var день = tournament.date_start || null;
+            var правки = расклад.map(function(з) {
+                return A.client.from('matches').update({
+                    scheduled_time: з.время,
+                    scheduled_day: день,
+                    court: з.корт
+                }).eq('id', з.id);
+            });
+
+            var ответы = await Promise.all(правки);
+            var беда = ответы.find(function(о) { return о && о.error; });
+            if (беда) { A.showToast(беда.error.message, 'error'); return; }
+
+            await A.client.from('tournaments')
+                .update({ schedule_saved_at: new Date().toISOString() })
+                .eq('id', tournamentId);
+
+            A.showToast(L.sessDone, 'success');
+            renderBracketManagement(tournamentId, 'schedule');
+        }, L.sessApply);
+
+        // Подсказка: когда доиграет первая сессия — это и есть самое раннее
+        // время для второй. Пока поле не тронули руками, держим его свежим
+        setTimeout(function() {
+            var поле1 = document.getElementById('adSess1');
+            var поле2 = document.getElementById('adSess2');
+            var подсказка = document.getElementById('adSessHint');
+            if (!поле1 || !поле2 || !подсказка) return;
+
+            поле2.addEventListener('input', function() { поле2.dataset.трогали = '1'; });
+
+            var пересчитать = function() {
+                var мин1 = вМинуты(поле1.value);
+                if (мин1 === null) { подсказка.textContent = ''; return; }
+
+                var сессияГруппы = {};
+                document.querySelectorAll('.ad-sess-pick').forEach(function(п) {
+                    сессияГруппы[п.dataset.group] = п.value;
+                });
+                var первые = групповые.filter(function(m) {
+                    return (сессияГруппы[String(m.group_number)] || '1') === '1';
+                });
+                var вторые = групповые.length - первые.length;
+
+                var конец = разложитьПоВолнам(очередьГрупповых(первые), мин1, кортов, шаг).конец;
+                var ч = Math.floor(конец / 60), мм = конец % 60;
+                var времяКонца = (ч < 10 ? '0' : '') + ч + ':' + (мм < 10 ? '0' : '') + мм;
+
+                if (!поле2.dataset.трогали && вторые) поле2.value = времяКонца;
+
+                подсказка.textContent = L.sessHint
+                    .replace('{first}', первые.length)
+                    .replace('{second}', вторые)
+                    .replace('{end}', времяКонца);
+            };
+
+            поле1.addEventListener('input', пересчитать);
+            document.querySelectorAll('.ad-sess-pick').forEach(function(п) {
+                п.addEventListener('change', пересчитать);
+            });
+            пересчитать();
+        }, 0);
+    }
+
+    function вМинуты(строка) {
+        var ч = String(строка || '').match(/^(\d{1,2}):(\d{2})$/);
+        if (!ч) return null;
+        var часы = +ч[1], минуты = +ч[2];
+        if (часы > 23 || минуты > 59) return null;
+        return часы * 60 + минуты;
+    }
+
     async function assignGroupSchedule(tournament) {
         var courtCount = tournament.court_count || 2;
         var matchDuration = tournament.match_duration || 90;
@@ -8505,93 +8790,19 @@
             var parts = String(t).split(':');
             return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
         }
-        function minToTime(m) {
-            var h = Math.floor(m / 60), mm = m % 60;
-            return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
-        }
-        function занятые(матч) {
-            return [матч.player1_id, матч.player2_id].filter(Boolean);
-        }
-        function пересекается(матч, кто) {
-            return занятые(матч).some(function(id) { return кто.indexOf(id) !== -1; });
-        }
 
-        // Порядок ожидания: круг за кругом, а внутри круга — по очереди из
-        // разных групп, чтобы соседние запуски не были из одной
-        var ждут = [];
-        var кругов = 0;
-        allMatches.forEach(function(m) { if (m.round_number > кругов) кругов = m.round_number; });
-        for (var круг = 1; круг <= кругов; круг++) {
-            var вКруге = allMatches.filter(function(m) { return m.round_number === круг; });
-            var поГруппам = {};
-            вКруге.forEach(function(m) {
-                var g = m.group_number || 0;
-                if (!поГруппам[g]) поГруппам[g] = [];
-                поГруппам[g].push(m);
-            });
-            var группы = Object.keys(поГруппам);
-            var осталось = true;
-            var шаг = 0;
-            while (осталось) {
-                осталось = false;
-                группы.forEach(function(g) {
-                    var список = поГруппам[g];
-                    if (шаг < список.length) { ждут.push(список[шаг]); осталось = true; }
-                });
-                шаг++;
-            }
-        }
+        // Порядок и развод по волнам — общим расчётом: им же пользуется
+        // окно сессий, и расписание не расходится само с собой
+        var итог = разложитьПоВолнам(
+            очередьГрупповых(allMatches), timeToMin(startTime), courtCount, interval);
 
-        var schedUpdates = [];
-        var текущее = timeToMin(startTime);
-        var прошлаяВолна = [];
-        var волн = 0;
-
-        while (ждут.length) {
-            var волна = [];
-            var игроки = [];
-
-            while (волна.length < courtCount && ждут.length) {
-                // Сначала ищем тех, кто не играл в прошлой волне
-                var i = -1;
-                for (var k = 0; k < ждут.length; k++) {
-                    if (!пересекается(ждут[k], игроки) && !пересекается(ждут[k], прошлаяВолна)) { i = k; break; }
-                }
-                // Все оставшиеся играли только что — берём любого, кто не занят
-                // в этой же волне: подряд лучше, чем простаивающий корт
-                if (i === -1) {
-                    for (var k2 = 0; k2 < ждут.length; k2++) {
-                        if (!пересекается(ждут[k2], игроки)) { i = k2; break; }
-                    }
-                }
-                if (i === -1) break;
-
-                var матч = ждут.splice(i, 1)[0];
-                волна.push(матч);
-                игроки = игроки.concat(занятые(матч));
-            }
-
-            if (!волна.length) break;
-
-            // Корт проставляем только первым запускам — по числу кортов.
-            // Дальше заранее не угадать: освободиться может любой, и ставит
-            // его ведущий турнира, когда это случится
-            var перваяВолна = (волн === 0);
-
-            волна.forEach(function(m, idx) {
-                schedUpdates.push(
-                    A.client.from('matches').update({
-                        scheduled_time: minToTime(текущее),
-                        scheduled_day: scheduledDay,
-                        court: перваяВолна ? String((idx % courtCount) + 1) : null
-                    }).eq('id', m.id)
-                );
-            });
-
-            волн++;
-            прошлаяВолна = игроки;
-            текущее += interval;
-        }
+        var schedUpdates = итог.расклад.map(function(з) {
+            return A.client.from('matches').update({
+                scheduled_time: з.время,
+                scheduled_day: scheduledDay,
+                court: з.корт
+            }).eq('id', з.id);
+        });
 
         await Promise.all(schedUpdates);
     }
