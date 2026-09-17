@@ -698,9 +698,12 @@
    в лентах кортов и тренеров */
 .sv-players-box {
     display: grid;
-    /* Ровно пять в ряд: при auto-fit на этой ширине помещалось четыре, и
-       десять игроков вставали тремя рядами вместо двух */
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    /* Пять в ряд, когда людей много. Но жёсткие пять оставляли дыру справа,
+       если нашлось трое: пустые колонки всё равно занимали ширину, и блок
+       выглядел недорисованным. Теперь колонок ровно столько, сколько карточек,
+       но не больше пяти */
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    justify-items: center;
     gap: 14px;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-xl);
@@ -735,7 +738,10 @@
 
 .sv-player {
     position: relative;
-    width: auto;
+    width: 100%;
+    /* Шире этого карточка пустеет: внутри аватар, имя и кнопка по центру, и
+       на растянутой колонке они повисают в воздухе */
+    max-width: 240px;
     height: 244px;
     display: flex;
     flex-direction: column;

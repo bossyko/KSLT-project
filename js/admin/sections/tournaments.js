@@ -944,6 +944,10 @@
                         '<label class="ad-field-label">' + L.trnGroupCount + '</label>' +
                         '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnGroupCount" placeholder="2" value="' + (item && item.group_count ? item.group_count : '') + '">' +
                     '</div>' +
+                    '<div class="ad-field" id="adTrnPerGroupWrap" style="display:none;">' +
+                        '<label class="ad-field-label">' + L.trnPerGroup + '</label>' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnPerGroup" placeholder="4">' +
+                    '</div>' +
                     '<div class="ad-field" id="adTrnQualifiersWrap" style="display:none;">' +
                         '<label class="ad-field-label">' + L.trnQualifiers + '</label>' +
                         '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnQualifiers" placeholder="2" value="' + (item && item.qualifiers_per_group ? item.qualifiers_per_group : '2') + '">' +
@@ -964,6 +968,9 @@
                 // сколько мест придётся доигрывать. Иначе менеджер узнаёт об
                 // этом только в день турнира, когда менять уже поздно
                 '<div id="adTrnDrawHint" class="ad-sched-note" style="display:none;margin-top:-4px;"></div>' +
+                // Формат сета, длительность и время начала — одним рядом:
+                // порознь они занимали две строки, а вместе читаются как одна
+                // настройка расписания
                 '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnSetFormat + '</label>' +
@@ -972,8 +979,6 @@
                             '<option value="short"' + A.sel(item, 'set_format', 'short') + '>' + L.formatShort + '</option>' +
                         '</select>' +
                     '</div>' +
-                '</div>' +
-                '<div class="ad-field-row ad-field-row-3">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnMatchDuration + '</label>' +
                         '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnMatchDuration" placeholder="90" value="' + (item ? (item.match_duration || 90) : 90) + '">' +
@@ -1086,7 +1091,8 @@
             if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
         });
 
-        // Group count — only digits
+        // Group count — only digits. Пересчёт числа в группе висит ниже, на
+        // том же событии: держим их порознь, чтобы порядок был очевиден
         var groupCountInput = document.getElementById('adTrnGroupCount');
         if (groupCountInput) {
             groupCountInput.addEventListener('input', function() {
@@ -1100,11 +1106,13 @@
             var bt = document.getElementById('adTrnBracketType').value;
             var dsWrap = document.getElementById('adTrnDrawSizeWrap');
             var gcWrap = document.getElementById('adTrnGroupCountWrap');
+            var pgWrap = document.getElementById('adTrnPerGroupWrap');
             var qWrap = document.getElementById('adTrnQualifiersWrap');
             var poWrap = document.getElementById('adTrnPlayoffWrap');
             if (bt === 'round_robin') {
                 dsWrap.style.display = 'none';
                 gcWrap.style.display = '';
+                if (pgWrap) pgWrap.style.display = '';
                 qWrap.style.display = '';
                 // Что делать со свободными местами — вопрос только для плей-офф.
                 // В «Группы + Лиги» выбора нет: там играют все
@@ -1113,11 +1121,13 @@
                 if (poWrap) poWrap.style.display = 'none';
                 dsWrap.style.display = 'none';
                 gcWrap.style.display = '';
+                if (pgWrap) pgWrap.style.display = '';
                 qWrap.style.display = '';
             } else {
                 if (poWrap) poWrap.style.display = 'none';
                 dsWrap.style.display = '';
                 gcWrap.style.display = 'none';
+                if (pgWrap) pgWrap.style.display = 'none';
                 qWrap.style.display = 'none';
             }
         }
@@ -1178,8 +1188,82 @@
                 if (формат !== 'direct' && групп < свободно) текст += ' ' + L.hintNotEnough;
             }
 
+            // Каждая мысль — своей строкой. Одной лентой это не читалось:
+            // «24 → 7 групп: по 4, и 4 по 3. Из групп выйдут 14 → плей-офф на
+            // 16. Свободных мест 2: 2 доп. матча…»
+            var строки = [];
+            var проГруппы = подсказкаОГруппах();
+            if (проГруппы) строки.push(проГруппы);
+            строки = строки.concat(текст.split(/(?<=\.)\s+/).filter(Boolean));
+
             подсказка.style.display = '';
-            подсказка.textContent = текст;
+            подсказка.innerHTML = строки.map(function(с) {
+                return '<div>' + A.esc(с) + '</div>';
+            }).join('');
+        }
+
+        /**
+         * Группы и число игроков в группе — две стороны одного счёта.
+         *
+         * Менеджер знает что-то одно: либо «делаем шесть групп», либо «по
+         * четыре в группе». Раньше второе приходилось делить в уме, а ошибка
+         * всплывала только в день жеребьёвки. Теперь заполняешь любое поле —
+         * второе считается само, от числа мест в турнире.
+         *
+         * Делится обычно неровно, и это нормально: лишние идут по одному в
+         * первые группы. Подсказка говорит об этом прямо.
+         */
+        function пересчитатьГруппы(откуда) {
+            var полеГрупп = document.getElementById('adTrnGroupCount');
+            var полеВГруппе = document.getElementById('adTrnPerGroup');
+            var полеМест = document.getElementById('adTrnMaxPart');
+            if (!полеГрупп || !полеВГруппе) return;
+
+            var мест = parseInt(полеМест && полеМест.value, 10) || 0;
+            if (!мест) return;
+
+            if (откуда === 'групп') {
+                var групп = parseInt(полеГрупп.value, 10) || 0;
+                полеВГруппе.value = групп > 0 ? Math.ceil(мест / групп) : '';
+                return;
+            }
+
+            var вГруппе = parseInt(полеВГруппе.value, 10) || 0;
+            if (вГруппе < 1) { полеГрупп.value = ''; return; }
+
+            // Сколько групп нужно, чтобы все поместились по столько в каждой
+            var надоГрупп = Math.ceil(мест / вГруппе);
+            полеГрупп.value = надоГрупп;
+
+            // И сразу обратная сверка: при 24 местах и 6 группах в группе
+            // выходит ровно 4 — значения должны сходиться между собой, иначе
+            // человек видит одно, а жеребьёвка считает другое
+            var сошлось = Math.ceil(мест / надоГрупп);
+            if (сошлось !== вГруппе) полеВГруппе.value = сошлось;
+        }
+
+        /** «24 → 6 групп по 4» или «24 → 5 групп: по 5, и одна по 4». */
+        function подсказкаОГруппах() {
+            var мест = parseInt((document.getElementById('adTrnMaxPart') || {}).value, 10) || 0;
+            var групп = parseInt((document.getElementById('adTrnGroupCount') || {}).value, 10) || 0;
+            if (!мест || groups_негодны(групп, мест)) return '';
+
+            var базово = Math.floor(мест / групп);
+            var остаток = мест % групп;
+            if (!остаток) {
+                return L.hintGroupsEven
+                    .replace('{max}', мест).replace('{groups}', групп).replace('{per}', базово);
+            }
+            return L.hintGroupsOdd
+                .replace('{max}', мест)
+                .replace('{groups}', групп)
+                .replace('{per}', базово + 1)
+                .replace('{rest}', групп - остаток)
+                .replace('{less}', базово);
+        }
+
+        function groups_негодны(групп, мест) {
+            return групп < 2 || групп > мест;
         }
 
         document.getElementById('adTrnBracketType').addEventListener('change', function() {
@@ -1192,7 +1276,27 @@
             if (поле) поле.addEventListener('change', обновитьРасклад);
         });
 
+        // Взаимный пересчёт: заполняешь одно — второе подстраивается
+        var полеГруппСчёт = document.getElementById('adTrnGroupCount');
+        var полеВГруппеСчёт = document.getElementById('adTrnPerGroup');
+        if (полеГруппСчёт) полеГруппСчёт.addEventListener('input', function() {
+            пересчитатьГруппы('групп'); обновитьРасклад();
+        });
+        if (полеВГруппеСчёт) {
+            полеВГруппеСчёт.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                пересчитатьГруппы('вГруппе'); обновитьРасклад();
+            });
+            полеВГруппеСчёт.addEventListener('wheel', function(e) { e.preventDefault(); });
+        }
+        // Изменили вместимость турнира — счёт в группе меняется вместе с ней
+        var полеМестСчёт = document.getElementById('adTrnMaxPart');
+        if (полеМестСчёт) полеМестСчёт.addEventListener('input', function() {
+            пересчитатьГруппы('групп'); обновитьРасклад();
+        });
+
         toggleBracketFields();
+        пересчитатьГруппы('групп');
         обновитьРасклад();
 
         // Toggle combined NTRP max based on format (doubles/mixed only)

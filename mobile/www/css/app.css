@@ -4103,6 +4103,16 @@ select.prof-field-input { color: var(--text); }
 .mob-standings td.num { text-align: center; font-weight: 600; }
 .mob-standings td.stat { text-align: center; }
 .mob-standings tr.qualified { background: rgba(204,255,0,0.06); }
+/* Геймы: справочная колонка, поэтому приглушена и уже остальных */
+.mob-standings td.mob-games {
+  font-size: 11px; color: var(--text-muted); white-space: nowrap;
+}
+/* Знак полного равенства: место определила жеребьёвка */
+.mob-standings .mob-lot {
+  display: block; margin-top: 2px;
+  font-size: 9px; font-weight: 500; line-height: 1;
+  color: var(--text-muted);
+}
 .mob-standings .seed {
   color: var(--accent); font-size: 10px;
   font-weight: 700; margin-left: 4px;

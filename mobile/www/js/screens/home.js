@@ -463,6 +463,23 @@
   // GROUPS
   // ============================
   function renderMobileGroups(container, tournament, matches, regsMap, playersMap, isDbl) {
+  /**
+   * Подпись под местом: почему оно такое. Равных разводит личная встреча,
+   * матчи между собой, сеты или геймы; где не развело ничто — жеребьёвка
+   */
+  function почемуМесто(st) {
+    if (st.жребий) {
+      return '<span class="mob-lot" title="' + I18N.t('td.lotHint') + '">' + I18N.t('td.lot') + '</span>';
+    }
+    var ключ = {
+      'встреча': 'td.whyHead',
+      'между собой': 'td.whyMini',
+      'сеты': 'td.whySets',
+      'геймы': 'td.whyGames'
+    }[st.причина];
+    return ключ ? '<span class="mob-lot">' + I18N.t(ключ) + '</span>' : '';
+  }
+
     var grpMatches = matches.filter(function(m) { return m.group_number && m.group_number > 0; });
     var ploffMatches = matches.filter(function(m) { return (!m.group_number || m.group_number <= 0) && m.round !== 'IG'; });
 
@@ -489,26 +506,13 @@
 
       var hasResults = gMatches.some(function(m) { return m.status === 'completed'; });
 
-      // Calculate standings
-      var stats = {};
-      gPlayerIds.forEach(function(pid) { stats[pid] = { playerId: pid, wins: 0, losses: 0, seed: null }; });
-      gMatches.forEach(function(m) {
-        if (m.seed1 && stats[m.player1_id]) stats[m.player1_id].seed = m.seed1;
-        if (m.seed2 && stats[m.player2_id]) stats[m.player2_id].seed = m.seed2;
-        if (m.status === 'completed' && m.winner_id && m.score !== 'BYE') {
-          if (stats[m.winner_id]) stats[m.winner_id].wins++;
-          var lid = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
-          if (stats[lid]) stats[lid].losses++;
-        }
+      // Места считает общий расчёт — тот же, что в админке и на сайте:
+      // победы, личная встреча, доля сетов, доля геймов
+      var standings = KSLT_GROUPS.расчёт(gPlayerIds, gMatches);
+      // Знак жеребьёвки решаем по своей группе, а не по всему турниру
+      var groupDone = gMatches.length > 0 && gMatches.every(function(m) {
+        return m.status === 'completed';
       });
-
-      var standings = gPlayerIds.map(function(pid) { return stats[pid]; });
-      standings.sort(function(a, b) {
-        if (b.wins !== a.wins) return b.wins - a.wins;
-        var sa = a.seed || 9999; var sb = b.seed || 9999;
-        return sa - sb;
-      });
-      standings.forEach(function(st, i) { st.place = i + 1; });
 
       var mgp = tournament.manual_group_places || {};
       if (mgp[String(g)]) {
@@ -528,6 +532,7 @@
         groupsHtml += '<thead><tr><th class="num">#</th><th>' + I18N.t('home.player') + '</th>';
         groupsHtml += '<th class="stat">' + I18N.t('td.winsShort') + '</th>';
         groupsHtml += '<th class="stat">' + I18N.t('td.lossesShort') + '</th>';
+        groupsHtml += '<th class="stat">' + I18N.t('td.gamesShort') + '</th>';
         groupsHtml += '<th class="stat">' + I18N.t('td.posShort') + '</th>';
         groupsHtml += '</tr></thead><tbody>';
 
@@ -540,7 +545,10 @@
           groupsHtml += '<td>' + name + seedHtml + '</td>';
           groupsHtml += '<td class="stat">' + st.wins + '</td>';
           groupsHtml += '<td class="stat">' + st.losses + '</td>';
-          groupsHtml += '<td class="stat" style="font-weight:700' + (isQualified ? ';color:var(--accent)' : '') + '">' + st.place + '</td>';
+          groupsHtml += '<td class="stat mob-games">' + st.gamesWon + '-' + st.gamesLost + '</td>';
+          // Почему место такое: жребий либо то, чем развели равных
+          var lot = groupDone ? почемуМесто(st) : '';
+          groupsHtml += '<td class="stat" style="font-weight:700;white-space:nowrap' + (isQualified ? ';color:var(--accent)' : '') + '">' + st.place + lot + '</td>';
           groupsHtml += '</tr>';
         });
         groupsHtml += '</tbody></table>';
@@ -674,7 +682,9 @@
 
   function renderPlayoffWithPills(container, matches, regsMap, playersMap, isDbl, prefix) {
     // Separate 3rd-place matches (supports '3RD', 'PL-3RD', 'CL-3RD')
+    // Отменённый матч за третье место в приложении не показываем
     var thirdPlace = matches.filter(function(m) {
+      if (m.status === 'cancelled') return false;
       return m.round === '3RD' || m.round === (prefix + '-3RD');
     });
     var regularMatches = matches.filter(function(m) {

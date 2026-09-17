@@ -291,6 +291,37 @@
      * английский вчера — сегодня открывается английский кабинет, а не
      * русский только потому, что вход был с русской страницы.
      */
+    /**
+     * Карточка игрока — сразу при входе, а не при первом заходе в кабинет.
+     *
+     * Без карточки человек не может ни записаться на турнир, ни вызвать
+     * кого-то на баттл: раньше она заводилась только в кабинете, и тот, кто
+     * пришёл по ссылке из рассылки, упирался в «у вас нет карточки игрока».
+     *
+     * Если в клубе нашлась похожая карточка — с рейтингом и историей, — сервер
+     * её не присваивает: человек подтвердит сам в кабинете. Молча отдавать
+     * чужой рейтинг однофамильцу нельзя.
+     */
+    async function завестиКарточкуИгрока() {
+        try {
+            var сессия = await client.auth.getSession();
+            var session = сессия.data && сессия.data.session;
+            if (!session || !session.access_token) return;
+            await fetch(window.SUPABASE_URL + '/functions/v1/ensure-player-card', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': window.SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + session.access_token
+                },
+                body: JSON.stringify({})
+            });
+        } catch (e) {
+            // Не получилось — не беда: кабинет и подача заявки попробуют снова
+            console.warn('[KSLT] карточка игрока:', e.message);
+        }
+    }
+
     function наЯзыке(файл) {
         var язык = localStorage.getItem('kslt_lang_saved');
         if (язык === 'en') return файл.replace('.html', '-en.html');
@@ -730,6 +761,9 @@
         }
 
         checkDeviceFingerprint(user.id);
+        // Карточка игрока — сразу, чтобы человек мог записаться
+        // на турнир, не заходя в кабинет
+        завестиКарточкуИгрока();
         localStorage.setItem('kslt_session_start', Date.now().toString());
         showMessage(signinForm, L.redirecting, false);
         setTimeout(function() {
@@ -932,6 +966,9 @@
                             }
                         } catch (e) { /* continue */ }
                         checkDeviceFingerprint(user.id);
+                        // Карточка игрока — сразу, чтобы человек мог записаться
+                        // на турнир, не заходя в кабинет
+                        завестиКарточкуИгрока();
                         localStorage.setItem('kslt_session_start', Date.now().toString());
                     }
                 }
@@ -1363,6 +1400,9 @@
                             }
                         } catch (e) { /* continue */ }
                         checkDeviceFingerprint(user.id);
+                        // Карточка игрока — сразу, чтобы человек мог записаться
+                        // на турнир, не заходя в кабинет
+                        завестиКарточкуИгрока();
                         localStorage.setItem('kslt_session_start', Date.now().toString());
                     }
                 }
@@ -1638,6 +1678,9 @@
                         }
                     } catch (e) { /* continue */ }
                     checkDeviceFingerprint(user.id);
+                    // Карточка игрока — сразу, чтобы человек мог записаться
+                    // на турнир, не заходя в кабинет
+                    завестиКарточкуИгрока();
                 }
 
                 localStorage.setItem('kslt_session_start', Date.now().toString());
@@ -1760,6 +1803,9 @@
                                 }
                             } catch (e) { /* continue */ }
                             checkDeviceFingerprint(user.id);
+                            // Карточка игрока — сразу, чтобы человек мог записаться
+                            // на турнир, не заходя в кабинет
+                            завестиКарточкуИгрока();
                             localStorage.setItem('kslt_session_start', Date.now().toString());
                         }
                     }

@@ -124,6 +124,9 @@
             partner_taken: pick('This player is already in another pair of this tournament',
                 'Бул оюнчу мелдештин башка жубунда',
                 'Этот игрок уже в другой паре этого турнира'),
+            entry_in_draw: pick('The draw is done — the lineup is closed. To change a partner, contact the club',
+                'Сетка тартылды — курам жабык. Өнөктөштү алмаштыруу үчүн клубга кайрылыңыз',
+                'Сетка сформирована — состав закрыт. Чтобы сменить напарника, обратитесь в клуб'),
             entry_rejected: pick('The club closed your entry for this tournament. To return, contact a manager',
                 'Клуб бул мелдешке арызыңызды жапты. Кайра кирүү үчүн менеджерге кайрылыңыз',
                 'Клуб закрыл вашу заявку на этот турнир. Чтобы вернуться, обратитесь к менеджеру'),
@@ -361,6 +364,62 @@
         return info;
     }
 
+    function pick3(isEn, isKg, en, kg, ru) { return isEn ? en : (isKg ? kg : ru); }
+
+    /**
+     * Чего не хватает в профиле для участия: ФИО, пол, телефон.
+     *
+     * Тот же набор, что показывает баннер в кабинете: «Заполните профиль».
+     * Возвращает true, если чего-то нет.
+     */
+    async function профильНеполон(client) {
+        try {
+            var сессия = await client.auth.getSession();
+            if (!сессия.data.session) return false;
+            var res = await client.from('profiles')
+                .select('full_name, gender, phone')
+                .eq('id', сессия.data.session.user.id)
+                .maybeSingle();
+            var p = res.data;
+            if (!p) return false;
+            if (!p.full_name || !p.full_name.trim()) return true;
+            if (p.gender !== 'men' && p.gender !== 'women') return true;
+            if (!p.phone || !p.phone.trim()) return true;
+            return false;
+        } catch (e) {
+            // Не смогли прочитать — не держим человека: решение примет сервер
+            return false;
+        }
+    }
+
+    /**
+     * Завести карточку игрока тому, у кого её ещё нет.
+     *
+     * Та же проверка, что в кабинете: нашлась похожая — не присваиваем молча,
+     * там чужой рейтинг и история; не нашлась — сервер заводит новую.
+     *
+     * Возвращает 'created', 'candidate' или пусто.
+     */
+    async function завестиКарточку(client) {
+        try {
+            var сессия = await client.auth.getSession();
+            if (!сессия.data.session) return '';
+            var res = await fetch(SUPABASE_URL + '/functions/v1/ensure-player-card', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + сессия.data.session.access_token
+                },
+                body: JSON.stringify({})
+            });
+            var д = await res.json();
+            return д.status || '';
+        } catch (e) {
+            return '';
+        }
+    }
+
     async function submit(client, tournamentId, opts) {
         opts = opts || {};
         var isEn = !!opts.isEn;
@@ -374,7 +433,45 @@
             return { created: false, needAuth: true };
         }
 
+        // Профиль должен быть заполнен: без пола не проверить ни микст, ни
+        // мужской с женским, без телефона клуб не дозвонится, если человек не
+        // вышел на корт. Не объясняем окном, а сразу уводим в кабинет — там
+        // эти поля и заполняют, и там же видно, чего не хватает
+        var неполный = await профильНеполон(client);
+        if (неполный) {
+            window.location.href = (window.location.pathname.indexOf('/pages/') !== -1 ? '' : 'pages/') +
+                pick3(isEn, isKg, 'dashboard-en.html', 'dashboard-kg.html', 'dashboard.html') + '#profile';
+            return { created: false, needProfile: true };
+        }
+
         var reg = await callRegister(client, tournamentId, opts.extra);
+
+        // «У вас нет карточки игрока» — тупик, из которого человек сам не
+        // выйдет. Такое бывает у того, кто пришёл по ссылке из рассылки и до
+        // кабинета не доходил: карточку там заводят при первом заходе.
+        // Заводим её здесь же и подаём заявку снова
+        if (reg.data && reg.data.error === 'no_player') {
+            var карточка = await завестиКарточку(client);
+            if (карточка === 'created') {
+                reg = await callRegister(client, tournamentId, opts.extra);
+            } else if (карточка === 'candidate') {
+                // Нашлась похожая карточка с чужим рейтингом и историей —
+                // присваивать молча нельзя, человек подтверждает сам в кабинете
+                showModal({
+                    ok: false,
+                    title: pick3(isEn, isKg,
+                        'Confirm your player card',
+                        'Оюнчу картаңызды ырастаңыз',
+                        'Подтвердите карточку игрока'),
+                    note: pick3(isEn, isKg,
+                        'We found a card that looks like yours. Open your dashboard and confirm it — then entry will work.',
+                        'Сизге окшош карта табылды. Кабинетти ачып ырастаңыз — андан кийин катталуу иштейт.',
+                        'Нашли карточку, похожую на вашу. Откройте кабинет и подтвердите её — после этого запись заработает.')
+                }, isEn, isKg);
+                return { created: false, needCard: true };
+            }
+        }
+
         var info = resultText(reg.data, isEn, isKg);
         var сГостем = opts.extra && opts.extra.partner_external_name;
         if (сГостем && !(reg.data && reg.data.error)) приписатьПроГостя(info, isEn, isKg);

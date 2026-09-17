@@ -7,6 +7,35 @@ function esc(str) {
     return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+/**
+ * Подпись под местом в группе: почему оно такое.
+ *
+ * Равных по победам разводит личная встреча, матчи между собой, сеты или
+ * геймы. Где не развело ничто — жеребьёвка. Без подписи одинаковые цифры в
+ * таблице выглядели произволом.
+ */
+function почемуМесто(st, isEn, isKg) {
+    var pick3 = function(en, kg, ru) { return isEn ? en : (isKg ? kg : ru); };
+
+    if (st.жребий) {
+        return '<span class="td-grp-lot" title="' +
+            pick3('Wins, sets and games are all equal — the place is decided by lot',
+                  'Жеңиштер, сеттер жана геймдер бирдей — орун чүчүкулак менен аныкталган',
+                  'Победы, сеты и геймы равны — место определено жребием') + '">' +
+            pick3('by lot', 'чүчүкулак', 'жребий') + '</span>';
+    }
+
+    var текст = {
+        'встреча': pick3('head-to-head', 'өз ара беттеш', 'личная встреча'),
+        'между собой': pick3('among tied', 'өз ара', 'между собой'),
+        'сеты': pick3('on sets', 'сеттер боюнча', 'по сетам'),
+        'геймы': pick3('on games', 'геймдер боюнча', 'по геймам')
+    }[st.причина];
+
+    return текст ? '<span class="td-grp-lot">' + текст + '</span>' : '';
+}
+
+
 function tdCountryFlag(val) {
     var CU = window.KSLT_COUNTRY;
     if (!CU || !val) return val || '';
@@ -347,7 +376,9 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
     bHtml += '</div></div>';
 
     // 3rd place match
-    var thirdMatch = leagueMatches.find(function(m) { return m.round === prefix + '-3RD'; });
+    var thirdMatch = leagueMatches.find(function(m) {
+        return m.round === prefix + '-3RD' && m.status !== 'cancelled';
+    });
     if (thirdMatch) {
         bHtml += '<div style="margin-top:20px;max-width:200px;">';
         bHtml += '<div class="td-round-title">' + (isEn ? '3rd Place' : (isKg ? '3-орун үчүн' : 'За 3-е место')) + '</div>';
@@ -1118,6 +1149,22 @@ function loadFromSupabase(client, id) {
                 var registrations = results[1].data || [];
                 var courtData = results[2].data || null;
 
+                // Состав берём из заявок: матч знает свою заявку (reg1_id,
+                // reg2_id), а кто в ней сегодня — дело самой заявки. Заменили
+                // человека — имя меняется и здесь, без переписывания матчей.
+                // Сыгранные не трогаем: их счёт принадлежит тем, кто играл
+                (function освежитьСостав() {
+                    var поId = {};
+                    registrations.forEach(function(r) { поId[r.id] = r; });
+                    matches.forEach(function(m) {
+                        if (m.status === 'completed') return;
+                        var r1 = m.reg1_id && поId[m.reg1_id];
+                        var r2 = m.reg2_id && поId[m.reg2_id];
+                        if (r1 && r1.player_id && m.player1_id) m.player1_id = r1.player_id;
+                        if (r2 && r2.player_id && m.player2_id) m.player2_id = r2.player_id;
+                    });
+                })();
+
                 // Build players map (include partner_ids for doubles)
                 var playerIds = [];
                 registrations.forEach(function(r) {
@@ -1584,26 +1631,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         if (m.player2_id && ggPlayerIds.indexOf(m.player2_id) === -1) ggPlayerIds.push(m.player2_id);
                     });
 
-                    var ggStats = {};
-                    ggPlayerIds.forEach(function(pid) { ggStats[pid] = { playerId: pid, wins: 0, losses: 0, seed: null }; });
-                    ggMatches.forEach(function(m) {
-                        if (m.seed1 && ggStats[m.player1_id]) ggStats[m.player1_id].seed = m.seed1;
-                        if (m.seed2 && ggStats[m.player2_id]) ggStats[m.player2_id].seed = m.seed2;
-                        if (m.status === 'completed' && m.winner_id && m.score !== 'BYE') {
-                            if (ggStats[m.winner_id]) ggStats[m.winner_id].wins++;
-                            var lid = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
-                            if (ggStats[lid]) ggStats[lid].losses++;
-                        }
-                    });
-                    var ggStandings = ggPlayerIds.map(function(pid) { return ggStats[pid]; });
+                    // Тот же общий расчёт, что в админке
+                    var ggStandings = KSLT_GROUPS.расчёт(ggPlayerIds, ggMatches);
                     var ggHasResults = ggMatches.some(function(m) { return m.status === 'completed'; });
-                    ggStandings.sort(function(a, b) {
-                        var sa = a.seed || 9999; var sb = b.seed || 9999;
-                        if (sa !== sb) return sa - sb;
-                        return ggPlayerIds.indexOf(a.playerId) - ggPlayerIds.indexOf(b.playerId);
+                    var ggGroupDone = ggMatches.length > 0 && ggMatches.every(function(m) {
+                        return m.status === 'completed';
                     });
-                    var ggByWins = ggStandings.slice().sort(function(a, b) { return b.wins - a.wins; });
-                    ggByWins.forEach(function(st, i) { st.place = i + 1; });
 
                     var ggMgp = t.manual_group_places || {};
                     if (ggMgp[String(gg)]) {
@@ -1613,13 +1646,22 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         });
                     }
 
+                    // Порядок строк не зависит от результатов: по посеву,
+                    // дальше по порядку в группе
+                    ggStandings.sort(function(a, b) {
+                        var sa = a.seed || 9999; var sb = b.seed || 9999;
+                        if (sa !== sb) return sa - sb;
+                        return ggPlayerIds.indexOf(a.playerId) - ggPlayerIds.indexOf(b.playerId);
+                    });
+
                     var ggLetter = glGroupLetters[gg - 1] || String(gg);
                     glHtml += '<div style="margin-bottom:24px;">';
                     glHtml += '<div style="font-weight:700;color:var(--text-primary);margin-bottom:8px;font-size:0.95rem;">' + (isEn ? 'Group ' : (isKg ? 'Топ ' : 'Группа ')) + ggLetter + '</div>';
                     glHtml += '<div style="overflow-x:auto;"><table class="td-group-table">';
                     glHtml += '<thead><tr><th>№</th><th>' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th>';
-                    for (var gc = 0; gc < ggStandings.length; gc++) glHtml += '<th style="text-align:center;min-width:65px;white-space:nowrap;">' + (gc + 1) + '</th>';
+                    for (var gc = 0; gc < ggStandings.length; gc++) glHtml += '<th style="text-align:center;min-width:46px;white-space:nowrap;">' + (gc + 1) + '</th>';
                     glHtml += '<th style="text-align:center;width:30px;">' + (isEn ? 'W' : (isKg ? 'Ж' : 'П')) + '</th>';
+                    glHtml += '<th style="text-align:center;width:44px;white-space:nowrap;">' + (isEn ? 'Games' : (isKg ? 'Геймдер' : 'Геймы')) + '</th>';
                     glHtml += '<th style="text-align:center;width:40px;">' + (isEn ? 'Pos' : (isKg ? 'О' : 'М')) + '</th>';
                     glHtml += '</tr></thead><tbody>';
 
@@ -1665,8 +1707,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                             }
                         }
 
+                        var glLot = ggGroupDone ? почемуМесто(gst, isEn, isKg) : '';
                         glHtml += '<td style="text-align:center;font-weight:600;">' + gst.wins + '</td>';
-                        glHtml += '<td style="text-align:center;font-weight:700;' + (gIsPL ? 'color:var(--accent);' : '') + '">' + (ggHasResults ? gst.place : '—') + '</td>';
+                        glHtml += '<td style="text-align:center;font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
+                            (ggHasResults ? gst.gamesWon + '-' + gst.gamesLost : '—') + '</td>';
+                        glHtml += '<td style="text-align:center;font-weight:700;white-space:nowrap;' + (gIsPL ? 'color:var(--accent);' : '') + '">' +
+                            (ggHasResults ? gst.place : '—') + glLot + '</td>';
                         glHtml += '</tr>';
                     }
                     glHtml += '</tbody></table></div></div>';
@@ -1754,7 +1800,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         players: plPlayersArr, bracket: { rounds: plRounds }, status: statusClass
                     };
 
-                    var thirdMatch = ploffMatches.find(function(m) { return m.round === '3RD'; });
+                    // Отменённый матч за третье место участникам не показываем:
+                    // он остаётся только в админке, пометкой
+                    var thirdMatch = ploffMatches.find(function(m) {
+                        return m.round === '3RD' && m.status !== 'cancelled';
+                    });
 
                     bHtml += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Playoff' : (isKg ? 'Плей-офф' : 'Плей-офф')) + '</h3>';
                     bHtml += '<div class="td-bracket-scroll"><div class="td-bracket">';
@@ -1858,31 +1908,20 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         if (m.player2_id && gPlayerIds.indexOf(m.player2_id) === -1) gPlayerIds.push(m.player2_id);
                     });
 
-                    // Calculate standings
-                    var stats = {};
-                    gPlayerIds.forEach(function(pid) { stats[pid] = { playerId: pid, wins: 0, losses: 0, seed: null }; });
-                    gMatches.forEach(function(m) {
-                        if (m.seed1 && stats[m.player1_id]) stats[m.player1_id].seed = m.seed1;
-                        if (m.seed2 && stats[m.player2_id]) stats[m.player2_id].seed = m.seed2;
-                        if (m.status === 'completed' && m.winner_id && m.score !== 'BYE') {
-                            if (stats[m.winner_id]) stats[m.winner_id].wins++;
-                            var lid = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
-                            if (stats[lid]) stats[lid].losses++;
-                        }
-                    });
-                    var standings = gPlayerIds.map(function(pid) { return stats[pid]; });
+                    // Места считает общий расчёт — тот же, что в админке:
+                    // победы, личная встреча, доля сетов, доля геймов. Раньше
+                    // здесь место ставилось просто по числу побед, и при
+                    // равенстве игрок видел один порядок, а менеджер другой
+                    var standings = KSLT_GROUPS.расчёт(gPlayerIds, gMatches);
                     var sbGroupHasResults = gMatches.some(function(m) { return m.status === 'completed'; });
-                    // Stable sort by seed
-                    standings.sort(function(a, b) {
-                        var sa = a.seed || 9999; var sb = b.seed || 9999;
-                        if (sa !== sb) return sa - sb;
-                        return gPlayerIds.indexOf(a.playerId) - gPlayerIds.indexOf(b.playerId);
+                    // Доиграна ли эта группа — по ней и решаем, показывать ли
+                    // знак жеребьёвки. Готовность всего турнира тут ни при
+                    // чём: соседние группы могут ещё играть
+                    var sbGroupDone = gMatches.length > 0 && gMatches.every(function(m) {
+                        return m.status === 'completed';
                     });
-                    // Calculate place by wins
-                    var byWins = standings.slice().sort(function(a, b) { return b.wins - a.wins; });
-                    byWins.forEach(function(st, i) { st.place = i + 1; });
 
-                    // Apply manual overrides
+                    // Ручные места менеджера поверх расчёта
                     var tdMgp = t.manual_group_places || {};
                     if (tdMgp[String(g)]) {
                         var tdOv = tdMgp[String(g)];
@@ -1891,13 +1930,22 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         });
                     }
 
+                    // Порядок строк не зависит от результатов: по посеву,
+                    // дальше по порядку в группе
+                    standings.sort(function(a, b) {
+                        var sa = a.seed || 9999; var sb = b.seed || 9999;
+                        if (sa !== sb) return sa - sb;
+                        return gPlayerIds.indexOf(a.playerId) - gPlayerIds.indexOf(b.playerId);
+                    });
+
                     var letter = groupLetters[g - 1] || String(g);
                     bHtml += '<div style="margin-bottom:24px;">';
                     bHtml += '<div style="font-weight:700;color:var(--text-primary);margin-bottom:8px;font-size:0.95rem;">' + (isEn ? 'Group ' : (isKg ? 'Топ ' : 'Группа ')) + letter + '</div>';
                     bHtml += '<div style="overflow-x:auto;"><table class="td-group-table">';
                     bHtml += '<thead><tr><th>№</th><th>' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th>';
-                    for (var c = 0; c < standings.length; c++) bHtml += '<th style="text-align:center;min-width:65px;white-space:nowrap;">' + (c + 1) + '</th>';
+                    for (var c = 0; c < standings.length; c++) bHtml += '<th style="text-align:center;min-width:46px;white-space:nowrap;">' + (c + 1) + '</th>';
                     bHtml += '<th style="text-align:center;width:30px;">' + (isEn ? 'W' : (isKg ? 'Ж' : 'П')) + '</th>';
+                    bHtml += '<th style="text-align:center;width:44px;white-space:nowrap;">' + (isEn ? 'Games' : (isKg ? 'Геймдер' : 'Геймы')) + '</th>';
                     bHtml += '<th style="text-align:center;width:40px;">' + (isEn ? 'Pos' : (isKg ? 'О' : 'М')) + '</th>';
                     bHtml += '</tr></thead><tbody>';
 
@@ -1954,8 +2002,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         }
 
                         var sbPlaceDisplay = sbGroupHasResults ? st.place : '—';
+                        var sbLot = sbGroupDone ? почемуМесто(st, isEn, isKg) : '';
                         bHtml += '<td style="text-align:center;font-weight:600;">' + st.wins + '</td>';
-                        bHtml += '<td style="text-align:center;font-weight:700;' + (isQualified ? 'color:var(--accent);' : '') + '">' + sbPlaceDisplay + '</td>';
+                        bHtml += '<td style="text-align:center;font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
+                            (sbGroupHasResults ? st.gamesWon + '-' + st.gamesLost : '—') + '</td>';
+                        bHtml += '<td style="text-align:center;font-weight:700;white-space:nowrap;' + (isQualified ? 'color:var(--accent);' : '') + '">' +
+                            sbPlaceDisplay + sbLot + '</td>';
                         bHtml += '</tr>';
                     }
 

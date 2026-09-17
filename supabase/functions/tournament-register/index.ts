@@ -205,6 +205,12 @@
           .not('status', 'in', '("withdrawn","rejected")')
           .maybeSingle()
         if (какНапарник) {
+          // Второй номер распоряжается заявкой наравне с подавшим — и так же
+          // теряет это право, когда сетка собрана
+          if (какНапарник.status === 'draw' || какНапарник.group_number != null ||
+              какНапарник.draw_position != null) {
+            return json({ error: 'entry_in_draw' }, 409)
+          }
           if (body.leave_pair) return await выйтиИзПары(db, какНапарник, player.id, serviceKey)
           return await сменитьНапарника(db, какНапарник, body, player, tournament)
         }
@@ -233,6 +239,21 @@
         return json({ error: 'entry_rejected' }, 409)
       }
       if (existing && existing.status !== 'withdrawn') {
+        // Сетка сформирована — состав закрыт.
+        //
+        // Пока жеребьёвки нет, игрок распоряжается своей парой сам. После неё
+        // менять напарника нельзя: посев разведён по группам, соперники
+        // определены, расписание разложено по кортам и времени — на корт
+        // вышла бы пара, которой в расчёте не было. Заодно мимо проверок
+        // прошли бы лимит суммы NTRP и разнополость в миксте. Дальше замену
+        // делает менеджер, который видит последствия.
+        var вСетке = existing.status === 'draw' ||
+                     existing.group_number != null ||
+                     existing.draw_position != null
+        if (вСетке && (body.change_partner || body.leave_pair)) {
+          return json({ error: 'entry_in_draw' }, 409)
+        }
+
         // Замена напарника — не новая заявка: место, время подачи и очередь
         // остаются за игроком, меняется только тот, с кем он выйдет на корт
         if (body.change_partner) {

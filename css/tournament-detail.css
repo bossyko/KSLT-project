@@ -1459,9 +1459,31 @@ tr.td-rr-row-dimmed {
 
 .td-group-table th,
 .td-group-table td {
-    padding: 8px 10px;
+    padding: 8px 6px;
     border-bottom: 1px solid var(--border-subtle);
     font-size: 0.85rem;
+}
+
+/* Две таблицы в ряд: после колонки геймов они перестали помещаться в свою
+   половину, и правая обрезалась по краю */
+@media (min-width: 900px) {
+    .td-groups-grid .td-group-table th,
+    .td-groups-grid .td-group-table td {
+        padding: 7px 4px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Подпись под местом: победы, сеты и геймы совпали, место определила
+   жеребьёвка */
+.td-grp-lot {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.62rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text-dim);
+    cursor: help;
 }
 
 .td-group-table thead th {

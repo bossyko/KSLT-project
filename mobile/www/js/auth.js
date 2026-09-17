@@ -509,7 +509,7 @@
             AUTH.currentUser = otpRes.data.user;
             localStorage.setItem('kslt_session_start', Date.now().toString());
             localStorage.setItem('kslt_last_activity', Date.now().toString());
-            try { checkDeviceFingerprint(otpRes.data.user.id); } catch(e) {}
+            try { checkDeviceFingerprint(otpRes.data.user.id); ensurePlayerCard(); } catch(e) {}
             AUTH.loadProfile(otpRes.data.user.id).then(function() {
               onDone();
             });
@@ -717,7 +717,7 @@
         AUTH.currentUser = res.data.user;
         localStorage.setItem('kslt_session_start', Date.now().toString());
         localStorage.setItem('kslt_last_activity', Date.now().toString());
-        try { checkDeviceFingerprint(res.data.user.id); } catch(e) {}
+        try { checkDeviceFingerprint(res.data.user.id); ensurePlayerCard(); } catch(e) {}
         AUTH.loadProfile(res.data.user.id).then(function() {
           authScreen.classList.remove('open');
           if (window.KSLT_APP && window.KSLT_APP.onAuthChange) {
@@ -961,7 +961,7 @@
             AUTH.currentUser = otpRes.data.user;
             localStorage.setItem('kslt_session_start', Date.now().toString());
             localStorage.setItem('kslt_last_activity', Date.now().toString());
-            try { checkDeviceFingerprint(otpRes.data.user.id); } catch(e) {}
+            try { checkDeviceFingerprint(otpRes.data.user.id); ensurePlayerCard(); } catch(e) {}
             AUTH.loadProfile(otpRes.data.user.id).then(function() {
               authScreen.classList.remove('open');
               if (window.KSLT_APP && window.KSLT_APP.onAuthChange) window.KSLT_APP.onAuthChange();
@@ -985,6 +985,38 @@
       hash |= 0;
     }
     return hash.toString(36);
+  }
+
+  /**
+   * Карточка игрока — сразу при входе, как на сайте.
+   *
+   * Без неё человек не может ни записаться на турнир, ни вызвать на баттл. В
+   * приложении карточку не заводили вовсе: кабинет живёт на сайте, и тот, кто
+   * пользуется только приложением, упирался в «у вас нет карточки игрока».
+   *
+   * Нашлась похожая карточка с рейтингом — сервер её не присваивает, человек
+   * подтверждает сам: чужую историю вслепую не отдаём.
+   */
+  function ensurePlayerCard() {
+    if (!supabaseClient) return;
+    supabaseClient.auth.getSession().then(function(res) {
+      var session = res.data && res.data.session;
+      if (!session || !session.access_token) return;
+      var url = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
+      var anon = window.SUPABASE_ANON_KEY || '';
+      return fetch(url + '/functions/v1/ensure-player-card', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': anon,
+          'Authorization': 'Bearer ' + session.access_token
+        },
+        body: JSON.stringify({})
+      });
+    }).catch(function(e) {
+      // Не вышло — кабинет и подача заявки попробуют снова
+      console.warn('[KSLT] карточка игрока:', e && e.message);
+    });
   }
 
   function checkDeviceFingerprint(userId) {
