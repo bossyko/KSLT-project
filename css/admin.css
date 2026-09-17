@@ -316,11 +316,88 @@ body.ad-page {
 }
 
 /* ---- Table Card ---- */
+/* Прокрутка вбок осталась страховкой: колонка действий теперь одна узкая
+   кнопка, и таблица помещается в экран. Но если окно совсем узкое, лучше
+   прокрутка, чем содержимое за краем */
+.ad-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ---- Действия заявки: одна кнопка и выпадающий список ---- */
+
+.ad-reg-actions-cell {
+    width: 44px;
+    text-align: center;
+    /* Меню раскрывается за пределы ячейки */
+    position: relative;
+    overflow: visible;
+}
+
+.ad-reg-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.ad-reg-menu-btn {
+    padding: 2px 8px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.2;
+    cursor: pointer;
+}
+
+.ad-reg-menu-btn:hover,
+.ad-reg-menu.open .ad-reg-menu-btn {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(204, 255, 0, 0.08);
+}
+
+.ad-reg-menu-list {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 30;
+    min-width: 150px;
+    padding: 4px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    text-align: left;
+}
+
+.ad-reg-menu.open .ad-reg-menu-list {
+    display: block;
+}
+
+/* Кнопки внутри меню идут столбиком и занимают всю ширину */
+.ad-reg-menu-list .ad-reg-act {
+    display: block;
+    width: 100%;
+    padding: 7px 10px !important;
+    text-align: left;
+    border-radius: 6px;
+}
+
+.ad-reg-menu-list .ad-reg-act:hover:not(:disabled) {
+    background: rgba(204, 255, 0, 0.1) !important;
+}
+
 .ad-table-card {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
+    /* Таблица шире экрана прокручивается внутри карточки, а не тянет за
+       собой страницу: на узком мониторе колонка действий уезжала за край,
+       и до кнопок было не добраться */
+    overflow-x: auto;
 }
 
 .ad-table-card-title {

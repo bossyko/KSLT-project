@@ -3039,6 +3039,29 @@
         }
 
         // Replace player buttons
+        // Меню действий у заявки: открываем одно, остальные закрываем
+        container.querySelectorAll('.ad-reg-menu-btn').forEach(function(кн) {
+            кн.addEventListener('click', function(е) {
+                е.stopPropagation();
+                var меню = кн.parentElement;
+                var былоОткрыто = меню.classList.contains('open');
+                container.querySelectorAll('.ad-reg-menu.open').forEach(function(м) {
+                    м.classList.remove('open');
+                });
+                if (!былоОткрыто) меню.classList.add('open');
+            });
+        });
+
+        // Клик мимо и выбор пункта закрывают меню
+        if (!container.dataset.менюЗакрытие) {
+            container.dataset.менюЗакрытие = '1';
+            document.addEventListener('click', function() {
+                document.querySelectorAll('.ad-reg-menu.open').forEach(function(м) {
+                    м.classList.remove('open');
+                });
+            });
+        }
+
         container.querySelectorAll('.ad-btn-replace').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var regId = btn.dataset.regId;
@@ -3480,7 +3503,7 @@
 
         var html = '<h3 class="ad-reg-section-title" style="margin-top:24px;">' + L.regChangesTitle +
             ' <span class="ad-badge">' + строки.length + '</span></h3>' +
-            '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+            '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                 '<th style="width:150px;">' + L.regChangesWhen + '</th>' +
                 '<th style="width:120px;">' + L.regChangesSide + '</th>' +
                 '<th>' + L.regChangesWho + '</th>' +
@@ -3661,7 +3684,7 @@
                 '<button id="adBrkAddExternal" style="padding:6px 14px;border:1px solid var(--accent);border-radius:6px;background:rgba(204,255,0,0.1);color:var(--accent);cursor:pointer;font-size:0.85rem;font-weight:600;">' + L.regAddExternal + '</button>' +
             '</div>';
             if (mainDraw.length > 0) {
-                html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                     regTableHead.replace('GRP', 'main') +
                 '</tr></thead><tbody>';
                 mainDraw.forEach(function(reg, idx) {
@@ -3676,7 +3699,7 @@
             // ---- Waitlist ----
             html += '<h3 class="ad-reg-section-title" style="margin-top:24px;">' + L.regWaitlist + ' <span class="ad-badge">' + waitlistRegs.length + '</span></h3>';
             if (waitlistRegs.length > 0) {
-                html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                     regTableHead.replace('GRP', 'wait') +
                 '</tr></thead><tbody>';
                 waitlistRegs.forEach(function(reg, idx) {
@@ -3703,7 +3726,7 @@
                     ' <span class="ad-badge" style="background:rgba(244,67,54,0.15);color:#f44336;">' +
                     внеТурнира.length + '</span></h3>';
                 html += '<p style="margin:-4px 0 10px;font-size:0.8rem;color:var(--text-dim);">' + L.regOutHint + '</p>';
-                html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                     '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
                     '<th>' + L.plrName + '</th>' +
                     (isDbl ? '<th>' + L.doublesPartner + '</th>' : '<th>' + (isEn ? 'Category' : 'Категория') + '</th>') +
@@ -3761,7 +3784,7 @@
                 html += '<h3 class="ad-reg-section-title" style="margin-top:24px;color:#ff9800;">' + blkTitle +
                     ' <span class="ad-badge" style="background:rgba(255,152,0,0.15);color:#ff9800;">' + blocked.length + '</span></h3>';
                 html += '<p style="margin:-4px 0 10px;font-size:0.8rem;color:var(--text-dim);">' + blkHint + '</p>';
-                html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
+                html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                     '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
                     '<th>' + L.plrName + '</th>' +
                     '<th>' + (isEn ? 'Category' : 'Категория') + '</th>' +
@@ -3883,8 +3906,13 @@
         // Кнопок бывает четыре: решить, заменить, снять, отклонить. Держим их
         // одной строкой — столбиком они разъезжались на три этажа и строка
         // таблицы прыгала. Помещаются за счёт мелкого кегля, см. .ad-reg-act
-        var actionsTd = '<td style="text-align:center;"><div style="display:flex;gap:2px;' +
-            'justify-content:flex-end;align-items:center;white-space:nowrap;">';
+        // Действия прячем под одну кнопку: тремя подписями колонка
+        // распирала таблицу шире экрана, и до кнопок приходилось доезжать
+        // прокруткой. Сами кнопки те же, просто лежат в выпадающем списке
+        var actionsTd = '<td class="ad-reg-actions-cell">' +
+            '<div class="ad-reg-menu">' +
+            '<button type="button" class="ad-reg-menu-btn" title="' + (isEn ? 'Actions' : 'Действия') + '">\u22EF</button>' +
+            '<div class="ad-reg-menu-list">';
 
         // Гость ждёт решения: подтвердить пару или убрать напарника. Заявку
         // целиком не снимаем — первый номер не виноват, найдёт другого
@@ -3909,7 +3937,7 @@
             actionsTd += '<button class="ad-reg-act ad-btn-approve" data-reg-id="' + reg.id + '" title="' + L.regMoveToMain + '"' + стоп + 'color:#4caf50;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regMoveToMainShort + '</button>' +
                 '<button class="ad-reg-act ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '"' + стоп + 'color:#f44336;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReject + '</button>';
         }
-        actionsTd += '</div></td>';
+        actionsTd += '</div></div></td>';
 
         // Partner column for doubles
         var partnerTd = '';
@@ -4226,7 +4254,7 @@
                 .replace('{size}', размер)
                 .replace('{free}', расклад.свободно) + '</p>';
 
-        html += '<div class="ad-table-card"><table class="ad-table"><tbody>';
+        html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><tbody>';
         for (var м = 0; м < размер; м += 2) {
             html += '<tr>' +
                 '<td style="width:36px;text-align:center;color:var(--text-dim);">' + (м / 2 + 1) + '</td>' +
@@ -9880,7 +9908,7 @@
                 }
             }
 
-            console.log('[tryFillPlayoffFromIG] Auto-placed', unplacedWinners.length, 'IG winners into X-slots');
+            console.log('[tryFillPlayoffFromIG] Победители доп. матчей расставлены по своим клеткам');
         } catch (err) {
             console.error('[tryFillPlayoffFromIG] Error:', err);
         }
