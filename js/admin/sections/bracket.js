@@ -1687,6 +1687,38 @@
     var ROUND_TO_KEY = {};
     // Will be populated dynamically based on draw_size
 
+    /**
+     * Таблица очков за место для категории турнира.
+     *
+     * Возвращает разбор `{место: очки}`. Пусто — если категории нет или
+     * турнир не рейтинговый: считать тогда нечего.
+     */
+    async function загрузитьТаблицуМест(tournament) {
+        if (!tournament.level_id || isUnrankedTournament(tournament)) return {};
+
+        var ответ = await A.client.from('points_by_place')
+            .select('place, points')
+            .eq('level_id', tournament.level_id);
+
+        var таблица = {};
+        (ответ.data || []).forEach(function(с) { таблица[с.place] = с.points; });
+        return таблица;
+    }
+
+    /**
+     * Куда попадает проигравший круга: место и сколько человек его делит.
+     *
+     * В круге, после которого остаётся K участников, проигравшие занимают
+     * места с K+1 по 2K. Между собой они не играли, поэтому место у всех
+     * одно и то же — дальше сноска Положения уравняет их по последнему.
+     *
+     * Финал и матч за третье место сюда не идут: там места разыграны.
+     */
+    function местоПроигравшего(roundNumber, totalRounds) {
+        var осталось = Math.pow(2, totalRounds - roundNumber);
+        return осталось + 1;
+    }
+
     function getRoundKey(roundNumber, totalRounds) {
         // For losers: roundsFromEnd = which round they lost in
         // Lost in Final → F, Lost in SF → SF, Lost in QF → QF, etc.
@@ -6047,11 +6079,27 @@
             sortResults(plResults);
             sortResults(clResults);
 
+            // В какой зачёт идут очки дивизиона
+            //
+            // Очки у обоих одинаковые: категория турнира одна, места
+            // считаются внутри своего дивизиона. Разные у них списки —
+            // верхний идёт в свою категорию, нижний в следующую. Без
+            // подписи это не видно, и непонятно, чьи это очки
+            var зачёт = function(рез) {
+                var катId = рез.length ? рез[0].category_id : null;
+                var кат = катId && A.categoriesMap ? A.categoriesMap[катId] : null;
+                if (!кат) return '';
+                var имя = isEn ? (кат.name_en || кат.name) : кат.name;
+                return ' <span style="font-size:0.8rem;color:var(--accent);font-weight:500;">— ' +
+                    (isEn ? 'counts toward ' : 'зачёт ') + A.esc(имя) + '</span>';
+            };
+
             // Premier League section
             if (plResults.length > 0) {
-                html += '<h3 style="margin:20px 0 12px;color:var(--accent);font-size:1.1rem;display:flex;align-items:center;gap:8px;">' +
+                html += '<h3 style="margin:20px 0 12px;color:var(--accent);font-size:1.1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
                     '<span style="font-size:1.2rem;">🏆</span> ' +
                     (isEn ? 'Premier League' : 'Высшая лига') +
+                    зачёт(plResults) +
                     ' <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:400;">(' + plResults.length + (isEn ? ' players' : ' уч.') + ')</span>' +
                 '</h3>';
                 html += renderTable(plResults);
@@ -6059,9 +6107,10 @@
 
             // Consolation League section
             if (clResults.length > 0) {
-                html += '<h3 style="margin:20px 0 12px;color:var(--text-secondary);font-size:1.1rem;display:flex;align-items:center;gap:8px;">' +
+                html += '<h3 style="margin:20px 0 12px;color:var(--text-secondary);font-size:1.1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
                     '<span style="font-size:1.2rem;">🎯</span> ' +
                     (isEn ? 'Consolation League' : 'Утешительная лига') +
+                    зачёт(clResults) +
                     ' <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:400;">(' + clResults.length + (isEn ? ' players' : ' уч.') + ')</span>' +
                 '</h3>';
                 html += renderTable(clResults);
@@ -10411,16 +10460,12 @@
             var totalRounds = Math.log2(drawSize);
             var season = new Date().getFullYear();
 
-            // Load points rules for this tournament's level
-            var rulesMap = {};
-            // Friendly очков не даёт — правила не грузим, считать нечего
-            if (tournament.level_id && !isUnrankedTournament(tournament)) {
-                var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
-                (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
-            }
+            // Очки платит занятое место, а не стадия: таблица Положения
+            // различает третье и четвёртое, пятое и шестое
+            var таблицаМест = await загрузитьТаблицуМест(tournament);
 
             // Determine round_reached for each player
-            var playerResults = {}; // player_id → { round_reached, points_earned }
+            var playerResults = {}; // player_id → { round_reached, place, разыграно }
 
             // Find the final match to determine winner (exclude 3RD place match)
             var finalMatch = matches.find(function(m) { return m.round_number === totalRounds && m.round !== '3RD'; });
@@ -10428,30 +10473,31 @@
             if (finalMatch && finalMatch.winner_id) {
                 // Winner
                 playerResults[finalMatch.winner_id] = {
-                    round_reached: 'W',
-                    points_earned: rulesMap['W'] || 0
+                    round_reached: 'W', place: 1, разыграно: true
                 };
                 // Finalist (loser of final)
                 var finalist = finalMatch.winner_id === finalMatch.player1_id ? finalMatch.player2_id : finalMatch.player1_id;
                 if (finalist) {
                     playerResults[finalist] = {
-                        round_reached: 'F',
-                        points_earned: rulesMap['F'] || 0
+                        round_reached: 'F', place: 2, разыграно: true
                     };
                 }
             }
 
-            // 3rd place match: winner = 3rd, loser excluded from results
-            var thirdPlaceExclude = {};
+            // Матч за третье место: победитель третий, проигравший четвёртый.
+            // Если матча не было, оба полуфиналиста придут сюда как третьи —
+            // и сноска Положения уравняет их по четвёртому месту
             var thirdPlaceMatch = matches.find(function(m) { return m.round === '3RD' && m.status === 'completed' && m.winner_id; });
             if (thirdPlaceMatch) {
                 playerResults[thirdPlaceMatch.winner_id] = {
-                    round_reached: '3RD',
-                    points_earned: rulesMap['3RD'] || rulesMap['SF'] || 0
+                    round_reached: '3RD', place: 3, разыграно: true
                 };
-                // Mark loser as excluded (won't appear in results)
                 var thirdLoserId = thirdPlaceMatch.winner_id === thirdPlaceMatch.player1_id ? thirdPlaceMatch.player2_id : thirdPlaceMatch.player1_id;
-                if (thirdLoserId) thirdPlaceExclude[thirdLoserId] = true;
+                if (thirdLoserId) {
+                    playerResults[thirdLoserId] = {
+                        round_reached: '4TH', place: 4, разыграно: true
+                    };
+                }
             }
 
             // Other players: lost in their round
@@ -10461,15 +10507,23 @@
                 if (m.round === '3RD') return; // Handled above
 
                 var loserId = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
-                if (!loserId || playerResults[loserId] || thirdPlaceExclude[loserId]) return;
+                if (!loserId || playerResults[loserId]) return;
 
                 // Player lost in round m.round_number → their round_reached is based on that
                 var roundKey = getRoundKey(m.round_number, totalRounds);
                 playerResults[loserId] = {
                     round_reached: roundKey,
-                    points_earned: rulesMap[roundKey] || 0
+                    place: местоПроигравшего(m.round_number, totalRounds),
+                    разыграно: false
                 };
             });
+
+            // Олимпийка победы отдельно не платит: место уже говорит,
+            // сколько человек выиграл
+            var кОплате = Object.keys(playerResults).map(function(pid) {
+                return playerResults[pid];
+            });
+            KSLT_POINTS.поТурниру(кОплате, таблицаМест, {});
 
             // Upsert tournament_results
             var isDbl = isDoublesTournament(tournament);
@@ -10564,14 +10618,9 @@
             var halfDraw = drawSize / 2;
             var season = new Date().getFullYear();
 
-            // Load points rules
-            var rulesMap = {};
-            // Friendly очков не даёт — правила не грузим, считать нечего
-            if (tournament.level_id && !isUnrankedTournament(tournament)) {
-                var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
-                (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
-            }
-
+            // В сетке всех мест каждое место разыграно отдельным матчем:
+            // платим строго по таблице, уравнивать нечего
+            var таблицаМест = await загрузитьТаблицуМест(tournament);
 
             // Map place → points round_key
             function placeToRoundKey(place) {
@@ -10606,22 +10655,25 @@
 
                 var loserId = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
 
-                var winnerKey = placeToRoundKey(winnerPlace);
                 playerResults[m.winner_id] = {
-                    round_reached: winnerKey,
-                    points_earned: rulesMap[winnerKey] || 0,
-                    place: winnerPlace
+                    round_reached: placeToRoundKey(winnerPlace),
+                    place: winnerPlace,
+                    разыграно: true
                 };
 
                 if (loserId) {
-                    var loserKey = placeToRoundKey(loserPlace);
                     playerResults[loserId] = {
-                        round_reached: loserKey,
-                        points_earned: rulesMap[loserKey] || 0,
-                        place: loserPlace
+                        round_reached: placeToRoundKey(loserPlace),
+                        place: loserPlace,
+                        разыграно: true
                     };
                 }
             });
+
+            var кОплатеFic = Object.keys(playerResults).map(function(pid) {
+                return playerResults[pid];
+            });
+            KSLT_POINTS.поТурниру(кОплатеFic, таблицаМест, {});
 
             // Upsert tournament_results
             var isDblFic = isDoublesTournament(tournament);
@@ -10709,22 +10761,11 @@
             var qualifiers = tournament.qualifiers_per_group || 2;
             var season = new Date().getFullYear();
 
-            // Load points rules
-            var rulesMap = {};
-            // Friendly очков не даёт — правила не грузим, считать нечего
-            if (tournament.level_id && !isUnrankedTournament(tournament)) {
-                var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
-                (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
-            }
-
-            // Auto-fill G3-G6 if not set in rules (proportional to W)
-            var wPts = rulesMap['W'] || 0;
-            var groupFallback = { G3: 0.12, G4: 0.06, G5: 0.03, G6: 0.01 };
-            ['G3', 'G4', 'G5', 'G6'].forEach(function(gk) {
-                if (!rulesMap[gk] && wPts > 0) {
-                    rulesMap[gk] = Math.round(wPts * groupFallback[gk]);
-                }
-            });
+            // Очки платит занятое место по таблице Положения. Здесь к нему
+            // добавляются победы: за выход из группы мест не дают, а
+            // встречи сыграны, и каждая стоит 25
+            var таблицаМест = await загрузитьТаблицуМест(tournament);
+            var правилаОчков = { заПобеды: true };
 
             var toUpsert = [];
             var plMatches = matches.filter(isPlayoffMatch);
@@ -10742,18 +10783,18 @@
                 // Final → W / F
                 var finalMatch = plMatches.find(function(m) { return m.round_number === plTotalRounds && m.round !== '3RD'; });
                 if (finalMatch && finalMatch.winner_id) {
-                    playerResults[finalMatch.winner_id] = { round_reached: 'W', points_earned: rulesMap['W'] || 0 };
+                    playerResults[finalMatch.winner_id] = { round_reached: 'W', place: 1, разыграно: true };
                     var finalist = finalMatch.winner_id === finalMatch.player1_id ? finalMatch.player2_id : finalMatch.player1_id;
-                    if (finalist) playerResults[finalist] = { round_reached: 'F', points_earned: rulesMap['F'] || 0 };
+                    if (finalist) playerResults[finalist] = { round_reached: 'F', place: 2, разыграно: true };
                 }
 
                 // 3rd place match
                 var thirdPM = plMatches.find(function(m) { return m.round === '3RD' && m.status === 'completed' && m.winner_id; });
                 if (thirdPM) {
-                    playerResults[thirdPM.winner_id] = { round_reached: '3RD', points_earned: rulesMap['3RD'] || rulesMap['SF'] || 0 };
+                    playerResults[thirdPM.winner_id] = { round_reached: '3RD', place: 3, разыграно: true };
                     var thirdLoserId = thirdPM.winner_id === thirdPM.player1_id ? thirdPM.player2_id : thirdPM.player1_id;
                     if (thirdLoserId) {
-                        playerResults[thirdLoserId] = { round_reached: '4TH', points_earned: rulesMap['4TH'] || rulesMap['SF'] || 0 };
+                        playerResults[thirdLoserId] = { round_reached: '4TH', place: 4, разыграно: true };
                     }
                 }
 
@@ -10763,10 +10804,74 @@
                     var loserId = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
                     if (!loserId || playerResults[loserId]) return;
                     var roundKey = getRoundKey(m.round_number, plTotalRounds);
-                    playerResults[loserId] = { round_reached: roundKey, points_earned: rulesMap[roundKey] || 0 };
+                    playerResults[loserId] = {
+                        round_reached: roundKey,
+                        place: местоПроигравшего(m.round_number, plTotalRounds),
+                        разыграно: false
+                    };
                 });
 
-                // Add playoff results
+                // Collect qualified player IDs (in playoff)
+                var qualifiedIds = {};
+                plMatches.forEach(function(m) {
+                    if (m.player1_id) qualifiedIds[m.player1_id] = true;
+                    if (m.player2_id) qualifiedIds[m.player2_id] = true;
+                });
+
+                // Не прошедшие из групп встают за сеткой
+                //
+                // Мест в плей-офф столько, сколько в нём людей. Дальше идут
+                // третьи места всех групп, за ними четвёртые и так далее.
+                // Между собой они не играли, поэтому место у каждой ступени
+                // одно — сноска Положения потом уравняет их по последнему
+                var занятоСеткой = Object.keys(qualifiedIds).length;
+                var поСтупеням = {};
+
+                var grpMatches = matches.filter(isGroupMatch);
+                for (var g = 1; g <= groupCount; g++) {
+                    var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
+                    var playerIds = [];
+                    groupMatchesG.forEach(function(m) {
+                        if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
+                        if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
+                    });
+                    var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
+                    применитьРучныеМеста(standings, (tournament.manual_group_places || {})[String(g)]);
+                    standings.sort(function(a, b) { return a.place - b.place; });
+
+                    standings.forEach(function(st) {
+                        if (qualifiedIds[st.playerId]) return; // уже в плей-офф
+                        if (!поСтупеням[st.place]) поСтупеням[st.place] = [];
+                        поСтупеням[st.place].push(st);
+                    });
+                }
+
+                var следующее = занятоСеткой + 1;
+                Object.keys(поСтупеням)
+                    .map(Number)
+                    .sort(function(a, b) { return a - b; })
+                    .forEach(function(вГруппе) {
+                        var ступень = поСтупеням[вГруппе];
+                        ступень.forEach(function(st) {
+                            playerResults[st.playerId] = {
+                                round_reached: 'G' + вГруппе,
+                                place: следующее,
+                                разыграно: false
+                            };
+                        });
+                        следующее += ступень.length;
+                    });
+
+                // Победы считаем по всему турниру: и в группе, и в сетке
+                Object.keys(playerResults).forEach(function(pid) {
+                    playerResults[pid].побед = KSLT_POINTS.победы(pid, matches);
+                });
+
+                var кОплате = Object.keys(playerResults).map(function(pid) {
+                    return playerResults[pid];
+                });
+                KSLT_POINTS.поТурниру(кОплате, таблицаМест, правилаОчков);
+
                 Object.keys(playerResults).forEach(function(pid) {
                     toUpsert.push({
                         tournament_id: tournament.id,
@@ -10777,42 +10882,9 @@
                         category_id: tournament.category_id
                     });
                 });
-
-                // Collect qualified player IDs (in playoff)
-                var qualifiedIds = {};
-                plMatches.forEach(function(m) {
-                    if (m.player1_id) qualifiedIds[m.player1_id] = true;
-                    if (m.player2_id) qualifiedIds[m.player2_id] = true;
-                });
-
-                // Non-qualified group players → G3, G4, etc.
-                var grpMatches = matches.filter(isGroupMatch);
-                for (var g = 1; g <= groupCount; g++) {
-                    var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
-                    var playerIds = [];
-                    groupMatchesG.forEach(function(m) {
-                        if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
-                        if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
-                    });
-                    var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
-                    применитьРучныеМеста(standings, (tournament.manual_group_places || {})[String(g)]);
-                    standings.sort(function(a, b) { return a.place - b.place; });
-
-                    standings.forEach(function(st) {
-                        if (qualifiedIds[st.playerId]) return; // already in playoff results
-                        var roundKey = 'G' + st.place;
-                        toUpsert.push({
-                            tournament_id: tournament.id,
-                            player_id: st.playerId,
-                            round_reached: roundKey,
-                            points_earned: rulesMap[roundKey] || 0,
-                            season: season,
-                            category_id: tournament.category_id
-                        });
-                    });
-                }
             } else {
                 // --- Pure group finalization (no playoff) ---
+                var ступени = {};
                 var grpMatches = matches.filter(isGroupMatch);
                 for (var g = 1; g <= groupCount; g++) {
                     var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
@@ -10826,17 +10898,46 @@
                     standings.sort(function(a, b) { return a.place - b.place; });
 
                     standings.forEach(function(st) {
-                        var roundKey = 'G' + st.place;
-                        toUpsert.push({
-                            tournament_id: tournament.id,
-                            player_id: st.playerId,
-                            round_reached: roundKey,
-                            points_earned: rulesMap[roundKey] || 0,
-                            season: season,
-                            category_id: tournament.category_id
-                        });
+                        if (!ступени[st.place]) ступени[st.place] = [];
+                        ступени[st.place].push(st);
                     });
                 }
+
+                // Плей-оффа нет: места турнира идут ступенями по местам в
+                // группах. Все первые места делят верхние строки, за ними
+                // вторые, и так далее — между собой они не играли
+                var местоТурнира = 1;
+                var чистые = [];
+                Object.keys(ступени)
+                    .map(Number)
+                    .sort(function(a, b) { return a - b; })
+                    .forEach(function(вГруппе) {
+                        var ступень = ступени[вГруппе];
+                        ступень.forEach(function(st) {
+                            var у = {
+                                playerId: st.playerId,
+                                round_reached: 'G' + вГруппе,
+                                place: местоТурнира,
+                                разыграно: false,
+                                побед: KSLT_POINTS.победы(st.playerId, matches)
+                            };
+                            чистые.push(у);
+                        });
+                        местоТурнира += ступень.length;
+                    });
+
+                KSLT_POINTS.поТурниру(чистые, таблицаМест, правилаОчков);
+
+                чистые.forEach(function(у) {
+                    toUpsert.push({
+                        tournament_id: tournament.id,
+                        player_id: у.playerId,
+                        round_reached: у.round_reached,
+                        points_earned: у.points_earned,
+                        season: season,
+                        category_id: tournament.category_id
+                    });
+                });
             }
 
             // Doubles expansion
@@ -11734,18 +11835,36 @@
             var groupCount = tournament.group_count || 2;
             var season = new Date().getFullYear();
 
-            // Load points rules
-            var rulesMap = {};
-            // Friendly очков не даёт — правила не грузим, считать нечего
-            if (tournament.level_id && !isUnrankedTournament(tournament)) {
-                var rulesRes = await A.client.from('points_rules').select('*').eq('level_id', tournament.level_id);
-                (rulesRes.data || []).forEach(function(r) { rulesMap[r.round] = r.points; });
+            var таблицаМест = await загрузитьТаблицуМест(tournament);
+            var правилаОчков = { заПобеды: true };
+
+            // Два зачёта, одна таблица
+            //
+            // Верхний дивизион идёт в зачёт своей категории, нижний — в
+            // следующую по порядку: кто не прошёл наверх, играет в Мастерс,
+            // а не в Про-Мастерс. Очки при этом одинаковые: категория
+            // турнира одна, и места считаются внутри своего дивизиона.
+            // Поэтому за первое место в обоих дивизионах платят ровно
+            // столько, сколько стоит первое место этого турнира.
+            //
+            // Раньше нижний получал половину очков верхнего, и выигравший
+            // подвал обходил четвёртое место наверху — при том, что наверх
+            // не прошёл.
+            var нижняяКатегория = tournament.category_id;
+            var катОтвет = await A.client.from('categories')
+                .select('id, sort_order')
+                .order('sort_order', { ascending: true });
+            var категории = катОтвет.data || [];
+            var своя = категории.find(function(к) { return к.id === tournament.category_id; });
+            if (своя) {
+                var следующая = категории.find(function(к) { return к.sort_order > своя.sort_order; });
+                if (следующая) нижняяКатегория = следующая.id;
             }
 
             var toUpsert = [];
 
             // Process each league
-            function processLeague(leagueMatches, multiplier, prefix) {
+            function processLeague(leagueMatches, категорияЗачёта, prefix) {
                 if (leagueMatches.length === 0) return;
 
                 var lR1 = leagueMatches.filter(function(m) { return m.round_number === 1; });
@@ -11759,18 +11878,18 @@
                     return m.round_number === lTotalRounds && m.round !== prefix + '-3RD';
                 });
                 if (finalMatch && finalMatch.winner_id) {
-                    playerResults[finalMatch.winner_id] = { round_reached: 'W', points_earned: Math.round((rulesMap['W'] || 0) * multiplier) };
+                    playerResults[finalMatch.winner_id] = { round_reached: 'W', place: 1, разыграно: true };
                     var finalist = finalMatch.winner_id === finalMatch.player1_id ? finalMatch.player2_id : finalMatch.player1_id;
-                    if (finalist) playerResults[finalist] = { round_reached: 'F', points_earned: Math.round((rulesMap['F'] || 0) * multiplier) };
+                    if (finalist) playerResults[finalist] = { round_reached: 'F', place: 2, разыграно: true };
                 }
 
                 // 3rd place match
                 var thirdPM = leagueMatches.find(function(m) { return m.round === prefix + '-3RD' && m.status === 'completed' && m.winner_id; });
                 if (thirdPM) {
-                    playerResults[thirdPM.winner_id] = { round_reached: '3RD', points_earned: Math.round((rulesMap['3RD'] || rulesMap['SF'] || 0) * multiplier) };
+                    playerResults[thirdPM.winner_id] = { round_reached: '3RD', place: 3, разыграно: true };
                     var thirdLoserId = thirdPM.winner_id === thirdPM.player1_id ? thirdPM.player2_id : thirdPM.player1_id;
                     if (thirdLoserId) {
-                        playerResults[thirdLoserId] = { round_reached: '4TH', points_earned: Math.round((rulesMap['4TH'] || rulesMap['SF'] || 0) * multiplier) };
+                        playerResults[thirdLoserId] = { round_reached: '4TH', place: 4, разыграно: true };
                     }
                 }
 
@@ -11779,9 +11898,22 @@
                     if (m.status !== 'completed' || !m.winner_id || m.score === 'BYE' || m.round === prefix + '-3RD') return;
                     var loserId = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
                     if (!loserId || playerResults[loserId]) return;
-                    var roundKey = getRoundKey(m.round_number, lTotalRounds);
-                    playerResults[loserId] = { round_reached: roundKey, points_earned: Math.round((rulesMap[roundKey] || 0) * multiplier) };
+                    playerResults[loserId] = {
+                        round_reached: getRoundKey(m.round_number, lTotalRounds),
+                        place: местоПроигравшего(m.round_number, lTotalRounds),
+                        разыграно: false
+                    };
                 });
+
+                // Победы по всему турниру: групповой этап у лиги общий
+                Object.keys(playerResults).forEach(function(pid) {
+                    playerResults[pid].побед = KSLT_POINTS.победы(pid, matches);
+                });
+
+                var кОплате = Object.keys(playerResults).map(function(pid) {
+                    return playerResults[pid];
+                });
+                KSLT_POINTS.поТурниру(кОплате, таблицаМест, правилаОчков);
 
                 Object.keys(playerResults).forEach(function(pid) {
                     if (!pid || pid === 'null' || pid === 'undefined') return; // Skip external players (no player_id)
@@ -11791,16 +11923,16 @@
                         round_reached: playerResults[pid].round_reached,
                         points_earned: playerResults[pid].points_earned,
                         season: season,
-                        category_id: tournament.category_id
+                        category_id: категорияЗачёта
                     });
                 });
             }
 
-            // Premier League: full points (multiplier 1.0)
-            processLeague(matches.filter(isPLMatch), 1.0, 'PL');
+            // Верхний дивизион — зачёт своей категории
+            processLeague(matches.filter(isPLMatch), tournament.category_id, 'PL');
 
-            // Consolation League: half points (multiplier 0.5)
-            processLeague(matches.filter(isCLMatch), 0.5, 'CL');
+            // Нижний — зачёт следующей по порядку
+            processLeague(matches.filter(isCLMatch), нижняяКатегория, 'CL');
 
             // Doubles expansion
             var isDblGL = isDoublesTournament(tournament);
