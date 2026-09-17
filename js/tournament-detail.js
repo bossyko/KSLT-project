@@ -902,6 +902,33 @@ function renderResults(tournament) {
     }
 
     html += '</div>';
+
+    // Кто проводил и кто судил — как в бумажном протоколе. Показываем только
+    // заполненное: клуб вводит имена не для каждого турнира
+    var директор = tournament.director_name || tournament.directorName;
+    var судья = tournament.referee_name || tournament.refereeName;
+    if (директор || судья) {
+        var подпись = function(звание, имя) {
+            if (!имя) return '';
+            return '<div class="td-official">' +
+                '<span class="td-official-role">' + звание + '</span>' +
+                '<span class="td-official-name">' + esc(имя) + '</span>' +
+            '</div>';
+        };
+        var язык = window.location.pathname;
+        var наАнгл = язык.indexOf('-en') !== -1;
+        var наКырг = язык.indexOf('-kg') !== -1;
+        var звания = наАнгл
+            ? { director: 'Tournament director', referee: 'Head referee' }
+            : (наКырг
+                ? { director: 'Турнир директору', referee: 'Башкы калыс' }
+                : { director: 'Директор турнира', referee: 'Главный судья' });
+        html += '<div class="td-officials">' +
+            подпись(звания.director, директор) +
+            подпись(звания.referee, судья) +
+        '</div>';
+    }
+
     container.innerHTML = html;
 }
 

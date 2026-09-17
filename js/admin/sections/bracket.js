@@ -321,11 +321,19 @@
 
         var убрать = function() {
             if (пузырь) { пузырь.remove(); пузырь = null; }
+            // Осиротевшие пузыри от прошлых отрисовок: строка исчезла вместе
+            // с обработчиком, а подсказка осталась на экране
+            document.querySelectorAll('.ad-tip-bubble').forEach(function(п) { п.remove(); });
         };
 
         container.querySelectorAll('[data-tip]').forEach(function(поле) {
             поле.addEventListener('mouseenter', function() {
                 убрать();
+                // Подсказка снимается и по прокрутке, и по клику: строка под
+                // курсором может исчезнуть при перерисовке, и тогда
+                // «указатель ушёл» уже не придёт, а пузырь останется висеть
+                window.addEventListener('scroll', убрать, { once: true, capture: true });
+                document.addEventListener('click', убрать, { once: true });
                 пузырь = document.createElement('div');
                 пузырь.className = 'ad-tip-bubble';
                 пузырь.textContent = поле.dataset.tip;
@@ -2029,6 +2037,14 @@
         // Кнопки выгрузки ставим в неё же: две полосы кнопок одна над другой
         // занимали место и выглядели как разные разделы
         собратьКнопкиСетки(container);
+
+        // Кто подписывает протокол — для выгрузки и печати
+        if (A.экспорт) {
+            A.экспорт.подписи = {
+                director_name: tournament.director_name || '',
+                referee_name: tournament.referee_name || ''
+            };
+        }
 
         // Матчи за места ставим под их круг: считаем по месту, а не в уме —
         // между кругами есть узкие столбцы с линиями, и на глаз ширину
@@ -4079,14 +4095,19 @@
             '<thead><tr>' +
                 '<th class="sched-num">№</th>' +
                 '<th class="sched-time">' + L.schedTime + '</th>' +
-                '<th class="sched-round">' + L.schedRound +
-                    '<select class="ad-sched-round-filter">' + фильтрКругов + '</select></th>' +
+                // В шапке только фильтр: подпись «Раунд» и список рядом
+                // занимали двойную ширину, а список сам говорит, что он про
+                // раунд — в нём и «все раунды», и названия групп
+                '<th class="sched-round">' +
+                    '<select class="ad-sched-round-filter" title="' + L.schedRound + '">' +
+                    фильтрКругов + '</select></th>' +
                 '<th class="sched-p">' + (isEn ? 'Pair 1' : 'Пара 1') + '</th>' +
                 '<th class="sched-vs"></th>' +
                 '<th class="sched-p">' + (isEn ? 'Pair 2' : 'Пара 2') + '</th>' +
                 '<th class="sched-court">' + L.schedCourt + '</th>' +
-                '<th class="sched-status">' + L.thStatus + '</th>' +
-                '<th class="sched-call">' + L.schedCallHead + '</th>' +
+                // Статус и зов живут в одном меню: пять кнопок в строке не
+                // сжимались и держали таблицу шире экрана
+                '<th class="sched-act"></th>' +
             '</tr></thead><tbody>';
 
         очередь.forEach(function(m, idx) {
@@ -4156,8 +4177,15 @@
                 '<td class="sched-vs">vs</td>' +
                 '<td>' + пара2 + '</td>' +
                 '<td>' + кортHtml + '</td>' +
-                '<td class="sched-status">' + статусHtml + '</td>' +
-                '<td class="sched-call">' + зовHtml + '</td>' +
+                '<td class="sched-act">' +
+                    (сыгран
+                        ? статусHtml
+                        : '<div class="ad-reg-menu ad-sched-menu">' +
+                            '<button type="button" class="ad-reg-menu-btn" title="' +
+                                (isEn ? 'Actions' : 'Действия') + '">\u22EF</button>' +
+                            '<div class="ad-reg-menu-list">' + статусHtml + зовHtml + '</div>' +
+                          '</div>') +
+                '</td>' +
             '</tr>';
         });
 
@@ -4644,11 +4672,20 @@
                     var местаРавных = tiedStandings
                         .map(function(s) { return s.расчётноеМесто; })
                         .sort(function(a, b) { return a - b; });
+                    // Сетка собрана — место больше не двигаем: перестановка
+                    // тасует людей по клеткам, а если доп. матч уже сыгран,
+                    // пересобрать не выйдет вовсе, и таблица разойдётся с
+                    // сеткой. Поле оставляем видимым, но запертым: менеджер
+                    // должен видеть, что место решала жеребьёвка
+                    var сеткаСобрана = hasPlayoff || hasIG;
                     html += '<td class="ad-grp-place" style="text-align:center;">' +
                         '<select class="ad-grp-place-select" data-group="' + g + '" data-player="' + st.playerId + '" ' +
-                        'data-place="' + st.place + '" data-tip="' + L.groupPlaceSwapHint + '" ' +
+                        'data-place="' + st.place + '" data-tip="' +
+                        (сеткаСобрана ? L.groupPlaceLockedHint : L.groupPlaceSwapHint) + '" ' +
+                        (сеткаСобрана ? 'disabled ' : '') +
                         'style="background:rgba(204,255,0,0.1);color:var(--accent);border:1px solid var(--accent);border-radius:4px;' +
-                        'font-weight:700;font-size:0.85rem;padding:2px 4px;cursor:pointer;text-align:center;width:42px;">';
+                        'font-weight:700;font-size:0.85rem;padding:2px 4px;text-align:center;width:42px;' +
+                        (сеткаСобрана ? 'opacity:0.45;cursor:not-allowed;' : 'cursor:pointer;') + '">';
                     for (var pi = 0; pi < местаРавных.length; pi++) {
                         var placeVal = местаРавных[pi];
                         html += '<option value="' + placeVal + '"' + (placeVal === st.place ? ' selected' : '') + '>' + placeVal + '</option>';

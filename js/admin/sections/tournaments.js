@@ -988,6 +988,22 @@
                         '<input type="time" class="ad-field-input" id="adTrnStartTime" value="' + (item && item.start_time ? item.start_time.slice(0, 5) : '09:00') + '">' +
                     '</div>' +
                 '</div>' +
+
+                // Кто подписывает протокол — последней настройкой: это не
+                // про игру, а про бумагу. Заполнили — имена печатаются под
+                // линией подписи; пусто — линия останется для ручки
+                '<div class="ad-field-row">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnDirector + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adTrnDirector" placeholder="' +
+                            L.trnSignHint + '" value="' + A.esc((item && item.director_name) || '') + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnReferee + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adTrnReferee" placeholder="' +
+                            L.trnSignHint + '" value="' + A.esc((item && item.referee_name) || '') + '">' +
+                    '</div>' +
+                '</div>' +
             '</div>' +
 
             // Actions
@@ -1578,6 +1594,8 @@
             group_count: (function() { var v = document.getElementById('adTrnGroupCount').value; return v ? parseInt(v, 10) : null; })(),
             qualifiers_per_group: (function() { var v = document.getElementById('adTrnQualifiers').value; return v ? parseInt(v, 10) : 2; })(),
             court_count: parseInt(document.getElementById('adTrnCourtCount').value, 10) || 2,
+            director_name: document.getElementById('adTrnDirector').value.trim() || null,
+            referee_name: document.getElementById('adTrnReferee').value.trim() || null,
             match_duration: parseInt(document.getElementById('adTrnMatchDuration').value, 10) || 90,
             start_time: document.getElementById('adTrnStartTime').value || null,
             registration_start: document.getElementById('adTrnRegStart').value || null,

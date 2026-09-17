@@ -1474,6 +1474,37 @@ tr.td-rr-row-dimmed {
     }
 }
 
+/* Кто проводил турнир: строка под подиумом, как подпись в протоколе */
+.td-officials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: center;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.td-official {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.td-official-role {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.td-official-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
 /* Подпись под местом: победы, сеты и геймы совпали, место определила
    жеребьёвка */
 .td-grp-lot {

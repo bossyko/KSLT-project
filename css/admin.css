@@ -175,6 +175,40 @@ body.ad-page {
     padding: var(--space-sm) var(--space-md);
 }
 
+/* Предел ширины: на большом мониторе строка таблицы растягивалась во всю
+   ширину, и между именем слева и кнопками справа зияла пустота — взгляд
+   терял строку. Держим разумный предел и ставим содержимое по центру */
+.ad-content > .ad-section,
+.ad-content > .ad-page {
+    max-width: 1800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Поля по бокам ужимаются вместе с окном: на широком экране они держат
+   воздух, на узком отдают место таблице. Публичной части это не касается —
+   правило живёт только в админке */
+@media (max-width: 1600px) {
+    .ad-content {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+
+@media (max-width: 1280px) {
+    .ad-content {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    /* Панель турнира тоже подбирает поля: внутри неё та же таблица */
+    .ad-brk-panel,
+    .ad-table-card {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
 .ad-section {
     display: none;
 }
@@ -2610,9 +2644,13 @@ select.ad-field-input {
    одну — и высота карточки подстраивается сама.
 
    Пустой слот держит высоту двух строк заранее: иначе сетка со слотами «A1»
-   стоит узкой, а как только встают имена пар — подпрыгивает вдвое. */
+   стоит узкой, а как только встают имена пар — подпрыгивает вдвое.
+
+   Содержимое ставим по центру строки: короткие подписи — «TBD», «BYE»,
+   метка слота — прижимались кверху, и под ними зияла пустота. Клетка
+   казалась выше соседних, хотя высота у всех одна. */
 .ad-brk-player {
-    align-items: flex-start;
+    align-items: center;
     min-height: 2.6em;
 }
 
@@ -3956,13 +3994,15 @@ select.ad-field-input {
     box-shadow: inset 0 2px 0 var(--accent);
 }
 
-/* Фильтр в шапке колонки «Раунд»: подпись и список в одну строку */
+/* В шапке колонки «Раунд» стоит только список: он и есть заголовок */
 .ad-sched-table th.sched-round {
     white-space: nowrap;
+    padding-left: 6px;
+    padding-right: 6px;
 }
 
 .ad-sched-round-filter {
-    margin-left: 8px;
+    margin-left: 0;
     padding: 3px 22px 3px 8px;
     background: var(--bg-elevated);
     /* Своя стрелка: системную в тёмной теме почти не видно, и поле
@@ -4086,6 +4126,80 @@ select.ad-field-input {
 .ad-sched-table .sched-court  { width: 1%; min-width: 84px; }
 .ad-sched-table .sched-status { width: 1%; }
 .ad-sched-table .sched-call   { width: 1%; }
+
+/* Статус и зов — одна колонка с меню: пять кнопок в строке не сжимались и
+   держали таблицу шире экрана */
+.ad-sched-table .sched-act {
+    width: 1%;
+    min-width: 44px;
+    text-align: center;
+    overflow: visible;
+}
+
+/* Внутри меню все пункты одного вида: строка списка, а не три разные
+   кнопки. Переключатель статуса и кнопки зова приходят из таблицы со
+   своим оформлением — здесь оно снимается */
+.ad-sched-menu .ad-reg-menu-list {
+    min-width: 156px;
+    padding: 4px;
+}
+
+/* Статус — одной строкой, зов — другой: два разных действия */
+.ad-sched-menu .ad-sched-switch,
+.ad-sched-menu .ad-sched-call {
+    display: flex;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.ad-sched-menu .ad-sched-switch button,
+.ad-sched-menu .ad-sched-call .ad-btn {
+    flex: 1;
+    text-align: center !important;
+}
+
+.ad-sched-menu .ad-reg-menu-list button {
+    display: block;
+    width: 100%;
+    margin: 0;
+    /* Мелкий кегль и тесные поля: это список в меню, а не кнопки страницы */
+    padding: 5px 8px;
+    background: none !important;
+    border: none !important;
+    border-radius: 5px;
+    color: var(--text-primary) !important;
+    font-size: 0.74rem;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ad-sched-menu .ad-reg-menu-list button:hover:not(:disabled) {
+    background: rgba(204, 255, 0, 0.1) !important;
+}
+
+/* Выбранный статус отмечаем цветом, а не заливкой во всю строку */
+.ad-sched-menu .ad-reg-menu-list .ad-sched-status.on {
+    color: var(--accent) !important;
+    font-weight: 600;
+}
+
+.ad-sched-menu .ad-reg-menu-list button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Черта между строками — заметная: сверху состояние игры, снизу вызов
+   пары на корт, путать их нельзя */
+.ad-sched-menu .ad-sched-call {
+    margin-top: 4px;
+    padding-top: 5px;
+    border-top: 2px solid var(--border-subtle);
+}
 
 /* Пары забирают всё оставшееся место и ужимаются первыми — длинные ФИО
    лучше обрезать, чем ломать всю строку */
@@ -6032,7 +6146,8 @@ select.ad-field-input {
     margin-bottom: 10px;
 }
 
-.ad-print-title {
+.ad-print-title,
+.ad-print-foot {
     display: none;
 }
 
@@ -6083,12 +6198,114 @@ select.ad-field-input {
         box-shadow: none !important;
     }
 
+    /* Шапка листа: логотип и название турнира. Повторяется на каждой
+       странице — протокол расходится по рукам, и лист без опознания
+       превращается в бумажку непонятно откуда */
     body.ad-printing .ad-print-title {
-        display: block;
-        font-size: 16pt;
-        font-weight: 700;
-        margin-bottom: 12pt;
+        display: flex;
+        align-items: center;
+        gap: 8pt;
+        padding-bottom: 6pt;
+        margin-bottom: 10pt;
+        border-bottom: 1pt solid #000;
         color: #000;
+    }
+
+    body.ad-printing .ad-print-logo {
+        width: 26mm;
+        height: auto;
+    }
+
+    body.ad-printing .ad-print-title-text {
+        font-size: 15pt;
+        font-weight: 700;
+    }
+
+    /* ---- Подвал: подписи и контакты ---- */
+
+    body.ad-printing .ad-print-foot {
+        display: block;
+        margin-top: 14pt;
+        padding-top: 8pt;
+        border-top: 1pt solid #000;
+        page-break-inside: avoid;
+    }
+
+    body.ad-printing .ad-print-signs {
+        display: flex;
+        gap: 16mm;
+        margin-top: 10pt;
+    }
+
+    body.ad-printing .ad-print-sign {
+        flex: 1;
+    }
+
+    body.ad-printing .ad-print-sign-role {
+        font-size: 10pt;
+        font-weight: 700;
+        margin-bottom: 10mm;
+    }
+
+    /* Линия для подписи: имя печатается под ней, как в протоколах */
+    body.ad-printing .ad-print-sign-line {
+        border-bottom: 0.5pt solid #000;
+        margin-bottom: 2pt;
+    }
+
+    body.ad-printing .ad-print-sign-name {
+        font-size: 10pt;
+    }
+
+    body.ad-printing .ad-print-sign-hint {
+        font-size: 7.5pt;
+        color: #666 !important;
+    }
+
+    /* Полоса клуба — внизу каждой страницы. Позиция fixed при печати
+       повторяется на всех листах: лист уходит на корты и в чат, и должен
+       сам говорить, чей он.
+
+       Адрес страницы рядом печатает браузер — он отключается галочкой
+       «Колонтитулы» в окне печати, и тогда внизу остаётся только эта строка */
+    /* Полоса лежит в самой странице, поэтому её надо открыть отдельно:
+       всё остальное вне печатной области спрятано */
+    body.ad-printing > .ad-print-contacts,
+    body.ad-printing > .ad-print-contacts * {
+        visibility: visible;
+    }
+
+    body.ad-printing .ad-print-contacts {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding-top: 4pt;
+        border-top: 0.5pt solid #999;
+        background: #fff;
+        font-size: 9pt;
+        text-align: center;
+        color: #333 !important;
+    }
+
+    /* Ссылки в полосе: значок и подпись рядом, всё в одну строку */
+    body.ad-printing .ad-print-contacts a {
+        display: inline-flex;
+        align-items: center;
+        gap: 3pt;
+        margin-left: 10pt;
+        color: #333 !important;
+        text-decoration: none;
+    }
+
+    body.ad-printing .ad-print-ico {
+        width: 9pt;
+        height: 9pt;
+        flex: none;
+    }
+
+    body.ad-printing .ad-print-club {
+        font-weight: 600;
     }
 
     /* Водяной знак: логотип клуба бледной подложкой по центру листа.
@@ -6102,7 +6319,7 @@ select.ad-field-input {
         transform: translate(-50%, -50%);
         width: 60%;
         max-width: 120mm;
-        opacity: 0.06;
+        opacity: 0.09;
         z-index: 0;
         pointer-events: none;
     }
@@ -6131,10 +6348,12 @@ select.ad-field-input {
         border-color: #999 !important;
     }
 
+    /* Кегль на бумаге крупнее экранного: лист читают на ходу, у корта, при
+       любом свете — девять пунктов там уже не разобрать */
     body.ad-printing .ad-print-area th,
     body.ad-printing .ad-print-area td {
-        padding: 4pt 6pt;
-        font-size: 9pt;
+        padding: 5pt 6pt;
+        font-size: 10.5pt;
         border-bottom: 0.5pt solid #999;
     }
 
@@ -6147,7 +6366,7 @@ select.ad-field-input {
        единственный признак, где кончается состав и начинается очередь */
     body.ad-printing .ad-print-area h3,
     body.ad-printing .ad-print-area h4 {
-        font-size: 11pt;
+        font-size: 12.5pt;
         margin: 10pt 0 4pt;
     }
 
