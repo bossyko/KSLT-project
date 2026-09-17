@@ -2383,31 +2383,7 @@
         // Время вводится руками в 24-часовом виде: цифры, двоеточие ставится
         // само, часы не больше 23, минуты не больше 59. Ни списков, ни
         // подсказок браузера — на площадке это только мешает
-        container.querySelectorAll('.ad-sched-time').forEach(function(поле) {
-            поле.addEventListener('focus', function() { поле.select(); });
-
-            поле.addEventListener('input', function() {
-                var цифры = поле.value.replace(/\D/g, '').slice(0, 4);
-                if (цифры.length >= 1) {
-                    // Первая цифра больше двух — это сразу час: 9 → 09
-                    if (Number(цифры[0]) > 2) цифры = '0' + цифры.slice(0, 3);
-                }
-                if (цифры.length >= 2 && Number(цифры.slice(0, 2)) > 23) цифры = '23' + цифры.slice(2);
-                if (цифры.length >= 4 && Number(цифры.slice(2, 4)) > 59) цифры = цифры.slice(0, 2) + '59';
-                поле.value = цифры.length > 2 ? цифры.slice(0, 2) + ':' + цифры.slice(2) : цифры;
-            });
-
-            поле.addEventListener('blur', function() {
-                var цифры = поле.value.replace(/\D/g, '');
-                if (!цифры) { поле.value = ''; return; }
-                // Одна цифра — это час: «9» значит 09:00, а не 90-й час
-                if (цифры.length === 1) цифры = '0' + цифры;
-                while (цифры.length < 4) цифры += '0';
-                var ч = Math.min(23, Number(цифры.slice(0, 2)));
-                var м = Math.min(59, Number(цифры.slice(2, 4)));
-                поле.value = ('0' + ч).slice(-2) + ':' + ('0' + м).slice(-2);
-            });
-        });
+        container.querySelectorAll('.ad-sched-time').forEach(маскаВремени);
 
         // Кнопка сохранения оживает от правки времени или корта. Стрелки и
         // статус пишутся в базу сразу — им сохранение не нужно
@@ -8725,6 +8701,8 @@
             var подсказка = document.getElementById('adSessHint');
             if (!поле1 || !поле2 || !подсказка) return;
 
+            маскаВремени(поле1);
+            маскаВремени(поле2);
             поле2.addEventListener('input', function() { поле2.dataset.трогали = '1'; });
 
             var пересчитать = function() {
@@ -8758,6 +8736,45 @@
             });
             пересчитать();
         }, 0);
+    }
+
+    /**
+     * Поле времени: 24 часа, вид 00:00.
+     *
+     * Человек печатает цифрами, разделитель ставится сам. Час больше 23 и
+     * минуты больше 59 не пропускаем — на корте нет времени разбираться,
+     * почему запуск уехал на 25:70.
+     */
+    function маскаВремени(поле) {
+        if (!поле || поле.dataset.маска) return;
+        поле.dataset.маска = '1';
+        поле.setAttribute('inputmode', 'numeric');
+        поле.setAttribute('maxlength', '5');
+        поле.setAttribute('placeholder', '00:00');
+
+        поле.addEventListener('focus', function() { поле.select(); });
+
+        поле.addEventListener('input', function() {
+            var цифры = поле.value.replace(/\D/g, '').slice(0, 4);
+            if (цифры.length >= 1) {
+                // Первая цифра больше двух — это сразу час: 9 → 09
+                if (Number(цифры[0]) > 2) цифры = '0' + цифры.slice(0, 3);
+            }
+            if (цифры.length >= 2 && Number(цифры.slice(0, 2)) > 23) цифры = '23' + цифры.slice(2);
+            if (цифры.length >= 4 && Number(цифры.slice(2, 4)) > 59) цифры = цифры.slice(0, 2) + '59';
+            поле.value = цифры.length > 2 ? цифры.slice(0, 2) + ':' + цифры.slice(2) : цифры;
+        });
+
+        поле.addEventListener('blur', function() {
+            var цифры = поле.value.replace(/\D/g, '');
+            if (!цифры) { поле.value = ''; return; }
+            // Одна цифра — это час: «9» значит 09:00, а не 90-й час
+            if (цифры.length === 1) цифры = '0' + цифры;
+            while (цифры.length < 4) цифры += '0';
+            var ч = Math.min(23, Number(цифры.slice(0, 2)));
+            var м = Math.min(59, Number(цифры.slice(2, 4)));
+            поле.value = ('0' + ч).slice(-2) + ':' + ('0' + м).slice(-2);
+        });
     }
 
     function вМинуты(строка) {
