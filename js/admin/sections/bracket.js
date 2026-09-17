@@ -4449,6 +4449,19 @@
             st.forEach(function(s) { playerGroupLabel[s.playerId] = letter + s.place; });
         }
 
+        // Состав разошёлся с заявками — говорим первым делом
+        //
+        // Молча такое уже стоило турнира: в группе A шесть пар вместо
+        // четырёх, у половины прочерки вместо счетов, а заметить это можно
+        // было только глазами. Теперь беда видна сразу и названа поимённо
+        var бедыГрупп = сверитьГруппыСЗаявками(matches, regsMap, groupCount, playersMap)
+            .concat(сверитьСеткуСГруппами(matches, regsMap, playersMap));
+        if (бедыГрупп.length) {
+            html += '<div class="ad-alert-warning" style="margin-bottom:12px;">' +
+                '<strong>' + L.groupMismatchTitle + '</strong><br>' +
+                бедыГрупп.join('<br>') + '</div>';
+        }
+
         // Правило выхода — над таблицами. Раньше о нём нигде не говорилось:
         // подсветка показывала, кто прошёл, но не объясняла, почему именно
         // столько. Менеджер знал правило из настроек, игрок — ниоткуда
@@ -6736,6 +6749,191 @@
         }
 
         return null;
+    }
+
+    /**
+     * Группа — это заявки, а не матчи.
+     *
+     * Таблица группы строится из матчей: кто встречается в матче с этим
+     * номером группы, тот и в таблице. Пока состав никто не трогает, всё
+     * сходится, но любая правка игрока в матче молча переселяет пару в
+     * чужую группу, а из своей она пропадает. Так на микст-турнире в
+     * группе A оказалось шесть пар вместо четырёх.
+     *
+     * Заявка знает свою группу твёрдо. Сверяем её с матчами при каждой
+     * отрисовке и говорим вслух, если разошлось.
+     *
+     * Возвращает список бед. Пусто — всё в порядке.
+     */
+    function сверитьГруппыСЗаявками(matches, regsMap, groupCount, playersMap) {
+        var беды = [];
+        if (!regsMap) return беды;
+
+        var заявки = Object.keys(regsMap).map(function(к) { return regsMap[к]; });
+        var имя = function(id) {
+            var p = playersMap ? playersMap[id] : null;
+            return p ? (isEn ? (p.name_en || p.name) : p.name) : '—';
+        };
+
+        for (var g = 1; g <= groupCount; g++) {
+            var вГруппе = заявки.filter(function(r) { return r.group_number === g; });
+            if (!вГруппе.length) continue;
+
+            var мг = matches.filter(function(m) { return m.group_number === g; });
+            if (!мг.length) continue;
+
+            // Кого называет заявка: капитан или напарник — оба свои
+            var свои = {};
+            вГруппе.forEach(function(r) {
+                if (r.player_id) свои[r.player_id] = true;
+                if (r.partner_id) свои[r.partner_id] = true;
+            });
+
+            var буква = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[g - 1] || String(g);
+            var чужие = [];
+            var встретились = {};
+
+            мг.forEach(function(m) {
+                [m.player1_id, m.player2_id].forEach(function(id) {
+                    if (!id) return;
+                    встретились[id] = true;
+                    if (!свои[id] && чужие.indexOf(id) === -1) чужие.push(id);
+                });
+            });
+
+            чужие.forEach(function(id) {
+                беды.push((isEn ? 'Group ' : 'Группа ') + буква + ': ' +
+                    A.esc(имя(id)) + (isEn ? ' is not in this group by registration'
+                                           : ' — по заявке не из этой группы'));
+            });
+
+            // Пропавшие: заявка в группе есть, а во встречах человека нет
+            вГруппе.forEach(function(r) {
+                if (r.player_id && !встретились[r.player_id]) {
+                    беды.push((isEn ? 'Group ' : 'Группа ') + буква + ': ' +
+                        A.esc(имя(r.player_id)) +
+                        (isEn ? ' has no matches' : ' — встреч не осталось'));
+                }
+            });
+
+            var надо = вГруппе.length * (вГруппе.length - 1) / 2;
+            if (мг.length !== надо) {
+                беды.push((isEn ? 'Group ' : 'Группа ') + буква + ': ' +
+                    (isEn ? 'matches ' : 'встреч ') + мг.length +
+                    (isEn ? ' instead of ' : ' вместо ') + надо);
+            }
+
+            // Одна и та же пара дважды: счёт вписывают в обе встречи, и
+            // побед у человека выходит больше, чем он сыграл
+            var счёт = {};
+            мг.forEach(function(m) {
+                if (!m.player1_id || !m.player2_id) return;
+                var ключ = [m.player1_id, m.player2_id].sort().join('|');
+                счёт[ключ] = (счёт[ключ] || 0) + 1;
+            });
+            Object.keys(счёт).forEach(function(к) {
+                if (счёт[к] < 2) return;
+                var двое = к.split('|');
+                беды.push((isEn ? 'Group ' : 'Группа ') + буква + ': ' +
+                    A.esc(имя(двое[0])) + ' — ' + A.esc(имя(двое[1])) +
+                    (isEn ? ' meet twice' : ' встречаются дважды'));
+            });
+        }
+
+        return беды;
+    }
+
+    /**
+     * Сетка: земляки в первом круге и никто дважды.
+     *
+     * Правило турнира — вышедшие из одной группы в первом круге плей-офф
+     * не встречаются: они уже играли между собой. Расстановка это
+     * разводит, но после пересборки, добора и доп. матчей состав клеток
+     * меняется, и проверить результат было нечем.
+     *
+     * Группу стороны берём по игроку — из его заявки. Если клетка ещё
+     * пустая, читаем метку: `A1` — первое место группы A. У победителя
+     * доп. матча метка `IG1`, группы в ней нет, поэтому до того, как в
+     * клетку встанет имя, такую сторону пропускаем.
+     *
+     * Возвращает список бед. Пусто — всё в порядке.
+     */
+    function сверитьСеткуСГруппами(matches, regsMap, playersMap) {
+        var беды = [];
+        if (!regsMap) return беды;
+
+        var имя = function(id) {
+            var p = playersMap ? playersMap[id] : null;
+            return p ? (isEn ? (p.name_en || p.name) : p.name) : '—';
+        };
+
+        // Заявка по любому из пары: в матче стоит капитан, но замена могла
+        // поднять напарника на его место
+        var группаИгрока = {};
+        Object.keys(regsMap).forEach(function(к) {
+            var r = regsMap[к];
+            if (!r || r.group_number == null) return;
+            if (r.player_id) группаИгрока[r.player_id] = r.group_number;
+            if (r.partner_id) группаИгрока[r.partner_id] = r.group_number;
+        });
+
+        var чья = function(playerId, метка) {
+            if (playerId && группаИгрока[playerId] !== undefined) return группаИгрока[playerId];
+            if (!метка) return null;
+            var б = метка.charAt(0).toUpperCase();
+            // Q — добор, I — доп. матч: место в группе они не называют
+            if (б < 'A' || б > 'Z' || б === 'Q' || б === 'I') return null;
+            return б.charCodeAt(0) - 64;
+        };
+
+        var сетка = matches.filter(function(m) {
+            return m.group_number == null && m.round !== 'IG';
+        });
+        if (!сетка.length) return беды;
+
+        var первый = сетка.filter(function(m) { return m.round_number === 1; });
+        var буквы = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        первый.forEach(function(m) {
+            var г1 = чья(m.player1_id, m.slot1_label);
+            var г2 = чья(m.player2_id, m.slot2_label);
+            if (г1 == null || г2 == null || г1 !== г2) return;
+
+            var кто1 = m.player1_id ? имя(m.player1_id) : (m.slot1_label || '—');
+            var кто2 = m.player2_id ? имя(m.player2_id) : (m.slot2_label || '—');
+            беды.push((isEn ? 'Playoff match ' : 'Плей-офф, матч ') + (m.match_order || '?') + ': ' +
+                A.esc(кто1) + ' — ' + A.esc(кто2) +
+                (isEn ? ' are both from group ' : ' — оба из группы ') +
+                (буквы[г1 - 1] || г1));
+        });
+
+        // Один человек в двух клетках сетки: после пересборки и добора
+        // пара могла остаться на прежнем месте и встать на новое
+        var где = {};
+        сетка.forEach(function(m) {
+            [m.player1_id, m.player2_id].forEach(function(id) {
+                if (!id) return;
+                if (!где[id]) где[id] = [];
+                где[id].push((m.round_number || '?') + '-' + (m.match_order || '?'));
+            });
+        });
+        Object.keys(где).forEach(function(id) {
+            // В разных кругах стоять нормально — так идут по сетке. Беда,
+            // когда человек дважды в одном круге
+            var круги = {};
+            var дважды = false;
+            где[id].forEach(function(адрес) {
+                var круг = String(адрес).split('-')[0];
+                круги[круг] = (круги[круг] || 0) + 1;
+                if (круги[круг] > 1) дважды = true;
+            });
+            if (дважды) {
+                беды.push(A.esc(имя(id)) +
+                    (isEn ? ' stands twice in the same round' : ' стоит дважды в одном круге'));
+            }
+        });
+
+        return беды;
     }
 
     // ---- Generate Group Draw (Round-Robin) ----
