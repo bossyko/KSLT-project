@@ -527,7 +527,7 @@
 
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.payNote + '</div>' +
-                '<textarea class="ad-field-input" id="adFinNote" rows="3">' + A.esc(item ? item.note || '' : '') + '</textarea>' +
+                '<textarea class="ad-field-input ad-field-textarea-sm" id="adFinNote" rows="3">' + A.esc(item ? item.note || '' : '') + '</textarea>' +
             '</div>' +
 
             '<div class="ad-form-actions">' +

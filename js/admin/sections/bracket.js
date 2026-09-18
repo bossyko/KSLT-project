@@ -887,6 +887,8 @@
             await освободитьИзОчереди(первый, tournamentId, registrations);
             await освободитьИзОчереди(второй, tournamentId, registrations);
 
+            // Пару меняют целиком — состав сверяем заново: в микст могли
+            // поставить двоих одного пола, и такая пара ждёт решения клуба
             var правка = await A.client.from('tournament_registrations').update({
                 player_id: первый,
                 is_external: false,
@@ -896,7 +898,10 @@
                 partner_id: второй,
                 partner_external_name: null,
                 partner_external_ntrp: null,
-                partner_gender: null
+                partner_gender: null,
+                gender_confirmed: составСошёлся(tournament,
+                    await полИгрока(первый, playersMap),
+                    await полИгрока(второй, playersMap))
             }).eq('id', regId);
             if (правка.error) { A.showToast(правка.error.message, 'error'); return; }
 
@@ -1087,8 +1092,13 @@
                     updateData.partner_gender = null;
                     updateData.partner_external_country = null;
                 } else {
-                    updateData.partner_id = null;
-                    updateData.partner_external_name = extName;
+                    // Гостю — карточку: иначе его сторона в матчах пустая,
+                    // и пара пропадает из группы и запусков
+                    var гостьНапарник = await карточкаГостя(extName, extGender, extCountry,
+                        extNtrp, tournament.category_id);
+                    if (гостьНапарник.беда) { A.showToast(гостьНапарник.беда, 'error'); return; }
+                    updateData.partner_id = гостьНапарник.id;
+                    updateData.partner_external_name = гостьНапарник.id ? null : extName;
                     updateData.partner_external_ntrp = extNtrp;
                     updateData.partner_gender = extGender;
                     updateData.partner_external_country = extCountry;
@@ -1103,9 +1113,12 @@
                     updateData.external_ntrp = null;
                     updateData.external_gender = null;
                 } else {
-                    updateData.player_id = null;
-                    updateData.is_external = true;
-                    updateData.external_name = extName;
+                    var гостьПервый = await карточкаГостя(extName, extGender, extCountry,
+                        extNtrp, tournament.category_id);
+                    if (гостьПервый.беда) { A.showToast(гостьПервый.беда, 'error'); return; }
+                    updateData.player_id = гостьПервый.id;
+                    updateData.is_external = !гостьПервый.id;
+                    updateData.external_name = гостьПервый.id ? null : extName;
                     updateData.external_country = extCountry;
                     updateData.external_ntrp = extNtrp;
                     updateData.external_gender = extGender;
@@ -1114,11 +1127,12 @@
 
             // Состав после замены сверяем заново: менеджер мог поставить в
             // микст второго мужчину, и такая пара снова ждёт решения
+            var полНового = selectedId ? await полИгрока(selectedId, playersMap) : extGender;
             var полПервого = target === 'partner'
                 ? полЗаявки(reg, 'player', playersMap)
-                : (selectedId ? (playersMap[selectedId] || {}).gender : extGender);
+                : полНового;
             var полВторого = target === 'partner'
-                ? (selectedId ? (playersMap[selectedId] || {}).gender : extGender)
+                ? полНового
                 : полЗаявки(reg, 'partner', playersMap);
             updateData.gender_confirmed = составСошёлся(tournament, полПервого, полВторого);
 
@@ -1131,7 +1145,10 @@
             // Меняем только пока эта сторона не сыграла: у сыгранных матчей
             // счёт принадлежит тем, кто играл, и передавать его новым нельзя.
             var прежний = target === 'partner' ? reg.partner_id : reg.player_id;
-            var новый = selectedId || null;
+            // Гость теперь тоже приходит с карточкой, и в матчах его надо
+            // переписать так же, как игрока из базы
+            var новый = selectedId ||
+                (target === 'partner' ? updateData.partner_id : updateData.player_id) || null;
             var вМатчах = 0;
 
             // Сыграла хоть раз — состав закрыт, кого бы ни меняли. Раньше
@@ -1552,6 +1569,75 @@
     }
 
     /** Пол стороны заявки: у игрока из карточки, у гостя — из самой заявки. */
+    /**
+     * Пол игрока, даже если его нет в этом турнире.
+     *
+     * `playersMap` знает только участников. Замену же берут со стороны — в
+     * карте его нет, пол выходил неизвестным, и правило микста молчало:
+     * менеджер спокойно ставил мужчине второго мужчину. Не нашли в карте —
+     * спрашиваем базу.
+     */
+    var _полИзБазы = {};
+    async function полИгрока(id, playersMap) {
+        if (!id) return null;
+        if (playersMap && playersMap[id] && playersMap[id].gender) return playersMap[id].gender;
+        if (_полИзБазы[id] !== undefined) return _полИзБазы[id];
+        var рез = await A.client.from('players').select('gender').eq('id', id).maybeSingle();
+        _полИзБазы[id] = (рез.data && рез.data.gender) || null;
+        return _полИзБазы[id];
+    }
+
+    /**
+     * Карточка гостя: находим по имени или заводим новую.
+     *
+     * Гость играет наравне со всеми, и показать его есть где — в составе
+     * группы, в запусках, в сетке, в протоколе. Но матч ссылается на игрока,
+     * а не на заявку: без карточки сторона матча остаётся пустой, пара
+     * пропадает с экранов, и счёт за неё не вписать. На микст-турнире так
+     * потерялась целая пара.
+     *
+     * Сначала ищем: карточку гостю могли завести на прошлом турнире, и
+     * второй заводить нельзя — история матчей разъедется по двойникам.
+     *
+     * @returns {Promise<{id: string|null, беда: string|null}>}
+     */
+    async function карточкаГостя(имя, пол, страна, ntrp, категория) {
+        var чистое = String(имя || '').trim();
+        if (!чистое) return { id: null, беда: null };
+
+        var поиск = await A.client.from('players').select('id, name').ilike('name', чистое).limit(5);
+        if (поиск.error) return { id: null, беда: поиск.error.message };
+        var точное = (поиск.data || []).find(function(p) {
+            return String(p.name || '').trim().toLowerCase() === чистое.toLowerCase();
+        });
+        if (точное) return { id: точное.id, беда: null };
+
+        // Имя ложится в опознаватель так же, как у остальных карточек:
+        // латиницей через дефис. Совпал с занятым — добавляем номер
+        var основа = A.slugify(чистое) || ('guest-' + Date.now());
+        var id = основа;
+        for (var н = 2; н <= 20; н++) {
+            var занято = await A.client.from('players').select('id').eq('id', id).maybeSingle();
+            if (занято.error) return { id: null, беда: занято.error.message };
+            if (!занято.data) break;
+            id = основа + '-' + н;
+        }
+
+        var завели = await A.client.from('players').insert({
+            id: id,
+            name: чистое,
+            gender: пол || null,
+            country: страна || null,
+            category_id: категория || null,
+            ntrp_singles: ntrp || null,
+            is_guest: true,
+            is_member: false,
+            has_account: false
+        });
+        if (завели.error) return { id: null, беда: завели.error.message };
+        return { id: id, беда: null };
+    }
+
     function полЗаявки(reg, сторона, playersMap) {
         if (!reg) return null;
         if (сторона === 'partner') {
@@ -2752,11 +2838,18 @@
                     if (!extGender) { A.showToast(L.regGenderRequired, 'error'); return; }
                     if (!extNtrp) { A.showToast(L.regNtrpRequired, 'error'); return; }
 
+                    // Гостю заводим карточку — или находим ту, что уже есть.
+                    // Без неё матч не на кого сослаться, и пара исчезает из
+                    // группы, запусков и сетки
+                    var гость = await карточкаГостя(extName, extGender, extCountry, extNtrp,
+                        tournament.category_id);
+                    if (гость.беда) { A.showToast(гость.беда, 'error'); return; }
+
                     var insertData = {
                         tournament_id: tournamentId,
-                        player_id: null,
-                        is_external: true,
-                        external_name: extName,
+                        player_id: гость.id,
+                        is_external: false,
+                        external_name: null,
                         external_country: extCountry,
                         external_ntrp: extNtrp,
                         external_gender: extGender,
@@ -2777,10 +2870,18 @@
                                 A.showToast(L.regNtrpRequired, 'error'); return;
                             }
                             var partnerCountryEl = document.getElementById('adExtPartnerCountry');
-                            insertData.partner_external_name = partnerNameEl.value.trim();
                             insertData.partner_external_ntrp = partnerNtrpEl ? (parseFloat(partnerNtrpEl.value) || null) : null;
                             insertData.partner_gender = partnerGenderEl.value;
                             insertData.partner_external_country = partnerCountryEl ? (partnerCountryEl.value.trim() || null) : null;
+
+                            // Напарнику-гостю тоже карточка: очки и история
+                            // матчей ведутся по ней, а не по имени в заявке
+                            var напарник = await карточкаГостя(partnerNameEl.value.trim(),
+                                partnerGenderEl.value, insertData.partner_external_country,
+                                insertData.partner_external_ntrp, tournament.category_id);
+                            if (напарник.беда) { A.showToast(напарник.беда, 'error'); return; }
+                            insertData.partner_id = напарник.id;
+                            insertData.partner_external_name = напарник.id ? null : partnerNameEl.value.trim();
                             // Состав не сошёлся с турниром — заявку берём, но
                             // место держим до решения. То же правило, что при
                             // подаче игроком
@@ -6727,6 +6828,18 @@
      * Проверяем до записи в базу: исправить набор матчей потом можно
      * только вручную, запросом, и уже поверх сыгранных результатов.
      */
+    /**
+     * Кто стоит в клетке: заявка, а если ссылки на неё нет — игрок.
+     *
+     * Считать только по игроку нельзя: у гостя без карточки его нет, и
+     * сторона выглядит пустой. Группа с такой парой казалась меньше на
+     * одного, и сторож отменял жеребьёвку, жалуясь на неровные группы —
+     * хотя по заявкам они были ровные.
+     */
+    function сторонаМатча(m, номер) {
+        return m['reg' + номер + '_id'] || m['player' + номер + '_id'] || null;
+    }
+
     function проверитьКругГрупп(матчи, groupCount) {
         var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         var размеры = {};
@@ -6738,15 +6851,19 @@
 
             var игроки = [];
             мг.forEach(function(m) {
-                if (m.player1_id && игроки.indexOf(m.player1_id) === -1) игроки.push(m.player1_id);
-                if (m.player2_id && игроки.indexOf(m.player2_id) === -1) игроки.push(m.player2_id);
+                var с1 = сторонаМатча(m, 1);
+                var с2 = сторонаМатча(m, 2);
+                if (с1 && игроки.indexOf(с1) === -1) игроки.push(с1);
+                if (с2 && игроки.indexOf(с2) === -1) игроки.push(с2);
             });
 
             var счёт = {};
             for (var i = 0; i < мг.length; i++) {
                 var m = мг[i];
-                if (!m.player1_id || !m.player2_id) continue;
-                var ключ = [m.player1_id, m.player2_id].sort().join('|');
+                var п1 = сторонаМатча(m, 1);
+                var п2 = сторонаМатча(m, 2);
+                if (!п1 || !п2) continue;
+                var ключ = [п1, п2].sort().join('|');
                 счёт[ключ] = (счёт[ключ] || 0) + 1;
             }
 

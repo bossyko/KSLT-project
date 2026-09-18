@@ -7,14 +7,14 @@
 
 /* ---- Container ---- */
 .bc-section {
-    padding: 70px 7%;
-    max-width: 1400px;
+    padding: var(--section-y) var(--gutter);
+    max-width: var(--container-max);
     margin: 0 auto;
     background: var(--bg-secondary, #111);
     border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
 }
 .bc-overview-section {
-    padding: 0 7% var(--space-lg, 2rem);
+    padding: 0 var(--pad-x) var(--space-lg, 2rem);
 }
 
 /* ---- Grid ----
@@ -408,10 +408,10 @@
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
     .bc-section {
-        padding: var(--space-lg, 2rem) 5%;
+        padding: var(--space-lg, 2rem) var(--pad-x);
     }
     .bc-overview-section {
-        padding: 0 5% var(--space-md, 1.5rem);
+        padding: 0 var(--pad-x) var(--space-md, 1.5rem);
     }
 }
 @media (max-width: 480px) {

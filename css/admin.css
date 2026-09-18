@@ -1079,16 +1079,26 @@ body.ad-page {
 
 .ad-field-input {
     width: 100%;
-    padding: 12px 16px;
+    padding: 12px var(--input-px);
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
+    border-radius: var(--input-radius);
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: var(--input-fs);
     font-family: inherit;
     transition: var(--transition-fast);
     box-sizing: border-box;
     -moz-appearance: textfield;
+}
+
+/* Высоту однострочного поля задаёт height, а не вертикальный padding.
+   У select line-height считается от шрифта опций, поэтому расчётная
+   высота уезжала на 2-4px: было 44px у 125 полей, 46px у 9, 47.95px у одного. */
+input.ad-field-input,
+select.ad-field-input {
+    height: var(--input-h);
+    padding-top: 0;
+    padding-bottom: 0;
 }
 .ad-field-input::-webkit-outer-spin-button,
 .ad-field-input::-webkit-inner-spin-button {
@@ -1121,13 +1131,24 @@ input[type="date"]::-webkit-datetime-edit {
     color: var(--text-primary);
 }
 
+/* Три размера многострочного поля. Без одного из этих классов textarea
+   берёт высоту из атрибута rows и размера шрифта — так и появился разнобой
+   80px против 120px. Класс обязателен на каждом textarea. */
+.ad-field-textarea-sm {
+    height: var(--textarea-h-sm);
+    min-height: var(--textarea-h-sm);
+    resize: vertical;
+}
+
 .ad-field-textarea {
-    min-height: 120px;
+    height: var(--textarea-h);
+    min-height: var(--textarea-h);
     resize: vertical;
 }
 
 .ad-field-textarea-lg {
-    min-height: 250px;
+    height: var(--textarea-h-lg);
+    min-height: var(--textarea-h-lg);
 }
 
 .ad-field-row {

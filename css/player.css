@@ -1933,7 +1933,7 @@ a.pp-tournament:hover {
 @media (max-width: 1300px) {
     .kslt-back-wrap.pp-back-float {
         position: static;
-        padding: 12px calc(max(24px, (100% - 1100px) / 2));
+        padding: 12px var(--pad-x);
         border: none;
         border-radius: 0;
         background: var(--bg-primary);

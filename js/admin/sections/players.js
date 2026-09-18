@@ -1434,7 +1434,7 @@
                 '</div>' +
                 '<div style="margin-bottom:16px;">' +
                     '<label class="ad-field-label">' + L.plrBanReason + '</label>' +
-                    '<textarea class="ad-field-input" id="adPlrBanReason" rows="2" style="resize:vertical;"></textarea>' +
+                    '<textarea class="ad-field-input ad-field-textarea-sm" id="adPlrBanReason" rows="2" style="resize:vertical;"></textarea>' +
                 '</div>' +
                 '<div class="ad-confirm-actions">' +
                     '<button class="ad-btn ad-btn-secondary" id="adPlrBanCancel">' + L.cancel + '</button>' +

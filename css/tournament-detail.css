@@ -10,7 +10,7 @@
     min-height: 300px;
     display: flex;
     align-items: flex-end;
-    padding: 0 7%;
+    padding: 0 var(--pad-x);
     overflow: hidden;
 }
 
@@ -35,7 +35,7 @@
 .td-hero-content {
     position: relative;
     z-index: 1;
-    max-width: 1400px;
+    max-width: var(--container-max);
     width: 100%;
     margin: 0 auto;
     padding: var(--space-xl) 0 var(--space-lg);
@@ -271,7 +271,7 @@
     justify-content: flex-start;
     align-items: center;
     gap: 28px;
-    padding: 0 7%;
+    padding: 0 var(--pad-x);
     /* Override global nav styles */
     height: auto;
     max-width: none;
@@ -351,18 +351,18 @@
 
 /* === SECTIONS === */
 .td-section {
-    padding: var(--space-xl) 7%;
+    padding: var(--section-y) var(--pad-x);
 }
 
 .td-section-header {
     background: var(--bg-primary, #0a0a0a);
-    padding: var(--space-md) 7% var(--space-sm);
+    padding: var(--space-md) var(--pad-x) var(--space-sm);
     border-bottom: 1px solid var(--border-subtle);
     scroll-margin-top: 120px;
 }
 
 .td-section-header h2 {
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
     font-size: 1.5rem;
     font-weight: 700;
@@ -381,7 +381,7 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding: var(--space-md) 0;
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
 }
 
@@ -655,7 +655,7 @@ tr.td-rr-row-dimmed {
 
 /* === ROUND ROBIN === */
 .td-rr-groups {
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -789,7 +789,7 @@ tr.td-rr-row-dimmed {
 
 /* Round Robin Knockout */
 .td-rr-knockout {
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: var(--space-lg) auto 0;
 }
 
@@ -819,7 +819,7 @@ tr.td-rr-row-dimmed {
 
 /* === VENUE === */
 .td-venue-card {
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -917,13 +917,13 @@ tr.td-rr-row-dimmed {
     gap: 8px;
     margin-bottom: var(--space-lg);
     flex-wrap: wrap;
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin-left: auto;
     margin-right: auto;
 }
 
 .td-schedule-day {
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto var(--space-lg);
 }
 
@@ -1045,7 +1045,7 @@ tr.td-rr-row-dimmed {
 
 /* === PARTICIPANTS === */
 .td-participants-grid {
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -1365,7 +1365,7 @@ tr.td-rr-row-dimmed {
 .td-podium-3 .td-podium-name { font-size: 0.95rem; }
 
 .td-no-results {
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
     text-align: center;
     padding: var(--space-xl) 0;
@@ -1438,7 +1438,7 @@ tr.td-rr-row-dimmed {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px 32px;
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
 }
 
@@ -1573,19 +1573,19 @@ tr.td-rr-row-dimmed {
 @media (max-width: 768px) {
     .td-hero {
         min-height: 320px;
-        padding: 0 5%;
+        padding: 0 var(--pad-x);
     }
 
     .td-section {
-        padding: var(--space-lg) 5%;
+        padding: var(--section-y-sm) var(--pad-x);
     }
 
     .td-section-header {
-        padding: var(--space-sm) 5% var(--space-xs);
+        padding: var(--space-sm) var(--pad-x) var(--space-xs);
     }
 
     .td-tabs-bar {
-        padding: 0 5%;
+        padding: 0 var(--pad-x);
     }
 
     .td-tab {
@@ -2221,7 +2221,7 @@ tr.td-rr-row-dimmed {
    краю. Раньше оно было в колонке 1000 пикселей по центру — и на широком
    экране висело отдельным островом, сдвинутым вправо от всего остального. */
 .td-sched-court {
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 0 var(--space-xl);
 }
 

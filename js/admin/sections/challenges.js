@@ -1916,7 +1916,7 @@
                     '<p class="ad-modal-note">' + L.chalCancelNote + '</p>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.chalCancelReason + '</label>' +
-                        '<textarea class="ad-field-input" id="cbxReason" rows="3" maxlength="200" ' +
+                        '<textarea class="ad-field-input ad-field-textarea-sm" id="cbxReason" rows="3" maxlength="200" ' +
                             'placeholder="' + A.esc(L.chalCancelReasonHint) + '"></textarea>' +
                     '</div>' +
                 '</div>' +

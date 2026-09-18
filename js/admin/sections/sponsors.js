@@ -219,15 +219,15 @@
                     '<div class="ad-field-row">' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.sponDescription + ' (RU)</label>' +
-                            '<textarea class="ad-field-input" id="spnDescription" rows="3">' + A.esc(isEdit ? (sponsor.description || '') : '') + '</textarea>' +
+                            '<textarea class="ad-field-input ad-field-textarea-sm" id="spnDescription" rows="3">' + A.esc(isEdit ? (sponsor.description || '') : '') + '</textarea>' +
                         '</div>' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.sponDescription + ' (EN)</label>' +
-                            '<textarea class="ad-field-input" id="spnDescriptionEn" rows="3">' + A.esc(isEdit ? (sponsor.description_en || '') : '') + '</textarea>' +
+                            '<textarea class="ad-field-input ad-field-textarea-sm" id="spnDescriptionEn" rows="3">' + A.esc(isEdit ? (sponsor.description_en || '') : '') + '</textarea>' +
                         '</div>' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.sponDescription + ' (KG)</label>' +
-                            '<textarea class="ad-field-input" id="spnDescriptionKg" rows="3">' + A.esc(isEdit ? (sponsor.description_kg || '') : '') + '</textarea>' +
+                            '<textarea class="ad-field-input ad-field-textarea-sm" id="spnDescriptionKg" rows="3">' + A.esc(isEdit ? (sponsor.description_kg || '') : '') + '</textarea>' +
                         '</div>' +
                     '</div>' +
                     '<button type="button" class="ad-btn-translate-all" data-ru="spnDescription" data-en="spnDescriptionEn" data-kg="spnDescriptionKg">&#127760; ' + L.translateAllBtn + '</button>' +

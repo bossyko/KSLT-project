@@ -9,7 +9,7 @@
    сжималась — теперь фиксированная, как у соседей */
 .bo-hero {
     position: relative;
-    padding: 110px 7% 64px;
+    padding: var(--section-y) var(--pad-x) var(--section-y);
     text-align: center;
     min-height: 460px;
     display: flex;
@@ -97,9 +97,9 @@
    обычные div, поэтому контейнер задаём вручную: иначе они шли по краю
    окна, а полоса фильтров над ними — по сетке страницы */
 .bo-section {
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
-    padding: var(--space-lg) 7%;
+    padding: var(--section-y-sm) var(--gutter);
     box-sizing: border-box;
 }
 
@@ -783,7 +783,7 @@
     /* Обложка по общему стандарту — тому же, что на страницах категорий
        турниров: сверху место под шапку, снизу коротко, лишней высоты нет */
     .bo-hero {
-        padding: 92px 5% 30px;
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
         min-height: 275px;
         align-items: stretch;
     }
@@ -801,7 +801,7 @@
     }
 
     .bo-section {
-        padding: var(--space-lg) 5%;
+        padding: var(--section-y-sm) var(--pad-x);
     }
 
     .bo-featured {

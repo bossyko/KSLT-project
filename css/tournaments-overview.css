@@ -8,7 +8,7 @@
    категорий турниров: раздел один, и шапки в нём должны читаться одинаково */
 .to-hero {
     position: relative;
-    padding: 110px 7% 64px;
+    padding: var(--section-y) var(--pad-x) var(--section-y);
     text-align: center;
     min-height: 460px;
     display: flex;
@@ -109,7 +109,7 @@
     z-index: 30;
     display: flex;
     justify-content: center;
-    padding: var(--space-md) 7%;
+    padding: var(--space-md) var(--pad-x);
     background: var(--bg-primary);
     border-bottom: 1px solid transparent;
     transition: border-color 0.2s;
@@ -165,7 +165,7 @@
    сверху и снизу — между двумя категориями зияло 160, и страница
    разъезжалась на пустоту */
 .to-category-block {
-    padding: 48px 7%;
+    padding: var(--section-y-sm) var(--pad-x);
 }
 
 .to-category-block:nth-child(odd) {
@@ -785,11 +785,11 @@
 
 @media (max-width: 768px) {
     .to-search-wrap {
-        padding: var(--space-md) 5%;
+        padding: var(--space-md) var(--pad-x);
     }
 
     .to-hero {
-        padding: 100px 5% 36px;
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
         min-height: 320px;
     }
 
@@ -800,7 +800,7 @@
     /* Между категориями было по 40 пикселей сверху и снизу — на телефоне
        это 80 пустоты на каждый стык */
     .to-category-block {
-        padding: 24px 5%;
+        padding: 24px var(--pad-x);
     }
 
     /* Под последней категорией держались ещё 80 пикселей, и до «Спонсоров»
@@ -841,7 +841,7 @@
 
 @media (max-width: 480px) {
     .to-hero {
-        padding: 90px 5% 28px;
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
         min-height: 280px;
     }
 
@@ -1191,7 +1191,7 @@
        у нижнего края с отступом в 30 — так цифры не жмутся ни к заголовку,
        ни к самому низу, а сверху остаётся видна фотография */
     .to-hero {
-        padding: 92px 5% 30px;
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
         min-height: 275px;
         align-items: stretch;
         margin-bottom: 0;

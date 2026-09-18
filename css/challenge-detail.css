@@ -12,7 +12,7 @@
     min-height: 460px;
     display: flex;
     align-items: flex-end;
-    padding: 110px 7% 40px;
+    padding: var(--section-y) var(--pad-x) var(--section-y-sm);
     overflow: hidden;
     background: linear-gradient(135deg, rgba(10,10,10,0.95) 0%, rgba(20,20,20,0.9) 100%);
     border-bottom: 1px solid var(--border);
@@ -41,7 +41,7 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
 }
 
@@ -70,7 +70,7 @@
 
 /* === СОПЕРНИКИ === */
 .ch-duel {
-    padding: var(--space-lg) 7%;
+    padding: var(--section-y-sm) var(--pad-x);
     border-bottom: 1px solid var(--border);
 }
 
@@ -82,7 +82,7 @@
     grid-template-columns: 1.15fr 1fr;
     gap: 24px;
     align-items: stretch;
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
 }
 
@@ -167,7 +167,7 @@
 
 /* === ЧТО ГОВОРЯТ ЧИСЛА === */
 .ch-forecast-sec {
-    padding: var(--space-lg) 7%;
+    padding: var(--section-y-sm) var(--pad-x);
     border-bottom: 1px solid var(--border);
 }
 
@@ -319,7 +319,7 @@
 
 /* === VOTING SECTION === */
 .ch-voting {
-    padding: var(--space-xl) 7%;
+    padding: var(--section-y) var(--pad-x);
     border-bottom: 1px solid var(--border);
 }
 
@@ -674,14 +674,14 @@
 
 /* === DETAILS SECTION === */
 .ch-details {
-    padding: var(--space-lg) 7%;
+    padding: var(--section-y-sm) var(--pad-x);
     border-bottom: 1px solid var(--border);
 }
 
 /* По той же сетке, что соперники выше: раньше блок центрировался в
    семистах пикселях и его левый край не совпадал ни с чем на странице */
 .ch-details-inner {
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -854,7 +854,7 @@
    Стоит сразу под шапкой, когда матч сыгран: это первое, за чем приходят
    на страницу отыгранного баттла. Раньше лежал в самом низу, под картой */
 .ch-score {
-    padding: var(--space-lg) 7%;
+    padding: var(--section-y-sm) var(--pad-x);
     border-bottom: 1px solid var(--border);
 }
 
@@ -940,7 +940,7 @@
 /* === NOT FOUND === */
 .ch-not-found {
     text-align: center;
-    padding: var(--space-xxl) 7%;
+    padding: var(--section-y) var(--pad-x);
     color: var(--text-secondary);
 }
 .ch-not-found h2 {
@@ -952,14 +952,14 @@
 /* === LOADING === */
 .ch-loading {
     text-align: center;
-    padding: var(--space-xxl) 7%;
+    padding: var(--section-y) var(--pad-x);
     color: var(--text-secondary);
     font-size: 1rem;
 }
 
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
-    .ch-hero { padding: var(--space-lg) 5%; }
+    .ch-hero { padding: var(--section-y-sm) var(--pad-x); }
     .ch-battle-title { font-size: 1.5rem; }
     .ch-vs-container {
         flex-direction: column;
@@ -969,19 +969,19 @@
     .ch-player-photo { width: 100px; height: 130px; }
     .ch-player-name { font-size: 1.1rem; }
     .ch-meta { flex-direction: column; align-items: center; gap: var(--space-sm); }
-    .ch-voting { padding: var(--space-lg) 5%; }
+    .ch-voting { padding: var(--section-y-sm) var(--pad-x); }
     .ch-vote-buttons { flex-direction: column; align-items: center; }
     .ch-vote-btn { width: 100%; max-width: 300px; }
-    .ch-details { padding: var(--space-lg) 5%; }
-    .ch-duel { padding: var(--space-md) 5%; }
-    .ch-score { padding: var(--space-lg) 5%; }
+    .ch-details { padding: var(--section-y-sm) var(--pad-x); }
+    .ch-duel { padding: var(--space-md) var(--pad-x); }
+    .ch-score { padding: var(--section-y-sm) var(--pad-x); }
     .ch-score-display { flex-direction: column; gap: var(--space-sm); }
     .ch-score-player { min-width: auto; }
-    .ch-hero { min-height: 340px; padding: 90px 5% 30px; }
+    .ch-hero { min-height: 340px; padding: var(--section-y) var(--pad-x) var(--section-y-sm); }
 }
 
 @media (max-width: 480px) {
-    .ch-hero { padding: var(--space-md) 4%; }
+    .ch-hero { padding: var(--space-md) var(--pad-x); }
     .ch-battle-title { font-size: 1.25rem; }
     .ch-player-photo { width: 80px; height: 110px; }
     .ch-player-stats { flex-direction: column; gap: 2px; text-align: center; }

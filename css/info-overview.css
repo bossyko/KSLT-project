@@ -8,7 +8,7 @@
    один сайт, шапки разделов должны читаться одинаково */
 .io-hero {
     position: relative;
-    padding: 110px 7% 64px;
+    padding: var(--section-y) var(--pad-x) var(--section-y);
     text-align: center;
     min-height: 460px;
     display: flex;
@@ -68,7 +68,7 @@
 
 /* Content container */
 .io-content {
-    padding: var(--space-xl) 7%;
+    padding: var(--section-y) var(--pad-x);
 }
 
 /* Featured card (big, photo background) */
@@ -235,7 +235,7 @@
     }
 
         .io-content {
-        padding: var(--space-lg) 5%;
+        padding: var(--section-y-sm) var(--pad-x);
     }
 
     .io-featured {
@@ -273,7 +273,7 @@
     /* Обложка раздела — общий размер, как у остальных страниц «Инфо» */
     .io-hero.io-hero {
         min-height: 275px;
-        padding: 92px 5% 30px;
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
     }
 
     .io-grid {
@@ -283,7 +283,7 @@
 
 @media (max-width: 480px) {
     .io-hero {
-        padding: 90px 5% 28px;
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
         min-height: 280px;
     }
 

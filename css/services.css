@@ -8,7 +8,7 @@
    один сайт, шапки разделов должны читаться одинаково */
 .sv-hero {
     position: relative;
-    padding: 110px 7% 64px;
+    padding: var(--section-y) var(--pad-x) var(--section-y);
     text-align: center;
     min-height: 460px;
     display: flex;
@@ -73,7 +73,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-xl);
-    padding: var(--space-md) 7% var(--space-xl);
+    padding: var(--space-md) var(--pad-x) var(--section-y);
 }
 
 /* Заголовок колонки едет вместе с содержимым, а не липнет к шапке:
@@ -605,7 +605,7 @@
 
         .sv-columns {
         grid-template-columns: 1fr;
-        padding: var(--space-lg) 5%;
+        padding: var(--section-y-sm) var(--pad-x);
     }
 
     .sv-partners-section {

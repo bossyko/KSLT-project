@@ -11,7 +11,7 @@
    один сайт, шапки разделов должны читаться одинаково */
 .pt-hero {
     position: relative;
-    padding: 110px 7% 64px;
+    padding: var(--section-y) var(--pad-x) var(--section-y);
     text-align: center;
     min-height: 460px;
     display: flex;
@@ -146,7 +146,7 @@
    ======================================== */
 
 .pt-grid-wrap {
-    padding: var(--space-lg) 7% var(--space-xl);
+    padding: var(--section-y-sm) var(--pad-x) var(--section-y);
 }
 
 .pt-grid {
@@ -595,7 +595,7 @@
 
 @media (max-width: 768px) {
     .pt-hero {
-        padding: 110px 5% 40px;
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
         min-height: 35vh;
     }
 
@@ -604,11 +604,11 @@
     }
 
         .pt-filters {
-        padding: 12px 5%;
+        padding: 12px var(--pad-x);
     }
 
     .pt-grid-wrap {
-        padding: var(--space-md) 5% var(--space-lg);
+        padding: var(--space-md) var(--pad-x) var(--section-y-sm);
     }
 
     .pt-grid {
@@ -618,7 +618,7 @@
 
 @media (max-width: 480px) {
     .pt-hero {
-        padding: 95px 5% 30px;
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
         min-height: 30vh;
     }
 
@@ -697,7 +697,7 @@
 
 /* === PAGINATION === */
 .pt-pagination-section {
-    max-width: 1100px;
+    max-width: var(--container-narrow);
     margin: 0 auto;
     padding: 0 24px var(--space-xl);
 }

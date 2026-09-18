@@ -8,7 +8,7 @@
    один сайт, шапки разделов должны читаться одинаково */
 .pl-hero {
     position: relative;
-    padding: 110px 7% 64px;
+    padding: var(--section-y) var(--pad-x) var(--section-y);
     text-align: center;
     overflow: hidden;
     min-height: 460px;
@@ -203,7 +203,7 @@
 
 /* === PODIUM (Pedestal) === */
 .pl-podium-section {
-    padding: 0 7% var(--space-md);
+    padding: 0 var(--pad-x) var(--space-md);
 }
 
 .pl-podium {
@@ -442,7 +442,7 @@
 
 /* === FILTERS === */
 .pl-filters-section {
-    padding: 12px 7% var(--space-md);
+    padding: 12px var(--pad-x) var(--space-md);
     position: sticky;
     top: 64px;
     z-index: 30;
@@ -581,7 +581,7 @@
 
 /* === TABLE === */
 .pl-table-section {
-    padding: 0 7% var(--space-lg);
+    padding: 0 var(--pad-x) var(--section-y-sm);
 }
 
 .pl-table {
@@ -1042,7 +1042,7 @@
 
 /* === PAGINATION === */
 .pl-pagination-section {
-    padding: 0 7% var(--space-xl);
+    padding: 0 var(--pad-x) var(--section-y);
 }
 
 .pl-pagination-section:empty {
@@ -1239,7 +1239,7 @@
 }
 
 .pl-filters-section.pl-cat-mode {
-    padding: 10px 7%;
+    padding: 10px var(--pad-x);
     top: 64px;
 }
 
@@ -1506,8 +1506,8 @@
     .pl-filters-section,
     .pl-table-section,
     .pl-pagination-section {
-        padding-left: 5%;
-        padding-right: 5%;
+        padding-left: var(--pad-x);
+        padding-right: var(--pad-x);
     }
 
     .pl-podium-first .pl-podium-photo {

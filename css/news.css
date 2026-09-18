@@ -91,7 +91,7 @@
     margin: 0 auto;
     /* Небольшой отступ снизу: дальше идёт ещё отступ самой статьи, и вместе
        они давали пустое поле в четверть экрана между датой и первым абзацем */
-    padding: var(--space-md) 7% var(--space-md);
+    padding: var(--space-md) var(--gutter) var(--space-md);
 }
 
 /* Ссылка «Назад к новостям» переехала в общую полосу .kslt-back-wrap */
@@ -203,7 +203,7 @@
 .news-article-body {
     max-width: 900px;
     margin: 0 auto;
-    padding: var(--space-lg) 7% var(--space-xl);
+    padding: var(--section-y-sm) var(--gutter) var(--section-y);
 }
 
 /* Paragraph */
@@ -489,7 +489,7 @@ h3.news-heading {
 .news-tags {
     max-width: 900px;
     margin: 0 auto;
-    padding: 0 7% var(--space-lg);
+    padding: 0 var(--gutter) var(--section-y-sm);
 }
 
 .news-section-title {
@@ -527,7 +527,7 @@ h3.news-heading {
 .news-reactions {
     max-width: 900px;
     margin: 0 auto;
-    padding: 0 7% var(--space-lg);
+    padding: 0 var(--gutter) var(--section-y-sm);
     text-align: center;
 }
 
@@ -707,9 +707,9 @@ body.news-article-page .section-sponsors-compact {
 
 /* === RELATED ARTICLES === */
 .news-related {
-    max-width: 1000px;
+    max-width: var(--container-narrow);
     margin: 0 auto;
-    padding: var(--space-lg) 7%;
+    padding: var(--section-y-sm) var(--gutter);
     border-top: 1px solid var(--border-subtle);
 }
 
@@ -818,9 +818,9 @@ body.news-article-page .section-sponsors-compact {
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 1200px;
+    max-width: var(--container-narrow);
     margin: 0 auto;
-    padding: var(--space-2xl) 7%;
+    padding: var(--section-y) var(--gutter);
     display: flex;
     flex-direction: column;
     gap: var(--space-lg);
@@ -842,9 +842,9 @@ body.news-article-page .section-sponsors-compact {
 
 /* === NEWS LIST — FILTERS === */
 .news-list-page {
-    max-width: 1200px;
+    max-width: var(--container-narrow);
     margin: 0 auto;
-    padding: var(--space-md) 7% var(--space-lg);
+    padding: var(--space-md) var(--gutter) var(--section-y-sm);
 }
 
 /* В режиме списка секция не должна нести отступы, рассчитанные на пустой
@@ -1105,7 +1105,7 @@ body.news-article-page .section-sponsors-compact {
 /* === NOT FOUND === */
 .news-not-found {
     display: none;
-    padding: var(--space-2xl) 7%;
+    padding: var(--section-y) var(--pad-x);
     text-align: center;
 }
 
@@ -1186,11 +1186,11 @@ body.news-article-page .section-sponsors-compact {
 @media (max-width: 768px) {
     /* List page */
     .news-hero-content-list {
-        padding: var(--space-xl) 5% var(--space-lg);
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
     }
 
     .news-list-page {
-        padding: var(--space-md) 5% var(--space-lg);
+        padding: var(--space-md) var(--pad-x) var(--section-y-sm);
     }
 
                     .news-bento {
@@ -1260,23 +1260,23 @@ body.news-article-page .section-sponsors-compact {
     }
 
     .news-hero-content {
-        padding: 0 5% var(--space-lg);
+        padding: 0 var(--pad-x) var(--section-y-sm);
     }
 
     .news-article-body {
-        padding: var(--space-lg) 5%;
+        padding: var(--section-y-sm) var(--pad-x);
     }
 
     .news-tags {
-        padding: 0 5% var(--space-md);
+        padding: 0 var(--pad-x) var(--space-md);
     }
 
     .news-reactions {
-        padding: 0 5% var(--space-lg);
+        padding: 0 var(--pad-x) var(--section-y-sm);
     }
 
     .news-related {
-        padding: var(--space-lg) 5%;
+        padding: var(--section-y-sm) var(--pad-x);
     }
 
     .news-hero h1 {

@@ -11,7 +11,7 @@
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
-    padding: 20px 7% 0;
+    padding: 20px var(--pad-x) 0;
     transition: color var(--transition-fast);
 }
 
@@ -32,7 +32,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 110px 7% 64px;
+    padding: var(--section-y) var(--pad-x) var(--section-y);
     overflow: hidden;
     /* Воздух между шапкой и полосой фильтров: без него поиск лип к фотографии */
     margin-bottom: 24px;
@@ -134,7 +134,7 @@
 }
 
 .trn-noresults {
-    padding: var(--space-lg) 7%;
+    padding: var(--section-y-sm) var(--pad-x);
 }
 
 .trn-noresults[hidden] {
@@ -481,7 +481,7 @@
 
 /* Tournament Ranking Section */
 .section-tournament-ranking {
-    padding: var(--space-xl) 7%;
+    padding: var(--section-y) var(--pad-x);
     background: var(--bg-secondary);
 }
 
@@ -807,7 +807,7 @@
 
     /* Тот же ритм, что у блоков категорий на обзоре турниров */
     .trn-block {
-        padding: 24px 5%;
+        padding: 24px var(--pad-x);
     }
 
     /* Одна высота у всех категорий и у обзора турниров: при переходе
@@ -815,7 +815,7 @@
        Содержимое стоит у нижнего края с отступом в 30 */
     .tournament-hero {
         min-height: 275px;
-        padding: 92px 5% 30px;
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
         display: flex;
         align-items: stretch;
         justify-content: center;
@@ -1090,3 +1090,4 @@
         text-align: center;
     }
 }
+

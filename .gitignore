@@ -58,3 +58,6 @@ tools/_ntrp-plan.json
 
 # Превью телефона: рабочий инструмент проверки, живёт только локально
 pages/_preview-mobile.html
+
+# локальные резервные копии Claude
+.kslt-backup/

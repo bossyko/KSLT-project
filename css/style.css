@@ -5,56 +5,11 @@
    CSS VARIABLES - KSLT Design System
    Electric Lime on Deep Black
    ======================================== */
-:root {
-    /* Background - Глубокий черный */
-    --bg-primary: #000000;
-    --bg-secondary: #0A0A0A;
-    --bg-elevated: #141414;
-    --bg-card: #111111;
-
-    /* Accent - Electric Lime (теннисный мяч) */
-    --accent: #CCFF00;
-    --accent-hover: #E0FF4D;
-    --accent-dim: #B8E600;
-    --accent-glow: rgba(204, 255, 0, 0.4);
-
-    /* Text */
-    --text-primary: #FFFFFF;
-    --text-secondary: rgba(255, 255, 255, 0.72);
-    --text-muted: rgba(255, 255, 255, 0.5);
-    --text-dim: rgba(255, 255, 255, 0.38);
-
-    /* Borders & Surfaces - более мягкие */
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-light: rgba(255, 255, 255, 0.12);
-    --surface-glass: rgba(255, 255, 255, 0.04);
-    --surface-glass-hover: rgba(255, 255, 255, 0.08);
-
-    /* Shadows - мягкие, без glow */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
-
-    /* Spacing - увеличенные отступы */
-    --space-xs: 0.5rem;
-    --space-sm: 1rem;
-    --space-md: 1.5rem;
-    --space-lg: 2.5rem;
-    --space-xl: 5rem;
-    --space-2xl: 8rem;
-
-    /* Border radius */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 24px;
-    --radius-full: 100px;
-
-    /* Transitions - плавные */
-    --transition-fast: 0.2s ease;
-    --transition-base: 0.3s ease;
-    --transition-slow: 0.5s ease;
-}
+/* Блок :root перенесён в css/tokens.css — единый источник токенов
+   для сайта и мобильного приложения. tokens.css подключается ПЕРВЫМ,
+   до этого файла. Старые имена переменных продолжают работать через
+   слой обратной совместимости в конце tokens.css.
+   Восстановить прежний блок: git show main:css/style.css */
 
 * {
     margin: 0;
@@ -102,7 +57,7 @@ input, button, select, textarea {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 
-    padding: 0 var(--space-xl);
+    padding: 0 var(--pad-x);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -174,7 +129,7 @@ input, button, select, textarea {
     border-bottom: 1px solid transparent;
     transition: all var(--transition-base);
 
-    padding: 0 var(--space-xl);
+    padding: 0 var(--pad-x);
 }
 
 .floating-header.scrolled {
@@ -188,7 +143,7 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
     height: 64px;
 }
@@ -1329,16 +1284,17 @@ nav {
 }
 
 main {
-    padding-top: 100px;
+    padding-top: var(--header-h);
 }
 
-/* Сбалансированный стиль секций */
+/* Секция во всю ширину: фон от края до края, содержимое — по общей линии.
+   Отступ --pad-x сам центрует содержимое и не даёт ему разъехаться шире контейнера,
+   поэтому обёртка внутри не нужна. */
 section {
-    /* Было 70: на каждый раздел уходило 140 пикселей воздуха — шестая часть
-       экрана. С 48 разделы по-прежнему не слипаются, но помещаются целиком */
-    padding: 48px 7%;
-    max-width: 1400px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    padding: var(--section-y-sm) var(--pad-x);
 }
 
 section:not(.hero) {
@@ -1370,7 +1326,6 @@ h2 {
        Теперь высота от содержимого, с потолком — чтобы на больших мониторах
        не растягивался, а на ноутбуке было видно, что страница продолжается */
     min-height: min(80vh, 740px);
-    margin-top: var(--header-height);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1378,7 +1333,7 @@ h2 {
     /* Сверху отступ больше, снизу меньше — так содержимое садится чуть
        ниже середины. По оптике это ровнее: сверху над блоком нависает
        шапка сайта, и равные отступы кажутся неравными */
-    padding: clamp(40px, 8vh, 96px) 5% clamp(12px, 2vh, 20px);
+    padding: clamp(40px, 8vh, 96px) var(--pad-x) clamp(12px, 2vh, 20px);
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
@@ -1386,7 +1341,7 @@ h2 {
 
 .hero-sponsors-section {
     width: 95%;
-    max-width: 1100px;
+    max-width: var(--container-narrow);
     margin-top: auto;
     padding: clamp(8px, 1.5vh, 16px) 0 clamp(8px, 1vh, 12px);
     position: relative;
@@ -1437,7 +1392,7 @@ h2 {
     z-index: 2;
     position: relative;
     width: 95%;
-    max-width: 1100px;
+    max-width: var(--container-narrow);
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -2296,14 +2251,14 @@ h2 {
 .section-badges-cta {
     /* Это перебивка между разделами, а не раздел: даёт передышку и зовёт
        зарегистрироваться. Поэтому ниже соседей, а не вровень с ними */
-    padding: 40px 7%;
+    padding: var(--section-y-sm) var(--pad-x);
     background: var(--bg-secondary);
     position: relative;
     overflow: hidden;
 }
 
 .badges-cta-inner {
-    max-width: 1000px;
+    max-width: var(--container-narrow);
     margin: 0 auto;
     text-align: center;
 }
@@ -2717,7 +2672,7 @@ h2 {
     left: 0;
     right: 0;
     z-index: 5;
-    padding: 0 7% 32px;
+    padding: 0 var(--pad-x) var(--section-y-sm);
     background: linear-gradient(to bottom,
         transparent 0%,
         rgba(10, 10, 10, 0.7) 30%,
@@ -2995,7 +2950,7 @@ h2 {
    вот площадки, вот люди. Четыре карточки в ряд вместо трёх: партнёров
    больше трёх, и каждому надо дать место. */
 .section-venues {
-    padding: 48px 7%;
+    padding: var(--section-y-sm) var(--pad-x);
 }
 
 /* Подзаголовок ряда стоит ближе к своим карточкам, чем к чужим: сверху
@@ -4017,9 +3972,9 @@ h2 {
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
-    padding: 0 7%;
+    padding: 0 var(--gutter);
 }
 
 .trn-filters.stuck {
@@ -4182,7 +4137,7 @@ h2 {
        висела посреди полосы и читалась как заголовок, а не как ссылка назад */
     .trn-filters-inner {
         justify-content: flex-start;
-        padding: 0 5%;
+        padding: 0 var(--pad-x);
     }
 
     .trn-back {
@@ -4277,7 +4232,7 @@ h2 {
     .sv-hero.sv-hero,
     .pr-hero.pr-hero {
         min-height: 275px;
-        padding: 92px 5% 30px;
+        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
     }
 }
 
@@ -4733,7 +4688,7 @@ h2 {
    состояние, а не раздел, и пустая заглушка первым экраном читается как
    поломка. «Завершённые» остаются всегда — архив есть у каждой категории. */
 .trn-block {
-    padding: var(--space-lg) 7%;
+    padding: var(--section-y-sm) var(--pad-x);
     background: var(--bg-primary);
 }
 
@@ -5588,9 +5543,7 @@ h2 {
     display: grid;
     grid-template-columns: 1.8fr 1fr 1fr 1fr 1.2fr;
     gap: var(--space-md);
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 8%;
+    padding: 0 var(--pad-x);
     padding-bottom: var(--space-lg);
 }
 
@@ -5720,10 +5673,9 @@ h2 {
     align-items: center;
     flex-wrap: wrap;
     gap: var(--space-sm);
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: var(--space-md) 8%;
+    padding: var(--space-md) var(--gutter);
     border-top: 1px solid var(--border-subtle);
+    padding-inline: var(--pad-x);
 }
 
 .footer-copyright {
@@ -6113,7 +6065,7 @@ h2 {
     font-size: 0.9rem;
     font-weight: 600;
     transition: color 0.2s;
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
 }
 
@@ -6134,7 +6086,7 @@ h2 {
        правило на один класс ему проигрывало — мобильные отступы молча не
        применялись, шапка держала 80 пикселей полей с каждой стороны */
     .floating-header.header-hybrid {
-        padding: 0 var(--space-lg);
+        padding: 0 var(--pad-x);
     }
 }
 
@@ -6153,7 +6105,7 @@ h2 {
     }
 
     .hero {
-        padding: clamp(12px, 2vh, 16px) 5% 0;
+        padding: clamp(12px, 2vh, 16px) var(--pad-x) 0;
     }
 
     .hero-content {
@@ -6179,7 +6131,7 @@ h2 {
 
 @media (max-width: 768px) {
     .floating-header.header-hybrid {
-        padding: 0 20px;
+        padding: 0 var(--pad-x);
     }
 
     /* Тот же вес, что у базового правила: иначе фон при прокрутке на
@@ -6251,7 +6203,7 @@ h2 {
        экран не помещаются, а `overflow: hidden` не давал им выйти за край —
        содержимое наезжало само на себя и страница не прокручивалась. */
     .hero {
-        padding: clamp(4px, 1vh, 8px) 5% 0;
+        padding: clamp(4px, 1vh, 8px) var(--pad-x) 0;
         height: auto;
         max-height: none;
         min-height: calc(100vh - 2px);
@@ -6675,9 +6627,9 @@ h2 {
     position: sticky;
     top: 64px;
     z-index: 10;
-    max-width: 1400px;
+    max-width: var(--container-max);
     margin: 0 auto;
-    padding: 16px 7%;
+    padding: 16px var(--gutter);
     box-sizing: border-box;
 }
 
@@ -7535,7 +7487,7 @@ h2 {
    ======================================== */
 @media (max-width: 375px) {
     .floating-header.header-hybrid {
-        padding: 0 16px;
+        padding: 0 var(--pad-x);
     }
 
     nav {
@@ -7842,7 +7794,7 @@ input:-internal-autofill-previewed {
     .kslt-back-wrap.kslt-back-float {
         position: static;
         display: block;
-        padding: 12px calc(max(24px, (100% - 1100px) / 2));
+        padding: 12px var(--pad-x);
         border-radius: 0;
         background: var(--bg-primary);
         backdrop-filter: none;
@@ -7888,10 +7840,10 @@ input:-internal-autofill-previewed {
 
 /* Отступ сверху такой же, как у заголовков разделов от разделительной
    линии — иначе карточка прилипает к полосе */
-.sp-offer-wrap { padding: 48px 5% 72px; }
+.sp-offer-wrap { padding: var(--section-y-sm) var(--pad-x) var(--section-y); }
 
 .sp-offer {
-    max-width: 1200px;
+    max-width: var(--container-narrow);
     margin: 0 auto;
     padding: 30px 34px;
     background: var(--surface-glass);
@@ -9320,5 +9272,48 @@ input:-internal-autofill-previewed {
         min-height: 32px;
         padding: 8px 12px;
         font-size: 0.75rem;
+    }
+}
+
+/* ============================================================================
+   ГЕРОЙ ПОД ШАПКОЙ — держим в самом конце файла
+
+   Правило должно стоять после всех медиазапросов: у них та же специфичность,
+   и при равной специфичности побеждает то, что ниже. Иначе на узких экранах
+   мобильный @media перебивал отбивку, и «Сезон 2026» уезжал под шапку.
+   ========================================================================= */
+
+/* Страница с героем не отбивается сверху — фото само уходит под шапку,
+   а отбивку берёт на себя padding героя. Отрицательные margin не используем:
+   на мобильных main обнуляет padding, и герой уезжал за верх экрана. */
+/* Только десктоп: на узких экранах у main и так нет верхней отбивки,
+   а у героя своя мобильная раскладка — туда не лезем. */
+@media (min-width: 993px) {
+    main:has(.hero) {
+        padding-top: 0;
+    }
+
+    .hero {
+        padding-top: calc(var(--header-h) + var(--space-4));
+    }
+}
+
+/* Мобильный герой оставлен как был — разбираемся отдельно. */
+
+/* ============================================================================
+   ПЕРВЫЙ БЛОК СТРАНИЦЫ НА УЗКИХ ЭКРАНАХ
+
+   На мобильных main не отбивается сверху, а шапка фиксированная и
+   полупрозрачная. У героев на всех внутренних страницах — tournament-hero,
+   to-hero, io-hero, ip-hero, sv-hero, pt-hero, ct-hero, pr-hero — всего
+   24px собственного отступа, и заголовок уезжал под шапку.
+
+   Одно правило вместо восьми: первый блок страницы получает высоту шапки.
+   Главная исключена — у её героя своя раскладка.
+   ========================================================================= */
+
+@media (max-width: 768px) {
+    main > section:first-child:not(.hero) {
+        padding-top: calc(var(--header-h) + var(--space-4));
     }
 }
