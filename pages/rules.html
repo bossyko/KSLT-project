@@ -26,7 +26,7 @@
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="../css/tokens.css?v=18">
-    <link rel="stylesheet" href="../css/style.css?v=270">
+    <link rel="stylesheet" href="../css/style.css?v=271">
     <link rel="stylesheet" href="../css/info-pages.css?v=39">
 </head>
 <body>
@@ -518,11 +518,21 @@
 
         <div class="footer-bottom">
             <p>© <span class="footer-year">2026</span> КСЛТ. Все права защищены.</p>
+            <!-- ОСОЗНАННЫЙ ДУБЛЬ, не чинить и не схлопывать.
+                 Два названия документа подряд — это не забытая копипаста.
+                 Замер: на 390 внутри плашки доступно 358, а полные русские
+                 названия занимают 457 — не влезают, переносятся во второй
+                 ряд, и цель нажатия падает до 17px. Короткие дают 333 в один
+                 ряд высотой 44. На десктопе места хватает, и терять точное
+                 имя документа там незачем.
+                 Переключает .footer-legal-full / .footer-legal-short в
+                 style.css. Кыргызский и английский дубля НЕ имеют: их полные
+                 названия влезают и на 390 (324 и 241). -->
             <nav class="footer-legal-nav" aria-label="Правовая информация">
                 <ul class="footer-bottom-links">
-                    <li><a href="offer.html">Оферта</a></li>
+                    <li><a href="offer.html"><span class="footer-legal-full">Публичная оферта</span><span class="footer-legal-short">Оферта</span></a></li>
                     <li><a href="terms.html">Условия использования</a></li>
-                    <li><a href="privacy-policy.html">Конфиденциальность</a></li>
+                    <li><a href="privacy-policy.html"><span class="footer-legal-full">Политика конфиденциальности</span><span class="footer-legal-short">Конфиденциальность</span></a></li>
                 </ul>
             </nav>
             <p class="footer-made">Сделано с <span aria-hidden="true">❤️</span> в Кыргызстане <span aria-hidden="true">🇰🇬</span></p>
