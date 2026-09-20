@@ -32,10 +32,22 @@ const { test, expect } = require('@playwright/test');
 
 const НОРМА = 44;
 
-/** Ширина окна проекта решает, мобильная раскладка или десктопная. */
-function мобильный(page) {
-    const vp = page.viewportSize();
-    return vp ? vp.width <= 768 : false;
+/**
+ * Мобильная раскладка или десктопная — решает СПОСОБ ВВОДА, а не ширина.
+ *
+ * Здесь задаётся ровно тот же вопрос, что в CSS: (pointer: coarse).
+ * Иначе тест и код судят по разным признакам, и тест перестаёт что-либо
+ * доказывать. Так и вышло 20-21.09: подвал уже переехал на указатель
+ * (h270), а эта функция осталась на ширине — значит на 844 и 1024
+ * (телефон и планшет боком) она сказала бы «десктоп» про пальцевую
+ * раскладку: три проверки пальца молча пропустились бы, а десктопная
+ * упала бы на ровном месте.
+ *
+ * Палец включается проектом (hasTouch), а не шириной окна, поэтому
+ * функция асинхронная: спрашивать надо страницу.
+ */
+async function мобильный(page) {
+    return page.evaluate(() => matchMedia('(pointer: coarse)').matches);
 }
 
 /**
@@ -69,13 +81,13 @@ test.describe('Подвал — цели нажатия', () => {
             const box = await ссылки.nth(i).boundingBox();
             const текст = (await ссылки.nth(i).innerText()).trim();
             expect(box, `ссылка «${текст}» не отрисована`).not.toBeNull();
-            if (!мобильный(page)) continue;   // на десктопе мышь, 44 не требуем
+            if (!await мобильный(page)) continue;   // на десктопе мышь, 44 не требуем
             expect(box.height, `цель нажатия «${текст}»`).toBeGreaterThanOrEqual(НОРМА);
         }
     });
 
     test('на мобильном правовые ссылки стоят в один ряд', async ({ page }) => {
-        test.skip(!мобильный(page), 'проверка только для мобильной раскладки');
+        test.skip(!await мобильный(page), 'проверка только для мобильной раскладки');
         await кПодвалу(page);
         const ряды = await page.evaluate(() => {
             const a = [...document.querySelectorAll('.footer-bottom-links a')];
@@ -87,7 +99,7 @@ test.describe('Подвал — цели нажатия', () => {
     });
 
     test('заголовки гармошки не меньше 44 и раскрываются', async ({ page }) => {
-        test.skip(!мобильный(page), 'гармошка живёт только до 768');
+        test.skip(!await мобильный(page), 'гармошка живёт только по пальцу');
         await кПодвалу(page);
 
         const подвал = page.locator('.footer-content');
@@ -129,7 +141,7 @@ test.describe('Подвал — цели нажатия', () => {
 
         // И по существу: нажатие в правый край заголовка должно попадать
         // в заголовок, а не в кнопку. Проверяем тычком, а не стилями.
-        if (!мобильный(page)) return;
+        if (!await мобильный(page)) return;
         const попал = await page.evaluate(() => {
             const h = document.querySelector('.footer-acc .footer-block:not(.footer-brand) h4');
             if (!h) return 'нет заголовка';
@@ -199,7 +211,7 @@ test.describe('Подвал — разметка и содержимое', () =>
     });
 
     test('на десктопе подвал остаётся пятиколоночным и без гармошки', async ({ page }) => {
-        test.skip(мобильный(page), 'проверка только для десктопной раскладки');
+        test.skip(await мобильный(page), 'проверка только для десктопной раскладки');
         await кПодвалу(page);
         const подвал = page.locator('.footer-content');
         await expect(подвал).not.toHaveClass(/footer-acc/);

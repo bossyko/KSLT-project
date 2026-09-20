@@ -13,7 +13,8 @@
     "test:unit": "vitest run tests/unit/",
     "test:unit:watch": "vitest tests/unit/",
     "check:footer": "node tools/check-footer.js",
-    "typecheck": "npx tsc --noEmit"
+    "typecheck": "npx tsc --noEmit",
+    "test:ui": "playwright test --ui"
   },
   "repository": {
     "type": "git",

@@ -15,7 +15,12 @@ const { test, expect } = require('@playwright/test');
 const { execFileSync } = require('child_process');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+// Три уровня вверх: tests/e2e/ui -> tests/e2e -> tests -> корень.
+// Было два, пока спек лежал в tests/e2e/. При переносе по папкам
+// 21.09 путь уехал в tests/tools/, и проверка падала на ровном
+// месте (h277). Сломанные require тогда нашлись регуляркой, а этот
+// путь собирается через path.resolve и такой формы не имеет.
+const ROOT = path.resolve(__dirname, '..', '..', '..');
 
 test.describe('Партиалы', () => {
     test('шапка и футер на всех страницах совпадают с образцом', () => {

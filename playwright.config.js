@@ -27,6 +27,17 @@ module.exports = defineConfig({
         trace: 'on-first-retry',
         viewport: { width: 1280, height: 800 }
     },
+    // Пять проектов: одна мышь и четыре пальца.
+    //
+    // hasTouch ставится НЕ для красоты. Правила вёрстки написаны через
+    // (pointer: coarse) — то есть спрашивают про палец, а не про ширину.
+    // Без hasTouch узкое окно срабатывало бы у них по запасному условию
+    // ширины, и набор проверял бы следствие вместо причины.
+    //
+    // 844 и 1024 — телефон и планшет ГОРИЗОНТАЛЬНО. Обе шире 768 и обе
+    // сенсорные. Полоса между 769 и 1279 не покрывалась ничем, и ровно
+    // там 20-21.09 нашлись h270 и h274 — оба ручным замером на
+    // устройствах, ни один из 23 зелёных запусков их не видел.
     projects: [
         {
             name: 'desktop',
@@ -34,11 +45,21 @@ module.exports = defineConfig({
         },
         {
             name: 'tablet',
-            use: { viewport: { width: 768, height: 1024 } }
+            use: { viewport: { width: 768, height: 1024 }, hasTouch: true, isMobile: true }
         },
         {
             name: 'mobile',
-            use: { viewport: { width: 375, height: 812 } }
+            use: { viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true }
+        },
+        {
+            // iPhone 12 Pro боком
+            name: 'phone-landscape',
+            use: { viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true }
+        },
+        {
+            // iPad Mini боком
+            name: 'tablet-landscape',
+            use: { viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true }
         }
     ],
     webServer: {
