@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('../fixtures');
+const { test, expect } = require('../../fixtures');
 
 /**
  * TC-AUTH-FORMS: Comprehensive auth page form testing

@@ -25,7 +25,7 @@
  * Норма 44×44 — Apple HIG и WCAG 2.5.5. Минимум по WCAG 2.5.8 — 24×24,
  * и исключение по расстоянию тут не спасает: ряды стояли в 4px.
  *
- * Запуск:  npx playwright test tests/e2e/19-footer-tap-targets.spec.js
+ * Запуск:  npx playwright test tests/e2e/ux/19-footer-tap-targets.spec.js
  */
 
 const { test, expect } = require('@playwright/test');

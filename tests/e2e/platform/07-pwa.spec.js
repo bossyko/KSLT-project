@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('../fixtures');
+const { test, expect } = require('../../fixtures');
 
 /**
  * TC-PWA: PWA manifest, service worker, meta tags

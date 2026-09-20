@@ -102,7 +102,7 @@ Test: добавление/изменение тестов
 npx playwright test
 
 # Запуск конкретного suite
-npx playwright test tests/e2e/01-pages-load.spec.js
+npx playwright test tests/e2e/ui/01-pages-load.spec.js
 
 # С UI
 npx playwright test --ui

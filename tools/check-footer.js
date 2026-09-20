@@ -2,7 +2,7 @@
 /**
  * Заморозка подвала — быстрая проверка без браузера.
  *
- * Тест tests/e2e/19-footer-tap-targets.spec.js проверяет ОТРИСОВКУ и ловит
+ * Тест tests/e2e/ux/19-footer-tap-targets.spec.js проверяет ОТРИСОВКУ и ловит
  * больше, но требует Playwright и поднятого сервера. Эта проверка идёт по
  * исходникам, запускается за долю секунды и ловит главное: что правила и
  * разметка, добытые замерами, никто не удалил и не переписал мимоходом.
@@ -225,6 +225,6 @@ if (ошибки.length) {
         console.log(`              ${о.почему}`);
     }
     console.log('');
-    console.log('Полная проверка отрисовки: npx playwright test tests/e2e/19-footer-tap-targets.spec.js');
+    console.log('Полная проверка отрисовки: npx playwright test tests/e2e/ux/19-footer-tap-targets.spec.js');
     process.exit(1);
 }

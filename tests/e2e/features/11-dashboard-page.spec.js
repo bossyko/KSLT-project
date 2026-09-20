@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('../fixtures');
+const { test, expect } = require('../../fixtures');
 
 /**
  * TC-DASHBOARD: разметка кабинета.
@@ -10,7 +10,7 @@ const { test, expect } = require('../fixtures');
  */
 
 // Все проверки в файле идут от лица тестового игрока
-test.use({ storageState: require('../auth-setup').playerState });
+test.use({ storageState: require('../../auth-setup').playerState });
 
 const DASHBOARD_PAGES = [
     { path: '/pages/dashboard.html', lang: 'RU', name: 'Dashboard RU' },

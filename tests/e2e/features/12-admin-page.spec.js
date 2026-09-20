@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('../fixtures');
+const { test, expect } = require('../../fixtures');
 
 /**
  * TC-ADMIN: разметка админки.
@@ -10,7 +10,7 @@ const { test, expect } = require('../fixtures');
  */
 
 // Все проверки в файле идут от лица тестового администратора
-test.use({ storageState: require('../auth-setup').adminState });
+test.use({ storageState: require('../../auth-setup').adminState });
 
 // Админка ведётся только на русском: английская страница оставлена
 // перенаправлением, проверять в ней нечего
