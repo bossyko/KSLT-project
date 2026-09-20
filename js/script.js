@@ -498,6 +498,18 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() { domObserver.disconnect(); }, 10000);
     })();
 
+    // Год в копирайте подставляется, а не лежит текстом.
+    //
+    // «© 2026» было записано словами в трёх партиалах и разнесено по 76
+    // страницам. Каждый январь это требовало правки и пересборки, а забыть
+    // ничего не стоило — на сайте просто стоял бы прошлый год.
+    (function() {
+        var y = String(new Date().getFullYear());
+        document.querySelectorAll('.footer-year').forEach(function(el) {
+            el.textContent = y;
+        });
+    })();
+
     // ========================================
     // SCROLL TO TOP BUTTON
     // ========================================
@@ -508,11 +520,27 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
         document.body.appendChild(btn);
 
+        // Кнопка уходит, пока подвал в кадре.
+        //
+        // Она закреплена в правом нижнем углу и ничего не знала о подвале,
+        // поэтому ложилась прямо на него. Замерено тычками: правые 44px
+        // заголовков гармошки — вся зона стрелки — принимали нажатие на себя,
+        // и человек, жавший «раскрыть раздел», улетал наверх страницы.
+        // Перекрыты были все четыре заголовка.
+        //
+        // Условие геометрическое, а не «подвал виден»: прячем, когда верх
+        // подвала дошёл до нижней кромки кнопки. Считается в том же
+        // requestAnimationFrame, новых слушателей не добавляем.
+        var footerEl = document.querySelector('.site-footer');
         var ticking = false;
         window.addEventListener('scroll', function() {
             if (!ticking) {
                 requestAnimationFrame(function() {
-                    if (window.scrollY > 400) {
+                    var overFooter = false;
+                    if (footerEl) {
+                        overFooter = footerEl.getBoundingClientRect().top < window.innerHeight - 20;
+                    }
+                    if (window.scrollY > 400 && !overFooter) {
                         btn.classList.add('visible');
                     } else {
                         btn.classList.remove('visible');

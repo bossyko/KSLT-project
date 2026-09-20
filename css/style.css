@@ -7815,12 +7815,29 @@ input:-internal-autofill-previewed {
 /* Нижняя строка футера: копирайт, документы и подпись — одним ростом.
    Раньше у ссылок не было ни одного правила, они наследовали цвет и размер
    обычной ссылки и выбивались из строки. */
+/* Ссылки правовых документов обёрнуты в <nav> ради ориентира для читалки.
+   Ловушка: в проекте есть голый селектор `nav` — он написан для шапки и
+   задаёт height 64px, display flex и gap. Новая навигация подвала под него
+   попала и выросла с 44 до 64, а плашка с 118 до 139. Поэтому свой класс и
+   явные свойства, а не надежда на то, что чужое правило не помешает.
+   Имя .footer-legal уже занято другим блоком, отсюда -nav. */
+.footer-legal-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    gap: 0;
+}
+
 .footer-bottom-links {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 6px 0;
+    list-style: none;
 }
+
+.footer-bottom-links li { display: flex; }
 
 .footer-bottom-links a {
     color: var(--text-secondary);
@@ -7831,8 +7848,17 @@ input:-internal-autofill-previewed {
 
 .footer-bottom-links a:hover { color: var(--accent); }
 
+/* Свой стиль фокуса, как у .mobile-nav-links и .trn-chip: до этого у ссылок
+   подвала работало только умолчание браузера, и они выпадали из системы */
+.footer-bottom-links a:focus { outline: none; }
+.footer-bottom-links a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
 /* Разделяем точкой, а не пробелом: так строка читается как одна */
-.footer-bottom-links a + a::before {
+.footer-bottom-links li + li a::before {
     content: '·';
     margin: 0 10px;
     color: var(--border-light);
@@ -8818,10 +8844,26 @@ input:-internal-autofill-previewed {
         text-align: center;
     }
 
+    /* Цель нажатия 44px. Ссылка была высотой 17 — зона попадания 8px вверх
+       и 8 вниз, промах уводил либо в пустоту, либо в соседний документ.
+       Псевдоэлементом расширить было нельзя: два ряда стояли в 4px друг от
+       друга и области наложились бы на 23px. Поэтому строка, а не подкладка.
+       Поля внутри ссылки 0 — иначе ряд не влезает в 358: русские названия
+       сокращены до «Оферта · Условия использования · Конфиденциальность»
+       = 45 + 141 + 127 + два зазора по 10 = 333. Запас 25 держим запасом.
+       flex-wrap оставлен: если перевод вырастет, ряд свалится во второй
+       ряд высотой 44, а не обратно в нынешнюю поломку. */
+    .footer-bottom-links a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+    }
+
     /* Точки между ссылками ставятся через ::before. При переносе строки они
        оставались висеть у края — на трёх ссылках подряд это выглядело как
        мусор. На телефоне строки и так разделены промежутком */
-    .footer-bottom-links a + a::before {
+    .footer-bottom-links li + li a::before {
         content: none;
     }
 

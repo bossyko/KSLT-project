@@ -26,7 +26,7 @@
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="css/tokens.css?v=18">
-    <link rel="stylesheet" href="css/style.css?v=268">
+    <link rel="stylesheet" href="css/style.css?v=270">
     <link rel="stylesheet" href="css/partners.css?v=34">
     <link rel="stylesheet" href="css/battle-cards.css?v=27">
 </head>
@@ -604,13 +604,15 @@
         </div>
 
         <div class="footer-bottom">
-            <p>© 2026 KSLT. All rights reserved.</p>
-            <div class="footer-bottom-links">
-                <a href="pages/offer-en.html">Public offer</a>
-                <a href="pages/terms-en.html">Terms of Use</a>
-                <a href="pages/privacy-policy-en.html">Privacy policy</a>
-            </div>
-            <p class="footer-made">Made with ❤️ in Kyrgyzstan 🇰🇬</p>
+            <p>© <span class="footer-year">2026</span> KSLT. All rights reserved.</p>
+            <nav class="footer-legal-nav" aria-label="Legal">
+                <ul class="footer-bottom-links">
+                    <li><a href="pages/offer-en.html">Public offer</a></li>
+                    <li><a href="pages/terms-en.html">Terms of Use</a></li>
+                    <li><a href="pages/privacy-policy-en.html">Privacy policy</a></li>
+                </ul>
+            </nav>
+            <p class="footer-made">Made with <span aria-hidden="true">❤️</span> in Kyrgyzstan <span aria-hidden="true">🇰🇬</span></p>
         </div>
     </footer>
 <!-- FOOTER:END -->
@@ -618,7 +620,7 @@
     <script src="js/contact-icons.js?v=1"></script>
 
     <script src="js/auth-nav.js?v=23"></script>
-    <script src="js/script.js?v=5"></script>
+    <script src="js/script.js?v=6"></script>
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js"></script>
