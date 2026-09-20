@@ -8829,6 +8829,25 @@ input:-internal-autofill-previewed {
         text-align: left;
     }
 
+    /* Цель нажатия 44 и ВНУТРИ раскрытого раздела.
+       Гармошка давала 44 заголовку, а ссылки внутри оставались 15 при шаге
+       26 и просвете 12 — расширить псевдоэлементом нельзя, области
+       наложились бы. Поэтому строка 44, а собственный зазор списка убран:
+       иначе шаг стал бы 50 и раскрытый раздел раздулся бы без нужды.
+       Раскрыт всегда один раздел, так что подвал целиком не растёт.
+       Адрес в контактах — не ссылка и 44 не получает: нажимать там нечего. */
+    .footer-acc .footer-block.открыт .footer-links,
+    .footer-acc .footer-block.открыт .footer-contacts {
+        gap: 0;
+    }
+
+    .footer-acc .footer-block.открыт .footer-links a,
+    .footer-acc .footer-block.открыт .footer-contacts a {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
     .footer-links { gap: 2px; }
 
     .footer-links a,

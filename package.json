@@ -12,6 +12,7 @@
     "test:report": "npx playwright show-report tests/reports/html",
     "test:unit": "vitest run tests/unit/",
     "test:unit:watch": "vitest tests/unit/",
+    "check:footer": "node tools/check-footer.js",
     "typecheck": "npx tsc --noEmit"
   },
   "repository": {
