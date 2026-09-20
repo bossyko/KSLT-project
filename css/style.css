@@ -8758,104 +8758,6 @@ input:-internal-autofill-previewed {
         font-size: 0.78rem;
         margin-bottom: 6px;
     }
-
-    /* Гармошка: видны только заголовки, списки раскрываются по нажатию.
-       Класс footer-acc ставит script.js — если он не отработал, подвал
-       остаётся обычным, со всеми ссылками на виду */
-    .footer-acc {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-
-    .footer-acc .footer-block:not(.footer-brand) {
-        border-top: 1px solid rgba(255, 255, 255, 0.07);
-        padding: 0;
-    }
-
-    /* Значки соцсетей упирались в первую линию гармошки — она шла прямо
-       по их нижнему краю */
-    .footer-acc .footer-brand {
-        padding-bottom: 18px;
-    }
-
-    .footer-acc .footer-block h4 {
-        position: relative;
-        margin: 0;
-        /* Строка была 45 пикселей — под палец хватает и 40 */
-        padding: 13px 26px 13px 0;
-        cursor: pointer;
-        user-select: none;
-        text-align: left;
-        /* Размер был как у ссылок, но жирность 700, заглавные и разрядка
-           делали заголовки тяжелее всего подвала */
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.03em;
-        color: var(--text-secondary);
-    }
-
-    /* Стрелка вниз, а у раскрытого раздела — вверх */
-    .footer-acc .footer-block h4::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        right: 6px;
-        width: 7px;
-        height: 7px;
-        margin-top: -5px;
-        border-right: 1.5px solid currentColor;
-        border-bottom: 1.5px solid currentColor;
-        transform: rotate(45deg);
-        transition: transform 0.2s ease;
-        opacity: 0.6;
-    }
-
-    .footer-acc .footer-block.открыт h4::after {
-        margin-top: -2px;
-        transform: rotate(-135deg);
-    }
-
-    .footer-acc .footer-block:not(.footer-brand) .footer-links,
-    .footer-acc .footer-block:not(.footer-brand) .footer-contacts {
-        display: none;
-    }
-
-    .footer-acc .footer-block.открыт .footer-links,
-    .footer-acc .footer-block.открыт .footer-contacts {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0 0 12px;
-        /* Выравнивание влево: по центру ссылки выглядели случайной кучкой,
-           а в подвале весь текст по центру — наследство широкого экрана */
-        text-align: left;
-    }
-
-    .footer-acc .footer-block.открыт .footer-links a,
-    .footer-acc .footer-block.открыт .footer-contacts a,
-    .footer-acc .footer-block.открыт .footer-contacts span {
-        text-align: left;
-    }
-
-    /* Цель нажатия 44 и ВНУТРИ раскрытого раздела.
-       Гармошка давала 44 заголовку, а ссылки внутри оставались 15 при шаге
-       26 и просвете 12 — расширить псевдоэлементом нельзя, области
-       наложились бы. Поэтому строка 44, а собственный зазор списка убран:
-       иначе шаг стал бы 50 и раскрытый раздел раздулся бы без нужды.
-       Раскрыт всегда один раздел, так что подвал целиком не растёт.
-       Адрес в контактах — не ссылка и 44 не получает: нажимать там нечего. */
-    .footer-acc .footer-block.открыт .footer-links,
-    .footer-acc .footer-block.открыт .footer-contacts {
-        gap: 0;
-    }
-
-    .footer-acc .footer-block.открыт .footer-links a,
-    .footer-acc .footer-block.открыт .footer-contacts a {
-        display: flex;
-        align-items: center;
-        min-height: 44px;
-    }
-
     .footer-links { gap: 2px; }
 
     .footer-links a,
@@ -9066,6 +8968,157 @@ input:-internal-autofill-previewed {
         padding-top: 78px;
         padding-bottom: 12px;
         min-height: 0;
+    }
+}
+
+/* ГАРМОШКА ПОДВАЛА — там, где палец, и там, где узко.
+   =====================================================
+   Условие двойное и читается как «или»: сенсорный экран ЛЮБОЙ ширины
+   либо узкое окно на компьютере.
+   Раньше эти правила лежали внутри @media (max-width: 768px), и это
+   оставляло дыру: телефон боком (844) и iPad Pro (1024) шире 768, но
+   тыкают в них пальцем. Там подвал разворачивался в колонки со всеми
+   списками — на 844 это 988 пикселей высоты при экране 390, почти два с
+   половиной экрана.
+   Скрипт js/script.js ставит класс footer-acc по такому же условию —
+   если поменять одно, надо менять и другое. */
+@media (pointer: coarse), (max-width: 768px) {
+    /* Гармошка: видны только заголовки, списки раскрываются по нажатию.
+       Класс footer-acc ставит script.js — если он не отработал, подвал
+       остаётся обычным, со всеми ссылками на виду */
+    .footer-acc {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .footer-acc .footer-block:not(.footer-brand) {
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        padding: 0;
+    }
+
+    /* Значки соцсетей упирались в первую линию гармошки — она шла прямо
+       по их нижнему краю */
+    .footer-acc .footer-brand {
+        padding-bottom: 18px;
+    }
+
+    .footer-acc .footer-block h4 {
+        position: relative;
+        margin: 0;
+        /* Строка была 45 пикселей — под палец хватает и 40 */
+        padding: 13px 26px 13px 0;
+        cursor: pointer;
+        user-select: none;
+        text-align: left;
+        /* Размер был как у ссылок, но жирность 700, заглавные и разрядка
+           делали заголовки тяжелее всего подвала */
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        color: var(--text-secondary);
+    }
+
+    /* Стрелка вниз, а у раскрытого раздела — вверх */
+    .footer-acc .footer-block h4::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 6px;
+        width: 7px;
+        height: 7px;
+        margin-top: -5px;
+        border-right: 1.5px solid currentColor;
+        border-bottom: 1.5px solid currentColor;
+        transform: rotate(45deg);
+        transition: transform 0.2s ease;
+        opacity: 0.6;
+    }
+
+    .footer-acc .footer-block.открыт h4::after {
+        margin-top: -2px;
+        transform: rotate(-135deg);
+    }
+
+    .footer-acc .footer-block:not(.footer-brand) .footer-links,
+    .footer-acc .footer-block:not(.footer-brand) .footer-contacts {
+        display: none;
+    }
+
+    .footer-acc .footer-block.открыт .footer-links,
+    .footer-acc .footer-block.открыт .footer-contacts {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 0 12px;
+        /* Выравнивание влево: по центру ссылки выглядели случайной кучкой,
+           а в подвале весь текст по центру — наследство широкого экрана */
+        text-align: left;
+    }
+
+    .footer-acc .footer-block.открыт .footer-links a,
+    .footer-acc .footer-block.открыт .footer-contacts a,
+    .footer-acc .footer-block.открыт .footer-contacts span {
+        text-align: left;
+    }
+
+    /* Цель нажатия 44 и ВНУТРИ раскрытого раздела.
+       Гармошка давала 44 заголовку, а ссылки внутри оставались 15 при шаге
+       26 и просвете 12 — расширить псевдоэлементом нельзя, области
+       наложились бы. Поэтому строка 44, а собственный зазор списка убран:
+       иначе шаг стал бы 50 и раскрытый раздел раздулся бы без нужды.
+       Раскрыт всегда один раздел, так что подвал целиком не растёт.
+       Адрес в контактах — не ссылка и 44 не получает: нажимать там нечего. */
+    .footer-acc .footer-block.открыт .footer-links,
+    .footer-acc .footer-block.открыт .footer-contacts {
+        gap: 0;
+    }
+
+    .footer-acc .footer-block.открыт .footer-links a,
+    .footer-acc .footer-block.открыт .footer-contacts a {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+    }
+}
+
+/* ЦЕЛИ НАЖАТИЯ ТАМ, ГДЕ ПАЛЕЦ, А НЕ ТАМ, ГДЕ УЗКО.
+   ================================================
+   Правила на 44 сначала жили только в @media (max-width: 768px), и это
+   была ошибка рассуждения: ширина окна ничего не говорит о том, чем по
+   экрану тыкают. Замерено на iPad Pro 1024×1366 — браузер отвечает
+   (pointer: coarse) ДА и (hover: none) ДА, то есть прямо сообщает, что
+   указатель грубый. А граница 768 записывала это устройство в компьютеры,
+   и подвал отдавал ему 14 ссылок высотой 15 и 18 при шаге 30, плюс три
+   ссылки в плашке по 17. Семнадцать целей размером в два миллиметра под
+   подушечку пальца в восемь.
+   Та же дыра у телефона в горизонтальном положении: iPhone 12 Pro боком —
+   844 пикселя, тоже шире 768.
+   Поэтому спрашиваем устройство, а не считаем пиксели. На компьютере с
+   мышью (pointer: fine) не меняется ничего.
+   Правила на 768 ОСТАВЛЕНЫ намеренно: узкое окно на компьютере даёт
+   pointer: fine, а автотесты гоняют именно такое окно — убрав ширину, мы
+   потеряли бы проверку. */
+@media (pointer: coarse) {
+    .footer-bottom-links a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+    }
+
+    /* Списки колонок: строка 44 и без собственного зазора, иначе шаг стал
+       бы 50 и подвал раздулся бы сверх нужного. Адрес в контактах — не
+       ссылка и 44 не получает, нажимать там нечего. */
+    .footer-links,
+    .footer-contacts {
+        gap: 0;
+    }
+
+    .footer-links a,
+    .footer-contacts a {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
     }
 }
 

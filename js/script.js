@@ -588,6 +588,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // границ и полоса в два пикселя, где не сработает ни одно правило.
         // Выбор между 768 и 767.98 для всего проекта — работа шага 6.
         var УЗКО = 768;
+
+        // Гармошка нужна там, где палец, а не там, где узко.
+        //
+        // Одной ширины мало: телефон боком — 844, iPad Pro стоймя — 1024,
+        // оба шире 768, и оба сенсорные. Замерено на 844: подвал в колонках
+        // со всеми списками занимал 988 пикселей при высоте экрана 390 —
+        // почти два с половиной экрана.
+        // Браузер сам говорит, чем по нему тыкают: на iPad Pro
+        // (pointer: coarse) отвечает ДА, а (hover: none) — тоже ДА.
+        // Ширину оставляем вторым условием: узкое окно на компьютере даёт
+        // pointer: fine, но колонки в него всё равно не помещаются.
+        // ТО ЖЕ САМОЕ УСЛОВИЕ стоит в css/style.css у блока .footer-acc.
+        // Меняешь здесь — меняй и там, иначе класс встанет без оформления.
+        function складывать() {
+            return (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+                || window.innerWidth <= УЗКО;
+        }
         var разделы = [].slice.call(подвал.querySelectorAll('.footer-block'))
             .filter(function(б) { return !б.classList.contains('footer-brand') && б.querySelector('h4'); });
         if (!разделы.length) return;
@@ -599,7 +616,7 @@ document.addEventListener('DOMContentLoaded', function() {
             заголовок.setAttribute('aria-expanded', 'false');
 
             function переключить() {
-                if (window.innerWidth > УЗКО) return;
+                if (!складывать()) return;
                 var открыт = раздел.classList.toggle('открыт');
                 заголовок.setAttribute('aria-expanded', открыт ? 'true' : 'false');
             }
@@ -613,7 +630,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Класс ставит скрипт, а не разметка: без него списки видны всегда,
         // и подвал не превратится в четыре мёртвых заголовка
         function пересобрать() {
-            var узко = window.innerWidth <= УЗКО;
+            var узко = складывать();
             подвал.classList.toggle('footer-acc', узко);
             if (узко) return;
             разделы.forEach(function(раздел) {
