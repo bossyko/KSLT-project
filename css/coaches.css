@@ -78,7 +78,7 @@
    разделами. Раскладку внутри задаёт .trn-filters-inner из style.css */
 #coachesFilters {
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 90;
     background: var(--bg-primary);
     padding: 14px 0;
@@ -578,7 +578,7 @@
     gap: 8px;
     margin-bottom: 32px;
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 10;
     background: var(--bg-primary);
     padding: 12px 0;

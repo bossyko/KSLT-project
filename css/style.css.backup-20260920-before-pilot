@@ -87,9 +87,7 @@ input, button, select, textarea {
 @media (max-width: 768px) {
     .floating-header.header-hybrid {
         background: rgba(5, 5, 5, 0.92);
-        /* Линия видимая и нужная, но нарисована тенью внутрь, а не рамкой:
-           рамка входит в высоту и делала шапку 57 вместо 56 и 65 вместо 64. */
-        box-shadow: inset 0 -1px 0 rgba(204, 255, 0, 0.22);
+        border-bottom: 1px solid rgba(204, 255, 0, 0.22);
     }
 }
 
@@ -128,11 +126,7 @@ input, button, select, textarea {
     background: transparent;
     backdrop-filter: blur(0px);
     -webkit-backdrop-filter: blur(0px);
-    /* Рамки здесь нет намеренно. Раньше стояло
-     border-bottom: 1px solid transparent — невидимая, но входящая в высоту:
-     шапка 64 отрисовывалась как 65, и ВСЕ липкие панели на top: 64 уходили
-     под неё на пиксель (h80, замерено 21.09). Линию под шапкой рисует
-     ::after — он не влияет на высоту. */
+    border-bottom: 1px solid transparent;
     transition: all var(--transition-base);
 
     padding: 0 var(--pad-x);
@@ -142,9 +136,7 @@ input, button, select, textarea {
     background: rgba(0, 0, 0, 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    /* Рамки нет по той же причине, что выше: она добавляла пиксель к высоте
-       при прокрутке, и шапка прыгала 64 -> 65. Линию рисует ::after, при
-       прокрутке он же становится ярче. */
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 nav {
@@ -153,7 +145,7 @@ nav {
     align-items: center;
     max-width: var(--container-max);
     margin: 0 auto;
-    height: var(--header-h);
+    height: 64px;
 }
 
 /* Равномерное распределение: лого | меню | правая часть */
@@ -323,10 +315,10 @@ nav {
     gap: 0.4rem;
     color: var(--text-secondary);
     text-decoration: none;
-    padding: 10px 16px;
+    padding: 0.6rem 1rem;
     border-radius: var(--radius-full);
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.9rem;
+    font-weight: 450;
     transition: all var(--transition-fast);
     position: relative;
 }
@@ -3966,7 +3958,7 @@ h2 {
    как в «Новостях» и «Рейтинге», активный — лаймовый. */
 .trn-filters {
     position: sticky;
-    top: var(--header-h);
+    top: 64px;
     z-index: 30;
     background: var(--bg-primary);
     padding: 14px 0;
@@ -5576,8 +5568,8 @@ h2 {
 }
 
 .footer-desc {
-    color: var(--text-secondary);
-    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
     line-height: 1.5;
     margin-bottom: var(--space-md);
 }
@@ -5585,7 +5577,7 @@ h2 {
 /* Social Links */
 .footer-socials {
     display: flex;
-    gap: 12px;
+    gap: 8px;
 }
 
 .social-link {
@@ -5597,20 +5589,8 @@ h2 {
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    color: var(--text-secondary);
+    color: var(--text-dim);
     transition: all var(--transition-fast);
-    position: relative;
-}
-
-/* Область нажатия 44x44 при коробке 32x32 — минимум касания.
-   Псевдоэлементом, а не padding: padding увеличил бы саму коробку и
-   сдвинул соседей. Отсчёт идёт от внутренней коробки 30x30 (рамка 1px),
-   поэтому -7, а не -6: 30 + 7 + 7 = 44. Промежуток 12 не даёт
-   областям соседних иконок пересечься. */
-.social-link::after {
-    content: "";
-    position: absolute;
-    inset: -7px;
 }
 
 .social-link svg {
@@ -5643,9 +5623,9 @@ h2 {
 }
 
 .footer-links a {
-    color: var(--text-secondary);
+    color: var(--text-dim);
     text-decoration: none;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     transition: color var(--transition-fast);
 }
 
@@ -5665,8 +5645,8 @@ h2 {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--text-secondary);
-    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
 }
 
 .footer-contacts svg {
@@ -5677,7 +5657,7 @@ h2 {
 }
 
 .footer-contacts a {
-    color: var(--text-secondary);
+    color: var(--text-dim);
     text-decoration: none;
     transition: color var(--transition-fast);
 }
@@ -5736,13 +5716,7 @@ h2 {
     }
 }
 
-/* Тот же перенос, h274. Здесь лежит центрирование блока бренда и
-   соцсетей. Оно относится к мобильной раскладке подвала, а стояло на
-   одной ширине — поэтому на iPad горизонтально (1024) текст вставал по
-   центру, а соцсети оставались у левого края. Замерено: знак и иконки
-   на x 22.5 при выравнивании center у всего остального.
-   Условие ТО ЖЕ, что у .footer-acc и у складывать() в js/script.js. */
-@media (pointer: coarse), (max-width: 992px) {
+@media (max-width: 992px) {
     .footer-content {
         grid-template-columns: 1fr 1fr;
         gap: var(--space-lg);
@@ -5767,10 +5741,7 @@ h2 {
     }
 }
 
-/* Тот же перенос, h274: шесть правил выравнивания подвала.
-   Условие ТО ЖЕ, что у блока .footer-acc и у складывать() в
-   js/script.js. Меняешь здесь — меняй во всех трёх местах. */
-@media (pointer: coarse), (max-width: 768px) {
+@media (max-width: 768px) {
     .footer-content {
         grid-template-columns: 1fr;
         text-align: center;
@@ -5872,12 +5843,12 @@ h2 {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 16px;
+    padding: 14px 16px;
     color: var(--text-secondary);
     text-decoration: none;
     border-radius: var(--radius-md);
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 450;
     transition: all var(--transition-fast);
 }
 
@@ -5941,12 +5912,12 @@ h2 {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 12px 16px;
+    padding: 14px 16px;
     color: var(--text-secondary);
     text-decoration: none;
     border-radius: var(--radius-md);
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 450;
     transition: all var(--transition-fast);
     cursor: pointer;
 }
@@ -6064,7 +6035,7 @@ h2 {
 
 .sticky-back-bar {
     position: fixed;
-    top: var(--header-h);
+    top: 64px;
     left: 0;
     right: 0;
     z-index: 999;
@@ -6125,7 +6096,8 @@ h2 {
     }
 
     .nav-item {
-        padding: 8px 12px;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8125rem;
     }
 
     .sponsor-badge {
@@ -6169,12 +6141,7 @@ h2 {
     }
 
     .sticky-back-bar {
-        /* ОСТОРОЖНО, ЗДЕСЬ УЖЕ ОШИБАЛИСЬ. Тут стояло top: 56px — это была
-           единственная во всём проекте попытка учесть вторую высоту шапки,
-           и она была неверной: шапка становилась 56 только ниже 375, а это
-           правило действовало до 768. Замерено 21.09: на 768 панель липла
-           на 56 при шапке 65. Теперь высоту даёт токен из базового правила,
-           и она верна на любой ширине — отдельная строка тут не нужна. */
+        top: 56px;
         padding: 8px 16px;
     }
 
@@ -6658,7 +6625,7 @@ h2 {
    растягивает подложка */
 .kslt-back-wrap {
     position: sticky;
-    top: var(--header-h);
+    top: 64px;
     z-index: 10;
     max-width: var(--container-max);
     margin: 0 auto;
@@ -7523,9 +7490,9 @@ h2 {
         padding: 0 var(--pad-x);
     }
 
-    /* nav { height: 56px } убран: вторую высоту теперь задаёт токен
-       --header-h в tokens.css, и её видят все двадцать с лишним мест,
-       которые от шапки отсчитываются. Правило здесь видел только сам nav. */
+    nav {
+        height: 56px;
+    }
 
     .logo-text {
         font-size: 1.1rem;
@@ -7576,7 +7543,8 @@ h2 {
     }
 
     .mobile-nav-links a {
-        padding: 12px 16px;
+        padding: 12px 14px;
+        font-size: 0.92rem;
     }
 
     .mobile-dropdown-menu li a {
@@ -7837,53 +7805,15 @@ input:-internal-autofill-previewed {
 /* Нижняя строка футера: копирайт, документы и подпись — одним ростом.
    Раньше у ссылок не было ни одного правила, они наследовали цвет и размер
    обычной ссылки и выбивались из строки. */
-/* Ссылки правовых документов обёрнуты в <nav> ради ориентира для читалки.
-   Ловушка: в проекте есть голый селектор `nav` — он написан для шапки и
-   задаёт height 64px, display flex и gap. Новая навигация подвала под него
-   попала и выросла с 44 до 64, а плашка с 118 до 139. Поэтому свой класс и
-   явные свойства, а не надежда на то, что чужое правило не помешает.
-   Имя .footer-legal уже занято другим блоком, отсюда -nav. */
-.footer-legal-nav {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: auto;
-    gap: 0;
-}
-
 .footer-bottom-links {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 6px 0;
-    list-style: none;
 }
 
-.footer-bottom-links li { display: flex; }
-
-/* ОСОЗНАННЫЙ ДУБЛЬ, не чинить и не схлопывать.
-   У двух русских ссылок подпись стоит дважды — полная и короткая. Это
-   решение Кости от 19.09, а не забытая копипаста.
-   Замер: на 390 внутри плашки доступно 358, полные русские названия
-   занимают 457 — не влезают, переносятся во второй ряд, и цель нажатия
-   падает до 17px вместо 44. Короткие дают 333 в один ряд.
-   На десктопе места хватает (110 + 164 + 209 в строку), и терять точное
-   имя документа там незачем.
-   Кыргызский и английский дубля НЕ имеют: их полные названия влезают и
-   на 390 — 324 и 241. Если появится четвёртый язык, проверить его
-   замером, а не на глаз.
-
-   ГРАНИЦА ПЕРЕКЛЮЧЕНИЯ — 600, а не 768. Сначала она была привязана к 768
-   заодно с раскладкой, и на планшете показывались короткие названия при
-   736 доступных — места хватало с запасом 279. Причина сокращать другая:
-   полные занимают 457, и не влезают они только на узком экране. Считано:
-   600 даёт 568 доступных и запас 111; 500 даёт запас 11 — по нашему же
-   правилу это не запас; 480 не влезает вовсе, а на 481 появилась бы
-   сломанная полоса до ~500. */
-.footer-legal-short { display: none; }
-
 .footer-bottom-links a {
-    color: var(--text-secondary);
+    color: var(--text-dim);
     font-size: 0.75rem;
     line-height: 1.4;
     transition: color var(--transition-base);
@@ -7891,23 +7821,14 @@ input:-internal-autofill-previewed {
 
 .footer-bottom-links a:hover { color: var(--accent); }
 
-/* Свой стиль фокуса, как у .mobile-nav-links и .trn-chip: до этого у ссылок
-   подвала работало только умолчание браузера, и они выпадали из системы */
-.footer-bottom-links a:focus { outline: none; }
-.footer-bottom-links a:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    border-radius: 4px;
-}
-
 /* Разделяем точкой, а не пробелом: так строка читается как одна */
-.footer-bottom-links li + li a::before {
+.footer-bottom-links a + a::before {
     content: '·';
     margin: 0 10px;
     color: var(--border-light);
 }
 
-.footer-bottom p { color: var(--text-secondary); font-size: 0.75rem; }
+.footer-bottom p { color: var(--text-dim); font-size: 0.75rem; }
 
 /* ========================================
    ПРИГЛАШЕНИЕ СПОНСОРАМ НА ГЛАВНОЙ
@@ -8755,6 +8676,148 @@ input:-internal-autofill-previewed {
         text-align: center;
     }
 
+    /* Футер шёл сплошной колонкой на 1116 пикселей: пять блоков подряд с
+       промежутком в 40. Ставим разделы по два в ряд — «Навигация» рядом с
+       «Игрокам», «Спонсорам» рядом с «Контактами», — а шапку с логотипом
+       оставляем во всю ширину */
+    .footer-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 14px;
+    }
+
+    .footer-brand {
+        grid-column: 1 / -1;
+    }
+
+    /* «Контакты» — последний блок, и с широкого экрана ему досталось
+       растягивание во всю ширину: он вставал один под «Спонсорами»
+       вместо того, чтобы встать рядом */
+    .footer-block:last-child {
+        grid-column: auto;
+        margin-top: 0;
+    }
+
+    .footer-block h4 {
+        font-size: 0.78rem;
+        margin-bottom: 6px;
+    }
+
+    /* Гармошка: видны только заголовки, списки раскрываются по нажатию.
+       Класс footer-acc ставит script.js — если он не отработал, подвал
+       остаётся обычным, со всеми ссылками на виду */
+    .footer-acc {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .footer-acc .footer-block:not(.footer-brand) {
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        padding: 0;
+    }
+
+    /* Значки соцсетей упирались в первую линию гармошки — она шла прямо
+       по их нижнему краю */
+    .footer-acc .footer-brand {
+        padding-bottom: 18px;
+    }
+
+    .footer-acc .footer-block h4 {
+        position: relative;
+        margin: 0;
+        /* Строка была 45 пикселей — под палец хватает и 40 */
+        padding: 11px 26px 11px 0;
+        cursor: pointer;
+        user-select: none;
+        text-align: left;
+        /* Размер был как у ссылок, но жирность 700, заглавные и разрядка
+           делали заголовки тяжелее всего подвала */
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        color: var(--text-secondary);
+    }
+
+    /* Стрелка вниз, а у раскрытого раздела — вверх */
+    .footer-acc .footer-block h4::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 6px;
+        width: 7px;
+        height: 7px;
+        margin-top: -5px;
+        border-right: 1.5px solid currentColor;
+        border-bottom: 1.5px solid currentColor;
+        transform: rotate(45deg);
+        transition: transform 0.2s ease;
+        opacity: 0.6;
+    }
+
+    .footer-acc .footer-block.открыт h4::after {
+        margin-top: -2px;
+        transform: rotate(-135deg);
+    }
+
+    .footer-acc .footer-block:not(.footer-brand) .footer-links,
+    .footer-acc .footer-block:not(.footer-brand) .footer-contacts {
+        display: none;
+    }
+
+    .footer-acc .footer-block.открыт .footer-links,
+    .footer-acc .footer-block.открыт .footer-contacts {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 0 12px;
+        /* Выравнивание влево: по центру ссылки выглядели случайной кучкой,
+           а в подвале весь текст по центру — наследство широкого экрана */
+        text-align: left;
+    }
+
+    .footer-acc .footer-block.открыт .footer-links a,
+    .footer-acc .footer-block.открыт .footer-contacts a,
+    .footer-acc .footer-block.открыт .footer-contacts span {
+        text-align: left;
+    }
+
+    .footer-links { gap: 2px; }
+
+    .footer-links a,
+    .footer-contacts a,
+    .footer-contacts span {
+        font-size: 0.76rem;
+        line-height: 1.5;
+    }
+
+    .footer-desc { font-size: 0.74rem; line-height: 1.4; }
+
+    /* Нижняя полоса: три строки по центру превращались в 157 пикселей */
+    .footer-bottom {
+        gap: 6px;
+        padding: 12px 0 14px;
+        font-size: 0.7rem;
+    }
+
+    /* Оферта, условия и политика шли от левого края и упирались в него:
+       строка не была выровнена и не знала про поля экрана */
+    .footer-bottom-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 4px 10px;
+        padding: 0 16px;
+        font-size: 0.7rem;
+        text-align: center;
+    }
+
+    /* Точки между ссылками ставятся через ::before. При переносе строки они
+       оставались висеть у края — на трёх ссылках подряд это выглядело как
+       мусор. На телефоне строки и так разделены промежутком */
+    .footer-bottom-links a + a::before {
+        content: none;
+    }
+
     /* Спонсоры лежали «облаком»: логотипы разной ширины — от 44 до 140
        пикселей — вставали по два-три в ряд, и блок шёл лесенкой на четыре
        ряда. Ставим сетку по четыре, ячейки одного размера, картинка внутри
@@ -8917,256 +8980,6 @@ input:-internal-autofill-previewed {
     }
 }
 
-/* Оформление подвала под палец — вынесено сюда из блока на 768.
-   Находка h274. Гармошка переехала на (pointer: coarse) 20.09, а её
-   оформление осталось на ширине — и на планшете выходил гибрид:
-   структура мобильная, вид десктопный.
-   Замерено под пальцем ДО правки, на 1024 и на 844: выравнивание было
-   start вместо center, перед «Контактами» висели лишние 24px
-   (блоки шли 45 · 45 · 45 · 69), нижняя плашка стояла в строку
-   с полями 24/22.5 вместо 12/0/14.
-   Условие ТО ЖЕ, что у блока .footer-acc и у складывать() в
-   js/script.js. Меняешь здесь — меняй во всех трёх местах. */
-@media (pointer: coarse), (max-width: 768px) {
-
-    /* Футер шёл сплошной колонкой на 1116 пикселей: пять блоков подряд с
-       промежутком в 40. Ставим разделы по два в ряд — «Навигация» рядом с
-       «Игрокам», «Спонсорам» рядом с «Контактами», — а шапку с логотипом
-       оставляем во всю ширину */
-    .footer-content {
-        grid-template-columns: 1fr 1fr;
-        gap: 18px 14px;
-    }
-
-    .footer-brand {
-        grid-column: 1 / -1;
-    }
-
-    /* «Контакты» — последний блок, и с широкого экрана ему досталось
-       растягивание во всю ширину: он вставал один под «Спонсорами»
-       вместо того, чтобы встать рядом */
-    .footer-block:last-child {
-        grid-column: auto;
-        margin-top: 0;
-    }
-
-    .footer-block h4 {
-        font-size: 0.78rem;
-        margin-bottom: 6px;
-    }
-    .footer-links { gap: 2px; }
-
-    .footer-links a,
-    .footer-contacts a,
-    .footer-contacts span {
-        line-height: 1.5;
-    }
-
-    .footer-desc { line-height: 1.4; }
-
-    /* Нижняя полоса: три строки по центру превращались в 157 пикселей */
-    .footer-bottom {
-        gap: 6px;
-        padding: 12px 0 14px;
-    }
-
-    /* Оферта, условия и политика шли от левого края и упирались в него:
-       строка не была выровнена и не знала про поля экрана */
-    .footer-bottom-links {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-        gap: 4px 10px;
-        padding: 0 16px;
-        text-align: center;
-    }
-
-    /* Цель нажатия 44px. Ссылка была высотой 17 — зона попадания 8px вверх
-       и 8 вниз, промах уводил либо в пустоту, либо в соседний документ.
-       Псевдоэлементом расширить было нельзя: два ряда стояли в 4px друг от
-       друга и области наложились бы на 23px. Поэтому строка, а не подкладка.
-       Поля внутри ссылки 0 — иначе ряд не влезает в 358: русские названия
-       сокращены до «Оферта · Условия использования · Конфиденциальность»
-       = 45 + 141 + 127 + два зазора по 10 = 333. Запас 25 держим запасом.
-       flex-wrap оставлен: если перевод вырастет, ряд свалится во второй
-       ряд высотой 44, а не обратно в нынешнюю поломку. */
-    .footer-bottom-links a {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 44px;
-    }
-
-    /* Точки между ссылками ставятся через ::before. При переносе строки они
-       оставались висеть у края — на трёх ссылках подряд это выглядело как
-       мусор. На телефоне строки и так разделены промежутком */
-    .footer-bottom-links li + li a::before {
-        content: none;
-    }
-}
-
-
-/* ГАРМОШКА ПОДВАЛА — там, где палец, и там, где узко.
-   =====================================================
-   Условие двойное и читается как «или»: сенсорный экран ЛЮБОЙ ширины
-   либо узкое окно на компьютере.
-   Раньше эти правила лежали внутри @media (max-width: 768px), и это
-   оставляло дыру: телефон боком (844) и iPad Pro (1024) шире 768, но
-   тыкают в них пальцем. Там подвал разворачивался в колонки со всеми
-   списками — на 844 это 988 пикселей высоты при экране 390, почти два с
-   половиной экрана.
-   Скрипт js/script.js ставит класс footer-acc по такому же условию —
-   если поменять одно, надо менять и другое. */
-@media (pointer: coarse), (max-width: 768px) {
-    /* Гармошка: видны только заголовки, списки раскрываются по нажатию.
-       Класс footer-acc ставит script.js — если он не отработал, подвал
-       остаётся обычным, со всеми ссылками на виду */
-    .footer-acc {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-
-    .footer-acc .footer-block:not(.footer-brand) {
-        border-top: 1px solid rgba(255, 255, 255, 0.07);
-        padding: 0;
-    }
-
-    /* Значки соцсетей упирались в первую линию гармошки — она шла прямо
-       по их нижнему краю */
-    .footer-acc .footer-brand {
-        padding-bottom: 18px;
-    }
-
-    .footer-acc .footer-block h4 {
-        position: relative;
-        margin: 0;
-        /* Строка была 45 пикселей — под палец хватает и 40 */
-        padding: 13px 26px 13px 0;
-        cursor: pointer;
-        user-select: none;
-        text-align: left;
-        /* Размер был как у ссылок, но жирность 700, заглавные и разрядка
-           делали заголовки тяжелее всего подвала */
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.03em;
-        color: var(--text-secondary);
-    }
-
-    /* Стрелка вниз, а у раскрытого раздела — вверх */
-    .footer-acc .footer-block h4::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        right: 6px;
-        width: 7px;
-        height: 7px;
-        margin-top: -5px;
-        border-right: 1.5px solid currentColor;
-        border-bottom: 1.5px solid currentColor;
-        transform: rotate(45deg);
-        transition: transform 0.2s ease;
-        opacity: 0.6;
-    }
-
-    .footer-acc .footer-block.открыт h4::after {
-        margin-top: -2px;
-        transform: rotate(-135deg);
-    }
-
-    .footer-acc .footer-block:not(.footer-brand) .footer-links,
-    .footer-acc .footer-block:not(.footer-brand) .footer-contacts {
-        display: none;
-    }
-
-    .footer-acc .footer-block.открыт .footer-links,
-    .footer-acc .footer-block.открыт .footer-contacts {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0 0 12px;
-        /* Выравнивание влево: по центру ссылки выглядели случайной кучкой,
-           а в подвале весь текст по центру — наследство широкого экрана */
-        text-align: left;
-    }
-
-    .footer-acc .footer-block.открыт .footer-links a,
-    .footer-acc .footer-block.открыт .footer-contacts a,
-    .footer-acc .footer-block.открыт .footer-contacts span {
-        text-align: left;
-    }
-
-    /* Цель нажатия 44 и ВНУТРИ раскрытого раздела.
-       Гармошка давала 44 заголовку, а ссылки внутри оставались 15 при шаге
-       26 и просвете 12 — расширить псевдоэлементом нельзя, области
-       наложились бы. Поэтому строка 44, а собственный зазор списка убран:
-       иначе шаг стал бы 50 и раскрытый раздел раздулся бы без нужды.
-       Раскрыт всегда один раздел, так что подвал целиком не растёт.
-       Адрес в контактах — не ссылка и 44 не получает: нажимать там нечего. */
-    .footer-acc .footer-block.открыт .footer-links,
-    .footer-acc .footer-block.открыт .footer-contacts {
-        gap: 0;
-    }
-
-    .footer-acc .footer-block.открыт .footer-links a,
-    .footer-acc .footer-block.открыт .footer-contacts a {
-        display: flex;
-        align-items: center;
-        min-height: 44px;
-    }
-}
-
-/* ЦЕЛИ НАЖАТИЯ ТАМ, ГДЕ ПАЛЕЦ, А НЕ ТАМ, ГДЕ УЗКО.
-   ================================================
-   Правила на 44 сначала жили только в @media (max-width: 768px), и это
-   была ошибка рассуждения: ширина окна ничего не говорит о том, чем по
-   экрану тыкают. Замерено на iPad Pro 1024×1366 — браузер отвечает
-   (pointer: coarse) ДА и (hover: none) ДА, то есть прямо сообщает, что
-   указатель грубый. А граница 768 записывала это устройство в компьютеры,
-   и подвал отдавал ему 14 ссылок высотой 15 и 18 при шаге 30, плюс три
-   ссылки в плашке по 17. Семнадцать целей размером в два миллиметра под
-   подушечку пальца в восемь.
-   Та же дыра у телефона в горизонтальном положении: iPhone 12 Pro боком —
-   844 пикселя, тоже шире 768.
-   Поэтому спрашиваем устройство, а не считаем пиксели. На компьютере с
-   мышью (pointer: fine) не меняется ничего.
-   Правила на 768 ОСТАВЛЕНЫ намеренно: узкое окно на компьютере даёт
-   pointer: fine, а автотесты гоняют именно такое окно — убрав ширину, мы
-   потеряли бы проверку. */
-@media (pointer: coarse) {
-    .footer-bottom-links a {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 44px;
-    }
-
-    /* Списки колонок: строка 44 и без собственного зазора, иначе шаг стал
-       бы 50 и подвал раздулся бы сверх нужного. Адрес в контактах — не
-       ссылка и 44 не получает, нажимать там нечего. */
-    .footer-links,
-    .footer-contacts {
-        gap: 0;
-    }
-
-    .footer-links a,
-    .footer-contacts a {
-        display: flex;
-        align-items: center;
-        min-height: 44px;
-    }
-}
-
-/* Короткие подписи — только на узком экране. Полные 457 не влезают в
-   доступные (ширина − 32) примерно до 489, поэтому граница 600 с запасом
-   111. Подробности и расчёт — у .footer-legal-short выше. */
-@media (max-width: 600px) {
-    .footer-legal-full { display: none; }
-    .footer-legal-short { display: inline; }
-}
-
-
 
 /* ============================================================
    Полосы прокрутки — один вид на всём сайте
@@ -9249,7 +9062,8 @@ input:-internal-autofill-previewed {
     }
 
     .mobile-nav-links a {
-        padding: 12px 16px;
+        padding: 12px 14px;
+        font-size: 0.95rem;
     }
 
     .mobile-dropdown-menu li a {

@@ -42,6 +42,9 @@ const СТРАНИЦЫ = [
     { key: 'news',        path: '/pages/news.html' },
     { key: 'info',        path: '/pages/info.html' },
     { key: 'pricing',     path: '/pages/pricing.html' },
+    // Страница турнира — ради .td-tabs-bar и .td-section-header: там
+    // осталось составное число 120, и без замера его не пересчитать.
+    { key: 'tournament',  path: '/pages/tournament.html' },
 ];
 
 /** Кабинет и админка — за входом, сессии готовит tests/auth-setup.js. */

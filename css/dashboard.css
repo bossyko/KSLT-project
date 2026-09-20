@@ -15,7 +15,7 @@ body.db-page.auth-ready {
 /* ---- Layout ---- */
 .db-layout {
     min-height: 100vh;
-    padding-top: 64px;
+    padding-top: var(--header-h);
 }
 
 /* ---- Header: using site header (floating-header header-hybrid) ---- */
@@ -23,10 +23,10 @@ body.db-page.auth-ready {
 /* ---- Sidebar ---- */
 .db-sidebar {
     position: fixed;
-    top: 64px;
+    top: var(--header-h);
     left: 0;
     width: 260px;
-    height: calc(100vh - 64px);
+    height: calc(100vh - var(--header-h));
     background: var(--bg-secondary);
     border-right: 1px solid var(--border-subtle);
     display: flex;
@@ -1593,7 +1593,7 @@ select.db-field-input {
         border-bottom: 1px solid var(--border-subtle);
         background: var(--bg-secondary);
         position: fixed;
-        top: 64px;
+        top: var(--header-h);
         left: 0;
         right: 0;
         z-index: 998;

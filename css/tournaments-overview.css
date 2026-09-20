@@ -105,7 +105,7 @@
 /* Search — sticky bar */
 .to-search-wrap {
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 30;
     display: flex;
     justify-content: center;

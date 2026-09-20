@@ -19,16 +19,16 @@ body.ad-page {
 /* ---- Layout ---- */
 .ad-layout {
     min-height: 100vh;
-    padding-top: 64px;
+    padding-top: var(--header-h);
 }
 
 /* ---- Sidebar ---- */
 .ad-sidebar {
     position: fixed;
-    top: 64px;
+    top: var(--header-h);
     left: 0;
     width: 260px;
-    height: calc(100vh - 64px);
+    height: calc(100vh - var(--header-h));
     background: var(--bg-secondary);
     border-right: 1px solid var(--border-subtle);
     display: flex;
@@ -1883,7 +1883,7 @@ select.ad-field-input {
     .ad-mobile-tabs {
         display: flex;
         position: fixed;
-        top: 64px;
+        top: var(--header-h);
         left: 0;
         right: 0;
         z-index: 999;
@@ -1924,7 +1924,14 @@ select.ad-field-input {
     }
 
     .ad-filter-sticky {
-        top: 120px; /* header 64px + mobile tabs ~56px */
+        /* ОСТОРОЖНО: составное число. Шапка плюс полоса вкладок админки.
+           Было 120 с комментарием «64 + ~56». Замерено 21.09: вкладки
+           #adMobileTabs занимают 58, а не 56, — то есть панель липла на два
+           пикселя выше, чем надо. Токен --tab-height в tokens.css говорит 64
+           и не зовётся НИОТКУДА — он мёртвый и вдобавок неверный.
+           58 остаётся числом сознательно: это замер, а не значение со шкалы.
+           Поставить его на шкалу — работа шага «админка», не этого. */
+        top: calc(var(--header-h) + 58px);
     }
 
     .ad-stats-grid {
@@ -1984,6 +1991,11 @@ select.ad-field-input {
 @media (max-width: 480px) {
     .ad-content {
         padding: 12px;
+        /* ОСТОРОЖНО: это НЕ про шапку, хотя похоже. Шапку уже отбивает
+           .ad-layout через var(--header-h). Эти 72 отбивают полосу вкладок
+           (замер 58) плюс воздух. Число осталось числом, потому что у полосы
+           вкладок пока нет своего токена, — заводить его будем на шаге
+           «админка». Не заменять на var(--header-h): оно тут ни при чём. */
         padding-top: 72px;
     }
 
@@ -2516,7 +2528,7 @@ select.ad-field-input {
 /* ---- Tournament Form: Sticky Header (title + tabs) ---- */
 .ad-trn-sticky-header {
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 40;
     background: var(--bg-primary);
     padding: 8px 0 4px;
@@ -3505,7 +3517,7 @@ select.ad-field-input {
 /* Sticky filter row for courts */
 .ad-filter-sticky {
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 20;
     background: var(--bg-primary);
     padding-top: 12px;

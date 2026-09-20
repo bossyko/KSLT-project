@@ -78,7 +78,7 @@
     padding: 14px 24px;
     margin-bottom: 0;
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 90;
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border-subtle);
@@ -536,7 +536,7 @@
     gap: 8px;
     margin-bottom: 32px;
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 10;
     background: var(--bg-primary);
     padding: 12px 0;

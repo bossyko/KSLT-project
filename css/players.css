@@ -444,7 +444,7 @@
 .pl-filters-section {
     padding: 12px var(--pad-x) var(--space-md);
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 30;
     background: var(--bg-primary);
 }
@@ -1240,7 +1240,7 @@
 
 .pl-filters-section.pl-cat-mode {
     padding: 10px var(--pad-x);
-    top: 64px;
+    top: var(--header-h);
 }
 
 .pl-filters-section.pl-cat-mode.stuck {

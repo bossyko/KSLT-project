@@ -2145,7 +2145,7 @@ a.pp-tournament:hover {
 @media (max-width: 768px) {
     .kslt-back-wrap.pp-back-float {
         position: sticky;
-        top: 64px;
+        top: var(--header-h);
         z-index: 40;
         padding: 10px 16px;
         background: var(--bg-primary);

@@ -260,7 +260,7 @@
    ни со ссылкой «назад» слева от них */
 .td-tabs-bar {
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 50;
     background: var(--bg-primary, #0a0a0a);
     border-bottom: 1px solid var(--border-subtle);
@@ -358,7 +358,17 @@
     background: var(--bg-primary, #0a0a0a);
     padding: var(--space-md) var(--pad-x) var(--space-sm);
     border-bottom: 1px solid var(--border-subtle);
-    scroll-margin-top: 120px;
+    /* Куда прокручивать, когда прыгаем по ссылке на раздел: под шапкой ещё
+       липнет полоса вкладок .td-tabs-bar, и заголовок должен встать под ней.
+       Было 120 одним числом. Сегодня выходит ровно столько же (64 + 56), но
+       теперь видно, из чего оно состоит, и первая половина поедет вместе с
+       шапкой сама.
+       ОСТОРОЖНО: 56 — НЕ ЗАМЕР. У .td-tabs-bar height: auto, её высота
+       зависит от содержимого, а на странице без турнира полоса не рисуется
+       вовсе — прибор 21.09 её не увидел ни на одной из пяти ширин. Пока это
+       число не подтверждено замером на странице с данными, доверять ему
+       нельзя. Задача заведена. */
+    scroll-margin-top: calc(var(--header-h) + 56px);
 }
 
 .td-section-header h2 {

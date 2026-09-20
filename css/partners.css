@@ -81,7 +81,7 @@
     align-items: center;
     gap: 18px;
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 90;
     background: var(--bg-primary);
     padding: 14px 24px;
