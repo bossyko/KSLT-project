@@ -73,5 +73,6 @@ CLAUDE.md
 # нужны только для сравнения «до/после» на своей машине. Метка прогона
 # внутри них и так делает их одноразовыми.
 tests/reports/header-snapshot/
+tests/reports/header-taps/
 tests/reports/header-snapshot-before/
 tests/reports/.run-id
