@@ -611,9 +611,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         разделы.forEach(function(раздел) {
             var заголовок = раздел.querySelector('h4');
-            заголовок.setAttribute('role', 'button');
-            заголовок.setAttribute('tabindex', '0');
-            заголовок.setAttribute('aria-expanded', 'false');
+            // role и tabindex НЕ ставятся здесь.
+            // Они появляются в пересобрать() и только там, где гармошка
+            // действительно работает. На десктопе списки видны, нажатие на
+            // заголовок ничего не делает, и читалка объявила бы «кнопка,
+            // свёрнуто» при раскрытом содержимом — WCAG 4.1.2, плюс четыре
+            // мёртвые остановки Tab. Находка h271, дефект был мой.
 
             function переключить() {
                 if (!складывать()) return;
@@ -632,10 +635,24 @@ document.addEventListener('DOMContentLoaded', function() {
         function пересобрать() {
             var узко = складывать();
             подвал.classList.toggle('footer-acc', узко);
-            if (узко) return;
             разделы.forEach(function(раздел) {
-                раздел.classList.remove('открыт');
-                раздел.querySelector('h4').setAttribute('aria-expanded', 'false');
+                var заголовок = раздел.querySelector('h4');
+                if (узко) {
+                    // Гармошка есть: заголовок ведёт себя как кнопка и
+                    // должен так и объявляться.
+                    заголовок.setAttribute('role', 'button');
+                    заголовок.setAttribute('tabindex', '0');
+                    заголовок.setAttribute('aria-expanded',
+                        раздел.classList.contains('открыт') ? 'true' : 'false');
+                } else {
+                    // Гармошки нет: снимаем ВСЕ три атрибута, а не только
+                    // aria-expanded. Иначе остаются кнопки, которые ничем
+                    // не управляют.
+                    раздел.classList.remove('открыт');
+                    заголовок.removeAttribute('role');
+                    заголовок.removeAttribute('tabindex');
+                    заголовок.removeAttribute('aria-expanded');
+                }
             });
         }
 
