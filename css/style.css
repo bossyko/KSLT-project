@@ -315,10 +315,10 @@ nav {
     gap: 0.4rem;
     color: var(--text-secondary);
     text-decoration: none;
-    padding: 0.6rem 1rem;
+    padding: 10px 16px;
     border-radius: var(--radius-full);
-    font-size: 0.9rem;
-    font-weight: 450;
+    font-size: 0.875rem;
+    font-weight: 500;
     transition: all var(--transition-fast);
     position: relative;
 }
@@ -5568,8 +5568,8 @@ h2 {
 }
 
 .footer-desc {
-    color: var(--text-dim);
-    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
     line-height: 1.5;
     margin-bottom: var(--space-md);
 }
@@ -5577,7 +5577,7 @@ h2 {
 /* Social Links */
 .footer-socials {
     display: flex;
-    gap: 8px;
+    gap: 12px;
 }
 
 .social-link {
@@ -5589,8 +5589,20 @@ h2 {
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    color: var(--text-dim);
+    color: var(--text-secondary);
     transition: all var(--transition-fast);
+    position: relative;
+}
+
+/* Область нажатия 44x44 при коробке 32x32 — минимум касания.
+   Псевдоэлементом, а не padding: padding увеличил бы саму коробку и
+   сдвинул соседей. Отсчёт идёт от внутренней коробки 30x30 (рамка 1px),
+   поэтому -7, а не -6: 30 + 7 + 7 = 44. Промежуток 12 не даёт
+   областям соседних иконок пересечься. */
+.social-link::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
 }
 
 .social-link svg {
@@ -5623,9 +5635,9 @@ h2 {
 }
 
 .footer-links a {
-    color: var(--text-dim);
+    color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     transition: color var(--transition-fast);
 }
 
@@ -5645,8 +5657,8 @@ h2 {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--text-dim);
-    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
 }
 
 .footer-contacts svg {
@@ -5657,7 +5669,7 @@ h2 {
 }
 
 .footer-contacts a {
-    color: var(--text-dim);
+    color: var(--text-secondary);
     text-decoration: none;
     transition: color var(--transition-fast);
 }
@@ -5843,12 +5855,12 @@ h2 {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 14px 16px;
+    padding: 12px 16px;
     color: var(--text-secondary);
     text-decoration: none;
     border-radius: var(--radius-md);
     font-size: 1rem;
-    font-weight: 450;
+    font-weight: 500;
     transition: all var(--transition-fast);
 }
 
@@ -5912,12 +5924,12 @@ h2 {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 14px 16px;
+    padding: 12px 16px;
     color: var(--text-secondary);
     text-decoration: none;
     border-radius: var(--radius-md);
     font-size: 1rem;
-    font-weight: 450;
+    font-weight: 500;
     transition: all var(--transition-fast);
     cursor: pointer;
 }
@@ -6096,8 +6108,7 @@ h2 {
     }
 
     .nav-item {
-        padding: 0.5rem 0.6rem;
-        font-size: 0.8125rem;
+        padding: 8px 12px;
     }
 
     .sponsor-badge {
@@ -7543,8 +7554,7 @@ h2 {
     }
 
     .mobile-nav-links a {
-        padding: 12px 14px;
-        font-size: 0.92rem;
+        padding: 12px 16px;
     }
 
     .mobile-dropdown-menu li a {
@@ -7813,7 +7823,7 @@ input:-internal-autofill-previewed {
 }
 
 .footer-bottom-links a {
-    color: var(--text-dim);
+    color: var(--text-secondary);
     font-size: 0.75rem;
     line-height: 1.4;
     transition: color var(--transition-base);
@@ -7828,7 +7838,7 @@ input:-internal-autofill-previewed {
     color: var(--border-light);
 }
 
-.footer-bottom p { color: var(--text-dim); font-size: 0.75rem; }
+.footer-bottom p { color: var(--text-secondary); font-size: 0.75rem; }
 
 /* ========================================
    ПРИГЛАШЕНИЕ СПОНСОРАМ НА ГЛАВНОЙ
@@ -8725,13 +8735,13 @@ input:-internal-autofill-previewed {
         position: relative;
         margin: 0;
         /* Строка была 45 пикселей — под палец хватает и 40 */
-        padding: 11px 26px 11px 0;
+        padding: 13px 26px 13px 0;
         cursor: pointer;
         user-select: none;
         text-align: left;
         /* Размер был как у ссылок, но жирность 700, заглавные и разрядка
            делали заголовки тяжелее всего подвала */
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         font-weight: 600;
         letter-spacing: 0.03em;
         color: var(--text-secondary);
@@ -8785,17 +8795,15 @@ input:-internal-autofill-previewed {
     .footer-links a,
     .footer-contacts a,
     .footer-contacts span {
-        font-size: 0.76rem;
         line-height: 1.5;
     }
 
-    .footer-desc { font-size: 0.74rem; line-height: 1.4; }
+    .footer-desc { line-height: 1.4; }
 
     /* Нижняя полоса: три строки по центру превращались в 157 пикселей */
     .footer-bottom {
         gap: 6px;
         padding: 12px 0 14px;
-        font-size: 0.7rem;
     }
 
     /* Оферта, условия и политика шли от левого края и упирались в него:
@@ -8807,7 +8815,6 @@ input:-internal-autofill-previewed {
         align-items: center;
         gap: 4px 10px;
         padding: 0 16px;
-        font-size: 0.7rem;
         text-align: center;
     }
 
@@ -9062,8 +9069,7 @@ input:-internal-autofill-previewed {
     }
 
     .mobile-nav-links a {
-        padding: 12px 14px;
-        font-size: 0.95rem;
+        padding: 12px 16px;
     }
 
     .mobile-dropdown-menu li a {
