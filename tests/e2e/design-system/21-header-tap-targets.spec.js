@@ -68,9 +68,17 @@ async function снять(page, где) {
             const кл = (el.className && typeof el.className === 'string')
                 ? '.' + el.className.trim().split(/\s+/).slice(0, 3).join('.') : '';
             итог.push({
-                ключ: (el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + кл).slice(0, 60),
-                текст: (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 24),
-                ш: окр(r.width), в: окр(r.height)
+                ключ: (el.tagName.toLowerCase() + (el.id ? "#" + el.id : "") + кл).slice(0, 60),
+                текст: (el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 24),
+                ш: окр(r.width), в: окр(r.height),
+                // Кегль и вес мерим здесь же. 19.09 они были записаны с живой
+                // страницы (14.4 и 450), а в исходниках сегодня стоит 0.875rem
+                // и 500. Откуда бралось расхождение — по коду не видно, и
+                // писать правку на числа годичной свежести нельзя.
+                кегль: окр(parseFloat(c.fontSize)),
+                вес: c.fontWeight,
+                отступы: c.padding,
+                строка: c.lineHeight
             });
         }
         return { итог, отсев };
