@@ -55,7 +55,24 @@ async function signIn(acc) {
     return session;
 }
 
+/**
+ * Метка прогона — ОДНА на весь запуск.
+ *
+ * ОСТОРОЖНО, ЗДЕСЬ ЛЕГКО ОШИБИТЬСЯ, И 21.09 Я ОШИБСЯ ДВАЖДЫ. Сначала
+ * сравнил свежие снимки со старыми и чуть не завёл несуществующий дефект.
+ * Потом поставил метку прямо в спеке — и получил ДВЕ метки на один прогон:
+ * Playwright грузит файл спека в каждом работнике отдельно, и каждый брал
+ * своё время. Метку надо ставить там, где код выполняется РОВНО ОДИН РАЗ
+ * за прогон, — то есть здесь, в globalSetup.
+ */
+function записатьМеткуПрогона() {
+    const файл = path.join(__dirname, 'reports', '.run-id');
+    fs.mkdirSync(path.dirname(файл), { recursive: true });
+    fs.writeFileSync(файл, new Date().toISOString(), 'utf8');
+}
+
 module.exports = async function globalSetup() {
+    записатьМеткуПрогона();
     fs.mkdirSync(DIR, { recursive: true });
 
     for (const acc of ACCOUNTS) {
