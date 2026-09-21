@@ -64,7 +64,7 @@ const ОТКАТЫ = [
 ['атрибут hidden сильнее display в классе',
  'css/style.css', '[hidden] {\n    display: none !important;\n}', '[hidden] {\n    opacity: 0;\n}'],
 
-['Apple по умолчанию выключен и флаг можно переопределить',
+['флаг Apple можно переопределить снаружи',
  'js/supabase-config.js', 'window.KSLT_APPLE = window.KSLT_APPLE || false;', 'window.KSLT_APPLE = false;'],
 
 ['кнопка Apple появляется только под флагом',

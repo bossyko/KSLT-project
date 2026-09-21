@@ -7485,7 +7485,10 @@ body.nav-open {
     border-radius: var(--radius-md);
     color: var(--text-primary);
     font-family: inherit;
-    font-size: 0.95rem;
+    /* 16, а не 0.95rem = 15.2. Ниже 16 Safari на iOS зумит страницу при
+       касании поля, и человек после первого же тапа видит четверть формы.
+       Токен --input-fs держит это значение для всех полей продукта. */
+    font-size: var(--input-fs);
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     outline: none;
 }
@@ -7701,46 +7704,59 @@ body.nav-open {
     margin-bottom: 4px;
 }
 
+/* СПОСОБЫ РЕГИСТРАЦИИ — ТА ЖЕ СЕМЬЯ, ЧТО НА ВХОДЕ.
+
+   Было третье семейство кнопок на одной карточке: высота ~48 (паддинг
+   14/20), радиус 8 числом, кегль 0.95rem = 15.2 вне шкалы, фон сырыми
+   цветами #fff и #0088cc.
+
+   Почему увели цвет из фона в значок. Брендбуки Google и Telegram белую и
+   синюю кнопки разрешают — дело не в запрете. Дело в том, что на карточке,
+   где главное действие лаймовое, самым громким элементом экрана
+   оказывался синий Telegram, который главным действием не является. И по
+   правилу App Store 4.8 кнопка Apple обязана быть не менее заметной, чем
+   остальные: рядом с белой и синей чёрная Apple читалась бы как
+   второсортная. Фирменный цвет остаётся в значке — узнаваемость держит он.
+
+   Размеры те же, что у способов входа: 52 · радиус --radius-md · --fs-sm.
+   Макет: Figma «Auth card — sizes to the scale» (258:145). */
 .auth-option-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
     width: 100%;
-    padding: 14px 20px;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    min-height: 52px;
+    padding: 0 16px;
+    border-radius: var(--radius-md);
+    font-size: var(--fs-sm);
     font-weight: 500;
     font-family: inherit;
     cursor: pointer;
     transition: all var(--transition-fast);
-    border: none;
+    border: 1px solid var(--border-light);
+    background: transparent;
+    color: var(--text-secondary);
 }
 
-.auth-option-google {
-    background: #fff;
-    color: #1f1f1f;
-}
-.auth-option-google:hover {
-    background: #f2f2f2;
-}
-
-.auth-option-telegram {
-    background: #0088cc;
-    color: #fff;
-}
-.auth-option-telegram:hover {
-    background: #006daa;
-}
-
+/* Фон у всех способов одинаковый — отличает их значок, а не заливка.
+   Наведение тоже одно на всех: разный hover у соседних кнопок читается
+   как разные виды элементов. */
+.auth-option-google,
+.auth-option-telegram,
 .auth-option-form {
     background: transparent;
     color: var(--text-secondary);
-    border: 1px solid var(--border-subtle);
 }
-.auth-option-form:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+
+/* Фирменный цвет ушёл из заливки в значок — он и держит узнаваемость */
+.auth-option-telegram svg {
+    color: var(--brand-telegram);
+}
+
+.auth-option-btn:hover {
+    background: var(--surface-glass);
+    border-color: var(--border-light);
 }
 
 .auth-tg-app-btn {

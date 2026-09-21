@@ -84,6 +84,11 @@
 
   /* Границы и стекло */
   --border-subtle:       var(--alpha-white-08);
+  /* Фирменный синий Telegram из брендбука. Выбран Костей 19.09.
+     В продукте до 21.09 жили ДВА синих: этот и #0088cc (10 вхождений
+     в style.css, dashboard.css, admin.css и приложении). Второй —
+     устаревший, из старой версии брендбука. */
+  --brand-telegram: #2AABEE;
   --border-light:        var(--alpha-white-12);
   --surface-glass:       var(--alpha-white-04);
   --surface-glass-hover: var(--alpha-white-08);
