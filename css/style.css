@@ -7491,17 +7491,24 @@ body.nav-open {
     padding-right: 48px;
 }
 
+/* Цель нажатия 44x44 (WCAG 2.5.5). Было 28x28: значок 20 плюс паддинг 4.
+   right: 4 вместо 12 — чтобы значок остался ровно там, где стоял:
+   его центр был на 26 от края поля (12 + 14), и при цели 44 это 4 + 22. */
 .auth-eye {
     position: absolute;
-    right: 12px;
+    right: 4px;
     top: 50%;
     transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
     background: none;
     border: none;
     color: var(--text-dim);
     cursor: pointer;
-    padding: 4px;
+    padding: 0;
     display: flex;
+    align-items: center;
+    justify-content: center;
     transition: color var(--transition-fast);
 }
 
@@ -7535,12 +7542,20 @@ body.nav-open {
     flex: 1;
 }
 
+/* Цель нажатия 44 по высоте (WCAG 2.5.5). Была 19 — высота строки текста.
+   Отрицательное поле справа держит текст прижатым к краю колонки,
+   а не сдвинутым внутрь на паддинг цели. */
 .auth-forgot {
     font-size: 0.8rem;
     color: var(--accent);
     text-decoration: none;
     align-self: flex-end;
     margin-top: -8px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 8px;
+    margin-right: -8px;
 }
 
 .auth-forgot:hover {
@@ -7720,6 +7735,32 @@ body.nav-open {
 .auth-tg-app-btn:hover {
     background: var(--surface-glass-hover);
     border-color: var(--border-light);
+}
+
+/* Способы входа — ОДНА семья кнопок.
+
+   До 21.09 их было две: .auth-social-btn (паддинг 12, радиус --radius-md,
+   текст --text-secondary, фон прозрачный, кегль 0.85rem) и .auth-tg-app-btn
+   (паддинг 10/16, радиус 8 числом, текст --text-primary, фон --surface-glass,
+   кегль 0.9rem). Замер дал 44 и 40 — соседние кнопки в одном столбце
+   разной высоты, и обе ниже 44 у Telegram, то есть WCAG 2.5.5 на всех
+   пяти видах и трёх языках.
+
+   Правило действует только на экране входа — через обёртку .auth-col-methods.
+   Экран выбора способа в регистрации живёт на .auth-option-btn и не задет.
+
+   Макет: Figma «Auth card — sizes to the scale» (258:145) — три способа по 52.
+*/
+.auth-col-methods .auth-social-btn,
+.auth-col-methods .auth-tg-app-btn {
+    min-height: 52px;
+    padding: 0 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: 500;
 }
 
 /* Колонки карточки входа. На обычных экранах это просто два блока друг
