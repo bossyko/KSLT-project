@@ -83,6 +83,21 @@ const ОТКАТЫ = [
 ['порядок способов входа Google — Apple — Telegram',
  'pages/auth-kg.html', 'class="auth-apple-btn"', 'class="auth-apple-button"'],
 
+['в форме регистрации нет поля пароля',
+ 'pages/auth.html', '<div class="auth-field">\n                    <label class="auth-label" for="signup-email">', '<div class="auth-field">\n                    <input class="auth-input" type="password" id="signup-password">\n                </div>\n                <div class="auth-field">\n                    <label class="auth-label" for="signup-email">'],
+
+['сервер заводит аккаунт и без присланного пароля',
+ 'supabase/functions/verify-otp/index.ts', 'const своПароль =', 'const своПарольОтключён ='],
+
+['метка needs_password ставится, когда пароля не было',
+ 'supabase/functions/verify-otp/index.ts', 'needs_password: !своПароль,', ''],
+
+['вход по коду есть на сервере и на странице',
+ 'pages/auth-kg.html', 'id="signinByCode"', 'id="signinByCodeOff"'],
+
+['тексты экрана «Готово» заданы на всех трёх языках',
+ 'pages/auth-en.html', 'data-gotovo-skip=', 'data-gotovo-skip-off='],
+
 ['версия style.css одна на все страницы',
  'pages/auth-en.html', 'style.css?v=', 'style.css?v=9'],
 
@@ -96,7 +111,7 @@ const ОТКАТЫ = [
 function песочницу() {
     fs.rmSync(ПЕСОЧНИЦА, { recursive: true, force: true });
     fs.mkdirSync(ПЕСОЧНИЦА, { recursive: true });
-    for (const п of ['css', 'js', 'pages', 'tools']) {
+    for (const п of ['css', 'js', 'pages', 'tools', 'supabase']) {
         execFileSync('cp', ['-R', path.join(ROOT, п), ПЕСОЧНИЦА]);
     }
     for (const ф of fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))) {
