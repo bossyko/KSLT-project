@@ -7737,6 +7737,56 @@ body.nav-open {
     border-color: var(--border-light);
 }
 
+/* Кнопка Apple. Логотип НЕ нарисован: это их фирменный знак, берётся
+   официальным файлом из ресурсов Apple и кладётся в images/apple-logo.svg.
+   Пока файла нет — место под него зарезервировано, кнопка спрятана
+   флагом window.KSLT_APPLE. */
+/* Атрибут hidden против display в классе.
+
+   Браузер прячет [hidden] правилом display: none из своей таблицы, но
+   любое НАШЕ правило с display его перебивает — у него выше приоритет.
+   Замер 21.09: спрятанный слот Apple внутри .auth-social (display: flex)
+   продолжал занимать 64px в колонке способов входа.
+
+   Это классические грабли, поэтому правило стоит один раз и на весь сайт. */
+[hidden] {
+    display: none !important;
+}
+
+.auth-apple-btn,
+.auth-option-apple {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 52px;
+    padding: 0 16px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.auth-apple-btn:hover,
+.auth-option-apple:hover {
+    border-color: var(--border-light);
+    background: var(--surface-glass);
+}
+
+/* Слот под официальный знак: держит место, чтобы подпись не прыгнула,
+   когда файл положат */
+.apple-logo {
+    width: 16px;
+    height: 19px;
+    flex: none;
+}
+
 /* Способы входа — ОДНА семья кнопок.
 
    До 21.09 их было две: .auth-social-btn (паддинг 12, радиус --radius-md,
@@ -7752,7 +7802,8 @@ body.nav-open {
    Макет: Figma «Auth card — sizes to the scale» (258:145) — три способа по 52.
 */
 .auth-col-methods .auth-social-btn,
-.auth-col-methods .auth-tg-app-btn {
+.auth-col-methods .auth-tg-app-btn,
+.auth-col-methods .auth-apple-btn {
     min-height: 52px;
     padding: 0 16px;
     border-radius: var(--radius-md);

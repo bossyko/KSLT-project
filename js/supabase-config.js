@@ -18,6 +18,18 @@ var SUPABASE_URL = (window.KSLT_DB && window.KSLT_DB.url) ||
 var SUPABASE_ANON_KEY = (window.KSLT_DB && window.KSLT_DB.key) ||
     'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G';
 
+/**
+ * Вход через Apple.
+ *
+ * Кнопка спрятана, пока здесь false. Включать ПОСЛЕ того, как в панели
+ * Supabase (Authentication -> Providers -> Apple) заданы Services ID и ключ,
+ * а в Apple Developer в Services ID прописан возвратный адрес
+ * https://qqkzszesviukopgjbead.supabase.co/auth/v1/callback
+ *
+ * Мёртвая кнопка хуже отсутствующей: человек жмёт и получает ошибку.
+ */
+window.KSLT_APPLE = window.KSLT_APPLE || false;
+
 /** @type {string} Telegram bot username (for deep link: t.me/BOT?start=PROFILE_ID) */
 window.KSLT_TG_BOT = 'KSLTennisBot';
 

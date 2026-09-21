@@ -1488,6 +1488,30 @@
     });
 
     // ============================================
+    // APPLE OAUTH — Supabase
+    // ============================================
+    // Кнопки лежат в разметке спрятанными. Показываем ТОЛЬКО когда провайдер
+    // настроен: window.KSLT_APPLE в js/supabase-config.js. Мёртвая кнопка
+    // хуже отсутствующей — человек жмёт и получает ошибку провайдера.
+    if (window.KSLT_APPLE) {
+        document.querySelectorAll('[data-apple-slot]').forEach(function(slot) {
+            slot.hidden = false;
+        });
+        document.querySelectorAll('[data-apple]').forEach(function(btn) {
+            btn.hidden = false;
+            btn.addEventListener('click', async function() {
+                if (!client) return;
+                await client.auth.signInWithOAuth({
+                    provider: 'apple',
+                    options: {
+                        redirectTo: basePath + (isKg ? 'dashboard-kg.html' : isEn ? 'dashboard-en.html' : 'dashboard.html')
+                    }
+                });
+            });
+        });
+    }
+
+    // ============================================
     // CHECK SESSION — redirect if logged in
     // Intercept recovery flow (password reset link)
     // ============================================
