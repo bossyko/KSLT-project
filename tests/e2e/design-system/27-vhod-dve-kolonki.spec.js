@@ -36,6 +36,35 @@ const СТРАНИЦЫ = [
     { имя: 'kg', адрес: '/pages/auth-kg.html' }
 ];
 
+/**
+ * Ждём ФАКТ отрисовки, а не время.
+ *
+ * Раньше здесь стояло ожидание по таймеру на 400 мс. При трёх
+ * параллельных работниках и одном статическом сервере его иногда не
+ * хватало: стиль ещё не применён, и проверка ловила промежуточное
+ * состояние. 21.09 это дало плавающее падение на планшете —
+ * «Forgot password? 128x44» в списке целей меньше 44, хотя в спокойном
+ * прогоне там ровно 44.
+ *
+ * Признак готовности выбран не наугад: min-height вкладки и нулевой
+ * паддинг дорожки задаются ИМЕННО в style.css. Пока они не такие —
+ * таблица стилей не доехала, и мерить нечего.
+ *
+ * Это правило проекта, на котором я уже обжигался в админке: проверять
+ * по факту отрисовки, а не по времени.
+ */
+async function дождатьсяСтилей(page) {
+    await page.waitForFunction(() => {
+        const в = document.querySelector('.auth-tab');
+        const д = document.querySelector('.auth-tabs');
+        if (!в || !д) return false;
+        return getComputedStyle(в).minHeight === '44px' &&
+               getComputedStyle(д).paddingTop === '0px';
+    }, null, { timeout: 15000 });
+    await page.evaluate(() => (document.fonts ? document.fonts.ready : null));
+}
+
+
 const ЗАМЕР = function () {
     window.scrollTo(0, 0);
     const экран = window.innerHeight;
@@ -60,9 +89,19 @@ const ЗАМЕР = function () {
     document.querySelectorAll('#signinForm button, #signinForm a, .auth-tab').forEach(function (э) {
         const r = э.getBoundingClientRect();
         if (r.width === 0 && r.height === 0) return;
-        if (r.width < 44 || r.height < 44) {
+        // Сравниваем ТО ЖЕ число, которое потом показываем.
+        //
+        // Было: сравнение по сырой дробной величине, а в отчёт шло
+        // округлённое. Раскладка считается с долями пикселя, и 43.996
+        // печаталось как «44», но падало как «меньше 44». 21.09 это дало
+        // плавающее падение на планшете с записью «Забыли пароль? 125x44»
+        // — цель, которая по отчёту ровно 44 и всё равно не сошлась.
+        // Четыре тысячных пикселя не мешают попасть пальцем; расхождение
+        // между проверкой и её же отчётом мешает работать.
+        const ш = Math.round(r.width), в = Math.round(r.height);
+        if (ш < 44 || в < 44) {
             мелкие.push((э.textContent || э.className).trim().slice(0, 24) +
-                ' ' + Math.round(r.width) + 'x' + Math.round(r.height));
+                ' ' + ш + 'x' + в);
         }
     });
 
@@ -93,7 +132,7 @@ test.describe('Вход — две колонки и размеры по шка�
 
         for (const с of СТРАНИЦЫ) {
             await page.goto(с.адрес, { waitUntil: 'domcontentloaded' });
-            await page.waitForTimeout(400);
+            await дождатьсяСтилей(page);
             const з = await page.evaluate(ЗАМЕР);
             поЯзыкам[с.имя] = з;
 
@@ -125,7 +164,7 @@ test.describe('Вход — две колонки и размеры по шка�
         // ---- Apple: тот же замер, но с включённым флагом ----
         await page.addInitScript(() => { window.KSLT_APPLE = true; });
         await page.goto(СТРАНИЦЫ[0].адрес, { waitUntil: 'domcontentloaded' });
-        await page.waitForTimeout(400);
+        await дождатьсяСтилей(page);
         const сApple = await page.evaluate(ЗАМЕР);
         поЯзыкам['ru + Apple'] = сApple;
 
