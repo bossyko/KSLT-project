@@ -70,7 +70,10 @@
         otpSavePw: 'Сыр сөздү сактоо',
         otpVerifying: 'Текшерилүүдө...',
         otpTimerPrefix: 'Код жарактуу: ',
-        otpAttemptsLeft: ' аракет калды',
+        /* Кыргызский: после числительного существительное НЕ меняется —
+           форма одна, «1 аракет» и «2 аракет». Функция здесь только ради
+           единого вида с ru и en. */
+        otpAttemptsLeft: function (n) { return n + ' аракет калды'; },
         sendCode: 'Код жөнөтүү',
         sendingCode: 'Жөнөтүлүүдө...'
     } : isEn ? {
@@ -119,7 +122,7 @@
         otpSavePw: 'Save Password',
         otpVerifying: 'Verifying...',
         otpTimerPrefix: 'Code valid for: ',
-        otpAttemptsLeft: ' attempts left',
+        otpAttemptsLeft: function (n) { return n + (n === 1 ? ' attempt left' : ' attempts left'); },
         sendCode: 'Send Code',
         sendingCode: 'Sending...'
     } : {
@@ -168,7 +171,17 @@
         otpSavePw: 'Сохранить пароль',
         otpVerifying: 'Проверка...',
         otpTimerPrefix: 'Код действителен: ',
-        otpAttemptsLeft: ' попыток осталось',
+        /* ЧТО: русские формы числа. ПОЧЕМУ: строка склеивалась с числом как
+           есть и давала «2 попыток осталось» и «1 попыток осталось».
+           СЛОМАЕТСЯ, ЕСЛИ: вернуть простую строку — текст снова станет
+           неграмотным на самых частых значениях 1 и 2. */
+        otpAttemptsLeft: function (n) {
+            var сотня = n % 100, десяток = n % 10;
+            if (сотня >= 11 && сотня <= 14) return 'осталось ' + n + ' попыток';
+            if (десяток === 1) return 'осталась ' + n + ' попытка';
+            if (десяток >= 2 && десяток <= 4) return 'осталось ' + n + ' попытки';
+            return 'осталось ' + n + ' попыток';
+        },
         sendCode: 'Отправить код',
         sendingCode: 'Отправка...'
     };
@@ -975,7 +988,7 @@
                         inputsWrap.classList.add('shake');
                         setTimeout(function() { inputsWrap.classList.remove('shake'); }, 500);
                     }
-                    showMessage(otpCodeForm, (data.remaining > 0 ? L.otpWrongCode + ' (' + data.remaining + L.otpAttemptsLeft + ')' : L.otpExhausted), true);
+                    showMessage(otpCodeForm, (data.remaining > 0 ? L.otpWrongCode + ' (' + L.otpAttemptsLeft(data.remaining) + ')' : L.otpExhausted), true);
                     clearOtpInputs();
                     var firstDigit = document.querySelector('#otpInputs .otp-digit');
                     if (firstDigit) firstDigit.focus();
@@ -1190,6 +1203,23 @@
      */
     var _resendInterval = null;
 
+    /* ЛЕСТНИЦА ПОВТОРНОЙ ОТПРАВКИ. Было 60 секунд на каждый повтор.
+       ПОЧЕМУ ЛЕСТНИЦА: первое ожидание в отрасли 30 секунд — за это время
+       письмо либо дошло, либо не дойдёт; 60 заставляло человека ждать зря.
+       Дальше растёт, чтобы повтор не дёргали без конца. Верхняя ступень
+       300 держится и дальше — это укладывается в серверный лимит
+       5 запросов в час (send-otp, RATE_LIMIT_MAX).
+       СЛОМАЕТСЯ, ЕСЛИ: не сбросить шаг при входе на экран кода — человек,
+       вернувшийся к форме заново, получит ожидание с прошлого раза. */
+    var ЛЕСТНИЦА_ПОВТОРА = [30, 60, 120, 300];
+    var _шагПовтора = 0;
+    function следующаяЗадержкаПовтора() {
+        var с = ЛЕСТНИЦА_ПОВТОРА[Math.min(_шагПовтора, ЛЕСТНИЦА_ПОВТОРА.length - 1)];
+        _шагПовтора++;
+        return с;
+    }
+    function сбросЛестницыПовтора() { _шагПовтора = 0; }
+
     function startResendCooldown(seconds) {
         if (!otpResend) return;
         clearInterval(_resendInterval);
@@ -1219,7 +1249,8 @@
         _otpIdentifierType = identifierType;
         _otpChannel = channel;
         _otpCallback = callback;
-        startResendCooldown(60);
+        сбросЛестницыПовтора();
+        startResendCooldown(следующаяЗадержкаПовтора());
 
         // Set channel hint text
         var channelText = document.getElementById('otpChannelText');
@@ -1265,7 +1296,7 @@
             clearOtpInputs();
             startOtpTimer(600);
             this.textContent = L.sent;
-            setTimeout(function() { startResendCooldown(60); }, 1500);
+            setTimeout(function() { startResendCooldown(следующаяЗадержкаПовтора()); }, 1500);
         });
     }
 
@@ -1336,7 +1367,7 @@
                         inputsWrap.classList.add('shake');
                         setTimeout(function() { inputsWrap.classList.remove('shake'); }, 500);
                     }
-                    showMessage(otpCodeForm, (verifyData.remaining > 0 ? L.otpWrongCode + ' (' + verifyData.remaining + L.otpAttemptsLeft + ')' : L.otpExhausted), true);
+                    showMessage(otpCodeForm, (verifyData.remaining > 0 ? L.otpWrongCode + ' (' + L.otpAttemptsLeft(verifyData.remaining) + ')' : L.otpExhausted), true);
                     clearOtpInputs();
                     var firstDigit = document.querySelector('#otpInputs .otp-digit');
                     if (firstDigit) firstDigit.focus();
@@ -1563,7 +1594,7 @@
                 var данные = await ответ.json();
                 if (данные.error === 'wrong_code') {
                     showMessage(otpCodeForm, (данные.remaining > 0
-                        ? L.otpWrongCode + ' (' + данные.remaining + L.otpAttemptsLeft + ')'
+                        ? L.otpWrongCode + ' (' + L.otpAttemptsLeft(данные.remaining) + ')'
                         : L.otpExhausted), true);
                     clearOtpInputs();
                     return;
@@ -1966,7 +1997,7 @@
                             inputsWrap.classList.add('shake');
                             setTimeout(function() { inputsWrap.classList.remove('shake'); }, 500);
                         }
-                        showMessage(otpCodeForm, (data.remaining > 0 ? L.otpWrongCode + ' (' + data.remaining + L.otpAttemptsLeft + ')' : L.otpExhausted), true);
+                        showMessage(otpCodeForm, (data.remaining > 0 ? L.otpWrongCode + ' (' + L.otpAttemptsLeft(data.remaining) + ')' : L.otpExhausted), true);
                         clearOtpInputs();
                         var firstDigit = document.querySelector('#otpInputs .otp-digit');
                         if (firstDigit) firstDigit.focus();

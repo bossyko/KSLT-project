@@ -104,6 +104,12 @@ const ОТКАТЫ = [
 ['ритм формы регистрации задаёт промежуток, а не встроенные отступы',
  'pages/auth-en.html', 'id="signupTurnstile"', 'id="signupTurnstile" style="margin-bottom:16px"'],
 
+['остаток попыток склоняется, а не склеивается',
+ 'js/auth.js', 'otpAttemptsLeft: function (n) {\n            var сотня', "otpAttemptsLeft: ' попыток осталось', // var сотня"],
+
+['задержка повторной отправки растёт по лестнице',
+ 'js/auth.js', 'ЛЕСТНИЦА_ПОВТОРА = [30, 60, 120, 300]', 'ЛЕСТНИЦА_ПОВТОРА = [60, 60, 60, 60]'],
+
 ['версия style.css одна на все страницы',
  'pages/auth-en.html', 'style.css?v=', 'style.css?v=9'],
 
