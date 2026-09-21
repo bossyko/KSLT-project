@@ -1537,8 +1537,9 @@ input, button, select, textarea {
     gap: 4px;
 }
 
+/* Подпись «ЯЗЫК»: было 0.7rem = 11.2, мимо шкалы. Ступень 12. */
 .mobile-lang-title {
-    font-size: 0.7rem;
+    font-size: var(--fs-xs);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--text-dim);
@@ -1554,7 +1555,7 @@ input, button, select, textarea {
     border: none;
     border-radius: var(--radius-md);
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
     text-align: left;
@@ -6304,7 +6305,7 @@ body.nav-open {
     color: var(--text-secondary);
     text-decoration: none;
     border-radius: var(--radius-md);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 500;
     transition: all var(--transition-fast);
 }
@@ -6373,7 +6374,7 @@ body.nav-open {
     color: var(--text-secondary);
     text-decoration: none;
     border-radius: var(--radius-md);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 500;
     transition: all var(--transition-fast);
     cursor: pointer;
@@ -6425,7 +6426,14 @@ body.nav-open {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    padding-left: 20px;
+
+    /* ШАГ УРОВНЯ ОБЪЯВЛЕН, А НЕ СЛОЖЕН.
+       Замер 20.09 (прибор 24-burger-inside): левые края вложенных пунктов
+       58 / 57.8 / 57.1 на трёх ширинах. Расхождение в доли пикселя значит,
+       что отступ НИКТО не задавал — он складывался из полей панели, полей
+       ссылки и этого числа, и слагаемые округлялись каждое по-своему.
+       20 к тому же мимо сетки 8. Шаг уровня — 16, одним числом. */
+    padding-left: 16px;
 }
 
 .mobile-nav-dropdown.active .mobile-dropdown-menu {
@@ -6433,9 +6441,18 @@ body.nav-open {
     overflow-y: auto;
 }
 
+/* КЕГЛЬ ВЛОЖЕННОГО ПУНКТА — ОДИН НА ВСЕ ШИРИНЫ, ИЗ ШКАЛЫ.
+   Было три размера у одного и того же пункта меню:
+       0.95rem = 15.2  от 769 и выше
+       0.88rem = 14.08 в блоке до 768
+       0.88rem = 14.08 копией в блоке до 375 (мёртвый дубль)
+   Ни 15.2, ни 14.08 в девятиступенчатой шкале 11/12/14/16/18/21/26/32/40
+   не существует. Пункт менял размер от ширины окна — то, что Костя
+   называет «сайт плывёт», в одном правиле. Теперь --fs-sm, то есть 14,
+   и на уровень ниже родителя (16), а не вровень с ним. */
 .mobile-dropdown-menu li a {
     padding: 12px 16px;
-    font-size: 0.95rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     opacity: 0;
     transform: translateX(-10px);
@@ -8002,7 +8019,6 @@ body.nav-open {
 
     .mobile-dropdown-menu li a {
         padding: 10px 14px;
-        font-size: 0.88rem;
     }
 
     .carousel-slide-infinite {
@@ -9675,7 +9691,6 @@ input:-internal-autofill-previewed {
 
     .mobile-dropdown-menu li a {
         padding: 10px 14px;
-        font-size: 0.88rem;
     }
 }
 
@@ -9702,6 +9717,13 @@ input:-internal-autofill-previewed {
         padding: 0 4px 0 0;
     }
 
+    /* ЧИП ЯЗЫКА: font-size: 0 — это НЕ размер текста, а способ спрятать
+       полную подпись («Русский», «Кыргызча», «English») так, чтобы
+       осталось только сокращение из ::after. Три слова в столбик занимали
+       192 пикселя — больше всего раздела «Инфо». Настоящий видимый кегль
+       живёт в ::after, и он на шкале: 12.
+       Прибор 24-burger-inside 20.09 вернул по чипу кегль 0 — и был прав.
+       Это я прочёл его как поломку прибора. Мерить надо ::after. */
     .mobile-lang-option {
         gap: 5px;
         padding: 7px 10px;
@@ -9710,12 +9732,12 @@ input:-internal-autofill-previewed {
     }
 
     .mobile-lang-option .lang-flag {
-        font-size: 0.95rem;
+        font-size: var(--fs-sm);
     }
 
     .mobile-lang-option::after {
         content: attr(data-lang);
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
         font-weight: 600;
         letter-spacing: 0.02em;
     }

@@ -17,8 +17,18 @@
     function закрытьСоседей() {
         var бургер = document.getElementById('burgerMenu');
         var боковое = document.getElementById('mobileNav');
-        if (бургер) бургер.classList.remove('active');
-        if (боковое) боковое.classList.remove('active');
+
+        /* БОКОВОЙ ЛИСТ ЗАКРЫВАЕМ ЕГО ЖЕ КНОПКОЙ, А НЕ СНЯТИЕМ КЛАССА.
+           Было: classList.remove('active') прямо отсюда. Класс снимался, а
+           затемнение, блокировка прокрутки страницы, inert на содержимом и
+           aria-expanded оставались висеть — лист «закрыт», а сайт под ним
+           мёртвый. Два места владели одним состоянием, и это второе про
+           половину состояния не знало.
+           Гостя это не задевало: у него нет ни колокольчика, ни аватара,
+           поэтому замеры 21.09 ничего не показали. Нашлось чтением кода. */
+        if (боковое && боковое.classList.contains('active') && бургер) {
+            бургер.click();
+        }
 
         document.querySelectorAll('.user-dropdown.open').forEach(function(эл) {
             эл.classList.remove('open');
