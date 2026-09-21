@@ -6964,19 +6964,46 @@ body.nav-open {
     z-index: 1;
 }
 
+/* Паддинг 0, а не 4: высоту дорожки задаёт сама вкладка — 44, как требует
+   палец. Кольцо вокруг пилюли рисует не паддинг дорожки, а внутренний
+   отступ самой вкладки (см. .auth-tab). */
 .auth-tabs {
     display: flex;
     background: rgba(255, 255, 255, 0.04);
     border-radius: var(--radius-full);
-    padding: 4px;
+    padding: 0;
     margin-bottom: 32px;
 }
 
+/* ОБЛАСТЬ НАЖАТИЯ И РИСУНОК — РАЗНЫЕ ВЕЩИ.
+
+   Было 36 — ниже 44, то есть нарушение WCAG 2.5.5 на всех видах и языках.
+   Растянуть пилюлю до 44 нельзя: по макету она 38, и Apple с Material обе
+   рисуют сегментированный контрол низким, а палец ловят шире собственных
+   границ.
+
+   Поэтому: min-height 44 — это ЦЕЛЬ. background-clip: content-box —
+   лаймовый фон красится только по внутренней части, то есть 44 минус
+   3 сверху и 3 снизу = 38 нарисованной пилюли.
+
+   Тронешь padding — поедет пилюля; тронешь min-height — поедет палец.
+   Это два разных числа, и они намеренно не равны.
+   Макет: Figma «Auth card — sizes to the scale» (258:145). */
 .auth-tab {
     flex: 1;
-    padding: 10px 16px;
-    border: none;
-    background: transparent;
+    min-height: 44px;
+    /* Прозрачная рамка 3 + background-clip: padding-box — фон красится
+       ВНУТРИ рамки, то есть ровно на 3 внутрь со ВСЕХ сторон.
+       content-box так не умеет: он режет по паддингу, а паддинг здесь
+       разный по осям (16 по горизонтали нужен тексту), и пилюля ужималась
+       по бокам на 16 вместо 3. */
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    padding: 0 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
     color: var(--text-muted);
     font-family: inherit;
     font-size: 0.9rem;
@@ -6987,7 +7014,7 @@ body.nav-open {
 }
 
 .auth-tab.active {
-    background: var(--accent);
+    background-color: var(--accent);
     color: #000;
 }
 
