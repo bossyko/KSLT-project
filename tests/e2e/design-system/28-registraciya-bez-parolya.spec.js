@@ -96,6 +96,40 @@ test.describe('Регистрация без пароля — вариант B',
             expect(форма.др, с.имя + ': дата рождения вернулась в форму').toBe(false);
             expect(форма.полей, с.имя + ': полей ввода должно быть три (имя, фамилия, почта)').toBe(3);
 
+            // ---- раскладка формы: кнопка по ширине полей, ритм один ----
+            // Ждём не таймер, а факт: обёртка раскрылась и померена браузером.
+            await page.waitForFunction(() => {
+                const п = document.getElementById('signupFields');
+                return п && п.getBoundingClientRect().height > 100;
+            }, null, { timeout: 5000 });
+
+            const раскладка = await page.evaluate(() => {
+                const об = document.getElementById('signupFields');
+                const ст = getComputedStyle(об);
+                const ряд = document.getElementById('signup-firstname')
+                    .closest('.auth-field').parentElement.getBoundingClientRect();
+                const почта = document.getElementById('signup-email')
+                    .closest('.auth-field').getBoundingClientRect();
+                const кн = document.querySelector('#signupForm .auth-btn').getBoundingClientRect();
+                return {
+                    направление: ст.display + ' ' + ст.flexDirection,
+                    промежуток: ст.rowGap,
+                    ряд: Math.round(ряд.width),
+                    кнопка: Math.round(кн.width),
+                    зазорРядПочта: Math.round(почта.top - ряд.bottom)
+                };
+            });
+
+            expect(раскладка.направление,
+                с.имя + ': обёртка полей — не колонка, дети не растянутся').toBe('flex column');
+            expect(раскладка.промежуток,
+                с.имя + ': у обёртки полей нет общего промежутка').toBe('16px');
+            expect(раскладка.кнопка,
+                с.имя + ': кнопка «Создать аккаунт» уже ряда полей ('
+                + раскладка.кнопка + ' при ' + раскладка.ряд + ')').toBe(раскладка.ряд);
+            expect(раскладка.зазорРядПочта,
+                с.имя + ': ритм между полями не 16 (' + раскладка.зазорРядПочта + ')').toBe(16);
+
             // ---- страница не падает ----
             expect(ошибки, с.имя + ': ошибки JS на странице').toEqual([]);
             page.removeAllListeners('pageerror');

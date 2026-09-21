@@ -79,3 +79,6 @@ tests/reports/header-row-fit/
 tests/reports/burger-inside/
 tests/reports/header-snapshot-before/
 tests/reports/.run-id
+tests/reports/_zamer/
+tests/reports/auth-forms/
+tests/reports/vhod/

@@ -98,6 +98,12 @@ const ОТКАТЫ = [
 ['тексты экрана «Готово» заданы на всех трёх языках',
  'pages/auth-en.html', 'data-gotovo-skip=', 'data-gotovo-skip-off='],
 
+['обёртка полей регистрации — колонка, а не блок',
+ 'css/style.css', '#signupFields {\n    display: flex;', '#signupFields {\n    display: block;'],
+
+['ритм формы регистрации задаёт промежуток, а не встроенные отступы',
+ 'pages/auth-en.html', 'id="signupTurnstile"', 'id="signupTurnstile" style="margin-bottom:16px"'],
+
 ['версия style.css одна на все страницы',
  'pages/auth-en.html', 'style.css?v=', 'style.css?v=9'],
 
