@@ -119,6 +119,43 @@ test.describe('Боковой лист навигации', () => {
                 };
             });
 
+            // РАСКРЫТЬ РАЗДЕЛ И ПОМЕРИТЬ СНОВА.
+            // Прогон 21.09 дал: на 375 содержимое листа 756 при видимых 756,
+            // то есть «прокрутка не нужна». Это правда только для СВЁРНУТОГО
+            // списка: вложенные пункты лежат в max-height: 0 и места в потоке
+            // не занимают. Ровно эту ошибку я уже сделал 19.09 при переписи —
+            // померил шесть видимых строк из сорока одной. Мерим оба состояния.
+            let послеРаскрытия = null;
+            const раскрыть = page.locator('#mobileNav .mobile-dropdown-toggle').last();
+            if (await раскрыть.count()) {
+                await раскрыть.click();
+                await page.waitForTimeout(450);
+                послеРаскрытия = await page.evaluate(() => {
+                    const лист = document.getElementById('mobileNav');
+                    return {
+                        содержимое: лист.scrollHeight,
+                        видно: лист.clientHeight,
+                        нужна_прокрутка: лист.scrollHeight > лист.clientHeight + 1,
+                        не_влезло: Math.max(0, лист.scrollHeight - лист.clientHeight)
+                    };
+                });
+            }
+
+            // Диагностика расхождения: 21.09 целей насчиталось 41 на 375 и 768,
+            // но 38 на 844. Объяснения у меня нет, поэтому не вывод, а список.
+            const нулевые = await page.evaluate(() => {
+                const лист = document.getElementById('mobileNav');
+                const пусто = [];
+                лист.querySelectorAll('a, button').forEach(эл => {
+                    const r = эл.getBoundingClientRect();
+                    if (!(r.width > 0 && r.height > 0)) {
+                        пусто.push((эл.className || эл.tagName) + ' «' +
+                                   (эл.textContent || '').trim().slice(0, 18) + '»');
+                    }
+                });
+                return { всего: лист.querySelectorAll('a, button').length, нулевых: пусто.length, список: пусто };
+            });
+
             const послеОткрытия = await бургер.boundingBox();
 
             await page.keyboard.press('Escape');
@@ -140,7 +177,9 @@ test.describe('Боковой лист навигации', () => {
                     ширина: кор(доОткрытия.width), высота: кор(доОткрытия.height)
                 } : null,
                 esc_закрывает: закрылся,
-                esc_вернул_фокус: фокусНаБургере
+                esc_вернул_фокус: фокусНаБургере,
+                с_раскрытым_разделом: послеРаскрытия,
+                цели_без_размера: нулевые
             });
         }
 
