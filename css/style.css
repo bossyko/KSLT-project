@@ -7830,6 +7830,81 @@ body.nav-open {
     }
 }
 
+/* ==============================================================
+   ВХОД НА НИЗКОМ И ШИРОКОМ ЭКРАНЕ — ДВЕ КОЛОНКИ
+
+   Условие написано по ВЫСОТЕ, а не по ширине и не по устройству.
+   Телефон боком 844x390 и неразвёрнутое окно ноутбука — одна и та
+   же задача: высоты мало, ширины много. Одна колонка для такой
+   формы экрана не годится: замер 21.09 показал, что способы входа
+   (Google, Telegram, Apple) на 844x390 не видны вовсе без
+   прокрутки, а кнопка уходит за сгиб.
+
+   Правило держит ТОЛЬКО экран входа: :has(#signinForm.active).
+   У регистрации своя длина и свой разговор — её сюда не тянем.
+
+   Макет: Figma 258:145, секция «Phone landscape 844 — two columns».
+   ============================================================== */
+@media (max-height: 680px) and (min-width: 600px) {
+
+    /* шапка страницы входа худеет с ~62 до 48: на 390 каждый пиксель счётный */
+    .auth-header {
+        padding: 10px 24px;
+    }
+
+    /* 100dvh, а не 100vh: на мобильных 100vh считает высоту БЕЗ учёта
+       адресной строки, и карточка уезжает под неё */
+    .auth-page:has(#signinForm.active) {
+        min-height: 100dvh;
+        padding: 48px 20px 12px;
+    }
+
+    .auth-card:has(#signinForm.active) {
+        max-width: 700px;
+        padding: 24px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 40px;
+        row-gap: 12px;
+        /* dense — чтобы способы входа подтянулись в свободные строки
+           левой колонки, а не встали ПОД кнопкой */
+        grid-auto-flow: row dense;
+        align-content: start;
+        /* align-items: start — БЕЗ него ячейки растягиваются на высоту строки:
+           замер 21.09 показал вкладки 69 и Google 69 при Telegram 40, потому
+           что строку задавали поля ввода справа. Ряд из 69/69/40 читается
+           как собранный из кусков. Высоты должны быть свои. */
+        align-items: start;
+    }
+
+    .auth-card:has(#signinForm.active) .auth-tabs {
+        grid-column: 1;
+        margin-bottom: 0;
+    }
+
+    /* display: contents — дети формы становятся ячейками сетки карточки,
+       и разметку менять не нужно ни на одной из трёх страниц */
+    #signinForm.active {
+        display: contents;
+    }
+
+    #signinForm > * {
+        grid-column: 2;
+    }
+
+    /* «или» разделяет две колонки, которых в одну колонку больше нет */
+    #signinForm > .auth-divider {
+        display: none;
+    }
+
+    #signinForm > .auth-social {
+        grid-column: 1;
+        /* margin-top: 12px стоит в разметке инлайном, перебить можно только так */
+        margin-top: 0 !important;
+    }
+}
+
+
 /* OTP Verification */
 .otp-method-tabs {
     display: flex;
