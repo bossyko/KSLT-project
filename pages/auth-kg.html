@@ -25,7 +25,7 @@
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="../css/tokens.css?v=18">
-    <link rel="stylesheet" href="../css/style.css?v=304">
+    <link rel="stylesheet" href="../css/style.css?v=305">
 </head>
 <body>
     <div class="auth-page">
@@ -72,7 +72,10 @@
                             </button>
                         </div>
                     </div>
-                    <a href="#" class="auth-forgot">Сыр сөзүңүздү унуттуңузбу?</a>
+                    <div class="auth-links">
+                        <a href="#" class="auth-forgot" id="signinByCode">Код менен кирүү</a>
+                        <a href="#" class="auth-forgot">Сыр сөзүңүздү унуттуңузбу?</a>
+                    </div>
                     <button type="submit" class="auth-btn">Кирүү</button>
                 </div>
 
@@ -202,7 +205,11 @@
             </div>
 
             <!-- Forgot Password: Step 3 — New password -->
-            <form class="auth-form" id="otpNewPasswordForm">
+            <form class="auth-form" id="otpNewPasswordForm"
+                  data-gotovo-title="Даяр, аккаунт түзүлдү"
+                  data-gotovo-sub="Аны менен кирүү үчүн сырсөз коюңуз. Же өткөрүп жибериңиз — почтага келген код менен кире аласыз."
+                  data-gotovo-btn="Сырсөздү сактоо"
+                  data-gotovo-skip="Өткөрүп жиберүү">
                 <div class="auth-screen-header">
                     <div class="auth-icon-wrap">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
@@ -283,22 +290,6 @@
                             <input type="radio" name="gender" value="women">
                             <span>Аял</span>
                         </label>
-                    </div>
-                </div>
-                <div class="auth-field">
-                    <label class="auth-label" for="signup-password">Сыр сөз <span class="auth-required">*</span></label>
-                    <div class="auth-password-wrap">
-                        <input class="auth-input" type="password" id="signup-password" placeholder="Сыр сөз түзүңүз" required minlength="8" autocomplete="new-password">
-                        <button type="button" class="auth-eye" data-target="signup-password">
-                            <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                        </button>
-                    </div>
-                    <div class="auth-pw-rules" id="pwRules">
-                        <span class="pw-rule" data-rule="length">8+ белги</span>
-                        <span class="pw-rule" data-rule="upper">A-Z</span>
-                        <span class="pw-rule" data-rule="digit">0-9</span>
-                        <span class="pw-rule" data-rule="special">!@#$</span>
                     </div>
                 </div>
                 <label class="auth-checkbox">
@@ -411,7 +402,7 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js?v=2"></script>
     <script src="../js/phone.js?v=6"></script>
-    <script src="../js/auth.js?v=45"></script>
+    <script src="../js/auth.js?v=47"></script>
     <script>if(new URLSearchParams(window.location.search).get('banned')==='1'){var bn=document.getElementById('banNotice');if(bn)bn.style.display='block';}</script>
 </body>
 </html>

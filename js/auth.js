@@ -639,21 +639,28 @@
         special: function(val) { return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val); }
     };
 
-    pwInput.addEventListener('input', function() {
-        var val = this.value;
-        Object.keys(rules).forEach(function(key) {
-            var el = document.querySelector('.pw-rule[data-rule="' + key + '"]');
-            if (rules[key](val)) {
-                el.classList.add('valid');
-                el.classList.remove('pw-rule-error');
-            } else {
-                el.classList.remove('valid');
-            }
+    /* Подсказка о правилах пароля живёт только там, где есть само поле.
+       На регистрации поля больше нет (вариант B, 21.09), и без этой
+       проверки страница падала с «Cannot read properties of null» на
+       каждой загрузке — поймано прогоном, а не глазами. */
+    if (pwInput) {
+        pwInput.addEventListener('input', function() {
+            var val = this.value;
+            Object.keys(rules).forEach(function(key) {
+                var el = document.querySelector('.pw-rule[data-rule="' + key + '"]');
+                if (!el) return;
+                if (rules[key](val)) {
+                    el.classList.add('valid');
+                    el.classList.remove('pw-rule-error');
+                } else {
+                    el.classList.remove('valid');
+                }
+            });
+            // Clear detailed error message when user starts typing
+            var detailMsg = signupForm.querySelector('.auth-pw-detail');
+            if (detailMsg) detailMsg.remove();
         });
-        // Clear detailed error message when user starts typing
-        var detailMsg = signupForm.querySelector('.auth-pw-detail');
-        if (detailMsg) detailMsg.remove();
-    });
+    }
 
     /* Поля «Подтвердите пароль» на регистрации больше нет (решение 21.09):
        у поля пароля есть глаз показа, а подтверждение — приём из времён,
@@ -804,7 +811,14 @@
         var birthMonth = месяцЭл ? месяцЭл.value : '';
         var birthYearEl = document.getElementById('signup-birth-year');
         var birthYear = birthYearEl ? birthYearEl.value : '';
-        var password = document.getElementById('signup-password').value;
+        /* ПАРОЛЯ В ФОРМЕ РЕГИСТРАЦИИ БОЛЬШЕ НЕТ (решение Кости 21.09,
+           вариант B). Почта подтверждается кодом — это и есть дверь.
+           Пароль предлагаем ПОСЛЕ регистрации, на экране «Готово», с
+           возможностью пропустить; войти потом можно и по коду.
+           Чтение защищено, а не выброшено: те же элементы есть на экранах
+           смены пароля. */
+        var парольЭл = document.getElementById('signup-password');
+        var password = парольЭл ? парольЭл.value : '';
         var подтверждЭл = document.getElementById('signup-confirm');
         var confirmPw = подтверждЭл ? подтверждЭл.value : password;
         var btn = signupForm.querySelector('.auth-btn');
@@ -815,7 +829,7 @@
             return;
         }
 
-        var allRulesPass = Object.keys(rules).every(function(key) { return rules[key](password); });
+        var allRulesPass = !парольЭл || Object.keys(rules).every(function(key) { return rules[key](password); });
         if (!allRulesPass) {
             showPwError(signupForm, password);
             // Highlight unfulfilled rules
@@ -892,7 +906,7 @@
         // Cache form data for after OTP verification
         _otpFormData = {
             email: email,
-            password: password,
+            password: парольЭл ? password : undefined,
             full_name: firstName + ' ' + lastName,
             gender: gender ? gender.value : '',
             birth_day: birthDay ? parseInt(birthDay) : null,
@@ -999,8 +1013,12 @@
                         localStorage.setItem('kslt_session_start', Date.now().toString());
                     }
                 }
-                showMessage(otpCodeForm, L.redirecting, false);
-                setTimeout(function() { window.location.href = getRedirectUrl(); }, 1000);
+                /* Раньше здесь через секунду уводило в кабинет. Теперь
+                   показываем «Готово» и предлагаем поставить пароль —
+                   без этого человек, зарегистрировавшийся без пароля,
+                   никогда бы его не завёл. Кнопка «Пропустить» рядом:
+                   войти можно и по коду. */
+                показатьГотово();
             });
         } catch (err) {
             console.error('[KSLT] регистрация:', err);
@@ -1387,6 +1405,27 @@
 
             setLoading(btn, true, L.otpSavingPw, L.otpSavePw);
 
+            /* Режим «Готово» после регистрации: человек УЖЕ вошёл, код
+               израсходован. Значит пароль ставится обычным updateUser, а
+               не через verify-otp — тому нужен неиспользованный код, и он
+               бы честно ответил «code_expired». */
+            if (_режимГотово) {
+                try {
+                    var итог = await client.auth.updateUser({ password: newPw });
+                    if (итог.error) {
+                        setLoading(btn, false, L.otpSavingPw, L.otpSavePw);
+                        showMessage(otpNewPasswordForm, L.errGeneric, true);
+                        return;
+                    }
+                    showMessage(otpNewPasswordForm, L.redirecting, false);
+                    setTimeout(function() { window.location.href = getRedirectUrl(); }, 800);
+                } catch (е) {
+                    setLoading(btn, false, L.otpSavingPw, L.otpSavePw);
+                    showMessage(otpNewPasswordForm, L.errGeneric, true);
+                }
+                return;
+            }
+
             try {
                 var resp = await fetch(SUPABASE_URL + '/functions/v1/verify-otp', {
                     method: 'POST',
@@ -1440,6 +1479,111 @@
                 setLoading(btn, false, L.otpSavingPw, L.otpSavePw);
                 showMessage(otpNewPasswordForm, L.errGeneric, true);
             }
+        });
+    }
+
+    // ============================================
+    // «ГОТОВО» — предложение поставить пароль после регистрации
+    // ============================================
+    //
+    // Отдельного экрана в разметке не заводим: otpNewPasswordForm — это
+    // ровно та же форма (поле пароля, глаз показа, кнопка). Меняем ей
+    // подписи и добавляем «Пропустить». Тексты лежат в разметке в
+    // data-атрибутах, по одному набору на каждый из трёх языков —
+    // в словаре L их нет, и плодить дубли переводов незачем.
+    var _режимГотово = false;
+
+    function показатьГотово() {
+        if (!otpNewPasswordForm) { window.location.href = getRedirectUrl(); return; }
+        _режимГотово = true;
+        clearOtpTimer();
+
+        var заголовок = otpNewPasswordForm.querySelector('.auth-screen-title');
+        var подзаголовок = otpNewPasswordForm.querySelector('.auth-screen-subtitle');
+        var кнопка = otpNewPasswordForm.querySelector('.auth-btn');
+        var д = otpNewPasswordForm.dataset;
+        if (заголовок && д.gotovoTitle) заголовок.textContent = д.gotovoTitle;
+        if (подзаголовок && д.gotovoSub) подзаголовок.textContent = д.gotovoSub;
+        if (кнопка && д.gotovoBtn) кнопка.textContent = д.gotovoBtn;
+
+        if (!document.getElementById('gotovoSkip')) {
+            var пропустить = document.createElement('button');
+            пропустить.type = 'button';
+            пропустить.id = 'gotovoSkip';
+            пропустить.className = 'auth-forgot';
+            пропустить.style.cssText = 'align-self:center;background:none;border:none;cursor:pointer;font-family:inherit';
+            пропустить.textContent = д.gotovoSkip || 'Skip';
+            пропустить.addEventListener('click', function() {
+                window.location.href = getRedirectUrl();
+            });
+            otpNewPasswordForm.appendChild(пропустить);
+        }
+
+        forms.forEach(function(f) { f.classList.remove('active'); });
+        otpNewPasswordForm.classList.add('active');
+    }
+
+    // ============================================
+    // ВХОД ПО КОДУ
+    // ============================================
+    //
+    // Нужен ровно потому, что пароль ушёл из регистрации: без явной двери
+    // человек без пароля попадал внутрь только через «Забыли пароль?» —
+    // то есть через починку того, что не сломано.
+    //
+    // Код уходит существующим потоком forgot_password: тексты писем лежат
+    // в таблице notification_texts, и новый поток потребовал бы правки
+    // базы. Разделяет их флаг login_only при проверке.
+    var входПоКоду = document.getElementById('signinByCode');
+    if (входПоКоду) {
+        входПоКоду.addEventListener('click', async function(e) {
+            e.preventDefault();
+            var почта = (document.getElementById('signin-email').value || '').trim();
+            if (!похоже_на_почту(почта)) {
+                showMessage(signinForm, L.errEmailBad, true);
+                document.getElementById('signin-email').focus();
+                return;
+            }
+            var отправка = await sendOtp('forgot_password', почта, 'email');
+            if (!отправка || отправка.error) {
+                showMessage(signinForm, L.errGeneric, true);
+                return;
+            }
+            showOtpScreen('forgot_password', почта, 'email', отправка.channel || 'email', async function(код) {
+                var ответ = await fetch(SUPABASE_URL + '/functions/v1/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+                    body: JSON.stringify({
+                        flow: 'forgot_password',
+                        identifier: почта,
+                        code: код,
+                        login_only: true
+                    })
+                });
+                var данные = await ответ.json();
+                if (данные.error === 'wrong_code') {
+                    showMessage(otpCodeForm, (данные.remaining > 0
+                        ? L.otpWrongCode + ' (' + данные.remaining + L.otpAttemptsLeft + ')'
+                        : L.otpExhausted), true);
+                    clearOtpInputs();
+                    return;
+                }
+                if (данные.error) { showMessage(otpCodeForm, L.errGeneric, true); return; }
+                if (данные.hashed_token && данные.email) {
+                    var вход = await client.auth.verifyOtp({
+                        token_hash: данные.hashed_token,
+                        type: 'magiclink'
+                    });
+                    if (!вход.error) {
+                        clearOtpTimer();
+                        localStorage.setItem('kslt_session_start', Date.now().toString());
+                        showMessage(otpCodeForm, L.redirecting, false);
+                        setTimeout(function() { window.location.href = getRedirectUrl(); }, 800);
+                        return;
+                    }
+                }
+                showMessage(otpCodeForm, L.errGeneric, true);
+            });
         });
     }
 

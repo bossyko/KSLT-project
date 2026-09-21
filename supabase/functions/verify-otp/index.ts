@@ -150,6 +150,51 @@ Deno.serve(async (req) => {
     if (flow === 'forgot_password') {
       const newPassword = body.new_password as string
 
+      // ВХОД ПО КОДУ.
+      //
+      // Тот же код, что и у восстановления пароля, но пароль не меняется:
+      // человек просто входит. Понадобилось, когда пароль ушёл из формы
+      // регистрации — иначе зарегистрировавшийся без пароля попадал внутрь
+      // только через «Забыли пароль?», то есть через починку того, что не
+      // сломано.
+      //
+      // Отдельный поток в send-otp не заводим намеренно: тексты писем
+      // лежат в таблице notification_texts, новая строка потребовала бы
+      // правки базы. Код уходит существующим потоком, а разделяет их
+      // флаг login_only.
+      if (body.login_only) {
+        const запись = db.from('profiles').select('id')
+          .order('created_at', { ascending: false })
+          .limit(1)
+        const { data: строки } = identifier.includes('@')
+          ? await запись.eq('email', identifier)
+          : await запись.eq('phone_e164', phoneToE164(identifier))
+        const кто = строки?.[0]?.id || null
+        if (!кто) return json({ error: 'User not found' }, 404)
+
+        const { data: учётка } = await db.auth.admin.getUserById(кто)
+        if (!учётка?.user?.email) return json({ error: 'User email not found' }, 500)
+
+        const { data: ссылка, error: ошибкаСсылки } = await db.auth.admin.generateLink({
+          type: 'magiclink',
+          email: учётка.user.email,
+        })
+        if (ошибкаСсылки || !ссылка?.properties?.hashed_token) {
+          return json({ error: 'Failed to sign in' }, 500)
+        }
+
+        // Код израсходован: он уже сделал свою работу
+        await db.from('otp_codes').update({ used: true }).eq('id', otpRecord.id)
+
+        return json({
+          verified: true,
+          flow,
+          logged_in: true,
+          hashed_token: ссылка.properties.hashed_token,
+          email: учётка.user.email,
+        })
+      }
+
       if (!newPassword) {
         // Code verified, but password not provided yet (step 1 of 2)
         // Code remains unused so it can be verified again with password
@@ -228,14 +273,29 @@ Deno.serve(async (req) => {
       const birthYear = body.birth_year as number | null
       const ntrp = body.ntrp != null ? Number(body.ntrp) : null
 
-      if (!password) {
-        return json({ error: 'Password required' }, 400)
+      // ПАРОЛЬ ПРИ РЕГИСТРАЦИИ БОЛЬШЕ НЕ ОБЯЗАТЕЛЕН (решение 21.09).
+      //
+      // Почта уже подтверждена кодом — это и есть дверь. Пароль добавляет
+      // замок к той же двери, поэтому спрашиваем его ПОСЛЕ регистрации,
+      // на экране «Готово», с возможностью пропустить.
+      //
+      // Аккаунт всё равно создаётся с паролем: Supabase без него
+      // пользователя не заводит. Ставим случайный — ровно так же, как уже
+      // сделано ниже в ветке telegram_register. Человек задаёт свой через
+      // updateUser, и метка needs_password говорит интерфейсу, что
+      // предложение ещё имеет смысл показать.
+      const своПароль = typeof password === 'string' && password.length > 0
+      if (своПароль && password.length < 8) {
+        return json({ error: 'Password too short' }, 400)
       }
+      const парольДляСоздания = своПароль
+        ? password
+        : crypto.randomUUID() + 'Aa1!'
 
       // Create user with confirmed email
       const { data: newUser, error: createErr } = await db.auth.admin.createUser({
         email,
-        password,
+        password: парольДляСоздания,
         email_confirm: true,
         user_metadata: {
           full_name: fullName,
@@ -243,6 +303,7 @@ Deno.serve(async (req) => {
           birth_day: birthDay,
           birth_month: birthMonth,
           birth_year: birthYear,
+          needs_password: !своПароль,
         },
       })
 
