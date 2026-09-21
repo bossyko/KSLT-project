@@ -782,8 +782,19 @@
         var lastName = document.getElementById('signup-lastname').value.trim();
         var email = document.getElementById('signup-email').value.trim();
         var gender = document.querySelector('input[name="gender"]:checked');
-        var birthDay = document.getElementById('signup-birth-day').value;
-        var birthMonth = document.getElementById('signup-birth-month').value;
+        // Дата рождения при РЕГИСТРАЦИИ больше не спрашивается (решение
+        // Кости 21.09). Она нужна промо-акции ко дню рождения, которой в
+        // админке ещё нет (задача dr-kalendar), и собирать её впрок значит
+        // удлинять форму ради того, чего пока не существует.
+        //
+        // Чтение оставлено защищённым, а не выброшено: те же строки работают
+        // на экране дозаполнения после Telegram, где поля ДР есть.
+        // Год рождения не спрашивался ни на одной из трёх страниц уже давно —
+        // это записанная задача про мёртвое чтение (#90).
+        var деньЭл = document.getElementById('signup-birth-day');
+        var месяцЭл = document.getElementById('signup-birth-month');
+        var birthDay = деньЭл ? деньЭл.value : '';
+        var birthMonth = месяцЭл ? месяцЭл.value : '';
         var birthYearEl = document.getElementById('signup-birth-year');
         var birthYear = birthYearEl ? birthYearEl.value : '';
         var password = document.getElementById('signup-password').value;
