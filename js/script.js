@@ -152,6 +152,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (headerEl) {
         window.addEventListener('scroll', function() {
+            // Пока открыт боковой лист, страница заблокирована, но события
+            // прокрутки всё равно приходят: от самой блокировки, от резинки
+            // iOS, от прокрутки внутри листа. Костя 20.09 поймал это глазами —
+            // шапка мигала лаймом поверх открытого меню, «как уродско».
+            if (document.body.classList.contains('nav-open')) return;
+
             const currentScroll = window.pageYOffset;
 
             if (currentScroll > 50) {
@@ -191,40 +197,81 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ========================================
-    // BURGER MENU (Mobile Navigation)
+    // БОКОВОЙ ЛИСТ НАВИГАЦИИ (вариант B, решение Кости 20.09, доска 243:145)
     // ========================================
     const burgerMenu = document.getElementById('burgerMenu');
     const mobileNav = document.getElementById('mobileNav');
 
     if (burgerMenu && mobileNav) {
-        burgerMenu.addEventListener('click', function() {
+        // Затемнение делает скрипт, а не разметка. Партиалов шапки три,
+        // страниц двадцать четыре — лишний пустой div в каждой это двадцать
+        // четыре места, где его однажды забудут, и лист останется без слоя.
+        var затемнение = document.querySelector('.mobile-nav-scrim');
+        if (!затемнение) {
+            затемнение = document.createElement('div');
+            затемнение.className = 'mobile-nav-scrim';
+            document.body.appendChild(затемнение);
+        }
+
+        burgerMenu.setAttribute('aria-expanded', 'false');
+
+        function листОткрыт() {
+            return mobileNav.classList.contains('active');
+        }
+
+        // ЛИСТ НЕ МОДАЛЬНЫЙ, И ЭТО ГЛАВНОЕ ЗДЕСЬ.
+        // Выключается страница ЗА затемнением — main и подвал. Шапка
+        // остаётся в порядке табуляции: иначе «Войти» становится недостижим
+        // с клавиатуры, а это ровно то преимущество, ради которого вариант B
+        // и выбран. Фокус не запирается, Esc возвращает его на бургер.
+        function переключитьЛист(открыть, вернутьФокус) {
+            burgerMenu.classList.toggle('active', открыть);
+            mobileNav.classList.toggle('active', открыть);
+            затемнение.classList.toggle('active', открыть);
+            document.body.classList.toggle('nav-open', открыть);
+            burgerMenu.setAttribute('aria-expanded', открыть ? 'true' : 'false');
+            document.querySelectorAll('main, .site-footer').forEach(function (эл) {
+                эл.inert = открыть;
+            });
+            if (!открыть && вернутьФокус) burgerMenu.focus();
+        }
+
+        burgerMenu.addEventListener('click', function () {
             // Меню под аватаром и список уведомлений закрываем: три
             // раскрывающихся блока в одной шапке накладывались друг на друга
-            document.querySelectorAll('.user-dropdown.open').forEach(function(эл) {
+            document.querySelectorAll('.user-dropdown.open').forEach(function (эл) {
                 эл.classList.remove('open');
             });
             var уведомления = document.getElementById('siteNotifDropdown');
             if (уведомления) уведомления.style.display = 'none';
-            this.classList.toggle('active');
-            mobileNav.classList.toggle('active');
+            переключитьЛист(!листОткрыт(), false);
         });
 
-        // Закрытие меню при клике на ссылку (кроме dropdown toggle)
-        mobileNav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Не закрываем если это toggle дропдауна
+        // Нажатие по затемнению — закрыть. Это ожидаемый жест: затемнение
+        // и означает «здесь сейчас неактивно, ткни чтобы вернуться».
+        затемнение.addEventListener('click', function () {
+            переключитьЛист(false, true);
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && листОткрыт()) переключитьЛист(false, true);
+        });
+
+        // Закрытие меню при клике на ссылку (кроме toggle дропдауна).
+        // Фокус не возвращаем: браузер уходит на другую страницу.
+        mobileNav.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () {
                 if (!this.classList.contains('mobile-dropdown-toggle')) {
-                    burgerMenu.classList.remove('active');
-                    mobileNav.classList.remove('active');
+                    переключитьЛист(false, false);
                 }
             });
         });
 
-        // Закрытие при клике вне меню
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.floating-header')) {
-                burgerMenu.classList.remove('active');
-                mobileNav.classList.remove('active');
+        // Клик мимо шапки. Лист лежит ВНУТРИ .floating-header, поэтому
+        // нажатия внутри самого листа сюда не попадают.
+        document.addEventListener('click', function (e) {
+            if (листОткрыт() && !e.target.closest('.floating-header')) {
+                переключитьЛист(false, false);
             }
         });
     }

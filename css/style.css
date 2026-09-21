@@ -6148,25 +6148,96 @@ h2 {
     transform: rotate(-45deg) translate(6px, -6px);
 }
 
+/* =========================================================================
+   БОКОВОЙ ЛИСТ НАВИГАЦИИ — вариант B, решение Кости 20.09 (доска 243:145)
+   =========================================================================
+   БЫЛО: штора во всю ширину, выезжающая вниз из-под шапки.
+   ЗАМЕР 20.09 (прибор 24-burger-inside): на 844x390 панель 827 высотой —
+   501 пиксель за сгибом, человек их просто не видит. При этом 844 пикселя
+   ширины простаивали. Спор шёл о том, как утрамбовать высоту, а незанятой
+   была ширина. Вопрос был поставлен неверно.
+
+   СТАЛО: лист прижат к правому краю ПОД шапкой. Шапка остаётся живой —
+   логотип ведёт на главную, «Войти» нажимается одним действием, бургер на
+   своём месте становится крестиком. Затемнение гасит только страницу.
+
+   ОТВЕРГНУТ ВАРИАНТ A (лист поверх шапки). Цена по макету на 844x390:
+   своя верхняя строка 56 плюс своя копия «Войти» внизу 56 — 112 из 390,
+   29% экрана под служебное, видно 5 строк меню вместо 7, и призыв к
+   действию раздваивается на две кнопки.
+
+   ПОЧЕМУ height, А НЕ bottom: 0. Лист лежит внутри .floating-header, а у
+   шапки есть backdrop-filter. Элемент с фильтром создаёт систему координат
+   для position: fixed внутри себя — значит bottom: 0 отсчитывался бы от
+   НИЗА ШАПКИ, и лист получил бы нулевую высоту. Высота задаётся явно.
+
+   Стережёт tools/check-header.js, девять правил, каждое доказано откатом.
+   ========================================================================= */
 .mobile-nav {
+    --sheet-w: 100%;
     display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
+    position: fixed;
+    top: var(--header-h);
     right: 0;
+    width: var(--sheet-w);
+    max-width: 100%;
+    height: calc(100dvh - var(--header-h));
     background: var(--bg-primary);
-    border-bottom: 1px solid var(--border-subtle);
+    border-left: 1px solid var(--border-subtle);
     padding: var(--space-md) var(--space-lg);
+    padding-right: calc(var(--space-lg) + env(safe-area-inset-right));
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
-    transition: all var(--transition-base);
+    transform: translateX(12px);
+    transition: opacity var(--transition-base), transform var(--transition-base), visibility var(--transition-base);
+    z-index: 1002;
+}
+
+/* Ступени ширины растут вместе с экраном. Базовая 100%: на 375 лист занимает
+   всю ширину — при листе 360 странице осталось бы 15 пикселей, это не
+   «страница видна», это полоска. На доске 243:145 у меня 844 сначала получал
+   лист уже, чем 768: экран шире, лист уже. Ошибка макета, здесь исправлена. */
+@media (min-width: 480px) {
+    .mobile-nav { --sheet-w: 360px; }
+}
+
+@media (min-width: 768px) {
+    .mobile-nav { --sheet-w: 400px; }
 }
 
 .mobile-nav.active {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateX(0);
+}
+
+/* Затемнение. top берётся из --header-h, а не равен нулю: гасится страница,
+   шапка остаётся живой. top: 0 — это отвергнутый вариант A, где «Войти»
+   выглядит выключенным, хотя нажимается. z-index ниже шапки (1000) и выше
+   страницы — поэтому шапка не уходит под затемнение. */
+.mobile-nav-scrim {
+    position: fixed;
+    top: var(--header-h);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.62);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+    z-index: 999;
+}
+
+.mobile-nav-scrim.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.nav-open {
+    overflow: hidden;
 }
 
 /* =========================================================================

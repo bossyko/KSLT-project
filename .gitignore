@@ -76,5 +76,6 @@ tests/reports/header-snapshot/
 tests/reports/header-taps/
 tests/reports/header-dropdowns/
 tests/reports/header-row-fit/
+tests/reports/burger-inside/
 tests/reports/header-snapshot-before/
 tests/reports/.run-id
