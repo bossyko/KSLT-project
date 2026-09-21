@@ -6289,6 +6289,72 @@ body.nav-open {
     }
 }
 
+/* =========================================================================
+   ЯЗЫК ПЕРЕЕЗЖАЕТ ТАМ ЖЕ, ГДЕ ПОЯВЛЯЕТСЯ БУРГЕР — 992
+   =========================================================================
+   Решение Кости 21.09, вариант A. Было 768, и это давало полосу 769–992,
+   где бургер уже есть, а язык ещё в шапке. Телефон боком (844) и планшет
+   стоймя (768) — два сенсорных устройства одного класса — получали
+   переключатель в РАЗНЫХ местах.
+
+   Замер 21.09 (прибор 25-nav-sheet): на 844 в листе три цели с нулевым
+   размером — «Русский», «Кыргызча», «English». Они лежали в разметке, но
+   не показывались, потому что .mobile-lang-list включался только до 768.
+   Сорок одна цель в DOM, тридцать восемь видимых.
+
+   Побочная выгода: ряд шапки на 844 становится короче на весь блок языка.
+   Кыргызской версии там было теснее всех (замер 23-header-row-fit: 689.5
+   при 616.3 доступных).
+
+   Граница ОДНА на всё: пункты меню, бургер, язык. Стережёт check-header.js.
+   ========================================================================= */
+@media (max-width: 992px) {
+    .lang-dropdown {
+        display: none;
+    }
+
+    .mobile-lang-list {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 14px 0;
+    }
+
+    .mobile-lang-title {
+        padding: 0 4px 0 0;
+    }
+
+    /* ЧИП ЯЗЫКА: font-size: 0 — это НЕ размер текста, а способ спрятать
+       полную подпись («Русский», «Кыргызча», «English») так, чтобы
+       осталось только сокращение из ::after. Три слова в столбик занимали
+       192 пикселя — больше всего раздела «Инфо». Настоящий видимый кегль
+       живёт в ::after, и он на шкале: 12.
+       Прибор 24-burger-inside 20.09 вернул по чипу кегль 0 — и был прав.
+       Это я прочёл его как поломку прибора. Мерить надо ::after. */
+    .mobile-lang-option {
+        gap: 5px;
+        padding: 7px 10px;
+        font-size: 0;
+        border: 1px solid var(--border-subtle);
+    }
+
+    .mobile-lang-option .lang-flag {
+        font-size: var(--fs-sm);
+    }
+
+    .mobile-lang-option::after {
+        content: attr(data-lang);
+        font-size: var(--fs-xs);
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+
+    .mobile-lang-option.active {
+        border-color: var(--accent);
+    }
+}
+
 
 .mobile-nav-links {
     list-style: none;
@@ -6653,14 +6719,6 @@ body.nav-open {
 
     .user-dropdown-arrow {
         display: none;
-    }
-
-    .lang-dropdown {
-        display: none;
-    }
-
-    .mobile-lang-list {
-        display: flex;
     }
 
     /* main { padding-top: 0 } убран 21.09. Отбивка от шапки теперь одна на
@@ -9706,45 +9764,6 @@ input:-internal-autofill-previewed {
    в разметке — его читают программы для незрячих. */
 
 @media (max-width: 768px) {
-    .mobile-lang-list {
-        flex-direction: row;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 14px 0;
-    }
-
-    .mobile-lang-title {
-        padding: 0 4px 0 0;
-    }
-
-    /* ЧИП ЯЗЫКА: font-size: 0 — это НЕ размер текста, а способ спрятать
-       полную подпись («Русский», «Кыргызча», «English») так, чтобы
-       осталось только сокращение из ::after. Три слова в столбик занимали
-       192 пикселя — больше всего раздела «Инфо». Настоящий видимый кегль
-       живёт в ::after, и он на шкале: 12.
-       Прибор 24-burger-inside 20.09 вернул по чипу кегль 0 — и был прав.
-       Это я прочёл его как поломку прибора. Мерить надо ::after. */
-    .mobile-lang-option {
-        gap: 5px;
-        padding: 7px 10px;
-        font-size: 0;
-        border: 1px solid var(--border-subtle);
-    }
-
-    .mobile-lang-option .lang-flag {
-        font-size: var(--fs-sm);
-    }
-
-    .mobile-lang-option::after {
-        content: attr(data-lang);
-        font-size: var(--fs-xs);
-        font-weight: 600;
-        letter-spacing: 0.02em;
-    }
-
-    .mobile-lang-option.active {
-        border-color: var(--accent);
-    }
 }
 
 /* ============================================
