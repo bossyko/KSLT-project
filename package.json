@@ -14,7 +14,9 @@
     "test:unit:watch": "vitest tests/unit/",
     "check:footer": "node tools/check-footer.js",
     "typecheck": "npx tsc --noEmit",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "check:auth": "node tools/check-auth.js",
+    "check:auth:otkat": "node tools/check-auth-otkat.js"
   },
   "repository": {
     "type": "git",
