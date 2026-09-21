@@ -655,9 +655,16 @@
         if (detailMsg) detailMsg.remove();
     });
 
-    document.getElementById('signup-confirm').addEventListener('input', function() {
-        this.setCustomValidity('');
-    });
+    /* Поля «Подтвердите пароль» на регистрации больше нет (решение 21.09):
+       у поля пароля есть глаз показа, а подтверждение — приём из времён,
+       когда посмотреть на введённое было нельзя. Обработчик оставлен
+       защищённым: те же элементы есть на экранах смены пароля. */
+    var подтвержд = document.getElementById('signup-confirm');
+    if (подтвержд) {
+        подтвержд.addEventListener('input', function() {
+            this.setCustomValidity('');
+        });
+    }
 
     // ---- Name script validation (allow Cyrillic + Kyrgyz + Latin on all versions) ----
     var _sRe = /^[a-zA-Zа-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
@@ -798,7 +805,8 @@
         var birthYearEl = document.getElementById('signup-birth-year');
         var birthYear = birthYearEl ? birthYearEl.value : '';
         var password = document.getElementById('signup-password').value;
-        var confirmPw = document.getElementById('signup-confirm').value;
+        var подтверждЭл = document.getElementById('signup-confirm');
+        var confirmPw = подтверждЭл ? подтверждЭл.value : password;
         var btn = signupForm.querySelector('.auth-btn');
 
         if (!похоже_на_почту(email)) {
@@ -825,9 +833,9 @@
             return;
         }
 
-        if (password !== confirmPw) {
-            document.getElementById('signup-confirm').setCustomValidity(L.errPwMatch);
-            document.getElementById('signup-confirm').reportValidity();
+        if (подтверждЭл && password !== confirmPw) {
+            подтверждЭл.setCustomValidity(L.errPwMatch);
+            подтверждЭл.reportValidity();
             return;
         }
 
