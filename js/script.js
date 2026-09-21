@@ -283,6 +283,58 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ========================================
+    // ПАНЕЛИ ДЕСКТОПНОЙ ШАПКИ ПОД ПАЛЬЦЕМ
+    // ========================================
+    //
+    // ЗАЧЕМ. На 1024 (планшет боком) отдаётся десктопная шапка, а панели
+    // разделов висят на :hover. У пальца наведения не существует — значит
+    // вложенные ссылки были недостижимы вовсе: тап по «Рейтингу» уводил на
+    // страницу раздела, а Pro-Masters, Masters, Tour, Challengers и Futures
+    // не открывались ничем. Третий случай той же ошибки: h270 и h274 в
+    // подвале, теперь в шапке.
+    //
+    // КАК. Решение Кости 20.09: первый тап раскрывает, второй уводит на
+    // страницу. То есть ссылка не ломается — она просто требует второго
+    // нажатия, как на большинстве сайтов.
+    //
+    // ОСТОРОЖНО, ГЛАВНОЕ МЕСТО ОШИБКИ: условие спрашивает У БРАУЗЕРА про
+    // способ ввода — matchMedia('(pointer: coarse)'), — а НЕ про ширину
+    // окна. 1024 шире любого «мобильного» порога, и проверка по ширине эту
+    // дыру не закрыла бы. Ровно на этой подмене мы обожглись дважды.
+    //
+    // Проверяем на каждом нажатии, а не один раз при загрузке: у ноутбука
+    // с сенсорным экраном способ ввода меняется по ходу дела.
+    const навПанели = document.querySelectorAll('.floating-header .nav-dropdown');
+
+    function подПальцем() {
+        return window.matchMedia('(pointer: coarse)').matches;
+    }
+
+    навПанели.forEach(function(панель) {
+        const заголовок = панель.querySelector('.nav-item');
+        if (!заголовок) return;
+
+        заголовок.addEventListener('click', function(e) {
+            if (!подПальцем()) return;              // мышь работает как работала
+            if (панель.classList.contains('open')) return;  // второй тап — переход
+
+            e.preventDefault();
+            навПанели.forEach(function(д) {
+                if (д !== панель) д.classList.remove('open');
+            });
+            панель.classList.add('open');
+        });
+    });
+
+    // Тап мимо панели закрывает её. Без этого раскрытая панель остаётся
+    // висеть навсегда: у пальца нет «увёл курсор», которым закрывался hover.
+    document.addEventListener('click', function(e) {
+        if (!подПальцем()) return;
+        if (e.target.closest && e.target.closest('.floating-header .nav-dropdown')) return;
+        навПанели.forEach(function(д) { д.classList.remove('open'); });
+    });
+
+    // ========================================
     // ACTIVE NAV HIGHLIGHT ON SCROLL
     // ========================================
     const sections = document.querySelectorAll('main section[id]');
@@ -362,6 +414,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // Закрытие при клике вне
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.lang-dropdown')) {
+                langDropdown.classList.remove('active');
+            }
+        });
+
+        // Закрытие, когда фокус ушёл с клавиатуры.
+        //
+        // НАЙДЕНО КОСТЕЙ 20.09 КЛАВИШЕЙ TAB: он открыл список языков,
+        // пошёл дальше по Tab — и список остался висеть поверх страницы.
+        // Закрытие было описано ТОЛЬКО для щелчка мимо. Мышь уводит
+        // курсор, клавиатура уводит фокус — это два разных события, и
+        // слушали мы одно.
+        //
+        // ОСТОРОЖНО: relatedTarget — это куда фокус УШЁЛ. Он бывает null,
+        // когда фокус уходит из окна вовсе; тогда список тоже закрываем.
+        langDropdown.addEventListener('focusout', function(e) {
+            const куда = e.relatedTarget;
+            if (!куда || !langDropdown.contains(куда)) {
                 langDropdown.classList.remove('active');
             }
         });
