@@ -108,7 +108,18 @@
             return;
         }
 
-        место.innerHTML = новости.map(карточка).join('');
+        /* Последней плиткой — «Все новости». Видна только в ленте на телефоне
+           боком: у полосы должен быть конец, иначе непонятно, докуда листать.
+           В сетке её прячет css — там ту же роль исполняет ссылка в шапке. */
+        var путь = window.location.pathname;
+        var все = путь.indexOf('-en') !== -1
+            ? { href: 'pages/news-en.html', текст: 'All news' }
+            : путь.indexOf('-kg') !== -1
+                ? { href: 'pages/news-kg.html', текст: 'Бардык жаңылыктар' }
+                : { href: 'pages/news.html', текст: 'Все новости' };
+        место.innerHTML = новости.map(карточка).join('')
+            + '<a class="hn-more" href="' + все.href + '">'
+            + '<span>' + все.текст + '</span><span aria-hidden="true">→</span></a>';
     }
 
     if (document.readyState === 'loading') {
