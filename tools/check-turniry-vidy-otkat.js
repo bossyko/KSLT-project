@@ -40,19 +40,22 @@ const ОТКАТЫ = [
  '@media (max-width: 992px) {',
  'высота обычной карточки планшета объявлена в СВОИХ границах'],
 
+/* Якоря ниже уводят на .tournaments-grid НАРОЧНО: 23.09 у новостей появилась
+   такая же лента с тем же условием и теми же тремя строками, и прувер честно
+   сказал «якорь встречается 2 раз». Уникальность держится на имени сетки. */
 ['убрать из условия ленты ширину', 'css/style.css',
- '@media (max-width: 992px) and (orientation: landscape) and (max-height: 500px) {',
- '@media (orientation: landscape) and (max-height: 500px) {',
+ '@media (max-width: 992px) and (orientation: landscape) and (max-height: 500px) {\n    .tournaments-grid {',
+ '@media (orientation: landscape) and (max-height: 500px) {\n    .tournaments-grid {',
  'лента объявлена условием из трёх частей'],
 
 ['отнять у ленты снап', 'css/style.css',
- '        scroll-snap-type: x mandatory;\n        -webkit-overflow-scrolling: touch;',
- '        -webkit-overflow-scrolling: touch;',
+ '    .tournaments-grid {\n        display: flex;\n        grid-template-columns: none;\n        gap: 12px;\n        overflow-x: auto;\n        scroll-snap-type: x mandatory;',
+ '    .tournaments-grid {\n        display: flex;\n        grid-template-columns: none;\n        gap: 12px;\n        overflow-x: auto;',
  'в ленте сетка становится полосой'],
 
 ['сделать карточку ленты резиновой', 'css/style.css',
- '        flex: 0 0 340px;\n        width: 340px;\n        height: 270px;',
- '        flex: 1 1 auto;\n        height: 270px;',
+ '    .tournaments-grid > .tc:nth-child(n) {\n        grid-column: auto;\n        flex: 0 0 340px;\n        width: 340px;',
+ '    .tournaments-grid > .tc:nth-child(n) {\n        grid-column: auto;\n        flex: 1 1 auto;\n        width: auto;',
  'в ленте карточка 340 × 270 и прилипает'],
 
 ['спрятать в ленте всё после третьей', 'css/style.css',

@@ -95,10 +95,32 @@ for (const стр of СТРАНИЦЫ) {
     test.describe('узкие виды турниров · ' + стр.имя, () => {
 
         test.beforeEach(async ({ page }) => {
-            await page.goto(стр.адрес);
-            await page.waitForLoadState('networkidle');
+            /* НЕ waitForLoadState('networkidle'). Страница опрашивает базу и
+               тянет чужие обложки — тишины сети может не наступить вовсе.
+               23.09 это уронило en/desktop на ровном месте: 30 секунд
+               ожидания и ⊗1 на навигации при полностью исправной вёрстке.
+               Ждём ПРИЗНАКИ, а не тишину, — тем же приёмом, что 30-ритм и
+               31-live: сперва доказательство, что наш css применился, потом
+               что страница перестала расти. */
+            await page.goto(стр.адрес, { waitUntil: 'domcontentloaded' });
+            await page.waitForFunction(() => {
+                const g = document.querySelector('.tournaments-grid');
+                return !g || ['grid', 'flex'].includes(getComputedStyle(g).display);
+            }, null, { timeout: 15000 });
+            /* даём базе шанс дорисовать карточки, но НЕ падаем без них:
+               пустая таблица — это не сломанная вёрстка, для неё есть фикстура */
+            await page.waitForFunction(
+                () => !!document.querySelector('.tournaments-grid .tc'),
+                null, { polling: 300, timeout: 8000 }
+            ).catch(() => {});
             const итог = await карточкиИлиФикстура(page);
             expect(итог, 'секция турниров есть в разметке').not.toBe('нет сетки');
+            await page.waitForFunction(() => {
+                const h = document.documentElement.scrollHeight;
+                if (window.__прежняяВысота === h) return true;
+                window.__прежняяВысота = h;
+                return false;
+            }, null, { polling: 300, timeout: 15000 }).catch(() => {});
         });
 
         test('видно ровно столько карточек, сколько заполняет ряды', async ({ page }) => {
