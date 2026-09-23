@@ -90,9 +90,12 @@ const ОТКАТЫ = [
  'font-size: clamp(1.15rem, 5vw, 1.32rem);\n        font-weight: 700;',
  'заголовок раздела на телефоне — 21 / Extra Bold'],
 
+/* ЯКОРЬ БЫЛ НА .badges-cta-text h2 — чужом селекторе, который 24.09 вынесли из
+   этого правила вместе с секцией значков. Откат перестал находить своё место.
+   Теперь держимся за сами заголовки разделов. */
 ['вернуть .sp-offer h3 в правило заголовка раздела', 'css/style.css',
- '    .badges-cta-text h2 {\n        font-size: var(--fs-lg);',
- '    .badges-cta-text h2,\n    .sp-offer h3 {\n        font-size: var(--fs-lg);',
+ '    .section-header h2,\n    section > h2 {\n        font-size: var(--fs-lg);',
+ '    .section-header h2,\n    section > h2,\n    .sp-offer h3 {\n        font-size: var(--fs-lg);',
  '.sp-offer h3 вынесен из правила заголовка раздела'],
 
 ['сдвинуть ряд в центр', 'css/style.css',

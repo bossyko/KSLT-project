@@ -17,7 +17,9 @@ const КУСКИ = [
     ['раздел live',         'check-live.js',         'check-live-otkat.js'],
     ['цвет статусов',       'check-turniry-cvet.js', 'check-turniry-cvet-otkat.js'],
     ['узкие виды турниров', 'check-turniry-vidy.js', 'check-turniry-vidy-otkat.js'],
-    ['новости',             'check-novosti.js',      'check-novosti-otkat.js']
+    ['новости',             'check-novosti.js',      'check-novosti-otkat.js'],
+    ['значки',              'check-znachki.js',      'check-znachki-otkat.js'],
+    ['коробка-гейт',        'check-korobka.js',      'check-korobka-otkat.js']
 ];
 
 function прогнать(файл) {
