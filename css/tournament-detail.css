@@ -47,7 +47,7 @@
     gap: 6px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 500;
     margin-bottom: var(--space-lg);
     transition: color 0.2s;
@@ -67,7 +67,7 @@
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid var(--border-subtle);
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
 }
 
@@ -97,7 +97,7 @@
     padding: 8px 24px;
     background: var(--accent);
     color: #000;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -107,7 +107,7 @@
 /* Uniform badge size in hero — all same padding/font/height */
 .td-hero-badges .tournament-category-badge {
     padding: 5px 14px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     letter-spacing: 0.5px;
     margin-bottom: 0;
@@ -121,7 +121,7 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     padding: 5px 14px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     letter-spacing: 0.5px;
     margin-top: 0;
@@ -134,7 +134,7 @@
     gap: 6px;
     padding: 5px 14px;
     border-radius: var(--radius-full);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -232,7 +232,7 @@
     align-items: center;
     gap: 6px;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .td-meta-item svg {
@@ -285,7 +285,7 @@
     gap: 6px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     padding: 8px 0 4px;
     max-width: none;
@@ -333,7 +333,7 @@
     border-bottom: 2px solid transparent;
     color: var(--text-secondary);
     font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
@@ -374,13 +374,13 @@
 .td-section-header h2 {
     max-width: var(--container-max);
     margin: 0 auto;
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .td-section-subtitle {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-primary);
     margin: var(--space-lg) 0 var(--space-md);
@@ -435,7 +435,7 @@
 
 .td-round-title {
     text-align: center;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -498,7 +498,7 @@ tr.td-rr-row-dimmed {
     align-items: center;
     padding: 6px 10px;
     gap: 6px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -521,7 +521,7 @@ tr.td-rr-row-dimmed {
 
 .td-seed {
     color: var(--text-dim);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     min-width: 24px;
 }
 
@@ -538,7 +538,7 @@ tr.td-rr-row-dimmed {
     min-width: 14px;
     text-align: center;
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 .td-match-player.winner .td-match-score {
@@ -547,11 +547,11 @@ tr.td-rr-row-dimmed {
 
 .td-match-score.live-score {
     color: #ef4444;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .td-match-outcome {
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 1px 4px;
     border-radius: 3px;
@@ -654,7 +654,7 @@ tr.td-rr-row-dimmed {
     margin-bottom: 0;
 }
 .td-fic-section-title {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     color: var(--accent);
     text-transform: uppercase;
@@ -680,7 +680,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-rr-group-title {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--accent);
     padding: var(--space-md) var(--space-md) 0;
@@ -702,13 +702,13 @@ tr.td-rr-row-dimmed {
     padding: 10px 12px;
     text-align: center;
     border-bottom: 1px solid var(--border-subtle);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .td-rr-table thead th {
     background: var(--bg-elevated);
     color: var(--text-dim);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -741,7 +741,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-rr-cell {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     vertical-align: middle;
     line-height: 1.4;
 }
@@ -756,13 +756,13 @@ tr.td-rr-row-dimmed {
 
 .td-rr-score-text {
     display: block;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .td-rr-result {
     display: block;
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     margin-top: 2px;
 }
 
@@ -782,7 +782,7 @@ tr.td-rr-row-dimmed {
 .td-rr-place {
     font-weight: 700 !important;
     color: var(--accent) !important;
-    font-size: 1rem !important;
+    font-size: var(--fs-base) !important;
 }
 
 .td-rr-table tbody tr {
@@ -815,7 +815,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-rr-ko-label {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -849,7 +849,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-venue-name {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--accent);
     text-decoration: none;
@@ -865,7 +865,7 @@ tr.td-rr-row-dimmed {
     align-items: center;
     gap: 6px;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .td-venue-address svg {
@@ -888,7 +888,7 @@ tr.td-rr-row-dimmed {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     text-decoration: none;
     transition: all 0.2s;
@@ -938,7 +938,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-schedule-day-title {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
     padding-bottom: var(--space-xs);
@@ -976,11 +976,11 @@ tr.td-rr-row-dimmed {
 .td-schedule-time {
     font-weight: 600;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .td-schedule-court {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     background: var(--bg-elevated);
     padding: 3px 8px;
@@ -993,7 +993,7 @@ tr.td-rr-row-dimmed {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
@@ -1005,12 +1005,12 @@ tr.td-rr-row-dimmed {
 
 .td-schedule-vs {
     color: var(--text-dim);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     flex-shrink: 0;
 }
 
 .td-schedule-round {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -1020,7 +1020,7 @@ tr.td-rr-row-dimmed {
 .td-schedule-score {
     font-weight: 600;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     text-align: center;
     min-width: 80px;
 }
@@ -1031,7 +1031,7 @@ tr.td-rr-row-dimmed {
     gap: 4px;
     padding: 3px 10px;
     border-radius: var(--radius-full);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -1090,7 +1090,7 @@ tr.td-rr-row-dimmed {
 .td-participant-seed {
     color: var(--accent);
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     min-width: 28px;
 }
 
@@ -1098,15 +1098,15 @@ tr.td-rr-row-dimmed {
     flex: 1;
     font-weight: 500;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .td-participant-country {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
 }
 
 .td-participants-subtitle {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
@@ -1116,7 +1116,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-participants-count {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     color: var(--text-muted);
     background: var(--bg-elevated);
@@ -1154,13 +1154,13 @@ tr.td-rr-row-dimmed {
 .td-reg-table td {
     padding: 8px 6px;
     border-bottom: 1px solid var(--border-subtle);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     text-align: left;
 }
 
 .td-reg-table thead th {
     color: var(--text-dim);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -1209,7 +1209,7 @@ tr.td-rr-row-dimmed {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--text-dim);
 }
 
@@ -1225,7 +1225,7 @@ tr.td-rr-row-dimmed {
 .td-description-text {
     max-width: 900px;
     margin: 0 auto;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     line-height: 1.7;
     color: var(--text-secondary);
 }
@@ -1348,12 +1348,12 @@ tr.td-rr-row-dimmed {
 }
 
 .td-podium-medal { margin-bottom: var(--space-xs); }
-.td-podium-1 .td-podium-medal { font-size: 2.8rem; }
-.td-podium-2 .td-podium-medal { font-size: 2rem; }
-.td-podium-3 .td-podium-medal { font-size: 1.8rem; }
+.td-podium-1 .td-podium-medal { font-size: var(--fs-3xl); }
+.td-podium-2 .td-podium-medal { font-size: var(--fs-2xl); }
+.td-podium-3 .td-podium-medal { font-size: var(--fs-xl); }
 
 .td-podium-place {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -1370,9 +1370,9 @@ tr.td-rr-row-dimmed {
     max-width: 100%;
 }
 
-.td-podium-1 .td-podium-name { font-size: 1.15rem; }
+.td-podium-1 .td-podium-name { font-size: var(--fs-md); }
 .td-podium-2 .td-podium-name,
-.td-podium-3 .td-podium-name { font-size: 0.95rem; }
+.td-podium-3 .td-podium-name { font-size: var(--fs-base); }
 
 .td-no-results {
     max-width: var(--container-max);
@@ -1393,7 +1393,7 @@ tr.td-rr-row-dimmed {
 
 .td-locked-subtitle {
     color: var(--text-secondary);
-    font-size: 1.35rem;
+    font-size: var(--fs-lg);
     line-height: 1.5;
     margin-bottom: var(--space-xl);
     max-width: 600px;
@@ -1413,7 +1413,7 @@ tr.td-rr-row-dimmed {
     background: var(--accent);
     color: #000;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     border-radius: var(--radius-full);
     text-decoration: none;
     transition: all 0.2s;
@@ -1431,7 +1431,7 @@ tr.td-rr-row-dimmed {
     background: transparent;
     color: var(--text-primary);
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-full);
     text-decoration: none;
@@ -1471,7 +1471,7 @@ tr.td-rr-row-dimmed {
 .td-group-table td {
     padding: 8px 6px;
     border-bottom: 1px solid var(--border-subtle);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 /* Две таблицы в ряд: после колонки геймов они перестали помещаться в свою
@@ -1480,7 +1480,7 @@ tr.td-rr-row-dimmed {
     .td-groups-grid .td-group-table th,
     .td-groups-grid .td-group-table td {
         padding: 7px 4px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -1503,14 +1503,14 @@ tr.td-rr-row-dimmed {
 }
 
 .td-official-role {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
 
 .td-official-name {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -1524,7 +1524,7 @@ tr.td-rr-row-dimmed {
 .td-grp-lot {
     display: block;
     margin-top: 3px;
-    font-size: 0.62rem;
+    font-size: var(--fs-2xs);
     font-weight: 500;
     line-height: 1;
     color: var(--text-dim);
@@ -1535,14 +1535,14 @@ tr.td-rr-row-dimmed {
 /* Две группы в ряд — подпись ужимаем, чтобы длинная не растянула колонку */
 @media (min-width: 900px) {
     .td-groups-grid .td-grp-lot {
-        font-size: 0.58rem;
+        font-size: var(--fs-2xs);
     }
 }
 
 .td-group-table thead th {
     background: var(--bg-elevated);
     color: var(--text-dim);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1600,7 +1600,7 @@ tr.td-rr-row-dimmed {
 
     .td-tab {
         padding: 12px 16px;
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     /* Первая вкладка на телефоне не прижимается вплотную к краю: базовое
@@ -1632,7 +1632,7 @@ tr.td-rr-row-dimmed {
 
     .td-schedule-score {
         min-width: 60px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 
     .td-participants-grid {
@@ -1643,15 +1643,15 @@ tr.td-rr-row-dimmed {
     .td-podium-1 .td-podium-photo { width: 80px; height: 80px; }
     .td-podium-2 .td-podium-photo { width: 65px; height: 65px; }
     .td-podium-3 .td-podium-photo { width: 58px; height: 58px; }
-    .td-podium-1 .td-podium-medal { font-size: 2.2rem; }
-    .td-podium-2 .td-podium-medal { font-size: 1.6rem; }
-    .td-podium-3 .td-podium-medal { font-size: 1.4rem; }
+    .td-podium-1 .td-podium-medal { font-size: var(--fs-2xl); }
+    .td-podium-2 .td-podium-medal { font-size: var(--fs-xl); }
+    .td-podium-3 .td-podium-medal { font-size: var(--fs-lg); }
     .td-podium-1::after { height: 100px; }
     .td-podium-2::after { height: 65px; }
     .td-podium-3::after { height: 45px; }
-    .td-podium-1 .td-podium-name { font-size: 0.95rem; }
+    .td-podium-1 .td-podium-name { font-size: var(--fs-base); }
     .td-podium-2 .td-podium-name,
-    .td-podium-3 .td-podium-name { font-size: 0.85rem; }
+    .td-podium-3 .td-podium-name { font-size: var(--fs-sm); }
 
     .td-rr-knockout-matches {
         flex-direction: column;
@@ -1664,7 +1664,7 @@ tr.td-rr-row-dimmed {
     }
 
     .td-hero h1 {
-        font-size: 1.5rem;
+        font-size: var(--fs-xl);
     }
 
     .td-match {
@@ -1683,12 +1683,12 @@ tr.td-rr-row-dimmed {
 
     .td-tab {
         padding: 10px 12px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
         white-space: nowrap;
     }
 
     .td-schedule-players {
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 
     .td-participants-grid {
@@ -1696,13 +1696,13 @@ tr.td-rr-row-dimmed {
     }
 
     .td-locked-subtitle {
-        font-size: 1.1rem;
+        font-size: var(--fs-md);
     }
 
     .td-locked-btn,
     .td-locked-btn-secondary {
         padding: 14px 28px;
-        font-size: 1rem;
+        font-size: var(--fs-base);
         width: 100%;
         justify-content: center;
     }
@@ -1716,10 +1716,10 @@ tr.td-rr-row-dimmed {
 
 @media (max-width: 375px) {
     .td-hero h1 {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
     .td-hero-meta {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
     .td-container {
         padding: 32px 12px 48px;
@@ -1733,10 +1733,10 @@ tr.td-rr-row-dimmed {
     }
     .td-tab {
         padding: 8px 10px;
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
     }
     .td-info-stat-num {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
 }
 
@@ -1749,7 +1749,7 @@ tr.td-rr-row-dimmed {
 .td-pred-names {
     display: flex;
     justify-content: space-between;
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     color: var(--text-secondary);
     margin-bottom: 2px;
@@ -1770,7 +1770,7 @@ tr.td-rr-row-dimmed {
     align-items: center;
     justify-content: center;
     transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     letter-spacing: 0.3px;
     min-width: 0;
@@ -1793,7 +1793,7 @@ tr.td-rr-row-dimmed {
 
 .td-pred-label {
     text-align: center;
-    font-size: 0.58rem;
+    font-size: var(--fs-2xs);
     color: var(--text-dim);
     margin-top: 3px;
     letter-spacing: 0.5px;
@@ -1822,10 +1822,10 @@ tr.td-rr-row-dimmed {
         height: 14px;
     }
     .td-pred-fill {
-        font-size: 0.55rem;
+        font-size: var(--fs-2xs);
     }
     .td-pred-label {
-        font-size: 0.5rem;
+        font-size: var(--fs-2xs);
     }
 }
 
@@ -1836,7 +1836,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-cd-title {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     letter-spacing: 2px;
     color: rgba(255,255,255,0.5);
@@ -1862,7 +1862,7 @@ tr.td-rr-row-dimmed {
 
 .td-cd-num {
     display: block;
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--accent);
     line-height: 1.2;
@@ -1872,7 +1872,7 @@ tr.td-rr-row-dimmed {
 
 .td-cd-label {
     display: block;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     font-weight: 500;
     color: rgba(255,255,255,0.45);
     text-transform: uppercase;
@@ -1921,7 +1921,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-cd-live-text {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--accent);
     letter-spacing: 1px;
@@ -1935,7 +1935,7 @@ tr.td-rr-row-dimmed {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     color: #ffaa00;
 }
@@ -1945,7 +1945,7 @@ tr.td-rr-row-dimmed {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     color: #ffaa00;
 }
@@ -1956,10 +1956,10 @@ tr.td-rr-row-dimmed {
         padding: 8px 10px;
     }
     .td-cd-num {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
     .td-cd-label {
-        font-size: 0.55rem;
+        font-size: var(--fs-2xs);
     }
     .td-cd-boxes {
         gap: 6px;
@@ -1986,7 +1986,7 @@ tr.td-rr-row-dimmed {
     display: inline-block;
     padding: 8px 16px;
     border-radius: var(--radius-sm, 6px);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2013,7 +2013,7 @@ tr.td-rr-row-dimmed {
 
 /* ---- Doubles: team names ---- */
 .td-team-name {
-    font-size: 0.85em;
+    font-size: var(--fs-sm);
     line-height: 1.3;
 }
 
@@ -2029,7 +2029,7 @@ tr.td-rr-row-dimmed {
     width: 100%;
     padding: 6px;
     border: 0;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.4px;
@@ -2070,7 +2070,7 @@ tr.td-rr-row-dimmed {
 .td-grp-act {
     display: block;
     color: var(--accent);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -2079,7 +2079,7 @@ tr.td-rr-row-dimmed {
 .td-grp-opp {
     display: block;
     color: var(--text-dim);
-    font-size: 0.62rem;
+    font-size: var(--fs-2xs);
     opacity: 0.7;
     white-space: nowrap;
     overflow: hidden;
@@ -2117,7 +2117,7 @@ tr.td-rr-row-dimmed {
    там есть всегда. */
 .td-match-outcome {
     position: static;
-    font-size: 0.62rem;
+    font-size: var(--fs-2xs);
     margin-left: 4px;
     white-space: nowrap;
 }
@@ -2142,7 +2142,7 @@ tr.td-rr-row-dimmed {
 }
 .td-bracket--big .td-match {
     width: 168px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
 }
 .td-bracket--big .td-bracket-round { min-width: 178px; }
 
@@ -2173,7 +2173,7 @@ tr.td-rr-row-dimmed {
 .td-bracket .td-match {
     width: 100%;
     max-width: 100%;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
 }
 .td-bracket .td-player-name {
     overflow: hidden;
@@ -2236,7 +2236,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-sched-court-title {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: var(--accent);
     text-transform: uppercase;
@@ -2247,7 +2247,7 @@ tr.td-rr-row-dimmed {
 .td-sched-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .td-sched-court-cell {
@@ -2257,7 +2257,7 @@ tr.td-rr-row-dimmed {
 
 .td-sched-table th {
     text-align: left;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-dim);
@@ -2290,7 +2290,7 @@ tr.td-rr-row-dimmed {
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.06);
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     white-space: nowrap;
 }
 
@@ -2303,14 +2303,14 @@ tr.td-rr-row-dimmed {
     width: 34px;
     text-align: center;
     color: var(--text-dim);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .td-sched-status {
     display: inline-block;
     padding: 2px 8px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     white-space: nowrap;
 }
@@ -2322,7 +2322,7 @@ tr.td-rr-row-dimmed {
 .td-sched-row-live td { background: rgba(255, 179, 0, 0.04); }
 
 @media (max-width: 768px) {
-    .td-sched-table { font-size: 0.82rem; }
+    .td-sched-table { font-size: var(--fs-sm); }
     .td-sched-table td, .td-sched-table th { padding: 8px 6px; }
     .td-sched-vs { width: 24px; }
 }
@@ -2348,7 +2348,7 @@ tr.td-rr-row-dimmed {
     .td-hero-badges { margin-bottom: 10px; }
 
     .td-hero-content h1 {
-        font-size: 1.25rem;
+        font-size: var(--fs-lg);
         line-height: 1.25;
         margin-bottom: 10px;
     }
@@ -2360,7 +2360,7 @@ tr.td-rr-row-dimmed {
        подпись, а ленте вкладок отдаём всё остальное */
     .td-tabs-back {
         flex: 0 0 auto;
-        font-size: 0.76rem;
+        font-size: var(--fs-xs);
         gap: 4px;
         padding-right: 10px;
         margin-right: 2px;
@@ -2388,7 +2388,7 @@ tr.td-rr-row-dimmed {
 
     .td-tab {
         flex: 0 0 auto;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
         padding: 10px 2px;
     }
 
@@ -2420,7 +2420,7 @@ tr.td-rr-row-dimmed {
        оставались низкими, и линии проходили прямо по именам */
     .td-match-player {
         padding: 4px 7px;
-        font-size: 0.7rem;
+        font-size: var(--fs-2xs);
         /* Высота задана жёстко, а не минимумом: у одиночного имени строка
            выходила 30 пикселей, у пары — 37, и клетки всё равно разъезжались */
         height: 38px;
@@ -2437,7 +2437,7 @@ tr.td-rr-row-dimmed {
     }
 
     .td-round-title {
-        font-size: 0.62rem;
+        font-size: var(--fs-2xs);
         margin-bottom: 6px;
     }
 
@@ -2473,12 +2473,12 @@ tr.td-rr-row-dimmed {
 
     .td-ig-match,
     .td-ig-card {
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
 
     .td-ig-match > div:first-child {
         padding: 4px 8px !important;
-        font-size: 0.58rem !important;
+        font-size: var(--fs-2xs) !important;
     }
 
     .td-ig-match .td-match-player,
@@ -2491,7 +2491,7 @@ tr.td-rr-row-dimmed {
     #descriptionContent,
     #descriptionContent p,
     #descriptionContent li {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
         line-height: 1.5;
     }
 
@@ -2539,20 +2539,20 @@ tr.td-rr-row-dimmed {
        Размер задан ячейкам, а не таблице: правило на ячейках сильнее */
     .td-reg-table th,
     .td-reg-table td {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 
     /* NTRP и дата — подписи: 0.72rem по стандарту */
     .td-reg-table td:nth-child(4),
     .td-reg-table td:nth-child(5) {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     /* Шапка на месте — без неё непонятно, что за цифры в колонках.
        Раньше она налезала сама на себя из-за длинного слова «Категория»;
        теперь там короткое «NTRP», и подписи помещаются */
     .td-reg-table thead th {
-        font-size: 0.54rem;
+        font-size: var(--fs-2xs);
         letter-spacing: 0.02em;
         white-space: nowrap;
         overflow: hidden;
@@ -2596,7 +2596,7 @@ tr.td-rr-row-dimmed {
     }
 
     .td-participants-subtitle {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
         margin-bottom: 8px;
     }
 
@@ -2635,7 +2635,7 @@ tr.td-rr-row-dimmed {
 
     .td-ig-title,
     .td-ig-match-title {
-        font-size: 0.62rem;
+        font-size: var(--fs-2xs);
     }
 
     /* ─── Расписание запусков вписано в экран ───
@@ -2663,7 +2663,7 @@ tr.td-rr-row-dimmed {
     .td-sched-round::after,
     .td-sched-court-cell::after {
         content: attr(data-short);
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
 
     /* Без table-layout: fixed — заголовок «Игра» объединяет три ячейки,
@@ -2675,13 +2675,13 @@ tr.td-rr-row-dimmed {
 
     .td-sched-table .td-sched-time {
         width: 44px;
-        font-size: 0.7rem;
+        font-size: var(--fs-2xs);
         white-space: nowrap;
     }
 
     .td-sched-table .td-sched-vs {
         width: 16px;
-        font-size: 0.6rem;
+        font-size: var(--fs-2xs);
         text-align: center;
     }
 
@@ -2693,7 +2693,7 @@ tr.td-rr-row-dimmed {
     .td-sched-table td:nth-child(3) { width: 24px; text-align: center; }
 
     .td-sched-table .td-sched-p {
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
         line-height: 1.2;
         word-break: break-word;
     }
@@ -2731,13 +2731,13 @@ tr.td-rr-row-dimmed {
     }
 
     .td-venue-name {
-        font-size: 1rem;
+        font-size: var(--fs-base);
         line-height: 1.25;
         margin-bottom: 4px;
     }
 
     .td-venue-address {
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
         margin-bottom: 0;
     }
 
@@ -2748,7 +2748,7 @@ tr.td-rr-row-dimmed {
 
     .td-venue-links a {
         padding: 6px 12px;
-        font-size: 0.76rem;
+        font-size: var(--fs-xs);
     }
 
     /* Карта на телефоне нужна для ориентира, а не для изучения района.
@@ -2778,7 +2778,7 @@ tr.td-rr-row-dimmed {
     .td-section h3,
     .td-tab-content h3,
     .td-content h3 {
-        font-size: 1rem;
+        font-size: var(--fs-base);
         line-height: 1.25;
     }
 
@@ -2807,7 +2807,7 @@ tr.td-rr-row-dimmed {
     /* Счётчик до старта: цифры в трёх коробках по 60 пикселей занимали
        125 пикселей высоты — столько же, сколько название турнира */
     .td-countdown { margin-top: 12px; }
-    .td-cd-title { margin-bottom: 6px; font-size: 0.62rem; letter-spacing: 1.5px; }
+    .td-cd-title { margin-bottom: 6px; font-size: var(--fs-2xs); letter-spacing: 1.5px; }
     .td-cd-boxes { gap: 6px; }
 
     .td-cd-box {

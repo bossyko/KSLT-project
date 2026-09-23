@@ -111,7 +111,7 @@
     border-radius: var(--radius-full);
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     outline: none;
     transition: all 0.3s;
 }
@@ -187,21 +187,21 @@
 }
 
 .co-card-name {
-    font-size: 1.15rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     margin-bottom: 4px;
 }
 
 .co-card-spec {
     color: var(--accent);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     margin-bottom: 12px;
 }
 
 .co-card-desc {
     color: var(--text-secondary);
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     margin-bottom: 16px;
     flex-grow: 1;
@@ -220,20 +220,20 @@
 }
 
 .co-card-stat-num {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
 }
 
 .co-card-stat-label {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     margin-top: 2px;
 }
 
 .co-card-price {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     margin-bottom: 16px;
 }
@@ -260,7 +260,7 @@
     padding: 10px 0;
     border-radius: var(--radius-full);
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -298,7 +298,7 @@
     z-index: 10000;
     padding: 12px 24px;
     border-radius: var(--radius-md);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: #000;
     background: var(--accent);
@@ -340,7 +340,7 @@
 }
 
 .co-detail-info h1 {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 800;
     margin-bottom: 4px;
     letter-spacing: -0.02em;
@@ -348,14 +348,14 @@
 
 .co-detail-spec {
     color: var(--accent);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     margin-bottom: 8px;
 }
 
 .co-detail-court {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -370,7 +370,7 @@
 .co-map-link {
     color: var(--accent);
     text-decoration: none;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     transition: opacity 0.2s;
     white-space: nowrap;
@@ -396,7 +396,7 @@
 }
 
 .co-detail-stat-num {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 800;
     color: var(--accent);
     line-height: 1;
@@ -405,7 +405,7 @@
 
 .co-detail-stat-label {
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 /* Detail sections */
@@ -414,7 +414,7 @@
 }
 
 .co-section-title {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     margin-bottom: 20px;
     padding-bottom: 10px;
@@ -427,7 +427,7 @@
 
 .co-bio-text {
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     line-height: 1.8;
 }
 
@@ -447,14 +447,14 @@
     border-radius: var(--radius-md);
     padding: 14px 18px;
     color: var(--text-secondary);
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
 }
 
 .co-achievement::before {
     content: '✓';
     color: var(--accent);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     flex-shrink: 0;
 }
 
@@ -481,7 +481,7 @@
 
 .co-schedule-time {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .co-schedule-row.day-off .co-schedule-time {
@@ -505,14 +505,14 @@
 
 .co-review-stars {
     color: var(--accent);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     margin-bottom: 10px;
     letter-spacing: 2px;
 }
 
 .co-review-text {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     margin-bottom: 12px;
     font-style: italic;
@@ -520,7 +520,7 @@
 
 .co-review-author {
     color: var(--text-muted);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
 }
 
@@ -535,7 +535,7 @@
 }
 
 .co-cta h3 {
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     margin-bottom: 12px;
 }
@@ -556,7 +556,7 @@
     background: var(--accent);
     color: #000;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     padding: 14px 36px;
     border: none;
@@ -587,7 +587,7 @@
 
 .co-back-sep {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .co-back-link {
@@ -596,7 +596,7 @@
     gap: 8px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     transition: color var(--transition-fast);
 }
@@ -663,7 +663,7 @@
     }
 
     .co-card-name {
-        font-size: 0.88rem;
+        font-size: var(--fs-sm);
         line-height: 1.25;
         /* Дальше двух строк не пускаем — иначе карточки в ряду разъедутся */
         display: -webkit-box;
@@ -673,7 +673,7 @@
     }
 
     .co-card-spec {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         margin-bottom: 8px;
     }
 
@@ -690,11 +690,11 @@
     }
 
     .co-card-stat-num {
-        font-size: 0.95rem;
+        font-size: var(--fs-base);
     }
 
     .co-card-stat-label {
-        font-size: 0.62rem;
+        font-size: var(--fs-2xs);
     }
 
     /* Кнопки столбиком: рядом на 173 пикселях «Подробнее →» ломалось
@@ -708,7 +708,7 @@
     .co-card-cta {
         width: 100%;
         padding: 8px 10px;
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
         justify-content: center;
         text-align: center;
         white-space: nowrap;
@@ -723,7 +723,7 @@
         height: 120px;
     }
     .co-detail-info h1 {
-        font-size: 1.5rem;
+        font-size: var(--fs-xl);
     }
     .co-detail-court {
         justify-content: center;
@@ -748,7 +748,7 @@
         padding: 16px 12px;
     }
     .co-detail-stat-num {
-        font-size: 1.5rem;
+        font-size: var(--fs-xl);
     }
 
     /* Страница тренера — по той же шкале, что страница корта: имя в обложке
@@ -765,19 +765,19 @@
     }
 
     .co-detail-info h1 {
-        font-size: 1.25rem;
+        font-size: var(--fs-lg);
     }
 
     .co-detail-spec {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     .co-detail-stat-num {
-        font-size: 1.25rem;
+        font-size: var(--fs-lg);
     }
 
     .co-detail-stat-label {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     .co-cta {
@@ -789,23 +789,23 @@
     }
 
     .co-cta p {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
         line-height: 1.35;
     }
 
     .co-cta-btn {
         padding: 10px 22px;
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     .co-detail-desc,
     .co-about-text {
-        font-size: 0.88rem;
+        font-size: var(--fs-sm);
         line-height: 1.55;
     }
     .co-search-input {
         padding: 12px 16px 12px 44px;
-        font-size: 0.9rem;
+        font-size: var(--fs-sm);
     }
     .co-filters {
         gap: 8px;
@@ -815,7 +815,7 @@
 @media (max-width: 375px) {
     
     .co-hero-title {
-        font-size: 1.6rem;
+        font-size: var(--fs-xl);
     }
     .co-container {
         padding: 32px 12px 48px;
@@ -824,20 +824,20 @@
         padding: 24px 16px;
     }
     .co-card-name {
-        font-size: 1rem;
+        font-size: var(--fs-base);
     }
     .co-detail-stat-num {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
     .co-cta {
         padding: 28px 16px;
     }
     .co-cta h3 {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
     .co-cta-btn {
         padding: 12px 28px;
-        font-size: 0.9rem;
+        font-size: var(--fs-sm);
     }
 }
 
@@ -871,7 +871,7 @@
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -928,11 +928,11 @@
     flex: 1;
 }
 .co-discount-name {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: rgba(255,255,255,0.85);
 }
 .co-discount-percent {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--accent);
     white-space: nowrap;
@@ -944,14 +944,14 @@
     padding: 8px 20px;
     border-radius: 8px;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: opacity 0.2s;
     white-space: nowrap;
 }
 .co-discount-btn:hover { opacity: 0.85; }
 .co-discount-hint {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: rgba(255,255,255,0.4);
     margin: 0;
     text-align: right;
@@ -1000,7 +1000,7 @@
     background: none;
     border: none;
     color: rgba(255,255,255,0.5);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
     transition: color 0.2s;
 }
@@ -1014,7 +1014,7 @@
 }
 
 .co-membership-modal h3 {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     margin-bottom: 10px;
     color: var(--text-primary);
@@ -1022,7 +1022,7 @@
 
 .co-membership-modal p {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     margin-bottom: 24px;
 }
@@ -1034,7 +1034,7 @@
     background: var(--accent);
     color: #000;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     padding: 12px 32px;
     border-radius: var(--radius-full);
     text-decoration: none;
@@ -1081,11 +1081,11 @@
     background: none;
     border: none;
     color: rgba(255,255,255,0.5);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
 }
 .co-voucher-title {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     color: var(--accent);
     margin-bottom: 20px;
 }
@@ -1108,7 +1108,7 @@
     display: flex;
     justify-content: space-between;
     padding: 6px 0;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.7);
     border-bottom: 1px solid rgba(255,255,255,0.06);
 }
@@ -1129,7 +1129,7 @@
     padding: 10px 24px;
     border-radius: 10px;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: opacity 0.2s;
 }
@@ -1142,7 +1142,7 @@
     border-top: 1px solid rgba(255,255,255,0.06);
 }
 .co-voucher-history h4 {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: rgba(255,255,255,0.7);
     margin-bottom: 12px;
@@ -1161,7 +1161,7 @@
     background: rgba(255,255,255,0.03);
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,0.04);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
 }
 .co-vh-date {
     color: rgba(255,255,255,0.4);
@@ -1180,7 +1180,7 @@
 .co-vh-status {
     padding: 2px 10px;
     border-radius: 100px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     white-space: nowrap;
 }
@@ -1202,7 +1202,7 @@
     color: var(--accent);
     padding: 2px 10px;
     border-radius: 6px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
@@ -1213,7 +1213,7 @@
 }
 .co-vh-empty {
     color: rgba(255,255,255,0.25);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     padding: 8px 0;
 }
 
@@ -1249,11 +1249,11 @@
     background: none;
     border: none;
     color: rgba(255,255,255,0.5);
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
     cursor: pointer;
 }
 .co-picker-title {
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 16px;
@@ -1303,13 +1303,13 @@
 }
 .co-picker-label {
     flex: 1;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.8);
 }
 .co-picker-percent {
     color: var(--accent);
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 .co-picker-submit {
     width: 100%;
@@ -1319,7 +1319,7 @@
     border: none;
     border-radius: 10px;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: opacity 0.2s;
 }
@@ -1367,7 +1367,7 @@
     border: 1px solid rgba(204, 255, 0, 0.2);
     color: var(--accent);
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     transition: all 0.2s;
 }
@@ -1410,14 +1410,14 @@
 }
 
 .co-empty-icon {
-    font-size: 2.5rem;
+    font-size: var(--fs-3xl);
     margin-bottom: 12px;
     opacity: 0.5;
 }
 
 .co-empty p {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 
 /* ============================================
@@ -1434,18 +1434,18 @@
     }
 
     .co-detail-stat-num {
-        font-size: 1.15rem;
+        font-size: var(--fs-md);
     }
 
     .co-detail-stat-label {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     .co-detail-spec {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 
     .co-bio-text {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 }

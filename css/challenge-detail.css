@@ -47,7 +47,7 @@
 
 .ch-hero-kicker {
     display: inline-block;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -60,7 +60,7 @@
     flex-wrap: wrap;
     gap: 8px 24px;
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 
 .ch-hero-meta b {
@@ -102,7 +102,7 @@
     margin-top: 14px;
     padding-top: 12px;
     border-top: 1px solid var(--border-subtle);
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     line-height: 1.5;
     color: var(--text-dim);
     text-align: center;
@@ -182,7 +182,7 @@
     gap: 6px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 500;
     margin-bottom: var(--space-lg);
     transition: color 0.2s;
@@ -228,14 +228,14 @@
 }
 
 .ch-player-name {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--text-primary);
     text-align: center;
 }
 
 .ch-player-cat {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--accent);
     font-weight: 600;
     text-transform: uppercase;
@@ -243,7 +243,7 @@
 }
 
 .ch-player-ntrp {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
     font-weight: 500;
     margin-top: 2px;
@@ -252,14 +252,14 @@
 .ch-player-stats {
     display: flex;
     gap: var(--space-md);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 .ch-stat-w { color: #4ade80; }
 .ch-stat-l { color: #f87171; }
 
 .ch-player-rating {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 .ch-player-rating strong {
@@ -276,7 +276,7 @@
 }
 
 .ch-vs-text {
-    font-size: 2.5rem;
+    font-size: var(--fs-3xl);
     font-weight: 900;
     color: var(--accent);
     text-shadow: 0 0 20px rgba(204, 255, 0, 0.4), 0 0 40px rgba(204, 255, 0, 0.2);
@@ -290,7 +290,7 @@
     gap: var(--space-lg);
     flex-wrap: wrap;
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 .ch-meta-item {
     display: flex;
@@ -307,7 +307,7 @@
 .ch-map-link {
     color: var(--accent);
     text-decoration: none;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     transition: opacity 0.2s;
     white-space: nowrap;
@@ -330,7 +330,7 @@
 }
 
 .ch-voting-title {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--space-md);
@@ -340,7 +340,7 @@
    кнопки, а не просто список */
 .ch-voting-hint {
     text-align: center;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     margin-bottom: 12px;
 }
@@ -359,7 +359,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     color: #fff;
     transition: width 0.5s ease;
@@ -370,7 +370,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     color: #fff;
     transition: width 0.5s ease;
@@ -404,22 +404,22 @@
     width: 128px;
 }
 .ch-pair .ch-player-photo { width: 100px; height: 132px; }
-.ch-pair .ch-player-name { font-size: 0.96rem; line-height: 1.25; min-height: 2.4em; }
+.ch-pair .ch-player-name { font-size: var(--fs-base); line-height: 1.25; min-height: 2.4em; }
 .ch-pair-plus {
     color: var(--text-dim);
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     margin-top: 56px;
 }
 
 /* Счёт в парах вместо побед и поражений: рейтинговые одиночные числа рядом
    с парным матчем ничего не значат */
-.ch-pair-record { font-size: 0.72rem; color: #6EA8FE; font-weight: 600; }
+.ch-pair-record { font-size: var(--fs-xs); color: #6EA8FE; font-weight: 600; }
 
 /* Состав словами: мужские пары, женские пары, микст */
 .ch-format {
     text-align: center;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -454,13 +454,13 @@
 }
 
 .ch-forecast-title {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .ch-forecast-hint {
-    font-size: 0.74rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -468,7 +468,7 @@
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
     margin-bottom: 6px;
 }
@@ -490,7 +490,7 @@
 }
 
 .ch-forecast-bar b {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 0 8px;
     white-space: nowrap;
@@ -524,7 +524,7 @@
     border: 2px solid rgba(255,255,255,0.15);
     background: rgba(255,255,255,0.06);
     color: var(--text-primary);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     cursor: pointer;
     transition: all 0.25s;
@@ -533,16 +533,16 @@
     position: relative;
 }
 .ch-vote-btn .ch-vote-name {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
 }
 .ch-vote-btn .ch-vote-count {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 400;
     color: var(--text-dim);
 }
 .ch-vote-btn .ch-vote-cta {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -603,7 +603,7 @@
     top: 8px;
     right: 10px;
     color: var(--accent);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     line-height: 1;
 }
@@ -618,7 +618,7 @@
     border: 1px solid rgba(204, 255, 0, 0.3);
     border-radius: 20px;
     color: var(--accent);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
 }
 .ch-tg-icon {
@@ -629,7 +629,7 @@
 .ch-vote-toast {
     color: var(--accent);
     margin-top: 8px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     animation: chFadeIn 0.3s ease;
 }
 @keyframes chFadeIn {
@@ -641,12 +641,12 @@
 .ch-vote-dot-blue { color: #3b82f6; }
 
 .ch-voting-total {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
 .ch-voting-login {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     margin-top: var(--space-sm);
 }
@@ -662,13 +662,13 @@
     border: 1px solid rgba(248, 113, 113, 0.3);
     border-radius: var(--radius-sm);
     color: #f87171;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     margin-top: var(--space-sm);
 }
 .ch-voting-until {
     color: var(--text-secondary, rgba(255,255,255,0.5));
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     margin-top: var(--space-sm);
 }
 
@@ -689,7 +689,7 @@
 }
 
 .ch-details-title {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 0;
@@ -705,15 +705,15 @@
     border: 1px solid var(--border);
 }
 .ch-detail-icon {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     flex-shrink: 0;
 }
 .ch-detail-label {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
 }
 .ch-detail-value {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: var(--text-primary);
     font-weight: 600;
 }
@@ -768,7 +768,7 @@
 }
 
 .ch-h2h-title {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -776,7 +776,7 @@
 }
 
 .ch-h2h-count {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 800;
     color: var(--text-secondary);
 }
@@ -801,7 +801,7 @@
     gap: 12px;
     padding: 8px 0;
     border-top: 1px solid var(--border-subtle);
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
@@ -819,7 +819,7 @@
 
 .ch-h2h-duel {
     color: var(--accent);
-    font-size: 0.8em;
+    font-size: var(--fs-xs);
 }
 
 .ch-h2h-score-text {
@@ -841,7 +841,7 @@
     padding: 0;
     color: var(--accent);
     font-family: var(--font-primary);
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
 }
@@ -869,7 +869,7 @@
 }
 
 .ch-score-title {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -886,7 +886,7 @@
 }
 
 .ch-score-player {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-primary);
     min-width: 120px;
@@ -904,7 +904,7 @@
     padding: 6px 12px;
     background: var(--bg-tertiary);
     border-radius: var(--radius-sm);
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--text-primary);
     white-space: nowrap;
@@ -919,13 +919,13 @@
     border: 1px solid rgba(204, 255, 0, 0.3);
     border-radius: var(--radius-md);
     color: var(--accent);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     margin-bottom: var(--space-md);
 }
 
 .ch-prediction-result {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: var(--text-secondary);
     padding: var(--space-sm) var(--space-md);
     background: var(--bg-secondary);
@@ -944,7 +944,7 @@
     color: var(--text-secondary);
 }
 .ch-not-found h2 {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
 }
@@ -954,20 +954,20 @@
     text-align: center;
     padding: var(--section-y) var(--pad-x);
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: var(--fs-base);
 }
 
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
     .ch-hero { padding: var(--section-y-sm) var(--pad-x); }
-    .ch-battle-title { font-size: 1.5rem; }
+    .ch-battle-title { font-size: var(--fs-xl); }
     .ch-vs-container {
         flex-direction: column;
         gap: var(--space-md);
     }
-    .ch-vs-text { font-size: 1.8rem; }
+    .ch-vs-text { font-size: var(--fs-xl); }
     .ch-player-photo { width: 100px; height: 130px; }
-    .ch-player-name { font-size: 1.1rem; }
+    .ch-player-name { font-size: var(--fs-md); }
     .ch-meta { flex-direction: column; align-items: center; gap: var(--space-sm); }
     .ch-voting { padding: var(--section-y-sm) var(--pad-x); }
     .ch-vote-buttons { flex-direction: column; align-items: center; }
@@ -982,7 +982,7 @@
 
 @media (max-width: 480px) {
     .ch-hero { padding: var(--space-md) var(--pad-x); }
-    .ch-battle-title { font-size: 1.25rem; }
+    .ch-battle-title { font-size: var(--fs-lg); }
     .ch-player-photo { width: 80px; height: 110px; }
     .ch-player-stats { flex-direction: column; gap: 2px; text-align: center; }
     .ch-h2h-match { flex-direction: column; gap: 4px; text-align: center; }

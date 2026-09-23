@@ -9,7 +9,7 @@
     gap: 8px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     padding: 20px var(--pad-x) 0;
     transition: color var(--transition-fast);
@@ -106,13 +106,13 @@
 
 .hero-stat-value {
     display: block;
-    font-size: 2.5rem;
+    font-size: var(--fs-3xl);
     font-weight: 800;
     color: var(--accent);
 }
 
 .hero-stat-label {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -172,7 +172,7 @@
     border-radius: var(--radius-full);
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     outline: none;
     transition: all 0.3s;
     min-width: 140px;
@@ -250,13 +250,13 @@
 }
 
 .date-day {
-    font-size: 1.75rem;
+    font-size: var(--fs-xl);
     font-weight: 800;
     color: var(--accent);
 }
 
 .date-month {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     color: var(--text-muted);
@@ -266,7 +266,7 @@
 .tournament-status {
     padding: 6px 14px;
     border-radius: var(--radius-full);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -337,7 +337,7 @@
 
 .tournament-gender-badge {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     padding: 2px 10px;
     border-radius: var(--radius-full);
@@ -352,7 +352,7 @@
 }
 
 .tournament-card-body h3 {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     margin-bottom: 0;
     color: var(--text-primary);
@@ -369,7 +369,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
@@ -395,7 +395,7 @@
 
 .detail-label {
     display: block;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -406,7 +406,7 @@
 }
 
 .detail-value {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     word-break: break-word;
     font-weight: 600;
     color: var(--text-primary);
@@ -460,7 +460,7 @@
 .btn-register {
     padding: 8px 12px;
     border-radius: var(--radius-md);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-align: center;
     text-decoration: none;
@@ -486,7 +486,7 @@
 }
 
 .ranking-note {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
 }
 
@@ -503,7 +503,7 @@
 }
 
 .ranking-column-title {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text);
     margin-bottom: var(--space-md);
@@ -527,11 +527,11 @@
 .tournaments-played {
     text-align: center;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .ranking-header .tournaments-played {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--text-dim);
 }
 
@@ -593,7 +593,7 @@
 .trn-strip .to-compact-date .to-day { color: var(--text-secondary); }
 
 .trn-strip-sub {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     white-space: nowrap;
     overflow: hidden;
@@ -604,7 +604,7 @@
 
 .trn-strip-badge {
     display: inline-block;
-    font-size: 0.66rem;
+    font-size: var(--fs-2xs);
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -617,7 +617,7 @@
 }
 
 .trn-strip-gender {
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 1px 7px;
     border-radius: var(--radius-full);
@@ -644,7 +644,7 @@
     background: transparent;
     color: var(--accent);
     font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -686,7 +686,7 @@
 }
 
 .past-date {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
@@ -694,14 +694,14 @@
     padding: 4px 10px;
     background: rgba(255, 255, 255, 0.08);
     border-radius: var(--radius-full);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
 }
 
 .past-tournament-card h4 {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--space-md);
@@ -730,25 +730,25 @@
 
 .winner-label {
     display: block;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--text-muted);
     text-transform: uppercase;
 }
 
 .winner-name {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .winner-trophy {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
 }
 
 .past-stats {
     display: flex;
     gap: 8px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     margin-bottom: var(--space-md);
 }
@@ -762,7 +762,7 @@
     border-radius: var(--radius-md);
     background: transparent;
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     white-space: nowrap;
     font-weight: 500;
     text-align: center;
@@ -852,7 +852,7 @@
 
     .ranking-column .ranking-row {
         grid-template-columns: 35px 1fr 45px 60px 40px;
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 }
 
@@ -873,19 +873,19 @@
 
 @media (max-width: 375px) {
     .tournament-list-header h1 {
-        font-size: 1.4rem;
+        font-size: var(--fs-lg);
     }
     .tournament-card-content {
         padding: 16px;
     }
     .tournament-card-title {
-        font-size: 1rem;
+        font-size: var(--fs-base);
     }
     .tournament-details {
         gap: var(--space-sm);
     }
     .detail-item {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 }
 
@@ -898,7 +898,7 @@
     border: 1px solid rgba(255,100,100,0.3);
     border-radius: 8px;
     padding: 6px 12px;
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: #fff;
@@ -938,7 +938,7 @@
 }
 
 .to-cd-unit small {
-    font-size: 0.58rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     opacity: 0.75;
     margin-right: 3px;
@@ -964,7 +964,7 @@
     border-color: rgba(74,222,128,0.3);
     color: #fff;
     gap: 8px;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
@@ -1000,7 +1000,7 @@
 
 /* Countdown prefix label */
 .to-cd-label {
-    font-size: 0.56rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
@@ -1046,7 +1046,7 @@
        Полное название занимало шесть строк, описание — ещё пять, и от
        карточки оставалась колонка текста без картинки */
     .tournament-card .tournament-title {
-        font-size: 0.92rem;
+        font-size: var(--fs-sm);
         line-height: 1.25;
         display: -webkit-box;
         -webkit-line-clamp: 3;
@@ -1062,7 +1062,7 @@
     }
 
     .tournament-card .tournament-date {
-        font-size: 0.7rem;
+        font-size: var(--fs-2xs);
     }
 
     /* Карточки одной высоты: иначе ряд идёт лесенкой */
@@ -1078,7 +1078,7 @@
 
     .tournament-card .tournament-meta {
         margin-top: auto;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     /* Кнопка во всю ширину карточки и мельче: она была шире колонки */
@@ -1086,7 +1086,7 @@
     .tournament-card .tournament-btn {
         width: 100%;
         padding: 8px 10px;
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
         text-align: center;
     }
 }

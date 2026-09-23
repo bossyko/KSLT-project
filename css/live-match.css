@@ -44,7 +44,7 @@
     justify-content: center;
     background: rgba(255,255,255,0.03);
     color: rgba(255,255,255,0.3);
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
 }
 
 /* Score panel */
@@ -62,7 +62,7 @@
     padding: 12px 16px;
     background: rgba(239,83,80,0.1);
     border-bottom: 1px solid rgba(255,255,255,0.06);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -128,7 +128,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: rgba(255,255,255,0.4);
 }
@@ -137,7 +137,7 @@
     min-width: 0;
 }
 .lm-player-name {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -162,7 +162,7 @@
 .lm-set-score {
     width: 28px;
     text-align: center;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: rgba(255,255,255,0.6);
@@ -175,7 +175,7 @@
 .lm-points-score {
     width: 32px;
     text-align: center;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 800;
     color: var(--accent, #CCFF00);
     background: rgba(204,255,0,0.1);
@@ -195,7 +195,7 @@
 .lm-info-row {
     display: flex;
     justify-content: space-between;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: rgba(255,255,255,0.4);
 }
 .lm-info-val {
@@ -211,12 +211,12 @@
     border-top: 1px solid rgba(204,255,0,0.15);
 }
 .lm-winner-text {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: var(--accent, #CCFF00);
 }
 .lm-final-score {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.5);
     margin-top: 4px;
 }
@@ -225,7 +225,7 @@
 .lm-tiebreak-badge {
     text-align: center;
     padding: 4px;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -239,12 +239,12 @@
     margin-bottom: 32px;
 }
 .lm-list-title {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 800;
     margin: 0 0 6px;
 }
 .lm-list-subtitle {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: rgba(255,255,255,0.5);
     margin: 0;
 }
@@ -278,7 +278,7 @@
     margin-bottom: 14px;
 }
 .lm-card-info {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: rgba(255,255,255,0.4);
 }
 
@@ -299,7 +299,7 @@
     text-align: right;
 }
 .lm-card-pname {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -318,7 +318,7 @@
     min-width: 60px;
 }
 .lm-card-vs {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.3);
     font-weight: 700;
 }
@@ -332,7 +332,7 @@
     flex-direction: column;
     align-items: center;
     gap: 1px;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 800;
     line-height: 1.1;
     color: rgba(255,255,255,0.6);
@@ -346,7 +346,7 @@
     display: inline-block;
     background: rgba(204,255,0,0.08);
     border-radius: 100px;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     color: var(--accent, #CCFF00);
 }
@@ -355,7 +355,7 @@
 .lm-back-link {
     display: inline-block;
     margin-bottom: 20px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--accent, #CCFF00);
     text-decoration: none;
     font-weight: 600;
@@ -367,14 +367,14 @@
     text-align: center;
     padding: 60px 20px;
 }
-.lm-empty-icon { font-size: 3rem; margin-bottom: 16px; }
+.lm-empty-icon { font-size: var(--fs-3xl); margin-bottom: 16px; }
 .lm-empty-title {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     margin-bottom: 6px;
 }
 .lm-empty-text {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.4);
 }
 
@@ -383,7 +383,7 @@
     text-align: center;
     padding: 80px 20px;
     color: rgba(255,255,255,0.4);
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
 }
 .lm-error { color: #EF5350; }
 
@@ -398,17 +398,17 @@
     .lm-container { padding: 70px 12px 24px; }
     .lm-player-row { padding: 10px 12px; gap: 8px; }
     .lm-avatar, .lm-avatar-placeholder { width: 36px; height: 36px; }
-    .lm-player-name { font-size: 0.85rem; }
+    .lm-player-name { font-size: var(--fs-sm); }
     .lm-list-grid { grid-template-columns: 1fr; }
-    .lm-list-title { font-size: 1.5rem; }
-    .lm-card-pname { font-size: 0.8rem; }
+    .lm-list-title { font-size: var(--fs-xl); }
+    .lm-card-pname { font-size: var(--fs-xs); }
 }
 
 @media (max-width: 375px) {
     .lm-container { padding: 70px 8px 20px; }
     .lm-player-row { padding: 8px 8px; gap: 6px; }
     .lm-avatar, .lm-avatar-placeholder { width: 32px; height: 32px; }
-    .lm-player-name { font-size: 0.8rem; }
-    .lm-set-score { width: 24px; font-size: 0.85rem; }
+    .lm-player-name { font-size: var(--fs-xs); }
+    .lm-set-score { width: 24px; font-size: var(--fs-sm); }
     .lm-points-score { width: 28px; }
 }

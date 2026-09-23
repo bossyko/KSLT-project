@@ -90,7 +90,7 @@
 }
 
 .sv-column-title {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -103,7 +103,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--accent);
     text-decoration: none;
@@ -184,7 +184,7 @@
 }
 
 .sv-featured-content h3 {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--space-xs);
@@ -194,7 +194,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     margin-bottom: var(--space-sm);
 }
@@ -218,13 +218,13 @@
 }
 
 .sv-featured-detail {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .sv-featured-detail .sv-label {
     color: var(--text-muted);
     text-transform: uppercase;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     letter-spacing: 0.5px;
     display: block;
     margin-bottom: 2px;
@@ -244,7 +244,7 @@
     padding: 10px 28px;
     background: var(--accent);
     color: #000;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     border-radius: var(--radius-md);
     text-decoration: none;
@@ -382,7 +382,7 @@
 }
 
 .sv-compact h4 {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
@@ -392,7 +392,7 @@
 }
 
 .sv-compact-sub {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     margin-bottom: var(--space-xs);
     white-space: nowrap;
@@ -406,7 +406,7 @@
 }
 
 .sv-compact-price {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     color: var(--accent);
     white-space: nowrap;
@@ -456,7 +456,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     margin-bottom: var(--space-sm);
     border: 2px solid var(--accent);
@@ -467,7 +467,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .sv-partner-status.online {
@@ -510,7 +510,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     border: 2px solid var(--border-subtle);
 }
@@ -532,7 +532,7 @@
     text-align: center;
     padding: var(--space-xl) var(--space-lg);
     color: var(--text-muted);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 
 .sv-empty svg {
@@ -551,7 +551,7 @@
     right: 14px;
     background: rgba(220, 38, 38, 0.9);
     color: #fff;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     padding: 5px 12px;
     border-radius: 100px;
@@ -569,7 +569,7 @@
     right: 6px;
     background: rgba(220, 38, 38, 0.9);
     color: #fff;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 2px 8px;
     border-radius: 100px;
@@ -600,7 +600,7 @@
     
 
     .sv-hero h1 {
-        font-size: 1.8rem;
+        font-size: var(--fs-xl);
     }
 
         .sv-columns {
@@ -617,7 +617,7 @@
     }
 
     .sv-featured-content h3 {
-        font-size: 1.15rem;
+        font-size: var(--fs-md);
     }
 
     .sv-compact {
@@ -643,15 +643,15 @@
     
 
     .sv-hero h1 {
-        font-size: 1.5rem;
+        font-size: var(--fs-xl);
     }
 
     .sv-hero p {
-        font-size: 0.9rem;
+        font-size: var(--fs-sm);
     }
 
         .sv-column-title {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
 
     .sv-featured {
@@ -663,7 +663,7 @@
     }
 
     .sv-featured-content h3 {
-        font-size: 1.05rem;
+        font-size: var(--fs-base);
     }
 
     .sv-featured-details {
@@ -677,18 +677,18 @@
     }
 
     .sv-compact h4 {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 }
 
 @media (max-width: 375px) {
     .sv-column-title {
-        font-size: 1.15rem;
+        font-size: var(--fs-md);
     }
 
     .sv-featured-link {
         padding: 8px 20px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -764,7 +764,7 @@
     position: absolute;
     top: 10px;
     right: 12px;
-    font-size: 0.62rem;
+    font-size: var(--fs-2xs);
     font-weight: 800;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -776,7 +776,7 @@
     position: absolute;
     top: 10px;
     left: 14px;
-    font-size: 1.15rem;
+    font-size: var(--fs-md);
     font-weight: 800;
     line-height: 1;
     color: var(--accent);
@@ -785,7 +785,7 @@
 
 .sv-player-ntrp small {
     display: block;
-    font-size: 0.5rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     letter-spacing: 1px;
     color: var(--text-dim);
@@ -828,7 +828,7 @@
 }
 
 .sv-player-name {
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     margin-bottom: 4px;
     /* Длинное имя переносим на вторую строку, а не обрезаем многоточием:
@@ -848,14 +848,14 @@
 }
 
 .sv-player-level {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
     margin-bottom: 2px;
 }
 
 /* Когда человек заходил в последний раз: по этому решают, писать ли */
 .sv-player-seen {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     margin-bottom: 12px;
 }
@@ -873,7 +873,7 @@
     background: transparent;
     color: var(--text-primary);
     font-family: var(--font-primary);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     cursor: pointer;
     transition: border-color 0.2s, color 0.2s;

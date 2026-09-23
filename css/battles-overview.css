@@ -79,13 +79,13 @@
 
 .bo-hero-stat-value {
     display: block;
-    font-size: 2.5rem;
+    font-size: var(--fs-3xl);
     font-weight: 800;
     color: var(--accent);
 }
 
 .bo-hero-stat-label {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -204,7 +204,7 @@
    превращалась в «Айсулуу Чоко…», и карточка переставала отвечать на
    вопрос, кто играет */
 .bo-player-name {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--text-primary);
     text-align: center;
@@ -214,7 +214,7 @@
 }
 
 .bo-player-cat {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -251,7 +251,7 @@
 }
 
 .bo-strip-sub {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     white-space: nowrap;
     overflow: hidden;
@@ -262,7 +262,7 @@
 
 .bo-strip-badge {
     display: inline-block;
-    font-size: 0.66rem;
+    font-size: var(--fs-2xs);
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -287,7 +287,7 @@
 .bo-strip-past .to-compact-date .to-day { color: var(--text-secondary); }
 
 .bo-strip-fmt {
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 1px 7px;
     border-radius: var(--radius-full);
@@ -337,7 +337,7 @@
     gap: 1px;
     line-height: 1.25;
 }
-.bo-player-name.bo-pair-names span { font-size: 0.85rem; }
+.bo-player-name.bo-pair-names span { font-size: var(--fs-sm); }
 
 /* Имя в паре переносится на вторую строку, а не режется многоточием:
    «Василий Просто Василий» превращался в «Василий Просто …» */
@@ -350,7 +350,7 @@
    знает, значит подпись собирается сама */
 .bo-format {
     text-align: center;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -359,7 +359,7 @@
 }
 
 .bo-vs-badge {
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
     font-weight: 900;
     color: var(--accent);
     flex-shrink: 0;
@@ -392,7 +392,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     margin-bottom: var(--space-sm);
 }
 
@@ -408,7 +408,7 @@
 
 .bo-total-votes {
     color: var(--text-muted);
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
 }
 
 /* Vote buttons */
@@ -425,7 +425,7 @@
     border-radius: var(--radius-md);
     background: rgba(255,255,255,0.06);
     color: var(--text-primary);
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
@@ -471,20 +471,20 @@
 }
 
 .bo-vote-status {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--accent);
     margin-bottom: 4px;
 }
 
 .bo-vote-login {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     margin-bottom: var(--space-sm);
     text-align: center;
 }
 
 .bo-vote-closed-msg {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     margin-bottom: var(--space-sm);
     text-align: center;
@@ -496,7 +496,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     margin-bottom: var(--space-sm);
 }
@@ -509,7 +509,7 @@
 
 /* Featured title */
 .bo-featured-title {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
@@ -521,7 +521,7 @@
     display: inline-block;
     padding: 4px 14px;
     border-radius: var(--radius-full);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -549,7 +549,7 @@
     padding: 10px 28px;
     background: var(--accent);
     color: #000;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     border-radius: var(--radius-md);
     text-decoration: none;
@@ -574,13 +574,13 @@
     background: rgba(204, 255, 0, 0.1);
     border: 1px solid rgba(204, 255, 0, 0.3);
     border-radius: var(--radius-md);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     color: var(--accent);
 }
 
 .bo-winner-name {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--accent);
     font-weight: 600;
 }
@@ -591,7 +591,7 @@
     text-align: center;
     padding: var(--space-xl) var(--space-lg);
     color: var(--text-muted);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 
 .bo-empty svg {
@@ -611,7 +611,7 @@
     border: 1px solid rgba(255,100,100,0.3);
     border-radius: 8px;
     padding: 6px 12px;
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: #fff;
@@ -651,7 +651,7 @@
 }
 
 .bo-cd-unit small {
-    font-size: 0.58rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     opacity: 0.75;
     margin-right: 3px;
@@ -673,7 +673,7 @@
 }
 
 .bo-cd-label {
-    font-size: 0.56rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
@@ -693,7 +693,7 @@
     color: #000;
     padding: 10px 24px;
     border-radius: var(--radius-full);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     z-index: 9999;
     opacity: 0;
@@ -740,7 +740,7 @@
     border-radius: var(--radius-md);
     text-align: center;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     text-decoration: none;
     border: none;
     font-family: inherit;
@@ -797,7 +797,7 @@
     }
 
     .bo-hero h1 {
-        font-size: 1.8rem;
+        font-size: var(--fs-xl);
     }
 
     .bo-section {
@@ -816,11 +816,11 @@
 
 @media (max-width: 480px) {
     .bo-hero h1 {
-        font-size: 1.5rem;
+        font-size: var(--fs-xl);
     }
 
     .bo-hero-sub {
-        font-size: 0.95rem;
+        font-size: var(--fs-base);
     }
 
         .bo-featured {
@@ -837,12 +837,12 @@
     }
 
     .bo-player-name {
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
         max-width: 100px;
     }
 
     .bo-vs-badge {
-        font-size: 1.1rem;
+        font-size: var(--fs-md);
     }
 
 }
@@ -850,7 +850,7 @@
 @media (max-width: 375px) {
         .bo-featured-link {
         padding: 8px 20px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 
     .bo-player-img {
@@ -861,7 +861,7 @@
 
 /* Заглушка пустого списка — пламя вместо листа бумаги из общего набора */
 .bo-empty-icon {
-    font-size: 2.4rem;
+    font-size: var(--fs-3xl);
     line-height: 1;
     margin-bottom: var(--space-sm);
     opacity: 0.45;

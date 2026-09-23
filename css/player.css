@@ -96,7 +96,7 @@
 }
 
 .pp-name {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 800;
     letter-spacing: -0.02em;
     margin-bottom: 4px;
@@ -107,13 +107,13 @@
     align-items: center;
     gap: 12px;
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     margin-bottom: 12px;
     flex-wrap: wrap;
 }
 
 .pp-meta-country {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
 }
 
 .pp-meta-category {
@@ -132,7 +132,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .pp-rating-label {
@@ -141,7 +141,7 @@
     letter-spacing: 0.5px;
     color: var(--accent);
     min-width: 40px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .pp-rating-value {
@@ -155,7 +155,7 @@
     gap: 6px;
     color: #22c55e;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .pp-meta-online::before {
@@ -180,13 +180,13 @@
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     padding: 4px 12px;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
     font-weight: 600;
 }
 
 .pp-badge-icon {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 /* Actions */
@@ -203,7 +203,7 @@
     padding: 12px 24px;
     border-radius: var(--radius-full);
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -212,7 +212,7 @@
 
 /* Значок крупнее текста: на 0.9rem огонь терялся рядом с жирной надписью */
 .pp-action-icon {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     line-height: 1;
 }
 
@@ -260,7 +260,7 @@
 .pp-stats-note {
     margin: 0 0 28px;
     color: var(--text-dim);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
 }
 
 .pp-stat {
@@ -269,7 +269,7 @@
 }
 
 .pp-stat-num {
-    font-size: 1.15rem;
+    font-size: var(--fs-md);
     font-weight: 800;
     color: var(--accent);
     line-height: 1.1;
@@ -278,13 +278,13 @@
 
 .pp-stat-label {
     color: var(--text-dim);
-    font-size: 0.66rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
 
 .pp-stat-change {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     margin-top: 4px;
 }
@@ -315,15 +315,15 @@
     margin-bottom: 10px;
 }
 .pp-pair-title {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 700;
 }
 .pp-pair-note {
-    font-size: 0.76rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 .pp-pair-tag {
-    font-size: 0.64rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 1px 7px;
     border-radius: var(--radius-full);
@@ -376,7 +376,7 @@
 }
 
 .pp-chart-label {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -389,7 +389,7 @@
 }
 
 .pp-section-title {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     margin-bottom: 20px;
     padding-bottom: 10px;
@@ -432,7 +432,7 @@
     border: 1px solid var(--accent);
     color: var(--accent);
     font-family: inherit;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     letter-spacing: 0.05em;
     padding: 4px 10px;
@@ -450,7 +450,7 @@
 
 .pp-match-date {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
 }
 
@@ -460,7 +460,7 @@
     display: flex;
     align-items: center;
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     max-width: 190px;
     min-width: 0;
 }
@@ -479,7 +479,7 @@
     margin-left: 6px;
     padding: 1px 7px;
     border-radius: var(--radius-full);
-    font-size: 0.66rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     white-space: nowrap;
 }
@@ -515,12 +515,12 @@
 
 .pp-match-opponent-name {
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 
 .pp-match-score {
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-family: 'Inter', monospace;
     letter-spacing: 0.02em;
 }
@@ -528,7 +528,7 @@
 .pp-match-result {
     padding: 4px 12px;
     border-radius: var(--radius-full);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -578,7 +578,7 @@ a.pp-match-opponent-name:hover {
 }
 
 .pp-achievement-icon {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     flex-shrink: 0;
 }
 
@@ -588,13 +588,13 @@ a.pp-match-opponent-name:hover {
 
 .pp-achievement-name {
     font-weight: 700;
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
     margin-bottom: 2px;
 }
 
 .pp-achievement-desc {
     color: var(--text-muted);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
 }
 
 /* ---- BADGES: Progress Bar ---- */
@@ -624,7 +624,7 @@ a.pp-match-opponent-name:hover {
 
 .pp-badges-progress-text {
     color: var(--accent);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     white-space: nowrap;
 }
@@ -651,7 +651,7 @@ a.pp-match-opponent-name:hover {
     text-align: center;
     padding: 32px 20px;
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .pp-badges-expand {
@@ -661,7 +661,7 @@ a.pp-match-opponent-name:hover {
     border-radius: var(--radius-md);
     color: var(--accent);
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     padding: 12px 20px;
     cursor: pointer;
@@ -726,7 +726,7 @@ a.pp-tournament:hover {
     align-items: center;
     justify-content: center;
     background: var(--bg-elevated);
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
 }
 
 .pp-tournament-info {
@@ -739,21 +739,21 @@ a.pp-tournament:hover {
 
 .pp-tournament-name {
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .pp-tournament-date {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: #888;
 }
 
 .pp-tournament-result {
     color: var(--accent);
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -767,11 +767,11 @@ a.pp-tournament:hover {
     background: rgba(204, 255, 0, 0.1);
     padding: 2px 10px;
     border-radius: var(--radius-full);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .pp-tournament-section-label {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -799,7 +799,7 @@ a.pp-tournament:hover {
     border-radius: var(--radius-md);
     color: var(--text-primary);
     font-family: inherit;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     cursor: pointer;
     transition: border-color var(--transition-fast), background var(--transition-fast);
@@ -816,7 +816,7 @@ a.pp-tournament:hover {
 }
 
 .pp-toggle-arrow {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--text-muted);
     transition: transform 0.2s ease;
 }
@@ -842,7 +842,7 @@ a.pp-tournament:hover {
     border-radius: var(--radius-md);
     color: var(--accent);
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     text-align: center;
@@ -873,7 +873,7 @@ a.pp-tournament:hover {
 
 .pp-challenge-date {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
 }
 
@@ -885,7 +885,7 @@ a.pp-tournament:hover {
 
 .pp-challenge-opp-name {
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: var(--text-primary);
     text-decoration: none;
     transition: color var(--transition-fast);
@@ -897,13 +897,13 @@ a.pp-tournament:hover {
 
 .pp-challenge-venue {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .pp-challenge-status {
     padding: 4px 12px;
     border-radius: var(--radius-full);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -931,7 +931,7 @@ a.pp-tournament:hover {
 }
 
 .pp-cta h3 {
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     margin-bottom: 12px;
 }
@@ -952,7 +952,7 @@ a.pp-tournament:hover {
     background: var(--accent);
     color: #000;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     padding: 14px 36px;
     border: none;
@@ -1010,7 +1010,7 @@ a.pp-tournament:hover {
         justify-content: center;
     }
     .pp-name {
-        font-size: 1.6rem;
+        font-size: var(--fs-xl);
     }
     .pp-stats {
         grid-template-columns: 84px repeat(3, 78px);
@@ -1068,7 +1068,7 @@ a.pp-tournament:hover {
         padding: 2px 0;
     }
     .pp-stat-num {
-        font-size: 1rem;
+        font-size: var(--fs-base);
     }
     .pp-actions {
         flex-direction: column;
@@ -1089,16 +1089,16 @@ a.pp-tournament:hover {
         padding: 32px 12px 48px;
     }
     .pp-name {
-        font-size: 1.4rem;
+        font-size: var(--fs-lg);
     }
     .pp-stat-num {
-        font-size: 1.2rem;
+        font-size: var(--fs-md);
     }
     .pp-cta {
         padding: 28px 16px;
     }
     .pp-cta h3 {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
 }
 
@@ -1109,7 +1109,7 @@ a.pp-tournament:hover {
     text-align: center;
     padding: 40px 20px;
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 /* ========================================
@@ -1177,7 +1177,7 @@ a.pp-tournament:hover {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
     width: 36px;
     height: 36px;
@@ -1199,7 +1199,7 @@ a.pp-tournament:hover {
     text-align: center;
     padding: 48px 20px;
     color: var(--text-muted);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 
 /* ---- Header: avatars + VS + score ---- */
@@ -1230,7 +1230,7 @@ a.pp-tournament:hover {
 
 .h2h-name {
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1245,7 +1245,7 @@ a.pp-tournament:hover {
 }
 
 .h2h-score {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 800;
     color: var(--accent);
     letter-spacing: 0.02em;
@@ -1253,7 +1253,7 @@ a.pp-tournament:hover {
 }
 
 .h2h-label {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -1284,7 +1284,7 @@ a.pp-tournament:hover {
 }
 
 .h2h-stat-val {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     font-weight: 800;
     min-width: 40px;
 }
@@ -1300,7 +1300,7 @@ a.pp-tournament:hover {
 }
 
 .h2h-stat-label {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     text-align: center;
     flex: 1;
@@ -1315,7 +1315,7 @@ a.pp-tournament:hover {
 }
 
 .h2h-matches-title {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -1335,7 +1335,7 @@ a.pp-tournament:hover {
 
 .h2h-match-date {
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     min-width: 52px;
     flex-shrink: 0;
@@ -1345,7 +1345,7 @@ a.pp-tournament:hover {
     display: flex;
     align-items: center;
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     flex: 1;
     min-width: 0;
 }
@@ -1354,7 +1354,7 @@ a.pp-tournament:hover {
 
 .h2h-match-score {
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-family: 'Inter', monospace;
     letter-spacing: 0.02em;
     flex-shrink: 0;
@@ -1363,7 +1363,7 @@ a.pp-tournament:hover {
 .h2h-match-result {
     padding: 3px 10px;
     border-radius: var(--radius-full);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1388,7 +1388,7 @@ a.pp-tournament:hover {
     background: var(--accent);
     color: #000;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-family: inherit;
     border: none;
     border-radius: var(--radius-full);
@@ -1419,15 +1419,15 @@ a.pp-tournament:hover {
     }
 
     .h2h-score {
-        font-size: 1.6rem;
+        font-size: var(--fs-xl);
     }
 
     .h2h-name {
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 
     .h2h-stat-val {
-        font-size: 1.1rem;
+        font-size: var(--fs-md);
     }
 
     .h2h-stat-row {
@@ -1459,7 +1459,7 @@ a.pp-tournament:hover {
     }
 
     .h2h-score {
-        font-size: 1.4rem;
+        font-size: var(--fs-lg);
     }
 }
 
@@ -1508,7 +1508,7 @@ a.pp-tournament:hover {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
     padding: 4px;
     line-height: 1;
@@ -1516,7 +1516,7 @@ a.pp-tournament:hover {
 .pp-chal-close:hover { color: #fff; }
 
 .pp-chal-title {
-    font-size: 1.15rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: #fff;
     margin: 0 0 20px;
@@ -1537,7 +1537,7 @@ a.pp-tournament:hover {
 .pp-chal-field { display: flex; flex-direction: column; gap: 4px; }
 
 .pp-chal-label {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     font-weight: 500;
 }
@@ -1548,7 +1548,7 @@ a.pp-tournament:hover {
     border-radius: 8px;
     color: #fff;
     padding: 10px 12px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-family: inherit;
     outline: none;
     transition: border-color 0.2s;
@@ -1575,7 +1575,7 @@ a.pp-tournament:hover {
 }
 
 .pp-chal-counter {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     text-align: right;
 }
@@ -1586,7 +1586,7 @@ a.pp-tournament:hover {
     border: none;
     border-radius: 10px;
     padding: 12px;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
@@ -1612,7 +1612,7 @@ a.pp-tournament:hover {
     padding: 14px 26px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     border-radius: 10px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     z-index: 10000;
     opacity: 0;
@@ -1664,7 +1664,7 @@ a.pp-tournament:hover {
 }
 
 .pp-guest-name {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 800;
     color: var(--text-primary);
 }
@@ -1682,14 +1682,14 @@ a.pp-tournament:hover {
 }
 
 .pp-guest-cta h3 {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .pp-guest-cta p {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     line-height: 1.5;
     margin-bottom: 24px;
@@ -1700,7 +1700,7 @@ a.pp-tournament:hover {
     padding: 12px 36px;
     background: var(--accent);
     color: #000;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     border-radius: var(--radius-full);
     text-decoration: none;
@@ -1748,7 +1748,7 @@ a.pp-tournament:hover {
     background: var(--bg-elevated);
     color: var(--text-primary);
     text-decoration: none;
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     line-height: 1;
     white-space: nowrap;
     transition: border-color 0.2s, background 0.2s, color 0.2s;
@@ -1778,7 +1778,7 @@ a.pp-tournament:hover {
 .pp-contact-ig:hover svg { color: #E1306C; }
 
 @media (max-width: 480px) {
-    .pp-contact { font-size: 0.82rem; padding: 8px 12px; }
+    .pp-contact { font-size: var(--fs-sm); padding: 8px 12px; }
 }
 
 
@@ -1799,11 +1799,11 @@ a.pp-tournament:hover {
 
 .pp-cat-name {
     font-weight: 700;
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
 }
 
 .pp-cat-home {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 500;
     color: var(--accent);
 }
@@ -1815,7 +1815,7 @@ a.pp-tournament:hover {
     border-radius: var(--radius-full);
     background: rgba(255,255,255,0.06);
     color: var(--text-muted);
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     font-weight: 500;
 }
 
@@ -1825,7 +1825,7 @@ a.pp-tournament:hover {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     background: var(--bg-elevated);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     color: var(--text-secondary);
 }
@@ -1855,7 +1855,7 @@ a.pp-tournament:hover {
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
@@ -1925,7 +1925,7 @@ a.pp-tournament:hover {
 }
 
 .kslt-back-wrap.pp-back-float .kslt-back {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 /* Ниже 1300 пикселей по бокам не остаётся места: кнопка наехала бы на
@@ -1977,7 +1977,7 @@ a.pp-tournament:hover {
     padding: 3px 10px;
     border: 1px solid var(--border-light);
     border-radius: var(--radius-full);
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     letter-spacing: 0.02em;
     color: var(--text-muted);
@@ -1994,7 +1994,7 @@ a.pp-tournament:hover {
     border-radius: var(--radius-md);
     background: var(--surface-glass);
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     line-height: 1.4;
     max-width: 340px;
 }
@@ -2022,7 +2022,7 @@ a.pp-tournament:hover {
     }
 
     .pp-tournament-name {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
         line-height: 1.25;
         white-space: normal;
         display: -webkit-box;
@@ -2032,7 +2032,7 @@ a.pp-tournament:hover {
     }
 
     .pp-tournament-date {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     .pp-tournament-photo {
@@ -2059,14 +2059,14 @@ a.pp-tournament:hover {
 
     .pp-match-date {
         grid-column: 1;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     .pp-match-tournament {
         grid-column: 2 / -1;
         justify-self: end;
         text-align: right;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -2092,15 +2092,15 @@ a.pp-tournament:hover {
     }
 
     .pp-match-opponent-name {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     .pp-match-score {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     .pp-section-title {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
 }
 
@@ -2167,20 +2167,20 @@ a.pp-tournament:hover {
     }
 
     .pp-achievement-icon {
-        font-size: 20px;
+        font-size: var(--fs-lg);
     }
 
     .pp-achievement-name {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     .pp-achievement-desc {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     .pp-badges-expand {
         padding: 8px 12px;
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
     }
 }
 

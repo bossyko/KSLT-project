@@ -44,7 +44,7 @@ body {
 /* Status bar */
 .um-status {
     text-align: center;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -64,7 +64,7 @@ body {
 /* Winner banner */
 .um-winner {
     text-align: center;
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--um-accent);
     padding: 12px;
@@ -97,12 +97,12 @@ body {
 
 .um-serve-dot {
     text-align: center;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     line-height: 1;
 }
 
 .um-player-name {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -111,7 +111,7 @@ body {
 
 .um-games, .um-points {
     text-align: center;
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
@@ -132,23 +132,23 @@ body {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
 }
 .um-set-label {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--um-dim);
     margin-right: 4px;
     text-transform: uppercase;
 }
 .um-set-val { font-variant-numeric: tabular-nums; }
 .um-set-sep { color: var(--um-dim); margin: 0 2px; }
-.um-set-tb { color: var(--um-dim); font-size: 0.8rem; }
+.um-set-tb { color: var(--um-dim); font-size: var(--fs-xs); }
 
 /* Tiebreak label */
 .um-tiebreak-label {
     text-align: center;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: #FFA726;
     text-transform: uppercase;
@@ -160,7 +160,7 @@ body {
     text-align: center;
 }
 .um-serve-choice-title {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--um-dim);
     margin-bottom: 12px;
@@ -174,7 +174,7 @@ body {
 .um-btn-serve {
     flex: 1;
     padding: 16px 12px;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     background: var(--um-card);
     color: var(--um-text);
     border: 2px solid rgba(255,255,255,0.12);
@@ -195,7 +195,7 @@ body {
     padding: 16px;
 }
 .um-changeover-label {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -203,7 +203,7 @@ body {
     margin-bottom: 8px;
 }
 .um-changeover-time {
-    font-size: 2.5rem;
+    font-size: var(--fs-3xl);
     font-weight: 800;
     color: #FFA726;
     font-variant-numeric: tabular-nums;
@@ -226,7 +226,7 @@ body {
 .um-btn-continue {
     width: 100%;
     padding: 14px;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     background: rgba(255,167,38,0.15);
     color: #FFA726;
     border: 1px solid rgba(255,167,38,0.3);
@@ -256,7 +256,7 @@ body {
 
 .um-btn-p1, .um-btn-p2 {
     flex: 1;
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     line-height: 1.3;
     color: #fff;
     min-height: 140px;
@@ -270,7 +270,7 @@ body {
 
 .um-btn-start {
     flex: 1;
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     color: #000;
     background: var(--um-accent);
     min-height: 140px;
@@ -285,7 +285,7 @@ body {
 .um-btn-undo, .um-btn-pause {
     flex: 1;
     padding: 14px;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     background: var(--um-card);
     color: var(--um-text);
     border: 1px solid rgba(255,255,255,0.1);
@@ -295,32 +295,32 @@ body {
 .um-error {
     text-align: center;
     color: var(--um-red);
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     padding: 60px 20px;
 }
 
 /* Large phones */
 @media (min-height: 700px) {
     .um-btn-p1, .um-btn-p2, .um-btn-start { min-height: 180px; }
-    .um-player-name { font-size: 1.2rem; }
-    .um-games, .um-points { font-size: 1.8rem; }
+    .um-player-name { font-size: var(--fs-md); }
+    .um-games, .um-points { font-size: var(--fs-xl); }
 }
 
 /* Small phones (375px) */
 @media (max-width: 375px) {
     #um-app { padding: 10px; gap: 10px; }
     .um-serve-choice-btns { gap: 8px; }
-    .um-serve-choice-title { font-size: 0.95rem; }
-    .um-btn-serve { padding: 12px 8px; font-size: 0.95rem; }
+    .um-serve-choice-title { font-size: var(--fs-base); }
+    .um-btn-serve { padding: 12px 8px; font-size: var(--fs-base); }
     .um-player-row { padding: 10px 6px; grid-template-columns: 24px 1fr 44px 44px; }
-    .um-player-name { font-size: 0.95rem; }
-    .um-games, .um-points { font-size: 1.4rem; }
+    .um-player-name { font-size: var(--fs-base); }
+    .um-games, .um-points { font-size: var(--fs-lg); }
 }
 
 /* Landscape */
 @media (orientation: landscape) and (max-height: 500px) {
     #um-app { padding: 6px; gap: 6px; }
-    .um-btn-p1, .um-btn-p2, .um-btn-start { min-height: 80px; font-size: 1rem; }
+    .um-btn-p1, .um-btn-p2, .um-btn-start { min-height: 80px; font-size: var(--fs-base); }
     .um-player-row { padding: 6px 8px; }
-    .um-games, .um-points { font-size: 1.3rem; }
+    .um-games, .um-points { font-size: var(--fs-lg); }
 }

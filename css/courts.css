@@ -123,7 +123,7 @@
     border-radius: var(--radius-full);
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     outline: none;
     transition: all 0.3s;
 }
@@ -152,7 +152,7 @@
 }
 
 .ct-filter-label {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--accent);
     font-weight: 700;
     text-transform: uppercase;
@@ -216,7 +216,7 @@
     left: 12px;
     background: var(--accent);
     color: #000;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 800;
     padding: 3px 10px;
     border-radius: 100px;
@@ -251,7 +251,7 @@
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
     color: var(--accent);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     text-decoration: none;
     transition: background 0.2s;
@@ -275,7 +275,7 @@
 }
 
 .ct-card-name {
-    font-size: 1.15rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     line-height: 1.3;
 }
@@ -283,7 +283,7 @@
 .ct-card-partner {
     background: var(--accent);
     color: #000;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 3px 8px;
     border-radius: var(--radius-full);
@@ -294,7 +294,7 @@
 }
 
 .ct-card-type {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--accent);
     font-weight: 600;
     margin-bottom: 8px;
@@ -302,7 +302,7 @@
 
 .ct-card-desc {
     color: var(--text-secondary);
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     margin-bottom: 16px;
     flex-grow: 1;
@@ -320,20 +320,20 @@
 }
 
 .ct-card-stat-num {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
 }
 
 .ct-card-stat-label {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     margin-top: 2px;
 }
 
 .ct-card-price {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     margin-bottom: 16px;
 }
@@ -386,7 +386,7 @@
     background: none;
     border: none;
     color: rgba(255,255,255,0.5);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
     transition: color 0.2s;
 }
@@ -400,7 +400,7 @@
 }
 
 .ct-membership-modal h3 {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     margin-bottom: 10px;
     color: var(--text-primary);
@@ -408,7 +408,7 @@
 
 .ct-membership-modal p {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     margin-bottom: 24px;
 }
@@ -420,7 +420,7 @@
     background: var(--accent);
     color: #000;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     padding: 12px 32px;
     border-radius: var(--radius-full);
     text-decoration: none;
@@ -439,7 +439,7 @@
     right: 12px;
     background: rgba(220, 38, 38, 0.9);
     color: #fff;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     padding: 4px 10px;
     border-radius: 100px;
@@ -465,7 +465,7 @@
     padding: 10px 0;
     border-radius: var(--radius-full);
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -503,7 +503,7 @@
     z-index: 10000;
     padding: 12px 24px;
     border-radius: var(--radius-md);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: #000;
     background: var(--accent);
@@ -545,7 +545,7 @@
 
 .ct-back-sep {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .ct-back-link.ct-back-service {
@@ -564,7 +564,7 @@
     gap: 8px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     transition: color var(--transition-fast);
 }
@@ -595,7 +595,7 @@
 }
 
 .ct-detail-info h1 {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 800;
     margin-bottom: 6px;
     letter-spacing: -0.02em;
@@ -603,14 +603,14 @@
 
 .ct-detail-type {
     color: var(--accent);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     margin-bottom: 10px;
 }
 
 .ct-detail-address {
     color: var(--text-secondary);
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -619,7 +619,7 @@
 
 .ct-detail-phone {
     color: var(--text-secondary);
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -653,7 +653,7 @@
 }
 
 .ct-detail-stat-num {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 800;
     color: var(--accent);
     line-height: 1;
@@ -662,7 +662,7 @@
 
 .ct-detail-stat-label {
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 /* Combined stat card */
@@ -685,7 +685,7 @@
 }
 
 .ct-stat-item {
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
     font-weight: 800;
     color: var(--accent);
     white-space: nowrap;
@@ -693,7 +693,7 @@
 
 .ct-stat-sep {
     color: var(--text-dim);
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
 }
 
 /* Court Types & Services tables */
@@ -709,7 +709,7 @@
 .ct-services-header {
     display: grid;
     padding: 10px 16px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -730,7 +730,7 @@
     display: grid;
     padding: 12px 16px;
     border-bottom: 1px solid rgba(255,255,255,0.04);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     align-items: center;
 }
@@ -761,7 +761,7 @@
 .ct-svc-discount {
     background: rgba(204,255,0,0.12);
     color: var(--accent);
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     padding: 2px 8px;
     border-radius: 100px;
     font-weight: 600;
@@ -775,7 +775,7 @@
 }
 
 .ct-section-title {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     margin-bottom: 20px;
     padding-bottom: 10px;
@@ -788,7 +788,7 @@
 
 .ct-about-text {
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     line-height: 1.8;
 }
 
@@ -808,7 +808,7 @@
     border-radius: var(--radius-md);
     padding: 14px 16px;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .ct-amenity::before {
@@ -840,7 +840,7 @@
 
 .ct-schedule-time {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 /* Gallery */
@@ -895,7 +895,7 @@
 }
 
 .ct-cta h3 {
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     margin-bottom: 12px;
 }
@@ -916,7 +916,7 @@
     background: var(--accent);
     color: #000;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     padding: 14px 36px;
     border: none;
@@ -990,7 +990,7 @@
     }
 
     .ct-card-name {
-        font-size: 0.88rem;
+        font-size: var(--fs-sm);
         line-height: 1.25;
         /* Длинное название не обрезаем многоточием, но дальше двух строк
            не пускаем — иначе карточки в ряду разъедутся по высоте */
@@ -1001,7 +1001,7 @@
     }
 
     .ct-card-type {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         margin-bottom: 6px;
     }
 
@@ -1018,24 +1018,24 @@
     }
 
     .ct-card-stat-num {
-        font-size: 0.95rem;
+        font-size: var(--fs-base);
     }
 
     .ct-card-stat-label {
-        font-size: 0.62rem;
+        font-size: var(--fs-2xs);
     }
 
     .ct-card-btn,
     .ct-card-cta {
         width: 100%;
         padding: 8px 10px;
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
         text-align: center;
         justify-content: center;
     }
 
     .ct-card-partner {
-        font-size: 0.58rem;
+        font-size: var(--fs-2xs);
         padding: 2px 6px;
         margin-left: 4px;
     }
@@ -1048,7 +1048,7 @@
         height: 220px;
     }
     .ct-detail-info h1 {
-        font-size: 1.5rem;
+        font-size: var(--fs-xl);
     }
     .ct-amenities {
         grid-template-columns: repeat(2, 1fr);
@@ -1071,22 +1071,22 @@
     .ct-types-header {
         grid-template-columns: 1fr 1fr 50px 90px;
         padding: 8px 12px;
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
     .ct-types-row {
         grid-template-columns: 1fr 1fr 50px 90px;
         padding: 10px 12px;
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
     .ct-services-header {
         grid-template-columns: 1fr 90px;
         padding: 8px 12px;
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
     .ct-services-row {
         grid-template-columns: 1fr 90px;
         padding: 10px 12px;
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
     .ct-detail-stats {
         grid-template-columns: 1fr 1fr;
@@ -1096,7 +1096,7 @@
         padding: 16px 12px;
     }
     .ct-detail-stat-num {
-        font-size: 1.5rem;
+        font-size: var(--fs-xl);
     }
 
     /* Страница корта на телефоне — по общей шкале размеров.
@@ -1109,11 +1109,11 @@
 
     .ct-detail-stat-combined {
         padding: 12px 16px;
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     .ct-about-text {
-        font-size: 0.88rem;
+        font-size: var(--fs-sm);
         line-height: 1.55;
     }
 
@@ -1126,13 +1126,13 @@
     }
 
     .ct-cta p {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
         line-height: 1.35;
     }
 
     .ct-cta-btn {
         padding: 10px 22px;
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
     .ct-amenities {
         grid-template-columns: 1fr;
@@ -1145,7 +1145,7 @@
     }
     .ct-search-input {
         padding: 12px 16px 12px 44px;
-        font-size: 0.9rem;
+        font-size: var(--fs-sm);
     }
     .ct-filters-wrap {
         gap: 10px;
@@ -1166,7 +1166,7 @@
 @media (max-width: 375px) {
     
     .ct-hero-title {
-        font-size: 1.6rem;
+        font-size: var(--fs-xl);
     }
     .ct-container {
         padding: 32px 12px 48px;
@@ -1175,16 +1175,16 @@
         padding: 16px;
     }
     .ct-card-name {
-        font-size: 1rem;
+        font-size: var(--fs-base);
     }
     .ct-card-img {
         height: 150px;
     }
     .ct-detail-info h1 {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
     .ct-detail-stat-num {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
     .ct-gallery-img {
         height: 160px;
@@ -1193,11 +1193,11 @@
         padding: 28px 16px;
     }
     .ct-cta h3 {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
     }
     .ct-cta-btn {
         padding: 12px 28px;
-        font-size: 0.9rem;
+        font-size: var(--fs-sm);
     }
     .ct-schedule-row {
         flex-direction: column;
@@ -1237,7 +1237,7 @@
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -1294,11 +1294,11 @@
     flex: 1;
 }
 .ct-discount-name {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: rgba(255,255,255,0.85);
 }
 .ct-discount-percent {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--accent);
     white-space: nowrap;
@@ -1310,7 +1310,7 @@
     padding: 8px 20px;
     border-radius: 8px;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: opacity 0.2s;
     white-space: nowrap;
@@ -1319,7 +1319,7 @@
     opacity: 0.85;
 }
 .ct-discount-hint {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: rgba(255,255,255,0.4);
     margin: 0;
     text-align: right;
@@ -1360,11 +1360,11 @@
     background: none;
     border: none;
     color: rgba(255,255,255,0.5);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
 }
 .ct-voucher-title {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     color: var(--accent);
     margin-bottom: 20px;
 }
@@ -1387,7 +1387,7 @@
     display: flex;
     justify-content: space-between;
     padding: 6px 0;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.7);
     border-bottom: 1px solid rgba(255,255,255,0.06);
 }
@@ -1408,7 +1408,7 @@
     padding: 10px 24px;
     border-radius: 10px;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: opacity 0.2s;
 }
@@ -1421,7 +1421,7 @@
     border-top: 1px solid rgba(255,255,255,0.06);
 }
 .ct-voucher-history h4 {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: rgba(255,255,255,0.7);
     margin-bottom: 12px;
@@ -1440,7 +1440,7 @@
     background: rgba(255,255,255,0.03);
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,0.04);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
 }
 .ct-vh-date {
     color: rgba(255,255,255,0.4);
@@ -1459,7 +1459,7 @@
 .ct-vh-status {
     padding: 2px 10px;
     border-radius: 100px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     white-space: nowrap;
 }
@@ -1481,7 +1481,7 @@
     color: var(--accent);
     padding: 2px 10px;
     border-radius: 6px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
@@ -1492,7 +1492,7 @@
 }
 .ct-vh-empty {
     color: rgba(255,255,255,0.25);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     padding: 8px 0;
 }
 
@@ -1528,11 +1528,11 @@
     background: none;
     border: none;
     color: rgba(255,255,255,0.5);
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
     cursor: pointer;
 }
 .ct-picker-title {
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 16px;
@@ -1582,13 +1582,13 @@
 }
 .ct-picker-label {
     flex: 1;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.8);
 }
 .ct-picker-percent {
     color: var(--accent);
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 .ct-picker-submit {
     width: 100%;
@@ -1598,7 +1598,7 @@
     border: none;
     border-radius: 10px;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: opacity 0.2s;
 }
@@ -1650,14 +1650,14 @@
 }
 
 .ct-empty-icon {
-    font-size: 2.5rem;
+    font-size: var(--fs-3xl);
     margin-bottom: 12px;
     opacity: 0.5;
 }
 
 .ct-empty p {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 
 /* ============================================
@@ -1675,22 +1675,22 @@
     }
 
     .ct-stat-item {
-        font-size: 1.15rem;
+        font-size: var(--fs-md);
     }
 
     .ct-detail-type {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 
     .ct-detail-address {
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
     }
 
     .ct-about-text {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 
     .ct-types-row {
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
     }
 }

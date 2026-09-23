@@ -195,7 +195,7 @@ input, button, select, textarea {
 }
 
 .logo-text {
-    font-size: 1.75rem;
+    font-size: var(--fs-xl);
     font-weight: 900;
     letter-spacing: -0.02em;
     text-transform: uppercase;
@@ -207,7 +207,7 @@ input, button, select, textarea {
 }
 
 .logo-icon {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     margin-left: 0.25rem;
     filter: drop-shadow(0 0 15px rgba(204, 255, 0, 0.5));
 }
@@ -259,7 +259,7 @@ input, button, select, textarea {
 }
 
 .sponsor-label {
-    font-size: 0.5rem;
+    font-size: var(--fs-2xs);
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -699,7 +699,7 @@ input, button, select, textarea {
    Решение Кости 20.09: первый тап раскрывает, второй уводит на страницу.
    Класс .open вешает js/script.js.
    ========================================================================= */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
     .nav-dropdown.open .nav-dropdown-menu {
         opacity: 1;
         visibility: visible;
@@ -784,7 +784,7 @@ input, button, select, textarea {
 }
 
 .dropdown-icon {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     width: 24px;
     text-align: center;
 }
@@ -841,7 +841,7 @@ input, button, select, textarea {
     color: var(--text-secondary);
     text-decoration: none;
     border-radius: var(--radius-sm);
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     transition: all var(--transition-fast);
 }
 
@@ -869,7 +869,7 @@ input, button, select, textarea {
     color: var(--text-secondary);
     padding: 0.5rem 0.75rem;
     border-radius: var(--radius-full);
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
 }
@@ -958,7 +958,7 @@ input, button, select, textarea {
     color: var(--text-primary);
     padding: 5px 12px 5px 5px;
     border-radius: var(--radius-full);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -990,7 +990,7 @@ input, button, select, textarea {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
 }
 
@@ -1037,7 +1037,7 @@ input, button, select, textarea {
 
 .user-dropdown-header {
     padding: 8px 12px 6px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--text-muted);
     border-bottom: 1px solid var(--border-subtle);
@@ -1054,7 +1054,7 @@ input, button, select, textarea {
     border: none;
     border-radius: var(--radius-md);
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
     text-align: left;
@@ -1129,7 +1129,7 @@ input, button, select, textarea {
     height: 16px;
     background: #f44336;
     border-radius: 8px;
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     color: #fff;
     display: flex;
@@ -1182,7 +1182,7 @@ input, button, select, textarea {
 }
 
 .site-notif-title {
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
     font-weight: 700;
 }
 
@@ -1190,7 +1190,7 @@ input, button, select, textarea {
     background: none;
     border: none;
     color: var(--text-muted, #888);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     line-height: 1;
     cursor: pointer;
     padding: 0 4px;
@@ -1211,7 +1211,7 @@ input, button, select, textarea {
 
 .site-notif-foot a {
     color: var(--accent, #CCFF00);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     text-decoration: none;
 }
@@ -1244,12 +1244,12 @@ input, button, select, textarea {
 }
 .site-notif-item-title {
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-primary, #fff);
     margin-bottom: 2px;
 }
 .site-notif-item-msg {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary, #999);
     line-height: 1.4;
     display: -webkit-box;
@@ -1293,7 +1293,7 @@ input, button, select, textarea {
 /* Текст одного уведомления — целиком, без обрезки */
 .site-notif-full {
     padding: 18px 20px 8px;
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
     line-height: 1.5;
     color: var(--text-secondary, #bbb);
     white-space: pre-wrap;
@@ -1303,7 +1303,7 @@ input, button, select, textarea {
     padding: 14px 20px;
 }
 .site-notif-item-time {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--text-dim, #666);
     margin-top: 4px;
 }
@@ -1469,7 +1469,7 @@ input, button, select, textarea {
     border: none;
     border-radius: var(--radius-md);
     color: var(--text-secondary);
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
     text-align: left;
@@ -1487,7 +1487,7 @@ input, button, select, textarea {
 }
 
 .lang-flag {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
 }
 
 .lang-name {
@@ -1586,7 +1586,7 @@ input, button, select, textarea {
     text-decoration: none;
     padding: 10px 20px;
     border-radius: var(--radius-full);
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -1611,7 +1611,16 @@ section {
     width: 100%;
     max-width: none;
     margin-inline: 0;
-    padding: var(--section-y-sm) var(--pad-x);
+    /* ВОЗДУХ СЕКЦИИ — КРУТИЛКА, А НЕ ВТОРОЕ ОБЪЯВЛЕНИЕ padding.
+       Слои ниже меняют ЗНАЧЕНИЕ, объявление padding остаётся одно на весь файл —
+       тот же приём, что у .hero, и те же три условия, чтобы граница героя и первой
+       секции не была швом между двумя разными системами.
+
+       Было: var(--section-y-sm) = clamp(1rem, 1.6vw, 1.5rem) — доля ШИРИНЫ ОКНА.
+       Замерено 22.09: 40 на 768, 16.384 на 769, 24 на 1512. Втрое поперёк одного
+       пикселя, и посередине число, которого нет ни в одной шкале. */
+    --section-vozduh: var(--space-10);   /* 40 */
+    padding: var(--section-vozduh) var(--pad-x);
 }
 
 section:not(.hero) {
@@ -1620,7 +1629,7 @@ section:not(.hero) {
 }
 
 h2 {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 800;
     margin-bottom: 1.25rem;
     color: var(--text-primary);
@@ -1628,9 +1637,10 @@ h2 {
     text-transform: uppercase;
 }
 
-.section-header {
-    margin-bottom: var(--space-lg);
-}
+/* Здесь было второе объявление .section-header с margin-bottom: var(--space-lg).
+   Оно НИКОГДА не работало: ниже по файлу стоит полное объявление .section-header
+   с margin-bottom: var(--space-md), и побеждает оно. Мёртвая строка, которая
+   читалась как правило. Отбивку шапки раздела задаёт ОДНО объявление. */
 
 
 /* ========================================
@@ -1646,11 +1656,29 @@ h2 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    /* Сверху отступ больше, снизу меньше — так содержимое садится чуть
-       ниже середины. По оптике это ровнее: сверху над блоком нависает
-       шапка сайта, и равные отступы кажутся неравными */
-    padding: clamp(40px, 8vh, 96px) var(--pad-x) clamp(12px, 2vh, 20px);
+    /* СВЕРХУ ВНИЗ, А НЕ ПО ЦЕНТРУ.
+       Было justify-content: center при min-height. Центрирование съедало
+       padding-top: объявлено 80, а до бейджа доходило 16 — остаток уходил
+       в центровку, и зазор под шапкой не был управляем ни на одной полосе.
+       Теперь колонка течёт сверху, а полосу спонсоров прижимает к низу
+       flex: 1 у .hero-content (1718) — это и даёт «шапка сверху,
+       спонсоры у сгиба» без борьбы двух механизмов. */
+    justify-content: flex-start;
+    /* ОТБИВКА ШАПКИ — ОДНО ОБЪЯВЛЕНИЕ НА ВСЕ ШИРИНЫ.
+       Было пять .hero с разным padding-top (992, 768, 768 второй раз, 993+),
+       и в полосе 769–992 отбивки не было вовсе: на 844x390 бейдж стоял под
+       шапкой. Шапка меняется ступенькой (--header-h: 64, ниже 600 — 56),
+       поэтому calc честно следует за ней сам. */
+    /* ДВЕ КРУТИЛКИ ВМЕСТО ВТОРОГО ОБЪЯВЛЕНИЯ.
+       Горизонтальному телефону (844x390) нужен воздух меньше: там на всё
+       содержимое остаётся 326 точек, и кнопка «Найти игрока» резалась сгибом
+       пополам. Написать второй .hero с другим padding значило бы вернуть ровно
+       ту болезнь, которую лечили утром, — пять объявлений в пяти полосах.
+       Поэтому значение вынесено в имя: медиазапрос крутит КРУТИЛКУ, а
+       объявление padding остаётся одно на весь файл. */
+    --hero-vozduh: var(--space-10);   /* 40 — воздух под шапкой */
+    --hero-shag:   var(--space-6);    /* 24 — шаг между смысловыми группами */
+    padding: calc(var(--header-h) + var(--hero-vozduh)) var(--pad-x) var(--space-8);
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
@@ -1660,7 +1688,10 @@ h2 {
     width: 95%;
     max-width: var(--container-narrow);
     margin-top: auto;
-    padding: clamp(8px, 1.5vh, 16px) 0 clamp(8px, 1vh, 12px);
+    /* 32 сверху — шаг между смысловыми группами. Снизу 0: под лентой
+       отбивает сам .hero своим padding-bottom, иначе зазор складывается
+       из трёх слагаемых и его нельзя прочитать. */
+    padding: var(--space-8) 0 0;
     position: relative;
     z-index: 2;
 }
@@ -1675,7 +1706,7 @@ h2 {
     text-transform: uppercase;
     letter-spacing: 3px;
     color: var(--accent);
-    margin-bottom: clamp(8px, 1vh, 14px);
+    margin-bottom: var(--space-2);
 }
 
 .hero-sponsors-title::before,
@@ -1692,6 +1723,25 @@ h2 {
 
 .hero-sponsors-title::after {
     background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+/* НИЗ ПЕРВОГО ЭКРАНА МЕРИТСЯ ПО ЛОГОТИПУ, А НЕ ПО КОРОБКЕ ЛЕНТЫ.
+   Моя ошибка 22.09, поймана Костей глазами: я замерил «под лентой 32» от
+   ГРАНИЦЫ .sponsors-carousel-infinite — а у неё своих 40 пустого padding
+   снизу, внутри коробки. Глаз видел 40 + 32 = 72 воздуха под логотипами,
+   и вдобавок герой выходил за сгиб: 896.6 при окне 857. Получалось, что
+   фон-фотография тянется ниже карусели, и лента не читалась как конец
+   первого экрана.
+   Лечим оба слагаемых: у ленты В ГЕРОЕ нет ни margin, ни padding снизу,
+   отбивку целиком задаёт .hero своим padding-bottom: 32. Замерено после
+   правки в живом браузере Кости: логотипы → низ героя 32, высота героя
+   856.6 при окне 857 — экран садится ровно на сгиб.
+   Верхний padding 40 у ленты ОСТАВЛЕН: он отделяет логотипы от разделителя
+   «НАШИ СПОНСОРЫ», и в сумме с margin-bottom заголовка (8) даёт 48 — шаг
+   из шкалы. У ленты на странице спонсоров всё как было (4076). */
+.hero-sponsors-section .sponsors-carousel-infinite {
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 /* Мягкий градиент фона — без резких акцентов */
@@ -1714,9 +1764,14 @@ h2 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(6px, 1.5vh, 16px);
+    /* GAP УБРАН НАМЕРЕННО.
+       Один gap на колонку не выражает нужный ритм: внутри смысловой группы
+       шаг 12, между группами 24. Раньше поверх общего gap на слоган вешали
+       margin-top: 26 — 26 + 12.87 давало 39, число, которого нет в шкале.
+       Теперь шаг задаёт сам блок, и каждое число читается глазами. */
+    gap: 0;
     flex: 1;
-    justify-content: center;
+    justify-content: flex-start;
     min-height: 0;
 }
 
@@ -1737,6 +1792,24 @@ h2 {
 }
 
 .badge-dot {
+    /* ОПТИЧЕСКИЙ ЦЕНТР, А НЕ ГЕОМЕТРИЧЕСКИЙ.
+
+       Замер 21.09 на пяти видах и трёх языках: геометрически точка стоит
+       ровно посередине пилюли — смещение 0. Но зрительно она задрана, и
+       Костя это увидел. Причина: центр СТРОКИ и центр БУКВ — разные вещи.
+       В «Сезон 2026» масса букв строчная, её середина ниже середины
+       строки на 0.5-1 пиксель в зависимости от кегля.
+
+       Сдвиг задан в em, а не в пикселях: кегль пилюли текучий,
+       clamp(0.7rem, 1.5vw, 0.85rem), и фиксированный сдвиг разъехался бы
+       между видами. 0.06em даёт 0.8 при кегле 13.6 и 0.67 при 11.2 —
+       ровно измеренную разницу.
+
+       ДВИГАЕМ ЧЕРЕЗ top, А НЕ transform: на точке крутится анимация
+       livePulse, и она задаёт свой transform: scale(). translateY был бы
+       стёрт на первом же кадре. */
+    position: relative;
+    top: 0.06em;
     width: 6px;
     height: 6px;
     background: var(--accent);
@@ -1747,6 +1820,7 @@ h2 {
 
 /* Заголовок — массивный, уверенный */
 .hero-title {
+    margin-top: var(--space-3);
     font-size: clamp(2rem, 4.8vw, 3.7rem);
     font-weight: 900;
     line-height: 0.95;
@@ -1772,7 +1846,7 @@ h2 {
     color: rgba(255, 255, 255, 0.7);
     text-transform: none;
     letter-spacing: 0;
-    margin-top: 2px;
+    margin-top: var(--space-3);
     animation: fadeInUp 0.6s ease 0.12s both;
 }
 
@@ -1790,8 +1864,10 @@ h2 {
     letter-spacing: 0.1em;
     /* Отступ больше остальных: здесь кончается «кто мы» и начинается
        «зачем». Одинаковые промежутки между всеми строками и делали из них
-       сплошную стену */
-    margin-top: 26px;
+       сплошную стену.
+       Было 26 поверх общего gap колонки — в сумме 39, числа из шкалы нет.
+       Теперь весь шаг здесь и целиком: 24. */
+    margin-top: var(--hero-shag);
     animation: fadeInUp 0.6s ease 0.15s both;
 }
 
@@ -1800,7 +1876,7 @@ h2 {
     font-size: clamp(0.95rem, 1.7vw, 1.12rem);
     color: var(--text-secondary);
     max-width: 580px;
-    margin-top: 2px;
+    margin-top: var(--space-3);
     line-height: 1.5;
     /* Иначе последнее слово строки уезжает вниз в одиночку и отрывается
        от того, к чему относится */
@@ -1811,6 +1887,7 @@ h2 {
 
 /* CTA Buttons */
 .hero-cta {
+    margin-top: var(--hero-shag);
     display: flex;
     gap: var(--space-sm);
     flex-wrap: wrap;
@@ -1828,7 +1905,7 @@ h2 {
     text-decoration: none;
     padding: 18px 36px;
     border-radius: var(--radius-full);
-    font-size: 1.0625rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1857,7 +1934,7 @@ h2 {
     text-decoration: none;
     padding: 18px 36px;
     border-radius: var(--radius-full);
-    font-size: 1.0625rem;
+    font-size: var(--fs-base);
     font-weight: 500;
     border: 1.5px solid var(--border-light);
     transition: all var(--transition-base);
@@ -1870,6 +1947,7 @@ h2 {
 
 /* Stats — с анимацией счётчика */
 .hero-stats {
+    margin-top: var(--hero-shag);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1912,7 +1990,7 @@ h2 {
 }
 
 .stat-label {
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     color: var(--text-dim);
     font-weight: 450;
     text-transform: uppercase;
@@ -2003,7 +2081,7 @@ h2 {
 }
 
 .floating-card .card-title {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--text-dim);
     font-weight: 500;
     text-transform: uppercase;
@@ -2011,13 +2089,13 @@ h2 {
 }
 
 .floating-card .card-value {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .floating-card .card-value small {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--accent);
     font-weight: 500;
 }
@@ -2141,6 +2219,16 @@ h2 {
     );
 }
 
+/* ВИДЕО-ФОН КЫРГЫЗСКОЙ ГЛАВНОЙ УДАЛЁН 22.09.
+   index-kg.html:283 держал <div class="hero-video-bg"> с роликом, который
+   тянулся с чужого CDN assets.mixkit.co (сток «tennis player serving»).
+   У классов .hero-video-bg и .hero-video-overlay НЕ БЫЛО НИ ОДНОГО правила
+   в css: div стоял в обычном потоке, толкал герой вниз на 157px, и зазор
+   под шапкой выходил 197 вместо 40. Ни ru, ни en этого не показывали.
+   Решение Кости: на ru и en видео нет, значит и на kg оно не нужно.
+   Разметка kg заменена на тот же .hero-bg со снимком images/hero-courts.jpg,
+   что на двух других языках, — один фон на три языка, без чужого сервера. */
+
 .hero-image {
     width: 100%;
     height: 100%;
@@ -2165,6 +2253,12 @@ h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    /* ОДНА ВЫСОТА ВО ВСЕХ РАЗДЕЛАХ. Заголовок турниров стоял на 3px ниже, чем
+       у live, и это оказалось не ошибкой вёрстки: у «Все турниры» цель нажатия
+       44, у live ссылки нет вовсе — шапка выходила 44 против 39, и заголовок
+       по центру съезжал. Цель нажатия трогать нельзя, поэтому высоту получают
+       ВСЕ шапки: с ссылкой и без неё заголовок теперь стоит одинаково. */
+    min-height: 44px;
     margin-bottom: var(--space-md);
     flex-wrap: wrap;
     gap: var(--space-sm);
@@ -2173,21 +2267,34 @@ h2 {
 /* Свой нижний отступ заголовку здесь не нужен: расстояние до карточек
    держит сама шапка, иначе они складываются и получается двойной провал */
 .section-header h2 {
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     margin-bottom: 0;
 }
 
 .section-desc {
     color: var(--text-secondary);
-    font-size: 1.125rem;
+    font-size: var(--fs-md);
     margin-top: -var(--space-md);
 }
 
 .link-all {
+    /* ЦЕЛЬ НАЖАТИЯ 44, ВИД НЕ МЕНЯЕТСЯ.
+
+       Замер 21.09 на пяти видах и трёх языках: 119x21 на десктопе, 102x18
+       на телефоне — при пороге 44. Правило не новое: доска
+       «Header & navigation — APPROVED SPEC» уже говорит «Tap targets 44
+       minimum under (pointer: coarse)», здесь оно просто применяется.
+
+       inline-flex, а не блок: ширина остаётся по тексту, растёт только
+       высота области нажатия. Кегль, цвет и начертание те же — человек
+       не увидит разницы, палец увидит. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     color: var(--accent);
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     transition: all var(--transition-fast);
 }
 
@@ -2262,7 +2369,7 @@ h2 {
     color: #000;
     padding: 6px 14px;
     border-radius: var(--radius-full);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     text-transform: uppercase;
 }
@@ -2276,28 +2383,28 @@ h2 {
 
 .tournament-date {
     color: var(--accent);
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .tournament-info h3 {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .tournament-info p {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .tournament-meta {
     display: flex;
     gap: var(--space-md);
     color: var(--text-dim);
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
 }
 
 .tournament-meta strong {
@@ -2331,6 +2438,21 @@ h2 {
        страницу, и два имени со счётом тонули в пустоте. Теперь карточки
        выстраиваются слева направо и держат свой размер */
     grid-template-columns: repeat(auto-fill, minmax(340px, 440px));
+    /* РЯД ИДЁТ СЛЕВА НАПРАВО. Решение Кости 22.09, глазами, после замера.
+
+       ЧТО ПРОБОВАЛИ И ОТВЕРГЛИ: центрирование ряда. Числа были в его пользу —
+       при одном матче справа оставалось 960 из 1400 на десктопе и 539 из 979
+       на планшете боком. Сделали, замерили: одна карточка 480/480, две 248/248,
+       ширины и высота не поплыли — технически безупречно. И отвергли по виду:
+       «по центру как бедный родственник». Заголовок раздела стоит у левого края,
+       и одинокая карточка посреди пустоты читается не как «вот что сейчас
+       происходит», а как «тут больше ничего нет».
+
+       Слева направо: первая у левого края под заголовком, вторая правее, третья
+       ещё правее — ряд наполняется, а не расползается из середины.
+
+       НЕ МЕНЯТЬ на center, не показав Косте глазами. Числа этот спор уже
+       проиграли один раз. */
     justify-content: start;
     gap: var(--space-md);
 }
@@ -2339,7 +2461,9 @@ h2 {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: 16px 18px;
+    /* Card 29:65, Padding=Compact — 16. Было 16/18: восемнадцати нет ни в шкале,
+       ни в компоненте. Радиус и рамка с компонентом сходились и раньше. */
+    padding: var(--space-4);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -2351,19 +2475,53 @@ h2 {
     gap: var(--space-sm);
 }
 
+/* БЕЙДЖ СТАТУСА — ПО КОМПОНЕНТУ Badge 27:53.
+   Было: сплошной красный #FF3B30 и пульсация У ВСЕХ статусов, включая разминку
+   и паузу. Разминка — это ещё не игра, а выглядела как «идёт прямо сейчас»,
+   и красный переставал что-либо значить.
+   Компонент: высота 24, padding 8, radius/full, 11 Medium uppercase, ls 0.5.
+   Solid — только для ОДНОГО бейджа, который должен доминировать. Здесь это LIVE.
+   То же решение уже принято на странице матча (css/live-match.css:82-92) —
+   два независимых источника сошлись. */
 .live-badge {
-    background: #FF3B30;
-    color: white;
-    padding: 4px 10px;
-    border-radius: var(--radius-sm);
-    font-size: 0.7rem;
-    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-full);
+    font-size: var(--fs-2xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--danger-subtle);
+    color: var(--danger);
+}
+
+/* Danger / Solid — единственный, кто доминирует, и единственный, кто пульсирует */
+.live-badge.is-live {
+    background: var(--danger);
+    /* Белый на #FF4757 — 3.34, порог для мелкого текста 4.5.
+       Почти-чёрный на той же заливке — 5.93. Яркость заливки не трогаем:
+       этот бейдж обязан доминировать. Та же пара, что у лайма. */
+    color: var(--danger-on);
     animation: livePulse 1.5s ease-in-out infinite;
+}
+
+/* Warning / Subtle */
+.live-badge.is-warmup {
+    background: var(--warning-subtle);
+    color: var(--warning);
+}
+
+/* Neutral / Subtle */
+.live-badge.is-paused {
+    background: var(--surface-glass-hover);
+    color: var(--text-secondary);
 }
 
 .match-set {
     color: var(--text-dim);
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
 }
 
 .match-players {
@@ -2386,6 +2544,28 @@ h2 {
     flex-shrink: 0;
 }
 
+/* ЗАГЛУШКА АВАТАРА — ИНИЦИАЛЫ, А НЕ КАРТИНКА С ЧУЖОГО CDN.
+   Было: два запроса на placehold.co на каждую карточку, и в кружке стоял «?».
+   Avatar 29:82 говорит прямо: Size=sm это 32, а когда фото нет — инициалы на
+   accent/subtle с текстом accent/default. «Фото нет у большинства» — это
+   умолчание компонента, а не исключение. Ни одного запроса наружу. */
+.match-players .player .live-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* Одна заглушка на весь сайт, нейтральная. Была лаймовой — см. .avatar-initials. */
+    background: var(--surface-glass-hover);
+    color: var(--text-primary);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
 .player-name {
     flex: 1;
     font-weight: 500;
@@ -2396,7 +2576,7 @@ h2 {
 }
 
 .player-score {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     letter-spacing: 1px;
@@ -2472,14 +2652,14 @@ h2 {
 }
 
 .preview-day {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 800;
     color: var(--accent);
     line-height: 1;
 }
 
 .preview-month {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     text-transform: uppercase;
     color: var(--text-muted);
@@ -2495,7 +2675,7 @@ h2 {
     padding: 4px 10px;
     background: rgba(204, 255, 0, 0.1);
     border-radius: var(--radius-full);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     color: var(--accent);
     text-transform: uppercase;
@@ -2504,7 +2684,7 @@ h2 {
 }
 
 .preview-info h4 {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
@@ -2512,14 +2692,14 @@ h2 {
 }
 
 .preview-location {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
 .preview-status {
     padding: 6px 12px;
     border-radius: var(--radius-full);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     text-transform: uppercase;
     text-align: center;
@@ -2592,7 +2772,7 @@ h2 {
 }
 
 .badges-cta-text p {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     color: var(--text-secondary);
     margin-bottom: var(--space-lg);
 }
@@ -2636,7 +2816,7 @@ h2 {
 }
 
 .badge-cta-emoji {
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
     line-height: 1;
     transition: transform 0.25s ease, filter 0.25s ease;
 }
@@ -2655,13 +2835,13 @@ h2 {
 }
 
 .badge-cta-name {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: var(--accent);
 }
 
 .badge-cta-desc {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     line-height: 1.4;
 }
@@ -2673,7 +2853,7 @@ h2 {
     padding: 13px 36px;
     background: var(--accent);
     color: #000;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 800;
     border-radius: 12px;
     text-decoration: none;
@@ -2737,7 +2917,7 @@ h2 {
     }
 
     .badge-cta-emoji {
-        font-size: 2rem;
+        font-size: var(--fs-2xl);
     }
 }
 
@@ -2757,16 +2937,16 @@ h2 {
     }
 
     .badge-cta-emoji {
-        font-size: 1.8rem;
+        font-size: var(--fs-xl);
     }
 
     .badge-cta-name {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     .badges-cta-btn {
         padding: 12px 32px;
-        font-size: 0.9rem;
+        font-size: var(--fs-sm);
     }
 }
 
@@ -2776,8 +2956,8 @@ h2 {
     gap: var(--space-sm);
 }
 .badges-cta-cards.badges-all .badge-cta-card { padding: var(--space-sm); }
-.badges-cta-cards.badges-all .badge-cta-emoji { font-size: 1.8rem; }
-.badges-cta-cards.badges-all .badge-cta-name { font-size: 0.75rem; }
+.badges-cta-cards.badges-all .badge-cta-emoji { font-size: var(--fs-xl); }
+.badges-cta-cards.badges-all .badge-cta-name { font-size: var(--fs-xs); }
 .badges-cta-cards.badges-all .badge-cta-desc { display: none; }
 
 /* Locked (unearned) badge state */
@@ -2822,7 +3002,7 @@ h2 {
 
 .ranking-header {
     background: var(--bg-elevated);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -2830,13 +3010,13 @@ h2 {
 }
 
 .rank {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .ranking-header .rank {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 .player-col {
@@ -2845,11 +3025,45 @@ h2 {
     gap: var(--space-sm);
 }
 
-.player-col img {
+/* Кружок игрока в рейтинге: фото ИЛИ инициалы. Размер объявлен один раз на
+   оба — иначе заглушка поехала бы отдельно от фото на первом же телефоне.
+   Инициалы по компоненту Avatar 29:82: accent/subtle под accent/default. */
+.player-col img,
+.player-col .avatar-initials {
+    font-size: var(--fs-sm);
     width: 44px;
     height: 44px;
     border-radius: 50%;
     object-fit: cover;
+}
+
+/* ЗАГЛУШКА АВАТАРА — ОДНА НА ВЕСЬ САЙТ. Размер не задаёт: его даёт место,
+   где она стоит, тем же объявлением, что и у фотографии. Avatar 29:82:
+   нет фото -> инициалы на accent/subtle с текстом accent/default. */
+.avatar-initials {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    /* НЕЙТРАЛЬНАЯ, А НЕ ЛАЙМОВАЯ. Решение Кости 23.09 «хочется одинаково»,
+       обосновано разбором FAANG: цвет на этом сайте уже занят. Красный,
+       зелёный, синий и серый держат СОСТОЯНИЕ турнира; лайм по правилу
+       109:370 принадлежит ОДНОМУ главному действию в поле зрения. Аватар —
+       это личность, а не состояние и не действие, поэтому он не занимает
+       ни то, ни другое. Так же у Apple в Контактах и у Linear: серый круг,
+       белые буквы. Палитра «цвет по имени» (Google, Slack) здесь не годится
+       именно потому, что цвет у нас уже что-то значит.
+       Белый на подложке 8% даёт 14.1 — мерено. */
+    background: var(--surface-glass-hover);
+    color: var(--text-primary);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    overflow: hidden;
+    /* Кегль по умолчанию — для мест, где размер кружка обычный. Крупные
+       кружки (подиум игроков) поднимают его у себя. */
+    font-size: var(--fs-xs);
 }
 
 .points {
@@ -2861,7 +3075,7 @@ h2 {
 .change {
     text-align: center;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
 }
 
 .change.positive {
@@ -2889,7 +3103,7 @@ h2 {
     background: transparent;
     color: var(--text-secondary);
     font: inherit;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
 }
@@ -2914,7 +3128,7 @@ h2 {
 
 .rankings-col-title {
     text-align: center;
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -2938,7 +3152,7 @@ h2 {
     border-radius: var(--radius-full);
     background: transparent;
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2971,12 +3185,12 @@ h2 {
 }
 
 .country {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     text-align: center;
 }
 
 .ranking-header .country {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 /* ========================================
@@ -3097,7 +3311,7 @@ h2 {
 }
 
 .guest-cta-title {
-    font-size: 1.15rem;
+    font-size: var(--fs-md);
     font-weight: 800;
     color: #fff;
     margin-bottom: 22px;
@@ -3112,7 +3326,7 @@ h2 {
     background: var(--accent);
     color: #000;
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     border-radius: 12px;
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3150,7 +3364,7 @@ h2 {
         padding: 28px 24px 24px;
     }
     .guest-cta-title {
-        font-size: 1rem;
+        font-size: var(--fs-base);
     }
 }
 
@@ -3170,7 +3384,7 @@ h2 {
     border: 1px solid rgba(204, 255, 0, 0.2);
     padding: 6px 16px;
     border-radius: var(--radius-full);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--accent);
     font-weight: 500;
     box-shadow: 0 0 20px rgba(204, 255, 0, 0.1);
@@ -3219,7 +3433,7 @@ h2 {
 }
 
 .player-info h4 {
-    font-size: 1.125rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -3227,13 +3441,13 @@ h2 {
 .player-level {
     color: var(--accent);
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
 }
 
 .player-location,
 .player-time {
     color: var(--text-dim);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .btn-invite {
@@ -3243,7 +3457,7 @@ h2 {
     border-radius: var(--radius-full);
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     transition: all var(--transition-fast);
 }
 
@@ -3281,7 +3495,7 @@ h2 {
 }
 
 .vn-row-head h3 {
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
     font-weight: 700;
 }
 
@@ -3332,13 +3546,13 @@ h2 {
    пропорция ближе к 16:9, как на страницах кортов */
 .vn-four .court-card img { height: 168px; }
 .vn-four .court-info { padding: 14px 16px; gap: 4px; }
-.vn-four .court-info h4 { font-size: 1rem; }
-.vn-four .court-info span { font-size: 0.8rem; }
+.vn-four .court-info h4 { font-size: var(--fs-base); }
+.vn-four .court-info span { font-size: var(--fs-xs); }
 .vn-four .court-card-actions { padding: 8px 14px 12px; }
 .vn-four .coach-photo { width: 104px; height: 104px; }
 .vn-four .coach-info { padding: 12px 14px 4px; }
-.vn-four .coach-info h4 { font-size: 1rem; }
-.vn-four .coach-info span { font-size: 0.8rem; }
+.vn-four .coach-info h4 { font-size: var(--fs-base); }
+.vn-four .coach-info span { font-size: var(--fs-xs); }
 .vn-four .court-card-details,
 .vn-four .coach-card-details { width: 100%; text-align: center; }
 
@@ -3354,7 +3568,7 @@ h2 {
     z-index: 2;
     background: rgba(204, 255, 0, 0.92);
     color: #0A0A0A;
-    font-size: 0.62rem;
+    font-size: var(--fs-2xs);
     font-weight: 800;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -3378,7 +3592,7 @@ h2 {
     padding: 28px 20px;
     text-align: center;
     color: var(--text-dim);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 /* Селекторы из двух классов: базовое правило задано как
@@ -3432,13 +3646,13 @@ h2 {
 }
 
 .court-info h4 {
-    font-size: 1.125rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .court-info span {
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     color: var(--text-dim);
 }
 
@@ -3506,7 +3720,7 @@ h2 {
     padding: 10px 0;
     border-radius: var(--radius-full);
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -3544,7 +3758,7 @@ h2 {
     z-index: 10000;
     padding: 12px 24px;
     border-radius: var(--radius-md);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     background: rgba(30, 30, 30, 0.95);
     color: var(--text-primary);
@@ -3619,25 +3833,25 @@ h2 {
 }
 
 .coach-info h4 {
-    font-size: 1.125rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .coach-speciality {
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     color: var(--accent);
     font-weight: 500;
 }
 
 .coach-experience,
 .coach-level {
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     color: var(--text-dim);
 }
 
 .coach-price {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-primary);
     font-weight: 600;
 }
@@ -3659,7 +3873,7 @@ h2 {
     padding: 10px 0;
     border-radius: var(--radius-full);
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -3697,7 +3911,7 @@ h2 {
     z-index: 10000;
     padding: 12px 24px;
     border-radius: var(--radius-md);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     background: rgba(30, 30, 30, 0.95);
     color: var(--text-primary);
@@ -3744,7 +3958,7 @@ h2 {
 }
 
 .sponsor-hero-label {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 3px;
     color: var(--accent);
@@ -3843,13 +4057,13 @@ h2 {
 }
 
 .main-sponsor-name {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 800;
     color: var(--text-primary);
 }
 
 .main-sponsor-desc {
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     color: var(--text-dim);
 }
 
@@ -3898,7 +4112,7 @@ h2 {
     background: none;
     border: none;
     color: var(--text-dim);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
     line-height: 1;
     padding: 4px;
@@ -3919,14 +4133,14 @@ h2 {
 }
 
 .spon-modal-name {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .spon-modal-desc {
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     line-height: 1.55;
     margin-bottom: 16px;
@@ -3940,7 +4154,7 @@ h2 {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     margin-bottom: 16px;
 }
@@ -3965,7 +4179,7 @@ h2 {
     border-radius: var(--radius-md);
     color: var(--text-primary);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     transition: all 0.2s ease;
 }
@@ -3999,7 +4213,7 @@ h2 {
 .spon-modal-action-label { font-weight: 600; line-height: 1.3; }
 
 .spon-modal-action-value {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 400;
     color: var(--text-secondary);
     line-height: 1.3;
@@ -4016,7 +4230,7 @@ h2 {
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     padding: 10px 24px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -4128,7 +4342,7 @@ h2 {
 }
 
 .carousel-slide-infinite span {
-    font-size: 0.875rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--text-secondary);
     transition: color var(--transition-fast);
@@ -4212,7 +4426,7 @@ h2 {
 }
 
 .about-lead {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     color: var(--text-secondary);
     line-height: 1.7;
     /* Ширину ограничиваем не из вредности: строка длиннее ~90 знаков читается
@@ -4237,18 +4451,18 @@ h2 {
 }
 
 .feature-icon {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     line-height: 1;
 }
 
 .feature h4 {
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .feature p {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     line-height: 1.5;
     color: var(--text-dim);
 }
@@ -4303,7 +4517,7 @@ h2 {
 .trn-back {
     flex: 0 0 auto;
     white-space: nowrap;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .trn-search-wrap {
@@ -4328,7 +4542,7 @@ h2 {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-family: var(--font-primary);
     outline: none;
     transition: all 0.25s;
@@ -4365,7 +4579,7 @@ h2 {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-family: var(--font-primary);
     font-weight: 500;
     cursor: pointer;
@@ -4423,7 +4637,7 @@ h2 {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-family: var(--font-primary);
     font-weight: 500;
     cursor: pointer;
@@ -4432,7 +4646,7 @@ h2 {
 /* Название категории в полосе — справа от поиска, тем же ростом, что чипы */
 .trn-cat-name {
     margin-left: auto;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: var(--text-primary);
     white-space: nowrap;
@@ -4487,7 +4701,7 @@ h2 {
 
     .trn-chip {
         padding: 8px 16px;
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 
     .trn-chips {
@@ -4514,7 +4728,7 @@ h2 {
     .trn-chip {
         padding: 7px 10px;
         min-height: 34px;
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
     }
 
     .trn-chip-count {
@@ -4651,7 +4865,7 @@ h2 {
     border-radius: 8px;
     color: var(--text-secondary);
     font-family: var(--font-primary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     text-align: left;
     cursor: pointer;
 }
@@ -4670,7 +4884,7 @@ h2 {
 
 .f-dd-count,
 .ct-dd-count {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     font-variant-numeric: tabular-nums;
 }
@@ -4759,7 +4973,7 @@ h2 {
     border: none;
     border-radius: 50%;
     color: var(--text-secondary);
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -4772,7 +4986,7 @@ h2 {
 }
 
 .pt-modal-icon {
-    font-size: 1.7rem;
+    font-size: var(--fs-xl);
     margin-bottom: 10px;
 }
 
@@ -4785,7 +4999,7 @@ h2 {
 }
 
 .pt-modal-text {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     line-height: 1.35;
     margin-bottom: 18px;
@@ -4796,7 +5010,7 @@ h2 {
     padding: 10px 22px;
     background: var(--accent);
     color: #000;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     font-family: inherit;
     border: none;
@@ -4813,7 +5027,7 @@ h2 {
 
 .pt-modal-disclaimer {
     margin-top: 12px;
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     color: var(--text-muted);
     line-height: 1.5;
 }
@@ -4842,7 +5056,7 @@ h2 {
 }
 
 .pt-pay-label {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -4873,11 +5087,11 @@ h2 {
 }
 
 .pt-pay-icon {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
 }
 
 .pt-pay-name {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--text-secondary);
     text-align: center;
@@ -4887,7 +5101,7 @@ h2 {
     position: absolute;
     top: 4px;
     right: 4px;
-    font-size: 0.55rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     color: var(--accent);
@@ -4902,7 +5116,7 @@ h2 {
     align-items: center;
     gap: 12px;
     margin: 16px 0;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
@@ -4923,7 +5137,7 @@ h2 {
     padding: 12px;
     background: var(--accent);
     color: #000;
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     font-family: inherit;
     border: none;
@@ -4940,7 +5154,7 @@ h2 {
 
 .pt-modal-note {
     margin-top: 12px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     text-align: center;
     line-height: 1.4;
@@ -4961,23 +5175,23 @@ h2 {
     }
 
     .pt-modal-icon {
-        font-size: 2.4rem;
+        font-size: var(--fs-3xl);
         margin-bottom: 16px;
     }
 
     .pt-modal-title {
-        font-size: 1.25rem;
+        font-size: var(--fs-lg);
     }
 
     .pt-modal-text {
-        font-size: 0.88rem;
+        font-size: var(--fs-sm);
         line-height: 1.55;
         margin-bottom: 24px;
     }
 
     .pt-modal-btn {
         padding: 11px 32px;
-        font-size: 0.88rem;
+        font-size: var(--fs-sm);
     }
 
     .pt-modal-close {
@@ -4989,7 +5203,7 @@ h2 {
 
     .pt-modal-disclaimer {
         margin-top: 16px;
-        font-size: 0.7rem;
+        font-size: var(--fs-2xs);
     }
 }
 
@@ -5024,13 +5238,13 @@ h2 {
 }
 
 .trn-block-title {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .trn-block-sub {
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     margin-top: 2px;
 }
@@ -5139,9 +5353,16 @@ h2 {
 /* Первый ряд — одной высоты. Главная карточка была ниже соседних, и ряд
    выглядел ступенькой; а если её не ограничить, длинное описание растягивает
    весь ряд втрое. Поэтому высота задана всем троим, а описание обрезается.
-   380 вместо 332: в плитке теперь есть кнопка записи, и она не помещалась */
+
+   320 вместо 380 — решение Кости 23.09, доска 345:9. Замер при 380: у боковых
+   тело 228 при содержимом 128, полях 24 и промежутках 18 — настоящая дыра 58;
+   у главной дыра 174. Сжать боковые ОТДЕЛЬНО нельзя: они стоят с главной в
+   одном ряду сетки, и высоту ряда задаёт самый высокий. Поэтому одно число:
+   при 320 тело боковых становится 170 и занято ровно, в ноль, а у главной
+   тело 318 — и туда же дотягивается её содержимое.
+   (380 в своё время пришло взамен 332, когда в плитке появилась кнопка.) */
 .tournaments-grid > .tc:nth-child(-n+3) {
-    height: 380px;
+    height: 320px;
 }
 
 .tc-featured .tc-desc {
@@ -5199,26 +5420,94 @@ h2 {
     align-items: center;
     justify-content: center;
     height: 100%;
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     opacity: 0.35;
 }
 
 .tc-badge {
+    /* Веса во всей карточке идут токенами --fw-*, а не числами. 23.09:
+       числа рисовали то же самое, но система про них не знала — поменяем
+       ступень веса в токенах, и карточка не сдвинется. */
+    /* БЕЙДЖ СТАТУСА — ПО КОМПОНЕНТУ Badge 27:53. Костя посмотрел оба варианта
+       рядом и принял 23.09.
+
+       Компонент: высота 24, поля 8, radius/full, 11 Medium ЗАГЛАВНЫМИ,
+       разрядка 0.5. Было: высота 30 (5+12 полей), кегль 12, вес 700, строчными.
+       Цвет и радиус не менялись — они и раньше совпадали с компонентом.
+
+       inline-flex с фиксированной высотой, а не padding сверху-снизу: высоту
+       бейджа задаёт компонент одним числом, и она не должна плавать от кегля. */
     position: absolute;
     top: 12px;
     left: 12px;
     z-index: 2;
-    padding: 5px 12px;
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 var(--space-2);
     border-radius: var(--radius-full);
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.tc-badge-live { background: var(--accent); color: var(--bg-primary); }
-.tc-badge-open { background: rgba(204, 255, 0, 0.15); color: var(--accent); border: 1px solid var(--accent); }
-.tc-badge-soon { background: rgba(255, 255, 255, 0.12); color: #fff; border: 1px solid rgba(255, 255, 255, 0.35); }
+/* ТОНА СТАТУСА. Костя принял 22.09, тон подобран замером.
+
+   СВЕРКА ФИГМЫ: изобретать не пришлось — в компоненте Badge 27:53 уже
+   лежат шесть тонов на два стиля. Берём готовые: идёт = Danger/Solid,
+   открыта = Success/Subtle, скоро = Info/Subtle, закрыта и завершён =
+   Neutral/Subtle, отменён = Danger/Subtle.
+
+   ПОЧЕМУ НЕ ЛАЙМ. Правило 109:370, записано с твоих слов «так много
+   лаймового, что тошнить начинает»: лайм принадлежит ОДНОМУ главному
+   действию в поле зрения. На карточке это кнопка записи. Бейдж и дата
+   забирали его себе — в секции насчитали 13 лаймовых пятен, осталось 7.
+
+   ПОЧЕМУ ПОДЛОЖКИ НЕПРОЗРАЧНЫЕ. Бейдж лежит НА АФИШЕ, а не на карточке.
+   Сквозь подложку в 15% проступает фотография, и контраст перестаёт быть
+   числом: он зависит от того, какую картинку загрузил организатор.
+   Поэтому здесь не -subtle, а их непрозрачные двойники из tokens.css.
+
+   ЗАМЕРЫ (WCAG 1.4.3; подпись 11px — мелкий текст, порог 4.5):
+     идёт     #FF4757 + почти-чёрный   5.93   было белым — 3.34, не проходило
+     открыта  #183122 + --success      7.25
+     скоро    #1F2A37 + --info         5.72   на старом #3B82F6 было 4.19
+     закрыта  #303030 + 72% белого     7.7
+     отменён  #331B1D + --danger       5.6
+
+   ВОЛОСЯНОЙ КРАЙ. Тёмная подложка на тёмной афише сливается с ней
+   (1.44 к чёрному), и бейдж читается как текст, висящий в воздухе.
+   Даём край. Не рамкой, а внутренней тенью: рамка добавила бы 2px
+   к высоте, а высоту 24 задаёт компонент одним числом. */
+.tc-badge-live {
+    background: var(--danger);
+    color: var(--danger-on);
+}
+.tc-badge-open {
+    background: var(--success-surface);
+    color: var(--success);
+    box-shadow: inset 0 0 0 1px var(--border-light);
+}
+.tc-badge-soon {
+    background: var(--info-surface);
+    color: var(--info);
+    box-shadow: inset 0 0 0 1px var(--border-light);
+}
 .tc-badge-closed,
-.tc-badge-done { background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.2); }
+.tc-badge-done {
+    background: var(--neutral-surface);
+    color: var(--text-secondary);
+    box-shadow: inset 0 0 0 1px var(--border-light);
+}
+/* Отменённый турнир рисовался БЕЗ подложки: класса .tc-badge-cancelled
+   не было вовсе, хотя js/tournament-card.js его выдаёт (статус cancelled
+   есть во всех трёх языках). Найдено 22.09. */
+.tc-badge-cancelled {
+    background: var(--danger-surface);
+    color: var(--danger);
+    box-shadow: inset 0 0 0 1px var(--border-light);
+}
 
 .tc-body {
     display: flex;
@@ -5230,21 +5519,28 @@ h2 {
 .tc-featured .tc-body { padding: 16px 24px; justify-content: center; }
 
 .tc-date {
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--accent);
+    /* ЛЕСТНИЦА ЦВЕТА В КАРТОЧКЕ — ТРИ СТУПЕНИ, доска 345:9, решение Кости 23.09.
+       Дата была лаймовой; лайм ушёл кнопке по правилу 109:370, и я поставил
+       белый — получил вторую стопроцентную ступень рядом с названием.
+       Костя: «дата название описание все одного белого цвета, всё сливается».
+       Теперь: 100% — что это (название), 72% — про что это (дата и описание),
+       50% — подробности (места). Дату и описание разводит не цвет, а форма:
+       12 капсом с разрядкой и весом 600 против обычных 14. Контраст 9.88. */
+    color: var(--text-secondary);
 }
 
 .tc-title {
-    font-size: 0.98rem;
-    font-weight: 700;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-bold);
     margin: 0;
     color: var(--text-primary);
 }
 
-.tc-featured .tc-title { font-size: 1.25rem; }
+.tc-featured .tc-title { font-size: var(--fs-lg); }
 
 /* Названия турниров бывают длинными: «ДРУЖЕСКИЙ ПАРНЫЙ ТУРНИР — BRK GROUP
    — женский» занимало четыре строки и выталкивало кнопку за нижний край
@@ -5258,7 +5554,7 @@ h2 {
 }
 
 .tc-desc {
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     margin: 0;
 }
@@ -5267,18 +5563,21 @@ h2 {
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
-    font-size: 0.82rem;
-    color: var(--text-dim);
+    font-size: var(--fs-sm);
+    /* Было --text-dim, 35% белого: контраст 3.22 при кегле 14. Порог 4.5
+       (WCAG 1.4.3) — не проходило. 50% даёт 5.31. Найдено замером 23.09,
+       глазами такое не ловится: текст «читается», просто плохо. */
+    color: var(--text-muted);
 }
 
-.tc-featured .tc-meta { font-size: 0.9rem; }
+.tc-featured .tc-meta { font-size: var(--fs-sm); }
 
 /* Свободные места. Пока их много — обычная строка вместе с местом
    проведения; когда осталась треть, подсвечиваем: ради этого счётчик
    и завели, иначе цифру не замечают */
 .tc-slots-tight {
     color: #FFB020;
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .tc-btn {
@@ -5288,8 +5587,8 @@ h2 {
     border-radius: var(--radius-full);
     background: var(--accent);
     color: var(--bg-primary);
-    font-size: 0.9rem;
-    font-weight: 700;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
 }
 
 /* Счётчик появляется за двое суток до старта и тикает каждую секунду */
@@ -5314,21 +5613,21 @@ h2 {
     border-radius: 8px;
     background: linear-gradient(135deg, rgba(220, 38, 38, 0.9), rgba(185, 28, 28, 0.95));
     border: 1px solid rgba(255, 100, 100, 0.3);
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
     font-variant-numeric: tabular-nums;
     line-height: 1;
     color: #fff;
 }
 
 .tc-cd-label {
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.85);
 }
 
-.tc-countdown small { font-weight: 500; opacity: 0.6; }
+.tc-countdown small { font-weight: var(--fw-medium); opacity: 0.6; }
 .tc-cd-urgent { box-shadow: 0 0 0 2px rgba(255, 100, 100, 0.25); }
 
 /* Правило по номеру ребёнка сильнее правила по классу — иначе сообщение
@@ -5348,26 +5647,54 @@ h2 {
     .tournaments-grid > .tc:nth-child(3),
     .tournaments-grid > .tc:nth-child(n+4) { grid-column: span 6; }
     .tc-featured { max-height: none; }
+
+    /* ПЯТЬ КАРТОЧЕК, 1 + 2 + 2. Решение Кости 23.09, доска 341:52.
+       Дефект был не в количестве, а в ШЕСТОЙ карточке: она висела одна в
+       последнем ряду, и секция читалась как обрезанный список, а не как
+       витрина. Правило одно на все узкие виды — показываем столько, сколько
+       заполняет ряды ЦЕЛИКОМ. Телефон 390: 1 + 2. Планшет 768: 1 + 2 + 2. */
+    .tournaments-grid > .tc:nth-child(n+6) { display: none; }
+}
+
+/* Высота 380 у первых трёх задумана для ДЕСКТОПНОГО ряда из трёх. На планшете
+   главная идёт на всю ширину, и от этой высоты второй ряд выходил на 58 выше
+   третьего — ступенька на ровном месте. Все обычные карточки одной высоты,
+   как на доске 341:52.
+
+   Условие сужено с двух сторон НАРОЧНО. Сначала это правило стояло просто в
+   слое 992 — и протекло в два других вида: на телефоне вертикально карточки
+   стали 322 вместо 273, в ленте боком 322 вместо 270. Причина в цепкости:
+   (0,4,1) перебивает и «height: auto» телефона, и высоту ленты. Правило,
+   которое нельзя перебить снизу, обязано само знать свои границы. */
+@media (min-width: 641px) and (max-width: 992px) and (orientation: portrait) {
+    .tournaments-grid > .tc:nth-child(-n+3):not(:nth-child(1)) { height: 322px; }
 }
 
 /* На телефоне карточки шли по одной на всю ширину — ряд из четырёх штук
    растягивался на четыре экрана. Ставим по две: афиша сверху, короткая
    подпись снизу, как на витринах магазинов. */
 @media (max-width: 640px) {
-    .tournaments-grid > .tc { grid-column: span 6 !important; }
+    /* ОДНА ШИРОКАЯ СВЕРХУ, ДВЕ ПОД НЕЙ. Решение Кости 23.09, доска 341:9.
+       Было четыре одинаковых плитки 2 × 2, и главную карточку нельзя было
+       отличить от остальных — витрина без витрины.
+       Обе строки одной цепкости (0,2,1): раньше здесь стоял !important,
+       чтобы перебить слой 992, теперь перебивать нечем — правила равные,
+       а этот блок стоит ниже. */
+    .tournaments-grid > .tc:nth-child(n+2) { grid-column: span 6; }
+    .tournaments-grid > .tc:nth-child(1)   { grid-column: span 12; }
     .tc-featured { grid-template-columns: 1fr; }
     .tc-featured .tc-image { height: 130px; }
     .tc-image { height: 130px; }
 
-    /* Больше четырёх на главной не показываем */
-    .tournaments-grid > .tc:nth-child(n+5) { display: none; }
+    /* Три карточки: ряды заполнены целиком, четвёртая ушла бы одна в ряд */
+    .tournaments-grid > .tc:nth-child(n+4) { display: none; }
 
     /* Название — две строки. Селектор с родителем: у карточки есть своё
        правило, и одиночный класс ему проигрывал — заголовок оставался
        нулевой высоты и пропадал совсем */
     .tournaments-grid .tc .tc-title,
     .tournaments-grid .tc-featured .tc-title {
-        font-size: 0.88rem;
+        font-size: var(--fs-sm);
         line-height: 1.25;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -5389,21 +5716,29 @@ h2 {
     .tournaments-grid .tc .tc-meta > span:not([class]) { display: none; }
 
     /* Дата и отсчёт в одну строку и мельче: вдвоём они занимали три */
-    .tc-date { font-size: 0.68rem; }
-    .tc-countdown { font-size: 0.62rem; padding: 3px 6px; }
-    .tc-meta { font-size: 0.68rem; margin-top: auto; }
+    .tc-date { font-size: var(--fs-2xs); }
+    .tc-countdown { font-size: var(--fs-2xs); padding: 3px 6px; }
+    /* Мета оставалась 14 — того же кегля, что заголовок: одиночный .tc-meta
+       (0,1,0) проигрывал правилу .tc-featured .tc-meta (0,2,0) из базы.
+       Замер 23.09 показал 14/400 при заголовке 14/700. Подпись не может быть
+       равна заголовку, поэтому селектор с родителем — как у названия ниже. */
+    .tc-meta { margin-top: auto; }
+    .tournaments-grid .tc .tc-meta,
+    .tournaments-grid .tc-featured .tc-meta { font-size: var(--fs-2xs); }
 
     /* Значок состояния вылезал за карточку: он ставится от левого края и
        растёт по содержимому, а в колонке 170 пикселей «Регистрация открыта»
        длиннее самой карточки. Ужимаем и не даём выйти за границы */
+    /* На телефоне у бейджа остаётся ТОЛЬКО защита от выхода за карточку.
+       Размеры отсюда убраны 23.09: кегль и поля задаёт компонент, один на все
+       ширины. Раньше здесь стояли font-size и padding: 3px 7px — они ломали
+       высоту 24 и делали бейдж на телефоне другим компонентом. */
     .tc-status, .tc-badge {
         top: 6px;
         left: 6px;
         right: 6px;
         width: fit-content;
         max-width: calc(100% - 12px);
-        font-size: 0.58rem;
-        padding: 3px 7px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -5430,6 +5765,16 @@ h2 {
         flex: 0 0 120px;
     }
 
+    /* ГЛАВНАЯ КАРТОЧКА крупнее остальных и по афише, и по названию:
+       она на всю ширину, ей есть чем распорядиться. Ступень card title из
+       лестницы 86:10 — 21 главная / 16 обычная / 14 телефон; на телефоне
+       главная берёт ступень выше обычной. */
+    .tournaments-grid > .tc:nth-child(1) .tc-image {
+        height: 150px;
+        flex: 0 0 150px;
+    }
+    .tournaments-grid > .tc:nth-child(1) .tc-title { font-size: var(--fs-base); }
+
     /* Карточки были вытянутыми: между строчками копился воздух, и четыре
        плитки занимали два экрана. Ужимаем отступы и промежутки — содержимое
        то же, но ряд помещается целиком */
@@ -5441,7 +5786,7 @@ h2 {
     .tournaments-grid .tc .tc-date { margin: 0 0 4px; }
     .tournaments-grid .tc .tc-countdown { margin: 0 0 5px; }
     .tournaments-grid .tc .tc-title { margin: 0 0 5px; }
-    .tournaments-grid .tc .tc-slots { margin: 0 0 6px; font-size: 0.7rem; }
+    .tournaments-grid .tc .tc-slots { margin: 0 0 6px; font-size: var(--fs-2xs); }
     .tournaments-grid .tc .tc-meta { margin: 0 0 6px; }
 
     .tournaments-grid .tc .tc-btn,
@@ -5470,10 +5815,150 @@ h2 {
     .tc .btn-primary, .tc-btn {
         width: 100%;
         padding: 8px;
-        font-size: 0.76rem;
+        font-size: var(--fs-xs);
         margin-top: 8px;
+        /* Цель нажатия 44 — меньше палец не берёт уверенно. С padding 8 и
+           кеглем 12 выходило около 33. Высоту задаём прямо, а надпись
+           центруем: растянутая кнопка иначе прижимает текст влево. */
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 }
+
+/* ==========================================================================
+   ТУРНИРЫ НА ТЕЛЕФОНЕ БОКОМ — ЛЕНТА. Решение Кости 23.09, доска 341:105.
+   Экран 844 × 390. Замер до правки: главная карточка 807 × 380 при высоте
+   экрана 390 — одна карточка И ЕСТЬ экран, ниже сгиба не видно ничего.
+   Дефицит здесь — высота, поэтому ряды заменяем полосой: вниз она не растёт
+   совсем.
+
+   ДВЕ ЦЕЛЫЕ КАРТОЧКИ В КАДРЕ И 88 ОТ ТРЕТЬЕЙ: 340 + 12 + 340 + 12 + 88 = 792.
+   Выглядывающий кусок — не украшение. Полоса, обрезанная ровно по краю
+   карточки, читается как законченный ряд, и её никто не листает. App Store,
+   Netflix и Google Play держат полоску следующей карточки по той же причине.
+
+   Условие сужено по ширине нарочно: без max-width под правило попало бы и
+   низкое окно браузера на ноутбуке, где лента не нужна. */
+@media (max-width: 992px) and (orientation: landscape) and (max-height: 500px) {
+    .tournaments-grid {
+        display: flex;
+        grid-template-columns: none;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 4px;
+    }
+    .tournaments-grid::-webkit-scrollbar { display: none; }
+
+    /* В ленте карточка не участвует в колонках: ширина и высота заданы прямо.
+       Цепкость (0,2,1) — той же, что у правил колонок выше, и блок ниже. */
+    .tournaments-grid > .tc:nth-child(n) {
+        grid-column: auto;
+        flex: 0 0 340px;
+        width: 340px;
+        height: 270px;
+        scroll-snap-align: start;
+        display: flex;
+    }
+    /* Лента показывает ВСЕ карточки: прятать нечего, вниз она не растёт */
+    .tournaments-grid > .tc:nth-child(n+4) { display: flex; }
+
+    /* Главная теряет разметку «афиша слева»: при 340 в ширину делить нечего.
+       Роль ей несёт ПОРЯДОК — она первая в полосе. */
+    .tc-featured { grid-template-columns: 1fr; }
+    .tournaments-grid .tc .tc-image,
+    .tournaments-grid .tc-featured .tc-image {
+        height: 150px;
+        flex: 0 0 150px;
+    }
+    .tournaments-grid > .tc:nth-child(-n+3) { height: 270px; }
+
+    /* Кегли берём телефонные: карточка 340 в ширину, ей ступени широкого
+       экрана велики. Ступень card title из лестницы 86:10 — 16 у главной,
+       14 у обычной. Селекторы с родителем, иначе .tc-featured .tc-title
+       (0,2,0) перебьёт одиночный класс, как это уже было с метой. */
+    .tournaments-grid .tc .tc-date,
+    .tournaments-grid .tc-featured .tc-date { font-size: var(--fs-2xs); }
+    /* Заголовку мало задать кегль. У главной карточки в базе стоит
+       -webkit-box с зажимом в три строки и фиксированной высотой карточки;
+       в полосе высотой 270 он схлопывался в НОЛЬ — заголовок исчезал совсем,
+       и карточка показывала дату, места и кнопку без названия. Ровно та же
+       беда уже случалась на телефоне, там это лечено полным блоком —
+       повторяем его, а не половину. */
+    .tournaments-grid .tc .tc-title,
+    .tournaments-grid .tc-featured .tc-title {
+        font-size: var(--fs-sm);
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin: 4px 0 6px;
+        max-height: none;
+    }
+    .tournaments-grid > .tc:nth-child(1) .tc-title { font-size: var(--fs-base); }
+    .tournaments-grid .tc .tc-meta,
+    .tournaments-grid .tc-featured .tc-meta { font-size: var(--fs-2xs); }
+    .tournaments-grid .tc .tc-desc,
+    .tournaments-grid .tc-featured .tc-desc { display: none; }
+
+    /* ПОЧЕМУ ЗАГОЛОВОК ИСЧЕЗАЛ. У него из базы стоит overflow: hidden ради
+       зажима строк, а это снимает у флекс-элемента защиту min-height: auto —
+       ему становится можно сжаться в ноль. Тело карточки в полосе не
+       помещалось на 10 пикселей, браузер отнял их у единственного, кто умел
+       сжиматься, и название пропадало совсем: оставались дата, места и кнопка.
+       Лечим с двух сторон — запрещаем сжимать заголовок и убираем те самые
+       10 пикселей из отступов, как это уже сделано на телефоне. */
+    .tournaments-grid .tc .tc-title { flex-shrink: 0; }
+    .tournaments-grid .tc .tc-body { padding: 8px 10px 10px; gap: 0; }
+    .tournaments-grid .tc .tc-date { margin: 0 0 4px; }
+    .tournaments-grid .tc .tc-meta { margin: 0 0 6px; }
+
+    /* Цель нажатия 44 — та же, что на телефоне вертикально: палец один и
+       тот же, экран просто повёрнут. */
+    .tournaments-grid .tc .tc-btn,
+    .tournaments-grid .tc .btn-register {
+        width: 100%;
+        min-height: 44px;
+        padding: 8px;
+        font-size: var(--fs-xs);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: auto;
+    }
+
+    /* Последней плиткой — «Все турниры». У полосы должен быть конец,
+       иначе непонятно, докуда листать. */
+    .tournaments-grid > .tc-more { display: flex; }
+}
+
+/* Плитка «Все турниры» живёт только в ленте: в сетке её роль исполняет
+   ссылка в шапке раздела, и второй такой же на экране не нужно. */
+.tc-more {
+    display: none;
+    flex: 0 0 200px;
+    width: 200px;
+    height: 270px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 6px;
+    flex-direction: column;
+    border: 1px dashed var(--border-light);
+    border-radius: var(--radius-lg);
+    background: var(--surface-glass);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+    text-decoration: none;
+    scroll-snap-align: start;
+}
+.tc-more:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ========================================
    ПОЗДРАВЛЕНИЕ С ДОСТИЖЕНИЕМ
@@ -5514,7 +5999,7 @@ h2 {
 }
 
 .ach-kicker {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -5524,7 +6009,7 @@ h2 {
 
 .ach-emoji {
     display: inline-block;
-    font-size: 4.4rem;
+    font-size: var(--fs-4xl);
     line-height: 1;
     margin: 14px 0 10px;
     animation: achBadge 0.8s cubic-bezier(0.2, 1.5, 0.4, 1) 0.1s both;
@@ -5556,14 +6041,14 @@ h2 {
 }
 
 .ach-name {
-    font-size: 1.45rem;
+    font-size: var(--fs-lg);
     font-weight: 800;
     animation: achUp 0.4s ease 0.3s both;
 }
 
 .ach-desc {
     margin-top: 6px;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: var(--text-secondary);
     animation: achUp 0.4s ease 0.38s both;
 }
@@ -5581,7 +6066,7 @@ h2 {
     background: var(--accent);
     color: var(--bg-primary);
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     cursor: pointer;
     animation: achUp 0.4s ease 0.46s both;
@@ -5589,7 +6074,7 @@ h2 {
 
 .ach-count {
     margin-top: 12px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     animation: achUp 0.4s ease 0.5s both;
 }
@@ -5635,14 +6120,14 @@ h2 {
     padding: 8px 10px;
     min-height: 44px;
     border-radius: 10px;
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
 }
 
 .rk-row + .rk-row { margin-top: 4px; }
 .rk-row:hover { background: rgba(255, 255, 255, 0.04); }
 
 .rk-head {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--text-dim);
@@ -5666,12 +6151,15 @@ h2 {
     min-width: 0;
 }
 
-.rk-player img {
+/* Фото ИЛИ инициалы — размер объявлен один раз на оба. */
+.rk-player img,
+.rk-player .avatar-initials {
     width: 26px;
     height: 26px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
+    font-size: var(--fs-2xs);
 }
 
 .rk-player a,
@@ -5691,7 +6179,7 @@ h2 {
 /* Подпись под названием столбца NTRP: какое число одиночное, какое парное */
 .pl-col-sub {
     display: block;
-    font-size: 0.62rem;
+    font-size: var(--fs-2xs);
     font-weight: 400;
     letter-spacing: 0;
     text-transform: none;
@@ -5699,7 +6187,7 @@ h2 {
 }
 .rk-wl { text-align: center; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .rk-points { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
-.rk-change { text-align: center; font-size: 0.8rem; }
+.rk-change { text-align: center; font-size: var(--fs-xs); }
 
 .rk-up { color: #2ED573; }
 .rk-down { color: #FF4757; }
@@ -5714,7 +6202,7 @@ h2 {
     padding: 30px 12px;
     text-align: center;
     color: var(--text-dim);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 /* Карточка входа тут перекрывает сразу две колонки, поэтому чуть компактнее
@@ -5732,8 +6220,8 @@ h2 {
 }
 
 #rankings .guest-cta-icon { width: 40px; height: 40px; margin-bottom: 14px; }
-#rankings .guest-cta-title { font-size: 1rem; }
-#rankings .guest-cta-btn { padding: 11px 28px; font-size: 0.9rem; }
+#rankings .guest-cta-title { font-size: var(--fs-base); }
+#rankings .guest-cta-btn { padding: 11px 28px; font-size: var(--fs-sm); }
 
 /* ========================================
    НАЙДИ ПАРТНЁРА ПО ИГРЕ — блок на главной
@@ -5744,7 +6232,7 @@ h2 {
 .pg-sub {
     margin: -14px 0 20px;
     color: var(--text-dim);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 /* На главной их десять, а не сорок, — поэтому карточка крупнее и вытянутее */
@@ -5763,11 +6251,11 @@ h2 {
 #players .pt-avatar-placeholder {
     width: 92px;
     height: 92px;
-    font-size: 1.8rem;
+    font-size: var(--fs-xl);
 }
 
 #players .pt-avatar-wrap { margin-bottom: 14px; }
-#players .pt-name { font-size: 1.02rem; }
+#players .pt-name { font-size: var(--fs-base); }
 /* Кнопка прижата к низу, чтобы ряд не шёл лесенкой: у кого строк меньше,
    у того она уезжала вверх. Селектор с идентификатором — он же перебивал
    правило из partners.css, где это уже было исправлено */
@@ -5795,7 +6283,7 @@ h2 {
 /* Приглушённая строка — тот спокойный ритм, что был у прежних карточек */
 .pg-record {
     margin-top: 6px;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -5808,7 +6296,7 @@ h2 {
     margin-top: 5px;
 }
 .pg-pairs span {
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 1px 7px;
     border-radius: var(--radius-full);
@@ -5831,8 +6319,8 @@ h2 {
 #players .guest-section-cta { max-height: 55%; align-items: flex-end; }
 #players .guest-cta-card { max-width: 340px; padding: 26px 28px 24px; }
 #players .guest-cta-icon { width: 40px; height: 40px; margin-bottom: 14px; }
-#players .guest-cta-title { font-size: 1rem; }
-#players .guest-cta-btn { padding: 11px 28px; font-size: 0.9rem; }
+#players .guest-cta-title { font-size: var(--fs-base); }
+#players .guest-cta-btn { padding: 11px 28px; font-size: var(--fs-sm); }
 
 @media (max-width: 1200px) {
     #players .pt-grid { grid-template-columns: repeat(4, 1fr); }
@@ -5876,17 +6364,17 @@ h2 {
 }
 
 .footer-logo .logo-text {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
 }
 
 .footer-logo .logo-icon {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     margin-left: 0.25rem;
 }
 
 .footer-desc {
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     line-height: 1.5;
     margin-bottom: var(--space-md);
 }
@@ -5936,7 +6424,7 @@ h2 {
 
 /* Footer Block */
 .footer-block h4 {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     color: var(--text-primary);
     text-transform: uppercase;
@@ -5954,7 +6442,7 @@ h2 {
 .footer-links a {
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     transition: color var(--transition-fast);
 }
 
@@ -5975,7 +6463,7 @@ h2 {
     align-items: center;
     gap: 8px;
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 .footer-contacts svg {
@@ -6009,7 +6497,7 @@ h2 {
 
 .footer-copyright {
     color: var(--text-dim);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 .footer-legal {
@@ -6020,7 +6508,7 @@ h2 {
 .footer-legal a {
     color: var(--text-dim);
     text-decoration: none;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     transition: color var(--transition-fast);
 }
 
@@ -6030,7 +6518,7 @@ h2 {
 
 .footer-made {
     color: var(--text-dim);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 /* Footer Responsive */
@@ -6051,7 +6539,7 @@ h2 {
    центру, а соцсети оставались у левого края. Замерено: знак и иконки
    на x 22.5 при выравнивании center у всего остального.
    Условие ТО ЖЕ, что у .footer-acc и у складывать() в js/script.js. */
-@media (pointer: coarse), (max-width: 992px) {
+@media (any-pointer: coarse), (max-width: 992px) {
     .footer-content {
         grid-template-columns: 1fr 1fr;
         gap: var(--space-lg);
@@ -6079,7 +6567,7 @@ h2 {
 /* Тот же перенос, h274: шесть правил выравнивания подвала.
    Условие ТО ЖЕ, что у блока .footer-acc и у складывать() в
    js/script.js. Меняешь здесь — меняй во всех трёх местах. */
-@media (pointer: coarse), (max-width: 768px) {
+@media (any-pointer: coarse), (max-width: 768px) {
     .footer-content {
         grid-template-columns: 1fr;
         text-align: center;
@@ -6602,7 +7090,7 @@ body.nav-open {
     gap: 8px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     transition: color 0.2s;
     max-width: var(--container-max);
@@ -6643,10 +7131,6 @@ body.nav-open {
        другой высоты, чем на широком экране. */
     .sponsor-badge {
         display: none;
-    }
-
-    .hero {
-        padding: clamp(12px, 2vh, 16px) var(--pad-x) 0;
     }
 
     .hero-content {
@@ -6692,7 +7176,7 @@ body.nav-open {
     }
 
     .sticky-back-bar a {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 
     /* Переключение шапки на бургер отсюда УНЕСЕНО в собственный блок 992 —
@@ -6706,7 +7190,7 @@ body.nav-open {
 
     .btn-auth {
         padding: 8px 16px;
-        font-size: 0.8125rem;
+        font-size: var(--fs-xs);
     }
 
     .user-dropdown-name {
@@ -6732,17 +7216,19 @@ body.nav-open {
        экран не помещаются, а `overflow: hidden` не давал им выйти за край —
        содержимое наезжало само на себя и страница не прокручивалась. */
     .hero {
-        padding: clamp(4px, 1vh, 8px) var(--pad-x) 0;
-        height: auto;
-        max-height: none;
-        min-height: calc(100vh - 2px);
-        min-height: calc(100dvh - 2px);
+        /* Осталось только overflow. Остальные четыре строки были мертвы —
+           доказано замером 22.09: height:auto и max-height:none повторяли
+           значения по умолчанию, а обе min-height перебивались правилом
+           .hero { min-height: 0 } ниже по файлу (9870), в том же условии
+           max-width: 768. Вычислённое значение на 390x844 и 768x1024 было
+           minH=0px ещё ДО удаления — то есть строки ни на что не влияли.
+           Замысел «не запирать первый экран в высоту окна» при этом цел:
+           min-height: 0 делает его ровно этим, и даже честнее, чем 100dvh. */
         overflow: visible;
     }
 
     .hero-content {
         width: 100%;
-        gap: clamp(4px, 1vh, 10px);
     }
 
     .hero-sponsors-section {
@@ -6781,7 +7267,7 @@ body.nav-open {
     }
 
     .floating-card .card-value {
-        font-size: 1rem;
+        font-size: var(--fs-base);
     }
 
     .card-rating {
@@ -6841,17 +7327,27 @@ body.nav-open {
 
 @media (max-width: 768px) {
     section {
-        /* Было --space-xl (80px): между разделами копилось 160 пикселей пустоты —
+        /* ТОЛЬКО БОКА. Вертикаль отсюда убрана 23.09: здесь стояло
+           padding: 40px 26px — сокращённая запись, которая перебивала крутилку
+           --section-vozduh целиком, вместе со всеми слоями. Правило заморозки
+           этого не увидело: шаблон искал section БЕЗ отступа, а это объявление
+           внутри медиазапроса. Замер тоже не увидел: 40 на телефоне лежит на
+           шкале и выглядело правильным числом.
+           Поймал Playwright — на 375x812 ждали 24 по сенсорному слою, получили 40.
+           Величина воздуха на телефоне теперь задана ниже отдельным слоем, чтобы
+           её было видно как решение, а не как побочный эффект записи в одну строку.
+
+           Было --space-xl (80px): между разделами копилось 160 пикселей пустоты —
            пол-экрана телефона уходило в никуда. 40 хватает, чтобы разделы
            читались раздельно. По бокам 5% давали 19 пикселей — карточки почти
            упирались в край экрана */
-        padding: 40px 26px;
+        padding-inline: 26px;
     }
 
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+    /* Здесь было .section-header { flex-direction: column }. Оно тоже НИКОГДА
+       не работало: ниже в файле есть ВТОРОЙ блок @media (max-width: 768px),
+       который ставит flex-direction: row. Два блока с одним условием спорили,
+       побеждал второй. Шапку раздела на телефоне задаёт он один. */
 
     .tournament-card-featured {
         grid-template-columns: 1fr;
@@ -6874,9 +7370,11 @@ body.nav-open {
         padding: var(--space-sm) var(--space-md);
     }
 
-    .player-col img {
+    .player-col img,
+    .player-col .avatar-initials {
         width: 36px;
         height: 36px;
+        font-size: var(--fs-xs);
     }
 
     .players-grid {
@@ -7006,7 +7504,7 @@ body.nav-open {
     background-color: transparent;
     color: var(--text-muted);
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     border-radius: var(--radius-full);
     cursor: pointer;
@@ -7043,7 +7541,7 @@ body.nav-open {
     display: flex;
     flex-wrap: nowrap;
     gap: 0;
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
 }
 
 .pw-rule,
@@ -7102,7 +7600,7 @@ body.nav-open {
 
 .auth-pw-detail li {
     padding: 2px 0;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .auth-pw-detail li::before {
@@ -7135,14 +7633,14 @@ body.nav-open {
 }
 
 .auth-screen-title {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 6px;
 }
 
 .auth-screen-subtitle {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     line-height: 1.4;
 }
@@ -7160,8 +7658,26 @@ body.nav-open {
 }
 
 .auth-back-link {
+    /* ЦЕЛЬ НАЖАТИЯ, А НЕ ПОЛОСА ВО ВСЮ КАРТОЧКУ.
+
+       Замер 21.09: 426x20 на десктопе, 308x20 на телефоне. Высота 20 — это
+       нарушение 2.5.5: ссылка БЛОЧНАЯ, а не внутри предложения, и
+       исключение для встроенных ссылок на неё не распространяется.
+       Ширина важна не меньше: невидимая полоса во всю карточку ловит
+       палец, который целился в соседнее.
+
+       fit-content сажает цель по тексту, min-height даёт 44, поля по 12
+       отделяют от края, автоматические внешние поля держат по центру —
+       раньше центрировал text-align, но центрировать теперь нечего. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-height: 44px;
+    padding: 0 12px;
+    margin-inline: auto;
     text-align: center;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     text-decoration: none;
     transition: color var(--transition-fast);
@@ -7226,7 +7742,7 @@ body.nav-open {
     gap: 8px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     transition: color var(--transition-fast);
 }
@@ -7237,7 +7753,7 @@ body.nav-open {
 
 .kslt-back-sep {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 /* Back link inside sticky filters (no separate sticky wrapper) */
@@ -7258,7 +7774,7 @@ body.nav-open {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--accent);
     color: var(--accent);
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -7298,7 +7814,7 @@ body.nav-open {
     background: rgba(204, 255, 0, 0.1);
     border: 1px solid var(--accent);
     color: var(--accent);
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -7325,13 +7841,13 @@ body.nav-open {
 
 @media (max-width: 480px) {
     .kslt-recommended-badge {
-        font-size: 0.6rem;
+        font-size: var(--fs-2xs);
         padding: 3px 8px;
         bottom: 8px;
         left: 8px;
     }
     .kslt-recommended-detail {
-        font-size: 0.65rem;
+        font-size: var(--fs-2xs);
         padding: 3px 10px;
     }
 }
@@ -7350,7 +7866,7 @@ body.nav-open {
 
 .auth-resend {
     text-align: center;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -7401,14 +7917,14 @@ body.nav-open {
 }
 
 .auth-modal-title {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .auth-modal-text {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: rgba(255, 255, 255, 0.85);
     line-height: 1.6;
     margin-bottom: 24px;
@@ -7423,7 +7939,7 @@ body.nav-open {
 .auth-modal-btn {
     padding: 12px 24px;
     border-radius: 10px;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     cursor: pointer;
     border: none;
@@ -7456,7 +7972,7 @@ body.nav-open {
     background: none;
     border: none;
     color: var(--text-dim);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
     line-height: 1;
     padding: 4px;
@@ -7473,7 +7989,7 @@ body.nav-open {
 }
 
 .auth-label {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     color: var(--text-secondary);
 }
@@ -7576,7 +8092,7 @@ body.nav-open {
    Отрицательное поле справа держит текст прижатым к краю колонки,
    а не сдвинутым внутрь на паддинг цели. */
 .auth-forgot {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--accent);
     text-decoration: none;
     align-self: flex-end;
@@ -7599,7 +8115,7 @@ body.nav-open {
     border: none;
     border-radius: var(--radius-md);
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     cursor: pointer;
     transition: background var(--transition-fast), transform var(--transition-fast);
@@ -7620,7 +8136,7 @@ body.nav-open {
 .auth-message {
     padding: 12px 16px;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     margin-bottom: 12px;
     text-align: center;
 }
@@ -7642,7 +8158,7 @@ body.nav-open {
     align-items: center;
     gap: 16px;
     color: var(--text-dim);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .auth-divider::before,
@@ -7670,7 +8186,7 @@ body.nav-open {
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -7770,7 +8286,7 @@ body.nav-open {
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-family: inherit;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -7922,7 +8438,7 @@ body.nav-open {
     border: 1px solid var(--border-light);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
 }
@@ -7951,7 +8467,7 @@ body.nav-open {
     gap: 10px;
     min-height: 44px;
     padding-top: 2px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     cursor: pointer;
 }
@@ -8081,8 +8597,125 @@ body.nav-open {
     #signinForm > .auth-divider {
         display: none;
     }
+
+    /* ЭКРАН КОДА — ТЕ ЖЕ ДВЕ КОЛОНКИ.
+
+       Правило писалось под вход и держало только :has(#signinForm.active).
+       Экран кода под него не попадал, и на 844x390 замер 21.09 живьём дал:
+       карточка 500x577, низ на 205 ниже сгиба, повтор на 50, ссылка
+       возврата на 88, а СООБЩЕНИЕ ОБ ОШИБКЕ — на 152. Человек вводил
+       неверный код, экран не менялся, попытка из трёх сгорала молча.
+
+       Контейнер взят тот же, что принят для входа: карточка 700, две
+       колонки, независимые стопки через display: contents. Слева контекст
+       (заголовок, таймер, «Изменить адрес»), справа действие (ошибка,
+       клетки, повтор) — так низ карточки укладывается в 371 при экране
+       390, и за сгиб не уходит ничего.
+
+       Макет: Figma «Auth card — sizes to the scale», раздел Code screen. */
+    .auth-page:has(#otpCodeForm.active) {
+        min-height: 100dvh;
+        padding: 48px 20px 12px;
+    }
+
+    .auth-card:has(#otpCodeForm.active) {
+        max-width: 700px;
+        padding: 24px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        /* auto auto, а не auto 1fr. У входа вторая строка растягивается,
+           потому что колонка полей длиннее колонки способов. Здесь обе
+           колонки короткие, растягиваться нечему — и карточка вырастала
+           выше содержимого, оставляя пустую полосу в треть высоты.
+           Увидел Костя на снимке, а не я. */
+        grid-template-rows: auto auto;
+        column-gap: 40px;
+        row-gap: 16px;
+        align-items: start;
+    }
+
+    #otpCodeForm.active {
+        display: contents;
+    }
+
+    #otpCodeForm > .otp-col-head   { grid-column: 1; grid-row: 1; }
+    #otpCodeForm > .otp-col-aside  { grid-column: 1; grid-row: 2; }
+    #otpCodeForm > .otp-col-action { grid-column: 2; grid-row: 1 / -1; }
+
+    /* в одну колонку у ряда клеток свои внешние поля; в две колонки они
+       складываются с зазором сетки и рвут ритм */
+    #otpCodeForm > .otp-col-action > .otp-inputs {
+        margin-top: 12px;
+    }
+
+    /* ВОССТАНОВЛЕНИЕ ПАРОЛЯ — ТЕ ЖЕ ДВЕ КОЛОНКИ.
+
+       Замер 21.09 живьём на 844x390: карточка 500x537, низ на 167 ниже
+       сгиба, а «Отправить код» — на 66. Единственное действие, ради
+       которого экран существует, лежало за сгибом: чтобы отправить код,
+       надо было сначала прокрутить. Нашёл Костя.
+
+       Слева — ЧТО вводим: заголовок, вкладки способа, поле. Справа — ЧЕМ
+       подтверждаем и ЧЕМ отправляем: капча, кнопка, возврат. Капча стоит
+       перед кнопкой, которую она разблокирует: если она всё-таки
+       потребует нажатия, препятствие должно встретиться ДО действия, а не
+       после него.
+
+       Правая колонка выравнивается по центру: она короче левой, и прижатая
+       к верху выглядела бы оторванной.
+
+       Макет: Figma «Auth card — sizes to the scale», раздел Recovery screen. */
+    .auth-page:has(#forgotStep1.active) {
+        min-height: 100dvh;
+        padding: 48px 20px 12px;
+    }
+
+    .auth-card:has(#forgotStep1.active) {
+        max-width: 700px;
+        padding: 24px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 40px;
+        align-items: center;
+    }
+
+    #forgotStep1.active {
+        display: contents;
+    }
+
+    #forgotStep1 > .forgot-col-enter { grid-column: 1; align-self: start; }
+
+    /* ритм колонки задаёт промежуток, а собственные внешние поля детей
+       гасятся: иначе они складываются с ним — ровно так плыла форма
+       регистрации 21.09 */
+    #forgotStep1 > .forgot-col-send {
+        grid-column: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    #forgotStep1 > .forgot-col-send > * {
+        margin: 0;
+    }
 }
 
+
+/* ОБЁРТКИ КОЛОНОК ВОССТАНОВЛЕНИЯ — ТАКИЕ ЖЕ СТОПКИ, ЧТО И САМА ФОРМА.
+
+   .auth-form — это flex-колонка с промежутком 16, и её дети растягивались
+   по ширине. Когда я завернул их в две обёртки, флекс-элементами стали
+   обёртки, а кнопка внутри обычного блока — <button> по умолчанию
+   строчно-блочный — села по своему тексту: замер дал 158 вместо 426.
+   Это ТОТ ЖЕ дефект, что чинили утром 21.09 на форме регистрации, и я
+   наступил на него второй раз за день. Обёртка обязана быть такой же
+   колонкой с тем же промежутком, иначе ритм и ширина живут порознь. */
+.forgot-col-enter,
+.forgot-col-send {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
 
 /* OTP Verification */
 .otp-method-tabs {
@@ -8095,12 +8728,16 @@ body.nav-open {
 }
 
 .otp-method-tab {
+    /* Замер 21.09 живьём: 212 x 38 — две цели ниже 44 на экране, куда
+       человек приходит пальцем. Высота задаётся минимумом, а не отступами:
+       отступы зависят от кегля и уезжают вместе с ним. */
+    min-height: 44px;
     flex: 1;
     padding: 10px 16px;
     background: rgba(255, 255, 255, 0.04);
     border: none;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
     font-family: inherit;
@@ -8129,7 +8766,7 @@ body.nav-open {
     border: 1px solid var(--border-light);
     border-radius: var(--radius-md);
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-family: inherit;
     cursor: pointer;
     -webkit-appearance: none;
@@ -8159,7 +8796,7 @@ body.nav-open {
     width: 48px;
     height: 56px;
     text-align: center;
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     font-family: 'Inter', monospace;
     background: rgba(255, 255, 255, 0.06);
@@ -8190,7 +8827,7 @@ body.nav-open {
 
 .otp-timer {
     text-align: center;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     margin-bottom: 16px;
 }
@@ -8205,7 +8842,7 @@ body.nav-open {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     margin-bottom: 16px;
 }
@@ -8230,13 +8867,28 @@ body.nav-open {
 }
 
 @media (max-width: 480px) {
-    .otp-digit {
-        width: 42px;
-        height: 50px;
-        font-size: 1.3rem;
-    }
+    /* КЛЕТКИ КОДА ТЯНУТСЯ ПО РЯДУ, А НЕ СТОЯТ ФИКСИРОВАННЫМИ 42.
+
+       Замер 21.09 живьём: на телефоне клетка 42x50 — шесть целей ниже 44
+       ровно там, где палец, а не мышь. На десктопе те же клетки 48x56, и
+       глазами дефект не виден вовсе.
+
+       Свободная ширина ВНУТРИ карточки, замерено: 360 -> 288, 375 -> 303,
+       390 -> 310, 430 -> 350. Шесть целей по 44 с зазором 6 требуют 294 —
+       на 375 и шире помещаются, на 360 нет. Поэтому не фиксированная
+       ширина, а flex: основа 44 держит порог, рост забирает остаток (на
+       390 выходит 46, на 430 — 53), а сжатие включается только ниже 360,
+       где шесть целей по 44 не помещаются ни при каком зазоре. */
     .otp-inputs {
         gap: 6px;
+    }
+    .otp-digit {
+        flex: 1 1 44px;
+        width: auto;
+        min-width: 0;
+        max-width: 56px;
+        height: 52px;
+        font-size: var(--fs-lg);
     }
 }
 
@@ -8254,14 +8906,16 @@ body.nav-open {
         padding: var(--space-sm) var(--space-sm);
     }
 
-    .rankings-panel .player-col img {
+    .rankings-panel .player-col img,
+    .rankings-panel .player-col .avatar-initials {
         width: 32px;
         height: 32px;
+        font-size: var(--fs-xs);
     }
 
     .rankings-tab {
         padding: 8px 14px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -8278,12 +8932,12 @@ body.nav-open {
        которые от шапки отсчитываются. Правило здесь видел только сам nav. */
 
     .logo-text {
-        font-size: 1.1rem;
+        font-size: var(--fs-md);
     }
 
     .btn-auth {
         padding: 6px 12px;
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
     }
 
     .hero-title {
@@ -8291,7 +8945,7 @@ body.nav-open {
     }
 
     .hero-subtitle {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     .hero-buttons {
@@ -8302,7 +8956,7 @@ body.nav-open {
     .btn-primary, .btn-secondary {
         width: 100%;
         padding: 12px 20px;
-        font-size: 0.88rem;
+        font-size: var(--fs-sm);
     }
 
     .section-title {
@@ -8315,14 +8969,16 @@ body.nav-open {
         gap: 6px;
     }
 
-    .rankings-panel .player-col img {
+    .rankings-panel .player-col img,
+    .rankings-panel .player-col .avatar-initials {
         width: 28px;
         height: 28px;
+        font-size: var(--fs-2xs);
     }
 
     .rankings-tab {
         padding: 6px 10px;
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
     }
 
     .mobile-nav-links a {
@@ -8441,14 +9097,14 @@ img {
 }
 
 .rc-single-value {
-    font-size: 1.8rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
 }
 
 .rc-single-note {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
 }
 
@@ -8465,7 +9121,7 @@ img {
     flex: 1;
     padding: 10px 14px;
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     /* Скругление как у кнопок сайта, а не восемь пикселей из ниоткуда */
     border-radius: var(--radius-full);
@@ -8500,7 +9156,7 @@ img {
 
 .site-notif-answered {
     padding: 0 20px 18px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted, #8A8A8F);
 }
 
@@ -8566,7 +9222,7 @@ input:-internal-autofill-previewed {
 }
 
 .kslt-back-wrap.kslt-back-float .kslt-back {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 /* Ниже 1300 пикселей по бокам нет места — ссылка наехала бы на содержимое.
@@ -8633,7 +9289,7 @@ input:-internal-autofill-previewed {
 
 .footer-bottom-links a {
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     line-height: 1.4;
     transition: color var(--transition-base);
 }
@@ -8656,7 +9312,7 @@ input:-internal-autofill-previewed {
     color: var(--border-light);
 }
 
-.footer-bottom p { color: var(--text-secondary); font-size: 0.75rem; }
+.footer-bottom p { color: var(--text-secondary); font-size: var(--fs-xs); }
 
 /* ========================================
    ПРИГЛАШЕНИЕ СПОНСОРАМ НА ГЛАВНОЙ
@@ -8696,7 +9352,7 @@ input:-internal-autofill-previewed {
 .sp-offer > * { position: relative; z-index: 1; }
 
 .sp-offer h3 {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     font-weight: 800;
     color: var(--text-primary);
     margin-bottom: 8px;
@@ -8704,7 +9360,7 @@ input:-internal-autofill-previewed {
 
 .sp-offer-lead {
     color: var(--text-secondary);
-    font-size: 0.94rem;
+    font-size: var(--fs-base);
     line-height: 1.6;
     max-width: 640px;
     margin-bottom: 22px;
@@ -8717,7 +9373,7 @@ input:-internal-autofill-previewed {
     margin-bottom: 22px;
 }
 .sp-num-val {
-    font-size: 1.7rem;
+    font-size: var(--fs-xl);
     font-weight: 800;
     color: var(--accent);
     line-height: 1;
@@ -8727,7 +9383,7 @@ input:-internal-autofill-previewed {
     display: block;
     margin-top: 6px;
     color: var(--text-secondary);
-    font-size: 0.83rem;
+    font-size: var(--fs-sm);
     line-height: 1.4;
 }
 
@@ -8743,7 +9399,7 @@ input:-internal-autofill-previewed {
     position: relative;
     padding-left: 24px;
     color: var(--text-secondary);
-    font-size: 0.91rem;
+    font-size: var(--fs-sm);
     line-height: 1.45;
 }
 .sp-gives li::before {
@@ -8768,7 +9424,7 @@ input:-internal-autofill-previewed {
     background: var(--accent);
     color: #0a0a0a;
     font-family: inherit;
-    font-size: 0.94rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     cursor: pointer;
     text-decoration: none;
@@ -8780,7 +9436,6 @@ input:-internal-autofill-previewed {
     .sp-offer { padding: 26px 22px; }
     .sp-nums { grid-template-columns: 1fr 1fr; }
     .sp-gives { grid-template-columns: 1fr; }
-}
 }
 
 /* Логотип спонсора, у которого нет ни ссылок, ни описания: показываем, но
@@ -8821,7 +9476,7 @@ input:-internal-autofill-previewed {
 
 .ar-title {
     margin: 0 0 10px;
-    font-size: 1.15rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -8829,7 +9484,7 @@ input:-internal-autofill-previewed {
 .ar-text {
     margin: 0 0 var(--space-md);
     color: var(--text-secondary);
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
 }
 
@@ -8843,7 +9498,7 @@ input:-internal-autofill-previewed {
 .ar-btn {
     padding: 10px 18px;
     border-radius: var(--radius-full);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     border: 1px solid transparent;
@@ -8866,7 +9521,7 @@ input:-internal-autofill-previewed {
 .ar-note {
     margin: 12px 0 0;
     min-height: 1.2em;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     text-align: right;
 }
@@ -8896,7 +9551,7 @@ input:-internal-autofill-previewed {
     background: var(--bg-card);
     color: var(--text-primary);
     text-decoration: none;
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     transition: border-color 0.2s, color 0.2s;
 }
 
@@ -8983,7 +9638,7 @@ input:-internal-autofill-previewed {
     border-radius: 999px;
     background: rgba(10, 10, 10, 0.75);
     color: var(--accent);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -8998,7 +9653,7 @@ input:-internal-autofill-previewed {
 }
 
 .hn-body h3 {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     line-height: 1.35;
     color: var(--text-primary);
@@ -9009,7 +9664,7 @@ input:-internal-autofill-previewed {
 }
 
 .hn-body p {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     line-height: 1.5;
     display: -webkit-box;
@@ -9020,7 +9675,7 @@ input:-internal-autofill-previewed {
 
 .hn-date {
     margin-top: auto;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -9042,7 +9697,7 @@ input:-internal-autofill-previewed {
 /* Подсказка под полем в форме входа: пояснение, а не ошибка */
 .auth-hint {
     margin-top: 6px;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     line-height: 1.4;
 }
@@ -9060,7 +9715,7 @@ input:-internal-autofill-previewed {
     padding: 9px 16px;
     border-radius: 10px;
     border: 1px solid transparent;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     line-height: 1.2;
     white-space: nowrap;
@@ -9183,7 +9838,7 @@ input:-internal-autofill-previewed {
 
     /* У новостей та же беда: подпись длиннее обложки */
     .hn-card h3 {
-        font-size: 0.9rem;
+        font-size: var(--fs-sm);
         line-height: 1.25;
         display: -webkit-box;
         -webkit-line-clamp: 3;
@@ -9203,7 +9858,7 @@ input:-internal-autofill-previewed {
     }
 
     .hn-card h3 {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
         padding: 0 9px;
         margin: 8px 0 0;
     }
@@ -9212,7 +9867,7 @@ input:-internal-autofill-previewed {
     .hn-card .hn-body,
     .hn-card .hn-meta,
     .hn-card time {
-        font-size: 0.7rem;
+        font-size: var(--fs-2xs);
     }
 
     .hn-card .hn-body { padding: 8px 9px 10px; }
@@ -9231,10 +9886,10 @@ input:-internal-autofill-previewed {
         gap: 3px;
     }
 
-    .badge-cta-emoji { font-size: 1.5rem; }
+    .badge-cta-emoji { font-size: var(--fs-xl); }
 
     .badge-cta-name {
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
         line-height: 1.2;
         text-align: center;
     }
@@ -9272,7 +9927,7 @@ input:-internal-autofill-previewed {
            наоборот просторнее: 30 пикселей для пальца мало, 36 — рабочий
            размер, и ширина строки от этого не растёт */
         padding: 10px 8px;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     /* Кнопка «наверх» стояла в 32 пикселях от края и налезала на содержимое —
@@ -9315,13 +9970,13 @@ input:-internal-autofill-previewed {
     #players .pt-avatar-placeholder {
         width: 52px;
         height: 52px;
-        font-size: 1rem;
+        font-size: var(--fs-base);
     }
 
     #players .pt-avatar-wrap { margin-bottom: 8px; }
-    #players .pt-name { font-size: 0.78rem; }
-    #players .pt-category { font-size: 0.66rem; }
-    #players .pt-ntrp-badge { font-size: 0.6rem; padding: 2px 6px; }
+    #players .pt-name { font-size: var(--fs-xs); }
+    #players .pt-category { font-size: var(--fs-2xs); }
+    #players .pt-ntrp-badge { font-size: var(--fs-2xs); padding: 2px 6px; }
 
     /* Счёт побед и поражений словами на три колонки не помещается —
        остаётся полоска формы */
@@ -9342,22 +9997,22 @@ input:-internal-autofill-previewed {
     }
 
     .guest-cta-title {
-        font-size: 0.88rem;
+        font-size: var(--fs-sm);
         margin-bottom: 12px;
     }
 
     .guest-cta-btn {
         padding: 10px 22px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
         border-radius: 10px;
     }
 
     #players .guest-cta-icon { width: 32px; height: 32px; margin-bottom: 10px; }
-    #players .guest-cta-title { font-size: 0.88rem; }
-    #players .guest-cta-btn { padding: 10px 22px; font-size: 0.8rem; }
+    #players .guest-cta-title { font-size: var(--fs-sm); }
+    #players .guest-cta-btn { padding: 10px 22px; font-size: var(--fs-xs); }
     #rankings .guest-cta-icon { width: 32px; height: 32px; margin-bottom: 10px; }
-    #rankings .guest-cta-title { font-size: 0.88rem; }
-    #rankings .guest-cta-btn { padding: 10px 22px; font-size: 0.8rem; }
+    #rankings .guest-cta-title { font-size: var(--fs-sm); }
+    #rankings .guest-cta-btn { padding: 10px 22px; font-size: var(--fs-xs); }
 
     /* «О проекте»: шесть пунктов шли столбиком по 84 пикселя — на них одних
        уходило полтора экрана. Ставим по два в ряд и прижимаем значок к тексту */
@@ -9370,9 +10025,9 @@ input:-internal-autofill-previewed {
         gap: 6px;
     }
 
-    .feature-icon { font-size: 1.1rem; }
-    .feature h4 { font-size: 0.8rem; margin: 0 0 2px; line-height: 1.2; }
-    .feature p { font-size: 0.68rem; line-height: 1.3; margin: 0; }
+    .feature-icon { font-size: var(--fs-md); }
+    .feature h4 { font-size: var(--fs-xs); margin: 0 0 2px; line-height: 1.2; }
+    .feature p { font-size: var(--fs-2xs); line-height: 1.3; margin: 0; }
 
     /* ─────────────────────────────────────────────────────────────
        Стандарт заголовка раздела на телефоне
@@ -9383,16 +10038,25 @@ input:-internal-autofill-previewed {
 
        За образец взят вид со страницы турниров. Правило общее: заголовок
        любого раздела на телефоне — 1.3rem, вес 700. */
+    /* СТУПЕНЬ ШКАЛЫ, А НЕ ПЛАВАЮЩЕЕ ЧИСЛО.
+       Лестница заголовков в Figma (86:10) — «одна на все 16 страниц» — 22.09
+       дополнена мобильной ступенью: заголовок раздела = 21 / Extra Bold.
+       Было clamp(1.15rem, 5vw, 1.32rem) при весе 700, то есть 18.4–21.1 и Bold:
+       и кегль мимо шкалы, и вес не тот. На десктопе заголовок раздела уже
+       26 / 800 и с лестницей сходится — замерено 22.09 на #live. */
     .section-header h2,
     section > h2,
-    .badges-cta-text h2,
-    .sp-offer h3 {
-        /* Плавно вместе с шириной экрана: на 320 — 18.4, на 390 — 19.5,
-           на 430 и шире — 21. Фиксированные 1.3rem на узком телефоне
-           смотрелись тяжело, а на крупном терялись.
+    .badges-cta-text h2 {
+        font-size: var(--fs-lg);   /* 21 */
+        font-weight: 800;          /* Extra Bold */
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+    }
 
-           Мелкий текст плавным не делаем — там разница в пиксель не видна,
-           зато строки в таблицах начинают переноситься по-разному */
+    /* .sp-offer h3 НАРОЧНО остаётся как был: это h3, а не заголовок раздела,
+       и по лестнице у него своя ступень — 21 / Bold. В общее правило он попал
+       заодно. Разводить ступени h2 и h3 по всему сайту — отдельная работа. */
+    .sp-offer h3 {
         font-size: clamp(1.15rem, 5vw, 1.32rem);
         font-weight: 700;
         letter-spacing: -0.03em;
@@ -9415,7 +10079,7 @@ input:-internal-autofill-previewed {
     .section-header .link-all,
     .section-header > a {
         margin-left: auto;
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
         white-space: nowrap;
     }
 
@@ -9548,7 +10212,7 @@ input:-internal-autofill-previewed {
 
 
     .sp-offer-lead {
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
         line-height: 1.4;
     }
 
@@ -9556,22 +10220,22 @@ input:-internal-autofill-previewed {
         gap: 10px;
     }
 
-    .sp-nums > * { font-size: 0.64rem; line-height: 1.25; }
+    .sp-nums > * { font-size: var(--fs-2xs); line-height: 1.25; }
 
     /* Числа стояли в 27 пикселей — на телефоне они кричали громче заголовка */
-    .sp-num-val { font-size: 1.25rem; line-height: 1.2; }
-    .sp-num-cap { font-size: 0.66rem; line-height: 1.25; }
+    .sp-num-val { font-size: var(--fs-lg); line-height: 1.2; }
+    .sp-num-cap { font-size: var(--fs-2xs); line-height: 1.25; }
 
     /* Что получает спонсор — по два в ряд вместо столбика */
     .sp-gives {
         grid-template-columns: 1fr 1fr;
         gap: 8px 10px;
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
 
     .sp-cta-btn {
         padding: 11px 20px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 
     /* Между фотографией и пунктами зияло 128 пикселей: это промежуток между
@@ -9583,7 +10247,7 @@ input:-internal-autofill-previewed {
 
     /* Вступление шло крупным шрифтом в семь строк */
     .about-lead {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
         line-height: 1.45;
     }
 
@@ -9598,8 +10262,8 @@ input:-internal-autofill-previewed {
 
     .vn-four .court-card img { height: 92px; }
     .vn-four .court-info { padding: 8px 9px; gap: 2px; }
-    .vn-four .court-info h4 { font-size: 0.8rem; line-height: 1.25; }
-    .vn-four .court-info span { font-size: 0.68rem; }
+    .vn-four .court-info h4 { font-size: var(--fs-xs); line-height: 1.25; }
+    .vn-four .court-info span { font-size: var(--fs-2xs); }
     .vn-four .court-card-actions { padding: 6px 9px 10px; }
 
     /* У карточки тренера оставались отступы широкого экрана: 40 пикселей по
@@ -9611,8 +10275,8 @@ input:-internal-autofill-previewed {
 
     .vn-four .coach-photo { width: 72px; height: 72px; }
     .vn-four .coach-info { padding: 8px 9px 2px; }
-    .vn-four .coach-info h4 { font-size: 0.8rem; line-height: 1.25; }
-    .vn-four .coach-info span { font-size: 0.68rem; }
+    .vn-four .coach-info h4 { font-size: var(--fs-xs); line-height: 1.25; }
+    .vn-four .coach-info span { font-size: var(--fs-2xs); }
 
     /* Строки в карточке тренера стояли просторно, как на широком экране:
        специализация, возраст, цена и скидка давали по 33–49 пикселей каждая */
@@ -9625,14 +10289,14 @@ input:-internal-autofill-previewed {
         line-height: 1.25;
     }
 
-    .vn-four .coach-info .vn-discount { font-size: 0.62rem; }
+    .vn-four .coach-info .vn-discount { font-size: var(--fs-2xs); }
 
     /* Кнопка «Подробнее» была во всю карточку и занимала столько же места,
        сколько название */
     .vn-four .court-card-details,
     .vn-four .coach-card-details {
         padding: 6px 8px;
-        font-size: 0.7rem;
+        font-size: var(--fs-2xs);
         line-height: 1.2;
     }
 
@@ -9642,7 +10306,7 @@ input:-internal-autofill-previewed {
     .vn-partner {
         top: 6px;
         left: 6px;
-        font-size: 0.55rem;
+        font-size: var(--fs-2xs);
         padding: 2px 6px;
     }
 
@@ -9660,8 +10324,6 @@ input:-internal-autofill-previewed {
        под неё: первый экран начинался с половины буквы. Отводим под шапку
        её высоту с запасом, а низ ужимаем — содержимое и так длиннее экрана */
     .hero {
-        padding-top: 78px;
-        padding-bottom: 12px;
         min-height: 0;
     }
 }
@@ -9676,7 +10338,7 @@ input:-internal-autofill-previewed {
    с полями 24/22.5 вместо 12/0/14.
    Условие ТО ЖЕ, что у блока .footer-acc и у складывать() в
    js/script.js. Меняешь здесь — меняй во всех трёх местах. */
-@media (pointer: coarse), (max-width: 768px) {
+@media (any-pointer: coarse), (max-width: 768px) {
 
     /* Футер шёл сплошной колонкой на 1116 пикселей: пять блоков подряд с
        промежутком в 40. Ставим разделы по два в ряд — «Навигация» рядом с
@@ -9700,7 +10362,7 @@ input:-internal-autofill-previewed {
     }
 
     .footer-block h4 {
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
         margin-bottom: 6px;
     }
     .footer-links { gap: 2px; }
@@ -9767,7 +10429,7 @@ input:-internal-autofill-previewed {
    половиной экрана.
    Скрипт js/script.js ставит класс footer-acc по такому же условию —
    если поменять одно, надо менять и другое. */
-@media (pointer: coarse), (max-width: 768px) {
+@media (any-pointer: coarse), (max-width: 768px) {
     /* Гармошка: видны только заголовки, списки раскрываются по нажатию.
        Класс footer-acc ставит script.js — если он не отработал, подвал
        остаётся обычным, со всеми ссылками на виду */
@@ -9797,7 +10459,7 @@ input:-internal-autofill-previewed {
         text-align: left;
         /* Размер был как у ссылок, но жирность 700, заглавные и разрядка
            делали заголовки тяжелее всего подвала */
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
         font-weight: 600;
         letter-spacing: 0.03em;
         color: var(--text-secondary);
@@ -9883,7 +10545,7 @@ input:-internal-autofill-previewed {
    Правила на 768 ОСТАВЛЕНЫ намеренно: узкое окно на компьютере даёт
    pointer: fine, а автотесты гоняют именно такое окно — убрав ширину, мы
    потеряли бы проверку. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
     .footer-bottom-links a {
         display: flex;
         align-items: center;
@@ -10029,7 +10691,7 @@ input:-internal-autofill-previewed {
    какой учётной записью сидит */
 .user-dropdown-header {
     padding: 10px 12px 8px;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: var(--text-primary);
 }
 
@@ -10068,7 +10730,7 @@ input:-internal-autofill-previewed {
     }
 
     .site-notif-title {
-        font-size: 0.9rem;
+        font-size: var(--fs-sm);
     }
 
     .site-notif-dropdown .site-notif-item {
@@ -10076,15 +10738,15 @@ input:-internal-autofill-previewed {
     }
 
     .site-notif-item-title {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 
     .site-notif-item-msg {
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
     }
 
     .site-notif-item-time {
-        font-size: 0.65rem;
+        font-size: var(--fs-2xs);
     }
 
     .site-notif-dropdown .site-notif-foot {
@@ -10092,7 +10754,7 @@ input:-internal-autofill-previewed {
     }
 
     .site-notif-foot a {
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -10122,7 +10784,7 @@ input:-internal-autofill-previewed {
     .pr-section-title.pr-section-title,
     .td-fic-section-title.td-fic-section-title,
     .trn-block-title.trn-block-title {
-        font-size: 1.3rem;
+        font-size: var(--fs-lg);
         font-weight: 700;
     }
 }
@@ -10152,7 +10814,7 @@ input:-internal-autofill-previewed {
     .hero-btn.hero-btn {
         min-height: 48px;
         padding: 14px 24px;
-        font-size: 0.95rem;
+        font-size: var(--fs-base);
     }
 
     /* 2. Обычная кнопка */
@@ -10165,7 +10827,7 @@ input:-internal-autofill-previewed {
     .db-btn.db-btn {
         min-height: 40px;
         padding: 11px 16px;
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 
     /* 3. Мелкая — переключатели и вкладки */
@@ -10176,7 +10838,7 @@ input:-internal-autofill-previewed {
     .db-chip.db-chip {
         min-height: 32px;
         padding: 8px 12px;
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -10198,28 +10860,17 @@ input:-internal-autofill-previewed {
    потому что ниже main и так имел нулевую отбивку. Отбивку убрали — значит
    исключение для героя должно работать везде, иначе герой главной уехал бы
    вниз на высоту шапки. */
-/* ОСТОРОЖНО, ЗДЕСЬ ЛЕГКО ОШИБИТЬСЯ, И 21.09 Я ОШИБСЯ — ПОЙМАНО ЗАМЕРОМ.
-   Сначала я снял это правило с медиазапроса и сделал общим. Логика была
-   верной («герой уходит под шапку, значит main не отбивается»), а результат
-   нет: у героя своя отбивка есть только от 993, а на 375 и 768 её даёт его
-   собственный padding 78. В полосе 769-992 у него ни того, ни другого —
-   там его спасала как раз отбивка main. Замерено на 844: заголовок героя
-   встал на 12 от верха при шапке 64, то есть на пятьдесят два пикселя ПОД
-   шапкой.
-   Поэтому исключение действует везде, КРОМЕ 769-992. Не упрощать это
-   условие, не свернув сначала полосу 769-992 у самого героя. */
-@media (max-width: 768px), (min-width: 993px) {
-    main:has(.hero) {
-        padding-top: 0;
-    }
-}
-
-@media (min-width: 993px) {
-    /* Герой главной НЕ ТРОНУТ намеренно: у него своя раскладка, и в макетах,
-       которые смотрел Костя, его не было. Разбираем отдельно — задача h279. */
-    .hero {
-        padding-top: calc(var(--header-h) + var(--space-4));
-    }
+/* УСЛОВИЕ СВЁРНУТО 22.09 — ровно так, как разрешала прежняя записка.
+   Она гласила: «исключение действует везде, КРОМЕ 769-992; не упрощать,
+   не свернув сначала полосу 769-992 у самого героя». Полоса свёрнута:
+   у .hero теперь ОДНА отбивка calc(var(--header-h) + var(--space-10)) на
+   все ширины, значит герой отбивает шапку сам везде, и main под ним не
+   должен отбивать её второй раз ни в одной полосе.
+   Замерено на 844x390 ДО свёртки: main padding-top 64 + hero padding-top
+   104 = бейдж на 168, то есть 104 под шапкой вместо 40. ПОСЛЕ — 40.
+   Меняешь отбивку героя — проверь это правило: они парные. */
+main:has(.hero) {
+    padding-top: 0;
 }
 
 /* Мобильный герой оставлен как был — разбираемся отдельно. */
@@ -10271,7 +10922,7 @@ main > section:first-child:not(.hero) {
    указатель точный. Менять высоту пункта меню на мыши — отдельное решение
    (h276, предложение 4), Костей не принятое.
    ========================================================================= */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
 
     /* Знак остаётся 34 в высоту — растёт только область вокруг него. */
     .floating-header .logo {
@@ -10309,3 +10960,300 @@ main > section:first-child:not(.hero) {
        пунктов (11 x 44 = 484). */
 }
 
+
+/* ============================================================================
+   ПЕРВЫЙ ЭКРАН НА ТЕЛЕФОНЕ — ВАРИАНТ «C», ПРИНЯТ КОСТЕЙ 22.09
+
+   Доска: «Landing — first screen on a phone» (315:9, страница Patterns).
+   Замерено живьём на iPhone 12 Pro, 390x844, с боевыми данными: герой 991.2
+   при окне 844 — за сгибом 147.
+
+   ПОЧЕМУ ЭТО НЕ ПРО ОТСТУПЫ. Все зазоры первого экрана уже на шкале и вместе
+   дают 260. Даже обнулив их все, снимаем 260 из 991 — экран не сойдётся.
+   Режут два блока: цифры 223.5 и полоса спонсоров 235.
+
+   ЧТО ДЕЛАЕТ ПЕРВЫЙ ЭКРАН: заявление и одно действие. Цифры и логотипы —
+   доказательство и обязательство перед спонсорами, а не то, ради чего человек
+   открыл сайт. На десктопе они стоят в строку и почти ничего не стоят; на
+   телефоне занимали половину.
+
+   Считано по варианту C: герой 991 -> 612, запас до сгиба 232, и видно начало
+   следующей секции — экран сам зовёт прокрутить.
+
+   ГРАНИЦА НАМЕРЕННО ПО ШИРИНЕ, А НЕ ПО ПАЛЬЦУ. Обычно условие сенсорного ввода
+   у нас (any-pointer: coarse) — но телефон боком 844x390 и планшет боком 1024
+   с данными ещё НЕ мерены, и распространять на них решение, принятое по замеру
+   390x844, значило бы выдумывать. Померим — расширим условие осознанно.
+   ========================================================================= */
+@media (max-width: 768px) {
+
+    /* B · ПЯТЬ ЦИФР — ТРИ И ДВА, ВСЕ ВИДНЫ СРАЗУ.
+       Было: сетка 1fr 1fr (правило выше, общее для всех обложек) — пять цифр
+       в три ряда, 223.5, четверть экрана.
+
+       СНАЧАЛА Я СДЕЛАЛ НЕ ТАК. Первым решением был один ряд с горизонтальной
+       прокруткой: 223.5 -> 61, экран сошёлся. Костя посмотрел и сказал то, чего
+       я не взвесил: две цифры из пяти прятались за жестом, который большинство
+       не сделает, а цифры на первом экране показывают, что сайт живой и им
+       пользуются. Прокрутка убрана, все пять видны без жеста.
+
+       ПОЧЕМУ РАЗМЕРЫ ЗАДАНЫ ЗДЕСЬ ЯВНО. Мобильные размеры цифр на обложках
+       заданы правилом .hero-stats .hero-stat-value (выше по файлу), а на
+       главной классы другие — .stat-value и .stat-label. То есть главная
+       НИКОГДА не получала мобильных размеров и рисовала цифры десктопными.
+       Найдено замером 22.09. Правило выше не трогаем: его классы живут на
+       других обложках. */
+    .hero-stats {
+        /* РАСТЯНУТЬСЯ ПРИХОДИТСЯ ЯВНО. И .hero, и .hero-content стоят
+           align-items: center — значит их дети НЕ растягиваются, а меряются по
+           содержимому. Без этого ряд вырастал шире экрана, страница получала
+           горизонтальный перелив, и браузер масштабировал её целиком:
+           innerWidth становился 549 вместо 390. Поймано замером на переливы,
+           глазами такое не видно — страница просто «чуть мельче». */
+        align-self: stretch;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        /* 12 между рядами, 8 между колонками: по вертикали шаг крупнее, иначе
+           два ряда читаются как один комок */
+        gap: var(--space-3) var(--space-2);
+    }
+
+    /* Три в ряд: пятая и четвёртая уходят во второй ряд и центруются сами.
+       Ровно треть минус половина промежутка — иначе третья карточка не влезает
+       и ряд распадается на 2 + 2 + 1. */
+    .hero-stats > .stat {
+        flex: 0 0 calc(33.333% - 6px);
+        min-width: 0;
+        align-items: center;
+        text-align: center;
+    }
+
+    .hero-stats .stat-value {
+        font-size: clamp(1.35rem, 6.4vw, 1.9rem);
+        line-height: 1.1;
+    }
+
+    .hero-stats .stat-label {
+        font-size: clamp(0.6rem, 2.7vw, 0.72rem);
+        line-height: 1.25;
+        letter-spacing: 0.04em;
+    }
+
+    /* Логотипы спонсоров мельче: место, освободившееся под цифры, взято здесь.
+       Замерено — карточка 138 -> 120, и нижний край логотипов остаётся над
+       сгибом. Ниже сгиба уходит только нижняя отбивка полосы, пустая. */
+    .hero-sponsors-carousel .carousel-slide-infinite {
+        gap: var(--space-2);
+    }
+
+    .hero-sponsors-carousel .carousel-slide-infinite img {
+        height: 48px;
+    }
+
+    .hero-sponsors-carousel .carousel-slide-infinite > span {
+        font-size: var(--fs-xs);
+    }
+
+    /* A · ПОЛОСА СПОНСОРОВ — СВОЯ ПОВЕРХНОСТЬ, А НЕ ФОТОГРАФИЯ.
+       В разметке она остаётся внутри .hero — и это правильно: на десктопе она
+       часть первого экрана и лежит на фото. На телефоне ей даётся собственный
+       непрозрачный фон во всю ширину, и фотография героя кончается там, где
+       кончается содержимое. Глаз читает её как отдельную секцию под героем.
+       Никакого переноса в разметке: одна разметка, разная раскладка. */
+    /* НИЖНЮЮ ОТБИВКУ ГЕРОЯ ПОЛОСА СЪЕДАЕТ САМА.
+       Первой мыслью я написал здесь .hero { padding-bottom: 0 } — и заморозка
+       тут же уронила два правила: «у .hero ровно три объявления» и «ни одно
+       другое объявление .hero не трогает padding». Правило сработало ровно
+       так, как задумано, поймав меня на том же, что чинили утром: четвёртое
+       объявление .hero в четвёртой полосе ширины.
+       Поэтому механизм местный: полоса вытягивает себя на 32 вниз
+       отрицательным полем и отдаёт те же 32 обратно собственным padding —
+       уже своей поверхностью, а не фотографией. .hero не трогаем вовсе. */
+    .hero-sponsors-section {
+        /* stretch по той же причине, что и у ряда цифр: родитель .hero стоит
+           align-items: center, и без этого полоса меряется по содержимому —
+           лента спонсоров растягивала её шире экрана. */
+        align-self: stretch;
+        width: auto;
+        max-width: none;
+        margin-inline: calc(var(--pad-x) * -1);
+        margin-bottom: calc(var(--space-8) * -1);
+        /* ВОЗДУХ НАД ШВОМ. Поймал Костя глазами 22.09: подписи цифр выглядели
+           обрезанными. Замер показал почему — низ ряда цифр 552.5 и верх тёмной
+           поверхности 552.5, зазор РОВНО НОЛЬ. Тридцать два, которые я считал
+           отбивкой, лежали ВНУТРИ тёмной полосы, над заголовком «Спонсоры», а
+           между фотографией и текстом не было ничего: буквы упирались в шов.
+           На десктопе этого не видно — там обе стороны шва лежат на фото.
+           base-правило ставит margin-top: auto (прижать к низу, когда есть
+           запас); на телефоне запаса нет, и шаг задаётся числом из шкалы. */
+        margin-top: var(--space-8);
+        padding: var(--space-8) var(--pad-x);
+        background: var(--bg);
+    }
+
+    /* Те 32 воздуха над швом надо откуда-то взять, иначе экран перестаёт
+       помещаться. Берём у самой ленты: у .sponsors-carousel-infinite 40
+       собственного padding сверху и снизу — внутри коробки, вокруг логотипов.
+       На телефоне полоса уже отбита своими 32, и сорок сверх них — это воздух
+       на воздухе.
+       Сколько именно: с 24 герой вышел 844.7 при окне 844 — на 0.7 за сгибом,
+       то есть последняя строка пикселей полосы всё-таки срезалась. Замерено,
+       не прикинуто. Ставим 16: герой уходит под сгиб с запасом, а зазор от
+       заголовка «Спонсоры» до логотипов становится 8 + 16 = 24 — шаг из
+       шкалы. На десктопе там 48, и это намеренно: там места вдоволь.
+       На странице спонсоров лента не трогается. */
+    .hero-sponsors-section .sponsors-carousel-infinite {
+        padding-top: var(--space-4);
+    }
+}
+
+/* ============================================================================
+   ШИРОКИЙ, НО НЕВЫСОКИЙ ЭКРАН — НОУТБУК. Принято Костей 22.09.
+
+   ЧТО БЫЛО. На ширине 1512 герой имеет высоту 864.8, и она НЕ зависит от высоты
+   окна: содержимое всегда длиннее min-height и диктует высоту само. Значит
+   первый экран помещается только в окно выше 865.
+
+   Замерено 22.09, что срезается при разной высоте окна:
+     900 — помещается целиком
+     861 — режется 3.8 ПУСТОЙ фотографии (нижняя отбивка героя 32). Чисто.
+     800 — РЕЖУТСЯ ЛОГОТИПЫ спонсоров на 32.8
+     760 — режутся логотипы на 72.8
+   Правило «сгиб может резать пустое, но не строку и не цифры» на 800 и ниже
+   нарушалось. 800 — это обычный ноутбук поменьше.
+
+   ЧТО ДЕЛАЕМ. Трогаем ТОЛЬКО ВОЗДУХ, содержимое не прячем: на десктопе
+   строка-расшифровка читается, и убирать её тут незачем. Воздух под шапкой
+   40 -> 32, шаг между смысловыми группами 24 -> 16, верхний padding ленты
+   40 -> 24. Итого 48: герой 864.8 -> 816.8, низ логотипов 784.8.
+   Теперь чисто для любого окна выше 785.
+
+   ПОРОГ 880, А НЕ 900. Сжимать надо только когда надо: окно 881 и выше вмещает
+   полный герой (864.8) без правок, и незачем отнимать у него воздух.
+
+   ПОЧЕМУ БЛОК СТОИТ ВЫШЕ СЕНСОРНОГО. На сенсорном устройстве оба условия могут
+   совпасть, и обе крутилки будут заданы дважды. Сенсорный блок идёт ПОСЛЕ и
+   поэтому побеждает — у пальца свои значения, более сжатые. Меняешь порядок —
+   ломаешь планшет боком.
+   ========================================================================= */
+@media (min-width: 993px) and (max-height: 880px) {
+    /* Ноутбучный слой. Секция дышит на ступень тише — ровно как герой над ней. */
+    section {
+        --section-vozduh: var(--space-8);   /* 32 */
+    }
+
+    .hero {
+        --hero-vozduh: var(--space-8);   /* 40 -> 32 */
+        --hero-shag:   var(--space-4);   /* 24 -> 16 */
+    }
+
+    .hero-sponsors-section .sponsors-carousel-infinite {
+        padding-top: var(--space-6);     /* 40 -> 24 */
+    }
+}
+
+/* ============================================================================
+   ТЕСНЫЕ ПО ВЫСОТЕ ЭКРАНЫ — ВАРИАНТ «B», ПРИНЯТ КОСТЕЙ 22.09
+
+   Два вида: телефон боком 844x390 и планшет боком 1024x768. Порог 820 выбран
+   так, чтобы накрыть оба и не задеть ни телефон вертикально (844 высоты), ни
+   планшет вертикально (1024), ни десктоп. Палец в условии обязателен: без него
+   обычное окно на десктопе высотой 800 вдруг потеряло бы строку-расшифровку.
+
+   Доска: «Landing — first screen, phone landscape» (318:9, страница Patterns).
+   Замерено живьём на 844x390 с боевыми данными: герой 815.7 при окне 390, и
+   кнопка «Найти игрока» РАЗРЕЗАНА сгибом пополам — её низ на 427.1.
+
+   ПОЧЕМУ ЭТО НЕ ПРО ОТСТУПЫ. Все зазоры первого экрана вместе дают 124. Окно
+   390, шапка 64 — на содержимое остаётся 326, а одни текстовые блоки занимают
+   179 плюс кнопка 60. Обнулив весь воздух, кнопку не вытащить.
+
+   ЧТО УБРАЛИ И ПОЧЕМУ ИМЕННО ЭТО. Строку-расшифровку «Кыргызстанское Сообщество
+   Любителей Тенниса»: кто мы — уже сказали логотип и «КСЛТ», а полное имя есть
+   в подвале и в «О нас». Подзаголовок ОСТАВЛЕН намеренно — это единственная
+   строка, которая объясняет, зачем сюда идти.
+
+   Запас после правки — 31. Меньше брать нельзя: английские и кыргызские строки
+   длиннее русских, слоган переносится, и запас в семь точек съедается языком.
+
+   УСЛОВИЕ — ВЫСОТА И ПАЛЕЦ. Не ширина: 844 бывает и у окна на десктопе, где
+   места по вертикали вдоволь. Режет здесь именно нехватка высоты.
+   ========================================================================= */
+@media (any-pointer: coarse) and (max-height: 820px) {
+
+    /* Сенсорный тесный. Стоит НИЖЕ ноутбучного намеренно: на планшете боком
+       совпадают оба условия, и побеждать должен палец — у него значения сжатее. */
+    section {
+        --section-vozduh: var(--space-6);   /* 24 */
+    }
+
+    /* Крутилки, а не второе объявление padding. Оба значения из шкалы. */
+    .hero {
+        --hero-vozduh: var(--space-6);   /* 40 -> 24 */
+        --hero-shag:   var(--space-4);   /* 24 -> 16 */
+    }
+
+    /* Расшифровка аббревиатуры: 24 своей высоты плюс 12 зазора = 36 точек,
+       которых и не хватало кнопке. */
+    .hero-full {
+        display: none;
+    }
+
+    /* Верхний padding ленты 40 -> 16. На планшете боком именно этих 24 не
+       хватало, чтобы карточки логотипов уместились целиком: замерено 22.09 —
+       герой 848.1 при окне 768, логотипы срезаны на 48.1. На телефоне
+       вертикально то же значение уже стоит в блоке max-width: 768px; здесь оно
+       для тесных по высоте ШИРОКИХ экранов, куда тот блок не доезжает. */
+    .hero-sponsors-section .sponsors-carousel-infinite {
+        padding-top: var(--space-4);
+    }
+}
+
+/* ============================================================================
+   ВОЗДУХ СЕКЦИИ НА ТЕЛЕФОНЕ И ПЛАНШЕТЕ ВЕРТИКАЛЬНО.
+   Стоит НИЖЕ сенсорного слоя намеренно и побеждает его.
+
+   ПОЧЕМУ ОТДЕЛЬНЫМ СЛОЕМ. Сенсорный слой ловит «тесные по высоте» условием
+   max-height: 820 — оно придумано для ПЕРВОГО экрана, чтобы герой влез до
+   сгиба. Обычный телефон 375x812 попадает под него случайно: он не тесный,
+   он просто телефон. А воздух МЕЖДУ секциями от высоты экрана не зависит
+   вовсе — там нет сгиба, за который идёт борьба.
+
+   Значение 40 — ровно то, что было на телефоне и раньше. Поведение не
+   менялось, менялся способ: раньше его давала сокращённая запись
+   padding: 40px 26px, которая молча перебивала все слои сразу.
+   ============================================================================ */
+@media (max-width: 768px) {
+    section {
+        --section-vozduh: var(--space-10);   /* 40 */
+    }
+}
+
+/* ============================================================================
+   САМЫЕ КОРОТКИЕ ЭКРАНЫ — СГИБ НЕ РЕЖЕТ ЦИФРЫ. Принято Костей 22.09.
+
+   Отдельный, более узкий слой поверх блока «тесных по высоте»: там мы СЖИМАЕМ,
+   здесь — следим, ЧТО именно оказывается на линии сгиба.
+
+   ЧТО БЫЛО. На телефоне боком (844x390) низ кнопки 359.1, верх блока цифр
+   375.1, сгиб 390 — из-за сгиба торчали 14.9, то есть ВЕРХУШКИ ЦИФР,
+   срезанные пополам. Глаз читает это не как «там есть ещё», а как поломку.
+   Ровно то же Костя до этого поймал на логотипах спонсоров.
+
+   ПРАВИЛО, КОТОРОГО НЕ ХВАТАЛО: сгиб может резать пустое место или блок,
+   который явно продолжается, но НЕ строку текста и не цифры.
+
+   Шаг «кнопка -> цифры» 16 -> 32: цифры уезжают на 1.1 ниже сгиба, под кнопкой
+   остаётся 30.9 чистой фотографии, и первый экран кончается кнопкой.
+
+   ПОЧЕМУ ПОРОГ 440, А НЕ 820. На планшете боком (768 высоты) цифры и так видны
+   целиком, а лишние 16 съели бы запас с 19.9 до 3.9 — при том что английские и
+   кыргызские строки длиннее русских. Замерено, не прикинуто.
+   ========================================================================= */
+@media (any-pointer: coarse) and (max-height: 440px) {
+    .hero-stats {
+        margin-top: var(--space-8);
+    }
+}

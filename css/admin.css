@@ -67,19 +67,19 @@ body.ad-page {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     color: var(--accent);
 }
 
 .ad-sidebar-name {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .ad-sidebar-email {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     word-break: break-all;
 }
@@ -87,7 +87,7 @@ body.ad-page {
 .ad-sidebar-role {
     display: inline-block;
     margin-top: 8px;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 1px;
     padding: 3px 10px;
@@ -117,7 +117,7 @@ body.ad-page {
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     transition: var(--transition-fast);
     cursor: pointer;
     border: none;
@@ -148,7 +148,7 @@ body.ad-page {
 
 .ad-sidebar-badge {
     margin-left: auto;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding: 2px 8px;
@@ -218,7 +218,7 @@ body.ad-page {
 }
 
 .ad-section-title {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--space-md);
@@ -241,13 +241,13 @@ body.ad-page {
 }
 
 .ad-stat-icon {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     margin-bottom: 2px;
     opacity: 0.7;
 }
 
 .ad-stat-value {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--accent);
     margin-bottom: 1px;
@@ -255,7 +255,7 @@ body.ad-page {
 }
 
 .ad-stat-label {
-    font-size: 0.55rem;
+    font-size: var(--fs-2xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -310,7 +310,7 @@ body.ad-page {
 }
 
 .ad-dash-view-all {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--accent);
     text-decoration: none;
     cursor: pointer;
@@ -322,7 +322,7 @@ body.ad-page {
 
 .ad-dash-count-badge {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 2px 8px;
     border-radius: 10px;
@@ -341,10 +341,10 @@ body.ad-page {
     text-align: center;
     padding: 40px 20px;
     color: var(--text-dim);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 .ad-dash-empty-icon {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     margin-bottom: 8px;
     opacity: 0.4;
 }
@@ -379,7 +379,7 @@ body.ad-page {
     border: 1px solid transparent;
     border-radius: 6px;
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     line-height: 1.2;
     cursor: pointer;
 }
@@ -435,7 +435,7 @@ body.ad-page {
 }
 
 .ad-table-card-title {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
@@ -450,13 +450,13 @@ body.ad-page {
 .ad-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .ad-table th {
     text-align: left;
     padding: 10px 12px;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-dim);
@@ -475,9 +475,9 @@ body.ad-page {
 .ad-col-header:hover { color: var(--accent); }
 .set-del-level:hover { background: rgba(255,60,60,0.35) !important; }
 .ad-col-active { color: var(--accent); }
-.ad-sort-arrow { font-size: 0.6rem; opacity: 0.7; }
+.ad-sort-arrow { font-size: var(--fs-2xs); opacity: 0.7; }
 .ad-col-filter-btn {
-    font-size: 0.5rem;
+    font-size: var(--fs-2xs);
     opacity: 0.3;
     transition: opacity 0.15s;
     padding: 2px;
@@ -513,7 +513,7 @@ body.ad-page {
     margin-bottom: 2px;
 }
 .ad-col-dd-title {
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -523,7 +523,7 @@ body.ad-page {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     color: var(--text-dim);
     cursor: pointer;
 }
@@ -549,13 +549,13 @@ body.ad-page {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 8px;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     color: #000;
 }
 .ad-col-dd-item {
     padding: 4px 10px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
     cursor: pointer;
 }
@@ -568,7 +568,7 @@ body.ad-page {
     align-items: center;
     gap: 6px;
     padding: 3px 10px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
     cursor: pointer;
 }
@@ -599,7 +599,7 @@ body.ad-page {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 9px;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     color: #000;
 }
@@ -637,7 +637,7 @@ body.ad-page {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--text-muted);
     flex-shrink: 0;
 }
@@ -654,13 +654,13 @@ body.ad-page {
 }
 
 .ad-table-user-email {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
 .ad-role-badge {
     display: inline-block;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding: 2px 8px;
@@ -703,20 +703,20 @@ body.ad-page {
 }
 
 .ad-coming-soon-icon {
-    font-size: 3rem;
+    font-size: var(--fs-3xl);
     margin-bottom: 16px;
     opacity: 0.4;
 }
 
 .ad-coming-soon-title {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-secondary);
     margin-bottom: 8px;
 }
 
 .ad-coming-soon-text {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-dim);
     max-width: 360px;
 }
@@ -737,7 +737,7 @@ body.ad-page {
 .ad-btn {
     padding: 10px 24px;
     border-radius: var(--radius-full);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -854,13 +854,13 @@ body.ad-page {
     left: 50%;
     transform: translate(-50%, -50%);
     color: #000;
-    font-size: 13px;
+    font-size: var(--fs-xs);
     font-weight: 700;
 }
 
 .ad-btn-sm {
     padding: 6px 14px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 .ad-btn-translate {
@@ -869,7 +869,7 @@ body.ad-page {
     gap: 4px;
     margin-top: 8px;
     padding: 6px 14px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: #CCFF00;
     background: rgba(204, 255, 0, 0.08);
     border: 1px solid rgba(204, 255, 0, 0.2);
@@ -892,7 +892,7 @@ body.ad-page {
     gap: 4px;
     margin-top: 8px;
     padding: 6px 14px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: #CCFF00;
     background: rgba(204, 255, 0, 0.08);
     border: 1px solid rgba(204, 255, 0, 0.2);
@@ -950,7 +950,7 @@ body.ad-page {
 /* ---- Status Badge ---- */
 .ad-status-badge {
     display: inline-block;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding: 2px 8px;
@@ -1008,7 +1008,7 @@ body.ad-page {
 /* ---- Category Badge ---- */
 .ad-cat-badge {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     padding: 2px 8px;
     border-radius: var(--radius-full);
     background: rgba(255, 255, 255, 0.06);
@@ -1036,7 +1036,7 @@ body.ad-page {
 }
 
 .ad-form-card-title {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
@@ -1057,7 +1057,7 @@ body.ad-page {
 
 .ad-field-group > .ad-field-label {
     display: block;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -1070,7 +1070,7 @@ body.ad-page {
 
 .ad-field-label {
     display: block;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -1204,12 +1204,12 @@ input[type="date"]::-webkit-datetime-edit {
 
 .ad-image-upload-round .ad-image-upload-placeholder {
     padding: 16px 8px;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     text-align: center;
 }
 
 .ad-image-upload-round .ad-image-upload-icon {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
 }
 
 /* Players — Rank Change */
@@ -1243,7 +1243,7 @@ input[type="date"]::-webkit-datetime-edit {
     background: var(--bg-elevated);
     color: var(--text-dim);
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: all 0.15s ease;
 }
@@ -1269,7 +1269,7 @@ input[type="date"]::-webkit-datetime-edit {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     cursor: pointer;
 }
@@ -1296,7 +1296,7 @@ input[type="date"]::-webkit-datetime-edit {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 11px;
+    font-size: var(--fs-2xs);
     color: #000;
     font-weight: 700;
 }
@@ -1342,12 +1342,12 @@ input[type="date"]::-webkit-datetime-edit {
     align-items: center;
     gap: 9px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 .ad-chk input { width: 16px; height: 16px; accent-color: var(--ad-accent, #CCFF00); }
 
 .ad-field-hint {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     margin-top: 4px;
 }
@@ -1356,7 +1356,7 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-type-badge {
     padding: 3px 10px;
     border-radius: var(--radius-full);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
 }
@@ -1380,7 +1380,7 @@ input[type="date"]::-webkit-datetime-edit {
     border-radius: 50%;
     background: var(--accent);
     color: #000;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
 }
 
@@ -1390,7 +1390,7 @@ input[type="date"]::-webkit-datetime-edit {
     grid-template-columns: 1fr 1fr 70px 100px 60px 70px 32px;
     gap: 8px;
     margin-bottom: 6px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1449,7 +1449,7 @@ input[type="date"]::-webkit-datetime-edit {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 13px;
+    font-size: var(--fs-xs);
     color: #000;
     font-weight: 700;
 }
@@ -1478,7 +1478,7 @@ input[type="date"]::-webkit-datetime-edit {
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     white-space: nowrap;
     flex-shrink: 0;
@@ -1509,13 +1509,13 @@ input[type="date"]::-webkit-datetime-edit {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 11px;
+    font-size: var(--fs-2xs);
     color: #0A0A0A;
     font-weight: 700;
 }
 
 .ad-court-type-line {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
 }
 
@@ -1543,7 +1543,7 @@ input[type="date"]::-webkit-datetime-edit {
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-dim);
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -1586,7 +1586,7 @@ input[type="date"]::-webkit-datetime-edit {
     background: rgba(0,0,0,0.7);
     color: #FF6B6B;
     border: none;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1624,7 +1624,7 @@ select.ad-field-input {
     border: 1px solid var(--border-subtle);
     background: transparent;
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -1667,11 +1667,11 @@ select.ad-field-input {
 
 .ad-image-upload-placeholder {
     color: var(--text-dim);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .ad-image-upload-icon {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     margin-bottom: 8px;
     opacity: 0.4;
 }
@@ -1696,7 +1696,7 @@ select.ad-field-input {
     color: #fff;
     border: none;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1715,7 +1715,7 @@ select.ad-field-input {
 .ad-news-meta-row {
     display: flex;
     gap: 20px;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -1723,7 +1723,7 @@ select.ad-field-input {
 .ad-engagement-stats {
     display: flex;
     gap: 24px;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
 }
 
 .ad-engagement-item {
@@ -1736,7 +1736,7 @@ select.ad-field-input {
 .ad-engagement-item span {
     font-weight: 600;
     color: var(--text-primary);
-    font-size: 1rem;
+    font-size: var(--fs-base);
 }
 
 /* ---- Reaction Tiles ---- */
@@ -1752,7 +1752,7 @@ select.ad-field-input {
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     min-width: 70px;
 }
 .ad-reaction-tile:hover {
@@ -1788,7 +1788,7 @@ select.ad-field-input {
     transform: translateX(-50%) translateY(-100px);
     padding: 14px 28px;
     border-radius: var(--radius-sm);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     z-index: 9999;
     opacity: 0;
@@ -1838,14 +1838,14 @@ select.ad-field-input {
 }
 
 .ad-confirm-title {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .ad-confirm-text {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     margin-bottom: var(--space-md);
 }
@@ -1906,7 +1906,7 @@ select.ad-field-input {
         border: 1px solid var(--border-subtle);
         background: transparent;
         color: var(--text-secondary);
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
         cursor: pointer;
         white-space: nowrap;
         transition: var(--transition-fast);
@@ -1976,7 +1976,7 @@ select.ad-field-input {
 
     .ad-court-type-row {
         grid-template-columns: 1fr 1fr 60px 80px 40px 60px 32px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 
     .ad-schedule-row {
@@ -2000,7 +2000,7 @@ select.ad-field-input {
     }
 
     .ad-section-title {
-        font-size: 1.2rem;
+        font-size: var(--fs-md);
     }
 
     .ad-stats-grid {
@@ -2013,7 +2013,7 @@ select.ad-field-input {
     }
 
     .ad-stat-value {
-        font-size: 1rem;
+        font-size: var(--fs-base);
     }
 }
 
@@ -2038,7 +2038,7 @@ select.ad-field-input {
     background: transparent;
     border: none;
     color: rgba(255,255,255,0.5);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     cursor: pointer;
     border-radius: 6px;
@@ -2076,7 +2076,7 @@ select.ad-field-input {
 }
 
 .ad-rat-hint {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: rgba(255,255,255,0.4);
     font-style: italic;
 }
@@ -2084,7 +2084,7 @@ select.ad-field-input {
 /* Category titles */
 .ad-rat-cat-title {
     color: var(--accent, #CCFF00);
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     margin: 20px 0 8px;
     padding-bottom: 4px;
@@ -2108,7 +2108,7 @@ select.ad-field-input {
     border-radius: 4px;
     text-align: center;
     line-height: 20px;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
 }
 
@@ -2160,7 +2160,7 @@ select.ad-field-input {
     background: rgba(255,255,255,0.05);
     border-radius: 8px;
     margin-bottom: 16px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.7);
 }
 
@@ -2179,7 +2179,7 @@ select.ad-field-input {
     border: 1px solid rgba(204,255,0,0.2);
     border-radius: 8px;
     color: rgba(255,255,255,0.8);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     margin-bottom: 16px;
 }
 
@@ -2188,7 +2188,7 @@ select.ad-field-input {
     background: none;
     border: none;
     color: #f44336;
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     cursor: pointer;
     padding: 2px 6px;
     border-radius: 4px;
@@ -2206,7 +2206,7 @@ select.ad-field-input {
     border-radius: 6px;
     color: #fff;
     padding: 6px 8px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .rat-rule-input:focus {
@@ -2274,7 +2274,7 @@ select.ad-field-input {
 
     .ad-rat-tab {
         padding: 8px 10px;
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
     }
 
     .ad-rat-actions {
@@ -2309,7 +2309,7 @@ select.ad-field-input {
     border: none;
     background: transparent;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     border-radius: 8px;
     cursor: pointer;
@@ -2366,7 +2366,7 @@ select.ad-field-input {
     animation: adFloatUp 0.25s ease-out;
 }
 .ad-reg-floating-count {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--text-primary, #fff);
     white-space: nowrap;
@@ -2380,7 +2380,7 @@ select.ad-field-input {
 }
 
 .ad-badge {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     padding: 2px 6px;
     border-radius: 10px;
     background: rgba(255,255,255,0.1);
@@ -2461,12 +2461,12 @@ select.ad-field-input {
 }
 
 .ad-reg-columns .ad-table {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .ad-reg-columns .ad-table th {
     padding: 8px 5px;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
 }
 
 .ad-reg-columns .ad-table td {
@@ -2480,7 +2480,7 @@ select.ad-field-input {
 }
 
 .ad-reg-section-title {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 8px;
@@ -2490,14 +2490,14 @@ select.ad-field-input {
 }
 
 .ad-reg-section-title .ad-badge {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 .ad-trn-status-field {
     cursor: default;
     font-weight: 600;
     text-transform: uppercase;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     letter-spacing: 0.5px;
 }
 
@@ -2572,7 +2572,7 @@ select.ad-field-input {
 
 .ad-brk-title {
     text-align: center;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -2616,7 +2616,7 @@ select.ad-field-input {
 
 /* Schedule info above players */
 .ad-brk-schedule {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--text-dim, rgba(255,255,255,0.45));
     padding: 3px 8px 0;
     white-space: nowrap;
@@ -2628,7 +2628,7 @@ select.ad-field-input {
     align-items: center;
     padding: 5px 8px;
     gap: 4px;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     border-bottom: 1px solid var(--border, rgba(255,255,255,0.06));
     color: var(--text-secondary, #aaa);
 }
@@ -2654,7 +2654,7 @@ select.ad-field-input {
    одной линии независимо от того, сеяный игрок или нет */
 .ad-brk-seed {
     color: var(--accent);
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     min-width: 18px;
     text-align: right;
     flex-shrink: 0;
@@ -2698,7 +2698,7 @@ select.ad-field-input {
 .ad-brk-set {
     min-width: 16px;
     text-align: center;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--text-muted, #888);
 }
@@ -2739,7 +2739,7 @@ select.ad-field-input {
     border-top: 1px solid var(--border, rgba(255,255,255,0.06));
     background: rgba(204,255,0,0.05);
     color: var(--accent);
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     cursor: pointer;
     text-align: center;
     transition: background 0.2s;
@@ -2842,7 +2842,7 @@ select.ad-field-input {
     margin-bottom: 0;
 }
 .ad-fic-section-title {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     color: var(--accent);
     text-transform: uppercase;
@@ -2887,14 +2887,14 @@ select.ad-field-input {
 .ad-modal-header h3 {
     margin: 0;
     color: var(--text-primary);
-    font-size: 1rem;
+    font-size: var(--fs-base);
 }
 
 .ad-modal-close {
     background: none;
     border: none;
     color: var(--text-secondary);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
     padding: 0;
     line-height: 1;
@@ -2921,7 +2921,7 @@ select.ad-field-input {
 
 .ad-import-modal .ad-field-label {
     text-transform: none;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     letter-spacing: 0;
 }
@@ -2943,20 +2943,20 @@ select.ad-field-input {
 }
 
 .ad-import-dropzone-icon {
-    font-size: 2.2rem;
+    font-size: var(--fs-2xl);
     margin-bottom: 8px;
     opacity: 0.6;
 }
 
 .ad-import-dropzone-text {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     margin-bottom: 4px;
 }
 
 .ad-import-dropzone-hint {
     color: var(--text-dim);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 .ad-import-dropzone-file {
@@ -2977,7 +2977,7 @@ select.ad-field-input {
 .ad-import-file-selected .file-name {
     flex: 1;
     color: var(--text-primary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
 }
 
@@ -2986,7 +2986,7 @@ select.ad-field-input {
     border: none;
     color: var(--text-dim);
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     padding: 0;
 }
 
@@ -3004,7 +3004,7 @@ select.ad-field-input {
 .ad-import-map-row label {
     min-width: 110px;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .ad-import-map-row select {
@@ -3019,7 +3019,7 @@ select.ad-field-input {
 }
 
 .ad-import-preview {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .ad-import-preview th {
@@ -3031,17 +3031,17 @@ select.ad-field-input {
 
 .ad-import-status-update {
     color: #4fc3f7;
-    font-size: 1rem;
+    font-size: var(--fs-base);
 }
 
 .ad-import-status-create {
     color: var(--accent);
-    font-size: 1rem;
+    font-size: var(--fs-base);
 }
 
 .ad-import-status-error {
     color: #ff4444;
-    font-size: 1rem;
+    font-size: var(--fs-base);
 }
 
 .ad-import-stats {
@@ -3051,7 +3051,7 @@ select.ad-field-input {
     padding: 10px 14px;
     background: var(--bg-elevated);
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
@@ -3067,7 +3067,7 @@ select.ad-field-input {
 
 /* Bracket button in tournament list */
 .ad-brk-btn {
-    font-size: 0.75rem !important;
+    font-size: var(--fs-xs) !important;
     padding: 4px 10px !important;
 }
 
@@ -3091,7 +3091,7 @@ select.ad-field-input {
 .ad-score-input {
     width: 56px !important;
     text-align: center !important;
-    font-size: 1.1rem !important;
+    font-size: var(--fs-md) !important;
     font-weight: 600 !important;
     padding: 8px 4px !important;
 }
@@ -3106,7 +3106,7 @@ select.ad-field-input {
 .ad-tb-input {
     width: 44px !important;
     text-align: center !important;
-    font-size: 0.9rem !important;
+    font-size: var(--fs-sm) !important;
     padding: 6px 4px !important;
 }
 
@@ -3129,7 +3129,7 @@ select.ad-field-input {
     display: inline-block;
     padding: 3px 10px;
     border-radius: 12px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -3168,7 +3168,7 @@ select.ad-field-input {
 .ad-mem-tg {
     background: rgba(0, 136, 204, 0.15);
     color: #0088cc;
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     padding: 1px 5px;
     vertical-align: middle;
     margin-right: 4px;
@@ -3178,11 +3178,11 @@ select.ad-field-input {
 #adMemTable th,
 #adMemTable td {
     padding: 8px 6px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 #adMemTable th {
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
 }
 
 /* ---- Membership Actions ---- */
@@ -3204,7 +3204,7 @@ select.ad-field-input {
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     transition: all 0.15s ease;
 }
 
@@ -3262,17 +3262,17 @@ select.ad-field-input {
     justify-content: center;
     background: rgba(204, 255, 0, 0.15);
     color: var(--accent);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
 }
 
 .ad-mem-profile-name {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-primary);
 }
 .ad-mem-profile-email {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     margin-top: 2px;
 }
@@ -3291,7 +3291,7 @@ select.ad-field-input {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 .ad-mem-profile-label {
     color: var(--text-secondary);
@@ -3305,7 +3305,7 @@ select.ad-field-input {
 .ad-mem-profile-payments {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 .ad-mem-profile-payments th {
     text-align: left;
@@ -3322,7 +3322,7 @@ select.ad-field-input {
 
 /* ---- Draft autosave indicator ---- */
 .ad-draft-status {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     margin-left: 12px;
     transition: opacity 0.3s;
@@ -3345,27 +3345,27 @@ select.ad-field-input {
 }
 
 .ad-news-stat-icon {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     margin-bottom: 4px;
     opacity: 0.7;
 }
 
 .ad-news-stat-value {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--accent);
     margin-bottom: 2px;
 }
 
 .ad-news-stat-label {
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .ad-news-stat-sub {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--text-dim);
     margin-top: 4px;
 }
@@ -3391,7 +3391,7 @@ select.ad-field-input {
     flex-shrink: 0;
     width: 18px;
     text-align: center;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .ad-news-stat-top-title {
@@ -3401,13 +3401,13 @@ select.ad-field-input {
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .ad-news-stat-top-score {
     flex-shrink: 0;
     color: var(--text-dim);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
 }
 
@@ -3429,7 +3429,7 @@ select.ad-field-input {
         grid-column: 1 / -1;
     }
     .ad-news-stat-value {
-        font-size: 1.2rem;
+        font-size: var(--fs-md);
     }
 }
 
@@ -3456,7 +3456,7 @@ select.ad-field-input {
 }
 
 .ad-crt-stat-title {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: var(--text-primary);
     white-space: nowrap;
@@ -3465,7 +3465,7 @@ select.ad-field-input {
 .ad-crt-stat-total-num {
     /* Раньше 1.4rem: число выходило вдвое крупнее подписи рядом и лезло
        в глаза сильнее, чем сам разряд, к которому относится */
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
@@ -3486,12 +3486,12 @@ select.ad-field-input {
 }
 
 .ad-crt-stat-surface {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
 .ad-crt-stat-count {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--text-secondary);
     min-width: 28px;
@@ -3547,7 +3547,7 @@ select.ad-field-input {
     border-radius: var(--radius-sm);
     background: var(--bg-elevated);
     color: var(--text-secondary);
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     cursor: pointer;
     transition: all 0.15s;
 }
@@ -3567,7 +3567,7 @@ select.ad-field-input {
 }
 .ad-crt-page-info {
     margin-left: 10px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -3597,12 +3597,12 @@ select.ad-field-input {
 }
 
 .ad-cch-stat-label {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
 .ad-cch-stat-value {
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
@@ -3612,7 +3612,7 @@ select.ad-field-input {
     display: inline-block;
     padding: 2px 8px;
     border-radius: 10px;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     background: rgba(204, 255, 0, 0.1);
     color: var(--accent);
@@ -3633,7 +3633,7 @@ select.ad-field-input {
     display: inline-block;
     padding: 3px 10px;
     border-radius: 12px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -3700,7 +3700,7 @@ select.ad-field-input {
 }
 
 .ad-pay-stat-card .stat-value {
-    font-size: 1.8rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1;
@@ -3708,7 +3708,7 @@ select.ad-field-input {
 }
 
 .ad-pay-stat-card .stat-label {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -3736,7 +3736,7 @@ select.ad-field-input {
     padding: 10px 14px;
     cursor: pointer;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     border-bottom: 1px solid rgba(255,255,255,0.04);
     transition: background 0.15s;
 }
@@ -3771,7 +3771,7 @@ select.ad-field-input {
     align-items: center;
     gap: 18px;
     margin-bottom: 14px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-dim);
 }
 
@@ -3814,7 +3814,7 @@ select.ad-field-input {
 }
 
 .ad-stat-arrow {
-    font-size: 10px;
+    font-size: var(--fs-2xs);
     color: var(--text-dim);
     margin-left: auto;
     transition: transform 0.2s;
@@ -3841,7 +3841,7 @@ select.ad-field-input {
 }
 
 .ad-grp-section-title {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -3865,7 +3865,7 @@ select.ad-field-input {
 }
 
 .ad-grp-title {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     text-transform: uppercase;
     color: var(--accent);
@@ -3882,7 +3882,7 @@ select.ad-field-input {
 .ad-grp-matrix td {
     padding: 6px 8px;
     border: 1px solid var(--border);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 
 .ad-grp-matrix th {
@@ -3901,7 +3901,7 @@ select.ad-field-input {
 .ad-grp-score {
     text-align: center;
     white-space: nowrap;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     transition: background 0.15s;
 }
 
@@ -3934,7 +3934,7 @@ select.ad-field-input {
    должны читаться первыми */
 .ad-grp-games {
     text-align: center;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
     white-space: nowrap;
 }
@@ -3949,7 +3949,7 @@ select.ad-field-input {
     padding: 6px 8px;
     border-top: 1px solid var(--border-subtle);
     color: var(--danger, #ff6b6b);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     text-align: center;
     text-transform: lowercase;
 }
@@ -3992,7 +3992,7 @@ select.ad-field-input {
 }
 
 .ad-sess-name {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -4003,7 +4003,7 @@ select.ad-field-input {
     border: 1px solid var(--border-subtle);
     border-radius: 6px;
     color: var(--text-primary);
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     cursor: pointer;
 }
 
@@ -4048,7 +4048,7 @@ select.ad-field-input {
     border: 1px solid var(--accent);
     border-radius: 6px;
     color: var(--accent);
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: none;
     letter-spacing: 0;
@@ -4065,14 +4065,14 @@ select.ad-field-input {
    крупная плашка во всю ширину перетягивала внимание с самой таблицы */
 .ad-qual-note {
     margin-bottom: 10px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     line-height: 1.4;
     color: var(--text-dim);
 }
 
 /* Итог отбора: «доп. матч 1» ломался на три строки */
 .ad-qual-res {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     white-space: nowrap;
 }
 
@@ -4087,7 +4087,7 @@ select.ad-field-input {
     border: 1px solid var(--accent);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     line-height: 1.35;
     text-align: left;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
@@ -4098,7 +4098,7 @@ select.ad-field-input {
    Словом, а не значком: знак равенства админу ничего не говорил */
 .ad-grp-lot {
     margin-top: 3px;
-    font-size: 0.62rem;
+    font-size: var(--fs-2xs);
     font-weight: 500;
     line-height: 1;
     color: var(--text-dim);
@@ -4114,7 +4114,7 @@ select.ad-field-input {
     .ad-grp-matrix th,
     .ad-grp-matrix td {
         padding: 4px 5px;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -4122,7 +4122,7 @@ select.ad-field-input {
 .ad-sched-section { margin-bottom: 24px; }
 
 .ad-sched-court-title {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -4204,7 +4204,7 @@ select.ad-field-input {
     border: none !important;
     border-radius: 5px;
     color: var(--text-primary) !important;
-    font-size: 0.74rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     line-height: 1.2;
     text-align: left;
@@ -4260,7 +4260,7 @@ select.ad-field-input {
     border-radius: 8px;
     color: var(--text-primary);
     padding: 6px 12px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     box-sizing: border-box;
 }
 
@@ -4332,14 +4332,14 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
 }
 
 .ad-usr-card-icon--sm {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
 }
 
 .ad-usr-card-body {
@@ -4347,18 +4347,18 @@ select.ad-field-input {
 }
 
 .ad-usr-card-value {
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1.2;
 }
 
 .ad-usr-card--sm .ad-usr-card-value {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
 }
 
 .ad-usr-card-label {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -4405,12 +4405,12 @@ select.ad-field-input {
 }
 
 .ad-vch-stat-big .stat-icon {
-    font-size: 1.8rem;
+    font-size: var(--fs-xl);
     margin-bottom: 8px;
 }
 
 .ad-vch-stat-big .stat-value {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1;
@@ -4418,7 +4418,7 @@ select.ad-field-input {
 }
 
 .ad-vch-stat-big .stat-label {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -4436,18 +4436,18 @@ select.ad-field-input {
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 10px;
     padding: 14px 16px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
 .ad-vch-stat span {
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     color: var(--text-primary);
 }
 
 .ad-vch-stat small {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -4463,7 +4463,7 @@ select.ad-field-input {
     display: inline-block;
     padding: 3px 10px;
     border-radius: 12px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -4493,7 +4493,7 @@ select.ad-field-input {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     padding: 4px 6px;
     border-radius: 6px;
     transition: background 0.2s;
@@ -4509,7 +4509,7 @@ select.ad-field-input {
 
 .ad-btn-sm {
     padding: 6px 14px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     border-radius: 8px;
 }
 
@@ -4526,7 +4526,7 @@ select.ad-field-input {
 
 .ad-btn-xs {
     padding: 2px 8px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     border-radius: 4px;
 }
 
@@ -4550,7 +4550,7 @@ select.ad-field-input {
 }
 
 .ad-vch-detail-label {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -4588,7 +4588,7 @@ select.ad-field-input {
     align-items: center;
     padding: 8px 12px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-primary);
     transition: background 0.15s;
 }
@@ -4596,7 +4596,7 @@ select.ad-field-input {
     background: rgba(204, 255, 0, 0.08);
 }
 .ad-dropdown-manual {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--accent);
     border-top: 1px solid var(--border);
 }
@@ -4604,7 +4604,7 @@ select.ad-field-input {
 /* ---- Challenge modal helpers ---- */
 .ad-chal-selected-hint {
     margin-top: 4px;
-    font-size: 13px;
+    font-size: var(--fs-xs);
     color: var(--accent);
     min-height: 18px;
 }
@@ -4669,12 +4669,12 @@ select.ad-field-input {
 }
 .cb-photo-hint {
     padding: 0;
-    font-size: 0.62rem;
+    font-size: var(--fs-2xs);
     line-height: 1.3;
     text-align: center;
 }
 .cb-photo-icon {
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
 }
 .cb-photo-img {
     width: 100%;
@@ -4688,7 +4688,7 @@ select.ad-field-input {
     height: 22px;
     top: 4px;
     right: 4px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
 }
 .cb-photo-busy {
     opacity: 0.6;
@@ -4702,7 +4702,7 @@ select.ad-field-input {
     flex-wrap: wrap;
 }
 .ad-chal-banner-name {
-    font-size: 12px;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
@@ -4757,7 +4757,7 @@ select.ad-field-input {
     box-shadow: 0 0 0 1px rgba(204, 255, 0, 0.15);
 }
 .ad-ig-card-title {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-dim);
@@ -4779,7 +4779,7 @@ select.ad-field-input {
     background: rgba(204, 255, 0, 0.06);
 }
 .ad-ig-card-name {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -4791,7 +4791,7 @@ select.ad-field-input {
     font-weight: 700;
 }
 .ad-ig-card-score {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
     font-weight: 600;
     white-space: nowrap;
@@ -4806,7 +4806,7 @@ select.ad-field-input {
     justify-content: center;
     background: rgba(204, 255, 0, 0.15);
     color: var(--accent);
-    font-size: 0.62rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 1px 0;
     border-radius: 3px;
@@ -4822,7 +4822,7 @@ select.ad-field-input {
 
 /* ---- Doubles: team name in brackets ---- */
 .ad-team-name {
-    font-size: 0.82em;
+    font-size: var(--fs-sm);
     line-height: 1.3;
     display: inline;
 }
@@ -4846,7 +4846,7 @@ select.ad-field-input {
     background: rgba(255, 193, 7, 0.1);
     border: 1px solid rgba(255, 193, 7, 0.3);
     color: #ffc107;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 /* ---- Analytics Dashboard ---- */
@@ -4864,16 +4864,16 @@ select.ad-field-input {
     text-align: center;
 }
 .anl-card-icon {
-    font-size: 1.8rem;
+    font-size: var(--fs-xl);
     margin-bottom: 6px;
 }
 .anl-card-value {
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--accent);
 }
 .anl-card-label {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     margin-top: 4px;
 }
@@ -4885,7 +4885,7 @@ select.ad-field-input {
     margin-bottom: 24px;
 }
 .anl-chart-title {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 16px;
@@ -4912,7 +4912,7 @@ select.ad-field-input {
     color: var(--text-dim);
     text-align: center;
     padding: 30px 0;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 /* ---- Визуальный редактор новостей ---- */
@@ -4935,7 +4935,7 @@ select.ad-field-input {
 .ad-editor-btn {
     padding: 6px 12px;
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary, #aaa);
     background: none;
     border: 1px solid transparent;
@@ -4954,7 +4954,7 @@ select.ad-field-input {
     max-height: 520px;
     overflow-y: auto;
     padding: 16px;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     line-height: 1.6;
     color: var(--text-primary, #fff);
     outline: none;
@@ -4966,16 +4966,16 @@ select.ad-field-input {
 }
 
 .ad-editor-area p { margin: 0 0 12px; }
-.ad-editor-area h3 { margin: 20px 0 10px; font-size: 1.05rem; color: var(--accent, #CCFF00); }
+.ad-editor-area h3 { margin: 20px 0 10px; font-size: var(--fs-base); color: var(--accent, #CCFF00); }
 .ad-editor-area ul,
 .ad-editor-area ol { margin: 0 0 12px; padding-left: 22px; }
 .ad-editor-area li { margin-bottom: 4px; }
 .ad-editor-area a { color: var(--accent, #CCFF00); }
 
 /* Предпросмотр новости — примерно то же, что увидит читатель */
-.ad-news-preview-body { font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary, #ccc); }
+.ad-news-preview-body { font-size: var(--fs-base); line-height: 1.7; color: var(--text-secondary, #ccc); }
 .ad-news-preview-body p { margin: 0 0 12px; }
-.ad-news-preview-body h3 { margin: 18px 0 8px; font-size: 1.05rem; color: var(--accent, #CCFF00); }
+.ad-news-preview-body h3 { margin: 18px 0 8px; font-size: var(--fs-base); color: var(--accent, #CCFF00); }
 .ad-news-preview-body ul,
 .ad-news-preview-body ol { margin: 0 0 12px; padding-left: 22px; }
 .ad-news-preview-body figure { margin: 14px 0; }
@@ -5060,14 +5060,14 @@ select.ad-field-input {
     background: none;
     border: none;
     color: var(--text-muted, #888);
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     line-height: 1;
     cursor: pointer;
 }
 
 .ad-crop-hint {
     padding: 12px 20px 0;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     line-height: 1.5;
     color: var(--text-muted, #888);
 }
@@ -5147,7 +5147,7 @@ select.ad-field-input {
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
@@ -5213,7 +5213,7 @@ select.ad-field-input {
     border-radius: var(--radius-full);
     background: rgba(255,255,255,0.06);
     color: var(--text-muted);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 500;
     white-space: nowrap;
 }
@@ -5232,7 +5232,7 @@ select.ad-field-input {
     border-radius: 10px;
     background: var(--accent);
     color: #0A0A0A;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
 }
 
@@ -5247,7 +5247,7 @@ select.ad-field-input {
     border-radius: 9px;
     background: var(--accent);
     color: #0A0A0A;
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
 }
 
@@ -5259,7 +5259,7 @@ select.ad-field-input {
     grid-template-columns: max-content 1fr;
     gap: 2px 14px;
     align-items: baseline;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     line-height: 1.6;
 }
 
@@ -5298,14 +5298,14 @@ select.ad-field-input {
 /* Причина отмены под названием баттла */
 .ad-chal-reason {
     margin-top: 3px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     font-style: italic;
 }
 
 .ad-modal-note {
     margin: 0 0 14px;
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     line-height: 1.5;
     color: var(--text-muted);
 }
@@ -5330,7 +5330,7 @@ select.ad-field-input {
     background: rgba(255, 59, 48, 0.08);
     border: 1px solid rgba(255, 59, 48, 0.2);
     color: #ff6b6b;
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     line-height: 1.5;
 }
 
@@ -5402,7 +5402,7 @@ select.ad-field-input {
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     white-space: nowrap;
     cursor: pointer;
     transition: border-color var(--transition-fast);
@@ -5452,7 +5452,7 @@ select.ad-field-input {
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     text-align: left;
     cursor: pointer;
     transition: background var(--transition-fast), color var(--transition-fast);
@@ -5489,7 +5489,7 @@ select.ad-field-input {
 .ad-input-hint {
     margin-top: 5px;
     color: #ff3b30;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     line-height: 1.3;
 }
 
@@ -5524,7 +5524,7 @@ select.ad-field-input {
 }
 
 .ad-sq-title {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.6px;
     color: var(--text-muted);
@@ -5547,21 +5547,21 @@ select.ad-field-input {
     flex: 1 1 220px;
     min-width: 0;
     color: var(--text-primary);
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
 }
 
 .ad-sq-score {
     color: var(--accent);
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     flex: 0 0 auto;
 }
 
 .ad-sq-note {
     flex: 1 1 100%;
     color: var(--text-dim);
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     font-style: italic;
 }
 
@@ -5569,7 +5569,7 @@ select.ad-field-input {
 
 .ad-sq-hint {
     color: var(--text-dim);
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     line-height: 1.45;
     margin-bottom: 6px;
 }
@@ -5626,7 +5626,7 @@ select.ad-field-input {
     position: absolute;
     right: 8px;
     bottom: 24px;
-    font-size: 0.62rem;
+    font-size: var(--fs-2xs);
 }
 .ad-brk-match { position: relative; }
 
@@ -5641,7 +5641,7 @@ select.ad-field-input {
 }
 .ad-brk-grid--big .ad-brk-match {
     width: 176px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
 }
 .ad-brk-grid--big .ad-brk-round { min-width: 186px; }
 
@@ -5699,7 +5699,7 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     line-height: 1;
     color: #fff;
     background: rgba(0, 0, 0, 0.55);
@@ -5719,7 +5719,7 @@ select.ad-field-input {
     border-radius: 999px;
     background: rgba(0, 0, 0, 0.6);
     color: #fff;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
 }
 .ad-prev-thumbs {
     display: flex;
@@ -5759,7 +5759,7 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     color: #fff;
     background: rgba(0, 0, 0, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -5785,7 +5785,7 @@ select.ad-field-input {
     align-items: center;
     gap: 8px;
     margin-bottom: 6px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
 }
 
 .ad-brk-ig-tag {
@@ -5823,7 +5823,7 @@ select.ad-field-input {
     border-radius: 6px;
     padding: 10px 14px;
     margin-bottom: 14px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     line-height: 1.5;
 }
@@ -5855,7 +5855,7 @@ select.ad-field-input {
 
 /* Когда рассылали расписание в прошлый раз */
 .ad-sched-sent {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -5863,13 +5863,13 @@ select.ad-field-input {
    таблица уезжает вбок */
 .ad-sched-call .ad-btn-sm {
     padding: 6px 9px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
 }
 
 /* Уже отправляли: кнопка тише, уже и подписана временем */
 .ad-sched-call .ad-call-done {
     padding: 6px 10px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     opacity: 0.75;
 }
 
@@ -5892,7 +5892,7 @@ select.ad-field-input {
 
 .ad-sched-status {
     padding: 4px 8px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border-subtle);
@@ -5929,13 +5929,13 @@ select.ad-field-input {
 #adTrnTable .ad-cat-badge,
 #adTrnTable .ad-status-badge {
     white-space: nowrap;
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     padding: 3px 8px;
 }
 
 #adTrnTable .ad-btn-sm {
     padding: 5px 10px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
 }
 
 /* Новости: заголовку — всё свободное место, служебным колонкам — минимум.
@@ -6020,7 +6020,7 @@ select.ad-field-input {
     border: 1px solid var(--border-subtle);
     border-radius: 6px;
     color: var(--accent);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     text-align: center;
     text-align-last: center;
@@ -6059,7 +6059,7 @@ select.ad-field-input {
     border: none;
     border-radius: 6px;
     background: transparent;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     white-space: nowrap;
     cursor: pointer;
@@ -6094,7 +6094,7 @@ select.ad-field-input {
 
 .ad-mode-switch button {
     padding: 10px 26px;
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     border: none;
     background: transparent;
@@ -6128,7 +6128,7 @@ select.ad-field-input {
 .ad-sched-switch button {
     padding: 6px 9px;
     white-space: nowrap;
-    font-size: 0.76rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     border: none;
     background: transparent;
@@ -6513,7 +6513,7 @@ select.ad-field-input {
 
 .ad-grp-draft {
     margin-left: 10px;
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     font-weight: 500;
     letter-spacing: 0;
     text-transform: none;
@@ -6530,6 +6530,6 @@ select.ad-field-input {
     background: rgba(255, 179, 0, 0.16);
     color: #ffb300;
     border: 1px solid rgba(255, 179, 0, 0.3);
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
     white-space: nowrap;
 }

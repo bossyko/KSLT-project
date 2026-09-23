@@ -65,19 +65,19 @@ body.db-page.auth-ready {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     color: var(--accent);
 }
 
 .db-sidebar-name {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .db-sidebar-email {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     word-break: break-all;
 }
@@ -85,7 +85,7 @@ body.db-page.auth-ready {
 .db-sidebar-role {
     display: inline-block;
     margin-top: 8px;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 1px;
     padding: 3px 10px;
@@ -108,7 +108,7 @@ body.db-page.auth-ready {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 .db-sidebar-rating-label {
@@ -129,7 +129,7 @@ body.db-page.auth-ready {
     gap: 4px;
     margin-top: 10px;
     padding: 5px 12px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: #aaa;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -166,7 +166,7 @@ body.db-page.auth-ready {
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     transition: var(--transition-fast);
     cursor: pointer;
     border: none;
@@ -216,7 +216,7 @@ body.db-page.auth-ready {
 }
 
 .db-section-title {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--space-md);
@@ -232,7 +232,7 @@ body.db-page.auth-ready {
 }
 
 .db-card-title {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
@@ -247,7 +247,7 @@ body.db-page.auth-ready {
 
 .db-field-label {
     display: block;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -261,7 +261,7 @@ body.db-page.auth-ready {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-family: inherit;
     transition: var(--transition-fast);
     box-sizing: border-box;
@@ -319,7 +319,7 @@ textarea.db-field-input:read-only {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.5rem;
+    font-size: var(--fs-3xl);
     color: var(--text-muted);
 }
 
@@ -332,7 +332,7 @@ textarea.db-field-input:read-only {
 .db-avatar-btn {
     padding: 8px 20px;
     border-radius: var(--radius-full);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     border: 1px solid var(--border-subtle);
     background: var(--bg-elevated);
@@ -346,7 +346,7 @@ textarea.db-field-input:read-only {
 }
 
 .db-avatar-hint {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -354,7 +354,7 @@ textarea.db-field-input:read-only {
 .db-btn {
     padding: 12px 32px;
     border-radius: var(--radius-full);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     border: none;
@@ -423,7 +423,7 @@ textarea.db-field-input:read-only {
     transform: translateX(-50%) translateY(-100px);
     padding: 14px 28px;
     border-radius: var(--radius-sm);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     z-index: 9999;
     opacity: 0;
@@ -475,7 +475,7 @@ textarea.db-field-input:read-only {
 .db-message {
     padding: 12px 16px;
     border-radius: var(--radius-sm);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     margin-bottom: 16px;
     text-align: center;
 }
@@ -493,19 +493,19 @@ textarea.db-field-input:read-only {
 }
 
 .db-empty-icon {
-    font-size: 3rem;
+    font-size: var(--fs-3xl);
     margin-bottom: 16px;
     opacity: 0.5;
 }
 
 .db-empty-title {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     color: var(--text-secondary);
     margin-bottom: 8px;
 }
 
 .db-empty-text {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
 }
 
@@ -516,7 +516,7 @@ textarea.db-field-input:read-only {
     color: #ffc107;
     padding: 14px 20px;
     border-radius: var(--radius-md);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     line-height: 1.5;
     margin-bottom: var(--space-md);
 }
@@ -575,7 +575,7 @@ textarea.db-field-input:read-only {
 }
 
 .db-checkbox-text {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     line-height: 1.4;
 }
@@ -638,7 +638,7 @@ select.db-field-input {
     white-space: nowrap;
     padding: 8px 14px;
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     color: var(--text-muted);
     background: none;
@@ -683,27 +683,27 @@ select.db-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
     border: 1px solid var(--border-subtle);
 }
 
 .db-tournament-name {
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .db-tournament-date {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted, #888);
 }
 
 .db-tournament-result {
     color: var(--accent);
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -735,15 +735,15 @@ select.db-field-input {
     margin-bottom: 12px;
 }
 .db-pair-title {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 700;
 }
 .db-pair-note {
-    font-size: 0.76rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 .db-pair-tag {
-    font-size: 0.64rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 1px 7px;
     border-radius: var(--radius-full);
@@ -762,7 +762,7 @@ select.db-field-input {
 .db-stats-note {
     margin: -8px 0 16px;
     color: var(--text-dim);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
 }
 
 /* Внутри категории карточки те же, но ниже: категорий у игрока до четырёх,
@@ -795,21 +795,21 @@ select.db-field-input {
 }
 
 .db-stats-grid-mini .db-stat-value {
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
     margin-bottom: 1px;
 }
 
 /* Очки — то, ради чего игрок открыл раздел. Победы, поражения и место при
    них: одинаковый размер у всех четырёх лишал блок главного числа */
 .db-stats-grid-mini .db-stat-card:first-child .db-stat-value {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     line-height: 1.1;
 }
 
 /* Разрядка была рассчитана на крупную подпись под большим числом; на этом
    размере она только растягивала слова */
 .db-stats-grid-mini .db-stat-label {
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
     letter-spacing: 0.2px;
 }
 
@@ -822,14 +822,14 @@ select.db-field-input {
 }
 
 .db-stat-value {
-    font-size: 1.8rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--accent);
     margin-bottom: 4px;
 }
 
 .db-stat-label {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -863,7 +863,7 @@ select.db-field-input {
 }
 
 .db-cat-home {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 500;
     color: var(--accent);
     margin-left: 8px;
@@ -877,7 +877,7 @@ select.db-field-input {
     border-radius: var(--radius-full);
     background: rgba(255,255,255,0.06);
     color: var(--text-muted);
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     font-weight: 500;
 }
 
@@ -911,7 +911,7 @@ select.db-field-input {
     gap: 12px;
     flex-wrap: wrap;
     padding-bottom: 8px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
@@ -1026,7 +1026,7 @@ select.db-field-input {
     display: flex;
     flex-wrap: nowrap;
     gap: 0;
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     margin-bottom: 20px;
     margin-top: -8px;
 }
@@ -1085,7 +1085,7 @@ select.db-field-input {
 }
 
 .db-crop-title {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -1094,7 +1094,7 @@ select.db-field-input {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
     padding: 0;
     line-height: 1;
@@ -1175,7 +1175,7 @@ select.db-field-input {
 }
 
 .db-membership-badge {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -1216,7 +1216,7 @@ select.db-field-input {
 }
 
 .db-membership-days {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
@@ -1226,7 +1226,7 @@ select.db-field-input {
 
 .db-membership-text {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     margin-bottom: 16px;
     line-height: 1.5;
 }
@@ -1255,14 +1255,14 @@ select.db-field-input {
 }
 
 .db-locked-title {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     font-weight: 600;
     color: var(--text-primary);
     margin: 0 0 12px;
 }
 
 .db-locked-text {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: var(--text-muted);
     max-width: 400px;
     margin: 0 auto 24px;
@@ -1282,13 +1282,13 @@ select.db-field-input {
 
 .db-sidebar-link.db-tab-locked::after {
     content: '\1F512';
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     margin-left: auto;
 }
 
 .db-mobile-tab.db-tab-locked::after {
     content: '\1F512';
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
     margin-left: 4px;
 }
 
@@ -1314,7 +1314,7 @@ select.db-field-input {
     background: transparent;
     border: none;
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
@@ -1325,7 +1325,7 @@ select.db-field-input {
 }
 
 .db-toggle-arrow {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     color: var(--text-muted);
 }
 
@@ -1344,7 +1344,7 @@ select.db-field-input {
     min-height: 72px;
     margin: 0;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .db-subsection-collapsed {
@@ -1355,7 +1355,7 @@ select.db-field-input {
 .db-matches-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
 }
 
 .db-matches-table thead tr {
@@ -1366,7 +1366,7 @@ select.db-field-input {
     text-align: left;
     padding: 6px 8px;
     color: var(--text-dim);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1429,7 +1429,7 @@ select.db-field-input {
     justify-content: center;
     background: rgba(204,255,0,0.1);
     color: var(--accent);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
 }
 
@@ -1454,7 +1454,7 @@ select.db-field-input {
     border: 1px solid transparent;
     border-radius: var(--radius-sm, 6px);
     font-weight: 700;
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     line-height: 1.2;
 }
 
@@ -1471,7 +1471,7 @@ select.db-field-input {
 }
 
 .db-match-tournament {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     max-width: 200px;
     white-space: nowrap;
@@ -1481,7 +1481,7 @@ select.db-field-input {
 
 .db-match-round {
     text-align: center;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--text-secondary);
     white-space: nowrap;
@@ -1491,7 +1491,7 @@ select.db-field-input {
     background: transparent;
     border: 1px solid rgba(204,255,0,0.3);
     color: var(--accent);
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 3px 8px;
     border-radius: 4px;
@@ -1515,7 +1515,7 @@ select.db-field-input {
     border: 1px solid rgba(204, 255, 0, 0.15);
     border-radius: var(--radius-md);
     color: var(--accent);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s, border-color 0.2s;
@@ -1567,7 +1567,7 @@ select.db-field-input {
         border: 1px solid var(--border-subtle);
         background: transparent;
         color: var(--text-secondary);
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         line-height: 1.2;
         text-align: center;
         cursor: pointer;
@@ -1575,7 +1575,7 @@ select.db-field-input {
     }
 
     .db-mobile-tab-icon {
-        font-size: 1.15rem;
+        font-size: var(--fs-md);
         line-height: 1;
     }
 
@@ -1649,7 +1649,7 @@ select.db-field-input {
     }
 
     .db-section-title {
-        font-size: 1.2rem;
+        font-size: var(--fs-md);
     }
 
     .db-card {
@@ -1666,7 +1666,7 @@ select.db-field-input {
     }
 
     .db-stat-value {
-        font-size: 1.4rem;
+        font-size: var(--fs-lg);
     }
 }
 
@@ -1709,7 +1709,7 @@ select.db-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     flex-shrink: 0;
 }
@@ -1720,7 +1720,7 @@ select.db-field-input {
 }
 
 .db-invite-name {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--text-primary);
     white-space: nowrap;
@@ -1729,7 +1729,7 @@ select.db-field-input {
 }
 
 .db-invite-meta {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     margin-top: 2px;
 }
@@ -1745,7 +1745,7 @@ select.db-field-input {
 }
 
 .db-invite-status {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1794,7 +1794,7 @@ select.db-field-input {
 
 .db-badges-progress-text {
     color: var(--accent);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     white-space: nowrap;
 }
@@ -1814,7 +1814,7 @@ select.db-field-input {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     padding: 6px 14px;
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     transition: border-color var(--transition-fast), transform 0.25s ease;
 }
@@ -1830,7 +1830,7 @@ select.db-field-input {
 }
 
 .db-badge-icon {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     display: inline-block;
     transition: transform 0.25s ease, filter 0.25s ease;
 }
@@ -1862,7 +1862,7 @@ select.db-field-input {
 }
 
 .db-badges-next-label {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--text-muted);
@@ -1879,7 +1879,7 @@ select.db-field-input {
     border-radius: var(--radius-md);
     color: var(--accent);
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     padding: 10px 16px;
     margin-top: 8px;
@@ -1941,7 +1941,7 @@ select.db-field-input {
 }
 
 .db-badge-all-icon {
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
     flex-shrink: 0;
     width: 32px;
     text-align: center;
@@ -1955,12 +1955,12 @@ select.db-field-input {
 
 .db-badge-all-name {
     font-weight: 600;
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     margin-bottom: 1px;
 }
 
 .db-badge-all-desc {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
@@ -1971,7 +1971,7 @@ select.db-field-input {
 .db-badge-all-check {
     color: var(--accent);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     flex-shrink: 0;
 }
 
@@ -1985,7 +1985,7 @@ select.db-field-input {
     border-radius: var(--radius-lg);
     padding: 14px 24px;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     z-index: 9999;
     transform: translateY(20px);
@@ -2002,7 +2002,7 @@ select.db-field-input {
 }
 
 .db-badge-toast-icon {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     margin-right: 4px;
 }
 
@@ -2045,7 +2045,7 @@ select.db-field-input {
     top: 14px; right: 14px;
     background: none; border: none;
     color: var(--text-muted);
-    font-size: 1.6rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
     width: 36px; height: 36px;
     display: flex; align-items: center; justify-content: center;
@@ -2058,7 +2058,7 @@ select.db-field-input {
     text-align: center;
     padding: 48px 20px;
     color: var(--text-muted);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 
 .h2h-header {
@@ -2091,12 +2091,12 @@ select.db-field-input {
     justify-content: center;
     background: rgba(204,255,0,0.1);
     color: var(--accent);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
 }
 
 .h2h-name {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     text-align: center;
     white-space: nowrap;
@@ -2107,13 +2107,13 @@ select.db-field-input {
 
 .h2h-center { text-align: center; flex-shrink: 0; }
 .h2h-score {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 800;
     color: var(--accent);
     letter-spacing: 2px;
 }
 .h2h-label {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -2134,11 +2134,11 @@ select.db-field-input {
     padding: 8px 0;
 }
 .h2h-stat-row + .h2h-stat-row { border-top: 1px solid var(--border-subtle); }
-.h2h-stat-val { font-size: 1.1rem; font-weight: 700; min-width: 40px; }
+.h2h-stat-val { font-size: var(--fs-md); font-weight: 700; min-width: 40px; }
 .h2h-val-left { text-align: left; color: var(--accent); }
 .h2h-val-right { text-align: right; color: var(--text-primary); }
 .h2h-stat-label {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2147,7 +2147,7 @@ select.db-field-input {
 
 .h2h-matches { margin-bottom: 20px; }
 .h2h-matches-title {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2161,15 +2161,15 @@ select.db-field-input {
     border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 .h2h-match:last-child { border-bottom: none; }
-.h2h-match-date { color: var(--text-muted); font-size: 0.8rem; min-width: 70px; }
+.h2h-match-date { color: var(--text-muted); font-size: var(--fs-xs); min-width: 70px; }
 /* Название турнира и метка рода матча. Окно узкое: имя укорачиваем
    многоточием, метку — никогда, иначе от «дружеский» останется «дру…» */
-.h2h-match-tournament { display: flex; align-items: center; flex: 1; min-width: 0; color: var(--text-dim); font-size: 0.8rem; }
+.h2h-match-tournament { display: flex; align-items: center; flex: 1; min-width: 0; color: var(--text-dim); font-size: var(--fs-xs); }
 .h2h-tname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .h2h-match-tournament .db-match-tag { flex: none; }
 .h2h-match-score { font-weight: 700; font-family: monospace; }
 .h2h-match-result {
-    font-size: 0.75rem; font-weight: 700;
+    font-size: var(--fs-xs); font-weight: 700;
     padding: 2px 8px; border-radius: 3px;
 }
 .h2h-match-result.win { background: rgba(52,199,89,0.15); color: #34c759; }
@@ -2183,7 +2183,7 @@ select.db-field-input {
     border: 1px solid rgba(204,255,0,0.15);
     border-radius: var(--radius-md);
     color: var(--accent);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     text-decoration: none;
     transition: background 0.2s;
@@ -2194,8 +2194,8 @@ select.db-field-input {
     .h2h-modal { padding: 24px 16px; }
     .h2h-photo { width: 56px; height: 56px; }
     .h2h-header { gap: 16px; }
-    .h2h-score { font-size: 1.5rem; }
-    .h2h-name { font-size: 0.75rem; max-width: 100px; }
+    .h2h-score { font-size: var(--fs-xl); }
+    .h2h-name { font-size: var(--fs-xs); max-width: 100px; }
 }
 
 /* ---- Onboarding Welcome Modal ---- */
@@ -2239,7 +2239,7 @@ select.db-field-input {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     cursor: pointer;
     line-height: 1;
     padding: 4px;
@@ -2248,20 +2248,20 @@ select.db-field-input {
 .db-onboarding-close:hover { color: var(--text-primary); }
 
 .db-onboarding-emoji {
-    font-size: 3rem;
+    font-size: var(--fs-3xl);
     margin-bottom: 16px;
     line-height: 1;
 }
 
 .db-onboarding-title {
-    font-size: 1.35rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 12px;
 }
 
 .db-onboarding-text {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: var(--text-secondary);
     line-height: 1.6;
     margin: 0 0 20px;
@@ -2293,7 +2293,7 @@ select.db-field-input {
     border: none;
     border-radius: 8px;
     padding: 12px 40px;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     cursor: pointer;
     transition: opacity 0.2s;
@@ -2308,7 +2308,7 @@ select.db-field-input {
     color: #fff;
     border-radius: 8px;
     padding: 10px 20px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     text-decoration: none;
     margin-bottom: 16px;
@@ -2318,13 +2318,13 @@ select.db-field-input {
 
 @media (max-width: 480px) {
     .db-onboarding-modal { padding: 32px 20px 24px; }
-    .db-onboarding-emoji { font-size: 2.5rem; }
-    .db-onboarding-title { font-size: 1.15rem; }
+    .db-onboarding-emoji { font-size: var(--fs-3xl); }
+    .db-onboarding-title { font-size: var(--fs-md); }
     .db-onboarding-btn { width: 100%; }
 }
 
 .db-tournaments-group-title {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -2424,7 +2424,7 @@ select:-webkit-autofill {
 }
 
 .db-show-label {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     color: var(--text-muted);
     transition: color 0.2s;
@@ -2474,7 +2474,7 @@ select:-webkit-autofill {
 /* Кому видны контакты — вопрос неочевидный, и без объяснения человек не
    понимает, что открывает и кому */
 .db-contacts-note {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.03);
@@ -2493,7 +2493,7 @@ select:-webkit-autofill {
 }
 
 .db-tg-title {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 10px;
@@ -2502,7 +2502,7 @@ select:-webkit-autofill {
 .db-tg-list {
     margin: 0 0 16px;
     padding-left: 20px;
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
     line-height: 1.8;
     color: var(--text-secondary);
 }
@@ -2514,7 +2514,7 @@ select:-webkit-autofill {
     align-items: center;
     gap: 6px;
     padding: 9px 18px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     background: rgba(0, 136, 204, 0.15);
     color: #0088cc;
@@ -2531,20 +2531,20 @@ select:-webkit-autofill {
     align-items: center;
     gap: 8px;
     color: #4caf50;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     margin-bottom: 6px;
 }
 
-.db-tg-connected span { font-size: 1.1rem; }
+.db-tg-connected span { font-size: var(--fs-md); }
 
 .db-tg-note {
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     color: var(--text-muted);
 }
 
 .db-tg-state {
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     color: #4caf50;
     white-space: nowrap;
@@ -2569,7 +2569,7 @@ select:-webkit-autofill {
 
 .db-notif-hint {
     margin-top: 14px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     color: var(--text-secondary);
 }
@@ -2626,7 +2626,7 @@ select:-webkit-autofill {
    1.3 и 1 были крупнее всего остального на сайте, и окно выпирало */
 .db-modal-title {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--text-primary);
@@ -2636,7 +2636,7 @@ select:-webkit-autofill {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     line-height: 1;
     padding: 2px 6px;
     cursor: pointer;
@@ -2645,7 +2645,7 @@ select:-webkit-autofill {
 .db-modal-close:hover { color: var(--text-primary); }
 
 .db-modal-text {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     color: var(--text-primary);
     margin: 0 0 18px;
@@ -2654,7 +2654,7 @@ select:-webkit-autofill {
 .db-modal-steps {
     margin: 0 0 20px;
     padding-left: 22px;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     line-height: 1.9;
     color: var(--text-secondary);
 }
@@ -2672,7 +2672,7 @@ select:-webkit-autofill {
    Общие 12×32 при 0.9 делали окно шире содержимого */
 .db-modal-actions .db-btn {
     padding: 10px 20px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .db-modal-wait {
@@ -2682,7 +2682,7 @@ select:-webkit-autofill {
     margin-top: 18px;
     padding-top: 16px;
     border-top: 1px solid var(--border-subtle);
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
@@ -2703,8 +2703,8 @@ select:-webkit-autofill {
 /* Ключевые слова в окнах выделяем — сплошной серый текст не читается */
 .db-modal-done { font-weight: 600; }
 .db-modal-steps li { padding-left: 4px; }
-.db-modal-steps li::marker { font-size: 1.05em; }
-.db-tg-list li::marker { font-size: 1.1em; }
+.db-modal-steps li::marker { font-size: var(--fs-base); }
+.db-tg-list li::marker { font-size: var(--fs-md); }
 
 /* Ссылка на платежи в карточке членства: сам список живёт в своём разделе,
    повторять его здесь незачем */
@@ -2719,7 +2719,7 @@ select:-webkit-autofill {
     border: none;
     padding: 0;
     font: inherit;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--accent);
     cursor: pointer;
 }
@@ -2732,12 +2732,12 @@ select:-webkit-autofill {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
 }
 
 .db-invite-outcome {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -2759,7 +2759,7 @@ select:-webkit-autofill {
     display: inline-flex;
     align-items: center;
     margin-top: 4px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--accent);
     text-decoration: none;
@@ -2776,7 +2776,7 @@ select:-webkit-autofill {
     border-radius: var(--radius-full);
     background: rgba(255,255,255,0.06);
     color: var(--text-secondary, var(--text-muted));
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     white-space: nowrap;
 }
@@ -2792,7 +2792,7 @@ select:-webkit-autofill {
     margin-left: 6px;
     padding: 1px 7px;
     border-radius: var(--radius-full);
-    font-size: 0.66rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     white-space: nowrap;
     vertical-align: middle;
@@ -2809,7 +2809,7 @@ select:-webkit-autofill {
    турнира, и двумя оттенками серого они сливались в одно пятно */
 .db-match-mate {
     margin-top: 3px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -2870,7 +2870,7 @@ select:-webkit-autofill {
     border-radius: var(--radius-full);
     padding: 5px 14px;
     color: var(--text-muted);
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     font-family: inherit;
     cursor: pointer;
 }
@@ -2894,7 +2894,7 @@ select:-webkit-autofill {
     justify-content: center;
     border-radius: 50%;
     background: rgba(255,255,255,0.05);
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
 }
 
 .db-notif-item.unread .db-notif-icon {
@@ -2916,7 +2916,7 @@ select:-webkit-autofill {
 
 .db-notif-title {
     font-weight: 600;
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2925,7 +2925,7 @@ select:-webkit-autofill {
 
 /* Текст в одну строку с обрезкой: целиком он открывается в окне */
 .db-notif-msg {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     line-height: 1.4;
     margin-top: 1px;
@@ -2936,7 +2936,7 @@ select:-webkit-autofill {
 
 .db-notif-time {
     flex-shrink: 0;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     white-space: nowrap;
 }
@@ -2965,14 +2965,14 @@ select:-webkit-autofill {
 
 .db-tour-status {
     white-space: nowrap;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
 /* Статус заявки берём общий (.kslt-status), только ужимаем под строку таблицы */
 .db-tour-table .kslt-status {
     padding: 5px 11px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     gap: 6px;
 }
 
@@ -2990,7 +2990,7 @@ select:-webkit-autofill {
 
 .db-tour-table .db-withdraw-btn {
     padding: 4px 10px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 /* ---- Постраничный переключатель ----
@@ -3010,7 +3010,7 @@ select:-webkit-autofill {
     height: 28px;
     padding: 0 6px;
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     background: none;
     border: 1px solid var(--border-subtle);
@@ -3043,7 +3043,7 @@ select:-webkit-autofill {
     display: inline-block;
     padding: 3px 8px;
     border-radius: 6px;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -3078,7 +3078,7 @@ select:-webkit-autofill {
 
 .db-cat-rate b {
     display: block;
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     line-height: 1.1;
     font-weight: 700;
     color: var(--accent);
@@ -3087,7 +3087,7 @@ select:-webkit-autofill {
 .db-cat-rate span {
     display: block;
     margin-top: 1px;
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
     letter-spacing: 0.2px;
     text-transform: uppercase;
     color: var(--text-muted);
@@ -3110,7 +3110,7 @@ select:-webkit-autofill {
 .db-chal-btn {
     padding: 4px 10px;
     font-family: inherit;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     white-space: nowrap;
     color: var(--text-muted);
@@ -3152,7 +3152,7 @@ select:-webkit-autofill {
 .db-modal-answered {
     padding: 14px 20px 18px;
     text-align: right;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
 }
 
@@ -3240,7 +3240,7 @@ select:-webkit-autofill {
 .db-chip {
     padding: 5px 14px;
     font-family: inherit;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     background: none;
     border: 1px solid var(--border-subtle);
@@ -3265,7 +3265,7 @@ select:-webkit-autofill {
 .db-notif-table td:nth-child(2) { width: 44px; text-align: center; }
 
 .db-notif-type {
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
 }
 
 .db-notif-row {
@@ -3287,12 +3287,12 @@ select:-webkit-autofill {
 
 .db-notif-table .db-notif-title {
     font-weight: 600;
-    font-size: 0.88rem;
+    font-size: var(--fs-sm);
     white-space: normal;
 }
 
 .db-notif-table .db-notif-msg {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     margin-top: 2px;
     overflow: hidden;
@@ -3359,7 +3359,7 @@ select:-webkit-autofill {
     flex-shrink: 0;
     margin-left: 6px;
     color: var(--text-dim);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 /* Кнопки кабинета выложены как блоки, поэтому выравнивание текстом на
@@ -3376,7 +3376,7 @@ select:-webkit-autofill {
 
 .db-btn-sm {
     padding: 5px 12px;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     border-radius: var(--radius-full);
     line-height: 1.2;
 }
@@ -3409,7 +3409,7 @@ select:-webkit-autofill {
     .db-invites-table th:nth-child(4),
     .db-invites-table td:nth-child(4) { width: auto; }
     .db-inv-actions { justify-content: flex-start; }
-    .db-btn-sm { padding: 5px 10px; font-size: 0.72rem; }
+    .db-btn-sm { padding: 5px 10px; font-size: var(--fs-xs); }
 }
 
 /* Карточка контактов собеседника — то, чем обменялись по согласию */
@@ -3435,7 +3435,7 @@ select:-webkit-autofill {
     background: var(--bg-elevated);
     color: var(--text-primary);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     transition: border-color 0.2s;
 }
 
@@ -3485,7 +3485,7 @@ select:-webkit-autofill {
 }
 
 .mma-title {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     text-transform: uppercase;
     letter-spacing: 0.6px;
     color: var(--accent);
@@ -3504,7 +3504,7 @@ select:-webkit-autofill {
 .mma-row + .mma-row { border-top: 1px solid var(--border-subtle); }
 
 .mma-when {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     flex: 0 0 58px;
 }
@@ -3514,12 +3514,12 @@ select:-webkit-autofill {
 .mma-name {
     color: var(--text-primary);
     font-weight: 600;
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
 }
 
 .mma-sub {
     color: var(--text-dim);
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     margin-top: 2px;
 }
 
@@ -3533,12 +3533,12 @@ select:-webkit-autofill {
     background: var(--accent);
     color: #0a0a0a;
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-family: inherit;
 }
 
 .mma-wait {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
 }
 
@@ -3560,14 +3560,14 @@ select:-webkit-autofill {
 
 .db-link-title {
     font-weight: 700;
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
     margin-bottom: 6px;
     color: var(--text-primary);
 }
 
 .db-link-text {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     line-height: 1.5;
     margin-bottom: 12px;
 }
@@ -3601,7 +3601,7 @@ select:-webkit-autofill {
 }
 
 .db-link-meta {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
     margin-top: 2px;
 }
@@ -3622,7 +3622,7 @@ select:-webkit-autofill {
     background: rgba(204, 255, 0, 0.1);
     color: var(--accent);
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
     white-space: nowrap;
 }
@@ -3641,7 +3641,7 @@ select:-webkit-autofill {
 
 .db-link-empty {
     color: var(--text-dim);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     padding: 6px 2px;
 }
 
@@ -3652,7 +3652,7 @@ select:-webkit-autofill {
     color: #ff6b60;
     border-radius: 8px;
     padding: 8px 12px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     margin-bottom: 12px;
 }
 
@@ -3692,7 +3692,7 @@ select:-webkit-autofill {
 }
 
 .db-profile-card-name {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1.25;
@@ -3709,7 +3709,7 @@ select:-webkit-autofill {
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
@@ -3735,13 +3735,13 @@ select:-webkit-autofill {
 }
 
 .db-profile-card-empty {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
 }
 
 @media (max-width: 768px) {
     .db-profile-card-row {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 
     .db-profile-card-actions {
@@ -3804,13 +3804,13 @@ select:-webkit-autofill {
 }
 
 .db-card-line-label {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .db-card-line-value {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--accent);
 }
@@ -3829,11 +3829,11 @@ select:-webkit-autofill {
     }
 
     .db-stat-value {
-        font-size: 1.25rem;
+        font-size: var(--fs-lg);
     }
 
     .db-stat-label {
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
 }
 
@@ -3890,7 +3890,7 @@ select:-webkit-autofill {
     .db-notif-row .db-notif-type {
         grid-area: icon;
         text-align: left;
-        font-size: 1rem;
+        font-size: var(--fs-base);
         line-height: 1.3;
     }
 
@@ -3901,17 +3901,17 @@ select:-webkit-autofill {
     .db-notif-row .db-match-date {
         grid-area: date;
         margin-top: 4px;
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
         color: var(--text-muted);
     }
 
     .db-notif-table .db-notif-title {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     /* Две строки вместо одной с многоточием */
     .db-notif-table .db-notif-msg {
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
         white-space: normal;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -3953,14 +3953,14 @@ select:-webkit-autofill {
 
     .db-notif-bar .db-chip {
         padding: 5px 10px;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         white-space: nowrap;
     }
 
     .db-notif-all-read {
         flex: 0 0 auto;
         padding: 5px 10px;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         white-space: nowrap;
     }
 }
@@ -3992,7 +3992,7 @@ select:-webkit-autofill {
     .db-section input:not([type="checkbox"]):not([type="radio"]),
     .db-section select,
     .db-section textarea {
-        font-size: 16px;
+        font-size: var(--fs-base);
     }
 }
 
@@ -4009,7 +4009,7 @@ select:-webkit-autofill {
 
 @media (max-width: 992px) {
     .db-badges-next-label {
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
         margin-bottom: 6px;
     }
 
@@ -4020,23 +4020,23 @@ select:-webkit-autofill {
 
     #dbBadgesNext .db-badge-item {
         padding: 4px 10px;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         gap: 4px;
     }
 
     #dbBadgesNext .db-badge-progress {
-        font-size: 0.65rem;
+        font-size: var(--fs-2xs);
         padding: 1px 5px;
     }
 
     .db-stat-value {
-        font-size: 1.15rem;
+        font-size: var(--fs-md);
         line-height: 1.15;
         margin-bottom: 2px;
     }
 
     .db-stat-label {
-        font-size: 0.65rem;
+        font-size: var(--fs-2xs);
     }
 }
 
@@ -4058,13 +4058,13 @@ select:-webkit-autofill {
     }
 
     .db-field-hint {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         line-height: 1.35;
         margin-top: 4px;
     }
 
     .db-contacts-note {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         line-height: 1.45;
         padding: 8px 10px;
         margin-bottom: 14px;
@@ -4103,7 +4103,7 @@ select:-webkit-autofill {
     }
 
     .db-profile-card-name {
-        font-size: 0.88rem;
+        font-size: var(--fs-sm);
     }
 
     /* Две кнопки в ряд: в столбик они занимали 91 пиксель на двоих при
@@ -4115,7 +4115,7 @@ select:-webkit-autofill {
 
     .db-profile-card-actions .db-btn {
         padding: 9px 10px;
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -4133,7 +4133,7 @@ select:-webkit-autofill {
 .db-choice {
     padding: 8px 16px;
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--text-secondary);
     background: var(--bg-elevated);
@@ -4160,7 +4160,7 @@ select:-webkit-autofill {
     margin-top: 6px;
     padding: 0;
     font-family: inherit;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     background: none;
     border: none;
@@ -4223,7 +4223,7 @@ select:-webkit-autofill {
        Кегль и поля поменьше: «Июль» и «Год» помещаются целиком */
     .db-field-row-3 .db-field-input {
         padding: 10px 8px;
-        font-size: 16px;
+        font-size: var(--fs-base);
     }
 
     .db-field-row-3 select.db-field-input {
@@ -4246,20 +4246,20 @@ select:-webkit-autofill {
     }
 
     .db-tg-title {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
         margin-bottom: 6px;
     }
 
     .db-tg-list {
         margin-bottom: 10px;
         padding-left: 16px;
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
         line-height: 1.45;
     }
 
     .db-tg-btn {
         padding: 8px 14px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -4324,14 +4324,14 @@ select:-webkit-autofill {
 
     .db-pay-date {
         grid-area: date;
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
         color: var(--text-secondary);
     }
 
     .db-pay-amount {
         grid-area: amount;
         text-align: right;
-        font-size: 0.95rem;
+        font-size: var(--fs-base);
         font-weight: 700;
         /* Без этого «2 500 KGS» ломалось на три строки: колонка сжималась
            по содержимому, а пробелы разрешали перенос */
@@ -4340,20 +4340,20 @@ select:-webkit-autofill {
 
     .db-pay-method {
         grid-area: method;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         color: var(--text-muted);
     }
 
     .db-pay-status {
         grid-area: status;
         text-align: right;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     .db-pay-note {
         grid-area: note;
         margin-top: 2px;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         color: var(--text-muted);
     }
 
@@ -4364,11 +4364,11 @@ select:-webkit-autofill {
     }
 
     .db-empty-icon {
-        font-size: 32px;
+        font-size: var(--fs-2xl);
     }
 
     .db-empty-title {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 }
 
@@ -4401,7 +4401,7 @@ select:-webkit-autofill {
 }
 
 .db-voucher-service {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: rgba(255, 255, 255, 0.5);
 }
 
@@ -4411,7 +4411,7 @@ select:-webkit-autofill {
     order: 3;
     flex: 1 1 100%;
     margin-top: 4px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: rgba(255, 255, 255, 0.35);
 }
 
@@ -4422,7 +4422,7 @@ select:-webkit-autofill {
 }
 
 .db-voucher-status {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     padding: 3px 10px;
     border-radius: 6px;
 }
@@ -4430,7 +4430,7 @@ select:-webkit-autofill {
 .db-voucher-qr-btn {
     padding: 4px 10px;
     font-family: inherit;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: #000;
     background: var(--accent);
@@ -4480,23 +4480,23 @@ select:-webkit-autofill {
     }
 
     .db-voucher-status {
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
         padding: 2px 8px;
     }
 
     .db-voucher-qr-btn {
         padding: 6px 10px;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
         white-space: nowrap;
     }
 
     .db-voucher-name {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
         margin-bottom: 2px;
     }
 
     .db-voucher-service {
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
     }
 
     /* Срок уезжает в свой ряд — рядом с кнопкой, а не под именем */
@@ -4504,7 +4504,7 @@ select:-webkit-autofill {
         grid-area: dates;
         align-self: center;
         margin-top: 0;
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
 }
 
@@ -4523,7 +4523,7 @@ select:-webkit-autofill {
 }
 
 .db-loy-balance-label {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 1.5px;
     color: rgba(255, 255, 255, 0.4);
@@ -4531,7 +4531,7 @@ select:-webkit-autofill {
 }
 
 .db-loy-balance-value {
-    font-size: 3rem;
+    font-size: var(--fs-3xl);
     font-weight: 800;
     line-height: 1;
     color: var(--accent);
@@ -4539,13 +4539,13 @@ select:-webkit-autofill {
 
 .db-loy-balance-unit {
     margin-top: 4px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: rgba(255, 255, 255, 0.35);
 }
 
 .db-loy-expiry {
     margin-top: 8px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
@@ -4553,7 +4553,7 @@ select:-webkit-autofill {
     margin-top: 20px;
     padding: 10px 28px;
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     color: #000;
     background: var(--accent);
@@ -4564,18 +4564,18 @@ select:-webkit-autofill {
 
 .db-loy-history-title {
     margin: 20px 0 12px;
-    font-size: 1rem;
+    font-size: var(--fs-base);
 }
 
 .db-loy-type {
     padding: 2px 8px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     background: rgba(255, 255, 255, 0.06);
     border-radius: 4px;
 }
 
 .db-loy-date {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
@@ -4590,33 +4590,33 @@ select:-webkit-autofill {
     }
 
     .db-loy-balance-label {
-        font-size: 0.62rem;
+        font-size: var(--fs-2xs);
         letter-spacing: 1px;
         margin-bottom: 4px;
     }
 
     .db-loy-balance-value {
-        font-size: 1.9rem;
+        font-size: var(--fs-2xl);
     }
 
     .db-loy-balance-unit {
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
 
     .db-loy-expiry {
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
         margin-top: 6px;
     }
 
     .db-loy-redeem {
         margin-top: 12px;
         padding: 8px 18px;
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
     }
 
     .db-loy-history-title {
         margin: 14px 0 8px;
-        font-size: 0.9rem;
+        font-size: var(--fs-sm);
     }
 
     /* История — как платежи и уведомления: строка становится записью,
@@ -4658,24 +4658,24 @@ select:-webkit-autofill {
 
     .db-loy-action {
         grid-area: action;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 
     .db-loy-type {
-        font-size: 0.65rem;
+        font-size: var(--fs-2xs);
         padding: 1px 6px;
     }
 
     .db-loy-date {
         grid-area: date;
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
 
     .db-loy-points {
         grid-area: points;
         align-self: center;
         text-align: right;
-        font-size: 0.95rem;
+        font-size: var(--fs-base);
         white-space: nowrap;
     }
 }
@@ -4705,14 +4705,14 @@ select:-webkit-autofill {
 
 .db-redeem-title {
     margin: 0;
-    font-size: 1.15rem;
+    font-size: var(--fs-md);
     color: #fff;
 }
 
 .db-loy-close {
     padding: 4px 8px;
     font-family: inherit;
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     line-height: 1;
     color: rgba(255, 255, 255, 0.4);
     background: none;
@@ -4728,14 +4728,14 @@ select:-webkit-autofill {
 }
 
 .db-redeem-balance-value {
-    font-size: 2.2rem;
+    font-size: var(--fs-2xl);
     font-weight: 700;
     color: var(--accent);
 }
 
 .db-redeem-balance-label {
     margin-top: 4px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: rgba(255, 255, 255, 0.45);
 }
 
@@ -4752,21 +4752,21 @@ select:-webkit-autofill {
 }
 
 .db-redeem-item-title {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: #fff;
 }
 
 .db-redeem-item-cost {
     margin-top: 2px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     color: rgba(255, 255, 255, 0.4);
 }
 
 .db-loy-redeem-item {
     padding: 8px 18px;
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     color: #000;
     background: var(--accent);
@@ -4797,7 +4797,7 @@ select:-webkit-autofill {
     }
 
     .db-redeem-title {
-        font-size: 1rem;
+        font-size: var(--fs-base);
     }
 
     /* Баланс здесь тот же, что в разделе: 35 пикселей цифры в окне
@@ -4808,11 +4808,11 @@ select:-webkit-autofill {
     }
 
     .db-redeem-balance-value {
-        font-size: 1.9rem;
+        font-size: var(--fs-2xl);
     }
 
     .db-redeem-balance-label {
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
 
     .db-redeem-item {
@@ -4821,16 +4821,16 @@ select:-webkit-autofill {
     }
 
     .db-redeem-item-title {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     .db-redeem-item-cost {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     .db-loy-redeem-item {
         padding: 7px 12px;
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -4848,14 +4848,14 @@ select:-webkit-autofill {
 .db-notify-head {
     padding: 4px 12px;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     color: var(--text-muted);
 }
 
 .db-notify-name {
     padding: 8px 12px;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
@@ -4869,7 +4869,7 @@ select:-webkit-autofill {
        кеглем, названия — четырнадцатым. По шкале телефона это подписи */
     .db-notify-head {
         padding: 4px 4px;
-        font-size: 0.68rem;
+        font-size: var(--fs-2xs);
     }
 
     /* Колонки одной ширины. «Сайт и приложение» занимало 135 пикселей из
@@ -4887,7 +4887,7 @@ select:-webkit-autofill {
        Кегль мельче, чтобы «приложение» помещалось в строку целиком */
     .db-notify-head {
         width: 22%;
-        font-size: 0.62rem;
+        font-size: var(--fs-2xs);
         line-height: 1.2;
         word-break: normal;
         hyphens: none;
@@ -4895,7 +4895,7 @@ select:-webkit-autofill {
 
     .db-notify-name {
         padding: 8px 2px 8px 0;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 
     .db-notify-cell {
@@ -4903,14 +4903,14 @@ select:-webkit-autofill {
     }
 
     .db-notif-hint {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 
     /* Кнопки раздела: общие поля 12×32 при кегле 0.9 — на телефоне это
        половина ширины экрана ради одного слова */
     #db-settings .db-btn {
         padding: 10px 18px;
-        font-size: 0.8rem;
+        font-size: var(--fs-xs);
     }
 
 }
@@ -4919,13 +4919,13 @@ select:-webkit-autofill {
    перебивал вовсе — та же ловушка, что была в оферте */
 .db-danger-text {
     margin-bottom: 16px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
 }
 
 @media (max-width: 992px) {
     .db-danger-text {
-        font-size: 0.78rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -4937,15 +4937,15 @@ select:-webkit-autofill {
     }
 
     .db-badge-all-icon {
-        font-size: 20px;
+        font-size: var(--fs-lg);
     }
 
     .db-badge-all-name {
-        font-size: 0.85rem;
+        font-size: var(--fs-sm);
     }
 
     .db-badge-all-desc {
-        font-size: 0.72rem;
+        font-size: var(--fs-xs);
     }
 }
 
@@ -4967,7 +4967,7 @@ select:-webkit-autofill {
 
 .db-tour-partner {
     margin-top: 2px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
 }
 
@@ -4992,12 +4992,12 @@ select:-webkit-autofill {
 }
 
 .db-device-icon {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     line-height: 1;
 }
 
 .db-device-name {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--text-primary);
 }
 
@@ -5009,7 +5009,7 @@ select:-webkit-autofill {
 }
 
 .db-device-time {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--text-muted);
     white-space: nowrap;
 }
@@ -5037,12 +5037,12 @@ select:-webkit-autofill {
 #db-settings .db-devices-more {
     min-height: 32px;
     padding: 7px 14px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 
 .db-devices-empty {
     margin-bottom: 14px;
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
 }
 
@@ -5064,11 +5064,11 @@ select:-webkit-autofill {
     }
 
     .db-modal-title {
-        font-size: 1.05rem;
+        font-size: var(--fs-base);
     }
 
     .db-modal-text {
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 
     .db-modal-actions {
@@ -5081,6 +5081,6 @@ select:-webkit-autofill {
         width: 100%;
         min-height: 40px;
         padding: 11px 16px;
-        font-size: 0.82rem;
+        font-size: var(--fs-sm);
     }
 }

@@ -26,14 +26,14 @@
 }
 
 .vr-header .logo-text {
-    font-size: 1.8rem;
+    font-size: var(--fs-xl);
     font-weight: 800;
     color: var(--accent);
     letter-spacing: 2px;
 }
 
 .vr-header .logo-icon {
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
 }
 
 .vr-card {
@@ -49,7 +49,7 @@
 
 .vr-loading {
     color: rgba(255,255,255,0.5);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     padding: 40px 0;
 }
 
@@ -64,7 +64,7 @@
     color: var(--accent);
     padding: 6px 16px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     margin-bottom: 20px;
     letter-spacing: 1px;
@@ -80,7 +80,7 @@
     display: flex;
     justify-content: space-between;
     padding: 10px 0;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.7);
     border-bottom: 1px solid rgba(255,255,255,0.06);
 }
@@ -99,7 +99,7 @@
 .vr-discount-badge {
     color: var(--accent);
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
 }
 
 /* PIN input */
@@ -109,7 +109,7 @@
 
 .vr-pin-label {
     display: block;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.5);
     margin-bottom: 12px;
 }
@@ -117,7 +117,7 @@
 .vr-pin-input {
     width: 180px;
     height: 56px;
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 700;
     letter-spacing: 12px;
     text-align: center;
@@ -154,7 +154,7 @@
     color: #000;
     border: none;
     border-radius: 12px;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 700;
     cursor: pointer;
     transition: opacity 0.2s;
@@ -173,19 +173,19 @@
 }
 
 .vr-error-icon {
-    font-size: 3rem;
+    font-size: var(--fs-3xl);
     margin-bottom: 16px;
 }
 
 .vr-error-title {
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: #ff4757;
     margin-bottom: 8px;
 }
 
 .vr-error-text {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.5);
 }
 
@@ -196,7 +196,7 @@
 }
 
 .vr-success-icon {
-    font-size: 4rem;
+    font-size: var(--fs-4xl);
     margin-bottom: 16px;
     animation: vrPop 0.4s ease-out;
 }
@@ -208,20 +208,20 @@
 }
 
 .vr-success-title {
-    font-size: 1.3rem;
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--accent);
     margin-bottom: 8px;
 }
 
 .vr-success-text {
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     color: rgba(255,255,255,0.6);
 }
 
 .vr-pin-error-msg {
     color: #ff4757;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     margin-top: 8px;
 }
 
@@ -233,7 +233,7 @@
     .vr-pin-input {
         width: 160px;
         height: 48px;
-        font-size: 1.6rem;
+        font-size: var(--fs-xl);
         letter-spacing: 10px;
     }
 }
