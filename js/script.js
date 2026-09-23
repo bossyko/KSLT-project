@@ -345,7 +345,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // нажатия, как на большинстве сайтов.
     //
     // ОСТОРОЖНО, ГЛАВНОЕ МЕСТО ОШИБКИ: условие спрашивает У БРАУЗЕРА про
-    // способ ввода — matchMedia('(pointer: coarse)'), — а НЕ про ширину
+    // способ ввода — matchMedia('(any-pointer: coarse)'), — а НЕ про ширину.
+    // 21.09 условие расширено с pointer на any-pointer: pointer говорит про
+    // ОСНОВНОЙ способ ввода, и ноутбук с сенсорным экраном или планшет с
+    // клавиатурой отвечают «мышь», хотя человек тычет пальцем. any-pointer
+    // спрашивает, есть ли грубый ввод ВООБЩЕ. Решение Кости 21.09.
     // окна. 1024 шире любого «мобильного» порога, и проверка по ширине эту
     // дыру не закрыла бы. Ровно на этой подмене мы обожглись дважды.
     //
@@ -354,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const навПанели = document.querySelectorAll('.floating-header .nav-dropdown');
 
     function подПальцем() {
-        return window.matchMedia('(pointer: coarse)').matches;
+        return window.matchMedia('(any-pointer: coarse)').matches;
     }
 
     навПанели.forEach(function(панель) {
@@ -718,7 +722,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // ТО ЖЕ САМОЕ УСЛОВИЕ стоит в css/style.css у блока .footer-acc.
         // Меняешь здесь — меняй и там, иначе класс встанет без оформления.
         function складывать() {
-            return (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+            return (window.matchMedia && window.matchMedia('(any-pointer: coarse)').matches)
                 || window.innerWidth <= УЗКО;
         }
         var разделы = [].slice.call(подвал.querySelectorAll('.footer-block'))
@@ -794,9 +798,24 @@ document.addEventListener('DOMContentLoaded', function() {
             links.forEach(function(a) { a.classList.toggle('is-live', on); });
         }
 
+        // ОДИН ИСТОЧНИК ОГОНЬКА. Раньше класс is-live ставили ДВА независимых
+        // куска кода: этот и встроенный скрипт главной — и селекторы у них были РАЗНЫЕ:
+        // href*="#live" против href="#live". На главной шёл лишний запрос в базу
+        // и гонка: кто ответил вторым, тот и прав. Теперь красит ТОЛЬКО этот кусок,
+        // а тот, кто уже знает ответ (раздел #live на главной), сообщает его сюда.
+        window.KSLT_отметитьLive = paint;
+
         // До ответа базы не горим: пусть лучше загорится с задержкой,
         // чем будет светить впустую
         paint(false);
+
+        // Страница с разделом Live спрашивает базу сама, причём с полными данными.
+        // Второй запрос оттуда ничего нового не узнаёт — ждём её ответа.
+        if (document.getElementById('liveMatchesGrid')) {
+            if (typeof window.KSLT_LIVE_АКТИВЕН === 'boolean') paint(window.KSLT_LIVE_АКТИВЕН);
+            document.addEventListener('kslt:live', function(e) { paint(!!(e.detail && e.detail.active)); });
+            return;
+        }
 
         var client = window.supabaseClient;
         if (!client) return;

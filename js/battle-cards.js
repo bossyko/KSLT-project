@@ -178,10 +178,21 @@
      * Места на строку, поэтому у пары фотографии наезжают друг на друга,
      * а имена идут в две строки под ними.
      */
+    function инициалыИмени(имя) {
+        return (имя || '').trim().split(/\s+/).slice(0, 2)
+            .map(function (ч) { return ч.charAt(0); }).join('');
+    }
+
     function sideHtml(side) {
         var ph = '<div class="bc-player-photos' + (side.names.length > 1 ? ' bc-pair' : '') + '">';
-        side.photos.forEach(function(src) {
-            ph += '<img src="' + esc(src || 'https://placehold.co/60x60/1a1a1a/666?text=?') + '" alt="">';
+        /* Нет фото — инициалы, а не запрос на чужой CDN. Имена лежат
+           параллельным списком, поэтому берём по тому же номеру.
+           Avatar 29:82; размер общий с фотографией, объявлен один раз. */
+        side.photos.forEach(function(src, i) {
+            ph += src
+                ? '<img src="' + esc(src) + '" alt="">'
+                : '<span class="avatar-initials" aria-hidden="true">'
+                  + esc(инициалыИмени((side.names || [])[i])) + '</span>';
         });
         ph += '</div>';
 

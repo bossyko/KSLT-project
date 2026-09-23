@@ -124,7 +124,12 @@
                             return {
                                 id: p.id,
                                 name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
-                                photo: p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?',
+                                // СЛОЙ ДАННЫХ НЕ ВЫДУМЫВАЕТ КАРТИНКУ. Здесь
+                                // стоял адрес placehold.co, и из-за него фото
+                                // «было» у каждого игрока: вид не мог отличить
+                                // настоящее от заглушки и честно ходил наружу.
+                                // Нет фото — null, заглушку рисует вид.
+                                photo: p.photo || null,
                                 country: (CU ? CU.flagEmoji(CU.normalizeCountry(p.country)) : p.country) || '🇰🇬',
                                 points: inCat[p.id] || 0,
                                 wins: p.wins || 0,

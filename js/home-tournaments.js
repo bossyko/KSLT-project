@@ -68,9 +68,20 @@
                     (regs.data || []).forEach(function(r) {
                         taken[r.tournament_id] = (taken[r.tournament_id] || 0) + 1;
                     });
+                    /* Последней плиткой — «Все турниры». Видна только в ленте
+                       на телефоне боком: у полосы должен быть конец, иначе
+                       непонятно, докуда листать. В сетке она скрыта css —
+                       там ту же роль исполняет ссылка в шапке раздела. */
+                    var всеСсылка = (window.location.pathname.indexOf('-en') !== -1)
+                        ? { href: 'pages/tournaments-overview-en.html', текст: 'All tournaments' }
+                        : (window.location.pathname.indexOf('-kg') !== -1)
+                            ? { href: 'pages/tournaments-overview-kg.html', текст: 'Бардык мелдештер' }
+                            : { href: 'pages/tournaments-overview.html', текст: 'Все турниры' };
                     grid.innerHTML = picked.map(function(t, i) {
                         return TC.render(t, { featured: i === 0, taken: taken[t.id] || 0 });
-                    }).join('');
+                    }).join('') +
+                        '<a class="tc-more" href="' + всеСсылка.href + '">' +
+                        '<span>' + всеСсылка.текст + '</span><span aria-hidden="true">→</span></a>';
                     TC.startTicker();
                     записьСКарточки(client, picked);
                 });

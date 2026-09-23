@@ -137,7 +137,7 @@
         return '<div class="rk-row' + blur + '">' +
             '<span class="rk-rank' + (i < 3 ? ' top' : '') + '">' + (i + 1) + '</span>' +
             '<div class="rk-player">' +
-                '<img src="' + esc(p.photo) + '" alt="" loading="lazy">' + name +
+                лицо(p) + name +
             '</div>' +
             '<span class="rk-country">' + esc(p.country) + '</span>' +
             '<span class="rk-ntrp">' + ntrp + '</span>' +
@@ -145,6 +145,18 @@
             '<span class="rk-points">' + Number(p.points || 0).toLocaleString('ru-RU') + '</span>' +
             '<span class="rk-change">' + chHtml + '</span>' +
         '</div>';
+    }
+
+    /* Нет фото — рисуем инициалы сами, без запроса на чужой CDN.
+       Avatar 29:82. Размер берётся от .rk-player, один на фото и на заглушку. */
+    function инициалы(имя) {
+        return (имя || '').trim().split(/\s+/).slice(0, 2)
+            .map(function (ч) { return ч.charAt(0); }).join('');
+    }
+    function лицо(p) {
+        return p.photo
+            ? '<img src="' + esc(p.photo) + '" alt="" loading="lazy">'
+            : '<span class="avatar-initials" aria-hidden="true">' + esc(инициалы(p.name)) + '</span>';
     }
 
     function esc(s) {

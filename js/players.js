@@ -22,6 +22,20 @@
                  : '<span class="pl-ntrp-na">\u2014</span>';
     }
 
+    /* Нет фото — инициалы, а не запрос на чужой CDN. Заглушка берёт ТОТ ЖЕ
+       класс, что и фотография, поэтому размер и скругление у них общие —
+       второго объявления не появляется. Avatar 29:82. */
+    function инициалы(имя) {
+        return (имя || '').trim().split(/\s+/).slice(0, 2)
+            .map(function (ч) { return ч.charAt(0); }).join('');
+    }
+    function лицо(p, класс, alt) {
+        return p.photo
+            ? '<img src="' + esc(p.photo) + '" alt="' + esc(alt || '') + '" class="' + класс + '">'
+            : '<span class="' + класс + ' avatar-initials" aria-hidden="true">'
+              + esc(инициалы(p.name)) + '</span>';
+    }
+
     function esc(str) {
         if (!str) return '';
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -453,7 +467,7 @@
             html += '<div class="pl-podium-card ' + placeClass[i] + ' ' + animClasses + '">' +
                 '<div class="pl-podium-medal">' + medals[i] + '</div>' +
                 '<div class="pl-podium-photo-wrap">' +
-                    '<img src="' + esc(p.photo) + '" alt="' + esc(p.name) + '" class="pl-podium-photo">' +
+                    лицо(p, 'pl-podium-photo', p.name) +
                     (p.online ? '<span class="pl-online-dot pl-online-pulse"></span>' : '') +
                 '</div>' +
                 '<div class="pl-podium-name">' + p.name + '</div>' +
@@ -627,7 +641,7 @@
             html += '<div class="pl-row pl-animate' + blurClass + '" style="transition-delay:' + Math.min(i * 30, 300) + 'ms">' +
                 '<span class="pl-col-rank' + rankClass + '">' + (rank || '\u2014') + '</span>' +
                 '<div class="pl-col-player">' +
-                    '<img src="' + esc(p.photo) + '" alt="" class="pl-player-photo">' +
+                    лицо(p, 'pl-player-photo') +
                     '<div class="pl-player-info">' +
                         '<div class="pl-player-name-row">' +
                             (isGuest
@@ -972,7 +986,7 @@
                 (!isGuest ? ' data-access="full"' : '') + '>' +
                 '<span class="pl-col-rank' + rankClass + '">' + rank + '</span>' +
                 '<div class="pl-col-player">' +
-                    '<img src="' + esc(p.photo) + '" alt="" class="pl-player-photo">' +
+                    лицо(p, 'pl-player-photo') +
                     '<div class="pl-player-info">' +
                         '<div class="pl-player-name-row">' +
                             nameHtml +

@@ -205,8 +205,24 @@
             'expired-callback': function() { _signupToken = null; },
             'error-callback': function() { _turnstileBroken = true; }
         });
+        /* КАПЧА НЕ РИСУЕТСЯ, ПОКА НЕ ПОНАДОБИТСЯ.
+
+           Вопрос Кости: «может капчу в самый низ, на неё же не надо
+           нажимать?». Чаще всего не надо — managed проходит молча. Но не
+           всегда: на подозрительном трафике она показывает галочку и ждёт.
+           Поэтому вниз, ПОД кнопку, её ставить нельзя: человек нажмёт, и
+           препятствие окажется после действия, вне порядка чтения.
+
+           Ответ, к которому ведёт его вопрос: не переставлять, а не
+           рисовать. appearance: 'interaction-only' — виджет не занимает
+           места, пока взаимодействие реально не потребуется; а когда
+           потребуется, появляется НАД кнопкой, где ему и место.
+
+           Было по умолчанию 'always': виджет рисовался всегда и своими
+           71.5 выталкивал «Отправить код» за сгиб на 844x390 — каждому и
+           каждый раз. Замер 21.09 живьём: кнопка на 66 ниже экрана. */
         if (fg) turnstile.render(fg, {
-            sitekey: TURNSTILE_SITE_KEY, theme: 'dark',
+            sitekey: TURNSTILE_SITE_KEY, theme: 'dark', appearance: 'interaction-only',
             callback: function(t) { _forgotToken = t; _turnstileBroken = false; },
             'expired-callback': function() { _forgotToken = null; },
             'error-callback': function() { _turnstileBroken = true; }
@@ -370,7 +386,16 @@
     var otpCodeForm = document.getElementById('otpCodeForm');
     var otpNewPasswordForm = document.getElementById('otpNewPasswordForm');
 
-    var forgotLink = document.querySelector('.auth-forgot');
+    /* БЫЛО: document.querySelector('.auth-forgot') — «первая с таким классом».
+       В ряду под паролем ДВЕ ссылки с этим классом, и первой стоит
+       «Войти по коду», добавленная позже. Обработчик восстановления
+       пароля повис на ней, и получилось два действия на одно нажатие:
+       сначала уход на forgotStep1 (а showScreen чистит формы через
+       reset()), потом отправка кода уже с ПУСТЫМ полем почты — человек
+       видел «Проверьте адрес почты» и оказывался в восстановлении.
+       «Забыли пароль?» при этом не делала ничего: обработчика на ней нет.
+       Класс — это внешность, id — это личность. Действие вешается на id. */
+    var forgotLink = document.getElementById('signinForgot');
     var forgotBack = document.getElementById('forgotBack');
     var otpBackToForgot = document.getElementById('otpBackToForgot');
     var otpResend = document.getElementById('otpResend');
@@ -397,8 +422,30 @@
         msg.className = 'auth-message ' + (isError ? 'auth-message-error' : 'auth-message-success');
         msg.textContent = text;
 
+        /* ОБЪЯВЛЯЕМ ВСЛУХ. Без role сообщение появлялось молча: экранный
+           диктор не говорил ничего, а на коротком экране человек его ещё и
+           не видел. role="alert" читается там, где бы блок ни лежал. */
+        msg.setAttribute('role', isError ? 'alert' : 'status');
+        msg.setAttribute('aria-live', isError ? 'assertive' : 'polite');
+
+        /* МЕСТО СООБЩЕНИЯ ЗАДАЁТ САМА ФОРМА, А НЕ ПОРЯДОК В РАЗМЕТКЕ.
+
+           Было: вставляем перед кнопкой отправки, а если её нет —
+           добавляем в конец. У экрана кода кнопки нет вовсе (код уходит
+           сам, когда набрана шестая цифра), и сообщение оказывалось
+           ПОСЛЕДНИМ — ниже таймера, повтора и ссылки возврата. На телефоне
+           боком оно уезжало на 152 точки за сгиб: человек вводил неверный
+           код, экран не менялся, попытка сгорала молча.
+
+           Стало: форма может объявить слот [data-message-slot] и сказать,
+           где сообщению место. Это правило общее, а не заплатка на один
+           экран: любая форма вправе поставить слот туда, куда смотрит
+           человек. */
+        var слот = form.querySelector('[data-message-slot]');
         var btn = form.querySelector('.auth-btn');
-        if (btn) {
+        if (слот) {
+            слот.appendChild(msg);
+        } else if (btn) {
             btn.parentNode.insertBefore(msg, btn);
         } else {
             form.appendChild(msg);
@@ -544,7 +591,7 @@
         otpBackToForgot.addEventListener('click', function(e) {
             e.preventDefault();
             clearOtpTimer();
-            showScreen('forgotStep1');
+            вернутьсяКВводуАдреса();
         });
     }
 
@@ -1243,8 +1290,71 @@
         _resendInterval = setInterval(tick, 1000);
     }
 
+    /* ВОЗВРАТ С ЭКРАНА КОДА.
+
+       ЧТО БЫЛО: ссылка «Назад» всегда звала showScreen('forgotStep1') —
+       форму восстановления пароля. А на экран кода ведут ЧЕТЫРЕ двери:
+       вход по коду, восстановление, регистрация и Telegram. Три из
+       четырёх выбрасывали человека в починку того, что не ломалось:
+       начал регистрироваться — нажал назад — оказался в «забыли пароль».
+       Имя otpBackToForgot и выдаёт историю: писали под восстановление,
+       потом экран переиспользовали трижды, а возврат забыли.
+
+       ЧТО СТАЛО: запоминаем экран, с которого ушли, и возвращаемся на
+       него. Одна точка правки — ни одно из четырёх мест вызова
+       showOtpScreen не тронуто.
+
+       ВТОРАЯ ПОЛОВИНА ДЕФЕКТА, без неё правка бесполезна: showScreen()
+       чистит все формы через f.reset(). Просто вернуться мало — человек
+       попадает в ПУСТОЕ поле и набирает адрес заново. Поэтому адрес
+       вписывается обратно ПОСЛЕ переключения. Ради этого и меняли
+       подпись на «Изменить адрес»: она обещает правку, а не пустой бланк. */
+    var _otpВозврат = null;
+    var ПОЛЕ_АДРЕСА = {
+        signinForm:     'signin-email',
+        signupForm:     'signup-email',
+        forgotStep1:    'forgot-email',
+        tgRegisterForm: 'tg-email'
+    };
+
+    function вернутьсяКВводуАдреса() {
+        var экран = ПОЛЕ_АДРЕСА[_otpВозврат] ? _otpВозврат : 'forgotStep1';
+        showScreen(экран);
+
+        /* Вкладки. На входе и регистрации showScreen их показывает, но
+           активной остаётся прежняя — ставим ту, что отвечает экрану. */
+        if (экран === 'signinForm' || экран === 'signupForm') {
+            var имяВкладки = экран === 'signupForm' ? 'signup' : 'signin';
+            Array.prototype.forEach.call(tabs, function (т) { т.classList.remove('active'); });
+            var нужная = document.querySelector('.auth-tab[data-tab="' + имяВкладки + '"]');
+            if (нужная) нужная.classList.add('active');
+        }
+
+        /* Форма регистрации раскрывается кнопкой «signupShowForm».
+           После reset() поля снова свёрнуты, и вписанный адрес был бы не
+           виден — раскрываем ровно так же, как это делает та кнопка. */
+        if (экран === 'signupForm') {
+            var поляРегистрации = document.getElementById('signupFields');
+            var способыРегистрации = document.querySelector('.auth-signup-options');
+            if (поляРегистрации) поляРегистрации.style.display = '';
+            if (способыРегистрации) способыРегистрации.style.display = 'none';
+        }
+
+        /* Телефонный поток сюда не попадает: поле телефона на forgotStep1
+           отдельное, и подставлять почту в него нельзя. */
+        var поле = document.getElementById(ПОЛЕ_АДРЕСА[экран]);
+        if (поле && _otpIdentifierType === 'email' && _otpIdentifier) {
+            поле.value = _otpIdentifier;
+            поле.focus();
+            if (поле.select) поле.select();
+        }
+    }
+
     function showOtpScreen(flow, identifier, identifierType, channel, callback) {
         _otpFlow = flow;
+        /* запоминаем ДО showScreen: он снимет active со всех форм */
+        var откуда = document.querySelector('.auth-form.active');
+        _otpВозврат = откуда ? откуда.id : null;
         _otpIdentifier = identifier;
         _otpIdentifierType = identifierType;
         _otpChannel = channel;
