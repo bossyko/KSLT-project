@@ -140,6 +140,10 @@
         var rest = list.slice(PER_ROW, PER_ROW * 2);
         locked.innerHTML = rest.map(card).join('');
         locked.style.display = rest.length ? '' : 'none';
+        /* ЗАКРЫТЫЙ РЯД ВЫВОДИТСЯ ИЗ ДЕРЕВА ДОСТУПНОСТИ. Он лежит под туманом и
+           маской и глазами не читается; при этом диктор зачитывал все шесть
+           достижений подряд. pointer-events: none в css убирает только мышь. */
+        locked.setAttribute('aria-hidden', 'true');
     }
 
     function card(b) {
@@ -149,6 +153,9 @@
         var icon = document.createElement('span');
         icon.className = 'badge-cta-emoji';
         icon.textContent = b.e;
+        /* ЭМОДЗИ — КАРТИНКА, А НЕ ТЕКСТ. Без этого экранный диктор читает
+           «теннисный мяч» перед каждым названием значка. Смысл несёт подпись. */
+        icon.setAttribute('aria-hidden', 'true');
 
         var name = document.createElement('span');
         name.className = 'badge-cta-name';
