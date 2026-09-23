@@ -9,7 +9,7 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co wss://*.supabase.co https://accounts.google.com; media-src 'self' https://assets.mixkit.co; frame-src https://www.youtube.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co wss://*.supabase.co https://accounts.google.com; media-src 'self'; frame-src https://www.youtube.com;">
     <title>KSLT - Kyrgyzstan Social Lawn Tennis</title>
     <meta name="description" content="Kyrgyzstan Social Lawn Tennis: tournaments, player ratings, courts and coaches in Bishkek. Join and play.">
     <meta property="og:type" content="website">
@@ -25,10 +25,10 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/tokens.css?v=18">
-    <link rel="stylesheet" href="css/style.css?v=306">
+    <link rel="stylesheet" href="css/tokens.css?v=19">
+    <link rel="stylesheet" href="css/style.css?v=342">
     <link rel="stylesheet" href="css/partners.css?v=34">
-    <link rel="stylesheet" href="css/battle-cards.css?v=28">
+    <link rel="stylesheet" href="css/battle-cards.css?v=29">
 </head>
 <body>
 <!-- HEADER:START -->
@@ -363,14 +363,6 @@
 
         </section>
 
-        <section id="tournaments" class="section-tournaments">
-            <div class="section-header">
-                <h2>Tournaments</h2>
-                <a href="pages/tournaments-overview-en.html" class="link-all">All Tournaments →</a>
-            </div>
-            <div class="tournaments-grid" id="homeTournaments"></div>
-        </section>
-
         <!-- LIVE SCORES (dynamic from Supabase) -->
         <section id="live" class="section-live" style="display:none">
             <div class="section-header">
@@ -381,6 +373,15 @@
 
         <!-- BATTLE CARDS -->
         <div id="battleContainer" class="bc-section" style="display:none"></div>
+
+        <section id="tournaments" class="section-tournaments">
+            <div class="section-header">
+                <h2>Tournaments</h2>
+                <a href="pages/tournaments-overview-en.html" class="link-all">All Tournaments →</a>
+            </div>
+            <div class="tournaments-grid" id="homeTournaments"></div>
+        </section>
+
 
         <!-- NEWS -->
         <section id="news" class="section-home-news">
@@ -620,7 +621,7 @@
     <script src="js/contact-icons.js?v=1"></script>
 
     <script src="js/auth-nav.js?v=24"></script>
-    <script src="js/script.js?v=16"></script>
+    <script src="js/script.js?v=18"></script>
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="js/supabase-config.js?v=2"></script>
@@ -633,7 +634,7 @@
     <script src="js/membership.js"></script>
     <script src="js/battle-format.js?v=3"></script>
     <script src="js/country-utils.js?v=4"></script>
-    <script src="js/battle-cards.js?v=14"></script>
+    <script src="js/battle-cards.js?v=15"></script>
     <script src="js/stats.js?v=3"></script>
     <script src="js/badge-celebration.js?v=2"></script>
     <script src="js/tournament-slots.js?v=5"></script>
@@ -642,10 +643,10 @@
     <script src="js/site-content.js?v=2"></script>
     <script src="js/tournament-register.js?v=21"></script>
     <script src="js/doubles-entry.js?v=11"></script>
-    <script src="js/home-tournaments.js?v=8"></script>
+    <script src="js/home-tournaments.js?v=9"></script>
     <script src="js/home-badges.js?v=1"></script>
-    <script src="js/rankings-data.js?v=13"></script>
-    <script src="js/home-rankings.js?v=5"></script>
+    <script src="js/rankings-data.js?v=14"></script>
+    <script src="js/home-rankings.js?v=6"></script>
     <script src="js/news-covers.js?v=1"></script>
     <script src="js/home-news.js?v=3"></script>
     <script src="js/invite-player.js?v=5"></script>
@@ -767,14 +768,27 @@
                         if (ch > 0) changeHtml = '<span class="change positive">+' + ch + '</span>';
                         else if (ch < 0) changeHtml = '<span class="change negative">' + ch + '</span>';
                         else changeHtml = '<span class="change">\u2014</span>';
-                        var photo = p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?';
+                        /* ЗАГЛУШКА АВАТАРА В РЕЙТИНГЕ — ИНИЦИАЛЫ, НЕ КАРТИНКА
+                           С ЧУЖОГО CDN. Было: у игрока без фото src уходил на
+                           placehold.co — запрос наружу на каждую строку, и в
+                           кружке стоял «?». Тест «ни одного запроса на чужой
+                           CDN» был зелёным только пока у всех игроков в базе
+                           было фото: правило держалось на данных, а не на коде.
+                           Avatar 29:82: нет фото -> инициалы на accent/subtle. */
+                        var инициалыИгрока = function (имя) {
+                            return (имя || '').trim().split(/\s+/).slice(0, 2)
+                                .map(function (ч) { return ч.charAt(0); }).join('');
+                        };
                         var name = p.name_en || p.name || '';
+                        var лицоИгрока = p.photo
+                            ? '<img src="' + p.photo + '" alt="">'
+                            : '<span class="avatar-initials" aria-hidden="true">' + инициалыИгрока(name) + '</span>';
                         var nameTag = isLoggedIn
                             ? '<a href="pages/player-en.html?id=' + p.id + '" style="color:inherit;text-decoration:none;">' + name + '</a>'
                             : '<a href="#" data-guest-profile="1" style="color:inherit;text-decoration:none;cursor:pointer;">' + name + '</a>';
                         panels += '<div class="ranking-row' + blurClass + '">' +
                             '<span class="rank">' + (pi + 1) + '</span>' +
-                            '<div class="player-col"><img src="' + photo + '" alt="">' + nameTag + '</div>' +
+                            '<div class="player-col">' + лицоИгрока + nameTag + '</div>' +
                             '<span class="country">' + (p.country || '\ud83c\uddf0\ud83c\uddec') + '</span>' +
                             '<span class="points">' + (p.points || 0).toLocaleString() + '</span>' +
                             changeHtml +
@@ -813,18 +827,15 @@
         var grid = document.getElementById('liveMatchesGrid');
         if (!section || !grid) return;
 
-        var navLiveDesktop = document.querySelector('.nav-links .nav-item-live');
-        var navLiveMobileLinks = document.querySelectorAll('.mobile-nav a[href="#live"]');
-
+        // ОГОНЬКОМ Live ЗДЕСЬ БОЛЬШЕ НЕ РАСПОРЯЖАЕМСЯ.
+        // Было два независимых хозяина класса is-live — этот блок и js/script.js.
+        // Два запроса в базу на каждую загрузку главной и разные селекторы:
+        // здесь href="#live", там href*="#live". Мы узнаём ответ первыми — и
+        // просто сообщаем его. Красит один js/script.js, одним набором селекторов.
         function toggleLiveClass(active) {
-            if (navLiveDesktop) {
-                if (active) navLiveDesktop.classList.add('is-live');
-                else navLiveDesktop.classList.remove('is-live');
-            }
-            navLiveMobileLinks.forEach(function(a) {
-                if (active) a.classList.add('is-live');
-                else a.classList.remove('is-live');
-            });
+            window.KSLT_LIVE_АКТИВЕН = !!active;
+            if (window.KSLT_отметитьLive) window.KSLT_отметитьLive(!!active);
+            document.dispatchEvent(new CustomEvent('kslt:live', { detail: { active: !!active } }));
         }
 
         function loadLive() {
@@ -852,7 +863,19 @@
                     pPromise.then(function(pRes) {
                         var pMap = {};
                         (pRes.data || []).forEach(function(p) { pMap[p.id] = p; });
-                        var placeholder = 'https://placehold.co/80x80/1a1a1a/888?text=?';
+                        // ЗАГЛУШКА АВАТАРА — ИНИЦИАЛЫ, НЕ КАРТИНКА С ЧУЖОГО CDN.
+                        // Было: картинка тянулась с placehold.co — два запроса
+                        // наружу на каждую карточку, и в кружке стоял «?».
+                        // Avatar 29:82: нет фото -> инициалы на accent/subtle.
+                        function инициалы(имя) {
+                            return (имя || '').trim().split(/\s+/).slice(0, 2)
+                                .map(function (ч) { return ч.charAt(0); }).join('');
+                        }
+                        function лицо(фото, имя) {
+                            return фото
+                                ? '<img src="' + фото + '" alt="' + имя + '">'
+                                : '<span class="live-avatar" aria-hidden="true">' + инициалы(имя) + '</span>';
+                        }
                         var html = '';
 
                         matches.forEach(function(m) {
@@ -873,20 +896,23 @@
                             var servingClass1 = m.serving_player === 1 ? ' serving' : '';
                             var servingClass2 = m.serving_player === 2 ? ' serving' : '';
                             var statusBadge = m.status === 'live' ? 'LIVE' : m.status === 'warmup' ? 'WARM-UP' : 'PAUSED';
+                            // Тон бейджа из компонента Badge 27:53: доминирует только LIVE.
+                            var statusClass = m.status === 'live' ? ' is-live'
+                                            : m.status === 'warmup' ? ' is-warmup' : ' is-paused';
 
                             html += '<a href="pages/live-match-en.html?id=' + m.id + '" class="live-match" style="text-decoration:none;color:inherit;cursor:pointer;">' +
                                 '<div class="match-status">' +
-                                    '<span class="live-badge">' + statusBadge + '</span>' +
+                                    '<span class="live-badge' + statusClass + '">' + statusBadge + '</span>' +
                                     (label ? '<span class="match-set">' + label + '</span>' : '') +
                                 '</div>' +
                                 '<div class="match-players">' +
                                     '<div class="player">' +
-                                        '<img src="' + (p1.photo || placeholder) + '" alt="' + p1Name + '">' +
+                                        лицо(p1.photo, p1Name) +
                                         '<span class="player-name">' + p1Name + '</span>' +
                                         '<span class="player-score' + servingClass1 + '">' + p1scores.trim() + '</span>' +
                                     '</div>' +
                                     '<div class="player">' +
-                                        '<img src="' + (p2.photo || placeholder) + '" alt="' + p2Name + '">' +
+                                        лицо(p2.photo, p2Name) +
                                         '<span class="player-name">' + p2Name + '</span>' +
                                         '<span class="player-score' + servingClass2 + '">' + p2scores.trim() + '</span>' +
                                     '</div>' +
@@ -901,7 +927,28 @@
         }
 
         loadLive();
-        setInterval(loadLive, 15000);
+
+        // НЕ СПРАШИВАЕМ БАЗУ, КОГДА ВКЛАДКУ НЕ ВИДНО.
+        // Было: setInterval(loadLive, 15000) без условий — вкладка,
+        // забытая в фоне, стучалась в базу 240 раз в час и обновляла
+        // счёт, на который никто не смотрит.
+        // Вернулись на экран — спрашиваем СРАЗУ, не дожидаясь очередных
+        // 15 секунд: иначе первое, что человек увидит, — счёт на момент,
+        // когда он ушёл.
+        // Такт заводим заново при возврате, а не просто пропускаем в фоне:
+        // иначе очередной тик приходил сразу за возвратом и запрос уходил
+        // дважды подряд. Замерено: прирост 2 вместо 1.
+        var такт = null;
+        function завестиТакт() {
+            if (такт) clearInterval(такт);
+            такт = setInterval(function () { if (!document.hidden) loadLive(); }, 15000);
+        }
+        завестиТакт();
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) { clearInterval(такт); такт = null; return; }
+            loadLive();
+            завестиТакт();
+        });
     })();
     // Guest profile modal for ranking names
     (function() {
