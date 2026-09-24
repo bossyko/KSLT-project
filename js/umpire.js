@@ -312,6 +312,39 @@
         });
     }
 
+    /* ЖУРНАЛ РОЗЫГРЫШЕЙ. Отдельно от history: history — это стек отмены,
+       полные снимки состояния для кнопки «назад». Журнал хранит РОЗЫГРЫШИ
+       и живёт в таблице live_match_points, его читает страница матча.
+       Пишется функцией umpire_log_point: судья работает анонимно и
+       удостоверяется ключом, прямой записи в таблицу у него нет. */
+    function logPoint(entry) {
+        var client = window.supabaseClient;
+        if (!client) return;
+        client.rpc('umpire_log_point', { p_key: umpireKey, p_entry: entry })
+            .then(function(res) {
+                if (res.error) console.error('Журнал розыгрыша:', res.error);
+            });
+    }
+
+    /* Отмена судьи честно убирает розыгрыш и из ленты зрителя: если судья
+       нажал «отменить», этого розыгрыша не было. */
+    function undoPoint() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        client.rpc('umpire_undo_point', { p_key: umpireKey })
+            .then(function(res) {
+                if (res.error) console.error('Отмена розыгрыша:', res.error);
+            });
+    }
+
+    /* Отпечаток счёта — чтобы отличить отмену РОЗЫГРЫША от отмены выбора
+       подачи: обе проходят через один и тот же стек. */
+    function scoreFingerprint(st) {
+        return [st.current_set, st.sets_data.length, st.current_game_p1,
+                st.current_game_p2, st.points_p1, st.points_p2,
+                st.tiebreak_p1, st.tiebreak_p2].join('|');
+    }
+
     function saveState() {
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(function() {
@@ -360,10 +393,42 @@
 
         var prevSetsCount = state.sets_data.length;
         var prevGames = state.current_game_p1 + state.current_game_p2;
+        var доРозыгрыша = {
+            set_no:  state.current_set,
+            game_no: prevGames + 1,
+            serving: state.serving_player,
+            tb:      !!state.is_tiebreak
+        };
 
         state = scorePoint(state, player);
         render();
         saveState();
+
+        /* Запись в журнал — после того, как состояние пересчитано:
+           в ленте показывается счёт ПОСЛЕ розыгрыша, как на ATP. */
+        (function() {
+            var взятГейм = (state.current_game_p1 + state.current_game_p2) > prevGames
+                        || state.sets_data.length > prevSetsCount;
+            var g1, g2;
+            if (state.sets_data.length > prevSetsCount) {
+                var завершённый = state.sets_data[state.sets_data.length - 1] || {};
+                g1 = завершённый.g1; g2 = завершённый.g2;
+            } else {
+                g1 = state.current_game_p1; g2 = state.current_game_p2;
+            }
+            logPoint({
+                set_no:  доРозыгрыша.set_no,
+                game_no: доРозыгрыша.game_no,
+                winner:  player,
+                p1: String(доРозыгрыша.tb ? state.tiebreak_p1 : state.points_p1),
+                p2: String(доРозыгрыша.tb ? state.tiebreak_p2 : state.points_p2),
+                g1: g1, g2: g2,
+                game_won: взятГейм ? player : null,
+                /* Брейк — гейм, взятый НЕ подающим. */
+                is_break: !!(взятГейм && доРозыгрыша.serving && player !== доРозыгрыша.serving),
+                is_tiebreak: доРозыгрыша.tb
+            });
+        })();
 
         if (state.status === 'completed') return;
 
@@ -382,9 +447,14 @@
 
     function handleUndo() {
         if (changeoverEndTime) clearChangeover();
+        var было = scoreFingerprint(state);
         state = undo(state);
         render();
         saveState();
+        /* Через этот же стек проходит и выбор подачи. Розыгрыш убираем из
+           журнала ТОЛЬКО если счёт действительно изменился, иначе отмена
+           выбора подачи стёрла бы чужую запись. */
+        if (scoreFingerprint(state) !== было) undoPoint();
     }
 
     function handleChooseServe(player) {
