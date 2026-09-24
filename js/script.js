@@ -1,8 +1,119 @@
+/* ============================================================================
+   ВОЗВРАТ ПРОКРУТКИ
+   ============================================================================
+   Правило, которое мы держим:
+
+   • «Назад» возвращает на ту страницу, откуда пришёл, И НА ТО САМОЕ МЕСТО.
+     Пролистал рейтинг до пятидесятого, открыл карточку игрока, нажал назад —
+     снова пятидесятый, а не верх страницы.
+   • Обновление (F5) — ВСЕГДА СВЕРХУ.
+
+   Браузер эти два случая различает сам, а мы до 24.09 — нет.
+
+   ПОЧЕМУ НЕЛЬЗЯ ПРОСТО ОСТАВИТЬ АВТОМАТИКУ БРАУЗЕРА. Она возвращает прокрутку
+   мгновенно, пока документ ещё пустой, а у нас почти всё содержимое рисует js
+   после загрузки: рейтинг, партнёры, корты, новости. Браузер ставит на
+   3000-й пиксель, документа на 3000 пикселей ещё нет, позиция схлопывается, а
+   потом разделы дорисовываются, и «якорение прокрутки» Chrome утаскивает её
+   вниз следом. Костя 24.09: страница открывалась в самом конце. Замерено:
+   прокрутка 5906 при высоте документа 6894 и окне 858 — ровно низ.
+
+   ПОЭТОМУ ДЕРЖИМ ПРОКРУТКУ САМИ:
+   1. Уходя со страницы, запоминаем место И ВЫСОТУ документа — привязанные к
+      этой записи в истории, а не к адресу: адрес у двух записей может
+      совпадать, а места в них разные.
+   2. При загрузке спрашиваем браузер, что это было: reload, обычный переход
+      или back_forward. Он знает точно.
+   3. Обновление и обычный переход — ставим наверх.
+   4. «Назад» — ЖДЁМ, пока документ дорастёт до запомненной высоты, и только
+      тогда возвращаем место. Ждём не дольше двух с половиной секунд: если
+      раздел не пришёл (база молчит, сеть легла), лучше показать верх, чем
+      висеть.
+
+   Страница с якорем в адресе (#live) не трогается вовсе — там прыжок нарочный.
+
+   СТОИТ ДО DOMContentLoaded нарочно: восстановление браузер делает раньше
+   него, и забрать управление надо успеть до этого. */
+(function () {
+    if (!('scrollRestoration' in history)) return;
+    history.scrollRestoration = 'manual';
+
+    var ХРАН = 'kslt-прокрутка:';
+
+    /* Ключ записи истории. Живёт в history.state, поэтому у двух записей с
+       одним адресом он разный — и «назад» не путает их между собой. */
+    function ключЗаписи() {
+        var с = history.state;
+        if (с && с.ksltKey) return с.ksltKey;
+        var к = 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+        var новый = {};
+        if (с && typeof с === 'object') { for (var п in с) новый[п] = с[п]; }
+        новый.ksltKey = к;
+        try { history.replaceState(новый, ''); } catch (e) {}
+        return к;
+    }
+
+    var КЛЮЧ = ключЗаписи();
+
+    function запомнить() {
+        try {
+            sessionStorage.setItem(ХРАН + КЛЮЧ, JSON.stringify({
+                y: Math.round(window.scrollY),
+                h: document.documentElement.scrollHeight
+            }));
+        } catch (e) {}
+    }
+
+    /* pagehide, а не beforeunload: на телефоне Safari второй не срабатывает
+       вовсе, а первый есть везде. visibilitychange ловит случай, когда
+       страницу не закрыли, а свернули и потом убили. */
+    window.addEventListener('pagehide', запомнить);
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') запомнить();
+    });
+
+    if (window.location.hash) return;
+
+    var вид = 'navigate';
+    try {
+        var зап = performance.getEntriesByType('navigation')[0];
+        if (зап && зап.type) вид = зап.type;
+    } catch (e) {}
+
+    if (вид !== 'back_forward') {
+        window.scrollTo(0, 0);
+        window.addEventListener('load', function () {
+            if (!window.location.hash && window.scrollY > 0) window.scrollTo(0, 0);
+        });
+        return;
+    }
+
+    var сохр = null;
+    try { сохр = JSON.parse(sessionStorage.getItem(ХРАН + КЛЮЧ) || 'null'); } catch (e) {}
+    if (!сохр || !сохр.y) return;
+
+    var срок = Date.now() + 2500;
+    (function ждатьРазделы() {
+        var доросла = document.documentElement.scrollHeight >= сохр.h - 4;
+        if (!доросла && Date.now() < срок) { requestAnimationFrame(ждатьРазделы); return; }
+        window.scrollTo(0, сохр.y);
+        /* Последний раздел мог прийти на полкадра позже — проверяем ещё раз. */
+        setTimeout(function () {
+            if (Math.abs(window.scrollY - сохр.y) > 4 &&
+                document.documentElement.scrollHeight >= сохр.y) {
+                window.scrollTo(0, сохр.y);
+            }
+        }, 350);
+    })();
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // Clean Supabase auth tokens from URL (prevent user seeing access_token in address bar)
     if (window.location.hash && window.location.hash.indexOf('access_token') !== -1) {
-        history.replaceState(null, '', window.location.pathname + window.location.search);
+        /* history.state сохраняем: в нём лежит ключ записи для возврата
+           прокрутки. Раньше здесь стоял null и ключ стирался. 24.09 */
+        history.replaceState(history.state, '', window.location.pathname + window.location.search);
     }
 
     // Active page indicator (yellow pulsing dot)
