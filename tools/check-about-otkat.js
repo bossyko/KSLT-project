@@ -20,18 +20,23 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-about-'));
 
 const ОТКАТЫ = [
   ['css/style.css',
-   '    grid-column: 1 / -1;\n    grid-row: 2;\n',
-   '',
-   'сетка плиток идёт во всю ширину, а не в колонке рядом с фото'],
+   '.about-image {\n    grid-column: 2;\n    grid-row: 1 / span 2;\n}',
+   '.about-image {\n    grid-column: 2;\n    grid-row: 1;\n}',
+   'на широком снимок ростом с левую часть, а не по своему отношению'],
 
   ['css/style.css',
-   '    aspect-ratio: 1400 / 691;\n    max-height: 320px;',
-   '    height: 340px;',
-   'фотография держит отношение файла, а не высоту числом'],
+   '    grid-template-columns: repeat(2, 1fr);\n    /* 24 — между смысловыми группами',
+   '    grid-template-columns: repeat(3, 1fr);\n    /* 24 — между смысловыми группами',
+   'плиток в ряд две, а не три'],
 
   ['css/style.css',
-   '    .about-image img { max-height: 240px; }',
-   '',
+   '        height: auto;\n        aspect-ratio: 1400 / 691;\n        max-height: 240px;',
+   '        height: 340px;',
+   'на узком фотография возвращается к отношению своего файла'],
+
+  ['css/style.css',
+   '        aspect-ratio: 1400 / 691;\n        max-height: 160px;',
+   '        aspect-ratio: 1400 / 691;',
    'потолок высоты фотографии падает по видам'],
 
   ['css/style.css',
@@ -110,7 +115,7 @@ const ОТКАТЫ = [
    'эмодзи в разделе нет, есть шесть иконок · kg'],
 
   ['index.html',
-   'style.css?v=363',
+   'style.css?v=364',
    'style.css?v=357',
    'версии подняты']
 ];
