@@ -26,7 +26,8 @@
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="css/tokens.css?v=19">
-    <link rel="stylesheet" href="css/style.css?v=351">
+    <link rel="stylesheet" href="css/style.css?v=356">
+    <link rel="stylesheet" href="css/podium.css?v=8">
     <link rel="stylesheet" href="css/partners.css?v=34">
     <link rel="stylesheet" href="css/battle-cards.css?v=29">
 </head>
@@ -417,39 +418,7 @@
                 <button class="rk-gender active" data-пол="men">Эркектер</button>
                 <button class="rk-gender" data-пол="women">Аялдар</button>
             </div>
-            <div class="rankings-columns">
-                <!-- MEN -->
-                <div class="rankings-col">
-                    <h3 class="rankings-col-title">Эркектердин жекече рейтинги</h3>
-                    <div class="rankings-tabs" data-group="men">
-                        <button class="rankings-tab active" data-target="men-promasters">Pro-Masters</button>
-                        <button class="rankings-tab" data-target="men-masters">Masters</button>
-                        <button class="rankings-tab" data-target="men-futures">Futures</button>
-                        <button class="rankings-tab" data-target="men-challenger">Challenger</button>
-                        <button class="rankings-tab" data-target="men-tour">Tour</button>
-                    </div>
-                    <div class="rankings-panel active" id="men-promasters"></div>
-                    <div class="rankings-panel" id="men-masters"></div>
-                    <div class="rankings-panel" id="men-futures"></div>
-                    <div class="rankings-panel" id="men-challenger"></div>
-                    <div class="rankings-panel" id="men-tour"></div>
-                </div>
-
-                <!-- WOMEN -->
-                <div class="rankings-col">
-                    <h3 class="rankings-col-title">Аялдардын жекече рейтинги</h3>
-                    <div class="rankings-tabs" data-group="women">
-                        <button class="rankings-tab active" data-target="women-masters">Masters</button>
-                        <button class="rankings-tab" data-target="women-tour">Tour</button>
-                        <button class="rankings-tab" data-target="women-challenger">Challenger</button>
-                        <button class="rankings-tab" data-target="women-promasters">Pro-Masters</button>
-                    </div>
-                    <div class="rankings-panel active" id="women-masters"></div>
-                    <div class="rankings-panel" id="women-tour"></div>
-                    <div class="rankings-panel" id="women-challenger"></div>
-                    <div class="rankings-panel" id="women-promasters"></div>
-                </div>
-            </div>
+            <div class="rankings-columns"></div>
         </section>
 
         <section id="players" class="section-players">
@@ -637,7 +606,7 @@
     <script src="js/home-tournaments.js?v=9"></script>
     <script src="js/home-badges.js?v=2"></script>
     <script src="js/rankings-data.js?v=14"></script>
-    <script src="js/home-rankings.js?v=6"></script>
+    <script src="js/home-rankings.js?v=13"></script>
     <script src="js/news-covers.js?v=1"></script>
     <script src="js/home-news.js?v=4"></script>
     <script src="js/invite-player.js?v=5"></script>
@@ -645,7 +614,7 @@
     <script src="js/home-courts-coaches.js?v=12"></script>
     <script src="js/contact-icons.js?v=1"></script>
     <script src="js/auth-nav.js?v=24"></script>
-    <script src="js/script.js?v=18"></script>
+    <script src="js/script.js?v=20"></script>
     <script>
     // Load LIVE matches from Supabase (live_matches table)
     (function() {

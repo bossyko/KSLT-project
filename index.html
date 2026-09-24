@@ -26,7 +26,8 @@
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="css/tokens.css?v=19">
-    <link rel="stylesheet" href="css/style.css?v=351">
+    <link rel="stylesheet" href="css/style.css?v=356">
+    <link rel="stylesheet" href="css/podium.css?v=8">
     <link rel="stylesheet" href="css/partners.css?v=34">
     <link rel="stylesheet" href="css/battle-cards.css?v=29">
 </head>
@@ -432,39 +433,7 @@
                 <button class="rk-gender active" data-пол="men">Мужчины</button>
                 <button class="rk-gender" data-пол="women">Женщины</button>
             </div>
-            <div class="rankings-columns">
-                <!-- MEN -->
-                <div class="rankings-col">
-                    <h3 class="rankings-col-title">Мужской одиночный рейтинг</h3>
-                    <div class="rankings-tabs" data-group="men">
-                        <button class="rankings-tab active" data-target="men-promasters">Pro-Masters</button>
-                        <button class="rankings-tab" data-target="men-masters">Masters</button>
-                        <button class="rankings-tab" data-target="men-futures">Futures</button>
-                        <button class="rankings-tab" data-target="men-challenger">Challenger</button>
-                        <button class="rankings-tab" data-target="men-tour">Tour</button>
-                    </div>
-                    <div class="rankings-panel active" id="men-promasters"></div>
-                    <div class="rankings-panel" id="men-masters"></div>
-                    <div class="rankings-panel" id="men-futures"></div>
-                    <div class="rankings-panel" id="men-challenger"></div>
-                    <div class="rankings-panel" id="men-tour"></div>
-                </div>
-
-                <!-- WOMEN -->
-                <div class="rankings-col">
-                    <h3 class="rankings-col-title">Женский одиночный рейтинг</h3>
-                    <div class="rankings-tabs" data-group="women">
-                        <button class="rankings-tab active" data-target="women-masters">Masters</button>
-                        <button class="rankings-tab" data-target="women-tour">Tour</button>
-                        <button class="rankings-tab" data-target="women-challenger">Challenger</button>
-                        <button class="rankings-tab" data-target="women-promasters">Pro-Masters</button>
-                    </div>
-                    <div class="rankings-panel active" id="women-masters"></div>
-                    <div class="rankings-panel" id="women-tour"></div>
-                    <div class="rankings-panel" id="women-challenger"></div>
-                    <div class="rankings-panel" id="women-promasters"></div>
-                </div>
-            </div>
+            <div class="rankings-columns"></div>
         </section>
 
         <!-- PLAYERS / FIND PARTNER -->
@@ -673,7 +642,7 @@
     <script src="js/contact-icons.js?v=1"></script>
 
     <script src="js/auth-nav.js?v=24"></script>
-    <script src="js/script.js?v=18"></script>
+    <script src="js/script.js?v=20"></script>
     <script src="js/scroll-spy.js"></script>
     <!-- Supabase: capture OAuth tokens from redirect -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -699,7 +668,7 @@
     <script src="js/home-tournaments.js?v=9"></script>
     <script src="js/home-badges.js?v=2"></script>
     <script src="js/rankings-data.js?v=14"></script>
-    <script src="js/home-rankings.js?v=6"></script>
+    <script src="js/home-rankings.js?v=13"></script>
     <script src="js/news-covers.js?v=1"></script>
     <script src="js/home-news.js?v=4"></script>
     <script src="js/invite-player.js?v=5"></script>
@@ -761,115 +730,14 @@
                 grid.innerHTML = html;
             });
     })();
-    // Load Supabase rankings into main page
-    (function() {
-        var client = window.supabaseClient;
-        if (!client) return;
-        var section = document.querySelector('.section-rankings .rankings-columns');
-        if (!section) return;
-
-        var isLoggedIn = false;
-        try {
-            var key = 'sb-qqkzszesviukopgjbead-auth-token';
-            var raw = localStorage.getItem(key);
-            if (raw) {
-                var s = JSON.parse(raw);
-                if (s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000)) isLoggedIn = true;
-            }
-        } catch(e) {}
-
-        var VISIBLE_ROWS = 4;
-
-        Promise.all([
-            client.from('categories').select('*').order('sort_order', { ascending: true }),
-            client.from('players').select('id,name,photo,country,points,rank_change,category_id,gender').order('points', { ascending: false })
-        ]).then(function(results) {
-            var cats = (results[0].data || []);
-            var players = (results[1].data || []);
-            if (!cats.length) return;
-
-            // Categories are gender-neutral; player.gender stores 'men'/'women'
-            var allCats = cats.filter(function(c) { return (c.name || '').toLowerCase() !== 'friendly'; });
-
-            function buildCol(catList, gender) {
-                var colTitle = gender === 'women'
-                    ? '<h3 class="rankings-col-title">Женский одиночный рейтинг</h3>'
-                    : '<h3 class="rankings-col-title">Мужской одиночный рейтинг</h3>';
-                // Only show categories that have players of this gender
-                var catsWithPlayers = catList.filter(function(c) {
-                    return players.some(function(p) { return p.category_id === c.id && p.gender === gender; });
-                });
-                if (!catsWithPlayers.length) return '';
-                var tabs = '<div class="rankings-tabs">';
-                catsWithPlayers.forEach(function(c, i) {
-                    tabs += '<button class="rankings-tab' + (i === 0 ? ' active' : '') + '" data-target="' + gender + '-' + c.id + '">' + c.name + '</button>';
-                });
-                tabs += '</div>';
-
-                var panels = '';
-                catsWithPlayers.forEach(function(c, ci) {
-                    var catPlayers = players.filter(function(p) { return p.category_id === c.id && p.gender === gender; }).slice(0, 8);
-                    panels += '<div class="rankings-panel' + (ci === 0 ? ' active' : '') + '" id="' + gender + '-' + c.id + '">';
-                    panels += '<div class="ranking-row ranking-header"><span class="rank">#</span><span class="player-col">Игрок</span><span class="country">Страна</span><span class="points">Очки</span><span class="change">\u0394</span></div>';
-                    catPlayers.forEach(function(p, pi) {
-                        var blurClass = '';
-                        if (!isLoggedIn && pi >= VISIBLE_ROWS) {
-                            blurClass = ' ranking-row-blur';
-                        }
-                        var changeHtml = '';
-                        var ch = p.rank_change || 0;
-                        if (ch > 0) changeHtml = '<span class="change positive">+' + ch + '</span>';
-                        else if (ch < 0) changeHtml = '<span class="change negative">' + ch + '</span>';
-                        else changeHtml = '<span class="change">\u2014</span>';
-                        /* ЗАГЛУШКА АВАТАРА В РЕЙТИНГЕ — ИНИЦИАЛЫ, НЕ КАРТИНКА
-                           С ЧУЖОГО CDN. Было: у игрока без фото src уходил на
-                           placehold.co — запрос наружу на каждую строку, и в
-                           кружке стоял «?». Тест «ни одного запроса на чужой
-                           CDN» был зелёным только пока у всех игроков в базе
-                           было фото: правило держалось на данных, а не на коде.
-                           Avatar 29:82: нет фото -> инициалы на accent/subtle. */
-                        var инициалыИгрока = function (имя) {
-                            return (имя || '').trim().split(/\s+/).slice(0, 2)
-                                .map(function (ч) { return ч.charAt(0); }).join('');
-                        };
-                        var лицоИгрока = p.photo
-                            ? '<img src="' + p.photo + '" alt="">'
-                            : '<span class="avatar-initials" aria-hidden="true">' + инициалыИгрока(p.name) + '</span>';
-                        panels += '<div class="ranking-row' + blurClass + '">' +
-                            '<span class="rank">' + (pi + 1) + '</span>' +
-                            '<div class="player-col">' + лицоИгрока + '<span>' + (p.name || '') + '</span></div>' +
-                            '<span class="country">' + (p.country || '\ud83c\uddf0\ud83c\uddec') + '</span>' +
-                            '<span class="points">' + (p.points || 0).toLocaleString() + '</span>' +
-                            changeHtml +
-                        '</div>';
-                    });
-                    // Guest lock overlay
-                    if (!isLoggedIn && catPlayers.length > VISIBLE_ROWS) {
-                        panels += '<div class="ranking-lock-overlay">' +
-                            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
-                            ' <a href="pages/auth.html?redirect=partners">Войти для полного рейтинга</a>' +
-                        '</div>';
-                    }
-                    panels += '</div>';
-                });
-                return '<div class="rankings-col">' + colTitle + tabs + panels + '</div>';
-            }
-
-            section.innerHTML = buildCol(allCats, 'men') + buildCol(allCats, 'women');
-
-            // Re-init tab clicks
-            section.querySelectorAll('.rankings-tab').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var parent = btn.closest('.rankings-col');
-                    parent.querySelectorAll('.rankings-tab').forEach(function(b) { b.classList.remove('active'); });
-                    parent.querySelectorAll('.rankings-panel').forEach(function(p) { p.classList.remove('active'); });
-                    btn.classList.add('active');
-                    var panel = parent.querySelector('#' + btn.dataset.target);
-                    if (panel) panel.classList.add('active');
-                });
-            });
-        });
-    })();
+    /* ИНЛАЙНОВЫЙ РЕНДЕР РЕЙТИНГА УДАЛЁН 24.09.
+       Он строил колонки, ленту вкладок и панели, а js/home-rankings.js потом
+       подменял содержимое каждой панели — два шага одного конвейера с двумя
+       разными правилами о том, что такое рейтинговая категория. Здесь фильтр
+       шёл по НАЗВАНИЮ ('friendly'), а категория называется «Friendly Weekend»,
+       поэтому он не срабатывал никогда: вкладка создавалась, данных для неё не
+       было, и раздел на всех пяти видах открывался пустой категорией.
+       Теперь колонку строит один файл — js/home-rankings.js. */
     // Load LIVE matches from Supabase (live_matches table)
     (function() {
         var client = window.supabaseClient;
