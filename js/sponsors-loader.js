@@ -46,7 +46,25 @@
                 _pending = null;
                 return null;
             }
-            _cache = res.data || [];
+            // ПОРЯДОК СРЕДИ РАВНЫХ — СЛУЧАЙНЫЙ, И ПЕРЕМЕШИВАЕМ ОДИН РАЗ.
+            // Решение Кости 24.09: спонсоры одного яруса равны, и любой
+            // постоянный порядок кто-то прочитает как «этот важнее».
+            // В базе sort_order у всех десяти равен нулю, а при одинаковом
+            // ключе Postgres не обещает никакого порядка вовсе — список и так
+            // мог меняться между запросами, просто неуправляемо.
+            // Тасуем ЗДЕСЬ, в общем месте, а не в каждом блоке: логотипы
+            // выводятся дважды — карусель в шапке и секция внизу, — и если
+            // каждый перетасует сам, на одном экране окажутся два разных
+            // порядка. Это читается уже не как случайность, а как поломка.
+            // Генеральный в перемешивание не попадает: он стоит первым.
+            var список = res.data || [];
+            var главные = [], прочие = [];
+            список.forEach(function(s) { (s.is_hero ? главные : прочие).push(s); });
+            for (var i = прочие.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var t = прочие[i]; прочие[i] = прочие[j]; прочие[j] = t;
+            }
+            _cache = главные.concat(прочие);
             _pending = null;
             return _cache;
         });
@@ -186,9 +204,12 @@
 
         var overlay = document.createElement('div');
         overlay.className = 'spon-modal-overlay';
+        // Диктор должен объявить окно окном и не читать страницу под ним.
+        // До 24.09 не было ни role, ни aria-modal, ни метки: окно открывалось,
+        // а для чтения с экрана ничего не происходило.
         overlay.innerHTML =
-            '<div class="spon-modal">' +
-                '<button class="spon-modal-close">&times;</button>' +
+            '<div class="spon-modal" role="dialog" aria-modal="true" aria-label="' + esc(s.name) + '">' +
+                '<button class="spon-modal-close" aria-label="' + modalLabels.close + '">&times;</button>' +
                 (s.logo ? '<div class="spon-modal-logo"><img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '"></div>' : '') +
                 '<div class="spon-modal-name">' + esc(s.name) + '</div>' +
                 (desc ? '<div class="spon-modal-desc">' + esc(desc) + '</div>' : '') +
@@ -199,8 +220,41 @@
 
         document.body.appendChild(overlay);
 
+        // ЗАПИРАЕМ СТРАНИЦУ ПОД ОКНОМ. Было overflow: visible — фон листался
+        // под модалкой, и это первое, что проверяет любой обзор.
+        var былОтступ = document.body.style.overflow;
+        var ктоОткрыл = document.activeElement;
+        document.body.style.overflow = 'hidden';
+        overlay._вернутьФокус = ктоОткрыл;
+        overlay._былОтступ = былОтступ;
+
         requestAnimationFrame(function() {
             overlay.classList.add('visible');
+            // УВОДИМ ФОКУС ВНУТРЬ. Было: activeElement оставался BODY, и с
+            // клавиатуры человек продолжал табать страницу ПОД окном.
+            var первый = overlay.querySelector('.spon-modal-close');
+            if (первый) первый.focus();
+        });
+
+        // ESCAPE ЗАКРЫВАЕТ. Обработчика не было вовсе: на доске 285:9 у меня
+        // записано «Escape закрывает, проверено настоящим нажатием» — я
+        // проверял боковой лист, а не это окно. Нашёл Playwright 24.09.
+        // Слушатель висит на документе, потому что фокус может уйти на
+        // действие внутри окна, а закрывать надо в любом случае.
+        var поEscape = function(e) {
+            if (e.key === 'Escape') { closeSponsorModal(overlay); }
+        };
+        document.addEventListener('keydown', поEscape);
+        overlay._снятьEscape = function() { document.removeEventListener('keydown', поEscape); };
+
+        // Табуляция не выходит за пределы окна, пока оно открыто
+        overlay.addEventListener('keydown', function(e) {
+            if (e.key !== 'Tab') return;
+            var поля = overlay.querySelectorAll('a[href], button');
+            if (!поля.length) return;
+            var первое = поля[0], последнее = поля[поля.length - 1];
+            if (e.shiftKey && document.activeElement === первое) { e.preventDefault(); последнее.focus(); }
+            else if (!e.shiftKey && document.activeElement === последнее) { e.preventDefault(); первое.focus(); }
         });
 
         // Close handlers
@@ -216,7 +270,14 @@
     }
 
     function closeSponsorModal(overlay) {
+        if (overlay._снятьEscape) { overlay._снятьEscape(); overlay._снятьEscape = null; }
         overlay.classList.remove('visible');
+        document.body.style.overflow = overlay._былОтступ || '';
+        // Фокус возвращается тому, кто открыл: иначе после закрытия человек
+        // оказывается в начале страницы и ищет, где он был.
+        if (overlay._вернутьФокус && overlay._вернутьФокус.focus) {
+            try { overlay._вернутьФокус.focus(); } catch (e) {}
+        }
         setTimeout(function() { overlay.remove(); }, 250);
     }
 
@@ -318,12 +379,12 @@
             }
 
             var slides = '';
-            // Главный — первым: он платит за первое место, а не за случайное
-            var ordered = data.slice().sort(function(a, b) {
-                if (!!b.is_hero !== !!a.is_hero) return b.is_hero ? 1 : -1;
-                return (b.sort_order || 0) - (a.sort_order || 0);
-            });
-            ordered.forEach(function(s) {
+            // ПОРЯДОК ОБЩИЙ С СЕКЦИЕЙ. Здесь стояла своя сортировка по
+            // sort_order ПО УБЫВАНИЮ, тогда как секция брала то же поле по
+            // возрастанию: один список был выстроен наоборот в двух местах на
+            // одной странице. Сейчас порядок задан один раз при загрузке —
+            // главный первым, остальные перемешаны, — и оба блока берут его.
+            data.forEach(function(s) {
                 var inner = (s.logo ? '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '">' : '') +
                     '<span>' + esc(s.name) + '</span>';
                 slides += buildSponsorElement(s, 'carousel-slide-infinite', inner);

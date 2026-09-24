@@ -4112,123 +4112,128 @@ h2 {
     margin-bottom: var(--space-lg);
 }
 
+/* ── ГЕНЕРАЛЬНЫЙ СПОНСОР ──────────────────────────────────────────────
+   Плитка у него ТА ЖЕ, что у остальных: спонсоры равны, а статус называет
+   подпись и своя строка. Решение Кости 24.09, доска 73:9.
+   Лайма здесь нет: он принадлежит кнопке «Подробнее о спонсорстве», которая
+   стоит прямо над этой секцией — правило 109:370, одно действие в поле
+   зрения. До 24.09 подпись была лаймовой. */
 .sponsor-hero {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 28px;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
 }
 
 .sponsor-hero-label {
     font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
     text-transform: uppercase;
-    letter-spacing: 3px;
-    color: var(--accent);
-    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
 }
 
-.sponsor-hero-logo {
-    display: flex;
-    align-items: center;
-    transition: all var(--transition-fast);
-    text-decoration: none;
-    color: inherit;
-}
-
-.sponsor-hero-logo img {
-    height: 60px;
-    width: auto;
-    max-width: 200px;
-    object-fit: contain;
-    filter: brightness(1.1);
-}
-
-.sponsor-hero-logo:hover {
-    transform: scale(1.08);
-    filter: drop-shadow(0 0 16px rgba(204, 255, 0, 0.3));
-}
-
+/* ── СТЕНА ЛОГОТИПОВ ──────────────────────────────────────────────────
+   Плитки одного размера. Логотипы приходят из базы разной ширины при одной
+   высоте — замерено на 1280: от 39 до 140, — и без общей коробки вес на
+   экране у них выходил втрое разный. Не потому, что кто-то больше заплатил,
+   а потому, что логотип вытянутый.
+   Ряд заполняется целиком, последний неполный встаёт по центру: когда число
+   спонсоров не делится на число колонок, нижний ряд сам оказывается со
+   смещением. Кирпичная кладка получается из ЧИСЛА карточек, а не рисуется. */
 .sponsors-cloud {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
-    gap: 20px 28px;
+    gap: var(--space-4);
 }
 
-/* Логотипы показываем как есть, в своих цветах. Раньше они были
-   обесцвечены и притушены до половины, а цвет возвращался только при
-   наведении — спонсор платит за узнаваемый бренд, а видел серое пятно */
-.sponsors-cloud .sponsor-logo-link {
+.sponsor-hero-logo,
+.sponsors-cloud .sponsor-logo-link,
+.sponsors-cloud .spon-static {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform var(--transition-fast);
+    flex: 0 0 calc((100% - 4 * var(--space-4)) / 5);
+    height: 88px;
+    padding: var(--space-3);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: inherit;
+    transition: transform var(--transition-fast), border-color var(--transition-fast);
 }
 
-.sponsors-cloud .sponsor-logo-link:hover {
-    transform: scale(1.15);
+/* Вся плитка — цель нажатия, и она заведомо выше порога 44. До 24.09 целью
+   был сам логотип: «STRETCH» давал 39 в ширину, то есть мимо порога. */
+.sponsors-cloud .sponsor-logo-link:hover,
+.sponsor-hero-logo:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-light);
 }
 
-.sponsor-logo-link img {
-    height: 36px;
+.sponsors-cloud .sponsor-logo-link:focus-visible,
+.sponsor-hero-logo:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* Логотип показывается как есть, в своих цветах: спонсор платит за
+   узнаваемый бренд. Потолок внутри плитки один на всех — иначе равные
+   коробки снова дадут неравный вес. */
+.sponsor-hero-logo img,
+.sponsors-cloud .sponsor-logo-link img,
+.sponsors-cloud .spon-static img {
+    max-width: 70%;
+    max-height: 58%;
     width: auto;
-    max-width: 120px;
+    height: auto;
     object-fit: contain;
+    display: block;
 }
 
-/* Bigger logos on homepage sponsors section */
-.section-sponsors-compact .sponsor-hero-logo img {
-    height: 72px;
-    max-width: 240px;
+@media (prefers-reduced-motion: reduce) {
+    .sponsor-hero-logo,
+    .sponsors-cloud .sponsor-logo-link { transition: none; }
+    .sponsor-hero-logo:hover,
+    .sponsors-cloud .sponsor-logo-link:hover { transform: none; }
 }
 
-.section-sponsors-compact .sponsor-logo-link img {
-    height: 44px;
-    max-width: 140px;
+/* Колонок меньше — плитка та же. Число колонок это свойство экрана,
+   а размер плитки — свойство карточки. */
+@media (max-width: 992px) {
+    .sponsor-hero-logo,
+    .sponsors-cloud .sponsor-logo-link,
+    .sponsors-cloud .spon-static {
+        flex-basis: calc((100% - 3 * var(--space-4)) / 4);
+        height: 80px;
+    }
 }
 
-/* Главный спонсор */
-.main-sponsor {
-    margin-bottom: var(--space-xl);
+/* Телефон: четыре в ряд, как и было до 24.09. Три колонки дали бы десяти
+   спонсорам четыре ряда вместо трёх — секция вырастала на 90 пикселей
+   ни за что. Число колонок — свойство экрана, размер плитки — её собственное. */
+@media (max-width: 640px) {
+    .sponsors-cloud { gap: var(--space-3); }
+
+    .sponsor-hero-logo,
+    .sponsors-cloud .sponsor-logo-link,
+    .sponsors-cloud .spon-static {
+        flex-basis: calc((100% - 3 * var(--space-3)) / 4);
+        height: 56px;
+        padding: var(--space-2);
+    }
+
+    .sponsor-hero-logo img,
+    .sponsors-cloud .sponsor-logo-link img,
+    .sponsors-cloud .spon-static img {
+        max-width: 80%;
+        max-height: 64%;
+    }
 }
 
-.main-sponsor-card {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-lg);
-    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(204, 255, 0, 0.05) 100%);
-    border: 2px solid var(--accent);
-    border-radius: var(--radius-xl);
-    padding: var(--space-lg);
-    box-shadow: 0 0 40px rgba(204, 255, 0, 0.1);
-}
-
-.main-sponsor-card img {
-    width: 120px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: var(--radius-md);
-}
-
-.main-sponsor-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-}
-
-.main-sponsor-name {
-    font-size: var(--fs-xl);
-    font-weight: 800;
-    color: var(--text-primary);
-}
-
-.main-sponsor-desc {
-    font-size: var(--fs-sm);
-    color: var(--text-dim);
-}
 
 /* ========================================
    SPONSOR DETAIL MODAL
@@ -4269,16 +4274,33 @@ h2 {
     transform: scale(1);
 }
 
+/* Цель нажатия 44 — Icon button 40:93, ступень lg: «Only lg (44) meets the
+   44pt minimum touch target, so lg is the required size anywhere a finger
+   uses it». Было 22 x 32 при padding 4: и ниже порога 44, и уже минимума 24
+   из WCAG 2.5.8. Крестик остаётся того же кегля, растёт коробка. */
 .spon-modal-close {
     position: absolute;
-    top: 12px; right: 16px;
+    top: var(--space-2); right: var(--space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--btn-h-md);
+    height: var(--btn-h-md);
     background: none;
     border: none;
+    border-radius: var(--radius-full);
     color: var(--text-dim);
     font-size: var(--fs-xl);
     cursor: pointer;
     line-height: 1;
-    padding: 4px;
+    padding: 0;
+}
+
+.spon-modal-close:focus-visible,
+.spon-modal-close-btn:focus-visible,
+.spon-modal-action:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
 }
 
 .spon-modal-close:hover {
@@ -4387,12 +4409,15 @@ h2 {
 
 .spon-modal-action:hover .spon-modal-action-value { color: inherit; opacity: 0.75; }
 
+/* Высота свойством, а не полями — Button 17:82. Было 99 x 36 из padding
+   10/24: ниже порога нажатия на кнопке, которой закрывают окно. */
 .spon-modal-close-btn {
+    height: var(--btn-h-md);
+    padding: 0 var(--space-6);
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
-    padding: 10px 24px;
     font-size: var(--fs-sm);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -4524,15 +4549,6 @@ h2 {
 
     .carousel-slide-infinite img {
         height: 80px;
-    }
-
-    .main-sponsor-card {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .main-sponsor-info {
-        align-items: center;
     }
 
     .carousel-track-infinite {
@@ -10762,38 +10778,6 @@ input:-internal-autofill-previewed {
         line-height: 1.25;
         letter-spacing: 0.04em;
         text-align: center;
-    }
-
-    /* Спонсоры лежали «облаком»: логотипы разной ширины — от 44 до 140
-       пикселей — вставали по два-три в ряд, и блок шёл лесенкой на четыре
-       ряда. Ставим сетку по четыре, ячейки одного размера, картинка внутри
-       вписывается целиком и не растягивается */
-    .sponsors-cloud {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 10px 8px;
-        align-items: center;
-    }
-
-    /* Логотипы без плашек: ровность ряда держит сама сетка — ячейки одного
-       размера, картинка вписана и центрирована. Рамки только добавляли шум */
-    .sponsor-logo-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 46px;
-        padding: 4px;
-    }
-
-    /* Селектор с двумя классами: у блока на главной задано height 44 и
-       max-width 140, и картинка вылезала за свою ячейку */
-    .section-sponsors-compact .sponsor-logo-link img,
-    .sponsors-cloud .sponsor-logo-link img {
-        max-width: 100%;
-        max-height: 100%;
-        width: auto;
-        height: auto;
-        object-fit: contain;
     }
 
 
