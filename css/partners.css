@@ -178,19 +178,72 @@
     border-color: var(--accent);
 }
 
-/* NTRP badge — top right corner */
-.pt-ntrp-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0, 191, 255, 0.15);
-    color: #00BFFF;
-    font-size: var(--fs-2xs);
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
-    letter-spacing: 0.3px;
+/* КЛИКАБЕЛЬНАЯ КАРТОЧКА — ЭТО ССЫЛКА, А НЕ DIV С ОБРАБОТЧИКОМ.
+   До 24.09 у карточки стоял cursor: pointer, а обработчик висел на div —
+   ни role, ни tabindex: клавиатурой сюда было не попасть вовсе, и диктор
+   не знал, что это действие.
+   Приём — растянутая ссылка: имя игрока становится <a>, его псевдоэлемент
+   накрывает карточку целиком, кнопка «Пригласить» поднимается над ним
+   z-index'ом. Клавиатура и диктор получают ОДНУ ссылку и ОДНУ кнопку,
+   а не немой прямоугольник с двумя невидимыми действиями. */
+.pt-name-link {
+    color: inherit;
+    text-decoration: none;
 }
+
+.pt-name-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+}
+
+.pt-card .pt-invite-btn {
+    position: relative;
+    z-index: 1;
+}
+
+/* Кольцо фокуса — обязательное по WCAG 2.4.7, описание Button 17:82.
+   До 24.09 во всём семействе .pt- не было НИ ОДНОГО :focus-visible. */
+.pt-name-link:focus-visible,
+.pt-invite-btn:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.pt-card:has(.pt-name-link:focus-visible) {
+    border-color: var(--accent);
+}
+
+/* NTRP — это Badge 27:53, тон Info, стиль Subtle: «Subtle — умолчание для
+   карточек и таблиц». Высота 24, поля 8, радиус full, 11 Medium прописными,
+   разрядка 0.5.
+   Цвет #00BFFF был ШЕСТЫМ в палитре и ни в одном токене не значился;
+   status/info после перекраски 23.09 — #60A5FA. */
+/* МЕТКА НЕ СТОИТ НА ЛИЦЕ. Замер 24.09 на пяти видах: она везде задевала
+   кружок — 6 пикселей на десктопе, 24 на телефоне. Абсолютный угол в
+   карточке, у которой по центру портрет, неизбежно кладёт метку на
+   портрет, как только карточка сужается.
+   Наверх её не поднять: карточки без NTRP получили бы пустую полосу, и
+   кружки в ряду встали бы на разной высоте. Поэтому метка — обычная
+   строка перед кнопкой, рядом с такой же по виду плашкой разряда.
+   Карточки без NTRP просто не имеют этой строки, как не имеют строки
+   «Masters». Кнопки держит margin-top: auto, а не порядок. */
+.pt-ntrp-badge {
+    order: 1;
+    margin-top: var(--space-2);          /* 8 */
+    background: rgba(96, 165, 250, 0.16);
+    color: #60A5FA;
+    font-size: var(--fs-2xs);            /* 11 */
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 var(--space-2);           /* 8; было 2 / 8 */
+    line-height: 24px;
+    border-radius: var(--radius-full);   /* было radius-sm */
+}
+
+.pt-invite-btn { order: 2; }
 
 /* NTRP filter dropdown */
 .pt-ntrp-select {
@@ -218,7 +271,13 @@
     margin-bottom: var(--space-sm);
 }
 
+/* ОДИН КРУЖОК — ОДНО ПОВЕДЕНИЕ. Замер 24.09: у карточки с фотографией
+   обёртка была 87 при кружке 80, у карточки с инициалами — ровно 80, и
+   имя под фотографией стояло на 6 пикселей ниже, чем имя под инициалами.
+   Разница не в размере: <img> строчный, и под ним оставался зазор базовой
+   линии. Заглушка рядом — flex, у неё зазора нет. */
 .pt-avatar {
+    display: block;
     width: 72px;
     height: 72px;
     border-radius: 50%;
@@ -226,15 +285,20 @@
     border: 2px solid var(--border-subtle);
 }
 
+/* ЗАГЛУШКА НЕЙТРАЛЬНАЯ — как у компонента Avatar 29:82, перекрашенного
+   23.09. Лайм по правилу 109:370 принадлежит одному главному действию;
+   аватар — личность, а не действие. Пятое место, где лайм уходит:
+   аватар рейтинга → плашка новости → подписи значков → заголовок колонки →
+   кольцо пьедестала → инициалы партнёра. */
 .pt-avatar-placeholder {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--bg-elevated);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--accent);
+    color: var(--text-primary);
     font-size: var(--fs-xl);
     font-weight: 700;
     border: 2px solid var(--border-subtle);
@@ -256,7 +320,7 @@
     font-size: var(--fs-base);
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 6px;
+    margin-bottom: var(--space-2);       /* 8; было 6 */
     word-break: break-word;
 }
 
@@ -353,10 +417,16 @@
     z-index: 2;
 }
 
+/* ПОДКЛЮЧЕНА К ЭТАЛОНУ 24.09 — третья из трёх копий коробки-гейта.
+   Эталон .badges-cta-box в css/style.css, сторож tools/check-korobka.js.
+   Поля были 44 / 40 / 40, ни одно не ступень шкалы 8 · 12 · 16 · 24 · 32.
+   Ширина 460 остаётся своей — это накладка поверх сетки карточек.
+   Телефонной ступени у этой копии не было вовсе: на 375 коробка держала
+   те же 44 / 40 при ширине экрана 375. Теперь ступень есть, ниже. */
 .pt-guest-cta {
     position: relative;
     text-align: center;
-    padding: 44px 40px 40px;
+    padding: var(--space-6) var(--space-8);   /* 24 / 32 — как у эталона */
     margin: 0 auto;
     max-width: 460px;
     background: rgba(18, 18, 18, 0.85);
@@ -438,23 +508,29 @@
     font-size: var(--fs-lg);
     font-weight: 800;
     color: #fff;
-    margin-bottom: 10px;
+    margin-bottom: var(--space-2);       /* 8; было 10 — не ступень */
     letter-spacing: -0.02em;
 }
 
 .pt-guest-text {
     font-size: var(--fs-sm);
     color: var(--text-secondary);
-    line-height: 1.5;
-    margin-bottom: 24px;
+    line-height: var(--lh-normal);       /* 1.5 */
+    margin-bottom: var(--space-6);       /* 24 */
     max-width: 340px;
     margin-left: auto;
     margin-right: auto;
 }
 
+/* КНОПКА ЭТАЛОНА. Было: высота полями 12 / 36 — 36 не ступень шкалы,
+   и высота выходила 43, не ступень Button 17:82 (28 · 36 · 44 · 52).
+   Теперь запись .badges-cta-btn: высота свойством, ступень md 44. */
 .pt-guest-btn {
-    display: inline-block;
-    padding: 12px 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--btn-h-md);             /* 44 */
+    padding: 0 var(--space-8);           /* 32; было 12 × 36 */
     background: var(--accent);
     color: #000;
     font-size: var(--fs-sm);
@@ -470,9 +546,18 @@
 }
 
 .pt-guest-hint {
-    margin-top: 16px;
+    margin-top: var(--space-4);          /* 16 */
     font-size: var(--fs-xs);
     color: var(--text-muted);
+}
+
+/* ТЕЛЕФОН — ступень, которой у этой копии не было. Числа эталона. */
+@media (max-width: 640px) {
+    .pt-guest-cta   { padding: var(--space-4) var(--space-6); }   /* 16 / 24 */
+    .pt-guest-icon  { width: 32px; height: 32px; margin-bottom: var(--space-2); }
+    .pt-guest-title { font-size: var(--fs-md); margin-bottom: var(--space-2); }   /* 18 */
+    .pt-guest-text  { font-size: var(--fs-xs); margin-bottom: var(--space-3); }   /* 12 */
+    .pt-guest-btn   { padding: 0 var(--space-6); }                /* 24; высота та же, 44 */
 }
 
 /* ========================================
@@ -492,11 +577,23 @@
        когда карточка самая высокая и свободного места не осталось */
     margin-top: auto;
     border-top: 12px solid transparent;
-    padding: 8px 0;
+    /* ВЫСОТА СВОЙСТВОМ, А НЕ ПОЛЯМИ — описание Button 17:82. Ступень md 44
+       названа там минимальной целью нажатия по Apple HIG. Замер 24.09 дал
+       43 на трёх видах и 51 на двух: ни одна из двух высот не ступень
+       (28 · 36 · 44 · 52), и обе на пиксель мимо.
+
+       ПОПРАВКА К СОБСТВЕННОЙ ЗАПИСИ, тем же днём. Первым заходом здесь
+       стояло min-height: 44 — и замер показал, что красится только 32:
+       box-sizing здесь border-box, а прозрачная рамка сверху съедала 12 из
+       этих 44. Цель нажатия выходила 44, а на вид кнопка вставала ступенью,
+       которой в Button 17:82 нет. Теперь 12 прибавлены явно: красится 44 —
+       ступень md, — а рамка остаётся тем, чем была, зазором сверху. */
+    min-height: calc(var(--btn-h-md) + 12px);   /* красится 44, цель 56 */
+    padding: 0;
     background: var(--accent);
     background-clip: padding-box;
     color: #000;
-    font-size: var(--fs-xs);
+    font-size: var(--fs-sm);             /* 14; было 12 */
     font-weight: 700;
     font-family: inherit;
     border-right: none;
@@ -650,47 +747,48 @@
         padding: var(--space-md);
     }
 
-    /* Селекторы с идентификатором: базовые правила рейтинга написаны как
-       `#players .pt-avatar`, и правило на один класс им проигрывало —
-       аватар оставался 92 пикселя в карточке шириной 134, и всё, что рядом,
-       вылезало за край */
-    .pt-avatar, .pt-avatar-placeholder,
-    #players .pt-avatar, #players .pt-avatar-placeholder {
+    /* 24.09: половинки `#players ...` отсюда убраны. Они появились, когда
+       блок «Давай сыграем» на главной не имел своего объявления и ловил
+       размеры отсюда. Теперь он объявлен целиком в style.css по шкале
+       640/992, а этот файл отвечает только за страницу «Найти партнёра». */
+    .pt-avatar, .pt-avatar-placeholder {
         width: 60px;
         height: 60px;
         font-size: var(--fs-md);
     }
 
-    .pt-card, #players .pt-card {
+    .pt-card {
         padding: 16px 12px;
     }
 
     /* Размеры по общей шкале для телефона: имя было 16-м кеглем при
        карточке в 171 пиксель и занимало всю ширину */
-    .pt-name, #players .pt-name {
+    /* Межстрочный убран 24.09: он был единственным уровнем, у которого
+       на телефоне менялась не только ступень кегля, но и плотность —
+       14 / 17.5 против 16 / 24 на всех остальных видах. У названия
+       карточки один межстрочный на все виды, 1.5, и он стоит в базовом
+       правиле .pt-name. */
+    .pt-name {
         font-size: var(--fs-sm);
-        line-height: 1.25;
     }
 
-    .pt-badge, #players .pt-badge {
+    .pt-badge {
         font-size: var(--fs-2xs);
         padding: 3px 8px;
     }
 
-    .pt-status, #players .pt-status {
+    .pt-status {
         font-size: var(--fs-2xs);
     }
 
-    .pt-ntrp-badge {
-        font-size: var(--fs-2xs);
-        top: 6px;
-        right: 6px;
-        padding: 2px 6px;
-    }
+    /* Кегль, поля и место метки сняты 24.09: это компонент Badge Info
+       Subtle, 11 / 500 / высота 24, один и тот же на всех видах, и стоит
+       он теперь строкой, а не в углу. Угловых координат здесь больше
+       быть не должно. */
 
     /* Размер кнопки теперь общий — вторая ступень в style.css. Здесь
        остаётся только разрядка: на узкой карточке она растягивала слово */
-    .pt-invite-btn, #players .pt-invite-btn {
+    .pt-invite-btn {
         letter-spacing: 0;
     }
 }

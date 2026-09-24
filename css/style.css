@@ -3267,8 +3267,16 @@ h2 {
 .guest-cta-card {
     position: relative;
     text-align: center;
-    padding: 40px 40px 36px;
-    max-width: 420px;
+    /* ПОДКЛЮЧЕНА К ЭТАЛОНУ 24.09 — первая из трёх копий коробки-гейта.
+       Числа больше не свои: они взяты у .badges-cta-box, как и обещано в
+       её комментарии и в tools/check-korobka.js.
+       До этого размеры плашки жили в ЧЕТЫРЁХ местах: базовое правило
+       (40 / 40 / 36), два блока 768 (28 / 24 / 24 и 18 / 16 / 16) и пара
+       наборов #players / #rankings байт в байт одинаковых (26 / 28 / 24).
+       Осталось два объявления — это и телефонная ступень ниже, обе с
+       числами эталона. */
+    padding: var(--space-6) var(--space-8);   /* 24 / 32 — как у эталона */
+    max-width: 340px;                    /* было 420 в базе и 340 в обеих секциях */
     width: 100%;
     background: rgba(18, 18, 18, 0.85);
     border-radius: 24px;
@@ -3346,9 +3354,9 @@ h2 {
 }
 
 .guest-cta-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 20px;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto var(--space-3);       /* 12; было 20 в базе и 14 в секциях */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3359,18 +3367,26 @@ h2 {
 }
 
 .guest-cta-title {
-    font-size: var(--fs-md);
+    font-size: var(--fs-base);           /* 16; было 18 в базе и 16 в секциях */
     font-weight: 800;
     color: #fff;
-    margin-bottom: 22px;
+    margin-bottom: var(--space-4);       /* 16; было 22 */
     letter-spacing: -0.02em;
 }
 
 /* Button with shimmer */
 .guest-cta-btn {
     position: relative;
-    display: inline-block;
-    padding: 13px 36px;
+    /* КНОПКА ЭТАЛОНА, СЛОВО В СЛОВО. Замер 24.09 дал три высоты на пяти
+       видах — 43, 48 и 48, и ни одна не ступень Button 17:82
+       (28 · 36 · 44 · 52). Взята запись .badges-cta-btn: высота свойством,
+       ступень md 44, поля 0 / 32. Это кнопка той же роли в такой же
+       коробке-гейте, и разойтись они больше не должны. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--btn-h-md);             /* 44 */
+    padding: 0 var(--space-8);           /* 32; было 13×36 — как у эталона */
     background: var(--accent);
     color: #000;
     font-weight: 800;
@@ -3404,16 +3420,13 @@ h2 {
     box-shadow: 0 0 32px rgba(204, 255, 0, 0.35), 0 8px 40px rgba(204, 255, 0, 0.12);
 }
 
-@media (max-width: 768px) {
-    /* Тот же вес, что у базового правила рейтинга: иначе отступы карточки
-       на телефоне не применялись */
-    .guest-cta-card,
-    #rankings .guest-cta-card {
-        padding: 28px 24px 24px;
-    }
-    .guest-cta-title {
-        font-size: var(--fs-base);
-    }
+/* ТЕЛЕФОН — единственная вторая ступень плашки, и тоже с числами эталона.
+   Границы 768 больше нет: лестница разрешает 640 и 992. */
+@media (max-width: 640px) {
+    .guest-cta-card { padding: var(--space-4) var(--space-6); }  /* 16 / 24 — как у эталона */
+    .guest-cta-icon { width: 32px; height: 32px; margin-bottom: var(--space-2); }  /* 8; было 10 */
+    .guest-cta-title { font-size: var(--fs-sm); margin-bottom: var(--space-3); }   /* 14 / 12 */
+    .guest-cta-btn  { padding: 0 var(--space-6); }            /* 24; высота та же, 44 */
 }
 
 /* ========================================
@@ -6301,14 +6314,8 @@ h2 {
     align-items: flex-end;
 }
 
-#rankings .guest-cta-card {
-    max-width: 340px;
-    padding: 26px 28px 24px;
-}
-
-#rankings .guest-cta-icon { width: 40px; height: 40px; margin-bottom: 14px; }
-#rankings .guest-cta-title { font-size: var(--fs-base); }
-#rankings .guest-cta-btn { padding: 11px 28px; font-size: var(--fs-sm); }
+/* Набор размеров плашки отсюда убран 24.09: он был копией базового
+   правила .guest-cta-card и такого же набора в #players. */
 
 /* ========================================
    НАЙДИ ПАРТНЁРА ПО ИГРЕ — блок на главной
@@ -6316,44 +6323,81 @@ h2 {
    в css/partners.css: она общая со страницей поиска
    ======================================== */
 
+/* ПОДЗАГОЛОВОК РАЗДЕЛА, А НЕ МЕЛКАЯ РЕМАРКА.
+   Костя 24.09: «мне кажется, она не читаема». Замер подтвердил числом:
+   было 14 / Regular цветом --text-dim, то есть 35 % белого, и это
+   КОНТРАСТ 3.14 : 1 при пороге WCAG 1.4.3 = 4.5. Четвёртое место с этим
+   же дефектом: правило «--text-dim на мелком тексте не проходит» выведено
+   ещё на новостях.
+
+   Ступень 18 — «лид» по токенам, на две ниже заголовка раздела 26.
+   ПАРА ЕДЕТ ОДНОЙ ГРАНИЦЕЙ: строка про 16 лежит в том же медиаслое, что и
+   кегль h2 (768), иначе в полосе между границами они схлопнутся.
+
+   Отрицательный отступ -14 убран: он гасил нижнее поле шапки раздела.
+   Теперь шапка сама отдаёт меньше, когда за ней идёт подзаголовок, и оба
+   числа стоят на шкале. */
+#players .section-header:has(+ .pg-sub) {
+    margin-bottom: var(--space-2);        /* 8 */
+}
+
 .pg-sub {
-    margin: -14px 0 20px;
-    color: var(--text-dim);
-    font-size: var(--fs-sm);
+    margin: 0 0 var(--space-6);           /* 24; было -14 / 20 */
+    color: var(--text-secondary);         /* было --text-dim, 3.14 : 1 */
+    font-size: var(--fs-md);              /* 18; было 14 */
 }
 
 /* На главной их десять, а не сорок, — поэтому карточка крупнее и вытянутее */
+/* ПЯТЬ КАРТОЧЕК НА ДЕСКТОПЕ — решение Кости 24.09. Корты и тренеры идут по
+   четыре, сетку целиком не сводим; сводим РИТМ: зазор один на все витрины,
+   24 на широком и 12 на телефоне. Было три разных — 20 у партнёров, 40 у
+   кортов и тренеров, 10 у всех на узком. */
 #players .pt-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 20px;
+    gap: var(--space-6);                  /* 24; было 20 */
 }
 
+/* ПОЛЯ ИЗ КОМПОНЕНТА Card 29:65: «Compact 16 для плотных списков, Regular 24
+   для отдельных». Витрина из пяти — плотный список. Было 24 / 16 / 20:
+   три разных числа на одну карточку, два из них мимо шкалы. */
 #players .pt-card {
-    padding: 24px 16px 20px;
-    cursor: pointer;
+    padding: var(--space-4);              /* 16; было 24 16 20 */
 }
 
+/* АВАТАР 92 → 80. У компонента Avatar 29:82 четыре ступени: xs 24 · sm 32 ·
+   md 40 · lg 56, и 92 нет ни одной. Правило Stat tile 39:57: «Do not invent
+   intermediate sizes per section» — если нужен новый размер, он заводится в
+   КОМПОНЕНТЕ. 80 заводится пятой ступенью xl.
+   КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ — правило пьедестала: доля 0.36,
+   округлённая до ступени. 80 → 26. */
 #players .pt-avatar,
 #players .pt-avatar-placeholder {
-    width: 92px;
-    height: 92px;
-    font-size: var(--fs-xl);
+    width: 80px;
+    height: 80px;
+    font-size: var(--fs-xl);              /* 26; доля 0.33 */
 }
 
-#players .pt-avatar-wrap { margin-bottom: 14px; }
-#players .pt-name { font-size: var(--fs-base); }
+#players .pt-avatar-wrap { margin-bottom: var(--space-3); }   /* 12; было 14 */
+
+/* ИМЯ И КАТЕГОРИЯ РАЗВЕДЕНЫ НА СТУПЕНЬ. Были обе 16 и отличались только
+   весом; на 768 они сходились в 12 и 11 и почти слипались. */
+#players .pt-name { font-size: var(--fs-base); }              /* 16 */
+#players .pt-category { font-size: var(--fs-sm); }            /* 14; было 16 */
 /* Кнопка прижата к низу, чтобы ряд не шёл лесенкой: у кого строк меньше,
    у того она уезжала вверх. Селектор с идентификатором — он же перебивал
    правило из partners.css, где это уже было исправлено */
 #players .pt-invite-btn { margin-top: auto; }
 
-/* Форма — последние пять матчей. Цвета те же, что в рейтинге */
+/* Форма — последние пять матчей. Цвета те же, что в рейтинге.
+   Зазор 4 — это сетка ИКОНОК, а не шкала отступов: точки по 8 пикселей, и
+   восьмёрка между ними развалила бы полоску на пять отдельных пятен. Тот же
+   довод, что у медали пьедестала: у иконок своя размерная сетка. */
 .pg-form {
     display: flex;
-    gap: 5px;
+    gap: var(--space-1);                  /* 4; было 5 */
     justify-content: center;
-    margin-top: 6px;
+    margin-top: var(--space-2);           /* 8; было 6 */
     min-height: 8px;
 }
 
@@ -6367,11 +6411,12 @@ h2 {
 .pg-form .w { background: #22c55e; }
 .pg-form .l { background: #ef4444; }
 
-/* Приглушённая строка — тот спокойный ритм, что был у прежних карточек */
+/* Приглушённая строка. --text-dim здесь давал те же 3.14 : 1, что и подпись
+   раздела: один и тот же провал дважды в одной секции. */
 .pg-record {
-    margin-top: 6px;
+    margin-top: var(--space-2);           /* 8; было 6 */
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    color: var(--text-secondary);         /* было --text-dim */
 }
 
 /* Парные игры второй строкой. Цвета те же, что у меток в истории матчей, —
@@ -6379,24 +6424,32 @@ h2 {
 .pg-pairs {
     display: flex;
     justify-content: center;
-    gap: 6px;
-    margin-top: 5px;
+    gap: var(--space-2);                  /* 8; было 6 */
+    margin-top: var(--space-2);           /* 8; было 5 */
 }
+
+/* Метки парных — это Badge 27:53, стиль Subtle: 11 Medium прописными,
+   поля 8, радиус full. Было 11 Bold с полями 1 / 7. */
 .pg-pairs span {
-    font-size: var(--fs-2xs);
-    font-weight: 700;
-    padding: 1px 7px;
+    font-size: var(--fs-2xs);             /* 11 */
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 var(--space-2);            /* 8; было 1 / 7 */
+    line-height: 24px;
     border-radius: var(--radius-full);
     white-space: nowrap;
 }
 .pg-pairs .pp-dbl { background: rgba(59,130,246,0.16); color: #6EA8FE; }
 .pg-pairs .pp-mix { background: rgba(168,85,247,0.18); color: #C084FC; }
 
+/* Empty state 37:53. Поля те же, что у .rk-empty: одно пустое состояние на
+   весь сайт, а не восьмое написание той же идеи. */
 .pg-empty {
     grid-column: 1 / -1;
-    padding: 40px 20px;
+    padding: var(--space-10) var(--space-5);   /* 40 / 20 */
     text-align: center;
-    color: var(--text-dim);
+    color: var(--text-secondary);              /* было --text-dim */
     border: 1px dashed var(--border-subtle);
     border-radius: var(--radius-lg);
 }
@@ -6404,21 +6457,136 @@ h2 {
 /* Карточка входа — того же размера, что в рейтинге */
 #players { position: relative; }
 #players .guest-section-cta { max-height: 55%; align-items: flex-end; }
-#players .guest-cta-card { max-width: 340px; padding: 26px 28px 24px; }
-#players .guest-cta-icon { width: 40px; height: 40px; margin-bottom: 14px; }
-#players .guest-cta-title { font-size: var(--fs-base); }
-#players .guest-cta-btn { padding: 11px 28px; font-size: var(--fs-sm); }
 
-@media (max-width: 1200px) {
-    #players .pt-grid { grid-template-columns: repeat(4, 1fr); }
-}
+/* ТОЛЬКО ЦЕЛЫЕ РЯДЫ. Решение Кости 24.09 по трём снимкам: ряд с дырой на
+   месте недостающей карточки читается как поломка, а не как «игроков пока
+   мало». Поэтому у каждого вида свой потолок, кратный числу колонок, и
+   хвост, не добравший ряд, прячется.
+     широкий  — 5 в ряд, потолок 5   (один ряд)
+     планшет  — 3 в ряд, потолок 6   (два ряда)
+     боком    — 4 в ряд, потолок 4   (один ряд)
+     телефон  — 2 в ряд, потолок 4   (два ряда)
+   ПОСЧИТАНО на сегодняшней базе: игроков пять, поэтому планшет показывает
+   три, а не шесть — шестая карточка появится с шестым игроком. Остальные
+   три вида на пяти игроках заполняются целиком. */
+#players .pt-grid > .pt-card:nth-child(n+6) { display: none; }
 
-@media (max-width: 900px) {
+/* ГРАНИЦЫ 1200 И 900 УБРАНЫ 24.09. Лестница разрешает две ширины — 640 и
+   992; всё остальное делится высотой и поворотом. Полоса 993–1200 теперь
+   считается десктопом: пять карточек, ПОСЧИТАНО ≈177 при окне 1024. */
+@media (max-width: 992px) {
     #players .pt-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* ПЛАНШЕТ ВЕРТИКАЛЬНО — единственный вид с тремя колонками, и потому
+   единственный, где считается хвост из трёх.
+   ГРАНИЦЫ НЕ НОВЫЕ: 641 и 501 — это те же 640 и 500 с другой стороны.
+   Условие выписано целиком нарочно: правила хвоста весят на два
+   псевдокласса больше обычного селектора, и «вернуть в поток» их в
+   соседнем слое уже не получится — они перебьют возврат. Значит слой
+   обязан не пересекаться с соседями, а не чиниться после них. */
+@media (min-width: 641px) and (max-width: 992px) and (min-height: 501px) {
+    #players .pt-grid > .pt-card:nth-child(n+6) { display: flex; }
+    #players .pt-grid > .pt-card:nth-child(n+7) { display: none; }
+
+    /* ХВОСТ, НЕ ДОБРАВШИЙ РЯД ИЗ ТРЁХ. Считается ОТ КОНЦА, потому что
+       начало может уехать: правило не знает, сколько игроков в базе.
+       Остался один лишний — прячем один, осталось два — прячем оба. */
+    #players .pt-grid > .pt-card:nth-child(3n+1):nth-last-child(1),
+    #players .pt-grid > .pt-card:nth-child(3n+1):nth-last-child(2),
+    #players .pt-grid > .pt-card:nth-child(3n+2):nth-last-child(1) { display: none; }
+}
+
+/* ПАРА ЕДЕТ ОДНОЙ ГРАНИЦЕЙ. Заголовок раздела падает 26 → 21 на 768
+   (общее правило .section-header h2 ниже по файлу), а подзаголовок стоял
+   18 на всех видах: на широком пара шла через две ступени, на планшете —
+   через одну, и в полосе между ними схлопывалась. Отношение заморожено,
+   а не число: 26/18 и 21/16 — обе пары через две ступени.
+   Граница 768 здесь ЗАИМСТВОВАНА у заголовка и уедет на 640 вместе с ним,
+   когда лестница заголовков сайта встанет на шкалу. */
+@media (max-width: 768px) {
+    .pg-sub { font-size: var(--fs-base); }   /* 16 */
+}
+
+/* ТЕЛЕФОН БОКОМ — четыре в ряд и ровно один ряд: по высоте видно всё
+   равно только его. Хвост здесь не нужен: потолок равен числу колонок. */
+@media (orientation: landscape) and (max-height: 500px) {
+    #players .pt-grid { grid-template-columns: repeat(4, 1fr); }
+    #players .pt-grid > .pt-card:nth-child(n+5) { display: none; }
+}
+
+/* ТЕЛЕФОН. 24.09 сюда перенесены правила «Давай сыграем», стоявшие в
+   блоке 768: граница 768 не входит в лестницу, и из-за неё планшет получал
+   телефонные размеры — две карточки вместо трёх, кружок 52 вместо 80. */
 @media (max-width: 640px) {
-    #players .pt-grid { grid-template-columns: repeat(2, 1fr); }
+    /* «Давай сыграем»: на телефоне карточки шли по одной в столбик, десять
+       штук растягивались на три экрана. Теперь две в ряд — как в поиске
+       игрока, на кортах и у тренеров.
+
+       Три в ряд помещались только за счёт сжатия: на карточку оставалось
+       107 пикселей, «Пригласить» обрывалось на «ПРИГЛАСИТ», а метка NTRP
+       налезала на фото. Селектор с идентификатором, иначе его перебьёт
+       правило блока на широком экране */
+    #players .pt-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-3);              /* 12; было 10 */
+    }
+
+    #players .pt-card { min-width: 0; }
+
+    #players .pt-name,
+    #players .pt-category {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+
+    /* Два ряда по две. Потолок четыре, и одинокая пятая в третьем ряду
+       прячется: нечётная последняя начинает ряд, который некем закрыть. */
+    #players .pt-grid > .pt-card:nth-child(n+5) { display: none; }
+    #players .pt-grid > .pt-card:nth-child(odd):nth-last-child(1) { display: none; }
+
+    /* Dense 12 — третья плотность компонента Card 29:65, заведённая 24.09
+       под плитку значка. Было 10 / 6 / 12: три числа, два мимо шкалы. */
+    #players .pt-card {
+        padding: var(--space-3);          /* 12 */
+    }
+
+    /* Кружок 52, кегль за диаметром: 52 × 0.36 = 18.7 → ступень 18.
+       Было 16 — доля 0.31. */
+    #players .pt-avatar,
+    #players .pt-avatar-placeholder {
+        width: 52px;
+        height: 52px;
+        font-size: var(--fs-md);          /* 18; было 16 */
+    }
+
+    #players .pt-avatar-wrap { margin-bottom: var(--space-2); }   /* 8 */
+
+    /* ПЛАНШЕТ БОЛЬШЕ НЕ МЕЛЬЧЕ ТЕЛЕФОНА. Было: имя 16 → 12 → 14,
+       категория 16 → 11 → 11, то есть на 768 текст оказывался самым мелким
+       на сайте. Теперь оба уровня едут вниз ровно на одну ступень и
+       сохраняют между собой ступень разницы. */
+    #players .pt-name { font-size: var(--fs-sm); }                /* 14; было 12 */
+    #players .pt-category { font-size: var(--fs-xs); }            /* 12; было 11 */
+
+    /* Счёт побед и поражений словами на три колонки не помещается —
+       остаётся полоска формы */
+    #players .pg-record { display: none; }
+
+
+
+
+    /* Размер кнопки задаёт общая вторая ступень ниже в этом же файле.
+       Здесь остаётся то, что относится к тесной карточке на главной:
+       во всю ширину и без разрядки. Раньше тут стояли поля 7×4 и кегль
+       0.62rem — в три раза мельче, чем у соседней «Найти игрока» */
+    #players .pt-invite-btn {
+        letter-spacing: 0;
+        width: 100%;
+        min-width: 0;
+    }
 }
 
 /* ========================================
@@ -10077,9 +10245,14 @@ input:-internal-autofill-previewed {
        только растягивали блок */
     .badges-cta-locked .badge-cta-card:nth-child(n+4) { display: none; }
 
+    /* ПОПРАВКА К СОБСТВЕННОЙ ЗАПИСИ 24.09: широкая ступень эталона была
+       поставлена на шкалу, а телефонная осталась 16 / 20 — и 20 не ступень
+       (8 · 12 · 16 · 24 · 32 · 40). К эталону подключаются копии, значит
+       неверным числом он делится дальше. Горизонталь идёт на следующую
+       ступень, 24, и форма «по бокам шире, чем сверху» сохраняется. */
     .badges-cta-box {
         margin-top: -38px;
-        padding: var(--space-4) var(--space-5);   /* 16 / 20 */
+        padding: var(--space-4) var(--space-6);   /* 16 / 24; было 16 / 20 */
     }
 
     /* ЛЕНТА ЧИПОВ ОТСЮДА УБРАНА 24.09: она ровно та же, что на широком, и
@@ -10094,82 +10267,13 @@ input:-internal-autofill-previewed {
         bottom: 20px;
     }
 
-    /* «Давай сыграем»: на телефоне карточки шли по одной в столбик, десять
-       штук растягивались на три экрана. Теперь две в ряд — как в поиске
-       игрока, на кортах и у тренеров.
-
-       Три в ряд помещались только за счёт сжатия: на карточку оставалось
-       107 пикселей, «Пригласить» обрывалось на «ПРИГЛАСИТ», а метка NTRP
-       налезала на фото. Селектор с идентификатором, иначе его перебьёт
-       правило блока на широком экране */
-    #players .pt-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-    }
-
-    #players .pt-card { min-width: 0; }
-
-    #players .pt-name,
-    #players .pt-category {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 100%;
-    }
-
-    #players .pt-grid > .pt-card:nth-child(n+7) { display: none; }
-
-    #players .pt-card {
-        padding: 10px 6px 12px;
-    }
-
-    #players .pt-avatar,
-    #players .pt-avatar-placeholder {
-        width: 52px;
-        height: 52px;
-        font-size: var(--fs-base);
-    }
-
-    #players .pt-avatar-wrap { margin-bottom: 8px; }
-    #players .pt-name { font-size: var(--fs-xs); }
-    #players .pt-category { font-size: var(--fs-2xs); }
-    #players .pt-ntrp-badge { font-size: var(--fs-2xs); padding: 2px 6px; }
-
-    /* Счёт побед и поражений словами на три колонки не помещается —
-       остаётся полоска формы */
-    #players .pg-record { display: none; }
-
     /* Приглашение войти занимало полэкрана: значок 40 пикселей, крупный
        заголовок и кнопка в 28 пикселей отступов по бокам. На телефоне
        это карточка-подсказка, а не главный герой блока */
-    .guest-cta-card {
-        padding: 18px 16px 16px;
-        border-radius: 18px;
-    }
-
-    .guest-cta-icon {
-        width: 32px;
-        height: 32px;
-        margin-bottom: 10px;
-    }
-
-    .guest-cta-title {
-        font-size: var(--fs-sm);
-        margin-bottom: 12px;
-    }
-
-    .guest-cta-btn {
-        padding: 10px 22px;
-        font-size: var(--fs-xs);
-        border-radius: 10px;
-    }
-
-    #players .guest-cta-icon { width: 32px; height: 32px; margin-bottom: 10px; }
-    #players .guest-cta-title { font-size: var(--fs-sm); }
-    #players .guest-cta-btn { padding: 10px 22px; font-size: var(--fs-xs); }
-    #rankings .guest-cta-icon { width: 32px; height: 32px; margin-bottom: 10px; }
-    #rankings .guest-cta-title { font-size: var(--fs-sm); }
-    #rankings .guest-cta-btn { padding: 10px 22px; font-size: var(--fs-xs); }
+    /* ПЛАШКА-ГЕЙТ ОТСЮДА УБРАНА 24.09 — вся, вместе с набором #rankings.
+       Радиус 18 и 10 мимо шкалы (8 · 12 · 16 · 24), граница 768 мимо
+       лестницы. Телефонная ступень теперь одна, в блоке 640 у базового
+       правила. */
 
     /* «О проекте»: шесть пунктов шли столбиком по 84 пикселя — на них одних
        уходило полтора экрана. Ставим по два в ряд и прижимаем значок к тексту */
@@ -10467,16 +10571,6 @@ input:-internal-autofill-previewed {
         left: 6px;
         font-size: var(--fs-2xs);
         padding: 2px 6px;
-    }
-
-    /* Размер кнопки задаёт общая вторая ступень ниже в этом же файле.
-       Здесь остаётся то, что относится к тесной карточке на главной:
-       во всю ширину и без разрядки. Раньше тут стояли поля 7×4 и кегль
-       0.62rem — в три раза мельче, чем у соседней «Найти игрока» */
-    #players .pt-invite-btn {
-        letter-spacing: 0;
-        width: 100%;
-        min-width: 0;
     }
 
     /* Шапка на телефоне висит поверх страницы, и название «КСЛТ» уезжало
@@ -10967,9 +11061,12 @@ input:-internal-autofill-previewed {
 
 @media (max-width: 768px) {
     /* 1. Главная кнопка */
+    /* .guest-cta-btn ОТСЮДА УБРАН 24.09, четвёртым случаем после
+       .badges-cta-btn, .rankings-tab и .pt-invite-btn. Ступень «главная»
+       давала min-height 48 — не ступень Button 17:82. Высоту задаёт
+       собственное правило кнопки, md = 44. */
     .btn-primary.btn-primary,
     .sponsor-cta-btn.sponsor-cta-btn,
-    .guest-cta-btn.guest-cta-btn,
     .hero-btn.hero-btn {
         min-height: 48px;
         padding: 14px 24px;
@@ -10985,8 +11082,13 @@ input:-internal-autofill-previewed {
        не совпадают со ступенями компонента Button 17:82 (28 / 36 / 44 / 52),
        а .guest-cta-btn — кнопка той же роли в такой же коробке-гейте — стоит
        в первой ступени, 48. Две одинаковые по роли кнопки в разных ступенях. */
+    /* .pt-invite-btn ОТСЮДА УБРАН 24.09, третьим случаем после .badges-cta-btn
+       и .rankings-tab. Ступень «обычная» давала min-height 40 и поля 11×16,
+       из чего на 768 и 375 выходила высота 51 — мимо ступеней компонента
+       Button 17:82 (28 · 36 · 44 · 52) и мимо собственного правила кнопки,
+       где высота задана свойством, а не полями. Высоту теперь задаёт
+       .pt-invite-btn в partners.css, ступенью md = 44, на всех пяти видах. */
     .btn-secondary.btn-secondary,
-    .pt-invite-btn.pt-invite-btn,
     .ct-card-btn.ct-card-btn,
     .cch-card-btn.cch-card-btn,
     .hn-card-btn.hn-card-btn,

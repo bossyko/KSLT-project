@@ -744,10 +744,16 @@
 }
 
 /* Animated gradient border card */
+/* ПОДКЛЮЧЕНА К ЭТАЛОНУ 24.09 — вторая из трёх копий коробки-гейта.
+   Эталон .badges-cta-box в css/style.css, сторож tools/check-korobka.js.
+   От эталона копия вправе отличаться только полями и шириной — и поля
+   теперь тоже его: было 44 / 40 / 40, ни одно не ступень шкалы
+   8 · 12 · 16 · 24 · 32 · 40. Ширина 460 остаётся своей: это накладка
+   поверх таблицы рейтинга, а не коробка под перебивкой. */
 .pl-guest-cta {
     position: relative;
     text-align: center;
-    padding: 44px 40px 40px;
+    padding: var(--space-6) var(--space-8);   /* 24 / 32 — как у эталона */
     margin: 0 auto;
     max-width: 460px;
     background: rgba(18, 18, 18, 0.85);
@@ -829,7 +835,7 @@
     font-size: var(--fs-lg);
     font-weight: 800;
     color: #fff;
-    margin-bottom: 10px;
+    margin-bottom: var(--space-2);       /* 8; было 10 — не ступень */
     letter-spacing: -0.02em;
 }
 
@@ -837,22 +843,28 @@
     font-size: var(--fs-sm);
     color: rgba(255, 255, 255, 0.5);
     max-width: 340px;
-    margin: 0 auto 28px;
-    line-height: 1.6;
+    margin: 0 auto var(--space-6);       /* 24; было 28 — не ступень */
+    line-height: var(--lh-normal);       /* 1.5; было 1.6 и 1.3 на телефоне */
 }
 
-/* Button with shimmer */
+/* КНОПКА ЭТАЛОНА. Было: высота полями 14 / 40, кегль 16, радиус 14, и
+   ещё две переопределяющие ступени ниже по файлу — 13/20 на 1024 и 10/16
+   на 768. Три высоты на пяти видах, ни одна не ступень Button 17:82
+   (28 · 36 · 44 · 52), радиус 14 не ступень (8 · 12 · 16 · 24).
+   Теперь запись .badges-cta-btn: высота свойством, ступень md 44. */
 .pl-guest-btn {
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 14px 40px;
+    justify-content: center;
+    gap: var(--space-2);                 /* 8 */
+    height: var(--btn-h-md);             /* 44 */
+    padding: 0 var(--space-8);           /* 32 */
     background: var(--accent);
     color: #000;
     font-weight: 800;
-    font-size: var(--fs-base);
-    border-radius: 14px;
+    font-size: var(--fs-sm);             /* 14; было 16 */
+    border-radius: 12px;
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 0 24px rgba(204, 255, 0, 0.2), 0 0 60px rgba(204, 255, 0, 0.06);
@@ -1644,53 +1656,53 @@
     white-space: nowrap;
 }
 
-@media (max-width: 1024px) {
-
-    .pl-guest-btn {
-        padding: 13px 20px;
-        font-size: var(--fs-sm);
-    }
-}
+/* СТУПЕНЬ НА 1024 УБРАНА 24.09: граница мимо лестницы (640 и 992), и
+   задавала она высоту полями, которую теперь держит свойство. */
 
 /* Приглашение гостю на телефоне: плашка занимала 377 пикселей — почти
    пол-экрана, и стояла отдельным этажом под таблицей. Уменьшаем и
    сильнее накладываем на последние строки рейтинга: список уходит в
    туман, а поверх него лежит короткое предложение */
-@media (max-width: 768px) {
+/* ТЕЛЕФОН. Граница переехала с 768 на 640 — лестница разрешает 640 и 992.
+   Числа поля и кнопки взяты у эталона. Радиус отсюда убран: 16 расходился
+   с общей формой всех четырёх копий, которая говорит 24 на всех видах, —
+   и это единственное, что сторож не дал бы разойтись, окажись оно в
+   базовом правиле. Кегль заголовка был clamp(1.15rem, 5vw, 1.32rem) —
+   18.4…21.1, то есть мимо шкалы и мимо сторожа кеглей, который ищет сырое
+   число сразу за font-size, а не внутри clamp. Теперь ступень 18: ровно
+   на одну ниже широкой. */
+@media (max-width: 640px) {
 
     /* Накладка садится на последние строки. Сильнее поднимать нельзя:
        строки стали ниже, и под туманом скрывался бы весь список — сверху
        оставалась бы пустая полоса */
     .pl-guest-overlay {
         margin-top: -210px;
-        padding-top: 24px;
+        padding-top: var(--space-6);     /* 24 */
     }
 
     .pl-guest-cta {
-        padding: 18px 16px;
-        border-radius: 16px;
+        padding: var(--space-4) var(--space-6);   /* 16 / 24 — как у эталона */
     }
 
     .pl-guest-icon {
-        width: 34px;
-        height: 34px;
-        margin-bottom: 10px;
+        width: 32px;
+        height: 32px;
+        margin-bottom: var(--space-2);   /* 8; было 34 и 10 */
     }
 
     .pl-guest-title {
-        font-size: clamp(1.15rem, 5vw, 1.32rem);
-        margin-bottom: 8px;
+        font-size: var(--fs-md);         /* 18; было clamp 18.4…21.1 */
+        margin-bottom: var(--space-2);   /* 8 */
     }
 
     .pl-guest-text {
         font-size: var(--fs-xs);
-        line-height: 1.3;
-        margin-bottom: 14px;
+        margin-bottom: var(--space-3);   /* 12; было 14 */
     }
 
     .pl-guest-btn {
-        padding: 10px 16px;
-        font-size: var(--fs-sm);
+        padding: 0 var(--space-6);       /* 24; высота та же, 44 */
     }
 }
 

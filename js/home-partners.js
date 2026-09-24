@@ -32,14 +32,19 @@
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
 
+    /* Подписи для диктора на всех трёх языках: форма и точка «онлайн»
+       несли смысл ОДНИМ ЦВЕТОМ, а это WCAG 1.4.1. */
     var L = isEn
         ? { invite: 'Invite', wins: 'wins', losses: 'losses', empty: 'No players yet',
-            pairs: 'Doubles', mixed: 'Mixed' }
+            pairs: 'Doubles', mixed: 'Mixed',
+            online: 'online now', formLabel: 'Recent form', win: 'win', loss: 'loss' }
         : (isKg
             ? { invite: 'Чакыруу', wins: 'жеңиш', losses: 'жеңилүү', empty: 'Оюнчулар жок',
-                pairs: 'Жуптук', mixed: 'Аралаш' }
+                pairs: 'Жуптук', mixed: 'Аралаш',
+                online: 'азыр сайтта', formLabel: 'Акыркы оюндар', win: 'жеңиш', loss: 'жеңилүү' }
             : { invite: 'Пригласить', wins: 'побед', losses: 'поражений', empty: 'Игроков пока нет',
-                pairs: 'Пара', mixed: 'Микст' });
+                pairs: 'Пара', mixed: 'Микст',
+                online: 'сейчас на сайте', formLabel: 'Последние матчи', win: 'победа', loss: 'поражение' });
 
     var playerPage = isEn ? 'pages/player-en.html' : (isKg ? 'pages/player-kg.html' : 'pages/player.html');
 
@@ -201,11 +206,18 @@
                ((parts[1] || '')[0] || '').toUpperCase();
     }
 
+    /* ФОРМА — ЧЕТЫРЕ ПУСТЫХ <i>, И ДИКТОР МОЛЧАЛ. Цвет точки был
+       единственным носителем смысла. Даём всей полоске роль и подпись
+       словами, а сами точки прячем от дерева доступности. */
     function formHtml(form) {
         if (!form || !form.length) return '<div class="pg-form"></div>';
-        var out = '<div class="pg-form">';
+        var словами = form.map(function (м) {
+            return м === 'W' ? (L.win || 'победа') : (L.loss || 'поражение');
+        }).join(', ');
+        var out = '<div class="pg-form" role="img" aria-label="' +
+            esc((L.formLabel || 'форма') + ': ' + словами) + '">';
         for (var i = 0; i < form.length; i++) {
-            out += '<i class="' + (form[i] === 'W' ? 'w' : 'l') + '"></i>';
+            out += '<i class="' + (form[i] === 'W' ? 'w' : 'l') + '" aria-hidden="true"></i>';
         }
         return out + '</div>';
     }
@@ -247,9 +259,22 @@
                 (p.avatar_url
                     ? '<img class="pt-avatar" src="' + esc(p.avatar_url) + '" alt="" loading="lazy">'
                     : '<div class="pt-avatar-placeholder">' + esc(initials(p.full_name)) + '</div>') +
-                (isOnline ? '<div class="pt-online-dot"></div>' : '') +
+                /* ТОЧКА «ОНЛАЙН» — ЦВЕТ БЫЛ ЕДИНСТВЕННЫМ НОСИТЕЛЕМ СМЫСЛА.
+                   WCAG 1.4.1: цвет не может быть единственным способом
+                   передать сведения. Теперь у точки есть роль и подпись. */
+                (isOnline ? '<div class="pt-online-dot" role="img" aria-label="' +
+                    esc(L.online || 'сейчас на сайте') + '"></div>' : '') +
             '</div>' +
-            '<div class="pt-name">' + esc(name) + '</div>' +
+            /* КАРТОЧКА — РАСТЯНУТАЯ ССЫЛКА. Имя настоящая <a>, её
+               псевдоэлемент накрывает карточку целиком (css), кнопка
+               «Пригласить» поднимается над ним. До 24.09 обработчик висел
+               на div: ни role, ни tabindex, клавиатурой недостижимо. */
+            '<div class="pt-name">' +
+                (guest || !p.id
+                    ? esc(name)
+                    : '<a class="pt-name-link" href="' + playerPage + '?id=' +
+                      encodeURIComponent(p.id) + '">' + esc(name) + '</a>') +
+            '</div>' +
             (cat ? '<div class="pt-category">' + esc(cat) + '</div>' : '') +
             formHtml(p.form) +
             '<div class="pg-record">' + p.wins + ' ' + L.wins + ' · ' + p.losses + ' ' + L.losses + '</div>' +
