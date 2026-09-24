@@ -3032,67 +3032,6 @@ h2 {
     margin-bottom: var(--space-md);
 }
 
-.rankings-table {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-}
-
-.ranking-row {
-    display: grid;
-    grid-template-columns: 60px 1fr 100px 60px;
-    align-items: center;
-    padding: var(--space-md) var(--space-lg);
-    border-bottom: 1px solid var(--border-subtle);
-    transition: background var(--transition-fast);
-}
-
-.ranking-row:last-child {
-    border-bottom: none;
-}
-
-.ranking-row:not(.ranking-header):hover {
-    background: var(--surface-glass-hover);
-}
-
-.ranking-header {
-    background: var(--bg-elevated);
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-dim);
-}
-
-.rank {
-    font-size: var(--fs-lg);
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.ranking-header .rank {
-    font-size: var(--fs-xs);
-}
-
-.player-col {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-}
-
-/* Кружок игрока в рейтинге: фото ИЛИ инициалы. Размер объявлен один раз на
-   оба — иначе заглушка поехала бы отдельно от фото на первом же телефоне.
-   Инициалы по компоненту Avatar 29:82: accent/subtle под accent/default. */
-.player-col img,
-.player-col .avatar-initials {
-    font-size: var(--fs-sm);
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
 /* ЗАГЛУШКА АВАТАРА — ОДНА НА ВЕСЬ САЙТ. Размер не задаёт: его даёт место,
    где она стоит, тем же объявлением, что и у фотографии. Avatar 29:82:
    нет фото -> инициалы на accent/subtle с текстом accent/default. */
@@ -3145,17 +3084,22 @@ h2 {
 /* Rankings: columns, tabs, panels */
 /* Переключатель пола — только на телефоне: на широком экране обе таблицы
    стоят рядом, и выбирать нечего */
+/* ПЕРЕКЛЮЧАТЕЛЬ ПОЛА — ЭТО Segmented control 49:70. В описании компонента
+   пол назван прямым текстом как случай применения: «a choice that changes
+   the form below it, where every option must stay visible». Дорожка 44 —
+   порог цели нажатия; было 36. */
 .rk-gender-switch {
     display: none;
-    gap: 8px;
-    margin: 0 0 14px;
+    gap: var(--space-2);                  /* 8 */
+    margin: 0 0 var(--space-4);           /* 16; было 14 — не ступень */
 }
 
 .rk-gender {
     flex: 1;
-    padding: 9px 14px;
+    min-height: var(--btn-h-md);          /* 44 */
+    padding: 0 var(--space-4);            /* 16; было 9/14 — не ступень */
     border: 1px solid var(--border-subtle);
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     background: transparent;
     color: var(--text-secondary);
     font: inherit;
@@ -3186,36 +3130,84 @@ h2 {
     text-align: center;
     font-size: var(--fs-base);
     font-weight: 600;
-    letter-spacing: 1.5px;
+    /* РАЗРЯДКА В EM, А НЕ ЧИСЛОМ. 1.5px не тянулась за кеглем; в файле 28
+       разрядок заданы в em и 14 числом — беда родится ровно на шве. 24.09 */
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: var(--space-md);
-    padding: 10px 0;
+    /* ЛАЙМ УБРАН 24.09. Правило 109:370: акцент принадлежит одному главному
+       действию в поле зрения, а здесь это «Полный рейтинг →». Название
+       колонки — подпись, не действие и не состояние. Тот же разбор, что увёл
+       лайм с даты новости, с аватара и с подписей значков. */
+    color: var(--text-secondary);
+    margin-bottom: var(--space-6);        /* 24 */
+    padding: var(--space-3) 0;            /* 12; было 10 — не ступень */
     border-bottom: none;
 }
 
+/* ЛЕНТА ЧИПОВ ЛИСТАЕТСЯ НА ВСЕХ ВИДАХ, И ЭТО ОДНО ОПРЕДЕЛЕНИЕ.
+   Раньше лента переносилась на широком и листалась на узком — два правила
+   на одно понятие, и беда родилась ровно на шве: у мужчин пять разрядов, у
+   женщин три, и на планшете боком (колонка 469) мужская лента уезжала на
+   вторую строку, а женская оставалась на одной. Таблицы начинались на
+   разной высоте. Теперь лента не переносится нигде: помещается — стоит по
+   центру (width: fit-content + auto), не помещается — листается пальцем.
+   Высоту чипа не трогаем, она из Filter chip 49:77. 24.09 */
 .rankings-tabs {
     display: flex;
-    gap: 4px;
+    gap: var(--space-2);                  /* 8; было 4 — не ступень шкалы */
     margin-bottom: var(--space-md);
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: var(--space-2);       /* 8 */
 }
 
+.rankings-tab { flex: 0 0 auto; }
+
+/* ВКЛАДКА РАЗРЯДА — ЭТО Filter chip 49:77, А НЕ Tab 28:45.
+   Описание компонента решает спор само: «a chip filters a list in place,
+   a Tab switches the whole view. They look similar and must not be swapped».
+   Наши вкладки фильтруют один список на месте. Высота 36 — ступень sm
+   компонента Button; было 32, ниже любой ступени шкалы. */
 .rankings-tab {
-    padding: 8px 16px;
+    min-height: var(--btn-h-sm);          /* 36 */
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-4);            /* 16 */
+    font-size: var(--fs-sm);              /* 14; было 12 */
+    /* 1.3. Был normal — единственный из девятнадцати текстовых уровней
+       раздела без замеренного межстрочного: замораживать было нечего. */
+    line-height: var(--lh-snug);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-full);
     background: transparent;
     color: var(--text-secondary);
-    font-size: var(--fs-xs);
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    /* transition: all — 24.09 из-за него замер через сжатие iframe возвращал
+       старую отбивку, и я полдня искал несуществующее противоречие в каскаде.
+       Правило замера: вид меряется ЗАГРУЗКОЙ на нужной ширине. */
+    /* ПЕРЕХОД ТОЛЬКО ПО ЦВЕТАМ: `all` тянул и font-weight, поэтому
+       наведение дёргало ширину всей полосы вкладок. 24.09 */
+    transition: background-color 0.2s ease, border-color 0.2s ease,
+                color 0.2s ease;
     white-space: nowrap;
 }
 
-.rankings-tab:hover,
+/* ВЫБРАННАЯ — ОДНА, И ЭТО ВИДНО. Наведение было один в один как выбранная:
+   тот же лайм заливкой, тот же вес 600. Пока указатель на соседней вкладке,
+   какая выбрана — не видно. Теперь наведение подсвечивает рамку и текст и
+   веса не трогает. 24.09 */
+.rankings-tab:hover:not(.active) {
+    color: var(--text-primary);
+    border-color: var(--accent);
+}
+
 .rankings-tab.active {
     background: var(--accent);
     color: #000;
@@ -3234,19 +3226,6 @@ h2 {
 .rankings-panel.active {
     display: block;
     flex: 1;
-}
-
-.rankings-panel .ranking-row {
-    grid-template-columns: 40px 1fr 50px 70px 40px;
-}
-
-.country {
-    font-size: var(--fs-md);
-    text-align: center;
-}
-
-.ranking-header .country {
-    font-size: var(--fs-xs);
 }
 
 /* ========================================
@@ -6186,32 +6165,41 @@ h2 {
     grid-template-columns: 26px 1fr 30px 66px 46px 58px 36px;
     align-items: center;
     gap: 8px;
-    padding: 8px 10px;
+    padding: var(--space-2) var(--space-3);   /* 8 12; было 8 10 */
     min-height: 44px;
-    border-radius: 10px;
+    border-radius: var(--radius-md);          /* 12; было 10 */
     font-size: var(--fs-sm);
 }
 
-.rk-row + .rk-row { margin-top: 4px; }
+/* 8, а не 4: ряд с фоном и скруглением — карточка, а четвёрки в лестнице
+   отступов нет. Раздел вырос, и это плата. 24.09 */
+.rk-row + .rk-row { margin-top: var(--space-2); }
 .rk-row:hover { background: rgba(255, 255, 255, 0.04); }
 
 .rk-head {
     font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--text-dim);
-    padding-bottom: 2px;
+    /* БЫЛ --text-dim, 35 % белого: контраст 3.21 при пороге 4.5. Замерено
+       24.09. Третий раз одна и та же беда — новости, турниры, теперь голова
+       таблицы рейтинга. --text-secondary даёт 9.98. */
+    color: var(--text-secondary);
+    padding-bottom: var(--space-2);       /* 8; было 2 — не ступень */
 }
 
 .rk-head:hover { background: none; }
 
 .rk-rank {
     font-weight: 700;
-    color: var(--text-dim);
+    /* Тот же контраст 3.21 и в каждой строке, а не только в голове. */
+    color: var(--text-secondary);
     text-align: center;
 }
 
-.rk-rank.top { color: var(--accent); }
+/* .rk-rank.top УБРАН 24.09 вместе с приходом пьедестала. Правило 109:370:
+   акцент один на поле зрения, а здесь это «Полный рейтинг →». Тройку
+   выделяет сам пьедестал — второе выделение лишнее. Класс `top` больше не
+   ставит и js. */
 
 .rk-player {
     display: flex;
@@ -6221,10 +6209,11 @@ h2 {
 }
 
 /* Фото ИЛИ инициалы — размер объявлен один раз на оба. */
+/* Avatar 29:82, размер xs 24 — «xs 24 for table rows». Было 26, мимо. */
 .rk-player img,
 .rk-player .avatar-initials {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -6256,21 +6245,50 @@ h2 {
 }
 .rk-wl { text-align: center; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .rk-points { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
-.rk-change { text-align: center; font-size: var(--fs-xs); }
+/* 14, как и остальные шесть ячеек ряда. Была 12 — единственная мельче
+   соседей без причины. 24.09 */
+.rk-change { text-align: center; font-size: var(--fs-sm); }
+
+/* ПЬЕДЕСТАЛ ЖИВЁТ В css/podium.css, А НЕ ЗДЕСЬ.
+   24.09 я написал для главной свой `.rk-podium` — а пьедестал уже был в
+   коде, на странице рейтинга, по компоненту Ranking podium 51:80. Свой
+   выброшен целиком; стили вынесены из css/players.css в общий файл, и обе
+   стороны берут один и тот же. Размер на главной считается от колонки. */
 
 .rk-up { color: #2ED573; }
 .rk-down { color: #FF4757; }
 .rk-same { color: var(--text-dim); }
 
-/* Гостю видны первые пять, дальше туман: правило то же, что на странице
-   рейтинга — видно, что список длиннее, но читать его нужно войдя */
-.rk-blur-1 { filter: blur(2px); opacity: 0.55; pointer-events: none; user-select: none; }
-.rk-blur-2 { filter: blur(3.5px); opacity: 0.35; pointer-events: none; user-select: none; }
+/* ТУМАН ГОСТЯ — ПРАВИЛО ВИДА, А НЕ РАЗМЕТКИ, И ОДНО НА ВСЕ ВИДЫ.
+   До 24.09 классы .rk-blur-1/2 навешивал js по индексу строки, потом их
+   сменили три копии правил: база, слой 640 и слой телефона боком — и каждая
+   считала строки от начала («с седьмой», «с пятой»). С приходом пьедестала
+   тройка ушла наверх, таблица начинается с четвёртого места, и счёт от
+   начала развалился бы весь сразу.
+   Считаем ОТ КОНЦА: туманятся две последние строки, сколько бы их ни было.
+   Отношение, а не число, — и копия ровно одна.
+   Голова таблицы тоже .rk-row, поэтому :not(.rk-head): в короткой категории
+   иначе размылась бы она. */
+.is-guest .rankings-panel .rk-row:not(.rk-head):nth-last-child(-n+2) {
+    pointer-events: none;
+    user-select: none;
+}
+.is-guest .rankings-panel .rk-row:not(.rk-head):nth-last-child(2) {
+    filter: blur(2px);
+    opacity: 0.55;
+}
+.is-guest .rankings-panel .rk-row:not(.rk-head):nth-last-child(1) {
+    filter: blur(3.5px);
+    opacity: 0.35;
+}
 
+/* Empty state 37:53. Поля 48/20 компонента, кегль 14, цвет читаемый.
+   Текст обязан говорить, ЧТО здесь появится, а не «данных нет» — копия
+   правится в js/home-rankings.js, здесь только вид. */
 .rk-empty {
-    padding: 30px 12px;
+    padding: var(--space-10) var(--space-5);   /* 40 / 20; было 30/12 */
     text-align: center;
-    color: var(--text-dim);
+    color: var(--text-secondary);
     font-size: var(--fs-sm);
 }
 
@@ -7429,21 +7447,6 @@ body.nav-open {
 
     .live-matches {
         grid-template-columns: 1fr;
-    }
-
-    /* Тот же вес, что у правила внутри панели рейтинга: без этого на
-       телефоне оставалось пять колонок вместо четырёх, и строка не влезала */
-    .ranking-row,
-    .rankings-panel .ranking-row {
-        grid-template-columns: 40px 1fr 70px 50px;
-        padding: var(--space-sm) var(--space-md);
-    }
-
-    .player-col img,
-    .player-col .avatar-initials {
-        width: 36px;
-        height: 36px;
-        font-size: var(--fs-xs);
     }
 
     .players-grid {
@@ -8961,30 +8964,32 @@ body.nav-open {
     }
 }
 
-/* Rankings responsive */
+/* ОДНА КОЛОНКА И ПЕРЕКЛЮЧАТЕЛЬ ПОЛА — ОДНА ГРАНИЦА, 992.
+   Раньше колонки схлопывались на 992, а переключатель появлялся только на
+   768: в полосе 769-992 две таблицы вставали друг под друга, и раздел
+   вырастал до 950 при экране 390. Решение Кости 24.09: две таблицы остаются,
+   но там, где рядом они не помещаются, показывается одна, а пол выбирается
+   кнопкой. Значит и то и другое включается в одном месте.
+   Правило пары: то, что читается как одно целое, едет одной границей. */
 @media (max-width: 992px) {
     .rankings-columns {
         grid-template-columns: 1fr;
-        gap: var(--space-lg);
-    }
-}
-
-@media (max-width: 480px) {
-    .rankings-panel .ranking-row {
-        grid-template-columns: 30px 1fr 36px 55px 32px;
-        padding: var(--space-sm) var(--space-sm);
+        gap: var(--space-10);             /* 40 */
     }
 
-    .rankings-panel .player-col img,
-    .rankings-panel .player-col .avatar-initials {
-        width: 32px;
-        height: 32px;
-        font-size: var(--fs-xs);
+    .rk-gender-switch {
+        display: flex;
     }
 
-    .rankings-tab {
-        padding: 8px 14px;
-        font-size: var(--fs-xs);
+    /* Показываем только выбранный пол */
+    .rankings-columns[data-пол="men"] .rankings-col:nth-child(2),
+    .rankings-columns[data-пол="women"] .rankings-col:nth-child(1) {
+        display: none;
+    }
+
+    /* Заголовок колонки не нужен: пол и так выбран кнопкой выше */
+    .rankings-col-title {
+        display: none;
     }
 }
 
@@ -9030,24 +9035,6 @@ body.nav-open {
 
     .section-title {
         font-size: clamp(1.4rem, 6vw, 1.8rem);
-    }
-
-    .rankings-panel .ranking-row {
-        grid-template-columns: 24px 1fr 32px 48px 28px;
-        padding: var(--space-xs) var(--space-xs);
-        gap: 6px;
-    }
-
-    .rankings-panel .player-col img,
-    .rankings-panel .player-col .avatar-initials {
-        width: 28px;
-        height: 28px;
-        font-size: var(--fs-2xs);
-    }
-
-    .rankings-tab {
-        padding: 6px 10px;
-        font-size: var(--fs-xs);
     }
 
     .mobile-nav-links a {
@@ -9986,30 +9973,22 @@ input:-internal-autofill-previewed {
    объявлены ниже по файлу, и при равном весе побеждало последнее —
    мобильные объявления молча не применялись. */
 
-/* ---- Телефон: рейтинг одной таблицей ----
-   Две колонки, мужская и женская, рядом не помещаются, а десять столбцов в
-   строке ужимали имя до многоточия. Оставляем то, ради чего сюда приходят:
-   место, имя, NTRP и очки. Пол переключается кнопками. */
-@media (max-width: 768px) {
-    .rk-gender-switch {
-        display: flex;
-    }
+/* ---- ТЕЛЕФОН: ВЕРТИКАЛЬНО И БОКОМ, ОДНИМ БЛОКОМ ----
+   Столбцы отваливаются ПО ПОРЯДКУ, а не по вкусу: место, имя и очки держатся
+   всегда, дальше по мере сужения уходят форма, В/П, страна. NTRP держим до
+   последнего: рейтинг одиночный, и парный разряд виден ТОЛЬКО вторым числом
+   в этой колонке — уберём её, и парная игра исчезнет с главной вовсе.
+   Граница 640, а не 768: iPad mini вертикально 744, и на 768 он считался бы
+   телефоном.
 
-    .rankings-columns {
-        grid-template-columns: 1fr;
-    }
-
-    /* Показываем только выбранный пол */
-    .rankings-columns[data-пол="men"] .rankings-col:nth-child(2),
-    .rankings-columns[data-пол="women"] .rankings-col:nth-child(1) {
-        display: none;
-    }
-
-    /* Заголовок колонки не нужен: пол и так выбран кнопкой выше */
-    .rankings-col-title {
-        display: none;
-    }
-
+   ТЕЛЕФОН БОКОМ — ТОТ ЖЕ ТЕЛЕФОН, и до 24.09 он лежал отдельным блоком с
+   ДОСЛОВНО тем же содержимым. Две копии одного правила — беда на шве; теперь
+   оба случая перечислены через запятую в одном условии. По ширине 844 это
+   «планшет», а по сути рука держит тот же аппарат, и до сгиба 390 пикселей:
+   разделяем не шириной, а высотой и поворотом. Ширины у нас только две,
+   640 и 992. */
+@media (max-width: 640px),
+       (orientation: landscape) and (max-height: 500px) {
     .rk-country,
     .rk-wl,
     .rk-change {
@@ -10020,11 +9999,6 @@ input:-internal-autofill-previewed {
         grid-template-columns: 34px 1fr 54px 58px;
     }
 
-    .rk-name {
-        white-space: normal;
-        overflow: visible;
-        text-overflow: clip;
-    }
 }
 
 /* ---- Телефон: карточки турниров на главной ----
@@ -10108,29 +10082,10 @@ input:-internal-autofill-previewed {
         padding: var(--space-4) var(--space-5);   /* 16 / 20 */
     }
 
-    /* Фильтры рейтинга: пять кнопок требовали 416 пикселей при 338 доступных,
-       и «Pro-Masters» срывалась одна на вторую строку. Ужимаем кнопки и держим
-       их одной лентой — на узком телефоне она прокручивается вбок */
-    .rankings-tabs {
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        padding-bottom: 2px;
-        gap: 3px;
-    }
-
-    .rankings-tabs::-webkit-scrollbar { display: none; }
-
-    .rankings-tab {
-        flex: 0 0 auto;
-        /* По бокам тесно, чтобы все пять помещались в строку, а по высоте
-           наоборот просторнее: 30 пикселей для пальца мало, 36 — рабочий
-           размер, и ширина строки от этого не растёт */
-        padding: 10px 8px;
-        font-size: var(--fs-xs);
-    }
+    /* ЛЕНТА ЧИПОВ ОТСЮДА УБРАНА 24.09: она ровно та же, что на широком, и
+       теперь объявлена один раз в базовом правиле .rankings-tabs. Скрытая
+       полоса прокрутки тоже описана один раз — в общем правиле ниже по
+       файлу, вместе с .td-tabs и .hn-scroll. */
 
     /* Кнопка «наверх» стояла в 32 пикселях от края и налезала на содержимое —
        на телефоне край дороже */
@@ -11041,9 +10996,18 @@ input:-internal-autofill-previewed {
         font-size: var(--fs-sm);
     }
 
-    /* 3. Мелкая — переключатели и вкладки */
-    .rankings-tab.rankings-tab,
-    .rk-gender.rk-gender,
+    /* 3. Мелкая — переключатели и вкладки.
+
+       .rankings-tab И .rk-gender ОТСЮДА УБРАНЫ 24.09, вторым случаем после
+       .badges-cta-btn. Ступень «мелкая» даёт 32, а у обоих есть свой
+       компонент со своей ступенью: вкладка разряда — Filter chip 49:77,
+       высота 36; переключатель пола — Segmented control 49:70, дорожка 44,
+       это ещё и порог цели нажатия. Высоту теперь задаёт собственное правило.
+
+       В ДОЛГ ПО КНОПКАМ, третья запись: ступени этого блока 48 / 40 / 32 не
+       совпадают со ступенями компонента Button 17:82 (28 / 36 / 44 / 52).
+       Каждый раз, когда кусок доходит до своей очереди, из блока вынимается
+       ещё один селектор. Разбирать надо блок целиком, а не по одному. */
     .trn-chip.trn-chip,
     .pl-category-pill.pl-category-pill,
     .db-chip.db-chip {
