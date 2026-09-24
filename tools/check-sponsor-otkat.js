@@ -18,6 +18,15 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-sponsor-'));
 ['index.html', 'index-en.html', 'index-kg.html'].forEach(ф =>
     fs.copyFileSync(path.join(КОРЕНЬ, ф), path.join(ВРЕМ, ф)));
 
+
+/* ЯКОРЬ НА ЧИСЛО, КОТОРОЕ РАСТЁТ, — ТАКОЙ ЖЕ ЯКОРЬ НА СОСЕДА. Здесь стояли
+   версии числом, и откат умирал каждый раз, когда соседний кусок поднимал
+   версию. Теперь число читается из файла в момент прогона. */
+const ВЕРСИЯ_СЕЙЧАС = 'style.css?v=' + (fs.readFileSync(path.join(КОРЕНЬ, 'index.html'), 'utf8').match(/style\.css\?v=(\d+)/) || [0, 0])[1];
+/* Откат уводит версию заведомо ниже порога: минус единица порог не пробивает,
+   а правило проверяет именно «не ниже». */
+const ВЕРСИЯ_НАЗАД = 'style.css?v=1';
+
 const ОТКАТЫ = [
   ['css/style.css',
    '.sp-offer h2 {\n    font-size: var(--fs-xl);',
@@ -50,8 +59,8 @@ const ОТКАТЫ = [
    'у коробки нет своей ширины — её задаёт обёртка, как всем секциям'],
 
   ['css/style.css',
-   '    height: var(--btn-h-md);\n    padding: 0 var(--space-6);',
-   '    padding: 12px 26px;',
+   '    gap: var(--space-2);\n    height: var(--btn-h-md);\n    padding: 0 var(--space-6);',
+   '    gap: var(--space-2);\n    padding: 12px 26px;',
    'высота кнопки — свойством, и это минимальная цель нажатия'],
 
   ['css/style.css',
@@ -115,8 +124,8 @@ const ОТКАТЫ = [
    'блок есть на языке · kg'],
 
   ['index.html',
-   'style.css?v=367',
-   'style.css?v=366',
+   ВЕРСИЯ_СЕЙЧАС,
+   ВЕРСИЯ_НАЗАД,
    'версии подняты'],
 ];
 

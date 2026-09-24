@@ -18,6 +18,15 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-about-'));
 ['index.html', 'index-en.html', 'index-kg.html'].forEach(ф =>
     fs.copyFileSync(path.join(КОРЕНЬ, ф), path.join(ВРЕМ, ф)));
 
+
+/* ЯКОРЬ НА ЧИСЛО, КОТОРОЕ РАСТЁТ, — ТАКОЙ ЖЕ ЯКОРЬ НА СОСЕДА. Здесь стояли
+   версии числом, и откат умирал каждый раз, когда соседний кусок поднимал
+   версию. Теперь число читается из файла в момент прогона. */
+const ВЕРСИЯ_СЕЙЧАС = 'style.css?v=' + (fs.readFileSync(path.join(КОРЕНЬ, 'index.html'), 'utf8').match(/style\.css\?v=(\d+)/) || [0, 0])[1];
+/* Откат уводит версию заведомо ниже порога: минус единица порог не пробивает,
+   а правило проверяет именно «не ниже». */
+const ВЕРСИЯ_НАЗАД = 'style.css?v=1';
+
 const ОТКАТЫ = [
   ['css/style.css',
    '.about-image {\n    grid-column: 2;\n    grid-row: 1 / span 2;\n}',
@@ -115,8 +124,8 @@ const ОТКАТЫ = [
    'эмодзи в разделе нет, есть шесть иконок · kg'],
 
   ['index.html',
-   'style.css?v=364',
-   'style.css?v=357',
+   ВЕРСИЯ_СЕЙЧАС,
+   ВЕРСИЯ_НАЗАД,
    'версии подняты']
 ];
 

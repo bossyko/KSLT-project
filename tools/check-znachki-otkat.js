@@ -34,9 +34,12 @@ const ОТКАТЫ = [
  '.badges-cta-text h2 {\n    font-size: clamp(1.05rem, 1.8vw, 1.25rem);\n    font-weight: 800;',
  'перебивка набрана ступенью h3, а не голосом раздела'],
 
+/* ПЕРЕЯКОРЕНО 24.09: якорь держался на СОСЕДЯХ по списку селекторов, и
+   список вырос — блоку «Станьте спонсором» добавили .sp-offer h2. Держимся
+   за один свой селектор и вставляем перебивку перед ним. */
 ['вернуть перебивку в правило заголовков разделов', 'css/style.css',
- '    .section-header h2,\n    section > h2 {\n        font-size: var(--fs-lg);   /* 21 */',
- '    .section-header h2,\n    section > h2,\n    .badges-cta-text h2 {\n        font-size: var(--fs-lg);   /* 21 */',
+ '    section > h2 {\n        font-size: var(--fs-lg);   /* 21 */',
+ '    .badges-cta-text h2,\n    section > h2 {\n        font-size: var(--fs-lg);   /* 21 */',
  'перебивка НЕ входит в правило заголовков разделов'],
 
 ['отодвинуть переключение перебивки с 768 на 640', 'css/style.css',
