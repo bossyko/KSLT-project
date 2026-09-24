@@ -23,7 +23,8 @@ const КУСКИ = [
     ['рейтинг',             'check-reyting.js',      'check-reyting-otkat.js'],
     ['давай сыграем',       'check-igroki.js',       'check-igroki-otkat.js'],
     ['где играть',          'check-venues.js',       'check-venues-otkat.js'],
-    ['о проекте',           'check-about.js',        'check-about-otkat.js']
+    ['о проекте',           'check-about.js',        'check-about-otkat.js'],
+    ['стань спонсором',     'check-sponsor.js',      'check-sponsor-otkat.js']
 ];
 
 function прогнать(файл) {
