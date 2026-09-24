@@ -46,8 +46,16 @@ const НОРМА = 44;
  * Палец включается проектом (hasTouch), а не шириной окна, поэтому
  * функция асинхронная: спрашивать надо страницу.
  */
+/* ОДНО УСЛОВИЕ НА ВСЕХ ТРОИХ — стили, скрипт и тест. 24.09 здесь остался
+   (pointer: coarse), хотя код и правила давно перешли на (any-pointer:
+   coarse): pointer спрашивает про ОСНОВНОЙ указатель, any-pointer — про любой
+   из имеющихся, и ноутбук с сенсорным экраном отвечает по-разному. Сегодня
+   разницы не видно, потому что у Playwright на десктопе указателей вообще
+   нет, а на мобильных проектах оба ответа совпадают. Но признак, по которому
+   судит тест, обязан быть тем же, по которому работает сайт, — иначе
+   однажды они разойдутся и тест будет мерить не то. */
 async function мобильный(page) {
-    return page.evaluate(() => matchMedia('(pointer: coarse)').matches);
+    return page.evaluate(() => matchMedia('(any-pointer: coarse)').matches);
 }
 
 /**
@@ -63,16 +71,54 @@ function узкий(page) {
     return vp ? vp.width <= 600 : false;
 }
 
-async function кПодвалу(page) {
-    await page.goto('/');
+/* ТРИ ЯЗЫКА, добавлено 24.09. До этого тест ходил только на русскую главную,
+   хотя переключатель длинных и коротких правовых названий существует именно
+   из-за длины строки — а она у каждого языка своя: ru полными 457, kg 324,
+   en 241 при доступных 358 на телефоне. Проверять раскладку на одном языке
+   для этой секции бессмысленнее всего. */
+const ЯЗЫКИ = [
+    { имя: 'ru', адрес: '/index.html' },
+    { имя: 'en', адрес: '/index-en.html' },
+    { имя: 'kg', адрес: '/index-kg.html' }
+];
+
+async function кПодвалу(page, адрес) {
+    await page.goto(адрес || '/');
+    /* Ждём ПРИЗНАК: подвал собирается из partial и появляется не сразу. */
+    await page.waitForSelector('.footer-bottom-links a', { timeout: 10000 });
+
+    /* СНАЧАЛА ЖДЁМ, ПОКА СТРАНИЦА ПЕРЕСТАНЕТ РАСТИ, И ТОЛЬКО ПОТОМ КРУТИМ.
+       24.09 тест упал на планшете, и виноват был не подвал: секции приходят
+       из базы после загрузки — спонсоры выросли со 193 до 341, — документ
+       дорастает уже ПОСЛЕ прокрутки, и подвал уезжает ниже видимой области.
+       elementFromPoint за её пределами возвращает null, и проверка тычком
+       получала «пусто» вместо заголовка. Ждём две одинаковых высоты подряд. */
+    await page.waitForFunction(() => {
+        const h = document.body.scrollHeight;
+        if (window.__высота === h) return true;
+        window.__высота = h;
+        return false;
+    }, null, { timeout: 15000, polling: 400 }).catch(() => {});
+
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(300);
+
+    /* И всё равно убеждаемся, что подвал в виду: если страница дорастёт ещё
+       раз, докручиваем по самому подвалу, а не по высоте документа. */
+    await page.evaluate(() => {
+        const п = document.querySelector('.footer-bottom-links');
+        if (п && п.getBoundingClientRect().bottom > window.innerHeight) {
+            п.scrollIntoView({ block: 'end' });
+        }
+    });
+    await page.waitForTimeout(200);
 }
 
-test.describe('Подвал — цели нажатия', () => {
+ЯЗЫКИ.forEach(({ имя, адрес }) => {
+test.describe('Подвал — цели нажатия · ' + имя, () => {
 
     test('ссылки правовых документов не меньше 44 в высоту', async ({ page }) => {
-        await кПодвалу(page);
+        await кПодвалу(page, адрес);
         const ссылки = page.locator('.footer-bottom-links a');
         await expect(ссылки).toHaveCount(3);
 
@@ -88,7 +134,7 @@ test.describe('Подвал — цели нажатия', () => {
 
     test('на мобильном правовые ссылки стоят в один ряд', async ({ page }) => {
         test.skip(!await мобильный(page), 'проверка только для мобильной раскладки');
-        await кПодвалу(page);
+        await кПодвалу(page, адрес);
         const ряды = await page.evaluate(() => {
             const a = [...document.querySelectorAll('.footer-bottom-links a')];
             return [...new Set(a.map(el => Math.round(el.getBoundingClientRect().top)))].length;
@@ -100,7 +146,7 @@ test.describe('Подвал — цели нажатия', () => {
 
     test('заголовки гармошки не меньше 44 и раскрываются', async ({ page }) => {
         test.skip(!await мобильный(page), 'гармошка живёт только по пальцу');
-        await кПодвалу(page);
+        await кПодвалу(page, адрес);
 
         const подвал = page.locator('.footer-content');
         await expect(подвал).toHaveClass(/footer-acc/);
@@ -133,7 +179,7 @@ test.describe('Подвал — цели нажатия', () => {
     });
 
     test('кнопка «наверх» не накрывает подвал', async ({ page }) => {
-        await кПодвалу(page);
+        await кПодвалу(page, адрес);
 
         const кнопка = page.locator('.scroll-to-top');
         const видна = await кнопка.evaluate(el => getComputedStyle(el).opacity !== '0');
@@ -155,10 +201,10 @@ test.describe('Подвал — цели нажатия', () => {
     });
 });
 
-test.describe('Подвал — разметка и содержимое', () => {
+test.describe('Подвал — разметка и содержимое · ' + имя, () => {
 
     test('правовые ссылки лежат в nav и списком', async ({ page }) => {
-        await кПодвалу(page);
+        await кПодвалу(page, адрес);
         const список = page.locator('.footer-bottom-links');
         await expect(список).toHaveCount(1);
         const устройство = await список.evaluate(el => ({
@@ -174,7 +220,7 @@ test.describe('Подвал — разметка и содержимое', () =>
     });
 
     test('год в копирайте подставляется, а не лежит текстом', async ({ page }) => {
-        await кПодвалу(page);
+        await кПодвалу(page, адрес);
         const год = page.locator('.footer-year');
         await expect(год).toHaveCount(1);
         const текущий = String(new Date().getFullYear());
@@ -182,7 +228,7 @@ test.describe('Подвал — разметка и содержимое', () =>
     });
 
     test('эмодзи скрыты от читалки', async ({ page }) => {
-        await кПодвалу(page);
+        await кПодвалу(page, адрес);
         const строка = page.locator('.footer-made');
         await expect(строка).toHaveCount(1);
         const скрытых = await строка.locator('[aria-hidden="true"]').count();
@@ -190,14 +236,21 @@ test.describe('Подвал — разметка и содержимое', () =>
     });
 
     test('полные названия там, где влезают; короткие — на узком', async ({ page }) => {
-        await кПодвалу(page);
+        await кПодвалу(page, адрес);
         const видно = await page.evaluate(() => {
             const вид = sel => {
                 const el = document.querySelector(sel);
                 return el ? getComputedStyle(el).display !== 'none' : null;
             };
-            return { полное: вид('.footer-legal-full'), короткое: вид('.footer-legal-short') };
+            return { полное: вид('.footer-legal-full'), короткое: вид('.footer-legal-short'),
+                     естьДубль: !!document.querySelector('.footer-legal-full') };
         });
+        /* ДУБЛЬ ЕСТЬ ТОЛЬКО У РУССКОГО, и это решение, а не недоработка:
+           полные русские названия занимают 457 при доступных 358, а kg даёт
+           324 и en 241 — им сокращать нечего. Замер 20.09. Поэтому на двух
+           других языках проверяем ровно одно: строка стоит одним рядом и
+           цель нажатия не падает, а это делают соседние проверки. */
+        test.skip(!видно.естьДубль, 'дубль подписей заведён только на русском');
         // ОСОЗНАННЫЙ ДУБЛЬ: подпись стоит дважды. Полные русские названия
         // занимают 457 при доступных 358 и переносятся во второй ряд, из-за
         // чего цель нажатия падает до 17. Короткие дают 333 в один ряд.
@@ -212,11 +265,12 @@ test.describe('Подвал — разметка и содержимое', () =>
 
     test('на десктопе подвал остаётся пятиколоночным и без гармошки', async ({ page }) => {
         test.skip(await мобильный(page), 'проверка только для десктопной раскладки');
-        await кПодвалу(page);
+        await кПодвалу(page, адрес);
         const подвал = page.locator('.footer-content');
         await expect(подвал).not.toHaveClass(/footer-acc/);
         const колонок = await подвал.evaluate(el =>
             getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
         expect(колонок, 'сетка подвала на десктопе поехала').toBe(5);
     });
+});
 });
