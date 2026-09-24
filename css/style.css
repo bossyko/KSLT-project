@@ -1486,8 +1486,54 @@ input, button, select, textarea {
     color: var(--accent);
 }
 
-.lang-flag {
-    font-size: var(--fs-md);
+/* КОД ЯЗЫКА ВМЕСТО ФЛАГА — 24.09.
+   Флаг обозначает СТРАНУ, а не язык: 🇺🇸 ставили английскому, на котором
+   говорят и в Британии, и в Индии, а 🇰🇬 — кыргызскому, который для части
+   страны не родной. Плюс эмодзи рисует операционная система: на Windows,
+   Android и macOS это три разных картинки, а на части Windows флагов нет
+   вовсе — там вместо них видны буквы RU и KG. Ставим эти буквы сами.
+   Имя языка рядом написано на самом языке — это и есть общепринятый приём. */
+.lang-code {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    background: var(--alpha-white-08);
+    color: var(--text-muted);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.04em;
+}
+
+.lang-option.active .lang-code,
+.mobile-lang-option.active .lang-code {
+    background: rgba(204, 255, 0, 0.12);
+    color: var(--accent);
+}
+
+/* Значок вместо эмодзи: рисуется нами, красится currentColor и не читается
+   диктором вслух. См. компонент Feature icon 429:191 — та же причина. */
+.nav-ico {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    vertical-align: -3px;
+}
+
+.lang-ico {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+
+.made-ico {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    vertical-align: -2px;
+    color: var(--status-danger, #FF4757);
 }
 
 .lang-name {
@@ -7378,8 +7424,10 @@ body.nav-open {
         border: 1px solid var(--border-subtle);
     }
 
-    .mobile-lang-option .lang-flag {
-        font-size: var(--fs-sm);
+    /* В бургере код языка уже печатает ::after из data-lang — свой код
+       прятали бы вдвойне. */
+    .mobile-lang-option .lang-code {
+        display: none;
     }
 
     .mobile-lang-option::after {

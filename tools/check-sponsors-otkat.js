@@ -18,6 +18,8 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-sponsors-'));
 ['index.html', 'index-en.html', 'index-kg.html'].forEach(ф =>
     fs.copyFileSync(path.join(КОРЕНЬ, ф), path.join(ВРЕМ, ф)));
 
+const ВЕРСИЯ_СЕЙЧАС = 'style.css?v=' + (fs.readFileSync(path.join(КОРЕНЬ, 'index.html'), 'utf8').match(/style\.css\?v=(\d+)/) || [0, 0])[1];
+
 const ОТКАТЫ = [
   ['css/style.css',
    '    height: 88px;\n    padding: var(--space-3);\n    background: var(--bg-card);',
@@ -109,9 +111,10 @@ const ОТКАТЫ = [
    "            if (e.key !== 'Escape') return;",
    'табуляция не выходит за пределы открытого окна'],
 
+  /* ЯКОРЬ НА ЧИСЛО, КОТОРОЕ РАСТЁТ, — ТАКОЙ ЖЕ ЯКОРЬ НА СОСЕДА. */
   ['index.html',
-   'style.css?v=370',
-   'style.css?v=369',
+   ВЕРСИЯ_СЕЙЧАС,
+   'style.css?v=1',
    'версии подняты'],
 ];
 
