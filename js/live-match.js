@@ -34,6 +34,8 @@
         feedTitle:  isEn ? 'Match progress' : isKg ? 'Матчтын жүрүшү' : 'Ход матча',
         setN:       isEn ? 'set'  : isKg ? 'сет' : 'сет',
         gameNow:    isEn ? 'Current game' : isKg ? 'Учурдагы гейм' : 'Текущий гейм',
+        ace:        isEn ? 'ace'    : isKg ? 'эйс'     : 'эйс',
+        doubleF:    isEn ? 'double' : isKg ? 'кош ката': 'двойная',
         game:       isEn ? 'game'  : isKg ? 'гейм' : 'гейм',
         allSets:    isEn ? 'All'   : isKg ? 'Баары' : 'Все',
         breakLabel: isEn ? 'break' : isKg ? 'брейк' : 'брейк',
@@ -107,7 +109,7 @@
         var client = window.supabaseClient;
         if (!client) return;
         client.from('live_match_points')
-            .select('seq,set_no,game_no,winner,p1,p2,g1,g2,game_won,is_break,is_tiebreak')
+            .select('seq,set_no,game_no,winner,p1,p2,g1,g2,game_won,is_break,is_tiebreak,mark')
             .eq('match_id', matchId)
             .order('seq', { ascending: true })
             .then(function(res) {
@@ -322,8 +324,15 @@
                 esc(текущий.set_no + '-й ' + L.setN + ', ' + L.game + ' ' + текущий.game_no) + '</p>' +
                 '<ul class="lm-points" aria-live="polite">' +
                 текущий.points.map(function(pt) {
-                    return '<li class="lm-point lm-point-w' + pt.winner + '">' +
-                        esc(pt.p1 + '\u2013' + pt.p2) + '</li>';
+                    /* Метка показывается, когда судья её поставил, и молчит,
+                       когда нет. Пусто значит «не отмечено», а НЕ «эйса не
+                       было»: метка у судьи необязательная. */
+                    var метка = pt.mark === 'ace' ? L.ace : pt.mark === 'double' ? L.doubleF : '';
+                    return '<li class="lm-point lm-point-w' + pt.winner +
+                        (метка ? ' has-mark' : '') + '">' +
+                        esc(pt.p1 + '\u2013' + pt.p2) +
+                        (метка ? '<span class="lm-point-mark">' + метка + '</span>' : '') +
+                    '</li>';
                 }).join('') +
                 '</ul>';
         }
