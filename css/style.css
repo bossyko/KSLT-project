@@ -3556,39 +3556,28 @@ h2 {
 }
 
 .vn-row-head h3 {
-    font-size: var(--fs-base);
+    font-size: var(--fs-lg);
     font-weight: 700;
 }
 
-/* Четыре в ряд. Карточка ужимается: фото ниже, отступы меньше, подписи
-   мельче. Разметка та же, что на страницах кортов и тренеров.
+/* ВИТРИНА «ГДЕ ИГРАТЬ И У КОГО УЧИТЬСЯ» — переписана 24.09.2026.
+   Доска Figma: Venues — seven layers, six breakpoints and the ladder inside
+   the card (419:9).
 
-   Селектор с двумя классами не случайно: у .courts-grid стоит автозаполнение
-   по 350 пикселей, и одного .vn-four оно перебивает */
+   БЫЛО: семь слоёв на шести границах — 1024 · 1100 · 768 · 600 · 560 · 480,
+   и ни одной из 640 и 992. «Две колонки» объявлены четыре раза. Высота
+   фотографии объявлена числом трижды (200 · 168 · 92) при текучей ширине,
+   поэтому отношение сторон гуляло от 1.79 до 3.91 — на 768 полоска.
+
+   СТАЛО: базовый слой, ≤992, ≤640 и телефон боком.
+   ОТНОШЕНИЕ СТОРОН — СВОЙСТВО КАРТОЧКИ, ЧИСЛО КОЛОНОК — СВОЙСТВО ЭКРАНА. */
 .courts-grid.vn-four,
 .coaches-grid.vn-four {
     grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-6);
 }
 
-/* Четыре в ряд — только пока для них есть место. На планшете два,
-   на телефоне тоже два: четыре ужимались до полосок в полсотни пикселей,
-   где название корта переносилось по одной букве */
-@media (max-width: 1024px) {
-    .courts-grid.vn-four,
-    .coaches-grid.vn-four {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 560px) {
-    .courts-grid.vn-four,
-    .coaches-grid.vn-four {
-        gap: 12px;
-    }
-}
-
-/* Карточка корта на главной — ссылка целиком, а не блок с кнопкой внутри:
-   по ней и так все кликают. Ссылка по умолчанию строчная, поэтому раскладку
+/* Карточка — ссылка целиком. Ссылка по умолчанию строчная, поэтому раскладку
    задаём явно, иначе фотография схлопывается */
 .vn-four .court-card,
 .vn-four .coach-card {
@@ -3597,75 +3586,210 @@ h2 {
     text-decoration: none;
     color: inherit;
 }
-.vn-four .court-card img {
+
+/* Карточка тренера получает ту же форму, что карточка корта: фотография 4:3
+   сверху, текст слева. Круг 100 был шестой ступенью мимо Avatar 29:82
+   (24 · 32 · 40 · 56 · 80), а портрет по центру не оставлял свободного угла */
+.vn-four .coach-card {
+    padding: 0;
+    gap: 0;
+    align-items: stretch;
+    text-align: left;
+}
+
+.vn-four .court-card img,
+.vn-four .coach-photo {
     width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
+    border: 0;
+    border-radius: 0;
 }
+
+/* Портрет в рамке 4:3 режется по голове: снимки у тренеров вертикальные и
+   лицо стоит в верхней трети. Кадрируем от верха, а не от центра */
+.vn-four .coach-photo { object-position: 50% top; }
+
+.vn-four .coach-card:hover .coach-photo { border-color: transparent; }
+
+/* Плотность Dense 12 по описанию Card 29:65, между строками 8 — ступень шкалы,
+   а не 2, 4 и 6, которые стояли здесь в трёх слоях сразу */
 .vn-four .court-info,
-.vn-four .coach-info { flex: 1; }
-/* Освободившееся от заголовка место отдаём карточкам: фотография выше,
-   пропорция ближе к 16:9, как на страницах кортов */
-.vn-four .court-card img { height: 168px; }
-.vn-four .court-info { padding: 14px 16px; gap: 4px; }
-.vn-four .court-info h4 { font-size: var(--fs-base); }
-.vn-four .court-info span { font-size: var(--fs-xs); }
-.vn-four .court-card-actions { padding: 8px 14px 12px; }
-.vn-four .coach-photo { width: 104px; height: 104px; }
-.vn-four .coach-info { padding: 12px 14px 4px; }
-.vn-four .coach-info h4 { font-size: var(--fs-base); }
-.vn-four .coach-info span { font-size: var(--fs-xs); }
-.vn-four .court-card-details,
-.vn-four .coach-card-details { width: 100%; text-align: center; }
-
-/* Партнёр клуба. Метка на фотографии, а не в углу описания: это первое,
-   что должно быть видно, и оно же объясняет строку про скидку */
-.vn-four .court-card,
-.vn-four .coach-card { position: relative; }
-
-.vn-partner {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 2;
-    background: rgba(204, 255, 0, 0.92);
-    color: #0A0A0A;
-    font-size: var(--fs-2xs);
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: var(--radius-full);
+.vn-four .coach-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-3);
+    gap: var(--space-2);
 }
 
-/* Скидка — строкой в описании, а не второй кнопкой: в узкой карточке две
-   круглые кнопки в ряд не помещались и наезжали друг на друга */
-/* Двумя классами: у .court-info span свой цвет, и одного класса он
-   перебивает */
+/* Имя — две строки с многоточием. Рисовалось столько строк, сколько придёт из
+   базы, и ряд карточек разной высоты читался как сбой */
+.vn-four .court-info h4,
+.vn-four .coach-info h4 {
+    font-size: var(--fs-base);
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Мета была 12 на широком и 11 на узком — 11 самый мелкий уровень на сайте.
+   Один уровень — один кегль и один межстрочный на все виды */
+.vn-four .court-info span,
+.vn-four .coach-info span {
+    font-size: var(--fs-xs);
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+/* ВНУТРИ ВИТРИНЫ ЛАЙМА НЕТ: он принадлежит одному главному действию в поле
+   зрения, а это «Все корты →» (правило 109:370). Покрытие, цена и скидка —
+   значимая мета, 72 % белого; город и специальность — 50 %.
+   Город и опыт давали 3.21 : 1 при пороге WCAG 1.4.3 = 4.5, стало 5.33 */
+.vn-four .court-surface,
+.vn-four .coach-price,
 .vn-four .vn-discount {
-    color: var(--accent);
+    color: var(--text-secondary) !important;
     font-weight: 600;
 }
 
-/* Сбой запроса и пустой список — разные вещи. Ряд остаётся с сообщением,
-   а не исчезает вместе с заголовком */
+.vn-four .coach-speciality {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Нижняя строка: мета слева, стрелка справа, прижата к низу карточки */
+.vn-four .vn-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: auto;
+}
+
+/* Тремя классами: у .vn-four .court-info span два класса и элемент, и
+   двухклассовое правило оно перебивает — метка садилась на 12 вместо 18 */
+.vn-four .vn-foot .vn-go {
+    font-size: var(--fs-md);
+    line-height: 1;
+    color: var(--text-muted);
+    transition: color var(--transition-fast);
+}
+
+.vn-four .court-card:hover .vn-foot .vn-go,
+.vn-four .coach-card:hover .vn-foot .vn-go,
+.vn-four .court-card:focus-visible .vn-foot .vn-go,
+.vn-four .coach-card:focus-visible .vn-foot .vn-go {
+    color: var(--accent);
+}
+
+/* Кольцо фокуса обязательно по WCAG 2.4.7 — описание Button 17:82.
+   До 24.09 во всей секции не было ни одного :focus-visible */
+.vn-four .court-card:focus-visible,
+.vn-four .coach-card:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Карточка двигается при наведении — значит, спрашиваем разрешения */
+@media (prefers-reduced-motion: reduce) {
+    .vn-four .court-card,
+    .vn-four .coach-card { transition: none; }
+
+    .vn-four .court-card:hover,
+    .vn-four .coach-card:hover { transform: none; }
+}
+
+/* «Подробнее» был <span>: выглядел кнопкой, но диктор читал его как текст, и
+   табом до него было не дойти. Нажимается вся карточка — кнопка внутри неё
+   создавала вторую цель там, где смысл один */
+.vn-four .court-card-actions,
+.vn-four .coach-card-actions { display: none; }
+
+/* Метка партнёра ушла из угла фотографии в строку: Badge 27:53 Subtle —
+   умолчание для карточек, а лаймовая заливка — снова акцент не на действии.
+   Плюс правило: в углу карточки с портретом свободного угла нет */
+/* Тоже тремя классами, и по той же причине */
+.vn-four .court-info .vn-partner,
+.vn-four .coach-info .vn-partner {
+    position: static;
+    align-self: flex-start;
+    background: var(--alpha-white-08);
+    color: var(--text-secondary);
+    font-size: var(--fs-2xs);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0 var(--space-2);
+    line-height: 24px;
+    border-radius: var(--radius-full);
+}
+
+/* Сбой запроса и пустой список — разные вещи, и текст у них разный: описание
+   Empty state 37:53 требует сказать, что здесь появится и как */
 .vn-notice {
     grid-column: 1 / -1;
-    padding: 28px 20px;
+    padding: var(--space-6) var(--space-4);
     text-align: center;
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-sm);
 }
 
-/* Селекторы из двух классов: базовое правило задано как
-   `.courts-grid.vn-four`, и одного `.vn-four` оно перебивало — на телефоне
-   сетка оставалась в четыре колонки по полсотни пикселей */
-@media (max-width: 1100px) {
+/* ТОЛЬКО ЦЕЛЫЕ РЯДЫ. Потолок вида кратен числу его колонок, хвост считается
+   ОТ КОНЦА: css не знает, сколько записей придёт из базы */
+.vn-four > .court-card:nth-child(n+5),
+.vn-four > .coach-card:nth-child(n+5) { display: none; }
+
+@media (max-width: 992px) {
     .courts-grid.vn-four,
-    .coaches-grid.vn-four { grid-template-columns: repeat(2, 1fr); }
+    .coaches-grid.vn-four { grid-template-columns: repeat(3, 1fr); }
+
+    .vn-row-head h3 { font-size: var(--fs-md); }
+
+    .vn-four > .court-card:nth-child(n+4),
+    .vn-four > .coach-card:nth-child(n+4) { display: none; }
 }
-@media (max-width: 600px) {
+
+@media (max-width: 640px) {
     .courts-grid.vn-four,
-    .coaches-grid.vn-four { grid-template-columns: 1fr; }
+    .coaches-grid.vn-four {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-3);
+    }
+
+    .vn-four > .court-card:nth-child(n+4),
+    .vn-four > .coach-card:nth-child(n+4) { display: flex; }
+
+    .vn-four > .court-card:nth-child(n+5),
+    .vn-four > .coach-card:nth-child(n+5) { display: none; }
+
+    /* :not(:first-child) — единственная запись не прячется. Тренер в базе
+       пока один: без этой оговорки правило хвоста гасило весь ряд, и вместо
+       карточки оставалась пустота. ХВОСТ ПРЯЧЕТСЯ, ПОКА ЕСТЬ ЧТО ОСТАВИТЬ */
+    .vn-four > .court-card:nth-child(odd):nth-last-child(1):not(:first-child),
+    .vn-four > .coach-card:nth-child(odd):nth-last-child(1):not(:first-child) { display: none; }
+
+    /* 16 в колонке 166 даёт 12 знаков в строке, 14 даёт 14.
+       Межстрочный НЕ меняется: один уровень — один межстрочный на все виды.
+       Едет ступень кегля, плотность не едет */
+    .vn-four .court-info h4,
+    .vn-four .coach-info h4 { font-size: var(--fs-sm); }
+}
+
+/* ТЕЛЕФОН БОКОМ — четыре в ряд, один ряд. Слой пишется целиком: у соседа
+   ≤992 те же два класса, и «вернуть в поток» из чужого слоя проигрывает */
+@media (orientation: landscape) and (max-height: 500px) {
+    .courts-grid.vn-four,
+    .coaches-grid.vn-four { grid-template-columns: repeat(4, 1fr); }
+
+    .vn-four > .court-card:nth-child(n+4),
+    .vn-four > .coach-card:nth-child(n+4) { display: flex; }
+
+    .vn-four > .court-card:nth-child(n+5),
+    .vn-four > .coach-card:nth-child(n+5) { display: none; }
 }
 
 .courts-grid {
@@ -3772,8 +3896,7 @@ h2 {
     padding: 0 var(--space-lg) var(--space-lg);
 }
 
-.court-card-details,
-.court-card-cta {
+.court-card-details {
     flex: 1;
     display: inline-flex;
     align-items: center;
@@ -3799,16 +3922,6 @@ h2 {
     color: #000;
 }
 
-.court-card-cta {
-    background: var(--accent);
-    border: 1px solid var(--accent);
-    color: var(--bg-primary);
-    font-weight: 700;
-}
-
-.court-card-cta:hover {
-    opacity: 0.85;
-}
 
 /* Court toast */
 .court-toast {
@@ -3925,8 +4038,7 @@ h2 {
     width: 100%;
 }
 
-.coach-card-details,
-.coach-card-cta {
+.coach-card-details {
     flex: 1;
     display: inline-flex;
     align-items: center;
@@ -3952,16 +4064,6 @@ h2 {
     color: #000;
 }
 
-.coach-card-cta {
-    background: var(--accent);
-    border: 1px solid var(--accent);
-    color: var(--bg-primary);
-    font-weight: 700;
-}
-
-.coach-card-cta:hover {
-    opacity: 0.85;
-}
 
 /* Coach toast */
 .coach-toast {
@@ -10514,64 +10616,6 @@ input:-internal-autofill-previewed {
         line-height: 1.45;
     }
 
-    /* Корты и тренеры на главной: правило .courts-grid из мобильного блока
-       схлопывало их в одну колонку и перебивало .vn-four — четыре карточки
-       занимали два с лишним экрана. Ставим две в ряд и оставляем два ряда */
-    .courts-grid.vn-four,
-    .coaches-grid.vn-four {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-    }
-
-    .vn-four .court-card img { height: 92px; }
-    .vn-four .court-info { padding: 8px 9px; gap: 2px; }
-    .vn-four .court-info h4 { font-size: var(--fs-xs); line-height: 1.25; }
-    .vn-four .court-info span { font-size: var(--fs-2xs); }
-    .vn-four .court-card-actions { padding: 6px 9px 10px; }
-
-    /* У карточки тренера оставались отступы широкого экрана: 40 пикселей по
-       кругу и 24 между строками — больше половины её высоты уходило в пустоту */
-    .vn-four .coach-card {
-        padding: 10px 8px 8px;
-        gap: 6px;
-    }
-
-    .vn-four .coach-photo { width: 72px; height: 72px; }
-    .vn-four .coach-info { padding: 8px 9px 2px; }
-    .vn-four .coach-info h4 { font-size: var(--fs-xs); line-height: 1.25; }
-    .vn-four .coach-info span { font-size: var(--fs-2xs); }
-
-    /* Строки в карточке тренера стояли просторно, как на широком экране:
-       специализация, возраст, цена и скидка давали по 33–49 пикселей каждая */
-    .vn-four .coach-info h4,
-    .vn-four .coach-speciality,
-    .vn-four .coach-experience,
-    .vn-four .coach-price,
-    .vn-four .vn-discount {
-        margin: 0 0 2px;
-        line-height: 1.25;
-    }
-
-    .vn-four .coach-info .vn-discount { font-size: var(--fs-2xs); }
-
-    /* Кнопка «Подробнее» была во всю карточку и занимала столько же места,
-       сколько название */
-    .vn-four .court-card-details,
-    .vn-four .coach-card-details {
-        padding: 6px 8px;
-        font-size: var(--fs-2xs);
-        line-height: 1.2;
-    }
-
-    .vn-four .court-card-actions,
-    .vn-four .coach-card-actions { padding: 4px 9px 9px; }
-
-    .vn-partner {
-        top: 6px;
-        left: 6px;
-        font-size: var(--fs-2xs);
-        padding: 2px 6px;
-    }
 
     /* Шапка на телефоне висит поверх страницы, и название «КСЛТ» уезжало
        под неё: первый экран начинался с половины буквы. Отводим под шапку

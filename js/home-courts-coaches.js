@@ -36,25 +36,50 @@
     var COURT_PHOTO = 'images/heroes/courts.jpg';
     var COACH_PHOTO = 'images/heroes/coaches.jpg';
 
+    // Три ступени, решение Кости 24.09: своё фото → заглушка по покрытию →
+    // общая картинка. Файлов покрытий пока нет, поэтому у <img> стоит onerror:
+    // пока их не положили, карточка молча падает на общую, а не на битую рамку
+    var SURFACE_PHOTO = {
+        clay:   'images/courts/surface-clay.jpg',
+        hard:   'images/courts/surface-hard.jpg',
+        grass:  'images/courts/surface-grass.jpg',
+        carpet: 'images/courts/surface-carpet.jpg',
+        indoor: 'images/courts/surface-indoor.jpg'
+    };
+
+    function courtPhoto(row, ct) {
+        if (row.photo) return row.photo;
+        var s = (ct && ct[0] && ct[0].surface) || '';
+        return SURFACE_PHOTO[s] || COURT_PHOTO;
+    }
+
+    var FALLBACK = ' onerror="this.onerror=null;this.src=\'' + COURT_PHOTO + '\'"';
+
 
     var L = isEn ? {
         partner: 'KSLT partner', discount: 'Discount for KSLT members',
         details: 'Details', courts: 'courts', years: 'yrs',
         from: 'from', perHour: 'som/h',
         surface: { hard: 'Hard', clay: 'Clay', carpet: 'Carpet' },
-        empty: 'Nothing to show yet'
+        emptyCourts: 'Courts appear here as soon as they join the KSLT registry',
+        emptyCoaches: 'Coaches appear here as soon as they join the KSLT registry',
+        failed: 'Could not load this row — please refresh the page'
     } : (isKg ? {
         partner: 'КСЛТ өнөктөшү', discount: 'КСЛТ мүчөлөрүнө арзандатуу',
         details: 'Толугураак', courts: 'корт', years: 'жыл',
         from: '', perHour: 'сом/саат',
         surface: { hard: 'Хард', clay: 'Топурак', carpet: 'Килем' },
-        empty: 'Азырынча көрсөтө турган эч нерсе жок'
+        emptyCourts: 'Корттор КСЛТ реестрине кошулганда ушул жерде көрүнөт',
+        emptyCoaches: 'Машыктыруучулар КСЛТ реестрине кошулганда ушул жерде көрүнөт',
+        failed: 'Жүктөлгөн жок — баракты жаңыртыңыз'
     } : {
         partner: 'Партнёр КСЛТ', discount: 'Скидка членам КСЛТ',
         details: 'Подробнее', courts: 'кортов', years: 'лет',
         from: 'от', perHour: 'сом/час',
         surface: { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр' },
-        empty: 'Пока нечего показать'
+        emptyCourts: 'Корты появятся здесь, как только попадут в реестр КСЛТ',
+        emptyCoaches: 'Тренеры появятся здесь, как только попадут в реестр КСЛТ',
+        failed: 'Не удалось загрузить ряд — обновите страницу'
     });
 
     var page = function(name) {
@@ -67,8 +92,8 @@
         var courts = await load('courts');
         var coaches = await load('coaches');
 
-        fill('venuesCourts', pick(courts).map(courtCard).join(''), courts);
-        fill('venuesCoaches', pick(coaches).map(coachCard).join(''), coaches);
+        fill('venuesCourts', pick(courts).map(courtCard).join(''), courts, 'courts');
+        fill('venuesCoaches', pick(coaches).map(coachCard).join(''), coaches, 'coaches');
     }
 
     async function load(table) {
@@ -89,14 +114,15 @@
      * Пустой ряд и сбой запроса — разные вещи, и выглядеть они должны
      * по-разному. У сбоя ряд остаётся с сообщением, а не тихо исчезает.
      */
-    function fill(id, html, data) {
+    function fill(id, html, data, kind) {
         var grid = document.getElementById(id);
         if (!grid) return;
+        var empty = kind === 'coaches' ? L.emptyCoaches : L.emptyCourts;
         if (data === null) {
-            grid.innerHTML = '<div class="vn-notice">' + L.empty + '</div>';
+            grid.innerHTML = '<div class="vn-notice">' + L.failed + '</div>';
             return;
         }
-        grid.innerHTML = html || '<div class="vn-notice">' + L.empty + '</div>';
+        grid.innerHTML = html || '<div class="vn-notice">' + empty + '</div>';
     }
 
     /**
@@ -146,22 +172,26 @@
             if (pr && (!minPrice || pr < minPrice)) minPrice = pr;
         });
 
-        var line = surfaces.join(', ') + (total ? ' · ' + total + ' ' + L.courts : '');
+        // Висячая точка: при пустом покрытии строка начиналась с « · 1 кортов».
+        // УМОЛЧАНИЕ — СВОЙСТВО ДАННЫХ, А НЕ РАЗМЕТКИ: склеиваем только то, что есть
+        var части = [];
+        if (surfaces.length) части.push(surfaces.join(', '));
+        if (total) части.push(total + ' ' + L.courts);
+        var line = части.join(' · ');
         var city = localized(row, 'city') || '';
         var href = page('court') + '?id=' + encodeURIComponent(row.id);
 
+        var price = minPrice ? (L.from + ' ' + minPrice + ' ' + L.perHour).trim() : '';
+
         return '<a class="court-card" href="' + href + '">' +
-            badge(row) +
-            '<img src="' + esc(row.photo || COURT_PHOTO) + '" alt="' + esc(localized(row, 'name')) + '" loading="lazy">' +
+            '<img src="' + esc(courtPhoto(row, ct)) + '" alt="' + esc(localized(row, 'name')) + '" loading="lazy"' + FALLBACK + '>' +
             '<div class="court-info">' +
+                badge(row) +
                 '<h4>' + esc(localized(row, 'name')) + '</h4>' +
                 (line ? '<span class="court-surface">' + esc(line) + '</span>' : '') +
                 (city ? '<span>📍 ' + esc(city) + '</span>' : '') +
-                (minPrice ? '<span class="court-price">' + L.from + ' ' + minPrice + ' ' + L.perHour + '</span>' : '') +
                 discount(row) +
-            '</div>' +
-            '<div class="court-card-actions">' +
-                '<span class="court-card-details">' + L.details + ' →</span>' +
+                foot(price) +
             '</div>' +
         '</a>';
     }
@@ -174,19 +204,27 @@
         var href = page('coach') + '?id=' + encodeURIComponent(row.id);
 
         return '<a class="coach-card" href="' + href + '">' +
-            badge(row) +
             '<img class="coach-photo" src="' + esc(row.photo || COACH_PHOTO) + '" alt="' + esc(name) + '" loading="lazy">' +
             '<div class="coach-info">' +
+                badge(row) +
                 '<h4>' + esc(name) + '</h4>' +
                 (localized(row, 'position') ? '<span class="coach-speciality">' + esc(localized(row, 'position')) + '</span>' : '') +
                 (exp ? '<span class="coach-experience">' + esc(exp) + '</span>' : '') +
-                (price ? '<span class="coach-price">' + esc(price) + '</span>' : '') +
                 discount(row) +
-            '</div>' +
-            '<div class="coach-card-actions">' +
-                '<span class="coach-card-details">' + L.details + ' →</span>' +
+                foot(price) +
             '</div>' +
         '</a>';
+    }
+
+    /**
+     * Нижняя строка карточки: цена слева, метка перехода справа, прижата к низу.
+     * Метка скрыта от диктора: карточка и так ссылка, и диктор читает её целиком.
+     */
+    function foot(price) {
+        return '<div class="vn-foot">' +
+            (price ? '<span class="coach-price">' + esc(price) + '</span>' : '<span></span>') +
+            '<span class="vn-go" aria-hidden="true">\u2192</span>' +
+        '</div>';
     }
 
     function esc(s) {
