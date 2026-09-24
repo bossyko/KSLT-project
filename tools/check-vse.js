@@ -13,6 +13,7 @@ const { execFileSync } = require('child_process');
 
 const быстро = process.argv.includes('--быстро');
 const КУСКИ = [
+    ['шапка',                'check-header.js',       'check-header-otkat.js'],
     ['первый экран',        'check-geroy.js',        'check-geroy-otkat.js'],
     ['раздел live',         'check-live.js',         'check-live-otkat.js'],
     ['цвет статусов',       'check-turniry-cvet.js', 'check-turniry-cvet-otkat.js'],
