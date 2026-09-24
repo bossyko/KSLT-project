@@ -276,6 +276,14 @@
     var CHANGEOVER_SET = 300;  // 5 minutes between sets
 
     var umpireKey = null;
+    /* ОКНО МЕТКИ. После очка на три секунды открывается пара «Эйс» /
+       «Двойная». Метка необязательна: не нажал — розыгрыш записан обычным,
+       и одно касание на розыгрыш остаётся одним. */
+    var markSeq = null;      // номер розыгрыша, к которому метка относится
+    var markUntil = 0;
+    var markTimer = null;
+    var markSet = null;
+    var wakeLock = null;
     var matchData = null;
     var state = null;
     var saveTimeout = null;
@@ -309,6 +317,7 @@
             matchData = res.data.match;
             state = dbToState(matchData);
             render();
+            if (state.status === 'live' || state.status === 'warmup') keepAwake();
         });
     }
 
@@ -322,8 +331,48 @@
         if (!client) return;
         client.rpc('umpire_log_point', { p_key: umpireKey, p_entry: entry })
             .then(function(res) {
-                if (res.error) console.error('Журнал розыгрыша:', res.error);
+                if (res.error) { console.error('Журнал розыгрыша:', res.error); return; }
+                /* Номер нужен метке: она ставится ПО НОМЕРУ, а не на
+                   «последний розыгрыш». Вставка уходит асинхронно, и пока
+                   она в пути «последним» остаётся предыдущее очко. */
+                if (res.data && res.data.ok) markSeq = res.data.seq;
             });
+    }
+
+    /* Метка эйса и двойной. Судья и так объявляет их вслух — суждения не
+       требуется. «Виннер» и «невынужденную» не спрашиваем: на больших
+       турнирах их считает отдельный логгер, а у нас один человек. */
+    function markPoint(kind) {
+        var client = window.supabaseClient;
+        if (!client || markSeq === null) return;
+        markSet = (markSet === kind) ? null : kind;
+        render();
+        client.rpc('umpire_mark_point', { p_key: umpireKey, p_seq: markSeq, p_mark: markSet })
+            .then(function(res) {
+                if (res.error) console.error('Метка розыгрыша:', res.error);
+            });
+    }
+
+    function openMarkWindow() {
+        markSet = null;
+        markUntil = Date.now() + 3000;
+        clearTimeout(markTimer);
+        markTimer = setTimeout(function() { markUntil = 0; render(); }, 3000);
+    }
+
+    function markWindowOpen() {
+        return Date.now() < markUntil && markSeq !== null;
+    }
+
+    /* ЭКРАН НЕ ГАСНЕТ. Судья держит телефон весь матч, и система усыпляет
+       его между розыгрышами. Работает не везде — там, где нет, ведёт себя
+       как раньше, молча. */
+    function keepAwake() {
+        if (!navigator.wakeLock) return;
+        navigator.wakeLock.request('screen').then(function(l) {
+            wakeLock = l;
+            l.addEventListener('release', function() { wakeLock = null; });
+        }).catch(function() { /* отказано или не поддержано — не беда */ });
     }
 
     /* Отмена судьи честно убирает розыгрыш и из ленты зрителя: если судья
@@ -401,6 +450,8 @@
         };
 
         state = scorePoint(state, player);
+        markSeq = null;          // новый розыгрыш — прежний номер недействителен
+        openMarkWindow();
         render();
         saveState();
 
@@ -454,7 +505,12 @@
         /* Через этот же стек проходит и выбор подачи. Розыгрыш убираем из
            журнала ТОЛЬКО если счёт действительно изменился, иначе отмена
            выбора подачи стёрла бы чужую запись. */
-        if (scoreFingerprint(state) !== было) undoPoint();
+        if (scoreFingerprint(state) !== было) {
+            undoPoint();
+            /* Отмена уносит и метку: строки больше нет, помечать нечего. */
+            markSeq = null; markSet = null; markUntil = 0;
+            clearTimeout(markTimer);
+        }
     }
 
     function handleChooseServe(player) {
@@ -523,23 +579,32 @@
         var winnerHtml = '';
         if (isCompleted) {
             var winnerName = state.winner_player === 1 ? p1Name : p2Name;
-            winnerHtml = '<div class="um-winner">🏆 ' + winnerName + ' побеждает! ' + state.final_score + '</div>';
+            winnerHtml = '<div class="um-winner">' + esc(winnerName) + ' побеждает! ' + state.final_score + '</div>';
         }
 
         app.innerHTML =
+            /* Судья видит, КАКОЙ матч ведёт: до 24.09 на экране были только
+               счёт и кнопки, и при двух матчах подряд перепутать было легко. */
+            '<div class="um-match-head">' +
+                '<div class="um-match-players">' + esc(p1Name) + ' — ' + esc(p2Name) + '</div>' +
+                (matchData.tournament_label
+                    ? '<div class="um-match-meta">' + esc(matchData.tournament_label) +
+                      ' · лучший из ' + (matchData.best_of || 3) + '</div>'
+                    : '') +
+            '</div>' +
             '<div class="um-status um-status-' + statusClass + '">' + statusLabel + '</div>' +
             winnerHtml +
             '<div class="um-scoreboard">' +
                 // Player 1 row
                 '<div class="um-player-row' + (state.serving_player === 1 ? ' um-serving' : '') + (state.winner_player === 1 ? ' um-winner-row' : '') + '">' +
-                    '<div class="um-serve-dot">' + (state.serving_player === 1 ? '🎾' : '') + '</div>' +
+                    '<div class="um-serve-dot">' + (state.serving_player === 1 ? '<span></span>' : '') + '</div>' +
                     '<div class="um-player-name">' + esc(p1Name) + '</div>' +
                     '<div class="um-games">' + state.current_game_p1 + '</div>' +
                     '<div class="um-points">' + pts.p1 + '</div>' +
                 '</div>' +
                 // Player 2 row
                 '<div class="um-player-row' + (state.serving_player === 2 ? ' um-serving' : '') + (state.winner_player === 2 ? ' um-winner-row' : '') + '">' +
-                    '<div class="um-serve-dot">' + (state.serving_player === 2 ? '🎾' : '') + '</div>' +
+                    '<div class="um-serve-dot">' + (state.serving_player === 2 ? '<span></span>' : '') + '</div>' +
                     '<div class="um-player-name">' + esc(p2Name) + '</div>' +
                     '<div class="um-games">' + state.current_game_p2 + '</div>' +
                     '<div class="um-points">' + pts.p2 + '</div>' +
@@ -567,8 +632,8 @@
                 ? '<div class="um-serve-choice">' +
                     '<div class="um-serve-choice-title">Кто подаёт первым?</div>' +
                     '<div class="um-serve-choice-btns">' +
-                        '<button class="um-btn um-btn-serve' + (serveChosen && state.serving_player === 1 ? ' um-btn-serve-active' : '') + '" id="umServe1">🎾 ' + esc(p1Name) + '</button>' +
-                        '<button class="um-btn um-btn-serve' + (serveChosen && state.serving_player === 2 ? ' um-btn-serve-active' : '') + '" id="umServe2">🎾 ' + esc(p2Name) + '</button>' +
+                        '<button class="um-btn um-btn-serve' + (serveChosen && state.serving_player === 1 ? ' um-btn-serve-active' : '') + '" id="umServe1">' + esc(p1Name) + '</button>' +
+                        '<button class="um-btn um-btn-serve' + (serveChosen && state.serving_player === 2 ? ' um-btn-serve-active' : '') + '" id="umServe2">' + esc(p2Name) + '</button>' +
                     '</div>' +
                   '</div>'
                 : '') +
@@ -583,6 +648,12 @@
                           '<button class="um-btn um-btn-p2" id="umP2">Очко<br>' + esc(p2Name) + '</button>'
                 ) +
             '</div>' +
+            (!isCompleted && !isWarmup && markWindowOpen()
+                ? '<div class="um-marks">' +
+                    '<button class="um-btn um-btn-mark' + (markSet === 'ace' ? ' is-set' : '') + '" id="umAce">Эйс</button>' +
+                    '<button class="um-btn um-btn-mark' + (markSet === 'double' ? ' is-set' : '') + '" id="umDouble">Двойная</button>' +
+                  '</div>'
+                : '') +
             (!isCompleted && !isWarmup
                 ? '<div class="um-bottom-actions">' +
                     '<button class="um-btn um-btn-undo" id="umUndo">↩ Отмена</button>' +
@@ -607,6 +678,10 @@
         if (btnStart) btnStart.addEventListener('click', handleStart);
         if (btnP1) btnP1.addEventListener('click', function() { handleScore(1); });
         if (btnP2) btnP2.addEventListener('click', function() { handleScore(2); });
+        var btnAce = document.getElementById('umAce');
+        var btnDouble = document.getElementById('umDouble');
+        if (btnAce) btnAce.addEventListener('click', function() { markPoint('ace'); });
+        if (btnDouble) btnDouble.addEventListener('click', function() { markPoint('double'); });
         if (btnUndo) btnUndo.addEventListener('click', handleUndo);
         if (btnPause) btnPause.addEventListener('click', handlePause);
     }
@@ -627,6 +702,13 @@
         stateToDb: stateToDb,
         dbToState: dbToState
     };
+
+    /* Браузер снимает блокировку экрана, когда вкладка уходит в фон.
+       Судья вернулся — возвращаем. */
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && !wakeLock && state &&
+            (state.status === 'live' || state.status === 'warmup')) keepAwake();
+    });
 
     // Init when DOM ready
     if (document.getElementById('um-app')) {

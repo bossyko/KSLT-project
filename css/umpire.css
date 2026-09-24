@@ -3,16 +3,28 @@
    Mobile-first, high contrast for outdoor use
    ============================================ */
 
+/* ПАЛИТРА — ПСЕВДОНИМЫ ТОКЕНОВ, А НЕ ВТОРАЯ ПАЛИТРА.
+   До 24.09 здесь стояли свои краски числом, и три из них были чуть-чуть не
+   те: #EF5350 против --danger #FF4757, #66BB6A против --success #2ED573,
+   #0a0a0a против --bg-base. В продукте выходило два красных и два зелёных.
+   Имена --um-* оставлены — по ним зовут краску 50 правил ниже, — но каждое
+   теперь ведёт к одному определению в токенах. */
 :root {
-    --um-bg: #0a0a0a;
-    --um-card: #1a1a1a;
-    --um-accent: #CCFF00;
-    --um-text: #fff;
-    --um-dim: rgba(255,255,255,0.5);
+    --um-bg:     var(--bg-base);
+    --um-card:   var(--bg-elevated);
+    --um-accent: var(--accent);
+    --um-text:   var(--text-primary);
+    --um-dim:    var(--text-muted);
+    --um-green:  var(--success);
+    --um-red:    var(--danger);
+
+    /* ДВЕ КРАСКИ ИГРОКОВ — единственное своё, и это осознанно.
+       Судья на корте должен различать две кнопки боковым зрением, не читая.
+       Статусных красок тут нет: экран закрытый, служебный, и ни красный, ни
+       зелёный на нём ничего не значат. Синий и оранжевый взяты потому, что
+       различимы при самой частой слепоте — красно-зелёной. */
     --um-p1: #4FC3F7;
     --um-p2: #FF7043;
-    --um-green: #66BB6A;
-    --um-red: #EF5350;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -41,6 +53,23 @@ body {
     gap: 12px;
 }
 
+/* ЗАГОЛОВОК МАТЧА. Судья не видел, какой матч ведёт: ни турнира, ни
+   соперников — только счёт. Если у него два матча подряд, перепутать легко. */
+.um-match-head {
+    text-align: center;
+    padding: 0 var(--space-2);
+}
+.um-match-players {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    line-height: 1.25;
+}
+.um-match-meta {
+    font-size: var(--fs-xs);
+    color: var(--um-dim);
+    margin-top: var(--space-1);
+}
+
 /* Status bar */
 .um-status {
     text-align: center;
@@ -51,10 +80,10 @@ body {
     padding: 8px;
     border-radius: 8px;
 }
-.um-status-warmup { background: rgba(255,255,255,0.1); color: var(--um-dim); }
-.um-status-live { background: rgba(239,83,80,0.2); color: var(--um-red); animation: um-pulse 1.5s infinite; }
-.um-status-paused { background: rgba(255,167,38,0.2); color: #FFA726; }
-.um-status-completed { background: rgba(204,255,0,0.15); color: var(--um-accent); }
+.um-status-warmup { background: var(--surface-glass-hover); color: var(--um-dim); }
+.um-status-live { background: var(--danger-subtle); color: var(--um-red); animation: um-pulse 1.5s infinite; }
+.um-status-paused { background: var(--warning-subtle); color: var(--warning); }
+.um-status-completed { background: var(--accent-subtle); color: var(--um-accent); }
 
 @keyframes um-pulse {
     0%, 100% { opacity: 1; }
@@ -68,9 +97,9 @@ body {
     font-weight: 700;
     color: var(--um-accent);
     padding: 12px;
-    background: rgba(204,255,0,0.1);
-    border-radius: 12px;
-    border: 1px solid rgba(204,255,0,0.3);
+    background: var(--accent-subtle);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--um-accent);
 }
 
 /* Scoreboard */
@@ -92,21 +121,35 @@ body {
     gap: 8px;
     transition: background 0.2s;
 }
-.um-player-row.um-serving { background: rgba(255,255,255,0.06); }
-.um-player-row.um-winner-row { background: rgba(204,255,0,0.1); }
+.um-player-row.um-serving { background: var(--surface-glass); }
+.um-player-row.um-winner-row { background: var(--accent-subtle); }
 
+/* ЗНАЧОК ПОДАЧИ — свой, а не эмодзи 🎾. Эмодзи рисует операционная система:
+   на одном телефоне он жёлтый, на другом зелёный, на третьем плоский, и
+   размер его нам не подчиняется. */
 .um-serve-dot {
-    text-align: center;
-    font-size: var(--fs-base);
-    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+.um-serve-dot::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-full);
+    background: var(--um-accent);
+}
+.um-serve-dot:empty::before { display: none; }
 
+/* ИМЯ НЕ ОБРЕЗАЕТСЯ. Было nowrap + ellipsis, и на 390 «Иван Корабельников»
+   показывался как «Иван Корабельн…» — 203 пикселя текста в 178 коробки.
+   Судья обязан видеть, кто есть кто: перепутать игроков дороже, чем
+   потратить вторую строку. */
 .um-player-name {
     font-size: var(--fs-md);
     font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
 .um-games, .um-points {
@@ -150,7 +193,7 @@ body {
     text-align: center;
     font-size: var(--fs-xs);
     font-weight: 600;
-    color: #FFA726;
+    color: var(--warning);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -177,20 +220,20 @@ body {
     font-size: var(--fs-md);
     background: var(--um-card);
     color: var(--um-text);
-    border: 2px solid rgba(255,255,255,0.12);
-    transition: border-color 0.2s, background 0.2s;
+    border: 2px solid var(--border-light);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 .um-btn-serve-active {
     border-color: var(--um-accent);
-    background: rgba(204,255,0,0.1);
+    background: var(--accent-subtle);
     color: var(--um-accent);
 }
 
 /* Changeover timer */
 .um-changeover {
     text-align: center;
-    background: rgba(255,167,38,0.1);
-    border: 1px solid rgba(255,167,38,0.3);
+    background: var(--warning-subtle);
+    border: 1px solid var(--warning);
     border-radius: 16px;
     padding: 16px;
 }
@@ -199,27 +242,27 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #FFA726;
+    color: var(--warning);
     margin-bottom: 8px;
 }
 .um-changeover-time {
     font-size: var(--fs-3xl);
     font-weight: 800;
-    color: #FFA726;
+    color: var(--warning);
     font-variant-numeric: tabular-nums;
     line-height: 1;
     margin-bottom: 12px;
 }
 .um-changeover-bar {
     height: 6px;
-    background: rgba(255,255,255,0.1);
+    background: var(--surface-glass-hover);
     border-radius: 3px;
     overflow: hidden;
     margin-bottom: 14px;
 }
 .um-changeover-fill {
     height: 100%;
-    background: #FFA726;
+    background: var(--warning);
     border-radius: 3px;
     transition: width 1s linear;
 }
@@ -227,9 +270,9 @@ body {
     width: 100%;
     padding: 14px;
     font-size: var(--fs-md);
-    background: rgba(255,167,38,0.15);
-    color: #FFA726;
-    border: 1px solid rgba(255,167,38,0.3);
+    background: var(--warning-subtle);
+    color: var(--warning);
+    border: 1px solid var(--warning);
 }
 
 /* Action buttons */
@@ -254,26 +297,50 @@ body {
     opacity: 0.85;
 }
 
+/* КНОПКА ОЧКА. Заливка — краска игрока, текст ПОЧТИ-ЧЁРНЫЙ, а не белый:
+   белый на светлой заливке порог контраста не проходит. То же правило, что
+   у Badge 27:53 в стиле Solid — заливка обязана доминировать, а читается
+   она за счёт тёмного текста. Градиенты убраны: это были ещё две пары
+   синих и оранжевых сверх краски игрока. */
 .um-btn-p1, .um-btn-p2 {
     flex: 1;
     font-size: var(--fs-lg);
     line-height: 1.3;
-    color: #fff;
+    color: var(--accent-on);
     min-height: 140px;
 }
-.um-btn-p1 {
-    background: linear-gradient(135deg, #1565C0, #42A5F5);
-}
-.um-btn-p2 {
-    background: linear-gradient(135deg, #D84315, #FF7043);
-}
+.um-btn-p1 { background: var(--um-p1); }
+.um-btn-p2 { background: var(--um-p2); }
 
 .um-btn-start {
     flex: 1;
     font-size: var(--fs-xl);
-    color: #000;
+    color: var(--accent-on);
     background: var(--um-accent);
     min-height: 140px;
+}
+
+/* МЕТКА РОЗЫГРЫША — «Эйс» и «Двойная». Появляется на три секунды после
+   очка и сама уходит. Необязательна: не нажал — розыгрыш записан обычным,
+   и поток судьи не меняется, одно касание остаётся одним.
+   Отдельной кнопки «обычный розыгрыш» нет намеренно: пусто здесь значит
+   «не отмечено», а не «эйса не было». */
+.um-marks {
+    display: flex;
+    gap: var(--space-3);
+}
+.um-btn-mark {
+    flex: 1;
+    min-height: var(--btn-h-md);
+    font-size: var(--fs-base);
+    background: var(--um-card);
+    color: var(--um-text);
+    border: 1px solid var(--border-subtle);
+}
+.um-btn-mark.is-set {
+    background: var(--accent-subtle);
+    border-color: var(--um-accent);
+    color: var(--um-accent);
 }
 
 /* Bottom actions */
@@ -288,7 +355,7 @@ body {
     font-size: var(--fs-base);
     background: var(--um-card);
     color: var(--um-text);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid var(--border-subtle);
 }
 
 /* Error */
@@ -306,21 +373,45 @@ body {
     .um-games, .um-points { font-size: var(--fs-xl); }
 }
 
-/* Small phones (375px) */
-@media (max-width: 375px) {
-    #um-app { padding: 10px; gap: 10px; }
-    .um-serve-choice-btns { gap: 8px; }
+/* ТЕСНЫЙ ТЕЛЕФОН. Было 375 — граница, которой нет в лестнице: она заводила
+   отдельный мир для iPhone SE рядом с iPhone 14. Две ширины на продукт. */
+@media (max-width: 640px) {
+    #um-app { padding: var(--space-3); gap: var(--space-3); }
+    .um-serve-choice-btns { gap: var(--space-2); }
     .um-serve-choice-title { font-size: var(--fs-base); }
-    .um-btn-serve { padding: 12px 8px; font-size: var(--fs-base); }
-    .um-player-row { padding: 10px 6px; grid-template-columns: 24px 1fr 44px 44px; }
-    .um-player-name { font-size: var(--fs-base); }
-    .um-games, .um-points { font-size: var(--fs-lg); }
+    .um-btn-serve { padding: var(--space-3) var(--space-2); font-size: var(--fs-base); }
+    .um-player-row { padding: var(--space-3) var(--space-2); grid-template-columns: 24px 1fr 44px 44px; }
+    /* КЕГЛИ ЗДЕСЬ НЕ УМЕНЬШАЮТСЯ, И ЭТО ПОПРАВКА К СЕБЕ.
+       Прежний блок стоял на 375 и мельчил имя до 16, а счёт до 21. Я
+       расширил границу до 640 — и уменьшение поехало на ВСЕ телефоны:
+       померено на 390, счёт стал 21 вместо 26. Судья читает этот экран на
+       улице, на солнце, между розыгрышами; ему нужно крупнее, а не мельче.
+       Уменьшать имя было нужно, пока оно обрезалось в одну строку, — теперь
+       оно переносится, и повод исчез. Остаются только отступы. */
 }
 
 /* Landscape */
+/* ТЕСНО ПО ВЫСОТЕ. Здесь уменьшение оправдано: места по вертикали нет
+   физически. Но счёт — последнее, что мельчает: сначала кнопки и отступы. */
 @media (orientation: landscape) and (max-height: 500px) {
-    #um-app { padding: 6px; gap: 6px; }
+    #um-app { padding: var(--space-2); gap: var(--space-2); }
     .um-btn-p1, .um-btn-p2, .um-btn-start { min-height: 80px; font-size: var(--fs-base); }
-    .um-player-row { padding: 6px 8px; }
-    .um-games, .um-points { font-size: var(--fs-lg); }
+    .um-player-row { padding: var(--space-2); }
+    .um-match-meta { display: none; }
+}
+
+/* КОЛЬЦО ФОКУСА. Не было ни у одной кнопки: судья, идущий клавишами или
+   внешней клавиатурой, не видел, где он. WCAG 2.4.7. */
+.um-btn:focus-visible {
+    outline: 3px solid var(--um-accent);
+    outline-offset: 3px;
+}
+
+/* Движение выключается по просьбе системы. Полоса статуса LIVE пульсирует
+   бесконечно, и она висит перед судьёй весь матч. WCAG 2.3.3. */
+@media (prefers-reduced-motion: reduce) {
+    .um-status-live { animation: none; }
+    .um-btn:active { transform: none; }
+    .um-changeover-fill { transition: none; }
+    .um-player-row { transition: none; }
 }
