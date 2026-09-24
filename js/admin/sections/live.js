@@ -322,6 +322,10 @@
                             '<span id="liveSponsorName" style="font-size:0.8rem;color:var(--text-dim);"></span>' +
                         '</div>' +
                         '<input type="hidden" id="liveSponsorUrl">' +
+                        // ИМЯ СПОНСОРА. До 24.09 поля не было: грузили только
+                        // картинку, и на табло она подписывалась alt="Sponsor" —
+                        // диктор читал «Sponsor». Решение Кости: имя завести.
+                        '<input type="text" class="ad-field-input" id="liveSponsorName2" placeholder="' + L.liveSponsorNamePh + '" style="margin-top:8px;">' +
                         '<div id="liveSponsorPreview" style="margin-top:8px;display:none;"><img id="liveSponsorImg" style="max-height:40px;border-radius:4px;"></div>' +
                     '</div>' +
                     // YouTube
@@ -448,6 +452,7 @@
                 set_format: document.getElementById('liveSetFormat').value || 'standard',
                 tournament_label: document.getElementById('liveTournLabel').value.trim() || null,
                 sponsor_logo: document.getElementById('liveSponsorUrl').value || null,
+                sponsor_name: (document.getElementById('liveSponsorName2') || {}).value || null,
                 status: 'warmup'
             };
 
