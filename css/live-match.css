@@ -1,414 +1,395 @@
-/* ============================================
-   KSLT — Live Match Page Styles (lm- prefix)
-   YouTube embed + realtime live score
-   ============================================ */
+/* ============================================================
+   КСЛТ — СТРАНИЦА МАТЧА.  Префикс lm-
+   ============================================================
+   РАМКА СТРАНИЦЫ — ЭТАЛОН ЛЕНДИНГА, решение Кости 24.09.
+   Своих чисел у страницы нет: поле от края задаёт --pad-x,
+   ширину ограничивает та же формула (максимум 1400),
+   отбивку сверху — --header-h. Было: контейнер 1100 и поля
+   20 / 12 числом, отсюда левый край 110 против 28 у шапки.
+   Это дефект h243 из описания компонента Header 168:147.
+
+   СЕТКА НЕ МЕНЯЕТСЯ. Слева видео, если есть youtube_url, и
+   ход матча, если его нет. Табло справа всегда одной ширины.
+   Решение Кости 24.09: «если будет ссылка с youtube — будет
+   видео, если нет — будет это». Одна сетка — одна раскладка
+   в коде, одна в заморозке, один тест, и появившаяся посреди
+   матча трансляция не перекладывает страницу под руками.
+
+   Доска: Live match — the score is the page, video joins it.
+   ============================================================ */
 
 .lm-container {
-    max-width: var(--container-narrow);
-    margin: 0 auto;
-    padding: 80px 20px 40px;
+    /* 40 — «воздух под шапкой» по доске 323:2 */
+    padding: calc(var(--header-h) + var(--space-10)) var(--pad-x) var(--space-10);
 }
 
-/* Layout: 2 columns on desktop */
+/* ── НАЗАД ────────────────────────────────────────────────
+   Ссылка, а не кнопка: она ничего не отправляет. Но цель
+   нажатия берёт ступень md 44 у Button 17:82 и кольцо фокуса
+   3px — «required on every button», WCAG 2.4.7. Тот же приём
+   уже применён к .auth-back-link. */
+.lm-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: fit-content;
+    min-height: var(--btn-h-md);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--text-secondary);
+    text-decoration: none;
+    margin-bottom: var(--space-2);
+    transition: color var(--transition-fast);
+}
+.lm-back-link:hover { color: var(--text-primary); }
+.lm-back-link:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+}
+
+/* ── ЗАГОЛОВОК МАТЧА ──────────────────────────────────────
+   Страница называет матч. Раньше заголовка не было вовсе, и
+   первым заголовком документа был h4 подвала. */
+.lm-title {
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-extrabold);
+    line-height: var(--lh-tight);
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-2);
+}
+.lm-meta {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    margin: 0 0 var(--space-6);
+}
+
+/* ── СЕТКА ────────────────────────────────────────────────
+   2 : 1 при зазоре 24. На 1280 содержимое 1224 — это ровно
+   800 и 400; на 1400 — 917 и 459. Число колонок — свойство
+   экрана, ширина табло выводится из него, а не задаётся. */
 .lm-grid {
     display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 24px;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-6);
     align-items: start;
 }
 
-/* YouTube embed */
+/* ── ВИДЕО ────────────────────────────────────────────────*/
 .lm-video {
     width: 100%;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    background: #111;
+    background: var(--bg-card);
 }
-.lm-video-wrapper {
-    position: relative;
-    padding-bottom: 56.25%; /* 16:9 */
-    height: 0;
-}
+.lm-video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; }
 .lm-video-wrapper iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-}
-.lm-no-video {
-    aspect-ratio: 16/9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,0.03);
-    color: rgba(255,255,255,0.3);
-    font-size: var(--fs-md);
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; border: none;
 }
 
-/* Score panel */
+/* ── ТАБЛО ────────────────────────────────────────────────
+   Коробка — Card 29:65: радиус 16, 1px border/subtle, bg/card. */
 .lm-score-panel {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
     overflow: hidden;
 }
 
-.lm-live-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background: rgba(239,83,80,0.1);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #EF5350;
-}
-.lm-live-badge .lm-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #EF5350;
-    animation: lm-pulse 1.5s infinite;
-}
-.lm-badge-warmup {
-    background: rgba(255,255,255,0.05);
-    color: rgba(255,255,255,0.5);
-}
-.lm-badge-warmup .lm-dot { background: rgba(255,255,255,0.3); animation: none; }
-.lm-badge-completed {
-    background: rgba(204,255,0,0.08);
-    color: var(--accent, #CCFF00);
-}
-.lm-badge-completed .lm-dot { background: var(--accent, #CCFF00); animation: none; }
-.lm-badge-paused {
-    background: rgba(255,167,38,0.1);
-    color: #FFA726;
-}
-.lm-badge-paused .lm-dot { background: #FFA726; animation: none; }
+/* Бейдж статуса НЕ объявляется здесь: страница берёт .live-badge
+   лендинга вместе с тонами is-live / is-warmup / is-paused.
+   Одно определение на одно понятие — до 24.09 их было два, и
+   они расходились: разминка была янтарной на главной и серой
+   здесь, пауза наоборот. */
 
-@keyframes lm-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-}
-
-/* Player rows */
-.lm-players {
-    padding: 0;
-}
+.lm-players { padding: 0; }
 
 .lm-player-row {
     display: grid;
-    grid-template-columns: 44px 1fr auto;
+    grid-template-columns: 40px 1fr auto;
     align-items: center;
-    padding: 12px 16px;
-    gap: 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border-subtle);
 }
 .lm-player-row:last-child { border-bottom: none; }
-.lm-player-row.lm-serving { background: rgba(255,255,255,0.03); }
-.lm-player-row.lm-winner-row { background: rgba(204,255,0,0.06); }
+.lm-player-row.lm-serving { background: var(--surface-glass); }
+.lm-player-row.lm-winner-row { background: var(--accent-subtle); }
 
-.lm-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255,255,255,0.1);
-}
+/* Аватар — ступени Avatar 29:82: md 40 широкий, sm 32 телефон.
+   Было 44 / 36 / 32 — ни одна не на шкале компонента. */
+.lm-avatar,
 .lm-avatar-placeholder {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--fs-base);
-    font-weight: 700;
-    color: rgba(255,255,255,0.4);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+}
+.lm-avatar { object-fit: cover; border: 2px solid var(--border-subtle); }
+.lm-avatar-placeholder {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface-glass-hover);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-secondary);
 }
 
-.lm-name-block {
-    min-width: 0;
-}
+.lm-name-block { min-width: 0; }
 .lm-player-name {
-    font-size: var(--fs-base);
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    display: flex; align-items: center; gap: var(--space-2);
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .lm-serve-indicator {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #66BB6A;
+    width: 8px; height: 8px; border-radius: var(--radius-full);
+    background: var(--success);
     flex-shrink: 0;
 }
 
-.lm-scores {
-    display: flex;
-    gap: 2px;
-    align-items: center;
-}
+/* ЛЕСТНИЦА ЦИФР. До 24.09 имя, счёт сета и очки были все трое
+   16 — три уровня одним кеглем, иерархии нет. Ступени взяты из
+   шкалы, промежуточных не заведено (правило Stat tile 39:57). */
+.lm-scores { display: flex; gap: var(--space-2); align-items: baseline; }
 .lm-set-score {
-    width: 28px;
+    min-width: 26px;
     text-align: center;
-    font-size: var(--fs-base);
-    font-weight: 700;
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-extrabold);
     font-variant-numeric: tabular-nums;
-    color: rgba(255,255,255,0.6);
-    padding: 4px 0;
+    color: var(--text-muted);
 }
-.lm-set-score.lm-current {
-    color: #fff;
-    font-weight: 800;
-}
+.lm-set-score.lm-current { color: var(--text-primary); }
 .lm-points-score {
-    width: 32px;
+    min-width: 56px;
     text-align: center;
-    font-size: var(--fs-base);
-    font-weight: 800;
-    color: var(--accent, #CCFF00);
-    background: rgba(204,255,0,0.1);
-    border-radius: 4px;
-    padding: 4px 0;
-    margin-left: 4px;
+    font-size: var(--fs-3xl);
+    font-weight: var(--fw-extrabold);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--lh-tight);
+    color: var(--accent);
 }
 
-/* Match info */
+/* ── ПОДАЧА И СВЕДЕНИЯ ────────────────────────────────────*/
 .lm-info {
-    padding: 12px 16px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--border-subtle);
+    display: flex; flex-direction: column; gap: var(--space-2);
 }
 .lm-info-row {
-    display: flex;
-    justify-content: space-between;
+    display: flex; justify-content: space-between; gap: var(--space-3);
     font-size: var(--fs-xs);
-    color: rgba(255,255,255,0.4);
+    /* Было rgba(255,255,255,0.4) — контраст 3.83 при пороге 4.5.
+       --text-muted это 50 %, и он порог проходит. */
+    color: var(--text-muted);
 }
-.lm-info-val {
-    color: rgba(255,255,255,0.7);
-    font-weight: 600;
-}
+.lm-info-val { color: var(--text-secondary); font-weight: var(--fw-semibold); }
 
-/* Winner block */
+/* ── СПОНСОР МАТЧА ────────────────────────────────────────
+   Поле sponsor_logo в базе есть с самого начала и рисовалось
+   только на табло для зала (js/scoreboard.js). Человек, который
+   смотрит матч из дома, спонсора не видел вовсе. Лайма здесь
+   нет: акцент принадлежит главному действию экрана, 109:370. */
+.lm-sponsor {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--border-subtle);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+}
+.lm-sponsor-logo { max-height: 20px; width: auto; display: block; }
+.lm-sponsor-name { color: var(--text-secondary); font-weight: var(--fw-semibold); }
+
+/* ── ПОБЕДИТЕЛЬ ───────────────────────────────────────────*/
 .lm-winner-block {
-    padding: 16px;
+    padding: var(--space-4);
     text-align: center;
-    background: rgba(204,255,0,0.06);
-    border-top: 1px solid rgba(204,255,0,0.15);
+    background: var(--accent-subtle);
+    border-top: 1px solid var(--border-subtle);
 }
 .lm-winner-text {
     font-size: var(--fs-base);
-    font-weight: 700;
-    color: var(--accent, #CCFF00);
+    font-weight: var(--fw-bold);
+    color: var(--accent);
 }
 .lm-final-score {
     font-size: var(--fs-sm);
-    color: rgba(255,255,255,0.5);
-    margin-top: 4px;
+    color: var(--text-muted);
+    margin-top: var(--space-2);
 }
 
-/* Tiebreak indicator */
 .lm-tiebreak-badge {
     text-align: center;
-    padding: 4px;
+    padding: var(--space-2);
     font-size: var(--fs-2xs);
-    font-weight: 700;
+    font-weight: var(--fw-semibold);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #FFA726;
-    background: rgba(255,167,38,0.08);
+    letter-spacing: 0.5px;
+    color: var(--warning);
+    background: var(--warning-subtle);
 }
 
-/* ====== LIST MODE ====== */
-.lm-list-header {
-    text-align: center;
-    margin-bottom: 32px;
+/* ── ХОД МАТЧА ────────────────────────────────────────────
+   Занимает место видео, когда трансляции нет. Построено на
+   Timeline item 39:78: точка 12 на рельсе 2, отступ 16,
+   ведущее слово 14 Bold акцентом. «Last has no trailing rail» —
+   поэтому рельс обрывается на текущем гейме. */
+.lm-feed {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-4) var(--space-2);
 }
-.lm-list-title {
-    font-size: var(--fs-2xl);
-    font-weight: 800;
-    margin: 0 0 6px;
-}
-.lm-list-subtitle {
-    font-size: var(--fs-base);
-    color: rgba(255,255,255,0.5);
-    margin: 0;
-}
-
-.lm-list-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: 16px;
-}
-
-.lm-card {
-    display: block;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 16px;
-    text-decoration: none;
-    color: inherit;
-    transition: background 0.15s, border-color 0.15s, transform 0.15s;
-}
-.lm-card:hover {
-    background: rgba(255,255,255,0.07);
-    border-color: rgba(255,255,255,0.15);
-    transform: translateY(-2px);
-}
-
-.lm-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-}
-.lm-card-info {
-    font-size: var(--fs-xs);
-    color: rgba(255,255,255,0.4);
-}
-
-.lm-card-players {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.lm-card-player {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-}
-.lm-card-right {
-    flex-direction: row-reverse;
-    text-align: right;
-}
-.lm-card-pname {
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.lm-card-right .lm-card-pname {
-    flex-direction: row-reverse;
-}
-
-.lm-card-score {
-    flex-shrink: 0;
-    text-align: center;
-    min-width: 60px;
-}
-.lm-card-vs {
-    font-size: var(--fs-sm);
-    color: rgba(255,255,255,0.3);
-    font-weight: 700;
-}
-.lm-card-sets {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-}
-.lm-card-set {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1px;
-    font-size: var(--fs-md);
-    font-weight: 800;
-    line-height: 1.1;
-    color: rgba(255,255,255,0.6);
-}
-.lm-card-set .lm-lead { color: var(--accent, #CCFF00); }
-.lm-card-set-current { color: var(--accent, #CCFF00); }
-
-.lm-card-video-tag {
-    margin-top: 10px;
-    padding: 4px 10px;
-    display: inline-block;
-    background: rgba(204,255,0,0.08);
-    border-radius: 100px;
+.lm-feed-title {
     font-size: var(--fs-2xs);
-    font-weight: 600;
-    color: var(--accent, #CCFF00);
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-4);
 }
-
-/* Back link */
-.lm-back-link {
-    display: inline-block;
-    margin-bottom: 20px;
+.lm-feed-list { list-style: none; margin: 0; padding: 0; position: relative; }
+.lm-feed-item {
+    position: relative;
+    display: flex; justify-content: space-between; gap: var(--space-4);
+    padding: 0 0 var(--space-4) var(--space-6);
     font-size: var(--fs-sm);
-    color: var(--accent, #CCFF00);
-    text-decoration: none;
-    font-weight: 600;
+    color: var(--text-secondary);
 }
-.lm-back-link:hover { text-decoration: underline; }
+.lm-feed-item::before {
+    content: '';
+    position: absolute; left: 0; top: 4px;
+    width: 12px; height: 12px;
+    border-radius: var(--radius-full);
+    background: var(--surface-glass-hover);
+}
+.lm-feed-item::after {
+    content: '';
+    position: absolute; left: 5px; top: 18px; bottom: 0;
+    width: 2px;
+    background: var(--border-subtle);
+}
+.lm-feed-item:last-child::after { display: none; }
+.lm-feed-item.is-now { color: var(--accent); font-weight: var(--fw-bold); }
+.lm-feed-item.is-now::before { background: var(--accent); }
+.lm-feed-note { font-size: var(--fs-xs); color: var(--text-muted); }
 
-/* Empty state */
+/* Переключение сетов — ЧИП (Filter chip 49:77), а не таб: он фильтрует
+   список на месте, а не переключает весь экран. «They look similar and
+   must not be swapped» — из описания компонента. */
+.lm-feed-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4); }
+.lm-chip {
+    height: var(--btn-h-sm);
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    background: var(--surface-glass);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    font-family: inherit;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+.lm-chip.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-on);
+    font-weight: var(--fw-semibold);
+}
+.lm-chip:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+.lm-feed-now {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    margin: 0 0 var(--space-2);
+}
+
+/* Розыгрыши текущего гейма. Полоска слева говорит, кто взял очко —
+   цвет не остаётся единственным признаком: рядом стоит сам счёт. */
+.lm-points { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0 0 var(--space-4); padding: 0; }
+.lm-point {
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--surface-glass);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+}
+.lm-point-w1 { box-shadow: inset 2px 0 0 var(--success); }
+.lm-point-w2 { box-shadow: inset -2px 0 0 var(--warning); }
+
+.lm-break {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    color: var(--accent);
+    background: var(--accent-subtle);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-full);
+}
+
+/* ── ПУСТО ────────────────────────────────────────────────
+   Empty state 37:53: «Always say what will appear here and how,
+   never just no data». Единственное место, где надпись уместна:
+   матч не начался, показывать нечего ни слева, ни справа. */
 .lm-empty {
+    padding: var(--space-12) var(--space-5);
     text-align: center;
-    padding: 60px 20px;
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-lg);
 }
-.lm-empty-icon { font-size: var(--fs-3xl); margin-bottom: 16px; }
 .lm-empty-title {
-    font-size: var(--fs-md);
-    font-weight: 700;
-    margin-bottom: 6px;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-2);
 }
-.lm-empty-text {
-    font-size: var(--fs-sm);
-    color: rgba(255,255,255,0.4);
-}
+.lm-empty-text { font-size: var(--fs-sm); color: var(--text-muted); margin: 0; }
 
-/* Loading / Error */
 .lm-loading, .lm-error {
     text-align: center;
-    padding: 80px 20px;
-    color: rgba(255,255,255,0.4);
+    padding: var(--space-12) var(--space-4);
+    color: var(--text-muted);
     font-size: var(--fs-md);
 }
-.lm-error { color: #EF5350; }
+.lm-error { color: var(--danger); }
 
-/* Responsive */
-@media (max-width: 991px) {
-    .lm-grid {
-        grid-template-columns: 1fr;
-    }
+/* ── ВИДЫ ─────────────────────────────────────────────────
+   Две границы на весь продукт: 640 и 992. Было 991 · 480 · 375 —
+   ни одна не из лестницы, и 375 заводил отдельный мир для
+   iPhone SE рядом с iPhone 14. */
+@media (max-width: 992px) {
+    .lm-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 480px) {
-    .lm-container { padding: 70px 12px 24px; }
-    .lm-player-row { padding: 10px 12px; gap: 8px; }
-    .lm-avatar, .lm-avatar-placeholder { width: 36px; height: 36px; }
-    .lm-player-name { font-size: var(--fs-sm); }
-    .lm-list-grid { grid-template-columns: 1fr; }
-    .lm-list-title { font-size: var(--fs-xl); }
-    .lm-card-pname { font-size: var(--fs-xs); }
-}
-
-@media (max-width: 375px) {
-    .lm-container { padding: 70px 8px 20px; }
-    .lm-player-row { padding: 8px 8px; gap: 6px; }
+@media (max-width: 640px) {
+    .lm-title { font-size: var(--fs-xl); }
+    .lm-player-row { grid-template-columns: 32px 1fr auto; gap: var(--space-2); padding: var(--space-3); }
     .lm-avatar, .lm-avatar-placeholder { width: 32px; height: 32px; }
-    .lm-player-name { font-size: var(--fs-xs); }
-    .lm-set-score { width: 24px; font-size: var(--fs-sm); }
-    .lm-points-score { width: 28px; }
+    .lm-avatar-placeholder { font-size: var(--fs-xs); }
+    .lm-player-name { font-size: var(--fs-base); }
+    .lm-set-score { font-size: var(--fs-lg); min-width: 20px; }
+    .lm-points-score { font-size: var(--fs-2xl); min-width: 44px; }
+}
+
+/* ТЕСНО ПО ВЫСОТЕ — телефон боком. Ширина здесь 844, то есть по ширине
+   это «широкий» вид, и лестница осталась бы крупной при высоте экрана 390.
+   Делится высотой и поворотом, как и весь остальной продукт: по ширине у
+   нас только две границы. */
+@media (orientation: landscape) and (max-height: 500px) {
+    .lm-container { padding-top: calc(var(--header-h) + var(--space-6)); }
+    .lm-title { font-size: var(--fs-xl); }
+    .lm-meta { margin-bottom: var(--space-4); }
+    .lm-empty { padding: var(--space-6) var(--space-4); }
+}
+
+/* Бесконечной анимации у бейджа не должно быть у того, кто
+   попросил систему убрать движение. WCAG 2.3.3. */
+@media (prefers-reduced-motion: reduce) {
+    .live-badge.is-live { animation: none; }
+    .lm-back-link,
+    .lm-chip { transition: none; }
 }

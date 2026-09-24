@@ -2536,6 +2536,14 @@ h2 {
     color: var(--text-secondary);
 }
 
+/* Neutral / Subtle — ЗАВЕРШЁН. Тон тот же, что у паузы: по доске
+   328:9 завершённый матч и пауза оба нейтральны. Повтор намеренный
+   и стережётся правилом: два состояния — два имени, один тон. */
+.live-badge.is-completed {
+    background: var(--surface-glass-hover);
+    color: var(--text-secondary);
+}
+
 .match-set {
     color: var(--text-dim);
     font-size: var(--fs-sm);
