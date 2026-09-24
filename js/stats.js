@@ -41,19 +41,27 @@
      * оставляем прочерк: соврать «ноль тренеров» хуже, чем честно не знать.
      */
     function apply(id, err, value) {
-        var el = document.getElementById(id);
-        if (!el) return;
+        // Одно число может стоять на странице в нескольких местах: 24.09 счёт
+        // турниров понадобился и в шапке, и в блоке «Станьте спонсором».
+        // Два разных механизма на одно понятие однажды разойдутся, поэтому
+        // счётчик остаётся один, а мест у него столько, сколько нужно:
+        // id — для первого, data-stat — для всех остальных.
+        var els = document.querySelectorAll('#' + id + ', [data-stat="' + id + '"]');
+        if (!els.length) return;
 
         if (err) {
             console.error('[KSLT] цифры, ' + id + ':', err.message || err);
             return;
         }
         if (!value) {
-            var card = el.closest('.ip-stat-card, .stat');
-            if (card) card.style.display = 'none';
+            Array.prototype.forEach.call(els, function(el) {
+                var card = el.closest('.ip-stat-card, .stat');
+                if (card) card.style.display = 'none';
+            });
             return;
         }
-        el.textContent = value.toLocaleString(LOCALE);
+        var text = value.toLocaleString(LOCALE);
+        Array.prototype.forEach.call(els, function(el) { el.textContent = text; });
     }
 
     // Числа берём одной функцией на сервере.

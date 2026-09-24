@@ -7867,8 +7867,15 @@ body.nav-open {
 
            Было --space-xl (80px): между разделами копилось 160 пикселей пустоты —
            пол-экрана телефона уходило в никуда. 40 хватает, чтобы разделы
-           читались раздельно. По бокам 5% давали 19 пикселей — карточки почти
-           упирались в край экрана */
+           читались раздельно.
+
+           ПОЛЕ ПО БОКАМ — 24.09. Здесь стояло 26px числом, и это был ВТОРОЙ
+           левый край страницы. Померено на 768: семь секций стояли на 26, а
+           #venues и блок спонсорам — на системном --pad-x, 16.89, потому что
+           их слои переписаны и берут формулу. Тест 40-sponsor нашёл это,
+           требуя одного края, и был прав про страницу, а не про блок.
+           Одно понятие — одно определение: поле от края экрана задаёт --pad-x
+           и только оно. 26 не ступень шкалы и ниоткуда не выведено. */
         padding-inline: 26px;
     }
 
@@ -9813,16 +9820,28 @@ input:-internal-autofill-previewed {
    Под логотипами спонсоров: показали, кто с нами, и тут же позвали встать
    рядом. Цифры — потому что спонсору важна аудитория, а не слова. Подробное
    предложение живёт на отдельной странице, сюда влезает только главное.
+
+   ЭТО РАЗДЕЛ, А НЕ ПЕРЕБИВКА ВНУТРИ РАЗДЕЛА. У него своя секция, свои
+   отступы сверху и снизу и своя поверхность — поэтому заголовок говорит
+   голосом раздела (26 / Extra Bold), а числа стоят ступенью НИЖЕ него.
+   До 24.09 было наоборот: заголовок 21, числа 26 — и первым в блоке про
+   спонсорство читалась цифра 350. Замерено на пяти видах, доска 437:9.
+
+   КОРОБКА-ПРЕДЛОЖЕНИЕ СУЩЕСТВУЕТ В ПРОЕКТЕ ДВАЖДЫ: здесь и .sn-final
+   на странице спонсоров (sponsors.css). Заливка, радиус и свечение у них
+   общие — эталон здесь, за расхождением следит правило-сторож.
    ======================================== */
 
 /* Отступ сверху такой же, как у заголовков разделов от разделительной
    линии — иначе карточка прилипает к полосе */
 .sp-offer-wrap { padding: var(--section-y-sm) var(--pad-x) var(--section-y); }
 
+/* Ширины своей у коробки нет: её задаёт --pad-x обёртки, как и всем
+   остальным секциям страницы. Было max-width: var(--container-narrow) —
+   1100 при контейнере 1400, и на 1280 содержимое блока начиналось на
+   125 пикселе против 28 у соседей. Третий левый край на одной странице. */
 .sp-offer {
-    max-width: var(--container-narrow);
-    margin: 0 auto;
-    padding: 30px 34px;
+    padding: var(--space-6) var(--space-8);
     background: var(--surface-glass);
     border: 1px solid rgba(204, 255, 0, 0.2);
     border-radius: var(--radius-xl);
@@ -9844,37 +9863,48 @@ input:-internal-autofill-previewed {
 }
 .sp-offer > * { position: relative; z-index: 1; }
 
-.sp-offer h3 {
-    font-size: var(--fs-lg);
-    font-weight: 800;
+/* Голос раздела. Мобильная ступень — в общем правиле заголовков разделов,
+   там же, где она у всех остальных: пара «этот заголовок и заголовок
+   соседнего раздела» обязана ехать одной границей. */
+.sp-offer h2 {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-extrabold);
+    letter-spacing: -0.03em;
+    line-height: var(--lh-tight);
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin: 0 0 var(--space-2);
 }
 
+/* Вступление — обычный текст, а не лид. Ступень lead (21 / 16) заведена
+   для абзаца ПОД заголовком раздела; внутри коробки это body. */
 .sp-offer-lead {
     color: var(--text-secondary);
     font-size: var(--fs-base);
-    line-height: 1.6;
+    line-height: var(--lh-relaxed);
     max-width: 640px;
-    margin-bottom: 22px;
+    margin: 0 0 var(--space-6);
 }
 
 .sp-nums {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-bottom: 22px;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
 }
+
+/* Ступень НИЖЕ заголовка блока. Stat tile 39:57 сюда не подходит — у него
+   своя поверхность, а наши числа лежат внутри уже готовой; но его правило
+   «подпись говорит, что именно посчитано» взято дословно. */
 .sp-num-val {
-    font-size: var(--fs-xl);
-    font-weight: 800;
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-extrabold);
     color: var(--accent);
-    line-height: 1;
+    line-height: var(--lh-tight);
     letter-spacing: -0.02em;
 }
 .sp-num-cap {
     display: block;
-    margin-top: 6px;
+    margin-top: var(--space-2);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
     line-height: 1.4;
@@ -9883,23 +9913,25 @@ input:-internal-autofill-previewed {
 .sp-gives {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 9px 32px;
-    margin-bottom: 24px;
+    gap: var(--space-3) var(--space-8);
+    margin: 0 0 var(--space-6);
     list-style: none;
     padding: 0;
 }
 .sp-gives li {
     position: relative;
-    padding-left: 24px;
+    padding-left: var(--space-6);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
     line-height: 1.45;
 }
+/* Галочка нарисована рамками: иконочного набора на сайте ещё нет, и таких
+   галочек в коде тринадцать штук. Сведение их в одну — отдельный кусок. */
 .sp-gives li::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 5px;
+    top: 0.35em;
     width: 13px;
     height: 7px;
     border-left: 2px solid var(--accent);
@@ -9907,28 +9939,80 @@ input:-internal-autofill-previewed {
     transform: rotate(-45deg);
 }
 
+/* Button 17:82: высота свойством, а не полями; md 44 — минимальная цель
+   нажатия; кольцо фокуса обязательно (WCAG 2.4.7). Было 48/40 из паддинга,
+   и 40 не проходило порог. */
 .sp-cta-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 26px;
+    justify-content: center;
+    gap: var(--space-2);
+    height: var(--btn-h-md);
+    padding: 0 var(--space-6);
     border-radius: var(--radius-full);
     border: none;
     background: var(--accent);
-    color: #0a0a0a;
+    color: var(--accent-on);
     font-family: inherit;
-    font-size: var(--fs-base);
-    font-weight: 700;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
     cursor: pointer;
     text-decoration: none;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .sp-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(204, 255, 0, 0.25); }
+.sp-cta-btn:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
 
-@media (max-width: 900px) {
-    .sp-offer { padding: 26px 22px; }
-    .sp-nums { grid-template-columns: 1fr 1fr; }
+@media (prefers-reduced-motion: reduce) {
+    .sp-cta-btn { transition: none; }
+    .sp-cta-btn:hover { transform: none; }
+}
+
+/* Телефон. Граница та же, на которой переключается заголовок раздела:
+   заголовок и число читаются парой и обязаны ехать одной границей.
+   Когда общий долг по ломкам будет закрыт и заголовки разделов уедут
+   на 640, этот слой уедет вместе с ними — правило заморозки проверяет
+   ОТНОШЕНИЕ, а не число. */
+@media (max-width: 768px) {
+    .sp-offer { padding: var(--space-4); }
+
+    .sp-offer-lead {
+        font-size: var(--fs-sm);
+        line-height: var(--lh-normal);
+        margin-bottom: var(--space-4);
+    }
+
+    .sp-nums {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-4);
+        margin-bottom: var(--space-4);
+    }
+    .sp-num-val { font-size: var(--fs-md); }
+    .sp-num-cap { font-size: var(--fs-xs); }
+
+    .sp-gives {
+        gap: var(--space-3);
+        margin-bottom: var(--space-4);
+    }
+}
+
+/* Телефон по ширине. Список встаёт в одну колонку: на двух колонка выходила
+   в 156 пикселей, строка — в 19 знаков, и каждый пункт ложился в три строки.
+   Замерено на 390. На 768 колонка 342 — там две колонки читаются, и одна
+   колонка стоила бы разделу 64 пикселя высоты. */
+@media (max-width: 640px) {
     .sp-gives { grid-template-columns: 1fr; }
+}
+
+/* Телефон боком: тесно по высоте — режем воздух, а не кегль */
+@media (orientation: landscape) and (max-height: 500px) {
+    .sp-offer { padding: var(--space-4) var(--space-6); }
+    .sp-offer-lead { margin-bottom: var(--space-4); }
+    .sp-nums { margin-bottom: var(--space-4); }
+    .sp-gives { margin-bottom: var(--space-4); }
 }
 
 /* Логотип спонсора, у которого нет ни ссылок, ни описания: показываем, но
@@ -10564,19 +10648,13 @@ input:-internal-autofill-previewed {
        и попав в это правило она получала ровно его голос, 21 / Extra Bold.
        Её ступень живёт в её собственном блоке. */
     .section-header h2,
+    /* Заголовок блока «Станьте спонсором» — это заголовок раздела, а не
+       перебивка внутри него: у блока своя секция, свои отступы и своя
+       поверхность. Ступень у него общая, и живёт она здесь, в одном месте. */
+    .sp-offer h2,
     section > h2 {
         font-size: var(--fs-lg);   /* 21 */
         font-weight: 800;          /* Extra Bold */
-        letter-spacing: -0.03em;
-        line-height: 1.2;
-    }
-
-    /* .sp-offer h3 НАРОЧНО остаётся как был: это h3, а не заголовок раздела,
-       и по лестнице у него своя ступень — 21 / Bold. В общее правило он попал
-       заодно. Разводить ступени h2 и h3 по всему сайту — отдельная работа. */
-    .sp-offer h3 {
-        font-size: clamp(1.15rem, 5vw, 1.32rem);
-        font-weight: 700;
         letter-spacing: -0.03em;
         line-height: 1.2;
     }
@@ -10718,43 +10796,6 @@ input:-internal-autofill-previewed {
         object-fit: contain;
     }
 
-    /* «Стань спонсором»: блок вытянулся на 772 пикселя — вступление крупным
-       шрифтом, четыре обещания столбиком и 120 пикселей отступов секции */
-    .sp-offer-wrap {
-        padding: 28px 19px 32px;
-    }
-
-    .sp-offer {
-        padding: 16px 14px;
-    }
-
-
-    .sp-offer-lead {
-        font-size: var(--fs-xs);
-        line-height: 1.4;
-    }
-
-    .sp-nums {
-        gap: 10px;
-    }
-
-    .sp-nums > * { font-size: var(--fs-2xs); line-height: 1.25; }
-
-    /* Числа стояли в 27 пикселей — на телефоне они кричали громче заголовка */
-    .sp-num-val { font-size: var(--fs-lg); line-height: 1.2; }
-    .sp-num-cap { font-size: var(--fs-2xs); line-height: 1.25; }
-
-    /* Что получает спонсор — по два в ряд вместо столбика */
-    .sp-gives {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px 10px;
-        font-size: var(--fs-2xs);
-    }
-
-    .sp-cta-btn {
-        padding: 11px 20px;
-        font-size: var(--fs-xs);
-    }
 
 
 
