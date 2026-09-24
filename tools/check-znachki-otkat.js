@@ -77,9 +77,12 @@ const ОТКАТЫ = [
  '    padding: 0 36px;',
  'горизонтальное поле кнопки — ступень шкалы'],
 
+/* ЯКОРЬ ПЕРЕПИСАН 24.09: он держался на соседе по списку — .pt-invite-btn,
+   которого 24.09 из этого яруса вынули четвёртым по счёту. Держится теперь
+   на том, что в блоке постоянно, — на первой строке самого списка. */
 ['вернуть кнопку в ступень «обычная 40»', 'css/style.css',
- '    .btn-secondary.btn-secondary,\n    .pt-invite-btn.pt-invite-btn,',
- '    .btn-secondary.btn-secondary,\n    .badges-cta-btn.badges-cta-btn,\n    .pt-invite-btn.pt-invite-btn,',
+ '    .btn-secondary.btn-secondary,\n    .ct-card-btn.ct-card-btn,',
+ '    .btn-secondary.btn-secondary,\n    .badges-cta-btn.badges-cta-btn,\n    .ct-card-btn.ct-card-btn,',
  'кнопка вынута из ступени «обычная 40»'],
 
 ['сделать кнопку круглой в обход решения', 'css/style.css',

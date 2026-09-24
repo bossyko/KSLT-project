@@ -43,9 +43,12 @@ const ОТКАТЫ = [
  '    border-radius: 20px;\n    overflow: hidden;\n    isolation: isolate;',
  '.pt-guest-cta держит общую форму: border-radius'],
 
+/* ЯКОРЬ ПЕРЕПИСАН 24.09: он держался на max-width: 420px, а 24.09 копия
+   подключена к эталону и ширина стала 340 — общей у обеих секций. Держится
+   теперь на трёх строках общей формы, которые правило и сторожит. */
 ['снять размытие фона у карточки гостя', 'css/style.css',
- '    max-width: 420px;\n    width: 100%;\n    background: rgba(18, 18, 18, 0.85);\n    border-radius: 24px;\n    backdrop-filter: blur(20px);',
- '    max-width: 420px;\n    width: 100%;\n    background: rgba(18, 18, 18, 0.85);\n    border-radius: 24px;\n    backdrop-filter: blur(12px);',
+ '    width: 100%;\n    background: rgba(18, 18, 18, 0.85);\n    border-radius: 24px;\n    backdrop-filter: blur(20px);',
+ '    width: 100%;\n    background: rgba(18, 18, 18, 0.85);\n    border-radius: 24px;\n    backdrop-filter: blur(12px);',
  '.guest-cta-card держит общую форму: backdrop-filter'],
 
 ['снять регистрацию угла — обводка встанет молча', 'css/style.css',

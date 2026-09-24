@@ -19,7 +19,9 @@ const КУСКИ = [
     ['узкие виды турниров', 'check-turniry-vidy.js', 'check-turniry-vidy-otkat.js'],
     ['новости',             'check-novosti.js',      'check-novosti-otkat.js'],
     ['значки',              'check-znachki.js',      'check-znachki-otkat.js'],
-    ['коробка-гейт',        'check-korobka.js',      'check-korobka-otkat.js']
+    ['коробка-гейт',        'check-korobka.js',      'check-korobka-otkat.js'],
+    ['рейтинг',             'check-reyting.js',      'check-reyting-otkat.js'],
+    ['давай сыграем',       'check-igroki.js',       'check-igroki-otkat.js']
 ];
 
 function прогнать(файл) {
