@@ -4558,87 +4558,228 @@ h2 {
 }
 
 /* ========================================
-   ABOUT SECTION
+   РАЗДЕЛ «О ПРОЕКТЕ КСЛТ» — переписан 24.09.2026.
+   Доска Figma: About — six tiles that name six sections and lead nowhere
+   (427:9). Компонент иконки: Feature icon (429:191).
+
+   БЫЛО: три слоя на границах 992 и 768, и в блоке 768 одно понятие
+   определено дважды — строка 7734 ставила плиткам одну колонку и не
+   работала никогда, потому что ниже, в ТОМ ЖЕ условии, стояли две.
+
+   ГЛАВНОЕ: сетка возможностей — это навигация, а не витрина текста.
+   Шесть плиток называли шесть разделов сайта и никуда не вели.
    ======================================== */
 
 .section-about {
     background: var(--bg-primary);
 }
 
-/* Заголовок и вводный абзац — во всю ширину, над карточками */
+/* Заголовок раздела и тело — разные смысловые группы: 24 (правило 323:2) */
 .about-head {
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-6);
 }
 
-/* Заголовок и вводный абзац — одно целое. Общий отступ у заголовков
-   разделов рассчитан на то, что дальше идут карточки, а не свой же текст */
 .about-head .section-header {
-    margin-bottom: 16px;
+    margin-bottom: 0;
 }
 
+/* ДВЕ СТРОКИ ВМЕСТО ДВУХ КОЛОНОК.
+   Было: плитки заперты в левой колонке, а та обрезана зазором между
+   колонками. Замер: плитка 177 на 1280 и 133 на 1024 при кегле имени 16 —
+   четырнадцать знаков в строке. Теперь плитки идут отдельной строкой во
+   всю ширину и получают ≈450.
+   Зазор 32 — вокруг блока, который несёт свою поверхность (фотография). */
 .about-body {
     display: grid;
     grid-template-columns: 1.15fr 1fr;
-    gap: var(--space-2xl);
-    /* Фотография держит свои пропорции — растянутая на всю высоту, она
-       обрезалась по бокам и теряла круг из людей, ради которого снималась.
-       По высоте с карточками она не сойдётся никогда: снимок вдвое шире,
-       чем высок. Поэтому ставим по центру — так пустота делится поровну
-       сверху и снизу и в глаза не бросается */
+    column-gap: var(--space-8);
+    row-gap: var(--space-8);
     align-items: center;
 }
 
 .about-lead {
+    grid-column: 1;
+    grid-row: 1;
     font-size: var(--fs-lg);
-    color: var(--text-secondary);
     line-height: 1.7;
-    /* Ширину ограничиваем не из вредности: строка длиннее ~90 знаков читается
-       тяжело — глаз не находит начало следующей */
+    color: var(--text-secondary);
+    /* Ширину ограничиваем не из вредности: строка длиннее ~90 знаков
+       читается тяжело — глаз не находит начало следующей. Замер: 70 */
     max-width: 68ch;
-    margin-bottom: 0;
+    margin: 0;
 }
 
-.about-features {
-    display: grid;
-    /* Шесть карточек в три столбца — два ряда вместо трёх. Блок был выше
-       экрана, хотя текста в нём на треть меньше: место съедали пустые
-       промежутки, а не содержимое */
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px 28px;
+.about-image {
+    grid-column: 2;
+    grid-row: 1;
 }
 
-.feature {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.feature-icon {
-    font-size: var(--fs-xl);
-    line-height: 1;
-}
-
-.feature h4 {
-    font-size: var(--fs-base);
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.feature p {
-    font-size: var(--fs-base);
-    line-height: 1.5;
-    color: var(--text-dim);
-}
-
+/* Отношение сторон — свойство карточки, а не высота числом.
+   1400 × 691 — настоящий размер файла, поэтому кадр не режется вовсе,
+   а место под него резервируется до загрузки. Потолок высоты нужен
+   только там, где экран ниже картинки. */
 .about-image img {
     width: 100%;
-    height: 100%;
-    max-height: 340px;
+    height: auto;
+    aspect-ratio: 1400 / 691;
+    max-height: 320px;
     object-fit: cover;
     display: block;
     border-radius: var(--radius-xl);
 }
 
+.about-features {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* 24 — между смысловыми группами: каждая плитка отдельный смысл */
+    gap: var(--space-6);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Пункт списка — только носитель ссылки: тянется сам и тянет ссылку,
+   иначе плитки в ряду разной высоты, а нажимается только текст */
+.about-features > li {
+    display: flex;
+}
+
+/* Плитка — ссылка целиком. Адрес есть у каждой из шести: раньше человек
+   читал «полный список кортов Кыргызстана», нажимал и не получал ничего */
+.feature {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    /* 12 — внутри одной смысловой группы: плашка и текст */
+    gap: var(--space-3);
+    text-decoration: none;
+    color: inherit;
+}
+
+.feature-text {
+    display: flex;
+    flex-direction: column;
+    /* 8 — подпись к тому, что подписывает */
+    gap: var(--space-2);
+}
+
+/* Кольцо фокуса обязательно по WCAG 2.4.7 — описание Button 17:82.
+   До 24.09 во всей секции не было ни одного :focus-visible */
+.feature:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: var(--radius-md);
+}
+
+/* Плашка иконки — компонент Feature icon 429:191.
+   ЭТО НЕ Icon button 40:93: у той радиус full, потому что на неё нажимают
+   пальцем. Здесь нажимается вся плитка, а плашка только показывает.
+   Ступень 44 взята у lg того компонента, форма — нет. */
+.feature-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-lg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    background: linear-gradient(145deg,
+        rgba(204, 255, 0, 0.20),
+        rgba(204, 255, 0, 0.05) 60%,
+        rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(204, 255, 0, 0.24);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        inset 0 -10px 16px rgba(0, 0, 0, 0.50),
+        0 8px 20px rgba(0, 0, 0, 0.50);
+    transition: transform var(--transition-fast),
+                box-shadow var(--transition-fast),
+                border-color var(--transition-fast);
+}
+
+.feature-icon svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+.feature:hover .feature-icon,
+.feature:focus-visible .feature-icon {
+    transform: translateY(-2px) rotate(-3deg);
+    border-color: rgba(204, 255, 0, 0.50);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -10px 16px rgba(0, 0, 0, 0.45),
+        0 10px 26px rgba(0, 0, 0, 0.55),
+        0 0 22px rgba(204, 255, 0, 0.18);
+}
+
+/* Плашка двигается — значит, спрашиваем разрешения */
+@media (prefers-reduced-motion: reduce) {
+    .feature-icon { transition: none; }
+
+    .feature:hover .feature-icon,
+    .feature:focus-visible .feature-icon { transform: none; }
+}
+
+/* Ступень card title по лестнице 86:10: заголовок КАРТОЧКИ, не раздела.
+   Было 16 — ровно кегль строки под ним, разница только в весе */
+.feature h3 {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Ступень small. Было 16 цветом --text-dim: 3.14 : 1 при пороге 4.5 —
+   седьмое место с этим дефектом по сайту, и текст здесь не мелкий */
+.feature p {
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+@media (max-width: 992px) {
+    .about-body {
+        grid-template-columns: 1fr;
+        row-gap: var(--space-6);
+    }
+
+    /* Порядок по смыслу: сначала о чём это, потом куда пойти, и только
+       потом снимок. Было наоборот — фотография стояла первой (order: -1) */
+    .about-lead     { grid-column: 1; grid-row: auto; order: 1; }
+    .about-features { grid-column: 1; grid-row: auto; order: 2; grid-template-columns: repeat(2, 1fr); }
+    .about-image    { grid-column: 1; grid-row: auto; order: 3; }
+
+    .about-image img { max-height: 240px; }
+
+    /* Ступень lead на узком — 16. Было 14, то есть мельче, чем строка
+       плитки на широком */
+    .about-lead {
+        font-size: var(--fs-base);
+        line-height: 1.5;
+    }
+}
+
+@media (max-width: 640px) {
+    .feature h3 { font-size: var(--fs-sm); }
+
+    /* Ступень caption — 12 и Medium, а не Regular */
+    .feature p {
+        font-size: var(--fs-xs);
+        font-weight: 500;
+    }
+}
+
+/* Телефон боком: секция была 998 при экране 390, и 340 из них занимала
+   одна фотография. Вид делится поворотом и высотой, а не шириной */
+@media (orientation: landscape) and (max-height: 500px) {
+    .about-image img { max-height: 160px; }
+}
 /* ========================================
    ПОЛОСА ПОИСКА И ФИЛЬТРОВ — одна на весь сайт
    Используется на страницах категорий турниров и на баттлах;
@@ -7669,13 +7810,6 @@ body.nav-open {
         max-height: 320px;
     }
 
-    .about-body {
-        grid-template-columns: 1fr;
-    }
-
-    .about-image {
-        order: -1;
-    }
 }
 
 /* ========================================
@@ -7728,10 +7862,6 @@ body.nav-open {
     }
 
     .coaches-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .about-features {
         grid-template-columns: 1fr;
     }
 
@@ -10377,20 +10507,6 @@ input:-internal-autofill-previewed {
        лестницы. Телефонная ступень теперь одна, в блоке 640 у базового
        правила. */
 
-    /* «О проекте»: шесть пунктов шли столбиком по 84 пикселя — на них одних
-       уходило полтора экрана. Ставим по два в ряд и прижимаем значок к тексту */
-    .about-features {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-    }
-
-    .feature {
-        gap: 6px;
-    }
-
-    .feature-icon { font-size: var(--fs-md); }
-    .feature h4 { font-size: var(--fs-xs); margin: 0 0 2px; line-height: 1.2; }
-    .feature p { font-size: var(--fs-2xs); line-height: 1.3; margin: 0; }
 
     /* ─────────────────────────────────────────────────────────────
        Стандарт заголовка раздела на телефоне
@@ -10603,18 +10719,6 @@ input:-internal-autofill-previewed {
         font-size: var(--fs-xs);
     }
 
-    /* Между фотографией и пунктами зияло 128 пикселей: это промежуток между
-       колонками с широкого экрана, а на телефоне колонка одна, и он стал
-       вертикальной дырой */
-    .about-body {
-        gap: 16px;
-    }
-
-    /* Вступление шло крупным шрифтом в семь строк */
-    .about-lead {
-        font-size: var(--fs-sm);
-        line-height: 1.45;
-    }
 
 
     /* Шапка на телефоне висит поверх страницы, и название «КСЛТ» уезжало
