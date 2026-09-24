@@ -1,0 +1,620 @@
+/* ============================================================================
+   ПЬЕДЕСТАЛ — ОДИН НА ВЕСЬ САЙТ
+   ============================================================================
+   Компонент Figma «Ranking podium» 51:80. До 24.09 он жил внутри
+   css/players.css, то есть принадлежал ОДНОЙ странице, и на главную его было
+   не достать. Когда пьедестал понадобился и на главной, второй рисовать
+   нельзя: одно определение на одно понятие. Поэтому 84 правила вынесены сюда
+   ДОСЛОВНО, без единой правки, и файл подключают обе стороны — страница
+   рейтинга и главная.
+
+   ЧТО СОЗНАТЕЛЬНО НЕ ТРОГАЛ. Границы здесь 992 · 768 · 480 · 375, а лестница
+   разрешает 640 и 992. Переезд и переделка — разные работы: сначала перенос
+   один в один, чтобы страница рейтинга доказуемо не поехала, потом отдельным
+   куском лестница. Записано в трекер.
+
+   ЧТО ДОБАВЛЕНО ВНИЗУ ФАЙЛА: размер пьедестала на главной берётся от
+   КОЛОНКИ, а не от окна — там их два рядом, мужской и женский, и колонка
+   бывает уже телефона при широком экране.
+   ============================================================================ */
+
+.pl-podium-section {
+    padding: 0 var(--pad-x) var(--space-md);
+}
+
+.pl-podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.pl-podium-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    /* Три равные колонки: раньше ширина шла от длины имени, и «Каныкей
+       Турсунбаева» вылезала за свою тумбу, а очки ломались на две строки */
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 230px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(30px);
+    position: relative;
+}
+
+.pl-podium-card.pl-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* ПОРЯДОК НА ЭКРАНЕ 2 – 1 – 3, В РАЗМЕТКЕ 1 – 2 – 3.
+   До 24.09 порядок задавала разметка: js выдавал карточки как 2 – 1 – 3, и
+   диктор так и читал — «второе место, первое, третье». Теперь разметка идёт
+   по местам, а переставляет их css. Вид не изменился ни на пиксель;
+   изменилось то, что слышит незрячий. */
+/* ТУМБА — КОРОБКА С СОДЕРЖИМЫМ, А НЕ ПОЛОСА ЖЁСТКОЙ ВЫСОТЫ.
+   До 24.09 тумбу рисовал ::after высотой 120 · 80 · 56, и она не знала,
+   что внутри: стоило фамилии лечь в две строки, как верхняя грань резала
+   её пополам — Костя показал это на главной 24.09. Теперь имя и очки лежат
+   ВНУТРИ тумбы, её высота считается от них, а лесенку 1 – 2 – 3 держит
+   НИЖНЕЕ поле: 56 · 24 · 12.
+
+   ПОЛЕ СНИЗУ, А НЕ СВЕРХУ. Сперва я сделал лесенку верхним полем — и у
+   первого места над именем повисла дыра в 56 пикселей, а само имя встало
+   НИЖЕ, чем у второго и третьего. Пьедестал — подставка, а не рамка: имя
+   и очки прижаты к верхнему краю тумбы у всех троих одинаково, а разной
+   высоты тумбу делает то, что у неё под ними. Низы всех трёх стоят на
+   одной линии, значит выше всех оказывается первое место — как и должно.
+
+   ЦВЕТ ТУМБЫ И КОЛЬЦА — МЕДАЛЬНЫЙ, А НЕ БРЕНДОВЫЙ. Первое место было
+   лаймовым, то есть носило цвет главного действия (правило 109:370) — тот
+   самый лайм, что у кнопки «Войти» и у ссылки «Полный рейтинг». Медаль
+   золотая, кольцо было лаймовым, и это спорило само с собой. Теперь три
+   места держат золото · серебро · бронзу, а лайм возвращается действию. */
+.pl-podium-base {
+    width: 100%;
+    border-radius: 12px 12px 0 0;
+    border: 1px solid var(--border-subtle);
+    border-bottom: none;
+    padding: var(--space-2);              /* 8 со всех сторон; низ — ниже */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pl-podium-first .pl-podium-base {
+    padding-bottom: 56px;
+    background: linear-gradient(to top, rgba(233, 184, 36, 0.12), rgba(233, 184, 36, 0.02));
+    border-color: rgba(233, 184, 36, 0.30);
+    box-shadow: 0 0 40px rgba(233, 184, 36, 0.07);
+}
+
+.pl-podium-second .pl-podium-base {
+    padding-bottom: var(--space-6);       /* 24 */
+    background: linear-gradient(to top, rgba(192, 192, 192, 0.08), transparent);
+    border-right: none;
+}
+
+.pl-podium-third .pl-podium-base {
+    padding-bottom: var(--space-3);       /* 12 */
+    background: linear-gradient(to top, rgba(205, 127, 50, 0.08), transparent);
+    border-left: none;
+}
+
+.pl-podium-first  { order: 2; }
+.pl-podium-second { order: 1; }
+.pl-podium-third  { order: 3; }
+
+.pl-podium-first {
+    z-index: 3;
+    /* Боковые отступы поменьше: с прежними внутри тумбы оставалось так мало
+       места, что «Джайлоева» ломалась пополам */
+    padding: var(--space-lg) var(--space-sm) 0;
+    margin: 0 -8px;
+}
+
+
+.pl-podium-first .pl-podium-medal,
+.pl-podium-first .pl-podium-photo-wrap,
+.pl-podium-first .pl-podium-name,
+.pl-podium-first .pl-podium-points,
+.pl-podium-first .pl-podium-badges {
+    position: relative;
+    z-index: 1;
+}
+
+.pl-podium-second {
+    z-index: 2;
+    padding: var(--space-md) var(--space-sm) 0;
+}
+
+
+.pl-podium-second .pl-podium-medal,
+.pl-podium-second .pl-podium-photo-wrap,
+.pl-podium-second .pl-podium-name,
+.pl-podium-second .pl-podium-points,
+.pl-podium-second .pl-podium-badges {
+    position: relative;
+    z-index: 1;
+}
+
+.pl-podium-third {
+    z-index: 1;
+    padding: var(--space-md) var(--space-sm) 0;
+}
+
+
+.pl-podium-third .pl-podium-medal,
+.pl-podium-third .pl-podium-photo-wrap,
+.pl-podium-third .pl-podium-name,
+.pl-podium-third .pl-podium-points,
+.pl-podium-third .pl-podium-badges {
+    position: relative;
+    z-index: 1;
+}
+
+.pl-podium::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 720px;
+    height: 1px;
+    background: var(--border-subtle);
+}
+
+.pl-podium-medal {
+    margin-bottom: var(--space-xs);
+}
+
+.pl-podium-first .pl-podium-medal {
+    font-size: var(--fs-3xl);
+}
+
+.pl-podium-second .pl-podium-medal {
+    font-size: var(--fs-2xl);
+}
+
+.pl-podium-third .pl-podium-medal {
+    font-size: var(--fs-xl);
+}
+
+.pl-podium-photo-wrap {
+    position: relative;
+    margin-bottom: var(--space-sm);
+}
+
+.pl-podium-photo {
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.pl-podium-card:hover .pl-podium-photo {
+    transform: scale(1.05);
+}
+
+/* КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ КРУЖКА, А НЕ ЖИВЁТ ОТДЕЛЬНО.
+   До 24.09 кегль был объявлен ОДИН раз — 40 · 32 · 26, — а диаметр менялся
+   на каждой ступени. На телефоне кружок первого места сжимался со 110 до 68,
+   кегль оставался 40, и две буквы занимали шесть десятых кружка: Костя это
+   увидел на главной, но беда была и на странице рейтинга.
+   Теперь кегль стоит рядом с КАЖДЫМ диаметром и считается от него: доля
+   0.36, округлённая до ступени шкалы 11 · 12 · 14 · 16 · 18 · 21 · 26 ·
+   32 · 40. ПОСЧИТАНО и проверено в браузере. */
+.pl-podium-first .pl-podium-photo {
+    width: 110px;
+    height: 110px;
+    border: 3px solid rgba(233, 184, 36, 0.85);
+    box-shadow: 0 0 20px rgba(233, 184, 36, 0.18);
+}
+.pl-podium-first .avatar-initials { font-size: var(--fs-3xl); }
+
+
+
+
+.pl-podium-second .pl-podium-photo {
+    width: 80px;
+    height: 80px;
+    border: 3px solid rgba(192, 192, 192, 0.4);
+}
+.pl-podium-second .avatar-initials { font-size: var(--fs-xl); }
+
+.pl-podium-third .pl-podium-photo {
+    width: 72px;
+    height: 72px;
+    border: 3px solid rgba(205, 127, 50, 0.4);
+}
+.pl-podium-third .avatar-initials { font-size: var(--fs-xl); }
+
+.pl-podium-name {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    line-height: 1.25;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.pl-podium-first .pl-podium-name {
+    font-size: var(--fs-md);
+}
+
+.pl-podium-second .pl-podium-name,
+.pl-podium-third .pl-podium-name {
+    font-size: var(--fs-base);
+}
+
+.pl-podium-points {
+    font-weight: 800;
+    /* Белые, а не лаймовые: лайм на поле зрения один и принадлежит
+       «Полный рейтинг →». Место здесь несут медаль и цвет тумбы. */
+    color: var(--text-primary);
+    /* Число с подписью держим одной строкой: «1 420» и «очков» на разных
+       строках читаются как два разных числа */
+    white-space: nowrap;
+}
+
+.pl-podium-first .pl-podium-points {
+    font-size: var(--fs-lg);
+}
+
+.pl-podium-second .pl-podium-points,
+.pl-podium-third .pl-podium-points {
+    font-size: var(--fs-base);
+}
+
+.pl-podium-badges {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.pl-podium {
+    position: relative;
+    padding-bottom: 1px;
+}
+
+@media (max-width: 992px) {
+/* КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ КРУЖКА, А НЕ ЖИВЁТ ОТДЕЛЬНО.
+   До 24.09 кегль был объявлен ОДИН раз — 40 · 32 · 26, — а диаметр менялся
+   на каждой ступени. На телефоне кружок первого места сжимался со 110 до 68,
+   кегль оставался 40, и две буквы занимали шесть десятых кружка: Костя это
+   увидел на главной, но беда была и на странице рейтинга.
+   Теперь кегль стоит рядом с КАЖДЫМ диаметром и считается от него: доля
+   0.36, округлённая до ступени шкалы 11 · 12 · 14 · 16 · 18 · 21 · 26 ·
+   32 · 40. ПОСЧИТАНО и проверено в браузере. */
+.pl-podium-first .pl-podium-photo {
+        width: 90px;
+        height: 90px;
+    }
+.pl-podium-first .avatar-initials { font-size: var(--fs-2xl); }
+.pl-podium-second .pl-podium-photo {
+        width: 68px;
+        height: 68px;
+    }
+.pl-podium-second .avatar-initials { font-size: var(--fs-xl); }
+.pl-podium-third .pl-podium-photo {
+        width: 60px;
+        height: 60px;
+    }
+.pl-podium-third .avatar-initials { font-size: var(--fs-lg); }
+.pl-podium-first .pl-podium-medal { font-size: var(--fs-2xl); }
+.pl-podium-second .pl-podium-medal { font-size: var(--fs-xl); }
+.pl-podium-third .pl-podium-medal { font-size: var(--fs-xl); }
+}
+
+@media (max-width: 768px) {
+.pl-podium-section {
+        padding-left: var(--pad-x);
+        padding-right: var(--pad-x);
+    }
+/* КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ КРУЖКА, А НЕ ЖИВЁТ ОТДЕЛЬНО.
+   До 24.09 кегль был объявлен ОДИН раз — 40 · 32 · 26, — а диаметр менялся
+   на каждой ступени. На телефоне кружок первого места сжимался со 110 до 68,
+   кегль оставался 40, и две буквы занимали шесть десятых кружка: Костя это
+   увидел на главной, но беда была и на странице рейтинга.
+   Теперь кегль стоит рядом с КАЖДЫМ диаметром и считается от него: доля
+   0.36, округлённая до ступени шкалы 11 · 12 · 14 · 16 · 18 · 21 · 26 ·
+   32 · 40. ПОСЧИТАНО и проверено в браузере. */
+.pl-podium-first .pl-podium-photo {
+        width: 80px;
+        height: 80px;
+    }
+.pl-podium-first .avatar-initials { font-size: var(--fs-xl); }
+.pl-podium-second .pl-podium-photo {
+        width: 60px;
+        height: 60px;
+    }
+.pl-podium-second .avatar-initials { font-size: var(--fs-lg); }
+.pl-podium-third .pl-podium-photo {
+        width: 54px;
+        height: 54px;
+    }
+.pl-podium-third .avatar-initials { font-size: var(--fs-md); }
+.pl-podium-first .pl-podium-name { font-size: var(--fs-base); }
+.pl-podium-second .pl-podium-name,
+    .pl-podium-third .pl-podium-name { font-size: var(--fs-sm); }
+.pl-podium-first .pl-podium-points { font-size: var(--fs-md); }
+.pl-podium-second .pl-podium-points,
+    .pl-podium-third .pl-podium-points { font-size: var(--fs-sm); }
+.pl-podium-first .pl-podium-medal { font-size: var(--fs-2xl); }
+.pl-podium-second .pl-podium-medal { font-size: var(--fs-xl); }
+.pl-podium-third .pl-podium-medal { font-size: var(--fs-lg); }
+.pl-podium-first { padding: var(--space-md) var(--space-lg) 0; }
+.pl-podium-second,
+    .pl-podium-third { padding: var(--space-sm) var(--space-md) 0; }
+}
+
+@media (max-width: 480px) {
+/* КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ КРУЖКА, А НЕ ЖИВЁТ ОТДЕЛЬНО.
+   До 24.09 кегль был объявлен ОДИН раз — 40 · 32 · 26, — а диаметр менялся
+   на каждой ступени. На телефоне кружок первого места сжимался со 110 до 68,
+   кегль оставался 40, и две буквы занимали шесть десятых кружка: Костя это
+   увидел на главной, но беда была и на странице рейтинга.
+   Теперь кегль стоит рядом с КАЖДЫМ диаметром и считается от него: доля
+   0.36, округлённая до ступени шкалы 11 · 12 · 14 · 16 · 18 · 21 · 26 ·
+   32 · 40. ПОСЧИТАНО и проверено в браузере. */
+.pl-podium-first .pl-podium-photo {
+        width: 68px;
+        height: 68px;
+    }
+.pl-podium-first .avatar-initials { font-size: var(--fs-xl); }
+.pl-podium-second .pl-podium-photo {
+        width: 50px;
+        height: 50px;
+    }
+.pl-podium-second .avatar-initials { font-size: var(--fs-md); }
+.pl-podium-third .pl-podium-photo {
+        width: 44px;
+        height: 44px;
+    }
+.pl-podium-third .avatar-initials { font-size: var(--fs-base); }
+.pl-podium-first .pl-podium-medal { font-size: var(--fs-xl); }
+.pl-podium-second .pl-podium-medal { font-size: var(--fs-lg); }
+.pl-podium-third .pl-podium-medal { font-size: var(--fs-md); }
+.pl-podium-first { padding: var(--space-sm) var(--space-md) 0; }
+.pl-podium-second,
+    .pl-podium-third { padding: var(--space-xs) var(--space-sm) 0; }
+.pl-podium-first .pl-podium-name { font-size: var(--fs-sm); }
+.pl-podium-second .pl-podium-name,
+    .pl-podium-third .pl-podium-name { font-size: var(--fs-xs); }
+.pl-podium-first .pl-podium-points { font-size: var(--fs-base); }
+.pl-podium-second .pl-podium-points,
+    .pl-podium-third .pl-podium-points { font-size: var(--fs-xs); }
+.pl-podium-badges { display: none; }
+}
+
+@media (max-width: 375px) {
+/* КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ КРУЖКА, А НЕ ЖИВЁТ ОТДЕЛЬНО.
+   До 24.09 кегль был объявлен ОДИН раз — 40 · 32 · 26, — а диаметр менялся
+   на каждой ступени. На телефоне кружок первого места сжимался со 110 до 68,
+   кегль оставался 40, и две буквы занимали шесть десятых кружка: Костя это
+   увидел на главной, но беда была и на странице рейтинга.
+   Теперь кегль стоит рядом с КАЖДЫМ диаметром и считается от него: доля
+   0.36, округлённая до ступени шкалы 11 · 12 · 14 · 16 · 18 · 21 · 26 ·
+   32 · 40. ПОСЧИТАНО и проверено в браузере. */
+.pl-podium-first .pl-podium-photo {
+        width: 58px;
+        height: 58px;
+    }
+.pl-podium-first .avatar-initials { font-size: var(--fs-lg); }
+.pl-podium-second .pl-podium-photo,
+    .pl-podium-third .pl-podium-photo {
+        width: 40px;
+        height: 40px;
+    }
+.pl-podium-second .avatar-initials,
+.pl-podium-third .avatar-initials { font-size: var(--fs-sm); }
+}
+
+@media (max-width: 768px) {
+.pl-podium-name {
+        overflow-wrap: normal;
+        word-break: normal;
+        hyphens: none;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+.pl-podium-first .pl-podium-name,
+    .pl-podium-second .pl-podium-name,
+    .pl-podium-third .pl-podium-name {
+        font-size: var(--fs-xs);
+    }
+.pl-podium-points {
+        display: none;
+    }
+.pl-podium-name {
+        -webkit-line-clamp: 3;
+        margin-bottom: 0;
+        /* Имя занимало 85 пикселей из 133: карточка отдавала половину
+           ширины полям. Длинная фамилия упиралась в край и срезалась */
+        width: 100%;
+        padding: 0 2px;
+    }
+.pl-podium-card {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+}
+
+/* ============================================================================
+   ПЬЕДЕСТАЛ НА ГЛАВНОЙ — РАЗМЕР ОТ КОЛОНКИ, А НЕ ОТ ОКНА
+   ============================================================================
+   На странице рейтинга пьедестал один и занимает всю ширину, поэтому его
+   ступени привязаны к окну. На главной их ДВА, мужской и женский, и колонка
+   под ними — половина раздела: при окне 1440 это 668, при 1024 уже 469, то
+   есть уже телефона. Привязка к окну здесь врёт по определению, поэтому
+   колонка объявлена контейнером, а ступени считаются от НЕЁ.
+   Числа не новые — это те же ступени компонента, что и на странице. */
+.rankings-col {
+    container-type: inline-size;
+    container-name: rk-col;
+}
+
+.rankings-col .pl-podium {
+    max-width: 100%;
+    /* На странице рейтинга воздух под пьедесталом даёт отступ секции; здесь
+       под ним сразу голова таблицы, и без отбивки тумба её подпирает. */
+    margin-bottom: var(--space-6);        /* 24 */
+}
+
+/* ПАРА, КОТОРАЯ ЧИТАЕТСЯ КАК ПАРА, ЕДЕТ ОДНОЙ ГРАНИЦЕЙ.
+   На странице рейтинга пьедестал один, и его высота вольна зависеть от
+   длины фамилии. На главной их два рядом: «Анастасия Трофимушкина» ложится
+   в три строки, «Атхам Исраилов» в одну — и женская таблица начиналась на
+   19 пикселей ниже мужской. Имя здесь занимает ровно две строки всегда:
+   короткое не поднимает тумбу, длинное обрезается по второй. */
+.rankings-col .pl-podium-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
+    min-height: calc(2em * 1.25);
+}
+
+@container rk-col (max-width: 700px) {
+    .pl-podium-first  .pl-podium-photo { width: 80px; height: 80px; }
+    .pl-podium-first  .avatar-initials { font-size: var(--fs-xl); }
+    .pl-podium-second .pl-podium-photo { width: 60px; height: 60px; }
+    .pl-podium-second .avatar-initials { font-size: var(--fs-lg); }
+    .pl-podium-third  .pl-podium-photo { width: 54px; height: 54px; }
+    .pl-podium-third  .avatar-initials { font-size: var(--fs-md); }
+
+    .pl-podium-first  .pl-podium-medal { font-size: var(--fs-2xl); }
+    .pl-podium-second .pl-podium-medal { font-size: var(--fs-xl); }
+    .pl-podium-third  .pl-podium-medal { font-size: var(--fs-xl); }
+
+}
+
+@container rk-col (max-width: 420px) {
+    .pl-podium-first  .pl-podium-photo { width: 68px; height: 68px; }
+    .pl-podium-first  .avatar-initials { font-size: var(--fs-xl); }
+    .pl-podium-second .pl-podium-photo { width: 50px; height: 50px; }
+    .pl-podium-second .avatar-initials { font-size: var(--fs-md); }
+    .pl-podium-third  .pl-podium-photo { width: 44px; height: 44px; }
+    .pl-podium-third  .avatar-initials { font-size: var(--fs-base); }
+
+    .pl-podium-first  .pl-podium-medal { font-size: var(--fs-xl); }
+    .pl-podium-second .pl-podium-medal { font-size: var(--fs-lg); }
+    .pl-podium-third  .pl-podium-medal { font-size: var(--fs-md); }
+
+
+    .pl-podium-first  .pl-podium-name { font-size: var(--fs-sm); }
+    .pl-podium-second .pl-podium-name,
+    .pl-podium-third  .pl-podium-name { font-size: var(--fs-xs); }
+
+    .pl-podium-first  .pl-podium-points { font-size: var(--fs-base); }
+    .pl-podium-second .pl-podium-points,
+    .pl-podium-third  .pl-podium-points { font-size: var(--fs-xs); }
+}
+
+
+/* ============================================================================
+   ВХОД ПЬЕДЕСТАЛА
+   ============================================================================
+   Постоянная анимация на таблице результатов — это украшение, которое никогда
+   не заканчивается: оно тянет взгляд на себя вечно и на телефоне жрёт батарею
+   всё время, пока раздел на экране. Ни ATP, ни Olympics, ни один спортивный
+   продукт так со СТОЯЩЕЙ таблицей не поступает. Анимируют МОМЕНТ — то, как
+   пьедестал собирается, когда до него дошли, — и один раз.
+
+   Поэтому здесь: тумбы встают снизу по очереди, бронза → серебро → золото,
+   победитель приземляется последним; следом каждое кольцо два раза
+   вспыхивает СВОИМ металлом и над ним просыпаются искры того же цвета —
+   в том же порядке, бронза → серебро → золото. Потом тишина, ничего не
+   крутится по кругу.
+
+   Порядок вспышек повторяет порядок приезда, а не наоборот: если бы все три
+   вспыхнули разом, лесенка перестала бы читаться и это стало бы просто
+   миганием.
+
+   ДОЛГ ПО ДВИЖЕНИЮ, ЗАПИСЬ ПЕРВАЯ. В проекте 47 объявлений `animation` и
+   ровно ОДИН блок prefers-reduced-motion — на вращающуюся обводку коробки.
+   То есть 46 анимаций человеку, которому от движения плохо, не подчиняются.
+   Этот компонент подчиняется — блок внизу. Остальные 46 разбираются отдельным
+   куском, в трекере. */
+.pl-podium-third  { transition-delay: 0s; }
+.pl-podium-second { transition-delay: 0.09s; }
+.pl-podium-first  { transition-delay: 0.18s; }
+
+@keyframes rk-zoloto {
+    0%   { box-shadow: 0 0 20px rgba(233, 184, 36, 0.18); }
+    40%  { box-shadow: 0 0 38px rgba(233, 184, 36, 0.55); }
+    100% { box-shadow: 0 0 20px rgba(233, 184, 36, 0.18); }
+}
+
+@keyframes rk-serebro {
+    0%   { box-shadow: 0 0 0 rgba(192, 192, 192, 0); }
+    40%  { box-shadow: 0 0 30px rgba(192, 192, 192, 0.45); }
+    100% { box-shadow: 0 0 0 rgba(192, 192, 192, 0); }
+}
+
+@keyframes rk-bronza {
+    0%   { box-shadow: 0 0 0 rgba(205, 127, 50, 0); }
+    40%  { box-shadow: 0 0 26px rgba(205, 127, 50, 0.45); }
+    100% { box-shadow: 0 0 0 rgba(205, 127, 50, 0); }
+}
+
+.pl-podium-card.pl-visible.pl-podium-first .pl-podium-photo {
+    animation: rk-zoloto 1.1s ease 0.6s 2;
+}
+
+.pl-podium-card.pl-visible.pl-podium-second .pl-podium-photo {
+    animation: rk-serebro 1.1s ease 0.51s 2;
+}
+
+.pl-podium-card.pl-visible.pl-podium-third .pl-podium-photo {
+    animation: rk-bronza 1.1s ease 0.42s 2;
+}
+
+/* Искры над каждым местом: js сыплет их один раз и убирает за собой.
+   Цвет — металл места, поэтому лежит не здесь, а в переменной. */
+.rk-iskra {
+    position: absolute;
+    top: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--iskra, rgba(233, 184, 36, 0.95));
+    box-shadow: 0 0 6px var(--iskra, rgba(233, 184, 36, 0.8));
+    pointer-events: none;
+    opacity: 0;
+    animation: rk-padenie 1.5s ease-out forwards;
+}
+
+@keyframes rk-padenie {
+    0%   { opacity: 0; transform: translateY(-14px) scale(0.6); }
+    15%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(120px) scale(0.9); }
+}
+
+/* ДВИЖЕНИЕ ВЫКЛЮЧАЕТСЯ, СОДЕРЖИМОЕ ОСТАЁТСЯ. Пьедестал виден целиком и
+   сразу; ничего не едет, не вспыхивает и не сыплется. */
+@media (prefers-reduced-motion: reduce) {
+    .pl-podium-card {
+        transition: none;
+        transition-delay: 0s;
+        opacity: 1;
+        transform: none;
+    }
+
+    .pl-podium-card.pl-visible.pl-podium-first .pl-podium-photo,
+    .pl-podium-card.pl-visible.pl-podium-second .pl-podium-photo,
+    .pl-podium-card.pl-visible.pl-podium-third .pl-podium-photo {
+        animation: none;
+    }
+
+    .rk-iskra { display: none; }
+}

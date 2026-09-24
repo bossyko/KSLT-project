@@ -452,7 +452,9 @@
         var players = cat.players || [];
         var top3 = players.slice(0, 3);
         var medals = ['\ud83e\udd47', '\ud83e\udd48', '\ud83e\udd49'];
-        var order = [1, 0, 2];
+        /* РАЗМЕТКА ИДЁТ ПО МЕСТАМ: 1 – 2 – 3. Порядок на экране (2 – 1 – 3)
+           задаёт css свойством order — см. css/podium.css. 24.09 */
+        var order = [0, 1, 2];
         var placeClass = ['pl-podium-first', 'pl-podium-second', 'pl-podium-third'];
 
         var animClasses = instant ? 'pl-animate pl-visible' : 'pl-animate';
@@ -470,9 +472,16 @@
                     лицо(p, 'pl-podium-photo', p.name) +
                     (p.online ? '<span class="pl-online-dot pl-online-pulse"></span>' : '') +
                 '</div>' +
-                '<div class="pl-podium-name">' + p.name + '</div>' +
-                '<div class="pl-podium-points">' + p.points.toLocaleString() + ' ' + подписьОчков() + '</div>' +
-                (badgesHtml ? '<div class="pl-podium-badges">' + badgesHtml + '</div>' : '') +
+                /* ТУМБА — ЭТО КОРОБКА, А НЕ ПОЛОСА ПОД КАРТОЧКОЙ.
+                   До 24.09 тумбу рисовал ::after с жёсткой высотой, и её
+                   верхняя грань резала фамилию пополам, как только имя
+                   ложилось в две строки. Теперь имя и очки лежат ВНУТРИ
+                   тумбы, а лесенку держит её верхнее поле. */
+                '<div class="pl-podium-base">' +
+                    '<div class="pl-podium-name">' + p.name + '</div>' +
+                    '<div class="pl-podium-points">' + p.points.toLocaleString() + ' ' + подписьОчков() + '</div>' +
+                    (badgesHtml ? '<div class="pl-podium-badges">' + badgesHtml + '</div>' : '') +
+                '</div>' +
             '</div>';
         }
         html += '</div>';
