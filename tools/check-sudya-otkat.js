@@ -20,8 +20,11 @@ const ОТКАТЫ = [
   ['css/umpire.css', '--um-bg:     var(--bg-base);', '--um-bg: #0a0a0a;',
    'свои имена красок ведут к токенам, а не к своим числам'],
 
-  ['css/umpire.css', '    --um-p1: #4FC3F7;', '    --um-p1: #4FC3F7;\n    --um-p3: #AB47BC;',
-   'своих красок ровно две — по одной на игрока'],
+  ['css/umpire.css', '    --um-p1: var(--player-1);', '    --um-p1: #4FC3F7;',
+   'своих красок числом не осталось вовсе'],
+
+  ['css/umpire.css', '    --um-p2: var(--player-2);', '    --um-p2: var(--um-accent);',
+   'краски игроков берутся из общих токенов'],
 
   ['css/umpire.css', '.um-marks {\n    display: flex;', '.um-marks {\n    background: rgba(0,0,0,0.5);\n    display: flex;',
    'в файле не осталось ни одной rgba'],
@@ -98,7 +101,7 @@ const ОТКАТЫ = [
   ['js/umpire.js', "    document.addEventListener('visibilitychange', function() {", "    document.addEventListener('focus', function() {",
    'блокировка возвращается, когда судья вернулся во вкладку'],
 
-  ['pages/umpire.html', 'href="../css/umpire.css?v=3"', 'href="../css/umpire.css"',
+  ['pages/umpire.html', /href="\.\.\/css\/umpire\.css\?v=\d+"/, 'href="../css/umpire.css"',
    'у стиля и скрипта судьи есть версия']
 ];
 
@@ -125,10 +128,18 @@ let плохо = 0;
 ОТКАТЫ.forEach(([ф, было, стало, ждём], i) => {
   const путь = path.join(ВРЕМ, ф);
   const ориг = fs.readFileSync(путь, 'utf8');
-  const n = ориг.split(было).length - 1;
+  /* ЯКОРЬ МОЖЕТ БЫТЬ ВЫРАЖЕНИЕМ, А НЕ ТОЛЬКО СТРОКОЙ.
+     Три раза подряд откат ломался об одно и то же: он держался за НОМЕР
+     версии файла, а номер меняется при каждой правке — это не «содержимое
+     блока», это как раз то, что уезжает. Теперь версия ловится выражением,
+     и поднятие номера её не рвёт. */
+  const строковый = typeof было === 'string';
+  const n = строковый
+    ? ориг.split(было).length - 1
+    : (ориг.match(new RegExp(было.source, было.flags.replace('g','') + 'g')) || []).length;
   if (n !== 1) {
     console.log('  ✗ откат ' + (i + 1) + ' (' + ф + '): якорь встречается ' + n + ' раз');
-    console.log('    ' + было.replace(/\n/g, ' ⏎ ').slice(0, 90));
+    console.log('    ' + String(строковый ? было : было.source).replace(/\n/g, ' ⏎ ').slice(0, 90));
     плохо++;
     return;
   }

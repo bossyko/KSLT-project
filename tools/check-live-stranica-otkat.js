@@ -145,8 +145,8 @@ const ОТКАТЫ = [
    'рельс ленты обрывается на последней записи'],
 
   ['css/live-match.css',
-   '.lm-point-w2 { box-shadow: inset -2px 0 0 var(--warning); }',
-   '.lm-point-w2 { box-shadow: inset 2px 0 0 var(--warning); }',
+   '.lm-player-row { box-shadow: inset 3px 0 0 var(--player-1); }',
+   '.lm-player-row { opacity: 1; }',
    'кто взял очко, видно не одним цветом'],
 
   ['js/live-match.js',
@@ -182,7 +182,7 @@ const ОТКАТЫ = [
    'писать в журнал может только функция, а читать — все'],
 
   ['pages/live-match.html',
-   'href="../css/live-match.css?v=2"',
+   /href="\.\.\/css\/live-match\.css\?v=\d+"/,
    'href="../css/live-match.css"',
    'стиль страницы подключён с версией · ru'],
 
@@ -220,10 +220,18 @@ let плохо = 0;
 ОТКАТЫ.forEach(([ф, было, стало, ждём], i) => {
   const путь = path.join(ВРЕМ, ф);
   const ориг = fs.readFileSync(путь, 'utf8');
-  const n = ориг.split(было).length - 1;
+  /* ЯКОРЬ МОЖЕТ БЫТЬ ВЫРАЖЕНИЕМ, А НЕ ТОЛЬКО СТРОКОЙ.
+     Три раза подряд откат ломался об одно и то же: он держался за НОМЕР
+     версии файла, а номер меняется при каждой правке — это не «содержимое
+     блока», это как раз то, что уезжает. Теперь версия ловится выражением,
+     и поднятие номера её не рвёт. */
+  const строковый = typeof было === 'string';
+  const n = строковый
+    ? ориг.split(было).length - 1
+    : (ориг.match(new RegExp(было.source, было.flags.replace('g','') + 'g')) || []).length;
   if (n !== 1) {
     console.log('  ✗ откат ' + (i + 1) + ' (' + ф + '): якорь встречается ' + n + ' раз');
-    console.log('    ' + было.replace(/\n/g, ' ⏎ ').slice(0, 90));
+    console.log('    ' + String(строковый ? было : было.source).replace(/\n/g, ' ⏎ ').slice(0, 90));
     плохо++;
     return;
   }
