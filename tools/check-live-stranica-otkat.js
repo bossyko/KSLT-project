@@ -37,13 +37,13 @@ const ОТКАТЫ = [
      формула лендинга. Поэтому откат её ДОБАВЛЯЕТ: возвращает узкий
      контейнер 1100, из-за которого у страницы было три левых края. */
   ['css/live-match.css',
-   '    padding: var(--space-10) var(--pad-x) var(--space-10);\n}',
-   '    max-width: var(--container-narrow);\n    padding: var(--space-10) var(--pad-x) var(--space-10);\n}',
+   '.lm-container {\n',
+   '.lm-container {\n    max-width: var(--container-narrow);\n',
    'своей ширины у страницы нет — ширину держит та же формула, что у лендинга'],
 
   ['css/live-match.css',
-   '@media (max-width: 992px) {',
-   '@media (max-width: 991px) {',
+   '(min-width: 641px) and (max-width: 992px)',
+   '(min-width: 641px) and (max-width: 991px)',
    'по ширине ровно две границы, и это 992 и 640'],
 
   ['css/live-match.css',
@@ -137,8 +137,8 @@ const ОТКАТЫ = [
    'режим списка убран из скрипта'],
 
   ['css/live-match.css',
-   '.lm-feed {\n',
-   '.lm-card { display: block; }\n.lm-feed {\n',
+   '\n.lm-feed {\n    background: var(--bg-card);',
+   '\n.lm-card { display: block; }\n.lm-feed {\n    background: var(--bg-card);',
    'раскладка списка убрана из стилей'],
 
   ['js/live-match.js',
@@ -179,8 +179,8 @@ const ОТКАТЫ = [
    'ряд ячеек в узкой колонке не схлопывается'],
 
   ['css/live-match.css',
-   '        align-self: center;\n        width: auto;',
-   '        width: 100%;',
+   '    align-self: center;\n    width: auto;',
+   '    width: 100%;',
    'кадр держит 16:9, а ширину ему ведёт высота'],
 
   ['js/live-match.js',
@@ -198,11 +198,14 @@ const ОТКАТЫ = [
    '',
    'в админке есть поле имени спонсора и оно сохраняется'],
 
-  /* Откат переписан вслед за правилом: отмена обросла меткой, строка стала
-     блоком. Возвращаем прежнюю суть — снятие БЕЗ проверки отпечатка. */
+  /* Откат переписан ВТОРОЙ РАЗ, 25.09: блок снова стал строкой — метка ушла
+     в саму запись розыгрыша, и убирать её отдельно больше нечего. Правило
+     держится за ОТНОШЕНИЕ (снятие только под проверкой отпечатка), поэтому
+     оно устояло; переехал только якорь отката. Это и есть цена якоря,
+     который держится за форму записи, а не за её смысл. */
   ['js/umpire.js',
-   '        if (scoreFingerprint(state) !== было) {\n            undoPoint();',
-   '        {\n            undoPoint();',
+   '        if (scoreFingerprint(state) !== было) undoPoint();',
+   '        undoPoint();',
    'отмена судьи убирает розыгрыш ТОЛЬКО когда счёт изменился'],
 
   ['js/umpire.js',
@@ -233,7 +236,120 @@ const ОТКАТЫ = [
   ['css/live-match.css',
    '.lm-sponsor {\n    display: flex; align-items: center; gap: var(--space-3);',
    '.lm-sponsor {\n    color: var(--accent);\n    display: flex; align-items: center; gap: var(--space-3);',
-   'у блока спонсора нет лайма']
+   'у блока спонсора нет лайма'],
+
+  /* ── УЗКИЕ ВИДЫ, 25.09 ──────────────────────────────────────────────── */
+
+  ['css/live-match.css',
+   '    height: calc(100dvh - var(--header-h));\n    display: flex;',
+   '    display: flex;',
+   'страница живёт в экране НА ВСЕХ ВИДАХ, а не только выше 992'],
+
+  ['css/live-match.css',
+   'calc(100dvh - var(--header-h))',
+   'calc(100vh - var(--header-h))',
+   'высота экрана считается в dvh, а не в vh'],
+
+  ['css/live-match.css',
+   '@media (min-width: 993px) {',
+   '@media (min-width: 993px) {\n    .lm-container { height: calc(100dvh - var(--header-h)); }',
+   'высота экрана задана ОДИН раз и не повторяется в медиа'],
+
+  ['css/live-match.css',
+   '    grid-template-rows: minmax(0, 1fr);\n}',
+   '}',
+   'сетка забирает остаток экрана и разрешает ряду сжиматься'],
+
+  ['css/live-match.css',
+   '\n/* ── ТЕЛЕФОН СТОЯ',
+   '\n@media (max-width: 992px) { .lm-grid { grid-template-columns: 1fr; } }\n/* ── ТЕЛЕФОН СТОЯ',
+   'одна колонка только до 640, а не до 992'],
+
+  ['css/live-match.css',
+   ' and (orientation: portrait) {',
+   ' {',
+   'планшет стоя делится ПОВОРОТОМ, а не третьей шириной'],
+
+  ['css/live-match.css',
+   '.lm-feed { order: 2;',
+   '.lm-feed { order: 9;',
+   'на телефоне порядок: журнал, счёт, сведения, спонсоры'],
+
+  ['js/live-match.js',
+   "document.body.classList.toggle('lm-video-idet', естьВидео);",
+   "document.body.classList.toggle('lm-video-idet', естьВидео);\n        document.body.classList.toggle('lm-video-idet', !!ytId);",
+   'признак «идёт трансляция» один на весь продукт'],
+
+  ['js/live-match.js',
+   'scorePanelHtml + infoHtml',
+   'scorePanelHtml',
+   'сведения стоят ПОСЛЕ табло, а не внутри него'],
+
+  ['css/live-match.css',
+   '    border-top: 0;\n    background: transparent;',
+   '    border-top: 1px solid var(--border-subtle);',
+   'у сведений нет ни рамки, ни подложки'],
+
+  ['css/live-match.css',
+   '    --lm-game-h: 128px;',
+   '    --lm-game-h: 128px;\n    --lm-game-h: 128px;',
+   'ступени журнала заведены в компоненте и ровно один раз'],
+
+  ['css/live-match.css',
+   '    .lm-video-idet .lm-feed { min-height: var(--lm-feed-min-video); }',
+   '    .lm-video-idet .lm-feed { min-height: 167px; }',
+   'пол журнала при трансляции считается из ступеней, а не числом'],
+
+  ['css/live-match.css',
+   'min-height: var(--lm-game-h);',
+   'min-height: 112px;',
+   'СТОРОЖ: пол высоты задаётся ступенью, а не числом'],
+
+  ['css/live-match.css',
+   '    body > footer, .site-footer { display: none; }\n',
+   '',
+   'на телефоне боком уходит и шапка, и подвал'],
+
+  ['css/live-match.css',
+   '.lm-grid { gap: var(--space-4); grid-template-columns: 2fr 1fr; }',
+   '.lm-grid { gap: var(--space-4); grid-template-columns: 1fr 1fr; }',
+   'на телефоне боком журнал шире счёта той же пропорцией 2 : 1'],
+
+  ['css/live-match.css',
+   '.lm-right .lm-sponsors { flex: 1 1 0;',
+   '.lm-right .lm-sponsors { flex: 0 0 auto;',
+   'на телефоне боком спонсоры строго НИЖЕ счёта, и это отношение'],
+
+  ['css/live-match.css',
+   '    .lm-video-idet .lm-right,\n',
+   '',
+   'при полноэкранном кадре пустая правая колонка прячется ЦЕЛИКОМ'],
+
+  ['css/live-match.css',
+   '        grid-row: 2 / 3;',
+   '        grid-row: 2;',
+   'журнал в клетке с кадром ограничен ОБЕИМИ границами'],
+
+  ['css/live-match.css',
+   '        width: 100%;\n        max-width: 100%;\n        height: auto;\n        flex: 0 0 auto;',
+   '        width: auto;\n        max-width: 100%;\n        height: auto;\n        flex: 0 0 auto;',
+   'кадр выше 992 идёт во всю ширину колонки — вровень с полосой'],
+
+  ['css/live-match.css',
+   '.lm-video-idet .lm-live-badge-wrap { display: none; }',
+   '.lm-video-idet .lm-live-badge-wrap { display: none; }\n.lm-live-badge-wrap { display: none; }',
+   'бейдж статуса прячется ТОЛЬКО при идущей трансляции'],
+
+  ['css/live-match.css',
+   '.lm-back-link { min-height: var(--btn-h-md); position: absolute; opacity: .9; }',
+   '.lm-back-link { min-height: var(--btn-h-sm); position: absolute; opacity: .9; }',
+   'цель нажатия «назад» — 44 на ВСЕХ видах, поворот её не отменяет'],
+
+  ['css/live-match.css',
+   '{ width: 120px; margin: 0 var(--space-3); gap: 0; }\n    .lm-sponsors .carousel-slide-infinite img { height: 56px; padding: 6px; }',
+   '{ width: 100px; margin: 0 var(--space-3); gap: 0; }\n    .lm-sponsors .carousel-slide-infinite img { height: 56px; padding: 6px; }',
+   'СТОРОЖ: полоса спонсоров на узких видах совпадает с is-strip'],
+
 ];
 
 function прогон() {

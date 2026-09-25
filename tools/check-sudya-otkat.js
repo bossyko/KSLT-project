@@ -1,8 +1,12 @@
 /**
- * ПРУВЕР ЗАМОРОЗКИ СУДЕЙСКОГО ОКНА.
+ * ПРУВЕР ЗАМОРОЗКИ СУДЕЙСКОГО ЭКРАНА.
  *
  * Берёт КОПИЮ файлов, возвращает по одному прежнему значению и требует,
  * чтобы упало ИМЕННО то правило, которое за это отвечает.
+ * «У меня зелёное» ничего не доказывает.
+ *
+ * Переписан 25.09 вместе с правилами: прежние откаты возвращали код,
+ * которого больше нет.
  *
  *   node tools/check-sudya-otkat.js
  */
@@ -16,93 +20,268 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-sudya-'));
 ['css', 'tools', 'js', 'sql', 'pages'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 
+const CSS = 'css/umpire.css', JSФ = 'js/umpire.js', HTML = 'pages/umpire.html';
+const SQLМ = 'sql/схема/live-match-point-mark.sql', SQLП = 'sql/схема/live-pereryvy.sql';
+const СЛОВ = 'js/live-texts.js', СТР = 'js/live-match.js';
+
 const ОТКАТЫ = [
-  ['css/umpire.css', '--um-bg:     var(--bg-base);', '--um-bg: #0a0a0a;',
+  [CSS, `--um-bg:     var(--bg-base);`,
+   `--um-bg: #0a0a0a;`,
    'свои имена красок ведут к токенам, а не к своим числам'],
 
-  ['css/umpire.css', '    --um-p1: var(--player-1);', '    --um-p1: #4FC3F7;',
+  [CSS, `    --um-p1: var(--player-1);`,
+   `    --um-p1: #4FC3F7;`,
    'своих красок числом не осталось вовсе'],
 
-  ['css/umpire.css', '    --um-p2: var(--player-2);', '    --um-p2: var(--um-accent);',
+  [CSS, `    --um-p2: var(--player-2);`,
+   `    --um-p2: var(--um-accent);`,
    'краски игроков берутся из общих токенов'],
 
-  ['css/umpire.css', '.um-marks {\n    display: flex;', '.um-marks {\n    background: rgba(0,0,0,0.5);\n    display: flex;',
+  [CSS, `.um-marks { display: flex; gap: var(--space-3); }`,
+   `.um-marks { display: flex; gap: var(--space-3); background: rgba(0,0,0,0.5); }`,
    'в файле не осталось ни одной rgba'],
 
-  ['css/umpire.css', '.um-btn-p1 { background: var(--um-p1); }',
-   '.um-btn-p1 { background: linear-gradient(135deg, #1565C0, #42A5F5); }',
+  [CSS, `.um-btn-p1 { background: var(--um-p1); }`,
+   `.um-btn-p1 { background: linear-gradient(135deg, var(--um-p1), var(--um-accent)); }`,
    'градиентов у кнопок очка нет'],
 
-  ['css/umpire.css', '    color: var(--accent-on);\n    min-height: 140px;', '    color: #ffffff;\n    min-height: 140px;',
+  [CSS, `    line-height: 1.3;
+    color: var(--accent-on);`,
+   `    line-height: 1.3;
+    color: var(--text-primary);`,
    'текст на кнопке очка почти-чёрный, а не белый'],
 
-  ['css/umpire.css', '    line-height: 1.2;\n    overflow-wrap: anywhere;',
-   '    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;',
+  [CSS, `    line-height: 1.2;
+    overflow-wrap: anywhere;`,
+   `    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;`,
    'имя игрока НИКОГДА не обрезается'],
 
-  ['css/umpire.css', '    .um-player-row { padding: var(--space-3) var(--space-2); grid-template-columns: 24px 1fr 44px 44px; }',
-   '    .um-player-row { padding: var(--space-3) var(--space-2); grid-template-columns: 24px 1fr 44px 44px; }\n    .um-player-name { font-size: var(--fs-base); }',
-   'СТОРОЖ: на телефоне кегли счёта и имени НЕ уменьшаются'],
+  [CSS, `    --um-target: 38dvh;`,
+   `    --um-target: 321px;`,
+   'мишень — ДОЛЯ ЭКРАНА, а не число'],
 
-  ['css/umpire.css', '@media (max-width: 640px) {', '@media (max-width: 375px) {',
-   'по ширине одна граница, и это 640'],
+  [CSS, `.um-btn-p1, .um-btn-p2 {
+    flex: 1;
+    font-size: var(--fs-lg);`,
+   `.um-btn-p1, .um-btn-p2 {
+    flex: 1;
+    min-height: 140px;
+    font-size: var(--fs-lg);`,
+   'у кнопки очка нет собственной высоты числом'],
 
-  ['css/umpire.css', '@media (orientation: landscape) and (max-height: 500px) {', '@media (max-width: 900px) and (max-height: 500px) {',
+  [CSS, `    gap: var(--space-3);
+    margin-top: auto;
+}`,
+   `    gap: var(--space-3);
+}`,
+   'воздух собирается НАД мишенью, а нижний ряд к ней прижат'],
+
+  [CSS, `        --um-target: 34dvh;`,
+   `        --um-target: 44dvh;`,
+   'на планшете мишень строго НИЖЕ, чем на телефоне'],
+
+  [JSФ, `setsHtml && !идётПерерыв`,
+   `setsHtml`,
+   'в перерыве чипы сетов уходят, а мишень не мельчает'],
+
+  [CSS, `@media (min-width: 641px) {`,
+   `@media (min-width: 700px) {`,
+   'в медиа ровно одна ширина, и это 641'],
+
+  [CSS, `@media (orientation: landscape) and (max-height: 500px) {`,
+   `@media (max-height: 500px) {`,
    'тесная высота делится поворотом, а не ещё одной шириной'],
 
-  ['js/umpire.js', "'<div class=\"um-match-head\">' +", "'<div class=\"um-match-head\">🎾' +",
+  [CSS, `    #um-app { display: none; }`,
+   `    #um-app { display: flex; }`,
+   'ТЕЛЕФОН БОКОМ — ОДНА РАСКЛАДКА: экран прячется, встаёт «поверните»'],
+
+  [HTML, `<p>Поверните телефон</p>`,
+   `<p></p>`,
+   'экран «поверните телефон» есть в разметке, а не только в стиле'],
+
+  [CSS, `.um-turn { display: none; }`,
+   `.um-turn { display: flex; }`,
+   'по умолчанию «поверните» спрятан'],
+
+  [CSS, `    .um-player-row { grid-template-columns: 28px 1fr 52px 52px; }`,
+   `    .um-player-row { grid-template-columns: 28px 1fr 52px 52px; }
+    .um-player-name { font-size: var(--fs-base); }`,
+   'КЕГЛЬ НЕ МЕНЯЕТСЯ ОТ ПОВОРОТА'],
+
+  [CSS, `    font-size: var(--fs-xl);
+    font-weight: 800;`,
+   `    font-size: 26px;
+    font-weight: 800;`,
+   'ни одного кегля числом — все со ступени шкалы'],
+
+  [JSФ, `'<b>Эйс</b><span>очко · '`,
+   `'<b>Эйс 🎾</b><span>очко · '`,
    'в судейском модуле не осталось ни одного эмодзи'],
 
-  ['css/umpire.css', '.um-serve-dot::before {\n    content: \'\';\n    width: 12px;\n    height: 12px;\n    border-radius: var(--radius-full);',
-   '.um-serve-dot::before {\n    content: \'\';\n    width: 12px;\n    height: 12px;',
+  [CSS, `    border-radius: var(--radius-full);
+    background: var(--um-accent);`,
+   `    border-radius: 50%;
+    background: var(--um-accent);`,
    'значок подачи рисуется стилем, а не буквой'],
 
-  ['js/umpire.js', "'<div class=\"um-match-players\">'", "'<div class=\"um-x\">'",
+  [JSФ, `<div class="um-match-players">`,
+   `<div class="um-match-title">`,
    'судья видит, какой матч ведёт'],
 
-  ['sql/схема/live-match-point-mark.sql', '       AND seq = p_seq\n    RETURNING seq INTO v_seq;',
-   '       AND seq = (SELECT MAX(seq) FROM public.live_match_points WHERE match_id = v_match_id)\n    RETURNING seq INTO v_seq;',
-   'метка ставится ПО НОМЕРУ розыгрыша, а не на «последний»'],
+  [JSФ, `handleScore(state.serving_player, 'ace');`,
+   `handleScore(1, 'ace');`,
+   'ЭЙС — ОЧКО ПОДАЮЩЕМУ'],
 
-  ['js/umpire.js', "{ p_key: umpireKey, p_seq: markSeq, p_mark: markSet }", "{ p_key: umpireKey, p_mark: markSet }",
-   'судейский модуль передаёт номер розыгрыша'],
+  [JSФ, `handleScore(state.serving_player === 1 ? 2 : 1, 'double');`,
+   `handleScore(state.serving_player, 'double');`,
+   'ДВОЙНАЯ — ОЧКО ПРИНИМАЮЩЕМУ'],
 
-  ['js/umpire.js', '        markSeq = null;          // новый розыгрыш — прежний номер недействителен\n', '',
-   'новое очко обнуляет прежний номер'],
+  [JSФ, `mark: метка || null`,
+   `mark: null`,
+   'метка едет ВНУТРИ записи розыгрыша, а не отдельным вызовом'],
 
-  ['js/umpire.js', '            markSeq = null; markSet = null; markUntil = 0;\n            clearTimeout(markTimer);\n', '',
-   'отмена очка уносит и метку'],
+  [JSФ, `    var выборПричины = false;`,
+   `    var выборПричины = false;
+    var markSeq = null;`,
+   'СТОРОЖ: окна метки на таймере больше нет'],
 
-  ['js/umpire.js', "'<button class=\"um-btn um-btn-mark' + (markSet === 'ace' ? ' is-set' : '') + '\" id=\"umAce\">Эйс</button>' +",
-   "'<button class=\"um-btn um-btn-mark\" id=\"umPlain\">Обычный</button>' +",
-   'метка необязательна: кнопки «обычный розыгрыш» нет'],
+  [SQLМ, `DROP FUNCTION IF EXISTS public.umpire_mark_point(text, integer, text);`,
+   `-- DROP убран`,
+   'отдельной функции метки нет и в базе'],
 
-  ['js/umpire.js', '        markUntil = Date.now() + 3000;', '        markUntil = Number.MAX_SAFE_INTEGER;',
-   'окно метки закрывается само'],
+  [SQLМ, `v_mark NOT IN ('ace', 'double')`,
+   `v_mark NOT IN ('ace')`,
+   'запись розыгрыша принимает метку и проверяет её'],
 
-  ['js/umpire.js', "'<button class=\"um-btn um-btn-mark' + (markSet === 'double' ? ' is-set' : '') + '\" id=\"umDouble\">Двойная</button>' +",
-   "'<button class=\"um-btn um-btn-mark\" id=\"umUnf\">Невынужденная</button>' +",
+  [JSФ, `(!isCompleted && !isWarmup && !идётПерерыв`,
+   `(!isCompleted && !isWarmup && Date.now() < 0`,
+   'кнопки метки стоят постоянно, а не выскакивают после очка'],
+
+  [JSФ, `подающий   = state.serving_player === 2 ? p2Name : p1Name;`,
+   `подающий   = p1Name;`,
+   'под меткой стоит имя того, кому идёт очко'],
+
+  [JSФ, `'<button class="um-btn um-btn-mark' + кП + '" id="umAce">' +
+                            '<b>Эйс</b><span>очко · ' + esc(подающий) + '</span></button>' +
+                        '<button class="um-btn um-btn-mark' + кПр + '" id="umDouble">' +
+                            '<b>Двойная</b><span>очко · ' + esc(принимающий) + '</span></button>'`,
+   `'<button class="um-btn um-btn-mark' + кПр + '" id="umDouble">' +
+                            '<b>Двойная</b><span>очко · ' + esc(принимающий) + '</span></button>' +
+                        '<button class="um-btn um-btn-mark' + кП + '" id="umAce">' +
+                            '<b>Эйс</b><span>очко · ' + esc(подающий) + '</span></button>'`,
+   'ПОЛОЖЕНИЕ кнопок метки от подачи НЕ зависит'],
+
+  [JSФ, `'<b>Двойная</b><span>очко · '`,
+   `'<b>Виннер</b><span>очко · '`,
    'спрашиваем только то, что судья объявляет вслух'],
 
-  ['js/live-match.js', "'seq,set_no,game_no,winner,p1,p2,g1,g2,game_won,is_break,is_tiebreak,mark'",
-   "'seq,set_no,game_no,winner,p1,p2,g1,g2,game_won,is_break,is_tiebreak'",
-   'лента зрителя показывает метку и молчит, когда её нет'],
+  [JSФ, `{ код: 'other',   имя: 'Другое' }`,
+   `{ код: 'other',   имя: 'Обычный розыгрыш' }`,
+   'кнопки «обычный розыгрыш» нет'],
 
-  ['css/umpire.css', '.um-btn:focus-visible {\n    outline: 3px solid var(--um-accent);',
-   '.um-btn:focus-visible {\n    outline-offset: 3px;\n    opacity: 0.9;',
+  [JSФ, `    var serveChosen = false;`,
+   `    var serveChosen = false;
+    var challenge = null;`,
+   'судейский экран не растёт в сторону тура'],
+
+  [JSФ, `var CHANGEOVER_GAME = 120;`,
+   `var CHANGEOVER_GAME = 200;`,
+   'СМЕНА СТОРОН СТРОГО КОРОЧЕ ПЕРЕРЫВА МЕЖДУ СЕТАМИ'],
+
+  [JSФ, `var CHANGEOVER_SET = 180;`,
+   `var CHANGEOVER_SET = 300;`,
+   'перерывы не длиннее двойного правила ITF'],
+
+  [JSФ, `        state.break_until = new Date(changeoverEndTime).toISOString();`,
+   ``,
+   'перерыв по счёту едет в базу'],
+
+  [JSФ, `            state.break_kind = null;`,
+   `            ;`,
+   'перерыв, который кончился, убирается из базы'],
+
+  [JSФ, `            pause_reason: state.pause_reason || null,`,
+   `            pause_reason: ИМЯ_ПРИЧИНЫ[state.pause_reason] || null,`,
+   'ПРИЧИНА ПАУЗЫ ХРАНИТСЯ КОДОМ, А НЕ СЛОВОМ'],
+
+  [SQLП, `CHECK (pause_reason IN ('medical', 'toilet', 'weather', 'other'))`,
+   `CHECK (pause_reason IN ('medical', 'toilet', 'weather', 'other', 'tech'))`,
+   'СТОРОЖ: причины в модуле и в базе — один список'],
+
+  [JSФ, `        { код: 'weather', имя: 'Погода' },`,
+   `        { код: 'weather', имя: 'Погода' },
+        { код: 'tech',    имя: 'Технический' },`,
+   'пятой причины нет'],
+
+  [JSФ, `        if (state.status === 'paused') { state.status = 'live'; state.pause_reason = null; }`,
+   ``,
+   'ОЧКО СНИМАЕТ И ПЕРЕРЫВ, И ПАУЗУ — одним правилом'],
+
+  [SQLП, `        pause_reason = CASE WHEN COALESCE(p_state->>'status', status) = 'paused'
+                            THEN NULLIF(p_state->>'pause_reason', '') END,`,
+   `        pause_reason = COALESCE(NULLIF(p_state->>'pause_reason', ''), pause_reason),`,
+   'причина не переживает снятие паузы'],
+
+  [SQLП, `    ADD COLUMN IF NOT EXISTS break_until timestamptz;`,
+   `    ADD COLUMN IF NOT EXISTS break_seconds integer;`,
+   'перерыв хранит МОМЕНТ ОКОНЧАНИЯ, а не длительность'],
+
+  [СЛОВ, `toilet:  { ru: 'Туалет',      en: 'Toilet break', kg: 'Даараткана' },`,
+   `toilet:  { ru: 'Туалет',      en: 'Toilet break' },`,
+   'в словаре есть все три языка у каждого кода'],
+
+  [СТР, `        loading:   isEn ? 'Loading...'      : isKg ? 'Жүктөлүүдө...'   : 'Загрузка...',`,
+   `        loading:   isEn ? 'Loading...'      : isKg ? 'Жүктөлүүдө...'   : 'Загрузка...',
+        paused2:   isEn ? 'PAUSED' : isKg ? 'ТЫНЫМ' : 'ПАУЗА',`,
+   'СТОРОЖ: подписи статусов живут ТОЛЬКО в словаре'],
+
+  [СТР, `: isPaused ? Т.пауза(m.pause_reason)`,
+   `: isPaused ? 'ПАУЗА'`,
+   'страница матча берёт перерыв и причину из словаря'],
+
+  [СТР, `                      : идётПерерыв ? Т.слово(m.break_kind || 'changeover')`,
+   `                      : идётПерерыв ? Т.слово(m.break_kind || 'changeover') + ' · ' + Т.часы(остатокПерерыва)`,
+   'зрителю не показываем отсчёт, которого не можем обновить'],
+
+  [CSS, `    outline: 3px solid var(--um-accent);`,
+   `    outline: none;`,
    'у кнопок есть кольцо фокуса'],
 
-  ['css/umpire.css', '    .um-status-live { animation: none; }', '    .um-status-live { opacity: 1; }',
+  [CSS, `    .um-status-live { animation: none; }`,
+   ``,
    'движение выключается по просьбе системы'],
 
-  ['js/umpire.js', '        if (!navigator.wakeLock) return;\n        navigator.wakeLock.request', '        if (!navigator.screenLock) return;\n        navigator.screenLock.request',
+  [JSФ, `um-scoreboard" role="group" aria-live="polite"`,
+   `um-scoreboard"`,
+   'табло — живая область: диктор читает изменившийся счёт'],
+
+  [JSФ, `(state.serving_player === 1 ? ' aria-label="подаёт"' : '')`,
+   `''`,
+   'значок подачи называет себя диктору в ОБЕИХ строках'],
+
+  [HTML, `content="width=device-width, initial-scale=1.0, viewport-fit=cover"`,
+   `content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"`,
+   'ЗУМ СТРАНИЦЕ ВЕРНУЛИ'],
+
+  [CSS, `    touch-action: manipulation;`,
+   ``,
+   'двойной тап забран у кнопок, а не у страницы'],
+
+  [JSФ, `navigator.wakeLock.request('screen')`,
+   `navigator.wakeLockOld.request('screen')`,
    'экран держится незаснувшим, пока идёт матч'],
 
-  ['js/umpire.js', "    document.addEventListener('visibilitychange', function() {", "    document.addEventListener('focus', function() {",
+  [JSФ, `document.addEventListener('visibilitychange'`,
+   `document.addEventListener('focus'`,
    'блокировка возвращается, когда судья вернулся во вкладку'],
 
-  ['pages/umpire.html', /href="\.\.\/css\/umpire\.css\?v=\d+"/, 'href="../css/umpire.css"',
-   'у стиля и скрипта судьи есть версия']
+  [HTML, /href="\.\.\/css\/umpire\.css\?v=\d+"/,
+   `href="../css/umpire.css"`,
+   'у стиля и скрипта судьи есть версия, и она не первая'],
 ];
 
 function прогон() {
