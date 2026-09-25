@@ -374,10 +374,16 @@
             return { lead: (i + 1) + '-й ' + L.setN + ' — ' + s.g1 + ' : ' + s.g2, note: '', now: false };
         });
         if (m.status !== 'completed') {
+            /* Счёт очков стоит СРАЗУ за геймом, а не улетает к дальнему краю:
+               в списке геймов справа живёт «брейк» и счёт по геймам, а в
+               одной строке разрыв на три четверти ширины читается так же
+               плохо, как растянутое табло. */
+            var очки = m.is_tiebreak ? (m.tiebreak_p1 || 0) + ' : ' + (m.tiebreak_p2 || 0)
+                                     : (m.points_p1 || '0') + ' : ' + (m.points_p2 || '0');
             строки.push({
-                lead: L.gameNow + ' — ' + (m.current_game_p1 || 0) + ' : ' + (m.current_game_p2 || 0),
-                note: (m.is_tiebreak ? (m.tiebreak_p1 || 0) + ' : ' + (m.tiebreak_p2 || 0)
-                                     : (m.points_p1 || '0') + ' : ' + (m.points_p2 || '0')),
+                lead: L.gameNow + ' — ' + (m.current_game_p1 || 0) + ' : ' + (m.current_game_p2 || 0) +
+                      '   ·   ' + очки,
+                note: '',
                 now: true
             });
         }
