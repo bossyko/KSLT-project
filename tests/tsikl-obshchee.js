@@ -132,7 +132,6 @@ async function открытьАдминку(браузер) {
         const текст = с.text();
         if (с.type() !== 'error') return;
         if (текст.indexOf('Failed to load resource') !== -1) return;
-        if (текст.indexOf('X-Frame-Options') !== -1) return;
         console.log('     [страница] ' + текст.slice(0, 200));
     });
     страница.сообщения = [];

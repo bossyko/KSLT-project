@@ -14,7 +14,7 @@
  *  · ЦЕЛЬ НАЖАТИЯ И ФОКУС. «Назад» был 89 × 21 и без кольца.
  *  · ПУСТОГО ПРЯМОУГОЛЬНИКА НЕТ. Когда трансляции нет, место занимает ход
  *    матча, а не серая рамка с извинением: 656 × 369 — это 62 % ширины.
- *  · СЕТКА НЕ МЕНЯЕТСЯ. Две колонки выше 992, одна ниже — и это ЕДИНСТВЕННОЕ
+ *  · СЕТКА НЕ МЕНЯЕТСЯ. Две колонки выше 640, одна ниже — и это ЕДИНСТВЕННОЕ
  *    место, где раскладка переключается.
  *
  * Тест ждёт ПРИЗНАКИ, а не тишину сети: признак — что табло отрисовано.
@@ -42,6 +42,24 @@ async function дождаться(page, адрес) {
     await page.waitForFunction(
         () => !!document.querySelector('.lm-feed, .lm-empty, .lm-video'),
         null, { timeout: 15000 });
+
+    /* ЖДЁМ НЕ ПОЯВЛЕНИЯ, А ТОГО, ЧТО РАЗМЕТКА ПЕРЕСТАЛА ПЕРЕРИСОВЫВАТЬСЯ.
+       Страница переписывает container.innerHTML на каждом обновлении
+       счёта и ещё раз — когда доезжает журнал. Узлы при этом создаются
+       заново: ссылка «назад» на снимке видна, а тот узел, за который
+       держался тест, уже откреплён — boundingBox отдаёт null, и падает
+       «ссылки назад нет» на живой и совершенно здоровой странице.
+       Поймано прогоном 25.09: в один прогон упало кольцо фокуса, в
+       следующий — цель нажатия, и оба раза на РАЗНЫХ видах. Это не два
+       дефекта, а один: слишком слабое условие ожидания.
+       Признак покоя — один и тот же узел пять проверок подряд. */
+    await page.waitForFunction(() => {
+        const э = document.querySelector('.lm-back-link');
+        if (!э) { window.__покой = 0; return false; }
+        if (window.__узел !== э) { window.__узел = э; window.__покой = 0; return false; }
+        window.__покой = (window.__покой || 0) + 1;
+        return window.__покой >= 5;
+    }, null, { timeout: 15000 });
 }
 
 for (const стр of СТРАНИЦЫ) {
@@ -61,11 +79,29 @@ test.describe('страница матча · ' + стр.имя, () => {
             const заголовок = document.querySelector('.lm-title');
             const назад = document.querySelector('.lm-back-link');
             const пр = э => э ? Math.round(э.getBoundingClientRect().left) : null;
-            return { шапка: пр(шапка), заголовок: пр(заголовок), назад: пр(назад) };
+            const св = э => э ? Math.round(э.getBoundingClientRect().right) : null;
+            const вр = э => э ? Math.round(э.getBoundingClientRect().top) : null;
+            return { шапка: пр(шапка), заголовок: пр(заголовок), назад: пр(назад),
+                     назадСправа: св(назад),
+                     верхЗаголовка: вр(заголовок), верхНазад: вр(назад),
+                     высота: window.innerHeight, ширина: window.innerWidth };
         });
         expect(края.заголовок, 'заголовок матча не найден').not.toBeNull();
-        expect(края.назад).toBe(края.заголовок);
-        if (края.шапка !== null && края.шапка > 0) {
+        /* ТЕЛЕФОН БОКОМ — ОСОБЫЙ СЛУЧАЙ, И ЭТО ПОПРАВКА К ТЕСТУ 25.09.
+           В полноэкранном режиме «назад» и заголовок стоят ОДНОЙ СТРОКОЙ:
+           высоты 390 не хватает на две. Общего левого края у них там нет
+           и быть не может — держится другое отношение: одна строка и
+           заголовок правее ссылки. Костя видел этот вид и принял его. */
+        const боком = края.высота <= 500 && края.ширина > края.высота;
+        if (боком) {
+            expect(Math.abs(края.верхЗаголовка - края.верхНазад),
+                'назад и заголовок разъехались по строкам').toBeLessThanOrEqual(24);
+            expect(края.заголовок, 'заголовок налез на ссылку «назад»')
+                .toBeGreaterThanOrEqual(края.назадСправа);
+        } else {
+            expect(края.назад).toBe(края.заголовок);
+        }
+        if (!боком && края.шапка !== null && края.шапка > 0) {
             expect(Math.abs(края.заголовок - края.шапка),
                 'содержимое ' + края.заголовок + ', шапка ' + края.шапка).toBeLessThanOrEqual(1);
         }
@@ -169,18 +205,40 @@ test.describe('страница матча · ' + стр.имя, () => {
 
     test('цель нажатия «назад» не ниже 44', async ({ page }) => {
         await дождаться(page, стр.адрес);
-        const к = await page.locator('.lm-back-link').boundingBox();
-        expect(к, 'ссылки «назад» нет').not.toBeNull();
-        expect(Math.round(к.height)).toBeGreaterThanOrEqual(44);
+        /* expect.poll, А НЕ ОДИН ЗАМЕР: даже после покоя страница вправе
+           перерисоваться от пришедшего по сокету очка. Проверка обязана
+           пережить перерисовку, а не совпасть с паузой между ними. */
+        await expect.poll(async () => {
+            const к = await page.locator('.lm-back-link').boundingBox();
+            return к ? Math.round(к.height) : null;
+        }, { message: 'цель нажатия «назад» не набирает 44' })
+            .toBeGreaterThanOrEqual(44);
     });
 
     test('у «назад» видно кольцо фокуса', async ({ page }) => {
         await дождаться(page, стр.адрес);
-        await page.locator('.lm-back-link').focus();
+        /* СНАЧАЛА КЛАВИША, ПОТОМ ФОКУС. Кольцо ставит :focus-visible, а он
+           зажигается не от факта фокуса, а от СПОСОБА, которым фокус
+           получен: браузер держит признак «человек пришёл с клавиатуры».
+           Программный .focus() этот признак не поднимает, и проверка
+           зеленела или краснела в зависимости от того, что происходило на
+           странице до неё — 314 из 315 прошли, один упал. Tab поднимает
+           клавиатурную модальность честно, тем же путём, каким доходит до
+           ссылки человек. Поймано прогоном 25.09. */
+        await page.keyboard.press('Tab');
+        /* Фокус ставим изнутри страницы, а не через локатор: локатор
+           держит УЗЕЛ, а страница пересоздаёт узлы на каждой перерисовке.
+           Внутри evaluate элемент ищется заново в тот же миг, когда с ним
+           работают. См. js/live-match.js:95 и :127 — render зовётся
+           дважды за загрузку. */
         const кольцо = await page.evaluate(() => {
-            const с = getComputedStyle(document.querySelector('.lm-back-link'));
-            return { ширина: parseFloat(с.outlineWidth) || 0, стиль: с.outlineStyle };
+            document.querySelector('.lm-back-link').focus();
+            const э = document.querySelector('.lm-back-link');
+            const с = getComputedStyle(э);
+            return { ширина: parseFloat(с.outlineWidth) || 0, стиль: с.outlineStyle,
+                     виден: э.matches(':focus-visible') };
         });
+        expect(кольцо.виден, 'ссылка не считается фокусируемой с клавиатуры').toBe(true);
         expect(кольцо.стиль, 'кольца нет').not.toBe('none');
         expect(кольцо.ширина).toBeGreaterThanOrEqual(3);
     });
@@ -198,8 +256,12 @@ test.describe('страница матча · ' + стр.имя, () => {
             const э = document.querySelector('.lm-score-panel .live-badge');
             if (!э) return null;
             const с = getComputedStyle(э);
-            const п = э.getBoundingClientRect();
-            return { высота: Math.round(п.height), кегль: parseFloat(с.fontSize), вес: с.fontWeight };
+            /* offsetHeight, А НЕ getBoundingClientRect. Бейдж «идёт» ПУЛЬСИРУЕТ:
+               @keyframes livePulse гонит transform: scale(1) → scale(1.1), и
+               нарисованная высота гуляет от 24 до 26.4. Прямоугольник меряет
+               нарисованное, offsetHeight — разметку. Проверка была шаткой с
+               рождения и зеленела по удаче: поймано прогоном 25.09. */
+            return { высота: э.offsetHeight, кегль: parseFloat(с.fontSize), вес: с.fontWeight };
         });
         expect(б, 'бейджа нет или он не общего класса').not.toBeNull();
         expect(б.высота).toBe(24);
@@ -259,33 +321,168 @@ test.describe('страница матча · ' + стр.имя, () => {
         if (было > 0) expect(стало.логотипов, 'логотипы пропали при перерисовке').toBe(было);
     });
 
-    /* ЭКРАН ЦЕЛИКОМ выше 992 — решение Кости 25.09: «надо будет всё
-       разместить на одном окне без скролов». Ниже 992 правило не
-       действует: там одна колонка и страница прокручивается. */
-    test('выше 992 содержимое умещается в экран', async ({ page }) => {
+    /* ══ УЗКИЕ ВИДЫ, 25.09 ══════════════════════════════════════════════
+       Костя отверг зелёный прогон снимками: «телефон в вертикальном
+       положении не помещается в экран и скролл». Тест этого не поймал,
+       потому что проверка стояла ПОД УСЛОВИЕМ ширины: ниже 992 она ничего
+       не утверждала. Условие снято — правило одно на все виды. */
+
+    test('содержимое умещается в экран НА ЛЮБОМ виде', async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const д = await page.evaluate(() => {
+            const к = document.querySelector('.lm-container');
+            return { ширина: window.innerWidth, экран: window.innerHeight,
+                     низ: Math.round(к.getBoundingClientRect().bottom) };
+        });
+        expect(д.низ, 'низ содержимого ' + д.низ + ' при экране ' + д.экран +
+                      ', ширина ' + д.ширина)
+            .toBeLessThanOrEqual(д.экран + 1);
+    });
+
+    test('сетка переключается ровно на 640 и больше нигде', async ({ page }) => {
         await дождаться(page, стр.адрес);
         const д = await page.evaluate(() => {
             const с = document.querySelector('.lm-grid');
-            return { ширина: window.innerWidth, экран: window.innerHeight,
-                     низ: Math.round(с.getBoundingClientRect().bottom) };
+            const cs = getComputedStyle(с);
+            return {
+                ширина: window.innerWidth,
+                режим: cs.display,
+                колонок: cs.gridTemplateColumns.trim().split(/\s+/).length
+            };
         });
-        if (д.ширина > 992) {
-            expect(д.низ, 'низ содержимого ' + д.низ + ' при экране ' + д.экран)
-                .toBeLessThanOrEqual(д.экран);
+        if (д.ширина <= 640) expect(д.режим, 'ширина ' + д.ширина).toBe('flex');
+        else expect(д.колонок, 'ширина ' + д.ширина).toBe(2);
+    });
+
+    /* Растёт и прокручивается ТОЛЬКО список геймов. Раньше росла страница:
+       документ был 2356 при экране 844 и 2616 при экране 390. */
+    test('прокручивается список геймов, а не страница', async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const д = await page.evaluate(() => {
+            const g = document.querySelector('.lm-feed-games');
+            const к = document.querySelector('.lm-container');
+            return {
+                ширина: window.innerWidth,
+                списокЕсть: !!g,
+                списокВидно: g ? g.clientHeight : 0,
+                списокВсего: g ? g.scrollHeight : 0,
+                прокрутка: g ? getComputedStyle(g).overflowY : null,
+                низ: Math.round(к.getBoundingClientRect().bottom),
+                экран: window.innerHeight
+            };
+        });
+        expect(д.низ, 'страница переросла экран').toBeLessThanOrEqual(д.экран + 1);
+        if (д.списокЕсть && д.списокВсего > д.списокВидно) {
+            expect(д.прокрутка, 'длинный список обязан прокручиваться внутри себя')
+                .toBe('auto');
         }
     });
 
-    test('сетка переключается ровно на 992 и больше нигде', async ({ page }) => {
+    /* ИДУЩИЙ ГЕЙМ ПОМЕЩАЕТСЯ ЦЕЛИКОМ. Гейм — 112: шапка 21, две строки по
+       28 и зазоры. Меньше — и списку остаётся полоса, в которой нечего
+       читать: на планшете с кадром во всю ширину было 47 из 170.
+       Костя: «журнал не читается и не скроллится». */
+    test('в журнале виден целый гейм, а не его полоска', async ({ page }) => {
         await дождаться(page, стр.адрес);
         const д = await page.evaluate(() => {
-            const с = document.querySelector('.lm-grid');
+            const g = document.querySelector('.lm-feed-games');
+            const первый = document.querySelector('.lm-game');
             return {
                 ширина: window.innerWidth,
-                колонок: getComputedStyle(с).gridTemplateColumns.trim().split(/\s+/).length
+                есть: !!g && !!первый,
+                видно: g ? g.clientHeight : 0,
+                гейм: первый ? Math.round(первый.getBoundingClientRect().height) : 0
             };
         });
-        if (д.ширина > 992) expect(д.колонок, 'ширина ' + д.ширина).toBe(2);
-        else expect(д.колонок, 'ширина ' + д.ширина).toBe(1);
+        if (д.есть && д.гейм > 0) {
+            expect(д.видно, 'списку видно ' + д.видно + ' при гейме ' + д.гейм +
+                            ', ширина ' + д.ширина)
+                .toBeGreaterThanOrEqual(д.гейм);
+        }
+    });
+
+    /* Порядок на телефоне — решение Кости: «поменять местами журнал и
+       счёт». Проверяем ГЕОМЕТРИЕЙ, а не строкой в css: order легко
+       переставить, не тронув ни одного селектора. */
+    test('на телефоне журнал стоит выше счёта, а спонсоры — ниже всех',
+        async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const д = await page.evaluate(() => {
+            const в = с => { const e = document.querySelector(с);
+                             return e ? Math.round(e.getBoundingClientRect().top) : null; };
+            return { ширина: window.innerWidth, журнал: в('.lm-feed'),
+                     счёт: в('.lm-score-panel'), спонсоры: в('.lm-sponsors') };
+        });
+        if (д.ширина <= 640 && д.журнал !== null && д.счёт !== null) {
+            expect(д.журнал, 'журнал обязан стоять выше счёта').toBeLessThan(д.счёт);
+            if (д.спонсоры !== null)
+                expect(д.спонсоры, 'спонсоры обязаны стоять ниже счёта')
+                    .toBeGreaterThan(д.счёт);
+        }
+    });
+
+    /* Сведения «подаёт · турнир · формат» — подпись К табло, а не его
+       нижний этаж: иначе карточка счёта не кончается полосой под вторым
+       игроком. Решение Кости 25.09. */
+    test('сведения стоят вне карточки счёта', async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const д = await page.evaluate(() => ({
+            естьСведения: !!document.querySelector('.lm-info'),
+            внутриТабло: !!document.querySelector('.lm-score-panel .lm-info')
+        }));
+        if (д.естьСведения)
+            expect(д.внутриТабло, 'блок сведений снова оказался внутри табло')
+                .toBe(false);
+    });
+
+    /* ТЕЛЕФОН БОКОМ — полноэкранный режим. Раз шапка уходит, уходит и
+       подвал: иначе страница остаётся прокручиваемой и за экраном во весь
+       рост стоит подвал. Костя: «а что у нас подвал на телефоне боком
+       поехал куда-то». */
+    test('на телефоне боком ни шапки, ни подвала, и страница не прокручивается',
+        async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const д = await page.evaluate(() => {
+            const шапка = document.querySelector('header.floating-header');
+            const подвал = document.querySelector('.site-footer');
+            return {
+                ширина: window.innerWidth, высота: window.innerHeight,
+                шапкаВидна: шапка ? getComputedStyle(шапка).display !== 'none' : false,
+                подвалВиден: подвал ? getComputedStyle(подвал).display !== 'none' : false,
+                документ: document.documentElement.scrollHeight,
+                экран: window.innerHeight
+            };
+        });
+        if (д.высота <= 500 && д.ширина > д.высота) {
+            expect(д.шапкаВидна, 'шапка осталась на полноэкранном виде').toBe(false);
+            expect(д.подвалВиден, 'подвал остался на полноэкранном виде').toBe(false);
+            expect(д.документ, 'страница прокручивается: документ ' + д.документ +
+                               ' при экране ' + д.экран)
+                .toBeLessThanOrEqual(д.экран + 1);
+        }
+    });
+
+    /* Две колонки читаются как одна карточка — значит кончаются на одной
+       линии. Проверяем там, где колонок две. */
+    test('где колонок две, низ у них общий', async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const д = await page.evaluate(() => {
+            const л = document.querySelector('.lm-left');
+            const п = document.querySelector('.lm-right');
+            const с = document.querySelector('.lm-grid');
+            if (!л || !п || getComputedStyle(с).display !== 'grid') return null;
+            const вид = e => getComputedStyle(e).display !== 'none' &&
+                             e.getBoundingClientRect().height > 0;
+            if (!вид(л) || !вид(п)) return null;
+            return {
+                ширина: window.innerWidth,
+                лево: Math.round(л.getBoundingClientRect().bottom),
+                право: Math.round(п.getBoundingClientRect().bottom)
+            };
+        });
+        if (д) expect(Math.abs(д.лево - д.право),
+            'низ колонок разошёлся: ' + д.лево + ' и ' + д.право +
+            ', ширина ' + д.ширина).toBeLessThanOrEqual(2);
     });
 
 });
