@@ -71,20 +71,91 @@ test.describe('страница матча · ' + стр.имя, () => {
         }
     });
 
-    test('лестница цифр: очки крупнее счёта сета, счёт сета крупнее имени', async ({ page }) => {
+    /* ПЕРЕПИСАНО 25.09. Прежнее «очки крупнее сета» отменено Костей:
+       «лаймовые цифры надо будет сделать такого же размера, что и геймы».
+       Теперь размер у них общий, а различает их КРАСКА — тест проверяет
+       обе половины решения сразу, иначе можно убрать цвет и остаться
+       зелёным. */
+    test('лестница цифр: очки и сет на одной ступени и разного цвета, оба крупнее имени', async ({ page }) => {
         await дождаться(page, стр.адрес);
         const л = await page.evaluate(() => {
-            const к = s => {
+            const взять = s => {
                 const э = document.querySelector(s);
-                return э ? parseFloat(getComputedStyle(э).fontSize) : null;
+                if (!э) return null;
+                const c = getComputedStyle(э);
+                return { кегль: parseFloat(c.fontSize), цвет: c.color };
             };
-            return { очки: к('.lm-points-score'), сет: к('.lm-set-score'), имя: к('.lm-player-name') };
+            return { очки: взять('.lm-points-score'), сет: взять('.lm-set-score'),
+                     имя: взять('.lm-player-name') };
         });
         expect(л.имя, 'имени игрока нет').not.toBeNull();
-        if (л.очки !== null && л.сет !== null) {
-            expect(л.очки, 'очки ' + л.очки + ', сет ' + л.сет).toBeGreaterThan(л.сет);
-            expect(л.сет, 'сет ' + л.сет + ', имя ' + л.имя).toBeGreaterThan(л.имя);
+        if (л.очки && л.сет) {
+            expect(л.очки.кегль, 'очки ' + л.очки.кегль + ', сет ' + л.сет.кегль).toBe(л.сет.кегль);
+            expect(л.очки.цвет, 'размер сравнялся — различать обязан цвет').not.toBe(л.сет.цвет);
+            expect(л.сет.кегль, 'сет ' + л.сет.кегль + ', имя ' + л.имя.кегль).toBeGreaterThan(л.имя.кегль);
         }
+    });
+
+    /* ЖУРНАЛ В ДВЕ СТРОКИ — решение Кости 25.09. Тест ждёт признаки
+       структуры, а не текст: у каждого гейма ровно две строки игроков, и
+       в них одинаковое число ячеек — иначе колонки разойдутся и читать
+       будет нечего. */
+    test('у каждого гейма ровно две строки, и колонки в них совпадают', async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const геймы = await page.evaluate(() => [...document.querySelectorAll('.lm-game')].map(г => ({
+            строк: г.querySelectorAll('.lm-game-row').length,
+            верх:  г.querySelectorAll('.lm-row-1 .lm-cell').length,
+            низ:   г.querySelectorAll('.lm-row-2 .lm-cell').length
+        })));
+        for (const г of геймы) {
+            expect(г.строк, 'у гейма не две строки, а ' + г.строк).toBe(2);
+            expect(г.верх, 'ячеек сверху ' + г.верх + ', снизу ' + г.низ).toBe(г.низ);
+        }
+    });
+
+    /* ЗАКРЫТЫЙ ГЕЙМ НЕ ТЕРЯЕТ СВОИ ОЧКИ. Костя открыл матч после гейма и
+       увидел пустую панель: восемь розыгрышей схлопывались в одну строку. */
+    test('закрытый гейм уносит свои розыгрыши с собой', async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const д = await page.evaluate(() => {
+            const геймы = [...document.querySelectorAll('.lm-game')];
+            const закрытые = геймы.filter(г => г.querySelector('.lm-cell.is-game'));
+            return { всего: геймы.length, закрытых: закрытые.length,
+                     ячеек: закрытые.map(г => г.querySelectorAll('.lm-row-1 .lm-cell').length) };
+        });
+        if (д.закрытых > 0) {
+            for (const n of д.ячеек) {
+                expect(n, 'у закрытого гейма осталась одна ячейка — он схлопнулся').toBeGreaterThan(1);
+            }
+        }
+    });
+
+    /* Тусклая цифра — это СЧЁТ, а не украшение: 38 % белого давало 3.54
+       при пороге 4.5. Тест меряет отношение яркостей в браузере. */
+    test('тусклая цифра счёта читается: контраст не ниже 4.5', async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const к = await page.evaluate(() => {
+            const я = ц => {
+                const [r, g, b] = ц.match(/\d+/g).map(Number);
+                const f = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+                return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+            };
+            const я2 = э => {
+                let n = э;
+                while (n && n !== document.documentElement) {
+                    const bg = getComputedStyle(n).backgroundColor;
+                    if (bg && !/rgba\(0, 0, 0, 0\)|transparent/.test(bg)) return я(bg);
+                    n = n.parentElement;
+                }
+                return 0;
+            };
+            const c = document.querySelector('.lm-cell:not(.is-won)');
+            if (!c) return null;
+            const t = я(getComputedStyle(c).color), f = я2(c);
+            const hi = Math.max(t, f), lo = Math.min(t, f);
+            return Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100;
+        });
+        if (к !== null) expect(к, 'контраст тусклой цифры ' + к).toBeGreaterThanOrEqual(4.5);
     });
 
     test('страница называет матч: ровно один h1, и в нём оба игрока', async ({ page }) => {
@@ -143,6 +214,65 @@ test.describe('страница матча · ' + стр.имя, () => {
         }));
         expect(есть.старый, 'вернулась серая рамка «нет трансляции»').toBe(false);
         expect(есть.лево, 'левая колонка пуста вовсе').toBe(true);
+    });
+
+    /* ДВА СОСТОЯНИЯ, И ОБА ВЫВОДЯТСЯ ИЗ ДАННЫХ (вариант Б2, 25.09).
+       Журнал обязан быть на странице В ЛЮБОМ из них: до 25.09 на матчах с
+       трансляцией его не было видно вовсе. */
+    test('журнал есть при любой раскладке, и он на своём месте', async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const д = await page.evaluate(() => {
+            const видео = !!document.querySelector('.lm-video');
+            const лента = document.querySelector('.lm-feed, .lm-empty');
+            return {
+                видео,
+                лента: !!лента,
+                вПравой: !!(лента && лента.closest('.lm-right')),
+                вЛевой:  !!(лента && лента.closest('.lm-left')),
+                спонсорыВЛевой: !!document.querySelector('.lm-left .lm-sponsors'),
+                полоса: !!document.querySelector('.lm-sponsors.is-strip')
+            };
+        });
+        expect(д.лента, 'журнала нет на странице вовсе').toBe(true);
+        if (д.видео) {
+            expect(д.вПравой, 'есть трансляция — журнал обязан быть под табло').toBe(true);
+            expect(д.полоса, 'есть трансляция — спонсоры обязаны стать полосой').toBe(true);
+        } else {
+            expect(д.вЛевой, 'нет трансляции — журнал обязан занимать левую колонку').toBe(true);
+        }
+    });
+
+    /* СПОНСОРЫ НЕ ПРОПАДАЮТ ПРИ ПЕРЕРИСОВКЕ. Поймано вживую 25.09: блок
+       переехал внутрь контейнера, и следующий же render() стёр его вместе
+       с логотипами. Тест перерисовывает страницу так же, как это делает
+       сокет, и смотрит, на месте ли он. */
+    test('блок спонсоров переживает перерисовку', async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const было = await page.evaluate(() =>
+            document.querySelectorAll('.lm-sponsors .carousel-slide-infinite').length);
+        await page.waitForTimeout(1200);
+        const стало = await page.evaluate(() => ({
+            есть: !!document.querySelector('.lm-sponsors'),
+            логотипов: document.querySelectorAll('.lm-sponsors .carousel-slide-infinite').length
+        }));
+        expect(стало.есть, 'блок спонсоров исчез из документа').toBe(true);
+        if (было > 0) expect(стало.логотипов, 'логотипы пропали при перерисовке').toBe(было);
+    });
+
+    /* ЭКРАН ЦЕЛИКОМ выше 992 — решение Кости 25.09: «надо будет всё
+       разместить на одном окне без скролов». Ниже 992 правило не
+       действует: там одна колонка и страница прокручивается. */
+    test('выше 992 содержимое умещается в экран', async ({ page }) => {
+        await дождаться(page, стр.адрес);
+        const д = await page.evaluate(() => {
+            const с = document.querySelector('.lm-grid');
+            return { ширина: window.innerWidth, экран: window.innerHeight,
+                     низ: Math.round(с.getBoundingClientRect().bottom) };
+        });
+        if (д.ширина > 992) {
+            expect(д.низ, 'низ содержимого ' + д.низ + ' при экране ' + д.экран)
+                .toBeLessThanOrEqual(д.экран);
+        }
     });
 
     test('сетка переключается ровно на 992 и больше нигде', async ({ page }) => {

@@ -20,18 +20,25 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-live-str-'));
 
 const ОТКАТЫ = [
   ['css/live-match.css',
-   'padding: calc(var(--header-h) + var(--space-10)) var(--pad-x) var(--space-10);',
-   'padding: 80px 20px 40px;',
+   'padding: var(--space-10) var(--pad-x) var(--space-10);',
+   'padding: 40px 20px 40px;',
    'поле от края экрана берётся у страницы, а не задаётся своим числом'],
 
+  /* Откат возвращает ДВОЙНОЙ счёт высоты шапки — ту самую поломку,
+     из-за которой под шапкой было 104 вместо 40. */
   ['css/live-match.css',
-   '    padding: calc(var(--header-h) + var(--space-10)) var(--pad-x) var(--space-10);\n}',
-   '    padding: var(--space-10) var(--pad-x);\n}',
-   'отбивка сверху считается от высоты шапки, а не числом'],
+   '    padding: var(--space-10) var(--pad-x) var(--space-10);',
+   '    padding: calc(var(--header-h) + var(--space-10)) var(--pad-x) var(--space-10);',
+   'страница НЕ отбивает шапку второй раз'],
 
+  /* Якорь ужат до объявления с max-width: после 25.09 .lm-container
+     объявлен дважды — второй раз в медиазапросе «экран целиком». */
+  /* У .lm-container своей ширины НЕТ вовсе — её держит --pad-x и общая
+     формула лендинга. Поэтому откат её ДОБАВЛЯЕТ: возвращает узкий
+     контейнер 1100, из-за которого у страницы было три левых края. */
   ['css/live-match.css',
-   '.lm-container {\n',
-   '.lm-container {\n    max-width: var(--container-narrow);\n',
+   '    padding: var(--space-10) var(--pad-x) var(--space-10);\n}',
+   '    max-width: var(--container-narrow);\n    padding: var(--space-10) var(--pad-x) var(--space-10);\n}',
    'своей ширины у страницы нет — ширину держит та же формула, что у лендинга'],
 
   ['css/live-match.css',
@@ -44,14 +51,17 @@ const ОТКАТЫ = [
    '@media (min-width: 700px) and (max-height: 500px) {',
    'тесная высота делится поворотом и высотой, а не ещё одной шириной'],
 
+  /* Откат возвращает РАЗНЫЕ ступени — решение, отменённое Костей 25.09. */
   ['css/live-match.css',
-   '.lm-points-score {\n    min-width: 56px;\n    text-align: center;\n    font-size: var(--fs-3xl);',
-   '.lm-points-score {\n    min-width: 56px;\n    text-align: center;\n    font-size: var(--fs-xl);',
-   'очки строго крупнее счёта сета'],
+   '.lm-points-score {\n    min-width: 40px;\n    text-align: center;\n    font-size: var(--fs-xl);',
+   '.lm-points-score {\n    min-width: 40px;\n    text-align: center;\n    font-size: var(--fs-3xl);',
+   'очки и счёт сета стоят на ОДНОЙ ступени и различаются цветом'],
 
+  /* Ронять надо ИМЯ, а не сет: сет теперь связан ещё и с очками, и его
+     откат валил сразу два правила. Якорь переехал на имя. */
   ['css/live-match.css',
-   '.lm-set-score {\n    min-width: 26px;\n    text-align: center;\n    font-size: var(--fs-xl);',
-   '.lm-set-score {\n    min-width: 26px;\n    text-align: center;\n    font-size: var(--fs-lg);',
+   '.lm-player-name {\n    display: flex; align-items: center; gap: var(--space-2);\n    font-size: var(--fs-md);',
+   '.lm-player-name {\n    display: flex; align-items: center; gap: var(--space-2);\n    font-size: var(--fs-xl);',
    'счёт сета строго крупнее имени игрока'],
 
   ['css/live-match.css',
@@ -60,13 +70,15 @@ const ОТКАТЫ = [
    'заголовок матча стоит на ступени H1'],
 
   ['css/live-match.css',
-   '    .lm-points-score { font-size: var(--fs-2xl); min-width: 44px; }',
-   '    .lm-points-score { font-size: var(--fs-3xl); min-width: 44px; }',
+   '    .lm-points-score { font-size: var(--fs-lg); min-width: 32px; }',
+   '    .lm-points-score { font-size: var(--fs-3xl); min-width: 32px; }',
    'на телефоне очки опускается по шкале'],
 
+  /* Якорь удлинён до цвета: с 25.09 сет и очки на ОДНОЙ ступени, и
+     прежний кусок встречался в файле дважды. Различает их краска. */
   ['css/live-match.css',
-   '    font-size: var(--fs-xl);\n    font-weight: var(--fw-extrabold);\n    font-variant-numeric: tabular-nums;',
-   '    font-size: var(--fs-xl);\n    font-weight: var(--fw-extrabold);',
+   '    font-variant-numeric: tabular-nums;\n    color: var(--text-muted);\n}\n.lm-set-score.lm-current',
+   '    color: var(--text-muted);\n}\n.lm-set-score.lm-current',
    'цифры счёта сета моноширинные'],
 
   ['css/live-match.css',
@@ -142,12 +154,39 @@ const ОТКАТЫ = [
   ['css/live-match.css',
    '.lm-feed-item:last-child::after { display: none; }',
    '.lm-feed-item:last-child::after { opacity: 0.5; }',
-   'рельс ленты обрывается на последней записи'],
+   'у грубой ленты рельс обрывается на последней записи'],
 
+  /* Два правила — два отката. Один роняет «цвет значит кто есть кто»,
+     другой — «победителя очка видно без цвета». */
   ['css/live-match.css',
    '.lm-player-row { box-shadow: inset 3px 0 0 var(--player-1); }',
    '.lm-player-row { opacity: 1; }',
-   'кто взял очко, видно не одним цветом'],
+   'краска игрока значит ровно одно — кто есть кто'],
+
+  ['css/live-match.css',
+   '.lm-cell.is-won {\n    background: var(--bg-elevated);',
+   '.lm-cell.is-won {\n    background: var(--player-1);',
+   'кто взял очко, видно БЕЗ цвета — весом и подложкой'],
+
+  ['css/live-match.css',
+   '.lm-right .lm-score-panel { flex: 0 0 auto; }',
+   '.lm-right .lm-score-panel { flex: 1 1 auto; }',
+   'табло в колонке НЕ сжимается'],
+
+  ['css/live-match.css',
+   '    flex: 1 1 0;\n    min-width: 0;\n    overflow-x: auto;',
+   '    overflow-x: auto;',
+   'ряд ячеек в узкой колонке не схлопывается'],
+
+  ['css/live-match.css',
+   '        align-self: center;\n        width: auto;',
+   '        width: 100%;',
+   'кадр держит 16:9, а ширину ему ведёт высота'],
+
+  ['js/live-match.js',
+   'var естьВидео = !!ytId;',
+   'var естьВидео = false;',
+   'состояний раскладки ровно два, и оба выводятся из youtube_url'],
 
   ['js/live-match.js',
    "alt=\"' + esc(m.sponsor_name || L.sponsor) + '\"",
