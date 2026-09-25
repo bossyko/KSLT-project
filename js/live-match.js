@@ -290,11 +290,24 @@
     function feedHtml(m, setsData, isWarmup) {
         var games = groupGames(points);
 
+        /* ЖУРНАЛА НЕТ — ЭТО ТРИ РАЗНЫХ СЛУЧАЯ, И ОНИ НЕ ОДИН.
+           Первым заходом я показывал на все три «Матч ещё не начался», и
+           Костя это поймал на живом матче: справа шёл счёт 1 : 0 и статус
+           LIVE, а слева стояло, что матч не начался. Подпись врала.
+
+           Разминка — да, не начался. Идёт или завершён, а журнала нет
+           (судейский модуль ещё не пишет, запись не дошла, матч начат до
+           того, как журнал завели) — показываем то, что база даёт наверняка:
+           сыгранные сеты и текущий гейм. Меньше, чем розыгрыш за розыгрышем,
+           но правда. */
         if (!games.length) {
-            return '<div class="lm-empty">' +
-                '<p class="lm-empty-title">' + L.emptyTitle + '</p>' +
-                '<p class="lm-empty-text">' + L.emptyText + '</p>' +
-            '</div>';
+            if (isWarmup) {
+                return '<div class="lm-empty">' +
+                    '<p class="lm-empty-title">' + L.emptyTitle + '</p>' +
+                    '<p class="lm-empty-text">' + L.emptyText + '</p>' +
+                '</div>';
+            }
+            return грубаяЛента(m, setsData);
         }
 
         var наборы = [];
@@ -349,6 +362,36 @@
             }).join('') +
             '</ul></div>';
         return html;
+    }
+
+    /**
+     * ЛЕНТА ИЗ ТОГО, ЧТО БАЗА ПИШЕТ ВСЕГДА — сеты и текущий гейм.
+     * Запасной путь, когда журнала розыгрышей нет. Не притворяется
+     * подробной: показывает ровно столько, сколько знает.
+     */
+    function грубаяЛента(m, setsData) {
+        var строки = (setsData || []).map(function(s, i) {
+            return { lead: (i + 1) + '-й ' + L.setN + ' — ' + s.g1 + ' : ' + s.g2, note: '', now: false };
+        });
+        if (m.status !== 'completed') {
+            строки.push({
+                lead: L.gameNow + ' — ' + (m.current_game_p1 || 0) + ' : ' + (m.current_game_p2 || 0),
+                note: (m.is_tiebreak ? (m.tiebreak_p1 || 0) + ' : ' + (m.tiebreak_p2 || 0)
+                                     : (m.points_p1 || '0') + ' : ' + (m.points_p2 || '0')),
+                now: true
+            });
+        }
+        if (!строки.length) return '';
+        return '<div class="lm-feed">' +
+            '<p class="lm-feed-title">' + L.feedTitle + '</p>' +
+            '<ul class="lm-feed-list">' +
+            строки.map(function(it) {
+                return '<li class="lm-feed-item' + (it.now ? ' is-now' : '') + '">' +
+                    '<span>' + esc(it.lead) + '</span>' +
+                    (it.note ? '<span class="lm-feed-note">' + esc(it.note) + '</span>' : '') +
+                '</li>';
+            }).join('') +
+            '</ul></div>';
     }
 
     function chip(value, label, active) {
