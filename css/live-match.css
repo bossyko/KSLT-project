@@ -130,6 +130,13 @@
     border-bottom: 1px solid var(--border-subtle);
 }
 .lm-player-row:last-child { border-bottom: none; }
+/* КЛЮЧ К ЦВЕТУ ЛЕНТЫ — САМИ СТРОКИ ИГРОКОВ.
+   Полоска у розыгрыша говорит, кто взял очко, но до 24.09 нигде не было
+   сказано, ЧЬЯ полоска какая. Костя: «цветами выделил классно, а вот у
+   игроков нет цветов». Теперь та же краска стоит у имени на табло — ключ
+   лежит там, где и так написаны имена, и отдельной легенды не нужно. */
+.lm-player-row { box-shadow: inset 3px 0 0 var(--player-1); }
+.lm-player-row + .lm-player-row { box-shadow: inset 3px 0 0 var(--player-2); }
 .lm-player-row.lm-serving { background: var(--surface-glass); }
 .lm-player-row.lm-winner-row { background: var(--accent-subtle); }
 
@@ -346,8 +353,11 @@
 }
 .lm-point.has-mark { background: var(--surface-glass-hover); }
 
-.lm-point-w1 { box-shadow: inset 2px 0 0 var(--success); }
-.lm-point-w2 { box-shadow: inset -2px 0 0 var(--warning); }
+/* Краска игрока, а не статусная: зелёный и янтарный значат «успех» и
+   «внимание», и на розыгрыше читались как оценка, которой там нет.
+   Сторона полоски остаётся разной — цвет не единственный признак. */
+.lm-point-w1 { box-shadow: inset 3px 0 0 var(--player-1); }
+.lm-point-w2 { box-shadow: inset -3px 0 0 var(--player-2); }
 
 .lm-break {
     font-size: var(--fs-2xs);

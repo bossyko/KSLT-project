@@ -352,7 +352,7 @@
 
         html += '<ul class="lm-feed-list">' +
             закрытые.map(function(g) {
-                var кто = g.won === 1 ? nameOf(m, 1) : nameOf(m, 2);
+                var кто = короткоеИмя(g.won === 1 ? nameOf(m, 1) : nameOf(m, 2));
                 return '<li class="lm-feed-item">' +
                     '<span>' + esc(L.game + ' ' + g.game_no + ' \u2014 ' + кто) + '</span>' +
                     (g.is_break
@@ -410,6 +410,18 @@
     function nameOf(m, n) {
         var p = n === 1 ? (m.player1 || {}) : (m.player2 || {});
         return getPlayerName(p, n === 1 ? m.player1_name : m.player2_name);
+    }
+
+    /**
+     * «Иван Корабельников» → «Иван К.» — по просьбе Кости 24.09.
+     * В ленте имя стоит в строке гейма рядом со счётом, и полное имя её
+     * разрывает. Первое слово целиком, от второго — буква с точкой.
+     * Одно слово («Петя») остаётся как есть: сокращать нечего.
+     */
+    function короткоеИмя(полное) {
+        var части = String(полное || '').trim().split(/\s+/);
+        if (части.length < 2) return части[0] || '—';
+        return части[0] + ' ' + части[1].charAt(0).toUpperCase() + '.';
     }
 
     function getPlayerName(p, fallbackName) {
