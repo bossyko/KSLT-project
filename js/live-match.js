@@ -19,10 +19,10 @@
     var L = {
         loading:   isEn ? 'Loading...'      : isKg ? 'Жүктөлүүдө...'   : 'Загрузка...',
         notFound:  isEn ? 'Match not found' : isKg ? 'Матч табылган жок': 'Матч не найден',
-        live:      'LIVE',
-        warmup:    isEn ? 'WARM-UP'   : isKg ? 'ДАЯРДОО'  : 'РАЗМИНКА',
-        paused:    isEn ? 'PAUSED'    : isKg ? 'ТЫНЫМ'    : 'ПАУЗА',
-        completed: isEn ? 'COMPLETED' : isKg ? 'АЯКТАГАН' : 'ЗАВЕРШЁН',
+        /* ПОДПИСИ СОСТОЯНИЯ УШЛИ В ОБЩИЙ СЛОВАРЬ js/live-texts.js.
+           Слово paused трогают четыре файла проекта, а человеческое слово до
+           25.09 стояло только здесь — и причина перерыва разошлась бы ровно
+           на этом шве. Одно определение на одно понятие. */
         tiebreak:  isEn ? 'Tiebreak'  : isKg ? 'Тайбрейк' : 'Тайбрейк',
         /* Кыргызские подписи до 24.09 повторяли русские — перевод мой. */
         tournament: isEn ? 'Tournament' : isKg ? 'Мелдеш' : 'Турнир',
@@ -222,8 +222,39 @@
 
         /* Тона бейджа — общие с лендингом: .live-badge + is-*.
            Своих классов у страницы больше нет. */
-        var badgeMod  = isWarmup ? 'is-warmup' : isPaused ? 'is-paused' : isCompleted ? 'is-completed' : 'is-live';
-        var badgeText = isWarmup ? L.warmup : isPaused ? L.paused : isCompleted ? L.completed : L.live;
+        /* ПЕРЕРЫВ И ПРИЧИНА ПАУЗЫ. До 25.09 зритель видел голое «ПАУЗА» и
+           обычное «LIVE» во время смены сторон — и не понимал, почему две
+           минуты ничего не происходит. Слова собирает общий словарь
+           js/live-texts.js: одно определение на одно понятие. */
+        /* Словарь подключается тегом в трёх html-файлах. Если его забыли —
+           это беда сборки, а не повод уронить всю страницу матча: говорим о
+           ней в консоли и показываем хотя бы состояние. Глушим беду, а не
+           её голос. */
+        var Т = window.KSLTLiveTexts;
+        if (!Т) {
+            console.error('Не подключён js/live-texts.js — подписи состояния будут неполными');
+            Т = { слово: function (к) { return к === 'live' ? 'LIVE' : ''; },
+                  пауза: function () { return 'PAUSE'; },
+                  остаток: function () { return 0; } };
+        }
+        var остатокПерерыва = isCompleted ? 0 : Т.остаток(m.break_until);
+        var идётПерерыв = остатокПерерыва > 0 && !isPaused && !isWarmup;
+
+        var badgeMod  = isWarmup ? 'is-warmup'
+                      : isPaused ? 'is-paused'
+                      : isCompleted ? 'is-completed'
+                      : идётПерерыв ? 'is-paused'
+                      : 'is-live';
+        var badgeText = isWarmup ? Т.слово('warmup')
+                      : isPaused ? Т.пауза(m.pause_reason)
+                      : isCompleted ? Т.слово('completed')
+                      /* ЧИСЛА ЗРИТЕЛЮ НЕ ПОКАЗЫВАЕМ. Страница опрашивает базу
+                         раз в пять секунд (js/live-match.js:84–86), и отсчёт
+                         прыгал бы через четыре секунды — это выглядит поломкой.
+                         Зрителю нужно знать ПОЧЕМУ ничего не происходит, а часы
+                         есть у судьи. */
+                      : идётПерерыв ? Т.слово(m.break_kind || 'changeover')
+                      : Т.слово('live');
 
         var p1SetsHtml = '', p2SetsHtml = '';
         setsData.forEach(function(s) {
@@ -260,13 +291,6 @@
                         (m.final_score ? '<div class="lm-final-score">' + esc(m.final_score) + '</div>' : '') +
                       '</div>'
                     : '') +
-                '<div class="lm-info">' +
-                    (servingName && !isCompleted
-                        ? '<div class="lm-info-row"><span>' + L.serving + '</span><span class="lm-info-val">' + esc(servingName) + '</span></div>'
-                        : '') +
-                    (m.tournament_label ? '<div class="lm-info-row"><span>' + L.tournament + '</span><span class="lm-info-val">' + esc(m.tournament_label) + '</span></div>' : '') +
-                    '<div class="lm-info-row"><span>' + L.format + '</span><span class="lm-info-val">' + formatValue(m.best_of) + '</span></div>' +
-                '</div>' +
                 /* СПОНСОР МАТЧА. Имя — не украшение: картинка без имени
                    подписывается диктору как «Sponsor». Если имя есть, оно и
                    становится подписью логотипа и видимым текстом. */
@@ -279,6 +303,30 @@
                       '</div>'
                     : '') +
             '</div>';
+
+        /* СВЕДЕНИЯ — ПОДПИСЬ ПОД ТАБЛО, А НЕ ЧАСТЬ ТАБЛО.
+           Решение Кости 25.09: «а „подаёт · турнир · формат“ — может,
+           убрать там рамку». Он прав по существу: карточка счёта обязана
+           кончаться полосой под вторым игроком, иначе рядом стоящий блок
+           спонсоров тянется ей вровень и пустует снизу. Подпись живёт
+           отдельным узлом, без подложки и без рамки.
+           При идущей трансляции подписи нет вовсе: её высоту забирает
+           журнал, а кто подаёт — видно по мячику в строке игрока.
+           Костя: «не надо возвращать, там мячик есть, кто подаёт». */
+        var infoHtml =
+            '<div class="lm-info">' +
+                (servingName && !isCompleted
+                    ? '<div class="lm-info-row"><span>' + L.serving + '</span><span class="lm-info-val">' + esc(servingName) + '</span></div>'
+                    : '') +
+                (m.tournament_label ? '<div class="lm-info-row"><span>' + L.tournament + '</span><span class="lm-info-val">' + esc(m.tournament_label) + '</span></div>' : '') +
+                '<div class="lm-info-row"><span>' + L.format + '</span><span class="lm-info-val">' + formatValue(m.best_of) + '</span></div>' +
+            '</div>';
+
+        /* ОДИН ПРИЗНАК НА ОДНО ПОНЯТИЕ: «идёт трансляция» помечается
+           классом на body и только им. Раскладка узких видов трогает
+           шапку, подвал и отбивку страницы — узлы вне сетки, — поэтому
+           признак обязан жить выше них. */
+        document.body.classList.toggle('lm-video-idet', естьВидео);
 
         /* ПРАВАЯ КОЛОНКА — ТАБЛО И СПОНСОРЫ ЛИГИ. Решение Кости 25.09:
            «надо будет, чтобы лента карусель спонсоров была всегда видна».
@@ -296,7 +344,7 @@
             backHtml + titleHtml +
             '<div class="lm-grid">' + leftHtml +
                 '<div class="lm-right' + (естьВидео ? ' has-feed' : '') + '">' +
-                    scorePanelHtml + (естьВидео ? feedHtmlStr : '') +
+                    scorePanelHtml + infoHtml + (естьВидео ? feedHtmlStr : '') +
                 '</div>' +
             '</div>';
 

@@ -33,6 +33,32 @@
        Одно определение на одно понятие. Остаётся только воздух — 40,
        «воздух под шапкой» по доске 323:2. */
     padding: var(--space-10) var(--pad-x) var(--space-10);
+
+    /* СТУПЕНИ ЖУРНАЛА. Шкала продукта меряет отступы и кегли, а не высоту
+       списка, поэтому размеры заводятся в компоненте, как того и требует
+       правило «нужен новый размер — заводится в компоненте». Стоят на
+       КОНТЕЙНЕРЕ, а не на .lm-feed: их читает и табло, а свойства
+       наследуются вниз, а не вбок. ПОСЧИТАНО из частей и проверено:
+       гейм 112 = шапка 21 + две строки по 28 + зазоры;
+       обвязка 123 = подпись 17 + чипы сетов 36 + поля карточки.
+       Пол при трансляции: ИДУЩИЙ ГЕЙМ ПОМЕЩАЕТСЯ ЦЕЛИКОМ. Меньше — и
+       списку остаётся 13 пикселей из 131. Костя: «журнал не читается». */
+    --lm-game-h: 128px;
+    --lm-feed-chrome: 123px;
+    --lm-feed-min-video: calc(var(--lm-game-h) + var(--space-4) * 2 + var(--space-2));
+
+    /* СТРАНИЦА ЖИВЁТ В ОДНОМ ЭКРАНЕ. Решение Кости 25.09: «надо будет всё
+       разместить на одном окне без скролов». Правило стояло ТОЛЬКО выше
+       992, и ниже страница росла как хотела: на 390 x 844 документ был
+       2356 при экране 844, на 844 x 390 — 2616 при экране 390. Табло
+       начиналось на 1301, 1287 и 1256 — счёт, ради которого страницу
+       открывают, лежал ниже сгиба на полтора-три экрана. Тест этого не
+       ловил: я сам загнал проверку выше 992. Костя: «нет, не прошло».
+       100dvh, А НЕ 100vh: на телефоне 100vh считается без адресной
+       строки, и низ страницы уезжает под неё. На десктопе они равны. */
+    height: calc(100dvh - var(--header-h));
+    display: flex;
+    flex-direction: column;
 }
 
 /* ── НАЗАД ────────────────────────────────────────────────
@@ -112,6 +138,13 @@
        середине матча лента её перерастает. Разница между «зарезервировали
        место под ничто» и «у контейнера есть своя форма». */
     align-items: stretch;
+    /* СЕТКА ЗАБИРАЕТ ОСТАТОК ЭКРАНА. grid-template-rows ОБЯЗАТЕЛЕН: без
+       него ряд остаётся auto и растёт по содержимому, сколько бы высоты
+       ни было у самой сетки — журнал вымахал до 1016 при контейнере 736.
+       minmax(0, 1fr) разрешает ряду сжиматься. */
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
 }
 
 /* ── ДВЕ КОЛОНКИ ──────────────────────────────────────────
@@ -280,9 +313,15 @@
 }
 
 /* ── ПОДАЧА И СВЕДЕНИЯ ────────────────────────────────────*/
+/* ПОДПИСЬ ПОД ТАБЛО, А НЕ ЧАСТЬ ТАБЛО. Было: подложка карточки и полоса
+   сверху — блок читался как нижний этаж счёта, и карточка счёта тянулась
+   на 95 ниже полосы под вторым игроком. Рядом стоящий блок спонсоров
+   тянулся ей вровень и пустовал снизу. Решение Кости 25.09.
+   Узел теперь и в разметке стоит ПОСЛЕ табло (js/live-match.js). */
 .lm-info {
-    padding: var(--space-3) var(--space-4);
-    border-top: 1px solid var(--border-subtle);
+    padding: 0 var(--space-1);
+    border-top: 0;
+    background: transparent;
     display: flex; flex-direction: column; gap: var(--space-2);
 }
 .lm-info-row {
@@ -569,6 +608,16 @@
     min-width: 0;
     overflow-x: auto;
     scrollbar-width: thin;
+    /* ПОЛЕ СВЕРХУ — ПОД МЕТКУ, А НЕ ДЛЯ КРАСОТЫ. Найдено Костей 25.09, когда
+       метка впервые доехала до ленты: «эйс не помещается, его не видно».
+       Померено: `.lm-cell-mark` висит на top: -7px, то есть СНАРУЖИ своей
+       коробки, а этот ряд — горизонтальный скроллер. Всё, что выше края,
+       он срезает. `overflow-y: visible` не спасает: при `overflow-x: auto`
+       браузер принудительно делает `auto` и по второй оси — в замере так и
+       вышло, auto/auto. Поэтому метке отдаётся поле внутри коробки.
+       ПЛАТИМ ВЫСОТОЙ: два ряда на гейм, по 8 — ступень --lm-game-h выросла
+       со 112 до 128. Число поднято в компоненте, а не зашито в секцию. */
+    padding-top: var(--space-2);
 }
 /* КЕГЛЬ ЦИФРЫ 14, А НЕ 16. Решение Кости 25.09 глазами: «цифры мелкого
    счёта через чур большие». Ступень вниз по шкале, не промежуточная.
@@ -759,132 +808,279 @@
     margin: 0 0 var(--space-4);
 }
 
-/* ── ЭКРАН ЦЕЛИКОМ ВЫШЕ 992 ─────────────────────────────
-   Медиазапросы держатся все вместе в конце файла: БАЗА в прувере —
-   это всё до первого @media, и блок, вставленный в середину, обрезал
-   её на трети файла. Пять правил заморозки разом перестали видеть
-   собственный код. Поймано прувером 25.09. */
+.lm-left, .lm-right { height: 100%; }
+
+/* ПРОКРУЧИВАЕТСЯ ВНУТРЕННИЙ СПИСОК, А НЕ ВСЯ ПАНЕЛЬ. Прокрутка на самой
+   .lm-feed уносит снимок, лежащий на её ::before, вместе со строками.
+   Фон обязан стоять; заодно стоят заголовок и чипы сетов. */
+.lm-feed-games {
+    overflow-y: auto;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+}
+
+/* ТАБЛО НЕ СЖИМАЕТСЯ НИКОГДА. Без этого flex сжал панель с 277 до 101. */
+.lm-right .lm-score-panel { flex: 0 0 auto; }
+.lm-right.has-feed .lm-feed { flex: 1 1 auto; min-height: 0; }
+.lm-left:not(.has-video) .lm-feed { flex: 1 1 auto; min-height: 0; }
+
+/* Кадр держит 16:9 и уступает по ВЫСОТЕ, когда экран низкий. Было только
+   выше 992 — из-за чего на узких видах кадр вообще не знал своей высоты. */
+.lm-left.has-video .lm-video {
+    flex: 1 1 0;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+    align-self: center;
+    width: auto;
+    max-width: 100%;
+}
+.lm-left.has-video .lm-video .lm-video-wrapper { padding-bottom: 0; height: 100%; }
+
+
+/* БЕЙДЖ LIVE ПРЯЧЕТСЯ ТОЛЬКО ПРИ ИДУЩЕЙ ТРАНСЛЯЦИИ: кадр и есть live, а
+   его 51 нужен журналу. Сначала я убрал бейдж на всех узких видах ради
+   высоты — и забрал у паузы и у завершённого матча единственное место,
+   где они себя называют. Поймано Playwright, не глазами. */
+.lm-video-idet .lm-live-badge-wrap { display: none; }
+
+/* ── ВЫШЕ 992 ─────────────────────────────────────────────
+   Медиазапросы держатся все вместе в конце файла: БАЗА в прувере — это
+   всё до первого @media, и блок, вставленный в середину, обрезал её на
+   трети файла. Пять правил заморозки разом перестали видеть собственный
+   код. Поймано прувером 25.09. */
 @media (min-width: 993px) {
-    /* Отношение, а не размер: журнал не выше экрана. Высота страницы
-       перестаёт зависеть от длины матча — спонсоры стоят на месте и на
-       первом гейме, и на тридцатом.
-       ПРОКРУЧИВАЕТСЯ ВНУТРЕННИЙ СПИСОК, А НЕ ВСЯ ПАНЕЛЬ. Сначала я повесил
-       прокрутку на саму .lm-feed — и снимок, лежащий на её ::before,
-       поехал вместе со строками, потому что он внутри прокручиваемого
-       блока. Фон обязан стоять. Заодно стоят заголовок и чипы сетов:
-       уехав к первому сету, человек не должен терять переключатель,
-       которым он туда шёл. */
-    /* ── ЭКРАН ЦЕЛИКОМ, БЕЗ ПРОКРУТКИ СТРАНИЦЫ ────────────────
-       Решение Кости 25.09: «надо будет всё разместить на одном окне
-       без скролов».
-       Высота страницы перестаёт зависеть от содержимого: контейнер ровно
-       в экран, заголовок и подзаголовок берут своё, СЕТКА ЗАБИРАЕТ
-       ОСТАТОК. Ни одного зашитого числа — ни высоты шапки второй раз, ни
-       «143 пикселя на заголовок»: их считает сам flex.
-       Внутри сетки то же деление ещё раз: видео держит кадр 16:9 и
-       сжимается по ВЫСОТЕ, когда экран низкий; журнал забирает, что
-       осталось, и прокручивается внутри себя.
-       ТОЛЬКО ВЫШЕ 992. Ниже сетка в одну колонку, и уместить туда видео,
-       журнал, табло и спонсоров нельзя ни на одном телефоне: 390 x 844
-       даёт под содержимое 617, а одно табло — 277. Там страница
-       прокручивается, как и прокручивалась. */
-    .lm-container {
-        height: calc(100vh - var(--header-h));
-        display: flex;
-        flex-direction: column;
-    }
-    /* grid-template-rows ОБЯЗАТЕЛЕН. Без него ряд сетки остаётся auto и
-       растёт по содержимому, сколько бы ни было высоты у самой сетки:
-       журнал вымахал до 1016 при контейнере 736 и страница всё равно
-       прокручивалась. minmax(0, 1fr) разрешает ряду сжиматься. */
-    .lm-grid {
-        flex: 1 1 auto;
-        min-height: 0;
-        grid-template-rows: minmax(0, 1fr);
-    }
-    .lm-left, .lm-right { height: 100%; }
-
-    /* Видео: кадр держится, высота уступает. max-width не даёт ему
-       разъехаться шире колонки на высоких экранах. */
-    /* ── ЕСТЬ ТРАНСЛЯЦИЯ: вариант Б2 ─────────────────────────
-       Слева кадр и узкая полоса спонсоров, справа табло и журнал.
-       Видео забирает ВСЁ, что осталось от полосы: flex: 1 у кадра и
-       фиксированные 120 у полосы. Так на окне 800 выходит 656 x 369
-       против 485 x 273 в прежней раскладке — почти вдвое по площади.
-       Пробовал отдавать видео долю, а не остаток: у элемента с
-       aspect-ratio нет своей базы по высоте, и flex отдавал всё соседу —
-       кадр схлопывался до 143. Померено, не угадано. */
-    .lm-left.has-video .lm-video {
-        flex: 1 1 0;
-        min-height: 0;
-        aspect-ratio: 16 / 9;
-        /* Ширину ведёт высота: align-self снимает растягивание по
-           колонке, width: auto отдаёт ширину отношению сторон. Без этого
-           кадр выходил 800 x 273, то есть не 16:9 вовсе. */
-        align-self: center;
-        width: auto;
+    /* КАДР ВО ВСЮ ШИРИНУ СВОЕЙ КОЛОНКИ — вровень с полосой спонсоров под
+       ним. Решение Кости 25.09: «тут надо будет экран по ширине спонсоров
+       сделать». 16:9 на 800 — это 450, и вместе с полосой 111 и зазором
+       выходит 585 при 513. Недостающее берётся у шапки страницы: при
+       идущей трансляции мета уходит (турнир и формат стоят на табло), а
+       верхняя отбивка ужимается с 40 до 16. ПОСЧИТАНО, проверено:
+       кадр 800 x 450, полоса 800, низ колонок сошёлся. */
+    .lm-video-idet .lm-left.has-video .lm-video {
+        width: 100%;
         max-width: 100%;
+        height: auto;
+        flex: 0 0 auto;
+        align-self: stretch;
+        aspect-ratio: 16 / 9;
     }
-    .lm-left.has-video .lm-video .lm-video-wrapper { padding-bottom: 0; height: 100%; }
+    .lm-video-idet .lm-left.has-video .lm-video .lm-video-wrapper {
+        padding-bottom: 56.25%;
+        height: 0;
+    }
+    /* Полоса прижата к низу своей колонки — то же правило, что у блока
+       спонсоров в правой колонке. Иначе на 1024 x 768 под полосой
+       оставалось 60 пустоты и колонки кончались на разной высоте. */
+    .lm-video-idet .lm-left.has-video .lm-sponsors { margin-top: auto; }
+    .lm-video-idet .lm-meta { display: none; }
+    .lm-video-idet .lm-container { padding-top: var(--space-4); }
+    /* Подписи под табло при трансляции нет: её высоту забирает журнал, а
+       кто подаёт — видно по мячику. Журнал вырос с 213 до 379. */
+    .lm-video-idet .lm-info { display: none; }
+}
 
-    /* Журнал без видео — во всю левую колонку. */
-    .lm-left:not(.has-video) .lm-feed { flex: 1 1 auto; min-height: 180px; }
+/* ── ПЛАНШЕТ СТОЯ ─────────────────────────────────────────
+   Две границы на весь продукт: 640 и 992. Остальное делится высотой и
+   поворотом. Одна колонка держалась до 992 — и 400 пикселей ширины
+   выбрасывались зря; у планшета стоя колонок теперь две. */
+@media (min-width: 641px) and (max-width: 992px) and (orientation: portrait) {
+    .lm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+    /* display: contents распускает колонки: детьми сетки становятся сами
+       карточки, и порядок задаётся клетками, а не разметкой. */
+    .lm-left, .lm-right { display: contents; }
+    .lm-right .lm-sponsors { margin-top: 0; }
 
-    /* Журнал ПОД ТАБЛО, когда идёт трансляция. Табло по содержимому,
-       журнал забирает остаток колонки.
-       flex: 0 0 auto у табло ОБЯЗАТЕЛЕН: без него flex сжал панель с 277
-       до 101 — счёт, ради которого страницу и открывают, схлопнулся,
-       чтобы уместить журнал. Померено. Табло не сжимается никогда. */
-    .lm-right .lm-score-panel { flex: 0 0 auto; }
-    .lm-right.has-feed .lm-feed { flex: 1 1 auto; min-height: 0; }
-    .lm-feed-games {
-        overflow-y: auto;
+    /* БЕЗ ТРАНСЛЯЦИИ. Решение Кости 25.09: «увеличить окно журнала по
+       ширине и оставить воздух по бокам, а две карточки — счёт и
+       спонсоры — спустить вниз в один ряд с одинаковой высотой».
+       Ряд auto равняет обе карточки по высокой из них; журнал забирает
+       остаток и прокручивается внутри. Сведения — третьим рядом. */
+    body:not(.lm-video-idet) .lm-grid { grid-template-rows: minmax(0, 1fr) auto auto; }
+    body:not(.lm-video-idet) .lm-feed { grid-column: 1 / -1; grid-row: 1; }
+    body:not(.lm-video-idet) .lm-score-panel { grid-column: 1; grid-row: 2; }
+    body:not(.lm-video-idet) .lm-sponsors { grid-column: 2; grid-row: 2; }
+    body:not(.lm-video-idet) .lm-info { grid-column: 1; grid-row: 3; align-self: start; }
+
+    /* С ТРАНСЛЯЦИЕЙ. Кадр во всю ширину обеих карточек — просьба Кости.
+       16:9 на 734 съедает 413 из 737. Чтобы в остаток влезли и журнал, и
+       полоса спонсоров, у журнала уходит обвязка, и он показывает идущий
+       гейм целиком: 413 + 148 + 111 + 48 = 716 при 737. ПОСЧИТАНО. */
+    .lm-video-idet .lm-grid {
+        position: relative;
+        grid-template-rows: auto auto auto;
+        align-content: start;
+    }
+    .lm-video-idet .lm-video { grid-column: 1 / -1; grid-row: 1; }
+    .lm-video-idet .lm-left.has-video .lm-video {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+        justify-self: stretch;
+        align-self: start;
+    }
+    .lm-video-idet .lm-left.has-video .lm-video .lm-video-wrapper { padding-bottom: 0; height: 100%; }
+    /* Табло НЕ растягивается на весь ряд: карточка кончается полосой под
+       вторым игроком. Решение Кости 25.09. */
+    .lm-video-idet .lm-score-panel {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: start;
+        min-height: var(--lm-feed-min-video);
+    }
+    .lm-video-idet .lm-info { display: none; }
+    /* Обвязка журнала уступает место списку: при полноширинном кадре
+       подпись 17 и чипы сетов 36 съедали бы гейм целиком — списку
+       оставалось 34 из 152. Померено. */
+    .lm-video-idet .lm-feed-title,
+    .lm-video-idet .lm-feed-chips { display: none; }
+    /* Журнал ложится в ту же клетку АБСОЛЮТНО: иначе он задаёт высоту
+       ряда своим содержимым и съедает кадр. Обе границы клетки заданы
+       явно — при auto-конце containing block тянется до конца сетки, и
+       журнал накрывал полосу спонсоров. Померено. */
+    .lm-video-idet .lm-feed {
+        position: absolute;
+        grid-column: 2 / 3;
+        grid-row: 2 / 3;
+        inset: 0;
         min-height: 0;
-        scrollbar-width: thin;
-        /* Место под полосу прокрутки, чтобы строки не дёргались, когда
-           геймов становится больше экрана. */
-        scrollbar-gutter: stable;
     }
+    .lm-video-idet .lm-sponsors { grid-column: 1 / -1; grid-row: 3; }
 }
 
-/* ── ВИДЫ ─────────────────────────────────────────────────
-   Две границы на весь продукт: 640 и 992. Было 991 · 480 · 375 —
-   ни одна не из лестницы, и 375 заводил отдельный мир для
-   iPhone SE рядом с iPhone 14. */
-@media (max-width: 992px) {
-    .lm-grid { grid-template-columns: 1fr; }
-}
-
+/* ── ТЕЛЕФОН СТОЯ ─────────────────────────────────────────*/
 @media (max-width: 640px) {
+    .lm-grid { display: flex; flex-direction: column; gap: var(--space-4); }
+    .lm-left, .lm-right { display: contents; }
+
+    /* ПОРЯДОК КОСТИ: журнал, счёт, спонсоры. Кадр, когда он есть, идёт
+       первым. В разметке журнал и табло лежат в разных колонках, и на
+       узком порядок задаётся order, а не переносом узлов. */
+    .lm-video { order: 1; }
+    .lm-left.has-video .lm-video {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 100%;
+        align-self: stretch;
+        aspect-ratio: auto;
+    }
+    .lm-left.has-video .lm-video .lm-video-wrapper { padding-bottom: 56.25%; height: 0; }
+    .lm-feed { order: 2; flex: 1 1 auto; min-height: var(--lm-game-h); display: flex; flex-direction: column; }
+    .lm-score-panel { order: 3; flex: 0 0 auto; }
+    .lm-info { order: 4; flex: 0 0 auto; }
+    .lm-sponsors { order: 5; flex: 0 0 auto; margin-top: 0; padding-top: var(--space-3); }
+
+    /* КОМПАКТ. Бейдж LIVE уезжает: слово «идёт» и так стоит в журнале, а
+       его 51 пиксель — это половина гейма. Заголовок ступенью ниже: на 26
+       он вставал в две строки. */
+    .lm-container { padding-top: var(--space-3); padding-bottom: var(--space-4); }
+    .lm-title { font-size: var(--fs-lg); margin-bottom: var(--space-1); }
+    .lm-meta { margin-bottom: var(--space-3); }
+    .lm-info { flex-direction: row; flex-wrap: wrap; gap: var(--space-2) var(--space-4); padding: var(--space-2) var(--space-4); }
+    .lm-info-row { gap: var(--space-2); }
+
+    /* С ТРАНСЛЯЦИЕЙ: место уступают сведения и обвязка журнала, список
+       получает идущий гейм целиком — 136 вместо 47. */
+    .lm-video-idet .lm-info { display: none; }
+    .lm-video-idet .lm-feed-title,
+    .lm-video-idet .lm-feed-chips { display: none; }
+    .lm-video-idet .lm-feed { min-height: var(--lm-feed-min-video); }
+
     /* Журнал на телефоне: ячейка уже, кегль НЕ мельчает — 14 и 12 уже
-       нижние ступени, на которых счёт ещё читается. Длинный гейм уезжает
-       вбок прокруткой, пара строк остаётся парой. */
+       нижние ступени, на которых счёт ещё читается. */
     .lm-row-name { flex: 0 0 84px; }
     .lm-cell { flex: 0 0 28px; }
-    .lm-cell.is-game { flex: 0 0 28px; }   /* та же ширина, что у остальных */
+    .lm-cell.is-game { flex: 0 0 28px; }
 
-    .lm-title { font-size: var(--fs-xl); }
     .lm-player-row { grid-template-columns: 32px 1fr auto; gap: var(--space-2); padding: var(--space-3); }
     .lm-avatar, .lm-avatar-placeholder { width: 32px; height: 32px; }
     .lm-avatar-placeholder { font-size: var(--fs-xs); }
-    .lm-player-name { font-size: var(--fs-base); }   /* 16 на узком: ступень вниз от 18 */
+    .lm-player-name { font-size: var(--fs-base); }
     .lm-set-score { font-size: var(--fs-lg); min-width: 20px; }
-    .lm-points-score { font-size: var(--fs-lg); min-width: 32px; }   /* на узком тоже вровень с геймами */
+    .lm-points-score { font-size: var(--fs-lg); min-width: 32px; }
+
+    /* Спонсоры полосой. Значения совпадают с .lm-sponsors.is-strip
+       НАМЕРЕННО: это один и тот же вид блока, и за их расхождением следит
+       правило-сторож в tools/check-live-stranica.js. */
+    .lm-sponsors .lm-sponsors-title { font-size: var(--fs-2xs); letter-spacing: 2px; margin: 0 0 var(--space-2); }
+    .lm-sponsors .sponsors-carousel-infinite { padding: var(--space-2) 0; margin-bottom: 0; }
+    .lm-sponsors .carousel-slide-infinite { width: 120px; margin: 0 var(--space-3); gap: 0; }
+    .lm-sponsors .carousel-slide-infinite img { height: 56px; padding: 6px; }
+    .lm-sponsors .carousel-slide-infinite > :not(img) { display: none; }
 }
 
-/* ТЕСНО ПО ВЫСОТЕ — телефон боком. Ширина здесь 844, то есть по ширине
-   это «широкий» вид, и лестница осталась бы крупной при высоте экрана 390.
-   Делится высотой и поворотом, как и весь остальной продукт: по ширине у
-   нас только две границы. */
+/* ── ТЕЛЕФОН БОКОМ ────────────────────────────────────────
+   Ширина здесь 844 — по ширине это «широкий» вид, и лестница осталась бы
+   крупной при высоте экрана 390. Делится высотой и поворотом.
+   ПОЛНОЭКРАННЫЙ РЕЖИМ. Решение Кости 25.09: «в горизонтальном наверно
+   сразу чтобы открывался полноразмерный экран — как у всех: перевернул,
+   окно видео на весь экран». Раз режим полноэкранный — уходит и шапка, и
+   подвал: иначе страница остаётся прокручиваемой и за кадром во весь
+   рост стоит подвал. Костя это и увидел. */
 @media (orientation: landscape) and (max-height: 500px) {
-    .lm-container { padding-top: var(--space-6); }   /* шапку отбивает main, см. выше */
-    .lm-title { font-size: var(--fs-xl); }
-    .lm-meta { margin-bottom: var(--space-4); }
-    .lm-empty { padding: var(--space-6) var(--space-4); }
+    header.floating-header { display: none; }
+    body > footer, .site-footer { display: none; }
+    main { padding-top: 0; }
+    .lm-container { height: 100dvh; padding-top: var(--space-2); padding-bottom: var(--space-2); }
+    /* Цель нажатия остаётся 44 и в полноэкранном режиме: я было
+       опустил её до 36 ради высоты — поймал тест. WCAG 2.5.5 не
+       отменяется поворотом телефона. */
+    .lm-back-link { min-height: var(--btn-h-md); position: absolute; opacity: .9; }
+    /* Заголовок отбивается от ссылки «назад» ступенью шкалы, а не
+       подогнанным числом: ссылка 102 широкая, 128 даёт 26 зазора. */
+    .lm-title { font-size: var(--fs-lg); margin: 0 0 var(--space-2) var(--space-32); }
+    .lm-meta { display: none; }
+    .lm-info { display: none; }
+
+    /* Журнал шире, счёт и спонсоры уже — просьба Кости 25.09. Пропорция
+       не выдумана: это та же 2 : 1, что у сетки везде. */
+    .lm-grid { gap: var(--space-4); grid-template-columns: 2fr 1fr; }
+    .lm-left { height: 100%; }
+    .lm-right { height: 100%; justify-content: flex-start; }
+    /* Обе правые карточки делят колонку 2 : 1 и вместе держат уровень
+       журнала. Спонсоры строго ниже счёта — решение Кости; заморожено
+       ОТНОШЕНИЕ, а не числа. */
+    .lm-right .lm-score-panel { flex: 2 1 0; display: flex; flex-direction: column; justify-content: center; }
+    .lm-right .lm-players { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; }
+    .lm-right .lm-player-row { flex: 1 1 0; }
+    .lm-right .lm-sponsors { flex: 1 1 0; margin-top: 0; display: flex; flex-direction: column; justify-content: center; }
+
+    .lm-sponsors .lm-sponsors-title { font-size: var(--fs-2xs); letter-spacing: 2px; margin: 0 0 var(--space-1); }
+    .lm-sponsors .sponsors-carousel-infinite { padding: 0; margin: 0; }
+    .lm-sponsors .carousel-slide-infinite { width: 120px; margin: 0 var(--space-3); gap: 0; }
+    .lm-sponsors .carousel-slide-infinite img { height: 40px; padding: var(--space-1); }
+    .lm-sponsors .carousel-slide-infinite > :not(img) { display: none; }
+
+    /* ЕСТЬ ТРАНСЛЯЦИЯ — КАДР НА ВЕСЬ ЭКРАН, И БОЛЬШЕ НИЧЕГО. Карусель
+       спонсоров здесь убрана по прямой просьбе Кости: «там вообще надо
+       будет убрать спонсора карусель, оставить только видео».
+       Пустая правая колонка ПРЯЧЕТСЯ ЦЕЛИКОМ: дети скрыты, а сама
+       колонка держала height 100% и давала странице второй экран
+       пустоты — документ был 780 при экране 390. Померено. */
+    .lm-video-idet .lm-title,
+    .lm-video-idet .lm-score-panel,
+    .lm-video-idet .lm-feed,
+    .lm-video-idet .lm-right,
+    .lm-video-idet .lm-sponsors { display: none; }
+    .lm-video-idet .lm-container { padding: 0; height: 100dvh; }
+    .lm-video-idet .lm-grid { display: block; gap: 0; }
+    .lm-video-idet .lm-left.has-video .lm-video {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        aspect-ratio: auto;
+        border-radius: 0;
+        z-index: 1;
+    }
+    .lm-video-idet .lm-left.has-video .lm-video .lm-video-wrapper { padding-bottom: 0; height: 100%; }
+    .lm-video-idet .lm-back-link { position: fixed; top: var(--space-3); left: var(--space-3); z-index: 3; }
 }
 
-/* Бесконечной анимации у бейджа не должно быть у того, кто
-   попросил систему убрать движение. WCAG 2.3.3. */
+/* Бесконечной анимации у бейджа не должно быть у того, кто попросил
+   систему убрать движение. WCAG 2.3.3. */
 @media (prefers-reduced-motion: reduce) {
     .live-badge.is-live { animation: none; }
     .lm-back-link,
