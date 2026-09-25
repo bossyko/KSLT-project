@@ -4506,6 +4506,14 @@ h2 {
     animation-play-state: paused;
 }
 
+/* ДОРОЖКА ЕДЕТ 90 СЕКУНД БЕЗ ОСТАНОВКИ — значит, спрашиваем разрешения.
+   Заведено 24.09, когда карусель встала ещё и внизу страницы матча: на
+   лендинге она живёт в шапке, где её проматывают, а на странице матча
+   висит перед глазами, пока человек смотрит счёт. WCAG 2.3.3. */
+@media (prefers-reduced-motion: reduce) {
+    .carousel-track-infinite { animation: none; }
+}
+
 @keyframes scrollCarousel {
     0% {
         transform: translateX(0);

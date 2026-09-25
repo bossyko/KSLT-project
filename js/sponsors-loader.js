@@ -373,7 +373,11 @@
 
         fetchSponsors().then(function(data) {
             if (!data || !data.length) {
-                var section = container.closest('.hero-sponsors-section');
+                /* Обёртку прячем ЛЮБУЮ, а не только геройскую: с 24.09
+                   карусель стоит ещё и внизу страницы матча, и там у неё
+                   своя обёртка. Иначе при пустом списке оставался бы
+                   одинокий заголовок «Спонсоры КСЛТ» над пустотой. */
+                var section = container.closest('.hero-sponsors-section, [data-sponsors-block]');
                 if (section) section.style.display = 'none';
                 return;
             }

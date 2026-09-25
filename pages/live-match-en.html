@@ -26,8 +26,8 @@
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="../css/tokens.css?v=20">
-    <link rel="stylesheet" href="../css/style.css?v=373">
-    <link rel="stylesheet" href="../css/live-match.css?v=4">
+    <link rel="stylesheet" href="../css/style.css?v=374">
+    <link rel="stylesheet" href="../css/live-match.css?v=5">
 </head>
 <body>
     <!-- HEADER -->
@@ -284,8 +284,13 @@
             <div class="lm-loading">Loading...</div>
         </div>
 
-        <!-- SPONSORS -->
-        <section id="sponsors" class="section-sponsors-compact"></section>
+        <!-- SPONSORS — карусель, решение Кости 24.09: «лучше каруселью,
+             чем просто». Та же дорожка, что в шапке первого экрана на
+             главной, тот же загрузчик и тот же порядок спонсоров. -->
+        <section class="lm-sponsors" data-sponsors-block>
+            <p class="lm-sponsors-title">KSLT sponsors</p>
+            <div class="sponsors-carousel-infinite" id="lmSponsorsCarousel"></div>
+        </section>
     </main>
 
     <!-- FOOTER -->
@@ -372,8 +377,8 @@
 
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js?v=2"></script>
-    <script src="../js/sponsors-loader.js?v=7"></script>
-    <script>if (window.loadSponsors) loadSponsors('sponsors');</script>
+    <script src="../js/sponsors-loader.js?v=8"></script>
+    <script>if (window.loadSponsorsCarousel) loadSponsorsCarousel('lmSponsorsCarousel');</script>
     <script src="../js/session-monitor.js?v=2"></script>
     <script src="../js/contact-icons.js?v=1"></script>
     <script src="../js/auth-nav.js?v=24"></script>
