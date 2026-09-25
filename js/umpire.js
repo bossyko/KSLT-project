@@ -242,6 +242,14 @@
             winner_player: state.winner_player,
             final_score: state.final_score,
             set_format: state.set_format || 'standard',
+            /* ПЕРЕРЫВ И ПРИЧИНА ПАУЗЫ ЕДУТ В БАЗУ. До 25.09 перерыв жил только
+               в памяти браузера судьи, и зритель на странице матча видел
+               обычный LIVE, не понимая, почему две минуты ничего не идёт.
+               Причина паузы уходит КОДОМ, а не словом: слово собирает та
+               страница, которая показывает, каждая на своём языке. */
+            pause_reason: state.pause_reason || null,
+            break_kind:   state.break_kind   || null,
+            break_until:  state.break_until  || null,
             history: state.history
         };
     }
@@ -262,6 +270,9 @@
             tiebreak_p1: dbMatch.tiebreak_p1 || 0,
             tiebreak_p2: dbMatch.tiebreak_p2 || 0,
             status: dbMatch.status || 'warmup',
+            pause_reason: dbMatch.pause_reason || null,
+            break_kind:   dbMatch.break_kind   || null,
+            break_until:  dbMatch.break_until  || null,
             winner_player: dbMatch.winner_player || null,
             final_score: dbMatch.final_score || null,
             history: dbMatch.history || []
@@ -272,17 +283,37 @@
     // UMPIRE UI — page controller
     // ============================================================
 
-    var CHANGEOVER_GAME = 180; // 3 minutes between odd games
-    var CHANGEOVER_SET = 300;  // 5 minutes between sets
+    /* ВРЕМЯ ПЕРЕРЫВОВ. Решение Кости 25.09: 120 и 180 — на треть длиннее
+       правил ITF (90 и 120) и вдвое короче прежних 180 и 300. Посчитано на
+       матче 6-4 6-4 (20 геймов, девять смен сторон, один перерыв между
+       сетами): 21 минута против 32 прежде и 15 по правилам. Таймер не
+       запрещает играть — «Продолжить» рядом, кнопки очка не исчезают, а
+       первое же очко перерыв снимает: это потолок, а не обязанность. */
+    var CHANGEOVER_GAME = 120; // смена сторон
+    var CHANGEOVER_SET = 180;  // перерыв между сетами
+
+    /* ПРИЧИНЫ ПАУЗЫ. Пятой («технический» — сетка, мяч, свет) нет намеренно:
+       каждая лишняя кнопка — лишнее решение в момент, когда судье надо
+       действовать, а «Другое» её закрывает. */
+    var ПРИЧИНЫ = [
+        { код: 'medical', имя: 'Медицинский' },
+        { код: 'toilet',  имя: 'Туалет' },
+        { код: 'weather', имя: 'Погода' },
+        { код: 'other',   имя: 'Другое' }
+    ];
+    var ИМЯ_ПРИЧИНЫ = { medical: 'Медицинский', toilet: 'Туалет', weather: 'Погода', other: 'Другое' };
 
     var umpireKey = null;
-    /* ОКНО МЕТКИ. После очка на три секунды открывается пара «Эйс» /
-       «Двойная». Метка необязательна: не нажал — розыгрыш записан обычным,
-       и одно касание на розыгрыш остаётся одним. */
-    var markSeq = null;      // номер розыгрыша, к которому метка относится
-    var markUntil = 0;
-    var markTimer = null;
-    var markSet = null;
+    /* ОКНА МЕТКИ БОЛЬШЕ НЕТ, И ЭТО ПОПРАВКА К СЕБЕ.
+       24.09 здесь стояла пара «Эйс» / «Двойная», открывавшаяся на три секунды
+       после очка. 25.09 проверено руками на стенде: она не открывалась НИ
+       РАЗУ. render() успевал отработать раньше, чем база возвращала номер
+       розыгрыша, а logPoint номер получал, но перерисовки не делал.
+       Чиню не строкой, а смыслом: по решению Кости 25.09 эйс и двойная стали
+       САМИМ ОЧКОМ. Эйс — очко подающему, двойная — очко принимающему; метка
+       уходит в той же записи, что и очко. Номер розыгрыша больше не нужен,
+       гонки с сетью нет, таймера нет. */
+    var выборПричины = false;
     var wakeLock = null;
     var matchData = null;
     var state = null;
@@ -331,37 +362,8 @@
         if (!client) return;
         client.rpc('umpire_log_point', { p_key: umpireKey, p_entry: entry })
             .then(function(res) {
-                if (res.error) { console.error('Журнал розыгрыша:', res.error); return; }
-                /* Номер нужен метке: она ставится ПО НОМЕРУ, а не на
-                   «последний розыгрыш». Вставка уходит асинхронно, и пока
-                   она в пути «последним» остаётся предыдущее очко. */
-                if (res.data && res.data.ok) markSeq = res.data.seq;
+                if (res.error) console.error('Журнал розыгрыша:', res.error);
             });
-    }
-
-    /* Метка эйса и двойной. Судья и так объявляет их вслух — суждения не
-       требуется. «Виннер» и «невынужденную» не спрашиваем: на больших
-       турнирах их считает отдельный логгер, а у нас один человек. */
-    function markPoint(kind) {
-        var client = window.supabaseClient;
-        if (!client || markSeq === null) return;
-        markSet = (markSet === kind) ? null : kind;
-        render();
-        client.rpc('umpire_mark_point', { p_key: umpireKey, p_seq: markSeq, p_mark: markSet })
-            .then(function(res) {
-                if (res.error) console.error('Метка розыгрыша:', res.error);
-            });
-    }
-
-    function openMarkWindow() {
-        markSet = null;
-        markUntil = Date.now() + 3000;
-        clearTimeout(markTimer);
-        markTimer = setTimeout(function() { markUntil = 0; render(); }, 3000);
-    }
-
-    function markWindowOpen() {
-        return Date.now() < markUntil && markSeq !== null;
     }
 
     /* ЭКРАН НЕ ГАСНЕТ. Судья держит телефон весь матч, и система усыпляет
@@ -410,6 +412,10 @@
         clearChangeover();
         changeoverTotalSec = seconds;
         changeoverEndTime = Date.now() + seconds * 1000;
+        /* Зритель обязан видеть перерыв: до 25.09 он жил только здесь. */
+        state.break_kind = (seconds === CHANGEOVER_SET) ? 'set_break' : 'changeover';
+        state.break_until = new Date(changeoverEndTime).toISOString();
+        saveState();
         changeoverInterval = setInterval(function() {
             if (Date.now() >= changeoverEndTime) {
                 clearChangeover();
@@ -420,8 +426,14 @@
     }
 
     function clearChangeover() {
+        var былПерерыв = !!changeoverEndTime;
         changeoverEndTime = 0;
         changeoverTotalSec = 0;
+        if (былПерерыв && state) {
+            state.break_kind = null;
+            state.break_until = null;
+            saveState();
+        }
         if (changeoverInterval) {
             clearInterval(changeoverInterval);
             changeoverInterval = null;
@@ -434,11 +446,15 @@
         return ms > 0 ? Math.ceil(ms / 1000) : 0;
     }
 
-    function handleScore(player) {
+    function handleScore(player, метка) {
         if (state.status === 'completed') return;
 
         // Clear any active changeover — umpire starts scoring
         if (changeoverEndTime) clearChangeover();
+        /* ОЧКО СНИМАЕТ И ПАУЗУ — тем же правилом, что и перерыв: игра пошла,
+           значит перерыв кончился. Одно определение на одно понятие; иначе
+           судья, забывший нажать «Продолжить», вёл бы матч «на паузе». */
+        if (state.status === 'paused') { state.status = 'live'; state.pause_reason = null; }
 
         var prevSetsCount = state.sets_data.length;
         var prevGames = state.current_game_p1 + state.current_game_p2;
@@ -456,8 +472,6 @@
         };
 
         state = scorePoint(state, player);
-        markSeq = null;          // новый розыгрыш — прежний номер недействителен
-        openMarkWindow();
         render();
         saveState();
 
@@ -500,7 +514,11 @@
                 game_won: взятГейм ? player : null,
                 /* Брейк — гейм, взятый НЕ подающим. */
                 is_break: !!(взятГейм && доРозыгрыша.serving && player !== доРозыгрыша.serving),
-                is_tiebreak: доРозыгрыша.tb
+                is_tiebreak: доРозыгрыша.tb,
+                /* Метка идёт ВНУТРИ записи розыгрыша, а не отдельным вызовом:
+                   отдельный вызов и породил беду с номером. NULL значит
+                   «судья не отметил», а не «эйса не было». */
+                mark: метка || null
             });
         })();
 
@@ -528,12 +546,8 @@
         /* Через этот же стек проходит и выбор подачи. Розыгрыш убираем из
            журнала ТОЛЬКО если счёт действительно изменился, иначе отмена
            выбора подачи стёрла бы чужую запись. */
-        if (scoreFingerprint(state) !== было) {
-            undoPoint();
-            /* Отмена уносит и метку: строки больше нет, помечать нечего. */
-            markSeq = null; markSet = null; markUntil = 0;
-            clearTimeout(markTimer);
-        }
+        /* Отмена уносит и метку: она лежит в той же строке журнала. */
+        if (scoreFingerprint(state) !== было) undoPoint();
     }
 
     function handleChooseServe(player) {
@@ -552,16 +566,31 @@
         }
     }
 
+    /* ПАУЗА НАЗЫВАЕТ СЕБЯ. До 25.09 «Пауза» была одна на все случаи, и в базе
+       дождь не отличался от травмы. Теперь кнопка спрашивает причину, а
+       страница матча и табло показывают её на своём языке. */
     function handlePause() {
-        if (state.status === 'live') {
-            state.status = 'paused';
+        if (state.status === 'paused') {
+            state.status = 'live';
+            state.pause_reason = null;
             render();
             saveState();
-        } else if (state.status === 'paused') {
-            state.status = 'live';
-            render();
+            return;
+        }
+        if (state.status !== 'live') return;
+        выборПричины = true;
+        render();
+    }
+
+    function применитьПричину(код) {
+        выборПричины = false;
+        if (код) {
+            if (changeoverEndTime) clearChangeover();
+            state.status = 'paused';
+            state.pause_reason = код;
             saveState();
         }
+        render();
     }
 
     function getPointDisplay(p1, p2, isTb) {
@@ -595,8 +624,16 @@
         });
 
         // Status label
-        var statusLabel = isWarmup ? 'Разминка' : isPaused ? 'Пауза' : isCompleted ? 'Матч завершён' : 'Live';
-        var statusClass = isWarmup ? 'warmup' : isPaused ? 'paused' : isCompleted ? 'completed' : 'live';
+        var идётПерерыв = getChangeoverRemaining() > 0;
+        var statusLabel =
+            isWarmup    ? 'Разминка' :
+            isPaused    ? 'Пауза' + (state.pause_reason ? ' · ' + (ИМЯ_ПРИЧИНЫ[state.pause_reason] || '') : '') :
+            isCompleted ? 'Матч завершён' :
+            идётПерерыв ? (changeoverTotalSec === CHANGEOVER_SET ? 'Перерыв между сетами' : 'Смена сторон') :
+                          'Live';
+        var statusClass =
+            isWarmup ? 'warmup' : isPaused ? 'paused' : isCompleted ? 'completed'
+            : идётПерерыв ? 'break' : 'live';
 
         // Winner banner
         var winnerHtml = '';
@@ -617,23 +654,28 @@
             '</div>' +
             '<div class="um-status um-status-' + statusClass + '">' + statusLabel + '</div>' +
             winnerHtml +
-            '<div class="um-scoreboard">' +
+            '<div class="um-scoreboard" role="group" aria-live="polite" aria-label="Счёт матча">' +
                 // Player 1 row
                 '<div class="um-player-row' + (state.serving_player === 1 ? ' um-serving' : '') + (state.winner_player === 1 ? ' um-winner-row' : '') + '">' +
-                    '<div class="um-serve-dot">' + (state.serving_player === 1 ? '<span></span>' : '') + '</div>' +
+                    '<div class="um-serve-dot"' + (state.serving_player === 1 ? ' aria-label="подаёт"' : '') + '>' + (state.serving_player === 1 ? '<span></span>' : '') + '</div>' +
                     '<div class="um-player-name">' + esc(p1Name) + '</div>' +
                     '<div class="um-games">' + state.current_game_p1 + '</div>' +
                     '<div class="um-points">' + pts.p1 + '</div>' +
                 '</div>' +
                 // Player 2 row
                 '<div class="um-player-row' + (state.serving_player === 2 ? ' um-serving' : '') + (state.winner_player === 2 ? ' um-winner-row' : '') + '">' +
-                    '<div class="um-serve-dot">' + (state.serving_player === 2 ? '<span></span>' : '') + '</div>' +
+                    '<div class="um-serve-dot"' + (state.serving_player === 2 ? ' aria-label="подаёт"' : '') + '>' + (state.serving_player === 2 ? '<span></span>' : '') + '</div>' +
                     '<div class="um-player-name">' + esc(p2Name) + '</div>' +
                     '<div class="um-games">' + state.current_game_p2 + '</div>' +
                     '<div class="um-points">' + pts.p2 + '</div>' +
                 '</div>' +
             '</div>' +
-            (setsHtml ? '<div class="um-sets">' + setsHtml + '</div>' : '') +
+            /* В ПЕРЕРЫВЕ ЧИПЫ СЕТОВ УХОДЯТ. Мишень не имеет права мельчать, а
+               карточка перерыва не помещалась в воздух на 35 пикселей
+               (померено на 390×844). Платит история сетов: в перерыве судье
+               нужны время и «Продолжить», а сыгранные сеты он видит на табло
+               зрителя и снова здесь сразу после перерыва. */
+            (setsHtml && !идётПерерыв ? '<div class="um-sets">' + setsHtml + '</div>' : '') +
             (state.is_tiebreak ? '<div class="um-tiebreak-label">Тайбрейк</div>' : '') +
             (function() {
                 var rem = getChangeoverRemaining();
@@ -660,6 +702,23 @@
                     '</div>' +
                   '</div>'
                 : '') +
+            /* ЭЙС И ДВОЙНАЯ — ЭТО ОЧКО. Эйс подающему, двойная принимающему.
+               Подписи и полосы краски меняются вместе с подачей, положение
+               кнопок — нет: судья жмёт не глядя. */
+            (!isCompleted && !isWarmup && !идётПерерыв
+                ? (function() {
+                    var подающий   = state.serving_player === 2 ? p2Name : p1Name;
+                    var принимающий = state.serving_player === 2 ? p1Name : p2Name;
+                    var кП = state.serving_player === 2 ? ' um-to-p2' : '';
+                    var кПр = state.serving_player === 2 ? '' : ' um-to-p2';
+                    return '<div class="um-marks">' +
+                        '<button class="um-btn um-btn-mark' + кП + '" id="umAce">' +
+                            '<b>Эйс</b><span>очко · ' + esc(подающий) + '</span></button>' +
+                        '<button class="um-btn um-btn-mark' + кПр + '" id="umDouble">' +
+                            '<b>Двойная</b><span>очко · ' + esc(принимающий) + '</span></button>' +
+                    '</div>';
+                  })()
+                : '') +
             '<div class="um-actions">' +
                 (isWarmup
                     ? (serveChosen
@@ -671,19 +730,22 @@
                           '<button class="um-btn um-btn-p2" id="umP2">Очко<br>' + esc(p2Name) + '</button>'
                 ) +
             '</div>' +
-            (!isCompleted && !isWarmup && markWindowOpen()
-                ? '<div class="um-marks">' +
-                    '<button class="um-btn um-btn-mark' + (markSet === 'ace' ? ' is-set' : '') + '" id="umAce">Эйс</button>' +
-                    '<button class="um-btn um-btn-mark' + (markSet === 'double' ? ' is-set' : '') + '" id="umDouble">Двойная</button>' +
-                  '</div>'
-                : '') +
             (!isCompleted && !isWarmup
                 ? '<div class="um-bottom-actions">' +
                     '<button class="um-btn um-btn-undo" id="umUndo">↩ Отмена</button>' +
-                    '<button class="um-btn um-btn-pause" id="umPause">' + (isPaused ? '▶ Продолжить' : '⏸ Пауза') + '</button>' +
+                    '<button class="um-btn um-btn-pause" id="umPause">' + (isPaused ? '▶ Продолжить' : '⏸ Перерыв') + '</button>' +
                   '</div>'
                 : ''
-            );
+            ) +
+            (выборПричины
+                ? '<div class="um-why"><div class="um-why-card" role="dialog" aria-label="Причина перерыва">' +
+                    '<div class="um-why-title">Почему остановили?</div>' +
+                    ПРИЧИНЫ.map(function(п) {
+                        return '<button class="um-btn um-btn-why" data-why="' + п.код + '">' + п.имя + '</button>';
+                    }).join('') +
+                    '<button class="um-btn um-btn-why um-btn-why-cancel" data-why="">Отмена</button>' +
+                  '</div></div>'
+                : '');
 
         // Bind events
         var btnContinue = document.getElementById('umContinue');
@@ -703,8 +765,16 @@
         if (btnP2) btnP2.addEventListener('click', function() { handleScore(2); });
         var btnAce = document.getElementById('umAce');
         var btnDouble = document.getElementById('umDouble');
-        if (btnAce) btnAce.addEventListener('click', function() { markPoint('ace'); });
-        if (btnDouble) btnDouble.addEventListener('click', function() { markPoint('double'); });
+        /* Эйс — очко подающему, двойная — принимающему. */
+        if (btnAce) btnAce.addEventListener('click', function() {
+            handleScore(state.serving_player, 'ace');
+        });
+        if (btnDouble) btnDouble.addEventListener('click', function() {
+            handleScore(state.serving_player === 1 ? 2 : 1, 'double');
+        });
+        app.querySelectorAll('[data-why]').forEach(function(б) {
+            б.addEventListener('click', function() { применитьПричину(б.getAttribute('data-why')); });
+        });
         if (btnUndo) btnUndo.addEventListener('click', handleUndo);
         if (btnPause) btnPause.addEventListener('click', handlePause);
     }

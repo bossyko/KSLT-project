@@ -1,13 +1,13 @@
 /* ============================================
-   KSLT — Umpire Page Styles (um- prefix)
-   Mobile-first, high contrast for outdoor use
+   КСЛТ — СУДЕЙСКИЙ ЭКРАН (префикс um-)
+   Пульт, а не страница: одна задача, две мишени, ноль чтения.
    ============================================ */
 
 /* ПАЛИТРА — ПСЕВДОНИМЫ ТОКЕНОВ, А НЕ ВТОРАЯ ПАЛИТРА.
    До 24.09 здесь стояли свои краски числом, и три из них были чуть-чуть не
    те: #EF5350 против --danger #FF4757, #66BB6A против --success #2ED573,
    #0a0a0a против --bg-base. В продукте выходило два красных и два зелёных.
-   Имена --um-* оставлены — по ним зовут краску 50 правил ниже, — но каждое
+   Имена --um-* оставлены — по ним зовут краску правила ниже, — но каждое
    теперь ведёт к одному определению в токенах. */
 :root {
     --um-bg:     var(--bg-base);
@@ -15,8 +15,6 @@
     --um-accent: var(--accent);
     --um-text:   var(--text-primary);
     --um-dim:    var(--text-muted);
-    --um-green:  var(--success);
-    --um-red:    var(--danger);
 
     /* ДВЕ КРАСКИ ИГРОКОВ — единственное своё, и это осознанно.
        Судья на корте должен различать две кнопки боковым зрением, не читая.
@@ -33,7 +31,6 @@ body {
     background: var(--um-bg);
     color: var(--um-text);
     font-family: 'Inter', -apple-system, sans-serif;
-    min-height: 100vh;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -42,47 +39,44 @@ body {
     overscroll-behavior: none;
 }
 
+/* МИШЕНЬ — ДОЛЯ ЭКРАНА, А НЕ ЧИСЛО. Померено 25.09: кнопка очка гуляла
+   471 / 80 / 651 / 395 / 527 по пяти видам и 471 / 444 / 406 внутри одного
+   вида — это был остаток flex: 1, а не решение. Мышечная память судьи
+   опирается на неё сильнее всего. Остаток высоты уходит воздуху НАД
+   мишенью: мишень и нижний ряд едут вниз одной группой, чтобы до них
+   доставал большой палец. */
 #um-app {
+    --um-target: 38dvh;
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 12px;
+    padding: var(--space-3);
     max-width: 500px;
     margin: 0 auto;
     width: 100%;
-    gap: 12px;
+    gap: var(--space-3);
 }
 
 /* ЗАГОЛОВОК МАТЧА. Судья не видел, какой матч ведёт: ни турнира, ни
    соперников — только счёт. Если у него два матча подряд, перепутать легко. */
-.um-match-head {
-    text-align: center;
-    padding: 0 var(--space-2);
-}
-.um-match-players {
-    font-size: var(--fs-base);
-    font-weight: 700;
-    line-height: 1.25;
-}
-.um-match-meta {
-    font-size: var(--fs-xs);
-    color: var(--um-dim);
-    margin-top: var(--space-1);
-}
+.um-match-head { text-align: center; padding: 0 var(--space-2); }
+.um-match-players { font-size: var(--fs-base); font-weight: 700; line-height: 1.25; }
+.um-match-meta { font-size: var(--fs-xs); color: var(--um-dim); margin-top: var(--space-1); }
 
-/* Status bar */
+/* Полоса состояния */
 .um-status {
     text-align: center;
     font-size: var(--fs-sm);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    padding: 8px;
-    border-radius: 8px;
+    letter-spacing: 0.14em;
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
 }
 .um-status-warmup { background: var(--surface-glass-hover); color: var(--um-dim); }
-.um-status-live { background: var(--danger-subtle); color: var(--um-red); animation: um-pulse 1.5s infinite; }
+.um-status-live { background: var(--danger-subtle); color: var(--danger); animation: um-pulse 1.5s infinite; }
 .um-status-paused { background: var(--warning-subtle); color: var(--warning); }
+.um-status-break { background: var(--warning-subtle); color: var(--warning); }
 .um-status-completed { background: var(--accent-subtle); color: var(--um-accent); }
 
 @keyframes um-pulse {
@@ -90,35 +84,35 @@ body {
     50% { opacity: 0.6; }
 }
 
-/* Winner banner */
+/* Победитель */
 .um-winner {
     text-align: center;
     font-size: var(--fs-md);
     font-weight: 700;
     color: var(--um-accent);
-    padding: 12px;
+    padding: var(--space-3);
     background: var(--accent-subtle);
     border-radius: var(--radius-md);
     border: 1px solid var(--um-accent);
 }
 
-/* Scoreboard */
+/* Табло */
 .um-scoreboard {
     background: var(--um-card);
-    border-radius: 16px;
-    padding: 8px;
+    border-radius: var(--radius-lg);
+    padding: var(--space-2);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--space-1);
 }
 
 .um-player-row {
     display: grid;
-    grid-template-columns: 28px 1fr 52px 52px;
+    grid-template-columns: 24px 1fr 44px 44px;
     align-items: center;
-    padding: 12px 8px;
-    border-radius: 12px;
-    gap: 8px;
+    padding: var(--space-3) var(--space-2);
+    border-radius: var(--radius-md);
+    gap: var(--space-2);
     transition: background 0.2s;
 }
 .um-player-row.um-serving { background: var(--surface-glass); }
@@ -127,11 +121,7 @@ body {
 /* ЗНАЧОК ПОДАЧИ — свой, а не эмодзи 🎾. Эмодзи рисует операционная система:
    на одном телефоне он жёлтый, на другом зелёный, на третьем плоский, и
    размер его нам не подчиняется. */
-.um-serve-dot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+.um-serve-dot { display: flex; align-items: center; justify-content: center; }
 .um-serve-dot::before {
     content: '';
     width: 12px;
@@ -161,66 +151,95 @@ body {
 .um-games { color: var(--um-text); }
 .um-points { color: var(--um-accent); }
 
-/* Sets history */
-.um-sets {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
+/* История сетов */
+.um-sets { display: flex; gap: var(--space-2); justify-content: center; flex-wrap: wrap; }
 .um-set-score {
     background: var(--um-card);
-    border-radius: 10px;
-    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--space-1);
     font-size: var(--fs-base);
     font-weight: 600;
 }
 .um-set-label {
     font-size: var(--fs-2xs);
     color: var(--um-dim);
-    margin-right: 4px;
+    margin-right: var(--space-1);
     text-transform: uppercase;
 }
 .um-set-val { font-variant-numeric: tabular-nums; }
-.um-set-sep { color: var(--um-dim); margin: 0 2px; }
+.um-set-sep { color: var(--um-dim); }
 .um-set-tb { color: var(--um-dim); font-size: var(--fs-xs); }
 
-/* Tiebreak label */
+/* Тайбрейк */
 .um-tiebreak-label {
     text-align: center;
     font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--warning);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.08em;
 }
 
-/* Serve choice (warmup) */
-.um-serve-choice {
-    text-align: center;
+/* ЭЙС И ДВОЙНАЯ — ЭТО ОЧКО, А НЕ ПОМЕТКА. Решение Кости 25.09.
+   Эйс: очко подающему. Двойная: очко принимающему. Одно касание вместо двух.
+   Кто получает очко — сказано именем и полосой его краски: смысл кнопки
+   меняется вместе с подачей и обязан это показывать, а ПОЛОЖЕНИЕ её меняться
+   не имеет права — судья жмёт не глядя.
+   Кнопки стоят постоянно, а не выскакивают после очка: окно на три секунды
+   проигрывало гонку с сетью и не открывалось НИ РАЗУ (найдено 25.09). */
+.um-marks { display: flex; gap: var(--space-3); }
+.um-btn-mark {
+    flex: 1;
+    min-height: var(--btn-h-lg);
+    font-size: var(--fs-base);
+    background: var(--um-card);
+    color: var(--um-text);
+    border: 1px solid var(--border-subtle);
+    position: relative;
+    padding-left: var(--space-4);
+    text-align: left;
+    line-height: 1.2;
 }
+.um-btn-mark b { display: block; font-weight: 700; }
+.um-btn-mark span {
+    display: block;
+    font-size: var(--fs-2xs);
+    font-weight: 400;
+    color: var(--um-dim);
+}
+.um-btn-mark::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: var(--space-2);
+    bottom: var(--space-2);
+    width: 4px;
+    border-radius: var(--radius-full);
+    background: var(--um-p1);
+}
+.um-btn-mark.um-to-p2::before { background: var(--um-p2); }
+
+/* Выбор подающего (разминка) */
+.um-serve-choice { text-align: center; }
 .um-serve-choice-title {
     font-size: var(--fs-md);
     font-weight: 700;
     color: var(--um-dim);
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.08em;
 }
-.um-serve-choice-btns {
-    display: flex;
-    gap: 12px;
-}
+.um-serve-choice-btns { display: flex; flex-direction: column; gap: var(--space-3); }
 .um-btn-serve {
-    flex: 1;
-    padding: 16px 12px;
-    font-size: var(--fs-md);
+    min-height: var(--btn-h-lg);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--fs-base);
     background: var(--um-card);
     color: var(--um-text);
-    border: 2px solid var(--border-light);
+    border: 1px solid var(--border-light);
     transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 .um-btn-serve-active {
@@ -229,21 +248,21 @@ body {
     color: var(--um-accent);
 }
 
-/* Changeover timer */
+/* Перерыв: смена сторон и перерыв между сетами */
 .um-changeover {
     text-align: center;
     background: var(--warning-subtle);
     border: 1px solid var(--warning);
-    border-radius: 16px;
-    padding: 16px;
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
 }
 .um-changeover-label {
     font-size: var(--fs-sm);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.08em;
     color: var(--warning);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 .um-changeover-time {
     font-size: var(--fs-3xl);
@@ -251,63 +270,63 @@ body {
     color: var(--warning);
     font-variant-numeric: tabular-nums;
     line-height: 1;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
 }
 .um-changeover-bar {
-    height: 6px;
+    height: 4px;
     background: var(--surface-glass-hover);
-    border-radius: 3px;
+    border-radius: var(--radius-full);
     overflow: hidden;
-    margin-bottom: 14px;
+    margin-bottom: var(--space-3);
 }
 .um-changeover-fill {
     height: 100%;
     background: var(--warning);
-    border-radius: 3px;
+    border-radius: var(--radius-full);
     transition: width 1s linear;
 }
 .um-btn-continue {
     width: 100%;
-    padding: 14px;
-    font-size: var(--fs-md);
-    background: var(--warning-subtle);
+    min-height: var(--btn-h-lg);
+    font-size: var(--fs-base);
+    background: transparent;
     color: var(--warning);
     border: 1px solid var(--warning);
 }
 
-/* Action buttons */
+/* Мишень */
 .um-actions {
-    flex: 1;
+    flex: 0 0 var(--um-target);
     display: flex;
-    gap: 12px;
-    min-height: 0;
+    gap: var(--space-3);
+    margin-top: auto;
 }
 
 .um-btn {
     border: none;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     font-family: inherit;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.1s, opacity 0.1s;
     -webkit-tap-highlight-color: transparent;
+    /* ЗУМ ВЕРНУЛИ СТРАНИЦЕ, А ДВОЙНОЙ ТАП ЗАБРАЛИ У КНОПОК.
+       user-scalable=no стоял ровно на одной странице из девяноста и валил
+       WCAG 1.4.4. Здесь то же самое, но точечно: страницу можно увеличить,
+       а кнопка не ждёт второго касания. */
+    touch-action: manipulation;
 }
-.um-btn:active {
-    transform: scale(0.96);
-    opacity: 0.85;
-}
+.um-btn:active { transform: scale(0.96); opacity: 0.85; }
 
 /* КНОПКА ОЧКА. Заливка — краска игрока, текст ПОЧТИ-ЧЁРНЫЙ, а не белый:
    белый на светлой заливке порог контраста не проходит. То же правило, что
    у Badge 27:53 в стиле Solid — заливка обязана доминировать, а читается
-   она за счёт тёмного текста. Градиенты убраны: это были ещё две пары
-   синих и оранжевых сверх краски игрока. */
+   она за счёт тёмного текста. */
 .um-btn-p1, .um-btn-p2 {
     flex: 1;
     font-size: var(--fs-lg);
     line-height: 1.3;
     color: var(--accent-on);
-    min-height: 140px;
 }
 .um-btn-p1 { background: var(--um-p1); }
 .um-btn-p2 { background: var(--um-p2); }
@@ -317,87 +336,105 @@ body {
     font-size: var(--fs-xl);
     color: var(--accent-on);
     background: var(--um-accent);
-    min-height: 140px;
 }
 
-/* МЕТКА РОЗЫГРЫША — «Эйс» и «Двойная». Появляется на три секунды после
-   очка и сама уходит. Необязательна: не нажал — розыгрыш записан обычным,
-   и поток судьи не меняется, одно касание остаётся одним.
-   Отдельной кнопки «обычный розыгрыш» нет намеренно: пусто здесь значит
-   «не отмечено», а не «эйса не было». */
-.um-marks {
-    display: flex;
-    gap: var(--space-3);
-}
-.um-btn-mark {
-    flex: 1;
-    min-height: var(--btn-h-md);
-    font-size: var(--fs-base);
-    background: var(--um-card);
-    color: var(--um-text);
-    border: 1px solid var(--border-subtle);
-}
-.um-btn-mark.is-set {
-    background: var(--accent-subtle);
-    border-color: var(--um-accent);
-    color: var(--um-accent);
-}
-
-/* Bottom actions */
-.um-bottom-actions {
-    display: flex;
-    gap: 12px;
-}
-
+/* Нижний ряд */
+.um-bottom-actions { display: flex; gap: var(--space-3); }
 .um-btn-undo, .um-btn-pause {
     flex: 1;
-    padding: 14px;
+    min-height: var(--btn-h-lg);
     font-size: var(--fs-base);
     background: var(--um-card);
     color: var(--um-text);
     border: 1px solid var(--border-subtle);
 }
 
-/* Error */
+/* ПРИЧИНА ПЕРЕРЫВА. Кнопка «Перерыв» спрашивает, почему остановили:
+   медицинский, туалет, погода, другое. Пятой причины («технический» —
+   сетка, мяч, свет) нет намеренно: каждая лишняя кнопка — лишнее решение в
+   момент, когда судье надо действовать, а «Другое» её закрывает. */
+.um-why {
+    position: fixed;
+    inset: 0;
+    background: var(--overlay-modal);
+    display: flex;
+    align-items: flex-end;
+    padding: var(--space-3);
+    z-index: 5;
+}
+.um-why-card {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    background: var(--um-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+.um-why-title {
+    font-size: var(--fs-md);
+    font-weight: 700;
+    text-align: center;
+    color: var(--um-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.um-btn-why {
+    min-height: var(--btn-h-lg);
+    font-size: var(--fs-base);
+    background: var(--um-bg);
+    color: var(--um-text);
+    border: 1px solid var(--border-light);
+}
+.um-btn-why-cancel { background: transparent; border-color: transparent; color: var(--um-dim); }
+
+/* Ошибка */
 .um-error {
     text-align: center;
-    color: var(--um-red);
+    color: var(--danger);
     font-size: var(--fs-md);
-    padding: 60px 20px;
+    padding: var(--space-16) var(--space-6);
 }
 
-/* Large phones */
-@media (min-height: 700px) {
-    .um-btn-p1, .um-btn-p2, .um-btn-start { min-height: 180px; }
-    .um-player-name { font-size: var(--fs-md); }
-    .um-games, .um-points { font-size: var(--fs-xl); }
+/* ТЕЛЕФОН БОКОМ — ОДНА РАСКЛАДКА. Решение Кости 25.09: вторая раскладка
+   стоит второго набора правил, второго прогона теста и второго источника
+   кривизны, а судья держит телефон вертикально одной рукой — боком он
+   оказывается случайно, от автоповорота. Замерено 25.09: боком с длинными
+   именами документ был 422 при высоте 390, кнопки очка уезжали за край. */
+.um-turn { display: none; }
+
+/* ПЛАНШЕТ. Колонка растёт, мишень становится ниже: высоты там много, а
+   тянуться через весь экран незачем. Планшет боком не отделяется — там
+   высота 768 и портретная колонка помещается целиком. */
+@media (min-width: 641px) {
+    #um-app {
+        --um-target: 34dvh;
+        max-width: 720px;
+        padding: var(--space-4);
+        gap: var(--space-4);
+    }
+    .um-player-row { grid-template-columns: 28px 1fr 52px 52px; }
+    .um-serve-choice-btns { flex-direction: row; }
+    .um-btn-serve { flex: 1; }
 }
 
-/* ТЕСНЫЙ ТЕЛЕФОН. Было 375 — граница, которой нет в лестнице: она заводила
-   отдельный мир для iPhone SE рядом с iPhone 14. Две ширины на продукт. */
-@media (max-width: 640px) {
-    #um-app { padding: var(--space-3); gap: var(--space-3); }
-    .um-serve-choice-btns { gap: var(--space-2); }
-    .um-serve-choice-title { font-size: var(--fs-base); }
-    .um-btn-serve { padding: var(--space-3) var(--space-2); font-size: var(--fs-base); }
-    .um-player-row { padding: var(--space-3) var(--space-2); grid-template-columns: 24px 1fr 44px 44px; }
-    /* КЕГЛИ ЗДЕСЬ НЕ УМЕНЬШАЮТСЯ, И ЭТО ПОПРАВКА К СЕБЕ.
-       Прежний блок стоял на 375 и мельчил имя до 16, а счёт до 21. Я
-       расширил границу до 640 — и уменьшение поехало на ВСЕ телефоны:
-       померено на 390, счёт стал 21 вместо 26. Судья читает этот экран на
-       улице, на солнце, между розыгрышами; ему нужно крупнее, а не мельче.
-       Уменьшать имя было нужно, пока оно обрезалось в одну строку, — теперь
-       оно переносится, и повод исчез. Остаются только отступы. */
-}
-
-/* Landscape */
-/* ТЕСНО ПО ВЫСОТЕ. Здесь уменьшение оправдано: места по вертикали нет
-   физически. Но счёт — последнее, что мельчает: сначала кнопки и отступы. */
 @media (orientation: landscape) and (max-height: 500px) {
-    #um-app { padding: var(--space-2); gap: var(--space-2); }
-    .um-btn-p1, .um-btn-p2, .um-btn-start { min-height: 80px; font-size: var(--fs-base); }
-    .um-player-row { padding: var(--space-2); }
-    .um-match-meta { display: none; }
+    #um-app { display: none; }
+    .um-turn {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-4);
+        padding: var(--space-6);
+        text-align: center;
+    }
+    .um-turn svg { width: 56px; height: 56px; color: var(--um-accent); }
+    .um-turn p { font-size: var(--fs-lg); font-weight: 700; }
+    .um-turn small { font-size: var(--fs-sm); color: var(--um-dim); }
 }
 
 /* КОЛЬЦО ФОКУСА. Не было ни у одной кнопки: судья, идущий клавишами или

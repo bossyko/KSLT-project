@@ -5,8 +5,7 @@
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-FVXLFVPCKX"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-FVXLFVPCKX");</script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co;">
     <title>КСЛТ — Судья</title>
@@ -24,15 +23,27 @@
     <meta name="theme-color" content="#0A0A0A">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
     <link rel="stylesheet" href="../css/tokens.css?v=20">
-    <link rel="stylesheet" href="../css/umpire.css?v=4">
+    <link rel="stylesheet" href="../css/umpire.css?v=5">
 </head>
 <body>
+    <!-- ТЕЛЕФОН БОКОМ — ОДНА РАСКЛАДКА. Решение Кости 25.09: вторая
+         раскладка стоит второго набора правил и второго прогона теста, а
+         судья держит телефон вертикально; боком он оказывается случайно. -->
+    <div class="um-turn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <rect x="7" y="2" width="10" height="20" rx="2"></rect>
+            <path d="M2 12a10 10 0 0 1 4-8"></path>
+        </svg>
+        <p>Поверните телефон</p>
+        <small>Судейский экран работает вертикально</small>
+    </div>
+
     <div id="um-app">
         <div class="um-status um-status-warmup">Загрузка...</div>
     </div>
 
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="../js/supabase-config.js?v=2"></script>
-    <script src="../js/umpire.js?v=4"></script>
+    <script src="../js/umpire.js?v=5"></script>
 </body>
 </html>
