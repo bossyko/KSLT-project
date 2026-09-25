@@ -51,7 +51,13 @@ test.describe('страница матча · ' + стр.имя, () => {
     test('у страницы один левый край: содержимое стоит там же, где шапка', async ({ page }) => {
         await дождаться(page, стр.адрес);
         const края = await page.evaluate(() => {
-            const шапка = document.querySelector('.header .container, header .container, header > div');
+            /* ЯКОРЬ ШАПКИ — ИМЕННО `nav`, И ЭТО ПОПРАВКА К ТЕСТУ.
+               Первым заходом я взял «header > div» — и он схватил СОСЕДА:
+               внутри шапки лежит .mobile-nav, панель бургер-меню, у неё
+               край 380. На 1280 её нет в раскладке и тест проходил, на 768
+               и 390 падал с «содержимое 17, шапка 380». Ряд шапки — это
+               nav: max-width 1400, margin auto (описание Header 168:147). */
+            const шапка = document.querySelector('header nav, .floating-header nav');
             const заголовок = document.querySelector('.lm-title');
             const назад = document.querySelector('.lm-back-link');
             const пр = э => э ? Math.round(э.getBoundingClientRect().left) : null;
