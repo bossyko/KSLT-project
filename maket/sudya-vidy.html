@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — судейский экран на пяти видах</title>
+<style>
+  body { margin:0; background:#111; color:#fff; font:13px/1.4 Inter, system-ui, sans-serif; padding:16px; }
+  h1 { font-size:16px; margin:0 0 16px; font-weight:700; }
+  .ряд { display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; }
+  .вид { margin:0 0 24px; }
+  .подпись { font-size:12px; color:#9aa; margin-bottom:6px; }
+  .коробка { position:relative; overflow:hidden; border:1px solid #333; background:#000; }
+  iframe { border:0; display:block; transform-origin:0 0; }
+</style>
+</head>
+<body>
+<h1>Судейский экран — пять видов. Заглушка базы: кнопки нажимать можно.</h1>
+<div class="ряд" id="ряд"></div>
+<script>
+var ВИДЫ = [
+  { имя:'Телефон вертикально',  w:390,  h:844,  м:0.62 },
+  { имя:'Телефон боком',        w:844,  h:390,  м:0.62 },
+  { имя:'Планшет вертикально',  w:768,  h:1024, м:0.50 },
+  { имя:'Планшет боком',        w:1024, h:768,  м:0.50 },
+  { имя:'Десктоп',              w:1440, h:900,  м:0.42 }
+];
+var п = new URLSearchParams(location.search);
+var состояние = п.get('v') || 'live';
+var ряд = document.getElementById('ряд');
+ВИДЫ.forEach(function (в, i) {
+  var блок = document.createElement('div'); блок.className = 'вид';
+  блок.innerHTML = '<div class="подпись">' + в.имя + ' — ' + в.w + '×' + в.h +
+                   ' · масштаб ' + Math.round(в.м * 100) + '%</div>';
+  var коробка = document.createElement('div'); коробка.className = 'коробка';
+  коробка.style.width  = Math.round(в.w * в.м) + 'px';
+  коробка.style.height = Math.round(в.h * в.м) + 'px';
+  var f = document.createElement('iframe');
+  f.id = 'ф' + i; f.width = в.w; f.height = в.h;
+  f.style.transform = 'scale(' + в.м + ')';
+  f.src = 'sudya-zamer.html?key=stend&v=' + состояние;
+  коробка.appendChild(f); блок.appendChild(коробка); ряд.appendChild(блок);
+});
+window.ВИДЫ = ВИДЫ;
+</script>
+</body>
+</html>

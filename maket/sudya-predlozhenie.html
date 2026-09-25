@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Судья — предложение, макет</title>
+<style>
+ body{margin:0;background:#101012;color:#fff;font:13px/1.45 Inter,system-ui,sans-serif;padding:18px}
+ h1{font-size:15px;margin:0 0 4px;font-weight:700}
+ .sub{font-size:12px;color:#8b8b93;margin:0 0 18px}
+ .ряд{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+ .вид{margin:0 0 20px}
+ .подпись{font-size:12px;color:#c9c9d1;margin-bottom:6px;font-weight:600}
+ .подпись span{color:#7a7a84;font-weight:400}
+ .коробка{position:relative;overflow:hidden;border:1px solid #2a2a30;background:#000;border-radius:6px}
+ iframe{border:0;display:block;transform-origin:0 0}
+</style>
+</head>
+<body>
+<h1>ПРЕДЛОЖЕНИЕ — судейский экран</h1>
+<p class="sub">Макет. В продукт не подключён, боевые css и js не тронуты. Кадры загружены на своей ширине, не сжаты.</p>
+<div class="ряд" id="ряд"></div>
+<script>
+var КАДРЫ = [
+ {имя:'Телефон · счёт',            под:'390×844',  w:390, h:844,  м:0.60, v:'live'},
+ {имя:'Телефон · подаёт Пётр',     под:'эйс → Пётр, двойная → Иван', w:390, h:844, м:0.60, v:'live&s=1'},
+ {имя:'Телефон · подаёт Иван',     под:'подписи и полосы поменялись местами, кнопки — нет', w:390, h:844, м:0.60, v:'live&s=2'},
+ {имя:'Телефон · разминка',        под:'выбор подающего',            w:390, h:844, м:0.60, v:'razminka'},
+ {имя:'Телефон · перерыв',         под:'смена сторон, 120 с',      w:390, h:844, м:0.60, v:'pereryv'},
+ {имя:'Телефон · причина паузы',   под:'по кнопке «Перерыв»',       w:390, h:844, м:0.60, v:'prichina'},
+ {имя:'Телефон · пауза идёт',      под:'полоса называет причину',   w:390, h:844, м:0.60, v:'pauza'},
+ {имя:'Планшет вертикально',       под:'768×1024 · колонка 720',    w:768, h:1024, м:0.46, v:'live'},
+ {имя:'Телефон боком',             под:'844×390 · одна раскладка',  w:844, h:390,  м:0.46, v:'live'},
+ {имя:'Планшет боком',             под:'1024×768',                  w:1024,h:768,  м:0.46, v:'live'}
+];
+var ряд = document.getElementById('ряд');
+КАДРЫ.forEach(function(к,i){
+  var б=document.createElement('div'); б.className='вид';
+  б.innerHTML='<div class="подпись">'+к.имя+' <span>— '+к.под+'</span></div>';
+  var кор=document.createElement('div'); кор.className='коробка';
+  кор.style.width=Math.round(к.w*к.м)+'px'; кор.style.height=Math.round(к.h*к.м)+'px';
+  var f=document.createElement('iframe'); f.id='ф'+i; f.width=к.w; f.height=к.h;
+  f.style.transform='scale('+к.м+')';
+  f.src='sudya-predlozhenie-ekran.html?v='+к.v;
+  кор.appendChild(f); б.appendChild(кор); ряд.appendChild(б);
+});
+window.КАДРЫ=КАДРЫ;
+</script>
+</body>
+</html>

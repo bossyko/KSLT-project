@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>КСЛТ — макет: страница матча, пять видов</title>
+<style>
+  :root { color-scheme: dark }
+  body { margin:0; background:#111; color:#eee; font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif }
+  h1 { font-size:21px; margin:24px 16px 8px }
+  p.note { margin:0 16px 16px; color:#9a9a9a; max-width:940px }
+  .perekl { margin:0 16px 24px; display:flex; gap:8px }
+  .perekl button {
+      font:inherit; padding:8px 16px; border-radius:100px; cursor:pointer;
+      background:#1c1c1c; color:#ccc; border:1px solid #333; min-height:36px;
+  }
+  .perekl button[aria-pressed="true"] { background:#ccff00; color:#0a0a0a; border-color:#ccff00; font-weight:600 }
+  .perekl button:focus-visible { outline:3px solid #ccff00; outline-offset:3px }
+  .row { display:flex; flex-wrap:wrap; gap:24px; padding:0 16px 40px; align-items:flex-start }
+  figure { margin:0 }
+  figcaption { font-size:12px; color:#ccff00; letter-spacing:2px; text-transform:uppercase; margin:0 0 8px }
+  figcaption span { color:#9a9a9a; letter-spacing:0; text-transform:none }
+  iframe { border:1px solid #333; border-radius:8px; background:#0a0a0a; display:block;
+           transform-origin: top left }
+  .holst { position:relative }
+</style>
+</head>
+<body>
+<h1>Страница матча — предложение, пять видов</h1>
+<p class="note">
+  Живая страница, живые данные, предложенные правила наложены поверх файла.
+  Каждая рамка — вид ЦЕЛИКОМ: если он выше окна, рамка ужимается вся и подписана,
+  во сколько раз. Прокрутки страницы внутри рамки нет — растёт и прокручивается
+  только список геймов.
+  <br><b>Правила уже в файле</b> — стенд ничего не красит, только подставляет кадр.<br><b>«С трансляцией» — кадр подставлен стендом</b>: у этого матча видео в базе нет,
+  ролик не грузится, чтобы пять плееров не жгли твою машину. Раскладка та самая.
+</p>
+<div class="perekl">
+  <button type="button" data-rezhim="net"  aria-pressed="true">Без трансляции</button>
+  <button type="button" data-rezhim="video" aria-pressed="false">С трансляцией</button>
+</div>
+<div class="row">
+  <figure>
+    <figcaption>Телефон стоя <span>390 × 844<span class="umen"></span></span></figcaption>
+    <div class="holst"><iframe data-w="390" data-h="844" width="390" height="844"></iframe></div>
+  </figure>
+  <figure>
+    <figcaption>Планшет стоя <span>768 × 1024<span class="umen"></span></span></figcaption>
+    <div class="holst"><iframe data-w="768" data-h="1024" width="768" height="1024"></iframe></div>
+  </figure>
+  <figure>
+    <figcaption>Телефон боком <span>844 × 390 · шапка уходит<span class="umen"></span></span></figcaption>
+    <div class="holst"><iframe data-w="844" data-h="390" width="844" height="390"></iframe></div>
+  </figure>
+  <figure>
+    <figcaption>Планшет боком <span>1024 × 768<span class="umen"></span></span></figcaption>
+    <div class="holst"><iframe data-w="1024" data-h="768" width="1024" height="768"></iframe></div>
+  </figure>
+  <figure>
+    <figcaption>Десктоп <span>1280 × 800<span class="umen"></span></span></figcaption>
+    <div class="holst"><iframe data-w="1280" data-h="800" width="1280" height="800"></iframe></div>
+  </figure>
+</div>
+
+<script>
+var MATCH = new URLSearchParams(location.search).get('id')
+         || '2dc04473-f294-4239-8054-4e61d2bd7322';
+var REZHIM = 'net';
+
+var CAND = '';
+
+/* Кадр-заглушка: та же разметка, что у настоящего видео, только пустая рамка. */
+var VIDEO_HTML =
+  '<div class="lm-video maket-video"><div class="lm-video-wrapper">' +
+    '<iframe src="about:blank" title="Трансляция" style="background:#151515"></iframe>' +
+    '<span style="position:absolute;inset:0;display:grid;place-items:center;' +
+      'color:#666;font:600 12px/1.4 system-ui;letter-spacing:2px;pointer-events:none">ТРАНСЛЯЦИЯ</span>' +
+  '</div></div>';
+
+function odet(frame) {
+    var d = frame.contentDocument;
+    if (!d) return;
+
+    // Сведения выносим из карточки счёта — это подпись, не табло.
+    var info = d.querySelector('.lm-info');
+    var panel = d.querySelector('.lm-score-panel');
+    if (info && panel && info.parentElement === panel) {
+        panel.after(info);
+    }
+
+    var grid  = d.querySelector('.lm-grid');
+    var left  = d.querySelector('.lm-left');
+    var right = d.querySelector('.lm-right');
+    var feed  = d.querySelector('.lm-feed');
+    var sp    = d.querySelector('.lm-sponsors');
+    if (!grid || !left || !right) return;
+
+    if (REZHIM === 'video') {
+        if (!left.classList.contains('has-video')) {
+            left.classList.add('has-video');
+            right.classList.add('has-feed');
+            left.insertAdjacentHTML('afterbegin', VIDEO_HTML);
+            if (feed) right.appendChild(feed);          // журнал уходит вправо
+            if (sp) { sp.classList.add('is-strip'); left.appendChild(sp); }
+        }
+        d.body.classList.add('lm-video-idet');
+    } else {
+        var maket = d.querySelector('.maket-video');
+        if (maket) {
+            maket.remove();
+            left.classList.remove('has-video');
+            right.classList.remove('has-feed');
+            if (feed) left.appendChild(feed);
+            if (sp) { sp.classList.remove('is-strip'); right.appendChild(sp); }
+        }
+        d.body.classList.remove('lm-video-idet');
+    }
+}
+
+// Рамка показывается ЦЕЛИКОМ. Если вид выше окна — уменьшаем целиком и
+// подписываем во сколько раз; обрезанный вид ничего не показывает.
+function vmestit() {
+    var zapas = 220;
+    document.querySelectorAll('figure').forEach(function (fig) {
+        var f = fig.querySelector('iframe');
+        var h = +f.dataset.h, w = +f.dataset.w;
+        var k = Math.min(1, (innerHeight - zapas) / h);
+        f.style.transform = k < 1 ? 'scale(' + k.toFixed(3) + ')' : 'none';
+        var holst = f.parentElement;
+        holst.style.width  = Math.round(w * k) + 'px';
+        holst.style.height = Math.round(h * k) + 'px';
+        fig.querySelector('figcaption .umen').textContent =
+            k < 1 ? ' · показано в ' + Math.round(k * 100) + ' %' : '';
+    });
+}
+addEventListener('resize', vmestit);
+
+document.querySelectorAll('.perekl button').forEach(function (b) {
+    b.addEventListener('click', function () {
+        REZHIM = b.dataset.rezhim;
+        document.querySelectorAll('.perekl button').forEach(function (x) {
+            x.setAttribute('aria-pressed', String(x === b));
+        });
+        document.querySelectorAll('iframe').forEach(function (f) {
+            // Перерисовываем с нуля: раскладка зависит от данных, а не от классов.
+            f.contentWindow.location.reload();
+        });
+    });
+});
+
+document.querySelectorAll('.row iframe').forEach(function (f) {
+    f.addEventListener('load', function () {
+        odet(f);
+        vmestit();
+        setInterval(function () { odet(f); }, 1200);
+    });
+    f.src = '/pages/live-match.html?id=' + encodeURIComponent(MATCH) + '&_=' + Date.now();
+});
+</script>
+</body>
+</html>

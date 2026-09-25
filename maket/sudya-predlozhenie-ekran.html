@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Судья — предложение</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="../css/tokens.css?v=20">
+<style>
+/* МАКЕТ ПРЕДЛОЖЕНИЯ. В продукт не подключён: живёт только в maket/.
+   Префикс up- (umpire proposal), чтобы не столкнуться с боевым um-.        */
+:root{
+  --up-bg:var(--bg-base); --up-card:var(--bg-elevated); --up-accent:var(--accent);
+  --up-text:var(--text-primary); --up-dim:var(--text-muted);
+  --up-p1:var(--player-1); --up-p2:var(--player-2);
+  /* ОТНОШЕНИЕ, А НЕ ЧИСЛО: мишень — доля экрана, остаток уходит воздуху. */
+  --up-target:38dvh;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--up-bg);color:var(--up-text);font-family:Inter,-apple-system,sans-serif;
+     min-height:100dvh;display:flex;flex-direction:column;user-select:none;overscroll-behavior:none}
+.up-app{flex:1;display:flex;flex-direction:column;gap:var(--space-3);
+        padding:var(--space-3);width:100%;max-width:500px;margin:0 auto}
+
+/* ——— шапка ——— */
+.up-head{text-align:center}
+.up-players{font-size:var(--fs-base);font-weight:700;line-height:1.25}
+.up-meta{font-size:var(--fs-xs);color:var(--up-dim);margin-top:var(--space-1)}
+
+/* ——— полоса состояния ——— */
+.up-status{text-align:center;font-size:var(--fs-sm);font-weight:700;text-transform:uppercase;
+           letter-spacing:.14em;padding:var(--space-2);border-radius:var(--radius-md)}
+.up-status.live{background:var(--danger-subtle);color:var(--danger)}
+.up-status.warm{background:var(--surface-glass-hover);color:var(--up-dim)}
+.up-status.pause{background:var(--warning-subtle);color:var(--warning)}
+
+/* ——— табло ——— */
+.up-board{background:var(--up-card);border-radius:var(--radius-lg);padding:var(--space-2);
+          display:flex;flex-direction:column;gap:var(--space-1)}
+.up-row{display:grid;grid-template-columns:24px 1fr 44px 44px;align-items:center;
+        padding:var(--space-3) var(--space-2);border-radius:var(--radius-md);gap:var(--space-2)}
+.up-row.serve{background:var(--surface-glass)}
+.up-dot{display:flex;align-items:center;justify-content:center}
+.up-dot.on::before{content:'';width:12px;height:12px;border-radius:var(--radius-full);background:var(--up-accent)}
+.up-name{font-size:var(--fs-md);font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.up-g,.up-p{text-align:center;font-size:var(--fs-xl);font-weight:800;font-variant-numeric:tabular-nums}
+.up-p{color:var(--up-accent)}
+.up-sets{display:flex;gap:var(--space-2);justify-content:center;flex-wrap:wrap}
+.up-set{background:var(--up-card);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);
+        display:flex;align-items:center;gap:var(--space-1);font-size:var(--fs-base);font-weight:600}
+.up-set i{font-size:var(--fs-2xs);color:var(--up-dim);text-transform:uppercase;font-style:normal;margin-right:var(--space-1)}
+
+/* ——— ЭЙС И ДВОЙНАЯ — ЭТО ОЧКО, А НЕ ПОМЕТКА. Решение Кости 25.09.
+   Эйс: очко подающему. Двойная: очко принимающему. Кто получает — сказано
+   именем и полосой его краски, потому что при смене подачи смысл кнопки
+   меняется, а ПОЛОЖЕНИЕ её остаётся — память судьи не ломается. ——— */
+.up-marks{display:flex;gap:var(--space-3)}
+.up-mark{flex:1;min-height:var(--btn-h-lg);font-size:var(--fs-base);font-weight:700;
+         background:var(--up-card);color:var(--up-text);border:1px solid var(--border-subtle);
+         border-radius:var(--radius-md);font-family:inherit;position:relative;
+         padding-left:var(--space-4);text-align:left;line-height:1.2}
+.up-mark b{display:block;font-weight:700}
+.up-mark small{display:block;font-size:var(--fs-2xs);font-weight:400;color:var(--up-dim)}
+.up-mark::before{content:'';position:absolute;left:0;top:var(--space-2);bottom:var(--space-2);
+                 width:4px;border-radius:var(--radius-full);background:var(--up-p1)}
+.up-mark.to2::before{background:var(--up-p2)}
+
+/* ——— мишень ——— */
+.up-actions{flex:0 0 var(--up-target);display:flex;gap:var(--space-3);margin-top:auto}
+.up-btn{border:none;border-radius:var(--radius-lg);font-family:inherit;font-weight:700;
+        -webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.up-point{flex:1;font-size:var(--fs-lg);line-height:1.3;color:var(--accent-on)}
+.up-point.p1{background:var(--up-p1)} .up-point.p2{background:var(--up-p2)}
+.up-bottom{display:flex;gap:var(--space-3)}
+.up-sec{flex:1;min-height:var(--btn-h-lg);font-size:var(--fs-base);background:var(--up-card);
+        color:var(--up-text);border:1px solid var(--border-subtle)}
+
+/* ——— перерыв ——— */
+.up-break{text-align:center;background:var(--warning-subtle);border:1px solid var(--warning);
+          border-radius:var(--radius-lg);padding:var(--space-3)}
+.up-break b{display:block;font-size:var(--fs-sm);font-weight:700;text-transform:uppercase;
+            letter-spacing:.08em;color:var(--warning);margin-bottom:var(--space-2)}
+.up-break time{display:block;font-size:var(--fs-3xl);font-weight:800;color:var(--warning);
+               font-variant-numeric:tabular-nums;line-height:1;margin-bottom:var(--space-3)}
+.up-bar{height:6px;background:var(--surface-glass-hover);border-radius:var(--radius-full);
+        overflow:hidden;margin-bottom:var(--space-3)}
+.up-bar span{display:block;height:100%;background:var(--warning);border-radius:var(--radius-full)}
+.up-go{width:100%;min-height:var(--btn-h-lg);font-size:var(--fs-base);background:transparent;
+       color:var(--warning);border:1px solid var(--warning)}
+
+/* ——— выбор причины перерыва ——— */
+.up-why{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;
+        padding:var(--space-3);z-index:5}
+.up-why-card{width:100%;max-width:500px;margin:0 auto;background:var(--up-card);
+             border-radius:var(--radius-lg);padding:var(--space-4);display:flex;
+             flex-direction:column;gap:var(--space-3)}
+.up-why-card h2{font-size:var(--fs-md);font-weight:700;text-align:center;color:var(--up-dim);
+                text-transform:uppercase;letter-spacing:.08em}
+.up-why-card button{min-height:var(--btn-h-lg);font-size:var(--fs-base);background:var(--bg-base);
+                    color:var(--up-text);border:1px solid var(--border-light)}
+.up-why-card button.cancel{background:transparent;border-color:transparent;color:var(--up-dim)}
+
+/* ——— ПЛАНШЕТ: колонка шире, мишень во всю ширину ——— */
+@media (min-width:641px){
+  .up-app{max-width:720px;gap:var(--space-4);padding:var(--space-4)}
+  .up-row{grid-template-columns:28px 1fr 52px 52px}
+  :root{--up-target:34dvh}
+}
+
+/* ——— ТЕЛЕФОН БОКОМ: одна раскладка, экран «поверните» ——— */
+.up-turn{display:none}
+@media (orientation:landscape) and (max-height:500px){
+  .up-app{display:none}
+  .up-turn{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;
+           gap:var(--space-4);padding:var(--space-6);text-align:center}
+  .up-turn svg{width:56px;height:56px;color:var(--up-accent)}
+  .up-turn p{font-size:var(--fs-lg);font-weight:700}
+  .up-turn small{font-size:var(--fs-sm);color:var(--up-dim)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="up-turn">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+    <rect x="7" y="2" width="10" height="20" rx="2"/><path d="M2 12a10 10 0 0 1 4-8"/>
+  </svg>
+  <p>Поверните телефон</p>
+  <small>Судейский экран работает вертикально</small>
+</div>
+
+<div class="up-app" id="app"></div>
+
+<script>
+var П = new URLSearchParams(location.search);
+var в = П.get('v') || 'live';
+/* КТО ПОДАЁТ. Эйс — очко подающему, двойная — принимающему. Подписи и полосы
+   краски под кнопками меняются вместе с подачей, ПОЛОЖЕНИЕ кнопок — нет. */
+var подаёт2 = П.get('s') === '2';
+var И1 = 'Пётр Иванов', И2 = 'Иван Петров';
+var подающий  = подаёт2 ? И2 : И1;
+var принимающий = подаёт2 ? И1 : И2;
+var шапка =
+  '<div class="up-head">' +
+    '<div class="up-players">Пётр Иванов — Иван Петров</div>' +
+    '<div class="up-meta">Кубок КСЛТ 2026 · четвертьфинал · лучший из 3</div>' +
+  '</div>';
+var нули = в === 'razminka';
+var табло =
+  '<div class="up-board" role="group" aria-live="polite" aria-label="Счёт матча">' +
+    '<div class="up-row' + (подаёт2 ? '' : ' serve') + '"><div class="up-dot' + (подаёт2 ? '' : ' on') + '" aria-label="подаёт"></div>' +
+      '<div class="up-name">Пётр Иванов</div><div class="up-g">' + (нули?0:3) + '</div><div class="up-p">' + (нули?0:40) + '</div></div>' +
+    '<div class="up-row' + (подаёт2 ? ' serve' : '') + '"><div class="up-dot' + (подаёт2 ? ' on' : '') + '"></div>' +
+      '<div class="up-name">Иван Петров</div><div class="up-g">' + (нули?0:5) + '</div><div class="up-p">' + (нули?0:30) + '</div></div>' +
+  '</div>' +
+  (нули ? '' : '<div class="up-sets"><div class="up-set"><i>сет 1</i>6<span>:</span>4</div></div>');
+var метки =
+  '<div class="up-marks">' +
+    '<button class="up-btn up-mark' + (подаёт2 ? ' to2' : '') + '"><b>Эйс</b><small>очко · ' + подающий + '</small></button>' +
+    '<button class="up-btn up-mark' + (подаёт2 ? '' : ' to2') + '"><b>Двойная</b><small>очко · ' + принимающий + '</small></button>' +
+  '</div>';
+var мишень =
+  '<div class="up-actions">' +
+    '<button class="up-btn up-point p1">Очко<br>Пётр Иванов</button>' +
+    '<button class="up-btn up-point p2">Очко<br>Иван Петров</button>' +
+  '</div>';
+var низ =
+  '<div class="up-bottom">' +
+    '<button class="up-btn up-sec">↩ Отмена</button>' +
+    '<button class="up-btn up-sec">Перерыв</button>' +
+  '</div>';
+var перерыв =
+  '<div class="up-break"><b>Смена сторон</b><time>1:12</time>' +
+    '<div class="up-bar"><span style="width:60%"></span></div>' +
+    '<button class="up-btn up-go">Продолжить ▶</button></div>';
+var причина =
+  '<div class="up-why"><div class="up-why-card"><h2>Почему остановили?</h2>' +
+    '<button class="up-btn">Медицинский</button>' +
+    '<button class="up-btn">Туалет</button>' +
+    '<button class="up-btn">Погода</button>' +
+    '<button class="up-btn">Другое</button>' +
+    '<button class="up-btn cancel">Отмена</button></div></div>';
+
+var разминка =
+  '<div class="up-why-card" style="position:static;max-width:none;padding:0;background:transparent">' +
+    '<h2>Кто подаёт первым?</h2>' +
+    '<button class="up-btn" style="min-height:var(--btn-h-lg);font-size:var(--fs-base);background:var(--accent-subtle);color:var(--up-accent);border:1px solid var(--up-accent);border-radius:var(--radius-md);font-family:inherit;font-weight:700">Пётр Иванов</button>' +
+    '<button class="up-btn" style="min-height:var(--btn-h-lg);font-size:var(--fs-base);background:var(--up-card);color:var(--up-text);border:1px solid var(--border-light);border-radius:var(--radius-md);font-family:inherit;font-weight:700">Иван Петров</button>' +
+  '</div>';
+
+var полоса = {
+  live:     '<div class="up-status live">Live</div>',
+  metka:    '<div class="up-status live">Live</div>',
+  pereryv:  '<div class="up-status pause">Смена сторон</div>',
+  prichina: '<div class="up-status live">Live</div>',
+  pauza:    '<div class="up-status pause">Пауза · Медицинский</div>',
+  razminka: '<div class="up-status warm">Разминка</div>'
+}[в] || '<div class="up-status live">Live</div>';
+
+/* В ПЕРЕРЫВЕ ЧИПЫ СЕТОВ УХОДЯТ. Мишень не имеет права мельчать, а карточка
+   перерыва в воздух не помещалась на 35 пикселей (померено на 390×844).
+   Платит история сетов: в перерыве судье нужны время и «Продолжить», а
+   сыгранные сеты он видит на табло зрителя и сразу после перерыва здесь же. */
+var тело = шапка + полоса + (в === 'pereryv' ? табло.split('<div class="up-sets">')[0] : табло);
+if (в !== 'pereryv' && в !== 'razminka') тело += метки;
+if (в === 'razminka') тело += разминка;
+if (в === 'pereryv') тело += перерыв;
+тело += (в === 'razminka'
+  ? '<div class="up-actions"><button class="up-btn up-point" style="background:var(--up-accent)">Начать матч</button></div>'
+  : мишень) + (в === 'razminka' ? '' : низ);
+document.getElementById('app').innerHTML = тело;
+if (в === 'prichina') document.body.insertAdjacentHTML('beforeend', причина);
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>КСЛТ — стенд замера судейского экрана</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="../css/tokens.css?v=20">
+<link rel="stylesheet" href="../css/umpire.css?v=5">
+</head>
+<body>
+<!--
+  СТЕНД ЗАМЕРА СУДЕЙСКОГО ЭКРАНА.
+  Живой базы не трогает: window.supabaseClient подменён заглушкой, все
+  rpc-вызовы записи уходят в console и возвращают ok. Поэтому здесь МОЖНО
+  нажимать кнопки — обход делается тут, а не на боевом экране.
+  Разметку и краски рисует НАСТОЯЩИЙ js/umpire.js и НАСТОЯЩИЙ css/umpire.css.
+  Состояние выбирается параметром ?v= : razminka | live | tb | zavershen | dlinnye
+-->
+<div class="um-turn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <rect x="7" y="2" width="10" height="20" rx="2"></rect><path d="M2 12a10 10 0 0 1 4-8"></path>
+    </svg>
+    <p>Поверните телефон</p><small>Судейский экран работает вертикально</small>
+</div>
+<div id="um-app">
+    <div class="um-status um-status-warmup">Загрузка...</div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+    var п = new URLSearchParams(location.search);
+    var вид = п.get('v') || 'live';
+
+    var имена = вид === 'dlinnye'
+        ? { p1: 'Иван Корабельников-Задунайский', p2: 'Айбек Жумагулов-Токтогулов' }
+        : { p1: 'Пётр Иванов', p2: 'Иван Петров' };
+
+    var база = {
+        player1_name: имена.p1,
+        player2_name: имена.p2,
+        tournament_label: 'Кубок КСЛТ 2026 · четвертьфинал',
+        best_of: 3,
+        set_format: 'standard',
+        serving_player: 1,
+        points_p1: '40', points_p2: '30',
+        current_set: 2,
+        sets_data: [{ g1: 6, g2: 4, tb1: null, tb2: null }],
+        current_game_p1: 3, current_game_p2: 5,
+        is_tiebreak: false, tiebreak_p1: 0, tiebreak_p2: 0,
+        status: 'live',
+        winner_player: null, final_score: null,
+        history: []
+    };
+
+    if (вид === 'razminka') {
+        база.status = 'warmup';
+        база.sets_data = []; база.current_set = 1;
+        база.current_game_p1 = 0; база.current_game_p2 = 0;
+        база.points_p1 = '0'; база.points_p2 = '0';
+    }
+    if (вид === 'tb') {
+        база.is_tiebreak = true; база.tiebreak_p1 = 6; база.tiebreak_p2 = 5;
+        база.current_game_p1 = 6; база.current_game_p2 = 6;
+    }
+    if (вид === 'zavershen') {
+        база.status = 'completed';
+        база.winner_player = 1;
+        база.final_score = '6-4, 7-6(5)';
+        база.sets_data = [{ g1: 6, g2: 4, tb1: null, tb2: null },
+                          { g1: 7, g2: 6, tb1: 7, tb2: 5 }];
+    }
+
+    function ответ(d) { return Promise.resolve({ data: d, error: null }); }
+
+    window.supabaseClient = {
+        rpc: function (имя, арг) {
+            if (имя === 'get_live_by_umpire_key') return ответ({ ok: true, match: база });
+            if (имя === 'umpire_log_point') { console.log('[стенд] журнал', арг); return ответ({ ok: true, seq: 1 }); }
+            console.log('[стенд] ' + имя, арг);
+            return ответ({ ok: true });
+        }
+    };
+})();
+</script>
+<script src="../js/umpire.js?v=5"></script>
+</body>
+</html>
