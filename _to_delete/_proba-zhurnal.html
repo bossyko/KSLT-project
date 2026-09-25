@@ -1,0 +1,135 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Журнал матча — две строки вместо одной</title><style>
+:root{--bg-base:#0A0A0A;--bg-card:#111;--bg-elev:#1E1E1E;
+ --border-subtle:rgba(255,255,255,.08);--border-light:rgba(255,255,255,.12);
+ --accent:#CCFF00;--danger:#FF4757;--player-1:#4FC3F7;--player-2:#FF7043;
+ --tp:#fff;--ts:rgba(255,255,255,.72);--tm:rgba(255,255,255,.5);--td:rgba(255,255,255,.38)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg-base);color:#fff;padding:40px 24px 80px;
+ font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:32px;font-weight:800;letter-spacing:-.02em;margin:0 0 8px}
+h2{font-size:21px;font-weight:700;margin:0 0 6px}
+.note{font-size:14px;line-height:1.6;color:var(--tm);margin:0 0 28px;max-width:80ch}
+.sec{padding:30px 0;border-top:1px solid var(--border-subtle)}
+.sec>p{font-size:14px;line-height:1.6;color:var(--ts);margin:0 0 18px;max-width:80ch}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.1em;
+ text-transform:uppercase;color:var(--tm);margin-bottom:12px}
+.num{font-size:12px;color:var(--tm);margin-top:12px;line-height:1.6}
+code{font-size:12px;color:var(--ts)}
+
+/* панель — настоящая ширина левой колонки на 1280: ПОМЕРЕНО 800 */
+.panel{width:800px;max-width:100%;background:var(--bg-card);
+ border:1px solid var(--border-subtle);border-radius:16px;padding:24px}
+.ptitle{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--tm);margin:0 0 16px}
+
+/* ── КАК СЕЙЧАС ── */
+.old-now{font-size:14px;color:var(--tm);margin:0 0 12px}
+.old-pts{list-style:none;display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0 0 20px}
+.old-pt{font-size:14px;padding:6px 12px;border-radius:100px;background:var(--bg-elev);
+ color:var(--ts);font-variant-numeric:tabular-nums}
+.old-pt.w1{box-shadow:inset 3px 0 0 var(--player-1)}
+.old-pt.w2{box-shadow:inset -3px 0 0 var(--player-2)}
+.old-list{list-style:none;padding:0;margin:0}
+.old-item{display:flex;justify-content:space-between;align-items:center;
+ font-size:14px;color:var(--ts);padding:10px 0;border-top:1px solid var(--border-subtle)}
+.old-item::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--tm);
+ margin-right:12px;flex:0 0 8px}
+.old-item span:first-of-type{flex:1}
+
+/* ── ПРЕДЛАГАЮ ── */
+.jgame{border-top:1px solid var(--border-subtle);padding:14px 0 6px}
+.jgame:first-of-type{border-top:none;padding-top:0}
+.jhead{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}
+.jh{font-size:14px;font-weight:700;color:var(--tp)}
+.jres{font-size:12px;color:var(--tm);margin-left:auto}
+.jres-now{color:var(--danger);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.jrow{display:flex;align-items:center;gap:12px;height:32px}
+.jname{flex:0 0 132px;font-size:14px;color:var(--ts);display:flex;align-items:center;
+ gap:6px;padding-left:10px;position:relative;white-space:nowrap;overflow:hidden;
+ text-overflow:ellipsis}
+.jrow.r1 .jname{box-shadow:inset 3px 0 0 var(--player-1)}
+.jrow.r2 .jname{box-shadow:inset 3px 0 0 var(--player-2)}
+.jserve{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:0 0 6px}
+.jcells{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin}
+.jc{flex:0 0 40px;height:28px;display:flex;align-items:center;justify-content:center;
+ font-size:16px;font-variant-numeric:tabular-nums;border-radius:8px;
+ color:var(--td);background:transparent}
+/* ЯРКОЕ — ТО ЧИСЛО, ЧЕЙ ИГРОК ВЫИГРАЛ ЭТО ОЧКО. Читается по тому, что сдвинулось. */
+.jc.is-won{color:var(--tp);font-weight:700;background:var(--bg-elev)}
+.jc.is-game{flex:0 0 52px;font-size:12px;font-weight:700;text-transform:uppercase;
+ letter-spacing:.06em}
+.jc.is-game.is-won{background:var(--accent);color:#0A0A0A}
+
+.phone{width:358px}
+.phone .jname{flex:0 0 92px;font-size:12px}
+.phone .jc{flex:0 0 34px;font-size:14px}
+.phone .jc.is-game{flex:0 0 44px;font-size:11px}
+
+.bad{border-left:3px solid var(--danger);padding-left:14px;margin:16px 0}
+.bad b{color:var(--danger)}
+</style></head><body><div class="wrap">
+
+<h1>Журнал хода матча — две строки вместо одной</h1>
+<p class="note">Данные настоящие: десять очков матча Иван Корабельников — Петя,
+прочитаны из <code>live_match_points</code> 25.09. Ширина панели 800 — померена
+на 1280, это левая колонка страницы матча.</p>
+
+<div class="sec">
+<span class="tag">Сейчас · пока гейм идёт</span>
+<div class="panel"><p class="ptitle">Ход матча</p><p class="old-now">Текущий гейм · 1-й сет, гейм 2</p><ul class="old-pts"><li class="old-pt w1">15–0</li><li class="old-pt w1">30–0</li><li class="old-pt w2">30–15</li><li class="old-pt w2">30–30</li><li class="old-pt w2">30–40</li><li class="old-pt w1">40–40</li><li class="old-pt w2">40–AD</li><li class="old-pt w1">40–40</li><li class="old-pt w2">40–AD</li></ul><ul class="old-list"><li class="old-item"><span>гейм 2 — Петя</span><span>1 : 1</span></li></ul></div>
+<p class="num">Чипы говорят счёт, но не говорят, <b>чей</b> он и <b>кто выиграл</b> очко.
+Победитель закодирован дугой в три пикселя слева или справа, без подписи.
+«40–40 · 40–AD · 40–40 · 40–AD» — правильный теннис, но плоским рядом
+читается как сбой.</p>
+</div>
+
+<div class="sec">
+<span class="tag">Сейчас · гейм закрылся</span>
+<div class="panel"><p class="ptitle">Ход матча</p><ul class="old-list"><li class="old-item"><span>гейм 2 — Петя</span><span>1 : 1</span></li></ul></div>
+<p class="num">Те же десять очков. Панель высотой 291 при колонке 800 —
+и в ней одна строка. Журнал по ходу матча <b>теряет</b> данные.</p>
+</div>
+
+<div class="sec">
+<h2>Предлагаю</h2>
+<p>Две строки, выровненные по колонкам: верхняя — очки Ивана, нижняя — Пети.
+Выигравшего очко видно по тому, <b>чьё число сдвинулось</b> — оно яркое и на
+подложке, второе тусклое. Краска больше ничего не кодирует: она осталась
+рельсом слева, тем же, что на табло. Точка подачи — лайм, как везде.</p>
+<div class="panel "><p class="ptitle">Ход матча</p><div class="jgame"><div class="jhead"><span class="jh">Гейм 2</span><span class="jres">Петя взял гейм</span></div><div class="jrow r1"><span class="jname"><i class="jserve" aria-hidden="true"></i>Иван К.</span><span class="jcells"><span class="jc is-won">15</span><span class="jc is-won">30</span><span class="jc">30</span><span class="jc">30</span><span class="jc">30</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-game">·</span></span></div><div class="jrow r2"><span class="jname">Петя</span><span class="jcells"><span class="jc">0</span><span class="jc">0</span><span class="jc is-won">15</span><span class="jc is-won">30</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-won">AD</span><span class="jc">40</span><span class="jc is-won">AD</span><span class="jc is-won is-game">гейм</span></span></div></div></div>
+<p class="num">Что чинится: видно, чья строка; видно, кто взял очко, без легенды;
+ровно-преимущество читается как скачок одной строки; закрытый гейм
+<b>оставляет свои очки</b>, а не схлопывается.</p>
+</div>
+
+<div class="sec">
+<h2>Крайний случай — четыре гейма, один из них на двенадцать очков</h2>
+<p>Чтобы было видно, что делается, когда матч идёт долго. Внутри гейма очки
+слева направо, геймы — новый сверху, и у каждого написан номер, так что
+направление времени нигде не гадается.</p>
+<div class="panel "><p class="ptitle">Ход матча</p><div class="jgame"><div class="jhead"><span class="jh">Гейм 4</span><span class="jres">Иван К. взял гейм</span></div><div class="jrow r1"><span class="jname"><i class="jserve" aria-hidden="true"></i>Иван К.</span><span class="jcells"><span class="jc is-won">15</span><span class="jc is-won">30</span><span class="jc">30</span><span class="jc">30</span><span class="jc">30</span><span class="jc is-won">40</span><span class="jc is-won">AD</span><span class="jc">40</span><span class="jc is-won">AD</span><span class="jc">40</span><span class="jc is-won">AD</span><span class="jc is-won is-game">гейм</span></span></div><div class="jrow r2"><span class="jname">Петя</span><span class="jcells"><span class="jc">0</span><span class="jc">0</span><span class="jc is-won">15</span><span class="jc is-won">30</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc">40</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-game">·</span></span></div></div><div class="jgame"><div class="jhead"><span class="jh">Гейм 3</span><span class="jres">Иван К. взял гейм</span></div><div class="jrow r1"><span class="jname">Иван К.</span><span class="jcells"><span class="jc is-won">15</span><span class="jc">15</span><span class="jc is-won">30</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-won is-game">гейм</span></span></div><div class="jrow r2"><span class="jname"><i class="jserve" aria-hidden="true"></i>Петя</span><span class="jcells"><span class="jc">0</span><span class="jc is-won">15</span><span class="jc">15</span><span class="jc">15</span><span class="jc is-won">30</span><span class="jc is-game">·</span></span></div></div><div class="jgame"><div class="jhead"><span class="jh">Гейм 2</span><span class="jres">Петя взял гейм</span></div><div class="jrow r1"><span class="jname"><i class="jserve" aria-hidden="true"></i>Иван К.</span><span class="jcells"><span class="jc">0</span><span class="jc is-won">15</span><span class="jc">15</span><span class="jc">15</span><span class="jc is-won">30</span><span class="jc is-game">·</span></span></div><div class="jrow r2"><span class="jname">Петя</span><span class="jcells"><span class="jc is-won">15</span><span class="jc">15</span><span class="jc is-won">30</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-won is-game">гейм</span></span></div></div><div class="jgame"><div class="jhead"><span class="jh">Гейм 1</span><span class="jres">Иван К. взял гейм</span></div><div class="jrow r1"><span class="jname">Иван К.</span><span class="jcells"><span class="jc is-won">15</span><span class="jc is-won">30</span><span class="jc is-won">40</span><span class="jc is-won is-game">гейм</span></span></div><div class="jrow r2"><span class="jname"><i class="jserve" aria-hidden="true"></i>Петя</span><span class="jcells"><span class="jc">0</span><span class="jc">0</span><span class="jc">0</span><span class="jc is-game">·</span></span></div></div></div>
+</div>
+
+<div class="sec">
+<h2>Телефон 358</h2>
+<p>Имя сокращается, ячейка с 40 до 34, длинный гейм уезжает вбок прокруткой —
+строка не ломается и не мельчает ниже ступени 12.</p>
+<div class="panel phone"><p class="ptitle">Ход матча</p><div class="jgame"><div class="jhead"><span class="jh">Гейм 4</span><span class="jres">Иван К. взял гейм</span></div><div class="jrow r1"><span class="jname"><i class="jserve" aria-hidden="true"></i>Иван К.</span><span class="jcells"><span class="jc is-won">15</span><span class="jc is-won">30</span><span class="jc">30</span><span class="jc">30</span><span class="jc">30</span><span class="jc is-won">40</span><span class="jc is-won">AD</span><span class="jc">40</span><span class="jc is-won">AD</span><span class="jc">40</span><span class="jc is-won">AD</span><span class="jc is-won is-game">гейм</span></span></div><div class="jrow r2"><span class="jname">Петя</span><span class="jcells"><span class="jc">0</span><span class="jc">0</span><span class="jc is-won">15</span><span class="jc is-won">30</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc">40</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-game">·</span></span></div></div><div class="jgame"><div class="jhead"><span class="jh">Гейм 3</span><span class="jres">Иван К. взял гейм</span></div><div class="jrow r1"><span class="jname">Иван К.</span><span class="jcells"><span class="jc is-won">15</span><span class="jc">15</span><span class="jc is-won">30</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-won is-game">гейм</span></span></div><div class="jrow r2"><span class="jname"><i class="jserve" aria-hidden="true"></i>Петя</span><span class="jcells"><span class="jc">0</span><span class="jc is-won">15</span><span class="jc">15</span><span class="jc">15</span><span class="jc is-won">30</span><span class="jc is-game">·</span></span></div></div><div class="jgame"><div class="jhead"><span class="jh">Гейм 2</span><span class="jres">Петя взял гейм</span></div><div class="jrow r1"><span class="jname"><i class="jserve" aria-hidden="true"></i>Иван К.</span><span class="jcells"><span class="jc">0</span><span class="jc is-won">15</span><span class="jc">15</span><span class="jc">15</span><span class="jc is-won">30</span><span class="jc is-game">·</span></span></div><div class="jrow r2"><span class="jname">Петя</span><span class="jcells"><span class="jc is-won">15</span><span class="jc">15</span><span class="jc is-won">30</span><span class="jc is-won">40</span><span class="jc">40</span><span class="jc is-won is-game">гейм</span></span></div></div><div class="jgame"><div class="jhead"><span class="jh">Гейм 1</span><span class="jres">Иван К. взял гейм</span></div><div class="jrow r1"><span class="jname">Иван К.</span><span class="jcells"><span class="jc is-won">15</span><span class="jc is-won">30</span><span class="jc is-won">40</span><span class="jc is-won is-game">гейм</span></span></div><div class="jrow r2"><span class="jname"><i class="jserve" aria-hidden="true"></i>Петя</span><span class="jcells"><span class="jc">0</span><span class="jc">0</span><span class="jc">0</span><span class="jc is-game">·</span></span></div></div></div>
+</div>
+
+<div class="sec">
+<h2>Нашёл по дороге — это дефект записи, а не вида</h2>
+<div class="bad"><p><b>Очко, которым выигран гейм, пишется в базу как 0–0.</b>
+Десятая запись матча: <code>p1="0", p2="0", winner=2, game_won=2</code>. Счёт
+уже сброшен к следующему гейму, и настоящий счёт розыгрыша (40–AD) потерян
+навсегда. На схеме выше я закрыл дыру словом «гейм», но это заплатка на виде —
+чинить надо в судейском модуле, там, где пишется запись.</p></div>
+<p class="num">Ещё: журнал этого матча начинается с гейма 2 при счёте 1 : 0 —
+матч начали раньше, чем завели журнал. Первый гейм не восстановить.
+Так и показываю, без выдумывания.</p>
+</div>
+
+</div></body></html>
