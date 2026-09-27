@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>КСЛТ · турниры — обложка и раздел</title>
+<style>
+  :root{
+    --s1:8px; --s2:12px; --s3:16px; --s4:24px; --s5:32px; --s6:40px;
+    --bg:#0b0d0f; --pane:#14171a; --line:#23282d; --tx:#e9ecef; --mu:#9aa1a9;
+    --acc:#CCFF00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--tx);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       padding:var(--s5) var(--s4) var(--s6)}
+  h1{font-size:26px; margin:0 0 var(--s1); letter-spacing:-.01em}
+  .шапка p{margin:0; color:var(--mu); font-size:14px; max-width:70ch; line-height:1.5}
+  .легенда{display:flex; gap:var(--s3); flex-wrap:wrap; margin-top:var(--s3); font-size:12px; color:var(--mu)}
+  .легенда b{color:var(--tx); font-weight:600}
+  h2.вар{font-size:21px; margin:var(--s6) 0 var(--s1); padding-top:var(--s4); border-top:1px solid var(--line)}
+  h2.вар span{color:var(--mu); font-size:14px; font-weight:400; margin-left:var(--s2)}
+  .виды{display:flex; gap:var(--s4); align-items:flex-start; overflow-x:auto; padding:var(--s4) 0}
+  .вид{flex:0 0 auto}
+  .вид figcaption{font-size:12px; color:var(--mu); margin-bottom:var(--s1)}
+  .вид iframe{border:1px solid var(--line); border-radius:var(--s2); background:#000; display:block}
+  .спека{background:var(--pane); border:1px solid var(--line); border-radius:var(--s2);
+         padding:var(--s4); font-size:13px; line-height:1.6}
+  .спека h3{font-size:14px; margin:0 0 var(--s2); text-transform:uppercase; letter-spacing:.06em; color:var(--acc)}
+  .спека h3+p{margin-top:0}
+  .спека table{border-collapse:collapse; width:100%; font-size:12px; margin:var(--s2) 0 var(--s4)}
+  .спека th,.спека td{border-bottom:1px solid var(--line); padding:6px var(--s2); text-align:left}
+  .спека th{color:var(--mu); font-weight:500}
+  .спека code{background:#0b0d0f; padding:1px 5px; border-radius:4px; font-size:11px}
+  .спека ul{margin:0 0 var(--s4); padding-left:18px}
+  .спека li{margin-bottom:4px}
+  .тег{display:inline-block; font-size:10px; letter-spacing:.06em; padding:1px 6px; border-radius:4px;
+       border:1px solid var(--line); color:var(--mu); vertical-align:middle}
+  .тег.нам{color:#7ee2a8; border-color:#2b4636}
+  .тег.пос{color:#8ab4ff; border-color:#2a3a55}
+</style>
+</head>
+<body>
+
+<div class="шапка">
+  <h1>Турниры — обложка и раздел категорий</h1>
+  <p>Шаг 7 цепочки. Слева направо: десктоп 1280×800, планшет 768×1024, телефон 390×844.
+     Каждый вид — отдельная загрузка на своей ширине, а не сжатое окно.
+     Содержимое взято крайнее: длинное название, пустые слоты, категория без турниров.</p>
+  <div class="легенда">
+    <span><b>НАМЕРЕНО</b> <span class="тег нам">нам</span> — число задано мной по шкале</span>
+    <span><b>ПОСЧИТАНО</b> <span class="тег пос">пос</span> — получено из базы или из суммы намеренных частей</span>
+    <span>Названия категорий — настоящие, из <code>js/kslt-rules.js:26</code>: порядок от сильной к слабой</span>
+  </div>
+</div>
+
+<h2 class="вар">А · КАК СЕЙЧАС <span>схема по коду: js/tournaments-overview.js:263 renderHero, :294 loadOverviewStats, :556 renderCategories, :720 renderFeatured, :777 renderCompact</span></h2>
+<div class="виды" id="виды-do"></div>
+<div class="спека">
+  <h3>Что видно на замере</h3>
+  <ul>
+    <li>Обложка несёт только заголовок и подзаголовок; счётчиков на ней нет — цифры живут отдельной полосой ниже, и на телефоне уезжают под сгиб.</li>
+    <li>Поиск стоит <b>под</b> обложкой отдельной строкой: он читается как элемент списка, а не как вход в раздел.</li>
+    <li>Категории идут строго в столбец: шесть блоков, каждый согласен сам с собой, а вместе дают шесть разных ритмов. Пользователю приходится прокручивать и считать.</li>
+    <li>Внутри блока — крупная карточка и список «компакт» переменной длины: где турниров два, блок короткий, где пять — вдвое длиннее, и полоса между блоками каждый раз другая.</li>
+    <li>Описание турнира спрятано в трёх разных местах независимо: <code>css/style.css:6195</code>, <code>css/style.css:6392</code>, <code>css/tournaments-overview.css:1300</code> — одно понятие определено трижды.</li>
+    <li>Точек останова шесть: 1024, 992, 768 (дважды), 480, 375 — против двух разрешённых.</li>
+  </ul>
+</div>
+
+<h2 class="вар">Б · ПРЕДЛОЖЕНИЕ <span>обложка держит цифры, категории — одна раскладка, телефон — вариант В</span></h2>
+<div class="виды" id="виды-posle"></div>
+<div class="спека">
+  <h3>Лестница текста <span class="тег нам">НАМЕРЕНО</span></h3>
+  <table>
+    <tr><th>Уровень</th><th>Десктоп</th><th>Планшет</th><th>Телефон</th><th>Вес</th></tr>
+    <tr><td>Заголовок обложки</td><td>40</td><td>32</td><td>26</td><td>700</td></tr>
+    <tr><td>Подзаголовок обложки</td><td>16</td><td>16</td><td>14</td><td>400</td></tr>
+    <tr><td>Цифра плитки</td><td>32</td><td>26</td><td>21</td><td>700</td></tr>
+    <tr><td>Подпись плитки</td><td>12</td><td>12</td><td>11</td><td>500</td></tr>
+    <tr><td>Поиск (текст / высота)</td><td>14 / 44</td><td>14 / 44</td><td>14 / 44</td><td>400</td></tr>
+    <tr><td>Заголовок категории</td><td>26</td><td>21</td><td>18</td><td>600</td></tr>
+    <tr><td>Перебивка категории</td><td>14</td><td>14</td><td>12</td><td>400</td></tr>
+    <tr><td>Название крупной карточки</td><td>21</td><td>18</td><td>16</td><td>600</td></tr>
+    <tr><td>Мета крупной карточки</td><td>12</td><td>12</td><td>11</td><td>400</td></tr>
+    <tr><td>Название бокового ряда</td><td>16</td><td>14</td><td>14</td><td>500</td></tr>
+    <tr><td>Мета бокового ряда</td><td>12</td><td>12</td><td>11</td><td>400</td></tr>
+    <tr><td>Чип статуса</td><td>11</td><td>11</td><td>11</td><td>600</td></tr>
+  </table>
+  <p style="margin-top:calc(-1 * var(--s2)); color:var(--mu)">Замороженным станет отношение, а не число: «перебивка строго мельче заголовка категории на каждом виде», «название бокового ряда строго мельче названия крупной карточки». Снимается заново после кода, шаг 10.</p>
+
+  <h3>Пять чисел на обложке — откуда каждое</h3>
+  <table>
+    <tr><th>Плитка</th><th>Что считаем</th><th>Источник</th></tr>
+    <tr><td>Турниров</td><td>всё проведённое: архив клуба + завершённые в базе</td>
+        <td>тот же счётчик, что на главной — <code>js/stats.js:86</code>, <code>ARCHIVE_TOURNAMENTS=300</code> плюс <code>get_club_stats()</code>. Второго механизма не заводим.</td></tr>
+    <tr><td>Участников</td><td>люди, сыгравшие хотя бы один турнир или баттл, гости в том числе; один человек считается один раз, даже если играл в двух разрядах</td>
+        <td>новая функция рядом с <code>get_club_stats</code>, файл на твой запуск</td></tr>
+    <tr><td>Матча</td><td>сыгранные матчи в базе <span class="тег пос">ПРЕДПОЛОЖЕНИЕ: ты назвал три плитки, четвёртую поставил я</span></td>
+        <td>та же функция</td></tr>
+    <tr><td>Категорий</td><td>6 — пять рейтинговых плюс Friendly Weekend</td><td>постоянная, не из базы</td></tr>
+    <tr><td>Призовой фонд</td><td>общая сумма по всем турнирам</td>
+        <td>та же функция; сумма 0 — плитки нет вовсе, ровно как прячет пустое <code>js/stats.js:56</code></td></tr>
+  </table>
+  <p style="margin-top:calc(-1 * var(--s2));color:var(--mu)">Числа в макете условные: база сейчас отвечает отказом <code>exceed_cached_egress_quota</code>, и ни одно из них не померить. 344 — это 300 архива плюс 44 из базы, но 44 были посчитаны по всем турнирам, а счётчик главной берёт только завершённые с 2025 года, так что настоящее число не больше. 266 — измеренное раньше по турнирам, без баттлов; с ними оно вырастет, и твоя оценка в 500+ проверится тем же запросом. Призовой записан у одного турнира строкой «20», единицы не определены.</p>
+
+  <h3>Что изменено и чем платим</h3>
+  <ul>
+    <li><b>Обложка с картинкой, цифры поверх неё</b> — как на главной: бейдж сезона, заголовок, подзаголовок, поиск, под ними полоса чисел. Плата: обложка занимает почти весь первый экран, первый турнир уходит под сгиб на всех видах.</li>
+    <li><b>Поиск внутри обложки</b>, высота 44, скруглённый — вход в раздел, а не строка списка. Плата: на телефоне занимает полосу, которую раньше держал первый турнир.</li>
+    <li><b>Призовой фонд — общая сумма за все турниры</b>, показывается только когда в базе есть хоть один турнир с призовым; ноль — плитку убираем, а не затемняем.</li>
+    <li><b>Одна раскладка на все шесть категорий:</b> крупная карточка 2fr + столб из <b>трёх фиксированных слотов</b> 1fr. Пустой слот не схлопывается, а говорит «здесь появится следующий турнир разряда». Плата: у категории с одним турниром два слота пустые — зато полоса между блоками одна и та же, и глаз не пересчитывает ритм.</li>
+    <li><b>Телефон — вариант В:</b> плитки категорий сверху (переход вниз по якорю), под ними общая лента. Плата: на телефоне крупная карточка внутри категории теряет главенство — там все турниры идут одним рядом.</li>
+    <li><b>Полоса «сейчас идёт матч»</b> над обложкой, когда live есть. Плата: ещё один источник высоты на первом экране; когда live нет — полосы нет вовсе.</li>
+    <li><b>Точек останова две — 640 и 992</b>, шесть прежних уходят. Плата: переписывать шесть медиазапросов в <code>css/tournaments-overview.css</code>.</li>
+  </ul>
+
+  <h3>Правило сортировки <span class="тег нам">НАМЕРЕНО, по твоему слову</span></h3>
+  <ul>
+    <li>Есть <b>ИДЁТ</b> — он на крупной карточке. Второй ИДЁТ — верхний боковой слот.</li>
+    <li>Дальше <b>РЕГИСТРАЦИЯ ОТКРЫТА</b>, затем <b>СКОРО</b> — самая ближайшая дата крайняя.</li>
+    <li>Все закрыты — на крупную идёт самая свежая закрытая.</li>
+  </ul>
+
+  <h3>Что ещё открыто</h3>
+  <ul>
+    <li><b>База закрыта по квоте.</b> <code>get_club_stats</code> отвечает «exceed_cached_egress_quota». Отсюда прочерки на главной и «турниры временно недоступны». Без этого ни одно число не померить и код счётчиков не проверить.</li>
+    <li>Базовое число для <b>матчей</b>: у турниров архив 300 зашит в <code>js/stats.js:26</code>. У матчей архива нет — прибавляем что-то к 1022 или показываем только базу?</li>
+    <li><b>Единицы призового фонда</b>: сомы? И считаем сумму по всем турнирам подряд или только по завершённым.</li>
+    <li>Замеры по рейтингу (уникальные игроки, кто играет в двух разрядах, кто играл турниры, но в рейтинге его нет) — ждут открытой базы.</li>
+  </ul>
+</div>
+
+<script>
+var СТИЛЬ = ''
++ ':root{--s1:8px;--s2:12px;--s3:16px;--s4:24px;--s5:32px;--s6:40px;'
++ '--gutter:clamp(1rem,2.2vw,2rem);'                      /* css/tokens.css:379 */
++ '--padx:max(var(--gutter),(100% - 1400px)/2);'          /* css/tokens.css:386 */
++ '--sy-sm:clamp(1rem,1.6vw,1.5rem);'                     /* css/tokens.css:390 */
++ '--bg2:#101316;'
++ '--bg:#0b0d0f;--pane:#14171a;--pane2:#191d21;--line:#23282d;--tx:#e9ecef;--mu:#9aa1a9;'
++ '--acc:#CCFF00;--live:#ff5f57;--ok:#7ee2a8;}'
++ '*{box-sizing:border-box}'
++ 'html,body{margin:0;background:var(--bg);color:var(--tx);'
++ 'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}'
++ 'body{padding-bottom:var(--s6)}'
++ '.шапка{display:flex;align-items:center;justify-content:space-between;'
++ 'padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);font-size:12px;color:var(--mu)}'
++ '.шапка b{color:var(--tx);font-size:14px;letter-spacing:.08em}'
++ '.обёртка{padding:0 var(--padx)}'
+
+/* живая полоса */
++ '.живая{display:flex;align-items:center;gap:var(--s2);padding:var(--s1) var(--s4);'
++ 'background:#1b1113;border-bottom:1px solid #3a2226;font-size:12px;color:#ffd9d7}'
++ '.живая i{width:7px;height:7px;border-radius:50%;background:var(--live);flex:0 0 auto}'
++ '.живая b{color:#fff;font-weight:600}'
++ '.живая span{color:#c9a4a4}'
+
+/* обложка — как на главной: картинка, поверх неё текст и цифры */
++ '.обложка{position:relative;isolation:isolate;text-align:center;'
++ 'min-height:460px;display:flex;flex-direction:column;justify-content:center;'
++ 'padding:var(--s6) var(--padx) var(--s5);background:#1a1210}'
++ '.обложка > *:not(.фон){max-width:1400px;margin-left:auto;margin-right:auto}'
++ '.обложка::after{content:"";position:absolute;inset:0;z-index:-1;'
++ 'background:linear-gradient(180deg,rgba(6,8,10,.62) 0%,rgba(6,8,10,.78) 62%,rgba(11,13,15,1) 100%)}'
++ '.обложка img.фон{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}'
++ '.бейдж{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;'
++ 'color:var(--acc);border:1px solid rgba(204,255,0,.4);border-radius:999px;padding:5px 14px;margin-bottom:var(--s4)}'
++ '.бейдж::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--acc)}'
++ '.обложка h1{font-size:clamp(1.9rem,4.4vw,3.1rem);line-height:1.1;margin:0 0 var(--s2);'
++ 'letter-spacing:-.02em;font-weight:800}'
++ '.обложка p.под{margin:0 auto;font-size:clamp(1rem,1.6vw,1.3rem);line-height:1.5;'
++ 'font-weight:600;color:rgba(255,255,255,.72)}'
++ '.плитки{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--s5);margin-top:var(--s5)}'
++ '.пл{text-align:center}'+ '.пл b{white-space:nowrap}'
++ '.пл b{display:block;font-size:36px;line-height:1.2;font-weight:700;color:var(--acc)}'
++ '.пл u{display:block;text-decoration:none;font-size:14px;font-weight:450;'
++ 'color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px}'
+
++ '.пл.ждёт{opacity:.42}'
++ '.поиск-полоса{display:flex;justify-content:center;padding:var(--s3) var(--padx)}'
++ '.поиск{display:flex;align-items:center;justify-content:space-between;height:44px;padding:0 var(--s4);'
++ 'width:100%;max-width:480px;text-align:left;'
++ 'background:rgba(255,255,255,.06);backdrop-filter:blur(12px);'
++ 'border:1px solid var(--line);border-radius:999px;font-size:16px;color:var(--mu)}'
++ '.поиск.фокус{border-color:var(--acc);background:rgba(255,255,255,.1);'
++ 'box-shadow:0 0 0 3px rgba(204,255,0,.1);color:var(--tx)}'
+
+/* категория */
++ '.кат{padding:var(--sy-sm) var(--padx)}'
++ '.кат:nth-of-type(even){background:var(--bg2)}'
++ '.кат-шапка{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s4)}'
++ '.кат h2{font-size:26px;margin:0;font-weight:600;letter-spacing:-.01em}'
++ '.кат .переб{font-size:14px;color:var(--mu);margin:4px 0 0}'
++ '.кат .все{font-size:12px;color:var(--acc);white-space:nowrap}'
++ '.сетка{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3);align-items:stretch}'
++ '.крупн{background:var(--pane);border:1px solid var(--line);border-radius:var(--s2);'
++ 'padding:var(--s4);display:flex;flex-direction:column;gap:var(--s2);min-height:236px}'
++ '.крупн h3{font-size:21px;line-height:1.25;margin:0;font-weight:600}'
++ '.крупн .мета{font-size:12px;color:var(--mu);line-height:1.6;margin:0}'
++ '.крупн .низ{margin-top:auto;display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}'
++ '.столб{display:grid;grid-template-rows:repeat(3,1fr);gap:var(--s3)}'
++ '.ряд{background:var(--pane);border:1px solid var(--line);border-radius:var(--s2);'
++ 'padding:var(--s3);display:flex;flex-direction:column;gap:6px;justify-content:center}'
++ '.ряд h4{font-size:16px;margin:0;font-weight:500;line-height:1.3}'
++ '.ряд .мета{font-size:12px;color:var(--mu);margin:0}'
++ '.ряд.пусто{border-style:dashed;color:#5f666e;font-size:12px;align-items:center;'
++ 'justify-content:center;text-align:center;line-height:1.5;background:transparent}'
++ '.чип{font-size:11px;font-weight:600;letter-spacing:.04em;padding:3px 8px;border-radius:999px;'
++ 'border:1px solid var(--line);color:var(--mu)}'
++ '.чип.идёт{color:#ffd9d7;border-color:#3a2226;background:#1b1113}'
++ '.чип.рег{color:var(--ok);border-color:#2b4636;background:#101a14}'
++ '.чип.скоро{color:#8ab4ff;border-color:#2a3a55;background:#0f1520}'
++ '.чип.закр{color:#6d747c}'
+
+/* плитки категорий — только телефон, вариант В */
++ '.кат-плитки{display:none}'
+
+/* планшет */
++ '@media (max-width:992px){'
++ '.обложка{padding:var(--s5) 0 var(--s4)}'
++ '.обложка h1{font-size:32px}'
++ '.плитки{gap:var(--s4) var(--s3)}'
++ '.плитки{grid-template-columns:repeat(3,1fr)}'
++ '.пл b{font-size:26px}'
++ '.кат h2{font-size:21px}'
++ '.крупн h3{font-size:18px}'
++ '.ряд h4{font-size:14px}'
++ '.сетка{grid-template-columns:1fr 1fr}'
++ '}'
+
+/* телефон — вариант В */
++ '@media (max-width:640px){'
++ '.живая span{display:none}'
++ '.обёртка{padding:0 var(--s3)}'
++ '.обложка{padding:var(--s5) var(--s3) var(--s4)}'
++ '.обложка h1{font-size:26px}'
++ '.обложка p.под{font-size:14px;margin-bottom:var(--s4)}'
++ '.плитки{gap:var(--s4) var(--s2);margin-top:var(--s4)}'
++ '.плитки{grid-template-columns:repeat(2,1fr)}'+ '.пл:last-child{grid-column:1 / -1}'
++ '.пл b{font-size:21px}'
++ '.пл u{font-size:10px;margin-top:6px}'
++ '.кат-плитки{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s2);margin-top:var(--s4)}'
++ '.кат-пл{background:var(--pane2);border:1px solid var(--line);border-radius:var(--s2);'
++ 'padding:var(--s2) var(--s3);font-size:14px;font-weight:500}'
++ '.кат-пл em{display:block;font-style:normal;font-size:11px;color:var(--mu);margin-top:2px}'
+
++ '.кат h2{font-size:18px}'
++ '.кат .переб{font-size:12px}'
++ '.сетка{grid-template-columns:1fr;gap:var(--s2)}'
++ '.столб{grid-template-rows:none;gap:var(--s2)}'
++ '.крупн{min-height:0;padding:var(--s3)}'
++ '.крупн h3{font-size:16px}'
++ '.крупн .мета,.ряд .мета,.пл u{font-size:11px}'
++ '.ряд h4{font-size:14px}'
++ '}';
+
+function чип(вид, текст){ return '<span class="чип ' + вид + '">' + текст + '</span>'; }
+
+function крупная(о){
+  return '<article class="крупн">'
+    + '<div>' + чип(о.чип, о.статус) + '</div>'
+    + '<h3>' + о.имя + '</h3>'
+    + '<p class="мета">' + о.мета + '</p>'
+    + '<div class="низ"><span class="чип">' + о.участники + '</span>'
+    + '<span class="чип">' + о.место + '</span></div>'
+    + '</article>';
+}
+function ряд(о){
+  if (!о) return '<div class="ряд пусто">здесь появится<br>следующий турнир категории</div>';
+  return '<article class="ряд">' + чип(о.чип, о.статус)
+    + '<h4>' + о.имя + '</h4><p class="мета">' + о.мета + '</p></article>';
+}
+
+var КАТЕГОРИИ = [
+  { имя:'Pro-Masters', переб:'высшая рейтинговая · очки идут в таблицу',
+    крупн:{ чип:'идёт', статус:'ИДЁТ', имя:'Осенний открытый чемпионат Бишкека по большому теннису, мужской одиночный разряд',
+            мета:'14–21 сентября · корты «Ала-Тоо», Бишкек · сетка 32 · 2-й круг', участники:'32 участника', место:'«Ала-Тоо»' },
+    ряды:[ { чип:'рег', статус:'РЕГИСТРАЦИЯ ОТКРЫТА', имя:'Кубок КСЛТ · октябрь', мета:'до 3 октября · 12 из 16 мест' },
+           { чип:'скоро', статус:'СКОРО', имя:'Зимний турнир Pro-Masters', мета:'8 ноября · регистрация с 20 октября' },
+           null ] },
+  { имя:'Masters', переб:'рейтинговая · очки идут в таблицу',
+    крупн:{ чип:'рег', статус:'РЕГИСТРАЦИЯ ОТКРЫТА', имя:'Кубок сентября',
+            мета:'27–28 сентября · «Теннис Парк», Бишкек · сетка 16 · до 24 сентября', участники:'9 из 16 мест', место:'«Теннис Парк»' },
+    ряды:[ { чип:'скоро', статус:'СКОРО', имя:'Октябрьский этап', мета:'11 октября' }, null, null ] },
+  { имя:'Tour', переб:'рейтинговая · очки идут в таблицу',
+    крупн:{ чип:'закр', статус:'ЗАКРЫТ', имя:'Летний этап Tour',
+            мета:'23–24 августа · «Ала-Тоо» · победитель: А. Иманкулов', участники:'16 участников', место:'«Ала-Тоо»' },
+    ряды:[ { чип:'закр', статус:'ЗАКРЫТ', имя:'Июльский этап', мета:'12 июля · победитель: Д. Осмонов' },
+           { чип:'закр', статус:'ЗАКРЫТ', имя:'Майский этап', мета:'17 мая · победитель: Т. Абдырахманов' },
+           { чип:'закр', статус:'ЗАКРЫТ', имя:'Апрельский этап', мета:'5 апреля · победитель: С. Керимов' } ] },
+  { имя:'Challenger', переб:'рейтинговая · очки идут в таблицу',
+    крупн:{ чип:'скоро', статус:'СКОРО', имя:'Осенний этап Challenger',
+            мета:'18 октября · «Теннис Парк» · регистрация с 1 октября', участники:'сетка 16', место:'«Теннис Парк»' },
+    ряды:[ null, null, null ] },
+  { имя:'Futures', переб:'рейтинговая · первая ступень рейтинга',
+    крупн:{ чип:'рег', статус:'РЕГИСТРАЦИЯ ОТКРЫТА', имя:'Дебют · Futures',
+            мета:'4 октября · «Ала-Тоо» · до 1 октября', участники:'6 из 16 мест', место:'«Ала-Тоо»' },
+    ряды:[ { чип:'закр', статус:'ЗАКРЫТ', имя:'Дебют · август', мета:'9 августа · победитель: М. Ниязов' }, null, null ] },
+  { имя:'Friendly Weekend', переб:'без рейтинговых очков · играем в удовольствие',
+    крупн:{ чип:'скоро', статус:'СКОРО', имя:'Friendly Weekend · октябрь',
+            мета:'25 октября · «Теннис Парк» · пары по жребию, рейтинг не начисляется', участники:'свободный вход', место:'«Теннис Парк»' },
+    ряды:[ { чип:'закр', статус:'ЗАКРЫТ', имя:'Friendly Weekend · сентябрь', мета:'6 сентября · 14 участников' }, null, null ] }
+];
+
+function экранПосле(){
+  var ч = '';
+  ч += '<div class="шапка"><b>КСЛТ</b><span>Турниры · Рейтинг · Игроки · Live</span></div>';
+  ч += '<section class="обложка">'
+     + '<img class="фон" src="../images/heroes/tournaments.jpg" alt="">'
+     + '<h1>Турниры</h1>'
+     + '<p class="под">Все категории турниров KSLT</p>'
+     + '<div class="плитки">'
+     +   '<div class="пл"><b>344</b><u>турниров</u></div>'
+     +   '<div class="пл"><b>266</b><u>участников</u></div>'
+     +   '<div class="пл"><b>1&nbsp;022</b><u>матчей</u></div>'
+     +   '<div class="пл"><b>20 000 сом</b><u>призовой фонд</u></div>'
+     +   '<div class="пл"><b>6</b><u>категорий</u></div>'
+     + '</div>'
+     + '<div class="кат-плитки">'
+     +   КАТЕГОРИИ.map(function(к){
+           return '<div class="кат-пл">' + к.имя + '<em>'
+                + (к.имя === 'Friendly Weekend' ? 'без очков' : 'рейтинговая') + '</em></div>'; }).join('')
+     + '</div>'
+     + '</section>';
+  ч += '<div class="поиск-полоса"><div class="поиск"><span>Поиск турнира...</span><span>&#9906;</span></div></div>';
+  ч += КАТЕГОРИИ.map(function(к){
+        return '<section class="кат">'
+          + '<div class="кат-шапка"><div><h2>' + к.имя + '</h2>'
+          + '<p class="переб">' + к.переб + '</p></div>'
+          + '<span class="все">все турниры категории →</span></div>'
+          + '<div class="сетка">' + крупная(к.крупн)
+          + '<div class="столб">' + к.ряды.map(ряд).join('') + '</div></div>'
+          + '</section>';
+      }).join('');
+  return ч;
+}
+
+/* КАК СЕЙЧАС: те же данные, прежняя раскладка — столб, поиск под обложкой, цифр в обложке нет */
+var СТИЛЬ_DO = СТИЛЬ
++ '.плитки{grid-template-columns:repeat(4,1fr);margin:0 0 var(--s4)}'
++ '.полоса-цифр{padding:var(--s4) 0 0}'
++ '.сетка{display:block}'
++ '.крупн{margin-bottom:var(--s2);min-height:0}'
++ '.столб{display:block}'
++ '.ряд{margin-bottom:var(--s2)}'
++ '.ряд.пусто{display:none}'
++ '.кат-плитки{display:none!important}'
++ '@media (max-width:640px){.обложка p.под{display:none}.плитки{grid-template-columns:repeat(2,1fr)}}';
+
+function экранДо(){
+  var ч = '';
+  ч += '<div class="шапка"><b>КСЛТ</b><span>Турниры · Рейтинг · Игроки · Live</span></div>';
+  ч += '<div class="обёртка">';
+  ч += '<section class="обложка"><h1>Турниры</h1>'
+     + '<p class="под">Все категории турниров KSLT</p>'
+     + '</section>';
+  ч += '<div class="поиск">Поиск по турнирам</div>';
+  ч += '<div class="полоса-цифр"><div class="плитки">'
+     + '<div class="пл"><b>44</b><u>турнира</u></div>'
+     + '<div class="пл"><b>266</b><u>участников</u></div>'
+     + '<div class="пл"><b>1&nbsp;022</b><u>матча</u></div>'
+     + '<div class="пл"><b>20 000</b><u>призовой фонд</u></div>'
+     + '</div></div>';
+  ч += КАТЕГОРИИ.map(function(к){
+        return '<section class="кат">'
+          + '<div class="кат-шапка"><div><h2>' + к.имя + '</h2>'
+          + '<p class="переб">' + к.переб + '</p></div></div>'
+          + '<div class="сетка">' + крупная(к.крупн)
+          + '<div class="столб">' + к.ряды.filter(Boolean).map(ряд).join('') + '</div></div>'
+          + '</section>';
+      }).join('');
+  ч += '</div>';
+  return ч;
+}
+
+var ВИДЫ = [
+  { имя:'Десктоп 1280×800', w:1280, h:800 },
+  { имя:'Планшет 768×1024', w:768, h:1024 },
+  { имя:'Телефон 390×844',  w:390, h:844 }
+];
+
+function док(тело, стиль){
+  return '<!doctype html><html lang="ru"><head><meta charset="utf-8">'
+       + '<meta name="viewport" content="width=device-width, initial-scale=1">'
+       + '<style>' + стиль + '</style></head><body>' + тело + '</body></html>';
+}
+
+function собрать(узел, тело, стиль){
+  var к = document.getElementById(узел);
+  к.innerHTML = ВИДЫ.map(function(в){
+    return '<figure class="вид" style="margin:0"><figcaption>' + в.имя + '</figcaption>'
+      + '<iframe width="' + в.w + '" height="' + в.h + '" sandbox="allow-same-origin"></iframe></figure>';
+  }).join('');
+  var рамки = к.querySelectorAll('iframe');
+  for (var i = 0; i < рамки.length; i++) рамки[i].srcdoc = док(тело, стиль);
+}
+
+
+// Один экран во весь браузер: ?экран=после или ?экран=до.
+// Нужен, чтобы мерить обложку на настоящем окне, а не в рамке.
+var ОДИН_ЭКРАН = new URLSearchParams(location.search).get('экран');
+(function(){
+  var режим = ОДИН_ЭКРАН;
+  if (!режим) return;
+  var тело = режим === 'до' ? экранДо() : экранПосле();
+  var стиль = режим === 'до' ? СТИЛЬ_DO : СТИЛЬ;
+  document.documentElement.innerHTML = '<head><meta charset="utf-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1">'
+    + '<style>' + стиль + '</style></head><body>' + тело + '</body>';
+})();
+
+if (!ОДИН_ЭКРАН) {
+  собрать('виды-do', экранДо(), СТИЛЬ_DO);
+  собрать('виды-posle', экранПосле(), СТИЛЬ);
+}
+</script>
+</body>
+</html>

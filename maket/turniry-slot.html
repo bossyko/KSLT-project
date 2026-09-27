@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — боковая строка: А, Б или В</title>
+<style>
+  :root{--line:#23282d;--tx:#e9ecef;--mu:#9aa1a9;--acc:#CCFF00}
+  *{box-sizing:border-box}
+  body{margin:0;background:#0b0d0f;color:var(--tx);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px}
+  h1{font-size:26px;margin:0 0 8px}
+  .под{color:var(--mu);font-size:14px;margin:0 0 24px;max-width:80ch;line-height:1.5}
+  .ряд{display:flex;flex-direction:column;gap:32px;align-items:flex-start}
+  .вар{flex:0 0 auto}
+  .вар h2{font-size:18px;margin:0 0 2px}
+  .вар h2 b{color:var(--acc)}
+  .вар p{margin:0 0 12px;font-size:12px;color:var(--mu);line-height:1.5;max-width:44ch}
+  .окно{width:min(100%,640px);height:560px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#000}
+  .окно iframe{width:1280px;height:1520px;border:0;transform:scale(0.5);transform-origin:0 0}
+  .низ{margin-top:24px;font-size:13px;color:var(--mu);line-height:1.6;max-width:90ch}
+  .низ b{color:var(--tx)}
+</style>
+</head>
+<body>
+
+<h1>Боковая строка в категории — выбрать один вариант</h1>
+<p class="под">Все три нарисованы настоящей страницей на <b>десктопе 1280</b>, база заглушена.
+Слева в каждом — крупная карточка, справа — столб слотов. Смотри на две вещи: помещается ли
+кнопка «Регистрация» в строке и не слишком ли высок блок целиком.</p>
+
+<div class="ряд">
+  <div class="вар">
+    <h2><b>А</b> · три слота по 224</h2>
+    <p>Всё помещается, столб из трёх. Блок вырастает до 720 — пять категорий делают страницу длинной.</p>
+    <div class="окно"><iframe data-src="/maket/turniry-zamer.html?slot=a"></iframe></div>
+  </div>
+
+  <div class="вар">
+    <h2><b>Б</b> · два слота по 224 <span style="color:var(--acc);font-size:12px">— предлагаю</span></h2>
+    <p>Строки целые, кнопка на месте, блок 472 — это рядом с сегодняшними 420 и с утверждённой доской.
+    Турниры сверх двух уходят под ссылку «все турниры категории».</p>
+    <div class="окно"><iframe data-src="/maket/turniry-zamer.html?slot=b"></iframe></div>
+  </div>
+
+  <div class="вар">
+    <h2><b>В</b> · три слота по 152</h2>
+    <p>Три строки и невысокий блок, но кнопка «Регистрация» из строки уезжает: записаться можно
+    с самой строки и с крупной карточки.</p>
+    <div class="окно"><iframe data-src="/maket/turniry-zamer.html?slot=v"></iframe></div>
+  </div>
+</div>
+
+<p class="низ"><b>Откуда взялись числа.</b> Естественные высоты боковых строк, снятые на стенде:
+147 у завершённого турнира, 148 у «скоро», 185 у открытой регистрации с кнопкой и <b>217</b> —
+у открытой регистрации с длинным названием. Поэтому слот не может быть меньше 224, если кнопка
+остаётся в строке. Вариант В укладывается в 152 именно потому, что кнопка из строки уходит.</p>
+
+<script>
+/* Рамка получает адрес ПОСЛЕ того, как встала в свой размер: иначе страница
+   успевает решить, что она на телефоне, и рисует телефонный вариант. */
+document.querySelectorAll('iframe').forEach(function (f, i) {
+    setTimeout(function () { f.src = f.dataset.src + '&v=' + Date.now(); }, 150 + i * 250);
+    /* Показываем сразу КАРТОЧКИ, а не обложку: смотреть просят на слоты */
+    f.addEventListener('load', function () {
+        setTimeout(function () {
+            var б = f.contentDocument.querySelector('.to-category-block');
+            if (б) f.contentWindow.scrollTo(0, б.offsetTop - 16);
+        }, 2600);
+    });
+});
+</script>
+</body>
+</html>

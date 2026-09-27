@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Турниры — раскладки</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="../css/tokens.css?v=21">
+<style>
+/* МАКЕТ РАСКЛАДОК ГЛАВНОЙ «ТУРНИРЫ». В продукт не подключён.
+   Схема, а не пиксели: показывает СТРОЙ, а не готовый вид. Числами себя
+   не подписывает — их тут не мерили. */
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg-base);color:var(--text-primary);
+     font-family:Inter,system-ui,sans-serif;padding:var(--space-4);min-height:100dvh}
+h1{font-size:var(--fs-2xl);font-weight:800;margin-bottom:var(--space-1)}
+.lead{font-size:var(--fs-base);color:var(--text-muted);margin-bottom:var(--space-6)}
+h2{font-size:var(--fs-xl);font-weight:700}
+.cat-head{display:flex;align-items:baseline;justify-content:space-between;
+          gap:var(--space-4);margin:var(--space-6) 0 var(--space-3)}
+.all{font-size:var(--fs-sm);font-weight:600;color:var(--accent);
+     min-height:var(--btn-h-md);display:inline-flex;align-items:center}
+.card{background:var(--bg-elevated);border:1px solid var(--border-subtle);
+      border-radius:var(--radius-lg);padding:var(--space-3);display:flex;
+      flex-direction:column;gap:var(--space-2);min-height:120px}
+.card .st{font-size:var(--fs-2xs);font-weight:500;text-transform:uppercase;
+          color:var(--accent);letter-spacing:.06em}
+.card .tt{font-size:var(--fs-base);font-weight:700;line-height:1.25}
+.card .mt{font-size:var(--fs-xs);color:var(--text-muted);margin-top:auto}
+
+/* ДО — крупная плюс столбик сжатых, и так шесть раз */
+.do-grid{display:grid;grid-template-columns:2fr 1fr;gap:var(--space-4)}
+.do-big{background:var(--bg-elevated);border:1px solid var(--border-subtle);
+        border-radius:var(--radius-lg);min-height:240px;padding:var(--space-4);
+        display:flex;flex-direction:column;justify-content:flex-end;gap:var(--space-2);
+        background-image:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.6))}
+.do-big .tt{font-size:var(--fs-lg);font-weight:800}
+.do-side{display:flex;flex-direction:column;gap:var(--space-2)}
+.do-row{background:var(--bg-elevated);border:1px solid var(--border-subtle);
+        border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);
+        display:flex;gap:var(--space-3);align-items:center;min-height:56px}
+.do-row .d{font-size:var(--fs-lg);font-weight:800;line-height:1;min-width:34px}
+.do-row .n{font-size:var(--fs-sm)}
+@media (max-width:640px){ .do-grid{grid-template-columns:1fr} .do-side{display:none} }
+
+/* А — ряды одинаковых карточек */
+.row{display:flex;gap:var(--space-3);overflow-x:auto;scrollbar-width:thin;
+     padding-bottom:var(--space-2)}
+.row .card{flex:0 0 240px}
+@media (max-width:640px){ .row .card{flex:0 0 72%} }
+
+/* Б — чипы и одна сетка */
+.chips{display:flex;gap:var(--space-2);overflow-x:auto;padding-bottom:var(--space-2)}
+.chip{flex:0 0 auto;min-height:var(--btn-h-md);padding:0 var(--space-4);
+      display:inline-flex;align-items:center;gap:var(--space-2);
+      border-radius:var(--radius-full);border:1px solid var(--border-light);
+      background:var(--bg-elevated);font-size:var(--fs-sm);font-weight:600}
+.chip.on{background:var(--accent);color:var(--accent-on);border-color:var(--accent)}
+.chip b{font-weight:700;opacity:.6}
+.grid{display:grid;gap:var(--space-3);grid-template-columns:repeat(3,1fr);
+      margin-top:var(--space-4)}
+@media (max-width:992px){ .grid{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:640px){ .grid{grid-template-columns:1fr} }
+
+/* В — плитки категорий и общая лента */
+.tiles{display:grid;gap:var(--space-3);grid-template-columns:repeat(3,1fr)}
+@media (max-width:992px){ .tiles{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:640px){ .tiles{grid-template-columns:repeat(2,1fr)} }
+.tile{background:var(--bg-elevated);border:1px solid var(--border-subtle);
+      border-radius:var(--radius-lg);padding:var(--space-4);display:flex;
+      flex-direction:column;gap:var(--space-1);min-height:var(--btn-h-lg)}
+.tile .n{font-size:var(--fs-base);font-weight:700}
+.tile .c{font-size:var(--fs-2xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.tile .d{font-size:var(--fs-xs);color:var(--accent);font-weight:600;margin-top:var(--space-1)}
+.feed{display:flex;flex-direction:column;gap:var(--space-2);margin-top:var(--space-3)}
+.fr{display:grid;grid-template-columns:44px 1fr auto;gap:var(--space-3);
+    align-items:center;background:var(--bg-elevated);border:1px solid var(--border-subtle);
+    border-radius:var(--radius-md);padding:var(--space-3);min-height:var(--btn-h-lg)}
+.fr .d{font-size:var(--fs-lg);font-weight:800;line-height:1;text-align:center}
+.fr .d small{display:block;font-size:var(--fs-2xs);font-weight:500;color:var(--text-muted)}
+.fr .n{font-size:var(--fs-sm);font-weight:700}
+.fr .c{font-size:var(--fs-2xs);color:var(--text-muted)}
+.fr .s{font-size:var(--fs-2xs);font-weight:600;color:var(--accent);text-transform:uppercase}
+.note{font-size:var(--fs-xs);color:var(--text-muted);margin-top:var(--space-4)}
+</style></head><body>
+<script>
+var К = ['Friendly Weekend','Pro-Masters','Masters','Tour','Challenger','Futures'];
+var Т = [['12','окт','Осенний кубок','Masters','регистрация'],
+         ['18','окт','Кубок Бишкека','Tour','регистрация'],
+         ['26','окт','Friendly Weekend #14','Friendly Weekend','идёт'],
+         ['02','ноя','Pro-Masters осень','Pro-Masters','скоро'],
+         ['09','ноя','Challenger Ala-Too','Challenger','скоро'],
+         ['16','ноя','Futures Open','Futures','скоро']];
+var в = new URLSearchParams(location.search).get('v') || 'do';
+function карточка(t){ return '<div class="card"><div class="st">' + t[4] + '</div>' +
+  '<div class="tt">' + t[2] + '</div><div class="mt">' + t[0] + ' ' + t[1] + ' · ' + t[3] + '</div></div>'; }
+var h = '<h1>Турниры КСЛТ</h1><div class="lead">Шесть разрядов — от Friendly Weekend до Futures</div>';
+
+if (в === 'do') {
+  К.forEach(function(k, i){
+    h += '<div class="cat-head"><h2>' + k + '</h2><span class="all">Все турниры →</span></div>' +
+      '<div class="do-grid"><div class="do-big"><div class="st">регистрация</div>' +
+      '<div class="tt">' + Т[i][2] + '</div><div class="mt">' + Т[i][0] + ' ' + Т[i][1] + '</div></div>' +
+      '<div class="do-side">' +
+        '<div class="do-row"><div class="d">' + Т[(i+1)%6][0] + '</div><div class="n">' + Т[(i+1)%6][2] + '</div></div>' +
+        '<div class="do-row"><div class="d">' + Т[(i+2)%6][0] + '</div><div class="n">' + Т[(i+2)%6][2] + '</div></div>' +
+        (i % 2 ? '<div class="do-row"><div class="d">' + Т[(i+3)%6][0] + '</div><div class="n">' + Т[(i+3)%6][2] + '</div></div>' : '') +
+      '</div></div>';
+  });
+}
+if (в === 'a') {
+  К.forEach(function(k, i){
+    h += '<div class="cat-head"><h2>' + k + '</h2><span class="all">Все →</span></div><div class="row">' +
+      Т.map(function(_, j){ return карточка(Т[(i+j)%6]); }).join('') + '</div>';
+  });
+}
+if (в === 'b') {
+  h += '<div class="chips">' + К.map(function(k, i){
+    return '<span class="chip' + (i === 0 ? ' on' : '') + '">' + k + ' <b>' + (3 + i % 3) + '</b></span>'; }).join('') + '</div>' +
+    '<div class="grid">' + Т.concat(Т).map(карточка).join('') + '</div>';
+}
+if (в === 'v') {
+  h += '<div class="tiles">' + К.map(function(k, i){
+    return '<a class="tile"><div class="n">' + k + '</div><div class="c">' + (3 + i % 3) + ' турнира</div>' +
+           '<div class="d">ближайший ' + Т[i][0] + ' ' + Т[i][1] + '</div></a>'; }).join('') + '</div>' +
+    '<div class="cat-head"><h2>Ближайшие</h2><span class="all">Все турниры →</span></div>' +
+    '<div class="feed">' + Т.concat(Т.slice(0,2)).map(function(t){
+      return '<div class="fr"><div class="d">' + t[0] + '<small>' + t[1] + '</small></div>' +
+             '<div><div class="n">' + t[2] + '</div><div class="c">' + t[3] + '</div></div>' +
+             '<div class="s">' + t[4] + '</div></div>'; }).join('') + '</div>';
+}
+document.body.insertAdjacentHTML('beforeend', h);
+</script></body></html>

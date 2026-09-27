@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8">
+<title>Турниры — до и после</title>
+<style>
+ body{margin:0;background:#0d0d0f;color:#fff;font:13px/1.45 Inter,system-ui,sans-serif;padding:20px}
+ h1{font-size:16px;margin:0 0 4px} .sub{font-size:12px;color:#8b8b93;margin:0 0 22px}
+ .вариант{border-top:1px solid #26262c;padding-top:14px;margin-bottom:26px}
+ .вариант > h2{font-size:15px;margin:0 0 2px;font-weight:700}
+ .вариант > p{font-size:12px;color:#8b8b93;margin:0 0 12px;max-width:860px}
+ .устройства{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+ .устр{}
+ .устр .шапка{font-size:12px;font-weight:700;color:#e6e6ea;margin-bottom:5px}
+ .устр .шапка span{font-weight:400;color:#77777f}
+ .коробка{position:relative;overflow:hidden;border:1px solid #2a2a30;background:#000;border-radius:6px}
+ iframe{border:0;display:block;transform-origin:0 0}
+</style></head><body>
+<h1>Главная «Турниры» — как сейчас и три раскладки</h1>
+<p class="sub">Схема, а не пиксели: показывает строй, не готовый вид. Каждый кадр загружен на своей ширине, высота кадра — ровно один экран, так что видно, сколько влезает без прокрутки.</p>
+<div id="всё"></div>
+<script>
+var УСТР = [
+  {имя:'Десктоп',  w:1280, h:800,  м:0.40},
+  {имя:'Планшет',  w:768,  h:1024, м:0.34},
+  {имя:'Телефон',  w:390,  h:844,  м:0.40}
+];
+var В = [
+ {имя:'КАК СЕЙЧАС', v:'do',
+  что:'Шесть категорий одна под другой. Внутри каждой — крупная карточка плюс столбик сжатых строк, то есть два формата в одном блоке, а на телефоне работает третий рисовальщик. Крупной становится просто первый турнир по сортировке.'},
+ {имя:'А · ряды одного формата', v:'a',
+  что:'Категории остаются разделами, но каждая — один горизонтальный ряд одинаковых карточек. Платим горизонтальной прокруткой: за краем ряда человек может ничего не искать.'},
+ {имя:'Б · чипы и одна сетка', v:'b',
+  что:'Ряд чипов сверху, под ним одна сетка. Наше же правило из системы: Filter chip 49:77 — «чип фильтрует список на месте». Платим тем, что категории перестают быть разделами и видна только одна за раз.'},
+ {имя:'В · плитки и общая лента', v:'v',
+  что:'Шесть одинаковых плиток — название, сколько турниров, ближайшая дата. Под ними одна лента ближайших, все категории вперемешку по дате. Отвечает сразу на «куда мне» и на «что скоро». Платим вторым блоком и тем, что лента повторяет содержимое плиток.'}
+];
+var корень = document.getElementById('всё');
+В.forEach(function(в){
+  var б = document.createElement('div'); б.className = 'вариант';
+  б.innerHTML = '<h2>' + в.имя + '</h2><p>' + в.что + '</p>';
+  var ряд = document.createElement('div'); ряд.className = 'устройства';
+  УСТР.forEach(function(у){
+    var к = document.createElement('div'); к.className = 'устр';
+    к.innerHTML = '<div class="шапка">' + у.имя + ' <span>' + у.w + ' × ' + у.h + '</span></div>';
+    var кор = document.createElement('div'); кор.className = 'коробка';
+    кор.style.width = Math.round(у.w * у.м) + 'px';
+    кор.style.height = Math.round(у.h * у.м) + 'px';
+    var f = document.createElement('iframe');
+    f.width = у.w; f.height = у.h; f.style.transform = 'scale(' + у.м + ')';
+    f.src = 'turniry-ekran.html?v=' + в.v;
+    кор.appendChild(f); к.appendChild(кор); ряд.appendChild(к);
+  });
+  б.appendChild(ряд); корень.appendChild(б);
+});
+</script></body></html>

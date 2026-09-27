@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — турниры на пяти видах</title>
+<style>
+  :root{--line:#23282d;--tx:#e9ecef;--mu:#9aa1a9;--acc:#CCFF00}
+  *{box-sizing:border-box}
+  body{margin:0;background:#0b0d0f;color:var(--tx);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px}
+  h1{font-size:26px;margin:0 0 8px}
+  .под{color:var(--mu);font-size:14px;margin:0 0 8px;max-width:86ch;line-height:1.5}
+  .под b{color:var(--tx)}
+  .кнопки{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 24px}
+  .кнопки a{font-size:13px;color:var(--acc);text-decoration:none;border:1px solid var(--line);
+            border-radius:999px;padding:8px 16px}
+  h2.группа{font-size:16px;margin:32px 0 12px;letter-spacing:.06em;color:var(--mu);
+            border-top:1px solid var(--line);padding-top:16px}
+  .ряд{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+  .вид h3{font-size:14px;margin:0 0 2px;letter-spacing:.06em}
+  .вид p{margin:0 0 8px;font-size:12px;color:var(--mu)}
+  .вид p b{color:var(--acc);font-weight:600}
+  .окно{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#000}
+  .окно iframe{border:0;transform-origin:0 0}
+  table{border-collapse:collapse;font-size:13px;margin-top:16px}
+  th,td{border-bottom:1px solid var(--line);padding:6px 16px 6px 0;text-align:left}
+  th{color:var(--mu);font-weight:500}
+  .низ{margin-top:24px;font-size:13px;color:var(--mu);line-height:1.6;max-width:92ch}
+  .низ b{color:var(--tx)}
+</style>
+</head>
+<body>
+
+<h1>Турниры — пять видов</h1>
+<p class="под">Это <b>настоящая страница</b>: те же <code>css/tournaments-overview.css</code> и
+<code>js/tournaments-overview.js</code>, что в бою. <b>База не нужна</b> — турниры даёт заглушка.
+У горизонтальных видов показан <b>первый экран</b>, у остальных — <b>карточки</b>.</p>
+
+<div class="кнопки">
+  <a href="/maket/turniry-zamer.html" target="_blank">Открыть во весь экран</a>
+  <a href="/maket/turniry-slot.html" target="_blank">Варианты слота</a>
+  <a href="/maket/turniry-maket.html" target="_blank">Макет «было / стало»</a>
+</div>
+
+<h2 class="группа">ГОРИЗОНТАЛЬНЫЕ — про них и был вопрос</h2>
+<div class="ряд" id="ряд-бок"></div>
+
+<h2 class="группа">ВЕРТИКАЛЬНЫЕ И ДЕСКТОП</h2>
+<div class="ряд" id="ряд-прямо"></div>
+
+<table>
+  <tr><th>вид</th><th>экран</th><th>обложка</th><th>доля экрана</th><th>раскладка категории</th></tr>
+  <tr><td>Телефон боком</td><td>844 × 390</td><td><b>226</b></td><td>58%</td><td>лента, листается вбок</td></tr>
+  <tr><td>Планшет боком</td><td>1024 × 768</td><td>460</td><td>60%</td><td>три слота сбоку</td></tr>
+  <tr><td>Телефон</td><td>390 × 844</td><td>275</td><td>33%</td><td>лента, листается вбок</td></tr>
+  <tr><td>Планшет</td><td>768 × 1024</td><td>460</td><td>45%</td><td>четыре слота, два ряда снизу</td></tr>
+  <tr><td>Десктоп</td><td>1280 × 900</td><td>460</td><td>51%</td><td>три слота сбоку</td></tr>
+</table>
+
+<p class="низ"><b>Что изменилось на телефоне боком.</b> Было 460 при экране 390 — фотография
+занимала весь первый экран с запасом, заголовка и цифр видно не было. Стало 226. Решено так же,
+как на главной: <b>min-height уходит в 0</b>, рост даёт содержимое, а воздух и шаг между группами
+крутятся двумя ручками — 40→24 и 40→16, как <code>--hero-vozduh</code> и <code>--hero-shag</code>.
+Кегли не трогали: лестница одна на все виды. Категория на низком горизонтальном идёт лентой,
+а не четырьмя слотами, — правило продукта «планшет стоя делится поворотом, а не третьей шириной».</p>
+
+<script>
+var ВИДЫ = [
+    { имя: 'ТЕЛЕФОН БОКОМ',  под: '844 × 390 · обложка 226 из 390',  ш: 844,  в: 390,  м: 0.62, где: 'верх', ряд: 'ряд-бок' },
+    { имя: 'ПЛАНШЕТ БОКОМ',  под: '1024 × 768 · обложка 460 из 768', ш: 1024, в: 768,  м: 0.50, где: 'верх', ряд: 'ряд-бок' },
+    { имя: 'ТЕЛЕФОН',        под: '390 × 844 · лента',               ш: 390,  в: 844,  м: 0.52, где: 'карточки', ряд: 'ряд-прямо' },
+    { имя: 'ПЛАНШЕТ',        под: '768 × 1024 · четыре слота',       ш: 768,  в: 1024, м: 0.40, где: 'карточки', ряд: 'ряд-прямо' },
+    { имя: 'ДЕСКТОП',        под: '1280 × 900 · три слота',          ш: 1280, в: 900,  м: 0.40, где: 'карточки', ряд: 'ряд-прямо' }
+];
+
+ВИДЫ.forEach(function (в, i) {
+    var box = document.createElement('div'); box.className = 'вид';
+    box.innerHTML = '<h3>' + в.имя + '</h3><p>' + в.под + '</p>';
+    var окно = document.createElement('div'); окно.className = 'окно';
+    окно.style.width  = Math.round(в.ш * в.м) + 'px';
+    окно.style.height = Math.round(в.в * в.м) + 'px';
+    var f = document.createElement('iframe');
+    f.setAttribute('width', в.ш); f.setAttribute('height', в.в);
+    f.style.width = в.ш + 'px'; f.style.height = в.в + 'px';
+    f.style.transform = 'scale(' + в.м + ')';
+    окно.appendChild(f); box.appendChild(окно);
+    document.getElementById(в.ряд).appendChild(box);
+
+    /* Адрес даём ПОСЛЕ того, как рамка встала в свой размер: иначе страница
+       успевает решить, что она узкая, и рисует ленту на десктопе */
+    setTimeout(function () { f.src = '/maket/turniry-zamer.html?v=' + Date.now(); }, 200 + i * 220);
+
+    f.addEventListener('load', function () {
+        if (в.где !== 'карточки') return;
+        setTimeout(function () {
+            var б = f.contentDocument.querySelector('.to-category-block');
+            if (б) f.contentWindow.scrollTo(0, б.offsetTop - 8);
+        }, 2600);
+    });
+});
+</script>
+</body>
+</html>

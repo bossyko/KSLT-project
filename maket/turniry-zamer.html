@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>КСЛТ — стенд замера страницы турниров</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../css/tokens.css?v=21">
+<link rel="stylesheet" href="../css/style.css?v=376">
+<link rel="stylesheet" href="../css/tournaments-overview.css?v=90">
+<style>
+/* ЛЕСА СТЕНДА, а не страницы: шапка нужна только чтобы прилипание поиска
+   имело подо что вставать. Своих правил на .to-* здесь нет ни одного. */
+.stend-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--pad-x);background:#0a0a0a;border-bottom:1px solid var(--border-subtle);
+  z-index:100;font-weight:700;letter-spacing:.08em}
+.stend-header span{font-weight:400;font-size:var(--fs-xs);color:var(--text-muted)}
+body{padding-top:var(--header-h)}
+</style>
+</head>
+<body>
+<!--
+  СТЕНД ЗАМЕРА СТРАНИЦЫ ТУРНИРОВ.
+  Живой базы не трогает: window.supabaseClient подменён заглушкой, все
+  запросы возвращают заготовленные строки, записи в базу нет. Поэтому здесь
+  МОЖНО нажимать кнопки — обход делается тут, а не на боевой странице.
+  Разметку и краски рисует НАСТОЯЩИЙ js/tournaments-overview.js и
+  НАСТОЯЩИЙ css/tournaments-overview.css.
+  Содержимое КРАЙНЕЕ: название в 76 знаков, категория без турниров,
+  категория с пятью, все четыре статуса.
+-->
+<div class="stend-header">КСЛТ <span id="stendVid">вид определяется…</span></div>
+
+<main>
+    <section class="to-hero" id="overviewHero"></section>
+
+    <div class="to-search-wrap" id="overviewSearchWrap">
+        <div class="to-search-field">
+                <input type="text" class="to-search-input" id="overviewSearch" aria-label="Поиск турнира" placeholder="Поиск турнира..." autocomplete="off">
+                <svg class="to-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+    </div>
+
+    <section class="to-categories" id="overviewCategories"></section>
+</main>
+
+<script>
+/* ЗАГЛУШКА БАЗЫ. Цепочка .from().select().order().in().eq() возвращает саму
+   себя и разрешается в { data, error } — ровно то, что ждёт страница. */
+(function () {
+    'use strict';
+
+    var сегодня = new Date();
+    function сдвиг(дней) {
+        var d = new Date(сегодня.getTime() + дней * 86400000);
+        return d.toISOString().slice(0, 10);
+    }
+
+    var КАТЕГОРИИ = [
+        { id: 'promasters', name: 'Pro-Masters', name_en: 'Pro-Masters', name_kg: 'Pro-Masters', sort_order: 6, is_rating: true },
+        { id: 'masters',    name: 'Masters',     name_en: 'Masters',     name_kg: 'Masters',     sort_order: 5, is_rating: true },
+        { id: 'tour',       name: 'Tour',        name_en: 'Tour',        name_kg: 'Tour',        sort_order: 4, is_rating: true },
+        { id: 'challenger', name: 'Challengers', name_en: 'Challengers', name_kg: 'Challengers', sort_order: 3, is_rating: true },
+        { id: 'futures',    name: 'Futures',     name_en: 'Futures',     name_kg: 'Futures',     sort_order: 2, is_rating: true },
+        { id: 'friendly',   name: 'Friendly Weekend', name_en: 'Friendly Weekend', name_kg: 'Friendly Weekend', sort_order: 1, is_rating: false }
+    ];
+
+    var н = 0;
+    function турнир(о) {
+        н += 1;
+        return Object.assign({
+            id: 'stend-' + н,
+            title: 'Турнир',
+            title_en: null,
+            title_kg: null,
+            category_id: 'masters',
+            status: 'upcoming',
+            date_start: сдвиг(14),
+            date_end: сдвиг(15),
+            start_time: '10:00',
+            location: '«Ала-Тоо», Бишкек',
+            format: 'singles',
+            gender: null,
+            max_participants: 16,
+            prize_fund: null,
+            registration_start: сдвиг(-7),
+            registration_end: сдвиг(7),
+            fee_member: 500,
+            fee_guest: 800,
+            image: null,
+            published_at: сдвиг(-30)
+        }, о);
+    }
+
+    /* Pro-Masters — крайний случай: идёт матч, длинное название, полный столб */
+    var ТУРНИРЫ = [
+        турнир({ category_id: 'promasters', status: 'ongoing',
+                 title: 'Осенний открытый чемпионат Бишкека по большому теннису, мужской одиночный разряд',
+                 date_start: сдвиг(-2), date_end: сдвиг(5), max_participants: 32,
+                 prize_fund: '20000', location: 'корты «Ала-Тоо», Бишкек' }),
+        турнир({ category_id: 'promasters', status: 'registration_open',
+                 title: 'Кубок КСЛТ · октябрь', date_start: сдвиг(12), registration_end: сдвиг(3) }),
+        турнир({ category_id: 'promasters', status: 'upcoming',
+                 title: 'Зимний турнир Pro-Masters', date_start: сдвиг(44), registration_start: сдвиг(25) }),
+        турнир({ category_id: 'promasters', status: 'completed',
+                 title: 'Летний этап Pro-Masters', date_start: сдвиг(-40), date_end: сдвиг(-39) }),
+        турнир({ category_id: 'promasters', status: 'completed',
+                 title: 'Весенний этап Pro-Masters', date_start: сдвиг(-120), date_end: сдвиг(-119) }),
+
+        /* Masters — регистрация и один «скоро» */
+        турнир({ category_id: 'masters', status: 'registration_open',
+                 title: 'Кубок сентября', date_start: сдвиг(2), registration_end: сдвиг(1),
+                 format: 'doubles', location: '«Теннис Парк», Бишкек' }),
+        турнир({ category_id: 'masters', status: 'upcoming',
+                 title: 'Октябрьский этап', date_start: сдвиг(16) }),
+
+        /* Tour — только завершённые, столб забит доверху */
+        турнир({ category_id: 'tour', status: 'completed', title: 'Летний этап Tour', date_start: сдвиг(-33) }),
+        турнир({ category_id: 'tour', status: 'completed', title: 'Июльский этап', date_start: сдвиг(-75) }),
+        турнир({ category_id: 'tour', status: 'completed', title: 'Майский этап', date_start: сдвиг(-131) }),
+        турнир({ category_id: 'tour', status: 'completed', title: 'Апрельский этап', date_start: сдвиг(-173) }),
+
+        /* Challengers — ОДИН турнир: столб пустой, крайний случай */
+        турнир({ category_id: 'challenger', status: 'upcoming',
+                 title: 'Осенний этап Challengers', date_start: сдвиг(22), registration_start: сдвиг(5) }),
+
+        /* Futures — регистрация плюс завершённый */
+        турнир({ category_id: 'futures', status: 'registration_open',
+                 title: 'Дебют · Futures', date_start: сдвиг(8), registration_end: сдвиг(5), gender: 'women' }),
+        турнир({ category_id: 'futures', status: 'completed', title: 'Дебют · август', date_start: сдвиг(-48) })
+
+        /* Friendly Weekend — НИ ОДНОГО турнира: пустая категория, крайний случай */
+    ];
+
+    var ЗАЯВКИ = [];
+    ТУРНИРЫ.forEach(function (т, i) {
+        var мест = (i % 5) + 4;
+        for (var k = 0; k < мест; k++) ЗАЯВКИ.push({ tournament_id: т.id, status: 'approved' });
+    });
+
+    function ответ(данные) {
+        var цепочка = {
+            data: данные,
+            error: null,
+            select: function () { return цепочка; },
+            order: function () { return цепочка; },
+            eq: function () { return цепочка; },
+            in: function () { return цепочка; },
+            limit: function () { return цепочка; },
+            single: function () { return Promise.resolve({ data: данные[0] || null, error: null }); },
+            maybeSingle: function () { return Promise.resolve({ data: данные[0] || null, error: null }); },
+            then: function (f, r) { return Promise.resolve({ data: данные, error: null }).then(f, r); }
+        };
+        return цепочка;
+    }
+
+    window.supabaseClient = {
+        from: function (таблица) {
+            if (таблица === 'categories') return ответ(КАТЕГОРИИ);
+            if (таблица === 'tournaments') return ответ(ТУРНИРЫ);
+            if (таблица === 'tournament_registrations') return ответ(ЗАЯВКИ);
+            return ответ([]);
+        },
+        rpc: function (имя) {
+            console.log('[стенд] rpc в базу не ушёл:', имя);
+            return Promise.resolve({ data: null, error: null });
+        },
+        auth: {
+            getUser: function () { return Promise.resolve({ data: { user: null }, error: null }); },
+            getSession: function () { return Promise.resolve({ data: { session: null }, error: null }); },
+            onAuthStateChange: function () { return { data: { subscription: { unsubscribe: function () {} } } }; }
+        }
+    };
+})();
+</script>
+
+<script src="../js/tournament-slots.js?v=5"></script>
+<script src="../js/tournament-card.js?v=6"></script>
+<script src="../js/tournament-featured.js?v=5"></script>
+<script src="../js/tournaments-overview.js?v=36"></script>
+<script>
+/* ПОДПИСЬ ВИДА — прямо на экране, а не в голове у того, кто смотрит.
+   Границы наши: 640 и 992. Поворот считается отдельно, не третьей шириной. */
+(function () {
+    var э = document.getElementById('stendVid');
+    /* Вид определяется НЕ ТОЛЬКО ШИРИНОЙ. Телефон боком — это 844 в
+       ширину и 390 в высоту: по ширине планшет, по существу телефон.
+       Граница та же, что в коде страницы: высота до 500 и поворот */
+    /* Честнее называть РАСКЛАДКУ, а не устройство: по одной ширине
+       устройство не угадать. 1024x768 — это планшет боком, но раскладку
+       он получает десктопную, и подпись должна говорить именно это */
+    function раскладка(ш, в) {
+        if (в <= 500 && ш >= в) return 'ЛЕНТА (низкий горизонтальный)';
+        if (ш <= 640) return 'ЛЕНТА (узкий)';
+        if (ш < 992) return 'ЧЕТЫРЕ СЛОТА (два ряда снизу)';
+        return 'ТРИ СЛОТА (столб сбоку)';
+    }
+    function обновить() {
+        var ш = window.innerWidth, в = window.innerHeight;
+        э.textContent = ш + '×' + в + ' · ' + (ш >= в ? 'горизонтально' : 'вертикально')
+            + ' · ' + раскладка(ш, в) + ' · база заглушена';
+    }
+    обновить();
+    window.addEventListener('resize', обновить);
+})();
+</script>
+<script>
+/* ВАРИАНТЫ СЛОТА — только для сравнения глазами: ?slot=a | b | v
+   Страница рисуется настоящим кодом, а стенд лишь крутит ступень и
+   убирает третий слот у варианта Б. В боевом коде ничего этого нет. */
+(function () {
+    var вар = (new URLSearchParams(location.search).get('slot') || '').toLowerCase();
+    if (!вар) return;
+    var к = document.documentElement.style;
+    var зазор = 24;
+    function примени() {
+        var слот = (вар === 'v') ? 152 : 224;
+        var сколько = (вар === 'b') ? 2 : 3;
+        document.querySelectorAll('.to-card-grid').forEach(function (g) {
+            g.style.setProperty('--to-slot', слот + 'px');
+            g.style.setProperty('--to-featured-h', (слот * сколько + зазор * (сколько - 1)) + 'px');
+            var стопка = g.querySelector('.to-side-stack');
+            if (!стопка) return;
+            стопка.style.gridTemplateRows = 'repeat(' + сколько + ', ' + слот + 'px)';
+            while (стопка.children.length > сколько) стопка.removeChild(стопка.lastElementChild);
+        });
+        if (вар === 'v') {
+            document.querySelectorAll('.to-side-stack .to-compact-regbtn, .to-side-stack .btn-register')
+                .forEach(function (b) { b.style.display = 'none'; });
+        }
+        var имя = { a: 'А · три слота по 224', b: 'Б · два слота по 224', v: 'В · три слота по 152, без кнопки в строке' }[вар];
+        var э = document.getElementById('stendVid');
+        if (э && имя && э.dataset.вариант !== вар) {
+            э.dataset.вариант = вар;
+            э.textContent = имя + ' · ' + э.textContent;
+        }
+    }
+    setTimeout(примени, 900);
+    setTimeout(примени, 2200);
+})();
+</script>
+</body>
+</html>
