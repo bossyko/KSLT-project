@@ -74,6 +74,7 @@
         heroDesc: 'From beginner to professional level',
         heroBadge: 'KSLT',
         viewAll: 'All tournaments',
+        slotEmpty: 'the next tournament of this category will appear here',
         details: 'Details',
         register: 'Register',
         empty: 'No upcoming tournaments',
@@ -93,6 +94,7 @@
         heroDesc: 'Башталгычтан профессионал деңгээлге чейин',
         heroBadge: 'KSLT',
         viewAll: 'Бардык мелдештер',
+        slotEmpty: 'бул категориянын кийинки мелдеши ушул жерде пайда болот',
         details: 'Толугураак',
         register: 'Каттоо',
         empty: 'Алдыдагы мелдештер жок',
@@ -112,6 +114,7 @@
         heroDesc: 'От начального до профессионального уровня',
         heroBadge: 'KSLT',
         viewAll: 'Все турниры',
+        slotEmpty: 'здесь появится следующий турнир категории',
         details: 'Подробнее',
         register: 'Регистрация',
         empty: 'Нет предстоящих турниров',
@@ -489,10 +492,13 @@
             _allGrouped[key] = map[key].slice();
         });
 
-        // Limit to 4 per category for default view (show all including past)
+        // ПЯТЬ, А НЕ ЧЕТЫРЕ: столько мест на самом широком из видов —
+        // крупная карточка плюс четыре слота на планшете. При четырёх один
+        // слот там оставался пустым ВСЕГДА, потому что данных не было
+        var МЕСТ_В_КАТЕГОРИИ = 5;
         var sliced = {};
         Object.keys(map).forEach(function(key) {
-            sliced[key] = map[key].slice(0, 4);
+            sliced[key] = map[key].slice(0, МЕСТ_В_КАТЕГОРИИ);
         });
 
         return sliced;
@@ -530,15 +536,46 @@
      *
      * Модулю нужна запись из базы, а не наши подписи, — она лежит в _row.
      */
-    var узкийЭкран = window.matchMedia ? window.matchMedia('(max-width: 768px)') : null;
+    // ГРАНИЦА ОДНОЙ КОЛОНКИ — 640, А НЕ 768. Две ширины на весь продукт,
+    // 640 и 992; 768 был третьей и уводил планшет в телефонную раскладку
+    // ...и НИЗКИЙ ГОРИЗОНТАЛЬНЫЙ ЭКРАН — это тоже телефон, хотя по ширине
+    // он 844. Замерено 27.09: на 844x390 категория уходила в планшетную
+    // ветку и разворачивалась на 963 — две с половиной высоты экрана.
+    // Правило продукта: планшет стоя делится ПОВОРОТОМ, а не третьей шириной
+    var узкийЭкран = window.matchMedia
+        ? window.matchMedia('(max-width: 640px), (max-height: 500px) and (orientation: landscape)')
+        : null;
 
     function телефон() {
         return !!(узкийЭкран && узкийЭкран.matches && window.KSLT_TCARD);
     }
 
+    /**
+     * Сколько боковых слотов рисуем.
+     *
+     * Число уменьшается вместе с шириной, и ни на одном виде не остаётся
+     * НЕПОЛНОГО РЯДА: на десктопе столб стоит сбоку колонкой — три; выше
+     * 640 он уходит под карточку в две колонки — значит два, иначе ряд
+     * из двух и ряд из одного; на телефоне карточки идут лентой — одна
+     * рядом с крупной, всего две.
+     *
+     * Решение Кости 27.09: десктоп три, планшет четыре (два целых ряда
+     * по два), телефон — лента до шести карточек.
+     */
+    function слотов() {
+        if (!window.matchMedia) return 3;
+        if (window.matchMedia('(min-width: 992px)').matches) return 3;
+        // Выше 640 столб уходит ПОД карточку в две колонки: четыре слота —
+        // это два целых ряда. Три дали бы ряд из двух и ряд из одного
+        if (window.matchMedia('(min-width: 641px)').matches) return 4;
+        return 1;
+    }
+
     function карточкиТелефона(items, фонКатегории) {
         var html = '<div class="tournaments-grid to-phone-cards">';
-        items.slice(0, 4).forEach(function(it) {
+        // ЛЕНТА ДО ШЕСТИ. Было четыре и сеткой в два ряда; решение Кости
+        // 27.09 — горизонтальная лента со снапом, как у телефона боком
+        items.slice(0, 6).forEach(function(it) {
             if (!it._row) return;
             // У части турниров своей афиши нет — на широком экране для них
             // берётся фоновая картинка категории. Общий модуль про этот
@@ -563,11 +600,20 @@
         // Разряды с живыми турнирами идут первыми: человек заходит сюда, чтобы
         // записаться, и не должен пролистывать архив в поисках открытой
         // регистрации. Внутри группы порядок разрядов прежний
-        var живой = function(ключ) {
-            return (grouped[ключ] || []).some(function(t) { return t.status !== 'past'; });
+        // ТРИ УРОВНЯ, А НЕ ДВА. Было: «есть хоть один не-прошедший» вперёд —
+        // и категория с ИДУЩИМ турниром не отличалась от категории, где
+        // только «скоро». Решение Кости 27.09: сначала та, где играют прямо
+        // сейчас; потом та, где есть предстоящие; потом всё остальное.
+        // Внутри уровня порядок категорий прежний, из базы
+        var вес = function(ключ) {
+            var список = grouped[ключ] || [];
+            // 'ongoing' — так называет идущий турнир mapStatus (:519)
+            if (список.some(function(t) { return t.status === 'ongoing'; })) return 2;
+            if (список.some(function(t) { return t.status !== 'past'; })) return 1;
+            return 0;
         };
         var порядок = CATEGORIES.slice().sort(function(a, b) {
-            return (живой(b.key) ? 1 : 0) - (живой(a.key) ? 1 : 0);
+            return вес(b.key) - вес(a.key);
         });
 
         порядок.forEach(function(cat) {
@@ -592,13 +638,18 @@
                 html += '<div class="to-card-grid">';
                 var featuredBg = items[0].image || bgImage;
                 html += renderFeatured(items[0], featuredBg, cat.key);
-                if (items.length > 1) {
-                    html += '<div class="to-side-stack">';
-                    for (var i = 1; i < items.length; i++) {
-                        html += renderCompact(items[i], cat.key, i);
-                    }
-                    html += '</div>';
+                // ТРИ СЛОТА ВСЕГДА, и пустой ГОВОРИТ, а не молчит.
+                // Замерено 26.09 до правки: столб был то из одного слота,
+                // то из трёх, и крупная карточка каждый раз подстраивалась
+                // под него — 420 · 185 · 191 · 160 в одной странице
+                var сколько = слотов();
+                html += '<div class="to-side-stack">';
+                for (var i = 1; i <= сколько; i++) {
+                    html += items[i]
+                        ? renderCompact(items[i], cat.key, i)
+                        : '<div class="to-slot-empty">' + L.slotEmpty + '</div>';
                 }
+                html += '</div>';
                 html += '</div>';
             }
 
