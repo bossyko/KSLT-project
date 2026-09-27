@@ -21,7 +21,14 @@ const { defineConfig } = require('@playwright/test');
  */
 module.exports = defineConfig({
     testDir: './tests/e2e/design-system',
-    testMatch: ['**/44-turniry.spec.js'],
+    /* ТОЛЬКО ТЕ, ЧТО ИДУТ ПО СТЕНДАМ.
+       43 — судейский экран по maket/sudya-zamer.html; одна его проверка
+       открывает боевую страницу, но читает только мета-тег зума.
+       44 — турниры по maket/turniry-zamer.html.
+       42 СЮДА НЕ ВХОДИТ НАРОЧНО: он открывает боевую страницу матча с
+       настоящим идентификатором и ждёт данные из базы. Подменить их
+       заглушкой значило бы проверять выдумку вместо правды. */
+    testMatch: ['**/43-sudya.spec.js', '**/44-turniry.spec.js'],
     timeout: 30000,
     expect: { timeout: 10000 },
     fullyParallel: true,
