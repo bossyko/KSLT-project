@@ -2935,11 +2935,6 @@
                         external_gender: extGender,
                         review_reasons: причиныСостава(tournament, extGender, null),
                         gender_confirmed: составСошёлся(tournament, extGender, null),
-                        /* РУЧНОЕ ДОБАВЛЕНИЕ САЖАЕТ НА МЕСТО КЛУБА. Резерв на
-                           то и держат: «часть мест придерживают под запись
-                           без сайта» (tournament-slots.js:16). Очередь такие
-                           места не трогает, и в счёт онлайна они не идут */
-                        seat_pool: 'reserved',
                         status: 'approved'
                     };
 
@@ -2986,18 +2981,31 @@
                         }
                     }
 
-                    /* Ручное добавление садится на МЕСТО КЛУБА, значит и
-                       предел у него свой — размер резерва, а не вся сетка.
-                       Считать по всей сетке значило бы разрешить админу
-                       занять места, отданные очереди. Резерв не задан —
-                       предела нет, как было. Сверх предела заявка не
-                       пропадает, а встаёт в лист ожидания */
+                    /* КУДА САДИТСЯ УЧАСТНИК, ВНЕСЁННЫЙ РУКАМИ.
+                       Сначала на место клуба — резерв на то и держат: «часть
+                       мест придерживают под запись без сайта»
+                       (tournament-slots.js:16). Места клуба кончились или их
+                       нет вовсе — садится на онлайн-место, если оно свободно.
+                       Нет и его — в лист ожидания.
+                       РЕЗЕРВ ВХОДИТ В РАЗМЕР СЕТКИ (правило Кости), поэтому
+                       в сумме основа никогда не превышает max_participants.
+                       Считать ручное добавление только по резерву было бы
+                       ошибкой: при резерве 0 предел вышел бы нулевым, то есть
+                       безграничным, и админ набил бы сетку сверх размера. */
+                    var занятые = registrations.filter(function(r) {
+                        return r.status === 'approved' || r.status === 'pending' || r.status === 'draw';
+                    });
                     var местКлуба = Number(tournament.reserved_spots) || 0;
-                    var заняторезерв = registrations.filter(function(r) {
-                        return r.seat_pool === 'reserved' &&
-                            (r.status === 'approved' || r.status === 'pending' || r.status === 'draw');
-                    }).length;
-                    var вСетку = !местКлуба || заняторезерв < местКлуба;
+                    var заняторезерв = занятые.filter(function(r) { return r.seat_pool === 'reserved'; }).length;
+                    var занятоОнлайн = занятые.filter(function(r) { return r.seat_pool !== 'reserved'; }).length;
+                    var сетка = Number(tournament.max_participants) || 0;
+                    var местОнлайн = сетка > 0 ? Math.max(0, сетка - местКлуба) : null;
+
+                    var запас = заняторезерв < местКлуба ? 'reserved'
+                              : (местОнлайн === null || занятоОнлайн < местОнлайн) ? 'online'
+                              : null;
+                    insertData.seat_pool = запас || 'online';
+                    var вСетку = запас !== null;
                     if (!вСетку) insertData.status = 'waitlist';
 
                     var insRes = await A.client.from('tournament_registrations').insert(insertData);
@@ -3808,6 +3816,17 @@
 
         // Add buttons will be placed in the Main Draw header row below
 
+        /* КНОПКИ ДОБАВЛЕНИЯ СТОЯТ ВЫШЕ ПУСТОГО СОСТОЯНИЯ.
+           Они жили внутри ветки «заявки есть», и в новом турнире менеджер
+           видел только «Заявок пока нет» — внести первого участника руками
+           было нечем. Курица и яйцо: чтобы добавить, нужна была хотя бы
+           одна заявка. Находка Кости 28.09. */
+        html += заморожено ? '' :
+            '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">' +
+            '<button id="adBrkAddFromDb" style="padding:6px 14px;border:1px solid var(--accent);border-radius:6px;background:rgba(204,255,0,0.1);color:var(--accent);cursor:pointer;font-size:0.85rem;font-weight:600;">' + L.regAddFromDb + '</button>' +
+            '<button id="adBrkAddExternal" style="padding:6px 14px;border:1px solid var(--accent);border-radius:6px;background:rgba(204,255,0,0.1);color:var(--accent);cursor:pointer;font-size:0.85rem;font-weight:600;">' + L.regAddExternal + '</button>' +
+        '</div>';
+
         if (mainDraw.length === 0 && waitlistRegs.length === 0 && rejected.length === 0 && withdrawn.length === 0 && blocked.length === 0) {
             html += '<div class="ad-empty-state"><p>' + L.noRegistrations + '</p></div>';
         } else {
@@ -3919,11 +3938,6 @@
                 badgeText += ' (' + reservedSpots + ' ' + (isEn ? 'reserved' : 'резерв') + ')';
             }
             html += '<h3 class="ad-reg-section-title">' + L.regMainDraw + ' <span class="ad-badge">' + badgeText + '</span></h3>';
-            html += заморожено ? '' :
-                '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">' +
-                '<button id="adBrkAddFromDb" style="padding:6px 14px;border:1px solid var(--accent);border-radius:6px;background:rgba(204,255,0,0.1);color:var(--accent);cursor:pointer;font-size:0.85rem;font-weight:600;">' + L.regAddFromDb + '</button>' +
-                '<button id="adBrkAddExternal" style="padding:6px 14px;border:1px solid var(--accent);border-radius:6px;background:rgba(204,255,0,0.1);color:var(--accent);cursor:pointer;font-size:0.85rem;font-weight:600;">' + L.regAddExternal + '</button>' +
-            '</div>';
             if (mainDraw.length > 0) {
                 html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                     regTableHead.replace('GRP', 'main') +
