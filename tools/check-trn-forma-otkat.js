@@ -1,0 +1,161 @@
+/**
+ * ПРУВЕР ЗАМОРОЗКИ ВКЛАДКИ «РЕДАКТИРОВАНИЕ».
+ *
+ * Берёт КОПИЮ файлов, возвращает по одному прежнему значению и требует,
+ * чтобы упало ИМЕННО то правило, которое за это отвечает.
+ *
+ * Откаты — ровно то, что жило в коде до 28.09: инлайн-сетки вместо
+ * готовых классов, высота кнопки из полей, слой цели нажатия копией,
+ * скрытие полей в разметке, уровень турнира у дружеского турнира.
+ *
+ *   node tools/check-trn-forma-otkat.js
+ */
+const fs = require('fs');
+const path = require('path');
+const { execFileSync } = require('child_process');
+const os = require('os');
+
+const КОРЕНЬ = path.join(__dirname, '..');
+const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-trnforma-'));
+
+['js', 'css', 'tools', 'pages'].forEach(д =>
+  fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
+
+const ОТКАТЫ = [
+  /* ─── сетка формы ─── */
+  ['js/admin/sections/tournaments.js',
+   "'<div class=\"ad-field-row ad-field-row-4\">' +\n                    '<div class=\"ad-field\">' +\n                        '<label class=\"ad-field-label\">' + L.trnCategory",
+   "'<div style=\"display:grid;grid-template-columns:repeat(4,1fr);gap:12px;\">' +\n                    '<div class=\"ad-field\">' +\n                        '<label class=\"ad-field-label\">' + L.trnCategory",
+   'сетка формы одна: инлайн-гридов в секции нет'],
+
+  ['js/admin/sections/tournaments.js',
+   "'<div class=\"ad-field-row ad-field-flow\">' +\n                    '<div class=\"ad-field ad-pole-srednee\" id=\"adTrnBracketTypeWrap\">'",
+   "'<div class=\"ad-field-row ad-field-row-4\">' +\n                    '<div class=\"ad-field ad-pole-srednee\" id=\"adTrnBracketTypeWrap\">'",
+   'ряд полей сетки идёт потоком, а не колонками'],
+
+  /* ─── ширина поля ─── */
+  ['css/admin.css',
+   '.ad-pole-uzkoe { --pole-shirina: 160px; }',
+   '.ad-pole-uzkoe { --pole-shirina: 150px; }',
+   'ступени ширины стоят на шкале восьмёрки'],
+
+  ['css/admin.css',
+   '.ad-pole-shirokoe { --pole-shirina: 360px; }',
+   '.ad-pole-shirokoe-net { --pole-shirina: 360px; }',
+   'ступени ширины поля заведены в компоненте'],
+
+  /* ─── кнопки ─── */
+  ['css/admin.css',
+   '    height: var(--ad-btn-h, var(--btn-h-md));\n    padding: 0 24px;',
+   '    padding: 10px 24px;',
+   'высота кнопки — свойством, а не полями'],
+
+  ['css/admin.css',
+   '.ad-btn-sm { --ad-btn-h: var(--btn-h-sm); padding: 0 var(--space-sm); }',
+   '.ad-btn-sm { --ad-btn-h: 36px; padding: 0 var(--space-sm); }',
+   'ступени кнопки берут переменные, а не числа'],
+
+  ['css/admin.css',
+   '    top: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);\n    bottom: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);',
+   '    top: -4px;\n    bottom: -4px;',
+   'цель нажатия считается из ступени, а не зашита числом'],
+
+  ['css/admin.css',
+   '.ad-image-upload-remove { --ad-cel-h: var(--btn-h-xs); }',
+   '.ad-image-upload-remove { --ad-cel-h-net: var(--btn-h-xs); }',
+   'крестик удаления афиши знает свою ступень xs'],
+
+  ['css/admin.css',
+   '.ad-btn:focus-visible {',
+   '.ad-btn-net:focus-visible {',
+   'кольцо фокуса стоит на базовом классе кнопки'],
+
+  /* ─── уровень и очки ─── */
+  ['js/admin/sections/tournaments.js',
+   'var безОчков = isDbl || дружескийТурнир();',
+   'var безОчков = isDbl;',
+   'уровень турнира скрыт там, где очков не дают'],
+
+  ['js/admin/sections/tournaments.js',
+   "if (безОчков && lvlField) lvlField.value = '';",
+   "if (безОчков && lvlField) lvlField.title = '';",
+   'скрытый уровень обнуляется, а не уезжает в базу'],
+
+  ['js/admin/sections/tournaments.js',
+   "(item && A.безОчковЗаКатегорию(item.category_id) ? '' :",
+   "(item && item.category_id === 'friendly' ? '' :",
+   '«дружеский» определён в одном месте'],
+
+  ['js/admin/sections/tournaments.js',
+   "document.getElementById('adTrnCat').addEventListener('change', toggleFormatDependentFields);",
+   "document.getElementById('adTrnCat').addEventListener('input', function() {});",
+   'смена категории перерисовывает форму'],
+
+  /* ─── умолчание — свойство данных ─── */
+  ['js/admin/sections/tournaments.js',
+   "'<div class=\"ad-field ad-pole-uzkoe\" id=\"adTrnGroupCountWrap\">'",
+   "'<div class=\"ad-field ad-pole-uzkoe\" id=\"adTrnGroupCountWrap\" style=\"display:none;\">'",
+   'скрытие полей сетки не зашито в разметку'],
+
+  ['js/admin/sections/tournaments.js',
+   "'<div id=\"adTrnDrawHint\" class=\"ad-sched-note ad-sched-note-wide\"></div>'",
+   "'<div id=\"adTrnDrawHint\" class=\"ad-sched-note ad-sched-note-wide\" style=\"margin-top:-4px;\"></div>'",
+   'подсказка расчёта без инлайн-стиля'],
+
+  ['css/admin.css',
+   '    padding: 12px 16px;\n    margin-bottom: 16px;',
+   '    padding: 10px 14px;\n    margin-bottom: 14px;',
+   'отступы подсказки расчёта со шкалы'],
+
+  /* ─── версии ─── */
+  ['pages/admin.html',
+   'sections/tournaments.js?v=49',
+   'sections/tournaments.js?v=45',
+   'версии подняты — иначе браузер отдаст старое из кеша']
+];
+
+function прогон() {
+  try {
+    execFileSync('node', [path.join(ВРЕМ, 'tools/check-trn-forma.js')], { cwd: ВРЕМ, encoding: 'utf8' });
+    return [];
+  } catch (e) {
+    const текст = (e.stdout || '') + (e.stderr || '');
+    return текст.split('\n').filter(с => /^\s*·\s/.test(с))
+                .map(с => с.replace(/^\s*·\s*/, '').trim());
+  }
+}
+
+let плохо = 0;
+console.log('');
+ОТКАТЫ.forEach(([ф, было, стало, ждём], i) => {
+  const путь = path.join(ВРЕМ, ф);
+  const ориг = fs.readFileSync(путь, 'utf8');
+  const n = ориг.split(было).length - 1;
+  if (n !== 1) {
+    console.log('  ✗ откат ' + (i + 1) + ' (' + ф + '): якорь встречается ' + n + ' раз');
+    console.log('    ' + было.replace(/\n/g, ' ⏎ ').slice(0, 90));
+    плохо++;
+    return;
+  }
+  fs.writeFileSync(путь, ориг.replace(было, стало));
+  const упали = прогон();
+  fs.writeFileSync(путь, ориг);
+  if (упали.indexOf(ждём) === -1) {
+    console.log('  ✗ откат ' + (i + 1) + ': ждали «' + ждём + '»');
+    console.log('    упало: ' + (упали.length ? упали.join(' · ') : '— ничего —'));
+    плохо++;
+  } else {
+    console.log('  ок  ' + String(i + 1).padStart(2) + '  ' + ждём + (упали.length > 1 ? '   (+ ещё ' + (упали.length - 1) + ')' : ''));
+  }
+});
+
+fs.rmSync(ВРЕМ, { recursive: true, force: true });
+console.log('');
+if (плохо === 0) {
+  console.log('  ок      все ' + ОТКАТЫ.length + ' откатов доказали свои правила');
+  console.log('');
+  process.exit(0);
+}
+console.log('  НЕ ТАК  прувер: ' + плохо + ' откатов из ' + ОТКАТЫ.length + ' не доказали правило');
+console.log('');
+process.exit(1);

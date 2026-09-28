@@ -744,7 +744,7 @@
                     '<button class="ad-tab' + (hasBracket ? '' : ' disabled') + '"' + (hasBracket ? ' data-trn-nav="bracket"' : '') + ' ' + (hasBracket ? '' : 'disabled') + '>' + L.trnTabBracket + '</button>' +
                     '<button class="ad-tab' + (hasBracket ? '' : ' disabled') + '"' + (hasBracket ? ' data-trn-nav="schedule"' : '') + ' ' + (hasBracket ? '' : 'disabled') + '>' + L.trnTabSchedule + '</button>' +
                     // Friendly не начисляет очки — вкладка «Результаты» ему не нужна
-                    (item && item.category_id === 'friendly' ? '' :
+                    (item && A.безОчковЗаКатегорию(item.category_id) ? '' :
                     '<button class="ad-tab' + (isExisting ? '' : ' disabled') + '"' + (isExisting ? ' data-trn-nav="points"' : '') + ' ' + (isExisting ? '' : 'disabled') + '>' + L.trnTabPoints + '</button>') +
                 '</div>' +
             '</div>' +
@@ -1406,11 +1406,14 @@
 
         // Toggle combined NTRP max based on format (doubles/mixed only)
         // + auto-hide Gender when Mixed Doubles (gender = 'mixed' auto)
-        /* Одно определение на одно понятие: «дружеский» — это категория
-           friendly, и проверяется она в одном месте */
+        /* Одно определение на одно понятие. Проверка стояла дважды: здесь
+           и на вкладке «Результаты» (её не рисуют дружескому турниру) —
+           поймано прувером заморозки 28.09. Источника два: значение поля
+           в форме и категория записи из базы, поэтому решает одна функция,
+           а зовут её с разным доводом */
         function дружескийТурнир() {
             var поле = document.getElementById('adTrnCat');
-            return !!поле && поле.value === 'friendly';
+            return A.безОчковЗаКатегорию(поле ? поле.value : '');
         }
 
         function toggleFormatDependentFields() {

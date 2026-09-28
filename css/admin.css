@@ -837,32 +837,9 @@ body.ad-page {
     outline-offset: 2px;
 }
 
-/* ЦЕЛЬ НАЖАТИЯ 44 — ОДНИМ ОПРЕДЕЛЕНИЕМ НА ВСЁ.
-   Раньше этот слой был написан дважды — у .ad-lang-tab и
-   .ad-btn-translate-all, — а девять кнопок из восемнадцати, что ниже 44,
-   не имели его вовсе: четыре вкладки турнира, колокольчик, «Выйти»,
-   крестик удаления афиши 28×28 и две инлайн-кнопки по 32.
-   Слой прозрачный и лежит СНАРУЖИ коробки: раздувать саму кнопку значит
-   ломать ряд, в котором она стоит. Правило проекта — «цель нажатия
-   рисуется рамкой вокруг элемента, а не его размером». */
-.ad-cel-44 {
-    position: relative;
-}
-
-.ad-cel-44::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    /* (44 − высота) / 2 в каждую сторону; для ступени 36 это 4, для 28 — 8 */
-    top: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);
-    bottom: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);
-}
-
 /* ФОКУС НА БАЗОВОМ КЛАССЕ, А НЕ У ИЗБРАННЫХ. Было у двух классов из
    десяти: клавиатурой по админке пройти было нельзя */
-.ad-btn:focus-visible,
-.ad-cel-44:focus-visible {
+.ad-btn:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
@@ -1317,9 +1294,9 @@ input[type="date"]::-webkit-datetime-edit {
     min-width: 0;
 }
 
-.ad-pole-uzkoe   { --pole-shirina: 160px; }
+.ad-pole-uzkoe { --pole-shirina: 160px; }
 .ad-pole-srednee { --pole-shirina: 280px; }
-.ad-pole-shirokoe{ --pole-shirina: 360px; }
+.ad-pole-shirokoe { --pole-shirina: 360px; }
 
 /* Ниже 640 ряд становится одной колонкой, как и у сеточных рядов */
 @media (max-width: 640px) {
