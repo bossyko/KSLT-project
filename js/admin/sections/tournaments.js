@@ -829,9 +829,32 @@
                 '<div id="adTrnVenueInfo" style="display:none;margin-top:10px;"></div>' +
             '</div>' +
 
-            // Meta row 1: Category / Format / Level
+            /* РАСКЛАДКА КАРТОЧКИ — решение Кости 28.09, его порядок:
+                 1  Категория · Формат · Макс. пар/участников · Резерв мест
+                 2  NTRP мин · NTRP макс · [Уровень ⊕ Общий NTRP] · Статус
+                 3  Взнос КСЛТ · Взнос остальным · Призовой фонд · Пол
+                 4  четыре даты — как было
+
+               ЧЕТЫРЕ РЯДА ПО ЧЕТЫРЕ, НА ГОТОВЫХ КЛАССАХ. Здесь стояли
+               четыре инлайн-сетки с зашитыми repeat(N,1fr) и gap:12, при
+               том что .ad-field-row-3 и -4 в admin.css:1204,1208 уже есть.
+               Беда была не косметическая: медиа-правило admin.css:2132
+               знает только классы, и на узком виде инлайн-ряды НЕ
+               схлопывались — оставались четыре колонки по 270.
+
+               ВЗАИМОИСКЛЮЧАЮЩИЕ ПОЛЯ СТОЯТ РЯДОМ И ДЕЛЯТ ОДНУ ЯЧЕЙКУ.
+               Замер 28.09 (toggleFormatDependentFields ниже):
+                 одиночный — Уровень есть, Общий NTRP нет;
+                 парный и микст — наоборот.
+               Вместе они не видны НИКОГДА, а скрытое поле выпадает из
+               сетки, и соседнее занимает его место. Так дыра, которую
+               Костя увидел справа в первом ряду, исчезает, а не прячется.
+               «Пол» так же: скрыт только в миксте — тогда третий ряд
+               показывает три поля, ровно как Костя и нарисовал. */
+
+            // Ряд 1: что за турнир и на сколько человек
             '<div class="ad-form-card">' +
-                '<div class="ad-field-row ad-field-row-3">' +
+                '<div class="ad-field-row ad-field-row-4">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnCategory + '</label>' +
                         '<select class="ad-field-input" id="adTrnCat">' + catOptionsHtml + '</select>' +
@@ -845,13 +868,61 @@
                             '<option value="mixed_doubles"' + A.sel(item, 'format', 'mixed_doubles') + '>' + L.formatMixedDoubles + '</option>' +
                         '</select>' +
                     '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label" id="adTrnMaxPartLabel">' + L.trnMaxParticipants + '</label>' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnMaxPart" placeholder="0" value="' + (item ? (item.max_participants || '') : '') + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnReservedSpots + '</label>' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnReservedSpots" placeholder="0" value="' + (item ? (item.reserved_spots || '') : '') + '">' +
+                    '</div>' +
+                '</div>' +
+
+                // Ряд 2: уровень игры и состояние записи
+                '<div class="ad-field-row ad-field-row-4">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnNtrpMin + '</label>' +
+                        '<select class="ad-field-input" id="adTrnNtrpMin">' + A.ntrpOptions(item && item.ntrp_min) + '</select>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnNtrpMax + '</label>' +
+                        '<select class="ad-field-input" id="adTrnNtrpMax">' + A.ntrpOptions(item && item.ntrp_max) + '</select>' +
+                    '</div>' +
+                    // Одна ячейка на двоих: вместе они не видны никогда
                     '<div class="ad-field" id="adTrnLevelWrap">' +
                         '<label class="ad-field-label">' + L.ratTournamentLevel + '</label>' +
                         '<select class="ad-field-input" id="adTrnLevel">' + trnLevelOptionsHtml + '</select>' +
                     '</div>' +
+                    '<div class="ad-field" id="adTrnNtrpCombinedWrap">' +
+                        '<label class="ad-field-label">' + L.trnNtrpCombinedMax + '</label>' +
+                        '<select class="ad-field-input" id="adTrnNtrpCombinedMax">' + A.ntrpOptions(item && item.ntrp_combined_max, { min: 2.0, max: 14.0 }) + '</select>' +
+                        '<div class="ad-field-hint">' + L.trnNtrpHint + '</div>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnStatus + '</label>' +
+                        '<div class="ad-field-input ad-trn-status-field" id="adTrnStatusBadge" data-status-class="' + trnStatusBadgeClass + '">' + trnStatusBadgeLabel + '</div>' +
+                    '</div>' +
                 '</div>' +
-                // Meta row 1b: Gender / NTRP Min / NTRP Max / Combined NTRP Max
-                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px;">' +
+
+                /* Ряд 3: деньги и состав. Две суммы взноса: членам КСЛТ
+                   дешевле. Не заполнил — на сайте про деньги не пишем
+                   вовсе, как и с призовым фондом. Для парных и смешанных
+                   сумма считается с пары */
+                '<div class="ad-field-row ad-field-row-4">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnFeeMember + '</label>' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnFeeMember" placeholder="0" value="' + (item ? (item.fee_member != null ? item.fee_member : '') : '') + '">' +
+                        '<div class="ad-field-hint" id="adTrnFeeHintMember"></div>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnFeeGuest + '</label>' +
+                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnFeeGuest" placeholder="0" value="' + (item ? (item.fee_guest != null ? item.fee_guest : '') : '') + '">' +
+                        '<div class="ad-field-hint" id="adTrnFeeHintGuest"></div>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.trnPrizeFund + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adTrnPrize" placeholder="100,000 сом" value="' + A.esc(item ? item.prize_fund : '') + '">' +
+                    '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnGender + '</label>' +
                         '<select class="ad-field-input" id="adTrnGender">' +
@@ -863,56 +934,10 @@
                             '<option value="mixed"' + A.sel(item, 'gender', 'mixed') + ' hidden>' + L.genderMixed + '</option>' +
                         '</select>' +
                     '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnNtrpMin + '</label>' +
-                        '<select class="ad-field-input" id="adTrnNtrpMin">' + A.ntrpOptions(item && item.ntrp_min) + '</select>' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnNtrpMax + '</label>' +
-                        '<select class="ad-field-input" id="adTrnNtrpMax">' + A.ntrpOptions(item && item.ntrp_max) + '</select>' +
-                    '</div>' +
-                    '<div class="ad-field" id="adTrnNtrpCombinedWrap">' +
-                        '<label class="ad-field-label">' + L.trnNtrpCombinedMax + '</label>' +
-                        '<select class="ad-field-input" id="adTrnNtrpCombinedMax">' + A.ntrpOptions(item && item.ntrp_combined_max, { min: 2.0, max: 14.0 }) + '</select>' +
-                        '<div class="ad-field-hint">' + L.trnNtrpHint + '</div>' +
-                    '</div>' +
                 '</div>' +
-                // Meta row 2: Max participants / Reserved spots / Prize fund / Status badge
-                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label" id="adTrnMaxPartLabel">' + L.trnMaxParticipants + '</label>' +
-                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnMaxPart" placeholder="0" value="' + (item ? (item.max_participants || '') : '') + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnReservedSpots + '</label>' +
-                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnReservedSpots" placeholder="0" value="' + (item ? (item.reserved_spots || '') : '') + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnPrizeFund + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adTrnPrize" placeholder="100,000 сом" value="' + A.esc(item ? item.prize_fund : '') + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnStatus + '</label>' +
-                        '<div class="ad-field-input ad-trn-status-field" id="adTrnStatusBadge" data-status-class="' + trnStatusBadgeClass + '">' + trnStatusBadgeLabel + '</div>' +
-                    '</div>' +
-                '</div>' +
-                // Взносы. Две суммы: членам КСЛТ дешевле. Не заполнил —
-                // на сайте про деньги не пишем вовсе, как и с призовым фондом.
-                // Для парных и смешанных сумма считается с пары
-                '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnFeeMember + '</label>' +
-                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnFeeMember" placeholder="0" value="' + (item ? (item.fee_member != null ? item.fee_member : '') : '') + '">' +
-                        '<div class="ad-field-hint" id="adTrnFeeHintMember"></div>' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnFeeGuest + '</label>' +
-                        '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnFeeGuest" placeholder="0" value="' + (item ? (item.fee_guest != null ? item.fee_guest : '') : '') + '">' +
-                        '<div class="ad-field-hint" id="adTrnFeeHintGuest"></div>' +
-                    '</div>' +
-                '</div>' +
-                // Meta row 3: Reg start / Reg end / Tournament start / Tournament end
-                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">' +
+
+                // Ряд 4: сроки — как было
+                '<div class="ad-field-row ad-field-row-4">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.trnRegStart + '</label>' +
                         '<input type="date" class="ad-field-input" id="adTrnRegStart" value="' + (item ? (item.registration_start || '') : '') + '">' +
@@ -1366,6 +1391,13 @@
 
         // Toggle combined NTRP max based on format (doubles/mixed only)
         // + auto-hide Gender when Mixed Doubles (gender = 'mixed' auto)
+        /* Одно определение на одно понятие: «дружеский» — это категория
+           friendly, и проверяется она в одном месте */
+        function дружескийТурнир() {
+            var поле = document.getElementById('adTrnCat');
+            return !!поле && поле.value === 'friendly';
+        }
+
         function toggleFormatDependentFields() {
             var fmt = document.getElementById('adTrnFormat').value;
             var isDbl = fmt === 'doubles' || fmt === 'mixed_doubles';
@@ -1373,12 +1405,21 @@
             var wrap = document.getElementById('adTrnNtrpCombinedWrap');
             if (wrap) wrap.style.display = isDbl ? '' : 'none';
 
-            // Уровень турнира задаёт таблицу очков. Парные и микст очков не дают,
-            // поэтому поле для них не нужно и значение сбрасывается.
+            /* УРОВЕНЬ ТУРНИРА ЗАДАЁТ ТАБЛИЦУ ОЧКОВ, и показывается только там,
+               где очки вообще начисляются. Не начисляются в двух случаях:
+                 • парные и микст — очков не дают вовсе;
+                 • категория «Friendly Weekend» — дружеский турнир.
+               Решение Кости 28.09: «там friendly значит без рейтинга идёт,
+               уровень убрать или неактивным сделать, чтобы случайно не
+               нажали и очки им не начислились».
+               Поле не просто прячется — ЗНАЧЕНИЕ СБРАСЫВАЕТСЯ. Спрятанное
+               поле с уровнем внутри уехало бы в базу, и турнир начислил бы
+               очки, которых не должен. */
             var lvlWrap = document.getElementById('adTrnLevelWrap');
             var lvlField = document.getElementById('adTrnLevel');
-            if (lvlWrap) lvlWrap.style.display = isDbl ? 'none' : '';
-            if (isDbl && lvlField) lvlField.value = '';
+            var безОчков = isDbl || дружескийТурнир();
+            if (lvlWrap) lvlWrap.style.display = безОчков ? 'none' : '';
+            if (безОчков && lvlField) lvlField.value = '';
 
             // Update max participants label: "Макс. участников" ↔ "Макс. пар"
             var maxPartLabel = document.getElementById('adTrnMaxPartLabel');
@@ -1400,6 +1441,8 @@
             }
         }
         document.getElementById('adTrnFormat').addEventListener('change', toggleFormatDependentFields);
+        // Смена категории меняет то же самое: friendly убирает уровень
+        document.getElementById('adTrnCat').addEventListener('change', toggleFormatDependentFields);
         toggleFormatDependentFields();
 
         // Image upload zone
