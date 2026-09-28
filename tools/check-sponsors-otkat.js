@@ -22,8 +22,8 @@ const ВЕРСИЯ_СЕЙЧАС = 'style.css?v=' + (fs.readFileSync(path.join(К
 
 const ОТКАТЫ = [
   ['css/style.css',
-   '    height: 88px;\n    padding: var(--space-3);\n    background: var(--bg-card);',
-   '    height: 88px;\n    padding: var(--space-3);',
+   '    height: 64px;\n    padding: var(--space-3);\n    background: var(--bg-card);',
+   '    height: 64px;\n    padding: var(--space-3);',
    'у плитки есть своя поверхность: заливка, контур и радиус'],
 
   ['css/style.css',
@@ -37,7 +37,7 @@ const ОТКАТЫ = [
    'ряд заполняется целиком, последний неполный встаёт по центру'],
 
   ['css/style.css',
-   '    height: 88px;\n    padding: var(--space-3);',
+   '    height: 64px;\n    padding: var(--space-3);',
    '    height: 36px;\n    padding: var(--space-3);',
    'высота плитки выше порога нажатия на каждом слое'],
 

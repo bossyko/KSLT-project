@@ -635,21 +635,26 @@
             if (телефон()) {
                 html += карточкиТелефона(items, bgImage);
             } else {
-                html += '<div class="to-card-grid">';
+                // СЛОТОВ СТОЛЬКО, СКОЛЬКО ТУРНИРОВ — решение Кости 28.09:
+                // «эти пустые слоты зачем показывать». Раньше слотов было
+                // три всегда, и незанятые говорили «здесь появится
+                // следующий»; категория с одним турниром давала три пустые
+                // коробки. Колонки ровняет не пустота, а число рядов:
+                // --to-ryadov уходит в css, и из него считается рост
+                // крупной карточки.
+                var мест = слотов();
+                var боковых = Math.min(мест, items.length - 1);
+                html += '<div class="to-card-grid' + (боковых ? '' : ' to-odna') +
+                        '" style="--to-ryadov: ' + Math.max(боковых, 1) + '">';
                 var featuredBg = items[0].image || bgImage;
                 html += renderFeatured(items[0], featuredBg, cat.key);
-                // ТРИ СЛОТА ВСЕГДА, и пустой ГОВОРИТ, а не молчит.
-                // Замерено 26.09 до правки: столб был то из одного слота,
-                // то из трёх, и крупная карточка каждый раз подстраивалась
-                // под него — 420 · 185 · 191 · 160 в одной странице
-                var сколько = слотов();
-                html += '<div class="to-side-stack">';
-                for (var i = 1; i <= сколько; i++) {
-                    html += items[i]
-                        ? renderCompact(items[i], cat.key, i)
-                        : '<div class="to-slot-empty">' + L.slotEmpty + '</div>';
+                if (боковых) {
+                    html += '<div class="to-side-stack">';
+                    for (var i = 1; i <= боковых; i++) {
+                        html += renderCompact(items[i], cat.key, i);
+                    }
+                    html += '</div>';
                 }
-                html += '</div>';
                 html += '</div>';
             }
 

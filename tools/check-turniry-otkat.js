@@ -38,21 +38,17 @@ const ОТКАТЫ = [
         `.to-card-grid {\n    /* СТУПЕНЬ ВЫВЕДЕНА`,
    'ступень слота живёт в разделе турниров, а не в общем .to-card-grid'],
 
-  [CSS, `--to-featured-h: calc(var(--to-slot) * 3 + var(--space-md) * 2);`,
-        `--to-featured-h: 720px;`,
-   'рост крупной карточки ВЫВЕДЕН из ступени слота, а не задан числом'],
+  [CSS, `--to-featured-h: calc(var(--to-slot) * var(--to-ryadov)`,
+        `--to-featured-h: 528px; --to-vykl: calc(var(--to-slot) * var(--to-ryadov)`,
+   'рост крупной карточки ВЫВЕДЕН из ступени слота и числа рядов'],
+
+  [CSS, `    display: grid;\n    grid-auto-rows: var(--to-slot);`,
+        `    display: grid;\n    grid-auto-rows: min-content;`,
+   'ряд столба — ступень слота, а не высота содержимого'],
 
   [CSS, `    min-height: var(--to-featured-h, 380px);`,
         `    min-height: var(--to-featured-h);`,
    'у соседа остаётся запасное значение, если переменной нет'],
-
-  [CSS, `    grid-template-rows: repeat(3, var(--to-slot));`,
-        `    grid-auto-rows: var(--to-slot);`,
-   'столб — сетка с ПОСТОЯННЫМ числом рядов, а не список переменной длины'],
-
-  [CSS, `        grid-template-rows: repeat(2, var(--to-slot));`,
-        `        grid-template-rows: repeat(3, var(--to-slot));`,
-   'на планшете рядов ДВА — целые ряды по два, а не три с хвостом'],
 
   [CSS, `    .to-categories .to-card-grid {\n        --to-featured-h: 320px;\n    }`,
         `    .to-categories .to-card-grid {\n        min-width: 0;\n    }`,
@@ -127,13 +123,17 @@ const ОТКАТЫ = [
    'цель нажатия у ссылки категории не меньше ступени md'],
 
   /* ── пустое и порядок ──────────────────────────────────────────────── */
-  [JSФ, `                        : '<div class="to-slot-empty">' + L.slotEmpty + '</div>';`,
-        `                        : '';`,
-   'пустой слот рисуется и объясняет себя'],
+  [JSФ, `                        html += renderCompact(items[i], cat.key, i);`,
+        `                        html += renderCompact(items[i], cat.key, i) + '<div class="to-slot-empty">x</div>';`,
+   'пустых слотов не рисуется'],
 
-  [JSФ, `        slotEmpty: 'здесь появится следующий турнир категории',`,
-        ``,
-   'подпись пустого слота живёт в словаре на трёх языках'],
+  [JSФ, `Math.min(мест, items.length - 1)`,
+        `мест`,
+   'число боковых строк ограничено числом турниров'],
+
+  [JSФ, `'" style="--to-ryadov: '`,
+        `'" style="--to-xx: '`,
+   'рост крупной карточки считается от ЧИСЛА РЯДОВ, а не от тройки'],
 
   [JSФ, `            if (список.some(function(t) { return t.status === 'ongoing'; })) return 2;`,
         `            if (false) return 2;`,

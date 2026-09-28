@@ -4276,8 +4276,15 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: center;
+    /* ПЯТЬ В РЯД — не трогаем: спонсоров десять, и пять даёт два целых
+       ряда. Витрина показывает только целые ряды.
+       ВЫСОТА 88 → 64 (Костя, 28.09): «подвал же идёт как второстепенное,
+       зачем их увеличивать». Замерено до правки: плитка 267 × 88, а
+       логотип внутри 36 в высоту — коробка была втрое выше содержимого.
+       64 — ступень восьмёрки, потолок логотипа 58 % от неё это те же 37,
+       то есть логотип не мельчает. Цель нажатия 64, порог 44 держится. */
     flex: 0 0 calc((100% - 4 * var(--space-4)) / 5);
-    height: 88px;
+    height: 64px;
     padding: var(--space-3);
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
@@ -4329,7 +4336,7 @@ h2 {
     .sponsors-cloud .sponsor-logo-link,
     .sponsors-cloud .spon-static {
         flex-basis: calc((100% - 3 * var(--space-4)) / 4);
-        height: 80px;
+        height: 56px;
     }
 }
 
