@@ -86,3 +86,6 @@ tests/reports/.run-id
 tests/reports/_zamer/
 tests/reports/auth-forms/
 tests/reports/vhod/
+
+# Папка для передачи файлов в песочницу замеров — в репозитории не нужна
+_sync/
