@@ -172,7 +172,9 @@ body.ad-page {
 /* ---- Content ---- */
 .ad-content {
     margin-left: 260px;
-    padding: var(--space-sm) var(--space-md);
+    /* Верхнее поле 16 -> 8: воздух над заголовком складывался трижды —
+       здесь, в секции и в липкой шапке */
+    padding: var(--space-2) var(--space-md) var(--space-sm);
 }
 
 /* Предел ширины: на большом мониторе строка таблицы растягивалась во всю
@@ -213,11 +215,31 @@ body.ad-page {
     display: none;
 }
 
+/* АДМИНСКАЯ СЕКЦИЯ — НЕ СЕКЦИЯ САЙТА, И ВОЗДУХ У НЕЁ СВОЙ.
+   Разметка админки лежит в теге <section>, а тому общее правило
+   `css/style.css:1646` даёт `padding: var(--section-vozduh) var(--pad-x)` —
+   40 сверху, как разделу лендинга. Публичной странице этот воздух нужен,
+   служебному экрану — нет: замерено 28.09, до заголовка было 185 на
+   десктопе и 257 на планшете, до первой карточки 233 и 465.
+   Поле по бокам оставляем: рамка страницы — свойство продукта.
+
+   OVERFLOW: тот же файл ниже (`css/style.css:9759`) ставит секциям
+   `overflow-x: hidden`, а браузер делает вторую ось `auto` — и секция
+   становится прокручиваемым предком. Липкая шапка турнира (`sticky`)
+   прилипает к ПРОКРУЧИВАЕМОМУ ПРЕДКУ, а он у неё не прокручивается
+   никогда, поэтому она не липла вовсе: замерено — при прокрутке на 800
+   шапка уезжала на -423. Тот же капкан уже описан в style.css для полосы
+   фильтров, это второй его случай. */
 .ad-section.active {
     display: block;
+    padding-top: 0;
+    overflow: visible;
 }
 
 .ad-section-title {
+    /* Ступень 26. Пробовали 21 — Костя посмотрел глазами и вернул 26:
+       «давай размер сделаем 26». Моё «служебный экран не спорит с
+       содержимым» отменено, и это его экран. */
     font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--text-primary);
@@ -2510,37 +2532,64 @@ select.ad-field-input {
 .ad-trn-status-field.ad-status-cancelled { color: #ef4444; }
 
 /* ---- Bracket Management: Sticky Header ---- */
-.ad-brk-sticky-header {
-    background: var(--bg-primary);
-    padding-bottom: 4px;
-    margin-bottom: 4px;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.ad-brk-sticky-header .ad-section-header {
-    margin-bottom: 8px;
-}
-
-.ad-brk-sticky-header .ad-trn-nav-tabs {
-    margin-bottom: 0;
-}
 
 /* ---- Tournament Form: Sticky Header (title + tabs) ---- */
-.ad-trn-sticky-header {
+/* Заголовок, «Назад к списку» и вкладки липнут под шапкой сайта: решение
+   Кости 28.09 — «чтобы быстрей можно было переходить между вкладками».
+   Само правило стояло здесь и раньше, но не работало — причину см. выше,
+   у .ad-section.active. Воздух сверху срезан до нуля: полоса и так отбита
+   от содержимого линией снизу */
+.ad-trn-sticky-header,
+.ad-brk-sticky-header {
     position: sticky;
     top: var(--header-h);
     z-index: 40;
     background: var(--bg-primary);
-    padding: 8px 0 4px;
-    margin-bottom: 16px;
+    /* Ступень 16 сверху, 12 снизу. Шли по шкале снизу вверх и смотрели
+       глазами: 0 — «сильно прижал», 12/8 — «прижато слишком, глаз болит».
+       Следующие ступени и остановили. Воздух работает и в прилипшем
+       состоянии: полоса не касается шапки сайта */
+    padding: var(--space-sm) 0 var(--space-3);
+    margin-bottom: var(--space-sm);
     border-bottom: 1px solid var(--border-subtle);
 }
 
-.ad-trn-sticky-header .ad-section-header {
-    margin-bottom: 8px;
+.ad-trn-sticky-header .ad-section-header,
+.ad-brk-sticky-header .ad-section-header {
+    /* Между строкой заголовка и полосой вкладок — ступень 12: на восьми
+       заголовок с вкладками читались одним комком */
+    margin-bottom: var(--space-3);
 }
 
-.ad-trn-sticky-header .ad-trn-nav-tabs {
+/* КНОПКА В ШАПКЕ ТУРНИРА — СТУПЕНЬ sm, А НЕ РОСТ ЗАГОЛОВКА.
+   Решение Кости 28.09: «кнопку назад к списку сделай чуть меньшего
+   размера». Было 39 в высоту — число мимо шкалы кнопок (28 · 36 · 44 · 52)
+   и вровень с заголовком, отчего служебная кнопка читалась как второй
+   заголовок. Стало 36.
+   ЦЕЛЬ НАЖАТИЯ ОСТАЁТСЯ 44 — админка живёт и на планшете, а WCAG 2.5.5
+   уменьшением кнопки не отменяется: недостающие 4 сверху и 4 снизу даёт
+   прозрачный слой, он не виден и не двигает соседей */
+.ad-trn-sticky-header .ad-btn,
+.ad-brk-sticky-header .ad-btn {
+    position: relative;
+    height: var(--btn-h-sm);
+    padding: 0 var(--space-sm);
+    display: inline-flex;
+    align-items: center;
+}
+
+.ad-trn-sticky-header .ad-btn::after,
+.ad-brk-sticky-header .ad-btn::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -4px;
+    bottom: -4px;
+}
+
+.ad-trn-sticky-header .ad-trn-nav-tabs,
+.ad-brk-sticky-header .ad-trn-nav-tabs {
     margin-bottom: 0;
 }
 
