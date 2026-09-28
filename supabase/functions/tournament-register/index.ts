@@ -212,7 +212,7 @@
             return json({ error: 'entry_in_draw' }, 409)
           }
           if (body.leave_pair) return await выйтиИзПары(db, какНапарник, player.id, serviceKey)
-          return await сменитьНапарника(db, какНапарник, body, player, tournament)
+          return await сменитьНапарника(db, какНапарник, body, player, tournament, serviceKey)
         }
         // Живой заявки нет. Раньше второй номер в этом месте молча проваливался
         // в обычную регистрацию и заводил себе отдельную заявку — пара
@@ -257,7 +257,7 @@
         // Замена напарника — не новая заявка: место, время подачи и очередь
         // остаются за игроком, меняется только тот, с кем он выйдет на корт
         if (body.change_partner) {
-          return await сменитьНапарника(db, existing, body, player, tournament)
+          return await сменитьНапарника(db, existing, body, player, tournament, serviceKey)
         }
         if (body.leave_pair) {
           return await выйтиИзПары(db, existing, player.id, serviceKey)
@@ -335,22 +335,27 @@
       // решать это человеку, а не проверке.
       const рейтинговый = tournament.format === 'singles' &&
                           tournament.category_id !== 'friendly' && !!tournament.level_id
-      let полСошёлся = true
+
+      /* ПРИЧИН БЫВАЕТ НЕСКОЛЬКО РАЗОМ, и раньше их держал булев
+         gender_confirmed — то есть одна. Пара может и не совпасть по полу,
+         и превысить сумму NTRP, и не иметь парного рейтинга. Список пустой —
+         проверять нечего. Решение Кости 28.09. */
+      const причины: string[] = []
 
       if (tournament.gender && tournament.gender !== 'mixed') {
         if (playerGender && playerGender !== tournament.gender) {
           if (рейтинговый) return json({ error: 'gender_mismatch' }, 403)
-          полСошёлся = false
+          причины.push('gender')
         }
         if (!isStaff && partnerGender && partnerGender !== tournament.gender) {
-          полСошёлся = false
+          причины.push('gender')
         }
       }
 
       // Микст: пара — мужчина и женщина
       if (!isStaff && tournament.format === 'mixed_doubles' &&
           playerGender && partnerGender && playerGender === partnerGender) {
-        полСошёлся = false
+        причины.push('gender')
       }
 
       // ---- Категория закрыта для этого игрока ----
@@ -378,14 +383,23 @@
 
       // ---- NTRP ----
       if (isDoubles) {
-        // Парные и микст: допуск по сумме NTRP двоих, категории не участвуют
+        /* Парные и микст: допуск по сумме NTRP двоих, категории не участвуют.
+           ОТКАЗА ЗДЕСЬ БОЛЬШЕ НЕТ. Раньше сумма выше предела давала 403, и
+           человек не попадал ни в основу, ни в очередь. Решение Кости 28.09:
+           заявку принять, место держать по времени подачи, решение — за
+           менеджером. Это та же дорога, по которой уже ходит несошедшийся
+           пол. */
         if (tournament.ntrp_combined_max) {
-          const partnerNtrp = body.partner_id
+          const мой = ntrpПары(player)
+          const напарника = body.partner_id
             ? await loadPartnerNtrp(db, body.partner_id)
-            : Number(body.partner_external_ntrp || 0)
-          const combined = ntrpПары(player) + Number(partnerNtrp || 0)
-          if (combined > Number(tournament.ntrp_combined_max)) {
-            return json({ error: 'ntrp_combined_exceeded', combined, limit: tournament.ntrp_combined_max }, 403)
+            : (Number(body.partner_external_ntrp) || null)
+          /* Нет парного рейтинга — сумму НЕ СЧИТАЕМ ВОВСЕ. Прежде сюда
+             подставлялся одиночный, и пара проходила предел чужим числом */
+          if (мой === null || напарника === null) {
+            причины.push('ntrp_doubles')
+          } else if (мой + напарника > Number(tournament.ntrp_combined_max)) {
+            причины.push('ntrp_combined')
           }
         }
       } else {
@@ -469,12 +483,24 @@
           .from('tournament_registrations')
           .select('id, player_id, status, registered_at')
           .eq('tournament_id', tournamentId)
+          .eq('seat_pool', 'online')
           .in('status', MAIN_DRAW_STATUSES)
           .order('registered_at', { ascending: true })
 
         const mainDraw = regs || []
-        const onlineSlots = (tournament.max_participants || 0) - (tournament.reserved_spots || 0)
-        const isFull = onlineSlots > 0 && mainDraw.length >= onlineSlots
+        /* РЕЗЕРВ — НЕ СВОБОДНЫЕ МЕСТА. Их заполняет человек: админ сажает
+           туда спецгостей турнира. Очередь их не трогает и в счёт онлайна
+           они не идут — потому заявки и помечены seat_pool, а запрос выше
+           берёт только 'online'. Правило Кости 28.09.
+
+           Ноль мест онлайн — это ноль, а не «без предела»: прежнее условие
+           onlineSlots > 0 выключало проверку целиком, и при резерве, равном
+           сетке, в основу пускали всех подряд. Размер сетки не задан вовсе —
+           вот тогда предела нет, и это другое условие. */
+        const сетка = Number(tournament.max_participants) || 0
+        const резерв = Number(tournament.reserved_spots) || 0
+        const onlineSlots = сетка > 0 ? Math.max(0, сетка - резерв) : null
+        const isFull = onlineSlots !== null && mainDraw.length >= onlineSlots
 
         if (isFull) {
           if (decision.reason === 'own_category') {
@@ -512,8 +538,17 @@
       row.partner_external_country = body.partner_external_country || null
       row.partner_gender = body.partner_gender || null
       row.guest_confirmed = false
-      // false — состав ждёт решения менеджера. Место при этом за парой
-      row.gender_confirmed = полСошёлся
+      /* Заявка пришла с сайта или из приложения — значит занимает место из
+         ОНЛАЙН-запаса. Резерв заполняет человек в админке, и очередь его
+         не трогает */
+      row.seat_pool = 'online'
+      /* Пусто — проверять нечего. Место при этом за парой в любом случае:
+         очередь честная, по времени подачи. Дубли снимаем — «не совпал пол»
+         могло прийти и от игрока, и от напарника */
+      row.review_reasons = [...new Set(причины)]
+      /* Переходное: столбец уберёт шаг 2 миграции. Пока живёт рядом, чтобы
+         уже открытая в браузере админка не ослепла */
+      row.gender_confirmed = причины.length === 0
 
       // Заявка после снятия или отказа — обновляем прежнюю строку, иначе
       // вставка упрётся в уникальный индекс
@@ -551,8 +586,8 @@
       // Игроку — что заявка принята и рассматривается: место за ним, и
       // молчать об этом нельзя. Клубу — что решение за ним, иначе заявка
       // провисит до жеребьёвки
-      if (!полСошёлся) {
-        await сообщитьОРассмотрении(db, serviceKey, player, body, tournament)
+      if (причины.length) {
+        await сообщитьОРассмотрении(db, serviceKey, player, body, tournament, [...new Set(причины)])
       }
 
       return json({
@@ -561,7 +596,8 @@
         rank: playerRank,
         block_reason: decision.text || null,
         displaced: displaced ? displaced.name : null,
-        gender_review: !полСошёлся,
+        review_reasons: [...new Set(причины)],
+        gender_review: причины.length > 0,
       })
 
     } catch (e) {
@@ -596,15 +632,18 @@
     return (g === 'men' || g === 'women') ? g : null
   }
 
-  // В парном турнире человек считается парным рейтингом. Нет его — берём
-  // одиночный, иначе игрок без парной оценки уходил бы в сумму нулём
-  function ntrpПары(p: { ntrp_singles?: number | null; ntrp_doubles?: number | null } | null): number {
+  /* В парном турнире человек считается ПАРНЫМ рейтингом и только им.
+     Раньше при его отсутствии подставлялся одиночный — решение Кости 28.09
+     это отменяет: сумма пары выходила ложной, и человек без парной оценки
+     проходил предел чужим числом. Нет парного — возвращаем null, сумма не
+     считается, а заявка идёт на рассмотрение с причиной ntrp_doubles:
+     рейтинг проставит менеджер. */
+  function ntrpПары(p: { ntrp_singles?: number | null; ntrp_doubles?: number | null } | null): number | null {
     const пар = Number(p?.ntrp_doubles || 0)
-    if (пар > 0) return пар
-    return Number(p?.ntrp_singles || 0)
+    return пар > 0 ? пар : null
   }
 
-  async function loadPartnerNtrp(db: any, partnerId: string): Promise<number> {
+  async function loadPartnerNtrp(db: any, partnerId: string): Promise<number | null> {
     const { data } = await db.from('players').select('ntrp_singles, ntrp_doubles').eq('id', partnerId).single()
     return ntrpПары(data)
   }
@@ -708,20 +747,37 @@
    * менеджерам — что решать им. Отправка не должна ронять регистрацию:
    * заявка уже записана, и молчание уведомления её не отменяет.
    */
-  async function сообщитьОРассмотрении(db: any, serviceKey: string, player: any, body: any, tournament: any) {
+  /**
+   * Заявка принята и ждёт решения клуба.
+   *
+   * ИГРОКУ — ОДНО СООБЩЕНИЕ НА ВСЕ СЛУЧАИ, без причины. Решение Кости 28.09:
+   * «одно правило и одно уведомление, проще и ясно». Причина может быть не
+   * одна, может измениться после правки данных, и решает её всё равно
+   * человек — перечислять её игроку незачем. Текст лежит в notification_texts
+   * и идёт на языке игрока: прежний был зашит по-русски прямо здесь, и
+   * англоязычный игрок получал русское сообщение.
+   *
+   * КЛУБУ — причины списком: менеджеру решать, и он должен видеть, что
+   * именно не так. Админка живёт только на русском (js/auth-nav.js:89),
+   * поэтому здесь русский и остаётся.
+   */
+  async function сообщитьОРассмотрении(
+    db: any, serviceKey: string, player: any, body: any, tournament: any, причины: string[]
+  ) {
     const кому = [player.id, body.partner_id].filter(Boolean)
     const { data: профили } = await db
       .from('profiles')
-      .select('id, telegram_chat_id, notify_preferences')
+      .select('id, lang, telegram_chat_id, notify_preferences')
       .in('player_id', кому)
 
-    const игроку = {
-      title: 'Заявка на рассмотрении',
-      message: `Состав вашей заявки на «${tournament.title}» не совпадает с турниром по полу. ` +
-        `Место за вами держится, решение примет менеджер клуба.`,
-    }
     for (const пр of (профили || [])) {
-      await отправить(пр, игроку.title, игроку.message, serviceKey)
+      const язык = языкИз(пр)
+      await отправить(
+        пр,
+        т('trn_review_title', язык),
+        т('trn_review_body', язык, { 'турнир': tournament.title }),
+        serviceKey
+      )
     }
 
     const { data: клуб } = await db
@@ -731,11 +787,17 @@
 
     const напарник = body.partner_external_name ||
       (body.partner_id ? await имяИгрока(db, body.partner_id) : null)
+    const словами: Record<string, string> = {
+      gender: 'состав не совпадает с турниром по полу',
+      ntrp_combined: 'сумма NTRP пары выше предела турнира',
+      ntrp_doubles: 'у кого-то из пары нет парного рейтинга — его нужно проставить'
+    }
+    const перечень = причины.map((п) => словами[п] || п).join('; ')
     const клубу = {
       title: 'Заявка требует решения',
       message: `«${tournament.title}»: ${player.name}` +
         (напарник ? ` и ${напарник}` : '') +
-        ` — состав не совпадает с турниром по полу. Место держится до вашего решения.`,
+        ` — ${перечень}. Место держится до вашего решения.`,
     }
     for (const пр of (клуб || [])) {
       await отправить(пр, клубу.title, клубу.message, serviceKey)
@@ -798,27 +860,36 @@
    * с карточкой, гостя пропускаем на рассмотрение менеджеру. Место в очереди не
    * трогаем: человек его заслужил временем подачи.
    */
-  async function сменитьНапарника(db: any, existing: any, body: any, player: any, tournament: any) {
+  async function сменитьНапарника(db: any, existing: any, body: any, player: any, tournament: any, serviceKey: string) {
     const isDoubles = tournament.format === 'doubles' || tournament.format === 'mixed_doubles'
     if (!isDoubles) return jsonResp({ error: 'not_doubles' }, 400)
 
     const partnerGender = await loadPartnerGender(db, body)
     const playerGender = normalizeGender(player.gender)
 
+    /* ОДНО ПРАВИЛО НА ОБА ВХОДА. Здесь стояли три отказа 403 — по полу
+       напарника, по составу микста и по сумме NTRP, — а при подаче те же
+       случаи уже принимались на рассмотрение. Один и тот же состав
+       проходил или нет в зависимости от того, каким входом он пришёл.
+       Теперь везде одно: принять, назвать причину, решает менеджер. */
+    const причиныДобора: string[] = []
+
     if (body.partner_id) {
       if (tournament.gender && tournament.gender !== 'mixed' &&
           partnerGender && partnerGender !== tournament.gender) {
-        return jsonResp({ error: 'partner_gender_mismatch' }, 403)
+        причиныДобора.push('gender')
       }
       if (tournament.format === 'mixed_doubles' &&
           playerGender && partnerGender && playerGender === partnerGender) {
-        return jsonResp({ error: 'mixed_pair_same_gender' }, 403)
+        причиныДобора.push('gender')
       }
       if (tournament.ntrp_combined_max) {
-        const partnerNtrp = await loadPartnerNtrp(db, body.partner_id)
-        const combined = ntrpПары(player) + Number(partnerNtrp || 0)
-        if (combined > Number(tournament.ntrp_combined_max)) {
-          return jsonResp({ error: 'ntrp_combined_exceeded', combined, limit: tournament.ntrp_combined_max }, 403)
+        const мой = ntrpПары(player)
+        const напарника = await loadPartnerNtrp(db, body.partner_id)
+        if (мой === null || напарника === null) {
+          причиныДобора.push('ntrp_doubles')
+        } else if (мой + напарника > Number(tournament.ntrp_combined_max)) {
+          причиныДобора.push('ntrp_combined')
         }
       }
       // Один человек не может играть в двух парах одного турнира
@@ -840,16 +911,26 @@
       partner_external_ntrp: body.partner_external_ntrp || null,
       partner_gender: body.partner_gender || null,
       // Нового гостя менеджер подтверждает заново
-      guest_confirmed: false
+      guest_confirmed: false,
+      review_reasons: [...new Set(причиныДобора)],
+      /* Переходное: столбец уберёт шаг 2 миграции. Пока живёт рядом,
+         чтобы уже открытая в браузере админка не ослепла */
+      gender_confirmed: причиныДобора.length === 0
     }).eq('id', existing.id)
 
     if (error) return jsonResp({ error: error.message }, 500)
+
+    /* Место в очереди не трогаем — человек его заслужил временем подачи */
+    if (причиныДобора.length) {
+      await сообщитьОРассмотрении(db, serviceKey, player, body, tournament, причиныДобора)
+    }
 
     return jsonResp({
       ok: true,
       status: existing.status,
       partner_changed: true,
-      guest: !!body.partner_external_name
+      guest: !!body.partner_external_name,
+      review_reasons: [...new Set(причиныДобора)]
     })
   }
 

@@ -69,10 +69,20 @@
         return map;
     }
 
-    function validateNtrpCombined(ntrp1, ntrp2, max) {
-        if (!max) return true;
-        if (!ntrp1 || !ntrp2) return true; // can't validate without both
-        return (ntrp1 + ntrp2) <= max;
+    /**
+     * Причины по рейтингу для допуска пары. Пусто — предел соблюдён.
+     *
+     * Раньше это был булев, и он возвращал true при отсутствии рейтинга:
+     * «проверить нечем — значит проходит». Гость без рейтинга обходил предел
+     * турнира молча. Теперь нечем проверить — это тоже причина, и заявка
+     * идёт к менеджеру, а не мимо него.
+     */
+    function причиныПоРейтингу(парный1, парный2, max) {
+        if (!max) return [];
+        var а = window.KSLT_RULES.ntrpДопуска(парный1);
+        var б = window.KSLT_RULES.ntrpДопуска(парный2);
+        if (а === null || б === null) return ['ntrp_doubles'];
+        return (а + б) <= max ? [] : ['ntrp_combined'];
     }
 
     function validateMixedDoublesGender(gender1, gender2) {
@@ -465,27 +475,25 @@
                 }
             }
 
-            // NTRP combined check
+            /* ПО РЕЙТИНГУ ЗДЕСЬ БОЛЬШЕ НЕ ОТКАЗЫВАЕМ. Правило одно на все
+               входы: пара принимается, место держится по времени подачи,
+               решает менеджер. Причины копим и запишем вместе с напарником */
+            var причиныДобора = [];
             if (tournament.ntrp_combined_max) {
                 var reg = registrations.find(function(r) { return r.id === regId; });
-                var captainNtrp = null;
+                var капитанПарный = null;
                 if (reg && reg.player_id) {
-                    var cnRes = await A.client.from('players').select('ntrp_singles, ntrp_doubles').eq('id', reg.player_id).single();
-                    captainNtrp = cnRes.data ? ntrpПары(cnRes.data) : null;
+                    var cnRes = await A.client.from('players').select('ntrp_doubles').eq('id', reg.player_id).single();
+                    капитанПарный = cnRes.data ? cnRes.data.ntrp_doubles : null;
                 } else if (reg) {
-                    captainNtrp = reg.external_ntrp;
+                    капитанПарный = reg.external_ntrp;
                 }
-                var partnerNtrp = selectedId ? null : extNtrp;
+                var напарникПарный = selectedId ? null : extNtrp;
                 if (selectedId) {
-                    var pnRes = await A.client.from('players').select('ntrp_singles, ntrp_doubles').eq('id', selectedId).single();
-                    partnerNtrp = pnRes.data ? ntrpПары(pnRes.data) : null;
+                    var pnRes = await A.client.from('players').select('ntrp_doubles').eq('id', selectedId).single();
+                    напарникПарный = pnRes.data ? pnRes.data.ntrp_doubles : null;
                 }
-                if (!validateNtrpCombined(captainNtrp, partnerNtrp, tournament.ntrp_combined_max)) {
-                    A.showToast(L.doublesNtrpCombinedError + ': ' +
-                        дробь(Number(captainNtrp) + Number(partnerNtrp)) + ' \u203A ' +
-                        дробь(tournament.ntrp_combined_max), 'error');
-                    return;
-                }
+                причиныДобора = причиныПоРейтингу(капитанПарный, напарникПарный, tournament.ntrp_combined_max);
             }
 
             // Отыгравшая сторона состав не меняет — и добор напарника это
@@ -499,6 +507,14 @@
             // Взяли из очереди — снимаем его прежнюю заявку, иначе замена
             // упрётся в запрет «одна заявка на человека»
             if (selectedId) await освободитьИзОчереди(selectedId, tournamentId, registrations);
+
+            /* Причины состава и рейтинга складываем в один список: у пары их
+               бывает несколько разом. Место при этом не трогаем */
+            var всеПричины = (updateData.review_reasons || []).concat(причиныДобора);
+            updateData.review_reasons = всеПричины.filter(function(п, i) {
+                return всеПричины.indexOf(п) === i;
+            });
+            updateData.gender_confirmed = updateData.review_reasons.length === 0;
 
             var upRes = await A.client.from('tournament_registrations').update(updateData).eq('id', regId);
             if (upRes.error) { A.showToast(upRes.error.message, 'error'); return; }
@@ -776,19 +792,31 @@
      */
     async function поднятьИзОчереди(tournamentId) {
         var т = await A.client.from('tournaments')
-            .select('max_participants').eq('id', tournamentId).single();
-        var всего = (т.data && т.data.max_participants) || 0;
-        if (!всего) return;
+            .select('max_participants, reserved_spots').eq('id', tournamentId).single();
+        var сетка = (т.data && Number(т.data.max_participants)) || 0;
+        if (!сетка) return;
+
+        /* РЕЗЕРВ ОЧЕРЕДЬ НЕ ТРОГАЕТ. Здесь считалось по всей сетке, а сервер
+           при подаче — по «сетка минус резерв» (index.ts): одно понятие,
+           два числа. Замер 28.09, турнир на 16 с резервом 4: снялась одна
+           пара из двенадцати — отсюда поднималось ПЯТЕРО вместо одного, и
+           все четыре места клуба уходили очереди.
+           Места клуба заполняет человек, спецгостями: заявка знает свой
+           запас в seat_pool, и в счёт идёт только online. */
+        var резерв = (т.data && Number(т.data.reserved_spots)) || 0;
+        var мест = Math.max(0, сетка - резерв);
 
         var занято = await A.client.from('tournament_registrations')
             .select('id', { count: 'exact', head: true })
             .eq('tournament_id', tournamentId)
+            .eq('seat_pool', 'online')
             .in('status', ['approved', 'pending', 'draw']);
-        var свободно = всего - (занято.count || 0);
+        var свободно = мест - (занято.count || 0);
         if (свободно <= 0) return;
 
         var очередь = await A.client.from('tournament_registrations')
             .select('id').eq('tournament_id', tournamentId).eq('status', 'waitlist')
+            .eq('seat_pool', 'online')
             .order('registered_at', { ascending: true }).limit(свободно);
         var ids = (очередь.data || []).map(function(r) { return r.id; });
         if (!ids.length) return;
@@ -899,6 +927,9 @@
                 partner_external_name: null,
                 partner_external_ntrp: null,
                 partner_gender: null,
+                review_reasons: причиныСостава(tournament,
+                    await полИгрока(первый, playersMap),
+                    await полИгрока(второй, playersMap)),
                 gender_confirmed: составСошёлся(tournament,
                     await полИгрока(первый, playersMap),
                     await полИгрока(второй, playersMap))
@@ -947,7 +978,8 @@
         if (!reg) return;
 
         var гость = reg.partner_external_name && !reg.guest_confirmed;
-        var поСоставу = reg.gender_confirmed === false;
+        var причины = причиныРассмотрения(reg);
+        var поСоставу = причины.indexOf('gender') !== -1;
 
         var кто = reg.player_id
             ? ((playersMap[reg.player_id] || {}).name || reg.player_id)
@@ -956,9 +988,13 @@
             ? ((playersMap[reg.partner_id] || {}).name || reg.partner_id)
             : (reg.partner_external_name || '—');
 
-        var причины = '';
-        if (гость) причины += '<li>' + L.regReviewWhyGuest + '</li>';
-        if (поСоставу) причины += '<li>' + L.regReviewWhyGender + '</li>';
+        /* Перечисляем ВСЕ причины, а не одну: у пары их бывает несколько
+           разом — и пол не совпал, и сумма NTRP выше предела */
+        var причиныHtml = '';
+        if (гость) причиныHtml += '<li>' + L.regReviewWhyGuest + '</li>';
+        причины.forEach(function(п) {
+            причиныHtml += '<li>' + A.esc(ПРИЧИНА_СЛОВАМИ[п] || п) + '</li>';
+        });
 
         var выборПола = function(id, значение) {
             return '<select class="ad-field-input" id="' + id + '">' +
@@ -974,7 +1010,7 @@
                     A.esc(кто) + ' \u2014 ' + A.esc(напарник) +
                 '</div>' +
                 '<ul style="margin:0;padding-left:18px;color:var(--text-secondary);font-size:0.82rem;line-height:1.5;">' +
-                    причины +
+                    причиныHtml +
                 '</ul>' +
                 (гость
                     ? '<div style="display:flex;gap:12px;">' +
@@ -992,7 +1028,8 @@
             '</div>';
 
         A.showConfirm(L.regReviewTitle, html, async function() {
-            var правки = { guest_confirmed: true, gender_confirmed: true };
+            /* Одобрение снимает ВСЕ причины разом: решение принято */
+            var правки = { guest_confirmed: true, gender_confirmed: true, review_reasons: [] };
 
             if (гость) {
                 var ntrp = parseFloat(document.getElementById('adReviewNtrp').value);
@@ -1134,7 +1171,8 @@
             var полВторого = target === 'partner'
                 ? полНового
                 : полЗаявки(reg, 'partner', playersMap);
-            updateData.gender_confirmed = составСошёлся(tournament, полПервого, полВторого);
+            updateData.review_reasons = причиныСостава(tournament, полПервого, полВторого);
+            updateData.gender_confirmed = updateData.review_reasons.length === 0;
 
             // ---- Замена на месте, когда сетка уже есть ----
             //
@@ -1390,7 +1428,7 @@
         if (!reg) return false;
         if (reg.status === 'withdrawn' || reg.status === 'rejected') return false;
         if (reg.partner_external_name && !reg.guest_confirmed) return true;
-        return reg.gender_confirmed === false;
+        return ждётРешения(reg);
     }
 
     /**
@@ -1661,6 +1699,39 @@
             if (полПервого && полВторого && полПервого === полВторого) return false;
         }
         return true;
+    }
+
+    /**
+     * ПОЧЕМУ ЗАЯВКА ЖДЁТ РЕШЕНИЯ — СПИСКОМ.
+     *
+     * Держалось булевым gender_confirmed, то есть одной причиной. Причин
+     * стало три, и у одной пары они бывают разом: не совпал пол, сумма NTRP
+     * выше предела, нет парного рейтинга. Решение Кости 28.09.
+     *
+     * Переходное: пока шаг 2 миграции не убрал старый столбец, читаем
+     * список, а если его нет вовсе — откатываемся на булев. Так уже
+     * открытая в браузере вкладка не слепнет.
+     */
+    function причиныРассмотрения(reg) {
+        if (!reg) return [];
+        if (Array.isArray(reg.review_reasons)) return reg.review_reasons;
+        return reg.gender_confirmed === false ? ['gender'] : [];
+    }
+
+    function ждётРешения(reg) {
+        return причиныРассмотрения(reg).length > 0;
+    }
+
+    /** Причины по-русски: админка живёт только на русском (auth-nav.js:89) */
+    var ПРИЧИНА_СЛОВАМИ = {
+        gender:        'Состав не совпадает с турниром по полу',
+        ntrp_combined: 'Сумма NTRP пары выше предела турнира',
+        ntrp_doubles:  'У кого-то из пары нет парного рейтинга — проставьте его'
+    };
+
+    /** Причины состава при ручных правках менеджера: пол считаем здесь же */
+    function причиныСостава(tournament, полПервого, полВторого) {
+        return составСошёлся(tournament, полПервого, полВторого) ? [] : ['gender'];
     }
 
     function isFriendlyTournament(tournament) {
@@ -2862,7 +2933,13 @@
                         external_country: extCountry,
                         external_ntrp: extNtrp,
                         external_gender: extGender,
+                        review_reasons: причиныСостава(tournament, extGender, null),
                         gender_confirmed: составСошёлся(tournament, extGender, null),
+                        /* РУЧНОЕ ДОБАВЛЕНИЕ САЖАЕТ НА МЕСТО КЛУБА. Резерв на
+                           то и держат: «часть мест придерживают под запись
+                           без сайта» (tournament-slots.js:16). Очередь такие
+                           места не трогает, и в счёт онлайна они не идут */
+                        seat_pool: 'reserved',
                         status: 'approved'
                     };
 
@@ -2894,27 +2971,33 @@
                             // Состав не сошёлся с турниром — заявку берём, но
                             // место держим до решения. То же правило, что при
                             // подаче игроком
-                            insertData.gender_confirmed = составСошёлся(tournament, extGender, partnerGenderEl.value);
+                            insertData.review_reasons = причиныСостава(tournament, extGender, partnerGenderEl.value);
+                            insertData.gender_confirmed = insertData.review_reasons.length === 0;
 
-                            // NTRP combined check
-                            if (tournament.ntrp_combined_max && extNtrp && insertData.partner_external_ntrp) {
-                                if (!validateNtrpCombined(extNtrp, insertData.partner_external_ntrp, tournament.ntrp_combined_max)) {
-                                    A.showToast(L.doublesNtrpCombinedError + ': ' +
-                                        дробь(Number(extNtrp) + Number(insertData.partner_external_ntrp)) + ' \u203A ' +
-                                        дробь(tournament.ntrp_combined_max), 'error');
-                                    return;
+                            /* Не отказ, а причина — то же правило, что
+                               на всех прочих входах */
+                            причиныПоРейтингу(extNtrp, insertData.partner_external_ntrp,
+                                tournament.ntrp_combined_max).forEach(function(п) {
+                                if (insertData.review_reasons.indexOf(п) === -1) {
+                                    insertData.review_reasons.push(п);
                                 }
-                            }
+                            });
+                            insertData.gender_confirmed = insertData.review_reasons.length === 0;
                         }
                     }
 
-                    // Мест столько, сколько выставлено в турнире. Сверх этого
-                    // заявка не пропадает, а встаёт в лист ожидания
-                    var всегоМест = tournament.max_participants || 0;
-                    var занято = registrations.filter(function(r) {
-                        return r.status === 'approved' || r.status === 'pending' || r.status === 'draw';
+                    /* Ручное добавление садится на МЕСТО КЛУБА, значит и
+                       предел у него свой — размер резерва, а не вся сетка.
+                       Считать по всей сетке значило бы разрешить админу
+                       занять места, отданные очереди. Резерв не задан —
+                       предела нет, как было. Сверх предела заявка не
+                       пропадает, а встаёт в лист ожидания */
+                    var местКлуба = Number(tournament.reserved_spots) || 0;
+                    var заняторезерв = registrations.filter(function(r) {
+                        return r.seat_pool === 'reserved' &&
+                            (r.status === 'approved' || r.status === 'pending' || r.status === 'draw');
                     }).length;
-                    var вСетку = !всегоМест || занято < всегоМест;
+                    var вСетку = !местКлуба || заняторезерв < местКлуба;
                     if (!вСетку) insertData.status = 'waitlist';
 
                     var insRes = await A.client.from('tournament_registrations').insert(insertData);
@@ -6389,7 +6472,7 @@
         // Состав, не сошедшийся с турниром, ждёт решения клуба: место за ним
         // держится, но в сетку он не идёт. Иначе в микст попадёт пара одного
         // пола, и сетка соберётся по составу, которого клуб не одобрял
-        var ждутРешения = approved.filter(function(r) { return r.gender_confirmed === false; });
+        var ждутРешения = approved.filter(ждётРешения);
         if (ждутРешения.length) {
             A.showNotice(L.regGenderReview,
                 '<p style="margin:0;">' + L.regGenderReviewHint + '</p>' +
