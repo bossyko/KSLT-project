@@ -1069,14 +1069,14 @@
                         '</div>' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.crtCity + '</label>' +
-                            '<input type="text" class="ad-field-input" id="adCrtCity" list="adCrtCityList" autocomplete="off" value="' + A.esc(item ? item.city : 'Бишкек') + '">' +
+                            '<input type="text" class="ad-field-input" id="adCrtCity" list="adCrtCityList" autocomplete="off" value="' + A.esc(item && item.city) + '">' +
                             '<datalist id="adCrtCityList">' +
                                 crtKnownCities.map(function(c) { return '<option value="' + A.esc(c.ru) + '">'; }).join('') +
                             '</datalist>' +
                         '</div>' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.crtCountry + '</label>' +
-                            '<input type="text" class="ad-field-input" id="adCrtCountry" list="adCrtCountryList" autocomplete="off" value="' + A.esc(item ? item.country : 'Кыргызстан') + '">' +
+                            '<input type="text" class="ad-field-input" id="adCrtCountry" list="adCrtCountryList" autocomplete="off" value="' + A.esc(item && item.country) + '">' +
                             '<datalist id="adCrtCountryList">' +
                                 crtKnownCountries.map(function(c) { return '<option value="' + A.esc(c.ru) + '">'; }).join('') +
                             '</datalist>' +
@@ -1100,14 +1100,14 @@
                     '</div>' +
                     '<div class="ad-field" style="margin-top:8px;">' +
                         '<label class="ad-field-label">' + L.crtCity + ' (EN)</label>' +
-                        '<input type="text" class="ad-field-input" id="adCrtCityEn" value="' + A.esc(item ? item.city_en : 'Bishkek') + '">' +
+                        '<input type="text" class="ad-field-input" id="adCrtCityEn" value="' + A.esc(item && item.city_en) + '">' +
                     '</div>' +
                     /* Кыргызской страны нет: в базе заведены country и
                        country_en, третьего столбца никто не заводил, и
                        выдумывать его форма не вправе */
                     '<div class="ad-field" style="margin-top:8px;">' +
                         '<label class="ad-field-label">' + L.crtCountry + ' (EN)</label>' +
-                        '<input type="text" class="ad-field-input" id="adCrtCountryEn" value="' + A.esc(item ? item.country_en : 'Kyrgyzstan') + '">' +
+                        '<input type="text" class="ad-field-input" id="adCrtCountryEn" value="' + A.esc(item && item.country_en) + '">' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="kg">' +
@@ -2216,6 +2216,19 @@
                 result = await A.client.from('courts').update(data).eq('id', crtEditingId);
             } else {
                 data.id = await uniqueCourtId(name);
+                /* УМОЛЧАНИЕ — СВОЙСТВО ДАННЫХ, А НЕ РАЗМЕТКИ. Раньше форма
+                   сама подставляла «Бишкек», «Bishkek», «Кыргызстан» и
+                   «Kyrgyzstan» четырьмя зашитыми строками, и они уезжали в
+                   базу как настоящие: чикагский корт значился кыргызским
+                   по-английски. Теперь форма показывает только то, что в
+                   записи, а незаполненное поле у НОВОГО корта не
+                   отправляется вовсе — значение ставит DEFAULT столбца
+                   (sql/схема/kort-umolchaniya.sql).
+                   При правке null отправляется как есть: иначе поле нельзя
+                   было бы очистить. */
+                Object.keys(data).forEach(function(к) {
+                    if (data[к] === null) delete data[к];
+                });
                 result = await A.client.from('courts').insert(data);
             }
 
