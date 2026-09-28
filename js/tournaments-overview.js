@@ -828,15 +828,18 @@
     function renderCompact(t, catKey, idx) {
         var compactHref = tournamentPage + '?id=' + t.id;
 
-        // Живым турнирам афишу даём миниатюрой: пёстрая картинка фоном не
-        // даёт прочитать название. Завершённым фон оставляем, но глушим
+        // АФИША СЛЕВА У ВСЕХ, НЕЗАВИСИМО ОТ СТАТУСА — решение Кости 28.09:
+        // «может, тоже просто ставить афишу слева, чем прятать её в
+        // подложку». Раньше завершённым афиша давалась ФОНОМ и глушилась:
+        // под текстом оставались цветные пятна, а контраст на такой
+        // подложке непредсказуем — среднее значение врёт о картинке.
+        // Довод «у архива останется настроение» дешевле, чем читаемость,
+        // и вид карточки не должен зависеть от статуса: одно понятие —
+        // одно определение.
         var прошёл = t.status === 'past';
-        var афиша = t.image
-            ? (прошёл ? ' style="background-image:url(' + t.image + ')"'
-                      : ' style="--poster:url(' + t.image + ')"')
-            : '';
+        var афиша = t.image ? ' style="--poster:url(' + t.image + ')"' : '';
 
-        return '<div class="to-compact ' + (прошёл ? 'to-compact-past' : 'to-compact-thumb') +
+        return '<div class="to-compact to-compact-thumb' + (прошёл ? ' to-compact-past' : '') +
             '" data-cat="' + catKey + '" data-idx="' + idx + '" data-href="' + compactHref + '"' +
             афиша + '>' +
             '<div class="to-compact-left">' +
