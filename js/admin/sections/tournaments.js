@@ -960,8 +960,20 @@
             // Bracket settings
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.trnBracketType + '</div>' +
-                '<div class="ad-field-row ad-field-row-3">' +
-                    '<div class="ad-field">' +
+                /* ШИРИНА ПОЛЯ — СВОЙСТВО СОДЕРЖИМОГО. Замер 28.09: «Корты»
+                   нужно 42, «В группе» 56, а жёсткая сетка давала всем 267;
+                   «Тип сетки» стоял в 549 под слово «Групповая».
+                   Ряд идёт потоком, поля встают по своей ступени и
+                   переносятся сами — дыр в конце ряда некому оставить.
+                   Ступени заведены в компоненте (admin.css, .ad-pole-*) и
+                   посчитаны от самой длинной ПОДПИСИ каждого рода: значение
+                   «2» занимает 10 пикселей, а «ВЫХОДЯТ ИЗ ГРУППЫ» — 121.
+                   РЯДОВ ТРИ — решение Кости 28.09: настройки сетки, потом
+                   расписание матча, потом подписи протокола. «Корты» уехали
+                   во второй ряд: корт — это про то, где играют матчи, а не
+                   про то, как устроена сетка. */
+                '<div class="ad-field-row ad-field-flow">' +
+                    '<div class="ad-field ad-pole-srednee" id="adTrnBracketTypeWrap">' +
                         '<label class="ad-field-label">' + L.trnBracketType + '</label>' +
                         '<select class="ad-field-input" id="adTrnBracketType">' +
                             '<option value="">' + L.selectBracketType + '</option>' +
@@ -971,7 +983,7 @@
                             '<option value="group_league"' + A.sel(item, 'bracket_type', 'group_league') + '>' + L.bracketGL + '</option>' +
                         '</select>' +
                     '</div>' +
-                    '<div class="ad-field" id="adTrnDrawSizeWrap">' +
+                    '<div class="ad-field ad-pole-srednee" id="adTrnDrawSizeWrap">' +
                         '<label class="ad-field-label">' + L.trnDrawSize + '</label>' +
                         '<select class="ad-field-input" id="adTrnDrawSize">' +
                             '<option value="">' + L.selectDrawSize + '</option>' +
@@ -982,50 +994,50 @@
                             '<option value="128"' + (item && +item.draw_size === 128 ? ' selected' : '') + '>128</option>' +
                         '</select>' +
                     '</div>' +
-                    '<div class="ad-field" id="adTrnGroupCountWrap" style="display:none;">' +
+                    '<div class="ad-field ad-pole-uzkoe" id="adTrnGroupCountWrap">' +
                         '<label class="ad-field-label">' + L.trnGroupCount + '</label>' +
                         '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnGroupCount" placeholder="2" value="' + (item && item.group_count ? item.group_count : '') + '">' +
                     '</div>' +
-                    '<div class="ad-field" id="adTrnPerGroupWrap" style="display:none;">' +
+                    '<div class="ad-field ad-pole-uzkoe" id="adTrnPerGroupWrap">' +
                         '<label class="ad-field-label">' + L.trnPerGroup + '</label>' +
                         '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnPerGroup" placeholder="4">' +
                     '</div>' +
-                    '<div class="ad-field" id="adTrnQualifiersWrap" style="display:none;">' +
+                    '<div class="ad-field ad-pole-uzkoe" id="adTrnQualifiersWrap">' +
                         '<label class="ad-field-label">' + L.trnQualifiers + '</label>' +
                         '<input type="text" inputmode="numeric" autocomplete="off" class="ad-field-input" id="adTrnQualifiers" placeholder="2" value="' + (item && item.qualifiers_per_group ? item.qualifiers_per_group : '2') + '">' +
                     '</div>' +
-                    '<div class="ad-field" id="adTrnPlayoffWrap" style="display:none;">' +
+                    '<div class="ad-field ad-pole-srednee" id="adTrnPlayoffWrap">' +
                         '<label class="ad-field-label">' + L.trnPlayoffFormat + '</label>' +
                         '<select class="ad-field-input" id="adTrnPlayoffFormat">' +
                             '<option value="ig"' + A.sel(item, 'playoff_format', 'ig') + '>' + L.playoffIg + '</option>' +
                             '<option value="direct"' + A.sel(item, 'playoff_format', 'direct') + '>' + L.playoffDirectShort + '</option>' +
                         '</select>' +
                     '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnCourtCount + '</label>' +
-                        '<input type="number" class="ad-field-input" id="adTrnCourtCount" min="1" max="10" value="' + (item ? (item.court_count || 2) : 2) + '">' +
-                    '</div>' +
                 '</div>' +
                 // Расклад прямо под настройками: сколько выйдет, какая сетка,
                 // сколько мест придётся доигрывать. Иначе менеджер узнаёт об
                 // этом только в день турнира, когда менять уже поздно
-                '<div id="adTrnDrawHint" class="ad-sched-note" style="display:none;margin-top:-4px;"></div>' +
+                '<div id="adTrnDrawHint" class="ad-sched-note ad-sched-note-wide"></div>' +
                 // Формат сета, длительность и время начала — одним рядом:
                 // порознь они занимали две строки, а вместе читаются как одна
                 // настройка расписания
-                '<div class="ad-field-row ad-field-row-3">' +
-                    '<div class="ad-field">' +
+                '<div class="ad-field-row ad-field-flow">' +
+                    '<div class="ad-field ad-pole-uzkoe">' +
+                        '<label class="ad-field-label">' + L.trnCourtCount + '</label>' +
+                        '<input type="number" class="ad-field-input" id="adTrnCourtCount" min="1" max="10" value="' + (item ? (item.court_count || 2) : 2) + '">' +
+                    '</div>' +
+                    '<div class="ad-field ad-pole-srednee">' +
                         '<label class="ad-field-label">' + L.trnSetFormat + '</label>' +
                         '<select class="ad-field-input" id="adTrnSetFormat">' +
                             '<option value="standard"' + A.sel(item, 'set_format', 'standard') + '>' + L.formatStandard + '</option>' +
                             '<option value="short"' + A.sel(item, 'set_format', 'short') + '>' + L.formatShort + '</option>' +
                         '</select>' +
                     '</div>' +
-                    '<div class="ad-field">' +
+                    '<div class="ad-field ad-pole-uzkoe">' +
                         '<label class="ad-field-label">' + L.trnMatchDuration + '</label>' +
                         '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnMatchDuration" placeholder="90" value="' + (item ? (item.match_duration || 90) : 90) + '">' +
                     '</div>' +
-                    '<div class="ad-field">' +
+                    '<div class="ad-field ad-pole-uzkoe">' +
                         '<label class="ad-field-label">' + L.trnStartTime + '</label>' +
                         '<input type="time" class="ad-field-input" id="adTrnStartTime" value="' + (item && item.start_time ? item.start_time.slice(0, 5) : '09:00') + '">' +
                     '</div>' +
@@ -1034,13 +1046,16 @@
                 // Кто подписывает протокол — последней настройкой: это не
                 // про игру, а про бумагу. Заполнили — имена печатаются под
                 // линией подписи; пусто — линия останется для ручки
-                '<div class="ad-field-row">' +
-                    '<div class="ad-field">' +
+                /* Имена людей длиннее номера корта, поэтому каждое поле
+                   занимает две ячейки: ширина остаётся прежней, а колонка
+                   формы не ломается */
+                '<div class="ad-field-row ad-field-flow">' +
+                    '<div class="ad-field ad-pole-shirokoe">' +
                         '<label class="ad-field-label">' + L.trnDirector + '</label>' +
                         '<input type="text" class="ad-field-input" id="adTrnDirector" placeholder="' +
                             L.trnSignHint + '" value="' + A.esc((item && item.director_name) || '') + '">' +
                     '</div>' +
-                    '<div class="ad-field">' +
+                    '<div class="ad-field ad-pole-shirokoe">' +
                         '<label class="ad-field-label">' + L.trnReferee + '</label>' +
                         '<input type="text" class="ad-field-input" id="adTrnReferee" placeholder="' +
                             L.trnSignHint + '" value="' + A.esc((item && item.referee_name) || '') + '">' +

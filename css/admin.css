@@ -757,7 +757,15 @@ body.ad-page {
 
 /* ---- Buttons ---- */
 .ad-btn {
-    padding: 10px 24px;
+    /* ВЫСОТА КНОПКИ — СВОЙСТВОМ, А НЕ ПОЛЯМИ. Считалась из padding 10+10
+       и межстрочного и давала 41: мимо шкалы 28·36·44·52 и МЕНЬШЕ цели
+       нажатия 44. Замер 28.09: четыре кнопки внизу формы турнира,
+       включая «Удалить» */
+    /* СТУПЕНЬ — ПЕРЕМЕННАЯ, А НЕ ЧИСЛО. Компонент Button 17:82:
+       xs 28 · sm 36 · md 44 · lg 52. Умолчание md, остальные ступени —
+       классами ниже. Одно определение на одно понятие */
+    height: var(--ad-btn-h, var(--btn-h-md));
+    padding: 0 24px;
     border-radius: var(--radius-full);
     font-size: var(--fs-sm);
     font-weight: 600;
@@ -782,6 +790,81 @@ body.ad-page {
 .ad-btn:hover:not(.ad-btn-primary):not(.ad-btn-secondary):not(.ad-btn-danger):not(.ad-btn-warning) {
     border-color: var(--accent);
     color: var(--accent);
+}
+
+/* ==========================================================================
+   СТУПЕНИ КНОПКИ — по компоненту Button 17:82.
+   Замер 28.09 на странице турнира: 37 видимых кнопок, 10 вариантов,
+   высоты 28 · 32 · 36 · 44 (32 мимо шкалы), радиусов четыре.
+   ========================================================================== */
+.ad-btn-xs { --ad-btn-h: var(--btn-h-xs); padding: 0 var(--space-3); font-size: var(--fs-xs); }
+.ad-btn-sm { --ad-btn-h: var(--btn-h-sm); padding: 0 var(--space-sm); }
+.ad-btn-lg { --ad-btn-h: var(--btn-h-lg); padding: 0 var(--space-6); }
+
+/* СПИСОК КНОПОК НИЖЕ 44 — В ОДНОМ МЕСТЕ.
+   CSS не умеет сказать «любая кнопка ниже ступени 44»: такого селектора
+   нет. Значит перечисление неизбежно — но оно ОДНО, и за ним следит
+   сторож заморозки: появится новая низкая кнопка мимо списка — правило
+   упадёт. Память уже подводила, пусть ловит проверка. */
+.ad-lang-tab,
+.ad-btn-translate-all,
+.ad-tab,
+.ad-image-upload-remove {
+    position: relative;
+}
+
+.ad-lang-tab::after,
+.ad-btn-translate-all::after,
+.ad-tab::after,
+.ad-image-upload-remove::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);
+    bottom: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);
+}
+
+/* Крестик удаления афиши — ступень xs 28, значит слой шире на 8 с каждой
+   стороны, а не на 4 */
+.ad-image-upload-remove { --ad-cel-h: var(--btn-h-xs); }
+
+.ad-lang-tab:focus-visible,
+.ad-btn-translate-all:focus-visible,
+.ad-tab:focus-visible,
+.ad-image-upload-remove:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ЦЕЛЬ НАЖАТИЯ 44 — ОДНИМ ОПРЕДЕЛЕНИЕМ НА ВСЁ.
+   Раньше этот слой был написан дважды — у .ad-lang-tab и
+   .ad-btn-translate-all, — а девять кнопок из восемнадцати, что ниже 44,
+   не имели его вовсе: четыре вкладки турнира, колокольчик, «Выйти»,
+   крестик удаления афиши 28×28 и две инлайн-кнопки по 32.
+   Слой прозрачный и лежит СНАРУЖИ коробки: раздувать саму кнопку значит
+   ломать ряд, в котором она стоит. Правило проекта — «цель нажатия
+   рисуется рамкой вокруг элемента, а не его размером». */
+.ad-cel-44 {
+    position: relative;
+}
+
+.ad-cel-44::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* (44 − высота) / 2 в каждую сторону; для ступени 36 это 4, для 28 — 8 */
+    top: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);
+    bottom: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);
+}
+
+/* ФОКУС НА БАЗОВОМ КЛАССЕ, А НЕ У ИЗБРАННЫХ. Было у двух классов из
+   десяти: клавиатурой по админке пройти было нельзя */
+.ad-btn:focus-visible,
+.ad-cel-44:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .ad-btn-primary,
@@ -880,13 +963,7 @@ body.ad-page {
     font-weight: 700;
 }
 
-/* ОДНА СТУПЕНЬ НА ВСЕ КНОПКИ ЭКРАНА. Было 12 у мелкой кнопки против 14 у
-   «Назад к списку» — одно понятие с двумя определениями на одном экране.
-   Решение Кости 28.09: свести к 14 */
-.ad-btn-sm {
-    padding: 6px var(--space-3);
-    font-size: var(--fs-sm);
-}
+
 
 .ad-btn-translate {
     display: inline-flex;
@@ -1207,6 +1284,54 @@ input[type="date"]::-webkit-datetime-edit {
 
 .ad-field-row-4 {
     grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+/* Сетка формы одна на всю вкладку, а полю, которому нужно шире, даётся
+   ячеек больше. Так колонка, которую глаз ведёт сверху вниз, не ломается
+   на стыке карточек — прежде соседние карточки имели 3 и 4 колонки */
+.ad-field-2 {
+    grid-column: span 2;
+}
+
+/* ШИРИНА ПОЛЯ — СВОЙСТВО СОДЕРЖИМОГО, А НЕ КОЛОНКИ.
+   Замер 28.09, карточка «Тип сетки»: полю «Корты» нужно 42, «В группе» —
+   56, а сетка давала всем по 267; «Тип сетки» стоял в 549 под слово
+   «Групповая». Поле шире содержимого — ложное обещание: человек думает,
+   что туда влезет длинное.
+   Ширину задаёт ПОДПИСЬ, а не значение: «2» занимает 10 пикселей, а
+   «ВЫХОДЯТ ИЗ ГРУППЫ» — 121. Отсюда и ступени, посчитанные от самой
+   длинной подписи каждого рода:
+     узкое   160  числа      (самая длинная подпись 121)
+     среднее 280  выбор      (самое длинное значение 259 — «Олимпийская»)
+     широкое 360  имена      (подпись и значение — человеческое имя)
+   Ряд идёт потоком: поля встают по своей ширине и переносятся сами.
+   Дыр в конце ряда не бывает — их некому оставить. */
+.ad-field-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.ad-field-flow > .ad-field {
+    flex: 0 0 var(--pole-shirina, 280px);
+    min-width: 0;
+}
+
+.ad-pole-uzkoe   { --pole-shirina: 160px; }
+.ad-pole-srednee { --pole-shirina: 280px; }
+.ad-pole-shirokoe{ --pole-shirina: 360px; }
+
+/* Ниже 640 ряд становится одной колонкой, как и у сеточных рядов */
+@media (max-width: 640px) {
+    .ad-field-flow > .ad-field {
+        flex: 1 1 100%;
+    }
+}
+
+/* Подсказка расчёта идёт под своим рядом во всю его ширину. Прежде она
+   стояла отдельным блоком с инлайн margin-top: -4px — числом мимо шкалы */
+.ad-sched-note-wide {
+    grid-column: 1 / -1;
 }
 
 /* Players — Filter Row */
@@ -1681,23 +1806,8 @@ select.ad-field-input {
     transition: var(--transition-fast);
 }
 
-/* Цель нажатия 44 при видимых 36: на планшете попадают пальцем,
-   а раздувать саму плашку значит ломать ряд */
-.ad-lang-tab::after,
-.ad-btn-translate-all::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: -4px;
-    bottom: -4px;
-}
-
-.ad-lang-tab:focus-visible,
-.ad-btn-translate-all:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-}
+/* Слой цели нажатия и кольцо фокуса переехали на общий .ad-cel-44:
+   здесь они были второй копией одного понятия */
 
 .ad-lang-tab.active {
     background: rgba(204, 255, 0, 0.1);
@@ -6035,9 +6145,11 @@ select.ad-field-input {
 .ad-sched-note {
     background: rgba(255, 255, 255, 0.04);
     border-left: 3px solid var(--accent);
-    border-radius: 6px;
-    padding: 10px 14px;
-    margin-bottom: 14px;
+    border-radius: var(--radius-sm);
+    /* Было 10 14 и margin-bottom 14 — ни одного числа со шкалы
+       8 · 12 · 16 · 24 · 32 · 40 */
+    padding: 12px 16px;
+    margin-bottom: 16px;
     font-size: var(--fs-sm);
     color: var(--text-secondary);
     line-height: 1.5;
