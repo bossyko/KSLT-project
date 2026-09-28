@@ -6749,6 +6749,33 @@ select.ad-field-input {
     white-space: nowrap;
 }
 
+/* Плашка «Черновик» в списке кортов — тем же тоном, что у турниров:
+   одно состояние, один вид на всю админку */
+.ad-crt-draft {
+    margin-left: var(--space-2);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+/* ---- Поиск корта в форме турнира ---- */
+/* Адрес рядом с названием был зашит в разметку числом 0.8rem и цветом
+   --text-dim (3.21:1, мимо WCAG AA). Ступень и токен вместо них */
+.ad-venue-addr {
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+}
+
+/* Последняя строка списка — создание. Отделена чертой, чтобы не читалась
+   как ещё один корт, и лаймом, потому что это действие, а не запись */
+.ad-venue-add {
+    border-top: 1px solid var(--border-subtle);
+    color: var(--accent);
+    font-weight: 600;
+}
+
 /* ---- Обводка окна ---- */
 /* Бегущая рамка ОТЛОЖЕНА, и вот почему — честно.
    Рисунок такой рамки в проекте один: `::before` с conic-gradient и маской

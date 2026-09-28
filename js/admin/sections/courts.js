@@ -259,6 +259,11 @@
             var partnerHtml = c.partner ? '<span class="ad-partner-badge">✓</span>' : '';
             var promotedHtml = c.promoted ? '<span style="color:var(--accent);">⭐</span>' : '—';
             var cityText = A.esc(c.city || '—');
+            /* Черновик — корт, заведённый из формы турнира тремя полями.
+               На сайте его нет, и в списке это должно быть видно сразу,
+               а не выясняться открытием карточки */
+            var имяЯчейка = A.esc(c.name || L.noData) +
+                (c.published_at ? '' : ' <span class="ad-status-draft ad-crt-draft">' + L.crtDraft + '</span>');
 
             var viewsCell = (c.view_count || 0) > 0 ? c.view_count : '\u2014';
 
@@ -267,7 +272,7 @@
                     '<tr data-crt-id="' + c.id + '">' +
                         A.bulkCheckboxTd(c.id) +
                         '<td style="text-align:center;">' + editBtnHtml + '</td>' +
-                        '<td style="font-weight:500;color:var(--text-primary);">' + A.esc(c.name || L.noData) + '</td>' +
+                        '<td style="font-weight:500;color:var(--text-primary);">' + имяЯчейка + '</td>' +
                         '<td>' + L.noData + '</td>' +
                         '<td>' + L.noData + '</td>' +
                         '<td style="text-align:center;">' + L.noData + '</td>' +
@@ -286,7 +291,7 @@
                             '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + c.id + '" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">' +
                         '</td>' +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + editBtnHtml + '</td>' +
-                        '<td rowspan="' + rowCount + '" style="font-weight:500;color:var(--text-primary);vertical-align:middle;">' + A.esc(c.name || L.noData) + '</td>' +
+                        '<td rowspan="' + rowCount + '" style="font-weight:500;color:var(--text-primary);vertical-align:middle;">' + имяЯчейка + '</td>' +
                         '<td><span class="ad-type-badge ad-type-' + (t0.type || 'indoor') + '">' + (A.COURT_TYPES[t0.type] || t0.type || '') + '</span></td>' +
                         '<td style="text-align:center;">' + (A.COURT_SURFACES[t0.surface] || t0.surface || '') + '</td>' +
                         '<td style="text-align:center;">' + (t0.count || 1) + '</td>' +
@@ -839,21 +844,34 @@
     // Города, уже заведённые в базе: название на трёх языках. Заполняется
     // при открытии раздела, используется подсказкой в поле города
     var crtKnownCities = [];
+    /* Страны берём из базы теми же данными, что и города: выдуманный список
+       стран — это выдуманные данные. Пока клуб играет в Кыргызстане, список
+       из одной страны, и он честен */
+    var crtKnownCountries = [];
 
     async function loadKnownCities() {
         if (!A.client) return;
-        var res = await A.client.from('courts').select('city, city_en, city_kg');
+        var res = await A.client.from('courts').select('city, city_en, city_kg, country, country_en');
         if (res.error || !res.data) return;
 
         var seen = {};
         crtKnownCities = [];
+        var виденаСтрана = {};
+        crtKnownCountries = [];
         res.data.forEach(function(row) {
             var name = (row.city || '').trim();
-            if (!name || seen[name.toLowerCase()]) return;
-            seen[name.toLowerCase()] = true;
-            crtKnownCities.push({ ru: name, en: (row.city_en || '').trim(), kg: (row.city_kg || '').trim() });
+            if (name && !seen[name.toLowerCase()]) {
+                seen[name.toLowerCase()] = true;
+                crtKnownCities.push({ ru: name, en: (row.city_en || '').trim(), kg: (row.city_kg || '').trim() });
+            }
+            var страна = (row.country || '').trim();
+            if (страна && !виденаСтрана[страна.toLowerCase()]) {
+                виденаСтрана[страна.toLowerCase()] = true;
+                crtKnownCountries.push({ ru: страна, en: (row.country_en || '').trim() });
+            }
         });
         crtKnownCities.sort(function(a, b) { return a.ru.localeCompare(b.ru, 'ru'); });
+        crtKnownCountries.sort(function(a, b) { return a.ru.localeCompare(b.ru, 'ru'); });
     }
 
     /**
@@ -1056,6 +1074,13 @@
                                 crtKnownCities.map(function(c) { return '<option value="' + A.esc(c.ru) + '">'; }).join('') +
                             '</datalist>' +
                         '</div>' +
+                        '<div class="ad-field">' +
+                            '<label class="ad-field-label">' + L.crtCountry + '</label>' +
+                            '<input type="text" class="ad-field-input" id="adCrtCountry" list="adCrtCountryList" autocomplete="off" value="' + A.esc(item ? item.country : 'Кыргызстан') + '">' +
+                            '<datalist id="adCrtCountryList">' +
+                                crtKnownCountries.map(function(c) { return '<option value="' + A.esc(c.ru) + '">'; }).join('') +
+                            '</datalist>' +
+                        '</div>' +
                         '<div class="ad-field" style="max-width:100px;">' +
                             '<label class="ad-field-label">' + L.crtPostalCode + '</label>' +
                             '<input type="text" class="ad-field-input" id="adCrtPostal" value="' + A.esc(item ? item.postal_code : '') + '">' +
@@ -1076,6 +1101,13 @@
                     '<div class="ad-field" style="margin-top:8px;">' +
                         '<label class="ad-field-label">' + L.crtCity + ' (EN)</label>' +
                         '<input type="text" class="ad-field-input" id="adCrtCityEn" value="' + A.esc(item ? item.city_en : 'Bishkek') + '">' +
+                    '</div>' +
+                    /* Кыргызской страны нет: в базе заведены country и
+                       country_en, третьего столбца никто не заводил, и
+                       выдумывать его форма не вправе */
+                    '<div class="ad-field" style="margin-top:8px;">' +
+                        '<label class="ad-field-label">' + L.crtCountry + ' (EN)</label>' +
+                        '<input type="text" class="ad-field-input" id="adCrtCountryEn" value="' + A.esc(item ? item.country_en : 'Kyrgyzstan') + '">' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="kg">' +
@@ -1228,6 +1260,12 @@
             '<div class="ad-btn-row">' +
                 '<button class="ad-btn ad-btn-primary" id="adCrtSave">' + L.save + '</button>' +
                 (crtEditingId ? '<button class="ad-btn ad-btn-danger" id="adCrtDelete">' + L.delete + '</button>' : '') +
+                /* Публикация отдельной кнопкой, как у турниров: сохранение
+                   не открывает корт людям само. Дозаполнил — опубликовал */
+                (crtEditingId
+                    ? '<button class="ad-btn ' + (item && item.published_at ? 'ad-btn-secondary' : 'ad-btn-primary') + '" id="adCrtPublish">' +
+                        (item && item.published_at ? L.crtUnpublish : L.crtPublish) + '</button>'
+                    : '') +
             '</div>';
 
         // --- Event Listeners ---
@@ -1793,6 +1831,39 @@
                 });
             });
         }
+
+        var pubBtn = document.getElementById('adCrtPublish');
+        if (pubBtn) {
+            pubBtn.addEventListener('click', function() {
+                var открыт = !!(item && item.published_at);
+                A.showConfirm(
+                    открыт ? L.crtUnpublishConfirm : L.crtPublishConfirm,
+                    открыт ? L.crtUnpublishText : L.crtPublishText,
+                    function() { return публикацияКорта(!открыт); },
+                    открыт ? L.crtUnpublish : L.crtPublish
+                );
+            });
+        }
+    }
+
+    /**
+     * Открыть корт людям или снять с сайта.
+     *
+     * Отдельной кнопкой, как у турниров: «Сохранить» не публикует само.
+     * Корт, заведённый из формы турнира, — это три поля без фотографии,
+     * покрытий и цен; показывать его людям до дозаполнения нельзя.
+     */
+    async function публикацияКорта(открыть) {
+        if (!crtEditingId) return;
+        var res = await A.client.from('courts')
+            .update({ published_at: открыть ? new Date().toISOString() : null })
+            .eq('id', crtEditingId);
+        if (res.error) {
+            A.showToast(res.error.message, 'error');
+            throw new Error(res.error.message);
+        }
+        A.showToast(открыть ? L.crtPublished : L.crtUnpublished, 'success');
+        renderCourtsList();
     }
 
     // ---- Map embed URL parser ----
@@ -2049,27 +2120,10 @@
         return false;
     }
 
-    /**
-     * Адрес страницы корта делается из названия и должен быть единственным
-     * на весь сайт. Два корта с одним названием раньше упирались в отказ
-     * базы: человек видел техническую ошибку про дубликат ключа.
-     */
-    async function uniqueCourtId(name) {
-        var base = A.slugify(name) || 'court';
-        if (!A.client) return base;
-
-        var res = await A.client.from('courts').select('id').like('id', base + '%');
-        if (res.error || !res.data || !res.data.length) return base;
-
-        var taken = {};
-        res.data.forEach(function(row) { taken[row.id] = true; });
-        if (!taken[base]) return base;
-
-        for (var n = 2; n < 100; n++) {
-            if (!taken[base + '-' + n]) return base + '-' + n;
-        }
-        return base + '-' + Date.now();
-    }
+    /* uniqueCourtId переехала в js/admin/core/utils.js: её же зовёт
+       создание корта прямо из формы турнира, и два одинаковых слугификатора
+       разошлись бы на первом же переименовании */
+    var uniqueCourtId = function(name) { return A.uniqueCourtId(name); };
 
     async function saveCourtHandler() {
         if (!validatePhones()) return;
@@ -2132,6 +2186,8 @@
                 city: normalizeCity(document.getElementById('adCrtCity').value) || null,
                 city_en: document.getElementById('adCrtCityEn').value.trim() || null,
                 city_kg: document.getElementById('adCrtCityKg').value.trim() || null,
+                country: document.getElementById('adCrtCountry').value.trim() || null,
+                country_en: document.getElementById('adCrtCountryEn').value.trim() || null,
                 postal_code: document.getElementById('adCrtPostal').value.trim() || null,
                 phone: phonesStr || null,
                 whatsapp: whatsappValue(),

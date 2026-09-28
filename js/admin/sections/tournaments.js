@@ -2099,6 +2099,19 @@
        предупреждение при уходе со страницы и при переходе по вкладкам. */
 
     // ---- Venue Search (court autocomplete) ----
+    /**
+     * Поиск корта по справочнику.
+     *
+     * Ищет по названию, английскому названию, улице и городу: раньше только
+     * по `name`, и корт, который помнят по адресу, не находился.
+     * Лимит поднят с 20 до 50 — кортов в базе 30, и десять из них при
+     * пустом запросе не показывались вовсе.
+     *
+     * Последней строкой — «Добавить корт»: справочник должен расти из
+     * работы. Менеджер заводит турнир за полчаса до публикации, и уйти
+     * в раздел «Корты», создать запись и вернуться он не успевает —
+     * замерено: из 45 турниров шесть остались вовсе без места.
+     */
     async function searchTrnVenue(query) {
         if (!A.client) return;
         var resultsDiv = document.getElementById('adTrnVenueResults');
@@ -2106,27 +2119,42 @@
 
         var qb = A.client.from('courts')
             .select('id,name,name_en,street,building,city,phone,google_maps_url,twogis_url');
-        if (query) qb = qb.ilike('name', '%' + query + '%');
-        var result = await qb.order('name').limit(20);
+        if (query) {
+            var шаблон = '%' + query + '%';
+            qb = qb.or('name.ilike.' + шаблон + ',name_en.ilike.' + шаблон +
+                       ',street.ilike.' + шаблон + ',city.ilike.' + шаблон);
+        }
+        var result = await qb.order('name').limit(50);
 
         var items = result.data || [];
-        if (items.length === 0) {
-            resultsDiv.style.display = 'none';
-            return;
-        }
-
         var html = '';
         items.forEach(function(c) {
             var addr = [c.street, c.building, c.city].filter(Boolean).join(', ');
             html += '<div class="ad-pay-entity-item" data-id="' + c.id + '" data-name="' + A.esc(c.name || '') + '" data-name-en="' + A.esc(c.name_en || '') + '">' +
-                A.esc(c.name) + (addr ? ' <span style="color:var(--text-dim);font-size:0.8rem;">— ' + A.esc(addr) + '</span>' : '') +
+                A.esc(c.name) + (addr ? ' <span class="ad-venue-addr">— ' + A.esc(addr) + '</span>' : '') +
             '</div>';
         });
+
+        var набрано = (query || '').trim();
+        if (набрано) {
+            html += '<div class="ad-pay-entity-item ad-venue-add" data-add="1">+ ' +
+                L.trnVenueAdd.replace('{name}', A.esc(набрано)) + '</div>';
+        }
+
+        if (!html) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
         resultsDiv.innerHTML = html;
         resultsDiv.style.display = 'block';
 
         resultsDiv.querySelectorAll('.ad-pay-entity-item').forEach(function(el) {
             el.addEventListener('click', function() {
+                if (el.dataset.add) {
+                    resultsDiv.style.display = 'none';
+                    окноКорта(набрано);
+                    return;
+                }
                 document.getElementById('adTrnCourtId').value = el.dataset.id;
                 document.getElementById('adTrnVenueSearch').value = el.dataset.name;
                 resultsDiv.style.display = 'none';
@@ -2135,10 +2163,197 @@
         });
     }
 
+    /**
+     * Окно «новый корт» прямо из формы турнира.
+     *
+     * Полей ровно столько, сколько нужно, чтобы место было местом:
+     * название и адрес обязательны, ссылки на карты — нет (решение Кости
+     * 28.09). Остальное — телефон, фотографии, покрытия, расписание —
+     * дозаполняется в разделе «Корты»: здесь менеджер занят турниром.
+     *
+     * ПРЕДПОЛОЖЕНИЕ: город нужен, хотя Костя его не называл. Он есть у всех
+     * тридцати кортов, по нему сайт группирует и ищет, и без него новый
+     * корт выпал бы из этих списков. Взят выпадающим из уже существующих.
+     */
+    /**
+     * Окно корта: создание и правка одним окном.
+     *
+     * @param {Object|string} что — строка courts для правки, либо набранное
+     *        название для нового корта. Два окна на одно понятие разошлись
+     *        бы на первой же правке полей.
+     */
+    async function окноКорта(что) {
+        var правим = что && typeof что === 'object' ? что : null;
+        var имя = правим ? (правим.name || '') : (что || '');
+        var города = [], страны = [];
+        if (A.client) {
+            var гр = await A.client.from('courts').select('city,country');
+            (гр.data || []).forEach(function(c) {
+                if (c.city && города.indexOf(c.city) === -1) города.push(c.city);
+                if (c.country && страны.indexOf(c.country) === -1) страны.push(c.country);
+            });
+            города.sort();
+            страны.sort();
+        }
+
+        A.showConfirm(
+            правим ? L.trnVenueEditTitle : L.trnVenueNewTitle,
+            '<div class="ad-field">' +
+                '<label class="ad-field-label" for="adTrnNewCrtName">' + L.trnVenueNewName + '</label>' +
+                '<input type="text" class="ad-field-input" id="adTrnNewCrtName" value="' + A.esc(имя) + '">' +
+            '</div>' +
+            '<div class="ad-field">' +
+                '<label class="ad-field-label" for="adTrnNewCrtStreet">' + L.trnVenueNewAddr + '</label>' +
+                '<input type="text" class="ad-field-input" id="adTrnNewCrtStreet" placeholder="' + A.esc(L.trnVenueNewAddrHint) + '" value="' + A.esc(правим ? (правим.street || '') : '') + '">' +
+            '</div>' +
+            /* Город — тем же приёмом, что и сам корт: печатаешь, список
+               фильтруется, а когда совпадений нет — последней строкой
+               «Использовать „Каракол"». Выпадающий список из пяти городов
+               запирал в справочнике: нового города туда было не вписать,
+               а отдельное поле «другой» — это второе определение одного
+               понятия. Одно поле на одно понятие */
+            '<div class="ad-field ad-pay-entity-wrap">' +
+                '<label class="ad-field-label" for="adTrnNewCrtCity">' + L.trnVenueNewCity + '</label>' +
+                '<input type="text" class="ad-field-input" id="adTrnNewCrtCity" autocomplete="off" value="' + A.esc(правим ? (правим.city || '') : (города[0] || '')) + '">' +
+                '<div class="ad-pay-entity-results" id="adTrnNewCrtCityList" style="display:none;"></div>' +
+            '</div>' +
+            /* Страна тем же полем: клуб играет в Кыргызстане, но возит
+               турниры в Алматы и Ташкент, и «Алматы» без страны в списке
+               рядом с «Ош» читается кыргызским городом */
+            '<div class="ad-field ad-pay-entity-wrap">' +
+                '<label class="ad-field-label" for="adTrnNewCrtCountry">' + L.trnVenueNewCountry + '</label>' +
+                '<input type="text" class="ad-field-input" id="adTrnNewCrtCountry" autocomplete="off" value="' + A.esc(правим ? (правим.country || '') : (страны[0] || '')) + '">' +
+                '<div class="ad-pay-entity-results" id="adTrnNewCrtCountryList" style="display:none;"></div>' +
+            '</div>' +
+            '<div class="ad-field">' +
+                '<label class="ad-field-label" for="adTrnNewCrt2gis">' + L.trnVenueNew2gis + '</label>' +
+                '<input type="url" class="ad-field-input" id="adTrnNewCrt2gis" placeholder="https://2gis.kg/..." value="' + A.esc(правим ? (правим.twogis_url || '') : '') + '">' +
+            '</div>' +
+            '<div class="ad-field">' +
+                '<label class="ad-field-label" for="adTrnNewCrtGoogle">' + L.trnVenueNewGoogle + '</label>' +
+                '<input type="url" class="ad-field-input" id="adTrnNewCrtGoogle" placeholder="https://www.google.com/maps/..." value="' + A.esc(правим ? (правим.google_maps_url || '') : '') + '">' +
+            '</div>',
+            function() { return сохранитьКорт(правим); },
+            правим ? L.trnVenueEditSave : L.trnVenueNewSave
+        );
+
+        подсказки('adTrnNewCrtCity', 'adTrnNewCrtCityList', города);
+        подсказки('adTrnNewCrtCountry', 'adTrnNewCrtCountryList', страны);
+    }
+
+    /**
+     * Подсказки к полю со своим вводом: те же классы списка, что у поиска
+     * корта. Одна функция на город и страну — два одинаковых списка
+     * разошлись бы на первой же правке.
+     */
+    function подсказки(idПоля, idСписка, значения) {
+        var города = значения;
+        var поле = document.getElementById(idПоля);
+        var список = document.getElementById(idСписка);
+        if (!поле || !список) return;
+
+        function нарисовать() {
+            var q = (поле.value || '').trim().toLowerCase();
+            var под = города.filter(function(г) { return !q || г.toLowerCase().indexOf(q) !== -1; });
+            var html = под.map(function(г) {
+                return '<div class="ad-pay-entity-item" data-city="' + A.esc(г) + '">' + A.esc(г) + '</div>';
+            }).join('');
+            /* Точного совпадения нет — предлагаем взять набранное как есть */
+            var своё = (поле.value || '').trim();
+            if (своё && города.indexOf(своё) === -1) {
+                html += '<div class="ad-pay-entity-item ad-venue-add" data-city="' + A.esc(своё) + '">+ ' +
+                    L.trnVenueUseCity.replace('{name}', A.esc(своё)) + '</div>';
+            }
+            if (!html) { список.style.display = 'none'; return; }
+            список.innerHTML = html;
+            список.style.display = 'block';
+            список.querySelectorAll('.ad-pay-entity-item').forEach(function(el) {
+                el.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    поле.value = el.dataset.city;
+                    список.style.display = 'none';
+                });
+            });
+        }
+
+        поле.addEventListener('input', нарисовать);
+        поле.addEventListener('focus', нарисовать);
+        поле.addEventListener('blur', function() { список.style.display = 'none'; });
+    }
+
+    /** @param {Object|null} правим — строка courts, если это правка */
+    async function сохранитьКорт(правим) {
+        var имя = (document.getElementById('adTrnNewCrtName').value || '').trim();
+        var улица = (document.getElementById('adTrnNewCrtStreet').value || '').trim();
+        var город = (document.getElementById('adTrnNewCrtCity').value || '').trim();
+        var страна = (document.getElementById('adTrnNewCrtCountry').value || '').trim();
+        var дгис = (document.getElementById('adTrnNewCrt2gis').value || '').trim();
+        var гугл = (document.getElementById('adTrnNewCrtGoogle').value || '').trim();
+
+        /* Ошибку показываем и НЕ закрываем окно: набранное не должно
+           пропадать из-за незаполненного поля */
+        if (!имя) { A.showToast(L.trnVenueNeedName, 'error'); throw new Error('нет названия'); }
+        if (!улица) { A.showToast(L.trnVenueNeedAddr, 'error'); throw new Error('нет адреса'); }
+
+        var поля = {
+            name: имя,
+            street: улица,
+            city: город || null,
+            country: страна || null,
+            google_maps_url: гугл || null,
+            twogis_url: дгис || null
+        };
+
+        /* ПЕРЕВОД НЕ ПЕРЕЖИВАЕТ ПРАВКУ ОРИГИНАЛА. Окно знает только русские
+           название, город и страну; английские и кыргызские поля остаются
+           в базе от прежнего значения. Замерено на «Отшибнике»: страна
+           стала «США», а country_en так и остался «Kyrgyzstan» — на
+           английской странице чикагский корт значился кыргызским.
+           Устаревший перевод хуже его отсутствия: пустое поле сборщик
+           адреса откатит на русское, и человек увидит «США», а не ложь.
+           Правильный перевод дописывается в разделе «Корты», где поля есть. */
+        if (правим) {
+            if ((правим.city || '') !== (город || '')) {
+                поля.city_en = null;
+                поля.city_kg = null;
+            }
+            if ((правим.country || '') !== (страна || '')) {
+                поля.country_en = null;
+            }
+            if ((правим.name || '') !== имя) {
+                поля.name_en = null;
+                поля.name_kg = null;
+            }
+        }
+
+        var res, id;
+        if (правим) {
+            /* Адрес страницы корта (id) при правке НЕ меняем: по нему уже
+               могут стоять ссылки, а переименование сломало бы их молча */
+            id = правим.id;
+            res = await A.client.from('courts').update(поля).eq('id', id);
+        } else {
+            id = await A.uniqueCourtId(имя);
+            res = await A.client.from('courts').insert(Object.assign({ id: id }, поля));
+        }
+        if (res.error) {
+            A.showToast(res.error.message, 'error');
+            throw new Error(res.error.message);
+        }
+
+        document.getElementById('adTrnCourtId').value = id;
+        document.getElementById('adTrnVenueSearch').value = имя;
+        var infoDiv = document.getElementById('adTrnVenueInfo');
+        if (infoDiv) infoDiv.innerHTML = '';
+        loadTrnVenueInfo(id);
+        trnDraftDirty = true;
+        A.showToast(правим ? L.trnVenueSaved : L.trnVenueAdded, 'success');
+    }
+
     async function loadTrnVenueInfo(courtId) {
         if (!A.client || !courtId) return;
         var result = await A.client.from('courts')
-            .select('id,name,name_en,street,building,city,phone,google_maps_url,twogis_url')
+            .select('id,name,name_en,street,building,city,country,country_en,phone,google_maps_url,twogis_url,published_at')
             .eq('id', courtId)
             .single();
 
@@ -2161,7 +2376,13 @@
         var html = '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;">' +
             '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
                 '<strong style="color:var(--text-primary);">' + A.esc(court.name) + '</strong>' +
-                '<button type="button" class="ad-btn ad-btn-sm ad-btn-secondary" id="adTrnVenueClear">' + L.trnVenueClear + '</button>' +
+                '<div style="display:flex;gap:8px;">' +
+                    /* Правка на месте: ошибся в названии — поправил, а не
+                       заводил корт заново. Раньше был только «Сбросить»,
+                       и опечатка стоила полного перенабора */
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-secondary" id="adTrnVenueEdit">' + L.trnVenueEdit + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-secondary" id="adTrnVenueClear">' + L.trnVenueClear + '</button>' +
+                '</div>' +
             '</div>';
         if (addr) {
             html += '<div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:4px;">' + L.trnVenueAddress + ': ' + A.esc(addr) + '</div>';
@@ -2184,6 +2405,10 @@
 
         infoDiv.innerHTML = html;
         infoDiv.style.display = 'block';
+
+        document.getElementById('adTrnVenueEdit').addEventListener('click', function() {
+            окноКорта(court);
+        });
 
         // Clear button
         document.getElementById('adTrnVenueClear').addEventListener('click', function() {

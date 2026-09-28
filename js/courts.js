@@ -332,6 +332,12 @@
                     renderDetail(found);
                     initScrollAnimations();
                     incrementCourtView(id);
+                } else {
+                    /* Корта среди опубликованных нет: он черновик, его сняли
+                       с сайта или ссылка старая. Раньше страница навсегда
+                       оставалась на «Загрузка…» — человек ждал того, чего
+                       не будет */
+                    нетКорта();
                 }
             }
         });
@@ -366,7 +372,11 @@
             return;
         }
         try {
-            client.from('courts').select('*').order('created_at', { ascending: false })
+            /* Черновики людям не показываем: корт, заведённый из формы
+               турнира, — это три поля без фото, покрытий и цен. Он ждёт,
+               когда его дозаполнят в админке и опубликуют */
+            client.from('courts').select('*').not('published_at', 'is', null)
+                .order('created_at', { ascending: false })
                 .then(function(result) {
                     if (result.error || !result.data) {
                         console.error('[KSLT] корты не загружены:', result.error && result.error.message);
@@ -430,14 +440,8 @@
             if (ct.price && (!minPrice || ct.price < minPrice)) minPrice = ct.price;
         });
 
-        // Build address
-        var parts = [];
-        var street = isEn ? (row.street_en || row.street) : isKg ? (row.street_kg || row.street) : row.street;
-        if (street) parts.push(street);
-        if (row.building) parts.push(row.building);
-        var city = isEn ? (row.city_en || row.city) : isKg ? (row.city_kg || row.city || 'Бишкек') : (row.city || 'Бишкек');
-        if (city) parts.push(city);
-        var address = parts.join(', ');
+        /* Адрес собирается в одном месте — js/court-address.js */
+        var address = window.KSLT_ADDRESS.адрес(row, isEn ? 'en' : (isKg ? 'kg' : 'ru'));
 
         // Description
         var desc = isEn ? (row.description_en || row.description || '') : isKg ? (row.description_kg || row.description || '') : (row.description || '');
@@ -1025,6 +1029,28 @@
         renderDetailHero(court);
         renderDetail(court);
         initScrollAnimations();
+    }
+
+    /** Корта нет среди опубликованных — говорим это, а не крутим загрузку */
+    function нетКорта() {
+        var container = document.getElementById('courtDetail');
+        var hero = document.getElementById('courtDetailHero');
+        if (hero) hero.innerHTML = '';
+        if (!container) return;
+        var заголовок = isEn ? 'Court is not published yet'
+            : (isKg ? 'Корт азырынча жарыяланган жок' : 'Корт ещё не открыт');
+        var текст = isEn ? 'It may be in preparation or removed from the site.'
+            : (isKg ? 'Ал даярдалууда же сайттан алынган болушу мүмкүн.'
+                    : 'Возможно, он готовится или снят с сайта.');
+        var кнопка = isEn ? 'All courts' : (isKg ? 'Бардык корттор' : 'Все корты');
+        var адрес = isEn ? 'courts-en.html' : (isKg ? 'courts-kg.html' : 'courts.html');
+        document.title = 'KSLT \u2014 ' + заголовок;
+        container.innerHTML =
+            '<div class="ct-empty">' +
+                '<h2 class="ct-empty-title">' + заголовок + '</h2>' +
+                '<p class="ct-empty-text">' + текст + '</p>' +
+                '<a class="btn-primary" href="' + адрес + '">' + кнопка + '</a>' +
+            '</div>';
     }
 
     function renderDetailHero(court) {

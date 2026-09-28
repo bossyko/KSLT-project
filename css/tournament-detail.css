@@ -856,6 +856,16 @@ tr.td-rr-row-dimmed {
     transition: opacity 0.2s;
 }
 
+/* Корт-черновик: имя текстом, а не ссылкой — вести некуда. Наведение
+   и курсор тоже снимаем, иначе обещают переход, которого не будет */
+.td-venue-name-plain {
+    cursor: default;
+}
+
+.td-venue-name-plain:hover {
+    color: var(--text-primary);
+}
+
 .td-venue-name:hover {
     opacity: 0.8;
 }

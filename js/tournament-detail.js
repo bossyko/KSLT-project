@@ -1168,7 +1168,7 @@ function loadFromSupabase(client, id) {
             // Doubles: will also need partner player data
 
             var courtPromise = tournament.court_id
-                ? client.from('courts').select('id, name, name_en, street, street_en, building, city, city_en, google_maps_url, twogis_url, photo').eq('id', tournament.court_id).single()
+                ? client.from('courts').select('id, name, name_en, street, street_en, street_kg, building, city, city_en, city_kg, country, country_en, google_maps_url, twogis_url, photo').eq('id', tournament.court_id).single()
                 : Promise.resolve({ data: null });
 
             Promise.all([matchesPromise, regsPromise, courtPromise]).then(function(results) {
@@ -2648,17 +2648,14 @@ function renderVenueSection(court, isEn) {
     if (!venueSection || !venueContent) return;
 
     var courtName = isEn ? (court.name_en || court.name) : (isKg ? (court.name_kg || court.name) : court.name);
-    var street = isEn ? (court.street_en || court.street || '') : (isKg ? (court.street_kg || court.street || '') : (court.street || ''));
-    var city = isEn ? (court.city_en || court.city || '') : (isKg ? (court.city_kg || court.city || '') : (court.city || ''));
-    var building = court.building || '';
+    /* Адрес собирается в одном месте — js/court-address.js */
+    var address = window.KSLT_ADDRESS.адрес(court, isEn ? 'en' : (isKg ? 'kg' : 'ru'));
 
-    var addressParts = [];
-    if (street) addressParts.push(street);
-    if (building) addressParts.push(building);
-    if (city) addressParts.push(city);
-    var address = addressParts.join(', ');
-
-    var courtUrl = isEn ? 'court-en.html?id=' + court.id : (isKg ? 'court-kg.html?id=' + court.id : 'court.html?id=' + court.id);
+    /* Черновик — корт без фотографий, покрытий и цен: его страницы на сайте
+       нет, и вести на неё некуда. Название остаётся текстом, карта работает:
+       доехать до места важнее, чем открыть карточку */
+    var черновик = !court.published_at;
+    var courtUrl = черновик ? '' : (isEn ? 'court-en.html?id=' + court.id : (isKg ? 'court-kg.html?id=' + court.id : 'court.html?id=' + court.id));
     var mapUrl = court.google_maps_url || court.twogis_url || '';
     var fullAddress = [courtName, address, 'Bishkek'].filter(Boolean).join(', ');
     var embedUrl = getMapEmbed(mapUrl, fullAddress);
@@ -2667,7 +2664,9 @@ function renderVenueSection(court, isEn) {
 
     // Info block
     html += '<div class="td-venue-info">' +
-        '<a href="' + esc(courtUrl) + '" class="td-venue-name">' + esc(courtName) + '</a>';
+        (черновик
+            ? '<span class="td-venue-name td-venue-name-plain">' + esc(courtName) + '</span>'
+            : '<a href="' + esc(courtUrl) + '" class="td-venue-name">' + esc(courtName) + '</a>');
     if (address) {
         html += '<div class="td-venue-address">' +
             '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +

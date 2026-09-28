@@ -134,6 +134,28 @@
     }
 
     /**
+     * Адрес страницы корта делается из названия и должен быть единственным
+     * на весь сайт. Два корта с одним названием раньше упирались в отказ
+     * базы: человек видел техническую ошибку про дубликат ключа.
+     */
+    async function uniqueCourtId(name) {
+        var base = slugify(name) || 'court';
+        if (!A.client) return base;
+
+        var res = await A.client.from('courts').select('id').like('id', base + '%');
+        if (res.error || !res.data || !res.data.length) return base;
+
+        var taken = {};
+        res.data.forEach(function(row) { taken[row.id] = true; });
+        if (!taken[base]) return base;
+
+        for (var n = 2; n < 100; n++) {
+            if (!taken[base + '-' + n]) return base + '-' + n;
+        }
+        return base + '-' + Date.now();
+    }
+
+    /**
      * Escapes HTML entities (& " < >).
      * @param {*} str
      * @returns {string}
@@ -858,6 +880,7 @@
     A.translateFromRu = translateFromRu;
     A.translateToEmpty = translateToEmpty;
     A.settleTranslateButtons = settleTranslateButtons;
+    A.uniqueCourtId = uniqueCourtId;
     A.settleTranslateButton = settleTranslateButton;
     A.translateText = translateText;
     A.setupBulkDelete = setupBulkDelete;

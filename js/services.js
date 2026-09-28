@@ -192,7 +192,9 @@
         if (client) {
             try {
                 var cResult = await client.from('courts')
-                    .select('id, name, name_en, photo, street, street_en, building, district, district_en, city, city_en, court_types, partner, promoted');
+                    .select('id, name, name_en, photo, street, street_en, street_kg, building, district, district_en, city, city_en, city_kg, country, country_en, court_types, partner, promoted')
+                    /* Черновики в витрину не попадают — см. js/courts.js */
+                    .not('published_at', 'is', null);
                 if (cResult.data && cResult.data.length > 0) {
                     courts = selectForDisplay(cResult.data, 10);
                 }
@@ -270,13 +272,8 @@
     }
 
     function getCourtAddress(c) {
-        var street = isEn ? (c.street_en || c.street) : (isKg ? (c.street_kg || c.street) : c.street);
-        var district = isEn ? (c.district_en || c.district) : (isKg ? (c.district_kg || c.district) : c.district);
-        var parts = [];
-        if (street) parts.push(street);
-        if (c.building) parts.push(c.building);
-        if (district) parts.push(district);
-        return parts.join(', ') || '';
+        /* Адрес собирается в одном месте — js/court-address.js */
+        return window.KSLT_ADDRESS.адрес(c, isEn ? 'en' : (isKg ? 'kg' : 'ru')) || '';
     }
 
     function getCourtMinPrice(c) {
