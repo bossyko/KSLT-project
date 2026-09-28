@@ -22,12 +22,12 @@ const ВЕРСИЯ_СЕЙЧАС = 'style.css?v=' + (fs.readFileSync(path.join(К
 
 const ОТКАТЫ = [
   ['css/style.css',
-   '    height: 64px;\n    padding: var(--space-3);\n    background: var(--bg-card);',
-   '    height: 64px;\n    padding: var(--space-3);',
+   '    padding: var(--space-2);\n    background: var(--bg-card);\n    border: 1px solid transparent;',
+   '    padding: var(--space-2);\n    background: var(--bg-card);',
    'у плитки есть своя поверхность: заливка, контур и радиус'],
 
   ['css/style.css',
-   '    max-width: 84%;\n    max-height: 72%;',
+   '    max-width: 94%;\n    max-height: 88%;',
    '    max-width: 100%;\n    max-height: 100%;',
    'потолок логотипа внутри плитки один на всех'],
 
@@ -37,7 +37,7 @@ const ОТКАТЫ = [
    'ряд заполняется целиком, последний неполный встаёт по центру'],
 
   ['css/style.css',
-   '    height: 64px;\n    padding: var(--space-3);',
+   '    padding: var(--space-2);\n    background: var(--bg-card);',
    '    height: 36px;\n    padding: var(--space-3);',
    'высота плитки выше порога нажатия на каждом слое'],
 
@@ -54,7 +54,7 @@ const ОТКАТЫ = [
   ['css/style.css',
    '    color: var(--text-muted);\n}\n\n/* ── СТЕНА ЛОГОТИПОВ',
    '    color: var(--accent);\n}\n\n/* ── СТЕНА ЛОГОТИПОВ',
-   'лайма в секции нет нигде, кроме кольца фокуса'],
+   'лаймового ТЕКСТА в секции нет нигде, кроме кольца фокуса'],
 
   ['css/style.css',
    '@media (max-width: 640px) {\n    .sponsors-cloud { gap: var(--space-3); }',
@@ -116,6 +116,11 @@ const ОТКАТЫ = [
    ВЕРСИЯ_СЕЙЧАС,
    'style.css?v=1',
    'версии подняты'],
+  ['css/style.css',
+   '    border-color: var(--accent);\n    box-shadow: 0 0 0 1px var(--accent);',
+   '    border-color: var(--border-light);',
+   'наведение подсвечивает плитку акцентом'],
+
 ];
 
 function прогон() {

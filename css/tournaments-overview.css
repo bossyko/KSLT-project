@@ -21,7 +21,7 @@
        пришёл смотреть турниры, а видит заголовок и четыре цифры.
        Ступенью ниже: воздух --section-y-sm (16→24), потолок 360. */
     --to-hero-vozduh:     var(--section-y-sm);
-    --to-hero-vozduh-niz: var(--section-y-sm);
+    --to-hero-vozduh-niz: var(--space-sm);
 
     position: relative;
     padding: var(--to-hero-vozduh) var(--pad-x) var(--to-hero-vozduh-niz);
@@ -148,7 +148,11 @@
        стало 12 — следующая ступень шкалы вниз. Ноль поставить нельзя:
        строка липкая, и без поля она при прилипании сливается с шапкой.
        Выигрыш 24 пикселя на каждом виде. */
-    padding: var(--space-3) var(--pad-x);
+    /* СВЕРХУ ВОЗДУХА МЕНЬШЕ, ЧЕМ СНИЗУ — Костя 28.09: «сверху поисковой
+       строки уменьшить надо ещё воздух». Над строкой уже стоит нижнее
+       поле обложки, и два поля подряд читаются как провал; под строкой
+       поле своё и единственное. Ступени 8 и 12. */
+    padding: var(--space-2) var(--pad-x) var(--space-3);
     background: var(--bg-primary);
     border-bottom: 1px solid transparent;
     transition: border-color 0.2s;
@@ -1328,7 +1332,7 @@
     .to-hero .tournament-hero-stats .hero-stat-value { font-size: var(--fs-lg); }
     .to-hero .tournament-hero-stats .hero-stat-label { font-size: var(--fs-2xs); }
     .to-search-wrap {
-        padding: var(--space-3) var(--pad-x);
+        padding: var(--space-2) var(--pad-x) var(--space-3);
     }
 
     .to-hero {
@@ -1456,7 +1460,7 @@
 
     /* Поиск шёл через 25 пикселей от обложки и добавлял свои 24 сверху */
     .to-search-wrap {
-        padding: var(--space-3) var(--pad-x);
+        padding: var(--space-2) var(--pad-x) var(--space-3);
     }
 
     /* Шрифт остаётся 16: при меньшем Safari на iPhone сам увеличивает
