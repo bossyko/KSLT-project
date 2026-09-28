@@ -647,7 +647,7 @@
                 for (var i = 1; i <= сколько; i++) {
                     html += items[i]
                         ? renderCompact(items[i], cat.key, i)
-                        : '<div class="to-slot-empty">' + L.slotEmpty + '</div>';
+                        : '<div class="to-slot-empty"></div>';
                 }
                 html += '</div>';
                 html += '</div>';
