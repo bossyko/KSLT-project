@@ -1287,6 +1287,20 @@
             card.querySelectorAll('.ad-lang-panel').forEach(function(p) { p.classList.toggle('active', p.dataset.langPanel === lang); });
         });
 
+        /* Латиница считается на месте: сети не требует, ошибиться не
+           может. Кыргызский пишется кириллицей — поле оставляем пустым,
+           и показ откатится на русский оригинал. Заполняем ТОЛЬКО пустое:
+           свой перевод человека не трогаем. */
+        function латиницей(idRu, idEn, как) {
+            var ru = document.getElementById(idRu);
+            var en = document.getElementById(idEn);
+            if (!ru || !en || !как || en.value.trim()) return;
+            var текст = ru.value.trim();
+            if (!текст || !/[\u0400-\u04FF]/.test(текст)) return;
+            en.value = как(текст);
+            en.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
         // Translate ALL — 3-language "translate to empty" buttons (delegate)
         container.addEventListener('click', function(e) {
             var btn = e.target.closest('.ad-btn-translate-all');
@@ -1294,8 +1308,15 @@
 
             // Address group has 3 field-pairs
             if (btn.dataset.group === 'address') {
+                /* УЛИЦА НЕ ПЕРЕВОДИТСЯ, А ТРАНСЛИТЕРИРУЕТСЯ. Замер 28.09:
+                   переводчик отдал «2550 Waterview Dr» → «2550 Waterview
+                   Доктор» — сокращение Dr прочитано как «доктор», и адрес,
+                   по которому едут, сломан. Родовое слово переводится и
+                   уезжает в конец: «улица Ахунбаева» → «Akhunbaeva St».
+                   То же решение в окне турнира — tournaments.js. */
+                латиницей('adCrtStreet', 'adCrtStreetEn', A.streetEn);
+                латиницей('adCrtName', 'adCrtNameEn', A.transliterate);
                 var fields = [
-                    { ru: 'adCrtStreet', en: 'adCrtStreetEn', kg: 'adCrtStreetKg' },
                     { ru: 'adCrtDistrict', en: 'adCrtDistrictEn', kg: 'adCrtDistrictKg' },
                     { ru: 'adCrtCity', en: 'adCrtCityEn', kg: 'adCrtCityKg' }
                 ];

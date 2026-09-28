@@ -1164,18 +1164,13 @@
         });
     }
 
+    /* Свой состав здесь был четвёртой копией сборщика адреса: район,
+       которого нет больше нигде, и кыргызского языка не было вовсе —
+       он получал русскую строку. Адрес собирается в одном месте. */
     function buildCourtAddress(court) {
-        var parts = [];
-        if (isEn) {
-            if (court.street_en || court.street) parts.push(court.street_en || court.street);
-            if (court.district_en || court.district) parts.push(court.district_en || court.district);
-            if (court.city_en || court.city) parts.push(court.city_en || court.city);
-        } else {
-            if (court.street) parts.push(court.street);
-            if (court.district) parts.push(court.district);
-            if (court.city) parts.push(court.city);
-        }
-        return parts.join(', ');
+        return window.KSLT_ADDRESS
+            ? window.KSLT_ADDRESS.адрес(court, isEn ? 'en' : 'ru')
+            : '';
     }
 
     // ---- Create battle (insert player if manual + challenge) ----
