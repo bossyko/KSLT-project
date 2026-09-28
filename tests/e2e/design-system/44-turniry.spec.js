@@ -94,43 +94,17 @@ test.describe('страница турниров · ' + Я.имя, () => {
             'колонки разного роста: ' + п.крупная + ' против ' + п.столб).toBeLessThanOrEqual(1));
     });
 
-    /* БЛОКИ С ОДИНАКОВЫМ ЧИСЛОМ СЛОТОВ — ОДНОГО РОСТА.
-       Было «все блоки одного роста», и держалось это на пустых слотах.
-       28.09 Костя их отменил: «эти пустые слоты зачем показывать».
-       Ритм сторожим по тому, что осталось правдой: два блока с одним и
-       тем же числом строк обязаны совпадать по высоте. Разной высоте
-       разных категорий теперь есть причина — в них разное число турниров. */
-    test('блоки с одинаковым числом слотов — одного роста', async ({ page }) => {
+    test('все блоки категорий одного роста — ритм не гуляет', async ({ page }) => {
         await открыть(page, Я.адрес);
-        const блоки = await page.evaluate(() =>
-            [...document.querySelectorAll('.to-category-block')].map(б => {
-                const ст = б.querySelector('.to-side-stack');
-                const л = б.querySelector('.to-phone-cards');
-                return {
-                    строк: л ? 'лента' : (ст ? ст.children.length : 0),
-                    h: Math.round(б.getBoundingClientRect().height)
-                };
-            }));
-        expect(блоки.length).toBeGreaterThan(1);
-        const по = {};
-        блоки.forEach(б => { (по[б.строк] = по[б.строк] || []).push(б.h); });
-        Object.keys(по).forEach(k => {
-            const в = по[k];
-            const разброс = Math.max(...в) - Math.min(...в);
-            expect(разброс, 'слотов ' + k + ', высоты: ' + в.join(' · ')).toBeLessThanOrEqual(2);
-        });
+        const высоты = await page.evaluate(() =>
+            [...document.querySelectorAll('.to-category-block')]
+                .map(б => Math.round(б.getBoundingClientRect().height)));
+        expect(высоты.length).toBeGreaterThan(1);
+        const разброс = Math.max(...высоты) - Math.min(...высоты);
+        expect(разброс, 'высоты блоков: ' + высоты.join(' · ')).toBeLessThanOrEqual(2);
     });
 
-    test('пустых слотов нет вовсе — решение Кости 28.09', async ({ page }) => {
-        await открыть(page, Я.адрес);
-        const пустых = await page.evaluate(() =>
-            document.querySelectorAll('.to-slot-empty').length);
-        expect(пустых, 'пустой слот вернулся').toBe(0);
-    });
-
-    /* ОТМЕНЕНО 28.09 Костей: пустых слотов больше нет. Проверка оставлена
-       перечёркнутой, а не стёрта — решение помечается, а не исчезает. */
-    test.skip('пустой слот держит место и объясняет себя', async ({ page }) => {
+    test('пустой слот держит место и объясняет себя', async ({ page }) => {
         await открыть(page, Я.адрес);
         if (await раскладка(page) === 'лента') return;
         const пустые = await page.evaluate(() =>
