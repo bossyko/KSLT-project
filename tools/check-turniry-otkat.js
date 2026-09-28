@@ -191,6 +191,15 @@ const ОТКАТЫ = [
            `tournaments-overview.css?v=999`,
    'версия css одинакова на всех трёх языках'],
 
+  /* ── порядок медиаблоков ───────────────────────────────────────────── */
+  [CSS, `@media (prefers-reduced-motion: reduce) {`,
+        `.to-category-title { font-size: var(--fs-xl); }\n@media (prefers-reduced-motion: reduce) {`,
+   'ни одно правило узких видов не перебито базой ниже по файлу'],
+
+  [CSS, `@media (max-height: 500px) and (orientation: landscape) {`,
+        `@media (max-height: 501px) and (orientation: landscape) {`,
+   'низкий горизонтальный стоит ПОСЛЕ ширин — иначе 992 перебивает ленту'],
+
   /* ── три языка ─────────────────────────────────────────────────────── */
   [СТЕНД, `history.replaceState(null, '', настоящий);`,
           `void настоящий;`,

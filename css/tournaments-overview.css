@@ -128,341 +128,7 @@
     font-size: var(--fs-sm);
 }
 
-@media (max-width: 992px) {
-    .to-hero h1 { font-size: var(--fs-2xl); }
-    .to-hero-sub { font-size: var(--fs-md); }
-    .to-hero .tournament-hero-stats .hero-stat-value { font-size: var(--fs-2xl); }
-    .to-hero .tournament-hero-stats .hero-stat-label { font-size: var(--fs-xs); }
-    .to-card-grid {
-        grid-template-columns: 1fr;
-    }
 
-    .to-side-stack {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-md);
-    }
-
-    /* ПЛАНШЕТ: столб уходит ПОД карточку в две колонки, значит слотов
-       ЧЕТЫРЕ — два целых ряда. Три дали бы ряд из двух и ряд из одного,
-       а витрина показывает только целые ряды. Решение Кости 27.09 */
-    .to-categories .to-side-stack {
-        grid-template-rows: repeat(2, var(--to-slot));
-    }
-
-    /* Отношение «крупная равна столбу» действует, ПОКА столб стоит РЯДОМ.
-       Здесь он под карточкой, условие кончилось — и число возвращается
-       к прежнему росту обложки раздела, а не тянется за тремя слотами */
-    .to-categories .to-card-grid {
-        --to-featured-h: 320px;
-    }
-
-    .to-featured {
-        min-height: 320px;
-    }
-    .to-compact-info h4 {
-        white-space: normal;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        line-height: 1.25;
-    }
-}
-
-@media (max-width: 640px) {
-    .to-hero h1 { font-size: var(--fs-xl); }
-    .to-hero-sub { font-size: var(--fs-base); }
-    .to-hero .tournament-hero-stats .hero-stat-value { font-size: var(--fs-lg); }
-    .to-hero .tournament-hero-stats .hero-stat-label { font-size: var(--fs-2xs); }
-    .to-search-wrap {
-        padding: var(--space-md) var(--pad-x);
-    }
-
-    .to-hero {
-        --to-hero-vozduh-niz: var(--section-y-sm);
-        min-height: 320px;
-    }
-
-    .to-hero h1 {
-        font-size: var(--fs-xl);
-    }
-
-    /* Между категориями было по 40 пикселей сверху и снизу — на телефоне
-       это 80 пустоты на каждый стык */
-    .to-category-block {
-        padding: 24px var(--pad-x);
-    }
-
-    /* Под последней категорией держались ещё 80 пикселей, и до «Спонсоров»
-       оставалась пустая треть экрана */
-    .to-categories {
-        padding-bottom: 0;
-    }
-
-    .to-side-stack {
-        grid-template-columns: 1fr;
-    }
-
-    .to-featured {
-        min-height: 280px;
-    }
-
-    .to-featured-content h3 {
-        font-size: var(--fs-md);
-    }
-
-    .to-compact {
-        grid-template-columns: auto 1fr;
-        gap: var(--space-sm);
-    }
-
-    .to-compact-left {
-        flex-direction: row;
-        gap: 8px;
-    }
-
-    .to-compact-right {
-        grid-column: 1 / -1;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-    }
- /* было 480 */
-    .to-hero {
-        --to-hero-vozduh-niz: var(--section-y-sm);
-        min-height: 280px;
-    }
-
-    .to-hero h1 {
-        font-size: var(--fs-xl);
-    }
-
-    .to-hero p {
-        font-size: var(--fs-sm);
-    }
-
-    .to-category-title {
-        font-size: var(--fs-lg);
-    }
-
-    .to-featured {
-        min-height: 260px;
-    }
-
-    .to-featured-content {
-        padding: var(--space-md);
-    }
-
-    .to-featured-content h3 {
-        font-size: var(--fs-base);
-    }
-
-    .to-featured-details {
-        gap: var(--space-sm);
-    }
-
-    .to-compact {
-        padding: var(--space-sm) var(--space-md);
-    }
-
-    .to-compact-info h4 {
-        font-size: var(--fs-sm);
-    }
-    .to-category-title {
-        font-size: var(--fs-md);
-    }
-
-    .to-featured-link {
-        padding: 0 var(--space-md);
-        font-size: var(--fs-xs);
-    }
-    /* Обложка той же высоты, что у страниц категорий: раздел один, и
-       переход с обзора в категорию не должен прыгать. Содержимое стоит
-       у нижнего края с отступом в 30 — так цифры не жмутся ни к заголовку,
-       ни к самому низу, а сверху остаётся видна фотография */
-    .to-hero {
-        --to-hero-vozduh-niz: var(--section-y-sm);
-        min-height: 275px;
-        align-items: stretch;
-        margin-bottom: 0;
-    }
-
-    /* Подпись идёт вплотную к названию: со своим отступом обложка обзора
-       вырастала на 7 пикселей выше остальных в разделе */
-    .to-hero-sub {
-        margin-bottom: 0;
-    }
-
-    /* Название вверху, цифры внизу — так же, как на страницах категорий */
-    .to-hero-content {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-
-    /* Поиск шёл через 25 пикселей от обложки и добавлял свои 24 сверху */
-    .to-search-wrap {
-        padding: var(--space-md) var(--pad-x);
-    }
-
-    /* Шрифт остаётся 16: при меньшем Safari на iPhone сам увеличивает
-       страницу, как только ставишь курсор в поле, и обратно уже не выйти.
-       Высоту и отступы поле несёт одни на все виды — ступень md */
-    .to-search-input {
-        font-size: var(--fs-base);
-    }
-
-    /* Заголовок категории нёс снизу отступ в 20 пикселей: из-за него
-       ссылка «Все турниры», выровненная по центру строки, вставала ниже
-       заголовка, а под шапкой зияла пустота. Отступ отдаём самой шапке */
-    .to-category-title {
-        margin: 0;
-    }
-
-    .to-category-header {
-        margin-bottom: var(--space-3);
-    }
-
-    /* ЛЕНТА, А НЕ СЕТКА. Решение Кости 27.09: на телефоне категория
-       листается вбок — две карточки видны, до шести доступно.
-
-       Приём не выдуман: ровно так уже сделан телефон боком
-       (css/style.css:6330), и там же записана причина — «держим полоску
-       следующей карточки», как App Store, Netflix и Google Play: ряд,
-       обрезанный ровно по краю, читается как законченный, и его никто
-       не листает.
-
-       Ширина карточки в долях экрана, а не в пикселях: две помещаются, а
-       третья выглядывает краем и зовёт листать дальше. */
-    .to-phone-cards {
-        display: flex;
-        gap: var(--space-xs);
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        padding-bottom: var(--space-xs);
-        /* Лента идёт от края до края экрана, а поля отдаёт себе сама:
-           обрезанная карточка у самого края и есть признак ленты */
-        margin-inline: calc(-1 * var(--pad-x));
-        padding-inline: var(--pad-x);
-    }
-
-    .to-phone-cards::-webkit-scrollbar { display: none; }
-
-    .to-categories .to-phone-cards > .tc {
-        /* ВЫСОТА КАРТОЧКИ В ЛЕНТЕ — СТУПЕНЬ, А НЕ СОДЕРЖИМОЕ. Playwright
-           27.09: блоки категорий выходили 449 · 453 · 432 · 412 · 449 —
-           разброс 41, потому что высоту задавала самая высокая карточка
-           своего блока. Естественные высоты 288 · 308 · 325 · 329, ступень
-           выше максимума — 336 (8 × 42), запас семь пикселей на длинные
-           названия по-английски и по-кыргызски */
-        flex: 0 0 44%;
-        height: var(--to-lenta-h);
-        scroll-snap-align: start;
-    }
-
-    /* ─── Категория читается как две карточки в ряд, два ряда ───
-       Карточка занимала весь экран: 380 пикселей минимальной высоты,
-       заголовок налезал на описание, и одна категория шла четырьмя
-       экранами */
-    .to-card-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-3);
-    }
-
-    /* Высота задана прямо: ряд сетки растягивался до 632 пикселей —
-       фоновая картинка тянула его за собой, хотя текста в карточке
-       на 190. Плитка одного размера, фото внутри обрезается по cover */
-    .to-featured,
-    .to-featured-side {
-        min-height: 0;
-        height: 200px;
-    }
-
-    .to-featured-content {
-        padding: var(--space-3);
-    }
-
-    .to-featured-content h3 {
-        font-size: var(--fs-sm);
-        line-height: 1.25;
-        margin-bottom: var(--space-2);
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    /* На двух колонках в карточке остаются дата, состояние, название и
-       кнопка. Описание, место, взнос и призовой фонд — на странице турнира */
-    .to-featured-desc,
-    .to-featured-venue,
-    .to-featured-details,
-    .to-featured-meta {
-        display: none;
-    }
-
-    .to-featured-status {
-        font-size: var(--fs-2xs);
-        padding: 0 var(--space-2);
-    }
-
-    .to-featured-date {
-        font-size: var(--fs-2xs);
-        padding: var(--space-1) var(--space-2);
-    }
-
-    .to-featured-date .to-day { font-size: var(--fs-base); }
-    .to-featured-date .to-month { font-size: var(--fs-2xs); }
-
-    .to-featured-actions a,
-    .to-featured-actions button {
-        height: var(--btn-h-sm);
-        padding: 0 var(--space-3);
-        font-size: var(--fs-2xs);
-        width: 100%;
-        text-align: center;
-    }
-
-    /* Рядом с главной карточкой стояла стопка из трёх компактных строк —
-       она держала ряд в 632 пикселя, а её карточки на узкой колонке
-       разъезжались. display: contents растворяет стопку: её карточки
-       становятся плитками той же сетки, и категория встаёт как 2×2 */
-    .to-side-stack {
-        display: contents;
-    }
-
-    .to-side-stack .to-compact {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        height: 200px;
-        padding: var(--space-3);
-        gap: var(--space-2);
-        overflow: hidden;
-    }
-
-    /* Строчная раскладка «картинка — текст — метки» на плитке не нужна:
-       фон карточки уже несёт картинку */
-    .to-side-stack .to-compact-thumb { display: none; }
-
-    .to-side-stack .to-compact-info h4 {
-        font-size: var(--fs-xs);
-        line-height: 1.2;
-        -webkit-line-clamp: 2;
-    }
-
-    .to-side-stack .to-compact-info span,
-    .to-side-stack .to-compact-right {
-        font-size: var(--fs-2xs);
-    }
-
-    .to-side-stack .to-compact .to-compact-right {
-        gap: var(--space-2);
-    }
-}
 
 /* Search — sticky bar */
 .to-search-wrap {
@@ -1515,16 +1181,6 @@
 
    Воздух при этом не второе объявление padding, а КРУТИЛКА: значение меняет
    медиазапрос, объявление остаётся одно. Тот же приём, что у .hero. */
-@media (max-height: 500px) and (orientation: landscape) {
-    .to-hero {
-        min-height: 0;
-        --to-hero-vozduh:     var(--section-y-sm);
-        --to-hero-vozduh-niz: var(--section-y-sm);
-        /* Вторая ручка, как на главной: 40 -> 16. Кегли не трогаем —
-           лестница одна на все виды, меняется только воздух между группами */
-        --to-hero-shag: var(--space-4);
-    }
-}
 
 /* ФОКУС — ОДИН ВИД НА ВЕСЬ ПРОДУКТ.
    Разбор 27.09: на этой странице не было НИ ОДНОГО правила фокуса, а общее
@@ -1558,21 +1214,6 @@
    Разбор 27.09: на странице 29 элементов с переходами и анимацией и ни
    одного правила на этот случай. Движение убираем целиком, а не замедляем:
    тем, кому оно мешает, мешает и медленное */
-@media (prefers-reduced-motion: reduce) {
-    .to-categories *,
-    .to-hero *,
-    .to-search-wrap * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-
-    /* Лента перестаёт «доезжать» рывком: палец ведёт её сам */
-    .to-phone-cards {
-        scroll-snap-type: none;
-    }
-}
 
 /* ЛЕНТА НА НИЗКОМ ГОРИЗОНТАЛЬНОМ: СОДЕРЖИМОЕ ДОЖИМАЕТСЯ ПОД ЧУЖУЮ СТУПЕНЬ.
    Замерено Playwright 27.09: на 844×390 четырнадцать карточек переполнены —
@@ -1582,7 +1223,383 @@
    нет. Поэтому дожимаем СВОЁ, а не переписываем общее:
    заголовок в одну строку и мета убирается — дата, статус и кнопка
    остаются, их и нажимают. */
+
+/* ══ УЗКИЕ ВИДЫ ═══════════════════════════════════════════════════════
+   ПЕРЕНЕСЕНЫ В КОНЕЦ ФАЙЛА 28.09. Раньше оба медиаблока стояли В НАЧАЛЕ,
+   сразу после обложки, а базовые правила категорий шли ПОСЛЕ них. При
+   равной силе побеждает то, что ниже, — и 31 объявление внутри медиа
+   не действовало вовсе: кегль заголовка категории, рост крупной карточки
+   на планшете, отступы поиска, обрезка строк в карточке и прочее.
+   Поймано замером: лестница говорила 18 на телефоне, браузер показывал 26.
+   Правило: УЗКИЕ ВИДЫ ЖИВУТ В КОНЦЕ ФАЙЛА, А НЕ В СЕРЕДИНЕ. */
+
+@media (max-width: 992px) {
+    .to-hero h1 { font-size: var(--fs-2xl); }
+    .to-hero-sub { font-size: var(--fs-md); }
+    .to-hero .tournament-hero-stats .hero-stat-value { font-size: var(--fs-2xl); }
+    .to-hero .tournament-hero-stats .hero-stat-label { font-size: var(--fs-xs); }
+    .to-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .to-side-stack {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-md);
+    }
+
+    /* ПЛАНШЕТ: столб уходит ПОД карточку в две колонки, значит слотов
+       ЧЕТЫРЕ — два целых ряда. Три дали бы ряд из двух и ряд из одного,
+       а витрина показывает только целые ряды. Решение Кости 27.09 */
+    .to-categories .to-side-stack {
+        grid-template-rows: repeat(2, var(--to-slot));
+    }
+
+    /* Отношение «крупная равна столбу» действует, ПОКА столб стоит РЯДОМ.
+       Здесь он под карточкой, условие кончилось — и число возвращается
+       к прежнему росту обложки раздела, а не тянется за тремя слотами */
+    .to-categories .to-card-grid {
+        --to-featured-h: 320px;
+    }
+
+    .to-featured {
+        min-height: 320px;
+    }
+    .to-compact-info h4 {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.25;
+    }
+}
+
+@media (max-width: 640px) {
+    .to-hero h1 { font-size: var(--fs-xl); }
+    .to-hero-sub { font-size: var(--fs-base); }
+    .to-hero .tournament-hero-stats .hero-stat-value { font-size: var(--fs-lg); }
+    .to-hero .tournament-hero-stats .hero-stat-label { font-size: var(--fs-2xs); }
+    .to-search-wrap {
+        padding: var(--space-md) var(--pad-x);
+    }
+
+    .to-hero {
+        --to-hero-vozduh-niz: var(--section-y-sm);
+        min-height: 320px;
+    }
+
+    .to-hero h1 {
+        font-size: var(--fs-xl);
+    }
+
+    /* Между категориями было по 40 пикселей сверху и снизу — на телефоне
+       это 80 пустоты на каждый стык */
+    .to-category-block {
+        padding: 24px var(--pad-x);
+    }
+
+    /* Под последней категорией держались ещё 80 пикселей, и до «Спонсоров»
+       оставалась пустая треть экрана */
+    .to-categories {
+        padding-bottom: 0;
+    }
+
+    .to-side-stack {
+        grid-template-columns: 1fr;
+    }
+
+    .to-featured {
+        min-height: 280px;
+    }
+
+    .to-featured-content h3 {
+        font-size: var(--fs-md);
+    }
+
+    .to-compact {
+        grid-template-columns: auto 1fr;
+        gap: var(--space-sm);
+    }
+
+    .to-compact-left {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .to-compact-right {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+    }
+ /* было 480 */
+    .to-hero {
+        --to-hero-vozduh-niz: var(--section-y-sm);
+        min-height: 280px;
+    }
+
+    .to-hero h1 {
+        font-size: var(--fs-xl);
+    }
+
+    .to-hero p {
+        font-size: var(--fs-sm);
+    }
+
+    .to-category-title {
+        font-size: var(--fs-lg);
+    }
+
+    .to-featured {
+        min-height: 260px;
+    }
+
+    .to-featured-content {
+        padding: var(--space-md);
+    }
+
+    .to-featured-content h3 {
+        font-size: var(--fs-base);
+    }
+
+    .to-featured-details {
+        gap: var(--space-sm);
+    }
+
+    .to-compact {
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .to-compact-info h4 {
+        font-size: var(--fs-sm);
+    }
+    .to-category-title {
+        font-size: var(--fs-md);
+    }
+
+    .to-featured-link {
+        padding: 0 var(--space-md);
+        font-size: var(--fs-xs);
+    }
+    /* Обложка той же высоты, что у страниц категорий: раздел один, и
+       переход с обзора в категорию не должен прыгать. Содержимое стоит
+       у нижнего края с отступом в 30 — так цифры не жмутся ни к заголовку,
+       ни к самому низу, а сверху остаётся видна фотография */
+    .to-hero {
+        --to-hero-vozduh-niz: var(--section-y-sm);
+        min-height: 275px;
+        align-items: stretch;
+        margin-bottom: 0;
+    }
+
+    /* Подпись идёт вплотную к названию: со своим отступом обложка обзора
+       вырастала на 7 пикселей выше остальных в разделе */
+    .to-hero-sub {
+        margin-bottom: 0;
+    }
+
+    /* Название вверху, цифры внизу — так же, как на страницах категорий */
+    .to-hero-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    /* Поиск шёл через 25 пикселей от обложки и добавлял свои 24 сверху */
+    .to-search-wrap {
+        padding: var(--space-md) var(--pad-x);
+    }
+
+    /* Шрифт остаётся 16: при меньшем Safari на iPhone сам увеличивает
+       страницу, как только ставишь курсор в поле, и обратно уже не выйти.
+       Высоту и отступы поле несёт одни на все виды — ступень md */
+    .to-search-input {
+        font-size: var(--fs-base);
+    }
+
+    /* Заголовок категории нёс снизу отступ в 20 пикселей: из-за него
+       ссылка «Все турниры», выровненная по центру строки, вставала ниже
+       заголовка, а под шапкой зияла пустота. Отступ отдаём самой шапке */
+    .to-category-title {
+        margin: 0;
+    }
+
+    /* ПАРА, КОТОРАЯ ЧИТАЕТСЯ КАК ПАРА, ЕДЕТ ОДНОЙ ГРАНИЦЕЙ.
+       Шапка стояла в строку с переносом, и перенос решала ДЛИНА НАЗВАНИЯ:
+       «Masters» и «Tour» помещались рядом с «Все турниры», а «Pro-Masters»
+       и «Challengers» — нет. Блок вырастал на 55, и ритм страницы зависел
+       от того, сколько букв в слове. Замерено на 375: шапка 99 против 44,
+       блоки 515 · 460 · 515 · 460 · 460, и одинаково на всех трёх языках.
+
+       На узком экране пара встаёт СТОЛБИКОМ ВСЕГДА — решает точка
+       останова, а не содержимое. Платим 55 пикселями на каждой категории;
+       взамен все блоки одного роста при любых названиях, включая
+       кыргызские, которые длиннее всех. */
+    .to-category-header {
+        margin-bottom: var(--space-3);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+
+    /* ЛЕНТА, А НЕ СЕТКА. Решение Кости 27.09: на телефоне категория
+       листается вбок — две карточки видны, до шести доступно.
+
+       Приём не выдуман: ровно так уже сделан телефон боком
+       (css/style.css:6330), и там же записана причина — «держим полоску
+       следующей карточки», как App Store, Netflix и Google Play: ряд,
+       обрезанный ровно по краю, читается как законченный, и его никто
+       не листает.
+
+       Ширина карточки в долях экрана, а не в пикселях: две помещаются, а
+       третья выглядывает краем и зовёт листать дальше. */
+    .to-phone-cards {
+        display: flex;
+        gap: var(--space-xs);
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: var(--space-xs);
+        /* Лента идёт от края до края экрана, а поля отдаёт себе сама:
+           обрезанная карточка у самого края и есть признак ленты */
+        margin-inline: calc(-1 * var(--pad-x));
+        padding-inline: var(--pad-x);
+    }
+
+    .to-phone-cards::-webkit-scrollbar { display: none; }
+
+    .to-categories .to-phone-cards > .tc {
+        /* ВЫСОТА КАРТОЧКИ В ЛЕНТЕ — СТУПЕНЬ, А НЕ СОДЕРЖИМОЕ. Playwright
+           27.09: блоки категорий выходили 449 · 453 · 432 · 412 · 449 —
+           разброс 41, потому что высоту задавала самая высокая карточка
+           своего блока. Естественные высоты 288 · 308 · 325 · 329, ступень
+           выше максимума — 336 (8 × 42), запас семь пикселей на длинные
+           названия по-английски и по-кыргызски */
+        flex: 0 0 44%;
+        height: var(--to-lenta-h);
+        scroll-snap-align: start;
+    }
+
+    /* ─── Категория читается как две карточки в ряд, два ряда ───
+       Карточка занимала весь экран: 380 пикселей минимальной высоты,
+       заголовок налезал на описание, и одна категория шла четырьмя
+       экранами */
+    .to-card-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-3);
+    }
+
+    /* Высота задана прямо: ряд сетки растягивался до 632 пикселей —
+       фоновая картинка тянула его за собой, хотя текста в карточке
+       на 190. Плитка одного размера, фото внутри обрезается по cover */
+    .to-featured,
+    .to-featured-side {
+        min-height: 0;
+        height: 200px;
+    }
+
+    .to-featured-content {
+        padding: var(--space-3);
+    }
+
+    .to-featured-content h3 {
+        font-size: var(--fs-sm);
+        line-height: 1.25;
+        margin-bottom: var(--space-2);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* На двух колонках в карточке остаются дата, состояние, название и
+       кнопка. Описание, место, взнос и призовой фонд — на странице турнира */
+    .to-featured-desc,
+    .to-featured-venue,
+    .to-featured-details,
+    .to-featured-meta {
+        display: none;
+    }
+
+    .to-featured-status {
+        font-size: var(--fs-2xs);
+        padding: 0 var(--space-2);
+    }
+
+    .to-featured-date {
+        font-size: var(--fs-2xs);
+        padding: var(--space-1) var(--space-2);
+    }
+
+    .to-featured-date .to-day { font-size: var(--fs-base); }
+    .to-featured-date .to-month { font-size: var(--fs-2xs); }
+
+    .to-featured-actions a,
+    .to-featured-actions button {
+        height: var(--btn-h-sm);
+        padding: 0 var(--space-3);
+        font-size: var(--fs-2xs);
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Рядом с главной карточкой стояла стопка из трёх компактных строк —
+       она держала ряд в 632 пикселя, а её карточки на узкой колонке
+       разъезжались. display: contents растворяет стопку: её карточки
+       становятся плитками той же сетки, и категория встаёт как 2×2 */
+    .to-side-stack {
+        display: contents;
+    }
+
+    .to-side-stack .to-compact {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        height: 200px;
+        padding: var(--space-3);
+        gap: var(--space-2);
+        overflow: hidden;
+    }
+
+    /* Строчная раскладка «картинка — текст — метки» на плитке не нужна:
+       фон карточки уже несёт картинку */
+    .to-side-stack .to-compact-thumb { display: none; }
+
+    .to-side-stack .to-compact-info h4 {
+        font-size: var(--fs-xs);
+        line-height: 1.2;
+        -webkit-line-clamp: 2;
+    }
+
+    .to-side-stack .to-compact-info span,
+    .to-side-stack .to-compact-right {
+        font-size: var(--fs-2xs);
+    }
+
+    .to-side-stack .to-compact .to-compact-right {
+        gap: var(--space-2);
+    }
+}
+
+/* ══ НИЗКИЙ ГОРИЗОНТАЛЬНЫЙ И «МЕНЬШЕ ДВИЖЕНИЯ» ════════════════════════
+   СТОЯТ ПОСЛЕ ШИРИН НАРОЧНО. Телефон боком — это 844 в ширину: под него
+   подходит и медиа 992, и медиа высоты. Побеждает то, что ниже, поэтому
+   высота должна идти ПОСЛЕ ширины — иначе планшетная раскладка перебивает
+   ленту. 28.09 при переносе медиаблоков в конец файла это едва не
+   перевернулось. */
+
 @media (max-height: 500px) and (orientation: landscape) {
+    .to-hero {
+        min-height: 0;
+        --to-hero-vozduh:     var(--section-y-sm);
+        --to-hero-vozduh-niz: var(--section-y-sm);
+        /* Вторая ручка, как на главной: 40 -> 16. Кегли не трогаем —
+           лестница одна на все виды, меняется только воздух между группами */
+        --to-hero-shag: var(--space-4);
+    }
+
     .to-categories .to-phone-cards > .tc {
         /* Своя ступень, а не содержимое: с height: auto один блок выходил
            424 против 400 у соседей. Естественные высоты после дожима —
@@ -1596,5 +1613,21 @@
 
     .to-categories .to-phone-cards .tc-meta {
         display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .to-categories *,
+    .to-hero *,
+    .to-search-wrap * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    /* Лента перестаёт «доезжать» рывком: палец ведёт её сам */
+    .to-phone-cards {
+        scroll-snap-type: none;
     }
 }
