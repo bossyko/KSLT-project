@@ -34,8 +34,8 @@ const ТЕСТ  = 'tests/e2e/design-system/44-turniry.spec.js';
 
 const ОТКАТЫ = [
   /* ── отношения ─────────────────────────────────────────────────────── */
-  [CSS, `.to-categories .to-card-grid {\n    --to-slot: 224px;`,
-        `.to-card-grid {\n    --to-slot: 224px;`,
+  [CSS, `.to-categories .to-card-grid {\n    /* СТУПЕНЬ ВЫВЕДЕНА`,
+        `.to-card-grid {\n    /* СТУПЕНЬ ВЫВЕДЕНА`,
    'ступень слота живёт в разделе турниров, а не в общем .to-card-grid'],
 
   [CSS, `--to-featured-h: calc(var(--to-slot) * 3 + var(--space-md) * 2);`,
@@ -58,8 +58,8 @@ const ОТКАТЫ = [
         `    .to-categories .to-card-grid {\n        min-width: 0;\n    }`,
    'отношение «крупная равна столбу» снимается там, где столб уходит вниз'],
 
-  [CSS, `.to-categories .to-side-stack .to-compact {\n    height: 100%;\n}`,
-        `.to-categories .to-side-stack .to-compact {\n    min-height: 0;\n}`,
+  [CSS, `.to-categories .to-side-stack .to-compact {\n    height: 100%;`,
+        `.to-categories .to-side-stack .to-compact {\n    min-height: 0;`,
    'высота боковой строки — свойство слота, а не содержимого'],
 
   [CSS, `    --to-thumb: 208px;`,
@@ -174,8 +174,8 @@ const ОТКАТЫ = [
    'в ленту идёт до шести карточек, а не до четырёх'],
 
   /* ── сторож чисел ──────────────────────────────────────────────────── */
-  [CSS, `    --to-slot: 224px;`,
-        `    --to-slot: 224px;\n    margin-top: 17px;`,
+  [CSS, `    --to-slot: 160px;`,
+        `    --to-slot: 160px;\n    margin-top: 17px;`,
    'в файле не осталось чисел мимо шкалы'],
 
   /* ── стенд и версии ────────────────────────────────────────────────── */
