@@ -104,9 +104,14 @@ test.describe('страница турниров · ' + Я.имя, () => {
         expect(разброс, 'высоты блоков: ' + высоты.join(' · ')).toBeLessThanOrEqual(2);
     });
 
-    test('пустой слот держит место и объясняет себя', async ({ page }) => {
+    /* Решение Кости 28.09: «только не рисуй там ничего, а то то одна
+       большая, другая маленькая — все одного размера и стандарта», и
+       отдельно про планшет: «не надо держать пустые места». Прежняя
+       проверка требовала от пустого слота ПОДПИСИ — это отменено. */
+    test('пустой слот держит место и молчит, а на планшете не держит вовсе', async ({ page }) => {
         await открыть(page, Я.адрес);
         if (await раскладка(page) === 'лента') return;
+        const { width } = page.viewportSize();
         const пустые = await page.evaluate(() =>
             [...document.querySelectorAll('.to-slot-empty')].map(э => ({
                 высота: Math.round(э.getBoundingClientRect().height),
@@ -115,9 +120,64 @@ test.describe('страница турниров · ' + Я.имя, () => {
         expect(пустые.length, 'в стенде есть категория с одним турниром — пустые слоты обязаны быть')
             .toBeGreaterThan(0);
         пустые.forEach(п => {
-            expect(п.высота, 'пустой слот схлопнулся').toBeGreaterThan(100);
-            expect(п.текст.length, 'пустой слот молчит').toBeGreaterThan(10);
+            if (width < 992) {
+                expect(п.высота, 'на планшете пустое место не держится').toBe(0);
+            } else {
+                expect(п.высота, 'пустой слот схлопнулся').toBeGreaterThan(100);
+            }
+            expect(п.текст, 'пустой слот что-то рисует').toBe('');
         });
+    });
+
+    /* НАЙДЕНО ЗАМЕРОМ 28.09, А НЕ ТЕСТОМ: на 768 под афишу держалось 232
+       при ширине карточки 332, названия турнира не было видно вовсе, а
+       overflow: hidden срезал это молча. Тест был зелёным всё это время,
+       потому что мерил высоты блоков и лестницу — но не перелив. */
+    test('содержимое боковой карточки не переливает за её край', async ({ page }) => {
+        await открыть(page, Я.адрес);
+        if (await раскладка(page) === 'лента') return;
+        const беда = await page.evaluate(() => {
+            const вышло = [];
+            document.querySelectorAll('.to-side-stack .to-compact').forEach(к => {
+                const r = к.getBoundingClientRect();
+                к.querySelectorAll('*').forEach(э => {
+                    const b = э.getBoundingClientRect();
+                    if (b.height === 0 && b.width === 0) return;
+                    if (b.bottom > r.bottom + 1 || b.right > r.right + 1) {
+                        вышло.push((э.getAttribute('class') || э.tagName).split(' ')[0] +
+                                   ' низ +' + Math.round(b.bottom - r.bottom) +
+                                   ' право +' + Math.round(b.right - r.right));
+                    }
+                });
+            });
+            return вышло;
+        });
+        expect(беда.length, 'переливает из карточки: ' + беда.slice(0, 6).join(' · ')).toBe(0);
+    });
+
+    /* Решение Кости 28.09: «на афишу не залезай — до границы афиш».
+       Проверяется ГЕОМЕТРИЕЙ, а не правилом в файле: плашка обязана
+       начинаться правее правого края афиши. */
+    test('плашка статуса не залезает на афишу', async ({ page }) => {
+        await открыть(page, Я.адрес);
+        if (await раскладка(page) === 'лента') return;
+        const наложения = await page.evaluate(() => {
+            const плохо = [];
+            document.querySelectorAll('.to-side-stack .to-compact-thumb').forEach(к => {
+                const фон = getComputedStyle(к, '::before');
+                if (фон.display === 'none') return;         // афиши нет — нечего беречь
+                const ширинаАфиши = parseFloat(фон.width) || 0;
+                if (!ширинаАфиши) return;
+                const край = к.getBoundingClientRect().left + ширинаАфиши;
+                const п = к.querySelector('.to-compact-status');
+                if (п && п.getBoundingClientRect().left < край - 1) {
+                    плохо.push(п.textContent.trim() + ' заходит на афишу на ' +
+                               Math.round(край - п.getBoundingClientRect().left));
+                }
+            });
+            return плохо;
+        });
+        expect(наложения.length, наложения.join(' · ')).toBe(0);
     });
 
     test('лента листается вбок, и следующая карточка выглядывает', async ({ page }) => {

@@ -209,6 +209,35 @@ const ОТКАТЫ = [
          `    { имя: 'ru2', адрес: СТЕНД }`,
    'тест ходит по ТРЁМ языкам, а не по одному'],
 
+  /* ── 28.09 · статус над датой и плитка по своей ширине ─────────────── */
+  [CSS, `.to-compact-thumb .to-compact-status {\n    max-width: 100%;`,
+        `.to-compact-thumb .to-compact-status {\n    position: absolute;\n    max-width: 100%;`,
+   'статус стоит в колонке сведений, а не плашкой поверх афиши'],
+
+  [CSS, `    width: var(--to-meta, 104px);`,
+        `    width: auto;`,
+   'колонка «статус над датой» одной ширины во всех строках'],
+
+  [CSS, `    container-type: inline-size;`,
+        `    container-type: normal;`,
+   'карточка перестраивается по СВОЕЙ ширине, а не по ширине окна'],
+
+  [CSS, `@container (max-width: 480px) {`,
+        `@media (max-width: 1100px) {`,
+   'третьей точки останова по ширине не завелось'],
+
+  [CSS, `        grid-template-columns: minmax(0, 1fr);\n        align-content: start;`,
+        `        grid-template-columns: minmax(0, 1fr);\n        align-content: start;\n    }\n    .to-side-stack .to-compact-thumb {\n        grid-template-columns: minmax(0, 1fr);\n        align-content: start;`,
+   'плитка описана ОДИН раз, а не отдельно под каждый планшет'],
+
+  [CSS, `        --to-slot: 216px;`,
+        `        --to-slot: 160px;`,
+   'ступень слота на планшете поднята, а кнопка записи не сжата'],
+
+  [ТЕСТ, `'переливает из карточки: '`,
+         `'переливает из кармана: '`,
+   'тест меряет перелив из карточки, а не только высоты блоков'],
+
 ];
 
 function прогон() {
