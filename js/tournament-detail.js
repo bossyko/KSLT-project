@@ -1230,15 +1230,8 @@ function loadFromSupabase(client, id) {
         });
 }
 
-function computeStatus(regStart, regEnd, dateStart, dateEnd) {
-    var now = new Date().toISOString().substring(0, 10);
-    if (regStart && now < regStart) return 'upcoming';
-    if (regStart && regEnd && now >= regStart && now <= regEnd) return 'registration_open';
-    if (dateEnd && now > dateEnd) return 'completed';
-    if (dateStart && now >= dateStart) return 'ongoing';
-    if (regEnd && now > regEnd) return 'registration_closed';
-    return 'upcoming';
-}
+/* Вычисление одно на всю КСЛТ — js/tournament-status.js */
+function computeStatus(a, b, c, d) { return window.KSLT_STATUS.вычислить(a, b, c, d); }
 
 /**
  * Места в шапке турнира. Пока свободных много — показываем вместимость,
@@ -1306,10 +1299,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     }
 
     // Status labels & CSS class mapping
-    var statusLabels = isEn
-        ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Registration Closed', ongoing: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
-        : (isKg ? { registration_open: 'Каттоо ачык', upcoming: 'Жакында', registration_closed: 'Каттоо жабык', ongoing: 'Жүрүп жатат', completed: 'Аяктады', cancelled: 'Жокко чыгарылды' }
-        : { registration_open: 'Регистрация открыта', upcoming: 'Скоро', registration_closed: 'Регистрация закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' });
+    /* Подписи статусов живут в js/tournament-status.js — одно определение на одно понятие */
+    var statusLabels = window.KSLT_STATUS.подписи(isEn ? 'en' : (isKg ? 'kg' : 'ru'));
 
     var statusClassMap = { registration_open: 'live', registration_closed: 'upcoming', ongoing: 'live', cancelled: 'completed', upcoming: 'upcoming', completed: 'completed' };
     var statusClass = statusClassMap[effectiveStatus] || 'upcoming';

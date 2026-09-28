@@ -196,9 +196,13 @@
         // Афиша живого турнира — миниатюрой слева, у архивного остаётся фоном
         // под сильным затемнением: там важнее компактность строки
         var прошёл = t.status === 'past';
-        var афиша = t.image
-            ? (прошёл ? ' style="background-image:url(' + t.image + ')"'
-                      : ' style="--poster:url(' + t.image + ')"')
+        /* Миниатюра живого турнира — целая афиша, если она заведена.
+           У архивного афиша идёт фоном во всю строку: туда только
+           обрезанная, целую там нечем вписать */
+        var постер = прошёл ? t.image : (t.imageFull || t.image);
+        var афиша = постер
+            ? (прошёл ? ' style="background-image:url(' + постер + ')"'
+                      : ' style="--poster:url(' + постер + ')"')
             : '';
 
         return '<div class="to-compact ' + (прошёл ? 'to-compact-past' : 'to-compact-thumb') + '"' +
@@ -207,6 +211,13 @@
             ' data-href="' + detailPage + '?id=' + t.id + '"' +
             афиша + '>' +
             '<div class="to-compact-left">' +
+                /* СТАТУС НАД ДАТОЙ, в той же колонке, что и на странице
+                   турниров (js/tournaments-overview.js) — решение Кости
+                   28.09: «статусы у нас в одном месте должны быть».
+                   Здесь плашка стояла в блоке справа, снизу под кнопкой:
+                   одна и та же карточка в двух местах сайта показывала
+                   статус в двух разных углах */
+                '<span class="to-compact-status ' + t.status + '">' + t.statusText + '</span>' +
                 '<div class="to-compact-date">' +
                     '<span class="to-day">' + t.date.day + '</span>' +
                     '<span class="to-month">' + t.date.month + '</span>' +
@@ -222,7 +233,6 @@
                 '</div>' +
             '</div>' +
             '<div class="to-compact-right">' +
-                '<span class="to-compact-status ' + t.status + '">' + t.statusText + '</span>' +
                 // Запись прямо отсюда: раньше в боковой карточке был только
                 // статус «регистрация открыта», а записаться было негде —
                 // приходилось открывать турнир ради одной кнопки

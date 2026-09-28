@@ -15,15 +15,8 @@
     if (!client) return;
 
     // Auto-compute tournament status from dates
-    function computeStatus(regStart, regEnd, dateStart, dateEnd) {
-        var now = new Date().toISOString().substring(0, 10);
-        if (regStart && now < regStart) return 'upcoming';
-        if (regStart && regEnd && now >= regStart && now <= regEnd) return 'registration_open';
-        if (dateEnd && now > dateEnd) return 'completed';
-        if (dateStart && now >= dateStart) return 'ongoing';
-        if (regEnd && now > regEnd) return 'registration_closed';
-        return 'upcoming';
-    }
+    /* Вычисление одно на всю КСЛТ — js/tournament-status.js */
+    function computeStatus(a, b, c, d) { return window.KSLT_STATUS.вычислить(a, b, c, d); }
 
     /** Сумма в шапке — коротко: 2626000 → «2.6M», 40000 → «40K» */
     function shortPrize(num) {
@@ -229,10 +222,8 @@
                 : (isKg ? { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }
                 : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
 
-            var statusLabels = isEn
-                ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Registration Closed', ongoing: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
-                : (isKg ? { registration_open: 'Каттоо ачык', upcoming: 'Жакында', registration_closed: 'Каттоо жабык', ongoing: 'Жүрүп жатат', completed: 'Аяктады', cancelled: 'Жокко чыгарылды' }
-                : { registration_open: 'Регистрация открыта', upcoming: 'Скоро открытие', registration_closed: 'Регистрация закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' });
+            /* Подписи статусов живут в js/tournament-status.js — одно определение на одно понятие */
+            var statusLabels = window.KSLT_STATUS.подписи(isEn ? 'en' : (isKg ? 'kg' : 'ru'));
 
             var L = isEn ? {
                 format: 'Format', participants: 'Players', prizeFund: 'Prize',
@@ -309,6 +300,7 @@
                     feeGuest: t.fee_guest != null ? Number(t.fee_guest) : null,
                     regLine: regLine,
                     image: t.image_url || t.image || '',
+                    imageFull: t.image_full || '',
                     _startTime: t.start_time || null,
                     // Исходная запись для карточки с афишей сбоку: ей нужны
                     // поля базы, а не наши готовые подписи

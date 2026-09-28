@@ -63,10 +63,8 @@
         : (isKg ? { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }
         : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
 
-    var statusLabels = isEn
-        ? { registration_open: 'Registration Open', upcoming: 'Coming Soon', registration_closed: 'Reg. Closed', ongoing: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
-        : (isKg ? { registration_open: 'Каттоо ачык', upcoming: 'Жакында', registration_closed: 'Каттоо жабык', ongoing: 'Жүрүп жатат', completed: 'Аяктады', cancelled: 'Жокко чыгарылды' }
-        : { registration_open: 'Регистрация открыта', upcoming: 'Скоро', registration_closed: 'Рег. закрыта', ongoing: 'Идёт', completed: 'Завершён', cancelled: 'Отменён' });
+    /* Подписи статусов живут в js/tournament-status.js — одно определение на одно понятие */
+    var statusLabels = window.KSLT_STATUS.подписи(isEn ? 'en' : (isKg ? 'kg' : 'ru'));
 
     var L = isEn ? {
         heroTitle: 'Tournaments',
@@ -156,15 +154,8 @@
     var _searchTimer = null;
 
     // Auto-compute tournament status from dates
-    function computeStatus(regStart, regEnd, dateStart, dateEnd) {
-        var now = new Date().toISOString().substring(0, 10);
-        if (regStart && now < regStart) return 'upcoming';
-        if (regStart && regEnd && now >= regStart && now <= regEnd) return 'registration_open';
-        if (dateEnd && now > dateEnd) return 'completed';
-        if (dateStart && now >= dateStart) return 'ongoing';
-        if (regEnd && now > regEnd) return 'registration_closed';
-        return 'upcoming';
-    }
+    /* Вычисление одно на всю КСЛТ — js/tournament-status.js */
+    function computeStatus(a, b, c, d) { return window.KSLT_STATUS.вычислить(a, b, c, d); }
 
     // SVG icons
     var pinSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
@@ -466,6 +457,10 @@
                     : '',
                 regLine: regLine,
                 image: t.image_url || t.image || '',
+                /* Целая афиша — для миниатюры в полосе. Крупная карточка
+                   остаётся на обрезанной: там афиша идёт фоном во всю
+                   ширину, и вписывать её целиком некуда */
+                imageFull: t.image_full || '',
                 _startTime: t.start_time || null,
                 // Исходная запись: по ней собирается карточка с афишей сбоку —
                 // та же, что на главной. Ей нужны поля базы, а не наши подписи
@@ -844,7 +839,11 @@
         // и вид карточки не должен зависеть от статуса: одно понятие —
         // одно определение.
         var прошёл = t.status === 'past';
-        var афиша = t.image ? ' style="--poster:url(' + t.image + ')"' : '';
+        /* Миниатюра показывает целую афишу, если она заведена: короб
+           3:4 вписывает её через background-size: contain. Старые турниры
+           целой не имеют — им остаётся обрезанная, как было */
+        var постер = t.imageFull || t.image;
+        var афиша = постер ? ' style="--poster:url(' + постер + ')"' : '';
 
         return '<div class="to-compact to-compact-thumb' + (прошёл ? ' to-compact-past' : '') +
             '" data-cat="' + catKey + '" data-idx="' + idx + '" data-href="' + compactHref + '"' +
