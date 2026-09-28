@@ -199,7 +199,15 @@
      * @param {string} [confirmLabel] - Custom confirm button text
      * @param {function} [onCancel] - Called when user cancels
      */
-    function showConfirm(title, text, onConfirm, confirmLabel, onCancel) {
+    /**
+     * Окно подтверждения админки.
+     *
+     * @param {Object} [ещё] — средняя кнопка: { label, action }. Заведена
+     *        для несохранённого черновика: там выбор не двоичный, а тройной —
+     *        сохранить, уйти без сохранения, остаться. Отдельного окна для
+     *        этого не делаем: одно определение на одно понятие.
+     */
+    function showConfirm(title, text, onConfirm, confirmLabel, onCancel, ещё) {
         // Одно окно за раз. Иначе повторные нажатия складывают их стопкой:
         // закрываешь верхнее, под ним такое же — и кажется, что оно замерло
         document.querySelectorAll('.ad-confirm-overlay').forEach(function(el) { el.remove(); });
@@ -214,6 +222,7 @@
                 '<div class="ad-confirm-text">' + text + '</div>' +
                 '<div class="ad-confirm-actions">' +
                     '<button class="ad-btn ad-btn-secondary" id="adConfirmCancel">' + L.cancel + '</button>' +
+                    (ещё ? '<button class="ad-btn ad-btn-secondary" id="adConfirmExtra">' + ещё.label + '</button>' : '') +
                     '<button class="ad-btn ' + btnClass + '" id="adConfirmOk">' + btnLabel + '</button>' +
                 '</div>' +
             '</div>';
@@ -238,6 +247,19 @@
             }
             overlay.remove();
         });
+        if (ещё) {
+            overlay.querySelector('#adConfirmExtra').addEventListener('click', async function() {
+                if (this.disabled) return;
+                this.disabled = true;
+                try {
+                    await ещё.action();
+                } catch (e) {
+                    console.error('[KSLT] действие не выполнилось:', e);
+                    showToast((e && e.message) || 'Не удалось выполнить действие', 'error');
+                }
+                overlay.remove();
+            });
+        }
         overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
     }
 
@@ -424,6 +446,11 @@
                 targets[i].el.dataset.translatedFrom = srcText;   // чтобы заметить правку исходника
                 // Над полем может стоять визуальный редактор — пусть перерисуется
                 targets[i].el.dispatchEvent(new Event('change'));
+                /* И «input» — иначе раздел не узнаёт, что в черновике
+                   появилось несохранённое: присваивание value события не
+                   рождает, а сторож ухода со страницы слушает именно input.
+                   Перевёл, ушёл — и перевод пропадал молча */
+                targets[i].el.dispatchEvent(new Event('input', { bubbles: true }));
             }
             if (failed.length === targets.length) {
                 var why = A.lastTranslateError === 'quota'
@@ -477,6 +504,26 @@
             live.forEach(function (el) { el.removeEventListener('input', wake); });
         }
         live.forEach(function (el) { el.addEventListener('input', wake); });
+    }
+
+    /**
+     * Погасить кнопки перевода, у которых переводить уже нечего.
+     *
+     * settleTranslateButton вызывалась только в конце самого перевода,
+     * поэтому после сохранения и перерисовки формы все кнопки загорались
+     * заново — будто ничего не переведено. Теперь состояние кнопки
+     * выводится из полей при каждой отрисовке, а не помнится с прошлого
+     * нажатия: состояние кнопки — свойство данных, а не разметки.
+     *
+     * @param {Element} [root] — где искать кнопки, по умолчанию весь документ
+     */
+    function settleTranslateButtons(root) {
+        var где = root || document;
+        где.querySelectorAll('.ad-btn-translate-all[data-ru]').forEach(function(btn) {
+            var поля = [btn.dataset.ru, btn.dataset.en, btn.dataset.kg]
+                .map(function(id) { return id ? document.getElementById(id) : null; });
+            settleTranslateButton(btn, поля);
+        });
     }
 
     /**
@@ -810,11 +857,13 @@
     A.formatDateLocal = formatDateLocal;
     A.translateFromRu = translateFromRu;
     A.translateToEmpty = translateToEmpty;
+    A.settleTranslateButtons = settleTranslateButtons;
     A.settleTranslateButton = settleTranslateButton;
     A.translateText = translateText;
     A.setupBulkDelete = setupBulkDelete;
     A.bulkCheckboxTd = bulkCheckboxTd;
     A.uploadImage = uploadImage;
+    A.compressImage = compressImage;
     A.exportCsv = exportCsv;
 
     // NTRP select options helper (1.0 - 7.0, step 0.25)

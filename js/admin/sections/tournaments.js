@@ -14,6 +14,18 @@
     var trnEditingStatus = null;
     var trnImageFile = null;
     var trnImageUrl = '';
+    /* Афиша живёт на сайте в двух формах: обрезанной 16:9 вверху страницы
+       турнира и целой в коробе 3:4 в карточке списка. Держим обе, чтобы
+       окно загрузки показывало обе, а не одну и догадку про вторую */
+    var trnImageFullUrl = '';
+    var trnImageFullFile = null;
+    /* Положение рамки в долях исходника. Файл ею не режут — по ней можно
+       будет перекадрировать ту же афишу, не заставляя искать оригинал */
+    var trnImageCrop = null;
+    /* Целую афишу показывают в коробе 120×160 (см. --to-thumb в
+       css/tournaments-overview.css). 1200 пикселей туда не нужны, а
+       трафик у нас уже за лимитом: 8.3 ГБ отдано при квоте 5 */
+    var ШИРИНА_ЦЕЛОЙ = 640;
     var trnAllData = [];
     var trnSearchQuery = '';
     var trnFilterCategory = '';
@@ -23,8 +35,6 @@
     var trnPage = 1;
     var TRN_PER_PAGE = 15;
     var trnDraftDirty = false;
-    var trnAutosaveTimer = null;
-    var trnAutosaving = false;
 
     async function renderTournamentsSection() {
         await A.loadCategories();
@@ -662,15 +672,18 @@
         trnEditingPublishedAt = (item && item.published_at) ? item.published_at : null;
         trnEditingStatus = (item && item.status) ? item.status : null;
         trnDraftDirty = false;
-        clearTimeout(trnAutosaveTimer);
         trnImageFile = null;
         trnImageUrl = (item && item.image) ? item.image : '';
+        /* image_full появится в базе отдельным столбцом; пока его нет,
+           в короб карточки кладём то же, что и в обложку */
+        trnImageFullUrl = (item && item.image_full) ? item.image_full : trnImageUrl;
+        trnImageFullFile = null;
+        trnImageCrop = (item && item.image_crop) ? item.image_crop : null;
 
         var title = item ? L.editTournament : L.addTournament;
 
         var imagePreviewHtml = trnImageUrl
-            ? '<img src="' + A.esc(trnImageUrl) + '" class="ad-image-upload-preview" id="adTrnImgPreview">' +
-              '<button type="button" class="ad-image-upload-remove" id="adTrnImgRemove">&times;</button>'
+            ? afishaSplitHtml(trnImageUrl, trnImageFullUrl)
             : '<div class="ad-image-upload-placeholder">' +
                   '<div class="ad-image-upload-icon">🖼</div>' +
                   '<div>' + L.uploadImage + '</div>' +
@@ -739,37 +752,41 @@
             // Image
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.trnImage + '</div>' +
-                '<div class="ad-image-upload' + hasImageClass + '" id="adTrnImgZone">' +
+                '<div class="ad-image-upload ad-afisha-zone' + hasImageClass + '" id="adTrnImgZone">' +
                     imagePreviewHtml +
                 '</div>' +
                 '<input type="file" accept="image/jpeg,image/png" id="adTrnImgInput" style="display:none">' +
-                '<div class="ad-image-url-row">' +
-                    '<input type="text" class="ad-field-input" id="adTrnImgUrl" placeholder="' + L.orPasteUrl + '" value="' + (trnImageUrl || '') + '">' +
-                    '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adTrnImgUrlBtn">' + L.applyUrl + '</button>' +
-                '</div>' +
+                /* ПОЛЕ ССЫЛКИ УБРАНО 28.09 — решение Кости: «афиши только
+                   свои». Чужая картинка живёт на чужом сайте: её могут
+                   удалить, мы её не сжимаем и не кадрируем (холст не имеет
+                   права читать чужой файл), а значит из неё не сделать двух
+                   представлений — миниатюры и обложки.
+                   Замерено перед правкой: 44 турнира, 43 афиши наши, чужих
+                   ссылок ноль. Ничего не сломали. Афиша грузится файлом —
+                   нажатием на поле выше или перетаскиванием. */
             '</div>' +
 
             // Title (RU/EN/KG)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.trnTitle + '</div>' +
-                '<div class="ad-lang-tabs">' +
-                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
-                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
-                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
+                '<div class="ad-lang-tabs" role="tablist" aria-label="' + L.trnTitle + '">' +
+                    '<button type="button" class="ad-lang-tab active" data-lang="ru" role="tab" aria-selected="true" aria-controls="adTrnTitleTabs-ru">RU</button>' +
+                    '<button type="button" class="ad-lang-tab" data-lang="en" role="tab" aria-selected="false" aria-controls="adTrnTitleTabs-en">EN</button>' +
+                    '<button type="button" class="ad-lang-tab" data-lang="kg" role="tab" aria-selected="false" aria-controls="adTrnTitleTabs-kg">KG</button>' +
                 '</div>' +
-                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
+                '<div class="ad-lang-panel active" id="adTrnTitleTabs-ru" role="tabpanel" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adTrnTitle" placeholder="' + L.trnTitle + ' (RU)" value="' + A.esc(item ? item.title : '') + '">' +
+                        '<input type="text" class="ad-field-input" id="adTrnTitle" aria-label="' + L.trnTitle + ' (RU)" placeholder="' + L.trnTitle + ' (RU)" value="' + A.esc(item ? item.title : '') + '">' +
                     '</div>' +
                 '</div>' +
-                '<div class="ad-lang-panel" data-lang-panel="en">' +
+                '<div class="ad-lang-panel" id="adTrnTitleTabs-en" role="tabpanel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adTrnTitleEn" placeholder="' + L.trnTitle + ' (EN)" value="' + A.esc(item ? item.title_en : '') + '">' +
+                        '<input type="text" class="ad-field-input" id="adTrnTitleEn" aria-label="' + L.trnTitle + ' (EN)" placeholder="' + L.trnTitle + ' (EN)" value="' + A.esc(item ? item.title_en : '') + '">' +
                     '</div>' +
                 '</div>' +
-                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                '<div class="ad-lang-panel" id="adTrnTitleTabs-kg" role="tabpanel" data-lang-panel="kg">' +
                     '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adTrnTitleKg" placeholder="' + L.trnTitle + ' (KG)" value="' + A.esc(item ? item.title_kg : '') + '">' +
+                        '<input type="text" class="ad-field-input" id="adTrnTitleKg" aria-label="' + L.trnTitle + ' (KG)" placeholder="' + L.trnTitle + ' (KG)" value="' + A.esc(item ? item.title_kg : '') + '">' +
                     '</div>' +
                 '</div>' +
                 '<button type="button" class="ad-btn-translate-all" data-ru="adTrnTitle" data-en="adTrnTitleEn" data-kg="adTrnTitleKg">&#127760; ' + L.translateAllBtn + '</button>' +
@@ -778,24 +795,24 @@
             // Description (RU/EN/KG)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.trnDescription + '</div>' +
-                '<div class="ad-lang-tabs">' +
-                    '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
-                    '<button class="ad-lang-tab" data-lang="en">EN</button>' +
-                    '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
+                '<div class="ad-lang-tabs" role="tablist" aria-label="' + L.trnDescription + '">' +
+                    '<button type="button" class="ad-lang-tab active" data-lang="ru" role="tab" aria-selected="true" aria-controls="adTrnDescTabs-ru">RU</button>' +
+                    '<button type="button" class="ad-lang-tab" data-lang="en" role="tab" aria-selected="false" aria-controls="adTrnDescTabs-en">EN</button>' +
+                    '<button type="button" class="ad-lang-tab" data-lang="kg" role="tab" aria-selected="false" aria-controls="adTrnDescTabs-kg">KG</button>' +
                 '</div>' +
-                '<div class="ad-lang-panel active" data-lang-panel="ru">' +
+                '<div class="ad-lang-panel active" id="adTrnDescTabs-ru" role="tabpanel" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adTrnDesc" placeholder="' + L.trnDescription + ' (RU)">' + A.esc(item ? item.description : '') + '</textarea>' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adTrnDesc" aria-label="' + L.trnDescription + ' (RU)" placeholder="' + L.trnDescription + ' (RU)">' + A.esc(item ? item.description : '') + '</textarea>' +
                     '</div>' +
                 '</div>' +
-                '<div class="ad-lang-panel" data-lang-panel="en">' +
+                '<div class="ad-lang-panel" id="adTrnDescTabs-en" role="tabpanel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adTrnDescEn" placeholder="' + L.trnDescription + ' (EN)">' + A.esc(item ? item.description_en : '') + '</textarea>' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adTrnDescEn" aria-label="' + L.trnDescription + ' (EN)" placeholder="' + L.trnDescription + ' (EN)">' + A.esc(item ? item.description_en : '') + '</textarea>' +
                     '</div>' +
                 '</div>' +
-                '<div class="ad-lang-panel" data-lang-panel="kg">' +
+                '<div class="ad-lang-panel" id="adTrnDescTabs-kg" role="tabpanel" data-lang-panel="kg">' +
                     '<div class="ad-field">' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adTrnDescKg" placeholder="' + L.trnDescription + ' (KG)">' + A.esc(item ? item.description_kg : '') + '</textarea>' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adTrnDescKg" aria-label="' + L.trnDescription + ' (KG)" placeholder="' + L.trnDescription + ' (KG)">' + A.esc(item ? item.description_kg : '') + '</textarea>' +
                     '</div>' +
                 '</div>' +
                 '<button type="button" class="ad-btn-translate-all" data-ru="adTrnDesc" data-en="adTrnDescEn" data-kg="adTrnDescKg">&#127760; ' + L.translateAllBtn + '</button>' +
@@ -1021,14 +1038,40 @@
 
         // --- Event Listeners ---
 
+        /* Кнопки перевода гаснут там, где переводить нечего. Иначе после
+           сохранения форма отрисовывается заново и все кнопки горят, будто
+           переводов нет */
+        if (A.settleTranslateButtons) A.settleTranslateButtons(container);
+
+        /* Тот же сторож — для ухода в другой раздел левого меню.
+           Вопрос и три ответа одни и те же, поэтому и окно одно */
+        A.стеречьЧерновик(
+            function() { return trnDraftDirty; },
+            function(уйти) {
+                A.showConfirm(L.unsavedChanges, L.unsavedChangesText,
+                    function() { return saveTournamentHandler(уйти); },
+                    L.unsavedSaveBtn,
+                    null,
+                    { label: L.unsavedLeaveBtn, action: function() { trnDraftDirty = false; уйти(); } });
+            }
+        );
+
         // Back (with unsaved changes protection)
         document.getElementById('adTrnBack').addEventListener('click', function() {
             if (trnDraftDirty) {
-                A.showConfirm(L.unsavedChanges, L.unsavedChangesText, function() {
+                var кСписку = function() {
                     trnDraftDirty = false;
                     A.setAdminHash('tournaments');
                     renderTournamentsList();
-                }, L.unsavedLeaveBtn);
+                };
+                /* Выбор тут тройной, а не двоичный: сохранить, уйти без
+                   сохранения, остаться. Главная кнопка — сохранить:
+                   она не теряет работу */
+                A.showConfirm(L.unsavedChanges, L.unsavedChangesText,
+                    function() { return saveTournamentHandler(кСписку); },
+                    L.unsavedSaveBtn,
+                    null,
+                    { label: L.unsavedLeaveBtn, action: кСписку });
             } else {
                 A.setAdminHash('tournaments');
                 renderTournamentsList();
@@ -1042,7 +1085,13 @@
             var lang = tab.dataset.lang;
             var card = tab.closest('.ad-form-card');
             if (!card) return;
-            card.querySelectorAll('.ad-lang-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.lang === lang); });
+            card.querySelectorAll('.ad-lang-tab').forEach(function(t) {
+                var выбрана = t.dataset.lang === lang;
+                t.classList.toggle('active', выбрана);
+                /* Диктору цвет плашки ничего не говорит: выбранную вкладку
+                   он узнаёт только по aria-selected */
+                t.setAttribute('aria-selected', выбрана ? 'true' : 'false');
+            });
             card.querySelectorAll('.ad-lang-panel').forEach(function(p) { p.classList.toggle('active', p.dataset.langPanel === lang); });
         });
 
@@ -1357,8 +1406,11 @@
         var imgZone = document.getElementById('adTrnImgZone');
         var imgInput = document.getElementById('adTrnImgInput');
 
+        /* Выбор файла открывает только тот короб, на котором это написано.
+           Раньше нажатие в любое место раздела — хоть по подписи, хоть по
+           пустоте — открывало окно замены: нажать было некуда */
         imgZone.addEventListener('click', function(e) {
-            if (e.target.closest('.ad-image-upload-remove')) return;
+            if (!e.target.closest('.ad-afisha-drop, .ad-image-upload-placeholder')) return;
             imgInput.click();
         });
 
@@ -1366,15 +1418,39 @@
         // угодно, а в карточке турнира нужна одна пропорция. Менеджер сам
         // двигает и приближает картинку и видит, что попадёт на сайт
         async function выбратьАфишу(file) {
-            trnImageFile = file;
-            if (A.cropCover) {
-                var обрезанная = await A.cropCover(file);
-                if (обрезанная) {
-                    trnImageFile = new File([обрезанная],
-                        (file.name || 'poster').replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+            var обрезанная = null;
+            /* Окно кадрирования отдаёт null и когда отменили, и когда
+               библиотека не подключилась. Различаем здесь: отмена — это
+               отказ от выбора целиком. Раньше закрытие окна молча
+               подменяло афишу необрезанным оригиналом, и он же уезжал
+               в базу по «Сохранить» */
+            var имя = (file.name || 'poster').replace(/\.\w+$/, '');
+            if (A.cropCover && typeof Cropper !== 'undefined') {
+                var итог = await A.cropCover(file, { сРамкой: true });
+                обрезанная = итог && итог.blob;
+                if (!обрезанная) {
+                    imgInput.value = '';
+                    return;
+                }
+                trnImageCrop = итог.рамка;
+                trnImageFile = new File([обрезанная], имя + '.jpg', { type: 'image/jpeg' });
+            } else {
+                trnImageCrop = null;
+                trnImageFile = file;
+            }
+            /* Целая афиша уезжает отдельным файлом и заметно меньше: её
+               короб на сайте — 120 пикселей шириной */
+            trnImageFullFile = file;
+            if (A.compressImage) {
+                try {
+                    var м = await A.compressImage(file, ШИРИНА_ЦЕЛОЙ, 0.85);
+                    trnImageFullFile = new File([м.blob], имя + '-full.jpg', { type: 'image/jpeg' });
+                } catch (e) {
+                    // холст не справился — грузим как есть
                 }
             }
-            previewTrnImage(URL.createObjectURL(trnImageFile));
+            trnImageFullUrl = URL.createObjectURL(trnImageFullFile);
+            previewTrnImage(URL.createObjectURL(trnImageFile), trnImageFullUrl);
         }
 
         imgInput.addEventListener('change', function() {
@@ -1397,15 +1473,6 @@
         setupTrnImgRemove();
 
         // URL apply
-        document.getElementById('adTrnImgUrlBtn').addEventListener('click', function() {
-            var url = document.getElementById('adTrnImgUrl').value.trim();
-            if (url) {
-                trnImageFile = null;
-                trnImageUrl = url;
-                previewTrnImage(url);
-            }
-        });
-
         // Save (with confirm for existing tournaments)
         document.getElementById('adTrnSave').addEventListener('click', function() {
             if (trnEditingId) {
@@ -1425,10 +1492,26 @@
             tab.addEventListener('click', function() {
                 var nav = tab.dataset.trnNav;
                 if (nav === 'edit') return; // Already on edit
-                if (nav === 'regs') A.renderBracketManagement(trnEditingId, 'registrations');
-                else if (nav === 'bracket') A.renderBracketManagement(trnEditingId, 'bracket');
-                else if (nav === 'schedule') A.renderBracketManagement(trnEditingId, 'schedule');
-                else if (nav === 'points') A.renderBracketManagement(trnEditingId, 'results');
+
+                function уйти() {
+                    trnDraftDirty = false;
+                    if (nav === 'regs') A.renderBracketManagement(trnEditingId, 'registrations');
+                    else if (nav === 'bracket') A.renderBracketManagement(trnEditingId, 'bracket');
+                    else if (nav === 'schedule') A.renderBracketManagement(trnEditingId, 'schedule');
+                    else if (nav === 'points') A.renderBracketManagement(trnEditingId, 'results');
+                }
+
+                // Несохранённое стережём и здесь: вкладки турнира — такой же
+                // уход со страницы, как кнопка «Назад к списку»
+                if (trnDraftDirty) {
+                    A.showConfirm(L.unsavedChanges, L.unsavedChangesText,
+                        function() { return saveTournamentHandler(уйти); },
+                        L.unsavedSaveBtn,
+                        null,
+                        { label: L.unsavedLeaveBtn, action: уйти });
+                    return;
+                }
+                уйти();
             });
         });
 
@@ -1496,23 +1579,69 @@
             });
         }
 
-        // Autosave on input (debounce 3s)
+        // АВТОСОХРАНЕНИЯ БОЛЬШЕ НЕТ — решение Кости 28.09: «давай уберём
+        // автосохранение, и при уходе со страницы будет окно-предупреждение,
+        // что что-то не было сохранено».
+        //
+        // Почему это правильно: одно и то же действие вело себя двумя
+        // способами. Кнопка «Сохранить» спрашивала подтверждение, а форма
+        // через три секунды после любого ввода писала в базу молча — и
+        // менеджер не мог ни передумать, ни понять, что уже сохранено.
+        // Теперь в базу пишет только кнопка, а несохранённое стережёт
+        // предупреждение.
         trnDraftDirty = false;
         container.addEventListener('input', function(e) {
             if (!e.target.closest('.ad-form-card, .ad-field')) return;
             trnDraftDirty = true;
-            clearTimeout(trnAutosaveTimer);
-            trnAutosaveTimer = setTimeout(autosaveTrnDraft, 3000);
         });
+
+        // Уход со страницы браузером: закрытие вкладки, обновление, адрес.
+        // Своё окно тут показать нельзя — браузер показывает своё, и только
+        // если на странице есть несохранённое
+        if (!window._кслтСторожЧерновика) {
+            window._кслтСторожЧерновика = true;
+            window.addEventListener('beforeunload', function(e) {
+                if (!trnDraftDirty) return;
+                e.preventDefault();
+                e.returnValue = '';
+            });
+        }
     }
 
-    function previewTrnImage(src) {
+    /* Два представления одной афиши рядом, каждое в своей настоящей
+       пропорции. Превью, которое врёт про форму, хуже, чем его отсутствие:
+       менеджер кадрирует вслепую и узнаёт о срезанной надписи с сайта */
+    function afishaSplitHtml(cropSrc, fullSrc) {
+        return '<div class="ad-afisha-split">' +
+                   '<figure class="ad-afisha-pane ad-afisha-pane--crop">' +
+                       '<img src="' + A.esc(cropSrc) + '" class="ad-afisha-img" id="adTrnImgPreview" alt="">' +
+                       /* Кнопка снятия сидит на самой афише, а не в углу окна:
+                          рядом с коробом загрузки её читали бы как «закрыть
+                          загрузку» */
+                       '<button type="button" class="ad-image-upload-remove" id="adTrnImgRemove">&times;</button>' +
+                       '<figcaption class="ad-afisha-cap">' + L.trnImgCapPage + '</figcaption>' +
+                   '</figure>' +
+                   '<figure class="ad-afisha-pane ad-afisha-pane--thumb">' +
+                       '<img src="' + A.esc(fullSrc || cropSrc) + '" class="ad-afisha-img" id="adTrnImgPreviewFull" alt="">' +
+                       '<figcaption class="ad-afisha-cap">' + L.trnImgCapCard + '</figcaption>' +
+                   '</figure>' +
+                   /* Своей кнопки у него нет: нажатие всплывает в окно, где
+                      уже висит открытие выбора файла — одно определение на
+                      одно понятие. Кнопка здесь ради клавиатуры и ради того,
+                      чтобы замена афиши была видна, а не угадывалась */
+                   '<button type="button" class="ad-afisha-drop" id="adTrnImgReplace">' +
+                       '<span class="ad-image-upload-icon">\uD83D\uDDBC</span>' +
+                       '<span>' + L.trnImgReplace + '</span>' +
+                       '<span class="ad-field-hint">' + L.uploadHint + '</span>' +
+                   '</button>' +
+               '</div>';
+    }
+
+    function previewTrnImage(cropSrc, fullSrc) {
         var zone = document.getElementById('adTrnImgZone');
         if (!zone) return;
         zone.classList.add('has-image');
-        zone.innerHTML =
-            '<img src="' + A.esc(src) + '" class="ad-image-upload-preview" id="adTrnImgPreview">' +
-            '<button type="button" class="ad-image-upload-remove" id="adTrnImgRemove">&times;</button>';
+        zone.innerHTML = afishaSplitHtml(cropSrc, fullSrc);
         setupTrnImgRemove();
     }
 
@@ -1523,6 +1652,9 @@
                 e.stopPropagation();
                 trnImageFile = null;
                 trnImageUrl = '';
+                trnImageFullUrl = '';
+                trnImageFullFile = null;
+                trnImageCrop = null;
                 var zone = document.getElementById('adTrnImgZone');
                 zone.classList.remove('has-image');
                 zone.innerHTML =
@@ -1531,7 +1663,7 @@
                         '<div>' + L.uploadImage + '</div>' +
                         '<div class="ad-field-hint">' + L.uploadHint + '</div>' +
                     '</div>';
-                document.getElementById('adTrnImgUrl').value = '';
+
                 document.getElementById('adTrnImgInput').value = '';
             });
         }
@@ -1585,6 +1717,8 @@
             fee_member: feeValue('adTrnFeeMember'),
             fee_guest: feeValue('adTrnFeeGuest'),
             image: trnImageUrl || null,
+            image_full: trnImageFullUrl || null,
+            image_crop: trnImageCrop || null,
             format: document.getElementById('adTrnFormat').value || 'singles',
             level_id: document.getElementById('adTrnLevel').value || null,
             bracket_type: document.getElementById('adTrnBracketType').value || null,
@@ -1784,7 +1918,11 @@
     }
 
     // ---- Save Tournament ----
-    async function saveTournamentHandler() {
+    /**
+     * @param {Function} [послеСохранения] — куда уйти после удачной записи.
+     *        Без него форма перерисовывается на месте, как и раньше.
+     */
+    async function saveTournamentHandler(послеСохранения) {
         var saveBtn = document.getElementById('adTrnSave');
         saveBtn.disabled = true;
         saveBtn.textContent = L.saving;
@@ -1799,6 +1937,13 @@
                     return;
                 }
                 trnImageUrl = uploaded;
+                /* Целая афиша — отдельный файл. Не залилась — не роняем
+                   сохранение: в карточке останется обрезанная, как было
+                   до двух представлений */
+                if (trnImageFullFile) {
+                    var целая = await A.uploadImage(trnImageFullFile, 'trn-full-');
+                    trnImageFullUrl = целая || uploaded;
+                }
             }
 
             var data = collectTrnFormData();
@@ -1896,6 +2041,13 @@
             trnDraftDirty = false;
             A.showToast(L.saved, 'success');
 
+            /* Уход отсюда — только после удачной записи. Если уйти раньше,
+               человек решит, что сохранилось, а в базе ничего нет */
+            if (послеСохранения) {
+                послеСохранения();
+                return;
+            }
+
             // Re-render form with updated state
             loadAndEditTournament(trnEditingId);
 
@@ -1940,56 +2092,11 @@
         renderTournamentsList();
     }
 
-    // ---- Autosave Tournament Draft ----
-    async function autosaveTrnDraft() {
-        var title = (document.getElementById('adTrnTitle') || {}).value || '';
-        if (!title.trim()) return;
-
-        if (trnAutosaving) return;
-        trnAutosaving = true;
-
-        try {
-            var data = collectTrnFormData();
-
-            // Keep published_at as-is (draft stays draft, published stays published)
-            data.published_at = trnEditingPublishedAt;
-
-            // Preserve special statuses that shouldn't be overwritten
-            var protectedStatuses = ['completed', 'registration_closed', 'cancelled'];
-            if (trnEditingStatus && protectedStatuses.indexOf(trnEditingStatus) !== -1) {
-                data.status = trnEditingStatus;
-            } else if (trnEditingPublishedAt) {
-                data.status = A.computeTournamentStatus(data.registration_start, data.registration_end, data.date_start, data.date_end);
-            } else {
-                data.status = 'upcoming';
-            }
-
-            var result;
-            if (trnEditingId) {
-                result = await A.client.from('tournaments').update(data).eq('id', trnEditingId);
-            } else {
-                data.id = crypto.randomUUID();
-                result = await A.client.from('tournaments').insert(data);
-                if (!result.error) {
-                    trnEditingId = data.id;
-                }
-            }
-
-            if (!result.error) {
-                trnDraftDirty = false;
-                var statusEl = document.getElementById('adTrnDraftStatus');
-                if (statusEl) {
-                    var now = new Date();
-                    var hh = String(now.getHours()).padStart(2, '0');
-                    var mm = String(now.getMinutes()).padStart(2, '0');
-                    statusEl.textContent = '\u2713 ' + L.draftSaved + ' ' + hh + ':' + mm;
-                }
-            }
-        } catch (e) {
-            console.error('Tournament autosave error:', e);
-        }
-        trnAutosaving = false;
-    }
+    /* Автосохранение убрано 28.09 по решению Кости. Функция
+       autosaveTrnDraft удалена целиком, а не оставлена «на всякий случай»:
+       код, который никто не зовёт, гниёт молча и однажды возвращается.
+       В базу пишет только кнопка «Сохранить»; несохранённое стережёт
+       предупреждение при уходе со страницы и при переходе по вкладкам. */
 
     // ---- Venue Search (court autocomplete) ----
     async function searchTrnVenue(query) {

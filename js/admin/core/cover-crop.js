@@ -21,9 +21,13 @@
     /**
      * Открывает окно кадрирования.
      * @param {File} file — выбранный файл
-     * @returns {Promise<Blob|null>} обрезанная картинка или null, если отменили
+     * @param {Object} [опции] — сРамкой: вернуть ещё и положение рамки
+     * @returns {Promise<Blob|Object|null>} обрезанная картинка (или
+     *          {blob, рамка} при сРамкой) либо null, если отменили.
+     *          Рамка — доли исходника, а не пиксели: по ним можно
+     *          перекадрировать ту же афишу позже, не трогая файл
      */
-    function cropCover(file) {
+    function cropCover(file, опции) {
         return new Promise(function(resolve) {
             if (typeof Cropper === 'undefined') {
                 resolve(null);   // библиотека не подключилась — грузим как есть
@@ -82,7 +86,22 @@
                         imageSmoothingQuality: 'high'
                     });
                     if (!canvas) { close(null); return; }
-                    canvas.toBlob(function(blob) { close(blob); }, 'image/jpeg', 0.88);
+                    var рамка = null;
+                    if (опции && опции.сРамкой) {
+                        var d = cropper.getData(true);
+                        var и = cropper.getImageData();
+                        if (и.naturalWidth && и.naturalHeight) {
+                            рамка = {
+                                x: +(d.x / и.naturalWidth).toFixed(4),
+                                y: +(d.y / и.naturalHeight).toFixed(4),
+                                w: +(d.width / и.naturalWidth).toFixed(4),
+                                h: +(d.height / и.naturalHeight).toFixed(4)
+                            };
+                        }
+                    }
+                    canvas.toBlob(function(blob) {
+                        close(опции && опции.сРамкой ? { blob: blob, рамка: рамка } : blob);
+                    }, 'image/jpeg', 0.88);
                 });
             };
             reader.readAsDataURL(file);

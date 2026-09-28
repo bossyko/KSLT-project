@@ -880,9 +880,12 @@ body.ad-page {
     font-weight: 700;
 }
 
+/* ОДНА СТУПЕНЬ НА ВСЕ КНОПКИ ЭКРАНА. Было 12 у мелкой кнопки против 14 у
+   «Назад к списку» — одно понятие с двумя определениями на одном экране.
+   Решение Кости 28.09: свести к 14 */
 .ad-btn-sm {
-    padding: 6px 14px;
-    font-size: var(--fs-xs);
+    padding: 6px var(--space-3);
+    font-size: var(--fs-sm);
 }
 
 .ad-btn-translate {
@@ -909,18 +912,26 @@ body.ad-page {
 }
 
 .ad-btn-translate-all {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    margin-top: 8px;
-    padding: 6px 14px;
+    /* gap здесь мёртв и был мёртв: внутри кнопки один текстовый узел
+       «🌐 Перевести в пустые», а gap раздвигает элементы, не слова.
+       Проверено чтением DOM: childNodes.length === 1 */
+    margin-top: var(--space-2);
+    /* Было 30 высотой — мимо шкалы кнопок 28·36·44·52 */
+    height: var(--btn-h-sm);
+    padding: 0 var(--space-3);
+    font-family: inherit;
     font-size: var(--fs-xs);
-    color: #CCFF00;
+    line-height: 1.2;
+    /* Было числом #CCFF00 — одно определение на одно понятие */
+    color: var(--accent);
     background: rgba(204, 255, 0, 0.08);
     border: 1px solid rgba(204, 255, 0, 0.2);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition-fast);
 }
 .ad-btn-translate-all:hover {
     background: rgba(204, 255, 0, 0.15);
@@ -1058,7 +1069,10 @@ body.ad-page {
 }
 
 .ad-form-card-title {
-    font-size: var(--fs-base);
+    /* Ступень 18, а не 16. Заголовок страницы 26, название карточки было
+       16 — между ними пропущены две ступени, и пара, которая читается как
+       пара, отстояла вдвое. Решение Кости 28.09 */
+    font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
@@ -1108,6 +1122,11 @@ body.ad-page {
     color: var(--text-primary);
     font-size: var(--input-fs);
     font-family: inherit;
+    /* Не normal: его считает браузер, и замерить у него нечего.
+       Замерено было 19.5px на 16px — это 1.22, тесно для абзаца.
+       Высота текстовых полей поднята со 120 до 144, чтобы видимых
+       строк осталось шесть, как и было */
+    line-height: 1.5;
     transition: var(--transition-fast);
     box-sizing: border-box;
     -moz-appearance: textfield;
@@ -1121,6 +1140,9 @@ select.ad-field-input {
     height: var(--input-h);
     padding-top: 0;
     padding-bottom: 0;
+    /* Однострочному полю высоту задаёт height, строке остаётся только
+       не быть выше короба */
+    line-height: 1.2;
 }
 .ad-field-input::-webkit-outer-spin-button,
 .ad-field-input::-webkit-inner-spin-button {
@@ -1636,20 +1658,45 @@ select.ad-field-input {
 /* ---- Lang Tabs (RU / EN / KG) ---- */
 .ad-lang-tabs {
     display: flex;
-    gap: 4px;
-    margin-bottom: 12px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
 }
 
 .ad-lang-tab {
-    padding: 6px 16px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    /* Ступень шкалы кнопок; было 28 из 6px padding + строки */
+    height: var(--btn-h-sm);
+    padding: 0 var(--space-sm);
     border-radius: var(--radius-full);
     border: 1px solid var(--border-subtle);
     background: transparent;
     color: var(--text-muted);
+    font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 600;
+    line-height: 1.2;
     cursor: pointer;
     transition: var(--transition-fast);
+}
+
+/* Цель нажатия 44 при видимых 36: на планшете попадают пальцем,
+   а раздувать саму плашку значит ломать ряд */
+.ad-lang-tab::after,
+.ad-btn-translate-all::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -4px;
+    bottom: -4px;
+}
+
+.ad-lang-tab:focus-visible,
+.ad-btn-translate-all:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .ad-lang-tab.active {
@@ -1727,6 +1774,107 @@ select.ad-field-input {
 
 .ad-image-upload-remove:hover {
     background: rgba(255, 59, 48, 0.8);
+}
+
+/* ---- Обложка турнира: два представления в одном окне ---- */
+/* Одна афиша живёт на сайте в двух формах: обрезанной 16:9 вверху страницы
+   турнира и целой, вписанной в короб 3:4, в карточке списка
+   (см. .to-compact-thumb::before в css/tournaments-overview.css —
+   background-size: contain). Показываем обе рядом, каждую в её настоящей
+   пропорции: превью, которое врёт про форму, хуже, чем его отсутствие —
+   менеджер кадрирует вслепую и узнаёт о срезанной надписи уже с сайта */
+.ad-afisha-zone.has-image {
+    padding: var(--space-sm);
+    overflow: visible;
+    /* Нажимают по коробу загрузки, а не по всему разделу — окно
+       не должно прикидываться кнопкой */
+    cursor: default;
+}
+
+.ad-afisha-split {
+    /* Высота у коробов одна: пара читается как пара и едет одной границей.
+       Ширины считает пропорция — 16:9 даёт 498, 3:4 даёт 210 */
+    --afisha-h: 320px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    align-items: flex-start;
+}
+
+.ad-afisha-pane {
+    position: relative;
+    margin: 0;
+    min-width: 0;
+}
+
+.ad-afisha-img {
+    display: block;
+    height: var(--afisha-h);
+    width: auto;
+    border-radius: var(--radius-sm);
+    /* Поле по краям вписанной афиши — то же, что на карточке сайта */
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.ad-afisha-pane--crop .ad-afisha-img {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.ad-afisha-pane--thumb .ad-afisha-img {
+    aspect-ratio: 3 / 4;
+    object-fit: contain;
+}
+
+.ad-afisha-cap {
+    margin-top: var(--space-2);
+    font-size: var(--fs-xs);
+    line-height: 1.4;
+    /* Не --text-dim: посчитано 3.21:1 на фоне карточки rgb(17,17,17) —
+       мимо WCAG AA. Подпись здесь не украшение, её читают. --text-muted
+       даёт 5.33:1 */
+    color: var(--text-muted);
+}
+
+/* Третий короб — сама загрузка. До него о замене афиши не говорило ничто:
+   на месте картинки была видна одна кнопка «×», а нажимать надо было в окно.
+   Он же добирает ширину строки — короба пропорций её не заполняют и не
+   должны: превью, растянутое до края, перестаёт показывать настоящий размер */
+.ad-afisha-drop {
+    flex: 1;
+    min-width: 160px;
+    /* Ровно по низу картинок: подписи висят ниже, это пометки, не короба */
+    height: var(--afisha-h);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 2px dashed var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.ad-afisha-drop:hover {
+    border-color: var(--accent);
+    color: var(--text-secondary);
+}
+
+.ad-afisha-drop:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 992px) {
+    .ad-afisha-split { --afisha-h: 200px; }
 }
 
 /* ---- News Meta Preview ---- */
@@ -1849,9 +1997,12 @@ select.ad-field-input {
     justify-content: center;
 }
 
+/* Обводка лаймом — решение Кости 28.09. Окно подтверждения перебивает
+   собой всю страницу, и край у него должен читаться как край, а не
+   теряться в фоне: подложка окна #0A0A0A темнее фона админки */
 .ad-confirm-modal {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--accent);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
     max-width: 400px;
@@ -1883,9 +2034,20 @@ select.ad-field-input {
     max-width: 520px;
 }
 
+/* Окно с тремя выходами шире: 104 + 126 + 24 зазора = 254 при 392
+   внутри. В окне 400 внутри 352, и три кнопки вылезали на 27 — померено
+   подстановкой в живое окно. 440 — существующая ширина системы
+   (см. claude/kslt-formy-i-modalki.md), нового числа не заводим */
+.ad-confirm-modal:has(.ad-confirm-actions > :nth-child(3)) {
+    max-width: 440px;
+}
+
 .ad-confirm-actions {
     display: flex;
-    gap: 12px;
+    /* Страховка на длинные языки: кыргызская подпись длиннее русской,
+       и лучше перенос строкой, чем кнопка за краем окна */
+    flex-wrap: wrap;
+    gap: var(--space-3);
     justify-content: center;
 }
 
@@ -2916,9 +3078,11 @@ select.ad-field-input {
     padding: 20px;
 }
 
+/* Вторая семья окон — та же обводка: два окна подряд не должны
+   выглядеть из разных приложений (см. claude/kslt-formy-i-modalki.md) */
 .ad-modal {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--accent);
     border-radius: 16px;
     width: 100%;
     max-height: 90vh;
@@ -4556,9 +4720,11 @@ select.ad-field-input {
     background: rgba(244, 67, 54, 0.15);
 }
 
+/* ВТОРОЕ ОПРЕДЕЛЕНИЕ .ad-btn-sm УБРАНО 28.09. Их было два: одно на :886,
+   другое здесь, и побеждало это — оно ниже по файлу. Из-за него мелкая
+   кнопка держала кегль 12 против 14 у соседей, и правка первого правила
+   ничего не меняла. Осталось только то, чего в первом не было: скругление */
 .ad-btn-sm {
-    padding: 6px 14px;
-    font-size: var(--fs-xs);
     border-radius: 8px;
 }
 
@@ -6582,3 +6748,13 @@ select.ad-field-input {
     font-size: var(--fs-2xs);
     white-space: nowrap;
 }
+
+/* ---- Обводка окна ---- */
+/* Бегущая рамка ОТЛОЖЕНА, и вот почему — честно.
+   Рисунок такой рамки в проекте один: `::before` с conic-gradient и маской
+   (эталон `.guest-cta-card` в css/style.css). Он уже размножен четырежды —
+   `.badges-cta-box`, `.guest-cta-card`, `.pt-guest-cta`, `.pl-guest-cta`, —
+   и сторож `tools/check-korobka.js` падает на ПЯТОЙ копии. Он прав:
+   дубликат ловит проверка, а не память.
+   Пока четыре копии не сведены в один класс, окно админки держит ровную
+   лаймовую рамку. Это записано в трекер отдельным куском. */

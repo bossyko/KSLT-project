@@ -175,6 +175,7 @@
         unsavedChanges: 'Unsaved changes',
         unsavedChangesText: 'You have unsaved changes. Leave without saving?',
         unsavedLeaveBtn: 'Leave',
+        unsavedSaveBtn: 'Save',
         // Tournaments
         addTournament: 'Add Tournament',
         editTournament: 'Edit Tournament',
@@ -196,6 +197,9 @@
         trnFeeHintPair: 'per player, som',
         trnFeeHintPlayer: 'per player, som',
         trnImage: 'Cover Image',
+        trnImgReplace: 'Replace poster',
+        trnImgCapPage: 'Top of the tournament page',
+        trnImgCapCard: 'Card in the list',
         noTournaments: 'No tournaments yet',
         noTournamentsText: 'Click "Add Tournament" to create your first tournament',
         trnDeleteConfirm: 'Delete this tournament?',
@@ -1655,6 +1659,7 @@
         unsavedChanges: 'Несохранённые изменения',
         unsavedChangesText: 'Есть несохранённые изменения. Выйти без сохранения?',
         unsavedLeaveBtn: 'Выйти',
+        unsavedSaveBtn: 'Сохранить',
         // Tournaments
         addTournament: 'Добавить турнир',
         editTournament: 'Редактировать турнир',
@@ -1676,6 +1681,9 @@
         trnFeeHintPair: 'с участника, сом',
         trnFeeHintPlayer: 'с игрока, сом',
         trnImage: 'Обложка',
+        trnImgReplace: 'Заменить афишу',
+        trnImgCapPage: 'Вверху страницы турнира',
+        trnImgCapCard: 'Карточка в списке',
         noTournaments: 'Турниров пока нет',
         noTournamentsText: 'Нажмите "Добавить турнир" чтобы создать первый турнир',
         trnDeleteConfirm: 'Удалить этот турнир?',
@@ -3033,23 +3041,14 @@
         { key: 'benches', label: isEn ? 'Benches' : 'Скамейки' }
     ];
 
-    var TOURNAMENT_STATUSES = {
-        upcoming: L.statusUpcoming,
-        registration_open: L.statusRegOpen,
-        registration_closed: L.statusRegClosed,
-        ongoing: L.statusOngoing,
-        completed: L.statusCompleted,
-        cancelled: L.statusCancelled
-    };
+    /* Подписи статусов — из js/tournament-status.js: одно определение на
+       одно понятие. Раньше админка звала то же состояние «Предстоящий»,
+       а сайт — «Скоро» и «Скоро открытие» */
+    var TOURNAMENT_STATUSES = window.KSLT_STATUS.подписи(isEn ? 'en' : 'ru');
 
-    function computeTournamentStatus(regStart, regEnd, dateStart, dateEnd) {
-        var now = new Date().toISOString().substring(0, 10);
-        if (regStart && now < regStart) return 'upcoming';
-        if (regStart && regEnd && now >= regStart && now <= regEnd) return 'registration_open';
-        if (dateEnd && now > dateEnd) return 'completed';
-        if (dateStart && now >= dateStart) return 'ongoing';
-        if (regEnd && now > regEnd) return 'registration_closed';
-        return 'upcoming';
+    /* Вычисление одно на всю КСЛТ — js/tournament-status.js */
+    function computeTournamentStatus(a, b, c, d) {
+        return window.KSLT_STATUS.вычислить(a, b, c, d);
     }
 
     // ---- SVG Icons ----

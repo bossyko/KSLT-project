@@ -113,19 +113,51 @@
             var link = e.target.closest('[data-tab]');
             if (!link) return;
             var tab = link.dataset.tab;
-            switchTab(tab);
-            window.location.hash = tab;
+            var уйти = function() {
+                switchTab(tab);
+                текущийХеш = '#' + tab;
+                window.location.hash = tab;
+            };
+            /* Уход в другой раздел — такой же уход со страницы, как кнопка
+               «Назад к списку». Раньше черновик тут пропадал молча: раздел
+               просто переключался. Сторожа ставит тот раздел, у которого
+               есть что терять (см. A.стеречьЧерновик) */
+            var сторож = A.сторожЧерновика;
+            if (сторож && сторож.грязно()) {
+                сторож.спросить(уйти);
+                return;
+            }
+            уйти();
         });
 
-        window.addEventListener('hashchange', function() {
-            var parsed = A.parseHash(window.location.hash.replace('#', ''));
-            switchTab(parsed.tab, parsed.action, parsed.itemId);
-        });
+        /* Кнопка «Назад» браузера меняет адрес сама, без нажатия по ссылке,
+           поэтому сторож из обработчика клика её не видел — черновик пропадал
+           молча. Здесь адрес уже сменился, когда мы об этом узнаём: возвращаем
+           его на место, спрашиваем, и уходим только по ответу.
+           Возврат адреса рождает своё hashchange — его пропускаем флагом,
+           иначе окно спросило бы дважды. */
+        var текущийХеш = window.location.hash;
+        var пропустить = false;
 
-        window.addEventListener('popstate', function() {
-            var parsed = A.parseHash(window.location.hash.replace('#', ''));
+        function перейтиПоАдресу() {
+            var новый = window.location.hash;
+            if (пропустить) { пропустить = false; текущийХеш = новый; return; }
+            if (новый === текущийХеш) return;
+
+            var сторож = A.сторожЧерновика;
+            if (сторож && сторож.грязно()) {
+                пропустить = true;
+                window.location.hash = текущийХеш;
+                сторож.спросить(function() { window.location.hash = новый; });
+                return;
+            }
+            текущийХеш = новый;
+            var parsed = A.parseHash(новый.replace('#', ''));
             switchTab(parsed.tab, parsed.action, parsed.itemId);
-        });
+        }
+
+        window.addEventListener('hashchange', перейтиПоАдресу);
+        window.addEventListener('popstate', перейтиПоАдресу);
     }
 
     function switchTab(tab, action, itemId) {
@@ -597,6 +629,19 @@
     A.renderDashboard = renderDashboard;
     A.initTabs = initTabs;
     A.switchTab = switchTab;
+    /**
+     * Сторож несохранённого черновика — один на всю админку.
+     *
+     * @param {Function} грязно — есть ли что терять
+     * @param {Function} спросить — показать окно и позвать уйти(), если
+     *        человек согласился
+     */
+    function стеречьЧерновик(грязно, спросить) {
+        A.сторожЧерновика = { грязно: грязно, спросить: спросить };
+    }
+
+    A.сторожЧерновика = null;
+    A.стеречьЧерновик = стеречьЧерновик;
     A.setAdminHash = setAdminHash;
     A.parseHash = parseHash;
     A.isDeepLinked = isDeepLinked;
