@@ -143,7 +143,12 @@
     z-index: 30;
     display: flex;
     justify-content: center;
-    padding: var(--space-md) var(--pad-x);
+    /* ВОЗДУХ СРЕЗАН ДО СТУПЕНИ, А НЕ ДО НУЛЯ — решение Кости 28.09:
+       «срежь воздух по максимуму, только не в 0». Было 24 сверху и снизу,
+       стало 12 — следующая ступень шкалы вниз. Ноль поставить нельзя:
+       строка липкая, и без поля она при прилипании сливается с шапкой.
+       Выигрыш 24 пикселя на каждом виде. */
+    padding: var(--space-3) var(--pad-x);
     background: var(--bg-primary);
     border-bottom: 1px solid transparent;
     transition: border-color 0.2s;
@@ -230,6 +235,13 @@
    разъезжалась на пустоту */
 .to-category-block {
     padding: var(--section-y-sm) var(--pad-x);
+}
+
+/* ПЕРВЫЙ БЛОК НЕ ДОБАВЛЯЕТ СВОЕГО ВОЗДУХА СВЕРХУ: над ним уже стоит поле
+   липкого поиска. Два поля подряд читаются как провал между обложкой и
+   первой категорией. Решение Кости 28.09 — срезать воздух сверху и снизу. */
+.to-category-block:first-child {
+    padding-top: var(--space-3);
 }
 
 .to-category-block:nth-child(odd) {
@@ -1316,7 +1328,7 @@
     .to-hero .tournament-hero-stats .hero-stat-value { font-size: var(--fs-lg); }
     .to-hero .tournament-hero-stats .hero-stat-label { font-size: var(--fs-2xs); }
     .to-search-wrap {
-        padding: var(--space-md) var(--pad-x);
+        padding: var(--space-3) var(--pad-x);
     }
 
     .to-hero {
@@ -1444,7 +1456,7 @@
 
     /* Поиск шёл через 25 пикселей от обложки и добавлял свои 24 сверху */
     .to-search-wrap {
-        padding: var(--space-md) var(--pad-x);
+        padding: var(--space-3) var(--pad-x);
     }
 
     /* Шрифт остаётся 16: при меньшем Safari на iPhone сам увеличивает

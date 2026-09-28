@@ -57,7 +57,7 @@ const БЛОК = нач > 0 && кон > нач ? СТИ.slice(нач, кон) : 
     '          потому, что логотип вытянутый.');
 
 правило('потолок логотипа внутри плитки один на всех',
-    /\.sponsor-hero-logo img,\s*\.sponsors-cloud \.sponsor-logo-link img,\s*\.sponsors-cloud \.spon-static img \{[\s\S]{0,200}max-width: 70%[\s\S]{0,60}max-height: 58%/.test(БЛОК),
+    /\.sponsor-hero-logo img,\s*\.sponsors-cloud \.sponsor-logo-link img,\s*\.sponsors-cloud \.spon-static img \{[\s\S]{0,200}max-width: 84%[\s\S]{0,60}max-height: 72%/.test(БЛОК),
     'Иначе равные коробки снова дадут неравный вес.');
 
 правило('ряд заполняется целиком, последний неполный встаёт по центру',

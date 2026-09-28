@@ -27,8 +27,8 @@ const ОТКАТЫ = [
    'у плитки есть своя поверхность: заливка, контур и радиус'],
 
   ['css/style.css',
-   '.sponsor-hero-logo img,\n.sponsors-cloud .sponsor-logo-link img,\n.sponsors-cloud .spon-static img {\n    max-width: 70%;\n    max-height: 58%;',
-   '.sponsor-hero-logo img,\n.sponsors-cloud .sponsor-logo-link img,\n.sponsors-cloud .spon-static img {\n    max-width: 100%;\n    max-height: 100%;',
+   '    max-width: 84%;\n    max-height: 72%;',
+   '    max-width: 100%;\n    max-height: 100%;',
    'потолок логотипа внутри плитки один на всех'],
 
   ['css/style.css',

@@ -4322,8 +4322,12 @@ h2 {
 .sponsor-hero-logo img,
 .sponsors-cloud .sponsor-logo-link img,
 .sponsors-cloud .spon-static img {
-    max-width: 70%;
-    max-height: 58%;
+    /* ЛОГОТИП КРУПНЕЕ ВНУТРИ ЯЧЕЙКИ — Костя 28.09. Было 70 % и 58 %: в
+       ячейке 120 x 64 это давало рисунок 84 x 37, и ячейка весила больше
+       того, что в ней. Стало 84 % и 72 % — 100 x 46. Поля остаются, иначе
+       логотип упирается в контур. */
+    max-width: 84%;
+    max-height: 72%;
     width: auto;
     height: auto;
     object-fit: contain;
