@@ -19,7 +19,11 @@ secrets/
 
 # Playwright / Tests
 test-results/
+# Отчёты Playwright. ШАБЛОНОМ, А НЕ СПИСКОМ: 27.09 папка html-stend
+# уехала в репозиторий — 143 файла — только потому, что её имени не
+# было в перечне. Каждый новый конфиг заводит свою папку отчёта.
 tests/reports/html/
+tests/reports/html-*/
 tests/reports/results.json
 .playwright/
 
