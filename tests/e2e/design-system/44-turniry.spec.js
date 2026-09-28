@@ -24,10 +24,21 @@ const { test, expect } = require('@playwright/test');
 
 const СТЕНД = '/maket/turniry-zamer.html';
 
+/* ТРИ ЯЗЫКА, А НЕ ОДИН. 27.09 Костя поймал: тест ходил только по русскому
+   стенду, и 95 зелёных проверок ничего не говорили про английскую и
+   кыргызскую страницы — а слова там длиннее, и ломается ровно это.
+   Стенд один: язык он берёт из ?lang= и на миг подменяет себе путь, потому
+   что код страницы определяет язык путём (js/tournaments-overview.js:6–7). */
+const ЯЗЫКИ = [
+    { имя: 'ru', адрес: СТЕНД },
+    { имя: 'en', адрес: СТЕНД + '?lang=en' },
+    { имя: 'kg', адрес: СТЕНД + '?lang=kg' }
+];
+
 const ШКАЛА = [11, 12, 14, 16, 18, 21, 26, 32, 40];
 
-async function открыть(page) {
-    await page.goto(СТЕНД);
+async function открыть(page, адрес) {
+    await page.goto(адрес);
     // Признак, а не тишина сети: категории отрисованы
     await page.waitForFunction(
         () => document.querySelectorAll('.to-category-block').length > 0,
@@ -46,12 +57,14 @@ async function раскладка(page) {
 const высота = (page, с) => page.evaluate(
     s => { const э = document.querySelector(s); return э ? Math.round(э.getBoundingClientRect().height) : null; }, с);
 
-test.describe('страница турниров', () => {
+for (const Я of ЯЗЫКИ) {
+
+test.describe('страница турниров · ' + Я.имя, () => {
 
     /* ══ РАСКЛАДКА ═══════════════════════════════════════════════════════ */
 
     test('раскладка выбрана по ширине и повороту, а не по одной ширине', async ({ page }, info) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const р = await раскладка(page);
         const { width, height } = page.viewportSize();
         const низкийБоком = height <= 500 && width >= height;
@@ -66,7 +79,7 @@ test.describe('страница турниров', () => {
     });
 
     test('крупная карточка равна столбу, пока столб стоит рядом', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         if (await раскладка(page) === 'лента') return;
         const { width } = page.viewportSize();
         if (width < 992) return;                    // здесь столб уже под карточкой
@@ -82,7 +95,7 @@ test.describe('страница турниров', () => {
     });
 
     test('все блоки категорий одного роста — ритм не гуляет', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const высоты = await page.evaluate(() =>
             [...document.querySelectorAll('.to-category-block')]
                 .map(б => Math.round(б.getBoundingClientRect().height)));
@@ -92,7 +105,7 @@ test.describe('страница турниров', () => {
     });
 
     test('пустой слот держит место и объясняет себя', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         if (await раскладка(page) === 'лента') return;
         const пустые = await page.evaluate(() =>
             [...document.querySelectorAll('.to-slot-empty')].map(э => ({
@@ -108,7 +121,7 @@ test.describe('страница турниров', () => {
     });
 
     test('лента листается вбок, и следующая карточка выглядывает', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         if (await раскладка(page) !== 'лента') return;
         const л = await page.evaluate(() => {
             const к = document.querySelector('.to-phone-cards');
@@ -133,7 +146,7 @@ test.describe('страница турниров', () => {
     /* ══ ПОРЯДОК ═════════════════════════════════════════════════════════ */
 
     test('категория с идущим турниром идёт первой', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const порядок = await page.evaluate(() =>
             [...document.querySelectorAll('.to-category-block')].map(б => б.dataset.cat));
         expect(порядок[0], 'в стенде идущий турнир заведён в promasters').toBe('promasters');
@@ -143,7 +156,7 @@ test.describe('страница турниров', () => {
     /* ══ ЛЕСТНИЦА ════════════════════════════════════════════════════════ */
 
     test('каждый текстовый уровень стоит на ступени шкалы', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const уровни = await page.evaluate(() => {
             const с = ['.to-hero h1', '.to-hero-sub', '.hero-stat-value', '.hero-stat-label',
                        '.to-category-title', '.to-view-all', '.to-slot-empty',
@@ -159,7 +172,7 @@ test.describe('страница турниров', () => {
     });
 
     test('подзаголовок обложки СТРОГО мельче заголовка на каждом виде', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const [з, п] = await page.evaluate(() => [
             parseFloat(getComputedStyle(document.querySelector('.to-hero h1')).fontSize),
             parseFloat(getComputedStyle(document.querySelector('.to-hero-sub')).fontSize)
@@ -170,7 +183,7 @@ test.describe('страница турниров', () => {
     /* ══ ОБЛОЖКА ═════════════════════════════════════════════════════════ */
 
     test('обложка не запирает первый экран на низком горизонтальном', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const { height } = page.viewportSize();
         if (height > 500) return;
         const о = await высота(page, '.to-hero');
@@ -180,7 +193,7 @@ test.describe('страница турниров', () => {
     /* ══ ПОИСК ═══════════════════════════════════════════════════════════ */
 
     test('поиск прилипает под шапку при прокрутке', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         await page.evaluate(() => window.scrollTo(0, 1200));
         await page.waitForTimeout(400);
         const р = await page.evaluate(() => {
@@ -194,7 +207,7 @@ test.describe('страница турниров', () => {
     });
 
     test('поле поиска держит ступень кнопки, а лупа стоит внутри него', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const р = await page.evaluate(() => {
             const поле = document.querySelector('.to-search-input');
             const лупа = document.querySelector('.to-search-icon');
@@ -213,7 +226,7 @@ test.describe('страница турниров', () => {
     /* ══ ДОСТУПНОСТЬ ═════════════════════════════════════════════════════ */
 
     test('клавиатурой видно, где ты находишься', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         // НАСТОЯЩИЙ Tab: :focus-visible зависит от способа получения фокуса,
         // и программный focus() его не включает
         let найдено = null;
@@ -237,7 +250,7 @@ test.describe('страница турниров', () => {
     });
 
     test('цель нажатия не меньше ступени md', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const мелкие = await page.evaluate(() =>
             [...document.querySelectorAll('a[href], button, input')]
                 .map(э => ({ э, r: э.getBoundingClientRect() }))
@@ -247,7 +260,7 @@ test.describe('страница турниров', () => {
     });
 
     test('подсказка и граница поля читаются по WCAG', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const к = await page.evaluate(() => {
             const разбор = c => { const m = c.match(/[\d.]+/g).map(Number);
                 return { r: m[0], g: m[1], b: m[2], a: m.length > 3 ? m[3] : 1 }; };
@@ -279,7 +292,7 @@ test.describe('страница турниров', () => {
 
     test('настройка «меньше движения» выключает движение', async ({ page }) => {
         await page.emulateMedia({ reducedMotion: 'reduce' });
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const длительности = await page.evaluate(() =>
             [...document.querySelectorAll('.to-categories *, .to-hero *')]
                 .map(э => parseFloat(getComputedStyle(э).transitionDuration) || 0)
@@ -288,7 +301,7 @@ test.describe('страница турниров', () => {
     });
 
     test('у поля поиска есть имя для диктора', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const имя = await page.getAttribute('.to-search-input', 'aria-label');
         expect(имя && имя.trim().length, 'диктор прочитает только подсказку').toBeTruthy();
     });
@@ -296,14 +309,14 @@ test.describe('страница турниров', () => {
     /* ══ ЦЕЛОСТНОСТЬ ═════════════════════════════════════════════════════ */
 
     test('страница не переливается вбок ни на одном виде', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         const перелив = await page.evaluate(() =>
             document.documentElement.scrollWidth - document.documentElement.clientWidth);
         expect(перелив, 'горизонтальный перелив ' + перелив + ' px').toBeLessThanOrEqual(1);
     });
 
     test('наведение мышью поднимает карточку, но не ломает ряд', async ({ page }) => {
-        await открыть(page);
+        await открыть(page, Я.адрес);
         if (await раскладка(page) === 'лента') return;
         const карточка = page.locator('.to-side-stack .to-compact').first();
         if (!(await карточка.count())) return;
@@ -319,8 +332,10 @@ test.describe('страница турниров', () => {
         const ошибки = [];
         page.on('pageerror', e => ошибки.push(e.message));
         page.on('console', m => { if (m.type() === 'error') ошибки.push(m.text()); });
-        await открыть(page);
+        await открыть(page, Я.адрес);
         await page.waitForTimeout(1200);
         expect(ошибки, ошибки.join(' · ')).toEqual([]);
     });
 });
+
+}

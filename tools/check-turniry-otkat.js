@@ -19,6 +19,10 @@ const КОРЕНЬ = path.join(__dirname, '..');
 const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-turniry-'));
 ['css', 'tools', 'js', 'pages', 'maket'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
+/* Тесты копируются ТОЛЬКО своей папкой: в tests/ лежат ещё и отчёты со
+   следами прогонов, и копировать их целиком — это минуты и гигабайты. */
+fs.cpSync(path.join(КОРЕНЬ, 'tests/e2e/design-system'),
+          path.join(ВРЕМ, 'tests/e2e/design-system'), { recursive: true });
 
 const CSS = 'css/tournaments-overview.css';
 const JSФ = 'js/tournaments-overview.js';
@@ -26,6 +30,7 @@ const ТОК = 'css/tokens.css';
 const HTML = 'pages/tournaments-overview.html';
 const HTMLen = 'pages/tournaments-overview-en.html';
 const СТЕНД = 'maket/turniry-zamer.html';
+const ТЕСТ  = 'tests/e2e/design-system/44-turniry.spec.js';
 
 const ОТКАТЫ = [
   /* ── отношения ─────────────────────────────────────────────────────── */
@@ -184,7 +189,17 @@ const ОТКАТЫ = [
 
   [HTMLen, /tournaments-overview\.css\?v=\d+/,
            `tournaments-overview.css?v=999`,
-   'версия css одинакова на всех трёх языках']
+   'версия css одинакова на всех трёх языках'],
+
+  /* ── три языка ─────────────────────────────────────────────────────── */
+  [СТЕНД, `history.replaceState(null, '', настоящий);`,
+          `void настоящий;`,
+   'стенд берёт язык из ?lang= и возвращает адрес на настоящий файл'],
+
+  [ТЕСТ, `    { имя: 'kg', адрес: СТЕНД + '?lang=kg' }`,
+         `    { имя: 'ru2', адрес: СТЕНД }`,
+   'тест ходит по ТРЁМ языкам, а не по одному'],
+
 ];
 
 function прогон() {

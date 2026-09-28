@@ -175,6 +175,30 @@ body{padding-top:var(--header-h)}
 })();
 </script>
 
+<script>
+/* ЯЗЫК СТЕНДА — ?lang=ru | en | kg.
+   Страница определяет язык ПУТЁМ, а не параметром: js/tournaments-overview.js:6–7
+   смотрит, есть ли в pathname «-en» или «-kg». Стенд один, копий ему заводить
+   незачем, поэтому путь на миг подменяется: перед тем как выполнится код
+   страницы, адрес становится turniry-zamer-en.html, а сразу после загрузки
+   возвращается на настоящий. Так и словарь берётся нужный, и обновление
+   страницы клавишей F5 не упирается в несуществующий файл.
+   Ничего, кроме адреса, стенд не трогает: словари, подписи и ссылки рисует
+   настоящий код страницы. */
+(function () {
+    var язык = (new URLSearchParams(location.search).get('lang') || 'ru').toLowerCase();
+    if (язык !== 'en' && язык !== 'kg') язык = 'ru';
+    document.documentElement.lang = язык;
+    if (язык === 'ru') return;
+
+    var настоящий = location.pathname + location.search;
+    var поддельный = location.pathname.replace('.html', '-' + язык + '.html') + location.search;
+    history.replaceState(null, '', поддельный);
+    window.addEventListener('load', function () {
+        history.replaceState(null, '', настоящий);
+    });
+})();
+</script>
 <script src="../js/tournament-slots.js?v=5"></script>
 <script src="../js/tournament-card.js?v=6"></script>
 <script src="../js/tournament-featured.js?v=5"></script>
@@ -198,8 +222,9 @@ body{padding-top:var(--header-h)}
     }
     function обновить() {
         var ш = window.innerWidth, в = window.innerHeight;
+        var язык = (new URLSearchParams(location.search).get('lang') || 'ru').toUpperCase();
         э.textContent = ш + '×' + в + ' · ' + (ш >= в ? 'горизонтально' : 'вертикально')
-            + ' · ' + раскладка(ш, в) + ' · база заглушена';
+            + ' · ' + раскладка(ш, в) + ' · ' + язык + ' · база заглушена';
     }
     обновить();
     window.addEventListener('resize', обновить);
