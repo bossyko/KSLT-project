@@ -14,13 +14,19 @@
     /* ВОЗДУХ — КРУТИЛКА, А НЕ ВТОРОЕ ОБЪЯВЛЕНИЕ padding. Прувер 27.09
        насчитал у обложки ПЯТЬ объявлений padding в пяти полосах — ровно та
        болезнь, которую главная уже вылечила (css/style.css:1631) */
-    --to-hero-vozduh:     var(--section-y);
-    --to-hero-vozduh-niz: var(--section-y);
+    /* ОБЛОЖКА НЕ ЗАБИРАЕТ БОЛЬШЕ ТРЕТИ ПЕРВОГО ЭКРАНА — решение Кости
+       28.09, вариант 1. Было: воздух по --section-y (24→40) и потолок
+       460, отчего на десктопе обложка выходила ~600 из 1300, почти
+       половина экрана, и до сгиба доезжал край одной карточки. Человек
+       пришёл смотреть турниры, а видит заголовок и четыре цифры.
+       Ступенью ниже: воздух --section-y-sm (16→24), потолок 360. */
+    --to-hero-vozduh:     var(--section-y-sm);
+    --to-hero-vozduh-niz: var(--section-y-sm);
 
     position: relative;
     padding: var(--to-hero-vozduh) var(--pad-x) var(--to-hero-vozduh-niz);
     text-align: center;
-    min-height: 460px;
+    min-height: 360px;
     display: flex;
     align-items: center;
     justify-content: center;
