@@ -32,7 +32,8 @@ const КУСКИ = [
     ['судейское окно',      'check-sudya.js',        'check-sudya-otkat.js'],
     ['страница турниров',   'check-turniry.js',      'check-turniry-otkat.js'],
     ['статус турнира',      'check-status.js',       'check-status-otkat.js'],
-    ['форма турнира',       'check-trn-forma.js',    'check-trn-forma-otkat.js']
+    ['форма турнира',       'check-trn-forma.js',    'check-trn-forma-otkat.js'],
+    ['жеребьёвка',          'check-zhrebiy.js',      'check-zhrebiy-otkat.js']
 ];
 
 function прогнать(файл) {
@@ -65,6 +66,18 @@ const fs = require('fs');
         console.log('\n  \u2717 ОБЩИЕ ПРАВИЛА РАЗОШЛИСЬ\n');
         console.log('    js/kslt-rules.js и mobile/www/js/kslt-rules.js не совпадают.');
         console.log('    Приложение работает по своим правилам, сайт по своим.\n');
+        process.exit(1);
+    }
+}
+
+/* ── общая предпосылка: правила должны СЧИТАТЬ верно ─────────────────────── */
+/* Заморозка читает файл как текст: она поймает исчезнувшую функцию, но не
+   поймает функцию, которая осталась и стала считать неверно. Проба зовёт
+   правила и сверяет числа. Браузера ей не надо — правила чистые. */
+{
+    const проба = прогнать('proba-pravil.js');
+    if (!проба.ок) {
+        console.log(проба.вывод);
         process.exit(1);
     }
 }
