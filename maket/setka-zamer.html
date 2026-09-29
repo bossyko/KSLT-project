@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>КСЛТ — стенд жеребьёвки</title>
+<link rel="stylesheet" href="../css/tokens.css?v=22">
+<link rel="stylesheet" href="../css/style.css?v=383">
+<link rel="stylesheet" href="../css/admin.css?v=169">
+<style>
+/* ЛЕСА СТЕНДА, а не админки. Ни одного правила на .ad-* здесь нет. */
+.stend-shapka{position:sticky;top:0;z-index:200;display:flex;gap:var(--space-2);
+  flex-wrap:wrap;align-items:center;padding:var(--space-3) var(--space-md);
+  background:#0a0a0a;border-bottom:1px solid var(--border-subtle)}
+.stend-shapka b{font-size:var(--fs-sm);letter-spacing:.08em;margin-right:var(--space-md)}
+.stend-shapka a{font-size:var(--fs-xs);color:var(--text-secondary);text-decoration:none;
+  padding:6px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm)}
+.stend-shapka a.tek{color:var(--accent);border-color:var(--accent)}
+.stend-podpis{padding:var(--space-3) var(--space-md);font-size:var(--fs-xs);
+  color:var(--text-muted);border-bottom:1px solid var(--border-subtle)}
+</style>
+</head>
+<body>
+<!--
+  СТЕНД ЖЕРЕБЬЁВКИ.
+  Живой базы не трогает: A.client подменён заглушкой, запись в базу
+  невозможна. Поэтому здесь МОЖНО нажимать кнопки.
+  Разметку рисует НАСТОЯЩИЙ js/admin/sections/bracket.js, краски —
+  НАСТОЯЩИЙ css/admin.css.
+  Расклад берётся из адреса: ?r=НОМЕР. Содержимое КРАЙНЕЕ — длинные имена,
+  неровные группы, отменённый доп. матч.
+-->
+<div class="stend-shapka"><b>КСЛТ · СТЕНД ЖЕРЕБЬЁВКИ</b><span id="stendSsylki"></span></div>
+<div class="stend-podpis" id="stendPodpis">грузится…</div>
+
+<div class="ad-content">
+  <div class="ad-section active" id="ad-tournaments"></div>
+</div>
+
+<script src="../js/kslt-rules.js?v=20"></script>
+<script src="../js/group-standings.js?v=2"></script>
+<script src="../js/rating-points.js?v=1"></script>
+<script src="../js/tournament-status.js?v=1"></script>
+<script src="../js/admin/core/constants.js?v=113"></script>
+<script src="../js/admin/core/utils.js?v=26"></script>
+<script src="../js/admin/core/layout.js?v=12"></script>
+<!-- players.js здесь не ради игроков: в нём живёт A.loadTournamentLevels,
+     которую зовёт bracket.js:1913. Найдено дымовым прогоном стенда, а не
+     чтением: раскладка уровней лежит в разделе игроков. -->
+<script src="../js/admin/sections/players.js?v=37"></script>
+<script src="../js/admin/sections/bracket.js?v=197"></script>
+<script src="stend-setka-dannye.js?v=1"></script>
+</body>
+</html>

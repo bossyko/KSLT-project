@@ -1,0 +1,261 @@
+/**
+ * ДАННЫЕ И ЗАГЛУШКА БАЗЫ ДЛЯ СТЕНДА ЖЕРЕБЬЁВКИ.
+ *
+ * Цепочка .from().select().eq().order().single() возвращает саму себя и
+ * разрешается в { data, error } — ровно то, что ждёт админка. Записи нет:
+ * update/insert/delete отвечают «на стенде базы нет», поэтому кнопки здесь
+ * можно нажимать без страха.
+ *
+ * Расклады КРАЙНИЕ, а не удобные:
+ *   1 — 10 человек, группы 4/3/3, выходят 2. Боевой 153bc688: неровные
+ *       группы, тройное кольцо в первой, один доп. матч и один проход.
+ *   2 — 20 человек, 5 групп по 4, выходят 2. Шесть свободных мест на
+ *       пятерых претендентов: пять меток Q и ОДИН честный проход.
+ *   3 — 8 человек, 4 группы по 2, выходят 2. Групповой этап никого не
+ *       отсеивает — предупреждение на виду.
+ *   4 — 8 человек, 2 группы по 4, выходят 2. Всё ровно, пустых клеток нет.
+ *   5 — тот же первый, но доп. матч ОТМЕНЁН: пустая клетка и пометка.
+ *   6 — парный турнир с длинными фамилиями: где ломается первым.
+ *   7 — тот же первый, но НИ ОДНОГО счёта: жеребьёвка только что
+ *       проведена. Единственный расклад, где видна кнопка «Пережеребить»:
+ *       она прячется, как только сыгран первый групповой матч.
+ */
+(function () {
+    'use strict';
+
+    var A = window.KSLT_ADMIN;
+
+    // ---- Имена: длинные нарочно ----
+    var ФАМИЛИИ = [
+        'Кошойбеков Улан', 'Ахматова Нармина', 'Сейдиматов Искендер',
+        'Мураталиев Ильдияр', 'Абдырахманова Эракыым', 'Чертков Михаил',
+        'Садыков Фуркат', 'Сыдыков Омурадил', 'Кулджаев Руслан',
+        'Серко Максим', 'Исаков Азим', 'Орозбекова Жылдыз',
+        'Токтогулов Бекзат', 'Эшматова Айпери', 'Джумабаев Нурсултан',
+        'Калыкова Гульнара', 'Мамбеталиев Тилек', 'Осмонова Айдай',
+        'Бекташев Данияр', 'Турдубекова Мээрим'
+    ];
+
+    function игроки(n) {
+        var из = [];
+        for (var i = 0; i < n; i++) {
+            из.push({
+                id: 'igrok-' + (i + 1),
+                name: ФАМИЛИИ[i % ФАМИЛИИ.length],
+                name_en: 'Player ' + (i + 1),
+                points: 1000 - i * 37,
+                ntrp_singles: (5.5 - i * 0.15).toFixed(2),
+                ntrp_doubles: (5.0 - i * 0.12).toFixed(2)
+            });
+        }
+        return из;
+    }
+
+    function заявки(n, парный) {
+        var из = [];
+        for (var i = 0; i < n; i++) {
+            из.push({
+                id: 'zayavka-' + (i + 1),
+                tournament_id: 'stend',
+                player_id: 'igrok-' + (i + 1),
+                partner_id: парный ? 'igrok-' + (i + 1 + n) : null,
+                status: 'draw',
+                seat_pool: 'online',
+                group_number: null,
+                seed_number: null,
+                registered_at: '2026-09-0' + ((i % 9) + 1) + 'T10:00:00Z',
+                players: null
+            });
+        }
+        return из;
+    }
+
+    /** Круг в группе: все со всеми, счёт проставлен. */
+    function группа(номер, участники, счета) {
+        var м = [], порядок = 0;
+        for (var a = 0; a < участники.length; a++) {
+            for (var b = a + 1; b < участники.length; b++) {
+                порядок++;
+                var с = счета && счета[порядок - 1];
+                м.push({
+                    id: 'g' + номер + '-' + порядок,
+                    tournament_id: 'stend',
+                    group_number: номер,
+                    round: 'G' + номер,
+                    round_number: порядок,
+                    match_order: порядок,
+                    player1_id: участники[a],
+                    player2_id: участники[b],
+                    reg1_id: 'zayavka-' + участники[a].split('-')[1],
+                    reg2_id: 'zayavka-' + участники[b].split('-')[1],
+                    status: с ? 'completed' : 'upcoming',
+                    score: с ? с.счёт : null,
+                    winner_id: с ? с.кто : null,
+                    seed1: null, seed2: null
+                });
+            }
+        }
+        return м;
+    }
+
+    function клетка(круг, номер, м1, м2, и1, и2, статус, счёт, кто) {
+        return {
+            id: круг + '-' + номер, tournament_id: 'stend',
+            group_number: null, round: круг, round_number: номер, match_order: номер,
+            slot1_label: м1, slot2_label: м2,
+            player1_id: и1 || null, player2_id: и2 || null,
+            status: статус || 'upcoming', score: счёт || null, winner_id: кто || null
+        };
+    }
+
+    // ---- Расклады ----
+    var РАСКЛАДЫ = {
+        1: {
+            имя: '10 человек · 3 группы 4/3/3 · выходят 2',
+            почему: 'Боевой 153bc688: неровные группы, тройное кольцо в первой, один доп. матч и один проход',
+            турнир: { group_count: 3, qualifiers_per_group: 2, max_participants: 10, draw_seed: 481273906 },
+            людей: 10
+        },
+        2: {
+            имя: '20 человек · 5 групп по 4 · выходят 2',
+            почему: 'Шесть свободных мест на пятерых претендентов: пять меток Q и ОДИН честный проход',
+            турнир: { group_count: 5, qualifiers_per_group: 2, max_participants: 20, draw_seed: 77712345 },
+            людей: 20
+        },
+        3: {
+            имя: '8 человек · 4 группы по 2 · выходят 2',
+            почему: 'Групповой этап никого не отсеивает — предупреждение должно быть на виду',
+            турнир: { group_count: 4, qualifiers_per_group: 2, max_participants: 8, draw_seed: 5150 },
+            людей: 8
+        },
+        4: {
+            имя: '8 человек · 2 группы по 4 · выходят 2',
+            почему: 'Всё ровно: сетка 4, пустых клеток нет, доп. матчей нет',
+            турнир: { group_count: 2, qualifiers_per_group: 2, max_participants: 8, draw_seed: 909090 },
+            людей: 8
+        },
+        5: {
+            имя: '10 человек · доп. матч ОТМЕНЁН',
+            почему: 'Клетка осталась пустой, карточка помечена «отменён» — соперник проходит без игры',
+            турнир: { group_count: 3, qualifiers_per_group: 2, max_participants: 10, draw_seed: 481273906 },
+            людей: 10, отменить: true
+        },
+        6: {
+            имя: 'Парный · 8 пар · 2 группы по 4',
+            почему: 'Длинные фамилии по двое в клетке — здесь ломается первым',
+            турнир: { group_count: 2, qualifiers_per_group: 2, max_participants: 8, format: 'doubles', draw_seed: 31337 },
+            людей: 8, парный: true
+        },
+        7: {
+            имя: '10 человек · жеребьёвка только что проведена',
+            почему: 'Ни одного счёта: кнопка «Пережеребить» и её подпись видны только здесь',
+            турнир: { group_count: 3, qualifiers_per_group: 2, max_participants: 10, draw_seed: 481273906 },
+            людей: 10, несыграно: true
+        }
+    };
+
+    var номер = String((location.search.match(/[?&]r=(\d+)/) || [])[1] || 1);
+    if (!РАСКЛАДЫ[номер]) номер = '1';
+    var Р = РАСКЛАДЫ[номер];
+
+    // ---- Строим матчи под расклад ----
+    var размеры = window.KSLT_RULES.размерыГрупп(Р.людей, Р.турнир.group_count);
+    var матчи = [], след = 1;
+    размеры.forEach(function (сколько, и) {
+        var уч = [];
+        for (var k = 0; k < сколько; k++) уч.push('igrok-' + (след++));
+        // Счёт: первый в списке выигрывает у всех, кроме последней встречи
+        var счета = [];
+        if (!Р.несыграно) {
+            var пар = сколько * (сколько - 1) / 2;
+            for (var п = 0; п < пар; п++) счета.push({ счёт: '6/' + (п % 5), кто: уч[п % сколько] });
+        }
+        матчи = матчи.concat(группа(и + 1, уч, счета));
+    });
+
+    var вышло = Р.турнир.group_count * Р.турнир.qualifiers_per_group;
+    var сетка = 2; while (сетка < вышло) сетка *= 2;
+    var расклад = window.KSLT_RULES.раскладСвободных(
+        Р.турнир.group_count, сетка - вышло, Р.турнир.playoff_format);
+
+    for (var д = 1; д <= расклад.матчей; д++) {
+        матчи.push(клетка('IG', д, 'Q' + (расклад.безИгры + д * 2 - 1), 'Q' + (расклад.безИгры + д * 2),
+            Р.несыграно ? null : 'igrok-1', Р.несыграно ? null : 'igrok-2',
+            Р.отменить ? 'cancelled' : (Р.несыграно ? 'upcoming' : 'completed'),
+            (Р.отменить || Р.несыграно) ? null : '6/4',
+            (Р.отменить || Р.несыграно) ? null : 'igrok-1'));
+    }
+    // Метки первого круга. Пары складываются честно: победитель группы
+    // встречает второго ИЗ ДРУГОЙ группы — вторые сдвинуты на одну букву.
+    // Наивное «A1 — A2» роняло предупреждение «оба из группы A», и стенд
+    // жаловался на собственную выдумку вместо настоящей беды
+    var букв = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    var гр = Р.турнир.group_count, клеток = сетка / 2, своб = 0;
+    var верх = [], низ = [];
+    for (var к = 1; к <= клеток; к++) {
+        верх.push(к <= гр ? букв[к - 1] + '1' : 'Q' + (++своб));
+        низ.push(к <= гр ? букв[к % гр] + '2' : 'Q' + (++своб));
+    }
+    for (var к = 1; к <= клеток; к++) {
+        матчи.push(клетка('R1', к, верх[к - 1], низ[к - 1],
+            Р.несыграно ? null : 'igrok-' + к,
+            Р.несыграно ? null : 'igrok-' + (к + 1)));
+    }
+    матчи.push(клетка('F', 1, null, null));
+    матчи.push(клетка('3RD', 99, null, null));
+
+    var ТУРНИР = Object.assign({
+        id: 'stend', title: 'Стенд жеребьёвки — расклад ' + номер,
+        title_en: 'Draw stand — layout ' + номер,
+        bracket_type: 'round_robin', format: 'singles', status: 'ongoing',
+        category_id: 'futures', level_id: 'lvl-1', gender: 'men',
+        date_start: '2026-10-01', date_end: '2026-10-02',
+        court_count: 2, match_duration: 90, start_time: '09:00',
+        manual_group_places: {}
+    }, Р.турнир);
+
+    var ЗАЯВКИ = заявки(Р.людей, Р.парный);
+    var ИГРОКИ = игроки(Р.людей * (Р.парный ? 2 : 1));
+
+    // ---- Заглушка базы ----
+    function ответ(данные) {
+        var ц = {
+            select: function () { return ц; }, eq: function () { return ц; },
+            in: function () { return ц; }, order: function () { return ц; },
+            limit: function () { return ц; }, or: function () { return ц; },
+            single: function () { return Promise.resolve({ data: данные[0] || null, error: null }); },
+            then: function (f) { return Promise.resolve({ data: данные, error: null, count: данные.length }).then(f); }
+        };
+        return ц;
+    }
+    var НЕТБАЗЫ = Promise.resolve({ data: null, error: { message: 'на стенде базы нет — запись невозможна' } });
+
+    A.client = {
+        from: function (таблица) {
+            var данные = таблица === 'tournaments' ? [ТУРНИР]
+                : таблица === 'tournament_registrations' ? ЗАЯВКИ
+                : таблица === 'matches' ? матчи
+                : таблица === 'players' ? ИГРОКИ
+                : [];
+            var ц = ответ(данные);
+            ц.update = function () { return { eq: function () { return НЕТБАЗЫ; }, in: function () { return НЕТБАЗЫ; } }; };
+            ц.insert = function () { return НЕТБАЗЫ; };
+            ц.delete = function () { return { eq: function () { return НЕТБАЗЫ; } }; };
+            return ц;
+        },
+        rpc: function () { return НЕТБАЗЫ; },
+        auth: { getSession: function () { return Promise.resolve({ data: { session: null } }); } }
+    };
+    A.currentRole = 'admin';
+    A.currentUserId = 'stend';
+
+    // ---- Шапка стенда ----
+    var ссылки = Object.keys(РАСКЛАДЫ).map(function (н) {
+        return '<a href="?r=' + н + '"' + (н === номер ? ' class="tek"' : '') + '>' + н + '</a>';
+    }).join(' ');
+    document.getElementById('stendSsylki').innerHTML = ссылки;
+    document.getElementById('stendPodpis').textContent = Р.имя + ' — ' + Р.почему;
+
+    // ---- Рисуем настоящей админкой ----
+    A.renderBracketManagement('stend', 'bracket');
+})();
