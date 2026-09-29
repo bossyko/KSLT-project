@@ -58,13 +58,35 @@ async function открытьФорму(page) {
        контейнер — вместе с формой, которую человек успел открыть.
        Тест не ждёт тишины и не спит: он нажимает и проверяет признак, и
        так до трёх раз. Находка записана в трекер — чинить её отдельно. */
+    let какОткрыли = '';
     for (let попытка = 1; попытка <= 3; попытка++) {
-        await добавить.click();
+        if (попытка < 3) {
+            // Обычное нажатие — так же, как человек
+            await добавить.click();
+            какОткрыли = 'клик';
+        } else {
+            /* ПОСЛЕДНЯЯ ПОПЫТКА — НАЖАТИЕ ИЗ САМОЙ СТРАНИЦЫ.
+               Бегунок жмёт по координатам центра элемента, а полоса
+               заголовка и вкладок у нас ЛИПКАЯ: она может накрыть кнопку,
+               и удар уйдёт в неё. Нажатие через el.click() координат не
+               знает и перекрытие обходит. Если форма открылась только так —
+               виновато перекрытие, а не разметка формы. */
+            await page.evaluate(() => {
+                const b = document.getElementById('adTrnAdd');
+                if (b) b.click();
+            });
+            какОткрыли = 'нажатие из страницы';
+        }
         const открылась = await page.locator('#adTrnCat')
             .waitFor({ state: 'visible', timeout: 4000 })
             .then(() => true, () => false);
-        if (открылась) break;
-        // Кнопка могла быть заменена перерисовкой — берём её заново
+        if (открылась) {
+            if (какОткрыли === 'нажатие из страницы') {
+                console.log('  ! форма открылась только нажатием из страницы — ' +
+                            'кнопку «+ Добавить турнир» что-то перекрывает');
+            }
+            break;
+        }
         await добавить.waitFor({ state: 'visible', timeout: 5000 });
     }
 
@@ -84,7 +106,18 @@ async function открытьФорму(page) {
             кнопкаЕсть: !!document.getElementById('adTrnAdd'),
             счётчик: (document.getElementById('adTrnStatTotal') || {}).textContent || 'нет',
             полей: document.querySelectorAll('.ad-field').length,
-            заголовок: (document.querySelector('.ad-section-title, h1, h2') || {}).textContent || 'нет'
+            заголовок: (document.querySelector('.ad-section-title, h1, h2') || {}).textContent || 'нет',
+            разделАктивен: !!document.querySelector('#ad-tournaments.active'),
+            ктоНадКнопкой: (() => {
+                const b = document.getElementById('adTrnAdd');
+                if (!b) return 'кнопки нет';
+                const r = b.getBoundingClientRect();
+                const верх = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+                if (!верх) return 'за экраном';
+                return верх === b ? 'сама кнопка'
+                    : (верх.id || верх.className || верх.tagName);
+            })(),
+            естьФункция: !!(window.KSLT_ADMIN && window.KSLT_ADMIN.renderTournamentsSection)
         }));
         throw new Error('форма не открылась. След: ' + JSON.stringify(след) +
             ' · ошибки страницы: ' + (ошибкиСтраницы.length ? ошибкиСтраницы.join(' | ') : 'нет'));
