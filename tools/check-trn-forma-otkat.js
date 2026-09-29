@@ -22,6 +22,17 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-trnforma-'));
   fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 
 const ОТКАТЫ = [
+  /* ─── одна точка входа в раздел ─── */
+  ['js/admin/core/init.js',
+   '        A.renderNewsSection();',
+   '        A.renderNewsSection();\n        A.renderTournamentsSection();',
+   'раздел турниров рисуется только через switchTab'],
+
+  ['js/admin/core/layout.js',
+   'tournaments: A.renderTournamentsSection,',
+   'tournaments: A.renderTournamentsList,',
+   'вкладка зовёт секцию, а не список напрямую'],
+
   /* ─── сетка формы ─── */
   ['js/admin/sections/tournaments.js',
    "'<div class=\"ad-field-row ad-field-row-4\">' +\n                    '<div class=\"ad-field\">' +\n                        '<label class=\"ad-field-label\">' + L.trnCategory",
@@ -56,14 +67,22 @@ const ОТКАТЫ = [
    'ступени кнопки берут переменные, а не числа'],
 
   ['css/admin.css',
-   '    top: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);\n    bottom: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);',
-   '    top: -4px;\n    bottom: -4px;',
-   'цель нажатия считается из ступени, а не зашита числом'],
+   '    height: var(--btn-h-md);\n    transform: translateY(-50%);',
+   '    height: 44px;\n    transform: translateY(-50%);',
+   'слой цели ростом со ступени 44, а не числом'],
 
+  /* Слой, написанный вторым блоком: ровно так он и размножался раньше */
   ['css/admin.css',
-   '.ad-image-upload-remove { --ad-cel-h: var(--btn-h-xs); }',
-   '.ad-image-upload-remove { --ad-cel-h-net: var(--btn-h-xs); }',
-   'крестик удаления афиши знает свою ступень xs'],
+   '.ad-lang-tab:focus-visible,',
+   '.ad-btn-translate-all::after { top: -4px; bottom: -4px; }\n\n.ad-lang-tab:focus-visible,',
+   'цель нажатия 44 определена ОДИН раз'],
+
+  /* Класс получил relative, а слой ему нарисовать забыли — шов, на котором
+     кнопка молча остаётся без цели нажатия */
+  ['css/admin.css',
+   '.ad-image-upload-remove,\n.ad-mobile-tab {\n    position: relative;',
+   '.ad-image-upload-remove {\n    position: relative;',
+   'слой цели и position: relative перечисляют одни и те же классы'],
 
   ['css/admin.css',
    '.ad-btn:focus-visible {',
@@ -109,7 +128,7 @@ const ОТКАТЫ = [
 
   /* ─── версии ─── */
   ['pages/admin.html',
-   'sections/tournaments.js?v=49',
+   'sections/tournaments.js?v=50',
    'sections/tournaments.js?v=45',
    'версии подняты — иначе браузер отдаст старое из кеша']
 ];

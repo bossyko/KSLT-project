@@ -17,14 +17,13 @@ const { test, expect } = require('../../fixtures');
 
 test.use({ storageState: require('../../auth-setup').adminState });
 
-/* ЗАПАС ПО ВРЕМЕНИ, И ОН НЕ ПРИХОТЬ. Замер 29.09: форма открывается не
-   сразу — три нажатия в первые двенадцать секунд не дали ничего, а
-   четвёртое дало 35 полей. Обработчик появляется только когда раздел
-   дорисован, а раздел ждёт категории и уровни из базы (tournaments.js:40-41,
-   два await подряд). Кнопка при этом видна задолго до.
-   Общий предел теста поднят, потому что само открытие может съесть
-   полминуты — это находка о продукте, записанная в трекер, а не о тесте. */
-test.describe.configure({ timeout: 90000 });
+/* ПОЧЕМУ ЗАПАС ПО ВРЕМЕНИ СНЯТ.
+   29.09 я записал здесь догадку: «обработчик появляется позже». Она была
+   неверна, и след Playwright её убил: `{"полей":0,...,"событиеДоходит":true,
+   "послеСвоегоНажатия":35}` и `element was detached from the DOM` на
+   #adTrnFormat. Форма ОТКРЫВАЛАСЬ — её стирала вторая отрисовка раздела:
+   init.js рисовал его сам, и switchTab рисовал его же. Шов убран, точка
+   входа одна, и десять нажатий подряд больше не нужны. */
 
 const ВИДЫ = [
     { имя: 'Десктоп 1512',  w: 1512, h: 900 },
@@ -50,59 +49,23 @@ async function открытьФорму(page) {
     const добавить = page.locator('#adTrnAdd');
     await добавить.waitFor({ state: 'visible', timeout: 15000 });
 
-    // Раздел готов, когда счётчик перестал быть многоточием
+    /* ТЕСТ ЖДЁТ ПРИЗНАК, А НЕ ТИШИНУ СЕТИ. Раздел готов, когда счётчик
+       турниров перестал быть многоточием: до ответа базы он '...'. */
     await page.waitForFunction(() => {
         const с = document.getElementById('adTrnStatTotal');
         return с && с.textContent.trim() !== '...' && с.textContent.trim() !== '';
     }, null, { timeout: 20000 });
 
-    // Ошибки страницы собираем ДО клика: падение отрисовки видно только так
+    // Ошибки страницы собираем ДО нажатия: падение отрисовки видно только так
     const ошибкиСтраницы = [];
     page.on('pageerror', e => ошибкиСтраницы.push(String(e.message || e)));
 
-    /* КЛИК ПОВТОРЯЕТСЯ, ПОКА НЕ ПОЯВИТСЯ ПРИЗНАК.
-       Раздел турниров дорисовывается ПОЗЖЕ, чем страница выглядит готовой:
-       init.js:22 зовёт renderTournamentsSection() без await, а та сперва
-       грузит категории и уровни. Список приходит следом и перезаписывает
-       контейнер — вместе с формой, которую человек успел открыть.
-       Тест не ждёт тишины и не спит: он нажимает и проверяет признак, и
-       так до трёх раз. Находка записана в трекер — чинить её отдельно. */
-    let какОткрыли = '';
-    const ПОПЫТОК = 10;
-    for (let попытка = 1; попытка <= ПОПЫТОК; попытка++) {
-        if (попытка < ПОПЫТОК) {
-            // Обычное нажатие — так же, как человек
-            await добавить.click();
-            какОткрыли = 'клик';
-        } else {
-            /* ПОСЛЕДНЯЯ ПОПЫТКА — НАЖАТИЕ ИЗ САМОЙ СТРАНИЦЫ.
-               Бегунок жмёт по координатам центра элемента, а полоса
-               заголовка и вкладок у нас ЛИПКАЯ: она может накрыть кнопку,
-               и удар уйдёт в неё. Нажатие через el.click() координат не
-               знает и перекрытие обходит. Если форма открылась только так —
-               виновато перекрытие, а не разметка формы. */
-            await page.evaluate(() => {
-                const b = document.getElementById('adTrnAdd');
-                if (b) b.click();
-            });
-            какОткрыли = 'нажатие из страницы';
-        }
-        const открылась = await page.locator('#adTrnCat')
-            .waitFor({ state: 'visible', timeout: 4000 })
-            .then(() => true, () => false);
-        if (открылась) {
-            if (какОткрыли === 'нажатие из страницы') {
-                console.log('  ! форма открылась только нажатием из страницы — ' +
-                            'кнопку «+ Добавить турнир» что-то перекрывает');
-            }
-            break;
-        }
-        await добавить.waitFor({ state: 'visible', timeout: 5000 });
-    }
+    await добавить.click();
 
     /* ДИАГНОСТИКА ВМЕСТО ДОГАДОК. Первый прогон сказал только «#adTrnCat не
-       появился за 15 секунд» — по такому следу причину не назвать. Теперь
-       при неудаче тест говорит, ГДЕ он оказался и что случилось. */
+       появился» — по такому следу причину не назвать. Теперь при неудаче
+       тест говорит, ГДЕ он оказался и что случилось. Именно этот след и
+       вывел на двойную отрисовку. */
     try {
         await page.locator('#adTrnCat').waitFor({ state: 'visible', timeout: 15000 });
         await page.locator('#adTrnBracketType').waitFor({ state: 'visible', timeout: 15000 });
@@ -110,40 +73,20 @@ async function открытьФорму(page) {
         const след = await page.evaluate(() => ({
             адрес: location.href,
             наВходе: /auth\.html/.test(location.pathname),
-            контейнер: !!document.getElementById('ad-tournaments'),
             вКонтейнере: (document.getElementById('ad-tournaments') || {}).innerHTML
                 ? document.getElementById('ad-tournaments').innerHTML.length : 0,
             кнопкаЕсть: !!document.getElementById('adTrnAdd'),
             счётчик: (document.getElementById('adTrnStatTotal') || {}).textContent || 'нет',
             полей: document.querySelectorAll('.ad-field').length,
-            заголовок: (document.querySelector('.ad-section-title, h1, h2') || {}).textContent || 'нет',
-            разделАктивен: !!document.querySelector('#ad-tournaments.active'),
             ктоНадКнопкой: (() => {
                 const b = document.getElementById('adTrnAdd');
                 if (!b) return 'кнопки нет';
                 const r = b.getBoundingClientRect();
                 const верх = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
                 if (!верх) return 'за экраном';
-                return верх === b ? 'сама кнопка'
-                    : (верх.id || верх.className || верх.tagName);
+                return верх === b ? 'сама кнопка' : (верх.id || верх.className || верх.tagName);
             })(),
-            естьФункция: !!(window.KSLT_ADMIN && window.KSLT_ADMIN.renderTournamentsSection),
-            /* РЕШАЮЩИЙ ЗАМЕР. Перекрытия нет, нажатие из страницы не
-               помогло, ошибок нет, контейнер не меняется. Остаётся
-               спросить прямо: доходит ли событие до кнопки, и одна ли
-               она на странице. Свой слушатель ставим одноразовым — он
-               ничего не ломает и снимается сам. */
-            кнопокСЭтимId: document.querySelectorAll('[id="adTrnAdd"]').length,
-            событиеДоходит: (() => {
-                const b = document.getElementById('adTrnAdd');
-                if (!b) return 'кнопки нет';
-                let дошло = false;
-                b.addEventListener('click', () => { дошло = true; }, { once: true });
-                b.click();
-                return дошло;
-            })(),
-            послеСвоегоНажатия: document.querySelectorAll('.ad-field').length,
-            списокПерерисован: !!(window.KSLT_ADMIN && window.KSLT_ADMIN.renderTournamentsList)
+            кнопокСЭтимId: document.querySelectorAll('[id="adTrnAdd"]').length
         }));
         throw new Error('форма не открылась. След: ' + JSON.stringify(след) +
             ' · ошибки страницы: ' + (ошибкиСтраницы.length ? ошибкиСтраницы.join(' | ') : 'нет'));
@@ -175,6 +118,14 @@ async function карточкаСетки(page, что) {
 for (const вид of ВИДЫ) {
     test.describe(`Форма турнира — ${вид.имя}`, () => {
         test.use({ viewport: { width: вид.w, height: вид.h } });
+
+        /* ВИДЫ ЗАДАЁТ САМ ФАЙЛ, ЗНАЧИТ ПРОЕКТ НУЖЕН ОДИН.
+           Конфиг гоняет пять проектов, а test.use выше переписывает вид
+           каждому — и одни и те же три вида прогонялись пятикратно: 90
+           прогонов вместо 18. Лишняя нагрузка на базу рождала гонку,
+           которой в продукте не было. */
+        test.skip(({}, инфо) => инфо.project.name !== 'desktop',
+                  'виды заданы внутри файла — проект берём один');
 
         test(`${вид.имя}: карточка «Тип сетки» — ровно три ряда`, async ({ page }) => {
             await открытьФорму(page);
