@@ -37,6 +37,8 @@ module.exports = defineConfig({
 
        11-dashboard-page  — кабинет закрыт входом: test.use storageState
        12-admin-page      — админка закрыта входом: то же
+       17-trn-forma       — форма турнира внутри админки: тот же вход, и
+                            категории с уровнями она берёт из базы
        20-header-offsets  — снимки отступов на ЗАКРЫТЫХ страницах, тот же вход
        42-live-stranica   — открывает боевую страницу матча с настоящим id и
                             ждёт данные из базы; подменить их заглушкой
@@ -47,6 +49,7 @@ module.exports = defineConfig({
     testIgnore: [
         '**/11-dashboard-page.spec.js',
         '**/12-admin-page.spec.js',
+        '**/17-trn-forma.spec.js',
         '**/20-header-offsets.spec.js',
         '**/42-live-stranica.spec.js'
     ],
