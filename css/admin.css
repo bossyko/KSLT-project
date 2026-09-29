@@ -809,30 +809,37 @@ body.ad-page {
 .ad-lang-tab,
 .ad-btn-translate-all,
 .ad-tab,
-.ad-image-upload-remove {
+.ad-image-upload-remove,
+.ad-mobile-tab {
     position: relative;
 }
 
+/* СЛОЙ НЕ ЗНАЕТ ВЫСОТЫ ЭЛЕМЕНТА, И ЭТО НЕ ЛЕНЬ.
+   Было «отступ = половина разницы со ступенью», и каждой низкой кнопке
+   приходилось объявлять свою ступень переменной. Оно держалось, пока все
+   кнопки стояли на шкале 28 / 36 / 44 / 52. Вкладки раздела на телефоне
+   ростом 32 — числа со шкалы нет вовсе, и формула на них соврала бы.
+   Слой ростом РОВНО 44 по центру верен при любой высоте, и переменная
+   --ad-cel-h стала не нужна — убрана, а не оставлена «на всякий». */
 .ad-lang-tab::after,
 .ad-btn-translate-all::after,
 .ad-tab::after,
-.ad-image-upload-remove::after {
+.ad-image-upload-remove::after,
+.ad-mobile-tab::after {
     content: '';
     position: absolute;
     left: 0;
     right: 0;
-    top: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);
-    bottom: calc((var(--btn-h-md) - var(--ad-cel-h, var(--btn-h-sm))) / -2);
+    top: 50%;
+    height: var(--btn-h-md);
+    transform: translateY(-50%);
 }
-
-/* Крестик удаления афиши — ступень xs 28, значит слой шире на 8 с каждой
-   стороны, а не на 4 */
-.ad-image-upload-remove { --ad-cel-h: var(--btn-h-xs); }
 
 .ad-lang-tab:focus-visible,
 .ad-btn-translate-all:focus-visible,
 .ad-tab:focus-visible,
-.ad-image-upload-remove:focus-visible {
+.ad-image-upload-remove:focus-visible,
+.ad-mobile-tab:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
