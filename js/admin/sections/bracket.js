@@ -2117,7 +2117,18 @@
 
         var html = '<div class="ad-brk-sticky-header">' +
             '<div class="ad-section-header">' +
-                '<h2 class="ad-section-title">' + A.esc(isEn ? (tournament.title_en || tournament.title) : tournament.title) + '</h2>' +
+                '<div class="ad-brk-zagolovok">' +
+                    '<h2 class="ad-section-title">' + A.esc(isEn ? (tournament.title_en || tournament.title) : tournament.title) + '</h2>' +
+                    /* НОМЕР ЖРЕБИЯ — ТИХОЙ СТРОКОЙ ПОД НАЗВАНИЕМ.
+                       Он не для игрока, а для спора: «почему я попал к первому
+                       сеяному» разрешается числом, а не объяснением. Тот же
+                       номер плюс тот же список заявок дают ту же сетку. */
+                    (tournament.draw_seed
+                        ? '<span class="ad-brk-zerno">' + L.drawSeedLabel + ' № ' +
+                            A.esc(String(tournament.draw_seed).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')) +
+                          '</span>'
+                        : '') +
+                '</div>' +
                 '<button class="ad-btn ad-btn-secondary" id="adBrkBack">' + L.back + '</button>' +
             '</div>' +
             '<div class="ad-tabs ad-trn-nav-tabs">' +
@@ -3608,8 +3619,13 @@
         // Regenerate draw button
         var regenBtn = document.getElementById('adBrkRegenerate');
         if (regenBtn) {
-            regenBtn.addEventListener('click', function() {
-                A.showConfirm(L.regenerateConfirm, '', async function() {
+            regenBtn.addEventListener('click', async function() {
+                /* ЦЕНУ НАЗЫВАЕМ ЧИСЛОМ, А НЕ СЛОВОМ «ВСЕ». Сколько именно
+                   матчей снесёт — видно до нажатия, а не после. */
+                var всего = await A.client.from('matches')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('tournament_id', tournamentId);
+                A.showConfirm(L.regenerateConfirm.replace('{n}', (всего.count || 0)), '', async function() {
                     regenBtn.disabled = true;
                     regenBtn.textContent = L.drawRunning;
                     await regenerateDraw(tournament, tournamentId);
@@ -4711,8 +4727,7 @@
         // справа — тем же порядком, что и в расписании запусков
         html += '<div class="ad-sched-actions">';
         if (!anyGroupCompleted && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adBrkRegenerate">' +
-                L.regenerateDraw + '</button>';
+            html += кнопкаПережеребить('ad-btn-sm');
         }
         html += '<div class="ad-sched-actions-right"></div></div>';
 
@@ -5733,7 +5748,7 @@
         // Action buttons
         html += '<div style="display:flex;justify-content:center;gap:8px;margin-top:16px;">';
         if (!anyCompleted && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-secondary" id="adBrkRegenerate">' + L.regenerateDraw + '</button>';
+            html += кнопкаПережеребить();
         }
         if (allCompleted && !isTournamentCompleted) {
             html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize">' + L.finalizeTournament + '</button>';
@@ -6118,7 +6133,7 @@
         // Action buttons
         html += '<div style="display:flex;justify-content:center;gap:8px;margin-top:16px;">';
         if (!anyCompleted && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-secondary" id="adBrkRegenerate">' + L.regenerateDraw + '</button>';
+            html += кнопкаПережеребить();
         }
         if (allCompleted && !isTournamentCompleted) {
             html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize">' + L.finalizeTournament + '</button>';
@@ -6389,7 +6404,44 @@
         return { ok: true };
     }
 
+    /**
+     * Кнопка «Пережеребить» — ОДНИМ ОПРЕДЕЛЕНИЕМ на четыре панели.
+     *
+     * Рисовалась в четырёх местах (групповая, олимпийка, FIC, лиги) четырьмя
+     * строками. Подпись под ней появилась бы в одном, а в трёх нет.
+     *
+     * ПОДПИСЬ СНИЗУ, А НЕ ПО НАВЕДЕНИЮ. Админку ведут и на планшете (виды
+     * 1024 и 768), а наведения там нет вовсе: свой механизм подсказок
+     * (bracket.js `подсказкиНаПолях`) висит на mouseenter и на планшете
+     * молчит. Действие необратимое — объяснять себя оно обязано без
+     * наведения.
+     */
+    function кнопкаПережеребить(размер) {
+        return '<div class="ad-brk-regen">' +
+            '<button class="ad-btn ad-btn-secondary' + (размер ? ' ' + размер : '') +
+                '" id="adBrkRegenerate">' + L.regenerateDraw + '</button>' +
+            '<span class="ad-brk-regen-podpis">' + L.regenerateHint + '</span>' +
+        '</div>';
+    }
+
     // ---- Regenerate Draw ----
+    /**
+     * Сколько матчей турнира уже сыграно со счётом.
+     *
+     * Нужно до сноса: снестиМатчиТурнира удаляет ВСЁ по tournament_id, без
+     * разбора, и результаты уходят вместе с пустыми клетками. Предупреждение
+     * про это молчало — говорило «все текущие матчи будут удалены», но не
+     * называло числа и не отличало сыгранное от пустого. Один клик посреди
+     * турнира стирал всё.
+     */
+    async function сыгранныхМатчей(tournamentId) {
+        var ответ = await A.client.from('matches')
+            .select('id', { count: 'exact', head: true })
+            .eq('tournament_id', tournamentId)
+            .eq('status', 'completed');
+        return ответ.error ? null : (ответ.count || 0);
+    }
+
     async function regenerateDraw(tournament, tournamentId) {
         if (жеребимСейчас) {
             A.showToast(L.drawInProgress, 'warning');
@@ -6397,6 +6449,23 @@
         }
         жеребимСейчас = true;
         try {
+            /* СЫГРАННОЕ НЕ ПЕРЕЖЕРЕБЛИВАЕТСЯ. Турнир, который уже играют,
+               нельзя перетасовать: результаты не вернуть ничем. */
+            var сыграно = await сыгранныхМатчей(tournamentId);
+            if (сыграно === null) {
+                A.showToast(isEn ? 'Could not count played matches' : 'Не смог сосчитать сыгранные матчи', 'error');
+                return;
+            }
+            if (сыграно > 0) {
+                A.showToast(L.regenerateBlocked.replace('{n}', сыграно), 'error');
+                return;
+            }
+
+            /* НОВЫЙ ЖРЕБИЙ. «Пережеребить» — это именно новый бросок, иначе
+               расклад повторится тот же и кнопка ничего не изменит. */
+            await A.client.from('tournaments').update({ draw_seed: null }).eq('id', tournamentId);
+            tournament.draw_seed = null;
+
             // 1. Delete all matches
             var снос = await снестиМатчиТурнира(tournamentId);
             if (!снос.ok) { A.showToast(снос.message, 'error'); return; }
@@ -11723,7 +11792,7 @@
         // Regenerate button (only before any results)
         if (!anyGroupCompleted && !isTournamentCompleted) {
             html += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;">';
-            html += '<button class="ad-btn ad-btn-secondary" id="adBrkRegenerate">' + L.regenerateDraw + '</button>';
+            html += кнопкаПережеребить();
             html += '</div>';
         }
 
