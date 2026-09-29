@@ -4877,7 +4877,13 @@
                     (номерДопа ? ' <span class="ad-badge ad-badge-ig" title="' +
                         (isEn ? 'Plays an additional match for a spot in the draw'
                               : 'Играет дополнительный матч за место в сетке') + '">' +
-                        (isEn ? 'extra match ' : 'доп. матч ') + номерДопа + '</span>' : '') + '</td>';
+                        (isEn ? 'extra match ' : 'доп. матч ') + номерДопа + '</span>' : '') +
+                    /* КТО НЕ БЕРЁТСЯ В ЗАЧЁТ — НАПИСАНО СЛОВАМИ, А НЕ ВЫВЕДЕНО
+                       ИЗ ПУСТЫХ ЦИФР. Дал неявку и не доиграл группу — все его
+                       матчи выкинуты из расчёта у всех. Без подписи его нули
+                       читались как «плохо сыграл», а не «не считается». */
+                    (st.внеЗачёта ? ' <span class="ad-badge ad-badge-out" title="' +
+                        L.groupNotCountedHint + '">' + L.groupNotCounted + '</span>' : '') + '</td>';
 
                 for (var col = 0; col < standings.length; col++) {
                     if (row === col) {
@@ -4917,8 +4923,27 @@
                 html += '<td class="ad-grp-pts" style="text-align:center;font-weight:600;">' + st.wins + '</td>';
                 // Геймы выигранные-проигранные: по ним и считается место,
                 // когда побед поровну
+                /* ЧИСЛО В КОЛОНКЕ — ТО, ПО КОТОРОМУ МЕСТО И РЕШИЛОСЬ.
+                   Здесь стояли геймы по ВСЕЙ группе, а троих равных расчёт
+                   сравнивает только по их встречам между собой: три матча
+                   против двух. Менеджер читал «12-15» и не мог понять, откуда
+                   порядок. У кого спора не было, сравнивать не с чем — прочерк. */
+                var база = st.разбор;
+                var подписьБазы = st.разборБаза === 'равные' ? L.groupBaseTied
+                    : (st.разборБаза === 'группа' ? L.groupBaseAll : '');
+                /* ЕСЛИ РАЗВЕЛИ ОЧКИ ТАЙ-БРЕЙКА — ИХ И ПОКАЗЫВАЕМ ЧИСЛОМ.
+                   Иначе в строке стоят равные геймы, под местом написано «по
+                   очкам тай-брейка», а сами очки человек складывает в уме по
+                   клеткам таблицы. */
+                var тбСтрока = (база && st.причина === 'тай-брейк')
+                    ? '<div class="ad-grp-lot ad-grp-lot-odna" title="' + L.groupBaseHint + '">' +
+                      L.groupTbShort + ' ' + база.tbWon + '-' + база.tbLost + '</div>'
+                    : '';
                 html += '<td class="ad-grp-games" style="text-align:center;">' +
-                    (groupHasResults ? st.gamesWon + '-' + st.gamesLost : '—') + '</td>';
+                    (groupHasResults && база
+                        ? база.gamesWon + '-' + база.gamesLost +
+                          (подписьБазы ? '<div class="ad-grp-lot ad-grp-lot-odna" title="' + L.groupBaseHint + '">' + подписьБазы + '</div>' : '') + тбСтрока
+                        : '—') + '</td>';
                 // Почему место такое: жребий либо то, чем расчёт развёл равных
                 var значокЖребия = группаДоиграна ? почемуМесто(st) : '';
                 if (!groupHasResults) {
@@ -4995,8 +5020,24 @@
             }
         }
 
-        if ((hasPlayoff || hasIG) && allGroupCompleted) {
+        /* СЕТКА ПОЛНАЯ — РАЗЫГРЫВАТЬ НЕЧЕГО, И ТАБЛИЦЫ НЕТ.
+           Показывали её всегда, и при четырёх вышедших на сетку в четыре в
+           ней стояли третьи места с приговором «не прошёл». Никакого отбора
+           не было: мест не освобождалось, доп. матчей не назначалось. */
+        var раскладГотов = раскладСлотов(tournament, groupCount);
+        /* Считаем по тому, что РАЗЫГРЫВАЕТСЯ, а не по числу пустых клеток.
+           При «без доп. матчей» свободные места есть, но никто их не
+           занимает — и таблица отбора там лишняя. */
+        /* `раскладСлотов` отдаёт `byeCount` — клетки, которые не достанутся
+           никому. Значит «есть что разыгрывать» ровно тогда, когда свободных
+           мест БОЛЬШЕ, чем пустых: разницу и занимают доп. матчи и проходы.
+           Поля `безИгры` в ответе нет — проверил чтением, а не памятью. */
+        var естьЧтоРазыгрывать = hasIG ||
+            (раскладГотов && раскладГотов.свободно > раскладГотов.byeCount);
+
+        if ((hasPlayoff || hasIG) && allGroupCompleted && естьЧтоРазыгрывать) {
             var претенденты = [];
+            var контекстО = {};
             for (var гд = 1; гд <= groupCount; гд++) {
                 var мгд = grpMatches.filter(function(m) { return m.group_number === гд; });
                 if (!мгд.length) continue;
@@ -5008,18 +5049,24 @@
                 var местаОтбора = calculateGroupStandings(игрокиГ, мгд, playersMap);
                 применитьРучныеМеста(местаОтбора, (tournament.manual_group_places || {})[String(гд)]);
                 местаОтбора.forEach(function(ст) {
-                    if (ст.place === qualifiers + 1) претенденты.push({ ст: ст, группа: гд });
+                    if (ст.place === qualifiers + 1) {
+                        претенденты.push({ ст: ст, группа: гд });
+                        /* Контекст группы нужен для отбрасывания результатов
+                           против последних: без него доли считались бы по
+                           разным знаменателям */
+                        контекстО[ст.playerId] = { места: местаОтбора, матчи: мгд };
+                    }
                 });
             }
 
             if (претенденты.length) {
-                var доля2 = function(в, п) { return (в + п) > 0 ? в / (в + п) : 0; };
+                // Сила претендентов — одно определение на всю платформу,
+                // `js/group-standings.js`. Здесь она была написана своей
+                // копией, и таких копий по файлу было четыре
+                var порядокП = KSLT_GROUPS.междуГруппами(
+                    претенденты.map(function(п) { return п.ст; }), контекстО);
                 претенденты.sort(function(a, b) {
-                    if (b.ст.wins !== a.ст.wins) return b.ст.wins - a.ст.wins;
-                    var сa = доля2(a.ст.setsWon, a.ст.setsLost);
-                    var сb = доля2(b.ст.setsWon, b.ст.setsLost);
-                    if (сb !== сa) return сb - сa;
-                    return доля2(b.ст.gamesWon, b.ст.gamesLost) - доля2(a.ст.gamesWon, a.ст.gamesLost);
+                    return порядокП.indexOf(a.ст) - порядокП.indexOf(b.ст);
                 });
 
                 html += '<div class="ad-qual-block" style="margin-top:20px;">';
@@ -5029,7 +5076,10 @@
                 html += '<thead><tr>' +
                     '<th style="width:30px;">№</th>' +
                     '<th>' + (isEn ? 'Player' : 'Игрок') + '</th>' +
-                    '<th class="ad-grp-pts" style="width:40px;text-align:center;">' + L.groupWins + '</th>' +
+                    /* 40 хватало на одну цифру, но под ней встала подпись
+                       «по доле побед» и разорвалась на три строки. Ширину
+                       задаёт ПОДПИСЬ, а не значение. */
+                    '<th class="ad-grp-pts" style="width:104px;text-align:center;">' + L.groupWins + '</th>' +
                     '<th class="ad-grp-games" style="width:66px;text-align:center;">' + L.qualSets + '</th>' +
                     '<th class="ad-grp-games" style="width:66px;text-align:center;">' + L.groupGames + '</th>' +
                     '<th class="ad-qual-res" style="width:96px;text-align:center;">' + L.qualResult + '</th>' +
@@ -5053,6 +5103,16 @@
                     } else if (вПлейофф[ст.playerId]) {
                         итог = L.qualViaBye;
                         цветИтога = 'color:var(--accent);';
+                        /* ЖРЕБИЙ РЕШИЛ — И ОБ ЭТОМ НАПИСАНО.
+                           Решение Кости: при полном равенстве автопроход
+                           выбирает жеребьёвка, а не менеджер, «чтобы не было
+                           человеческого фактора». Молчаливый выбор выглядел
+                           бы как чьё-то решение, и спрашивать пришли бы к
+                           человеку. */
+                        if (ст.жребий) {
+                            итог += '<div class="ad-grp-lot ad-grp-lot-odna" title="' +
+                                L.qualByLotHint + '">' + L.qualByLot + '</div>';
+                        }
                     }
 
                     var процент = function(в, п2) {
@@ -5063,11 +5123,21 @@
                     html += '<td style="text-align:center;font-weight:600;">' + (и + 1) + '</td>';
                     html += '<td style="white-space:nowrap;">' + имяП +
                         ' <span class="ad-badge" style="font-size:0.65rem;">' + меткаП + '</span></td>';
-                    html += '<td class="ad-grp-pts" style="text-align:center;font-weight:600;">' + ст.wins + '</td>';
-                    html += '<td class="ad-grp-games" style="text-align:center;">' + ст.setsWon + '-' + ст.setsLost +
-                        ' <span style="opacity:0.7;">' + процент(ст.setsWon, ст.setsLost) + '</span></td>';
-                    html += '<td class="ad-grp-games" style="text-align:center;">' + ст.gamesWon + '-' + ст.gamesLost +
-                        ' <span style="opacity:0.7;">' + процент(ст.gamesWon, ст.gamesLost) + '</span></td>';
+                    /* ЧИСЛА В СТРОКЕ — ТЕ, ПО КОТОРЫМ СРАВНИВАЛИ.
+                       Группы бывают разного размера, и тогда у бОльшей
+                       отброшены матчи против последних. Показывать при этом
+                       полный счёт — значит снова объяснять порядок числами,
+                       которые его не объясняют. */
+                    var базаП = ст.поСравнению || ст;
+                    var подписьП = ст.базаСравнения === 'без последних'
+                        ? '<div class="ad-grp-lot ad-grp-lot-odna" title="' + L.groupBaseCutHint + '">' +
+                          L.groupBaseCut + '</div>' : '';
+                    html += '<td class="ad-grp-pts" style="text-align:center;font-weight:600;">' + базаП.wins +
+                        почемуМесто(ст, true) + подписьП + '</td>';
+                    html += '<td class="ad-grp-games" style="text-align:center;">' + базаП.setsWon + '-' + базаП.setsLost +
+                        ' <span style="opacity:0.7;">' + процент(базаП.setsWon, базаП.setsLost) + '</span></td>';
+                    html += '<td class="ad-grp-games" style="text-align:center;">' + базаП.gamesWon + '-' + базаП.gamesLost +
+                        ' <span style="opacity:0.7;">' + процент(базаП.gamesWon, базаП.gamesLost) + '</span></td>';
                     html += '<td class="ad-qual-res" style="text-align:center;' + цветИтога + '">' + итог + '</td>';
                     html += '</tr>';
                 });
@@ -5095,26 +5165,13 @@
                 [пм.slot1_label, пм.slot2_label].forEach(function(метка, сторона) {
                     if (!метка || метка.indexOf('IG') !== 0) return;
 
-                    // Кто ждёт победителя в той клетке. Круг и номер матча
-                    // ничего не говорили: менеджер всё равно шёл искать
-                    // глазами, с кем предстоит играть
-                    var соперникId = сторона === 0 ? пм.player2_id : пм.player1_id;
-                    var соперникМетка = сторона === 0 ? пм.slot2_label : пм.slot1_label;
-                    // Чистым текстом: подпись целиком экранируется ниже
-                    var соперник = '';
-                    if (соперникId) {
-                        соперник = isDbl
-                            ? getTeamDisplayName(соперникId, regsMap, playersMap, true).replace(/<[^>]*>/g, '')
-                            : ((playersMap[соперникId] || {}).name || '?');
-                    } else if (соперникМетка) {
-                        соперник = соперникМетка;
-                    }
-
-                    var куда = getRoundName(пм.round_number, всегоКругов, размерСетки) +
-                        ', ' + (isEn ? 'match ' : 'матч ') + (пм.match_order || 1);
-                    кудаВедётДоп[метка] = соперник
-                        ? (isEn ? 'vs ' : 'на ') + соперник + ' (' + куда + ')'
-                        : куда;
+                    /* ТОЛЬКО КРУГ — И БОЛЬШЕ НИЧЕГО.
+                       Было «победитель → на Абдырахманова Эракыым (1/8
+                       финала, матч 7)»: 57 знаков и ТРИ строки в карточке
+                       шириной 250. Имя соперника и номер матча здесь лишние —
+                       клетка, которая ждёт победителя, подписана меткой
+                       «IG1», по ней он и находится. Решение Кости 29.09. */
+                    кудаВедётДоп[метка] = getRoundName(пм.round_number, всегоКругов, размерСетки);
                 });
             });
 
@@ -5224,7 +5281,8 @@
             var plDrawSize = 1;
             while (plDrawSize < plR1.length * 2) plDrawSize *= 2;
             if (plDrawSize < 2) plDrawSize = plMatches.length * 2;
-            html += renderPlayoffBracketHtml(plMatches, playersMap, plDrawSize, playerGroupLabel, regsMap, isDbl);
+            html += renderPlayoffBracketHtml(plMatches, playersMap, plDrawSize, playerGroupLabel, regsMap, isDbl,
+                tournament.playoff_format === 'direct');
             html += '</div>';
         }
 
@@ -5259,7 +5317,7 @@
     }
 
     // ---- Render Playoff bracket HTML (reuses bracket logic for SE matches) ----
-    function renderPlayoffBracketHtml(plMatches, playersMap, drawSize, playerGroupLabel, regsMap, isDbl) {
+    function renderPlayoffBracketHtml(plMatches, playersMap, drawSize, playerGroupLabel, regsMap, isDbl, безДопМатчей) {
         playerGroupLabel = playerGroupLabel || {};
         var totalRounds = Math.log2(drawSize);
         var html = '';
@@ -5297,11 +5355,21 @@
                 // Group labels for playoff display
                 var p1GrpLbl = match.player1_id && playerGroupLabel[match.player1_id] ? playerGroupLabel[match.player1_id] : '';
                 var p2GrpLbl = match.player2_id && playerGroupLabel[match.player2_id] ? playerGroupLabel[match.player2_id] : '';
-                // X-slot: R1 empty slot (not BYE) — show [X] marker in accent color
+                /* «[X]» И «BYE» — РАЗНЫЕ ВЕЩИ, И РАЗНИЦУ РЕШАЕТ НАСТРОЙКА.
+                   «[X]» значит «сюда ещё поставят»: админ расставляет туда
+                   победителей доп. матчей и проходных. BYE значит «играть не
+                   с кем».
+
+                   При «без доп. матчей» свободные места НЕ разыгрываются
+                   вовсе (решение Кости 29.09), значит в эти клетки не придёт
+                   никто и никогда — и звать их X-слотами нельзя: человек
+                   будет ждать расстановки, которой не будет. */
                 var isR1 = match.round_number === 1 && match.round !== 'IG';
                 var isByeMatch = match.score === 'BYE';
-                var isXSlotP1 = isR1 && !match.player1_id && match.status !== 'completed';
-                var isXSlotP2 = isR1 && !match.player2_id && match.status !== 'completed';
+                var isXSlotP1 = isR1 && !match.player1_id && match.status !== 'completed' && !безДопМатчей;
+                var isXSlotP2 = isR1 && !match.player2_id && match.status !== 'completed' && !безДопМатчей;
+                var byeСторона1 = (isByeMatch || (безДопМатчей && isR1)) && !match.player1_id;
+                var byeСторона2 = (isByeMatch || (безДопМатчей && isR1)) && !match.player2_id;
                 var xSlotMark = '<span style="color:var(--accent);font-weight:600;">' + L.xSlot + '</span>';
                 var byeMark = '<span style="color:var(--text-dim);font-style:italic;">BYE</span>';
                 var p1Name, p2Name;
@@ -5315,11 +5383,11 @@
                     return '<span style="color:var(--text-dim);">TBD</span>';
                 }
                 if (isDbl && regsMap) {
-                    p1Name = match.player1_id ? getTeamDisplayName(match.player1_id, regsMap, playersMap, true) : emptySlotName(isXSlotP1, isByeMatch && !match.player1_id, match.slot1_label);
-                    p2Name = match.player2_id ? getTeamDisplayName(match.player2_id, regsMap, playersMap, true) : emptySlotName(isXSlotP2, isByeMatch && !match.player2_id, match.slot2_label);
+                    p1Name = match.player1_id ? getTeamDisplayName(match.player1_id, regsMap, playersMap, true) : emptySlotName(isXSlotP1, byeСторона1, match.slot1_label);
+                    p2Name = match.player2_id ? getTeamDisplayName(match.player2_id, regsMap, playersMap, true) : emptySlotName(isXSlotP2, byeСторона2, match.slot2_label);
                 } else {
-                    p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : emptySlotName(isXSlotP1, isByeMatch && !match.player1_id, match.slot1_label));
-                    p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : emptySlotName(isXSlotP2, isByeMatch && !match.player2_id, match.slot2_label));
+                    p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : emptySlotName(isXSlotP1, byeСторона1, match.slot1_label));
+                    p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : emptySlotName(isXSlotP2, byeСторона2, match.slot2_label));
                 }
 
                 var isCompleted = match.status === 'completed';
@@ -5520,17 +5588,21 @@
      * Там, где не развело ничто, стоит «жребий»: только в этом случае
      * место и можно поставить руками.
      */
-    function почемуМесто(st) {
+    function почемуМесто(st, вОднуСтроку) {
+        /* В таблице претендентов колонка узкая, и «по доле побед»
+           рвалось на четыре строки. Таблица и так прокручивается вбок. */
+        var кл = 'ad-grp-lot' + (вОднуСтроку ? ' ad-grp-lot-odna' : '');
         if (st.жребий) {
-            return '<div class="ad-grp-lot" title="' + L.groupLotHint + '">' + L.groupLot + '</div>';
+            return '<div class="' + кл + '" title="' + L.groupLotHint + '">' + L.groupLot + '</div>';
         }
         var текст = {
             'встреча': L.groupWhyHead,
-            'между собой': L.groupWhyMini,
             'сеты': L.groupWhySets,
-            'геймы': L.groupWhyGames
+            'геймы': L.groupWhyGames,
+            'тай-брейк': L.groupWhyTb,
+            'победы': L.groupWhyWins
         }[st.причина];
-        return текст ? '<div class="ad-grp-lot">' + текст + '</div>' : '';
+        return текст ? '<div class="' + кл + '">' + текст + '</div>' : '';
     }
 
     function применитьРучныеМеста(standings, overrides) {
@@ -7900,6 +7972,7 @@
         var qualifiers = tournament.qualifiers_per_group || 2;
         var всеГруппыСыграны = true;
         var претенденты = [];
+        var контекстQ = {};
         for (var гп = 1; гп <= groupCount; гп++) {
             var мгп = grpMatches.filter(function(m) { return m.group_number === гп; });
             if (!мгп.length) continue;
@@ -7924,20 +7997,16 @@
             var местаП = calculateGroupStandings(игрокиП, мгп, {});
             применитьРучныеМеста(местаП, (tournament.manual_group_places || {})[String(гп)]);
             местаП.forEach(function(ст) {
-                if (ст.place === qualifiers + 1) претенденты.push(ст);
+                if (ст.place === qualifiers + 1) {
+                    претенденты.push(ст);
+                    контекстQ[ст.playerId] = { места: местаП, матчи: мгп };
+                }
             });
         }
         if (всеГруппыСыграны && претенденты.length) {
-            претенденты.sort(function(a, b) {
-                if (b.wins !== a.wins) return b.wins - a.wins;
-                var aс = a.setsWon + a.setsLost > 0 ? a.setsWon / (a.setsWon + a.setsLost) : 0;
-                var bс = b.setsWon + b.setsLost > 0 ? b.setsWon / (b.setsWon + b.setsLost) : 0;
-                if (bс !== aс) return bс - aс;
-                var aг = a.gamesWon + a.gamesLost > 0 ? a.gamesWon / (a.gamesWon + a.gamesLost) : 0;
-                var bг = b.gamesWon + b.gamesLost > 0 ? b.gamesWon / (b.gamesWon + b.gamesLost) : 0;
-                return bг - aг;
-            });
-            претенденты.forEach(function(ст, и) { кто['Q' + (и + 1)] = ст.playerId; });
+            // Сила претендентов — `js/group-standings.js`
+            KSLT_GROUPS.междуГруппами(претенденты, контекстQ)
+                .forEach(function(ст, и) { кто['Q' + (и + 1)] = ст.playerId; });
         }
 
         // Победители доп. матчей
@@ -8108,7 +8177,6 @@
 
         // Build standings + candidates (same logic as generateIGMatches steps 1-4)
         var groupStandings = [];
-        var groupSizes = [];
         for (var g = 1; g <= groupCount; g++) {
             var groupMatchesG = grpMatches.filter(function(m) { return m.group_number === g; });
             var playerIds = [];
@@ -8126,7 +8194,6 @@
             }
             standings.sort(function(a, b) { return a.place - b.place; });
             groupStandings.push(standings);
-            groupSizes.push(playerIds.length);
         }
 
         var directQualifiers = [];
@@ -8144,20 +8211,29 @@
         while (drawSize < directQualifiers.length) drawSize *= 2;
         var freeSlots = drawSize - directQualifiers.length;
 
+        // Претендент — следующий за вышедшими, из ЛЮБОЙ группы.
+        //
+        // Было: `groupSizes[g3] <= 3` и зашитое `place === 3`. В группе из
+        // четверых третий не попадал в претенденты вовсе — админ получал
+        // «не требуется», и свободные места сетки оставались пустыми. Место
+        // тоже считается от настройки, а не от тройки: при одном вышедшем
+        // из группы претендент — второй, а не третий
         var candidates = [];
+        var контекстК = {};
         for (var g3 = 0; g3 < groupCount; g3++) {
-            if (groupSizes[g3] <= 3) {
-                var third = groupStandings[g3].find(function(s) { return s.place === 3; });
-                if (third) {
-                    candidates.push({
-                        playerId: third.playerId,
-                        groupIdx: g3,
-                        wins: third.wins,
-                        losses: third.losses,
-                        setRatio: third.setsWon + third.setsLost > 0 ? third.setsWon / (third.setsWon + third.setsLost) : 0,
-                        gameRatio: third.gamesWon + third.gamesLost > 0 ? third.gamesWon / (third.gamesWon + third.gamesLost) : 0
-                    });
-                }
+            var след = groupStandings[g3].find(function(s) { return s.place === qualifiers + 1; });
+            if (след) {
+                контекстК[след.playerId] = {
+                    места: groupStandings[g3],
+                    матчи: grpMatches.filter(function(m) { return m.group_number === g3 + 1; })
+                };
+                candidates.push({
+                    playerId: след.playerId,
+                    groupIdx: g3,
+                    строка: след,
+                    wins: след.wins,
+                    losses: след.losses
+                });
             }
         }
 
@@ -8171,10 +8247,10 @@
         if (candidates.length <= freeSlots) {
             for (var dc = 0; dc < candidates.length; dc++) defaultActions.push('auto');
         } else {
+            var порядокК = KSLT_GROUPS.междуГруппами(
+                candidates.map(function(к) { return к.строка; }), контекстК);
             candidates.sort(function(a, b) {
-                if (b.wins !== a.wins) return b.wins - a.wins;
-                if (b.setRatio !== a.setRatio) return b.setRatio - a.setRatio;
-                return b.gameRatio - a.gameRatio;
+                return порядокК.indexOf(a.строка) - порядокК.indexOf(b.строка);
             });
             var autoCount = Math.max(0, freeSlots - Math.ceil((candidates.length - freeSlots)));
             for (var dc2 = 0; dc2 < candidates.length; dc2++) {
@@ -8722,7 +8798,7 @@
                         });
                     }
                     standings.sort(function(a, b) { return a.place - b.place; });
-                    allGroupStandings.push({ groupIdx: g - 1, standings: standings });
+                    allGroupStandings.push({ groupIdx: g - 1, standings: standings, матчи: groupMatchesG });
 
                     for (var p = 0; p < Math.min(qualifiers, standings.length); p++) {
                         allQualified.push({
@@ -8733,8 +8809,13 @@
                     }
                 }
 
-                // Best 3rd place: if odd group count and not enough qualifiers, fill from best next-place finishers
-                if (groupCount % 2 !== 0) {
+                // Свободные места добираются лучшими из непрошедших.
+                //
+                // Было: `if (groupCount % 2 !== 0)` — добор шёл только при
+                // НЕЧЁТНОМ числе групп. Шесть групп по двое дают 12 при
+                // сетке на 16, и четыре клетки оставались пустыми навсегда.
+                // Условие — нехватка клеток, а не чётность
+                {
                     var nextPlace = qualifiers + 1; // typically 3rd place
                     var drawSizeCheck = 2;
                     while (drawSizeCheck < allQualified.length) drawSizeCheck *= 2;
@@ -8742,6 +8823,7 @@
                     if (allQualified.length < drawSizeCheck) {
                         // Collect all players at nextPlace across groups
                         var candidates = [];
+                        var контекстД = {};
                         allGroupStandings.forEach(function(gs) {
                             var st = gs.standings.find(function(s) { return s.place === nextPlace; });
                             if (st) {
@@ -8749,18 +8831,17 @@
                                     playerId: st.playerId,
                                     groupIdx: gs.groupIdx,
                                     place: nextPlace,
-                                    wins: st.wins,
-                                    setRatio: st.setsWon + st.setsLost > 0 ? st.setsWon / (st.setsWon + st.setsLost) : 0,
-                                    gameRatio: st.gamesWon + st.gamesLost > 0 ? st.gamesWon / (st.gamesWon + st.gamesLost) : 0
+                                    строка: st
                                 });
+                                контекстД[st.playerId] = { места: gs.standings, матчи: gs.матчи };
                             }
                         });
 
-                        // Sort: wins DESC → set ratio DESC → game ratio DESC
+                        // Сила претендентов — `js/group-standings.js`
+                        var порядокД = KSLT_GROUPS.междуГруппами(
+                            candidates.map(function(к) { return к.строка; }), контекстД);
                         candidates.sort(function(a, b) {
-                            if (b.wins !== a.wins) return b.wins - a.wins;
-                            if (b.setRatio !== a.setRatio) return b.setRatio - a.setRatio;
-                            return b.gameRatio - a.gameRatio;
+                            return порядокД.indexOf(a.строка) - порядокД.indexOf(b.строка);
                         });
 
                         // Fill up to drawSize
@@ -12962,5 +13043,9 @@
     // ---- Export to namespace ----
     A.recalcDoublesPoints = recalcDoublesPoints;
     A.renderBracketManagement = renderBracketManagement;
+    /* Стенду нужна НАСТОЯЩАЯ расстановка, а не своя выдумка: он рисовал
+       клетки по порядку и сводил двух непрошедших, чего продукт не
+       допускает. Отдаём ему ту же функцию, которой пользуется админка. */
+    A.раскладСлотов = раскладСлотов;
 
 })();

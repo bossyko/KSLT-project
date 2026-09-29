@@ -4435,6 +4435,11 @@ select.ad-field-input {
 
 /* Подпись под местом: расчёт равенство не рассудил, решает жеребьёвка.
    Словом, а не значком: знак равенства админу ничего не говорил */
+/* Подпись в одну строку — для узкой колонки претендентов. */
+.ad-grp-lot-odna {
+    white-space: nowrap;
+}
+
 .ad-grp-lot {
     margin-top: 3px;
     font-size: var(--fs-2xs);
@@ -4443,6 +4448,13 @@ select.ad-field-input {
     color: var(--text-dim);
     text-transform: lowercase;
     letter-spacing: 0.02em;
+    /* Курсор-вопросик только там, где подсказка ЕСТЬ. Раньше он
+       стоял на всех подписях подряд, и человек наводил на «по геймам»
+       в ожидании объяснения, которого не было. */
+    cursor: default;
+}
+
+.ad-grp-lot[title] {
     cursor: help;
 }
 
@@ -6873,6 +6885,17 @@ select.ad-field-input {
     background: rgba(255, 179, 0, 0.16);
     color: #ffb300;
     border: 1px solid rgba(255, 179, 0, 0.3);
+    font-size: var(--fs-2xs);
+    white-space: nowrap;
+}
+
+/* «В зачёт не берётся» — дал неявку и не доиграл группу.
+   Приглушённая и с пунктиром: это не событие, а отсутствие. Акцент здесь
+   читался бы как достижение, а цвет статуса — как состояние матча. */
+.ad-badge-out {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px dashed var(--border-subtle);
     font-size: var(--fs-2xs);
     white-space: nowrap;
 }
