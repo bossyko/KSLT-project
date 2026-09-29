@@ -197,7 +197,9 @@
         // Reset to list view when switching tabs via sidebar
         var resetMap = {
             content: A.renderNewsList,
-            tournaments: A.renderTournamentsList,
+            // Турниры — через секцию: она грузит категории и уровни, без
+            // которых фильтр рисуется пустым. Остальные разделы пока как были
+            tournaments: A.renderTournamentsSection,
             players: A.renderPlayersSection,
             courts: A.renderCourtsList,
             coaches: A.renderCoachesList,

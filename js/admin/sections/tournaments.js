@@ -36,10 +36,18 @@
     var TRN_PER_PAGE = 15;
     var trnDraftDirty = false;
 
+    /* ЕДИНСТВЕННЫЙ ВХОД В РАЗДЕЛ: сперва данные, потом разметка.
+       Зовёт её switchTab (layout.js). Порядок важен: список рисует фильтр
+       категорий из A.cachedCategories, а тот стартует пустым
+       (constants.js:3052) — отрисовка до загрузки давала фильтр без
+       категорий, и это было видно, просто вторая отрисовка его чинила.
+       Защиты `if (A.isDeepLinked(...)) return;` тут больше нет: она стерегла
+       ту самую вторую отрисовку. На глубокой ссылке switchTab сюда не
+       доходит — он уходит в loadAndEditTournament, а та грузит категории
+       и уровни сама (строки 653-654). */
     async function renderTournamentsSection() {
         await A.loadCategories();
         await A.loadTournamentLevels();
-        if (A.isDeepLinked('tournaments')) return;
         renderTournamentsList();
     }
 
