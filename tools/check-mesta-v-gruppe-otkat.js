@@ -20,7 +20,7 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-mesta-'));
 
 /* Копируем только то, что читает проверка: в mobile/ лежат 199 МБ сборок,
    и копировать их ради одного файла — минуты вместо секунды */
-['js', 'tools', 'pages'].forEach(д =>
+['js', 'tools', 'pages', 'maket'].forEach(д =>
   fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 fs.cpSync(path.join(КОРЕНЬ, 'mobile/www/js'), path.join(ВРЕМ, 'mobile/www/js'), { recursive: true });
 
@@ -149,11 +149,27 @@ const ОТКАТЫ = [
    '            var цена = ценаСама(',
    'цена настройки считается одной функцией правил'],
 
+  /* ─── язык админки ─── */
+  ['pages/admin-en.html',
+   '<meta http-equiv="refresh" content="0; url=admin.html">',
+   '<meta name="description" content="admin">',
+   'старый английский адрес админки остался перенаправлением'],
+
   /* ЯКОРЬ БЕЗ НОМЕРА: на 'v=6' он ломался бы при каждом подъёме версии */
   [СТР,
    'group-standings.js?v=',
    'group-standings.js?v=5&bylo=',
    'версии подняты — иначе правка не доедет до того, у кого файл в кеше']
+];
+
+/* ОТКАТ, КОТОРЫЙ НЕ ПРАВИТ, А ЗАВОДИТ ФАЙЛ. Моя ошибка 29.09 была именно
+   такой: я не менял текст, я СОЗДАЛ английский адрес стенда — и стал гонять
+   по нему тест на язык, которого в продукте нет. Заменой строки это не
+   воспроизвести, поэтому откат кладёт файл и убирает его за собой. */
+const ЗАВОДИМ = [
+  ['maket/setka-zamer-en.html',
+   '<script src="../js/admin/core/constants.js?v=1"></script>',
+   'админка одноязычна: английского адреса у подписей нет']
 ];
 
 function прогон() {
@@ -191,13 +207,35 @@ console.log('');
   }
 });
 
+ЗАВОДИМ.forEach(([ф, содержимое, ждём], i) => {
+  const путь = path.join(ВРЕМ, ф);
+  const номер = ОТКАТЫ.length + i + 1;
+  if (fs.existsSync(путь)) {
+    console.log('  ✗ откат ' + номер + ' (' + ф + '): файл уже есть — откат ничего не доказывает');
+    плохо++;
+    return;
+  }
+  fs.writeFileSync(путь, содержимое);
+  const упали = прогон();
+  fs.rmSync(путь);
+  if (упали.indexOf(ждём) === -1) {
+    console.log('  ✗ откат ' + номер + ': ждали «' + ждём + '»');
+    console.log('    упало: ' + (упали.length ? упали.join(' · ') : '— ничего —'));
+    плохо++;
+  } else {
+    console.log('  ок  ' + String(номер).padStart(2) + '  ' + ждём + (упали.length > 1 ? '   (+ ещё ' + (упали.length - 1) + ')' : ''));
+  }
+});
+
+const ВСЕГО = ОТКАТЫ.length + ЗАВОДИМ.length;
+
 fs.rmSync(ВРЕМ, { recursive: true, force: true });
 console.log('');
 if (плохо === 0) {
-  console.log('  ок      все ' + ОТКАТЫ.length + ' откатов доказали свои правила');
+  console.log('  ок      все ' + ВСЕГО + ' откатов доказали свои правила');
   console.log('');
   process.exit(0);
 }
-console.log('  НЕ ТАК  прувер: ' + плохо + ' откатов из ' + ОТКАТЫ.length + ' не доказали правило');
+console.log('  НЕ ТАК  прувер: ' + плохо + ' откатов из ' + ВСЕГО + ' не доказали правило');
 console.log('');
 process.exit(1);
