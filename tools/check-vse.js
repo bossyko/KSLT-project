@@ -51,6 +51,24 @@ const число = (текст, шаблон) => { const м = текст.match(�
    Проверка стоит первой: если файл не разбирается, всё остальное считает
    неизвестно что. */
 const fs = require('fs');
+
+/* ── общая предпосылка: копии общих правил обязаны совпадать ─────────────── */
+/* js/kslt-rules.js лежит копией в mobile/www/js/ — Capacitor раскладывает ту
+   папку и в Android, и в iOS. Сверял их tools/check-rules.js, но он НЕ ВХОДИЛ
+   в этот бегунок и сгнил молча: 29.09 копии разошлись на 20 строк, и никто
+   не узнал. ПРОВЕРКА, НЕ ВХОДЯЩАЯ В ОБЩИЙ БЕГУНОК, МОЛЧА ГНИЁТ — теперь
+   входит. Сверяем содержимое, а не дату: дата у копии своя. */
+{
+    const свой = path.join(__dirname, '..', 'js/kslt-rules.js');
+    const копия = path.join(__dirname, '..', 'mobile/www/js/kslt-rules.js');
+    if (fs.readFileSync(свой, 'utf8') !== fs.readFileSync(копия, 'utf8')) {
+        console.log('\n  \u2717 ОБЩИЕ ПРАВИЛА РАЗОШЛИСЬ\n');
+        console.log('    js/kslt-rules.js и mobile/www/js/kslt-rules.js не совпадают.');
+        console.log('    Приложение работает по своим правилам, сайт по своим.\n');
+        process.exit(1);
+    }
+}
+
 ['css/style.css', 'css/tokens.css'].forEach(ф => {
     const s = fs.readFileSync(path.join(__dirname, '..', ф), 'utf8')
         .replace(/\/\*[\s\S]*?\*\//g, м => м.replace(/[{}]/g, ' '));
