@@ -7229,20 +7229,61 @@
     }
 
     // ---- Generate Group Draw (Round-Robin) ----
+    /**
+     * Почему жеребьёвка не пойдёт — человеческими словами.
+     *
+     * Коды беды приходят из одного правила (KSLT_RULES.бедаНастройкиГрупп),
+     * одного на форму и на жеребьёвку. Текст живёт здесь и рядом с ним же
+     * говорит, ЧТО СДЕЛАТЬ: отказ без выхода — это тупик, а не сторож.
+     *
+     * Админка ведётся только на русском (js/auth-nav.js:89), но соседние
+     * отказы в этом файле написаны через isEn, и ломать здесь строй не буду.
+     */
+    function словамиОБедеГрупп(код, групп, выходят, участников) {
+        var размеры = KSLT_RULES.размерыГрупп(участников, групп).join('/');
+        var карта = {
+            'групп_пусто': isEn
+                ? 'Fill in the number of groups: the draw has no default for it'
+                : 'Заполните «Количество групп» — жеребьёвка не придумывает его за вас',
+            'выходят_пусто': isEn
+                ? 'Fill in how many advance from a group'
+                : 'Заполните «Выходят из группы» — жеребьёвка не придумывает его за вас',
+            'групп_мало': isEn
+                ? 'At least 2 groups are needed'
+                : 'Групп должно быть хотя бы две',
+            'выходят_мало': isEn
+                ? 'At least 1 player must advance from a group'
+                : 'Из группы должен выходить хотя бы один',
+            'мало_участников': isEn
+                ? 'Not enough players: ' + участников + ' for ' + групп + ' groups, 2 per group minimum'
+                : 'Участников мало: ' + участников + ' на ' + групп + ' групп, а нужно хотя бы по двое',
+            'группа_не_решает': isEn
+                ? 'Groups would be ' + размеры + ' and ' + выходят + ' advance from each — the smallest group decides nothing. Use fewer groups.'
+                : 'Группы выйдут ' + размеры + ', а выходят по ' + выходят +
+                  ' — из меньшей пройдут все, и она ничего не решает. Возьмите групп поменьше.'
+        };
+        return карта[код] || код;
+    }
+
     async function generateGroupDraw(tournament, approvedSorted, playersMap) {
-        var groupCount = tournament.group_count || 2;
+        /* УМОЛЧАНИЕ — СВОЙСТВО ДАННЫХ, А НЕ КОДА. Здесь стояло
+           `tournament.group_count || 2`: пустое поле молча становилось двумя
+           группами, и менеджер узнавал об этом в день турнира. Решение Кости
+           29.09 — убрать, пустое поле останавливает жеребьёвку. */
+        var groupCount = tournament.group_count;
+        var qualifiers = tournament.qualifiers_per_group;
         var maxPart = tournament.max_participants || approvedSorted.length;
 
         // Take only main draw (first maxPart players), rest = waitlist
         var mainDraw = approvedSorted.slice(0, maxPart);
         var totalPlayers = mainDraw.length;
 
-        if (groupCount < 2) {
-            A.showToast(isEn ? 'Need at least 2 groups' : 'Нужно минимум 2 группы', 'error');
-            return;
-        }
-        if (totalPlayers < groupCount * 2) {
-            A.showToast(isEn ? 'Need at least 2 players per group' : 'Нужно минимум 2 игрока в группе', 'error');
+        /* СУДЬЯ ОДИН НА ФОРМУ И НА ЖЕРЕБЬЁВКУ. Раньше здесь проверялись два
+           условия из шести, а форма не проверяла ничего. Считаем от ФАКТА —
+           от того, сколько человек реально идёт в основу, а не от «макс». */
+        var беда = KSLT_RULES.бедаНастройкиГрупп(groupCount, qualifiers, totalPlayers);
+        if (беда) {
+            A.showToast(словамиОБедеГрупп(беда, groupCount, qualifiers, totalPlayers), 'error');
             return;
         }
 
