@@ -124,12 +124,35 @@ async function открытьФорму(page) {
     }
 }
 
+/**
+ * Карточка «Тип сетки» — одним определением на весь файл.
+ *
+ * Искали её дважды, и обе копии падали без объяснения: `k` выходил
+ * undefined, и бегунок говорил «Cannot read properties of undefined»
+ * вместо «карточки нет». Теперь неудача называет себя сама.
+ */
+async function карточкаСетки(page, что) {
+    const есть = await page.evaluate(() =>
+        [...document.querySelectorAll('.ad-form-card')]
+            .some(c => c.querySelector('#adTrnBracketType')));
+    if (!есть) {
+        const след = await page.evaluate(() => ({
+            карточек: document.querySelectorAll('.ad-form-card').length,
+            полей: document.querySelectorAll('.ad-field').length,
+            типСеткиЕсть: !!document.getElementById('adTrnBracketType')
+        }));
+        throw new Error('карточка «Тип сетки» не найдена (' + что + '). След: ' +
+                        JSON.stringify(след));
+    }
+}
+
 for (const вид of ВИДЫ) {
     test.describe(`Форма турнира — ${вид.имя}`, () => {
         test.use({ viewport: { width: вид.w, height: вид.h } });
 
         test(`${вид.имя}: карточка «Тип сетки» — ровно три ряда`, async ({ page }) => {
             await открытьФорму(page);
+            await карточкаСетки(page, 'ряды');
             const рядов = await page.evaluate(() => {
                 const k = [...document.querySelectorAll('.ad-form-card')]
                     .find(c => c.querySelector('#adTrnBracketType'));
@@ -140,6 +163,7 @@ for (const вид of ВИДЫ) {
 
         test(`${вид.имя}: ширина поля — ступень, а не остаток колонки`, async ({ page }) => {
             await открытьФорму(page);
+            await карточкаСетки(page, 'ширины');
             const ширины = await page.evaluate(() => {
                 const k = [...document.querySelectorAll('.ad-form-card')]
                     .find(c => c.querySelector('#adTrnBracketType'));
