@@ -23,16 +23,57 @@ const ВИДЫ = [
     { имя: 'Планшет 768',   w: 768,  h: 1024 }
 ];
 
-/** Открыть форму создания турнира и дождаться её полей. */
+/**
+ * Открыть форму создания турнира и дождаться её полей.
+ *
+ * ТЕСТ ЖДЁТ, ЧТО РАЗМЕТКА ПЕРЕСТАЛА МЕНЯТЬСЯ, А НЕ ЧТО ОНА ПОЯВИЛАСЬ.
+ * Кнопка «+ Добавить турнир» рисуется вместе с шапкой раздела, а слушатель
+ * на неё вешается позже — после того как список турниров пришёл из базы.
+ * Клик по видимой кнопке до этого момента не делает ничего, и форма не
+ * открывается: первый прогон падал именно здесь.
+ *
+ * Признак готовности раздела — счётчик турниров: он стоит '...' до ответа
+ * базы и заполняется числом после.
+ */
 async function открытьФорму(page) {
     await page.goto('/pages/admin.html#tournaments');
-    // Признак, а не таймаут: кнопка появляется, когда раздел отрисован
+
     const добавить = page.locator('#adTrnAdd');
     await добавить.waitFor({ state: 'visible', timeout: 15000 });
+
+    // Раздел готов, когда счётчик перестал быть многоточием
+    await page.waitForFunction(() => {
+        const с = document.getElementById('adTrnStatTotal');
+        return с && с.textContent.trim() !== '...' && с.textContent.trim() !== '';
+    }, null, { timeout: 20000 });
+
+    // Ошибки страницы собираем ДО клика: падение отрисовки видно только так
+    const ошибкиСтраницы = [];
+    page.on('pageerror', e => ошибкиСтраницы.push(String(e.message || e)));
+
     await добавить.click();
-    // Форма готова, когда есть и первое поле, и карточка «Тип сетки»
-    await page.locator('#adTrnCat').waitFor({ state: 'visible', timeout: 15000 });
-    await page.locator('#adTrnBracketType').waitFor({ state: 'visible', timeout: 15000 });
+
+    /* ДИАГНОСТИКА ВМЕСТО ДОГАДОК. Первый прогон сказал только «#adTrnCat не
+       появился за 15 секунд» — по такому следу причину не назвать. Теперь
+       при неудаче тест говорит, ГДЕ он оказался и что случилось. */
+    try {
+        await page.locator('#adTrnCat').waitFor({ state: 'visible', timeout: 15000 });
+        await page.locator('#adTrnBracketType').waitFor({ state: 'visible', timeout: 15000 });
+    } catch (e) {
+        const след = await page.evaluate(() => ({
+            адрес: location.href,
+            наВходе: /auth\.html/.test(location.pathname),
+            контейнер: !!document.getElementById('ad-tournaments'),
+            вКонтейнере: (document.getElementById('ad-tournaments') || {}).innerHTML
+                ? document.getElementById('ad-tournaments').innerHTML.length : 0,
+            кнопкаЕсть: !!document.getElementById('adTrnAdd'),
+            счётчик: (document.getElementById('adTrnStatTotal') || {}).textContent || 'нет',
+            полей: document.querySelectorAll('.ad-field').length,
+            заголовок: (document.querySelector('.ad-section-title, h1, h2') || {}).textContent || 'нет'
+        }));
+        throw new Error('форма не открылась. След: ' + JSON.stringify(след) +
+            ' · ошибки страницы: ' + (ошибкиСтраницы.length ? ошибкиСтраницы.join(' | ') : 'нет'));
+    }
 }
 
 for (const вид of ВИДЫ) {
