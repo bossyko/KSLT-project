@@ -117,7 +117,23 @@ async function открытьФорму(page) {
                 return верх === b ? 'сама кнопка'
                     : (верх.id || верх.className || верх.tagName);
             })(),
-            естьФункция: !!(window.KSLT_ADMIN && window.KSLT_ADMIN.renderTournamentsSection)
+            естьФункция: !!(window.KSLT_ADMIN && window.KSLT_ADMIN.renderTournamentsSection),
+            /* РЕШАЮЩИЙ ЗАМЕР. Перекрытия нет, нажатие из страницы не
+               помогло, ошибок нет, контейнер не меняется. Остаётся
+               спросить прямо: доходит ли событие до кнопки, и одна ли
+               она на странице. Свой слушатель ставим одноразовым — он
+               ничего не ломает и снимается сам. */
+            кнопокСЭтимId: document.querySelectorAll('[id="adTrnAdd"]').length,
+            событиеДоходит: (() => {
+                const b = document.getElementById('adTrnAdd');
+                if (!b) return 'кнопки нет';
+                let дошло = false;
+                b.addEventListener('click', () => { дошло = true; }, { once: true });
+                b.click();
+                return дошло;
+            })(),
+            послеСвоегоНажатия: document.querySelectorAll('.ad-field').length,
+            списокПерерисован: !!(window.KSLT_ADMIN && window.KSLT_ADMIN.renderTournamentsList)
         }));
         throw new Error('форма не открылась. След: ' + JSON.stringify(след) +
             ' · ошибки страницы: ' + (ошибкиСтраницы.length ? ошибкиСтраницы.join(' | ') : 'нет'));
