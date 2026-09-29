@@ -8,6 +8,7 @@
 #
 #   ./tools/zapusk-testov.sh           окно Playwright (--ui)
 #   ./tools/zapusk-testov.sh --vse     прогон целиком, без окна
+#   ./tools/zapusk-testov.sh --admin   ТОЛЬКО админка по базе — 3 файла
 #   ./tools/zapusk-testov.sh --s-bazoy   ВСЕ 44 файла по базе — тратит трафик
 #   ./tools/zapusk-testov.sh --otchet  отчёт последнего прогона
 #
@@ -20,6 +21,13 @@
 # Полный прогон запрашивается ЯВНО: --s-bazoy. Тогда скрипт сначала стучит
 # в базу и, если она молчит, честно говорит об этом и не идёт в общий
 # конфиг — тот всё равно упал бы на входе.
+#
+# СЕРЕДИНА: --admin. Между «без базы вовсе» и «все 44 файла» ничего не было,
+# и правка в админке проверялась либо никак, либо прогоном на 5945 тестов.
+# Админку трогают ровно три файла из сорока пяти — 17, 12 и 20 (только они
+# упоминают admin.html или admin.css, проверено грепом 29.09), и все три
+# сидят за входом, то есть без базы не идут вовсе. --admin стучит в базу
+# так же, как --s-bazoy, и гонит эти три: 285 тестов вместо 5945.
 #
 # Имена переменных латиницей НАМЕРЕННО: bash не разрешает в именах ничего,
 # кроме латиницы, цифр и подчёркивания, — кириллическое имя он читает как
@@ -73,7 +81,16 @@ fi
 CONFIG="playwright.bez-bazy.config.js"
 WHY="без базы — 40 файлов из 44, трафик не тратится"
 S_BAZOY=""
-for arg in "$@"; do [ "$arg" = "--s-bazoy" ] && S_BAZOY="da"; done
+ADMIN=""
+for arg in "$@"; do
+    [ "$arg" = "--s-bazoy" ] && S_BAZOY="da"
+    [ "$arg" = "--admin" ]   && { S_BAZOY="da"; ADMIN="da"; }
+done
+
+# Три файла админки — перечень ОДИН, и живёт он здесь
+FILES_ADMIN="tests/e2e/features/17-trn-forma.spec.js \
+tests/e2e/features/12-admin-page.spec.js \
+tests/e2e/design-system/20-header-offsets.spec.js"
 
 if [ -n "$S_BAZOY" ]; then
     CODE="000"
@@ -88,7 +105,11 @@ if [ -n "$S_BAZOY" ]; then
     fi
     if [ "$CODE" = "200" ]; then
         CONFIG="playwright.config.js"
-        WHY="ПО БАЗЕ, по твоей просьбе — все 44 файла. Это тратит трафик."
+        if [ -n "$ADMIN" ]; then
+            WHY="ПО БАЗЕ, только админка — 3 файла, 285 тестов."
+        else
+            WHY="ПО БАЗЕ, по твоей просьбе — все 44 файла. Это тратит трафик."
+        fi
     else
         echo ""
         echo "  База ответила $CODE — полный прогон не пойдёт: общий конфиг"
@@ -102,8 +123,14 @@ echo "  конфиг: $CONFIG"
 echo "  $WHY"
 echo ""
 
-if [ "${1:-}" = "--vse" ]; then
-    npx playwright test --config="$CONFIG"
+# ЧТО ГОНИМ. Пусто — весь конфиг; --admin — три файла админки.
+# Без кавычек НАМЕРЕННО: здесь нужно разбиение на три слова, а не одно имя
+SHTO=""
+[ -n "$ADMIN" ] && SHTO="$FILES_ADMIN"
+
+if [ "${1:-}" = "--vse" ] || [ -n "$ADMIN" ]; then
+    # shellcheck disable=SC2086
+    npx playwright test --config="$CONFIG" $SHTO
     echo ""
     echo "  Отчёт: ./tools/zapusk-testov.sh --otchet"
     pause
