@@ -6448,6 +6448,35 @@
     // обеих, и пара оказывалась сразу в двух группах
     var жеребимСейчас = false;
 
+    /**
+     * ЖРЕБИЙ ЭТОГО ТУРНИРА — один на все его жеребьёвки.
+     *
+     * До 29.09 случайность бралась из Math.random() в семи местах и нигде не
+     * сохранялась. Пересоздал сетку — расклад другой, и доказать честность
+     * первого нечем. Теперь всё считается от одного числа в турнире:
+     * `draw_seed`. То же зерно и тот же список заявок дают ту же сетку.
+     *
+     * Зерно заводится один раз и больше не меняется. У турниров, разыгранных
+     * ДО этой правки, его нет: группы у них уже раскиданы случайностью,
+     * которой не вернуть, — поэтому зерно заводим при первой же нужде и им
+     * правим то, что ещё впереди (доп. матчи, плей-офф). Прошлое не
+     * переписываем, будущее становится повторяемым.
+     *
+     * Бросает, если зерно не записалось: жеребьёвка, которую нельзя
+     * повторить, не считается проведённой, и лучше остановиться здесь, чем
+     * оставить сетку, про которую нечего сказать.
+     */
+    async function жребийТурнира(tournament) {
+        if (!tournament.draw_seed) {
+            var зерно = Math.floor(Math.random() * 2147483000) + 1;
+            var зап = await A.client.from('tournaments')
+                .update({ draw_seed: зерно }).eq('id', tournament.id);
+            if (зап.error) throw new Error('зерно жребия не записалось: ' + зап.error.message);
+            tournament.draw_seed = зерно;
+        }
+        return KSLT_RULES.бросок(tournament.draw_seed);
+    }
+
     async function generateBracketDraw(tournament, registrations, playersMap) {
         if (жеребимСейчас) {
             A.showToast(L.drawInProgress, 'warning');
@@ -6530,10 +6559,7 @@
             }
 
             // Кто не сеян — жеребится: в дружеском турнире мерить их нечем
-            for (var пi = прочие.length - 1; пi > 0; пi--) {
-                var пj = Math.floor(Math.random() * (пi + 1));
-                var пt = прочие[пi]; прочие[пi] = прочие[пj]; прочие[пj] = пt;
-            }
+            KSLT_RULES.перемешать(прочие, await жребийТурнира(tournament));
             approved = сеяные.concat(прочие);
         } else {
             await посилеОтсортировать(approved, tournament, playersMap, isDbl);
@@ -6582,14 +6608,8 @@
             };
         }
 
-        // Fisher-Yates shuffle for unseeded
         var unseeded = approved.slice(seedCount);
-        for (var i = unseeded.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var tmp = unseeded[i];
-            unseeded[i] = unseeded[j];
-            unseeded[j] = tmp;
-        }
+        KSLT_RULES.перемешать(unseeded, await жребийТурнира(tournament));
 
         // Fill empty slots
         var emptySlots = [];
@@ -7233,13 +7253,7 @@
         var seeded = mainDraw.slice(0, seedCount);
         var unseeded = mainDraw.slice(seedCount);
 
-        // Fisher-Yates shuffle unseeded
-        for (var i = unseeded.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var tmp = unseeded[i];
-            unseeded[i] = unseeded[j];
-            unseeded[j] = tmp;
-        }
+        KSLT_RULES.перемешать(unseeded, await жребийТурнира(tournament));
 
         // Combined list: seeded first, then shuffled unseeded
         var allPlayers = seeded.concat(unseeded);
@@ -8294,11 +8308,7 @@
 
             // Place 2nd places: cross-seeded (avoid same-group in R1 and bracket half)
             var halfSize = Math.max(drawSize / 2, 2);
-            // Shuffle 2nd places first for randomness
-            for (var i = secondPlaces.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var tmp = secondPlaces[i]; secondPlaces[i] = secondPlaces[j]; secondPlaces[j] = tmp;
-            }
+            KSLT_RULES.перемешать(secondPlaces, await жребийТурнира(tournament));
             // Sort by most-constrained group first
             var groupCounts = {};
             directQualifiers.forEach(function(q) {
@@ -8694,14 +8704,9 @@
             allQualified.forEach(function(q) {
                 groupCounts[q.groupIdx] = (groupCounts[q.groupIdx] || 0) + 1;
             });
-            // Перемешиваем — внутри одного места порядок не должен быть
-            // предсказуемым
-            for (var i = otherPlaces.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var tmp = otherPlaces[i];
-                otherPlaces[i] = otherPlaces[j];
-                otherPlaces[j] = tmp;
-            }
+            // Внутри одного места порядок не должен быть предсказуемым —
+            // но обязан быть повторяемым: он идёт от зерна турнира
+            KSLT_RULES.перемешать(otherPlaces, await жребийТурнира(tournament));
             otherPlaces.sort(function(a, b) {
                 // Сначала те, кто занял место ниже: третьи раньше вторых
                 if (b.place !== a.place) return b.place - a.place;
@@ -11254,11 +11259,7 @@
         var seeded = mainDraw.slice(0, seedCount);
         var unseeded = mainDraw.slice(seedCount);
 
-        // Fisher-Yates shuffle unseeded
-        for (var i = unseeded.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var tmp = unseeded[i]; unseeded[i] = unseeded[j]; unseeded[j] = tmp;
-        }
+        KSLT_RULES.перемешать(unseeded, await жребийТурнира(tournament));
 
         var allPlayers = seeded.concat(unseeded);
 
@@ -11406,8 +11407,9 @@
             }
 
             // 2. Build both league brackets
-            var plMatches = buildLeagueSEBracket(tournament, plQualified, 'PL');
-            var clMatches = buildLeagueSEBracket(tournament, clQualified, 'CL');
+            var бросокЛиги = await жребийТурнира(tournament);
+            var plMatches = buildLeagueSEBracket(tournament, plQualified, 'PL', бросокЛиги);
+            var clMatches = buildLeagueSEBracket(tournament, clQualified, 'CL', бросокЛиги);
 
             // 3. Insert all matches
             var allToInsert = plMatches.concat(clMatches);
@@ -11430,7 +11432,7 @@
     }
 
     // ---- Build SE Bracket for a League (PL or CL) ----
-    function buildLeagueSEBracket(tournament, qualified, prefix) {
+    function buildLeagueSEBracket(tournament, qualified, prefix, бросок) {
         var drawSize = 2;
         while (drawSize < qualified.length) drawSize *= 2;
         var totalRounds = Math.log2(drawSize);
@@ -11484,11 +11486,7 @@
             }
         }
 
-        // Shuffle unseeded
-        for (var i = unseeded.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var tmp = unseeded[i]; unseeded[i] = unseeded[j]; unseeded[j] = tmp;
-        }
+        KSLT_RULES.перемешать(unseeded, бросок);
 
         // Sort unseeded by most-constrained group first
         var groupCounts = {};
