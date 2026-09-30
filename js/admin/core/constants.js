@@ -568,6 +568,11 @@
         regGenderRequired: 'Choose the guest gender',
         regGenderReview: 'Entries waiting on gender decision',
         regGenderReviewHint: 'The lineup does not match the tournament. The place is held until you decide.',
+        /* Гость без карточки игрока. Вся цепочка — места в группе, сетка,
+           сторож дубля — ключуется по player_id, и у гостя его нет: для
+           продукта все гости один человек. Отказ громкий, а не тихий счёт. */
+        drawNoCardTitle: 'Some entries have no player card',
+        drawNoCardHint: 'Places in a group and the bracket are counted by the player card. Everyone without one counts as the SAME person. Create a card for each and add them from the database:',
         regGenderOk: 'Approve lineup',
         regGenderOkDone: 'Lineup approved',
         regReview: 'Entries awaiting your decision',
@@ -2114,6 +2119,11 @@
         regGenderRequired: 'Укажите пол гостя',
         regGenderReview: 'Заявки ждут решения по составу',
         regGenderReviewHint: 'Состав не совпадает с турниром. Место держится до вашего решения.',
+        /* Гость без карточки игрока. Вся цепочка — места в группе, сетка,
+           сторож дубля — ключуется по player_id, и у гостя его нет: для
+           продукта все гости один человек. Отказ громкий, а не тихий счёт. */
+        drawNoCardTitle: 'У части заявок нет карточки игрока',
+        drawNoCardHint: 'Места в группе и сетка считаются по карточке игрока. Все, у кого её нет, считаются ОДНИМ человеком. Заведите карточку каждому и добавьте их из базы:',
         regGenderOk: 'Одобрить состав',
         regGenderOkDone: 'Состав одобрен',
         regReview: 'Заявки ждут вашего решения',
