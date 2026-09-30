@@ -12309,8 +12309,8 @@
                     (isCLRow && hasLeagues ? ' style="background:rgba(255,255,255,0.03);"' : '') + '>';
                 html += '<td style="font-weight:600;text-align:center;">' + (row + 1) + '</td>';
                 html += '<td style="white-space:nowrap;">' + pName + seedHtml +
-                    (isPLRow ? ' <span class="ad-badge ad-league-go ad-league-pl">' + L.premierLeague + '</span>' : '') +
-                    (isCLRow ? ' <span class="ad-badge ad-league-go ad-league-cl">' + L.consolationLeague + '</span>' : '') + '</td>';
+                    (isPLRow ? ' <span class="ad-badge ad-league-go ad-league-pl">' + L.leagueGoPL + '</span>' : '') +
+                    (isCLRow ? ' <span class="ad-badge ad-league-go ad-league-cl">' + L.leagueGoCL + '</span>' : '') + '</td>';
 
                 for (var col = 0; col < standings.length; col++) {
                     if (row === col) {
@@ -13372,6 +13372,10 @@
        клетки по порядку и сводил двух непрошедших, чего продукт не
        допускает. Отдаём ему ту же функцию, которой пользуется админка. */
     A.раскладСлотов = раскладСлотов;
+
+    /* Стенду нужно НАСТОЯЩЕЕ деление по лигам: своё он уже делил по-своему
+       и показывал второе место уходящим не туда. */
+    A.лигаМеста = лигаМеста;
 
     /* ПРОГОН ЦЕПОЧКИ ЗОВЁТ НАСТОЯЩИЕ ФУНКЦИИ ЭТАПОВ, А НЕ ИХ ПЕРЕСКАЗ.
        Пересказ проверял бы мою выдумку, а не продукт: стенд уже соврал

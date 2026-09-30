@@ -94,7 +94,7 @@ const ОТКАТЫ = [
 
   /* ─── словом, а не цветом ─── */
   [СЕТКА,
-   "                    (isPLRow ? ' <span class=\"ad-badge ad-league-go ad-league-pl\">' + L.premierLeague + '</span>' : '') +",
+   "                    (isPLRow ? ' <span class=\"ad-badge ad-league-go ad-league-pl\">' + L.leagueGoPL + '</span>' : '') +",
    "                    (isPLRow ? ' <span style=\"color:var(--accent);font-size:0.65rem;\">&#9654;</span>' : '') +",
    'в строке стоит название лиги, а не значок'],
 

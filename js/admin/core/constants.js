@@ -574,6 +574,10 @@
         /* Куда идёт игрок после группы — СЛОВОМ, а не цветным значком:
            один и тот же треугольник на оба исхода различим только краской. */
         grpGoesToPlayoff: 'to the draw',
+        /* В СТРОКЕ — КОРОТКО. Слово «лига» стоит заголовком раздела строкой
+           выше; в строке оно повторяется зря и отъедает 44 пикселя из 147. */
+        leagueGoPL: 'Premier',
+        leagueGoCL: 'Consolation',
         drawNoCardTitle: 'Some entries have no player card',
         drawNoCardHint: 'Places in a group and the bracket are counted by the player card. Everyone without one counts as the SAME person. Create a card for each and add them from the database:',
         regGenderOk: 'Approve lineup',
@@ -2128,6 +2132,10 @@
         /* Куда идёт игрок после группы — СЛОВОМ, а не цветным значком:
            один и тот же треугольник на оба исхода различим только краской. */
         grpGoesToPlayoff: 'в сетку',
+        /* В СТРОКЕ — КОРОТКО. Слово «лига» стоит заголовком раздела строкой
+           выше; в строке оно повторяется зря и отъедает 44 пикселя из 147. */
+        leagueGoPL: 'Высшая',
+        leagueGoCL: 'Утешительная',
         drawNoCardTitle: 'У части заявок нет карточки игрока',
         drawNoCardHint: 'Места в группе и сетка считаются по карточке игрока. Все, у кого её нет, считаются ОДНИМ человеком. Заведите карточку каждому и добавьте их из базы:',
         regGenderOk: 'Одобрить состав',
