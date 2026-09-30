@@ -55,14 +55,30 @@
         };
         П.Б.tournaments.push(турнир);
 
+        /* ГОСТЬ — ЗАЯВКА БЕЗ КАРТОЧКИ. `bracket.js:1164` ставит
+           `is_external = !гостьПервый.id`, то есть у гостя `player_id` пуст,
+           а имя лежит в `external_name`. Жеребьёвка кладёт в матч именно
+           `player_id` (`:7527`) — значит у гостя в матче пустая ссылка.
+           Меряем, а не предполагаем: `гостей: K` делает последних K заявок
+           гостевыми, как это делает админка. */
         var заявки = [], playersMap = {};
+        var гостей = Number(н.гостей) || 0;
         for (var i = 0; i < н.людей; i++) {
-            var игрок = { id: 'p' + i, name: 'Игрок ' + i, name_en: 'Player ' + i,
-                ntrp_singles: (5.5 - i * 0.05).toFixed(2), rating_points: 1000 - i * 7 };
-            П.Б.players.push(игрок);
-            playersMap[игрок.id] = игрок;
-            var з = { id: 'r' + i, tournament_id: 't', player_id: игрок.id, partner_id: null,
-                status: 'approved', seed_number: null, group_number: null };
+            var гость = i >= н.людей - гостей;
+            var з;
+            if (гость) {
+                з = { id: 'r' + i, tournament_id: 't', player_id: null, partner_id: null,
+                    is_external: true, external_name: 'Гость ' + i,
+                    status: 'approved', seed_number: null, group_number: null };
+            } else {
+                var игрок = { id: 'p' + i, name: 'Игрок ' + i, name_en: 'Player ' + i,
+                    ntrp_singles: (5.5 - i * 0.05).toFixed(2), rating_points: 1000 - i * 7 };
+                П.Б.players.push(игрок);
+                playersMap[игрок.id] = игрок;
+                з = { id: 'r' + i, tournament_id: 't', player_id: игрок.id, partner_id: null,
+                    is_external: false, external_name: null,
+                    status: 'approved', seed_number: null, group_number: null };
+            }
             П.Б.tournament_registrations.push(з);
             заявки.push(з);
         }
@@ -71,7 +87,10 @@
         var сказать = function (т) { находки.push(т); };
 
         // ---- ЭТАП 1: жеребьёвка групп ----
-        await A.прогон.жеребьёвкаГрупп(турнир, заявки, playersMap);
+        /* Ходим в ТУ ЖЕ дверь, что и менеджер: `генерироватьСетку` держит
+           проверки, которых у `generateGroupDraw` нет — гость без карточки,
+           состав на рассмотрении, порог в два человека. */
+        await A.прогон.сеткуЦеликом(турнир, заявки, playersMap);
 
         var матчи = П.Б.matches;
         var групповые = матчи.filter(этоГрупповой);
