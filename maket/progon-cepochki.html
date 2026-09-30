@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — прогон цепочки этапов</title>
+<!--
+    СТЕНД С ПИШУЩЕЙ ЗАГЛУШКОЙ. Ничего не рисует: он гоняет настоящие функции
+    этапов и отдаёт находки числами. Видом здесь проверять нечего, поэтому и
+    вида нет — только строка о том, что прогон готов.
+
+    ПОРЯДОК ЗАГРУЗКИ ВАЖЕН: заглушка ставит A.client ПОСЛЕ того, как
+    bracket.js объявил свои функции, но ДО того, как их позовут.
+-->
+<style>
+  body { margin: 0; padding: 24px; background: #0A0A0A; color: #EDEDED;
+         font: 14px/1.4 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  code { color: #CCFF00; }
+</style>
+</head>
+<body>
+<div id="progonGotov">прогон загружается…</div>
+
+<script src="../js/kslt-rules.js?v=23"></script>
+<script src="../js/group-standings.js?v=6"></script>
+<script src="../js/rating-points.js?v=1"></script>
+<script src="../js/tournament-status.js?v=1"></script>
+<script src="../js/admin/core/constants.js?v=126"></script>
+<script src="../js/admin/core/utils.js?v=26"></script>
+<script src="../js/admin/core/layout.js?v=12"></script>
+<script src="../js/admin/sections/players.js?v=37"></script>
+<script src="../js/admin/sections/tournaments.js?v=56"></script>
+<script src="../js/admin/sections/bracket.js?v=212"></script>
+<script src="progon-zaglushka.js?v=1"></script>
+<script src="progon-dvizhok.js?v=1"></script>
+<script>
+  document.getElementById('progonGotov').textContent =
+      (window.ПРОГОН && window.ПРОГОН.одинРасклад && window.KSLT_ADMIN && window.KSLT_ADMIN.прогон)
+          ? 'прогон готов' : 'ПРОГОН НЕ СОБРАЛСЯ';
+</script>
+</body>
+</html>
