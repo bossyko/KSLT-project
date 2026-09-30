@@ -334,6 +334,14 @@
         igCompleted: 'All inter-group matches completed',
         igStageTitle: 'Additional Matches',
         igGoesTo: 'winner → {куда}',
+        /* Пометки на клетке сетки. Решение Кости 29.09: сыгранный матч с
+           «не тем» участником остаётся как есть, но молча не остаётся. */
+        brkNoticeDup: 'twice in the bracket — also in {где}',
+        brkNoticeMismatch: 'expected {метка} — {ждали}',
+        brkNoticeSameGroup: 'both from group {группа}',
+        /* Сообщение о беде называет лечение: иначе человек видит, ЧТО
+           сломано, и гадает, что с этим делать */
+        brkNoticeDupFix: 'clear the score — the rest falls into place',
         igSlotWaits: 'waiting for {метка}',
         igCancelledMark: 'cancelled',
         thirdCancelTitle: 'Cancel the third place match?',
@@ -604,7 +612,6 @@
         qualAddedHint: 'Went through as one of the best runners-up: the draw had free slots',
         qualExplain: 'Free slots in the draw were filled by the best from below the cut-off: {who}. Order: wins → set ratio → game ratio.',
         qualTableTitle: 'Who took the free slots',
-        placesPlayoffStarted: 'Places saved, but the draw is not rebuilt: playoff matches have already been played',
         qualTableNote: 'Everyone one place below the cut-off, ranked by WIN SHARE → set ratio → game ratio → tie-break points. Share, not count: a group of four plays three matches, a group of three plays two. The strongest go straight into the draw, the rest play an extra match for what is left.',
         qualSets: 'Sets',
         qualResult: 'Outcome',
@@ -1873,6 +1880,14 @@
         igCompleted: 'Все межгрупповые матчи завершены',
         igStageTitle: 'Дополнительные матчи',
         igGoesTo: 'победитель → {куда}',
+        /* Пометки на клетке сетки. Решение Кости 29.09: сыгранный матч с
+           «не тем» участником остаётся как есть, но молча не остаётся. */
+        brkNoticeDup: 'дважды в сетке — ещё в {где}',
+        brkNoticeMismatch: 'ждали {метка} — {ждали}',
+        brkNoticeSameGroup: 'оба из группы {группа}',
+        /* Сообщение о беде называет лечение: иначе человек видит, ЧТО
+           сломано, и гадает, что с этим делать */
+        brkNoticeDupFix: 'снимите счёт — остальное встанет само',
         igSlotWaits: 'ждёт {метка}',
         igCancelledMark: 'матч отменён',
         thirdCancelTitle: 'Отменить матч за третье место?',
@@ -2146,7 +2161,6 @@
         qualAddedHint: 'Прошёл как один из лучших среди тех, кто не попал напрямую: в сетке были свободные места',
         qualExplain: 'Свободные места в сетке закрыли лучшие из непрошедших: {who}. Порядок: победы → процент сетов → процент геймов.',
         qualTableTitle: 'Кто занял свободные места',
-        placesPlayoffStarted: 'Места сохранены, но сетку не пересобрать: в плей-офф уже есть сыгранные матчи',
         qualTableNote: 'Все, кто на одно место ниже проходного, по порядку: ДОЛЯ ПОБЕД → процент сетов → процент геймов → очки тай-брейка. Доля, а не число: в группе из четырёх играют три матча, из трёх — два. Сильнейшие идут прямо в сетку, остальные разыгрывают оставшиеся места доп. матчем.',
         qualSets: 'Сеты',
         qualResult: 'Итог',

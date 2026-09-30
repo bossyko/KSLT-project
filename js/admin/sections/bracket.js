@@ -5299,8 +5299,12 @@
             var plDrawSize = 1;
             while (plDrawSize < plR1.length * 2) plDrawSize *= 2;
             if (plDrawSize < 2) plDrawSize = plMatches.length * 2;
+            /* ПОМЕТКИ СЧИТАЕМ ПО ВСЕМ МАТЧАМ, А НЕ ПО ОДНОЙ СЕТКЕ: метки
+               указывают на места в группах, и без групповых матчей сравнивать
+               было бы не с чем. */
             html += renderPlayoffBracketHtml(plMatches, playersMap, plDrawSize, playerGroupLabel, regsMap, isDbl,
-                tournament.playoff_format === 'direct');
+                tournament.playoff_format === 'direct',
+                пометкиКлеток(tournament, matches, playersMap));
             html += '</div>';
         }
 
@@ -5335,7 +5339,8 @@
     }
 
     // ---- Render Playoff bracket HTML (reuses bracket logic for SE matches) ----
-    function renderPlayoffBracketHtml(plMatches, playersMap, drawSize, playerGroupLabel, regsMap, isDbl, безДопМатчей) {
+    function renderPlayoffBracketHtml(plMatches, playersMap, drawSize, playerGroupLabel, regsMap, isDbl, безДопМатчей, пометки) {
+        пометки = пометки || {};
         playerGroupLabel = playerGroupLabel || {};
         var totalRounds = Math.log2(drawSize);
         var html = '';
@@ -5446,6 +5451,19 @@
                 if (canEdit) {
                     html += '<button class="ad-brk-edit" data-match-edit="' + match.id + '">' +
                         (isCompleted ? (isEn ? 'Edit' : 'Изм.') : (isEn ? 'Score' : 'Счёт')) + '</button>';
+                }
+                /* ПОМЕТКА — ПОЛОСОЙ ПОД СТРОКАМИ, а не значком в углу.
+                   Устройство взято у готового компонента `Bracket match 40:74`:
+                   так же под строками живёт `.td-prediction`. Ширину полоса не
+                   задаёт — колонка круга остаётся хозяином ширины. */
+                var пометка = пометки[match.id];
+                if (пометка) {
+                    html += '<div class="ad-brk-notice ad-brk-notice-' + пометка.тон + '">' +
+                        A.esc(пометка.текст) +
+                        (пометка.лечение
+                            ? '<div class="ad-brk-notice-fix">' + A.esc(пометка.лечение) + '</div>'
+                            : '') +
+                        '</div>';
                 }
                 html += '</div>';
             });
@@ -8083,6 +8101,120 @@
         });
 
         return { кто: кто, группаИгрока: группаИгрока, всеГруппыСыграны: всеГруппыСыграны };
+    }
+
+    /**
+     * ОДИН ЧЕЛОВЕК НЕ МОЖЕТ СТОЯТЬ В ОДНОМ КРУГЕ ДВАЖДЫ.
+     *
+     * Сторож, а не память. В боевом турнире 153bc688 игрок стоял в первом
+     * круге в двух клетках — `A2` держала его старое место, а как лучший
+     * третий он занял `Q1`. Он уже выиграл один из этих матчей и уехал в
+     * полуфинал, продолжая числиться участником второго. Заметили это через
+     * недели, при разборе, а не в тот день.
+     *
+     * Меряем ВНУТРИ ОДНОГО КРУГА: стоять в R1 и в SF — это нормальное
+     * продвижение, а две клетки одного круга — всегда беда.
+     */
+    function дублиВСетке(matches) {
+        var где = {};
+        matches.forEach(function(m) {
+            if (isGroupMatch(m) || m.round === 'IG') return;
+            [m.player1_id, m.player2_id].forEach(function(id) {
+                if (!id) return;
+                var к = m.round_number + '|' + id;
+                (где[к] = где[к] || []).push(m);
+            });
+        });
+        var итог = [];
+        Object.keys(где).forEach(function(к) {
+            if (где[к].length < 2) return;
+            итог.push({ playerId: к.split('|')[1], клетки: где[к] });
+        });
+        return итог;
+    }
+
+    /**
+     * ЧТО ПОКАЗАТЬ НА КЛЕТКЕ: расхождение, дубль, земляки.
+     *
+     * Решение Кости 29.09: сыгранный матч с «не тем» участником остаётся
+     * как есть — результат принадлежит тем, кто играл, — но МОЛЧА он не
+     * остаётся. Менеджер видит расхождение на самой клетке, а не узнаёт о
+     * нём через месяц.
+     *
+     * Возвращает { 'id матча': { тон, текст } }.
+     */
+    function пометкиКлеток(tournament, matches, playersMap) {
+        var пометки = {};
+        var имя = function(id) {
+            var и = playersMap && playersMap[id];
+            if (!и) return '—';
+            return isEn ? (и.name_en || и.name || '—') : (и.name || '—');
+        };
+        var подпись = function(m) {
+            return (m.round || '') + ' №' + (m.match_order || '');
+        };
+
+        // 1. ДУБЛЬ — самое тяжёлое, перебивает остальное
+        дублиВСетке(matches).forEach(function(д) {
+            д.клетки.forEach(function(m) {
+                /* ИМЯ НЕ ПОВТОРЯЕМ: оно стоит строкой выше, в этой же
+                   клетке. И перечисляем не все клетки, а ДРУГИЕ: человек
+                   смотрит на эту, ему нужно, где второе место. Первая
+                   редакция занимала 66 % высоты клетки — померено. */
+                var другие = д.клетки.filter(function(о) { return о !== m; }).map(подпись).join(', ');
+                пометки[m.id] = {
+                    тон: 'dup',
+                    текст: L.brkNoticeDup.replace('{где}', другие),
+                    /* Снимать счёт можно только там, где он есть. На
+                       несыгранной клетке лечение бессмысленно и просто
+                       отъедает место */
+                    лечение: клеткаЗаперта(m) ? L.brkNoticeDupFix : null
+                };
+            });
+        });
+
+        var поМеткам = ктоПоМеткам(tournament, matches);
+        var кто = поМеткам.кто;
+        var букв = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+        matches.forEach(function(m) {
+            if (isGroupMatch(m) || m.round === 'IG') return;
+            if (пометки[m.id]) return;
+
+            // 2. РАСХОЖДЕНИЕ — только у запертых: незапертые пересчитались сами
+            if (клеткаЗаперта(m)) {
+                var разошлись = [];
+                [['slot1_label', 'player1_id'], ['slot2_label', 'player2_id']].forEach(function(пара) {
+                    var метка = m[пара[0]], стоит = m[пара[1]];
+                    if (!метка || !стоит) return;
+                    var ждали = кто[метка];
+                    if (!ждали || ждали === стоит) return;
+                    /* Кто ИГРАЛ — видно строкой выше, в этой же клетке.
+                       Повторять его имя значит занимать место тем, что
+                       человек и так читает. */
+                    разошлись.push(L.brkNoticeMismatch
+                        .replace('{метка}', метка)
+                        .replace('{ждали}', имя(ждали)));
+                });
+                if (разошлись.length) {
+                    пометки[m.id] = { тон: 'mismatch', текст: разошлись.join(' · ') };
+                    return;
+                }
+            }
+
+            // 3. ЗЕМЛЯКИ — развести пытались дважды, и не вышло
+            if (m.round_number !== 1) return;
+            var г1 = поМеткам.группаИгрока[m.player1_id];
+            var г2 = поМеткам.группаИгрока[m.player2_id];
+            if (г1 && г1 === г2) {
+                пометки[m.id] = {
+                    тон: 'same',
+                    текст: L.brkNoticeSameGroup.replace('{группа}', букв[г1 - 1] || г1)
+                };
+            }
+        });
+
+        return пометки;
     }
 
     async function заполнитьСлоты(tournament, matches) {
