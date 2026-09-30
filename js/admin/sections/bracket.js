@@ -1877,6 +1877,42 @@
     }
 
     /**
+     * Таблица очков УРОВНЕМ НИЖЕ — для нижней лиги.
+     *
+     * Решение Кости 30.09 по Положению: «Участникам верхней сетки MASTERS
+     * начисляются очки согласно таблице второй категории, участникам нижней
+     * сетки TOUR — согласно таблице третьей». Уровень у турнира один, поэтому
+     * нижней лиге берём соседний снизу по `sort_order`.
+     *
+     * ЦЕНА НАЗВАНА ВСЛУХ: первое место в нижней лиге (215) дороже четвёртого
+     * в верхней (130). От этого когда-то ушли; возвращаем осознанно, потому
+     * что так написано в Положении.
+     *
+     * Соседа снизу нет — возвращаем свою: платить нечем не станем.
+     */
+    async function таблицаУровнемНиже(tournament) {
+        if (!tournament.level_id || isUnrankedTournament(tournament)) return {};
+
+        var уровни = await A.client.from('tournament_levels')
+            .select('id, sort_order')
+            .order('sort_order', { ascending: false });
+        var список = уровни.data || [];
+        var свой = список.find(function(у) { return у.id === tournament.level_id; });
+        if (!свой) return await загрузитьТаблицуМест(tournament);
+
+        var ниже = список.find(function(у) { return у.sort_order < свой.sort_order; });
+        if (!ниже) return await загрузитьТаблицуМест(tournament);
+
+        var ответ = await A.client.from('points_by_place')
+            .select('place, points')
+            .eq('level_id', ниже.id);
+
+        var таблица = {};
+        (ответ.data || []).forEach(function(с) { таблица[с.place] = с.points; });
+        return таблица;
+    }
+
+    /**
      * Куда попадает проигравший круга: место и сколько человек его делит.
      *
      * В круге, после которого остаётся K участников, проигравшие занимают
@@ -4312,7 +4348,6 @@
     function renderSchedulePanel(matches, playersMap, tournament, regsMap) {
         var парный = isDoublesTournament(tournament);
         var courtCount = (tournament && tournament.court_count) || 2;
-        var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
         var очередь = matches.filter(function(m) {
             return m.scheduled_time && m.score !== 'BYE';
@@ -4341,7 +4376,7 @@
         var кругиОчереди = [];
         очередь.forEach(function(m) {
             var имя = m.group_number
-                ? L.groupLabel + ' ' + (groupLetters[m.group_number - 1] || m.group_number)
+                ? L.groupLabel + ' ' + (KSLT_RULES.букваГруппы(m.group_number) || m.group_number)
                 : (m.round || '');
             if (имя && кругиОчереди.indexOf(имя) === -1) кругиОчереди.push(имя);
         });
@@ -4388,7 +4423,7 @@
             var время = m.scheduled_time ? m.scheduled_time.slice(0, 5) : '';
 
             var круг = m.round || '';
-            if (m.group_number) круг = L.groupLabel + ' ' + (groupLetters[m.group_number - 1] || m.group_number);
+            if (m.group_number) круг = L.groupLabel + ' ' + (KSLT_RULES.букваГруппы(m.group_number) || m.group_number);
             var ключКруга = круг;
 
             // Стрелки убраны: место в очереди меняют перетаскиванием строки
@@ -4589,6 +4624,25 @@
     function isPLMatch(m) { return m.round && m.round.indexOf('PL-') === 0; }
     function isCLMatch(m) { return m.round && m.round.indexOf('CL-') === 0; }
     function isLeagueMatch(m) { return isPLMatch(m) || isCLMatch(m); }
+    /**
+     * В КАКУЮ ЛИГУ ИДЁТ ЭТО МЕСТО — ОДНО ОПРЕДЕЛЕНИЕ.
+     *
+     * Мест столько же, сколько «выходит из группы»: первые `qualifiers`
+     * идут в Высшую, остальные в Утешительную. Так делит генератор лиг
+     * (`:11887`), так же говорит подсказка формы («{N} уйдут в Высшую»).
+     *
+     * А групповая таблица делила ИНАЧЕ — `floor(qualifiers / 2)`, то есть
+     * при «выходят 2» второе место показывалось уходящим в Утешительную,
+     * хотя на деле уходило в Высшую. Два определения одного понятия, и шов
+     * был виден прямо в админке.
+     *
+     * @returns {'PL'|'CL'}
+     */
+    function лигаМеста(tournament, place) {
+        var выходит = tournament.qualifiers_per_group || 2;
+        return (place && place <= выходит) ? 'PL' : 'CL';
+    }
+
     function getLeaguePrefix(m) {
         if (isPLMatch(m)) return 'PL';
         if (isCLMatch(m)) return 'CL';
@@ -4651,7 +4705,6 @@
         var groupCount = tournament.group_count || 2;
         var qualifiers = tournament.qualifiers_per_group || 2;
         var html = '';
-        var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
         // Split matches into group, IG, and playoff
         var grpMatches = matches.filter(isGroupMatch);
@@ -4717,7 +4770,7 @@
             var st = calculateGroupStandings(pids, gm, playersMap);
             применитьРучныеМеста(st, (tournament.manual_group_places || {})[String(g)]);
             st.sort(function(a, b) { return a.place - b.place; });
-            var letter = groupLetters[g - 1] || String(g);
+            var letter = KSLT_RULES.букваГруппы(g) || String(g);
             st.forEach(function(s) { playerGroupLabel[s.playerId] = letter + s.place; });
         }
 
@@ -4843,7 +4896,7 @@
             });
 
             // Build matrix table
-            var letter = groupLetters[g - 1] || String(g);
+            var letter = KSLT_RULES.букваГруппы(g) || String(g);
             html += '<div class="ad-grp-block">';
             html += '<div class="ad-grp-title">' + L.groupLabel + ' ' + letter +
                 (группаДоиграна ? '' :
@@ -4888,7 +4941,8 @@
                 html += '<td style="font-weight:600;text-align:center;">' + (row + 1) + '</td>';
                 var номерДопа = вДопМатчах[st.playerId];
                 html += '<td style="white-space:nowrap;">' + pName + seedHtml +
-                    (isQualified && hasPlayoff ? ' <span style="color:var(--accent);font-size:0.65rem;">&#9654;</span>' : '') +
+                    (isQualified && hasPlayoff
+                        ? ' <span class="ad-badge ad-league-go ad-league-pl">' + L.grpGoesToPlayoff + '</span>' : '') +
                     (добран ? ' <span class="ad-badge" style="background:rgba(204,255,0,0.15);color:var(--accent);font-size:0.6rem;" title="' +
                         L.qualAddedHint + '">' + L.qualAdded + '</span>' : '') +
                     (номерДопа ? ' <span class="ad-badge ad-badge-ig" title="' +
@@ -5107,7 +5161,7 @@
                     var имяП = isDbl && regsMap
                         ? getTeamDisplayName(ст.playerId, regsMap, playersMap, true)
                         : A.esc((playersMap[ст.playerId] || {}).name || ст.playerId);
-                    var меткаП = (groupLetters[п.группа - 1] || п.группа) + ст.place;
+                    var меткаП = KSLT_RULES.букваГруппы(п.группа) + ст.place;
 
                     // Итог известен, только когда доиграны все группы: до
                     // этого никто никуда не попал, и «не прошёл» у всех
@@ -7173,7 +7227,6 @@
     }
 
     function проверитьКругГрупп(матчи, groupCount) {
-        var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         var размеры = {};
         var чьяГруппа = {};
 
@@ -7199,7 +7252,7 @@
                 счёт[ключ] = (счёт[ключ] || 0) + 1;
             }
 
-            var буква = groupLetters[g - 1] || String(g);
+            var буква = KSLT_RULES.букваГруппы(g) || String(g);
             var надо = игроки.length * (игроки.length - 1) / 2;
 
             for (var к in счёт) {
@@ -7223,7 +7276,7 @@
             for (var и = 0; и < игроки.length; и++) {
                 var кто = игроки[и];
                 if (чьяГруппа[кто] !== undefined && чьяГруппа[кто] !== g) {
-                    var первая = groupLetters[чьяГруппа[кто] - 1] || String(чьяГруппа[кто]);
+                    var первая = KSLT_RULES.букваГруппы(чьяГруппа[кто]) || String(чьяГруппа[кто]);
                     return (isEn ? 'Draw cancelled: a participant is in groups ' +
                                    первая + ' and ' + буква + ' at once'
                                  : 'Жеребьёвка отменена: участник попал сразу в группы ' +
@@ -7287,7 +7340,7 @@
                 if (r.partner_id) свои[r.partner_id] = true;
             });
 
-            var буква = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[g - 1] || String(g);
+            var буква = KSLT_RULES.букваГруппы(g) || String(g);
             var чужие = [];
             var встретились = {};
 
@@ -7391,7 +7444,6 @@
         if (!сетка.length) return беды;
 
         var первый = сетка.filter(function(m) { return m.round_number === 1; });
-        var буквы = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
         первый.forEach(function(m) {
             var г1 = чья(m.player1_id, m.slot1_label);
@@ -7403,7 +7455,7 @@
             беды.push((isEn ? 'Playoff match ' : 'Плей-офф, матч ') + (m.match_order || '?') + ': ' +
                 A.esc(кто1) + ' — ' + A.esc(кто2) +
                 (isEn ? ' are both from group ' : ' — оба из группы ') +
-                (буквы[г1 - 1] || г1));
+                (KSLT_RULES.букваГруппы(г1) || г1));
         });
 
         // Один человек в двух клетках сетки: после пересборки и добора
@@ -9600,7 +9652,6 @@
             return;
         }
 
-        var буквы = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         var номера = [];
         групповые.forEach(function(m) {
             if (m.group_number && номера.indexOf(m.group_number) === -1) номера.push(m.group_number);
@@ -9625,7 +9676,7 @@
             '<div class="ad-sess-list">' +
                 номера.map(function(г) {
                     return '<label class="ad-sess-row">' +
-                        '<span class="ad-sess-name">' + L.groupLabel + ' ' + (буквы[г - 1] || г) + '</span>' +
+                        '<span class="ad-sess-name">' + L.groupLabel + ' ' + (KSLT_RULES.букваГруппы(г) || г) + '</span>' +
                         '<select class="ad-sess-pick" data-group="' + г + '">' +
                             '<option value="1">' + L.sessFirstShort + '</option>' +
                             '<option value="2">' + L.sessSecondShort + '</option>' +
@@ -11853,7 +11904,7 @@
                         gamesWon: st.gamesWon,
                         gamesLost: st.gamesLost
                     };
-                    if (st.place <= qualifiers) {
+                    if (лигаМеста(tournament, st.place) === 'PL') {
                         plQualified.push(entry);
                     } else {
                         clQualified.push(entry);
@@ -12101,7 +12152,6 @@
     function renderGroupLeaguePanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap) {
         var groupCount = tournament.group_count || 2;
         var html = '';
-        var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
         // Split matches
         var grpMatches = matches.filter(isGroupMatch);
@@ -12147,7 +12197,7 @@
                 st.forEach(function(s) { if (ov[s.playerId] !== undefined) s.place = ov[s.playerId]; });
             }
             st.sort(function(a, b) { return a.place - b.place; });
-            var letter = groupLetters[g - 1] || String(g);
+            var letter = KSLT_RULES.букваГруппы(g) || String(g);
             st.forEach(function(s) { playerGroupLabel[s.playerId] = letter + s.place; });
         }
 
@@ -12217,7 +12267,7 @@
                 return playerIds.indexOf(a.playerId) - playerIds.indexOf(b.playerId);
             });
 
-            var letter = groupLetters[g - 1] || String(g);
+            var letter = KSLT_RULES.букваГруппы(g) || String(g);
             html += '<div class="ad-grp-block">';
             html += '<div class="ad-grp-title">' + L.groupLabel + ' ' + letter +
                 (группаДоиграна ? '' :
@@ -12245,18 +12295,22 @@
                     ? getTeamDisplayName(st.playerId, regsMap, playersMap, true)
                     : A.esc(isEn ? (p.name_en || p.name || '?') : (p.name || '?'));
                 var seedHtml = st.seed ? ' <span class="ad-badge" style="font-size:0.65rem;">[' + st.seed + ']</span>' : '';
-                // Highlight: top half of qualifiers → PL (green), bottom half → CL (dim)
-                var glQualifiers = tournament.qualifiers_per_group || 4;
-                var glPlCutoff = Math.floor(Math.min(glQualifiers, standings.length) / 2);
-                var isPLRow = st.place <= glPlCutoff && allGroupCompleted;
-                var isCLRow = st.place > glPlCutoff && st.place <= glQualifiers && allGroupCompleted;
+                /* КУДА ИДЁТ ЭТОТ ЧЕЛОВЕК — СЛОВОМ, А НЕ ЦВЕТОМ.
+                   Здесь стоял цветной треугольник: лаймовый — в Высшую,
+                   тусклый — в Утешительную. Один и тот же знак на оба
+                   исхода, различимый только краской: дальтонику и на
+                   снимке он не говорит ничего. И делил он местá своей
+                   формулой, расходившейся с генератором лиг. */
+                var вЛигу = лигаМеста(tournament, st.place);
+                var isPLRow = вЛигу === 'PL' && группаДоиграна;
+                var isCLRow = вЛигу === 'CL' && группаДоиграна;
 
                 html += '<tr' + (isPLRow && hasLeagues ? ' style="background:rgba(204,255,0,0.06);"' : '') +
                     (isCLRow && hasLeagues ? ' style="background:rgba(255,255,255,0.03);"' : '') + '>';
                 html += '<td style="font-weight:600;text-align:center;">' + (row + 1) + '</td>';
                 html += '<td style="white-space:nowrap;">' + pName + seedHtml +
-                    (isPLRow && hasLeagues ? ' <span style="color:var(--accent);font-size:0.65rem;">&#9654;</span>' : '') +
-                    (isCLRow && hasLeagues ? ' <span style="color:var(--text-dim);font-size:0.65rem;">&#9654;</span>' : '') + '</td>';
+                    (isPLRow ? ' <span class="ad-badge ad-league-go ad-league-pl">' + L.premierLeague + '</span>' : '') +
+                    (isCLRow ? ' <span class="ad-badge ad-league-go ad-league-cl">' + L.consolationLeague + '</span>' : '') + '</td>';
 
                 for (var col = 0; col < standings.length; col++) {
                     if (row === col) {
@@ -12519,18 +12573,22 @@
             var таблицаМест = await загрузитьТаблицуМест(tournament);
             var правилаОчков = { заПобеды: true };
 
-            // Два зачёта, одна таблица
-            //
-            // Верхний дивизион идёт в зачёт своей категории, нижний — в
-            // следующую по порядку: кто не прошёл наверх, играет в Мастерс,
-            // а не в Про-Мастерс. Очки при этом одинаковые: категория
-            // турнира одна, и места считаются внутри своего дивизиона.
-            // Поэтому за первое место в обоих дивизионах платят ровно
-            // столько, сколько стоит первое место этого турнира.
-            //
-            // Раньше нижний получал половину очков верхнего, и выигравший
-            // подвал обходил четвёртое место наверху — при том, что наверх
-            // не прошёл.
+            /* ДВА ЗАЧЁТА И ДВЕ ТАБЛИЦЫ — правка 30.09, слово Кости.
+             *
+             * Верхний дивизион идёт в зачёт своей категории и платится
+             * таблицей своего уровня; нижний — в следующую категорию по
+             * порядку и таблицей уровня на ступень ниже. Так написано в
+             * Положении: «верхней сетке MASTERS — по таблице второй
+             * категории, нижней сетке TOUR — по таблице третьей».
+             *
+             * ЗДЕСЬ СТОЯЛО ОБРАТНОЕ, и причина была записана: одна таблица
+             * на оба дивизиона, потому что при разных таблицах «выигравший
+             * подвал обходил четвёртое место наверху — при том, что наверх
+             * не прошёл». Это остаётся правдой: 215 за первое в TOUR против
+             * 130 за четвёртое в MASTERS. Костя видел числа и решил считать
+             * по Положению. Отменённое не стёрто — вот оно, с причиной.
+             */
+            var таблицаНижней = await таблицаУровнемНиже(tournament);
             var нижняяКатегория = tournament.category_id;
             var катОтвет = await A.client.from('categories')
                 .select('id, sort_order')
@@ -12545,7 +12603,7 @@
             var toUpsert = [];
 
             // Process each league
-            function processLeague(leagueMatches, категорияЗачёта, prefix) {
+            function processLeague(leagueMatches, категорияЗачёта, prefix, таблицаЛиги) {
                 if (leagueMatches.length === 0) return;
 
                 var lR1 = leagueMatches.filter(function(m) { return m.round_number === 1; });
@@ -12594,7 +12652,7 @@
                 var кОплате = Object.keys(playerResults).map(function(pid) {
                     return playerResults[pid];
                 });
-                KSLT_POINTS.поТурниру(кОплате, таблицаМест, правилаОчков);
+                KSLT_POINTS.поТурниру(кОплате, таблицаЛиги || таблицаМест, правилаОчков);
 
                 Object.keys(playerResults).forEach(function(pid) {
                     if (!pid || pid === 'null' || pid === 'undefined') return; // Skip external players (no player_id)
@@ -12610,10 +12668,10 @@
             }
 
             // Верхний дивизион — зачёт своей категории
-            processLeague(matches.filter(isPLMatch), tournament.category_id, 'PL');
+            processLeague(matches.filter(isPLMatch), tournament.category_id, 'PL', таблицаМест);
 
             // Нижний — зачёт следующей по порядку
-            processLeague(matches.filter(isCLMatch), нижняяКатегория, 'CL');
+            processLeague(matches.filter(isCLMatch), нижняяКатегория, 'CL', таблицаНижней);
 
             // Doubles expansion
             var isDblGL = isDoublesTournament(tournament);

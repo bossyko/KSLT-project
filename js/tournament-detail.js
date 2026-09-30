@@ -1529,7 +1529,6 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var шапкаРасп = document.getElementById('schedule');
             if (шапкаРасп) шапкаРасп.style.display = 'none';
         } else {
-            var буквы = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
             // Одна очередь, как у ведущего в админке. По кортам больше не
             // делим: корт заранее известен только у первых запусков, дальше
@@ -1567,7 +1566,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
             очередь.forEach(function(m, i) {
                 var круг = m.round || '';
-                if (m.group_number) круг = подписи.group + ' ' + (буквы[m.group_number - 1] || m.group_number);
+                if (m.group_number) круг = подписи.group + ' ' + (KSLT_RULES.букваГруппы(m.group_number) || m.group_number);
 
                 var состояние = m.status === 'completed' ? подписи.done
                     : (m.status === 'live' ? подписи.live : подписи.soon);
@@ -1581,7 +1580,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     // «Группа A» показываем только букву — её берёт стиль из
                     // data-short
                     '<td><span class="td-sched-round" data-short="' +
-                        esc(m.group_number ? (буквы[m.group_number - 1] || m.group_number) : круг) +
+                        esc(m.group_number ? (KSLT_RULES.букваГруппы(m.group_number) || m.group_number) : круг) +
                         '">' + esc(круг) + '</span></td>' +
                     '<td class="td-sched-p">' + pName(m.player1_id) + '</td>' +
                     '<td class="td-sched-vs">vs</td>' +
@@ -1607,7 +1606,6 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             // ---- Group League: groups + dual leagues ----
             if (t.bracket_type === 'group_league') {
                 var glGroupCount = t.group_count || 2;
-                var glGroupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
                 var glGrpMatches = matches.filter(function(m) { return m.group_number && m.group_number > 0; });
                 var glPLMatches = matches.filter(function(m) { return m.round && m.round.indexOf('PL-') === 0; });
                 var glCLMatches = matches.filter(function(m) { return m.round && m.round.indexOf('CL-') === 0; });
@@ -1672,7 +1670,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         return ggPlayerIds.indexOf(a.playerId) - ggPlayerIds.indexOf(b.playerId);
                     });
 
-                    var ggLetter = glGroupLetters[gg - 1] || String(gg);
+                    var ggLetter = KSLT_RULES.букваГруппы(gg) || String(gg);
                     glHtml += '<div style="margin-bottom:24px;">';
                     glHtml += '<div style="font-weight:700;color:var(--text-primary);margin-bottom:8px;font-size:0.95rem;">' + (isEn ? 'Group ' : (isKg ? 'Топ ' : 'Группа ')) + ggLetter + '</div>';
                     glHtml += '<div style="overflow-x:auto;"><table class="td-group-table">';
@@ -1744,7 +1742,6 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             else if (t.bracket_type === 'round_robin') {
                 var groupCount = t.group_count || 2;
                 var qualifiers = t.qualifiers_per_group || 2;
-                var groupLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
                 var grpMatches = matches.filter(function(m) { return m.group_number && m.group_number > 0; });
                 var igMatches = matches.filter(function(m) { return m.round === 'IG'; });
                 var ploffMatches = matches.filter(function(m) { return (!m.group_number || m.group_number <= 0) && m.round !== 'IG'; });
@@ -1956,7 +1953,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         return gPlayerIds.indexOf(a.playerId) - gPlayerIds.indexOf(b.playerId);
                     });
 
-                    var letter = groupLetters[g - 1] || String(g);
+                    var letter = KSLT_RULES.букваГруппы(g) || String(g);
                     bHtml += '<div style="margin-bottom:24px;">';
                     bHtml += '<div style="font-weight:700;color:var(--text-primary);margin-bottom:8px;font-size:0.95rem;">' + (isEn ? 'Group ' : (isKg ? 'Топ ' : 'Группа ')) + letter + '</div>';
                     bHtml += '<div style="overflow-x:auto;"><table class="td-group-table">';

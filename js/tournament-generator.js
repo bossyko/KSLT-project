@@ -292,7 +292,6 @@ function _generateRR(players, config, lang) {
     var startTime = config.startTime || "09:00";
     var matchDuration = config.matchDuration || 60;
     var labels = GROUP_LABELS[lang];
-    var groupLetters = "ABCDEFGH";
 
     // --- Распределение по группам (серпантин по рейтингу) ---
     var groupPlayerIds = [];
@@ -311,7 +310,10 @@ function _generateRR(players, config, lang) {
     var rrGroups = [];
 
     groupPlayerIds.forEach(function(pIds, gi) {
-        var letter = groupLetters[gi];
+        /* Буква группы — общей таблицей. Здесь лежала своя строка из ВОСЬМИ
+           букв: девятая группа получала undefined, и подпись уезжала в
+           «undefined1». */
+        var letter = KSLT_RULES.букваГруппы(gi + 1);
         var groupName = labels.group + " " + letter;
         var matches = [];
         var matchIdx = 1;

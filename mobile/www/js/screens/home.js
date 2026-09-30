@@ -486,7 +486,6 @@
     var maxGroup = 0;
     grpMatches.forEach(function(m) { if (m.group_number > maxGroup) maxGroup = m.group_number; });
 
-    var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     var qualifiers = tournament.qualifiers_per_group || 2;
     var allGroupDone = grpMatches.length > 0 && grpMatches.every(function(m) { return m.status === 'completed'; });
 
@@ -522,7 +521,7 @@
         });
       }
 
-      var letter = letters[g - 1] || String(g);
+      var letter = KSLT_RULES.букваГруппы(g) || String(g);
       groupsHtml += '<div class="mob-group">';
       groupsHtml += '<div class="mob-group-title">' + I18N.t('td.group') + ' ' + letter + '</div>';
 
