@@ -939,6 +939,13 @@
             if (вМатчах && прежний) {
                 var бедаЗамены = await заменитьВМатчах(tournamentId, regId, прежний, первый);
                 if (бедаЗамены) { A.showToast(бедаЗамены, 'error'); return; }
+                /* Замена игрока сама по себе мест не двигает: она меняет
+                   ЛИЧНОСТЬ в заявке и в матчах, а счёт и порядок остаются.
+                   Пересчёт здесь нужен ради незапертых клеток: у
+                   `заменитьВМатчах` есть известная беда (`:303` пропускает
+                   матч, где новый игрок уже стоит), и пересчёт по меткам
+                   чинит то, что она не дописала. */
+                await пересчитатьСоставСетки(tournamentId);
             }
 
             A.showToast(L.regReplacePairDone, 'success');
@@ -1216,6 +1223,13 @@
             if (вМатчах && прежний && новый) {
                 var бедаЗамены = await заменитьВМатчах(tournamentId, regId, прежний, новый);
                 if (бедаЗамены) { A.showToast(бедаЗамены, 'error'); return; }
+                /* Замена игрока сама по себе мест не двигает: она меняет
+                   ЛИЧНОСТЬ в заявке и в матчах, а счёт и порядок остаются.
+                   Пересчёт здесь нужен ради незапертых клеток: у
+                   `заменитьВМатчах` есть известная беда (`:303` пропускает
+                   матч, где новый игрок уже стоит), и пересчёт по меткам
+                   чинит то, что она не дописала. */
+                await пересчитатьСоставСетки(tournamentId);
             }
 
             A.showToast(isEn ? 'Player replaced' : 'Игрок заменён', 'success');
@@ -3473,6 +3487,8 @@
                     A.showToast(r.error.message, 'error');
                     return;
                 }
+                // Проход без игры — такой же результат группы, как счёт
+                if (групповой(match)) await пересчитатьСоставСетки(tournamentId, tournament);
                 A.showToast(isEn ? 'Advanced' : 'Проведён дальше', 'success');
                 renderBracketManagement(tournamentId, 'bracket');
             });
@@ -3490,6 +3506,8 @@
                         winner_id: null, score: null, status: 'upcoming', played_at: null
                     }).eq('id', matchId);
                     if (сн.error) { btn.disabled = false; A.showToast(сн.error.message, 'error'); return; }
+                    // Снятый результат меняет места так же, как проставленный
+                    await пересчитатьСоставСетки(tournamentId, tournament);
                     renderBracketManagement(tournamentId, 'bracket');
                     return;
                 }
@@ -7886,46 +7904,88 @@
      * Если в плей-офф или доп. матчах уже есть сыгранное — не трогаем
      * ничего: там результат, и он принадлежит тем, кто играл.
      */
-    async function пересобратьПоМестам(tournament, tournamentId) {
+    /**
+     * ЗАПЕРТА ЛИ КЛЕТКА.
+     *
+     * Сыгранный матч — факт, и он принадлежит тем, кто играл: имена в нём
+     * пересчёт не трогает. Rule 27 правил тенниса называет этот принцип
+     * прямо — «all points previously played shall stand».
+     *
+     * ЗАПИРАЕТСЯ КЛЕТКА, А НЕ СЕТКА. Раньше один сыгранный матч
+     * останавливал пересборку целиком: в боевом турнире 153bc688 два матча
+     * были сыграны, пересчёт стал невозможен навсегда — а расхождение уже
+     * было внутри, и человек стоял в сетке дважды.
+     */
+    function клеткаЗаперта(m) {
+        if (!m) return false;
+        if (m.status === 'completed') return true;
+        if (m.winner_id) return true;
+        if (m.score) return true;
+        return false;
+    }
+
+    /**
+     * ПЕРЕСЧИТАТЬ СОСТАВ СЕТКИ — ОДНА ТОЧКА НА ВЕСЬ ПРОДУКТ.
+     *
+     * Метка — источник, имя — производное. Пока клетка не сыграна, её имя
+     * пересчитывается по меткам; сыгранная клетка остаётся как есть.
+     *
+     * Зовут её ВСЕ пять дверей, за которыми могут измениться места в
+     * группе: правка счёта группового матча, проход без игры, снятие
+     * результата, ручная перестановка места, замена игрока. Раньше
+     * пересчёт звала одна из пяти — ручная перестановка, — и сетка
+     * расходилась с группами молча.
+     *
+     * Возвращает true, если что-то переставлено: тогда сетку надо перечитать.
+     */
+    async function пересчитатьСоставСетки(tournamentId, tournament) {
+        /* Турнир читаем сами, если его не дали: у окна ввода счёта в руках
+           только `tournamentId` (`openScoreModal:9959`), и требовать от
+           вызывающего лишнее значит завести пятый способ его достать. */
+        if (!tournament) {
+            var т = await A.client.from('tournaments').select('*').eq('id', tournamentId).single();
+            if (т.error || !т.data) return false;
+            tournament = т.data;
+        }
         var рес = await A.client.from('matches').select('*').eq('tournament_id', tournamentId);
         var внеГрупп = (рес.data || []).filter(function(m) { return !isGroupMatch(m); });
-        if (!внеГрупп.length) return;
+        if (!внеГрупп.length) return false;
 
-        var ужеИграли = внеГрупп.some(function(m) {
-            return m.status === 'completed' && m.score && m.score !== 'BYE';
-        });
-        if (ужеИграли) {
-            A.showToast(L.placesPlayoffStarted, 'error');
-            return;
-        }
-
-        var чистки = [];
+        var снятия = [];
         внеГрупп.forEach(function(m) {
+            if (клеткаЗаперта(m)) return;
             var изм = {};
             if (m.slot1_label && m.player1_id) { изм.player1_id = null; изм.reg1_id = null; }
             if (m.slot2_label && m.player2_id) { изм.player2_id = null; изм.reg2_id = null; }
             if (Object.keys(изм).length) {
-                чистки.push(A.client.from('matches').update(изм).eq('id', m.id));
+                снятия.push(A.client.from('matches').update(изм).eq('id', m.id));
             }
         });
-        if (чистки.length) await Promise.all(чистки);
+        if (снятия.length) await Promise.all(снятия);
 
         var свежие = await A.client.from('matches').select('*').eq('tournament_id', tournamentId);
-        await заполнитьСлоты(tournament, свежие.data || []);
+        return await заполнитьСлоты(tournament, свежие.data || []);
     }
 
-    async function заполнитьСлоты(tournament, matches) {
-        var сМетками = matches.filter(function(m) {
-            return (m.slot1_label && !m.player1_id) || (m.slot2_label && !m.player2_id);
-        });
-        if (!сМетками.length) return false;
+    /** Прежнее имя — чтобы не плодить второго определения одного понятия. */
+    async function пересобратьПоМестам(tournament, tournamentId) {
+        return await пересчитатьСоставСетки(tournamentId, tournament);
+    }
 
-        // Заявки турнира: по ним проставим ссылки в клетках плей-офф
-        var regsРез = await A.client.from('tournament_registrations')
-            .select('id, player_id, partner_id, status')
-            .eq('tournament_id', tournament.id);
-        var regsОбщие = regsРез.data || [];
-
+    /**
+     * КТО СТОИТ ЗА КАЖДОЙ МЕТКОЙ — ОДНО ОПРЕДЕЛЕНИЕ.
+     *
+     * Метка «A1», «Q2», «IG1» — это ИСТОЧНИК: победитель группы A, второй по
+     * силе претендент, победитель первого доп. матча. Имя в клетке сетки —
+     * производное от источника, а не запись, сделанная однажды и навсегда.
+     *
+     * Раньше этот счёт жил внутри `заполнитьСлоты` и был виден только ей.
+     * Из-за этого никто не мог СРАВНИТЬ то, что стоит в клетке, с тем, что
+     * там должно стоять, — и сетка молча расходилась с группами.
+     *
+     * Возвращает { кто, группаИгрока, всеГруппыСыграны }.
+     */
+    function ктоПоМеткам(tournament, matches) {
         var букв = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
         var кто = {};
 
@@ -8016,6 +8076,32 @@
             }
         });
 
+        var группаИгрока = {};
+        grpMatches.forEach(function(m) {
+            if (m.player1_id) группаИгрока[m.player1_id] = m.group_number;
+            if (m.player2_id) группаИгрока[m.player2_id] = m.group_number;
+        });
+
+        return { кто: кто, группаИгрока: группаИгрока, всеГруппыСыграны: всеГруппыСыграны };
+    }
+
+    async function заполнитьСлоты(tournament, matches) {
+        var сМетками = matches.filter(function(m) {
+            return (m.slot1_label && !m.player1_id) || (m.slot2_label && !m.player2_id);
+        });
+        if (!сМетками.length) return false;
+
+        // Заявки турнира: по ним проставим ссылки в клетках плей-офф
+        var regsРез = await A.client.from('tournament_registrations')
+            .select('id, player_id, partner_id, status')
+            .eq('tournament_id', tournament.id);
+        var regsОбщие = regsРез.data || [];
+
+        var поМеткам = ктоПоМеткам(tournament, matches);
+        var кто = поМеткам.кто;
+        var группаИгрока = поМеткам.группаИгрока;
+        var grpMatches = matches.filter(isGroupMatch);
+
         // ---- Земляков в первом круге не сводим ----
         //
         // Метки Q и IG раздаются при сборке сетки, когда ещё неизвестно, из
@@ -8026,12 +8112,6 @@
         //
         // Сейчас имена известны, и слоты Q и IG между собой равнозначны:
         // меняем их местами, если это убирает встречу земляков.
-        var группаИгрока = {};
-        grpMatches.forEach(function(m) {
-            if (m.player1_id) группаИгрока[m.player1_id] = m.group_number;
-            if (m.player2_id) группаИгрока[m.player2_id] = m.group_number;
-        });
-
         var безгрупные = [];
         сМетками.forEach(function(m) {
             if (m.round !== 'R1') return;
@@ -10511,6 +10591,15 @@
             // выбирает человек, и это задумано так
             if (match.round === 'IG') {
                 await tryFillPlayoffFromIG(tournamentId);
+            }
+
+            /* СЧЁТ ГРУППЫ ДВИГАЕТ МЕСТА, А МЕСТА ДВИГАЮТ СЕТКУ.
+               Эта дверь была открыта: пересчёт звала только ручная
+               перестановка места. В боевом турнире правка счёта опустила
+               игрока со второго места на третье, клетка `A2` осталась с его
+               именем, а он честно занял `Q1` — и встал в сетке ДВАЖДЫ. */
+            if (isGroupMatch(match)) {
+                await пересчитатьСоставСетки(tournamentId);
             }
 
             overlay.remove();
