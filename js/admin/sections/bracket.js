@@ -4496,7 +4496,6 @@
      * доиграна, вместо подписи встаёт имя: ждать остальные группы не нужно.
      */
     function предпросмотрПлейофф(tournament, grpMatches, playersMap, groupCount, qualifiers, regsMap, isDbl) {
-        var букв = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
         // Кто уже известен: в доигранной группе места окончательны
         var именаСлотов = {};
@@ -4514,7 +4513,7 @@
             var места = calculateGroupStandings(игроки, матчиГруппы, playersMap);
             применитьРучныеМеста(места, (tournament.manual_group_places || {})[String(g)]);
             места.forEach(function(м) {
-                именаСлотов[(букв[g - 1] || g) + м.place] = м.playerId;
+                именаСлотов[KSLT_RULES.букваГруппы(g) + м.place] = м.playerId;
             });
         }
 
@@ -7349,10 +7348,11 @@
         var чья = function(playerId, метка) {
             if (playerId && группаИгрока[playerId] !== undefined) return группаИгрока[playerId];
             if (!метка) return null;
-            var б = метка.charAt(0).toUpperCase();
-            // Q — добор, I — доп. матч: место в группе они не называют
-            if (б < 'A' || б > 'Z' || б === 'Q' || б === 'I') return null;
-            return б.charCodeAt(0) - 64;
+            /* ОБРАТНЫЙ ПЕРЕВОД ИДЁТ ПО ТОЙ ЖЕ ТАБЛИЦЕ, что и прямой.
+               Раньше здесь стоял `charCodeAt(0) - 64`, и это верно только для
+               сплошного алфавита: `I` и `Q` заняты добором и доп. матчем, их
+               в алфавите групп нет, и код буквы с номером группы расходится. */
+            return KSLT_RULES.группаПоБукве(метка.charAt(0));
         };
 
         var сетка = matches.filter(function(m) {
@@ -7428,6 +7428,9 @@
             'групп_мало': isEn
                 ? 'At least 2 groups are needed'
                 : 'Групп должно быть хотя бы две',
+            'групп_много': isEn
+                ? 'At most ' + KSLT_RULES.БУКВЫ_ГРУПП.length + ' groups: each group is named by a letter, and I and Q are taken by qualifiers and extra matches'
+                : 'Групп не больше ' + KSLT_RULES.БУКВЫ_ГРУПП.length + ': каждая группа зовётся буквой, а I и Q заняты добором и доп. матчами',
             'выходят_мало': isEn
                 ? 'At least 1 player must advance from a group'
                 : 'Из группы должен выходить хотя бы один',
@@ -7694,13 +7697,12 @@
      */
     function раскладСлотов(tournament, groupCount) {
         var qualifiers = tournament.qualifiers_per_group || 2;
-        var букв = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
         // Прямые: места 1..qualifiers из каждой группы
         var прямые = [];
         for (var м = 1; м <= qualifiers; м++) {
             for (var г = 0; г < groupCount; г++) {
-                прямые.push({ метка: (букв[г] || (г + 1)) + м, группа: г, место: м });
+                прямые.push({ метка: KSLT_RULES.букваГруппы(г + 1) + м, группа: г, место: м });
             }
         }
         if (прямые.length < 2) return null;
@@ -8004,7 +8006,6 @@
      * Возвращает { кто, группаИгрока, всеГруппыСыграны }.
      */
     function ктоПоМеткам(tournament, matches) {
-        var букв = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
         var кто = {};
 
         // Места в доигранных группах
@@ -8040,7 +8041,7 @@
             var местаГр = calculateGroupStandings(игроки, мг, {});
             применитьРучныеМеста(местаГр, (tournament.manual_group_places || {})[String(г)]);
             местаГр.forEach(function(ст) {
-                кто[(букв[г - 1] || г) + ст.place] = ст.playerId;
+                кто[KSLT_RULES.букваГруппы(г) + ст.place] = ст.playerId;
             });
         }
 
@@ -8175,7 +8176,6 @@
 
         var поМеткам = ктоПоМеткам(tournament, matches);
         var кто = поМеткам.кто;
-        var букв = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
         matches.forEach(function(m) {
             if (isGroupMatch(m) || m.round === 'IG') return;
@@ -8209,7 +8209,7 @@
             if (г1 && г1 === г2) {
                 пометки[m.id] = {
                     тон: 'same',
-                    текст: L.brkNoticeSameGroup.replace('{группа}', букв[г1 - 1] || г1)
+                    текст: L.brkNoticeSameGroup.replace('{группа}', KSLT_RULES.букваГруппы(г1) || г1)
                 };
             }
         });
