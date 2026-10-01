@@ -1113,16 +1113,64 @@
         var reg = registrations.find(function(r) { return r.id === regId; });
         if (!reg) return;
 
-        // Тот же выбор, что при добавлении: игрок с карточкой или гость.
-        // Место в сетке при замене остаётся за заявкой — меняется только тот,
-        // кто выйдет на корт
+        /* ЗАМЕНУ БЕРУТ ИЗ ОЧЕРЕДИ — ЗНАЧИТ ОЧЕРЕДЬ И ОТКРЫВАЕТСЯ ПЕРВОЙ.
+           Решение Кости 01.10: «замена берутся в основном из листа ожидания».
+           Раньше окно знало два источника, и оба — ручные: искать человека по
+           всей базе или вписывать гостя. Тот, кто уже стоит в очереди этого
+           турнира и ждёт места, не предлагался вовсе — менеджер набирал его
+           имя в поиске по базе и мог промахнуться мимо однофамильца.
+
+           Очередь — не поиск, а СПИСОК: её читают целиком и выбирают глазами,
+           потому что порядок подачи здесь и есть основание выбора.
+
+           ПОРЯДОК ОЧЕРЕДИ ОДИН НА ПРОДУКТ: по времени подачи, как считает
+           `поднятьИзОчереди` (`:817`). Второй сортировки не заводим.
+
+           Очередь пуста — переключатель открывается на базе: пустая вкладка
+           первой выглядит как поломка. */
+        var очередьЗамены = (registrations || []).filter(function(r) {
+            return r.status === 'waitlist' && r.id !== regId;
+        }).sort(function(a, b) {
+            return String(a.registered_at || '').localeCompare(String(b.registered_at || ''));
+        });
+        var естьОчередь = очередьЗамены.length > 0;
+
+        var строкиОчереди = очередьЗамены.map(function(r, и) {
+            var кто = имяСтороны(r, 'player', playersMap);
+            var карточка = r.player_id ? (playersMap[r.player_id] || null) : null;
+            var кат = карточка && карточка.category_id
+                ? карточка.category_id.charAt(0).toUpperCase() + карточка.category_id.slice(1) : '';
+            var ntrp = (карточка && карточка.ntrp_singles) || r.external_ntrp;
+            var подпись = [кат, ntrp ? ('NTRP ' + ntrp) : ''].filter(Boolean).join(' \u00b7 ');
+            return '<div class="ad-replace-queue-item" data-queue-reg="' + r.id + '">' +
+                    '<span class="ad-replace-queue-num">' + (и + 1) + '</span>' +
+                    '<span class="ad-replace-queue-name">' + A.esc(кто) + '</span>' +
+                    (подпись ? '<span class="ad-replace-queue-meta">' + подпись + '</span>' : '') +
+                '</div>';
+        }).join('');
+
+        // Тот же выбор, что при добавлении: очередь, игрок с карточкой или
+        // гость. Место в сетке при замене остаётся за заявкой — меняется
+        // только тот, кто выйдет на корт
         var modalHtml =
             '<div style="display:flex;flex-direction:column;gap:12px;min-width:340px;">' +
                 '<div class="ad-mode-switch" id="adReplaceMode">' +
-                    '<button type="button" class="on" data-mode="db">' + L.regAddFromDb.replace('+ ', '') + '</button>' +
+                    '<button type="button"' + (естьОчередь ? ' class="on"' : '') + ' data-mode="queue">' +
+                        L.regFromQueue + '</button>' +
+                    '<button type="button"' + (естьОчередь ? '' : ' class="on"') + ' data-mode="db">' +
+                        L.regAddFromDb.replace('+ ', '') + '</button>' +
                     '<button type="button" data-mode="guest">' + L.regGuest + '</button>' +
                 '</div>' +
-                '<div id="adReplaceDbBlock">' +
+                '<div id="adReplaceQueueBlock"' + (естьОчередь ? '' : ' style="display:none;"') + '>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.regFromQueue + '</label>' +
+                        (естьОчередь
+                            ? '<div class="ad-replace-queue">' + строкиОчереди + '</div>'
+                            : '<div class="ad-replace-queue-empty">' + L.regQueueEmpty + '</div>') +
+                        '<input type="hidden" id="adReplaceQueueReg" value="">' +
+                    '</div>' +
+                '</div>' +
+                '<div id="adReplaceDbBlock"' + (естьОчередь ? ' style="display:none;"' : '') + '>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.regFromDb + '</label>' +
                         '<input type="text" class="ad-field-input" id="adReplaceSearch" placeholder="' + L.regSearchPlayer + '" autocomplete="off">' +
@@ -1165,6 +1213,26 @@
             var extCountry = document.getElementById('adReplaceExtCountry').value.trim() || null;
             var extNtrp = parseFloat(document.getElementById('adReplaceExtNtrp').value) || null;
             var extGender = document.getElementById('adReplaceExtGender').value;
+
+            /* ВЫБОР ИЗ ОЧЕРЕДИ — ТОТ ЖЕ ВЫБОР ЧЕЛОВЕКА, А НЕ ТРЕТЬЯ ВЕТКА.
+               Кладём его в те же поля, что заполнили бы руками: с карточкой —
+               в выбранного игрока, гостя из очереди — в гостевые поля. Ниже
+               код про источник уже не знает. */
+            var полеОчереди = document.getElementById('adReplaceQueueReg');
+            var идОчереди = полеОчереди ? полеОчереди.value.trim() : '';
+            var изОчереди = идОчереди && (registrations || []).find(function(r) {
+                return r.id === идОчереди;
+            });
+            if (изОчереди) {
+                if (изОчереди.player_id) {
+                    selectedId = изОчереди.player_id;
+                } else {
+                    extName = изОчереди.external_name || '';
+                    extCountry = изОчереди.external_country || null;
+                    extNtrp = изОчереди.external_ntrp || null;
+                    extGender = изОчереди.external_gender || '';
+                }
+            }
 
             if (!selectedId && !extName) {
                 A.showToast(isEn ? 'Select a player or enter external name' : 'Выберите игрока или введите имя', 'error');
@@ -1261,8 +1329,11 @@
             }
 
             // Взяли из очереди — снимаем его прежнюю заявку, иначе замена
-            // упрётся в запрет «одна заявка на человека»
-            if (новый) await освободитьИзОчереди(новый, tournamentId, registrations);
+            // упрётся в запрет «одна заявка на человека». Гость из очереди
+            // карточки не имел, и найти его можно только по самой заявке
+            if (новый || идОчереди) {
+                await освободитьИзОчереди(новый, tournamentId, registrations, идОчереди);
+            }
 
             var upRes = await A.client.from('tournament_registrations').update(updateData).eq('id', regId);
             if (upRes.error) { A.showToast(upRes.error.message, 'error'); return; }
@@ -1296,8 +1367,36 @@
             var hiddenInput = document.getElementById('adReplaceSelectedId');
             if (!searchInput) return;
 
-            // Переключение способа замены: чужие поля чистим, чтобы сохранилось
-            // ровно то, что человек видел на экране
+            /* ПЕРЕКЛЮЧЕНИЕ ИСТОЧНИКА ЧИСТИТ ЧУЖИЕ ПОЛЯ. Иначе сохранится не
+               то, что человек видел на экране: выбрал из очереди, передумал,
+               вписал гостя — и ушли бы оба. Источников теперь три, и чистка
+               идёт по одному списку, а не тремя if'ами. */
+            var блокиИсточника = {
+                queue: document.getElementById('adReplaceQueueBlock'),
+                db: document.getElementById('adReplaceDbBlock'),
+                guest: document.getElementById('adReplaceGuestBlock')
+            };
+            var полеОчередиВыбор = document.getElementById('adReplaceQueueReg');
+
+            function очиститьИсточники(кроме) {
+                if (кроме !== 'queue' && полеОчередиВыбор) {
+                    полеОчередиВыбор.value = '';
+                    (блокиИсточника.queue || document).querySelectorAll('.ad-replace-queue-item')
+                        .forEach(function(э) { э.classList.remove('on'); });
+                }
+                if (кроме !== 'db') {
+                    hiddenInput.value = '';
+                    searchInput.value = '';
+                    resultsDiv.innerHTML = '';
+                }
+                if (кроме !== 'guest') {
+                    document.getElementById('adReplaceExtName').value = '';
+                    document.getElementById('adReplaceExtCountry').value = '';
+                    document.getElementById('adReplaceExtNtrp').value = '';
+                    document.getElementById('adReplaceExtGender').value = '';
+                }
+            }
+
             var режим = document.getElementById('adReplaceMode');
             if (режим) {
                 режим.querySelectorAll('button').forEach(function(кн) {
@@ -1305,18 +1404,24 @@
                         режим.querySelectorAll('button').forEach(function(x) {
                             x.classList.toggle('on', x === кн);
                         });
-                        var гость = кн.dataset.mode === 'guest';
-                        document.getElementById('adReplaceDbBlock').style.display = гость ? 'none' : '';
-                        document.getElementById('adReplaceGuestBlock').style.display = гость ? '' : 'none';
-                        if (гость) {
-                            hiddenInput.value = '';
-                            searchInput.value = '';
-                            resultsDiv.innerHTML = '';
-                        } else {
-                            document.getElementById('adReplaceExtName').value = '';
-                            document.getElementById('adReplaceExtCountry').value = '';
-                            document.getElementById('adReplaceExtNtrp').value = '';
-                        }
+                        var выбран = кн.dataset.mode;
+                        Object.keys(блокиИсточника).forEach(function(имя) {
+                            var б = блокиИсточника[имя];
+                            if (б) б.style.display = (имя === выбран) ? '' : 'none';
+                        });
+                        очиститьИсточники(выбран);
+                    });
+                });
+            }
+
+            // Очередь выбирается нажатием по строке: это список, а не поиск
+            if (блокиИсточника.queue) {
+                блокиИсточника.queue.querySelectorAll('.ad-replace-queue-item').forEach(function(стр) {
+                    стр.addEventListener('click', function() {
+                        блокиИсточника.queue.querySelectorAll('.ad-replace-queue-item')
+                            .forEach(function(э) { э.classList.toggle('on', э === стр); });
+                        if (полеОчередиВыбор) полеОчередиВыбор.value = стр.dataset.queueReg;
+                        очиститьИсточники('queue');
                     });
                 });
             }
@@ -1629,11 +1734,16 @@
      *
      * Возвращает имя снятой заявки или пусто, если снимать было нечего.
      */
-    async function освободитьИзОчереди(playerId, tournamentId, registrations) {
-        if (!playerId) return '';
+    async function освободитьИзОчереди(playerId, tournamentId, registrations, идЗаявки) {
+        if (!playerId && !идЗаявки) return '';
         var очередная = (registrations || []).find(function(r) {
-            return r.status === 'waitlist' &&
-                (r.player_id === playerId || r.partner_id === playerId);
+            if (r.status !== 'waitlist') return false;
+            /* ГОСТЬ ИЗ ОЧЕРЕДИ НАХОДИТСЯ ПО ЗАЯВКЕ, А НЕ ПО ИГРОКУ. У него
+               нет карточки, и `player_id` пустой: поиск по игроку его не
+               видел, заявка оставалась висеть в очереди, и человек оказывался
+               в турнире дважды — в основе и в листе ожидания. */
+            if (идЗаявки && r.id === идЗаявки) return true;
+            return !!playerId && (r.player_id === playerId || r.partner_id === playerId);
         });
         if (!очередная) return '';
 
