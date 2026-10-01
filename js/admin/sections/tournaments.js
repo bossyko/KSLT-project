@@ -1585,7 +1585,16 @@ function обновитьРасклад() {
             toggleBracketFields();
             обновитьРасклад();
         });
-        ['adTrnGroupCount', 'adTrnQualifiers', 'adTrnPlayoffFormat', 'adTrnCourtCount'].forEach(function(id) {
+        /* ПОДПИСКА СОВПАДАЕТ С ТЕМ, ЧТО ПОДСКАЗКА ЧИТАЕТ.
+           Здесь не было `adTrnMatchDuration` и `adTrnStartTime`, хотя строка
+           времени берёт оба (`:1363` и `:1391`). Подсказка пересчитывалась
+           от соседних полей и подхватывала их заодно, а от своих — нет:
+           замер 01.10 на 28 местах, 7 группах, 4 кортах показал «28 ч 30 мин»
+           при длительности 35 (это 19 × 90, умолчание формы), и смена старта
+           09:00 → 07:00 строку не трогала вовсе. Список зависимостей один и
+           держится рядом с чтением. */
+        ['adTrnGroupCount', 'adTrnQualifiers', 'adTrnPlayoffFormat', 'adTrnCourtCount',
+         'adTrnMatchDuration', 'adTrnStartTime'].forEach(function(id) {
             var поле = document.getElementById(id);
             if (поле) поле.addEventListener('input', обновитьРасклад);
             if (поле) поле.addEventListener('change', обновитьРасклад);
