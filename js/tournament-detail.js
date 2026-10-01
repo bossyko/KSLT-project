@@ -1725,8 +1725,19 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                         var glLot = ggGroupDone ? почемуМесто(gst, isEn, isKg) : '';
                         glHtml += '<td style="text-align:center;font-weight:600;">' + gst.wins + '</td>';
+                        /* ПРОЦЕНТ ГЕЙМОВ — ТОЛЬКО У СПОРНЫХ, как в админке.
+                           `разбор` заполняется лишь у тех, кого разводил
+                           расчёт при равных победах. У кого спора не было —
+                           прочерк: сравнивать не с чем, и число там только
+                           мешает. Слово Кости 01.10.
+                           Числа — ТЕ ЖЕ, ЧТО У МЕНЕДЖЕРА: встречи между
+                           равными, а не по всей группе. */
+                        var glДоли = KSLT_GROUPS.долиГеймов(gst.разбор);
                         glHtml += '<td style="text-align:center;font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
-                            (ggHasResults ? gst.gamesWon + '-' + gst.gamesLost : '—') + '</td>';
+                            (ggHasResults && glДоли
+                                ? gst.разбор.gamesWon + '-' + gst.разбор.gamesLost +
+                                  '<br><span style="opacity:0.7;">' + glДоли.процент + '</span>'
+                                : '—') + '</td>';
                         glHtml += '<td style="text-align:center;font-weight:700;white-space:nowrap;' + (gIsPL ? 'color:var(--accent);' : '') + '">' +
                             (ggHasResults ? gst.place : '—') + glLot + '</td>';
                         glHtml += '</tr>';
@@ -2019,8 +2030,19 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         var sbPlaceDisplay = sbGroupHasResults ? st.place : '—';
                         var sbLot = sbGroupDone ? почемуМесто(st, isEn, isKg) : '';
                         bHtml += '<td style="text-align:center;font-weight:600;">' + st.wins + '</td>';
+                        /* ПРОЦЕНТ ГЕЙМОВ — ТОЛЬКО У СПОРНЫХ, как в админке.
+                           `разбор` заполняется лишь у тех, кого разводил
+                           расчёт при равных победах. У кого спора не было —
+                           прочерк: сравнивать не с чем, и число там только
+                           мешает. Слово Кости 01.10.
+                           Числа — ТЕ ЖЕ, ЧТО У МЕНЕДЖЕРА: встречи между
+                           равными, а не по всей группе. */
+                        var sbДоли = KSLT_GROUPS.долиГеймов(st.разбор);
                         bHtml += '<td style="text-align:center;font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
-                            (sbGroupHasResults ? st.gamesWon + '-' + st.gamesLost : '—') + '</td>';
+                            (sbGroupHasResults && sbДоли
+                                ? st.разбор.gamesWon + '-' + st.разбор.gamesLost +
+                                  '<br><span style="opacity:0.7;">' + sbДоли.процент + '</span>'
+                                : '—') + '</td>';
                         bHtml += '<td style="text-align:center;font-weight:700;white-space:nowrap;' + (isQualified ? 'color:var(--accent);' : '') + '">' +
                             sbPlaceDisplay + sbLot + '</td>';
                         bHtml += '</tr>';
