@@ -2197,9 +2197,17 @@
         // Ручная копия: заявки, сетка и расписание уезжают в файл или на
         // бумагу. На корте интернет пропадает, а лист с расписанием — нет
         var названиеТурнира = isEn ? (tournament.title_en || tournament.title) : tournament.title;
-        function шапкаВыгрузки(панельId, что) {
-            if (!A.экспорт) return '';
-            return '<div class="ad-export-bar">' + A.экспорт.кнопки(панельId, что) + '</div>';
+        /* ПОЛОСА ЗНАЕТ ДВА КРАЯ. Правая группа — необязательная: её даёт
+           только вкладка заявок. Раньше кнопки добавления жили в своём
+           контейнере, тоже прижатом вправо, и вставали вторым этажом —
+           не от тесноты, а оттого что контейнера было два. */
+        function шапкаВыгрузки(панельId, что, справа) {
+            var слева = A.экспорт ? A.экспорт.кнопки(панельId, что) : '';
+            if (!слева && !справа) return '';
+            return '<div class="ad-export-bar' + (справа ? ' ad-export-bar--split' : '') + '">' +
+                '<div class="ad-export-bar-levo">' + слева + '</div>' +
+                (справа ? '<div class="ad-export-bar-pravo">' + справа + '</div>' : '') +
+            '</div>';
         }
 
 
@@ -2221,11 +2229,11 @@
 
         // Registrations panel
         html += '<div class="ad-brk-panel" id="adBrkRegPanel" style="padding-top:8px;' + (activeTab !== 'registrations' ? 'display:none;' : '') + '">';
-        html += шапкаВыгрузки('adBrkRegPanel', L.trnTabRegs);
         // Сетка сформирована — состав больше не трогаем: заявка это и есть
         // место в сетке, и убрать её значит оставить в матчах игрока, которого
         // в заявках уже нет
         var сеткаЕсть = matches.length > 0;
+        html += шапкаВыгрузки('adBrkRegPanel', L.trnTabRegs, сеткаЕсть ? '' : кнопкиДобавления());
         html += renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds, isDbl, regsMap, сеткаЕсть);
         html += '</div>';
 
@@ -3847,6 +3855,22 @@
         место.innerHTML = html;
     }
 
+    /**
+     * КНОПКИ ДОБАВЛЕНИЯ — ОДНО ОПРЕДЕЛЕНИЕ, И ОНО НА СИСТЕМЕ КНОПОК.
+     *
+     * Были написаны инлайном: `padding:6px 14px`, радиус 6, кегль 0.85rem.
+     * Замер 30.09 рядом со «Скачать · Печать»: 30 против 36 по высоте,
+     * 13.6 против 14 по кеглю, 6 против 8 по радиусу. Пока ряды стояли
+     * друг под другом, разницу не было видно; в одной строке она видна
+     * сразу. Одно понятие — кнопка — было определено дважды.
+     */
+    function кнопкиДобавления() {
+        return '<button id="adBrkAddFromDb" class="ad-btn ad-btn-secondary ad-btn-sm">' +
+                   L.regAddFromDb + '</button>' +
+               '<button id="adBrkAddExternal" class="ad-btn ad-btn-secondary ad-btn-sm">' +
+                   L.regAddExternal + '</button>';
+    }
+
     // ---- Registrations Panel HTML ----
     function renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds, isDbl, regsMap, заморожено) {
         var html = '';
@@ -3886,16 +3910,10 @@
 
         // Add buttons will be placed in the Main Draw header row below
 
-        /* КНОПКИ ДОБАВЛЕНИЯ СТОЯТ ВЫШЕ ПУСТОГО СОСТОЯНИЯ.
-           Они жили внутри ветки «заявки есть», и в новом турнире менеджер
-           видел только «Заявок пока нет» — внести первого участника руками
-           было нечем. Курица и яйцо: чтобы добавить, нужна была хотя бы
-           одна заявка. Находка Кости 28.09. */
-        html += заморожено ? '' :
-            '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">' +
-            '<button id="adBrkAddFromDb" style="padding:6px 14px;border:1px solid var(--accent);border-radius:6px;background:rgba(204,255,0,0.1);color:var(--accent);cursor:pointer;font-size:0.85rem;font-weight:600;">' + L.regAddFromDb + '</button>' +
-            '<button id="adBrkAddExternal" style="padding:6px 14px;border:1px solid var(--accent);border-radius:6px;background:rgba(204,255,0,0.1);color:var(--accent);cursor:pointer;font-size:0.85rem;font-weight:600;">' + L.regAddExternal + '</button>' +
-        '</div>';
+        /* КНОПКИ ДОБАВЛЕНИЯ ЖИВУТ В ПОЛОСЕ ВЫГРУЗКИ — см. `кнопкиДобавления`.
+           Они стоят ВЫШЕ пустого состояния: жили внутри ветки «заявки есть»,
+           и в новом турнире менеджер видел только «Заявок пока нет» —
+           внести первого участника руками было нечем. Находка Кости 28.09. */
 
         if (mainDraw.length === 0 && waitlistRegs.length === 0 && rejected.length === 0 && withdrawn.length === 0 && blocked.length === 0) {
             html += '<div class="ad-empty-state"><p>' + L.noRegistrations + '</p></div>';
@@ -4227,14 +4245,28 @@
         // в сетке уже разыграно. А замена на месте разрешена: человек выбыл,
         // вместо него выходит другой, место и посев остаются за заявкой
         var стоп = заморожено ? ' disabled style="opacity:0.35;cursor:not-allowed;' : ' style="';
-        var стопЗамены = ' style="';
         // Кнопок бывает четыре: решить, заменить, снять, отклонить. Держим их
         // одной строкой — столбиком они разъезжались на три этажа и строка
         // таблицы прыгала. Помещаются за счёт мелкого кегля, см. .ad-reg-act
         // Действия прячем под одну кнопку: тремя подписями колонка
         // распирала таблицу шире экрана, и до кнопок приходилось доезжать
         // прокруткой. Сами кнопки те же, просто лежат в выпадающем списке
+        /* НАРУЖУ ВЫХОДИТ ТОЛЬКО БЕЗОПАСНОЕ.
+           «Заменить» ничего не пишет в базу — открывает окно выбора, и это
+           самое частое действие менеджера. «Снять», «Отклонить» и «В сетку»
+           остаются в меню: они МЕНЯЮТ ДАННЫЕ, а промах по строке стоит
+           человеку турнира. Меню здесь не лень, а замок.
+           Замер 30.09: три кнопки в строке заняли бы 303.7 против 91 —
+           213 пикселей пришлось бы отнять у имени (498.8) при таблице
+           1114; на планшете 1024 это половина строки. Одна занимает
+           102.7, прирост 12. */
+        var вынесено = (group === 'main' || group === 'wait')
+            ? '<button class="ad-reg-act ad-reg-act-vynos ad-btn-replace" data-reg-id="' + reg.id +
+              '" title="' + L.regReplace + '">' + L.regReplaceShort + '</button>'
+            : '';
+
         var actionsTd = '<td class="ad-reg-actions-cell">' +
+            '<div class="ad-reg-ryad">' + вынесено +
             '<div class="ad-reg-menu">' +
             '<button type="button" class="ad-reg-menu-btn" title="' + (isEn ? 'Actions' : 'Действия') + '">\u22EF</button>' +
             '<div class="ad-reg-menu-list">';
@@ -4251,18 +4283,16 @@
         }
 
         if (group === 'main') {
-            actionsTd += '<button class="ad-reg-act ad-btn-replace" data-reg-id="' + reg.id + '" title="' + L.regReplace + '"' + стопЗамены + 'color:#42a5f5;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReplaceShort + '</button>';
             actionsTd += '<button class="ad-reg-act ad-btn-to-waitlist" data-reg-id="' + reg.id + '" title="' + L.regMoveToWaitlist + '"' + стоп + 'color:#FFA726;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regMoveToWaitlistShort + '</button>';
             // Отказ из сетки: человек не придёт совсем. Раньше его можно было
             // только задвинуть в очередь, где он никого не ждал, либо снести
             // скопом — и заявка пропадала из всех списков без следа
             actionsTd += '<button class="ad-reg-act ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '"' + стоп + 'color:#f44336;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReject + '</button>';
         } else if (group === 'wait') {
-            actionsTd += '<button class="ad-reg-act ad-btn-replace" data-reg-id="' + reg.id + '" title="' + L.regReplace + '"' + стопЗамены + 'color:#42a5f5;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReplaceShort + '</button>';
             actionsTd += '<button class="ad-reg-act ad-btn-approve" data-reg-id="' + reg.id + '" title="' + L.regMoveToMain + '"' + стоп + 'color:#4caf50;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regMoveToMainShort + '</button>' +
                 '<button class="ad-reg-act ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '"' + стоп + 'color:#f44336;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReject + '</button>';
         }
-        actionsTd += '</div></div></td>';
+        actionsTd += '</div></div></div></td>';
 
         // Partner column for doubles
         var partnerTd = '';

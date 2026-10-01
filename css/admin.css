@@ -395,15 +395,33 @@ body.ad-page {
     display: inline-block;
 }
 
+/* ЧИСЛА СО ШКАЛЫ. Было 2px 8px и радиус 6 — ни отступа 2, ни радиуса 6
+   в системе нет. Высота выходила 25.2: ниже самой нижней ступени 28.
+   Замер 30.09 во вкладке «Заявки», 39 таких кнопок */
 .ad-reg-menu-btn {
-    padding: 2px 8px;
+    height: var(--btn-h-xs);
+    padding: 0 var(--space-2);
     background: none;
     border: 1px solid transparent;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-size: var(--fs-base);
     line-height: 1.2;
     cursor: pointer;
+}
+
+/* ВЫНЕСЕННОЕ ДЕЙСТВИЕ И МЕНЮ — ОДНОЙ СТРОКОЙ.
+   Наружу вышла ОДНА кнопка — «Заменить»: она ничего не пишет в базу, а
+   открывает окно выбора. «Снять» и «Отклонить» остались в меню, потому
+   что меняют данные, и промах по строке стоит человеку турнира.
+   Замер 30.09: три кнопки в строке заняли бы 303.7 против 91 сейчас —
+   213 пикселей пришлось бы отнять у имени (498.8) при таблице 1114.
+   Одна занимает 102.7, прирост 12. */
+.ad-reg-ryad {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
 }
 
 .ad-reg-menu-btn:hover,
@@ -433,6 +451,29 @@ body.ad-page {
 }
 
 /* Кнопки внутри меню идут столбиком и занимают всю ширину */
+/* ВЫНЕСЕННАЯ «ЗАМЕНИТЬ» — ТА ЖЕ КНОПКА, ЧТО В МЕНЮ, ТОЛЬКО В СТРОКЕ.
+   Краска и кегль берутся отсюда, а не из инлайна: в меню цвет приходил
+   атрибутом `style` у каждой из четырёх кнопок. Числа со шкалы: ступень
+   28, воздух 8, кегль 12, радиус 8. */
+.ad-reg-act-vynos {
+    height: var(--btn-h-xs);
+    padding: 0 var(--space-2);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: #42a5f5;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.ad-reg-act-vynos:hover:not(:disabled) {
+    border-color: #42a5f5;
+    background: rgba(66, 165, 245, 0.1);
+}
+
 .ad-reg-menu-list .ad-reg-act {
     display: block;
     width: 100%;
@@ -842,7 +883,9 @@ body.ad-page {
 .ad-btn-translate-all,
 .ad-tab,
 .ad-image-upload-remove,
-.ad-mobile-tab {
+.ad-mobile-tab,
+.ad-reg-menu-btn,
+.ad-reg-act-vynos {
     position: relative;
 }
 
@@ -857,7 +900,9 @@ body.ad-page {
 .ad-btn-translate-all::after,
 .ad-tab::after,
 .ad-image-upload-remove::after,
-.ad-mobile-tab::after {
+.ad-mobile-tab::after,
+.ad-reg-menu-btn::after,
+.ad-reg-act-vynos::after {
     content: '';
     position: absolute;
     left: 0;
@@ -871,7 +916,9 @@ body.ad-page {
 .ad-btn-translate-all:focus-visible,
 .ad-tab:focus-visible,
 .ad-image-upload-remove:focus-visible,
-.ad-mobile-tab:focus-visible {
+.ad-mobile-tab:focus-visible,
+.ad-reg-menu-btn:focus-visible,
+.ad-reg-act-vynos:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
@@ -6610,8 +6657,26 @@ select.ad-field-input {
 .ad-export-bar {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
+
+/* ДВА КРАЯ ВМЕСТО ДВУХ ЭТАЖЕЙ.
+   Кнопки добавления жили в СВОЁМ контейнере, тоже прижатом вправо, и
+   вставали вторым рядом под «Скачать · Печать». Замер 30.09 на 1512:
+   два ряда по 1164, кнопок на 380.6 — свободного места 759. Этаж был
+   не от тесноты, а от второго контейнера.
+   Разделитель включается ТОЛЬКО там, где правая группа есть: на сетке
+   и расписании её нет, и полоса остаётся прижатой вправо, как была. */
+.ad-export-bar--split {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ad-export-bar-levo,
+.ad-export-bar-pravo {
+    display: flex;
+    gap: var(--space-2);
 }
 
 .ad-print-title,

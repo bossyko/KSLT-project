@@ -80,8 +80,8 @@ const ОТКАТЫ = [
   /* Класс получил relative, а слой ему нарисовать забыли — шов, на котором
      кнопка молча остаётся без цели нажатия */
   ['css/admin.css',
-   '.ad-image-upload-remove,\n.ad-mobile-tab {\n    position: relative;',
-   '.ad-image-upload-remove {\n    position: relative;',
+   '.ad-reg-menu-btn,\n.ad-reg-act-vynos {\n    position: relative;',
+   '.ad-reg-menu-btn {\n    position: relative;',
    'слой цели и position: relative перечисляют одни и те же классы'],
 
   ['css/admin.css',
