@@ -500,7 +500,10 @@
 
             // Взяли из очереди — снимаем его прежнюю заявку, иначе замена
             // упрётся в запрет «одна заявка на человека»
-            if (selectedId) await освободитьИзОчереди(selectedId, tournamentId, registrations);
+            if (selectedId) {
+                var очередь1 = await освободитьИзОчереди(selectedId, tournamentId, registrations);
+                if (очередь1.беда) { A.showToast(очередь1.беда, 'error'); return; }
+            }
 
             /* Причины состава и рейтинга складываем в один список: у пары их
                бывает несколько разом. Место при этом не трогаем */
@@ -902,8 +905,10 @@
             }
 
             // Кого взяли из очереди — снимаем оттуда: одна заявка на человека
-            await освободитьИзОчереди(первый, tournamentId, registrations);
-            await освободитьИзОчереди(второй, tournamentId, registrations);
+            var очередьП1 = await освободитьИзОчереди(первый, tournamentId, registrations);
+            if (очередьП1.беда) { A.showToast(очередьП1.беда, 'error'); return; }
+            var очередьП2 = await освободитьИзОчереди(второй, tournamentId, registrations);
+            if (очередьП2.беда) { A.showToast(очередьП2.беда, 'error'); return; }
 
             // Пару меняют целиком — состав сверяем заново: в микст могли
             // поставить двоих одного пола, и такая пара ждёт решения клуба
@@ -1327,7 +1332,11 @@
             // упрётся в запрет «одна заявка на человека». Гость из очереди
             // карточки не имел, и найти его можно только по самой заявке
             if (новый || идОчереди) {
-                await освободитьИзОчереди(новый, tournamentId, registrations, идОчереди);
+                var очередьЗ = await освободитьИзОчереди(новый, tournamentId, registrations, идОчереди);
+                /* ОТКАЗ ОСТАНАВЛИВАЕТ ЗАМЕНУ. Иначе повторится боевой случай
+                   01.10: строку очереди сняли, а вписать не смогли, и человек
+                   выпал из турнира совсем. */
+                if (очередьЗ.беда) { A.showToast(очередьЗ.беда, 'error'); return; }
             }
 
             var upRes = await A.client.from('tournament_registrations').update(updateData).eq('id', regId);
@@ -1699,10 +1708,12 @@
      * очереди, просто не проходила — упиралась в этот запрет. Снимаем его
      * прежнюю заявку и поднимаем очередь: место в ней освободилось.
      *
-     * Возвращает имя снятой заявки или пусто, если снимать было нечего.
+     * Возвращает { беда, id }: `беда` — текст отказа базы, `id` — снятая
+     * заявка. Прежде функция возвращала просто строку и молчала об отказе,
+     * и вызывающий шёл дальше как ни в чём не бывало.
      */
     async function освободитьИзОчереди(playerId, tournamentId, registrations, идЗаявки) {
-        if (!playerId && !идЗаявки) return '';
+        if (!playerId && !идЗаявки) return { беда: '', id: '' };
         var очередная = (registrations || []).find(function(r) {
             if (r.status !== 'waitlist') return false;
             /* ГОСТЬ ИЗ ОЧЕРЕДИ НАХОДИТСЯ ПО ЗАЯВКЕ, А НЕ ПО ИГРОКУ. У него
@@ -1712,24 +1723,53 @@
             if (идЗаявки && r.id === идЗаявки) return true;
             return !!playerId && (r.player_id === playerId || r.partner_id === playerId);
         });
-        if (!очередная) return '';
+        if (!очередная) return { беда: '', id: '' };
+
+        /* СНЯТЬ ЗАЯВКУ МАЛО — НАДО ОСВОБОДИТЬ ОТ ЧЕЛОВЕКА САМУ СТРОКУ.
+           В базе на турнир одна строка на игрока, и ограничение
+           `tournament_registrations_tournament_player_unique` держит пару
+           «турнир + игрок» БЕЗ ОГЛЯДКИ НА СТАТУС. Снятая строка эту пару
+           всё равно занимает, и вписать того же человека в чужую строку
+           база не даёт.
+
+           Боевой случай 01.10: меняли Салмана на Бахрама из очереди. Строка
+           Бахрама стала `withdrawn`, а следом `update` упал на ограничении.
+           Транзакции между шагами нет — Бахрам оказался снят из очереди и в
+           основу не попал, то есть выпал из турнира совсем.
+
+           Поэтому снимаем с неё `player_id`, а имя переносим в
+           `external_name`: пара освобождается, а строка не превращается в
+           безымянную — видно, кто тут стоял и почему ушёл. */
+        var имяСнятого = имяИгрокаИзЗаявок(playerId, registrations);
 
         // Стоял вторым номером — заявка остаётся её первому номеру, просто
         // без напарника. Стоял первым — заявка уходит целиком
         if (очередная.partner_id === playerId) {
             // Стоял вторым номером: заявка остаётся первому, просто без пары
-            await A.client.from('tournament_registrations')
-                .update({ partner_id: null, guest_confirmed: false })
+            var беда2 = await A.client.from('tournament_registrations')
+                .update({
+                    partner_id: null,
+                    partner_external_name: имяСнятого,
+                    guest_confirmed: false
+                })
                 .eq('id', очередная.id);
+            if (беда2.error) return { беда: беда2.error.message, id: '' };
         } else {
-            await A.client.from('tournament_registrations')
-                .update({ status: 'withdrawn', withdrawn_at: new Date().toISOString() })
+            var беда1 = await A.client.from('tournament_registrations')
+                .update({
+                    player_id: null,
+                    is_external: true,
+                    external_name: имяСнятого,
+                    status: 'withdrawn',
+                    withdrawn_at: new Date().toISOString()
+                })
                 .eq('id', очередная.id);
+            if (беда1.error) return { беда: беда1.error.message, id: '' };
             await сообщитьОЗаявке(очередная.id, 'withdrawn');
             await поднятьИзОчереди(tournamentId);
         }
-        A.showToast(L.regQueueWarn.replace('{кто}', имяИгрокаИзЗаявок(playerId, registrations)), 'success');
-        return очередная.id;
+        A.showToast(L.regQueueWarn.replace('{кто}', имяСнятого), 'success');
+        return { беда: '', id: очередная.id };
     }
 
     /** Кто в заявке — для окна подтверждения: «Иванов и Петрова». */
