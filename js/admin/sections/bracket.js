@@ -6788,16 +6788,13 @@
 
     // ---- Results Panel (points summary) ----
     function renderResultsPanel(tournament, results, playersMap, matches, registrations, isDbl) {
-        // Round labels for display
-        var roundLabels = isEn
-            ? { W: 'Winner', F: 'Finalist', '3RD': '3rd Place', '4TH': '4th Place', SF: 'Semifinal', QF: 'Quarterfinal', R16: 'Round of 16', R32: 'Round of 32', R64: 'Round of 64',
-                G1: '1st in Group', G2: '2nd in Group', G3: '3rd in Group', G4: '4th in Group', G5: '5th in Group', G6: '6th in Group' }
-            : { W: 'Победитель', F: 'Финалист', '3RD': '3-е место', '4TH': '4-е место', SF: 'Полуфинал', QF: 'Четвертьфинал', R16: '1/8 финала', R32: '1/16 финала', R64: '1/32 финала',
-                G1: '1-е в группе', G2: '2-е в группе', G3: '3-е в группе', G4: '4-е в группе', G5: '5-е в группе', G6: '6-е в группе' };
-
-        var roundOrder = { W: 1, F: 2, '3RD': 3, '4TH': 4, SF: 5, QF: 6, R16: 7, R32: 8, R64: 9,
-            G3: 10, G4: 11, G5: 12, G6: 13 };
-        var placeByRound = { W: 1, F: 2, '3RD': 3, '4TH': 4, SF: 4, QF: 5, R16: 9, R32: 17, R64: 33 };
+        /* ЭТАП И МЕСТО ПО НЕМУ — ОДНО ОПРЕДЕЛЕНИЕ НА ПРОДУКТ.
+           Эти три словаря лежали здесь своей копией. Их же читают кабинет
+           (`dashboard.js`), страница игрока (`player.js`) и — с 01.10 —
+           публичная страница турнира. Теперь они живут в
+           `js/rating-points.js` рядом с расчётом очков: этап, место и
+           очки — одно понятие, и расходиться им негде. */
+        var roundLabels = KSLT_POINTS.ПОДПИСИ_РАУНДА[isEn ? 'en' : 'ru'];
 
         // Build registrations lookup for external player names
         var regsById = {};
@@ -6844,8 +6841,8 @@
                 var ptsA = a.points_earned || 0;
                 var ptsB = b.points_earned || 0;
                 if (ptsA !== ptsB) return ptsB - ptsA;
-                var orderA = roundOrder[a.round_reached] || 99;
-                var orderB = roundOrder[b.round_reached] || 99;
+                var orderA = KSLT_POINTS.порядокРаунда(a.round_reached);
+                var orderB = KSLT_POINTS.порядокРаунда(b.round_reached);
                 return orderA - orderB;
             });
         }
@@ -6861,7 +6858,7 @@
                 '</tr></thead><tbody>';
 
             tableResults.forEach(function(r, idx) {
-                var place = placeByRound[r.round_reached] || (idx + 1);
+                var place = KSLT_POINTS.местоПоРаунду(r.round_reached) || (idx + 1);
                 var pName = getResultName(r.player_id) + getPartnerDisplay(r.player_id);
                 var roundLabel = roundLabels[r.round_reached] || r.round_reached;
                 var isWinner = r.round_reached === 'W';

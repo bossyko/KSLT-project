@@ -1241,6 +1241,58 @@ tr.td-rr-row-dimmed {
 }
 
 /* === RESULTS / PODIUM (Olympic: 3-1-2) === */
+/* ───────── РАСКЛАДКА ОЧКОВ ПОД ПЬЕДЕСТАЛОМ ─────────
+   Пьедестал показывает троих, а сыграли все: таблица досказывает, кто на
+   каком этапе остановился и сколько получил. Отступы со шкалы
+   8 · 12 · 16 · 24 · 32 · 40, кегли со шкалы 11 · 12 · 14 · 16 · 18. */
+.td-results-table {
+    max-width: 720px;
+    margin: 32px auto 0;
+    padding: 0 16px;
+}
+.td-results-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    text-align: center;
+}
+.td-results-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.td-results-table th {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    /* `--text-secondary`, а не `--text-dim`: при кегле 11 тусклый цвет
+       проваливает WCAG 1.4.3 */
+    color: var(--text-secondary);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.td-results-table td {
+    font-size: 14px;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.td-res-place { width: 72px; text-align: center; font-weight: 600; }
+.td-results-table th.td-res-place { text-align: center; }
+.td-res-stage { color: var(--text-secondary); }
+.td-res-pts { width: 80px; text-align: right; font-weight: 700; color: var(--accent); }
+.td-results-table th.td-res-pts { text-align: right; }
+.td-res-winner td { background: rgba(204, 255, 0, 0.08); font-weight: 600; }
+
+/* Телефон: этап уходит — он производное от места, а место остаётся */
+@media (max-width: 640px) {
+    .td-res-stage { display: none; }
+    .td-res-place { width: 56px; }
+}
+
 .td-podium {
     max-width: 800px;
     margin: 0 auto;

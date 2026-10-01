@@ -26,6 +26,7 @@ const ОЧКИ  = 'js/rating-points.js';
 const СЕТКА = 'js/admin/sections/bracket.js';
 const CSS   = 'css/admin.css';
 const СТР   = 'pages/admin.html';
+const СТЕНД_ЗАМЕР = 'maket/setka-zamer.html';
 
 const ОТКАТЫ = [
   /* ─── одно или другое, а не оба разом ─── */
@@ -113,10 +114,12 @@ const ОТКАТЫ = [
    '.ad-league-pl {\n    background: var(--accent);\n    color: #FFFFFF;\n}',
    'высшая лига красится акцентом с почти-чёрным текстом'],
 
-  [СТР,
+  /* Стенд остался на прежней версии, страница ушла вперёд: глазами на
+     странице всё хорошо, а стенд меряет вчерашний файл. */
+  [СТЕНД_ЗАМЕР,
+   'rating-points.js?v=3',
    'rating-points.js?v=2',
-   'rating-points.js?v=1',
-   'версии подняты — иначе правка не доедет до того, у кого файл в кеше']
+   'версия rating-points.js одна на странице и стендах']
 ];
 
 function прогон() {

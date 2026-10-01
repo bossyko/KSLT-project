@@ -2641,6 +2641,24 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     resHtml += '</div>';
                     resultsPodium.innerHTML = resHtml;
+
+                    /* ПЬЕДЕСТАЛ ПОКАЗЫВАЕТ ТРОИХ, А СЫГРАЛИ ВСЕ.
+                       Слово Кости 01.10: «надо будет отобразить так, как
+                       надо, чтобы все видели». Под пьедесталом — вся
+                       раскладка: кто на каком этапе остановился и сколько
+                       очков получил.
+
+                       Источник — `tournament_results`, то, что посчитала и
+                       записала админка при завершении турнира. Своего счёта
+                       страница не ведёт: именно второй счёт мест и развёл
+                       пьедестал с действительностью (16 «третьих мест»).
+
+                       МЕСТО ПИШЕМ ТОЛЬКО ТАМ, ГДЕ ОНО ОПРЕДЕЛЕНО. У
+                       сеточных этапов оно выводится однозначно; у места в
+                       группе — нет: третье место группы A и третье группы B
+                       стоят в таблице по силе, а не по букве. Там прочерк,
+                       а не номер строки. */
+                    показатьРаскладкуОчков(t, resultsPodium, resHtml, isEn, isKg, pName);
                 } else {
                     resultsPodium.innerHTML = '<div class="td-no-results"><p>' + (isRatingTournament(t) ? L.noResults : L.noResultsPlain) + '</p></div>';
                 }
@@ -2666,6 +2684,72 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
     // Highlight player matches if ?player= param
     applyPlayerHighlight();
+}
+
+/**
+ * РАСКЛАДКА ОЧКОВ ПОД ПЬЕДЕСТАЛОМ.
+ *
+ * Читает `tournament_results` — то, что админка посчитала при завершении
+ * турнира, — и показывает всех: место, имя, этап, очки. Своего счёта тут
+ * нет и быть не должно: второй счёт одного понятия и развёл пьедестал с
+ * действительностью.
+ *
+ * Подписи этапа и место по этапу берём из `KSLT_POINTS`: их читают ещё
+ * админка, кабинет и страница игрока.
+ *
+ * Дорисовываем ПОВЕРХ уже выставленного пьедестала, а не вместо него:
+ * ответ базы приходит позже, и присваивание целиком стёрло бы карточки.
+ */
+function показатьРаскладкуОчков(t, контейнер, пьедесталHtml, isEn, isKg, имя) {
+    if (!контейнер || typeof supabaseClient === 'undefined') return;
+    if (typeof KSLT_POINTS === 'undefined') return;
+
+    var язык = isEn ? 'en' : (isKg ? 'kg' : 'ru');
+    var П = {
+        ru: { место: 'Место', игрок: 'Игрок', этап: 'Этап', очки: 'Очки', итог: 'Итоги турнира' },
+        en: { место: 'Place', игрок: 'Player', этап: 'Stage', очки: 'Points', итог: 'Tournament results' },
+        kg: { место: 'Орун', игрок: 'Оюнчу', этап: 'Этап', очки: 'Упай', итог: 'Турнирдин жыйынтыгы' }
+    }[язык];
+
+    supabaseClient.from('tournament_results')
+        .select('player_id, round_reached, points_earned')
+        .eq('tournament_id', t.id)
+        .then(function(ответ) {
+            var строки = ответ.data || [];
+            if (!строки.length) return;
+
+            /* Порядок один с админской таблицей: сперва очки, при равных —
+               кто прошёл дальше. */
+            строки.sort(function(a, b) {
+                var оа = a.points_earned || 0, об = b.points_earned || 0;
+                if (оа !== об) return об - оа;
+                return KSLT_POINTS.порядокРаунда(a.round_reached) -
+                       KSLT_POINTS.порядокРаунда(b.round_reached);
+            });
+
+            var html = '<div class="td-results-table">' +
+                '<h3 class="td-results-title">' + П.итог + '</h3>' +
+                '<table><thead><tr>' +
+                    '<th class="td-res-place">' + П.место + '</th>' +
+                    '<th>' + П.игрок + '</th>' +
+                    '<th class="td-res-stage">' + П.этап + '</th>' +
+                    '<th class="td-res-pts">' + П.очки + '</th>' +
+                '</tr></thead><tbody>';
+
+            строки.forEach(function(р) {
+                var место = KSLT_POINTS.местоПоРаунду(р.round_reached);
+                var медаль = место === 1 ? '🥇 ' : место === 2 ? '🥈 ' : место === 3 ? '🥉 ' : '';
+                html += '<tr' + (место === 1 ? ' class="td-res-winner"' : '') + '>' +
+                    '<td class="td-res-place">' + медаль + (место === null ? '—' : место) + '</td>' +
+                    '<td>' + имя(р.player_id) + '</td>' +
+                    '<td class="td-res-stage">' + KSLT_POINTS.подписьРаунда(р.round_reached, язык) + '</td>' +
+                    '<td class="td-res-pts">' + (р.points_earned || 0) + '</td>' +
+                '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            контейнер.innerHTML = пьедесталHtml + html;
+        });
 }
 
 // ========================================
