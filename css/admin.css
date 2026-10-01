@@ -395,6 +395,37 @@ body.ad-page {
     display: inline-block;
 }
 
+/* СТРОКА, КОТОРАЯ ЖДЁТ РЕШЕНИЯ, НАХОДИТСЯ ГЛАЗАМИ.
+   Полоса сверху считает такие заявки, но какая именно — приходилось
+   искать по всей таблице: кнопка «Решить» лежит под «⋯» и строку не
+   выдаёт. Признак — ПОЛОСА СЛЕВА, а не фон: фон у строки один, и он
+   уже занят пометкой о задолженности, которая может стоять у того же
+   человека. Краска та же, что у самой кнопки «Решить», — #FFA726. */
+.ad-reg-row-reshenie > td:first-child {
+    box-shadow: inset 3px 0 0 #FFA726;
+}
+
+.ad-reg-row-reshenie > td {
+    background: rgba(255, 167, 38, 0.06);
+}
+
+.ad-reg-row-dolg > td {
+    background: rgba(244, 67, 54, 0.04);
+}
+
+/* КОЛОНКА «МЕСТО». Было инлайном: 0.65rem — кегля 10.4 в шкале нет.
+   Числа со шкалы: кегль 11 (--fs-2xs), воздух 4 и 8. */
+/* Вес селектора ровно на единицу выше, чем у `.ad-table td`: тот красит
+   все ячейки во второстепенный, и одного класса не хватало — замер 30.09
+   показал белый 0.72 вместо акцента. */
+.ad-table td.ad-reg-mesto {
+    text-align: center;
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--fs-2xs);
+    font-weight: 600;
+    color: var(--accent);
+}
+
 /* ЧИСЛА СО ШКАЛЫ. Было 2px 8px и радиус 6 — ни отступа 2, ни радиуса 6
    в системе нет. Высота выходила 25.2: ниже самой нижней ступени 28.
    Замер 30.09 во вкладке «Заявки», 39 таких кнопок */
@@ -467,6 +498,17 @@ body.ad-page {
     line-height: 1.2;
     white-space: nowrap;
     cursor: pointer;
+}
+
+/* «Решить» — та же вынесенная кнопка, только краской беды: тем же
+   #FFA726, что у полосы слева у этой строки. Контраст 10.19. */
+.ad-reg-act-reshit {
+    color: #FFA726;
+}
+
+.ad-reg-act-reshit:hover:not(:disabled) {
+    border-color: #FFA726;
+    background: rgba(255, 167, 38, 0.12);
 }
 
 .ad-reg-act-vynos:hover:not(:disabled) {
@@ -2213,6 +2255,36 @@ select.ad-field-input {
    (см. claude/kslt-formy-i-modalki.md), нового числа не заводим */
 .ad-confirm-modal:has(.ad-confirm-actions > :nth-child(3)) {
     max-width: 440px;
+}
+
+/* ТРИ ДЕЙСТВИЯ В РЯД, ВЫХОД — ОТДЕЛЬНО.
+   У заявки три исхода: снять, отклонить, одобрить. Четвёртой кнопкой в
+   том же ряду «Отмена» вставала наравне с ними, хотя она ничего не
+   делает, а только закрывает. Замер 30.09: четыре кнопки дают 474 при
+   окне 440 — ряд переносился. Поэтому там, где действий три и больше,
+   «Отмена» уходит под ряд строкой: выход виден, но места у действий не
+   отнимает. Клик мимо окна и Esc делают то же самое. */
+.ad-confirm-actions:has(> :nth-child(4)) {
+    position: relative;
+    padding-bottom: var(--space-6);
+}
+
+.ad-confirm-actions:has(> :nth-child(4)) .ad-confirm-cancel {
+    order: 9;
+    position: absolute;
+    bottom: 0;
+    height: auto;
+    padding: var(--space-1) var(--space-2);
+    border: 0;
+    background: none;
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+.ad-confirm-actions:has(> :nth-child(4)) .ad-confirm-cancel:hover {
+    color: var(--text-primary);
 }
 
 .ad-confirm-actions {

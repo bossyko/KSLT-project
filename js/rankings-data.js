@@ -103,18 +103,17 @@
 
                     var inCat = pointsIn[cat.id] || {};
                     var closedHere = closedIn[cat.id] || {};
-                    var catPlayers = players.filter(function(p) {
-                        if (p.gender !== g) return false;
-                        if (closedHere[p.id]) return false;
-                        // Домашняя категория — всегда, чужая — только если там есть очки
-                        return p.category_id === cat.id || inCat[p.id] > 0;
-                    }).sort(function(a, b) {
-                        var очки = (inCat[b.id] || 0) - (inCat[a.id] || 0);
-                        if (очки) return очки;
-                        // Очки равны — выше тот, у кого одиночный NTRP больше.
-                        // Парный здесь не смотрим: рейтинг одиночный
-                        return (Number(b.ntrp_singles) || 0) - (Number(a.ntrp_singles) || 0);
-                    });
+                    /* ПОРЯДОК МЕСТ — ОДНО ОПРЕДЕЛЕНИЕ НА ПРОДУКТ.
+                       Он жил здесь, и каждый, кому был нужен, считал его
+                       заново: админка насчитала своё и показывала в заявках
+                       не то число, по которому сеется сетка. Теперь правило
+                       одно — `KSLT_RULES.рейтингКатегории`, — и зовут его
+                       отсюда и из жеребьёвки. */
+                    var поМестам = window.KSLT_RULES.рейтингКатегории(
+                        players, inCat, closedHere, cat.id, g);
+                    var поId = {};
+                    players.forEach(function(p) { поId[p.id] = p; });
+                    var catPlayers = поМестам.map(function(id) { return поId[id]; });
                     var key = g + '-' + cat.id;
                     result[key] = {
                         name: catName,

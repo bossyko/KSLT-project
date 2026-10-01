@@ -1013,8 +1013,13 @@
 
         var html =
             '<div style="display:flex;flex-direction:column;gap:12px;min-width:340px;text-align:left;">' +
+                /* В ОДИНОЧНОМ НАПАРНИКА НЕТ, И ПРОЧЕРКА ТОЖЕ.
+                   Заголовок читался «Чынгыз Исматов — —»: второй прочерк
+                   стоял на месте напарника, которого в одиночном турнире
+                   не бывает. Замер 30.09 */
                 '<div style="font-size:0.9rem;color:var(--text-primary);">' +
-                    A.esc(кто) + ' \u2014 ' + A.esc(напарник) +
+                    A.esc(кто) + (напарник && напарник !== '\u2014'
+                        ? ' \u2014 ' + A.esc(напарник) : '') +
                 '</div>' +
                 '<ul style="margin:0;padding-left:18px;color:var(--text-secondary);font-size:0.82rem;line-height:1.5;">' +
                     причиныHtml +
@@ -1033,6 +1038,49 @@
                     '</div>'
                     : '') +
             '</div>';
+
+        /* ТРИ ИСХОДА — ТРИ КНОПКИ, И НИ ОДНОГО УГАДЫВАНИЯ.
+           Было две: «Отмена» и «Одобрить», и непонятно было, отклоняет ли
+           «Отмена». Она не отклоняет — просто закрывает окно, и заявка
+           остаётся ждать. Отказ теперь назван своим словом и стоит рядом.
+           Находка Кости 30.09. */
+        /* ТРИ ИСХОДА ЗАЯВКИ СТОЯТ В ОДНОМ ОКНЕ — РЕШЕНИЕ КОСТИ 30.09.
+           Были разбросаны по трём местам: «Решить» в строке, «Одобрить» в
+           окне, «Снять» и «Отклонить» под «⋯». Человек решает одно дело, а
+           кнопки искал в трёх. Теперь дверь одна, за ней ровно столько
+           кнопок, сколько у заявки исходов:
+             снять     — в лист ожидания, вернуть можно;
+             отклонить — заявка ушла, место отдаётся очереди;
+             одобрить  — остаётся в основе.
+           Выход без действия — клик мимо окна или Esc. Четвёртой кнопкой
+           «Отмена» ряд не занимаем: она ничего не делает, а место занимает
+           наравне с тремя, которые делают. */
+        var снять = {
+            label: L.regMoveToWaitlistShort,
+            action: async function() {
+                var о = await A.client.from('tournament_registrations')
+                    .update({ status: 'waitlist' }).eq('id', regId);
+                if (о.error) { A.showToast(о.error.message, 'error'); return; }
+                await сообщитьОЗаявке(regId, 'waitlist');
+                await поднятьИзОчереди(tournamentId);
+                renderBracketManagement(tournamentId, 'registrations');
+            }
+        };
+
+        var отклонить = {
+            label: L.regReject,
+            опасная: true,
+            action: async function() {
+                var о = await A.client.from('tournament_registrations')
+                    .update({ status: 'rejected' }).eq('id', regId);
+                if (о.error) { A.showToast(о.error.message, 'error'); return; }
+                await сообщитьОЗаявке(regId, 'rejected');
+                // Место освободилось — первый из очереди занимает его сам
+                await поднятьИзОчереди(tournamentId);
+                A.showToast(L.regRejected);
+                renderBracketManagement(tournamentId, 'registrations');
+            }
+        };
 
         A.showConfirm(L.regReviewTitle, html, async function() {
             /* Одобрение снимает ВСЕ причины разом: решение принято */
@@ -1058,7 +1106,7 @@
             await сообщитьОЗаявке(regId, гость ? 'guest_ok' : 'gender_ok');
             A.showToast(L.regReviewDone, 'success');
             renderBracketManagement(tournamentId, 'registrations');
-        }, L.regReviewApprove);
+        }, L.regReviewApprove, null, [снять, отклонить]);
     }
 
     function openReplaceModal(regId, target, tournament, tournamentId, registrations, playersMap) {
@@ -1740,7 +1788,13 @@
     var ПРИЧИНА_СЛОВАМИ = {
         gender:        'Состав не совпадает с турниром по полу',
         ntrp_combined: 'Сумма NTRP пары выше предела турнира',
-        ntrp_doubles:  'У кого-то из пары нет парного рейтинга — проставьте его'
+        ntrp_doubles:  'У кого-то из пары нет парного рейтинга — проставьте его',
+        /* Игрок играет в своей категории и на одну ступень выше. Через две
+           ступени — не отказ, а решение клуба: место в основе за ним
+           держится, пока админ турнира не скажет. Решение Кости 30.09.
+           Проверку ещё не ставим — слово уже есть, чтобы пометка, которую
+           проставили руками, читалась по-человечески, а не кодом. */
+        category:      'Категория игрока ниже турнирной больше чем на ступень'
     };
 
     /** Причины состава при ручных правках менеджера: пол считаем здесь же */
@@ -1760,6 +1814,60 @@
      * гость из нижней категории сеется по тому, что набрал здесь, а не по
      * своим домашним очкам.
      */
+    /**
+     * МЕСТА В РЕЙТИНГЕ КАТЕГОРИИ ТУРНИРА — ОДИН ЧИТАТЕЛЬ ОДНОГО ПРАВИЛА.
+     *
+     * Правило лежит в `KSLT_RULES.рейтингКатегории`, и то же правило читает
+     * публичная таблица рейтинга. Отсюда его зовут ДВОЕ: колонка «Место» в
+     * заявках и посев жеребьёвки. Раньше у каждого было своё, и они
+     * расходились молча.
+     *
+     * В таблицу категории входит тот, у кого она домашняя, и тот, кто пришёл
+     * со стороны и набрал в ней очки. Пришедший без очков в ней не стоит —
+     * места у него нет, и это честно: в публичном рейтинге его там тоже нет.
+     *
+     * Возвращает { [player_id]: место }. Пусто для нерейтинговых турниров.
+     */
+    async function местаВКатегории(tournament) {
+        if (!tournament || !tournament.category_id) return {};
+        if (isUnrankedTournament(tournament)) return {};
+        /* Рейтинг ведётся только в одиночном разряде и раздельно по полу.
+           У парных и микста пола у турнира нет — мерить нечем. */
+        var пол = tournament.gender;
+        if (пол !== 'men' && пол !== 'women') return {};
+
+        var катId = tournament.category_id;
+        var pcRes = await A.client.from('player_categories')
+            .select('player_id, points, closed_at').eq('category_id', катId);
+        if (pcRes.error) return {};
+
+        var очки = {}, закрытые = {}, чужие = [];
+        (pcRes.data || []).forEach(function(r) {
+            if (r.closed_at) { закрытые[r.player_id] = true; return; }
+            очки[r.player_id] = r.points || 0;
+            чужие.push(r.player_id);
+        });
+
+        var свои = await A.client.from('players')
+            .select('id, gender, category_id, ntrp_singles').eq('category_id', катId);
+        if (свои.error) return {};
+        var карточки = свои.data || [];
+        var есть = {};
+        карточки.forEach(function(p) { есть[p.id] = true; });
+
+        var надо = чужие.filter(function(id) { return !есть[id]; });
+        if (надо.length) {
+            var ещё = await A.client.from('players')
+                .select('id, gender, category_id, ntrp_singles').in('id', надо);
+            карточки = карточки.concat(ещё.data || []);
+        }
+
+        var итог = {};
+        KSLT_RULES.рейтингКатегории(карточки, очки, закрытые, катId, пол)
+            .forEach(function(id, и) { итог[id] = и + 1; });
+        return итог;
+    }
+
     async function посилеОтсортировать(список, tournament, playersMap, isDbl) {
         if (!список || список.length < 2) return список;
 
@@ -1780,22 +1888,43 @@
             return список;
         }
 
-        var catPoints = {};
-        if (tournament.category_id) {
-            var pcIds = список.map(function(r) { return r.player_id; }).filter(Boolean);
-            if (pcIds.length > 0) {
-                var pcRes = await A.client.from('player_categories')
-                    .select('player_id, points')
-                    .eq('category_id', tournament.category_id)
-                    .in('player_id', pcIds);
-                (pcRes.data || []).forEach(function(r) { catPoints[r.player_id] = r.points || 0; });
-            }
+        /* ПОСЕВ ЧИТАЕТ ТО ЖЕ МЕСТО, ЧТО ПОКАЗАНО МЕНЕДЖЕРУ.
+           Здесь стоял свой счёт по `player_categories`, а колонка в заявках
+           считала своё по карточке. Числа расходились, и менеджер видел не
+           тот порядок, в котором сеялась сетка. Теперь источник один —
+           `местаВКатегории`, то же правило, что у публичного рейтинга. */
+        var места = await местаВКатегории(tournament);
+
+        /* ЛЕСТНИЦА КАТЕГОРИЙ ГЛАВНЕЕ МЕСТА — РЕШЕНИЕ КОСТИ 30.09.
+           «Сортировку надо делать согласно категории», и добор сеяных —
+           «также по иерархии ProMasters → Masters → Challenger → Futures →
+           Tour». Значит ключ один: сначала ступень категории игрока, сверху
+           вниз, и только внутри ступени — место в рейтинге категории
+           турнира. Пришедший сверху сеется обязательно: он объективно
+           сильнее всех в сетке, и жребий развёл бы его как рядового.
+           Своих не хватило на сеяных — добор идёт дальше по той же
+           лестнице, а не прерывается. */
+        var лестница = {};
+        var катОтвет = await A.client.from('categories').select('id, sort_order');
+        (катОтвет.data || []).forEach(function(к) { лестница[к.id] = Number(к.sort_order) || 0; });
+
+        function ступень(r) {
+            var п = playersMap[r.player_id] || {};
+            // Категории нет вовсе — в самый низ: мерить нечем
+            return лестница[п.category_id] || 0;
         }
+
         список.sort(function(a, b) {
-            var pA = catPoints[a.player_id] || 0;
-            var pB = catPoints[b.player_id] || 0;
-            if (pB !== pA) return pB - pA;
-            // Очки равны — выше тот, у кого сильнее одиночный NTRP.
+            var сA = ступень(a), сB = ступень(b);
+            if (сA !== сB) return сB - сA;   // выше по лестнице — раньше
+
+            var мA = места[a.player_id] || 0;
+            var мB = места[b.player_id] || 0;
+            // Места нет — в самый низ ступени: в этой таблице его вовсе нет
+            if (!мA !== !мB) return мA ? -1 : 1;
+            if (мA && мB && мA !== мB) return мA - мB;
+
+            // Мест нет у обоих — выше тот, у кого сильнее одиночный NTRP.
             // То же правило, что в таблице рейтинга
             var nA = Number((playersMap[a.player_id] || {}).ntrp_singles || 0);
             var nB = Number((playersMap[b.player_id] || {}).ntrp_singles || 0);
@@ -2043,26 +2172,16 @@
             var plRes = await A.client.from('players').select('id, name, name_en, points, category_id, gender, ntrp_singles, ntrp_doubles').in('id', playerIds);
             (plRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
 
-            // Compute rank within category: load all players for relevant categories
-            var catIds = [];
-            (plRes.data || []).forEach(function(p) {
-                if (p.category_id && catIds.indexOf(p.category_id) === -1) catIds.push(p.category_id);
+            /* МЕСТО — ТО ЖЕ, ЧТО В ПУБЛИЧНОМ РЕЙТИНГЕ, И ТО ЖЕ, ПО ЧЕМУ СЕЕТСЯ.
+               Было: место считалось внутри категории ИГРОКА по очкам из
+               карточки, без пола. В турнире с двумя категориями рядом вставали
+               два «пятых места» из разных списков, а сеялось по третьему
+               числу. Теперь место одно — `местаВКатегории` — и его же читает
+               жеребьёвка. */
+            var места = await местаВКатегории(tournament);
+            Object.keys(playersMap).forEach(function(pid) {
+                playersMap[pid].rank = места[pid] || null;
             });
-            if (catIds.length > 0) {
-                var rankRes = await A.client.from('players').select('id, points, category_id').in('category_id', catIds).order('points', { ascending: false });
-                var catGroups = {};
-                (rankRes.data || []).forEach(function(p) {
-                    var cat = p.category_id;
-                    if (!catGroups[cat]) catGroups[cat] = [];
-                    catGroups[cat].push(p.id);
-                });
-                // Already sorted by points DESC — index = rank
-                Object.keys(catGroups).forEach(function(cat) {
-                    catGroups[cat].forEach(function(pid, idx) {
-                        if (playersMap[pid]) playersMap[pid].rank = idx + 1;
-                    });
-                });
-            }
         }
 
         // Пометка «Задолженность» — про неоплаченное членство. Пока идёт
@@ -3949,13 +4068,18 @@
                     '<th>' + thRegTime + '</th>' +
                     '<th style="width:150px;text-align:center;">' + thActions + '</th>';
             } else {
-                // Singles: # | Ранг | Имя | Категория | Регистрация | Действия
-                var thRank = isEn ? 'Rank' : 'Ранг';
+                /* Одиночный: # | Место | Категория | ФИО | Регистрация | Действия.
+                   ПОРЯДОК — РЕШЕНИЕ КОСТИ 30.09: место и категория идут ДО
+                   имени, потому что именно по ним читают таблицу при посеве.
+                   Заголовок «Ранг» заменён на «Место»: колонка показывает
+                   место в рейтинге категории турнира, а не абстрактный ранг,
+                   и это ровно то число, по которому сеется сетка. */
+                var thRank = isEn ? 'Rank' : 'Место';
                 regTableHead = '<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></th>' +
                     '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
-                    '<th style="width:32px;text-align:center;padding:4px 6px;">' + thRank + '</th>' +
-                    '<th>' + L.plrName + '</th>' +
+                    '<th style="width:48px;text-align:center;padding:4px 6px;">' + thRank + '</th>' +
                     '<th>' + thCategory + '</th>' +
+                    '<th>' + L.plrName + '</th>' +
                     thSeed +
                     '<th>' + thRegTime + '</th>' +
                     '<th style="width:150px;text-align:center;">' + thActions + '</th>';
@@ -4260,10 +4384,21 @@
            213 пикселей пришлось бы отнять у имени (498.8) при таблице
            1114; на планшете 1024 это половина строки. Одна занимает
            102.7, прирост 12. */
-        var вынесено = (group === 'main' || group === 'wait')
-            ? '<button class="ad-reg-act ad-reg-act-vynos ad-btn-replace" data-reg-id="' + reg.id +
-              '" title="' + L.regReplace + '">' + L.regReplaceShort + '</button>'
-            : '';
+        /* «РЕШИТЬ» ВЫХОДИТ В СТРОКУ ПЕРЕД «ЗАМЕНИТЬ».
+           Она появляется у считаных заявок и именно к ним зовёт менеджера.
+           Прятать под «⋯» то, ради чего строку и подсветили, — значит
+           показать беду и спрятать лечение. Находка Кости 30.09.
+           Краска та же, что у полосы слева: #FFA726. */
+        var вынесено = '';
+        if (нужноРешение(reg)) {
+            вынесено += '<button class="ad-reg-act ad-reg-act-vynos ad-reg-act-reshit ad-btn-review"' +
+                ' data-reg-id="' + reg.id + '" title="' + L.regReviewTitle + '">' +
+                L.regReviewBtn + '</button>';
+        }
+        if (group === 'main' || group === 'wait') {
+            вынесено += '<button class="ad-reg-act ad-reg-act-vynos ad-btn-replace" data-reg-id="' + reg.id +
+                '" title="' + L.regReplace + '">' + L.regReplaceShort + '</button>';
+        }
 
         var actionsTd = '<td class="ad-reg-actions-cell">' +
             '<div class="ad-reg-ryad">' + вынесено +
@@ -4276,12 +4411,6 @@
         // Заявка ждёт решения — одна кнопка на все причины. Раньше их было
         // три: подтвердить гостя, убрать гостя, одобрить состав. Менеджер
         // выбирал между кнопками, не видя, что именно не так с заявкой
-        if (нужноРешение(reg)) {
-            actionsTd += '<button class="ad-reg-act ad-btn-review" data-reg-id="' + reg.id + '"' +
-                ' title="' + L.regReviewTitle + '" style="color:#FFA726;font-size:0.8rem;font-weight:600;">' +
-                L.regReviewBtn + '</button>';
-        }
-
         if (group === 'main') {
             actionsTd += '<button class="ad-reg-act ad-btn-to-waitlist" data-reg-id="' + reg.id + '" title="' + L.regMoveToWaitlist + '"' + стоп + 'color:#FFA726;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regMoveToWaitlistShort + '</button>';
             // Отказ из сетки: человек не придёт совсем. Раньше его можно было
@@ -4323,7 +4452,16 @@
                 дробь(combinedNtrp) + '</td>';
         }
 
-        var rowStyle = hasDebt ? ' style="background:rgba(244,67,54,0.04);"' : '';
+        /* ЖДУЩУЮ РЕШЕНИЯ ЗАЯВКУ ВИДНО В СПИСКЕ, А НЕ ТОЛЬКО В СЧЁТЧИКЕ.
+           Полоса сверху говорила «заявки ждут вашего решения: 1», а какая
+           именно — приходилось искать глазами по 28 строкам. Находка Кости
+           30.09. Кнопка «Решить» лежит под «⋯» и строку не выдаёт.
+           Признак — цвет слева и подпись, а не только фон: фон один на всю
+           строку и уже занят пометкой о задолженности. */
+        var ждёт = нужноРешение(reg);
+        var rowClass = ждёт ? ' class="ad-reg-row-reshenie"'
+                            : (hasDebt ? ' class="ad-reg-row-dolg"' : '');
+        var rowStyle = rowClass;
         if (isDbl) {
             // Doubles row: # | NTRP | Имя | NTRP | Партнёр | Общий NTRP | Регистрация | Действия
             // У своих показываем парный рейтинг, а если он не проставлен —
@@ -4352,13 +4490,13 @@
                 actionsTd +
             '</tr>';
         } else {
-            // Singles row: # | Ранг | Имя | Категория | Регистрация | Действия
+            // Одиночный: # | Место | Категория | ФИО | Регистрация | Действия
             return '<tr' + rowStyle + '>' +
                 '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></td>' +
                 '<td style="text-align:center;padding:4px 6px;">' + num + '</td>' +
-                '<td style="text-align:center;padding:4px 6px;font-size:0.65rem;color:var(--accent);font-weight:600;">' + rankVal + '</td>' +
-                '<td>' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</td>' +
+                '<td class="ad-reg-mesto">' + rankVal + '</td>' +
                 '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
+                '<td>' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</td>' +
                 посевTd +
                 '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
                 actionsTd +

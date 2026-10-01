@@ -293,6 +293,11 @@
         // закрываешь верхнее, под ним такое же — и кажется, что оно замерло
         document.querySelectorAll('.ad-confirm-overlay').forEach(function(el) { el.remove(); });
 
+        /* `ещё` принимает и одну кнопку, и список: старые двадцать с лишним
+           вызовов передают объект, и переписывать их ради новой — значит
+           трогать то, что работает. */
+        var добавочные = !ещё ? [] : (Array.isArray(ещё) ? ещё : [ещё]);
+
         var btnLabel = confirmLabel || L.delete;
         var btnClass = confirmLabel ? 'ad-btn-primary' : 'ad-btn-danger';
         var overlay = document.createElement('div');
@@ -302,8 +307,18 @@
                 '<div class="ad-confirm-title">' + title + '</div>' +
                 '<div class="ad-confirm-text">' + text + '</div>' +
                 '<div class="ad-confirm-actions">' +
-                    '<button class="ad-btn ad-btn-secondary" id="adConfirmCancel">' + L.cancel + '</button>' +
-                    (ещё ? '<button class="ad-btn ad-btn-secondary" id="adConfirmExtra">' + ещё.label + '</button>' : '') +
+                    '<button class="ad-btn ad-btn-secondary ad-confirm-cancel" id="adConfirmCancel">' + L.cancel + '</button>' +
+                    /* ДОПОЛНИТЕЛЬНЫХ ДЕЙСТВИЙ БЫВАЕТ НЕСКОЛЬКО, И ОНИ УМЕЮТ
+                       БЫТЬ ОПАСНЫМИ. Было одно, и всегда такое же серое, как
+                       «Отмена»: в окне решения по заявке рядом стояли два
+                       одинаковых на вид действия — безобидное закрытие и
+                       необратимый отказ. Замер 30.09: обе rgba(255,255,255,.72).
+                       У заявки исходов три — снять, отклонить, одобрить, —
+                       и все три обязаны стоять в одном окне. Решение Кости. */
+                    добавочные.map(function(д, и) {
+                        return '<button class="ad-btn ' + (д.опасная ? 'ad-btn-danger' : 'ad-btn-secondary') +
+                               '" data-dop="' + и + '">' + д.label + '</button>';
+                    }).join('') +
                     '<button class="ad-btn ' + btnClass + '" id="adConfirmOk">' + btnLabel + '</button>' +
                 '</div>' +
             '</div>';
@@ -328,20 +343,30 @@
             }
             overlay.remove();
         });
-        if (ещё) {
-            overlay.querySelector('#adConfirmExtra').addEventListener('click', async function() {
+        overlay.querySelectorAll('[data-dop]').forEach(function(кн) {
+            кн.addEventListener('click', async function() {
                 if (this.disabled) return;
                 this.disabled = true;
                 try {
-                    await ещё.action();
+                    await добавочные[Number(this.dataset.dop)].action();
                 } catch (e) {
                     console.error('[KSLT] действие не выполнилось:', e);
                     showToast((e && e.message) || 'Не удалось выполнить действие', 'error');
                 }
                 overlay.remove();
             });
-        }
+        });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
+
+        /* ВЫЙТИ БЕЗ ДЕЙСТВИЯ МОЖНО С КЛАВИАТУРЫ. Esc работал в окне ввода
+           (`showPrompt`), а здесь его не было: окно с тремя действиями без
+           выхода по Esc заставляет целиться мышью в «Отмену». */
+        function поEsc(e) {
+            if (e.key !== 'Escape') return;
+            document.removeEventListener('keydown', поEsc);
+            if (document.body.contains(overlay)) dismiss();
+        }
+        document.addEventListener('keydown', поEsc);
     }
 
     /**
