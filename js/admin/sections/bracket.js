@@ -5797,7 +5797,7 @@
         }
 
         // Action buttons (bottom)
-        html += '<div style="display:flex;justify-content:center;gap:12px;margin-top:24px;padding:16px 0;">';
+        html += '<div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:24px;padding:16px 0;">';
         if (allGroupCompleted && !hasPlayoff && !hasIG && !isTournamentCompleted) {
             // Always show format modal — it auto-detects IG availability
             html += '<button class="ad-btn ad-btn-primary" id="adBrkPlayoffFormat" style="font-size:1rem;padding:12px 32px;">' + L.playoffFormatTitle + '</button>';
@@ -5817,7 +5817,18 @@
                 (totalAllCompleted ? '' : 'opacity:0.45;cursor:not-allowed;') + '">' +
                 L.finalizeTournament + '</button>';
             if (!totalAllCompleted && незаписано > 0) {
-                html += '<div class="ad-sched-note" style="margin-top:10px;flex-basis:100%;">' +
+                /* КНОПКА И ПОЯСНЕНИЕ СТОЯТ В ОДНОЙ СТРОКЕ — ЗНАЧИТ И ПО
+                   ОДНОЙ ЛИНИИ. `margin-top: 10px` задумывался как отступ
+                   для полосы, перенесённой НА НОВУЮ строку, но у родителя
+                   нет `flex-wrap`, переноса не происходит, и маргин
+                   превратился в сдвиг вниз. Замер 01.10: верх полосы ниже
+                   верха кнопки на 10, низ — на 11. Костя: «можешь выровнять
+                   эти строчки, они не на одном уровне идут».
+                   Маргины зануляем оба: у `.ad-sched-note` есть и
+                   `margin-bottom: 16px`, он сместил бы центр вверх. Высота
+                   выравнивается по центру родителем, а не числом: кнопка 44,
+                   полоса 45. И 10 мимо шкалы 8 · 12 · 16 · 24 · 32 · 40. */
+                html += '<div class="ad-sched-note" style="margin:0;flex-basis:100%;">' +
                     L.finalizeLeft.replace('{n}', незаписано) + '</div>';
             }
         }
@@ -13106,7 +13117,7 @@
         }
 
         // Action buttons
-        html += '<div style="display:flex;justify-content:center;gap:12px;margin-top:24px;padding:16px 0;">';
+        html += '<div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:24px;padding:16px 0;">';
         if (allGroupCompleted && !hasLeagues && !isTournamentCompleted) {
             html += '<button class="ad-btn ad-btn-primary" id="adBrkGenLeagues" style="font-size:1rem;padding:12px 32px;">' + L.generateLeagues + '</button>';
         }
