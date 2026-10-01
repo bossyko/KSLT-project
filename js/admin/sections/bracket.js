@@ -6859,6 +6859,10 @@
 
             tableResults.forEach(function(r, idx) {
                 var place = KSLT_POINTS.местоПоРаунду(r.round_reached) || (idx + 1);
+                /* Подпись места — полоса, а не одно число: проигравшие один
+                   круг между собой не играли. Само `place` остаётся числом:
+                   по нему решается медаль и порядок. */
+                var подписьМеста = KSLT_POINTS.подписьМеста(r.round_reached) || String(place);
                 var pName = getResultName(r.player_id) + getPartnerDisplay(r.player_id);
                 var roundLabel = roundLabels[r.round_reached] || r.round_reached;
                 var isWinner = r.round_reached === 'W';
@@ -6871,7 +6875,7 @@
                 else if (place === 3) medal = '<span style="margin-right:4px;">🥉</span>';
 
                 tbl += '<tr style="' + (isWinner ? 'background:rgba(204,255,0,0.08);' : '') + '">' +
-                    '<td style="font-weight:600;text-align:center;">' + medal + place + '</td>' +
+                    '<td style="font-weight:600;text-align:center;">' + medal + подписьМеста + '</td>' +
                     '<td style="' + (isWinner ? 'font-weight:700;color:var(--accent);' : (isFinalist ? 'font-weight:600;' : '')) + '">' + pName + '</td>' +
                     '<td>' + roundLabel + '</td>' +
                     '<td style="text-align:right;font-weight:700;' + (isExt ? 'color:var(--text-secondary);' : 'color:var(--accent);') + 'font-size:1.1rem;">' + (r.points_earned || 0) + '</td>' +

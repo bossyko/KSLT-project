@@ -2738,9 +2738,12 @@ function показатьРаскладкуОчков(t, контейнер, п�
 
             строки.forEach(function(р) {
                 var место = KSLT_POINTS.местоПоРаунду(р.round_reached);
+                /* Полоса, а не одно число: четверо проигравших четвертьфинал
+                   между собой не играли и стоят на местах 5-8. */
+                var подпись = KSLT_POINTS.подписьМеста(р.round_reached);
                 var медаль = место === 1 ? '🥇 ' : место === 2 ? '🥈 ' : место === 3 ? '🥉 ' : '';
                 html += '<tr' + (место === 1 ? ' class="td-res-winner"' : '') + '>' +
-                    '<td class="td-res-place">' + медаль + (место === null ? '—' : место) + '</td>' +
+                    '<td class="td-res-place">' + медаль + (подпись === null ? '—' : подпись) + '</td>' +
                     '<td>' + имя(р.player_id) + '</td>' +
                     '<td class="td-res-stage">' + KSLT_POINTS.подписьРаунда(р.round_reached, язык) + '</td>' +
                     '<td class="td-res-pts">' + (р.points_earned || 0) + '</td>' +
