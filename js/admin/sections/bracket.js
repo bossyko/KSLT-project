@@ -920,6 +920,14 @@
 
             // Пару меняют целиком — состав сверяем заново: в микст могли
             // поставить двоих одного пола, и такая пара ждёт решения клуба
+            /* ПОЛ ТУРНИРА — ОТКАЗ, А НЕ ПОМЕТКА (слово Кости 01.10).
+               Считаем пол обоих ДО записи: иначе пара не того пола уже
+               лежала бы в базе, а менеджер читал бы пометку. */
+            var бедаПолПары = бедаПоПолу(tournament,
+                await полИгрока(первый, playersMap),
+                await полИгрока(второй, playersMap));
+            if (бедаПолПары) { A.showToast(бедаПолПары, 'error'); return; }
+
             var правка = await A.client.from('tournament_registrations').update({
                 player_id: первый,
                 is_external: false,
@@ -1309,6 +1317,10 @@
             var полВторого = target === 'partner'
                 ? полНового
                 : полЗаявки(reg, 'partner', playersMap);
+            /* ПОЛ ТУРНИРА — ОТКАЗ, А НЕ ПОМЕТКА (слово Кости 01.10). */
+            var бедаПол = бедаПоПолу(tournament, полПервого, полВторого);
+            if (бедаПол) { A.showToast(бедаПол, 'error'); return; }
+
             updateData.review_reasons = причиныСостава(tournament, полПервого, полВторого);
             updateData.gender_confirmed = updateData.review_reasons.length === 0;
 
@@ -1932,6 +1944,34 @@
     /** Причины состава при ручных правках менеджера: пол считаем здесь же */
     function причиныСостава(tournament, полПервого, полВторого) {
         return составСошёлся(tournament, полПервого, полВторого) ? [] : ['gender'];
+    }
+
+    /**
+     * ПОЛ ТУРНИРА — НЕ ПРЕДМЕТ РЕШЕНИЯ, А ОТКАЗ.
+     *
+     * Слово Кости 01.10: «Рейтинговые турниры — жёсткие правила: не
+     * проходит она туда и не принимается заявка». ITF и ATP заявку не того
+     * пола в турнир с полом не принимают вовсе — это не то, о чём судья
+     * договаривается.
+     *
+     * Делим НЕ на «рейтинговые и дружеские», а по полю `gender` турнира —
+     * одно определение на всё. Рейтинговый турнир (`isUnrankedTournament`:
+     * одиночный и не `friendly`) всегда имеет пол `men` или `women`, так
+     * что правило накрывает их целиком, а заодно мужские и женские парные,
+     * где ошибка ровно та же.
+     *
+     * МИКСТ НЕ ТРОГАЕМ. Там `gender` = `mixed`, и требование разнополой
+     * пары остаётся ПОМЕТКОЙ: микст очков не даёт, и состав там клуб
+     * решает сам. Слова менять это правило не было.
+     *
+     * Возвращает текст отказа или пусто.
+     */
+    function бедаПоПолу(tournament, полПервого, полВторого) {
+        if (!tournament) return '';
+        var турнир = tournament.gender;
+        if (турнир !== 'men' && турнир !== 'women') return '';
+        if (составСошёлся(tournament, полПервого, полВторого)) return '';
+        return турнир === 'men' ? L.regGenderMenOnly : L.regGenderWomenOnly;
     }
 
     function isFriendlyTournament(tournament) {
@@ -3265,6 +3305,11 @@
                         status: 'approved'
                     };
 
+                    /* ПОЛ ТУРНИРА — ОТКАЗ, А НЕ ПОМЕТКА (слово Кости 01.10).
+                       Заявку не того пола турнир не принимает вовсе. */
+                    var бедаПолОдин = бедаПоПолу(tournament, extGender, null);
+                    if (бедаПолОдин) { A.showToast(бедаПолОдин, 'error'); return; }
+
                     // Doubles: add partner fields
                     if (isDbl) {
                         var partnerNameEl = document.getElementById('adExtPartnerName');
@@ -3293,6 +3338,10 @@
                             // Состав не сошёлся с турниром — заявку берём, но
                             // место держим до решения. То же правило, что при
                             // подаче игроком
+                            /* ПОЛ ТУРНИРА — ОТКАЗ, А НЕ ПОМЕТКА (слово Кости 01.10) */
+                            var бедаПолПара = бедаПоПолу(tournament, extGender, partnerGenderEl.value);
+                            if (бедаПолПара) { A.showToast(бедаПолПара, 'error'); return; }
+
                             insertData.review_reasons = причиныСостава(tournament, extGender, partnerGenderEl.value);
                             insertData.gender_confirmed = insertData.review_reasons.length === 0;
 
