@@ -812,10 +812,18 @@
         var свободно = мест - (занято.count || 0);
         if (свободно <= 0) return;
 
+        /* ПОРЯДОК ОЧЕРЕДИ — ВРЕМЯ ПОСТАНОВКИ В НЕЁ, А НЕ ПОДАЧИ ЗАЯВКИ.
+           Здесь стояло `registered_at`, и снятый с основы возвращался в
+           основу сам: его заявка подана раньше всех, кто в основу не попал,
+           значит в очереди он оказывался первым. Замер 01.10 на ec46a732:
+           «Снять» у S03 не менял НИЧЕГО — 8 approved / 4 waitlist до и
+           после, и ни слова в ответ.
+           `queue_at` считает база: COALESCE(waitlisted_at, registered_at).
+           Записать его руками нельзя — колонка генерируемая. */
         var очередь = await A.client.from('tournament_registrations')
             .select('id').eq('tournament_id', tournamentId).eq('status', 'waitlist')
             .eq('seat_pool', 'online')
-            .order('registered_at', { ascending: true }).limit(свободно);
+            .order('queue_at', { ascending: true }).limit(свободно);
         var ids = (очередь.data || []).map(function(r) { return r.id; });
         if (!ids.length) return;
 
@@ -1053,8 +1061,14 @@
         var снять = {
             label: L.regMoveToWaitlistShort,
             action: async function() {
+                /* ВСТАЛ В ОЧЕРЕДЬ СЕЙЧАС — ЗНАЧИТ В КОНЕЦ.
+                   ITF/ATP: список альтернатов упорядочен тем, кто раньше в
+                   нём оказался. Игрок, освободивший место в основе,
+                   возвращается в альтернаты, но НЕ впереди тех, кто всё это
+                   время ждал: своё место он уже получал. */
                 var о = await A.client.from('tournament_registrations')
-                    .update({ status: 'waitlist' }).eq('id', regId);
+                    .update({ status: 'waitlist', waitlisted_at: new Date().toISOString() })
+                    .eq('id', regId);
                 if (о.error) { A.showToast(о.error.message, 'error'); return; }
                 await сообщитьОЗаявке(regId, 'waitlist');
                 await поднятьИзОчереди(tournamentId);
@@ -1131,7 +1145,8 @@
         var очередьЗамены = (registrations || []).filter(function(r) {
             return r.status === 'waitlist' && r.id !== regId;
         }).sort(function(a, b) {
-            return String(a.registered_at || '').localeCompare(String(b.registered_at || ''));
+            return String(a.queue_at || a.registered_at || '')
+                .localeCompare(String(b.queue_at || b.registered_at || ''));
         });
         var естьОчередь = очередьЗамены.length > 0;
 
@@ -3120,8 +3135,15 @@
                         A.esc(ктоВЗаявке(regId, registrations, playersMap))) + '</p>',
                     async function() {
                         btn.disabled = true;
+                        /* ВСТАЛ В ОЧЕРЕДЬ СЕЙЧАС — ЗНАЧИТ В КОНЕЦ.
+                           ДВЕРЕЙ В ОЧЕРЕДЬ ДВЕ, И ЭТА — ВТОРАЯ. Окно «три
+                           исхода» (`:1078`) отметку ставило, а кнопка в меню
+                           строки — нет, и снятый через неё возвращался в
+                           основу сам. Поймано прогоном 01.10: правка в одной
+                           двери не чинит вторую. */
                         await A.client.from('tournament_registrations')
-                            .update({ status: 'waitlist' }).eq('id', regId);
+                            .update({ status: 'waitlist', waitlisted_at: new Date().toISOString() })
+                            .eq('id', regId);
                         await сообщитьОЗаявке(regId, 'waitlist');
 
                         // Место освободилось — первый из очереди занимает его
@@ -4124,8 +4146,11 @@
                 return r.status === 'approved' || r.status === 'pending' || r.status === 'draw';
             })
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
+        /* Очередь показываем в ТОМ ЖЕ порядке, в каком её читает подъём:
+           менеджер должен видеть на экране того, кто займёт место. */
         var waitlistRegs = registrations.filter(function(r) { return r.status === 'waitlist'; })
-            .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
+            .sort(function(a, b) { return (a.queue_at || a.registered_at || '')
+                .localeCompare(b.queue_at || b.registered_at || ''); });
         var rejected = registrations.filter(function(r) { return r.status === 'rejected'; })
             .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
         var withdrawn = registrations.filter(function(r) { return r.status === 'withdrawn'; });

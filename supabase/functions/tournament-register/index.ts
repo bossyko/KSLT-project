@@ -507,8 +507,13 @@
             // Приоритет у своей категории: двигаем последнего по времени игрока нижней категории
             const victim = await findLastLowerCategoryReg(db, mainDraw, tournament.category_id)
             if (victim) {
+              /* ВЫТЕСНЕННЫЙ ВСТАЁТ В КОНЕЦ ОЧЕРЕДИ, А НЕ В НАЧАЛО.
+                 Без отметки времени постановки он вернулся бы в основу
+                 первым же подъёмом: его заявка подана раньше всех, кто
+                 в основу не попал. Та же беда, что у кнопки «Снять»
+                 (замер 01.10). Порядок очереди считает `queue_at`. */
               await db.from('tournament_registrations')
-                .update({ status: 'waitlist' })
+                .update({ status: 'waitlist', waitlisted_at: new Date().toISOString() })
                 .eq('id', victim.regId)
               displaced = { player_id: victim.playerId, name: victim.name }
             } else {
