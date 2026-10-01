@@ -2611,20 +2611,32 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         podiumCard(winner, 1, '🥇') +
                         podiumCard(finalist, 2, '🥈');
 
-                    // 3rd place match result
+                    /* ТРЕТЬЕ МЕСТО ДАЁТ ТОЛЬКО МАТЧ ЗА ТРЕТЬЕ МЕСТО.
+                       Слово Кости 01.10: «3 места — если не играли за 3 место,
+                       то только 1 и 2».
+
+                       Здесь стоял запасной ход: раз матча за третье нет —
+                       раздать бронзу всем проигравшим полуфинал. Он брал их
+                       фильтром `round_number === totalRounds - 1`, который НЕ
+                       ОТСЕКАЕТ ГРУППОВЫЕ МАТЧИ, а `round_number` у них тоже
+                       заполнен. Замер 01.10 на d8b39287: искался
+                       `round_number === 3`, находилось 16 матчей, из них 14
+                       групповых — и на пьедестале выросли шестнадцать
+                       «третьих мест». Восемнадцать карточек на 800 пикселей
+                       дают по 45 на каждую, и имена рассыпались по буквам
+                       в столбик.
+
+                       `totalRounds` считался из `t.draw_size || 16`, а
+                       `draw_size` у турнира пуст — круг «полуфинала» выбирался
+                       наугад и совпал случайно.
+
+                       Соседняя ветка `group_league` (`:2563`) всё это время
+                       делала правильно: третье место там только из матча за
+                       третье место. Берём её поведение, а не изобретаем своё. */
                     var thirdPlaceMatch = matches.find(function(m) { return m.round === '3RD' && m.status === 'completed' && m.winner_id; });
                     if (thirdPlaceMatch) {
                         var thirdPlayer = playersMap[thirdPlaceMatch.winner_id] || {};
                         resHtml += podiumCard(thirdPlayer, 3, '🥉');
-                    } else {
-                        var sfMatches = matches.filter(function(m) { return m.round_number === totalRounds - 1 && m.status === 'completed'; });
-                        sfMatches.forEach(function(m) {
-                            var loserId = m.winner_id === m.player1_id ? m.player2_id : m.player1_id;
-                            if (loserId) {
-                                var sfPlayer = playersMap[loserId] || {};
-                                resHtml += podiumCard(sfPlayer, 3, '🥉');
-                            }
-                        });
                     }
 
                     resHtml += '</div>';
