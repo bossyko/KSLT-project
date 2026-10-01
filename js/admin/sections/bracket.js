@@ -369,19 +369,13 @@
     function openPartnerModal(regId, tournament, tournamentId, registrations) {
         var isMixed = tournament.format === 'mixed_doubles';
 
-        // Кто уже занят в этом турнире. Снятые заявки не в счёт: человек
-        // снова свободен для пары.
-        //
-        // Стоящие в очереди — не «заняты»: как раз оттуда менеджер и берёт
-        // напарника. Их прежнюю заявку при выборе снимем, очередь подвинется
-        var usedIds = {};
-        var вОчереди = {};
-        registrations.forEach(function(r) {
-            if (r.status === 'withdrawn' || r.status === 'rejected') return;
-            var очередь = r.status === 'waitlist';
-            if (r.player_id) (очередь ? вОчереди : usedIds)[r.player_id] = true;
-            if (r.partner_id) (очередь ? вОчереди : usedIds)[r.partner_id] = true;
-        });
+        /* Кто уже занят. Здесь НЕ пропускаем свою заявку: её первый номер
+           тоже занят — напарником самому себе не станешь. При замене,
+           наоборот, своя заявка пропускается, и это единственная разница
+           между двумя вызовами одной функции. */
+        var занятость = ктоЗанятВТурнире(registrations, null);
+        var usedIds = занятость.занятые;
+        var вОчереди = занятость.вОчереди;
 
         // Сначала выбор, кого добавляем: игрока с карточкой или гостя. Раньше
         // оба способа стояли на экране разом, и было непонятно, что заполнять
@@ -555,87 +549,80 @@
                 });
             }
 
-            var searchTimeout;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                var q = searchInput.value.trim();
-                if (q.length < 2) { resultsDiv.innerHTML = ''; return; }
+            /* ПОИСК ОДИН НА ВСЕ ОКНА. Здесь стояла третья его копия.
+               Своё у этой двери только две вещи: подпись строки (парный
+               NTRP) и карточка выбранного под полем — их и отдаём опциями. */
+            привязатьПоиск(searchInput, resultsDiv, hiddenInput, usedIds, вОчереди, {
+                подпись: function (p) {
+                    return ntrpПары(p) ? 'NTRP ' + ntrpПары(p) : '';
+                },
+                послеВыбора: function (выбран) {
+                    var extNameEl = document.getElementById('adPartnerExtName');
+                    if (extNameEl) extNameEl.value = '';
 
-                searchTimeout = setTimeout(async function() {
-                    var res = await A.client.from('players')
-                        .select('id, name, name_en, gender, ntrp_singles, ntrp_doubles, category_id')
-                        .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
-                        .limit(10);
-                    var players = (res.data || []).filter(function(p) { return !usedIds[p.id]; });
-
-                    if (players.length === 0) {
-                        resultsDiv.innerHTML = '<div style="padding:8px;color:var(--text-dim);font-size:0.85rem;">' +
-                            (isEn ? 'No players found' : 'Игроков не найдено') + '</div>';
-                        return;
+                    // У игрока с карточкой пол и рейтинг брать неоткуда,
+                    // кроме карточки — показываем, что подтянулось
+                    var карточка = document.getElementById('adPartnerCard');
+                    if (выбран && карточка) {
+                        var пол = выбран.gender === 'women' ? L.genderWomen
+                            : (выбран.gender === 'men' ? L.genderMen : '\u2014');
+                        var рейтинг = ntrpПары(выбран) ? 'NTRP ' + ntrpПары(выбран) : L.dblNtrpNeedTitle;
+                        карточка.innerHTML = A.esc(isEn ? (выбран.name_en || выбран.name) : выбран.name) +
+                            ' \u00B7 ' + пол + ' \u00B7 ' + рейтинг;
+                        карточка.style.display = '';
                     }
-
-                    var html = '';
-                    players.forEach(function(p) {
-                        var pName = isEn ? (p.name_en || p.name) : p.name;
-                        html += '<div class="ad-partner-search-item" data-player-id="' + p.id + '" ' +
-                            'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.9rem;display:flex;justify-content:space-between;align-items:center;">' +
-                            '<span>' + A.esc(pName) +
-                                (вОчереди[p.id]
-                                    ? ' <span style="color:#FFA726;font-size:0.72rem;">' + L.regInQueue + '</span>'
-                                    : '') +
-                            '</span>' +
-                            (ntrpПары(p) ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + ntrpПары(p) + '</span>' : '') +
-                        '</div>';
-                    });
-                    resultsDiv.innerHTML = html;
-
-                    resultsDiv.querySelectorAll('.ad-partner-search-item').forEach(function(item) {
-                        item.addEventListener('click', function() {
-                            hiddenInput.value = item.dataset.playerId;
-                            searchInput.value = item.querySelector('span').textContent.trim();
-                            resultsDiv.innerHTML = '';
-                            // Clear external fields
-                            var extNameEl = document.getElementById('adPartnerExtName');
-                            if (extNameEl) extNameEl.value = '';
-
-                            // У игрока с карточкой пол и рейтинг брать неоткуда,
-                            // кроме карточки — показываем, что подтянулось
-                            var выбран = players.find(function(x) { return x.id === item.dataset.playerId; });
-                            var карточка = document.getElementById('adPartnerCard');
-                            if (выбран && карточка) {
-                                var пол = выбран.gender === 'women' ? L.genderWomen
-                                    : (выбран.gender === 'men' ? L.genderMen : '\u2014');
-                                var рейтинг = ntrpПары(выбран) ? 'NTRP ' + ntrpПары(выбран) : L.dblNtrpNeedTitle;
-                                карточка.innerHTML = A.esc(isEn ? (выбран.name_en || выбран.name) : выбран.name) +
-                                    ' \u00B7 ' + пол + ' \u00B7 ' + рейтинг;
-                                карточка.style.display = '';
-                            }
-                        });
-                    });
-                }, 300);
+                }
             });
         }, 100);
     }
 
-    // ---- Replace Player Modal ----
-    // target: 'player' (main) or 'partner' (doubles partner)
     /**
-     * Привязать поиск игрока к паре «поле ввода — список результатов».
+     * КТО УЖЕ ЗАНЯТ В ЭТОМ ТУРНИРЕ — ОДНО ОПРЕДЕЛЕНИЕ НА ВСЕ ОКНА ЗАМЕНЫ.
      *
-     * Тот же поиск нужен в трёх окнах: добавить партнёра, заменить одного,
-     * заменить пару целиком. Раньше он был написан заново в каждом.
+     * Кого нельзя брать — те, кто уже играет. А кто стоит в очереди, брать
+     * можно: как раз оттуда менеджер и берёт замену, и прежняя заявка при
+     * выборе снимется.
+     *
+     * Было написано только в окне замены ПАРЫ, а окно замены одиночки
+     * искало голым `ilike` по всей базе и предлагало тех, кто уже стоит в
+     * другой группе. Выбор такого упирался в запрет «одна заявка на
+     * человека» либо заводил человека в турнир дважды.
      */
+    function ктоЗанятВТурнире(registrations, regId) {
+        var занятые = {};
+        var вОчереди = {};
+        (registrations || []).forEach(function(r) {
+            if (r.id === regId) return;
+            if (r.status === 'withdrawn' || r.status === 'rejected') return;
+            var очередь = r.status === 'waitlist';
+            if (r.player_id) (очередь ? вОчереди : занятые)[r.player_id] = r.id;
+            if (r.partner_id) (очередь ? вОчереди : занятые)[r.partner_id] = r.id;
+        });
+        return { занятые: занятые, вОчереди: вОчереди };
+    }
+
     /**
-     * Поиск игрока для замены.
+     * ПОИСК ИГРОКА — ОДНА ДВЕРЬ НА ВСЕ ОКНА.
+     *
+     * Он был написан ТРИЖДЫ: добор напарника, замена пары, замена одиночки.
+     * Беда родилась ровно на шве — копия окна замены одиночки забыла
+     * исключить тех, кто уже играет в этом турнире, и предлагала человека
+     * из соседней группы.
+     *
+     * Разнилось у копий только две вещи: ЧТО написано справа в строке и ЧТО
+     * происходит ПОСЛЕ выбора. Их и выносим наружу, а сам поиск оставляем
+     * один. Сторож `check-zamena.js` падает, если копия заведётся снова.
      *
      * @param занятые   — кого нельзя брать: они уже в живых заявках турнира
      * @param вОчереди  — кого можно, но с оговоркой: стоят в листе ожидания.
      *                    Их прежнюю заявку при выборе снимут, и очередь
      *                    подвинется. Прятать их неправильно: как раз оттуда
      *                    менеджер и берёт замену
+     * @param {object} [опции] — { подпись(p) → text, послеВыбора(p) }
      */
-    function привязатьПоиск(поле, список, скрытое, занятые, вОчереди) {
+    function привязатьПоиск(поле, список, скрытое, занятые, вОчереди, опции) {
         if (!поле) return;
+        опции = опции || {};
         var таймер;
         поле.addEventListener('input', function() {
             clearTimeout(таймер);
@@ -645,7 +632,7 @@
 
             таймер = setTimeout(async function() {
                 var res = await A.client.from('players')
-                    .select('id, name, name_en, gender, ntrp_singles, ntrp_doubles')
+                    .select('id, name, name_en, gender, category_id, ntrp_singles, ntrp_doubles')
                     .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
                     .limit(10);
                 var найдены = (res.data || []).filter(function(p) { return !(занятые && занятые[p.id]); });
@@ -657,6 +644,9 @@
                 var html = '';
                 найдены.forEach(function(p) {
                     var имя = isEn ? (p.name_en || p.name) : p.name;
+                    var мета = опции.подпись
+                        ? опции.подпись(p)
+                        : (ntrpПары(p) ? 'NTRP ' + ntrpПары(p) : '');
                     html += '<div class="ad-partner-search-item" data-player-id="' + p.id + '" ' +
                         'data-player-name="' + A.esc(имя) + '" ' +
                         'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.9rem;' +
@@ -666,7 +656,7 @@
                                 ? ' <span style="color:#FFA726;font-size:0.72rem;">' + L.regInQueue + '</span>'
                                 : '') +
                         '</span>' +
-                        (ntrpПары(p) ? '<span style="color:var(--text-dim);font-size:0.75rem;">NTRP ' + ntrpПары(p) + '</span>' : '') +
+                        (мета ? '<span style="color:var(--text-dim);font-size:0.75rem;">' + A.esc(мета) + '</span>' : '') +
                     '</div>';
                 });
                 список.innerHTML = html;
@@ -676,6 +666,11 @@
                         if (скрытое) скрытое.value = строка.dataset.playerId;
                         поле.value = строка.dataset.playerName;
                         список.innerHTML = '';
+                        if (опции.послеВыбора) {
+                            опции.послеВыбора(найдены.find(function(x) {
+                                return x.id === строка.dataset.playerId;
+                            }));
+                        }
                     });
                 });
             }, 300);
@@ -852,18 +847,9 @@
         var reg = registrations.find(function(r) { return r.id === regId; });
         if (!reg) return;
 
-        // Кого нельзя брать — те, кто уже играет в этом турнире. А кто стоит
-        // в очереди, брать можно: как раз оттуда менеджер и берёт замену.
-        // Их прежнюю заявку при выборе снимем, очередь подвинется
-        var занятые = {};
-        var вОчереди = {};
-        registrations.forEach(function(r) {
-            if (r.id === regId) return;
-            if (r.status === 'withdrawn' || r.status === 'rejected') return;
-            var очередь = r.status === 'waitlist';
-            if (r.player_id) (очередь ? вОчереди : занятые)[r.player_id] = r.id;
-            if (r.partner_id) (очередь ? вОчереди : занятые)[r.partner_id] = r.id;
-        });
+        var кто = ктоЗанятВТурнире(registrations, regId);
+        var занятые = кто.занятые;
+        var вОчереди = кто.вОчереди;
 
         var поле = function(подпись, id) {
             return '<div class="ad-field">' +
@@ -895,20 +881,24 @@
                 return;
             }
 
-            // Сыгранную пару не меняем: её счета принадлежат тем, кто играл
+            /* ОДНО ОПРЕДЕЛЕНИЕ «СТОРОНА СЫГРАЛА». Здесь стояла вторая его
+               копия, и она искала только по ПЕРВОМУ НОМЕРУ: у пары, чей
+               первый номер менялся раньше, матчи висят на прежней заявке, и
+               копия их не видела. Судья один — `сторонаСыграла`, он смотрит
+               и по заявке, и по игроку. */
             var прежний = reg.player_id;
+            if (await сторонаСыграла(regId, tournamentId, прежний)) {
+                A.showToast(L.regReplacePlayed, 'error');
+                return;
+            }
+
             var вМатчах = 0;
             if (прежний) {
                 var мРес = await A.client.from('matches')
-                    .select('id, status, score')
+                    .select('id')
                     .eq('tournament_id', tournamentId)
                     .or('player1_id.eq.' + прежний + ',player2_id.eq.' + прежний);
-                var мои = мРес.data || [];
-                if (мои.some(function(m) { return m.status === 'completed' && m.score && m.score !== 'BYE'; })) {
-                    A.showToast(L.regReplacePlayed, 'error');
-                    return;
-                }
-                вМатчах = мои.length;
+                вМатчах = (мРес.data || []).length;
             }
 
             // Кого взяли из очереди — снимаем оттуда: одна заявка на человека
@@ -1112,6 +1102,11 @@
     function openReplaceModal(regId, target, tournament, tournamentId, registrations, playersMap) {
         var reg = registrations.find(function(r) { return r.id === regId; });
         if (!reg) return;
+
+        /* Кого нельзя брать — те, кто уже играет в этом турнире. Считается
+           одной функцией на все окна замены: своя копия этого отбора в
+           поиске одиночки и была дырой. */
+        var занятость = ктоЗанятВТурнире(registrations, regId);
 
         /* ЗАМЕНУ БЕРУТ ИЗ ОЧЕРЕДИ — ЗНАЧИТ ОЧЕРЕДЬ И ОТКРЫВАЕТСЯ ПЕРВОЙ.
            Решение Кости 01.10: «замена берутся в основном из листа ожидания».
@@ -1426,52 +1421,24 @@
                 });
             }
 
-            var searchTimeout;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                var q = searchInput.value.trim();
-                if (q.length < 2) { resultsDiv.innerHTML = ''; return; }
-
-                searchTimeout = setTimeout(async function() {
-                    var res = await A.client.from('players')
-                        .select('id, name, name_en, photo, category_id, ntrp_singles')
-                        .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
-                        .limit(10);
-                    var players = res.data || [];
-
-                    if (players.length === 0) {
-                        resultsDiv.innerHTML = '<div style="padding:8px;color:var(--text-dim);font-size:0.85rem;">' +
-                            (isEn ? 'No players found' : 'Игроков не найдено') + '</div>';
-                        return;
+            /* ПОИСК ОДИН НА ВСЕ ОКНА. Здесь стояла своя копия — она и
+               забыла исключить тех, кто уже играет в этом турнире, и
+               предлагала человека из соседней группы. Теперь зовём ту же
+               `привязатьПоиск`, что и окно пары, а своё отдаём опциями:
+               подпись строки (категория и одиночный NTRP) и чистку
+               гостевого имени после выбора. */
+            привязатьПоиск(searchInput, resultsDiv, hiddenInput,
+                занятость.занятые, занятость.вОчереди, {
+                    подпись: function (p) {
+                        var кат = p.category_id
+                            ? p.category_id.charAt(0).toUpperCase() + p.category_id.slice(1) : '';
+                        var ntrp = p.ntrp_singles ? 'NTRP ' + p.ntrp_singles : '';
+                        return [кат, ntrp].filter(Boolean).join(' \u00b7 ');
+                    },
+                    послеВыбора: function () {
+                        очиститьИсточники('db');
                     }
-
-                    var html = '';
-                    players.forEach(function(p) {
-                        var pName = isEn ? (p.name_en || p.name) : p.name;
-                        var catLabel = p.category_id ? p.category_id.charAt(0).toUpperCase() + p.category_id.slice(1) : '';
-                        var ntrpLabel = p.ntrp_singles ? ('NTRP ' + p.ntrp_singles) : '';
-                        var meta = [catLabel, ntrpLabel].filter(Boolean).join(' · ');
-                        html += '<div class="ad-replace-search-item" data-player-id="' + p.id + '" ' +
-                            'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.9rem;display:flex;justify-content:space-between;align-items:center;">' +
-                            '<span>' + A.esc(pName) + '</span>' +
-                            (meta ? '<span style="color:var(--text-dim);font-size:0.75rem;">' + meta + '</span>' : '') +
-                        '</div>';
-                    });
-                    resultsDiv.innerHTML = html;
-
-                    resultsDiv.querySelectorAll('.ad-replace-search-item').forEach(function(item) {
-                        item.addEventListener('mouseenter', function() { item.style.background = 'rgba(255,255,255,0.05)'; });
-                        item.addEventListener('mouseleave', function() { item.style.background = ''; });
-                        item.addEventListener('click', function() {
-                            hiddenInput.value = item.dataset.playerId;
-                            searchInput.value = item.querySelector('span').textContent.trim();
-                            resultsDiv.innerHTML = '';
-                            // Clear external fields
-                            document.getElementById('adReplaceExtName').value = '';
-                        });
-                    });
-                }, 300);
-            });
+                });
         }, 100);
     }
 
