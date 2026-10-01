@@ -2406,6 +2406,8 @@
 
         container.innerHTML = html;
 
+        следитьЗаОкномРасписания(container);
+
         // Кнопки выгрузки: читают таблицы своей панели, поэтому вешаем их
         // сразу после отрисовки — до того, как менеджер что-то нажмёт
         if (A.экспорт) A.экспорт.оживить(container, названиеТурнира);
@@ -2459,6 +2461,10 @@
                 }
                 var schedPanel = document.getElementById('adBrkSchedulePanel');
                 if (schedPanel) schedPanel.style.display = panelTab === 'schedule' ? '' : 'none';
+                // Та же беда, что у сетки: пока панель спрятана, обёртка
+                // расписания меряется нулём, и окно липкой шапки считалось бы
+                // от нуля. Считаем, когда панель показали
+                if (panelTab === 'schedule') пересчитатьОкноПослеПоказа(container);
                 var resPanel = document.getElementById('adBrkResultsPanel');
                 if (resPanel) resPanel.style.display = panelTab === 'results' ? '' : 'none';
                 var newsPanel = document.getElementById('adBrkNewsPanel');
@@ -4502,6 +4508,61 @@
                 actionsTd +
             '</tr>';
         }
+    }
+
+    /* ОКНО РАСПИСАНИЯ. Липкая шапка таблицы живёт внутри своей области
+       прокрутки (css/admin.css, .ad-sched-wrap) — значит у области должна
+       быть высота, иначе прокручивать нечего и липнуть не к чему.
+
+       ВЫСОТА НЕ ЗАДАЁТСЯ ЧИСЛОМ: над таблицей стоят липкая шапка турнира,
+       примечание и полоса действий, и их суммарный рост меняется от вида —
+       вкладки переносятся. Поэтому меряем, где обёртка начинается, и
+       отдаём остаток до низа экрана. Пересчитываем на каждое изменение
+       размеров шапки и окна, а не один раз при отрисовке.
+
+       Нижний воздух — ступень 24: без него последняя строка упирается в
+       край окна и читается как обрезанная. */
+    var воздухСнизу = 24;
+    var сторожОкна = null;
+
+    function пересчитатьОкноРасписания(обёртка) {
+        if (!обёртка || !обёртка.isConnected) return;
+        // Невидимая панель меряется нулём — её окно считать нечего
+        if (!обёртка.offsetParent) return;
+        var верх = обёртка.getBoundingClientRect().top;
+        var остаток = Math.round(window.innerHeight - верх - воздухСнизу);
+        // Меньше трёх строк окна не бывает: лучше длинная страница, чем
+        // щель, в которой видно полторы игры
+        var минимум = 160;
+        document.documentElement.style.setProperty(
+            '--sched-max-h', Math.max(минимум, остаток) + 'px');
+    }
+
+    function следитьЗаОкномРасписания(container) {
+        if (сторожОкна) { сторожОкна.disconnect(); сторожОкна = null; }
+        var обёртка = container.querySelector('.ad-sched-wrap');
+        if (!обёртка) {
+            document.documentElement.style.removeProperty('--sched-max-h');
+            return;
+        }
+        var пересчёт = function() { пересчитатьОкноРасписания(обёртка); };
+        // Ждём раскладки: сразу после innerHTML верх обёртки ещё не тот
+        requestAnimationFrame(пересчёт);
+        window.addEventListener('resize', пересчёт);
+        if (window.ResizeObserver) {
+            сторожОкна = new ResizeObserver(пересчёт);
+            var шапка = container.querySelector('.ad-brk-sticky-header');
+            if (шапка) сторожОкна.observe(шапка);
+            сторожОкна.observe(обёртка.parentNode || обёртка);
+        }
+    }
+
+    /* Вкладки переключаются без перерисовки: расписание показывают
+       display'ем, и до показа обёртка меряется нулём. Пересчитываем, когда
+       её наконец видно */
+    function пересчитатьОкноПослеПоказа(container) {
+        var о = (container || document).querySelector('.ad-sched-wrap');
+        if (о) requestAnimationFrame(function() { пересчитатьОкноРасписания(о); });
     }
 
     // ---- Расписание запусков: одна очередь ----
