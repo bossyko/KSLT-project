@@ -122,6 +122,62 @@ ALTER TABLE public.players
     ADD COLUMN IF NOT EXISTS is_guest boolean NOT NULL DEFAULT false,
     ADD COLUMN IF NOT EXISTS has_account boolean NOT NULL DEFAULT false;
 
+-- ---- Таблицы, которых в тестовой не было вовсе ----
+--
+-- Сверка 02.10 (`sql/обслуживание/sverka-shem.sql`): в тестовой не хватало
+-- девяти таблиц боевой. Здесь заведены четыре, на которые опирается то, что
+-- мы проверяем; остальные пять — `live_match_points`, `news_sources`,
+-- `news_suggestions`, `player_link_requests`, `app_releases` — ждут своих
+-- кусков.
+--
+-- Колонки и типы взяты ЧТЕНИЕМ БОЕВОЙ СХЕМЫ, а не выведены из кода.
+-- Политик доступа здесь нет намеренно: тестовая база живёт под служебным
+-- ключом сева и под учётками проверок.
+
+-- Таблица ЖИВЫХ очков: по ней считает начисление при завершении турнира
+-- (`bracket.js:2286`). Без неё прогон начисления невозможен в принципе.
+CREATE TABLE IF NOT EXISTS public.points_by_place (
+    id       uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    level_id uuid NOT NULL REFERENCES public.tournament_levels(id) ON DELETE CASCADE,
+    place    integer NOT NULL,
+    points   integer NOT NULL DEFAULT 0,
+    UNIQUE (level_id, place)
+);
+
+-- Журнал замен: `записатьЗамену` (`bracket.js:689`) пишет сюда, и без
+-- таблицы запись уходит в никуда — молча.
+CREATE TABLE IF NOT EXISTS public.registration_changes (
+    id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    tournament_id   text,
+    registration_id uuid,
+    side            text,
+    old_player_id   text,
+    new_player_id   text,
+    old_name        text,
+    new_name        text,
+    changed_by      uuid,
+    created_at      timestamptz DEFAULT now()
+);
+
+-- Настройки доступа: бесплатный период читает функция допуска
+-- (`tournament-register/index.ts:273`).
+CREATE TABLE IF NOT EXISTS public.app_settings (
+    key        text PRIMARY KEY,
+    value      jsonb,
+    updated_at timestamptz DEFAULT now(),
+    updated_by uuid
+);
+
+-- Тексты уведомлений и отказов, три языка в колонках
+-- (`tournament-register/index.ts:40`).
+CREATE TABLE IF NOT EXISTS public.notification_texts (
+    key        text PRIMARY KEY,
+    ru         text,
+    kg         text,
+    en         text,
+    updated_at timestamptz DEFAULT now()
+);
+
 COMMIT;
 
 -- PostgREST иначе не узнает о новых столбцах, и запись в них пройдёт молча
@@ -136,7 +192,8 @@ SELECT table_name AS таблица, count(*) AS столбцов
  GROUP BY table_name
  ORDER BY table_name;
 
--- Ожидаем: tournaments 53, matches 33, tournament_registrations 26.
+-- Ожидаем: tournaments 53, matches 33, tournament_registrations 26,
+-- и четыре новые таблицы на месте.
 -- Было 22: четыре столбца очереди и места добавлены выше 02.10. Числа
 -- сверены со списком столбцов тестовой базы, а не взяты по памяти;
 -- боевую сверять тем же запросом.
