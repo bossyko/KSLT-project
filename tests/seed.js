@@ -298,6 +298,49 @@ async function upsert(table, rows, onConflict) {
     ], 'id');
     console.log('  история рейтинга в двух категориях и оценки NTRP');
 
+    // --- МЕСТО В РЕЙТИНГЕ: равные очки и гость ---------------------------
+    // Беда 02.10: место в заявках расходилось с местом в публичном рейтинге.
+    // Две причины, и для каждой здесь свой человек.
+    //
+    // 1) ГОСТЬ. Публичная таблица гостей не показывает, а колонка «Место» в
+    //    админке их считала — список выходил длиннее, и числа ехали. Гостю
+    //    места нет вовсе.
+    // 2) РАВНЫЕ. У троих совпали и очки, и NTRP. Третьего ключа сортировки
+    //    не было, а `sort` в таком случае оставляет порядок ВХОДНОГО
+    //    массива — а он разный у публичной страницы и у админки. Одно
+    //    определение давало два числа.
+    //
+    // Имена подобраны так, чтобы алфавит id не совпадал с алфавитом имён:
+    // иначе совпадение чисел ничего не докажет.
+    await upsert('players', [
+        { id: 'mr-alpha',   name: 'Яков Первый',   category_id: 'tour', points: 300, ntrp_singles: 3, gender: 'men' },
+        { id: 'mr-bravo',   name: 'Эдуард Равный', category_id: 'tour', points: 225, ntrp_singles: 3, gender: 'men' },
+        { id: 'mr-charlie', name: 'Борис Равный',  category_id: 'tour', points: 225, ntrp_singles: 3, gender: 'men' },
+        { id: 'mr-delta',   name: 'Антон Равный',  category_id: 'tour', points: 225, ntrp_singles: 3, gender: 'men' },
+        { id: 'mr-echo',    name: 'Василий Пятый', category_id: 'tour', points: 100, ntrp_singles: 3, gender: 'men' },
+        { id: 'mr-guest',   name: 'Гость Безочков', category_id: 'tour', points: 0, ntrp_singles: 3, gender: 'men', is_guest: true }
+    ], 'id');
+
+    await upsert('player_categories', [
+        { player_id: 'mr-alpha',   category_id: 'tour', points: 300, wins: 0, losses: 0 },
+        { player_id: 'mr-bravo',   category_id: 'tour', points: 225, wins: 0, losses: 0 },
+        { player_id: 'mr-charlie', category_id: 'tour', points: 225, wins: 0, losses: 0 },
+        { player_id: 'mr-delta',   category_id: 'tour', points: 225, wins: 0, losses: 0 },
+        { player_id: 'mr-echo',    category_id: 'tour', points: 100, wins: 0, losses: 0 }
+    ], 'player_id,category_id');
+
+    // Заявки на одиночный турнир той же категории: именно здесь админка
+    // показывает колонку «Место», и именно её сверяет проверка.
+    await upsert('tournament_registrations', [
+        { id: 'cc000001-0000-4000-8000-000000000001', tournament_id: 'test-tournament', player_id: 'mr-alpha',   status: 'approved' },
+        { id: 'cc000001-0000-4000-8000-000000000002', tournament_id: 'test-tournament', player_id: 'mr-bravo',   status: 'approved' },
+        { id: 'cc000001-0000-4000-8000-000000000003', tournament_id: 'test-tournament', player_id: 'mr-charlie', status: 'approved' },
+        { id: 'cc000001-0000-4000-8000-000000000004', tournament_id: 'test-tournament', player_id: 'mr-delta',   status: 'approved' },
+        { id: 'cc000001-0000-4000-8000-000000000005', tournament_id: 'test-tournament', player_id: 'mr-echo',    status: 'approved' },
+        { id: 'cc000001-0000-4000-8000-000000000006', tournament_id: 'test-tournament', player_id: 'mr-guest',   status: 'approved' }
+    ], 'id');
+    console.log('  место в рейтинге: трое с равными очками и гость');
+
     console.log('\nГотово. Вход для проверок:');
     ACCOUNTS.forEach(a => console.log('  ' + a.email + '  ' + a.password));
 })().catch(e => {
