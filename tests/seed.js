@@ -772,8 +772,101 @@ async function upsert(table, rows, onConflict) {
         console.log('  ВНИМАНИЕ: итоги не завелись — ' + String(e.message).slice(0, 160));
     }
 
+    /* --- Пол турнира: ОТКАЗ, а не пометка -------------------------------
+       Решение Кости 30.09: в рейтинговом одиночном несовпадение пола —
+       отказ 403, в парных и дружеских заявка идёт на рассмотрение. Признак
+       рейтингового требует НЕПУСТОЙ `level_id`: пустой уровень выключает не
+       только очки, но и отказ (`tournament-register/index.ts:337`).
+
+       Чтобы проверка дошла до пола, заявка обязана пройти все воротца
+       раньше: профиль с карточкой, не забанен, турнир открыт, заявки ещё
+       нет, ЧЛЕНСТВО ДЕЙСТВУЕТ и взнос оплачен. Поэтому здесь заводится
+       отдельная женская учётка со своим членством, а не правится мужская:
+       её карточку читают другие проверки. */
+    try {
+    var женщина = { email: 'woman@test.kslt.kg', password: 'TestWoman1!',
+                    name: 'Тестовая Игрокиня', role: 'user' };
+    var женИд = await ensureUser(женщина);
+    await upsert('players', [{
+        id: 'test-woman', name: женщина.name, category_id: 'tour',
+        points: 40, gender: 'women'
+    }], 'id');
+    await upsert('profiles', [{
+        id: женИд, full_name: женщина.name, email: женщина.email,
+        role: 'user', player_id: 'test-woman', gender: 'women'
+    }], 'id');
+    await upsert('memberships', [{
+        profile_id: женИд, status: 'active',
+        starts_at: today.toISOString().slice(0, 10),
+        expires_at: inYear.toISOString().slice(0, 10)
+    }]);
+
+    /* УРОВЕНЬ ЗАВОДИТСЯ, А НЕ УГАДЫВАЕТСЯ. `level_id` ссылается на
+       `tournament_levels`, и его ключ — не слово «вторая», а то, что
+       выдала база. Берём существующий, а нет — заводим и читаем id. */
+    var уровеньИд = null;
+    var естьУровни = await call('GET', '/rest/v1/tournament_levels?select=id,name,sort_order&order=sort_order');
+    if (естьУровни.ok && (естьУровни.data || []).length) {
+        уровеньИд = естьУровни.data[0].id;
+    } else {
+        var новыйУровень = await call('POST', '/rest/v1/tournament_levels',
+            [{ name: 'Тестовый уровень', name_en: 'Test level', sort_order: 1 }]);
+        if (!новыйУровень.ok) {
+            console.log('  ВНИМАНИЕ: уровень турнира не завёлся — ' +
+                String(JSON.stringify(новыйУровень.data)).slice(0, 160));
+        }
+        /* ОТВЕТ «ок» НЕ ЗНАЧИТ, ЧТО В БАЗЕ ЛЕЖИТ СТРОКА, а без `Prefer`
+           вставка и вовсе ничего не возвращает: id берём чтением. */
+        var послеВставки = await call('GET', '/rest/v1/tournament_levels?select=id&order=sort_order&limit=1');
+        if (послеВставки.ok && (послеВставки.data || []).length) {
+            уровеньИд = послеВставки.data[0].id;
+        }
+    }
+
+    await upsert('tournaments', [{
+        id: 'test-pol',
+        title: 'Тестовый турнир: мужской рейтинговый',
+        category_id: 'tour',
+        status: 'registration_open',
+        format: 'singles',
+        level_id: уровеньИд,
+        bracket_type: 'single_elimination',
+        date_start: today.toISOString().slice(0, 10),
+        date_end: today.toISOString().slice(0, 10),
+        max_participants: 8,
+        gender: 'men'
+    }], 'id');
+
+    /* ПРОГОН НЕ ДОЛЖЕН ЗАВИСЕТЬ ОТ ПРОШЛОГО ПРОГОНА. Заявка этой женщины
+       появится в базе только если отказ сломается — но если он уже
+       ломался, вторая проверка получила бы `already_registered` и прошла
+       бы мимо беды. Чистим перед каждым севом. */
+    await call('DELETE', '/rest/v1/tournament_registrations?tournament_id=eq.test-pol' +
+        '&player_id=eq.test-woman');
+
+    /* ПЕРЕЧИТКА ОБЯЗАНА УМЕТЬ УПАСТЬ: спрашиваем ровно то, без чего отказ
+       не наступит — формат, непустой уровень, пол турнира и пол игрока. */
+    var свёлП = await call('GET', '/rest/v1/tournaments?id=eq.test-pol' +
+        '&select=format,level_id,gender,status');
+    var свёлЖ = await call('GET', '/rest/v1/players?id=eq.test-woman&select=gender');
+    var т = (свёлП.data || [])[0] || {};
+    var ж = (свёлЖ.data || [])[0] || {};
+    console.log('    пол турнира: формат ' + (т.format || '—') +
+        ', уровень ' + (т.level_id ? 'есть' : 'ПУСТ') +
+        ', турнир ' + (т.gender || '—') + ', игрок ' + (ж.gender || '—'));
+    if (т.format !== 'singles' || !т.level_id || т.gender !== 'men' || ж.gender !== 'women') {
+        console.log('  ВНИМАНИЕ: отказ по полу не наступит — проверка пройдёт вхолостую. ' +
+            'Пустой уровень выключает признак рейтингового, и несовпадение пола ' +
+            'станет пометкой, а не отказом.');
+    }
+    console.log('  пол турнира: женская учётка woman@test.kslt.kg и мужской рейтинговый');
+    } catch (e) {
+        console.log('  ВНИМАНИЕ: пол турнира не завёлся — ' + String(e.message).slice(0, 160));
+    }
+
     console.log('\nГотово. Вход для проверок:');
     ACCOUNTS.forEach(a => console.log('  ' + a.email + '  ' + a.password));
+    console.log('  woman@test.kslt.kg  TestWoman1!');
 })().catch(e => {
     console.error('\nОшибка:', e.message);
     process.exit(1);
