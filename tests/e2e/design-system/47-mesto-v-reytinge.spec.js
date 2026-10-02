@@ -1,5 +1,11 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+/* ОБВЯЗКА, А НЕ ГОЛЫЙ PLAYWRIGHT. `tests/fixtures.js` подставляет адрес
+   ТЕСТОВОЙ базы в `window.KSLT_DB` до загрузки страницы. Без неё страница
+   уходит в БОЕВУЮ базу, а сессия из `tests/.auth/` заведена в тестовой —
+   supabase-js ищет свой ключ `sb-<проект>-auth-token`, не находит и уводит
+   на форму входа. Прогон 02.10 упал всеми тремя проверками именно так: в
+   следе лежал снимок страницы авторизации. */
+const { test, expect } = require('../../fixtures');
 
 /**
  * МЕСТО В РЕЙТИНГЕ НЕ ОТКЛОНЯЕТСЯ ОТ ТОГО, ЧТО ВИДИТ АДМИН В ЗАЯВКАХ.
@@ -33,30 +39,74 @@ const { test, expect } = require('@playwright/test');
 const ТЕЛЕФОННЫЕ = ['mobile', 'phone-landscape'];
 
 /** Турнир и категория из `tests/seed.js`. */
-const ТУРНИР = 'test-tournament';
+/* Турнир БЕЗ матчей: у `test-tournament` сетка уже сформирована, и вкладка
+   «Заявки» показывает «Заявок пока нет» вместо таблицы. */
+const ТУРНИР = 'test-mesto';
 const РАЗРЯД = 'men-tour';
 
 /** Кто заведён с равными очками и кто гость — оттуда же. */
 const РАВНЫЕ = ['Эдуард Равный', 'Борис Равный', 'Антон Равный'];
 const ГОСТЬ = 'Гость Безочков';
 
+/* ИМЯ В ЯЧЕЙКЕ ИДЁТ НЕ ОДНО. Рядом с ним админка рисует пометки — у
+   тестовых игроков это «Задолженность», у внешних «EXT», у гостя может
+   быть своя. Прогон 02.10 сравнивал ключи целиком и не нашёл никого:
+   «Гость Безочков Задолженность» не равно «Гость Безочков». Сверяем по
+   НАЧАЛУ имени, а не по полному совпадению строки. */
+/* ПОМЕТКА МОЖЕТ БЫТЬ С ЛЮБОЙ СТОРОНЫ, поэтому начало проверяем в обе: в
+   заявках к имени липнет «Задолженность», а на публичной строке рядом с
+   именем может оказаться своя подпись. Сличать «кто чей префикс» в одну
+   сторону — значит зависеть от того, какая из двух страниц сегодня чище. */
+function тотЖе(a, b) {
+    return a === b || a.indexOf(b + ' ') === 0 || b.indexOf(a + ' ') === 0;
+}
+
+function найти(места, имя) {
+    const ключ = Object.keys(места).find(k => тотЖе(k, имя));
+    return ключ === undefined ? undefined : места[ключ];
+}
+
 /** Имя → место, снятое с публичной страницы рейтинга. */
 async function местаВРейтинге(page) {
     await page.goto('/pages/players.html?tab=' + РАЗРЯД);
-    await page.waitForFunction(
-        () => /\d/.test(document.body.innerText) && document.body.innerText.length > 400,
-        null, { timeout: 20000 });
+    /* Та же осторожность: ждём не «что-нибудь», а строку конкретного
+       человека из сева. */
+    const виден = await page.waitForFunction(
+        () => /Яков Первый/.test(document.body.innerText), null, { timeout: 20000 })
+        .then(() => true).catch(() => false);
+
+    if (!виден) {
+        /* ПУБЛИЧНЫЙ РЕЙТИНГ ЧИТАЕТ НЕ `players`, А ПРЕДСТАВЛЕНИЕ
+           `players_public` (`rankings-data.js:33`), админка — таблицу
+           напрямую. Нет представления в базе — страница молча показывает
+           «Игроки не найдены», и причина ниоткуда не видна. Прогон 02.10
+           упёрся ровно в это. Спрашиваем базу и называем причину. */
+        const что = await page.evaluate(async () => {
+            if (!window.supabaseClient) return 'клиента базы на странице нет';
+            const v = await window.supabaseClient.from('players_public').select('id').limit(1);
+            if (v.error) return 'представление players_public недоступно: ' + v.error.message +
+                '. Прогоните в тестовой базе sql/доступ/players-public-view.sql';
+            const t = await window.supabaseClient.from('players').select('id').limit(1);
+            return 'players_public отвечает, строк в выборке ' + ((v.data || []).length) +
+                '; players ' + (t.error ? ('ошибка: ' + t.error.message) : ((t.data || []).length) + ' строк');
+        });
+        throw new Error('в публичном рейтинге ' + РАЗРЯД + ' нет наших игроков. ' + что);
+    }
 
     return await page.evaluate(() => {
         const места = {};
-        /* Строка таблицы рейтинга: номер, инициалы, имя, дальше числа.
-           Берём текст строки и вытаскиваем первое число и имя человека. */
-        document.querySelectorAll('tbody tr, [class*="rank-row"]').forEach(tr => {
-            const t = tr.innerText.replace(/\s+/g, ' ').trim();
-            const м = t.match(/^(\d+)\s/);
-            if (!м) return;
-            const имя = (t.match(/[А-ЯЁ][а-яё]+\s+[А-ЯЁ][а-яё]+/) || [])[0];
-            if (имя) места[имя] = Number(м[1]);
+        /* РЕЙТИНГ РИСУЕТСЯ НЕ ТАБЛИЦЕЙ, А СТРОКАМИ-БЛОКАМИ: `.pl-row` с
+           ячейками `.pl-col-rank` и `.pl-player-name` (`players.js:993`).
+           Прогон 02.10 искал `tbody tr`, не находил ничего и сверял пустоту
+           — проверка проходила вхолостую. Берём ровно те две ячейки, в
+           которых и лежат число и имя. */
+        document.querySelectorAll('.pl-row').forEach(row => {
+            const н = row.querySelector('.pl-col-rank');
+            const и = row.querySelector('.pl-player-name');
+            if (!н || !и) return;
+            const место = Number(н.textContent.trim());
+            const имя = и.textContent.replace(/\s+/g, ' ').trim();
+            if (имя && !isNaN(место)) места[имя] = место;
         });
         return места;
     });
@@ -65,13 +115,50 @@ async function местаВРейтинге(page) {
 /** Имя → место, снятое с вкладки «Заявки» в админке. */
 async function местаВЗаявках(page) {
     await page.goto('/pages/admin.html#tournaments/bracket/' + ТУРНИР);
-    await page.waitForSelector('button:has-text("Заявки")', { timeout: 20000 });
+
+    /* СНАЧАЛА УБЕЖДАЕМСЯ, ЧТО ТУРНИР ВООБЩЕ ОТКРЫЛСЯ. Нет его в базе —
+       админка молча остаётся на дашборде, и ожидание кнопки «Заявки»
+       падает по таймауту: в следе лежит снимок дашборда, и о причине там
+       ни слова. Прогон 02.10 упал именно так, когда сев ещё не завёл
+       `test-mesto`. Пусть проверка говорит, чего не хватает. */
+    const открылся = await page.waitForSelector('button:has-text("Заявки")', { timeout: 20000 })
+        .then(() => true).catch(() => false);
+    if (!открылся) {
+        /* ПРИБОР ГОВОРИТ, ЧЕГО НЕ ХВАТАЕТ, а не просто падает по таймауту.
+           Клиент базы у админки уже поднят — спрашиваем её прямо: есть ли
+           турнир и сколько у него заявок. Иначе в следе лежит снимок
+           дашборда, и причина не названа ничем. */
+        const что = await page.evaluate(async (id) => {
+            if (!window.supabaseClient) return 'клиента базы на странице нет';
+            const т = await window.supabaseClient.from('tournaments')
+                .select('id, title, status, category_id, gender').eq('id', id);
+            const з = await window.supabaseClient.from('tournament_registrations')
+                .select('id').eq('tournament_id', id);
+            if (т.error) return 'база ответила ошибкой: ' + т.error.message;
+            if (!т.data || !т.data.length) return 'турнира нет в базе вовсе';
+            const t = т.data[0];
+            return 'турнир есть: ' + JSON.stringify(t) +
+                ', заявок ' + ((з.data || []).length);
+        }, ТУРНИР);
+        throw new Error('турнир ' + ТУРНИР + ' не открылся в админке. ' + что +
+            '. Если турнира нет — прогоните `node tests/seed.js`');
+    }
     await page.click('button:has-text("Заявки")');
-    await page.waitForSelector('table tbody tr', { timeout: 20000 });
+
+    /* ЖДЁМ НЕ «КАКУЮ-НИБУДЬ СТРОКУ», А СВОЮ. В админке таблиц много, и
+       скрытые разделы тоже отдают `table tbody tr`: прогон 02.10 нашёл
+       220 строк и уткнулся в первую, невидимую. Ждём человека, которого
+       сами же и завели — он есть только в таблице заявок. */
+    await page.waitForSelector('table tbody tr:has-text("Яков Первый")', { timeout: 20000 });
 
     return await page.evaluate(() => {
         const места = {};
-        document.querySelectorAll('table tbody tr').forEach(tr => {
+        /* Строки берём из ТОЙ таблицы, где стоят наши люди, а не из всех
+           подряд: иначе в разбор попадут чужие разделы. */
+        const таблицы = [...document.querySelectorAll('table')]
+            .filter(t => /Яков Первый/.test(t.innerText));
+        const строки = таблицы.flatMap(t => [...t.querySelectorAll('tbody tr')]);
+        строки.forEach(tr => {
             const c = [...tr.cells].map(x => x.innerText.replace(/\s+/g, ' ').trim());
             if (c.length < 5) return;
             /* Колонки: ☐ | # | Место | Категория | ФИО | … */
@@ -85,6 +172,13 @@ async function местаВЗаявках(page) {
 }
 
 test.describe('Место в рейтинге и место в заявках — одно число', () => {
+
+    /* АДМИНКА ЗА ВХОДОМ. Без сессии страница уводит на форму авторизации, и
+       проверка ищет таблицу заявок там, где её не может быть — первый
+       прогон 02.10 упал всеми тремя именно так: в следе лежал снимок формы
+       входа. Сессии готовит `tests/auth-setup.js`, приём взят у
+       `20-header-offsets`. Публичной странице рейтинга вход не мешает. */
+    test.use({ storageState: require('../../auth-setup').adminState });
 
     test.beforeEach(({}, testInfo) => {
         test.skip(ТЕЛЕФОННЫЕ.includes(testInfo.project.name),
@@ -100,10 +194,32 @@ test.describe('Место в рейтинге и место в заявках �
             expect(свои.length, 'в заявках никто не получил места — проверять нечего')
                 .toBeGreaterThan(0);
 
-            const расхождения = свои
-                .filter(и => рейтинг[и] !== undefined && рейтинг[и] !== заявки[и])
-                .map(и => и + ': заявки ' + заявки[и] + ', рейтинг ' + рейтинг[и]);
+            /* СВЕРЕННЫХ СЧИТАЕМ ОТДЕЛЬНО. Пустой список расхождений сам по
+               себе ничего не доказывает: он пуст и когда никого не нашли.
+               Прогон 02.10 так и прошёл — вхолостую, не сверив ни одного
+               человека, потому что имена не совпадали из-за пометок.
+               СЛИЧАЕМ ОТ РЕЙТИНГА К ЗАЯВКАМ, А НЕ НАОБОРОТ. В рейтинге имя
+               лежит чистым, в заявках — с пометкой («Яков Первый
+               Задолженность»). Прогон 02.10 резал ключ заявок по двойному
+               пробелу, но текст ячейки уже сжат `\s+ → ' '`, и резать было
+               нечего: ключ оставался с пометкой, `найти` не находил его в
+               рейтинге, и сверено выходило нулём при пустом списке
+               расхождений. Чистое имя — у рейтинга, значит он и ведёт. */
+            const сверено = [];
+            const расхождения = [];
+            Object.keys(рейтинг).forEach(имя => {
+                const ключ = свои.find(k => тотЖе(k, имя));
+                if (ключ === undefined) return;
+                сверено.push(имя);
+                if (рейтинг[имя] !== заявки[ключ]) {
+                    расхождения.push(имя + ': заявки ' + заявки[ключ] +
+                        ', рейтинг ' + рейтинг[имя]);
+                }
+            });
 
+            expect(сверено.length, 'ни одного заявленного не нашлось в таблице рейтинга — ' +
+                'сверять было не с чем, проверка прошла бы вхолостую')
+                .toBeGreaterThanOrEqual(3);
             expect(расхождения, 'место в заявках разошлось с местом в рейтинге')
                 .toEqual([]);
         });
@@ -114,16 +230,16 @@ test.describe('Место в рейтинге и место в заявках �
             const заявки = await местаВЗаявках(page);
 
             РАВНЫЕ.forEach(и => {
-                expect(заявки[и], и + ' не получил места в заявках').not.toBeNull();
-                expect(рейтинг[и], и + ' не найден в таблице рейтинга').toBeDefined();
-                expect(заявки[и], и + ': число в заявках и в рейтинге разное')
-                    .toBe(рейтинг[и]);
+                expect(найти(заявки, и), и + ' не получил места в заявках').not.toBeNull();
+                expect(найти(рейтинг, и), и + ' не найден в таблице рейтинга').toBeDefined();
+                expect(найти(заявки, и), и + ': число в заявках и в рейтинге разное')
+                    .toBe(найти(рейтинг, и));
             });
 
             /* Подряд — значит их три места идут без разрывов. Какое из них
                чьё, не решено ничем и решено быть не может; важно, что
                порядок ОДИН на обоих экранах, а это проверено выше. */
-            const их = РАВНЫЕ.map(и => заявки[и]).sort((a, b) => a - b);
+            const их = РАВНЫЕ.map(и => найти(заявки, и)).sort((a, b) => a - b);
             expect(их[1] - их[0], 'места равных идут не подряд').toBe(1);
             expect(их[2] - их[1], 'места равных идут не подряд').toBe(1);
         });
@@ -133,11 +249,31 @@ test.describe('Место в рейтинге и место в заявках �
             const рейтинг = await местаВРейтинге(page);
             const заявки = await местаВЗаявках(page);
 
-            expect(рейтинг[ГОСТЬ], 'гость попал в публичную таблицу рейтинга')
+            /* ПРИБОР НАЗЫВАЕТ ПРИЧИНУ, А НЕ ТОЛЬКО ЧИСЛО. Гость в рейтинге
+               значит одно из двух, и это РАЗНЫЕ беды: либо сев не положил
+               `is_guest` — тогда это не гость и проверка пустая, — либо
+               предикат `KSLT_RULES.вРейтинге` не применён на странице.
+               Спрашиваем базу прямо (мы на админке, клиент поднят) и
+               кладём ответ в сообщение. */
+            const про = await page.evaluate(async () => {
+                if (!window.supabaseClient) return 'клиента базы на странице нет';
+                const т = await window.supabaseClient.from('players')
+                    .select('id, name, is_guest').eq('id', 'mr-guest');
+                if (т.error) return 'players ответил ошибкой: ' + т.error.message;
+                if (!т.data || !т.data.length) return 'игрока mr-guest нет в базе — прогоните node tests/seed.js';
+                const в = await window.supabaseClient.from('players_public')
+                    .select('id, is_guest').eq('id', 'mr-guest');
+                return 'players.is_guest = ' + JSON.stringify(т.data[0].is_guest) +
+                    '; players_public: ' + (в.error ? ('ошибка ' + в.error.message)
+                        : JSON.stringify(в.data));
+            });
+
+            expect(найти(рейтинг, ГОСТЬ),
+                'гость попал в публичную таблицу рейтинга. В базе: ' + про)
                 .toBeUndefined();
-            expect(Object.keys(заявки), 'гостя нет в заявках — проверять нечего')
-                .toContain(ГОСТЬ);
-            expect(заявки[ГОСТЬ], 'гостю выписано место, хотя в рейтинге его нет')
+            expect(Object.keys(заявки).some(k => тотЖе(k, ГОСТЬ)),
+                'гостя нет в заявках — проверять нечего').toBe(true);
+            expect(найти(заявки, ГОСТЬ), 'гостю выписано место, хотя в рейтинге его нет')
                 .toBeNull();
         });
 });

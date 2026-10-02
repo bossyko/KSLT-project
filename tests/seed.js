@@ -312,14 +312,66 @@ async function upsert(table, rows, onConflict) {
     //
     // Имена подобраны так, чтобы алфавит id не совпадал с алфавитом имён:
     // иначе совпадение чисел ничего не докажет.
+    /* ПОЛЯ — ТОЛЬКО ТЕ, ЧТО СЕВ УЖЕ КЛАДЁТ ДРУГИМ ИГРОКАМ. Прогон 02.10
+       упал здесь: `players: {"code": ...}`, и до турнира дело не дошло.
+       Тестовая база старше боевой, и лишнее поле валит всю вставку.
+       `ntrp_singles` и `is_guest` добавляем ОТДЕЛЬНО и не падаем, если их
+       нет: без ntrp равенство по очкам сохраняется (у всех выйдет 0), а
+       про гостя скажем вслух — проверка о нём тогда не состоится. */
     await upsert('players', [
-        { id: 'mr-alpha',   name: 'Яков Первый',   category_id: 'tour', points: 300, ntrp_singles: 3, gender: 'men' },
-        { id: 'mr-bravo',   name: 'Эдуард Равный', category_id: 'tour', points: 225, ntrp_singles: 3, gender: 'men' },
-        { id: 'mr-charlie', name: 'Борис Равный',  category_id: 'tour', points: 225, ntrp_singles: 3, gender: 'men' },
-        { id: 'mr-delta',   name: 'Антон Равный',  category_id: 'tour', points: 225, ntrp_singles: 3, gender: 'men' },
-        { id: 'mr-echo',    name: 'Василий Пятый', category_id: 'tour', points: 100, ntrp_singles: 3, gender: 'men' },
-        { id: 'mr-guest',   name: 'Гость Безочков', category_id: 'tour', points: 0, ntrp_singles: 3, gender: 'men', is_guest: true }
+        { id: 'mr-alpha',   name: 'Яков Первый',    category_id: 'tour', points: 300, gender: 'men' },
+        { id: 'mr-bravo',   name: 'Эдуард Равный',  category_id: 'tour', points: 225, gender: 'men' },
+        { id: 'mr-charlie', name: 'Борис Равный',   category_id: 'tour', points: 225, gender: 'men' },
+        { id: 'mr-delta',   name: 'Антон Равный',   category_id: 'tour', points: 225, gender: 'men' },
+        { id: 'mr-echo',    name: 'Василий Пятый',  category_id: 'tour', points: 100, gender: 'men' },
+        { id: 'mr-guest',   name: 'Гость Безочков', category_id: 'tour', points: 0,   gender: 'men' }
     ], 'id');
+
+    /* ПОЛЕ ДОПИСЫВАЕТСЯ ПРАВКОЙ, А НЕ АПСЕРТОМ. Апсерт — это INSERT с
+       `ON CONFLICT`, и у него есть INSERT-часть: в неё уходят только
+       переданные колонки, а `name` в `players` обязательна. Такой запрос
+       валится ДО конфликта — и валится молча для нас, потому что ошибку
+       мы проглатывали в `catch` одной строкой «ВНИМАНИЕ». Прогон 02.10
+       показал ровно это: в базе у `mr-guest` лежал `is_guest = false`,
+       то есть значение по умолчанию, а не наше. PATCH трогает только то,
+       что ему дали, и INSERT-части у него нет. */
+    for (const поле of [
+        { имя: 'ntrp_singles', ряд: ['mr-alpha','mr-bravo','mr-charlie','mr-delta','mr-echo','mr-guest'], знач: 3 },
+        { имя: 'is_guest',     ряд: ['mr-guest'], знач: true }
+    ]) {
+        for (const id of поле.ряд) {
+            const тело = {}; тело[поле.имя] = поле.знач;
+            const р = await call('PATCH', '/rest/v1/players?id=eq.' + id, тело);
+            if (!р.ok) {
+                console.log('  ВНИМАНИЕ: ' + поле.имя + ' не легло у ' + id +
+                    ' — ' + String(JSON.stringify(р.data)).slice(0, 160));
+            }
+        }
+    }
+
+    /* РЕЗУЛЬТАТ ПРОВЕРЯЕТСЯ ЧТЕНИЕМ БАЗЫ, А НЕ ОТВЕТОМ «ОК». Сев сказал
+       «ок» по всем шести игрокам, а гость в базе гостем не стал — и узнали
+       мы об этом только когда упал прогон. Теперь сев сам читает, что лёг,
+       и называет расхождение вслух. */
+    const свёл = await call('GET', '/rest/v1/players?id=in.(mr-alpha,mr-bravo,' +
+        'mr-charlie,mr-delta,mr-echo,mr-guest)&select=id,name,points,ntrp_singles,is_guest');
+    if (!свёл.ok) {
+        console.log('  ВНИМАНИЕ: не смог перечитать игроков — ' +
+            String(JSON.stringify(свёл.data)).slice(0, 160));
+    } else {
+        (свёл.data || []).forEach(function(и) {
+            console.log('    ' + и.id + ': очки ' + и.points +
+                ', ntrp ' + JSON.stringify(и.ntrp_singles) +
+                ', гость ' + JSON.stringify(и.is_guest));
+        });
+        const г = (свёл.data || []).filter(function(и) { return и.id === 'mr-guest'; })[0];
+        if (!г) {
+            console.log('  ВНИМАНИЕ: mr-guest в базе не нашёлся вовсе');
+        } else if (г.is_guest !== true) {
+            console.log('  ВНИМАНИЕ: у mr-guest is_guest = ' + JSON.stringify(г.is_guest) +
+                ', а не true. Проверка про гостя пройдёт вхолостую: это не гость.');
+        }
+    }
 
     await upsert('player_categories', [
         { player_id: 'mr-alpha',   category_id: 'tour', points: 300, wins: 0, losses: 0 },
@@ -329,15 +381,31 @@ async function upsert(table, rows, onConflict) {
         { player_id: 'mr-echo',    category_id: 'tour', points: 100, wins: 0, losses: 0 }
     ], 'player_id,category_id');
 
+    /* ОТДЕЛЬНЫЙ ТУРНИР, А НЕ `test-tournament`. У того уже есть матчи, и
+       админка честно говорит «Сетка сформирована — состав закрыт»: вкладка
+       «Заявки» показывает не таблицу, а строку «Заявок пока нет». Прогон
+       02.10 упал именно так — в следе это написано прямым текстом.
+       Здесь турнир без единого матча: состав открыт, таблица на месте. */
+    await upsert('tournaments', [{
+        id: 'test-mesto',
+        title: 'Тестовый турнир: место в рейтинге',
+        category_id: 'tour',
+        status: 'registration_open',
+        date_start: today.toISOString().slice(0, 10),
+        date_end: today.toISOString().slice(0, 10),
+        max_participants: 16,
+        gender: 'men'
+    }], 'id');
+
     // Заявки на одиночный турнир той же категории: именно здесь админка
     // показывает колонку «Место», и именно её сверяет проверка.
     await upsert('tournament_registrations', [
-        { id: 'cc000001-0000-4000-8000-000000000001', tournament_id: 'test-tournament', player_id: 'mr-alpha',   status: 'approved' },
-        { id: 'cc000001-0000-4000-8000-000000000002', tournament_id: 'test-tournament', player_id: 'mr-bravo',   status: 'approved' },
-        { id: 'cc000001-0000-4000-8000-000000000003', tournament_id: 'test-tournament', player_id: 'mr-charlie', status: 'approved' },
-        { id: 'cc000001-0000-4000-8000-000000000004', tournament_id: 'test-tournament', player_id: 'mr-delta',   status: 'approved' },
-        { id: 'cc000001-0000-4000-8000-000000000005', tournament_id: 'test-tournament', player_id: 'mr-echo',    status: 'approved' },
-        { id: 'cc000001-0000-4000-8000-000000000006', tournament_id: 'test-tournament', player_id: 'mr-guest',   status: 'approved' }
+        { id: 'cc000001-0000-4000-8000-000000000001', tournament_id: 'test-mesto', player_id: 'mr-alpha',   status: 'approved' },
+        { id: 'cc000001-0000-4000-8000-000000000002', tournament_id: 'test-mesto', player_id: 'mr-bravo',   status: 'approved' },
+        { id: 'cc000001-0000-4000-8000-000000000003', tournament_id: 'test-mesto', player_id: 'mr-charlie', status: 'approved' },
+        { id: 'cc000001-0000-4000-8000-000000000004', tournament_id: 'test-mesto', player_id: 'mr-delta',   status: 'approved' },
+        { id: 'cc000001-0000-4000-8000-000000000005', tournament_id: 'test-mesto', player_id: 'mr-echo',    status: 'approved' },
+        { id: 'cc000001-0000-4000-8000-000000000006', tournament_id: 'test-mesto', player_id: 'mr-guest',   status: 'approved' }
     ], 'id');
     console.log('  место в рейтинге: трое с равными очками и гость');
 
