@@ -5988,8 +5988,15 @@
                 var isByeMatch = match.score === 'BYE';
                 var isXSlotP1 = isR1 && !match.player1_id && match.status !== 'completed' && !безДопМатчей;
                 var isXSlotP2 = isR1 && !match.player2_id && match.status !== 'completed' && !безДопМатчей;
-                var byeСторона1 = (isByeMatch || (безДопМатчей && isR1)) && !match.player1_id;
-                var byeСторона2 = (isByeMatch || (безДопМатчей && isR1)) && !match.player2_id;
+                /* МЕТКА СИЛЬНЕЕ BYE: СЛОТ, КОТОРЫЙ КОГО-ТО ЖДЁТ, НЕ ПУСТ.
+                   `безДопМатчей && isR1` метило BYE КАЖДЫЙ слот без игрока,
+                   а пока группы не доиграны, игроков нет ни у кого — и вся
+                   сетка показывалась как «играть не с кем». Замер 02.10 на
+                   боевом CHALLENGERS: в базе 14 меток на 16 слотов, а
+                   менеджер видел 16 BYE. Свободны ровно два места — те, у
+                   которых метки нет, и только они BYE. */
+                var byeСторона1 = (isByeMatch || (безДопМатчей && isR1 && !match.slot1_label)) && !match.player1_id;
+                var byeСторона2 = (isByeMatch || (безДопМатчей && isR1 && !match.slot2_label)) && !match.player2_id;
                 var xSlotMark = '<span style="color:var(--accent);font-weight:600;">' + L.xSlot + '</span>';
                 var byeMark = '<span style="color:var(--text-dim);font-style:italic;">BYE</span>';
                 var p1Name, p2Name;

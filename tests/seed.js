@@ -525,7 +525,9 @@ async function upsert(table, rows, onConflict) {
         };
     }
     try {
-        await upsert('matches', [слотМатч(1, 'A1', 'IG1'), слотМатч(2, 'B1', 'Q1')], 'id');
+        // Вторая клетка — со СВОБОДНЫМ местом: метки нет, значит играть не с
+        // кем, и клетка обязана сказать BYE, а не «ждём»
+        await upsert('matches', [слотМатч(1, 'A1', 'IG1'), слотМатч(2, 'B1', null)], 'id');
         var свёлС = await call('GET', '/rest/v1/matches?tournament_id=eq.test-sloty' +
             '&select=match_order,slot1_label,slot2_label');
         if (!свёлС.ok) {

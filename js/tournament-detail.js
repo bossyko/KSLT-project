@@ -634,14 +634,28 @@ function renderMatch(tournament, match, predOpts) {
        групп ещё никто не доиграл. Правило и слова взяты у админки
        (`emptySlotName`, `bracket.js:6005`), а не придуманы заново.
        BYE не трогаем: там соперника не будет вовсе, и ждать некого. */
-    var слоты = tdМеткиСлотов[match.matchId] || {};
-    if (!match.player1Id && слоты.s1 && p1.name === 'TBD') {
-        p1 = { name: '<span class="td-slot-wait">' + esc(слоты.s1) + '</span>',
-               seed: null, country: '' };
-    }
-    if (!match.player2Id && слоты.s2 && p2.name === 'TBD') {
-        p2 = { name: '<span class="td-slot-wait">' + esc(слоты.s2) + '</span>',
-               seed: null, country: '' };
+    var слоты = tdМеткиСлотов[match.matchId];
+    if (слоты) {
+        /* В КЛЕТКЕ С МЕТКАМИ ПУСТОЙ СЛОТ — ЭТО BYE, А НЕ «ЖДЁМ».
+           `создатьПустойПлейофф` пишет метку каждому слоту, куда кто-то
+           придёт; где не придёт — оставляет пусто. Значит отсутствие метки
+           в такой клетке и есть свободное место: играть не с кем, а не
+           «соперник ещё не определился». Слово Кости 02.10: «давай на
+           публичной поставим BYE, а не TBD, где понятно, что нет игр».
+           Замер на боевом CHALLENGERS: 14 меток на 16 слотов — свободных
+           мест ровно два, и admin их тоже зовёт BYE. */
+        if (!match.player1Id && p1.name === 'TBD') {
+            p1 = слоты.s1
+                ? { name: '<span class="td-slot-wait">' + esc(слоты.s1) + '</span>',
+                    seed: null, country: '' }
+                : { name: 'BYE', seed: null, country: '' };
+        }
+        if (!match.player2Id && p2.name === 'TBD') {
+            p2 = слоты.s2
+                ? { name: '<span class="td-slot-wait">' + esc(слоты.s2) + '</span>',
+                    seed: null, country: '' }
+                : { name: 'BYE', seed: null, country: '' };
+        }
     }
 
     // Player 1

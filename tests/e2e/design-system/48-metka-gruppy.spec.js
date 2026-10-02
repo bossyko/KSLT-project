@@ -129,8 +129,20 @@ test.describe('Пустая клетка говорит, кого ждёт', () 
             /* ПРОВЕРКА, КОТОРАЯ НЕ МОЖЕТ УПАСТЬ, НИЧЕГО НЕ ДОКАЗЫВАЕТ:
                сперва порог, потом разбор. */
             expect(слоты.length, 'меток слотов на сетке нет — зритель снова видит подряд TBD')
-                .toBeGreaterThanOrEqual(4);
-            expect(слоты.sort()).toEqual(['A1', 'B1', 'IG1', 'Q1']);
+                .toBeGreaterThanOrEqual(3);
+            expect(слоты.sort()).toEqual(['A1', 'B1', 'IG1']);
+
+            /* СВОБОДНОЕ МЕСТО ГОВОРИТ «BYE», А НЕ «TBD». У второй клетки
+               правый слот без метки: туда никто не придёт. Слово Кости
+               02.10: «давай на публичной поставим BYE, а не TBD, где
+               понятно, что нет игр». */
+            const имена = await page.evaluate(() =>
+                [...document.querySelectorAll('.td-match-player .td-player-name')]
+                    .map(э => э.textContent.trim()));
+            expect(имена.filter(и => и === 'BYE').length,
+                'свободное место названо не BYE').toBe(1);
+            expect(имена.filter(и => и === 'TBD').length,
+                'в сетке с метками осталось TBD — значит слот не разобран').toBe(0);
         });
 
     test('метка слота читается иначе, чем фамилия',

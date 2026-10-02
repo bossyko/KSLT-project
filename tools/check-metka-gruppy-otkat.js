@@ -117,8 +117,8 @@ const ОТКАТЫ = [
 
     /* 19. Метка слота пропала у второго игрока клетки. */
     [СТРАН,
-     "    if (!match.player2Id && слоты.s2 && p2.name === 'TBD') {",
-     "    if (false) {",
+     "        if (!match.player2Id && p2.name === 'TBD') {",
+     "        if (false) {",
      'пустая клетка на сайте показывает метку слота'],
 
     /* 20. Подстановка метки уехала ПЕРЕД разбором BYE — настоящей
@@ -137,10 +137,22 @@ const ОТКАТЫ = [
      ".td-slot-wait {\n    color: var(--text-dim);",
      'метка слота взяла померенную краску'],
 
+    /* 22. В админку вернулось BYE поверх метки — как было до 02.10. */
+    [СЕТКА,
+     "var byeСторона1 = (isByeMatch || (безДопМатчей && isR1 && !match.slot1_label)) && !match.player1_id;",
+     "var byeСторона1 = (isByeMatch || (безДопМатчей && isR1)) && !match.player1_id;",
+     'в админке BYE не закрывает слот с меткой'],
+
+    /* 23. На сайте свободное место снова стало «ждём» вместо BYE. */
+    [СТРАН,
+     "                : { name: 'BYE', seed: null, country: '' };\n        }\n        if (!match.player2Id",
+     "                : p1;\n        }\n        if (!match.player2Id",
+     'на сайте свободное место — BYE, а не «ждём»'],
+
     /* 15–17. Версия файла поднята не везде. */
     [HTML, 'group-standings.js?v=8', 'group-standings.js?v=7',
      'версия group-standings.js одна на все страницы'],
-    [HTML, 'tournament-detail.js?v=94', 'tournament-detail.js?v=93',
+    [HTML, 'tournament-detail.js?v=95', 'tournament-detail.js?v=94',
      'версия tournament-detail.js одна на все страницы'],
     [HTML, 'tournament-detail.css?v=89', 'tournament-detail.css?v=88',
      'версия tournament-detail.css одна на все страницы']
