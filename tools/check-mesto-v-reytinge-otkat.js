@@ -53,10 +53,12 @@ const ОТКАТЫ = [
 
     /* 5. Админка перестала запрашивать поле — признак останется, но
        отличать будет нечем. */
+    /* Одно из чтений карточек потеряло поле — остальные на месте, глазами
+       всё хорошо, а гости вернулись в таблицу через эту дверь. */
     [СЕТКА,
-     ".select('id, gender, category_id, ntrp_singles, is_guest').eq('category_id', катId);",
-     ".select('id, gender, category_id, ntrp_singles').eq('category_id', катId);",
-     'админка спрашивает is_guest у карточек'],
+     ".select('id, gender, category_id, ntrp_singles, is_guest').in('category_id', катСписок);",
+     ".select('id, gender, category_id, ntrp_singles').in('category_id', катСписок);",
+     'каждое чтение карточек спрашивает is_guest'],
 
     /* 6. Состав таблицы категории изменился. */
     [ПРАВ,

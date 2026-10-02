@@ -2000,7 +2000,7 @@
      *
      * Возвращает { [player_id]: место }. Пусто для нерейтинговых турниров.
      */
-    async function местаВКатегории(tournament) {
+    async function местаВКатегории(tournament, заявленные) {
         if (!tournament || !tournament.category_id) return {};
         if (isUnrankedTournament(tournament)) return {};
         /* Рейтинг ведётся только в одиночном разряде и раздельно по полу.
@@ -2009,37 +2009,106 @@
         if (пол !== 'men' && пол !== 'women') return {};
 
         var катId = tournament.category_id;
+
+        /* МЕСТО ПОКАЗЫВАЕМ ВСЕГДА, И ВСЕГДА ГОВОРИМ — В КАКОЙ КАТЕГОРИИ.
+           Решение Кости 02.10, три правила:
+             1) играет в своей категории — место в ней показываем обязательно;
+             2) играет не в своей — показываем ту категорию, где он стоит
+                выше всего по лестнице, и его место там: так видно, чего
+                человек стоит, когда он пришёл на турнир другого разряда;
+             3) очков нет нигде — показываем категорию, которую ему
+                присвоил админ.
+           Прочерк не годился: у Бакыта Капакова 225 очков и 18-е место в
+           Futures, а в очереди CHALLENGERS он выглядел так же пусто, как
+           гость без единой игры (замер 02.10). */
         var pcRes = await A.client.from('player_categories')
-            .select('player_id, points, closed_at').eq('category_id', катId);
+            .select('player_id, category_id, points, closed_at');
         if (pcRes.error) return {};
 
-        var очки = {}, закрытые = {}, чужие = [];
+        /* Считаем только те категории, которые реально нужны: категорию
+           турнира и домашние категории заявленных. Остальные таблицы
+           строить незачем. */
+        var нужныеКат = {};
+        нужныеКат[катId] = true;
+        var ids = (заявленные || []).filter(Boolean);
+        var карточкиЗаявленных = [];
+        if (ids.length) {
+            var зРес = await A.client.from('players')
+                .select('id, gender, category_id, ntrp_singles, is_guest').in('id', ids);
+            карточкиЗаявленных = зРес.data || [];
+            карточкиЗаявленных.forEach(function(p) {
+                if (p.category_id) нужныеКат[p.category_id] = true;
+            });
+        }
         (pcRes.data || []).forEach(function(r) {
-            if (r.closed_at) { закрытые[r.player_id] = true; return; }
-            очки[r.player_id] = r.points || 0;
-            чужие.push(r.player_id);
+            if (ids.indexOf(r.player_id) !== -1 && (r.points || 0) > 0) нужныеКат[r.category_id] = true;
         });
 
         /* `is_guest` СПРАШИВАЕМ: без него гости попадали в таблицу категории,
            и место считалось по списку, которого нет нигде. Отбор делает
            `KSLT_RULES.рейтингКатегории` — предикат один на продукт. */
-        var свои = await A.client.from('players')
-            .select('id, gender, category_id, ntrp_singles, is_guest').eq('category_id', катId);
-        if (свои.error) return {};
-        var карточки = свои.data || [];
+        var карточки = карточкиЗаявленных.slice();
         var есть = {};
         карточки.forEach(function(p) { есть[p.id] = true; });
 
-        var надо = чужие.filter(function(id) { return !есть[id]; });
-        if (надо.length) {
+        var катСписок = Object.keys(нужныеКат);
+        var домашние = await A.client.from('players')
+            .select('id, gender, category_id, ntrp_singles, is_guest').in('category_id', катСписок);
+        if (домашние.error) return {};
+        (домашние.data || []).forEach(function(p) {
+            if (!есть[p.id]) { есть[p.id] = true; карточки.push(p); }
+        });
+
+        var сОчками = (pcRes.data || [])
+            .filter(function(r) { return нужныеКат[r.category_id] && !есть[r.player_id]; })
+            .map(function(r) { return r.player_id; });
+        сОчками = сОчками.filter(function(id, и) { return сОчками.indexOf(id) === и; });
+        if (сОчками.length) {
             var ещё = await A.client.from('players')
-                .select('id, gender, category_id, ntrp_singles, is_guest').in('id', надо);
-            карточки = карточки.concat(ещё.data || []);
+                .select('id, gender, category_id, ntrp_singles, is_guest').in('id', сОчками);
+            (ещё.data || []).forEach(function(p) {
+                if (!есть[p.id]) { есть[p.id] = true; карточки.push(p); }
+            });
         }
 
+        /* Таблица каждой нужной категории — тем же правилом, что у
+           публичного рейтинга. */
+        var поКатегориям = {};
+        катСписок.forEach(function(к) {
+            var очки = {}, закрытые = {};
+            (pcRes.data || []).forEach(function(r) {
+                if (r.category_id !== к) return;
+                if (r.closed_at) { закрытые[r.player_id] = true; return; }
+                очки[r.player_id] = r.points || 0;
+            });
+            var места = {};
+            KSLT_RULES.рейтингКатегории(карточки, очки, закрытые, к, пол)
+                .forEach(function(id, и) { места[id] = и + 1; });
+            поКатегориям[к] = места;
+        });
+
+        /* Выбираем, какую категорию показать: сначала категория турнира —
+           правило 1, — потом самая высокая по лестнице, где человек стоит.
+           `CATEGORY_ORDER` идёт сверху вниз, первая попавшаяся и есть
+           наивысшая. */
+        var лестница = KSLT_RULES.CATEGORY_ORDER || [];
         var итог = {};
-        KSLT_RULES.рейтингКатегории(карточки, очки, закрытые, катId, пол)
-            .forEach(function(id, и) { итог[id] = и + 1; });
+        карточки.forEach(function(p) {
+            if (поКатегориям[катId] && поКатегориям[катId][p.id]) {
+                итог[p.id] = { место: поКатегориям[катId][p.id], категория: катId, своя: true };
+                return;
+            }
+            for (var и = 0; и < лестница.length; и++) {
+                var к = лестница[и];
+                if (поКатегориям[к] && поКатегориям[к][p.id]) {
+                    итог[p.id] = { место: поКатегориям[к][p.id], категория: к, своя: false };
+                    return;
+                }
+            }
+            /* Правило 3: мест нет нигде — показываем присвоенную админом
+               категорию, без числа. */
+            итог[p.id] = { место: null, категория: p.category_id || null, своя: false };
+        });
         return итог;
     }
 
@@ -2068,7 +2137,8 @@
            считала своё по карточке. Числа расходились, и менеджер видел не
            тот порядок, в котором сеялась сетка. Теперь источник один —
            `местаВКатегории`, то же правило, что у публичного рейтинга. */
-        var места = await местаВКатегории(tournament);
+        var места = await местаВКатегории(tournament,
+            (список || []).map(function(r) { return r.player_id; }));
 
         /* ЛЕСТНИЦА КАТЕГОРИЙ ГЛАВНЕЕ МЕСТА — РЕШЕНИЕ КОСТИ 30.09.
            «Сортировку надо делать согласно категории», и добор сеяных —
@@ -2093,8 +2163,8 @@
             var сA = ступень(a), сB = ступень(b);
             if (сA !== сB) return сB - сA;   // выше по лестнице — раньше
 
-            var мA = места[a.player_id] || 0;
-            var мB = места[b.player_id] || 0;
+            var мA = (места[a.player_id] || {}).место || 0;
+            var мB = (места[b.player_id] || {}).место || 0;
             // Места нет — в самый низ ступени: в этой таблице его вовсе нет
             if (!мA !== !мB) return мA ? -1 : 1;
             if (мA && мB && мA !== мB) return мA - мB;
@@ -2353,9 +2423,16 @@
                два «пятых места» из разных списков, а сеялось по третьему
                числу. Теперь место одно — `местаВКатегории` — и его же читает
                жеребьёвка. */
-            var места = await местаВКатегории(tournament);
+            var места = await местаВКатегории(tournament, Object.keys(playersMap));
             Object.keys(playersMap).forEach(function(pid) {
-                playersMap[pid].rank = места[pid] || null;
+                var м = места[pid] || null;
+                playersMap[pid].rank = м ? м.место : null;
+                /* Категория, из которой взято место. Своя она или чужая —
+                   решает `местаВКатегории`; колонка показывает именно её,
+                   а не домашнюю вслепую: иначе число и подпись под ним
+                   были бы из разных таблиц. */
+                playersMap[pid].rankCat = м ? м.категория : null;
+                playersMap[pid].rankOwn = м ? !!м.своя : false;
             });
         }
 
@@ -4537,12 +4614,25 @@
             ? ' <span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(156,39,176,0.15);color:#ce93d8;margin-left:4px;">' + playerNtrp + '</span>'
             : '';
 
-        var catId = isExternal ? '' : (player.category_id || pmEntry.category_id || '');
+        /* МЕСТО И КАТЕГОРИЯ — ИЗ ОДНОЙ ТАБЛИЦЫ, ВСЕГДА.
+           Слово Кости 02.10: «отображать место в рейтинге и категорию
+           обязательно». Колонка «Категория» показывала домашнюю, а число
+           рядом считалось по категории ТУРНИРА — подпись и число могли
+           быть из разных списков. Теперь категорию называет тот же расчёт,
+           что дал место: `pmEntry.rankCat`. Нет места нигде — остаётся
+           присвоенная админом (правило 3). */
+        var catId = isExternal ? '' : (pmEntry.rankCat || player.category_id || pmEntry.category_id || '');
         var catParts = catId.split('-');
         var catLabel = isExternal ? '—' : (catParts.length > 1
             ? catParts.slice(1).map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-')
             : catId || '—');
-        var rankVal = isExternal ? '—' : (pmEntry.rank || '—');
+        /* Место из ЧУЖОЙ категории помечаем: иначе «18» рядом с турниром
+           Challenger читается как восемнадцатое место в Challenger. */
+        var rankVal = isExternal ? '—' : (pmEntry.rank
+            ? (pmEntry.rankOwn ? String(pmEntry.rank)
+                : '<span title="' + A.esc(isEn ? 'Place in own category' : 'Место в своей категории') +
+                  '" style="color:var(--text-secondary);">' + pmEntry.rank + '</span>')
+            : '—');
         // Время подачи — коротко: день, месяц и часы с минутами. Год и секунды
         // занимали полстолбца, а с четырьмя кнопками действий строка
         // переставала помещаться и таблицу уводило вбок
