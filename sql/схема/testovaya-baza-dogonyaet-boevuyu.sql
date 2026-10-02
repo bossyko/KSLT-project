@@ -52,6 +52,50 @@ ALTER TABLE public.tournament_registrations
     ADD COLUMN IF NOT EXISTS external_gender text,
     ADD COLUMN IF NOT EXISTS partner_external_country text;
 
+-- ---- Заявки: место и очередь (боевая, 28.09 и 01.10) ----
+--
+-- Чего не хватало 02.10: проверка окна замены падала на
+-- «column tournament_registrations.waitlisted_at does not exist», а до неё
+-- тихо брала порядок очереди по времени ПОДАЧИ — колонки для порядка
+-- постановки в базе не было вовсе.
+--
+-- `seat_pool`      — чьё место занимает заявка: онлайн или резерв клуба
+--                    (`sql/схема/zayavki-mesto-i-prichiny-shag1.sql`)
+-- `review_reasons` — почему заявка ждёт решения, списком, а не одной
+--                    причиной
+-- `waitlisted_at`  — когда заявка попала в очередь; пусто у тех, кто в ней
+--                    с подачи
+-- `queue_at`       — ОДИН порядок очереди на продукт, считает база
+--                    (`sql/функции/ochered-vremya-postanovki.sql`)
+--
+-- ПОРЯДОК ЗДЕСЬ ОБЯЗАТЕЛЕН: `queue_at` генерируемый и считается из
+-- `waitlisted_at`, а индекс очереди стоит на `seat_pool` — обе колонки
+-- должны лежать раньше. Именно на этом 02.10 откатилась вся правка
+-- целиком: индекс завели одной транзакцией со столбцами, которых ещё не
+-- было.
+
+ALTER TABLE public.tournament_registrations
+    ADD COLUMN IF NOT EXISTS seat_pool text NOT NULL DEFAULT 'online',
+    ADD COLUMN IF NOT EXISTS review_reasons text[] NOT NULL DEFAULT '{}',
+    ADD COLUMN IF NOT EXISTS waitlisted_at timestamptz;
+
+ALTER TABLE public.tournament_registrations
+    DROP CONSTRAINT IF EXISTS tournament_registrations_seat_pool_check;
+ALTER TABLE public.tournament_registrations
+    ADD CONSTRAINT tournament_registrations_seat_pool_check
+    CHECK (seat_pool = ANY (ARRAY['online'::text, 'reserved'::text]));
+
+ALTER TABLE public.tournament_registrations
+    ADD COLUMN IF NOT EXISTS queue_at timestamptz
+    GENERATED ALWAYS AS (COALESCE(waitlisted_at, registered_at)) STORED;
+
+CREATE INDEX IF NOT EXISTS idx_registrations_seat_pool
+    ON public.tournament_registrations (tournament_id, seat_pool, status);
+
+CREATE INDEX IF NOT EXISTS tournament_registrations_queue_idx
+    ON public.tournament_registrations (tournament_id, seat_pool, queue_at)
+    WHERE status = 'waitlist';
+
 -- ---- Карточки игроков ----
 --
 -- Жеребьёвка читает карточки запросом с NTRP: нет столбца — падает весь
@@ -78,8 +122,10 @@ SELECT table_name AS таблица, count(*) AS столбцов
  GROUP BY table_name
  ORDER BY table_name;
 
--- Ожидаем: tournaments 53, matches 33, tournament_registrations 22 —
--- столько же, сколько в боевой.
+-- Ожидаем: tournaments 53, matches 33, tournament_registrations 26.
+-- Было 22: четыре столбца очереди и места добавлены выше 02.10. Числа
+-- сверены со списком столбцов тестовой базы, а не взяты по памяти;
+-- боевую сверять тем же запросом.
 
 -- ---- Что запустить следом, в этом же порядке ----
 --
