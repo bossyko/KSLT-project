@@ -96,6 +96,20 @@ CREATE INDEX IF NOT EXISTS tournament_registrations_queue_idx
     ON public.tournament_registrations (tournament_id, seat_pool, queue_at)
     WHERE status = 'waitlist';
 
+-- ---- Профили ----
+--
+-- Чего не хватало 02.10: проверка допуска падала на `profile_not_found`, и
+-- выглядело это как беда продукта. На деле функция читает профиль списком
+-- `id, full_name, player_id, role, gender, lang`
+-- (`tournament-register/index.ts:143`) — нет ОДНОЙ колонки, падает ВЕСЬ
+-- запрос, функция видит пустоту и честно отвечает «профиля нет».
+--
+-- `lang` — язык человека, на нём пишутся отказы и уведомления: ru · en · kg,
+-- пусто читается как ru (`языкИз`, там же, :66).
+
+ALTER TABLE public.profiles
+    ADD COLUMN IF NOT EXISTS lang text;
+
 -- ---- Карточки игроков ----
 --
 -- Жеребьёвка читает карточки запросом с NTRP: нет столбца — падает весь

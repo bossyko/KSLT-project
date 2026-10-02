@@ -801,6 +801,33 @@ async function upsert(table, rows, onConflict) {
         expires_at: inYear.toISOString().slice(0, 10)
     }]);
 
+    /* ЧЛЕНСТВО БЕЗ ОПЛАТЫ ДО ПОЛА НЕ ДОПУСКАЕТ. После членства функция
+       требует строку в `payments` со статусом `completed`
+       (`tournament-register/index.ts:298`) — иначе `not_paid`, и проверка
+       упёрлась бы в воротца раньше. Платёж кладём тем же набором полей,
+       что пишет админка (`users.js:862`), и привязываем к НАЙДЕННОМУ
+       членству, а не к выдуманному id. */
+    var членства = await call('GET', '/rest/v1/memberships?profile_id=eq.' + женИд +
+        '&status=eq.active&select=id&order=expires_at.desc&limit=1');
+    var членствоИд = ((членства.data || [])[0] || {}).id || null;
+    if (!членствоИд) {
+        console.log('  ВНИМАНИЕ: членство женской учётки не нашлось — заявка упрётся в no_membership');
+    } else {
+        var естьПлатёж = await call('GET', '/rest/v1/payments?membership_id=eq.' + членствоИд +
+            '&status=eq.completed&select=id&limit=1');
+        if (!(естьПлатёж.data || []).length) {
+            var платёж = await call('POST', '/rest/v1/payments', [{
+                profile_id: женИд, membership_id: членствоИд,
+                amount: 1000, currency: 'KGS', payment_method: 'cash',
+                status: 'completed', note: 'сев тестовой базы', created_by: женИд
+            }]);
+            if (!платёж.ok) {
+                console.log('  ВНИМАНИЕ: платёж не лёг — ' +
+                    String(JSON.stringify(платёж.data)).slice(0, 200));
+            }
+        }
+    }
+
     /* УРОВЕНЬ ЗАВОДИТСЯ, А НЕ УГАДЫВАЕТСЯ. `level_id` ссылается на
        `tournament_levels`, и его ключ — не слово «вторая», а то, что
        выдала база. Берём существующий, а нет — заводим и читаем id. */
@@ -851,6 +878,11 @@ async function upsert(table, rows, onConflict) {
     var свёлЖ = await call('GET', '/rest/v1/players?id=eq.test-woman&select=gender');
     var т = (свёлП.data || [])[0] || {};
     var ж = (свёлЖ.data || [])[0] || {};
+    var свёлОпл = await call('GET', '/rest/v1/payments?membership_id=eq.' +
+        (членствоИд || '00000000-0000-0000-0000-000000000000') +
+        '&status=eq.completed&select=id');
+    console.log('    пол турнира: членство ' + (членствоИд ? 'есть' : 'НЕТ') +
+        ', оплат ' + ((свёлОпл.data || []).length));
     console.log('    пол турнира: формат ' + (т.format || '—') +
         ', уровень ' + (т.level_id ? 'есть' : 'ПУСТ') +
         ', турнир ' + (т.gender || '—') + ', игрок ' + (ж.gender || '—'));
