@@ -2352,13 +2352,28 @@
         if (!tournament.level_id || isUnrankedTournament(tournament)) return {};
 
         var уровни = await A.client.from('tournament_levels')
-            .select('id, sort_order')
+            .select('id, sort_order, on_ladder')
             .order('sort_order', { ascending: false });
         var список = уровни.data || [];
         var свой = список.find(function(у) { return у.id === tournament.level_id; });
         if (!свой) return await загрузитьТаблицуМест(tournament);
 
-        var ниже = список.find(function(у) { return у.sort_order < свой.sort_order; });
+        /* ИТОГОВЫЙ ТУРНИР СТОИТ ВОЗЛЕ ЛЕСТНИЦЫ, А НЕ НА НЕЙ.
+           Слово Кости 02.10: «итоговый — это просто восьмёрка, как у ATP и в
+           женском; он не должен браться в расчёт как обычный турнир. Третья
+           категория самая последняя и никуда не ведёт».
+
+           Здесь стоял отбор только по `sort_order`, и соседом снизу у
+           третьей категории (2) оказывался итоговый турнир (1): утешительная
+           лига платилась бы по таблице ИТОГОВОГО. `sort_order` говорит, ГДЕ
+           уровень стоит, а не ВХОДИТ ли он в лестницу, — поэтому признак
+           отдельный, `on_ladder`, и у итогового он выключен.
+
+           Та же форма, что у лестницы категорий, где `friendly` отсеивается
+           своим условием (`:13471`). Нет уровня ниже — зачёт остаётся своим
+           (`:2362`), это уже умеет код. */
+        var наЛестнице = список.filter(function(у) { return у.on_ladder !== false; });
+        var ниже = наЛестнице.find(function(у) { return у.sort_order < свой.sort_order; });
         if (!ниже) return await загрузитьТаблицуМест(tournament);
 
         var ответ = await A.client.from('points_by_place')
