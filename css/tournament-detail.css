@@ -525,6 +525,39 @@ tr.td-rr-row-dimmed {
     min-width: 24px;
 }
 
+/* МЕТКА ГРУППЫ В КЛЕТКЕ СЕТКИ: откуда человек приехал — `A1`, `G2`.
+   Приём и размеры взяты у `.ad-brk-grp-label` в админке, а не придуманы
+   заново: одно понятие рисуется одинаково на обоих экранах. Ширина 22
+   фиксированная — метки `A1` и `G2` обязаны занимать одно место, иначе
+   имена в соседних клетках встают разными левыми краями.
+   Кегль — та же ступень `--fs-2xs`, что у посева строкой выше. */
+.td-grp-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 22px;
+    margin-right: 4px;
+    background: rgba(204, 255, 0, 0.15);
+    color: var(--accent);
+    font-size: var(--fs-2xs);
+    font-weight: 700;
+    line-height: 1.4;
+    border-radius: 3px;
+    text-align: center;
+}
+
+/* ПУСТАЯ КЛЕТКА, КОТОРАЯ ГОВОРИТ, КОГО ЖДЁТ: `A1`, `IG1`, `Q1`.
+   Это не фамилия, а адрес, и читаться должен иначе: вес из системы и
+   разрядка, чтобы короткий код не слипался в одно пятно. Цвет —
+   `--text-secondary`: на фоне клетки он даёт 9.98 и проходит WCAG 1.4.3,
+   а `--text-dim`, которым рисуется «TBD», даёт 3.21 и проваливает. */
+.td-slot-wait {
+    color: var(--text-secondary);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
 .td-player-name {
     flex: 1;
     overflow: hidden;

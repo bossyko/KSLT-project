@@ -409,6 +409,140 @@ async function upsert(table, rows, onConflict) {
     ], 'id');
     console.log('  место в рейтинге: трое с равными очками и гость');
 
+    /* --- Турнир с ГРУППАМИ и плей-офф: метка `A1`, `B1` -----------------
+       Метку «кто из какой группы вышел» строит `KSLT_GROUPS.меткиИгроков`,
+       и сравнить её НА ДВУХ ЭКРАНАХ может только прогон: заморозка читает
+       файлы как текст и видит лишь то, что карта одна.
+       Группы по трое, все матчи сыграны, порядок однозначен — ни одного
+       жребия: иначе место зависело бы от случая и сверять было бы нечего.
+       Финал НЕ сыгран: метка должна стоять у обоих, а не только у
+       победителя. */
+    await upsert('tournaments', [{
+        id: 'test-metka',
+        title: 'Тестовый турнир: метка группы',
+        category_id: 'tour',
+        status: 'ongoing',
+        bracket_type: 'round_robin',
+        group_count: 2,
+        qualifiers_per_group: 1,
+        date_start: today.toISOString().slice(0, 10),
+        date_end: today.toISOString().slice(0, 10),
+        max_participants: 6,
+        gender: 'men'
+    }], 'id');
+
+    await upsert('tournament_registrations', [
+        { id: 'cc000002-0000-4000-8000-000000000001', tournament_id: 'test-metka', player_id: 'mr-alpha',   status: 'approved' },
+        { id: 'cc000002-0000-4000-8000-000000000002', tournament_id: 'test-metka', player_id: 'mr-bravo',   status: 'approved' },
+        { id: 'cc000002-0000-4000-8000-000000000003', tournament_id: 'test-metka', player_id: 'mr-charlie', status: 'approved' },
+        { id: 'cc000002-0000-4000-8000-000000000004', tournament_id: 'test-metka', player_id: 'mr-delta',   status: 'approved' },
+        { id: 'cc000002-0000-4000-8000-000000000005', tournament_id: 'test-metka', player_id: 'mr-echo',    status: 'approved' },
+        { id: 'cc000002-0000-4000-8000-000000000006', tournament_id: 'test-metka', player_id: 'mr-guest',   status: 'approved' }
+    ], 'id');
+
+    // Группа A: alpha первый, bravo второй, charlie третий.
+    // Группа B: delta первый, echo второй, guest третий.
+    var мНомер = 0;
+    function мИд() {
+        мНомер += 1;
+        return 'dd000001-0000-4000-8000-0000000000' + String(мНомер).padStart(2, '0');
+    }
+    /* ВСТАВКА МАССИВОМ ТРЕБУЕТ ОДИНАКОВОГО НАБОРА КЛЮЧЕЙ У ВСЕХ ОБЪЕКТОВ.
+       PostgREST строит один INSERT на весь массив и отвечает `PGRST102
+       All object keys must match`, если у одной строки ключей больше.
+       Групповой матч несёт `group_number`, матч сетки — `round`: поэтому
+       оба ключа есть у ОБОИХ, просто один из них пустой. */
+    function грМатч(группа, круг, порядок, п1, п2, счёт, победитель, когда, состояние) {
+        return {
+            id: мИд(), tournament_id: 'test-metka',
+            player1_id: п1, player2_id: п2,
+            score: счёт, winner_id: победитель,
+            group_number: группа, round: круг,
+            round_number: порядок, match_order: порядок,
+            played_at: когда, status: состояние, match_type: 'tournament'
+        };
+    }
+    await upsert('matches', [
+        грМатч(1, null, 1, 'mr-alpha', 'mr-bravo',   '6/1 6/1', 'mr-alpha', played, 'completed'),
+        грМатч(1, null, 2, 'mr-alpha', 'mr-charlie', '6/2 6/2', 'mr-alpha', played, 'completed'),
+        грМатч(1, null, 3, 'mr-bravo', 'mr-charlie', '6/3 6/3', 'mr-bravo', played, 'completed'),
+        грМатч(2, null, 1, 'mr-delta', 'mr-echo',    '6/1 6/1', 'mr-delta', played, 'completed'),
+        грМатч(2, null, 2, 'mr-delta', 'mr-guest',   '6/2 6/2', 'mr-delta', played, 'completed'),
+        грМатч(2, null, 3, 'mr-echo',  'mr-guest',   '6/3 6/3', 'mr-echo',  played, 'completed'),
+        // Финал БЕЗ счёта: метка обязана стоять у обоих, а не только у
+        // победителя. Ключи те же, что у групповых — иначе PGRST102
+        грМатч(null, 'F', 1, 'mr-alpha', 'mr-delta', null, null, null, 'upcoming')
+    ], 'id');
+
+    /* РЕЗУЛЬТАТ ПРОВЕРЯЕТСЯ ЧТЕНИЕМ БАЗЫ. Сев уже один раз сказал «ок»,
+       а в базе лежало значение по умолчанию. Перечитываем и называем
+       расхождение вслух. */
+    var свёлМ = await call('GET', '/rest/v1/matches?tournament_id=eq.test-metka' +
+        '&select=id,group_number,round,status');
+    if (!свёлМ.ok) {
+        console.log('  ВНИМАНИЕ: не смог перечитать матчи test-metka — ' +
+            String(JSON.stringify(свёлМ.data)).slice(0, 160));
+    } else {
+        var вГруппах = (свёлМ.data || []).filter(function(м) { return м.group_number > 0; }).length;
+        var вСетке = (свёлМ.data || []).filter(function(м) { return !м.group_number; }).length;
+        console.log('    матчей в группах ' + вГруппах + ', в сетке ' + вСетке);
+        if (вГруппах !== 6 || вСетке !== 1) {
+            console.log('  ВНИМАНИЕ: ждали 6 групповых и 1 в сетке. Проверка метки ' +
+                'пройдёт вхолостую: сверять будет нечего.');
+        }
+    }
+    console.log('  метка группы: две группы по трое и финал без счёта');
+
+    /* --- Сетка, где игроков ещё нет, а метки слотов уже есть -----------
+       Пустая клетка обязана говорить, кого ждёт: `A1` — победитель группы
+       A, `IG1` — победитель первого дополнительного матча. До 02.10 это
+       читала только админка, а зритель видел подряд «TBD».
+       Турнир отдельный: в `test-metka` финал уже с людьми, и пустых
+       клеток с метками там нет — проверять было бы нечего. */
+    await upsert('tournaments', [{
+        id: 'test-sloty',
+        title: 'Тестовый турнир: метки слотов',
+        category_id: 'tour',
+        status: 'ongoing',
+        bracket_type: 'single_elimination',
+        draw_size: 4,
+        date_start: today.toISOString().slice(0, 10),
+        date_end: today.toISOString().slice(0, 10),
+        max_participants: 4,
+        gender: 'men'
+    }], 'id');
+
+    function слотМатч(порядок, м1, м2) {
+        return {
+            id: 'ee000001-0000-4000-8000-0000000000' + String(порядок).padStart(2, '0'),
+            tournament_id: 'test-sloty',
+            player1_id: null, player2_id: null,
+            slot1_label: м1, slot2_label: м2,
+            score: null, winner_id: null,
+            group_number: null, round: null,
+            round_number: 1, match_order: порядок,
+            played_at: null, status: 'upcoming', match_type: 'tournament'
+        };
+    }
+    try {
+        await upsert('matches', [слотМатч(1, 'A1', 'IG1'), слотМатч(2, 'B1', 'Q1')], 'id');
+        var свёлС = await call('GET', '/rest/v1/matches?tournament_id=eq.test-sloty' +
+            '&select=match_order,slot1_label,slot2_label');
+        if (!свёлС.ok) {
+            console.log('  ВНИМАНИЕ: не смог перечитать матчи test-sloty');
+        } else {
+            var сМетками = (свёлС.data || []).filter(function(м) { return м.slot1_label; }).length;
+            console.log('    клеток с меткой слота ' + сМетками + ' из ' + ((свёлС.data || []).length));
+            if (сМетками !== 2) {
+                console.log('  ВНИМАНИЕ: ждали 2 клетки с меткой. Проверка меток слотов ' +
+                    'пройдёт вхолостую — сверять будет нечего.');
+            }
+        }
+        console.log('  метки слотов: сетка на четверых, игроков ещё нет');
+    } catch (e) {
+        console.log('  ВНИМАНИЕ: test-sloty не завёлся — ' + String(e.message).slice(0, 160));
+    }
+
     console.log('\nГотово. Вход для проверок:');
     ACCOUNTS.forEach(a => console.log('  ' + a.email + '  ' + a.password));
 })().catch(e => {

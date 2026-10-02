@@ -5235,21 +5235,13 @@
             if (m.player2_id) вДопМатчах[m.player2_id] = m.match_order || 1;
         });
 
-        // Build playerGroupLabel map: playerId → "A1", "B2", "C3" etc.
-        var playerGroupLabel = {};
-        for (var g = 1; g <= groupCount; g++) {
-            var gm = grpMatches.filter(function(m) { return m.group_number === g; });
-            var pids = [];
-            gm.forEach(function(m) {
-                if (m.player1_id && pids.indexOf(m.player1_id) === -1) pids.push(m.player1_id);
-                if (m.player2_id && pids.indexOf(m.player2_id) === -1) pids.push(m.player2_id);
-            });
-            var st = calculateGroupStandings(pids, gm, playersMap);
-            применитьРучныеМеста(st, (tournament.manual_group_places || {})[String(g)]);
-            st.sort(function(a, b) { return a.place - b.place; });
-            var letter = KSLT_RULES.букваГруппы(g) || String(g);
-            st.forEach(function(s) { playerGroupLabel[s.playerId] = letter + s.place; });
-        }
+        /* КТО ИЗ КАКОЙ ГРУППЫ ВЫШЕЛ — ОДНА КАРТА НА ПРОДУКТ.
+           Карта строилась здесь, и поэтому метку видел только менеджер: на
+           публичной сетке рядом с именем стоял лишь номер посева. Теперь её
+           строит `KSLT_GROUPS.меткиИгроков`, и страница турнира берёт её
+           оттуда же — одним расчётом и одной перестановкой. */
+        var playerGroupLabel = KSLT_GROUPS.меткиИгроков(
+            grpMatches, groupCount, tournament.manual_group_places);
 
         // Состав разошёлся с заявками — говорим первым делом
         //
@@ -6275,21 +6267,11 @@
         return текст ? '<div class="' + кл + '">' + текст + '</div>' : '';
     }
 
+    // Перестановка мест руками переехала в js/group-standings.js: до 02.10
+    // проверка «набор мест тот же» жила только здесь, а страница турнира
+    // применяла ручные места двумя своими копиями без неё
     function применитьРучныеМеста(standings, overrides) {
-        if (!overrides) return;
-        standings.forEach(function(st) {
-            if (st.расчётноеМесто === undefined) st.расчётноеМесто = st.place;
-        });
-
-        var новые = standings.map(function(st) {
-            return overrides[st.playerId] !== undefined ? overrides[st.playerId] : st.расчётноеМесто;
-        });
-        var порядок = function(a, b) { return a - b; };
-        var было = standings.map(function(st) { return st.расчётноеМесто; }).sort(порядок).join();
-        var стало = новые.slice().sort(порядок).join();
-        if (было !== стало) return;
-
-        standings.forEach(function(st, i) { st.place = новые[i]; });
+        KSLT_GROUPS.ручныеМеста(standings, overrides);
     }
 
     // ---- Calculate Group Standings (ITF Tiebreaking) ----
@@ -12992,26 +12974,13 @@
 
 
 
-        // Build playerGroupLabel map
-        var playerGroupLabel = {};
-        for (var g = 1; g <= groupCount; g++) {
-            var gm = grpMatches.filter(function(m) { return m.group_number === g; });
-            var pids = [];
-            gm.forEach(function(m) {
-                if (m.player1_id && pids.indexOf(m.player1_id) === -1) pids.push(m.player1_id);
-                if (m.player2_id && pids.indexOf(m.player2_id) === -1) pids.push(m.player2_id);
-            });
-            var st = calculateGroupStandings(pids, gm, playersMap);
-
-            var mgp = tournament.manual_group_places || {};
-            if (mgp[String(g)]) {
-                var ov = mgp[String(g)];
-                st.forEach(function(s) { if (ov[s.playerId] !== undefined) s.place = ov[s.playerId]; });
-            }
-            st.sort(function(a, b) { return a.place - b.place; });
-            var letter = KSLT_RULES.букваГруппы(g) || String(g);
-            st.forEach(function(s) { playerGroupLabel[s.playerId] = letter + s.place; });
-        }
+        /* ВТОРАЯ КОПИЯ КАРТЫ — И ОНА БЫЛА НЕ РАВНА ПЕРВОЙ.
+           Нашло её правило заморозки 02.10, а не глаза: здесь ручные места
+           применялись СВОИМ кодом, без проверки «набор мест тот же», —
+           то есть в одной админке два разных поведения на одно понятие.
+           Теперь карта одна, и строит её общий модуль. */
+        var playerGroupLabel = KSLT_GROUPS.меткиИгроков(
+            grpMatches, groupCount, tournament.manual_group_places);
 
         // ---- Group tables ----
         for (var g = 1; g <= groupCount; g++) {

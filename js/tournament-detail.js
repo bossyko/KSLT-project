@@ -542,6 +542,22 @@ function renderSingleEliminationBracket(tournament, predOpts) {
 
 var tdИтоги = {};
 
+/* КТО ИЗ КАКОЙ ГРУППЫ ВЫШЕЛ: `playerId` → `A1`, `G2`.
+   Приём взят у `tdИтоги` строкой выше, а не придуман свой: карта считается
+   один раз перед отрисовкой и читается из `renderMatch`, куда объект
+   турнира приходит разными путями — их семь. Строит её
+   `KSLT_GROUPS.меткиИгроков`, та же, что и в админке: иначе метка у
+   менеджера и у зрителя разошлась бы ровно так же, как расходилось место
+   в рейтинге. Сбрасывается на каждой отрисовке — турнир может смениться
+   без перезагрузки страницы. */
+var tdМеткиГрупп = {};
+
+/* ЧЬЮ КЛЕТКУ ЖДЁМ: `matchId` → метки обоих слотов (`A1`, `IG1`, `Q1`).
+   Метка живёт в базе в `slot1_label` / `slot2_label` и до 02.10 читалась
+   ТОЛЬКО админкой (`bracket.js:6009`): зритель видел пятнадцать клеток
+   «TBD» и не понимал ни одной, пока менеджер видел, кто куда выйдет. */
+var tdМеткиСлотов = {};
+
 /** Есть ли в блоке хоть один человек. */
 function ficВБлокеЕстьЛюди(section, matches) {
     var клетки = section.rounds.map(function(rd) {
@@ -606,9 +622,32 @@ function renderMatch(tournament, match, predOpts) {
     var html = '<div class="td-match ' + match.status + '" data-p1="' + (match.player1Id || '') + '" data-p2="' + (match.player2Id || '') + '"' +
         (match.matchId ? ' data-match-id="' + match.matchId + '"' : '') + '>';
 
+    /* МЕТКА ГРУППЫ — ПОСЛЕ ПОСЕВА, ПЕРЕД ИМЕНЕМ, как в админке. Пустая
+       метка не рисуется вовсе: в сетке без групп её нет ни у кого, и
+       пустая плашка съедала бы ширину у имени. */
+    var p1Grp = tdМеткиГрупп[match.player1Id] || '';
+    var p2Grp = tdМеткиГрупп[match.player2Id] || '';
+
+    /* ПУСТАЯ КЛЕТКА ГОВОРИТ, КОГО ЖДЁТ. «A1» — победитель группы A, «IG1» —
+       победитель первого дополнительного матча, «Q1» — первый из отбора.
+       Это понятнее безликого «TBD» и видно сразу после жеребьёвки, когда
+       групп ещё никто не доиграл. Правило и слова взяты у админки
+       (`emptySlotName`, `bracket.js:6005`), а не придуманы заново.
+       BYE не трогаем: там соперника не будет вовсе, и ждать некого. */
+    var слоты = tdМеткиСлотов[match.matchId] || {};
+    if (!match.player1Id && слоты.s1 && p1.name === 'TBD') {
+        p1 = { name: '<span class="td-slot-wait">' + esc(слоты.s1) + '</span>',
+               seed: null, country: '' };
+    }
+    if (!match.player2Id && слоты.s2 && p2.name === 'TBD') {
+        p2 = { name: '<span class="td-slot-wait">' + esc(слоты.s2) + '</span>',
+               seed: null, country: '' };
+    }
+
     // Player 1
     html += '<div class="td-match-player ' + p1Class + '">' +
         (p1.seed ? '<span class="td-seed">[' + p1.seed + ']</span>' : '<span class="td-seed"></span>') +
+        (p1Grp ? '<span class="td-grp-label">' + p1Grp + '</span>' : '') +
         '<span class="td-player-name">' + p1.name + '</span>';
 
     if (match.status === 'live' && scores.length > 0) {
@@ -626,6 +665,7 @@ function renderMatch(tournament, match, predOpts) {
     // Player 2
     html += '<div class="td-match-player ' + p2Class + '">' +
         (p2.seed ? '<span class="td-seed">[' + p2.seed + ']</span>' : '<span class="td-seed"></span>') +
+        (p2Grp ? '<span class="td-grp-label">' + p2Grp + '</span>' : '') +
         '<span class="td-player-name">' + p2.name + '</span>';
 
     if (match.status !== 'live') {
@@ -1602,6 +1642,25 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     var bracketContainer = document.getElementById('bracketContainer');
     if (bracketContainer) {
         if (matches.length > 0 && (t.bracket_type === 'single_elimination' || t.bracket_type === 'fic' || t.bracket_type === 'round_robin' || t.bracket_type === 'group_league')) {
+            // Метки прошлой отрисовки не наследуются: турнир меняется без
+            // перезагрузки страницы, и чужая метка пережила бы смену
+            tdМеткиГрупп = {};
+
+            /* МЕТКИ СЛОТОВ СНИМАЮТСЯ ОДИН РАЗ, А НЕ В СЕМИ МЕСТАХ.
+               Объект матча для `renderMatch` собирается здесь семью
+               разными кусками (`:346`, `:386`, `:1846`, `:1885`, `:2180`,
+               `:2219`, `:2307`), и протащить два поля через каждый значило
+               бы завести семь мест, где их можно забыть. Карта строится
+               одной точкой — приёмом `tdИтоги`, который уже стоит рядом. */
+            tdМеткиСлотов = {};
+            matches.forEach(function(м) {
+                if (м.slot1_label || м.slot2_label) {
+                    tdМеткиСлотов[м.id] = {
+                        s1: м.slot1_label || '',
+                        s2: м.slot2_label || ''
+                    };
+                }
+            });
 
             // ---- Group League: groups + dual leagues ----
             if (t.bracket_type === 'group_league') {
@@ -1654,13 +1713,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         return m.status === 'completed';
                     });
 
-                    var ggMgp = t.manual_group_places || {};
-                    if (ggMgp[String(gg)]) {
-                        var ggOv = ggMgp[String(gg)];
-                        ggStandings.forEach(function(st) {
-                            if (ggOv[st.playerId] !== undefined) st.place = ggOv[st.playerId];
-                        });
-                    }
+                    /* Ручные места — ОБЩЕЙ функцией, со своей проверкой.
+                       Здесь стояла своя копия: она присваивала место без
+                       проверки, что это ПЕРЕСТАНОВКА, и «два вторых» на
+                       публичной были возможны, а в админке нет. */
+                    KSLT_GROUPS.ручныеМеста(ggStandings,
+                        (t.manual_group_places || {})[String(gg)]);
 
                     // Порядок строк не зависит от результатов: по посеву,
                     // дальше по порядку в группе
@@ -1759,6 +1817,15 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var hasPlayoff = ploffMatches.length > 0;
                 var hasIG = igMatches.length > 0;
                 var allGroupDone = grpMatches.length > 0 && grpMatches.every(function(m) { return m.status === 'completed'; });
+
+                /* ОТКУДА ПРИЕХАЛ ЧЕЛОВЕК В КЛЕТКЕ. Просьба Кости, сказанная
+                   трижды: «в админке показывается, кто с какой группы
+                   выходит куда, а на публичной нет — может, также отрисовать
+                   её с G1 F1». Карту строит общий модуль, тот же, что и для
+                   админки, и считается она ДО отрисовки сетки — ниже её
+                   читает `renderMatch`. */
+                tdМеткиГрупп = KSLT_GROUPS.меткиИгроков(
+                    grpMatches, groupCount, t.manual_group_places);
 
                 var bHtml = '';
 
@@ -1947,14 +2014,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         return m.status === 'completed';
                     });
 
-                    // Ручные места менеджера поверх расчёта
-                    var tdMgp = t.manual_group_places || {};
-                    if (tdMgp[String(g)]) {
-                        var tdOv = tdMgp[String(g)];
-                        standings.forEach(function(st) {
-                            if (tdOv[st.playerId] !== undefined) st.place = tdOv[st.playerId];
-                        });
-                    }
+                    // Ручные места менеджера поверх расчёта — общей функцией,
+                    // вторая копия из двух
+                    KSLT_GROUPS.ручныеМеста(standings,
+                        (t.manual_group_places || {})[String(g)]);
 
                     // Порядок строк не зависит от результатов: по посеву,
                     // дальше по порядку в группе
