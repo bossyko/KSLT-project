@@ -28,6 +28,7 @@ const CSS   = 'css/admin.css';
 const СТР   = 'pages/admin.html';
 const СТЕНД_ЗАМЕР = 'maket/setka-zamer.html';
 const ПУБЛИЧНАЯ = 'js/tournament-detail.js';
+const ПУБЛCSS   = 'css/tournament-detail.css';
 
 const ОТКАТЫ = [
   /* ─── одно или другое, а не оба разом ─── */
@@ -73,9 +74,40 @@ const ОТКАТЫ = [
    'подписи этапа объявлены один раз и на трёх языках'],
 
   [ПУБЛИЧНАЯ,
-   '                var подпись = KSLT_POINTS.подписьМеста(р.round_reached);',
+   '                var подпись = своё !== null ? String(своё)\n                    : KSLT_POINTS.подписьМеста(р.round_reached);',
    '                var подпись = место === null ? null : String(место);',
    'публичная страница турнира своего счёта мест не ведёт'],
+
+  /* ─── итоги: одна таблица на все четыре типа сетки ─── */
+  [ПУБЛИЧНАЯ,
+   '                    показатьРаскладкуОчков(t, resultsPodium, resHtml, isEn, isKg, pName, местаФика);',
+   '                    void местаФика;',
+   'итоги рисует одна функция, и зовут её все ветки'],
+
+  [ПУБЛИЧНАЯ,
+   "    supabaseClient.from('tournament_results')",
+   "    supabaseClient.from('rating_history')",
+   'итоги читают tournament_results, и второго источника нет'],
+
+  [ПУБЛИЧНАЯ,
+   "            var html = '<div class=\"td-results-table\">' +",
+   "            var html = '<table style=\"border-collapse:collapse\"></table><div class=\"td-results-table\">' +",
+   'своей таблицы с зашитыми стилями под пьедесталом нет'],
+
+  [ОЧКИ,
+   '    function подписьМатчаЗаМеста(место, язык) {',
+   '    function подписьМатчаЗаМеста_БЫЛО(место, язык) {',
+   'этап называет матч за места там, где места разыграны'],
+
+  [ОЧКИ,
+   '        var начало = (м % 2) ? м : м - 1;',
+   "        var начало = ({ 3: 3, 4: 3, 5: 5, 6: 5, 7: 7, 8: 7 })[м] || м;",
+   'пара мест выводится из места, а не перечислена'],
+
+  [ПУБЛCSS,
+   '.td-results-table .td-res-winner .td-res-pts { font-weight: 700; }',
+   '.td-results-table .td-res-winner .td-res-pts { color: inherit; }',
+   'победитель не теряет вес в колонке очков'],
 
   /* ─── две лиги — две таблицы ─── */
   [СЕТКА,

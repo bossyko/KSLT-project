@@ -149,12 +149,19 @@ const ОТКАТЫ = [
      "                : p1;\n        }\n        if (!match.player2Id",
      'на сайте свободное место — BYE, а не «ждём»'],
 
-    /* 15–17. Версия файла поднята не везде. */
-    [HTML, 'group-standings.js?v=8', 'group-standings.js?v=7',
+    /* 15–17. Версия файла поднята не везде.
+
+       ЯКОРЬ НЕ ДЕРЖИТСЯ НА САМОМ НОМЕРЕ. Здесь стояло `?v=96`, и 02.10 при
+       подъёме до 97 прувер упал с «якорь встречается 0 раз» — правило было
+       зелёным, а доказать его стало нечем. Это та же болезнь, что в
+       правилах: число старится ровно тогда, когда его меняют. Откат
+       приписывает к версии лишнюю цифру: на одной странице версия
+       становится другой, какой бы она ни была. */
+    [HTML, 'group-standings.js?v=', 'group-standings.js?v=1',
      'версия group-standings.js одна на все страницы'],
-    [HTML, 'tournament-detail.js?v=96', 'tournament-detail.js?v=95',
+    [HTML, 'tournament-detail.js?v=', 'tournament-detail.js?v=1',
      'версия tournament-detail.js одна на все страницы'],
-    [HTML, 'tournament-detail.css?v=89', 'tournament-detail.css?v=88',
+    [HTML, 'tournament-detail.css?v=', 'tournament-detail.css?v=1',
      'версия tournament-detail.css одна на все страницы']
 ];
 
