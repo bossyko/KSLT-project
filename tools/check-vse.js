@@ -41,7 +41,8 @@ const КУСКИ = [
     ['проход без игры',    'check-bye-ne-zapiraet.js','check-bye-ne-zapiraet-otkat.js'],
     ['пол турнира',        'check-pol-turnira.js',   'check-pol-turnira-otkat.js'],
     ['порядок очереди',    'check-ochered-poryadok.js','check-ochered-poryadok-otkat.js'],
-    ['кнопка «Снять»',     'check-knopka-snyat.js',  'check-knopka-snyat-otkat.js']
+    ['кнопка «Снять»',     'check-knopka-snyat.js',  'check-knopka-snyat-otkat.js'],
+    ['место в рейтинге',   'check-mesto-v-reytinge.js','check-mesto-v-reytinge-otkat.js']
 ];
 
 function прогнать(файл) {

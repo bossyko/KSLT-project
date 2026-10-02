@@ -1,0 +1,113 @@
+/**
+ * ПРУВЕР ЗАМОРОЗКИ «МЕСТО В РЕЙТИНГЕ».
+ *
+ * Берёт КОПИЮ файлов, возвращает по одному прежнему значению и требует,
+ * чтобы упало ИМЕННО то правило, которое за это отвечает.
+ *
+ * Откаты 1 и 4 — ровно то, что жило в коде до 02.10 и дало гостю «место
+ * 161» при 105 строках в публичном рейтинге.
+ *
+ *   node tools/check-mesto-v-reytinge-otkat.js
+ */
+const fs = require('fs');
+const path = require('path');
+const { execFileSync } = require('child_process');
+const os = require('os');
+
+const КОРЕНЬ = path.join(__dirname, '..');
+const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-mesto-'));
+
+['js', 'tools'].forEach(д =>
+    fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
+
+const ПРАВ    = 'js/kslt-rules.js';
+const РЕЙТИНГ = 'js/rankings-data.js';
+const СЕТКА   = 'js/admin/sections/bracket.js';
+
+const ОТКАТЫ = [
+    /* 1. Отсев ушёл из расчёта — прежнее поведение: список собирался с
+       гостями, и место считалось по нему. */
+    [ПРАВ,
+     '            if (!R.вРейтинге(и)) return false;\n',
+     '',
+     'рейтингКатегории сама спрашивает вРейтинге'],
+
+    /* 2. Признак перестал смотреть на гостя: строка в файле есть, глазами
+       всё хорошо, а отбивать перестал. */
+    [ПРАВ,
+     '        return !!карточка && !карточка.is_guest;',
+     '        return !!карточка;',
+     'вРейтинге отбивает гостя'],
+
+    /* 3. Второе определение признака — ровно тот шов. */
+    [ПРАВ,
+     '    R.вРейтинге = function (карточка) {',
+     '    R.вРейтинге = function (к) { return !!к; };\n    R.вРейтинге = function (карточка) {',
+     'вРейтинге объявлена ровно один раз'],
+
+    /* 4. Публичная страница вернула свою копию отсева. */
+    [РЕЙТИНГ,
+     'return window.KSLT_RULES ? window.KSLT_RULES.вРейтинге(p) : !p.is_guest;',
+     'return !p.is_guest;',
+     'публичный рейтинг зовёт общий признак'],
+
+    /* 5. Админка перестала запрашивать поле — признак останется, но
+       отличать будет нечем. */
+    [СЕТКА,
+     ".select('id, gender, category_id, ntrp_singles, is_guest').eq('category_id', катId);",
+     ".select('id, gender, category_id, ntrp_singles').eq('category_id', катId);",
+     'админка спрашивает is_guest у карточек'],
+
+    /* 6. Состав таблицы категории изменился. */
+    [ПРАВ,
+     'return и.category_id === катId || (в[и.id] || 0) > 0;',
+     'return и.category_id === катId;',
+     'в таблицу входит домашний или набравший очки']
+];
+
+let провалов = 0;
+
+ОТКАТЫ.forEach(([файл, было, стало, ждём], и) => {
+    const путь = path.join(ВРЕМ, файл);
+    const исходный = fs.readFileSync(путь, 'utf8');
+
+    const встреч = исходный.split(было).length - 1;
+    if (встреч !== 1) {
+        console.log('✗ откат ' + (и + 1) + ': якорь встречается ' + встреч +
+            ' раз — нужен ровно один\n    ' + было.slice(0, 70).replace(/\n/g, ' ⏎ '));
+        провалов++;
+        return;
+    }
+
+    fs.writeFileSync(путь, исходный.replace(было, стало));
+
+    let вывод = '', упало = false;
+    try {
+        execFileSync(process.execPath, [path.join(ВРЕМ, 'tools/check-mesto-v-reytinge.js')],
+            { cwd: ВРЕМ, encoding: 'utf8' });
+    } catch (e) {
+        упало = true;
+        вывод = (e.stdout || '') + (e.stderr || '');
+    }
+
+    fs.writeFileSync(путь, исходный);
+
+    if (!упало) {
+        console.log('✗ откат ' + (и + 1) + ' («' + ждём + '»): правило НЕ упало — оно ничего не держит');
+        провалов++;
+    } else if (вывод.indexOf(ждём) === -1) {
+        console.log('✗ откат ' + (и + 1) + ': упало не то правило. Ждали «' + ждём + '», а в выводе:\n' +
+            вывод.split('\n').filter(с => с.indexOf('•') !== -1).join('\n'));
+        провалов++;
+    } else {
+        console.log('✓ откат ' + (и + 1) + ' уронил «' + ждём + '»');
+    }
+});
+
+fs.rmSync(ВРЕМ, { recursive: true, force: true });
+
+if (провалов) {
+    console.log('\n✗ Прувер: ' + провалов + ' из ' + ОТКАТЫ.length + ' откатов не доказали правило');
+    process.exit(1);
+}
+console.log('\n✓ Прувер: все ' + ОТКАТЫ.length + ' откатов уронили свои правила');

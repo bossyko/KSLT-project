@@ -2020,8 +2020,11 @@
             чужие.push(r.player_id);
         });
 
+        /* `is_guest` СПРАШИВАЕМ: без него гости попадали в таблицу категории,
+           и место считалось по списку, которого нет нигде. Отбор делает
+           `KSLT_RULES.рейтингКатегории` — предикат один на продукт. */
         var свои = await A.client.from('players')
-            .select('id, gender, category_id, ntrp_singles').eq('category_id', катId);
+            .select('id, gender, category_id, ntrp_singles, is_guest').eq('category_id', катId);
         if (свои.error) return {};
         var карточки = свои.data || [];
         var есть = {};
@@ -2030,7 +2033,7 @@
         var надо = чужие.filter(function(id) { return !есть[id]; });
         if (надо.length) {
             var ещё = await A.client.from('players')
-                .select('id, gender, category_id, ntrp_singles').in('id', надо);
+                .select('id, gender, category_id, ntrp_singles, is_guest').in('id', надо);
             карточки = карточки.concat(ещё.data || []);
         }
 
