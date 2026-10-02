@@ -647,6 +647,131 @@ async function upsert(table, rows, onConflict) {
         console.log('  ВНИМАНИЕ: test-sloty или test-ochered не завелись — ' + String(e.message).slice(0, 160));
     }
 
+    /* --- Итоги турнира: таблица под пьедесталом --------------------------
+       Решение Кости 01.10: «надо будет отобразить так, как надо, чтобы все
+       видели». Под пьедесталом — все участники: место, игрок, этап, очки.
+
+       ДВА ТУРНИРА, ПОТОМУ ЧТО МЕСТО СЧИТАЕТСЯ ПО-РАЗНОМУ.
+       В олимпийке места 5-8 НЕ разыграны: четверо проигравших четвертьфинал
+       между собой не играли, и каждому пишется полоса. В сетке «все места»
+       (`fic`) разыграны ВСЕ: пятый сыграл матч за 5-6, и место у него
+       точное, а этап назовёт этот матч, а не выдуманный полуфинал
+       (решение Кости 02.10).
+
+       Одним турниром это не проверить: одна и та же строка не может быть
+       одновременно полосой и числом. */
+    try {
+    await upsert('tournaments', [
+        {
+            id: 'test-itogi',
+            title: 'Тестовый турнир: итоги олимпийки',
+            category_id: 'tour',
+            status: 'completed',
+            bracket_type: 'single_elimination',
+            draw_size: 8,
+            date_start: today.toISOString().slice(0, 10),
+            date_end: today.toISOString().slice(0, 10),
+            max_participants: 8,
+            gender: 'men'
+        },
+        {
+            id: 'test-itogi-fic',
+            title: 'Тестовый турнир: итоги всех мест',
+            category_id: 'tour',
+            status: 'completed',
+            bracket_type: 'fic',
+            draw_size: 8,
+            date_start: today.toISOString().slice(0, 10),
+            date_end: today.toISOString().slice(0, 10),
+            max_participants: 8,
+            gender: 'men'
+        }
+    ], 'id');
+
+    /* Ключи у всех матчей ОДИНАКОВЫЕ: PostgREST отказывает массиву, где
+       объекты несут разные наборы полей (PGRST102). Попадались 02.10. */
+    function итогМатч(ид, турнир, круг, порядок, п1, п2, победитель, имяКруга) {
+        return {
+            id: ид, tournament_id: турнир,
+            player1_id: п1, player2_id: п2,
+            score: '6/4 6/2', winner_id: победитель,
+            group_number: null, round: имяКруга,
+            round_number: круг, match_order: порядок,
+            played_at: today.toISOString(), status: 'completed',
+            match_type: 'tournament'
+        };
+    }
+
+    var ИД = function (н) { return 'dd000001-0000-4000-8000-0000000000' + String(н).padStart(2, '0'); };
+
+    await upsert('matches', [
+        // Олимпийка: финал и матч за третье место — пьедестал из троих
+        итогМатч(ИД(1), 'test-itogi', 3, 1, 'mr-alpha', 'mr-bravo', 'mr-alpha', 'F'),
+        итогМатч(ИД(2), 'test-itogi', 3, 2, 'mr-charlie', 'mr-delta', 'mr-charlie', '3RD'),
+        // Все места: последний круг разыгрывает 1-2, 3-4, 5-6 и 7-8
+        итогМатч(ИД(3), 'test-itogi-fic', 3, 1, 'mr-alpha', 'mr-bravo', 'mr-alpha', 'F'),
+        итогМатч(ИД(4), 'test-itogi-fic', 3, 2, 'mr-charlie', 'mr-delta', 'mr-charlie', '3RD'),
+        итогМатч(ИД(5), 'test-itogi-fic', 3, 3, 'mr-echo', 'test-player', 'mr-echo', 'F5'),
+        итогМатч(ИД(6), 'test-itogi-fic', 3, 4, 'test-rival', 'test-captain', 'test-rival', 'F7')
+    ], 'id');
+
+    /* Итоги пишет админка при завершении турнира; здесь кладём то же, что
+       записала бы она. Очки — уровень «Вторая»: 360 · 215 · 150 · 130,
+       остальным победы. */
+    function итог(турнир, игрок, этап, очки) {
+        return { tournament_id: турнир, player_id: игрок, round_reached: этап,
+                 points_earned: очки, season: today.getFullYear(), category_id: 'tour' };
+    }
+    await call('DELETE', '/rest/v1/tournament_results?tournament_id=in.(test-itogi,test-itogi-fic)');
+    var итоги = [
+        итог('test-itogi', 'mr-alpha',     'W',   360),
+        итог('test-itogi', 'mr-bravo',     'F',   215),
+        итог('test-itogi', 'mr-charlie',   '3RD', 150),
+        итог('test-itogi', 'mr-delta',     '4TH', 130),
+        итог('test-itogi', 'mr-echo',      'QF',   75),
+        итог('test-itogi', 'test-player',  'QF',   50),
+        итог('test-itogi', 'test-rival',   'QF',   25),
+        итог('test-itogi', 'test-captain', 'QF',   10),
+
+        итог('test-itogi-fic', 'mr-alpha',     'W',   360),
+        итог('test-itogi-fic', 'mr-bravo',     'F',   215),
+        итог('test-itogi-fic', 'mr-charlie',   '3RD', 150),
+        итог('test-itogi-fic', 'mr-delta',     '4TH', 130),
+        итог('test-itogi-fic', 'mr-echo',      'SF',  111),
+        итог('test-itogi-fic', 'test-player',  'SF',  111),
+        итог('test-itogi-fic', 'test-rival',   'QF',   90),
+        итог('test-itogi-fic', 'test-captain', 'QF',   90)
+    ];
+    var ответИтоги = await call('POST', '/rest/v1/tournament_results', итоги);
+    if (!ответИтоги.ok) {
+        console.log('  ВНИМАНИЕ: итоги не легли — ' +
+            String(JSON.stringify(ответИтоги.data)).slice(0, 200));
+    }
+
+    /* ПЕРЕЧИТКА ОБЯЗАНА УМЕТЬ УПАСТЬ: спрашиваем не «есть ли строки», а
+       ровно то, что различает проверка — восемь строк на каждый турнир и
+       четверо на неразыгранной полосе у олимпийки. */
+    var свёлИ = await call('GET', '/rest/v1/tournament_results?tournament_id=in.' +
+        '(test-itogi,test-itogi-fic)&select=tournament_id,player_id,round_reached,points_earned');
+    if (!свёлИ.ok) {
+        console.log('  ВНИМАНИЕ: не смог перечитать итоги');
+    } else {
+        var все = свёлИ.data || [];
+        var олимп = все.filter(function(р) { return р.tournament_id === 'test-itogi'; });
+        var фик = все.filter(function(р) { return р.tournament_id === 'test-itogi-fic'; });
+        var полоса = олимп.filter(function(р) { return р.round_reached === 'QF'; }).length;
+        console.log('    итоги: олимпийка ' + олимп.length + ', все места ' + фик.length +
+            ', на полосе 5-8 — ' + полоса);
+        if (олимп.length !== 8 || фик.length !== 8 || полоса !== 4) {
+            console.log('  ВНИМАНИЕ: итоги легли не полностью. Проверка таблицы итогов ' +
+                'пройдёт вхолостую — сверять будет нечего.');
+        }
+    }
+    console.log('  итоги турнира: олимпийка с полосой и сетка всех мест');
+    } catch (e) {
+        console.log('  ВНИМАНИЕ: итоги не завелись — ' + String(e.message).slice(0, 160));
+    }
+
     console.log('\nГотово. Вход для проверок:');
     ACCOUNTS.forEach(a => console.log('  ' + a.email + '  ' + a.password));
 })().catch(e => {
