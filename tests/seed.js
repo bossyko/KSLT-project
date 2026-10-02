@@ -553,8 +553,98 @@ async function upsert(table, rows, onConflict) {
             }
         }
         console.log('  метки слотов: сетка на четверых, игроков ещё нет');
+
+    /* --- Очередь замены: порядок ОБРАТЕН порядку подачи ----------------
+       «ЛИСТ ОЖИДАНИЯ — РЕШЕНИЕ КЛУБА, А НЕ ПОРЯДОК ВРЕМЕНИ» (30.09): в
+       боевом CHALLENGERS 10 строк ожидания из 11 поданы РАНЬШЕ последней
+       строки сетки. Окно замены сортирует по `queue_at` (`bracket.js:1155`).
+
+       ЧТОБЫ ПРОВЕРКА НЕ ПРОШЛА ВХОЛОСТУЮ, два порядка должны РАЗЛИЧАТЬСЯ:
+       подали alpha → bravo → charlie, а в очередь поставили наоборот. Если
+       код вернётся к `registered_at`, тест это увидит; при совпадающих
+       порядках он не увидел бы ничего. */
+    await upsert('tournaments', [{
+        id: 'test-ochered',
+        title: 'Тестовый турнир: очередь замены',
+        category_id: 'tour',
+        status: 'registration_open',
+        date_start: today.toISOString().slice(0, 10),
+        date_end: today.toISOString().slice(0, 10),
+        max_participants: 4,
+        gender: 'men'
+    }], 'id');
+
+    function чч(часов) {
+        var д = new Date(today);
+        д.setHours(часов, 0, 0, 0);
+        return д.toISOString();
+    }
+
+    var базоваяОчередь = [
+        { id: 'ff000001-0000-4000-8000-000000000001', player_id: 'mr-echo',    status: 'approved', registered_at: чч(8) },
+        { id: 'ff000001-0000-4000-8000-000000000002', player_id: 'mr-delta',   status: 'approved', registered_at: чч(8) },
+        // Подали рано — в очередь поставили поздно, и наоборот
+        { id: 'ff000001-0000-4000-8000-000000000003', player_id: 'mr-alpha',   status: 'waitlist', registered_at: чч(9) },
+        { id: 'ff000001-0000-4000-8000-000000000004', player_id: 'mr-bravo',   status: 'waitlist', registered_at: чч(10) },
+        { id: 'ff000001-0000-4000-8000-000000000005', player_id: 'mr-charlie', status: 'waitlist', registered_at: чч(11) }
+    ].map(function(з) {
+        return { id: з.id, tournament_id: 'test-ochered', player_id: з.player_id,
+                 status: з.status, registered_at: з.registered_at };
+    });
+    await upsert('tournament_registrations', базоваяОчередь, 'id');
+
+    /* ПОРЯДОК ОЧЕРЕДИ ЗАДАЁТСЯ `waitlisted_at`, А НЕ `queue_at`.
+       Здесь стоял `queue_at`, и сев врал: колонка ГЕНЕРИРУЕМАЯ —
+       `COALESCE(waitlisted_at, registered_at)`, так она и заведена
+       (`sql/функции/ochered-vremya-postanovki.sql:62`). Записать её руками
+       нельзя, правка уходила в отказ, а перечитка спрашивала «queue_at не
+       пуст?» — он не пуст НИКОГДА, и проверка проходила вхолостую.
+       Пишем то, что пишет сама админка при снятии с основы
+       (`bracket.js:1078`), а порядок перечитываем сравнением с подачей. */
+    var очередьВремена = [
+        { id: 'ff000001-0000-4000-8000-000000000003', waitlisted_at: чч(17) },  // alpha — поставлен последним
+        { id: 'ff000001-0000-4000-8000-000000000004', waitlisted_at: чч(16) },
+        { id: 'ff000001-0000-4000-8000-000000000005', waitlisted_at: чч(15) }   // charlie — первым
+    ];
+    var очередьЛегла = true;
+    for (var оч = 0; оч < очередьВремена.length; оч++) {
+        var р = await call('PATCH', '/rest/v1/tournament_registrations?id=eq.' + очередьВремена[оч].id,
+            { waitlisted_at: очередьВремена[оч].waitlisted_at });
+        if (!р.ok) {
+            очередьЛегла = false;
+            console.log('  ВНИМАНИЕ: waitlisted_at не лёг — ' +
+                String(JSON.stringify(р.data)).slice(0, 160));
+            break;
+        }
+    }
+
+    /* ПЕРЕЧИТКА ОБЯЗАНА УМЕТЬ УПАСТЬ. Спрашиваем не «есть ли queue_at»
+       (он есть всегда), а РАЗОШЁЛСЯ ЛИ порядок очереди с порядком подачи:
+       ровно это и различает проверка в прогоне. */
+    var свёлО = await call('GET', '/rest/v1/tournament_registrations?tournament_id=eq.test-ochered' +
+        '&status=eq.waitlist&select=id,registered_at,waitlisted_at,queue_at');
+    if (!свёлО.ok) {
+        console.log('  ВНИМАНИЕ: не смог перечитать очередь');
+    } else {
+        var ждут = свёлО.data || [];
+        var поПодаче = ждут.slice().sort(function(a, b) {
+            return String(a.registered_at).localeCompare(String(b.registered_at));
+        }).map(function(з) { return з.id; }).join(',');
+        var поОчереди = ждут.slice().sort(function(a, b) {
+            return String(a.queue_at).localeCompare(String(b.queue_at));
+        }).map(function(з) { return з.id; }).join(',');
+        var своё = ждут.filter(function(з) { return !!з.waitlisted_at; }).length;
+        console.log('    в очереди ' + ждут.length + ', со своим временем постановки ' + своё);
+        if (ждут.length !== 3 || своё !== 3 || поПодаче === поОчереди) {
+            console.log('  ВНИМАНИЕ: порядок очереди не разошёлся с порядком подачи. ' +
+                'Проверка порядка пройдёт вхолостую — по подаче и по очереди выйдет одно и то же.');
+        } else {
+            console.log('    порядок очереди обратен подаче — проверка различит две сортировки');
+        }
+    }
+    console.log('  очередь замены: трое ждут, порядок обратен подаче');
     } catch (e) {
-        console.log('  ВНИМАНИЕ: test-sloty не завёлся — ' + String(e.message).slice(0, 160));
+        console.log('  ВНИМАНИЕ: test-sloty или test-ochered не завелись — ' + String(e.message).slice(0, 160));
     }
 
     console.log('\nГотово. Вход для проверок:');
