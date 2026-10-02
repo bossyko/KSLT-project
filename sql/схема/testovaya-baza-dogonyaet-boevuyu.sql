@@ -122,6 +122,77 @@ ALTER TABLE public.players
     ADD COLUMN IF NOT EXISTS is_guest boolean NOT NULL DEFAULT false,
     ADD COLUMN IF NOT EXISTS has_account boolean NOT NULL DEFAULT false;
 
+-- ---- Двадцать одна колонка из сверки 02.10 ----
+--
+-- Сведено двумя списками колонок — боевым и тестовым; типы прочитаны из
+-- боевой схемы, не выведены из кода. Половина из них держит живые куски:
+-- перерывы судейского экрана, отзыв рассылки, кадрированная афиша,
+-- новости из внешних источников. Пока их нет в тестовой, эти экраны
+-- прогоном не проверяются вовсе.
+
+ALTER TABLE public.courts
+    ADD COLUMN IF NOT EXISTS country      text,
+    ADD COLUMN IF NOT EXISTS country_en   text,
+    ADD COLUMN IF NOT EXISTS instagram    text,
+    ADD COLUMN IF NOT EXISTS whatsapp     text,
+    ADD COLUMN IF NOT EXISTS published_at timestamptz;
+
+ALTER TABLE public.live_matches
+    ADD COLUMN IF NOT EXISTS break_kind   text,
+    ADD COLUMN IF NOT EXISTS pause_reason text,
+    ADD COLUMN IF NOT EXISTS sponsor_name text,
+    ADD COLUMN IF NOT EXISTS break_until  timestamptz;
+
+ALTER TABLE public.news
+    ADD COLUMN IF NOT EXISTS source_name text,
+    ADD COLUMN IF NOT EXISTS source_url  text;
+
+ALTER TABLE public.payments
+    ADD COLUMN IF NOT EXISTS payer_email text,
+    ADD COLUMN IF NOT EXISTS payer_name  text;
+
+ALTER TABLE public.push_log
+    ADD COLUMN IF NOT EXISTS recalled_at timestamptz,
+    ADD COLUMN IF NOT EXISTS recalled_by uuid;
+
+ALTER TABLE public.tournaments
+    ADD COLUMN IF NOT EXISTS image_full text,
+    ADD COLUMN IF NOT EXISTS image_crop jsonb;
+
+ALTER TABLE public.profiles
+    ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+
+ALTER TABLE public.notification_log
+    ADD COLUMN IF NOT EXISTS push_id uuid;
+
+ALTER TABLE public.player_badges
+    ADD COLUMN IF NOT EXISTS seen_at timestamptz;
+
+ALTER TABLE public.challenge_predictions
+    ADD COLUMN IF NOT EXISTS predicted_side smallint;
+
+-- ---- Чистки, которые в тестовую не доехали ----
+--
+-- Эти десять колонок боевая не «потеряла», а УДАЛИЛА миграциями:
+-- challenges-rework.sql:59–64, ntrp-staroe-pole-udalit.sql:99,
+-- doubles-mixed-stats.sql:216–218. Живой код их не читает ни строкой.
+-- Отстаёт тестовая, и в обе стороны: ей не доехали и новые столбцы, и
+-- чистки. Применено Костей 02.10.
+
+ALTER TABLE public.challenges
+    DROP COLUMN IF EXISTS counter_date,
+    DROP COLUMN IF EXISTS counter_time,
+    DROP COLUMN IF EXISTS counter_venue,
+    DROP COLUMN IF EXISTS counter_court_id,
+    DROP COLUMN IF EXISTS counter_step,
+    DROP COLUMN IF EXISTS countered_at;
+
+ALTER TABLE public.players
+    DROP COLUMN IF EXISTS ntrp_rating,
+    DROP COLUMN IF EXISTS doubles_points,
+    DROP COLUMN IF EXISTS doubles_rank_change,
+    DROP COLUMN IF EXISTS doubles_form;
+
 -- ---- Таблицы, которых в тестовой не было вовсе ----
 --
 -- Сверка 02.10 (`sql/обслуживание/sverka-shem.sql`): в тестовой не хватало
