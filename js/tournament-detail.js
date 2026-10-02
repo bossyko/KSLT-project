@@ -1432,7 +1432,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // В парном он считается по рейтингу капитана — а на корт выходят двое, и
     // сила пары складывается из обоих. Полоса выглядела уверенно, а опиралась
     // на половину данных, поэтому в парных её не показываем вовсе.
-    var predOpts = isDbl ? null : {
+    /* Полоса прогноза выключена до декабря — решение Кости 02.10. Спрашиваем
+       ТОТ ЖЕ выключатель, что и страница вызова: причина и числа в шапке
+       js/match-prediction.js. Парные отключены отдельно и давно: формула
+       берёт силу одного человека, а на корт выходят двое. */
+    var предсказаниеВидно = !!(window.KSLT_PREDICTION && window.KSLT_PREDICTION.показывать());
+    var predOpts = (isDbl || !предсказаниеВидно) ? null : {
         playersMap: playersMap,
         h2hMap: h2hMap,
         label: isEn ? 'KSLT AI Prediction' : (isKg ? 'KSLT AI Болжолу' : 'Прогноз KSLT AI'),

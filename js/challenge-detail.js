@@ -474,6 +474,9 @@
 
     function forecastHtml(b, c1Name, c2Name) {
         if (!window.KSLT_PREDICTION) return '';
+        // Выключатель ОДИН на продукт: решение Кости 02.10, причина и
+        // числа — в шапке js/match-prediction.js
+        if (!window.KSLT_PREDICTION.показывать()) return '';
         if (b.format && b.format !== 'singles') return '';
 
         // Гость баттла в базе не заведён: очков и формы у него нет, считать

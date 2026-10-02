@@ -152,7 +152,7 @@ const ОТКАТЫ = [
     /* 15–17. Версия файла поднята не везде. */
     [HTML, 'group-standings.js?v=8', 'group-standings.js?v=7',
      'версия group-standings.js одна на все страницы'],
-    [HTML, 'tournament-detail.js?v=95', 'tournament-detail.js?v=94',
+    [HTML, 'tournament-detail.js?v=96', 'tournament-detail.js?v=95',
      'версия tournament-detail.js одна на все страницы'],
     [HTML, 'tournament-detail.css?v=89', 'tournament-detail.css?v=88',
      'версия tournament-detail.css одна на все страницы']
