@@ -452,13 +452,25 @@ async function upsert(table, rows, onConflict) {
        All object keys must match`, если у одной строки ключей больше.
        Групповой матч несёт `group_number`, матч сетки — `round`: поэтому
        оба ключа есть у ОБОИХ, просто один из них пустой. */
+    /* ВРЕМЯ ЗАПУСКА — ЧАСТЬ ДАННЫХ, А НЕ УКРАШЕНИЕ. Очередь запусков
+       строится ТОЛЬКО из матчей с `scheduled_time` (`bracket.js:4829`):
+       без него панель показывает пустое состояние, и печатать нечего.
+       Прогон 02.10 упал на пороге «нет таблицы расписания» — правильное
+       падение, беда была в севе. */
+    var часПуска = 9;
     function грМатч(группа, круг, порядок, п1, п2, счёт, победитель, когда, состояние) {
+        var пуск = new Date(today);
+        пуск.setHours(часПуска, 0, 0, 0);
+        часПуска += 1;
         return {
             id: мИд(), tournament_id: 'test-metka',
             player1_id: п1, player2_id: п2,
             score: счёт, winner_id: победитель,
             group_number: группа, round: круг,
             round_number: порядок, match_order: порядок,
+            scheduled_time: пуск.toISOString(),
+            // `court` в базе ЦЕЛОЕ: строка «Корт 2» падает на 22P02
+            court: (порядок % 2) + 1,
             played_at: когда, status: состояние, match_type: 'tournament'
         };
     }
