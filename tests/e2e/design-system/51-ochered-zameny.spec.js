@@ -259,4 +259,119 @@ test.describe('Окно замены: очередь первой', () => {
             expect(выбор.вПоле, 'в поле лёг не тот, по кому нажали').toBe(выбор.уСтроки);
             expect(выбор.помечена, 'выбранная строка не помечена на вид').toContain('on');
         });
+
+    test('поиск по базе не предлагает тех, кто уже играет в этом турнире',
+        async ({ page }) => {
+            /* ТРИ ОКНА ЗАМЕНЫ ПИСАЛИ ПОИСК ТРИЖДЫ, и копия окна одиночки
+               забыла исключить занятых — предлагала человека из соседней
+               группы. 01.10 поиск сведён в один `привязатьПоиск`
+               (`bracket.js:626`), и окно замены зовёт его с картой занятых
+               (`:1466`). Заморозка держит, что копия не заведётся снова;
+               КОГО ИМЕННО показал поиск, видно только прогоном.
+
+               Кто занят, а кто в очереди, считает `ктоЗанятВТурнире`
+               (`:594`): живая заявка — занят, лист ожидания — свободен, но
+               помечен; снятые и отклонённые не в счёт. Заменяемый не занят
+               сам собой — иначе его нельзя было бы оставить. */
+            await page.goto('/pages/admin.html#tournaments/bracket/' + ТУРНИР);
+            await page.locator('[data-trn-nav="regs"]').first().click();
+            await page.waitForSelector('#adBrkRegPanel .ad-btn-replace', { timeout: 20000 });
+
+            /* Чьё окно откроется — читаем со страницы, а не предполагаем:
+               от этого зависит, кого поиск обязан показать. */
+            const кого = await page.evaluate(() => {
+                const кн = document.querySelector('#adBrkRegPanel .ad-btn-replace');
+                const стр = кн ? кн.closest('tr') : null;
+                return стр ? стр.textContent.replace(/\s+/g, ' ').trim() : '';
+            });
+
+            await page.locator('#adBrkRegPanel .ad-btn-replace').first().click();
+            await page.waitForSelector('#adReplaceMode', { timeout: 10000 });
+            await дождатьсяОживления(page);
+
+            await page.locator('#adReplaceMode button[data-mode="db"]').click();
+            await expect(page.locator('#adReplaceDbBlock'), 'поиск по базе не открылся')
+                .toBeVisible();
+
+            await page.locator('#adReplaceSearch').fill('Равный');
+            await page.waitForSelector('#adReplaceResults .ad-partner-search-item', { timeout: 10000 });
+
+            const строки = await page.evaluate(() =>
+                [...document.querySelectorAll('#adReplaceResults .ad-partner-search-item')]
+                    .map(э => э.textContent.replace(/\s+/g, ' ').trim()));
+
+            /* ПОРОГ: поиск вообще что-то нашёл. Пустой список «не предлагает
+               занятых» ровно так же, как и сломанный. */
+            expect(строки.length, 'поиск ничего не нашёл — проверять нечего').toBeGreaterThan(0);
+
+            const есть = имя => строки.some(с => с.indexOf(имя) !== -1);
+
+            /* В ОЧЕРЕДИ — МОЖНО, И ЭТО ВИДНО СТРОКОЙ. */
+            expect(есть('Эдуард Равный'), 'человека из листа ожидания поиск не показал').toBe(true);
+            expect(есть('Борис Равный'), 'человека из листа ожидания поиск не показал').toBe(true);
+
+            /* В ОСНОВЕ — НЕЛЬЗЯ, кроме того, кого и меняем. */
+            const меняемАнтона = кого.indexOf('Антон Равный') !== -1;
+            expect(есть('Антон Равный'), меняемАнтона
+                ? 'заменяемого поиск обязан предлагать: его место и освобождается'
+                : 'поиск предложил того, кто уже играет в этом турнире. Меняем: ' + кого)
+                .toBe(меняемАнтона);
+        });
+
+    test('замена капитана не предлагает его же напарника',
+        async ({ page }) => {
+            /* ПАРА ИЗ ОДНОГО ЧЕЛОВЕКА. Вопрос Кости 02.10: «если будет
+               заменяться капитан, что будет перетираться?». Нормальный ход
+               не ломает ничего: заявке ставится новый `player_id`, и
+               `заменитьВМатчах` переписывает сторону в матчах. Ломал только
+               один случай: `ктоЗанятВТурнире` пропускает заменяемую заявку
+               ЦЕЛИКОМ (`bracket.js:598`), и вместе с заменяемым из списка
+               занятых выпадал его НАПАРНИК — поиск предлагал поставить
+               капитаном того, кто уже стоит напарником в этой же паре.
+
+               В паре капитана нет как правила, но в ДАННЫХ он есть: матч
+               несёт один идентификатор стороны — `player_id` заявки, —
+               а имя пары собирается из заявки (`tournament-detail.js:102`).
+
+               ЗАПИСЬ ЗДЕСЬ НЕ ТРОГАЕМ: окно открывается и читается, кнопку
+               сохранения прибор не нажимает. */
+            await page.goto('/pages/admin.html#tournaments/bracket/test-doubles');
+            await page.locator('[data-trn-nav="regs"]').first().click();
+            await page.waitForSelector('#adBrkRegPanel .ad-btn-replace', { timeout: 20000 });
+
+            const строкаПары = page.locator('#adBrkRegPanel tr')
+                .filter({ hasText: 'Тестовый Капитан' }).first();
+            await expect(строкаПары, 'пары с Тестовым Капитаном нет — прогоните node tests/seed.js')
+                .toBeVisible();
+            await строкаПары.locator('.ad-btn-replace').first().click();
+
+            /* В парном окно сперва спрашивает, кого менять. */
+            await page.waitForSelector('#adReplaceMainBtn', { timeout: 10000 });
+            await page.locator('#adReplaceMainBtn').click();
+            await page.waitForSelector('#adReplaceMode', { timeout: 10000 });
+            await дождатьсяОживления(page);
+
+            await page.locator('#adReplaceMode button[data-mode="db"]').click();
+            await page.locator('#adReplaceSearch').fill('Тестовый');
+            await page.waitForSelector('#adReplaceResults .ad-partner-search-item', { timeout: 10000 });
+
+            const найдены = await page.evaluate(() =>
+                [...document.querySelectorAll('#adReplaceResults .ad-partner-search-item')]
+                    .map(э => э.textContent.replace(/\s+/g, ' ').trim()));
+
+            const есть = имя => найдены.some(с => с.indexOf(имя) !== -1);
+
+            /* ПОРОГ: поиск вообще работает и кого-то показывает. Пустой
+               список «не предлагает напарника» ровно так же, как и
+               починенный. */
+            expect(есть('Тестовый Админ'),
+                'поиск не нашёл даже того, кто в турнире не играет: ' +
+                JSON.stringify(найдены)).toBe(true);
+
+            expect(есть('Тестовый Игрок'),
+                'поиск предложил собственного напарника этой пары — выйдет пара из ' +
+                'одного человека. Найдено: ' + JSON.stringify(найдены)).toBe(false);
+            expect(есть('Тестовый Капитан'),
+                'поиск предложил того, кого и меняем').toBe(false);
+        });
 });
