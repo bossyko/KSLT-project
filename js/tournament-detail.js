@@ -2607,22 +2607,21 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     }
                     resHtml += '</div>';
 
-                    // Table for remaining places
-                    if (ficPlaces.length > 3) {
-                        resHtml += '<div style="max-width:500px;margin:24px auto 0;">';
-                        resHtml += '<table style="width:100%;border-collapse:collapse;">';
-                        resHtml += '<thead><tr><th style="text-align:center;padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">#</th>' +
-                            '<th style="padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th></tr></thead><tbody>';
-                        for (var i = 3; i < ficPlaces.length; i++) {
-                            var fpName = pName(ficPlaces[i].playerId);
-                            resHtml += '<tr style="border-bottom:1px solid var(--border, rgba(255,255,255,0.06));">' +
-                                '<td style="text-align:center;padding:8px;font-weight:600;color:var(--text-secondary);">' + ficPlaces[i].place + '</td>' +
-                                '<td style="padding:8px;">' + fpName + '</td></tr>';
-                        }
-                        resHtml += '</tbody></table></div>';
-                    }
-
                     resultsPodium.innerHTML = resHtml;
+
+                    /* ИТОГИ — ОДНА ТАБЛИЦА НА ВСЕ ЧЕТЫРЕ ТИПА СЕТКИ.
+                       Здесь стояла своя: номер и имя, ОЧКОВ НЕ БЫЛО ВОВСЕ, а
+                       стили зашиты в разметку. Понятие одно — «итоги
+                       турнира», — и экранов у него было три.
+
+                       Место у фика ТОЧНОЕ, а не полоса: там разыграны все
+                       места, и считает их эта же страница по номеру матча
+                       последнего круга. В базе их нет — `tournament_results`
+                       хранит только буквенный код, — поэтому отдаём картой
+                       отсюда. */
+                    var местаФика = {};
+                    ficPlaces.forEach(function(ф) { местаФика[ф.playerId] = ф.place; });
+                    показатьРаскладкуОчков(t, resultsPodium, resHtml, isEn, isKg, pName, местаФика);
                 } else {
                     resultsPodium.innerHTML = '<div class="td-no-results"><p>' + (isRatingTournament(t) ? L.noResults : L.noResultsPlain) + '</p></div>';
                 }
@@ -2650,31 +2649,15 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     resHtml += '</div>';
 
-                    // Таблица очков — только для рейтинговых турниров
-                    if (isRatingTournament(t)) supabaseClient.from('rating_history')
-                        .select('player_id, points_earned')
-                        .eq('tournament_id', t.id)
-                        .order('points_earned', { ascending: false })
-                        .then(function(rhRes) {
-                            if (rhRes.data && rhRes.data.length > 0) {
-                                var tblHtml = '<div style="max-width:600px;margin:24px auto 0;">';
-                                tblHtml += '<table style="width:100%;border-collapse:collapse;">';
-                                tblHtml += '<thead><tr><th style="text-align:center;padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">#</th>' +
-                                    '<th style="padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th>' +
-                                    '<th style="text-align:right;padding:6px 8px;color:var(--text-secondary);font-size:0.8rem;">' + (isEn ? 'Points' : (isKg ? 'Упай' : 'Очки')) + '</th></tr></thead><tbody>';
-                                rhRes.data.forEach(function(row, i) {
-                                    var rpName = pName(row.player_id);
-                                    tblHtml += '<tr style="border-bottom:1px solid var(--border, rgba(255,255,255,0.06));">' +
-                                        '<td style="text-align:center;padding:8px;font-weight:600;color:var(--text-secondary);">' + (i + 1) + '</td>' +
-                                        '<td style="padding:8px;">' + rpName + '</td>' +
-                                        '<td style="text-align:right;padding:8px;color:var(--accent);font-weight:600;">+' + (row.points_earned || 0) + '</td></tr>';
-                                });
-                                tblHtml += '</tbody></table></div>';
-                                resultsPodium.innerHTML += tblHtml;
-                            }
-                        });
-
                     resultsPodium.innerHTML = resHtml;
+
+                    /* ИТОГИ ЧИТАЮТСЯ ОТТУДА ЖЕ, ОТКУДА У ВСЕХ.
+                       Здесь стояла своя таблица из `rating_history`: второй
+                       источник одного понятия. Место в ней было НОМЕРОМ
+                       СТРОКИ — не местом вовсе, — а этапа не было совсем.
+                       `tournament_results` пишет админка при завершении
+                       турнира, и его же читают остальные типы сетки. */
+                    показатьРаскладкуОчков(t, resultsPodium, resHtml, isEn, isKg, pName);
                 } else {
                     resultsPodium.innerHTML = '<div class="td-no-results"><p>' + (isRatingTournament(t) ? L.noResults : L.noResultsPlain) + '</p></div>';
                 }
@@ -2782,7 +2765,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
  * Дорисовываем ПОВЕРХ уже выставленного пьедестала, а не вместо него:
  * ответ базы приходит позже, и присваивание целиком стёрло бы карточки.
  */
-function показатьРаскладкуОчков(t, контейнер, пьедесталHtml, isEn, isKg, имя) {
+function показатьРаскладкуОчков(t, контейнер, пьедесталHtml, isEn, isKg, имя, точныеМеста) {
     if (!контейнер || typeof supabaseClient === 'undefined') return;
     if (typeof KSLT_POINTS === 'undefined') return;
 
@@ -2800,9 +2783,19 @@ function показатьРаскладкуОчков(t, контейнер, п�
             var строки = ответ.data || [];
             if (!строки.length) return;
 
-            /* Порядок один с админской таблицей: сперва очки, при равных —
-               кто прошёл дальше. */
+            /* ТАМ, ГДЕ МЕСТА РАЗЫГРАНЫ ВСЕ, ПОРЯДОК ЗАДАЁТ МЕСТО.
+               В сетке «все места» второй и третий по очкам могут стоять
+               вровень, а места у них разные и разыграны матчем: сортировать
+               такую таблицу очками значило бы спорить с кортом.
+               Где точного места нет — порядок прежний: сперва очки, при
+               равных кто прошёл дальше. */
+            var поМесту = function (ид) {
+                return точныеМеста && точныеМеста[ид] !== undefined
+                    ? точныеМеста[ид] : null;
+            };
             строки.sort(function(a, b) {
+                var ма = поМесту(a.player_id), мб = поМесту(b.player_id);
+                if (ма !== null && мб !== null) return ма - мб;
                 var оа = a.points_earned || 0, об = b.points_earned || 0;
                 if (оа !== об) return об - оа;
                 return KSLT_POINTS.порядокРаунда(a.round_reached) -
@@ -2819,15 +2812,28 @@ function показатьРаскладкуОчков(t, контейнер, п�
                 '</tr></thead><tbody>';
 
             строки.forEach(function(р) {
-                var место = KSLT_POINTS.местоПоРаунду(р.round_reached);
-                /* Полоса, а не одно число: четверо проигравших четвертьфинал
-                   между собой не играли и стоят на местах 5-8. */
-                var подпись = KSLT_POINTS.подписьМеста(р.round_reached);
+                var своё = поМесту(р.player_id);
+
+                /* МЕСТО: ТОЧНОЕ ТАМ, ГДЕ ЕГО РАЗЫГРАЛИ, ПОЛОСА — ГДЕ НЕТ.
+                   Четверо проигравших четвертьфинал между собой не играли и
+                   стоят на 5-8; в сетке «все места» тот же пятый сыграл за
+                   пятое и шестое, и полоса у него была бы неправдой. */
+                var место = своё !== null ? своё : KSLT_POINTS.местоПоРаунду(р.round_reached);
+                var подпись = своё !== null ? String(своё)
+                    : KSLT_POINTS.подписьМеста(р.round_reached);
+
+                /* ЭТАП НАЗЫВАЕТ ТО, ЧТО БЫЛО. Где места разыграны, этап — это
+                   матч за места: буквенный код там взят для ОЧКОВ, и
+                   «Полуфинал» у пятого означал бы матч, которого не было. */
+                var этап = своё !== null
+                    ? KSLT_POINTS.подписьМатчаЗаМеста(своё, язык)
+                    : KSLT_POINTS.подписьРаунда(р.round_reached, язык);
+
                 var медаль = место === 1 ? '🥇 ' : место === 2 ? '🥈 ' : место === 3 ? '🥉 ' : '';
                 html += '<tr' + (место === 1 ? ' class="td-res-winner"' : '') + '>' +
                     '<td class="td-res-place">' + медаль + (подпись === null ? '—' : подпись) + '</td>' +
                     '<td>' + имя(р.player_id) + '</td>' +
-                    '<td class="td-res-stage">' + KSLT_POINTS.подписьРаунда(р.round_reached, язык) + '</td>' +
+                    '<td class="td-res-stage">' + этап + '</td>' +
                     '<td class="td-res-pts">' + (р.points_earned || 0) + '</td>' +
                 '</tr>';
             });

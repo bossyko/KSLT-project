@@ -1320,6 +1320,13 @@ tr.td-rr-row-dimmed {
 .td-results-table th.td-res-pts { text-align: right; }
 .td-res-winner td { background: rgba(204, 255, 0, 0.08); font-weight: 600; }
 
+/* ПОБЕДИТЕЛЬ НЕ ТЕРЯЕТ ВЕС В КОЛОНКЕ ОЧКОВ.
+   Замер 02.10 прогоном: в строке победителя очки шли весом 600, а у всех
+   остальных — 700. `.td-res-winner td` весит (0,1,1), `.td-res-pts` —
+   (0,1,0), и правило строки перебивало правило колонки ровно там, где
+   число важнее всего. Поймала проверка лестницы, а не глаз. */
+.td-results-table .td-res-winner .td-res-pts { font-weight: 700; }
+
 /* Телефон: этап уходит — он производное от места, а место остаётся */
 @media (max-width: 640px) {
     .td-res-stage { display: none; }
