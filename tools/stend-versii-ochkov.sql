@@ -33,7 +33,11 @@ CREATE TABLE public.tournaments (
     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name       text,
     level_id   uuid REFERENCES public.tournament_levels(id),
-    date_start date NOT NULL
+    date_start   date NOT NULL,
+    format       text DEFAULT 'singles',
+    bracket_type text,
+    gender       text,
+    status       text DEFAULT 'completed'
 );
 
 CREATE TABLE public.tournament_results (
@@ -108,3 +112,13 @@ SELECT 'Прошедший', id, DATE '2026-09-18'
 
 INSERT INTO public.tournament_results (tournament_id, player_id, round_reached, points_earned, season)
 SELECT id, gen_random_uuid(), 'W', 360, 2026 FROM public.tournaments;
+
+-- Турнир БЕЗ уровня, но с начисленными очками: крайний случай шага 8.
+-- Один парный (мусор) и один одиночный (осиротевший рейтинговый).
+INSERT INTO public.tournaments (name, level_id, date_start, format, bracket_type, gender, status)
+VALUES ('Парный дружеский', NULL, DATE '2026-08-01', 'doubles', 'group_playoff', 'men', 'completed'),
+       ('Осиротевший одиночный', NULL, DATE '2026-07-01', 'singles', 'single_elimination', 'men', 'completed');
+
+INSERT INTO public.tournament_results (tournament_id, player_id, round_reached, points_earned, season)
+SELECT id, gen_random_uuid(), 'W', 1000, 2026
+  FROM public.tournaments WHERE level_id IS NULL;

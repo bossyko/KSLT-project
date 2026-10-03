@@ -236,8 +236,8 @@ SELECT coalesce(у.name, '— без уровня —') AS уровень,
   FROM public.tournaments т
   JOIN public.tournament_results и ON и.tournament_id = т.id
   LEFT JOIN public.tournament_levels у ON у.id = т.level_id
- GROUP BY 1, 2, 3
- ORDER BY (у.name IS NULL) DESC, 1, 2, 3;
+ GROUP BY у.name, т.format, т.bracket_type
+ ORDER BY (у.name IS NULL) DESC, у.name, т.format, т.bracket_type;
 
 -- Поимённо — те, у кого уровня нет, а очки начислены: это и есть список на
 -- разбор. Парные и дружеские в нём ожидаемы; одиночный в этом списке —
