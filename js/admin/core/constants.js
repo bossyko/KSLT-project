@@ -917,11 +917,11 @@
         ratWhoViews: 'Viewing: <b>manager</b> · editing is for administrators only',
         ratVersionInForce: 'Version in force since <b>{d}</b> · per win <b>{w}</b> · per entry <b>{e}</b>',
         ratVersionNone: 'Points-table versions are not set up yet',
-        ratBandTitle: 'One table, two ways of paying.',
+        ratBandTitle: 'One table, two ways of awarding.',
         ratBandKnockoutWho: 'Knockout and full-placing draws',
-        ratBandKnockout: '— the table pays for every place, wins are not added.',
+        ratBandKnockout: '— points are awarded for every place, wins are not added.',
         ratBandGroupsWho: 'Groups and two leagues',
-        ratBandGroups: '— the table pays places 1–4, everyone else gets 25 per win or 10 for taking part.',
+        ratBandGroups: '— places 1–4 are awarded by the table, everyone else gets 25 per win or 10 for taking part.',
         ratPlacesLimit: '{n}',
         ratBeyondLimit: 'Beyond this level\u2019s limit — this place is not played out here',
         ratNothingChanged: 'Nothing changed',
@@ -2509,11 +2509,15 @@
         ratWhoViews: 'Смотрит: <b>менеджер</b> · правка только у администратора',
         ratVersionInForce: 'Версия в силе с <b>{d}</b> · за победу <b>{w}</b> · за участие <b>{e}</b>',
         ratVersionNone: 'Версии таблицы очков ещё не заведены',
-        ratBandTitle: 'Таблица одна, а платит она двумя способами.',
+        /* НАЧИСЛЯЕТ, А НЕ «ПЛАТИТ» — слово Кости 03.10: «замени слово платит
+           на начисляет, что за платит?». В клубе ничего не платят деньгами:
+           очки НАЧИСЛЯЮТСЯ. Слово «платит» я взял из своей же головы, в
+           Положении его нет. */
+        ratBandTitle: 'Таблица одна, а начисляет она двумя способами.',
         ratBandKnockoutWho: 'В олимпийке и сетке всех мест',
-        ratBandKnockout: '— таблица платит за каждое место, победы не прибавляются.',
+        ratBandKnockout: '— очки начисляются за каждое место, победы не прибавляются.',
         ratBandGroupsWho: 'В группах и двух лигах',
-        ratBandGroups: '— таблица платит места 1–4, остальным 25 за победу либо 10 за участие.',
+        ratBandGroups: '— по таблице начисляются места 1–4, остальным 25 за победу либо 10 за участие.',
         /* Только число: слово Кости 03.10 — «Итоговый турнир - 8 - убери ДО».
            Колонка и так называется местами, «до» в ней ничего не добавляет. */
         ratPlacesLimit: '{n}',

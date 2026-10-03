@@ -485,6 +485,11 @@ const ОТКАТЫ = [
    "        await expect(page.locator('#setRulesTable .ad-pts-in')).toHaveCount(264);",
    "        await expect(page.locator('#setRulesTable .ad-pts-in')).not.toHaveCount(0);",
    'тест держит числа, а не «примерно столько»'],
+
+  [СЛОВАРЬ,
+   "        ratBandTitle: 'Таблица одна, а начисляет она двумя способами.',",
+   "        ratBandTitle: 'Таблица одна, а платит она двумя способами.',",
+   'в плашке очки НАЧИСЛЯЮТСЯ, а не «платятся»'],
 ];
 
 function прогон() {
