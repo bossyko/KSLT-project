@@ -1,6 +1,17 @@
--- Стенд: ровно те части схемы КСЛТ, которых касается миграция версий.
--- Числа и формы взяты из sql/схема/kategorii-i-ochki.sql и
--- sql/схема/schema-snapshot.sql, а не выдуманы.
+-- ============================================================
+-- СТЕНД: части схемы КСЛТ, которых касаются версии очков
+-- ============================================================
+--
+-- ТИПЫ И ИМЕНА ВЗЯТЫ ИЗ `supabase/migrations/20260210000000_baseline.sql`,
+-- А НЕ ПРИДУМАНЫ. Первая редакция стенда придумала три вещи, и каждая
+-- потом упала у Кости на боевой:
+--   · `tournaments.start_date` — на деле `date_start` (:2830);
+--   · у `tournaments` не было ни `format`, ни `bracket_type`, ни `gender`,
+--     ни `status` — запрос до них не доходил и ошибки не показывал;
+--   · `tournaments.name` — на деле `title`, и `id` там **text**, не uuid.
+--
+-- СТЕНД, В КОТОРОМ НЕТ НУЖНОЙ КОЛОНКИ, НИЧЕГО НЕ ДОКАЗЫВАЕТ. Поэтому у
+-- каждой таблицы названо, откуда взяты её колонки.
 
 CREATE SCHEMA IF NOT EXISTS auth;
 
@@ -10,46 +21,57 @@ LANGUAGE sql STABLE AS $$
     SELECT nullif(current_setting('стенд.uid', true), '')::uuid;
 $$;
 
+-- profiles — baseline :2595, role :2602, CHECK :2639
 CREATE TABLE public.profiles (
     id   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    role text
+    role text DEFAULT 'user'
+        CHECK (role = ANY (ARRAY['user','player','manager','admin']))
 );
 
+-- is_admin — sql/схема/schema-snapshot.sql:1430
 CREATE OR REPLACE FUNCTION public.is_admin() RETURNS boolean
 LANGUAGE sql SECURITY DEFINER AS $$
     SELECT EXISTS (SELECT 1 FROM public.profiles
                     WHERE id = auth.uid() AND role = 'admin');
 $$;
 
+-- tournament_levels — baseline :2820, плюс on_ladder (заведён Костей 02.10)
 CREATE TABLE public.tournament_levels (
     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name       text NOT NULL,
     name_en    text,
-    sort_order integer,
+    sort_order integer DEFAULT 0,
     on_ladder  boolean NOT NULL DEFAULT true
 );
 
+-- tournaments — baseline :2828. id ТЕКСТОВЫЙ, название в title.
 CREATE TABLE public.tournaments (
-    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    name       text,
-    level_id   uuid REFERENCES public.tournament_levels(id),
+    id           text PRIMARY KEY,
+    title        text NOT NULL,
     date_start   date NOT NULL,
-    format       text DEFAULT 'singles',
+    date_end     date,
+    status       text DEFAULT 'upcoming',
+    format       text DEFAULT 'singles'
+        CHECK (format = ANY (ARRAY['singles','doubles','mixed_doubles'])),
+    level_id     uuid REFERENCES public.tournament_levels(id),
     bracket_type text,
     gender       text,
-    status       text DEFAULT 'completed'
+    start_time   text
 );
 
+-- tournament_results — baseline :2800. tournament_id и player_id ТЕКСТОВЫЕ.
 CREATE TABLE public.tournament_results (
     id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    tournament_id uuid REFERENCES public.tournaments(id),
-    player_id     uuid,
-    round_reached text,
-    points_earned integer,
-    season        integer
+    tournament_id text REFERENCES public.tournaments(id),
+    player_id     text,
+    round_reached text NOT NULL,
+    points_earned integer DEFAULT 0,
+    season        integer NOT NULL,
+    category_id   text
 );
 
--- Как сейчас в боевой: без версии, уникальность по (level_id, place)
+-- points_by_place — sql/схема/kategorii-i-ochki.sql:67, КАК СЕЙЧАС В БОЕВОЙ:
+-- без версии, уникальность по (level_id, place)
 CREATE TABLE public.points_by_place (
     id       uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     level_id uuid NOT NULL REFERENCES public.tournament_levels(id) ON DELETE CASCADE,
@@ -66,16 +88,25 @@ CREATE POLICY points_by_place_staff ON public.points_by_place FOR ALL
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles p
                          WHERE p.id = auth.uid() AND p.role IN ('admin','manager')));
 
+-- points_rules — baseline :2584. Кривые числа ТЕ ЖЕ, что в боевой
+-- (замер 02.10, шаг 4): SF перевёрнут по категориям, QF ровно вдвое меньше.
+CREATE TABLE public.points_rules (
+    id       uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    level_id uuid,
+    round    text NOT NULL,
+    points   integer NOT NULL DEFAULT 0
+);
+
 -- ---- Данные: пять уровней, как после переименований 30.09 и 02.10 ----
+
 INSERT INTO public.tournament_levels (name, name_en, sort_order, on_ladder) VALUES
-    ('Высшая категория', 'Top category', 5, true),
-    ('1 категория',      'Category 1',   4, true),
-    ('2 категория',      'Category 2',   3, true),
-    ('3 категория',      'Category 3',   2, true),
+    ('Высшая категория', 'Top category',    5, true),
+    ('1 категория',      'Category 1',      4, true),
+    ('2 категория',      'Category 2',      3, true),
+    ('3 категория',      'Category 3',      2, true),
     ('Итоговый турнир',  'Year-End Finals', 1, false);
 
--- Первые четыре места по числам из трекера, остальные места добиваем
--- убывающей шкалой: форма важнее значений, но числа 1–4 настоящие.
+-- Места 1–4 — настоящие числа боевой (замер 02.10, шаг 3)
 INSERT INTO public.points_by_place (level_id, place, points)
 SELECT у.id, м.место,
        CASE у.sort_order
@@ -88,37 +119,53 @@ SELECT у.id, м.место,
   FROM public.tournament_levels у
   CROSS JOIN generate_series(1, 4) AS м(место);
 
--- четырём категориям добиваем места 5–64, итоговому — 5–8
+-- Места 5–64. В БОЕВОЙ 64 СТРОКИ У ВСЕХ ПЯТИ УРОВНЕЙ, включая итоговый
+-- (замер, шаг 2: у итогового 64 строки, из них 30 нулевых). Стенд это
+-- повторяет — иначе он не показал бы беду, ради которой заведён предел.
 INSERT INTO public.points_by_place (level_id, place, points)
-SELECT у.id, м.место, greatest(2, 70 - м.место)
+SELECT у.id, м.место,
+       CASE WHEN у.on_ladder    THEN greatest(2, 70 - м.место)
+            WHEN м.место <= 34  THEN greatest(2, 36 - м.место)
+            ELSE 0 END
   FROM public.tournament_levels у
-  CROSS JOIN generate_series(5, 64) AS м(место)
- WHERE у.on_ladder;
+  CROSS JOIN generate_series(5, 64) AS м(место);
 
-INSERT INTO public.points_by_place (level_id, place, points)
-SELECT у.id, м.место, 0
+-- Кривая таблица по раундам
+INSERT INTO public.points_rules (level_id, round, points)
+SELECT у.id, р.round,
+       CASE у.sort_order
+           WHEN 5 THEN (ARRAY[1000,600,420,360,150,75])[р.n]
+           WHEN 4 THEN (ARRAY[600,360,250,215,8,4])[р.n]
+           WHEN 3 THEN (ARRAY[360,215,150,130,18,9])[р.n]
+           WHEN 2 THEN (ARRAY[215,130,90,77,36,18])[р.n]
+           WHEN 1 THEN (ARRAY[130,80,55,48,70,35])[р.n]
+       END
   FROM public.tournament_levels у
-  CROSS JOIN generate_series(5, 8) AS м(место)
- WHERE NOT у.on_ladder;
+  CROSS JOIN (VALUES ('W',1),('F',2),('3RD',3),('4TH',4),('SF',5),('QF',6)) AS р(round, n);
 
--- Прошедший турнир с начисленными очками
 INSERT INTO public.profiles (id, role) VALUES
     ('11111111-1111-1111-1111-111111111111', 'admin'),
     ('22222222-2222-2222-2222-222222222222', 'manager');
 
-INSERT INTO public.tournaments (name, level_id, date_start)
-SELECT 'Прошедший', id, DATE '2026-09-18'
+-- ---- Турниры: крайние случаи, а не удобные ----
+
+INSERT INTO public.tournaments (id, title, level_id, date_start, format, bracket_type, gender, status)
+SELECT 't-proshedshiy', 'Прошедший рейтинговый', id, DATE '2026-09-18',
+       'singles', 'round_robin', 'men', 'completed'
   FROM public.tournament_levels WHERE sort_order = 3;
 
-INSERT INTO public.tournament_results (tournament_id, player_id, round_reached, points_earned, season)
-SELECT id, gen_random_uuid(), 'W', 360, 2026 FROM public.tournaments;
+INSERT INTO public.tournaments (id, title, level_id, date_start, format, bracket_type, gender, status)
+VALUES ('t-parnyy', 'Парный дружеский',      NULL, DATE '2025-04-27', 'doubles', NULL,  'men', 'completed'),
+       ('t-sirota', 'Осиротевший одиночный', NULL, DATE '2026-06-01', 'singles', 'fic', 'men', 'completed');
 
--- Турнир БЕЗ уровня, но с начисленными очками: крайний случай шага 8.
--- Один парный (мусор) и один одиночный (осиротевший рейтинговый).
-INSERT INTO public.tournaments (name, level_id, date_start, format, bracket_type, gender, status)
-VALUES ('Парный дружеский', NULL, DATE '2026-08-01', 'doubles', 'group_playoff', 'men', 'completed'),
-       ('Осиротевший одиночный', NULL, DATE '2026-07-01', 'singles', 'single_elimination', 'men', 'completed');
-
+-- Итоги: оплачено по месту, оплачено кривым раундом, мимо обеих, по старому
+-- правилу «таблица плюс победы», и очки у турниров без уровня — которых
+-- там быть не должно вовсе.
 INSERT INTO public.tournament_results (tournament_id, player_id, round_reached, points_earned, season)
-SELECT id, gen_random_uuid(), 'W', 1000, 2026
-  FROM public.tournaments WHERE level_id IS NULL;
+VALUES ('t-proshedshiy', 'p1', 'W',   360, 2026),
+       ('t-proshedshiy', 'p2', 'F',   215, 2026),
+       ('t-proshedshiy', 'p3', 'SF',   18, 2026),
+       ('t-proshedshiy', 'p4', 'QF',  777, 2026),
+       ('t-proshedshiy', 'p5', 'W',   535, 2026),
+       ('t-parnyy',      'p6', 'W',  1000, 2026),
+       ('t-sirota',      'p7', 'W',  1000, 2026);

@@ -40,7 +40,9 @@ WITH нужно(таблица, колонка) AS (
          ('points_by_place','points'),
          ('points_rules','level_id'),        ('points_rules','round'),
          ('points_rules','points'),
-         ('tournaments','date_start'),
+         ('tournaments','date_start'),  ('tournaments','title'),
+         ('tournaments','format'),      ('tournaments','bracket_type'),
+         ('tournaments','gender'),      ('tournaments','status'),
          ('tournament_results','tournament_id'),
          ('tournament_results','points_earned')
 )
@@ -245,12 +247,12 @@ SELECT coalesce(у.name, '— без уровня —') AS уровень,
 
 SELECT 'ШАГ 8б · ПОИМЁННО' AS шаг;
 
-SELECT т.name, т.format, т.gender, т.status, т.date_start,
+SELECT т.title, т.format, т.gender, т.status, т.date_start,
        count(и.id)          AS строк,
        sum(и.points_earned) AS очков
   FROM public.tournaments т
   JOIN public.tournament_results и ON и.tournament_id = т.id
  WHERE т.level_id IS NULL
    AND и.points_earned > 0
- GROUP BY т.id, т.name, т.format, т.gender, т.status, т.date_start
+ GROUP BY т.id, т.title, т.format, т.gender, т.status, т.date_start
  ORDER BY т.format, т.date_start;
