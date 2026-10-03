@@ -133,7 +133,58 @@ const ОТКАТЫ = [
       подставляем заведомо старое: правило требует 50 и выше. */
    'sections/tournaments.js?v=',
    'sections/tournaments.js?v=45&bylo=',
-   'версии подняты — иначе браузер отдаст старое из кеша']
+   'версии подняты — иначе браузер отдаст старое из кеша'],
+  /* ─── афиша: два представления и ни одной чужой ссылки (03.10) ─── */
+  ['js/admin/sections/tournaments.js',
+   "'<input type=\"file\" accept=\"image/jpeg,image/png\" id=\"adTrnImgInput\" style=\"display:none\">' +",
+   "'<input type=\"url\" class=\"ad-field-input\" id=\"adTrnImgUrl\" placeholder=\"https://...\">' +\n                '<input type=\"file\" accept=\"image/jpeg,image/png\" id=\"adTrnImgInput\" style=\"display:none\">' +",
+   'карточка афиши берёт только свой файл'],
+
+  ['js/admin/sections/tournaments.js',
+   'ad-afisha-pane--thumb',
+   'ad-afisha-pane--crop',
+   'афиша показана двумя створками'],
+
+  ['js/admin/sections/tournaments.js',
+   'A.esc(fullSrc || cropSrc)',
+   'A.esc(cropSrc)',
+   'у створок разные источники'],
+
+  ['js/admin/sections/tournaments.js',
+   'image_full: trnImageFullUrl || null,',
+   'image_full: null,',
+   'кадр и полная афиша пишутся в базу'],
+
+  ['js/tournaments-overview.js',
+   "imageFull: t.image_full || '',",
+   "imageFull: t.image || '',",
+   'публичная сторона читает полную афишу'],
+
+  /* ─── лестница: межстрочный ступенью, а не от шрифта (03.10) ─── */
+  ['css/tokens.css',
+   '  --lh-none:    1;',
+   '  --lh-odnoy-strokoy: 1;',
+   'ступень --lh-none объявлена один раз'],
+
+  ['css/admin.css',
+   '    line-height: var(--lh-none);\n    border: none;',
+   '    line-height: normal;\n    border: none;',
+   'межстрочный управляющих уровней — ступенью лестницы'],
+
+  ['css/admin.css',
+   '       height, текст центрируется flex\'ом — ступень лестницы здесь --lh-none */\n    line-height: var(--lh-none);',
+   '       height, текст центрируется flex\'ом — ступень лестницы здесь --lh-none */\n    line-height: 1.2;',
+   'межстрочный управляющих уровней — ступенью лестницы'],
+
+  ['css/admin.css',
+   '    line-height: var(--lh-snug);',
+   '    line-height: 1.4;',
+   'межстрочный текста афиши — ступенью лестницы'],
+
+  ['css/admin.css',
+   '    min-height: var(--btn-h-sm);',
+   '    height: var(--btn-h-sm);',
+   'вкладка раздела держит высоту порогом'],
 ];
 
 function прогон() {
