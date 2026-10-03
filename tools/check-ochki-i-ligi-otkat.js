@@ -446,6 +446,21 @@ const ОТКАТЫ = [
    "    h += '<th><span>' + у.имя + '</span>' +",
    "    h += '<th>' + у.имя + '' +",
    'макет рисует шапку ТОЙ ЖЕ разметкой, что продукт'],
+
+  [АДМИН_CSS,
+   ".ad-pts-in { -moz-appearance: textfield; appearance: textfield; }",
+   ".ad-pts-in { }",
+   'у поля очков нет стрелок «на 1»'],
+
+  [НАСТРОЙКИ,
+   "                e.target.blur();",
+   "                var _ = e;",
+   'колесо над полем не меняет число'],
+
+  [СЛОВАРЬ,
+   "        ratPlacesLimit: '{n}',\n        ratBeyondLimit: 'За пределом",
+   "        ratPlacesLimit: 'до {n}',\n        ratBeyondLimit: 'За пределом",
+   'предел подписан одним числом, без «до»'],
 ];
 
 function прогон() {

@@ -7480,6 +7480,16 @@ select.ad-field-input {
     text-align: center; font-variant-numeric: tabular-nums;
     transition: var(--transition-fast);
 }
+/* СТРЕЛОК «НА 1» У ПОЛЯ НЕТ — слово Кости 03.10: «убери на 1 в поле очки,
+   зачем там, ручной ввод только».
+   Очки за место — не счётчик: разница между соседними местами бывает
+   130 (1000 → 600), и шаг в единицу там бессмыслен. Стрелки вдобавок
+   съедали ширину поля: на боевой «1000» обрезалось до «100(».
+   `type="number"` остаётся — он даёт числовую клавиатуру и отсев букв. */
+.ad-pts-in::-webkit-outer-spin-button,
+.ad-pts-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ad-pts-in { -moz-appearance: textfield; appearance: textfield; }
+
 .ad-pts-in:hover { border-color: var(--alpha-white-16, rgba(255,255,255,.16)); }
 .ad-pts-in:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 1px;

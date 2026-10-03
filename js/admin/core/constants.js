@@ -922,7 +922,7 @@
         ratBandKnockout: '— the table pays for every place, wins are not added.',
         ratBandGroupsWho: 'Groups and two leagues',
         ratBandGroups: '— the table pays places 1–4, everyone else gets 25 per win or 10 for taking part.',
-        ratPlacesLimit: 'up to {n}',
+        ratPlacesLimit: '{n}',
         ratBeyondLimit: 'Beyond this level\u2019s limit — this place is not played out here',
         ratNothingChanged: 'Nothing changed',
         ratSaveMismatch: 'Saved, but {n} value(s) in the database differ from what was sent. Nothing is confirmed — reload and check.',
@@ -2514,7 +2514,9 @@
         ratBandKnockout: '— таблица платит за каждое место, победы не прибавляются.',
         ratBandGroupsWho: 'В группах и двух лигах',
         ratBandGroups: '— таблица платит места 1–4, остальным 25 за победу либо 10 за участие.',
-        ratPlacesLimit: 'до {n}',
+        /* Только число: слово Кости 03.10 — «Итоговый турнир - 8 - убери ДО».
+           Колонка и так называется местами, «до» в ней ничего не добавляет. */
+        ratPlacesLimit: '{n}',
         ratBeyondLimit: 'За пределом уровня — это место здесь не разыгрывается',
         ratNothingChanged: 'Ничего не изменено',
         ratSaveMismatch: 'Сохранено, но {n} значений в базе разошлись с отправленным. Ничего не подтверждено — перечитайте и проверьте.',
