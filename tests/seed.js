@@ -751,93 +751,6 @@ async function upsert(table, rows, onConflict) {
     /* ПЕРЕЧИТКА ОБЯЗАНА УМЕТЬ УПАСТЬ: спрашиваем не «есть ли строки», а
        ровно то, что различает проверка — восемь строк на каждый турнир и
        четверо на неразыгранной полосе у олимпийки. */
-    /* ───────── ТУРНИР С ДВУМЯ ЛИГАМИ ─────────
-       Замер боевой 03.10: турниров с `bracket_type = 'group_league'` НЕТ НИ
-       ОДНОГО. Значит вся ветка двух лиг — генератор, сетки `PL-`/`CL-`,
-       правило «нижняя лига платится уровнем ниже» (`bracket.js:2351`) и
-       таблица итогов — ни разу не проезжала на живых данных.
-
-       Здесь заводится турнир, на котором её видно: восемь человек, две
-       лиги по четверо, у каждой свой финал и свой матч за третье место.
-
-       ОЧКИ ИЗ РАЗНЫХ ТАБЛИЦ, И В ЭТОМ ВЕСЬ СМЫСЛ. Верхняя лига платится
-       таблицей «2 категории» — 360 · 215 · 150 · 130; нижняя уровнем ниже,
-       «3 категории» — 215 · 130 · 90 · 77. Числа настоящие, из
-       `sql/схема/kategorii-i-ochki.sql:101`. Первое место нижней лиги (215)
-       ДОРОЖЕ четвёртого в верхней (130) — цена названа Костей 30.09.
-
-       ГРУППОВЫХ МАТЧЕЙ ЗДЕСЬ НЕТ НАМЕРЕННО: проверяется таблица итогов, а
-       она читает `tournament_results` и делит лиги по приставке круга.
-       Полный прогон от жеребьёвки до завершения — отдельный шаг, и его
-       делает админка, а не сев. */
-    await upsert('tournaments', [{
-        id: 'test-dve-ligi',
-        title: 'Тестовый турнир: две лиги',
-        category_id: 'tour',
-        status: 'completed',
-        bracket_type: 'group_league',
-        draw_size: 8,
-        group_count: 2,
-        qualifiers_per_group: 2,
-        date_start: today.toISOString().slice(0, 10),
-        date_end: today.toISOString().slice(0, 10),
-        max_participants: 8,
-        gender: 'men'
-    }], 'id');
-
-    var ЛИГИ = function (н) { return 'dd000002-0000-4000-8000-0000000000' + String(н).padStart(2, '0'); };
-
-    await upsert('matches', [
-        // Высшая лига: полуфиналы, финал и матч за третье место
-        итогМатч(ЛИГИ(1), 'test-dve-ligi', 1, 1, 'mr-alpha',   'mr-delta',     'mr-alpha',   'PL-SF'),
-        итогМатч(ЛИГИ(2), 'test-dve-ligi', 1, 2, 'mr-bravo',   'mr-charlie',   'mr-bravo',   'PL-SF'),
-        итогМатч(ЛИГИ(3), 'test-dve-ligi', 2, 1, 'mr-alpha',   'mr-bravo',     'mr-alpha',   'PL-F'),
-        итогМатч(ЛИГИ(4), 'test-dve-ligi', 2, 2, 'mr-charlie', 'mr-delta',     'mr-charlie', 'PL-3RD'),
-        // Утешительная: то же самое своей четвёркой
-        итогМатч(ЛИГИ(5), 'test-dve-ligi', 1, 3, 'mr-echo',    'test-captain', 'mr-echo',    'CL-SF'),
-        итогМатч(ЛИГИ(6), 'test-dve-ligi', 1, 4, 'test-player','test-rival',   'test-player','CL-SF'),
-        итогМатч(ЛИГИ(7), 'test-dve-ligi', 2, 3, 'mr-echo',    'test-player',  'mr-echo',    'CL-F'),
-        итогМатч(ЛИГИ(8), 'test-dve-ligi', 2, 4, 'test-rival', 'test-captain', 'test-rival', 'CL-3RD')
-    ], 'id');
-
-    await call('DELETE', '/rest/v1/tournament_results?tournament_id=eq.test-dve-ligi');
-    var итогиЛиг = [
-        итог('test-dve-ligi', 'mr-alpha',     'W',   360),
-        итог('test-dve-ligi', 'mr-bravo',     'F',   215),
-        итог('test-dve-ligi', 'mr-charlie',   '3RD', 150),
-        итог('test-dve-ligi', 'mr-delta',     '4TH', 130),
-        итог('test-dve-ligi', 'mr-echo',      'W',   215),
-        итог('test-dve-ligi', 'test-player',  'F',   130),
-        итог('test-dve-ligi', 'test-rival',   '3RD',  90),
-        итог('test-dve-ligi', 'test-captain', '4TH',  77)
-    ];
-    var ответЛиги = await call('POST', '/rest/v1/tournament_results', итогиЛиг);
-    if (!ответЛиги.ok) {
-        console.log('  ВНИМАНИЕ: итоги двух лиг не легли — ' +
-            String(JSON.stringify(ответЛиги.data)).slice(0, 200));
-    }
-
-    /* ПЕРЕЧИТКА СПРАШИВАЕТ РОВНО ТО, ЧТО РАЗЛИЧАЕТ ПРОВЕРКУ: восемь строк,
-       и у двух победителей РАЗНЫЕ очки. Совпади они — две таблицы стали бы
-       неотличимы, и проверка прошла бы вхолостую. */
-    var свёлЛиги = await call('GET', '/rest/v1/tournament_results' +
-        '?tournament_id=eq.test-dve-ligi&select=player_id,round_reached,points_earned');
-    if (!свёлЛиги.ok) {
-        console.log('  ВНИМАНИЕ: не смог перечитать итоги двух лиг');
-    } else {
-        var строкиЛиг = свёлЛиги.data || [];
-        var победы = строкиЛиг.filter(function (р) { return р.round_reached === 'W'; })
-                              .map(function (р) { return р.points_earned; }).sort(function (a, b) { return b - a; });
-        if (строкиЛиг.length !== 8) {
-            console.log('  ВНИМАНИЕ: у двух лиг ' + строкиЛиг.length + ' строк вместо восьми');
-        } else if (победы.length !== 2 || победы[0] === победы[1]) {
-            console.log('  ВНИМАНИЕ: победителей ' + победы.length +
-                ', очки ' + победы.join(' и ') + ' — лиги должны платиться РАЗНЫМИ таблицами');
-        } else {
-            console.log('  две лиги: 8 строк, победители ' + победы.join(' и ') + ' — таблицы разные');
-        }
-    }
-
     var свёлИ = await call('GET', '/rest/v1/tournament_results?tournament_id=in.' +
         '(test-itogi,test-itogi-fic)&select=tournament_id,player_id,round_reached,points_earned');
     if (!свёлИ.ok) {
@@ -857,6 +770,101 @@ async function upsert(table, rows, onConflict) {
     console.log('  итоги турнира: олимпийка с полосой и сетка всех мест');
     } catch (e) {
         console.log('  ВНИМАНИЕ: итоги не завелись — ' + String(e.message).slice(0, 160));
+    }
+
+    /* СВОЙ TRY, А НЕ ЧУЖОЙ. Этот блок сидел внутри try соседнего куска, и
+       его падение печаталось чужим именем — «итоги не завелись», обрезанное
+       до 160 знаков. ПРИБОР ОБЯЗАН НАЗЫВАТЬ СВОЮ ПРИЧИНУ И ЦЕЛИКОМ: по
+       обрезанному тексту не видно, какой колонки не хватает в тестовой. */
+    try {
+    /* ───────── ТУРНИР С ДВУМЯ ЛИГАМИ ─────────
+           Замер боевой 03.10: турниров с `bracket_type = 'group_league'` НЕТ НИ
+           ОДНОГО. Значит вся ветка двух лиг — генератор, сетки `PL-`/`CL-`,
+           правило «нижняя лига платится уровнем ниже» (`bracket.js:2351`) и
+           таблица итогов — ни разу не проезжала на живых данных.
+
+           Здесь заводится турнир, на котором её видно: восемь человек, две
+           лиги по четверо, у каждой свой финал и свой матч за третье место.
+
+           ОЧКИ ИЗ РАЗНЫХ ТАБЛИЦ, И В ЭТОМ ВЕСЬ СМЫСЛ. Верхняя лига платится
+           таблицей «2 категории» — 360 · 215 · 150 · 130; нижняя уровнем ниже,
+           «3 категории» — 215 · 130 · 90 · 77. Числа настоящие, из
+           `sql/схема/kategorii-i-ochki.sql:101`. Первое место нижней лиги (215)
+           ДОРОЖЕ четвёртого в верхней (130) — цена названа Костей 30.09.
+
+           ГРУППОВЫХ МАТЧЕЙ ЗДЕСЬ НЕТ НАМЕРЕННО: проверяется таблица итогов, а
+           она читает `tournament_results` и делит лиги по приставке круга.
+           Полный прогон от жеребьёвки до завершения — отдельный шаг, и его
+           делает админка, а не сев. */
+        await upsert('tournaments', [{
+            id: 'test-dve-ligi',
+            title: 'Тестовый турнир: две лиги',
+            category_id: 'tour',
+            status: 'completed',
+            bracket_type: 'group_league',
+            draw_size: 8,
+            group_count: 2,
+            qualifiers_per_group: 2,
+            date_start: today.toISOString().slice(0, 10),
+            date_end: today.toISOString().slice(0, 10),
+            max_participants: 8,
+            gender: 'men'
+        }], 'id');
+
+        var ЛИГИ = function (н) { return 'dd000002-0000-4000-8000-0000000000' + String(н).padStart(2, '0'); };
+
+        await upsert('matches', [
+            // Высшая лига: полуфиналы, финал и матч за третье место
+            итогМатч(ЛИГИ(1), 'test-dve-ligi', 1, 1, 'mr-alpha',   'mr-delta',     'mr-alpha',   'PL-SF'),
+            итогМатч(ЛИГИ(2), 'test-dve-ligi', 1, 2, 'mr-bravo',   'mr-charlie',   'mr-bravo',   'PL-SF'),
+            итогМатч(ЛИГИ(3), 'test-dve-ligi', 2, 1, 'mr-alpha',   'mr-bravo',     'mr-alpha',   'PL-F'),
+            итогМатч(ЛИГИ(4), 'test-dve-ligi', 2, 2, 'mr-charlie', 'mr-delta',     'mr-charlie', 'PL-3RD'),
+            // Утешительная: то же самое своей четвёркой
+            итогМатч(ЛИГИ(5), 'test-dve-ligi', 1, 3, 'mr-echo',    'test-captain', 'mr-echo',    'CL-SF'),
+            итогМатч(ЛИГИ(6), 'test-dve-ligi', 1, 4, 'test-player','test-rival',   'test-player','CL-SF'),
+            итогМатч(ЛИГИ(7), 'test-dve-ligi', 2, 3, 'mr-echo',    'test-player',  'mr-echo',    'CL-F'),
+            итогМатч(ЛИГИ(8), 'test-dve-ligi', 2, 4, 'test-rival', 'test-captain', 'test-rival', 'CL-3RD')
+        ], 'id');
+
+        await call('DELETE', '/rest/v1/tournament_results?tournament_id=eq.test-dve-ligi');
+        var итогиЛиг = [
+            итог('test-dve-ligi', 'mr-alpha',     'W',   360),
+            итог('test-dve-ligi', 'mr-bravo',     'F',   215),
+            итог('test-dve-ligi', 'mr-charlie',   '3RD', 150),
+            итог('test-dve-ligi', 'mr-delta',     '4TH', 130),
+            итог('test-dve-ligi', 'mr-echo',      'W',   215),
+            итог('test-dve-ligi', 'test-player',  'F',   130),
+            итог('test-dve-ligi', 'test-rival',   '3RD',  90),
+            итог('test-dve-ligi', 'test-captain', '4TH',  77)
+        ];
+        var ответЛиги = await call('POST', '/rest/v1/tournament_results', итогиЛиг);
+        if (!ответЛиги.ok) {
+            console.log('  ВНИМАНИЕ: итоги двух лиг не легли — ' +
+                String(JSON.stringify(ответЛиги.data)).slice(0, 200));
+        }
+
+        /* ПЕРЕЧИТКА СПРАШИВАЕТ РОВНО ТО, ЧТО РАЗЛИЧАЕТ ПРОВЕРКУ: восемь строк,
+           и у двух победителей РАЗНЫЕ очки. Совпади они — две таблицы стали бы
+           неотличимы, и проверка прошла бы вхолостую. */
+        var свёлЛиги = await call('GET', '/rest/v1/tournament_results' +
+            '?tournament_id=eq.test-dve-ligi&select=player_id,round_reached,points_earned');
+        if (!свёлЛиги.ok) {
+            console.log('  ВНИМАНИЕ: не смог перечитать итоги двух лиг');
+        } else {
+            var строкиЛиг = свёлЛиги.data || [];
+            var победы = строкиЛиг.filter(function (р) { return р.round_reached === 'W'; })
+                                  .map(function (р) { return р.points_earned; }).sort(function (a, b) { return b - a; });
+            if (строкиЛиг.length !== 8) {
+                console.log('  ВНИМАНИЕ: у двух лиг ' + строкиЛиг.length + ' строк вместо восьми');
+            } else if (победы.length !== 2 || победы[0] === победы[1]) {
+                console.log('  ВНИМАНИЕ: победителей ' + победы.length +
+                    ', очки ' + победы.join(' и ') + ' — лиги должны платиться РАЗНЫМИ таблицами');
+            } else {
+                console.log('  две лиги: 8 строк, победители ' + победы.join(' и ') + ' — таблицы разные');
+            }
+        }
+    } catch (e) {
+        console.log('  ВНИМАНИЕ: две лиги не завелись — ' + String(e.message));
     }
 
     /* --- Пол турнира: ОТКАЗ, а не пометка -------------------------------
