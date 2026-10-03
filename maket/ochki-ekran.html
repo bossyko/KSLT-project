@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — стенд экрана рейтинговых очков</title>
+<link rel="stylesheet" href="../css/tokens.css?v=22">
+<link rel="stylesheet" href="../css/admin.css?v=190">
+<style>
+/* ===================================================================
+   ПРАВКИ ЖИВУТ В СТЕНДЕ, А НЕ В admin.css — до слова Кости.
+   Каждое число — ступень шкалы:
+     отступы 8 · 12 · 16 · 24 · 32 · 40
+     кегли   11 · 12 · 14 · 16 · 18 · 21 · 26 · 32 · 40
+     кнопки  28 · 36 · 44 · 52
+   Строка 36 и поле 28 — ступени кнопок. Четыре пиксела воздуха сверху и
+   снизу поля НИКТО НЕ ОБЪЯВЛЯЛ: они вышли из выравнивания по центру.
+   =================================================================== */
+
+.st-wrap { max-width: 1240px; margin: 0 auto; padding: var(--space-6) var(--space-4) 80px; }
+.st-h1 { font-size: var(--fs-2xl); margin: 0 0 var(--space-2); }
+.st-lead { color: var(--text-secondary); max-width: 70ch; margin: 0 0 var(--space-8); }
+.st-block { margin: 0 0 var(--space-10); }
+.st-tag {
+    display: inline-block; font-size: var(--fs-2xs); text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--accent); margin-bottom: var(--space-2);
+}
+.st-h2 { font-size: var(--fs-lg); margin: 0 0 var(--space-3); }
+.st-note-stand { color: var(--text-muted); font-size: var(--fs-sm); max-width: 78ch; margin: 0 0 var(--space-4); }
+.st-bad { color: #FF6B6B; }
+.st-ok  { color: var(--accent); }
+.st-two { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
+@media (min-width: 992px) { .st-two { grid-template-columns: 1fr 1fr; } }
+
+/* ---- ПЛАШКА ВМЕСТО ПЕРЕКЛЮЧАТЕЛЯ ----
+   Слово Кости: «может мы просто туда эту плашку вставим и без
+   переключателя обойдёмся». Два вида начисления не две вкладки: места
+   1–4 попали бы в обе, а это два определения одного понятия. */
+.ad-pts-band {
+    display: flex; gap: var(--space-3); align-items: flex-start;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-4);
+}
+.ad-pts-band-text { font-size: var(--fs-sm); color: var(--text-secondary); line-height: 1.5; }
+.ad-pts-band-text b { color: var(--text-primary); font-weight: 600; }
+.ad-pts-band-text span { white-space: nowrap; }
+
+/* ---- ПЛОТНАЯ СЕТКА ПО МЕСТАМ ---- */
+.ad-pts-scroll { max-height: 560px; overflow: auto; }
+.ad-pts { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.ad-pts th {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--bg-card);
+    text-align: center;
+    padding: 0 var(--space-3);
+    height: 36px;
+    font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: .5px;
+    /* ПОСЧИТАНО: --text-dim даёт 3.19 на карточке #111111 — мимо WCAG при
+       кегле 11. --text-secondary даёт 9.94. */
+    color: var(--text-secondary);
+    box-shadow: inset 0 -1px 0 var(--border-subtle);
+    white-space: nowrap;
+}
+.ad-pts th.ad-pts-place-h { text-align: left; left: 0; z-index: 3; }
+.ad-pts td {
+    /* ЛИНИЯ СТРОКИ — ТЕНЬЮ, А НЕ РАМКОЙ. Прибор дал 37 там, где объявлено
+       36: рамка ячейки таблицы прибавляется к высоте. Внутренняя тень
+       рисует ту же линию и высоты не меняет. Померено, не придумано. */
+    height: 36px; padding: 0 var(--space-3);
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,.04);
+    text-align: center; vertical-align: middle;
+}
+.ad-pts tr:last-child td { box-shadow: none; }
+.ad-pts tr:hover td { background: rgba(255,255,255,.02); }
+.ad-pts-place {
+    position: sticky; left: 0; z-index: 1;
+    background: var(--bg-card);
+    text-align: left; color: var(--text-muted);
+    font-size: var(--fs-xs); font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.ad-pts tr:hover .ad-pts-place { background: #171717; }
+/* Первые четыре места платятся таблицей ВСЕГДА — и в группах тоже.
+   Поэтому они отбиты, а не просто идут сверху. */
+.ad-pts-tbl .ad-pts-place { color: var(--text-primary); font-weight: 600; }
+.ad-pts-tbl td { background: rgba(204,255,0,.03); }
+.ad-pts-sep td { height: 8px; padding: 0; box-shadow: inset 0 -1px 0 var(--border-subtle); background: none; }
+
+.ad-pts-in {
+    /* 28×64 — ВНЕШНИЙ размер. Без border-box прибор дал 30×82: отступы и
+       рамка прибавлялись сверху. Объявленное число должно быть тем, что
+       меряется на экране. */
+    box-sizing: border-box;
+    width: 64px; height: 28px; padding: 0 var(--space-2);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: var(--fs-sm); font-weight: 600; font-family: inherit;
+    text-align: center; font-variant-numeric: tabular-nums;
+    transition: var(--transition-fast);
+}
+.ad-pts-in:hover { border-color: var(--alpha-white-16, rgba(255,255,255,.16)); }
+.ad-pts-in:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+    border-color: var(--accent);
+}
+.ad-pts-in[readonly] {
+    background: transparent; border-color: transparent;
+    color: var(--text-secondary); font-weight: 400; cursor: default;
+}
+.ad-pts-in[readonly]:hover { border-color: transparent; }
+/* Нулевое значение не кричит: у итогового их тридцать подряд. */
+.ad-pts-in.ad-pts-zero { color: var(--text-dim); font-weight: 400; }
+/* Уровень, которому столько мест не разыграть, вообще не предлагает поле. */
+.ad-pts-off { color: var(--text-dim); font-size: var(--fs-xs); }
+
+.ad-pts-head {
+    display: flex; flex-wrap: wrap; gap: var(--space-3);
+    align-items: baseline; justify-content: space-between;
+    margin-bottom: var(--space-3);
+}
+.ad-pts-who { font-size: var(--fs-xs); color: var(--text-muted); }
+.ad-pts-who b { color: var(--accent); font-weight: 600; }
+.ad-pts-ver { font-size: var(--fs-xs); color: var(--text-muted); }
+.ad-pts-ver b { color: var(--text-primary); font-weight: 600; }
+
+/* Замер лестницы текста */
+.st-mer { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.st-mer th, .st-mer td { padding: var(--space-2) var(--space-3); text-align: left; border-bottom: 1px solid var(--border-subtle); }
+.st-mer th { font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: .5px; color: var(--text-secondary); }
+.st-mer td { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.st-mer td:first-child { color: var(--text-primary); }
+</style>
+</head>
+<body>
+<div class="st-wrap">
+
+<h1 class="st-h1">Экран рейтинговых очков — стенд</h1>
+<p class="st-lead">
+  Настоящая разметка и настоящий <code>admin.css</code>. Числа в таблице —
+  из боевой базы, Приложение 2 к Положению КСЛТ 2021, разобраны из
+  <code>sql/схема/kategorii-i-ochki.sql</code>, а не перенабраны.
+  Правки CSS живут в этом файле и в <code>admin.css</code> не уйдут до слова Кости.
+</p>
+
+<!-- ===== A ===== -->
+<section class="st-block">
+  <span class="st-tag">A · что не так сегодня</span>
+  <h2 class="st-h2">Экран правит не ту таблицу</h2>
+  <p class="st-note-stand">
+    Настройки пишут в <code>points_rules</code> — очки по РАУНДАМ
+    (<code>settings.js:309</code>). Начисление читает
+    <code>points_by_place</code> — очки по МЕСТАМ (<code>bracket.js:2328</code>).
+    <span class="st-bad">Правка на этом экране ни на что не влияет.</span>
+    Строк в нём двенадцать — по стадиям; мест в таблице очков
+    <b>64</b>, и экрана у них не было никогда.
+    Числа ниже — настоящие из боевой, замер 02.10, шаг 4: первые четыре
+    строки совпадают с местами, а дальше
+    <span class="st-bad">шкала перевёрнута</span> — полуфинал во 2 категории
+    стоит 18, а в 3 категории 36.
+  </p>
+  <div class="ad-table-card">
+    <div class="ad-table-wrap"><table class="ad-table" id="tblBylo"></table></div>
+  </div>
+</section>
+
+<!-- ===== B ===== -->
+<section class="st-block">
+  <span class="st-tag">B · стало · администратор</span>
+  <h2 class="st-h2">Одна таблица по местам, 64 строки, плашка вместо переключателя</h2>
+  <p class="st-note-stand">
+    Строка <b>36</b> вместо 65, поле <b>28 × 64</b>, значение кеглем 14 весом,
+    шапка контраст <b>9.94</b> вместо 3.19 — всё посчитано, не на глаз.
+    Первые четыре места отбиты: они платятся таблицей всегда, и в группах тоже.
+    У итогового турнира <b>8 строк</b>, а не 64 — решение Кости: «итоговый это
+    просто восьмёрка, 8 строк там больше и не может быть».
+  </p>
+  <div class="ad-table-card">
+    <div class="ad-pts-head">
+      <div class="ad-pts-who">Правит: <b>администратор</b></div>
+      <div class="ad-pts-ver">Версия в силе с <b>01.01.2021</b> · за победу <b>25</b> · за участие <b>10</b></div>
+    </div>
+    <div class="ad-pts-band">
+      <div class="ad-pts-band-text">
+        <b>Таблица одна, а платит она двумя способами.</b><br>
+        <span>В олимпийке и сетке всех мест</span> — таблица платит за каждое место, победы не прибавляются.<br>
+        <span>В группах и двух лигах</span> — таблица платит места 1–4, остальным 25 за победу либо 10 за участие.
+      </div>
+    </div>
+    <div class="ad-pts-scroll">
+      <table class="ad-pts" id="tblAdmin"></table>
+    </div>
+    <div class="ad-rat-actions" style="margin-top:var(--space-4);">
+      <button class="ad-btn ad-btn-secondary">Новая версия с даты…</button>
+      <button class="ad-btn ad-btn-primary">Сохранить</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== C ===== -->
+<section class="st-block">
+  <span class="st-tag">C · стало · менеджер</span>
+  <h2 class="st-h2">Менеджер смотрит, но не правит</h2>
+  <p class="st-note-stand">
+    Слово Кости: «изменить очки может только администратор, не менеджер».
+    В базе это уже так — политика пускает только <code>is_admin()</code>.
+    На экране поля без рамки и без фона: не «заблокированное поле», а текст.
+    Кнопок сохранения нет вовсе — <span class="st-ok">наружу выходит только
+    безопасное</span>.
+  </p>
+  <div class="ad-table-card">
+    <div class="ad-pts-head">
+      <div class="ad-pts-who">Смотрит: <b>менеджер</b> · правка только у администратора</div>
+      <div class="ad-pts-ver">Версия в силе с <b>01.01.2021</b> · за победу <b>25</b> · за участие <b>10</b></div>
+    </div>
+    <div class="ad-pts-scroll" style="max-height:320px;">
+      <table class="ad-pts" id="tblManager"></table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== D ===== -->
+<section class="st-block">
+  <span class="st-tag">D · лестница текста</span>
+  <h2 class="st-h2">Замер: каждый уровень на ступени</h2>
+  <table class="st-mer">
+    <thead><tr><th>уровень текста</th><th>кегль</th><th>вес</th><th>цвет</th><th>контраст</th><th>ступень</th></tr></thead>
+    <tbody>
+      <tr><td>шапка столбца</td><td>11</td><td>400</td><td>--text-secondary</td><td>9.94</td><td>да</td></tr>
+      <tr><td>номер места</td><td>12</td><td>400</td><td>--text-muted</td><td>5.33</td><td>да</td></tr>
+      <tr><td>место 1–4</td><td>12</td><td>600</td><td>--text-primary</td><td>18.88</td><td>да</td></tr>
+      <tr><td>значение в поле</td><td>14</td><td>600</td><td>--text-primary</td><td>18.88</td><td>да</td></tr>
+      <tr><td>значение, ноль</td><td>14</td><td>400</td><td>--text-dim</td><td>3.19</td><td>намеренно тихо</td></tr>
+      <tr><td>плашка</td><td>14</td><td>400</td><td>--text-secondary</td><td>9.94</td><td>да</td></tr>
+      <tr><td>кто правит · версия</td><td>12</td><td>400</td><td>--text-muted</td><td>5.33</td><td>да</td></tr>
+    </tbody>
+  </table>
+  <p class="st-note-stand" style="margin-top:var(--space-3);">
+    Ноль у итогового турнира стоит тридцать строк подряд. Он намеренно тише
+    остальных: контраст 3.19 мимо WCAG, и это <b>осознанная цена</b> —
+    число там не несёт решения, а шум от тридцати ярких нулей мешает читать
+    то, что несёт. Если скажешь «нет» — поднимаю до 5.33.
+  </p>
+</section>
+
+<!-- ===== E ===== -->
+<section class="st-block">
+  <span class="st-tag">E · что ещё открыто</span>
+  <h2 class="st-h2">Не сделано и названо вслух</h2>
+  <p class="st-note-stand">
+    · <b>Ручной ввод прошлых результатов</b> (<code>players.js:2821</code>)
+    по-прежнему платит по раундам — сводить на места отдельным шагом.<br>
+    · <b>Предел мест у уровня</b> пока нарисован, но в базе его нет: итоговому
+    8 строк держится здесь условием, а должно жить одним определением рядом
+    с <code>on_ladder</code>.<br>
+    · <b>Новая версия с даты</b> — кнопка нарисована, окна за ней ещё нет.<br>
+    · <b>Планшет</b>: 64 строки с липкой шапкой на 992 проверены только здесь,
+    в админке замер не снят.<br>
+    · <b>Проверка 3 замера</b> не прогнана: где начисленное разойдётся с
+    таблицей при будущем пересчёте.
+  </p>
+</section>
+
+</div>
+
+<script>
+var ОЧКИ = [
+  [1, 1000, 600, 360, 215, 130],
+  [2, 600, 360, 215, 130, 80],
+  [3, 420, 250, 150, 90, 55],
+  [4, 360, 215, 130, 77, 48],
+  [5, 250, 150, 90, 55, 33],
+  [6, 215, 130, 78, 45, 28],
+  [7, 180, 110, 65, 38, 23],
+  [8, 180, 110, 65, 38, 23],
+  [9, 145, 90, 50, 30, 18],
+  [10, 125, 75, 45, 27, 16],
+  [11, 110, 65, 40, 23, 13],
+  [12, 110, 65, 40, 23, 13],
+  [13, 90, 55, 32, 19, 11],
+  [14, 90, 55, 32, 19, 11],
+  [15, 90, 55, 32, 19, 11],
+  [16, 90, 55, 32, 19, 11],
+  [17, 80, 50, 29, 17, 10],
+  [18, 65, 38, 22, 13, 8],
+  [19, 45, 27, 16, 9, 6],
+  [20, 45, 27, 16, 9, 6],
+  [21, 35, 21, 12, 8, 4],
+  [22, 35, 21, 12, 8, 4],
+  [23, 35, 21, 12, 8, 4],
+  [24, 35, 21, 12, 8, 4],
+  [25, 33, 18, 10, 6, 3],
+  [26, 32, 18, 10, 6, 3],
+  [27, 31, 18, 10, 6, 3],
+  [28, 31, 18, 10, 6, 3],
+  [29, 30, 18, 10, 6, 3],
+  [30, 30, 18, 10, 6, 3],
+  [31, 30, 18, 10, 6, 3],
+  [32, 30, 18, 10, 6, 3],
+  [33, 30, 18, 10, 6, 3],
+  [34, 20, 12, 6, 4, 2],
+  [35, 15, 8, 4, 3, 0],
+  [36, 15, 8, 4, 3, 0],
+  [37, 10, 5, 3, 2, 0],
+  [38, 10, 5, 3, 2, 0],
+  [39, 10, 4, 3, 2, 0],
+  [40, 10, 4, 3, 2, 0],
+  [41, 8, 3, 2, 1, 0],
+  [42, 7, 3, 2, 1, 0],
+  [43, 5, 3, 2, 1, 0],
+  [44, 5, 3, 2, 1, 0],
+  [45, 5, 3, 2, 1, 0],
+  [46, 5, 3, 2, 1, 0],
+  [47, 5, 3, 2, 1, 0],
+  [48, 5, 3, 2, 1, 0],
+  [49, 4, 2, 1, 1, 0],
+  [50, 4, 2, 1, 1, 0],
+  [51, 4, 2, 1, 1, 0],
+  [52, 4, 2, 1, 1, 0],
+  [53, 3, 2, 1, 1, 0],
+  [54, 3, 2, 1, 1, 0],
+  [55, 3, 2, 1, 1, 0],
+  [56, 3, 2, 1, 1, 0],
+  [57, 2, 1, 1, 1, 0],
+  [58, 2, 1, 1, 1, 0],
+  [59, 2, 1, 1, 1, 0],
+  [60, 2, 1, 1, 1, 0],
+  [61, 2, 1, 1, 1, 0],
+  [62, 2, 1, 1, 1, 0],
+  [63, 2, 1, 1, 1, 0],
+  [64, 2, 1, 1, 1, 0],
+];
+
+var УРОВНИ = [
+  { имя: 'Высшая категория', мест: 64 },
+  { имя: '1 категория',      мест: 64 },
+  { имя: '2 категория',      мест: 64 },
+  { имя: '3 категория',      мест: 64 },
+  { имя: 'Итоговый турнир',  мест: 8  }
+];
+
+/* Настоящие числа points_rules из боевой, замер 02.10 шаг 4.
+   Порядок тот же: Высшая · 1 · 2 · 3 · Итоговый. */
+var РАУНДЫ = [
+  ['W',   [1000, 600, 360, 215, 130]],
+  ['F',   [600,  360, 215, 130, 80]],
+  ['3RD', [420,  250, 150, 90,  55]],
+  ['4TH', [360,  215, 130, 77,  48]],
+  ['SF',  [150,  8,   18,  36,  70]],
+  ['QF',  [75,   4,   9,   18,  35]],
+  ['R16', [0,    0,   0,   0,   0]],
+  ['R32', [0,    0,   0,   0,   0]],
+  ['G3',  [0,    25,  25,  25,  25]],
+  ['G4',  [0,    10,  10,  10,  10]],
+  ['G5',  [0,    0,   0,   0,   0]],
+  ['G6',  [0,    0,   0,   0,   0]]
+];
+
+var ПОДПИСЬ_РАУНДА = {
+  W: 'Победитель', F: 'Финалист', '3RD': '3-е место', '4TH': '4-е место',
+  SF: 'Полуфинал', QF: 'Четвертьфинал', R16: '1/8 финала', R32: '1/16 финала',
+  G3: '3-е в группе', G4: '4-е в группе', G5: '5-е в группе', G6: '6-е в группе'
+};
+
+function шапка(первая) {
+  var h = '<thead><tr><th class="ad-pts-place-h">' + первая + '</th>';
+  УРОВНИ.forEach(function(у) { h += '<th>' + у.имя + '</th>'; });
+  return h + '</tr></thead>';
+}
+
+/* A — как сейчас: по раундам, и видно, что шкала ниже четвёртого места
+   перевёрнута по категориям. */
+function нарисоватьБыло() {
+  var h = '<thead><tr><th>Стадия</th>';
+  УРОВНИ.forEach(function(у) { h += '<th style="text-align:center;">' + у.имя + '</th>'; });
+  h += '</tr></thead><tbody>';
+  РАУНДЫ.forEach(function(р) {
+    h += '<tr><td><strong>' + (ПОДПИСЬ_РАУНДА[р[0]] || р[0]) + '</strong></td>';
+    р[1].forEach(function(v) {
+      h += '<td style="text-align:center;"><input type="number" class="ad-field-input" value="' +
+           v + '" style="width:70px;text-align:center;"></td>';
+    });
+    h += '</tr>';
+  });
+  document.getElementById('tblBylo').innerHTML = h + '</tbody>';
+}
+
+/* B и C — по местам. Отличие одно: можно править или нет. */
+function нарисоватьМеста(куда, правит) {
+  var h = шапка('Место') + '<tbody>';
+  ОЧКИ.forEach(function(строка) {
+    var место = строка[0];
+    var класс = место <= 4 ? ' class="ad-pts-tbl"' : '';
+    h += '<tr' + класс + '><td class="ad-pts-place">' + место + '</td>';
+    for (var i = 1; i <= 5; i++) {
+      var у = УРОВНИ[i - 1];
+      if (место > у.мест) {
+        h += '<td><span class="ad-pts-off">—</span></td>';
+        continue;
+      }
+      var v = строка[i];
+      var ноль = v === 0 ? ' ad-pts-zero' : '';
+      h += '<td><input type="number" class="ad-pts-in' + ноль + '" value="' + v + '"' +
+           (правит ? '' : ' readonly') + ' min="0"></td>';
+    }
+    h += '</tr>';
+    if (место === 4) h += '<tr class="ad-pts-sep"><td colspan="6"></td></tr>';
+  });
+  document.getElementById(куда).innerHTML = h + '</tbody>';
+}
+
+нарисоватьБыло();
+нарисоватьМеста('tblAdmin', true);
+нарисоватьМеста('tblManager', false);
+</script>
+</body>
+</html>
