@@ -122,7 +122,7 @@ COMMENT ON COLUMN public.points_by_place.version_id IS
 DROP TRIGGER IF EXISTS ochki_mesta_storozh  ON public.points_by_place;
 DROP TRIGGER IF EXISTS ochki_versii_storozh ON public.points_versions;
 
--- ---- Шаг 3б. Если таблица мест ПУСТА — наполняем её тут же ----
+-- ---- Шаг 3б. Уровни без мест наполняются тут же ----
 --
 -- ПОЙМАЛ ПРОГОН КОСТИ В ТЕСТОВОЙ 02.10. Там `points_by_place` пуста, и
 -- после миграции наполнить её стало НЕЧЕМ: сторож из шага 4 запрещает
@@ -225,10 +225,21 @@ WITH таблица(место, "5", "4", "3", "2", "1") AS (
      WHERE у.sort_order BETWEEN 1 AND 5
 )
 INSERT INTO public.points_by_place (version_id, level_id, place, points)
-SELECT version_id, level_id, место, очки
-  FROM разложено
- WHERE очки IS NOT NULL
-   AND NOT EXISTS (SELECT 1 FROM public.points_by_place);
+SELECT р.version_id, р.level_id, р.место, р.очки
+  FROM разложено р
+ WHERE р.очки IS NOT NULL
+   /* НАПОЛНЯЕМ ПО КАЖДОМУ УРОВНЮ ОТДЕЛЬНО, А НЕ «ЕСЛИ ТАБЛИЦА ПУСТА».
+      Поймал второй прогон Кости: в тестовой нашёлся ОДИН уровень вместо
+      пяти, наполнение дало ему 64 строки — и условие «таблица пуста»
+      закрылось. Добавь после этого четыре категории — места им уже не
+      завести. «Пять уровней с sort_order 1…5» было фактом БОЕВОЙ, а я
+      принял его за факт продукта; стенд, собранный по боевой, промолчал.
+
+      Уровень без мест наполняется, уровень со своими местами не
+      трогается — условие измеримо и не зависит от числа уровней. */
+   AND NOT EXISTS (SELECT 1 FROM public.points_by_place п
+                    WHERE п.level_id   = р.level_id
+                      AND п.version_id = р.version_id);
 
 -- ---- Шаг 4. Сторож: прошлое не переписывается ----
 --
