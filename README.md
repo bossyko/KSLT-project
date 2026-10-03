@@ -6,7 +6,6 @@ A full-featured community platform for tennis players in Kyrgyzstan — tourname
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
 ![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=flat&logo=supabase&logoColor=white)
-![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=flat&logo=netlify&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white)
 
 ---
@@ -38,7 +37,7 @@ A full-featured community platform for tennis players in Kyrgyzstan — tourname
 | Serverless | 15 Deno/TypeScript Edge Functions |
 | Bot | Telegram Bot API (webhooks + inline buttons) |
 | Testing | [Playwright](https://playwright.dev) (E2E) + [Vitest](https://vitest.dev) (Unit) |
-| CI/CD | GitHub Actions (tests on push/PR + auto-deploy to Netlify) |
+| CI/CD | GitHub Actions (tests on push/PR); site is served by GitHub Pages from `main` |
 | Design | Dark theme, accent `#CCFF00`, Inter font, glassmorphism |
 | Libraries | [Cropper.js](https://fengyuanchen.github.io/cropperjs/) (avatar cropping), [Chart.js](https://www.chartjs.org/) (analytics) |
 
@@ -135,7 +134,6 @@ npx vitest run
 Two GitHub Actions workflows:
 
 - **test.yml** — Runs E2E + unit tests on every push and pull request
-- **deploy.yml** — Auto-deploys to Netlify on push to `main`
 
 ## Quick Start
 

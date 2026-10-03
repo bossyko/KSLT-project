@@ -1165,5 +1165,3 @@ Telegram bot webhook handler. See [Section 9](#9-telegram-bot).
 
 | Variable | Purpose |
 |----------|---------|
-| `NETLIFY_AUTH_TOKEN` | Netlify deploy auth |
-| `NETLIFY_SITE_ID` | Target Netlify site |

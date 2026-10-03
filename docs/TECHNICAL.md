@@ -14,11 +14,10 @@
 | Языки | RU (основной), EN, KG |
 | Тема | Dark, accent #CCFF00 |
 | Шрифт | Inter |
-| Хостинг | Netlify (фронтенд) |
+| Хостинг | GitHub Pages (фронтенд) |
 | Backend | Supabase (PostgreSQL + Auth + Storage + Edge Functions) |
 | Бот | Telegram Bot API |
 | Тестирование | Playwright (E2E) + Vitest (Unit) |
-| CI/CD | GitHub Actions (test.yml + deploy.yml) |
 | Фреймворки | Нет (Vanilla HTML/CSS/JS) |
 | Сборка | Нет (статика, без бандлера) |
 
@@ -46,7 +45,6 @@
 ### Тестирование
 - **Playwright** — E2E тесты (9 test suites, 3 viewport: desktop/tablet/mobile)
 - **Vitest** — Unit тесты Edge Functions (72 теста, 3 suite)
-- **GitHub Actions** — CI/CD (test.yml: тесты, deploy.yml: деплой на Netlify)
 
 ### Интеграции
 - **Telegram Bot** (`@KSLTennisBot`) — уведомления, голосование, регистрация
@@ -216,7 +214,6 @@ KSLT/
 │
 ├── .github/workflows/              ← CI/CD
 │   ├── test.yml                    ← Тесты на push/PR
-│   └── deploy.yml                  ← Auto-deploy на Netlify
 │
 ├── docs/                           ← Документация
 │   ├── TECHNICAL.md                ← Техническая документация (RU)
@@ -1046,17 +1043,14 @@ Admin → создаёт Live Match (source: free/tournament/battle)
 | Workflow | Триггер | Что делает |
 |----------|---------|-----------|
 | `test.yml` | push, PR | E2E + Unit тесты |
-| `deploy.yml` | push to main | Auto-deploy на Netlify |
 
 ---
 
 ## 18. Деплой
 
-### Frontend (Netlify)
 
 ```bash
 git push origin main
-# → GitHub Actions → tests → deploy на Netlify
 ```
 
 ### SQL миграции

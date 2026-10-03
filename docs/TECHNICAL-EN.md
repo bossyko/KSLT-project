@@ -14,11 +14,10 @@
 | Languages | RU (primary), EN, KG |
 | Theme | Dark, accent #CCFF00 |
 | Font | Inter |
-| Hosting | Netlify (frontend) |
+| Hosting | GitHub Pages (frontend) |
 | Backend | Supabase (PostgreSQL + Auth + Storage + Edge Functions) |
 | Bot | Telegram Bot API |
 | Testing | Playwright (E2E) + Vitest (Unit) |
-| CI/CD | GitHub Actions (test.yml + deploy.yml) |
 | Frameworks | None (Vanilla HTML/CSS/JS) |
 | Build | None (static, no bundler) |
 
@@ -46,7 +45,6 @@
 ### Testing
 - **Playwright** — E2E tests (9 test suites, 3 viewports: desktop/tablet/mobile)
 - **Vitest** — Unit tests for Edge Functions (72 tests, 3 suites)
-- **GitHub Actions** — CI/CD (test.yml: tests, deploy.yml: deploy to Netlify)
 
 ### Integrations
 - **Telegram Bot** (`@KSLTennisBot`) — notifications, voting, registration
@@ -211,7 +209,6 @@ KSLT/
 │
 ├── .github/workflows/              ← CI/CD
 │   ├── test.yml                    ← Tests on push/PR
-│   └── deploy.yml                  ← Auto-deploy to Netlify
 │
 ├── docs/                           ← Documentation
 │   ├── TECHNICAL.md                ← Technical documentation (RU)
@@ -898,17 +895,14 @@ Modal window for new visitors:
 | Workflow | Trigger | Action |
 |----------|---------|--------|
 | `test.yml` | push, PR | E2E + Unit tests |
-| `deploy.yml` | push to main | Auto-deploy to Netlify |
 
 ---
 
 ## 18. Deployment
 
-### Frontend (Netlify)
 
 ```bash
 git push origin main
-# → GitHub Actions → tests → deploy to Netlify
 ```
 
 ### SQL Migrations

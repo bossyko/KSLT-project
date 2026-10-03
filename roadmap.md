@@ -223,7 +223,7 @@
 - [x] Onboarding modal: first-visit guide for new users (localStorage, 3 languages)
 - [x] Unit tests: 72 tests for Edge Functions (Vitest) — create-challenge, admin-manage-user, battle-publish
 - [x] JSDoc type annotations: @param, @returns, @typedef across JS codebase
-- [x] CI/CD: GitHub Actions — E2E tests on push/PR (test.yml) + auto-deploy to Netlify (deploy.yml)
+- [x] CI/CD: GitHub Actions — E2E tests on push/PR (test.yml); site served by GitHub Pages from main
 - [x] API documentation v2.0 (31 tables, 28 RPCs, 15 Edge Functions, RLS matrix, Telegram bot, cron jobs)
 
 ## При переезде на рабочий домен

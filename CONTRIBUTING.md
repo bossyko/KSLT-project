@@ -44,7 +44,6 @@ KSLT/
 ├── tests/
 │   ├── e2e/                      # 9 Playwright test suites
 │   └── unit/                     # 72 Vitest теста (Edge Functions)
-├── .github/workflows/            # CI/CD (test.yml + deploy.yml)
 ├── docs/                         # Документация
 └── images/                       # Изображения
 ```
@@ -125,7 +124,6 @@ npx vitest
 ### CI/CD
 
 - **test.yml** — автоматически при push и PR (E2E + Unit)
-- **deploy.yml** — auto-deploy на Netlify при push в main
 
 ---
 
@@ -253,7 +251,7 @@ var res = await fetch(SUPABASE_URL + '/functions/v1/<name>', {
 
 ## Деплой
 
-### Frontend (Netlify)
+### Frontend (GitHub Pages)
 - Push в `main` → GitHub Actions → tests → auto-deploy
 - Настроек сборки нет (статика)
 

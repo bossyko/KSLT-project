@@ -44,7 +44,6 @@ KSLT/
 ├── tests/
 │   ├── e2e/                      # 9 Playwright test suites
 │   └── unit/                     # 72 Vitest tests (Edge Functions)
-├── .github/workflows/            # CI/CD (test.yml + deploy.yml)
 ├── docs/                         # Documentation
 └── images/                       # Images
 ```
@@ -125,7 +124,6 @@ npx vitest
 ### CI/CD
 
 - **test.yml** — runs automatically on push and PR (E2E + Unit)
-- **deploy.yml** — auto-deploy to Netlify on push to main
 
 ---
 
@@ -253,7 +251,7 @@ All migrations are in the `sql/` folder (64 files). Run them in the **Supabase S
 
 ## Deployment
 
-### Frontend (Netlify)
+### Frontend (GitHub Pages)
 - Push to `main` → GitHub Actions → tests → auto-deploy
 - No build configuration needed (static site)
 
