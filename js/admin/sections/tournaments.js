@@ -708,8 +708,13 @@
         trnDraftDirty = false;
         trnImageFile = null;
         trnImageUrl = (item && item.image) ? item.image : '';
-        /* image_full появится в базе отдельным столбцом; пока его нет,
-           в короб карточки кладём то же, что и в обложку */
+        /* ПОДПИСЬ ПОПРАВЛЕНА 03.10. Раньше здесь стояло «image_full
+           появится в базе отдельным столбцом; пока его нет» — столбец
+           ЕСТЬ: sql/схема/afisha-dva-predstavleniya.sql, в тестовую
+           доведён testovaya-baza-dogonyaet-boevuyu.sql. Запасной ход
+           оставлен намеренно и по другой причине: у турниров, заведённых
+           ДО миграции, полной афиши нет вовсе, и тогда карточка берёт
+           кадр — пустой короб хуже обрезанной картинки. */
         trnImageFullUrl = (item && item.image_full) ? item.image_full : trnImageUrl;
         trnImageFullFile = null;
         trnImageCrop = (item && item.image_crop) ? item.image_crop : null;
