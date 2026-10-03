@@ -21,7 +21,10 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-ochki-'));
    Без неё `чит('sql/схема/predel-mest-urovnya.sql')` падает в копии, и
    КАЖДЫЙ откат «роняет правило» по чужой причине: прибор обязан
    называть свою причину, а не соседскую. */
-['js', 'css', 'tools', 'pages', 'maket', 'sql'].forEach(д =>
+/* `tests` в копии — по той же причине, что и `sql`: замораживается и сам
+   тест экрана. Без него `чит` падает в копии, и КАЖДЫЙ откат «роняет
+   правило» по чужой причине. Прибор обязан называть свою причину. */
+['js', 'css', 'tools', 'pages', 'maket', 'sql', 'tests'].forEach(д =>
   fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 fs.mkdirSync(path.join(ВРЕМ, 'mobile/www/js'), { recursive: true });
 fs.cpSync(path.join(КОРЕНЬ, 'mobile/www/js'), path.join(ВРЕМ, 'mobile/www/js'), { recursive: true });
@@ -40,6 +43,7 @@ const УТИЛИТЫ   = 'js/admin/core/utils.js';
 const МАКЕТ_ОЧКИ = 'maket/ochki-ekran.html';
 const АДМИН_CSS = 'css/admin.css';
 const ЗАМЕР_ФАЙЛ = 'tools/zamer-ochki-ekran.mjs';
+const ТЕСТ_ФАЙЛ  = 'tests/e2e/features/19-ekran-ochkov.spec.js';
 
 const ОТКАТЫ = [
   /* ─── одно или другое, а не оба разом ─── */
@@ -461,6 +465,26 @@ const ОТКАТЫ = [
    "        ratPlacesLimit: '{n}',\n        ratBeyondLimit: 'За пределом",
    "        ratPlacesLimit: 'до {n}',\n        ratBeyondLimit: 'За пределом",
    'предел подписан одним числом, без «до»'],
+
+  [ТЕСТ_ФАЙЛ,
+   "    test.skip(({}, info) => /mobile|phone/.test(info.project.name),",
+   "    test.skip(({}, info) => false && /mobile/.test(info.project.name),",
+   'тест экрана пропускает телефон, а не мерит его мягче'],
+
+  [ТЕСТ_ФАЙЛ,
+   "        await expect(поле).toHaveValue(было);   // ждём признак, а не таймер",
+   "        await page.waitForTimeout(300);",
+   'тест экрана ждёт признаки, а не таймеры'],
+
+  [ТЕСТ_ФАЙЛ,
+   "        await expect(page.locator('.set-del-level')).toHaveCount(5);",
+   "        await page.locator('.set-del-level').first().click();",
+   'тест не нажимает кнопок, которые пишут в базу'],
+
+  [ТЕСТ_ФАЙЛ,
+   "        await expect(page.locator('#setRulesTable .ad-pts-in')).toHaveCount(264);",
+   "        await expect(page.locator('#setRulesTable .ad-pts-in')).not.toHaveCount(0);",
+   'тест держит числа, а не «примерно столько»'],
 ];
 
 function прогон() {
