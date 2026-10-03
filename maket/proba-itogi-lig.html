@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>КСЛТ — проба: итоги двух лиг и отсечка</title>
+<link rel="stylesheet" href="../css/tokens.css?v=22">
+<link rel="stylesheet" href="../css/style.css?v=383">
+<link rel="stylesheet" href="../css/tournament-detail.css?v=91">
+<style>body{background:#0A0A0A;color:#fff;font-family:Inter,system-ui,sans-serif;margin:0;padding:24px;}
+.pr-h{font-size:14px;letter-spacing:.08em;color:#CCFF00;margin:0 0 12px;text-transform:uppercase;}
+.pr-box{margin-bottom:40px;max-width:720px;}</style>
+</head>
+<body>
+
+<!-- ПРОБА, А НЕ СТЕНД. Зовётся НАСТОЯЩАЯ функция продукта
+     показатьРаскладкуОчков из js/tournament-detail.js — не копия. База
+     подменена заглушкой, которая отдаёт заданные строки и падает на любом
+     другом обращении: заглушка должна падать, а не угадывать. -->
+
+<div class="pr-box"><p class="pr-h">А · две лиги</p><div id="лиги"></div></div>
+<div class="pr-box"><p class="pr-h">Б · 64 места, отсечка</p><div id="много"></div></div>
+<div class="pr-box"><p class="pr-h">В · обычная таблица, восемь строк</p><div id="обычно"></div></div>
+
+<script src="../js/rating-points.js?v=5"></script>
+<script>
+var ПОДАНО = [];
+var supabaseClient = {
+    from: function (таблица) {
+        if (таблица !== 'tournament_results') {
+            throw new Error('заглушка не знает таблицы ' + таблица);
+        }
+        var цепь = {
+            select: function () { return цепь; },
+            eq: function () { return цепь; },
+            then: function (дальше) { return Promise.resolve(дальше({ data: ПОДАНО })); }
+        };
+        return цепь;
+    }
+};
+</script>
+<script src="../js/tournament-detail.js?v=98"></script>
+<script>
+function имя(ид) { return 'Игрок ' + ид; }
+
+function прогнать(куда, строки, лиги) {
+    ПОДАНО = строки;
+    показатьРаскладкуОчков({ id: 't1' }, document.getElementById(куда),
+        '', false, false, имя, null, лиги);
+}
+
+/* Две лиги: верхняя платится таблицей 2 категории, нижняя — 3 категории.
+   Числа настоящие, из kategorii-i-ochki.sql:101. */
+прогнать('лиги', [
+    { player_id: 'p1', round_reached: 'W',   points_earned: 360 },
+    { player_id: 'p2', round_reached: 'F',   points_earned: 215 },
+    { player_id: 'p3', round_reached: '3RD', points_earned: 150 },
+    { player_id: 'p4', round_reached: '4TH', points_earned: 130 },
+    { player_id: 'p5', round_reached: 'W',   points_earned: 215 },
+    { player_id: 'p6', round_reached: 'F',   points_earned: 130 },
+    { player_id: 'p7', round_reached: '3RD', points_earned: 90  },
+    { player_id: 'p8', round_reached: '4TH', points_earned: 77  },
+    { player_id: 'p9', round_reached: 'G3',  points_earned: 25  }
+], { p1:'PL', p2:'PL', p3:'PL', p4:'PL', p5:'CL', p6:'CL', p7:'CL', p8:'CL' });
+
+var много = [];
+for (var i = 1; i <= 64; i++) {
+    много.push({ player_id: 'm' + i, round_reached: 'R64', points_earned: 100 - i });
+}
+прогнать('много', много);
+
+прогнать('обычно', [
+    { player_id: 'o1', round_reached: 'W',   points_earned: 360 },
+    { player_id: 'o2', round_reached: 'F',   points_earned: 215 },
+    { player_id: 'o3', round_reached: '3RD', points_earned: 150 },
+    { player_id: 'o4', round_reached: '4TH', points_earned: 130 },
+    { player_id: 'o5', round_reached: 'QF',  points_earned: 75  },
+    { player_id: 'o6', round_reached: 'QF',  points_earned: 50  },
+    { player_id: 'o7', round_reached: 'QF',  points_earned: 25  },
+    { player_id: 'o8', round_reached: 'QF',  points_earned: 10  }
+]);
+</script>
+</body>
+</html>

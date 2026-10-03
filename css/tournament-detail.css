@@ -1327,6 +1327,39 @@ tr.td-rr-row-dimmed {
    число важнее всего. Поймала проверка лестницы, а не глаз. */
 .td-results-table .td-res-winner .td-res-pts { font-weight: 700; }
 
+/* ───────── ОТСЕЧКА ДЛИННОЙ ТАБЛИЦЫ ─────────
+ *
+ * Ограничения не было вовсе: запрос итогов идёт без `limit`
+ * (`js/tournament-detail.js`), и строки рисуются все до одной. На восьми
+ * это читается, на 64 — стена в треть экрана, и смотрят её с телефона.
+ *
+ * СТРОКА СКРЫТА, А НЕ ВЫБРОШЕНА: она есть в разметке, её находит поиск по
+ * странице и читает диктор. Кнопка лишь снимает класс со своей таблицы.
+ */
+.td-results-table .td-res-hidden { display: none; }
+.td-results-table.td-res-full .td-res-hidden { display: table-row; }
+
+.td-res-more {
+    display: block;
+    width: 100%;
+    /* 44 — ступень шкалы кнопок и нижняя граница цели нажатия */
+    height: 44px;
+    margin-top: var(--space-2);
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+.td-res-more:hover { border-color: var(--accent); color: var(--accent); }
+.td-res-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Две лиги идут одна под другой: заголовок каждой — её собственный. */
+.td-results-table + .td-results-table { margin-top: var(--space-6); }
+
 /* Телефон: этап уходит — он производное от места, а место остаётся */
 @media (max-width: 640px) {
     .td-res-stage { display: none; }

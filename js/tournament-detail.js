@@ -1698,13 +1698,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     // Premier League
                     glHtml += '<div class="td-league-bracket">';
-                    glHtml += '<h3 class="td-league-title td-league-title-premier">' + (isEn ? 'Premier League' : (isKg ? 'Жогорку лига' : 'Высшая лига')) + '</h3>';
+                    glHtml += '<h3 class="td-league-title td-league-title-premier">' + подписьЛиги('PL', isEn, isKg) + '</h3>';
                     glHtml += renderLeagueBracketPublic(glPLMatches, playersMap, 'PL', isEn, isKg, predOpts, pName);
                     glHtml += '</div>';
 
                     // Consolation League
                     glHtml += '<div class="td-league-bracket">';
-                    glHtml += '<h3 class="td-league-title td-league-title-consolation">' + (isEn ? 'Consolation League' : (isKg ? 'Сооротуу лигасы' : 'Утешительная лига')) + '</h3>';
+                    glHtml += '<h3 class="td-league-title td-league-title-consolation">' + подписьЛиги('CL', isEn, isKg) + '</h3>';
                     glHtml += renderLeagueBracketPublic(glCLMatches, playersMap, 'CL', isEn, isKg, predOpts, pName);
                     glHtml += '</div>';
 
@@ -2656,8 +2656,23 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                        источник одного понятия. Место в ней было НОМЕРОМ
                        СТРОКИ — не местом вовсе, — а этапа не было совсем.
                        `tournament_results` пишет админка при завершении
-                       турнира, и его же читают остальные типы сетки. */
-                    показатьРаскладкуОчков(t, resultsPodium, resHtml, isEn, isKg, pName);
+                       турнира, и его же читают остальные типы сетки.
+
+                       ЛИГА ИГРОКА БЕРЁТСЯ ИЗ МАТЧЕЙ, А НЕ ВЫВОДИТСЯ. В
+                       `tournament_results` её нет, а в матчах она стоит
+                       приставкой круга — `PL-` и `CL-`, тем же признаком,
+                       по которому страница рисует две сетки выше (`:1688`).
+                       Один признак на оба экрана. */
+                    var лигаИгрока = {};
+                    matches.forEach(function (m) {
+                        var вид = m.round && m.round.indexOf('PL-') === 0 ? 'PL'
+                                : m.round && m.round.indexOf('CL-') === 0 ? 'CL' : null;
+                        if (!вид) return;
+                        [m.player1_id, m.player2_id].forEach(function (ид) {
+                            if (ид) лигаИгрока[ид] = вид;
+                        });
+                    });
+                    показатьРаскладкуОчков(t, resultsPodium, resHtml, isEn, isKg, pName, null, лигаИгрока);
                 } else {
                     resultsPodium.innerHTML = '<div class="td-no-results"><p>' + (isRatingTournament(t) ? L.noResults : L.noResultsPlain) + '</p></div>';
                 }
@@ -2765,7 +2780,22 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
  * Дорисовываем ПОВЕРХ уже выставленного пьедестала, а не вместо него:
  * ответ базы приходит позже, и присваивание целиком стёрло бы карточки.
  */
-function показатьРаскладкуОчков(t, контейнер, пьедесталHtml, isEn, isKg, имя, точныеМеста) {
+/* ───────── НАЗВАНИЯ ЛИГ — ОДНО ОПРЕДЕЛЕНИЕ ─────────
+ *
+ * Слова «Высшая лига» и «Утешительная лига» стояли вписанными прямо в
+ * разметку сеток (`:1701` и `:1707`). Таблице итогов они нужны те же, и
+ * вторая копия родила бы расхождение ровно на шве: сетка называет лигу
+ * одним словом, таблица под ней — другим.
+ */
+function подписьЛиги(вид, isEn, isKg) {
+    var П = {
+        PL: { ru: 'Высшая лига',       en: 'Premier League',     kg: 'Жогорку лига' },
+        CL: { ru: 'Утешительная лига', en: 'Consolation League', kg: 'Сооротуу лигасы' }
+    }[вид] || { ru: '', en: '', kg: '' };
+    return isEn ? П.en : (isKg ? П.kg : П.ru);
+}
+
+function показатьРаскладкуОчков(t, контейнер, пьедесталHtml, isEn, isKg, имя, точныеМеста, лиги) {
     if (!контейнер || typeof supabaseClient === 'undefined') return;
     if (typeof KSLT_POINTS === 'undefined') return;
 
@@ -2775,6 +2805,15 @@ function показатьРаскладкуОчков(t, контейнер, п�
         en: { место: 'Place', игрок: 'Player', этап: 'Stage', очки: 'Points', итог: 'Tournament results' },
         kg: { место: 'Орун', игрок: 'Оюнчу', этап: 'Этап', очки: 'Упай', итог: 'Турнирдин жыйынтыгы' }
     }[язык];
+    var ВСЕХ = { ru: 'Показать всех', en: 'Show all', kg: 'Баарын көрсөтүү' }[язык];
+
+    /* СКОЛЬКО СТРОК ВИДНО СРАЗУ.
+       Ограничения не было вовсе: запрос идёт без `limit`, и строки рисуются
+       все до одной. На восьми это читается, на 64 — стена в треть экрана, и
+       смотрят её с телефона. Восемь — не красивое число, а размер самой
+       мелкой сетки: столько мест разыгрывает турнир, где играют все.
+       Решение Кости 03.10: «первые 8, остальные под кнопку». */
+    var СТРОК_СРАЗУ = 8;
 
     supabaseClient.from('tournament_results')
         .select('player_id, round_reached, points_earned')
@@ -2802,16 +2841,33 @@ function показатьРаскладкуОчков(t, контейнер, п�
                        KSLT_POINTS.порядокРаунда(b.round_reached);
             });
 
-            var html = '<div class="td-results-table">' +
-                '<h3 class="td-results-title">' + П.итог + '</h3>' +
+            /* ТАБЛИЦА РИСУЕТСЯ ОДНОЙ ФУНКЦИЕЙ, А ЗОВЁТСЯ ОДИН РАЗ ИЛИ ДВА.
+               В двух лигах РЕЗУЛЬТАТА ДВА: у верхней сетки свой победитель и
+               свои 1-2, у утешительной свои, и платятся они РАЗНЫМИ таблицами
+               (`bracket.js:2351`). Один список с прочерками это прятал.
+               Слово Кости 03.10: «2 лиги — значит 2 результата». */
+            function таблица(свои, заголовок) {
+                if (!свои.length) return '';
+                var h = '<div class="td-results-table">' +
+                '<h3 class="td-results-title">' + заголовок + '</h3>' +
                 '<table><thead><tr>' +
                     '<th class="td-res-place">' + П.место + '</th>' +
                     '<th>' + П.игрок + '</th>' +
                     '<th class="td-res-stage">' + П.этап + '</th>' +
                     '<th class="td-res-pts">' + П.очки + '</th>' +
                 '</tr></thead><tbody>';
+                h += строкиТаблицы(свои);
+                h += '</tbody></table>';
+                if (свои.length > СТРОК_СРАЗУ) {
+                    h += '<button type="button" class="td-res-more">' +
+                         ВСЕХ + ' (' + свои.length + ')</button>';
+                }
+                return h + '</div>';
+            }
 
-            строки.forEach(function(р) {
+            function строкиТаблицы(свои) {
+                var html = '';
+                свои.forEach(function(р, номер) {
                 var своё = поМесту(р.player_id);
 
                 /* МЕСТО: ТОЧНОЕ ТАМ, ГДЕ ЕГО РАЗЫГРАЛИ, ПОЛОСА — ГДЕ НЕТ.
@@ -2830,16 +2886,49 @@ function показатьРаскладкуОчков(t, контейнер, п�
                     : KSLT_POINTS.подписьРаунда(р.round_reached, язык);
 
                 var медаль = место === 1 ? '🥇 ' : место === 2 ? '🥈 ' : место === 3 ? '🥉 ' : '';
-                html += '<tr' + (место === 1 ? ' class="td-res-winner"' : '') + '>' +
+                /* СКРЫТА, А НЕ ВЫБРОШЕНА: строка есть в разметке, её читает
+                   поиск по странице и диктор, кнопка лишь снимает класс.
+                   Выброшенную пришлось бы дорисовывать вторым проходом. */
+                var скрыта = свои.length > СТРОК_СРАЗУ && номер >= СТРОК_СРАЗУ
+                    ? ' td-res-hidden' : '';
+                var классы = (место === 1 ? 'td-res-winner' : '') + скрыта;
+                html += '<tr' + (классы ? ' class="' + классы.trim() + '"' : '') + '>' +
                     '<td class="td-res-place">' + медаль + (подпись === null ? '—' : подпись) + '</td>' +
                     '<td>' + имя(р.player_id) + '</td>' +
                     '<td class="td-res-stage">' + этап + '</td>' +
                     '<td class="td-res-pts">' + (р.points_earned || 0) + '</td>' +
                 '</tr>';
-            });
+                });
+                return html;
+            }
 
-            html += '</tbody></table></div>';
+            var html;
+            if (лиги) {
+                var своиЛиги = function (вид) {
+                    return строки.filter(function (р) { return лиги[р.player_id] === вид; });
+                };
+                /* Кто не попал ни в одну лигу — не выброшен: он вышел из
+                   группы и не сыграл ни одного матча плей-офф. Таблица «вне
+                   лиг» показывает его под своим заголовком, а не прячет. */
+                var безЛиги = строки.filter(function (р) { return !лиги[р.player_id]; });
+                html = таблица(своиЛиги('PL'), подписьЛиги('PL', isEn, isKg)) +
+                       таблица(своиЛиги('CL'), подписьЛиги('CL', isEn, isKg)) +
+                       таблица(безЛиги, П.итог);
+            } else {
+                html = таблица(строки, П.итог);
+            }
+
             контейнер.innerHTML = пьедесталHtml + html;
+
+            /* Кнопка снимает класс со СВОЕЙ таблицы, а не со всех: лиг две, и
+               раскрытая верхняя не должна раскрывать утешительную. */
+            контейнер.querySelectorAll('.td-res-more').forEach(function (кнопка) {
+                кнопка.addEventListener('click', function () {
+                    var таб = кнопка.closest('.td-results-table');
+                    if (таб) таб.classList.add('td-res-full');
+                    кнопка.remove();
+                });
+            });
         });
 }
 
