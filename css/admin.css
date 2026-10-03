@@ -852,6 +852,9 @@ body.ad-page {
     border-radius: var(--radius-full);
     font-size: var(--fs-sm);
     font-weight: 600;
+    /* Межстрочный был `normal`, то есть от шрифта. Высоту кнопки задаёт
+       height, текст центрируется flex'ом — ступень лестницы здесь --lh-none */
+    line-height: var(--lh-none);
     cursor: pointer;
     transition: var(--transition-fast);
     text-decoration: none;
@@ -1906,7 +1909,9 @@ select.ad-field-input {
     font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 600;
-    line-height: 1.2;
+    /* Было 1.2 — числа нет ни на одной ступени. Высота фиксирована
+       ступенью --btn-h-sm, строка одна */
+    line-height: var(--lh-none);
     cursor: pointer;
     transition: var(--transition-fast);
 }
@@ -1981,6 +1986,9 @@ select.ad-field-input {
     border: none;
     cursor: pointer;
     font-size: var(--fs-base);
+    /* Был `normal`, то есть от шрифта. Круг 28 задан width/height,
+       крестик центрируется flex'ом */
+    line-height: var(--lh-none);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2044,7 +2052,9 @@ select.ad-field-input {
 .ad-afisha-cap {
     margin-top: var(--space-2);
     font-size: var(--fs-xs);
-    line-height: 1.4;
+    /* Было 1.4 — мимо лестницы. Подпись переносится на узком виде,
+       значит ступень подзаголовка, а не одной строки */
+    line-height: var(--lh-snug);
     /* Не --text-dim: посчитано 3.21:1 на фоне карточки rgb(17,17,17) —
        мимо WCAG AA. Подпись здесь не украшение, её читают. --text-muted
        даёт 5.33:1 */
@@ -2072,7 +2082,9 @@ select.ad-field-input {
     color: var(--text-muted);
     font-family: inherit;
     font-size: var(--fs-sm);
-    line-height: 1.4;
+    /* Было 1.4 — мимо лестницы. Текст короба переносится, это основной
+       уровень; высота короба задана --afisha-h, сдвига нет */
+    line-height: var(--lh-normal);
     text-align: center;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -2734,7 +2746,18 @@ select.ad-field-input {
 
 .ad-tab {
     flex: 1;
-    padding: 10px 16px;
+    /* ВЫСОТА СТУПЕНЬЮ, А НЕ СУММОЙ. Было padding 10+10 плюс строка от
+       шрифта: замер 03.10 дал 36 — ступень шкалы, но ВЫПАВШУЮ случайно.
+       Сменится шрифт — съедет и она. Теперь 36 объявлено ступенью кнопки,
+       а межстрочный не участвует.
+       ПОЧЕМУ min-height, А НЕ height: при ширине 768 и ниже `.ad-tabs`
+       становится колонкой (admin.css, @media max-width 768), и у элемента
+       `flex: 1` основная ось — вертикальная. Тогда `flex-basis: 0%`
+       ПЕРЕБИВАЕТ `height`, и вкладка схлопывается до строки: замер поймал
+       14px при 36 объявленных. `min-height` — порог, он верен на обеих осях. */
+    min-height: var(--btn-h-sm);
+    padding: 0 var(--space-4);
+    line-height: var(--lh-none);
     border: none;
     background: transparent;
     color: var(--text-secondary);
