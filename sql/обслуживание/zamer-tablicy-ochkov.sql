@@ -306,3 +306,57 @@ SELECT п.title,
         AND (п.очки - ф.очки) % 25 = 0
  GROUP BY п.title, п.gender, п.очки
  ORDER BY п.очки DESC, п.title;
+
+-- ---- Шаг 10. Вся лестница осиротевших, а не только первое место ----
+--
+-- Шаг 9 дал ответ, который формально верен и по сути ведёт не туда: у
+-- СЕМИ победителей из восьми ровно 1000 — и у ТБШ Tour, и у ТБШ
+-- ProMasters. Семь турниров разного уровня не могут все быть Высшей
+-- категорией. Значит одинаковое число у всех — не доказательство уровня,
+-- а признак того, что уровень не при чём: очки поставлены мимо таблиц.
+--
+-- ОДНО ЧИСЛО НЕ ОТЛИЧАЕТ ТАБЛИЦУ ОТ РУЧНОГО ВВОДА — отличает ЛЕСТНИЦА.
+-- Если за второе место везде 600, за третье 420, за четвёртое 360 — платила
+-- таблица Высшей. Если второе место у турниров разное — таблицы были разные.
+-- Если «разных_чисел» единица или два — числа ставили руками.
+--
+-- Восьмой, «ТБШ Futures 2026» мужской, в шаг 9 не попал вовсе: у него нет
+-- строки `W` с очками, хотя турнир `completed` и несёт 50 строк итогов.
+-- Колонка `за_1` покажет это пустотой.
+
+SELECT 'ШАГ 10 · ЛЕСТНИЦА ОСИРОТЕВШИХ' AS шаг;
+
+SELECT т.title,
+       т.gender,
+       count(*)                                                   AS строк,
+       max(и.points_earned) FILTER (WHERE и.round_reached = 'W')   AS за_1,
+       max(и.points_earned) FILTER (WHERE и.round_reached = 'F')   AS за_2,
+       max(и.points_earned) FILTER (WHERE и.round_reached = '3RD') AS за_3,
+       max(и.points_earned) FILTER (WHERE и.round_reached = '4TH') AS за_4,
+       max(и.points_earned) FILTER (WHERE и.round_reached = 'SF')  AS sf,
+       max(и.points_earned) FILTER (WHERE и.round_reached = 'QF')  AS qf,
+       count(DISTINCT и.points_earned)                            AS разных_чисел,
+       min(и.points_earned)                                       AS самое_малое,
+       max(и.points_earned)                                       AS самое_большое
+  FROM public.tournaments т
+  JOIN public.tournament_results и ON и.tournament_id = т.id
+ WHERE т.level_id IS NULL
+   AND и.points_earned > 0
+ GROUP BY т.id, т.title, т.gender
+ ORDER BY т.title;
+
+-- И какие вообще этапы в них записаны: если вместо W/F/SF стоят G1…G6 или
+-- пусто — лестницы там нет, и сравнивать не с чем.
+
+SELECT 'ШАГ 10б · КАКИЕ ЭТАПЫ ЗАПИСАНЫ' AS шаг;
+
+SELECT coalesce(и.round_reached, '— пусто —') AS этап,
+       count(*)                               AS строк,
+       count(DISTINCT т.id)                   AS турниров,
+       min(и.points_earned)                   AS от,
+       max(и.points_earned)                   AS до
+  FROM public.tournaments т
+  JOIN public.tournament_results и ON и.tournament_id = т.id
+ WHERE т.level_id IS NULL
+ GROUP BY 1
+ ORDER BY count(*) DESC;

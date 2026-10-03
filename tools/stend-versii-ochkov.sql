@@ -182,3 +182,23 @@ INSERT INTO public.tournament_results (tournament_id, player_id, round_reached, 
 VALUES ('t-tbsh-pro',  'p10', 'W', 1000, 2026),
        ('t-tbsh-chal', 'p11', 'W',  535, 2026),
        ('t-tbsh-tour', 'p12', 'W',  999, 2026);
+
+-- Крайние случаи шага 10: лестница есть · лестницы нет · победителя нет.
+INSERT INTO public.tournaments (id, title, level_id, date_start, format, bracket_type, gender, status)
+VALUES ('t-tbsh-lest', 'ТБШ с лестницей',   NULL, DATE '2026-06-01', 'singles', 'fic', 'men', 'completed'),
+       ('t-tbsh-flat', 'ТБШ всем одинаково', NULL, DATE '2026-06-01', 'singles', 'fic', 'men', 'completed'),
+       ('t-tbsh-bezw', 'ТБШ без победителя', NULL, DATE '2026-06-01', 'singles', 'fic', 'men', 'completed');
+
+INSERT INTO public.tournament_results (tournament_id, player_id, round_reached, points_earned, season)
+VALUES -- настоящая лестница Высшей: 1000 · 600 · 420 · 360
+       ('t-tbsh-lest', 'p20', 'W',   1000, 2026),
+       ('t-tbsh-lest', 'p21', 'F',    600, 2026),
+       ('t-tbsh-lest', 'p22', '3RD',  420, 2026),
+       ('t-tbsh-lest', 'p23', '4TH',  360, 2026),
+       -- всем одно и то же: лестницы нет
+       ('t-tbsh-flat', 'p24', 'W',   1000, 2026),
+       ('t-tbsh-flat', 'p25', 'F',   1000, 2026),
+       ('t-tbsh-flat', 'p26', 'SF',  1000, 2026),
+       -- победителя нет вовсе, этап записан группой
+       ('t-tbsh-bezw', 'p27', 'G1',   250, 2026),
+       ('t-tbsh-bezw', 'p28', 'G2',   120, 2026);
