@@ -201,3 +201,56 @@ SELECT уровень, раунд,
   FROM разбор
  GROUP BY уровень, раунд
  ORDER BY уровень, раунд;
+
+-- ---- Шаг 8. Кто такие 408 строк «без уровня» ----
+--
+-- Шаг 7 нашёл в боевой 408 строк итогов, у чьих турниров `level_id` пуст.
+-- Таблица очков к ним неприменима по определению: `isUnrankedTournament`
+-- (`bracket.js`) считает нерейтинговыми дружеские и всё парное, а признак
+-- рейтингового требует непустого `level_id`. Тогда очков у них быть не
+-- должно вовсе — а в выводе стоит «начислено 15…1000».
+--
+-- ДВЕ РАЗНЫЕ ПРИЧИНЫ, И РАЗЛИЧАЕТ ИХ ТОЛЬКО ЭТОТ ЗАПРОС:
+--   · турнир парный или дружеский — уровня у него и не было, а очки
+--     остались от старого кода: `stripFriendlyPoints` обнуляет их при
+--     ЧТЕНИИ, в базе они как лежали, так и лежат;
+--   · турнир был РЕЙТИНГОВЫМ, а уровень под ним удалили: `deleteLevel`
+--     (`settings.js:283`) ставит турнирам `level_id = null`, но
+--     `tournament_results` не трогает. 30.09 удалён прежний уровень
+--     «Итоговый турнир» — и если под ним были турниры, их история
+--     осиротела: очки начислены, а по какой таблице — больше не узнать.
+--
+-- Вторая причина — настоящая беда, первая — мусор в данных.
+
+SELECT 'ШАГ 8 · ТУРНИРЫ БЕЗ УРОВНЯ' AS шаг;
+
+SELECT coalesce(у.name, '— без уровня —') AS уровень,
+       т.format,
+       т.bracket_type,
+       count(DISTINCT т.id)               AS турниров,
+       count(и.id)                        AS строк_итогов,
+       sum(и.points_earned)               AS очков_всего,
+       max(и.points_earned)               AS самое_большое,
+       min(т.date_start)                  AS с,
+       max(т.date_start)                  AS по
+  FROM public.tournaments т
+  JOIN public.tournament_results и ON и.tournament_id = т.id
+  LEFT JOIN public.tournament_levels у ON у.id = т.level_id
+ GROUP BY 1, 2, 3
+ ORDER BY (у.name IS NULL) DESC, 1, 2, 3;
+
+-- Поимённо — те, у кого уровня нет, а очки начислены: это и есть список на
+-- разбор. Парные и дружеские в нём ожидаемы; одиночный в этом списке —
+-- осиротевший рейтинговый.
+
+SELECT 'ШАГ 8б · ПОИМЁННО' AS шаг;
+
+SELECT т.name, т.format, т.gender, т.status, т.date_start,
+       count(и.id)          AS строк,
+       sum(и.points_earned) AS очков
+  FROM public.tournaments т
+  JOIN public.tournament_results и ON и.tournament_id = т.id
+ WHERE т.level_id IS NULL
+   AND и.points_earned > 0
+ GROUP BY т.id, т.name, т.format, т.gender, т.status, т.date_start
+ ORDER BY т.format, т.date_start;
