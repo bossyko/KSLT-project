@@ -435,13 +435,23 @@ async function upsert(table, rows, onConflict) {
        image_crop завела миграция afisha-dva-predstavleniya.sql; если в
        тестовой базе её не прогнали, апсерт уйдёт в отказ или потеряет
        колонки — и проверка упала бы в браузере, назвав виновным код. */
+    /* `call` отдаёт { ok, status, data } — строки лежат в `.data`.
+       Первая редакция читала `свёл[0]` и получала undefined ВСЕГДА:
+       проверка не могла пройти ни при каком состоянии базы. Та же
+       болезнь, что у проверки, которая не может упасть, — только
+       наоборот. Поймал первый же прогон у Кости. */
     var свёлА = await call('GET', '/rest/v1/tournaments?id=eq.test-afisha' +
         '&select=image,image_full,image_crop');
-    var А = (свёлА || [])[0];
+    if (!свёлА.ok) {
+        throw new Error('сев афиши: база отказала на чтении — ' + свёлА.status + ' ' +
+            String(JSON.stringify(свёлА.data)).slice(0, 200) +
+            '. Если жалуется на столбец image_full или image_crop — в тестовом ' +
+            'проекте не прогнана sql/схема/afisha-dva-predstavleniya.sql');
+    }
+    var А = (свёлА.data || [])[0];
     if (!А || !А.image || !А.image_full || А.image === А.image_full) {
         throw new Error('сев афиши не доехал: в базе ' + JSON.stringify(А || null) +
-            ' — нужны ДВА разных источника. Проверь, прогнана ли ' +
-            'sql/схема/afisha-dva-predstavleniya.sql в тестовом проекте');
+            ' — нужны ДВА разных источника');
     }
     if (!А.image_crop) {
         throw new Error('сев афиши: image_crop не записался — столбца нет или он не jsonb');
