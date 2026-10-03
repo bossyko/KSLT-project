@@ -7388,10 +7388,27 @@ select.ad-field-input {
 .ad-pts-band-text span { white-space: nowrap; }
 
 /* ---- ПЛОТНАЯ СЕТКА ПО МЕСТАМ ---- */
-.ad-pts-scroll { max-height: 560px; overflow: auto; }
+/* ПРОКРУТКИ ВНУТРИ ПРОКРУТКИ НЕТ — слово Кости 03.10: «убери этот скролл в
+   скролле, неудобно же, пусть страница вниз уходит, только липкую оставь
+   сверху».
+   Здесь стояло `max-height: 560px; overflow: auto` — таблица на 64 строки
+   жила в своём окне, и первые два места оказывались выше его края: человек
+   открывал экран и не видел ни первого места, ни второго.
+   Теперь вниз уходит страница, а шапка липнет к шапке сайта.
+   ОБЁРТКА НЕ ПОЛУЧАЕТ И ГОРИЗОНТАЛЬНОЙ ПРОКРУТКИ: `overflow-x: auto`
+   делает контейнер прокручиваемым по ОБЕИМ осям, и тогда `position: sticky`
+   у шапки липнет к краю этого контейнера, а не страницы — то есть никуда.
+   Таблице она и не нужна: пять колонок по ~88 и место ~60 укладываются в
+   820 (планшет стоя), а телефона у админки нет. */
+.ad-pts-scroll { /* пусто намеренно: см. выше */ }
 .ad-pts { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
 .ad-pts th {
-    position: sticky; top: 0; z-index: 2;
+    /* ЛИПНЕТ К ШАПКЕ САЙТА, А НЕ К КРАЮ СВОЕГО ОКНА. `top: 0` работал,
+       пока таблица жила в прокручиваемой обёртке; без обёртки ноль увёл бы
+       шапку под шапку сайта. `--header-h` — то же число, которым липнут
+       полосы фильтров (`.ad-filter-sticky`): одно определение высоты
+       шапки, а не своё. */
+    position: sticky; top: var(--header-h); z-index: 2;
     background: var(--bg-card);
     text-align: center;
     padding: 0 var(--space-3);
@@ -7404,6 +7421,27 @@ select.ad-field-input {
     white-space: nowrap;
 }
 .ad-pts th.ad-pts-place-h { text-align: left; left: 0; z-index: 3; }
+/* Название уровня и его предел — РАЗНЫЕ СТРОКИ, а не одна.
+   03.10 на боевой вышло «ИТОГОВЫЙ ТУРНИРДО 8»: предел подписан прямо за
+   названием, без своего места. Числа в шапке не кричат: кегль 11 как у
+   названия, но вес обычный и цвет тише. */
+.ad-pts th > span { display: block; }
+.ad-pts-limit {
+    display: block;
+    font-weight: 400; text-transform: none; letter-spacing: 0;
+    color: var(--text-muted);
+}
+/* Крестик удаления уровня — В УГЛУ ШАПКИ, а не отдельной строкой под ней.
+   Прежние числа стояли прямо в разметке (18×18 инлайном); разметка их
+   больше не несёт, значит место им здесь. 28 — ступень кнопок. */
+.ad-pts th .set-del-level {
+    position: absolute; top: 2px; right: 2px;
+    width: 28px; height: 28px; line-height: 28px; padding: 0;
+    border: 0; border-radius: 50%;
+    background: rgba(255,60,60,0.15); color: #ff4444;
+    font-size: var(--fs-sm); cursor: pointer;
+}
+.ad-pts th .set-del-level:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .ad-pts td {
     /* ЛИНИЯ СТРОКИ — ТЕНЬЮ, А НЕ РАМКОЙ. Прибор дал 37 там, где объявлено
        36: рамка ячейки таблицы прибавляется к высоте. Внутренняя тень

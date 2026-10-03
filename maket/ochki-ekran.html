@@ -19,7 +19,7 @@
   прочитав этих строк.
 -->
 <link rel="stylesheet" href="../css/tokens.css?v=22">
-<link rel="stylesheet" href="../css/admin.css?v=191">
+<link rel="stylesheet" href="../css/admin.css?v=192">
 <style>
 /* ===================================================================
    ПРАВКИ ЖИВУТ В СТЕНДЕ, А НЕ В admin.css — до слова Кости.
@@ -225,7 +225,7 @@ html, body {
       <div class="ad-pts-who">Смотрит: <b>менеджер</b> · правка только у администратора</div>
       <div class="ad-pts-ver">Версия в силе с <b>01.01.2021</b> · за победу <b>25</b> · за участие <b>10</b></div>
     </div>
-    <div class="ad-pts-scroll" style="max-height:320px;">
+    <div class="ad-pts-scroll">
       <table class="ad-pts" id="tblManager"></table>
     </div>
   </div>
@@ -503,9 +503,20 @@ var ПОДПИСЬ_РАУНДА = {
   G3: '3-е в группе', G4: '4-е в группе', G5: '5-е в группе', G6: '6-е в группе'
 };
 
-function шапка(первая) {
+/* РАЗМЕТКА ШАПКИ — ТА ЖЕ, ЧТО В ПРОДУКТЕ (`settings.js`, renderSetRules).
+   До 03.10 макет рисовал `<th>имя</th>` без `<span>` и без предела, и
+   прибор, глядя на макет, читал пустые названия колонок: макет перестал
+   говорить про продукт ровно там, где его и смотрят.
+   Предел — ОТДЕЛЬНОЙ СТРОКОЙ: на боевой вышло «ИТОГОВЫЙ ТУРНИРДО 8». */
+function шапка(первая, правит) {
+  var предел = Math.max.apply(null, УРОВНИ.map(function(у) { return у.мест; }));
   var h = '<thead><tr><th class="ad-pts-place-h">' + первая + '</th>';
-  УРОВНИ.forEach(function(у) { h += '<th>' + у.имя + '</th>'; });
+  УРОВНИ.forEach(function(у) {
+    h += '<th><span>' + у.имя + '</span>' +
+         (у.мест < предел ? '<span class="ad-pts-limit">до ' + у.мест + '</span>' : '') +
+         (правит ? '<button class="ad-btn-icon set-del-level" title="Удалить уровень">&times;</button>' : '') +
+         '</th>';
+  });
   return h + '</tr></thead>';
 }
 
@@ -528,7 +539,7 @@ function нарисоватьБыло() {
 
 /* B и C — по местам. Отличие одно: можно править или нет. */
 function нарисоватьМеста(куда, правит) {
-  var h = шапка('Место') + '<tbody>';
+  var h = шапка('Место', правит) + '<tbody>';
   ОЧКИ.forEach(function(строка) {
     var место = строка[0];
     var класс = место <= 4 ? ' class="ad-pts-tbl"' : '';

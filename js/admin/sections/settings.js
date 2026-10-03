@@ -175,7 +175,15 @@
         var panel = document.getElementById('setPanelRules');
         if (!panel) return;
 
-        var cachedLevels = A.cachedLevels || [];
+        /* ПОРЯДОК КОЛОНОК — ОТ СТАРШЕЙ К МЛАДШЕЙ, как на макете, который
+           Костя одобрил. `A.cachedLevels` приходит по `sort_order` ВОЗРАСТАЮЩЕ
+           (`players.js:136`), и на боевой 03.10 первой встала колонка
+           «Итоговый турнир», а «Высшая категория» ушла в конец — читается
+           задом наперёд. Копия, а не сортировка на месте: `cachedLevels`
+           общий, его читает и начисление. */
+        var cachedLevels = (A.cachedLevels || []).slice().sort(function(a, b) {
+            return (b.sort_order || 0) - (a.sort_order || 0);
+        });
         var места = A._местаОчков || [];
         var версия = A._версияОчков;
         var правит = A.currentRole === 'admin';
@@ -229,6 +237,8 @@
             cachedLevels.forEach(function(lv) {
                 var name = isEn ? (lv.name_en || lv.name) : lv.name;
                 var предел = A.пределМест(lv.id);
+                /* Название и предел — разными строками. 03.10 на боевой вышло
+                   «ИТОГОВЫЙ ТУРНИРДО 8»: предел шёл встык за названием. */
                 html += '<th>' +
                     '<span>' + A.esc(name) + '</span>' +
                     (предел < строк ? '<span class="ad-pts-limit">' +

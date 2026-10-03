@@ -415,6 +415,37 @@ const ОТКАТЫ = [
    "  { имя: 'планшет стоя',       w: 820,  h: 1180 }",
    "  { имя: 'планшет стоя',       w: 820,  h: 1180 },\n  { имя: 'телефон',            w: 390,  h: 844 }",
    'у макета экрана нет четвёртого вида'],
+
+  /* ─── прокрутка, порядок колонок и шапка ─── */
+  [АДМИН_CSS,
+   ".ad-pts-scroll { /* пусто намеренно: см. выше */ }",
+   ".ad-pts-scroll { max-height: 560px; overflow: auto; }",
+   'прокрутки внутри прокрутки нет'],
+
+  [АДМИН_CSS,
+   "    position: sticky; top: var(--header-h); z-index: 2;",
+   "    position: sticky; top: 0; z-index: 2;",
+   'шапка липнет к шапке сайта, а не к краю окна'],
+
+  [НАСТРОЙКИ,
+   "        var cachedLevels = (A.cachedLevels || []).slice().sort(function(a, b) {\n            return (b.sort_order || 0) - (a.sort_order || 0);\n        });",
+   "        var cachedLevels = A.cachedLevels || [];",
+   'колонки идут от старшей категории к младшей'],
+
+  [АДМИН_CSS,
+   ".ad-pts-limit {\n    display: block;",
+   ".ad-pts-limit {\n    display: inline;",
+   'предел подписан отдельной строкой, а не встык'],
+
+  [АДМИН_CSS,
+   ".ad-pts th .set-del-level {\n    position: absolute; top: 2px; right: 2px;",
+   ".ad-pts th .set-del-level {\n    top: 2px; right: 2px;",
+   'крестик стоит в углу шапки, а не строкой под ней'],
+
+  [МАКЕТ_ОЧКИ,
+   "    h += '<th><span>' + у.имя + '</span>' +",
+   "    h += '<th>' + у.имя + '' +",
+   'макет рисует шапку ТОЙ ЖЕ разметкой, что продукт'],
 ];
 
 function прогон() {
